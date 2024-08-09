@@ -94,8 +94,9 @@ bool RichEditorSelectOverlay::CheckHandleVisible(const RectF& paintRect)
     if (visibleContentRect.IsEmpty()) {
         return false;
     }
-    PointF bottomPoint = { paintRect.Left(), paintRect.Bottom() - BOX_EPSILON };
-    PointF topPoint = { paintRect.Left(), paintRect.Top() + BOX_EPSILON };
+    auto paintLeft = paintRect.Left() + paintRect.Width() / 2.0f;
+    PointF bottomPoint = { paintLeft, paintRect.Bottom() - BOX_EPSILON };
+    PointF topPoint = { paintLeft, paintRect.Top() + BOX_EPSILON };
     visibleContentRect.SetLeft(visibleContentRect.GetX() - BOX_EPSILON);
     visibleContentRect.SetWidth(visibleContentRect.Width() + DOUBLE * BOX_EPSILON);
     visibleContentRect.SetTop(visibleContentRect.GetY() - BOX_EPSILON);
@@ -156,14 +157,9 @@ void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst
     GetLocalPointWithTransform(movingHandleOffsetF); // do affine transformation
     pattern->SetMovingHandleOffset(movingHandleOffsetF);
 
-    auto contentRect = pattern->GetContentRect();
-    auto caretRect = pattern->GetCaretRect();
-    float x = std::clamp(localOffset.GetX(), contentRect.Left(), contentRect.Right() - caretRect.Width());
+    float x = localOffset.GetX();
     float y = localOffset.GetY();
-    if (!isFirst) {
-        y = y + handleRect.Height() - caretRect.Height();
-    }
-    y = std::clamp(y, contentRect.Top(), contentRect.Bottom() - caretRect.Height());
+    y += handleRect.Height() / 2; // 2: Half the height of the handle
     auto magnifierLocalOffset = OffsetF(x, y);
     GetLocalPointWithTransform(magnifierLocalOffset); // do affine transformation
     pattern->magnifierController_->SetLocalOffset(magnifierLocalOffset);
@@ -209,6 +205,7 @@ void RichEditorSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOf
 
 void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle)
 {
+    isHandleMoving_ = false;
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "handleRect=%{public}s, isFirstHandle=%{public}d",
@@ -224,7 +221,7 @@ void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isF
     }
     pattern->CalculateHandleOffsetAndShowOverlay();
     pattern->StopAutoScroll();
-    pattern->magnifierController_->UpdateShowMagnifier();
+    pattern->magnifierController_->RemoveMagnifierFrameNode();
     if (!IsSingleHandleShow() && textSelector.StartEqualToDest()) {
         HideMenu();
         CloseOverlay(true, CloseReason::CLOSE_REASON_NORMAL);
@@ -317,7 +314,7 @@ void RichEditorSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selec
         selectInfo.isSingleHandle = true;
     }
     selectInfo.recreateOverlay = requestCode == REQUEST_RECREATE;
-    CheckEditorTypeChange(selectInfo, pattern->GetEditorType());
+    CheckMenuParamChange(selectInfo, pattern->GetEditorType(), responseType);
     pattern->CopySelectionMenuParams(selectInfo, responseType);
     if (hasTransform_) {
         selectInfo.callerNodeInfo = {
@@ -326,18 +323,19 @@ void RichEditorSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selec
         };
     }
 }
-void RichEditorSelectOverlay::CheckEditorTypeChange(SelectOverlayInfo& selectInfo, TextSpanType selectType)
+void RichEditorSelectOverlay::CheckMenuParamChange(SelectOverlayInfo& selectInfo,
+    TextSpanType selectType, TextResponseType responseType)
 {
     auto manager = SelectContentOverlayManager::GetOverlayManager();
     CHECK_NULL_VOID(manager);
     CHECK_NULL_VOID(manager->IsOpen());
-    auto overlayInfo = manager->GetSelectOverlayInfo();
-    CHECK_NULL_VOID(overlayInfo);
-    auto lastSelectType = overlayInfo->menuInfo.editorType.value_or(static_cast<int32_t>(TextSpanType::NONE));
-    // need to recreate overlay, when overlay is on, but select type changed
-    if (lastSelectType != static_cast<int32_t>(selectType)) {
-        selectInfo.recreateOverlay = true;
-    }
+
+    auto pattern = GetPattern<RichEditorPattern>();
+    auto menuParams = pattern ? pattern->GetMenuParams(selectType, responseType) : nullptr;
+    std::pair<TextSpanType, TextResponseType> selectResponseComb = { selectType, responseType };
+    selectInfo.recreateOverlay |= (lastMenuParams_ || menuParams) && selectResponseComb != lastSelectResponseComb_;
+    lastMenuParams_ = menuParams;
+    lastSelectResponseComb_ = selectResponseComb;
 }
 
 // set menu callback
@@ -349,6 +347,7 @@ void RichEditorSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenu
     auto usingMouse = pattern->IsUsingMouse();
     switch (id) {
         case OptionMenuActionId::COPY:
+            needRefreshMenu_ = !IsShowPaste() && pattern->copyOption_ != CopyOptions::None;
             pattern->HandleOnCopy();
             break;
         case OptionMenuActionId::CUT:
@@ -374,6 +373,17 @@ void RichEditorSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenu
             TAG_LOGI(AceLogTag::ACE_TEXT, "Unsupported menu option id %{public}d", id);
             break;
     }
+}
+
+void RichEditorSelectOverlay::ToggleMenu()
+{
+    auto manager = GetManager<SelectContentOverlayManager>();
+    if (manager && !manager->IsMenuShow() && needRefreshMenu_) {
+        needRefreshMenu_ = false;
+        ProcessOverlay({ .menuIsShow = true, .animation = true, .requestCode = REQUEST_RECREATE });
+        return;
+    }
+    BaseTextSelectOverlay::ToggleMenu();
 }
 
 void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
@@ -454,4 +464,27 @@ void RichEditorSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag
     }
     BaseTextSelectOverlay::OnAncestorNodeChanged(flag);
 }
+
+void RichEditorSelectOverlay::OnHandleMoveStart(bool isFirst)
+{
+    isHandleMoving_ = true;
+}
+
+void RichEditorSelectOverlay::UpdateHandleOffset()
+{
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    manager->MarkInfoChange(DIRTY_FIRST_HANDLE | DIRTY_SECOND_HANDLE);
+}
+
+void RichEditorSelectOverlay::UpdateSelectOverlayOnAreaChanged()
+{
+    HideMenu(true);
+    CHECK_NULL_VOID(SelectOverlayIsOn() || SelectOverlayIsCreating());
+    auto pattern = GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->CalculateHandleOffsetAndShowOverlay();
+    UpdateHandleOffset();
+}
+
 } // namespace OHOS::Ace::NG

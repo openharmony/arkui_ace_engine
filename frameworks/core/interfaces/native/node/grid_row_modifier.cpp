@@ -202,5 +202,12 @@ const ArkUIGridRowModifier* GetGridRowModifier()
         SetOnBreakpointChange, ResetOnBreakpointChange };
     return &modifier;
 }
+
+const CJUIGridRowModifier* GetCJUIGridRowModifier()
+{
+    static const CJUIGridRowModifier modifier = { SetAlignItems, ResetAlignItems, SetDirection, ResetDirection,
+        SetBreakpoints, ResetBreakpoints, SetColumns, ResetColumns, SetGutter, ResetGutter };
+    return &modifier;
+}
 }
 }

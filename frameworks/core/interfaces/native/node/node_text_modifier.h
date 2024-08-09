@@ -22,6 +22,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
     const ArkUITextModifier* GetTextModifier();
+    const CJUITextModifier* GetCJUITextModifier();
     void SetOnDetectResultUpdate(ArkUINodeHandle node, void* extraParam);
 
     void ResetOnDetectResultUpdate(ArkUINodeHandle node);

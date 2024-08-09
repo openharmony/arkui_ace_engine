@@ -96,6 +96,15 @@ void MovingPhotoModelNG::SetObjectFit(ImageFit objectFit)
     ACE_UPDATE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, ObjectFit, objectFit);
 }
 
+void MovingPhotoModelNG::SetOnComplete(MovingPhotoEventFunc&& onComplete)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<MovingPhotoEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnComplete(std::move(onComplete));
+}
+
 void MovingPhotoModelNG::SetOnStart(MovingPhotoEventFunc&& onStart)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -139,5 +148,32 @@ void MovingPhotoModelNG::SetOnError(MovingPhotoEventFunc&& onError)
     auto eventHub = frameNode->GetEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnError(std::move(onError));
+}
+
+void MovingPhotoModelNG::AutoPlayPeriod(int64_t startTime, int64_t endTime)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto movingPhotoPattern = AceType::DynamicCast<MovingPhotoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(movingPhotoPattern);
+    movingPhotoPattern->AutoPlayPeriod(startTime, endTime);
+}
+
+void MovingPhotoModelNG::AutoPlay(bool isAutoPlay)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto movingPhotoPattern = AceType::DynamicCast<MovingPhotoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(movingPhotoPattern);
+    movingPhotoPattern->AutoPlay(isAutoPlay);
+}
+
+void MovingPhotoModelNG::RepeatPlay(bool isRepeatPlay)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto movingPhotoPattern = AceType::DynamicCast<MovingPhotoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(movingPhotoPattern);
+    movingPhotoPattern->RepeatPlay(isRepeatPlay);
 }
 } // namespace OHOS::Ace::NG

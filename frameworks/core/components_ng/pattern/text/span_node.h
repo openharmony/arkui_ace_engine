@@ -30,6 +30,7 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text/span/tlv_util.h"
@@ -188,6 +189,8 @@ public:
     int32_t rangeStart = -1;
     int32_t position = -1;
     int32_t imageNodeId = -1;
+    int32_t paragraphIndex = -1;
+    uint32_t length = 0;
     std::string inspectId;
     std::string description;
     std::string content;
@@ -206,8 +209,8 @@ public:
     // when paragraph ends with a \n, it causes the paragraph height to gain an extra line
     // to have normal spacing between paragraphs, remove \n from every paragraph except the last one.
     bool needRemoveNewLine = false;
-    bool hasResourceFontColor = false;
-    bool hasResourceDecorationColor = false;
+    bool useThemeFontColor = false;
+    bool useThemeDecorationColor = false;
     std::optional<LeadingMargin> leadingMargin;
     int32_t selectedStart = -1;
     int32_t selectedEnd = -1;
@@ -281,10 +284,18 @@ public:
     virtual bool EncodeTlv(std::vector<uint8_t>& buff);
     static RefPtr<SpanItem> DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor);
 
+    void SetTextPattern(const RefPtr<Pattern>& pattern)
+    {
+        pattern_ = pattern;
+    }
+
+    bool UpdateSpanTextColor(Color color);
+
 private:
     std::optional<TextStyle> textStyle_;
     bool isParentText = false;
     RefPtr<ResourceObject> resourceObject_;
+    WeakPtr<Pattern> pattern_;
 };
 
 enum class PropertyInfo {
@@ -310,6 +321,9 @@ enum class PropertyInfo {
     BASELINE_OFFSET,
     LINESPACING,
     SYMBOL_EFFECT_OPTIONS,
+    HALFLEADING,
+    MIN_FONT_SCALE,
+    MAX_FONT_SCALE,
 };
 
 class ACE_EXPORT BaseSpan : public virtual AceType {
@@ -403,14 +417,19 @@ public:
         spanItem_->description = desc;
     }
 
+    void UpdateColorByResourceId()
+    {
+        spanItem_->fontStyle->UpdateColorByResourceId();
+    }
+
     DEFINE_SPAN_FONT_STYLE_ITEM(FontSize, Dimension);
-    DEFINE_SPAN_FONT_STYLE_ITEM(TextColor, Color);
+    DEFINE_SPAN_FONT_STYLE_ITEM(TextColor, DynamicColor);
     DEFINE_SPAN_FONT_STYLE_ITEM(ItalicFontStyle, Ace::FontStyle);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontWeight, FontWeight);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontFamily, std::vector<std::string>);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecoration, TextDecoration);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationStyle, TextDecorationStyle);
-    DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationColor, Color);
+    DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationColor, DynamicColor);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontFeature, FONT_FEATURES_LIST);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextCase, TextCase);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextShadow, std::vector<Shadow>);
@@ -419,6 +438,8 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(SymbolRenderingStrategy, uint32_t);
     DEFINE_SPAN_FONT_STYLE_ITEM(SymbolEffectStrategy, uint32_t);
     DEFINE_SPAN_FONT_STYLE_ITEM(SymbolEffectOptions, SymbolEffectOptions);
+    DEFINE_SPAN_FONT_STYLE_ITEM(MinFontScale, float);
+    DEFINE_SPAN_FONT_STYLE_ITEM(MaxFontScale, float);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(BaselineOffset, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextAlign, TextAlign);
@@ -426,6 +447,7 @@ public:
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LeadingMargin, LeadingMargin);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineBreakStrategy, LineBreakStrategy);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineSpacing, Dimension);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(HalfLeading, bool);
 
     // Mount to the previous Span node or Text node.
     void MountToParagraph();
@@ -469,6 +491,21 @@ public:
     }
 
     std::set<PropertyInfo> CalculateInheritPropertyInfo();
+
+
+    void UpdateSpanTextColor(Color color)
+    {
+        if (!spanItem_->fontStyle) {
+            spanItem_->fontStyle = std::make_unique<FontStyle>();
+        }
+        if (spanItem_->fontStyle->CheckTextColor(color)) {
+            return;
+        }
+        spanItem_->fontStyle->UpdateTextColor(color);
+        if (!spanItem_->UpdateSpanTextColor(color)) {
+            RequestTextFlushDirty();
+        }
+    }
 
 protected:
     void DumpInfo() override;
@@ -585,10 +622,62 @@ public:
     }
     ~CustomSpanItem() override = default;
     RefPtr<SpanItem> GetSameStyleSpanItem() const override;
+    ResultObject GetSpanResultObject(int32_t start, int32_t end) override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override {};
     ACE_DISALLOW_COPY_AND_MOVE(CustomSpanItem);
     std::optional<std::function<CustomSpanMetrics(CustomSpanMeasureInfo)>> onMeasure;
     std::optional<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> onDraw;
+};
+
+class ACE_EXPORT CustomSpanNode : public FrameNode {
+    DECLARE_ACE_TYPE(CustomSpanNode, FrameNode);
+
+public:
+    static RefPtr<CustomSpanNode> CreateFrameNode(int32_t nodeId)
+    {
+        auto customSpanNode = AceType::MakeRefPtr<CustomSpanNode>(
+            V2::CUSTOM_SPAN_NODE_ETS_TAG, nodeId);
+        customSpanNode->InitializePatternAndContext();
+        ElementRegister::GetInstance()->AddUINode(customSpanNode);
+        return customSpanNode;
+    }
+
+    static RefPtr<CustomSpanNode> GetOrCreateSpanNode(
+        const std::string& tag, int32_t nodeId)
+    {
+        auto frameNode = GetFrameNode(tag, nodeId);
+        CHECK_NULL_RETURN(!frameNode, AceType::DynamicCast<CustomSpanNode>(frameNode));
+        auto customSpanNode = AceType::MakeRefPtr<CustomSpanNode>(tag, nodeId);
+        customSpanNode->InitializePatternAndContext();
+        ElementRegister::GetInstance()->AddUINode(customSpanNode);
+        return customSpanNode;
+    }
+
+    CustomSpanNode(const std::string& tag, int32_t nodeId) :
+        FrameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>()) {}
+    ~CustomSpanNode() override = default;
+
+    const RefPtr<CustomSpanItem>& GetSpanItem() const
+    {
+        return customSpanItem_;
+    }
+
+    bool IsAtomicNode() const override
+    {
+        return false;
+    }
+
+    void DumpInfo() override
+    {
+        FrameNode::DumpInfo();
+        CHECK_NULL_VOID(customSpanItem_);
+        customSpanItem_->DumpInfo();
+    }
+
+private:
+    RefPtr<CustomSpanItem> customSpanItem_ = MakeRefPtr<CustomSpanItem>();
+
+    ACE_DISALLOW_COPY_AND_MOVE(CustomSpanNode);
 };
 
 struct ImageSpanItem : public PlaceholderSpanItem {

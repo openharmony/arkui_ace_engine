@@ -379,6 +379,20 @@ const ArkUITimepickerModifier* GetTimepickerModifier()
     return &modifier;
 }
 
+const CJUITimepickerModifier* GetCJUITimepickerModifier()
+{
+    static const CJUITimepickerModifier modifier = { GetTimepickerSelected, SetTimepickerSelected,
+        ResetTimepickerSelected, GetTimepickerBackgroundColor, SetTimepickerBackgroundColor,
+        GetTimepickerDisappearTextStyle, SetTimepickerDisappearTextStyle, GetTimepickerTextStyle,
+        SetTimepickerTextStyle, GetTimepickerSelectedTextStyle, SetTimepickerSelectedTextStyle,
+        ResetTimepickerDisappearTextStyle, ResetTimepickerTextStyle, ResetTimepickerSelectedTextStyle,
+        ResetTimepickerBackgroundColor, GetTimepickerUseMilitaryTime, SetTimepickerUseMilitaryTime,
+        ResetTimepickerUseMilitaryTime, SetTimepickerLoop, ResetTimepickerLoop, SetTimepickerDateTimeOptions,
+        ResetTimepickerDateTimeOptions };
+
+    return &modifier;
+}
+
 void SetTimePickerOnChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);

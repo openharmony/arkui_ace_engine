@@ -1200,6 +1200,7 @@ HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerHandleOverdueDeadlineTest
      * @tc.expected: step2. result equals REJECT.
      */
     longPressRecognizerPtr->refereeState_ = RefereeState::DETECTING;
+    longPressRecognizerPtr->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
     longPressRecognizerPtr->HandleOverdueDeadline(true);
     EXPECT_EQ(longPressRecognizerPtr->disposal_, GestureDisposal::REJECT);
 

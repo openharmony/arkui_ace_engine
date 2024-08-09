@@ -14,14 +14,21 @@
  */
 
 #include "core/interfaces/native/node/node_gesture_modifier.h"
+#include <securec.h>
 
+#include "base/error/error_code.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/gestures/long_press_gesture.h"
+#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
+#include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/components_ng/pattern/gesture/gesture_model_ng.h"
 #include "core/components_ng/gestures/pan_gesture.h"
 #include "core/components_ng/gestures/pinch_gesture.h"
 #include "core/components_ng/gestures/rotation_gesture.h"
 #include "core/components_ng/gestures/swipe_gesture.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/interfaces/native/node/touch_event_convertor.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
@@ -73,7 +80,16 @@ ArkUIGesture* createPanGesture(ArkUI_Int32 fingers, ArkUI_Int32 direction, ArkUI
 
 ArkUIGesture* createTapGesture(ArkUI_Int32 count, ArkUI_Int32 fingers, void* userData)
 {
-    auto tapGestureObject = AceType::MakeRefPtr<TapGesture>(count, fingers);
+    auto tapGestureObject = AceType::MakeRefPtr<TapGesture>(count, fingers, std::numeric_limits<double>::infinity());
+    tapGestureObject->SetUserData(userData);
+    tapGestureObject->IncRefCount();
+    return reinterpret_cast<ArkUIGesture*>(AceType::RawPtr(tapGestureObject));
+}
+
+ArkUIGesture* createTapGestureWithDistanceThreshold(
+    ArkUI_Int32 count, ArkUI_Int32 fingers, double distanceThreshold, void* userData)
+{
+    auto tapGestureObject = AceType::MakeRefPtr<TapGesture>(count, fingers, distanceThreshold);
     tapGestureObject->SetUserData(userData);
     tapGestureObject->IncRefCount();
     return reinterpret_cast<ArkUIGesture*>(AceType::RawPtr(tapGestureObject));
@@ -240,6 +256,7 @@ void GetGestureEvent(ArkUIAPIEventGestureAsyncEvent& ret, GestureEvent& info)
     ret.scale = info.GetScale();
     ret.pinchCenterX = info.GetPinchCenter().GetX();
     ret.pinchCenterY = info.GetPinchCenter().GetY();
+    ret.speed = info.GetSpeed();
     ret.source = static_cast<int32_t>(info.GetSourceDevice());
 }
 
@@ -268,6 +285,57 @@ void GetBaseGestureEvent(ArkUIAPIEventGestureAsyncEvent* ret, ArkUITouchEvent& r
     rawInputEvent.touchPointes = &(points[0]);
     rawInputEvent.touchPointSize = fingerList.size();
     ret->rawPointerEvent = &rawInputEvent;
+}
+
+void GetUniqueGestureEvent(ArkUIAPIEventGestureAsyncEvent* ret, GestureTypeName typeName,
+    const std::shared_ptr<BaseGestureEvent>& info)
+{
+    switch (typeName) {
+        case OHOS::Ace::GestureTypeName::LONG_PRESS_GESTURE: {
+            auto longPressGestureEvent = TypeInfoHelper::DynamicCast<LongPressGestureEvent>(info.get());
+            if (longPressGestureEvent) {
+                ret->repeat = longPressGestureEvent->GetRepeat();
+            }
+            break;
+        }
+        case OHOS::Ace::GestureTypeName::PAN_GESTURE: {
+            auto panGestureEvent = TypeInfoHelper::DynamicCast<PanGestureEvent>(info.get());
+            if (panGestureEvent) {
+                ret->x = panGestureEvent->GetOffsetX();
+                ret->y = panGestureEvent->GetOffsetY();
+                ret->velocityX = panGestureEvent->GetVelocity().GetVelocityX();
+                ret->velocityY = panGestureEvent->GetVelocity().GetVelocityY();
+                ret->velocity = panGestureEvent->GetVelocity().GetVelocityValue();
+            }
+            break;
+        }
+        case OHOS::Ace::GestureTypeName::PINCH_GESTURE: {
+            auto pinchGestureEvent = TypeInfoHelper::DynamicCast<PinchGestureEvent>(info.get());
+            if (pinchGestureEvent) {
+                ret->scale = pinchGestureEvent->GetScale();
+                ret->pinchCenterX = pinchGestureEvent->GetPinchCenter().GetX();
+                ret->pinchCenterY = pinchGestureEvent->GetPinchCenter().GetY();
+            }
+            break;
+        }
+        case OHOS::Ace::GestureTypeName::ROTATION_GESTURE: {
+            auto rotationGestureEvent = TypeInfoHelper::DynamicCast<RotationGestureEvent>(info.get());
+            if (rotationGestureEvent) {
+                ret->angle = rotationGestureEvent->GetAngle();
+            }
+            break;
+        }
+        case OHOS::Ace::GestureTypeName::SWIPE_GESTURE: {
+            auto swipeGestureEvent = TypeInfoHelper::DynamicCast<SwipeGestureEvent>(info.get());
+            if (swipeGestureEvent) {
+                ret->angle = swipeGestureEvent->GetAngle();
+                ret->speed = swipeGestureEvent->GetSpeed();
+            }
+            break;
+        }
+        default:
+            break;
+    }
 }
 
 void setCancelActionFunc(Gesture* gestureRef, void* extraParam)
@@ -402,31 +470,283 @@ void setGestureInterrupterToNode(
     ArkUINodeHandle node, ArkUI_Int32 (*interrupter)(ArkUIGestureInterruptInfo* interrupterInfo))
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    auto onGestureJudgeBegin = [interrupter](const RefPtr<NG::GestureInfo>& gestureInfo,
-                                   const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
+    auto onGestureRecognizerJudgeBegin = [frameNode, interrupter](const std::shared_ptr<BaseGestureEvent>& info,
+                                   const RefPtr<NG::NGGestureRecognizer>& current,
+                                   const std::list<RefPtr<NG::NGGestureRecognizer>>& others) -> GestureJudgeResult {
         ArkUIAPIEventGestureAsyncEvent gestureEvent;
         ArkUITouchEvent rawInputEvent;
         GetBaseGestureEvent(&gestureEvent, rawInputEvent, info);
+        auto gestureInfo = current->GetGestureInfo();
+        CHECK_NULL_RETURN(gestureInfo, GestureJudgeResult::CONTINUE);
+        GetUniqueGestureEvent(&gestureEvent, gestureInfo->GetRecognizerType(), info);
         ArkUIGestureInterruptInfo interruptInfo;
         interruptInfo.isSystemGesture = gestureInfo->IsSystemGesture();
         interruptInfo.systemRecognizerType = static_cast<ArkUI_Int32>(gestureInfo->GetType());
         interruptInfo.event = &gestureEvent;
         interruptInfo.userData = gestureInfo->GetUserData();
+        ArkUIGestureRecognizer* currentArkUIGestureRecognizer = NodeModifier::CreateGestureRecognizer(current);
+        interruptInfo.userData = reinterpret_cast<void*>(currentArkUIGestureRecognizer);
+        auto count = static_cast<int32_t>(others.size());
+        ArkUIGestureRecognizer** othersRecognizer = nullptr;
+        if (count > 0) {
+            othersRecognizer = new ArkUIGestureRecognizer* [count];
+        }
+        int32_t index = 0;
+        for (const auto& item : others) {
+            othersRecognizer[index] = NodeModifier::CreateGestureRecognizer(item);
+            index++;
+        }
+        interruptInfo.responseLinkRecognizer = othersRecognizer;
+        interruptInfo.count = count;
         ArkUI_UIInputEvent inputEvent { ARKUI_UIINPUTEVENT_TYPE_TOUCH, C_TOUCH_EVENT_ID,
             &rawInputEvent };
         ArkUIGestureEvent arkUIGestureEvent { gestureEvent, nullptr };
         interruptInfo.inputEvent = &inputEvent;
         interruptInfo.gestureEvent = &arkUIGestureEvent;
         auto result = interrupter(&interruptInfo);
+        delete[] othersRecognizer;
         return static_cast<GestureJudgeResult>(result);
     };
-    ViewAbstract::SetOnGestureJudgeBegin(frameNode, std::move(onGestureJudgeBegin));
+    ViewAbstract::SetOnGestureRecognizerJudgeBegin(frameNode, std::move(onGestureRecognizerJudgeBegin));
+}
+
+ArkUI_Int32 setInnerGestureParallelTo(ArkUINodeHandle node, void* userData,
+    ArkUIGestureRecognizer* (*parallelInnerGesture)(ArkUIParallelInnerGestureEvent* event))
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto parallelInnerGestureTo =
+        [userData, parallelInnerGesture](const RefPtr<NGGestureRecognizer>& current,
+            const std::vector<RefPtr<NGGestureRecognizer>>& others) -> RefPtr<NGGestureRecognizer> {
+        auto* currentArkUIGestureRecognizer = NodeModifier::CreateGestureRecognizer(current);
+        auto count = static_cast<int32_t>(others.size());
+        ArkUIGestureRecognizer** othersArkUIGestureRecognizer = nullptr;
+        if (count > 0) {
+            othersArkUIGestureRecognizer = new ArkUIGestureRecognizer* [count];
+        }
+        for (auto index = 0; index < count; index++) {
+            othersArkUIGestureRecognizer[index] = NodeModifier::CreateGestureRecognizer(others[index]);
+        }
+        ArkUIParallelInnerGestureEvent parallelInnerGestureEvent;
+        parallelInnerGestureEvent.current = currentArkUIGestureRecognizer;
+        parallelInnerGestureEvent.responseLinkRecognizer = othersArkUIGestureRecognizer;
+        parallelInnerGestureEvent.userData = userData;
+        parallelInnerGestureEvent.count = count;
+        auto* result = parallelInnerGesture(&parallelInnerGestureEvent);
+        if (!result || !result->recognizer) {
+            return nullptr;
+        }
+        delete[] othersArkUIGestureRecognizer;
+        return AceType::Claim(reinterpret_cast<NG::NGGestureRecognizer*>(result->recognizer));
+    };
+    ViewAbstract::SetShouldBuiltInRecognizerParallelWith(frameNode, std::move(parallelInnerGestureTo));
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 setGestureRecognizerEnabled(ArkUIGestureRecognizer* recognizer, bool enabled)
+{
+    auto* gestureRecognizer = reinterpret_cast<NG::NGGestureRecognizer*>(recognizer->recognizer);
+    CHECK_NULL_RETURN(gestureRecognizer, ERROR_CODE_PARAM_INVALID);
+    gestureRecognizer->SetEnabled(enabled);
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Bool getGestureRecognizerEnabled(ArkUIGestureRecognizer* recognizer)
+{
+    auto* rawRecognizer = reinterpret_cast<NG::NGGestureRecognizer*>(recognizer->recognizer);
+    CHECK_NULL_RETURN(rawRecognizer, false);
+    auto gestureRecognizer = AceType::Claim(rawRecognizer);
+    return gestureRecognizer->IsEnabled();
+}
+
+ArkUI_Int32 getGestureRecognizerState(ArkUIGestureRecognizer* recognizer, ArkUIGestureRecognizerState* state)
+{
+    auto* rawRecognizer = reinterpret_cast<NG::NGGestureRecognizer*>(recognizer->recognizer);
+    CHECK_NULL_RETURN(rawRecognizer, ERROR_CODE_PARAM_INVALID);
+    auto gestureRecognizer = AceType::Claim(rawRecognizer);
+    switch (gestureRecognizer->GetRefereeState()) {
+        case NG::RefereeState::READY:
+            *state = ArkUIGestureRecognizerState::RECOGNIZER_STATE_READY;
+            return ERROR_CODE_NO_ERROR;
+        case NG::RefereeState::DETECTING:
+            *state = ArkUIGestureRecognizerState::RECOGNIZER_STATE_DETECTING;
+            return ERROR_CODE_NO_ERROR;
+        case NG::RefereeState::PENDING:
+            *state = ArkUIGestureRecognizerState::RECOGNIZER_STATE_PENDING;
+            return ERROR_CODE_NO_ERROR;
+        case NG::RefereeState::PENDING_BLOCKED:
+        case NG::RefereeState::SUCCEED_BLOCKED:
+            *state = ArkUIGestureRecognizerState::RECOGNIZER_STATE_BLOCKED;
+            return ERROR_CODE_NO_ERROR;
+        case NG::RefereeState::SUCCEED:
+            *state = ArkUIGestureRecognizerState::RECOGNIZER_STATE_SUCCESSFUL;
+            return ERROR_CODE_NO_ERROR;
+        case NG::RefereeState::FAIL:
+            *state = ArkUIGestureRecognizerState::RECOGNIZER_STATE_FAILED;
+            return ERROR_CODE_NO_ERROR;
+        default:
+            *state = ArkUIGestureRecognizerState::RECOGNIZER_STATE_READY;
+            return ERROR_CODE_PARAM_INVALID;
+    }
+}
+
+ArkUI_Int32 gestureEventTargetInfoIsScrollBegin(ArkUIGestureEventTargetInfo* info, bool* ret)
+{
+    auto frameNode = AceType::Claim(reinterpret_cast<NG::FrameNode*>(info->uiNode));
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    auto scrollablePattern = frameNode->GetPattern<NG::ScrollablePattern>();
+    if (scrollablePattern) {
+        *ret = scrollablePattern->IsAtTop();
+        return ERROR_CODE_NO_ERROR;
+    }
+    auto swiperPattern = frameNode->GetPattern<NG::SwiperPattern>();
+    if (swiperPattern) {
+        *ret = swiperPattern->IsAtStart();
+        return ERROR_CODE_NO_ERROR;
+    }
+    return ERROR_CODE_NON_SCROLLABLE_CONTAINER;
+}
+
+ArkUI_Int32 gestureEventTargetInfoIsScrollEnd(ArkUIGestureEventTargetInfo* info, bool* ret)
+{
+    auto frameNode = AceType::Claim(reinterpret_cast<NG::FrameNode*>(info->uiNode));
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    auto scrollablePattern = frameNode->GetPattern<NG::ScrollablePattern>();
+    if (scrollablePattern) {
+        *ret = scrollablePattern->IsAtBottom();
+        return ERROR_CODE_NO_ERROR;
+    }
+    auto swiperPattern = frameNode->GetPattern<NG::SwiperPattern>();
+    if (swiperPattern) {
+        *ret = swiperPattern->IsAtEnd();
+        return ERROR_CODE_NO_ERROR;
+    }
+    return ERROR_CODE_NON_SCROLLABLE_CONTAINER;
+}
+
+ArkUI_Int32 getPanGestureDirectionMask(ArkUIGestureRecognizer* recognizer, ArkUIGestureDirection* direction)
+{
+    auto* rawRecognizer = reinterpret_cast<NG::NGGestureRecognizer*>(recognizer->recognizer);
+    CHECK_NULL_RETURN(rawRecognizer, ERROR_CODE_PARAM_INVALID);
+    auto gestureRecognizer = AceType::Claim(rawRecognizer);
+    auto panRecognizer = AceType::DynamicCast<PanRecognizer>(gestureRecognizer);
+    CHECK_NULL_RETURN(panRecognizer, ERROR_CODE_PARAM_INVALID);
+    *direction = static_cast<ArkUIGestureDirection>(panRecognizer->GetDirection().type);
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Bool isBuiltInGesture(ArkUIGestureRecognizer* recognizer)
+{
+    auto* rawRecognizer = reinterpret_cast<NG::NGGestureRecognizer*>(recognizer->recognizer);
+    CHECK_NULL_RETURN(rawRecognizer, false);
+    auto gestureRecognizer = AceType::Claim(rawRecognizer);
+    return gestureRecognizer->IsSystemGesture();
+}
+
+ArkUI_Int32 getGestureTag(ArkUIGestureRecognizer* recognizer, char* buffer, ArkUI_Int32 bufferSize, ArkUI_Int32* result)
+{
+    auto* rawRecognizer = reinterpret_cast<NG::NGGestureRecognizer*>(recognizer->recognizer);
+    CHECK_NULL_RETURN(rawRecognizer, ERROR_CODE_PARAM_INVALID);
+    auto gestureRecognizer = AceType::Claim(rawRecognizer);
+    auto gestureInfo = gestureRecognizer->GetGestureInfo();
+    CHECK_NULL_RETURN(gestureRecognizer, ERROR_CODE_PARAM_INVALID);
+    auto gestureTag = gestureInfo->GetTag();
+    CHECK_NULL_RETURN(gestureTag.has_value(), ERROR_CODE_PARAM_INVALID);
+    auto actualSize = static_cast<int32_t>(gestureTag.value().size());
+    *result = actualSize;
+    if (actualSize > bufferSize - 1) {
+        return ERROR_CODE_BUFFER_SIZE_NOT_ENOUGH;
+    }
+    auto count = snprintf_s(buffer, bufferSize, bufferSize - 1, "%s", gestureTag.value().c_str());
+    if (count < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 getGestureBindNodeId(
+    ArkUIGestureRecognizer* recognizer, char* nodeId, ArkUI_Int32 size, ArkUI_Int32* result)
+{
+    auto* rawRecognizer = reinterpret_cast<NG::NGGestureRecognizer*>(recognizer->recognizer);
+    CHECK_NULL_RETURN(rawRecognizer, ERROR_CODE_PARAM_INVALID);
+    auto gestureRecognizer = AceType::Claim(rawRecognizer);
+    auto attachNode = gestureRecognizer->GetAttachedNode().Upgrade();
+    CHECK_NULL_RETURN(attachNode, ERROR_CODE_PARAM_INVALID);
+    auto inspectorId = attachNode->GetInspectorIdValue("");
+    auto actualSize = static_cast<int32_t>(inspectorId.size());
+    *result = actualSize;
+    if (actualSize > size - 1) {
+        return ERROR_CODE_BUFFER_SIZE_NOT_ENOUGH;
+    }
+    auto count = snprintf_s(nodeId, size, size - 1, "%s", inspectorId.c_str());
+    if (count < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Bool isGestureRecognizerValid(ArkUIGestureRecognizer* recognizer)
+{
+    auto* rawRecognizer = reinterpret_cast<NG::NGGestureRecognizer*>(recognizer->recognizer);
+    CHECK_NULL_RETURN(rawRecognizer, false);
+    auto gestureRecognizer = AceType::Claim(rawRecognizer);
+    return gestureRecognizer->IsInResponseLinkRecognizers();
+}
+
+ArkUI_Int32 setArkUIGestureRecognizerDisposeNotify(ArkUIGestureRecognizer* recognizer, void* userData,
+    void (*callback)(ArkUIGestureRecognizer* recognizer, void* userData))
+{
+    auto* rawRecognizer = reinterpret_cast<NG::NGGestureRecognizer*>(recognizer->recognizer);
+    CHECK_NULL_RETURN(rawRecognizer, ERROR_CODE_PARAM_INVALID);
+    auto gestureRecognizer = AceType::Claim(rawRecognizer);
+    auto disposeNotify = [userData, callback](void* recognizer) {
+        auto* arkuiGestureRecognizer = reinterpret_cast<ArkUIGestureRecognizer*>(recognizer);
+        callback(arkuiGestureRecognizer, userData);
+    };
+    gestureRecognizer->SetDisposeNotifyCallback(std::move(disposeNotify));
+    return ERROR_CODE_NO_ERROR;
 }
 
 namespace NodeModifier {
 const ArkUIGestureModifier* GetGestureModifier()
 {
     static const ArkUIGestureModifier modifier = {
+        createTapGesture,
+        createTapGestureWithDistanceThreshold,
+        createLongPressGesture,
+        createPanGesture,
+        createPinchGesture,
+        createRotationGesture,
+        createSwipeGesture,
+        createSwipeGestureByModifier,
+        createGestureGroup,
+        addGestureToGestureGroup,
+        removeGestureFromGestureGroup,
+        dispose,
+        registerGestureEvent,
+        addGestureToNode,
+        removeGestureFromNode,
+        removeGestureFromNodeByTag,
+        clearGestures,
+        setGestureInterrupterToNode,
+        setInnerGestureParallelTo,
+        setGestureRecognizerEnabled,
+        getGestureRecognizerEnabled,
+        getGestureRecognizerState,
+        gestureEventTargetInfoIsScrollBegin,
+        gestureEventTargetInfoIsScrollEnd,
+        getPanGestureDirectionMask,
+        isBuiltInGesture,
+        getGestureTag,
+        getGestureBindNodeId,
+        isGestureRecognizerValid,
+        setArkUIGestureRecognizerDisposeNotify,
+        };
+    return &modifier;
+}
+
+const CJUIGestureModifier* GetCJUIGestureModifier()
+{
+    static const CJUIGestureModifier modifier = {
         createTapGesture,
         createLongPressGesture,
         createPanGesture,
@@ -444,8 +764,35 @@ const ArkUIGestureModifier* GetGestureModifier()
         removeGestureFromNodeByTag,
         clearGestures,
         setGestureInterrupterToNode,
-        };
+    };
     return &modifier;
+}
+
+ArkUIGestureRecognizer* CreateGestureRecognizer(const RefPtr<NG::NGGestureRecognizer>& recognizer)
+{
+    CHECK_NULL_RETURN(recognizer, nullptr);
+    ArkUIGestureRecognizer* arkUIGestureRecognizer;
+    auto gestureInfo = recognizer->GetGestureInfo();
+    CHECK_NULL_RETURN(gestureInfo, nullptr);
+    auto* userData = gestureInfo->GetUserData();
+    if (userData) {
+        arkUIGestureRecognizer = reinterpret_cast<ArkUIGestureRecognizer*>(userData);
+    } else {
+        arkUIGestureRecognizer = new ArkUIGestureRecognizer();
+        arkUIGestureRecognizer->capi = false;
+        gestureInfo->SetUserData(arkUIGestureRecognizer);
+    }
+    arkUIGestureRecognizer->type = static_cast<int32_t>(gestureInfo->GetRecognizerType());
+    arkUIGestureRecognizer->recognizer = reinterpret_cast<void*>(AceType::RawPtr(recognizer));
+    auto attachNode = recognizer->GetAttachedNode().Upgrade();
+    if (attachNode) {
+        arkUIGestureRecognizer->targetInfo.uiNode = reinterpret_cast<void*>(AceType::RawPtr(attachNode));
+    }
+    gestureInfo->SetIsCapi(arkUIGestureRecognizer->capi);
+    gestureInfo->SetDisposeJSRecognizerInfoFunc([arkUIGestureRecognizer]() {
+        delete arkUIGestureRecognizer;
+    });
+    return arkUIGestureRecognizer;
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

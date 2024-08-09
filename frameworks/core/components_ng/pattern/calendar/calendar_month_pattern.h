@@ -55,6 +55,14 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
+        if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+            if ((!isInitVirtualNode_ || buttonAccessibilityNodeVec_.size() != obtainedMonth_.days.size()) &&
+                monthState_ == MonthState::CUR_MONTH) {
+                isInitVirtualNode_ = InitCalendarVirtualNode();
+            } else {
+                FireModifyAccessibilityVirtualNode(obtainedMonth_);
+            }
+        }
         return MakeRefPtr<CalendarPaintMethod>(obtainedMonth_, calendarDay_, isCalendarDialog_);
     }
 
@@ -107,6 +115,11 @@ public:
         return hoverState_;
     }
 
+    void UpdateColRowSpace()
+    {
+        SetColRowSpace();
+    }
+
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -120,9 +133,23 @@ private:
     void SetColRowSpace();
     int32_t JudgeArea(const Offset& offset);
     Dimension GetDaySize(const RefPtr<CalendarTheme>& theme);
+    RefPtr<FrameNode> AddButtonNodeIntoVirtual(const CalendarDay& calendarDay);
+    void UpdateAccessibilityButtonNode(RefPtr<FrameNode> frameNode, int32_t index);
+    void ModifyAccessibilityVirtualNode(const ObtainedMonth& currentData);
+    void ChangeVirtualNodeContent(const CalendarDay& calendarDay);
+    bool InitCalendarVirtualNode();
+    void InitVirtualButtonClickEvent(RefPtr<FrameNode> frameNode, int32_t index);
+    void SetVirtualNodeUserSelected(int32_t index);
+    void FireModifyAccessibilityVirtualNode(const ObtainedMonth& currentData);
+    void InitAccessibilityHoverEvent();
+    void HandleAccessibilityHoverEvent(bool state, AccessibilityHoverInfo& info);
+    void SetCalendarAccessibilityLevel(const std::string& level);
     bool isCalendarDialog_ = false;
     bool hoverState_ = false;
-
+    bool isOnHover_ = false;
+    std::vector<RefPtr<AccessibilityProperty>> accessibilityPropertyVec_;
+    std::vector<RefPtr<FrameNode>> buttonAccessibilityNodeVec_;
+    bool isInitVirtualNode_ = false;
     CalendarDay calendarDay_;
     ObtainedMonth obtainedMonth_;
     MonthState monthState_ = MonthState::CUR_MONTH;

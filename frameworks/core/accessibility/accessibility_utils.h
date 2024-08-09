@@ -107,6 +107,8 @@ enum class AccessibilityEventType : size_t {
     ACCESSIBILITY_FOCUS_CLEARED = 0x00010000,
     TEXT_MOVE_UNIT = 0x00020000,
     SCROLL_START = 0x01000000,
+    PAGE_CLOSE = 0x08000000,
+    PAGE_OPEN = 0x20000000,
     UNKNOWN,
 };
 
@@ -162,6 +164,7 @@ enum class AceAction : uint32_t {
     ACTION_SET_SELECTION,
     ACTION_CLEAR_SELECTION,
     ACTION_SET_CURSOR_POSITION,
+    ACTION_EXEC_SUB_COMPONENT,
 };
 
 struct AccessibilityValue {
@@ -202,6 +205,14 @@ enum class AccessibilityScrollType : int32_t {
     SCROLL_HALF = 0,
     SCROLL_FULL = 1,
     SCROLL_MAX_TYPE = SCROLL_FULL, // for check parameter, do not add enum after
+};
+
+struct SubComponentInfo {
+    int32_t spanId = 0;
+    std::string spanText = "";
+    std::string accessibilityText = "";
+    std::string accessibilityDescription = "";
+    std::string accessibilityLevel = "";
 };
 
 bool CheckBetterRect(const Rect& nodeRect, int direction, const Rect& itemRect, const Rect& tempBest);

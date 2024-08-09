@@ -208,7 +208,7 @@ const decltype(GridLayoutInfo::gridMatrix_) MATRIX_DEMO_13_AFTER_DELETE = {
 };
 
 GridLayoutOptions GetOptionDemo14();
-const decltype(GridLayoutInfo::gridMatrix_) MATRIX_DEMO_14 = { { 0, { { 0, 0 }, { 1, 0 }, { 2, 1 } } },
+const decltype(GridLayoutInfo::gridMatrix_) MATRIX_DEMO_14_HORIZONTAL = { { 0, { { 0, 0 }, { 1, 0 }, { 2, 1 } } },
     { 1, { { 0, 0 }, { 1, 0 }, { 2, 2 }, { 3, -2 } } }, { 2, { { 0, 0 }, { 1, 0 }, { 2, -2 }, { 3, -2 } } },
     { 3, { { 0, 3 }, { 1, 4 }, { 2, -2 }, { 3, -2 } } }, { 4, { { 0, 5 }, { 1, 6 }, { 2, 7 }, { 3, 8 } } },
     { 5, { { 0, 9 }, { 1, 10 }, { 2, 11 }, { 3, 12 } } }, { 6, { { 0, 13 }, { 1, 14 }, { 2, 15 }, { 3, 16 } } },

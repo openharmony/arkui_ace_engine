@@ -20,5 +20,6 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
     const ArkUIXComponentModifier* GetXComponentModifier();
+    const CJUIXComponentModifier* GetCJUIXComponentModifier();
 } // namespace OHOS::Ace::NG::NodeModifier
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_NODE_XCOMPONENT_MODIFIER_H

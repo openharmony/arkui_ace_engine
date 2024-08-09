@@ -20,6 +20,7 @@
 
 #include "transaction/rs_interfaces.h"
 
+#include "base/log/ace_trace.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
@@ -34,6 +35,9 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+
+constexpr std::chrono::duration<int, std::milli> SNAPSHOT_TIMEOUT_DURATION(3000);
+
 class CustomizedCallback : public Rosen::SurfaceCaptureCallback {
 public:
     CustomizedCallback(ComponentSnapshot::JsCallback&& jsCallback, WeakPtr<FrameNode> node)
@@ -43,6 +47,7 @@ public:
     void OnSurfaceCapture(std::shared_ptr<Media::PixelMap> pixelMap) override
     {
         if (callback_ == nullptr) {
+            TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Internal error! The callback_ is null");
             auto node = node_.Upgrade();
             CHECK_NULL_VOID(node);
             Inspector::RemoveOffscreenNode(node);
@@ -56,6 +61,9 @@ public:
                 Inspector::RemoveOffscreenNode(frameNode);
             });
         } else {
+            TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+                "ComponentSnapshot successful! pixelMap.width=%{public}d pixelMap.height=%{public}d",
+                pixelMap->GetWidth(), pixelMap->GetHeight());
             callback_(pixelMap, ERROR_CODE_NO_ERROR, [node = node_]() {
                 auto frameNode = node.Upgrade();
                 CHECK_NULL_VOID(frameNode);
@@ -82,6 +90,45 @@ public:
 private:
     ComponentSnapshot::NormalCallback callback_;
 };
+
+class SyncCustomizedCallback : public Rosen::SurfaceCaptureCallback {
+public:
+    SyncCustomizedCallback() = default;
+    ~SyncCustomizedCallback() override = default;
+    void OnSurfaceCapture(std::shared_ptr<Media::PixelMap> pixelMap) override
+    {
+        if (!pixelMap) {
+            TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Internal error! The pixelmap returned by the system is null");
+            pixelMap_ = nullptr;
+        } else {
+            TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+                "ComponentSnapshot successful! pixelMap.width=%{public}d pixelMap.height=%{public}d",
+                pixelMap->GetWidth(), pixelMap->GetHeight());
+            pixelMap_ = pixelMap;
+        }
+        std::unique_lock<std::mutex> lock(mutex_);
+        cv_.notify_all();
+    }
+
+    std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetPixelMap()
+    {
+        std::pair<int32_t, std::shared_ptr<Media::PixelMap>> result(ERROR_CODE_INTERNAL_ERROR, nullptr);
+        std::unique_lock<std::mutex> lock(mutex_);
+        auto status = cv_.wait_for(lock, SNAPSHOT_TIMEOUT_DURATION);
+        if (status == std::cv_status::timeout) {
+            return { ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT, nullptr };
+        }
+        if (pixelMap_) {
+            result = { ERROR_CODE_NO_ERROR, pixelMap_ };
+        }
+        return result;
+    }
+
+private:
+    mutable std::mutex mutex_;
+    std::condition_variable cv_;
+    std::shared_ptr<Media::PixelMap> pixelMap_;
+};
 } // namespace
 
 void ProcessImageNode(const RefPtr<UINode>& node)
@@ -89,7 +136,8 @@ void ProcessImageNode(const RefPtr<UINode>& node)
     if (node->GetTag() == V2::IMAGE_ETS_TAG) {
         auto imageNode = AceType::DynamicCast<FrameNode>(node);
         if (imageNode && AceType::DynamicCast<ImagePattern>(imageNode->GetPattern())) {
-            auto imagePattern  = AceType::DynamicCast<ImagePattern>(imageNode->GetPattern());
+            auto imagePattern = AceType::DynamicCast<ImagePattern>(imageNode->GetPattern());
+            imagePattern->SetIsComponentSnapshotNode();
             imagePattern->OnVisibleAreaChange(true);
         }
     }
@@ -106,7 +154,7 @@ bool CheckImageSuccessfullyLoad(const RefPtr<UINode>& node, int32_t& imageCount)
         imageCount++;
         auto imageNode = AceType::DynamicCast<FrameNode>(node);
         CHECK_NULL_RETURN(imageNode, false);
-        auto imagePattern  = AceType::DynamicCast<ImagePattern>(imageNode->GetPattern());
+        auto imagePattern = AceType::DynamicCast<ImagePattern>(imageNode->GetPattern());
         CHECK_NULL_RETURN(imagePattern, false);
         auto imageLoadContext = imagePattern->GetImageLoadingContext().Upgrade();
         CHECK_NULL_RETURN(imageLoadContext, false);
@@ -156,6 +204,10 @@ void ComponentSnapshot::Get(const std::string& componentId, JsCallback&& callbac
         std::list<RefPtr<FrameNode>> children;
         node->GetOneDepthVisibleFrame(children);
         if (children.empty()) {
+            callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
+            TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+                "Children is empty from FrameNode(InspectorId=%{public}s Id=%{public}d)",
+                componentId.c_str(), node->GetId());
             return;
         }
         node = children.front();
@@ -165,13 +217,14 @@ void ComponentSnapshot::Get(const std::string& componentId, JsCallback&& callbac
     if (!rsNode) {
         callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-            "RsNode is null from FrameNode(id=%{public}s)",
-            componentId.c_str());
+            "RsNode is null from FrameNode(InspectorId=%{public}s Id=%{public}d)",
+            componentId.c_str(), node->GetId());
         return;
     }
     TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-        "Get ComponentSnapshot key=%{public}s Id=%{public}d Tag=%{public}s RsNodeId=%{public}" PRIu64 "",
-        componentId.c_str(), node->GetId(), node->GetTag().c_str(), rsNode->GetId());
+        "Get ComponentSnapshot key=%{public}s options=%{public}s Id=%{public}d Tag=%{public}s "
+        "RsNodeId=%{public}" PRIu64 "",
+        componentId.c_str(), options.ToString().c_str(), node->GetId(), node->GetTag().c_str(), rsNode->GetId());
     auto& rsInterface = Rosen::RSInterfaces::GetInstance();
     rsInterface.TakeSurfaceCaptureForUI(rsNode, std::make_shared<CustomizedCallback>(std::move(callback), nullptr),
         options.scale, options.scale, options.waitUntilRenderFinished);
@@ -195,8 +248,10 @@ void ComponentSnapshot::Create(
         node = stackNode;
     }
     FrameNode::ProcessOffscreenNode(node);
-    TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Process off screen Node finished, root size = %{public}s",
-        node->GetGeometryNode()->GetFrameSize().ToString().c_str());
+    TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+        "Process off screen Node finished, root size = %{public}s Id=%{public}d Tag=%{public}s InspectorId=%{public}s",
+        node->GetGeometryNode()->GetFrameSize().ToString().c_str(), node->GetId(), node->GetTag().c_str(),
+        node->GetInspectorId().value_or("").c_str());
 
     ProcessImageNode(node);
 
@@ -244,8 +299,9 @@ void ComponentSnapshot::BuilerTask(JsCallback&& callback, const RefPtr<FrameNode
 {
     int32_t imageCount = 0;
     if (param.checkImageStatus && !CheckImageSuccessfullyLoad(node, imageCount)) {
-        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Image loading failed! rootId=%{public}d rootNode=%{public}s",
-            node->GetId(), node->GetTag().c_str());
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+            "Image loading failed! rootId=%{public}d rootNode=%{public}s InspectorId=%{public}s",
+            node->GetId(), node->GetTag().c_str(), node->GetInspectorId().value_or("").c_str());
         callback(nullptr, ERROR_CODE_COMPONENT_SNAPSHOT_IMAGE_LOAD_ERROR, nullptr);
         return;
     }
@@ -256,11 +312,61 @@ void ComponentSnapshot::BuilerTask(JsCallback&& callback, const RefPtr<FrameNode
     auto rsNode = GetRsNode(node);
     auto& rsInterface = Rosen::RSInterfaces::GetInstance();
     TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-        "Begin to take surfaceCapture for ui, rootId=%{public}d rootNode=%{public}s imageCount=%{public}d",
-        node->GetId(), node->GetTag().c_str(), imageCount);
+        "Begin to take surfaceCapture for ui, rootId=%{public}d param=%{public}s imageCount=%{public}d",
+        node->GetId(), param.ToString().c_str(), imageCount);
     rsInterface.TakeSurfaceCaptureForUI(
         rsNode,
         std::make_shared<CustomizedCallback>(std::move(callback), enableInspector ? node : nullptr),
         param.options.scale, param.options.scale, param.options.waitUntilRenderFinished);
+}
+
+std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSync(const std::string& componentId,
+    const SnapshotOptions& options)
+{
+    CHECK_RUN_ON(UI);
+    ACE_SCOPED_TRACE("ComponentSnapshot::GetSyncStart_%s", componentId.c_str());
+    std::pair<int32_t, std::shared_ptr<Media::PixelMap>> result(ERROR_CODE_INTERNAL_ERROR, nullptr);
+    auto node = Inspector::GetFrameNodeByKey(componentId);
+    if (!node) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+            "Can't find a component that id or key are %{public}s, Please check your parameters are correct",
+            componentId.c_str());
+        return result;
+    }
+
+    auto rsNode = GetRsNode(node);
+
+    if (node->GetIsLayoutNode()) {
+        std::list<RefPtr<FrameNode>> children;
+        node->GetOneDepthVisibleFrame(children);
+        if (children.empty()) {
+            TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+                "Children is empty from FrameNode(InspectorId=%{public}s Id=%{public}d)",
+                componentId.c_str(), node->GetId());
+            return result;
+        }
+        node = children.front();
+        rsNode = GetRsNode(children.front());
+    }
+
+    if (!rsNode) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+            "RsNode is null from FrameNode(InspectorId=%{public}s Id=%{public}d)",
+            componentId.c_str(), node->GetId());
+        return result;
+    }
+    TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+        "GetSync ComponentSnapshot key=%{public}s options=%{public}s Id=%{public}d Tag=%{public}s "
+        "RsNodeId=%{public}" PRIu64 "",
+        componentId.c_str(), options.ToString().c_str(), node->GetId(), node->GetTag().c_str(), rsNode->GetId());
+    auto& rsInterface = Rosen::RSInterfaces::GetInstance();
+    auto syncCallback = std::make_shared<SyncCustomizedCallback>();
+    {
+        ACE_SCOPED_TRACE("ComponentSnapshot::GetSync_TakeSurfaceCaptureForUI_%s_%d_%" PRIu64 "", componentId.c_str(),
+            node->GetId(), rsNode->GetId());
+    }
+    rsInterface.TakeSurfaceCaptureForUI(rsNode, syncCallback,
+        options.scale, options.scale, options.waitUntilRenderFinished);
+    return syncCallback->GetPixelMap();
 }
 } // namespace OHOS::Ace::NG

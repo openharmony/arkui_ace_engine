@@ -217,6 +217,7 @@ namespace OHOS::Ace::Framework {
 namespace {
 constexpr int32_t DEFAULT_TAP_FINGER = 1;
 constexpr int32_t DEFAULT_TAP_COUNT = 1;
+constexpr double DEFAULT_TAP_DISTANCE = std::numeric_limits<double>::infinity();
 constexpr int32_t DEFAULT_LONG_PRESS_FINGER = 1;
 constexpr int32_t DEFAULT_LONG_PRESS_DURATION = 500;
 constexpr int32_t DEFAULT_PINCH_FINGER = 2;
@@ -232,6 +233,7 @@ constexpr double DEFAULT_ROTATION_ANGLE = 1.0;
 
 constexpr char GESTURE_FINGERS[] = "fingers";
 constexpr char GESTURE_DISTANCE[] = "distance";
+constexpr char TAP_GESTURE_DISTANCE[] = "distanceThreshold";
 constexpr char GESTURE_SPEED[] = "speed";
 constexpr char TAP_COUNT[] = "count";
 constexpr char LONG_PRESS_REPEAT[] = "repeat";
@@ -276,10 +278,12 @@ void JSTapGesture::Create(const JSCallbackInfo& args)
 {
     int32_t countNum = DEFAULT_TAP_COUNT;
     int32_t fingersNum = DEFAULT_TAP_FINGER;
+    double distanceThresholdNum = DEFAULT_TAP_DISTANCE;
     if (args.Length() > 0 && args[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
         JSRef<JSVal> count = obj->GetProperty(TAP_COUNT);
         JSRef<JSVal> fingers = obj->GetProperty(GESTURE_FINGERS);
+        JSRef<JSVal> distanceThreshold = obj->GetProperty(TAP_GESTURE_DISTANCE);
 
         if (count->IsNumber()) {
             int32_t countNumber = count->ToNumber<int32_t>();
@@ -289,9 +293,13 @@ void JSTapGesture::Create(const JSCallbackInfo& args)
             int32_t fingersNumber = fingers->ToNumber<int32_t>();
             fingersNum = fingersNumber <= DEFAULT_TAP_FINGER ? DEFAULT_TAP_FINGER : fingersNumber;
         }
+        if (distanceThreshold->IsNumber()) {
+            double distanceThresholdNumber = distanceThreshold->ToNumber<double>();
+            distanceThresholdNum = distanceThresholdNumber < 0? DEFAULT_TAP_DISTANCE : distanceThresholdNumber;
+        }
     }
 
-    TapGestureModel::GetInstance()->Create(countNum, fingersNum);
+    TapGestureModel::GetInstance()->Create(countNum, fingersNum, distanceThresholdNum);
 }
 
 void JSLongPressGesture::Create(const JSCallbackInfo& args)

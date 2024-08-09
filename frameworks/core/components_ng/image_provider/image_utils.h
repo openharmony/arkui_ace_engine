@@ -24,9 +24,9 @@ namespace OHOS::Ace::NG {
 class ImageUtils {
 public:
     static void PostToUI(std::function<void()>&& task, const std::string& name,
-        const int32_t containerId = Container::CurrentId(), PriorityType priorityType = PriorityType::LOW);
+        const int32_t containerId = Container::CurrentId(), PriorityType priorityType = PriorityType::VIP);
     static void PostToBg(std::function<void()>&& task, const std::string& name,
-        const int32_t containerId = Container::CurrentId(), PriorityType priorityType = PriorityType::LOW);
+        const int32_t containerId = Container::CurrentId(), PriorityType priorityType = PriorityType::IMMEDIATE);
 
     inline static std::string GenerateImageKey(const ImageSourceInfo& src, const NG::SizeF& targetSize)
     {

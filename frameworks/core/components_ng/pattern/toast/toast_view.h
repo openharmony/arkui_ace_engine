@@ -30,8 +30,9 @@ public:
 
 private:
     static void UpdateTextLayoutProperty(
-        const RefPtr<FrameNode>& textNode, const std::string& message, bool isRightToLeft);
-    static void UpdateTextContext(const RefPtr<FrameNode>& textNode);
+        const RefPtr<FrameNode>& textNode, const std::string& message, bool isRightToLeft,
+        const std::optional<Color>& textColor);
+    static void UpdateToastContext(const RefPtr<FrameNode>& toastContext);
 };
 } // namespace OHOS::Ace::NG
 

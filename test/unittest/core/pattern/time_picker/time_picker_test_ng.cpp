@@ -1906,8 +1906,6 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern011, TestSize.Level1)
     EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEvent));
     EXPECT_EQ(timePickerRowPattern->focusKeyID_, 0);
 
-    auto frameWidth = frameNode->GetGeometryNode()->GetFrameSize().Width();
-    auto childSize = frameNode->GetChildren().size();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto pickerTheme = AceType::MakeRefPtr<PickerTheme>();
@@ -1948,7 +1946,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern011, TestSize.Level1)
     RoundRect paintRect2;
     timePickerRowPattern->GetInnerFocusPaintRect(paintRect2);
     auto rect2 = paintRect2.GetRect();
-    auto centerX = (frameWidth / childSize - pickerThemeWidth) / 2 +
+    auto centerX = (pickerChild->GetGeometryNode()->GetFrameSize().Width() - pickerThemeWidth) / 2 +
                    pickerChild->GetGeometryNode()->GetFrameRect().Width() * timePickerRowPattern->focusKeyID_ +
                    PRESS_INTERVAL.ConvertToPx() * 2;
     EXPECT_EQ(rect2.GetX(), centerX);
@@ -4723,5 +4721,61 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow043, TestSize.Level1)
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + std::to_string(CURRENT_VALUE5) + COLON + std::to_string(CURRENT_VALUE5));
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerEnableHapticFeedback001
+ * @tc.desc: Test property enableHapticFeedback by default.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerEnableHapticFeedback001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_TRUE(TimePickerModelNG::getEnableHapticFeedback(frameNode));
+}
+
+/**
+ * @tc.name: TimePickerEnableHapticFeedback002
+ * @tc.desc: Test property enableHapticFeedback by Setter API
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerEnableHapticFeedback002, TestSize.Level1)
+{
+    std::vector<bool> testValues = { false, true, true, false, false };
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    for (auto testValue : testValues) {
+        TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        ASSERT_NE(frameNode, nullptr);
+        TimePickerModelNG::GetInstance()->SetIsEnableHapticFeedback(testValue);
+        EXPECT_EQ(TimePickerModelNG::getEnableHapticFeedback(frameNode), static_cast<uint32_t>(testValue));
+    }
+}
+
+/**
+ * @tc.name: TimePickerEnableHapticFeedback003
+ * @tc.desc: Test property enableHapticFeedback by Setter/Getter API
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerEnableHapticFeedback003, TestSize.Level1)
+{
+    std::vector<bool> testValues = { false, true, true, false, false };
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    for (auto testValue : testValues) {
+        TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        ASSERT_NE(frameNode, nullptr);
+        TimePickerModelNG::GetInstance()->SetIsEnableHapticFeedback(testValue);
+        auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+        ASSERT_NE(timePickerRowPattern, nullptr);
+        EXPECT_EQ(timePickerRowPattern->GetIsEnableHaptic(), testValue);
+    }
 }
 } // namespace OHOS::Ace::NG

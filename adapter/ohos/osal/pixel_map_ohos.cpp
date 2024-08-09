@@ -264,6 +264,19 @@ void* PixelMapOhos::GetWritablePixels() const
     return pixmap_->GetWritablePixels();
 }
 
+bool PixelMapOhos::GetPixelsVec(std::vector<uint8_t>& data) const
+{
+    CHECK_NULL_RETURN(pixmap_, false);
+    data.resize(pixmap_->GetByteCount());
+    uint8_t* dst = data.data();
+    uint32_t errCode = pixmap_->ReadPixels(pixmap_->GetByteCount(), dst);
+    if (errCode) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "GetPixelsVec error, errCode=%{public}d", errCode);
+        return false;
+    }
+    return true;
+}
+
 RefPtr<PixelMap> PixelMap::ConvertSkImageToPixmap(
     const uint32_t* colors, uint32_t colorLength, int32_t width, int32_t height)
 {

@@ -103,13 +103,17 @@ bool MarqueePattern::OnDirtyLayoutWrapperSwap(
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    if (measureChanged_) {
+    auto geoNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geoNode, false);
+    auto marqueeWidth = geoNode->GetFrameSize().Width();
+    if (measureChanged_ || marqueeWidth_ != marqueeWidth) {
         measureChanged_ = false;
         auto paintProperty = host->GetPaintProperty<MarqueePaintProperty>();
         CHECK_NULL_RETURN(paintProperty, false);
         auto playStatus = paintProperty->GetPlayerStatus().value_or(false);
         StopMarqueeAnimation(playStatus);
     }
+    marqueeWidth_ = marqueeWidth;
     return false;
 }
 

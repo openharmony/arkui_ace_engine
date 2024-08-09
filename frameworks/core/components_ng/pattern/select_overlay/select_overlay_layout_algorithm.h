@@ -87,7 +87,7 @@ public:
     }
 
     void MeasureChild(LayoutWrapper* layoutWrapper);
-    void LayoutChild(LayoutWrapper* layoutWrapper);
+    void LayoutChild(LayoutWrapper* layoutWrapper, SelectOverlayMode mode);
 
 private:
     OffsetF ComputeSelectMenuPosition(LayoutWrapper* layoutWrapper);

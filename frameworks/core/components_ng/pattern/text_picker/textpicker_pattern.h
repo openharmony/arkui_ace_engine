@@ -322,6 +322,8 @@ public:
 
     void OnColorConfigurationUpdate() override;
 
+    void OnDirectionConfigurationUpdate() override;
+
     void SetContentRowNode(RefPtr<FrameNode>& contentRowNode)
     {
         contentRowNode_ = contentRowNode;
@@ -415,7 +417,7 @@ public:
         closeDialogEvent_ = closeDialogEvent;
     }
 
-        void SetTextProperties(const PickerTextProperties& properties)
+    void SetTextProperties(const PickerTextProperties& properties)
     {
         if (properties.disappearTextStyle_.fontSize.has_value() && properties.disappearTextStyle_.fontSize->IsValid()) {
             isUserSetGradientFont_ = true;
@@ -493,6 +495,14 @@ private:
         std::vector<NG::RangeContent>& rangeContents, uint32_t patterIndex);
     void ProcessCascadeOptionsValues(const std::vector<std::string>& rangeResultValue, uint32_t index);
     void SetFocusCornerRadius(RoundRect& paintRect);
+    void UpdateConfirmButtonMargin(
+        const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme);
+    void UpdateCancelButtonMargin(
+        const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme);
+    void CheckFocusID(int32_t childSize);
+    bool ParseDirectionKey(RefPtr<TextPickerColumnPattern>& textPickerColumnPattern, KeyCode& code, int32_t childSize);
+    RectF CalculatePaintRect(int32_t currentFocusIndex,
+        float centerX, float centerY, float piantRectWidth, float piantRectHeight, float columnWidth);
 
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
@@ -531,6 +541,7 @@ private:
     bool isPicker_ = true;
     bool isFiredSelectsChange_ = false;
     std::optional<std::string> firedSelectsStr_;
+    
     ItemDivider divider_;
     bool customDividerFlag_ = false;
     Dimension value_;
@@ -541,6 +552,7 @@ private:
     Dimension gradientHeight_;
     Dimension dividerSpacing_;
     float paintDividerSpacing_ = 1.0f;
+    bool isNeedUpdateSelectedIndex_ = true;
 };
 } // namespace OHOS::Ace::NG
 

@@ -120,6 +120,7 @@ bool JSNavigationStack::IsEmpty()
 
 void JSNavigationStack::Pop()
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
     if (dataSourceObj_->IsEmpty()) {
         return;
     }
@@ -312,6 +313,16 @@ void JSNavigationStack::InitNavPathIndex(const std::vector<std::string>& pathNam
     func->Call(dataSourceObj_, 1, params);
 }
 
+void JSNavigationStack::SetDestinationIdToJsStack(int32_t index, const std::string& navDestinationId)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
+    auto pathInfo = GetJsPathInfo(index);
+    if (pathInfo->IsEmpty()) {
+        return;
+    }
+    pathInfo->SetProperty<std::string>("navDestinationId", navDestinationId);
+}
+
 RefPtr<NG::UINode> JSNavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>& customNode)
 {
     auto name = GetNameByIndex(index);
@@ -414,9 +425,10 @@ JSRef<JSVal> JSNavigationStack::GetOnPopByIndex(int32_t index) const
 bool JSNavigationStack::GetNavDestinationNodeInUINode(
     RefPtr<NG::UINode> node, RefPtr<NG::NavDestinationGroupNode>& desNode)
 {
+    RefPtr<NG::CustomNode> customNode;
     while (node) {
         if (node->GetTag() == V2::JS_VIEW_ETS_TAG) {
-            auto customNode = AceType::DynamicCast<NG::CustomNode>(node);
+            customNode = AceType::DynamicCast<NG::CustomNode>(node);
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "render current custom node: %{public}s",
                 customNode->GetCustomTag().c_str());
             // record parent navigationNode before customNode is rendered in case of navDestinationNode
@@ -426,6 +438,9 @@ bool JSNavigationStack::GetNavDestinationNodeInUINode(
             customNode->Render();
         } else if (node->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
             desNode = AceType::DynamicCast<NG::NavDestinationGroupNode>(node);
+            if (desNode) {
+                desNode->SetNavDestinationCustomNode(AceType::WeakClaim(AceType::RawPtr(customNode)));
+            }
             return true;
         }
         auto children = node->GetChildren();
@@ -498,6 +513,7 @@ bool JSNavigationStack::GetDisableAnimation() const
 
 std::string JSNavigationStack::GetRouteParam() const
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, "");
     auto size = GetSize();
     if (size > 0) {
         auto param = GetParamByIndex(size - 1);
@@ -523,7 +539,7 @@ int32_t JSNavigationStack::GetSize() const
     return 0;
 }
 
-std::string JSNavigationStack::ConvertParamToString(const JSRef<JSVal>& param)
+std::string JSNavigationStack::ConvertParamToString(const JSRef<JSVal>& param) const
 {
     if (param->IsBoolean()) {
         bool ret = param->ToBoolean();
@@ -545,8 +561,10 @@ std::string JSNavigationStack::ConvertParamToString(const JSRef<JSVal>& param)
     return "";
 }
 
-void JSNavigationStack::ParseJsObject(std::unique_ptr<JsonValue>& json, const JSRef<JSObject>& obj, int32_t depthLimit)
+void JSNavigationStack::ParseJsObject(
+    std::unique_ptr<JsonValue>& json, const JSRef<JSObject>& obj, int32_t depthLimit) const
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
     if (depthLimit == 0) {
         return;
     }
@@ -932,6 +950,7 @@ void JSNavigationStack::UpdatePathInfoIfNeeded(RefPtr<NG::UINode>& uiNode, int32
 
 bool JSNavigationStack::GetNeedUpdatePathInfo(int32_t index)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
     auto path = GetJsPathInfo(index);
     if (path->IsEmpty()) {
         return false;
@@ -945,6 +964,7 @@ bool JSNavigationStack::GetNeedUpdatePathInfo(int32_t index)
 
 void JSNavigationStack::SetNeedUpdatePathInfo(int32_t index, bool need)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
     auto path = GetJsPathInfo(index);
     if (path->IsEmpty()) {
         return;
@@ -959,7 +979,7 @@ void JSNavigationStack::RecoveryNavigationStack()
         return;
     }
     JSRef<JSArray> pathArray = JSRef<JSArray>::New();
-    for (uint32_t index = 0; index < navPathList_.size(); index++) {
+    for (int32_t index = 0; index < static_cast<int32_t>(navPathList_.size()); index++) {
         auto node = navPathList_[index].second;
         auto navDestinationGroupNode = AceType::DynamicCast<NG::NavDestinationGroupNode>(
             NG::NavigationGroupNode::GetNavDestinationNode(node));
@@ -970,18 +990,11 @@ void JSNavigationStack::RecoveryNavigationStack()
         if (!pattern) {
             continue;
         }
-        auto navPathInfo = pattern->GetNavPathInfo();
-        if (!navPathInfo) {
+        auto context = pattern->GetNavDestinationContext();
+        if (!context) {
             continue;
         }
-        JSRef<JSObject> item = JSRef<JSObject>::New();
-        item->SetProperty<std::string>("name", navPathInfo->GetName());
-        item->SetProperty<int32_t>("index", navDestinationGroupNode->GetIndex());
-        auto jsPathInfo = AceType::DynamicCast<JSNavPathInfo>(navPathInfo);
-        if (jsPathInfo) {
-            item->SetProperty("param", jsPathInfo->GetParam());
-            item->SetProperty("onPop", jsPathInfo->GetOnPop());
-        }
+        JSRef<JSObject> item = CreatePathInfoWithNecessaryProperty(context);
         pathArray->SetValueAt(index, item);
     }
     dataSourceObj_->SetPropertyObject("pathArray", pathArray);
@@ -989,6 +1002,7 @@ void JSNavigationStack::RecoveryNavigationStack()
 
 bool JSNavigationStack::NeedBuildNewInstance(int32_t index)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
     auto pathInfo = GetJsPathInfo(index);
     if (pathInfo->IsEmpty()) {
         return false;
@@ -1002,6 +1016,7 @@ bool JSNavigationStack::NeedBuildNewInstance(int32_t index)
 
 void JSNavigationStack::SetNeedBuildNewInstance(int32_t index, bool need)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
     auto pathInfo = GetJsPathInfo(index);
     if (pathInfo->IsEmpty()) {
         return;
@@ -1035,4 +1050,21 @@ JSRef<JSObject> JSNavigationStack::GetJsPathInfo(int32_t index)
     }
     return JSRef<JSObject>::Cast(pathInfo);
 }
+
+JSRef<JSObject> JSNavigationStack::CreatePathInfoWithNecessaryProperty(
+    const RefPtr<NG::NavDestinationContext>& context)
+{
+    auto pathInfo = JSRef<JSObject>::New();
+    CHECK_NULL_RETURN(context, pathInfo);
+    auto jsPathInfo = AceType::DynamicCast<JSNavPathInfo>(context->GetNavPathInfo());
+    CHECK_NULL_RETURN(jsPathInfo, pathInfo);
+
+    pathInfo->SetProperty<std::string>("name", jsPathInfo->GetName());
+    pathInfo->SetProperty<int32_t>("index", context->GetIndex());
+    pathInfo->SetProperty<std::string>("navDestinationId", std::to_string(context->GetNavDestinationId()));
+    pathInfo->SetProperty("param", jsPathInfo->GetParam());
+    pathInfo->SetProperty("onPop", jsPathInfo->GetOnPop());
+    return pathInfo;
+}
+
 } // namespace OHOS::Ace::Framework

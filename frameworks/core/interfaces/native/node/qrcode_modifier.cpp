@@ -83,5 +83,13 @@ const ArkUIQRCodeModifier* GetQRCodeModifier()
 
     return &modifier;
 }
+
+const CJUIQRCodeModifier* GetCJUIQRCodeModifier()
+{
+    static const CJUIQRCodeModifier modifier = { SetQRColor, ResetQRColor, SetQRBackgroundColor,
+        ResetQRBackgroundColor, SetContentOpacity, ResetContentOpacity };
+
+    return &modifier;
+}
 }
 }

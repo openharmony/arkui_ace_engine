@@ -179,7 +179,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorOnCollectTouchTargetTest003, TestSize
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
     EXPECT_NE(getEventTargetImpl, nullptr);
     TouchTestResult finalResult;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     framenode->GetOrCreateFocusHub();
     dragEventActuator->OnCollectTouchTarget(
         COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
@@ -344,7 +344,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg002, TestSize.Level1)
      * @tc.expected: dragEventActuator's userCallback_ is not null.
      */
     TouchTestResult finalResult;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     double unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
     GestureEventFunc actionStart = [&unknownPropertyValue](GestureEvent& info) {
         unknownPropertyValue = info.GetScale();
@@ -423,7 +423,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg003, TestSize.Level1)
      * @tc.expected: longPressRecognizer is not nullptr and longPressRecognizer's HasThumbnailCallback() return true.
      */
     TouchTestResult finalResult;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
     EXPECT_NE(getEventTargetImpl, nullptr);
     EXPECT_EQ(dragEventActuator->longPressRecognizer_->HasThumbnailCallback(), false);
@@ -493,7 +493,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg004, TestSize.Level1)
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
     EXPECT_NE(getEventTargetImpl, nullptr);
     TouchTestResult finalResult;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     frameNode->GetOrCreateFocusHub();
     dragEventActuator->OnCollectTouchTarget(
         COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT_MOUSE, getEventTargetImpl, finalResult, responseLinkResult);
@@ -539,7 +539,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg005, TestSize.Level1)
      */
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
     TouchTestResult finalResult;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     frameNode->GetOrCreateFocusHub();
     dragEventActuator->OnCollectTouchTarget(
         COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
@@ -632,7 +632,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg006, TestSize.Level1)
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
     EXPECT_NE(getEventTargetImpl, nullptr);
     TouchTestResult finalResult;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     frameNode->GetOrCreateFocusHub();
     dragEventActuator->OnCollectTouchTarget(
         COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
@@ -711,7 +711,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg007, TestSize.Level1)
      */
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
     TouchTestResult finalResult;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     frameNode->GetOrCreateFocusHub();
     dragEventActuator->OnCollectTouchTarget(
         COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
@@ -858,9 +858,9 @@ HWTEST_F(DragEventTestNg, DragEventTestNg009, TestSize.Level1)
      * @tc.expected: cover branch IsPreviewNeedScale() == true.
      */
     imageNode->GetGeometryNode()->frame_.rect_.width_ = IMAGE_INVALID_RECT_WIDTH;
-    EXPECT_EQ(imageNode->IsPreviewNeedScale(), true);
+    EXPECT_EQ(imageNode->IsPreviewNeedScale(), false);
     dragEventActuator->SetPreviewDefaultAnimateProperty(imageNode);
-    TranslateOptions result = imageContext->GetTransformTranslate().value();
+    TranslateOptions result = imageContext->GetTransformTranslate().value_or(TranslateOptions());
     TranslateOptions expectValue { 0.0f, 0.0f, 0.0f };
     EXPECT_EQ(result.x.calcvalue_, expectValue.x.calcvalue_);
 }

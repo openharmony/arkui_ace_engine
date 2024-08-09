@@ -297,7 +297,7 @@ void NavigationPattern::InitFoldState()
     CHECK_NULL_VOID(container);
     container->InitIsFoldable();
     if (container->IsFoldable()) {
-        currentfoldStatus_ = container->GetCurrentFoldStatus();
+        currentFoldStatus_ = container->GetCurrentFoldStatus();
     }
 }
 
@@ -335,8 +335,10 @@ bool NavigationPattern::JudgeFoldStateChangeAndUpdateState()
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
     auto foldStatus = container->GetCurrentFoldStatus();
-    if (foldStatus != currentfoldStatus_) {
-        currentfoldStatus_ = foldStatus;
+    TAG_LOGI(AceLogTag::ACE_SHEET, "newFoldStatus: %{public}d, currentFoldStatus: %{public}d.",
+        static_cast<int32_t>(foldStatus), static_cast<int32_t>(currentFoldStatus_));
+    if (foldStatus != currentFoldStatus_) {
+        currentFoldStatus_ = foldStatus;
         return true;
     }
     return false;
@@ -647,6 +649,7 @@ void NavigationPattern::UpdateNavPathList()
 
 void NavigationPattern::RefreshNavDestination()
 {
+    isChanged_ = false;
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -656,8 +659,24 @@ void NavigationPattern::RefreshNavDestination()
     hostNode->UpdateNavDestinationNodeWithoutMarkDirty(
         preTopNavPath.has_value() ? preTopNavPath->second : nullptr, navigationModeChange_);
     auto newTopNavPath = navigationStack_->GetTopNavPath();
+#if defined(ENABLE_NAV_SPLIT_MODE)
+    isBackPage_ = newTopNavPath.has_value() ?
+        navigationStack_->isLastListContains(newTopNavPath->first, newTopNavPath->second) : false;
+#endif
     std::string navDestinationName = "";
     CheckTopNavPathChange(preTopNavPath, newTopNavPath);
+
+    // close keyboard
+#if defined(ENABLE_STANDARD_INPUT)
+    auto focusHub = hostNode->GetFocusHub();
+    if (isChanged_ && focusHub->IsFocusableWholePath()) {
+        InputMethodManager::GetInstance()->CloseKeyboard();
+    }
+#endif
+
+#if defined(ENABLE_NAV_SPLIT_MODE)
+    navigationStack_->SetLastNavPathList(navPathList);
+#endif
 
     /* if first navDestination is removed, the new one will be refreshed */
     if (!navPathList.empty()) {
@@ -716,11 +735,6 @@ void NavigationPattern::CheckTopNavPathChange(
         return;
     }
 
-    // close keyboard
-#if defined(ENABLE_STANDARD_INPUT)
-    InputMethodManager::GetInstance()->CloseKeyboard();
-#endif
-
     isChanged_ = true;
     UpdateIsAnimation(preTopNavPath);
     isReplace_ = replaceValue != 0;
@@ -755,7 +769,14 @@ void NavigationPattern::CheckTopNavPathChange(
     if (newTopNavPath.has_value()) {
         newTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
             NavigationGroupNode::GetNavDestinationNode(newTopNavPath->second));
-        if (newTopNavDestination) {
+        do {
+            if (!newTopNavDestination) {
+                break;
+            }
+            auto focusHub = newTopNavDestination->GetFocusHub();
+            if (!GetIsFocusable(newTopNavDestination)) {
+                break;
+            }
             auto navDestinationPattern = newTopNavDestination->GetPattern<NavDestinationPattern>();
             auto navDestinationFocusView = AceType::DynamicCast<FocusView>(navDestinationPattern);
             CHECK_NULL_VOID(navDestinationFocusView);
@@ -763,7 +784,7 @@ void NavigationPattern::CheckTopNavPathChange(
                 navDestinationFocusView->SetIsViewRootScopeFocused(false);
             }
             navDestinationFocusView->FocusViewShow();
-        }
+        } while (0);
     } else {
         // back to navBar case
         auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
@@ -783,12 +804,15 @@ void NavigationPattern::CheckTopNavPathChange(
             NotifyPageShow(pageInfo->GetPageUrl());
         }
         navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
-        auto navBarFocusView = navBarNode->GetPattern<FocusView>();
-        CHECK_NULL_VOID(navBarFocusView);
-        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            navBarFocusView->SetIsViewRootScopeFocused(false);
+        auto focusHub = navBarNode->GetFocusHub();
+        if (GetIsFocusable(navBarNode)) {
+            auto navBarFocusView = navBarNode->GetPattern<FocusView>();
+            CHECK_NULL_VOID(navBarFocusView);
+            if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                navBarFocusView->SetIsViewRootScopeFocused(false);
+            }
+            navBarFocusView->FocusViewShow();
         }
-        navBarFocusView->FocusViewShow();
     }
     bool isShow = false;
     bool isDialog =
@@ -864,7 +888,13 @@ void NavigationPattern::FireNavigationInner(const RefPtr<UINode>& node, bool isO
     int32_t standardIndex = lastStandardIndex >= 0 ? lastStandardIndex : 0;
     int32_t start = standardIndex;
     int32_t end = navigationPattern->navigationStack_->Size();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
     if (isOnShow) {
+        if (overlayManager && overlayManager->HasModalPage()) {
+            return;
+        }
         for (int32_t index = start; index < end; index++) {
             const auto& curPath = navDestinationNodes[index];
             auto curDestination = AceType::DynamicCast<NavDestinationGroupNode>(
@@ -996,7 +1026,9 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
             navigationNode->DealNavigationExit(navBarNode, true, false);
         }
         navigationNode->RemoveDialogDestination();
-        navigationNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+        auto id = navigationNode->GetTopDestination() ? navigationNode->GetTopDestination()->GetAccessibilityId() : -1;
+        navigationNode->OnAccessibilityEvent(
+            AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
         navigationStack_->UpdateReplaceValue(0);
         return;
     }
@@ -1004,6 +1036,7 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
     // navDestination push/pop navDestination
     if (newTopNavDestination && preTopNavDestination) {
         if (isPopPage) {
+            newTopNavDestination->SetTransitionType(PageTransitionType::ENTER_POP);
             auto parent = preTopNavDestination->GetParent();
             CHECK_NULL_VOID(parent);
             auto preTopNavDestinationPattern = preTopNavDestination->GetPattern<NavDestinationPattern>();
@@ -1017,16 +1050,25 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
             parent->RemoveChild(preTopNavDestination, true);
             parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         } else {
+            preTopNavDestination->SetTransitionType(PageTransitionType::EXIT_PUSH);
+            newTopNavDestination->SetTransitionType(PageTransitionType::ENTER_PUSH);
             DealTransitionVisibility(preTopNavDestination, needVisible, false);
         }
         navigationNode->RemoveDialogDestination();
-        navigationNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+        auto id = navigationNode->GetTopDestination() ? navigationNode->GetTopDestination()->GetAccessibilityId() : -1;
+        navigationNode->OnAccessibilityEvent(
+            AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
         return;
     }
 
     // navBar push navDestination
     if (newTopNavDestination && newTopNavDestination->GetNavDestinationMode() == NavDestinationMode::STANDARD &&
         navigationMode_ == NavigationMode::STACK) {
+        auto navBar = AceType::DynamicCast<NavBarNode>(navBarNode);
+        if (navBar) {
+            navBar->SetTransitionType(PageTransitionType::EXIT_PUSH);
+        }
+        newTopNavDestination->SetTransitionType(PageTransitionType::ENTER_PUSH);
         DealTransitionVisibility(navBarNode, false, true);
         navigationNode->SetNeedSetInvisible(true);
     }
@@ -1045,10 +1087,16 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
         }
         parent->RemoveChild(preTopNavDestination, true);
         navigationNode->SetNeedSetInvisible(false);
+        auto navBar = AceType::DynamicCast<NavBarNode>(navBarNode);
+        if (navBar) {
+            navBar->SetTransitionType(PageTransitionType::ENTER_POP);
+        }
         parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     navigationNode->RemoveDialogDestination();
-    navigationNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+    auto id = navigationNode->GetTopDestination() ? navigationNode->GetTopDestination()->GetAccessibilityId() : -1;
+    navigationNode->OnAccessibilityEvent(
+        AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
 }
 
 void NavigationPattern::TransitionWithAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
@@ -1391,6 +1439,8 @@ RefPtr<UINode> NavigationPattern::GenerateUINodeByIndex(int32_t index)
     if (navigationNode && navDestinationPattern) {
         navDestinationPattern->SetNavigationNode(navigationNode);
         navDestinationPattern->SetNavigationId(navigationNode->GetInspectorId().value_or(""));
+        navigationStack_->SetDestinationIdToJsStack(
+            index, std::to_string(navDestinationPattern->GetNavDestinationId()));
     }
     auto eventHub = navDestinationNode->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_RETURN(eventHub, node);
@@ -1447,7 +1497,8 @@ void NavigationPattern::HandleDragUpdate(float xOffset)
 
     auto navigationPosition = navigationLayoutProperty->GetNavBarPosition().value_or(NavBarPosition::START);
     bool isNavBarStart = navigationPosition == NavBarPosition::START;
-    auto navBarLine = preNavBarWidth_ + (isNavBarStart ? xOffset : -xOffset);
+    auto navBarLine = isRightToLeft_ ? preNavBarWidth_ + (isNavBarStart ? -xOffset : xOffset)
+                                     : preNavBarWidth_ + (isNavBarStart ? xOffset : -xOffset);
     float currentNavBarWidth = realNavBarWidth_;
 
     if (maxNavBarWidthPx + dividerWidth + minContentWidthPx > frameWidth) {
@@ -1678,6 +1729,7 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
         return false;
     }
     ExecuteAddAnimation(preTopNavDestination, newTopNavDestination, isPopPage, proxy, navigationTransition);
+    ACE_SCOPED_TRACE_COMMERCIAL("Navigation page custom transition start");
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
     if (navigationTransition.interactive) {
         auto finishCallback = [weakNavigation = WeakClaim(this),
@@ -1741,6 +1793,7 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "preDestination and topDestination is invalid");
         return;
     }
+    ACE_SCOPED_TRACE_COMMERCIAL("Navigation page custom transition end");
     PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
     auto replaceValue = navigationStack_->GetReplaceValue();
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
@@ -1752,7 +1805,9 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
     if (newTopNavDestination) {
         newTopNavDestination->SetIsOnAnimation(false);
     }
-    hostNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+    auto id = hostNode->GetTopDestination() ? hostNode->GetTopDestination()->GetAccessibilityId() : -1;
+    hostNode->OnAccessibilityEvent(
+        AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
     do {
         if (replaceValue != 0) {
             hostNode->DealNavigationExit(preTopNavDestination, preTopNavDestination == nullptr);
@@ -1990,6 +2045,17 @@ void NavigationPattern::DealTransitionVisibility(const RefPtr<FrameNode>& node, 
     renderContext->SetTransitionOutCallback([weakNode = WeakPtr<FrameNode>(node), isVisible, isNavBar] {
         auto curNode = weakNode.Upgrade();
         CHECK_NULL_VOID(curNode);
+        if (isNavBar) {
+            auto navBarNode = AceType::DynamicCast<NavBarNode>(curNode);
+            if (navBarNode->GetTransitionType() != PageTransitionType::EXIT_PUSH) {
+                return;
+            }
+        } else {
+            auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
+            if (navDestinationNode->GetTransitionType() != PageTransitionType::EXIT_PUSH) {
+                return;
+            }
+        }
         curNode->SetJSViewActive(isVisible);
     });
 }
@@ -2105,7 +2171,9 @@ void NavigationPattern::NotifyNavDestinationSwitch(const RefPtr<NavDestinationCo
     const RefPtr<NavDestinationContext>& to, NavigationOperation operation)
 {
     auto host = GetHost();
-    if (!host) {
+    auto NavdestinationSwitchFunc =
+        UIObserverHandler::GetInstance().GetHandleNavDestinationSwitchFunc();
+    if (!host || !NavdestinationSwitchFunc) {
         return;
     }
 
@@ -2169,7 +2237,14 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
     if (topDestination) {
         NotifyDialogChange(NavDestinationLifecycle::ON_WILL_SHOW, false, true);
     }
-    if (!isAnimated) {
+    bool isNotNeedAnimation = !isAnimated;
+#if defined(ENABLE_NAV_SPLIT_MODE)
+    isNotNeedAnimation = !isAnimated ||
+        (navigationMode_ == NavigationMode::SPLIT && navigationStack_->Size() <= 1 && !isBackPage_);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "StartTransition navigationMode_:%{public}d isNotNeedAnimation:%{public}d",
+        navigationMode_, isNotNeedAnimation);
+#endif
+    if (isNotNeedAnimation) {
         FireShowAndHideLifecycle(preDestination, topDestination, isPopPage, false);
         TransitionWithOutAnimation(preDestination, topDestination, isPopPage, isNeedVisible);
         return;
@@ -2311,17 +2386,30 @@ void NavigationPattern::NotifyPerfMonitorPageMsg(const std::string& pageName)
 void NavigationPattern::RefreshFocusToDestination()
 {
     auto newTopNavPath = navigationStack_->GetTopNavPath();
-    if (newTopNavPath.has_value()) {
-        auto newTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
-            NavigationGroupNode::GetNavDestinationNode(newTopNavPath->second));
-        CHECK_NULL_VOID(newTopNavDestination);
-        auto navDestinationFocusView = newTopNavDestination->GetPattern<FocusView>();
-        CHECK_NULL_VOID(navDestinationFocusView);
-        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            navDestinationFocusView->SetIsViewRootScopeFocused(false);
-        }
-        navDestinationFocusView->FocusViewShow();
+    if (!newTopNavPath.has_value()) {
+        return;
     }
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto navBarNode = AceType::DynamicCast<FrameNode>(hostNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto navBarFocus = navBarNode->GetFocusHub();
+    CHECK_NULL_VOID(navBarFocus);
+    if (!navBarFocus->IsCurrentFocus()) {
+        return;
+    }
+    auto newTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+        NavigationGroupNode::GetNavDestinationNode(newTopNavPath->second));
+    CHECK_NULL_VOID(newTopNavDestination);
+    if (!GetIsFocusable(newTopNavDestination)) {
+        return;
+    }
+    auto navDestinationFocusView = newTopNavDestination->GetPattern<FocusView>();
+    CHECK_NULL_VOID(navDestinationFocusView);
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        navDestinationFocusView->SetIsViewRootScopeFocused(false);
+    }
+    navDestinationFocusView->FocusViewShow();
 }
 
 void NavigationPattern::RecoveryToLastStack(
@@ -2369,9 +2457,12 @@ void NavigationPattern::RecoveryToLastStack(
 
     // update name index
     navigationStack_->RecoveryNavigationStack();
+    ACE_SCOPED_TRACE_COMMERCIAL("Navigation page transition end");
     PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
     hostNode->SetIsOnAnimation(false);
-    hostNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+    auto id = hostNode->GetTopDestination() ? hostNode->GetTopDestination()->GetAccessibilityId() : -1;
+    hostNode->OnAccessibilityEvent(
+        AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
 }
 
 bool NavigationPattern::ExecuteAddAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
@@ -2431,5 +2522,19 @@ bool NavigationPattern::ExecuteAddAnimation(const RefPtr<NavDestinationGroupNode
         },
         TaskExecutor::TaskType::UI, timeout, "ArkUINavigationTransitionProxyFinish");
     return true;
+}
+
+bool NavigationPattern::GetIsFocusable(const RefPtr<FrameNode>& frameNode)
+{
+    auto hostNode = AceType::DynamicCast<FrameNode>(GetHost());
+    CHECK_NULL_RETURN(hostNode, false);
+    auto focusHub = hostNode->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    if (!focusHub->IsFocusableWholePath()) {
+        return false;
+    }
+    auto currentFocusHub = frameNode->GetFocusHub();
+    CHECK_NULL_RETURN(currentFocusHub, false);
+    return currentFocusHub->IsFocusableNode();
 }
 } // namespace OHOS::Ace::NG

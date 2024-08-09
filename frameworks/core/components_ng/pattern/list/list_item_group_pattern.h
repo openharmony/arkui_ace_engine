@@ -222,6 +222,7 @@ private:
     void SetListItemGroupDefaultAttributes(const RefPtr<FrameNode>& itemGroupNode);
     void OnColorConfigurationUpdate() override;
     void CheckListDirectionInCardStyle();
+    float GetPaddingAndMargin() const;
     RefPtr<ShallowBuilder> shallowBuilder_;
     RefPtr<ListPositionMap> posMap_;
     RefPtr<ListChildrenMainSize> childrenSize_;

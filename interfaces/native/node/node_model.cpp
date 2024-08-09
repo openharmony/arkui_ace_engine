@@ -147,7 +147,8 @@ ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
         ARKUI_CHECKBOX, ARKUI_XCOMPONENT, ARKUI_DATE_PICKER, ARKUI_TIME_PICKER, ARKUI_TEXT_PICKER,
         ARKUI_CALENDAR_PICKER, ARKUI_SLIDER, ARKUI_RADIO, ARKUI_IMAGE_ANIMATOR, ARKUI_STACK, ARKUI_SWIPER,
         ARKUI_SCROLL, ARKUI_LIST, ARKUI_LIST_ITEM, ARKUI_LIST_ITEM_GROUP, ARKUI_COLUMN, ARKUI_ROW, ARKUI_FLEX,
-        ARKUI_REFRESH, ARKUI_WATER_FLOW, ARKUI_FLOW_ITEM, ARKUI_RELATIVE_CONTAINER, ARKUI_GRID, ARKUI_GRID_ITEM };
+        ARKUI_REFRESH, ARKUI_WATER_FLOW, ARKUI_FLOW_ITEM, ARKUI_RELATIVE_CONTAINER, ARKUI_GRID, ARKUI_GRID_ITEM,
+        ARKUI_CUSTOM_SPAN };
     // already check in entry point.
     uint32_t nodeType = type < MAX_NODE_SCOPE_NUM ? type : (type - MAX_NODE_SCOPE_NUM + BASIC_COMPONENT_NUM);
     auto* impl = GetFullImpl();
@@ -291,7 +292,7 @@ int32_t SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, c
     if (node == nullptr) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    if (node->type == -1) {
+    if (node->type == -1 && attribute != NODE_LAYOUT_RECT) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     return SetNodeAttribute(node, attribute, value);
@@ -302,7 +303,7 @@ int32_t ResetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute)
     if (node == nullptr) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    if (node->type == -1) {
+    if (node->type == -1 && attribute != NODE_LAYOUT_RECT) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     return ResetNodeAttribute(node, attribute);
@@ -509,6 +510,9 @@ int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent)
         case MIXED_EVENT:
             subKind = static_cast<ArkUIEventSubKind>(innerEvent->mixedEvent.subKind);
             break;
+        case DRAG_EVENT:
+            subKind = static_cast<ArkUIEventSubKind>(innerEvent->dragEvent.subKind);
+            break;
         default:
             break; /* Empty */
     }
@@ -528,14 +532,28 @@ void HandleNodeEvent(ArkUI_NodeEvent* event)
     }
     if (event->node && event->node->eventListeners) {
         auto eventListenersSet = reinterpret_cast<std::set<void (*)(ArkUI_NodeEvent*)>*>(event->node->eventListeners);
-        if (eventListenersSet) {
-            for (const auto& eventListener : *eventListenersSet) {
-                (*eventListener)(event);
-            }
-        }
+        TriggerNodeEvent(event, eventListenersSet);
     }
     if (g_eventReceiver) {
         g_eventReceiver(event);
+    }
+}
+
+void TriggerNodeEvent(ArkUI_NodeEvent* event, std::set<void (*)(ArkUI_NodeEvent*)>* eventListenersSet)
+{
+    if (!eventListenersSet) {
+        return;
+    }
+    if (eventListenersSet->size() == 1) {
+        auto eventListener = eventListenersSet->begin();
+        (*eventListener)(event);
+    } else if (eventListenersSet->size() > 1) {
+        for (const auto& eventListener : *eventListenersSet) {
+            (*eventListener)(event);
+            if (!IsValidArkUINode(event->node)) {
+                break;
+            }
+        }
     }
 }
 

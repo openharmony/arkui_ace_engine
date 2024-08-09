@@ -17,6 +17,14 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CUSTOM_PAINT_UTIL_H
 #include <string>
 
+#ifndef ACE_UNITTEST
+#include "include/encode/SkJpegEncoder.h"
+#include "include/encode/SkPngEncoder.h"
+#include "include/encode/SkWebpEncoder.h"
+#include "include/utils/SkBase64.h"
+#include "core/components/common/painter/rosen_decoration_painter.h"
+#endif
+
 namespace OHOS::Ace::NG {
 
 const std::string UNSUPPORTED = "data:image/png";
@@ -27,13 +35,26 @@ const std::string IMAGE_JPEG = "image/jpeg";
 const std::string IMAGE_WEBP = "image/webp";
 
 constexpr int32_t MAX_LENGTH = 2048 * 2048;
-constexpr double HANGING_PERCENT = 0.8;
 constexpr double DEFAULT_QUALITY = 0.92;
+constexpr double HANGING_PERCENT = 0.8;
+constexpr double QUALITY_COEFFICIENT = 100.0;
+
+struct CanvasModifierDump {
+    int64_t timestamp = 0;
+    double width = 0;
+    double height = 0;
+    size_t opItemSize = 0;
+};
 
 // If args is empty or invalid format, use default: image/png
-std::string GetMimeType(const std::string& args);
+std::string GetMimeType(const std::string& type);
 
 // Quality need between 0.0 and 1.0 for MimeType jpeg and webp
-double GetQuality(const std::string& args);
+double GetQuality(const std::string& type, const double quality);
+
+#ifndef ACE_UNITTEST
+// Encode Image Format
+bool EncodeImage(std::string& type, const double quality, SkPixmap& src, SkDynamicMemoryWStream& dst);
+#endif
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CUSTOM_PAINT_UTIL_H

@@ -115,7 +115,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     if (!needAppend && touchTestResults_.empty()) {
         NG::NGGestureRecognizer::ResetGlobalTransCfg();
     }
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     // For root node, the parent local point is the same as global point.
     frameNode->TouchTest(point, point, point, touchRestrict, hitTestResult, touchPoint.id, responseLinkResult);
     TouchTestResult savePrevHitTestResult = touchTestResults_[touchPoint.id];
@@ -159,7 +159,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
         refereeNG_->CleanAll();
 
         TouchTestResult reHitTestResult;
-        TouchTestResult reResponseLinkResult;
+        ResponseLinkResult reResponseLinkResult;
         frameNode->TouchTest(point, point, point, touchRestrict,
             reHitTestResult, touchPoint.id, reResponseLinkResult);
         SetResponseLinkRecognizers(reHitTestResult, reResponseLinkResult);
@@ -203,9 +203,8 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     }
     std::string resultInfo = std::string("fingerId: ").append(std::to_string(touchPoint.id));
     for (const auto& item : touchTestResultInfo) {
-        resultInfo.append("{ id: ")
-            .append(std::to_string(item.first))
-            .append(", tag: ")
+        resultInfo.append("{ ")
+            .append("tag: ")
             .append(item.second.tag)
             .append(", inspectorId: ")
             .append(item.second.inspectorId)
@@ -297,9 +296,8 @@ void EventManager::LogTouchTestResultRecognizers(const TouchTestResult& result, 
     for (const auto& item : hittedRecognizerInfo) {
         hittedRecognizerTypeInfo.append("recognizer type ").append(item.first).append(" node info:");
         for (const auto& nodeInfo : item.second) {
-            hittedRecognizerTypeInfo.append(" { id: ")
-                .append(std::to_string(nodeInfo.nodeId))
-                .append(", tag: ")
+            hittedRecognizerTypeInfo.append(" { ")
+                .append("tag: ")
                 .append(nodeInfo.tag)
                 .append(", inspectorId: ")
                 .append(nodeInfo.inspectorId)
@@ -312,7 +310,9 @@ void EventManager::LogTouchTestResultRecognizers(const TouchTestResult& result, 
         std::list<std::pair<int32_t, std::string>> dumpList;
         eventTree_.Dump(dumpList, 0, DUMP_START_NUMBER);
         for (auto& item : dumpList) {
-            TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
+            if (!SystemProperties::GetAceCommercialLogEnabled()) {
+                TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
+            }
         }
     }
 }
@@ -333,7 +333,7 @@ bool EventManager::PostEventTouchTest(
             postEventRefereeNG_->CleanAll();
         }
     }
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     // For root node, the parent local point is the same as global point.
     uiNode->TouchTest(point, point, point, touchRestrict, hitTestResult, touchPoint.id, responseLinkResult);
     for (const auto& item : hitTestResult) {
@@ -375,7 +375,7 @@ void EventManager::TouchTest(
     const NG::PointF point { event.x, event.y };
     // For root node, the parent local point is the same as global point.
     TouchTestResult hitTestResult;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     frameNode->TouchTest(point, point, point, touchRestrict, hitTestResult, event.id, responseLinkResult);
     SetResponseLinkRecognizers(hitTestResult, responseLinkResult);
     axisTouchTestResults_[event.id] = std::move(hitTestResult);
@@ -618,7 +618,7 @@ void EventManager::CheckDownEvent(const TouchEvent& touchEvent)
             touchTestResults_.clear();
             downFingerIds_.clear();
         }
-        downFingerIds_.insert(touchEvent.id);
+        downFingerIds_[touchEvent.id] = touchEvent.originalId;
     }
 }
 
@@ -736,16 +736,33 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
     return true;
 }
 
+void EventManager::ClearTouchTestTargetForPenStylus(TouchEvent& touchEvent)
+{
+    refereeNG_->CleanGestureScope(touchEvent.id);
+    referee_->CleanGestureScope(touchEvent.id);
+    touchTestResults_.erase(touchEvent.id);
+    touchEvent.isMocked = true;
+    touchEvent.type = TouchType::CANCEL;
+    for (const auto& iter : downFingerIds_) {
+        touchEvent.id = iter.first;
+        DispatchTouchEvent(touchEvent);
+    }
+}
+
 void EventManager::CleanRecognizersForDragBegin(TouchEvent& touchEvent)
 {
-    downFingerIds_.erase(touchEvent.id);
     // send cancel to all recognizer
     for (const auto& iter : touchTestResults_) {
         touchEvent.id = iter.first;
+        touchEvent.isInterpolated = true;
+        if (!downFingerIds_.empty() && downFingerIds_.find(iter.first) != downFingerIds_.end()) {
+            touchEvent.originalId = downFingerIds_[touchEvent.id];
+        }
         DispatchTouchEventToTouchTestResult(touchEvent, iter.second, true);
         refereeNG_->CleanGestureScope(touchEvent.id);
         referee_->CleanGestureScope(touchEvent.id);
     }
+    downFingerIds_.erase(touchEvent.id);
     touchTestResults_.clear();
     refereeNG_->CleanRedundanceScope();
 }
@@ -892,13 +909,13 @@ bool EventManager::DispatchTabIndexEventNG(const KeyEvent& event, const RefPtr<N
 {
     CHECK_NULL_RETURN(mainView, false);
     TAG_LOGD(AceLogTag::ACE_FOCUS,
-        "Dispatch tab index event: code:%{public}d/action:%{public}d on node: %{public}s/%{public}d.", event.code,
+        "Dispatch tab index event: code:%{private}d/action:%{public}d on node: %{public}s/%{public}d.", event.code,
         event.action, mainView->GetTag().c_str(), mainView->GetId());
     auto mainViewFocusHub = mainView->GetFocusHub();
     CHECK_NULL_RETURN(mainViewFocusHub, false);
     if (mainViewFocusHub->HandleFocusByTabIndex(event)) {
-        TAG_LOGD(AceLogTag::ACE_FOCUS, "Tab index handled the key event: code:%{public}d/action:%{public}d", event.code,
-            event.action);
+        TAG_LOGD(AceLogTag::ACE_FOCUS, "Tab index handled the key event: code:%{private}d/action:%{public}d",
+            event.code, event.action);
         return true;
     }
     return false;
@@ -908,18 +925,18 @@ bool EventManager::DispatchKeyEventNG(const KeyEvent& event, const RefPtr<NG::Fr
 {
     CHECK_NULL_RETURN(focusNode, false);
     TAG_LOGD(AceLogTag::ACE_FOCUS,
-        "Dispatch key event: code:%{public}d/action:%{public}d on node: %{public}s/%{public}d.", event.code,
+        "Dispatch key event: code:%{private}d/action:%{public}d on node: %{public}s/%{public}d.", event.code,
         event.action, focusNode->GetTag().c_str(), focusNode->GetId());
     isKeyConsumed_ = false;
     auto focusNodeHub = focusNode->GetFocusHub();
     CHECK_NULL_RETURN(focusNodeHub, false);
     if (focusNodeHub->HandleKeyEvent(event)) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus system handled the key event: code:%{public}d/action:%{public}d",
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus system handled the key event: code:%{private}d/action:%{public}d",
             event.code, event.action);
         return true;
     }
     if (!isKeyConsumed_) {
-        TAG_LOGD(AceLogTag::ACE_FOCUS, "Focus system do not handled the key event: code:%{public}d/action:%{public}d",
+        TAG_LOGD(AceLogTag::ACE_FOCUS, "Focus system do not handled the key event: code:%{private}d/action:%{public}d",
             event.code, event.action);
     }
     return isKeyConsumed_;
@@ -1073,7 +1090,7 @@ void EventManager::AccessibilityHoverTest(
     }
     const NG::PointF point { event.x, event.y };
     TouchTestResult testResult;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     frameNode->TouchTest(
         point, point, point, touchRestrict, testResult, event.id, responseLinkResult);
     SetResponseLinkRecognizers(testResult, responseLinkResult);
@@ -1098,7 +1115,7 @@ void EventManager::MouseTest(
         } else if ((event.action == MouseAction::MOVE && event.button != MouseButton::NONE_BUTTON)) {
             testResult = mouseTestResults_[event.GetPointerId(event.id)];
         } else {
-            TouchTestResult responseLinkResult;
+            ResponseLinkResult responseLinkResult;
             if (event.action != MouseAction::MOVE) {
                 touchRestrict.touchEvent.isMouseTouchTest = true;
             }
@@ -1108,7 +1125,7 @@ void EventManager::MouseTest(
             mouseTestResults_[event.GetPointerId(event.id)] = testResult;
         }
     } else {
-        TouchTestResult responseLinkResult;
+        ResponseLinkResult responseLinkResult;
         if (event.action != MouseAction::MOVE) {
             touchRestrict.touchEvent.isMouseTouchTest = true;
         }
@@ -2040,7 +2057,7 @@ void EventManager::CheckAndLogLastConsumedEventInfo(int32_t eventId, bool logImm
 }
 
 void EventManager::SetResponseLinkRecognizers(
-    const TouchTestResult& result, const TouchTestResult& responseLinkRecognizers)
+    const TouchTestResult& result, const ResponseLinkResult& responseLinkRecognizers)
 {
     for (const auto& item : result) {
         auto group = AceType::DynamicCast<NG::RecognizerGroup>(item);
@@ -2061,7 +2078,7 @@ void EventManager::MockCancelEventAndDispatch(const TouchEvent& touchPoint)
     mockedEvent.isMocked = true;
     mockedEvent.type = TouchType::CANCEL;
     for (const auto& iter : downFingerIds_) {
-        mockedEvent.id = iter;
+        mockedEvent.id = iter.first;
         DispatchTouchEvent(mockedEvent);
     }
 }
@@ -2083,7 +2100,7 @@ bool EventManager::TouchTargetHitTest(const TouchEvent& touchPoint, const RefPtr
 {
     CHECK_NULL_RETURN(frameNode, false);
     TouchTestResult hitTestResult;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     const NG::PointF point { touchPoint.x, touchPoint.y };
     frameNode->TouchTest(point, point, point, touchRestrict, hitTestResult, touchPoint.id, responseLinkResult);
     for (const auto& entry : hitTestResult) {

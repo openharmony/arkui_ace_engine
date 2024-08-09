@@ -11,6 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/build/ace_ext.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("view_stack_processor_test_ng") {
@@ -124,4 +126,9 @@ group("core_base_unittest") {
     ":view_partial_update_model_test_ng",
     ":view_stack_processor_test_ng",
   ]
+
+  if (ace_engine_feature_enable_split_mode &&
+      defined(vendor_configs.ace_engine_advanced_split_mode_base_test_ng)) {
+    deps += vendor_configs.ace_engine_advanced_split_mode_base_test_ng
+  }
 }

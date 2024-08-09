@@ -44,6 +44,11 @@ public:
     void HasUserDefinedNormalFontFamily(bool isUserDefined) override;
     void HasUserDefinedSelectedFontFamily(bool isUserDefined) override;
     void SetBackgroundColor(const Color& color) override;
+    static void SetStartDate(FrameNode* frameNode, const PickerDate& value);
+    static void SetEndDate(FrameNode* frameNode, const PickerDate& value);
+    static void SetSelectedDate(FrameNode* frameNode, const PickerDate& value);
+    static void SetOnDateChange(FrameNode* frameNode, DateChangeEvent&& onChange);
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     void SetChangeEvent(DateChangeEvent&& onChange) override;
     static void SetSelectedTextStyle(
         FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value);
@@ -53,11 +58,6 @@ public:
         FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value);
     static void SetShowLunar(FrameNode* frameNode, bool lunar);
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
-    static void SetStartDate(FrameNode* frameNode, const PickerDate& value);
-    static void SetEndDate(FrameNode* frameNode, const PickerDate& value);
-    static void SetSelectedDate(FrameNode* frameNode, const PickerDate& value);
-    static void SetOnDateChange(FrameNode* frameNode, DateChangeEvent&& onChange);
-    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static PickerTextStyle getSelectedTextStyle(FrameNode* frameNode);
     static PickerTextStyle getNormalTextStyle(FrameNode* frameNode);
     static PickerTextStyle getDisappearTextStyle(FrameNode* frameNode);

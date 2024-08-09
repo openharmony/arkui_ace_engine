@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIDataPanelModifier* GetDataPanelModifier();
+const CJUIDataPanelModifier* GetCJUIDataPanelModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_DATA_PANEL_MODIFIER_H

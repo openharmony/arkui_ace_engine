@@ -38,8 +38,7 @@ public:
     ~StageManager() override = default;
 
     // PushUrl and ReplaceUrl both use PushPage function
-    virtual bool PushPage(const RefPtr<FrameNode>& node, bool needHideLast = true, bool needTransition = true,
-        bool isPush = false);
+    virtual bool PushPage(const RefPtr<FrameNode>& node, bool needHideLast = true, bool needTransition = true);
     virtual bool InsertPage(const RefPtr<FrameNode>& node, bool bellowTopOrBottom);
     virtual bool PopPage(bool needShowNext = true, bool needTransition = true);
     virtual bool PopPageToIndex(int32_t index, bool needShowNext = true, bool needTransition = true);
@@ -51,7 +50,8 @@ public:
     void PageChangeCloseKeyboard();
 
     static void FirePageHide(const RefPtr<UINode>& node, PageTransitionType transitionType = PageTransitionType::NONE);
-    static void FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType = PageTransitionType::NONE);
+    static void FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType = PageTransitionType::NONE,
+        bool needFocus = true);
 
     virtual RefPtr<FrameNode> GetLastPage() const;
     RefPtr<FrameNode> GetPageById(int32_t pageId);
@@ -64,6 +64,11 @@ public:
 
     virtual RefPtr<FrameNode> GetLastPageWithTransition() const;
     virtual RefPtr<FrameNode> GetPrevPageWithTransition() const;
+
+    virtual RefPtr<FrameNode> GetFocusPage() const
+    {
+        return nullptr;
+    }
 
     void SetStageInTrasition (bool stageInTrasition) {
         stageInTrasition_ = stageInTrasition;
@@ -81,11 +86,13 @@ public:
     }
 #endif
 
-    virtual void SyncPageSafeArea(const RefPtr<FrameNode>& lastPage, PropertyChangeFlag changeFlag);
+    virtual void SyncPageSafeArea(bool keyboardSafeArea);
+    
+    virtual bool CheckPageFocus();
 
 protected:
     // ace performance check
-    void PerformanceCheck(const RefPtr<FrameNode>& pageNode, int64_t vsyncTimeout);
+    void PerformanceCheck(const RefPtr<FrameNode>& pageNode, int64_t vsyncTimeout, std::string path);
     void StopPageTransition();
     void FireAutoSave(const RefPtr<FrameNode>& outPageNode, const RefPtr<FrameNode>& inPageNode);
     void AddPageTransitionTrace(const RefPtr<FrameNode>& srcPage, const RefPtr<FrameNode>& destPage);

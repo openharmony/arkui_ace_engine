@@ -1675,6 +1675,8 @@ HWTEST_F(TextPickerPatternTestNg, TextPickerPatternUpdateColumnChildPosition001,
     textPickerColumnPattern_->isReboundInProgress_ = true;
     textPickerColumnPattern_->SetYLast(1.0);
     textPickerColumnPattern_->UpdateColumnChildPosition(2.0);
+    std::vector<NG::RangeContent> range = { { "", "" } };
+    textPickerColumnPattern_->SetOptions(range);
     EXPECT_EQ(textPickerColumnPattern_->scrollDelta_, 1.0f);
     /**
      * @tc.cases: case. cover isReboundInProgress_ == true && canLoop_ == false
@@ -1713,6 +1715,8 @@ HWTEST_F(TextPickerPatternTestNg, TextPickerPatternUpdateColumnChildPosition002,
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    std::vector<NG::RangeContent> range = { { "", "" } };
+    textPickerColumnPattern_->SetOptions(range);
     /**
      * @tc.cases: case. covering the false branch
      */
@@ -1750,7 +1754,10 @@ HWTEST_F(TextPickerPatternTestNg, TextPickerPatternUpdateColumnChildPosition002,
 HWTEST_F(TextPickerPatternTestNg, LinearFontSize001, TestSize.Level1)
 {
     InitTextPickerPatternTestNg();
-    textPickerColumnPattern_->LinearFontSize(Dimension(FONT_SIZE_10), Dimension(FONT_SIZE_20), 1);
+    Dimension dimension = Dimension(FONT_SIZE_10);
+    Dimension dimension1;
+    dimension1 = textPickerColumnPattern_->LinearFontSize(dimension, dimension, 1);
+    EXPECT_FALSE(dimension < dimension1);
 }
 
 /**
@@ -1761,7 +1768,10 @@ HWTEST_F(TextPickerPatternTestNg, LinearFontSize001, TestSize.Level1)
 HWTEST_F(TextPickerPatternTestNg, LinearFontSize002, TestSize.Level1)
 {
     InitTextPickerPatternTestNg();
-    textPickerColumnPattern_->LinearFontSize(Dimension(FONT_SIZE_10), Dimension(FONT_SIZE_20), 2);
+    Dimension dimension = Dimension(FONT_SIZE_10);
+    Dimension dimension1;
+    dimension1 = textPickerColumnPattern_->LinearFontSize(dimension, dimension, 2);
+    EXPECT_FALSE(dimension < dimension1);
 }
 
 /**

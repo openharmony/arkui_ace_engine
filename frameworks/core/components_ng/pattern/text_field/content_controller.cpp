@@ -185,7 +185,9 @@ void ContentController::FilterValue()
         property->HasMaxLength() ? property->GetMaxLengthValue(Infinity<uint32_t>()) : Infinity<uint32_t>();
     auto textWidth = static_cast<int32_t>(GetWideText().length());
     if (GreatNotEqual(textWidth, maxLength)) {
-        content_ = StringUtils::ToString(GetWideText().substr(0, maxLength));
+        // clamp emoji
+        auto subWstring = TextEmojiProcessor::SubWstring(0, maxLength, GetWideText());
+        content_ = StringUtils::ToString(subWstring);
     }
 }
 
@@ -350,7 +352,7 @@ int32_t ContentController::GetDeleteLength(int32_t startIndex, int32_t length, b
     auto content = content_;
     return TextEmojiProcessor::Delete(startIndex, length, content, isBackward);
 }
-
+ 
 bool ContentController::IsIndexBeforeOrInEmoji(int32_t index)
 {
     int32_t startIndex = index - EMOJI_RANGE_LEFT;

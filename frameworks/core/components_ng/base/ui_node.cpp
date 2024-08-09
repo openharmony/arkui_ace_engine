@@ -79,6 +79,9 @@ UINode::~UINode()
     } else {
         ElementRegister::GetInstance()->RemoveItemSilently(nodeId_);
     }
+    if (propInspectorId_.has_value()) {
+        ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(propInspectorId_.value_or(""), nodeId_);
+    }
     if (!onMainTree_) {
         return;
     }
@@ -161,10 +164,16 @@ void UINode::AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& si
     DoAddChild(it, child, false);
 }
 
-void UINode::AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode)
+void UINode::AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode, bool addModalUiextension)
 {
     CHECK_NULL_VOID(child);
     CHECK_NULL_VOID(siblingNode);
+    if (!addModalUiextension && modalUiextensionCount_ > 0) {
+        LOGW("AddChildBefore Current Node(id: %{public}d) is prohibited add child(tag %{public}s, id: %{public}d), "
+            "Current modalUiextension count is : %{public}d",
+            GetId(), child->GetTag().c_str(), child->GetId(), modalUiextensionCount_);
+        return;
+    }
     auto it = std::find(children_.begin(), children_.end(), child);
     if (it != children_.end()) {
         LOGW("Child node already exists. Existing child nodeId %{public}d, add %{public}s child nodeId nodeId "
@@ -182,6 +191,24 @@ void UINode::AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& s
     it = children_.begin();
     std::advance(it, -1);
     DoAddChild(it, child, false);
+}
+
+void UINode::TraversingCheck(RefPtr<UINode> node, bool withAbort)
+{
+    if (isTraversing_) {
+        if (node) {
+            LOGF("Try to remove the child([%{public}s][%{public}d]) of node [%{public}s][%{public}d] when its children "
+                "is traversing", node->GetTag().c_str(), node->GetId(), GetTag().c_str(), GetId());
+        } else {
+            LOGF("Try to remove all the children of node [%{public}s][%{public}d] when its children is traversing",
+                GetTag().c_str(), GetId());
+        }
+        OHOS::Ace::LogBacktrace();
+        
+        if (withAbort) {
+            abort();
+        }
+    }
 }
 
 std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& child, bool allowTransition)
@@ -203,6 +230,13 @@ std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& ch
         AddDisappearingChild(child, std::distance(children_.begin(), iter));
     }
     MarkNeedSyncRenderTree(true);
+    // Iter maybe lost in OnRemoveFromParent, needs reacquire.
+    iter = std::find(children_.begin(), children_.end(), child);
+    if (iter == children_.end()) {
+        LOGW("Iter is qeual to children end");
+        return children_.end();
+    }
+    TraversingCheck(*iter);
     auto result = children_.erase(iter);
     return result;
 }
@@ -267,7 +301,9 @@ void UINode::Clean(bool cleanDirectly, bool allowTransition, int32_t branchId)
 {
     bool needSyncRenderTree = false;
     int32_t index = 0;
-    for (const auto& child : children_) {
+
+    auto children = GetChildren();
+    for (const auto& child : children) {
         // traverse down the child subtree to mark removing and find needs to hold subtree, if found add it to pending
         if (!cleanDirectly && child->MarkRemoving()) {
             ElementRegister::GetInstance()->AddPendingRemoveNode(child);
@@ -338,9 +374,79 @@ void UINode::ResetParent()
     depth_ = -1;
 }
 
+namespace {
+std::ostream& operator<<(std::ostream& ss, const RefPtr<UINode>& node)
+{
+    return ss << node->GetId() << "(" << node->GetTag() << "," << node->GetDepth()
+        << "," << node->GetChildren().size() << ")";
+}
+
+std::string ToString(const RefPtr<UINode>& node)
+{
+    std::stringstream ss;
+    ss << node;
+    for (auto parent = node->GetParent(); parent; parent = parent->GetParent()) {
+        ss << "->" << parent;
+    }
+    return ss.str();
+}
+
+void LoopDetected(const RefPtr<UINode>& child, const RefPtr<UINode>& current)
+{
+    auto childNode = ToString(child);
+    auto currentNode = ToString(current);
+
+    constexpr size_t totalLengthLimit = 900; // hilog oneline length limit is 1024
+    constexpr size_t childLengthLimit = 100;
+    static_assert(totalLengthLimit > childLengthLimit, "totalLengthLimit too small");
+    constexpr size_t currentLengthLimit = totalLengthLimit - childLengthLimit;
+
+    LOGF("Detected loop: child[%{public}.*s] vs current[%{public}.*s]",
+        (int)childLengthLimit, childNode.c_str(), (int)currentLengthLimit, currentNode.c_str());
+
+    // log full childNode info in case of hilog length limit reached
+    if (childNode.length() > childLengthLimit) {
+        auto s = childNode.c_str();
+        for (size_t i = 0; i < childNode.length(); i += totalLengthLimit) {
+            LOGI("child.%{public}zu:[%{public}.*s]", i, (int)totalLengthLimit, s + i);
+        }
+    }
+
+    // log full currentNode info in case of hilog length limit reached
+    if (currentNode.length() > currentLengthLimit) {
+        auto s = currentNode.c_str();
+        for (size_t i = 0; i < currentNode.length(); i += totalLengthLimit) {
+            LOGI("current.%{public}zu:[%{public}.*s]", i, (int)totalLengthLimit, s + i);
+        }
+    }
+
+    if (SystemProperties::GetLayoutDetectEnabled()) {
+        abort();
+    } else {
+        LogBacktrace();
+    }
+}
+
+bool DetectLoop(const RefPtr<UINode>& child, const RefPtr<UINode>& current)
+{
+    if ((child->GetDepth() > 0 && child->GetDepth() < INT32_MAX) || child == current) {
+        for (auto parent = current; parent; parent = parent->GetParent()) {
+            if (parent == child) {
+                LoopDetected(child, current);
+                return true;
+            }
+        }
+    }
+    return false;
+}
+}
+
 void UINode::DoAddChild(
     std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently, bool addDefaultTransition)
 {
+    if (DetectLoop(child, Claim(this))) {
+        return;
+    }
     children_.insert(it, child);
 
     child->SetParent(Claim(this));
@@ -386,6 +492,7 @@ void UINode::RemoveFromParentCleanly(const RefPtr<UINode>& child, const RefPtr<U
         auto& children = parent->ModifyChildren();
         auto iter = std::find(children.begin(), children.end(), child);
         if (iter != children.end()) {
+            parent->TraversingCheck(*iter);
             children.erase(iter);
         }
     }
@@ -472,7 +579,7 @@ void UINode::GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const
 
 void UINode::GetChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes)
 {
-    for (const auto& uiChild : GetChildren()) {
+    for (const auto& uiChild : GetChildren(true)) {
         if (uiChild && !uiChild->IsOnMainTree()) {
             continue;
         }
@@ -550,13 +657,17 @@ void UINode::DetachFromMainTree(bool recursive)
         nodeStatus_ = NodeStatus::BUILDER_NODE_OFF_MAINTREE;
     }
     isRemoving_ = true;
+    auto context = context_;
     DetachContext(false);
-    OnDetachFromMainTree(recursive);
+    OnDetachFromMainTree(recursive, context);
     // if recursive = false, recursively call DetachFromMainTree(false), until we reach the first FrameNode.
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
-    for (const auto& child : GetChildren()) {
+    isTraversing_ = true;
+    std::list<RefPtr<UINode>> children = GetChildren();
+    for (const auto& child : children) {
         child->DetachFromMainTree(isRecursive);
     }
+    isTraversing_ = false;
 }
 
 void UINode::ProcessOffscreenTask(bool recursive)
@@ -591,12 +702,15 @@ void UINode::MovePosition(int32_t slot)
 
         auto itSelf = std::find(it, children.end(), self);
         if (itSelf != children.end()) {
+            parentNode->TraversingCheck(*itSelf);
             children.erase(itSelf);
         } else {
+            parentNode->TraversingCheck(self);
             children.remove(self);
             ++it;
         }
     } else {
+        parentNode->TraversingCheck(self);
         children.remove(self);
     }
     children.insert(it, self);
@@ -647,7 +761,7 @@ void UINode::RebuildRenderContextTree()
         parent->RebuildRenderContextTree();
     }
 }
-void UINode::OnDetachFromMainTree(bool) {}
+void UINode::OnDetachFromMainTree(bool, PipelineContext*) {}
 
 void UINode::OnAttachToMainTree(bool)
 {
@@ -664,16 +778,18 @@ void UINode::UpdateGeometryTransition()
 
 bool UINode::IsAutoFillContainerNode()
 {
-    return tag_ == V2::PAGE_ETS_TAG || tag_ == V2::NAVDESTINATION_VIEW_ETS_TAG;
+    return tag_ == V2::PAGE_ETS_TAG || tag_ == V2::NAVDESTINATION_VIEW_ETS_TAG || tag_ == V2::DIALOG_ETS_TAG
+        || tag_ == V2::SHEET_PAGE_TAG || tag_ == V2::MODAL_PAGE_TAG;
 }
 
-void UINode::DumpViewDataPageNodes(RefPtr<ViewDataWrap> viewDataWrap, bool skipSubAutoFillContainer)
+void UINode::DumpViewDataPageNodes(
+    RefPtr<ViewDataWrap> viewDataWrap, bool skipSubAutoFillContainer, bool needsRecordData)
 {
     auto frameNode = AceType::DynamicCast<FrameNode>(this);
     if (frameNode && !frameNode->IsVisible()) {
         return;
     }
-    DumpViewDataPageNode(viewDataWrap);
+    DumpViewDataPageNode(viewDataWrap, needsRecordData);
     for (const auto& item : GetChildren()) {
         if (!item) {
             continue;
@@ -681,7 +797,7 @@ void UINode::DumpViewDataPageNodes(RefPtr<ViewDataWrap> viewDataWrap, bool skipS
         if (skipSubAutoFillContainer && item->IsAutoFillContainerNode()) {
             continue;
         }
-        item->DumpViewDataPageNodes(viewDataWrap, skipSubAutoFillContainer);
+        item->DumpViewDataPageNodes(viewDataWrap, skipSubAutoFillContainer, needsRecordData);
     }
 }
 
@@ -827,7 +943,7 @@ void UINode::GenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& visibleList)
     }
 }
 
-PipelineContext* UINode::GetContext()
+PipelineContext* UINode::GetContext() const
 {
     PipelineContext* context = nullptr;
     if (context_) {
@@ -856,7 +972,7 @@ PipelineContext* UINode::GetContextWithCheck()
     return PipelineContext::GetCurrentContextPtrSafelyWithCheck();
 }
 
-RefPtr<PipelineContext> UINode::GetContextRefPtr()
+RefPtr<PipelineContext> UINode::GetContextRefPtr() const
 {
     auto* context = GetContext();
     return Claim(context);
@@ -864,7 +980,7 @@ RefPtr<PipelineContext> UINode::GetContextRefPtr()
 
 HitTestResult UINode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
-    TouchTestResult& responseLinkResult, bool isDispatch)
+    ResponseLinkResult& responseLinkResult, bool isDispatch)
 {
     auto children = GetChildren();
     HitTestResult hitTestResult = HitTestResult::OUT_OF_REGION;
@@ -989,7 +1105,12 @@ void UINode::Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos)
 {
     ACE_LAYOUT_TRACE_BEGIN("Build[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(), GetId(),
         GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str());
+    std::vector<RefPtr<UINode>> children;
+    children.reserve(GetChildren().size());
     for (const auto& child : GetChildren()) {
+        children.push_back(child);
+    }
+    for (const auto& child : children) {
         if (InstanceOf<CustomNode>(child)) {
             auto custom = DynamicCast<CustomNode>(child);
             if (custom->HasExtraInfo()) {

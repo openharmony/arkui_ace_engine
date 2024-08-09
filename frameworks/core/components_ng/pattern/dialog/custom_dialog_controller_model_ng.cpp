@@ -157,7 +157,6 @@ void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogPrope
             dialogs.pop_back();
         } else {
             overlayManager->CloseDialog(dialog);
-            dialogs.pop_back();
         }
     };
     executor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIDialogCloseCustomDialog");
@@ -168,6 +167,7 @@ void CustomDialogControllerModelNG::SetCloseDialogForNDK(FrameNode* dialogNode)
     CHECK_NULL_VOID(dialogNode);
     ContainerScope scope(Container::CurrentIdSafely());
     auto container = Container::Current();
+    dialogNode->SetIsUseTransitionAnimator(true);
     CHECK_NULL_VOID(container);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);

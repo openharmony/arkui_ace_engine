@@ -196,7 +196,11 @@ bool RosenMediaPlayer::MediaPlay(const std::string& filePath)
         return false;
     }
     auto hapPath = container->GetHapPath();
-    auto hapFd = open(hapPath.c_str(), O_RDONLY);
+    char realPath[PATH_MAX] = { 0x00 };
+    if (!RealPath(hapPath, realPath)) {
+        return false;
+    }
+    auto hapFd = open(realPath, O_RDONLY);
     if (hapFd < 0) {
         LOGE("Open hap file failed");
         return false;
@@ -229,7 +233,11 @@ bool RosenMediaPlayer::RawFilePlay(const std::string& filePath)
         return false;
     }
     auto hapPath = container->GetHapPath();
-    auto hapFd = open(hapPath.c_str(), O_RDONLY);
+    char realPath[PATH_MAX] = { 0x00 };
+    if (!RealPath(hapPath, realPath)) {
+        return false;
+    }
+    auto hapFd = open(realPath, O_RDONLY);
     if (hapFd < 0) {
         LOGE("Open hap file failed");
         return false;
@@ -259,7 +267,11 @@ bool RosenMediaPlayer::RelativePathPlay(const std::string& filePath)
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
     auto hapPath = container->GetHapPath();
-    auto hapFd = open(hapPath.c_str(), O_RDONLY);
+    char realPath[PATH_MAX] = { 0x00 };
+    if (!RealPath(hapPath, realPath)) {
+        return false;
+    }
+    auto hapFd = open(realPath, O_RDONLY);
     if (hapFd < 0) {
         LOGE("Open hap file failed");
         return false;
@@ -429,6 +441,13 @@ int32_t RosenMediaPlayer::Seek(int32_t mSeconds, OHOS::Ace::SeekMode mode)
     LOGI("Media player start to seek.");
     CHECK_NULL_RETURN(mediaPlayer_, -1);
     return mediaPlayer_->Seek(mSeconds, ConvertToMediaSeekMode(mode));
+}
+
+int32_t RosenMediaPlayer::SetPlayRange(int64_t startTime, int64_t endTime)
+{
+    LOGI("Media player start to SetPlayRange.");
+    CHECK_NULL_RETURN(mediaPlayer_, -1);
+    return mediaPlayer_->SetPlayRange(startTime, endTime);
 }
 
 } // namespace OHOS::Ace::NG

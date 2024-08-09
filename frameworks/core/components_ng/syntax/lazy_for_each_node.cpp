@@ -311,6 +311,7 @@ void LazyForEachNode::OnDatasetChange(const std::list<V2::Operation>& DataOperat
     tempChildren_.clear();
     tempChildren_.swap(children_);
     NotifyDataCountChanged(initialChangedIndex);
+    ParseOperations(DataOperations);
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
@@ -427,15 +428,24 @@ void LazyForEachNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t 
 const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildren(bool notDetach) const
 {
     if (children_.empty()) {
+        LoadChildren(notDetach);
+
         // if measure not done, return previous children
-        if (notDetach) {
+        if (notDetach && children_.empty()) {
             return tempChildren_;
         }
+
         tempChildren_.clear();
+    }
+    return children_;
+}
 
-        std::list<std::pair<std::string, RefPtr<UINode>>> childList;
-        const auto& items = builder_->GetItems(childList);
+void LazyForEachNode::LoadChildren(bool notDetach) const
+{
+    std::list<std::pair<std::string, RefPtr<UINode>>> childList;
+    const auto& items = builder_->GetItems(childList);
 
+    if (!notDetach) {
         for (auto& node : childList) {
             if (!node.second->OnRemoveFromParent(true)) {
                 const_cast<LazyForEachNode*>(this)->AddDisappearingChild(node.second);
@@ -443,14 +453,14 @@ const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildren(bool notDetach) co
                 node.second->DetachFromMainTree();
             }
         }
-        for (const auto& [index, item] : items) {
-            if (item.second) {
-                const_cast<LazyForEachNode*>(this)->RemoveDisappearingChild(item.second);
-                children_.push_back(item.second);
-            }
+    }
+
+    for (const auto& [index, item] : items) {
+        if (item.second) {
+            const_cast<LazyForEachNode*>(this)->RemoveDisappearingChild(item.second);
+            children_.push_back(item.second);
         }
     }
-    return children_;
 }
 
 void LazyForEachNode::OnConfigurationUpdate(const ConfigurationChange& configurationChange)
@@ -562,6 +572,40 @@ void LazyForEachNode::NotifyCountChange(int32_t index, int32_t count)
     int64_t accessibilityId = GetAccessibilityId();
     if (parent) {
         parent->NotifyDataChange(index, count, accessibilityId);
+    }
+}
+
+void LazyForEachNode::ParseOperations(const std::list<V2::Operation>& dataOperations)
+{
+    std::map<std::string, int32_t> operationTypeMap = { { "add", 1 }, { "delete", 2 }, { "change", 3 }, { "move", 4 },
+        { "exchange", 5 }, { "reload", 6 } };
+    constexpr int ADDOP = 1;
+    constexpr int DELETEOP = 2;
+    constexpr int CHANGEOP = 3;
+    constexpr int MOVEOP = 4;
+    constexpr int EXCHANGEOP = 5;
+    constexpr int RELOADOP = 6;
+    for (const auto& operation : dataOperations) {
+        switch (operationTypeMap[operation.type]) {
+            case ADDOP:
+                NotifyCountChange(operation.index, operation.count);
+                break;
+            case DELETEOP:
+                NotifyCountChange(operation.index, -operation.count);
+                break;
+            case CHANGEOP:
+                NotifyCountChange(operation.index + operation.count - 1, 0);
+                break;
+            case MOVEOP:
+                NotifyCountChange(std::max(operation.coupleIndex.first, operation.coupleIndex.second), 0);
+                break;
+            case EXCHANGEOP:
+                NotifyCountChange(operation.coupleIndex.second, 0);
+                break;
+            case RELOADOP:
+                NotifyCountChange(static_cast<int32_t>(FrameCount()), 0);
+                break;
+        }
     }
 }
 } // namespace OHOS::Ace::NG

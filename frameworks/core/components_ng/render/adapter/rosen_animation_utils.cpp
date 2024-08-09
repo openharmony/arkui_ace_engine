@@ -51,6 +51,7 @@ Rosen::RSAnimationTimingProtocol OptionToTimingProtocol(const AnimationOption& o
     if (rateRange) {
         timingProtocol.SetFrameRateRange({ rateRange->min_, rateRange->max_, rateRange->preferred_ });
     }
+    timingProtocol.SetInstanceId(Container::CurrentIdSafelyWithCheck());
     return timingProtocol;
 }
 std::function<void()> GetWrappedCallback(const std::function<void()>& callback)
@@ -58,7 +59,7 @@ std::function<void()> GetWrappedCallback(const std::function<void()>& callback)
     if (!callback) {
         return nullptr;
     }
-    auto wrappedOnFinish = [onFinish = callback, instanceId = Container::CurrentId()]() {
+    auto wrappedOnFinish = [onFinish = callback, instanceId = Container::CurrentIdSafelyWithCheck()]() {
         ContainerScope scope(instanceId);
         auto taskExecutor = Container::CurrentTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
@@ -198,11 +199,22 @@ void AnimationUtils::PauseAnimation(const std::shared_ptr<AnimationUtils::Animat
     for (auto& ani : animation->animations_) {
         ani->Pause();
     }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    if (pipeline && !pipeline->GetOnShow()) {
+        pipeline->FlushMessages();
+    }
 }
 
 void AnimationUtils::ResumeAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation)
 {
     CHECK_NULL_VOID(animation);
+    if (animation->animations_.empty()) {
+        return;
+    }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    if (pipeline) {
+        pipeline->RequestFrame();
+    }
     for (auto& ani : animation->animations_) {
         ani->Resume();
     }

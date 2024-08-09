@@ -24,6 +24,7 @@
 
 namespace OHOS::Ace::Framework {
 
+constexpr int32_t REVERSE_OFFSET_ZOOM = 2;
 void JSFlexImpl::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -141,9 +142,9 @@ void JSFlexImpl::WrapComponent(const JSRef<JSObject>& obj, int32_t wrapVal)
             FlexModel::GetInstance()->SetDirection(static_cast<FlexDirection>(direction));
             // WrapReverse means wrapVal = 2. Wrap means wrapVal = 1.
             if (direction <= 1) {
-                direction += 2 * (wrapVal - 1);
+                direction += REVERSE_OFFSET_ZOOM * (wrapVal - 1);
             } else {
-                direction -= 2 * (wrapVal - 1);
+                direction -= REVERSE_OFFSET_ZOOM * (wrapVal - 1);
             }
             FlexModel::GetInstance()->SetWrapDirection(static_cast<WrapDirection>(direction));
         }

@@ -61,6 +61,45 @@ void GetTextCaretMetrics(RefPtr<FrameNode>& targetNode, CaretMetricsF& caretMetr
     }
 }
 
+class TextGestureSelector : public virtual AceType {
+    DECLARE_ACE_TYPE(TextGestureSelector, AceType);
+
+public:
+    void StartGestureSelection(int32_t start, int32_t end)
+    {
+        start_ = start;
+        end_ = end;
+        isStarted = start_ <= end_;
+    }
+
+    void EndGestureSelection()
+    {
+        if (!isStarted) {
+            return;
+        }
+        OnTextGenstureSelectionEnd();
+        start_ = -1;
+        end_ = -1;
+        isStarted = false;
+    }
+
+    void DoGestureSelection(const TouchEventInfo& info);
+
+protected:
+    virtual int32_t GetTouchIndex(const OffsetF& offset)
+    {
+        return -1;
+    }
+    virtual void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) {}
+    virtual void OnTextGenstureSelectionEnd() {}
+
+private:
+    void DoTextSelectionTouchMove(const TouchEventInfo& info);
+    int32_t start_ = -1;
+    int32_t end_ = -1;
+    bool isStarted = false;
+};
+
 class TextBase : public SelectOverlayClient {
     DECLARE_ACE_TYPE(TextBase, SelectOverlayClient);
 
@@ -100,6 +139,11 @@ public:
 
     virtual void OnVirtualKeyboardAreaChanged() {}
 
+    virtual RefPtr<Clipboard> GetClipboard()
+    {
+        return nullptr;
+    }
+
     const RectF& GetContentRect() const
     {
         return contentRect_;
@@ -138,11 +182,6 @@ public:
     virtual OffsetF GetSecondHandleOffset() const
     {
         return OffsetF();
-    }
-
-    virtual RefPtr<Clipboard> GetClipboard()
-    {
-        return nullptr;
     }
 
     TextSelector GetTextSelector() const

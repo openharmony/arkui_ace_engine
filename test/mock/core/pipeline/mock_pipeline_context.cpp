@@ -349,11 +349,6 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
 
 void PipelineContext::OnLayoutCompleted(const std::string& componentId) {}
 
-bool PipelineContext::CheckPageFocus()
-{
-    return true;
-}
-
 bool PipelineContext::CheckOverlayFocus()
 {
     return false;
@@ -560,6 +555,7 @@ bool PipelineContext::IsEnableKeyBoardAvoidMode()
 {
     return false;
 }
+void PipelineContext::RequireSummary() {};
 void PipelineContext::SetIgnoreViewSafeArea(bool value) {};
 void PipelineContext::SetIsLayoutFullScreen(bool value) {};
 void PipelineContext::SetIsNeedAvoidWindow(bool value) {};
@@ -578,6 +574,11 @@ SafeAreaInsets PipelineContext::GetSafeAreaWithoutProcess() const
 float PipelineContext::GetPageAvoidOffset()
 {
     return 0.0f;
+}
+
+bool PipelineContext::CheckNeedAvoidInSubWindow()
+{
+    return false;
 }
 
 void PipelineContext::AddFontNodeNG(const WeakPtr<UINode>& node) {}
@@ -642,7 +643,7 @@ void PipelineContext::ResetDragging() {}
 
 void PipelineContext::UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) {}
 
-void PipelineContext::CheckAndUpdateKeyboardInset() {}
+void PipelineContext::CheckAndUpdateKeyboardInset(float keyboardHeight) {}
 
 bool PipelineContext::PrintVsyncInfoIfNeed() const
 {
@@ -714,6 +715,11 @@ void PipelineContext::FlushNodeChangeFlag() {}
 
 void PipelineContext::CleanNodeChangeFlag() {}
 
+bool PipelineContext::HasOnAreaChangeNode(int32_t nodeId)
+{
+    return false;
+}
+
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 
@@ -721,9 +727,6 @@ void PipelineContext::CleanNodeChangeFlag() {}
 namespace OHOS::Ace {
 class ManagerInterface : public AceType {
     DECLARE_ACE_TYPE(ManagerInterface, AceType);
-};
-class FontManager : public AceType {
-    DECLARE_ACE_TYPE(FontManager, AceType);
 };
 
 void PipelineBase::OpenImplicitAnimation(

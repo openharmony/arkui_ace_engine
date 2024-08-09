@@ -74,12 +74,7 @@ public:
     void SetBoardColor(LinearColor color, int32_t duratuion, const RefPtr<CubicCurve>& curve);
     void InitializeParam();
     void PaintRadio(RSCanvas& canvas, bool checked, const SizeF& contentSize, const OffsetF& contentOffset) const;
-    void DrawFocusBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& contentOffset) const;
-    void PaintRingCircle(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& contentOffset, RSBrush brush) const;
-    void PaintOutRingCircle(
-        RSCanvas& canvas, const SizeF& contentSize, const OffsetF& contentOffset, RSPen outPen) const;
     void PaintIndicator(RSCanvas& canvas, bool checked, const SizeF& contentSize, const OffsetF& contentOffset) const;
-    void PaintUnselectedRadio(RSCanvas& canvas, float outCircleRadius, float centerX, float centerY) const;
     void PaintUnselectedIndicator(RSCanvas& canvas, float outCircleRadius, float centerX, float centerY) const;
     void DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& contentOffset) const;
 
@@ -198,13 +193,6 @@ public:
         showHoverEffect_ = showHoverEffect;
     }
 
-    void SetIsFocused(bool isFocused)
-    {
-        if (isFocused_) {
-            isFocused_->Set(isFocused);
-        }
-    }
-
     void SetUseContentModifier(bool useContentModifier)
     {
         if (useContentModifier_) {
@@ -231,7 +219,6 @@ private:
     RefPtr<PropertyBool> enabled_;
     RefPtr<PropertyBool> isCheck_;
     RefPtr<PropertyInt> uiStatus_;
-    RefPtr<PropertyBool> isFocused_;
     RefPtr<PropertyBool> useContentModifier_;
 
     RefPtr<AnimatablePropertyColor> pointColor_;

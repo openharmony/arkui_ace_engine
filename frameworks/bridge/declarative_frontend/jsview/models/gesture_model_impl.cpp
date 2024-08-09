@@ -65,11 +65,11 @@ void GestureModelImpl::Pop()
     gestureProcessor->PopGesture();
 }
 
-void TapGestureModelImpl::Create(int32_t countNum, int32_t fingersNum)
+void TapGestureModelImpl::Create(int32_t countNum, int32_t fingersNum, double distanceThreshold)
 {
     RefPtr<GestureProcessor> gestureProcessor;
     gestureProcessor = ViewStackProcessor::GetInstance()->GetGestureComponent();
-    auto gesture = AceType::MakeRefPtr<TapGesture>(countNum, fingersNum);
+    auto gesture = AceType::MakeRefPtr<TapGesture>(countNum, fingersNum, distanceThreshold);
     gestureProcessor->PushGesture(gesture);
 }
 

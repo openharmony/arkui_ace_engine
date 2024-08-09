@@ -114,7 +114,6 @@ void CheckBoxPattern::OnModifyDone()
     InitClickEvent();
     InitTouchEvent();
     InitMouseEvent();
-    InitFocusEvent();
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
@@ -268,73 +267,6 @@ void CheckBoxPattern::HandleMouseEvent(bool isHover)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-}
-
-void CheckBoxPattern::InitFocusEvent()
-{
-    if (focusEventInitialized_) {
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto focusHub = host->GetOrCreateFocusHub();
-    auto focusTask = [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleFocusEvent();
-        }
-    };
-    focusHub->SetOnFocusInternal(focusTask);
-    auto blurTask = [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandleBlurEvent();
-    };
-    focusHub->SetOnBlurInternal(blurTask);
-
-    focusEventInitialized_ = true;
-}
-
-void CheckBoxPattern::HandleFocusEvent()
-{
-    CHECK_NULL_VOID(checkboxModifier_);
-    AddIsFocusActiveUpdateEvent();
-    OnIsFocusActiveUpdate(true);
-}
-
-void CheckBoxPattern::HandleBlurEvent()
-{
-    CHECK_NULL_VOID(checkboxModifier_);
-    RemoveIsFocusActiveUpdateEvent();
-    OnIsFocusActiveUpdate(false);
-}
-
-void CheckBoxPattern::AddIsFocusActiveUpdateEvent()
-{
-    if (!isFocusActiveUpdateEvent_) {
-        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->OnIsFocusActiveUpdate(isFocusAcitve);
-        };
-    }
-
-    auto pipline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipline);
-    pipline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
-}
-
-void CheckBoxPattern::RemoveIsFocusActiveUpdateEvent()
-{
-    auto pipline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipline);
-    pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
-}
-
-void CheckBoxPattern::OnIsFocusActiveUpdate(bool isFocusAcitve)
-{
-    CHECK_NULL_VOID(checkboxModifier_);
-    checkboxModifier_->SetIsFocused(isFocusAcitve);
 }
 
 void CheckBoxPattern::OnClick()
@@ -684,7 +616,7 @@ void CheckBoxPattern::CheckBoxGroupIsTrue()
         }
     }
     const auto& groupPaintProperty = checkBoxGroupNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
-    if (groupPaintProperty->GetIsCheckBoxCallbackDealed()) {
+    if (!groupManager->GetCheckboxGroupIsChange(group) && groupPaintProperty->GetIsCheckBoxCallbackDealed()) {
         return;
     }
     // All checkboxes do not set select status.
@@ -696,6 +628,7 @@ void CheckBoxPattern::CheckBoxGroupIsTrue()
         UpdateCheckBoxGroupStatus(checkBoxGroupNode, list);
     }
     groupPaintProperty->SetIsCheckBoxCallbackDealed(true);
+    groupManager->SetCheckboxGroupIsChange(group, false);
 }
 
 void CheckBoxPattern::InitCheckBoxStatusByGroup(RefPtr<FrameNode> checkBoxGroupNode,

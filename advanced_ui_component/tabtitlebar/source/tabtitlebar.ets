@@ -15,11 +15,16 @@
 
 import { KeyCode } from '@ohos.multimodalInput.keyCode'
 import MeasureText from '@ohos.measure'
+import window from '@ohos.window'
+import common from '@ohos.app.ability.common'
+import { BusinessError } from '@kit.BasicServicesKit'
+import { hilog } from '@kit.PerformanceAnalysisKit'
 
 export interface TabTitleBarMenuItem {
   value: ResourceStr;
   isEnabled?: boolean;
   action?: () => void;
+  label?: ResourceStr;
 }
 
 export interface TabTitleBarTabItem {
@@ -28,6 +33,10 @@ export interface TabTitleBarTabItem {
 }
 
 const PUBLIC_MORE =  $r('sys.media.ohos_ic_public_more')
+const TEXT_EDITABLE_DIALOG = '18.3fp'
+const IMAGE_SIZE = '64vp'
+const MAX_DIALOG = '256vp'
+const MIN_DIALOG = '216vp'
 
 @Component
 export struct TabTitleBar {
@@ -37,6 +46,7 @@ export struct TabTitleBar {
 
   @State tabWidth: number = 0
   @State currentIndex: number = 0
+  @State fontSize: number = 1
 
   static readonly totalHeight = 56
   static readonly correctionOffset = -40.0
@@ -194,6 +204,15 @@ export struct TabTitleBar {
 struct CollapsibleMenuSection {
   menuItems: Array<TabTitleBarMenuItem> = [];
   index: number = 0;
+  item: TabTitleBarMenuItem = {
+    value: PUBLIC_MORE,
+    label: $r('sys.string.ohos_toolbar_more'),
+  } as TabTitleBarMenuItem;
+  longPressTime: number = 500;
+  minFontSize: number = 1.75;
+  isFollowingSystemFontScale: boolean = false;
+  maxFontScale: number = 1;
+  systemFontScale?: number = 1;
 
   static readonly maxCountOfVisibleItems = 1
   private static readonly focusPadding = 4
@@ -205,6 +224,22 @@ struct CollapsibleMenuSection {
   @State isMoreIconOnFocus: boolean = false
   @State isMoreIconOnHover: boolean = false
   @State isMoreIconOnClick: boolean = false
+  @Prop fontSize: number = 1
+
+  dialogController: CustomDialogController | null = new CustomDialogController({
+    builder: TabTitleBarDialog({
+      cancel: () => {
+      },
+      confirm: () => {
+      },
+      TabTitleDialog: this.item,
+      TabTitleBarDialog: this.item.label ? this.item.label : '',
+      fontSize: this.fontSize,
+    }),
+    maskColor: Color.Transparent,
+    isModal: true,
+    customStyle: true,
+  })
 
   getMoreIconFgColor() {
     return this.isMoreIconOnClick
@@ -223,12 +258,31 @@ struct CollapsibleMenuSection {
   }
 
   aboutToAppear() {
+    let uiContent: UIContext = this.getUIContext();
+    this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
+    this.maxFontScale = uiContent.getMaxFontScale();
     this.menuItems.forEach((item, index) => {
       if (item.isEnabled && this.firstFocusableIndex == -1 &&
         index > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
           this.firstFocusableIndex = this.index * 1000 + index + 1
       }
     })
+  }
+
+  decideFontScale(): number {
+    try {
+      let uiContent: UIContext = this.getUIContext();
+      this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1;
+      if (!this.isFollowingSystemFontScale) {
+        return 1;
+      }
+      return Math.min(this.systemFontScale, this.maxFontScale);
+    } catch (exception) {
+      let code: number = (exception as BusinessError).code;
+      let message: string = (exception as BusinessError).message;
+      hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
+      return 1;
+    }
   }
 
   build() {
@@ -249,6 +303,7 @@ struct CollapsibleMenuSection {
               .width(ImageMenuItem.imageSize)
               .height(ImageMenuItem.imageSize)
               .focusable(true)
+              .draggable(false)
               .fillColor($r('sys.color.icon_primary'))
           }
           .width(ImageMenuItem.imageHotZoneWidth)
@@ -291,11 +346,24 @@ struct CollapsibleMenuSection {
             if (event.type === TouchType.Down) {
               this.isMoreIconOnClick = true
             }
-            if (event.type === TouchType.Up) {
+            if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
               this.isMoreIconOnClick = false
+              if (this.fontSize >= this.minFontSize) {
+                this.dialogController?.close()
+              }
             }
           })
           .onClick(() => this.isPopupShown = true)
+          .gesture(
+            LongPressGesture({ repeat: false, duration: this.longPressTime })
+              .onAction((event: GestureEvent) => {
+                this.fontSize = this.decideFontScale();
+                if (event) {
+                  if (this.fontSize >= this.minFontSize) {
+                    this.dialogController?.open()
+                  }
+                }
+              }))
           .bindPopup(this.isPopupShown, {
             builder: this.popupBuilder,
             placement: Placement.Bottom,
@@ -334,12 +402,19 @@ struct CollapsibleMenuSection {
 @Component
 struct TabContentItem {
   item: TabTitleBarTabItem = { title: '' };
+  TabItem: TabTitleBarMenuItem = {} as TabTitleBarMenuItem
   index: number = 0;
   maxIndex: number = 0;
   onCustomClick?: (index: number) => void
   onImageComplete?: (width: number) => void
+  longPressTime: number = 500
+  minFontSize: number = 1.75
+  isFollowingSystemFontScale: boolean = false;
+  maxFontScale: number = 1;
+  systemFontScale?: number = 1;
 
   @Prop currentIndex: number
+  @Prop fontSize: number = 1
 
   @State isOnFocus: boolean = false
   @State isOnHover: boolean = false
@@ -357,6 +432,31 @@ struct TabContentItem {
   static readonly paddingLeft = 8
   static readonly paddingRight = 8
   static readonly marginFirst = 16
+
+  private ToTabItem(item: TabTitleBarTabItem): TabTitleBarMenuItem {
+    if (item.title) {
+      this.TabItem.label = item.title;
+    }
+    if (item.icon) {
+      this.TabItem.value = item.icon;
+    }
+    return this.TabItem;
+  }
+
+  dialogController: CustomDialogController | null = new CustomDialogController({
+    builder: TabTitleBarDialog({
+      cancel: () => {
+      },
+      confirm: () => {
+      },
+      TabTitleDialog: this.ToTabItem(this.item),
+      TabTitleBarDialog: this.ToTabItem(this.item).label ? this.ToTabItem(this.item).label : '',
+      fontSize: this.fontSize,
+    }),
+    maskColor: Color.Transparent,
+    isModal: true,
+    customStyle: true,
+  })
 
   getBgColor() {
     if (this.isOnClick) {
@@ -386,6 +486,28 @@ struct TabContentItem {
 
   getImageLayoutWidth(): number {
     return TabContentItem.imageSize / Math.max(this.imageHeight, 1.0) * this.imageWidth
+  }
+
+  aboutToAppear(): void {
+    let uiContent: UIContext = this.getUIContext();
+    this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
+    this.maxFontScale = uiContent.getMaxFontScale();
+  }
+
+  decideFontScale(): number {
+    try {
+      let uiContent: UIContext = this.getUIContext();
+      this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1;
+      if (!this.isFollowingSystemFontScale) {
+        return 1;
+      }
+      return Math.min(this.systemFontScale, this.maxFontScale);
+    } catch (exception) {
+      let code: number = (exception as BusinessError).code;
+      let message: string = (exception as BusinessError).message;
+      hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
+      return 1;
+    }
   }
 
   build() {
@@ -439,6 +561,7 @@ struct TabContentItem {
                 .width(this.getImageLayoutWidth())
                 .height(TabContentItem.imageSize)
                 .objectFit(ImageFit.Fill)
+                .draggable(false)
                 .scale({
                   x: this.getImageScaleFactor(),
                   y: this.getImageScaleFactor()
@@ -489,11 +612,24 @@ struct TabContentItem {
               if (event.type === TouchType.Down) {
                 this.isOnClick = true
               }
-              if (event.type === TouchType.Up) {
+              if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
                 this.isOnClick = false
+                if (this.fontSize >= this.minFontSize) {
+                  this.dialogController?.close()
+                }
               }
             })
             .onClick(() => this.onCustomClick && this.onCustomClick(this.index))
+            .gesture(
+              LongPressGesture({ repeat: false, duration: this.longPressTime })
+                .onAction((event: GestureEvent) => {
+                  this.fontSize = this.decideFontScale();
+                  if (event) {
+                    if (this.fontSize >= this.minFontSize) {
+                      this.dialogController?.open()
+                    }
+                  }
+                }))
           }
         }
         .justifyContent(FlexAlign.Center)
@@ -537,6 +673,11 @@ struct TabContentItem {
 struct ImageMenuItem {
   item: TabTitleBarMenuItem = { value: '' };
   index: number = 0;
+  longPressTime: number = 500;
+  minFontSize: number = 1.75;
+  isFollowingSystemFontScale: boolean = false;
+  maxFontScale: number = 1;
+  systemFontScale?: number = 1;
 
   static readonly imageSize = 24
   static readonly imageHotZoneWidth = 48
@@ -545,9 +686,33 @@ struct ImageMenuItem {
   static readonly disabledImageOpacity = 0.4
   static readonly focusablePrefix = "Id-TabTitleBar-ImageMenuItem-"
 
+  @Prop fontSize: number = 1;
   @State isOnFocus: boolean = false
   @State isOnHover: boolean = false
   @State isOnClick: boolean = false
+
+  dialogController: CustomDialogController | null = new CustomDialogController({
+    builder: TabTitleBarDialog({
+      cancel: () => {
+      },
+      confirm: () => {
+      },
+      TabTitleDialog: this.item,
+      TabTitleBarDialog: this.item.label ? this.item.label : this.textDialog(),
+      fontSize: this.fontSize,
+    }),
+    maskColor: Color.Transparent,
+    isModal: true,
+    customStyle: true,
+  })
+
+  private textDialog(): ResourceStr {
+    if (this.item.value === PUBLIC_MORE) {
+      return $r('sys.string.ohos_toolbar_more');
+    } else {
+      return this.item.label ? this.item.label : '';
+    }
+  }
 
   getFgColor() {
     return this.isOnClick
@@ -565,6 +730,28 @@ struct ImageMenuItem {
     }
   }
 
+  aboutToAppear(): void {
+    let uiContent: UIContext = this.getUIContext();
+    this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
+    this.maxFontScale = uiContent.getMaxFontScale();
+  }
+
+  decideFontScale(): number {
+    try {
+      let uiContent: UIContext = this.getUIContext();
+      this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1;
+      if (!this.isFollowingSystemFontScale) {
+        return 1;
+      }
+      return Math.min(this.systemFontScale, this.maxFontScale);
+    } catch (exception) {
+      let code: number = (exception as BusinessError).code;
+      let message: string = (exception as BusinessError).message;
+      hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
+      return 1;
+    }
+  }
+
   build() {
     Row() {
       Image(this.item.value)
@@ -572,6 +759,7 @@ struct ImageMenuItem {
         .height(ImageMenuItem.imageSize)
         .focusable(this.item.isEnabled)
         .key(ImageMenuItem.focusablePrefix + this.index)
+        .draggable(false)
     }
     .width(ImageMenuItem.imageHotZoneWidth)
     .height(ImageMenuItem.imageHotZoneWidth)
@@ -630,10 +818,108 @@ struct ImageMenuItem {
       if (event.type === TouchType.Down) {
         this.isOnClick = true
       }
-      if (event.type === TouchType.Up) {
+      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
         this.isOnClick = false
+        if (this.fontSize >= this.minFontSize) {
+          this.dialogController?.close()
+        }
       }
     })
     .onClick(() => this.item.isEnabled && this.item.action && this.item.action())
+    .gesture(
+      LongPressGesture({ repeat: false, duration: this.longPressTime })
+        .onAction((event: GestureEvent) => {
+          this.fontSize = this.decideFontScale();
+          if (event) {
+            if (this.fontSize >= this.minFontSize) {
+              this.dialogController?.open()
+            }
+          }
+        }))
+  }
+}
+
+/**
+ *  TabTitleBarDialog
+ */
+@CustomDialog
+struct TabTitleBarDialog {
+  TabTitleDialog: TabTitleBarMenuItem = { value: '' };
+  callbackId: number | undefined = undefined;
+  TabTitleBarDialog?: ResourceStr = '';
+  mainWindowStage: window.Window | undefined = undefined;
+  controller?: CustomDialogController
+  minFontSize: number = 1.75;
+  maxFontSize: number = 3.2;
+  screenWidth: number = 640;
+  verticalScreenLines: number = 6;
+  horizontalsScreenLines: number = 1;
+  @StorageLink('mainWindow') mainWindow: Promise<window.Window> | undefined = undefined;
+  @State fontSize: number = 1;
+  @State maxLines: number = 1;
+  @StorageProp('windowStandardHeight') windowStandardHeight: number = 0;
+  cancel: () => void = () => {
+  }
+  confirm: () => void = () => {
+  }
+
+  build() {
+    if (this.TabTitleBarDialog) {
+      Column() {
+        Image(this.TabTitleDialog.value)
+          .width(IMAGE_SIZE)
+          .height(IMAGE_SIZE)
+          .margin({
+            top: $r('sys.float.padding_level24'),
+            bottom: $r('sys.float.padding_level8'),
+          })
+          .fillColor($r('sys.color.icon_primary'))
+        Column() {
+          Text(this.TabTitleBarDialog)
+            .fontSize(TEXT_EDITABLE_DIALOG)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
+            .maxLines(this.maxLines)
+            .width('100%')
+            .textAlign(TextAlign.Center)
+            .fontColor($r('sys.color.font_primary'))
+        }
+        .width('100%')
+        .padding({
+          left: $r('sys.float.padding_level4'),
+          right: $r('sys.float.padding_level4'),
+          bottom: $r('sys.float.padding_level12'),
+        })
+      }
+      .width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG)
+      .constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG })
+      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
+      .shadow(ShadowStyle.OUTER_DEFAULT_LG)
+      .borderRadius($r('sys.float.corner_radius_level10'))
+    } else {
+      Column() {
+        Image(this.TabTitleDialog.value)
+          .width(IMAGE_SIZE)
+          .height(IMAGE_SIZE)
+          .fillColor($r('sys.color.icon_primary'))
+      }
+      .width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG)
+      .constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG })
+      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
+      .shadow(ShadowStyle.OUTER_DEFAULT_LG)
+      .borderRadius($r('sys.float.corner_radius_level10'))
+      .justifyContent(FlexAlign.Center)
+    }
+  }
+
+  async aboutToAppear(): Promise<void> {
+    let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
+    this.mainWindowStage = context.windowStage.getMainWindowSync();
+    let properties: window.WindowProperties = this.mainWindowStage.getWindowProperties();
+    let rect = properties.windowRect;
+    if (px2vp(rect.height) > this.screenWidth) {
+      this.maxLines = this.verticalScreenLines;
+    } else {
+      this.maxLines = this.horizontalsScreenLines;
+    }
   }
 }

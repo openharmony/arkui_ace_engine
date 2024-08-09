@@ -101,8 +101,6 @@ public:
     std::string GetDotIndicatorStyle() const;
     std::string GetDigitIndicatorStyle() const;
 
-    virtual std::string GetArcDotIndicatorStyle() const { return ""; }
-
     int32_t GetCurrentShownIndex() const
     {
         return IsLoop() ? currentIndex_ : GetLoopIndex(currentIndex_);
@@ -113,11 +111,7 @@ public:
         return swiperController_;
     }
 
-    void SetSwiperController(const RefPtr<SwiperController>& swiperController)
-    {
-        swiperController_ = swiperController;
-        InitSwiperController();
-    }
+    void SetSwiperController(const RefPtr<SwiperController>& controller);
 
     int32_t GetCurrentFirstIndex() const
     {
@@ -188,8 +182,8 @@ public:
      */
     bool SpringOverScroll(float offset);
 
-    void CheckMarkDirtyNodeForRenderIndicator(float additionalOffset = 0.0f,
-        std::optional<int32_t> nextIndex = std::nullopt);
+    void CheckMarkDirtyNodeForRenderIndicator(
+        float additionalOffset = 0.0f, std::optional<int32_t> nextIndex = std::nullopt);
 
     int32_t TotalCount() const;
 
@@ -269,8 +263,6 @@ public:
     {
         swiperDigitalParameters_ = std::make_shared<SwiperDigitalParameters>(swiperDigitalParameters);
     }
-
-    virtual void SetSwiperArcDotParameters(const SwiperArcDotParameters& swiperArcDotParameters) {}
 
     void ShowNext();
     void ShowPrevious();
@@ -359,12 +351,12 @@ public:
 
     bool IsIndicatorCustomSize() const
     {
-        return IsCustomSize_;
+        return isCustomSize_;
     }
 
-    void SetIsIndicatorCustomSize(bool IsCustomSize)
+    void SetIsIndicatorCustomSize(bool isCustomSize)
     {
-        IsCustomSize_ = IsCustomSize;
+        isCustomSize_ = isCustomSize;
     }
 
     void SetIndicatorIsBoolean(bool isBoolean)
@@ -415,7 +407,6 @@ public:
     }
 
     std::shared_ptr<SwiperParameters> GetSwiperParameters() const;
-    virtual std::shared_ptr<SwiperArcDotParameters> GetSwiperArcDotParameters() const { return nullptr; }
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
 
     void ArrowHover(bool hoverFlag);
@@ -435,11 +426,11 @@ public:
     void DumpAdvanceInfo() override;
     int32_t GetLoopIndex(int32_t originalIndex) const;
     int32_t GetDuration() const;
-    RefPtr<Curve> GetCurveIncludeMotion();
+    void UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus);
+    void AdjustCurrentIndexOnSwipePage(int32_t index);
     void OnCustomContentTransition(int32_t toIndex);
     void OnCustomAnimationFinish(int32_t fromIndex, int32_t toIndex, bool hasOnChanged);
-    void OnSwiperCustomAnimationFinish(std::pair<int32_t, SwiperItemInfo> item);
-    float IgnoreBlankOffset(bool isJump);
+    void OnSwiperCustomAnimationFinish(CancelableCallback<void()>& task, int32_t index, bool isFinishAnimation);
 
     void SetCustomAnimationToIndex(int32_t toIndex)
     {
@@ -485,16 +476,22 @@ public:
     void SetSwiperEventCallback(bool disableSwipe);
     void UpdateSwiperPanEvent(bool disableSwipe);
     bool IsUseCustomAnimation() const;
-    float GetMotionVelocity()
-    {
-        return motionVelocity_;
-    }
 
     void SetTabsPaddingAndBorder(const PaddingPropertyF& tabsPaddingAndBorder)
     {
         tabsPaddingAndBorder_ = tabsPaddingAndBorder;
     }
 
+    RefPtr<Curve> GetCurveIncludeMotion();
+    float GetMotionVelocity()
+    {
+        return motionVelocity_;
+    }
+
+    int32_t RealTotalCount() const;
+    bool IsSwipeByGroup() const;
+    int32_t GetDisplayCount() const;
+    int32_t GetCachedCount() const;
     bool ContentWillChange(int32_t comingIndex);
     bool ContentWillChange(int32_t currentIndex, int32_t comingIndex);
     bool CheckSwiperPanEvent(float mainDeltaOrVelocity);
@@ -502,11 +499,6 @@ public:
     {
         indexCanChangeMap_.clear();
     }
-
-    int32_t RealTotalCount() const;
-    bool IsSwipeByGroup() const;
-    int32_t GetDisplayCount() const;
-    int32_t GetCachedCount() const;
 
     int32_t GetNextValidIndex() const
     {
@@ -530,6 +522,9 @@ public:
         isIndicatorInteractive_ = isInteractive;
     }
 
+    bool IsAtStart() const;
+    bool IsAtEnd() const;
+
     bool IsIndicatorInteractive() const
     {
         return isIndicatorInteractive_;
@@ -545,7 +540,12 @@ public:
         prevMarginIgnoreBlank_ = prevMarginIgnoreBlank;
     }
 
-    virtual void SaveCircleDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNode) {}
+    void SetFrameRateRange(const RefPtr<FrameRateRange>& rateRange, SwiperDynamicSyncSceneType type) override
+    {
+        frameRateRange_[type] = rateRange;
+    }
+    void UpdateNodeRate();
+    int32_t GetMaxDisplayCount() const;
 
     bool GetPrevMarginIgnoreBlank()
     {
@@ -556,16 +556,6 @@ public:
     {
         return nextMarginIgnoreBlank_;
     }
-
-    bool IsAtStart() const;
-    bool IsAtEnd() const;
-
-    void SetFrameRateRange(const RefPtr<FrameRateRange>& rateRange, SwiperDynamicSyncSceneType type) override
-    {
-        frameRateRange_[type] = rateRange;
-    }
-    void UpdateNodeRate();
-    int32_t GetMaxDisplayCount() const;
 
     const std::set<int32_t>& GetCachedItems() const
     {
@@ -607,9 +597,6 @@ public:
         return isTouchDownOnOverlong_;
     }
 
-protected:
-    void MarkDirtyNodeSelf();
-
 private:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
@@ -620,8 +607,8 @@ private:
 
     // Init pan recognizer to move items when drag update, play translate animation when drag end.
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
-    void AddPanEvent(const RefPtr<GestureEventHub>& gestureHub, GestureEventFunc && actionStart,
-        GestureEventFunc && actionUpdate, GestureEventFunc && actionEnd, GestureEventNoParameter && actionCancel);
+    void AddPanEvent(const RefPtr<GestureEventHub>& gestureHub, GestureEventFunc&& actionStart,
+        GestureEventFunc&& actionUpdate, GestureEventFunc&& actionEnd, GestureEventNoParameter&& actionCancel);
 
     // Init touch event, stop animation when touch down.
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -633,9 +620,6 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
     void FlushFocus(const RefPtr<FrameNode>& curShowFrame);
     WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
-
-    // Init controller of swiper, controller support showNext, showPrevious and finishAnimation interface.
-    void InitSwiperController();
 
     // Init indicator
     void InitIndicator();
@@ -659,8 +643,8 @@ private:
     // use property animation feature
     void PlayPropertyTranslateAnimation(
         float translate, int32_t nextIndex, float velocity = 0.0f, bool stopAutoPlay = false);
-    void StopPropertyTranslateAnimation(bool isFinishAnimation,
-        bool isBeforeCreateLayoutWrapper = false, bool isInterrupt = false);
+    void StopPropertyTranslateAnimation(
+        bool isFinishAnimation, bool isBeforeCreateLayoutWrapper = false, bool isInterrupt = false);
     void UpdateOffsetAfterPropertyAnimation(float offset);
     void OnPropertyTranslateAnimationFinish(const OffsetF& offset);
     void PlayIndicatorTranslateAnimation(float translate, std::optional<int32_t> nextIndex = std::nullopt);
@@ -679,8 +663,7 @@ private:
     float GetMainContentSize() const;
     void FireChangeEvent(int32_t preIndex, int32_t currentIndex) const;
     void FireAnimationStartEvent(int32_t currentIndex, int32_t nextIndex, const AnimationCallbackInfo& info) const;
-    void FireAnimationEndEvent(int32_t currentIndex,
-        const AnimationCallbackInfo& info, bool isInterrupt = false) const;
+    void FireAnimationEndEvent(int32_t currentIndex, const AnimationCallbackInfo& info, bool isInterrupt = false) const;
     void FireGestureSwipeEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const;
     void FireSwiperCustomAnimationEvent();
     void FireContentDidScrollEvent();
@@ -708,15 +691,13 @@ private:
     std::pair<int32_t, SwiperItemInfo> GetSecondItemInfoInVisibleArea() const;
     void OnIndexChange();
     bool IsOutOfHotRegion(const PointF& dragPoint) const;
-    void SaveDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNode);
-    void SaveDigitIndicatorProperty(const RefPtr<FrameNode>& indicatorNode);
     void SetDigitStartAndEndProperty(const RefPtr<FrameNode>& indicatorNode);
     void UpdatePaintProperty(const RefPtr<FrameNode>& indicatorNode);
     void PostTranslateTask(uint32_t delayTime);
     void RegisterVisibleAreaChange();
     bool NeedAutoPlay() const;
-    void OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay,
-        bool isFinishAnimation, bool forceStop = false, bool isInterrupt = false);
+    void OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, bool isFinishAnimation, bool forceStop = false,
+        bool isInterrupt = false);
     bool IsShowArrow() const;
     void SaveArrowProperty(const RefPtr<FrameNode>& arrowNode);
     RefPtr<FocusHub> GetFocusHubChild(std::string childFrameName);
@@ -751,14 +732,12 @@ private:
     void OnLoopChange();
     void StopSpringAnimationAndFlushImmediately();
     void UpdateItemRenderGroup(bool itemRenderGroup);
-    
+    void MarkDirtyNodeSelf();
     void ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex);
     int32_t GetLoopIndex(int32_t index, int32_t childrenSize) const;
     bool IsAutoLinear() const;
     bool AutoLinearAnimationNeedReset(float translate) const;
     void OnAnimationTranslateZero(int32_t nextIndex, bool stopAutoPlay);
-    void UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus);
-    void AdjustCurrentIndexOnSwipePage(int32_t index);
     void TriggerCustomContentTransitionEvent(int32_t fromIndex, int32_t toIndex);
     /**
      * @brief Preprocess drag delta when received from DragUpdate event.
@@ -828,9 +807,6 @@ private:
     void NotifyParentScrollEnd();
 
     inline bool ChildFirst(NestedState state);
-    void HandleTouchBottomLoop();
-    void CalculateGestureState(float additionalOffset, float currentTurnPageRate, int32_t preFirstIndex);
-    void StopIndicatorAnimation(bool ifImmediately = false);
     RefPtr<FrameNode> GetCurrentFrameNode(int32_t currentIndex) const;
     bool FadeOverScroll(float offset);
     int32_t ComputeSwipePageNextIndex(float velocity, bool onlyDistance = false) const;
@@ -842,6 +818,12 @@ private:
     bool IsContentFocused();
 
     int32_t CheckTargetIndex(int32_t targetIndex, bool isForceBackward = false);
+
+    void HandleTouchBottomLoop();
+    void CalculateGestureState(float additionalOffset, float currentTurnPageRate, int32_t preFirstIndex);
+    std::pair<float, float> CalcCurrentPageStatus(float additionalOffset) const;
+    std::pair<float, float> CalcCurrentPageStatusOnRTL(float additionalOffset) const;
+    void StopIndicatorAnimation(bool ifImmediately = false);
 
     void PreloadItems(const std::set<int32_t>& indexSet);
     void DoTabsPreloadItems(const std::set<int32_t>& indexSet);
@@ -895,8 +877,8 @@ private:
     bool SupportSwiperCustomAnimation()
     {
         auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
-        return (onSwiperCustomContentTransition_ || onContentDidScroll_) &&
-            !hasCachedCapture_ && SwiperUtils::IsStretch(swiperLayoutProperty);
+        return (onSwiperCustomContentTransition_ || onContentDidScroll_) && !hasCachedCapture_ &&
+               SwiperUtils::IsStretch(swiperLayoutProperty);
     }
 
     bool NeedStartNewAnimation(const OffsetF& offset) const;
@@ -914,6 +896,17 @@ private:
     bool ParseTabsIsRtl();
 
     void PostIdleTask(const RefPtr<FrameNode>& frameNode);
+
+    float AdjustIgnoreBlankOverScrollOffSet(bool isStartOverScroll) const;
+    void UpdateIgnoreBlankOffsetWithIndex();
+    // overSrollDirection is true means over start boundary, false means over end boundary.
+    void UpdateIgnoreBlankOffsetWithDrag(bool overSrollDirection);
+
+    std::set<int32_t> CalcVisibleIndex(float offset = 0.0f) const;
+
+    bool IsItemOverlay() const;
+
+    friend class SwiperHelper;
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -969,9 +962,9 @@ private:
     bool isInit_ = true;
     bool hasVisibleChangeRegistered_ = false;
     bool isVisible_ = true;
-    bool isVisibleArea_ = true;
+    bool isVisibleArea_ = false;
     bool isWindowShow_ = true;
-    bool IsCustomSize_ = false;
+    bool isCustomSize_ = false;
     bool indicatorIsBoolean_ = true;
     bool isAtHotRegion_ = false;
     bool isDragging_ = false;
@@ -1011,7 +1004,6 @@ private:
     float contentMainSize_ = 0.0f;
     float contentCrossSize_ = 0.0f;
     bool crossMatchChild_ = false;
-    float ignoreBlankSpringOffset_ = 0.0f;
 
     std::optional<int32_t> uiCastJumpIndex_;
     std::optional<int32_t> jumpIndex_;
@@ -1044,6 +1036,7 @@ private:
     bool isIndicatorInteractive_ = true;
     bool nextMarginIgnoreBlank_ = false;
     bool prevMarginIgnoreBlank_ = false;
+    float ignoreBlankOffset_ = 0.0f;
 
     std::optional<int32_t> cachedCount_;
 
@@ -1063,7 +1056,7 @@ private:
     RefPtr<TabContentTransitionProxy> currentProxyInAnimation_;
     PaddingPropertyF tabsPaddingAndBorder_;
     std::map<int32_t, bool> indexCanChangeMap_;
-    std::unordered_map<SwiperDynamicSyncSceneType, RefPtr<FrameRateRange>> frameRateRange_ ;
+    std::unordered_map<SwiperDynamicSyncSceneType, RefPtr<FrameRateRange>> frameRateRange_;
     // capture
     std::optional<int32_t> leftCaptureIndex_;
     std::optional<int32_t> rightCaptureIndex_;

@@ -198,4 +198,48 @@ void ElementRegister::ClearPendingRemoveNodes()
     pendingRemoveNodes_.clear();
 }
 
+RefPtr<NG::FrameNode> ElementRegister::GetAttachedFrameNodeById(const std::string& key)
+{
+    auto it = inspectorIdMap_.find(key);
+    CHECK_NULL_RETURN(it != inspectorIdMap_.end(), nullptr);
+    CHECK_NULL_RETURN(!it->second.empty(), nullptr);
+    int32_t depth = INT32_MAX;
+    RefPtr<NG::FrameNode> frameNode;
+    for (const auto& node : it->second) {
+        auto uiNode = node.Upgrade();
+        if (!uiNode) {
+            continue;
+        }
+        auto depOfNode = uiNode->GetDepth();
+        if (uiNode->IsOnMainTree() && uiNode->GetInspectorId().value_or("") == key && depth > depOfNode) {
+            depth = depOfNode;
+            frameNode = uiNode;
+        }
+    }
+    return frameNode;
+}
+
+void ElementRegister::AddFrameNodeByInspectorId(const std::string& key, const WeakPtr<NG::FrameNode>& node)
+{
+    auto it = inspectorIdMap_.find(key);
+    if (it != inspectorIdMap_.end()) {
+        it->second.push_back(node);
+    } else {
+        std::list<WeakPtr<NG::FrameNode>> nodeList = { node };
+        inspectorIdMap_.try_emplace(key, nodeList);
+    }
+}
+
+void ElementRegister::RemoveFrameNodeByInspectorId(const std::string& key, int32_t nodeId)
+{
+    auto it = inspectorIdMap_.find(key);
+    CHECK_NULL_VOID(it != inspectorIdMap_.end());
+    CHECK_NULL_VOID(!it->second.empty());
+    it->second.remove_if([nodeId](const WeakPtr<NG::FrameNode>& node) {
+        return (!node.Upgrade()) || (node.Upgrade()->GetId() == nodeId);
+    });
+    if (it->second.empty()) {
+        inspectorIdMap_.erase(it);
+    }
+}
 } // namespace OHOS::Ace

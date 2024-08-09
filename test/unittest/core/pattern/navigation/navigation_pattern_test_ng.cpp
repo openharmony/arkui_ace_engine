@@ -1016,16 +1016,19 @@ HWTEST_F(NavigationPatternTestNg, NavigationLayoutAlgorithm001, TestSize.Level1)
  */
 HWTEST_F(NavigationPatternTestNg, NavigationModelNG001, TestSize.Level1)
 {
+    auto elementRegister = ElementRegister::GetInstance();
+    auto navigationUniqueId = elementRegister->MakeUniqueId();
     auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+        V2::NAVIGATION_VIEW_ETS_TAG, navigationUniqueId, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
     auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
     navigation->GetPattern<NavigationPattern>()->SetNavigationStack(std::move(navigationStack));
     auto contentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
-        "NavDestination", 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    auto navBarNode =
-        NavBarNode::GetOrCreateNavBarNode("navBarNode", 33, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
-    auto dividerNode =
-        FrameNode::GetOrCreateFrameNode("dividerNode", 44, []() { return AceType::MakeRefPtr<DividerPattern>(); });
+        "NavDestination", elementRegister->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navBarNode = NavBarNode::GetOrCreateNavBarNode(
+        "navBarNode", elementRegister->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    auto dividerNode = FrameNode::GetOrCreateFrameNode(
+        "dividerNode", elementRegister->MakeUniqueId(), []() { return AceType::MakeRefPtr<DividerPattern>(); });
     navigation->navBarNode_ = navBarNode;
     navigation->contentNode_ = contentNode;
     navigation->dividerNode_ = dividerNode;
@@ -1034,28 +1037,28 @@ HWTEST_F(NavigationPatternTestNg, NavigationModelNG001, TestSize.Level1)
     navigationLayoutProperty->propNavigationMode_ = NavigationMode::AUTO;
 
     auto* stack = ViewStackProcessor::GetInstance();
-    stack->reservedNodeId_ = 11;
+    stack->reservedNodeId_ = navigationUniqueId;
     NavigationModelNG model;
     model.Create();
     ASSERT_EQ(navigationLayoutProperty->propNavigationMode_.value(), NavigationMode::AUTO);
 
     navigation->navBarNode_ = nullptr;
     navBarNode = NavBarNode::GetOrCreateNavBarNode(
-        V2::NAVBAR_ETS_TAG, 55, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+        V2::NAVBAR_ETS_TAG, elementRegister->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavBarPattern>(); });
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
-        "titleBarNode", 66, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+        "titleBarNode", elementRegister->MakeUniqueId(), []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto navBarContentNode = FrameNode::GetOrCreateFrameNode(
-        "navBarContentNode", 77, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        "navBarContentNode", elementRegister->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
     auto toolBarNode = FrameNode::GetOrCreateFrameNode(
-        "toolBarNode", 88, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+        "toolBarNode", elementRegister->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
 
     navBarNode->titleBarNode_ = titleBarNode;
     navBarNode->navBarContentNode_ = navBarContentNode;
     navBarNode->toolBarNode_ = toolBarNode;
 
-    stack->reservedNodeId_ = 11;
-    auto tempRegister = ElementRegister::GetInstance();
-    tempRegister->nextUniqueElementId_ = 55;
+    stack->reservedNodeId_ = navigationUniqueId;
     model.Create();
     ASSERT_EQ(navigationLayoutProperty->propNavigationMode_.value(), NavigationMode::AUTO);
 }

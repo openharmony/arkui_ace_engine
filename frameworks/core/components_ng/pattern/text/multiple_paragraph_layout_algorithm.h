@@ -57,6 +57,13 @@ protected:
         const TextStyle& textStyle, const std::string& content, LayoutWrapper* layoutWrapper) const;
     virtual bool CreateParagraph(
         const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper, double maxWidth = 0.0) = 0;
+    virtual void HandleEmptyParagraph(RefPtr<Paragraph> paragraph, const std::list<RefPtr<SpanItem>>& spanGroup) {}
+    virtual RefPtr<SpanItem> GetParagraphStyleSpanItem(const std::list<RefPtr<SpanItem>>& spanGroup)
+    {
+        CHECK_NULL_RETURN(!spanGroup.empty(), nullptr);
+        return spanGroup.front();
+    }
+
     void ApplyIndent(ParagraphStyle& paragraphStyle, const RefPtr<Paragraph>& paragraph, double width,
         const TextStyle& textStyle);
     void ConstructTextStyles(
@@ -109,8 +116,12 @@ private:
         RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph, const std::list<RefPtr<SpanItem>>& spans);
     void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
     void UpdateTextColorIfForeground(const RefPtr<FrameNode>& frameNode, TextStyle& textStyle);
-    void SetPropertyToModifier(const RefPtr<TextLayoutProperty>& layoutProperty, RefPtr<TextContentModifier> modifier,
-        TextStyle& textStyle);
+    void SetPropertyToModifier(const RefPtr<TextLayoutProperty>& layoutProperty,
+        const RefPtr<TextContentModifier>& modifier, const TextStyle& textStyle);
+    void SetDecorationPropertyToModifier(const RefPtr<TextLayoutProperty>& layoutProperty,
+        const RefPtr<TextContentModifier>& modifier, const TextStyle& textStyle);
+    void SetFontSizePropertyToModifier(const RefPtr<TextLayoutProperty>& layoutProperty,
+        const RefPtr<TextContentModifier>&, const TextStyle& textStyle);
 
     void AddImageToParagraph(RefPtr<ImageSpanItem>& imageSpanItem, const RefPtr<LayoutWrapper>& iterItem,
         const LayoutConstraintF& layoutConstrain, const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength,

@@ -256,5 +256,16 @@ const ArkUICommonShapeModifier* GetCommonShapeModifier()
         ResetShapeForegroundColor };
     return &modifier;
 }
+
+const CJUICommonShapeModifier* GetCJUICommonShapeModifier()
+{
+    static const CJUICommonShapeModifier modifier = { SetStrokeDashArray, ResetStrokeDashArray, SetStrokeMiterLimit,
+        ResetStrokeMiterLimit, SetFillOpacity, ResetFillOpacity, SetStrokeOpacity, ResetStrokeOpacity, SetStrokeWidth,
+        ResetStrokeWidth, SetAntiAlias, ResetAntiAlias, SetStroke, ResetStroke, SetFill, ResetFill, SetStrokeDashOffset,
+        ResetStrokeDashOffset, SetStrokeLineCap, ResetStrokeLineCap, SetStrokeLineJoin, ResetStrokeLineJoin,
+        SetShapeWidth, ResetShapeWidth, SetShapeHeight, ResetShapeHeight, SetShapeForegroundColor,
+        ResetShapeForegroundColor };
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

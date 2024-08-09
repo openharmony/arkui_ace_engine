@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/ime/input_method_manager.h"
 #include "core/components_ng/event/focus_hub.h"
@@ -79,6 +78,11 @@ void InputMethodManager::OnFocusNodeChange(const RefPtr<NG::FrameNode>& curFocus
 
 void InputMethodManager::ProcessKeyboardInWindowScene(const RefPtr<NG::FrameNode>& curFocusNode)
 {
+    if (curFocusNode && NG::WindowSceneHelper::IsFocusWindowSceneCloseKeyboard(curFocusNode)) {
+        lastKeep_ = true;
+    } else {
+        lastKeep_ = false;
+    }
     // Frame other window to SCB window Or inSCB window changes,hide keyboard.
     if ((windowFocus_.has_value() && windowFocus_.value())) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SCB Window focus first, ready to hide keyboard.");
@@ -96,6 +100,11 @@ void InputMethodManager::ProcessKeyboardInWindowScene(const RefPtr<NG::FrameNode
 
 void InputMethodManager::ProcessKeyboard(const RefPtr<NG::FrameNode>& curFocusNode)
 {
+    if (curFocusNode && curFocusNode->GetTag() == V2::SCREEN_ETS_TAG && lastKeep_) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "node is screen and last node want to save keyboard Ignore");
+        lastKeep_ = false;
+        return;
+    }
     auto pipeline = curFocusNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     if (windowFocus_.has_value() && windowFocus_.value()) {
@@ -175,6 +184,16 @@ void InputMethodManager::CloseKeyboard()
 #endif
 }
 
+void InputMethodManager::CloseKeyboardInPipelineDestroy()
+{
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Pipeline Destroyed, Ready to close SoftKeyboard.");
+    auto inputMethod = MiscServices::InputMethodController::GetInstance();
+    if (inputMethod) {
+        inputMethod->Close();
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Pipelinne Destroyed, Close SoftKeyboard Successfully.");
+    }
+}
+
 void InputMethodManager::CloseKeyboard(const RefPtr<NG::FrameNode>& focusNode)
 {
 #if defined(ENABLE_STANDARD_INPUT)
@@ -208,6 +227,7 @@ void InputMethodManager::HideKeyboardAcrossProcesses()
 void InputMethodManager::ProcessModalPageScene()
 {
     auto currentFocusNode = curFocusNode_.Upgrade();
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "ProcessModalPageScene");
     if (currentFocusNode && currentFocusNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG) {
         HideKeyboardAcrossProcesses();
     } else {

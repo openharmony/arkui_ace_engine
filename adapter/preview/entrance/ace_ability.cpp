@@ -273,6 +273,10 @@ std::unique_ptr<AceAbility> AceAbility::CreateInstance(AceRunArgs& runArgs)
 {
     DumpAceRunArgs(runArgs);
     LOGI("Start create AceAbility instance");
+#ifdef INIT_ICU_DATA_PATH
+    std::string icuPath = ".";
+    u_setDataDirectory(icuPath.c_str());
+#endif
     AceApplicationInfo::GetInstance().SetLocale(runArgs.language, runArgs.region, runArgs.script, "");
     SetFontMgrConfig(runArgs.containerSdkPath);
     EventDispatcher::GetInstance().Initialize();
@@ -282,10 +286,6 @@ std::unique_ptr<AceAbility> AceAbility::CreateInstance(AceRunArgs& runArgs)
 
 void AceAbility::InitEnv()
 {
-#ifdef INIT_ICU_DATA_PATH
-    std::string icuPath = ".";
-    u_setDataDirectory(icuPath.c_str());
-#endif
     std::vector<std::string> paths;
     paths.push_back(runArgs_.assetPath);
     std::string appResourcesPath(runArgs_.appResourcesPath);

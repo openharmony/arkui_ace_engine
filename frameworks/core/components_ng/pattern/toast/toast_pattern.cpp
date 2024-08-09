@@ -104,7 +104,13 @@ Dimension ToastPattern::GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper)
     auto textHeight = text->GetGeometryNode()->GetMarginFrameSize().Height();
     Dimension offsetY;
     auto safeAreaManager = context->GetSafeAreaManager();
-    auto safeAreaOffset = safeAreaManager ? safeAreaManager->GetSystemSafeArea().bottom_.Length() : 0.0f;
+    auto safeAreaOffset = safeAreaManager ? safeAreaManager->GetSafeAreaWithoutProcess().bottom_.Length() : 0;
+    auto showMode = toastProp->GetShowModeValue(ToastShowMode::DEFAULT);
+    if (showMode == ToastShowMode::DEFAULT) {
+        auto keyboardInset = safeAreaManager ? safeAreaManager->GetKeyboardInset().Length() : 0;
+        auto keyboardOffset = GreatNotEqual(keyboardInset, 0) ? keyboardInset : 0;
+        safeAreaOffset = safeAreaOffset + keyboardOffset;
+    }
     if (!toastProp->HasToastAlignment()) {
         auto toastBottom = GetBottomValue(layoutWrapper);
         toastBottom_ = toastBottom;
@@ -156,7 +162,11 @@ void ToastPattern::BeforeCreateLayoutWrapper()
 
     auto toastNode = GetHost();
     CHECK_NULL_VOID(toastNode);
-    UpdateToastSize(toastNode);
+    auto pipelineContext = IsDefaultToast() ? toastNode->GetContextRefPtr() : GetMainPipelineContext();
+    if (!pipelineContext) {
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "toast get pipelineContext failed");
+        return;
+    }
 
     auto textNode = DynamicCast<FrameNode>(toastNode->GetFirstChild());
     CHECK_NULL_VOID(textNode);
@@ -279,10 +289,9 @@ double ToastPattern::GetTextMaxHeight()
         auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
         deviceHeight = windowGlobalRect.Height();
     }
-
     auto safeAreaManager = pipelineContext->GetSafeAreaManager();
-    auto bottom = safeAreaManager ? safeAreaManager->GetSystemSafeArea().bottom_.Length() : 0.0f;
-    auto top = safeAreaManager ? safeAreaManager->GetSystemSafeArea().top_.Length() : 0.0f;
+    auto bottom = safeAreaManager ? safeAreaManager->GetSafeAreaWithoutProcess().bottom_.Length() : 0;
+    auto top = safeAreaManager ? safeAreaManager->GetSafeAreaWithoutProcess().top_.Length() : 0;
     auto maxHeight = deviceHeight - bottom - top - toastBottom_;
     auto limitHeight = (deviceHeight - bottom - top) * 0.65;
     if (GreatNotEqual(maxHeight, limitHeight)) {

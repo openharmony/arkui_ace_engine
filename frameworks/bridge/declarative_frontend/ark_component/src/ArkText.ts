@@ -750,7 +750,7 @@ class TextEditMenuOptionsModifier extends ModifierWithKey<EditMenuOptions> {
     super(value);
   }
   static identity: Symbol = Symbol('textEditMenuOptions');
-  applyPeer(node: KNode, reset: boolean) {
+  applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().text.resetSelectionMenuOptions(node);
     } else {
@@ -759,12 +759,29 @@ class TextEditMenuOptionsModifier extends ModifierWithKey<EditMenuOptions> {
   }
 }
 
+class TextHalfLeadingModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textHalfLeading');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetHalfLeading(node);
+    } else {
+      getUINativeModule().text.setHalfLeading(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkTextComponent extends ArkComponent implements TextAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
   allowChildTypes(): string[] {
-    return ["Span", "ImageSpan", "SymbolSpan", "ContainerSpan"];
+    return ['Span', 'ImageSpan', 'SymbolSpan', 'ContainerSpan'];
   }
   initialize(value: Object[]): void {
     modifierWithKey(this._modifiersWithKeys, TextContentModifier.identity, TextContentModifier, value[0]);
@@ -775,9 +792,9 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextEnableDataDetectorModifier.identity, TextEnableDataDetectorModifier, value);
     return this;
   }
-  dataDetectorConfig(config: any): this {
+  dataDetectorConfig(config: TextDataDetectorConfig): this {
     let detectorConfig = new TextDataDetectorConfig();
-    detectorConfig.types = config.type;
+    detectorConfig.types = config.types;
     detectorConfig.onDetectResultUpdate = config.onDetectResultUpdate;
     modifierWithKey(this._modifiersWithKeys, TextDataDetectorConfigModifier.identity, TextDataDetectorConfigModifier, detectorConfig);
     return this;
@@ -790,7 +807,7 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     modifierWithKey(this._modifiersWithKeys, FontColorModifier.identity, FontColorModifier, value);
     return this;
   }
-  fontSize(value: any): TextAttribute {
+  fontSize(value: number | string | Resource): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, FontSizeModifier.identity, FontSizeModifier, value);
     return this;
   }
@@ -935,9 +952,14 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
       TextOnTextSelectionChangeModifier, callback);
     return this;
   }
-  editMenuOptions(value: EditMenuOptions) {
+  editMenuOptions(value: EditMenuOptions): this {
     modifierWithKey(this._modifiersWithKeys, TextEditMenuOptionsModifier.identity,
       TextEditMenuOptionsModifier, value);
+    return this;
+  }
+  halfLeading(value: boolean): TextAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextHalfLeadingModifier.identity,
+      TextHalfLeadingModifier, value);
     return this;
   }
 }

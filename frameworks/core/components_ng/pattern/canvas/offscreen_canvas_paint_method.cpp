@@ -16,11 +16,7 @@
 #include "core/components_ng/pattern/canvas/offscreen_canvas_paint_method.h"
 
 #ifndef ACE_UNITTEST
-#include "include/encode/SkJpegEncoder.h"
-#include "include/encode/SkPngEncoder.h"
-#include "include/encode/SkWebpEncoder.h"
 #include "include/utils/SkBase64.h"
-
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/font/constants_converter.h"
 #include "core/components/font/rosen_font_collection.h"
@@ -35,7 +31,7 @@
 #include "core/components_ng/pattern/canvas/custom_paint_util.h"
 
 namespace OHOS::Ace::NG {
-
+constexpr Dimension DEFAULT_FONT_SIZE = 14.0_px;
 OffscreenCanvasPaintMethod::OffscreenCanvasPaintMethod(int32_t width, int32_t height)
 {
     antiAlias_ = false;
@@ -46,6 +42,8 @@ OffscreenCanvasPaintMethod::OffscreenCanvasPaintMethod(int32_t width, int32_t he
     lastLayoutSize_.SetHeight(static_cast<float>(height));
     InitBitmap();
     InitImageCallbacks();
+    // The initial value of the font size in canvas is 14px.
+    SetFontSize(DEFAULT_FONT_SIZE);
 }
 
 void OffscreenCanvasPaintMethod::InitBitmap()
@@ -195,42 +193,12 @@ void OffscreenCanvasPaintMethod::GetImageData(const std::shared_ptr<Ace::ImageDa
     subBitmap.ReadPixels(imageInfo, rawData, dirtyWidth * imageInfo.GetBytesPerPixel(), dx, dy);
 }
 
-void OffscreenCanvasPaintMethod::FillText(
-    const std::string& text, double x, double y, std::optional<double> maxWidth, const PaintState& state)
-{
-    if (!UpdateParagraph(text, false, HasShadow())) {
-        return;
-    }
-    PaintText(static_cast<float>(width_), x, y, maxWidth, false, HasShadow());
-}
-
-void OffscreenCanvasPaintMethod::StrokeText(
-    const std::string& text, double x, double y, std::optional<double> maxWidth, const PaintState& state)
-{
-    if (HasShadow()) {
-        if (!UpdateParagraph(text, true, true)) {
-            return;
-        }
-        PaintText(static_cast<float>(width_), x, y, maxWidth, true, true);
-    }
-
-    if (!UpdateParagraph(text, true)) {
-        return;
-    }
-    PaintText(static_cast<float>(width_), x, y, maxWidth, true);
-}
-
 std::string OffscreenCanvasPaintMethod::ToDataURL(const std::string& type, const double quality)
 {
 #ifndef ACE_UNITTEST
     std::string mimeType = GetMimeType(type);
-    double qua = quality;
-    if (mimeType != IMAGE_JPEG && mimeType != IMAGE_WEBP) {
-        qua = DEFAULT_QUALITY;
-    }
-    if (quality < 0.0 || quality > 1.0) {
-        qua = DEFAULT_QUALITY;
-    }
+    // Quality needs to be between 0.0 and 1.0 for MimeType jpeg and webp
+    double qua = GetQuality(mimeType, quality);
     auto imageInfo = SkImageInfo::Make(width_, height_, SkColorType::kBGRA_8888_SkColorType,
         (mimeType == IMAGE_JPEG) ? SkAlphaType::kOpaque_SkAlphaType : SkAlphaType::kUnpremul_SkAlphaType);
     RSBitmap tempCache;
@@ -244,22 +212,10 @@ std::string OffscreenCanvasPaintMethod::ToDataURL(const std::string& type, const
     tempCanvas.DrawBitmap(bitmap_, 0.0f, 0.0f);
     RSPixmap rsSrc;
     bool success = tempCache.PeekPixels(rsSrc);
-    SkPixmap src { imageInfo, rsSrc.GetAddr(), rsSrc.GetRowBytes() };
     CHECK_NULL_RETURN(success, UNSUPPORTED);
+    SkPixmap src { imageInfo, rsSrc.GetAddr(), rsSrc.GetRowBytes() };
     SkDynamicMemoryWStream dst;
-    if (mimeType == IMAGE_JPEG) {
-        SkJpegEncoder::Options options;
-        options.fQuality = qua;
-        success = SkJpegEncoder::Encode(&dst, src, options);
-    } else if (mimeType == IMAGE_WEBP) {
-        SkWebpEncoder::Options options;
-        options.fQuality = qua * 100.0;
-        success = SkWebpEncoder::Encode(&dst, src, options);
-    } else {
-        mimeType = IMAGE_PNG;
-        SkPngEncoder::Options options;
-        success = SkPngEncoder::Encode(&dst, src, options);
-    }
+    success = EncodeImage(mimeType, qua, src, dst);
     CHECK_NULL_RETURN(success, UNSUPPORTED);
     auto result = dst.detachAsData();
     CHECK_NULL_RETURN(result, UNSUPPORTED);

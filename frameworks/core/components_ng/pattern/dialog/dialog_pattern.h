@@ -17,11 +17,13 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DIALOG_DIALOG_PATTERN_H
 
 #include <cstdint>
+#include <functional>
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/common/autofill/auto_fill_trigger_state_holder.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/manager/focus/focus_view.h"
@@ -46,8 +48,8 @@ enum class DialogDismissReason {
     DIALOG_TOUCH_OUTSIDE,
     DIALOG_CLOSE_BUTTON,
 };
-class DialogPattern : public PopupBasePattern, public FocusView {
-    DECLARE_ACE_TYPE(DialogPattern, PopupBasePattern, FocusView);
+class DialogPattern : public PopupBasePattern, public FocusView, public AutoFillTriggerStateHolder {
+    DECLARE_ACE_TYPE(DialogPattern, PopupBasePattern, FocusView, AutoFillTriggerStateHolder);
 
 public:
     DialogPattern(const RefPtr<DialogTheme>& dialogTheme, const RefPtr<UINode>& customNode)
@@ -68,6 +70,19 @@ public:
     bool ShouldDismiss() const
     {
         if (onWillDismiss_) {
+            return true;
+        }
+        return false;
+    }
+
+    void SetOnWillDismissByNDK(const std::function<bool(const int32_t& info)>& onWillDismissByNDK)
+    {
+        onWillDismissByNDK_ = onWillDismissByNDK;
+    }
+
+    bool CallDismissInNDK(int reason)
+    {
+        if (onWillDismissByNDK_ && onWillDismissByNDK_(reason)) {
             return true;
         }
         return false;
@@ -255,9 +270,29 @@ public:
         return fontScaleForElderly_;
     }
 
+    void SetIsPickerDiaglog(bool value)
+    {
+        isPickerDiaglog_ = value;
+    }
+
+    bool GetIsPickerDiaglog()
+    {
+        return isPickerDiaglog_;
+    }
+
     void UpdateDeviceOrientation(const DeviceOrientation& deviceOrientation);
     void InitHostWindowRect();
     void UpdateFontScale();
+
+    bool GetIsSuitOldMeasure()
+    {
+        return isSuitOldMeasure_;
+    }
+
+    void SetIsScrollHeightNegative(bool isScrollHeightNegative)
+    {
+        isScrollHeightNegative_ = isScrollHeightNegative;
+    }
 
 private:
     bool AvoidKeyboard() const override
@@ -281,10 +316,8 @@ private:
 
     // set render context properties of content frame
     void UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode, const DialogProperties& props);
-    void UpdateBgBlurStyle(const RefPtr<RenderContext>& contentRenderContext, const DialogProperties& props);
     void BuildCustomChild(const DialogProperties& props, const RefPtr<UINode>& customNode);
     RefPtr<FrameNode> BuildMainTitle(const DialogProperties& dialogProperties);
-    void CreateTitleRowNode(const DialogProperties& dialogProperties, PaddingProperty& titlePadding);
     RefPtr<FrameNode> BuildSubTitle(const DialogProperties& dialogProperties);
     void ParseButtonFontColorAndBgColor(
         const ButtonInfo& params, std::string& textColor, std::optional<Color>& bgColor);
@@ -326,6 +359,7 @@ private:
     void OnFontConfigurationUpdate() override;
     void UpdateTextFontScale();
     void UpdateTitleTextFontScale();
+    void CheckScrollHeightIsNegative(const RefPtr<UINode>& contentColumn, const DialogProperties& props);
     RefPtr<DialogTheme> dialogTheme_;
     WeakPtr<UINode> customNode_;
     RefPtr<ClickEvent> onClick_;
@@ -340,6 +374,7 @@ private:
     std::string title_;
     std::string subtitle_;
     std::function<void(const int32_t& info)> onWillDismiss_;
+    std::function<bool(const int32_t& info)> onWillDismissByNDK_;
 
     DialogProperties dialogProperties_;
     WeakPtr<FrameNode> menuNode_;
@@ -348,7 +383,10 @@ private:
     RefPtr<FrameNode> contentColumn_;
     RefPtr<RenderContext> contentRenderContext_;
     bool isSuitableForElderly_ = false;
+    bool isPickerDiaglog_ = false;
     bool notAdapationAging_ = false;
+    bool isSuitOldMeasure_ = false;
+    bool isScrollHeightNegative_ = false;
     float fontScaleForElderly_ = 1.0f;
     DeviceOrientation deviceOrientation_ = DeviceOrientation::PORTRAIT;
     RefPtr<FrameNode> titleContainer_;

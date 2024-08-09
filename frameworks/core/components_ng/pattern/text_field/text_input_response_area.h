@@ -42,7 +42,7 @@ public:
 
     virtual void ClearArea() {}
 
-    virtual OffsetF GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize, float nodeWidth) = 0;
+    virtual OffsetF GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize, float nodeWidth);
 
     RectF GetAreaRect()
     {
@@ -77,8 +77,6 @@ public:
 
     void Layout(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth) override;
 
-    OffsetF GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize, float nodeWidth) override;
-
     void AddEvent(const RefPtr<FrameNode>& node);
 
     void SetObscured(bool isObscured)
@@ -112,9 +110,13 @@ public:
 
 private:
     void LoadImageSourceInfo();
+    void AddImageEventOnError();
     void ChangeObscuredState();
     ImageSourceInfo GetDefaultSourceInfo(bool isObscured);
     void UpdateImageSource();
+    void UpdateSymbolSource();
+    void InitSymbolEffectOptions();
+    bool IsShowSymbol();
     bool IsShowPasswordIcon();
     float GetIconRightOffset();
     float GetIconSize();
@@ -147,8 +149,6 @@ public:
 
     void Layout(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth) override;
 
-    OffsetF GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize, float nodeWidth) override;
-
     const RefPtr<FrameNode> GetFrameNode() override;
 
     void ClearArea() override
@@ -179,8 +179,6 @@ public:
     SizeF Measure(LayoutWrapper* layoutWrapper, int32_t index) override;
 
     void Layout(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth) override;
-
-    OffsetF GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize, float nodeWidth) override;
 
     const RefPtr<FrameNode> GetFrameNode() override;
 

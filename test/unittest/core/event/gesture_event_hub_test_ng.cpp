@@ -96,7 +96,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest002, TestSize.Level1)
     TouchRestrict touchRestrict;
     TouchTestResult innerTargets;
     TouchTestResult finalResult;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     auto flag = gestureEventHub->ProcessTouchTestHit(
         COORDINATE_OFFSET, touchRestrict, innerTargets, finalResult, TOUCH_ID, PointF(), nullptr, responseLinkResult);
     EXPECT_FALSE(flag);
@@ -651,7 +651,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest010, TestSize.Level1)
     TouchRestrict touchRestrict;
     std::list<RefPtr<NGGestureRecognizer>> innerTargets;
     TouchTestResult finalResult;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
 
     std::vector<RefPtr<NGGestureRecognizer>> vc;
     vc.push_back(AceType::MakeRefPtr<ClickRecognizer>());
@@ -869,7 +869,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest013, TestSize.Level1)
     TouchRestrict touchRestrict;
     TouchTestResult innerTargets;
     TouchTestResult finalResult;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     PointF localPoint;
 
     PanDirection panDirection;
@@ -1035,7 +1035,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest017, TestSize.Level1)
     TouchRestrict touchRestrict;
     TouchTestResult innerTargets;
     TouchTestResult finalResult;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     PointF localPoint;
 
     PanDirection panDirection;
@@ -1070,6 +1070,8 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest017, TestSize.Level1)
     auto dragEvent = AceType::MakeRefPtr<DragEvent>(
         std::move(dragActionStart), std::move(dragActionUpdate), std::move(dragActionEnd), std::move(dragActionCancel));
     guestureEventHub->dragEventActuator_->userCallback_ = dragEvent;
+    guestureEventHub->userParallelClickEventActuator_ =
+        AceType::MakeRefPtr<ClickEventActuator>(AceType::WeakClaim(AceType::RawPtr(guestureEventHub)));
     result = guestureEventHub->ProcessTouchTestHit(
         coordinateOffset, touchRestrict, innerTargets, finalResult, 2, localPoint, nullptr, responseLinkResult);
     EXPECT_FALSE(result);
@@ -1827,18 +1829,9 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest031, TestSize.Level1)
  */
 HWTEST_F(GestureEventHubTestNg, ResetDragActionForWeb001, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. Create GestureEventHub.
-     * @tc.expected: gestureEventHub is not null.
-     */
     auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
     auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
     ASSERT_NE(guestureEventHub, nullptr);
-
-    /**
-     * @tc.steps: step1. Calling the ResetDragActionForWeb interface
-     * @tc.expected: IsReceivedDragGestureInfo_ Equal to false.
-     */
     guestureEventHub->ResetDragActionForWeb();
     ASSERT_EQ(guestureEventHub->isReceivedDragGestureInfo_, false);
 }
@@ -1850,34 +1843,127 @@ HWTEST_F(GestureEventHubTestNg, ResetDragActionForWeb001, TestSize.Level1)
  */
 HWTEST_F(GestureEventHubTestNg, OnDragStart001, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. Create GestureEventHub.
-     * @tc.expected: gestureEventHub is not null.
-     */
     auto frameNode = FrameNode::CreateFrameNode("myButton", 101, AceType::MakeRefPtr<Pattern>());
     auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
     ASSERT_NE(guestureEventHub, nullptr);
     auto eventHub = guestureEventHub->eventHub_.Upgrade();
-
     GestureEvent info;
     auto pipline = PipelineContext::GetCurrentContext();
-
     auto EventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     EXPECT_TRUE(EventHub);
-
     auto frameNodeOfEvent = EventHub->GetFrameNode();
     EXPECT_TRUE(frameNodeOfEvent);
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-
     RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     DragDropInfo dragDropInfo;
     dragDropInfo.customNode = customNode;
-
-    /**
-     * @tc.steps: step1. Calling the ResetDragActionForWeb interface
-     * @tc.expected: dragDropProxy_ Equal to false.
-     */
+    event->SetResult(DragRet::DRAG_FAIL);
+    guestureEventHub->OnDragStart(info, pipline, frameNode, dragDropInfo, event);
+    event->SetResult(DragRet::DRAG_CANCEL);
     guestureEventHub->OnDragStart(info, pipline, frameNode, dragDropInfo, event);
     EXPECT_TRUE(EventHub->dragDropProxy_ == false);
+}
+
+/**
+ * @tc.name: SetMouseDragGatherPixelMaps001
+ * @tc.desc: Test SetMouseDragGatherPixelMaps
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, SetMouseDragGatherPixelMaps001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 101, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+    auto eventHub = guestureEventHub->eventHub_.Upgrade();
+    guestureEventHub->SetMouseDragGatherPixelMaps();
+    guestureEventHub->SetNotMouseDragGatherPixelMaps();
+    ASSERT_NE(PipelineContext::GetCurrentContext(), nullptr);
+}
+
+/**
+ * @tc.name: IsTextCategoryComponent001
+ * @tc.desc: Test IsTextCategoryComponent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, IsTextCategoryComponent001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 101, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    string frameTag = V2::TEXTAREA_ETS_TAG;
+    bool result = guestureEventHub->IsTextCategoryComponent(frameTag);
+    ASSERT_TRUE(result);
+    frameTag = V2::TEXT_ETS_TAG;
+    result = guestureEventHub->IsTextCategoryComponent(frameTag);
+    ASSERT_TRUE(result);
+    frameTag = V2::TEXTINPUT_ETS_TAG;
+    result = guestureEventHub->IsTextCategoryComponent(frameTag);
+    ASSERT_TRUE(result);
+    frameTag = V2::SEARCH_Field_ETS_TAG;
+    result = guestureEventHub->IsTextCategoryComponent(frameTag);
+    ASSERT_TRUE(result);
+    frameTag = V2::RICH_EDITOR_ETS_TAG;
+    result = guestureEventHub->IsTextCategoryComponent(frameTag);
+    ASSERT_TRUE(result);
+    frameTag = "";
+    result = guestureEventHub->IsTextCategoryComponent(frameTag);
+    ASSERT_FALSE(result);
+}
+
+/**
+ * @tc.name: SetResponseRegion001
+ * @tc.desc: Test SetResponseRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, SetResponseRegion001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 101, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    std::vector<DimensionRect> responseRegion;
+    guestureEventHub->SetResponseRegion(responseRegion);
+    responseRegion.push_back(DimensionRect());
+    int32_t callbackInfo = 0;
+    guestureEventHub->SetResponseRegionFunc([&callbackInfo](const std::vector<DimensionRect>& /*reponseRegion*/) {
+        callbackInfo = 1;
+    });
+    guestureEventHub->SetResponseRegion(responseRegion);
+    ASSERT_TRUE(guestureEventHub->isResponseRegion_);
+}
+
+/**
+ * @tc.name: RemoveLastResponseRect001
+ * @tc.desc: Test RemoveLastResponseRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, RemoveLastResponseRect001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 101, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    std::vector<DimensionRect> responseRegion;
+    guestureEventHub->RemoveLastResponseRect();
+    responseRegion.push_back(DimensionRect());
+    responseRegion.push_back(DimensionRect());
+    guestureEventHub->SetResponseRegion(responseRegion);
+    guestureEventHub->RemoveLastResponseRect();
+    int32_t callbackInfo = 0;
+    guestureEventHub->SetResponseRegionFunc([&callbackInfo](const std::vector<DimensionRect>& /*reponseRegion*/) {
+        callbackInfo = 1;
+    });
+    guestureEventHub->RemoveLastResponseRect();
+    ASSERT_FALSE(guestureEventHub->isResponseRegion_);
+}
+
+/**
+ * @tc.name: SetJSFrameNodeOnTouchEvent001
+ * @tc.desc: Test SetJSFrameNodeOnTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, SetJSFrameNodeOnTouchEvent001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 101, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    guestureEventHub->touchEventActuator_ = nullptr;
+    TouchEventFunc touchEventFunc = [](TouchEventInfo& info) {};
+    guestureEventHub->SetJSFrameNodeOnTouchEvent(std::move(touchEventFunc));
+    ASSERT_NE(guestureEventHub->touchEventActuator_, nullptr);
 }
 } // namespace OHOS::Ace::NG

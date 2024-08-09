@@ -17,6 +17,7 @@
 #include <dirent.h>
 #include <fstream>
 #include <sys/stat.h>
+#include <cstdio>
 
 #include "base/image/image_packer.h"
 #include "base/image/image_source.h"
@@ -43,16 +44,29 @@ const std::string SLASH = "/";
 const std::string BACKSLASH = "\\";
 const mode_t CHOWN_RW_UG = 0660;
 const std::string SVG_FORMAT = "image/svg+xml";
+
 bool EndsWith(const std::string& str, const std::string& substr)
 {
     return str.rfind(substr) == (str.length() - substr.length());
 }
+
 bool IsAstcFile(const char fileName[])
 {
     auto fileNameStr = std::string(fileName);
     return (fileNameStr.length() >= ASTC_SUFFIX.length()) && EndsWith(fileNameStr, ASTC_SUFFIX);
 }
+
+bool IsFileExists(const char* path)
+{
+    FILE *file = fopen(path, "r");
+    if (file) {
+        fclose(file);
+        return true;
+    }
+    return false;
 }
+
+} // namespace
 
 void ImageFileCache::SetImageCacheFilePath(const std::string& cacheFilePath)
 {
@@ -162,10 +176,10 @@ void ImageFileCache::SaveCacheInner(const std::string& cacheKey, const std::stri
     auto cacheTime = time(nullptr);
     auto convertAstcThreshold = SystemProperties::GetImageFileCacheConvertAstcThreshold();
     if (iter != fileNameToFileInfoPos_.end()) {
+        // update cache file info
         auto infoIter = iter->second;
         cacheFileInfo_.splice(cacheFileInfo_.begin(), cacheFileInfo_, infoIter);
         cacheFileSize_ = cacheFileSize_ + cacheSize - infoIter->fileSize;
-        removeVector.push_back(ConstructCacheFilePath(infoIter->fileName));
 
         infoIter->fileName = cacheFileName;
         infoIter->fileSize = cacheSize;
@@ -214,8 +228,7 @@ void ImageFileCache::EraseCacheFile(const std::string &url)
     }
 }
 
-void ImageFileCache::WriteCacheFile(
-    const std::string& url, const void* const data, size_t size, const std::string& suffix)
+void ImageFileCache::WriteCacheFile(const std::string& url, const void* data, size_t size, const std::string& suffix)
 {
     if (size > fileLimit_) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "file size is %{public}d, greater than limit %{public}d, cannot cache",
@@ -223,6 +236,7 @@ void ImageFileCache::WriteCacheFile(
         return;
     }
     auto fileCacheKey = std::to_string(std::hash<std::string> {}(url));
+    auto writeFilePath = ConstructCacheFilePath(fileCacheKey + suffix);
     {
         std::scoped_lock<std::mutex> lock(cacheFileInfoMutex_);
         // 1. first check if file has been cached.
@@ -230,7 +244,7 @@ void ImageFileCache::WriteCacheFile(
         if (iter != fileNameToFileInfoPos_.end()) {
             auto infoIter = iter->second;
             // either suffix not specified, or fileName ends with the suffix
-            if (suffix.empty() || EndsWith(infoIter->fileName, suffix)) {
+            if ((suffix.empty() || EndsWith(infoIter->fileName, suffix)) && IsFileExists(writeFilePath.c_str())) {
                 TAG_LOGI(AceLogTag::ACE_IMAGE, "file has been wrote %{private}s", infoIter->fileName.c_str());
                 return;
             }

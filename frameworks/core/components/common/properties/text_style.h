@@ -52,7 +52,7 @@ enum class FontWeight {
 };
 
 enum class FontStyle {
-    NORMAL = 0,
+    NORMAL,
     ITALIC,
     NONE
 };
@@ -348,12 +348,22 @@ public:
         fontWeight_ = fontWeight;
     }
 
-    const Color& GetTextColor() const
+    const Color GetTextColor() const
+    {
+        return textColor_.ToColor();
+    }
+
+    const DynamicColor GetDynamicTextColor() const
     {
         return textColor_;
     }
 
     void SetTextColor(const Color& textColor)
+    {
+        textColor_ = textColor;
+    }
+
+    void SetTextColor(const DynamicColor& textColor)
     {
         textColor_ = textColor;
     }
@@ -378,12 +388,17 @@ public:
         wordSpacing_ = wordSpacing;
     }
 
-    const Color& GetTextDecorationColor() const
+    const Color GetTextDecorationColor() const
+    {
+        return textDecorationColor_.ToColor();
+    }
+
+    const DynamicColor GetDynamicTextDecorationColor() const
     {
         return textDecorationColor_;
     }
 
-    void SetTextDecorationColor(const Color& textDecorationColor)
+    void SetTextDecorationColor(const DynamicColor& textDecorationColor)
     {
         textDecorationColor_ = textDecorationColor;
     }
@@ -672,6 +687,16 @@ public:
         return locale_;
     }
 
+    void SetTextBackgroundStyle(const std::optional<TextBackgroundStyle>& style)
+    {
+        textBackgroundStyle_ = style;
+    }
+
+    const std::optional<TextBackgroundStyle>& GetTextBackgroundStyle() const
+    {
+        return textBackgroundStyle_;
+    }
+
     bool isSymbolGlyph_ = false;
 
     void SetRenderColors(std::vector<Color>& renderColors)
@@ -719,16 +744,6 @@ public:
         return effectStrategy_;
     }
 
-    void SetTextBackgroundStyle(const std::optional<TextBackgroundStyle>& style)
-    {
-        textBackgroundStyle_ = style;
-    }
-
-    const std::optional<TextBackgroundStyle>& GetTextBackgroundStyle() const
-    {
-        return textBackgroundStyle_;
-    }
-
     LineBreakStrategy GetLineBreakStrategy() const
     {
         return lineBreakStrategy_;
@@ -745,6 +760,7 @@ public:
     }
 
     std::string ToString() const;
+    void UpdateColorByResourceId();
 
 private:
     std::vector<std::string> fontFamilies_;
@@ -752,8 +768,8 @@ private:
     std::vector<Dimension> preferFontSizes_;
     std::vector<TextSizeGroup> preferTextSizeGroups_;
     std::vector<Shadow> textShadows_;
-    // use 16vp for normal font size.
-    Dimension fontSize_ { 16, DimensionUnit::VP };
+    // use 14px for normal font size.
+    Dimension fontSize_ { 14, DimensionUnit::PX };
     Dimension adaptMinFontSize_;
     Dimension adaptMaxFontSize_;
     Dimension adaptFontSizeStep_;
@@ -776,14 +792,15 @@ private:
     TextCase textCase_ { TextCase::NORMAL };
     EllipsisMode ellipsisMode_ = EllipsisMode::TAIL;
     LineBreakStrategy lineBreakStrategy_ { LineBreakStrategy::GREEDY };
-    Color textColor_ { Color::BLACK };
-    Color textDecorationColor_ { Color::BLACK };
+    DynamicColor textColor_ { Color::BLACK };
+    DynamicColor textDecorationColor_ { Color::BLACK };
     uint32_t maxLines_ = UINT32_MAX;
     bool hasHeightOverride_ = false;
     bool adaptTextSize_ = false;
     bool adaptHeight_ = false; // whether adjust text size with height.
     bool allowScale_ = true;
     bool halfLeading_ = false;
+    std::optional<TextBackgroundStyle> textBackgroundStyle_;
     std::optional<float> minFontScale_;
     std::optional<float> maxFontScale_;
 
@@ -792,8 +809,6 @@ private:
     int32_t renderStrategy_ = 0;
     int32_t effectStrategy_ = 0;
     std::optional<NG::SymbolEffectOptions> symbolEffectOptions_;
-
-    std::optional<TextBackgroundStyle> textBackgroundStyle_;
     double heightScale_ = 1.0;
     bool heightOnly_ = false;
     std::u16string ellipsis_;

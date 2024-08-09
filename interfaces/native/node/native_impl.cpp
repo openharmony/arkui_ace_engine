@@ -110,6 +110,7 @@ ArkUI_NativeDialogAPI_1 dialogImpl_1 = {
     OHOS::Ace::DialogModel::RegisterOnWillDismiss,
     OHOS::Ace::DialogModel::Show,
     OHOS::Ace::DialogModel::Close,
+    OHOS::Ace::DialogModel::RegisterOnWillDismissWithUserData,
 };
 
 constexpr int32_t CURRENT_NATIVE_GESTURE_API_VERSION = 1;
@@ -130,6 +131,8 @@ ArkUI_NativeGestureAPI_1 gestureImpl_1 = {
     OHOS::Ace::GestureModel::RemoveGestureFromNode,
     OHOS::Ace::GestureModel::SetGestureInterrupterToNode,
     OHOS::Ace::GestureModel::GetGestureType,
+    OHOS::Ace::GestureModel::SetInnerGestureParallelTo,
+    OHOS::Ace::GestureModel::CreateTapGestureWithDistanceThreshold,
 };
 
 ArkUI_NativeAnimateAPI_1 animateImpl_1 = {

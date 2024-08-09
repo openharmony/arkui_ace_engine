@@ -30,6 +30,7 @@ public:
         const uint32_t* colors, uint32_t colorLength, int32_t width, int32_t height);
     int32_t GetWidth() const override;
     int32_t GetHeight() const override;
+    bool GetPixelsVec(std::vector<uint8_t>& data) const override;
     const uint8_t* GetPixels() const override;
     PixelFormat GetPixelFormat() const override;
     AlphaType GetAlphaType() const override;

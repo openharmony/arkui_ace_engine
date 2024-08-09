@@ -26,6 +26,7 @@
 #include "base/json/json_util.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
+#include "bridge/common/utils/source_map.h"
 
 namespace OHOS::Ace {
 struct PerformanceCheckNode {
@@ -69,9 +70,8 @@ public:
     ~AceScopedPerformanceCheck();
 
     static CodeInfo GetCodeInfo(int32_t row, int32_t col);
-    static void RecordPerformanceCheckData(const PerformanceCheckNodeMap& nodeMap, int64_t vsyncTimeout);
-    static void RecordPerformanceCheckDataForNavigation(
-        const PerformanceCheckNodeMap& nodeMap, int64_t vsyncTimeout, const std::string& navPath);
+    static void RecordPerformanceCheckData(
+        const PerformanceCheckNodeMap& nodeMap, int64_t vsyncTimeout, std::string path);
 
 private:
     static std::string GetCurrentTime();
@@ -84,10 +84,10 @@ private:
     static void RecordVsyncTimeout(const PerformanceCheckNodeMap& nodeMap, int64_t vsyncTimeout, const CodeInfo& info);
     static bool CheckPage(const CodeInfo& codeInfo, const std::string& rule);
     void RecordFunctionTimeout(int64_t sec, const std::string& functionName);
-
+    static RefPtr<Framework::RevSourceMap> GetCurrentSourceMap();
     int64_t markTime_ = 0;
     std::string name_;
-
+    static std::string currentPath_;
     ACE_DISALLOW_COPY_AND_MOVE(AceScopedPerformanceCheck);
 };
 } // namespace OHOS::Ace

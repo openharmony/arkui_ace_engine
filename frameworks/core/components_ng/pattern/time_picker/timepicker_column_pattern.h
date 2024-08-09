@@ -303,6 +303,8 @@ public:
         clickBreak_ = value;
     }
 
+    void InitHapticController(const RefPtr<FrameNode>& host);
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -366,7 +368,6 @@ private:
     DimensionRect CalculateHotZone(int32_t index, int32_t midSize, float middleChildHeight, float otherChildHeight);
     void AddHotZoneRectToText();
     void InitTextFontFamily();
-    void InitHapticController(const RefPtr<FrameNode>& host);
     void RegisterWindowStateChangedCallback();
     void UnregisterWindowStateChangedCallback();
     void OnWindowHide() override;

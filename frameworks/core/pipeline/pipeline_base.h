@@ -356,7 +356,7 @@ public:
 
     virtual void GetBoundingRectData(int32_t nodeId, Rect& rect) {}
 
-    virtual void CheckAndUpdateKeyboardInset() {}
+    virtual void CheckAndUpdateKeyboardInset(float keyboardHeight) {}
 
     virtual RefPtr<AccessibilityManager> GetAccessibilityManager() const;
 
@@ -957,6 +957,8 @@ public:
         return false;
     }
 
+    virtual void RequireSummary() {}
+
     void SetPluginOffset(const Offset& offset)
     {
         pluginOffset_ = offset;
@@ -1290,6 +1292,11 @@ public:
         return 0.0f;
     }
 
+    virtual bool CheckNeedAvoidInSubWindow()
+    {
+        return false;
+    }
+
     virtual bool IsDensityChanged() const = 0;
 
     void SetUiDvsyncSwitch(bool on);
@@ -1489,7 +1496,7 @@ private:
     WindowSizeChangeReason type_ = WindowSizeChangeReason::UNDEFINED;
     std::shared_ptr<Rosen::RSTransaction> rsTransaction_;
     uint32_t frameCount_ = 0;
-    bool followSystem_ = true;
+    bool followSystem_ = false;
     float maxAppFontScale_ = static_cast<float>(INT32_MAX);
     float dragNodeGrayscale_ = 0.0f;
     

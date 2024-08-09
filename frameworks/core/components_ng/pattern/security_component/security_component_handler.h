@@ -47,6 +47,7 @@ public:
         Security::SecurityComponent::OnFirstUseDialogCloseFunc&& callback);
     static bool IsSecurityComponentServiceExist();
     static bool LoadSecurityComponentService();
+    static bool IsSystemAppCalling();
 
 private:
     static bool CheckOpacity(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);

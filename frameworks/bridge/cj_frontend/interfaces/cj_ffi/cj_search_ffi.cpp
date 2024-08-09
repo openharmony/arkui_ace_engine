@@ -210,6 +210,9 @@ void FfiOHOSAceFrameworkSearchOnPaste(void (*callback)(const char* value))
 int64_t FfiOHOSAceFrameworkSearchController()
 {
     auto ret_ = FFIData::Create<SearchController>();
+    if (ret_ == nullptr) {
+        return FFI_ERROR_CODE;
+    }
     return ret_->GetID();
 }
 

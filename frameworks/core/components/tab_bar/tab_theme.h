@@ -29,6 +29,7 @@ namespace OHOS::Ace {
  * using TabTheme::Builder.
  */
 namespace {
+constexpr double THIRDFONT_DEFAULT_VALUE = 1.45;
 constexpr double BIGFONT_DEFAULT_VALUE = 1.75;
 constexpr double LARGEFONT_DEFAULT_VALUE = 2.0;
 constexpr double MAXFONT_DEFAULT_VALUE = 3.2;
@@ -59,6 +60,7 @@ public:
                 theme->subTabIndicatorHeight_ = pattern->GetAttr<Dimension>("subtab_indicator_height", 0.0_vp);
                 theme->subTabTextOnColor_ = pattern->GetAttr<Color>("subtab_text_on_color", Color::WHITE);
                 theme->subTabTextOffColor_ = pattern->GetAttr<Color>("subtab_text_off_color", Color::WHITE);
+                theme->subTabBoardTextOnColor_ = pattern->GetAttr<Color>("subtab_board_text_on_color", Color::WHITE);
                 theme->subTabIndicatorGap_ = pattern->GetAttr<Dimension>("subtab_indicator_gap", 0.0_vp);
                 theme->subTabHorizontalPadding_ = pattern->GetAttr<Dimension>("subtab_horizontal_padding", 0.0_vp);
                 theme->subTabTopPadding_ = pattern->GetAttr<Dimension>("subtab_top_padding", 0.0_vp);
@@ -100,6 +102,8 @@ public:
                     pattern->GetAttr<Dimension>("sub_tab_bar_left_right_margin", 12.0_vp);
                 theme->subTabBarIndicatorstyleMarginTop_ =
                     pattern->GetAttr<Dimension>("sub_tab_bar_indicatorstyle_margin_top", 4.0_vp);
+                theme->subTabBarThirdLargeFontSizeScale_ =
+                    pattern->GetAttr<double>("sub_tab_bar_third_large_font_size_scale", THIRDFONT_DEFAULT_VALUE);
 
                 ParseAttribute(theme, pattern);
             } else {
@@ -234,6 +238,11 @@ public:
     const Color& GetSubTabTextOffColor() const
     {
         return subTabTextOffColor_;
+    }
+
+    const Color& GetSubTabBoardTextOnColor() const
+    {
+        return subTabBoardTextOnColor_;
     }
 
     const Dimension& GetSubTabIndicatorHeight() const
@@ -420,6 +429,11 @@ public:
         return tabBarColumnMargin_;
     }
 
+    float GetsubTabBarThirdLargeFontSizeScale() const
+    {
+        return subTabBarThirdLargeFontSizeScale_;
+    }
+
     const Dimension& GetHorizontalBottomTabMinWidth() const
     {
         return horizontalBottomTabMinWidth_;
@@ -486,6 +500,7 @@ private:
     Dimension focusIndicatorVerticalPadding_;
     Color subTabTextOnColor_;
     Color subTabTextOffColor_;
+    Color subTabBoardTextOnColor_;
     Dimension subTabIndicatorHeight_;
     Dimension subTabIndicatorGap_;
     Dimension subTabHorizontalPadding_;
@@ -534,6 +549,7 @@ private:
     float subTabBarOriginFontSizeScale_ = 1.0f;
     Dimension subTabBarLeftRightMargin_;
     Dimension subTabBarIndicatorstyleMarginTop_;
+    float subTabBarThirdLargeFontSizeScale_ = 1.45f;
 };
 
 } // namespace OHOS::Ace

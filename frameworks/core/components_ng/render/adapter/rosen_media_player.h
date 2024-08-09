@@ -55,6 +55,7 @@ public:
     int32_t Pause() override;
     int32_t Stop() override;
     int32_t Seek(int32_t mSeconds, OHOS::Ace::SeekMode mode) override;
+    int32_t SetPlayRange(int64_t startTime, int64_t endTime) override;
 
 private:
     // Interim programme

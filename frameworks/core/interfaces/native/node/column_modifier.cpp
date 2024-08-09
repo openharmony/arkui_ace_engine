@@ -106,5 +106,20 @@ const ArkUIColumnModifier* GetColumnModifier()
     };
     return &modifier;
 }
+
+const CJUIColumnModifier* GetCJUIColumnModifier()
+{
+    static const CJUIColumnModifier modifier = {
+        SetColumnJustifyContent,
+        ResetColumnJustifyContent,
+        SetColumnAlignItems,
+        ResetColumnAlignItems,
+        GetColumnJustifyContent,
+        GetColumnAlignItems,
+        SetColumnSpace,
+        ResetColumnSpace,
+    };
+    return &modifier;
+}
 }
 }

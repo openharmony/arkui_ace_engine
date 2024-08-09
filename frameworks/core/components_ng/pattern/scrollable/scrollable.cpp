@@ -58,7 +58,7 @@ constexpr float DEFAULT_THRESHOLD = 0.75f;
 constexpr float DEFAULT_SPRING_RESPONSE = 0.416f;
 constexpr float DEFAULT_SPRING_DAMP = 0.99f;
 constexpr uint32_t MAX_VSYNC_DIFF_TIME = 100 * 1000 * 1000; // max 100 ms
-constexpr float FRICTION_VELOCITY_THRESHOLD = 42.0f;
+constexpr float FRICTION_VELOCITY_THRESHOLD = 120.0f;
 constexpr float SPRING_ACCURACY = 0.1;
 #ifdef OHOS_PLATFORM
 constexpr int64_t INCREASE_CPU_TIME_ONCE = 4000000000; // 4s(unit: ns)
@@ -78,6 +78,12 @@ void Scrollable::SetVelocityScale(double sVelocityScale)
     sVelocityScale_ = sVelocityScale;
 }
 
+double Scrollable::GetVelocityScale()
+{
+    return Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ?
+        NEW_VELOCITY_SCALE : VELOCITY_SCALE;
+}
+
 void Scrollable::SetFriction(double sFriction)
 {
     if (LessOrEqual(sFriction, 0.0)) {
@@ -93,6 +99,7 @@ Scrollable::Scrollable()
     velocityScale_ =
         Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_VELOCITY_SCALE : VELOCITY_SCALE;
 }
+
 Scrollable::Scrollable(ScrollPositionCallback&& callback, Axis axis) : callback_(std::move(callback)), axis_(axis)
 {
     friction_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? API11_FRICTION : FRICTION;
@@ -100,6 +107,7 @@ Scrollable::Scrollable(ScrollPositionCallback&& callback, Axis axis) : callback_
     velocityScale_ =
         Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_VELOCITY_SCALE : VELOCITY_SCALE;
 }
+
 Scrollable::Scrollable(const ScrollPositionCallback& callback, Axis axis) : callback_(callback), axis_(axis)
 {
     friction_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? API11_FRICTION : FRICTION;
@@ -234,10 +242,10 @@ void Scrollable::HandleTouchUp()
     // outBoundaryCallback_ is only set in ScrollablePattern::SetEdgeEffect and when the edge effect is spring
     if (outBoundaryCallback_ && outBoundaryCallback_()) {
         if (isSpringAnimationStop_ && scrollOverCallback_) {
-            ProcessScrollOverCallback(0.0);
             if (onScrollStartRec_) {
                 onScrollStartRec_(static_cast<float>(axis_));
             }
+            ProcessScrollOverCallback(0.0);
         }
         return;
     }
@@ -428,8 +436,8 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     isDragUpdateStop_ = false;
     touchUp_ = false;
     scrollPause_ = false;
-    lastVelocity_ = info.GetMainVelocity();
-    double gestureVelocity = info.GetMainVelocity();
+    lastVelocity_ = GetPanDirection() == Axis::NONE ? 0.0 : info.GetMainVelocity();
+    double gestureVelocity = GetPanDirection() == Axis::NONE ? 0.0 : info.GetMainVelocity();
     SetDragEndPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
     LayoutDirectionEst(gestureVelocity);
     // Apply max fling velocity limit, it must be calculated after all fling velocity gain.
@@ -545,6 +553,9 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
             scroll->ProcessScrollMotionStop(true);
         });
     isFrictionAnimationStop_ = false;
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->RequestFrame();
 }
 
 void Scrollable::SetDelayedTask()
@@ -676,12 +687,14 @@ void Scrollable::StartScrollSnapMotion(float predictSnapOffset, float scrollSnap
     snapOffsetProperty_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
     ACE_SCOPED_TRACE("List snap animation start, start:%f, end:%f, vel:%f, id:%d", currentPos_, endPos_,
         scrollSnapVelocity, nodeId_);
+    updateSnapAnimationCount_++;
     snapOffsetProperty_->AnimateWithVelocity(option, endPos_, scrollSnapVelocity,
         [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
             ContainerScope scope(id);
             auto scroll = weak.Upgrade();
             CHECK_NULL_VOID(scroll);
             ACE_SCOPED_TRACE("List snap animation finish, id:%d", scroll->nodeId_);
+            scroll->updateSnapAnimationCount_--;
             if (scroll->updateSnapAnimationCount_ == 0) {
                 scroll->isSnapScrollAnimationStop_ = true;
                 scroll->ProcessScrollSnapStop();
@@ -764,9 +777,7 @@ void Scrollable::ProcessScrollSnapStop()
 
 void Scrollable::OnAnimateStop()
 {
-    if (moved_) {
-        HandleScrollEnd(std::nullopt);
-    }
+    HandleScrollEnd(std::nullopt);
     currentVelocity_ = 0.0;
     if (isTouching_ || isDragUpdateStop_) {
         return;
@@ -815,9 +826,7 @@ void Scrollable::StartSpringMotion(
     springOffsetProperty_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
     ACE_SCOPED_TRACE("Scrollable spring animation start, start:%f, end:%f, vel:%f, id:%d, tag:%s", mainPosition,
         finalPosition_, mainVelocity, nodeId_, nodeTag_.c_str());
-    auto context = context_.Upgrade();
-    CHECK_NULL_VOID(context);
-    lastVsyncTime_ = context->GetVsyncTime();
+    lastVsyncTime_ = static_cast<uint64_t>(GetSysTimestamp());
     springOffsetProperty_->AnimateWithVelocity(
         option, finalPosition_, mainVelocity, [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
             ContainerScope scope(id);
@@ -836,6 +845,9 @@ void Scrollable::StartSpringMotion(
         });
     isSpringAnimationStop_ = false;
     skipRestartSpring_ = false;
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->RequestFrame();
 }
 
 void Scrollable::UpdateSpringMotion(
@@ -929,8 +941,6 @@ void Scrollable::ProcessScrollMotionStop(bool stopFriction)
 
 void Scrollable::ProcessSpringMotion(double position)
 {
-    // Do not round when the current position is less than 0.5 px from the final position.
-    position = NearEqual(position, finalPosition_, 0.5) ? position : Round(position);
     TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "Current Pos is %{public}f, position is %{public}f",
         currentPos_, position);
     auto context = OHOS::Ace::PipelineContext::GetCurrentContext();
@@ -941,51 +951,45 @@ void Scrollable::ProcessSpringMotion(double position)
         currentVelocity_ = (position - currentPos_) / diff * MILLOS_PER_NANO_SECONDS;
     }
     lastVsyncTime_ = currentVsync;
-    if (NearEqual(currentPos_, position)) {
+    if (LessOrEqual(std::abs(currentPos_ - position), 1)) {
         // trace stop at OnScrollStop
         if (!isFadingAway_) {
             AceAsyncTraceBegin(0, (TRAILING_ANIMATION + std::to_string(nodeId_) + std::string(" ") + nodeTag_).c_str());
+        }
+    }
+    auto distance = currentPos_ - finalPosition_;
+    auto nextDistance = position - finalPosition_;
+    isFadingAway_ = GreatNotEqual(std::abs(nextDistance), std::abs(distance));
+    auto delta = position - currentPos_;
+    if (distance * nextDistance < 0) {
+        double currentVelocity = currentVelocity_;
+        scrollPause_ = true;
+        MarkNeedFlushAnimationStartTime();
+        StopSpringAnimation();
+        ACE_SCOPED_TRACE("change direction in spring animation and start fling animation, distance:%f, "
+                            "nextDistance:%f, nodeId:%d, tag:%s",
+            distance, nextDistance, nodeId_, nodeTag_.c_str());
+        if (remainVelocityCallback_ && remainVelocityCallback_(currentVelocity)) {
+            // pass the velocity to the child component to avoid dealing with additional offsets
+            delta = finalPosition_ - currentPos_;
         } else {
-            ACE_SCOPED_TRACE("Spring to same position");
+            StartScrollAnimation(position, currentVelocity);
         }
-        UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION_SPRING);
-    } else {
-        auto distance = currentPos_ - finalPosition_;
-        auto nextDistance = position - finalPosition_;
-        isFadingAway_ = GreatNotEqual(std::abs(nextDistance), std::abs(distance));
-        auto delta = position - currentPos_;
-        if (distance * nextDistance < 0) {
-            double currentVelocity = currentVelocity_;
-            scrollPause_ = true;
-            MarkNeedFlushAnimationStartTime();
-            StopSpringAnimation();
-            ACE_SCOPED_TRACE("change direction in spring animation and start fling animation, distance:%f, "
-                             "nextDistance:%f, nodeId:%d, tag:%s",
-                distance, nextDistance, nodeId_, nodeTag_.c_str());
-            if (remainVelocityCallback_ && remainVelocityCallback_(currentVelocity)) {
-                // pass the velocity to the child component to avoid dealing with additional offsets
-                delta = finalPosition_ - currentPos_;
-            } else {
-                StartScrollAnimation(position, currentVelocity);
-            }
+    }
+    moved_ = UpdateScrollPosition(delta, SCROLL_FROM_ANIMATION_SPRING);
+    if (!moved_) {
+        StopSpringAnimation();
+    } else if (!touchUp_) {
+        if (scrollTouchUpCallback_) {
+            scrollTouchUpCallback_();
         }
-        moved_ = UpdateScrollPosition(delta, SCROLL_FROM_ANIMATION_SPRING);
-        if (!moved_) {
-            StopSpringAnimation();
-        } else if (!touchUp_) {
-            if (scrollTouchUpCallback_) {
-                scrollTouchUpCallback_();
-            }
-            touchUp_ = true;
-        }
+        touchUp_ = true;
     }
     currentPos_ = position;
 }
 
 void Scrollable::ProcessScrollMotion(double position)
 {
-    double nearPosition = isSnapAnimation_ ? endPos_ : finalPosition_;
-    position = NearEqual(position, nearPosition, 0.5) ? position : Round(position);
     currentVelocity_ = frictionVelocity_;
     if (needScrollSnapToSideCallback_) {
         needScrollSnapChange_ = needScrollSnapToSideCallback_(position - currentPos_);
@@ -993,22 +997,20 @@ void Scrollable::ProcessScrollMotion(double position)
     TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "position is %{public}f, currentVelocity_ is %{public}f, "
         "needScrollSnapChange_ is %{public}u",
         position, currentVelocity_, needScrollSnapChange_);
-    if ((NearEqual(currentPos_, position))) {
+    if (LessOrEqual(std::abs(currentPos_ - position), 1)) {
         // trace stop at OnScrollStop
         AceAsyncTraceBegin(0, (TRAILING_ANIMATION + std::to_string(nodeId_) + std::string(" ") + nodeTag_).c_str());
-        UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION);
-    } else {
-        // UpdateScrollPosition return false, means reach to scroll limit.
-        auto mainDelta = position - currentPos_;
-        HandleScroll(mainDelta, SCROLL_FROM_ANIMATION, NestedState::GESTURE);
-        if (!moved_) {
-            StopFrictionAnimation();
-        } else if (!touchUp_) {
-            if (scrollTouchUpCallback_) {
-                scrollTouchUpCallback_();
-            }
-            touchUp_ = true;
+    }
+    // UpdateScrollPosition return false, means reach to scroll limit.
+    auto mainDelta = position - currentPos_;
+    HandleScroll(mainDelta, SCROLL_FROM_ANIMATION, NestedState::GESTURE);
+    if (!moved_) {
+        StopFrictionAnimation();
+    } else if (!touchUp_) {
+        if (scrollTouchUpCallback_) {
+            scrollTouchUpCallback_();
         }
+        touchUp_ = true;
     }
     currentPos_ = position;
 
@@ -1141,14 +1143,25 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetSpringProperty()
     auto propertyCallback = [weak = AceType::WeakClaim(this)](float position) {
         auto scroll = weak.Upgrade();
         CHECK_NULL_VOID(scroll);
-        if (!scroll->isSpringAnimationStop_) {
-            if (NearEqual(scroll->finalPosition_, position, SPRING_ACCURACY)) {
-                scroll->ProcessSpringMotion(scroll->finalPosition_);
-                scroll->StopSpringAnimation();
-            } else {
-                scroll->ProcessSpringMotion(position);
+        if (scroll->isSpringAnimationStop_) {
+            return;
+        }
+        if (!NearEqual(scroll->finalPosition_, position, SPRING_ACCURACY)) {
+            scroll->ProcessSpringMotion(position);
+            return;
+        }
+        /*
+         * In order to prevent accumulation errors, the current position is re obtained to ensure that
+         * the last frame can accurately stop at the top and bottom positions.
+         */
+        if (scroll->currentPositionCallback_) {
+            double currPos = scroll->currentPositionCallback_();
+            if (NearEqual(currPos, scroll->currentPos_, 0.5)) {
+                scroll->currentPos_ = currPos;
             }
         }
+        scroll->ProcessSpringMotion(scroll->finalPosition_);
+        scroll->StopSpringAnimation();
     };
     springOffsetProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
     return springOffsetProperty_;
@@ -1228,7 +1241,6 @@ void Scrollable::StopSpringAnimation()
                 scroll->springOffsetProperty_->Set(scroll->currentPos_);
             },
             nullptr);
-        OnAnimateStop();
     }
     currentVelocity_ = 0.0;
 }
@@ -1260,7 +1272,7 @@ inline bool Scrollable::IsMouseWheelScroll(const GestureEvent& info)
 }
 
 void Scrollable::OnCollectTouchTarget(TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
-    const RefPtr<TargetComponent>& targetComponent, TouchTestResult& responseLinkResult)
+    const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult)
 {
     if (panRecognizerNG_) {
         panRecognizerNG_->SetNodeId(frameNode->GetId());

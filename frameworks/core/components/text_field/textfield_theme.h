@@ -48,7 +48,10 @@ public:
             if (!themeConstants) {
                 return theme;
             }
+            theme->height_ = themeConstants->GetDimension(THEME_TEXTFIELD_HEIGHT);
             ParsePattern(themeConstants->GetThemeStyle(), theme);
+            theme->showSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.eye");
+            theme->hideSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.eye_slash");
             return theme;
         }
 
@@ -88,6 +91,8 @@ public:
             theme->needFade_ = static_cast<bool>(pattern->GetAttr<double>("textfield_need_fade", 0.0));
             theme->iconSize_ = pattern->GetAttr<Dimension>("textfield_icon_size", 0.0_vp);
             theme->iconHotZoneSize_ = pattern->GetAttr<Dimension>("textfield_icon_hot_zone_size", 0.0_vp);
+            theme->symbolSize_ = pattern->GetAttr<Dimension>("textfield_icon_size", 0.0_vp);
+            theme->symbolColor_ = pattern->GetAttr<Color>("textfield_symbol_color", Color());
             theme->showEllipsis_ = static_cast<bool>(pattern->GetAttr<double>("textfield_show_ellipsis", 0.0));
             theme->errorSpacing_ = pattern->GetAttr<Dimension>("textfield_error_spacing", 0.0_vp);
             theme->errorIsInner_ = static_cast<bool>(pattern->GetAttr<double>("textfield_error_is_inner", 0.0));
@@ -109,6 +114,13 @@ public:
             theme->focusPlaceholderColor_ = pattern->GetAttr<Color>("tips_text_color_focused", Color());
             theme->bgColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, Color());
             theme->focusBgColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_FOCUSED, Color());
+            theme->glassOutlinePrimaryColor_ =
+                pattern->GetAttr<Color>("glass_material_outline_primary", Color(0xffffff));
+            theme->glassOutlineSecondaryColor_ =
+                pattern->GetAttr<Color>("glass_material_outline_secondary", Color(0xf0f0f0));
+            theme->glassMaskPrimaryColor_ = pattern->GetAttr<Color>("glass_material_mask_primary", Color(0x00808080));
+            theme->glassMaskSecondaryColor_ =
+                pattern->GetAttr<Color>("glass_material_mask_secondary", Color(0x26808080));
         }
 
         void ParsePatternSubSecondPart(const RefPtr<ThemeStyle>& pattern, const RefPtr<TextFieldTheme>& theme) const
@@ -188,17 +200,8 @@ public:
             theme->showPasswordDirectly_ = StringUtils::StringToInt(showPasswordDirectly);
             auto textfieldShowHandle = pattern->GetAttr<std::string>("textfield_show_handle", "0");
             theme->textfieldShowHandle_ = StringUtils::StringToInt(textfieldShowHandle);
-            theme->textInputBorderColor_ = pattern->GetAttr<Color>("text_input_border_color", Color());
-            theme->textInputBorderWidth_ = pattern->GetAttr<Dimension>("text_input_border_width", 0.0_vp);
-            theme->errorTextInputBorderWidth_ = pattern->GetAttr<Dimension>("error_text_input_border_width", 1.0_vp);
-            theme->textInputAndErrTipsSpacing_ =
-                pattern->GetAttr<Dimension>("text_input_and_error_tips_spacing", 8.0_vp);
-            theme->showPasswordIcon_ = static_cast<bool>(pattern->GetAttr<double>("show_icon_text_input", 1.0));
 
-            std::string isTextFadeout = pattern->GetAttr<std::string>("text_fadeout_enable", "");
-            theme->textFadeoutEnabled_ = isTextFadeout == "true";
-
-            theme->cancelButtonIconColor_ = pattern->GetAttr<Color>("cancel_button_icon_color", Color());
+            theme->cancelButtonIconColor_ = pattern->GetAttr<Color>("textfield_symbol_color", Color());
             theme->previewUnderlineColor_ = pattern->GetAttr<Color>(PREVIEW_UNDERLINE_COLOR, Color());
             theme->previewBoardColor_ = pattern->GetAttr<Color>(PREVIEW_BOARD_COLOR, Color());
 
@@ -369,6 +372,26 @@ public:
         return iconHotZoneSize_;
     }
 
+    const Dimension& GetSymbolSize() const
+    {
+        return symbolSize_;
+    }
+
+    const Color& GetSymbolColor() const
+    {
+        return symbolColor_;
+    }
+
+    uint32_t GetShowSymbolId() const
+    {
+        return showSymbolId_;
+    }
+
+    uint32_t GetHideSymbolId() const
+    {
+        return hideSymbolId_;
+    }
+
     bool ShowEllipsis() const
     {
         return showEllipsis_;
@@ -514,6 +537,26 @@ public:
         return overCounterColor_;
     }
 
+    const Color& GetGlassOutlinePrimaryColor() const
+    {
+        return glassOutlinePrimaryColor_;
+    }
+
+    const Color& GetGlassOutlineSecondaryColor() const
+    {
+        return glassOutlineSecondaryColor_;
+    }
+
+    const Color& GetGlassMaskPrimaryColor() const
+    {
+        return glassMaskPrimaryColor_;
+    }
+
+    const Color& GetGlassMaskSecondaryColor() const
+    {
+        return glassMaskSecondaryColor_;
+    }
+
     const Dimension& GetInsertCursorOffset() const
     {
         return insertCursorOffset_;
@@ -534,31 +577,6 @@ public:
         return textfieldShowHandle_;
     }
 
-    const Dimension& GetTextInputWidth() const
-    {
-        return textInputBorderWidth_;
-    }
-
-    const Color& GetTextInputColor() const
-    {
-        return textInputBorderColor_;
-    }
-
-    const Dimension& GetTextInputAndErrTipsSpacing() const
-    {
-        return textInputAndErrTipsSpacing_;
-    }
-
-    bool IsShowPasswordIcon() const
-    {
-        return showPasswordIcon_;
-    }
-
-    const Dimension& GetErrorTextInputBorderWidth() const
-    {
-        return errorTextInputBorderWidth_;
-    }
-
     const Dimension& GetAvoidKeyboardOffset() const
     {
         return avoidKeyboardOffset_;
@@ -567,11 +585,6 @@ public:
     const CancelButtonStyle& GetCancelButtonStyle() const
     {
         return cancelButtonStyle_;
-    }
-
-    bool TextFadeoutEnabled() const
-    {
-        return textFadeoutEnabled_;
     }
 
     const Color& GetCancelButtonIconColor() const
@@ -668,6 +681,10 @@ private:
     Color inlineBorderColor_;
     Color defaultCounterColor_;
     Color overCounterColor_;
+    Color glassOutlinePrimaryColor_;
+    Color glassOutlineSecondaryColor_;
+    Color glassMaskPrimaryColor_;
+    Color glassMaskSecondaryColor_;
 
     // UX::disable state: opacity is set to 38% of the default
     double disableOpacityRatio_ = 1.0;
@@ -686,6 +703,12 @@ private:
     Dimension iconHotZoneSize_;
     Dimension inlineBorderWidth_ = 2.0_vp;
 
+    // Replace image(icon) with symbol
+    Dimension symbolSize_;
+    Color symbolColor_;
+    uint32_t showSymbolId_ = 0;
+    uint32_t hideSymbolId_ = 0;
+
     // UX::insert cursor offset up by 8vp
     Dimension insertCursorOffset_ = 8.0_vp;
 
@@ -696,14 +719,6 @@ private:
     bool showPasswordDirectly_ = false;
     bool textfieldShowHandle_ = false;
     Dimension passwordTypeHeight_ = 40.0_vp;
-
-    Dimension textInputBorderWidth_ = 0.0_vp;
-    Dimension textInputAndErrTipsSpacing_ = 4.0_vp;
-    Dimension errorTextInputBorderWidth_ = 1.0_vp;
-    Color textInputBorderColor_;
-    bool showPasswordIcon_ = true;
-
-    bool textFadeoutEnabled_ = false;
 
     // cancelButton
     Color cancelButtonIconColor_;

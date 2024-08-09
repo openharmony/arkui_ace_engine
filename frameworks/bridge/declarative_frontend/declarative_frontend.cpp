@@ -1112,7 +1112,7 @@ void DeclarativeFrontend::DumpFrontend() const
     std::string params;
     int32_t stackSize = delegate_->GetStackSize();
     DumpLog::GetInstance().Print(0, "Router stack size " + std::to_string(stackSize));
-    for (int32_t i = 0; i <= stackSize; ++i) {
+    for (int32_t i = 1; i <= stackSize; ++i) {
         delegate_->GetRouterStateByIndex(i, name, path, params);
         unrestore = delegate_->IsUnrestoreByIndex(i);
         DumpLog::GetInstance().Print(1, "Page[" + std::to_string(i) + "], name: " + name);

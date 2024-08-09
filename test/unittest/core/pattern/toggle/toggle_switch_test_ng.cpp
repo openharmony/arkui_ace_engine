@@ -46,10 +46,10 @@ constexpr Dimension TOGGLE_WIDTH = 60.0_px;
 constexpr Dimension TOGGLE_HEIGHT = 20.0_px;
 constexpr float SWITCH_WIDTH = 100.0f;
 constexpr float SWITCH_HEIGHT = 50.0f;
+constexpr float POINT_RADIUS_INITIAL = 0.0f;
 constexpr float POINT_RADIUS_ILLEGAL = -20.0f;
 constexpr float POINT_RADIUS_LARGE = 30.0f;
 constexpr float TRACK_BORDER_RADIUS = 10.0f;
-constexpr Color SELECTED_COLOR = Color(0XFFFF0000);
 const SizeF CONTAINER_SIZE(CONTAINER_WIDTH, CONTAINER_HEIGHT);
 } // namespace
 
@@ -669,9 +669,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest001, TestSize.Level1)
     switchFrameNode->MarkModifyDone();
     auto pattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
     EXPECT_NE(pattern, nullptr);
-    pattern->switchModifier_ = AceType::MakeRefPtr<SwitchModifier>(false, SELECTED_COLOR, 0.0f);
-    SwitchPaintMethod switchPaintMethod = SwitchPaintMethod(pattern->switchModifier_);
-
+    pattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
     /**
      * @tc.steps: step2. get paintWrapper
      * @tc.expected: paintWrapper is not null
@@ -693,9 +691,18 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest001, TestSize.Level1)
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
 
-    EXPECT_EQ(pattern->switchModifier_, switchPaintMethod.GetContentModifier(paintWrapper));
-    switchPaintMethod.UpdateContentModifier(paintWrapper);
-    EXPECT_EQ(pattern->switchModifier_->GetPointRadius(), POINT_RADIUS_LARGE);
+    EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
+    pattern->paintMethod_->UpdateContentModifier(paintWrapper);
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawRoundRect(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DrawCircle(_, _)).Times(AtLeast(1));
+
+    auto contentSize = SizeF(100, 50);
+    auto contentOffset = OffsetF(0, 0);
+    pattern->paintMethod_->switchModifier_->PaintSwitch(rsCanvas, contentOffset, contentSize);
+    EXPECT_EQ(pattern->paintMethod_->GetSwitchModifier()->GetPointRadius(), POINT_RADIUS_LARGE);
 }
 
 /**
@@ -716,9 +723,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest002, TestSize.Level1)
     switchFrameNode->MarkModifyDone();
     auto pattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
     EXPECT_NE(pattern, nullptr);
-    pattern->switchModifier_ = AceType::MakeRefPtr<SwitchModifier>(false, SELECTED_COLOR, 0.0f);
-    SwitchPaintMethod switchPaintMethod = SwitchPaintMethod(pattern->switchModifier_);
-
+    pattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
     /**
      * @tc.steps: step2. get paintWrapper
      * @tc.expected: paintWrapper is not null
@@ -740,9 +745,9 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest002, TestSize.Level1)
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
 
-    EXPECT_EQ(pattern->switchModifier_, switchPaintMethod.GetContentModifier(paintWrapper));
-    switchPaintMethod.UpdateContentModifier(paintWrapper);
-    EXPECT_EQ(pattern->switchModifier_->inactiveColor_, Color::RED);
+    EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
+    pattern->paintMethod_->UpdateContentModifier(paintWrapper);
+    EXPECT_EQ(pattern->paintMethod_->GetSwitchModifier()->inactiveColor_, Color::RED);
 }
 
 /**
@@ -763,8 +768,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest003, TestSize.Level1)
     switchFrameNode->MarkModifyDone();
     auto pattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
     EXPECT_NE(pattern, nullptr);
-    pattern->switchModifier_ = AceType::MakeRefPtr<SwitchModifier>(false, SELECTED_COLOR, 0.0f);
-    SwitchPaintMethod switchPaintMethod = SwitchPaintMethod(pattern->switchModifier_);
+    pattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
 
     /**
      * @tc.steps: step2. get paintWrapper
@@ -786,10 +790,9 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest003, TestSize.Level1)
     switchTheme->height_ = TOGGLE_HEIGHT;
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
-
-    EXPECT_EQ(pattern->switchModifier_, switchPaintMethod.GetContentModifier(paintWrapper));
-    switchPaintMethod.UpdateContentModifier(paintWrapper);
-    EXPECT_EQ(pattern->switchModifier_->animatePointColor_->Get(), LinearColor(Color::BLACK));
+    EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
+    pattern->paintMethod_->UpdateContentModifier(paintWrapper);
+    EXPECT_EQ(pattern->paintMethod_->GetSwitchModifier()->animatePointColor_->Get(), LinearColor(Color::BLACK));
 }
 
 /**
@@ -810,9 +813,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest004, TestSize.Level1)
     switchFrameNode->MarkModifyDone();
     auto pattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
     EXPECT_NE(pattern, nullptr);
-    pattern->switchModifier_ = AceType::MakeRefPtr<SwitchModifier>(false, SELECTED_COLOR, 0.0f);
-    SwitchPaintMethod switchPaintMethod = SwitchPaintMethod(pattern->switchModifier_);
-
+    pattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
     /**
      * @tc.steps: step2. get paintWrapper
      * @tc.expected: paintWrapper is not null
@@ -834,9 +835,10 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest004, TestSize.Level1)
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
 
-    EXPECT_EQ(pattern->switchModifier_, switchPaintMethod.GetContentModifier(paintWrapper));
-    switchPaintMethod.UpdateContentModifier(paintWrapper);
-    EXPECT_EQ(pattern->switchModifier_->GetTrackRadius(), TRACK_BORDER_RADIUS);
+    EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
+    pattern->paintMethod_->UpdateContentModifier(paintWrapper);
+    pattern->paintMethod_->GetSwitchModifier()->SetActualTrackRadius(TRACK_BORDER_RADIUS);
+    EXPECT_EQ(pattern->paintMethod_->GetSwitchModifier()->GetTrackRadius(), TRACK_BORDER_RADIUS);
 }
 
 /**
@@ -859,8 +861,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest005, TestSize.Level1)
     switchFrameNode->MarkModifyDone();
     auto pattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
     EXPECT_NE(pattern, nullptr);
-    pattern->switchModifier_ = AceType::MakeRefPtr<SwitchModifier>(false, SELECTED_COLOR, 0.0f);
-    SwitchPaintMethod switchPaintMethod = SwitchPaintMethod(pattern->switchModifier_);
+    pattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
 
     /**
      * @tc.steps: step2. get paintWrapper
@@ -883,9 +884,9 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest005, TestSize.Level1)
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
 
-    EXPECT_EQ(pattern->switchModifier_, switchPaintMethod.GetContentModifier(paintWrapper));
-    switchPaintMethod.UpdateContentModifier(paintWrapper);
-    EXPECT_EQ(pattern->switchModifier_->GetPointRadius(), SWITCH_ERROR_RADIUS);
+    EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
+    pattern->paintMethod_->UpdateContentModifier(paintWrapper);
+    EXPECT_EQ(pattern->paintMethod_->GetSwitchModifier()->GetPointRadius(), POINT_RADIUS_INITIAL);
 }
 
 /**
@@ -908,8 +909,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest006, TestSize.Level1)
     switchFrameNode->MarkModifyDone();
     auto pattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
     EXPECT_NE(pattern, nullptr);
-    pattern->switchModifier_ = AceType::MakeRefPtr<SwitchModifier>(false, SELECTED_COLOR, 0.0f);
-    SwitchPaintMethod switchPaintMethod = SwitchPaintMethod(pattern->switchModifier_);
+    pattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
 
     /**
      * @tc.steps: step2. get paintWrapper
@@ -932,9 +932,9 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest006, TestSize.Level1)
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
 
-    EXPECT_EQ(pattern->switchModifier_, switchPaintMethod.GetContentModifier(paintWrapper));
-    switchPaintMethod.UpdateContentModifier(paintWrapper);
-    EXPECT_EQ(pattern->switchModifier_->GetTrackRadius(), SWITCH_ERROR_RADIUS);
+    EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
+    pattern->paintMethod_->UpdateContentModifier(paintWrapper);
+    EXPECT_EQ(pattern->paintMethod_->GetSwitchModifier()->GetTrackRadius(), POINT_RADIUS_INITIAL);
 }
 
 /**
@@ -955,9 +955,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest007, TestSize.Level1)
     switchFrameNode->MarkModifyDone();
     auto pattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
     EXPECT_NE(pattern, nullptr);
-    pattern->switchModifier_ = AceType::MakeRefPtr<SwitchModifier>(false, SELECTED_COLOR, 0.0f);
-    SwitchPaintMethod switchPaintMethod = SwitchPaintMethod(pattern->switchModifier_);
-
+    pattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
     /**
      * @tc.steps: step2. get paintWrapper
      * @tc.expected: paintWrapper is not null
@@ -979,9 +977,9 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest007, TestSize.Level1)
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
 
-    EXPECT_EQ(pattern->switchModifier_, switchPaintMethod.GetContentModifier(paintWrapper));
-    switchPaintMethod.UpdateContentModifier(paintWrapper);
-    EXPECT_EQ(pattern->switchModifier_->inactiveColor_, Color(0xFFFF00FF));
+    EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
+    pattern->paintMethod_->UpdateContentModifier(paintWrapper);
+    EXPECT_EQ(pattern->paintMethod_->GetSwitchModifier()->inactiveColor_, Color(0xFFFF00FF));
 }
 
 /**
@@ -1004,9 +1002,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest008, TestSize.Level1)
     switchFrameNode->MarkModifyDone();
     auto pattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
     EXPECT_NE(pattern, nullptr);
-    pattern->switchModifier_ = AceType::MakeRefPtr<SwitchModifier>(false, SELECTED_COLOR, 0.0f);
-    SwitchPaintMethod switchPaintMethod = SwitchPaintMethod(pattern->switchModifier_);
-
+    pattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
     /**
      * @tc.steps: step2. get paintWrapper
      * @tc.expected: paintWrapper is not null
@@ -1028,9 +1024,18 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest008, TestSize.Level1)
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
 
-    EXPECT_EQ(pattern->switchModifier_, switchPaintMethod.GetContentModifier(paintWrapper));
-    switchPaintMethod.UpdateContentModifier(paintWrapper);
-    EXPECT_EQ(pattern->switchModifier_->GetPointRadius(), POINT_RADIUS_ILLEGAL);
+    EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
+    pattern->paintMethod_->UpdateContentModifier(paintWrapper);
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawRoundRect(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DrawCircle(_, _)).Times(AtLeast(1));
+
+    auto contentSize = SizeF(100, -50);
+    auto contentOffset = OffsetF(0, 0);
+    pattern->paintMethod_->switchModifier_->PaintSwitch(rsCanvas, contentOffset, contentSize);
+    EXPECT_EQ(pattern->paintMethod_->GetSwitchModifier()->GetPointRadius(), POINT_RADIUS_ILLEGAL);
 }
 
 /**
@@ -1053,9 +1058,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest009, TestSize.Level1)
     switchFrameNode->MarkModifyDone();
     auto pattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
     EXPECT_NE(pattern, nullptr);
-    pattern->switchModifier_ = AceType::MakeRefPtr<SwitchModifier>(false, SELECTED_COLOR, 0.0f);
-    SwitchPaintMethod switchPaintMethod = SwitchPaintMethod(pattern->switchModifier_);
-
+    pattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
     /**
      * @tc.steps: step2. get paintWrapper
      * @tc.expected: paintWrapper is not null
@@ -1077,9 +1080,10 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest009, TestSize.Level1)
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
 
-    EXPECT_EQ(pattern->switchModifier_, switchPaintMethod.GetContentModifier(paintWrapper));
-    switchPaintMethod.UpdateContentModifier(paintWrapper);
-    EXPECT_EQ(pattern->switchModifier_->GetTrackRadius(), POINT_RADIUS_ILLEGAL);
+    EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
+    pattern->paintMethod_->UpdateContentModifier(paintWrapper);
+    pattern->paintMethod_->GetSwitchModifier()->SetActualTrackRadius(POINT_RADIUS_ILLEGAL);
+    EXPECT_EQ(pattern->paintMethod_->GetSwitchModifier()->GetTrackRadius(), POINT_RADIUS_ILLEGAL);
 }
 
 /**
@@ -1102,9 +1106,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest010, TestSize.Level1)
     switchFrameNode->MarkModifyDone();
     auto pattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
     EXPECT_NE(pattern, nullptr);
-    pattern->switchModifier_ = AceType::MakeRefPtr<SwitchModifier>(false, SELECTED_COLOR, 0.0f);
-    SwitchPaintMethod switchPaintMethod = SwitchPaintMethod(pattern->switchModifier_);
-
+    pattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
     /**
      * @tc.steps: step2. get paintWrapper
      * @tc.expected: paintWrapper is not null
@@ -1126,9 +1128,9 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest010, TestSize.Level1)
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
 
-    EXPECT_EQ(pattern->switchModifier_, switchPaintMethod.GetContentModifier(paintWrapper));
-    switchPaintMethod.UpdateContentModifier(paintWrapper);
-    EXPECT_EQ(pattern->switchModifier_->GetPointRadius(), 0);
+    EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
+    pattern->paintMethod_->UpdateContentModifier(paintWrapper);
+    EXPECT_EQ(pattern->paintMethod_->GetSwitchModifier()->GetPointRadius(), 0);
 }
 
 /**
@@ -1151,9 +1153,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest011, TestSize.Level1)
     switchFrameNode->MarkModifyDone();
     auto pattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
     EXPECT_NE(pattern, nullptr);
-    pattern->switchModifier_ = AceType::MakeRefPtr<SwitchModifier>(false, SELECTED_COLOR, 0.0f);
-    SwitchPaintMethod switchPaintMethod = SwitchPaintMethod(pattern->switchModifier_);
-
+    pattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
     /**
      * @tc.steps: step2. get paintWrapper
      * @tc.expected: paintWrapper is not null
@@ -1175,9 +1175,9 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest011, TestSize.Level1)
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
 
-    EXPECT_EQ(pattern->switchModifier_, switchPaintMethod.GetContentModifier(paintWrapper));
-    switchPaintMethod.UpdateContentModifier(paintWrapper);
-    EXPECT_EQ(pattern->switchModifier_->GetTrackRadius(), 0);
+    EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
+    pattern->paintMethod_->UpdateContentModifier(paintWrapper);
+    EXPECT_EQ(pattern->paintMethod_->GetSwitchModifier()->GetTrackRadius(), 0);
 }
 
 /**
@@ -1198,9 +1198,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest012, TestSize.Level1)
     switchFrameNode->MarkModifyDone();
     auto pattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
     EXPECT_NE(pattern, nullptr);
-    pattern->switchModifier_ = AceType::MakeRefPtr<SwitchModifier>(false, SELECTED_COLOR, 0.0f);
-    SwitchPaintMethod switchPaintMethod = SwitchPaintMethod(pattern->switchModifier_);
-
+    pattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
     /**
      * @tc.steps: step2. get paintWrapper
      * @tc.expected: paintWrapper is not null
@@ -1222,9 +1220,9 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest012, TestSize.Level1)
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
 
-    EXPECT_EQ(pattern->switchModifier_, switchPaintMethod.GetContentModifier(paintWrapper));
-    switchPaintMethod.UpdateContentModifier(paintWrapper);
-    EXPECT_EQ(pattern->switchModifier_->animatePointColor_->Get(), LinearColor(Color(0xFF00FF00)));
+    EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
+    pattern->paintMethod_->UpdateContentModifier(paintWrapper);
+    EXPECT_EQ(pattern->paintMethod_->GetSwitchModifier()->animatePointColor_->Get(), LinearColor(Color(0xFF00FF00)));
 }
 
 /**
@@ -1248,9 +1246,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPatternTest001, TestSize.Level1)
     switchFrameNode->MarkModifyDone();
     auto pattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
     EXPECT_NE(pattern, nullptr);
-    pattern->switchModifier_ = AceType::MakeRefPtr<SwitchModifier>(false, SELECTED_COLOR, 0.0f);
-    SwitchPaintMethod switchPaintMethod = SwitchPaintMethod(pattern->switchModifier_);
-
+    pattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
     /**
      * @tc.steps: step2. get paintWrapper
      * @tc.expected: paintWrapper is not null
@@ -1264,15 +1260,15 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPatternTest001, TestSize.Level1)
     auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
     ASSERT_NE(paintWrapper, nullptr);
 
-    EXPECT_EQ(pattern->switchModifier_, switchPaintMethod.GetContentModifier(paintWrapper));
     pattern->width_ = SWITCH_WIDTH;
     pattern->height_ = SWITCH_HEIGHT;
-    switchPaintMethod.UpdateContentModifier(paintWrapper);
+    EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
+    pattern->paintMethod_->UpdateContentModifier(paintWrapper);
     auto eventHub = switchFrameNode->GetFocusHub();
     ASSERT_NE(eventHub, nullptr);
     RoundRect paintRect;
     eventHub->getInnerFocusRectFunc_(paintRect);
-    EXPECT_EQ(paintRect.GetRect().ToString(), "RectT (-5.00, -5.00) - [110.00 x 60.00]");
+    EXPECT_EQ(paintRect.GetRect().ToString(), "RectT (0.00, 0.00) - [100.00 x 50.00]");
 
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
@@ -1298,9 +1294,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPatternTest002, TestSize.Level1)
     switchFrameNode->MarkModifyDone();
     auto pattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
     EXPECT_NE(pattern, nullptr);
-    pattern->switchModifier_ = AceType::MakeRefPtr<SwitchModifier>(false, SELECTED_COLOR, 0.0f);
-    SwitchPaintMethod switchPaintMethod = SwitchPaintMethod(pattern->switchModifier_);
-
+    pattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
     /**
      * @tc.steps: step2. get paintWrapper
      * @tc.expected: paintWrapper is not null
@@ -1314,10 +1308,10 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPatternTest002, TestSize.Level1)
     auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
     ASSERT_NE(paintWrapper, nullptr);
 
-    EXPECT_EQ(pattern->switchModifier_, switchPaintMethod.GetContentModifier(paintWrapper));
     pattern->width_ = CONTAINER_WIDTH;
     pattern->height_ = CONTAINER_HEIGHT;
-    switchPaintMethod.UpdateContentModifier(paintWrapper);
+    EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
+    pattern->paintMethod_->UpdateContentModifier(paintWrapper);
     auto eventHub = switchFrameNode->GetFocusHub();
     ASSERT_NE(eventHub, nullptr);
     RoundRect paintRect;
@@ -1348,9 +1342,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPatternTest003, TestSize.Level1)
     switchFrameNode->MarkModifyDone();
     auto pattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
     EXPECT_NE(pattern, nullptr);
-    pattern->switchModifier_ = AceType::MakeRefPtr<SwitchModifier>(false, SELECTED_COLOR, 0.0f);
-    SwitchPaintMethod switchPaintMethod = SwitchPaintMethod(pattern->switchModifier_);
-
+    pattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
     /**
      * @tc.steps: step2. get paintWrapper
      * @tc.expected: paintWrapper is not null
@@ -1364,15 +1356,15 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPatternTest003, TestSize.Level1)
     auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
     ASSERT_NE(paintWrapper, nullptr);
 
-    EXPECT_EQ(pattern->switchModifier_, switchPaintMethod.GetContentModifier(paintWrapper));
     pattern->width_ = TOGGLE_WIDTH.ConvertToPx();
     pattern->height_ = TOGGLE_HEIGHT.ConvertToPx();
-    switchPaintMethod.UpdateContentModifier(paintWrapper);
+    EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
+    pattern->paintMethod_->UpdateContentModifier(paintWrapper);
     auto eventHub = switchFrameNode->GetFocusHub();
     ASSERT_NE(eventHub, nullptr);
     RoundRect paintRect;
     eventHub->getInnerFocusRectFunc_(paintRect);
-    EXPECT_EQ(paintRect.GetRect().ToString(), "RectT (-20.00, -20.00) - [100.00 x 60.00]");
+    EXPECT_EQ(paintRect.GetRect().ToString(), "RectT (0.00, 0.00) - [60.00 x 20.00]");
 
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
@@ -1398,9 +1390,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPatternTest004, TestSize.Level1)
     switchFrameNode->MarkModifyDone();
     auto pattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
     EXPECT_NE(pattern, nullptr);
-    pattern->switchModifier_ = AceType::MakeRefPtr<SwitchModifier>(false, SELECTED_COLOR, 0.0f);
-    SwitchPaintMethod switchPaintMethod = SwitchPaintMethod(pattern->switchModifier_);
-
+    pattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
     /**
      * @tc.steps: step2. get paintWrapper
      * @tc.expected: paintWrapper is not null
@@ -1414,15 +1404,15 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPatternTest004, TestSize.Level1)
     auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
     ASSERT_NE(paintWrapper, nullptr);
 
-    EXPECT_EQ(pattern->switchModifier_, switchPaintMethod.GetContentModifier(paintWrapper));
     pattern->width_ = 0;
     pattern->height_ = TOGGLE_HEIGHT.ConvertToPx();
-    switchPaintMethod.UpdateContentModifier(paintWrapper);
+    EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
+    pattern->paintMethod_->UpdateContentModifier(paintWrapper);
     auto eventHub = switchFrameNode->GetFocusHub();
     ASSERT_NE(eventHub, nullptr);
     RoundRect paintRect;
     eventHub->getInnerFocusRectFunc_(paintRect);
-    EXPECT_EQ(paintRect.GetRect().ToString(), "RectT (-20.00, -20.00) - [40.00 x 60.00]");
+    EXPECT_EQ(paintRect.GetRect().ToString(), "RectT (0.00, 0.00) - [0.00 x 20.00]");
 
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
@@ -1448,9 +1438,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPatternTest005, TestSize.Level1)
     switchFrameNode->MarkModifyDone();
     auto pattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
     EXPECT_NE(pattern, nullptr);
-    pattern->switchModifier_ = AceType::MakeRefPtr<SwitchModifier>(false, SELECTED_COLOR, 0.0f);
-    SwitchPaintMethod switchPaintMethod = SwitchPaintMethod(pattern->switchModifier_);
-
+    pattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
     /**
      * @tc.steps: step2. get paintWrapper
      * @tc.expected: paintWrapper is not null
@@ -1463,11 +1451,10 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPatternTest005, TestSize.Level1)
     ASSERT_NE(paintProperty, nullptr);
     auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
     ASSERT_NE(paintWrapper, nullptr);
-
-    EXPECT_EQ(pattern->switchModifier_, switchPaintMethod.GetContentModifier(paintWrapper));
     pattern->width_ = 0;
     pattern->height_ = CONTAINER_HEIGHT;
-    switchPaintMethod.UpdateContentModifier(paintWrapper);
+    EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
+    pattern->paintMethod_->UpdateContentModifier(paintWrapper);
     auto eventHub = switchFrameNode->GetFocusHub();
     ASSERT_NE(eventHub, nullptr);
     RoundRect paintRect;
@@ -1498,9 +1485,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPatternTest006, TestSize.Level1)
     switchFrameNode->MarkModifyDone();
     auto pattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
     EXPECT_NE(pattern, nullptr);
-    pattern->switchModifier_ = AceType::MakeRefPtr<SwitchModifier>(false, SELECTED_COLOR, 0.0f);
-    SwitchPaintMethod switchPaintMethod = SwitchPaintMethod(pattern->switchModifier_);
-
+    pattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
     /**
      * @tc.steps: step2. get paintWrapper
      * @tc.expected: paintWrapper is not null
@@ -1514,15 +1499,15 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPatternTest006, TestSize.Level1)
     auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
     ASSERT_NE(paintWrapper, nullptr);
 
-    EXPECT_EQ(pattern->switchModifier_, switchPaintMethod.GetContentModifier(paintWrapper));
     pattern->width_ = SWITCH_WIDTH;
     pattern->height_ = 0;
-    switchPaintMethod.UpdateContentModifier(paintWrapper);
+    EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
+    pattern->paintMethod_->UpdateContentModifier(paintWrapper);
     auto eventHub = switchFrameNode->GetFocusHub();
     ASSERT_NE(eventHub, nullptr);
     RoundRect paintRect;
     eventHub->getInnerFocusRectFunc_(paintRect);
-    EXPECT_EQ(paintRect.GetRect().ToString(), "RectT (-30.00, -30.00) - [160.00 x 60.00]");
+    EXPECT_EQ(paintRect.GetRect().ToString(), "RectT (0.00, 0.00) - [100.00 x 0.00]");
 
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
@@ -1571,7 +1556,6 @@ HWTEST_F(ToggleSwitchTestNg, PreventDefault001, TestSize.Level1)
     switchPattern->clickListener_->operator()(clickInfo);
     EXPECT_FALSE(switchPattern->isTouchPreventDefault_);
     EXPECT_FALSE(switchPattern->isOn_);
-    EXPECT_FALSE(switchPattern->isFocus_);
 }
 
 /**

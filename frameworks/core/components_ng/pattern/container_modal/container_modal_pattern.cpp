@@ -537,6 +537,8 @@ void ContainerModalPattern::UpdateGestureRowVisible()
 
 void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow)
 {
+    LOGI("ContainerModal customTitleSettedShow=%{public}d, floatingTitleSettedShow=%{public}d", customTitleSettedShow,
+        floatingTitleSettedShow);
     customTitleSettedShow_ = customTitleSettedShow;
     auto customTitleRow = GetCustomTitleRow();
     CHECK_NULL_VOID(customTitleRow);
@@ -563,6 +565,7 @@ void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSetted
 
 void ContainerModalPattern::SetContainerModalTitleHeight(int32_t height)
 {
+    LOGI("ContainerModal SetContainerModalTitleHeight height=%{public}d", height);
     if (height < 0) {
         height = 0;
     }

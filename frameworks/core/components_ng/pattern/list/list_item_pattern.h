@@ -259,6 +259,7 @@ private:
         endNodeSize_ = 0.0f;
     }
     bool IsRTLAndVertical() const;
+    void OnDetachFromMainTree() override;
 
     RefPtr<ShallowBuilder> shallowBuilder_;
     V2::ListItemStyle listItemStyle_ = V2::ListItemStyle::NONE;

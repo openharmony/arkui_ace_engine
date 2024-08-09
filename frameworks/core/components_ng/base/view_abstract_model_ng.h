@@ -360,7 +360,7 @@ public:
             return;
         }
         NG::BorderWidthProperty borderWidth {
-            .startDimen = start, .endDimen = end, .topDimen = top, .bottomDimen = bottom, .multiValued = true
+            .topDimen = top, .bottomDimen = bottom, .startDimen = start, .endDimen = end, .multiValued = true
         };
         ViewAbstract::SetBorderWidth(borderWidth);
     }
@@ -898,9 +898,9 @@ public:
         ViewAbstract::SetClickEffectLevel(level, scaleValue);
     }
 
-    void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) override
+    void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc, double distanceThreshold) override
     {
-        ViewAbstract::SetOnClick(std::move(tapEventFunc));
+        ViewAbstract::SetOnClick(std::move(tapEventFunc), distanceThreshold);
     }
 
     void SetOnGestureJudgeBegin(NG::GestureJudgeFunc&& gestureJudgeFunc) override
@@ -1023,6 +1023,20 @@ public:
             return info;
         };
         ViewAbstract::SetOnDragStart(std::move(dragStart));
+    }
+
+    static void SetOnDragStart(FrameNode* frameNode, NG::OnDragStartFunc&& onDragStart)
+    {
+        auto dragStart = [dragStartFunc = std::move(onDragStart)](const RefPtr<OHOS::Ace::DragEvent>& event,
+                             const std::string& extraParams) -> DragDropInfo {
+            auto dragInfo = dragStartFunc(event, extraParams);
+            DragDropInfo info;
+            info.extraInfo = dragInfo.extraInfo;
+            info.pixelMap = dragInfo.pixelMap;
+            info.customNode = AceType::DynamicCast<UINode>(dragInfo.node);
+            return info;
+        };
+        ViewAbstract::SetOnDragStart(frameNode, std::move(dragStart));
     }
 
     void SetOnPreDrag(NG::OnPreDragFunc&& onPreDrag) override

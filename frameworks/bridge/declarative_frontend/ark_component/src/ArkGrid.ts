@@ -144,6 +144,10 @@ class ArkGridComponent extends ArkComponent implements GridAttribute {
     modifierWithKey(this._modifiersWithKeys, GridFlingSpeedLimitModifier.identity, GridFlingSpeedLimitModifier, value);
     return this;
   }
+  alignItems(value: GridItemAlignment): this {
+    modifierWithKey(this._modifiersWithKeys, GridAlignItemsModifier.identity, GridAlignItemsModifier, value);
+    return this;
+  }
 }
 
 class GridColumnsTemplateModifier extends ModifierWithKey<string> {
@@ -459,6 +463,20 @@ class GridFlingSpeedLimitModifier extends ModifierWithKey<number> {
       getUINativeModule().grid.resetFlingSpeedLimit(node);
     } else {
       getUINativeModule().grid.setFlingSpeedLimit(node, this.value);
+    }
+  }
+}
+
+class GridAlignItemsModifier extends ModifierWithKey<GridItemAlignment> {
+  constructor(value: GridItemAlignment) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('gridAlignItems');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().grid.resetAlignItems(node);
+    } else {
+      getUINativeModule().grid.setAlignItems(node, this.value);
     }
   }
 }

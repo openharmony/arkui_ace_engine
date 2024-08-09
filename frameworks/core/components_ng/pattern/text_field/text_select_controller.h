@@ -180,7 +180,8 @@ public:
     {
         return caretInfo_.index == static_cast<int32_t>(contentController_->GetWideText().length());
     }
-
+    
+    int32_t ConvertTouchOffsetToPosition(const Offset& localOffset, bool isSelectionPos = false);
     void ResetHandles();
     void UpdateHandleIndex(int32_t firstHandleIndex, int32_t secondHandleIndex);
     void UpdateCaretIndex(int32_t index);
@@ -209,9 +210,8 @@ public:
     std::vector<RectF> GetSelectedRects() const;
     RectF CalculateEmptyValueCaretRect();
     std::string ToString() const;
-    int32_t ConvertTouchOffsetToPosition(const Offset& localOffset, bool isSelectionPos = false);
-    void GetSubParagraphByOffset(int32_t pos, int32_t &start, int32_t &end);
     bool IsTouchAtLineEnd(const Offset& localOffset);
+    void GetSubParagraphByOffset(int32_t pos, int32_t &start, int32_t &end);
 
 private:
     constexpr static uint32_t SECONDS_TO_MILLISECONDS = 1000;
@@ -223,6 +223,7 @@ private:
         int32_t extent, CaretMetricsF& caretMetrics, const OffsetF& touchOffset);
     // The cursor needs to fit the line where the touch is located.
     void UpdateCaretRectByPositionNearTouchOffset(int32_t position, const Offset& touchOffset);
+
     // ai text analysis or detect
     bool NeedAIAnalysis(int32_t& index, const CaretUpdateType targetType, const Offset& touchOffset,
         std::chrono::duration<float, std::ratio<1, SECONDS_TO_MILLISECONDS>> timeout);

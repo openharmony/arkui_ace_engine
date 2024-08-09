@@ -27,7 +27,7 @@
 extern "C" {
 #endif
 
-ArkUI_NodeAdapterHandle OH_ArkUI_NodeAdapter_Create()
+ArkUI_NodeAdapterHandle OH_ArkUI_NodeAdapter_Create(void)
 {
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(fullImpl, nullptr);

@@ -22,6 +22,7 @@
 #include "base/memory/referenced.h"
 #include "bridge/cj_frontend/cppview/canvas_gradient.h"
 #include "bridge/cj_frontend/cppview/canvas_path.h"
+#include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
 #include "bridge/common/utils/utils.h"
 #include "core/components/custom_paint/custom_paint_component.h"
 #include "core/components_ng/pattern/canvas/canvas_rendering_context_2d_model_ng.h"

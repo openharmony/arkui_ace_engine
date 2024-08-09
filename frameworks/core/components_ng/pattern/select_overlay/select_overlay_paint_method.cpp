@@ -49,7 +49,6 @@ void SelectOverlayPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
                                   : defaultMenuEndOffset_ + OffsetF(static_cast<float>(-buttonRadius - right), tempY);
 
     CheckCirclesAndBackArrowIsShown();
-    CheckHasExtensionMenu();
     selectOverlayModifier_->SetIsReverse(isReversePaint_);
     selectOverlayModifier_->SetMenuOptionOffset(offset);
     selectOverlayModifier_->SetFirstHandleIsShow(info_.firstHandle.isShow);
@@ -102,6 +101,8 @@ void SelectOverlayPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     selectOverlayContentModifier_->SetSecondHandlePaintInfo(info_.secondHandle.paintInfo - offset);
     selectOverlayContentModifier_->SetIsOverlayMode(isOverlayMode);
     selectOverlayContentModifier_->SetScale(info_.scale);
+    selectOverlayContentModifier_->SetFirstCircleIsShow(info_.firstHandle.isCircleShow);
+    selectOverlayContentModifier_->SetSecondCircleIsShow(info_.secondHandle.isCircleShow);
 }
 
 void SelectOverlayPaintMethod::CheckCirclesAndBackArrowIsShown()
@@ -127,8 +128,8 @@ void SelectOverlayPaintMethod::CheckCirclesAndBackArrowIsShown()
             }
         }
         circlesAndBackArrowIsShown_ = true;
-        selectOverlayModifier_->SetHasExtensionMenu(hasExtensionMenu_);
     }
+    selectOverlayModifier_->SetHasExtensionMenu(hasExtensionMenu_);
 }
 
 void SelectOverlayPaintMethod::CheckHasExtensionMenu()

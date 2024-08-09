@@ -1624,7 +1624,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
             auto movePoint = (*iter).CreateScalePoint(GetViewScale());
             if (scalePoint.id == movePoint.id) {
                 lastMoveEvent = movePoint;
-                touchEvents_.erase(iter++);
+                iter = touchEvents_.erase(iter);
             }
         }
         if (lastMoveEvent.has_value()) {
@@ -2915,7 +2915,7 @@ void PipelineContext::ClearDeactivateElements()
         auto element = iter->second;
         RefPtr<RenderNode> render = element ? element->GetRenderNode() : nullptr;
         if (!render || !render->IsDisappearing()) {
-            deactivateElements_.erase(iter++);
+            iter = deactivateElements_.erase(iter);
         } else {
             iter++;
         }

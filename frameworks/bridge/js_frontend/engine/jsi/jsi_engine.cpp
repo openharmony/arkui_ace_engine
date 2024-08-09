@@ -619,13 +619,11 @@ void GetPackageInfoCallback(
 void GetPackageInfo(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& arg)
 {
     if (!arg->IsObject(runtime) || !arg->IsArray(runtime)) {
-        LOGE("GetPackageInfo: arg is not Object or Array");
         return;
     }
 
     int32_t len = arg->GetArrayLength(runtime);
     if (len < static_cast<int32_t>(PAG_INFO_ARGS_LEN)) {
-        LOGE("GetPackageInfo: invalid callback value");
         return;
     }
     shared_ptr<JsValue> message = arg->GetElement(runtime, PAG_INFO_ARGS_MSG_IDX);

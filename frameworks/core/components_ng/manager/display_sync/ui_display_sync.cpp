@@ -319,6 +319,13 @@ RefPtr<PipelineBase> UIDisplaySync::GetCurrentContext()
     return context;
 }
 
+UIDisplaySync::UIDisplaySync(UIObjectType uiObjectType)
+    : uiObjectType_(uiObjectType)
+{
+    TAG_LOGD(AceLogTag::ACE_DISPLAY_SYNC, "Create UIDisplaySync, Type: %{public}d",
+        static_cast<int32_t>(uiObjectType_));
+}
+
 UIDisplaySync::UIDisplaySync() {}
 
 UIDisplaySync::~UIDisplaySync() noexcept {}
@@ -345,7 +352,8 @@ RefPtr<DisplaySyncData> UIDisplaySync::GetDisplaySyncData() const
 int32_t UIDisplaySync::GetAnimatorExpectedRate()
 {
     // Callback from Animator
-    if (data_ && data_->onFrameWithTimestamp_ == nullptr) {
+    if (data_ && data_->onFrameWithTimestamp_ == nullptr &&
+        uiObjectType_ != UIObjectType::DISPLAYSYNC_ANIMATOR) {
         return INVALID_ANIMATOR_EXPECTED_RATE;
     }
 

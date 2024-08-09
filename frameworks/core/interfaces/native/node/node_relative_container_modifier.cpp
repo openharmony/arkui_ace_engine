@@ -133,6 +133,13 @@ const ArkUIRelativeContainerModifier* GetRelativeContainerModifier()
         ResetGuideline, ResetBarrier };
     return &modifier;
 }
+
+const CJUIRelativeContainerModifier* GetCJUIRelativeContainerModifier()
+{
+    static const CJUIRelativeContainerModifier modifier = { SetGuideLine, SetBarrier, GetGuideLine, GetBarrier,
+        ResetGuideline, ResetBarrier };
+    return &modifier;
+}
 } // namespace NodeModifier
 
 } // namespace OHOS::Ace::NG

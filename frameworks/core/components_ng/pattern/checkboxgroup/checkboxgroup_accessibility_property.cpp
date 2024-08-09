@@ -15,6 +15,10 @@
 
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_accessibility_property.h"
 
+#if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
+#include "accessibility_element_info.h"
+#endif
+
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
@@ -61,5 +65,20 @@ int32_t CheckBoxGroupAccessibilityProperty::GetCollectionItemCounts() const
     auto group = checkBoxGroupEventHub->GetGroupName();
     auto list = groupManager->GetCheckboxList(group);
     return list.size();
+}
+
+void CheckBoxGroupAccessibilityProperty::GetExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo)
+{
+#if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto checkBoxGroupPaintProperty = frameNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    CHECK_NULL_VOID(checkBoxGroupPaintProperty);
+
+    auto checkBoxGroupSelectStatus = checkBoxGroupPaintProperty->GetSelectStatus();
+
+    extraElementInfo.SetExtraElementInfo(
+        "CheckboxGroupSelectedStatus", static_cast<int32_t>(checkBoxGroupSelectStatus));
+#endif
 }
 } // namespace OHOS::Ace::NG

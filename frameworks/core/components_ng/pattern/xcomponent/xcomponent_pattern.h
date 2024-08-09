@@ -404,7 +404,7 @@ private:
     bool hasXComponentInit_ = false;
 
     RefPtr<TouchEventImpl> touchEvent_;
-    OH_NativeXComponent_TouchEvent touchEventPoint_;
+    OH_NativeXComponent_TouchEvent touchEventPoint_ = {};
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> axisEvent_;
     RefPtr<InputEvent> mouseHoverEvent_;
@@ -415,7 +415,7 @@ private:
     OffsetF globalPosition_;
     SizeF drawSize_;
     SizeF surfaceSize_;
-    RefPtr<UIDisplaySync> displaySync_ = AceType::MakeRefPtr<UIDisplaySync>();
+    RefPtr<UIDisplaySync> displaySync_ = AceType::MakeRefPtr<UIDisplaySync>(UIObjectType::DISPLAYSYNC_XCOMPONENT);
 
     std::optional<float> selfIdealSurfaceWidth_;
     std::optional<float> selfIdealSurfaceHeight_;

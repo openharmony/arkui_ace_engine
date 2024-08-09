@@ -17,6 +17,8 @@
 
 #define private public
 #define protected public
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -24,7 +26,6 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -879,7 +880,7 @@ HWTEST_F(EventHubTestNg, EventHubFrameNodeTest003, TestSize.Level1)
      */
     eventHub->SetOnAppear(std::move(flagFunc));
     eventHub->FireOnAppear();
-    EXPECT_EQ(eventHub->onAppear_, nullptr);
+    EXPECT_NE(eventHub->onAppear_, nullptr);
 }
 
 /**
@@ -962,5 +963,311 @@ HWTEST_F(EventHubTestNg, EventHubFrameNodeTest005, TestSize.Level1)
     eventHub->SetVisibleAreaRatiosAndCallback(callbackInfo, ratios, true);
     EXPECT_EQ(flag, 0);
     EXPECT_EQ(eventHub->HasImmediatelyVisibleCallback(), true);
+}
+
+/**
+ * @tc.name: EventHubTest006
+ * @tc.desc: OnAttachContext
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest006, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    RectF tempOldRect;
+    OffsetF tempOldOrigin;
+    RectF tempNewRect;
+    OffsetF tempNewOrigin;
+    auto onAreaChanged = [&tempOldRect, &tempOldOrigin, &tempNewRect, &tempNewOrigin](
+                             const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {
+        tempOldRect = oldRect;
+        tempOldOrigin = oldOrigin;
+        tempNewRect = rect;
+        tempNewOrigin = origin;
+    };
+
+    eventHub->SetOnAreaChanged(onAreaChanged);
+    eventHub->GetOrCreateGestureEventHub();
+    eventHub->GetOrCreateInputEventHub();
+    eventHub->GetOrCreateFocusHub();
+
+    VisibleCallbackInfo callbackInfo;
+    const std::function<void(bool, double)>&& jsCallback = [](bool isVisible, double radio) { flag++; };
+    callbackInfo.callback = jsCallback;
+    callbackInfo.period = MIN_INTERVAL;
+    callbackInfo.period = 0;
+    std::vector<double> ratios = { 0, 1.0 };
+    eventHub->SetVisibleAreaRatiosAndCallback(callbackInfo, ratios, true);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+
+    auto context = MockPipelineContext::GetCurrent();
+    eventHub->OnAttachContext(AceType::RawPtr(context));
+    EXPECT_NE(eventHub->GetOrCreateGestureEventHub(), nullptr);
+}
+
+/**
+ * @tc.name: EventHubTest007
+ * @tc.desc: OnAttachContext
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest007, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+
+    eventHub->GetOrCreateGestureEventHub();
+    eventHub->GetOrCreateInputEventHub();
+    eventHub->GetOrCreateFocusHub();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    bool flags = false;
+    OnAreaChangedFunc onAreaChanged = [&flags](const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect,
+                                          const OffsetF& origin) { flags = !flags; };
+    eventHub->AddInnerOnAreaChangedCallback(1, std::move(onAreaChanged));
+    VisibleCallbackInfo callbackInfo;
+    const std::function<void(bool, double)>&& jsCallback = [](bool isVisible, double radio) { flag++; };
+    callbackInfo.callback = jsCallback;
+    callbackInfo.period = MIN_INTERVAL;
+    std::vector<double> ratios = { 0, 1.0 };
+    eventHub->SetVisibleAreaRatiosAndCallback(callbackInfo, ratios, false);
+
+    auto context = MockPipelineContext::GetCurrent();
+    eventHub->OnAttachContext(AceType::RawPtr(context));
+    EXPECT_NE(eventHub->GetOrCreateGestureEventHub(), nullptr);
+}
+
+/**
+ * @tc.name: EventHubTest008
+ * @tc.desc: OnDetachContext
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest008, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    RectF tempOldRect;
+    OffsetF tempOldOrigin;
+    RectF tempNewRect;
+    OffsetF tempNewOrigin;
+    auto onAreaChanged = [&tempOldRect, &tempOldOrigin, &tempNewRect, &tempNewOrigin](
+                             const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {
+        tempOldRect = oldRect;
+        tempOldOrigin = oldOrigin;
+        tempNewRect = rect;
+        tempNewOrigin = origin;
+    };
+
+    eventHub->SetOnAreaChanged(onAreaChanged);
+    eventHub->GetOrCreateGestureEventHub();
+    eventHub->GetOrCreateInputEventHub();
+    eventHub->GetOrCreateFocusHub();
+
+    VisibleCallbackInfo callbackInfo;
+    const std::function<void(bool, double)>&& jsCallback = [](bool isVisible, double radio) { flag++; };
+    callbackInfo.callback = jsCallback;
+    callbackInfo.period = MIN_INTERVAL;
+    callbackInfo.period = 0;
+    std::vector<double> ratios = { 0, 1.0 };
+    eventHub->SetVisibleAreaRatiosAndCallback(callbackInfo, ratios, true);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+
+    auto context = MockPipelineContext::GetCurrent();
+    eventHub->OnDetachContext(AceType::RawPtr(context));
+    EXPECT_NE(eventHub->GetOrCreateGestureEventHub(), nullptr);
+}
+
+/**
+ * @tc.name: EventHubTest009
+ * @tc.desc: OnDetachContext
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest009, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->GetOrCreateGestureEventHub();
+    eventHub->GetOrCreateInputEventHub();
+    eventHub->GetOrCreateFocusHub();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    bool flags = false;
+    OnAreaChangedFunc onAreaChanged = [&flags](const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect,
+                                          const OffsetF& origin) { flags = !flags; };
+    eventHub->AddInnerOnAreaChangedCallback(1, std::move(onAreaChanged));
+    VisibleCallbackInfo callbackInfo;
+    const std::function<void(bool, double)>&& jsCallback = [](bool isVisible, double radio) { flag++; };
+    callbackInfo.callback = jsCallback;
+    callbackInfo.period = MIN_INTERVAL;
+    std::vector<double> ratios = { 0, 1.0 };
+    eventHub->SetVisibleAreaRatiosAndCallback(callbackInfo, ratios, false);
+    auto context = MockPipelineContext::GetCurrent();
+    eventHub->OnDetachContext(AceType::RawPtr(context));
+    EXPECT_NE(eventHub->GetOrCreateGestureEventHub(), nullptr);
+}
+
+/**
+ * @tc.name: EventHubTest010
+ * @tc.desc: FireOnSizeChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest010, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    bool flags = false;
+    OnSizeChangedFunc onSizeChanged = [&flags](const RectF& oldRect, const RectF& Rect) { flags = !flags; };
+    RectF tempOldRect;
+    RectF tempNewRect;
+    eventHub->SetOnSizeChanged(std::move(onSizeChanged));
+    eventHub->FireOnSizeChanged(tempOldRect, tempNewRect);
+    EXPECT_NE(eventHub->GetOrCreateGestureEventHub(), nullptr);
+}
+
+/**
+ * @tc.name: EventHubTest011
+ * @tc.desc: FireOnSizeChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest011, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    RectF tempOldRect;
+    RectF tempNewRect;
+    eventHub->FireOnSizeChanged(tempOldRect, tempNewRect);
+    EXPECT_NE(eventHub->GetOrCreateGestureEventHub(), nullptr);
+}
+
+/**
+ * @tc.name: EventHubTest012
+ * @tc.desc: FireJSFrameNodeOnSizeChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest012, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    bool flags = false;
+    OnSizeChangedFunc onSizeChanged = [&flags](const RectF& oldRect, const RectF& Rect) { flags = !flags; };
+    RectF tempOldRect;
+    RectF tempNewRect;
+    eventHub->SetJSFrameNodeOnSizeChangeCallback(std::move(onSizeChanged));
+    eventHub->FireJSFrameNodeOnSizeChanged(tempOldRect, tempNewRect);
+    EXPECT_NE(eventHub->GetOrCreateGestureEventHub(), nullptr);
+}
+
+/**
+ * @tc.name: EventHubTest013
+ * @tc.desc: FireJSFrameNodeOnSizeChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest013, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    RectF tempOldRect;
+    RectF tempNewRect;
+    eventHub->FireJSFrameNodeOnSizeChanged(tempOldRect, tempNewRect);
+    EXPECT_NE(eventHub->GetOrCreateGestureEventHub(), nullptr);
+}
+
+/**
+ * @tc.name: EventHubTest014
+ * @tc.desc:ClearJSFrameNodeOnSizeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest014, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->ClearJSFrameNodeOnSizeChange();
+    EXPECT_NE(eventHub->GetOrCreateGestureEventHub(), nullptr);
+}
+
+/**
+ * @tc.name: EventHubTest015
+ * @tc.desc: ClearJSFrameNodeOnSizeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest015, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    bool flags = false;
+    OnSizeChangedFunc onSizeChanged = [&flags](const RectF& oldRect, const RectF& Rect) { flags = !flags; };
+    eventHub->SetJSFrameNodeOnSizeChangeCallback(std::move(onSizeChanged));
+    eventHub->ClearJSFrameNodeOnSizeChange();
+    EXPECT_NE(eventHub->GetOrCreateGestureEventHub(), nullptr);
+}
+
+/**
+ * @tc.name: EventHubTest016
+ * @tc.desc: FireInnerOnSizeChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest016, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    bool flags = false;
+    OnSizeChangedFunc onSizeChanged = [&flags](const RectF& oldRect, const RectF& Rect) { flags = !flags; };
+    eventHub->AddInnerOnSizeChanged(1, std::move(onSizeChanged));
+    eventHub->AddInnerOnSizeChanged(2, std::move(onSizeChanged));
+    RectF tempOldRect;
+    RectF tempNewRect;
+    eventHub->FireInnerOnSizeChanged(tempOldRect, tempNewRect);
+    EXPECT_NE(eventHub->GetOrCreateGestureEventHub(), nullptr);
+}
+
+/**
+ * @tc.name: EventHubTest017
+ * @tc.desc: FireInnerOnSizeChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest017, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    RectF tempOldRect;
+    RectF tempNewRect;
+    eventHub->FireInnerOnSizeChanged(tempOldRect, tempNewRect);
+    EXPECT_NE(eventHub->GetOrCreateGestureEventHub(), nullptr);
+}
+
+/**
+ * @tc.name: EventHubTest018
+ * @tc.desc: FireOnAttach
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest018, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    std::function<void()> onAttachCallback = []() {};
+    eventHub->SetOnAttach(std::move(onAttachCallback));
+    eventHub->FireOnAttach();
+    EXPECT_NE(eventHub->GetOrCreateGestureEventHub(), nullptr);
+}
+
+/**
+ * @tc.name: EventHubTest019
+ * @tc.desc: FireOnAttach
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest019, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    std::function<void()> onAttachCallback = []() {};
+    eventHub->SetOnDetach(std::move(onAttachCallback));
+    eventHub->FireOnDetach();
+    EXPECT_NE(eventHub->GetOrCreateGestureEventHub(), nullptr);
+}
+
+/**
+ * @tc.name: EventHubTest020
+ * @tc.desc: debugEnabled_
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest020, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    SystemProperties::debugEnabled_ = true;
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    eventHub->FireOnDragEnter(dragEvent, DRAG_ENTER_EVENT_TYPE);
+    eventHub->FireOnDragLeave(dragEvent, DRAG_ENTER_EVENT_TYPE);
+    eventHub->FireOnDragMove(dragEvent, DRAG_ENTER_EVENT_TYPE);
+    eventHub->FireOnDrop(dragEvent, DRAG_ENTER_EVENT_TYPE);
+    EXPECT_NE(eventHub->GetOrCreateGestureEventHub(), nullptr);
 }
 } // namespace OHOS::Ace::NG
