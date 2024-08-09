@@ -115,16 +115,16 @@ void SliderPattern::HandleAccessibilityHoverEvent(bool isHover, const Accessibil
                        accessibilityHoverAction == AccessibilityHoverAction::HOVER_MOVE)) {
         for (const auto& pointNode : pointAccessibilityNodeVec_) {
             pointNode->GetAccessibilityProperty<AccessibilityProperty>()->SetAccessibilityLevel(
-                AccessibilityProperty::Level::YES);
+                AccessibilityProperty::Level::YES_STR);
         }
     } else if (!isHover) {
         for (const auto& pointNode : pointAccessibilityNodeVec_) {
             pointNode->GetAccessibilityProperty<AccessibilityProperty>()->SetAccessibilityLevel(
-                AccessibilityProperty::Level::NO);
+                AccessibilityProperty::Level::NO_STR);
         }
         auto host = GetHost();
         auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
-        accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::YES);
+        accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::YES_STR);
     }
 }
 
@@ -270,7 +270,7 @@ void SliderPattern::HandleTextOnAccessibilityFocusCallback()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
-    accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO);
+    accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -306,7 +306,7 @@ void SliderPattern::UpdateStepPointsAccessibilityVirtualNodeSelected()
     for (uint32_t i = 0; i < pointCount; i++) {
         RefPtr<FrameNode>& pointNode = pointAccessibilityNodeVec_[i];
         auto pointAccessibilityProperty = pointNode->GetAccessibilityProperty<TextAccessibilityProperty>();
-        pointAccessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::YES);
+        pointAccessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::YES_STR);
 
         auto pointNodeProperty = pointNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(pointNodeProperty);
