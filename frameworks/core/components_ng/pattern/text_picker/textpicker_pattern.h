@@ -397,8 +397,7 @@ private:
     void GetInnerFocusButtonPaintRect(RoundRect& paintRect);
     void UpdateFocusButtonState();
     void SetHaveFocus(bool haveFocus);
-    void UpdateButtonStyles(const RefPtr<FrameNode>& buttonNode, const RefPtr<FrameNode>& columnNode,
-        const RefPtr<PickerTheme>& pickerTheme, bool haveFocus);
+    void UpdateColumnButtonStyles(const RefPtr<FrameNode>& columnNode, bool haveFocus, bool needMarkDirty);
     void GetFocusPaintRect(const RefPtr<PipelineBase>& pipeline, const RefPtr<FrameNode>& pickerChild,
         const RefPtr<FrameNode>& columnNode, RoundRect& paintRect, const uint32_t& childSize);
     double CalculateHeight();
@@ -432,6 +431,7 @@ private:
     double resizePickerItemHeight_;
     bool focusEventInitialized_ = false;
     bool haveFocus_ = false;
+    bool useButtonFocusArea_ = false;
     Dimension selectorItemRadius_ = 8.0_vp;
     std::function<void(bool)> isFocusActiveUpdateEvent_;
     uint32_t selectedIndex_ = 0;

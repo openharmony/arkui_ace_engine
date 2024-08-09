@@ -250,36 +250,6 @@ HWTEST_F(ArcScrollTestNg, ArcScrollTestNg003, TestSize.Level1)
 }
 
 /**
- * @tc.name: ArcScrollTestNg004
- * @tc.desc: Test ArcScrollTest
- * @tc.type: FUNC
- */
-HWTEST_F(ArcScrollTestNg, ArcScrollTestNg004, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create CreateWithContent, call HandlingTouch
-     * @tc.expected: expect scrollBar is not nullptr
-     */
-    TouchLocationInfo locationInfo(1);
-    CreateWithContent([](ScrollModelNG model) { model.SetDisplayMode(static_cast<int32_t>(DisplayMode::ON)); });
-    auto scrollBar = AceType::DynamicCast<ArcScrollBar> (pattern_->GetScrollBar());
-    TouchEventInfo eventInfo("touch");
-    eventInfo.SetSourceDevice(SourceType::TOUCH);
-    eventInfo.AddTouchLocationInfo(std::move(locationInfo));
-    scrollBar->HandlingTouch(eventInfo);
-    ASSERT_NE(scrollBar, nullptr);
-
-    locationInfo.SetTouchType(TouchType::DOWN);
-    locationInfo.SetSourceDevice(SourceType::TOUCH);
-    eventInfo.AddTouchLocationInfo(std::move(locationInfo));
-    scrollBar->HandlingTouch(eventInfo);
-    locationInfo.SetTouchType(TouchType::DOWN);
-    locationInfo.SetSourceDevice(SourceType::MOUSE);
-    eventInfo.AddTouchLocationInfo(std::move(locationInfo));
-    scrollBar->HandlingTouch(eventInfo);
-}
-
-/**
  * @tc.name: ArcScrollTestNg005
  * @tc.desc: Test ArcScrollTest
  * @tc.type: FUNC

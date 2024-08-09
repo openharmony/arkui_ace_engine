@@ -227,7 +227,6 @@ private:
     bool showHoverEffect_ = true;
     bool enabled_ = true;
     bool isBgColorUnselectFocus_ = false;
-    bool isPointColorUnselectFocus_ = false;
 
     float width_ = 0.0f;
     float height_ = 0.0f;

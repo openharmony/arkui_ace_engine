@@ -317,6 +317,7 @@ protected:
     {
         return ScrollAlign::AUTO;
     }
+    virtual void OnMidIndexChanged(int32_t lastIndex, int32_t curIndex) {}
     virtual float GetStartOverScrollOffset(float offset) const;
     virtual float GetEndOverScrollOffset(float offset) const;
     virtual float GetSnapCenterOverScrollPos(float startPos, float overScroll);

@@ -294,6 +294,7 @@ void Scrollable::HandleCrownActionBegin(const TimeStamp& timeStamp, double mainD
     info.SetMainDelta(mainDelta);
     info.SetMainVelocity(crownVelocityTracker_.GetMainAxisVelocity());
     isDragging_ = true;
+    isCrownEventDragging_ = true;
     HandleDragStart(info);
 }
 
@@ -320,6 +321,7 @@ void Scrollable::HandleCrownActionEnd(const TimeStamp& timeStamp, double mainDel
         actionEnd_(info);
     }
     isDragging_ = false;
+    isCrownEventDragging_ = false;
 }
 
 void Scrollable::HandleCrownActionCancel(GestureEvent& info)
