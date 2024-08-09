@@ -1817,6 +1817,9 @@ HWTEST_F(WaterFlowTestNg, Cache001, TestSize.Level1)
     UpdateCurrentOffset(-500.0f);
     EXPECT_EQ(info->startIndex_, 4);
     EXPECT_EQ(info->endIndex_, 17);
+    EXPECT_EQ(GetChildY(frameNode_, 3), -290.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 2), -390.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 1), -500.0f);
     const std::list<int32_t> preloadList2 = { 18, 19, 20 };
     EXPECT_EQ(pattern_->preloadItems_, preloadList2);
     PipelineContext::GetCurrentContext()->OnIdle(GetSysTimestamp());

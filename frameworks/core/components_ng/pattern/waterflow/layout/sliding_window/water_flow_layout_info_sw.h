@@ -204,6 +204,9 @@ public:
         const std::vector<WaterFlowSections::Section>& prevSections, int32_t start) override;
 
     struct Lane;
+    /**
+     * REQUIRES: In stable state (outside update phase), only items inside viewport are in lanes_.
+     */
     std::vector<std::vector<Lane>> lanes_; // lanes in multiple sections
     // mapping of all items previously or currently in lanes_.
     std::unordered_map<int32_t, size_t> idxToLane_;

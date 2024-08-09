@@ -964,4 +964,39 @@ HWTEST_F(WaterFlowSWTest, NotifyDataChange002, TestSize.Level1)
     secObj->ChangeData(6, 1, newSections);
     EXPECT_EQ(info_->newStartIndex_, -2);
 }
+
+/**
+ * @tc.name: Cache002
+ * @tc.desc: Test cache item layout position
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Cache002, TestSize.Level1)
+{
+    CreateRepeatWaterFlow(
+        [](WaterFlowModelNG model) {
+            model.SetCachedCount(3);
+            model.SetColumnsTemplate("1fr 1fr");
+            model.SetRowsGap(Dimension(10));
+            model.SetColumnsGap(Dimension(10));
+        },
+        50, [](int32_t i) { return i % 2 ? 100.0f : 200.0f; });
+
+    pattern_->ScrollToIndex(30);
+    FlushLayoutTask(frameNode_);
+    auto info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->startIndex_, 30);
+    EXPECT_EQ(info->endIndex_, 40);
+    const std::list<int32_t> preloadList = { 41, 42, 43, 29, 28, 27 };
+    EXPECT_EQ(pattern_->preloadItems_, preloadList);
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 40));
+    EXPECT_EQ(GetChildWidth(frameNode_, 40), (WATERFLOW_WIDTH - 10.0f) / 2.0f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 41), 850.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 42), 960.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 43), 960.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 27), -220.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 28), -210.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 29), -110.0f);
+}
 } // namespace OHOS::Ace::NG
