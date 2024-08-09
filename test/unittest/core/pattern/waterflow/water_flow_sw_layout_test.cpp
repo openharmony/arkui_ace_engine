@@ -970,7 +970,7 @@ HWTEST_F(WaterFlowSWTest, NotifyDataChange002, TestSize.Level1)
  * @tc.desc: Test cache item layout position
  * @tc.type: FUNC
  */
-HWTEST_F(WaterFlowTestNg, Cache002, TestSize.Level1)
+HWTEST_F(WaterFlowSWTest, Cache002, TestSize.Level1)
 {
     CreateRepeatWaterFlow(
         [](WaterFlowModelNG model) {
@@ -983,9 +983,8 @@ HWTEST_F(WaterFlowTestNg, Cache002, TestSize.Level1)
 
     pattern_->ScrollToIndex(30);
     FlushLayoutTask(frameNode_);
-    auto info = pattern_->layoutInfo_;
-    EXPECT_EQ(info->startIndex_, 30);
-    EXPECT_EQ(info->endIndex_, 40);
+    EXPECT_EQ(info_->startIndex_, 30);
+    EXPECT_EQ(info_->endIndex_, 40);
     const std::list<int32_t> preloadList = { 41, 42, 43, 29, 28, 27 };
     EXPECT_EQ(pattern_->preloadItems_, preloadList);
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
@@ -998,5 +997,9 @@ HWTEST_F(WaterFlowTestNg, Cache002, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 27), -220.0f);
     EXPECT_EQ(GetChildY(frameNode_, 28), -210.0f);
     EXPECT_EQ(GetChildY(frameNode_, 29), -110.0f);
+    // test lanes_'s constraint
+    info_->BeginUpdate();
+    EXPECT_EQ(info_->StartIndex(), 30);
+    EXPECT_EQ(info_->EndIndex(), 40);
 }
 } // namespace OHOS::Ace::NG

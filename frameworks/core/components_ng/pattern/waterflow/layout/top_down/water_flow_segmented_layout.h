@@ -67,15 +67,7 @@ public:
         overScroll_ = value;
     }
 
-    void StartCacheLayout() override
-    {
-        isCache_ = true;
-    }
     bool AppendCacheItem(LayoutWrapper* host, int32_t itemIdx) override;
-    void EndCacheLayout() override
-    {
-        isCache_ = false;
-    }
 
 private:
     /**
@@ -118,8 +110,9 @@ private:
      * If user has defined a size for any FlowItem, use that size instead of calling child->Measure.
      *
      * @param targetIdx index of the last FlowItem to measure.
+     * @param isCache if called during a cache layout. In cache layout, always measure the items.
      */
-    void MeasureToTarget(int32_t targetIdx);
+    void MeasureToTarget(int32_t targetIdx, bool isCache);
 
     /**
      * @brief Helper to measure a single FlowItems.
@@ -131,7 +124,7 @@ private:
      * @return LayoutWrapper of the FlowItem.
      */
     RefPtr<LayoutWrapper> MeasureItem(
-        const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, int32_t crossIdx, float userDefMainSize) const;
+        const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, int32_t crossIdx, float userDefMainSize, bool isCache) const;
 
     /**
      * @brief Layout a FlowItem at [idx].
@@ -172,7 +165,6 @@ private:
 
     // true if WaterFlow can be overScrolled
     bool overScroll_ = false;
-    bool isCache_ = false; // true if during cache item layout
 
     ACE_DISALLOW_COPY_AND_MOVE(WaterFlowSegmentedLayout);
 };
