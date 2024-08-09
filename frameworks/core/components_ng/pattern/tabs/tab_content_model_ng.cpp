@@ -145,7 +145,6 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
 
     auto tabsNode = FindTabsNode(tabContent);
     CHECK_NULL_VOID(tabsNode);
-
     auto tabBarNode = tabsNode->GetTabBar();
     CHECK_NULL_VOID(tabBarNode);
     auto tabContentPattern = tabContentNode->GetPattern<TabContentPattern>();
@@ -249,7 +248,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
             tabBarNode->ReplaceChild(oldColumnNode, columnNode);
         }
         tabBarPattern->AddTabBarItemType(columnNode->GetId(), true);
-        tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
         return;
     }
 
@@ -441,7 +440,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     textNode->MarkDirtyNode();
     iconNode->MarkModifyDone();
     tabBarPattern->AddTabBarItemType(columnNode->GetId(), false);
-    tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 void TabContentModelNG::RemoveTabBarItem(const RefPtr<TabContentNode>& tabContentNode)
@@ -467,7 +466,7 @@ void TabContentModelNG::RemoveTabBarItem(const RefPtr<TabContentNode>& tabConten
     auto tabsNode = FindTabsNode(tabContentNode);
     CHECK_NULL_VOID(tabsNode);
     tabsNode->RemoveBuilderByContentId(tabContentNode->GetId());
-    tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 void TabContentModelNG::SetTabBar(const std::optional<std::string>& text, const std::optional<std::string>& icon,
