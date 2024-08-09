@@ -3770,12 +3770,9 @@ void FrameNode::ProcessAccessibilityVirtualNode()
     auto virtualNode = accessibilityProperty->GetAccessibilityVirtualNode();
     auto virtualFrameNode = AceType::DynamicCast<NG::FrameNode>(virtualNode);
     if (virtualFrameNode) {
-        auto pipeline = GetContext();
-        CHECK_NULL_VOID(pipeline);
         auto constraint = GetLayoutConstraint();
         virtualFrameNode->ApplyConstraint(constraint);
         ProcessOffscreenNode(virtualFrameNode);
-        pipeline->SendUpdateVirtualNodeFocusEvent();
     }
 }
 
@@ -3850,6 +3847,9 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
     }
     layoutAlgorithm_.Reset();
     ProcessAccessibilityVirtualNode();
+    auto pipeline = GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    pipeline->SendUpdateVirtualNodeFocusEvent();
     return true;
 }
 
