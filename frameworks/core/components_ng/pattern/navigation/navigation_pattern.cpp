@@ -649,6 +649,7 @@ void NavigationPattern::UpdateNavPathList()
 
 void NavigationPattern::RefreshNavDestination()
 {
+    isChanged_ = false;
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -773,7 +774,7 @@ void NavigationPattern::CheckTopNavPathChange(
                 break;
             }
             auto focusHub = newTopNavDestination->GetFocusHub();
-            if (!focusHub || !focusHub->IsFocusableWholePath()) {
+            if (!GetIsFocusable(newTopNavDestination)) {
                 break;
             }
             auto navDestinationPattern = newTopNavDestination->GetPattern<NavDestinationPattern>();
@@ -804,7 +805,7 @@ void NavigationPattern::CheckTopNavPathChange(
         }
         navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
         auto focusHub = navBarNode->GetFocusHub();
-        if (focusHub && focusHub->IsFocusableWholePath()) {
+        if (GetIsFocusable(navBarNode)) {
             auto navBarFocusView = navBarNode->GetPattern<FocusView>();
             CHECK_NULL_VOID(navBarFocusView);
             if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -2388,12 +2389,19 @@ void NavigationPattern::RefreshFocusToDestination()
     if (!newTopNavPath.has_value()) {
         return;
     }
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto navBarNode = AceType::DynamicCast<FrameNode>(hostNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto navBarFocus = navBarNode->GetFocusHub();
+    CHECK_NULL_VOID(navBarFocus);
+    if (!navBarFocus->IsCurrentFocus()) {
+        return;
+    }
     auto newTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
         NavigationGroupNode::GetNavDestinationNode(newTopNavPath->second));
     CHECK_NULL_VOID(newTopNavDestination);
-    auto focusHub = newTopNavDestination->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    if (!focusHub->IsFocusableWholePath()) {
+    if (!GetIsFocusable(newTopNavDestination)) {
         return;
     }
     auto navDestinationFocusView = newTopNavDestination->GetPattern<FocusView>();
@@ -2514,5 +2522,19 @@ bool NavigationPattern::ExecuteAddAnimation(const RefPtr<NavDestinationGroupNode
         },
         TaskExecutor::TaskType::UI, timeout, "ArkUINavigationTransitionProxyFinish");
     return true;
+}
+
+bool NavigationPattern::GetIsFocusable(const RefPtr<FrameNode>& frameNode)
+{
+    auto hostNode = AceType::DynamicCast<FrameNode>(GetHost());
+    CHECK_NULL_RETURN(hostNode, false);
+    auto focusHub = hostNode->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    if (!focusHub->IsFocusableWholePath()) {
+        return false;
+    }
+    auto currentFocusHub = frameNode->GetFocusHub();
+    CHECK_NULL_RETURN(currentFocusHub, false);
+    return currentFocusHub->IsFocusableNode();
 }
 } // namespace OHOS::Ace::NG
