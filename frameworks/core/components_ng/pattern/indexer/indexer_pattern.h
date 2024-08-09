@@ -146,6 +146,7 @@ private:
     void ChangeListItemsSelectedStyle(int32_t clickIndex);
     RefPtr<FrameNode> CreatePopupNode();
     void UpdateBubbleView();
+    Shadow GetPopupShadow();
     void UpdateBubbleSize();
     void UpdateBubbleLetterView(bool showDivider, std::vector<std::string>& currentListData);
     void CreateBubbleListView(std::vector<std::string>& currentListData);
