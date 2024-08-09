@@ -1631,7 +1631,7 @@ void TextPattern::OnDragEnd(const RefPtr<Ace::DragEvent>& event)
     }
     UpdateSpanItemDragStatus(dragResultObjects_, false);
     dragResultObjects_.clear();
-    if (event && event->GetResult() != DragRet::DRAG_SUCCESS) {
+    if (event && event->GetResult() != DragRet::DRAG_SUCCESS && IsSelectableAndCopy()) {
         HandleSelectionChange(recoverStart_, recoverEnd_);
         isShowMenu_ = false;
         if (GetCurrentDragTool() == SourceTool::FINGER) {
@@ -1653,7 +1653,7 @@ void TextPattern::OnDragEndNoChild(const RefPtr<Ace::DragEvent>& event)
         pattern->status_ = Status::NONE;
         pattern->MarkContentChange();
         pattern->contentMod_->ChangeDragStatus();
-        if (event && event->GetResult() != DragRet::DRAG_SUCCESS) {
+        if (event && event->GetResult() != DragRet::DRAG_SUCCESS && IsSelectableAndCopy()) {
             HandleSelectionChange(recoverStart_, recoverEnd_);
             isShowMenu_ = false;
             if (GetCurrentDragTool() == SourceTool::FINGER) {
@@ -2126,6 +2126,8 @@ void TextPattern::OnModifyDone()
 
     auto gestureEventHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
     if (IsSelectableAndCopy()) {
         auto context = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_VOID(context);
@@ -2143,6 +2145,14 @@ void TextPattern::OnModifyDone()
     } else {
         if (host->IsDraggable() || gestureEventHub->GetTextDraggable()) {
             gestureEventHub->SetTextDraggable(false);
+            eventHub->SetDefaultOnDragStart(nullptr);
+            if (!eventHub->HasOnDragStart()) {
+                gestureEventHub->RemoveDragEvent();
+            }
+        }
+        if (longPressEvent_ && !hasSpanStringLongPressEvent_) {
+            gestureEventHub->SetLongPressEvent(nullptr);
+            longPressEvent_ = nullptr;
         }
     }
     if (onClick_ || IsSelectableAndCopy() || CanStartAITask()) {
@@ -2156,8 +2166,6 @@ void TextPattern::OnModifyDone()
             InitMouseEvent();
         }
     }
-    auto eventHub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
     bool enabledCache = eventHub->IsEnabled();
     if (textDetectEnable_ && enabledCache != enabled_) {
         enabled_ = enabledCache;
@@ -3447,6 +3455,7 @@ void TextPattern::ProcessSpanString()
     childNodes_.clear();
     dataDetectorAdapter_->textForAI_.clear();
     host->Clean();
+    hasSpanStringLongPressEvent_ = false;
 
     // 适配AI&&挂载image节点
     auto imageChildren = host->GetChildren();
@@ -3465,6 +3474,7 @@ void TextPattern::ProcessSpanString()
         if (span->onLongPress) {
             auto gestureEventHub = host->GetOrCreateGestureEventHub();
             InitLongPressEvent(gestureEventHub);
+            hasSpanStringLongPressEvent_ = true;
         }
         textForDisplay_ += span->content;
     }
