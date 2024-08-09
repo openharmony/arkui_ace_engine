@@ -422,9 +422,11 @@ HWTEST_F(OverlayTestUpdate, ToastTest004, TestSize.Level1)
     auto textval1 = textLayoutProperty->GetLayoutDirection();
     auto textval2 = textLayoutProperty->GetTextOverflow();
     auto textval3 = textLayoutProperty->GetEllipsisMode();
+    auto textval4 = textLayoutProperty->GetTextColorValue(Color::BLACK);
     EXPECT_EQ(textval1, TextDirection::RTL);
     EXPECT_EQ(textval2, TextOverflow::ELLIPSIS);
     EXPECT_EQ(textval3, EllipsisMode::TAIL);
+    EXPECT_EQ(textval4, Color::RED);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
@@ -439,7 +441,8 @@ HWTEST_F(OverlayTestUpdate, ToastTest005, TestSize.Level1)
      * @tc.steps: step1. create toastInfo toastPattern.
      */
     auto offset = DimensionOffset(MENU_OFFSET);
-    ToastInfo toastInfo = { MESSAGE, 0, BOTTOMSTRING, true, ToastShowMode::DEFAULT, 0, offset };
+    ToastInfo toastInfo = { MESSAGE, 0, BOTTOMSTRING, true, ToastShowMode::DEFAULT, 0, offset,
+        Color::BLUE, Color::RED, 0, ShadowConfig::DefaultShadowL };
     auto toastNode = ToastView::CreateToastNode(toastInfo);
     ASSERT_NE(toastNode, nullptr);
     auto toastPattern = toastNode->GetPattern<ToastPattern>();
@@ -471,8 +474,10 @@ HWTEST_F(OverlayTestUpdate, ToastTest005, TestSize.Level1)
      */
     auto styleOption = toastContext->GetBackBlurStyle();
     auto testval1 = toastContext->GetBackgroundColorValue();
-    EXPECT_EQ(testval1, Color::TRANSPARENT);
-    EXPECT_EQ(styleOption->blurStyle, BlurStyle::COMPONENT_ULTRA_THICK);
+    auto shadow1 = textContext->GetBackShadow().value();
+    EXPECT_EQ(testval1, Color::BLUE);
+    EXPECT_EQ(styleOption->blurStyle, BlurStyle::NO_MATERIAL);
+    EXPECT_EQ(shadow1, ShadowConfig::DefaultShadowL);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
