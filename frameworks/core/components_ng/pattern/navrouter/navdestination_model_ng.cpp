@@ -34,9 +34,6 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-    constexpr int32_t TEXT_MAX_LINES_TWO = 2;
-} // namespace
 bool NavDestinationModelNG::ParseCommonTitle(
     bool hasSubTitle, bool hasMainTitle, const std::string& subtitle, const std::string& title)
 {
@@ -69,35 +66,13 @@ bool NavDestinationModelNG::ParseCommonTitle(
         if (mainTitle) {
             // update main title
             auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
-            textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : TEXT_MAX_LINES_TWO);
-            if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-                textLayoutProperty->UpdateHeightAdaptivePolicy(hasSubTitle ? TextHeightAdaptivePolicy::MAX_LINES_FIRST :
-                    TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
-            }
             textLayoutProperty->UpdateContent(title);
-            textLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
         } else {
             // create and init main title
             mainTitle = FrameNode::CreateFrameNode(
                 V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
             auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
-            textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : TEXT_MAX_LINES_TWO);
             textLayoutProperty->UpdateContent(title);
-            textLayoutProperty->UpdateTextColor(theme->GetTitleColor());
-            //max title font size should be 20.0 vp, because of backbutton
-            textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSizeMin());
-            //min title font size should be 14.0 vp
-            textLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_TITLE_FONT_SIZE);
-            textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
-            textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-            textLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
-            if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-                textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetMainTitleFontSizeS());
-                textLayoutProperty->UpdateTextColor(theme->GetMainTitleFontColor());
-                textLayoutProperty->UpdateFontWeight(FontWeight::BOLD);
-                textLayoutProperty->UpdateHeightAdaptivePolicy(hasSubTitle ? TextHeightAdaptivePolicy::MAX_LINES_FIRST :
-                    TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
-            }
             titleBarNode->SetTitle(mainTitle);
             titleBarNode->AddChild(mainTitle);
         }
@@ -119,27 +94,12 @@ bool NavDestinationModelNG::ParseCommonTitle(
         // update subtitle
         auto textLayoutProperty = subTitle->GetLayoutProperty<TextLayoutProperty>();
         textLayoutProperty->UpdateContent(subtitle);
-        textLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
     } else {
         // create and init subtitle
         subTitle = FrameNode::CreateFrameNode(
             V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         auto textLayoutProperty = subTitle->GetLayoutProperty<TextLayoutProperty>();
         textLayoutProperty->UpdateContent(subtitle);
-        //max title font size shoule be 14.0 vp
-        textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetSubTitleFontSize());
-        //min title font size should be 10.0 vp
-        textLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_SUBTITLE_FONT_SIZE);
-        textLayoutProperty->UpdateTextColor(theme->GetSubTitleColor());
-        textLayoutProperty->UpdateFontWeight(FontWeight::REGULAR);
-        textLayoutProperty->UpdateMaxLines(1);
-        textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-        textLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetSubTitleFontSizeS());
-            textLayoutProperty->UpdateTextColor(theme->GetSubTitleFontColor());
-            textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
-        }
         titleBarNode->SetSubtitle(subTitle);
         titleBarNode->AddChild(subTitle);
     }
