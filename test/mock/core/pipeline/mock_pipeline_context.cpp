@@ -516,6 +516,13 @@ bool PipelineBase::CloseImplicitAnimation()
     return true;
 }
 
+bool PipelineBase::IsDestroyed()
+{
+    return false;
+}
+
+void PipelineBase::SetDestroyed() {}
+
 RefPtr<Frontend> PipelineBase::GetFrontend() const
 {
     return nullptr;
