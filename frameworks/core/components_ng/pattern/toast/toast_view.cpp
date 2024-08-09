@@ -152,7 +152,7 @@ void ToastView::UpdateToastContext(const RefPtr<FrameNode>& toastNode)
         toastContext->UpdateOuterBorderColor(outerColorProp);
     }
     auto toastInfo = pattern->GetToastInfo();
-    toastContext->UpdateBackShadow(toastInfo.shadow.value());
+    toastContext->UpdateBackShadow(toastInfo.shadow.value_or(Shadow::CreateShadow(ShadowStyle::OuterDefaultMD)));
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         toastContext->UpdateBackgroundColor(toastInfo.backgroundColor.value_or(Color::TRANSPARENT));
         BlurStyleOption styleOption;
