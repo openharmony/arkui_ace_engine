@@ -107,6 +107,24 @@ void SetFontWeight(ArkUINodeHandle node, ArkUI_Int32 weight)
     TextModelNG::SetFontWeight(frameNode, static_cast<FontWeight>(weight));
 }
 
+void SetOnClick(ArkUINodeHandle node, void* callback)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    GestureEventFunc* click = nullptr;
+    if (callback) {
+        click = reinterpret_cast<GestureEventFunc*>(callback);
+    }
+    TextModelNG::SetOnClick(frameNode, std::move(*click));
+}
+
+void ResetOnClick(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::ClearOnClick(frameNode);
+}
+
 void ResetFontWeight(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1203,7 +1221,9 @@ const ArkUITextModifier* GetTextModifier()
         ResetTextSelectionMenuOptions,
         SetTextHalfLeading,
         ResetTextHalfLeading,
-        GetTextHalfLeading
+        GetTextHalfLeading,
+        SetOnClick,
+        ResetOnClick
     };
 
     return &modifier;
