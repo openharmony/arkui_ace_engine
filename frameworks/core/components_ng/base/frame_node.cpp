@@ -1181,9 +1181,8 @@ void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
         }
         focusHub->RemoveSelf();
     }
-    eventHub_->FireOnDetach();
     pattern_->OnDetachFromMainTree();
-    eventHub_->FireOnDisappear();
+    eventHub_->OnDetachClear();
     CHECK_NULL_VOID(renderContext_);
     renderContext_->OnNodeDisappear(recursive);
     if (context) {
