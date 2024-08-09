@@ -725,15 +725,6 @@ void SearchPattern::OnClickTextField()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->PaintInnerFocusState(focusRect);
-
-    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
-    CHECK_NULL_VOID(textFieldFrameNode);
-    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(textFieldPattern);
-    auto textFiledFocusHub = textFieldPattern->GetFocusHub();
-    if (!textFiledFocusHub->IsCurrentFocus() && focusHub->IsFocusOnTouch().value_or(true)) {
-        textFiledFocusHub->RequestFocusImmediately();
-    }
     host->MarkModifyDone();
 }
 
