@@ -124,6 +124,8 @@ export struct ToolBar {
   @State symbolEffect: SymbolEffect = new SymbolEffect();
   @State fontSize: number = 1;
   @State dialogController: CustomDialogController | null = null;
+  @State isFollowSystem: boolean = false;
+  @State maxFontSizeScale: number = 3.2;
 
   onWillApplyTheme(theme: Theme) {
     this.iconPrimaryColor = theme.colors.iconPrimary;
@@ -319,22 +321,11 @@ export struct ToolBar {
   private getFontSizeScale(): number {
     let context = this.getUIContext();
     let fontScaleSystem = (context.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
-    let fontSizeScale = 1;
-    try {
-      let isFollowSystem = context.isFollowingSystemFontScale();
-      let maxFontSizeScale = context.getMaxFontScale();
-      if (!isFollowSystem) {
-        fontSizeScale = 1;
-      } else {
-        fontSizeScale = Math.min(fontScaleSystem, maxFontSizeScale);
-      }
-    } catch (err) {
-      fontSizeScale = fontScaleSystem;
-      let code: number = (err as BusinessError)?.code;
-      let message: string = (err as BusinessError)?.message;
-      hilog.error(0x3900, 'Ace', `Faild to toolBar getFontSizeScale, code: ${code}, message: ${message}`);
+    if (!this.isFollowSystem) {
+      return 1;
+    } else {
+      return Math.min(fontScaleSystem, this.maxFontSizeScale);
     }
-    return fontSizeScale;
   }
 
   private getToolBarSymbolModifier(index: number): SymbolGlyphModifier | undefined {
@@ -429,6 +420,16 @@ export struct ToolBar {
 
   aboutToAppear() {
     this.refreshData();
+    try {
+      this.isFollowSystem = this.getUIContext()?.isFollowingSystemFontScale();
+      this.maxFontSizeScale = this.getUIContext()?.getMaxFontScale();
+    } catch (err) {
+      this.isFollowSystem = false;
+      this.maxFontSizeScale = MAX_FONT_SIZE;
+      let code: number = (err as BusinessError)?.code;
+      let message: string = (err as BusinessError)?.message;
+      hilog.error(0x3900, 'Ace', `Faild to toolBar getMaxFontScale, code: ${code}, message: ${message}`);
+    }
   }
   build() {
     Column() {

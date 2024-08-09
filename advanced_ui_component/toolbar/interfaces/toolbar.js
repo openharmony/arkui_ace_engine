@@ -189,6 +189,8 @@ export class ToolBar extends ViewPU {
     this.__symbolEffect = new ObservedPropertyObjectPU(new SymbolEffect(), this, 'symbolEffect');
     this.__fontSize = new ObservedPropertySimplePU(1, this, 'fontSize');
     this.__dialogController = new ObservedPropertyObjectPU(null, this, 'dialogController');
+    this.__isFollowSystem = new ObservedPropertySimplePU(false, this, 'isFollowSystem');
+    this.__maxFontSizeScale = new ObservedPropertySimplePU(3.2, this, 'maxFontSizeScale');
     this.setInitiallyProvidedValue(x6);
     this.finalizeConstruction();
   }
@@ -248,6 +250,12 @@ export class ToolBar extends ViewPU {
     if (v6.dialogController !== undefined) {
       this.dialogController = v6.dialogController;
     }
+    if (v6.isFollowSystem !== undefined) {
+      this.isFollowSystem = v6.isFollowSystem;
+    }
+    if (v6.maxFontSizeScale !== undefined) {
+      this.maxFontSizeScale = v6.maxFontSizeScale;
+    }
   }
 
   updateStateVars(u6) {
@@ -273,6 +281,8 @@ export class ToolBar extends ViewPU {
     this.__symbolEffect.purgeDependencyOnElmtId(t6);
     this.__fontSize.purgeDependencyOnElmtId(t6);
     this.__dialogController.purgeDependencyOnElmtId(t6);
+    this.__isFollowSystem.purgeDependencyOnElmtId(t6);
+    this.__maxFontSizeScale.purgeDependencyOnElmtId(t6);
   }
 
   aboutToBeDeleted() {
@@ -290,6 +300,8 @@ export class ToolBar extends ViewPU {
     this.__symbolEffect.aboutToBeDeleted();
     this.__fontSize.aboutToBeDeleted();
     this.__dialogController.aboutToBeDeleted();
+    this.__isFollowSystem.aboutToBeDeleted();
+    this.__maxFontSizeScale.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal();
   }
@@ -399,6 +411,22 @@ export class ToolBar extends ViewPU {
   }
   set dialogController(g6) {
     this.__dialogController.set(g6);
+  }
+
+  get isFollowSystem() {
+    return this.__isFollowSystem.get();
+  }
+
+  set isFollowSystem(k6) {
+    this.__isFollowSystem.set(k6);
+  }
+
+  get maxFontSizeScale() {
+    return this.__maxFontSizeScale.get();
+  }
+
+  set maxFontSizeScale(j6) {
+    this.__maxFontSizeScale.set(j6);
   }
 
   onWillApplyTheme(f6) {
@@ -758,26 +786,14 @@ export class ToolBar extends ViewPU {
   }
 
   getFontSizeScale() {
-    let z3 = this.getUIContext();
-    let a4 = z3.getHostContext()?.config?.fontSizeScale ?? 1;
-    let b4 = 1;
-    try {
-      let f4 = z3.isFollowingSystemFontScale();
-      let g4 = z3.getMaxFontScale();
-      if (!f4) {
-        b4 = 1;
-      }
-      else {
-        b4 = Math.min(a4, g4);
-      }
+    let c4 = this.getUIContext();
+    let d4 = c4.getHostContext()?.config?.fontSizeScale ?? 1;
+    if (!this.isFollowSystem) {
+      return 1;
     }
-    catch (c4) {
-      b4 = a4;
-      let d4 = c4?.code;
-      let e4 = c4?.message;
-      hilog.error(0x3900, 'Ace', `Faild to toolBar getFontSizeScale, code: ${d4}, message: ${e4}`);
+    else {
+      return Math.min(d4, this.maxFontSizeScale);
     }
-    return b4;
   }
 
   getToolBarSymbolModifier(y3) {
@@ -874,6 +890,17 @@ export class ToolBar extends ViewPU {
 
   aboutToAppear() {
     this.refreshData();
+    try {
+      this.isFollowSystem = this.getUIContext()?.isFollowingSystemFontScale();
+      this.maxFontSizeScale = this.getUIContext()?.getMaxFontScale();
+    }
+    catch (p3) {
+      this.isFollowSystem = false;
+      this.maxFontSizeScale = MAX_FONT_SIZE;
+      let q3 = p3?.code;
+      let r3 = p3?.message;
+      hilog.error(0x3900, 'Ace', `Faild to toolBar getMaxFontScale, code: ${q3}, message: ${r3}`);
+    }
   }
 
   initialRender() {
