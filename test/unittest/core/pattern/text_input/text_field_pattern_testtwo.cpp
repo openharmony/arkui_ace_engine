@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "test/mock/core/common/mock_resource_adapter_v2.h"
+#include "test/mock/core/common/mock_udmf.h"
 
 namespace OHOS::Ace::NG {
 
@@ -335,5 +336,251 @@ HWTEST_F(TextFieldPatternTestTwo, ProcessNumberOfLines001, TestSize.Level0)
 
     pattern->ProcessNumberOfLines();
     EXPECT_EQ(layoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Width(), CalcLength(10));
+}
+
+/**
+ * @tc.name: HandleCountStyle001
+ * @tc.desc: test testInput text HandleCountStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, HandleCountStyle001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateShowCounter(true);
+    layoutProperty->UpdateMaxLength(1024);
+    layoutProperty->UpdateShowUnderline(true);
+
+    pattern->deleteForwardOperations_.emplace(10);
+    pattern->deleteBackwardOperations_.emplace(10);
+    pattern->HandleCountStyle();
+    pattern->deleteForwardOperations_.pop();
+    pattern->deleteBackwardOperations_.pop();
+
+    pattern->HandleCountStyle();
+
+    layoutProperty->UpdateSetCounter(0);
+    pattern->HandleCountStyle();
+
+    layoutProperty->UpdateShowHighlightBorder(false);
+    pattern->HandleCountStyle();
+
+    layoutProperty->UpdateSetCounter(1);
+    pattern->HandleCountStyle();
+
+    pattern->showCountBorderStyle_ = true;
+    layoutProperty->UpdateShowHighlightBorder(true);
+    pattern->HandleCountStyle();
+
+    EXPECT_EQ(pattern->underlineWidth_, 2.0_px);
+}
+
+/**
+ * @tc.name: ProcessUnderlineColorOnModifierDone001
+ * @tc.desc: test testInput text ProcessUnderlineColorOnModifierDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, ProcessUnderlineColorOnModifierDone001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    layoutProperty->UpdateShowUnderline(true);
+    pattern->showCountBorderStyle_ = true;
+    pattern->ProcessUnderlineColorOnModifierDone();
+
+    auto focusHub = pattern->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = true;
+    pattern->ProcessUnderlineColorOnModifierDone();
+
+    layoutProperty->UpdateSetCounter(1);
+    pattern->ProcessUnderlineColorOnModifierDone();
+
+    layoutProperty->UpdateShowHighlightBorder(false);
+    pattern->ProcessUnderlineColorOnModifierDone();
+
+    layoutProperty->UpdateSetCounter(0);
+    pattern->ProcessUnderlineColorOnModifierDone();
+
+    EXPECT_EQ(pattern->GetUnderlineColor(), pattern->GetTheme()->GetErrorUnderlineColor());
+}
+
+/**
+ * @tc.name: OnModifyDone001
+ * @tc.desc: test testInput text OnModifyDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, OnModifyDone001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto focusHub = pattern->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = true;
+
+    pattern->contentController_->content_ = "Test";
+    pattern->selectController_->UpdateHandleIndex(0, 4);
+
+    pattern->OnModifyDone();
+
+    auto manager = SelectContentOverlayManager::GetOverlayManager();
+    ASSERT_NE(manager, nullptr);
+    pattern->selectOverlay_->OnBind(manager);
+
+    SelectOverlayInfo info;
+    manager->CreateNormalSelectOverlay(info, false);
+
+    pattern->OnModifyDone();
+
+    pattern->isTextChangedAtCreation_ = true;
+    pattern->OnModifyDone();
+
+    pattern->isTextChangedAtCreation_ = true;
+    pattern->contentController_->content_ = "";
+    pattern->selectController_->UpdateHandleIndex(0, 0);
+    pattern->OnModifyDone();
+
+    pattern->deleteForwardOperations_.emplace(10);
+    pattern->OnModifyDone();
+
+    auto eventHub = textFieldNode->GetEventHub<TextFieldEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetEnabled(false);
+    pattern->OnModifyDone();
+
+    pattern->barState_ = DisplayMode::ON;
+
+    pattern->OnModifyDone();
+
+    auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+
+    pattern->isModifyDone_ = false;
+    pattern->OnModifyDone();
+    EXPECT_EQ(pattern->isModifyDone_, true);
+}
+
+/**
+ * @tc.name: FireOnTextChangeEvent001
+ * @tc.desc: test testInput text FireOnTextChangeEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, FireOnTextChangeEvent001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto context = textFieldNode->GetContextRefPtr();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>(false);
+    ASSERT_NE(context->taskExecutor_, nullptr);
+
+    pattern->contentController_->content_ = "Test";
+    pattern->selectController_->UpdateHandleIndex(0, 4);
+
+    EXPECT_EQ(pattern->FireOnTextChangeEvent(), true);
+
+    auto focusHub = pattern->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = true;
+
+    pattern->contentController_->content_ = "";
+    pattern->selectController_->UpdateHandleIndex(0, 0);
+    EXPECT_EQ(pattern->FireOnTextChangeEvent(), true);
+}
+
+/**
+ * @tc.name: OnDragDrop001
+ * @tc.desc: test testInput text OnDragDrop
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, OnDragDrop001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto focusHub = pattern->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = true;
+
+    auto func = pattern->OnDragDrop();
+    ASSERT_NE(func, nullptr);
+
+    auto event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(event, nullptr);
+    std::string extraParams = "Test";
+
+    auto unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
+    ASSERT_NE(unifiedData, nullptr);
+    std::vector<uint8_t> arr;
+    auto spanString = AceType::MakeRefPtr<SpanString>("Test");
+    spanString->EncodeTlv(arr);
+    UdmfClient::GetInstance()->AddSpanStringRecord(unifiedData, arr);
+    event->SetData(unifiedData);
+
+    func(event, extraParams);
+
+    EXPECT_EQ(pattern->dragRecipientStatus_, DragStatus::NONE);
+}
+
+/**
+ * @tc.name: ProcBorderAndUnderlineInBlurEvent001
+ * @tc.desc: test testInput text ProcBorderAndUnderlineInBlurEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, ProcBorderAndUnderlineInBlurEvent001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->showCountBorderStyle_ = true;
+    pattern->ProcBorderAndUnderlineInBlurEvent();
+
+    auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    layoutProperty->UpdateShowErrorText(true);
+    layoutProperty->UpdateErrorText("ERROR");
+
+    pattern->ProcBorderAndUnderlineInBlurEvent();
+
+    layoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
+    pattern->ProcBorderAndUnderlineInBlurEvent();
+
+    layoutProperty->UpdateShowUnderline(true);
+    pattern->ProcBorderAndUnderlineInBlurEvent();
+
+    pattern->showCountBorderStyle_ = true;
+    pattern->ProcBorderAndUnderlineInBlurEvent();
+    EXPECT_EQ(pattern->showCountBorderStyle_, false);
 }
 } // namespace OHOS::Ace::NG
