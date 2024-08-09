@@ -77,6 +77,9 @@ void OH_ArkUI_WaterFlowSectionOption_SetCrossCount(
     if (index < 0) {
         return;
     }
+    if (crossCount <= 0) {
+        crossCount = 1;
+    }
     auto size = static_cast<int32_t>(option->sections.size());
     if (size == 0 || size <= index + 1) {
         option->sections.resize(static_cast<uint32_t>(index + 1));
