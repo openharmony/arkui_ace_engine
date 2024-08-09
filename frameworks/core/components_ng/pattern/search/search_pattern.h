@@ -130,7 +130,6 @@ public:
 
     void UpdateChangeEvent(const std::string& value, int16_t style = -1);
 
-    void JudgmentImageHost(const RefPtr<FrameNode>& imageHost);
     void SetCancelButtonNode(const RefPtr<FrameNode>& cancelButtonNode)
     {
         cancelButtonNode_ = cancelButtonNode;
