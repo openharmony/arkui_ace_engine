@@ -1126,6 +1126,13 @@ float GridScrollLayoutAlgorithm::MeasureRecordedItems(float mainSize, float cros
     return mainLength;
 }
 
+namespace {
+inline bool OneLineMovesOffViewportFromAbove(float mainLength, float lineHeight)
+{
+    return LessNotEqual(mainLength, 0.0) || (NearZero(mainLength) && GreatNotEqual(lineHeight, 0.0f));
+}
+} // namespace
+
 bool GridScrollLayoutAlgorithm::UseCurrentLines(
     float mainSize, float crossSize, LayoutWrapper* layoutWrapper, float& mainLength)
 {
@@ -1183,7 +1190,7 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
             mainLength += (cellAveLength_ + mainGap_);
         }
         // If a line moves up out of viewport, update [startIndex_], [currentOffset_] and [startMainLineIndex_]
-        if (LessNotEqual(mainLength, 0.0)) {
+        if (OneLineMovesOffViewportFromAbove(mainLength, cellAveLength_)) {
             gridLayoutInfo_.currentOffset_ = mainLength;
             gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
             gridLayoutInfo_.startMainLineIndex_ = currentMainLineIndex_ + 1;
