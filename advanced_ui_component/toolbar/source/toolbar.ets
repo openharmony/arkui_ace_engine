@@ -32,8 +32,6 @@ const PUBLIC_MORE: Resource = $r('sys.media.ohos_ic_public_more');
 const IMAGE_SIZE: string = '24vp';
 const DEFAULT_TOOLBAR_HEIGHT: number = 56;
 const TOOLBAR_MAX_LENGTH: number = 5;
-// 字串“更多”资源ID
-const MORE_TEXT_ID: number = 125833704;
 const MIN_FONT_SIZE = 1.75;
 const MAX_FONT_SIZE = 3.2;
 const LONG_PRESS_TIME = 500;
@@ -43,7 +41,7 @@ const MIN_DIALOG = '216vp';
 const TEXT_TOOLBAR_DIALOG = '18.3fp';
 
 interface MenuController {
-  value: string;
+  value: ResourceStr;
   action: () => void;
   enabled?: boolean;
 }
@@ -55,7 +53,7 @@ export interface ToolBarSymbolGlyphOptions {
 
 @Observed
 export class ToolBarOption {
-  public content: string = '';
+  public content: ResourceStr = '';
   public action?: () => void = undefined;
   public icon?: Resource = undefined;
   public state?: ItemState = 1;
@@ -192,7 +190,7 @@ export struct ToolBar {
                   confirm: () => {
                   },
                   itemDialog: {
-                    content: this.getStringSync(MORE_TEXT_ID),
+                    content: this.moreText,
                     icon: PUBLIC_MORE,
                   },
                   fontSize: this.fontSize,
@@ -297,25 +295,6 @@ export struct ToolBar {
           }
         })
     )
-  }
-
-  private getStringSync(resourceId: number): string {
-    let resourceString: string = '';
-    if (!resourceId) {
-      return resourceString;
-    }
-    let resourceManager = getContext()?.resourceManager;
-    if (!resourceManager) {
-      return resourceString;
-    }
-    try {
-      resourceString = resourceManager.getStringSync(resourceId);
-    } catch (err) {
-      let code: number = (err as BusinessError)?.code;
-      let message: string = (err as BusinessError)?.message;
-      hilog.error(0x3900, 'Ace', `Faild to toolBar getStringSync, code: ${code}, message: ${message}`);
-    }
-    return resourceString;
   }
 
   private getFontSizeScale(): number {
@@ -553,10 +532,19 @@ struct ToolBarDialog {
       .borderRadius(($r('sys.float.corner_radius_level10')))
     } else {
       Column() {
-        Image(this.itemDialog.icon)
-          .width(DIALOG_IMAGE_SIZE)
-          .height(DIALOG_IMAGE_SIZE)
-          .fillColor($r('sys.color.icon_primary'))
+        if (this.itemDialog.toolBarSymbolOptions?.normal ||
+          this.itemDialog.toolBarSymbolOptions?.activated) {
+          SymbolGlyph()
+            .attributeModifier(this.itemSymbolModifier)
+            .symbolEffect(this.symbolEffect, false)
+            .fontColor([$r('sys.color.icon_primary')])
+            .fontSize(DIALOG_IMAGE_SIZE)
+        } else {
+          Image(this.itemDialog.icon)
+            .width(DIALOG_IMAGE_SIZE)
+            .height(DIALOG_IMAGE_SIZE)
+            .fillColor($r('sys.color.icon_primary'))
+        }
       }
       .width(this.fontSize === MAX_FONT_SIZE ? MAX_DIALOG : MIN_DIALOG)
       .constraintSize({ minHeight: this.fontSize === MAX_FONT_SIZE ? MAX_DIALOG : MIN_DIALOG })

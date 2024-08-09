@@ -45,7 +45,6 @@ const PUBLIC_MORE = { id: -1, type: 20000, params: ['sys.media.ohos_ic_public_mo
 const IMAGE_SIZE = '24vp';
 const DEFAULT_TOOLBAR_HEIGHT = 56;
 const TOOLBAR_MAX_LENGTH = 5;
-const MORE_TEXT_ID = 125833704;
 const MIN_FONT_SIZE = 1.75;
 const MAX_FONT_SIZE = 3.2;
 const LONG_PRESS_TIME = 500;
@@ -482,7 +481,7 @@ export class ToolBar extends ViewPU {
                   confirm: () => {
                   },
                   itemDialog: {
-                    content: this.getStringSync(MORE_TEXT_ID),
+                    content: this.moreText,
                     icon: PUBLIC_MORE,
                   },
                   fontSize: this.fontSize,
@@ -497,7 +496,7 @@ export class ToolBar extends ViewPU {
                     confirm: () => {
                     },
                     itemDialog: {
-                      content: this.getStringSync(MORE_TEXT_ID),
+                      content: this.moreText,
                       icon: PUBLIC_MORE,
                     },
                     fontSize: this.fontSize
@@ -734,26 +733,6 @@ export class ToolBar extends ViewPU {
     }, Text);
     Text.pop();
     Column.pop();
-  }
-
-  getStringSync(z3) {
-    let a4 = '';
-    if (!z3) {
-      return a4;
-    }
-    let b4 = getContext()?.resourceManager;
-    if (!b4) {
-      return a4;
-    }
-    try {
-      a4 = b4.getStringSync(z3);
-    }
-    catch (c4) {
-      let d4 = c4?.code;
-      let e4 = c4?.message;
-      hilog.error(0x3900, 'Ace', `Faild to toolBar getStringSync, code: ${d4}, message: ${e4}`);
-    }
-    return a4;
   }
 
   getFontSizeScale() {
