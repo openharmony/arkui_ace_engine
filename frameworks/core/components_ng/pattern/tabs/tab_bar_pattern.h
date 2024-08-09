@@ -220,9 +220,6 @@ public:
         animationDuration_ = animationDuration;
     }
 
-    void UpdateTabBarBackgroundColor(
-        RefPtr<FrameNode> columnFrameNode, const RefPtr<TabTheme>& tabTheme, int32_t focusedColumnId);
-
     void SetTouching(bool isTouching)
     {
         touching_ = isTouching;
@@ -439,6 +436,11 @@ public:
         clickEvents_.erase(tabBarId);
     }
 
+    void SetFocusSet(bool hasFocus)
+    {
+        isFocusSet_ = hasFocus;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -458,6 +460,9 @@ private:
     void HandleHoverEvent(bool isHover);
     void HandleHoverOnEvent(int32_t index);
     void HandleMoveAway(int32_t index);
+    void HandleFocusEvent();
+    void HandleBlurEvent();
+    void InitTabbarProperties(const RefPtr<TabTheme>& tabTheme);
     void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
@@ -493,6 +498,10 @@ private:
     void PlayTranslateAnimation(float startPos, float endPos, float targetCurrentOffset);
     void StopTranslateAnimation();
     void UpdateIndicatorCurrentOffset(float offset);
+    const Color& GetSubTabBarHoverColor(int32_t index) const;
+    void UpdateFocusTabarPageState();
+    void UpdateSubTabarItemStyles(
+        const RefPtr<FrameNode>& columnNode, int32_t focusedColumnId, int32_t selectedColumnId, OHOS::Ace::Axis axis);
 
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void PaintFocusState(bool needMarkDirty = true);
@@ -602,6 +611,9 @@ private:
     MarginProperty marginLeftOrRight_;
     MarginProperty marginTopOrBottom_;
     bool isFocusSet_ = false;
+    Color tabBarItemDefalutBgColor_ = Color::TRANSPARENT;
+    Color tabBarItemFocusBgColor_ = Color::TRANSPARENT;
+    Color tabBarItemHoverColor_ = Color::TRANSPARENT;
     std::function<void(bool)> isFocusActiveUpdateEvent_;
 };
 } // namespace OHOS::Ace::NG
