@@ -126,12 +126,12 @@ interface CommonArcButtonOptions {
   /**
    * TouchEvent
    */
-  touchCallback?: Callback<TouchEvent>;
+  onTouch?: Callback<TouchEvent>;
 
   /**
    * ClickEvent
    */
-  onClickEvent?: Callback<ClickEvent>;
+  onClick?: Callback<ClickEvent>;
 }
 
 @ObservedV2
@@ -152,8 +152,8 @@ export class ArcButtonOptions {
   @Trace public textStyle: FontStyle;
   @Trace public textFamily: string | Resource;
   @Trace public textMargin: LocalizedMargin;
-  @Trace public touchCallback?: Callback<TouchEvent>
-  @Trace public onClickEvent?: Callback<ClickEvent>
+  @Trace public onTouch?: Callback<TouchEvent>
+  @Trace public onClick?: Callback<ClickEvent>
 
   constructor(options: CommonArcButtonOptions) {
     this.type = options.type ?? ArcButtonTypeMode.BOTTOM_EDGE
@@ -178,8 +178,10 @@ export class ArcButtonOptions {
       end: new LengthMetrics(Constants.TEXT_HORIZONTAL_MARGIN, LengthUnit.VP),
       bottom: new LengthMetrics(Constants.TEXT_MARGIN_BOTTOM, LengthUnit.VP)
     }
-    this.onClickEvent = options.onClickEvent ?? (()=>{})
-    this.touchCallback = options.touchCallback ?? (()=>{})
+    this.onTouch = options.onTouch ?? (() => {
+    })
+    this.onClick = options.onClick ?? (() => {
+    })
   }
 }
 
@@ -350,29 +352,50 @@ export struct ArcButton {
     let canvasLeftTopPoint = data.canvasLeftTop
     canvasLeftTopPoint.x -= Constants.SHADOW_BLUR
     canvasLeftTopPoint.y -= Constants.DISTANCE_FROM_BORDER
-    let pathStr = `M ${vp2px(leftTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftTopPoint.y - canvasLeftTopPoint.y)}
-        A ${vp2px(Constants.UPPER_ARC_CIRCLE_R)} ${vp2px(Constants.UPPER_ARC_CIRCLE_R)},
-        0, 0, 0, ${vp2px(rightTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightTopPoint.y - canvasLeftTopPoint.y)} ` +
+    let pathStr = `M ${this.getUIContext().vp2px(leftTopPoint.x - canvasLeftTopPoint.x)} ${this.getUIContext()
+      .vp2px(leftTopPoint.y - canvasLeftTopPoint.y)}
+        A ${this.getUIContext().vp2px(Constants.UPPER_ARC_CIRCLE_R)} ${this.getUIContext()
+      .vp2px(Constants.UPPER_ARC_CIRCLE_R)},
+        0, 0, 0, ${this.getUIContext().vp2px(rightTopPoint.x - canvasLeftTopPoint.x)} ${this.getUIContext()
+      .vp2px(rightTopPoint.y - canvasLeftTopPoint.y)} ` +
 
-      `M ${vp2px(rightTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightTopPoint.y - canvasLeftTopPoint.y)}
-          A ${vp2px(Constants.CHAMFER_CIRCLE_R)} ${vp2px(Constants.CHAMFER_CIRCLE_R)}, 0, 0, 0,
-          ${vp2px(rightBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightBottomPoint.y - canvasLeftTopPoint.y)} ` +
+      `M ${this.getUIContext().vp2px(rightTopPoint.x - canvasLeftTopPoint.x)} ${this.getUIContext()
+        .vp2px(rightTopPoint.y - canvasLeftTopPoint.y)}
+          A ${this.getUIContext().vp2px(Constants.CHAMFER_CIRCLE_R)} ${this.getUIContext()
+        .vp2px(Constants.CHAMFER_CIRCLE_R)}, 0, 0, 0,
+          ${this.getUIContext().vp2px(rightBottomPoint.x - canvasLeftTopPoint.x)} ${this.getUIContext()
+        .vp2px(rightBottomPoint.y - canvasLeftTopPoint.y)} ` +
 
-      `M ${vp2px(rightBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightBottomPoint.y - canvasLeftTopPoint.y)}
-          A ${vp2px(Constants.LOWER_ARC_CIRCLE_R)} ${vp2px(Constants.LOWER_ARC_CIRCLE_R)},
-          0, 0, 0, ${vp2px(leftBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftBottomPoint.y - canvasLeftTopPoint.y)} ` +
+      `M ${this.getUIContext().vp2px(rightBottomPoint.x - canvasLeftTopPoint.x)} ${this.getUIContext()
+        .vp2px(rightBottomPoint.y - canvasLeftTopPoint.y)}
+          A ${this.getUIContext().vp2px(Constants.LOWER_ARC_CIRCLE_R)} ${this.getUIContext()
+        .vp2px(Constants.LOWER_ARC_CIRCLE_R)},
+          0, 0, 0, ${this.getUIContext().vp2px(leftBottomPoint.x - canvasLeftTopPoint.x)} ${this.getUIContext()
+        .vp2px(leftBottomPoint.y - canvasLeftTopPoint.y)} ` +
 
-      `M ${vp2px(leftBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftBottomPoint.y - canvasLeftTopPoint.y)}
-          A ${vp2px(Constants.CHAMFER_CIRCLE_R)} ${vp2px(Constants.CHAMFER_CIRCLE_R)}, 0, 0, 0,
-          ${vp2px(leftTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftTopPoint.y - canvasLeftTopPoint.y)} ` +
+      `M ${this.getUIContext().vp2px(leftBottomPoint.x - canvasLeftTopPoint.x)} ${this.getUIContext()
+        .vp2px(leftBottomPoint.y - canvasLeftTopPoint.y)}
+          A ${this.getUIContext().vp2px(Constants.CHAMFER_CIRCLE_R)} ${this.getUIContext()
+        .vp2px(Constants.CHAMFER_CIRCLE_R)}, 0, 0, 0,
+          ${this.getUIContext().vp2px(leftTopPoint.x - canvasLeftTopPoint.x)} ${this.getUIContext()
+        .vp2px(leftTopPoint.y - canvasLeftTopPoint.y)} ` +
 
-      `M ${vp2px(leftTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftTopPoint.y - canvasLeftTopPoint.y)}
-          L ${vp2px(rightTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightTopPoint.y - canvasLeftTopPoint.y)}
-          L ${vp2px(rightBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightBottomPoint.y - canvasLeftTopPoint.y)}
-          L ${vp2px(leftBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftBottomPoint.y - canvasLeftTopPoint.y)}
-          L ${vp2px(leftTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftTopPoint.y - canvasLeftTopPoint.y)}`
+      `M ${this.getUIContext().vp2px(leftTopPoint.x - canvasLeftTopPoint.x)} ${this.getUIContext()
+        .vp2px(leftTopPoint.y - canvasLeftTopPoint.y)}
+          L ${this.getUIContext().vp2px(rightTopPoint.x - canvasLeftTopPoint.x)} ${this.getUIContext()
+        .vp2px(rightTopPoint.y - canvasLeftTopPoint.y)}
+          L ${this.getUIContext().vp2px(rightBottomPoint.x - canvasLeftTopPoint.x)} ${this.getUIContext()
+        .vp2px(rightBottomPoint.y - canvasLeftTopPoint.y)}
+          L ${this.getUIContext().vp2px(leftBottomPoint.x - canvasLeftTopPoint.x)} ${this.getUIContext()
+        .vp2px(leftBottomPoint.y - canvasLeftTopPoint.y)}
+          L ${this.getUIContext().vp2px(leftTopPoint.x - canvasLeftTopPoint.x)} ${this.getUIContext()
+        .vp2px(leftTopPoint.y - canvasLeftTopPoint.y)}`
     this.path2D = new Path2D(pathStr)
     this.doDraw()
+  }
+
+  buttonVp2px(value: number) {
+    return this.getUIContext().vp2px(value)
   }
 
   @Monitor('btnColor')
@@ -465,15 +488,15 @@ export struct ArcButton {
       this.dealTouchEvent(event)
     })
     .onClick((event: ClickEvent) => {
-      if (this.options.onClickEvent) {
-        this.options.onClickEvent(event)
+      if (this.options.onClick) {
+        this.options.onClick(event)
       }
     })
   }
 
   private dealTouchEvent(event: TouchEvent) {
-    if (this.options.touchCallback) {
-      this.options.touchCallback(event)
+    if (this.options.onTouch) {
+      this.options.onTouch(event)
     }
     let x = event.touches[0].windowX
     let y = event.touches[0].windowY
