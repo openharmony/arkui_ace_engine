@@ -451,6 +451,27 @@ void ResetTextPickerDivider(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto themeManager = context->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto pickerTheme = themeManager->GetTheme<PickerTheme>();
+    NG::ItemDivider divider;
+    Dimension defaultStrokeWidth = 0.0_vp;
+    Color defaultColor = Color::TRANSPARENT;
+    if (pickerTheme) {
+        defaultStrokeWidth = pickerTheme->GetDividerThickness();
+        defaultColor = pickerTheme->GetDividerColor();
+        divider.strokeWidth = defaultStrokeWidth;
+        divider.color = defaultColor;
+    }
+    TextPickerModelNG::SetDivider(frameNode, divider);
+}
+
+void ResetTextPickerDividerNull(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
     NG::ItemDivider divider;
     TextPickerModelNG::SetDivider(frameNode, divider);
 }
@@ -507,7 +528,8 @@ const ArkUITextPickerModifier* GetTextPickerModifier()
         ResetTextPickerDisappearTextStyle, ResetTextPickerDefaultPickerItemHeight, ResetTextPickerBackgroundColor,
         GetTextPickerRangeStr, GetTextPickerSingleRange, SetTextPickerRangeStr, GetTextPickerValue, SetTextPickerValue,
         SetTextPickerDivider, ResetTextPickerDivider, SetTextPickerGradientHeight, ResetTextPickerGradientHeight,
-        GetTextPickerSelectedSize, GetTextPickerCanLoop, GetTextPickerDefaultPickerItemHeight };
+        GetTextPickerSelectedSize, GetTextPickerCanLoop, GetTextPickerDefaultPickerItemHeight,
+        ResetTextPickerDividerNull };
 
     return &modifier;
 }
