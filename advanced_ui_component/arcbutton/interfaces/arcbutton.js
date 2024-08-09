@@ -77,8 +77,10 @@ let ArcButtonOptions = class ArcButtonOptions {
             end: new LengthMetrics(Constants.TEXT_HORIZONTAL_MARGIN, LengthUnit.VP),
             bottom: new LengthMetrics(Constants.TEXT_MARGIN_BOTTOM, LengthUnit.VP)
         };
-        this.onClickEvent = options.onClickEvent ?? (() => { });
-        this.touchCallback = options.touchCallback ?? (() => { });
+        this.onTouch = options.onTouch ?? (() => {
+        });
+        this.onClick = options.onClick ?? (() => {
+        });
     }
 };
 __decorate([
@@ -131,10 +133,10 @@ __decorate([
 ], ArcButtonOptions.prototype, "textMargin", void 0);
 __decorate([
     Trace
-], ArcButtonOptions.prototype, "touchCallback", void 0);
+], ArcButtonOptions.prototype, "onTouch", void 0);
 __decorate([
     Trace
-], ArcButtonOptions.prototype, "onClickEvent", void 0);
+], ArcButtonOptions.prototype, "onClick", void 0);
 ArcButtonOptions = __decorate([
     ObservedV2
 ], ArcButtonOptions);
@@ -296,25 +298,32 @@ export class ArcButton extends ViewV2 {
         let canvasLeftTopPoint = data.canvasLeftTop;
         canvasLeftTopPoint.x -= Constants.SHADOW_BLUR;
         canvasLeftTopPoint.y -= Constants.DISTANCE_FROM_BORDER;
-        let pathStr = `M ${vp2px(leftTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftTopPoint.y - canvasLeftTopPoint.y)}
-        A ${vp2px(Constants.UPPER_ARC_CIRCLE_R)} ${vp2px(Constants.UPPER_ARC_CIRCLE_R)},
-        0, 0, 0, ${vp2px(rightTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightTopPoint.y - canvasLeftTopPoint.y)} ` +
-            `M ${vp2px(rightTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightTopPoint.y - canvasLeftTopPoint.y)}
-          A ${vp2px(Constants.CHAMFER_CIRCLE_R)} ${vp2px(Constants.CHAMFER_CIRCLE_R)}, 0, 0, 0,
-          ${vp2px(rightBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightBottomPoint.y - canvasLeftTopPoint.y)} ` +
-            `M ${vp2px(rightBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightBottomPoint.y - canvasLeftTopPoint.y)}
-          A ${vp2px(Constants.LOWER_ARC_CIRCLE_R)} ${vp2px(Constants.LOWER_ARC_CIRCLE_R)},
-          0, 0, 0, ${vp2px(leftBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftBottomPoint.y - canvasLeftTopPoint.y)} ` +
-            `M ${vp2px(leftBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftBottomPoint.y - canvasLeftTopPoint.y)}
-          A ${vp2px(Constants.CHAMFER_CIRCLE_R)} ${vp2px(Constants.CHAMFER_CIRCLE_R)}, 0, 0, 0,
-          ${vp2px(leftTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftTopPoint.y - canvasLeftTopPoint.y)} ` +
-            `M ${vp2px(leftTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftTopPoint.y - canvasLeftTopPoint.y)}
-          L ${vp2px(rightTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightTopPoint.y - canvasLeftTopPoint.y)}
-          L ${vp2px(rightBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightBottomPoint.y - canvasLeftTopPoint.y)}
-          L ${vp2px(leftBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftBottomPoint.y - canvasLeftTopPoint.y)}
-          L ${vp2px(leftTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftTopPoint.y - canvasLeftTopPoint.y)}`;
+        let mLeftTopPointX = this.buttonVp2px(leftTopPoint.x - canvasLeftTopPoint.x);
+        let mLeftTopPointY = this.buttonVp2px(leftTopPoint.y - canvasLeftTopPoint.y);
+        let upperArcCircleR = this.buttonVp2px(Constants.UPPER_ARC_CIRCLE_R);
+        let rightTopPointX = this.buttonVp2px(rightTopPoint.x - canvasLeftTopPoint.x);
+        let rightTopPointY = this.buttonVp2px(rightTopPoint.y - canvasLeftTopPoint.y);
+        let chamferCircleR = this.buttonVp2px(Constants.CHAMFER_CIRCLE_R);
+        let rightBottomPointX = this.buttonVp2px(rightBottomPoint.x - canvasLeftTopPoint.x);
+        let rightBottomPointY = this.buttonVp2px(rightBottomPoint.y - canvasLeftTopPoint.y);
+        let lowerArcCircleR = this.buttonVp2px(Constants.LOWER_ARC_CIRCLE_R);
+        let leftBottomPointX = this.buttonVp2px(leftBottomPoint.x - canvasLeftTopPoint.x);
+        let leftBottomPointY = this.buttonVp2px(leftBottomPoint.y - canvasLeftTopPoint.y);
+        let pathStr = `M ${mLeftTopPointX} ${mLeftTopPointY} A ${upperArcCircleR} ${upperArcCircleR}, 0, 0, 0,
+       ${rightTopPointX} ${rightTopPointY}` +
+            `M ${rightTopPointX} ${rightTopPointY} A ${chamferCircleR} ${chamferCircleR}, 0, 0, 0, ${rightBottomPointX}
+       ${rightBottomPointY}` +
+            `M ${rightBottomPointX} ${rightBottomPointY} A ${lowerArcCircleR} ${lowerArcCircleR}, 0, 0, 0, ${leftBottomPointX}
+       ${leftBottomPointY}` +
+            `M ${leftBottomPointX} ${leftBottomPointY} A ${chamferCircleR} ${chamferCircleR}, 0, 0, 0, ${mLeftTopPointX}
+       ${mLeftTopPointY}` +
+            `M ${mLeftTopPointX} ${mLeftTopPointY} L ${rightTopPointX} ${rightTopPointY} L ${rightBottomPointX}
+       ${rightBottomPointY} L ${leftBottomPointX} ${leftBottomPointY} L ${mLeftTopPointX} ${mLeftTopPointY}`;
         this.path2D = new Path2D(pathStr);
         this.doDraw();
+    }
+    buttonVp2px(value) {
+        return this.getUIContext().vp2px(value);
     }
     doDraw() {
         if (!this.isReady || this.path2D === undefined) {
@@ -390,8 +399,8 @@ export class ArcButton extends ViewV2 {
                 this.dealTouchEvent(event);
             });
             Stack.onClick((event) => {
-                if (this.options.onClickEvent) {
-                    this.options.onClickEvent(event);
+                if (this.options.onClick) {
+                    this.options.onClick(event);
                 }
             });
         }, Stack);
@@ -435,8 +444,8 @@ export class ArcButton extends ViewV2 {
         Stack.pop();
     }
     dealTouchEvent(event) {
-        if (this.options.touchCallback) {
-            this.options.touchCallback(event);
+        if (this.options.onTouch) {
+            this.options.onTouch(event);
         }
         let x = event.touches[0].windowX;
         let y = event.touches[0].windowY;
