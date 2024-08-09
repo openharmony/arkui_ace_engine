@@ -829,6 +829,38 @@ HWTEST_F(TextFieldUXTest, OnHandleMove007, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnHandleMove008
+ * @tc.desc: Test Magnifier activation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, OnHandleMove008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. Call ProcessOverlay.
+     */
+    pattern_->ProcessOverlay();
+
+    /**
+     * @tc.steps: step2. set two handle and call OnHandleMove
+     * tc.expected: step2. Check if the value is created.
+     */
+    pattern_->HandleSetSelection(5, 10, false);
+    pattern_->SetIsSingleHandle(false);
+    pattern_->ProcessOverlay();
+    RectF handleRect(5, 5, 1, 1);
+    pattern_->selectOverlay_->OnHandleMove(handleRect, true);
+
+    auto magnifierLocalOffset = pattern_->GetMagnifierController()->GetLocalOffset();
+    EXPECT_EQ(magnifierLocalOffset.GetX(), handleRect.GetOffset().GetX());
+    EXPECT_EQ(magnifierLocalOffset.GetY(), handleRect.GetOffset().GetY() + handleRect.Height() / 2.0f);
+}
+
+/**
  * @tc.name: HandleSelect001
  * @tc.desc: Test the caret move upAndDown
  * @tc.type: FUNC
