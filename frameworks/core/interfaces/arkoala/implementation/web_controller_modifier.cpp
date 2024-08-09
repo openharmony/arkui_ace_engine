@@ -37,13 +37,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         void ClearHistoryImpl(WebControllerPeer* peer)
         {
         }
-        void RunJavaScriptImpl(WebControllerPeer* peer, const Literal_script_String_callback_Opt_Function* options)
+        void RunJavaScriptImpl(WebControllerPeer* peer, const Literal_String_script_Opt_Function_callback* options)
         {
         }
-        void LoadDataImpl(WebControllerPeer* peer, const Literal_data_String_mimeType_String_encoding_String_baseUrl_Opt_String_historyUrl_Opt_String* options)
+        void LoadDataImpl(WebControllerPeer* peer, const Literal_String_data_mimeType_encoding_Opt_String_baseUrl_historyUrl* options)
         {
         }
-        void LoadUrlImpl(WebControllerPeer* peer, const Literal_url_Union_String_Resource_headers_Opt_Array_Header* options)
+        void LoadUrlImpl(WebControllerPeer* peer, const Literal_Union_String_Resource_url_Opt_Array_Header_headers* options)
         {
         }
         void RefreshImpl(WebControllerPeer* peer)
@@ -52,7 +52,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         void StopImpl(WebControllerPeer* peer)
         {
         }
-        void RegisterJavaScriptProxyImpl(WebControllerPeer* peer, const Literal_object_CustomObject_name_String_methodList_Array_String* options)
+        void RegisterJavaScriptProxyImpl(WebControllerPeer* peer, const Literal_CustomObject_object_String_name_Array_String_methodList* options)
         {
         }
         void DeleteJavaScriptRegisterImpl(WebControllerPeer* peer, const Ark_String* name)

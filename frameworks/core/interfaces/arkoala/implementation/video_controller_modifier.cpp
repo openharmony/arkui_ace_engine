@@ -34,7 +34,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         void StopImpl(VideoControllerPeer* peer)
         {
         }
-        void SetCurrentTime_numberImpl(VideoControllerPeer* peer, const Ark_Number* value)
+        void SetCurrentTime0Impl(VideoControllerPeer* peer, const Ark_Number* value)
         {
         }
         void RequestFullscreenImpl(VideoControllerPeer* peer, Ark_Boolean value)
@@ -43,7 +43,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         void ExitFullscreenImpl(VideoControllerPeer* peer)
         {
         }
-        void SetCurrentTime_number_SeekModeImpl(VideoControllerPeer* peer, const Ark_Number* value, Ark_Int32 seekMode)
+        void SetCurrentTime1Impl(VideoControllerPeer* peer, const Ark_Number* value, Ark_Int32 seekMode)
         {
         }
         void ResetImpl(VideoControllerPeer* peer)
@@ -58,10 +58,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             VideoControllerModifier::StartImpl,
             VideoControllerModifier::PauseImpl,
             VideoControllerModifier::StopImpl,
-            VideoControllerModifier::SetCurrentTime_numberImpl,
+            VideoControllerModifier::SetCurrentTime0Impl,
             VideoControllerModifier::RequestFullscreenImpl,
             VideoControllerModifier::ExitFullscreenImpl,
-            VideoControllerModifier::SetCurrentTime_number_SeekModeImpl,
+            VideoControllerModifier::SetCurrentTime1Impl,
             VideoControllerModifier::ResetImpl,
         };
         return &VideoControllerAccessorImpl;

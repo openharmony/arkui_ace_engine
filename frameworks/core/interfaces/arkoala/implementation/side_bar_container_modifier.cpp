@@ -34,22 +34,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         void OnChangeImpl(Ark_NativePointer node, Ark_Function callback)
         {
         }
-        void SideBarWidth_numberImpl(Ark_NativePointer node, const Ark_Number* value)
+        void SideBarWidth0Impl(Ark_NativePointer node, const Ark_Number* value)
         {
         }
-        void MinSideBarWidth_numberImpl(Ark_NativePointer node, const Ark_Number* value)
+        void MinSideBarWidth0Impl(Ark_NativePointer node, const Ark_Number* value)
         {
         }
-        void MaxSideBarWidth_numberImpl(Ark_NativePointer node, const Ark_Number* value)
+        void MaxSideBarWidth0Impl(Ark_NativePointer node, const Ark_Number* value)
         {
         }
-        void SideBarWidth_LengthImpl(Ark_NativePointer node, const Ark_Length* value)
+        void SideBarWidth1Impl(Ark_NativePointer node, const Ark_Length* value)
         {
         }
-        void MinSideBarWidth_LengthImpl(Ark_NativePointer node, const Ark_Length* value)
+        void MinSideBarWidth1Impl(Ark_NativePointer node, const Ark_Length* value)
         {
         }
-        void MaxSideBarWidth_LengthImpl(Ark_NativePointer node, const Ark_Length* value)
+        void MaxSideBarWidth1Impl(Ark_NativePointer node, const Ark_Length* value)
         {
         }
         void AutoHideImpl(Ark_NativePointer node, Ark_Boolean value)
@@ -73,12 +73,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SideBarContainerAttributeModifier::ControlButtonImpl,
             SideBarContainerAttributeModifier::ShowControlButtonImpl,
             SideBarContainerAttributeModifier::OnChangeImpl,
-            SideBarContainerAttributeModifier::SideBarWidth_numberImpl,
-            SideBarContainerAttributeModifier::MinSideBarWidth_numberImpl,
-            SideBarContainerAttributeModifier::MaxSideBarWidth_numberImpl,
-            SideBarContainerAttributeModifier::SideBarWidth_LengthImpl,
-            SideBarContainerAttributeModifier::MinSideBarWidth_LengthImpl,
-            SideBarContainerAttributeModifier::MaxSideBarWidth_LengthImpl,
+            SideBarContainerAttributeModifier::SideBarWidth0Impl,
+            SideBarContainerAttributeModifier::MinSideBarWidth0Impl,
+            SideBarContainerAttributeModifier::MaxSideBarWidth0Impl,
+            SideBarContainerAttributeModifier::SideBarWidth1Impl,
+            SideBarContainerAttributeModifier::MinSideBarWidth1Impl,
+            SideBarContainerAttributeModifier::MaxSideBarWidth1Impl,
             SideBarContainerAttributeModifier::AutoHideImpl,
             SideBarContainerAttributeModifier::SideBarPositionImpl,
             SideBarContainerAttributeModifier::DividerImpl,

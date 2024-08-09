@@ -17,10 +17,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
     namespace PasteButtonInterfaceModifier {
-        void _setPasteButtonOptions_Impl(Ark_NativePointer node)
+        void _setPasteButtonOptions0Impl(Ark_NativePointer node)
         {
         }
-        void _setPasteButtonOptions_PasteButtonOptionsImpl(Ark_NativePointer node, const Ark_PasteButtonOptions* options)
+        void _setPasteButtonOptions1Impl(Ark_NativePointer node, const Ark_PasteButtonOptions* options)
         {
         }
     } // PasteButtonInterfaceModifier
@@ -32,8 +32,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUIPasteButtonModifier* GetPasteButtonModifier()
     {
         static const GENERATED_ArkUIPasteButtonModifier ArkUIPasteButtonModifierImpl {
-            PasteButtonInterfaceModifier::_setPasteButtonOptions_Impl,
-            PasteButtonInterfaceModifier::_setPasteButtonOptions_PasteButtonOptionsImpl,
+            PasteButtonInterfaceModifier::_setPasteButtonOptions0Impl,
+            PasteButtonInterfaceModifier::_setPasteButtonOptions1Impl,
             PasteButtonAttributeModifier::OnClickImpl,
         };
         return &ArkUIPasteButtonModifierImpl;

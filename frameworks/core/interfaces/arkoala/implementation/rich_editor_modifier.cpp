@@ -17,10 +17,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
     namespace RichEditorInterfaceModifier {
-        void _setRichEditorOptions_RichEditorOptionsImpl(Ark_NativePointer node, const Ark_RichEditorOptions* value)
+        void _setRichEditorOptions0Impl(Ark_NativePointer node, const Ark_RichEditorOptions* value)
         {
         }
-        void _setRichEditorOptions_RichEditorStyledStringOptionsImpl(Ark_NativePointer node, const Ark_RichEditorStyledStringOptions* options)
+        void _setRichEditorOptions1Impl(Ark_NativePointer node, const Ark_RichEditorStyledStringOptions* options)
         {
         }
     } // RichEditorInterfaceModifier
@@ -104,8 +104,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUIRichEditorModifier* GetRichEditorModifier()
     {
         static const GENERATED_ArkUIRichEditorModifier ArkUIRichEditorModifierImpl {
-            RichEditorInterfaceModifier::_setRichEditorOptions_RichEditorOptionsImpl,
-            RichEditorInterfaceModifier::_setRichEditorOptions_RichEditorStyledStringOptionsImpl,
+            RichEditorInterfaceModifier::_setRichEditorOptions0Impl,
+            RichEditorInterfaceModifier::_setRichEditorOptions1Impl,
             RichEditorAttributeModifier::OnReadyImpl,
             RichEditorAttributeModifier::OnSelectImpl,
             RichEditorAttributeModifier::OnSelectionChangeImpl,

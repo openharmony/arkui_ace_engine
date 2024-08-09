@@ -79,7 +79,7 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<typename T>
-    void AssignUnionTo(std::optional<T>& dst, const Union_Length_Literal_topLeft_Opt_Length_topRight_Opt_Length_bottomLeft_Opt_Length_bottomRight_Opt_Length& src)
+    void AssignUnionTo(std::optional<T>& dst, const Union_Length_Literal_Opt_Length_topLeft_topRight_bottomLeft_bottomRight& src)
     {
         switch (src.selector) {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -93,7 +93,7 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<typename T>
-    void AssignUnionTo(std::optional<T>& dst, const Union_Length_Literal_top_Opt_Length_right_Opt_Length_bottom_Opt_Length_left_Opt_Length& src)
+    void AssignUnionTo(std::optional<T>& dst, const Union_Length_Literal_Opt_Length_top_right_bottom_left& src)
     {
         switch (src.selector) {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -123,7 +123,7 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<typename T>
-    void AssignUnionTo(std::optional<T>& dst, const Union_CustomObject_Literal_topLeft_Opt_Length_topRight_Opt_Length_bottomLeft_Opt_Length_bottomRight_Opt_Length& src)
+    void AssignUnionTo(std::optional<T>& dst, const Union_CustomObject_Literal_Opt_Length_topLeft_topRight_bottomLeft_bottomRight& src)
     {
         switch (src.selector) {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -137,7 +137,7 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<typename T>
-    void AssignUnionTo(std::optional<T>& dst, const Union_CustomObject_Literal_top_Opt_Length_right_Opt_Length_bottom_Opt_Length_left_Opt_Length& src)
+    void AssignUnionTo(std::optional<T>& dst, const Union_CustomObject_Literal_Opt_Length_top_right_bottom_left& src)
     {
         switch (src.selector) {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -445,7 +445,7 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<typename T>
-    void AssignUnionTo(std::optional<T>& dst, const Union_Literal_top_Opt_Length_right_Opt_Length_bottom_Opt_Length_left_Opt_Length_Length_LocalizedPadding& src)
+    void AssignUnionTo(std::optional<T>& dst, const Union_Literal_Opt_Length_top_right_bottom_left_Length_LocalizedPadding& src)
     {
         switch (src.selector) {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -460,7 +460,7 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<typename T>
-    void AssignUnionTo(std::optional<T>& dst, const Union_Literal_top_Opt_Length_right_Opt_Length_bottom_Opt_Length_left_Opt_Length_Length& src)
+    void AssignUnionTo(std::optional<T>& dst, const Union_Literal_Opt_Length_top_right_bottom_left_Length& src)
     {
         switch (src.selector) {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -573,7 +573,7 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<typename T>
-    void AssignUnionTo(std::optional<T>& dst, const Union_Boolean_Literal_color_Union_Color_Number_String_Resource& src)
+    void AssignUnionTo(std::optional<T>& dst, const Union_Boolean_Literal_Union_Color_Number_String_Resource_color& src)
     {
         switch (src.selector) {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -871,7 +871,7 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<typename T>
-    void AssignUnionTo(std::optional<T>& dst, const Union_BorderStyle_Literal_top_Opt_BorderStyle_right_Opt_BorderStyle_bottom_Opt_BorderStyle_left_Opt_BorderStyle& src)
+    void AssignUnionTo(std::optional<T>& dst, const Union_BorderStyle_Literal_Opt_BorderStyle_top_right_bottom_left& src)
     {
         switch (src.selector) {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -885,7 +885,7 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<typename T>
-    void AssignUnionTo(std::optional<T>& dst, const Union_Union_Color_Number_String_Resource_Literal_top_Opt_Union_Color_Number_String_Resource_right_Opt_Union_Color_Number_String_Resource_bottom_Opt_Union_Color_Number_String_Resource_left_Opt_Union_Color_Number_String_Resource_LocalizedEdgeColors& src)
+    void AssignUnionTo(std::optional<T>& dst, const Union_Union_Color_Number_String_Resource_Literal_Opt_Union_Color_Number_String_Resource_top_right_bottom_left_LocalizedEdgeColors& src)
     {
         switch (src.selector) {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -900,7 +900,7 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<typename T>
-    void AssignUnionTo(std::optional<T>& dst, const Union_Length_Literal_top_Opt_Length_right_Opt_Length_bottom_Opt_Length_left_Opt_Length_LocalizedEdgeWidths& src)
+    void AssignUnionTo(std::optional<T>& dst, const Union_Length_Literal_Opt_Length_top_right_bottom_left_LocalizedEdgeWidths& src)
     {
         switch (src.selector) {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -971,7 +971,7 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<typename T>
-    void AssignUnionTo(std::optional<T>& dst, const Union_Number_Literal_span_Number_offset_Number& src)
+    void AssignUnionTo(std::optional<T>& dst, const Union_Number_Literal_Number_span_offset& src)
     {
         switch (src.selector) {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -1000,7 +1000,7 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<typename T>
-    void AssignUnionTo(std::optional<T>& dst, const Union_Literal_top_Opt_OutlineStyle_right_Opt_OutlineStyle_bottom_Opt_OutlineStyle_left_Opt_OutlineStyle_OutlineStyle& src)
+    void AssignUnionTo(std::optional<T>& dst, const Union_Literal_Opt_OutlineStyle_top_right_bottom_left_OutlineStyle& src)
     {
         switch (src.selector) {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -1014,7 +1014,7 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<typename T>
-    void AssignUnionTo(std::optional<T>& dst, const Union_Literal_topLeft_Opt_Length_topRight_Opt_Length_bottomLeft_Opt_Length_bottomRight_Opt_Length_Length& src)
+    void AssignUnionTo(std::optional<T>& dst, const Union_Literal_Opt_Length_topLeft_topRight_bottomLeft_bottomRight_Length& src)
     {
         switch (src.selector) {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -1028,7 +1028,7 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<typename T>
-    void AssignUnionTo(std::optional<T>& dst, const Union_Literal_top_Opt_Union_Color_Number_String_Resource_right_Opt_Union_Color_Number_String_Resource_bottom_Opt_Union_Color_Number_String_Resource_left_Opt_Union_Color_Number_String_Resource_Union_Color_Number_String_Resource_LocalizedEdgeColors& src)
+    void AssignUnionTo(std::optional<T>& dst, const Union_Literal_Opt_Union_Color_Number_String_Resource_top_right_bottom_left_Union_Color_Number_String_Resource_LocalizedEdgeColors& src)
     {
         switch (src.selector) {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -1058,7 +1058,7 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<typename T>
-    void AssignUnionTo(std::optional<T>& dst, const Union_Literal_top_Opt_Length_right_Opt_Length_bottom_Opt_Length_left_Opt_Length_CustomObject_LocalizedEdgeWidths& src)
+    void AssignUnionTo(std::optional<T>& dst, const Union_Literal_Opt_Length_top_right_bottom_left_CustomObject_LocalizedEdgeWidths& src)
     {
         switch (src.selector) {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -1073,7 +1073,7 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<typename T>
-    void AssignUnionTo(std::optional<T>& dst, const Union_Literal_top_Opt_BorderStyle_right_Opt_BorderStyle_bottom_Opt_BorderStyle_left_Opt_BorderStyle_BorderStyle& src)
+    void AssignUnionTo(std::optional<T>& dst, const Union_Literal_Opt_BorderStyle_top_right_bottom_left_BorderStyle& src)
     {
         switch (src.selector) {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -1087,7 +1087,7 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<typename T>
-    void AssignUnionTo(std::optional<T>& dst, const Union_Literal_topLeft_Opt_Length_topRight_Opt_Length_bottomLeft_Opt_Length_bottomRight_Opt_Length_Length_LocalizedBorderRadiuses& src)
+    void AssignUnionTo(std::optional<T>& dst, const Union_Literal_Opt_Length_topLeft_topRight_bottomLeft_bottomRight_Length_LocalizedBorderRadiuses& src)
     {
         switch (src.selector) {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -1102,7 +1102,7 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<typename T>
-    void AssignUnionTo(std::optional<T>& dst, const Union_Literal_top_Opt_Length_right_Opt_Length_bottom_Opt_Length_left_Opt_Length_Length_LocalizedEdgeWidths& src)
+    void AssignUnionTo(std::optional<T>& dst, const Union_Literal_Opt_Length_top_right_bottom_left_Length_LocalizedEdgeWidths& src)
     {
         switch (src.selector) {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -1318,7 +1318,7 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<typename T>
-    void AssignUnionTo(std::optional<T>& dst, const Union_String_Resource_Union_Function_Undefined_Literal_icon_Opt_Union_String_Resource_text_Opt_Union_String_Resource& src)
+    void AssignUnionTo(std::optional<T>& dst, const Union_String_Resource_Union_Function_Undefined_Literal_Opt_Union_String_Resource_icon_text& src)
     {
         switch (src.selector) {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -1334,7 +1334,7 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<typename T>
-    void AssignUnionTo(std::optional<T>& dst, const Union_Number_String_Literal_minSize_Union_String_Number& src)
+    void AssignUnionTo(std::optional<T>& dst, const Union_Number_String_Literal_Union_String_Number_minSize& src)
     {
         switch (src.selector) {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -1463,7 +1463,7 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<typename T>
-    void AssignUnionTo(std::optional<T>& dst, const Union_Literal_width_Opt_Union_Number_String_height_Opt_Union_Number_String_radius_Opt_Union_Number_String_Array_CustomObject_Literal_width_Opt_Union_Number_String_height_Opt_Union_Number_String_radiusWidth_Opt_Union_Number_String_radiusHeight_Opt_Union_Number_String& src)
+    void AssignUnionTo(std::optional<T>& dst, const Union_Literal_Opt_Union_Number_String_width_height_Opt_Union_Number_String_Array_CustomObject_radius_Literal_Opt_Union_Number_String_width_height_radiusWidth_radiusHeight& src)
     {
         switch (src.selector) {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -1670,7 +1670,7 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<typename T>
-    void AssignUnionTo(std::optional<T>& dst, const Union_Literal_strokeWidth_Length_color_Opt_Union_Color_Number_String_Resource_startMargin_Opt_Length_endMargin_Opt_Length_Ark_Undefined& src)
+    void AssignUnionTo(std::optional<T>& dst, const Union_Literal_Length_strokeWidth_Opt_Union_Color_Number_String_Resource_color_Opt_Length_startMargin_endMargin_Ark_Undefined& src)
     {
         switch (src.selector) {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -1698,7 +1698,7 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<typename T>
-    void AssignUnionTo(std::optional<T>& dst, const Union_Number_Literal_minLength_Length_maxLength_Length& src)
+    void AssignUnionTo(std::optional<T>& dst, const Union_Number_Literal_Length_minLength_maxLength& src)
     {
         switch (src.selector) {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -2069,7 +2069,7 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<typename T>
-    void AssignUnionTo(std::optional<T>& dst, const Union_OutlineStyle_Literal_top_Opt_OutlineStyle_right_Opt_OutlineStyle_bottom_Opt_OutlineStyle_left_Opt_OutlineStyle& src)
+    void AssignUnionTo(std::optional<T>& dst, const Union_OutlineStyle_Literal_Opt_OutlineStyle_top_right_bottom_left& src)
     {
         switch (src.selector) {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -2083,7 +2083,7 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<typename T>
-    void AssignUnionTo(std::optional<T>& dst, const Union_Length_Literal_topLeft_Opt_Length_topRight_Opt_Length_bottomLeft_Opt_Length_bottomRight_Opt_Length_LocalizedBorderRadiuses& src)
+    void AssignUnionTo(std::optional<T>& dst, const Union_Length_Literal_Opt_Length_topLeft_topRight_bottomLeft_bottomRight_LocalizedBorderRadiuses& src)
     {
         switch (src.selector) {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -2157,403 +2157,403 @@ namespace OHOS::Ace::NG::Converter {
     void AssignLiteralTo(std::optional<T>& dst, const P& src);
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_topLeft_Opt_Length_topRight_Opt_Length_bottomLeft_Opt_Length_bottomRight_Opt_Length& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Length_topLeft_topRight_bottomLeft_bottomRight& src)
     {
         AssignTo(dst, src.topLeft);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_top_Opt_Length_right_Opt_Length_bottom_Opt_Length_left_Opt_Length& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Length_top_right_bottom_left& src)
     {
         AssignTo(dst, src.top);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_color_Union_Color_Number_String_Resource& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Union_Color_Number_String_Resource_color& src)
     {
         AssignTo(dst, src.color);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_top_Opt_BorderStyle_right_Opt_BorderStyle_bottom_Opt_BorderStyle_left_Opt_BorderStyle& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_BorderStyle_top_right_bottom_left& src)
     {
         AssignTo(dst, src.top);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_top_Opt_Union_Color_Number_String_Resource_right_Opt_Union_Color_Number_String_Resource_bottom_Opt_Union_Color_Number_String_Resource_left_Opt_Union_Color_Number_String_Resource& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Union_Color_Number_String_Resource_top_right_bottom_left& src)
     {
         AssignTo(dst, src.top);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_value_String_action_Function& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_String_value_Function_action& src)
     {
         AssignTo(dst, src.value);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_span_Number_offset_Number& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Number_span_offset& src)
     {
         AssignTo(dst, src.span);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_top_Opt_OutlineStyle_right_Opt_OutlineStyle_bottom_Opt_OutlineStyle_left_Opt_OutlineStyle& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_OutlineStyle_top_right_bottom_left& src)
     {
         AssignTo(dst, src.top);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_shown_Union_String_CustomObject_Resource_hidden_Union_String_CustomObject_Resource_switching_Opt_Union_String_CustomObject_Resource& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Union_String_CustomObject_Resource_shown_hidden_Opt_Union_String_CustomObject_Resource_switching& src)
     {
         AssignTo(dst, src.shown);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_icon_Opt_Union_String_Resource_text_Opt_Union_String_Resource& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Union_String_Resource_icon_text& src)
     {
         AssignTo(dst, src.icon);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_minSize_Union_String_Number& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Union_String_Number_minSize& src)
     {
         AssignTo(dst, src.minSize);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_width_Opt_Union_Number_String_height_Opt_Union_Number_String_radiusWidth_Opt_Union_Number_String_radiusHeight_Opt_Union_Number_String& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Union_Number_String_width_height_radiusWidth_radiusHeight& src)
     {
         AssignTo(dst, src.width);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_width_Opt_Union_Number_String_height_Opt_Union_Number_String_radius_Opt_Union_Number_String_Array_CustomObject& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Union_Number_String_width_height_Opt_Union_Number_String_Array_CustomObject_radius& src)
     {
         AssignTo(dst, src.width);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_strokeWidth_Length_color_Opt_Union_Color_Number_String_Resource_startMargin_Opt_Length_endMargin_Opt_Length& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Length_strokeWidth_Opt_Union_Color_Number_String_Resource_color_Opt_Length_startMargin_endMargin& src)
     {
         AssignTo(dst, src.strokeWidth);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_minLength_Length_maxLength_Length& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Length_minLength_maxLength& src)
     {
         AssignTo(dst, src.minLength);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_year_Number_month_Number_day_Number& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Number_year_month_day& src)
     {
         AssignTo(dst, src.year);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_anchor_String_align_VerticalAlign& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_String_anchor_VerticalAlign_align& src)
     {
         AssignTo(dst, src.anchor);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_anchor_String_align_HorizontalAlign& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_String_anchor_HorizontalAlign_align& src)
     {
         AssignTo(dst, src.anchor);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_callback_Function_fileSelector_CustomObject& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Function_callback_CustomObject_fileSelector& src)
     {
         AssignTo(dst, src.callback);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_handler_Function_error_CustomObject& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Function_handler_CustomObject_error& src)
     {
         AssignTo(dst, src.handler);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_data_Union_String_WebResourceRequest& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Union_String_WebResourceRequest_data& src)
     {
         AssignTo(dst, src.data);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_time_Number& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Number_time& src)
     {
         AssignTo(dst, src.time);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_duration_Number& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Number_duration& src)
     {
         AssignTo(dst, src.duration);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_fullscreen_Boolean& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Boolean_fullscreen& src)
     {
         AssignTo(dst, src.fullscreen);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_errcode_Number_msg_String& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Number_errcode_String_msg& src)
     {
         AssignTo(dst, src.errcode);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_width_Number_height_Number_componentWidth_Number_componentHeight_Number_loadingStatus_Number_contentWidth_Number_contentHeight_Number_contentOffsetX_Number_contentOffsetY_Number& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Number_width_height_componentWidth_componentHeight_loadingStatus_contentWidth_contentHeight_contentOffsetX_contentOffsetY& src)
     {
         AssignTo(dst, src.width);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_foldStatus_FoldStatus& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_FoldStatus_foldStatus& src)
     {
         AssignTo(dst, src.foldStatus);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_surfaceWidth_Number_surfaceHeight_Number& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Number_surfaceWidth_surfaceHeight& src)
     {
         AssignTo(dst, src.surfaceWidth);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_object_CustomObject_name_String_methodList_Array_String& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_CustomObject_object_String_name_Array_String_methodList& src)
     {
         AssignTo(dst, src.object);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_url_Union_String_Resource_headers_Opt_Array_Header& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Union_String_Resource_url_Opt_Array_Header_headers& src)
     {
         AssignTo(dst, src.url);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_data_String_mimeType_String_encoding_String_baseUrl_Opt_String_historyUrl_Opt_String& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_String_data_mimeType_encoding_Opt_String_baseUrl_historyUrl& src)
     {
         AssignTo(dst, src.data);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_script_String_callback_Opt_Function& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_String_script_Opt_Function_callback& src)
     {
         AssignTo(dst, src.script);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_next_Boolean_direction_Opt_Axis& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Boolean_next_Opt_Axis_direction& src)
     {
         AssignTo(dst, src.next);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_xOffset_Union_Number_String_yOffset_Union_Number_String_animation_Opt_Union_ScrollAnimationOptions_Boolean& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Union_Number_String_xOffset_yOffset_Opt_Union_ScrollAnimationOptions_Boolean_animation& src)
     {
         AssignTo(dst, src.xOffset);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_fingers_Opt_Number_direction_Opt_PanDirection_distance_Opt_Number& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Number_fingers_distance_Opt_PanDirection_direction& src)
     {
         AssignTo(dst, src.fingers);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_id_String_type_XComponentType_libraryname_Opt_String_controller_Opt_XComponentController& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_String_id_XComponentType_type_Opt_String_libraryname_Opt_XComponentController_controller& src)
     {
         AssignTo(dst, src.id);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_id_String_type_String_libraryname_Opt_String_controller_Opt_XComponentController& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_String_id_type_Opt_String_libraryname_Opt_XComponentController_controller& src)
     {
         AssignTo(dst, src.id);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_type_ToggleType_isOn_Opt_Boolean& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_ToggleType_type_Opt_Boolean_isOn& src)
     {
         AssignTo(dst, src.type);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_style_Opt_CancelButtonStyle_icon_Opt_IconOptions& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_CancelButtonStyle_style_Opt_IconOptions_icon& src)
     {
         AssignTo(dst, src.style);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_timeZoneOffset_Opt_Number_controller_Opt_TextClockController& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Number_timeZoneOffset_Opt_TextClockController_controller& src)
     {
         AssignTo(dst, src.timeZoneOffset);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_overflow_TextOverflow& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_TextOverflow_overflow& src)
     {
         AssignTo(dst, src.overflow);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_barPosition_Opt_BarPosition_index_Opt_Number_controller_Opt_TabsController& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_BarPosition_barPosition_Opt_Number_index_Opt_TabsController_controller& src)
     {
         AssignTo(dst, src.barPosition);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_index_Opt_Number& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Number_index& src)
     {
         AssignTo(dst, src.index);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_alignContent_Opt_Alignment& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Alignment_alignContent& src)
     {
         AssignTo(dst, src.alignContent);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_x_Opt_Union_Number_String_y_Opt_Union_Number_String_width_Opt_Union_Number_String_height_Opt_Union_Number_String& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Union_Number_String_x_y_width_height& src)
     {
         AssignTo(dst, src.x);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_value_Opt_String_placeholder_Opt_Union_String_Resource_icon_Opt_String_controller_Opt_SearchController& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_String_value_icon_Opt_Union_String_Resource_placeholder_Opt_SearchController_controller& src)
     {
         AssignTo(dst, src.value);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_space_Opt_Union_String_Number& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Union_String_Number_space& src)
     {
         AssignTo(dst, src.space);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_backgroundUri_String_foregroundUri_String_secondaryUri_Opt_String& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_String_backgroundUri_foregroundUri_Opt_String_secondaryUri& src)
     {
         AssignTo(dst, src.backgroundUri);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_rating_Number_indicator_Opt_Boolean& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Number_rating_Opt_Boolean_indicator& src)
     {
         AssignTo(dst, src.rating);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_width_Opt_Union_String_Number_height_Opt_Union_String_Number& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Union_String_Number_width_height& src)
     {
         AssignTo(dst, src.width);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_template_PluginComponentTemplate_data_CustomObject& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_PluginComponentTemplate_template_CustomObject_data& src)
     {
         AssignTo(dst, src.template_);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_width_Opt_Union_Number_String_height_Opt_Union_Number_String_commands_Opt_String& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Union_Number_String_width_height_Opt_String_commands& src)
     {
         AssignTo(dst, src.width);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_target_String_type_Opt_NavigationType& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_String_target_Opt_NavigationType_type& src)
     {
         AssignTo(dst, src.target);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_start_Boolean_step_Opt_Number_loop_Opt_Number_fromStart_Opt_Boolean_src_String& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Boolean_start_Opt_Number_step_loop_Opt_Boolean_fromStart_String_src& src)
     {
         AssignTo(dst, src.start);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_initialIndex_Opt_Number_space_Opt_Union_Number_String_scroller_Opt_Scroller& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Number_initialIndex_Opt_Union_Number_String_space_Opt_Scroller_scroller& src)
     {
         AssignTo(dst, src.initialIndex);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_width_Number_height_Number& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Number_width_height& src)
     {
         AssignTo(dst, src.width);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_value_Number_min_Opt_Number_max_Opt_Number& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Number_value_Opt_Number_min_max& src)
     {
         AssignTo(dst, src.value);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_upperItems_Opt_Array_String& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Array_String_upperItems& src)
     {
         AssignTo(dst, src.upperItems);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_dx_Length_dy_Length& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Length_dx_dy& src)
     {
         AssignTo(dst, src.dx);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_date_Literal_year_Number_month_Number_day_Number_currentData_MonthData_preData_MonthData_nextData_MonthData_controller_Opt_CalendarController& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Literal_Number_year_month_day_date_MonthData_currentData_preData_nextData_Opt_CalendarController_controller& src)
     {
         AssignTo(dst, src.date);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_arrayValue_Array_String_selected_Number& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Array_String_arrayValue_Number_selected& src)
     {
         AssignTo(dst, src.arrayValue);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_want_CustomObject& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_CustomObject_want& src)
     {
         AssignTo(dst, src.want);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_center_Tuple_Length_Length_radius_Union_Number_String_colors_Array_Tuple_Union_Color_Number_String_Resource_Number_repeating_Opt_Boolean& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Tuple_Length_Length_center_Union_Number_String_radius_Array_Tuple_Union_Color_Number_String_Resource_Number_colors_Opt_Boolean_repeating& src)
     {
         AssignTo(dst, src.center);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_center_Tuple_Length_Length_start_Opt_Union_Number_String_end_Opt_Union_Number_String_rotation_Opt_Union_Number_String_colors_Array_Tuple_Union_Color_Number_String_Resource_Number_repeating_Opt_Boolean& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Tuple_Length_Length_center_Opt_Union_Number_String_start_end_rotation_Array_Tuple_Union_Color_Number_String_Resource_Number_colors_Opt_Boolean_repeating& src)
     {
         AssignTo(dst, src.center);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_angle_Opt_Union_Number_String_direction_Opt_GradientDirection_colors_Array_Tuple_Union_Color_Number_String_Resource_Number_repeating_Opt_Boolean& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Union_Number_String_angle_Opt_GradientDirection_direction_Array_Tuple_Union_Color_Number_String_Resource_Number_colors_Opt_Boolean_repeating& src)
     {
         AssignTo(dst, src.angle);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_xs_Opt_Union_Number_Literal_span_Number_offset_Number_sm_Opt_Union_Number_Literal_span_Number_offset_Number_md_Opt_Union_Number_Literal_span_Number_offset_Number_lg_Opt_Union_Number_Literal_span_Number_offset_Number& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Union_Number_Literal_Number_span_offset_xs_sm_md_lg& src)
     {
         AssignTo(dst, src.xs);
     }
 
     template<typename T>
-    void AssignLiteralTo(std::optional<T>& dst, const Literal_align_Opt_Alignment& src)
+    void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Alignment_align& src)
     {
         AssignTo(dst, src.align);
     }
@@ -2581,8 +2581,8 @@ namespace OHOS::Ace::NG::Converter {
         ASSIGN_OPT(Opt_ColoringStrategy)
         ASSIGN_OPT(Opt_Color)
         ASSIGN_OPT(Opt_Position)
-        ASSIGN_OPT(Opt_Literal_topLeft_Opt_Length_topRight_Opt_Length_bottomLeft_Opt_Length_bottomRight_Opt_Length)
-        ASSIGN_OPT(Opt_Literal_top_Opt_Length_right_Opt_Length_bottom_Opt_Length_left_Opt_Length)
+        ASSIGN_OPT(Opt_Literal_Opt_Length_topLeft_topRight_bottomLeft_bottomRight)
+        ASSIGN_OPT(Opt_Literal_Opt_Length_top_right_bottom_left)
         ASSIGN_OPT(Opt_Tuple_Length_Length)
         ASSIGN_OPT(Opt_CustomObject)
         ASSIGN_OPT(Opt_Boolean)
@@ -2591,14 +2591,14 @@ namespace OHOS::Ace::NG::Converter {
         ASSIGN_OPT(Opt_ShadowType)
         ASSIGN_OPT(Opt_FontWeight)
         ASSIGN_OPT(Opt_Area)
-        ASSIGN_OPT(Opt_Union_Length_Literal_topLeft_Opt_Length_topRight_Opt_Length_bottomLeft_Opt_Length_bottomRight_Opt_Length)
-        ASSIGN_OPT(Opt_Union_Length_Literal_top_Opt_Length_right_Opt_Length_bottom_Opt_Length_left_Opt_Length)
+        ASSIGN_OPT(Opt_Union_Length_Literal_Opt_Length_topLeft_topRight_bottomLeft_bottomRight)
+        ASSIGN_OPT(Opt_Union_Length_Literal_Opt_Length_top_right_bottom_left)
         ASSIGN_OPT(Opt_LeadingMarginPlaceholder)
         ASSIGN_OPT(Opt_TextDecorationStyle)
         ASSIGN_OPT(Opt_Union_Color_Number_String_Resource)
         ASSIGN_OPT(Opt_TextDecorationType)
-        ASSIGN_OPT(Opt_Union_CustomObject_Literal_topLeft_Opt_Length_topRight_Opt_Length_bottomLeft_Opt_Length_bottomRight_Opt_Length)
-        ASSIGN_OPT(Opt_Union_CustomObject_Literal_top_Opt_Length_right_Opt_Length_bottom_Opt_Length_left_Opt_Length)
+        ASSIGN_OPT(Opt_Union_CustomObject_Literal_Opt_Length_topLeft_topRight_bottomLeft_bottomRight)
+        ASSIGN_OPT(Opt_Union_CustomObject_Literal_Opt_Length_top_right_bottom_left)
         ASSIGN_OPT(Opt_Array_ShadowOptions)
         ASSIGN_OPT(Opt_ShadowOptions)
         ASSIGN_OPT(Opt_ICurve)
@@ -2664,7 +2664,7 @@ namespace OHOS::Ace::NG::Converter {
         ASSIGN_OPT(Opt_TransitionEffect)
         ASSIGN_OPT(Opt_MenuPreviewMode)
         ASSIGN_OPT(Opt_ShadowStyle)
-        ASSIGN_OPT(Opt_Literal_color_Union_Color_Number_String_Resource)
+        ASSIGN_OPT(Opt_Literal_Union_Color_Number_String_Resource_color)
         ASSIGN_OPT(Opt_OutlineStyle)
         ASSIGN_OPT(Opt_Array_TouchObject)
         ASSIGN_OPT(Opt_TouchType)
@@ -2707,9 +2707,9 @@ namespace OHOS::Ace::NG::Converter {
         ASSIGN_OPT(Opt_TabBarIconStyle)
         ASSIGN_OPT(Opt_VerticalAlign)
         ASSIGN_OPT(Opt_LayoutMode)
-        ASSIGN_OPT(Opt_Union_Literal_top_Opt_Length_right_Opt_Length_bottom_Opt_Length_left_Opt_Length_Length_LocalizedPadding)
+        ASSIGN_OPT(Opt_Union_Literal_Opt_Length_top_right_bottom_left_Length_LocalizedPadding)
         ASSIGN_OPT(Opt_LabelStyle)
-        ASSIGN_OPT(Opt_Union_Literal_top_Opt_Length_right_Opt_Length_bottom_Opt_Length_left_Opt_Length_Length)
+        ASSIGN_OPT(Opt_Union_Literal_Opt_Length_top_right_bottom_left_Length)
         ASSIGN_OPT(Opt_BoardStyle)
         ASSIGN_OPT(Opt_SelectedMode)
         ASSIGN_OPT(Opt_IndicatorStyle)
@@ -2737,9 +2737,9 @@ namespace OHOS::Ace::NG::Converter {
         ASSIGN_OPT(Opt_Array_CalendarDay)
         ASSIGN_OPT(Opt_BadgeStyle)
         ASSIGN_OPT(Opt_Union_BadgePosition_Position)
-        ASSIGN_OPT(Opt_Literal_top_Opt_BorderStyle_right_Opt_BorderStyle_bottom_Opt_BorderStyle_left_Opt_BorderStyle)
+        ASSIGN_OPT(Opt_Literal_Opt_BorderStyle_top_right_bottom_left)
         ASSIGN_OPT(Opt_LocalizedEdgeColors)
-        ASSIGN_OPT(Opt_Literal_top_Opt_Union_Color_Number_String_Resource_right_Opt_Union_Color_Number_String_Resource_bottom_Opt_Union_Color_Number_String_Resource_left_Opt_Union_Color_Number_String_Resource)
+        ASSIGN_OPT(Opt_Literal_Opt_Union_Color_Number_String_Resource_top_right_bottom_left)
         ASSIGN_OPT(Opt_LocalizedEdgeWidths)
         ASSIGN_OPT(Opt_SheetTitleOptions)
         ASSIGN_OPT(Opt_BlurStyle)
@@ -2749,21 +2749,21 @@ namespace OHOS::Ace::NG::Converter {
         ASSIGN_OPT(Opt_Union_Boolean_Function)
         ASSIGN_OPT(Opt_Union_ShadowOptions_ShadowStyle)
         ASSIGN_OPT(Opt_ArrowPointPosition)
-        ASSIGN_OPT(Opt_Union_Boolean_Literal_color_Union_Color_Number_String_Resource)
+        ASSIGN_OPT(Opt_Union_Boolean_Literal_Union_Color_Number_String_Resource_color)
         ASSIGN_OPT(Opt_Union_Color_String_Resource_Number)
         ASSIGN_OPT(Opt_PopupMessageOptions)
-        ASSIGN_OPT(Opt_Literal_value_String_action_Function)
+        ASSIGN_OPT(Opt_Literal_String_value_Function_action)
         ASSIGN_OPT(Opt_Array_DragPreviewMode)
         ASSIGN_OPT(Opt_DragPreviewMode)
         ASSIGN_OPT(Opt_ClickEffectLevel)
         ASSIGN_OPT(Opt_HorizontalAlign)
-        ASSIGN_OPT(Opt_Literal_span_Number_offset_Number)
+        ASSIGN_OPT(Opt_Literal_Number_span_offset)
         ASSIGN_OPT(Opt_GestureInterface)
         ASSIGN_OPT(Opt_RotateOptions)
         ASSIGN_OPT(Opt_ScaleOptions)
         ASSIGN_OPT(Opt_TranslateOptions)
         ASSIGN_OPT(Opt_TransitionType)
-        ASSIGN_OPT(Opt_Literal_top_Opt_OutlineStyle_right_Opt_OutlineStyle_bottom_Opt_OutlineStyle_left_Opt_OutlineStyle)
+        ASSIGN_OPT(Opt_Literal_Opt_OutlineStyle_top_right_bottom_left)
         ASSIGN_OPT(Opt_LocalizedBorderRadiuses)
         ASSIGN_OPT(Opt_BlurOptions)
         ASSIGN_OPT(Opt_AdaptiveColor)
@@ -2841,7 +2841,7 @@ namespace OHOS::Ace::NG::Converter {
         ASSIGN_OPT(Opt_Scroller)
         ASSIGN_OPT(Opt_RRect)
         ASSIGN_OPT(Opt_DividerStyle)
-        ASSIGN_OPT(Opt_Literal_shown_Union_String_CustomObject_Resource_hidden_Union_String_CustomObject_Resource_switching_Opt_Union_String_CustomObject_Resource)
+        ASSIGN_OPT(Opt_Literal_Union_String_CustomObject_Resource_shown_hidden_Opt_Union_String_CustomObject_Resource_switching)
         ASSIGN_OPT(Opt_ImageAIOptions)
         ASSIGN_OPT(Opt_XComponentController)
         ASSIGN_OPT(Opt_XComponentType)
@@ -2865,13 +2865,13 @@ namespace OHOS::Ace::NG::Converter {
         ASSIGN_OPT(Opt_TextController)
         ASSIGN_OPT(Opt_BottomTabBarStyle)
         ASSIGN_OPT(Opt_SubTabBarStyle)
-        ASSIGN_OPT(Opt_Literal_icon_Opt_Union_String_Resource_text_Opt_Union_String_Resource)
+        ASSIGN_OPT(Opt_Literal_Opt_Union_String_Resource_icon_text)
         ASSIGN_OPT(Opt_EdgeEffect)
         ASSIGN_OPT(Opt_AnimationMode)
         ASSIGN_OPT(Opt_LayoutStyle)
         ASSIGN_OPT(Opt_TabsController)
         ASSIGN_OPT(Opt_BarPosition)
-        ASSIGN_OPT(Opt_Literal_minSize_Union_String_Number)
+        ASSIGN_OPT(Opt_Literal_Union_String_Number_minSize)
         ASSIGN_OPT(Opt_ArrowStyle)
         ASSIGN_OPT(Opt_DigitIndicator)
         ASSIGN_OPT(Opt_DotIndicator)
@@ -2898,8 +2898,8 @@ namespace OHOS::Ace::NG::Converter {
         ASSIGN_OPT(Opt_LocalizedBarrierDirection)
         ASSIGN_OPT(Opt_BarrierDirection)
         ASSIGN_OPT(Opt_GuideLinePosition)
-        ASSIGN_OPT(Opt_Literal_width_Opt_Union_Number_String_height_Opt_Union_Number_String_radiusWidth_Opt_Union_Number_String_radiusHeight_Opt_Union_Number_String)
-        ASSIGN_OPT(Opt_Literal_width_Opt_Union_Number_String_height_Opt_Union_Number_String_radius_Opt_Union_Number_String_Array_CustomObject)
+        ASSIGN_OPT(Opt_Literal_Opt_Union_Number_String_width_height_radiusWidth_radiusHeight)
+        ASSIGN_OPT(Opt_Literal_Opt_Union_Number_String_width_height_Opt_Union_Number_String_Array_CustomObject_radius)
         ASSIGN_OPT(Opt_RadioIndicatorType)
         ASSIGN_OPT(Opt_PluginComponentTemplate)
         ASSIGN_OPT(Opt_CircleStyleOptions)
@@ -2923,14 +2923,14 @@ namespace OHOS::Ace::NG::Converter {
         ASSIGN_OPT(Opt_LocationIconStyle)
         ASSIGN_OPT(Opt_LocalizedEdges)
         ASSIGN_OPT(Opt_Edges)
-        ASSIGN_OPT(Opt_Literal_strokeWidth_Length_color_Opt_Union_Color_Number_String_Resource_startMargin_Opt_Length_endMargin_Opt_Length)
+        ASSIGN_OPT(Opt_Literal_Length_strokeWidth_Opt_Union_Color_Number_String_Resource_color_Opt_Length_startMargin_endMargin)
         ASSIGN_OPT(Opt_ListItemGroupStyle)
         ASSIGN_OPT(Opt_SwipeEdgeEffect)
         ASSIGN_OPT(Opt_Union_Union_Function_Undefined_SwipeActionItem)
         ASSIGN_OPT(Opt_EditMode)
         ASSIGN_OPT(Opt_ListItemStyle)
         ASSIGN_OPT(Opt_ChainEdgeEffect)
-        ASSIGN_OPT(Opt_Literal_minLength_Length_maxLength_Length)
+        ASSIGN_OPT(Opt_Literal_Length_minLength_maxLength)
         ASSIGN_OPT(Opt_ColorFilter)
         ASSIGN_OPT(Opt_Union_String_Resource_CustomObject)
         ASSIGN_OPT(Opt_ImageContent)
@@ -2964,7 +2964,7 @@ namespace OHOS::Ace::NG::Converter {
         ASSIGN_OPT(Opt_CanvasRenderingContext2D)
         ASSIGN_OPT(Opt_CalendarController)
         ASSIGN_OPT(Opt_MonthData)
-        ASSIGN_OPT(Opt_Literal_year_Number_month_Number_day_Number)
+        ASSIGN_OPT(Opt_Literal_Number_year_month_day)
         ASSIGN_OPT(Opt_ButtonRole)
         ASSIGN_OPT(Opt_ControlSize)
         ASSIGN_OPT(Opt_ButtonStyleMode)
@@ -2975,9 +2975,9 @@ namespace OHOS::Ace::NG::Converter {
         ASSIGN_OPT(Opt_FunctionKey)
         ASSIGN_OPT(Opt_ScrollSizeMode)
         ASSIGN_OPT(Opt_SheetMode)
-        ASSIGN_OPT(Opt_Union_BorderStyle_Literal_top_Opt_BorderStyle_right_Opt_BorderStyle_bottom_Opt_BorderStyle_left_Opt_BorderStyle)
-        ASSIGN_OPT(Opt_Union_Union_Color_Number_String_Resource_Literal_top_Opt_Union_Color_Number_String_Resource_right_Opt_Union_Color_Number_String_Resource_bottom_Opt_Union_Color_Number_String_Resource_left_Opt_Union_Color_Number_String_Resource_LocalizedEdgeColors)
-        ASSIGN_OPT(Opt_Union_Length_Literal_top_Opt_Length_right_Opt_Length_bottom_Opt_Length_left_Opt_Length_LocalizedEdgeWidths)
+        ASSIGN_OPT(Opt_Union_BorderStyle_Literal_Opt_BorderStyle_top_right_bottom_left)
+        ASSIGN_OPT(Opt_Union_Union_Color_Number_String_Resource_Literal_Opt_Union_Color_Number_String_Resource_top_right_bottom_left_LocalizedEdgeColors)
+        ASSIGN_OPT(Opt_Union_Length_Literal_Opt_Length_top_right_bottom_left_LocalizedEdgeWidths)
         ASSIGN_OPT(Opt_Union_SheetTitleOptions_Union_Function_Undefined)
         ASSIGN_OPT(Opt_SheetType)
         ASSIGN_OPT(Opt_Union_Boolean_Resource)
@@ -2998,9 +2998,9 @@ namespace OHOS::Ace::NG::Converter {
         ASSIGN_OPT(Opt_Bias)
         ASSIGN_OPT(Opt_LocalizedVerticalAlignParam)
         ASSIGN_OPT(Opt_LocalizedHorizontalAlignParam)
-        ASSIGN_OPT(Opt_Literal_anchor_String_align_VerticalAlign)
-        ASSIGN_OPT(Opt_Literal_anchor_String_align_HorizontalAlign)
-        ASSIGN_OPT(Opt_Union_Number_Literal_span_Number_offset_Number)
+        ASSIGN_OPT(Opt_Literal_String_anchor_VerticalAlign_align)
+        ASSIGN_OPT(Opt_Literal_String_anchor_HorizontalAlign_align)
+        ASSIGN_OPT(Opt_Union_Number_Literal_Number_span_offset)
         ASSIGN_OPT(Opt_LocalizedPosition)
         ASSIGN_OPT(Opt_SharedTransitionEffectType)
         ASSIGN_OPT(Opt_MotionPathOptions)
@@ -3019,15 +3019,15 @@ namespace OHOS::Ace::NG::Converter {
         ASSIGN_OPT(Opt_ExpectedFrameRateRange)
         ASSIGN_OPT(Opt_FinishCallbackType)
         ASSIGN_OPT(Opt_PlayMode)
-        ASSIGN_OPT(Opt_Union_Literal_top_Opt_OutlineStyle_right_Opt_OutlineStyle_bottom_Opt_OutlineStyle_left_Opt_OutlineStyle_OutlineStyle)
-        ASSIGN_OPT(Opt_Union_Literal_topLeft_Opt_Length_topRight_Opt_Length_bottomLeft_Opt_Length_bottomRight_Opt_Length_Length)
-        ASSIGN_OPT(Opt_Union_Literal_top_Opt_Union_Color_Number_String_Resource_right_Opt_Union_Color_Number_String_Resource_bottom_Opt_Union_Color_Number_String_Resource_left_Opt_Union_Color_Number_String_Resource_Union_Color_Number_String_Resource_LocalizedEdgeColors)
+        ASSIGN_OPT(Opt_Union_Literal_Opt_OutlineStyle_top_right_bottom_left_OutlineStyle)
+        ASSIGN_OPT(Opt_Union_Literal_Opt_Length_topLeft_topRight_bottomLeft_bottomRight_Length)
+        ASSIGN_OPT(Opt_Union_Literal_Opt_Union_Color_Number_String_Resource_top_right_bottom_left_Union_Color_Number_String_Resource_LocalizedEdgeColors)
         ASSIGN_OPT(Opt_Union_String_Resource_LinearGradient)
         ASSIGN_OPT(Opt_RepeatMode)
-        ASSIGN_OPT(Opt_Union_Literal_top_Opt_Length_right_Opt_Length_bottom_Opt_Length_left_Opt_Length_CustomObject_LocalizedEdgeWidths)
-        ASSIGN_OPT(Opt_Union_Literal_top_Opt_BorderStyle_right_Opt_BorderStyle_bottom_Opt_BorderStyle_left_Opt_BorderStyle_BorderStyle)
-        ASSIGN_OPT(Opt_Union_Literal_topLeft_Opt_Length_topRight_Opt_Length_bottomLeft_Opt_Length_bottomRight_Opt_Length_Length_LocalizedBorderRadiuses)
-        ASSIGN_OPT(Opt_Union_Literal_top_Opt_Length_right_Opt_Length_bottom_Opt_Length_left_Opt_Length_Length_LocalizedEdgeWidths)
+        ASSIGN_OPT(Opt_Union_Literal_Opt_Length_top_right_bottom_left_CustomObject_LocalizedEdgeWidths)
+        ASSIGN_OPT(Opt_Union_Literal_Opt_BorderStyle_top_right_bottom_left_BorderStyle)
+        ASSIGN_OPT(Opt_Union_Literal_Opt_Length_topLeft_topRight_bottomLeft_bottomRight_Length_LocalizedBorderRadiuses)
+        ASSIGN_OPT(Opt_Union_Literal_Opt_Length_top_right_bottom_left_Length_LocalizedEdgeWidths)
         ASSIGN_OPT(Opt_BlurStyleOptions)
         ASSIGN_OPT(Opt_BlurType)
         ASSIGN_OPT(Opt_BlurStyleActivePolicy)
@@ -3070,10 +3070,10 @@ namespace OHOS::Ace::NG::Converter {
         ASSIGN_OPT(Opt_OnScaleChangeEvent)
         ASSIGN_OPT(Opt_FullScreenEnterEvent)
         ASSIGN_OPT(Opt_OnResourceLoadEvent)
-        ASSIGN_OPT(Opt_Literal_callback_Function_fileSelector_CustomObject)
+        ASSIGN_OPT(Opt_Literal_Function_callback_CustomObject_fileSelector)
         ASSIGN_OPT(Opt_OnShowFileSelectorEvent)
-        ASSIGN_OPT(Opt_Literal_handler_Function_error_CustomObject)
-        ASSIGN_OPT(Opt_Literal_data_Union_String_WebResourceRequest)
+        ASSIGN_OPT(Opt_Literal_Function_handler_CustomObject_error)
+        ASSIGN_OPT(Opt_Literal_Union_String_WebResourceRequest_data)
         ASSIGN_OPT(Opt_OnRefreshAccessedHistoryEvent)
         ASSIGN_OPT(Opt_OnDownloadStartEvent)
         ASSIGN_OPT(Opt_OnHttpErrorReceiveEvent)
@@ -3088,9 +3088,9 @@ namespace OHOS::Ace::NG::Converter {
         ASSIGN_OPT(Opt_OnProgressChangeEvent)
         ASSIGN_OPT(Opt_OnPageBeginEvent)
         ASSIGN_OPT(Opt_OnPageEndEvent)
-        ASSIGN_OPT(Opt_Literal_time_Number)
-        ASSIGN_OPT(Opt_Literal_duration_Number)
-        ASSIGN_OPT(Opt_Literal_fullscreen_Boolean)
+        ASSIGN_OPT(Opt_Literal_Number_time)
+        ASSIGN_OPT(Opt_Literal_Number_duration)
+        ASSIGN_OPT(Opt_Literal_Boolean_fullscreen)
         ASSIGN_OPT(Opt_TimePickerResult)
         ASSIGN_OPT(Opt_MarqueeState)
         ASSIGN_OPT(Opt_TabsAnimationEvent)
@@ -3110,7 +3110,7 @@ namespace OHOS::Ace::NG::Converter {
         ASSIGN_OPT(Opt_RichEditorInsertValue)
         ASSIGN_OPT(Opt_RichEditorSelection)
         ASSIGN_OPT(Opt_RefreshStatus)
-        ASSIGN_OPT(Opt_Literal_errcode_Number_msg_String)
+        ASSIGN_OPT(Opt_Literal_Number_errcode_String_msg)
         ASSIGN_OPT(Opt_PasteButtonOnClickResult)
         ASSIGN_OPT(Opt_NavigationOperation)
         ASSIGN_OPT(Opt_NavContentInfo)
@@ -3118,11 +3118,11 @@ namespace OHOS::Ace::NG::Converter {
         ASSIGN_OPT(Opt_VisibleListContentInfo)
         ASSIGN_OPT(Opt_ImageLoadResult)
         ASSIGN_OPT(Opt_ImageError)
-        ASSIGN_OPT(Opt_Literal_width_Number_height_Number_componentWidth_Number_componentHeight_Number_loadingStatus_Number_contentWidth_Number_contentHeight_Number_contentOffsetX_Number_contentOffsetY_Number)
+        ASSIGN_OPT(Opt_Literal_Number_width_height_componentWidth_componentHeight_loadingStatus_contentWidth_contentHeight_contentOffsetX_contentOffsetY)
         ASSIGN_OPT(Opt_ItemDragInfo)
         ASSIGN_OPT(Opt_FormCallbackInfo)
         ASSIGN_OPT(Opt_HoverEventParam)
-        ASSIGN_OPT(Opt_Literal_foldStatus_FoldStatus)
+        ASSIGN_OPT(Opt_Literal_FoldStatus_foldStatus)
         ASSIGN_OPT(Opt_DatePickerResult)
         ASSIGN_OPT(Opt_ScrollState)
         ASSIGN_OPT(Opt_Array_GestureRecognizer)
@@ -3148,15 +3148,15 @@ namespace OHOS::Ace::NG::Converter {
         ASSIGN_OPT(Opt_Array_SectionOptions)
         ASSIGN_OPT(Opt_SurfaceRotationOptions)
         ASSIGN_OPT(Opt_SurfaceRect)
-        ASSIGN_OPT(Opt_Literal_surfaceWidth_Number_surfaceHeight_Number)
+        ASSIGN_OPT(Opt_Literal_Number_surfaceWidth_surfaceHeight)
         ASSIGN_OPT(Opt_ScreenCaptureConfig)
         ASSIGN_OPT(Opt_Union_String_Number_Resource_ArrayBuffer)
         ASSIGN_OPT(Opt_MessageLevel)
-        ASSIGN_OPT(Opt_Literal_object_CustomObject_name_String_methodList_Array_String)
+        ASSIGN_OPT(Opt_Literal_CustomObject_object_String_name_Array_String_methodList)
         ASSIGN_OPT(Opt_Header)
-        ASSIGN_OPT(Opt_Literal_url_Union_String_Resource_headers_Opt_Array_Header)
-        ASSIGN_OPT(Opt_Literal_data_String_mimeType_String_encoding_String_baseUrl_Opt_String_historyUrl_Opt_String)
-        ASSIGN_OPT(Opt_Literal_script_String_callback_Opt_Function)
+        ASSIGN_OPT(Opt_Literal_Union_String_Resource_url_Opt_Array_Header_headers)
+        ASSIGN_OPT(Opt_Literal_String_data_mimeType_encoding_Opt_String_baseUrl_historyUrl)
+        ASSIGN_OPT(Opt_Literal_String_script_Opt_Function_callback)
         ASSIGN_OPT(Opt_SeekMode)
         ASSIGN_OPT(Opt_SpanStyle)
         ASSIGN_OPT(Opt_StyledStringChangedListener)
@@ -3182,11 +3182,11 @@ namespace OHOS::Ace::NG::Converter {
         ASSIGN_OPT(Opt_NavPathInfo)
         ASSIGN_OPT(Opt_ScrollToIndexOptions)
         ASSIGN_OPT(Opt_ScrollAlign)
-        ASSIGN_OPT(Opt_Literal_next_Boolean_direction_Opt_Axis)
+        ASSIGN_OPT(Opt_Literal_Boolean_next_Opt_Axis_direction)
         ASSIGN_OPT(Opt_ScrollPageOptions)
         ASSIGN_OPT(Opt_ScrollEdgeOptions)
         ASSIGN_OPT(Opt_Edge)
-        ASSIGN_OPT(Opt_Literal_xOffset_Union_Number_String_yOffset_Union_Number_String_animation_Opt_Union_ScrollAnimationOptions_Boolean)
+        ASSIGN_OPT(Opt_Literal_Union_Number_String_xOffset_yOffset_Opt_Union_ScrollAnimationOptions_Boolean_animation)
         ASSIGN_OPT(Opt_Matrix2D)
         ASSIGN_OPT(Opt_ImageData)
         ASSIGN_OPT(Opt_Union_String_Undefined)
@@ -3195,7 +3195,7 @@ namespace OHOS::Ace::NG::Converter {
         ASSIGN_OPT(Opt_Union_ImageBitmap_CustomObject)
         ASSIGN_OPT(Opt_RenderingContextSettings)
         ASSIGN_OPT(Opt_UIGestureEvent)
-        ASSIGN_OPT(Opt_Literal_fingers_Opt_Number_direction_Opt_PanDirection_distance_Opt_Number)
+        ASSIGN_OPT(Opt_Literal_Opt_Number_fingers_distance_Opt_PanDirection_direction)
         ASSIGN_OPT(Opt_LinearIndicatorController)
         ASSIGN_OPT(Opt_UIExtensionOptions)
         ASSIGN_OPT(Opt_WaterFlowOptions)
@@ -3205,8 +3205,8 @@ namespace OHOS::Ace::NG::Converter {
         ASSIGN_OPT(Opt_ButtonStyle)
         ASSIGN_OPT(Opt_SideBarContainerType)
         ASSIGN_OPT(Opt_XComponentOptions)
-        ASSIGN_OPT(Opt_Literal_id_String_type_XComponentType_libraryname_Opt_String_controller_Opt_XComponentController)
-        ASSIGN_OPT(Opt_Literal_id_String_type_String_libraryname_Opt_String_controller_Opt_XComponentController)
+        ASSIGN_OPT(Opt_Literal_String_id_XComponentType_type_Opt_String_libraryname_Opt_XComponentController_controller)
+        ASSIGN_OPT(Opt_Literal_String_id_type_Opt_String_libraryname_Opt_XComponentController_controller)
         ASSIGN_OPT(Opt_WebKeyboardAvoidMode)
         ASSIGN_OPT(Opt_ExpandedMenuItemOptions)
         ASSIGN_OPT(Opt_Array_ExpandedMenuItemOptions)
@@ -3223,21 +3223,21 @@ namespace OHOS::Ace::NG::Converter {
         ASSIGN_OPT(Opt_WebOptions)
         ASSIGN_OPT(Opt_VideoOptions)
         ASSIGN_OPT(Opt_SwitchStyle)
-        ASSIGN_OPT(Opt_Literal_type_ToggleType_isOn_Opt_Boolean)
+        ASSIGN_OPT(Opt_Literal_ToggleType_type_Opt_Boolean_isOn)
         ASSIGN_OPT(Opt_TimePickerOptions)
         ASSIGN_OPT(Opt_TextTimerOptions)
         ASSIGN_OPT(Opt_Union_DividerOptions_Undefined)
         ASSIGN_OPT(Opt_TextCascadePickerRangeContent)
         ASSIGN_OPT(Opt_TextPickerRangeContent)
         ASSIGN_OPT(Opt_TextPickerOptions)
-        ASSIGN_OPT(Opt_Literal_style_Opt_CancelButtonStyle_icon_Opt_IconOptions)
+        ASSIGN_OPT(Opt_Literal_Opt_CancelButtonStyle_style_Opt_IconOptions_icon)
         ASSIGN_OPT(Opt_Union_Union_Color_Number_String_Resource_UnderlineColor_Undefined)
         ASSIGN_OPT(Opt_Union_Union_String_Resource_Undefined)
         ASSIGN_OPT(Opt_PasswordIcon)
         ASSIGN_OPT(Opt_Union_TextInputStyle_TextContentStyle)
         ASSIGN_OPT(Opt_InputType)
         ASSIGN_OPT(Opt_TextInputOptions)
-        ASSIGN_OPT(Opt_Literal_timeZoneOffset_Opt_Number_controller_Opt_TextClockController)
+        ASSIGN_OPT(Opt_Literal_Opt_Number_timeZoneOffset_Opt_TextClockController_controller)
         ASSIGN_OPT(Opt_ContentType)
         ASSIGN_OPT(Opt_TextAreaType)
         ASSIGN_OPT(Opt_InputCounterOptions)
@@ -3246,31 +3246,31 @@ namespace OHOS::Ace::NG::Converter {
         ASSIGN_OPT(Opt_TextResponseType)
         ASSIGN_OPT(Opt_TextSpanType)
         ASSIGN_OPT(Opt_EllipsisMode)
-        ASSIGN_OPT(Opt_Literal_overflow_TextOverflow)
+        ASSIGN_OPT(Opt_Literal_TextOverflow_overflow)
         ASSIGN_OPT(Opt_TextOptions)
         ASSIGN_OPT(Opt_Union_SubTabBarStyle_BottomTabBarStyle)
-        ASSIGN_OPT(Opt_Union_String_Resource_Union_Function_Undefined_Literal_icon_Opt_Union_String_Resource_text_Opt_Union_String_Resource)
+        ASSIGN_OPT(Opt_Union_String_Resource_Union_Function_Undefined_Literal_Opt_Union_String_Resource_icon_text)
         ASSIGN_OPT(Opt_BarGridColumnOptions)
         ASSIGN_OPT(Opt_ScrollableBarModeOptions)
         ASSIGN_OPT(Opt_BarMode)
-        ASSIGN_OPT(Opt_Literal_barPosition_Opt_BarPosition_index_Opt_Number_controller_Opt_TabsController)
+        ASSIGN_OPT(Opt_Literal_Opt_BarPosition_barPosition_Opt_Number_index_Opt_TabsController_controller)
         ASSIGN_OPT(Opt_SymbolEffect)
         ASSIGN_OPT(Opt_SwiperContentAnimatedTransition)
         ASSIGN_OPT(Opt_SwiperNestedScrollMode)
-        ASSIGN_OPT(Opt_Union_Number_String_Literal_minSize_Union_String_Number)
+        ASSIGN_OPT(Opt_Union_Number_String_Literal_Union_String_Number_minSize)
         ASSIGN_OPT(Opt_SwiperDisplayMode)
         ASSIGN_OPT(Opt_Union_ArrowStyle_Boolean)
         ASSIGN_OPT(Opt_Union_DotIndicator_DigitIndicator_Boolean)
         ASSIGN_OPT(Opt_SwiperController)
         ASSIGN_OPT(Opt_ItemState)
-        ASSIGN_OPT(Opt_Literal_index_Opt_Number)
-        ASSIGN_OPT(Opt_Literal_alignContent_Opt_Alignment)
+        ASSIGN_OPT(Opt_Literal_Opt_Number_index)
+        ASSIGN_OPT(Opt_Literal_Opt_Alignment_alignContent)
         ASSIGN_OPT(Opt_TextCase)
         ASSIGN_OPT(Opt_SlideRange)
         ASSIGN_OPT(Opt_SliderInteraction)
         ASSIGN_OPT(Opt_SliderBlockStyle)
         ASSIGN_OPT(Opt_SliderOptions)
-        ASSIGN_OPT(Opt_Literal_x_Opt_Union_Number_String_y_Opt_Union_Number_String_width_Opt_Union_Number_String_height_Opt_Union_Number_String)
+        ASSIGN_OPT(Opt_Literal_Opt_Union_Number_String_x_y_width_height)
         ASSIGN_OPT(Opt_Union_Opt_DividerOptions_Undefined)
         ASSIGN_OPT(Opt_Union_Length_OptionWidthMode)
         ASSIGN_OPT(Opt_MenuAlignType)
@@ -3283,14 +3283,14 @@ namespace OHOS::Ace::NG::Converter {
         ASSIGN_OPT(Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions)
         ASSIGN_OPT(Opt_Union_IconOptions_CustomObject)
         ASSIGN_OPT(Opt_SearchButtonOptions)
-        ASSIGN_OPT(Opt_Literal_value_Opt_String_placeholder_Opt_Union_String_Resource_icon_Opt_String_controller_Opt_SearchController)
+        ASSIGN_OPT(Opt_Literal_Opt_String_value_icon_Opt_Union_String_Resource_placeholder_Opt_SearchController_controller)
         ASSIGN_OPT(Opt_ScrollBarOptions)
         ASSIGN_OPT(Opt_OffsetOptions)
         ASSIGN_OPT(Opt_ScrollSnapOptions)
         ASSIGN_OPT(Opt_Union_Color_Number_String)
         ASSIGN_OPT(Opt_ScrollDirection)
         ASSIGN_OPT(Opt_SaveButtonOptions)
-        ASSIGN_OPT(Opt_Literal_space_Opt_Union_String_Number)
+        ASSIGN_OPT(Opt_Literal_Opt_Union_String_Number_space)
         ASSIGN_OPT(Opt_RootSceneSession)
         ASSIGN_OPT(Opt_EditMenuOptions)
         ASSIGN_OPT(Opt_EnterKeyType)
@@ -3310,20 +3310,20 @@ namespace OHOS::Ace::NG::Converter {
         ASSIGN_OPT(Opt_GuideLineStyle)
         ASSIGN_OPT(Opt_Array_GuideLineStyle)
         ASSIGN_OPT(Opt_RefreshOptions)
-        ASSIGN_OPT(Opt_Union_Literal_width_Opt_Union_Number_String_height_Opt_Union_Number_String_radius_Opt_Union_Number_String_Array_CustomObject_Literal_width_Opt_Union_Number_String_height_Opt_Union_Number_String_radiusWidth_Opt_Union_Number_String_radiusHeight_Opt_Union_Number_String)
-        ASSIGN_OPT(Opt_Literal_backgroundUri_String_foregroundUri_String_secondaryUri_Opt_String)
-        ASSIGN_OPT(Opt_Literal_rating_Number_indicator_Opt_Boolean)
+        ASSIGN_OPT(Opt_Union_Literal_Opt_Union_Number_String_width_height_Opt_Union_Number_String_Array_CustomObject_radius_Literal_Opt_Union_Number_String_width_height_radiusWidth_radiusHeight)
+        ASSIGN_OPT(Opt_Literal_String_backgroundUri_foregroundUri_Opt_String_secondaryUri)
+        ASSIGN_OPT(Opt_Literal_Number_rating_Opt_Boolean_indicator)
         ASSIGN_OPT(Opt_RadioStyle)
         ASSIGN_OPT(Opt_RadioOptions)
-        ASSIGN_OPT(Opt_Literal_width_Opt_Union_String_Number_height_Opt_Union_String_Number)
-        ASSIGN_OPT(Opt_Literal_template_PluginComponentTemplate_data_CustomObject)
+        ASSIGN_OPT(Opt_Literal_Opt_Union_String_Number_width_height)
+        ASSIGN_OPT(Opt_Literal_PluginComponentTemplate_template_CustomObject_data)
         ASSIGN_OPT(Opt_PatternLockController)
-        ASSIGN_OPT(Opt_Literal_width_Opt_Union_Number_String_height_Opt_Union_Number_String_commands_Opt_String)
+        ASSIGN_OPT(Opt_Literal_Opt_Union_Number_String_width_height_Opt_String_commands)
         ASSIGN_OPT(Opt_PasteButtonOptions)
         ASSIGN_OPT(Opt_Union_Length_PanelHeight)
         ASSIGN_OPT(Opt_PanelType)
         ASSIGN_OPT(Opt_PanelMode)
-        ASSIGN_OPT(Opt_Literal_target_String_type_Opt_NavigationType)
+        ASSIGN_OPT(Opt_Literal_String_target_Opt_NavigationType_type)
         ASSIGN_OPT(Opt_Array_LayoutSafeAreaEdge)
         ASSIGN_OPT(Opt_Array_LayoutSafeAreaType)
         ASSIGN_OPT(Opt_NavigationToolbarOptions)
@@ -3352,11 +3352,11 @@ namespace OHOS::Ace::NG::Converter {
         ASSIGN_OPT(Opt_Union_DividerStyleOptions_Undefined)
         ASSIGN_OPT(Opt_Union_CustomObject_Union_String_Resource_CustomObject_ASTCResource)
         ASSIGN_OPT(Opt_MarqueeUpdateStrategy)
-        ASSIGN_OPT(Opt_Literal_start_Boolean_step_Opt_Number_loop_Opt_Number_fromStart_Opt_Boolean_src_String)
+        ASSIGN_OPT(Opt_Literal_Boolean_start_Opt_Number_step_loop_Opt_Boolean_fromStart_String_src)
         ASSIGN_OPT(Opt_LocationButtonOptions)
         ASSIGN_OPT(Opt_Union_Position_Edges_LocalizedEdges)
         ASSIGN_OPT(Opt_SecurityComponentLayoutDirection)
-        ASSIGN_OPT(Opt_Union_Literal_strokeWidth_Length_color_Opt_Union_Color_Number_String_Resource_startMargin_Opt_Length_endMargin_Opt_Length_Undefined)
+        ASSIGN_OPT(Opt_Union_Literal_Length_strokeWidth_Opt_Union_Color_Number_String_Resource_color_Opt_Length_startMargin_endMargin_Undefined)
         ASSIGN_OPT(Opt_ListItemGroupOptions)
         ASSIGN_OPT(Opt_SwipeActionOptions)
         ASSIGN_OPT(Opt_Union_Boolean_EditMode)
@@ -3366,15 +3366,15 @@ namespace OHOS::Ace::NG::Converter {
         ASSIGN_OPT(Opt_StickyStyle)
         ASSIGN_OPT(Opt_ChainAnimationOptions)
         ASSIGN_OPT(Opt_ListItemAlign)
-        ASSIGN_OPT(Opt_Union_Number_Literal_minLength_Length_maxLength_Length)
-        ASSIGN_OPT(Opt_Literal_initialIndex_Opt_Number_space_Opt_Union_Number_String_scroller_Opt_Scroller)
+        ASSIGN_OPT(Opt_Union_Number_Literal_Length_minLength_maxLength)
+        ASSIGN_OPT(Opt_Literal_Opt_Number_initialIndex_Opt_Union_Number_String_space_Opt_Scroller_scroller)
         ASSIGN_OPT(Opt_Union_ColorFilter_CustomObject)
         ASSIGN_OPT(Opt_Union_Union_String_Resource_CustomObject)
         ASSIGN_OPT(Opt_ImageFrameInfo)
         ASSIGN_OPT(Opt_Array_ImageFrameInfo)
         ASSIGN_OPT(Opt_ImageAnalyzerConfig)
         ASSIGN_OPT(Opt_CopyOptions)
-        ASSIGN_OPT(Opt_Literal_width_Number_height_Number)
+        ASSIGN_OPT(Opt_Literal_Number_width_height)
         ASSIGN_OPT(Opt_ImageInterpolation)
         ASSIGN_OPT(Opt_DynamicRangeMode)
         ASSIGN_OPT(Opt_ImageRenderMode)
@@ -3392,10 +3392,10 @@ namespace OHOS::Ace::NG::Converter {
         ASSIGN_OPT(Opt_GaugeShadowOptions)
         ASSIGN_OPT(Opt_Tuple_Union_Union_Color_Number_String_Resource_LinearGradient_Number)
         ASSIGN_OPT(Opt_Union_Union_Color_Number_String_Resource_LinearGradient_Array_Tuple_Union_Union_Color_Number_String_Resource_LinearGradient_Number)
-        ASSIGN_OPT(Opt_Literal_value_Number_min_Opt_Number_max_Opt_Number)
+        ASSIGN_OPT(Opt_Literal_Number_value_Opt_Number_min_max)
         ASSIGN_OPT(Opt_FormLinkOptions)
         ASSIGN_OPT(Opt_FormInfo)
-        ASSIGN_OPT(Opt_Literal_upperItems_Opt_Array_String)
+        ASSIGN_OPT(Opt_Literal_Opt_Array_String_upperItems)
         ASSIGN_OPT(Opt_FlexOptions)
         ASSIGN_OPT(Opt_EmbeddedType)
         ASSIGN_OPT(Opt_DatePickerOptions)
@@ -3415,7 +3415,7 @@ namespace OHOS::Ace::NG::Converter {
         ASSIGN_OPT(Opt_ImageAnalyzerType)
         ASSIGN_OPT(Opt_Union_CanvasRenderingContext2D_DrawingRenderingContext)
         ASSIGN_OPT(Opt_PickerTextStyle)
-        ASSIGN_OPT(Opt_Literal_dx_Length_dy_Length)
+        ASSIGN_OPT(Opt_Literal_Length_dx_dy)
         ASSIGN_OPT(Opt_CalendarAlign)
         ASSIGN_OPT(Opt_CalendarOptions)
         ASSIGN_OPT(Opt_WorkStateStyle)
@@ -3424,7 +3424,7 @@ namespace OHOS::Ace::NG::Converter {
         ASSIGN_OPT(Opt_NonCurrentDayStyle)
         ASSIGN_OPT(Opt_CurrentDayStyle)
         ASSIGN_OPT(Opt_CalendarDay)
-        ASSIGN_OPT(Opt_Literal_date_Literal_year_Number_month_Number_day_Number_currentData_MonthData_preData_MonthData_nextData_MonthData_controller_Opt_CalendarController)
+        ASSIGN_OPT(Opt_Literal_Literal_Number_year_month_day_date_MonthData_currentData_preData_nextData_Opt_CalendarController_controller)
         ASSIGN_OPT(Opt_ButtonOptions)
         ASSIGN_OPT(Opt_BadgeParamWithString)
         ASSIGN_OPT(Opt_BadgeParamWithNumber)
@@ -3432,8 +3432,8 @@ namespace OHOS::Ace::NG::Converter {
         ASSIGN_OPT(Opt_FillMode)
         ASSIGN_OPT(Opt_AnimationStatus)
         ASSIGN_OPT(Opt_IndexerAlign)
-        ASSIGN_OPT(Opt_Literal_arrayValue_Array_String_selected_Number)
-        ASSIGN_OPT(Opt_Literal_want_CustomObject)
+        ASSIGN_OPT(Opt_Literal_Array_String_arrayValue_Number_selected)
+        ASSIGN_OPT(Opt_Literal_CustomObject_want)
         ASSIGN_OPT(Opt_BackgroundBrightnessOptions)
         ASSIGN_OPT(Opt_GestureModifier)
         ASSIGN_OPT(Opt_RenderFit)
@@ -3457,9 +3457,9 @@ namespace OHOS::Ace::NG::Converter {
         ASSIGN_OPT(Opt_BlendApplyType)
         ASSIGN_OPT(Opt_BlendMode)
         ASSIGN_OPT(Opt_Tuple_Union_Color_Number_String_Resource_Number)
-        ASSIGN_OPT(Opt_Literal_center_Tuple_Length_Length_radius_Union_Number_String_colors_Array_Tuple_Union_Color_Number_String_Resource_Number_repeating_Opt_Boolean)
-        ASSIGN_OPT(Opt_Literal_center_Tuple_Length_Length_start_Opt_Union_Number_String_end_Opt_Union_Number_String_rotation_Opt_Union_Number_String_colors_Array_Tuple_Union_Color_Number_String_Resource_Number_repeating_Opt_Boolean)
-        ASSIGN_OPT(Opt_Literal_angle_Opt_Union_Number_String_direction_Opt_GradientDirection_colors_Array_Tuple_Union_Color_Number_String_Resource_Number_repeating_Opt_Boolean)
+        ASSIGN_OPT(Opt_Literal_Tuple_Length_Length_center_Union_Number_String_radius_Array_Tuple_Union_Color_Number_String_Resource_Number_colors_Opt_Boolean_repeating)
+        ASSIGN_OPT(Opt_Literal_Tuple_Length_Length_center_Opt_Union_Number_String_start_end_rotation_Array_Tuple_Union_Color_Number_String_Resource_Number_colors_Opt_Boolean_repeating)
+        ASSIGN_OPT(Opt_Literal_Opt_Union_Number_String_angle_Opt_GradientDirection_direction_Array_Tuple_Union_Color_Number_String_Resource_Number_colors_Opt_Boolean_repeating)
         ASSIGN_OPT(Opt_OverlayOptions)
         ASSIGN_OPT(Opt_Union_String_Union_Function_Undefined_CustomObject)
         ASSIGN_OPT(Opt_DragInteractionOptions)
@@ -3470,7 +3470,7 @@ namespace OHOS::Ace::NG::Converter {
         ASSIGN_OPT(Opt_ChainStyle)
         ASSIGN_OPT(Opt_LocalizedAlignRuleOptions)
         ASSIGN_OPT(Opt_AlignRuleOption)
-        ASSIGN_OPT(Opt_Literal_xs_Opt_Union_Number_Literal_span_Number_offset_Number_sm_Opt_Union_Number_Literal_span_Number_offset_Number_md_Opt_Union_Number_Literal_span_Number_offset_Number_lg_Opt_Union_Number_Literal_span_Number_offset_Number)
+        ASSIGN_OPT(Opt_Literal_Opt_Union_Number_Literal_Number_span_offset_xs_sm_md_lg)
         ASSIGN_OPT(Opt_Union_Position_LocalizedPosition)
         ASSIGN_OPT(Opt_Direction)
         ASSIGN_OPT(Opt_sharedTransitionOptions)
@@ -3487,10 +3487,10 @@ namespace OHOS::Ace::NG::Converter {
         ASSIGN_OPT(Opt_FocusBoxStyle)
         ASSIGN_OPT(Opt_HoverEffect)
         ASSIGN_OPT(Opt_Union_Union_Color_Number_String_Resource_ColoringStrategy)
-        ASSIGN_OPT(Opt_Union_OutlineStyle_Literal_top_Opt_OutlineStyle_right_Opt_OutlineStyle_bottom_Opt_OutlineStyle_left_Opt_OutlineStyle)
+        ASSIGN_OPT(Opt_Union_OutlineStyle_Literal_Opt_OutlineStyle_top_right_bottom_left)
         ASSIGN_OPT(Opt_OutlineOptions)
         ASSIGN_OPT(Opt_BorderImageOption)
-        ASSIGN_OPT(Opt_Union_Length_Literal_topLeft_Opt_Length_topRight_Opt_Length_bottomLeft_Opt_Length_bottomRight_Opt_Length_LocalizedBorderRadiuses)
+        ASSIGN_OPT(Opt_Union_Length_Literal_Opt_Length_topLeft_topRight_bottomLeft_bottomRight_LocalizedBorderRadiuses)
         ASSIGN_OPT(Opt_BorderOptions)
         ASSIGN_OPT(Opt_ForegroundBlurStyleOptions)
         ASSIGN_OPT(Opt_ForegroundEffectOptions)
@@ -3501,7 +3501,7 @@ namespace OHOS::Ace::NG::Converter {
         ASSIGN_OPT(Opt_Union_SizeOptions_ImageSize)
         ASSIGN_OPT(Opt_ImageRepeat)
         ASSIGN_OPT(Opt_PixelRoundPolicy)
-        ASSIGN_OPT(Opt_Literal_align_Opt_Alignment)
+        ASSIGN_OPT(Opt_Literal_Opt_Alignment_align)
         ASSIGN_OPT(Opt_HitTestMode)
         ASSIGN_OPT(Opt_ConstraintSizeOptions)
         ASSIGN_OPT(Opt_Union_Array_Rectangle_Rectangle)

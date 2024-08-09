@@ -17,13 +17,13 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
     namespace ImageInterfaceModifier {
-        void _setImageOptions_PixelMapResourceStrDrawableDescriptorImpl(Ark_NativePointer node, const Type_ImageInterface__setImageOptions_Arg0* src)
+        void _setImageOptions0Impl(Ark_NativePointer node, const Type_ImageInterface__setImageOptions_Arg0* src)
         {
         }
-        void _setImageOptions_PixelMapResourceStrDrawableDescriptorImageContentImpl(Ark_NativePointer node, const Type_ImageInterface__setImageOptions1_Arg0* src)
+        void _setImageOptions1Impl(Ark_NativePointer node, const Type_ImageInterface__setImageOptions1_Arg0* src)
         {
         }
-        void _setImageOptions_PixelMapResourceStrDrawableDescriptor_ImageAIOptionsImpl(Ark_NativePointer node, const Type_ImageInterface__setImageOptions2_Arg0* src, const Ark_ImageAIOptions* imageAIOptions)
+        void _setImageOptions2Impl(Ark_NativePointer node, const Type_ImageInterface__setImageOptions2_Arg0* src, const Ark_ImageAIOptions* imageAIOptions)
         {
         }
     } // ImageInterfaceModifier
@@ -107,9 +107,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUIImageModifier* GetImageModifier()
     {
         static const GENERATED_ArkUIImageModifier ArkUIImageModifierImpl {
-            ImageInterfaceModifier::_setImageOptions_PixelMapResourceStrDrawableDescriptorImpl,
-            ImageInterfaceModifier::_setImageOptions_PixelMapResourceStrDrawableDescriptorImageContentImpl,
-            ImageInterfaceModifier::_setImageOptions_PixelMapResourceStrDrawableDescriptor_ImageAIOptionsImpl,
+            ImageInterfaceModifier::_setImageOptions0Impl,
+            ImageInterfaceModifier::_setImageOptions1Impl,
+            ImageInterfaceModifier::_setImageOptions2Impl,
             ImageAttributeModifier::AltImpl,
             ImageAttributeModifier::MatchTextDirectionImpl,
             ImageAttributeModifier::FitOriginalSizeImpl,

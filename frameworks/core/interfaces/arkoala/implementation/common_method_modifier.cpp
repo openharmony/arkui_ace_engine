@@ -203,10 +203,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         void AnimationImpl(Ark_NativePointer node, const Ark_AnimateParam* value)
         {
         }
-        void Transition_TransitionOptionsTransitionEffectImpl(Ark_NativePointer node, const Type_CommonMethod_transition_Arg0* value)
+        void Transition0Impl(Ark_NativePointer node, const Type_CommonMethod_transition_Arg0* value)
         {
         }
-        void Transition_TransitionEffect_TransitionFinishCallbackundefinedImpl(Ark_NativePointer node, const Ark_TransitionEffect* effect, const Opt_Function* onFinish)
+        void Transition1Impl(Ark_NativePointer node, const Ark_TransitionEffect* effect, const Opt_Function* onFinish)
         {
         }
         void GestureImpl(Ark_NativePointer node, const Ark_GestureType* gesture, const Opt_GestureMask* mask)
@@ -347,10 +347,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         void UseSizeTypeImpl(Ark_NativePointer node, const Type_CommonMethod_useSizeType_Arg0* value)
         {
         }
-        void AlignRules_AlignRuleOptionImpl(Ark_NativePointer node, const Ark_AlignRuleOption* value)
+        void AlignRules0Impl(Ark_NativePointer node, const Ark_AlignRuleOption* value)
         {
         }
-        void AlignRules_LocalizedAlignRuleOptionsImpl(Ark_NativePointer node, const Ark_LocalizedAlignRuleOptions* alignRule)
+        void AlignRules1Impl(Ark_NativePointer node, const Ark_LocalizedAlignRuleOptions* alignRule)
         {
         }
         void ChainModeImpl(Ark_NativePointer node, Ark_Int32 direction, Ark_Int32 style)
@@ -416,19 +416,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         void BlendModeImpl(Ark_NativePointer node, Ark_Int32 value, const Opt_BlendApplyType* type)
         {
         }
-        void Clip_booleanImpl(Ark_NativePointer node, Ark_Boolean value)
+        void Clip0Impl(Ark_NativePointer node, Ark_Boolean value)
         {
         }
-        void Clip_booleanCircleAttributeEllipseAttributePathAttributeRectAttributeImpl(Ark_NativePointer node, const Type_CommonMethod_clip1_Arg0* value)
+        void Clip1Impl(Ark_NativePointer node, const Type_CommonMethod_clip1_Arg0* value)
         {
         }
         void ClipShapeImpl(Ark_NativePointer node, const Type_CommonMethod_clipShape_Arg0* value)
         {
         }
-        void Mask_ProgressMaskImpl(Ark_NativePointer node, const Ark_Materialized* value)
+        void Mask0Impl(Ark_NativePointer node, const Ark_Materialized* value)
         {
         }
-        void Mask_CircleAttributeEllipseAttributePathAttributeRectAttributeProgressMaskImpl(Ark_NativePointer node, const Type_CommonMethod_mask1_Arg0* value)
+        void Mask1Impl(Ark_NativePointer node, const Type_CommonMethod_mask1_Arg0* value)
         {
         }
         void MaskShapeImpl(Ark_NativePointer node, const Type_CommonMethod_maskShape_Arg0* value)
@@ -440,31 +440,31 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         void IdImpl(Ark_NativePointer node, const Ark_String* value)
         {
         }
-        void GeometryTransition_stringImpl(Ark_NativePointer node, const Ark_String* id)
+        void GeometryTransition0Impl(Ark_NativePointer node, const Ark_String* id)
         {
         }
-        void GeometryTransition_string_GeometryTransitionOptionsImpl(Ark_NativePointer node, const Ark_String* id, const Opt_GeometryTransitionOptions* options)
+        void GeometryTransition1Impl(Ark_NativePointer node, const Ark_String* id, const Opt_GeometryTransitionOptions* options)
         {
         }
         void BindPopupImpl(Ark_NativePointer node, Ark_Boolean show, const Type_CommonMethod_bindPopup_Arg1* popup)
         {
         }
-        void BindMenu_ArrayMenuElementCustomBuilder_MenuOptionsImpl(Ark_NativePointer node, const Type_CommonMethod_bindMenu_Arg0* content, const Opt_MenuOptions* options)
+        void BindMenu0Impl(Ark_NativePointer node, const Type_CommonMethod_bindMenu_Arg0* content, const Opt_MenuOptions* options)
         {
         }
-        void BindMenu_boolean_ArrayMenuElementCustomBuilder_MenuOptionsImpl(Ark_NativePointer node, Ark_Boolean isShow, const Type_CommonMethod_bindMenu1_Arg1* content, const Opt_MenuOptions* options)
+        void BindMenu1Impl(Ark_NativePointer node, Ark_Boolean isShow, const Type_CommonMethod_bindMenu1_Arg1* content, const Opt_MenuOptions* options)
         {
         }
-        void BindContextMenu_CustomBuilder_ResponseType_ContextMenuOptionsImpl(Ark_NativePointer node, const CustomBuilder* content, Ark_Int32 responseType, const Opt_ContextMenuOptions* options)
+        void BindContextMenu0Impl(Ark_NativePointer node, const CustomBuilder* content, Ark_Int32 responseType, const Opt_ContextMenuOptions* options)
         {
         }
-        void BindContextMenu_boolean_CustomBuilder_ContextMenuOptionsImpl(Ark_NativePointer node, Ark_Boolean isShown, const CustomBuilder* content, const Opt_ContextMenuOptions* options)
+        void BindContextMenu1Impl(Ark_NativePointer node, Ark_Boolean isShown, const CustomBuilder* content, const Opt_ContextMenuOptions* options)
         {
         }
-        void BindContentCover_booleanundefined_CustomBuilder_ModalTransitionImpl(Ark_NativePointer node, const Opt_Boolean* isShow, const CustomBuilder* builder, const Opt_ModalTransition* type)
+        void BindContentCover0Impl(Ark_NativePointer node, const Opt_Boolean* isShow, const CustomBuilder* builder, const Opt_ModalTransition* type)
         {
         }
-        void BindContentCover_booleanundefined_CustomBuilder_ContentCoverOptionsImpl(Ark_NativePointer node, const Opt_Boolean* isShow, const CustomBuilder* builder, const Opt_ContentCoverOptions* options)
+        void BindContentCover1Impl(Ark_NativePointer node, const Opt_Boolean* isShow, const CustomBuilder* builder, const Opt_ContentCoverOptions* options)
         {
         }
         void BindSheetImpl(Ark_NativePointer node, const Opt_Boolean* isShow, const CustomBuilder* builder, const Opt_SheetOptions* options)
@@ -494,19 +494,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         void AccessibilityGroupImpl(Ark_NativePointer node, Ark_Boolean value)
         {
         }
-        void AccessibilityText_stringImpl(Ark_NativePointer node, const Ark_String* value)
+        void AccessibilityText0Impl(Ark_NativePointer node, const Ark_String* value)
         {
         }
-        void AccessibilityText_ResourceImpl(Ark_NativePointer node, const Ark_Resource* text)
+        void AccessibilityText1Impl(Ark_NativePointer node, const Ark_Resource* text)
         {
         }
         void AccessibilityTextHintImpl(Ark_NativePointer node, const Ark_String* value)
         {
         }
-        void AccessibilityDescription_stringImpl(Ark_NativePointer node, const Ark_String* value)
+        void AccessibilityDescription0Impl(Ark_NativePointer node, const Ark_String* value)
         {
         }
-        void AccessibilityDescription_ResourceImpl(Ark_NativePointer node, const Ark_Resource* description)
+        void AccessibilityDescription1Impl(Ark_NativePointer node, const Ark_Resource* description)
         {
         }
         void AccessibilityLevelImpl(Ark_NativePointer node, const Ark_String* value)
@@ -614,8 +614,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::FocusScopeIdImpl,
             CommonMethodModifier::FocusScopePriorityImpl,
             CommonMethodModifier::AnimationImpl,
-            CommonMethodModifier::Transition_TransitionOptionsTransitionEffectImpl,
-            CommonMethodModifier::Transition_TransitionEffect_TransitionFinishCallbackundefinedImpl,
+            CommonMethodModifier::Transition0Impl,
+            CommonMethodModifier::Transition1Impl,
             CommonMethodModifier::GestureImpl,
             CommonMethodModifier::PriorityGestureImpl,
             CommonMethodModifier::ParallelGestureImpl,
@@ -662,8 +662,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::OffsetImpl,
             CommonMethodModifier::EnabledImpl,
             CommonMethodModifier::UseSizeTypeImpl,
-            CommonMethodModifier::AlignRules_AlignRuleOptionImpl,
-            CommonMethodModifier::AlignRules_LocalizedAlignRuleOptionsImpl,
+            CommonMethodModifier::AlignRules0Impl,
+            CommonMethodModifier::AlignRules1Impl,
             CommonMethodModifier::ChainModeImpl,
             CommonMethodModifier::AspectRatioImpl,
             CommonMethodModifier::ClickEffectImpl,
@@ -685,23 +685,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::MotionPathImpl,
             CommonMethodModifier::ShadowImpl,
             CommonMethodModifier::BlendModeImpl,
-            CommonMethodModifier::Clip_booleanImpl,
-            CommonMethodModifier::Clip_booleanCircleAttributeEllipseAttributePathAttributeRectAttributeImpl,
+            CommonMethodModifier::Clip0Impl,
+            CommonMethodModifier::Clip1Impl,
             CommonMethodModifier::ClipShapeImpl,
-            CommonMethodModifier::Mask_ProgressMaskImpl,
-            CommonMethodModifier::Mask_CircleAttributeEllipseAttributePathAttributeRectAttributeProgressMaskImpl,
+            CommonMethodModifier::Mask0Impl,
+            CommonMethodModifier::Mask1Impl,
             CommonMethodModifier::MaskShapeImpl,
             CommonMethodModifier::KeyImpl,
             CommonMethodModifier::IdImpl,
-            CommonMethodModifier::GeometryTransition_stringImpl,
-            CommonMethodModifier::GeometryTransition_string_GeometryTransitionOptionsImpl,
+            CommonMethodModifier::GeometryTransition0Impl,
+            CommonMethodModifier::GeometryTransition1Impl,
             CommonMethodModifier::BindPopupImpl,
-            CommonMethodModifier::BindMenu_ArrayMenuElementCustomBuilder_MenuOptionsImpl,
-            CommonMethodModifier::BindMenu_boolean_ArrayMenuElementCustomBuilder_MenuOptionsImpl,
-            CommonMethodModifier::BindContextMenu_CustomBuilder_ResponseType_ContextMenuOptionsImpl,
-            CommonMethodModifier::BindContextMenu_boolean_CustomBuilder_ContextMenuOptionsImpl,
-            CommonMethodModifier::BindContentCover_booleanundefined_CustomBuilder_ModalTransitionImpl,
-            CommonMethodModifier::BindContentCover_booleanundefined_CustomBuilder_ContentCoverOptionsImpl,
+            CommonMethodModifier::BindMenu0Impl,
+            CommonMethodModifier::BindMenu1Impl,
+            CommonMethodModifier::BindContextMenu0Impl,
+            CommonMethodModifier::BindContextMenu1Impl,
+            CommonMethodModifier::BindContentCover0Impl,
+            CommonMethodModifier::BindContentCover1Impl,
             CommonMethodModifier::BindSheetImpl,
             CommonMethodModifier::StateStylesImpl,
             CommonMethodModifier::RestoreIdImpl,
@@ -711,11 +711,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::PixelStretchEffectImpl,
             CommonMethodModifier::KeyboardShortcutImpl,
             CommonMethodModifier::AccessibilityGroupImpl,
-            CommonMethodModifier::AccessibilityText_stringImpl,
-            CommonMethodModifier::AccessibilityText_ResourceImpl,
+            CommonMethodModifier::AccessibilityText0Impl,
+            CommonMethodModifier::AccessibilityText1Impl,
             CommonMethodModifier::AccessibilityTextHintImpl,
-            CommonMethodModifier::AccessibilityDescription_stringImpl,
-            CommonMethodModifier::AccessibilityDescription_ResourceImpl,
+            CommonMethodModifier::AccessibilityDescription0Impl,
+            CommonMethodModifier::AccessibilityDescription1Impl,
             CommonMethodModifier::AccessibilityLevelImpl,
             CommonMethodModifier::AccessibilityVirtualNodeImpl,
             CommonMethodModifier::ObscuredImpl,

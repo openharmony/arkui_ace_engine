@@ -17,10 +17,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
     namespace ListItemInterfaceModifier {
-        void _setListItemOptions_ListItemOptionsImpl(Ark_NativePointer node, const Opt_ListItemOptions* value)
+        void _setListItemOptions0Impl(Ark_NativePointer node, const Opt_ListItemOptions* value)
         {
         }
-        void _setListItemOptions_stringImpl(Ark_NativePointer node, const Opt_String* value)
+        void _setListItemOptions1Impl(Ark_NativePointer node, const Opt_String* value)
         {
         }
     } // ListItemInterfaceModifier
@@ -47,8 +47,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUIListItemModifier* GetListItemModifier()
     {
         static const GENERATED_ArkUIListItemModifier ArkUIListItemModifierImpl {
-            ListItemInterfaceModifier::_setListItemOptions_ListItemOptionsImpl,
-            ListItemInterfaceModifier::_setListItemOptions_stringImpl,
+            ListItemInterfaceModifier::_setListItemOptions0Impl,
+            ListItemInterfaceModifier::_setListItemOptions1Impl,
             ListItemAttributeModifier::StickyImpl,
             ListItemAttributeModifier::EditableImpl,
             ListItemAttributeModifier::SelectableImpl,

@@ -25,10 +25,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         {
             return 0;
         }
-        void Confirm_string_stringImpl(ClientAuthenticationHandlerPeer* peer, const Ark_String* priKeyFile, const Ark_String* certChainFile)
+        void Confirm0Impl(ClientAuthenticationHandlerPeer* peer, const Ark_String* priKeyFile, const Ark_String* certChainFile)
         {
         }
-        void Confirm_stringImpl(ClientAuthenticationHandlerPeer* peer, const Ark_String* authUri)
+        void Confirm1Impl(ClientAuthenticationHandlerPeer* peer, const Ark_String* authUri)
         {
         }
         void CancelImpl(ClientAuthenticationHandlerPeer* peer)
@@ -43,8 +43,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIClientAuthenticationHandlerAccessor ClientAuthenticationHandlerAccessorImpl {
             ClientAuthenticationHandlerModifier::CtorImpl,
             ClientAuthenticationHandlerModifier::GetFinalizerImpl,
-            ClientAuthenticationHandlerModifier::Confirm_string_stringImpl,
-            ClientAuthenticationHandlerModifier::Confirm_stringImpl,
+            ClientAuthenticationHandlerModifier::Confirm0Impl,
+            ClientAuthenticationHandlerModifier::Confirm1Impl,
             ClientAuthenticationHandlerModifier::CancelImpl,
             ClientAuthenticationHandlerModifier::IgnoreImpl,
         };

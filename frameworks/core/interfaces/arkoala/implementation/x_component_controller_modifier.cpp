@@ -32,7 +32,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         {
             return 0;
         }
-        void SetXComponentSurfaceSizeImpl(XComponentControllerPeer* peer, const Literal_surfaceWidth_Number_surfaceHeight_Number* value)
+        void SetXComponentSurfaceSizeImpl(XComponentControllerPeer* peer, const Literal_Number_surfaceWidth_surfaceHeight* value)
         {
         }
         void SetXComponentSurfaceRectImpl(XComponentControllerPeer* peer, const Ark_SurfaceRect* rect)

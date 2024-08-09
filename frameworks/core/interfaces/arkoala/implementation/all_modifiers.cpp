@@ -83,22 +83,18 @@ namespace OHOS::Ace::NG {
     namespace Bridge {
         Ark_NodeHandle CreateNode(GENERATED_Ark_NodeType type, Ark_Int32 id, Ark_Int32 flags);
         void SetCallbackMethod(GENERATED_Ark_APICallbackMethod* method);
-
         void RegisterCustomNodeEventReceiver(GENERATED_CustomEventReceiver eventReceiver)
         {
             ApiImpl::RegisterCustomNodeEventReceiver(reinterpret_cast<CustomEventReceiver>(eventReceiver));
         }
-
         int CheckEvent(GENERATED_Ark_NodeEvent* event)
         {
             return NodeEvent::CheckEvent(reinterpret_cast<ArkUINodeEvent*>(event));
         }
-
         void SendAsyncEvent(GENERATED_Ark_NodeEvent* event)
         {
             NodeEvent::SendArkUIAsyncEvent(reinterpret_cast<ArkUINodeEvent*>(event));
         }
-
         void CallContinuation(Ark_Int32 continuationId, Ark_Int32 argCount, GENERATED_Ark_EventCallbackArg* args)
         {
             ApiImpl::CallContinuation(continuationId, argCount, reinterpret_cast<ArkUIEventCallbackArg*>(args));
@@ -420,7 +416,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         };
         return &modifiersImpl;
     }
-
     const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
     {
         static const GENERATED_ArkUIAccessors accessorsImpl = {
@@ -501,7 +496,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         };
         return &accessorsImpl;
     }
-
     const GENERATED_Ark_UtilsModifier* GENERATED_GetUtilsModifier()
     {
         static const GENERATED_Ark_UtilsModifier utilsImpl = {
@@ -511,7 +505,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         };
         return &utilsImpl;
     }
-
     const GENERATED_ArkUIBasicNodeAPI* GENERATED_GetBasicAPI()
     {
         static const GENERATED_ArkUIBasicNodeAPI basicNodeAPIImpl = {
@@ -583,8 +576,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GENERATED_ARKUI_FULL_API_VERSION, // version
             GENERATED_GetArkUINodeModifiers,
             GENERATED_GetArkUIAccessors,
-            nullptr,
-            nullptr,
             nullptr,
             OHOS::Ace::NG::GeneratedEvents::GENERATED_GetArkUiEventsAPI,
             GENERATED_GetExtendedAPI,

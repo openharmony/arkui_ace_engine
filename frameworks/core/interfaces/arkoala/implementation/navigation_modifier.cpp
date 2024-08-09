@@ -17,10 +17,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
     namespace NavigationInterfaceModifier {
-        void _setNavigationOptions_Impl(Ark_NativePointer node)
+        void _setNavigationOptions0Impl(Ark_NativePointer node)
         {
         }
-        void _setNavigationOptions_NavPathStackImpl(Ark_NativePointer node, const Ark_Materialized* pathInfos)
+        void _setNavigationOptions1Impl(Ark_NativePointer node, const Ark_Materialized* pathInfos)
         {
         }
     } // NavigationInterfaceModifier
@@ -98,8 +98,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUINavigationModifier* GetNavigationModifier()
     {
         static const GENERATED_ArkUINavigationModifier ArkUINavigationModifierImpl {
-            NavigationInterfaceModifier::_setNavigationOptions_Impl,
-            NavigationInterfaceModifier::_setNavigationOptions_NavPathStackImpl,
+            NavigationInterfaceModifier::_setNavigationOptions0Impl,
+            NavigationInterfaceModifier::_setNavigationOptions1Impl,
             NavigationAttributeModifier::NavBarWidthImpl,
             NavigationAttributeModifier::NavBarPositionImpl,
             NavigationAttributeModifier::NavBarWidthRangeImpl,

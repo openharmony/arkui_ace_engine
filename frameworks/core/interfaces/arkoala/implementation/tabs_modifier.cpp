@@ -31,13 +31,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         void ScrollableImpl(Ark_NativePointer node, Ark_Boolean value)
         {
         }
-        void BarMode_BarModeFixedImpl(Ark_NativePointer node, Ark_Int32 value)
+        void BarMode0Impl(Ark_NativePointer node, Ark_Int32 value)
         {
         }
-        void BarMode_BarModeScrollable_ScrollableBarModeOptionsImpl(Ark_NativePointer node, Ark_Int32 value, const Ark_ScrollableBarModeOptions* options)
+        void BarMode1Impl(Ark_NativePointer node, Ark_Int32 value, const Ark_ScrollableBarModeOptions* options)
         {
         }
-        void BarMode_BarMode_ScrollableBarModeOptionsImpl(Ark_NativePointer node, Ark_Int32 value, const Opt_ScrollableBarModeOptions* options)
+        void BarMode2Impl(Ark_NativePointer node, Ark_Int32 value, const Opt_ScrollableBarModeOptions* options)
         {
         }
         void BarWidthImpl(Ark_NativePointer node, const Ark_Length* value)
@@ -102,9 +102,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TabsAttributeModifier::VerticalImpl,
             TabsAttributeModifier::BarPositionImpl,
             TabsAttributeModifier::ScrollableImpl,
-            TabsAttributeModifier::BarMode_BarModeFixedImpl,
-            TabsAttributeModifier::BarMode_BarModeScrollable_ScrollableBarModeOptionsImpl,
-            TabsAttributeModifier::BarMode_BarMode_ScrollableBarModeOptionsImpl,
+            TabsAttributeModifier::BarMode0Impl,
+            TabsAttributeModifier::BarMode1Impl,
+            TabsAttributeModifier::BarMode2Impl,
             TabsAttributeModifier::BarWidthImpl,
             TabsAttributeModifier::BarHeightImpl,
             TabsAttributeModifier::AnimationDurationImpl,

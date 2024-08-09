@@ -148,13 +148,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         void OnSslErrorReceiveImpl(Ark_NativePointer node, Ark_Function callback)
         {
         }
-        void OnRenderExited_CallbackOnRenderExitedEventImpl(Ark_NativePointer node, Ark_Function callback)
+        void OnRenderExited0Impl(Ark_NativePointer node, Ark_Function callback)
         {
         }
         void OnShowFileSelectorImpl(Ark_NativePointer node, Ark_Function callback)
         {
         }
-        void OnRenderExited_eventdetailObjectbooleanImpl(Ark_NativePointer node, Ark_Function callback)
+        void OnRenderExited1Impl(Ark_NativePointer node, Ark_Function callback)
         {
         }
         void OnFileSelectorShowImpl(Ark_NativePointer node, Ark_Function callback)
@@ -420,9 +420,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::OnRefreshAccessedHistoryImpl,
             WebAttributeModifier::OnUrlLoadInterceptImpl,
             WebAttributeModifier::OnSslErrorReceiveImpl,
-            WebAttributeModifier::OnRenderExited_CallbackOnRenderExitedEventImpl,
+            WebAttributeModifier::OnRenderExited0Impl,
             WebAttributeModifier::OnShowFileSelectorImpl,
-            WebAttributeModifier::OnRenderExited_eventdetailObjectbooleanImpl,
+            WebAttributeModifier::OnRenderExited1Impl,
             WebAttributeModifier::OnFileSelectorShowImpl,
             WebAttributeModifier::OnResourceLoadImpl,
             WebAttributeModifier::OnFullScreenExitImpl,

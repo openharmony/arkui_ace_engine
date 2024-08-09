@@ -17,10 +17,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
     namespace LocationButtonInterfaceModifier {
-        void _setLocationButtonOptions_Impl(Ark_NativePointer node)
+        void _setLocationButtonOptions0Impl(Ark_NativePointer node)
         {
         }
-        void _setLocationButtonOptions_LocationButtonOptionsImpl(Ark_NativePointer node, const Ark_LocationButtonOptions* options)
+        void _setLocationButtonOptions1Impl(Ark_NativePointer node, const Ark_LocationButtonOptions* options)
         {
         }
     } // LocationButtonInterfaceModifier
@@ -32,8 +32,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUILocationButtonModifier* GetLocationButtonModifier()
     {
         static const GENERATED_ArkUILocationButtonModifier ArkUILocationButtonModifierImpl {
-            LocationButtonInterfaceModifier::_setLocationButtonOptions_Impl,
-            LocationButtonInterfaceModifier::_setLocationButtonOptions_LocationButtonOptionsImpl,
+            LocationButtonInterfaceModifier::_setLocationButtonOptions0Impl,
+            LocationButtonInterfaceModifier::_setLocationButtonOptions1Impl,
             LocationButtonAttributeModifier::OnClickImpl,
         };
         return &ArkUILocationButtonModifierImpl;

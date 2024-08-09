@@ -37,11 +37,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         {
             return 0;
         }
-        Ark_NativePointer Rotate_number_numberImpl(Matrix2DPeer* peer, const Opt_Number* rx, const Opt_Number* ry)
+        Ark_NativePointer Rotate0Impl(Matrix2DPeer* peer, const Opt_Number* rx, const Opt_Number* ry)
         {
             return 0;
         }
-        Ark_NativePointer Rotate_number_number_numberImpl(Matrix2DPeer* peer, const Ark_Number* degree, const Opt_Number* rx, const Opt_Number* ry)
+        Ark_NativePointer Rotate1Impl(Matrix2DPeer* peer, const Ark_Number* degree, const Opt_Number* rx, const Opt_Number* ry)
         {
             return 0;
         }
@@ -104,8 +104,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             Matrix2DModifier::IdentityImpl,
             Matrix2DModifier::InvertImpl,
             Matrix2DModifier::MultiplyImpl,
-            Matrix2DModifier::Rotate_number_numberImpl,
-            Matrix2DModifier::Rotate_number_number_numberImpl,
+            Matrix2DModifier::Rotate0Impl,
+            Matrix2DModifier::Rotate1Impl,
             Matrix2DModifier::TranslateImpl,
             Matrix2DModifier::ScaleImpl,
             Matrix2DModifier::GetScaleXImpl,

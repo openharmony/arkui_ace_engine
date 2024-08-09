@@ -22,10 +22,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
     } // TabContentInterfaceModifier
     namespace TabContentAttributeModifier {
-        void TabBar_stringResourceCustomBuildericonstringResourcetextstringResourceImpl(Ark_NativePointer node, const Type_TabContentAttribute_tabBar_Arg0* value)
+        void TabBar0Impl(Ark_NativePointer node, const Type_TabContentAttribute_tabBar_Arg0* value)
         {
         }
-        void TabBar_SubTabBarStyleBottomTabBarStyleImpl(Ark_NativePointer node, const Type_TabContentAttribute_tabBar1_Arg0* value)
+        void TabBar1Impl(Ark_NativePointer node, const Type_TabContentAttribute_tabBar1_Arg0* value)
         {
         }
         void OnWillShowImpl(Ark_NativePointer node, Ark_Function event)
@@ -39,8 +39,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         static const GENERATED_ArkUITabContentModifier ArkUITabContentModifierImpl {
             TabContentInterfaceModifier::_setTabContentOptionsImpl,
-            TabContentAttributeModifier::TabBar_stringResourceCustomBuildericonstringResourcetextstringResourceImpl,
-            TabContentAttributeModifier::TabBar_SubTabBarStyleBottomTabBarStyleImpl,
+            TabContentAttributeModifier::TabBar0Impl,
+            TabContentAttributeModifier::TabBar1Impl,
             TabContentAttributeModifier::OnWillShowImpl,
             TabContentAttributeModifier::OnWillHideImpl,
         };

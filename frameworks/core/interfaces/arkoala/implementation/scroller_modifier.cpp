@@ -25,7 +25,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         {
             return 0;
         }
-        void ScrollToImpl(ScrollerPeer* peer, const Literal_xOffset_Union_Number_String_yOffset_Union_Number_String_animation_Opt_Union_Opt_ScrollAnimationOptions_Opt_Boolean* value)
+        void ScrollToImpl(ScrollerPeer* peer, const Literal_Union_Number_String_xOffset_yOffset_Opt_Union_ScrollAnimationOptions_Boolean_animation* value)
         {
         }
         void ScrollEdgeImpl(ScrollerPeer* peer, Ark_Int32 value, const Opt_ScrollEdgeOptions* options)
@@ -34,10 +34,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         void FlingImpl(ScrollerPeer* peer, const Ark_Number* velocity)
         {
         }
-        void ScrollPage_ScrollPageOptionsImpl(ScrollerPeer* peer, const Ark_ScrollPageOptions* value)
+        void ScrollPage0Impl(ScrollerPeer* peer, const Ark_ScrollPageOptions* value)
         {
         }
-        void ScrollPage_nextbooleandirectionAxisImpl(ScrollerPeer* peer, const Literal_next_Boolean_direction_Axis* value)
+        void ScrollPage1Impl(ScrollerPeer* peer, const Literal_Boolean_next_Opt_Axis_direction* value)
         {
         }
         Ark_NativePointer CurrentOffsetImpl(ScrollerPeer* peer)
@@ -67,8 +67,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ScrollerModifier::ScrollToImpl,
             ScrollerModifier::ScrollEdgeImpl,
             ScrollerModifier::FlingImpl,
-            ScrollerModifier::ScrollPage_ScrollPageOptionsImpl,
-            ScrollerModifier::ScrollPage_nextbooleandirectionAxisImpl,
+            ScrollerModifier::ScrollPage0Impl,
+            ScrollerModifier::ScrollPage1Impl,
             ScrollerModifier::CurrentOffsetImpl,
             ScrollerModifier::ScrollToIndexImpl,
             ScrollerModifier::ScrollByImpl,

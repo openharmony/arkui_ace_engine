@@ -17,10 +17,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
     namespace ShapeInterfaceModifier {
-        void _setShapeOptions_PixelMapImpl(Ark_NativePointer node, const Ark_CustomObject* value)
+        void _setShapeOptions0Impl(Ark_NativePointer node, const Ark_CustomObject* value)
         {
         }
-        void _setShapeOptions_Impl(Ark_NativePointer node)
+        void _setShapeOptions1Impl(Ark_NativePointer node)
         {
         }
     } // ShapeInterfaceModifier
@@ -68,8 +68,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUIShapeModifier* GetShapeModifier()
     {
         static const GENERATED_ArkUIShapeModifier ArkUIShapeModifierImpl {
-            ShapeInterfaceModifier::_setShapeOptions_PixelMapImpl,
-            ShapeInterfaceModifier::_setShapeOptions_Impl,
+            ShapeInterfaceModifier::_setShapeOptions0Impl,
+            ShapeInterfaceModifier::_setShapeOptions1Impl,
             ShapeAttributeModifier::ViewPortImpl,
             ShapeAttributeModifier::StrokeImpl,
             ShapeAttributeModifier::FillImpl,

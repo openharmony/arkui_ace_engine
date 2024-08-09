@@ -25,34 +25,34 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         {
             return 0;
         }
-        void DrawImage_ImageBitmapPixelMap_number_numberImpl(CanvasRendererPeer* peer, const Union_ImageBitmap_PixelMap* image, const Ark_Number* dx, const Ark_Number* dy)
+        void DrawImage0Impl(CanvasRendererPeer* peer, const Union_ImageBitmap_PixelMap* image, const Ark_Number* dx, const Ark_Number* dy)
         {
         }
-        void DrawImage_ImageBitmapPixelMap_number_number_number_numberImpl(CanvasRendererPeer* peer, const Union_ImageBitmap_PixelMap* image, const Ark_Number* dx, const Ark_Number* dy, const Ark_Number* dw, const Ark_Number* dh)
+        void DrawImage1Impl(CanvasRendererPeer* peer, const Union_ImageBitmap_PixelMap* image, const Ark_Number* dx, const Ark_Number* dy, const Ark_Number* dw, const Ark_Number* dh)
         {
         }
-        void DrawImage_ImageBitmapPixelMap_number_number_number_number_number_number_number_numberImpl(CanvasRendererPeer* peer, const Union_ImageBitmap_PixelMap* image, const Ark_Number* sx, const Ark_Number* sy, const Ark_Number* sw, const Ark_Number* sh, const Ark_Number* dx, const Ark_Number* dy, const Ark_Number* dw, const Ark_Number* dh)
+        void DrawImage2Impl(CanvasRendererPeer* peer, const Union_ImageBitmap_PixelMap* image, const Ark_Number* sx, const Ark_Number* sy, const Ark_Number* sw, const Ark_Number* sh, const Ark_Number* dx, const Ark_Number* dy, const Ark_Number* dw, const Ark_Number* dh)
         {
         }
         void BeginPathImpl(CanvasRendererPeer* peer)
         {
         }
-        void Clip_CanvasFillRuleImpl(CanvasRendererPeer* peer, const Opt_CanvasFillRule* fillRule)
+        void Clip0Impl(CanvasRendererPeer* peer, const Opt_CanvasFillRule* fillRule)
         {
         }
-        void Clip_PathD_CanvasFillRuleImpl(CanvasRendererPeer* peer, const Ark_Materialized* path, const Opt_CanvasFillRule* fillRule)
+        void Clip1Impl(CanvasRendererPeer* peer, const Ark_Materialized* path, const Opt_CanvasFillRule* fillRule)
         {
         }
-        void Fill_CanvasFillRuleImpl(CanvasRendererPeer* peer, const Opt_CanvasFillRule* fillRule)
+        void Fill0Impl(CanvasRendererPeer* peer, const Opt_CanvasFillRule* fillRule)
         {
         }
-        void Fill_PathD_CanvasFillRuleImpl(CanvasRendererPeer* peer, const Ark_Materialized* path, const Opt_CanvasFillRule* fillRule)
+        void Fill1Impl(CanvasRendererPeer* peer, const Ark_Materialized* path, const Opt_CanvasFillRule* fillRule)
         {
         }
-        void Stroke_Impl(CanvasRendererPeer* peer)
+        void Stroke0Impl(CanvasRendererPeer* peer)
         {
         }
-        void Stroke_PathDImpl(CanvasRendererPeer* peer, const Ark_Materialized* path)
+        void Stroke1Impl(CanvasRendererPeer* peer, const Ark_Materialized* path)
         {
         }
         Ark_NativePointer CreateLinearGradientImpl(CanvasRendererPeer* peer, const Ark_Number* x0, const Ark_Number* y0, const Ark_Number* x1, const Ark_Number* y1)
@@ -71,11 +71,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         {
             return 0;
         }
-        Ark_NativePointer CreateImageData_number_numberImpl(CanvasRendererPeer* peer, const Ark_Number* sw, const Ark_Number* sh)
+        Ark_NativePointer CreateImageData0Impl(CanvasRendererPeer* peer, const Ark_Number* sw, const Ark_Number* sh)
         {
             return 0;
         }
-        Ark_NativePointer CreateImageData_ImageDataImpl(CanvasRendererPeer* peer, const Ark_ImageData* imagedata)
+        Ark_NativePointer CreateImageData1Impl(CanvasRendererPeer* peer, const Ark_ImageData* imagedata)
         {
             return 0;
         }
@@ -87,10 +87,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         {
             return 0;
         }
-        void PutImageData_ImageData_numberstring_numberstringImpl(CanvasRendererPeer* peer, const Ark_ImageData* imagedata, const Union_Number_String* dx, const Union_Number_String* dy)
+        void PutImageData0Impl(CanvasRendererPeer* peer, const Ark_ImageData* imagedata, const Union_Number_String* dx, const Union_Number_String* dy)
         {
         }
-        void PutImageData_ImageData_numberstring_numberstring_numberstring_numberstring_numberstring_numberstringImpl(CanvasRendererPeer* peer, const Ark_ImageData* imagedata, const Union_Number_String* dx, const Union_Number_String* dy, const Union_Number_String* dirtyX, const Union_Number_String* dirtyY, const Union_Number_String* dirtyWidth, const Union_Number_String* dirtyHeight)
+        void PutImageData1Impl(CanvasRendererPeer* peer, const Ark_ImageData* imagedata, const Union_Number_String* dx, const Union_Number_String* dy, const Union_Number_String* dirtyX, const Union_Number_String* dirtyY, const Union_Number_String* dirtyWidth, const Union_Number_String* dirtyHeight)
         {
         }
         void GetLineDashImpl(CanvasRendererPeer* peer)
@@ -137,10 +137,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         void ScaleImpl(CanvasRendererPeer* peer, const Ark_Number* x, const Ark_Number* y)
         {
         }
-        void SetTransform_number_number_number_number_number_numberImpl(CanvasRendererPeer* peer, const Ark_Number* a, const Ark_Number* b, const Ark_Number* c, const Ark_Number* d, const Ark_Number* e, const Ark_Number* f)
+        void SetTransform0Impl(CanvasRendererPeer* peer, const Ark_Number* a, const Ark_Number* b, const Ark_Number* c, const Ark_Number* d, const Ark_Number* e, const Ark_Number* f)
         {
         }
-        void SetTransform_MatrixDImpl(CanvasRendererPeer* peer, const Opt_Matrix2D* transform)
+        void SetTransform1Impl(CanvasRendererPeer* peer, const Opt_Matrix2D* transform)
         {
         }
         void TransformImpl(CanvasRendererPeer* peer, const Ark_Number* a, const Ark_Number* b, const Ark_Number* c, const Ark_Number* d, const Ark_Number* e, const Ark_Number* f)
@@ -274,26 +274,26 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUICanvasRendererAccessor CanvasRendererAccessorImpl {
             CanvasRendererModifier::CtorImpl,
             CanvasRendererModifier::GetFinalizerImpl,
-            CanvasRendererModifier::DrawImage_ImageBitmapPixelMap_number_numberImpl,
-            CanvasRendererModifier::DrawImage_ImageBitmapPixelMap_number_number_number_numberImpl,
-            CanvasRendererModifier::DrawImage_ImageBitmapPixelMap_number_number_number_number_number_number_number_numberImpl,
+            CanvasRendererModifier::DrawImage0Impl,
+            CanvasRendererModifier::DrawImage1Impl,
+            CanvasRendererModifier::DrawImage2Impl,
             CanvasRendererModifier::BeginPathImpl,
-            CanvasRendererModifier::Clip_CanvasFillRuleImpl,
-            CanvasRendererModifier::Clip_PathD_CanvasFillRuleImpl,
-            CanvasRendererModifier::Fill_CanvasFillRuleImpl,
-            CanvasRendererModifier::Fill_PathD_CanvasFillRuleImpl,
-            CanvasRendererModifier::Stroke_Impl,
-            CanvasRendererModifier::Stroke_PathDImpl,
+            CanvasRendererModifier::Clip0Impl,
+            CanvasRendererModifier::Clip1Impl,
+            CanvasRendererModifier::Fill0Impl,
+            CanvasRendererModifier::Fill1Impl,
+            CanvasRendererModifier::Stroke0Impl,
+            CanvasRendererModifier::Stroke1Impl,
             CanvasRendererModifier::CreateLinearGradientImpl,
             CanvasRendererModifier::CreatePatternImpl,
             CanvasRendererModifier::CreateRadialGradientImpl,
             CanvasRendererModifier::CreateConicGradientImpl,
-            CanvasRendererModifier::CreateImageData_number_numberImpl,
-            CanvasRendererModifier::CreateImageData_ImageDataImpl,
+            CanvasRendererModifier::CreateImageData0Impl,
+            CanvasRendererModifier::CreateImageData1Impl,
             CanvasRendererModifier::GetImageDataImpl,
             CanvasRendererModifier::GetPixelMapImpl,
-            CanvasRendererModifier::PutImageData_ImageData_numberstring_numberstringImpl,
-            CanvasRendererModifier::PutImageData_ImageData_numberstring_numberstring_numberstring_numberstring_numberstring_numberstringImpl,
+            CanvasRendererModifier::PutImageData0Impl,
+            CanvasRendererModifier::PutImageData1Impl,
             CanvasRendererModifier::GetLineDashImpl,
             CanvasRendererModifier::SetLineDashImpl,
             CanvasRendererModifier::ClearRectImpl,
@@ -308,8 +308,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CanvasRendererModifier::ResetTransformImpl,
             CanvasRendererModifier::RotateImpl,
             CanvasRendererModifier::ScaleImpl,
-            CanvasRendererModifier::SetTransform_number_number_number_number_number_numberImpl,
-            CanvasRendererModifier::SetTransform_MatrixDImpl,
+            CanvasRendererModifier::SetTransform0Impl,
+            CanvasRendererModifier::SetTransform1Impl,
             CanvasRendererModifier::TransformImpl,
             CanvasRendererModifier::TranslateImpl,
             CanvasRendererModifier::SetPixelMapImpl,

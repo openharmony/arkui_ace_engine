@@ -17,13 +17,13 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
     namespace XComponentInterfaceModifier {
-        void _setXComponentOptions_idstringtypestringlibrarynamestringcontrollerXComponentControllerImpl(Ark_NativePointer node, const Type_XComponentInterface__setXComponentOptions_Arg0* value)
+        void _setXComponentOptions0Impl(Ark_NativePointer node, const Type_XComponentInterface__setXComponentOptions_Arg0* value)
         {
         }
-        void _setXComponentOptions_idstringtypeXComponentTypelibrarynamestringcontrollerXComponentControllerImpl(Ark_NativePointer node, const Type_XComponentInterface__setXComponentOptions1_Arg0* value)
+        void _setXComponentOptions1Impl(Ark_NativePointer node, const Type_XComponentInterface__setXComponentOptions1_Arg0* value)
         {
         }
-        void _setXComponentOptions_XComponentOptionsImpl(Ark_NativePointer node, const Ark_XComponentOptions* options)
+        void _setXComponentOptions2Impl(Ark_NativePointer node, const Ark_XComponentOptions* options)
         {
         }
     } // XComponentInterfaceModifier
@@ -41,9 +41,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUIXComponentModifier* GetXComponentModifier()
     {
         static const GENERATED_ArkUIXComponentModifier ArkUIXComponentModifierImpl {
-            XComponentInterfaceModifier::_setXComponentOptions_idstringtypestringlibrarynamestringcontrollerXComponentControllerImpl,
-            XComponentInterfaceModifier::_setXComponentOptions_idstringtypeXComponentTypelibrarynamestringcontrollerXComponentControllerImpl,
-            XComponentInterfaceModifier::_setXComponentOptions_XComponentOptionsImpl,
+            XComponentInterfaceModifier::_setXComponentOptions0Impl,
+            XComponentInterfaceModifier::_setXComponentOptions1Impl,
+            XComponentInterfaceModifier::_setXComponentOptions2Impl,
             XComponentAttributeModifier::OnLoadImpl,
             XComponentAttributeModifier::OnDestroyImpl,
             XComponentAttributeModifier::EnableAnalyzerImpl,

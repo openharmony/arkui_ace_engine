@@ -28,7 +28,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         void BackToTodayImpl(CalendarControllerPeer* peer)
         {
         }
-        void GoToImpl(CalendarControllerPeer* peer, const Literal_year_Number_month_Number_day_Number* value)
+        void GoToImpl(CalendarControllerPeer* peer, const Literal_Number_year_month_day* value)
         {
         }
     } // CalendarControllerModifier

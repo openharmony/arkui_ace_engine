@@ -21,17 +21,16 @@
 #include "core/components_ng/base/view_stack_processor.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace ColumnInterface {
-void _setColumnOptionsImpl(Ark_NativePointer node, const Opt_Type_ColumnInterface__setColumnOptions_Arg0 *value)
+namespace ColumnInterfaceModifier {
+void _setColumnOptionsImpl(Ark_NativePointer node, const Opt_Type_ColumnInterface__setColumnOptions_Arg0* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     std::tuple<Ark_Float32, Ark_Int32> space = Converter::ConvertOrDefault(
         *value, std::make_tuple(0.0f, (int)DimensionUnit::PX));
     ColumnModelNG::SetSpace(frameNode, CalcDimension(std::get<0>(space), (DimensionUnit)std::get<1>(space)));
 }
-} // ColumnInterface
-
-namespace ColumnAttribute {
+} // ColumnInterfaceModifier
+namespace ColumnAttributeModifier {
 void AlignItemsImpl(Ark_NativePointer node, Ark_Int32 value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -53,7 +52,7 @@ void JustifyContentImpl(Ark_NativePointer node, Ark_Int32 value)
     ColumnModelNG::SetJustifyContent(frameNode, static_cast<FlexAlign>(value));
 }
 
-void PointLightImpl(Ark_NativePointer node, const Ark_PointLightStyle *value)
+void PointLightImpl(Ark_NativePointer node, const Ark_PointLightStyle* value)
 {
     LOGE("ARKOALA ColumnAttribute_PointLightImpl -> Method is not FULLY "
         "implemented.");
@@ -62,16 +61,16 @@ void PointLightImpl(Ark_NativePointer node, const Ark_PointLightStyle *value)
         (float)Converter::ConvertOrDefault(value->illuminated, 0), frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(Bloom, (float)Converter::ConvertOrDefault(value->bloom, 0), frameNode);
 }
-} // ColumnAttribute
+} // ColumnAttributeModifier
 
-const GENERATED_ArkUIColumnModifier *GetColumnModifier()
+const GENERATED_ArkUIColumnModifier* GetColumnModifier()
 {
-    static GENERATED_ArkUIColumnModifier ArkUIColumnModifierImpl {
-        ColumnInterface::_setColumnOptionsImpl,
-        ColumnAttribute::AlignItemsImpl,
-        ColumnAttribute::JustifyContentImpl,
-        ColumnAttribute::PointLightImpl,
+    static const GENERATED_ArkUIColumnModifier ArkUIColumnModifierImpl {
+        ColumnInterfaceModifier::_setColumnOptionsImpl,
+        ColumnAttributeModifier::AlignItemsImpl,
+        ColumnAttributeModifier::JustifyContentImpl,
+        ColumnAttributeModifier::PointLightImpl,
     };
     return &ArkUIColumnModifierImpl;
 }
-} // namespace OHOS::Ace::NG::GeneratedModifier
+}

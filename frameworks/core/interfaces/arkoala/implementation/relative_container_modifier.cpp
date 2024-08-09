@@ -25,10 +25,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         void GuideLineImpl(Ark_NativePointer node, const Array_GuideLineStyle* value)
         {
         }
-        void Barrier_ArrayBarrierStyleImpl(Ark_NativePointer node, const Array_BarrierStyle* value)
+        void Barrier0Impl(Ark_NativePointer node, const Array_BarrierStyle* value)
         {
         }
-        void Barrier_ArrayLocalizedBarrierStyleImpl(Ark_NativePointer node, const Array_LocalizedBarrierStyle* barrierStyle)
+        void Barrier1Impl(Ark_NativePointer node, const Array_LocalizedBarrierStyle* barrierStyle)
         {
         }
     } // RelativeContainerAttributeModifier
@@ -37,8 +37,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIRelativeContainerModifier ArkUIRelativeContainerModifierImpl {
             RelativeContainerInterfaceModifier::_setRelativeContainerOptionsImpl,
             RelativeContainerAttributeModifier::GuideLineImpl,
-            RelativeContainerAttributeModifier::Barrier_ArrayBarrierStyleImpl,
-            RelativeContainerAttributeModifier::Barrier_ArrayLocalizedBarrierStyleImpl,
+            RelativeContainerAttributeModifier::Barrier0Impl,
+            RelativeContainerAttributeModifier::Barrier1Impl,
         };
         return &ArkUIRelativeContainerModifierImpl;
     }

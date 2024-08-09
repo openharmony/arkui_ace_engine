@@ -17,18 +17,18 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
     namespace BadgeInterfaceModifier {
-        void _setBadgeOptions_BadgeParamWithNumberImpl(Ark_NativePointer node, const Ark_BadgeParamWithNumber* value)
+        void _setBadgeOptions0Impl(Ark_NativePointer node, const Ark_BadgeParamWithNumber* value)
         {
         }
-        void _setBadgeOptions_BadgeParamWithStringImpl(Ark_NativePointer node, const Ark_BadgeParamWithString* value)
+        void _setBadgeOptions1Impl(Ark_NativePointer node, const Ark_BadgeParamWithString* value)
         {
         }
     } // BadgeInterfaceModifier
     const GENERATED_ArkUIBadgeModifier* GetBadgeModifier()
     {
         static const GENERATED_ArkUIBadgeModifier ArkUIBadgeModifierImpl {
-            BadgeInterfaceModifier::_setBadgeOptions_BadgeParamWithNumberImpl,
-            BadgeInterfaceModifier::_setBadgeOptions_BadgeParamWithStringImpl,
+            BadgeInterfaceModifier::_setBadgeOptions0Impl,
+            BadgeInterfaceModifier::_setBadgeOptions1Impl,
         };
         return &ArkUIBadgeModifierImpl;
     }

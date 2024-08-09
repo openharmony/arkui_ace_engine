@@ -37,10 +37,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         void RenderingStrategyImpl(Ark_NativePointer node, Ark_Int32 value)
         {
         }
-        void SymbolEffect_SymbolEffect_booleanImpl(Ark_NativePointer node, const Ark_SymbolEffect* symbolEffect, const Opt_Boolean* isActive)
+        void SymbolEffect0Impl(Ark_NativePointer node, const Ark_SymbolEffect* symbolEffect, const Opt_Boolean* isActive)
         {
         }
-        void SymbolEffect_SymbolEffect_numberImpl(Ark_NativePointer node, const Ark_SymbolEffect* symbolEffect, const Opt_Number* triggerValue)
+        void SymbolEffect1Impl(Ark_NativePointer node, const Ark_SymbolEffect* symbolEffect, const Opt_Number* triggerValue)
         {
         }
     } // SymbolGlyphAttributeModifier
@@ -53,8 +53,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SymbolGlyphAttributeModifier::FontWeightImpl,
             SymbolGlyphAttributeModifier::EffectStrategyImpl,
             SymbolGlyphAttributeModifier::RenderingStrategyImpl,
-            SymbolGlyphAttributeModifier::SymbolEffect_SymbolEffect_booleanImpl,
-            SymbolGlyphAttributeModifier::SymbolEffect_SymbolEffect_numberImpl,
+            SymbolGlyphAttributeModifier::SymbolEffect0Impl,
+            SymbolGlyphAttributeModifier::SymbolEffect1Impl,
         };
         return &ArkUISymbolGlyphModifierImpl;
     }

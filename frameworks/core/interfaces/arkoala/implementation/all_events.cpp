@@ -270,7 +270,7 @@ namespace OHOS::Ace::NG::GeneratedEvents {
         }
     }
     namespace FolderStack {
-        void onFolderStateChangeImpl(Ark_Int32 nodeId, const Literal_foldStatus_FoldStatus event)
+        void onFolderStateChangeImpl(Ark_Int32 nodeId, const Literal_FoldStatus_foldStatus event)
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
@@ -284,7 +284,7 @@ namespace OHOS::Ace::NG::GeneratedEvents {
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
-        void onErrorImpl(Ark_Int32 nodeId, const Literal_errcode_Number_msg_String info)
+        void onErrorImpl(Ark_Int32 nodeId, const Literal_Number_errcode_String_msg info)
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
@@ -368,7 +368,7 @@ namespace OHOS::Ace::NG::GeneratedEvents {
         }
     }
     namespace Image {
-        void onCompleteImpl(Ark_Int32 nodeId, const Opt_Literal_width_Number_height_Number_componentWidth_Number_componentHeight_Number_loadingStatus_Number_contentWidth_Number_contentHeight_Number_contentOffsetX_Number_contentOffsetY_Number event)
+        void onCompleteImpl(Ark_Int32 nodeId, const Opt_Literal_Number_width_height_componentWidth_componentHeight_loadingStatus_contentWidth_contentHeight_contentOffsetX_contentOffsetY event)
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
@@ -592,7 +592,7 @@ namespace OHOS::Ace::NG::GeneratedEvents {
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
-        void onErrorImpl(Ark_Int32 nodeId, const Literal_errcode_Number_msg_String info)
+        void onErrorImpl(Ark_Int32 nodeId, const Literal_Number_errcode_String_msg info)
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
@@ -1058,23 +1058,23 @@ namespace OHOS::Ace::NG::GeneratedEvents {
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
-        void onFullscreenChangeImpl(Ark_Int32 nodeId, const Literal_fullscreen_Boolean event)
+        void onFullscreenChangeImpl(Ark_Int32 nodeId, const Literal_Boolean_fullscreen event)
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
-        void onPreparedImpl(Ark_Int32 nodeId, const Literal_duration_Number event)
+        void onPreparedImpl(Ark_Int32 nodeId, const Literal_Number_duration event)
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
-        void onSeekingImpl(Ark_Int32 nodeId, const Literal_time_Number event)
+        void onSeekingImpl(Ark_Int32 nodeId, const Literal_Number_time event)
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
-        void onSeekedImpl(Ark_Int32 nodeId, const Literal_time_Number event)
+        void onSeekedImpl(Ark_Int32 nodeId, const Literal_Number_time event)
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
-        void onUpdateImpl(Ark_Int32 nodeId, const Literal_time_Number event)
+        void onUpdateImpl(Ark_Int32 nodeId, const Literal_Number_time event)
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
@@ -1152,11 +1152,11 @@ namespace OHOS::Ace::NG::GeneratedEvents {
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
-        void onUrlLoadInterceptImpl(Ark_Int32 nodeId, const Opt_Literal_data_Union_String_WebResourceRequest event)
+        void onUrlLoadInterceptImpl(Ark_Int32 nodeId, const Opt_Literal_Union_String_WebResourceRequest_data event)
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
-        void onSslErrorReceiveImpl(Ark_Int32 nodeId, const Opt_Literal_handler_Function_error_CustomObject event)
+        void onSslErrorReceiveImpl(Ark_Int32 nodeId, const Opt_Literal_Function_handler_CustomObject_error event)
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
@@ -1164,7 +1164,7 @@ namespace OHOS::Ace::NG::GeneratedEvents {
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
-        void onFileSelectorShowImpl(Ark_Int32 nodeId, const Opt_Literal_callback_Function_fileSelector_CustomObject event)
+        void onFileSelectorShowImpl(Ark_Int32 nodeId, const Opt_Literal_Function_callback_CustomObject_fileSelector event)
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
