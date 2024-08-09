@@ -463,7 +463,6 @@ class AtomicServiceProxy {
                 this.atomicService.errorWithCodeAndMsg(JS_API_INVALID_INVOKE_ERROR, v9);
                 return;
             }
-            this.atomicService.logOptions(u9, v9);
             let x9 = ATOMIC_SERVICE_JS_API_MAP.get(u9);
             if (!this.atomicService.checkRequiredFieldInOptions(x9, v9)) {
                 return;
@@ -1028,7 +1027,6 @@ class AtomicServiceApi extends AtomicService {
                 files: this.convertToFile(z2.files),
                 data: this.convertToRequestData(z2.data)
             };
-            this.consoleLog('uploadFile uploadConfig=' + JSON.stringify(e3));
             request.uploadFile(this.context, e3).then((i3) => {
                 i3.on('complete', (m3) => {
                     this.handleUploadFileResult(m3, d3.uriMap, z2);
