@@ -4945,7 +4945,7 @@ globalThis.applyTextModifierToNode = function (modifier, nodePtr) {
   let component = new ArkTextComponent(nodePtr);
   applyUIAttributes(modifier, nodePtr, component);
   component.applyModifierPatch();
-}
+};
 
 /// <reference path='./import.ts' />
 class ColumnAlignItemsModifier extends ModifierWithKey {
