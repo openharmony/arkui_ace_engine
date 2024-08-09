@@ -99,12 +99,6 @@ void SearchPattern::UpdateChangeEvent(const std::string& textValue, int16_t styl
     imageHost->MarkModifyDone();
     buttonHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     imageHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    PaintSearchFocusState();
-    JudgmentImageHost(imageHost);
-}
-
-void SearchPattern::JudgmentImageHost(const RefPtr<FrameNode>& imageHost)
-{
     if (imageHost->GetTag() == V2::SYMBOL_ETS_TAG) {
         auto textLayoutProperty = imageHost->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
@@ -1338,11 +1332,11 @@ void SearchPattern::HandleBlurEvent()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    if (isFocusBgColorSet_) {
+    if (isFocusBgColorSet_ && renderContext->GetBackgroundColor().value_or(focusBgColor_) == focusBgColor_) {
         renderContext->UpdateBackgroundColor(searchNormalColor_);
         isFocusBgColorSet_ = false;
     }
-    if (isFocusIconColorSet_) {
+    if (isFocusIconColorSet_ && GetDefaultIconColor(IMAGE_INDEX) == focusIconColor_) {
         SetSearchIconColor(normalIconColor_);
         isFocusIconColorSet_ = false;
     }
@@ -1350,17 +1344,17 @@ void SearchPattern::HandleBlurEvent()
     CHECK_NULL_VOID(textFieldFrameNode);
     auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
-    if (isFocusTextColorSet_) {
-        textFieldLayoutProperty->UpdateTextColor(normalTextColor_);
-        isFocusTextColorSet_ = false;
-    }
-    if (isFocusPlaceholderColorSet_) {
-        textFieldLayoutProperty->UpdatePlaceholderTextColor(normalPlaceholderColor_);
-        isFocusPlaceholderColorSet_ = false;
-    }
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
     textFieldPattern->HandleBlurEvent();
+    if (isFocusTextColorSet_ && textFieldLayoutProperty->GetTextColorValue(focusTextColor_) == focusTextColor_) {
+        textFieldLayoutProperty->UpdateTextColor(normalTextColor_);
+        isFocusTextColorSet_ = false;
+    }
+    if (isFocusPlaceholderColorSet_ && textFieldLayoutProperty->GetPlaceholderTextColorValue(focusPlaceholderColor_) == focusPlaceholderColor_) {
+        textFieldLayoutProperty->UpdatePlaceholderTextColor(normalPlaceholderColor_);
+        isFocusPlaceholderColorSet_ = false;
+    }
 }
 
 void SearchPattern::InitClickEvent()
@@ -1758,6 +1752,9 @@ void SearchPattern::InitIconColorSize()
 void SearchPattern::CreateSearchIcon(const std::string& src)
 {
     CHECK_NULL_VOID(GetSearchNode());
+    if (GetSearchNode()->HasSearchIconNodeCreated()) {
+        return;
+    }
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
         src.empty()) {
         CreateOrUpdateSymbol(IMAGE_INDEX, !GetSearchNode()->HasSearchIconNodeCreated());
@@ -1774,6 +1771,9 @@ void SearchPattern::CreateSearchIcon(const std::string& src)
 void SearchPattern::CreateCancelIcon()
 {
     CHECK_NULL_VOID(GetSearchNode());
+    if (GetSearchNode()->HasCancelIconNodeCreated()) {
+        return;
+    }
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         CreateOrUpdateSymbol(CANCEL_IMAGE_INDEX, !GetSearchNode()->HasCancelIconNodeCreated());
     } else {

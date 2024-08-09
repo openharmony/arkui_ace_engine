@@ -661,6 +661,9 @@ void SearchModelNG::SetType(TextInputType value)
 void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const std::optional<std::string>& placeholder,
     const std::optional<std::string>& value, bool hasTextFieldNode)
 {
+    if (hasTextFieldNode) {
+        return;
+    }
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto searchTheme = pipeline->GetTheme<SearchTheme>();
