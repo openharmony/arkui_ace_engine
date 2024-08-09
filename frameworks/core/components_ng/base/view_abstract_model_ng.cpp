@@ -345,6 +345,7 @@ void ViewAbstractModelNG::BindDragWithContextMenuParams(const NG::MenuParam& men
     if (gestureHub) {
         gestureHub->SetPreviewMode(menuParam.previewMode);
         gestureHub->SetContextMenuShowStatus(menuParam.isShow);
+        gestureHub->SetMenuBindingType(menuParam.menuBindType);
     } else {
         TAG_LOGW(AceLogTag::ACE_DRAG, "Can not get gestureEventHub!");
     }
