@@ -239,17 +239,17 @@ HWTEST_F(TextFieldModifyTest, TextinputCaretPositionOnHandleMove001, TestSize.Le
      * tc.expected: step2. Check if the value is right.
      */
     OffsetF localOffset1(1.0f, 1.0f);
-    EXPECT_EQ(pattern_->selectOverlay_->GetCaretPositionOnHandleMove(localOffset1), 0);
+    EXPECT_EQ(pattern_->selectOverlay_->GetCaretPositionOnHandleMove(localOffset1, true), 0);
 
     FlushLayoutTask(frameNode_);
     GetFocus();
     OffsetF localOffset2(720.0f, 1.0f);
-    EXPECT_EQ(pattern_->selectOverlay_->GetCaretPositionOnHandleMove(localOffset2), 26);
+    EXPECT_EQ(pattern_->selectOverlay_->GetCaretPositionOnHandleMove(localOffset2, true), 26);
 
     FlushLayoutTask(frameNode_);
     GetFocus();
     OffsetF localOffset3(30.0f, 1.0f);
-    EXPECT_EQ(pattern_->selectOverlay_->GetCaretPositionOnHandleMove(localOffset3), 0);
+    EXPECT_EQ(pattern_->selectOverlay_->GetCaretPositionOnHandleMove(localOffset3, true), 0);
 }
 
 /**
@@ -1132,17 +1132,17 @@ HWTEST_F(TextFieldModifyTest, UpdateCaretPositionOnHandleMove001, TestSize.Level
      * tc.expected: step2. Check if the value is right.
      */
     OffsetF localOffset1(1.0f, 1.0f);
-    pattern_->selectOverlay_->GetCaretPositionOnHandleMove(localOffset1);
+    pattern_->selectOverlay_->GetCaretPositionOnHandleMove(localOffset1, true);
 
     FlushLayoutTask(frameNode_);
     GetFocus();
     OffsetF localOffset2(60.0f, 0.0f);
-    pattern_->selectOverlay_->GetCaretPositionOnHandleMove(localOffset2);
+    pattern_->selectOverlay_->GetCaretPositionOnHandleMove(localOffset2, true);
 
     FlushLayoutTask(frameNode_);
     GetFocus();
     OffsetF localOffset3(30.0f, 0.0f);
-    EXPECT_EQ(pattern_->selectOverlay_->GetCaretPositionOnHandleMove(localOffset3), 0);
+    EXPECT_EQ(pattern_->selectOverlay_->GetCaretPositionOnHandleMove(localOffset3, true), 0);
 }
 
 /**
