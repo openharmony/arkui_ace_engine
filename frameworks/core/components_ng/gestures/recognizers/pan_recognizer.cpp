@@ -724,7 +724,9 @@ GestureJudgeResult PanRecognizer::TriggerGestureJudgeCallback()
     if (lastTouchEvent_.tiltY.has_value()) {
         info->SetTiltY(lastTouchEvent_.tiltY.value());
     }
-    gestureInfo_->SetInputEventType(inputEventType_);
+    if (gestureInfo_) {
+        gestureInfo_->SetInputEventType(inputEventType_);
+    }
     if (gestureRecognizerJudgeFunc &&
         gestureRecognizerJudgeFunc(info, Claim(this), responseLinkRecognizer_) == GestureJudgeResult::REJECT) {
         return GestureJudgeResult::REJECT;
