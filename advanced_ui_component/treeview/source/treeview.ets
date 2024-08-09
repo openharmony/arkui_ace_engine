@@ -15,6 +15,8 @@
 
 import { Theme } from '@ohos.arkui.theme';
 import { LengthMetrics } from '@ohos.arkui.node';
+import { common } from '@kit.AbilityKit';
+import resourceManager from '@ohos.resourceManager';
 
 const IMAGE_NODE_HEIGHT: number = 24
 const IMAGE_NODE_WIDTH: number = 24
@@ -30,6 +32,8 @@ const SHADOW_OFFSETY: number = 10
 const FLAG_NUMBER: number = 2
 const DRAG_OPACITY: number = 0.4
 const DRAG_OPACITY_NONE: number = 1
+const MIN_FONT_SCALE: number = 1
+const MAX_FONT_SCALE: number = 2
 const FLAG_LINE_HEIGHT: string = '1.0vp'
 const X_OFF_SET: string = '0vp'
 const Y_OFF_SET: string = '2.75vp'
@@ -258,7 +262,7 @@ class TreeViewNodeItemFactory implements NodeItemViewFactory {
 
   /**
    * TreeViewNodeItemFactory singleton function
-   * 
+   *
    * @returns TreeViewNodeItemFactory
    */
   public static getInstance(): TreeViewNodeItemFactory {
@@ -282,7 +286,7 @@ class TreeViewNodeItemFactory implements NodeItemViewFactory {
       fontColor: undefined,
     };
   }
-  
+
    /**
    * TreeViewNodeItemFactory create node by node parameter
    *
@@ -340,7 +344,7 @@ class TreeViewTheme {
 
   /**
    * TreeViewTheme singleton function
-   * 
+   *
    * @returns TreeViewNodeItemFactory
    */
   public static getInstance(): TreeViewTheme {
@@ -415,7 +419,7 @@ export class NodeInfo {
   }
 
   /**
-   * NodeInfo add collapse image 
+   * NodeInfo add collapse image
    *
    * @param isHasChildNode whether node has child node
    */
@@ -947,6 +951,8 @@ export struct TreeView {
   @State touchCount: number = 0;
   @State dropSelectedIndex: number = 0;
   @State viewLastIndex: number = -1;
+  @State followingSystemFontScale: boolean = false;
+  @State maxAppFontScale: number = 1;
   @State listItemBgColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
   @Provide treeViewTheme: TreeViewTheme = TreeViewTheme.getInstance();
 
@@ -992,12 +998,28 @@ export struct TreeView {
       this.nodeList = this.treeController.getListNodeDataSource().listNode;
       this.item = this.treeController.getListNodeDataSource().listNode;
     }
+    let uiContent: UIContext = this.getUIContext();
+    this.followingSystemFontScale = uiContent.isFollowingSystemFontScale();
+    this.maxAppFontScale = uiContent.getMaxFontScale();
+  }
+
+  decideFontScale() {
+    let uiContent: UIContext = this.getUIContext();
+    let systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1;
+    if (!this.followingSystemFontScale) {
+      return 1;
+    }
+    return Math.min(systemFontScale, this.maxAppFontScale, MAX_FONT_SCALE)
   }
 
   @Builder
   popupForShowTitle(text: string | Resource, backgroundColor: Resource, fontColor: Resource) {
     Row() {
-      Text(text).fontSize($r('sys.float.ohos_id_text_size_body2')).fontWeight('regular').fontColor(fontColor)
+      Text(text)
+        .fontSize($r('sys.float.ohos_id_text_size_body2'))
+        .fontWeight('regular').fontColor(fontColor)
+        .minFontScale(MIN_FONT_SCALE)
+        .maxFontScale(this.decideFontScale())
     }.backgroundColor(backgroundColor)
     .border({ radius: $r('sys.float.ohos_id_elements_margin_horizontal_l') })
     .padding({
@@ -1037,6 +1059,8 @@ export struct TreeView {
         if (item.getNodeItem().mainTitleNode && item.getIsShowTitle()) {
           Text(item.getNodeItem().mainTitleNode?.title)
             .maxLines(1)
+            .minFontScale(MIN_FONT_SCALE)
+            .maxFontScale(this.decideFontScale())
             .fontSize(item.getNodeItem().mainTitleNode?.size)
             .fontColor(this.listNodeDataSource.getDragPopupPara().fontColor)
             .fontWeight(this.listNodeDataSource.getDragPopupPara().fontWeight)
@@ -1711,8 +1735,8 @@ export class TreeController {
   }
 
   /**
-   * add new node 
-   * 
+   * add new node
+   *
    * @param initBuild whether is in initialization process
    */
   public add(initBuild: boolean): void {
@@ -1957,8 +1981,8 @@ function delayUpdateParentChildNum(isAdd: boolean, count: number,
 }
 
 /**
- * delay sort nodeId list 
- * 
+ * delay sort nodeId list
+ *
  * @param nodeIdList nodeId list
  */
 function delaySortNodeIdList(nodeIdList: Array<number>): void {
@@ -2419,7 +2443,7 @@ class ListNodeDataSource extends BasicDataSource {
   }
 
   private eventHandler(index: number, event: Event): void {
-    let lazyForEachIndex: number = 
+    let lazyForEachIndex: number =
       this.loadedNodeIdAndIndexMap.get(this.listNode[index].getNodeCurrentNodeId()) as number;
     switch (event) {
       case Event.TOUCH_DOWN:
@@ -3345,7 +3369,7 @@ class ListNodeDataSource extends BasicDataSource {
 
   /**
    * find parent node id
-   * 
+   *
    * @param currentNodeId current node id
    * @returns parent node id
    */
@@ -3359,7 +3383,7 @@ class ListNodeDataSource extends BasicDataSource {
 
   /**
    * add nodeItem in params
-   * 
+   *
    * @param parentNodeId parent node id
    * @param currentNodeId current node id
    * @param data  node param
@@ -3422,7 +3446,7 @@ class ListNodeDataSource extends BasicDataSource {
 
    /**
    * remove node
-   * 
+   *
    * @param currentNodeId current node id
    * @param parentNodeId  parent node id
    * @returns node id list which is removed
@@ -3521,7 +3545,7 @@ class ListNodeDataSource extends BasicDataSource {
 
   /**
    * get child node ids by node id
-   * 
+   *
    * @param nodeId node id
    * @returns child node ids
    */
@@ -3585,7 +3609,7 @@ class ListNodeDataSource extends BasicDataSource {
 
   /**
    * check main title is valid
-   * 
+   *
    * @param title main title
    * @returns check result
    */
@@ -3602,7 +3626,7 @@ class ListNodeDataSource extends BasicDataSource {
 
   /**
    * DFS: Depth first traversal in drag event.
-   * 
+   *
    * @param callback dfs callback fuction
    */
   dragTraverseNodeDF(callback: (node: NodeItem, listNode: NodeInfo[]) => boolean,
@@ -3694,6 +3718,8 @@ export struct TreeViewInner {
   @State index: number = -1;
   @State lastIndex: number = -1;
   @State count: number = 0;
+  @State followingSystemFontScale: boolean = false;
+  @State maxAppFontScale: number = 1;
   @Consume treeViewTheme: TreeViewTheme;
   @BuilderParam private listTreeViewMenu: () => void;
   private readonly MAX_CN_LENGTH: number = 254;
@@ -3713,12 +3739,30 @@ export struct TreeViewInner {
     left: $r('sys.float.padding_level0'),
     right: $r('sys.float.padding_level0'),
     top: $r('sys.float.padding_level0'),
-    bottom: $r('sys.float.padding_level0') }
+    bottom: $r('sys.float.padding_level0') };
+  private inputFontSize: number = getContext().resourceManager.getNumberByName('ohos_id_text_size_body1');
 
   aboutToAppear(): void {
     if (this.item.getNodeItem().imageNode) {
       this.item.imageSource = this.item.getNodeItem().imageNode?.source;
     }
+    let uiContent: UIContext = this.getUIContext();
+    this.followingSystemFontScale = uiContent.isFollowingSystemFontScale();
+    this.maxAppFontScale = uiContent.getMaxFontScale();
+  }
+
+  decideFontScale() {
+    let uiContent: UIContext = this.getUIContext();
+    let systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1;
+    if (!this.followingSystemFontScale) {
+      return 1;
+    }
+    return Math.min(systemFontScale, this.maxAppFontScale, MAX_FONT_SCALE)
+  }
+
+  getInputTextMaxFontSize() {
+    let inputTextMaxFontSize = this.decideFontScale() * this.inputFontSize + 'vp';
+    return inputTextMaxFontSize;
   }
 
   private checkInvalidPattern(title: string): boolean {
@@ -3732,7 +3776,12 @@ export struct TreeViewInner {
   @Builder
   popupForShowTitle(text: string | Resource | undefined, backgroundColor: ResourceColor, fontColor: ResourceColor) {
     Row() {
-      Text(text).fontSize($r('sys.float.ohos_id_text_size_body2')).fontWeight('regular').fontColor(fontColor)
+      Text(text)
+        .fontSize($r('sys.float.ohos_id_text_size_body2'))
+        .fontWeight('regular')
+        .fontColor(fontColor)
+        .minFontScale(MIN_FONT_SCALE)
+        .maxFontScale(this.decideFontScale())
     }
     .backgroundColor(backgroundColor)
     .border({ radius: $r('sys.float.ohos_id_elements_margin_horizontal_l') })
@@ -3790,6 +3839,8 @@ export struct TreeViewInner {
               Row() {
                 if (this.item.getNodeItem().mainTitleNode && this.item.getIsShowTitle()) {
                   Text(this.item.getNodeItem().mainTitleNode?.title)
+                    .minFontScale(MIN_FONT_SCALE)
+                    .maxFontScale(this.decideFontScale())
                     .maxLines(1)// max line
                     .fontSize(this.item.getNodeItem().mainTitleNode?.size)
                     .fontColor(this.item.getIsSelected() ?
@@ -3807,7 +3858,7 @@ export struct TreeViewInner {
                   Row() {
                     TextInput({ text: this.item.getNodeItem().mainTitleNode?.title })
                       .height(this.item.getNodeItem().inputText?.itemHeight)
-                      .fontSize(this.item.getNodeItem().inputText?.size)
+                      .fontSize(this.getInputTextMaxFontSize())
                       .fontColor(this.item.getNodeItem().inputText?.color)
                       .borderRadius(this.item.getNodeItem().inputText?.borderRadius)
                       .backgroundColor(this.item.getNodeItem().inputText?.backgroundColor)
@@ -3876,6 +3927,8 @@ export struct TreeViewInner {
               if (this.listNodeDataSource.hasSubtitle(this.item.getNodeCurrentNodeId())) {
                 Row() {
                   Text(this.listNodeDataSource.getSubtitle(this.item.getNodeCurrentNodeId()))
+                    .minFontScale(MIN_FONT_SCALE)
+                    .maxFontScale(this.decideFontScale())
                     .fontSize(this.listNodeDataSource.getSubTitlePara().fontSize)
                     .fontColor(this.item.getIsHighLight() || this.item.getIsModify() ?
                     $r('sys.color.ohos_id_color_primary_contrary') : this.treeViewTheme.secondaryTitleFontColor)
@@ -4170,16 +4223,16 @@ class CollapseImageNodeFactory {
 
   /**
    * CollapseImageNodeFactory singleton function
-   * 
+   *
    * @returns CollapseImageNodeFactory
-   */ 
+   */
   public static getInstance(): CollapseImageNodeFactory {
     if (!CollapseImageNodeFactory.instance) {
       CollapseImageNodeFactory.instance = new CollapseImageNodeFactory();
     }
     return CollapseImageNodeFactory.instance;
   }
- 
+
   /**
    * create collapse image node by type
    *
@@ -4233,7 +4286,7 @@ class CollapseImageNodeFlyweightFactory {
 
   /**
    * get collapse image node by interactionStatus and nodeStatus
-   * 
+   *
    * @param interactionStatus interaction status
    * @param nodeStatus node status
    * @param defaultType default collapse image type
@@ -4262,11 +4315,11 @@ class CollapseImageNodeFlyweightFactory {
 
   /**
    * change collapse image node source
-   * 
+   *
    * @param nodeStatus node status
    * @param isImageCollapse whether collapse image or white collapse image
    * @returns collapse image node
-   */ 
+   */
   static changeImageCollapseSource(nodeStatus: NodeStatus, isImageCollapse: boolean): CollapseImageNode {
     let type: CollapseImageType;
     if (!isImageCollapse) {

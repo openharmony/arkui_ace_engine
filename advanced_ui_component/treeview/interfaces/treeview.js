@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,20 +12,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var __decorate = (this && this.__decorate) || function (b27, c27, d27, e27) {
-    var f27 = arguments.length, g27 = f27 < 3 ? c27 : e27 === null ? e27 = Object.getOwnPropertyDescriptor(c27, d27) : e27, h27;
+
+var __decorate = (this && this.__decorate) || function (k28, l28, m28, n28) {
+    var o28 = arguments.length,
+        p28 = o28 < 3 ? l28 : n28 === null ? n28 = Object.getOwnPropertyDescriptor(l28, m28) : n28, q28;
     if (typeof Reflect === 'object' && typeof Reflect.decorate === 'function')
-        g27 = Reflect.decorate(b27, c27, d27, e27);
+        p28 = Reflect.decorate(k28, l28, m28, n28);
     else
-        for (var i27 = b27.length - 1; i27 >= 0; i27--)
-            if (h27 = b27[i27])
-                g27 = (f27 < 3 ? h27(g27) : f27 > 3 ? h27(c27, d27, g27) : h27(c27, d27)) || g27;
-    return f27 > 3 && g27 && Object.defineProperty(c27, d27, g27), g27;
+        for (var r28 = k28.length - 1; r28 >= 0; r28--)
+            if (q28 = k28[r28])
+                p28 = (o28 < 3 ? q28(p28) : o28 > 3 ? q28(l28, m28, p28) : q28(l28, m28)) || p28;
+    return o28 > 3 && p28 && Object.defineProperty(l28, m28, p28), p28;
 };
 if (!('finalizeConstruction' in ViewPU.prototype)) {
-    Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
+    Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {
+    });
 }
+
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
+const resourceManager = requireNapi('resourceManager');
 
 const IMAGE_NODE_HEIGHT = 24;
 const IMAGE_NODE_WIDTH = 24;
@@ -41,6 +46,8 @@ const SHADOW_OFFSETY = 10;
 const FLAG_NUMBER = 2;
 const DRAG_OPACITY = 0.4;
 const DRAG_OPACITY_NONE = 1;
+const MIN_FONT_SCALE = 1;
+const MAX_FONT_SCALE = 2;
 const FLAG_LINE_HEIGHT = '1.0vp';
 const X_OFF_SET = '0vp';
 const Y_OFF_SET = '2.75vp';
@@ -62,11 +69,11 @@ const DELAY_TIME = 100;
 const LEVEL_MARGIN = 12;
 const MARGIN_OFFSET = 8;
 const ARROW_DOWN = {
-  id: -1,
-  type: 20000,
-  params: ['sys.media.ohos_ic_public_arrow_down'],
-  bundleName: '__harDefaultBundleName__',
-  moduleName: '__harDefaultModuleName__',
+    'id': -1,
+    'type': 20000,
+    params: ['sys.media.ohos_ic_public_arrow_down'],
+    'bundleName': '__harDefaultBundleName__',
+    'moduleName': '__harDefaultModuleName__',
 };
 const ARROW_DOWN_WITHE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAIGNIUk0AAHomAAC' +
     'AhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAl' +
@@ -74,11 +81,11 @@ const ARROW_DOWN_WITHE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAY
     '4BYgvYFODz4JYIF4DxBOwWYJkeAAQRwBdvxGbIcy4TG9sbPzX0NCwHsjUAuIiIPsDUOwkDsPXkhwHWFwaAsQlQAwyrJsYw4myAIslIPCHGMP' +
     'xBhGO4PoGxF+AOA9o+NbRTDgKRgFxAAAzj0Grm3RjyAAAAABJRU5ErkJggg==';
 const ARROW_RIGHT = {
-  id: -1,
-  type: 20000,
-  params: ['sys.media.ohos_ic_public_arrow_right'],
-  bundleName: '__harDefaultBundleName__',
-  moduleName: '__harDefaultModuleName__',
+    'id': -1,
+    'type': 20000,
+    params: ['sys.media.ohos_ic_public_arrow_right'],
+    'bundleName': '__harDefaultBundleName__',
+    'moduleName': '__harDefaultModuleName__',
 };
 const ARROW_RIGHT_WITHE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAIGNIUk0AAHomAA' +
     'CAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAA' +
@@ -86,70 +93,75 @@ const ARROW_RIGHT_WITHE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAA
     'cDxX5RzQJKLGEmxbvkWMJEaqQxMjKuBVI5QGwDxOnUimR08AFK81DdAmAqArl8DhDfAOKpVLUAavh2IH4CxI7A4HpDMEgpMPwFUXFGS8NJCa' +
     'L55BgOAixEqqsB4oOkGj4KRggAAN4STB9zyhGzAAAAAElFTkSuQmCC';
 var Event;
-(function (z26) {
-    z26[z26['TOUCH_DOWN'] = 0] = 'TOUCH_DOWN';
-    z26[z26['TOUCH_UP'] = 1] = 'TOUCH_UP';
-    z26[z26['HOVER'] = 3] = 'HOVER';
-    z26[z26['HOVER_OVER'] = 4] = 'HOVER_OVER';
-    z26[z26['FOCUS'] = 5] = 'FOCUS';
-    z26[z26['BLUR'] = 6] = 'BLUR';
-    z26[z26['MOUSE_BUTTON_RIGHT'] = 7] = 'MOUSE_BUTTON_RIGHT';
-    z26[z26['DRAG'] = 8] = 'DRAG';
+(function (i28) {
+    i28[i28['TOUCH_DOWN'] = 0] = 'TOUCH_DOWN';
+    i28[i28['TOUCH_UP'] = 1] = 'TOUCH_UP';
+    i28[i28['HOVER'] = 3] = 'HOVER';
+    i28[i28['HOVER_OVER'] = 4] = 'HOVER_OVER';
+    i28[i28['FOCUS'] = 5] = 'FOCUS';
+    i28[i28['BLUR'] = 6] = 'BLUR';
+    i28[i28['MOUSE_BUTTON_RIGHT'] = 7] = 'MOUSE_BUTTON_RIGHT';
+    i28[i28['DRAG'] = 8] = 'DRAG';
 })(Event || (Event = {}));
 var MenuOperation;
-(function (y26) {
-    y26[y26['ADD_NODE'] = 0] = 'ADD_NODE';
-    y26[y26['REMOVE_NODE'] = 1] = 'REMOVE_NODE';
-    y26[y26['MODIFY_NODE'] = 2] = 'MODIFY_NODE';
-    y26[y26['COMMIT_NODE'] = 3] = 'COMMIT_NODE';
+(function (h28) {
+    h28[h28['ADD_NODE'] = 0] = 'ADD_NODE';
+    h28[h28['REMOVE_NODE'] = 1] = 'REMOVE_NODE';
+    h28[h28['MODIFY_NODE'] = 2] = 'MODIFY_NODE';
+    h28[h28['COMMIT_NODE'] = 3] = 'COMMIT_NODE';
 })(MenuOperation || (MenuOperation = {}));
 var PopUpType;
-(function (x26) {
-    x26[x26['HINTS'] = 0] = 'HINTS';
-    x26[x26['WARNINGS'] = 1] = 'WARNINGS';
+(function (g28) {
+    g28[g28['HINTS'] = 0] = 'HINTS';
+    g28[g28['WARNINGS'] = 1] = 'WARNINGS';
 })(PopUpType || (PopUpType = {}));
 var InputError;
-(function (w26) {
-    w26[w26['INVALID_ERROR'] = 0] = 'INVALID_ERROR';
-    w26[w26['LENGTH_ERROR'] = 1] = 'LENGTH_ERROR';
-    w26[w26['NONE'] = 2] = 'NONE';
+(function (f28) {
+    f28[f28['INVALID_ERROR'] = 0] = 'INVALID_ERROR';
+    f28[f28['LENGTH_ERROR'] = 1] = 'LENGTH_ERROR';
+    f28[f28['NONE'] = 2] = 'NONE';
 })(InputError || (InputError = {}));
 var Flag;
-(function (v26) {
-    v26[v26['DOWN_FLAG'] = 0] = 'DOWN_FLAG';
-    v26[v26['UP_FLAG'] = 1] = 'UP_FLAG';
-    v26[v26['NONE'] = 2] = 'NONE';
+(function (e28) {
+    e28[e28['DOWN_FLAG'] = 0] = 'DOWN_FLAG';
+    e28[e28['UP_FLAG'] = 1] = 'UP_FLAG';
+    e28[e28['NONE'] = 2] = 'NONE';
 })(Flag || (Flag = {}));
+
 export var NodeStatus;
-(function (u26) {
-    u26[u26['EXPAND'] = 0] = 'EXPAND';
-    u26[u26['COLLAPSE'] = 1] = 'COLLAPSE';
+(function (d28) {
+    d28[d28['EXPAND'] = 0] = 'EXPAND';
+    d28[d28['COLLAPSE'] = 1] = 'COLLAPSE';
 })(NodeStatus || (NodeStatus = {}));
+
 export var InteractionStatus;
-(function (t26) {
-    t26[t26['NORMAL'] = 0] = 'NORMAL';
-    t26[t26['SELECTED'] = 1] = 'SELECTED';
-    t26[t26['EDIT'] = 2] = 'EDIT';
-    t26[t26['FINISH_EDIT'] = 3] = 'FINISH_EDIT';
-    t26[t26['DRAG_INSERT'] = 4] = 'DRAG_INSERT';
-    t26[t26['FINISH_DRAG_INSERT'] = 5] = 'FINISH_DRAG_INSERT';
+(function (c28) {
+    c28[c28['NORMAL'] = 0] = 'NORMAL';
+    c28[c28['SELECTED'] = 1] = 'SELECTED';
+    c28[c28['EDIT'] = 2] = 'EDIT';
+    c28[c28['FINISH_EDIT'] = 3] = 'FINISH_EDIT';
+    c28[c28['DRAG_INSERT'] = 4] = 'DRAG_INSERT';
+    c28[c28['FINISH_DRAG_INSERT'] = 5] = 'FINISH_DRAG_INSERT';
 })(InteractionStatus || (InteractionStatus = {}));
 var CollapseImageType;
-(function (y22) {
-    y22[y22['ARROW_DOWN'] = 0] = 'ARROW_DOWN';
-    y22[y22['ARROW_RIGHT'] = 1] = 'ARROW_RIGHT';
-    y22[y22['ARROW_DOWN_WHITE'] = 2] = 'ARROW_DOWN_WHITE';
-    y22[y22['ARROW_RIGHT_WHITE'] = 3] = 'ARROW_RIGHT_WHITE';
+(function (b28) {
+    b28[b28['ARROW_DOWN'] = 0] = 'ARROW_DOWN';
+    b28[b28['ARROW_RIGHT'] = 1] = 'ARROW_RIGHT';
+    b28[b28['ARROW_DOWN_WHITE'] = 2] = 'ARROW_DOWN_WHITE';
+    b28[b28['ARROW_RIGHT_WHITE'] = 3] = 'ARROW_RIGHT_WHITE';
 })(CollapseImageType || (CollapseImageType = {}));
+
 class TreeViewNodeItemFactory {
     constructor() {
     }
+
     static getInstance() {
         if (!TreeViewNodeItemFactory.instance) {
             TreeViewNodeItemFactory.instance = new TreeViewNodeItemFactory();
         }
         return TreeViewNodeItemFactory.instance;
     }
+
     createNode() {
         return {
             imageNode: undefined,
@@ -159,24 +171,25 @@ class TreeViewNodeItemFactory {
             fontColor: undefined,
         };
     }
-    createNodeByNodeParam(k21) {
-        let x22 = this.createNode();
-        if (k21.icon) {
-            x22.imageNode = new ImageNode(k21.icon, {
+
+    createNodeByNodeParam(z27) {
+        let a28 = this.createNode();
+        if (z27.icon) {
+            a28.imageNode = new ImageNode(z27.icon, {
                 'id': -1,
                 'type': 10002,
                 params: ['sys.float.ohos_id_alpha_content_fourth'],
                 'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            }, IMAGE_NODE_HEIGHT, IMAGE_NODE_WIDTH, k21.selectedIcon, k21.editIcon);
+                'moduleName': '__harDefaultModuleName__',
+            }, IMAGE_NODE_HEIGHT, IMAGE_NODE_WIDTH, z27.selectedIcon, z27.editIcon);
         }
-        if (k21.primaryTitle) {
-            x22.mainTitleNode = new MainTitleNode(k21.primaryTitle);
+        if (z27.primaryTitle) {
+            a28.mainTitleNode = new MainTitleNode(z27.primaryTitle);
         }
-        return x22;
+        return a28;
     }
 }
-TreeViewNodeItemFactory.instance = new TreeViewNodeItemFactory();
+
 let emptyNodeInfo = {
     isFolder: true,
     icon: '',
@@ -189,83 +202,85 @@ let emptyNodeInfo = {
     parentNodeId: -1,
     currentNodeId: -1,
 };
+
 class TreeViewTheme {
-  constructor() {
-    this.itemSelectedBgColor = '#1A0A59F7';
-    this.primaryTitleFontColor = {
-      id: -1,
-      type: 10001,
-      params: ['sys.color.ohos_id_color_primary'],
-      bundleName: '__harDefaultBundleName__',
-      moduleName: '__harDefaultModuleName__',
-    };
-    this.secondaryTitleFontColor = {
-      id: -1,
-      type: 10001,
-      params: ['sys.color.ohos_id_color_secondary'],
-      bundleName: '__harDefaultBundleName__',
-      moduleName: '__harDefaultModuleName__',
-    };
-    this.primaryTitleActiveFontColor = {
-      id: -1,
-      type: 10001,
-      params: ['sys.color.ohos_id_color_text_primary_activated'],
-      bundleName: '__harDefaultBundleName__',
-      moduleName: '__harDefaultModuleName__',
-    };
-    this.itemPressedBgColor = {
-      id: -1,
-      type: 10001,
-      params: ['sys.color.ohos_id_color_click_effect'],
-      bundleName: '__harDefaultBundleName__',
-      moduleName: '__harDefaultModuleName__',
-    };
-    this.itemHoverBgColor = {
-      id: -1,
-      type: 10001,
-      params: ['sys.color.ohos_id_color_hover'],
-      bundleName: '__harDefaultBundleName__',
-      moduleName: '__harDefaultModuleName__',
-    };
-    this.borderFocusedColor = {
-      id: -1,
-      type: 10001,
-      params: ['sys.color.ohos_id_color_focused_outline'],
-      bundleName: '__harDefaultBundleName__',
-      moduleName: '__harDefaultModuleName__',
-    };
-    this.leftIconColor = {
-      id: -1,
-      type: 10001,
-      params: ['sys.color.icon_secondary'],
-      bundleName: '__harDefaultBundleName__',
-      moduleName: '__harDefaultModuleName__',
-    };
-    this.leftIconActiveColor = {
-      id: -1,
-      type: 10001,
-      params: ['sys.color.icon_secondary'],
-      bundleName: '__harDefaultBundleName__',
-      moduleName: '__harDefaultModuleName__',
-    };
-    this.arrowIconColor = {
-      id: -1,
-      type: 10001,
-      params: ['sys.color.icon_tertiary'],
-      bundleName: '__harDefaultBundleName__',
-      moduleName: '__harDefaultModuleName__',
-    };
-  }
-  static getInstance() {
-      if (!TreeViewTheme.instance) {
-          TreeViewTheme.instance = new TreeViewTheme();
-      }
-      return TreeViewTheme.instance;
-  }
+    constructor() {
+        this.itemSelectedBgColor = '#1A0A59F7';
+        this.primaryTitleFontColor = {
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.ohos_id_color_primary'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
+        };
+        this.secondaryTitleFontColor = {
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.ohos_id_color_secondary'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
+        };
+        this.primaryTitleActiveFontColor = {
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.ohos_id_color_text_primary_activated'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
+        };
+        this.itemPressedBgColor = {
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.ohos_id_color_click_effect'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
+        };
+        this.itemHoverBgColor = {
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.ohos_id_color_hover'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
+        };
+        this.borderFocusedColor = {
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.ohos_id_color_focused_outline'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
+        };
+        this.leftIconColor = {
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.icon_secondary'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
+        };
+        this.leftIconActiveColor = {
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.icon_secondary'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
+        };
+        this.arrowIconColor = {
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.icon_tertiary'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
+        };
+    }
+
+    static getInstance() {
+        if (!TreeViewTheme.instance) {
+            TreeViewTheme.instance = new TreeViewTheme();
+        }
+        return TreeViewTheme.instance;
+    }
 }
-TreeViewTheme.instance = new TreeViewTheme();
+
 let NodeInfo = class NodeInfo {
-    constructor(r26, s26) {
+    constructor(x27, y27) {
         this.imageSource = '';
         this.borderWidth = { has: BORDER_WIDTH_HAS, none: BORDER_WIDTH_NONE };
         this.canShowFlagLine = false;
@@ -275,9 +290,9 @@ let NodeInfo = class NodeInfo {
         this.isModify = false;
         this.treeViewTheme = TreeViewTheme.getInstance();
         this.fontColor = '';
-        this.node = r26;
-        this.nodeParam = s26;
-        this.nodeItemView = TreeViewNodeItemFactory.getInstance().createNodeByNodeParam(s26);
+        this.node = x27;
+        this.nodeParam = y27;
+        this.nodeItemView = TreeViewNodeItemFactory.getInstance().createNodeByNodeParam(y27);
         this.popUpInfo = {
             popUpIsShow: false,
             popUpEnableArrow: false,
@@ -286,13 +301,13 @@ let NodeInfo = class NodeInfo {
             popUpTextColor: undefined,
         };
         this.nodeHeight = NODE_HEIGHT;
-        this.nodeLeftPadding = r26.nodeLevel * LEVEL_MARGIN + MARGIN_OFFSET;
+        this.nodeLeftPadding = x27.nodeLevel * LEVEL_MARGIN + MARGIN_OFFSET;
         this.nodeColor = {
-          id: -1,
-          type: 10001,
-          params: ['sys.color.ohos_id_color_background'],
-          bundleName: '__harDefaultBundleName__',
-          moduleName: '__harDefaultModuleName__',
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.ohos_id_color_background'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
         };
         this.nodeIsShow = (this.node.nodeLevel > 0) ? false : true;
         this.listItemHeight = (this.node.nodeLevel > 0) ? LIST_ITEM_HEIGHT_NONE : LIST_ITEM_HEIGHT;
@@ -300,78 +315,90 @@ let NodeInfo = class NodeInfo {
         this.isShowInputText = false;
         this.isSelected = false;
         this.status = {
-          normal: {
-            id: -1,
-            type: 10001,
-            params: ['sys.color.ohos_id_color_background_transparent'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          },
-          hover: this.treeViewTheme.itemHoverBgColor,
-          press: this.treeViewTheme.itemPressedBgColor,
-          selected: this.treeViewTheme.itemSelectedBgColor,
-          highLight: {
-            id: -1,
-            type: 10001,
-            params: ['sys.color.ohos_id_color_activated'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          },
+            normal: {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.ohos_id_color_background_transparent'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            },
+            hover: this.treeViewTheme.itemHoverBgColor,
+            press: this.treeViewTheme.itemPressedBgColor,
+            selected: this.treeViewTheme.itemSelectedBgColor,
+            highLight: {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.ohos_id_color_activated'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            }
         };
         this.nodeBorder = {
-          borderWidth: BORDER_WIDTH_NONE,
-          borderColor: this.treeViewTheme.borderFocusedColor,
-          borderRadius: {
-            id: -1,
-            type: 10002,
-            params: ['sys.float.ohos_id_corner_radius_clicked'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          },
+            borderWidth: BORDER_WIDTH_NONE,
+            borderColor: this.treeViewTheme.borderFocusedColor,
+            borderRadius: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_corner_radius_clicked'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            }
         };
-        this.flagLineLeftMargin = r26.nodeLevel * LEVEL_MARGIN + MARGIN_OFFSET;
+        this.flagLineLeftMargin = x27.nodeLevel * LEVEL_MARGIN + MARGIN_OFFSET;
     }
-    addImageCollapse(q26) {
-        if (q26) {
+
+    addImageCollapse(w27) {
+        if (w27) {
             this.nodeItemView.imageCollapse =
-                CollapseImageNodeFlyweightFactory.getCollapseImageNodeByType(CollapseImageType.ARROW_RIGHT);
+            CollapseImageNodeFlyweightFactory.getCollapseImageNodeByType(CollapseImageType.ARROW_RIGHT);
         }
         else {
             this.nodeItemView.imageCollapse = undefined;
         }
     }
-    setFontColor(p26) {
-        this.fontColor = p26;
+
+    setFontColor(v27) {
+        this.fontColor = v27;
     }
+
     getFontColor() {
         return this.fontColor;
     }
+
     getPopUpInfo() {
         return this.popUpInfo;
     }
-    setPopUpIsShow(o26) {
-        this.popUpInfo.popUpIsShow = o26;
+
+    setPopUpIsShow(u27) {
+        this.popUpInfo.popUpIsShow = u27;
     }
-    setPopUpEnableArrow(n26) {
-        this.popUpInfo.popUpEnableArrow = n26;
+
+    setPopUpEnableArrow(t27) {
+        this.popUpInfo.popUpEnableArrow = t27;
     }
-    setPopUpColor(m26) {
-        this.popUpInfo.popUpColor = m26;
+
+    setPopUpColor(s27) {
+        this.popUpInfo.popUpColor = s27;
     }
-    setPopUpText(l26) {
-        this.popUpInfo.popUpText = l26;
+
+    setPopUpText(r27) {
+        this.popUpInfo.popUpText = r27;
     }
-    setPopUpTextColor(k26) {
-        this.popUpInfo.popUpTextColor = k26;
+
+    setPopUpTextColor(q27) {
+        this.popUpInfo.popUpTextColor = q27;
     }
+
     getIsShowTitle() {
         return this.isShowTitle;
     }
+
     getIsShowInputText() {
         return this.isShowInputText;
     }
-    setTitleAndInputTextStatus(j26) {
-        if (j26) {
+
+    setTitleAndInputTextStatus(p27) {
+        if (p27) {
             this.isShowTitle = false;
             this.isShowInputText = true;
         }
@@ -380,120 +407,155 @@ let NodeInfo = class NodeInfo {
             this.isShowInputText = false;
         }
     }
-    handleImageCollapseAfterAddNode(i26) {
-        if (i26) {
+
+    handleImageCollapseAfterAddNode(o27) {
+        if (o27) {
             this.nodeItemView.imageCollapse =
-                CollapseImageNodeFlyweightFactory.getCollapseImageNodeByType(CollapseImageType.ARROW_DOWN);
+            CollapseImageNodeFlyweightFactory.getCollapseImageNodeByType(CollapseImageType.ARROW_DOWN);
         }
         else {
             this.nodeItemView.imageCollapse = undefined;
         }
     }
-    setNodeColor(h26) {
-        if (h26 === undefined) {
+
+    setNodeColor(n27) {
+        if (n27 === undefined) {
             return;
         }
-        this.nodeColor = h26;
+        this.nodeColor = n27;
     }
+
     getNodeColor() {
         return this.nodeColor;
     }
-    setListItemHeight(g26) {
-        this.listItemHeight = g26;
+
+    setListItemHeight(m27) {
+        this.listItemHeight = m27;
     }
+
     getListItemHeight() {
         return this.listItemHeight;
     }
+
     getNodeCurrentNodeId() {
         return this.node.currentNodeId;
     }
+
     getNodeParentNodeId() {
         return this.node.parentNodeId;
     }
+
     getNodeLeftPadding() {
         return this.nodeLeftPadding;
     }
+
     getNodeHeight() {
         return this.nodeHeight;
     }
-    setNodeIsShow(f26) {
-        this.nodeIsShow = f26;
+
+    setNodeIsShow(l27) {
+        this.nodeIsShow = l27;
     }
+
     getNodeIsShow() {
         return this.nodeIsShow;
     }
+
     getNodeItem() {
         return this.nodeItemView;
     }
+
     getNodeStatus() {
         return this.status;
     }
+
     getNodeBorder() {
         return this.nodeBorder;
     }
-    setNodeBorder(e26) {
-        this.nodeBorder.borderWidth = e26 ? this.borderWidth.has : this.borderWidth.none;
+
+    setNodeBorder(k27) {
+        this.nodeBorder.borderWidth = k27 ? this.borderWidth.has : this.borderWidth.none;
     }
+
     getChildNodeInfo() {
         return this.node.childNodeInfo;
     }
+
     getMenu() {
         return this.nodeParam.container;
     }
-    setIsSelected(d26) {
-        this.isSelected = d26;
+
+    setIsSelected(j27) {
+        this.isSelected = j27;
     }
+
     getIsSelected() {
         return this.isSelected;
     }
+
     getNodeInfoData() {
         return this.nodeParam;
     }
+
     getNodeInfoNode() {
         return this.node;
     }
+
     getIsFolder() {
         return this.nodeParam.isFolder;
     }
-    setCanShowFlagLine(c26) {
-        this.canShowFlagLine = c26;
+
+    setCanShowFlagLine(i27) {
+        this.canShowFlagLine = i27;
     }
+
     getCanShowFlagLine() {
         return this.canShowFlagLine;
     }
-    setFlagLineLeftMargin(b26) {
-        if (b26 === undefined) {
+
+    setFlagLineLeftMargin(h27) {
+        if (h27 === undefined) {
             return;
         }
-        this.flagLineLeftMargin = b26 * LEVEL_MARGIN + MARGIN_OFFSET;
+        this.flagLineLeftMargin = h27 * LEVEL_MARGIN + MARGIN_OFFSET;
     }
+
     getFlagLineLeftMargin() {
         return this.flagLineLeftMargin;
     }
+
     getNodeLevel() {
         return this.node.nodeLevel;
     }
-    setIsOverBorder(a26) {
-        this.isOverBorder = a26;
+
+    setIsOverBorder(g27) {
+        this.isOverBorder = g27;
     }
+
     getIsOverBorder() {
         return this.isOverBorder;
     }
-    setCanShowBottomFlagLine(z25) {
-        this.canShowBottomFlagLine = z25;
+
+    setCanShowBottomFlagLine(f27) {
+        this.canShowBottomFlagLine = f27;
     }
+
     getCanShowBottomFlagLine() {
         return this.canShowBottomFlagLine;
     }
-    setIsHighLight(y25) {
-        this.isHighLight = y25;
+
+    setIsHighLight(e27) {
+        this.isHighLight = e27;
     }
+
     getIsHighLight() {
         return this.isHighLight;
     }
-    setIsModify(x25) {
-        this.isModify = x25;
+
+    setIsModify(d27) {
+        this.isModify = d27;
     }
+
     getIsModify() {
         return this.isModify;
     }
@@ -501,86 +563,93 @@ let NodeInfo = class NodeInfo {
 NodeInfo = __decorate([
     Observed
 ], NodeInfo);
+
 export { NodeInfo };
+
 export var TreeListenType;
-(function (w25) {
-    w25['NODE_CLICK'] = 'NodeClick';
-    w25['NODE_ADD'] = 'NodeAdd';
-    w25['NODE_DELETE'] = 'NodeDelete';
-    w25['NODE_MODIFY'] = 'NodeModify';
-    w25['NODE_MOVE'] = 'NodeMove';
+(function (c27) {
+    c27['NODE_CLICK'] = 'NodeClick';
+    c27['NODE_ADD'] = 'NodeAdd';
+    c27['NODE_DELETE'] = 'NodeDelete';
+    c27['NODE_MODIFY'] = 'NodeModify';
+    c27['NODE_MOVE'] = 'NodeMove';
 })(TreeListenType || (TreeListenType = {}));
+
 export class TreeListener {
     constructor() {
         this._events = [];
         this._once_events = [];
     }
-    on(s25, t25) {
-        if (Array.isArray(s25)) {
-            for (let u25 = 0, v25 = s25.length; u25 < v25; u25++) {
-                this.on(s25[u25], t25);
+
+    on(y26, z26) {
+        if (Array.isArray(y26)) {
+            for (let a27 = 0, b27 = y26.length; a27 < b27; a27++) {
+                this.on(y26[a27], z26);
             }
         }
         else {
-            (this._events[s25] || (this._events[s25] = [])).push(t25);
+            (this._events[y26] || (this._events[y26] = [])).push(z26);
         }
     }
-    once(q25, r25) {
-        if (Array.isArray(q25)) {
-            this.off(q25, r25);
+
+    once(w26, x26) {
+        if (Array.isArray(w26)) {
+            this.off(w26, x26);
         }
         else {
-            (this._once_events[q25] || (this._once_events[q25] = [])).push(r25);
+            (this._once_events[w26] || (this._once_events[w26] = [])).push(x26);
         }
     }
-    off(j25, k25) {
-        if (j25 === null) {
+
+    off(p26, q26) {
+        if (p26 === null) {
             this._events = [];
         }
-        if (Array.isArray(j25)) {
-            for (let o25 = 0, p25 = j25.length; o25 < p25; o25++) {
-                this.off(j25[o25], k25);
+        if (Array.isArray(p26)) {
+            for (let u26 = 0, v26 = p26.length; u26 < v26; u26++) {
+                this.off(p26[u26], q26);
             }
         }
-        let l25 = this._events[j25];
-        if (!l25) {
+        let r26 = this._events[p26];
+        if (!r26) {
             return;
         }
-        if (k25 === null) {
-            this._events[j25] = null;
+        if (q26 === null) {
+            this._events[p26] = null;
         }
-        let m25 = l25.length;
-        while (m25--) {
-            let n25 = l25[m25];
-            if (n25 === k25) {
-                l25.splice(m25, 1);
+        let s26 = r26.length;
+        while (s26--) {
+            let t26 = r26[s26];
+            if (t26 === q26) {
+                r26.splice(s26, 1);
                 break;
             }
         }
     }
-    emit(z24, a25) {
-        if (this._once_events[z24]) {
-            let f25 = Array.from(this._once_events[z24]);
-            if (f25) {
-                for (let g25 = 0, h25 = f25.length; g25 < h25; g25++) {
+
+    emit(f26, g26) {
+        if (this._once_events[f26]) {
+            let l26 = Array.from(this._once_events[f26]);
+            if (l26) {
+                for (let m26 = 0, n26 = l26.length; m26 < n26; m26++) {
                     try {
-                        f25[g25](a25);
+                        l26[m26](g26);
                     }
-                    catch (i25) {
+                    catch (o26) {
                         throw new Error('once function callbacks error.');
                     }
                 }
-                this._once_events[z24] = null;
+                this._once_events[f26] = null;
             }
         }
-        else if (this._events[z24]) {
-            let b25 = Array.from(this._events[z24]);
-            if (b25) {
-                for (let c25 = 0, d25 = b25.length; c25 < d25; c25++) {
+        else if (this._events[f26]) {
+            let h26 = Array.from(this._events[f26]);
+            if (h26) {
+                for (let i26 = 0, j26 = h26.length; i26 < j26; i26++) {
                     try {
-                        b25[c25](a25);
+                        h26[i26](g26);
                     }
-                    catch (e25) {
+                    catch (k26) {
                         throw new Error('on function callbacks error.');
                     }
                 }
@@ -588,58 +657,48 @@ export class TreeListener {
         }
     }
 }
+
 export class TreeListenerManager {
     constructor() {
         this.appEventBus = new TreeListener();
     }
+
     static getInstance() {
         if (AppStorage.Get('app_key_event_bus') === undefined) {
             AppStorage.SetOrCreate('app_key_event_bus', new TreeListenerManager());
         }
         return AppStorage.Get('app_key_event_bus');
     }
+
     getTreeListener() {
         return this.appEventBus;
     }
 }
 TreeListenerManager.APP_KEY_EVENT_BUS = 'app_key_event_bus';
+
 export class TreeView extends ViewPU {
-    constructor(t24, u24, v24, w24 = -1, x24 = undefined, y24) {
-        super(t24, v24, w24, y24);
-        if (typeof x24 === 'function') {
-            this.paramsGenerator_ = x24;
+    constructor(z25, a26, b26, c26 = -1, d26 = undefined, e26) {
+        super(z25, b26, c26, e26);
+        if (typeof d26 === 'function') {
+            this.paramsGenerator_ = d26;
         }
         this.treeController = new TreeController();
         this.__nodeList = new ObservedPropertyObjectPU([], this, 'nodeList');
         this.listNodeDataSource = new ListNodeDataSource();
         this.__item = new ObservedPropertyObjectPU(null, this, 'item');
         this.__touchCount = new ObservedPropertySimplePU(0, this, 'touchCount');
-        this.__dropSelectedIndex = new ObservedPropertySimplePU(
-          0,
-          this,
-          'dropSelectedIndex'
-        );
-        this.__viewLastIndex = new ObservedPropertySimplePU(
-          -1,
-          this,
-          'viewLastIndex'
-        );
-        this.__listItemBgColor = new ObservedPropertyObjectPU(
-          {
-            id: -1,
-            type: 10001,
+        this.__dropSelectedIndex = new ObservedPropertySimplePU(0, this, 'dropSelectedIndex');
+        this.__viewLastIndex = new ObservedPropertySimplePU(-1, this, 'viewLastIndex');
+        this.__followingSystemFontScale = new ObservedPropertySimplePU(false, this, 'followingSystemFontScale');
+        this.__maxAppFontScale = new ObservedPropertySimplePU(1, this, 'maxAppFontScale');
+        this.__listItemBgColor = new ObservedPropertyObjectPU({
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.ohos_id_color_background_transparent'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          },
-          this,
-          'listItemBgColor'
-        );
-        this.__treeViewTheme = new ObservedPropertyObjectPU(
-          TreeViewTheme.getInstance(),
-          this,
-          'treeViewTheme'
-        );
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
+        }, this, 'listItemBgColor');
+        this.__treeViewTheme = new ObservedPropertyObjectPU(TreeViewTheme.getInstance(), this, 'treeViewTheme');
         this.addProvidedVar('treeViewTheme', this.__treeViewTheme, false);
         this.listTreeViewMenu = this.NullBuilder;
         this.MAX_CN_LENGTH = 254;
@@ -650,277 +709,352 @@ export class TreeView extends ViewPU {
         this.touchDownCount = this.INITIAL_INVALID_VALUE;
         this.appEventBus = TreeListenerManager.getInstance().getTreeListener();
         this.itemPadding = {
-          left: {
-            id: -1,
-            type: 10002,
-            params: ['sys.float.ohos_id_card_margin_start'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          },
-          right: {
-            id: -1,
-            type: 10002,
-            params: ['sys.float.ohos_id_card_margin_end'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          },
-          top: {
-            id: -1,
-            type: 10002,
-            params: ['sys.float.ohos_id_text_margin_vertical'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          },
-          bottom: {
-            id: -1,
-            type: 10002,
-            params: ['sys.float.ohos_id_text_margin_vertical'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          },
+            left: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_card_margin_start'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            },
+            right: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_card_margin_end'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            },
+            top: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_text_margin_vertical'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            },
+            bottom: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_text_margin_vertical'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            },
         };
         this.textInputPadding = {
-          left: {
-            id: -1,
-            type: 10002,
-            params: ['sys.float.padding_level0'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          },
-          right: {
-            id: -1,
-            type: 10002,
-            params: ['sys.float.padding_level0'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          },
-          top: {
-            id: -1,
-            type: 10002,
-            params: ['sys.float.padding_level0'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          },
-          bottom: {
-            id: -1,
-            type: 10002,
-            params: ['sys.float.padding_level0'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          },
+            left: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.padding_level0'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            },
+            right: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.padding_level0'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            },
+            top: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.padding_level0'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            },
+            bottom: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.padding_level0'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            }
         };
-        this.setInitiallyProvidedValue(u24);
+        this.setInitiallyProvidedValue(a26);
         this.finalizeConstruction();
     }
-    setInitiallyProvidedValue(s24) {
-        if (s24.treeController !== undefined) {
-            this.treeController = s24.treeController;
+
+    setInitiallyProvidedValue(y25) {
+        if (y25.treeController !== undefined) {
+            this.treeController = y25.treeController;
         }
-        if (s24.nodeList !== undefined) {
-            this.nodeList = s24.nodeList;
+        if (y25.nodeList !== undefined) {
+            this.nodeList = y25.nodeList;
         }
-        if (s24.listNodeDataSource !== undefined) {
-            this.listNodeDataSource = s24.listNodeDataSource;
+        if (y25.listNodeDataSource !== undefined) {
+            this.listNodeDataSource = y25.listNodeDataSource;
         }
-        if (s24.item !== undefined) {
-            this.item = s24.item;
+        if (y25.item !== undefined) {
+            this.item = y25.item;
         }
-        if (s24.touchCount !== undefined) {
-            this.touchCount = s24.touchCount;
+        if (y25.touchCount !== undefined) {
+            this.touchCount = y25.touchCount;
         }
-        if (s24.dropSelectedIndex !== undefined) {
-            this.dropSelectedIndex = s24.dropSelectedIndex;
+        if (y25.dropSelectedIndex !== undefined) {
+            this.dropSelectedIndex = y25.dropSelectedIndex;
         }
-        if (s24.viewLastIndex !== undefined) {
-            this.viewLastIndex = s24.viewLastIndex;
+        if (y25.viewLastIndex !== undefined) {
+            this.viewLastIndex = y25.viewLastIndex;
         }
-        if (s24.listItemBgColor !== undefined) {
-            this.listItemBgColor = s24.listItemBgColor;
+        if (y25.followingSystemFontScale !== undefined) {
+            this.followingSystemFontScale = y25.followingSystemFontScale;
         }
-        if (s24.treeViewTheme !== undefined) {
-            this.treeViewTheme = s24.treeViewTheme;
+        if (y25.maxAppFontScale !== undefined) {
+            this.maxAppFontScale = y25.maxAppFontScale;
         }
-        if (s24.listTreeViewMenu !== undefined) {
-            this.listTreeViewMenu = s24.listTreeViewMenu;
+        if (y25.listItemBgColor !== undefined) {
+            this.listItemBgColor = y25.listItemBgColor;
         }
-        if (s24.MAX_CN_LENGTH !== undefined) {
-            this.MAX_CN_LENGTH = s24.MAX_CN_LENGTH;
+        if (y25.treeViewTheme !== undefined) {
+            this.treeViewTheme = y25.treeViewTheme;
         }
-        if (s24.MAX_EN_LENGTH !== undefined) {
-            this.MAX_EN_LENGTH = s24.MAX_EN_LENGTH;
+        if (y25.listTreeViewMenu !== undefined) {
+            this.listTreeViewMenu = y25.listTreeViewMenu;
         }
-        if (s24.INITIAL_INVALID_VALUE !== undefined) {
-            this.INITIAL_INVALID_VALUE = s24.INITIAL_INVALID_VALUE;
+        if (y25.MAX_CN_LENGTH !== undefined) {
+            this.MAX_CN_LENGTH = y25.MAX_CN_LENGTH;
         }
-        if (s24.MAX_TOUCH_DOWN_COUNT !== undefined) {
-            this.MAX_TOUCH_DOWN_COUNT = s24.MAX_TOUCH_DOWN_COUNT;
+        if (y25.MAX_EN_LENGTH !== undefined) {
+            this.MAX_EN_LENGTH = y25.MAX_EN_LENGTH;
         }
-        if (s24.isMultiPress !== undefined) {
-            this.isMultiPress = s24.isMultiPress;
+        if (y25.INITIAL_INVALID_VALUE !== undefined) {
+            this.INITIAL_INVALID_VALUE = y25.INITIAL_INVALID_VALUE;
         }
-        if (s24.touchDownCount !== undefined) {
-            this.touchDownCount = s24.touchDownCount;
+        if (y25.MAX_TOUCH_DOWN_COUNT !== undefined) {
+            this.MAX_TOUCH_DOWN_COUNT = y25.MAX_TOUCH_DOWN_COUNT;
         }
-        if (s24.appEventBus !== undefined) {
-            this.appEventBus = s24.appEventBus;
+        if (y25.isMultiPress !== undefined) {
+            this.isMultiPress = y25.isMultiPress;
         }
-        if (s24.itemPadding !== undefined) {
-            this.itemPadding = s24.itemPadding;
+        if (y25.touchDownCount !== undefined) {
+            this.touchDownCount = y25.touchDownCount;
         }
-        if (s24.textInputPadding !== undefined) {
-            this.textInputPadding = s24.textInputPadding;
+        if (y25.appEventBus !== undefined) {
+            this.appEventBus = y25.appEventBus;
+        }
+        if (y25.itemPadding !== undefined) {
+            this.itemPadding = y25.itemPadding;
+        }
+        if (y25.textInputPadding !== undefined) {
+            this.textInputPadding = y25.textInputPadding;
         }
     }
-    updateStateVars(r24) {
+
+    updateStateVars(x25) {
     }
-    purgeVariableDependenciesOnElmtId(q24) {
-        this.__nodeList.purgeDependencyOnElmtId(q24);
-        this.__item.purgeDependencyOnElmtId(q24);
-        this.__touchCount.purgeDependencyOnElmtId(q24);
-        this.__dropSelectedIndex.purgeDependencyOnElmtId(q24);
-        this.__viewLastIndex.purgeDependencyOnElmtId(q24);
-        this.__listItemBgColor.purgeDependencyOnElmtId(q24);
-        this.__treeViewTheme.purgeDependencyOnElmtId(q24);
+
+    purgeVariableDependenciesOnElmtId(w25) {
+        this.__nodeList.purgeDependencyOnElmtId(w25);
+        this.__item.purgeDependencyOnElmtId(w25);
+        this.__touchCount.purgeDependencyOnElmtId(w25);
+        this.__dropSelectedIndex.purgeDependencyOnElmtId(w25);
+        this.__viewLastIndex.purgeDependencyOnElmtId(w25);
+        this.__followingSystemFontScale.purgeDependencyOnElmtId(w25);
+        this.__maxAppFontScale.purgeDependencyOnElmtId(w25);
+        this.__listItemBgColor.purgeDependencyOnElmtId(w25);
+        this.__treeViewTheme.purgeDependencyOnElmtId(w25);
     }
+
     aboutToBeDeleted() {
         this.__nodeList.aboutToBeDeleted();
         this.__item.aboutToBeDeleted();
         this.__touchCount.aboutToBeDeleted();
         this.__dropSelectedIndex.aboutToBeDeleted();
         this.__viewLastIndex.aboutToBeDeleted();
+        this.__followingSystemFontScale.aboutToBeDeleted();
+        this.__maxAppFontScale.aboutToBeDeleted();
         this.__listItemBgColor.aboutToBeDeleted();
         this.__treeViewTheme.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
+
     get nodeList() {
         return this.__nodeList.get();
     }
-    set nodeList(p24) {
-        this.__nodeList.set(p24);
+
+    set nodeList(v25) {
+        this.__nodeList.set(v25);
     }
+
     get item() {
         return this.__item.get();
     }
-    set item(o24) {
-        this.__item.set(o24);
+
+    set item(u25) {
+        this.__item.set(u25);
     }
+
     get touchCount() {
         return this.__touchCount.get();
     }
-    set touchCount(n24) {
-        this.__touchCount.set(n24);
+
+    set touchCount(t25) {
+        this.__touchCount.set(t25);
     }
+
     get dropSelectedIndex() {
         return this.__dropSelectedIndex.get();
     }
-    set dropSelectedIndex(m24) {
-        this.__dropSelectedIndex.set(m24);
+
+    set dropSelectedIndex(s25) {
+        this.__dropSelectedIndex.set(s25);
     }
+
     get viewLastIndex() {
         return this.__viewLastIndex.get();
     }
-    set viewLastIndex(l24) {
-        this.__viewLastIndex.set(l24);
+
+    set viewLastIndex(r25) {
+        this.__viewLastIndex.set(r25);
     }
+
+    get followingSystemFontScale() {
+        return this.__followingSystemFontScale.get();
+    }
+
+    set followingSystemFontScale(q25) {
+        this.__followingSystemFontScale.set(q25);
+    }
+
+    get maxAppFontScale() {
+        return this.__maxAppFontScale.get();
+    }
+
+    set maxAppFontScale(p25) {
+        this.__maxAppFontScale.set(p25);
+    }
+
     get listItemBgColor() {
         return this.__listItemBgColor.get();
     }
-    set listItemBgColor(k24) {
-        this.__listItemBgColor.set(k24);
+
+    set listItemBgColor(o25) {
+        this.__listItemBgColor.set(o25);
     }
+
     get treeViewTheme() {
         return this.__treeViewTheme.get();
     }
-    set treeViewTheme(j24) {
-        this.__treeViewTheme.set(j24);
+
+    set treeViewTheme(n25) {
+        this.__treeViewTheme.set(n25);
     }
-    NullBuilder(i24 = null) {
+
+    NullBuilder(m25 = null) {
     }
-    onWillApplyTheme(h24) {
-        this.treeViewTheme.itemSelectedBgColor = h24.colors.interactiveSelect;
-        this.treeViewTheme.itemPressedBgColor = h24.colors.interactivePressed;
-        this.treeViewTheme.itemHoverBgColor = h24.colors.interactiveHover;
-        this.treeViewTheme.primaryTitleFontColor = h24.colors.fontPrimary;
-        this.treeViewTheme.secondaryTitleFontColor = h24.colors.fontSecondary;
-        this.treeViewTheme.primaryTitleActiveFontColor = h24.colors.interactiveActive;
-        this.treeViewTheme.borderFocusedColor = h24.colors.interactiveFocus;
-        this.treeViewTheme.leftIconColor = h24.colors.iconSecondary;
-        this.treeViewTheme.leftIconActiveColor = h24.colors.interactiveActive;
-        this.treeViewTheme.arrowIconColor = h24.colors.iconPrimary;
+
+    onWillApplyTheme(l25) {
+        this.treeViewTheme.itemSelectedBgColor = l25.colors.interactiveSelect;
+        this.treeViewTheme.itemPressedBgColor = l25.colors.interactivePressed;
+        this.treeViewTheme.itemHoverBgColor = l25.colors.interactiveHover;
+        this.treeViewTheme.primaryTitleFontColor = l25.colors.fontPrimary;
+        this.treeViewTheme.secondaryTitleFontColor = l25.colors.fontSecondary;
+        this.treeViewTheme.primaryTitleActiveFontColor = l25.colors.interactiveActive;
+        this.treeViewTheme.borderFocusedColor = l25.colors.interactiveFocus;
+        this.treeViewTheme.leftIconColor = l25.colors.iconSecondary;
+        this.treeViewTheme.leftIconActiveColor = l25.colors.interactiveActive;
+        this.treeViewTheme.arrowIconColor = l25.colors.iconPrimary;
         this.treeController.treeViewTheme = this.treeViewTheme;
     }
+
     aboutToAppear() {
         if (this.treeController !== null) {
             this.listNodeDataSource = this.treeController.getListNodeDataSource();
             this.nodeList = this.treeController.getListNodeDataSource().listNode;
             this.item = this.treeController.getListNodeDataSource().listNode;
         }
+        let k25 = this.getUIContext();
+        this.followingSystemFontScale = k25.isFollowingSystemFontScale();
+        this.maxAppFontScale = k25.getMaxFontScale();
     }
-    popupForShowTitle(x23, y23, z23, a24 = null) {
-        this.observeComponentCreation2((f24, g24) => {
+
+    decideFontScale() {
+        let i25 = this.getUIContext();
+        let j25 = i25.getHostContext()?.config.fontSizeScale ?? 1;
+        if (!this.followingSystemFontScale) {
+            return 1;
+        }
+        return Math.min(j25, this.maxAppFontScale, MAX_FONT_SCALE);
+    }
+
+    popupForShowTitle(y24, z24, a25, b25 = null) {
+        this.observeComponentCreation((g25, h25) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(g25);
             Row.create();
-            Row.backgroundColor(y23);
+            Row.backgroundColor(z24);
             Row.border({
-              radius: {
-                id: -1,
-                type: 10002,
-                params: ['sys.float.ohos_id_elements_margin_horizontal_l'],
-                bundleName: '__harDefaultBundleName__',
-                moduleName: '__harDefaultModuleName__',
-              },
+                radius: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.ohos_id_elements_margin_horizontal_l'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
+                }
             });
             Row.padding({
-              left: {
-                id: -1,
-                type: 10002,
-                params: ['sys.float.ohos_id_elements_margin_horizontal_l'],
-                bundleName: '__harDefaultBundleName__',
-                moduleName: '__harDefaultModuleName__',
-              },
-              right: {
-                id: -1,
-                type: 10002,
-                params: ['sys.float.ohos_id_elements_margin_horizontal_l'],
-                bundleName: '__harDefaultBundleName__',
-                moduleName: '__harDefaultModuleName__',
-              },
-              top: {
-                id: -1,
-                type: 10002,
-                params: ['sys.float.ohos_id_card_margin_middle'],
-                bundleName: '__harDefaultBundleName__',
-                moduleName: '__harDefaultModuleName__',
-              },
-              bottom: {
-                id: -1,
-                type: 10002,
-                params: ['sys.float.ohos_id_card_margin_middle'],
-                bundleName: '__harDefaultBundleName__',
-                moduleName: '__harDefaultModuleName__',
-              },
+                left: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.ohos_id_elements_margin_horizontal_l'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
+                },
+                right: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.ohos_id_elements_margin_horizontal_l'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
+                },
+                top: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.ohos_id_card_margin_middle'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
+                },
+                bottom: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.ohos_id_card_margin_middle'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
+                },
             });
-        }, Row);
-        this.observeComponentCreation2((d24, e24) => {
-            Text.create(x23);
+            if (!h25) {
+                Row.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+        });
+        this.observeComponentCreation((e25, f25) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(e25);
+            Text.create(y24);
             Text.fontSize({
-              id: -1,
-              type: 10002,
-              params: ['sys.float.ohos_id_text_size_body2'],
-              bundleName: '__harDefaultBundleName__',
-              moduleName: '__harDefaultModuleName__',
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_text_size_body2'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             });
             Text.fontWeight('regular');
-            Text.fontColor(z23);
-        }, Text);
+            Text.fontColor(a25);
+            Text.minFontScale(MIN_FONT_SCALE);
+            Text.maxFontScale(this.decideFontScale());
+            if (!f25) {
+                Text.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+        });
         Text.pop();
         Row.pop();
     }
-    builder(w23 = null) {
-        this.listTreeViewMenu.bind(this)(w23 ? w23 : this);
+
+    builder(x24 = null) {
+        this.listTreeViewMenu.bind(this)(x24 ? x24 : this);
     }
-    draggingPopup(v22, w22 = null) {
-        this.observeComponentCreation2((u23, v23) => {
+
+    draggingPopup(w23, x23 = null) {
+        this.observeComponentCreation((v24, w24) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(v24);
             Row.create();
             Row.constraintSize({
                 minWidth: this.listNodeDataSource.getDragPopupPara().floorConstraintSize.minWidth,
@@ -930,41 +1064,58 @@ export class TreeView extends ViewPU {
             Row.backgroundColor(this.listNodeDataSource.getDragPopupPara().backgroundColor);
             Row.padding({
                 start: LengthMetrics.resource(this.listNodeDataSource.getDragPopupPara().padding.left),
-                end: LengthMetrics.resource(this.listNodeDataSource.getDragPopupPara().padding.right)
+                end: LengthMetrics.resource(this.listNodeDataSource.getDragPopupPara().padding.right),
             });
             Row.shadow({
-              radius: {
-                id: -1,
-                type: 10002,
-                params: ['sys.float.ohos_id_corner_radius_default_m'],
-                bundleName: '__harDefaultBundleName__',
-                moduleName: '__harDefaultModuleName__',
-              },
-              color: SHADOW_COLOR,
-              offsetY: 0,
+                radius: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.ohos_id_corner_radius_default_m'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
+                },
+                color: SHADOW_COLOR,
+                offsetY: 0,
             });
             Row.borderRadius(this.listNodeDataSource.getDragPopupPara().borderRadius);
-        }, Row);
-        this.observeComponentCreation2((k23, l23) => {
+            if (!w24) {
+                Row.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+        });
+        this.observeComponentCreation((l24, m24) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(l24);
             If.create();
-            if (v22.getNodeItem().imageNode) {
+            if (w23.getNodeItem().imageNode) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((s23, t23) => {
+                    this.observeComponentCreation((t24, u24) => {
+                        ViewStackProcessor.StartGetAccessRecordingFor(t24);
                         Row.create();
                         Row.backgroundColor(COLOR_IMAGE_ROW);
-                        Row.margin({ end: getLengthMetricsByResourceOrNumber(v22.getNodeItem().imageNode?.itemRightMargin) });
-                        Row.height(v22.getNodeItem().imageNode?.itemHeight);
-                        Row.width(v22.getNodeItem().imageNode?.itemWidth);
-                    }, Row);
-                    this.observeComponentCreation2((q23, r23) => {
-                        Image.create(v22.getNodeItem().imageNode?.normalSource);
+                        Row.margin({
+                            end: getLengthMetricsByResourceOrNumber(w23.getNodeItem().imageNode?.itemRightMargin)
+                        });
+                        Row.height(w23.getNodeItem().imageNode?.itemHeight);
+                        Row.width(w23.getNodeItem().imageNode?.itemWidth);
+                        if (!u24) {
+                            Row.pop();
+                        }
+                        ViewStackProcessor.StopGetAccessRecording();
+                    });
+                    this.observeComponentCreation((r24, s24) => {
+                        ViewStackProcessor.StartGetAccessRecordingFor(r24);
+                        Image.create(w23.getNodeItem().imageNode?.normalSource);
                         Image.objectFit(ImageFit.Contain);
-                        Image.height(v22.getNodeItem().imageNode?.itemHeight);
-                        Image.width(v22.getNodeItem().imageNode?.itemWidth);
+                        Image.height(w23.getNodeItem().imageNode?.itemHeight);
+                        Image.width(w23.getNodeItem().imageNode?.itemWidth);
                         Image.opacity(this.listNodeDataSource.getDragPopupPara().imageOpacity);
-                        Image.matchTextDirection((v22.getNodeItem().imageCollapse?.collapseSource === ARROW_RIGHT || v22.getNodeItem()
+                        Image.matchTextDirection((w23.getNodeItem().imageCollapse?.collapseSource === ARROW_RIGHT || w23.getNodeItem()
                             .imageCollapse?.collapseSource === ARROW_RIGHT_WITHE) ? true : false);
-                    }, Image);
+                        if (!s24) {
+                            Image.pop();
+                        }
+                        ViewStackProcessor.StopGetAccessRecording();
+                    });
                     Row.pop();
                 });
             }
@@ -972,31 +1123,48 @@ export class TreeView extends ViewPU {
                 this.ifElseBranchUpdateFunction(1, () => {
                 });
             }
-        }, If);
+            if (!m24) {
+                If.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+        });
         If.pop();
-        this.observeComponentCreation2((i23, j23) => {
+        this.observeComponentCreation((j24, k24) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(j24);
             Row.create();
             Row.constraintSize({
-                minWidth: v22.getNodeItem().imageNode ?
-                    this.listNodeDataSource.getDragPopupPara().textConstraintSize.minWidth1 :
-                    this.listNodeDataSource.getDragPopupPara().textConstraintSize.minWidth2,
-                maxWidth: v22.getNodeItem().imageNode ?
-                    this.listNodeDataSource.getDragPopupPara().textConstraintSize.maxWidth1 :
-                    this.listNodeDataSource.getDragPopupPara().textConstraintSize.maxWidth2
+                minWidth: w23.getNodeItem().imageNode ?
+                this.listNodeDataSource.getDragPopupPara().textConstraintSize.minWidth1 :
+                this.listNodeDataSource.getDragPopupPara().textConstraintSize.minWidth2,
+                maxWidth: w23.getNodeItem().imageNode ?
+                this.listNodeDataSource.getDragPopupPara().textConstraintSize.maxWidth1 :
+                this.listNodeDataSource.getDragPopupPara().textConstraintSize.maxWidth2,
             });
-        }, Row);
-        this.observeComponentCreation2((b23, c23) => {
+            if (!k24) {
+                Row.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+        });
+        this.observeComponentCreation((c24, d24) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(c24);
             If.create();
-            if (v22.getNodeItem().mainTitleNode && v22.getIsShowTitle()) {
+            if (w23.getNodeItem().mainTitleNode && w23.getIsShowTitle()) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((g23, h23) => {
-                        Text.create(v22.getNodeItem().mainTitleNode?.title);
+                    this.observeComponentCreation((h24, i24) => {
+                        ViewStackProcessor.StartGetAccessRecordingFor(h24);
+                        Text.create(w23.getNodeItem().mainTitleNode?.title);
                         Text.maxLines(1);
-                        Text.fontSize(v22.getNodeItem().mainTitleNode?.size);
+                        Text.minFontScale(MIN_FONT_SCALE);
+                        Text.maxFontScale(this.decideFontScale());
+                        Text.fontSize(w23.getNodeItem().mainTitleNode?.size);
                         Text.fontColor(this.listNodeDataSource.getDragPopupPara().fontColor);
                         Text.fontWeight(this.listNodeDataSource.getDragPopupPara().fontWeight);
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-                    }, Text);
+                        if (!i24) {
+                            Text.pop();
+                        }
+                        ViewStackProcessor.StopGetAccessRecording();
+                    });
                     Text.pop();
                 });
             }
@@ -1004,187 +1172,193 @@ export class TreeView extends ViewPU {
                 this.ifElseBranchUpdateFunction(1, () => {
                 });
             }
-        }, If);
+            if (!d24) {
+                If.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+        });
         If.pop();
         Row.pop();
         Row.pop();
     }
+
     clearLastIndexColor() {
         if (this.viewLastIndex === -1 || this.viewLastIndex >= this.nodeList.length) {
             return;
         }
         this.setImageSources(this.viewLastIndex, InteractionStatus.NORMAL);
         this.nodeList[this.viewLastIndex].setNodeColor({
-          id: -1,
-          type: 10001,
-          params: ['sys.color.ohos_id_color_background_transparent'],
-          bundleName: '__harDefaultBundleName__',
-          moduleName: '__harDefaultModuleName__',
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.ohos_id_color_background_transparent'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
         });
-        this.nodeList[this.viewLastIndex].fontColor =
-          this.treeViewTheme.primaryTitleFontColor;
+        this.nodeList[this.viewLastIndex].fontColor = this.treeViewTheme.primaryTitleFontColor;
         this.listNodeDataSource.listNode[this.viewLastIndex].setNodeColor({
-          id: -1,
-          type: 10001,
-          params: ['sys.color.ohos_id_color_background_transparent'],
-          bundleName: '__harDefaultBundleName__',
-          moduleName: '__harDefaultModuleName__',
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.ohos_id_color_background_transparent'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
         });
-        this.listNodeDataSource.listNode[this.viewLastIndex].fontColor =
-          this.treeViewTheme.primaryTitleFontColor;
+        this.listNodeDataSource.listNode[this.viewLastIndex].fontColor = this.treeViewTheme.primaryTitleFontColor;
         this.listNodeDataSource.listNode[this.viewLastIndex].setIsSelected(false);
         this.listNodeDataSource.setImageSource(this.viewLastIndex, InteractionStatus.NORMAL);
     }
-    setImageSources(s22, t22) {
-        let u22 = this.nodeList[s22];
-        u22.setIsSelected(t22 === InteractionStatus.SELECTED ||
-            t22 === InteractionStatus.EDIT || t22 === InteractionStatus.FINISH_EDIT);
-        if (u22.getNodeItem().mainTitleNode !== null && t22 !== InteractionStatus.DRAG_INSERT &&
-            t22 !== InteractionStatus.FINISH_DRAG_INSERT) {
-            u22.getNodeItem().mainTitleNode?.setMainTitleSelected(t22 === InteractionStatus.SELECTED ||
-                t22 === InteractionStatus.FINISH_EDIT);
+
+    setImageSources(t23, u23) {
+        let v23 = this.nodeList[t23];
+        v23.setIsSelected(u23 === InteractionStatus.SELECTED ||
+            u23 === InteractionStatus.EDIT || u23 === InteractionStatus.FINISH_EDIT);
+        if (v23.getNodeItem().mainTitleNode !== null && u23 !== InteractionStatus.DRAG_INSERT &&
+            u23 !== InteractionStatus.FINISH_DRAG_INSERT) {
+            v23.getNodeItem().mainTitleNode?.setMainTitleSelected(u23 === InteractionStatus.SELECTED ||
+                u23 === InteractionStatus.FINISH_EDIT);
         }
-        if (u22.getNodeItem().imageNode !== null) {
-            u22.getNodeItem().imageNode?.setImageSource(t22);
+        if (v23.getNodeItem().imageNode !== null) {
+            v23.getNodeItem().imageNode?.setImageSource(u23);
         }
     }
+
     initialRender() {
-        this.observeComponentCreation2((g21, h21) => {
+        this.observeComponentCreation((h22, i22) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(h22);
             List.create({});
-            List.onDragMove((j22, k22) => {
+            List.onDragMove((k23, l23) => {
                 if (this.isMultiPress) {
                     console.error('drag error, a item has been dragged');
                     return;
                 }
-                let l22 = LIST_ITEM_HEIGHT;
-                let m22 = Math.floor(j22.getY() /
-                    (l22 / FLAG_NUMBER)) %
+                let m23 = LIST_ITEM_HEIGHT;
+                let n23 = Math.floor(k23.getY() /
+                    (m23 / FLAG_NUMBER)) %
                     FLAG_NUMBER ? Flag.DOWN_FLAG : Flag.UP_FLAG;
-                let n22 = JSON.parse(k22).insertIndex;
-                let o22 = false;
-                if (n22 >= this.listNodeDataSource.totalCount()) {
-                    m22 = Flag.DOWN_FLAG;
-                    n22 = this.listNodeDataSource.totalCount() - 1;
-                    this.listNodeDataSource.getData(n22)?.setIsOverBorder(true);
-                    o22 = true;
+                let o23 = JSON.parse(l23).insertIndex;
+                let p23 = false;
+                if (o23 >= this.listNodeDataSource.totalCount()) {
+                    n23 = Flag.DOWN_FLAG;
+                    o23 = this.listNodeDataSource.totalCount() - 1;
+                    this.listNodeDataSource.getData(o23)?.setIsOverBorder(true);
+                    p23 = true;
                 }
                 else {
-                    this.listNodeDataSource.getData(n22)?.setIsOverBorder(false);
+                    this.listNodeDataSource.getData(o23)?.setIsOverBorder(false);
                 }
-                let p22 = this.listNodeDataSource.getData(n22);
-                let q22 = p22?.getNodeCurrentNodeId();
-                if (n22 !== this.listNodeDataSource.getLastPassIndex() && this.listNodeDataSource.getIsInnerDrag()) {
-                    let r22 = this.listNodeDataSource.getIsParentOfInsertNode(q22);
-                    if (r22) {
-                        this.listNodeDataSource.setPassIndex(n22);
-                        if (q22 !== undefined) {
-                            this.listNodeDataSource.clearTimeOutAboutDelayHighLightAndExpand(this.listNodeDataSource.findIndex(q22));
+                let q23 = this.listNodeDataSource.getData(o23);
+                let r23 = q23?.getNodeCurrentNodeId();
+                if (o23 !== this.listNodeDataSource.getLastPassIndex() && this.listNodeDataSource.getIsInnerDrag()) {
+                    let s23 = this.listNodeDataSource.getIsParentOfInsertNode(r23);
+                    if (s23) {
+                        this.listNodeDataSource.setPassIndex(o23);
+                        if (r23 !== undefined) {
+                            this.listNodeDataSource.clearTimeOutAboutDelayHighLightAndExpand(this.listNodeDataSource.findIndex(r23));
                         }
                         this.listNodeDataSource.setFlag(Flag.NONE);
                         return;
                     }
                 }
-                this.listNodeDataSource.setLastPassIndex(n22);
-                this.listNodeDataSource.setVisibility(m22, n22 - 1, o22);
-                if (q22 !== undefined && q22 !== this.listNodeDataSource.getDraggingCurrentNodeId()) {
-                    this.listNodeDataSource.delayHighLightAndExpandNode(this.listNodeDataSource.findIndex(q22), q22, n22);
+                this.listNodeDataSource.setLastPassIndex(o23);
+                this.listNodeDataSource.setVisibility(n23, o23 - 1, p23);
+                if (r23 !== undefined && r23 !== this.listNodeDataSource.getDraggingCurrentNodeId()) {
+                    this.listNodeDataSource.delayHighLightAndExpandNode(this.listNodeDataSource.findIndex(r23), r23, o23);
                 }
             });
-            List.onDragEnter((g22, h22) => {
+            List.onDragEnter((h23, i23) => {
                 if (this.listNodeDataSource.getIsInnerDrag()) {
                     this.listNodeDataSource.setIsDrag(true);
-                    let i22 = DRAG_OPACITY;
-                    this.listNodeDataSource.setListItemOpacity(i22);
+                    let j23 = DRAG_OPACITY;
+                    this.listNodeDataSource.setListItemOpacity(j23);
                 }
             });
-            List.onDragLeave((d22, e22) => {
+            List.onDragLeave((e23, f23) => {
                 this.listNodeDataSource.hideLastLine();
                 this.listNodeDataSource.clearLastTimeoutHighLight();
                 this.listNodeDataSource.clearLastTimeoutExpand();
-                let f22 = DRAG_OPACITY_NONE;
-                this.listNodeDataSource.setListItemOpacity(f22);
+                let g23 = DRAG_OPACITY_NONE;
+                this.listNodeDataSource.setListItemOpacity(g23);
                 this.listNodeDataSource.setIsDrag(false);
                 this.listNodeDataSource.notifyDataReload();
             });
-            List.onDrop((m21, n21) => {
+            List.onDrop((n22, o22) => {
                 this.listNodeDataSource.clearLastTimeoutExpand();
-                let o21 = DRAG_OPACITY_NONE;
-                this.listNodeDataSource.setListItemOpacity(o21);
-                let p21 = JSON.parse(n21).insertIndex;
-                let q21 = this.dropSelectedIndex;
-                if (q21 - 1 > this.listNodeDataSource.totalCount() || q21 === undefined) {
+                let p22 = DRAG_OPACITY_NONE;
+                this.listNodeDataSource.setListItemOpacity(p22);
+                let q22 = JSON.parse(o22).insertIndex;
+                let r22 = this.dropSelectedIndex;
+                if (r22 - 1 > this.listNodeDataSource.totalCount() || r22 === undefined) {
                     console.error('drag error, currentNodeIndex is not found');
                     this.listNodeDataSource.setIsDrag(false);
                     return;
                 }
-                if (p21 === this.listNodeDataSource.totalCount()) {
+                if (q22 === this.listNodeDataSource.totalCount()) {
                     console.log('need to insert into the position of the last line, now insertNodeIndex = insertNodeIndex - 1');
-                    p21 -= 1;
+                    q22 -= 1;
                 }
-                let r21 = this.listNodeDataSource.getData(p21);
-                if (r21 === undefined) {
+                let s22 = this.listNodeDataSource.getData(q22);
+                if (s22 === undefined) {
                     return;
                 }
-                let s21 = r21.getNodeCurrentNodeId();
+                let t22 = s22.getNodeCurrentNodeId();
                 if (!this.listNodeDataSource.getIsDrag() || !this.listNodeDataSource.getIsInnerDrag()) {
                     this.listNodeDataSource.clearLastTimeoutHighLight();
                     this.listNodeDataSource.setIsInnerDrag(false);
                     this.listNodeDataSource.hideLastLine();
                     this.listNodeDataSource.initialParameterAboutDelayHighLightAndExpandIndex();
-                    this.listNodeDataSource.refreshSubtitle(s21);
+                    this.listNodeDataSource.refreshSubtitle(t22);
                     this.listNodeDataSource.notifyDataReload();
                     return;
                 }
-                let t21 = this.listNodeDataSource.getCurrentNodeInfo();
-                let u21 = r21.getNodeParentNodeId();
-                let v21 = this.listNodeDataSource.getDraggingCurrentNodeId();
-                let w21 = this.listNodeDataSource.getDraggingParentNodeId();
-                let x21 = this.listNodeDataSource.getIsParentOfInsertNode(s21);
-                if (x21) {
+                let u22 = this.listNodeDataSource.getCurrentNodeInfo();
+                let v22 = s22.getNodeParentNodeId();
+                let w22 = this.listNodeDataSource.getDraggingCurrentNodeId();
+                let x22 = this.listNodeDataSource.getDraggingParentNodeId();
+                let y22 = this.listNodeDataSource.getIsParentOfInsertNode(t22);
+                if (y22) {
                     this.listNodeDataSource.clearLastTimeoutHighLight();
                     this.listNodeDataSource.setIsInnerDrag(false);
                     this.listNodeDataSource.hideLastLine();
-                    this.listNodeDataSource.notifyDataChange(p21);
+                    this.listNodeDataSource.notifyDataChange(q22);
                     this.listNodeDataSource.initialParameterAboutDelayHighLightAndExpandIndex();
                     this.listNodeDataSource.setIsDrag(false);
-                    let c22 = this.listNodeDataSource.findIndex(v21);
-                    this.listNodeDataSource.setClickIndex(c22);
-                    this.listNodeDataSource.handleEvent(Event.DRAG, c22);
+                    let d23 = this.listNodeDataSource.findIndex(w22);
+                    this.listNodeDataSource.setClickIndex(d23);
+                    this.listNodeDataSource.handleEvent(Event.DRAG, d23);
                     return;
                 }
-                if (this.listNodeDataSource.getExpandAndCollapseInfo(v21) === NodeStatus.EXPAND) {
-                    this.listNodeDataSource.expandAndCollapseNode(this.listNodeDataSource.findIndex(v21));
+                if (this.listNodeDataSource.getExpandAndCollapseInfo(w22) === NodeStatus.EXPAND) {
+                    this.listNodeDataSource.expandAndCollapseNode(this.listNodeDataSource.findIndex(w22));
                 }
-                let y21 = false;
-                if (this.listNodeDataSource.getExpandAndCollapseInfo(s21) === NodeStatus.COLLAPSE) {
-                    let b22 = this.listNodeDataSource.findIndex(s21);
-                    if (this.listNodeDataSource.listNode[b22].getIsHighLight()) {
-                        this.listNodeDataSource.expandAndCollapseNode(b22);
+                let z22 = false;
+                if (this.listNodeDataSource.getExpandAndCollapseInfo(t22) === NodeStatus.COLLAPSE) {
+                    let c23 = this.listNodeDataSource.findIndex(t22);
+                    if (this.listNodeDataSource.listNode[c23].getIsHighLight()) {
+                        this.listNodeDataSource.expandAndCollapseNode(c23);
                     }
-                    y21 = true;
+                    z22 = true;
                 }
                 this.listNodeDataSource.setLastDelayHighLightId();
-                if (t21 !== null && v21 !== s21) {
-                    this.listNodeDataSource.alterDragNode(u21, s21, w21, v21, t21);
+                if (u22 !== null && w22 !== t22) {
+                    this.listNodeDataSource.alterDragNode(v22, t22, x22, w22, u22);
                     this.listNodeDataSource.hideLastLine();
                 }
                 else {
                     this.listNodeDataSource.hideLastLine();
-                    this.listNodeDataSource.setLastPassId(v21);
+                    this.listNodeDataSource.setLastPassId(w22);
                     this.listNodeDataSource.hideLastLine();
                 }
-                let z21 = this.listNodeDataSource.findIndex(this.listNodeDataSource.getLastDelayHighLightId());
-                this.listNodeDataSource.setLastDelayHighLightIndex(z21);
+                let a23 = this.listNodeDataSource.findIndex(this.listNodeDataSource.getLastDelayHighLightId());
+                this.listNodeDataSource.setLastDelayHighLightIndex(a23);
                 this.listNodeDataSource.clearLastTimeoutHighLight();
                 this.listNodeDataSource.initialParameterAboutDelayHighLightAndExpandIndex();
                 this.listNodeDataSource.setIsDrag(false);
-                let a22 = this.listNodeDataSource.findIndex(v21);
-                this.listNodeDataSource.setClickIndex(a22);
-                this.listNodeDataSource.handleEvent(Event.DRAG, a22);
+                let b23 = this.listNodeDataSource.findIndex(w22);
+                this.listNodeDataSource.setClickIndex(b23);
+                this.listNodeDataSource.handleEvent(Event.DRAG, b23);
                 this.listNodeDataSource.setIsInnerDrag(false);
                 this.listNodeDataSource.notifyDataReload();
-                this.listNodeDataSource.listNode[a22].fontColor = this.treeViewTheme.primaryTitleActiveFontColor;
-                if (this.viewLastIndex !== -1 && q21 !== this.viewLastIndex) {
+                this.listNodeDataSource.listNode[b23].fontColor = this.treeViewTheme.primaryTitleActiveFontColor;
+                if (this.viewLastIndex !== -1 && r22 !== this.viewLastIndex) {
                     this.listNodeDataSource.listNode[this.viewLastIndex].getNodeItem()
                         .mainTitleNode?.setMainTitleSelected(false);
                     this.listNodeDataSource.listNode[this.viewLastIndex].getNodeItem()
@@ -1205,142 +1379,166 @@ export class TreeView extends ViewPU {
                     }
                 }
                 if (this.listNodeDataSource.listNode[this.viewLastIndex]) {
-                    this.listNodeDataSource.listNode[
-                      this.viewLastIndex
-                    ].setNodeColor({
-                      id: -1,
-                      type: 10001,
-                      params: [
-                        'sys.color.ohos_id_color_background_transparent',
-                      ],
-                      bundleName: '__harDefaultBundleName__',
-                      moduleName: '__harDefaultModuleName__',
-                    });
+                    this.listNodeDataSource.listNode[this.viewLastIndex]
+                        .setNodeColor({
+                            'id': -1,
+                            'type': 10001,
+                            params: ['sys.color.ohos_id_color_background_transparent'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__',
+                        });
                 }
-                this.listNodeDataSource.lastIndex = a22;
+                this.listNodeDataSource.lastIndex = b23;
             });
-        }, List);
+            if (!i22) {
+                List.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+        });
         {
-            const y19 = d20 => {
-                const e20 = d20;
+            const v20 = a21 => {
+                const b21 = a21;
                 {
-                    const f20 = (w20, x20) => {
-                        ListItem.create(() => { }, false);
+                    const c21 = (f22, g22) => {
+                        ViewStackProcessor.StartGetAccessRecordingFor(f22);
+                        d21(f22, g22);
+                        if (!g22) {
+                            ListItem.pop();
+                        }
+                        ViewStackProcessor.StopGetAccessRecording();
+                    };
+                    const d21 = (v21, w21) => {
+                        ListItem.create(() => {
+                        }, false);
                         ListItem.width('100%');
-                        ListItem.height(e20.getListItemHeight());
+                        ListItem.height(b21.getListItemHeight());
                         ListItem.padding({
                             start: LengthMetrics.resource(this.itemPadding.left),
                             end: LengthMetrics.resource(this.itemPadding.right)
                         });
                         ListItem.align(Alignment.Start);
-                        ListItem.onDragStart((a21, b21) => {
+                        ListItem.onDragStart((z21, a22) => {
                             if (this.listNodeDataSource.getIsDrag() || this.listNodeDataSource.getIsInnerDrag() || this.isMultiPress) {
                                 console.error('drag error, a item has been dragged');
                                 return;
                             }
-                            this.dropSelectedIndex = JSON.parse(b21).selectedIndex;
-                            let c21 = JSON.parse(b21).selectedIndex;
-                            let d21 = this.listNodeDataSource.getData(c21);
-                            let e21 = e20.getNodeCurrentNodeId();
-                            if (c21 >= this.listNodeDataSource.totalCount() || c21 === undefined) {
+                            this.dropSelectedIndex = JSON.parse(a22).selectedIndex;
+                            let b22 = JSON.parse(a22).selectedIndex;
+                            let c22 = this.listNodeDataSource.getData(b22);
+                            let d22 = b21.getNodeCurrentNodeId();
+                            if (b22 >= this.listNodeDataSource.totalCount() || b22 === undefined) {
                                 console.error('drag error, currentNodeIndex is not found in onDragStart');
                                 return;
                             }
                             this.listNodeDataSource.setIsInnerDrag(true);
                             this.listNodeDataSource.setIsDrag(true);
-                            this.listNodeDataSource.setCurrentNodeInfo(d21);
-                            this.listNodeDataSource.setDraggingCurrentNodeId(d21?.getNodeCurrentNodeId());
-                            this.listNodeDataSource.setDraggingParentNodeId(d21?.getNodeParentNodeId());
-                            let f21 = DRAG_OPACITY;
-                            this.listNodeDataSource.setListItemOpacity(f21);
-                            this.listNodeDataSource.notifyDataChange(c21);
-                            if (e21 !== d21?.getNodeCurrentNodeId()) {
+                            this.listNodeDataSource.setCurrentNodeInfo(c22);
+                            this.listNodeDataSource.setDraggingCurrentNodeId(c22?.getNodeCurrentNodeId());
+                            this.listNodeDataSource.setDraggingParentNodeId(c22?.getNodeParentNodeId());
+                            let e22 = DRAG_OPACITY;
+                            this.listNodeDataSource.setListItemOpacity(e22);
+                            this.listNodeDataSource.notifyDataChange(b22);
+                            if (d22 !== c22?.getNodeCurrentNodeId()) {
                                 console.error('drag is too fast,it attribute a fault to OH');
                                 this.listNodeDataSource.setIsDrag(false);
                                 return;
                             }
                             return { builder: () => {
-                                    this.draggingPopup.call(this, d21);
-                                } };
+                                this.draggingPopup.call(this, c22);
+                            } };
                         });
                     };
-                    const g20 = () => {
-                        this.observeComponentCreation2(f20, ListItem);
-                        this.observeComponentCreation2((r20, s20) => {
+                    const e21 = () => {
+                        this.observeComponentCreation(c21);
+                        this.observeComponentCreation((q21, r21) => {
+                            ViewStackProcessor.StartGetAccessRecordingFor(q21);
                             Row.create();
-                            Row.onTouch((u20) => {
+                            Row.onTouch((t21) => {
                                 this.viewLastIndex = this.listNodeDataSource.getLastIndex();
-                                let v20 = this.listNodeDataSource.findIndex(e20.getNodeCurrentNodeId());
-                                if (u20.type === TouchType.Down) {
-                                    if (v20 !== this.viewLastIndex) {
+                                let u21 = this.listNodeDataSource.findIndex(b21.getNodeCurrentNodeId());
+                                if (t21.type === TouchType.Down) {
+                                    if (u21 !== this.viewLastIndex) {
                                         this.clearLastIndexColor();
-                                        this.listNodeDataSource.lastIndex = v20;
-                                        this.listNodeDataSource.setClickIndex(v20);
+                                        this.listNodeDataSource.lastIndex = u21;
+                                        this.listNodeDataSource.setClickIndex(u21);
                                     }
                                 }
-                                if (u20.type === TouchType.Up) {
-                                    this.listNodeDataSource.listNode[v20].setIsSelected(true);
-                                    this.listNodeDataSource.setImageSource(v20, InteractionStatus.SELECTED);
-                                    if (this.listNodeDataSource.listNode[v20].getNodeItem().imageNode !== null) {
-                                        this.listNodeDataSource.listNode[v20].imageSource = this.listNodeDataSource.listNode[v20]
+                                if (t21.type === TouchType.Up) {
+                                    this.listNodeDataSource.listNode[u21].setIsSelected(true);
+                                    this.listNodeDataSource.setImageSource(u21, InteractionStatus.SELECTED);
+                                    if (this.listNodeDataSource.listNode[u21].getNodeItem().imageNode !== null) {
+                                        this.listNodeDataSource.listNode[u21].imageSource = this.listNodeDataSource.listNode[u21]
                                             .getNodeItem().imageNode?.source;
                                     }
-                                    if (v20 !== this.viewLastIndex) {
+                                    if (u21 !== this.viewLastIndex) {
                                         this.clearLastIndexColor();
-                                        this.listNodeDataSource.lastIndex = v20;
-                                        this.listNodeDataSource.setClickIndex(v20);
+                                        this.listNodeDataSource.lastIndex = u21;
+                                        this.listNodeDataSource.setClickIndex(u21);
                                     }
-                                    this.viewLastIndex = v20;
+                                    this.viewLastIndex = u21;
                                 }
-                                if (this.listNodeDataSource.getLastIndex() !== -1 && v20 !== this.listNodeDataSource.getLastIndex()) {
+                                if (this.listNodeDataSource.getLastIndex() !== -1 && u21 !== this.listNodeDataSource.getLastIndex()) {
                                     this.listNodeDataSource.setPopUpInfo(PopUpType.WARNINGS, InputError.NONE, false, this.listNodeDataSource.getLastIndex());
                                     this.listNodeDataSource.setItemVisibilityOnEdit(this.listNodeDataSource.getLastIndex(), MenuOperation.COMMIT_NODE);
                                 }
                             });
-                        }, Row);
+                            if (!r21) {
+                                Row.pop();
+                            }
+                            ViewStackProcessor.StopGetAccessRecording();
+                        });
                         {
-                            this.observeComponentCreation2((l20, m20) => {
-                                if (m20) {
-                                    let n20 = new TreeViewInner(this, {
-                                        item: e20,
+                            this.observeComponentCreation((k21, l21) => {
+                                ViewStackProcessor.StartGetAccessRecordingFor(k21);
+                                if (l21) {
+                                    let m21 = new TreeViewInner(this, {
+                                        item: b21,
                                         listNodeDataSource: this.listNodeDataSource,
-                                        index: this.listNodeDataSource.findIndex(e20.getNodeCurrentNodeId()),
+                                        index: this.listNodeDataSource.findIndex(b21.getNodeCurrentNodeId()),
                                         listTreeViewMenu: this.listTreeViewMenu,
-                                    }, undefined, l20, () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 1040, col: 13 });
-                                    ViewPU.create(n20);
-                                    let o20 = () => {
+                                    }, undefined, k21, () => {
+                                    }, {
+                                        page: 'library/src/main/ets/components/mainpage/MainPage.ets',
+                                        line: 1130,
+                                        col: 13
+                                    });
+                                    ViewPU.create(m21);
+                                    let n21 = () => {
                                         return {
-                                            item: e20,
+                                            item: b21,
                                             listNodeDataSource: this.listNodeDataSource,
-                                            index: this.listNodeDataSource.findIndex(e20.getNodeCurrentNodeId()),
+                                            index: this.listNodeDataSource.findIndex(b21.getNodeCurrentNodeId()),
                                             listTreeViewMenu: this.listTreeViewMenu
                                         };
                                     };
-                                    n20.paramsGenerator_ = o20;
+                                    m21.paramsGenerator_ = n21;
                                 }
                                 else {
-                                    this.updateStateVarsOfChildByElmtId(l20, {
-                                        item: e20
+                                    this.updateStateVarsOfChildByElmtId(k21, {
+                                        item: b21
                                     });
                                 }
-                            }, { name: 'TreeViewInner' });
+                                ViewStackProcessor.StopGetAccessRecording();
+                            });
                         }
                         Row.pop();
                         ListItem.pop();
                     };
-                    g20();
+                    e21();
                 }
             };
-            const z19 = (c20) => JSON.stringify(c20);
-            LazyForEach.create('1', this, this.listNodeDataSource, y19, z19);
+            const w20 = (z20) => JSON.stringify(z20);
+            LazyForEach.create('1', this, this.listNodeDataSource, v20, w20);
             LazyForEach.pop();
         }
         List.pop();
     }
+
     rerender() {
         this.updateDirtyElements();
     }
 }
+
 export class TreeController {
     constructor() {
         this.ROOT_NODE_ID = -1;
@@ -1349,97 +1547,106 @@ export class TreeController {
         this.initBuild = true;
         this.treeViewTheme = TreeViewTheme.getInstance();
     }
+
     getListNodeDataSource() {
         return this.listNodeDataSource;
     }
+
     getClickNodeChildrenInfo() {
-        let w19 = this.listNodeDataSource.getClickNodeId();
-        return this.listNodeDataSource.getClickNodeChildrenInfo(w19);
+        let t20 = this.listNodeDataSource.getClickNodeId();
+        return this.listNodeDataSource.getClickNodeChildrenInfo(t20);
     }
+
     getChildrenId() {
-        let v19 = this.listNodeDataSource.getClickNodeId();
-        return this.listNodeDataSource.getClickChildId(v19);
+        let s20 = this.listNodeDataSource.getClickNodeId();
+        return this.listNodeDataSource.getClickChildId(s20);
     }
+
     removeNode() {
-        let s19 = this.listNodeDataSource.getClickNodeId();
-        if (s19 < 0) {
+        let p20 = this.listNodeDataSource.getClickNodeId();
+        if (p20 < 0) {
             return;
         }
-        let t19 = this.listNodeDataSource.findParentNodeId(s19);
-        let u19 = this.listNodeDataSource.removeNode(s19, t19);
-        this.listNodeDataSource.refreshData(MenuOperation.REMOVE_NODE, t19, u19);
-        this.nodeIdList.splice(this.nodeIdList.indexOf(s19), 1);
+        let q20 = this.listNodeDataSource.findParentNodeId(p20);
+        let r20 = this.listNodeDataSource.removeNode(p20, q20);
+        this.listNodeDataSource.refreshData(MenuOperation.REMOVE_NODE, q20, r20);
+        this.nodeIdList.splice(this.nodeIdList.indexOf(p20), 1);
         this.listNodeDataSource.lastIndex = -1;
     }
+
     modifyNode() {
-        let r19 = this.listNodeDataSource.getClickNodeId();
-        this.listNodeDataSource.setItemVisibilityOnEdit(r19, MenuOperation.MODIFY_NODE);
+        let o20 = this.listNodeDataSource.getClickNodeId();
+        this.listNodeDataSource.setItemVisibilityOnEdit(o20, MenuOperation.MODIFY_NODE);
     }
-    add(m19) {
-        let n19 = this.listNodeDataSource.getClickNodeId();
-        if (n19 === this.listNodeDataSource.ROOT_NODE_ID || !this.listNodeDataSource.getIsFolder(n19)) {
+
+    add(j20) {
+        let k20 = this.listNodeDataSource.getClickNodeId();
+        if (k20 === this.listNodeDataSource.ROOT_NODE_ID || !this.listNodeDataSource.getIsFolder(k20)) {
             return;
         }
-        let o19 = this.listNodeDataSource.getNewNodeParam(n19);
+        let l20 = this.listNodeDataSource.getNewNodeParam(k20);
         this.nodeIdList.push(this.nodeIdList[this.nodeIdList.length - 1] + 1);
-        let p19 = this.nodeIdList[this.nodeIdList.length - 1];
-        this.listNodeDataSource.addNode(n19, p19, {
-            isFolder: o19.isFolder,
-            icon: o19.icon,
-            selectedIcon: o19.selectedIcon,
-            editIcon: o19.editIcon,
+        let m20 = this.nodeIdList[this.nodeIdList.length - 1];
+        this.listNodeDataSource.addNode(k20, m20, {
+            isFolder: l20.isFolder,
+            icon: l20.icon,
+            selectedIcon: l20.selectedIcon,
+            editIcon: l20.editIcon,
             primaryTitle: '新建文件夹',
-            container: o19.container,
-            secondaryTitle: o19.secondaryTitle,
-        }, m19);
-        this.listNodeDataSource.refreshData(MenuOperation.ADD_NODE, n19, [p19]);
+            container: l20.container,
+            secondaryTitle: l20.secondaryTitle,
+        }, j20);
+        this.listNodeDataSource.refreshData(MenuOperation.ADD_NODE, k20, [m20]);
         this.listNodeDataSource.setPopUpInfo(PopUpType.WARNINGS, InputError.NONE, false, this.listNodeDataSource.getLastIndex());
         this.listNodeDataSource.setItemVisibilityOnEdit(this.listNodeDataSource.getLastIndex(), MenuOperation.COMMIT_NODE);
         this.listNodeDataSource.listNode[this.listNodeDataSource.getLastIndex()]
             .setFontColor(this.treeViewTheme.primaryTitleFontColor);
-        let q19 = this.listNodeDataSource.findIndex(p19);
-        this.listNodeDataSource.setClickIndex(q19);
-        this.listNodeDataSource.handleEvent(Event.TOUCH_UP, q19);
+        let n20 = this.listNodeDataSource.findIndex(m20);
+        this.listNodeDataSource.setClickIndex(n20);
+        this.listNodeDataSource.handleEvent(Event.TOUCH_UP, n20);
     }
-    addNode(k19) {
-        if (k19 === undefined) {
+
+    addNode(h20) {
+        if (h20 === undefined) {
             this.add(this.initBuild);
             return this;
         }
         else {
-            if (k19.primaryTitle !== undefined &&
-                !this.listNodeDataSource.checkMainTitleIsValid(k19.primaryTitle.toString())) {
+            if (h20.primaryTitle !== undefined &&
+                !this.listNodeDataSource.checkMainTitleIsValid(h20.primaryTitle.toString())) {
                 throw new Error('ListTreeNode[addNode]: ' +
-                    "The directory name cannot contain the following characters\ /: *? '< > | or exceeds the maximum length.");
+                    'The directory name cannot contain the following characters\ /: *? "< > | or exceeds the maximum length.');
                 return this;
             }
-            if (k19.primaryTitle === null && k19.icon === null) {
+            if (h20.primaryTitle === null && h20.icon === null) {
                 throw new Error('ListTreeNode[addNode]: ' +
                     'The icon and directory name cannot be empty at the same time.');
                 return this;
             }
-            if (k19.currentNodeId === this.ROOT_NODE_ID || k19.currentNodeId === null) {
+            if (h20.currentNodeId === this.ROOT_NODE_ID || h20.currentNodeId === null) {
                 throw new Error('ListTreeNode[addNode]: currentNodeId can not be -1 or null.');
                 return this;
             }
-            if (k19.currentNodeId !== undefined) {
-                this.nodeIdList.push(k19.currentNodeId);
+            if (h20.currentNodeId !== undefined) {
+                this.nodeIdList.push(h20.currentNodeId);
             }
-            if (k19.parentNodeId !== undefined) {
-                if (k19.currentNodeId !== undefined) {
-                    this.listNodeDataSource.addNode(k19.parentNodeId, k19.currentNodeId, k19, this.initBuild);
+            if (h20.parentNodeId !== undefined) {
+                if (h20.currentNodeId !== undefined) {
+                    this.listNodeDataSource.addNode(h20.parentNodeId, h20.currentNodeId, h20, this.initBuild);
                 }
             }
-            if (!this.initBuild && k19.parentNodeId !== undefined) {
-                let l19 = this.nodeIdList[this.nodeIdList.length - 1];
-                this.listNodeDataSource.refreshData(MenuOperation.ADD_NODE, k19.parentNodeId, [l19]);
+            if (!this.initBuild && h20.parentNodeId !== undefined) {
+                let i20 = this.nodeIdList[this.nodeIdList.length - 1];
+                this.listNodeDataSource.refreshData(MenuOperation.ADD_NODE, h20.parentNodeId, [i20]);
             }
             return this;
         }
     }
-    refreshNode(h19, i19, j19) {
-        this.listNodeDataSource.setNodeSubtitlePara(h19, i19, j19);
+
+    refreshNode(e20, f20, g20) {
+        this.listNodeDataSource.setNodeSubtitlePara(e20, f20, g20);
     }
+
     buildDone() {
         this.listNodeDataSource.initSection();
         this.listNodeDataSource.delayInit();
@@ -1448,81 +1655,94 @@ export class TreeController {
         this.initBuild = false;
     }
 }
+
 class BasicDataSource {
     constructor() {
         this.listeners = [];
     }
+
     totalCount() {
         return 0;
     }
-    getData(e19) {
+
+    getData(d20) {
         return undefined;
     }
-    registerDataChangeListener(d19) {
-        if (this.listeners.indexOf(d19) < 0) {
-            this.listeners.push(d19);
+
+    registerDataChangeListener(c20) {
+        if (this.listeners.indexOf(c20) < 0) {
+            this.listeners.push(c20);
         }
     }
-    unregisterDataChangeListener(b19) {
-        const c19 = this.listeners.indexOf(b19);
-        if (c19 >= 0) {
-            this.listeners.splice(c19, 1);
+
+    unregisterDataChangeListener(a20) {
+        const b20 = this.listeners.indexOf(a20);
+        if (b20 >= 0) {
+            this.listeners.splice(b20, 1);
         }
     }
+
     notifyDataReload() {
-        this.listeners.forEach(a19 => {
-            a19.onDataReloaded();
+        this.listeners.forEach(z19 => {
+            z19.onDataReloaded();
         });
     }
-    notifyDataAdd(w18) {
-        this.listeners.forEach(y18 => {
-            y18.onDataAdd(w18);
+
+    notifyDataAdd(v19) {
+        this.listeners.forEach(x19 => {
+            x19.onDataAdd(v19);
         });
     }
-    notifyDataChange(t18) {
-        if (t18 === undefined) {
+
+    notifyDataChange(s19) {
+        if (s19 === undefined) {
             return;
         }
-        this.listeners.forEach(v18 => {
-            v18.onDataChange(t18);
+        this.listeners.forEach(u19 => {
+            u19.onDataChange(s19);
         });
     }
-    notifyDataDelete(q18) {
-        this.listeners.forEach(s18 => {
-            s18.onDataDelete(q18);
+
+    notifyDataDelete(p19) {
+        this.listeners.forEach(r19 => {
+            r19.onDataDelete(p19);
         });
     }
-    notifyDataMove(m18, n18) {
-        this.listeners.forEach(p18 => {
-            p18.onDataMove(m18, n18);
+
+    notifyDataMove(l19, m19) {
+        this.listeners.forEach(o19 => {
+            o19.onDataMove(l19, m19);
         });
     }
 }
-function delayUpdateParentChildNum(b24, b25, f25, w25) {
-    let j27 = setTimeout(() => {
-        w25.forEach((m27) => {
-            let n27 = m27;
-            while (n27 >= 0) {
-                if (f25.has(n27)) {
-                    let o27 = f25.get(n27);
-                    o27.getChildNodeInfo().allChildNum =
-                        b24 ? o27.getChildNodeInfo().allChildNum + b25 : o27.getChildNodeInfo().allChildNum - b25;
-                    n27 = o27.parentNodeId;
+
+function delayUpdateParentChildNum(b19, c19, d19, e19) {
+    let f19 = setTimeout(() => {
+        e19.forEach((i19) => {
+            let j19 = i19;
+            while (j19 >= 0) {
+                if (d19.has(j19)) {
+                    let k19 = d19.get(j19);
+                    k19.getChildNodeInfo().allChildNum =
+                        b19 ? k19.getChildNodeInfo().allChildNum + c19 : k19.getChildNodeInfo().allChildNum - c19;
+                    j19 = k19.parentNodeId;
                 }
                 else {
                     throw new Error('delayUpdateParentChildNum: Parent node not found.');
                 }
             }
         });
-        clearTimeout(j27);
+        clearTimeout(f19);
     }, DELAY_TIME);
 }
-function delaySortNodeIdList(g20) {
-    let h20 = setTimeout(() => {
-        g20.sort((z22, o23) => z22 - o23);
-        clearTimeout(h20);
+
+function delaySortNodeIdList(v18) {
+    let w18 = setTimeout(() => {
+        v18.sort((z18, a19) => z18 - a19);
+        clearTimeout(w18);
     }, DELAY_TIME);
 }
+
 class ListNodeDataSource extends BasicDataSource {
     constructor() {
         super();
@@ -1574,154 +1794,156 @@ class ListNodeDataSource extends BasicDataSource {
         this.treeViewTheme = TreeViewTheme.getInstance();
         this.updateNodeIdList = [];
         this.FLAG_LINE = {
-          flagLineHeight: FLAG_LINE_HEIGHT,
-          flagLineColor: {
-            id: -1,
-            type: 10001,
-            params: ['sys.color.ohos_id_color_emphasize'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          },
-          xOffset: X_OFF_SET,
-          yTopOffset: Y_OFF_SET,
-          yBottomOffset: Y_BOTTOM_OFF_SET,
-          yBasePlateOffset: Y_BASE_PLATE_OFF_SET,
+            flagLineHeight: FLAG_LINE_HEIGHT,
+            flagLineColor: {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.ohos_id_color_emphasize'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            },
+            xOffset: X_OFF_SET,
+            yTopOffset: Y_OFF_SET,
+            yBottomOffset: Y_BOTTOM_OFF_SET,
+            yBasePlateOffset: Y_BASE_PLATE_OFF_SET,
         };
         this.DRAG_POPUP = {
-          floorConstraintSize: {
-            minWidth: FLOOR_MIN_WIDTH,
-            maxWidth: FLOOR_MAX_WIDTH,
-          },
-          textConstraintSize: {
-            minWidth1: TEXT_MIN_WIDTH,
-            maxWidth1: TEXT_MAX_WIDTH,
-            minWidth2: MIN_WIDTH,
-            maxWidth2: MAX_WIDTH,
-          },
-          padding: {
-            left: {
-              id: -1,
-              type: 10002,
-              params: ['sys.float.padding_level4'],
-              bundleName: '__harDefaultBundleName__',
-              moduleName: '__harDefaultModuleName__',
+            floorConstraintSize: { minWidth: FLOOR_MIN_WIDTH, maxWidth: FLOOR_MAX_WIDTH },
+            textConstraintSize: {
+                minWidth1: TEXT_MIN_WIDTH,
+                maxWidth1: TEXT_MAX_WIDTH,
+                minWidth2: MIN_WIDTH,
+                maxWidth2: MAX_WIDTH,
             },
-            right: {
-              id: -1,
-              type: 10002,
-              params: ['sys.float.padding_level4'],
-              bundleName: '__harDefaultBundleName__',
-              moduleName: '__harDefaultModuleName__',
+            padding: {
+                left: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.padding_level4'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
+                },
+                right: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.padding_level4'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
+                }
             },
-          },
-          backgroundColor: COLOR_IMAGE_EDIT,
-          height: GRAG_POP_UP_HEIGHT,
-          shadow: {
-            radius: {
-              id: -1,
-              type: 10002,
-              params: ['sys.float.ohos_id_corner_radius_default_m'],
-              bundleName: '__harDefaultBundleName__',
-              moduleName: '__harDefaultModuleName__',
+            backgroundColor: COLOR_IMAGE_EDIT,
+            height: GRAG_POP_UP_HEIGHT,
+            shadow: {
+                radius: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.ohos_id_corner_radius_default_m'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
+                },
+                color: SHADOW_COLOR,
+                offsetX: 0,
+                offsetY: SHADOW_OFFSETY,
             },
-            color: SHADOW_COLOR,
-            offsetX: 0,
-            offsetY: SHADOW_OFFSETY,
-          },
-          borderRadius: {
-            id: -1,
-            type: 10002,
-            params: ['sys.float.ohos_id_corner_radius_clicked'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          },
-          fontColor: this.treeViewTheme.primaryTitleFontColor,
-          fontSize: {
-            id: -1,
-            type: 10002,
-            params: ['sys.float.ohos_id_text_size_body1'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          },
-          fontWeight: FontWeight.Regular,
-          imageOpacity: {
-            id: -1,
-            type: 10002,
-            params: ['sys.float.ohos_id_alpha_content_fourth'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          },
+            borderRadius: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_corner_radius_clicked'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            },
+            fontColor: this.treeViewTheme.primaryTitleFontColor,
+            fontSize: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_text_size_body1'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            },
+            fontWeight: FontWeight.Regular,
+            imageOpacity: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_alpha_content_fourth'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            }
         };
         this.subTitle = {
-          normalFontColor: this.treeViewTheme.secondaryTitleFontColor,
-          highLightFontColor: {
-            id: -1,
-            type: 10001,
-            params: ['sys.color.ohos_id_color_primary_contrary'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          },
-          fontSize: {
-            id: -1,
-            type: 10002,
-            params: ['sys.float.ohos_id_text_size_body2'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          },
-          fontWeight: FontWeight.Regular,
-          margin: {
-            left: {
-              id: -1,
-              type: 10002,
-              params: ['sys.float.padding_level2'],
-              bundleName: '__harDefaultBundleName__',
-              moduleName: '__harDefaultModuleName__',
+            normalFontColor: this.treeViewTheme.secondaryTitleFontColor,
+            highLightFontColor: {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.ohos_id_color_primary_contrary'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             },
-            right: {
-              id: -1,
-              type: 10002,
-              params: ['sys.float.padding_level12'],
-              bundleName: '__harDefaultBundleName__',
-              moduleName: '__harDefaultModuleName__',
+            fontSize: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_text_size_body2'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             },
-          },
+            fontWeight: FontWeight.Regular,
+            margin: {
+                left: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.padding_level2'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
+                },
+                right: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.padding_level12'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
+                }
+            }
         };
         this._root.nodeLevel = -1;
         this.nodeIdNodeItemMap.set(-1, this._root);
         this.nodeIdNodeParamMap.set(-1, emptyNodeInfo);
     }
-    changeNodeColor(y17, z17) {
-        this.listNode[y17].setNodeColor(z17);
-        this.listNode[y17].setNodeBorder(false);
+
+    changeNodeColor(t18, u18) {
+        this.listNode[t18].setNodeColor(u18);
+        this.listNode[t18].setNodeBorder(false);
     }
-    getNodeColor(x17) {
-        return this.listNode[x17].getNodeColor();
+
+    getNodeColor(s18) {
+        return this.listNode[s18].getNodeColor();
     }
-    handleFocusEffect(v17, w17) {
-        if (this.listNode[v17].getNodeIsShow()) {
-            this.listNode[v17].setNodeBorder(w17);
+
+    handleFocusEffect(q18, r18) {
+        if (this.listNode[q18].getNodeIsShow()) {
+            this.listNode[q18].setNodeBorder(r18);
         }
     }
-    setImageSource(s17, t17) {
-        let u17 = this.listNode[s17];
-        u17.setIsSelected(t17 === InteractionStatus.SELECTED ||
-            t17 === InteractionStatus.EDIT || t17 === InteractionStatus.FINISH_EDIT);
-        if (u17.getNodeItem().mainTitleNode !== null && t17 !== InteractionStatus.DRAG_INSERT &&
-            t17 !== InteractionStatus.FINISH_DRAG_INSERT) {
-            u17.getNodeItem().mainTitleNode?.setMainTitleSelected(t17 === InteractionStatus.SELECTED ||
-                t17 === InteractionStatus.FINISH_EDIT);
+
+    setImageSource(n18, o18) {
+        let p18 = this.listNode[n18];
+        p18.setIsSelected(o18 === InteractionStatus.SELECTED ||
+            o18 === InteractionStatus.EDIT || o18 === InteractionStatus.FINISH_EDIT);
+        if (p18.getNodeItem().mainTitleNode !== null && o18 !== InteractionStatus.DRAG_INSERT &&
+            o18 !== InteractionStatus.FINISH_DRAG_INSERT) {
+            p18.getNodeItem().mainTitleNode?.setMainTitleSelected(o18 === InteractionStatus.SELECTED ||
+                o18 === InteractionStatus.FINISH_EDIT);
         }
-        if (u17.getNodeItem().imageNode !== null) {
-            u17.getNodeItem().imageNode?.setImageSource(t17);
-        }
-    }
-    setImageCollapseSource(p17, q17) {
-        let r17 = this.listNode[p17];
-        if (r17.getNodeItem().imageCollapse !== undefined) {
-            r17.getNodeItem().imageCollapse = CollapseImageNodeFlyweightFactory.getCollapseImageNode(q17,
-                this.expandAndCollapseInfo.get(r17.getNodeCurrentNodeId()), r17.getNodeItem().imageCollapse.type);
+        if (p18.getNodeItem().imageNode !== null) {
+            p18.getNodeItem().imageNode?.setImageSource(o18);
         }
     }
+
+    setImageCollapseSource(k18, l18) {
+        let m18 = this.listNode[k18];
+        if (m18.getNodeItem().imageCollapse !== undefined) {
+            m18.getNodeItem().imageCollapse = CollapseImageNodeFlyweightFactory.getCollapseImageNode(l18, this.expandAndCollapseInfo.get(m18.getNodeCurrentNodeId()), m18.getNodeItem().imageCollapse.type);
+        }
+    }
+
     clearLastIndexStatus() {
         if (this.lastIndex === -1 || this.lastIndex >= this.listNode.length) {
             return;
@@ -1731,358 +1953,379 @@ class ListNodeDataSource extends BasicDataSource {
         this.handleFocusEffect(this.lastIndex, false);
         this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(this.listNode[this.lastIndex].getNodeCurrentNodeId()));
     }
+
     loadedListNodeFunction() {
-        let n17 = 0;
+        let i18 = 0;
         this.loadedNodeIdAndIndexMap.clear();
         this.nodeIdAndNodeIndexMap.clear();
         this.loadedListNode.splice(0, this.loadedListNode.length);
-        for (let o17 = 0; o17 < this.listNode.length; o17++) {
-            this.nodeIdAndNodeIndexMap.set(this.listNode[o17].getNodeCurrentNodeId(), o17);
-            if (this.listNode[o17].getNodeIsShow()) {
-                this.loadedNodeIdAndIndexMap.set(this.listNode[o17].getNodeCurrentNodeId(), n17++);
-                this.loadedListNode.push(this.listNode[o17]);
+        for (let j18 = 0; j18 < this.listNode.length; j18++) {
+            this.nodeIdAndNodeIndexMap.set(this.listNode[j18].getNodeCurrentNodeId(), j18);
+            if (this.listNode[j18].getNodeIsShow()) {
+                this.loadedNodeIdAndIndexMap.set(this.listNode[j18].getNodeCurrentNodeId(), i18++);
+                this.loadedListNode.push(this.listNode[j18]);
             }
         }
     }
-    changeNodeStatus(k17) {
-        if (k17 >= this.listNode.length) {
+
+    changeNodeStatus(f18) {
+        if (f18 >= this.listNode.length) {
             throw new Error('changeNodeStatus clickIndex error.');
         }
-        let l17 = k17;
-        let m17 = this.listNode[k17].getNodeCurrentNodeId();
-        if (this.expandAndCollapseInfo.get(m17) === NodeStatus.EXPAND) {
-            this.expandAndCollapseInfo.set(m17, NodeStatus.COLLAPSE);
-            this.listNode[l17].getNodeItem().imageCollapse = this.listNode[l17].getNodeItem().imageCollapse ?
-            CollapseImageNodeFlyweightFactory.changeImageCollapseSource(NodeStatus.COLLAPSE,
-                this.listNode[l17].getNodeItem().imageCollapse.isCollapse) : undefined;
-        } else if (this.expandAndCollapseInfo.get(m17) === NodeStatus.COLLAPSE) {
-            this.expandAndCollapseInfo.set(m17, NodeStatus.EXPAND);
-            this.listNode[l17].getNodeItem().imageCollapse = this.listNode[l17].getNodeItem().imageCollapse ?
-            CollapseImageNodeFlyweightFactory.changeImageCollapseSource(NodeStatus.EXPAND,
-                this.listNode[l17].getNodeItem().imageCollapse.isCollapse) : undefined;
+        let g18 = f18;
+        let h18 = this.listNode[f18].getNodeCurrentNodeId();
+        if (this.expandAndCollapseInfo.get(h18) === NodeStatus.EXPAND) {
+            this.expandAndCollapseInfo.set(h18, NodeStatus.COLLAPSE);
+            this.listNode[g18].getNodeItem().imageCollapse = this.listNode[g18].getNodeItem().imageCollapse ?
+            CollapseImageNodeFlyweightFactory.changeImageCollapseSource(NodeStatus.COLLAPSE, this.listNode[g18].getNodeItem().imageCollapse.isCollapse) : undefined;
+        }
+        else if (this.expandAndCollapseInfo.get(h18) === NodeStatus.COLLAPSE) {
+            this.expandAndCollapseInfo.set(h18, NodeStatus.EXPAND);
+            this.listNode[g18].getNodeItem().imageCollapse = this.listNode[g18].getNodeItem().imageCollapse ?
+            CollapseImageNodeFlyweightFactory.changeImageCollapseSource(NodeStatus.EXPAND, this.listNode[g18].getNodeItem().imageCollapse.isCollapse) : undefined;
         }
     }
-    handleExpandAndCollapse(a17, b17) {
-        if (a17 >= this.listNode.length) {
+
+    handleExpandAndCollapse(v17, w17) {
+        if (v17 >= this.listNode.length) {
             throw new Error('handleExpandAndCollapse clickIndex error.');
         }
-        let c17 = a17;
-        let d17 = this.listNode[c17].getNodeCurrentNodeId();
-        if (!this.expandAndCollapseInfo.has(d17)) {
+        let x17 = v17;
+        let y17 = this.listNode[x17].getNodeCurrentNodeId();
+        if (!this.expandAndCollapseInfo.has(y17)) {
             return;
         }
-        let e17 = this.expandAndCollapseInfo.get(d17);
-        if (this.listNode[c17].getChildNodeInfo().isHasChildNode && e17 === NodeStatus.COLLAPSE) {
-            for (let j17 = 0; j17 < this.listNode[c17].getChildNodeInfo().allChildNum; j17++) {
-                this.listNode[c17 + 1 + j17].setNodeIsShow(false);
-                this.listNode[c17 + 1 + j17].setListItemHeight(LIST_ITEM_HEIGHT_NONE);
+        let z17 = this.expandAndCollapseInfo.get(y17);
+        if (this.listNode[x17].getChildNodeInfo().isHasChildNode && z17 === NodeStatus.COLLAPSE) {
+            for (let e18 = 0; e18 < this.listNode[x17].getChildNodeInfo().allChildNum; e18++) {
+                this.listNode[x17 + 1 + e18].setNodeIsShow(false);
+                this.listNode[x17 + 1 + e18].setListItemHeight(LIST_ITEM_HEIGHT_NONE);
             }
             this.loadedListNodeFunction();
             this.notifyDataReload();
             return;
         }
-        let f17 = new Array(this.listNode[c17].getChildNodeInfo().childNum);
-        f17[0] = c17 + 1;
-        let g17 = 1;
-        while (g17 < this.listNode[c17].getChildNodeInfo().childNum) {
-            f17[g17] = f17[g17 - 1] + this.listNode[f17[g17 - 1]].getChildNodeInfo().allChildNum + 1;
-            g17++;
+        let a18 = new Array(this.listNode[x17].getChildNodeInfo().childNum);
+        a18[0] = x17 + 1;
+        let b18 = 1;
+        while (b18 < this.listNode[x17].getChildNodeInfo().childNum) {
+            a18[b18] = a18[b18 - 1] + this.listNode[a18[b18 - 1]].getChildNodeInfo().allChildNum + 1;
+            b18++;
         }
-        if (e17 === NodeStatus.EXPAND) {
-            for (let h17 = 0; h17 < f17.length; h17++) {
-                this.listNode[f17[h17]].setNodeIsShow(true);
-                this.listNode[f17[h17]].setListItemHeight(LIST_ITEM_HEIGHT);
-                let i17 = this.listNode[f17[h17]].getNodeCurrentNodeId();
-                if (this.expandAndCollapseInfo.get(i17) === NodeStatus.EXPAND) {
-                    this.handleExpandAndCollapse(f17[h17], false);
+        if (z17 === NodeStatus.EXPAND) {
+            for (let c18 = 0; c18 < a18.length; c18++) {
+                this.listNode[a18[c18]].setNodeIsShow(true);
+                this.listNode[a18[c18]].setListItemHeight(LIST_ITEM_HEIGHT);
+                let d18 = this.listNode[a18[c18]].getNodeCurrentNodeId();
+                if (this.expandAndCollapseInfo.get(d18) === NodeStatus.EXPAND) {
+                    this.handleExpandAndCollapse(a18[c18], false);
                 }
             }
         }
-        f17 = null;
-        if (b17) {
+        a18 = null;
+        if (w17) {
             this.loadedListNodeFunction();
             this.notifyDataReload();
         }
     }
+
     updateAllChildNum() {
         delayUpdateParentChildNum(true, 1, this.nodeIdNodeItemMap, this.updateNodeIdList);
     }
-    initHandler(q16, r16, s16) {
-        let t16 = 0;
-        let u16 = 0;
-        q16.splice(0, q16.length);
+
+    initHandler(n17, o17, p17) {
+        let q17 = 0;
+        let r17 = 0;
+        n17.splice(0, n17.length);
         this.loadedNodeIdAndIndexMap.clear();
         this.loadedListNode.splice(0, this.loadedListNode.length);
         this.nodeIdAndNodeIndexMap.clear();
         this.nodeIdAndSubtitleMap.clear();
-        this.traverseSectionNodeDF((w16) => {
-            if (w16.getCurrentNodeId() >= 0 && this.nodeIdNodeParamMap.has(w16.getCurrentNodeId())) {
-                let x16 = new NodeInfo(w16, this.nodeIdNodeParamMap.get(w16.getCurrentNodeId()));
-                x16.addImageCollapse(w16.getChildNodeInfo().isHasChildNode);
-                q16.push(x16);
-                this.nodeIdAndNodeIndexMap.set(x16.getNodeCurrentNodeId(), u16++);
-                if (x16.getChildNodeInfo().isHasChildNode) {
-                    this.expandAndCollapseInfo.set(x16.getNodeCurrentNodeId(), NodeStatus.COLLAPSE);
+        this.traverseSectionNodeDF((t17) => {
+            if (t17.getCurrentNodeId() >= 0 && this.nodeIdNodeParamMap.has(t17.getCurrentNodeId())) {
+                let u17 = new NodeInfo(t17, this.nodeIdNodeParamMap.get(t17.getCurrentNodeId()));
+                u17.addImageCollapse(t17.getChildNodeInfo().isHasChildNode);
+                n17.push(u17);
+                this.nodeIdAndNodeIndexMap.set(u17.getNodeCurrentNodeId(), r17++);
+                if (u17.getChildNodeInfo().isHasChildNode) {
+                    this.expandAndCollapseInfo.set(u17.getNodeCurrentNodeId(), NodeStatus.COLLAPSE);
                 }
-                if (x16.getNodeIsShow()) {
-                    this.loadedNodeIdAndIndexMap.set(x16.getNodeCurrentNodeId(), t16++);
-                    this.loadedListNode.push(x16);
+                if (u17.getNodeIsShow()) {
+                    this.loadedNodeIdAndIndexMap.set(u17.getNodeCurrentNodeId(), q17++);
+                    this.loadedListNode.push(u17);
                 }
-                if (x16.getIsFolder()) {
-                    if (x16.getNodeInfoData().secondaryTitle !== undefined) {
-                        this.nodeIdAndSubtitleMap.set(x16.getNodeCurrentNodeId(), x16.getNodeInfoData().secondaryTitle);
+                if (u17.getIsFolder()) {
+                    if (u17.getNodeInfoData().secondaryTitle !== undefined) {
+                        this.nodeIdAndSubtitleMap.set(u17.getNodeCurrentNodeId(), u17.getNodeInfoData().secondaryTitle);
                     }
                     else {
-                        this.nodeIdAndSubtitleMap.set(x16.getNodeCurrentNodeId(), '');
+                        this.nodeIdAndSubtitleMap.set(u17.getNodeCurrentNodeId(), '');
                     }
                 }
             }
             return false;
-        }, this._root, r16, s16);
+        }, this._root, o17, p17);
     }
+
     delayInit() {
-        let n16 = setTimeout(() => {
-            let p16 = [];
-            this.initHandler(p16, 0);
+        let h17 = setTimeout(() => {
+            let j17 = [];
+            this.initHandler(j17, 0);
             this.listNode.splice(0, this.listNode.length);
-            this.listNode.push(...p16);
-            this.listNode.forEach((m15, f20) => {
-                this.notifyDataDelete(f20);
-                this.notifyDataAdd(f20);
+            this.listNode.push(...j17);
+            this.listNode.forEach((l17, m17) => {
+                this.notifyDataDelete(m17);
+                this.notifyDataAdd(m17);
             });
-            clearTimeout(n16);
+            clearTimeout(h17);
         }, DELAY_TIME);
     }
+
     initSection() {
         this.initHandler(this.listNode, 0, 1);
     }
-    refreshRemoveNodeData(c16, d16) {
-        let e16 = [];
-        if (c16.length === 0) {
+
+    refreshRemoveNodeData(w16, x16) {
+        let y16 = [];
+        if (w16.length === 0) {
             return;
         }
-        let f16 = undefined;
-        for (let k16 = 0; k16 < c16.length; k16++) {
-            if (this.loadedNodeIdAndIndexMap.has(c16[k16])) {
-                let m16 = this.loadedNodeIdAndIndexMap.get(c16[k16]);
-                e16.push(m16);
+        let z16 = undefined;
+        for (let e17 = 0; e17 < w16.length; e17++) {
+            if (this.loadedNodeIdAndIndexMap.has(w16[e17])) {
+                let g17 = this.loadedNodeIdAndIndexMap.get(w16[e17]);
+                y16.push(g17);
             }
-            if (f16 === undefined && this.nodeIdAndNodeIndexMap.has(c16[k16])) {
-                f16 = this.nodeIdAndNodeIndexMap.get(c16[k16]);
+            if (z16 === undefined && this.nodeIdAndNodeIndexMap.has(w16[e17])) {
+                z16 = this.nodeIdAndNodeIndexMap.get(w16[e17]);
             }
-            if (f16 !== undefined) {
-                let l16 = this.listNode.splice(f16, 1);
-                l16 = null;
+            if (z16 !== undefined) {
+                let f17 = this.listNode.splice(z16, 1);
+                f17 = null;
             }
-            if (this.expandAndCollapseInfo.has(c16[k16])) {
-                this.expandAndCollapseInfo.delete(c16[k16]);
+            if (this.expandAndCollapseInfo.has(w16[e17])) {
+                this.expandAndCollapseInfo.delete(w16[e17]);
             }
         }
-        e16.forEach((j16) => {
-            this.notifyDataDelete(j16);
-            this.notifyDataChange(j16);
+        y16.forEach((d17) => {
+            this.notifyDataDelete(d17);
+            this.notifyDataChange(d17);
         });
-        if (d16.getNodeItem().imageCollapse === null) {
-            if (this.nodeIdAndNodeIndexMap.has(d16.getNodeCurrentNodeId())) {
-                let i16 = this.nodeIdAndNodeIndexMap.get(d16.getNodeCurrentNodeId());
-                this.listNode[i16]?.handleImageCollapseAfterAddNode(false);
+        if (x16.getNodeItem().imageCollapse === null) {
+            if (this.nodeIdAndNodeIndexMap.has(x16.getNodeCurrentNodeId())) {
+                let c17 = this.nodeIdAndNodeIndexMap.get(x16.getNodeCurrentNodeId());
+                this.listNode[c17]?.handleImageCollapseAfterAddNode(false);
             }
-            this.expandAndCollapseInfo.delete(d16.getNodeCurrentNodeId());
-            this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(d16.getNodeCurrentNodeId()));
+            this.expandAndCollapseInfo.delete(x16.getNodeCurrentNodeId());
+            this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(x16.getNodeCurrentNodeId()));
         }
-        let g16 = {
-            currentNodeId: d16.getNodeCurrentNodeId(),
-            parentNodeId: d16.getNodeParentNodeId(),
+        let a17 = {
+            currentNodeId: x16.getNodeCurrentNodeId(),
+            parentNodeId: x16.getNodeParentNodeId(),
         };
         this.loadedListNodeFunction();
-        this.appEventBus.emit(TreeListenType.NODE_DELETE, g16);
+        this.appEventBus.emit(TreeListenType.NODE_DELETE, a17);
     }
-    refreshAddNodeData(x15) {
-        let y15 = new NodeInfo(new NodeItem(emptyNodeInfo), emptyNodeInfo);
-        if (this.nodeIdNodeItemMap.has(x15[0])) {
-            let b16 = this.nodeIdNodeItemMap.get(x15[0]);
-            y15 = new NodeInfo(b16, this.nodeIdNodeParamMap.get(x15[0]));
-            y15.addImageCollapse(b16.getChildNodeInfo().isHasChildNode);
+
+    refreshAddNodeData(r16) {
+        let s16 = new NodeInfo(new NodeItem(emptyNodeInfo), emptyNodeInfo);
+        if (this.nodeIdNodeItemMap.has(r16[0])) {
+            let v16 = this.nodeIdNodeItemMap.get(r16[0]);
+            s16 = new NodeInfo(v16, this.nodeIdNodeParamMap.get(r16[0]));
+            s16.addImageCollapse(v16.getChildNodeInfo().isHasChildNode);
         }
-        y15.setIsModify(true);
-        let z15 = 0;
-        for (let a16 = 0; a16 < this.listNode.length; a16++) {
-            if (this.listNode[a16].getNodeCurrentNodeId() === y15.getNodeParentNodeId()) {
-                z15 = a16;
-                if (this.listNode[a16].getNodeItem().imageCollapse === null) {
-                    this.listNode[a16].handleImageCollapseAfterAddNode(true);
-                    this.notifyDataChange(z15);
+        s16.setIsModify(true);
+        let t16 = 0;
+        for (let u16 = 0; u16 < this.listNode.length; u16++) {
+            if (this.listNode[u16].getNodeCurrentNodeId() === s16.getNodeParentNodeId()) {
+                t16 = u16;
+                if (this.listNode[u16].getNodeItem().imageCollapse === null) {
+                    this.listNode[u16].handleImageCollapseAfterAddNode(true);
+                    this.notifyDataChange(t16);
                 }
-                else if (this.expandAndCollapseInfo.get(this.listNode[a16].getNodeCurrentNodeId()) === NodeStatus.COLLAPSE) {
-                    this.changeNodeStatus(z15);
+                else if (this.expandAndCollapseInfo.get(this.listNode[u16].getNodeCurrentNodeId()) === NodeStatus.COLLAPSE) {
+                    this.changeNodeStatus(t16);
                 }
-                this.listNode.splice(a16 + 1, 0, y15);
-                this.listNode[a16 + 1].setTitleAndInputTextStatus(true);
-                this.listNode[a16 + 1].setNodeIsShow(true);
-                this.listNode[a16 + 1].setListItemHeight(LIST_ITEM_HEIGHT);
-                this.nodeIdAndNodeIndexMap.set(x15[0], a16 + 1);
-                this.setImageSource(a16 + 1, InteractionStatus.EDIT);
+                this.listNode.splice(u16 + 1, 0, s16);
+                this.listNode[u16 + 1].setTitleAndInputTextStatus(true);
+                this.listNode[u16 + 1].setNodeIsShow(true);
+                this.listNode[u16 + 1].setListItemHeight(LIST_ITEM_HEIGHT);
+                this.nodeIdAndNodeIndexMap.set(r16[0], u16 + 1);
+                this.setImageSource(u16 + 1, InteractionStatus.EDIT);
                 this.currentOperation = MenuOperation.ADD_NODE;
-                this.notifyDataAdd(a16 + 1);
-                this.notificationNodeInfo(a16 + 1, this.currentOperation);
+                this.notifyDataAdd(u16 + 1);
+                this.notificationNodeInfo(u16 + 1, this.currentOperation);
                 break;
             }
         }
-        this.modifyNodeIndex = z15 + 1;
-        this.setClickIndex(z15);
-        this.lastIndex = z15;
-        this.expandAndCollapseInfo.set(y15.getNodeParentNodeId(), NodeStatus.EXPAND);
-        this.handleExpandAndCollapse(z15, true);
+        this.modifyNodeIndex = t16 + 1;
+        this.setClickIndex(t16);
+        this.lastIndex = t16;
+        this.expandAndCollapseInfo.set(s16.getNodeParentNodeId(), NodeStatus.EXPAND);
+        this.handleExpandAndCollapse(t16, true);
     }
-    refreshData(s15, t15, u15) {
-        let v15 = new NodeInfo(new NodeItem(emptyNodeInfo), emptyNodeInfo);
-        if (this.nodeIdNodeItemMap.has(t15)) {
-            let w15 = this.nodeIdNodeItemMap.get(t15);
-            v15 = new NodeInfo(w15, this.nodeIdNodeParamMap.get(t15));
-            v15.addImageCollapse(w15.getChildNodeInfo().isHasChildNode);
+
+    refreshData(m16, n16, o16) {
+        let p16 = new NodeInfo(new NodeItem(emptyNodeInfo), emptyNodeInfo);
+        if (this.nodeIdNodeItemMap.has(n16)) {
+            let q16 = this.nodeIdNodeItemMap.get(n16);
+            p16 = new NodeInfo(q16, this.nodeIdNodeParamMap.get(n16));
+            p16.addImageCollapse(q16.getChildNodeInfo().isHasChildNode);
         }
-        if (s15 === MenuOperation.REMOVE_NODE) {
-            this.nodeIdAndSubtitleMap.set(t15, this.selectedParentNodeSubtitle);
-            this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(t15));
-            this.refreshRemoveNodeData(u15, v15);
+        if (m16 === MenuOperation.REMOVE_NODE) {
+            this.nodeIdAndSubtitleMap.set(n16, this.selectedParentNodeSubtitle);
+            this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(n16));
+            this.refreshRemoveNodeData(o16, p16);
         }
-        if (s15 === MenuOperation.ADD_NODE) {
-            this.addFocusNodeId = u15[0];
+        if (m16 === MenuOperation.ADD_NODE) {
+            this.addFocusNodeId = o16[0];
             this.nodeIdAndSubtitleMap.set(this.getClickNodeId(), this.selectedParentNodeSubtitle);
-            this.nodeIdAndSubtitleMap.set(u15[0], this.insertNodeSubtitle);
-            this.refreshAddNodeData(u15);
+            this.nodeIdAndSubtitleMap.set(o16[0], this.insertNodeSubtitle);
+            this.refreshAddNodeData(o16);
         }
     }
-    setClickIndex(r15) {
-        this.thisIndex = r15;
+
+    setClickIndex(l16) {
+        this.thisIndex = l16;
     }
+
     getClickNodeId() {
         if (this.thisIndex < 0 || this.thisIndex >= this.listNode.length) {
             return -1;
         }
         return this.listNode[this.thisIndex].getNodeCurrentNodeId();
     }
-    expandAndCollapseNode(q15) {
-        this.changeNodeStatus(q15);
-        this.handleExpandAndCollapse(q15, true);
+
+    expandAndCollapseNode(k16) {
+        this.changeNodeStatus(k16);
+        this.handleExpandAndCollapse(k16, true);
     }
+
     getIsTouchDown() {
         return this.isTouchDown;
     }
+
     getLastIndex() {
         return this.lastIndex;
     }
-    findIndex(o15) {
-        let p15 = -1;
-        if (this.nodeIdAndNodeIndexMap.has(o15)) {
-            p15 = this.nodeIdAndNodeIndexMap.get(o15);
+
+    findIndex(i16) {
+        let j16 = -1;
+        if (this.nodeIdAndNodeIndexMap.has(i16)) {
+            j16 = this.nodeIdAndNodeIndexMap.get(i16);
         }
-        return p15;
+        return j16;
     }
-    handleEventDrag(n15) {
-        this.setImageSource(n15, InteractionStatus.NORMAL);
-        this.changeNodeColor(n15, this.listNode[n15].getNodeStatus().normal);
-        this.handleFocusEffect(n15, false);
-        this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(this.listNode[n15].getNodeCurrentNodeId()));
+
+    handleEventDrag(h16) {
+        this.setImageSource(h16, InteractionStatus.NORMAL);
+        this.changeNodeColor(h16, this.listNode[h16].getNodeStatus().normal);
+        this.handleFocusEffect(h16, false);
+        this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(this.listNode[h16].getNodeCurrentNodeId()));
     }
-    handleEvent(i15, j15) {
+
+    handleEvent(f16, g16) {
         if (this.isDrag) {
             return;
         }
-        if (i15 === Event.TOUCH_DOWN || i15 === Event.TOUCH_UP || i15 === Event.MOUSE_BUTTON_RIGHT) {
-            if (j15 !== this.lastIndex) {
+        if (f16 === Event.TOUCH_DOWN || f16 === Event.TOUCH_UP || f16 === Event.MOUSE_BUTTON_RIGHT) {
+            if (g16 !== this.lastIndex) {
                 this.clearLastIndexStatus();
             }
         }
-        this.eventHandler(j15, i15);
+        this.eventHandler(g16, f16);
     }
-    eventHandler(j12, y19) {
-        let z19 = this.loadedNodeIdAndIndexMap.get(this.listNode[j12].getNodeCurrentNodeId());
-        switch (y19) {
+
+    eventHandler(b16, c16) {
+        let d16 = this.loadedNodeIdAndIndexMap.get(this.listNode[b16].getNodeCurrentNodeId());
+        switch (c16) {
             case Event.TOUCH_DOWN:
                 this.isTouchDown = true;
-                this.changeNodeColor(j12, this.listNode[j12].getNodeStatus().press);
-                this.notifyDataChange(z19);
+                this.changeNodeColor(b16, this.listNode[b16].getNodeStatus().press);
+                this.notifyDataChange(d16);
                 break;
             case Event.TOUCH_UP: {
-                this.touchUpHandler(j12, z19);
+                this.touchUpHandler(b16, d16);
                 break;
             }
             case Event.HOVER:
-                if (this.getNodeColor(j12) !== this.listNode[j12].getNodeStatus().selected) {
-                    this.changeNodeColor(j12, this.listNode[j12].getNodeStatus().hover);
-                    this.notifyDataChange(z19);
+                if (this.getNodeColor(b16) !== this.listNode[b16].getNodeStatus().selected) {
+                    this.changeNodeColor(b16, this.listNode[b16].getNodeStatus().hover);
+                    this.notifyDataChange(d16);
                 }
                 break;
             case Event.HOVER_OVER:
-                if (this.getNodeColor(j12) !== this.listNode[j12].getNodeStatus().selected) {
-                    this.changeNodeColor(j12, this.listNode[j12].getNodeStatus().normal);
-                    this.notifyDataChange(z19);
+                if (this.getNodeColor(b16) !== this.listNode[b16].getNodeStatus().selected) {
+                    this.changeNodeColor(b16, this.listNode[b16].getNodeStatus().normal);
+                    this.notifyDataChange(d16);
                 }
                 break;
             case Event.FOCUS:
-                this.handleFocusEffect(j12, true);
-                this.notifyDataChange(z19);
+                this.handleFocusEffect(b16, true);
+                this.notifyDataChange(d16);
                 break;
             case Event.BLUR:
-                this.handleFocusEffect(j12, false);
-                this.notifyDataChange(z19);
+                this.handleFocusEffect(b16, false);
+                this.notifyDataChange(d16);
                 break;
             case Event.MOUSE_BUTTON_RIGHT:
-                this.lastIndex = j12;
+                this.lastIndex = b16;
                 this.finishEditing();
                 break;
             case Event.DRAG:
                 this.isTouchDown = false;
-                let a20 = this.listNode[j12];
-                this.setImageSource(j12, InteractionStatus.SELECTED);
-                this.lastIndex = j12;
-                this.changeNodeColor(j12, a20.getNodeStatus().selected);
-                this.notifyDataChange(z19);
+                let e16 = this.listNode[b16];
+                this.setImageSource(b16, InteractionStatus.SELECTED);
+                this.lastIndex = b16;
+                this.changeNodeColor(b16, e16.getNodeStatus().selected);
+                this.notifyDataChange(d16);
                 break;
             default:
                 break;
         }
     }
-    touchUpHandler(i4, f5) {
+
+    touchUpHandler(y15, z15) {
         if (this.isInnerDrag) {
             this.isInnerDrag = false;
         }
         this.isTouchDown = false;
-        let e8 = this.listNode[i4];
-        this.setImageSource(i4, InteractionStatus.SELECTED);
-        e8.setFontColor(this.treeViewTheme.primaryTitleFontColor);
-        this.lastIndex = i4;
-        this.changeNodeColor(i4, e8.getNodeStatus().selected);
-        this.notifyDataChange(f5);
+        let a16 = this.listNode[y15];
+        this.setImageSource(y15, InteractionStatus.SELECTED);
+        a16.setFontColor(this.treeViewTheme.primaryTitleFontColor);
+        this.lastIndex = y15;
+        this.changeNodeColor(y15, a16.getNodeStatus().selected);
+        this.notifyDataChange(z15);
     }
-    notificationNodeInfo(z14, a15) {
-        if (a15 === MenuOperation.MODIFY_NODE) {
-            let g15 = this.listNode[this.modifyNodeIndex];
-            let h15 = {
-                currentNodeId: g15.getNodeCurrentNodeId(),
-                parentNodeId: g15.getNodeParentNodeId(),
+
+    notificationNodeInfo(p15, q15) {
+        if (q15 === MenuOperation.MODIFY_NODE) {
+            let w15 = this.listNode[this.modifyNodeIndex];
+            let x15 = {
+                currentNodeId: w15.getNodeCurrentNodeId(),
+                parentNodeId: w15.getNodeParentNodeId(),
             };
-            this.appEventBus.emit(TreeListenType.NODE_MODIFY, h15);
+            this.appEventBus.emit(TreeListenType.NODE_MODIFY, x15);
         }
-        else if (a15 === MenuOperation.ADD_NODE) {
-            let b15 = this.listNode[z14];
-            if (b15 === undefined) {
+        else if (q15 === MenuOperation.ADD_NODE) {
+            let r15 = this.listNode[p15];
+            if (r15 === undefined) {
                 return;
             }
-            let c15 = (b15.getNodeItem().imageNode !== undefined) ?
-                b15.getNodeItem().imageNode?.source : undefined;
-            let d15 = (b15.getNodeItem().imageNode !== undefined) ?
-                b15.getNodeItem().imageNode?.selectedSource : undefined;
-            let e15 = (b15.getNodeItem().imageNode !== undefined) ?
-                b15.getNodeItem().imageNode?.editSource : undefined;
-            let f15 = {
-                currentNodeId: b15.getNodeCurrentNodeId(),
-                parentNodeId: b15.getNodeParentNodeId(),
+            let s15 = (r15.getNodeItem().imageNode !== undefined) ?
+                r15.getNodeItem().imageNode?.source : undefined;
+            let t15 = (r15.getNodeItem().imageNode !== undefined) ?
+                r15.getNodeItem().imageNode?.selectedSource : undefined;
+            let u15 = (r15.getNodeItem().imageNode !== undefined) ?
+                r15.getNodeItem().imageNode?.editSource : undefined;
+            let v15 = {
+                currentNodeId: r15.getNodeCurrentNodeId(),
+                parentNodeId: r15.getNodeParentNodeId(),
             };
-            this.appEventBus.emit(TreeListenType.NODE_ADD, f15);
+            this.appEventBus.emit(TreeListenType.NODE_ADD, v15);
         }
     }
+
     finishEditing() {
         if (this.modifyNodeIndex !== -1) {
             this.setImageSource(this.modifyNodeIndex, InteractionStatus.FINISH_EDIT);
@@ -2093,257 +2336,285 @@ class ListNodeDataSource extends BasicDataSource {
             this.notifyDataChange(this.modifyNodeIndex);
         }
     }
-    setItemVisibilityOnEdit(t14, u14) {
-        let v14 = -1;
-        if (t14 === -1) {
+
+    setItemVisibilityOnEdit(j15, k15) {
+        let l15 = -1;
+        if (j15 === -1) {
             return;
         }
-        if (u14 === MenuOperation.MODIFY_NODE) {
-            for (let y14 = 0; y14 < this.listNode.length; y14++) {
-                if (this.listNode[y14].getNodeCurrentNodeId() === t14) {
-                    v14 = y14;
+        if (k15 === MenuOperation.MODIFY_NODE) {
+            for (let o15 = 0; o15 < this.listNode.length; o15++) {
+                if (this.listNode[o15].getNodeCurrentNodeId() === j15) {
+                    l15 = o15;
                     break;
                 }
             }
-            let x14 = this.listNode[v14];
-            if (x14 === undefined) {
+            let n15 = this.listNode[l15];
+            if (n15 === undefined) {
                 return;
             }
-            x14.setIsModify(true);
-            if (x14.getNodeItem().mainTitleNode === null) {
+            n15.setIsModify(true);
+            if (n15.getNodeItem().mainTitleNode === null) {
                 return;
             }
             this.currentOperation = MenuOperation.MODIFY_NODE;
-            x14.setTitleAndInputTextStatus(true);
-            this.setImageSource(v14, InteractionStatus.EDIT);
-            this.setImageCollapseSource(v14, InteractionStatus.EDIT);
-            this.modifyNodeIndex = v14;
-            if (x14.getNodeItem().inputText) {
-                if (x14.getNodeItem().imageCollapse !== null) {
-                  x14.getNodeItem().inputText.rightMargin = {
-                    id: -1,
-                    type: 10002,
-                    params: ['sys.float.ohos_id_text_paragraph_margin_xs'],
-                    bundleName: '__harDefaultBundleName__',
-                    moduleName: '__harDefaultModuleName__',
-                  };
-                } else {
-                  x14.getNodeItem().inputText.rightMargin = {
-                    id: -1,
-                    type: 10002,
-                    params: ['sys.float.ohos_id_elements_margin_horizontal_m'],
-                    bundleName: '__harDefaultBundleName__',
-                    moduleName: '__harDefaultModuleName__',
-                  };
+            n15.setTitleAndInputTextStatus(true);
+            this.setImageSource(l15, InteractionStatus.EDIT);
+            this.setImageCollapseSource(l15, InteractionStatus.EDIT);
+            this.modifyNodeIndex = l15;
+            if (n15.getNodeItem().inputText) {
+                if (n15.getNodeItem().imageCollapse !== null) {
+                    n15.getNodeItem().inputText.rightMargin = {
+                        'id': -1,
+                        'type': 10002,
+                        params: ['sys.float.ohos_id_text_paragraph_margin_xs'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__',
+                    };
+                }
+                else {
+                    n15.getNodeItem().inputText.rightMargin = {
+                        'id': -1,
+                        'type': 10002,
+                        params: ['sys.float.ohos_id_elements_margin_horizontal_m'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__',
+                    };
                 }
             }
-            this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(t14));
+            this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(j15));
         }
-        v14 = t14;
-        if (u14 === MenuOperation.COMMIT_NODE) {
-            let w14 = this.listNode[v14];
-            if (w14 === undefined) {
+        l15 = j15;
+        if (k15 === MenuOperation.COMMIT_NODE) {
+            let m15 = this.listNode[l15];
+            if (m15 === undefined) {
                 return;
             }
-            w14.setTitleAndInputTextStatus(false);
-            w14.setIsModify(false);
-            this.setImageSource(v14, InteractionStatus.FINISH_EDIT);
-            this.setImageCollapseSource(v14, InteractionStatus.FINISH_EDIT);
+            m15.setTitleAndInputTextStatus(false);
+            m15.setIsModify(false);
+            this.setImageSource(l15, InteractionStatus.FINISH_EDIT);
+            this.setImageCollapseSource(l15, InteractionStatus.FINISH_EDIT);
             this.notificationNodeInfo(this.modifyNodeIndex, this.currentOperation);
-            this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(w14.getNodeCurrentNodeId()));
+            this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(m15.getNodeCurrentNodeId()));
         }
     }
-    setPopUpInfo(n14, o14, p14, q14) {
-        let r14 = this.listNode[q14];
-        if (r14 === undefined) {
+
+    setPopUpInfo(d15, e15, f15, g15) {
+        let h15 = this.listNode[g15];
+        if (h15 === undefined) {
             return;
         }
-        r14.setPopUpIsShow(p14);
-        let s14 = this.loadedNodeIdAndIndexMap.get(r14.getNodeCurrentNodeId());
-        if (!p14) {
-            this.notifyDataChange(s14);
+        h15.setPopUpIsShow(f15);
+        let i15 = this.loadedNodeIdAndIndexMap.get(h15.getNodeCurrentNodeId());
+        if (!f15) {
+            this.notifyDataChange(i15);
             return;
         }
-        if (n14 === PopUpType.HINTS) {
-            if (r14.getNodeItem().mainTitleNode !== null) {
-                r14.setPopUpText(r14.getNodeItem().mainTitleNode?.title);
+        if (d15 === PopUpType.HINTS) {
+            if (h15.getNodeItem().mainTitleNode !== null) {
+                h15.setPopUpText(h15.getNodeItem().mainTitleNode?.title);
             }
             else {
-                r14.setPopUpText('');
-                r14.setPopUpIsShow(false);
+                h15.setPopUpText('');
+                h15.setPopUpIsShow(false);
             }
-            r14.setPopUpEnableArrow(false);
-            r14.setPopUpColor({
-              id: -1,
-              type: 10001,
-              params: ['sys.color.ohos_id_color_background'],
-              bundleName: '__harDefaultBundleName__',
-              moduleName: '__harDefaultModuleName__',
+            h15.setPopUpEnableArrow(false);
+            h15.setPopUpColor({
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.ohos_id_color_background'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             });
-            r14.setPopUpTextColor(this.treeViewTheme.secondaryTitleFontColor);
+            h15.setPopUpTextColor(this.treeViewTheme.secondaryTitleFontColor);
         }
-        else if (n14 === PopUpType.WARNINGS) {
-            if (r14.getNodeItem().inputText !== null) {
-                if (o14 === InputError.INVALID_ERROR) {
-                    r14.setPopUpText('invalid error');
+        else if (d15 === PopUpType.WARNINGS) {
+            if (h15.getNodeItem().inputText !== null) {
+                if (e15 === InputError.INVALID_ERROR) {
+                    h15.setPopUpText('invalid error');
                 }
-                else if (o14 === InputError.LENGTH_ERROR) {
-                    r14.setPopUpText('length error');
+                else if (e15 === InputError.LENGTH_ERROR) {
+                    h15.setPopUpText('length error');
                 }
-                r14.setPopUpEnableArrow(true);
-                r14.setPopUpColor({
-                  id: -1,
-                  type: 10001,
-                  params: ['sys.color.ohos_id_color_help_tip_bg'],
-                  bundleName: '__harDefaultBundleName__',
-                  moduleName: '__harDefaultModuleName__',
+                h15.setPopUpEnableArrow(true);
+                h15.setPopUpColor({
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.ohos_id_color_help_tip_bg'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
                 });
-                r14.setPopUpTextColor({
-                  id: -1,
-                  type: 10001,
-                  params: ['sys.color.ohos_id_color_text_hint_contrary'],
-                  bundleName: '__harDefaultBundleName__',
-                  moduleName: '__harDefaultModuleName__',
+                h15.setPopUpTextColor({
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.ohos_id_color_text_hint_contrary'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
                 });
             }
         }
-        this.notifyDataChange(s14);
+        this.notifyDataChange(i15);
     }
-    setShowPopUpTimeout(k14, l14) {
-        if (this.listNode[l14].getNodeItem().mainTitleNode !== null) {
-            this.listNode[l14].getNodeItem().mainTitleNode.popUpTimeout = k14;
+
+    setShowPopUpTimeout(a15, b15) {
+        if (this.listNode[b15].getNodeItem().mainTitleNode !== null) {
+            this.listNode[b15].getNodeItem().mainTitleNode.popUpTimeout = a15;
         }
-        let m14 = this.loadedNodeIdAndIndexMap.get(this.listNode[l14].getNodeCurrentNodeId());
-        this.notifyDataChange(m14);
+        let c15 = this.loadedNodeIdAndIndexMap.get(this.listNode[b15].getNodeCurrentNodeId());
+        this.notifyDataChange(c15);
     }
-    setMainTitleNameOnEdit(i14, j14) {
-        this.modifyNodeIndex = i14;
-        if (this.listNode[i14].getNodeItem().mainTitleNode !== null) {
-            this.listNode[i14].getNodeItem().mainTitleNode.title = j14;
+
+    setMainTitleNameOnEdit(y14, z14) {
+        this.modifyNodeIndex = y14;
+        if (this.listNode[y14].getNodeItem().mainTitleNode !== null) {
+            this.listNode[y14].getNodeItem().mainTitleNode.title = z14;
         }
     }
+
     totalCount() {
         return this.loadedNodeIdAndIndexMap.size;
     }
-    getData(h14) {
-        if (h14 < 0 || h14 >= this.loadedListNode.length) {
+
+    getData(x14) {
+        if (x14 < 0 || x14 >= this.loadedListNode.length) {
             return undefined;
         }
-        return this.loadedListNode[h14];
+        return this.loadedListNode[x14];
     }
-    addData(f14, g14) {
-        this.listNode.splice(f14, 0, g14);
-        this.nodeIdAndNodeIndexMap.set(g14.getNodeCurrentNodeId(), f14);
+
+    addData(v14, w14) {
+        this.listNode.splice(v14, 0, w14);
+        this.nodeIdAndNodeIndexMap.set(w14.getNodeCurrentNodeId(), v14);
         this.loadedListNodeFunction();
-        this.notifyDataAdd(f14);
+        this.notifyDataAdd(v14);
     }
-    pushData(e14) {
-        this.listNode.push(e14);
-        this.nodeIdAndNodeIndexMap.set(e14.getNodeCurrentNodeId(), this.listNode.length);
+
+    pushData(u14) {
+        this.listNode.push(u14);
+        this.nodeIdAndNodeIndexMap.set(u14.getNodeCurrentNodeId(), this.listNode.length);
         this.loadedListNodeFunction();
         this.notifyDataAdd(this.listNode.length - 1);
     }
-    setIsInnerDrag(d14) {
-        this.isInnerDrag = d14;
+
+    setIsInnerDrag(t14) {
+        this.isInnerDrag = t14;
     }
+
     getIsInnerDrag() {
         return this.isInnerDrag;
     }
-    setIsDrag(c14) {
-        this.isDrag = c14;
+
+    setIsDrag(s14) {
+        this.isDrag = s14;
     }
+
     getIsDrag() {
         return this.isDrag;
     }
-    setCurrentNodeInfo(b14) {
-        if (b14 === undefined) {
+
+    setCurrentNodeInfo(r14) {
+        if (r14 === undefined) {
             return;
         }
-        this.currentNodeInfo = b14;
+        this.currentNodeInfo = r14;
     }
+
     getCurrentNodeInfo() {
         return this.currentNodeInfo;
     }
-    setDraggingParentNodeId(a14) {
-        if (a14 === undefined) {
+
+    setDraggingParentNodeId(q14) {
+        if (q14 === undefined) {
             return;
         }
-        this.draggingParentNodeId = a14;
+        this.draggingParentNodeId = q14;
     }
+
     getDraggingParentNodeId() {
         return this.draggingParentNodeId;
     }
+
     getDraggingCurrentNodeId() {
         return this.draggingCurrentNodeId;
     }
-    setDraggingCurrentNodeId(z13) {
-        if (z13 === undefined) {
+
+    setDraggingCurrentNodeId(p14) {
+        if (p14 === undefined) {
             return;
         }
-        this.draggingCurrentNodeId = z13;
+        this.draggingCurrentNodeId = p14;
     }
-    setListItemOpacity(y13) {
-        this.listItemOpacity = y13;
+
+    setListItemOpacity(o14) {
+        this.listItemOpacity = o14;
     }
-    getListItemOpacity(x13) {
-        return x13.getNodeCurrentNodeId() === this.getDraggingCurrentNodeId() ? this.listItemOpacity : 1;
+
+    getListItemOpacity(n14) {
+        return n14.getNodeCurrentNodeId() === this.getDraggingCurrentNodeId() ? this.listItemOpacity : 1;
     }
+
     getDragPopupPara() {
         return this.DRAG_POPUP;
     }
-    setLastPassIndex(w13) {
-        this.lastPassIndex = w13;
+
+    setLastPassIndex(m14) {
+        this.lastPassIndex = m14;
     }
+
     getLastPassIndex() {
         return this.lastPassIndex;
     }
-    getIsParentOfInsertNode(t13) {
-        if (this.currentNodeInfo === null || t13 === undefined) {
+
+    getIsParentOfInsertNode(i14) {
+        if (this.currentNodeInfo === null || i14 === undefined) {
             return false;
         }
-        let u13 = this.currentNodeInfo.getNodeInfoNode();
-        let v13 = u13.currentNodeId;
-        let k15 = this.nodeIdNodeItemMap.get(t13)?.parentNodeId;
-        while (k15 !== undefined && k15 !== -1) {
-            if (v13 === k15) {
+        let j14 = this.currentNodeInfo.getNodeInfoNode();
+        let k14 = j14.currentNodeId;
+        let l14 = this.nodeIdNodeItemMap.get(i14)?.parentNodeId;
+        while (l14 !== undefined && l14 !== -1) {
+            if (k14 === l14) {
                 return true;
             }
             else {
-                k15 = this.nodeIdNodeItemMap.get(k15)?.parentNodeId;
+                l14 = this.nodeIdNodeItemMap.get(l14)?.parentNodeId;
             }
         }
         return false;
     }
-    setPassIndex(s13) {
-        this.thisPassIndex = s13;
+
+    setPassIndex(h14) {
+        this.thisPassIndex = h14;
     }
+
     getPassIndex() {
         return this.thisPassIndex;
     }
-    clearTimeOutAboutDelayHighLightAndExpand(n13) {
+
+    clearTimeOutAboutDelayHighLightAndExpand(c14) {
         if (this.lastPassId !== this.INITIAL_INVALID_VALUE && this.loadedNodeIdAndIndexMap.has(this.lastPassId)) {
-            let p13 = this.loadedNodeIdAndIndexMap.get(this.lastPassId);
-            this.listNode.forEach((r13) => {
-                if (r13.getNodeCurrentNodeId() === this.lastPassId) {
-                    r13.setCanShowFlagLine(false);
+            let e14 = this.loadedNodeIdAndIndexMap.get(this.lastPassId);
+            this.listNode.forEach((g14) => {
+                if (g14.getNodeCurrentNodeId() === this.lastPassId) {
+                    g14.setCanShowFlagLine(false);
                     return;
                 }
             });
-            this.notifyDataChange(p13);
+            this.notifyDataChange(e14);
         }
         if ((this.lastTimeoutHighLightId !== this.INITIAL_INVALID_VALUE &&
             this.clearTimeoutHighLightId !== this.lastTimeoutHighLightId)) {
             clearTimeout(this.lastTimeoutHighLightId);
             if (this.lastDelayHighLightIndex !== this.INITIAL_INVALID_VALUE) {
                 this.clearHighLight(this.lastDelayHighLightIndex);
-                let o13 = this.loadedNodeIdAndIndexMap
+                let d14 = this.loadedNodeIdAndIndexMap
                     .get(this.listNode[this.lastDelayHighLightIndex].getNodeCurrentNodeId());
-                this.notifyDataChange(o13);
+                this.notifyDataChange(d14);
             }
             this.clearTimeoutHighLightId = this.lastTimeoutHighLightId;
         }
         this.lastTimeoutHighLightId = this.timeoutHighLightId;
-        this.lastDelayHighLightIndex = n13;
+        this.lastDelayHighLightIndex = c14;
         if ((this.lastTimeoutExpandId !== this.INITIAL_INVALID_VALUE &&
             this.clearTimeoutExpandId !== this.lastTimeoutExpandId)) {
             clearTimeout(this.lastTimeoutExpandId);
@@ -2352,93 +2623,97 @@ class ListNodeDataSource extends BasicDataSource {
         this.lastTimeoutExpandId = this.timeoutExpandId;
         this.lastDelayExpandIndex = this.INITIAL_INVALID_VALUE;
     }
-    clearHighLight(m13) {
-        this.changeNodeColor(m13, this.listNode[m13].getNodeStatus().normal);
-        this.changeNodeHighLightColor(m13, false);
-        this.setImageSource(m13, InteractionStatus.FINISH_DRAG_INSERT);
-        this.setImageCollapseSource(m13, InteractionStatus.FINISH_DRAG_INSERT);
-        this.listNode[m13].setIsHighLight(false);
+
+    clearHighLight(b14) {
+        this.changeNodeColor(b14, this.listNode[b14].getNodeStatus().normal);
+        this.changeNodeHighLightColor(b14, false);
+        this.setImageSource(b14, InteractionStatus.FINISH_DRAG_INSERT);
+        this.setImageCollapseSource(b14, InteractionStatus.FINISH_DRAG_INSERT);
+        this.listNode[b14].setIsHighLight(false);
     }
-    changeNodeHighLightColor(k13, l13) {
-        if (this.listNode[k13].getNodeItem().mainTitleNode && this.listNode[k13].getIsShowTitle()) {
-            this.listNode[k13].getNodeItem().mainTitleNode?.setMainTitleHighLight(l13);
+
+    changeNodeHighLightColor(z13, a14) {
+        if (this.listNode[z13].getNodeItem().mainTitleNode && this.listNode[z13].getIsShowTitle()) {
+            this.listNode[z13].getNodeItem().mainTitleNode?.setMainTitleHighLight(a14);
         }
     }
-    setVisibility(b13, c13, d13) {
-        let e13 = (this.thisPassIndex !== c13 || this.flag !== b13) ? true : false;
-        this.thisPassIndex = c13;
-        if ((e13 || d13) && this.isInnerDrag) {
-            this.flag = b13;
-            let f13 = this.getData(c13)?.getNodeCurrentNodeId();
-            let g13 = this.getData(c13)?.getNodeLevel();
-            if (f13 !== undefined) {
-                g13 = (this.expandAndCollapseInfo.get(f13) === NodeStatus.EXPAND &&
-                    this.flag === Flag.DOWN_FLAG) ? (g13 ? g13 + 1 : undefined) : g13;
+
+    setVisibility(q13, r13, s13) {
+        let t13 = (this.thisPassIndex !== r13 || this.flag !== q13) ? true : false;
+        this.thisPassIndex = r13;
+        if ((t13 || s13) && this.isInnerDrag) {
+            this.flag = q13;
+            let u13 = this.getData(r13)?.getNodeCurrentNodeId();
+            let v13 = this.getData(r13)?.getNodeLevel();
+            if (u13 !== undefined) {
+                v13 = (this.expandAndCollapseInfo.get(u13) === NodeStatus.EXPAND &&
+                    this.flag === Flag.DOWN_FLAG) ? (v13 ? v13 + 1 : undefined) : v13;
                 if (this.lastPassId !== this.INITIAL_INVALID_VALUE && this.loadedNodeIdAndIndexMap.has(this.lastPassId)) {
-                    let h13 = this.loadedNodeIdAndIndexMap.get(this.lastPassId);
-                    this.listNode.forEach((j13) => {
-                        if (j13.getNodeCurrentNodeId() === this.lastPassId) {
-                            j13.setCanShowFlagLine(false);
+                    let w13 = this.loadedNodeIdAndIndexMap.get(this.lastPassId);
+                    this.listNode.forEach((y13) => {
+                        if (y13.getNodeCurrentNodeId() === this.lastPassId) {
+                            y13.setCanShowFlagLine(false);
                         }
                     });
-                    this.notifyDataChange(h13);
+                    this.notifyDataChange(w13);
                 }
-                if (this.flag === Flag.DOWN_FLAG && c13 < this.totalCount() - 1) {
-                    this.getData(c13)?.setCanShowFlagLine(false);
-                    this.getData(c13 + 1)?.setCanShowFlagLine(true);
-                    this.getData(c13)?.setCanShowBottomFlagLine(false);
-                    this.getData(c13 + 1)?.setFlagLineLeftMargin(g13);
-                    this.notifyDataChange(c13);
-                    this.notifyDataChange(c13 + 1);
-                    this.lastPassId = this.getData(c13 + 1)?.getNodeCurrentNodeId();
+                if (this.flag === Flag.DOWN_FLAG && r13 < this.totalCount() - 1) {
+                    this.getData(r13)?.setCanShowFlagLine(false);
+                    this.getData(r13 + 1)?.setCanShowFlagLine(true);
+                    this.getData(r13)?.setCanShowBottomFlagLine(false);
+                    this.getData(r13 + 1)?.setFlagLineLeftMargin(v13);
+                    this.notifyDataChange(r13);
+                    this.notifyDataChange(r13 + 1);
+                    this.lastPassId = this.getData(r13 + 1)?.getNodeCurrentNodeId();
                 }
-                else if (this.flag === Flag.UP_FLAG && c13 < this.totalCount() - 1) {
-                    this.getData(c13)?.setCanShowFlagLine(true);
-                    this.getData(c13 + 1)?.setCanShowFlagLine(false);
-                    this.getData(c13)?.setCanShowBottomFlagLine(false);
-                    this.getData(c13)?.setFlagLineLeftMargin(g13);
-                    this.notifyDataChange(c13);
-                    this.notifyDataChange(c13 + 1);
-                    this.lastPassId = this.getData(c13)?.getNodeCurrentNodeId();
+                else if (this.flag === Flag.UP_FLAG && r13 < this.totalCount() - 1) {
+                    this.getData(r13)?.setCanShowFlagLine(true);
+                    this.getData(r13 + 1)?.setCanShowFlagLine(false);
+                    this.getData(r13)?.setCanShowBottomFlagLine(false);
+                    this.getData(r13)?.setFlagLineLeftMargin(v13);
+                    this.notifyDataChange(r13);
+                    this.notifyDataChange(r13 + 1);
+                    this.lastPassId = this.getData(r13)?.getNodeCurrentNodeId();
                 }
-                else if (c13 >= this.totalCount() - 1) {
+                else if (r13 >= this.totalCount() - 1) {
                     if (this.flag === Flag.DOWN_FLAG) {
-                        this.getData(c13)?.setCanShowFlagLine(false);
-                        this.getData(c13)?.setCanShowBottomFlagLine(true);
+                        this.getData(r13)?.setCanShowFlagLine(false);
+                        this.getData(r13)?.setCanShowBottomFlagLine(true);
                     }
                     else {
-                        this.getData(c13)?.setCanShowFlagLine(true);
-                        this.getData(c13)?.setCanShowBottomFlagLine(false);
+                        this.getData(r13)?.setCanShowFlagLine(true);
+                        this.getData(r13)?.setCanShowBottomFlagLine(false);
                     }
-                    this.getData(c13)?.setFlagLineLeftMargin(g13);
-                    this.notifyDataChange(c13);
-                    this.lastPassId = this.getData(c13)?.getNodeCurrentNodeId();
+                    this.getData(r13)?.setFlagLineLeftMargin(v13);
+                    this.notifyDataChange(r13);
+                    this.lastPassId = this.getData(r13)?.getNodeCurrentNodeId();
                 }
             }
         }
     }
-    delayHighLightAndExpandNode(q12, r12, s12) {
-        let t12 = q12 !== this.lastDelayExpandIndex ? true : false;
-        let u12 = this.getData(s12)?.getIsOverBorder();
-        if (u12) {
+
+    delayHighLightAndExpandNode(f13, g13, h13) {
+        let i13 = f13 !== this.lastDelayExpandIndex ? true : false;
+        let j13 = this.getData(h13)?.getIsOverBorder();
+        if (j13) {
             this.lastDelayExpandIndex = this.INITIAL_INVALID_VALUE;
         }
         else {
-            this.lastDelayExpandIndex = q12;
+            this.lastDelayExpandIndex = f13;
         }
-        if (u12 || t12) {
-            let v12 = !u12 && (!this.isInnerDrag ||
-                (this.expandAndCollapseInfo.get(r12) === NodeStatus.COLLAPSE && this.isInnerDrag) ||
-                (!this.expandAndCollapseInfo.has(r12) && this.listNode[q12].getIsFolder()));
-            if (v12) {
-                this.changeNodeColor(q12, this.listNode[q12].getNodeStatus().hover);
-                this.notifyDataChange(s12);
-                let z12 = this.isInnerDrag ? 1000 : 0;
+        if (j13 || i13) {
+            let k13 = !j13 && (!this.isInnerDrag ||
+                (this.expandAndCollapseInfo.get(g13) === NodeStatus.COLLAPSE && this.isInnerDrag) ||
+                (!this.expandAndCollapseInfo.has(g13) && this.listNode[f13].getIsFolder()));
+            if (k13) {
+                this.changeNodeColor(f13, this.listNode[f13].getNodeStatus().hover);
+                this.notifyDataChange(h13);
+                let o13 = this.isInnerDrag ? 1000 : 0;
                 this.timeoutHighLightId = setTimeout(() => {
-                    this.delayHighLight(q12);
-                }, z12);
+                    this.delayHighLight(f13);
+                }, o13);
             }
-            if (u12 || (this.lastTimeoutHighLightId !== this.INITIAL_INVALID_VALUE &&
+            if (j13 || (this.lastTimeoutHighLightId !== this.INITIAL_INVALID_VALUE &&
                 this.clearTimeoutHighLightId !== this.lastTimeoutHighLightId)) {
                 clearTimeout(this.lastTimeoutHighLightId);
                 if (this.lastDelayHighLightIndex !== this.INITIAL_INVALID_VALUE) {
@@ -2448,18 +2723,18 @@ class ListNodeDataSource extends BasicDataSource {
                 this.clearTimeoutHighLightId = this.lastTimeoutHighLightId;
             }
             this.lastTimeoutHighLightId = this.timeoutHighLightId;
-            this.lastDelayHighLightIndex = q12;
-            if (!u12 && this.expandAndCollapseInfo.get(r12) === NodeStatus.COLLAPSE) {
-                let w12 = this.getData(s12)?.getNodeInfoNode().children[0]?.currentNodeId;
-                let x12 = 2000;
+            this.lastDelayHighLightIndex = f13;
+            if (!j13 && this.expandAndCollapseInfo.get(g13) === NodeStatus.COLLAPSE) {
+                let l13 = this.getData(h13)?.getNodeInfoNode().children[0]?.currentNodeId;
+                let m13 = 2000;
                 this.timeoutExpandId = setTimeout(() => {
                     this.clearHighLight(this.lastDelayHighLightIndex);
-                    if (w12 !== undefined) {
-                        this.alterFlagLineAndExpandNode(q12, w12);
+                    if (l13 !== undefined) {
+                        this.alterFlagLineAndExpandNode(f13, l13);
                     }
-                }, x12);
+                }, m13);
             }
-            if (u12 || (this.lastTimeoutExpandId !== this.INITIAL_INVALID_VALUE &&
+            if (j13 || (this.lastTimeoutExpandId !== this.INITIAL_INVALID_VALUE &&
                 this.clearTimeoutExpandId !== this.lastTimeoutExpandId)) {
                 clearTimeout(this.lastTimeoutExpandId);
                 this.clearTimeoutExpandId = this.lastTimeoutExpandId;
@@ -2467,50 +2742,54 @@ class ListNodeDataSource extends BasicDataSource {
             this.lastTimeoutExpandId = this.timeoutExpandId;
         }
     }
-    delayHighLight(n12) {
-        this.listNode.forEach((p12) => {
-            if (p12.getNodeCurrentNodeId() === this.lastPassId) {
-                p12.setCanShowFlagLine(false);
-                p12.setCanShowBottomFlagLine(false);
+
+    delayHighLight(c13) {
+        this.listNode.forEach((e13) => {
+            if (e13.getNodeCurrentNodeId() === this.lastPassId) {
+                e13.setCanShowFlagLine(false);
+                e13.setCanShowBottomFlagLine(false);
                 return;
             }
         });
-        this.changeNodeColor(n12, this.listNode[n12].getNodeStatus().highLight);
-        this.listNode[n12].setIsHighLight(true);
-        this.changeNodeHighLightColor(n12, true);
-        this.setImageSource(n12, InteractionStatus.DRAG_INSERT);
-        this.setImageCollapseSource(n12, InteractionStatus.DRAG_INSERT);
+        this.changeNodeColor(c13, this.listNode[c13].getNodeStatus().highLight);
+        this.listNode[c13].setIsHighLight(true);
+        this.changeNodeHighLightColor(c13, true);
+        this.setImageSource(c13, InteractionStatus.DRAG_INSERT);
+        this.setImageCollapseSource(c13, InteractionStatus.DRAG_INSERT);
         this.notifyDataReload();
     }
-    alterFlagLineAndExpandNode(h12, i12) {
-        this.listNode.forEach((m12) => {
-            if (m12.getNodeCurrentNodeId() === this.lastPassId) {
-                m12.setCanShowFlagLine(false);
-                m12.setCanShowBottomFlagLine(false);
+
+    alterFlagLineAndExpandNode(w12, x12) {
+        this.listNode.forEach((b13) => {
+            if (b13.getNodeCurrentNodeId() === this.lastPassId) {
+                b13.setCanShowFlagLine(false);
+                b13.setCanShowBottomFlagLine(false);
             }
         });
-        this.listNode.forEach((l12) => {
-            if (this.isInnerDrag && l12.getNodeCurrentNodeId() === i12) {
-                l12.setCanShowFlagLine(true);
+        this.listNode.forEach((a13) => {
+            if (this.isInnerDrag && a13.getNodeCurrentNodeId() === x12) {
+                a13.setCanShowFlagLine(true);
             }
         });
-        this.changeNodeStatus(h12);
-        this.handleExpandAndCollapse(h12, true);
-        this.lastPassId = i12;
+        this.changeNodeStatus(w12);
+        this.handleExpandAndCollapse(w12, true);
+        this.lastPassId = x12;
     }
+
     hideLastLine() {
         if (this.lastPassId !== this.INITIAL_INVALID_VALUE && this.loadedNodeIdAndIndexMap.has(this.lastPassId)) {
-            this.listNode.forEach((g12) => {
-                if (g12.getNodeCurrentNodeId() === this.lastPassId) {
-                    g12.setCanShowFlagLine(false);
-                    g12.setCanShowBottomFlagLine(false);
+            this.listNode.forEach((v12) => {
+                if (v12.getNodeCurrentNodeId() === this.lastPassId) {
+                    v12.setCanShowFlagLine(false);
+                    v12.setCanShowBottomFlagLine(false);
                     return;
                 }
             });
-            let e12 = this.loadedNodeIdAndIndexMap.get(this.lastPassId);
-            this.notifyDataChange(e12);
+            let t12 = this.loadedNodeIdAndIndexMap.get(this.lastPassId);
+            this.notifyDataChange(t12);
         }
     }
+
     clearLastTimeoutHighLight() {
         if (this.lastTimeoutHighLightId !== this.INITIAL_INVALID_VALUE &&
             this.clearTimeoutHighLightId !== this.lastTimeoutHighLightId) {
@@ -2520,28 +2799,32 @@ class ListNodeDataSource extends BasicDataSource {
             }
         }
     }
+
     clearLastTimeoutExpand() {
         if (this.lastTimeoutExpandId !== this.INITIAL_INVALID_VALUE &&
             this.clearTimeoutExpandId !== this.lastTimeoutExpandId) {
             clearTimeout(this.lastTimeoutExpandId);
         }
     }
-    getSubtitle(d12) {
-        if (this.nodeIdAndSubtitleMap.has(d12)) {
-            if (typeof this.nodeIdAndSubtitleMap.get(d12) === 'number') {
-                return this.nodeIdAndSubtitleMap.get(d12)?.toString();
+
+    getSubtitle(s12) {
+        if (this.nodeIdAndSubtitleMap.has(s12)) {
+            if (typeof this.nodeIdAndSubtitleMap.get(s12) === 'number') {
+                return this.nodeIdAndSubtitleMap.get(s12)?.toString();
             }
             else {
-                return this.nodeIdAndSubtitleMap.get(d12);
+                return this.nodeIdAndSubtitleMap.get(s12);
             }
         }
         else {
             return '';
         }
     }
-    hasSubtitle(c12) {
-        return this.nodeIdAndSubtitleMap.has(c12);
+
+    hasSubtitle(r12) {
+        return this.nodeIdAndSubtitleMap.has(r12);
     }
+
     initialParameterAboutDelayHighLightAndExpandIndex() {
         this.lastDelayHighLightIndex = this.INITIAL_INVALID_VALUE;
         this.lastDelayExpandIndex = this.INITIAL_INVALID_VALUE;
@@ -2549,597 +2832,638 @@ class ListNodeDataSource extends BasicDataSource {
         this.draggingCurrentNodeId = this.INITIAL_INVALID_VALUE;
         this.flag = Flag.NONE;
     }
-    refreshSubtitle(b12) {
+
+    refreshSubtitle(q12) {
         this.nodeIdAndSubtitleMap.set(this.selectedParentNodeId, this.selectedParentNodeSubtitle);
-        this.nodeIdAndSubtitleMap.set(b12, this.insertNodeSubtitle);
+        this.nodeIdAndSubtitleMap.set(q12, this.insertNodeSubtitle);
         this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(this.selectedParentNodeId));
-        this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(b12));
+        this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(q12));
     }
-    setNodeSubtitlePara(y11, z11, a12) {
-        this.selectedParentNodeId = y11;
-        this.selectedParentNodeSubtitle = z11;
-        this.insertNodeSubtitle = a12;
+
+    setNodeSubtitlePara(n12, o12, p12) {
+        this.selectedParentNodeId = n12;
+        this.selectedParentNodeSubtitle = o12;
+        this.insertNodeSubtitle = p12;
     }
+
     getInsertNodeSubtitle() {
         return this.insertNodeSubtitle;
     }
-    getExpandAndCollapseInfo(x11) {
-        return this.expandAndCollapseInfo.get(x11);
+
+    getExpandAndCollapseInfo(m12) {
+        return this.expandAndCollapseInfo.get(m12);
     }
+
     getLastDelayHighLightId() {
         return this.lastDelayHighLightId;
     }
+
     setLastDelayHighLightId() {
-        this.listNode.forEach((v11, w11) => {
-            if (w11 === this.lastDelayHighLightIndex) {
-                this.lastDelayHighLightId = v11.getNodeCurrentNodeId();
+        this.listNode.forEach((k12, l12) => {
+            if (l12 === this.lastDelayHighLightIndex) {
+                this.lastDelayHighLightId = k12.getNodeCurrentNodeId();
             }
         });
     }
-    setLastPassId(t11) {
-        this.lastPassId = t11;
+
+    setLastPassId(i12) {
+        this.lastPassId = i12;
     }
-    setLastDelayHighLightIndex(s11) {
-        this.lastDelayHighLightIndex = s11;
+
+    setLastDelayHighLightIndex(h12) {
+        this.lastDelayHighLightIndex = h12;
     }
-    alterDragNode(o10, p10, q10, r10, s10) {
-        let t10 = [];
-        let u10 = o10;
-        let v10 = r10;
-        let w10 = s10.getNodeInfoData();
-        let x10 = null;
-        let y10 = s10.getNodeInfoNode();
-        let z10 = false;
-        let a11 = this.INITIAL_INVALID_VALUE;
-        let b11 = this.INITIAL_INVALID_VALUE;
-        let c11 = this.flag === Flag.DOWN_FLAG ? true : false;
-        b11 = this.getChildIndex(q10, r10);
-        a11 = this.getChildIndex(o10, p10) + 1;
-        if (o10 !== q10) {
-            a11 = c11 ? a11 + 1 : a11;
+
+    alterDragNode(d11, e11, f11, g11, h11) {
+        let i11 = [];
+        let j11 = d11;
+        let k11 = g11;
+        let l11 = h11.getNodeInfoData();
+        let m11 = null;
+        let n11 = h11.getNodeInfoNode();
+        let o11 = false;
+        let p11 = this.INITIAL_INVALID_VALUE;
+        let q11 = this.INITIAL_INVALID_VALUE;
+        let r11 = this.flag === Flag.DOWN_FLAG ? true : false;
+        q11 = this.getChildIndex(f11, g11);
+        p11 = this.getChildIndex(d11, e11) + 1;
+        if (d11 !== f11) {
+            p11 = r11 ? p11 + 1 : p11;
         }
         else {
-            if (a11 > b11) {
-                a11 = c11 ? a11 : a11 - 1;
+            if (p11 > q11) {
+                p11 = r11 ? p11 : p11 - 1;
             }
             else {
-                a11 = c11 ? a11 + 1 : a11;
+                p11 = r11 ? p11 + 1 : p11;
             }
         }
-        for (let r11 = 0; r11 < this.listNode.length; r11++) {
-            if (this.listNode[r11].getNodeCurrentNodeId() === p10) {
-                z10 = this.listNode[r11].getIsHighLight();
-                if (this.flag === Flag.DOWN_FLAG && this.expandAndCollapseInfo.get(p10) === NodeStatus.EXPAND) {
-                    u10 = p10;
-                    a11 = 0;
+        for (let g12 = 0; g12 < this.listNode.length; g12++) {
+            if (this.listNode[g12].getNodeCurrentNodeId() === e11) {
+                o11 = this.listNode[g12].getIsHighLight();
+                if (this.flag === Flag.DOWN_FLAG && this.expandAndCollapseInfo.get(e11) === NodeStatus.EXPAND) {
+                    j11 = e11;
+                    p11 = 0;
                 }
-                else if (this.flag === Flag.UP_FLAG && this.expandAndCollapseInfo.get(p10) ===
-                    NodeStatus.EXPAND &&
-                    this.listNode[r11].getCanShowFlagLine() === false) {
-                    u10 = p10;
-                    a11 = 0;
+                else if (this.flag === Flag.UP_FLAG && this.expandAndCollapseInfo.get(e11) ===
+                NodeStatus.EXPAND &&
+                    this.listNode[g12].getCanShowFlagLine() === false) {
+                    j11 = e11;
+                    p11 = 0;
                 }
-                else if (z10) {
-                    u10 = p10;
-                    a11 = 0;
+                else if (o11) {
+                    j11 = e11;
+                    p11 = 0;
                 }
                 break;
             }
         }
-        let d11 = {
-            currentNodeId: v10,
-            parentNodeId: u10,
-            childIndex: a11,
+        let s11 = {
+            currentNodeId: k11,
+            parentNodeId: j11,
+            childIndex: p11,
         };
-        this.appEventBus.emit(TreeListenType.NODE_MOVE, d11);
-        t10.push({ parentId: u10, currentId: v10, data: w10 });
-        let e11 = (n11, o11) => {
-            if (n11) {
-                u10 = n11.parentNodeId;
-                v10 = n11.currentNodeId;
-                for (let q11 = 0; q11 < o11.length; q11++) {
-                    if (o11[q11].getNodeCurrentNodeId() === v10) {
-                        x10 = o11[q11];
+        this.appEventBus.emit(TreeListenType.NODE_MOVE, s11);
+        i11.push({ parentId: j11, currentId: k11, data: l11 });
+        let t11 = (c12, d12) => {
+            if (c12) {
+                j11 = c12.parentNodeId;
+                k11 = c12.currentNodeId;
+                for (let f12 = 0; f12 < d12.length; f12++) {
+                    if (d12[f12].getNodeCurrentNodeId() === k11) {
+                        m11 = d12[f12];
                         break;
                     }
                 }
-                if (x10 === null) {
+                if (m11 === null) {
                     return false;
                 }
-                let p11 = x10.getNodeInfoData();
-                if (u10 !== q10) {
-                    t10.push({ parentId: u10, currentId: v10, data: p11 });
+                let e12 = m11.getNodeInfoData();
+                if (j11 !== f11) {
+                    i11.push({ parentId: j11, currentId: k11, data: e12 });
                 }
                 return false;
             }
             return false;
         };
-        this.dragTraverseNodeDF(e11, y10, this.listNode);
-        this.removeNode(r10, q10);
-        let f11 = p10;
-        let g11 = c11;
-        if (this.expandAndCollapseInfo.get(p10) === NodeStatus.EXPAND) {
-            g11 = false;
-            this.listNode.forEach((m11) => {
-                if (m11.getNodeCurrentNodeId() === p10 && m11.getCanShowFlagLine() === false) {
-                    if (m11.getNodeInfoNode().children.length) {
-                        f11 = m11.getNodeInfoNode().children[0].currentNodeId;
+        this.dragTraverseNodeDF(t11, n11, this.listNode);
+        this.removeNode(g11, f11);
+        let u11 = e11;
+        let v11 = r11;
+        if (this.expandAndCollapseInfo.get(e11) === NodeStatus.EXPAND) {
+            v11 = false;
+            this.listNode.forEach((b12) => {
+                if (b12.getNodeCurrentNodeId() === e11 && b12.getCanShowFlagLine() === false) {
+                    if (b12.getNodeInfoNode().children.length) {
+                        u11 = b12.getNodeInfoNode().children[0].currentNodeId;
                     }
                     else {
-                        f11 = this.INITIAL_INVALID_VALUE;
+                        u11 = this.INITIAL_INVALID_VALUE;
                     }
                 }
             });
         }
-        else if (!this.expandAndCollapseInfo.get(p10) && z10) {
-            this.expandAndCollapseInfo.set(p10, NodeStatus.EXPAND);
+        else if (!this.expandAndCollapseInfo.get(e11) && o11) {
+            this.expandAndCollapseInfo.set(e11, NodeStatus.EXPAND);
         }
-        this.addDragNode(t10[0].parentId, t10[0].currentId, f11, g11, t10[0].data);
-        for (let k11 = 1; k11 < t10.length; k11++) {
-            this.addNode(t10[k11].parentId, t10[k11].currentId, t10[k11].data, false);
+        this.addDragNode(i11[0].parentId, i11[0].currentId, u11, v11, i11[0].data);
+        for (let z11 = 1; z11 < i11.length; z11++) {
+            this.addNode(i11[z11].parentId, i11[z11].currentId, i11[z11].data, false);
         }
-        for (let j11 = 0; j11 < this.listNode.length; j11++) {
-            if (this.listNode[j11].getNodeCurrentNodeId() === q10) {
-                if (this.listNode[j11].getNodeItem().imageCollapse === null) {
-                    this.listNode[j11].handleImageCollapseAfterAddNode(false);
-                    this.expandAndCollapseInfo.delete(q10);
+        for (let y11 = 0; y11 < this.listNode.length; y11++) {
+            if (this.listNode[y11].getNodeCurrentNodeId() === f11) {
+                if (this.listNode[y11].getNodeItem().imageCollapse === null) {
+                    this.listNode[y11].handleImageCollapseAfterAddNode(false);
+                    this.expandAndCollapseInfo.delete(f11);
                     break;
                 }
             }
         }
-        let h11 = [...this.listNode];
-        this.reloadListNode(h11);
+        let w11 = [...this.listNode];
+        this.reloadListNode(w11);
     }
-    reloadListNode(g10) {
-        let h10 = 0;
-        let i10 = 0;
+
+    reloadListNode(v10) {
+        let w10 = 0;
+        let x10 = 0;
         this.listNode.splice(0, this.listNode.length);
         this.loadedNodeIdAndIndexMap.clear();
         this.loadedListNode.splice(0, this.loadedListNode.length);
-        this.traverseNodeDF((k10) => {
-            let l10 = k10.currentNodeId;
-            if (l10 >= 0) {
-                if (this.nodeIdNodeParamMap.has(l10)) {
-                    let m10 = new NodeInfo(k10, this.nodeIdNodeParamMap.get(l10));
-                    m10.addImageCollapse(k10.getChildNodeInfo().isHasChildNode);
-                    this.listNode.push(m10);
-                    this.nodeIdAndNodeIndexMap.set(m10.getNodeCurrentNodeId(), i10++);
-                    if (this.expandAndCollapseInfo.get(l10) === NodeStatus.EXPAND) {
-                        m10.getNodeItem().imageCollapse = m10.getNodeItem().imageCollapse ?
-                        CollapseImageNodeFlyweightFactory.changeImageCollapseSource(NodeStatus.EXPAND,
-                            m10.getNodeItem().imageCollapse.isCollapse) : undefined;
-                    } else if (this.expandAndCollapseInfo.get(l10) === NodeStatus.COLLAPSE) {
-                        m10.getNodeItem().imageCollapse = m10.getNodeItem().imageCollapse ?
-                        CollapseImageNodeFlyweightFactory.changeImageCollapseSource(NodeStatus.COLLAPSE,
-                            m10.getNodeItem().imageCollapse.isCollapse) : undefined;
+        this.traverseNodeDF((z10) => {
+            let a11 = z10.currentNodeId;
+            if (a11 >= 0) {
+                if (this.nodeIdNodeParamMap.has(a11)) {
+                    let b11 = new NodeInfo(z10, this.nodeIdNodeParamMap.get(a11));
+                    b11.addImageCollapse(z10.getChildNodeInfo().isHasChildNode);
+                    this.listNode.push(b11);
+                    this.nodeIdAndNodeIndexMap.set(b11.getNodeCurrentNodeId(), x10++);
+                    if (this.expandAndCollapseInfo.get(a11) === NodeStatus.EXPAND) {
+                        b11.getNodeItem().imageCollapse = b11.getNodeItem().imageCollapse ?
+                        CollapseImageNodeFlyweightFactory.changeImageCollapseSource(NodeStatus.EXPAND, b11.getNodeItem().imageCollapse.isCollapse) : undefined;
                     }
-                    for (let n10 = 0; n10 < g10.length; n10++) {
-                        if (g10[n10].getNodeCurrentNodeId() === m10.getNodeCurrentNodeId()) {
-                            m10.setNodeIsShow(g10[n10].getNodeIsShow());
-                            m10.setListItemHeight(g10[n10].getListItemHeight());
-                            if (m10.getNodeItem().mainTitleNode && m10.getIsShowTitle()) {
-                                m10.getNodeItem().mainTitleNode.title = g10[n10].getNodeItem().mainTitleNode?.title;
+                    else if (this.expandAndCollapseInfo.get(a11) === NodeStatus.COLLAPSE) {
+                        b11.getNodeItem().imageCollapse = b11.getNodeItem().imageCollapse ?
+                        CollapseImageNodeFlyweightFactory.changeImageCollapseSource(NodeStatus.COLLAPSE, b11.getNodeItem().imageCollapse.isCollapse) : undefined;
+                    }
+                    for (let c11 = 0; c11 < v10.length; c11++) {
+                        if (v10[c11].getNodeCurrentNodeId() === b11.getNodeCurrentNodeId()) {
+                            b11.setNodeIsShow(v10[c11].getNodeIsShow());
+                            b11.setListItemHeight(v10[c11].getListItemHeight());
+                            if (b11.getNodeItem().mainTitleNode && b11.getIsShowTitle()) {
+                                b11.getNodeItem().mainTitleNode.title = v10[c11].getNodeItem().mainTitleNode?.title;
                             }
                             break;
                         }
                     }
-                    if (m10.getNodeIsShow()) {
-                        this.loadedNodeIdAndIndexMap.set(m10.getNodeCurrentNodeId(), h10++);
-                        this.loadedListNode.push(m10);
+                    if (b11.getNodeIsShow()) {
+                        this.loadedNodeIdAndIndexMap.set(b11.getNodeCurrentNodeId(), w10++);
+                        this.loadedListNode.push(b11);
                     }
                 }
             }
             return false;
         });
     }
+
     getFlagLine() {
         return this.FLAG_LINE;
     }
-    getVisibility(d10) {
-        let e10 = this.loadedNodeIdAndIndexMap.get(d10.getNodeCurrentNodeId()) - 1;
-        if (e10 > this.INITIAL_INVALID_VALUE) {
-            let f10 = this.getData(e10);
-            return (d10.getCanShowFlagLine() === true && !d10.getIsHighLight() && !f10?.getIsHighLight()) ?
-                Visibility.Visible : Visibility.Hidden;
+
+    getVisibility(s10) {
+        let t10 = this.loadedNodeIdAndIndexMap.get(s10.getNodeCurrentNodeId()) - 1;
+        if (t10 > this.INITIAL_INVALID_VALUE) {
+            let u10 = this.getData(t10);
+            return (s10.getCanShowFlagLine() === true && !s10.getIsHighLight() && !u10?.getIsHighLight()) ?
+            Visibility.Visible : Visibility.Hidden;
         }
         else {
-            return (d10.getCanShowFlagLine() === true && !d10.getIsHighLight()) ?
-                Visibility.Visible : Visibility.Hidden;
+            return (s10.getCanShowFlagLine() === true && !s10.getIsHighLight()) ?
+            Visibility.Visible : Visibility.Hidden;
         }
     }
+
     getSubTitlePara() {
         return this.subTitle;
     }
-    getIsFolder(c10) {
-        if (this.loadedNodeIdAndIndexMap.has(c10)) {
-            return this.getData(this.loadedNodeIdAndIndexMap.get(c10))?.getIsFolder();
+
+    getIsFolder(r10) {
+        if (this.loadedNodeIdAndIndexMap.has(r10)) {
+            return this.getData(this.loadedNodeIdAndIndexMap.get(r10))?.getIsFolder();
         }
         return false;
     }
-    getSubTitleFontColor(b10) {
-        return b10 ? this.subTitle.highLightFontColor : this.treeViewTheme.secondaryTitleFontColor;
+
+    getSubTitleFontColor(q10) {
+        return q10 ? this.subTitle.highLightFontColor : this.treeViewTheme.secondaryTitleFontColor;
     }
-    getChildIndex(u9, v9) {
-        let w9 = this.INITIAL_INVALID_VALUE;
-        if (this.nodeIdNodeItemMap.has(u9)) {
-            let x9 = this.nodeIdNodeItemMap.get(u9);
-            if (x9.getCurrentNodeId() === u9) {
-                x9.children.forEach((z9, a10) => {
-                    if (z9.getCurrentNodeId() === v9) {
-                        w9 = a10;
+
+    getChildIndex(j10, k10) {
+        let l10 = this.INITIAL_INVALID_VALUE;
+        if (this.nodeIdNodeItemMap.has(j10)) {
+            let m10 = this.nodeIdNodeItemMap.get(j10);
+            if (m10.getCurrentNodeId() === j10) {
+                m10.children.forEach((o10, p10) => {
+                    if (o10.getCurrentNodeId() === k10) {
+                        l10 = p10;
                         return;
                     }
                 });
             }
         }
-        return w9;
+        return l10;
     }
-    setCurrentFocusNodeId(t9) {
-        this.currentFocusNodeId = t9;
+
+    setCurrentFocusNodeId(i10) {
+        this.currentFocusNodeId = i10;
     }
+
     getCurrentFocusNodeId() {
         return this.currentFocusNodeId;
     }
-    setLastFocusNodeId(s9) {
-        this.lastFocusNodeId = s9;
+
+    setLastFocusNodeId(h10) {
+        this.lastFocusNodeId = h10;
     }
+
     getLastFocusNodeId() {
         return this.lastFocusNodeId;
     }
+
     getAddFocusNodeId() {
         return this.addFocusNodeId;
     }
-    setFlag(r9) {
-        this.flag = r9;
+
+    setFlag(g10) {
+        this.flag = g10;
     }
-    traverseNodeDF(m9, n9 = this._root) {
-        let o9 = [];
-        let p9 = false;
-        o9.unshift(n9);
-        let q9 = o9.shift();
-        while (!p9 && q9) {
-            p9 = m9(q9) === true;
-            if (!p9) {
-                o9.unshift(...q9.children);
-                q9 = o9.shift();
+
+    traverseNodeDF(b10, c10 = this._root) {
+        let d10 = [];
+        let e10 = false;
+        d10.unshift(c10);
+        let f10 = d10.shift();
+        while (!e10 && f10) {
+            e10 = b10(f10) === true;
+            if (!e10) {
+                d10.unshift(...f10.children);
+                f10 = d10.shift();
             }
         }
     }
-    traverseSectionNodeDF(d9, e9 = this._root, f9, g9) {
-        let h9 = [];
-        let i9 = false;
-        let j9 = false;
-        h9.unshift(e9);
-        let k9 = h9.shift();
-        while (!i9 && k9) {
+
+    traverseSectionNodeDF(s9, t9 = this._root, u9, v9) {
+        let w9 = [];
+        let x9 = false;
+        let y9 = false;
+        w9.unshift(t9);
+        let z9 = w9.shift();
+        while (!x9 && z9) {
             try {
-                if (f9 !== undefined && k9.nodeLevel < f9) {
-                    j9 = true;
+                if (u9 !== undefined && z9.nodeLevel < u9) {
+                    y9 = true;
                 }
-                if (g9 !== undefined && k9.nodeLevel > g9) {
-                    j9 = true;
+                if (v9 !== undefined && z9.nodeLevel > v9) {
+                    y9 = true;
                 }
-                if (!j9) {
-                    i9 = d9(k9);
+                if (!y9) {
+                    x9 = s9(z9);
                 }
             }
-            catch (l9) {
+            catch (a10) {
                 throw new Error('traverseSectionNodeDF function callbacks error');
             }
-            if (!i9) {
-                h9.unshift(...k9.children);
-                k9 = h9.shift();
-                j9 = false;
+            if (!x9) {
+                w9.unshift(...z9.children);
+                z9 = w9.shift();
+                y9 = false;
             }
         }
     }
-    updateParentChildNum(y8, z8, a9) {
-        let b9 = y8.parentNodeId;
-        while (b9 >= 0) {
-            if (this.nodeIdNodeItemMap.has(b9)) {
-                let c9 = this.nodeIdNodeItemMap.get(b9);
-                c9.getChildNodeInfo().allChildNum =
-                    z8 ? c9.getChildNodeInfo().allChildNum + a9 : c9.getChildNodeInfo().allChildNum - a9;
-                b9 = c9.parentNodeId;
+
+    updateParentChildNum(n9, o9, p9) {
+        let q9 = n9.parentNodeId;
+        while (q9 >= 0) {
+            if (this.nodeIdNodeItemMap.has(q9)) {
+                let r9 = this.nodeIdNodeItemMap.get(q9);
+                r9.getChildNodeInfo().allChildNum =
+                    o9 ? r9.getChildNodeInfo().allChildNum + p9 : r9.getChildNodeInfo().allChildNum - p9;
+                q9 = r9.parentNodeId;
             }
             else {
                 throw new Error('updateParentChildNum: Parent node not found');
             }
         }
     }
-    findParentNodeId(w8) {
-        let x8 = new NodeItem(emptyNodeInfo);
-        if (this.nodeIdNodeItemMap.has(w8)) {
-            x8 = this.nodeIdNodeItemMap.get(w8);
+
+    findParentNodeId(l9) {
+        let m9 = new NodeItem(emptyNodeInfo);
+        if (this.nodeIdNodeItemMap.has(l9)) {
+            m9 = this.nodeIdNodeItemMap.get(l9);
         }
-        return x8.parentNodeId;
+        return m9.parentNodeId;
     }
-    addNode(n8, o8, p8, q8) {
+
+    addNode(e9, f9, g9, h9) {
         if (this._root === null) {
             this._root = new NodeItem(emptyNodeInfo);
             this._root.nodeLevel = -1;
             this.nodeIdNodeItemMap.set(-1, this._root);
             this.nodeIdNodeParamMap.set(-1, emptyNodeInfo);
         }
-        if (this.nodeIdNodeItemMap.has(n8)) {
-            let r8 = this.nodeIdNodeItemMap.get(n8);
-            let s8 = new NodeItem(p8);
-            if (r8.nodeLevel > this.maxNodeLevel) {
+        if (this.nodeIdNodeItemMap.has(e9)) {
+            let i9 = this.nodeIdNodeItemMap.get(e9);
+            let j9 = new NodeItem(g9);
+            if (i9.nodeLevel > this.maxNodeLevel) {
                 throw new Error('ListNodeUtils[addNode]: The level of the tree view cannot exceed 50.');
             }
-            s8.nodeLevel = r8.nodeLevel + 1;
-            s8.parentNodeId = n8;
-            s8.currentNodeId = o8;
-            s8.indexOfParent = r8.children.length;
-            p8.parentNodeId = n8;
-            p8.currentNodeId = o8;
-            r8.children.push(s8);
-            r8.getChildNodeInfo().isHasChildNode = true;
-            r8.getChildNodeInfo().childNum = r8.children.length;
-            r8.getChildNodeInfo().allChildNum += 1;
-            if (q8) {
-                this.updateNodeIdList.push(r8.parentNodeId);
+            j9.nodeLevel = i9.nodeLevel + 1;
+            j9.parentNodeId = e9;
+            j9.currentNodeId = f9;
+            j9.indexOfParent = i9.children.length;
+            g9.parentNodeId = e9;
+            g9.currentNodeId = f9;
+            i9.children.push(j9);
+            i9.getChildNodeInfo().isHasChildNode = true;
+            i9.getChildNodeInfo().childNum = i9.children.length;
+            i9.getChildNodeInfo().allChildNum += 1;
+            if (h9) {
+                this.updateNodeIdList.push(i9.parentNodeId);
             }
             else {
-                let t8 = [];
-                t8.push(r8.parentNodeId);
-                delayUpdateParentChildNum(true, 1, this.nodeIdNodeItemMap, t8);
+                let k9 = [];
+                k9.push(i9.parentNodeId);
+                delayUpdateParentChildNum(true, 1, this.nodeIdNodeItemMap, k9);
             }
-            this.nodeIdNodeParamMap.set(o8, p8);
-            this.nodeIdNodeItemMap.set(o8, s8);
+            this.nodeIdNodeParamMap.set(f9, g9);
+            this.nodeIdNodeItemMap.set(f9, j9);
             return;
         }
         else {
             throw new Error('ListDataSource[addNode]: Parent node not found.');
         }
     }
-    freeNodeMemory(a8, b8) {
-        let c8 = [];
-        let d8 = (h8) => {
-            c8.push(h8);
+
+    freeNodeMemory(w8, x8) {
+        let y8 = [];
+        let z8 = (d9) => {
+            y8.push(d9);
             return false;
         };
-        this.traverseNodeDF(d8, a8);
-        c8.forEach((g8) => {
-            b8.push(g8.getCurrentNodeId());
-            this.nodeIdNodeItemMap.delete(g8.getCurrentNodeId());
-            this.nodeIdNodeParamMap.delete(g8.getCurrentNodeId());
-            g8 = new NodeItem(emptyNodeInfo);
+        this.traverseNodeDF(z8, w8);
+        y8.forEach((c9) => {
+            x8.push(c9.getCurrentNodeId());
+            this.nodeIdNodeItemMap.delete(c9.getCurrentNodeId());
+            this.nodeIdNodeParamMap.delete(c9.getCurrentNodeId());
+            c9 = new NodeItem(emptyNodeInfo);
         });
     }
-    removeNode(n7, o7) {
-        if (this.nodeIdNodeItemMap.has(o7) && this.nodeIdNodeItemMap.has(n7)) {
-            let p7 = this.nodeIdNodeItemMap.get(o7);
-            let q7 = this.nodeIdNodeItemMap.get(n7);
-            let r7 = [];
-            let s7 = q7.indexOfParent;
-            let t7 = 0;
-            if (s7 < 0) {
+
+    removeNode(l8, m8) {
+        if (this.nodeIdNodeItemMap.has(m8) && this.nodeIdNodeItemMap.has(l8)) {
+            let n8 = this.nodeIdNodeItemMap.get(m8);
+            let o8 = this.nodeIdNodeItemMap.get(l8);
+            let p8 = [];
+            let q8 = o8.indexOfParent;
+            let r8 = 0;
+            if (q8 < 0) {
                 throw new Error('Node does not exist.');
             }
             else {
-                t7 = p7.children[s7].getChildNodeInfo().allChildNum + 1;
-                this.freeNodeMemory(p7.children[s7], r7);
-                for (let z7 = s7; z7 < p7.children.length; z7++) {
-                    p7.children[z7].indexOfParent -= 1;
+                r8 = n8.children[q8].getChildNodeInfo().allChildNum + 1;
+                this.freeNodeMemory(n8.children[q8], p8);
+                for (let v8 = q8; v8 < n8.children.length; v8++) {
+                    n8.children[v8].indexOfParent -= 1;
                 }
-                let x7 = p7.children.splice(s7, 1);
-                x7 = null;
-                if (p7.children.length === 0) {
-                    if (this.nodeIdAndNodeIndexMap.has(o7)) {
-                        let y7 = this.nodeIdAndNodeIndexMap.get(o7);
-                        this.listNode[y7]?.addImageCollapse(false);
+                let t8 = n8.children.splice(q8, 1);
+                t8 = null;
+                if (n8.children.length === 0) {
+                    if (this.nodeIdAndNodeIndexMap.has(m8)) {
+                        let u8 = this.nodeIdAndNodeIndexMap.get(m8);
+                        this.listNode[u8]?.addImageCollapse(false);
                     }
                 }
             }
-            p7.getChildNodeInfo().childNum = p7.children.length;
-            p7.getChildNodeInfo().allChildNum -= (t7);
-            let u7 = [];
-            u7.push(p7.parentNodeId);
-            delayUpdateParentChildNum(false, t7, this.nodeIdNodeItemMap, u7);
-            return r7;
+            n8.getChildNodeInfo().childNum = n8.children.length;
+            n8.getChildNodeInfo().allChildNum -= (r8);
+            let s8 = [];
+            s8.push(n8.parentNodeId);
+            delayUpdateParentChildNum(false, r8, this.nodeIdNodeItemMap, s8);
+            return p8;
         }
         else {
             throw new Error('Parent does not exist.');
         }
     }
-    getNodeInfoByNodeItem(l7) {
-        if (l7?.currentNodeId === undefined) {
+
+    getNodeInfoByNodeItem(j8) {
+        if (j8?.currentNodeId === undefined) {
             throw new Error('getNodeInfoByNodeItem: currentId is undefined');
         }
-        if (!this.nodeIdAndNodeIndexMap.has(l7.currentNodeId)) {
+        if (!this.nodeIdAndNodeIndexMap.has(j8.currentNodeId)) {
             throw new Error('getNodeInfoByNodeItem: not has nodeItem');
         }
-        let m7 = this.nodeIdAndNodeIndexMap.get(l7.currentNodeId);
-        return this.listNode[m7];
+        let k8 = this.nodeIdAndNodeIndexMap.get(j8.currentNodeId);
+        return this.listNode[k8];
     }
-    getNewNodeParam(g7) {
-        let h7 = new NodeItem(emptyNodeInfo);
-        if (this.nodeIdNodeItemMap.has(g7)) {
-            h7 = this.nodeIdNodeItemMap.get(g7);
+
+    getNewNodeParam(e8) {
+        let f8 = new NodeItem(emptyNodeInfo);
+        if (this.nodeIdNodeItemMap.has(e8)) {
+            f8 = this.nodeIdNodeItemMap.get(e8);
         }
-        let i7 = emptyNodeInfo;
-        if (h7) {
-            let j7 = this.getNodeInfoByNodeItem(h7);
-            if (h7.children.length === 0) {
-                if (j7.getNodeItem().imageNode !== undefined) {
-                    i7.icon = j7.getNodeItem().imageNode?.normalSource;
-                    i7.selectedIcon = j7.getNodeItem().imageNode?.selectedSource;
-                    i7.editIcon = j7.getNodeItem().imageNode?.editSource;
-                    i7.container = j7.getMenu();
+        let g8 = emptyNodeInfo;
+        if (f8) {
+            let h8 = this.getNodeInfoByNodeItem(f8);
+            if (f8.children.length === 0) {
+                if (h8.getNodeItem().imageNode !== undefined) {
+                    g8.icon = h8.getNodeItem().imageNode?.normalSource;
+                    g8.selectedIcon = h8.getNodeItem().imageNode?.selectedSource;
+                    g8.editIcon = h8.getNodeItem().imageNode?.editSource;
+                    g8.container = h8.getMenu();
                 }
                 else {
-                    i7.icon = undefined;
-                    i7.selectedIcon = undefined;
-                    i7.editIcon = undefined;
-                    i7.container = j7.getMenu();
+                    g8.icon = undefined;
+                    g8.selectedIcon = undefined;
+                    g8.editIcon = undefined;
+                    g8.container = h8.getMenu();
                 }
             }
-            else if (h7.children.length > 0) {
-                let k7 = this.getNodeInfoByNodeItem(h7.children[0]);
-                if (j7.getNodeItem().imageNode !== null) {
-                    i7.icon = (k7.getNodeItem().imageNode !== undefined) ?
-                        k7.getNodeItem().imageNode?.normalSource : undefined;
-                    i7.selectedIcon = (k7.getNodeItem().imageNode !== undefined) ?
-                        k7.getNodeItem().imageNode?.selectedSource : undefined;
-                    i7.editIcon = (k7.getNodeItem().imageNode !== undefined) ?
-                        k7.getNodeItem().imageNode?.editSource : undefined;
-                    i7.container = k7.getMenu();
+            else if (f8.children.length > 0) {
+                let i8 = this.getNodeInfoByNodeItem(f8.children[0]);
+                if (h8.getNodeItem().imageNode !== null) {
+                    g8.icon = (i8.getNodeItem().imageNode !== undefined) ?
+                        i8.getNodeItem().imageNode?.normalSource : undefined;
+                    g8.selectedIcon = (i8.getNodeItem().imageNode !== undefined) ?
+                        i8.getNodeItem().imageNode?.selectedSource : undefined;
+                    g8.editIcon = (i8.getNodeItem().imageNode !== undefined) ?
+                        i8.getNodeItem().imageNode?.editSource : undefined;
+                    g8.container = i8.getMenu();
                 }
                 else {
-                    i7.icon = undefined;
-                    i7.selectedIcon = undefined;
-                    i7.editIcon = undefined;
-                    i7.container = k7.getMenu();
+                    g8.icon = undefined;
+                    g8.selectedIcon = undefined;
+                    g8.editIcon = undefined;
+                    g8.container = i8.getMenu();
                 }
             }
         }
-        return i7;
+        return g8;
     }
-    getClickChildId(b7) {
-        let c7 = new NodeItem(emptyNodeInfo);
-        if (this.nodeIdNodeItemMap.has(b7)) {
-            c7 = this.nodeIdNodeItemMap.get(b7);
+
+    getClickChildId(z7) {
+        let a8 = new NodeItem(emptyNodeInfo);
+        if (this.nodeIdNodeItemMap.has(z7)) {
+            a8 = this.nodeIdNodeItemMap.get(z7);
         }
-        if (c7) {
-            if (c7.children.length === 0) {
+        if (a8) {
+            if (a8.children.length === 0) {
                 return [];
             }
-            else if (c7.children.length > 0) {
-                let d7 = new Array(c7.children.length);
-                for (let f7 = 0; f7 < d7.length; f7++) {
-                    d7[f7] = 0;
+            else if (a8.children.length > 0) {
+                let b8 = new Array(a8.children.length);
+                for (let d8 = 0; d8 < b8.length; d8++) {
+                    b8[d8] = 0;
                 }
-                for (let e7 = 0; e7 < c7.children.length && e7 < d7.length; e7++) {
-                    d7[e7] = c7.children[e7].currentNodeId;
+                for (let c8 = 0; c8 < a8.children.length && c8 < b8.length; c8++) {
+                    b8[c8] = a8.children[c8].currentNodeId;
                 }
-                return d7;
+                return b8;
             }
         }
         return [];
     }
-    getClickNodeChildrenInfo(v6) {
-        let w6 = new NodeItem(emptyNodeInfo);
-        if (this.nodeIdNodeItemMap.has(v6)) {
-            w6 = this.nodeIdNodeItemMap.get(v6);
+
+    getClickNodeChildrenInfo(t7) {
+        let u7 = new NodeItem(emptyNodeInfo);
+        if (this.nodeIdNodeItemMap.has(t7)) {
+            u7 = this.nodeIdNodeItemMap.get(t7);
         }
-        if (w6) {
-            if (w6.children.length === 0) {
+        if (u7) {
+            if (u7.children.length === 0) {
                 return [];
             }
-            else if (w6.children.length > 0) {
-                let x6 = new Array(w6.children.length);
-                for (let a7 = 0; a7 < x6.length; a7++) {
-                    x6[a7] = {};
+            else if (u7.children.length > 0) {
+                let v7 = new Array(u7.children.length);
+                for (let y7 = 0; y7 < v7.length; y7++) {
+                    v7[y7] = {};
                 }
-                for (let y6 = 0; y6 < w6.children.length && y6 < x6.length; y6++) {
-                    x6[y6].itemId = w6.children[y6].currentNodeId;
-                    let z6 = this.getNodeInfoByNodeItem(w6.children[y6]);
-                    if (z6.getNodeItem().imageNode) {
-                        x6[y6].itemIcon = z6.getNodeItem().imageNode?.source;
+                for (let w7 = 0; w7 < u7.children.length && w7 < v7.length; w7++) {
+                    v7[w7].itemId = u7.children[w7].currentNodeId;
+                    let x7 = this.getNodeInfoByNodeItem(u7.children[w7]);
+                    if (x7.getNodeItem().imageNode) {
+                        v7[w7].itemIcon = x7.getNodeItem().imageNode?.source;
                     }
-                    if (z6.getNodeItem().mainTitleNode) {
-                        x6[y6].itemTitle = z6.getNodeItem().mainTitleNode?.title;
+                    if (x7.getNodeItem().mainTitleNode) {
+                        v7[w7].itemTitle = x7.getNodeItem().mainTitleNode?.title;
                     }
-                    x6[y6].isFolder = z6.getIsFolder();
+                    v7[w7].isFolder = x7.getIsFolder();
                 }
-                return x6;
+                return v7;
             }
         }
         return [];
     }
-    checkMainTitleIsValid(u6) {
-        if (new RegExp('/[\\\/:*?"<>|]/').test(u6)) {
+
+    checkMainTitleIsValid(s7) {
+        if (new RegExp('/[\\\/:*?"<>|]/').test(s7)) {
             return false;
         }
-        if ((new RegExp('/^[\u4e00-\u9fa5]+$/').test(u6) && u6.length > this.MAX_CN_LENGTH) ||
-            (!new RegExp('/^[\u4e00-\u9fa5]+$/').test(u6) && u6.length > this.MAX_EN_LENGTH)) {
+
+        if ((new RegExp('/^[\u4e00-\u9fa5]+$/').test(s7) && s7.length > this.MAX_CN_LENGTH) ||
+            (!new RegExp('/^[\u4e00-\u9fa5]+$/').test(s7) && s7.length > this.MAX_EN_LENGTH)) {
             return false;
         }
+
         return true;
     }
-    dragTraverseNodeDF(o6, p6 = this._root, q6) {
-        let r6 = [];
-        let s6 = false;
-        r6.unshift(p6);
-        let t6 = r6.shift();
-        while (!s6 && t6) {
-            s6 = o6(t6, q6) === true;
-            if (!s6) {
-                r6.unshift(...t6.children);
-                t6 = r6.shift();
+
+    dragTraverseNodeDF(m7, n7 = this._root, o7) {
+        let p7 = [];
+        let q7 = false;
+        p7.unshift(n7);
+        let r7 = p7.shift();
+        while (!q7 && r7) {
+            q7 = m7(r7, o7) === true;
+            if (!q7) {
+                p7.unshift(...r7.children);
+                r7 = p7.shift();
             }
         }
     }
-    updateChildIndexOfParent(l6, m6) {
-        for (let n6 = l6; n6 < m6.children.length; n6++) {
-            m6.children[n6].indexOfParent += 1;
+
+    updateChildIndexOfParent(j7, k7) {
+        for (let l7 = j7; l7 < k7.children.length; l7++) {
+            k7.children[l7].indexOfParent += 1;
         }
     }
-    addDragNode(c6, d6, e6, f6, g6) {
+
+    addDragNode(a7, b7, c7, d7, e7) {
         if (this._root === null) {
             this._root = new NodeItem(emptyNodeInfo);
             this._root.nodeLevel = this.INITIAL_INVALID_VALUE;
         }
-        if (this.nodeIdNodeItemMap.has(c6)) {
-            let h6 = this.nodeIdNodeItemMap.get(c6);
-            let i6 = new NodeItem(g6);
-            if (h6.nodeLevel > this.maxNodeLevel) {
+        if (this.nodeIdNodeItemMap.has(a7)) {
+            let f7 = this.nodeIdNodeItemMap.get(a7);
+            let g7 = new NodeItem(e7);
+            if (f7.nodeLevel > this.maxNodeLevel) {
                 throw new Error('ListNodeUtils[addNode]: The level of the tree view cannot exceed 50.');
             }
-            i6.nodeLevel = h6.nodeLevel + 1;
-            i6.parentNodeId = c6;
-            i6.currentNodeId = d6;
-            g6.parentNodeId = c6;
-            g6.currentNodeId = d6;
-            let j6 = this.INITIAL_INVALID_VALUE;
-            if (h6.children.length) {
-                for (let k6 = 0; k6 < h6.children.length; k6++) {
-                    if (h6.children[k6].getCurrentNodeId() === e6) {
-                        j6 = k6;
+            g7.nodeLevel = f7.nodeLevel + 1;
+            g7.parentNodeId = a7;
+            g7.currentNodeId = b7;
+            e7.parentNodeId = a7;
+            e7.currentNodeId = b7;
+            let h7 = this.INITIAL_INVALID_VALUE;
+            if (f7.children.length) {
+                for (let i7 = 0; i7 < f7.children.length; i7++) {
+                    if (f7.children[i7].getCurrentNodeId() === c7) {
+                        h7 = i7;
                         break;
                     }
                 }
-                if (f6) {
-                    i6.indexOfParent = j6 + 1;
-                    this.updateChildIndexOfParent(i6.indexOfParent, h6);
-                    h6.children.splice(j6 + 1, 0, i6);
+                if (d7) {
+                    g7.indexOfParent = h7 + 1;
+                    this.updateChildIndexOfParent(g7.indexOfParent, f7);
+                    f7.children.splice(h7 + 1, 0, g7);
                 }
                 else {
-                    i6.indexOfParent = j6 < 0 ? h6.children.length + j6 : j6;
-                    this.updateChildIndexOfParent(i6.indexOfParent, h6);
-                    h6.children.splice(j6, 0, i6);
+                    g7.indexOfParent = h7 < 0 ? f7.children.length + h7 : h7;
+                    this.updateChildIndexOfParent(g7.indexOfParent, f7);
+                    f7.children.splice(h7, 0, g7);
                 }
             }
             else {
-                i6.indexOfParent = h6.children.length;
-                h6.children.push(i6);
+                g7.indexOfParent = f7.children.length;
+                f7.children.push(g7);
             }
-            h6.getChildNodeInfo().isHasChildNode = true;
-            h6.getChildNodeInfo().childNum = h6.children.length;
-            h6.getChildNodeInfo().allChildNum += 1;
-            this.updateParentChildNum(h6, true, 1);
-            this.nodeIdNodeItemMap.set(d6, i6);
-            this.nodeIdNodeParamMap.set(d6, g6);
+            f7.getChildNodeInfo().isHasChildNode = true;
+            f7.getChildNodeInfo().childNum = f7.children.length;
+            f7.getChildNodeInfo().allChildNum += 1;
+            this.updateParentChildNum(f7, true, 1);
+            this.nodeIdNodeItemMap.set(b7, g7);
+            this.nodeIdNodeParamMap.set(b7, e7);
         }
         else {
             throw new Error('addDragNode: Parent node not found.');
         }
     }
 }
+
 export class TreeViewInner extends ViewPU {
-    constructor(w5, x5, y5, z5 = -1, a6 = undefined, b6) {
-        super(w5, y5, z5, b6);
-        if (typeof a6 === 'function') {
-            this.paramsGenerator_ = a6;
+    constructor(u6, v6, w6, x6 = -1, y6 = undefined, z6) {
+        super(u6, w6, x6, z6);
+        if (typeof y6 === 'function') {
+            this.paramsGenerator_ = y6;
         }
-        this.__item = new SynchedPropertyNesedObjectPU(x5.item, this, 'item');
+        this.__item = new SynchedPropertyNesedObjectPU(v6.item, this, 'item');
         this.listNodeDataSource = new ListNodeDataSource();
         this.__columnWidth = new ObservedPropertySimplePU(0, this, 'columnWidth');
         this.__isFocused = new ObservedPropertySimplePU(false, this, 'isFocused');
         this.__index = new ObservedPropertySimplePU(-1, this, 'index');
         this.__lastIndex = new ObservedPropertySimplePU(-1, this, 'lastIndex');
         this.__count = new ObservedPropertySimplePU(0, this, 'count');
+        this.__followingSystemFontScale = new ObservedPropertySimplePU(false, this, 'followingSystemFontScale');
+        this.__maxAppFontScale = new ObservedPropertySimplePU(1, this, 'maxAppFontScale');
         this.__treeViewTheme = this.initializeConsume('treeViewTheme', 'treeViewTheme');
         this.listTreeViewMenu = undefined;
         this.MAX_CN_LENGTH = 254;
@@ -3150,131 +3474,147 @@ export class TreeViewInner extends ViewPU {
         this.touchDownCount = this.INITIAL_INVALID_VALUE;
         this.appEventBus = TreeListenerManager.getInstance().getTreeListener();
         this.itemPadding = {
-          left: {
-            id: -1,
-            type: 10002,
-            params: ['sys.float.ohos_id_card_margin_start'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          },
-          right: {
-            id: -1,
-            type: 10002,
-            params: ['sys.float.ohos_id_card_margin_end'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          },
-          top: {
-            id: -1,
-            type: 10002,
-            params: ['sys.float.ohos_id_text_margin_vertical'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          },
-          bottom: {
-            id: -1,
-            type: 10002,
-            params: ['sys.float.padding_level0'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          },
+            left: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_card_margin_start'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            },
+            right: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_card_margin_end'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            },
+            top: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_text_margin_vertical'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            },
+            bottom: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.padding_level0'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            },
         };
         this.textInputPadding = {
-          left: {
-            id: -1,
-            type: 10002,
-            params: ['sys.float.padding_level0'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          },
-          right: {
-            id: -1,
-            type: 10002,
-            params: ['sys.float.padding_level0'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          },
-          top: {
-            id: -1,
-            type: 10002,
-            params: ['sys.float.padding_level0'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          },
-          bottom: {
-            id: -1,
-            type: 10002,
-            params: ['sys.float.padding_level0'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          },
+            left: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.padding_level0'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            },
+            right: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.padding_level0'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            },
+            top: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.padding_level0'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            },
+            bottom: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.padding_level0'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            }
         };
-        this.setInitiallyProvidedValue(x5);
+        this.inputFontSize = resourceManager.getSystemResourceManager().getNumberByName('ohos_id_text_size_body1');
+        this.setInitiallyProvidedValue(v6);
         this.finalizeConstruction();
     }
-    setInitiallyProvidedValue(v5) {
-        this.__item.set(v5.item);
-        if (v5.listNodeDataSource !== undefined) {
-            this.listNodeDataSource = v5.listNodeDataSource;
+
+    setInitiallyProvidedValue(t6) {
+        this.__item.set(t6.item);
+        if (t6.listNodeDataSource !== undefined) {
+            this.listNodeDataSource = t6.listNodeDataSource;
         }
-        if (v5.columnWidth !== undefined) {
-            this.columnWidth = v5.columnWidth;
+        if (t6.columnWidth !== undefined) {
+            this.columnWidth = t6.columnWidth;
         }
-        if (v5.isFocused !== undefined) {
-            this.isFocused = v5.isFocused;
+        if (t6.isFocused !== undefined) {
+            this.isFocused = t6.isFocused;
         }
-        if (v5.index !== undefined) {
-            this.index = v5.index;
+        if (t6.index !== undefined) {
+            this.index = t6.index;
         }
-        if (v5.lastIndex !== undefined) {
-            this.lastIndex = v5.lastIndex;
+        if (t6.lastIndex !== undefined) {
+            this.lastIndex = t6.lastIndex;
         }
-        if (v5.count !== undefined) {
-            this.count = v5.count;
+        if (t6.count !== undefined) {
+            this.count = t6.count;
         }
-        if (v5.listTreeViewMenu !== undefined) {
-            this.listTreeViewMenu = v5.listTreeViewMenu;
+        if (t6.followingSystemFontScale !== undefined) {
+            this.followingSystemFontScale = t6.followingSystemFontScale;
         }
-        if (v5.MAX_CN_LENGTH !== undefined) {
-            this.MAX_CN_LENGTH = v5.MAX_CN_LENGTH;
+        if (t6.maxAppFontScale !== undefined) {
+            this.maxAppFontScale = t6.maxAppFontScale;
         }
-        if (v5.MAX_EN_LENGTH !== undefined) {
-            this.MAX_EN_LENGTH = v5.MAX_EN_LENGTH;
+        if (t6.listTreeViewMenu !== undefined) {
+            this.listTreeViewMenu = t6.listTreeViewMenu;
         }
-        if (v5.INITIAL_INVALID_VALUE !== undefined) {
-            this.INITIAL_INVALID_VALUE = v5.INITIAL_INVALID_VALUE;
+        if (t6.MAX_CN_LENGTH !== undefined) {
+            this.MAX_CN_LENGTH = t6.MAX_CN_LENGTH;
         }
-        if (v5.MAX_TOUCH_DOWN_COUNT !== undefined) {
-            this.MAX_TOUCH_DOWN_COUNT = v5.MAX_TOUCH_DOWN_COUNT;
+        if (t6.MAX_EN_LENGTH !== undefined) {
+            this.MAX_EN_LENGTH = t6.MAX_EN_LENGTH;
         }
-        if (v5.isMultiPress !== undefined) {
-            this.isMultiPress = v5.isMultiPress;
+        if (t6.INITIAL_INVALID_VALUE !== undefined) {
+            this.INITIAL_INVALID_VALUE = t6.INITIAL_INVALID_VALUE;
         }
-        if (v5.touchDownCount !== undefined) {
-            this.touchDownCount = v5.touchDownCount;
+        if (t6.MAX_TOUCH_DOWN_COUNT !== undefined) {
+            this.MAX_TOUCH_DOWN_COUNT = t6.MAX_TOUCH_DOWN_COUNT;
         }
-        if (v5.appEventBus !== undefined) {
-            this.appEventBus = v5.appEventBus;
+        if (t6.isMultiPress !== undefined) {
+            this.isMultiPress = t6.isMultiPress;
         }
-        if (v5.itemPadding !== undefined) {
-            this.itemPadding = v5.itemPadding;
+        if (t6.touchDownCount !== undefined) {
+            this.touchDownCount = t6.touchDownCount;
         }
-        if (v5.textInputPadding !== undefined) {
-            this.textInputPadding = v5.textInputPadding;
+        if (t6.appEventBus !== undefined) {
+            this.appEventBus = t6.appEventBus;
+        }
+        if (t6.itemPadding !== undefined) {
+            this.itemPadding = t6.itemPadding;
+        }
+        if (t6.textInputPadding !== undefined) {
+            this.textInputPadding = t6.textInputPadding;
+        }
+        if (t6.inputFontSize !== undefined) {
+            this.inputFontSize = t6.inputFontSize;
         }
     }
-    updateStateVars(u5) {
-        this.__item.set(u5.item);
+
+    updateStateVars(s6) {
+        this.__item.set(s6.item);
     }
-    purgeVariableDependenciesOnElmtId(t5) {
-        this.__item.purgeDependencyOnElmtId(t5);
-        this.__columnWidth.purgeDependencyOnElmtId(t5);
-        this.__isFocused.purgeDependencyOnElmtId(t5);
-        this.__index.purgeDependencyOnElmtId(t5);
-        this.__lastIndex.purgeDependencyOnElmtId(t5);
-        this.__count.purgeDependencyOnElmtId(t5);
-        this.__treeViewTheme.purgeDependencyOnElmtId(t5);
+
+    purgeVariableDependenciesOnElmtId(r6) {
+        this.__item.purgeDependencyOnElmtId(r6);
+        this.__columnWidth.purgeDependencyOnElmtId(r6);
+        this.__isFocused.purgeDependencyOnElmtId(r6);
+        this.__index.purgeDependencyOnElmtId(r6);
+        this.__lastIndex.purgeDependencyOnElmtId(r6);
+        this.__count.purgeDependencyOnElmtId(r6);
+        this.__followingSystemFontScale.purgeDependencyOnElmtId(r6);
+        this.__maxAppFontScale.purgeDependencyOnElmtId(r6);
+        this.__treeViewTheme.purgeDependencyOnElmtId(r6);
     }
+
     aboutToBeDeleted() {
         this.__item.aboutToBeDeleted();
         this.__columnWidth.aboutToBeDeleted();
@@ -3282,187 +3622,263 @@ export class TreeViewInner extends ViewPU {
         this.__index.aboutToBeDeleted();
         this.__lastIndex.aboutToBeDeleted();
         this.__count.aboutToBeDeleted();
+        this.__followingSystemFontScale.aboutToBeDeleted();
+        this.__maxAppFontScale.aboutToBeDeleted();
         this.__treeViewTheme.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
+
     get item() {
         return this.__item.get();
     }
+
     get columnWidth() {
         return this.__columnWidth.get();
     }
-    set columnWidth(s5) {
-        this.__columnWidth.set(s5);
+
+    set columnWidth(q6) {
+        this.__columnWidth.set(q6);
     }
+
     get isFocused() {
         return this.__isFocused.get();
     }
-    set isFocused(r5) {
-        this.__isFocused.set(r5);
+
+    set isFocused(p6) {
+        this.__isFocused.set(p6);
     }
+
     get index() {
         return this.__index.get();
     }
-    set index(q5) {
-        this.__index.set(q5);
+
+    set index(o6) {
+        this.__index.set(o6);
     }
+
     get lastIndex() {
         return this.__lastIndex.get();
     }
-    set lastIndex(p5) {
-        this.__lastIndex.set(p5);
+
+    set lastIndex(n6) {
+        this.__lastIndex.set(n6);
     }
+
     get count() {
         return this.__count.get();
     }
-    set count(o5) {
-        this.__count.set(o5);
+
+    set count(m6) {
+        this.__count.set(m6);
     }
+
+    get followingSystemFontScale() {
+        return this.__followingSystemFontScale.get();
+    }
+
+    set followingSystemFontScale(l6) {
+        this.__followingSystemFontScale.set(l6);
+    }
+
+    get maxAppFontScale() {
+        return this.__maxAppFontScale.get();
+    }
+
+    set maxAppFontScale(k6) {
+        this.__maxAppFontScale.set(k6);
+    }
+
     get treeViewTheme() {
         return this.__treeViewTheme.get();
     }
-    set treeViewTheme(n5) {
-        this.__treeViewTheme.set(n5);
+
+    set treeViewTheme(j6) {
+        this.__treeViewTheme.set(j6);
     }
+
     aboutToAppear() {
         if (this.item.getNodeItem().imageNode) {
             this.item.imageSource = this.item.getNodeItem().imageNode?.source;
         }
+        let i6 = this.getUIContext();
+        this.followingSystemFontScale = i6.isFollowingSystemFontScale();
+        this.maxAppFontScale = i6.getMaxFontScale();
     }
-    checkInvalidPattern(m5) {
-        return new RegExp('/[\\\/:*?"<>|]/').test(m5);
+
+    decideFontScale() {
+        let g6 = this.getUIContext();
+        let h6 = g6.getHostContext()?.config.fontSizeScale ?? 1;
+        if (!this.followingSystemFontScale) {
+            return 1;
+        }
+        return Math.min(h6, this.maxAppFontScale, MAX_FONT_SCALE);
     }
-    checkIsAllCN(l5) {
-        return new RegExp('/^[\u4e00-\u9fa5]+$/').test(l5);
+
+    getInputTextMaxFontSize() {
+        let f6 = this.decideFontScale() * this.inputFontSize + 'vp';
+        return f6;
     }
-    popupForShowTitle(b5, c5, d5, e5 = null) {
-        this.observeComponentCreation2((j5, k5) => {
+
+    checkInvalidPattern(e6) {
+        return new RegExp('/[\\\/:*?" < > |] /').test(e6);
+    }
+
+    checkIsAllCN(d6) {
+        return new RegExp('/^[\u4e00-\u9fa5]+$/').test(d6);
+    }
+
+    popupForShowTitle(t5, u5, v5, w5 = null) {
+        this.observeComponentCreation((b6, c6) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(b6);
             Row.create();
-            Row.backgroundColor(c5);
+            Row.backgroundColor(u5);
             Row.border({
-              radius: {
-                id: -1,
-                type: 10002,
-                params: ['sys.float.ohos_id_elements_margin_horizontal_l'],
-                bundleName: '__harDefaultBundleName__',
-                moduleName: '__harDefaultModuleName__',
-              },
+                radius: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.ohos_id_elements_margin_horizontal_l'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
+                }
             });
             Row.padding({
-              left: {
-                id: -1,
-                type: 10002,
-                params: ['sys.float.ohos_id_elements_margin_horizontal_l'],
-                bundleName: '__harDefaultBundleName__',
-                moduleName: '__harDefaultModuleName__',
-              },
-              right: {
-                id: -1,
-                type: 10002,
-                params: ['sys.float.ohos_id_elements_margin_horizontal_l'],
-                bundleName: '__harDefaultBundleName__',
-                moduleName: '__harDefaultModuleName__',
-              },
-              top: {
-                id: -1,
-                type: 10002,
-                params: ['sys.float.ohos_id_card_margin_middle'],
-                bundleName: '__harDefaultBundleName__',
-                moduleName: '__harDefaultModuleName__',
-              },
-              bottom: {
-                id: -1,
-                type: 10002,
-                params: ['sys.float.ohos_id_card_margin_middle'],
-                bundleName: '__harDefaultBundleName__',
-                moduleName: '__harDefaultModuleName__',
-              },
+                left: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.ohos_id_elements_margin_horizontal_l'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
+                },
+                right: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.ohos_id_elements_margin_horizontal_l'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
+                },
+                top: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.ohos_id_card_margin_middle'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
+                },
+                bottom: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.ohos_id_card_margin_middle'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
+                },
             });
-        }, Row);
-        this.observeComponentCreation2((h5, i5) => {
-            Text.create(b5);
+            if (!c6) {
+                Row.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+        });
+        this.observeComponentCreation((z5, a6) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(z5);
+            Text.create(t5);
             Text.fontSize({
-              id: -1,
-              type: 10002,
-              params: ['sys.float.ohos_id_text_size_body2'],
-              bundleName: '__harDefaultBundleName__',
-              moduleName: '__harDefaultModuleName__',
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_text_size_body2'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             });
             Text.fontWeight('regular');
-            Text.fontColor(d5);
-        }, Text);
+            Text.fontColor(v5);
+            Text.minFontScale(MIN_FONT_SCALE);
+            Text.maxFontScale(this.decideFontScale());
+            if (!a6) {
+                Text.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+        });
         Text.pop();
         Row.pop();
     }
-    builder(v4 = null) {
-        this.observeComponentCreation2((x4, y4) => {
+
+    builder(n5 = null) {
+        this.observeComponentCreation((p5, q5) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(p5);
             If.create();
             if (this.listTreeViewMenu) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.listTreeViewMenu.bind(this)(v4 ? v4 : this);
+                    this.listTreeViewMenu.bind(this)(n5 ? n5 : this);
                 });
             }
             else {
                 this.ifElseBranchUpdateFunction(1, () => {
                 });
             }
-        }, If);
+            if (!q5) {
+                If.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+        });
         If.pop();
     }
+
     initialRender() {
-        this.observeComponentCreation2((v, w) => {
+        this.observeComponentCreation((n1, o1) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(n1);
             If.create();
             if (this.item.getNodeIsShow()) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((t4, u4) => {
+                    this.observeComponentCreation((l5, m5) => {
+                        ViewStackProcessor.StartGetAccessRecordingFor(l5);
                         Stack.create();
                         ViewStackProcessor.visualState('focused');
                         Stack.border({
-                          radius: {
-                            id: -1,
-                            type: 10002,
-                            params: ['sys.float.ohos_id_corner_radius_clicked'],
-                            bundleName: '__harDefaultBundleName__',
-                            moduleName: '__harDefaultModuleName__',
-                          },
-                          width: FLAG_NUMBER,
-                          color: this.treeViewTheme.borderFocusedColor,
-                          style: BorderStyle.Solid,
+                            radius: {
+                                'id': -1,
+                                'type': 10002,
+                                params: ['sys.float.ohos_id_corner_radius_clicked'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__',
+                            },
+                            width: FLAG_NUMBER,
+                            color: this.treeViewTheme.borderFocusedColor,
+                            style: BorderStyle.Solid,
                         });
                         ViewStackProcessor.visualState('normal');
                         Stack.border({
-                          radius: {
-                            id: -1,
-                            type: 10002,
-                            params: ['sys.float.ohos_id_corner_radius_clicked'],
-                            bundleName: '__harDefaultBundleName__',
-                            moduleName: '__harDefaultModuleName__',
-                          },
-                          width: 0,
+                            radius: {
+                                'id': -1,
+                                'type': 10002,
+                                params: ['sys.float.ohos_id_corner_radius_clicked'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__',
+                            },
+                            width: 0,
                         });
                         ViewStackProcessor.visualState();
-                    }, Stack);
-                    this.observeComponentCreation2((e4, f4) => {
+                        if (!m5) {
+                            Stack.pop();
+                        }
+                        ViewStackProcessor.StopGetAccessRecording();
+                    });
+                    this.observeComponentCreation((w4, x4) => {
+                        ViewStackProcessor.StartGetAccessRecordingFor(w4);
                         Column.create();
                         Column.opacity(this.listNodeDataSource.getListItemOpacity(ObservedObject.GetRawObject(this.item)));
-                        Column.onHover((s4) => {
-                            if (s4) {
+                        Column.onHover((k5) => {
+                            if (k5) {
                                 this.item.setNodeColor(this.treeViewTheme.itemHoverBgColor);
                             }
                             else {
                                 this.item.setNodeColor({
-                                  id: -1,
-                                  type: 10001,
-                                  params: [
-                                    'sys.color.ohos_id_color_background_transparent',
-                                  ],
-                                  bundleName: '__harDefaultBundleName__',
-                                  moduleName: '__harDefaultModuleName__',
+                                    'id': -1,
+                                    'type': 10001,
+                                    params: ['sys.color.ohos_id_color_background_transparent'],
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__',
                                 });
                             }
                         });
-                        Column.onTouch((p4) => {
+                        Column.onTouch((h5) => {
                             this.count++;
                             if (this.count > 1) {
                                 this.count--;
@@ -3470,11 +3886,11 @@ export class TreeViewInner extends ViewPU {
                             }
                             this.index = this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId());
                             this.listNodeDataSource.setClickIndex(this.index);
-                            let q4 = this.item.getNodeCurrentNodeId();
-                            if (p4.type === TouchType.Down) {
+                            let i5 = this.item.getNodeCurrentNodeId();
+                            if (h5.type === TouchType.Down) {
                                 this.item.setNodeColor(this.treeViewTheme.itemPressedBgColor);
                             }
-                            else if (p4.type === TouchType.Up) {
+                            else if (h5.type === TouchType.Up) {
                                 if (!(typeof this.treeViewTheme.itemSelectedBgColor === 'string')) {
                                     this.item.setNodeColor(COLOR_SELECT);
                                 }
@@ -3487,23 +3903,18 @@ export class TreeViewInner extends ViewPU {
                                     this.item.imageSource = this.item.getNodeItem().imageNode?.source;
                                 }
                                 this.item.getNodeItem().mainTitleNode?.setMainTitleSelected(true);
-                                let r4 = { currentNodeId: q4 };
-                                this.appEventBus.emit(TreeListenType.NODE_CLICK, r4);
+                                let j5 = { currentNodeId: i5 };
+                                this.appEventBus.emit(TreeListenType.NODE_CLICK, j5);
                             }
                             if (this.listNodeDataSource.getLastIndex() !== -1 && this.index !== this.listNodeDataSource.getLastIndex()) {
-                                this.listNodeDataSource.setPopUpInfo(
-                                  PopUpType.WARNINGS,
-                                  InputError.NONE,
-                                  false,
-                                  this.listNodeDataSource.getLastIndex()
-                                );
+                                this.listNodeDataSource.setPopUpInfo(PopUpType.WARNINGS, InputError.NONE, false, this.listNodeDataSource.getLastIndex());
                                 this.listNodeDataSource.setItemVisibilityOnEdit(this.listNodeDataSource.getLastIndex(), MenuOperation.COMMIT_NODE);
                             }
                             this.lastIndex = this.index;
                             this.count--;
                         });
                         Column.backgroundColor((this.item.getNodeItem().mainTitleNode && this.item.getNodeItem().inputText &&
-                            this.item.getIsShowInputText()) ? this.item.getNodeItem().inputText?.editColor : this.item.getNodeColor());
+                        this.item.getIsShowInputText()) ? this.item.getNodeItem().inputText?.editColor : this.item.getNodeColor());
                         Column.border({
                             width: this.item.getNodeBorder().borderWidth,
                             color: this.item.getNodeBorder().borderColor,
@@ -3511,47 +3922,47 @@ export class TreeViewInner extends ViewPU {
                         });
                         Column.height(LIST_ITEM_HEIGHT);
                         Column.focusable(true);
-                        Column.onMouse((n4) => {
-                            let o4 = this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId());
-                            if (n4.button === MouseButton.Right) {
-                                this.listNodeDataSource.handleEvent(
-                                  Event.MOUSE_BUTTON_RIGHT,
-                                  this.listNodeDataSource.findIndex(
-                                    this.item.getNodeCurrentNodeId()
-                                  )
-                                );
+                        Column.onMouse((f5) => {
+                            let g5 = this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId());
+                            if (f5.button === MouseButton.Right) {
+                                this.listNodeDataSource.handleEvent(Event.MOUSE_BUTTON_RIGHT, this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId()));
                                 this.listTreeViewMenu = this.item.getMenu();
-                                this.listNodeDataSource.setClickIndex(o4);
+                                this.listNodeDataSource.setClickIndex(g5);
                                 clearTimeout(this.item.getNodeItem().mainTitleNode?.popUpTimeout);
                             }
-                            n4.stopPropagation();
+                            f5.stopPropagation();
                         });
                         Column.padding({ top: 0, bottom: 0 });
                         Column.bindPopup(this.item.getPopUpInfo().popUpIsShow, {
                             builder: { builder: () => {
-                                    this.popupForShowTitle.call(
-                                      this,
-                                      this.item.getPopUpInfo().popUpText,
-                                      this.item.getPopUpInfo().popUpColor,
-                                      this.item.getPopUpInfo().popUpTextColor
-                                    );
-                                } },
+                                this.popupForShowTitle.call(this, this.item.getPopUpInfo().popUpText, this.item.getPopUpInfo().popUpColor, this.item.getPopUpInfo().popUpTextColor);
+                            } },
                             placement: Placement.BottomLeft,
                             placementOnTop: false,
                             popupColor: this.item.getPopUpInfo().popUpColor,
                             autoCancel: true,
                             enableArrow: this.item.getPopUpInfo().popUpEnableArrow
                         });
-                        Column.onAreaChange((k4, l4) => {
-                            let m4 = Number.parseInt(l4.width.toString());
-                            this.columnWidth = m4;
+                        Column.onAreaChange((c5, d5) => {
+                            let e5 = Number.parseInt(d5.width.toString());
+                            this.columnWidth = e5;
                         });
-                    }, Column);
-                    this.observeComponentCreation2((c4, d4) => {
+                        if (!x4) {
+                            Column.pop();
+                        }
+                        ViewStackProcessor.StopGetAccessRecording();
+                    });
+                    this.observeComponentCreation((u4, v4) => {
+                        ViewStackProcessor.StartGetAccessRecordingFor(u4);
                         Stack.create({ alignContent: Alignment.Bottom });
                         Stack.focusable(true);
-                    }, Stack);
-                    this.observeComponentCreation2((a4, b4) => {
+                        if (!v4) {
+                            Stack.pop();
+                        }
+                        ViewStackProcessor.StopGetAccessRecording();
+                    });
+                    this.observeComponentCreation((s4, t4) => {
+                        ViewStackProcessor.StartGetAccessRecordingFor(s4);
                         Divider.create();
                         Divider.height(this.listNodeDataSource.getFlagLine().flagLineHeight);
                         Divider.color(this.listNodeDataSource.getFlagLine().flagLineColor);
@@ -3559,14 +3970,19 @@ export class TreeViewInner extends ViewPU {
                         Divider.lineCap(LineCapStyle.Round);
                         Divider.margin({ start: LengthMetrics.vp(this.item.getFlagLineLeftMargin()) });
                         Divider.focusable(true);
-                    }, Divider);
-                    this.observeComponentCreation2((w3, x3) => {
+                        if (!t4) {
+                            Divider.pop();
+                        }
+                        ViewStackProcessor.StopGetAccessRecording();
+                    });
+                    this.observeComponentCreation((o4, p4) => {
+                        ViewStackProcessor.StartGetAccessRecordingFor(o4);
                         Row.create({});
                         Row.focusable(true);
                         Row.width('100%');
                         Gesture.create(GesturePriority.Low);
                         TapGesture.create({ count: 2 });
-                        TapGesture.onAction((z3) => {
+                        TapGesture.onAction((r4) => {
                             this.listNodeDataSource.expandAndCollapseNode(this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId()));
                         });
                         TapGesture.pop();
@@ -3574,12 +3990,18 @@ export class TreeViewInner extends ViewPU {
                         Row.height(this.item.getNodeHeight());
                         Row.padding({ start: LengthMetrics.vp(this.item.getNodeLeftPadding()) });
                         Row.bindContextMenu({ builder: this.builder.bind(this) }, ResponseType.RightClick);
-                    }, Row);
-                    this.observeComponentCreation2((m3, n3) => {
+                        if (!p4) {
+                            Row.pop();
+                        }
+                        ViewStackProcessor.StopGetAccessRecording();
+                    });
+                    this.observeComponentCreation((e4, f4) => {
+                        ViewStackProcessor.StartGetAccessRecordingFor(e4);
                         If.create();
                         if (this.item.getNodeItem().imageNode) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((u3, v3) => {
+                                this.observeComponentCreation((m4, n4) => {
+                                    ViewStackProcessor.StartGetAccessRecordingFor(m4);
                                     Row.create();
                                     Row.focusable(true);
                                     Row.backgroundColor(COLOR_IMAGE_ROW);
@@ -3588,8 +4010,13 @@ export class TreeViewInner extends ViewPU {
                                     });
                                     Row.height(this.item.getNodeItem().imageNode?.itemHeight);
                                     Row.width(this.item.getNodeItem().imageNode?.itemWidth);
-                                }, Row);
-                                this.observeComponentCreation2((s3, t3) => {
+                                    if (!n4) {
+                                        Row.pop();
+                                    }
+                                    ViewStackProcessor.StopGetAccessRecording();
+                                });
+                                this.observeComponentCreation((k4, l4) => {
+                                    ViewStackProcessor.StartGetAccessRecordingFor(k4);
                                     Image.create(this.item.imageSource);
                                     Image.objectFit(ImageFit.Contain);
                                     Image.height(this.item.getNodeItem().imageNode?.itemHeight);
@@ -3598,11 +4025,15 @@ export class TreeViewInner extends ViewPU {
                                         this.item.getNodeItem().imageNode?.opacity : this.item.getNodeItem().imageNode?.noOpacity);
                                     Image.focusable(this.item.getNodeItem().mainTitleNode !== null ? false : true);
                                     Image.fillColor(!this.item.getIsSelected() && !this.item.getIsHighLight() ?
-                                        this.treeViewTheme.leftIconColor : this.treeViewTheme.leftIconActiveColor);
+                                    this.treeViewTheme.leftIconColor : this.treeViewTheme.leftIconActiveColor);
                                     Image.matchTextDirection((this.item.getNodeItem()
                                         .imageCollapse?.collapseSource === ARROW_RIGHT || this.item.getNodeItem()
                                         .imageCollapse?.collapseSource === ARROW_RIGHT_WITHE) ? true : false);
-                                }, Image);
+                                    if (!l4) {
+                                        Image.pop();
+                                    }
+                                    ViewStackProcessor.StopGetAccessRecording();
+                                });
                                 Row.pop();
                             });
                         }
@@ -3610,23 +4041,36 @@ export class TreeViewInner extends ViewPU {
                             this.ifElseBranchUpdateFunction(1, () => {
                             });
                         }
-                    }, If);
+                        if (!f4) {
+                            If.pop();
+                        }
+                        ViewStackProcessor.StopGetAccessRecording();
+                    });
                     If.pop();
-                    this.observeComponentCreation2((k3, l3) => {
+                    this.observeComponentCreation((c4, d4) => {
+                        ViewStackProcessor.StartGetAccessRecordingFor(c4);
                         Row.create();
                         Row.layoutWeight(1);
                         Row.focusable(true);
-                    }, Row);
-                    this.observeComponentCreation2((d3, e3) => {
+                        if (!d4) {
+                            Row.pop();
+                        }
+                        ViewStackProcessor.StopGetAccessRecording();
+                    });
+                    this.observeComponentCreation((v3, w3) => {
+                        ViewStackProcessor.StartGetAccessRecordingFor(v3);
                         If.create();
                         if (this.item.getNodeItem().mainTitleNode && this.item.getIsShowTitle()) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((i3, j3) => {
+                                this.observeComponentCreation((a4, b4) => {
+                                    ViewStackProcessor.StartGetAccessRecordingFor(a4);
                                     Text.create(this.item.getNodeItem().mainTitleNode?.title);
+                                    Text.minFontScale(MIN_FONT_SCALE);
+                                    Text.maxFontScale(this.decideFontScale());
                                     Text.maxLines(1);
                                     Text.fontSize(this.item.getNodeItem().mainTitleNode?.size);
                                     Text.fontColor(this.item.getIsSelected() ?
-                                        this.treeViewTheme.primaryTitleActiveFontColor : this.treeViewTheme.primaryTitleFontColor);
+                                    this.treeViewTheme.primaryTitleActiveFontColor : this.treeViewTheme.primaryTitleFontColor);
                                     Text.margin({
                                         end: getLengthMetricsByResourceOrNumber(this.item.getNodeItem()
                                             .mainTitleNode?.itemRightMargin)
@@ -3634,7 +4078,11 @@ export class TreeViewInner extends ViewPU {
                                     Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                                     Text.fontWeight(this.item.getNodeItem().mainTitleNode?.weight);
                                     Text.focusable(true);
-                                }, Text);
+                                    if (!b4) {
+                                        Text.pop();
+                                    }
+                                    ViewStackProcessor.StopGetAccessRecording();
+                                });
                                 Text.pop();
                             });
                         }
@@ -3642,14 +4090,20 @@ export class TreeViewInner extends ViewPU {
                             this.ifElseBranchUpdateFunction(1, () => {
                             });
                         }
-                    }, If);
+                        if (!w3) {
+                            If.pop();
+                        }
+                        ViewStackProcessor.StopGetAccessRecording();
+                    });
                     If.pop();
-                    this.observeComponentCreation2((j2, k2) => {
+                    this.observeComponentCreation((b3, c3) => {
+                        ViewStackProcessor.StartGetAccessRecordingFor(b3);
                         If.create();
                         if (this.item.getNodeItem().mainTitleNode && this.item.getNodeItem().inputText &&
-                            this.item.getIsShowInputText()) {
+                        this.item.getIsShowInputText()) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((b3, c3) => {
+                                this.observeComponentCreation((t3, u3) => {
+                                    ViewStackProcessor.StartGetAccessRecordingFor(t3);
                                     Row.create();
                                     Row.backgroundColor(this.item.getNodeItem().inputText?.backgroundColor);
                                     Row.borderRadius(this.item.getNodeItem().inputText?.borderRadius);
@@ -3657,11 +4111,16 @@ export class TreeViewInner extends ViewPU {
                                         end: getLengthMetricsByResourceOrNumber(this.item.getNodeItem()
                                             .inputText?.itemRightMargin)
                                     });
-                                }, Row);
-                                this.observeComponentCreation2((p2, q2) => {
+                                    if (!u3) {
+                                        Row.pop();
+                                    }
+                                    ViewStackProcessor.StopGetAccessRecording();
+                                });
+                                this.observeComponentCreation((h3, i3) => {
+                                    ViewStackProcessor.StartGetAccessRecordingFor(h3);
                                     TextInput.create({ text: this.item.getNodeItem().mainTitleNode?.title });
                                     TextInput.height(this.item.getNodeItem().inputText?.itemHeight);
-                                    TextInput.fontSize(this.item.getNodeItem().inputText?.size);
+                                    TextInput.fontSize(this.getInputTextMaxFontSize());
                                     TextInput.fontColor(this.item.getNodeItem().inputText?.color);
                                     TextInput.borderRadius(this.item.getNodeItem().inputText?.borderRadius);
                                     TextInput.backgroundColor(this.item.getNodeItem().inputText?.backgroundColor);
@@ -3673,44 +4132,48 @@ export class TreeViewInner extends ViewPU {
                                         top: LengthMetrics.resource(this.textInputPadding.top),
                                         bottom: LengthMetrics.resource(this.textInputPadding.bottom),
                                     });
-                                    TextInput.onChange((v2) => {
-                                        let w2 = this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId());
-                                        let x2 = '';
-                                        let y2 = false;
-                                        let z2 = false;
-                                        if (this.checkInvalidPattern(v2)) {
-                                            for (let a3 = 0; a3 < v2.length; a3++) {
-                                                if (!this.checkInvalidPattern(v2[a3])) {
-                                                    x2 += v2[a3];
+                                    TextInput.onChange((n3) => {
+                                        let o3 = this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId());
+                                        let p3 = '';
+                                        let q3 = false;
+                                        let r3 = false;
+                                        if (this.checkInvalidPattern(n3)) {
+                                            for (let s3 = 0; s3 < n3.length; s3++) {
+                                                if (!this.checkInvalidPattern(n3[s3])) {
+                                                    p3 += n3[s3];
                                                 }
                                             }
-                                            y2 = true;
-                                            this.listNodeDataSource.setPopUpInfo(PopUpType.WARNINGS, InputError.INVALID_ERROR, true, w2);
+                                            q3 = true;
+                                            this.listNodeDataSource.setPopUpInfo(PopUpType.WARNINGS, InputError.INVALID_ERROR, true, o3);
                                         }
                                         else {
-                                            x2 = v2;
-                                            y2 = false;
+                                            p3 = n3;
+                                            q3 = false;
                                         }
-                                        if ((this.checkIsAllCN(x2) && x2.length > this.MAX_CN_LENGTH) ||
-                                            (!this.checkIsAllCN(x2) && x2.length > this.MAX_EN_LENGTH)) {
-                                            x2 = this.checkIsAllCN(x2) ?
-                                                x2.substr(0, this.MAX_CN_LENGTH) : x2.substr(0, this.MAX_EN_LENGTH);
-                                            z2 = true;
-                                            this.listNodeDataSource.setPopUpInfo(PopUpType.WARNINGS, InputError.LENGTH_ERROR, true, w2);
+                                        if ((this.checkIsAllCN(p3) && p3.length > this.MAX_CN_LENGTH) ||
+                                            (!this.checkIsAllCN(p3) && p3.length > this.MAX_EN_LENGTH)) {
+                                            p3 = this.checkIsAllCN(p3) ?
+                                            p3.substr(0, this.MAX_CN_LENGTH) : p3.substr(0, this.MAX_EN_LENGTH);
+                                            r3 = true;
+                                            this.listNodeDataSource.setPopUpInfo(PopUpType.WARNINGS, InputError.LENGTH_ERROR, true, o3);
                                         }
                                         else {
-                                            z2 = false;
+                                            r3 = false;
                                         }
-                                        if (!z2 && !y2) {
-                                            this.listNodeDataSource.setMainTitleNameOnEdit(w2, x2);
+                                        if (!r3 && !q3) {
+                                            this.listNodeDataSource.setMainTitleNameOnEdit(o3, p3);
                                         }
                                     });
-                                    TextInput.onSubmit((t2) => {
-                                        let u2 = this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId());
-                                        this.listNodeDataSource.setPopUpInfo(PopUpType.WARNINGS, InputError.NONE, false, u2);
-                                        this.listNodeDataSource.setItemVisibilityOnEdit(u2, MenuOperation.COMMIT_NODE);
+                                    TextInput.onSubmit((l3) => {
+                                        let m3 = this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId());
+                                        this.listNodeDataSource.setPopUpInfo(PopUpType.WARNINGS, InputError.NONE, false, m3);
+                                        this.listNodeDataSource.setItemVisibilityOnEdit(m3, MenuOperation.COMMIT_NODE);
                                     });
-                                }, TextInput);
+                                    if (!i3) {
+                                        TextInput.pop();
+                                    }
+                                    ViewStackProcessor.StopGetAccessRecording();
+                                });
                                 Row.pop();
                             });
                         }
@@ -3718,65 +4181,66 @@ export class TreeViewInner extends ViewPU {
                             this.ifElseBranchUpdateFunction(1, () => {
                             });
                         }
-                    }, If);
+                        if (!c3) {
+                            If.pop();
+                        }
+                        ViewStackProcessor.StopGetAccessRecording();
+                    });
                     If.pop();
-                    this.observeComponentCreation2((h2, i2) => {
+                    this.observeComponentCreation((z2, a3) => {
+                        ViewStackProcessor.StartGetAccessRecordingFor(z2);
                         Blank.create();
-                    }, Blank);
+                        if (!a3) {
+                            Blank.pop();
+                        }
+                        ViewStackProcessor.StopGetAccessRecording();
+                    });
                     Blank.pop();
                     Row.pop();
-                    this.observeComponentCreation2((x1, y1) => {
+                    this.observeComponentCreation((p2, q2) => {
+                        ViewStackProcessor.StartGetAccessRecordingFor(p2);
                         If.create();
                         if (this.listNodeDataSource.hasSubtitle(this.item.getNodeCurrentNodeId())) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((f2, g2) => {
+                                this.observeComponentCreation((x2, y2) => {
+                                    ViewStackProcessor.StartGetAccessRecordingFor(x2);
                                     Row.create();
                                     Row.focusable(true);
                                     Row.margin({
-                                      start: LengthMetrics.resource(
-                                        this.listNodeDataSource.getSubTitlePara()
-                                          .margin.left
-                                      ),
-                                      end: this.item.getNodeItem().imageCollapse
-                                        ? LengthMetrics.resource({
-                                            id: -1,
-                                            type: 10002,
-                                            params: [
-                                              'sys.float.padding_level0',
-                                            ],
-                                            bundleName:
-                                              '__harDefaultBundleName__',
-                                            moduleName:
-                                              '__harDefaultModuleName__',
-                                          })
-                                        : LengthMetrics.resource(
-                                            this.listNodeDataSource.getSubTitlePara()
-                                              .margin.right
-                                          ),
+                                        start: LengthMetrics.resource(this.listNodeDataSource.getSubTitlePara().margin.left),
+                                        end: this.item.getNodeItem().imageCollapse ?
+                                        LengthMetrics.resource({
+                                            'id': -1,
+                                            'type': 10002,
+                                            params: ['sys.float.padding_level0'],
+                                            'bundleName': '__harDefaultBundleName__',
+                                            'moduleName': '__harDefaultModuleName__',
+                                        }) : LengthMetrics.resource(this.listNodeDataSource.getSubTitlePara().margin.right)
                                     });
-                                }, Row);
-                                this.observeComponentCreation2((d2, e2) => {
+                                    if (!y2) {
+                                        Row.pop();
+                                    }
+                                    ViewStackProcessor.StopGetAccessRecording();
+                                });
+                                this.observeComponentCreation((v2, w2) => {
+                                    ViewStackProcessor.StartGetAccessRecordingFor(v2);
                                     Text.create(this.listNodeDataSource.getSubtitle(this.item.getNodeCurrentNodeId()));
+                                    Text.minFontScale(MIN_FONT_SCALE);
+                                    Text.maxFontScale(this.decideFontScale());
                                     Text.fontSize(this.listNodeDataSource.getSubTitlePara().fontSize);
-                                    Text.fontColor(
-                                      this.item.getIsHighLight() ||
-                                        this.item.getIsModify()
-                                        ? {
-                                            id: -1,
-                                            type: 10001,
-                                            params: [
-                                              'sys.color.ohos_id_color_primary_contrary',
-                                            ],
-                                            bundleName:
-                                              '__harDefaultBundleName__',
-                                            moduleName:
-                                              '__harDefaultModuleName__',
-                                          }
-                                        : this.treeViewTheme
-                                            .secondaryTitleFontColor
-                                    );
+                                    Text.fontColor(this.item.getIsHighLight() || this.item.getIsModify() ? {
+                                        'id': -1,
+                                        'type': 10001,
+                                        params: ['sys.color.ohos_id_color_primary_contrary'],
+                                        'bundleName': '__harDefaultBundleName__',
+                                        'moduleName': '__harDefaultModuleName__',
+                                    } : this.treeViewTheme.secondaryTitleFontColor);
                                     Text.fontWeight(this.listNodeDataSource.getSubTitlePara().fontWeight);
-                                }, Text);
+                                    if (!w2) {
+                                        Text.pop();
+                                    }
+                                    ViewStackProcessor.StopGetAccessRecording();
+                                });
                                 Text.pop();
                                 Row.pop();
                             });
@@ -3785,44 +4249,55 @@ export class TreeViewInner extends ViewPU {
                             this.ifElseBranchUpdateFunction(1, () => {
                             });
                         }
-                    }, If);
+                        if (!q2) {
+                            If.pop();
+                        }
+                        ViewStackProcessor.StopGetAccessRecording();
+                    });
                     If.pop();
-                    this.observeComponentCreation2((l1, m1) => {
+                    this.observeComponentCreation((d2, e2) => {
+                        ViewStackProcessor.StartGetAccessRecordingFor(d2);
                         If.create();
                         if (this.item.getNodeItem().imageCollapse) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((v1, w1) => {
+                                this.observeComponentCreation((n2, o2) => {
+                                    ViewStackProcessor.StartGetAccessRecordingFor(n2);
                                     Row.create();
                                     Row.focusable(true);
                                     Row.height(this.item.getNodeItem().imageCollapse?.itemHeight);
                                     Row.width(this.item.getNodeItem().imageCollapse?.itemWidth);
-                                }, Row);
-                                this.observeComponentCreation2((r1, s1) => {
+                                    if (!o2) {
+                                        Row.pop();
+                                    }
+                                    ViewStackProcessor.StopGetAccessRecording();
+                                });
+                                this.observeComponentCreation((j2, k2) => {
+                                    ViewStackProcessor.StartGetAccessRecordingFor(j2);
                                     Image.create(this.item.getNodeItem().imageCollapse?.collapseSource);
-                                    Image.fillColor(
-                                      this.item.getNodeItem().imageCollapse
-                                        ?.isCollapse
-                                        ? this.treeViewTheme.arrowIconColor
-                                        : COLOR_IMAGE_EDIT
-                                    );
+                                    Image.fillColor(this.item.getNodeItem().imageCollapse?.isCollapse ?
+                                    this.treeViewTheme.arrowIconColor : COLOR_IMAGE_EDIT);
                                     Image.align(Alignment.End);
                                     Image.objectFit(ImageFit.Contain);
                                     Image.height(this.item.getNodeItem().imageCollapse?.itemHeight);
                                     Image.width(this.item.getNodeItem().imageCollapse?.itemWidth);
                                     Image.opacity(!this.item.getIsHighLight() ?
                                         this.item.getNodeItem().imageCollapse?.opacity : this.item.getNodeItem().imageCollapse?.noOpacity);
-                                    Image.onTouch((u1) => {
-                                        if (u1.type === TouchType.Down) {
+                                    Image.onTouch((m2) => {
+                                        if (m2.type === TouchType.Down) {
                                             this.listNodeDataSource.expandAndCollapseNode(this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId()));
                                             this.listNodeDataSource.setCurrentFocusNodeId(this.item.getNodeCurrentNodeId());
                                         }
-                                        u1.stopPropagation();
+                                        m2.stopPropagation();
                                     });
                                     Image.focusable(true);
                                     Image.matchTextDirection((this.item.getNodeItem()
                                         .imageCollapse?.collapseSource === ARROW_RIGHT || this.item.getNodeItem()
                                         .imageCollapse?.collapseSource === ARROW_RIGHT_WITHE) ? true : false);
-                                }, Image);
+                                    if (!k2) {
+                                        Image.pop();
+                                    }
+                                    ViewStackProcessor.StopGetAccessRecording();
+                                });
                                 Row.pop();
                             });
                         }
@@ -3830,7 +4305,11 @@ export class TreeViewInner extends ViewPU {
                             this.ifElseBranchUpdateFunction(1, () => {
                             });
                         }
-                    }, If);
+                        if (!e2) {
+                            If.pop();
+                        }
+                        ViewStackProcessor.StopGetAccessRecording();
+                    });
                     If.pop();
                     Row.pop();
                     Stack.pop();
@@ -3842,203 +4321,228 @@ export class TreeViewInner extends ViewPU {
                 this.ifElseBranchUpdateFunction(1, () => {
                 });
             }
-        }, If);
+            if (!o1) {
+                If.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+        });
         If.pop();
     }
+
     rerender() {
         this.updateDirtyElements();
     }
 }
+
 export class NodeItem {
-    constructor(t) {
-        this.currentNodeId = t.currentNodeId ?? -1;
-        this.parentNodeId = t.parentNodeId ?? -1;
-        this.isFolder = t.isFolder;
+    constructor(l1) {
+        this.currentNodeId = l1.currentNodeId ?? -1;
+        this.parentNodeId = l1.parentNodeId ?? -1;
+        this.isFolder = l1.isFolder;
         this.nodeLevel = -1;
         this.indexOfParent = -1;
         this.childNodeInfo = { isHasChildNode: false, childNum: 0, allChildNum: 0 };
         this.children = [];
     }
+
     getChildNodeInfo() {
         return this.childNodeInfo;
     }
+
     getCurrentNodeId() {
         return this.currentNodeId;
     }
+
     getIsFolder() {
         return this.isFolder;
     }
 }
+
 class NodeBaseInfo {
     constructor() {
         this.rightMargin = -1;
         this.width = -1;
         this.height = -1;
     }
-    set itemWidth(s) {
-        this.width = s;
+
+    set itemWidth(k1) {
+        this.width = k1;
     }
+
     get itemWidth() {
         return this.width;
     }
-    set itemHeight(r) {
-        this.height = r;
+
+    set itemHeight(j1) {
+        this.height = j1;
     }
+
     get itemHeight() {
         return this.height;
     }
-    set itemRightMargin(q) {
-        this.rightMargin = q;
+
+    set itemRightMargin(i1) {
+        this.rightMargin = i1;
     }
+
     get itemRightMargin() {
         return this.rightMargin;
     }
 }
+
 export class CollapseImageNode extends NodeBaseInfo {
-    constructor(p1, b2, n2, r2, q3, g4, h4) {
+    constructor(b1, c1, d1, e1, f1, g1, h1) {
         super();
         this.rightMargin = {
             'id': -1,
             'type': 10002,
             params: ['sys.float.ohos_id_elements_margin_horizontal_m'],
             'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            'moduleName': '__harDefaultModuleName__',
         };
-        this.imageSource = p1;
-        this.rightMargin = q3;
-        this.imageOpacity = b2;
-        this.itemWidth = n2;
-        this.itemHeight = r2;
-        this.imageCollapseSource = p1;
-        this.isImageCollapse = g4;
-        this.collapseImageType = h4;
+        this.imageSource = b1;
+        this.rightMargin = f1;
+        this.imageOpacity = c1;
+        this.itemWidth = d1;
+        this.itemHeight = e1;
+        this.imageCollapseSource = b1;
+        this.isImageCollapse = g1;
+        this.collapseImageType = h1;
     }
 
     get source() {
         return this.imageSource;
     }
+
     get opacity() {
         return this.imageOpacity;
     }
+
     get noOpacity() {
         return 1;
     }
+
     get collapseSource() {
         return this.imageCollapseSource;
     }
+
     get isCollapse() {
         return this.isImageCollapse;
     }
+
     get type() {
         return this.collapseImageType;
     }
 }
+
 class CollapseImageNodeFactory {
     constructor() {
     }
+
     static getInstance() {
         if (!CollapseImageNodeFactory.instance) {
             CollapseImageNodeFactory.instance = new CollapseImageNodeFactory();
         }
         return CollapseImageNodeFactory.instance;
     }
-    createCollapseImageNodeByType(i1) {
-        let j1;
-        switch (i1) {
+
+    createCollapseImageNodeByType(z) {
+        let a1;
+        switch (z) {
             case CollapseImageType.ARROW_RIGHT_WHITE:
-                j1 = ARROW_RIGHT_WITHE;
+                a1 = ARROW_RIGHT_WITHE;
                 break;
             case CollapseImageType.ARROW_RIGHT:
-                j1 = ARROW_RIGHT;
+                a1 = ARROW_RIGHT;
                 break;
             case CollapseImageType.ARROW_DOWN_WHITE:
-                j1 = ARROW_DOWN_WITHE;
+                a1 = ARROW_DOWN_WITHE;
                 break;
             default:
-                j1 = ARROW_DOWN;
+                a1 = ARROW_DOWN;
         }
-        return new CollapseImageNode(j1, {
+        return new CollapseImageNode(a1, {
             'id': -1,
             'type': 10002,
             params: ['sys.float.ohos_id_alpha_content_tertiary'],
             'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            'moduleName': '__harDefaultModuleName__',
         }, IMAGE_NODE_HEIGHT, IMAGE_NODE_WIDTH, {
             'id': -1,
             'type': 10002,
             params: ['sys.float.ohos_id_text_paragraph_margin_xs'],
             'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        }, (i1 === CollapseImageType.ARROW_RIGHT_WHITE || i1 === CollapseImageType.ARROW_DOWN_WHITE) ? false : true,
-            i1);
+            'moduleName': '__harDefaultModuleName__',
+        }, (z === CollapseImageType.ARROW_RIGHT_WHITE || z === CollapseImageType.ARROW_DOWN_WHITE) ? false : true, z);
     }
 }
 
-CollapseImageNodeFactory.instance = new CollapseImageNodeFactory();
-
 class CollapseImageNodeFlyweightFactory {
-    static getCollapseImageNodeByType(g1) {
-        let h1 = CollapseImageNodeFlyweightFactory.nodeMap.get(g1);
-        if (h1 === undefined) {
-            h1 = CollapseImageNodeFactory.getInstance().createCollapseImageNodeByType(g1);
-            CollapseImageNodeFlyweightFactory.nodeMap.set(g1, h1);
+    static getCollapseImageNodeByType(x) {
+        let y = CollapseImageNodeFlyweightFactory.nodeMap.get(x);
+        if (y === undefined) {
+            y = CollapseImageNodeFactory.getInstance().createCollapseImageNodeByType(x);
+            CollapseImageNodeFlyweightFactory.nodeMap.set(x, y);
         }
-        return h1;
+        return y;
     }
-    static getCollapseImageNode(c1, d1, e1) {
-        let f1 = e1;
-        if (c1 == InteractionStatus.EDIT ||
-            c1 === InteractionStatus.DRAG_INSERT) {
-            if (d1 === NodeStatus.COLLAPSE) {
-                f1 = CollapseImageType.ARROW_RIGHT_WHITE;
+
+    static getCollapseImageNode(t, u, v) {
+        let w = v;
+        if (t == InteractionStatus.EDIT ||
+            t === InteractionStatus.DRAG_INSERT) {
+            if (u === NodeStatus.COLLAPSE) {
+                w = CollapseImageType.ARROW_RIGHT_WHITE;
             }
             else {
-                f1 = CollapseImageType.ARROW_DOWN_WHITE;
+                w = CollapseImageType.ARROW_DOWN_WHITE;
             }
         }
-        else if (c1 === InteractionStatus.FINISH_EDIT ||
-            c1 === InteractionStatus.FINISH_DRAG_INSERT) {
-            if (d1 === NodeStatus.COLLAPSE) {
-                f1 = CollapseImageType.ARROW_RIGHT;
+        else if (t === InteractionStatus.FINISH_EDIT ||
+            t === InteractionStatus.FINISH_DRAG_INSERT) {
+            if (u === NodeStatus.COLLAPSE) {
+                w = CollapseImageType.ARROW_RIGHT;
             }
             else {
-                f1 = CollapseImageType.ARROW_DOWN;
+                w = CollapseImageType.ARROW_DOWN;
             }
         }
-        return CollapseImageNodeFlyweightFactory.getCollapseImageNodeByType(f1);
+        return CollapseImageNodeFlyweightFactory.getCollapseImageNodeByType(w);
     }
-    static changeImageCollapseSource(z, a1) {
-        let b1;
-        if (!a1) {
-            if (z === NodeStatus.COLLAPSE) {
-                b1 = CollapseImageType.ARROW_RIGHT_WHITE;
+
+    static changeImageCollapseSource(q, r) {
+        let s;
+        if (!r) {
+            if (q === NodeStatus.COLLAPSE) {
+                s = CollapseImageType.ARROW_RIGHT_WHITE;
             }
             else {
-                b1 = CollapseImageType.ARROW_DOWN_WHITE;
+                s = CollapseImageType.ARROW_DOWN_WHITE;
             }
         }
         else {
-            if (z === NodeStatus.COLLAPSE) {
-                b1 = CollapseImageType.ARROW_RIGHT;
+            if (q === NodeStatus.COLLAPSE) {
+                s = CollapseImageType.ARROW_RIGHT;
             }
             else {
-                b1 = CollapseImageType.ARROW_DOWN;
+                s = CollapseImageType.ARROW_DOWN;
             }
         }
-        return CollapseImageNodeFlyweightFactory.getCollapseImageNodeByType(b1);
+        return CollapseImageNodeFlyweightFactory.getCollapseImageNodeByType(s);
     }
 }
+
 CollapseImageNodeFlyweightFactory.nodeMap = new Map();
 
 export class ImageNode extends NodeBaseInfo {
     constructor(k, l, m, n, o, p) {
         super();
         this.rightMargin = {
-          id: -1,
-          type: 10002,
-          params: ['sys.float.ohos_id_elements_margin_horizontal_m'],
-          bundleName: '__harDefaultBundleName__',
-          moduleName: '__harDefaultModuleName__',
+            'id': -1,
+            'type': 10002,
+            params: ['sys.float.ohos_id_elements_margin_horizontal_m'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
         };
         this.imageSource = k;
         this.imageNormalSource = k;
@@ -4063,30 +4567,39 @@ export class ImageNode extends NodeBaseInfo {
         this.isImageCollapse = true;
         this.currentInteractionStatus = InteractionStatus.NORMAL;
     }
+
     get source() {
         return this.imageSource;
     }
+
     get normalSource() {
         return this.imageNormalSource;
     }
+
     get selectedSource() {
         return this.imageSelectedSource;
     }
+
     get editSource() {
         return this.imageEditSource;
     }
+
     get opacity() {
         return this.imageOpacity;
     }
+
     get noOpacity() {
         return 1;
     }
+
     get collapseSource() {
         return this.imageCollapseSource;
     }
+
     get isCollapse() {
         return this.isImageCollapse;
     }
+
     changeImageCollapseSource(j) {
         if (j === NodeStatus.EXPAND) {
             this.imageCollapseSource = this.imageCollapseDownSource;
@@ -4095,6 +4608,7 @@ export class ImageNode extends NodeBaseInfo {
             this.imageCollapseSource = this.imageCollapseRightSource;
         }
     }
+
     setImageCollapseSource(h, i) {
         if (h === InteractionStatus.EDIT || h === InteractionStatus.DRAG_INSERT) {
             this.imageCollapseDownSource = ARROW_DOWN_WITHE;
@@ -4108,8 +4622,9 @@ export class ImageNode extends NodeBaseInfo {
             this.isImageCollapse = true;
         }
         this.imageCollapseSource = (i === NodeStatus.COLLAPSE) ?
-            this.imageCollapseRightSource : this.imageCollapseDownSource;
+        this.imageCollapseRightSource : this.imageCollapseDownSource;
     }
+
     setImageSource(g) {
         switch (g) {
             case InteractionStatus.NORMAL:
@@ -4143,178 +4658,199 @@ export class ImageNode extends NodeBaseInfo {
         }
     }
 }
+
 class MainTitleNode extends NodeBaseInfo {
-  constructor(f) {
-    super();
-    this.treeViewTheme = TreeViewTheme.getInstance();
-    this.mainTitleName = f;
-    this.itemWidth = ITEM_WIDTH;
-    this.itemHeight = ITEM_HEIGHT;
-    this.rightMargin = {
-      id: -1,
-      type: 10002,
-      params: ['sys.float.ohos_id_text_paragraph_margin_xs'],
-      bundleName: '__harDefaultBundleName__',
-      moduleName: '__harDefaultModuleName__',
-    };
-    this.mainTitleSetting = {
-      fontColor: this.treeViewTheme.primaryTitleFontColor,
-      fontSize: {
-        id: -1,
-        type: 10002,
-        params: ['sys.float.ohos_id_text_size_body1'],
-        bundleName: '__harDefaultBundleName__',
-        moduleName: '__harDefaultModuleName__',
-      },
-      fontWeight: FontWeight.Normal,
-    };
-    this.showPopUpTimeout = 0;
-  }
-  setMainTitleSelected(e) {
-    if (e) {
-      this.mainTitleSetting = {
-        fontColor: this.treeViewTheme.primaryTitleActiveFontColor,
-        fontSize: {
-          id: -1,
-          type: 10002,
-          params: ['sys.float.ohos_id_text_size_body1'],
-          bundleName: '__harDefaultBundleName__',
-          moduleName: '__harDefaultModuleName__',
-        },
-        fontWeight: FontWeight.Regular,
-      };
-    } else {
-      this.mainTitleSetting = {
-        fontColor: this.treeViewTheme.primaryTitleFontColor,
-        fontSize: {
-          id: -1,
-          type: 10002,
-          params: ['sys.float.ohos_id_text_size_body1'],
-          bundleName: '__harDefaultBundleName__',
-          moduleName: '__harDefaultModuleName__',
-        },
-        fontWeight: FontWeight.Normal,
-      };
+    constructor(f) {
+        super();
+        this.treeViewTheme = TreeViewTheme.getInstance();
+        this.mainTitleName = f;
+        this.itemWidth = ITEM_WIDTH;
+        this.itemHeight = ITEM_HEIGHT;
+        this.rightMargin = {
+            'id': -1,
+            'type': 10002,
+            params: ['sys.float.ohos_id_text_paragraph_margin_xs'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
+        };
+        this.mainTitleSetting = {
+            fontColor: this.treeViewTheme.primaryTitleFontColor,
+            fontSize: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_text_size_body1'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            },
+            fontWeight: FontWeight.Normal,
+        };
+        this.showPopUpTimeout = 0;
     }
-  }
-  set title(d) {
-    this.mainTitleName = d;
-  }
-  get title() {
-    return this.mainTitleName;
-  }
-  set popUpTimeout(c) {
-    this.showPopUpTimeout = c;
-  }
-  get popUpTimeout() {
-    return this.showPopUpTimeout;
-  }
-  get color() {
-    return this.mainTitleSetting.fontColor;
-  }
-  get size() {
-    return this.mainTitleSetting.fontSize;
-  }
-  get weight() {
-    return this.mainTitleSetting.fontWeight;
-  }
-  setMainTitleHighLight(b) {
-    if (b) {
-      this.mainTitleSetting = {
-        fontColor: this.treeViewTheme.primaryTitleActiveFontColor,
-        fontSize: {
-          id: -1,
-          type: 10002,
-          params: ['sys.float.ohos_id_text_size_body1'],
-          bundleName: '__harDefaultBundleName__',
-          moduleName: '__harDefaultModuleName__',
-        },
-        fontWeight: FontWeight.Regular,
-      };
-    } else {
-      this.mainTitleSetting = {
-        fontColor: this.treeViewTheme.primaryTitleFontColor,
-        fontSize: {
-          id: -1,
-          type: 10002,
-          params: ['sys.float.ohos_id_text_size_body1'],
-          bundleName: '__harDefaultBundleName__',
-          moduleName: '__harDefaultModuleName__',
-        },
-        fontWeight: FontWeight.Normal,
-      };
+
+    setMainTitleSelected(e) {
+        if (e) {
+            this.mainTitleSetting = {
+                fontColor: this.treeViewTheme.primaryTitleActiveFontColor,
+                fontSize: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.ohos_id_text_size_body1'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
+                },
+                fontWeight: FontWeight.Regular,
+            };
+        }
+        else {
+            this.mainTitleSetting = {
+                fontColor: this.treeViewTheme.primaryTitleFontColor,
+                fontSize: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.ohos_id_text_size_body1'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
+                },
+                fontWeight: FontWeight.Normal,
+            };
+        }
     }
-  }
+
+    set title(d) {
+        this.mainTitleName = d;
+    }
+
+    get title() {
+        return this.mainTitleName;
+    }
+
+    set popUpTimeout(c) {
+        this.showPopUpTimeout = c;
+    }
+
+    get popUpTimeout() {
+        return this.showPopUpTimeout;
+    }
+
+    get color() {
+        return this.mainTitleSetting.fontColor;
+    }
+
+    get size() {
+        return this.mainTitleSetting.fontSize;
+    }
+
+    get weight() {
+        return this.mainTitleSetting.fontWeight;
+    }
+
+    setMainTitleHighLight(b) {
+        if (b) {
+            this.mainTitleSetting = {
+                fontColor: this.treeViewTheme.primaryTitleActiveFontColor,
+                fontSize: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.ohos_id_text_size_body1'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
+                },
+                fontWeight: FontWeight.Regular,
+            };
+        }
+        else {
+            this.mainTitleSetting = {
+                fontColor: this.treeViewTheme.primaryTitleFontColor,
+                fontSize: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.ohos_id_text_size_body1'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
+                },
+                fontWeight: FontWeight.Normal,
+            };
+        }
+    }
 }
+
 export class InputText extends NodeBaseInfo {
     constructor() {
         super();
         this.status = undefined;
         this.statusColor = {
-          id: -1,
-          type: 10001,
-          params: ['sys.color.ohos_id_color_background'],
-          bundleName: '__harDefaultBundleName__',
-          moduleName: '__harDefaultModuleName__',
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.ohos_id_color_background'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
         };
         this.editItemColor = {
-          id: -1,
-          type: 10001,
-          params: ['sys.color.ohos_id_color_emphasize'],
-          bundleName: '__harDefaultBundleName__',
-          moduleName: '__harDefaultModuleName__',
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.ohos_id_color_emphasize'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
         };
         this.radius = {
-          id: -1,
-          type: 10002,
-          params: ['sys.float.ohos_id_corner_radius_default_xs'],
-          bundleName: '__harDefaultBundleName__',
-          moduleName: '__harDefaultModuleName__',
+            'id': -1,
+            'type': 10002,
+            params: ['sys.float.ohos_id_corner_radius_default_xs'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
         };
         this.treeViewTheme = TreeViewTheme.getInstance();
         this.itemWidth = ITEM_WIDTH;
         this.itemHeight = ITEM_HEIGHT_INPUT;
         this.rightMargin = {
-          id: -1,
-          type: 10002,
-          params: ['sys.float.ohos_id_text_paragraph_margin_xs'],
-          bundleName: '__harDefaultBundleName__',
-          moduleName: '__harDefaultModuleName__',
+            'id': -1,
+            'type': 10002,
+            params: ['sys.float.ohos_id_text_paragraph_margin_xs'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
         };
         this.inputTextSetting = {
-          fontColor: this.treeViewTheme.primaryTitleFontColor,
-          fontSize: {
-            id: -1,
-            type: 10002,
-            params: ['sys.float.ohos_id_text_size_body1'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          },
-          fontWeight: FontWeight.Normal,
+            fontColor: this.treeViewTheme.primaryTitleFontColor,
+            fontSize: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_text_size_body1'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            },
+            fontWeight: FontWeight.Normal,
         };
     }
+
     get color() {
         return this.inputTextSetting.fontColor;
     }
+
     get size() {
         return this.inputTextSetting.fontSize;
     }
+
     get weight() {
         return this.inputTextSetting.fontWeight;
     }
+
     get borderRadius() {
         return this.radius;
     }
+
     get backgroundColor() {
         return this.statusColor;
     }
+
     get editColor() {
         return this.editItemColor;
     }
+
     get textInputStatusColor() {
         return this.status;
     }
 }
+
 function getLengthMetricsByResourceOrNumber(a) {
     if (!a) {
         return LengthMetrics.vp(0);
