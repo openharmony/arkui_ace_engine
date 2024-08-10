@@ -321,10 +321,11 @@ public:
     } DragPreviewInfo;
     bool IsNeedScaleDragPreview();
     void DoDragMoveAnimate(const PointerEvent& pointerEvent);
-    void DoDragStartAnimation(const RefPtr<OverlayManager>& overlayManager,
-        const GestureEvent& event, bool isSubwindowOverlay = false);
-    void DragStartAnimation(
-        const Offset& newOffset, const RefPtr<OverlayManager>& overlayManager, const OffsetF& gatherNodeCenter);
+    void DragMoveAnimation(const Offset& newOffset, const RefPtr<OverlayManager>& overlayManager, Point point);
+    void DoDragStartAnimation(
+        const RefPtr<OverlayManager>& overlayManager, const GestureEvent& event, bool isSubwindowOverlay = false);
+    void DragStartAnimation(const Offset& newOffset, const RefPtr<OverlayManager>& overlayManager,
+        const OffsetF& gatherNodeCenter, Point point = { 1, 1 });
     void SetDragResult(const DragNotifyMsgCore& notifyMessage, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
     void SetDragBehavior(const DragNotifyMsgCore& notifyMessage, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
     void ResetDragPreviewInfo()
@@ -478,7 +479,7 @@ public:
 
     uint32_t GetDampingOverflowCount() const
     {
-        return dampingOverflowCount_ ;
+        return dampingOverflowCount_;
     }
 
     void SetDampingOverflowCount()
@@ -486,6 +487,16 @@ public:
         dampingOverflowCount_++;
     }
     static double GetMaxWidthBaseOnGridSystem(const RefPtr<PipelineBase>& pipeline);
+
+    RefPtr<FrameNode> GetMenuWrapperNode()
+    {
+        return menuWrapperNode_.Upgrade();
+    }
+
+    void SetMenuWrapperNode(const RefPtr<FrameNode>& frameNode)
+    {
+        menuWrapperNode_ = frameNode;
+    }
 
 private:
     double CalcDragPreviewDistanceWithPoint(
@@ -589,6 +600,7 @@ private:
     uint32_t dampingOverflowCount_ = 0;
     std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction_;
     RefPtr<GridColumnInfo> columnInfo_;
+    WeakPtr<FrameNode> menuWrapperNode_;
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
 };
 } // namespace OHOS::Ace::NG
