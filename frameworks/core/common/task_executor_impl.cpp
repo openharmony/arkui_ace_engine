@@ -22,7 +22,6 @@
 #include <sys/resource.h>
 #endif
 #include <unistd.h>
-
 #include "base/log/trace_id.h"
 #include "base/thread/background_task_executor.h"
 #include "core/common/container.h"
