@@ -95,6 +95,7 @@ enum class SelectorAdjustPolicy { INCLUDE = 0, EXCLUDE };
 enum class HandleType { FIRST = 0, SECOND };
 enum class SelectType { SELECT_FORWARD = 0, SELECT_BACKWARD, SELECT_NOTHING, SELECT_ABOVE_LINE };
 enum class CaretAffinityPolicy { DEFAULT = 0, UPSTREAM_FIRST, DOWNSTREAM_FIRST };
+enum class OperationType { DEFAULT = 0, DRAG, IME };
 const std::map<std::pair<HandleType, SelectorAdjustPolicy>, MoveDirection> SELECTOR_ADJUST_DIR_MAP = {
     {{ HandleType::FIRST, SelectorAdjustPolicy::INCLUDE }, MoveDirection::BACKWARD },
     {{ HandleType::FIRST, SelectorAdjustPolicy::EXCLUDE }, MoveDirection::FORWARD },
@@ -338,9 +339,12 @@ public:
 
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
+    bool IsIMEOperation(OperationType operationType);
     void InsertValue(const std::string& insertValue, bool isIME = false) override;
-    void InsertValueOperation(
-        const std::string& insertValue, OperationRecord* const record = nullptr, bool isIME = true);
+    void InsertValueByOperationType(const std::string& insertValue,
+        OperationType operationType = OperationType::DEFAULT);
+    void InsertValueOperation(const std::string& insertValue, OperationRecord* const record = nullptr,
+        OperationType operationType = OperationType::IME);
     void DeleteSelectOperation(OperationRecord* const record);
     void DeleteByRange(OperationRecord* const record, int32_t start, int32_t end);
     void InsertValueAfterBeforeSpan(RefPtr<SpanNode>& spanNodeBefore, RefPtr<SpanNode>& spanNode,
@@ -1090,7 +1094,6 @@ private:
     void HandleOnDragDropTextOperation(const std::string& insertValue, bool isDeleteSelect);
     void UndoDrag(const OperationRecord& record);
     void RedoDrag(const OperationRecord& record);
-    void HandleOnDragInsertValueOperation(const std::string& insertValue);
     void HandleOnDragInsertValue(const std::string& str);
     void HandleOnEditChanged(bool isEditing);
     void OnTextInputActionUpdate(TextInputAction value);
@@ -1126,7 +1129,8 @@ private:
     void HandleOnCopyStyledString();
     void HandleOnDragDropStyledString(const RefPtr<OHOS::Ace::DragEvent>& event);
     void NotifyExitTextPreview();
-    void ProcessInsertValue(const std::string& insertValue, bool isIME = false, bool calledbyImf = false);
+    void ProcessInsertValue(const std::string& insertValue, OperationType operationType = OperationType::DEFAULT,
+        bool calledbyImf = false);
     void FinishTextPreviewInner();
     void TripleClickSection(GestureEvent& info, int32_t start, int32_t end, int32_t pos);
     SelectType JudgeSelectType(const PositionWithAffinity& positionWithAffinity);

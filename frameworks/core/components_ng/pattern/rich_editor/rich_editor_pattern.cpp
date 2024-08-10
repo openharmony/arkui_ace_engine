@@ -4257,7 +4257,7 @@ bool RichEditorPattern::InitPreviewText(const std::string& previewTextValue, con
     record.replacedRange = range;
     record.startOffset = textSelector_.SelectNothing() ? caretPosition_ : textSelector_.GetTextStart();
     record.newPreviewContent = previewTextValue;
-    ProcessInsertValue(previewTextValue, true, false);
+    ProcessInsertValue(previewTextValue, OperationType::IME, false);
     record.previewContent = record.newPreviewContent;
     auto length = static_cast<int32_t>(StringUtils::ToWstring(previewTextValue).length());
     record.endOffset = record.startOffset + length;
@@ -4275,7 +4275,7 @@ bool RichEditorPattern::ReplacePreviewText(const std::string& previewTextValue, 
     previewTextRecord_.replacedRange = range;
     previewTextRecord_.startOffset = range.start;
     previewTextRecord_.endOffset = range.end;
-    ProcessInsertValue(previewTextValue, true, false);
+    ProcessInsertValue(previewTextValue, OperationType::IME, false);
     return true;
 }
 
@@ -4297,7 +4297,7 @@ bool RichEditorPattern::UpdatePreviewText(const std::string& previewTextValue, c
     if (range.start == -1 && range.end == -1 && !record.previewContent.empty()) {
         record.replacedRange.Set(record.startOffset, record.endOffset);
         record.newPreviewContent = previewTextValue;
-        ProcessInsertValue(previewTextValue, true, false);
+        ProcessInsertValue(previewTextValue, OperationType::IME, false);
         record.previewContent = record.newPreviewContent;
         record.newPreviewContent.clear();
         record.endOffset =
@@ -4324,7 +4324,7 @@ bool RichEditorPattern::UpdatePreviewText(const std::string& previewTextValue, c
                                       .replace(replaceIndex, replaceLength, StringUtils::ToWstring(previewTextValue)));
         record.replacedRange = range;
         record.newPreviewContent = newContent;
-        ProcessInsertValue(previewTextValue, true, false);
+        ProcessInsertValue(previewTextValue, OperationType::IME, false);
         record.previewContent = record.newPreviewContent;
         record.newPreviewContent.clear();
         record.endOffset =
@@ -4354,7 +4354,7 @@ void RichEditorPattern::FinishTextPreview()
     }
     auto previewContent = previewTextRecord_.previewContent;
     FinishTextPreviewInner();
-    ProcessInsertValue(previewContent, true, false);
+    ProcessInsertValue(previewContent, OperationType::IME, false);
 }
 
 void RichEditorPattern::FinishTextPreviewInner()
@@ -4429,16 +4429,28 @@ float RichEditorPattern::GetPreviewTextUnderlineWidth() const
     return theme->GetPreviewUnderlineWidth().ConvertToPx();
 }
 
-void RichEditorPattern::InsertValue(const std::string& insertValue, bool isIME)
+bool RichEditorPattern::IsIMEOperation(OperationType operationType)
 {
-    ProcessInsertValue(insertValue, isIME, true);
+    return operationType == OperationType::IME;
 }
 
-// isIME: controls whether to perform ime callbacks
+void RichEditorPattern::InsertValue(const std::string& insertValue, bool isIME)
+{
+    InsertValueByOperationType(insertValue, isIME ? OperationType::IME : OperationType::DEFAULT);
+}
+
+void RichEditorPattern::InsertValueByOperationType(const std::string& insertValue, OperationType operationType)
+{
+    ProcessInsertValue(insertValue, operationType, true);
+}
+
+// operationType: when type is IME, it controls whether to perform ime callbacks
 // calledByImf: true means real input; false means preview input
-void RichEditorPattern::ProcessInsertValue(const std::string& insertValue, bool isIME, bool calledByImf)
+void RichEditorPattern::ProcessInsertValue(const std::string& insertValue, OperationType operationType,
+    bool calledByImf)
 {
     CONTENT_MODIFY_LOCK(this);
+    bool isIME = IsIMEOperation(operationType);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
         "insertLen=%{public}zu, isIME=%{public}d, calledByImf=%{public}d, isSpanString=%{public}d",
         StringUtils::ToWstring(insertValue).length(), isIME, calledByImf, isSpanStringMode_);
@@ -4470,7 +4482,7 @@ void RichEditorPattern::ProcessInsertValue(const std::string& insertValue, bool 
     CHECK_NULL_VOID(allowContentChange && allowImeInput || previewTextRecord_.hasDiff);
 
     ClearRedoOperationRecords();
-    InsertValueOperation(insertValue, &record, isIME);
+    InsertValueOperation(insertValue, &record, operationType);
     record.afterCaretPosition = caretPosition_;
     if (isDragSponsor_) {
         record.deleteCaretPostion = dragRange_.first;
@@ -4479,7 +4491,8 @@ void RichEditorPattern::ProcessInsertValue(const std::string& insertValue, bool 
     AfterChangeText(changeValue);
 }
 
-void RichEditorPattern::InsertValueOperation(const std::string& insertValue, OperationRecord* const record, bool isIME)
+void RichEditorPattern::InsertValueOperation(const std::string& insertValue, OperationRecord* const record,
+    OperationType operationType)
 {
     bool isSelector = textSelector_.IsValid();
     if (isSelector) {
@@ -4502,6 +4515,7 @@ void RichEditorPattern::InsertValueOperation(const std::string& insertValue, Ope
         InsertValueWithoutSpan(spanNode, info, insertValue);
         return;
     }
+    bool isIME = IsIMEOperation(operationType);
     if (info.GetOffsetInSpan() == 0) {
         auto spanNodeBefore = DynamicCast<SpanNode>(host->GetChildAtIndex(info.GetSpanIndex() - 1));
         bool beforeSpanCanInsert = spanNodeBefore && spanNodeBefore->GetTag() == V2::SPAN_ETS_TAG
@@ -4511,7 +4525,7 @@ void RichEditorPattern::InsertValueOperation(const std::string& insertValue, Ope
             return;
         }
     }
-    if (typingStyle_.has_value() && !HasSameTypingStyle(spanNode)) {
+    if (typingStyle_.has_value() && !HasSameTypingStyle(spanNode) && operationType != OperationType::DRAG) {
         InsertDiffStyleValueInSpan(spanNode, info, insertValue, isIME);
         return;
     }
@@ -6535,7 +6549,7 @@ void RichEditorPattern::InsertValueByPaste(const std::string& pasteStr)
         InsertValueInStyledString(pasteStr);
         return;
     }
-    InsertValue(pasteStr, false);
+    InsertValueByOperationType(pasteStr, OperationType::DEFAULT);
 }
 
 void RichEditorPattern::HandleOnPaste()
@@ -8401,7 +8415,7 @@ void RichEditorPattern::UndoDrag(const OperationRecord& record)
     DeleteForward(record.beforeCaretPosition, length);
 
     caretPosition_ = record.deleteCaretPostion;
-    InsertValueOperation(str, nullptr, false);
+    InsertValueOperation(str, nullptr, OperationType::DEFAULT);
 }
 
 void RichEditorPattern::RedoDrag(const OperationRecord& record)
@@ -8415,19 +8429,8 @@ void RichEditorPattern::RedoDrag(const OperationRecord& record)
     int32_t length = static_cast<int32_t>(StringUtils::ToWstring(str).length());
     DeleteForward(record.deleteCaretPostion, length);
     caretPosition_ = record.beforeCaretPosition;
-    InsertValueOperation(str, nullptr, false);
+    InsertValueOperation(str, nullptr, OperationType::DRAG);
     AfterChangeText(changeValue);
-}
-
-void RichEditorPattern::HandleOnDragInsertValueOperation(const std::string& insertValue)
-{
-    TextSpanOptions options;
-    options.offset = caretPosition_;
-    options.value = insertValue;
-    if (typingStyle_.has_value() && typingTextStyle_.has_value()) {
-        options.style = typingTextStyle_.value();
-    }
-    AddTextSpanOperation(options, false, -1, false, false);
 }
 
 void RichEditorPattern::HandleOnDragInsertValue(const std::string& insertValue)
@@ -8439,7 +8442,7 @@ void RichEditorPattern::HandleOnDragInsertValue(const std::string& insertValue)
     }
     record.addText = insertValue;
     ClearRedoOperationRecords();
-    HandleOnDragInsertValueOperation(insertValue);
+    InsertValueByOperationType(insertValue, OperationType::DRAG);
     int32_t length = dragRange_.second - dragRange_.first;
     record.afterCaretPosition = record.beforeCaretPosition + length;
     record.deleteCaretPostion = dragRange_.first;
