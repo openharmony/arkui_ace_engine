@@ -1094,6 +1094,7 @@ private:
     void HandleOnDragDropTextOperation(const std::string& insertValue, bool isDeleteSelect);
     void UndoDrag(const OperationRecord& record);
     void RedoDrag(const OperationRecord& record);
+    void HandleOnDragInsertValueOperation(const std::string& insertValue);
     void HandleOnDragInsertValue(const std::string& str);
     void HandleOnEditChanged(bool isEditing);
     void OnTextInputActionUpdate(TextInputAction value);

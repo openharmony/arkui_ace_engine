@@ -8433,6 +8433,11 @@ void RichEditorPattern::RedoDrag(const OperationRecord& record)
     AfterChangeText(changeValue);
 }
 
+void RichEditorPattern::HandleOnDragInsertValueOperation(const std::string& insertValue)
+{
+    InsertValueByOperationType(insertValue, OperationType::DRAG);
+}
+
 void RichEditorPattern::HandleOnDragInsertValue(const std::string& insertValue)
 {
     OperationRecord record;
@@ -8442,7 +8447,7 @@ void RichEditorPattern::HandleOnDragInsertValue(const std::string& insertValue)
     }
     record.addText = insertValue;
     ClearRedoOperationRecords();
-    InsertValueByOperationType(insertValue, OperationType::DRAG);
+    HandleOnDragInsertValueOperation(insertValue);
     int32_t length = dragRange_.second - dragRange_.first;
     record.afterCaretPosition = record.beforeCaretPosition + length;
     record.deleteCaretPostion = dragRange_.first;
