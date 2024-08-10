@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#include "native_engine/native_engine.h"
-
-#include "napi/native_api.h"
 #include "napi/native_node_api.h"
 
 extern const char _binary_chipgroup_abc_start[];
