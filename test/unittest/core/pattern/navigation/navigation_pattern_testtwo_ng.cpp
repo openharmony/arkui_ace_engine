@@ -73,6 +73,9 @@ void PerformTransition(const RefPtr<NavigationTransitionProxy>& proxy) {}
 
 void HandleEnd(bool success) {}
 
+void NavDestinationSwitchHandle(const AbilityContextInfo& abilityContextInfo,
+                                NavDestinationSwitchInfo& navDestinationSwitchInfo) {}
+
 NavigationTransition CustomNavigationAnimation(RefPtr<NavDestinationContext> fromContext,
                                                RefPtr<NavDestinationContext> toContext,
                                                NavigationOperation operation)
@@ -464,6 +467,11 @@ HWTEST_F(NavigationPatternTestNgOne, NavigationPatternTestOne_013, TestSize.Leve
     newTopNavDestination->mode_ = NavDestinationMode::DIALOG;
     navigationPattern->StartDefaultAnimation(nullptr, newTopNavDestination, true, true);
     EXPECT_TRUE(navigationPattern->navigationStack_ != nullptr);
+
+    newTopNavDestination->mode_ = NavDestinationMode::STANDARD;
+    navigationPattern->isCustomAnimation_ = false;
+    navigationPattern->StartDefaultAnimation(preTopNavDestination, newTopNavDestination, true, false);
+    EXPECT_TRUE(navigationPattern->navigationStack_ != nullptr);
 }
 
 /**
@@ -589,6 +597,8 @@ HWTEST_F(NavigationPatternTestNgOne, NavigationPatternTestOne_018, TestSize.Leve
     ret = navigationPattern->TriggerCustomAnimation(preTopNavDestination, newTopNavDestination, true);
     EXPECT_TRUE(ret);
     navigationPattern->navigationMode_ = NavigationMode::STACK;
+    auto pipeline = navigationPattern->GetHost()->GetContext();
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     ret = navigationPattern->TriggerCustomAnimation(nullptr, newTopNavDestination, true);
     EXPECT_TRUE(ret);
 }
@@ -732,6 +742,152 @@ HWTEST_F(NavigationPatternTestNgOne, NavigationPatternTestOne_024, TestSize.Leve
         V2::NAVDESTINATION_VIEW_ETS_TAG, 111, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     navigationPattern->onTransition_ = CustomNavigationAnimation;
     navigationPattern->RecoveryToLastStack(preTopNavDestination, newTopNavDestination);
+    EXPECT_TRUE(navigationPattern->navigationStack_ != nullptr);
+}
+
+/**
+ * @tc.name: NavigationPatternTestOne_025
+ * @tc.desc: Test Navigation Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNgOne, NavigationPatternTestOne_025, TestSize.Level1)
+{
+    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigation->GetPattern<NavigationPattern>()->SetNavigationStack(std::move(navigationStack));
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    auto from = AceType::MakeRefPtr<NavDestinationContext>();
+    auto to = AceType::MakeRefPtr<NavDestinationContext>();
+    NavigationOperation operation = NavigationOperation::PUSH;
+    UIObserverHandler::GetInstance().SetHandleNavDestinationSwitchFunc(NavDestinationSwitchHandle);
+    navigationPattern->NotifyNavDestinationSwitch(nullptr, to, operation);
+    EXPECT_TRUE(navigationPattern->navigationStack_ != nullptr);
+    from->pathInfo_ = AceType::MakeRefPtr<NavPathInfo>();
+    navigationPattern->NotifyNavDestinationSwitch(from, to, operation);
+    EXPECT_TRUE(navigationPattern->navigationStack_ != nullptr);
+}
+
+/**
+ * @tc.name: NavigationPatternTestOne_026
+ * @tc.desc: Test Navigation Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNgOne, NavigationPatternTestOne_026, TestSize.Level1)
+{
+    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigation->GetPattern<NavigationPattern>()->SetNavigationStack(std::move(navigationStack));
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG, 101,
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    navigation->SetContentNode(contentNode);
+    navigationPattern->GetTitleBarRenderContext();
+    EXPECT_TRUE(navigationPattern->navigationStack_ != nullptr);
+}
+
+/**
+ * @tc.name: NavigationPatternTestOne_027
+ * @tc.desc: Test Navigation Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNgOne, NavigationPatternTestOne_027, TestSize.Level1)
+{
+    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG, 101,
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    navigationPattern->IsTopNavDestination(contentNode);
+    EXPECT_TRUE(navigationPattern->navigationStack_ == nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigation->GetPattern<NavigationPattern>()->SetNavigationStack(std::move(navigationStack));
+    EXPECT_TRUE(navigationPattern->navigationStack_ != nullptr);
+}
+
+/**
+ * @tc.name: NavigationPatternTestOne_028
+ * @tc.desc: Test Navigation Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNgOne, NavigationPatternTestOne_028, TestSize.Level1)
+{
+    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigation->GetPattern<NavigationPattern>()->SetNavigationStack(std::move(navigationStack));
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto preTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 110, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto newTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 111, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto proxy = AceType::MakeRefPtr<NavigationTransitionProxy>();
+    struct NavigationTransition navigationTransition;
+    navigationTransition.isValid = false;
+    auto ret = navigationPattern->ExecuteAddAnimation(preTopNavDestination, newTopNavDestination, true,
+                                           proxy, navigationTransition);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: NavigationPatternTestOne_029
+ * @tc.desc: Test Navigation Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNgOne, NavigationPatternTestOne_029, TestSize.Level1)
+{
+    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigation->GetPattern<NavigationPattern>()->SetNavigationStack(std::move(navigationStack));
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    struct DirtySwapConfig dirtySwapConfig;
+    MockPipelineContext::TearDown();
+    auto ret = navigationPattern->OnDirtyLayoutWrapperSwap(nullptr, dirtySwapConfig);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: NavigationPatternTestOne_030
+ * @tc.desc: Test Navigation Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNgOne, NavigationPatternTestOne_030, TestSize.Level1)
+{
+    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigation->GetPattern<NavigationPattern>()->SetNavigationStack(nullptr);
+    EXPECT_TRUE(navigationPattern->navigationStack_ == nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigation->GetPattern<NavigationPattern>()->SetNavigationStack(std::move(navigationStack));
+    EXPECT_TRUE(navigationPattern->navigationStack_ != nullptr);
+}
+
+/**
+ * @tc.name: NavigationPatternTestOne_031
+ * @tc.desc: Test Navigation Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNgOne, NavigationPatternTestOne_031, TestSize.Level1)
+{
+    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigation->GetPattern<NavigationPattern>()->SetNavigationStack(std::move(navigationStack));
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->navigationMode_ = NavigationMode::SPLIT;
+    std::optional<std::pair<std::string, RefPtr<UINode>>> optPair;
+    navigationPattern->FireInterceptionEvent(false, optPair);
     EXPECT_TRUE(navigationPattern->navigationStack_ != nullptr);
 }
 } // namespace OHOS::Ace::NG
