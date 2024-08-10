@@ -15,10 +15,6 @@
 
 #include "frameworks/bridge/common/dom/dom_badge.h"
 
-#include "base/log/event_report.h"
-#include "core/components/declaration/badge/badge_declaration.h"
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 
 DOMBadge::DOMBadge(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, nodeName)

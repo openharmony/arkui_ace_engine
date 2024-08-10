@@ -15,9 +15,6 @@
 
 #include "frameworks/bridge/common/dom/dom_qrcode.h"
 
-#include "core/components/declaration/qrcode/qrcode_declaration.h"
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 
 DOMQrcode::DOMQrcode(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, nodeName)

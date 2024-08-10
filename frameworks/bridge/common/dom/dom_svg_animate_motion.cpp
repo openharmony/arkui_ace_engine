@@ -15,8 +15,6 @@
 
 #include "frameworks/bridge/common/dom/dom_svg_animate_motion.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 
 void DOMSvgAnimateMotion::PrepareSpecializedComponent()

@@ -15,9 +15,6 @@
 
 #include "frameworks/bridge/common/dom/dom_canvas.h"
 
-#include "base/utils/string_utils.h"
-#include "frameworks/bridge/common/dom/dom_type.h"
-#include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/core/components/declaration/canvas/canvas_declaration.h"
 
 namespace OHOS::Ace::Framework {
