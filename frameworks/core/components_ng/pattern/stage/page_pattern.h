@@ -193,6 +193,14 @@ public:
         }
     }
 
+    void RemoveOnHiddenChange(int32_t id)
+    {
+        auto iter = onHiddenChange_.find(id);
+        if (iter != onHiddenChange_.end()) {
+            onHiddenChange_.erase(iter);
+        }
+    }
+
     void CreateOverlayManager(bool isShow)
     {
         if (!overlayManager_ && isShow) {
