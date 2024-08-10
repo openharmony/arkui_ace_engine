@@ -91,7 +91,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag001, TestSize.Level1)
     float delta = SCROLL_BAR_CHILD_HEIGHT;
     info.SetMainDelta(-delta);
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_);
+    FlushLayoutTask(stackNode_, true);
     EXPECT_EQ(pattern_->GetCurrentPosition(), 0.f);
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), 0.f);
 
@@ -101,7 +101,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag001, TestSize.Level1)
      */
     info.SetMainDelta(delta);
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_);
+    FlushLayoutTask(stackNode_, true);
     EXPECT_EQ(pattern_->GetCurrentPosition(), delta);
     float expectOffset = delta * controlDistance / scrollableDistance;
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), expectOffset); // 50.f
@@ -111,7 +111,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag001, TestSize.Level1)
      * @tc.expected: Scroll down
      */
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_);
+    FlushLayoutTask(stackNode_, true);
     EXPECT_EQ(pattern_->GetCurrentPosition(), delta * 2);
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), expectOffset * 2); // 100.f
 
@@ -121,7 +121,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag001, TestSize.Level1)
      */
     info.SetMainDelta(-delta);
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_);
+    FlushLayoutTask(stackNode_, true);
     EXPECT_EQ(pattern_->GetCurrentPosition(), delta);
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), expectOffset); // 50.f
 
@@ -129,7 +129,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag001, TestSize.Level1)
      * @tc.steps: step6. HandleDragEnd, drag end
      */
     HandleDragEnd(info);
-    FlushLayoutTask(stackNode_);
+    FlushLayoutTask(stackNode_, true);
     EXPECT_EQ(pattern_->GetCurrentPosition(), delta);
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), expectOffset);
 }
@@ -164,7 +164,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag002, TestSize.Level1)
     float delta = -SCROLL_BAR_CHILD_HEIGHT;
     info.SetMainDelta(delta);
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_);
+    FlushLayoutTask(stackNode_, true);
     float expectBarPosition = -delta / controlDistance * scrollableDistance;
     EXPECT_EQ(pattern_->GetCurrentPosition(), expectBarPosition); // 512.f
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), -delta);
@@ -174,7 +174,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag002, TestSize.Level1)
      * @tc.expected: Scroll down
      */
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_);
+    FlushLayoutTask(stackNode_, true);
     EXPECT_EQ(pattern_->GetCurrentPosition(), scrollableDistance); // 640.f
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), controlDistance);
 
@@ -184,7 +184,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag002, TestSize.Level1)
      */
     info.SetMainDelta(-delta);
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_);
+    FlushLayoutTask(stackNode_, true);
     EXPECT_EQ(pattern_->GetCurrentPosition(), scrollableDistance - expectBarPosition); // 138
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), controlDistance + delta);              // 40.f
 
@@ -192,7 +192,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag002, TestSize.Level1)
      * @tc.steps: step5. HandleDragEnd, mouse wheel end
      */
     HandleDragEnd(info);
-    FlushLayoutTask(stackNode_);
+    FlushLayoutTask(stackNode_, true);
     EXPECT_EQ(pattern_->GetCurrentPosition(), scrollableDistance - expectBarPosition); // 138
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), controlDistance + delta);              // 40.f
 }
@@ -290,7 +290,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag004, TestSize.Level1)
     float delta = -SCROLL_BAR_CHILD_HEIGHT;
     info.SetMainDelta(delta);
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_);
+    FlushLayoutTask(stackNode_, true);
     EXPECT_EQ(pattern_->GetCurrentPosition(), 0.f);
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), 0.f);
 
@@ -298,7 +298,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag004, TestSize.Level1)
      * @tc.steps: step3. HandleDragEnd, mouse wheel end
      */
     HandleDragEnd(info);
-    FlushLayoutTask(stackNode_);
+    FlushLayoutTask(stackNode_, true);
     EXPECT_EQ(pattern_->GetCurrentPosition(), 0.f);
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), 0.f);
 }
