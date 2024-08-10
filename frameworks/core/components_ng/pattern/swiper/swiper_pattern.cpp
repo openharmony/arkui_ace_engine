@@ -3133,10 +3133,10 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
 void SwiperPattern::UpdateOffsetAfterPropertyAnimation(float offset)
 {
     UpdateCurrentOffset(offset);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    if (pipeline) {
-        pipeline->FlushUITasks();
-    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->SetLayoutDirtyMarked(true);
+    host->CreateLayoutTask();
 }
 
 void SwiperPattern::OnPropertyTranslateAnimationFinish(const OffsetF& offset)
