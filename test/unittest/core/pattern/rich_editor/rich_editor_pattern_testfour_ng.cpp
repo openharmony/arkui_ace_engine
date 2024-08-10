@@ -150,4 +150,197 @@ HWTEST_F(RichEditorPatternTestFourNg, HandleMenuCallbackOnSelectAll001, TestSize
     EXPECT_EQ(richEditorPattern->selectOverlay_->IsUsingMouse(), true);
     richEditorPattern->HandleMenuCallbackOnSelectAll();
 }
+
+/**
+ * @tc.name: ToStyledString002
+ * @tc.desc: test ToStyledString
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, ToStyledString002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    int32_t start = 3;
+    int32_t end = -2;
+    AddSpan("test");
+    RefPtr<SpanString> res = richEditorPattern->ToStyledString(start, end);
+    ASSERT_NE(res, nullptr);
+}
+
+/**
+ * @tc.name: GetTextStyleBySpanItem001
+ * @tc.desc: test GetTextStyleBySpanItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, GetTextStyleBySpanItem001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->fontStyle = nullptr;
+    spanItem->textLineStyle = nullptr;
+    richEditorPattern->GetTextStyleBySpanItem(spanItem);
+    ASSERT_EQ(spanItem->fontStyle, nullptr);
+}
+
+/**
+ * @tc.name: GetImageStyleBySpanItem001
+ * @tc.desc: test GetImageStyleBySpanItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, GetImageStyleBySpanItem001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto spanItem1 = AceType::MakeRefPtr<ImageSpanItem>();
+    ImageSpanAttribute imageStyle;
+    std::optional<Ace::NG::MarginProperty> marginProp = std::nullopt;
+    std::optional<Ace::NG::BorderRadiusProperty> borderRadius = std::nullopt;
+    marginProp = { CALC_LENGTH_CALC, CALC_LENGTH_CALC, CALC_LENGTH_CALC, CALC_LENGTH_CALC };
+    borderRadius = { CALC_TEST, CALC_TEST, CALC_TEST, CALC_TEST };
+    imageStyle.marginProp = marginProp;
+    imageStyle.borderRadius = borderRadius;
+    ImageSpanSize imageSize;
+    CalcDimension imageSpanWidth;
+    CalcDimension imageSpanHeight;
+    imageSize.width = imageSpanWidth;
+    imageSize.height = imageSpanHeight;
+    imageStyle.size = imageSize;
+    imageStyle.verticalAlign = VerticalAlign::TOP;
+    imageStyle.objectFit = ImageFit::COVER;
+    ImageSpanOptions option;
+    option.imageAttribute = imageStyle;
+    spanItem1->options = option;
+    richEditorPattern->GetImageStyleBySpanItem(spanItem1);
+
+    auto spanItem2 = AceType::MakeRefPtr<ImageSpanItem>();
+    ImageSpanAttribute imageStyle2;
+    ImageSpanOptions option2;
+    option2.imageAttribute = imageStyle2;
+    spanItem2->options = option2;
+    richEditorPattern->GetImageStyleBySpanItem(spanItem2);
+
+    ASSERT_EQ(spanItem1->options.imageAttribute.has_value(), true);
+}
+
+/**
+ * @tc.name: RequestKeyboard001
+ * @tc.desc: test RequestKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, RequestKeyboard001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    bool res = richEditorPattern->RequestKeyboard(true, true, true);
+
+    res = richEditorPattern->RequestKeyboard(true, true, false);
+
+    richEditorPattern->customKeyboardBuilder_ = []() {};
+    res = richEditorPattern->RequestKeyboard(true, true, true);
+
+    richEditorPattern->customKeyboardBuilder_ = []() {};
+    res = richEditorPattern->RequestKeyboard(true, true, false);
+    ASSERT_NE(res, true);
+}
+
+/**
+ * @tc.name: ReplacePreviewText001
+ * @tc.desc: test ReplacePreviewText
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, ReplacePreviewText001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    AddSpan("test");
+    PreviewRange previewRange;
+    std::string previewTextValue;
+    previewRange.start = -1;
+    previewRange.end = -2;
+    richEditorPattern->ReplacePreviewText(previewTextValue, previewRange);
+
+    previewRange.start = -3;
+    previewRange.end = -2;
+    richEditorPattern->ReplacePreviewText(previewTextValue, previewRange);
+
+    previewRange.start = 1;
+    previewRange.end = 0;
+    richEditorPattern->ReplacePreviewText(previewTextValue, previewRange);
+
+    previewRange.start = 10;
+    previewRange.end = 20;
+    richEditorPattern->ReplacePreviewText(previewTextValue, previewRange);
+
+    previewRange.start = 15;
+    previewRange.end = 10;
+    richEditorPattern->ReplacePreviewText(previewTextValue, previewRange);
+
+    previewRange.start = 1;
+    previewRange.end = 2;
+    bool res = richEditorPattern->ReplacePreviewText(previewTextValue, previewRange);
+    ASSERT_NE(res, false);
+}
+
+/**
+ * @tc.name: UpdatePreviewText002
+ * @tc.desc: test UpdatePreviewText
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, UpdatePreviewText002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->previewTextRecord_.startOffset = -99;
+    richEditorPattern->previewTextRecord_.endOffset = 99;
+
+    PreviewRange previewRange;
+
+    std::string previewTextValue;
+    previewRange.start = -2;
+    previewRange.end = -2;
+    bool res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
+
+    previewRange.start = -2;
+    previewRange.end = 9;
+    res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
+
+    previewTextValue = "abc";
+    previewRange.start = -2;
+    previewRange.end = -2;
+    res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
+
+    previewRange.start = -2;
+    previewRange.end = 9;
+    res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
+    ASSERT_NE(res, true);
+}
+
+/**
+ * @tc.name: FinishTextPreview004
+ * @tc.desc: test FinishTextPreview
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, FinishTextPreview004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->previewTextRecord_.previewContent = "";
+    richEditorPattern->FinishTextPreview();
+    ASSERT_EQ(richEditorPattern->previewTextRecord_.previewContent.empty(), true);
+}
 } // namespace OHOS::Ace::NG
