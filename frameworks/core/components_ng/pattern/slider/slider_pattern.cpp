@@ -230,7 +230,8 @@ void SliderPattern::UpdateStepAccessibilityVirtualNode()
     const std::vector<PointF>& stepPointVec = sliderContentModifier_->GetStepPointVec();
 
     for (uint32_t i = 0; i < pointCount; i++) {
-        std::string txt = GetPointAccessibilityTxt(sliderPaintProperty, i, stepRatio_, min, max);
+        std::string txt =
+            GetPointAccessibilityTxt(sliderPaintProperty, i, sliderPaintProperty->GetStepRatio(), min, max);
         SetStepPointAccessibilityVirtualNode(pointAccessibilityNodeVec_[i], pointSize,
             PointF(stepPointVec[i].GetX() - pointOffsetWidth, stepPointVec[i].GetY() - pointOffsetHeight),
             (i < rangeFromPointIndex || i > rangeToPointIndex) ? " " : txt);
@@ -339,7 +340,6 @@ void SliderPattern::CalcSliderValue()
     float step = sliderPaintProperty->GetStep().value_or(1.0f);
     CancelExceptionValue(min, max, step);
     valueRatio_ = (value_ - min) / (max - min);
-    stepRatio_ = step / (max - min);
 }
 
 void SliderPattern::CancelExceptionValue(float& min, float& max, float& step)
@@ -790,11 +790,12 @@ void SliderPattern::UpdateValueByLocalLocation(const std::optional<Offset>& loca
     touchLength = std::clamp(touchLength, 0.0f, sliderLength_);
     CHECK_NULL_VOID(sliderLength_ != 0);
     valueRatio_ = touchLength / sliderLength_;
-    CHECK_NULL_VOID(stepRatio_ != 0);
-    valueRatio_ = NearEqual(valueRatio_, 1) ? 1 : std::round(valueRatio_ / stepRatio_) * stepRatio_;
+    auto stepRatio = sliderPaintProperty->GetStepRatio();
+    CHECK_NULL_VOID(stepRatio != 0);
+    valueRatio_ = NearEqual(valueRatio_, 1) ? 1 : std::round(valueRatio_ / stepRatio) * stepRatio;
 
     float oldValue = value_;
-    value_ = NearEqual(valueRatio_, 1) ? max : (std::round(valueRatio_ / stepRatio_) * step + min);
+    value_ = NearEqual(valueRatio_, 1) ? max : (std::round(valueRatio_ / stepRatio) * step + min);
     value_ = std::clamp(value_, min, max);
     sliderPaintProperty->UpdateValue(value_);
     valueChangeFlag_ = !NearEqual(oldValue, value_);
@@ -829,7 +830,7 @@ float SliderPattern::GetValueInValidRange(
         if (range->HasValidValues()) {
             auto fromValue = range->GetFromValue();
             auto toValue = range->GetToValue();
-            float step = stepRatio_ * (max - min);
+            float step = paintProperty->GetStepRatio() * (max - min);
             if (NearEqual(step, 0.0f)) {
                 step = 1.0f;
             }
@@ -1294,7 +1295,8 @@ SliderContentModifier::Parameters SliderPattern::UpdateContentParameters()
     CHECK_NULL_RETURN(pipeline, SliderContentModifier::Parameters());
     auto theme = pipeline->GetTheme<SliderTheme>();
     CHECK_NULL_RETURN(theme, SliderContentModifier::Parameters());
-    SliderContentModifier::Parameters parameters { trackThickness_, blockSize_, stepRatio_, hotBlockShadowWidth_,
+    auto stepRatio = paintProperty->GetStepRatio();
+    SliderContentModifier::Parameters parameters { trackThickness_, blockSize_, stepRatio, hotBlockShadowWidth_,
         mouseHoverFlag_, mousePressedFlag_ };
     auto contentSize = GetHostContentSize();
     CHECK_NULL_RETURN(contentSize, SliderContentModifier::Parameters());
