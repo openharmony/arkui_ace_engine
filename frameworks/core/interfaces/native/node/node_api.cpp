@@ -2220,6 +2220,7 @@ CJUIFullNodeAPI fullCJUIApi {
     GetCJUIGraphicsAPI,         // Graphics
     GetCJUIDialogAPI,
     GetCJUIExtendedAPI,         // Extended
+    NodeAdapter::GetCJUINodeAdapterAPI,         // adapter.
 };
 } // namespace
 
