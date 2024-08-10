@@ -636,8 +636,14 @@ public:
         closeDialogEvent_ = closeDialogEvent;
     }
 
+    const PickerTextProperties& GetTextProperties() const
+    {
+        return textProperties_;
+    }
+
     void SetTextProperties(const PickerTextProperties& properties)
     {
+        textProperties_ = properties;
         if (properties.disappearTextStyle_.fontSize.has_value() && properties.disappearTextStyle_.fontSize->IsValid()) {
             isUserSetGradientFont_ = true;
             gradientHeight_ = properties.disappearTextStyle_.fontSize.value();
@@ -771,6 +777,7 @@ private:
     Dimension gradientHeight_;
     Dimension dividerSpacing_;
     float paintDividerSpacing_ = 1.0f;
+    PickerTextProperties textProperties_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerPattern);
 };
