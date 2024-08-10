@@ -67,8 +67,8 @@ void NavDestinationEventHub::FireOnShownEvent(const std::string& name, const std
         auto onShownEvent = onShownEvent_;
         onShownEvent();
     }
-    if (onHiddenChange_) {
-        onHiddenChange_(true);
+    if (!onHiddenChange_.empty()) {
+        FireOnHiddenChange(true);
     }
     if (Recorder::EventRecorder::Get().IsPageRecordEnable()) {
         auto host = GetFrameNode();
@@ -92,10 +92,9 @@ void NavDestinationEventHub::FireOnHiddenEvent(const std::string& name)
     if (onHiddenEvent_) {
         onHiddenEvent_();
     }
-    if (onHiddenChange_) {
-        onHiddenChange_(false);
+    if (!onHiddenChange_.empty()) {
+        FireOnHiddenChange(false);
     }
-
     if (Recorder::EventRecorder::Get().IsPageRecordEnable()) {
         auto host = GetFrameNode();
         CHECK_NULL_VOID(host);
