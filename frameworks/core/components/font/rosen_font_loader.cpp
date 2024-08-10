@@ -17,7 +17,6 @@
 
 #include "base/network/download_manager.h"
 #include "core/common/resource/resource_manager.h"
-#include "core/common/resource/resource_object.h"
 #include "core/common/resource/resource_wrapper.h"
 #include "core/components/font/rosen_font_collection.h"
 #include "core/pipeline/base/rosen_render_context.h"

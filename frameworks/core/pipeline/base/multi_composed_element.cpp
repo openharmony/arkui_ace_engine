@@ -16,8 +16,6 @@
 #include "frameworks/core/pipeline/base/multi_composed_element.h"
 
 #include "core/pipeline/base/multi_composed_component.h"
-#include "frameworks/core/common/frontend.h"
-#include "frameworks/core/pipeline/base/render_element.h"
 
 namespace OHOS::Ace {
 

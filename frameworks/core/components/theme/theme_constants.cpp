@@ -15,16 +15,7 @@
 
 #include "core/components/theme/theme_constants.h"
 
-#include <cstdint>
-
-#include "base/json/json_util.h"
 #include "base/resource/ace_res_config.h"
-#include "base/utils/device_type.h"
-#include "base/utils/string_utils.h"
-#include "base/utils/system_properties.h"
-#include "core/common/ace_application_info.h"
-#include "core/components/theme/theme_constants_defines.h"
-#include "core/components/theme/theme_utils.h"
 
 namespace OHOS::Ace {
 namespace {

@@ -15,13 +15,6 @@
 
 #include "core/pipeline_ng/pipeline_context.h"
 
-#include <algorithm>
-#include <cinttypes>
-#include <cstdint>
-#include <memory>
-#include <string>
-
-#include "base/log/log_wrapper.h"
 #include "base/subwindow/subwindow_manager.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
@@ -41,16 +34,9 @@
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
-#include "base/thread/task_executor.h"
-#include "base/utils/time_util.h"
-#include "base/utils/utils.h"
-#include "core/animation/scheduler.h"
-#include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
-#include "core/common/container.h"
 #include "core/common/font_manager.h"
 #include "core/common/font_change_observer.h"
 #include "core/common/ime/input_method_manager.h"
@@ -58,45 +44,18 @@
 #include "core/common/stylus/stylus_detector_default.h"
 #include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/common/text_field_manager.h"
-#include "core/common/thread_checker.h"
-#include "core/common/window.h"
-#include "core/components/common/layout/screen_system_manager.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_advanced_register.h"
-#include "core/components_ng/event/focus_hub.h"
-#include "core/components_ng/pattern/app_bar/app_bar_view.h"
-#include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
-#include "core/components_ng/pattern/container_modal/container_modal_view.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view_factory.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
-#include "core/components_ng/pattern/custom/custom_node_base.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
-#include "core/components_ng/pattern/navigation/title_bar_node.h"
-#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
-#include "core/components_ng/pattern/overlay/keyboard_base_pattern.h"
-#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
-#include "core/components_ng/pattern/stage/page_pattern.h"
-#include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
-#include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/scene/window_scene_layout_manager.h"
 #endif
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/safe_area_insets.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/event/ace_events.h"
-#include "core/event/touch_event.h"
 #include "core/image/image_file_cache.h"
-#include "core/pipeline/base/element_register.h"
 #include "core/pipeline/pipeline_context.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace {
 constexpr uint64_t ONE_MS_IN_NS = 1 * 1000 * 1000;
