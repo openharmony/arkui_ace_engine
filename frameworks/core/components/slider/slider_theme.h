@@ -102,7 +102,7 @@ public:
                 theme->selectedTxt_ = pattern->GetAttr<std::string>("slider_accessibility_selected", "");
                 theme->unselectedTxt_ = pattern->GetAttr<std::string>("slider_accessibility_unselected", "");
                 theme->unselectedDesc_ = pattern->GetAttr<std::string>("slider_accessibility_unselectedDesc", "");
-                theme->disabledDesc_ = pattern->GetAttr<std::string>("slider_accessibility_disabledDesc", "");        
+                theme->disabledDesc_ = pattern->GetAttr<std::string>("slider_accessibility_disabledDesc", "");
             } else {
                 LOGW("find pattern of slider fail");
             }

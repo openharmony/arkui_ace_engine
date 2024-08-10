@@ -365,7 +365,7 @@ void DatePickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
         childSize = static_cast<float>(host->GetChildren().size());
     }
     auto leftTotalColumnWith = 0.0f;
-    for (uint32_t index = 0; index < focusKeyID_; ++index) {
+    for (int32_t index = 0; index < focusKeyID_; ++index) {
         auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(index));
         CHECK_NULL_VOID(stackChild);
         leftTotalColumnWith += stackChild->GetGeometryNode()->GetFrameSize().Width();
