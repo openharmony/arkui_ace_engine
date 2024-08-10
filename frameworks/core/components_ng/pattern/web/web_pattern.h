@@ -881,7 +881,7 @@ private:
     bool FilterScrollEventHandleOffset(const float offset);
     bool FilterScrollEventHandlevVlocity(const float velocity);
     void UpdateFlingReachEdgeState(const float value, bool status);
-    void CalculateTooltipMargin(RefPtr<FrameNode>& textNode, MarginProperty& textMargin);
+    void CalculateTooltipOffset(RefPtr<FrameNode>& tooltipNode, OffsetF& tooltipOfffset);
     void HandleShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     void ShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     void RegisterVisibleAreaChangeCallback(const RefPtr<PipelineContext> &context);
@@ -995,7 +995,6 @@ private:
     bool isCurrentStartHandleDragging_ = false;
     std::list<TouchInfo> touchOverlayInfo_;
     bool isPopup_ = false;
-    int32_t tooltipTextId_ = -1;
     int32_t tooltipId_ = -1;
     int32_t mouseHoveredX_ = -1;
     int32_t mouseHoveredY_ = -1;

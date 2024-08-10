@@ -3966,29 +3966,14 @@ void WebPattern::HandleShowTooltip(const std::string& tooltip, int64_t tooltipTi
     CHECK_NULL_VOID(overlayManager);
     if (tooltipId_ == -1) {
         tooltipId_ = ElementRegister::GetInstance()->MakeUniqueId();
-        tooltipTextId_ = ElementRegister::GetInstance()->MakeUniqueId();
     }
-    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, tooltipTextId_,
+    auto tooltipNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, tooltipId_,
         []() { return AceType::MakeRefPtr<TextPattern>(); });
-    CHECK_NULL_VOID(textNode);
-    auto tooltipNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, tooltipId_,
-        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
     CHECK_NULL_VOID(tooltipNode);
 
-    textNode->MountToParent(tooltipNode, 0);
-
-    auto tooltipLayoutProperty = tooltipNode->GetLayoutProperty<LinearLayoutProperty>();
-    CHECK_NULL_VOID(tooltipLayoutProperty);
-    tooltipLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(CalcLength(1.0, DimensionUnit::PERCENT))));
-    tooltipLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(CalcLength(1.0, DimensionUnit::PERCENT))));
-    tooltipLayoutProperty->UpdateMainAxisAlign(FlexAlign::FLEX_START);
-    tooltipLayoutProperty->UpdateCrossAxisAlign(FlexAlign::FLEX_START);
-
-    auto textRenderContext = textNode->GetRenderContext();
+    auto textRenderContext = tooltipNode->GetRenderContext();
     CHECK_NULL_VOID(textRenderContext);
-    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    auto textLayoutProperty = tooltipNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateContent(tooltip);
 
@@ -4002,9 +3987,10 @@ void WebPattern::HandleShowTooltip(const std::string& tooltip, int64_t tooltipTi
         pipeline->GetCurrentRootWidth() * TOOLTIP_MAX_PORTION)), std::nullopt));
     textRenderContext->UpdateBackgroundColor(Color::WHITE);
 
-    MarginProperty textMargin;
-    CalculateTooltipMargin(textNode, textMargin);
-    textLayoutProperty->UpdateMargin(textMargin);
+    OffsetF tooltipOffset;
+    CalculateTooltipOffset(tooltipNode, tooltipOffset);
+    textRenderContext->UpdatePosition(OffsetT<Dimension>(Dimension(tooltipOffset.GetX()),
+        Dimension(tooltipOffset.GetY())));
 
     BorderColorProperty borderColor;
     borderColor.SetColor(Color::BLACK);
@@ -4031,9 +4017,9 @@ void WebPattern::ShowTooltip(const std::string& tooltip, int64_t tooltipTimestam
     taskExecutor->PostDelayedTask(tooltipTask, TaskExecutor::TaskType::UI, TOOLTIP_DELAY_MS, "ArkUIWebShowTooltip");
 }
 
-void WebPattern::CalculateTooltipMargin(RefPtr<FrameNode>& textNode, MarginProperty& textMargin)
+void WebPattern::CalculateTooltipOffset(RefPtr<FrameNode>& tooltipNode, OffsetF& tooltipOffset)
 {
-    auto textLayoutWrapper = textNode->CreateLayoutWrapper(true);
+    auto textLayoutWrapper = tooltipNode->CreateLayoutWrapper(true);
     CHECK_NULL_VOID(textLayoutWrapper);
     textLayoutWrapper->Measure(std::nullopt);
     auto textGeometryNode = textLayoutWrapper->GetGeometryNode();
@@ -4042,18 +4028,22 @@ void WebPattern::CalculateTooltipMargin(RefPtr<FrameNode>& textNode, MarginPrope
     auto textHeight = textGeometryNode->GetMarginFrameSize().Height();
 
     auto offset = GetCoordinatePoint().value_or(OffsetF());
-    auto marginX = offset.GetX() + mouseHoveredX_ + TOOLTIP_MARGIN;
-    auto marginY = offset.GetY() + mouseHoveredY_ + TOOLTIP_MARGIN;
+    auto offsetX = offset.GetX() + mouseHoveredX_ + TOOLTIP_MARGIN;
+    auto offsetY = offset.GetY() + mouseHoveredY_ + TOOLTIP_MARGIN;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    if (GreatNotEqual(marginX + textWidth, pipeline->GetCurrentRootWidth())) {
-        marginX = pipeline->GetCurrentRootWidth() - textWidth;
+    if (GreatNotEqual(offsetX + textWidth, pipeline->GetCurrentRootWidth())) {
+        offsetX = pipeline->GetCurrentRootWidth() - textWidth;
     }
-    if (GreatNotEqual(marginY + textHeight, pipeline->GetCurrentRootHeight())) {
-        marginY = pipeline->GetCurrentRootHeight() - textHeight;
+    if (GreatNotEqual(offsetY + textHeight, pipeline->GetCurrentRootHeight())) {
+        offsetY = pipeline->GetCurrentRootHeight() - textHeight;
     }
-    textMargin.left = CalcLength(Dimension(marginX));
-    textMargin.top = CalcLength(Dimension(marginY));
+    tooltipOffset.SetX(offsetX);
+    tooltipOffset.SetY(offsetY);
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "CalculateTooltipOffset [Tooltip] width: %{public}f height: %{public}f offset:(%{public}f, %{public}f)"
+        " [Web] width: %{public}f height: %{public}f offset:(%{public}f, %{public}f)",
+        textWidth, textHeight, offsetX, offsetY, drawSize_.Width(), drawSize_.Height(), offset.GetX(), offset.GetY());
 }
 
 void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
