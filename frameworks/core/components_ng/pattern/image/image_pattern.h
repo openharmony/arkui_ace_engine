@@ -26,6 +26,7 @@
 #include "core/components/declaration/image/image_animator_declaration.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/manager/select_overlay/selection_host.h"
+#include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/pattern/image/image_event_hub.h"
 #include "core/components_ng/pattern/image/image_layout_algorithm.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -334,11 +335,6 @@ public:
         isImageAnimator_ = isImageAnimator;
     }
 
-    bool GetLoadInVipChannel()
-    {
-        return loadInVipChannel_;
-    }
-
     bool GetNeedLoadAlt()
     {
         return needLoadAlt_;
@@ -347,11 +343,6 @@ public:
     void SetNeedLoadAlt(bool needLoadAlt)
     {
         needLoadAlt_ = needLoadAlt;
-    }
-
-    void SetLoadInVipChannel(bool loadInVipChannel)
-    {
-        loadInVipChannel_ = loadInVipChannel;
     }
 
     void SetOnProgressCallback(std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& onProgress);
@@ -526,11 +517,12 @@ private:
     RefPtr<Clipboard> clipboard_;
     RefPtr<SelectOverlayProxy> selectOverlay_;
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
+    ImageDfxConfig imageDfxConfig_;
+    ImageDfxConfig altImageDfxConfig_;
 
     std::function<bool(const KeyEvent& event)> keyEventCallback_ = nullptr;
     bool syncLoad_ = false;
     bool needBorderRadius_ = false;
-    bool loadInVipChannel_ = false;
     AIImageQuality imageQuality_ = AIImageQuality::NONE;
     bool isImageQualityChange_ = false;
     bool isEnableAnalyzer_ = false;

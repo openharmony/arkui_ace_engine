@@ -104,23 +104,36 @@ RefPtr<CanvasImage> ImageDecoder::MakeDrawingImage()
 RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(AIImageQuality imageQuality, bool isHdrDecoderNeed)
 {
     CHECK_NULL_RETURN(obj_ && data_, nullptr);
+    auto imageDfxConfig = obj_->GetImageDfxConfig();
 #ifndef USE_ROSEN_DRAWING
     auto source = ImageSource::Create(data_->bytes(), data_->size());
 #else
     auto source = ImageSource::Create(static_cast<const uint8_t*>(data_->GetData()), data_->GetSize());
 #endif
-    CHECK_NULL_RETURN(source, nullptr);
+    if (!source) {
+        TAG_LOGE(AceLogTag::ACE_IMAGE,
+            "ImageSouce Create Fail, id = %{public}d, accessId = %{public}lld, src = %{public}s.",
+            imageDfxConfig.nodeId_, static_cast<long long>(imageDfxConfig.accessibilityId_),
+            imageDfxConfig.imageSrc_.c_str());
+        return nullptr;
+    }
 
     auto width = std::lround(desiredSize_.Width());
     auto height = std::lround(desiredSize_.Height());
     std::pair<int32_t, int32_t> sourceSize = source->GetImageSize();
     auto src = obj_->GetSourceInfo();
     auto srcStr = src.GetSrcType() == SrcType::BASE64 ? src.GetKey() : src.ToString();
-    ACE_SCOPED_TRACE("CreateImagePixelMap %s, sourceSize: [ %d, %d ], targetSize: [ %d, %d ]", srcStr.c_str(),
-        sourceSize.first, sourceSize.second, static_cast<int32_t>(width), static_cast<int32_t>(height));
-    auto pixmap = source->CreatePixelMap({ width, height }, imageQuality, isHdrDecoderNeed);
+    ACE_SCOPED_TRACE("CreateImagePixelMap %s, hdr: [%d], quality: [%d], sourceSize: [ %d, %d ], targetSize: [ %d, %d ]",
+        srcStr.c_str(), static_cast<int32_t>(isHdrDecoderNeed), static_cast<int32_t>(imageQuality), sourceSize.first,
+        sourceSize.second, static_cast<int32_t>(width), static_cast<int32_t>(height));
 
-    CHECK_NULL_RETURN(pixmap, nullptr);
+    auto pixmap = source->CreatePixelMap({ width, height }, imageQuality, isHdrDecoderNeed);
+    if (!pixmap) {
+        TAG_LOGE(AceLogTag::ACE_IMAGE,
+            "PixelMap Create Fail, id = %{public}d, accessId = %{public}lld, src = %{public}s.", imageDfxConfig.nodeId_,
+            static_cast<long long>(imageDfxConfig.accessibilityId_), imageDfxConfig.imageSrc_.c_str());
+        return nullptr;
+    }
     auto image = PixelMapImage::Create(pixmap);
 
     if (SystemProperties::GetDebugEnabled()) {

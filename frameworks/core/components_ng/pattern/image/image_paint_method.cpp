@@ -124,7 +124,12 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
 
 CanvasDrawFunction ImagePaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
 {
-    CHECK_NULL_RETURN(canvasImage_, nullptr);
+    if (!canvasImage_) {
+        TAG_LOGE(AceLogTag::ACE_IMAGE,
+            "canvasImage is null id = %{public}d, accessId = %{public}lld, src = %{public}s.", imageDfxConfig_.nodeId_,
+            static_cast<long long>(imageDfxConfig_.accessibilityId_), imageDfxConfig_.imageSrc_.c_str());
+        return nullptr;
+    }
     auto contentSize = paintWrapper->GetContentSize();
     auto&& paintConfig = canvasImage_->GetPaintConfig();
 
@@ -144,9 +149,8 @@ CanvasDrawFunction ImagePaintMethod::GetContentDrawFunction(PaintWrapper* paintW
             svgCanvas->SetColorFilter(imageColorFilter);
         }
     }
-    ImagePainter imagePainter(canvasImage_);
-    auto sensitive = sensitive_;
-    return [imagePainter, contentSize, sensitive](RSCanvas& canvas) {
+    ImagePainter imagePainter(canvasImage_, imageDfxConfig_);
+    return [imagePainter, contentSize, sensitive = sensitive_](RSCanvas& canvas) {
         if (!sensitive) {
             imagePainter.DrawImage(canvas, {}, contentSize);
         }

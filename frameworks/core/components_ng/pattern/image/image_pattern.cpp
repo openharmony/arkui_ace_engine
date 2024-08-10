@@ -14,6 +14,7 @@
  */
 
 #include "third_party/libphonenumber/cpp/src/phonenumbers/base/logging.h"
+#include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/pattern/image/image_event_hub.h"
 #include "core/components_ng/pattern/image/image_overlay_modifier.h"
 #include "core/image/image_source_info.h"
@@ -59,6 +60,7 @@ constexpr float BOX_EPSILON = 0.5f;
 constexpr float IMAGE_SENSITIVE_RADIUS = 80.0f;
 constexpr double IMAGE_SENSITIVE_SATURATION = 1.0;
 constexpr double IMAGE_SENSITIVE_BRIGHTNESS = 1.08;
+constexpr uint32_t MAX_SRC_LENGTH = 100; // prevent the Base64 image format from too long.
 
 ImagePattern::ImagePattern()
 {
@@ -178,7 +180,18 @@ void ImagePattern::TriggerFirstVisibleAreaChange()
     RectF visibleInnerRect;
     RectF visibleRect;
     host->GetVisibleRectWithClip(visibleRect, visibleInnerRect, frameRect);
-    OnVisibleAreaChange(GreatNotEqual(visibleInnerRect.Width(), 0.0) && GreatNotEqual(visibleInnerRect.Height(), 0.0));
+    bool visible = GreatNotEqual(visibleInnerRect.Width(), 0.0) && GreatNotEqual(visibleInnerRect.Height(), 0.0);
+    ACE_SCOPED_TRACE("TriggerFirstVisibleAreaChange visible: [%d], imageInfo: [%d]-[%lld]-[%s]", visible,
+        imageDfxConfig_.nodeId_, static_cast<long long>(imageDfxConfig_.accessibilityId_),
+        imageDfxConfig_.imageSrc_.c_str());
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGD(AceLogTag::ACE_IMAGE,
+            "TriggerFirstVisibleAreaChange visible:%{public}d, imageInfo: id = %{public}d, accessId = %{public}lld, "
+            "src = %{public}s",
+            visible, imageDfxConfig_.nodeId_, static_cast<long long>(imageDfxConfig_.accessibilityId_),
+            imageDfxConfig_.imageSrc_.c_str());
+    }
+    OnVisibleAreaChange(visible);
 }
 
 void ImagePattern::PrepareAnimation(const RefPtr<CanvasImage>& image)
@@ -356,6 +369,7 @@ void ImagePattern::OnImageLoadSuccess()
     dstRect_ = loadingCtx_->GetDstRect();
 
     CHECK_NULL_VOID(image_);
+    image_->SetImageDfxConfig(imageDfxConfig_);
     RectF paintRect = CalcImageContentPaintSize(geometryNode);
     LoadImageSuccessEvent event(loadingCtx_->GetImageSize().Width(), loadingCtx_->GetImageSize().Height(),
         geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), 1, paintRect.Width(),
@@ -388,11 +402,12 @@ void ImagePattern::OnImageLoadSuccess()
             pattern->CreateAnalyzerOverlay();
         }, "ArkUIImageCreateAnalyzerOverlay");
     }
-    ACE_LAYOUT_SCOPED_TRACE(
-        "OnImageLoadSuccess[self:%d][src:%s]", host->GetId(), loadingCtx_->GetSourceInfo().ToString().c_str());
+    ACE_SCOPED_TRACE("OnImageLoadSuccess [%d]-[%lld], srr: [%s]", imageDfxConfig_.nodeId_,
+        static_cast<long long>(imageDfxConfig_.accessibilityId_), imageDfxConfig_.imageSrc_.c_str());
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGD(
-            AceLogTag::ACE_IMAGE, "OnImageLoadSuccess src=%{public}s", loadingCtx_->GetSourceInfo().ToString().c_str());
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "OnImageLoadSuccess id = %{public}d, accessId = %{public}lld, src=%{public}s",
+            imageDfxConfig_.nodeId_, static_cast<long long>(imageDfxConfig_.accessibilityId_),
+            imageDfxConfig_.imageSrc_.c_str());
     }
     host->MarkNeedRenderOnly();
 }
@@ -531,18 +546,23 @@ RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
     if (!overlayMod_) {
         overlayMod_ = MakeRefPtr<ImageOverlayModifier>(selectedColor_);
     }
+    ImagePaintMethodConfig imagePaintMethodConfig {
+        .selected = isSelected_,
+        .imageOverlayModifier = overlayMod_,
+        .sensitive = sensitive,
+        .interpolation = interpolationDefault_
+    };
     if (image_) {
-        return MakeRefPtr<ImagePaintMethod>(image_, isSelected_, overlayMod_, sensitive, interpolationDefault_);
+        return MakeRefPtr<ImagePaintMethod>(image_, imagePaintMethodConfig, imageDfxConfig_);
     }
     if (altImage_ && altDstRect_ && altSrcRect_) {
-        return MakeRefPtr<ImagePaintMethod>(altImage_, isSelected_, overlayMod_, sensitive, interpolationDefault_);
+        return MakeRefPtr<ImagePaintMethod>(altImage_, imagePaintMethodConfig, imageDfxConfig_);
     }
     CreateObscuredImage();
     if (obscuredImage_) {
-        return MakeRefPtr<ImagePaintMethod>(
-            obscuredImage_, isSelected_, overlayMod_, sensitive, interpolationDefault_);
+        return MakeRefPtr<ImagePaintMethod>(obscuredImage_, imagePaintMethodConfig, imageDfxConfig_);
     }
-    return MakeRefPtr<ImagePaintMethod>(nullptr, isSelected_, overlayMod_, sensitive, interpolationDefault_);
+    return MakeRefPtr<ImagePaintMethod>(nullptr, imagePaintMethodConfig, imageDfxConfig_);
 }
 
 bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -620,11 +640,19 @@ void ImagePattern::LoadImage(
     loadNotifier.onDataReadyComplete_ = CreateCompleteCallBackInDataReady();
 
     loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(loadNotifier), syncLoad_);
+    auto host = GetHost();
+
+    imageDfxConfig_ = {
+        .nodeId_ = host->GetId(),
+        .accessibilityId_ = host->GetAccessibilityId(),
+        .imageSrc_ = src.ToString().substr(0, MAX_SRC_LENGTH),
+    };
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGD(AceLogTag::ACE_IMAGE, "start loading image %{public}s", src.ToString().c_str());
+        TAG_LOGD(AceLogTag::ACE_IMAGE,
+            "start loading image, id = %{public}d, accessId = %{public}lld, src = %{public}s", imageDfxConfig_.nodeId_,
+            static_cast<long long>(imageDfxConfig_.accessibilityId_), imageDfxConfig_.imageSrc_.c_str());
     }
-    loadingCtx_->SetLoadInVipChannel(GetLoadInVipChannel());
-    loadingCtx_->SetNodeId(GetHost()->GetId());
+    loadingCtx_->SetImageDfxConfig(imageDfxConfig_);
     if (onProgressCallback_) {
         loadingCtx_->SetOnProgressCallback(std::move(onProgressCallback_));
     }
@@ -642,6 +670,14 @@ void ImagePattern::LoadAltImage(const ImageSourceInfo& altImageSourceInfo)
     if (!altLoadingCtx_ || altLoadingCtx_->GetSourceInfo() != altImageSourceInfo ||
         (altLoadingCtx_ && altImageSourceInfo.IsSvg())) {
         altLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(altImageSourceInfo, std::move(altLoadNotifier));
+        auto host = GetHost();
+
+        altImageDfxConfig_ = {
+            .nodeId_ = host->GetId(),
+            .accessibilityId_ = host->GetAccessibilityId(),
+            .imageSrc_ = altImageSourceInfo.ToString().substr(0, MAX_SRC_LENGTH),
+        };
+        altLoadingCtx_->SetImageDfxConfig(altImageDfxConfig_);
         altLoadingCtx_->LoadImageData();
     }
 }
@@ -924,6 +960,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
         }
         pattern->altImage_ = pattern->altLoadingCtx_->MoveCanvasImage();
         CHECK_NULL_VOID(pattern->altImage_);
+        pattern->altImage_->SetImageDfxConfig(pattern->altImageDfxConfig_);
         pattern->altSrcRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetSrcRect());
         pattern->altDstRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetDstRect());
         pattern->SetImagePaintConfig(pattern->altImage_, *pattern->altSrcRect_, *pattern->altDstRect_,
@@ -1043,8 +1080,14 @@ void ImagePattern::OnVisibleChange(bool visible)
 
 void ImagePattern::OnVisibleAreaChange(bool visible, double ratio)
 {
+    ACE_SCOPED_TRACE("OnVisibleAreaChange visible: [%d], imageInfo: [%d]-[%lld]-[%s]", visible, imageDfxConfig_.nodeId_,
+        static_cast<long long>(imageDfxConfig_.accessibilityId_), imageDfxConfig_.imageSrc_.c_str());
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGD(AceLogTag::ACE_IMAGE, "OnVisibleAreaChange visible:%{public}d", (int)visible);
+        TAG_LOGD(AceLogTag::ACE_IMAGE,
+            "OnVisibleAreaChange visible:%{public}d, imageInfo: id = %{public}d, accessId = %{public}lld, "
+            "src = %{public}s",
+            visible, imageDfxConfig_.nodeId_, static_cast<long long>(imageDfxConfig_.accessibilityId_),
+            imageDfxConfig_.imageSrc_.c_str());
     }
     if (!visible) {
         CloseSelectOverlay();

@@ -25,6 +25,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/common/properties/decoration.h"
+#include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/image/image_source_info.h"
 
@@ -115,6 +116,11 @@ public:
         return *paintConfig_;
     }
 
+    inline ImageDfxConfig& GetImageDfxConfig()
+    {
+        return imageDfxConfig_;
+    }
+
     virtual bool IsStatic()
     {
         return true;
@@ -127,11 +133,17 @@ public:
 
     virtual void SetRawCompressData(void* dataPtr, int32_t w, int32_t h) {}
 
+    inline void SetImageDfxConfig(const ImageDfxConfig& imageDfxConfig)
+    {
+        imageDfxConfig_ = imageDfxConfig;
+    }
+
 protected:
     bool isDrawAnimate_ = false;
 
 private:
     std::unique_ptr<ImagePaintConfig> paintConfig_;
+    ImageDfxConfig imageDfxConfig_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CanvasImage);
 };
