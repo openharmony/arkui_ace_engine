@@ -402,4 +402,202 @@ HWTEST_F(RichEditorPatternTestTwoNg, MoveTextRect001, TestSize.Level1)
     richEditorPattern->UpdateScrollStateAfterLayout(true);
     EXPECT_EQ(richEditorPattern->MoveTextRect(0.0f), 0.0f);
 }
+
+/**
+ * @tc.name: IsResponseRegionExpandingNeededForStylus004
+ * @tc.desc: test IsResponseRegionExpandingNeededForStylus
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, IsResponseRegionExpandingNeededForStylus004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    TouchEvent touchEvent;
+    touchEvent.sourceTool = SourceTool::PEN;
+    touchEvent.type = TouchType::UNKNOWN;
+    bool ret = true;
+    ret = richEditorPattern->IsResponseRegionExpandingNeededForStylus(touchEvent);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: IsResponseRegionExpandingNeededForStylus005
+ * @tc.desc: test IsResponseRegionExpandingNeededForStylus
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, IsResponseRegionExpandingNeededForStylus005, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->GetHost()->GetFocusHub()->SetFocusType(FocusType::DISABLE);
+    TouchEvent touchEvent;
+    touchEvent.sourceTool = SourceTool::PEN;
+    touchEvent.type = TouchType::DOWN;
+    bool ret = true;
+    ret = richEditorPattern->IsResponseRegionExpandingNeededForStylus(touchEvent);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: TripleClickSection001
+ * @tc.desc: test TripleClickSection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, TripleClickSection001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->GetHost()->GetFocusHub()->SetFocusType(FocusType::DISABLE);
+    GestureEvent info = GestureEvent();
+    info.sourceTool_ = SourceTool::FINGER;
+    richEditorPattern->TripleClickSection(info, 1, 10, 2);
+    EXPECT_TRUE(richEditorPattern->showSelect_);
+}
+
+/**
+ * @tc.name: TripleClickSection002
+ * @tc.desc: test TripleClickSection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, TripleClickSection002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->GetHost()->GetFocusHub()->SetFocusType(FocusType::DISABLE);
+    GestureEvent info = GestureEvent();
+    info.sourceTool_ = SourceTool::FINGER;
+    richEditorPattern->TripleClickSection(info, 10, 10, 2);
+    EXPECT_TRUE(richEditorPattern->showSelect_);
+}
+
+/**
+ * @tc.name: UpdateSelectionByTouchMove001
+ * @tc.desc: test UpdateSelectionByTouchMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, UpdateSelectionByTouchMove001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->isEditing_ = true;
+    Offset touchOffset(11.0f, 11.0f);
+    richEditorPattern->UpdateSelectionByTouchMove(touchOffset);
+    EXPECT_TRUE(richEditorPattern->isShowMenu_);
+}
+
+/**
+ * @tc.name: GetSelectedMaxWidth001
+ * @tc.desc: test GetSelectedMaxWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, GetSelectedMaxWidth001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto ret = richEditorPattern->GetSelectedMaxWidth();
+    EXPECT_EQ(ret, 0.0f);
+}
+
+/**
+ * @tc.name: GetSelectedMaxWidth002
+ * @tc.desc: test GetSelectedMaxWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, GetSelectedMaxWidth002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    std::vector<RectF> rectList;
+    rectList.push_back(RectF(1.0f, 1.0f, 5.0f, 10.f));
+    auto overlayMod = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
+    overlayMod->SetSelectedRects(rectList);
+    auto ret = richEditorPattern->GetSelectedMaxWidth();
+    EXPECT_NE(ret, 0.0f);
+}
+
+/**
+ * @tc.name: GetSelectedMaxWidth003
+ * @tc.desc: test GetSelectedMaxWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, GetSelectedMaxWidth003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    std::vector<RectF> rectList;
+    rectList.push_back(RectF(1.0f, 1.0f, 5.0f, 10.f));
+    rectList.push_back(RectF(10.0f, 10.0f, 50.0f, 100.f));
+    auto overlayMod = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
+    overlayMod->SetSelectedRects(rectList);
+    auto ret = richEditorPattern->GetSelectedMaxWidth();
+    EXPECT_NE(ret, 0.0f);
+}
+
+/**
+ * @tc.name: HandleSelectParagraghPos001
+ * @tc.desc: test HandleSelectParagraghPos
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, HandleSelectParagraghPos001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->spans_.clear();
+    richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
+    auto it = richEditorPattern->spans_.front();
+    it->content = "test\n123";
+    it->position = 4;
+    richEditorPattern->caretPosition_ = 0;
+    richEditorPattern->isSpanStringMode_ = true;
+    auto ret = richEditorPattern->HandleSelectParagraghPos(true);
+    EXPECT_EQ(ret, 0);
+    ret = richEditorPattern->HandleSelectParagraghPos(false);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: HandleSelectFontStyle001
+ * @tc.desc: test HandleSelectFontStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, HandleSelectFontStyle001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->isSpanStringMode_ = false;
+    KeyCode code = KeyCode::KEY_UNKNOWN;
+    richEditorPattern->HandleSelectFontStyle(code);
+    EXPECT_EQ(richEditorPattern->isSpanStringMode_, false);
+}
+
+/**
+ * @tc.name: HandleOnShowMenu001
+ * @tc.desc: test HandleOnShowMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, HandleOnShowMenu001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->overlayMod_ = nullptr;
+    richEditorPattern->HandleOnShowMenu();
+    EXPECT_EQ(richEditorPattern->overlayMod_, nullptr);
+}
 } // namespace OHOS::Ace::NG
