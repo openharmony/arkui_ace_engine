@@ -67,6 +67,7 @@ ohos_unittest("form_render_test") {
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_proxy.cpp",
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_stub.cpp",
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_group.cpp",
+    "$ace_root/test/mock/interfaces/mock_uicontent_creator.cpp",
     "form_render_test.cpp",
     "form_renderer_dispatcher_proxy_test.cpp",
   ]
