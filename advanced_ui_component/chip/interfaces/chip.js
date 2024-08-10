@@ -327,9 +327,9 @@ export class ChipComponent extends ViewPU {
         this.onClicked = noop;
         this.__suffixIconOnFocus = new ObservedPropertySimplePU(false, this, "suffixIconOnFocus");
         this.__chipBreakPoints = new ObservedPropertySimplePU(BreakPointsType.SM, this, "chipBreakPoints");
-        this.smListener = mediaquery.matchMediaSync("0vp<width<600vp");
-        this.mdListener = mediaquery.matchMediaSync("600vp<=width<840vp");
-        this.lgListener = mediaquery.matchMediaSync("840vp<=width");
+        this.smListener = mediaquery.matchMediaSync("(0vp<width) and (width<600vp)");
+        this.mdListener = mediaquery.matchMediaSync("(600vp<=width) and (width<840vp)");
+        this.lgListener = mediaquery.matchMediaSync("(840vp<=width)");
         this.__isShowPressedBackGroundColor = new ObservedPropertySimplePU(false, this, "isShowPressedBackGroundColor");
         this.__fontSizeScale = new ObservedPropertyObjectPU(0, this, "fontSizeScale");
         this.__fontWeightScale = new ObservedPropertyObjectPU(0, this, "fontWeightScale");

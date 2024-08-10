@@ -296,9 +296,9 @@ export struct ChipComponent {
   private onClicked: () => void = noop
   @State suffixIconOnFocus: boolean = false
   @State chipBreakPoints: BreakPointsType = BreakPointsType.SM
-  private smListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("0vp<width<600vp")
-  private mdListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("600vp<=width<840vp")
-  private lgListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("840vp<=width")
+  private smListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("(0vp<width) and (width<600vp)")
+  private mdListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("(600vp<=width) and (width<840vp)")
+  private lgListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("(840vp<=width)")
   @State private isShowPressedBackGroundColor: boolean = false
   @State fontSizeScale: number | undefined = 0
   @State fontWeightScale: number | undefined = 0
