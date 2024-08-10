@@ -158,6 +158,14 @@ public:
         return defaultValue;
     }
 
+    float GetStepRatio()
+    {
+        float min = GetMin().value_or(0.0f);
+        float max = GetMax().value_or(100.0f);
+        float step = GetStep().value_or(1.0f);
+        return step / (max - min);
+    }
+
     ACE_DEFINE_PROPERTY_GROUP(SliderPaintStyle, SliderPaintStyle)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, Value, float, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, Min, float, PROPERTY_UPDATE_RENDER)
