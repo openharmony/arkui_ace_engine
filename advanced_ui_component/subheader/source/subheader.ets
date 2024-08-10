@@ -181,8 +181,8 @@ export struct SubHeader {
     end: LengthMetrics.resource($r('sys.float.margin_right')),
   };
   @Provide subHeaderTheme: SubHeaderTheme = new SubHeaderTheme();
-  @State isFollowingSystemFontScale: boolean = false;
-  @State appMaxFontScale: number = 3.2;
+  isFollowingSystemFontScale: boolean = false;
+  appMaxFontScale: number = 3.2;
   constraintWidth: number = 0;
   paddingLeft: number = 2;
 
@@ -519,6 +519,7 @@ export struct SubHeader {
           fontColor: this.subHeaderTheme.fontPrimaryColor,
         })
         .attributeModifier(this.primaryTitleModifier)
+        .accessibilityLevel('yes')
         .width('100%')
       Text($$.subContent)
         .secondaryTitleStyles({
@@ -532,6 +533,7 @@ export struct SubHeader {
           top: $r('sys.float.padding_level1'),
         })
         .attributeModifier(this.secondaryTitleModifier)
+        .accessibilityLevel('yes')
     }
     .commonContentPadding()
     .alignItems(HorizontalAlign.Start)
@@ -555,6 +557,7 @@ export struct SubHeader {
           this.changeFlexAlign(FlexAlign.SpaceBetween);
         })
         .attributeModifier(this.secondaryTitleModifier)
+        .accessibilityLevel('yes')
     }
     .alignItems(HorizontalAlign.Start)
     .commonListPadding()
@@ -603,6 +606,7 @@ export struct SubHeader {
           this.changeFlexAlign(FlexAlign.SpaceBetween);
         })
         .attributeModifier(this.primaryTitleModifier)
+        .accessibilityLevel('yes')
     }
     .alignItems(HorizontalAlign.Start)
     .commonContentPadding()
@@ -998,7 +1002,7 @@ class Util {
     } else if (typeof fontSize === 'number') {
       return fontSize;
     } else {
-      return resourceManager.getSystemResourceManager().getNumber(fontSize);
+      return getContext().resourceManager.getNumber(fontSize);
     }
   }
 
