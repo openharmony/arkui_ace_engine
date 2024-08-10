@@ -20,9 +20,9 @@
 namespace OHOS::Ace::NG {
 class WaterFlowSegmentCommonTest : public WaterFlowTestNg {
 protected:
-    void GetInstance() override
+    void GetWaterFlow() override
     {
-        WaterFlowTestNg::GetInstance();
+        WaterFlowTestNg::GetWaterFlow();
         info_ = AceType::DynamicCast<WaterFlowLayoutInfoBase>(pattern_->layoutInfo_);
         EXPECT_TRUE(info_);
     }
@@ -37,17 +37,14 @@ protected:
  */
 HWTEST_F(WaterFlowSegmentCommonTest, Illegal001, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(37);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(37);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, {});
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
+    CreateDone();
 
     UpdateCurrentOffset(-205.0f);
     EXPECT_EQ(info_->startIndex_, 0);
@@ -61,17 +58,14 @@ HWTEST_F(WaterFlowSegmentCommonTest, Illegal001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentCommonTest, Illegal002, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(10);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(10);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_8);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
+    CreateDone();
 
     // user-defined negative size would be treated as 0
     UpdateCurrentOffset(-205.0f);
@@ -89,17 +83,14 @@ HWTEST_F(WaterFlowSegmentCommonTest, Illegal002, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentCommonTest, Add001, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(60);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(60);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_5);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
+    CreateDone();
     EXPECT_EQ(info_->startIndex_, 0);
     EXPECT_EQ(info_->endIndex_, 10);
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
@@ -146,17 +137,14 @@ HWTEST_F(WaterFlowSegmentCommonTest, Add001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentCommonTest, Splice001, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(37);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(37);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_7);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
+    CreateDone();
     UpdateCurrentOffset(-300.0f);
 
     EXPECT_EQ(info_->startIndex_, 2);
@@ -207,17 +195,14 @@ HWTEST_F(WaterFlowSegmentCommonTest, Splice001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentCommonTest, Splice002, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(37);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(37);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_7);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
+    CreateDone();
 
     EXPECT_EQ(info_->endIndex_, 6);
     for (int i = 0; i < info_->endIndex_; ++i) {
@@ -254,17 +239,14 @@ HWTEST_F(WaterFlowSegmentCommonTest, Splice002, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentCommonTest, Delete001, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(37);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(37);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_7);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
+    CreateDone();
 
     UpdateCurrentOffset(-200.0f);
     EXPECT_EQ(info_->startIndex_, 1);
@@ -292,17 +274,14 @@ HWTEST_F(WaterFlowSegmentCommonTest, Delete001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentCommonTest, Delete002, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(37);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(37);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_7);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
+    CreateDone();
 
     UpdateCurrentOffset(-400.0f);
     EXPECT_EQ(info_->startIndex_, 3);
@@ -334,17 +313,14 @@ HWTEST_F(WaterFlowSegmentCommonTest, Delete002, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentCommonTest, Replace001, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(37);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(37);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_7);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
+    CreateDone();
 
     UpdateCurrentOffset(-205.0f);
     EXPECT_EQ(info_->startIndex_, 2);
@@ -378,17 +354,14 @@ HWTEST_F(WaterFlowSegmentCommonTest, Replace001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentCommonTest, Replace002, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(37);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(37);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_7);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
+    CreateDone();
 
     UpdateCurrentOffset(-300.0f);
     EXPECT_EQ(info_->startIndex_, 2);
@@ -410,17 +383,14 @@ HWTEST_F(WaterFlowSegmentCommonTest, Replace002, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentCommonTest, Replace003, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(37);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(37);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_7);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
+    CreateDone();
 
     UpdateCurrentOffset(-2000.0f);
     EXPECT_EQ(info_->startIndex_, 20);
@@ -458,17 +428,14 @@ HWTEST_F(WaterFlowSegmentCommonTest, Replace003, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentCommonTest, Replace004, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(6);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(6);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_9);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
+    CreateDone();
 
     AddItems(100);
     frameNode_->ChildrenUpdatedFrom(6);
@@ -506,17 +473,14 @@ HWTEST_F(WaterFlowSegmentCommonTest, Replace004, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentCommonTest, Replace005, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(37);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(37);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_7);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
+    CreateDone();
 
     UpdateCurrentOffset(-2000.0f);
     EXPECT_EQ(info_->startIndex_, 20);
@@ -545,17 +509,14 @@ HWTEST_F(WaterFlowSegmentCommonTest, Replace005, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentCommonTest, Replace006, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(37);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(37);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_7);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
+    CreateDone();
 
     UpdateCurrentOffset(-2000.0f);
     EXPECT_EQ(info_->startIndex_, 20);
@@ -588,27 +549,23 @@ HWTEST_F(WaterFlowSegmentCommonTest, Replace006, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentCommonTest, ChangeHeight001, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(37);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(37);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     auto sections = SECTION_7;
     sections[3].onGetItemMainSizeByIndex = nullptr;
     secObj->ChangeData(0, 0, sections);
 
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
+    CreateDone();
 
     UpdateCurrentOffset(-1900.0f);
     EXPECT_EQ(info_->startIndex_, 15);
 
     auto item = GetChildFrameNode(frameNode_, 14);
-    item->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(100.0f), CalcLength(Dimension(300.0f))));
+    item->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(CalcLength(100.0f), CalcLength(Dimension(300.0f))));
 
     UpdateCurrentOffset(100.0f);
     EXPECT_EQ(GetChildY(frameNode_, 15) - GetChildY(frameNode_, 14), 302.0f);
@@ -622,13 +579,12 @@ HWTEST_F(WaterFlowSegmentCommonTest, ChangeHeight001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentCommonTest, Reset005, TestSize.Level1)
 {
-    Create([](WaterFlowModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        model.SetColumnsGap(Dimension(5.0f));
-        model.SetRowsGap(Dimension(1.0f));
-        CreateItem(200);
-        ViewStackProcessor::GetInstance()->Pop();
-    });
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetColumnsGap(Dimension(5.0f));
+    model.SetRowsGap(Dimension(1.0f));
+    CreateWaterFlowItems(200);
+    CreateDone();
     EXPECT_EQ(info_->startIndex_, 0);
     EXPECT_EQ(info_->endIndex_, 21);
     for (int i = 0; i <= 21; ++i) {
@@ -651,17 +607,14 @@ HWTEST_F(WaterFlowSegmentCommonTest, Reset005, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentCommonTest, Segmented006, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(37);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(37);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_7);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
+    CreateDone();
 
     EXPECT_EQ(*info_->margins_[0].top, 5.0f);
     EXPECT_EQ(GetChildY(frameNode_, 0), 5.0f);
@@ -692,17 +645,14 @@ HWTEST_F(WaterFlowSegmentCommonTest, Segmented006, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentCommonTest, Segmented007, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(60);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(60);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_4);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
+    CreateDone();
     EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(0, 0, 400.0f / 3, 100)));
     EXPECT_TRUE(IsEqual(pattern_->GetItemRect(2), Rect(400.0f / 3 * 2, 0, 400.0f / 3, 100)));
 
@@ -719,17 +669,14 @@ HWTEST_F(WaterFlowSegmentCommonTest, Segmented007, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentCommonTest, CheckHeight001, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(37);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(37);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_7);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
+    CreateDone();
     EXPECT_EQ(info_->startIndex_, 0);
     EXPECT_EQ(info_->endIndex_, 6);
     EXPECT_EQ(GetChildY(frameNode_, 6), 508.0f);
@@ -766,17 +713,14 @@ HWTEST_F(WaterFlowSegmentCommonTest, CheckHeight001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentCommonTest, ScrollToEdge, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(37);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(37);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_7);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
+    CreateDone();
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(GetChildY(frameNode_, 36), 500.0f);
@@ -793,17 +737,14 @@ HWTEST_F(WaterFlowSegmentCommonTest, ScrollToEdge, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentCommonTest, Constraint001, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(60);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(60);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_5);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
+    CreateDone();
 
     EXPECT_EQ(info_->startIndex_, 0);
     EXPECT_EQ(info_->endIndex_, 10);
@@ -839,17 +780,14 @@ HWTEST_F(WaterFlowSegmentCommonTest, Constraint001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentCommonTest, Multi001, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(400.f));
-            CreateRandomItem(45);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(400.f));
+    CreateRandomWaterFlowItems(45);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_10);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
+    CreateDone();
 
     float maxHeight = 0.0f;
     for (int i = 0; i <= 2; ++i) {
@@ -890,18 +828,15 @@ HWTEST_F(WaterFlowSegmentCommonTest, Multi001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentCommonTest, Spring001, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(400.f));
-            model.SetEdgeEffect(EdgeEffect::SPRING, true);
-            CreateRandomItem(37);
-        },
-        false);
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(400.f));
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateRandomWaterFlowItems(37);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_7);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
+    CreateDone();
     EXPECT_EQ(GetChildY(frameNode_, 0), 5.0f);
     pattern_->SetAnimateCanOverScroll(true);
 
@@ -926,17 +861,14 @@ HWTEST_F(WaterFlowSegmentCommonTest, Spring001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentCommonTest, Illegal003, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(6);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(6);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_9);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
+    CreateDone();
     EXPECT_EQ(info_->endIndex_, 5);
 
     auto newSection = SECTION_8;
@@ -962,17 +894,14 @@ HWTEST_F(WaterFlowSegmentCommonTest, Illegal003, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentCommonTest, overScroll001, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(37);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(37);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_7);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
+    CreateDone();
 
     auto info = pattern_->layoutInfo_;
 
