@@ -128,6 +128,8 @@ public:
         return false;
     }
 
+    virtual void OnTouchDown(const TouchEventInfo& info) {}
+
     void AddScrollEvent();
     RefPtr<ScrollableEvent> GetScrollableEvent()
     {
