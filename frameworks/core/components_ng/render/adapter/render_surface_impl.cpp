@@ -15,7 +15,6 @@
 #include "core/components_ng/render/adapter/render_surface_impl.h"
 
 #include "core/common/container.h"
-
 namespace OHOS::Ace::NG {
 
 RenderSurfaceImpl::~RenderSurfaceImpl()
