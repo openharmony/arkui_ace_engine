@@ -35,11 +35,11 @@ extern const char* _binary_multimedia_movingphotoview_abc_end;
 
 namespace OHOS::Ace {
 namespace {
-static constexpr const size_t MAX_ARG_NUM = 10;
-static constexpr const int32_t ARG_NUM_1 = 1;
-static constexpr const int32_t ARG_NUM_2 = 2;
-static constexpr const int32_t PARAM_INDEX_ZERO = 0;
-static constexpr const int32_t PARAM_INDEX_ONE = 1;
+static constexpr size_t MAX_ARG_NUM = 10;
+static constexpr int32_t ARG_NUM_ONE = 1;
+static constexpr int32_t ARG_NUM_TWO = 2;
+static constexpr int32_t PARAM_INDEX_ZERO = 0;
+static constexpr int32_t PARAM_INDEX_ONE = 1;
 } // namespace
 
 std::unique_ptr<NG::MovingPhotoModelNG> NG::MovingPhotoModelNG::instance_ = nullptr;
@@ -61,7 +61,7 @@ napi_value JsCreate(napi_env env, napi_callback_info info)
     size_t argc = MAX_ARG_NUM;
     napi_value argv[MAX_ARG_NUM] = { nullptr };
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
-    NAPI_ASSERT(env, argc >= ARG_NUM_1, "Wrong number of arguments");
+    NAPI_ASSERT(env, argc >= ARG_NUM_ONE, "Wrong number of arguments");
 
     if (!ExtNapiUtils::CheckTypeForNapiValue(env, argv[0], napi_object)) {
         return ExtNapiUtils::CreateNull(env);
@@ -99,7 +99,7 @@ napi_value JsMuted(napi_env env, napi_callback_info info)
     size_t argc = MAX_ARG_NUM;
     napi_value argv[MAX_ARG_NUM] = { nullptr };
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
-    NAPI_ASSERT(env, argc >= ARG_NUM_1, "Wrong number of arguments");
+    NAPI_ASSERT(env, argc >= ARG_NUM_ONE, "Wrong number of arguments");
 
     bool muted = false;
     if (ExtNapiUtils::CheckTypeForNapiValue(env, argv[0], napi_boolean)) {
@@ -115,7 +115,7 @@ napi_value JsObjectFit(napi_env env, napi_callback_info info)
     size_t argc = MAX_ARG_NUM;
     napi_value argv[MAX_ARG_NUM] = { nullptr };
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
-    NAPI_ASSERT(env, argc >= ARG_NUM_1, "Wrong number of arguments");
+    NAPI_ASSERT(env, argc >= ARG_NUM_ONE, "Wrong number of arguments");
 
     auto objectFit = ImageFit::COVER;
     if (ExtNapiUtils::CheckTypeForNapiValue(env, argv[0], napi_number)) {
@@ -325,7 +325,7 @@ napi_value JsAutoPlayPeriod(napi_env env, napi_callback_info info)
     size_t argc = MAX_ARG_NUM;
     napi_value argv[MAX_ARG_NUM] = { nullptr };
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
-    NAPI_ASSERT(env, argc >= ARG_NUM_2, "Wrong number of arguments");
+    NAPI_ASSERT(env, argc >= ARG_NUM_TWO, "Wrong number of arguments");
 
     int64_t startTime = 0;
     if (ExtNapiUtils::CheckTypeForNapiValue(env, argv[PARAM_INDEX_ZERO], napi_number)) {
@@ -345,7 +345,7 @@ napi_value JsAutoPlay(napi_env env, napi_callback_info info)
     size_t argc = MAX_ARG_NUM;
     napi_value argv[MAX_ARG_NUM] = { nullptr };
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
-    NAPI_ASSERT(env, argc >= ARG_NUM_1, "Wrong number of arguments");
+    NAPI_ASSERT(env, argc >= ARG_NUM_ONE, "Wrong number of arguments");
 
     bool isAutoPlay = false;
     if (ExtNapiUtils::CheckTypeForNapiValue(env, argv[PARAM_INDEX_ZERO], napi_boolean)) {
@@ -361,7 +361,7 @@ napi_value JsRepeatPlay(napi_env env, napi_callback_info info)
     size_t argc = MAX_ARG_NUM;
     napi_value argv[MAX_ARG_NUM] = { nullptr };
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
-    NAPI_ASSERT(env, argc >= ARG_NUM_1, "Wrong number of arguments");
+    NAPI_ASSERT(env, argc >= ARG_NUM_ONE, "Wrong number of arguments");
 
     bool isRepeatPlay = false;
     if (ExtNapiUtils::CheckTypeForNapiValue(env, argv[PARAM_INDEX_ZERO], napi_boolean)) {
