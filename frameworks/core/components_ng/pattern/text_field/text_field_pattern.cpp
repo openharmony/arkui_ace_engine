@@ -1767,9 +1767,6 @@ void TextFieldPattern::UpdateCaretByTouchMove(const TouchEventInfo& info)
     SetScrollEnabled(scrollable_);
     // limit move when preview text is shown
     auto touchOffset = info.GetTouches().front().GetLocalLocation();
-    if (magnifierController_) {
-        magnifierController_->SetLocalOffset({ touchOffset.GetX(), touchOffset.GetY() });
-    }
     int32_t preCaretIndex = selectController_->GetCaretIndex();
     if (GetIsPreviewText()) {
         TAG_LOGI(ACE_TEXT_FIELD, "UpdateCaretByTouchMove when has previewText");
@@ -1793,6 +1790,9 @@ void TextFieldPattern::UpdateCaretByTouchMove(const TouchEventInfo& info)
         selectController_->UpdateCaretInfoByOffset(previewTextTouchOffset);
     } else {
         selectController_->UpdateCaretInfoByOffset(touchOffset);
+        if (magnifierController_) {
+            magnifierController_->SetLocalOffset({ touchOffset.GetX(), touchOffset.GetY() });
+        }
     }
 
     if (selectController_->GetCaretIndex() != preCaretIndex) {
