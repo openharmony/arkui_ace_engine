@@ -39,6 +39,7 @@ void TextFieldManagerNG::ClearOnFocusTextField(int32_t id)
     if (onFocusTextFieldId == id) {
         onFocusTextField_ = nullptr;
         focusFieldIsInline = false;
+        optionalPosition_ = std::nullopt;
     }
 }
 
@@ -64,6 +65,7 @@ void TextFieldManagerNG::SetClickPosition(const Offset& position)
         return;
     }
     position_ = position;
+    optionalPosition_ = position;
 }
 
 RefPtr<FrameNode> TextFieldManagerNG::FindScrollableOfFocusedTextField(const RefPtr<FrameNode>& textField)
