@@ -16,7 +16,10 @@
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 
 #include "image_painter_utils.h"
+
+#include "base/log/ace_trace.h"
 #include "core/components_ng/image_provider/image_data.h"
+#include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/render/adapter/rosen/drawing_image.h"
 #ifdef USE_ROSEN_DRAWING
@@ -169,7 +172,6 @@ bool PixelMapImage::DrawImageLattice(
     RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY)
 {
     auto pixmap = GetPixelMap();
-    CHECK_NULL_RETURN(pixmap, false);
     const auto& config = GetPaintConfig();
     auto drawingLattice = config.resizableLattice_;
     CHECK_NULL_RETURN(drawingLattice, false);
@@ -224,7 +226,6 @@ bool PixelMapImage::DrawImageNine(
     RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY)
 {
     auto pixmap = GetPixelMap();
-    CHECK_NULL_RETURN(pixmap, false);
     const auto& config = GetPaintConfig();
     const auto& slice = GetPaintConfig().resizableSlice_;
     CHECK_NULL_RETURN(slice.Valid(), false);
@@ -276,7 +277,12 @@ void PixelMapImage::DrawToRSCanvas(
     RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY)
 {
     auto pixmap = GetPixelMap();
-    CHECK_NULL_VOID(pixmap);
+    auto dfxConfig = GetImageDfxConfig();
+    if (!pixmap || !pixmap->GetPixelMapSharedPtr()) {
+        TAG_LOGE(AceLogTag::ACE_IMAGE, "Empty pixmap, src:%{public}s, nodeId = %{public}d, accessId = %{public}lld",
+            dfxConfig.imageSrc_.c_str(), dfxConfig.nodeId_, static_cast<long long>(dfxConfig.accessibilityId_));
+        return;
+    }
     const auto& config = GetPaintConfig();
 
 #ifdef ENABLE_ROSEN_BACKEND
@@ -287,6 +293,9 @@ void PixelMapImage::DrawToRSCanvas(
         DrawImageNine(canvas, srcRect, dstRect, radiusXY)) {
         return;
     }
+    ACE_IMAGE_SCOPED_TRACE("DrawToRSCanvas [%d]-[%lld]-[%d x %d], src:[%s]", dfxConfig.nodeId_,
+        static_cast<long long>(dfxConfig.accessibilityId_), pixmap->GetWidth(), pixmap->GetHeight(),
+        dfxConfig.imageSrc_.c_str());
     RSBrush brush;
     RSSamplingOptions options;
     ImagePainterUtils::AddFilter(brush, options, config);
@@ -300,7 +309,6 @@ void PixelMapImage::DrawToRSCanvas(
     recordingCanvas.ClipAdaptiveRoundRect(radius);
     recordingCanvas.Scale(config.scaleX_, config.scaleY_);
 
-    CHECK_NULL_VOID(pixmap->GetPixelMapSharedPtr());
     RSPoint pointRadius[4] = {};
     for (int i = 0; i < 4; i++) {
         pointRadius[i] = radius[i];
@@ -311,10 +319,12 @@ void PixelMapImage::DrawToRSCanvas(
     recordingCanvas.AttachBrush(brush);
     if (SystemProperties::GetDebugPixelMapSaveEnabled()) {
         TAG_LOGI(AceLogTag::ACE_IMAGE,
-            "pixmap, sourceInfo:%{public}s ,width=%{public}d * height=%{public}d, dynamicRangeMode = %{public}s",
-            config.sourceInfo_.ToString().c_str(), pixmap->GetWidth(), pixmap->GetHeight(),
-            GetDynamicModeString(config.dynamicMode).c_str());
-        pixmap->SavePixelMapToFile("_ToRS_");
+            "pixmap, sourceInfo:%{public}s, nodeId = %{public}d, accessId = %{public}lld, width=%{public}d * "
+            "height=%{public}d, dynamicRangeMode = %{public}s",
+            dfxConfig.imageSrc_.c_str(), dfxConfig.nodeId_, static_cast<long long>(dfxConfig.accessibilityId_),
+            pixmap->GetWidth(), pixmap->GetHeight(), GetDynamicModeString(config.dynamicMode).c_str());
+        pixmap->SavePixelMapToFile(
+            std::to_string(dfxConfig.nodeId_) + "_" + std::to_string(dfxConfig.accessibilityId_) + "_ToRS_");
     }
     recordingCanvas.DrawPixelMapWithParm(pixmap->GetPixelMapSharedPtr(), rsImageInfo, options);
     recordingCanvas.DetachBrush();

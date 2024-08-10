@@ -20,20 +20,29 @@
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
+#include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/pattern/image/image_overlay_modifier.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
+#include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_wrapper.h"
 
 namespace OHOS::Ace::NG {
+struct ImagePaintMethodConfig {
+    bool selected = false;
+    RefPtr<ImageOverlayModifier> imageOverlayModifier;
+    bool sensitive = false;
+    ImageInterpolation interpolation = ImageInterpolation::NONE;
+};
 class ACE_EXPORT ImagePaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(ImagePaintMethod, NodePaintMethod)
 public:
-    ImagePaintMethod(const RefPtr<CanvasImage>& canvasImage, bool selected = false,
-        RefPtr<ImageOverlayModifier> imageOverlayModifier = nullptr, bool sensitive = false,
-        ImageInterpolation interpolation = ImageInterpolation::NONE)
-        : canvasImage_(canvasImage), selected_(selected), imageOverlayModifier_(std::move(imageOverlayModifier)),
-          sensitive_(sensitive), interpolationDefault_(interpolation)
+    ImagePaintMethod(const RefPtr<CanvasImage>& canvasImage,
+        const ImagePaintMethodConfig& imagePainterMethodConfig = {}, const ImageDfxConfig& imageDfxConfig = {})
+        : canvasImage_(canvasImage), selected_(imagePainterMethodConfig.selected),
+          imageOverlayModifier_(std::move(imagePainterMethodConfig.imageOverlayModifier)),
+          sensitive_(imagePainterMethodConfig.sensitive), interpolationDefault_(imagePainterMethodConfig.interpolation),
+          imageDfxConfig_(imageDfxConfig)
     {}
     ~ImagePaintMethod() override = default;
 
@@ -49,6 +58,7 @@ private:
     RefPtr<ImageOverlayModifier> imageOverlayModifier_;
     bool sensitive_ = false;
     ImageInterpolation interpolationDefault_ = ImageInterpolation::NONE;
+    ImageDfxConfig imageDfxConfig_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImagePaintMethod);
 };

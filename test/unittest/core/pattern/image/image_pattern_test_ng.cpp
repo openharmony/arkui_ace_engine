@@ -113,7 +113,7 @@ HWTEST_F(ImagePatternTestNg, SetColorFilter001, TestSize.Level1)
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(imagePattern->image_, true);
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, { .selected = true });
     ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
 
     auto& config = imagePaintMethod.canvasImage_->paintConfig_;

@@ -92,7 +92,7 @@ ImageLoadingContext::~ImageLoadingContext()
             // cancel CreateImgObj task
             ImageProvider::CancelTask(src_.GetKey(), WeakClaim(this));
             if (Downloadable()) {
-                DownloadManager::GetInstance()->RemoveDownloadTask(src_.GetSrc(), nodeId_);
+                DownloadManager::GetInstance()->RemoveDownloadTask(src_.GetSrc(), imageDfxConfig_.nodeId_);
             }
         } else if (state == ImageLoadingState::MAKE_CANVAS_IMAGE) {
             // cancel MakeCanvasImage task
@@ -232,7 +232,8 @@ void ImageLoadingContext::DownloadImage()
 
 void ImageLoadingContext::PerformDownload()
 {
-    ACE_SCOPED_TRACE("PerformDownload %s", src_.GetSrc().c_str());
+    ACE_SCOPED_TRACE("PerformDownload [%d]-[%lld], src: [%s]", imageDfxConfig_.nodeId_,
+        static_cast<long long>(imageDfxConfig_.accessibilityId_), src_.GetSrc().c_str());
     DownloadCallback downloadCallback;
     downloadCallback.successCallback = [weak = AceType::WeakClaim(this)](
                                            const std::string&& imageData, bool async, int32_t instanceId) {
@@ -267,7 +268,7 @@ void ImageLoadingContext::PerformDownload()
             async ? NG::ImageUtils::PostToUI(callback, "ArkUIImageDownloadOnProcess") : callback();
         };
     }
-    NetworkImageLoader::DownloadImage(std::move(downloadCallback), src_.GetSrc(), syncLoad_, nodeId_);
+    NetworkImageLoader::DownloadImage(std::move(downloadCallback), src_.GetSrc(), syncLoad_, imageDfxConfig_.nodeId_);
 }
 
 void ImageLoadingContext::CacheDownloadedImage()
@@ -284,9 +285,13 @@ void ImageLoadingContext::CacheDownloadedImage()
 
 void ImageLoadingContext::DownloadImageSuccess(const std::string& imageData)
 {
-    TAG_LOGI(AceLogTag::ACE_IMAGE, "Download image successfully, srcInfo = %{private}s, ImageData length=%{public}zu",
-        GetSrc().ToString().c_str(), imageData.size());
-    ACE_LAYOUT_SCOPED_TRACE("DownloadImageSuccess[src:%s]", GetSrc().ToString().c_str());
+    TAG_LOGI(AceLogTag::ACE_IMAGE,
+        "Download image successfully, nodeId = %{public}d, accessId = %{public}lld, srcInfo = %{private}s, ImageData "
+        "length=%{public}zu",
+        imageDfxConfig_.nodeId_, static_cast<long long>(imageDfxConfig_.accessibilityId_), GetSrc().ToString().c_str(),
+        imageData.size());
+    ACE_SCOPED_TRACE("DownloadImageSuccess [%d]-[%lld], [%zu], src: [%s]", imageDfxConfig_.nodeId_,
+        static_cast<long long>(imageDfxConfig_.accessibilityId_), imageData.size(), src_.GetSrc().c_str());
     if (!Positive(imageData.size())) {
         FailCallback("The length of imageData from netStack is not positive");
         return;
@@ -349,7 +354,8 @@ void ImageLoadingContext::OnMakeCanvasImage()
 
     // step4: [MakeCanvasImage] according to [targetSize]
     canvasKey_ = ImageUtils::GenerateImageKey(src_, targetSize);
-    imageObj_->MakeCanvasImage(Claim(this), targetSize, userDefinedSize.has_value(), syncLoad_, GetLoadInVipChannel());
+    imageObj_->SetImageDfxConfig(imageDfxConfig_);
+    imageObj_->MakeCanvasImage(Claim(this), targetSize, userDefinedSize.has_value(), syncLoad_);
 }
 
 void ImageLoadingContext::ResizableCalcDstSize()

@@ -112,7 +112,6 @@ const std::unordered_map<ImageFit, std::function<Alignment(bool)>> ImagePainter:
 
 void ImagePainter::DrawObscuration(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const
 {
-    CHECK_NULL_VOID(canvasImage_);
     const auto config = canvasImage_->GetPaintConfig();
     RSBrush brush;
     Color fillColor = COLOR_PRIVATE_MODE;
@@ -141,7 +140,10 @@ void ImagePainter::DrawObscuration(RSCanvas& canvas, const OffsetF& offset, cons
 
 void ImagePainter::DrawImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const
 {
-    CHECK_NULL_VOID(canvasImage_);
+    if (!canvasImage_) {
+        TAG_LOGE(AceLogTag::ACE_IMAGE, "canvasImage is null");
+        return;
+    }
     const auto config = canvasImage_->GetPaintConfig();
     bool drawObscuration = std::any_of(config.obscuredReasons_.begin(), config.obscuredReasons_.end(),
         [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
@@ -156,7 +158,6 @@ void ImagePainter::DrawImage(RSCanvas& canvas, const OffsetF& offset, const Size
 
 void ImagePainter::DrawSVGImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& svgContainerSize) const
 {
-    CHECK_NULL_VOID(canvasImage_);
     canvas.Save();
     canvas.Translate(offset.GetX(), offset.GetY());
     const auto config = canvasImage_->GetPaintConfig();
@@ -173,7 +174,10 @@ void ImagePainter::DrawSVGImage(RSCanvas& canvas, const OffsetF& offset, const S
 
 void ImagePainter::DrawStaticImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const
 {
-    CHECK_NULL_VOID(canvasImage_);
+    if (!canvasImage_) {
+        TAG_LOGE(AceLogTag::ACE_IMAGE, "canvasImage is null");
+        return;
+    }
     const auto config = canvasImage_->GetPaintConfig();
     canvas.Save();
     canvas.Translate(offset.GetX(), offset.GetY());
