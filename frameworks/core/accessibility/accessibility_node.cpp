@@ -16,7 +16,6 @@
 #include "core/accessibility/accessibility_node.h"
 
 #include "core/common/container.h"
-
 namespace OHOS::Ace {
 namespace {
 
