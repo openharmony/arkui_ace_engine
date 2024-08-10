@@ -15,11 +15,7 @@
 
 #include "base/json/uobject.h"
 
-#include <cstring>
-#include <stack>
-
 #include "securec.h"
-
 #include "base/log/log_wrapper.h"
 
 namespace OHOS {

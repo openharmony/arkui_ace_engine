@@ -14,8 +14,6 @@
  */
 
 #include "base/geometry/animatable_dimension.h"
-
-#include "core/animation/animator.h"
 #include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {

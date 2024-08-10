@@ -15,8 +15,6 @@
 
 #include "base/geometry/matrix3.h"
 
-#include "base/utils/utils.h"
-
 namespace OHOS::Ace {
 void Matrix3::SetEntry(int32_t row, int32_t col, double value)
 {
