@@ -18,7 +18,6 @@
 #ifndef WINDOWS_PLATFORM
 #include <dlfcn.h>
 #endif
-
 #include "base/i18n/localization.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "bridge/js_frontend/engine/jsi/jsi_base_utils.h"
