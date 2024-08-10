@@ -598,6 +598,6 @@ HWTEST_F(MenuItemGroupTestNg, MenuItemGroupPattern003, TestSize.Level1)
     index = -1;
     menuItemGroupPattern2->OnIntItemPressed(index, press);
     auto needHeaderDivider = menuItemGroup3->GetPaintProperty<MenuItemGroupPaintProperty>()->propNeedHeaderDivider_;
-    EXPECT_EQ(needHeaderDivider, false);
+    EXPECT_EQ(needHeaderDivider, std::nullopt);
 }
 } // namespace OHOS::Ace::NG
