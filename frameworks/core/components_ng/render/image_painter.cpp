@@ -15,9 +15,6 @@
 
 #include "core/components_ng/render/image_painter.h"
 
-#include "base/utils/utils.h"
-#include "core/common/ace_application_info.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline_ng/pipeline_context.h"
 

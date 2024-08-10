@@ -15,15 +15,8 @@
 #include "core/components_ng/render/adapter/rosen_media_player.h"
 
 #include <fcntl.h>
-#include <iomanip>
-#include <sstream>
-#include <string>
 #include <sys/stat.h>
-#include <unistd.h>
-
 #include "base/image/file_uri_helper.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

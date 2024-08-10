@@ -15,10 +15,6 @@
 
 #include "core/components_ng/render/adapter/gradient_style_modifier.h"
 
-#include "base/geometry/dimension.h"
-#include "base/log/log_wrapper.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/render/adapter/graphic_modifier.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/render/adapter/skia_decoration_painter.h"
