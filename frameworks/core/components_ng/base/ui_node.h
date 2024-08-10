@@ -776,6 +776,7 @@ protected:
         }
     }
 
+    virtual void AfterMountToParent() {}
     virtual void OnContextAttached() {}
     // dump self info.
     virtual void DumpInfo() {}

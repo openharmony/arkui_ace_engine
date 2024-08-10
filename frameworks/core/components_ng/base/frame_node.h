@@ -190,6 +190,8 @@ public:
 
     void OnMountToParentDone();
 
+    void AfterMountToParent() override;
+
     bool GetIsLayoutNode();
 
     bool GetIsFind();
