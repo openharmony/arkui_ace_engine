@@ -280,4 +280,126 @@ HWTEST_F(RichEditorPatternTestTwoNg, InitScrollablePattern003, TestSize.Level1)
     richEditorPattern->InitScrollablePattern();
     EXPECT_EQ(richEditorPattern->GetScrollBar(), true);
 }
+
+/**
+ * @tc.name: InitScrollablePattern004
+ * @tc.desc: test InitScrollablePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, InitScrollablePattern004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
+    ASSERT_NE(richEditorPattern->overlayMod_, nullptr);
+    richEditorPattern->InitScrollablePattern();
+    EXPECT_EQ(richEditorPattern->GetScrollBar(), true);
+}
+
+/**
+ * @tc.name: OnScrollCallback001
+ * @tc.desc: test OnScrollCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, OnScrollCallback001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    RichEditorPattern::OperationRecord record;
+    richEditorPattern->DeleteSelectOperation(&record);
+
+    RectF rect(0, 0, 5, 5);
+    richEditorPattern->CreateHandles();
+    richEditorPattern->textSelector_.Update(0, 5);
+    richEditorPattern->selectOverlay_->OnHandleMoveDone(rect, true);
+
+    EXPECT_TRUE(richEditorPattern->selectOverlay_->SelectOverlayIsOn());
+    bool ret = false;
+    ret = richEditorPattern->OnScrollCallback(10, 10);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: GetCrossOverHeight001
+ * @tc.desc: test GetCrossOverHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, GetCrossOverHeight001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->status_ = Status::DRAGGING;
+    richEditorPattern->CreateHandles();
+    richEditorPattern->contentChange_ = true;
+    richEditorPattern->keyboardAvoidance_ = true;
+    EXPECT_EQ(richEditorPattern->GetCrossOverHeight(), 0.0f);
+}
+
+/**
+ * @tc.name: GetCrossOverHeight002
+ * @tc.desc: test GetCrossOverHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, GetCrossOverHeight002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->status_ = Status::DRAGGING;
+    richEditorPattern->CreateHandles();
+    richEditorPattern->contentChange_ = true;
+    richEditorPattern->keyboardAvoidance_ = true;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->rootHeight_ = 80.0;
+    SafeAreaInsets::Inset insetBottom;
+    insetBottom.start = 70;
+    insetBottom.end = 80;
+    pipeline->GetSafeAreaManager()->keyboardInset_ = SafeAreaInsets::Inset(insetBottom);
+    EXPECT_EQ(richEditorPattern->GetCrossOverHeight(), 0.0f);
+}
+
+/**
+ * @tc.name: GetCrossOverHeight003
+ * @tc.desc: test GetCrossOverHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, GetCrossOverHeight003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->status_ = Status::DRAGGING;
+    richEditorPattern->CreateHandles();
+    richEditorPattern->contentChange_ = true;
+    richEditorPattern->keyboardAvoidance_ = true;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->rootHeight_ = 80.0;
+    SafeAreaInsets::Inset insetBottom;
+    insetBottom.start = 1;
+    insetBottom.end = 86;
+    pipeline->GetSafeAreaManager()->keyboardInset_ = SafeAreaInsets::Inset(insetBottom);
+    EXPECT_EQ(richEditorPattern->GetCrossOverHeight(), 5.0f);
+}
+
+/**
+ * @tc.name: MoveTextRect001
+ * @tc.desc: test MoveTextRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, MoveTextRect001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->richTextRect_ = RectF(0, 5, 100, 160);
+    richEditorPattern->contentRect_ = RectF(0, 10, 100, 140);
+    richEditorPattern->UpdateScrollStateAfterLayout(true);
+    EXPECT_EQ(richEditorPattern->MoveTextRect(0.0f), 0.0f);
+}
 } // namespace OHOS::Ace::NG
