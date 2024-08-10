@@ -299,7 +299,9 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
         UIEXT_LOGW("Unable to StartUiextensionAbility while in the background.");
         return;
     }
-    if (!isModal_ && !hasMountToParent_) {
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    if (container->IsScenceBoardWindow() && !isModal_ && !hasMountToParent_) {
         needReNotifyForeground_ = true;
         UIEXT_LOGI("Should NotifyForeground after MountToParent.");
         return;
@@ -1159,6 +1161,7 @@ void UIExtensionPattern::AfterMountToParent()
     UIEXT_LOGI("AfterMountToParent.");
     hasMountToParent_ = true;
     if (needReNotifyForeground_) {
+<<<<<<< HEAD
         auto hostWindowNode = WindowSceneHelper::FindWindowScene(GetHost());
         if (hostWindowNode) {
             needReNotifyForeground_ = false;
@@ -1167,6 +1170,11 @@ void UIExtensionPattern::AfterMountToParent()
         } else {
             UIEXT_LOGI("No WindowScene When AfterMountToParent, wait.");
         }
+=======
+        needReNotifyForeground_ = false;
+        UIEXT_LOGI("NotifyForeground AfterMountToParent.");
+        NotifyForeground();
+>>>>>>> 1ba7da2a1d (fix)
     }
 }
 
