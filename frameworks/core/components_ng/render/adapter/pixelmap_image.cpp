@@ -49,6 +49,8 @@ const float GRAY_COLOR_MATRIX[20] = { 0.30f, 0.59f, 0.11f, 0, 0, // red
     0.30f, 0.59f, 0.11f, 0, 0,                                   // blue
     0, 0, 0, 1.0f, 0 };                                          // alpha transparency
 
+constexpr int32_t BORDER_RADIUS_ARRAY_SIZE = 4;
+
 void PrintDrawingLatticeConfig(const Rosen::Drawing::Lattice& lattice, const RSRect& dstRect)
 {
     std::string drawingConfigStr;
@@ -168,7 +170,7 @@ int32_t PixelMapImage::GetHeight() const
     return 0;
 }
 
-bool PixelMapImage::DrawImageLattice(
+bool PixelMapImage::StretchImageWithLattice(
     RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY)
 {
     auto pixmap = GetPixelMap();
@@ -197,15 +199,15 @@ bool PixelMapImage::DrawImageLattice(
     auto& recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
     auto radii = ImagePainterUtils::ToRSRadius(radiusXY);
     std::vector<RSPoint> radius;
-    for (size_t ii = 0; ii < 4; ii++) {
+    for (size_t ii = 0; ii < BORDER_RADIUS_ARRAY_SIZE; ii++) {
         RSPoint point(radii[ii].GetX(), radii[ii].GetY());
         radius.emplace_back(point);
     }
     recordingCanvas.ClipAdaptiveRoundRect(radius);
     recordingCanvas.Scale(config.scaleX_, config.scaleY_);
 
-    RSPoint pointRadius[4] = {};
-    for (size_t i = 0; i < 4; i++) {
+    RSPoint pointRadius[BORDER_RADIUS_ARRAY_SIZE] = {};
+    for (size_t i = 0; i < BORDER_RADIUS_ARRAY_SIZE; i++) {
         pointRadius[i] = radius[i];
     }
     std::shared_ptr<RSImage> rsImage = DrawingImage::MakeRSImageFromPixmap(pixmap);
@@ -222,7 +224,7 @@ bool PixelMapImage::DrawImageLattice(
     return false;
 }
 
-bool PixelMapImage::DrawImageNine(
+bool PixelMapImage::StretchImageWithSlice(
     RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY)
 {
     auto pixmap = GetPixelMap();
@@ -250,15 +252,15 @@ bool PixelMapImage::DrawImageNine(
     auto& recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
     auto radii = ImagePainterUtils::ToRSRadius(radiusXY);
     std::vector<RSPoint> radius;
-    for (int ii = 0; ii < 4; ii++) {
+    for (int ii = 0; ii < BORDER_RADIUS_ARRAY_SIZE; ii++) {
         RSPoint point(radii[ii].GetX(), radii[ii].GetY());
         radius.emplace_back(point);
     }
     recordingCanvas.ClipAdaptiveRoundRect(radius);
     recordingCanvas.Scale(config.scaleX_, config.scaleY_);
 
-    RSPoint pointRadius[4] = {};
-    for (int i = 0; i < 4; i++) {
+    RSPoint pointRadius[BORDER_RADIUS_ARRAY_SIZE] = {};
+    for (int i = 0; i < BORDER_RADIUS_ARRAY_SIZE; i++) {
         pointRadius[i] = radius[i];
     }
     RSRectI rsCenterRect(centerRect.GetX(), centerRect.GetY(), centerRect.GetX() + centerRect.Width(),
@@ -270,6 +272,22 @@ bool PixelMapImage::DrawImageNine(
     recordingCanvas.DetachBrush();
     return true;
 #endif
+    return false;
+}
+
+bool PixelMapImage::CheckIfNeedForStretching(
+    RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY)
+{
+    const auto& config = GetPaintConfig();
+
+    if (config.frameCount_ == 1 && config.resizableLattice_ &&
+        StretchImageWithLattice(canvas, srcRect, dstRect, radiusXY)) {
+        return true;
+    }
+    if (config.frameCount_ == 1 && config.resizableSlice_.Valid() &&
+        StretchImageWithSlice(canvas, srcRect, dstRect, radiusXY)) {
+        return true;
+    }
     return false;
 }
 
@@ -286,11 +304,7 @@ void PixelMapImage::DrawToRSCanvas(
     const auto& config = GetPaintConfig();
 
 #ifdef ENABLE_ROSEN_BACKEND
-    if (config.frameCount_ == 1 && config.resizableLattice_ && DrawImageLattice(canvas, srcRect, dstRect, radiusXY)) {
-        return;
-    }
-    if (config.frameCount_ == 1 && config.resizableSlice_.Valid() &&
-        DrawImageNine(canvas, srcRect, dstRect, radiusXY)) {
+    if (CheckIfNeedForStretching(canvas, srcRect, dstRect, radiusXY)) {
         return;
     }
     ACE_IMAGE_SCOPED_TRACE("DrawToRSCanvas [%d]-[%lld]-[%d x %d], src:[%s]", dfxConfig.nodeId_,
@@ -302,15 +316,15 @@ void PixelMapImage::DrawToRSCanvas(
     auto radii = ImagePainterUtils::ToRSRadius(radiusXY);
     auto& recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
     std::vector<RSPoint> radius;
-    for (int ii = 0; ii < 4; ii++) {
+    for (int ii = 0; ii < BORDER_RADIUS_ARRAY_SIZE; ii++) {
         RSPoint point(radii[ii].GetX(), radii[ii].GetY());
         radius.emplace_back(point);
     }
     recordingCanvas.ClipAdaptiveRoundRect(radius);
     recordingCanvas.Scale(config.scaleX_, config.scaleY_);
 
-    RSPoint pointRadius[4] = {};
-    for (int i = 0; i < 4; i++) {
+    RSPoint pointRadius[BORDER_RADIUS_ARRAY_SIZE] = {};
+    for (int i = 0; i < BORDER_RADIUS_ARRAY_SIZE; i++) {
         pointRadius[i] = radius[i];
     }
     Rosen::Drawing::AdaptiveImageInfo rsImageInfo = { static_cast<int32_t>(config.imageFit_),
@@ -341,7 +355,7 @@ void PixelMapImage::DrawToRSCanvasWithBrush(
 #ifdef ENABLE_ROSEN_BACKEND
 #ifndef USE_ROSEN_DRAWING
     if (config.frameCount_ == 1 && config.resizableSlice_.Valid() &&
-        DrawImageNine(canvas, srcRect, dstRect, BorderRadiusArray())) {
+        StretchImageWithSlice(canvas, srcRect, dstRect, BorderRadiusArray())) {
         return;
     }
     auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
@@ -361,7 +375,7 @@ void PixelMapImage::DrawToRSCanvasWithBrush(
     recordingCanvas->DrawPixelMapWithParm(pixmap->GetPixelMapSharedPtr(), rsImageInfo, options, paint);
 #else
     if (config.frameCount_ == 1 &&config.resizableSlice_.Valid() &&
-        DrawImageNine(canvas, srcRect, dstRect, BorderRadiusArray())) {
+        StretchImageWithSlice(canvas, srcRect, dstRect, BorderRadiusArray())) {
         return;
     }
     RSSamplingOptions options;
