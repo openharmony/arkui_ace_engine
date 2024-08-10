@@ -37,7 +37,7 @@ public:
 
     void SetOnComplete(MovingPhotoEventFunc&& onComplete)
     {
-        onComplete_ = std ::move(onComplete);
+        onComplete_ = std::move(onComplete);
     }
 
     MovingPhotoEventFunc GetOnComplete()
