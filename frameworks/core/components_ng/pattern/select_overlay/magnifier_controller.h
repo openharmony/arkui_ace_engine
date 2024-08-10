@@ -78,6 +78,9 @@ public:
     {
         colorModeChange_ = colorModeChange;
     }
+    RefPtr<FrameNode> GetRootNode();
+
+    RefPtr<UINode> FindWindowScene(const RefPtr<FrameNode>& targetNode);
 private:
     MagnifierParams params_;
     bool visible_ = false;
