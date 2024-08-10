@@ -915,7 +915,7 @@ public:
     void SetExposureProcessor(const RefPtr<Recorder::ExposureProcessor>& processor);
 
     void GetVisibleRect(RectF& visibleRect, RectF& frameRect) const;
-    void GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect) const;
+    void GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect);
 
     bool GetIsGeometryTransitionIn() const
     {
