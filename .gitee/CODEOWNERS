@@ -2361,8 +2361,6 @@ frameworks/core/components_ng/pattern/overlay/group_manager.h @arkuipopupwindow
 frameworks/core/components_ng/pattern/overlay/keyboard_base_pattern.cpp @huawei_g_five
 frameworks/core/components_ng/pattern/overlay/keyboard_base_pattern.h @huawei_g_five
 frameworks/core/components_ng/pattern/overlay/keyboard_view.h @huawei_g_five
-frameworks/core/components_ng/pattern/overlay/modal_presentation_layout_algorithm.cpp @arkui_superman
-frameworks/core/components_ng/pattern/overlay/modal_presentation_layout_algorithm.h @arkui_superman
 frameworks/core/components_ng/pattern/overlay/modal_presentation_pattern.cpp @arkui_superman
 frameworks/core/components_ng/pattern/overlay/modal_presentation_pattern.h @arkui_superman
 frameworks/core/components_ng/pattern/overlay/modal_style.h @arkui_superman
