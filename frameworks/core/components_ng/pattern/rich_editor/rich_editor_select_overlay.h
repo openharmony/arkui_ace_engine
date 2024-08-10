@@ -59,6 +59,10 @@ public:
     void UpdateHandleOffset();
     void UpdateSelectOverlayOnAreaChanged();
     void ToggleMenu();
+    bool GetIsHandleMoving()
+    {
+        return isHandleMoving_;
+    }
 
 private:
     void RemoveAreaChangeInner();

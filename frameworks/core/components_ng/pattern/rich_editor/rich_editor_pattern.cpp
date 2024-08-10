@@ -2440,7 +2440,7 @@ bool RichEditorPattern::HandleClickSelection(const OHOS::Ace::GestureEvent& info
     if (info.GetSourceDevice() == SourceType::MOUSE || !BetweenSelection(info.GetGlobalLocation())) {
         return false;
     }
-
+    CHECK_NULL_RETURN(!selectOverlay_->GetIsHandleMoving(), true);
     if (SelectOverlayIsOn()) {
         selectOverlay_->ToggleMenu();
     } else {
@@ -3100,7 +3100,7 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<
         info.GetSourceDevice() == SourceType::MOUSE && caretUpdateType_ == CaretUpdateType::DOUBLE_CLICK;
     bool isShowSelectOverlay = !isDoubleClickByMouse && caretUpdateType_ != CaretUpdateType::LONG_PRESSED;
     if (isShowSelectOverlay) {
-        selectOverlay_->ProcessOverlay({ .animation = true });
+        selectOverlay_->ProcessOverlay({ .menuIsShow = !selectOverlay_->GetIsHandleMoving(), .animation = true });
         if (selectOverlay_->IsSingleHandle()) {
             StartTwinkling();
         }
@@ -7529,6 +7529,7 @@ void RichEditorPattern::OnScrollEndCallback()
     if (scrollBar) {
         scrollBar->ScheduleDisappearDelayTask();
     }
+    CHECK_NULL_VOID(!selectOverlay_->GetIsHandleMoving());
     if (IsSelectAreaVisible()) {
         selectOverlay_->UpdateMenuOffset();
         selectOverlay_->ShowMenu();
@@ -9844,7 +9845,7 @@ void RichEditorPattern::TripleClickSection(GestureEvent& info, int32_t start, in
         RequestKeyboard(false, true, true);
         HandleOnEditChanged(true);
         CalculateHandleOffsetAndShowOverlay();
-        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+        selectOverlay_->ProcessOverlay({ .menuIsShow = !selectOverlay_->GetIsHandleMoving(), .animation = true });
     }
     if (info.GetSourceTool() == SourceTool::FINGER && start == end) {
         selectOverlay_->SetIsSingleHandle(true);
