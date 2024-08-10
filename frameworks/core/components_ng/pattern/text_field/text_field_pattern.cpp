@@ -1731,6 +1731,7 @@ void TextFieldPattern::HandleTouchUp()
     if (moveCaretState_.isTouchCaret) {
         moveCaretState_.isTouchCaret = false;
         CheckScrollable();
+        StartTwinkling();
     }
     if (moveCaretState_.isMoveCaret) {
         moveCaretState_.isMoveCaret = false;
