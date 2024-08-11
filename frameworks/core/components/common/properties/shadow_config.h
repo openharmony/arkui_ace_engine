@@ -43,6 +43,8 @@ public:
     static const Shadow DefaultShadowLDark;
     static const Shadow FloatingShadowSDark;
     static const Shadow FloatingShadowMDark;
+
+    static const Shadow& GetShadowConfig(int shadowLevel);
 };
 
 } // namespace OHOS::Ace

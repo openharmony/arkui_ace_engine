@@ -248,6 +248,7 @@ bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(
             AvoidSafeArea();
         }
     }
+    MarkOuterBorderRender();
     return true;
 }
 
@@ -405,6 +406,8 @@ void SheetPresentationPattern::SetSheetBorderWidth(bool isPartialUpdate)
         layoutProperty->UpdateBorderWidth(borderWidth);
         renderContext->UpdateBorderWidth(borderWidth);
     }
+
+    SetSheetOuterBorderWidth(sheetTheme, sheetStyle);
 }
 
 // initial drag gesture event
@@ -1719,10 +1722,12 @@ void SheetPresentationPattern::ClipSheetNode()
     } else {
         clipPath = GetBottomStyleSheetClipPath(sheetSize, sheetRadius);
     }
-    auto path = AceType::MakeRefPtr<Path>();
-    path->SetValue(clipPath);
-    path->SetBasicShapeType(BasicShapeType::PATH);
-    renderContext->UpdateClipShape(path);
+    if (!sheetTheme->IsOuterBorderEnable() || sheetType == SheetType::SHEET_POPUP) {
+        auto path = AceType::MakeRefPtr<Path>();
+        path->SetValue(clipPath);
+        path->SetBasicShapeType(BasicShapeType::PATH);
+        renderContext->UpdateClipShape(path);
+    }
 }
 
 void SheetPresentationPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
@@ -2372,4 +2377,65 @@ float SheetPresentationPattern::GetTopAreaInWindow() const
     CHECK_NULL_RETURN(window, 0.0f);
     return window->GetStatusBarHeight();
 }
+
+void SheetPresentationPattern::MarkOuterBorderRender()
+{
+    auto sheetType = GetSheetType();
+    if (sheetType != SheetType::SHEET_POPUP) {
+        return;
+    }
+    auto parentHost = GetHost()->GetParent();
+    CHECK_NULL_VOID(parentHost);
+    auto frameNode = AceType::DynamicCast<FrameNode>(parentHost);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->MarkNeedRenderOnly();
+}
+
+void SheetPresentationPattern::SetSheetOuterBorderWidth(
+    const RefPtr<SheetTheme>& sheetTheme, const NG::SheetStyle& sheetStyle)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetType = GetSheetType();
+    if (sheetTheme->IsOuterBorderEnable() && !sheetStyle.borderWidth.has_value()) {
+        BorderWidthProperty borderWidth;
+        BorderWidthProperty outBorderWidth;
+        BorderColorProperty borderColor;
+        BorderColorProperty outBorderColor;
+        BorderRadiusProperty borderraduis;
+        borderWidth.SetBorderWidth(0.0_vp);
+        outBorderWidth.SetBorderWidth(0.0_vp);
+        if (sheetType != SheetType::SHEET_POPUP) {
+            borderColor.SetColor(sheetTheme->GetSheetInnerBorderColor());
+            outBorderColor.SetColor(sheetTheme->GetSheetOuterBorderColor());
+            renderContext->UpdateOuterBorderColor(outBorderColor);
+            renderContext->UpdateBorderColor(borderColor);
+            if (sheetType == SheetType::SHEET_CENTER) {
+                borderraduis.SetRadius(sheetTheme->GetSheetRadius());
+                borderWidth.SetBorderWidth(sheetTheme->GetSheetInnerBorderWidth());
+                outBorderWidth.SetBorderWidth(sheetTheme->GetSheetOuterBorderWidth());
+            } else {
+                borderraduis.radiusTopLeft = sheetTheme->GetSheetRadius();
+                borderraduis.radiusTopRight = sheetTheme->GetSheetRadius();
+                borderWidth.leftDimen = sheetTheme->GetSheetInnerBorderWidth();
+                borderWidth.topDimen = sheetTheme->GetSheetInnerBorderWidth();
+                borderWidth.rightDimen = sheetTheme->GetSheetInnerBorderWidth();
+                outBorderWidth.leftDimen = sheetTheme->GetSheetOuterBorderWidth();
+                outBorderWidth.topDimen = sheetTheme->GetSheetOuterBorderWidth();
+                outBorderWidth.rightDimen = sheetTheme->GetSheetOuterBorderWidth();
+            }
+        }
+        layoutProperty->UpdateBorderWidth(borderWidth);
+        renderContext->UpdateBorderWidth(borderWidth);
+        layoutProperty->UpdateOuterBorderWidth(outBorderWidth);
+        renderContext->UpdateOuterBorderWidth(outBorderWidth);
+        renderContext->UpdateOuterBorderRadius(borderraduis);
+        renderContext->UpdateBorderRadius(borderraduis);
+    }
+}
+
 } // namespace OHOS::Ace::NG
