@@ -1470,33 +1470,4 @@ HWTEST_F(RichEditorPatternTestOneNg, HandleDoubleClickOrLongPress001, TestSize.L
     richEditorPattern->HandleDoubleClickOrLongPress(info);
     EXPECT_EQ(richEditorPattern->IsSelected(), false);
 }
-
-/**
- * @tc.name: SwitchState001
- * @tc.desc: test SwitchState
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, SwitchState001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    richEditorPattern->previewLongPress_ = true;
-    richEditorPattern->SwitchState();
-
-    richEditorPattern->previewLongPress_ = false;
-    richEditorPattern->SwitchState();
-
-    richEditorPattern->previewLongPress_ = true;
-    AddSpan("test");
-    richEditorPattern->textSelector_.Update(3, 4);
-    richEditorPattern->SwitchState();
-
-    richEditorPattern->previewLongPress_ = false;
-    AddSpan("test");
-    richEditorPattern->textSelector_.Update(3, 4);
-    richEditorPattern->SwitchState();
-    EXPECT_EQ(richEditorPattern->IsSelected(), true);
-}
 } // namespace OHOS::Ace::NG

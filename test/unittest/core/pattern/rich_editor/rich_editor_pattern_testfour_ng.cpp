@@ -70,11 +70,11 @@ void RichEditorPatternTestFourNg::TearDownTestSuite()
 }
 
 /**
- * @tc.name: SwitchState001
- * @tc.desc: test SwitchState
+ * @tc.name: HandleDoubleClickOrLongPress001
+ * @tc.desc: test HandleDoubleClickOrLongPress
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorPatternTestFourNg, SwitchState001, TestSize.Level1)
+HWTEST_F(RichEditorPatternTestFourNg, HandleDoubleClickOrLongPress001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -98,9 +98,9 @@ HWTEST_F(RichEditorPatternTestFourNg, SwitchState001, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->GetTextContentLength(), 4);
     richEditorPattern->textSelector_.Update(3, 4);
     richEditorPattern->selectOverlay_->OnHandleMoveDone(rect, true);
-    EXPECT_TRUE(richEditorPattern->textSelector_.IsValid());
-
     richEditorPattern->HandleDoubleClickOrLongPress(info, imageNode);
+
+    EXPECT_TRUE(richEditorPattern->textSelector_.IsValid());
 }
 
 /**
@@ -342,5 +342,214 @@ HWTEST_F(RichEditorPatternTestFourNg, FinishTextPreview004, TestSize.Level1)
     richEditorPattern->previewTextRecord_.previewContent = "";
     richEditorPattern->FinishTextPreview();
     ASSERT_EQ(richEditorPattern->previewTextRecord_.previewContent.empty(), true);
+}
+
+/**
+ * @tc.name: InsertValueAfterBeforeSpan001
+ * @tc.desc: test InsertValueAfterBeforeSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, InsertValueAfterBeforeSpan001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    RefPtr<SpanNode> spanNodeBefore = OHOS::Ace::NG::SpanNode::CreateSpanNode(1);
+    RefPtr<SpanNode> spanNode = OHOS::Ace::NG::SpanNode::CreateSpanNode(2);
+    TextInsertValueInfo info;
+    std::string insertValue = "abc";
+    UpdateSpanStyle updateSpanStyle;
+    updateSpanStyle.isSymbolStyle = true;
+
+    TextStyle textStyle;
+    spanNodeBefore->GetSpanItem()->textStyle_ = textStyle;
+
+    richEditorPattern->typingStyle_ = updateSpanStyle;
+    richEditorPattern->InsertValueAfterBeforeSpan(spanNodeBefore, spanNode, info, insertValue, true);
+
+    ASSERT_EQ(richEditorPattern->HasSameTypingStyle(spanNodeBefore), false);
+    ASSERT_EQ(richEditorPattern->typingStyle_.has_value(), true);
+}
+
+/**
+ * @tc.name: InsertValueWithoutSpan001
+ * @tc.desc: test InsertValueWithoutSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, InsertValueWithoutSpan001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    std::string insertValue = "abc";
+
+    auto spanNode = SpanNode::GetOrCreateSpanNode(V2::SPAN_ETS_TAG, 0);
+    TextInsertValueInfo info;
+    info.spanIndex_ = 0;
+
+    richEditorPattern->InsertValueWithoutSpan(spanNode, info, insertValue, true);
+    info.spanIndex_ = 1;
+    richEditorPattern->InsertValueWithoutSpan(spanNode, info, insertValue, true);
+
+    info.spanIndex_ = 0;
+    spanNode = SpanNode::GetOrCreateSpanNode(V2::SPAN_COMPONENT_TAG, 0);
+    richEditorPattern->InsertValueWithoutSpan(spanNode, info, insertValue, true);
+
+    info.spanIndex_ = 1;
+    spanNode = SpanNode::GetOrCreateSpanNode(V2::SPAN_ETS_TAG, 0);
+    richEditorPattern->InsertValueWithoutSpan(spanNode, info, insertValue, true);
+
+    ASSERT_EQ(spanNode->GetTag(), V2::SPAN_ETS_TAG);
+}
+
+/**
+ * @tc.name: InsertValueToSpanNode001
+ * @tc.desc: test InsertValueToSpanNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, InsertValueToSpanNode001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    std::string insertValue = "abc";
+
+    auto spanNode = SpanNode::GetOrCreateSpanNode(V2::SPAN_ETS_TAG, 0);
+    TextInsertValueInfo info;
+    info.spanIndex_ = 0;
+    info.SetOffsetInSpan(100);
+
+    richEditorPattern->InsertValueToSpanNode(spanNode, insertValue, info);
+
+    auto spanItem = spanNode->GetSpanItem();
+    auto text = spanItem->content;
+    std::wstring textTemp = StringUtils::ToWstring(text);
+    auto textTempSize = static_cast<int32_t>(textTemp.size());
+
+    ASSERT_EQ(textTempSize, 0);
+}
+
+/**
+ * @tc.name: ResetFirstNodeStyle001
+ * @tc.desc: test ResetFirstNodeStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, ResetFirstNodeStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor controller
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step2. initalize symbol span properties
+     */
+    TextStyle style;
+    style.SetFontSize(FONT_SIZE_VALUE);
+    SymbolSpanOptions options;
+    options.symbolId = SYMBOL_ID;
+    options.style = style;
+
+    /**
+     * @tc.steps: step3. add symbol span
+     */
+    auto index1 = richEditorController->AddSymbolSpan(options);
+    EXPECT_EQ(index1, 0);
+    auto index2 = richEditorController->AddSymbolSpan(options);
+    EXPECT_EQ(index2, 1);
+    auto index3 = richEditorController->AddSymbolSpan(options);
+    EXPECT_EQ(index3, 2);
+    auto index4 = richEditorController->AddSymbolSpan(options);
+    EXPECT_EQ(index4, 3);
+    EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
+
+    richEditorPattern->ResetFirstNodeStyle();
+
+    auto host = richEditorPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+}
+
+/**
+ * @tc.name: DeleteBackward001
+ * @tc.desc: test DeleteBackward
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, DeleteBackward001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->previewTextRecord_.previewContent = "123";
+    richEditorPattern->previewTextRecord_.isPreviewTextInputting = true;
+    richEditorPattern->previewTextRecord_.startOffset = 0;
+    richEditorPattern->previewTextRecord_.endOffset = 0;
+    richEditorPattern->DeleteBackward(0);
+
+    ASSERT_EQ(richEditorPattern->IsPreviewTextInputting(), true);
+}
+
+/**
+ * @tc.name: DeleteForward001
+ * @tc.desc: test DeleteForward
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, DeleteForward001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->previewTextRecord_.previewContent = "123";
+    richEditorPattern->previewTextRecord_.isPreviewTextInputting = true;
+    richEditorPattern->previewTextRecord_.startOffset = 0;
+    richEditorPattern->previewTextRecord_.endOffset = 0;
+    richEditorPattern->DeleteForward(0);
+    ASSERT_EQ(richEditorPattern->IsPreviewTextInputting(), true);
+}
+
+/**
+ * @tc.name: ProcessInsertValue001
+ * @tc.desc: test ProcessInsertValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, ProcessInsertValue001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    std::string insertValue = "abc";
+    richEditorPattern->isDragSponsor_ = true;
+    richEditorPattern->isSpanStringMode_ = false;
+    richEditorPattern->previewTextRecord_.hasDiff = true;
+    richEditorPattern->ProcessInsertValue(insertValue, false, false);
+
+    ASSERT_EQ(richEditorPattern->previewTextRecord_.IsValid(), false);
+}
+
+/**
+ * @tc.name: DeleteBackwardOperation001
+ * @tc.desc: test DeleteBackwardOperation
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, DeleteBackwardOperation001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->caretPosition_ = 100;
+    richEditorPattern->previewLongPress_ = true;
+    richEditorPattern->DeleteBackwardOperation(0);
+
+    ASSERT_EQ(richEditorPattern->spans_.empty(), true);
 }
 } // namespace OHOS::Ace::NG
