@@ -546,42 +546,6 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     return true;
 }
 
-void TextFieldPattern::OnDirectionConfigurationUpdate()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto context = host->GetContextRefPtr();
-    CHECK_NULL_VOID(context);
-    auto taskExecutor = context->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [weak = WeakClaim(this)] {
-            auto textField = weak.Upgrade();
-            CHECK_NULL_VOID(textField);
-            textField->parentGlobalOffset_ = textField->GetPaintRectGlobalOffset();
-            textField->UpdateTextFieldManager(Offset(textField->parentGlobalOffset_.GetX(),
-                textField->parentGlobalOffset_.GetY()), textField->frameRect_.Height());
-            textField->UpdateCaretInfoToController(true);
-            TAG_LOGI(ACE_TEXT_FIELD, "onDirectionUpdate change parentGlobalOffset to: %{public}s",
-                textField->parentGlobalOffset_.ToString().c_str());
-        },
-        TaskExecutor::TaskType::UI, "ArkUITextFieldOnDirectionConfigurationUpdate");
-
-    if (isCustomKeyboardAttached_) {
-        auto caretHeight = selectController_->GetCaretRect().Height();
-        auto safeHeight = caretHeight + selectController_->GetCaretRect().GetY();
-        if (selectController_->GetCaretRect().GetY() > caretHeight) {
-            safeHeight = caretHeight;
-        }
-        auto nodeId = host->GetId();
-        context->AddAfterLayoutTask([keyboardWeak = WeakPtr<OverlayManager>(keyboardOverlay_), nodeId, safeHeight]() {
-            auto keyboardOverlay = keyboardWeak.Upgrade();
-            CHECK_NULL_VOID(keyboardOverlay);
-            keyboardOverlay->AvoidCustomKeyboard(nodeId, safeHeight);
-        });
-    }
-}
-
 void TextFieldPattern::SetAccessibilityPasswordIconAction()
 {
     if (IsInPasswordMode() && IsShowPasswordIcon()) {
@@ -7241,10 +7205,52 @@ void TextFieldPattern::RegisterWindowSizeCallback()
 
 void TextFieldPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
-    CHECK_NULL_VOID(SelectOverlayIsOn());
     if (type == WindowSizeChangeReason::ROTATION) {
-        selectController_->CalculateHandleOffset();
-        selectOverlay_->ProcessOverlayOnAreaChanged({ .menuIsShow = false});
+        if (SelectOverlayIsOn()) {
+            selectController_->CalculateHandleOffset();
+            selectOverlay_->ProcessOverlayOnAreaChanged({ .menuIsShow = false});
+        }
+
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContextRefPtr();
+        CHECK_NULL_VOID(context);
+        auto taskExecutor = context->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
+        CHECK_NULL_VOID(textFieldManager);
+        textFieldManager->ResetOptionalClickPosition();
+        taskExecutor->PostTask(
+            [weak = WeakClaim(this), manager = WeakPtr<TextFieldManagerNG>(textFieldManager)] {
+                auto textField = weak.Upgrade();
+                CHECK_NULL_VOID(textField);
+                textField->parentGlobalOffset_ = textField->GetPaintRectGlobalOffset();
+                textField->UpdateTextFieldManager(Offset(textField->parentGlobalOffset_.GetX(),
+                    textField->parentGlobalOffset_.GetY()), textField->frameRect_.Height());
+                textField->UpdateCaretInfoToController(true);
+                auto textFieldManager = manager.Upgrade();
+                if (textFieldManager && textField->HasFocus()) {
+                    textFieldManager->AvoidKeyboardInSheet(textField->GetHost());
+                }
+                TAG_LOGI(ACE_TEXT_FIELD, "OnWindowSizeChanged change parentGlobalOffset to: %{public}s",
+                    textField->parentGlobalOffset_.ToString().c_str());
+            },
+            TaskExecutor::TaskType::UI, "ArkUITextFieldOnWindowSizeChangedRotation");
+
+        if (isCustomKeyboardAttached_) {
+            auto caretHeight = selectController_->GetCaretRect().Height();
+            auto safeHeight = caretHeight + selectController_->GetCaretRect().GetY();
+            if (selectController_->GetCaretRect().GetY() > caretHeight) {
+                safeHeight = caretHeight;
+            }
+            auto nodeId = host->GetId();
+            context->AddAfterLayoutTask([keyboardWeak = WeakPtr<OverlayManager>(keyboardOverlay_),
+                nodeId, safeHeight]() {
+                auto keyboardOverlay = keyboardWeak.Upgrade();
+                CHECK_NULL_VOID(keyboardOverlay);
+                keyboardOverlay->AvoidCustomKeyboard(nodeId, safeHeight);
+            });
+        }
     }
 }
 

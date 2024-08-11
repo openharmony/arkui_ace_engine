@@ -202,6 +202,25 @@ void TextFieldManagerNG::AvoidKeyBoardInNavigation()
     SetNavContentAvoidKeyboardOffset(navNode, avoidKeyboardOffset);
 }
 
+void TextFieldManagerNG::AvoidKeyboardInSheet(const RefPtr<FrameNode>& textField)
+{
+    CHECK_NULL_VOID(textField);
+    auto parent = textField->GetAncestorNodeOfFrame();
+    bool findSheet = false;
+    while (parent) {
+        if (parent->GetHostTag() == V2::SHEET_PAGE_TAG) {
+            findSheet = true;
+            break;
+        }
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+    CHECK_NULL_VOID(parent);
+    auto sheetNodePattern = parent->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetNodePattern);
+    TAG_LOGI(ACE_KEYBOARD, "Force AvoidKeyboard in sheet");
+    sheetNodePattern->AvoidSafeArea(true);
+}
+
 RefPtr<FrameNode> TextFieldManagerNG::FindNavNode(const RefPtr<FrameNode>& textField)
 {
     CHECK_NULL_RETURN(textField, nullptr);

@@ -42,6 +42,12 @@ public:
         return optionalPosition_;
     }
 
+    void ResetOptionalClickPosition() {
+        optionalPosition_ = std::nullopt;
+    }
+
+    void AvoidKeyboardInSheet(const RefPtr<FrameNode>& textField);
+
     void MovePage(int32_t pageId, const Offset& rootRect, double offsetHeight) override {}
     void RemovePageId(int32_t pageId) override {}
 
