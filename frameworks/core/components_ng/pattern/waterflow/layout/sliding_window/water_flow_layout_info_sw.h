@@ -205,9 +205,10 @@ public:
 
     struct Lane;
     /**
+     * @brief lanes in multiple sections.
      * REQUIRES: In stable state (outside update phase), only items inside viewport are in lanes_.
      */
-    std::vector<std::vector<Lane>> lanes_; // lanes in multiple sections
+    std::vector<std::vector<Lane>> lanes_;
     // mapping of all items previously or currently in lanes_.
     std::unordered_map<int32_t, size_t> idxToLane_;
 

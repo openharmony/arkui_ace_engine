@@ -145,7 +145,7 @@ WaterFlowModelNG WaterFlowTestNg::CreateRepeatWaterFlow(int32_t itemNumber, std:
         }
         return keys;
     };
-    repeatModel.Create(itemNumber, {}, createFunc, updateFunc, getKeys, getTypes);
+    repeatModel.Create(itemNumber, {}, createFunc, updateFunc, getKeys, getTypes, [](uint32_t start, uint32_t end) {});
     return model;
 }
 

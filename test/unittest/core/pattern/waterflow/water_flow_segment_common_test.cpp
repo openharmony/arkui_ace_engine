@@ -929,13 +929,11 @@ HWTEST_F(WaterFlowSegmentCommonTest, overScroll001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentCommonTest, Cache001, TestSize.Level1)
 {
-    CreateRepeatWaterFlow(
-        [](WaterFlowModelNG model) {
-            model.SetCachedCount(3);
-            model.SetRowsGap(Dimension(10));
-            model.SetColumnsGap(Dimension(10));
-        },
-        30, [](int32_t i) { return 100.0f; });
+    auto model = CreateRepeatWaterFlow(30, [](int32_t i) { return 100.0f; });
+    model.SetCachedCount(3);
+    model.SetRowsGap(Dimension(10));
+    model.SetColumnsGap(Dimension(10));
+    CreateDone();
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_12);
     FlushLayoutTask(frameNode_);

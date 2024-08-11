@@ -299,7 +299,7 @@ HWTEST_F(WaterFlowSWTest, Order001, TestSize.Level1)
     model.SetRowsGap(Dimension(5.0f));
     model.SetColumnsGap(Dimension(5.0f));
     for (int i = 0; i < 30; ++i) {
-        CreateWaterFlowItemWithHeight(100.0f);
+        CreateItemWithHeight(100.0f);
     }
     CreateDone();
     AddItemsAtSlot(5, 100.0f, 3);
@@ -321,7 +321,7 @@ HWTEST_F(WaterFlowSWTest, Update001, TestSize.Level1)
     ViewAbstract::SetWidth(CalcLength(400.0f));
     ViewAbstract::SetHeight(CalcLength(600.f));
     for (int i = 0; i < 35; ++i) {
-        CreateWaterFlowItemWithHeight(100.0f);
+        CreateItemWithHeight(100.0f);
     }
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_11);
@@ -587,7 +587,7 @@ HWTEST_F(WaterFlowSWTest, Misaligned002, TestSize.Level1)
         106, 156, 213, 102, 93, 73, 184, 89, 156, 178, 163, 176, 187, 191, 118, 218, 212, 196, 52, 103, 57, 189, 55,
         127, 230, 51, 167, 166, 118, 107 };
     for (const float& f : randomHeights) {
-        CreateWaterFlowItemWithHeight(f);
+        CreateItemWithHeight(f);
     }
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_10);
@@ -972,15 +972,13 @@ HWTEST_F(WaterFlowSWTest, NotifyDataChange002, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSWTest, Cache002, TestSize.Level1)
 {
-    CreateRepeatWaterFlow(
-        [](WaterFlowModelNG model) {
-            model.SetCachedCount(3);
-            model.SetColumnsTemplate("1fr 1fr");
-            model.SetRowsGap(Dimension(10));
-            model.SetColumnsGap(Dimension(10));
-        },
-        50, [](int32_t i) { return i % 2 ? 100.0f : 200.0f; });
+    auto model = CreateRepeatWaterFlow(50, [](int32_t i) { return i % 2 ? 100.0f : 200.0f; });
 
+    model.SetCachedCount(3);
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(10));
+    model.SetColumnsGap(Dimension(10));
+    CreateDone();
     pattern_->ScrollToIndex(30);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info_->startIndex_, 30);
@@ -989,7 +987,7 @@ HWTEST_F(WaterFlowSWTest, Cache002, TestSize.Level1)
     EXPECT_EQ(pattern_->preloadItems_, preloadList);
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 40));
-    EXPECT_EQ(GetChildWidth(frameNode_, 40), (WATERFLOW_WIDTH - 10.0f) / 2.0f);
+    EXPECT_EQ(GetChildWidth(frameNode_, 40), (WATER_FLOW_WIDTH - 10.0f) / 2.0f);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(GetChildY(frameNode_, 41), 850.0f);
     EXPECT_EQ(GetChildY(frameNode_, 42), 960.0f);

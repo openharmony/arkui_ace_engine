@@ -123,8 +123,8 @@ private:
      * @param userDefMainSize user-defined main-axis size of the FlowItem.
      * @return LayoutWrapper of the FlowItem.
      */
-    RefPtr<LayoutWrapper> MeasureItem(
-        const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, int32_t crossIdx, float userDefMainSize, bool isCache) const;
+    RefPtr<LayoutWrapper> MeasureItem(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, int32_t crossIdx,
+        float userDefMainSize, bool isCache) const;
 
     /**
      * @brief Layout a FlowItem at [idx].
