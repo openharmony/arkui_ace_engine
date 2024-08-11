@@ -20,6 +20,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
     constexpr uint32_t RECORD_MAX_LENGTH = 20;
+    constexpr int32_t SYMBOL_SPAN_LENGTH = 2;
     const std::string TEST_INSERT_LINE_SPACE = " ";
 } // namespace
 
@@ -241,5 +242,130 @@ HWTEST_F(RichEditorPatternTestThreeNg, HandleOnUndoAction001, TestSize.Level2)
     richEditorPattern->operationRecords_.emplace_back(secondRecord);
     richEditorPattern->HandleOnUndoAction();
     EXPECT_TRUE(richEditorPattern->operationRecords_.empty());
+}
+
+/**
+ * @tc.name: HandleOnRedoAction001
+ * @tc.desc: test HandleOnRedoAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, HandleOnRedoAction001, TestSize.Level2)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->HandleOnRedoAction();
+    RichEditorPattern::OperationRecord firstRecord;
+    firstRecord.addText = "first Record helloWorld";
+    firstRecord.deleteCaretPostion = 3;
+    richEditorPattern->redoOperationRecords_.emplace_back(firstRecord);
+    richEditorPattern->HandleOnRedoAction();
+    EXPECT_TRUE(richEditorPattern->redoOperationRecords_.empty());
+
+    RichEditorPattern::OperationRecord secondRecord;
+    secondRecord.addText = "second Record helloWorld";
+    secondRecord.deleteText = "helloWorld";
+    richEditorPattern->redoOperationRecords_.clear();
+    richEditorPattern->redoOperationRecords_.emplace_back(secondRecord);
+    richEditorPattern->HandleOnRedoAction();
+    EXPECT_TRUE(richEditorPattern->redoOperationRecords_.empty());
+
+    RichEditorPattern::OperationRecord thridRecord;
+    thridRecord.deleteText = "helloWorld";
+    thridRecord.beforeCaretPosition = 10;
+    thridRecord.afterCaretPosition = 15;
+    richEditorPattern->redoOperationRecords_.clear();
+    richEditorPattern->redoOperationRecords_.emplace_back(thridRecord);
+    richEditorPattern->HandleOnRedoAction();
+    EXPECT_TRUE(richEditorPattern->redoOperationRecords_.empty());
+}
+
+/**
+ * @tc.name: CalcDeleteValueObj001
+ * @tc.desc: test CalcDeleteValueObj delete unicode
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, CalcDeleteValueObj001, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(INIT_VALUE_1);
+    auto spans = richEditorPattern->GetSpanItemChildren();
+    ASSERT_FALSE(spans.empty());
+    auto spanItem = spans.back();
+    ASSERT_NE(spanItem, nullptr);
+    spanItem->unicode = 1;
+
+    RichEditorDeleteValue info;
+    int32_t currentPosition = INIT_VALUE_1.size() - 2;
+    int32_t length = 2;
+    richEditorPattern->CalcDeleteValueObj(currentPosition, length, info);
+    EXPECT_EQ(info.GetLength(), SYMBOL_SPAN_LENGTH);
+}
+
+/**
+ * @tc.name: CalcDeleteValueObj001
+ * @tc.desc: test CalcDeleteValueObj delete builder span
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, CalcDeleteValueObj002, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(INIT_VALUE_1);
+    auto spans = richEditorPattern->GetSpanItemChildren();
+    ASSERT_FALSE(spans.empty());
+    auto spanItem = spans.back();
+    ASSERT_NE(spanItem, nullptr);
+    int32_t currentPosition = INIT_VALUE_1.size() - 2;
+    spanItem->placeholderIndex = currentPosition;
+
+    RichEditorDeleteValue info;
+    int32_t length = 2;
+    richEditorPattern->CalcDeleteValueObj(currentPosition, length, info);
+    EXPECT_EQ(info.GetRichEditorDeleteSpans().size(), 1);
+}
+
+/**
+ * @tc.name: GetSpanNodeBySpanItem001
+ * @tc.desc: test GetSpanNodeBySpanItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, GetSpanNodeBySpanItem001, TestSize.Level2)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(INIT_VALUE_1);
+    ASSERT_EQ(richEditorPattern->GetSpanNodeBySpanItem(nullptr), nullptr);
+}
+
+/**
+ * @tc.name: DeleteValueSetImageSpan001
+ * @tc.desc: test DeleteValueSetImageSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, DeleteValueSetImageSpan001, TestSize.Level1)
+{
+    AddImageSpan();
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto imageNode = AceType::DynamicCast<FrameNode>(richEditorNode_->GetLastChild());
+    ASSERT_NE(imageNode, nullptr);
+    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
+    imageLayoutProperty->UpdateVerticalAlign(VerticalAlign::CENTER);
+
+    RichEditorAbstractSpanResult spanResult;
+    spanResult.SetSpanIndex(richEditorNode_->GetChildIndexById(imageNode->GetId()));
+
+    auto spans = richEditorPattern->GetSpanItemChildren();
+    ASSERT_FALSE(spans.empty());
+    auto imageSpanItem = AceType::DynamicCast<ImageSpanItem>(spans.back());
+    ASSERT_NE(imageSpanItem, nullptr);
+    richEditorPattern->DeleteValueSetImageSpan(imageSpanItem, spanResult);
+    EXPECT_EQ(spanResult.GetObjectFit(), ImageFit::FILL);
+    EXPECT_EQ(spanResult.GetVerticalAlign(), VerticalAlign::CENTER);
 }
 } // namespace OHOS::Ace::NG
