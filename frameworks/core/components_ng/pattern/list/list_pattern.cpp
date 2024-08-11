@@ -199,7 +199,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     startMainPos_ = listLayoutAlgorithm->GetStartPosition();
     endMainPos_ = listLayoutAlgorithm->GetEndPosition();
     crossMatchChild_ = listLayoutAlgorithm->IsCrossMatchChild();
-    bool sizeDiminished =
+    bool sizeDiminished = !chainAnimation_ &&
         LessNotEqual(endMainPos_ - startMainPos_, contentMainSize_ - contentStartOffset_ - contentEndOffset_) &&
         GreatOrEqual(prevTotalSize, prevContentSize) && LessNotEqual(endMainPos_ - startMainPos_, prevTotalSize);
     CheckScrollable();
@@ -672,18 +672,6 @@ bool ListPattern::IsAtBottom() const
            LessOrEqual(endMainPos - currentDelta_ + GetChainDelta(endIndex), contentMainSize_ - contentEndOffset_);
 }
 
-bool ListPattern::OutBoundaryCallback()
-{
-    bool outBoundary = IsOutOfBoundary();
-    if (!dragFromSpring_ && outBoundary && chainAnimation_) {
-        chainAnimation_->SetOverDrag(false);
-        auto delta = chainAnimation_->SetControlIndex(IsAtTop() ? 0 : maxListItemIndex_);
-        currentDelta_ -= delta;
-        dragFromSpring_ = true;
-    }
-    return outBoundary;
-}
-
 void ListPattern::GetListItemGroupEdge(bool& groupAtStart, bool& groupAtEnd) const
 {
     if (itemPosition_.empty()) {
@@ -899,7 +887,6 @@ bool ListPattern::IsOutOfBoundary(bool useCurrentDelta)
 bool ListPattern::OnScrollCallback(float offset, int32_t source)
 {
     if (source == SCROLL_FROM_START) {
-        ProcessDragStart(offset);
         auto item = swiperItem_.Upgrade();
         if (item) {
             item->ResetSwipeStatus();
@@ -1786,6 +1773,28 @@ void ListPattern::TriggerModifyDone()
     OnModifyDone();
 }
 
+void ListPattern::SetChainAnimationCallback()
+{
+    CHECK_NULL_VOID(chainAnimation_);
+    chainAnimation_->SetAnimationCallback([weak = AceType::WeakClaim(this)]() {
+        auto list = weak.Upgrade();
+        CHECK_NULL_VOID(list);
+        list->MarkDirtyNodeSelf();
+    });
+    auto scrollEffect = AceType::DynamicCast<ScrollSpringEffect>(GetScrollEdgeEffect());
+    CHECK_NULL_VOID(scrollEffect);
+    scrollEffect->SetOnWillStartSpringCallback([weak = AceType::WeakClaim(this)]() {
+        auto list = weak.Upgrade();
+        CHECK_NULL_VOID(list);
+        if (!list->dragFromSpring_ && list->chainAnimation_) {
+            list->chainAnimation_->SetOverDrag(false);
+            auto delta = list->chainAnimation_->SetControlIndex(list->IsAtTop() ? 0 : list->maxListItemIndex_);
+            list->currentDelta_ -= delta;
+            list->dragFromSpring_ = true;
+        }
+    });
+}
+
 void ListPattern::SetChainAnimation()
 {
     auto listLayoutProperty = GetLayoutProperty<ListLayoutProperty>();
@@ -1832,11 +1841,7 @@ void ListPattern::SetChainAnimation()
             auto maxSpace = space * DEFAULT_MAX_SPACE_SCALE;
             chainAnimation_ = AceType::MakeRefPtr<ChainAnimation>(space, maxSpace, minSpace, springProperty_);
         }
-        chainAnimation_->SetAnimationCallback([weak = AceType::WeakClaim(this)]() {
-            auto list = weak.Upgrade();
-            CHECK_NULL_VOID(list);
-            list->MarkDirtyNodeSelf();
-        });
+        SetChainAnimationCallback();
     }
 }
 
@@ -1875,6 +1880,17 @@ void ListPattern::SetChainAnimationOptions(const ChainAnimationOptions& options)
     }
 }
 
+void ListPattern::OnTouchDown(const TouchEventInfo& info)
+{
+    auto& touches = info.GetTouches();
+    if (touches.empty()) {
+        return;
+    }
+    auto offset = touches.front().GetLocalLocation();
+    float startPosition = GetAxis() == Axis::HORIZONTAL ? offset.GetX() : offset.GetY();
+    ProcessDragStart(startPosition);
+}
+
 void ListPattern::ProcessDragStart(float startPosition)
 {
     CHECK_NULL_VOID(chainAnimation_);
@@ -1891,8 +1907,12 @@ void ListPattern::ProcessDragStart(float startPosition)
         index = itemPosition_.rbegin()->first + 1;
     }
     dragFromSpring_ = false;
-    chainAnimation_->SetControlIndex(index);
+    float delta = chainAnimation_->SetControlIndex(index);
+    currentDelta_ -= delta;
     chainAnimation_->SetMaxIndex(maxListItemIndex_);
+    if (IsOutOfBoundary()) {
+        chainAnimation_->SetOverDrag(true);
+    }
 }
 
 void ListPattern::ProcessDragUpdate(float dragOffset, int32_t source)
