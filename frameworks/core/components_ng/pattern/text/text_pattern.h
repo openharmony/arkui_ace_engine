@@ -826,6 +826,7 @@ private:
     bool isDoubleClick_ = false;
     bool showSelected_ = false;
     bool isSensitive_ = false;
+    bool hasSpanStringLongPressEvent_ = false;
     int32_t clickedSpanPosition_ = -1;
 
     RefPtr<ParagraphManager> pManager_;
