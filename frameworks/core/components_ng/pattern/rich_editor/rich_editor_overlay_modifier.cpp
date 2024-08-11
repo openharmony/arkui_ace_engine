@@ -179,26 +179,25 @@ void RichEditorOverlayModifier::PaintCaret(DrawingContext& drawingContext) const
     if (!caretVisible_->Get()) {
         return;
     }
+    auto& canvas = drawingContext.canvas;
     auto offset = caretOffset_->Get();
-    drawingContext.canvas.Save();
-    RSBrush brush;
-    brush.SetAntiAlias(true);
-    brush.SetColor(caretColor_->Get());
-    drawingContext.canvas.AttachBrush(brush);
-
-    if (GreatOrEqual(offset.GetX() + caretWidth_->Get(), contentRect_.value().Right())) {
-        drawingContext.canvas.DrawRect(RSRect(
-            offset.GetX() - caretWidth_->Get(), offset.GetY(), offset.GetX(), offset.GetY() + caretHeight_->Get()));
-    } else if (GreatOrEqual(offset.GetY() + caretHeight_->Get(), contentRect_.value().Bottom())) {
-        drawingContext.canvas.DrawRect(RSRect(
-            offset.GetX(), offset.GetY(), offset.GetX() + caretWidth_->Get(), contentRect_.value().Bottom()));
-    } else {
-        drawingContext.canvas.DrawRect(RSRect(
-            offset.GetX(), offset.GetY(), offset.GetX() + caretWidth_->Get(), offset.GetY() + caretHeight_->Get()));
-    }
-
-    drawingContext.canvas.DetachBrush();
-    drawingContext.canvas.Restore();
+    canvas.Save();
+    RSPen pen;
+    pen.SetAntiAlias(true);
+    float caretWidth = static_cast<float>(caretWidth_->Get());
+    float caretHeight = static_cast<float>(caretHeight_->Get());
+    pen.SetWidth(caretWidth);
+    pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
+    pen.SetColor(caretColor_->Get());
+    canvas.AttachPen(pen);
+    float midPosX = offset.GetX() + caretWidth / 2;
+    float startPosY = offset.GetY();
+    float endPosY = LessOrEqual(offset.GetY() + caretHeight, contentRect_.value().Bottom())
+                        ? offset.GetY() + caretHeight : contentRect_.value().Bottom();
+    float roundCapRadius = caretWidth / 2;
+    canvas.DrawLine(RSPoint(midPosX, startPosY + roundCapRadius), RSPoint(midPosX, endPosY - roundCapRadius));
+    canvas.DetachPen();
+    canvas.Restore();
 }
 
 void RichEditorOverlayModifier::PaintScrollBar(DrawingContext& context)
