@@ -210,8 +210,8 @@ void SwiperPattern::OnIndexChange()
 
 void SwiperPattern::StopAndResetSpringAnimation()
 {
-    if (springAnimationIsRunning_) {
-        StopSpringAnimationImmediately();
+    if (springAnimationIsRunning_ && !isTouchDownSpringAnimation_) {
+        StopSpringAnimation();
         currentDelta_ = 0.0f;
         itemPosition_.clear();
         isVoluntarilyClear_ = true;
@@ -494,10 +494,11 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
             jumpIndex_ = 0;
         }
         targetIndex_.reset();
+        nextIndex_ = jumpIndex_.value();
         StopAutoPlay();
         StopTranslateAnimation();
         StopFadeAnimation();
-        StopSpringAnimationImmediately();
+        StopSpringAnimation();
         if (usePropertyAnimation_) {
             StopPropertyTranslateAnimation(false, true);
             StopIndicatorAnimation();
