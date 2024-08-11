@@ -143,6 +143,22 @@ struct PreState {
     bool hasBorderColor = false;
 };
 
+enum class RequestKeyboardReason {
+    UNKNOWN = 0,
+    ON_KEY_EVENT,
+    SINGLE_CLICK,
+    DOUBLE_CLICK,
+    LONG_PRESS,
+    RESET_KEYBOARD,
+    MOUSE_RELEASE,
+    SET_SELECTION,
+    SEARCH_REQUEST,
+    AUTO_FILL_REQUEST_FILL,
+    SHOW_KEYBOARD_ON_FOCUS,
+    STYLUS_DETECTOR,
+    CUSTOM_KEYBOARD
+};
+
 struct PreviewTextInfo {
     std::string text;
     PreviewRange range;
@@ -638,6 +654,8 @@ public:
 
     void SearchRequestKeyboard();
 
+    bool RequestKeyboardNotByFocusSwitch(RequestKeyboardReason reason = RequestKeyboardReason::UNKNOWN);
+
     bool GetTextObscured() const
     {
         return textObscured_;
@@ -1048,7 +1066,7 @@ public:
             // close customKeyboard and request system keyboard
             CloseCustomKeyboard();
             customKeyboardBuilder_ = keyboardBuilder; // refresh current keyboard
-            RequestKeyboard(false, true, true);
+            RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::CUSTOM_KEYBOARD);
             StartTwinkling();
             return;
         }
@@ -1058,7 +1076,7 @@ public:
             if (imeShown_) {
                 CloseKeyboard(true);
                 customKeyboardBuilder_ = keyboardBuilder; // refresh current keyboard
-                RequestKeyboard(false, true, true);
+                RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::CUSTOM_KEYBOARD);
                 StartTwinkling();
                 return;
             }
@@ -1073,7 +1091,7 @@ public:
             // close customKeyboard and request system keyboard
             CloseCustomKeyboard();
             customKeyboard_ = keyboardBuilder; // refresh current keyboard
-            RequestKeyboard(false, true, true);
+            RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::CUSTOM_KEYBOARD);
             StartTwinkling();
             return;
         }
@@ -1083,7 +1101,7 @@ public:
             if (imeShown_) {
                 CloseKeyboard(true);
                 customKeyboard_ = keyboardBuilder; // refresh current keyboard
-                RequestKeyboard(false, true, true);
+                RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::CUSTOM_KEYBOARD);
                 StartTwinkling();
                 return;
             }
@@ -1525,7 +1543,7 @@ private:
     void SetDisabledStyle();
 
     void CalculateDefaultCursor();
-    void RequestKeyboardOnFocus();
+    void RequestKeyboardByFocusSwitch();
     bool IsModalCovered();
     void SetNeedToRequestKeyboardOnFocus();
     void SetAccessibilityAction() override;

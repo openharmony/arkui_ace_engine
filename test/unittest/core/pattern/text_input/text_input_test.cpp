@@ -1046,7 +1046,7 @@ HWTEST_F(TextFieldUXTest, testEnableKeyboardOnFocus001, TestSize.Level1)
     /**
      * @tc.step: step2. default enableKeyboardOnFocus
      */
-    pattern_->RequestKeyboardOnFocus();
+    pattern_->RequestKeyboardByFocusSwitch();
     frameNode_->MarkModifyDone();
     EXPECT_EQ(pattern_->needToRequestKeyboardOnFocus_, true);
 
