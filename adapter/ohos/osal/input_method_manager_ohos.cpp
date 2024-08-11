@@ -151,6 +151,14 @@ bool InputMethodManager::NeedSoftKeyboard() const
 {
     auto currentFocusNode = curFocusNode_.Upgrade();
     CHECK_NULL_RETURN(currentFocusNode, false);
+    auto pipeline = currentFocusNode->GetContextRefPtr();
+    if (pipeline) {
+        auto manager = AceType::DynamicCast<NG::TextFieldManagerNG>(pipeline->GetTextFieldManager());
+        if (manager && manager->GetLastRequestKeyboardId() == currentFocusNode->GetId()) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Last RequestKeyboard node is current focus node, So keep");
+            return true;
+        }
+    }
     if (currentFocusNode && (currentFocusNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG ||
                              currentFocusNode->GetTag() == V2::EMBEDDED_COMPONENT_ETS_TAG)) {
         return true;
