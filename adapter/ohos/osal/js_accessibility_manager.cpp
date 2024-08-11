@@ -197,8 +197,11 @@ Accessibility::EventType ConvertAceEventType(AccessibilityEventType type)
         { AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED,
             Accessibility::EventType::TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED_EVENT },
         { AccessibilityEventType::TEXT_MOVE_UNIT, Accessibility::EventType::TYPE_VIEW_TEXT_MOVE_UNIT_EVENT },
+        { AccessibilityEventType::REQUEST_FOCUS, Accessibility::EventType::TYPE_VIEW_REQUEST_FOCUS_FOR_ACCESSIBILITY },
         { AccessibilityEventType::SCROLL_START, Accessibility::EventType::TYPE_VIEW_SCROLLED_START },
         { AccessibilityEventType::PAGE_CLOSE, Accessibility::EventType::TYPE_PAGE_CLOSE },
+        { AccessibilityEventType::ANNOUNCE_FOR_ACCESSIBILITY,
+            Accessibility::EventType::TYPE_VIEW_ANNOUNCE_FOR_ACCESSIBILITY },
         { AccessibilityEventType::PAGE_OPEN, Accessibility::EventType::TYPE_PAGE_OPEN },
     };
     Accessibility::EventType eventType = Accessibility::EventType::TYPE_VIEW_INVALID;
@@ -2156,6 +2159,7 @@ void GenerateAccessibilityEventInfo(const AccessibilityEvent& accessibilityEvent
     eventInfo.SetTimeStamp(GetMicroTickCount());
     eventInfo.SetBeforeText(accessibilityEvent.beforeText);
     eventInfo.SetLatestContent(accessibilityEvent.latestContent);
+    eventInfo.SetTextAnnouncedForAccessibility(accessibilityEvent.textAnnouncedForAccessibility);
     eventInfo.SetWindowChangeTypes(static_cast<Accessibility::WindowUpdateType>(accessibilityEvent.windowChangeTypes));
     eventInfo.SetWindowContentChangeTypes(
         static_cast<Accessibility::WindowsContentChangeTypes>(accessibilityEvent.windowContentChangeTypes));
@@ -4999,6 +5003,30 @@ void JsAccessibilityManager::DeregisterAccessibilityChildTreeCallback(int64_t el
     childTreeCallbackMap_.erase(elementId);
 }
 
+void JsAccessibilityManager::RegisterAccessibilitySAObserverCallback(
+    int64_t elementId, const std::shared_ptr<AccessibilitySAObserverCallback> &callback)
+{
+    std::lock_guard<std::mutex> lock(componentSACallbackMutex_);
+    componentSACallbackMap_[elementId] = callback;
+}
+
+void JsAccessibilityManager::DeregisterAccessibilitySAObserverCallback(int64_t elementId)
+{
+    std::lock_guard<std::mutex> lock(componentSACallbackMutex_);
+    componentSACallbackMap_.erase(elementId);
+}
+
+void JsAccessibilityManager::NotifyAccessibilitySAStateChange(bool state)
+{
+    std::lock_guard<std::mutex> lock(componentSACallbackMutex_);
+    for (auto &item : componentSACallbackMap_) {
+        if (item.second == nullptr) {
+            continue;
+        }
+        item.second->OnState(state);
+    }
+}
+
 void JsAccessibilityManager::NotifyChildTreeOnRegister(int32_t treeId)
 {
     TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "NotifyChildTreeOnRegister size: %{public}zu", childTreeCallbackMap_.size());
@@ -5301,6 +5329,7 @@ void JsAccessibilityManager::JsAccessibilityStateObserver::OnStateChanged(const 
                 jsAccessibilityManager->DeregisterInteractionOperation();
             }
             AceApplicationInfo::GetInstance().SetAccessibilityEnabled(state);
+            jsAccessibilityManager->NotifyAccessibilitySAStateChange(state);
         },
         TaskExecutor::TaskType::UI, "ArkUIAccessibilityStateChanged");
 }
