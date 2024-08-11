@@ -499,10 +499,11 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
             jumpIndex_ = 0;
         }
         targetIndex_.reset();
+        nextIndex_ = jumpIndex_.value();
         StopAutoPlay();
         StopTranslateAnimation();
         StopFadeAnimation();
-        StopSpringAnimationImmediately();
+        StopSpringAnimation();
         if (usePropertyAnimation_) {
             StopPropertyTranslateAnimation(false, true);
             StopIndicatorAnimation();
