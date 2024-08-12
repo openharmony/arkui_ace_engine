@@ -6545,7 +6545,7 @@ void TextFieldPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, b
     info->SetId(host->GetId());
     info->SetDepth(host->GetDepth());
     info->SetAutoFillType(autoFillTypeAndMetaData.autoFillType);
-    info->SetMetaData(autoFillTypeAndMetaData.metadata);
+    info->SetMetadata(autoFillTypeAndMetaData.metadata);
     info->SetTag(host->GetTag());
     if (autoFillOtherAccount_) {
         viewDataWrap->SetOtherAccount(true);
