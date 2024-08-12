@@ -846,6 +846,7 @@ HWTEST_F(OverlayManagerExtendTestNg, ShowToastTest001, TestSize.Level1)
      */
     auto toastInfo =
         NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
+    toastInfo.shadow = ShadowConfig::DefaultShadowL;
     /**
      * @tc.steps: step3. run ShowToast
      * @tc.expected: toastMap_ is not empty
@@ -874,7 +875,7 @@ HWTEST_F(OverlayManagerExtendTestNg, ShowToastTest002, TestSize.Level1)
      */
     auto toastInfo =
         NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
-
+    toastInfo.shadow = ShadowConfig::DefaultShadowL;
     auto callback = [](int32_t callbackId) {
         /**
          * @tc.steps: step4. get callbackId.
@@ -911,7 +912,7 @@ HWTEST_F(OverlayManagerExtendTestNg, CloseToastTest001, TestSize.Level1)
      */
     auto toastInfo =
         NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
-
+    toastInfo.shadow = ShadowConfig::DefaultShadowL;
     auto callback = [overlayManager](int32_t callbackId) {
         /**
          * @tc.steps: step4. get callbackId.
