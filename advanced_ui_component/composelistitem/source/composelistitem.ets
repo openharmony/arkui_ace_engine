@@ -569,7 +569,10 @@ struct OperateItemStruct {
        })
       .margin({ end: LengthMetrics.vp(OperateItemStruct.RIGHT_ITEM_OFFSET_LEVEL1) })
       .checked(this.radioState)
-      .onChange(this.radio?.onChange)
+      .onChange((isCheck: boolean) => {
+        this.radioState = isCheck;
+        this.radio?.onChange(isCheck);
+      })
       .height(OPERATEITEM_ICONLIKE_SIZE)
       .width(OPERATEITEM_ICONLIKE_SIZE)
       .onFocus(() => {

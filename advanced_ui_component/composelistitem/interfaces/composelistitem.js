@@ -1232,30 +1232,37 @@ class OperateItemStruct extends ViewPU {
             Radio.backgroundColor(!FOCUSABLE && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR : Color.Transparent.toString());
             Radio.borderRadius(FOCUSABLE ? UNUSUAL : OPERATE_ITEM_RADIUS);
             Radio.onClick(() => {
+                if (!FOCUSABLE) {
+                    this.radioState = !this.radioState;
+                    this.isOnClick = this.radioState;
+                }
             });
             Radio.margin({ end: LengthMetrics.vp(OperateItemStruct.RIGHT_ITEM_OFFSET_LEVEL1) });
             Radio.checked(this.radioState);
-            Radio.onChange(this.radio?.onChange);
+            Radio.onChange((p) => {
+                this.radioState = p;
+                this.radio?.onChange(p);
+            });
             Radio.height(OPERATEITEM_ICONLIKE_SIZE);
             Radio.width(OPERATEITEM_ICONLIKE_SIZE);
             Radio.onFocus(() => {
                 this.parentCanFocus = false;
             });
             Radio.hitTestBehavior(HitTestMode.Block);
-            Radio.onTouch((g7) => {
-                if (g7.type == TouchType.Down) {
+            Radio.onTouch((o) => {
+                if (o.type == TouchType.Down) {
                     this.parentCanTouch = false;
                 }
-                if (g7.type == TouchType.Up) {
+                if (o.type == TouchType.Up) {
                     this.parentCanTouch = true;
                 }
             });
-            Radio.onHover((f7) => {
+            Radio.onHover((d) => {
                 this.parentCanHover = false;
-                if (f7 && this.parentFrontColor === this.hoveringColor) {
+                if (d && this.parentFrontColor === this.hoveringColor) {
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 }
-                if (!f7) {
+                if (!d) {
                     this.parentCanHover = true;
                     if (this.parentIsHover) {
                         this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
@@ -2180,7 +2187,7 @@ export class ComposeListItem extends ViewPU {
                     {
                         this.observeComponentCreation2((l1, m1) => {
                             if (m1) {
-                                let n1 = new ContentItemStruct(this, {}, undefined, l1, () => { }, { page: "library/src/main/ets/components/mainpage/composelistitem.ets", line: 1043, col: 11 });
+                                let n1 = new ContentItemStruct(this, {}, undefined, l1, () => { }, { page: "library/src/main/ets/components/mainpage/composelistitem.ets", line: 1050, col: 11 });
                                 ViewPU.create(n1);
                                 let c = () => {
                                     return {};
@@ -2225,7 +2232,7 @@ export class ComposeListItem extends ViewPU {
                                     itemDirection: this.contentItemDirection,
                                     isFocus: this.isFocus,
                                     itemHeight: this.itemHeight,
-                                }, undefined, a1, () => { }, { page: "library/src/main/ets/components/mainpage/composelistitem.ets", line: 1046, col: 11 });
+                                }, undefined, a1, () => { }, { page: "library/src/main/ets/components/mainpage/composelistitem.ets", line: 1053, col: 11 });
                                 ViewPU.create(c1);
                                 let b = () => {
                                     return {
@@ -2320,7 +2327,7 @@ export class ComposeListItem extends ViewPU {
                                     parentDirection: this.containerDirection,
                                     isFocus: this.__isFocus,
                                     isOnClick: this.__isOnClick,
-                                }, undefined, l, () => { }, { page: "library/src/main/ets/components/mainpage/composelistitem.ets", line: 1067, col: 11 });
+                                }, undefined, l, () => { }, { page: "library/src/main/ets/components/mainpage/composelistitem.ets", line: 1074, col: 11 });
                                 ViewPU.create(n);
                                 let a = () => {
                                     return {
