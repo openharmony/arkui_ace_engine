@@ -286,6 +286,7 @@ void GridIrregularLayoutAlgorithm::MeasureOnJump(float mainSize)
     Jump(mainSize);
 
     if (info_.extraOffset_) {
+        info_.prevOffset_ = info_.currentOffset_;
         info_.currentOffset_ += *info_.extraOffset_;
         MeasureOnOffset(mainSize);
     }
