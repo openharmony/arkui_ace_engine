@@ -2444,6 +2444,7 @@ void TextFieldPattern::StartTwinkling()
     cursorTwinklingTask_.Cancel();
 
     // Show cursor right now.
+    isCaretTwinkling_ = true;
     cursorVisible_ = true;
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
@@ -2474,6 +2475,7 @@ void TextFieldPattern::StopTwinkling()
     cursorTwinklingTask_.Cancel();
 
     // Repaint only if cursor is visible for now.
+    isCaretTwinkling_ = false;
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     if (cursorVisible_) {
@@ -2490,6 +2492,7 @@ void TextFieldPattern::ShowCaretAndStopTwinkling()
     cursorTwinklingTask_.Cancel();
 
     // Repaint and make cursor visible.
+    isCaretTwinkling_ = false;
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     cursorVisible_ = true;
@@ -6160,8 +6163,8 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
     json->PutExtAttr("barState", GetBarStateString().c_str(), filter);
     json->PutExtAttr("caretPosition", std::to_string(GetCaretIndex()).c_str(), filter);
     json->PutExtAttr("enablePreviewText", GetSupportPreviewText(), filter);
-
     ToJsonValueForOption(json, filter);
+    ToJsonValueSelectOverlay(json, filter);
 }
 
 void TextFieldPattern::ToJsonValueForOption(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -6184,6 +6187,58 @@ void TextFieldPattern::ToJsonValueForOption(std::unique_ptr<JsonValue>& json, co
     jsonShowCounterOptions->Put("highlightBorder", layoutProperty->GetShowHighlightBorderValue(true));
     jsonShowCounter->Put("options", jsonShowCounterOptions);
     json->PutExtAttr("showCounter", jsonShowCounter, filter);
+}
+
+void TextFieldPattern::ToJsonValueSelectOverlay(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    json->PutExtAttr("CaretStatus", cursorVisible_ ? "show" : "hide", filter);
+    json->PutExtAttr("CaretTwinkling", isCaretTwinkling_ ? "true" : "false", filter);
+    json->PutExtAttr("caretRect", selectController_->GetCaretRect().ToString().c_str(), filter);
+    json->PutExtAttr("caretWidth", std::to_string(selectController_->GetCaretRect().Width()).c_str(), filter);
+    json->PutExtAttr("isShowMagnifier", magnifierController_->GetShowMagnifier() ? "true" : "false", filter);
+    json->PutExtAttr("MagnifierPosition", magnifierController_->GetLocalOffset().ToString().c_str(), filter);
+
+    auto manager = selectOverlay_->GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    auto selectOverlayInfo = manager->GetSelectOverlayInfo();
+    CHECK_NULL_VOID(selectOverlayInfo);
+
+    //handle info
+    json->PutExtAttr("IsSingleHandle", selectOverlayInfo->isSingleHandle ? "true" : "false", filter);
+    json->PutExtAttr("IsHandleReverse", selectOverlayInfo->handleReverse ? "true" : "false", filter);
+    json->PutExtAttr("FirstHandleRect", selectOverlayInfo->firstHandle.paintRect.ToString().c_str(), filter);
+    json->PutExtAttr("FirstHandleStartPoint",
+        selectOverlayInfo->firstHandle.paintInfo.startPoint.ToString().c_str(), filter);
+    json->PutExtAttr("FirstHandleEndPoint",
+        selectOverlayInfo->firstHandle.paintInfo.endPoint.ToString().c_str(), filter);
+    json->PutExtAttr("IsFirstHandlePaintByPoints",
+        selectOverlayInfo->firstHandle.isPaintHandleWithPoints ? "true" : "false", filter);
+    json->PutExtAttr("SecondHandleRect", selectOverlayInfo->secondHandle.paintRect.ToString().c_str(), filter);
+    json->PutExtAttr("SecondHandleStartPoint",
+        selectOverlayInfo->secondHandle.paintInfo.startPoint.ToString().c_str(), filter);
+    json->PutExtAttr("SecondHandleEndPoint",
+        selectOverlayInfo->secondHandle.paintInfo.endPoint.ToString().c_str(), filter);
+    json->PutExtAttr("IsSecondHandlePaintByPoints",
+        selectOverlayInfo->secondHandle.isPaintHandleWithPoints ? "true" : "false", filter);
+
+    //menu
+    auto menuNode = manager->GetSelectOverlayNode();
+    CHECK_NULL_VOID(menuNode);
+    json->PutExtAttr("MenuNode", menuNode->GetTag().c_str(), filter);
+    if (menuNode->GetAncestorNodeOfFrame()) {
+        json->PutExtAttr("MountOn", menuNode->GetAncestorNodeOfFrame()->GetTag().c_str(), filter);
+    }
+    auto menuLayoutProperty = menuNode->GetLayoutProperty();
+    CHECK_NULL_VOID(menuLayoutProperty);
+    auto menuVisible = static_cast<int32_t>(menuLayoutProperty->GetVisibility().value_or(VisibleType::VISIBLE));
+    json->PutExtAttr("Visible", std::to_string(menuVisible).c_str(), filter);
+    auto menuGeometryNode = menuNode->GetGeometryNode();
+    CHECK_NULL_VOID(menuGeometryNode);
+    json->PutExtAttr("MenuFrameRect", menuGeometryNode->GetFrameRect().ToString().c_str(), filter);
+    json->PutExtAttr("MenuItemCount", std::to_string(selectOverlayInfo->menuOptionItems.size()).c_str(), filter);
+    for (auto menuItme : selectOverlayInfo->menuOptionItems) {
+        json->PutExtAttr("MenuItme", menuItme.content.value_or("").c_str(), filter);
+    }
 }
 
 void TextFieldPattern::FromJson(const std::unique_ptr<JsonValue>& json)
