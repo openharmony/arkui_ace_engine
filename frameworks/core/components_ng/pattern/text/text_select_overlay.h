@@ -70,6 +70,12 @@ public:
         return handleGlobalOffset_;
     }
 
+    bool IsRegisterTouchCallback() override
+    {
+        return true;
+    }
+    void OnOverlayClick(const GestureEvent& event, bool isFirst) override;
+
 protected:
     virtual void UpdateSelectorOnHandleMove(const OffsetF& handleOffset, bool isFirstHandle);
     void UpdateTransformFlag() override

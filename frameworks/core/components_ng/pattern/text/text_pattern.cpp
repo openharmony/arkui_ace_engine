@@ -1401,6 +1401,7 @@ bool TextPattern::IsDraggable(const Offset& offset)
         GreatNotEqual(textSelector_.GetTextEnd(), textSelector_.GetTextStart())) {
         // Determine if the pan location is in the selected area
         auto selectedRects = pManager_->GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
+        TextBase::CalculateSelectedRect(selectedRects, contentRect_.Width());
         auto panOffset = OffsetF(offset.GetX(), offset.GetY()) - contentRect_.GetOffset() +
                          OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
         for (const auto& selectedRect : selectedRects) {
