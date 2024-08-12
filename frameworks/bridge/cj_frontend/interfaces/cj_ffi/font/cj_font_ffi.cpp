@@ -15,7 +15,6 @@
 
 #include "cj_font_ffi.h"
 
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;

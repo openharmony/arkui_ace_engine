@@ -16,9 +16,7 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/concurrency/cj_concurrency_ffi.h"
 
 #include "cj_lambda.h"
-#include "bridge/common/utils/engine_helper.h"
 #include "frameworks/core/common/container.h"
-#include "frameworks/core/common/container_scope.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;

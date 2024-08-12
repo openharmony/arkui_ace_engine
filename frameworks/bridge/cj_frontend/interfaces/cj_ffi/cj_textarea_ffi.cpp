@@ -15,7 +15,6 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_textarea_ffi.h"
 
-#include <cinttypes>
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;

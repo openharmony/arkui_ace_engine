@@ -15,15 +15,9 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_text_ffi.h"
 
-#include "cj_lambda.h"
 
-#include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 #include "bridge/common/utils/utils.h"
-#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
-#include "core/event/ace_event_handler.h"
-#include "core/gestures/click_recognizer.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;

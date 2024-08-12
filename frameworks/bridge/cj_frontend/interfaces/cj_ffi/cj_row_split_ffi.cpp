@@ -15,10 +15,7 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_row_split_ffi.h"
 
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
-#include "bridge/common/utils/utils.h"
 #include "core/components_ng/base/view_abstract_model.h"
-#include "core/common/container.h"
 #include "core/components_ng/pattern/linear_split/linear_split_model.h"
 #include "bridge/cj_frontend/cppview/shape_abstract.h"
 
