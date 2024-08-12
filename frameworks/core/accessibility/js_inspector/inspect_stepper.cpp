@@ -15,8 +15,6 @@
 
 #include "inspect_stepper.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 InspectStepper::InspectStepper(NodeId nodeId, const std::string& nodeName) : InspectNode(nodeId, nodeName) {}
 
