@@ -560,7 +560,7 @@ void CalendarMonthPattern::ChangeVirtualNodeContent(const CalendarDay& calendarD
     auto remainderWeek = calendarDay.index % CALENDAR_WEEK_DAYS;
     int32_t index = (textDirection == TextDirection::RTL ?
         CALENDAR_WEEK_DAYS - remainderWeek * 2 + calendarDay.index - 1 : calendarDay.index);
-    if (index >= buttonAccessibilityNodeVec_.size()) {
+    if (index >= static_cast<int32_t>(buttonAccessibilityNodeVec_.size())) {
         return;
     }
     std::string message;
