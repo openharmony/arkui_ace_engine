@@ -113,6 +113,7 @@ constexpr int32_t USED_ID_FIND_FLAG = 3;                 // if args >3 , it mean
 constexpr int32_t MILLISECONDS_TO_NANOSECONDS = 1000000; // Milliseconds to nanoseconds
 constexpr int32_t RESAMPLE_COORD_TIME_THRESHOLD = 20 * 1000 * 1000;
 constexpr int32_t VSYNC_PERIOD_COUNT = 2;
+constexpr int32_t MIN_IDLE_TIME = 1000;
 constexpr uint8_t SINGLECOLOR_UPDATE_ALPHA = 75;
 constexpr int8_t RENDERING_SINGLE_COLOR = 1;
 
@@ -3474,6 +3475,62 @@ void PipelineContext::AddPredictTask(PredictTask&& task)
     RequestFrame();
 }
 
+void PipelineContext::AddFrameCallback(FrameCallbackFunc&& frameCallbackFunc, FrameCallbackFunc&& idleCallbackFunc,
+    int64_t delayMillis)
+{
+    if (delayMillis <= 0) {
+        if (frameCallbackFunc != nullptr) {
+            frameCallbackFuncs_.emplace_back(std::move(frameCallbackFunc));
+        }
+        if (idleCallbackFunc != nullptr) {
+            idleCallbackFuncs_.emplace_back(std::move(idleCallbackFunc));
+        }
+        RequestFrame();
+        return;
+    }
+    auto taskScheduler = GetTaskExecutor();
+    CHECK_NULL_VOID(taskScheduler);
+    if (frameCallbackFunc != nullptr) {
+        taskScheduler->PostDelayedTask(
+            [weak = WeakClaim(this), callbackFunc = std::move(frameCallbackFunc)]() -> void {
+                auto pipeline = weak.Upgrade();
+                CHECK_NULL_VOID(pipeline);
+                auto callback = const_cast<FrameCallbackFunc&>(callbackFunc);
+                pipeline->frameCallbackFuncs_.emplace_back(std::move(callback));
+                pipeline->RequestFrame();
+            },
+            TaskExecutor::TaskType::UI, delayMillis, "ArkUIPostFrameCallbackFuncDelayed");
+    }
+    if (idleCallbackFunc != nullptr) {
+        taskScheduler->PostDelayedTask(
+            [weak = WeakClaim(this), callbackFunc = std::move(idleCallbackFunc)]() -> void {
+                auto pipeline = weak.Upgrade();
+                CHECK_NULL_VOID(pipeline);
+                auto callback = const_cast<FrameCallbackFunc&>(callbackFunc);
+                pipeline->idleCallbackFuncs_.emplace_back(std::move(callback));
+                pipeline->RequestFrame();
+            },
+            TaskExecutor::TaskType::UI, delayMillis, "ArkUIPostIdleCallbackFuncDelayed");
+    }
+}
+
+void PipelineContext::TriggerIdleCallback(int64_t deadline)
+{
+    if (idleCallbackFuncs_.empty()) {
+        return;
+    }
+    int64_t currentTime = GetSysTimestamp();
+    if (deadline - currentTime < MIN_IDLE_TIME) {
+        RequestFrame();
+        return;
+    }
+    decltype(idleCallbackFuncs_) tasks(std::move(idleCallbackFuncs_));
+    for (const auto& idleCallbackFunc : tasks) {
+        idleCallbackFunc(deadline - currentTime);
+        currentTime = GetSysTimestamp();
+    }
+}
+
 void PipelineContext::OnIdle(int64_t deadline)
 {
     int64_t currentTime = GetSysTimestamp();
@@ -3507,6 +3564,7 @@ void PipelineContext::OnIdle(int64_t deadline)
     if (currentTime < deadline) {
         ElementRegister::GetInstance()->CallJSCleanUpIdleTaskFunc();
     }
+    TriggerIdleCallback(deadline);
 }
 
 void PipelineContext::Finish(bool /* autoFinish */) const

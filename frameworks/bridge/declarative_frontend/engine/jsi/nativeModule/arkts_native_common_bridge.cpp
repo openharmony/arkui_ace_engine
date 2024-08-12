@@ -7320,35 +7320,42 @@ ArkUINativeModuleValue CommonBridge::PostFrameCallback(ArkUIRuntimeCallInfo* run
         delayMillis = secondArg->IntegerValue(vm);
     }
 
-    FrameCallbackFunc frameCallbackFunc = [vm, frameCallbackObj = panda::CopyableGlobal(vm, frameCallback),
-                                              delayMillis](int64_t nanoTimestamp) -> void {
-        if (frameCallbackObj->IsNull() || frameCallbackObj->IsUndefined() || !frameCallbackObj->IsObject(vm)) {
-            return;
-        }
-        Local<FunctionRef> onFrameFunc = frameCallbackObj->Get(vm, "onFrame");
-        if (!onFrameFunc->IsFunction(vm)) {
-            return;
-        }
+    if (frameCallback->IsNull() || frameCallback->IsUndefined() || !frameCallback->IsObject(vm)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
 
-        auto nanoTimestampRef = NumberRef::New(vm, nanoTimestamp);
-        Local<JSValueRef> params[] = { nanoTimestampRef };
-        onFrameFunc->Call(vm, frameCallbackObj.ToLocal(), params, 1);
-    };
+    FrameCallbackFunc onFrameCallbackFunc = nullptr;
+    FrameCallbackFunc onIdleCallbackFunc = nullptr;
+
+    if (frameCallback->Get(vm, "onFrame")->IsFunction(vm)) {
+        onFrameCallbackFunc = [vm, frameCallbackObj = panda::CopyableGlobal(vm, frameCallback),
+                                  delayMillis](int64_t nanoTimestamp) -> void {
+            Local<FunctionRef> onFrameFunc = frameCallbackObj->Get(vm, "onFrame");
+
+            auto nanoTimestampRef = NumberRef::New(vm, nanoTimestamp);
+            Local<JSValueRef> params[] = { nanoTimestampRef };
+            onFrameFunc->Call(vm, frameCallbackObj.ToLocal(), params, 1);
+        };
+    }
+
+    if (frameCallback->Get(vm, "onIdle")->IsFunction(vm)) {
+        onIdleCallbackFunc = [vm, frameCallbackObj = panda::CopyableGlobal(vm, frameCallback),
+                                 delayMillis](int64_t nanoTimestamp) -> void {
+            Local<FunctionRef> onIdleFunc = frameCallbackObj->Get(vm, "onIdle");
+
+            auto nanoTimestampRef = NumberRef::New(vm, nanoTimestamp);
+            Local<JSValueRef> params[] = { nanoTimestampRef };
+            onIdleFunc->Call(vm, frameCallbackObj.ToLocal(), params, 1);
+        };
+    }
+
+    if (onFrameCallbackFunc == nullptr && onIdleCallbackFunc == nullptr) {
+        return panda::JSValueRef::Undefined(vm);
+    }
 
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, panda::JSValueRef::Undefined(vm));
-    if (delayMillis <= 0) {
-        context->AddFrameCallback(std::move(frameCallbackFunc));
-    } else {
-        auto taskScheduler = context->GetTaskExecutor();
-        CHECK_NULL_RETURN(taskScheduler, panda::JSValueRef::Undefined(vm));
-        taskScheduler->PostDelayedTask(
-            [context, callbackFunc = std::move(frameCallbackFunc)]() -> void {
-                auto callback = const_cast<FrameCallbackFunc&>(callbackFunc);
-                context->AddFrameCallback(std::move(callback));
-            },
-            TaskExecutor::TaskType::UI, delayMillis, "ArkUIPostFrameCallbackFuncDelayed");
-    }
+    context->AddFrameCallback(std::move(onFrameCallbackFunc), std::move(onIdleCallbackFunc), delayMillis);
     return panda::JSValueRef::Undefined(vm);
 }
 
