@@ -31,6 +31,94 @@ class TextFieldPatternTestTwo : public TextInputBases {
 public:
 };
 
+class TextFieldPatternTestTwoViewDataWrap : public ViewDataWrap {
+public:
+    const std::string& GetBundleName() const
+    {
+        return str;
+    }
+    const std::string& GetModuleName() const
+    {
+        return str;
+    }
+    const std::string& GetAbilityName() const
+    {
+        return str;
+    }
+    const std::string& GetPageUrl() const
+    {
+        return str;
+    }
+    const std::vector<RefPtr<PageNodeInfoWrap>>& GetPageNodeInfoWraps()
+    {
+        return vct;
+    }
+    const NG::RectF& GetPageRect() const
+    {
+        return rect;
+    }
+    bool GetUserSelected() const
+    {
+        return true;
+    }
+    void SetOtherAccount(bool isOtherAccount)
+    {
+        isOtherAccount_ = isOtherAccount;
+    }
+    bool GetOtherAccount() const
+    {
+        return isOtherAccount_;
+    }
+
+protected:
+    std::string str;
+    std::vector<RefPtr<PageNodeInfoWrap>> vct;
+    NG::RectF rect;
+    bool isOtherAccount_ = false;
+};
+
+class TextFieldPatternTestTwoPageNodeInfoWrap : public PageNodeInfoWrap {
+public:
+    const std::string& GetTag() const
+    {
+        return str;
+    }
+    void SetValue(const std::string& value)
+    {
+        value_ = value;
+    }
+    const std::string& GetValue() const
+    {
+        return value_;
+    }
+    const std::string& GetPlaceholder() const
+    {
+        return str;
+    }
+    const std::string& GetPasswordRules() const
+    {
+        return str;
+    }
+    void SetIsFocus(bool isFocus)
+    {
+        isFocus_ = isFocus;
+    }
+    bool GetIsFocus() const
+    {
+        return isFocus_;
+    }
+    const NG::RectF& GetPageNodeRect() const
+    {
+        return rect;
+    }
+
+protected:
+    std::string str;
+    NG::RectF rect;
+    bool isFocus_ = false;
+    std::string value_;
+};
+
 /**
  * @tc.name: InitDragDropCallBack001
  * @tc.desc: test testInput text InitDragDropCallBack
@@ -582,5 +670,146 @@ HWTEST_F(TextFieldPatternTestTwo, ProcBorderAndUnderlineInBlurEvent001, TestSize
     pattern->showCountBorderStyle_ = true;
     pattern->ProcBorderAndUnderlineInBlurEvent();
     EXPECT_EQ(pattern->showCountBorderStyle_, false);
+}
+
+/**
+ * @tc.name: NotifyFillRequestSuccess001
+ * @tc.desc: test testInput text NotifyFillRequestSuccess
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, NotifyFillRequestSuccess001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /* Create custom ViewDataWrap and PageNodeInfoWrap objects */
+    auto viewDataWrap = AceType::MakeRefPtr<TextFieldPatternTestTwoViewDataWrap>();
+    ASSERT_NE(viewDataWrap, nullptr);
+    auto nodeWrap = AceType::MakeRefPtr<TextFieldPatternTestTwoPageNodeInfoWrap>();
+    ASSERT_NE(nodeWrap, nullptr);
+
+    pattern->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, AceAutoFillType::ACE_UNSPECIFIED);
+
+    nodeWrap->SetValue("Test");
+    pattern->lastAutoFillTextValue_ = "";
+    pattern->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, AceAutoFillType::ACE_UNSPECIFIED);
+    EXPECT_EQ(pattern->lastAutoFillTextValue_, "Test");
+
+    /* Simulate contentControl_ as nullptr */
+    auto contentController = pattern->contentController_;
+    pattern->contentController_ = nullptr;
+    pattern->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, AceAutoFillType::ACE_UNSPECIFIED);
+    pattern->contentController_ = contentController;
+
+    nodeWrap->SetIsFocus(true);
+    pattern->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, AceAutoFillType::ACE_UNSPECIFIED);
+
+    /* Give the pattern focus */
+    auto focusHub = pattern->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = true;
+    pattern->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, AceAutoFillType::ACE_NEW_PASSWORD);
+
+    auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateTextContentType(TextContentType::NEW_PASSWORD);
+    pattern->lastAutoFillTextValue_ = "";
+    pattern->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, AceAutoFillType::ACE_NEW_PASSWORD);
+    EXPECT_NE(pattern->lastAutoFillTextValue_, "Test");
+
+    viewDataWrap->SetOtherAccount(true);
+    pattern->lastAutoFillTextValue_ = "";
+    pattern->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, AceAutoFillType::ACE_NEW_PASSWORD);
+    EXPECT_NE(pattern->lastAutoFillTextValue_, "Test");
+}
+
+/**
+ * @tc.name: ParseFillContentJsonValue001
+ * @tc.desc: test testInput text ParseFillContentJsonValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, ParseFillContentJsonValue001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /* Construct JSON object */
+    auto jsonObject = JsonUtil::Create(true);
+    auto childJsonObject = JsonUtil::Create(true);
+    std::unordered_map<std::string, std::variant<std::string, bool, int32_t>> map;
+
+    childJsonObject->Put("name", "textfieldtest");
+    jsonObject->Put("child0", childJsonObject);
+    jsonObject->Put("child1", "child1");
+    jsonObject->Put("child2", "child2");
+    jsonObject->Put("child3", "child3");
+    jsonObject->Put("child4", "child4");
+    jsonObject->Put("child5", "child5");
+    jsonObject->Put("child6", "child6");
+    jsonObject->Put("child7", "child7");
+
+    EXPECT_EQ(pattern->ParseFillContentJsonValue(jsonObject, map), true);
+    EXPECT_EQ(pattern->ParseFillContentJsonValue(jsonObject->GetChild()->GetNext(), map), false);
+
+    /* Construct an array JSON object */
+    auto arrayJsonObject = JsonUtil::CreateArray(true);
+    arrayJsonObject->Put("name", "textfieldtest");
+
+    EXPECT_EQ(pattern->ParseFillContentJsonValue(arrayJsonObject, map), false);
+}
+
+/**
+ * @tc.name: GetDragUpperLeftCoordinates001
+ * @tc.desc: test testInput text GetDragUpperLeftCoordinates
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, GetDragUpperLeftCoordinates001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /* Set the value of contentRect_ */
+    pattern->contentRect_.SetRect(100, 100, 100, 100);
+
+    /* Make the IsSelected function return true */
+    pattern->contentController_->content_ = "Test";
+    pattern->selectController_->UpdateHandleIndex(0, 4);
+
+    /* Create a paragraph and mock to return two rectangles with the same starting point */
+    auto paragraph0 = MockParagraph::GetOrCreateMockParagraph();
+    std::vector<RectF> rects0 { RectF(0, 0, 10, 10), RectF(0, 0, 20, 20) };
+    EXPECT_CALL(*paragraph0, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects0));
+    pattern->selectController_->paragraph_ = paragraph0;
+
+    EXPECT_EQ(pattern->GetDragUpperLeftCoordinates(), OffsetF(100, 100));
+
+    /* Make the IsTextArea function return false */
+    auto layoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateMaxLines(1);
+
+    EXPECT_EQ(pattern->GetDragUpperLeftCoordinates(), OffsetF(100, 100));
+
+    /* Create a paragraph, mock and return two rectangles with different starting points */
+    auto paragraph1 = MockParagraph::GetOrCreateMockParagraph();
+    std::vector<RectF> rects1 { RectF(0, 0, 10, 10), RectF(10, 10, 20, 20) };
+    EXPECT_CALL(*paragraph1, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects1));
+    pattern->selectController_->paragraph_ = paragraph1;
+
+    EXPECT_EQ(pattern->GetDragUpperLeftCoordinates(), OffsetF(100, 100));
+
+    /* Make the IsTextArea function return true */
+    layoutProperty->UpdateMaxLines(1024);
+
+    EXPECT_EQ(pattern->GetDragUpperLeftCoordinates(), OffsetF(100, 100));
 }
 } // namespace OHOS::Ace::NG
