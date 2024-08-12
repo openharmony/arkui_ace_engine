@@ -2817,7 +2817,9 @@ void RichEditorPattern::HandleBlurEvent()
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "RichEditor Blur, Close Keyboard.");
         CloseKeyboard(true);
     }
-
+    if (magnifierController_) {
+        magnifierController_->RemoveMagnifierFrameNode();
+    }
     CloseSelectOverlay();
     ResetSelection();
 
