@@ -372,4 +372,393 @@ HWTEST_F(ImagePatternTestNg, CreatePictureAnimation001, TestSize.Level1)
     pictureAnimation->NotifyListener(index);
     EXPECT_EQ(imagePattern->nowImageIndex_, 0);
 }
+
+/**
+ * @tc.name: OnVisibleAreaChange001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, OnVisibleAreaChange001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = CreatePixelMapAnimator();
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    /**
+     * @tc.steps: step2. call OnVisibleAreaChange.
+     * @tc.expected:
+     */
+    SystemProperties::debugEnabled_ = true;
+    imagePattern->animator_->status_ = OHOS::Ace::Animator::Status::PAUSED;
+    imagePattern->imageType_ = ImagePattern::ImageType::ANIMATION;
+    imagePattern->OnVisibleAreaChange(true, 1.0f);
+    EXPECT_EQ(imagePattern->animator_->status_, OHOS::Ace::Animator::Status::RUNNING);
+}
+
+/**
+ * @tc.name: InitCopy001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, InitCopy001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = CreatePixelMapAnimator();
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    /**
+     * @tc.steps: step2. call mouseEvent_.
+     * @tc.expected:
+     */
+    imagePattern->InitCopy();
+    ASSERT_NE(imagePattern->mouseEvent_, nullptr);
+    MouseInfo info;
+    info.SetButton(MouseButton::RIGHT_BUTTON);
+    info.SetAction(MouseAction::PRESS);
+    imagePattern->mouseEvent_->GetOnMouseEventFunc()(info);
+    info.SetButton(MouseButton::LEFT_BUTTON);
+    info.SetAction(MouseAction::PRESS);
+    imagePattern->mouseEvent_->GetOnMouseEventFunc()(info);
+    info.SetButton(MouseButton::RIGHT_BUTTON);
+    info.SetAction(MouseAction::MOVE);
+    imagePattern->mouseEvent_->GetOnMouseEventFunc()(info);
+    info.SetButton(MouseButton::BACK_BUTTON);
+    info.SetAction(MouseAction::PULL_UP);
+    imagePattern->mouseEvent_->GetOnMouseEventFunc()(info);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    SelectOverlayInfo& info1 = pipeline->GetSelectOverlayManager()->selectOverlayInfo_;
+    RectF rect(0.0f, 0.0f, 1.0f, 1.0f);
+    bool isFirst = false;
+    info1.onHandleMoveDone(rect, isFirst);
+    bool closedByGlobalEvent = true;
+    info1.onClose(closedByGlobalEvent);
+    EXPECT_FALSE(imagePattern->isSelected_);
+}
+
+/**
+ * @tc.name: ToJsonValue001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, ToJsonValue001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = CreatePixelMapAnimator();
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    /**
+     * @tc.steps: step2. call ToJsonValue.
+     * @tc.expected:
+     */
+    std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
+    InspectorFilter filter;
+    filter.filterExt.clear();
+    filter.filterFixed = 1;
+    imagePattern->ToJsonValue(json, filter);
+    filter.filterExt.emplace_back("test001");
+    imagePattern->ToJsonValue(json, filter);
+    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+    DynamicRangeMode value = DynamicRangeMode::CONSTRAINT;
+    imageRenderProperty->UpdateDynamicMode(value);
+    imagePattern->ToJsonValue(json, filter);
+    DynamicRangeMode defaultValue = DynamicRangeMode::STANDARD;
+    EXPECT_EQ(imageRenderProperty->GetDynamicModeValue(defaultValue), DynamicRangeMode::CONSTRAINT);
+}
+
+/**
+ * @tc.name: UpdateFillColorIfForegroundColor001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, UpdateFillColorIfForegroundColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = CreatePixelMapAnimator();
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    /**
+     * @tc.steps: step2. call UpdateFillColorIfForegroundColor.
+     * @tc.expected:
+     */
+    const RefPtr<RenderContext>& renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    ForegroundColorStrategy value2 = ForegroundColorStrategy::NONE;
+    renderContext->UpdateForegroundColorStrategy(value2);
+
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ImageSourceInfo value1;
+    value1.isSvg_ = true;
+    imageLayoutProperty->UpdateImageSourceInfo(value1);
+    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+    imagePattern->UpdateFillColorIfForegroundColor();
+
+    Color value(10);
+    renderContext->UpdateForegroundColor(value);
+    ImageSourceInfo value3;
+    value3.isSvg_ = true;
+    imageLayoutProperty->UpdateImageSourceInfo(value3);
+    renderContext->ResetForegroundColorStrategy();
+    imagePattern->UpdateFillColorIfForegroundColor();
+    auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value();
+    EXPECT_EQ(imageSourceInfo.fillColor_.value_or(Color::TRANSPARENT), Color::FOREGROUND);
+}
+
+/**
+ * @tc.name: TriggerFirstVisibleAreaChange001
+ * @tc.desc: call TriggerFirstVisibleAreaChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, TriggerFirstVisibleAreaChange001, TestSize.Level1)
+{
+    auto frameNode = CreatePixelMapAnimator();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    imagePattern->isComponentSnapshotNode_ = true;
+    imagePattern->TriggerFirstVisibleAreaChange();
+    EXPECT_FALSE(imagePattern->isFormAnimationStart_);
+}
+
+/**
+ * @tc.name: OnAreaChangedInner001
+ * @tc.desc: call OnAreaChangedInner.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, OnAreaChangedInner001, TestSize.Level1)
+{
+    auto frameNode = CreatePixelMapAnimator();
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->OpenSelectOverlay();
+    imagePattern->OnAreaChangedInner();
+    imagePattern->selectOverlay_->Close();
+    imagePattern->OnAreaChangedInner();
+    EXPECT_NE(imagePattern->selectOverlay_.GetRawPtr(), nullptr);
+}
+
+/**
+ * @tc.name: DumpRenderInfo001
+ * @tc.desc: call DumpRenderInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, DumpRenderInfo001, TestSize.Level1)
+{
+    auto [frameNode, imageLayoutProperty, imagePattern, imageRenderProperty] = GetCompoment();
+
+    imagePattern->TriggerFirstVisibleAreaChange();
+    EXPECT_EQ(imagePattern->gifAnimation_, false);
+    imagePattern->imageAnalyzerManager_ = nullptr;
+    EXPECT_EQ(imagePattern->IsSupportImageAnalyzerFeature(), false);
+    auto frameNodePtr = AceType::Claim(frameNode);
+    imagePattern->AddImageLoadSuccessEvent(frameNodePtr);
+    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
+    EXPECT_NE(eventHub->completeEvent_, nullptr);
+    std::vector<float> matrix = { 1.1f };
+    ImageModelNG::SetColorFilterMatrix(frameNode, matrix);
+    imagePattern->SetColorFilter(frameNodePtr);
+    imagePattern->DumpRenderInfo();
+    EXPECT_EQ(imageRenderProperty->GetColorFilter().value(), matrix);
+    auto renderProp = frameNode->GetPaintProperty<ImageRenderProperty>();
+    renderProp->UpdateSmoothEdge(10.0f);
+    imagePattern->DumpRenderInfo();
+    auto smoothEdge = renderProp->GetSmoothEdge();
+    EXPECT_TRUE(smoothEdge.has_value());
+}
+
+/**
+ * @tc.name: DumpAdvanceInfo001
+ * @tc.desc: call DumpAdvanceInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, DumpAdvanceInfo001, TestSize.Level1)
+{
+    auto frameNode = CreatePixelMapAnimator();
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->OnRecycle();
+    imagePattern->DumpInfo();
+    EXPECT_EQ(imagePattern->loadingCtx_, nullptr);
+    imagePattern->DumpAdvanceInfo();
+    EXPECT_EQ(imagePattern->loadingCtx_, nullptr);
+}
+
+/**
+ * @tc.name: EnableAnalyzer001
+ * @tc.desc: call EnableAnalyzer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, EnableAnalyzer001, TestSize.Level1)
+{
+    auto frameNode = CreatePixelMapAnimator();
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->UpdateAnalyzerOverlayLayout();
+    imagePattern->EnableAnalyzer(true);
+    imagePattern->UpdateAnalyzerOverlayLayout();
+    imagePattern->EnableAnalyzer(true);
+    EXPECT_TRUE(imagePattern->imageAnalyzerManager_);
+}
+
+/**
+ * @tc.name: OnDirtyLayoutWrapperSwap001
+ * @tc.desc: call OnDirtyLayoutWrapperSwap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
+{
+    auto frameNode = CreatePixelMapAnimator();
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto imageLayoutProperty = AceType::MakeRefPtr<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(WIDTH, HEIGHT));
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, geometryNode, imageLayoutProperty);
+    auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(nullptr);
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+    layoutWrapper->skipMeasureContent_ = true;
+    DirtySwapConfig config;
+    config.skipMeasure = false;
+    EXPECT_FALSE(imagePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+    layoutWrapper->skipMeasureContent_ = false;
+    config.skipMeasure = true;
+    EXPECT_FALSE(imagePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+    config.skipMeasure = false;
+
+    EXPECT_EQ(imagePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config), imagePattern->image_);
+    imagePattern->images_.clear();
+    EXPECT_TRUE(imagePattern->images_.size() == 0);
+    EXPECT_FALSE(imagePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+}
+
+/**
+ * @tc.name: UpdateFormDurationByRemainder001
+ * @tc.desc: call UpdateFormDurationByRemainder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, UpdateFormDurationByRemainder001, TestSize.Level1)
+{
+    auto frameNode = CreatePixelMapAnimator();
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto pipeline = MockPipelineContext::GetCurrentContext();
+    pipeline->SetIsFormRender(true);
+    EXPECT_EQ(imagePattern->IsFormRender(), true);
+    imagePattern->animator_->duration_ = 2000;
+    imagePattern->UpdateFormDurationByRemainder();
+    ASSERT_NE(imagePattern->animator_->duration_, 2000);
+}
+
+/**
+ * @tc.name: CheckCallback001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, CheckCallback001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = CreatePixelMapAnimator();
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    /**
+     * @tc.steps: step2. call callbacks.
+     * @tc.expected:
+     */
+    auto imageLayoutProperty = imagePattern->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
+    ImageSourceInfo value("");
+    imageLayoutProperty->UpdateImageSourceInfo(value);
+    ImageSourceInfo sourceInfo("testmsg");
+    auto callback1 = imagePattern->CreateDataReadyCallback();
+    callback1(sourceInfo);
+    auto callback2 = imagePattern->CreateLoadSuccessCallback();
+    callback2(sourceInfo);
+    auto callback3 = imagePattern->CreateLoadFailCallback();
+    std::string errorMsg = "erormsg";
+    callback3(sourceInfo, errorMsg);
+    auto callback4 = imagePattern->CreateCompleteCallBackInDataReady();
+    callback4(sourceInfo);
+    currentSourceInfo.SetIsFromReset(true);
+    ImageSourceInfo value1("testmsg");
+    imageLayoutProperty->UpdateImageSourceInfo(value1);
+    callback3(sourceInfo, errorMsg);
+    frameNode->draggable_ = true;
+    SystemProperties::debugEnabled_ = true;
+    const RefPtr<RenderContext>& renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    BorderRadiusProperty value2(Dimension(10.0f));
+    renderContext->UpdateBorderRadius(value2);
+    callback2(sourceInfo);
+    frameNode->GetGeometryNode()->SetContentSize(SizeF(100.0f, 100.0f));
+    auto props = AceType::DynamicCast<ImageLayoutProperty>(frameNode->GetLayoutProperty());
+    ASSERT_NE(props, nullptr);
+    props->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    props->calcLayoutConstraint_->selfIdealSize = std::make_optional<CalcSize>(CalcLength(100.0f), CalcLength(200.0f));
+    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+    DynamicRangeMode value3 = DynamicRangeMode::CONSTRAINT;
+    imageRenderProperty->UpdateDynamicMode(value3);
+    callback1(sourceInfo);
+    imageLayoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+    imagePattern->isImageAnimator_ = false;
+    callback1(sourceInfo);
+    imagePattern->isImageAnimator_ = true;
+    callback1(sourceInfo);
+    EXPECT_EQ(imagePattern->altImage_, nullptr);
+}
+
+/**
+ * @tc.name: CheckHandles001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, CheckHandles001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = CreatePixelMapAnimator();
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    /**
+     * @tc.steps: step2. call CheckHandles.
+     * @tc.expected:
+     */
+    SelectHandleInfo handleInfo;
+    const RefPtr<RenderContext>& renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateClipEdge(false);
+    imagePattern->CheckHandles(handleInfo);
+    EXPECT_FALSE(renderContext->GetClipEdge().value());
+}
 } // namespace OHOS::Ace::NG
