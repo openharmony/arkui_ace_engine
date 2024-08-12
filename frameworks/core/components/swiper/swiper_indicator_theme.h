@@ -104,7 +104,7 @@ public:
             theme->pressSize_ = swiperPattern->GetAttr<Dimension>("swiper_indicator_press_size", 0.0_vp);
             theme->hoverSize_ = swiperPattern->GetAttr<Dimension>("swiper_indicator_hover_size", 0.0_vp);
             theme->hotZoneSize_ = swiperPattern->GetAttr<Dimension>("swiper_indicator_hotzone_size", 0.0_vp);
-            theme->indicatorPaddingDot_ = swiperPattern->GetAttr<Dimension>("indicator_padding_dot", 12.0_vp);
+            theme->indicatorPaddingDot_ = swiperPattern->GetAttr<Dimension>("indicator_padding_dot", 0.0_vp);
             theme->isIndicatorDisabled_ =
                 static_cast<bool>(swiperPattern->GetAttr<double>("swiper_indicator_disabled", 0.0));
             theme->animationCurve_ =
