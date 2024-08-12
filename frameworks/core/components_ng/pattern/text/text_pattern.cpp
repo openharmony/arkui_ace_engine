@@ -2064,7 +2064,8 @@ void TextPattern::OnModifyDone()
 
     if (CheckNeedMeasure(textLayoutProperty->GetPropertyChangeFlag()) && pManager_) {
         // measure flag changed, reset paragraph.
-        ACE_TEXT_SCOPED_TRACE("OnModifyDone[Text][id:%d]", host->GetId());
+        auto nowTime = static_cast<unsigned long long>(GetSystemTimestamp());
+        ACE_SCOPED_TRACE("OnModifyDone[Text][id:%d][time:%llu]", host->GetId(), nowTime);
         pManager_->Reset();
     }
 
@@ -2747,6 +2748,8 @@ void TextPattern::DumpInfo()
     auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProp);
     auto& dumpLog = DumpLog::GetInstance();
+    auto nowTime = GetSystemTimestamp();
+    dumpLog.AddDesc(std::string("time: ").append(std::to_string(nowTime)));
     if (!IsSetObscured()) {
         dumpLog.AddDesc(std::string("Content: ").append(textLayoutProp->GetContent().value_or(" ")));
     }
