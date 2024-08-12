@@ -2817,10 +2817,12 @@ void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
             touchPoint.y -= webOffset_.GetY();
             DelTouchOverlayInfoByTouchId(touchPoint.id);
         }
-        delegate_->HandleTouchUp(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
-        if (overlayCreating_) {
+        if (!overlayCreating_) {
+            delegate_->HandleTouchUp(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
+        } else {
             imageAnalyzerManager_->UpdateOverlayTouchInfo(touchPoint.x, touchPoint.y, TouchType::UP);
             overlayCreating_ = false;
+            delegate_->HandleTouchCancel();
         }
     }
 }
