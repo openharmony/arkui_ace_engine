@@ -124,7 +124,7 @@ void CheckBoxGroupModelNG::SetSelectAll(FrameNode* frameNode, bool isSelected)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
     pattern->SetUpdateFlag(true);
-    ACE_UPDATE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupSelect, isSelected);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupSelect, isSelected, frameNode);
 }
 
 void CheckBoxGroupModelNG::SetSelectedColor(FrameNode* frameNode, const Color& color)
@@ -173,4 +173,11 @@ void CheckBoxGroupModelNG::SetCheckboxGroupStyle(FrameNode* frameNode, CheckBoxS
         CheckBoxGroupPaintProperty, CheckBoxGroupSelectedStyle, checkboxGroupStyle, frameNode);
 }
 
+RefPtr<FrameNode> CheckBoxGroupModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::CHECKBOXGROUP_ETS_TAG, nodeId, AceType::MakeRefPtr<CheckBoxGroupPattern>());
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return frameNode;
+}
 } // namespace OHOS::Ace::NG

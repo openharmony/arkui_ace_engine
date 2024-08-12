@@ -25,6 +25,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/badge/badge_model_ng.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
 #include "core/components_ng/pattern/common_view/common_view_model_ng.h"
 #include "core/components_ng/pattern/canvas/canvas_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
@@ -208,6 +209,14 @@ void* createProgressNode(ArkUI_Int32 nodeId)
 void* createCheckBoxNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = CheckBoxModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createCheckBoxGroupNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = CheckBoxGroupModelNG::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -543,6 +552,7 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createButtonNode,
     createProgressNode,
     createCheckBoxNode,
+    createCheckBoxGroupNode,
     createColumnNode,
     createRowNode,
     createFlexNode,
