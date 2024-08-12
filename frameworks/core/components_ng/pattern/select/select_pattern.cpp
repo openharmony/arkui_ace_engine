@@ -480,7 +480,7 @@ void SelectPattern::SetFocusStyle()
         textRenderContext->UpdateForegroundColor(selectTheme->GetSelectFocusTextColor());
         text_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
-    SetFocusIconStyle(selectTheme);
+    ModFocusIconStyle(selectTheme, true);
 }
 
 void SelectPattern::ClearFocusStyle()
@@ -525,33 +525,21 @@ void SelectPattern::ClearFocusStyle()
         textRenderContext->UpdateForegroundColor(selectTheme->GetFontColor());
         text_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
-    ClearFocusIconStyle(selectTheme);
+    ModFocusIconStyle(selectTheme, false);
 }
 
-void SelectPattern::SetFocusIconStyle(RefPtr<SelectTheme> selectTheme)
+void SelectPattern::ModFocusIconStyle(RefPtr<SelectTheme> selectTheme, bool focusedFlag)
 {
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         auto spinnerLayoutProperty = spinner_->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(spinnerLayoutProperty);
-        spinnerLayoutProperty->UpdateSymbolColorList({selectTheme->GetSpinnerFocusedSymbolColor()});
+        focusedFlag ? spinnerLayoutProperty->UpdateSymbolColorList({selectTheme->GetSpinnerFocusedSymbolColor()}) :
+            spinnerLayoutProperty->UpdateSymbolColorList({selectTheme->GetSpinnerSymbolColor()});
     } else {
         auto spinnerRenderProperty = spinner_->GetPaintProperty<ImageRenderProperty>();
         CHECK_NULL_VOID(spinnerRenderProperty);
-        spinnerRenderProperty->UpdateSvgFillColor(selectTheme->GetSpinnerFocusedColor());
-    }
-    spinner_->MarkDirtyNode();
-}
-
-void SelectPattern::ClearFocusIconStyle(RefPtr<SelectTheme> selectTheme)
-{
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        auto spinnerLayoutProperty = spinner_->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(spinnerLayoutProperty);
-        spinnerLayoutProperty->UpdateSymbolColorList({selectTheme->GetSpinnerSymbolColor()});
-    } else {
-        auto spinnerRenderProperty = spinner_->GetPaintProperty<ImageRenderProperty>();
-        CHECK_NULL_VOID(spinnerRenderProperty);
-        spinnerRenderProperty->UpdateSvgFillColor(selectTheme->GetSpinnerColor());
+        focusedFlag ? spinnerRenderProperty->UpdateSvgFillColor(selectTheme->GetSpinnerFocusedColor()) :
+            spinnerRenderProperty->UpdateSvgFillColor(selectTheme->GetSpinnerColor());
     }
     spinner_->MarkDirtyNode();
 }
@@ -562,11 +550,7 @@ void SelectPattern::AddIsFocusActiveUpdateEvent()
         isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
             auto selectPattern = weak.Upgrade();
             CHECK_NULL_VOID(selectPattern);
-            if (isFocusAcitve) {
-                selectPattern->SetFocusStyle();
-            } else {
-                selectPattern->ClearFocusStyle();
-            }
+            isFocusAcitve ? selectPattern->SetFocusStyle() : selectPattern->ClearFocusStyle();
         };
     }
 
