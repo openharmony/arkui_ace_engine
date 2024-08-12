@@ -93,7 +93,7 @@ bool ViewDataWrap::GetPlaceHolderValue(AbilityBase::ViewData& viewData)
 {
     std::vector<std::string> placeHolder;
     std::vector<int> intType;
-    std::vector<int> metaData;
+    std::vector<std::string> metaData;
     for (auto it = viewData.nodes.begin(); it != viewData.nodes.end(); ++it) {
         if (it->autoFillType == AbilityBase::AutoFillType::UNSPECIFIED) {
             placeHolder.push_back(it->placeholder);
