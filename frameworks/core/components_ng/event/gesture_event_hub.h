@@ -46,6 +46,11 @@ enum class MenuPreviewMode {
     IMAGE,
     CUSTOM,
 };
+
+enum class MenuBindingType {
+    LONG_PRESS,
+    RIGHT_CLICK,
+};
 namespace OHOS::Ace::NG {
 
 enum class HitTestMode {
@@ -572,6 +577,16 @@ public:
         return contextMenuShowStatus_;
     }
 
+    void SetMenuBindingType(MenuBindingType menuBindingType)
+    {
+        menuBindingType_ = menuBindingType;
+    }
+
+    MenuBindingType GetMenuBindingType()
+    {
+        return menuBindingType_;
+    }
+
     void SetPixelMap(RefPtr<PixelMap> pixelMap)
     {
         pixelMap_ = pixelMap;
@@ -774,6 +789,7 @@ private:
     MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;
     // the value from show parameter of context menu, which is controlled by caller manually
     bool contextMenuShowStatus_  = false;
+    MenuBindingType menuBindingType_  = MenuBindingType::LONG_PRESS;
     bool isDragForbidden_ = false;
     bool textDraggable_ = false;
     bool isTextDraggable_ = false;
