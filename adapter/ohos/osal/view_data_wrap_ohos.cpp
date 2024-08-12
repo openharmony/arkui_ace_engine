@@ -66,7 +66,7 @@ AbilityBase::AutoFillType ViewDataWrap::ViewDataToType(const AbilityBase::ViewDa
 }
 
 bool ViewDataWrap::LoadHint2Type(const std::vector<std::string>& placeHolder, std::vector<int>& intType,
-                                 std::vector<std::string>& metaData)
+                                 std::vector<std::string>& metadata)
 {
     void* handle = dlopen(LIB_HINT2_TYPE_Z_SO_NAME, RTLD_LAZY);
     if (handle == nullptr) {
@@ -80,7 +80,7 @@ bool ViewDataWrap::LoadHint2Type(const std::vector<std::string>& placeHolder, st
         LOGE("Failed to get symbol %{public}s in %{public}s", HINT_2_TYPE, LIB_HINT2_TYPE_Z_SO_NAME);
         return false;
     }
-    if (hintFun(placeHolder, intType, metaData)) {
+    if (hintFun(placeHolder, intType, metadata)) {
         LOGE("Failed to Hint 2 intType");
         dlclose(handle);
         return false;
@@ -93,13 +93,13 @@ bool ViewDataWrap::GetPlaceHolderValue(AbilityBase::ViewData& viewData)
 {
     std::vector<std::string> placeHolder;
     std::vector<int> intType;
-    std::vector<std::string> metaData;
+    std::vector<std::string> metadata;
     for (auto it = viewData.nodes.begin(); it != viewData.nodes.end(); ++it) {
         if (it->autoFillType == AbilityBase::AutoFillType::UNSPECIFIED) {
             placeHolder.push_back(it->placeholder);
         }
     }
-    auto isSuccessLoadHint2Type = LoadHint2Type(placeHolder, intType, metaData);
+    auto isSuccessLoadHint2Type = LoadHint2Type(placeHolder, intType, metadata);
     if (!isSuccessLoadHint2Type) {
         LOGE("Load Hint2Type Failed !");
         return false;

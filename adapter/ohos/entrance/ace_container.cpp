@@ -1386,9 +1386,9 @@ HintToTypeWrap AceContainer::PlaceHolderToType(const std::string& onePlaceHolder
     CHECK_NULL_RETURN(viewDataWrapOhos, hintToTypeWrap);
     std::vector<std::string> placeHolder;
     std::vector<int> intType;
-    std::vector<std::string> metaData;
+    std::vector<std::string> metadata;
     placeHolder.push_back(onePlaceHolder);
-    auto isSuccess = viewDataWrapOhos->LoadHint2Type(placeHolder, intType, metaData);
+    auto isSuccess = viewDataWrapOhos->LoadHint2Type(placeHolder, intType, metadata);
     if (!isSuccess) {
         TAG_LOGE(AceLogTag::ACE_AUTO_FILL, "Load Hint2Type Failed !");
         return hintToTypeWrap;
@@ -1397,8 +1397,8 @@ HintToTypeWrap AceContainer::PlaceHolderToType(const std::string& onePlaceHolder
         return hintToTypeWrap;
     }
     hintToTypeWrap.autoFillType = static_cast<AceAutoFillType>(viewDataWrapOhos->HintToAutoFillType(intType[0]));
-    if (!metaData.empty()) {
-        hintToTypeWrap.metaData = metaData[0];
+    if (!metadata.empty()) {
+        hintToTypeWrap.metadata = metadata[0];
     }
     return hintToTypeWrap;
 }

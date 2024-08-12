@@ -34,7 +34,7 @@ public:
     static AbilityBase::AutoFillType ViewDataToType(const AbilityBase::ViewData& viewData);
     static bool GetPlaceHolderValue(AbilityBase::ViewData& viewData);
     static bool LoadHint2Type(const std::vector<std::string>& placeHolder, std::vector<int>& type,
-                                    std::vector<std::string>& metaData);
+                                    std::vector<std::string>& metadata);
     static AbilityBase::AutoFillType HintToAutoFillType(const int& intType);
 
     virtual void SetBundleName(const std::string& bundleName) {}

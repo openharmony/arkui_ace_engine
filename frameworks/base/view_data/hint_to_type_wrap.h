@@ -21,7 +21,7 @@
 namespace OHOS::Ace {
 struct HintToTypeWrap {
     AceAutoFillType autoFillType = AceAutoFillType::ACE_UNSPECIFIED;
-    std::string metaData = "";
+    std::string metadata = "";
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_HINT_TO_TYPE_WRAP_H

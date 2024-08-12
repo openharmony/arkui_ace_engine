@@ -94,14 +94,14 @@ public:
         return pageNodeInfo_.placeholder;
     }
 
-    void SetMetaData(const std::string& metaData) override
+    void SetMetadata(const std::string& metadata) override
     {
-        pageNodeInfo_.metaData = metaData;
+        pageNodeInfo_.metadata = metadata;
     }
 
-    const std::string& GetMetaData() const override
+    const std::string& GetMetadata() const override
     {
-        return pageNodeInfo_.metaData;
+        return pageNodeInfo_.metadata;
     }
 
     void SetPasswordRules(const std::string& passwordRules) override
