@@ -2813,6 +2813,8 @@ void RichEditorPattern::HandleBlurEvent()
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleBlurEvent/%{public}d", frameId_);
     isLongPress_ = false;
+    previewLongPress_ = false;
+    editingLongPress_ = false;
     StopTwinkling();
     auto reason = GetBlurReason();
     // The pattern handles blurevent, Need to close the softkeyboard first.
