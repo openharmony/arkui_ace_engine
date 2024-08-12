@@ -800,7 +800,6 @@ private:
     void HandleOnDragEnd(int32_t x, int32_t y);
     void InitTouchEventListener();
     void UninitTouchEventListener();
-    void DragDropSelectionMenu();
     void OnDragFileNameStart(const RefPtr<UnifiedData>& aceUnifiedData, const std::string& fileName);
     bool needRestoreMenuForDrag_ = false;
     int32_t dropX_ = 0;
