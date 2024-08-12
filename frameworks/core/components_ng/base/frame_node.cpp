@@ -1995,7 +1995,7 @@ void FrameNode::MarkModifyDone()
 #endif
 }
 
-void FrameNode::OnMountToParentDone()
+[[deprecated("using AfterMountToParent")]] void FrameNode::OnMountToParentDone()
 {
     pattern_->OnMountToParentDone();
 }

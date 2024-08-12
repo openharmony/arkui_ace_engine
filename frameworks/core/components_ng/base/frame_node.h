@@ -188,7 +188,7 @@ public:
         MarkDirtyNode(extraFlag);
     }
 
-    void OnMountToParentDone();
+    [[deprecated]] void OnMountToParentDone();
 
     void AfterMountToParent() override;
 
