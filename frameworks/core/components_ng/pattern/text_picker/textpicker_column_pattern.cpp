@@ -1228,6 +1228,9 @@ void TextPickerColumnPattern::CalcAlgorithmOffset(double distancePercent)
 
 double TextPickerColumnPattern::GetShiftDistance(int32_t index, ScrollDirection dir)
 {
+    if (optionProperties_.empty()) {
+        return 0.0;
+    }
     int32_t optionCounts = static_cast<int32_t>(GetShowOptionCount());
     if (optionCounts == 0) {
         return 0.0;
