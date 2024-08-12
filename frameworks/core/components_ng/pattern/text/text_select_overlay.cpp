@@ -407,4 +407,11 @@ void TextSelectOverlay::OnHandleMoveStart(bool isFirst)
     CHECK_NULL_VOID(manager);
     manager->SetHandleCircleIsShow(isFirst, false);
 }
+
+void TextSelectOverlay::OnOverlayClick(const GestureEvent& event, bool isFirst)
+{
+    if (!IsSingleHandle()) {
+        ToggleMenu();
+    }
+}
 } // namespace OHOS::Ace::NG
