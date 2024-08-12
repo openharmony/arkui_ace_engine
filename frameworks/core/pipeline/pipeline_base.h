@@ -150,6 +150,10 @@ public:
 
     bool CloseImplicitAnimation();
 
+    bool IsDestroyed();
+
+    void SetDestroyed();
+
     void ForceLayoutForImplicitAnimation();
 
     void ForceRenderForImplicitAnimation();
@@ -1279,6 +1283,7 @@ private:
     uint64_t vsyncTime_ = 0;
 
     bool delaySurfaceChange_ = false;
+    bool destroyed_ = false;
     int32_t width_ = -1;
     int32_t height_ = -1;
     WindowSizeChangeReason type_ = WindowSizeChangeReason::UNDEFINED;
