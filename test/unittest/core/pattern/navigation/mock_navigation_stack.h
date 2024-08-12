@@ -176,6 +176,13 @@ public:
         mockPathArray_.pop_back();
     }
 
+    void PopToIndex(int32_t index)
+    {
+        auto iter = mockPathArray_.begin();
+        std::advance(iter, index + 1);
+        mockPathArray_.erase(iter, mockPathArray_.end());
+    }
+
     void SetLifecycleIndex(int8_t index)
     {
         lifecycleIndex_ = index;
