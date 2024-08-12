@@ -1155,12 +1155,11 @@ void JSRichEditor::JsDataDetectorConfig(const JSCallbackInfo& info)
         return;
     }
 
-    std::string textTypes;
-    std::function<void(const std::string&)> onResult;
-    if (!ParseDataDetectorConfig(info, textTypes, onResult)) {
+    TextDetectConfig textDetectConfig;
+    if (!ParseDataDetectorConfig(info, textDetectConfig)) {
         return;
     }
-    RichEditorModel::GetInstance()->SetTextDetectConfig(textTypes, std::move(onResult));
+    RichEditorModel::GetInstance()->SetTextDetectConfig(textDetectConfig);
 }
 
 void JSRichEditor::SetCaretColor(const JSCallbackInfo& info)

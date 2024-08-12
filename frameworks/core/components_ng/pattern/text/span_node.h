@@ -215,13 +215,12 @@ public:
     virtual int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
         bool isSpanStringMode = false, PlaceholderStyle placeholderStyle = PlaceholderStyle(), bool isMarquee = false);
     virtual void UpdateSymbolSpanColor(const RefPtr<FrameNode>& frameNode, TextStyle& symbolSpanStyle);
-    virtual void UpdateTextStyleForAISpan(
-        const std::string& content, const RefPtr<Paragraph>& builder, const TextStyle& textStyle);
+    virtual void UpdateTextStyleForAISpan(const std::string& content, const RefPtr<Paragraph>& builder,
+        const TextStyle& textStyle, const TextStyle& aiSpanStyle);
     virtual void UpdateTextStyle(const std::string& content, const RefPtr<Paragraph>& builder,
         const TextStyle& textStyle, const int32_t selStart, const int32_t selEnd);
     virtual void UpdateContentTextStyle(
         const std::string& content, const RefPtr<Paragraph>& builder, const TextStyle& textStyle);
-    virtual void SetAiSpanTextStyle(std::optional<TextStyle>& textStyle);
     virtual void GetIndex(int32_t& start, int32_t& end) const;
     virtual void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
