@@ -25,10 +25,13 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return 0;
 }
-void ToDataURLImpl(CanvasRenderingContext2DPeer* peer, const Opt_String* type, const Opt_CustomObject* quality)
+void ToDataURLImpl(CanvasRenderingContext2DPeer* peer,
+                   const Opt_String* type,
+                   const Opt_CustomObject* quality)
 {
 }
-Ark_NativePointer StartImageAnalyzerImpl(CanvasRenderingContext2DPeer* peer, const Ark_ImageAnalyzerConfig* config)
+Ark_NativePointer StartImageAnalyzerImpl(CanvasRenderingContext2DPeer* peer,
+                                         const Ark_ImageAnalyzerConfig* config)
 {
     return 0;
 }

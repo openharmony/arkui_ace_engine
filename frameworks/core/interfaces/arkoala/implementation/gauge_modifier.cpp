@@ -17,39 +17,50 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GaugeInterfaceModifier {
-void _setGaugeOptionsImpl(Ark_NativePointer node, const Type_GaugeInterface__setGaugeOptions_Arg0* options)
+void _setGaugeOptionsImpl(Ark_NativePointer node,
+                          const Type_GaugeInterface__setGaugeOptions_Arg0* options)
 {
 }
 } // GaugeInterfaceModifier
 namespace GaugeAttributeModifier {
-void ValueImpl(Ark_NativePointer node, const Ark_Number* value)
+void ValueImpl(Ark_NativePointer node,
+               const Ark_Number* value)
 {
 }
-void StartAngleImpl(Ark_NativePointer node, const Ark_Number* angle)
+void StartAngleImpl(Ark_NativePointer node,
+                    const Ark_Number* angle)
 {
 }
-void EndAngleImpl(Ark_NativePointer node, const Ark_Number* angle)
+void EndAngleImpl(Ark_NativePointer node,
+                  const Ark_Number* angle)
 {
 }
-void ColorsImpl(Ark_NativePointer node, const Type_GaugeAttribute_colors_Arg0* colors)
+void ColorsImpl(Ark_NativePointer node,
+                const Type_GaugeAttribute_colors_Arg0* colors)
 {
 }
-void StrokeWidthImpl(Ark_NativePointer node, const Ark_Length* length)
+void StrokeWidthImpl(Ark_NativePointer node,
+                     const Ark_Length* length)
 {
 }
-void DescriptionImpl(Ark_NativePointer node, const CustomBuilder* value)
+void DescriptionImpl(Ark_NativePointer node,
+                     const CustomBuilder* value)
 {
 }
-void TrackShadowImpl(Ark_NativePointer node, const Ark_GaugeShadowOptions* value)
+void TrackShadowImpl(Ark_NativePointer node,
+                     const Ark_GaugeShadowOptions* value)
 {
 }
-void IndicatorImpl(Ark_NativePointer node, const Ark_GaugeIndicatorOptions* value)
+void IndicatorImpl(Ark_NativePointer node,
+                   const Ark_GaugeIndicatorOptions* value)
 {
 }
-void PrivacySensitiveImpl(Ark_NativePointer node, const Opt_Boolean* isPrivacySensitiveMode)
+void PrivacySensitiveImpl(Ark_NativePointer node,
+                          const Opt_Boolean* isPrivacySensitiveMode)
 {
 }
-void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* modifier)
+void ContentModifierImpl(Ark_NativePointer node,
+                         const Ark_CustomObject* modifier)
 {
 }
 } // GaugeAttributeModifier

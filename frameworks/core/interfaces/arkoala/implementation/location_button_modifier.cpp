@@ -20,12 +20,14 @@ namespace LocationButtonInterfaceModifier {
 void _setLocationButtonOptions0Impl(Ark_NativePointer node)
 {
 }
-void _setLocationButtonOptions1Impl(Ark_NativePointer node, const Ark_LocationButtonOptions* options)
+void _setLocationButtonOptions1Impl(Ark_NativePointer node,
+                                    const Ark_LocationButtonOptions* options)
 {
 }
 } // LocationButtonInterfaceModifier
 namespace LocationButtonAttributeModifier {
-void OnClickImpl(Ark_NativePointer node, Ark_Function event)
+void OnClickImpl(Ark_NativePointer node,
+                 Ark_Function event)
 {
 }
 } // LocationButtonAttributeModifier

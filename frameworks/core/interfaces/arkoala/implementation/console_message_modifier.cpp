@@ -17,7 +17,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ConsoleMessageModifier {
-Ark_NativePointer CtorImpl(const Ark_String* message, const Ark_String* sourceId, const Ark_Number* lineNumber, Ark_Int32 messageLevel)
+Ark_NativePointer CtorImpl(const Ark_String* message,
+                           const Ark_String* sourceId,
+                           const Ark_Number* lineNumber,
+                           Ark_Int32 messageLevel)
 {
     return 0;
 }

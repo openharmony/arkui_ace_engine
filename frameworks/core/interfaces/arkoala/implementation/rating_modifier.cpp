@@ -17,24 +17,30 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RatingInterfaceModifier {
-void _setRatingOptionsImpl(Ark_NativePointer node, const Opt_Type_RatingInterface__setRatingOptions_Arg0* options)
+void _setRatingOptionsImpl(Ark_NativePointer node,
+                           const Opt_Type_RatingInterface__setRatingOptions_Arg0* options)
 {
 }
 } // RatingInterfaceModifier
 namespace RatingAttributeModifier {
-void StarsImpl(Ark_NativePointer node, const Ark_Number* value)
+void StarsImpl(Ark_NativePointer node,
+               const Ark_Number* value)
 {
 }
-void StepSizeImpl(Ark_NativePointer node, const Ark_Number* value)
+void StepSizeImpl(Ark_NativePointer node,
+                  const Ark_Number* value)
 {
 }
-void StarStyleImpl(Ark_NativePointer node, const Type_RatingAttribute_starStyle_Arg0* value)
+void StarStyleImpl(Ark_NativePointer node,
+                   const Type_RatingAttribute_starStyle_Arg0* value)
 {
 }
-void OnChangeImpl(Ark_NativePointer node, Ark_Function callback)
+void OnChangeImpl(Ark_NativePointer node,
+                  Ark_Function callback)
 {
 }
-void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* modifier)
+void ContentModifierImpl(Ark_NativePointer node,
+                         const Ark_CustomObject* modifier)
 {
 }
 } // RatingAttributeModifier

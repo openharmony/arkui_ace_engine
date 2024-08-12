@@ -17,49 +17,65 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScrollableCommonMethodModifier {
-void ScrollBarImpl(Ark_NativePointer node, Ark_Int32 barState)
+void ScrollBarImpl(Ark_NativePointer node,
+                   Ark_Int32 barState)
 {
 }
-void ScrollBarColorImpl(Ark_NativePointer node, const Type_ScrollableCommonMethod_scrollBarColor_Arg0* color)
+void ScrollBarColorImpl(Ark_NativePointer node,
+                        const Type_ScrollableCommonMethod_scrollBarColor_Arg0* color)
 {
 }
-void ScrollBarWidthImpl(Ark_NativePointer node, const Type_ScrollableCommonMethod_scrollBarWidth_Arg0* value)
+void ScrollBarWidthImpl(Ark_NativePointer node,
+                        const Type_ScrollableCommonMethod_scrollBarWidth_Arg0* value)
 {
 }
-void EdgeEffectImpl(Ark_NativePointer node, Ark_Int32 edgeEffect, const Opt_EdgeEffectOptions* options)
+void EdgeEffectImpl(Ark_NativePointer node,
+                    Ark_Int32 edgeEffect,
+                    const Opt_EdgeEffectOptions* options)
 {
 }
-void NestedScrollImpl(Ark_NativePointer node, const Ark_NestedScrollOptions* value)
+void NestedScrollImpl(Ark_NativePointer node,
+                      const Ark_NestedScrollOptions* value)
 {
 }
-void EnableScrollInteractionImpl(Ark_NativePointer node, Ark_Boolean value)
+void EnableScrollInteractionImpl(Ark_NativePointer node,
+                                 Ark_Boolean value)
 {
 }
-void FrictionImpl(Ark_NativePointer node, const Type_ScrollableCommonMethod_friction_Arg0* value)
+void FrictionImpl(Ark_NativePointer node,
+                  const Type_ScrollableCommonMethod_friction_Arg0* value)
 {
 }
-void OnScrollImpl(Ark_NativePointer node, Ark_Function event)
+void OnScrollImpl(Ark_NativePointer node,
+                  Ark_Function event)
 {
 }
-void OnWillScrollImpl(Ark_NativePointer node, const Ark_CustomObject* stub_for_onWillScroll)
+void OnWillScrollImpl(Ark_NativePointer node,
+                      const Ark_CustomObject* stub_for_onWillScroll)
 {
 }
-void OnDidScrollImpl(Ark_NativePointer node, Ark_Function handler)
+void OnDidScrollImpl(Ark_NativePointer node,
+                     Ark_Function handler)
 {
 }
-void OnReachStartImpl(Ark_NativePointer node, Ark_Function event)
+void OnReachStartImpl(Ark_NativePointer node,
+                      Ark_Function event)
 {
 }
-void OnReachEndImpl(Ark_NativePointer node, Ark_Function event)
+void OnReachEndImpl(Ark_NativePointer node,
+                    Ark_Function event)
 {
 }
-void OnScrollStartImpl(Ark_NativePointer node, Ark_Function event)
+void OnScrollStartImpl(Ark_NativePointer node,
+                       Ark_Function event)
 {
 }
-void OnScrollStopImpl(Ark_NativePointer node, Ark_Function event)
+void OnScrollStopImpl(Ark_NativePointer node,
+                      Ark_Function event)
 {
 }
-void FlingSpeedLimitImpl(Ark_NativePointer node, const Ark_Number* speedLimit)
+void FlingSpeedLimitImpl(Ark_NativePointer node,
+                         const Ark_Number* speedLimit)
 {
 }
 } // ScrollableCommonMethodModifier

@@ -21,7 +21,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BlankInterfaceModifier {
-void _setBlankOptionsImpl(Ark_NativePointer node, const Opt_Type_BlankInterface__setBlankOptions_Arg0* min)
+void _setBlankOptionsImpl(Ark_NativePointer node,
+                          const Opt_Type_BlankInterface__setBlankOptions_Arg0* min)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     std::tuple<Ark_Float32, Ark_Int32> dimension = Converter::ConvertOrDefault(
@@ -31,7 +32,8 @@ void _setBlankOptionsImpl(Ark_NativePointer node, const Opt_Type_BlankInterface_
 } // BlankInterfaceModifier
 
 namespace BlankAttributeModifier {
-void ColorImpl(Ark_NativePointer node, const ResourceColor* value)
+void ColorImpl(Ark_NativePointer node,
+               const ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     BlankModelNG::SetColor(frameNode, Converter::ConvertOrDefault(*value, Color()));

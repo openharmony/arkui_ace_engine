@@ -28,7 +28,8 @@ Ark_NativePointer GetFinalizerImpl()
 void CloseSelectionMenuImpl(TextControllerPeer* peer)
 {
 }
-void SetStyledStringImpl(TextControllerPeer* peer, const Ark_Materialized* value)
+void SetStyledStringImpl(TextControllerPeer* peer,
+                         const Ark_Materialized* value)
 {
 }
 Ark_NativePointer GetLayoutManagerImpl(TextControllerPeer* peer)

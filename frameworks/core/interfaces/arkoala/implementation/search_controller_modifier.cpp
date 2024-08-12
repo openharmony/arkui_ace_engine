@@ -25,13 +25,17 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return 0;
 }
-void CaretPositionImpl(SearchControllerPeer* peer, const Ark_Number* value)
+void CaretPositionImpl(SearchControllerPeer* peer,
+                       const Ark_Number* value)
 {
 }
 void StopEditingImpl(SearchControllerPeer* peer)
 {
 }
-void SetTextSelectionImpl(SearchControllerPeer* peer, const Ark_Number* selectionStart, const Ark_Number* selectionEnd, const Opt_SelectionOptions* options)
+void SetTextSelectionImpl(SearchControllerPeer* peer,
+                          const Ark_Number* selectionStart,
+                          const Ark_Number* selectionEnd,
+                          const Opt_SelectionOptions* options)
 {
 }
 } // SearchControllerModifier

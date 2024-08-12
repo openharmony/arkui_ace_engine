@@ -25,7 +25,8 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return 0;
 }
-void SetGestureEventResultImpl(EventResultPeer* peer, Ark_Boolean result)
+void SetGestureEventResultImpl(EventResultPeer* peer,
+                               Ark_Boolean result)
 {
 }
 } // EventResultModifier

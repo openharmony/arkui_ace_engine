@@ -36,7 +36,8 @@ Ark_Boolean IsBuiltInImpl(GestureRecognizerPeer* peer)
 {
     return 0;
 }
-void SetEnabledImpl(GestureRecognizerPeer* peer, Ark_Boolean isEnabled)
+void SetEnabledImpl(GestureRecognizerPeer* peer,
+                    Ark_Boolean isEnabled)
 {
 }
 Ark_Boolean IsEnabledImpl(GestureRecognizerPeer* peer)

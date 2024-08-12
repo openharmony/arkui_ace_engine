@@ -22,16 +22,20 @@ void _setTabContentOptionsImpl(Ark_NativePointer node)
 }
 } // TabContentInterfaceModifier
 namespace TabContentAttributeModifier {
-void TabBar0Impl(Ark_NativePointer node, const Type_TabContentAttribute_tabBar_Arg0* value)
+void TabBar0Impl(Ark_NativePointer node,
+                 const Type_TabContentAttribute_tabBar_Arg0* value)
 {
 }
-void TabBar1Impl(Ark_NativePointer node, const Type_TabContentAttribute_tabBar1_Arg0* value)
+void TabBar1Impl(Ark_NativePointer node,
+                 const Type_TabContentAttribute_tabBar1_Arg0* value)
 {
 }
-void OnWillShowImpl(Ark_NativePointer node, Ark_Function event)
+void OnWillShowImpl(Ark_NativePointer node,
+                    Ark_Function event)
 {
 }
-void OnWillHideImpl(Ark_NativePointer node, Ark_Function event)
+void OnWillHideImpl(Ark_NativePointer node,
+                    Ark_Function event)
 {
 }
 } // TabContentAttributeModifier

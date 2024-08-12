@@ -32,14 +32,16 @@ Ark_Int32 GetFromImpl(TabContentTransitionProxyPeer* peer)
 {
     return 0;
 }
-void SetFromImpl(TabContentTransitionProxyPeer* peer, const Ark_Number* from)
+void SetFromImpl(TabContentTransitionProxyPeer* peer,
+                 const Ark_Number* from)
 {
 }
 Ark_Int32 GetToImpl(TabContentTransitionProxyPeer* peer)
 {
     return 0;
 }
-void SetToImpl(TabContentTransitionProxyPeer* peer, const Ark_Number* to)
+void SetToImpl(TabContentTransitionProxyPeer* peer,
+               const Ark_Number* to)
 {
 }
 } // TabContentTransitionProxyModifier

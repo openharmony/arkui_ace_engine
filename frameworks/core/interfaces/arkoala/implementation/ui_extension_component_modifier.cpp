@@ -17,27 +17,35 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace UIExtensionComponentInterfaceModifier {
-void _setUIExtensionComponentOptionsImpl(Ark_NativePointer node, const Ark_CustomObject* want, const Opt_UIExtensionOptions* options)
+void _setUIExtensionComponentOptionsImpl(Ark_NativePointer node,
+                                         const Ark_CustomObject* want,
+                                         const Opt_UIExtensionOptions* options)
 {
 }
 } // UIExtensionComponentInterfaceModifier
 namespace UIExtensionComponentAttributeModifier {
-void OnRemoteReadyImpl(Ark_NativePointer node, Ark_Function callback)
+void OnRemoteReadyImpl(Ark_NativePointer node,
+                       Ark_Function callback)
 {
 }
-void OnReceiveImpl(Ark_NativePointer node, Ark_Function callback)
+void OnReceiveImpl(Ark_NativePointer node,
+                   Ark_Function callback)
 {
 }
-void OnResultImpl(Ark_NativePointer node, Ark_Function callback)
+void OnResultImpl(Ark_NativePointer node,
+                  Ark_Function callback)
 {
 }
-void OnReleaseImpl(Ark_NativePointer node, Ark_Function callback)
+void OnReleaseImpl(Ark_NativePointer node,
+                   Ark_Function callback)
 {
 }
-void OnErrorImpl(Ark_NativePointer node, const Ark_CustomObject* callback)
+void OnErrorImpl(Ark_NativePointer node,
+                 const Ark_CustomObject* callback)
 {
 }
-void OnTerminatedImpl(Ark_NativePointer node, Ark_Function callback)
+void OnTerminatedImpl(Ark_NativePointer node,
+                      Ark_Function callback)
 {
 }
 } // UIExtensionComponentAttributeModifier

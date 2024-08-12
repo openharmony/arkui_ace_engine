@@ -25,7 +25,10 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return 0;
 }
-void InvokeImpl(JsGeolocationPeer* peer, const Ark_String* origin, Ark_Boolean allow, Ark_Boolean retain)
+void InvokeImpl(JsGeolocationPeer* peer,
+                const Ark_String* origin,
+                Ark_Boolean allow,
+                Ark_Boolean retain)
 {
 }
 } // JsGeolocationModifier

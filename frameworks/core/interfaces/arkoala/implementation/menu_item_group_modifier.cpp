@@ -17,7 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MenuItemGroupInterfaceModifier {
-void _setMenuItemGroupOptionsImpl(Ark_NativePointer node, const Opt_MenuItemGroupOptions* value)
+void _setMenuItemGroupOptionsImpl(Ark_NativePointer node,
+                                  const Opt_MenuItemGroupOptions* value)
 {
 }
 } // MenuItemGroupInterfaceModifier

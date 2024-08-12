@@ -17,15 +17,18 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RichTextInterfaceModifier {
-void _setRichTextOptionsImpl(Ark_NativePointer node, const Ark_String* content)
+void _setRichTextOptionsImpl(Ark_NativePointer node,
+                             const Ark_String* content)
 {
 }
 } // RichTextInterfaceModifier
 namespace RichTextAttributeModifier {
-void OnStartImpl(Ark_NativePointer node, Ark_Function callback)
+void OnStartImpl(Ark_NativePointer node,
+                 Ark_Function callback)
 {
 }
-void OnCompleteImpl(Ark_NativePointer node, Ark_Function callback)
+void OnCompleteImpl(Ark_NativePointer node,
+                    Ark_Function callback)
 {
 }
 } // RichTextAttributeModifier

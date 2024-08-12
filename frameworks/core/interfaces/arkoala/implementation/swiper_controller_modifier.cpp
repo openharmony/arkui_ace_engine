@@ -31,10 +31,13 @@ void ShowNextImpl(SwiperControllerPeer* peer)
 void ShowPreviousImpl(SwiperControllerPeer* peer)
 {
 }
-void ChangeIndexImpl(SwiperControllerPeer* peer, const Ark_Number* index, const Opt_Boolean* useAnimation)
+void ChangeIndexImpl(SwiperControllerPeer* peer,
+                     const Ark_Number* index,
+                     const Opt_Boolean* useAnimation)
 {
 }
-void FinishAnimationImpl(SwiperControllerPeer* peer, const Opt_Function* callback)
+void FinishAnimationImpl(SwiperControllerPeer* peer,
+                         const Opt_Function* callback)
 {
 }
 } // SwiperControllerModifier

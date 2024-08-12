@@ -17,12 +17,15 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace HyperlinkInterfaceModifier {
-void _setHyperlinkOptionsImpl(Ark_NativePointer node, const Type_HyperlinkInterface__setHyperlinkOptions_Arg0* address, const Opt_Type_HyperlinkInterface__setHyperlinkOptions_Arg1* content)
+void _setHyperlinkOptionsImpl(Ark_NativePointer node,
+                              const Type_HyperlinkInterface__setHyperlinkOptions_Arg0* address,
+                              const Opt_Type_HyperlinkInterface__setHyperlinkOptions_Arg1* content)
 {
 }
 } // HyperlinkInterfaceModifier
 namespace HyperlinkAttributeModifier {
-void ColorImpl(Ark_NativePointer node, const Type_HyperlinkAttribute_color_Arg0* value)
+void ColorImpl(Ark_NativePointer node,
+               const Type_HyperlinkAttribute_color_Arg0* value)
 {
 }
 } // HyperlinkAttributeModifier

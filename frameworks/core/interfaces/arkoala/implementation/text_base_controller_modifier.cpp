@@ -25,7 +25,10 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return 0;
 }
-void SetSelectionImpl(TextBaseControllerPeer* peer, const Ark_Number* selectionStart, const Ark_Number* selectionEnd, const Opt_SelectionOptions* options)
+void SetSelectionImpl(TextBaseControllerPeer* peer,
+                      const Ark_Number* selectionStart,
+                      const Ark_Number* selectionEnd,
+                      const Opt_SelectionOptions* options)
 {
 }
 void CloseSelectionMenuImpl(TextBaseControllerPeer* peer)

@@ -17,37 +17,48 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CommonShapeMethodModifier {
-void StrokeImpl(Ark_NativePointer node, const ResourceColor* value)
+void StrokeImpl(Ark_NativePointer node,
+                const ResourceColor* value)
 {
 }
-void FillImpl(Ark_NativePointer node, const ResourceColor* value)
+void FillImpl(Ark_NativePointer node,
+              const ResourceColor* value)
 {
 }
-void StrokeDashOffsetImpl(Ark_NativePointer node, const Type_CommonShapeMethod_strokeDashOffset_Arg0* value)
+void StrokeDashOffsetImpl(Ark_NativePointer node,
+                          const Type_CommonShapeMethod_strokeDashOffset_Arg0* value)
 {
 }
-void StrokeLineCapImpl(Ark_NativePointer node, Ark_Int32 value)
+void StrokeLineCapImpl(Ark_NativePointer node,
+                       Ark_Int32 value)
 {
 }
-void StrokeLineJoinImpl(Ark_NativePointer node, Ark_Int32 value)
+void StrokeLineJoinImpl(Ark_NativePointer node,
+                        Ark_Int32 value)
 {
 }
-void StrokeMiterLimitImpl(Ark_NativePointer node, const Type_CommonShapeMethod_strokeMiterLimit_Arg0* value)
+void StrokeMiterLimitImpl(Ark_NativePointer node,
+                          const Type_CommonShapeMethod_strokeMiterLimit_Arg0* value)
 {
 }
-void StrokeOpacityImpl(Ark_NativePointer node, const Type_CommonShapeMethod_strokeOpacity_Arg0* value)
+void StrokeOpacityImpl(Ark_NativePointer node,
+                       const Type_CommonShapeMethod_strokeOpacity_Arg0* value)
 {
 }
-void FillOpacityImpl(Ark_NativePointer node, const Type_CommonShapeMethod_fillOpacity_Arg0* value)
+void FillOpacityImpl(Ark_NativePointer node,
+                     const Type_CommonShapeMethod_fillOpacity_Arg0* value)
 {
 }
-void StrokeWidthImpl(Ark_NativePointer node, const Ark_Length* value)
+void StrokeWidthImpl(Ark_NativePointer node,
+                     const Ark_Length* value)
 {
 }
-void AntiAliasImpl(Ark_NativePointer node, Ark_Boolean value)
+void AntiAliasImpl(Ark_NativePointer node,
+                   Ark_Boolean value)
 {
 }
-void StrokeDashArrayImpl(Ark_NativePointer node, const Array_CustomObject* value)
+void StrokeDashArrayImpl(Ark_NativePointer node,
+                         const Array_CustomObject* value)
 {
 }
 } // CommonShapeMethodModifier

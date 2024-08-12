@@ -17,18 +17,22 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GridColInterfaceModifier {
-void _setGridColOptionsImpl(Ark_NativePointer node, const Opt_GridColOptions* option)
+void _setGridColOptionsImpl(Ark_NativePointer node,
+                            const Opt_GridColOptions* option)
 {
 }
 } // GridColInterfaceModifier
 namespace GridColAttributeModifier {
-void SpanImpl(Ark_NativePointer node, const Type_GridColAttribute_span_Arg0* value)
+void SpanImpl(Ark_NativePointer node,
+              const Type_GridColAttribute_span_Arg0* value)
 {
 }
-void GridColOffsetImpl(Ark_NativePointer node, const Type_GridColAttribute_gridColOffset_Arg0* value)
+void GridColOffsetImpl(Ark_NativePointer node,
+                       const Type_GridColAttribute_gridColOffset_Arg0* value)
 {
 }
-void OrderImpl(Ark_NativePointer node, const Type_GridColAttribute_order_Arg0* value)
+void OrderImpl(Ark_NativePointer node,
+               const Type_GridColAttribute_order_Arg0* value)
 {
 }
 } // GridColAttributeModifier

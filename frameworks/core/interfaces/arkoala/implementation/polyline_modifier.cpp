@@ -17,12 +17,14 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PolylineInterfaceModifier {
-void _setPolylineOptionsImpl(Ark_NativePointer node, const Opt_Type_PolylineInterface__setPolylineOptions_Arg0* value)
+void _setPolylineOptionsImpl(Ark_NativePointer node,
+                             const Opt_Type_PolylineInterface__setPolylineOptions_Arg0* value)
 {
 }
 } // PolylineInterfaceModifier
 namespace PolylineAttributeModifier {
-void PointsImpl(Ark_NativePointer node, const Array_CustomObject* value)
+void PointsImpl(Ark_NativePointer node,
+                const Array_CustomObject* value)
 {
 }
 } // PolylineAttributeModifier

@@ -25,93 +25,145 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return 0;
 }
-void PushPath0Impl(NavPathStackPeer* peer, const Ark_NavPathInfo* info, const Opt_Boolean* animated)
+void PushPath0Impl(NavPathStackPeer* peer,
+                   const Ark_NavPathInfo* info,
+                   const Opt_Boolean* animated)
 {
 }
-void PushPath1Impl(NavPathStackPeer* peer, const Ark_NavPathInfo* info, const Opt_NavigationOptions* options)
+void PushPath1Impl(NavPathStackPeer* peer,
+                   const Ark_NavPathInfo* info,
+                   const Opt_NavigationOptions* options)
 {
 }
-Ark_NativePointer PushDestination0Impl(NavPathStackPeer* peer, const Ark_NavPathInfo* info, const Opt_Boolean* animated)
-{
-    return 0;
-}
-Ark_NativePointer PushDestination1Impl(NavPathStackPeer* peer, const Ark_NavPathInfo* info, const Opt_NavigationOptions* options)
-{
-    return 0;
-}
-void PushPathByName0Impl(NavPathStackPeer* peer, const Ark_String* name, const Ark_CustomObject* param, const Opt_Boolean* animated)
-{
-}
-void PushPathByName1Impl(NavPathStackPeer* peer, const Ark_String* name, const Ark_Object* param, Ark_Function onPop, const Opt_Boolean* animated)
-{
-}
-Ark_NativePointer PushDestinationByName0Impl(NavPathStackPeer* peer, const Ark_String* name, const Ark_Object* param, const Opt_Boolean* animated)
+Ark_NativePointer PushDestination0Impl(NavPathStackPeer* peer,
+                                       const Ark_NavPathInfo* info,
+                                       const Opt_Boolean* animated)
 {
     return 0;
 }
-Ark_NativePointer PushDestinationByName1Impl(NavPathStackPeer* peer, const Ark_String* name, const Ark_Object* param, Ark_Function onPop, const Opt_Boolean* animated)
+Ark_NativePointer PushDestination1Impl(NavPathStackPeer* peer,
+                                       const Ark_NavPathInfo* info,
+                                       const Opt_NavigationOptions* options)
 {
     return 0;
 }
-void ReplacePath0Impl(NavPathStackPeer* peer, const Ark_NavPathInfo* info, const Opt_Boolean* animated)
+void PushPathByName0Impl(NavPathStackPeer* peer,
+                         const Ark_String* name,
+                         const Ark_CustomObject* param,
+                         const Opt_Boolean* animated)
 {
 }
-void ReplacePath1Impl(NavPathStackPeer* peer, const Ark_NavPathInfo* info, const Opt_NavigationOptions* options)
+void PushPathByName1Impl(NavPathStackPeer* peer,
+                         const Ark_String* name,
+                         const Ark_Object* param,
+                         Ark_Function onPop,
+                         const Opt_Boolean* animated)
 {
 }
-void ReplacePathByNameImpl(NavPathStackPeer* peer, const Ark_String* name, const Ark_Object* param, const Opt_Boolean* animated)
-{
-}
-Ark_Int32 RemoveByIndexesImpl(NavPathStackPeer* peer, const Array_Number* indexes)
-{
-    return 0;
-}
-Ark_Int32 RemoveByNameImpl(NavPathStackPeer* peer, const Ark_String* name)
-{
-    return 0;
-}
-void Pop0Impl(NavPathStackPeer* peer, const Opt_Boolean* animated)
-{
-}
-void Pop1Impl(NavPathStackPeer* peer, const Ark_Object* result, const Opt_Boolean* animated)
-{
-}
-Ark_Int32 PopToName0Impl(NavPathStackPeer* peer, const Ark_String* name, const Opt_Boolean* animated)
+Ark_NativePointer PushDestinationByName0Impl(NavPathStackPeer* peer,
+                                             const Ark_String* name,
+                                             const Ark_Object* param,
+                                             const Opt_Boolean* animated)
 {
     return 0;
 }
-Ark_Int32 PopToName1Impl(NavPathStackPeer* peer, const Ark_String* name, const Ark_Object* result, const Opt_Boolean* animated)
+Ark_NativePointer PushDestinationByName1Impl(NavPathStackPeer* peer,
+                                             const Ark_String* name,
+                                             const Ark_Object* param,
+                                             Ark_Function onPop,
+                                             const Opt_Boolean* animated)
 {
     return 0;
 }
-void PopToIndex0Impl(NavPathStackPeer* peer, const Ark_Number* index, const Opt_Boolean* animated)
+void ReplacePath0Impl(NavPathStackPeer* peer,
+                      const Ark_NavPathInfo* info,
+                      const Opt_Boolean* animated)
 {
 }
-void PopToIndex1Impl(NavPathStackPeer* peer, const Ark_Number* index, const Ark_Object* result, const Opt_Boolean* animated)
+void ReplacePath1Impl(NavPathStackPeer* peer,
+                      const Ark_NavPathInfo* info,
+                      const Opt_NavigationOptions* options)
 {
 }
-Ark_Int32 MoveToTopImpl(NavPathStackPeer* peer, const Ark_String* name, const Opt_Boolean* animated)
+void ReplacePathByNameImpl(NavPathStackPeer* peer,
+                           const Ark_String* name,
+                           const Ark_Object* param,
+                           const Opt_Boolean* animated)
+{
+}
+Ark_Int32 RemoveByIndexesImpl(NavPathStackPeer* peer,
+                              const Array_Number* indexes)
 {
     return 0;
 }
-void MoveIndexToTopImpl(NavPathStackPeer* peer, const Ark_Number* index, const Opt_Boolean* animated)
+Ark_Int32 RemoveByNameImpl(NavPathStackPeer* peer,
+                           const Ark_String* name)
+{
+    return 0;
+}
+void Pop0Impl(NavPathStackPeer* peer,
+              const Opt_Boolean* animated)
 {
 }
-void ClearImpl(NavPathStackPeer* peer, const Opt_Boolean* animated)
+void Pop1Impl(NavPathStackPeer* peer,
+              const Ark_Object* result,
+              const Opt_Boolean* animated)
+{
+}
+Ark_Int32 PopToName0Impl(NavPathStackPeer* peer,
+                         const Ark_String* name,
+                         const Opt_Boolean* animated)
+{
+    return 0;
+}
+Ark_Int32 PopToName1Impl(NavPathStackPeer* peer,
+                         const Ark_String* name,
+                         const Ark_Object* result,
+                         const Opt_Boolean* animated)
+{
+    return 0;
+}
+void PopToIndex0Impl(NavPathStackPeer* peer,
+                     const Ark_Number* index,
+                     const Opt_Boolean* animated)
+{
+}
+void PopToIndex1Impl(NavPathStackPeer* peer,
+                     const Ark_Number* index,
+                     const Ark_Object* result,
+                     const Opt_Boolean* animated)
+{
+}
+Ark_Int32 MoveToTopImpl(NavPathStackPeer* peer,
+                        const Ark_String* name,
+                        const Opt_Boolean* animated)
+{
+    return 0;
+}
+void MoveIndexToTopImpl(NavPathStackPeer* peer,
+                        const Ark_Number* index,
+                        const Opt_Boolean* animated)
+{
+}
+void ClearImpl(NavPathStackPeer* peer,
+               const Opt_Boolean* animated)
 {
 }
 Ark_NativePointer GetAllPathNameImpl(NavPathStackPeer* peer)
 {
     return 0;
 }
-void GetParamByIndexImpl(NavPathStackPeer* peer, const Ark_Number* index)
+void GetParamByIndexImpl(NavPathStackPeer* peer,
+                         const Ark_Number* index)
 {
 }
-Ark_NativePointer GetParamByNameImpl(NavPathStackPeer* peer, const Ark_String* name)
+Ark_NativePointer GetParamByNameImpl(NavPathStackPeer* peer,
+                                     const Ark_String* name)
 {
     return 0;
 }
-Ark_NativePointer GetIndexByNameImpl(NavPathStackPeer* peer, const Ark_String* name)
+Ark_NativePointer GetIndexByNameImpl(NavPathStackPeer* peer,
+                                     const Ark_String* name)
 {
     return 0;
 }
@@ -123,10 +175,12 @@ Ark_Int32 SizeImpl(NavPathStackPeer* peer)
 {
     return 0;
 }
-void DisableAnimationImpl(NavPathStackPeer* peer, Ark_Boolean value)
+void DisableAnimationImpl(NavPathStackPeer* peer,
+                          Ark_Boolean value)
 {
 }
-void SetInterceptionImpl(NavPathStackPeer* peer, const Ark_NavigationInterception* interception)
+void SetInterceptionImpl(NavPathStackPeer* peer,
+                         const Ark_NavigationInterception* interception)
 {
 }
 } // NavPathStackModifier

@@ -25,7 +25,8 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return 0;
 }
-void SetStyledStringImpl(RichEditorStyledStringControllerPeer* peer, const Ark_Materialized* styledString)
+void SetStyledStringImpl(RichEditorStyledStringControllerPeer* peer,
+                         const Ark_Materialized* styledString)
 {
 }
 Ark_NativePointer GetStyledStringImpl(RichEditorStyledStringControllerPeer* peer)
@@ -36,7 +37,8 @@ Ark_NativePointer GetSelectionImpl(RichEditorStyledStringControllerPeer* peer)
 {
     return 0;
 }
-void OnContentChangedImpl(RichEditorStyledStringControllerPeer* peer, const Ark_StyledStringChangedListener* listener)
+void OnContentChangedImpl(RichEditorStyledStringControllerPeer* peer,
+                          const Ark_StyledStringChangedListener* listener)
 {
 }
 } // RichEditorStyledStringControllerModifier

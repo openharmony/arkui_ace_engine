@@ -17,15 +17,18 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ListItemGroupInterfaceModifier {
-void _setListItemGroupOptionsImpl(Ark_NativePointer node, const Opt_ListItemGroupOptions* options)
+void _setListItemGroupOptionsImpl(Ark_NativePointer node,
+                                  const Opt_ListItemGroupOptions* options)
 {
 }
 } // ListItemGroupInterfaceModifier
 namespace ListItemGroupAttributeModifier {
-void DividerImpl(Ark_NativePointer node, const Type_ListItemGroupAttribute_divider_Arg0* value)
+void DividerImpl(Ark_NativePointer node,
+                 const Type_ListItemGroupAttribute_divider_Arg0* value)
 {
 }
-void ChildrenMainSizeImpl(Ark_NativePointer node, const Ark_Materialized* value)
+void ChildrenMainSizeImpl(Ark_NativePointer node,
+                          const Ark_Materialized* value)
 {
 }
 } // ListItemGroupAttributeModifier

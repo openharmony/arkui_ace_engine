@@ -31,20 +31,24 @@ void FinishTransitionImpl(NavigationTransitionProxyPeer* peer)
 void CancelTransitionImpl(NavigationTransitionProxyPeer* peer)
 {
 }
-void UpdateTransitionImpl(NavigationTransitionProxyPeer* peer, const Ark_Number* progress)
+void UpdateTransitionImpl(NavigationTransitionProxyPeer* peer,
+                          const Ark_Number* progress)
 {
 }
-void SetFromImpl(NavigationTransitionProxyPeer* peer, const Ark_NavContentInfo* from)
+void SetFromImpl(NavigationTransitionProxyPeer* peer,
+                 const Ark_NavContentInfo* from)
 {
 }
-void SetToImpl(NavigationTransitionProxyPeer* peer, const Ark_NavContentInfo* to)
+void SetToImpl(NavigationTransitionProxyPeer* peer,
+               const Ark_NavContentInfo* to)
 {
 }
 Ark_Boolean GetIsInteractiveImpl(NavigationTransitionProxyPeer* peer)
 {
     return 0;
 }
-void SetIsInteractiveImpl(NavigationTransitionProxyPeer* peer, Ark_Boolean isInteractive)
+void SetIsInteractiveImpl(NavigationTransitionProxyPeer* peer,
+                          Ark_Boolean isInteractive)
 {
 }
 } // NavigationTransitionProxyModifier

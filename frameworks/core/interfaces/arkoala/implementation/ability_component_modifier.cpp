@@ -17,15 +17,18 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AbilityComponentInterfaceModifier {
-void _setAbilityComponentOptionsImpl(Ark_NativePointer node, const Type_AbilityComponentInterface__setAbilityComponentOptions_Arg0* value)
+void _setAbilityComponentOptionsImpl(Ark_NativePointer node,
+                                     const Type_AbilityComponentInterface__setAbilityComponentOptions_Arg0* value)
 {
 }
 } // AbilityComponentInterfaceModifier
 namespace AbilityComponentAttributeModifier {
-void OnConnectImpl(Ark_NativePointer node, Ark_Function callback)
+void OnConnectImpl(Ark_NativePointer node,
+                   Ark_Function callback)
 {
 }
-void OnDisconnectImpl(Ark_NativePointer node, Ark_Function callback)
+void OnDisconnectImpl(Ark_NativePointer node,
+                      Ark_Function callback)
 {
 }
 } // AbilityComponentAttributeModifier

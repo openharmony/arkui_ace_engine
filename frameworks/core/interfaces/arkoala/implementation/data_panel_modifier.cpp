@@ -17,27 +17,34 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DataPanelInterfaceModifier {
-void _setDataPanelOptionsImpl(Ark_NativePointer node, const Ark_DataPanelOptions* options)
+void _setDataPanelOptionsImpl(Ark_NativePointer node,
+                              const Ark_DataPanelOptions* options)
 {
 }
 } // DataPanelInterfaceModifier
 namespace DataPanelAttributeModifier {
-void CloseEffectImpl(Ark_NativePointer node, Ark_Boolean value)
+void CloseEffectImpl(Ark_NativePointer node,
+                     Ark_Boolean value)
 {
 }
-void ValueColorsImpl(Ark_NativePointer node, const Array_Union_ResourceColor_LinearGradient* value)
+void ValueColorsImpl(Ark_NativePointer node,
+                     const Array_Union_ResourceColor_LinearGradient* value)
 {
 }
-void TrackBackgroundColorImpl(Ark_NativePointer node, const ResourceColor* value)
+void TrackBackgroundColorImpl(Ark_NativePointer node,
+                              const ResourceColor* value)
 {
 }
-void StrokeWidthImpl(Ark_NativePointer node, const Ark_Length* value)
+void StrokeWidthImpl(Ark_NativePointer node,
+                     const Ark_Length* value)
 {
 }
-void TrackShadowImpl(Ark_NativePointer node, const Ark_DataPanelShadowOptions* value)
+void TrackShadowImpl(Ark_NativePointer node,
+                     const Ark_DataPanelShadowOptions* value)
 {
 }
-void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* modifier)
+void ContentModifierImpl(Ark_NativePointer node,
+                         const Ark_CustomObject* modifier)
 {
 }
 } // DataPanelAttributeModifier

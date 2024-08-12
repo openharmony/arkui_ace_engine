@@ -17,18 +17,22 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RowInterfaceModifier {
-void _setRowOptionsImpl(Ark_NativePointer node, const Opt_Type_RowInterface__setRowOptions_Arg0* value)
+void _setRowOptionsImpl(Ark_NativePointer node,
+                        const Opt_Type_RowInterface__setRowOptions_Arg0* value)
 {
 }
 } // RowInterfaceModifier
 namespace RowAttributeModifier {
-void AlignItemsImpl(Ark_NativePointer node, Ark_Int32 value)
+void AlignItemsImpl(Ark_NativePointer node,
+                    Ark_Int32 value)
 {
 }
-void JustifyContentImpl(Ark_NativePointer node, Ark_Int32 value)
+void JustifyContentImpl(Ark_NativePointer node,
+                        Ark_Int32 value)
 {
 }
-void PointLightImpl(Ark_NativePointer node, const Ark_PointLightStyle* value)
+void PointLightImpl(Ark_NativePointer node,
+                    const Ark_PointLightStyle* value)
 {
 }
 } // RowAttributeModifier

@@ -17,81 +17,108 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TabsInterfaceModifier {
-void _setTabsOptionsImpl(Ark_NativePointer node, const Opt_Type_TabsInterface__setTabsOptions_Arg0* value)
+void _setTabsOptionsImpl(Ark_NativePointer node,
+                         const Opt_Type_TabsInterface__setTabsOptions_Arg0* value)
 {
 }
 } // TabsInterfaceModifier
 namespace TabsAttributeModifier {
-void VerticalImpl(Ark_NativePointer node, Ark_Boolean value)
+void VerticalImpl(Ark_NativePointer node,
+                  Ark_Boolean value)
 {
 }
-void BarPositionImpl(Ark_NativePointer node, Ark_Int32 value)
+void BarPositionImpl(Ark_NativePointer node,
+                     Ark_Int32 value)
 {
 }
-void ScrollableImpl(Ark_NativePointer node, Ark_Boolean value)
+void ScrollableImpl(Ark_NativePointer node,
+                    Ark_Boolean value)
 {
 }
-void BarMode0Impl(Ark_NativePointer node, Ark_Int32 value)
+void BarMode0Impl(Ark_NativePointer node,
+                  Ark_Int32 value)
 {
 }
-void BarMode1Impl(Ark_NativePointer node, Ark_Int32 value, const Ark_ScrollableBarModeOptions* options)
+void BarMode1Impl(Ark_NativePointer node,
+                  Ark_Int32 value,
+                  const Ark_ScrollableBarModeOptions* options)
 {
 }
-void BarMode2Impl(Ark_NativePointer node, Ark_Int32 value, const Opt_ScrollableBarModeOptions* options)
+void BarMode2Impl(Ark_NativePointer node,
+                  Ark_Int32 value,
+                  const Opt_ScrollableBarModeOptions* options)
 {
 }
-void BarWidthImpl(Ark_NativePointer node, const Ark_Length* value)
+void BarWidthImpl(Ark_NativePointer node,
+                  const Ark_Length* value)
 {
 }
-void BarHeightImpl(Ark_NativePointer node, const Ark_Length* value)
+void BarHeightImpl(Ark_NativePointer node,
+                   const Ark_Length* value)
 {
 }
-void AnimationDurationImpl(Ark_NativePointer node, const Ark_Number* value)
+void AnimationDurationImpl(Ark_NativePointer node,
+                           const Ark_Number* value)
 {
 }
-void AnimationModeImpl(Ark_NativePointer node, const Opt_AnimationMode* mode)
+void AnimationModeImpl(Ark_NativePointer node,
+                       const Opt_AnimationMode* mode)
 {
 }
-void EdgeEffectImpl(Ark_NativePointer node, const Opt_EdgeEffect* edgeEffect)
+void EdgeEffectImpl(Ark_NativePointer node,
+                    const Opt_EdgeEffect* edgeEffect)
 {
 }
-void OnChangeImpl(Ark_NativePointer node, Ark_Function event)
+void OnChangeImpl(Ark_NativePointer node,
+                  Ark_Function event)
 {
 }
-void OnTabBarClickImpl(Ark_NativePointer node, Ark_Function event)
+void OnTabBarClickImpl(Ark_NativePointer node,
+                       Ark_Function event)
 {
 }
-void OnAnimationStartImpl(Ark_NativePointer node, Ark_Function handler)
+void OnAnimationStartImpl(Ark_NativePointer node,
+                          Ark_Function handler)
 {
 }
-void OnAnimationEndImpl(Ark_NativePointer node, Ark_Function handler)
+void OnAnimationEndImpl(Ark_NativePointer node,
+                        Ark_Function handler)
 {
 }
-void OnGestureSwipeImpl(Ark_NativePointer node, Ark_Function handler)
+void OnGestureSwipeImpl(Ark_NativePointer node,
+                        Ark_Function handler)
 {
 }
-void FadingEdgeImpl(Ark_NativePointer node, Ark_Boolean value)
+void FadingEdgeImpl(Ark_NativePointer node,
+                    Ark_Boolean value)
 {
 }
-void DividerImpl(Ark_NativePointer node, const Type_TabsAttribute_divider_Arg0* value)
+void DividerImpl(Ark_NativePointer node,
+                 const Type_TabsAttribute_divider_Arg0* value)
 {
 }
-void BarOverlapImpl(Ark_NativePointer node, Ark_Boolean value)
+void BarOverlapImpl(Ark_NativePointer node,
+                    Ark_Boolean value)
 {
 }
-void BarBackgroundColorImpl(Ark_NativePointer node, const ResourceColor* value)
+void BarBackgroundColorImpl(Ark_NativePointer node,
+                            const ResourceColor* value)
 {
 }
-void BarGridAlignImpl(Ark_NativePointer node, const Ark_BarGridColumnOptions* value)
+void BarGridAlignImpl(Ark_NativePointer node,
+                      const Ark_BarGridColumnOptions* value)
 {
 }
-void CustomContentTransitionImpl(Ark_NativePointer node, Ark_Function delegate)
+void CustomContentTransitionImpl(Ark_NativePointer node,
+                                 Ark_Function delegate)
 {
 }
-void BarBackgroundBlurStyleImpl(Ark_NativePointer node, Ark_Int32 value)
+void BarBackgroundBlurStyleImpl(Ark_NativePointer node,
+                                Ark_Int32 value)
 {
 }
-void OnContentWillChangeImpl(Ark_NativePointer node, Ark_Function handler)
+void OnContentWillChangeImpl(Ark_NativePointer node,
+                             Ark_Function handler)
 {
 }
 } // TabsAttributeModifier

@@ -17,45 +17,58 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PanelInterfaceModifier {
-void _setPanelOptionsImpl(Ark_NativePointer node, Ark_Boolean show)
+void _setPanelOptionsImpl(Ark_NativePointer node,
+                          Ark_Boolean show)
 {
 }
 } // PanelInterfaceModifier
 namespace PanelAttributeModifier {
-void ModeImpl(Ark_NativePointer node, Ark_Int32 value)
+void ModeImpl(Ark_NativePointer node,
+              Ark_Int32 value)
 {
 }
-void TypeImpl(Ark_NativePointer node, Ark_Int32 value)
+void TypeImpl(Ark_NativePointer node,
+              Ark_Int32 value)
 {
 }
-void DragBarImpl(Ark_NativePointer node, Ark_Boolean value)
+void DragBarImpl(Ark_NativePointer node,
+                 Ark_Boolean value)
 {
 }
-void CustomHeightImpl(Ark_NativePointer node, const Type_PanelAttribute_customHeight_Arg0* value)
+void CustomHeightImpl(Ark_NativePointer node,
+                      const Type_PanelAttribute_customHeight_Arg0* value)
 {
 }
-void FullHeightImpl(Ark_NativePointer node, const Type_PanelAttribute_fullHeight_Arg0* value)
+void FullHeightImpl(Ark_NativePointer node,
+                    const Type_PanelAttribute_fullHeight_Arg0* value)
 {
 }
-void HalfHeightImpl(Ark_NativePointer node, const Type_PanelAttribute_halfHeight_Arg0* value)
+void HalfHeightImpl(Ark_NativePointer node,
+                    const Type_PanelAttribute_halfHeight_Arg0* value)
 {
 }
-void MiniHeightImpl(Ark_NativePointer node, const Type_PanelAttribute_miniHeight_Arg0* value)
+void MiniHeightImpl(Ark_NativePointer node,
+                    const Type_PanelAttribute_miniHeight_Arg0* value)
 {
 }
-void ShowImpl(Ark_NativePointer node, Ark_Boolean value)
+void ShowImpl(Ark_NativePointer node,
+              Ark_Boolean value)
 {
 }
-void BackgroundMaskImpl(Ark_NativePointer node, const ResourceColor* color)
+void BackgroundMaskImpl(Ark_NativePointer node,
+                        const ResourceColor* color)
 {
 }
-void ShowCloseIconImpl(Ark_NativePointer node, Ark_Boolean value)
+void ShowCloseIconImpl(Ark_NativePointer node,
+                       Ark_Boolean value)
 {
 }
-void OnChangeImpl(Ark_NativePointer node, Ark_Function event)
+void OnChangeImpl(Ark_NativePointer node,
+                  Ark_Function event)
 {
 }
-void OnHeightChangeImpl(Ark_NativePointer node, Ark_Function callback)
+void OnHeightChangeImpl(Ark_NativePointer node,
+                        Ark_Function callback)
 {
 }
 } // PanelAttributeModifier

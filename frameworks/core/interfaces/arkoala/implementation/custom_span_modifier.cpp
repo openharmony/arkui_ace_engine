@@ -25,11 +25,14 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return 0;
 }
-Ark_NativePointer OnMeasureImpl(CustomSpanPeer* peer, const Ark_CustomSpanMeasureInfo* measureInfo)
+Ark_NativePointer OnMeasureImpl(CustomSpanPeer* peer,
+                                const Ark_CustomSpanMeasureInfo* measureInfo)
 {
     return 0;
 }
-void OnDrawImpl(CustomSpanPeer* peer, const Ark_CustomObject* context, const Ark_CustomSpanDrawInfo* drawInfo)
+void OnDrawImpl(CustomSpanPeer* peer,
+                const Ark_CustomObject* context,
+                const Ark_CustomSpanDrawInfo* drawInfo)
 {
 }
 } // CustomSpanModifier

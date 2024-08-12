@@ -22,13 +22,16 @@ void _setRelativeContainerOptionsImpl(Ark_NativePointer node)
 }
 } // RelativeContainerInterfaceModifier
 namespace RelativeContainerAttributeModifier {
-void GuideLineImpl(Ark_NativePointer node, const Array_GuideLineStyle* value)
+void GuideLineImpl(Ark_NativePointer node,
+                   const Array_GuideLineStyle* value)
 {
 }
-void Barrier0Impl(Ark_NativePointer node, const Array_BarrierStyle* value)
+void Barrier0Impl(Ark_NativePointer node,
+                  const Array_BarrierStyle* value)
 {
 }
-void Barrier1Impl(Ark_NativePointer node, const Array_LocalizedBarrierStyle* barrierStyle)
+void Barrier1Impl(Ark_NativePointer node,
+                  const Array_LocalizedBarrierStyle* barrierStyle)
 {
 }
 } // RelativeContainerAttributeModifier

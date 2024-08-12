@@ -17,30 +17,38 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ListItemInterfaceModifier {
-void _setListItemOptions0Impl(Ark_NativePointer node, const Opt_ListItemOptions* value)
+void _setListItemOptions0Impl(Ark_NativePointer node,
+                              const Opt_ListItemOptions* value)
 {
 }
-void _setListItemOptions1Impl(Ark_NativePointer node, const Opt_String* value)
+void _setListItemOptions1Impl(Ark_NativePointer node,
+                              const Opt_String* value)
 {
 }
 } // ListItemInterfaceModifier
 namespace ListItemAttributeModifier {
-void StickyImpl(Ark_NativePointer node, Ark_Int32 value)
+void StickyImpl(Ark_NativePointer node,
+                Ark_Int32 value)
 {
 }
-void EditableImpl(Ark_NativePointer node, const Type_ListItemAttribute_editable_Arg0* value)
+void EditableImpl(Ark_NativePointer node,
+                  const Type_ListItemAttribute_editable_Arg0* value)
 {
 }
-void SelectableImpl(Ark_NativePointer node, Ark_Boolean value)
+void SelectableImpl(Ark_NativePointer node,
+                    Ark_Boolean value)
 {
 }
-void SelectedImpl(Ark_NativePointer node, Ark_Boolean value)
+void SelectedImpl(Ark_NativePointer node,
+                  Ark_Boolean value)
 {
 }
-void SwipeActionImpl(Ark_NativePointer node, const Ark_SwipeActionOptions* value)
+void SwipeActionImpl(Ark_NativePointer node,
+                     const Ark_SwipeActionOptions* value)
 {
 }
-void OnSelectImpl(Ark_NativePointer node, Ark_Function event)
+void OnSelectImpl(Ark_NativePointer node,
+                  Ark_Function event)
 {
 }
 } // ListItemAttributeModifier

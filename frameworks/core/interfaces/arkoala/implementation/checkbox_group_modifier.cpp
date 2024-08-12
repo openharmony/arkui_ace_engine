@@ -17,27 +17,34 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CheckboxGroupInterfaceModifier {
-void _setCheckboxGroupOptionsImpl(Ark_NativePointer node, const Opt_CheckboxGroupOptions* options)
+void _setCheckboxGroupOptionsImpl(Ark_NativePointer node,
+                                  const Opt_CheckboxGroupOptions* options)
 {
 }
 } // CheckboxGroupInterfaceModifier
 namespace CheckboxGroupAttributeModifier {
-void SelectAllImpl(Ark_NativePointer node, Ark_Boolean value)
+void SelectAllImpl(Ark_NativePointer node,
+                   Ark_Boolean value)
 {
 }
-void SelectedColorImpl(Ark_NativePointer node, const ResourceColor* value)
+void SelectedColorImpl(Ark_NativePointer node,
+                       const ResourceColor* value)
 {
 }
-void UnselectedColorImpl(Ark_NativePointer node, const ResourceColor* value)
+void UnselectedColorImpl(Ark_NativePointer node,
+                         const ResourceColor* value)
 {
 }
-void MarkImpl(Ark_NativePointer node, const Ark_MarkStyle* value)
+void MarkImpl(Ark_NativePointer node,
+              const Ark_MarkStyle* value)
 {
 }
-void OnChangeImpl(Ark_NativePointer node, Ark_Function callback)
+void OnChangeImpl(Ark_NativePointer node,
+                  Ark_Function callback)
 {
 }
-void CheckboxShapeImpl(Ark_NativePointer node, Ark_Int32 value)
+void CheckboxShapeImpl(Ark_NativePointer node,
+                       Ark_Int32 value)
 {
 }
 } // CheckboxGroupAttributeModifier

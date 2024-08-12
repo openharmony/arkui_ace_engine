@@ -22,13 +22,16 @@ void _setStepperItemOptionsImpl(Ark_NativePointer node)
 }
 } // StepperItemInterfaceModifier
 namespace StepperItemAttributeModifier {
-void PrevLabelImpl(Ark_NativePointer node, const Ark_String* value)
+void PrevLabelImpl(Ark_NativePointer node,
+                   const Ark_String* value)
 {
 }
-void NextLabelImpl(Ark_NativePointer node, const Ark_String* value)
+void NextLabelImpl(Ark_NativePointer node,
+                   const Ark_String* value)
 {
 }
-void StatusImpl(Ark_NativePointer node, const Opt_ItemState* value)
+void StatusImpl(Ark_NativePointer node,
+                const Opt_ItemState* value)
 {
 }
 } // StepperItemAttributeModifier

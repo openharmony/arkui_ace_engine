@@ -20,12 +20,14 @@ namespace PasteButtonInterfaceModifier {
 void _setPasteButtonOptions0Impl(Ark_NativePointer node)
 {
 }
-void _setPasteButtonOptions1Impl(Ark_NativePointer node, const Ark_PasteButtonOptions* options)
+void _setPasteButtonOptions1Impl(Ark_NativePointer node,
+                                 const Ark_PasteButtonOptions* options)
 {
 }
 } // PasteButtonInterfaceModifier
 namespace PasteButtonAttributeModifier {
-void OnClickImpl(Ark_NativePointer node, Ark_Function event)
+void OnClickImpl(Ark_NativePointer node,
+                 Ark_Function event)
 {
 }
 } // PasteButtonAttributeModifier

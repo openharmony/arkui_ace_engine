@@ -25,11 +25,14 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return 0;
 }
-Ark_NativePointer OnCreateMenuImpl(EditMenuOptionsPeer* peer, const Array_TextMenuItem* menuItems)
+Ark_NativePointer OnCreateMenuImpl(EditMenuOptionsPeer* peer,
+                                   const Array_TextMenuItem* menuItems)
 {
     return 0;
 }
-Ark_Boolean OnMenuItemClickImpl(EditMenuOptionsPeer* peer, const Ark_TextMenuItem* menuItem, const Ark_TextRange* range)
+Ark_Boolean OnMenuItemClickImpl(EditMenuOptionsPeer* peer,
+                                const Ark_TextMenuItem* menuItem,
+                                const Ark_TextRange* range)
 {
     return 0;
 }

@@ -25,13 +25,16 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return 0;
 }
-void DrawBehindImpl(DrawModifierPeer* peer, const Ark_CustomObject* drawContext)
+void DrawBehindImpl(DrawModifierPeer* peer,
+                    const Ark_CustomObject* drawContext)
 {
 }
-void DrawContentImpl(DrawModifierPeer* peer, const Ark_CustomObject* drawContext)
+void DrawContentImpl(DrawModifierPeer* peer,
+                     const Ark_CustomObject* drawContext)
 {
 }
-void DrawFrontImpl(DrawModifierPeer* peer, const Ark_CustomObject* drawContext)
+void DrawFrontImpl(DrawModifierPeer* peer,
+                   const Ark_CustomObject* drawContext)
 {
 }
 void InvalidateImpl(DrawModifierPeer* peer)

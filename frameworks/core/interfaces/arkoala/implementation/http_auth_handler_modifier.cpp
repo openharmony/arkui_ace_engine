@@ -25,7 +25,9 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return 0;
 }
-Ark_Boolean ConfirmImpl(HttpAuthHandlerPeer* peer, const Ark_String* userName, const Ark_String* password)
+Ark_Boolean ConfirmImpl(HttpAuthHandlerPeer* peer,
+                        const Ark_String* userName,
+                        const Ark_String* password)
 {
     return 0;
 }

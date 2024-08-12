@@ -25,7 +25,8 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return 0;
 }
-void HandleFileListImpl(FileSelectorResultPeer* peer, const Array_String* fileList)
+void HandleFileListImpl(FileSelectorResultPeer* peer,
+                        const Array_String* fileList)
 {
 }
 } // FileSelectorResultModifier

@@ -17,66 +17,87 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScrollInterfaceModifier {
-void _setScrollOptionsImpl(Ark_NativePointer node, const Opt_Scroller* scroller)
+void _setScrollOptionsImpl(Ark_NativePointer node,
+                           const Opt_Scroller* scroller)
 {
 }
 } // ScrollInterfaceModifier
 namespace ScrollAttributeModifier {
-void ScrollableImpl(Ark_NativePointer node, Ark_Int32 value)
+void ScrollableImpl(Ark_NativePointer node,
+                    Ark_Int32 value)
 {
 }
-void OnScrollImpl(Ark_NativePointer node, Ark_Function event)
+void OnScrollImpl(Ark_NativePointer node,
+                  Ark_Function event)
 {
 }
-void OnWillScrollImpl(Ark_NativePointer node, const Ark_CustomObject* stub_for_onWillScroll)
+void OnWillScrollImpl(Ark_NativePointer node,
+                      const Ark_CustomObject* stub_for_onWillScroll)
 {
 }
-void OnDidScrollImpl(Ark_NativePointer node, Ark_Function handler)
+void OnDidScrollImpl(Ark_NativePointer node,
+                     Ark_Function handler)
 {
 }
-void OnScrollEdgeImpl(Ark_NativePointer node, Ark_Function event)
+void OnScrollEdgeImpl(Ark_NativePointer node,
+                      Ark_Function event)
 {
 }
-void OnScrollStartImpl(Ark_NativePointer node, Ark_Function event)
+void OnScrollStartImpl(Ark_NativePointer node,
+                       Ark_Function event)
 {
 }
-void OnScrollEndImpl(Ark_NativePointer node, Ark_Function event)
+void OnScrollEndImpl(Ark_NativePointer node,
+                     Ark_Function event)
 {
 }
-void OnScrollStopImpl(Ark_NativePointer node, Ark_Function event)
+void OnScrollStopImpl(Ark_NativePointer node,
+                      Ark_Function event)
 {
 }
-void ScrollBarImpl(Ark_NativePointer node, Ark_Int32 barState)
+void ScrollBarImpl(Ark_NativePointer node,
+                   Ark_Int32 barState)
 {
 }
-void ScrollBarColorImpl(Ark_NativePointer node, const Type_ScrollAttribute_scrollBarColor_Arg0* color)
+void ScrollBarColorImpl(Ark_NativePointer node,
+                        const Type_ScrollAttribute_scrollBarColor_Arg0* color)
 {
 }
-void ScrollBarWidthImpl(Ark_NativePointer node, const Type_ScrollAttribute_scrollBarWidth_Arg0* value)
+void ScrollBarWidthImpl(Ark_NativePointer node,
+                        const Type_ScrollAttribute_scrollBarWidth_Arg0* value)
 {
 }
-void EdgeEffectImpl(Ark_NativePointer node, Ark_Int32 edgeEffect, const Opt_EdgeEffectOptions* options)
+void EdgeEffectImpl(Ark_NativePointer node,
+                    Ark_Int32 edgeEffect,
+                    const Opt_EdgeEffectOptions* options)
 {
 }
-void OnScrollFrameBeginImpl(Ark_NativePointer node, Ark_Function event)
+void OnScrollFrameBeginImpl(Ark_NativePointer node,
+                            Ark_Function event)
 {
 }
-void NestedScrollImpl(Ark_NativePointer node, const Ark_NestedScrollOptions* value)
+void NestedScrollImpl(Ark_NativePointer node,
+                      const Ark_NestedScrollOptions* value)
 {
 }
-void EnableScrollInteractionImpl(Ark_NativePointer node, Ark_Boolean value)
+void EnableScrollInteractionImpl(Ark_NativePointer node,
+                                 Ark_Boolean value)
 {
 }
-void FrictionImpl(Ark_NativePointer node, const Type_ScrollAttribute_friction_Arg0* value)
+void FrictionImpl(Ark_NativePointer node,
+                  const Type_ScrollAttribute_friction_Arg0* value)
 {
 }
-void ScrollSnapImpl(Ark_NativePointer node, const Ark_ScrollSnapOptions* value)
+void ScrollSnapImpl(Ark_NativePointer node,
+                    const Ark_ScrollSnapOptions* value)
 {
 }
-void EnablePagingImpl(Ark_NativePointer node, Ark_Boolean value)
+void EnablePagingImpl(Ark_NativePointer node,
+                      Ark_Boolean value)
 {
 }
-void InitialOffsetImpl(Ark_NativePointer node, const Ark_OffsetOptions* value)
+void InitialOffsetImpl(Ark_NativePointer node,
+                       const Ark_OffsetOptions* value)
 {
 }
 } // ScrollAttributeModifier

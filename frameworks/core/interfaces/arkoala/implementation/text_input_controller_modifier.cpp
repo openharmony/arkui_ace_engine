@@ -25,10 +25,14 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return 0;
 }
-void CaretPositionImpl(TextInputControllerPeer* peer, const Ark_Number* value)
+void CaretPositionImpl(TextInputControllerPeer* peer,
+                       const Ark_Number* value)
 {
 }
-void SetTextSelectionImpl(TextInputControllerPeer* peer, const Ark_Number* selectionStart, const Ark_Number* selectionEnd, const Opt_SelectionOptions* options)
+void SetTextSelectionImpl(TextInputControllerPeer* peer,
+                          const Ark_Number* selectionStart,
+                          const Ark_Number* selectionEnd,
+                          const Opt_SelectionOptions* options)
 {
 }
 void StopEditingImpl(TextInputControllerPeer* peer)

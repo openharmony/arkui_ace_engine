@@ -28,7 +28,8 @@ Ark_NativePointer GetFinalizerImpl()
 void BackToTodayImpl(CalendarControllerPeer* peer)
 {
 }
-void GoToImpl(CalendarControllerPeer* peer, const Literal_Number_year_month_day* value)
+void GoToImpl(CalendarControllerPeer* peer,
+              const Literal_Number_year_month_day* value)
 {
 }
 } // CalendarControllerModifier

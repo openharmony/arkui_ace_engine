@@ -29,11 +29,14 @@ Ark_Int32 GetLineCountImpl(LayoutManagerPeer* peer)
 {
     return 0;
 }
-Ark_NativePointer GetGlyphPositionAtCoordinateImpl(LayoutManagerPeer* peer, const Ark_Number* x, const Ark_Number* y)
+Ark_NativePointer GetGlyphPositionAtCoordinateImpl(LayoutManagerPeer* peer,
+                                                   const Ark_Number* x,
+                                                   const Ark_Number* y)
 {
     return 0;
 }
-Ark_NativePointer GetLineMetricsImpl(LayoutManagerPeer* peer, const Ark_Number* lineNumber)
+Ark_NativePointer GetLineMetricsImpl(LayoutManagerPeer* peer,
+                                     const Ark_Number* lineNumber)
 {
     return 0;
 }

@@ -35,7 +35,8 @@ Ark_NativePointer GetAccessibleResourceImpl(PermissionRequestPeer* peer)
 {
     return 0;
 }
-void GrantImpl(PermissionRequestPeer* peer, const Array_String* resources)
+void GrantImpl(PermissionRequestPeer* peer,
+               const Array_String* resources)
 {
 }
 } // PermissionRequestModifier

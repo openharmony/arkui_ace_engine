@@ -25,31 +25,68 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return 0;
 }
-void ArcImpl(CanvasPathPeer* peer, const Ark_Number* x, const Ark_Number* y, const Ark_Number* radius, const Ark_Number* startAngle, const Ark_Number* endAngle, const Opt_Boolean* counterclockwise)
+void ArcImpl(CanvasPathPeer* peer,
+             const Ark_Number* x,
+             const Ark_Number* y,
+             const Ark_Number* radius,
+             const Ark_Number* startAngle,
+             const Ark_Number* endAngle,
+             const Opt_Boolean* counterclockwise)
 {
 }
-void ArcToImpl(CanvasPathPeer* peer, const Ark_Number* x1, const Ark_Number* y1, const Ark_Number* x2, const Ark_Number* y2, const Ark_Number* radius)
+void ArcToImpl(CanvasPathPeer* peer,
+               const Ark_Number* x1,
+               const Ark_Number* y1,
+               const Ark_Number* x2,
+               const Ark_Number* y2,
+               const Ark_Number* radius)
 {
 }
-void BezierCurveToImpl(CanvasPathPeer* peer, const Ark_Number* cp1x, const Ark_Number* cp1y, const Ark_Number* cp2x, const Ark_Number* cp2y, const Ark_Number* x, const Ark_Number* y)
+void BezierCurveToImpl(CanvasPathPeer* peer,
+                       const Ark_Number* cp1x,
+                       const Ark_Number* cp1y,
+                       const Ark_Number* cp2x,
+                       const Ark_Number* cp2y,
+                       const Ark_Number* x,
+                       const Ark_Number* y)
 {
 }
 void ClosePathImpl(CanvasPathPeer* peer)
 {
 }
-void EllipseImpl(CanvasPathPeer* peer, const Ark_Number* x, const Ark_Number* y, const Ark_Number* radiusX, const Ark_Number* radiusY, const Ark_Number* rotation, const Ark_Number* startAngle, const Ark_Number* endAngle, const Opt_Boolean* counterclockwise)
+void EllipseImpl(CanvasPathPeer* peer,
+                 const Ark_Number* x,
+                 const Ark_Number* y,
+                 const Ark_Number* radiusX,
+                 const Ark_Number* radiusY,
+                 const Ark_Number* rotation,
+                 const Ark_Number* startAngle,
+                 const Ark_Number* endAngle,
+                 const Opt_Boolean* counterclockwise)
 {
 }
-void LineToImpl(CanvasPathPeer* peer, const Ark_Number* x, const Ark_Number* y)
+void LineToImpl(CanvasPathPeer* peer,
+                const Ark_Number* x,
+                const Ark_Number* y)
 {
 }
-void MoveToImpl(CanvasPathPeer* peer, const Ark_Number* x, const Ark_Number* y)
+void MoveToImpl(CanvasPathPeer* peer,
+                const Ark_Number* x,
+                const Ark_Number* y)
 {
 }
-void QuadraticCurveToImpl(CanvasPathPeer* peer, const Ark_Number* cpx, const Ark_Number* cpy, const Ark_Number* x, const Ark_Number* y)
+void QuadraticCurveToImpl(CanvasPathPeer* peer,
+                          const Ark_Number* cpx,
+                          const Ark_Number* cpy,
+                          const Ark_Number* x,
+                          const Ark_Number* y)
 {
 }
-void RectImpl(CanvasPathPeer* peer, const Ark_Number* x, const Ark_Number* y, const Ark_Number* w, const Ark_Number* h)
+void RectImpl(CanvasPathPeer* peer,
+              const Ark_Number* x,
+              const Ark_Number* y,
+              const Ark_Number* w,
+              const Ark_Number* h)
 {
 }
 } // CanvasPathModifier

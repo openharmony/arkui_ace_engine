@@ -32,7 +32,8 @@ Ark_Boolean IsEditingImpl(TextEditControllerExPeer* peer)
 void StopEditingImpl(TextEditControllerExPeer* peer)
 {
 }
-Ark_Boolean SetCaretOffsetImpl(TextEditControllerExPeer* peer, const Ark_Number* offset)
+Ark_Boolean SetCaretOffsetImpl(TextEditControllerExPeer* peer,
+                               const Ark_Number* offset)
 {
     return 0;
 }

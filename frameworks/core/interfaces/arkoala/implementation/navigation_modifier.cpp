@@ -20,78 +20,105 @@ namespace NavigationInterfaceModifier {
 void _setNavigationOptions0Impl(Ark_NativePointer node)
 {
 }
-void _setNavigationOptions1Impl(Ark_NativePointer node, const Ark_Materialized* pathInfos)
+void _setNavigationOptions1Impl(Ark_NativePointer node,
+                                const Ark_Materialized* pathInfos)
 {
 }
 } // NavigationInterfaceModifier
 namespace NavigationAttributeModifier {
-void NavBarWidthImpl(Ark_NativePointer node, const Ark_Length* value)
+void NavBarWidthImpl(Ark_NativePointer node,
+                     const Ark_Length* value)
 {
 }
-void NavBarPositionImpl(Ark_NativePointer node, Ark_Int32 value)
+void NavBarPositionImpl(Ark_NativePointer node,
+                        Ark_Int32 value)
 {
 }
-void NavBarWidthRangeImpl(Ark_NativePointer node, const Type_NavigationAttribute_navBarWidthRange_Arg0* value)
+void NavBarWidthRangeImpl(Ark_NativePointer node,
+                          const Type_NavigationAttribute_navBarWidthRange_Arg0* value)
 {
 }
-void MinContentWidthImpl(Ark_NativePointer node, const Ark_Length* value)
+void MinContentWidthImpl(Ark_NativePointer node,
+                         const Ark_Length* value)
 {
 }
-void ModeImpl(Ark_NativePointer node, Ark_Int32 value)
+void ModeImpl(Ark_NativePointer node,
+              Ark_Int32 value)
 {
 }
-void BackButtonIconImpl(Ark_NativePointer node, const Type_NavigationAttribute_backButtonIcon_Arg0* value)
+void BackButtonIconImpl(Ark_NativePointer node,
+                        const Type_NavigationAttribute_backButtonIcon_Arg0* value)
 {
 }
-void HideNavBarImpl(Ark_NativePointer node, Ark_Boolean value)
+void HideNavBarImpl(Ark_NativePointer node,
+                    Ark_Boolean value)
 {
 }
-void TitleImpl(Ark_NativePointer node, const Type_NavigationAttribute_title_Arg0* value, const Opt_NavigationTitleOptions* options)
+void TitleImpl(Ark_NativePointer node,
+               const Type_NavigationAttribute_title_Arg0* value,
+               const Opt_NavigationTitleOptions* options)
 {
 }
-void SubTitleImpl(Ark_NativePointer node, const Ark_String* value)
+void SubTitleImpl(Ark_NativePointer node,
+                  const Ark_String* value)
 {
 }
-void HideTitleBarImpl(Ark_NativePointer node, Ark_Boolean value)
+void HideTitleBarImpl(Ark_NativePointer node,
+                      Ark_Boolean value)
 {
 }
-void HideBackButtonImpl(Ark_NativePointer node, Ark_Boolean value)
+void HideBackButtonImpl(Ark_NativePointer node,
+                        Ark_Boolean value)
 {
 }
-void TitleModeImpl(Ark_NativePointer node, Ark_Int32 value)
+void TitleModeImpl(Ark_NativePointer node,
+                   Ark_Int32 value)
 {
 }
-void MenusImpl(Ark_NativePointer node, const Type_NavigationAttribute_menus_Arg0* value)
+void MenusImpl(Ark_NativePointer node,
+               const Type_NavigationAttribute_menus_Arg0* value)
 {
 }
-void ToolBarImpl(Ark_NativePointer node, const Type_NavigationAttribute_toolBar_Arg0* value)
+void ToolBarImpl(Ark_NativePointer node,
+                 const Type_NavigationAttribute_toolBar_Arg0* value)
 {
 }
-void ToolbarConfigurationImpl(Ark_NativePointer node, const Type_NavigationAttribute_toolbarConfiguration_Arg0* value, const Opt_NavigationToolbarOptions* options)
+void ToolbarConfigurationImpl(Ark_NativePointer node,
+                              const Type_NavigationAttribute_toolbarConfiguration_Arg0* value,
+                              const Opt_NavigationToolbarOptions* options)
 {
 }
-void HideToolBarImpl(Ark_NativePointer node, Ark_Boolean value)
+void HideToolBarImpl(Ark_NativePointer node,
+                     Ark_Boolean value)
 {
 }
-void OnTitleModeChangeImpl(Ark_NativePointer node, Ark_Function callback)
+void OnTitleModeChangeImpl(Ark_NativePointer node,
+                           Ark_Function callback)
 {
 }
-void OnNavBarStateChangeImpl(Ark_NativePointer node, Ark_Function callback)
+void OnNavBarStateChangeImpl(Ark_NativePointer node,
+                             Ark_Function callback)
 {
 }
-void OnNavigationModeChangeImpl(Ark_NativePointer node, Ark_Function callback)
+void OnNavigationModeChangeImpl(Ark_NativePointer node,
+                                Ark_Function callback)
 {
 }
-void NavDestinationImpl(Ark_NativePointer node, Ark_Function builder)
+void NavDestinationImpl(Ark_NativePointer node,
+                        Ark_Function builder)
 {
 }
-void CustomNavContentTransitionImpl(Ark_NativePointer node, Ark_Function delegate)
+void CustomNavContentTransitionImpl(Ark_NativePointer node,
+                                    Ark_Function delegate)
 {
 }
-void IgnoreLayoutSafeAreaImpl(Ark_NativePointer node, const Opt_Array_LayoutSafeAreaType* types, const Opt_Array_LayoutSafeAreaEdge* edges)
+void IgnoreLayoutSafeAreaImpl(Ark_NativePointer node,
+                              const Opt_Array_LayoutSafeAreaType* types,
+                              const Opt_Array_LayoutSafeAreaEdge* edges)
 {
 }
-void SystemBarStyleImpl(Ark_NativePointer node, const Opt_CustomObject* style)
+void SystemBarStyleImpl(Ark_NativePointer node,
+                        const Opt_CustomObject* style)
 {
 }
 } // NavigationAttributeModifier

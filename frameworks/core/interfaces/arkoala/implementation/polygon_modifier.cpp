@@ -17,12 +17,14 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PolygonInterfaceModifier {
-void _setPolygonOptionsImpl(Ark_NativePointer node, const Opt_Type_PolygonInterface__setPolygonOptions_Arg0* value)
+void _setPolygonOptionsImpl(Ark_NativePointer node,
+                            const Opt_Type_PolygonInterface__setPolygonOptions_Arg0* value)
 {
 }
 } // PolygonInterfaceModifier
 namespace PolygonAttributeModifier {
-void PointsImpl(Ark_NativePointer node, const Array_CustomObject* value)
+void PointsImpl(Ark_NativePointer node,
+                const Array_CustomObject* value)
 {
 }
 } // PolygonAttributeModifier

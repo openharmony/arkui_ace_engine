@@ -28,7 +28,8 @@ Ark_NativePointer GetFinalizerImpl()
 void GetOriginImpl(ScreenCaptureHandlerPeer* peer)
 {
 }
-void GrantImpl(ScreenCaptureHandlerPeer* peer, const Ark_ScreenCaptureConfig* config)
+void GrantImpl(ScreenCaptureHandlerPeer* peer,
+               const Ark_ScreenCaptureConfig* config)
 {
 }
 void DenyImpl(ScreenCaptureHandlerPeer* peer)

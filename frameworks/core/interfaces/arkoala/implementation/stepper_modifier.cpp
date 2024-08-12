@@ -17,24 +17,30 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace StepperInterfaceModifier {
-void _setStepperOptionsImpl(Ark_NativePointer node, const Opt_Type_StepperInterface__setStepperOptions_Arg0* value)
+void _setStepperOptionsImpl(Ark_NativePointer node,
+                            const Opt_Type_StepperInterface__setStepperOptions_Arg0* value)
 {
 }
 } // StepperInterfaceModifier
 namespace StepperAttributeModifier {
-void OnFinishImpl(Ark_NativePointer node, Ark_Function callback)
+void OnFinishImpl(Ark_NativePointer node,
+                  Ark_Function callback)
 {
 }
-void OnSkipImpl(Ark_NativePointer node, Ark_Function callback)
+void OnSkipImpl(Ark_NativePointer node,
+                Ark_Function callback)
 {
 }
-void OnChangeImpl(Ark_NativePointer node, Ark_Function callback)
+void OnChangeImpl(Ark_NativePointer node,
+                  Ark_Function callback)
 {
 }
-void OnNextImpl(Ark_NativePointer node, Ark_Function callback)
+void OnNextImpl(Ark_NativePointer node,
+                Ark_Function callback)
 {
 }
-void OnPreviousImpl(Ark_NativePointer node, Ark_Function callback)
+void OnPreviousImpl(Ark_NativePointer node,
+                    Ark_Function callback)
 {
 }
 } // StepperAttributeModifier

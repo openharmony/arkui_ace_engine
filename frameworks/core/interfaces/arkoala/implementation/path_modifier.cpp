@@ -17,12 +17,14 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PathInterfaceModifier {
-void _setPathOptionsImpl(Ark_NativePointer node, const Opt_Type_PathInterface__setPathOptions_Arg0* value)
+void _setPathOptionsImpl(Ark_NativePointer node,
+                         const Opt_Type_PathInterface__setPathOptions_Arg0* value)
 {
 }
 } // PathInterfaceModifier
 namespace PathAttributeModifier {
-void CommandsImpl(Ark_NativePointer node, const Ark_String* value)
+void CommandsImpl(Ark_NativePointer node,
+                  const Ark_String* value)
 {
 }
 } // PathAttributeModifier

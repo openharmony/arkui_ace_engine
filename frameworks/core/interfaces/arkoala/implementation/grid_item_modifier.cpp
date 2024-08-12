@@ -17,33 +17,42 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GridItemInterfaceModifier {
-void _setGridItemOptionsImpl(Ark_NativePointer node, const Opt_GridItemOptions* value)
+void _setGridItemOptionsImpl(Ark_NativePointer node,
+                             const Opt_GridItemOptions* value)
 {
 }
 } // GridItemInterfaceModifier
 namespace GridItemAttributeModifier {
-void RowStartImpl(Ark_NativePointer node, const Ark_Number* value)
+void RowStartImpl(Ark_NativePointer node,
+                  const Ark_Number* value)
 {
 }
-void RowEndImpl(Ark_NativePointer node, const Ark_Number* value)
+void RowEndImpl(Ark_NativePointer node,
+                const Ark_Number* value)
 {
 }
-void ColumnStartImpl(Ark_NativePointer node, const Ark_Number* value)
+void ColumnStartImpl(Ark_NativePointer node,
+                     const Ark_Number* value)
 {
 }
-void ColumnEndImpl(Ark_NativePointer node, const Ark_Number* value)
+void ColumnEndImpl(Ark_NativePointer node,
+                   const Ark_Number* value)
 {
 }
-void ForceRebuildImpl(Ark_NativePointer node, Ark_Boolean value)
+void ForceRebuildImpl(Ark_NativePointer node,
+                      Ark_Boolean value)
 {
 }
-void SelectableImpl(Ark_NativePointer node, Ark_Boolean value)
+void SelectableImpl(Ark_NativePointer node,
+                    Ark_Boolean value)
 {
 }
-void SelectedImpl(Ark_NativePointer node, Ark_Boolean value)
+void SelectedImpl(Ark_NativePointer node,
+                  Ark_Boolean value)
 {
 }
-void OnSelectImpl(Ark_NativePointer node, Ark_Function event)
+void OnSelectImpl(Ark_NativePointer node,
+                  Ark_Function event)
 {
 }
 } // GridItemAttributeModifier

@@ -20,15 +20,18 @@ namespace NavRouterInterfaceModifier {
 void _setNavRouterOptions0Impl(Ark_NativePointer node)
 {
 }
-void _setNavRouterOptions1Impl(Ark_NativePointer node, const Ark_RouteInfo* value)
+void _setNavRouterOptions1Impl(Ark_NativePointer node,
+                               const Ark_RouteInfo* value)
 {
 }
 } // NavRouterInterfaceModifier
 namespace NavRouterAttributeModifier {
-void OnStateChangeImpl(Ark_NativePointer node, Ark_Function callback)
+void OnStateChangeImpl(Ark_NativePointer node,
+                       Ark_Function callback)
 {
 }
-void ModeImpl(Ark_NativePointer node, Ark_Int32 mode)
+void ModeImpl(Ark_NativePointer node,
+              Ark_Int32 mode)
 {
 }
 } // NavRouterAttributeModifier

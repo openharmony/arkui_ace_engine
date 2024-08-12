@@ -25,10 +25,13 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return 0;
 }
-void SetProgressImpl(LinearIndicatorControllerPeer* peer, const Ark_Number* index, const Ark_Number* progress)
+void SetProgressImpl(LinearIndicatorControllerPeer* peer,
+                     const Ark_Number* index,
+                     const Ark_Number* progress)
 {
 }
-void StartImpl(LinearIndicatorControllerPeer* peer, const Opt_LinearIndicatorStartOptions* options)
+void StartImpl(LinearIndicatorControllerPeer* peer,
+               const Opt_LinearIndicatorStartOptions* options)
 {
 }
 void PauseImpl(LinearIndicatorControllerPeer* peer)

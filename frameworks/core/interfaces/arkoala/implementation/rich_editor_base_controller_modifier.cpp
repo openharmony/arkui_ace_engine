@@ -29,7 +29,8 @@ Ark_Int32 GetCaretOffsetImpl(RichEditorBaseControllerPeer* peer)
 {
     return 0;
 }
-Ark_Boolean SetCaretOffsetImpl(RichEditorBaseControllerPeer* peer, const Ark_Number* offset)
+Ark_Boolean SetCaretOffsetImpl(RichEditorBaseControllerPeer* peer,
+                               const Ark_Number* offset)
 {
     return 0;
 }
@@ -40,10 +41,14 @@ Ark_NativePointer GetTypingStyleImpl(RichEditorBaseControllerPeer* peer)
 {
     return 0;
 }
-void SetTypingStyleImpl(RichEditorBaseControllerPeer* peer, const Ark_RichEditorTextStyle* value)
+void SetTypingStyleImpl(RichEditorBaseControllerPeer* peer,
+                        const Ark_RichEditorTextStyle* value)
 {
 }
-void SetSelectionImpl(RichEditorBaseControllerPeer* peer, const Ark_Number* selectionStart, const Ark_Number* selectionEnd, const Opt_SelectionOptions* options)
+void SetSelectionImpl(RichEditorBaseControllerPeer* peer,
+                      const Ark_Number* selectionStart,
+                      const Ark_Number* selectionEnd,
+                      const Opt_SelectionOptions* options)
 {
 }
 Ark_Boolean IsEditingImpl(RichEditorBaseControllerPeer* peer)

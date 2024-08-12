@@ -25,7 +25,8 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return 0;
 }
-void ApplyGestureImpl(GestureModifierPeer* peer, const Ark_UIGestureEvent* event)
+void ApplyGestureImpl(GestureModifierPeer* peer,
+                      const Ark_UIGestureEvent* event)
 {
 }
 } // GestureModifierModifier

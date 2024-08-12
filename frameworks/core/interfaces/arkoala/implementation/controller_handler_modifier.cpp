@@ -25,7 +25,8 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return 0;
 }
-void SetWebControllerImpl(ControllerHandlerPeer* peer, const Ark_CustomObject* controller)
+void SetWebControllerImpl(ControllerHandlerPeer* peer,
+                          const Ark_CustomObject* controller)
 {
 }
 } // ControllerHandlerModifier

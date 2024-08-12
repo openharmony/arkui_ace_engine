@@ -45,25 +45,32 @@ Ark_Int32 GetResponseCodeImpl(WebResourceResponsePeer* peer)
 {
     return 0;
 }
-void SetResponseDataImpl(WebResourceResponsePeer* peer, const Union_String_Number_Resource_ArrayBuffer* data)
+void SetResponseDataImpl(WebResourceResponsePeer* peer,
+                         const Union_String_Number_Resource_ArrayBuffer* data)
 {
 }
-void SetResponseEncodingImpl(WebResourceResponsePeer* peer, const Ark_String* encoding)
+void SetResponseEncodingImpl(WebResourceResponsePeer* peer,
+                             const Ark_String* encoding)
 {
 }
-void SetResponseMimeTypeImpl(WebResourceResponsePeer* peer, const Ark_String* mimeType)
+void SetResponseMimeTypeImpl(WebResourceResponsePeer* peer,
+                             const Ark_String* mimeType)
 {
 }
-void SetReasonMessageImpl(WebResourceResponsePeer* peer, const Ark_String* reason)
+void SetReasonMessageImpl(WebResourceResponsePeer* peer,
+                          const Ark_String* reason)
 {
 }
-void SetResponseHeaderImpl(WebResourceResponsePeer* peer, const Array_Header* header)
+void SetResponseHeaderImpl(WebResourceResponsePeer* peer,
+                           const Array_Header* header)
 {
 }
-void SetResponseCodeImpl(WebResourceResponsePeer* peer, const Ark_Number* code)
+void SetResponseCodeImpl(WebResourceResponsePeer* peer,
+                         const Ark_Number* code)
 {
 }
-void SetResponseIsReadyImpl(WebResourceResponsePeer* peer, Ark_Boolean IsReady)
+void SetResponseIsReadyImpl(WebResourceResponsePeer* peer,
+                            Ark_Boolean IsReady)
 {
 }
 } // WebResourceResponseModifier

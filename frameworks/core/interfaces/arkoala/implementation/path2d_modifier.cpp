@@ -25,7 +25,9 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return 0;
 }
-void AddPathImpl(Path2DPeer* peer, const Ark_Materialized* path, const Opt_Matrix2D* transform)
+void AddPathImpl(Path2DPeer* peer,
+                 const Ark_Materialized* path,
+                 const Opt_Matrix2D* transform)
 {
 }
 } // Path2DModifier

@@ -22,10 +22,12 @@ void _setColumnSplitOptionsImpl(Ark_NativePointer node)
 }
 } // ColumnSplitInterfaceModifier
 namespace ColumnSplitAttributeModifier {
-void ResizeableImpl(Ark_NativePointer node, Ark_Boolean value)
+void ResizeableImpl(Ark_NativePointer node,
+                    Ark_Boolean value)
 {
 }
-void DividerImpl(Ark_NativePointer node, const Type_ColumnSplitAttribute_divider_Arg0* value)
+void DividerImpl(Ark_NativePointer node,
+                 const Type_ColumnSplitAttribute_divider_Arg0* value)
 {
 }
 } // ColumnSplitAttributeModifier

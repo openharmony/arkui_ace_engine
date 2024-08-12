@@ -25,10 +25,13 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return 0;
 }
-void Confirm0Impl(ClientAuthenticationHandlerPeer* peer, const Ark_String* priKeyFile, const Ark_String* certChainFile)
+void Confirm0Impl(ClientAuthenticationHandlerPeer* peer,
+                  const Ark_String* priKeyFile,
+                  const Ark_String* certChainFile)
 {
 }
-void Confirm1Impl(ClientAuthenticationHandlerPeer* peer, const Ark_String* authUri)
+void Confirm1Impl(ClientAuthenticationHandlerPeer* peer,
+                  const Ark_String* authUri)
 {
 }
 void CancelImpl(ClientAuthenticationHandlerPeer* peer)

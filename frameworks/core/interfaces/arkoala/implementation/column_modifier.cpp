@@ -22,7 +22,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ColumnInterfaceModifier {
-void _setColumnOptionsImpl(Ark_NativePointer node, const Opt_Type_ColumnInterface__setColumnOptions_Arg0* value)
+void _setColumnOptionsImpl(Ark_NativePointer node,
+                           const Opt_Type_ColumnInterface__setColumnOptions_Arg0* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     std::tuple<Ark_Float32, Ark_Int32> space = Converter::ConvertOrDefault(
@@ -31,7 +32,8 @@ void _setColumnOptionsImpl(Ark_NativePointer node, const Opt_Type_ColumnInterfac
 }
 } // ColumnInterfaceModifier
 namespace ColumnAttributeModifier {
-void AlignItemsImpl(Ark_NativePointer node, Ark_Int32 value)
+void AlignItemsImpl(Ark_NativePointer node,
+                    Ark_Int32 value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     if ((value == static_cast<int32_t>(FlexAlign::FLEX_START)) ||
@@ -46,13 +48,15 @@ void AlignItemsImpl(Ark_NativePointer node, Ark_Int32 value)
     ColumnModelNG::SetAlignItems(frameNode, value_flexAlign);
 }
 
-void JustifyContentImpl(Ark_NativePointer node, Ark_Int32 value)
+void JustifyContentImpl(Ark_NativePointer node,
+                        Ark_Int32 value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     ColumnModelNG::SetJustifyContent(frameNode, static_cast<FlexAlign>(value));
 }
 
-void PointLightImpl(Ark_NativePointer node, const Ark_PointLightStyle* value)
+void PointLightImpl(Ark_NativePointer node,
+                    const Ark_PointLightStyle* value)
 {
     LOGE("ARKOALA ColumnAttribute_PointLightImpl -> Method is not FULLY "
         "implemented.");

@@ -17,105 +17,140 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GridInterfaceModifier {
-void _setGridOptionsImpl(Ark_NativePointer node, const Opt_Scroller* scroller, const Opt_GridLayoutOptions* layoutOptions)
+void _setGridOptionsImpl(Ark_NativePointer node,
+                         const Opt_Scroller* scroller,
+                         const Opt_GridLayoutOptions* layoutOptions)
 {
 }
 } // GridInterfaceModifier
 namespace GridAttributeModifier {
-void ColumnsTemplateImpl(Ark_NativePointer node, const Ark_String* value)
+void ColumnsTemplateImpl(Ark_NativePointer node,
+                         const Ark_String* value)
 {
 }
-void RowsTemplateImpl(Ark_NativePointer node, const Ark_String* value)
+void RowsTemplateImpl(Ark_NativePointer node,
+                      const Ark_String* value)
 {
 }
-void ColumnsGapImpl(Ark_NativePointer node, const Ark_Length* value)
+void ColumnsGapImpl(Ark_NativePointer node,
+                    const Ark_Length* value)
 {
 }
-void RowsGapImpl(Ark_NativePointer node, const Ark_Length* value)
+void RowsGapImpl(Ark_NativePointer node,
+                 const Ark_Length* value)
 {
 }
-void ScrollBarWidthImpl(Ark_NativePointer node, const Type_GridAttribute_scrollBarWidth_Arg0* value)
+void ScrollBarWidthImpl(Ark_NativePointer node,
+                        const Type_GridAttribute_scrollBarWidth_Arg0* value)
 {
 }
-void ScrollBarColorImpl(Ark_NativePointer node, const Type_GridAttribute_scrollBarColor_Arg0* value)
+void ScrollBarColorImpl(Ark_NativePointer node,
+                        const Type_GridAttribute_scrollBarColor_Arg0* value)
 {
 }
-void ScrollBarImpl(Ark_NativePointer node, Ark_Int32 value)
+void ScrollBarImpl(Ark_NativePointer node,
+                   Ark_Int32 value)
 {
 }
-void OnScrollBarUpdateImpl(Ark_NativePointer node, Ark_Function event)
+void OnScrollBarUpdateImpl(Ark_NativePointer node,
+                           Ark_Function event)
 {
 }
-void OnScrollIndexImpl(Ark_NativePointer node, Ark_Function event)
+void OnScrollIndexImpl(Ark_NativePointer node,
+                       Ark_Function event)
 {
 }
-void CachedCountImpl(Ark_NativePointer node, const Ark_Number* value)
+void CachedCountImpl(Ark_NativePointer node,
+                     const Ark_Number* value)
 {
 }
-void EditModeImpl(Ark_NativePointer node, Ark_Boolean value)
+void EditModeImpl(Ark_NativePointer node,
+                  Ark_Boolean value)
 {
 }
-void MultiSelectableImpl(Ark_NativePointer node, Ark_Boolean value)
+void MultiSelectableImpl(Ark_NativePointer node,
+                         Ark_Boolean value)
 {
 }
-void MaxCountImpl(Ark_NativePointer node, const Ark_Number* value)
+void MaxCountImpl(Ark_NativePointer node,
+                  const Ark_Number* value)
 {
 }
-void MinCountImpl(Ark_NativePointer node, const Ark_Number* value)
+void MinCountImpl(Ark_NativePointer node,
+                  const Ark_Number* value)
 {
 }
-void CellLengthImpl(Ark_NativePointer node, const Ark_Number* value)
+void CellLengthImpl(Ark_NativePointer node,
+                    const Ark_Number* value)
 {
 }
-void LayoutDirectionImpl(Ark_NativePointer node, Ark_Int32 value)
+void LayoutDirectionImpl(Ark_NativePointer node,
+                         Ark_Int32 value)
 {
 }
-void SupportAnimationImpl(Ark_NativePointer node, Ark_Boolean value)
+void SupportAnimationImpl(Ark_NativePointer node,
+                          Ark_Boolean value)
 {
 }
-void OnItemDragStartImpl(Ark_NativePointer node, Ark_Function event)
+void OnItemDragStartImpl(Ark_NativePointer node,
+                         Ark_Function event)
 {
 }
-void OnItemDragEnterImpl(Ark_NativePointer node, Ark_Function event)
+void OnItemDragEnterImpl(Ark_NativePointer node,
+                         Ark_Function event)
 {
 }
-void OnItemDragMoveImpl(Ark_NativePointer node, Ark_Function event)
+void OnItemDragMoveImpl(Ark_NativePointer node,
+                        Ark_Function event)
 {
 }
-void OnItemDragLeaveImpl(Ark_NativePointer node, Ark_Function event)
+void OnItemDragLeaveImpl(Ark_NativePointer node,
+                         Ark_Function event)
 {
 }
-void OnItemDropImpl(Ark_NativePointer node, Ark_Function event)
+void OnItemDropImpl(Ark_NativePointer node,
+                    Ark_Function event)
 {
 }
-void EdgeEffectImpl(Ark_NativePointer node, Ark_Int32 value, const Opt_EdgeEffectOptions* options)
+void EdgeEffectImpl(Ark_NativePointer node,
+                    Ark_Int32 value,
+                    const Opt_EdgeEffectOptions* options)
 {
 }
-void NestedScrollImpl(Ark_NativePointer node, const Ark_NestedScrollOptions* value)
+void NestedScrollImpl(Ark_NativePointer node,
+                      const Ark_NestedScrollOptions* value)
 {
 }
-void EnableScrollInteractionImpl(Ark_NativePointer node, Ark_Boolean value)
+void EnableScrollInteractionImpl(Ark_NativePointer node,
+                                 Ark_Boolean value)
 {
 }
-void FrictionImpl(Ark_NativePointer node, const Type_GridAttribute_friction_Arg0* value)
+void FrictionImpl(Ark_NativePointer node,
+                  const Type_GridAttribute_friction_Arg0* value)
 {
 }
-void OnScrollImpl(Ark_NativePointer node, Ark_Function event)
+void OnScrollImpl(Ark_NativePointer node,
+                  Ark_Function event)
 {
 }
-void OnReachStartImpl(Ark_NativePointer node, Ark_Function event)
+void OnReachStartImpl(Ark_NativePointer node,
+                      Ark_Function event)
 {
 }
-void OnReachEndImpl(Ark_NativePointer node, Ark_Function event)
+void OnReachEndImpl(Ark_NativePointer node,
+                    Ark_Function event)
 {
 }
-void OnScrollStartImpl(Ark_NativePointer node, Ark_Function event)
+void OnScrollStartImpl(Ark_NativePointer node,
+                       Ark_Function event)
 {
 }
-void OnScrollStopImpl(Ark_NativePointer node, Ark_Function event)
+void OnScrollStopImpl(Ark_NativePointer node,
+                      Ark_Function event)
 {
 }
-void OnScrollFrameBeginImpl(Ark_NativePointer node, Ark_Function event)
+void OnScrollFrameBeginImpl(Ark_NativePointer node,
+                            Ark_Function event)
 {
 }
 } // GridAttributeModifier

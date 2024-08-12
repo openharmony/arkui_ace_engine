@@ -17,7 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NodeContainerInterfaceModifier {
-void _setNodeContainerOptionsImpl(Ark_NativePointer node, const Ark_CustomObject* controller)
+void _setNodeContainerOptionsImpl(Ark_NativePointer node,
+                                  const Ark_CustomObject* controller)
 {
 }
 } // NodeContainerInterfaceModifier

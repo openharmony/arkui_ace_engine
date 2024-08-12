@@ -17,15 +17,19 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace EmbeddedComponentInterfaceModifier {
-void _setEmbeddedComponentOptionsImpl(Ark_NativePointer node, const Ark_CustomObject* loader, Ark_Int32 type)
+void _setEmbeddedComponentOptionsImpl(Ark_NativePointer node,
+                                      const Ark_CustomObject* loader,
+                                      Ark_Int32 type)
 {
 }
 } // EmbeddedComponentInterfaceModifier
 namespace EmbeddedComponentAttributeModifier {
-void OnTerminatedImpl(Ark_NativePointer node, Ark_Function callback)
+void OnTerminatedImpl(Ark_NativePointer node,
+                      Ark_Function callback)
 {
 }
-void OnErrorImpl(Ark_NativePointer node, const Ark_CustomObject* callback)
+void OnErrorImpl(Ark_NativePointer node,
+                 const Ark_CustomObject* callback)
 {
 }
 } // EmbeddedComponentAttributeModifier

@@ -17,7 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace EllipseInterfaceModifier {
-void _setEllipseOptionsImpl(Ark_NativePointer node, const Opt_Type_EllipseInterface__setEllipseOptions_Arg0* value)
+void _setEllipseOptionsImpl(Ark_NativePointer node,
+                            const Opt_Type_EllipseInterface__setEllipseOptions_Arg0* value)
 {
 }
 } // EllipseInterfaceModifier

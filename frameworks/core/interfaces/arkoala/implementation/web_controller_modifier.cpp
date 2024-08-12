@@ -31,19 +31,23 @@ void OnInactiveImpl(WebControllerPeer* peer)
 void OnActiveImpl(WebControllerPeer* peer)
 {
 }
-void ZoomImpl(WebControllerPeer* peer, const Ark_Number* factor)
+void ZoomImpl(WebControllerPeer* peer,
+              const Ark_Number* factor)
 {
 }
 void ClearHistoryImpl(WebControllerPeer* peer)
 {
 }
-void RunJavaScriptImpl(WebControllerPeer* peer, const Literal_String_script_Opt_Function_callback* options)
+void RunJavaScriptImpl(WebControllerPeer* peer,
+                       const Literal_String_script_Opt_Function_callback* options)
 {
 }
-void LoadDataImpl(WebControllerPeer* peer, const Literal_String_data_mimeType_encoding_Opt_String_baseUrl_historyUrl* options)
+void LoadDataImpl(WebControllerPeer* peer,
+                  const Literal_String_data_mimeType_encoding_Opt_String_baseUrl_historyUrl* options)
 {
 }
-void LoadUrlImpl(WebControllerPeer* peer, const Literal_Union_String_Resource_url_Opt_Array_Header_headers* options)
+void LoadUrlImpl(WebControllerPeer* peer,
+                 const Literal_Union_String_Resource_url_Opt_Array_Header_headers* options)
 {
 }
 void RefreshImpl(WebControllerPeer* peer)
@@ -52,10 +56,12 @@ void RefreshImpl(WebControllerPeer* peer)
 void StopImpl(WebControllerPeer* peer)
 {
 }
-void RegisterJavaScriptProxyImpl(WebControllerPeer* peer, const Literal_CustomObject_object_String_name_Array_String_methodList* options)
+void RegisterJavaScriptProxyImpl(WebControllerPeer* peer,
+                                 const Literal_CustomObject_object_String_name_Array_String_methodList* options)
 {
 }
-void DeleteJavaScriptRegisterImpl(WebControllerPeer* peer, const Ark_String* name)
+void DeleteJavaScriptRegisterImpl(WebControllerPeer* peer,
+                                  const Ark_String* name)
 {
 }
 Ark_NativePointer GetHitTestImpl(WebControllerPeer* peer)
@@ -73,7 +79,8 @@ Ark_Boolean AccessForwardImpl(WebControllerPeer* peer)
 {
     return 0;
 }
-Ark_Boolean AccessStepImpl(WebControllerPeer* peer, const Ark_Number* step)
+Ark_Boolean AccessStepImpl(WebControllerPeer* peer,
+                           const Ark_Number* step)
 {
     return 0;
 }

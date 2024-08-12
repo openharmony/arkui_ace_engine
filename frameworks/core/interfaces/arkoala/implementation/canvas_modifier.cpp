@@ -17,18 +17,23 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasInterfaceModifier {
-void _setCanvasOptions0Impl(Ark_NativePointer node, const Opt_Type_CanvasInterface__setCanvasOptions_Arg0* context)
+void _setCanvasOptions0Impl(Ark_NativePointer node,
+                            const Opt_Type_CanvasInterface__setCanvasOptions_Arg0* context)
 {
 }
-void _setCanvasOptions1Impl(Ark_NativePointer node, const Type_CanvasInterface__setCanvasOptions1_Arg0* context, const Ark_ImageAIOptions* imageAIOptions)
+void _setCanvasOptions1Impl(Ark_NativePointer node,
+                            const Type_CanvasInterface__setCanvasOptions1_Arg0* context,
+                            const Ark_ImageAIOptions* imageAIOptions)
 {
 }
 } // CanvasInterfaceModifier
 namespace CanvasAttributeModifier {
-void OnReadyImpl(Ark_NativePointer node, Ark_Function event)
+void OnReadyImpl(Ark_NativePointer node,
+                 Ark_Function event)
 {
 }
-void EnableAnalyzerImpl(Ark_NativePointer node, Ark_Boolean enable)
+void EnableAnalyzerImpl(Ark_NativePointer node,
+                        Ark_Boolean enable)
 {
 }
 } // CanvasAttributeModifier

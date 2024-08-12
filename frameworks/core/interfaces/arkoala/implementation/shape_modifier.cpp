@@ -17,7 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ShapeInterfaceModifier {
-void _setShapeOptions0Impl(Ark_NativePointer node, const Ark_CustomObject* value)
+void _setShapeOptions0Impl(Ark_NativePointer node,
+                           const Ark_CustomObject* value)
 {
 }
 void _setShapeOptions1Impl(Ark_NativePointer node)
@@ -25,43 +26,58 @@ void _setShapeOptions1Impl(Ark_NativePointer node)
 }
 } // ShapeInterfaceModifier
 namespace ShapeAttributeModifier {
-void ViewPortImpl(Ark_NativePointer node, const Type_ShapeAttribute_viewPort_Arg0* value)
+void ViewPortImpl(Ark_NativePointer node,
+                  const Type_ShapeAttribute_viewPort_Arg0* value)
 {
 }
-void StrokeImpl(Ark_NativePointer node, const ResourceColor* value)
+void StrokeImpl(Ark_NativePointer node,
+                const ResourceColor* value)
 {
 }
-void FillImpl(Ark_NativePointer node, const ResourceColor* value)
+void FillImpl(Ark_NativePointer node,
+              const ResourceColor* value)
 {
 }
-void StrokeDashOffsetImpl(Ark_NativePointer node, const Type_ShapeAttribute_strokeDashOffset_Arg0* value)
+void StrokeDashOffsetImpl(Ark_NativePointer node,
+                          const Type_ShapeAttribute_strokeDashOffset_Arg0* value)
 {
 }
-void StrokeDashArrayImpl(Ark_NativePointer node, const Array_CustomObject* value)
+void StrokeDashArrayImpl(Ark_NativePointer node,
+                         const Array_CustomObject* value)
 {
 }
-void StrokeLineCapImpl(Ark_NativePointer node, Ark_Int32 value)
+void StrokeLineCapImpl(Ark_NativePointer node,
+                       Ark_Int32 value)
 {
 }
-void StrokeLineJoinImpl(Ark_NativePointer node, Ark_Int32 value)
+void StrokeLineJoinImpl(Ark_NativePointer node,
+                        Ark_Int32 value)
 {
 }
-void StrokeMiterLimitImpl(Ark_NativePointer node, const Type_ShapeAttribute_strokeMiterLimit_Arg0* value)
+void StrokeMiterLimitImpl(Ark_NativePointer node,
+                          const Type_ShapeAttribute_strokeMiterLimit_Arg0* value)
 {
 }
-void StrokeOpacityImpl(Ark_NativePointer node, const Type_ShapeAttribute_strokeOpacity_Arg0* value)
+void StrokeOpacityImpl(Ark_NativePointer node,
+                       const Type_ShapeAttribute_strokeOpacity_Arg0* value)
 {
 }
-void FillOpacityImpl(Ark_NativePointer node, const Type_ShapeAttribute_fillOpacity_Arg0* value)
+void FillOpacityImpl(Ark_NativePointer node,
+                     const Type_ShapeAttribute_fillOpacity_Arg0* value)
 {
 }
-void StrokeWidthImpl(Ark_NativePointer node, const Type_ShapeAttribute_strokeWidth_Arg0* value)
+void StrokeWidthImpl(Ark_NativePointer node,
+                     const Type_ShapeAttribute_strokeWidth_Arg0* value)
 {
 }
-void AntiAliasImpl(Ark_NativePointer node, Ark_Boolean value)
+void AntiAliasImpl(Ark_NativePointer node,
+                   Ark_Boolean value)
 {
 }
-void MeshImpl(Ark_NativePointer node, const Array_CustomObject* value, const Ark_Number* column, const Ark_Number* row)
+void MeshImpl(Ark_NativePointer node,
+              const Array_CustomObject* value,
+              const Ark_Number* column,
+              const Ark_Number* row)
 {
 }
 } // ShapeAttributeModifier

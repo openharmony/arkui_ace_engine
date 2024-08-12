@@ -17,24 +17,30 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace XComponentInterfaceModifier {
-void _setXComponentOptions0Impl(Ark_NativePointer node, const Type_XComponentInterface__setXComponentOptions_Arg0* value)
+void _setXComponentOptions0Impl(Ark_NativePointer node,
+                                const Type_XComponentInterface__setXComponentOptions_Arg0* value)
 {
 }
-void _setXComponentOptions1Impl(Ark_NativePointer node, const Type_XComponentInterface__setXComponentOptions1_Arg0* value)
+void _setXComponentOptions1Impl(Ark_NativePointer node,
+                                const Type_XComponentInterface__setXComponentOptions1_Arg0* value)
 {
 }
-void _setXComponentOptions2Impl(Ark_NativePointer node, const Ark_XComponentOptions* options)
+void _setXComponentOptions2Impl(Ark_NativePointer node,
+                                const Ark_XComponentOptions* options)
 {
 }
 } // XComponentInterfaceModifier
 namespace XComponentAttributeModifier {
-void OnLoadImpl(Ark_NativePointer node, Ark_Function callback)
+void OnLoadImpl(Ark_NativePointer node,
+                Ark_Function callback)
 {
 }
-void OnDestroyImpl(Ark_NativePointer node, Ark_Function event)
+void OnDestroyImpl(Ark_NativePointer node,
+                   Ark_Function event)
 {
 }
-void EnableAnalyzerImpl(Ark_NativePointer node, Ark_Boolean enable)
+void EnableAnalyzerImpl(Ark_NativePointer node,
+                        Ark_Boolean enable)
 {
 }
 } // XComponentAttributeModifier

@@ -28,16 +28,19 @@ Ark_NativePointer GetFinalizerImpl()
 void GetConfigInRouteMapImpl(NavDestinationContextPeer* peer)
 {
 }
-void SetPathInfoImpl(NavDestinationContextPeer* peer, const Ark_NavPathInfo* pathInfo)
+void SetPathInfoImpl(NavDestinationContextPeer* peer,
+                     const Ark_NavPathInfo* pathInfo)
 {
 }
-void SetPathStackImpl(NavDestinationContextPeer* peer, const Ark_Materialized* pathStack)
+void SetPathStackImpl(NavDestinationContextPeer* peer,
+                      const Ark_Materialized* pathStack)
 {
 }
 void GetNavDestinationIdImpl(NavDestinationContextPeer* peer)
 {
 }
-void SetNavDestinationIdImpl(NavDestinationContextPeer* peer, const Ark_String* navDestinationId)
+void SetNavDestinationIdImpl(NavDestinationContextPeer* peer,
+                             const Ark_String* navDestinationId)
 {
 }
 } // NavDestinationContextModifier

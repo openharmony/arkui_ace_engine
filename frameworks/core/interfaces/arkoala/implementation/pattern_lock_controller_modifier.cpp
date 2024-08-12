@@ -28,7 +28,8 @@ Ark_NativePointer GetFinalizerImpl()
 void ResetImpl(PatternLockControllerPeer* peer)
 {
 }
-void SetChallengeResultImpl(PatternLockControllerPeer* peer, Ark_Int32 result)
+void SetChallengeResultImpl(PatternLockControllerPeer* peer,
+                            Ark_Int32 result)
 {
 }
 } // PatternLockControllerModifier

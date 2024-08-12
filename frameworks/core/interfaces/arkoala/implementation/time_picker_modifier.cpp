@@ -17,33 +17,42 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TimePickerInterfaceModifier {
-void _setTimePickerOptionsImpl(Ark_NativePointer node, const Opt_TimePickerOptions* options)
+void _setTimePickerOptionsImpl(Ark_NativePointer node,
+                               const Opt_TimePickerOptions* options)
 {
 }
 } // TimePickerInterfaceModifier
 namespace TimePickerAttributeModifier {
-void UseMilitaryTimeImpl(Ark_NativePointer node, Ark_Boolean value)
+void UseMilitaryTimeImpl(Ark_NativePointer node,
+                         Ark_Boolean value)
 {
 }
-void LoopImpl(Ark_NativePointer node, Ark_Boolean value)
+void LoopImpl(Ark_NativePointer node,
+              Ark_Boolean value)
 {
 }
-void DisappearTextStyleImpl(Ark_NativePointer node, const Ark_PickerTextStyle* value)
+void DisappearTextStyleImpl(Ark_NativePointer node,
+                            const Ark_PickerTextStyle* value)
 {
 }
-void TextStyleImpl(Ark_NativePointer node, const Ark_PickerTextStyle* value)
+void TextStyleImpl(Ark_NativePointer node,
+                   const Ark_PickerTextStyle* value)
 {
 }
-void SelectedTextStyleImpl(Ark_NativePointer node, const Ark_PickerTextStyle* value)
+void SelectedTextStyleImpl(Ark_NativePointer node,
+                           const Ark_PickerTextStyle* value)
 {
 }
-void DateTimeOptionsImpl(Ark_NativePointer node, const Ark_CustomObject* value)
+void DateTimeOptionsImpl(Ark_NativePointer node,
+                         const Ark_CustomObject* value)
 {
 }
-void OnChangeImpl(Ark_NativePointer node, Ark_Function callback)
+void OnChangeImpl(Ark_NativePointer node,
+                  Ark_Function callback)
 {
 }
-void EnableHapticFeedbackImpl(Ark_NativePointer node, Ark_Boolean enable)
+void EnableHapticFeedbackImpl(Ark_NativePointer node,
+                              Ark_Boolean enable)
 {
 }
 } // TimePickerAttributeModifier

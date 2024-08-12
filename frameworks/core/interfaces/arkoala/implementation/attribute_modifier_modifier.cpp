@@ -25,19 +25,24 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return 0;
 }
-void ApplyNormalAttributeImpl(AttributeModifierPeer* peer, const Ark_CustomObject* instance)
+void ApplyNormalAttributeImpl(AttributeModifierPeer* peer,
+                              const Ark_CustomObject* instance)
 {
 }
-void ApplyPressedAttributeImpl(AttributeModifierPeer* peer, const Ark_CustomObject* instance)
+void ApplyPressedAttributeImpl(AttributeModifierPeer* peer,
+                               const Ark_CustomObject* instance)
 {
 }
-void ApplyFocusedAttributeImpl(AttributeModifierPeer* peer, const Ark_CustomObject* instance)
+void ApplyFocusedAttributeImpl(AttributeModifierPeer* peer,
+                               const Ark_CustomObject* instance)
 {
 }
-void ApplyDisabledAttributeImpl(AttributeModifierPeer* peer, const Ark_CustomObject* instance)
+void ApplyDisabledAttributeImpl(AttributeModifierPeer* peer,
+                                const Ark_CustomObject* instance)
 {
 }
-void ApplySelectedAttributeImpl(AttributeModifierPeer* peer, const Ark_CustomObject* instance)
+void ApplySelectedAttributeImpl(AttributeModifierPeer* peer,
+                                const Ark_CustomObject* instance)
 {
 }
 } // AttributeModifierModifier

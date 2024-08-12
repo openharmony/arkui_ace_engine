@@ -25,7 +25,8 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return 0;
 }
-Ark_Int32 InterpolateImpl(ICurvePeer* peer, const Ark_Number* fraction)
+Ark_Int32 InterpolateImpl(ICurvePeer* peer,
+                          const Ark_Number* fraction)
 {
     return 0;
 }

@@ -25,7 +25,8 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return 0;
 }
-void SetTransformImpl(CanvasPatternPeer* peer, const Opt_Matrix2D* transform)
+void SetTransformImpl(CanvasPatternPeer* peer,
+                      const Opt_Matrix2D* transform)
 {
 }
 } // CanvasPatternModifier

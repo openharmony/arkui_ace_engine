@@ -17,7 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScreenInterfaceModifier {
-void _setScreenOptionsImpl(Ark_NativePointer node, const Ark_Number* screenId)
+void _setScreenOptionsImpl(Ark_NativePointer node,
+                           const Ark_Number* screenId)
 {
 }
 } // ScreenInterfaceModifier

@@ -32,28 +32,32 @@ Ark_Int32 GetSelectedIndexImpl(SwiperContentTransitionProxyPeer* peer)
 {
     return 0;
 }
-void SetSelectedIndexImpl(SwiperContentTransitionProxyPeer* peer, const Ark_Number* selectedIndex)
+void SetSelectedIndexImpl(SwiperContentTransitionProxyPeer* peer,
+                          const Ark_Number* selectedIndex)
 {
 }
 Ark_Int32 GetIndexImpl(SwiperContentTransitionProxyPeer* peer)
 {
     return 0;
 }
-void SetIndexImpl(SwiperContentTransitionProxyPeer* peer, const Ark_Number* index)
+void SetIndexImpl(SwiperContentTransitionProxyPeer* peer,
+                  const Ark_Number* index)
 {
 }
 Ark_Int32 GetPositionImpl(SwiperContentTransitionProxyPeer* peer)
 {
     return 0;
 }
-void SetPositionImpl(SwiperContentTransitionProxyPeer* peer, const Ark_Number* position)
+void SetPositionImpl(SwiperContentTransitionProxyPeer* peer,
+                     const Ark_Number* position)
 {
 }
 Ark_Int32 GetMainAxisLengthImpl(SwiperContentTransitionProxyPeer* peer)
 {
     return 0;
 }
-void SetMainAxisLengthImpl(SwiperContentTransitionProxyPeer* peer, const Ark_Number* mainAxisLength)
+void SetMainAxisLengthImpl(SwiperContentTransitionProxyPeer* peer,
+                           const Ark_Number* mainAxisLength)
 {
 }
 } // SwiperContentTransitionProxyModifier

@@ -33,23 +33,33 @@ Ark_NativePointer InvertImpl(Matrix2DPeer* peer)
 {
     return 0;
 }
-Ark_NativePointer MultiplyImpl(Matrix2DPeer* peer, const Opt_Matrix2D* other)
+Ark_NativePointer MultiplyImpl(Matrix2DPeer* peer,
+                               const Opt_Matrix2D* other)
 {
     return 0;
 }
-Ark_NativePointer Rotate0Impl(Matrix2DPeer* peer, const Opt_Number* rx, const Opt_Number* ry)
+Ark_NativePointer Rotate0Impl(Matrix2DPeer* peer,
+                              const Opt_Number* rx,
+                              const Opt_Number* ry)
 {
     return 0;
 }
-Ark_NativePointer Rotate1Impl(Matrix2DPeer* peer, const Ark_Number* degree, const Opt_Number* rx, const Opt_Number* ry)
+Ark_NativePointer Rotate1Impl(Matrix2DPeer* peer,
+                              const Ark_Number* degree,
+                              const Opt_Number* rx,
+                              const Opt_Number* ry)
 {
     return 0;
 }
-Ark_NativePointer TranslateImpl(Matrix2DPeer* peer, const Opt_Number* tx, const Opt_Number* ty)
+Ark_NativePointer TranslateImpl(Matrix2DPeer* peer,
+                                const Opt_Number* tx,
+                                const Opt_Number* ty)
 {
     return 0;
 }
-Ark_NativePointer ScaleImpl(Matrix2DPeer* peer, const Opt_Number* sx, const Opt_Number* sy)
+Ark_NativePointer ScaleImpl(Matrix2DPeer* peer,
+                            const Opt_Number* sx,
+                            const Opt_Number* sy)
 {
     return 0;
 }
@@ -57,42 +67,48 @@ Ark_Int32 GetScaleXImpl(Matrix2DPeer* peer)
 {
     return 0;
 }
-void SetScaleXImpl(Matrix2DPeer* peer, const Ark_Number* scaleX)
+void SetScaleXImpl(Matrix2DPeer* peer,
+                   const Ark_Number* scaleX)
 {
 }
 Ark_Int32 GetRotateYImpl(Matrix2DPeer* peer)
 {
     return 0;
 }
-void SetRotateYImpl(Matrix2DPeer* peer, const Ark_Number* rotateY)
+void SetRotateYImpl(Matrix2DPeer* peer,
+                    const Ark_Number* rotateY)
 {
 }
 Ark_Int32 GetRotateXImpl(Matrix2DPeer* peer)
 {
     return 0;
 }
-void SetRotateXImpl(Matrix2DPeer* peer, const Ark_Number* rotateX)
+void SetRotateXImpl(Matrix2DPeer* peer,
+                    const Ark_Number* rotateX)
 {
 }
 Ark_Int32 GetScaleYImpl(Matrix2DPeer* peer)
 {
     return 0;
 }
-void SetScaleYImpl(Matrix2DPeer* peer, const Ark_Number* scaleY)
+void SetScaleYImpl(Matrix2DPeer* peer,
+                   const Ark_Number* scaleY)
 {
 }
 Ark_Int32 GetTranslateXImpl(Matrix2DPeer* peer)
 {
     return 0;
 }
-void SetTranslateXImpl(Matrix2DPeer* peer, const Ark_Number* translateX)
+void SetTranslateXImpl(Matrix2DPeer* peer,
+                       const Ark_Number* translateX)
 {
 }
 Ark_Int32 GetTranslateYImpl(Matrix2DPeer* peer)
 {
     return 0;
 }
-void SetTranslateYImpl(Matrix2DPeer* peer, const Ark_Number* translateY)
+void SetTranslateYImpl(Matrix2DPeer* peer,
+                       const Ark_Number* translateY)
 {
 }
 } // Matrix2DModifier

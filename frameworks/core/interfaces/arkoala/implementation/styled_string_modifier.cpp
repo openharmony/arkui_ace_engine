@@ -17,7 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace StyledStringModifier {
-Ark_NativePointer CtorImpl(const Union_String_ImageAttachment_CustomSpan* value, const Opt_Array_StyleOptions* styles)
+Ark_NativePointer CtorImpl(const Union_String_ImageAttachment_CustomSpan* value,
+                           const Opt_Array_StyleOptions* styles)
 {
     return 0;
 }
@@ -28,15 +29,21 @@ Ark_NativePointer GetFinalizerImpl()
 void GetStringImpl(StyledStringPeer* peer)
 {
 }
-Ark_NativePointer GetStylesImpl(StyledStringPeer* peer, const Ark_Number* start, const Ark_Number* length, const Opt_StyledStringKey* styledKey)
+Ark_NativePointer GetStylesImpl(StyledStringPeer* peer,
+                                const Ark_Number* start,
+                                const Ark_Number* length,
+                                const Opt_StyledStringKey* styledKey)
 {
     return 0;
 }
-Ark_Boolean EqualsImpl(StyledStringPeer* peer, const Ark_Materialized* other)
+Ark_Boolean EqualsImpl(StyledStringPeer* peer,
+                       const Ark_Materialized* other)
 {
     return 0;
 }
-Ark_NativePointer SubStyledStringImpl(StyledStringPeer* peer, const Ark_Number* start, const Opt_Number* length)
+Ark_NativePointer SubStyledStringImpl(StyledStringPeer* peer,
+                                      const Ark_Number* start,
+                                      const Opt_Number* length)
 {
     return 0;
 }

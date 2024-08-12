@@ -22,16 +22,20 @@ void _setCounterOptionsImpl(Ark_NativePointer node)
 }
 } // CounterInterfaceModifier
 namespace CounterAttributeModifier {
-void OnIncImpl(Ark_NativePointer node, Ark_Function event)
+void OnIncImpl(Ark_NativePointer node,
+               Ark_Function event)
 {
 }
-void OnDecImpl(Ark_NativePointer node, Ark_Function event)
+void OnDecImpl(Ark_NativePointer node,
+               Ark_Function event)
 {
 }
-void EnableDecImpl(Ark_NativePointer node, Ark_Boolean value)
+void EnableDecImpl(Ark_NativePointer node,
+                   Ark_Boolean value)
 {
 }
-void EnableIncImpl(Ark_NativePointer node, Ark_Boolean value)
+void EnableIncImpl(Ark_NativePointer node,
+                   Ark_Boolean value)
 {
 }
 } // CounterAttributeModifier

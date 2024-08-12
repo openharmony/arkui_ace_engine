@@ -17,198 +17,265 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextInputInterfaceModifier {
-void _setTextInputOptionsImpl(Ark_NativePointer node, const Opt_TextInputOptions* value)
+void _setTextInputOptionsImpl(Ark_NativePointer node,
+                              const Opt_TextInputOptions* value)
 {
 }
 } // TextInputInterfaceModifier
 namespace TextInputAttributeModifier {
-void TypeImpl(Ark_NativePointer node, Ark_Int32 value)
+void TypeImpl(Ark_NativePointer node,
+              Ark_Int32 value)
 {
 }
-void ContentTypeImpl(Ark_NativePointer node, Ark_Int32 value)
+void ContentTypeImpl(Ark_NativePointer node,
+                     Ark_Int32 value)
 {
 }
-void PlaceholderColorImpl(Ark_NativePointer node, const ResourceColor* value)
+void PlaceholderColorImpl(Ark_NativePointer node,
+                          const ResourceColor* value)
 {
 }
-void TextOverflowImpl(Ark_NativePointer node, Ark_Int32 value)
+void TextOverflowImpl(Ark_NativePointer node,
+                      Ark_Int32 value)
 {
 }
-void TextIndentImpl(Ark_NativePointer node, const Ark_Length* value)
+void TextIndentImpl(Ark_NativePointer node,
+                    const Ark_Length* value)
 {
 }
-void PlaceholderFontImpl(Ark_NativePointer node, const Opt_Font* value)
+void PlaceholderFontImpl(Ark_NativePointer node,
+                         const Opt_Font* value)
 {
 }
-void EnterKeyTypeImpl(Ark_NativePointer node, Ark_Int32 value)
+void EnterKeyTypeImpl(Ark_NativePointer node,
+                      Ark_Int32 value)
 {
 }
-void CaretColorImpl(Ark_NativePointer node, const ResourceColor* value)
+void CaretColorImpl(Ark_NativePointer node,
+                    const ResourceColor* value)
 {
 }
-void OnEditChangedImpl(Ark_NativePointer node, Ark_Function callback)
+void OnEditChangedImpl(Ark_NativePointer node,
+                       Ark_Function callback)
 {
 }
-void OnEditChangeImpl(Ark_NativePointer node, Ark_Function callback)
+void OnEditChangeImpl(Ark_NativePointer node,
+                      Ark_Function callback)
 {
 }
-void OnSubmitImpl(Ark_NativePointer node, Ark_Function callback)
+void OnSubmitImpl(Ark_NativePointer node,
+                  Ark_Function callback)
 {
 }
-void OnChangeImpl(Ark_NativePointer node, Ark_Function callback)
+void OnChangeImpl(Ark_NativePointer node,
+                  Ark_Function callback)
 {
 }
-void OnTextSelectionChangeImpl(Ark_NativePointer node, Ark_Function callback)
+void OnTextSelectionChangeImpl(Ark_NativePointer node,
+                               Ark_Function callback)
 {
 }
-void OnContentScrollImpl(Ark_NativePointer node, Ark_Function callback)
+void OnContentScrollImpl(Ark_NativePointer node,
+                         Ark_Function callback)
 {
 }
-void MaxLengthImpl(Ark_NativePointer node, const Ark_Number* value)
+void MaxLengthImpl(Ark_NativePointer node,
+                   const Ark_Number* value)
 {
 }
-void FontColorImpl(Ark_NativePointer node, const ResourceColor* value)
+void FontColorImpl(Ark_NativePointer node,
+                   const ResourceColor* value)
 {
 }
-void FontSizeImpl(Ark_NativePointer node, const Ark_Length* value)
+void FontSizeImpl(Ark_NativePointer node,
+                  const Ark_Length* value)
 {
 }
-void FontStyleImpl(Ark_NativePointer node, Ark_Int32 value)
+void FontStyleImpl(Ark_NativePointer node,
+                   Ark_Int32 value)
 {
 }
-void FontWeightImpl(Ark_NativePointer node, const Type_TextInputAttribute_fontWeight_Arg0* value)
+void FontWeightImpl(Ark_NativePointer node,
+                    const Type_TextInputAttribute_fontWeight_Arg0* value)
 {
 }
-void FontFamilyImpl(Ark_NativePointer node, const ResourceStr* value)
+void FontFamilyImpl(Ark_NativePointer node,
+                    const ResourceStr* value)
 {
 }
-void InputFilterImpl(Ark_NativePointer node, const ResourceStr* value, const Opt_Function* error)
+void InputFilterImpl(Ark_NativePointer node,
+                     const ResourceStr* value,
+                     const Opt_Function* error)
 {
 }
-void OnCopyImpl(Ark_NativePointer node, Ark_Function callback)
+void OnCopyImpl(Ark_NativePointer node,
+                Ark_Function callback)
 {
 }
-void OnCutImpl(Ark_NativePointer node, Ark_Function callback)
+void OnCutImpl(Ark_NativePointer node,
+               Ark_Function callback)
 {
 }
-void OnPasteImpl(Ark_NativePointer node, Ark_Function callback)
+void OnPasteImpl(Ark_NativePointer node,
+                 Ark_Function callback)
 {
 }
-void CopyOptionImpl(Ark_NativePointer node, Ark_Int32 value)
+void CopyOptionImpl(Ark_NativePointer node,
+                    Ark_Int32 value)
 {
 }
-void ShowPasswordIconImpl(Ark_NativePointer node, Ark_Boolean value)
+void ShowPasswordIconImpl(Ark_NativePointer node,
+                          Ark_Boolean value)
 {
 }
-void TextAlignImpl(Ark_NativePointer node, Ark_Int32 value)
+void TextAlignImpl(Ark_NativePointer node,
+                   Ark_Int32 value)
 {
 }
-void StyleImpl(Ark_NativePointer node, const Type_TextInputAttribute_style_Arg0* value)
+void StyleImpl(Ark_NativePointer node,
+               const Type_TextInputAttribute_style_Arg0* value)
 {
 }
-void CaretStyleImpl(Ark_NativePointer node, const Ark_CaretStyle* value)
+void CaretStyleImpl(Ark_NativePointer node,
+                    const Ark_CaretStyle* value)
 {
 }
-void SelectedBackgroundColorImpl(Ark_NativePointer node, const ResourceColor* value)
+void SelectedBackgroundColorImpl(Ark_NativePointer node,
+                                 const ResourceColor* value)
 {
 }
-void CaretPositionImpl(Ark_NativePointer node, const Ark_Number* value)
+void CaretPositionImpl(Ark_NativePointer node,
+                       const Ark_Number* value)
 {
 }
-void EnableKeyboardOnFocusImpl(Ark_NativePointer node, Ark_Boolean value)
+void EnableKeyboardOnFocusImpl(Ark_NativePointer node,
+                               Ark_Boolean value)
 {
 }
-void PasswordIconImpl(Ark_NativePointer node, const Ark_PasswordIcon* value)
+void PasswordIconImpl(Ark_NativePointer node,
+                      const Ark_PasswordIcon* value)
 {
 }
-void ShowErrorImpl(Ark_NativePointer node, const Opt_Type_TextInputAttribute_showError_Arg0* value)
+void ShowErrorImpl(Ark_NativePointer node,
+                   const Opt_Type_TextInputAttribute_showError_Arg0* value)
 {
 }
-void ShowUnitImpl(Ark_NativePointer node, const CustomBuilder* value)
+void ShowUnitImpl(Ark_NativePointer node,
+                  const CustomBuilder* value)
 {
 }
-void ShowUnderlineImpl(Ark_NativePointer node, Ark_Boolean value)
+void ShowUnderlineImpl(Ark_NativePointer node,
+                       Ark_Boolean value)
 {
 }
-void UnderlineColorImpl(Ark_NativePointer node, const Type_TextInputAttribute_underlineColor_Arg0* value)
+void UnderlineColorImpl(Ark_NativePointer node,
+                        const Type_TextInputAttribute_underlineColor_Arg0* value)
 {
 }
-void SelectionMenuHiddenImpl(Ark_NativePointer node, Ark_Boolean value)
+void SelectionMenuHiddenImpl(Ark_NativePointer node,
+                             Ark_Boolean value)
 {
 }
-void BarStateImpl(Ark_NativePointer node, Ark_Int32 value)
+void BarStateImpl(Ark_NativePointer node,
+                  Ark_Int32 value)
 {
 }
-void MaxLinesImpl(Ark_NativePointer node, const Ark_Number* value)
+void MaxLinesImpl(Ark_NativePointer node,
+                  const Ark_Number* value)
 {
 }
-void WordBreakImpl(Ark_NativePointer node, Ark_Int32 value)
+void WordBreakImpl(Ark_NativePointer node,
+                   Ark_Int32 value)
 {
 }
-void LineBreakStrategyImpl(Ark_NativePointer node, Ark_Int32 strategy)
+void LineBreakStrategyImpl(Ark_NativePointer node,
+                           Ark_Int32 strategy)
 {
 }
-void CustomKeyboardImpl(Ark_NativePointer node, const CustomBuilder* value, const Opt_KeyboardOptions* options)
+void CustomKeyboardImpl(Ark_NativePointer node,
+                        const CustomBuilder* value,
+                        const Opt_KeyboardOptions* options)
 {
 }
-void ShowCounterImpl(Ark_NativePointer node, Ark_Boolean value, const Opt_InputCounterOptions* options)
+void ShowCounterImpl(Ark_NativePointer node,
+                     Ark_Boolean value,
+                     const Opt_InputCounterOptions* options)
 {
 }
-void CancelButtonImpl(Ark_NativePointer node, const Type_TextInputAttribute_cancelButton_Arg0* value)
+void CancelButtonImpl(Ark_NativePointer node,
+                      const Type_TextInputAttribute_cancelButton_Arg0* value)
 {
 }
-void SelectAllImpl(Ark_NativePointer node, Ark_Boolean value)
+void SelectAllImpl(Ark_NativePointer node,
+                   Ark_Boolean value)
 {
 }
-void MinFontSizeImpl(Ark_NativePointer node, const Type_TextInputAttribute_minFontSize_Arg0* value)
+void MinFontSizeImpl(Ark_NativePointer node,
+                     const Type_TextInputAttribute_minFontSize_Arg0* value)
 {
 }
-void MaxFontSizeImpl(Ark_NativePointer node, const Type_TextInputAttribute_maxFontSize_Arg0* value)
+void MaxFontSizeImpl(Ark_NativePointer node,
+                     const Type_TextInputAttribute_maxFontSize_Arg0* value)
 {
 }
-void HeightAdaptivePolicyImpl(Ark_NativePointer node, Ark_Int32 value)
+void HeightAdaptivePolicyImpl(Ark_NativePointer node,
+                              Ark_Int32 value)
 {
 }
-void EnableAutoFillImpl(Ark_NativePointer node, Ark_Boolean value)
+void EnableAutoFillImpl(Ark_NativePointer node,
+                        Ark_Boolean value)
 {
 }
-void DecorationImpl(Ark_NativePointer node, const Ark_TextDecorationOptions* value)
+void DecorationImpl(Ark_NativePointer node,
+                    const Ark_TextDecorationOptions* value)
 {
 }
-void LetterSpacingImpl(Ark_NativePointer node, const Type_TextInputAttribute_letterSpacing_Arg0* value)
+void LetterSpacingImpl(Ark_NativePointer node,
+                       const Type_TextInputAttribute_letterSpacing_Arg0* value)
 {
 }
-void LineHeightImpl(Ark_NativePointer node, const Type_TextInputAttribute_lineHeight_Arg0* value)
+void LineHeightImpl(Ark_NativePointer node,
+                    const Type_TextInputAttribute_lineHeight_Arg0* value)
 {
 }
-void PasswordRulesImpl(Ark_NativePointer node, const Ark_String* value)
+void PasswordRulesImpl(Ark_NativePointer node,
+                       const Ark_String* value)
 {
 }
-void FontFeatureImpl(Ark_NativePointer node, const Ark_String* value)
+void FontFeatureImpl(Ark_NativePointer node,
+                     const Ark_String* value)
 {
 }
-void ShowPasswordImpl(Ark_NativePointer node, Ark_Boolean visible)
+void ShowPasswordImpl(Ark_NativePointer node,
+                      Ark_Boolean visible)
 {
 }
-void OnSecurityStateChangeImpl(Ark_NativePointer node, Ark_Function callback)
+void OnSecurityStateChangeImpl(Ark_NativePointer node,
+                               Ark_Function callback)
 {
 }
-void OnWillInsertImpl(Ark_NativePointer node, Ark_Function callback)
+void OnWillInsertImpl(Ark_NativePointer node,
+                      Ark_Function callback)
 {
 }
-void OnDidInsertImpl(Ark_NativePointer node, Ark_Function callback)
+void OnDidInsertImpl(Ark_NativePointer node,
+                     Ark_Function callback)
 {
 }
-void OnWillDeleteImpl(Ark_NativePointer node, Ark_Function callback)
+void OnWillDeleteImpl(Ark_NativePointer node,
+                      Ark_Function callback)
 {
 }
-void OnDidDeleteImpl(Ark_NativePointer node, Ark_Function callback)
+void OnDidDeleteImpl(Ark_NativePointer node,
+                     Ark_Function callback)
 {
 }
-void EditMenuOptionsImpl(Ark_NativePointer node, const Ark_Materialized* editMenu)
+void EditMenuOptionsImpl(Ark_NativePointer node,
+                         const Ark_Materialized* editMenu)
 {
 }
-void EnablePreviewTextImpl(Ark_NativePointer node, Ark_Boolean enable)
+void EnablePreviewTextImpl(Ark_NativePointer node,
+                           Ark_Boolean enable)
 {
 }
 } // TextInputAttributeModifier

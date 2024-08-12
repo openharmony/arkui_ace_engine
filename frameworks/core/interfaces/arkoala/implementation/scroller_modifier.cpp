@@ -25,36 +25,49 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return 0;
 }
-void ScrollToImpl(ScrollerPeer* peer, const Literal_Union_Number_String_xOffset_yOffset_Opt_Union_ScrollAnimationOptions_Boolean_animation* value)
+void ScrollToImpl(ScrollerPeer* peer,
+                  const Literal_Union_Number_String_xOffset_yOffset_Opt_Union_ScrollAnimationOptions_Boolean_animation* value)
 {
 }
-void ScrollEdgeImpl(ScrollerPeer* peer, Ark_Int32 value, const Opt_ScrollEdgeOptions* options)
+void ScrollEdgeImpl(ScrollerPeer* peer,
+                    Ark_Int32 value,
+                    const Opt_ScrollEdgeOptions* options)
 {
 }
-void FlingImpl(ScrollerPeer* peer, const Ark_Number* velocity)
+void FlingImpl(ScrollerPeer* peer,
+               const Ark_Number* velocity)
 {
 }
-void ScrollPage0Impl(ScrollerPeer* peer, const Ark_ScrollPageOptions* value)
+void ScrollPage0Impl(ScrollerPeer* peer,
+                     const Ark_ScrollPageOptions* value)
 {
 }
-void ScrollPage1Impl(ScrollerPeer* peer, const Literal_Boolean_next_Opt_Axis_direction* value)
+void ScrollPage1Impl(ScrollerPeer* peer,
+                     const Literal_Boolean_next_Opt_Axis_direction* value)
 {
 }
 Ark_NativePointer CurrentOffsetImpl(ScrollerPeer* peer)
 {
     return 0;
 }
-void ScrollToIndexImpl(ScrollerPeer* peer, const Ark_Number* value, const Opt_Boolean* smooth, const Opt_ScrollAlign* align, const Opt_ScrollToIndexOptions* options)
+void ScrollToIndexImpl(ScrollerPeer* peer,
+                       const Ark_Number* value,
+                       const Opt_Boolean* smooth,
+                       const Opt_ScrollAlign* align,
+                       const Opt_ScrollToIndexOptions* options)
 {
 }
-void ScrollByImpl(ScrollerPeer* peer, const Ark_Length* dx, const Ark_Length* dy)
+void ScrollByImpl(ScrollerPeer* peer,
+                  const Ark_Length* dx,
+                  const Ark_Length* dy)
 {
 }
 Ark_Boolean IsAtEndImpl(ScrollerPeer* peer)
 {
     return 0;
 }
-Ark_NativePointer GetItemRectImpl(ScrollerPeer* peer, const Ark_Number* index)
+Ark_NativePointer GetItemRectImpl(ScrollerPeer* peer,
+                                  const Ark_Number* index)
 {
     return 0;
 }

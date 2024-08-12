@@ -17,24 +17,30 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SymbolSpanInterfaceModifier {
-void _setSymbolSpanOptionsImpl(Ark_NativePointer node, const Ark_Resource* value)
+void _setSymbolSpanOptionsImpl(Ark_NativePointer node,
+                               const Ark_Resource* value)
 {
 }
 } // SymbolSpanInterfaceModifier
 namespace SymbolSpanAttributeModifier {
-void FontSizeImpl(Ark_NativePointer node, const Type_SymbolSpanAttribute_fontSize_Arg0* value)
+void FontSizeImpl(Ark_NativePointer node,
+                  const Type_SymbolSpanAttribute_fontSize_Arg0* value)
 {
 }
-void FontColorImpl(Ark_NativePointer node, const Array_ResourceColor* value)
+void FontColorImpl(Ark_NativePointer node,
+                   const Array_ResourceColor* value)
 {
 }
-void FontWeightImpl(Ark_NativePointer node, const Type_SymbolSpanAttribute_fontWeight_Arg0* value)
+void FontWeightImpl(Ark_NativePointer node,
+                    const Type_SymbolSpanAttribute_fontWeight_Arg0* value)
 {
 }
-void EffectStrategyImpl(Ark_NativePointer node, Ark_Int32 value)
+void EffectStrategyImpl(Ark_NativePointer node,
+                        Ark_Int32 value)
 {
 }
-void RenderingStrategyImpl(Ark_NativePointer node, Ark_Int32 value)
+void RenderingStrategyImpl(Ark_NativePointer node,
+                           Ark_Int32 value)
 {
 }
 } // SymbolSpanAttributeModifier

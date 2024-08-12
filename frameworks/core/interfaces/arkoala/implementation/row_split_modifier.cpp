@@ -22,7 +22,8 @@ void _setRowSplitOptionsImpl(Ark_NativePointer node)
 }
 } // RowSplitInterfaceModifier
 namespace RowSplitAttributeModifier {
-void ResizeableImpl(Ark_NativePointer node, Ark_Boolean value)
+void ResizeableImpl(Ark_NativePointer node,
+                    Ark_Boolean value)
 {
 }
 } // RowSplitAttributeModifier

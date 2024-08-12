@@ -22,13 +22,16 @@ void _setLoadingProgressOptionsImpl(Ark_NativePointer node)
 }
 } // LoadingProgressInterfaceModifier
 namespace LoadingProgressAttributeModifier {
-void ColorImpl(Ark_NativePointer node, const ResourceColor* value)
+void ColorImpl(Ark_NativePointer node,
+               const ResourceColor* value)
 {
 }
-void EnableLoadingImpl(Ark_NativePointer node, Ark_Boolean value)
+void EnableLoadingImpl(Ark_NativePointer node,
+                       Ark_Boolean value)
 {
 }
-void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* modifier)
+void ContentModifierImpl(Ark_NativePointer node,
+                         const Ark_CustomObject* modifier)
 {
 }
 } // LoadingProgressAttributeModifier

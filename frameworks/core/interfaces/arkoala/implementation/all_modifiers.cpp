@@ -35,6 +35,7 @@ namespace ApiImpl {
     // Basic API
     Ark_NodeHandle GetNodeByViewStack();
     void DisposeNode(Ark_NodeHandle node);
+    void DumpTreeNode(ArkUINodeHandle node);
     Ark_Int32 AddChild(Ark_NodeHandle parent, Ark_NodeHandle child);
     void RemoveChild(Ark_NodeHandle parent, Ark_NodeHandle child);
     Ark_Int32 InsertChildAfter(Ark_NodeHandle parent, Ark_NodeHandle child, Ark_NodeHandle sibling);
@@ -512,6 +513,7 @@ const GENERATED_ArkUIBasicNodeAPI* GENERATED_GetBasicAPI()
         OHOS::Ace::NG::Bridge::CreateNode,
         OHOS::Ace::NG::ApiImpl::GetNodeByViewStack,
         OHOS::Ace::NG::ApiImpl::DisposeNode,
+        OHOS::Ace::NG::ApiImpl::DumpTreeNode,
         OHOS::Ace::NG::ApiImpl::AddChild,
         OHOS::Ace::NG::ApiImpl::RemoveChild,
         OHOS::Ace::NG::ApiImpl::InsertChildAfter,

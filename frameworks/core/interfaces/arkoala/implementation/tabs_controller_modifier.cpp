@@ -25,10 +25,12 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return 0;
 }
-void ChangeIndexImpl(TabsControllerPeer* peer, const Ark_Number* value)
+void ChangeIndexImpl(TabsControllerPeer* peer,
+                     const Ark_Number* value)
 {
 }
-Ark_NativePointer PreloadItemsImpl(TabsControllerPeer* peer, const Opt_Array_Number* indices)
+Ark_NativePointer PreloadItemsImpl(TabsControllerPeer* peer,
+                                   const Opt_Array_Number* indices)
 {
     return 0;
 }

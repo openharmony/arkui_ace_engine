@@ -17,90 +17,119 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AlphabetIndexerInterfaceModifier {
-void _setAlphabetIndexerOptionsImpl(Ark_NativePointer node, const Type_AlphabetIndexerInterface__setAlphabetIndexerOptions_Arg0* value)
+void _setAlphabetIndexerOptionsImpl(Ark_NativePointer node,
+                                    const Type_AlphabetIndexerInterface__setAlphabetIndexerOptions_Arg0* value)
 {
 }
 } // AlphabetIndexerInterfaceModifier
 namespace AlphabetIndexerAttributeModifier {
-void OnSelectedImpl(Ark_NativePointer node, Ark_Function callback)
+void OnSelectedImpl(Ark_NativePointer node,
+                    Ark_Function callback)
 {
 }
-void ColorImpl(Ark_NativePointer node, const ResourceColor* value)
+void ColorImpl(Ark_NativePointer node,
+               const ResourceColor* value)
 {
 }
-void SelectedColorImpl(Ark_NativePointer node, const ResourceColor* value)
+void SelectedColorImpl(Ark_NativePointer node,
+                       const ResourceColor* value)
 {
 }
-void PopupColorImpl(Ark_NativePointer node, const ResourceColor* value)
+void PopupColorImpl(Ark_NativePointer node,
+                    const ResourceColor* value)
 {
 }
-void SelectedBackgroundColorImpl(Ark_NativePointer node, const ResourceColor* value)
+void SelectedBackgroundColorImpl(Ark_NativePointer node,
+                                 const ResourceColor* value)
 {
 }
-void PopupBackgroundImpl(Ark_NativePointer node, const ResourceColor* value)
+void PopupBackgroundImpl(Ark_NativePointer node,
+                         const ResourceColor* value)
 {
 }
-void PopupSelectedColorImpl(Ark_NativePointer node, const ResourceColor* value)
+void PopupSelectedColorImpl(Ark_NativePointer node,
+                            const ResourceColor* value)
 {
 }
-void PopupUnselectedColorImpl(Ark_NativePointer node, const ResourceColor* value)
+void PopupUnselectedColorImpl(Ark_NativePointer node,
+                              const ResourceColor* value)
 {
 }
-void PopupItemBackgroundColorImpl(Ark_NativePointer node, const ResourceColor* value)
+void PopupItemBackgroundColorImpl(Ark_NativePointer node,
+                                  const ResourceColor* value)
 {
 }
-void UsingPopupImpl(Ark_NativePointer node, Ark_Boolean value)
+void UsingPopupImpl(Ark_NativePointer node,
+                    Ark_Boolean value)
 {
 }
-void SelectedFontImpl(Ark_NativePointer node, const Ark_Font* value)
+void SelectedFontImpl(Ark_NativePointer node,
+                      const Ark_Font* value)
 {
 }
-void PopupFontImpl(Ark_NativePointer node, const Ark_Font* value)
+void PopupFontImpl(Ark_NativePointer node,
+                   const Ark_Font* value)
 {
 }
-void PopupItemFontImpl(Ark_NativePointer node, const Ark_Font* value)
+void PopupItemFontImpl(Ark_NativePointer node,
+                       const Ark_Font* value)
 {
 }
-void ItemSizeImpl(Ark_NativePointer node, const Type_AlphabetIndexerAttribute_itemSize_Arg0* value)
+void ItemSizeImpl(Ark_NativePointer node,
+                  const Type_AlphabetIndexerAttribute_itemSize_Arg0* value)
 {
 }
-void FontImpl(Ark_NativePointer node, const Ark_Font* value)
+void FontImpl(Ark_NativePointer node,
+              const Ark_Font* value)
 {
 }
-void AlignStyleImpl(Ark_NativePointer node, Ark_Int32 value, const Opt_Length* offset)
+void AlignStyleImpl(Ark_NativePointer node,
+                    Ark_Int32 value,
+                    const Opt_Length* offset)
 {
 }
-void OnSelectImpl(Ark_NativePointer node, Ark_Function callback)
+void OnSelectImpl(Ark_NativePointer node,
+                  Ark_Function callback)
 {
 }
-void OnRequestPopupDataImpl(Ark_NativePointer node, Ark_Function callback)
+void OnRequestPopupDataImpl(Ark_NativePointer node,
+                            Ark_Function callback)
 {
 }
-void OnPopupSelectImpl(Ark_NativePointer node, Ark_Function callback)
+void OnPopupSelectImpl(Ark_NativePointer node,
+                       Ark_Function callback)
 {
 }
-void SelectedImpl(Ark_NativePointer node, const Ark_Number* index)
+void SelectedImpl(Ark_NativePointer node,
+                  const Ark_Number* index)
 {
 }
-void PopupPositionImpl(Ark_NativePointer node, const Ark_Position* value)
+void PopupPositionImpl(Ark_NativePointer node,
+                       const Ark_Position* value)
 {
 }
-void AutoCollapseImpl(Ark_NativePointer node, Ark_Boolean value)
+void AutoCollapseImpl(Ark_NativePointer node,
+                      Ark_Boolean value)
 {
 }
-void PopupItemBorderRadiusImpl(Ark_NativePointer node, const Ark_Number* value)
+void PopupItemBorderRadiusImpl(Ark_NativePointer node,
+                               const Ark_Number* value)
 {
 }
-void ItemBorderRadiusImpl(Ark_NativePointer node, const Ark_Number* value)
+void ItemBorderRadiusImpl(Ark_NativePointer node,
+                          const Ark_Number* value)
 {
 }
-void PopupBackgroundBlurStyleImpl(Ark_NativePointer node, Ark_Int32 value)
+void PopupBackgroundBlurStyleImpl(Ark_NativePointer node,
+                                  Ark_Int32 value)
 {
 }
-void PopupTitleBackgroundImpl(Ark_NativePointer node, const ResourceColor* value)
+void PopupTitleBackgroundImpl(Ark_NativePointer node,
+                              const ResourceColor* value)
 {
 }
-void EnableHapticFeedbackImpl(Ark_NativePointer node, Ark_Boolean value)
+void EnableHapticFeedbackImpl(Ark_NativePointer node,
+                              Ark_Boolean value)
 {
 }
 } // AlphabetIndexerAttributeModifier

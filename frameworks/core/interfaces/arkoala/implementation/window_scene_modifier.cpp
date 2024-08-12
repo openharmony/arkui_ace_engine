@@ -17,12 +17,15 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WindowSceneInterfaceModifier {
-void _setWindowSceneOptionsImpl(Ark_NativePointer node, const Ark_Number* persistentId)
+void _setWindowSceneOptionsImpl(Ark_NativePointer node,
+                                const Ark_Number* persistentId)
 {
 }
 } // WindowSceneInterfaceModifier
 namespace WindowSceneAttributeModifier {
-void AttractionEffectImpl(Ark_NativePointer node, const Ark_Position* destination, const Ark_Number* fraction)
+void AttractionEffectImpl(Ark_NativePointer node,
+                          const Ark_Position* destination,
+                          const Ark_Number* fraction)
 {
 }
 } // WindowSceneAttributeModifier

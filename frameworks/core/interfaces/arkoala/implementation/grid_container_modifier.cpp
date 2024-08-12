@@ -17,7 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GridContainerInterfaceModifier {
-void _setGridContainerOptionsImpl(Ark_NativePointer node, const Opt_GridContainerOptions* value)
+void _setGridContainerOptionsImpl(Ark_NativePointer node,
+                                  const Opt_GridContainerOptions* value)
 {
 }
 } // GridContainerInterfaceModifier

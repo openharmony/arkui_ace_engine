@@ -25,7 +25,9 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return 0;
 }
-void AddColorStopImpl(CanvasGradientPeer* peer, const Ark_Number* offset, const Ark_String* color)
+void AddColorStopImpl(CanvasGradientPeer* peer,
+                      const Ark_Number* offset,
+                      const Ark_String* color)
 {
 }
 } // CanvasGradientModifier

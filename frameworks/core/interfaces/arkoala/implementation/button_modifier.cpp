@@ -34,7 +34,8 @@ void _setButtonOptions0Impl(Ark_NativePointer node)
     ButtonModelNG::SetControlSize(frameNode, ControlSize::NORMAL);
     ButtonModelNG::SetButtonStyle(frameNode, ButtonStyleMode::EMPHASIZE);
 }
-void _setButtonOptions1Impl(Ark_NativePointer node, const Ark_ButtonOptions* options)
+void _setButtonOptions1Impl(Ark_NativePointer node,
+                            const Ark_ButtonOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -45,7 +46,9 @@ void _setButtonOptions1Impl(Ark_NativePointer node, const Ark_ButtonOptions* opt
     ButtonModelNG::SetButtonStyle(frameNode, Converter::ConvertOrDefault(options->buttonStyle,
                                                                          ButtonStyleMode::EMPHASIZE));
 }
-void _setButtonOptions2Impl(Ark_NativePointer node, const ResourceStr* label, const Opt_ButtonOptions* options)
+void _setButtonOptions2Impl(Ark_NativePointer node,
+                            const ResourceStr* label,
+                            const Opt_ButtonOptions* options)
 {
     if (options->tag == ARK_TAG_UNDEFINED) {
         _setButtonOptions0Impl(node);
@@ -61,73 +64,85 @@ namespace ButtonAttributeModifier {
 constexpr int32_t DEFAULT_FONT_SIZE = 12;
 constexpr int32_t DEFAULT_MAX_LINES = 100;
 
-void TypeImpl(Ark_NativePointer node, Ark_Int32 value)
+void TypeImpl(Ark_NativePointer node,
+              Ark_Int32 value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ButtonModelNG::SetType(frameNode, (ArkUI_Int32)Converter::ConvertOrDefault(value, ButtonType::CAPSULE));
 }
-void StateEffectImpl(Ark_NativePointer node, Ark_Boolean value)
+void StateEffectImpl(Ark_NativePointer node,
+                     Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ButtonModelNG::SetStateEffect(frameNode, Converter::ConvertOrDefault(value, true));
 }
-void ButtonStyleImpl(Ark_NativePointer node, Ark_Int32 value)
+void ButtonStyleImpl(Ark_NativePointer node,
+                     Ark_Int32 value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ButtonModelNG::SetButtonStyle(frameNode, Converter::ConvertOrDefault(value, ButtonStyleMode::EMPHASIZE));
 }
-void ControlSizeImpl(Ark_NativePointer node, Ark_Int32 value)
+void ControlSizeImpl(Ark_NativePointer node,
+                     Ark_Int32 value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ButtonModelNG::SetControlSize(frameNode, Converter::ConvertOrDefault(value, ControlSize::NORMAL));
 }
-void RoleImpl(Ark_NativePointer node, Ark_Int32 value)
+void RoleImpl(Ark_NativePointer node,
+              Ark_Int32 value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ButtonModelNG::SetRole(frameNode, Converter::ConvertOrDefault(value, ButtonRole::NORMAL));
 }
-void FontColorImpl(Ark_NativePointer node, const ResourceColor* value)
+void FontColorImpl(Ark_NativePointer node,
+                   const ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ButtonModelNG::SetFontColor(frameNode, Converter::ConvertOrDefault(*value, Color()));
 }
-void FontSizeImpl(Ark_NativePointer node, const Ark_Length* value)
+void FontSizeImpl(Ark_NativePointer node,
+                  const Ark_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ButtonModelNG::SetFontSize(frameNode, CalcDimension(value->value, (DimensionUnit)value->unit));
 }
-void FontWeightImpl(Ark_NativePointer node, const Type_ButtonAttribute_fontWeight_Arg0* value)
+void FontWeightImpl(Ark_NativePointer node,
+                    const Type_ButtonAttribute_fontWeight_Arg0* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ButtonModelNG::SetFontWeight(frameNode, Converter::ConvertOrDefault(*value, FontWeight::NORMAL));
 }
-void FontStyleImpl(Ark_NativePointer node, Ark_Int32 value)
+void FontStyleImpl(Ark_NativePointer node,
+                   Ark_Int32 value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ButtonModelNG::SetFontStyle(frameNode, (Ace::FontStyle)value);
 }
-void FontFamilyImpl(Ark_NativePointer node, const Type_ButtonAttribute_fontFamily_Arg0* value)
+void FontFamilyImpl(Ark_NativePointer node,
+                    const Type_ButtonAttribute_fontFamily_Arg0* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ButtonModelNG::SetFontFamily(frameNode,
                                  Framework::ConvertStrToFontFamilies(Converter::ConvertOrDefault(*value, "")));
 }
-void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* modifier)
+void ContentModifierImpl(Ark_NativePointer node,
+                         const Ark_CustomObject* modifier)
 {
     LOGE("ARKOALA ButtonAttribute::ContentModifierImpl -> Method is not "
             "implemented.");
 }
-void LabelStyleImpl(Ark_NativePointer node, const Ark_LabelStyle* value)
+void LabelStyleImpl(Ark_NativePointer node,
+                    const Ark_LabelStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

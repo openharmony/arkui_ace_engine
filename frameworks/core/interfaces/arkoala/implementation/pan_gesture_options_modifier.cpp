@@ -25,13 +25,16 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return 0;
 }
-void SetDirectionImpl(PanGestureOptionsPeer* peer, Ark_Int32 value)
+void SetDirectionImpl(PanGestureOptionsPeer* peer,
+                      Ark_Int32 value)
 {
 }
-void SetDistanceImpl(PanGestureOptionsPeer* peer, const Ark_Number* value)
+void SetDistanceImpl(PanGestureOptionsPeer* peer,
+                     const Ark_Number* value)
 {
 }
-void SetFingersImpl(PanGestureOptionsPeer* peer, const Ark_Number* value)
+void SetFingersImpl(PanGestureOptionsPeer* peer,
+                    const Ark_Number* value)
 {
 }
 Ark_NativePointer GetDirectionImpl(PanGestureOptionsPeer* peer)

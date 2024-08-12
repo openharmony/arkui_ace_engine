@@ -22,7 +22,8 @@ void _setContainerSpanOptionsImpl(Ark_NativePointer node)
 }
 } // ContainerSpanInterfaceModifier
 namespace ContainerSpanAttributeModifier {
-void TextBackgroundStyleImpl(Ark_NativePointer node, const Ark_TextBackgroundStyle* style)
+void TextBackgroundStyleImpl(Ark_NativePointer node,
+                             const Ark_TextBackgroundStyle* style)
 {
 }
 } // ContainerSpanAttributeModifier

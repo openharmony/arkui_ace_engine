@@ -25,7 +25,8 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return 0;
 }
-void SetStyledStringImpl(StyledStringControllerPeer* peer, const Ark_Materialized* styledString)
+void SetStyledStringImpl(StyledStringControllerPeer* peer,
+                         const Ark_Materialized* styledString)
 {
 }
 Ark_NativePointer GetStyledStringImpl(StyledStringControllerPeer* peer)

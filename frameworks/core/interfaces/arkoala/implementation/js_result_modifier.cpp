@@ -31,7 +31,8 @@ void HandleCancelImpl(JsResultPeer* peer)
 void HandleConfirmImpl(JsResultPeer* peer)
 {
 }
-void HandlePromptConfirmImpl(JsResultPeer* peer, const Ark_String* result)
+void HandlePromptConfirmImpl(JsResultPeer* peer,
+                             const Ark_String* result)
 {
 }
 } // JsResultModifier
