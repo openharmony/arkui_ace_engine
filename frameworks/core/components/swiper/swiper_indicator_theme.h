@@ -104,7 +104,7 @@ public:
             theme->pressSize_ = swiperPattern->GetAttr<Dimension>("swiper_indicator_press_size", 0.0_vp);
             theme->hoverSize_ = swiperPattern->GetAttr<Dimension>("swiper_indicator_hover_size", 0.0_vp);
             theme->hotZoneSize_ = swiperPattern->GetAttr<Dimension>("swiper_indicator_hotzone_size", 0.0_vp);
-            theme->indicatorPaddingDot_ = swiperPattern->GetAttr<Dimension>("indicator_padding_dot", 0.0_vp);
+            theme->indicatorPaddingDot_ = swiperPattern->GetAttr<Dimension>("indicator_padding_dot", 12.0_vp);
             theme->isIndicatorDisabled_ =
                 static_cast<bool>(swiperPattern->GetAttr<double>("swiper_indicator_disabled", 0.0));
             theme->animationCurve_ =
@@ -128,7 +128,7 @@ public:
             theme->hoverColor_ = swiperPattern->GetAttr<Color>("indicator_color_hover", Color::TRANSPARENT);
             theme->pressedColor_ = swiperPattern->GetAttr<Color>("indicator_color_pressed", Color::TRANSPARENT);
             theme->focusedColor_ = swiperPattern->GetAttr<Color>("indicator_color_focused", Color::TRANSPARENT);
-            theme->indicatorFocusedPadding_ = swiperPattern->GetAttr<Dimension>("indicator_focused_padding", 12.0_vp);
+            theme->indicatorFocusedPadding_ = swiperPattern->GetAttr<Dimension>("indicator_focused_padding", 0.0_vp);
             theme->clipToBounds_ = static_cast<bool>(swiperPattern->GetAttr<int>("clip_bounds", 0));
             theme->focusedBorderWidth_ = SWIPER_FOCUSED_BORDER_WIDTH;
             theme->hoverArrowBackgroundColor_ =
