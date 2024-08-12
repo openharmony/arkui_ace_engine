@@ -15,6 +15,7 @@
 
 import curves from '@ohos.curves';
 import { Route, RouteGroup } from '../common/route';
+import { ContainersDestination, containersRoute } from './containers';
 import { OperatesDestination, operatesRoute } from './operates';
 import { DisplaysDestination, displaysRoute } from './displays';
 
@@ -42,7 +43,9 @@ function CardDisabledStyle() {
 
 @Builder
 function Destination(name: string, route: Route) {
-  if (name.startsWith('displays/')) {
+  if (name.startsWith('containers/')) {
+    ContainersDestination(name, route)
+  } else if (name.startsWith('displays/')) {
     DisplaysDestination(name, route)
   } else if (name.startsWith('operates/')) {
     OperatesDestination(name, route)
@@ -54,6 +57,7 @@ function Destination(name: string, route: Route) {
 struct Index {
   @Provide('router') router: NavPathStack = new NavPathStack();
   @State routes: RouteGroup[] = [
+    containersRoute,
     operatesRoute,
     displaysRoute,
   ];
