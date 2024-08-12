@@ -625,35 +625,52 @@ class DynamicSyncScene {
     /**
      * Construct new instance of DynamicSyncScene.
      * initialize with instanceId.
-     * @param nodeRef obtained on the c++ side.
-     * @param frameRateRange frameRateRange
+     * @param {Object} nodeRef - obtained on the c++ side.
+     * @param {Object} frameRateRange - frameRateRange
      * @since 12
      */
     constructor(nodeRef, frameRateRange) {
-        this.frameRateRange = frameRateRange;
+        this.frameRateRange = { ...frameRateRange }; // 确保每个实例有独立的frameRateRange
         this.nodeRef = nodeRef;
         this.nodePtr = this.nodeRef.getNativeHandle();
     }
 
+    /**
+     * Get the frame rate range.
+     * @returns {Object} The frame rate range.
+     */
     getFrameRateRange() {
         return this.frameRateRange;
     }
 }
 
 class SwiperDynamicSyncScene extends DynamicSyncScene {
-    static Create(nodeRef) {
-        let swiperDynamicSyncScene = [new SwiperDynamicSyncScene(nodeRef, 0), new SwiperDynamicSyncScene(nodeRef, 1)];
-        return swiperDynamicSyncScene;
+    /**
+     * Create instances of SwiperDynamicSyncScene.
+     * @param {Object} nodeRef - obtained on the c++ side.
+     * @returns {SwiperDynamicSyncScene[]} Array of SwiperDynamicSyncScene instances.
+     */
+    static createInstances(nodeRef) {
+        return [new SwiperDynamicSyncScene(nodeRef, 0), new SwiperDynamicSyncScene(nodeRef, 1)];
     }
 
+    /**
+     * Construct new instance of SwiperDynamicSyncScene.
+     * @param {Object} nodeRef - obtained on the c++ side.
+     * @param {number} type - type of the scenes.
+     */
     constructor(nodeRef, type) {
         super(nodeRef, { min: 0, max: 120, expected: 120 });
         this.type = type;
     }
 
+    /**
+     * Set the frame rate range.
+     * @param {Object} frameRateRange - The new frame rate range.
+     */
     setFrameRateRange(frameRateRange) {
-        this.frameRateRange = frameRateRange;
-        getUINativeModule().setFrameRateRange(this.nodePtr, frameRateRange, this.type); // -> this.nodeRef -> SetFrameRate.
+        this.frameRateRange = { ...frameRateRange }; // 确保每个实例有独立的frameRateRange
+        getUINativeModule().setFrameRateRange(this.nodePtr, frameRateRange, this.type);
     }
 }
 
