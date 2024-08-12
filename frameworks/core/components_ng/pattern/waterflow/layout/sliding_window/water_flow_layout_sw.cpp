@@ -97,7 +97,7 @@ void WaterFlowLayoutSW::Init(const SizeF& frameSize)
 {
     mainLen_ = frameSize.MainSize(axis_);
     // omit footer from children count
-    itemCnt_ = wrapper_->GetTotalChildCount() - info_->footerIndex_ - 1;
+    itemCnt_ = info_->ItemCnt(wrapper_->GetTotalChildCount());
     sections_ = wrapper_->GetHostNode()->GetPattern<WaterFlowPattern>()->GetSections();
     if (sections_) {
         const auto& sections = sections_->GetSectionInfo();

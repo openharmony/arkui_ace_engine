@@ -45,20 +45,17 @@ std::list<int32_t> WaterFlowLayoutBase::GeneratePreloadList(
     const RefPtr<WaterFlowLayoutInfoBase>& info, LayoutWrapper* host, int32_t cacheCount)
 {
     std::list<int32_t> preloadList;
-    auto currIndex = info->NodeIdx(info->endIndex_ + 1);
-    auto totalCount = host->GetTotalChildCount();
-    for (int32_t i = 0; i < cacheCount && currIndex + i < totalCount; ++i) {
-        int32_t index = currIndex + i;
-        if (!host->GetChildByIndex(index, true)) {
-            preloadList.emplace_back(index);
+    const int32_t endBound = std::min(info->ItemCnt(host->GetTotalChildCount()) - 1, info->endIndex_ + cacheCount);
+    for (int32_t i = info->endIndex_ + 1; i <= endBound; ++i) {
+        if (!host->GetChildByIndex(info->NodeIdx(i), true)) {
+            preloadList.emplace_back(i);
         }
     }
 
-    currIndex = info->NodeIdx(info->FirstIdx() - 1);
-    for (int32_t i = 0; i < cacheCount && currIndex - i >= info->NodeIdx(0); ++i) {
-        int32_t index = currIndex - i;
-        if (!host->GetChildByIndex(index, true)) {
-            preloadList.emplace_back(index);
+    const int32_t startBound = std::max(0, info->startIndex_ - cacheCount);
+    for (int32_t i = info->FirstIdx() - 1; i >= startBound; --i) {
+        if (!host->GetChildByIndex(info->NodeIdx(i), true)) {
+            preloadList.emplace_back(i);
         }
     }
     return preloadList;

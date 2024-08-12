@@ -42,6 +42,9 @@ public:
     }
 
 protected:
+    /**
+     * @brief Register an IdleTask to preload (create/measure/layout) items in cache range.
+     */
     void PreloadItems(LayoutWrapper* host, const RefPtr<WaterFlowLayoutInfoBase>& info, int32_t cacheCount);
 
 private:
