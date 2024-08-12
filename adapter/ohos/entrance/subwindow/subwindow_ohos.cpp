@@ -1151,8 +1151,6 @@ void SubwindowOhos::ShowToastForAbility(const NG::ToastInfo& toastInfo, std::fun
         toastInfo.showMode == NG::ToastShowMode::SYSTEM_TOP_MOST) {
         ResizeWindow();
         ShowWindow(false);
-        CHECK_NULL_VOID(window_);
-        window_->SetTouchable(false);
     }
     delegate->ShowToast(toastInfo, std::move(callback));
 }
