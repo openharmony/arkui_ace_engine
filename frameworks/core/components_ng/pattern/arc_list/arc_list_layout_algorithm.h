@@ -60,6 +60,7 @@ protected:
     int32_t LayoutALineBackward(
         LayoutWrapper* layoutWrapper, int32_t& currentIndex, float endPos, float& startPos) override;
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize) override;
+    void UpdateSnapCenterContentOffset(LayoutWrapper* layoutWrapper) override;
     float GetLayoutFixOffset() override;
 
 private:

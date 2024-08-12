@@ -43,10 +43,10 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr float ARC_LIST_ITEM_SCALE = 0.92f;
-constexpr float ARC_LIST_MAIN_POS_OFFSET = 200.f;
-constexpr float ARC_LIST_ITEM_SNAP_SIZE = 72.5f;
-constexpr float FLOAT_TWO = 2.0f;
+static constexpr float ARC_LIST_ITEM_SCALE = 0.92f;
+static constexpr float ARC_LIST_MAIN_POS_OFFSET = 200.f;
+static constexpr Dimension ARC_LIST_ITEM_SNAP_SIZE = 145.0_vp;
+static constexpr float FLOAT_TWO = 2.0f;
 } // namespace
 
 // map data from UX, mark for scale ratio according to distance between item center and list center
@@ -257,9 +257,9 @@ void ArcListLayoutAlgorithm::FixPredictSnapOffsetAlignCenter()
 
     auto predictEndPos = totalOffset_ - predictSnapOffset_.value();
     auto itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos + spaceWidth_;
-    float snapSize = LessOrEqual(itemHeight, ARC_LIST_ITEM_SNAP_SIZE + spaceWidth_)
+    float snapSize = LessOrEqual(itemHeight, GetItemSnapSize() + spaceWidth_)
                          ? itemHeight
-                         : ARC_LIST_ITEM_SNAP_SIZE + spaceWidth_;
+                         : GetItemSnapSize() + spaceWidth_;
     if (LessNotEqual(predictEndPos, snapSize / FLOAT_TWO - contentMainSize_ / FLOAT_TWO - spaceWidth_ / FLOAT_TWO)) {
         if (isSpringEffect_) {
             return;
@@ -361,7 +361,7 @@ float ArcListLayoutAlgorithm::CalculatePredictSnapEndPositionByIndex(uint32_t in
     float predictSnapEndPos = prevPredictEndPos;
     float predictPos = prevPredictEndPos + contentMainSize_ / FLOAT_TWO - totalOffset_;
     float itemHeight = itemPosition_[index].endPos - itemPosition_[index].startPos;
-    float snapSize = LessOrEqual(itemHeight, ARC_LIST_ITEM_SNAP_SIZE) ? itemHeight : ARC_LIST_ITEM_SNAP_SIZE;
+    float snapSize = LessOrEqual(itemHeight, GetItemSnapSize()) ? itemHeight : GetItemSnapSize();
     float snapLow = itemPosition_[index].startPos + snapSize / FLOAT_TWO;
     float snapHigh = itemPosition_[index].endPos - snapSize / FLOAT_TWO;
     predictPos = LessNotEqual(predictPos, snapLow) ? snapLow : predictPos;
@@ -397,7 +397,7 @@ void ArcListLayoutAlgorithm::OnItemPositionAddOrUpdate(LayoutWrapper* layoutWrap
 
 float ArcListLayoutAlgorithm::GetItemSnapSize()
 {
-    return ARC_LIST_ITEM_SNAP_SIZE;
+    return ARC_LIST_ITEM_SNAP_SIZE.ConvertToPx();
 }
 
 void ArcListLayoutAlgorithm::MeasureHeader(LayoutWrapper* layoutWrapper)
@@ -453,7 +453,7 @@ void ArcListLayoutAlgorithm::LayoutHeader(LayoutWrapper* layoutWrapper, const Of
 
     auto offset = paddingOffset;
     float childCrossSize = GetCrossAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
-    float crossOffset = (crossSize - childCrossSize) / 2;
+    float crossOffset = (crossSize - childCrossSize) / FLOAT_TWO;
     crossOffset = GreatOrEqual(crossOffset, 0.0f) ? crossOffset : 0.0f;
 
     offset = offset + OffsetF(crossOffset, startHeaderPos_ + chainOffset);
@@ -478,6 +478,25 @@ void ArcListLayoutAlgorithm::UpdateZIndex(const RefPtr<LayoutWrapper>& layoutWra
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateZIndex(1);
+}
+
+void ArcListLayoutAlgorithm::UpdateSnapCenterContentOffset(LayoutWrapper* layoutWrapper)
+{
+    if (itemPosition_.empty()) {
+        return;
+    }
+
+    float itemHeight = 0.0f;
+    if (GetStartIndex() == 0) {
+        itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
+        auto snapSize = LessOrEqual(itemHeight, GetItemSnapSize()) ? itemHeight : GetItemSnapSize();
+        contentStartOffset_ = std::max((contentMainSize_ - snapSize) / FLOAT_TWO, 0.0f);
+    }
+    if (GetEndIndex() == totalItemCount_ - 1) {
+        itemHeight = itemPosition_.rbegin()->second.endPos - itemPosition_.rbegin()->second.startPos;
+        auto snapSize = LessOrEqual(itemHeight, GetItemSnapSize()) ? itemHeight : GetItemSnapSize();
+        contentEndOffset_ = std::max((contentMainSize_ - snapSize) / FLOAT_TWO, 0.0f);
+    }
 }
 
 float ArcListLayoutAlgorithm::GetLayoutFixOffset()
