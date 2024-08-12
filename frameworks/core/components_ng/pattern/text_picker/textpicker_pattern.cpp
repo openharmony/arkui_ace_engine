@@ -113,9 +113,8 @@ void TextPickerPattern::SetButtonIdeaSize()
             buttonHeight = resizePickerItemHeight_ - PRESS_INTERVAL.ConvertToPx() * RATE;
         }
 
-        auto buttonSpace =
-            pickerTheme->NeedButtonFocusAreaType() ? pickerTheme->GetSelectorItemSpace() : PRESS_INTERVAL * RATE;
-        if (children.size() == 1 && pickerTheme->NeedButtonFocusAreaType()) {
+        auto buttonSpace = useButtonFocusArea_ ? pickerTheme->GetSelectorItemSpace() : PRESS_INTERVAL * RATE;
+        if (children.size() == 1 && useButtonFocusArea_) {
             buttonSpace = PRESS_INTERVAL * RATE;
         }
         buttonLayoutProperty->UpdateUserDefinedIdealSize(
@@ -127,11 +126,14 @@ void TextPickerPattern::SetButtonIdeaSize()
         CHECK_NULL_VOID(columnNode);
         auto columnPattern = columnNode->GetPattern<TextPickerColumnPattern>();
         CHECK_NULL_VOID(columnPattern);
-        if (!columnPattern->isHover()) {
-            buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        if (!useButtonFocusArea_) {
+            if (!columnPattern->isHover()) {
+                buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+            }
+        } else {
+            auto isFocusButton = haveFocus_ && (currentFocusButtonNode == buttonNode);
+            UpdateColumnButtonStyles(columnNode, isFocusButton, false);
         }
-        auto isFocusButton = haveFocus_ && (currentFocusButtonNode == buttonNode);
-        UpdateButtonStyles(buttonNode, columnNode, pickerTheme, isFocusButton);
         buttonNode->MarkModifyDone();
         buttonNode->MarkDirtyNode();
     }
@@ -147,6 +149,7 @@ void TextPickerPattern::InitSelectorProps()
     CHECK_NULL_VOID(pickerTheme);
 
     selectorItemRadius_ = pickerTheme->GetSelectorItemRadius();
+    useButtonFocusArea_ = pickerTheme->NeedButtonFocusAreaType();
 }
 
 void TextPickerPattern::InitFocusEvent()
@@ -181,9 +184,16 @@ void TextPickerPattern::SetHaveFocus(bool haveFocus)
 
 void TextPickerPattern::HandleFocusEvent()
 {
-    SetHaveFocus(true);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+
     AddIsFocusActiveUpdateEvent();
-    UpdateFocusButtonState();
+    if (context->GetIsFocusActive()) {
+        SetHaveFocus(true);
+        UpdateFocusButtonState();
+    }
 }
 
 void TextPickerPattern::HandleBlurEvent()
@@ -219,63 +229,27 @@ void TextPickerPattern::UpdateFocusButtonState()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContextRefPtr();
-    CHECK_NULL_VOID(context);
-    auto pickerTheme = context->GetTheme<PickerTheme>();
-    CHECK_NULL_VOID(pickerTheme);
-    if (pickerTheme->NeedButtonFocusAreaType()) {
+
+    if (useButtonFocusArea_) {
         auto currentFocusStackNode = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
         CHECK_NULL_VOID(currentFocusStackNode);
         auto blendColumnNode = currentFocusStackNode->GetLastChild();
         CHECK_NULL_VOID(blendColumnNode);
         auto currentFocusColumnNode = DynamicCast<FrameNode>(blendColumnNode->GetLastChild());
         CHECK_NULL_VOID(currentFocusColumnNode);
-        auto currentFocusButtonNode = DynamicCast<FrameNode>(currentFocusStackNode->GetFirstChild());
-        CHECK_NULL_VOID(currentFocusButtonNode);
-        UpdateButtonStyles(currentFocusButtonNode, currentFocusColumnNode, pickerTheme, haveFocus_);
-        currentFocusButtonNode->MarkModifyDone();
-        currentFocusButtonNode->MarkDirtyNode();
+
+        UpdateColumnButtonStyles(currentFocusColumnNode, haveFocus_, true);
     }
 }
 
-void TextPickerPattern::UpdateButtonStyles(const RefPtr<FrameNode>& buttonNode, const RefPtr<FrameNode>& columnNode,
-    const RefPtr<PickerTheme>& pickerTheme, bool haveFocus)
+void TextPickerPattern::UpdateColumnButtonStyles(
+    const RefPtr<FrameNode>& columnNode, bool haveFocus, bool needMarkDirty)
 {
-    CHECK_NULL_VOID(buttonNode);
     CHECK_NULL_VOID(columnNode);
-    CHECK_NULL_VOID(pickerTheme);
 
-    if (pickerTheme->NeedButtonFocusAreaType()) {
-        auto textPickerColumnPattern = columnNode->GetPattern<TextPickerColumnPattern>();
-        CHECK_NULL_VOID(textPickerColumnPattern);
-        auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-        CHECK_NULL_VOID(buttonLayoutProperty);
-        auto buttonRenderContext = buttonNode->GetRenderContext();
-        CHECK_NULL_VOID(buttonRenderContext);
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
-        BorderWidthProperty borderWidth;
-        BorderColorProperty borderColor;
-        Color buttonBgColor;
-
-        if (haveFocus && context->GetIsFocusActive()) {
-            buttonBgColor = pickerTheme->GetSelectorItemFocusBgColor();
-            borderWidth.SetBorderWidth(pickerTheme->GetSelectorItemFocusBorderWidth());
-            borderColor.SetColor(pickerTheme->GetSelectorItemFocusBorderColor());
-        } else {
-            buttonBgColor = pickerTheme->GetSelectorItemNormalBgColor();
-            borderWidth.SetBorderWidth(pickerTheme->GetSelectorItemBorderWidth());
-            borderColor.SetColor(pickerTheme->GetSelectorItemBorderColor());
-        }
-
-        textPickerColumnPattern->SetButtonBgColor(buttonBgColor);
-        textPickerColumnPattern->UpdateFocusColumnState(haveFocus);
-        buttonLayoutProperty->UpdateBorderWidth(borderWidth);
-        buttonRenderContext->UpdateBorderColor(borderColor);
-        buttonRenderContext->UpdateBackgroundColor(buttonBgColor);
-    }
+    auto textPickerColumnPattern = columnNode->GetPattern<TextPickerColumnPattern>();
+    CHECK_NULL_VOID(textPickerColumnPattern);
+    textPickerColumnPattern->UpdateColumnButtonFocusState(haveFocus, needMarkDirty);
 }
 
 void TextPickerPattern::GetInnerFocusButtonPaintRect(RoundRect& paintRect)
@@ -776,7 +750,7 @@ void TextPickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     CHECK_NULL_VOID(blendChild);
     auto pickerChild = DynamicCast<FrameNode>(blendChild->GetLastChild());
     CHECK_NULL_VOID(pickerChild);
-    if (pickerTheme->NeedButtonFocusAreaType()) {
+    if (useButtonFocusArea_) {
         return GetInnerFocusButtonPaintRect(paintRect);
     }
     GetFocusPaintRect(pipeline, pickerChild, columnNode, paintRect, childSize);

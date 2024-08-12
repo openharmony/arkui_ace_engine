@@ -85,6 +85,8 @@ public:
 
 protected:
     void SetFriction(double friction) override;
+    void HandleScrollBarOutBoundary() override;
+    float GetSnapCenterOverScrollPos(float startPos, float prevScroll) override;
 
 private:
     void OnModifyDone() override;
@@ -101,13 +103,20 @@ private:
     ListItemInfo GetItemDisplayInfo(int32_t index);
     bool GetItemSnapPosition(int32_t nIndex, ItemSnapInfo& snapInfo);
 
-    float FixScrollOffset(float offset, int32_t source) override;
+    float FixScrollOffset(float offset, int32_t source);
     void OnScrollVisibleContentChange(const RefPtr<ListEventHub>& listEventHub, bool indexChanged) override {}
     float GetScrollUpdateFriction(float overScroll) override;
     ScrollAlign GetScrollToNodeAlign() override
     {
         return ScrollAlign::CENTER;
     }
+    float GetStartOverScrollOffset(float offset) const override;
+    float GetEndOverScrollOffset(float offset) const override;
+
+    void OnMidIndexChanged(int32_t lastIndex, int32_t curIndex) override;
+#ifdef SUPPORT_DIGITAL_CROWN
+    void StartVibrator(bool bEdge);
+#endif
 
     RefPtr<FrameNode> header_ = nullptr;
     int32_t scrollStartMidIndex_ = -1;

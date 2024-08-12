@@ -294,7 +294,7 @@ class DrawParameters {
     }
 }
 
-function checkApprox(num1, num2) {
+function nearEquals(num1, num2) {
     return Math.abs(num1 - num2) < APPROXIMATE_NUMBER;
 }
 
@@ -317,64 +317,99 @@ class MyFullDrawModifier extends DrawModifier {
         const canvas = context.canvas;
         const pen = new drawing.Pen();
         pen.setAntiAlias(true);
-        pen.setColor(this.parseColorString(this.parameters.trackColor));
+        pen.setColor(this.parseColorString(this.parameters.selectedColor));
         pen.setStrokeWidth(this.parameters.uiContext.vp2px(this.parameters.lineWidth));
         pen.setCapStyle(drawing.CapStyle.ROUND_CAP);
         canvas.attachPen(pen);
         let path = new drawing.Path();
+        let leftTopX = this.parameters.uiContext.vp2px(this.parameters.x - this.parameters.normalRadius);
+        let leftTopY = this.parameters.uiContext.vp2px(this.parameters.y - this.parameters.normalRadius);
+        let rightBottomX = this.parameters.uiContext.vp2px(this.parameters.x + this.parameters.normalRadius);
+        let rightBottomY = this.parameters.uiContext.vp2px(this.parameters.y + this.parameters.normalRadius);
+        let startAngular;
+        let stopAngular;
         if (this.parameters.reverse) {
             if (this.parameters.start < this.parameters.end) {
-                path.arcTo(this.parameters.uiContext.vp2px(this.parameters.x - this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.y - this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.x + this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.y + this.parameters.normalRadius), this.parameters.end * RADIAN_TO_ANGULAR, TWO_PI_RADIAN + (this.parameters.trackStart - this.parameters.end) * RADIAN_TO_ANGULAR);
+                startAngular = this.parameters.end * RADIAN_TO_ANGULAR;
+                stopAngular = TWO_PI_RADIAN + (this.parameters.trackStart - this.parameters.end) * RADIAN_TO_ANGULAR;
             }
             else {
-                path.arcTo(this.parameters.uiContext.vp2px(this.parameters.x - this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.y - this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.x + this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.y + this.parameters.normalRadius), this.parameters.end * RADIAN_TO_ANGULAR, (this.parameters.trackStart - this.parameters.end) * RADIAN_TO_ANGULAR);
+                startAngular = this.parameters.end * RADIAN_TO_ANGULAR;
+                stopAngular = (this.parameters.trackStart - this.parameters.end) * RADIAN_TO_ANGULAR;
             }
         }
         else {
             if (this.parameters.start < this.parameters.end) {
-                path.arcTo(this.parameters.uiContext.vp2px(this.parameters.x - this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.y - this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.x + this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.y + this.parameters.normalRadius), this.parameters.end * RADIAN_TO_ANGULAR, (this.parameters.trackStart - this.parameters.end) * RADIAN_TO_ANGULAR);
+                startAngular = this.parameters.end * RADIAN_TO_ANGULAR;
+                stopAngular = (this.parameters.trackStart - this.parameters.end) * RADIAN_TO_ANGULAR;
             }
             else {
-                path.arcTo(this.parameters.uiContext.vp2px(this.parameters.x - this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.y - this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.x + this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.y + this.parameters.normalRadius), this.parameters.trackStart * RADIAN_TO_ANGULAR, TWO_PI_RADIAN + (this.parameters.end - this.parameters.trackStart) * RADIAN_TO_ANGULAR);
+                startAngular = this.parameters.trackStart * RADIAN_TO_ANGULAR;
+                stopAngular = TWO_PI_RADIAN + (this.parameters.end - this.parameters.trackStart) * RADIAN_TO_ANGULAR;
             }
         }
+        path.arcTo(leftTopX, leftTopY, rightBottomX, rightBottomY, startAngular, stopAngular);
         canvas.drawPath(path);
         canvas.detachPen();
     }
 
-    drawSelect(context) {
+    drawSelection(context) {
         if (this.parameters.uiContext === undefined) {
             hilog.error(0x3900, 'ArcSlider', `uiContext is undefined`);
             return;
         }
-        if (!checkApprox(this.parameters.start, this.parameters.selectArc)) {
-            const canvas = context.canvas;
-            const pen = new drawing.Pen();
-            pen.setAntiAlias(true);
-            pen.setColor(this.parseColorString(this.parameters.selectedColor));
-            pen.setStrokeWidth(this.parameters.uiContext.vp2px(this.parameters.lineWidth));
-            pen.setCapStyle(drawing.CapStyle.ROUND_CAP);
-            canvas.attachPen(pen);
-            let path = new drawing.Path();
-            if (this.parameters.reverse) {
-                if (this.parameters.start < this.parameters.end) {
-                    path.arcTo(this.parameters.uiContext.vp2px(this.parameters.x - this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.y - this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.x + this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.y + this.parameters.normalRadius), this.parameters.selectArc * RADIAN_TO_ANGULAR, (this.parameters.start - this.parameters.selectArc) * RADIAN_TO_ANGULAR);
+        if (nearEquals(this.parameters.start, this.parameters.selectArc)) {
+            return;
+        }
+        const canvas = context.canvas;
+        const pen = new drawing.Pen();
+        pen.setAntiAlias(true);
+        pen.setColor(this.parseColorString(this.parameters.selectedColor));
+        pen.setStrokeWidth(this.parameters.uiContext.vp2px(this.parameters.lineWidth));
+        pen.setCapStyle(drawing.CapStyle.ROUND_CAP);
+        canvas.attachPen(pen);
+        let path = new drawing.Path();
+        let leftTopX = this.parameters.uiContext.vp2px(this.parameters.x - this.parameters.normalRadius);
+        let leftTopY = this.parameters.uiContext.vp2px(this.parameters.y - this.parameters.normalRadius);
+        let rightBottomX = this.parameters.uiContext.vp2px(this.parameters.x + this.parameters.normalRadius);
+        let rightBottomY = this.parameters.uiContext.vp2px(this.parameters.y + this.parameters.normalRadius);
+        let startAngular;
+        let stopAngular;
+        if (this.parameters.reverse) {
+            if (this.parameters.start < this.parameters.end) {
+                if (this.parameters.selectArc > this.parameters.start) {
+                    startAngular = (this.parameters.selectArc - 2 * Math.PI) * RADIAN_TO_ANGULAR;
+                    stopAngular = (2 * Math.PI + this.parameters.start - this.parameters.selectArc) * RADIAN_TO_ANGULAR;
                 }
                 else {
-                    path.arcTo(this.parameters.uiContext.vp2px(this.parameters.x - this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.y - this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.x + this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.y + this.parameters.normalRadius), this.parameters.selectArc * RADIAN_TO_ANGULAR, (this.parameters.start - this.parameters.selectArc) * RADIAN_TO_ANGULAR);
+                    startAngular = this.parameters.selectArc * RADIAN_TO_ANGULAR;
+                    stopAngular = (this.parameters.start - this.parameters.selectArc) * RADIAN_TO_ANGULAR;
                 }
             }
             else {
-                if (this.parameters.start < this.parameters.end) {
-                    path.arcTo(this.parameters.uiContext.vp2px(this.parameters.x - this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.y - this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.x + this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.y + this.parameters.normalRadius), this.parameters.selectArc * RADIAN_TO_ANGULAR, (this.parameters.start - this.parameters.selectArc) * RADIAN_TO_ANGULAR);
+                startAngular = this.parameters.selectArc * RADIAN_TO_ANGULAR;
+                stopAngular = (this.parameters.start - this.parameters.selectArc) * RADIAN_TO_ANGULAR;
+            }
+        }
+        else {
+            if (this.parameters.start < this.parameters.end) {
+                startAngular = this.parameters.selectArc * RADIAN_TO_ANGULAR;
+                stopAngular = (this.parameters.start - this.parameters.selectArc) * RADIAN_TO_ANGULAR;
+            }
+            else {
+                if (this.parameters.selectArc < this.parameters.start) {
+                    startAngular = (this.parameters.start - 2 * Math.PI) * RADIAN_TO_ANGULAR;
+                    stopAngular = (2 * Math.PI + this.parameters.selectArc - this.parameters.start) * RADIAN_TO_ANGULAR;
                 }
                 else {
-                    path.arcTo(this.parameters.uiContext.vp2px(this.parameters.x - this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.y - this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.x + this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.y + this.parameters.normalRadius), this.parameters.start * RADIAN_TO_ANGULAR, (this.parameters.selectArc - this.parameters.start) * RADIAN_TO_ANGULAR);
+                    startAngular = this.parameters.start * RADIAN_TO_ANGULAR;
+                    stopAngular = (this.parameters.selectArc - this.parameters.start) * RADIAN_TO_ANGULAR;
                 }
             }
-            canvas.drawPath(path);
-            canvas.detachPen();
         }
+        path.arcTo(leftTopX, leftTopY, rightBottomX, rightBottomY, startAngular, stopAngular);
+        canvas.drawPath(path);
+        canvas.detachPen();
     }
 
     drawContent(context) {
@@ -382,7 +417,7 @@ class MyFullDrawModifier extends DrawModifier {
     }
 
     drawFront(context) {
-        this.drawSelect(context);
+        this.drawSelection(context);
     }
 }
 
@@ -432,7 +467,7 @@ export class ArcSlider extends ViewPU {
         this.crownEventCounter = 0;
         this.__clipPath = new ObservedPropertySimplePU('', this, "clipPath");
         this.__sweepFlag = new ObservedPropertySimplePU(false, this, "sweepFlag");
-        this.__largeArcFlag = new ObservedPropertySimplePU(false, this, "largeArcFlag");
+        this.__isArcLarge = new ObservedPropertySimplePU(false, this, "isArcLarge");
         this.setInitiallyProvidedValue(params);
         this.finalizeConstruction();
     }
@@ -558,8 +593,8 @@ export class ArcSlider extends ViewPU {
         if (params.sweepFlag !== undefined) {
             this.sweepFlag = params.sweepFlag;
         }
-        if (params.largeArcFlag !== undefined) {
-            this.largeArcFlag = params.largeArcFlag;
+        if (params.isArcLarge !== undefined) {
+            this.isArcLarge = params.isArcLarge;
         }
     }
 
@@ -569,13 +604,13 @@ export class ArcSlider extends ViewPU {
     purgeVariableDependenciesOnElmtId(rmElmtId) {
         this.__clipPath.purgeDependencyOnElmtId(rmElmtId);
         this.__sweepFlag.purgeDependencyOnElmtId(rmElmtId);
-        this.__largeArcFlag.purgeDependencyOnElmtId(rmElmtId);
+        this.__isArcLarge.purgeDependencyOnElmtId(rmElmtId);
     }
 
     aboutToBeDeleted() {
         this.__clipPath.aboutToBeDeleted();
         this.__sweepFlag.aboutToBeDeleted();
-        this.__largeArcFlag.aboutToBeDeleted();
+        this.__isArcLarge.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -596,12 +631,12 @@ export class ArcSlider extends ViewPU {
         this.__sweepFlag.set(newValue);
     }
 
-    get largeArcFlag() {
-        return this.__largeArcFlag.get();
+    get isArcLarge() {
+        return this.__isArcLarge.get();
     }
 
-    set largeArcFlag(newValue) {
-        this.__largeArcFlag.set(newValue);
+    set isArcLarge(newValue) {
+        this.__isArcLarge.set(newValue);
     }
 
     aboutToAppear() {
@@ -717,6 +752,9 @@ export class ArcSlider extends ViewPU {
         if (this.end > this.start) {
             if (this.options.layoutOptions.reverse) {
                 this.selectArc = this.start - selectRatio * (2 * Math.PI - Math.abs(this.end - this.start));
+                if (this.selectArc <= -Math.PI) {
+                    this.selectArc += 2 * Math.PI;
+                }
             }
             else {
                 this.selectArc = this.start + selectRatio * Math.abs(this.end - this.start);
@@ -728,11 +766,14 @@ export class ArcSlider extends ViewPU {
             }
             else {
                 this.selectArc = this.start + selectRatio * (2 * Math.PI - Math.abs(this.end - this.start));
+                if (this.selectArc >= Math.PI) {
+                    this.selectArc = -2 * Math.PI + this.start + selectRatio * (2 * Math.PI - Math.abs(this.end - this.start));
+                }
             }
         }
         this.normalRadius = this.options.layoutOptions.radius - (this.lineWidth / 2) -
         this.options.layoutOptions.padding;
-        this.calBlurNormal();
+        this.calBlur();
     }
 
     setSelected() {
@@ -741,6 +782,9 @@ export class ArcSlider extends ViewPU {
         if (this.end > this.start) {
             if (this.options.layoutOptions.reverse) {
                 this.selectArc = this.start - selectRatio * (2 * Math.PI - Math.abs(this.end - this.start));
+                if (this.selectArc <= -Math.PI) {
+                    this.selectArc = 2 * Math.PI + this.start - selectRatio * (2 * Math.PI - Math.abs(this.end - this.start));
+                }
             }
             else {
                 this.selectArc = this.start + selectRatio * Math.abs(this.end - this.start);
@@ -752,168 +796,104 @@ export class ArcSlider extends ViewPU {
             }
             else {
                 this.selectArc = this.start + selectRatio * (2 * Math.PI - Math.abs(this.end - this.start));
+                if (this.selectArc >= Math.PI) {
+                    this.selectArc = -2 * Math.PI + this.start + selectRatio * (2 * Math.PI - Math.abs(this.end - this.start));
+                }
             }
         }
         this.normalRadius = this.options.layoutOptions.radius - (this.lineWidth / 2);
-        this.calBlurSelected();
+        this.calBlur();
     }
 
-    calBlurNormal() {
-        if (this.parameters.reverse) {
-            if (this.trackStart > this.end) {
-                if (this.trackStart - this.end > Math.PI) {
-                    this.largeArcFlag = true;
-                    this.sweepFlag = false;
-                }
-                else {
-                    this.largeArcFlag = false;
-                    this.sweepFlag = false;
-                }
+    calBlurIsReverseTrue() {
+        if (this.trackStart > this.end) {
+            if (this.trackStart - this.end > Math.PI) {
+                this.isArcLarge = true;
+                this.sweepFlag = false;
             }
             else {
-                if (2 * Math.PI + this.trackStart - this.end > Math.PI) {
-                    this.largeArcFlag = true;
-                    this.sweepFlag = false;
-                }
-                else {
-                    this.largeArcFlag = false;
-                    this.sweepFlag = false;
-                }
+                this.isArcLarge = false;
+                this.sweepFlag = false;
             }
         }
         else {
-            if (this.trackStart > this.end) {
-                if (2 * Math.PI + this.end - this.trackStart > Math.PI) {
-                    this.largeArcFlag = true;
-                    this.sweepFlag = true;
-                }
-                else {
-                    this.largeArcFlag = false;
-                    this.sweepFlag = true;
-                }
+            if (2 * Math.PI + this.trackStart - this.end > Math.PI) {
+                this.isArcLarge = true;
+                this.sweepFlag = false;
             }
             else {
-                if (this.end - this.trackStart > Math.PI) {
-                    this.largeArcFlag = true;
-                    this.sweepFlag = true;
-                }
-                else {
-                    this.largeArcFlag = false;
-                    this.sweepFlag = true;
-                }
+                this.isArcLarge = false;
+                this.sweepFlag = false;
             }
         }
+    }
+
+    calBlurIsReverseFalse() {
+        if (this.trackStart > this.end) {
+            if (2 * Math.PI + this.end - this.trackStart > Math.PI) {
+                this.isArcLarge = true;
+                this.sweepFlag = true;
+            }
+            else {
+                this.isArcLarge = false;
+                this.sweepFlag = true;
+            }
+        }
+        else {
+            if (this.end - this.trackStart > Math.PI) {
+                this.isArcLarge = true;
+                this.sweepFlag = true;
+            }
+            else {
+                this.isArcLarge = false;
+                this.sweepFlag = true;
+            }
+        }
+    }
+
+    setClipPath() {
         if (this.parameters.uiContext) {
-            this.clipPath = 'M' + JSON.stringify(1.5 * (this.parameters.x + (this.parameters.normalRadius -
-                this.parameters.lineWidth / 2) * Math.cos(this.parameters.trackStart))) + ' ' + JSON.stringify(1.5 *
-                (this.parameters.y + (this.parameters.normalRadius - this.parameters.lineWidth / 2) *
-                Math.sin(this.parameters.trackStart))) + ' A' +
-            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.lineWidth / 2)) + ' ' +
-            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.lineWidth / 2)) + ' 0' + ' 1' + ' ' +
-            JSON.stringify(Number(this.sweepFlag)) + ' ' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.x +
-                (this.parameters.normalRadius + this.parameters.lineWidth / 2) * Math.cos(this.parameters.trackStart))) + ' ' +
-            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.y + (this.parameters.normalRadius +
+            this.clipPath = 'M' + String(this.parameters.uiContext.vp2px(this.parameters.x + (this.parameters.normalRadius -
+                this.parameters.lineWidth / 2) * Math.cos(this.parameters.trackStart))) + ' ' +
+            String(this.parameters.uiContext.vp2px(this.parameters.y + (this.parameters.normalRadius -
                 this.parameters.lineWidth / 2) * Math.sin(this.parameters.trackStart))) + ' A' +
-            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.normalRadius + this.parameters.lineWidth / 2)) +
-                ' ' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.normalRadius + this.parameters.lineWidth /
-                2)) + ' 0' + ' ' + JSON.stringify(Number(this.largeArcFlag)) + ' ' + JSON.stringify(Number(this.sweepFlag)) +
-                ' ' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.x + (this.parameters.normalRadius +
+            String(this.parameters.uiContext.vp2px(this.parameters.lineWidth / 2)) + ' ' +
+            String(this.parameters.uiContext.vp2px(this.parameters.lineWidth / 2)) + ' 0' + ' 1' + ' ' +
+            String(Number(this.sweepFlag)) + ' ' + String(this.parameters.uiContext.vp2px(this.parameters.x +
+                (this.parameters.normalRadius + this.parameters.lineWidth / 2) * Math.cos(this.parameters.trackStart))) + ' ' +
+            String(this.parameters.uiContext.vp2px(this.parameters.y + (this.parameters.normalRadius +
+                this.parameters.lineWidth / 2) * Math.sin(this.parameters.trackStart))) + ' A' +
+            String(this.parameters.uiContext.vp2px(this.parameters.normalRadius + this.parameters.lineWidth / 2)) + ' ' +
+            String(this.parameters.uiContext.vp2px(this.parameters.normalRadius + this.parameters.lineWidth / 2)) + ' 0 ' +
+            String(Number(this.isArcLarge)) + ' ' + String(Number(this.sweepFlag)) + ' ' +
+            String(this.parameters.uiContext.vp2px(this.parameters.x + (this.parameters.normalRadius +
                 this.parameters.lineWidth / 2) * Math.cos(this.parameters.end))) + ' ' +
-            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.y + (this.parameters.normalRadius +
+            String(this.parameters.uiContext.vp2px(this.parameters.y + (this.parameters.normalRadius +
                 this.parameters.lineWidth / 2) * Math.sin(this.parameters.end))) + ' A' +
-            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.lineWidth / 2)) + ' ' +
-            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.lineWidth / 2)) + ' 0' + ' 1' + ' ' +
-            JSON.stringify(Number(this.sweepFlag)) + ' ' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.x +
+            String(this.parameters.uiContext.vp2px(this.parameters.lineWidth / 2)) + ' ' +
+            String(this.parameters.uiContext.vp2px(this.parameters.lineWidth / 2)) + ' 0' + ' 1 ' +
+            String(Number(this.sweepFlag)) + ' ' + String(this.parameters.uiContext.vp2px(this.parameters.x +
                 (this.parameters.normalRadius - this.parameters.lineWidth / 2) * Math.cos(this.parameters.end))) + ' ' +
-            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.y + (this.parameters.normalRadius -
+            String(this.parameters.uiContext.vp2px(this.parameters.y + (this.parameters.normalRadius -
                 this.parameters.lineWidth / 2) * Math.sin(this.parameters.end))) + ' A' +
-            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.normalRadius - this.parameters.lineWidth / 2)) +
-                ' ' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.normalRadius - this.parameters.lineWidth /
-                2)) + ' 180' + ' ' + JSON.stringify(Number(this.largeArcFlag)) + ' ' + JSON.stringify(Number(!this.sweepFlag)) +
-                ' ' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.x + (this.parameters.normalRadius -
+            String(this.parameters.uiContext.vp2px(this.parameters.normalRadius - this.parameters.lineWidth / 2)) + ' ' +
+            String(this.parameters.uiContext.vp2px(this.parameters.normalRadius - this.parameters.lineWidth / 2)) + ' 180 ' +
+            String(Number(this.isArcLarge)) + ' ' + String(Number(!this.sweepFlag)) + ' ' +
+            String(this.parameters.uiContext.vp2px(this.parameters.x + (this.parameters.normalRadius -
                 this.parameters.lineWidth / 2) * Math.cos(this.parameters.trackStart))) + ' ' +
-            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.y + (this.parameters.normalRadius -
+            String(this.parameters.uiContext.vp2px(this.parameters.y + (this.parameters.normalRadius -
                 this.parameters.lineWidth / 2) * Math.sin(this.parameters.trackStart)));
         }
     }
 
-    calBlurSelected() {
+    calBlur() {
         if (this.parameters.reverse) {
-            if (this.trackStart > this.end) {
-                if (this.trackStart - this.end > Math.PI) {
-                    this.largeArcFlag = true;
-                    this.sweepFlag = false;
-                }
-                else {
-                    this.largeArcFlag = false;
-                    this.sweepFlag = false;
-                }
-            }
-            else {
-                if (2 * Math.PI + this.trackStart - this.end > Math.PI) {
-                    this.largeArcFlag = true;
-                    this.sweepFlag = false;
-                }
-                else {
-                    this.largeArcFlag = false;
-                    this.sweepFlag = false;
-                }
-            }
+            this.calBlurIsReverseTrue();
         }
         else {
-            if (this.trackStart > this.end) {
-                if (2 * Math.PI + this.end - this.trackStart > Math.PI) {
-                    this.largeArcFlag = true;
-                    this.sweepFlag = true;
-                }
-                else {
-                    this.largeArcFlag = false;
-                    this.sweepFlag = true;
-                }
-            }
-            else {
-                if (this.end - this.trackStart > Math.PI) {
-                    this.largeArcFlag = true;
-                    this.sweepFlag = true;
-                }
-                else {
-                    this.largeArcFlag = false;
-                    this.sweepFlag = true;
-                }
-            }
+            this.calBlurIsReverseFalse();
         }
-        if (this.parameters.uiContext) {
-            this.clipPath = 'M' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.x +
-                (this.parameters.normalRadius - this.parameters.lineWidth / 2) * Math.cos(this.parameters.trackStart))) + ' ' +
-            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.y + (this.parameters.normalRadius -
-                this.parameters.lineWidth / 2) * Math.sin(this.parameters.trackStart))) + ' A' +
-            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.lineWidth) / 2) + ' ' +
-            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.lineWidth) / 2) + ' 0' + ' 1' + ' ' +
-            JSON.stringify(Number(this.sweepFlag)) + ' ' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.x +
-                (this.parameters.normalRadius + this.parameters.lineWidth / 2) * Math.cos(this.parameters.trackStart))) + ' ' +
-            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.y + (this.parameters.normalRadius +
-                this.parameters.lineWidth / 2) * Math.sin(this.parameters.trackStart))) + ' A' +
-            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.normalRadius + this.parameters.lineWidth / 2)) +
-                ' ' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.normalRadius +
-                this.parameters.lineWidth / 2)) + ' 0' + ' ' + JSON.stringify(Number(this.largeArcFlag)) + ' ' +
-            JSON.stringify(Number(this.sweepFlag)) + ' ' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.x +
-                (this.parameters.normalRadius + this.parameters.lineWidth / 2) * Math.cos(this.parameters.end))) + ' ' +
-            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.y + (this.parameters.normalRadius +
-                this.parameters.lineWidth / 2) * Math.sin(this.parameters.end))) + ' A' +
-            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.lineWidth) / 2) + ' ' +
-            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.lineWidth) / 2) + ' 0' + ' 0' + ' ' +
-            JSON.stringify(Number(this.sweepFlag)) + ' ' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.x +
-                (this.parameters.normalRadius - this.parameters.lineWidth / 2) * Math.cos(this.parameters.end))) + ' ' +
-            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.y + (this.parameters.normalRadius -
-                this.parameters.lineWidth / 2) * Math.sin(this.parameters.end))) + ' A' +
-            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.normalRadius - this.parameters.lineWidth / 2)) +
-                ' ' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.normalRadius - this.parameters.lineWidth /
-                2)) + ' 180' + ' ' + JSON.stringify(Number(this.largeArcFlag)) + ' ' + JSON.stringify(Number(!this.sweepFlag)) +
-                ' ' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.x + (this.parameters.normalRadius -
-                this.parameters.lineWidth / 2) * Math.cos(this.parameters.trackStart))) + ' ' +
-            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.y + (this.parameters.normalRadius -
-                this.parameters.lineWidth / 2) * Math.sin(this.parameters.trackStart)));
-        }
+        this.setClipPath();
     }
 
     startTouchAnimator() {
@@ -936,7 +916,7 @@ export class ArcSlider extends ViewPU {
             this.setSelected();
             this.updateModifier();
             this.fullModifier.invalidate();
-            this.calBlurNormal();
+            this.calBlur();
         };
         this.touchAnimator.onFinish = () => {
             this.isTouchAnimatorFinished = true;
@@ -965,7 +945,10 @@ export class ArcSlider extends ViewPU {
             this.end = this.selectArc;
             this.updateModifier();
             this.fullModifier.invalidate();
-            this.calBlurSelected();
+            this.calBlur();
+        };
+        this.maxRestoreAnimator.onFinish = () => {
+            this.selectedMaxOrMin = 'normal';
         };
         if (this.maxRestoreAnimator) {
             this.maxRestoreAnimator.play();
@@ -990,7 +973,10 @@ export class ArcSlider extends ViewPU {
             this.trackStartCurrent;
             this.updateModifier();
             this.fullModifier.invalidate();
-            this.calBlurSelected();
+            this.calBlur();
+        };
+        this.minRestoreAnimator.onFinish = () => {
+            this.selectedMaxOrMin = 'normal';
         };
         if (this.minRestoreAnimator) {
             this.minRestoreAnimator.play();
@@ -1018,7 +1004,7 @@ export class ArcSlider extends ViewPU {
             this.setNormal();
             this.updateModifier();
             this.fullModifier.invalidate();
-            this.calBlurNormal();
+            this.calBlur();
         };
         if (this.restoreAnimator) {
             this.restoreAnimator.play();
@@ -1069,7 +1055,25 @@ export class ArcSlider extends ViewPU {
             radian = -radian;
         }
         this.selectArc = radian;
-        this.selectRatioNow = (this.selectArc - this.start) / (this.end - this.start);
+        if ((this.parameters.reverse) && (this.end > this.start)) {
+            if (this.selectArc < this.start) {
+                this.selectRatioNow = (this.start - this.selectArc) / (2 * Math.PI + this.start - this.end);
+            }
+            else {
+                this.selectRatioNow = (2 * Math.PI + this.start - this.selectArc) / (2 * Math.PI + this.start - this.end);
+            }
+        }
+        else if ((!this.parameters.reverse) && (this.end < this.start)) {
+            if (this.selectArc < this.start) {
+                this.selectRatioNow = (2 * Math.PI + this.selectArc - this.start) / (2 * Math.PI - this.start + this.end);
+            }
+            else {
+                this.selectRatioNow = (this.selectArc - this.start) / (2 * Math.PI - this.start + this.end);
+            }
+        }
+        else {
+            this.selectRatioNow = (this.selectArc - this.start) / (this.end - this.start);
+        }
         this.selectRatioNow = Math.min(1, this.selectRatioNow);
         this.selectRatioNow = Math.max(0, this.selectRatioNow);
         this.clickValue = this.selectRatioNow * (this.options.valueOptions.max - this.options.valueOptions.min) +
@@ -1091,8 +1095,27 @@ export class ArcSlider extends ViewPU {
 
     calcValue(moveY) {
         this.delta = this.touchY - moveY;
-        let total = this.normalRadius * (this.calcSin(this.activeEndAngle * ANGULAR_TO_RADIAN) -
-        this.calcSin(this.activeStartAngle * ANGULAR_TO_RADIAN));
+        let total = 0;
+        if (this.parameters.reverse) {
+            if (this.start > this.end) {
+                total = this.normalRadius * (this.calcSin(this.activeEndAngle * ANGULAR_TO_RADIAN) -
+                this.calcSin(this.activeStartAngle * ANGULAR_TO_RADIAN));
+            }
+            else {
+                total = this.normalRadius * (this.calcSin(this.activeStartAngle * ANGULAR_TO_RADIAN) + 4 -
+                this.calcSin(this.activeEndAngle * ANGULAR_TO_RADIAN));
+            }
+        }
+        else {
+            if (this.start > this.end) {
+                total = this.normalRadius * (this.calcSin(this.activeEndAngle * ANGULAR_TO_RADIAN) + 4 -
+                this.calcSin(this.activeStartAngle * ANGULAR_TO_RADIAN));
+            }
+            else {
+                total = this.normalRadius * (this.calcSin(this.activeStartAngle * ANGULAR_TO_RADIAN) -
+                this.calcSin(this.activeEndAngle * ANGULAR_TO_RADIAN));
+            }
+        }
         let valueNow = (this.options.valueOptions.value - this.options.valueOptions.min) /
             (this.options.valueOptions.max - this.options.valueOptions.min);
         valueNow += this.delta / total;
@@ -1193,20 +1216,20 @@ export class ArcSlider extends ViewPU {
             }
         }
         else {
-            if ((this.selectArc <= this.endCurrent) ||
-                (this.lineWidth <= this.options.styleOptions.activeTrackThickness)) {
-                this.selectArc -= (ANGLE_OVER_MIN * ANGULAR_TO_RADIAN) * Math.abs(this.delta) /
+            if ((this.selectArc <= (this.endCurrent + ANGLE_OVER_MIN * ANGULAR_TO_RADIAN)) &&
+                (this.lineWidth >= this.options.styleOptions.activeTrackThickness * (1 - LENGTH_OVER_MIN))) {
+                this.selectArc += (ANGLE_OVER_MIN * ANGULAR_TO_RADIAN) * Math.abs(this.delta) /
                     (ANGLE_OVER_MIN * ANGULAR_TO_RADIAN * this.normalRadius + Math.abs(this.delta));
-                this.lineWidth += LENGTH_OVER_MIN * this.lineWidth * Math.abs(this.delta) /
+                this.lineWidth -= LENGTH_OVER_MIN * this.lineWidth * Math.abs(this.delta) /
                     (LENGTH_OVER_MIN * this.lineWidth + Math.abs(this.delta));
                 this.end = this.selectArc;
             }
-            if (this.selectArc <= this.endCurrent) {
-                this.selectArc = this.endCurrent;
-                this.end = this.selectArc;
+            if (this.lineWidth <= this.options.styleOptions.activeTrackThickness * (1 - LENGTH_OVER_MIN)) {
+                this.lineWidth = this.options.styleOptions.activeTrackThickness * (1 - LENGTH_OVER_MIN);
             }
-            if (this.lineWidth >= this.options.styleOptions.activeTrackThickness) {
-                this.lineWidth = this.options.styleOptions.activeTrackThickness;
+            if (((this.selectArc / ANGULAR_TO_RADIAN) >= (this.endCurrent / ANGULAR_TO_RADIAN + ANGLE_OVER_MIN))) {
+                this.selectArc = this.endCurrent + ANGLE_OVER_MIN * ANGULAR_TO_RADIAN;
+                this.end = this.selectArc;
             }
         }
     }
@@ -1230,13 +1253,20 @@ export class ArcSlider extends ViewPU {
             }
         }
         else {
-            if ((this.selectArc <= (this.endCurrent + ANGLE_OVER_MIN * ANGULAR_TO_RADIAN)) &&
-                (this.lineWidth >= this.options.styleOptions.activeTrackThickness * (1 - LENGTH_OVER_MIN))) {
-                this.selectArc += (ANGLE_OVER_MIN * ANGULAR_TO_RADIAN) * Math.abs(this.delta) /
+            if (((this.selectArc >= this.endCurrent) && (this.selectArc < this.start)) ||
+                (this.lineWidth <= this.options.styleOptions.activeTrackThickness)) {
+                this.selectArc -= (ANGLE_OVER_MIN * ANGULAR_TO_RADIAN) * Math.abs(this.delta) /
                     (ANGLE_OVER_MIN * ANGULAR_TO_RADIAN * this.normalRadius + Math.abs(this.delta));
-                this.lineWidth -= LENGTH_OVER_MIN * this.lineWidth * Math.abs(this.delta) /
+                this.lineWidth += LENGTH_OVER_MIN * this.lineWidth * Math.abs(this.delta) /
                     (LENGTH_OVER_MIN * this.lineWidth + Math.abs(this.delta));
                 this.end = this.selectArc;
+            }
+            if (this.selectArc <= this.endCurrent) {
+                this.selectArc = this.endCurrent;
+                this.end = this.selectArc;
+            }
+            if (this.lineWidth >= this.options.styleOptions.activeTrackThickness) {
+                this.lineWidth = this.options.styleOptions.activeTrackThickness;
             }
         }
     }
@@ -1252,7 +1282,7 @@ export class ArcSlider extends ViewPU {
         this.updateModifier();
         this.fullModifier.invalidate();
         this.touchY = moveY;
-        this.calBlurSelected();
+        this.calBlur();
     }
 
     calcMinValueDeltaIsNegative() {
@@ -1272,17 +1302,18 @@ export class ArcSlider extends ViewPU {
             }
         }
         else {
-            if ((this.trackStart < this.start) || (this.lineWidth <= this.options.styleOptions.activeTrackThickness)) {
-                this.trackStart += (ANGLE_OVER_MIN * ANGULAR_TO_RADIAN) * Math.abs(this.delta) /
+            if ((this.trackStart > this.start - ANGLE_OVER_MIN * ANGULAR_TO_RADIAN) &&
+                (this.lineWidth >= this.options.styleOptions.activeTrackThickness * (1 - LENGTH_OVER_MIN))) {
+                this.trackStart -= (ANGLE_OVER_MIN * ANGULAR_TO_RADIAN) * Math.abs(this.delta) /
                     (ANGLE_OVER_MIN * ANGULAR_TO_RADIAN * this.normalRadius + Math.abs(this.delta));
-                this.lineWidth += LENGTH_OVER_MIN * this.lineWidth * Math.abs(this.delta) /
+                this.lineWidth -= LENGTH_OVER_MIN * this.lineWidth * Math.abs(this.delta) /
                     (LENGTH_OVER_MIN * this.lineWidth + Math.abs(this.delta));
             }
-            if (this.trackStart > this.start) {
-                this.trackStart = this.start;
+            if ((this.trackStart / ANGULAR_TO_RADIAN) <= this.start / ANGULAR_TO_RADIAN - ANGLE_OVER_MIN) {
+                this.trackStart = this.start - ANGLE_OVER_MIN * ANGULAR_TO_RADIAN;
             }
-            if (this.lineWidth >= this.options.styleOptions.activeTrackThickness) {
-                this.lineWidth = this.options.styleOptions.activeTrackThickness;
+            if (this.lineWidth <= this.options.styleOptions.activeTrackThickness * (1 - LENGTH_OVER_MIN)) {
+                this.lineWidth = this.options.styleOptions.activeTrackThickness * (1 - LENGTH_OVER_MIN);
             }
         }
     }
@@ -1303,18 +1334,17 @@ export class ArcSlider extends ViewPU {
             }
         }
         else {
-            if ((this.trackStart > this.start - ANGLE_OVER_MIN * ANGULAR_TO_RADIAN) &&
-                (this.lineWidth >= this.options.styleOptions.activeTrackThickness * (1 - LENGTH_OVER_MIN))) {
-                this.trackStart -= (ANGLE_OVER_MIN * ANGULAR_TO_RADIAN) * Math.abs(this.delta) /
+            if ((this.trackStart < this.start) || (this.lineWidth <= this.options.styleOptions.activeTrackThickness)) {
+                this.trackStart += (ANGLE_OVER_MIN * ANGULAR_TO_RADIAN) * Math.abs(this.delta) /
                     (ANGLE_OVER_MIN * ANGULAR_TO_RADIAN * this.normalRadius + Math.abs(this.delta));
-                this.lineWidth -= LENGTH_OVER_MIN * this.lineWidth * Math.abs(this.delta) /
+                this.lineWidth += LENGTH_OVER_MIN * this.lineWidth * Math.abs(this.delta) /
                     (LENGTH_OVER_MIN * this.lineWidth + Math.abs(this.delta));
             }
-            if ((this.trackStart / ANGULAR_TO_RADIAN) <= this.start / ANGULAR_TO_RADIAN - ANGLE_OVER_MIN) {
-                this.trackStart = this.start - ANGLE_OVER_MIN * ANGULAR_TO_RADIAN;
+            if (this.trackStart > this.start) {
+                this.trackStart = this.start;
             }
-            if (this.lineWidth <= this.options.styleOptions.activeTrackThickness * (1 - LENGTH_OVER_MIN)) {
-                this.lineWidth = this.options.styleOptions.activeTrackThickness * (1 - LENGTH_OVER_MIN);
+            if (this.lineWidth >= this.options.styleOptions.activeTrackThickness) {
+                this.lineWidth = this.options.styleOptions.activeTrackThickness;
             }
         }
     }
@@ -1330,7 +1360,7 @@ export class ArcSlider extends ViewPU {
         this.updateModifier();
         this.fullModifier.invalidate();
         this.touchY = moveY;
-        this.calBlurNormal();
+        this.calBlur();
     }
 
     isHotRegion(touchX, touchY) {
@@ -1419,6 +1449,7 @@ export class ArcSlider extends ViewPU {
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create();
+            Stack.hitTestBehavior(HitTestMode.Transparent);
         }, Stack);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Circle.create({ width: TOTAL_LENGTH, height: TOTAL_LENGTH });
@@ -1426,6 +1457,7 @@ export class ArcSlider extends ViewPU {
             Circle.fill(BLUR_COLOR_DEFAULT);
             Circle.clipShape(new Path({ commands: this.clipPath }));
             Circle.backdropBlur(TRACK_BLUR_DEFAULT);
+            Circle.hitTestBehavior(HitTestMode.Transparent);
         }, Circle);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Button.createWithLabel();
@@ -1445,7 +1477,7 @@ export class ArcSlider extends ViewPU {
                             this.options.onTouch?.(event);
                             this.isEnlarged = true;
                             this.startTouchAnimator();
-                            this.calBlurSelected();
+                            this.calBlur();
                         }
                     }
                     else if (event.type === TouchType.Down && this.isEnlarged) {
@@ -1487,33 +1519,62 @@ export class ArcSlider extends ViewPU {
                                 this.isClickAnimatorFinished = false;
                                 this.isEnlarged = false;
                                 this.startRestoreAnimator();
-                                this.calBlurNormal();
+                                this.calBlur();
                             }
                         }, RESTORE_TIMEOUT);
                         if (this.options.layoutOptions.reverse) {
-                            if (this.selectedMaxOrMin === MAX_STATUS && this.selectArc < this.endCurrent) {
-                                this.lineWidthCurrent = this.lineWidth;
-                                this.selectArcCurrent = this.selectArc;
-                                this.startMaxRestoreAnimator();
+                            if (this.selectedMaxOrMin === MAX_STATUS && (this.selectArc < this.endCurrent)) {
+                                if (this.start > this.end) {
+                                    this.lineWidthCurrent = this.lineWidth;
+                                    this.selectArcCurrent = this.selectArc;
+                                    this.startMaxRestoreAnimator();
+                                }
+                                else if ((this.start < this.end) && (this.selectArc > this.start)) {
+                                    this.lineWidthCurrent = this.lineWidth;
+                                    this.selectArcCurrent = this.selectArc;
+                                    this.startMaxRestoreAnimator();
+                                }
                             }
                             if (this.selectedMaxOrMin === MIN_STATUS && this.trackStart > this.start) {
-                                this.lineWidthCurrent = this.lineWidth;
-                                this.trackStartCurrent = this.trackStart;
-                                this.startMinRestoreAnimator();
-                                this.calBlurSelected();
+                                if (this.start > this.end) {
+                                    this.lineWidthCurrent = this.lineWidth;
+                                    this.trackStartCurrent = this.trackStart;
+                                    this.startMinRestoreAnimator();
+                                    this.calBlur();
+                                }
+                                else if (this.start < this.end && this.trackStart < this.end) {
+                                    this.lineWidthCurrent = this.lineWidth;
+                                    this.trackStartCurrent = this.trackStart;
+                                    this.startMinRestoreAnimator();
+                                }
                             }
                         }
                         else {
-                            if (this.selectedMaxOrMin === MAX_STATUS && this.selectArc > this.endCurrent) {
-                                this.lineWidthCurrent = this.lineWidth;
-                                this.selectArcCurrent = this.selectArc;
-                                this.startMaxRestoreAnimator();
+                            if (this.selectedMaxOrMin === MAX_STATUS && (this.selectArc > this.endCurrent)) {
+                                if (this.start > this.end && this.selectArc < this.start) {
+                                    this.lineWidthCurrent = this.lineWidth;
+                                    this.selectArcCurrent = this.selectArc;
+                                    this.startMaxRestoreAnimator();
+                                }
+                                else if (this.start < this.end) {
+                                    this.lineWidthCurrent = this.lineWidth;
+                                    this.selectArcCurrent = this.selectArc;
+                                    this.startMaxRestoreAnimator();
+                                }
                             }
                             if (this.selectedMaxOrMin === MIN_STATUS && this.trackStart < this.start) {
-                                this.lineWidthCurrent = this.lineWidth;
-                                this.trackStartCurrent = this.trackStart;
-                                this.startMinRestoreAnimator();
-                                this.calBlurSelected();
+                                if (this.start > this.end && this.trackStart > this.end) {
+                                    this.lineWidthCurrent = this.lineWidth;
+                                    this.trackStartCurrent = this.trackStart;
+                                    this.startMinRestoreAnimator();
+                                    this.calBlur();
+                                }
+                                else if (this.start < this.end) {
+                                    this.lineWidthCurrent = this.lineWidth;
+                                    this.trackStartCurrent = this.trackStart;
+                                    this.startMinRestoreAnimator();
+                                    this.calBlur();
+                                }
                             }
                         }
                     }
@@ -1525,55 +1586,111 @@ export class ArcSlider extends ViewPU {
                             this.meter = INVALID_TIMEOUT_ID;
                         }
                         if (this.options.layoutOptions.reverse) {
-                            if (((this.selectArc < this.endCurrent) || (checkApprox(this.selectArc, this.endCurrent))) &&
-                                (this.delta >= 0)) {
-                                this.selectedMaxOrMin = MAX_STATUS;
-                                this.calcMaxValue(event.touches[0].y);
-                            }
-                            else if ((this.selectArc < this.endCurrent) && (this.delta <= 0)) {
-                                this.selectedMaxOrMin = MAX_STATUS;
-                                this.calcMaxValue(event.touches[0].y);
-                            }
-                            else if ((this.trackStart >= this.start) && (checkApprox(this.options.valueOptions.value, this.options.valueOptions.min)) && (this.delta <= 0)) {
-                                this.selectedMaxOrMin = MIN_STATUS;
-                                this.calcMinValue(event.touches[0].y);
-                                this.calBlurSelected();
-                            }
-                            else if ((this.trackStart > this.start) && (this.delta >= 0)) {
-                                this.selectedMaxOrMin = MIN_STATUS;
-                                this.calcMinValue(event.touches[0].y);
-                                this.calBlurSelected();
+                            if (this.start > this.endCurrent) {
+                                if (((this.selectArc < this.endCurrent) || (nearEquals(this.selectArc, this.endCurrent))) &&
+                                    (this.delta >= 0)) {
+                                    this.selectedMaxOrMin = MAX_STATUS;
+                                    this.calcMaxValue(event.touches[0].y);
+                                }
+                                else if ((this.selectArc < this.endCurrent) && (this.delta <= 0)) {
+                                    this.selectedMaxOrMin = MAX_STATUS;
+                                    this.calcMaxValue(event.touches[0].y);
+                                }
+                                else if ((this.trackStart >= this.start) && (nearEquals(this.options.valueOptions.value, this.options.valueOptions.min)) && (this.delta <= 0)) {
+                                    this.selectedMaxOrMin = MIN_STATUS;
+                                    this.calcMinValue(event.touches[0].y);
+                                    this.calBlur();
+                                }
+                                else if ((this.trackStart > this.start) && (this.delta >= 0)) {
+                                    this.selectedMaxOrMin = MIN_STATUS;
+                                    this.calcMinValue(event.touches[0].y);
+                                    this.calBlur();
+                                }
+                                else {
+                                    this.calcValue(event.touches[0].y);
+                                    this.selectedMaxOrMin = NORMAL_STATUS;
+                                }
                             }
                             else {
-                                this.calcValue(event.touches[0].y);
-                                this.selectedMaxOrMin = NORMAL_STATUS;
+                                if ((this.selectArc > this.start) && ((this.selectArc < this.endCurrent)) && (this.delta <= 0)) {
+                                    this.selectedMaxOrMin = MAX_STATUS;
+                                    this.calcMaxValue(event.touches[0].y);
+                                }
+                                else if ((this.selectArc > this.start) && ((this.selectArc <= this.endCurrent) ||
+                                    (nearEquals(this.selectArc, this.endCurrent))) && (this.delta >= 0)) {
+                                    this.selectedMaxOrMin = MAX_STATUS;
+                                    this.calcMaxValue(event.touches[0].y);
+                                }
+                                else if ((this.trackStart > this.start) && (this.delta >= 0)) {
+                                    this.selectedMaxOrMin = MIN_STATUS;
+                                    this.calcMinValue(event.touches[0].y);
+                                    this.calBlur();
+                                }
+                                else if ((this.trackStart >= this.start) && (nearEquals(this.options.valueOptions.value, this.options.valueOptions.min)) && (this.delta <= 0)) {
+                                    this.selectedMaxOrMin = MIN_STATUS;
+                                    this.calcMinValue(event.touches[0].y);
+                                    this.calBlur();
+                                }
+                                else {
+                                    this.calcValue(event.touches[0].y);
+                                    this.selectedMaxOrMin = NORMAL_STATUS;
+                                }
                             }
                         }
                         else {
-                            if (((this.selectArc > this.endCurrent) || (checkApprox(this.selectArc, this.endCurrent))) &&
-                                (this.delta <= 0)) {
-                                this.selectedMaxOrMin = MAX_STATUS;
-                                this.calcMaxValue(event.touches[0].y);
-                            }
-                            else if ((this.selectArc > this.endCurrent) && (this.delta >= 0)) {
-                                this.selectedMaxOrMin = MAX_STATUS;
-                                this.calcMaxValue(event.touches[0].y);
-                            }
-                            else if ((checkApprox(this.options.valueOptions.value, this.options.valueOptions.min)) &&
-                                (this.delta >= 0) && ((this.trackStart <= this.start) ||
-                                (checkApprox(this.selectArc, this.endCurrent)))) {
-                                this.selectedMaxOrMin = MIN_STATUS;
-                                this.calcMinValue(event.touches[0].y);
-                                this.calBlurSelected();
-                            }
-                            else if ((this.trackStart < this.start) && (this.delta <= 0)) {
-                                this.selectedMaxOrMin = MIN_STATUS;
-                                this.calcMinValue(event.touches[0].y);
-                                this.calBlurSelected();
+                            if (this.start > this.endCurrent) {
+                                if ((((this.selectArc < this.start) && (this.selectArc > this.endCurrent))) && (this.delta <= 0)) {
+                                    this.selectedMaxOrMin = MAX_STATUS;
+                                    this.calcMaxValue(event.touches[0].y);
+                                }
+                                else if ((this.selectArc < this.start) && ((this.selectArc > this.endCurrent) ||
+                                    (nearEquals(this.selectArc, this.endCurrent))) && (this.delta >= 0)) {
+                                    this.selectedMaxOrMin = MAX_STATUS;
+                                    this.calcMaxValue(event.touches[0].y);
+                                }
+                                else if ((nearEquals(this.options.valueOptions.value, this.options.valueOptions.min)) &&
+                                    (this.delta <= 0) && ((this.trackStart <= this.start) ||
+                                    (nearEquals(this.selectArc, this.endCurrent)))) {
+                                    this.selectedMaxOrMin = MIN_STATUS;
+                                    this.calcMinValue(event.touches[0].y);
+                                    this.calBlur();
+                                }
+                                else if ((this.trackStart < this.start) && (this.delta >= 0)) {
+                                    this.selectedMaxOrMin = MIN_STATUS;
+                                    this.calcMinValue(event.touches[0].y);
+                                    this.calBlur();
+                                }
+                                else {
+                                    this.calcValue(event.touches[0].y);
+                                    this.selectedMaxOrMin = NORMAL_STATUS;
+                                }
                             }
                             else {
-                                this.calcValue(event.touches[0].y);
-                                this.selectedMaxOrMin = NORMAL_STATUS;
+                                if (((this.selectArc >= this.endCurrent) || (nearEquals(this.selectArc, this.endCurrent))) &&
+                                    (this.delta >= 0)) {
+                                    this.selectedMaxOrMin = MAX_STATUS;
+                                    this.calcMaxValue(event.touches[0].y);
+                                }
+                                else if ((this.selectArc > this.endCurrent) && (this.delta >= 0)) {
+                                    this.selectedMaxOrMin = MAX_STATUS;
+                                    this.calcMaxValue(event.touches[0].y);
+                                }
+                                else if ((nearEquals(this.options.valueOptions.value, this.options.valueOptions.min)) &&
+                                    (this.delta <= 0) && ((this.trackStart <= this.start) ||
+                                    (nearEquals(this.selectArc, this.endCurrent)))) {
+                                    this.selectedMaxOrMin = MIN_STATUS;
+                                    this.calcMinValue(event.touches[0].y);
+                                    this.calBlur();
+                                }
+                                else if ((this.trackStart < this.start) && (this.delta >= 0)) {
+                                    this.selectedMaxOrMin = MIN_STATUS;
+                                    this.calcMinValue(event.touches[0].y);
+                                    this.calBlur();
+                                }
+                                else {
+                                    this.calcValue(event.touches[0].y);
+                                    this.selectedMaxOrMin = NORMAL_STATUS;
+                                }
                             }
                         }
                     }
@@ -1622,7 +1739,7 @@ export class ArcSlider extends ViewPU {
                         }
                         this.isEnlarged = true;
                         this.startTouchAnimator();
-                        this.calBlurSelected();
+                        this.calBlur();
                         this.crownDeltaAngle = this.getUIContext().px2vp(event.degree *
                         this.calcDisplayControlRatio(this.options.digitalCrownSensitivity)) / this.normalRadius;
                         this.calcCrownValue(this.crownDeltaAngle);
@@ -1657,12 +1774,13 @@ export class ArcSlider extends ViewPU {
                                 this.isClickAnimatorFinished = false;
                                 this.isEnlarged = false;
                                 this.startRestoreAnimator();
-                                this.calBlurNormal();
+                                this.calBlur();
                             }
                         }, RESTORE_TIMEOUT);
                     }
                 }
             });
+            Button.hitTestBehavior(HitTestMode.Transparent);
         }, Button);
         Button.pop();
         Stack.pop();

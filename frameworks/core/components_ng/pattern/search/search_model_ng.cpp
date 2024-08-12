@@ -84,7 +84,9 @@ RefPtr<SearchNode> SearchModelNG::CreateSearchNode(int32_t nodeId, const std::op
     bool hasButtonNode = frameNode->HasButtonNode();
     bool hasCancelButtonNode = frameNode->HasCancelButtonNode();
 
-    CreateTextField(frameNode, placeholder, value, hasTextFieldNode);
+    if (!hasTextFieldNode) {
+        CreateTextField(frameNode, placeholder, value, hasTextFieldNode);
+    }
 
     std::string src;
     if (icon.has_value()) {

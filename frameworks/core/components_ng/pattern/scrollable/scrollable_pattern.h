@@ -631,6 +631,13 @@ public:
     {
         return crownSensitivity_;
     }
+    bool GetCrownEventDragging() const
+    {
+        CHECK_NULL_RETURN(scrollableEvent_, false);
+        auto scrollable = scrollableEvent_->GetScrollable();
+        CHECK_NULL_RETURN(scrollable, false);
+        return scrollable->GetCrownEventDragging();
+    }
 #endif
 protected:
     void SuggestOpIncGroup(bool flag);

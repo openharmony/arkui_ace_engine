@@ -80,5 +80,7 @@ void SwitchTheme::Builder::ParseSubStylePattern(const RefPtr<ThemeConstants>& th
     theme->focusedPointColorUnselected_ =
         switchPattern->GetAttr<Color>("switch_focus_pointColor_unselected", Color());
     theme->pointColorUnchecked_ = switchPattern->GetAttr<Color>("switch_unchecked_pointColor", Color());
+    theme->isDiffPointColor_ =
+        static_cast<bool>(switchPattern->GetAttr<double>("switch_different_pointColor", 0.0));
 }
 } // namespace OHOS::Ace

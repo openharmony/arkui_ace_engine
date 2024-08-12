@@ -60,6 +60,7 @@ protected:
     int32_t LayoutALineBackward(
         LayoutWrapper* layoutWrapper, int32_t& currentIndex, float endPos, float& startPos) override;
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize) override;
+    void UpdateSnapCenterContentOffset(LayoutWrapper* layoutWrapper) override;
     float GetLayoutFixOffset() override;
 
 private:
@@ -76,15 +77,6 @@ private:
     }
     static float GetNearScale(float pos);
     void GenerateItemOffset(LayoutWrapper* layoutWrapper);
-
-    static void LayoutConstraintApplyScale(LayoutConstraintF& layoutConstraint, float scale)
-    {
-        layoutConstraint.minSize.ApplyScale(scale);
-        layoutConstraint.maxSize.ApplyScale(scale);
-        layoutConstraint.percentReference.ApplyScale(scale);
-        layoutConstraint.parentIdealSize.ApplyScale(scale);
-        layoutConstraint.selfIdealSize.ApplyScale(scale);
-    }
 
     void MeasureHeader(LayoutWrapper* layoutWrapper) override;
     void SetActiveChildRange(LayoutWrapper* layoutWrapper) override;

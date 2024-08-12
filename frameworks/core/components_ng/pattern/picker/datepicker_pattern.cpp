@@ -101,9 +101,12 @@ bool DatePickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
         buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(width - buttonSpace.ConvertToPx()), CalcLength(heigth - PRESS_INTERVAL)));
         auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
-        buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-        auto isFocusButton = haveFocus_ && (currentFocusButtonNode == buttonNode);
-        UpdateButtonStyles(buttonNode, columnNode, pickerTheme, isFocusButton);
+        if (!useButtonFocusArea_) {
+            buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        } else {
+            auto isFocusButton = haveFocus_ && (currentFocusButtonNode == buttonNode);
+            UpdateColumnButtonStyles(columnNode, isFocusButton, false);
+        }
         buttonNode->MarkModifyDone();
         buttonNode->MarkDirtyNode();
     }
@@ -120,6 +123,7 @@ void DatePickerPattern::InitSelectorProps()
     CHECK_NULL_VOID(pickerTheme);
 
     selectorItemRadius_ = pickerTheme->GetSelectorItemRadius();
+    useButtonFocusArea_ = pickerTheme->NeedButtonFocusAreaType();
 }
 
 void DatePickerPattern::InitFocusEvent()
@@ -157,7 +161,6 @@ void DatePickerPattern::AddIsFocusActiveUpdateEvent()
         isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
             auto pickerPattern = weak.Upgrade();
             CHECK_NULL_VOID(pickerPattern);
-
             pickerPattern->SetHaveFocus(isFocusAcitve);
             pickerPattern->UpdateFocusButtonState();
         };
@@ -182,9 +185,16 @@ void DatePickerPattern::SetHaveFocus(bool haveFocus)
 
 void DatePickerPattern::HandleFocusEvent()
 {
-    SetHaveFocus(true);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+
     AddIsFocusActiveUpdateEvent();
-    UpdateFocusButtonState();
+    if (context->GetIsFocusActive()) {
+        SetHaveFocus(true);
+        UpdateFocusButtonState();
+    }
 }
 
 void DatePickerPattern::HandleBlurEvent()
@@ -198,64 +208,26 @@ void DatePickerPattern::UpdateFocusButtonState()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContextRefPtr();
-    CHECK_NULL_VOID(context);
-    auto pickerTheme = context->GetTheme<PickerTheme>();
-    CHECK_NULL_VOID(pickerTheme);
-    if (pickerTheme->NeedButtonFocusAreaType()) {
+    if (useButtonFocusArea_) {
         auto currentFocusStackNode = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
         CHECK_NULL_VOID(currentFocusStackNode);
         auto blendColumnNode = currentFocusStackNode->GetLastChild();
         CHECK_NULL_VOID(blendColumnNode);
         auto currentFocusColumnNode = DynamicCast<FrameNode>(blendColumnNode->GetLastChild());
         CHECK_NULL_VOID(currentFocusColumnNode);
-        auto currentFocusButtonNode = DynamicCast<FrameNode>(currentFocusStackNode->GetFirstChild());
-        CHECK_NULL_VOID(currentFocusButtonNode);
-        UpdateButtonStyles(currentFocusButtonNode, currentFocusColumnNode, pickerTheme, haveFocus_);
-        currentFocusButtonNode->MarkModifyDone();
-        currentFocusButtonNode->MarkDirtyNode();
+
+        UpdateColumnButtonStyles(currentFocusColumnNode, haveFocus_, true);
     }
 }
 
-void DatePickerPattern::UpdateButtonStyles(const RefPtr<FrameNode>& buttonNode, const RefPtr<FrameNode>& columnNode,
-    const RefPtr<PickerTheme>& pickerTheme, bool haveFocus)
+void DatePickerPattern::UpdateColumnButtonStyles(
+    const RefPtr<FrameNode>& columnNode, bool haveFocus, bool needMarkDirty)
 {
-    CHECK_NULL_VOID(buttonNode);
     CHECK_NULL_VOID(columnNode);
-    CHECK_NULL_VOID(pickerTheme);
 
-    if (pickerTheme->NeedButtonFocusAreaType()) {
-        auto datePickerColumnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
-        CHECK_NULL_VOID(datePickerColumnPattern);
-        auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-        CHECK_NULL_VOID(buttonLayoutProperty);
-        auto buttonRenderContext = buttonNode->GetRenderContext();
-        CHECK_NULL_VOID(buttonRenderContext);
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
-
-        BorderWidthProperty borderWidth;
-        BorderColorProperty borderColor;
-        Color buttonBgColor;
-
-        if (haveFocus && context->GetIsFocusActive()) {
-            buttonBgColor = pickerTheme->GetSelectorItemFocusBgColor();
-            borderWidth.SetBorderWidth(pickerTheme->GetSelectorItemFocusBorderWidth());
-            borderColor.SetColor(pickerTheme->GetSelectorItemFocusBorderColor());
-        } else {
-            buttonBgColor = pickerTheme->GetSelectorItemNormalBgColor();
-            borderWidth.SetBorderWidth(pickerTheme->GetSelectorItemBorderWidth());
-            borderColor.SetColor(pickerTheme->GetSelectorItemBorderColor());
-        }
-
-        datePickerColumnPattern->SetButtonBgColor(buttonBgColor);
-        datePickerColumnPattern->UpdateFocusColumnState(haveFocus);
-        buttonLayoutProperty->UpdateBorderWidth(borderWidth);
-        buttonRenderContext->UpdateBorderColor(borderColor);
-        buttonRenderContext->UpdateBackgroundColor(buttonBgColor);
-    }
+    auto datePickerColumnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
+    CHECK_NULL_VOID(datePickerColumnPattern);
+    datePickerColumnPattern->UpdateColumnButtonFocusState(haveFocus, needMarkDirty);
 }
 
 void DatePickerPattern::GetInnerFocusButtonPaintRect(RoundRect& paintRect)
@@ -536,7 +508,7 @@ void DatePickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
-    if (pickerTheme->NeedButtonFocusAreaType()) {
+    if (useButtonFocusArea_) {
         return GetInnerFocusButtonPaintRect(paintRect);
     }
     auto frameWidth = host->GetGeometryNode()->GetFrameSize().Width();
