@@ -27,7 +27,7 @@ constexpr char LIB_HINT2_TYPE_Z_SO_NAME[] = "/system/lib64/module/core/atomicser
 constexpr char LIB_HINT2_TYPE_Z_SO_NAME[] = "/system/lib64/module/core/atomicservicecomponent/libhint2type.z.so";
 #endif
 constexpr char HINT_2_TYPE[] = "Hint2Type";
-using Hint2Type = int (*) (std::vector<std::string>, std::vector<int>&);
+using Hint2Type = int (*) (std::vector<std::string>, std::vector<int>&, std::vector<std::string>&);
 
 RefPtr<PageNodeInfoWrap> PageNodeInfoWrap::CreatePageNodeInfoWrap()
 {
@@ -65,7 +65,8 @@ AbilityBase::AutoFillType ViewDataWrap::ViewDataToType(const AbilityBase::ViewDa
     return type;
 }
 
-bool ViewDataWrap::LoadHint2Type(const std::vector<std::string>& placeHolder, std::vector<int>& intType)
+bool ViewDataWrap::LoadHint2Type(const std::vector<std::string>& placeHolder, std::vector<int>& intType,
+                                 std::vector<std::string>& metaData)
 {
     void* handle = dlopen(LIB_HINT2_TYPE_Z_SO_NAME, RTLD_LAZY);
     if (handle == nullptr) {
@@ -79,7 +80,7 @@ bool ViewDataWrap::LoadHint2Type(const std::vector<std::string>& placeHolder, st
         LOGE("Failed to get symbol %{public}s in %{public}s", HINT_2_TYPE, LIB_HINT2_TYPE_Z_SO_NAME);
         return false;
     }
-    if (hintFun(placeHolder, intType)) {
+    if (hintFun(placeHolder, intType, metaData)) {
         LOGE("Failed to Hint 2 intType");
         dlclose(handle);
         return false;
@@ -92,12 +93,13 @@ bool ViewDataWrap::GetPlaceHolderValue(AbilityBase::ViewData& viewData)
 {
     std::vector<std::string> placeHolder;
     std::vector<int> intType;
+    std::vector<int> metaData;
     for (auto it = viewData.nodes.begin(); it != viewData.nodes.end(); ++it) {
         if (it->autoFillType == AbilityBase::AutoFillType::UNSPECIFIED) {
             placeHolder.push_back(it->placeholder);
         }
     }
-    auto isSuccessLoadHint2Type = LoadHint2Type(placeHolder, intType);
+    auto isSuccessLoadHint2Type = LoadHint2Type(placeHolder, intType, metaData);
     if (!isSuccessLoadHint2Type) {
         LOGE("Load Hint2Type Failed !");
         return false;

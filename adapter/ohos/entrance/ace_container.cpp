@@ -1377,24 +1377,30 @@ bool AceContainer::ClosePopupUIExtension(uint32_t autoFillSessionId)
     return true;
 }
 
-AceAutoFillType AceContainer::PlaceHolderToType(const std::string& onePlaceHolder)
+HintToTypeWrap AceContainer::PlaceHolderToType(const std::string& onePlaceHolder)
 {
+    HintToTypeWrap hintToTypeWrap;
     auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
-    CHECK_NULL_RETURN(viewDataWrap, AceAutoFillType::ACE_UNSPECIFIED);
+    CHECK_NULL_RETURN(viewDataWrap, hintToTypeWrap);
     auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
-    CHECK_NULL_RETURN(viewDataWrapOhos, AceAutoFillType::ACE_UNSPECIFIED);
+    CHECK_NULL_RETURN(viewDataWrapOhos, hintToTypeWrap);
     std::vector<std::string> placeHolder;
     std::vector<int> intType;
+    std::vector<std::string> metaData;
     placeHolder.push_back(onePlaceHolder);
-    auto isSuccess = viewDataWrapOhos->LoadHint2Type(placeHolder, intType);
+    auto isSuccess = viewDataWrapOhos->LoadHint2Type(placeHolder, intType, metaData);
     if (!isSuccess) {
         TAG_LOGE(AceLogTag::ACE_AUTO_FILL, "Load Hint2Type Failed !");
-        return AceAutoFillType::ACE_UNSPECIFIED;
+        return hintToTypeWrap;
     }
     if (intType.empty()) {
-        return AceAutoFillType::ACE_UNSPECIFIED;
+        return hintToTypeWrap;
     }
-    return static_cast<AceAutoFillType>(viewDataWrapOhos->HintToAutoFillType(intType[0]));
+    hintToTypeWrap.autoFillType = static_cast<AceAutoFillType>(viewDataWrapOhos->HintToAutoFillType(intType[0]));
+    if (!metaData.empty()) {
+        hintToTypeWrap.metaData = metaData[0];
+    }
+    return hintToTypeWrap;
 }
 
 bool AceContainer::ChangeType(AbilityBase::ViewData& viewData)
