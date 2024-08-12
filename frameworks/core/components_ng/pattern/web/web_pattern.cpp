@@ -2965,8 +2965,8 @@ void WebPattern::CheckHandles(SelectHandleInfo& handleInfo,
     RectF visibleInnerRect;
     RectF frameRect;
     host->GetVisibleRectWithClip(visibleRect, visibleInnerRect, frameRect);
-    visibleInnerRect.SetRect(visibleInnerRect.GetX(), visibleInnerRect.GetY() + viewPortY,
-        visibleInnerRect.Width(), visibleInnerRect.Height() - viewPortY);
+    visibleInnerRect.SetRect(visibleInnerRect.GetX(), visibleInnerRect.GetY() + viewPortY - 1,
+        visibleInnerRect.Width(), visibleInnerRect.Height() - viewPortY + 1);
     auto paintRect = handleInfo.paintRect;
     PointF bottomPoint = { paintRect.Left(), paintRect.Bottom() };
     PointF topPoint = { paintRect.Left(), paintRect.Top() };
@@ -3077,7 +3077,7 @@ void WebPattern::OnParentScrollStartOrEndCallback(bool isEnd)
 
     if (selectOverlayProxy_->IsSingleHandle()) {
         if (!isEnd) {
-            selectOverlayProxy_->UpdateSelectMenuInfo([isEnd](SelectMenuInfo& menuInfo) {
+            selectOverlayProxy_->UpdateSelectMenuInfo([](SelectMenuInfo& menuInfo) {
                 menuInfo.menuIsShow = false;
             });
         }
