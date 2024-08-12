@@ -363,6 +363,15 @@ struct OperateItemStruct {
   }
 
   aboutToAppear() {
+    if (this.switch != null) {
+      this.isOnClick = this.switch.isCheck as boolean;
+    }
+    if (this.radio != null) {
+      this.isOnClick = this.radio.isCheck as boolean;
+    }
+    if (this.checkBox != null) {
+      this.isOnClick = this.checkBox.isCheck as boolean;
+    }
     this.onPropChange();
     this.onFocusChange();
   }
@@ -557,7 +566,7 @@ struct OperateItemStruct {
           this.radioState = !this.radioState;
           this.isOnClick = this.radioState;
         }
-      })
+       })
       .margin({ end: LengthMetrics.vp(OperateItemStruct.RIGHT_ITEM_OFFSET_LEVEL1) })
       .checked(this.radioState)
       .onChange(this.radio?.onChange)
@@ -1101,6 +1110,9 @@ export struct ComposeListItem {
         this.canFocus = false
       })
       .onHover((isHover: boolean) => {
+        if (this.isFocus && !FOCUSABLE) {
+          return;
+        }
         this.isHoverBlend = isHover;
         this.isHover = isHover
         if (this.canHover) {
@@ -1111,7 +1123,10 @@ export struct ComposeListItem {
           (this.isFocus ? $r('sys.color.composeListItem_focused_backboard') : $r('sys.color.composeListItem_color_background_normal') ?? Color.Transparent.toString());
       })
       .onTouch((event: TouchEvent) => {
-        if (this.isCanTouch) {
+        if (this.isFocus && !FOCUSABLE) {
+          return;
+        }
+        if (this.isCanTouch || !FOCUSABLE) {
           if (event.type === TouchType.Down && this.canTouch) {
             this.frontColor = $r('sys.color.composeListItem_color_press') ?? this.touchDownColor;
           }
@@ -1153,7 +1168,11 @@ export struct ComposeListItem {
     .borderRadius(this.isFocus ? $r('sys.float.composeListItem_normal_radio') : $r('sys.float.composeListItem_focused_circular_bead'))
     .onClick(() => {
       if (!FOCUSABLE) {
-        this.isOnClick = !this.isOnClick;
+        if (this.operateItem?.radio !== null && this.isOnClick) {
+          this.isOnClick = true;
+        } else {
+          this.isOnClick = !this.isOnClick;
+        }
         if (this.operateItem?.icon && this.operateItem.icon?.action) {
           this.operateItem.icon.action();
         }
