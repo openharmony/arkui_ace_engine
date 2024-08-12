@@ -179,10 +179,10 @@ void HyperlinkPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto touchAfterTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto hyperlinkPattern = weak.Upgrade();
         CHECK_NULL_VOID(hyperlinkPattern);
-        hyperlinkPattern->isTouchPreventDefault_ = info.IsPreventDefault();
-        if (!info.IsPreventDefault()) {
-            hyperlinkPattern->OnTouchEvent(info);
+        if (info.IsPreventDefault() && !hyperlinkPattern->isTouchPreventDefault_) {
+            hyperlinkPattern->isTouchPreventDefault_ = info.IsPreventDefault();
         }
+        hyperlinkPattern->OnTouchEvent(info);
     };
     gestureHub->RemoveTouchEvent(onTouchEvent_);
     onTouchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchAfterTask));
