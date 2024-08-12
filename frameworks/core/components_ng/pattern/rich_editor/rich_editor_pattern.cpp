@@ -2821,10 +2821,10 @@ void RichEditorPattern::HandleBlurEvent()
     CloseSelectOverlay();
     ResetSelection();
 
+    isCaretInContentArea_ = reason == BlurReason::WINDOW_BLUR && IsCaretInContentArea();
     if (reason != BlurReason::WINDOW_BLUR) {
         lastSelectionRange_.reset();
     }
-    isCaretInContentArea_ = reason == BlurReason::WINDOW_BLUR && IsCaretInContentArea();
     HandleOnEditChanged(false);
     isMoveCaretAnywhere_ = false;
 }
