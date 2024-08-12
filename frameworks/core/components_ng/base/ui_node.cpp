@@ -340,6 +340,7 @@ void UINode::MountToParent(const RefPtr<UINode>& parent,
     if (parent->GetPageId() != 0) {
         SetHostPageId(parent->GetPageId());
     }
+    AfterMountToParent();
 }
 
 void UINode::UpdateConfigurationUpdate(const ConfigurationChange& configurationChange)
