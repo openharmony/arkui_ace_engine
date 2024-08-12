@@ -15,7 +15,6 @@
 
 #include "core/common/thread_checker.h"
 
-#include "base/log/log.h"
 #include "core/common/container.h"
 
 namespace OHOS::Ace {

@@ -15,8 +15,6 @@
 
 #include "core/common/rosen/rosen_convert_helper.h"
 
-#include "base/utils/system_properties.h"
-
 namespace OHOS::Ace {
 MATERIAL_BLUR_STYLE GetRosenBlurStyleValue(const BlurStyleOption& option)
 {

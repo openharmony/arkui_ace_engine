@@ -15,11 +15,6 @@
 
 #include "core/common/form_manager.h"
 
-#include "unistd.h"
-
-#include "base/log/log.h"
-#include "base/utils/utils.h"
-
 namespace OHOS::Ace {
 FormManager::FormManager() {}
 
