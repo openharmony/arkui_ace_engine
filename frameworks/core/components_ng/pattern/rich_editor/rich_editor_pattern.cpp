@@ -1976,19 +1976,22 @@ void RichEditorPattern::SetSelectSpanStyle(int32_t start, int32_t end, KeyCode c
 }
 
 void RichEditorPattern::GetSelectSpansPositionInfo(
-    int32_t start, int32_t end, SpanPositionInfo& startPositionSpanInfo, SpanPositionInfo& endPositionSpanInfo)
+    int32_t& start, int32_t& end, SpanPositionInfo& startPositionSpanInfo, SpanPositionInfo& endPositionSpanInfo)
 {
+    bool isText = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    std::find_if(spans_.begin(), spans_.end(), [&start](const RefPtr<SpanItem>& spanItem) {
-        if ((spanItem->rangeStart <= start) && (start < spanItem->position)) {
+    std::find_if(spans_.begin(), spans_.end(), [&start, &end, &isText](const RefPtr<SpanItem>& spanItem) {
+        if ((spanItem->rangeStart <= start) && (start < spanItem->position) && start < end) {
             if (spanItem->spanItemType == NG::SpanItemType::NORMAL && spanItem->unicode == 0) {
+                isText = true;
                 return true;
             }
             start += StringUtils::ToWstring(spanItem->content).length();
         }
         return false;
     });
+    CHECK_EQUAL_VOID(isText, false);
     std::find_if(spans_.rbegin(), spans_.rend(), [&end](const RefPtr<SpanItem>& spanItem) {
         if ((spanItem->rangeStart < end) && (end <= spanItem->position)) {
             if (spanItem->spanItemType == NG::SpanItemType::NORMAL && spanItem->unicode == 0) {
@@ -2086,12 +2089,12 @@ std::list<SpanPosition> RichEditorPattern::GetSelectSpanInfo(int32_t start, int3
     std::list<SpanPosition> resultObjects;
     int32_t spanIndex = 0;
     GetSelectSpansPositionInfo(start, end, startPositionSpanInfo, endPositionSpanInfo);
+    CHECK_EQUAL_RETURN(startPositionSpanInfo.spanStart_, -1, resultObjects);
     if (startPositionSpanInfo.spanIndex_ == endPositionSpanInfo.spanIndex_) {
         SpanPosition resultObject;
         resultObject.spanRange[RichEditorSpanRange::RANGESTART] = start;
         resultObject.spanRange[RichEditorSpanRange::RANGEEND] = end;
         resultObject.spanIndex = spanIndex;
-        spanIndex++;
         resultObjects.emplace_back(resultObject);
     } else {
         resultObjects = GetSelectSpanSplit(startPositionSpanInfo, endPositionSpanInfo);
