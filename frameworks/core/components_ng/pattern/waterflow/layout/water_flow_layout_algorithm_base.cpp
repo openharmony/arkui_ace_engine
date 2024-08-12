@@ -28,8 +28,12 @@ void WaterFlowLayoutBase::PreloadItems(
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();
     CHECK_NULL_VOID(pattern);
-    const bool taskRegistered = pattern->HasPreloadList();
+    const bool taskRegistered = !pattern->PreloadListEmpty();
     pattern->SetPreloadList(GeneratePreloadList(info, host, cacheCount));
+    if (pattern->PreloadListEmpty()) {
+        return;
+    }
+
     pattern->SetCacheLayoutAlgo(Claim(this));
     if (taskRegistered) {
         return;
@@ -65,7 +69,6 @@ void WaterFlowLayoutBase::PostIdleTask(const RefPtr<FrameNode>& frameNode)
     auto* context = frameNode->GetContext();
     CHECK_NULL_VOID(context);
     context->AddPredictTask([weak = WeakPtr(frameNode)](int64_t deadline, bool canUseLongPredictTask) {
-        ACE_SCOPED_TRACE("WaterFlow predict");
         auto host = weak.Upgrade();
         CHECK_NULL_VOID(host);
         auto pattern = host->GetPattern<WaterFlowPattern>();
@@ -75,14 +78,15 @@ void WaterFlowLayoutBase::PostIdleTask(const RefPtr<FrameNode>& frameNode)
         CHECK_NULL_VOID(algo);
         algo->StartCacheLayout();
 
-        auto items = pattern->MovePreloadList();
         bool needMarkDirty = false;
+        auto items = pattern->MovePreloadList();
         for (auto it = items.begin(); it != items.end(); ++it) {
             if (GetSysTimestamp() > deadline) {
                 pattern->SetPreloadList(std::list<int32_t>(it, items.end()));
-                algo->PostIdleTask(host);
-                return;
+                PostIdleTask(host);
+                break;
             }
+            ACE_SCOPED_TRACE("FlowItem %d predict", *it);
             needMarkDirty |= algo->AppendCacheItem(RawPtr(host), *it);
         }
         if (needMarkDirty) {

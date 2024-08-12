@@ -155,9 +155,9 @@ public:
     {
         preloadItems_ = std::move(preload);
     }
-    bool HasPreloadList() const
+    bool PreloadListEmpty() const
     {
-        return !preloadItems_.empty();
+        return preloadItems_.empty();
     }
     std::list<int32_t>&& MovePreloadList()
     {
