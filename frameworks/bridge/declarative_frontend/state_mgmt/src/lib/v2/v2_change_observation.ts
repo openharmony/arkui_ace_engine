@@ -940,7 +940,7 @@ class ObserveV2 {
     set(target: any, key: string | symbol, value: any): boolean {
       return ObserveV2.commonHandlerSet(target, key, value);
     }
-  }
+  };
 
   public static readonly arraySetMapProxy = {
     get(
