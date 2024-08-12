@@ -270,6 +270,77 @@ constexpr char WEB_NODE_URL[] = "url";
 
 #define WEB_ACCESSIBILITY_DELAY_TIME 100
 
+class WebAccessibilityChildTreeCallback : public AccessibilityChildTreeCallback {
+public:
+    WebAccessibilityChildTreeCallback(const WeakPtr<WebPattern> &weakPattern, int64_t accessibilityId)
+        : AccessibilityChildTreeCallback(accessibilityId), weakPattern_(weakPattern)
+    {}
+
+    ~WebAccessibilityChildTreeCallback() override = default;
+
+    bool OnRegister(uint32_t windowId, int32_t treeId) override
+    {
+        auto pattern = weakPattern_.Upgrade();
+        if (pattern == nullptr) {
+            return false;
+        }
+        if (isReg_) {
+            return true;
+        }
+        if (!pattern->OnAccessibilityChildTreeRegister()) {
+            return false;
+        }
+        pattern->SetAccessibilityState(true);
+        isReg_ = true;
+        return true;
+    }
+
+    bool OnDeregister() override
+    {
+        auto pattern = weakPattern_.Upgrade();
+        if (pattern == nullptr) {
+            return false;
+        }
+        if (!isReg_) {
+            return true;
+        }
+        if (!pattern->OnAccessibilityChildTreeDeregister()) {
+            return false;
+        }
+        pattern->SetAccessibilityState(false);
+        isReg_ = false;
+        return true;
+    }
+
+    bool OnSetChildTree(int32_t childWindowId, int32_t childTreeId) override
+    {
+        auto pattern = weakPattern_.Upgrade();
+        if (pattern == nullptr) {
+            return false;
+        }
+        pattern->OnSetAccessibilityChildTree(childWindowId, childTreeId);
+        return true;
+    }
+
+    bool OnDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override
+    {
+        return false;
+    }
+
+    void OnClearRegisterFlag() override
+    {
+        auto pattern = weakPattern_.Upgrade();
+        if (pattern == nullptr) {
+            return;
+        }
+        isReg_ = false;
+    }
+
+private:
+    bool isReg_ = false;
+    WeakPtr<WebPattern> weakPattern_;
+};
+
 WebPattern::WebPattern() = default;
 
 WebPattern::WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController, RenderMode renderMode,
@@ -308,6 +379,7 @@ WebPattern::~WebPattern()
     if (imageAnalyzerManager_) {
         imageAnalyzerManager_->ReleaseImageAnalyzer();
     }
+    UninitializeAccessibility();
 }
 
 void WebPattern::ShowContextSelectOverlay(const RectF& firstHandle, const RectF& secondHandle,
@@ -2271,6 +2343,7 @@ void WebPattern::OnAttachContext(PipelineContext *context)
     nodeAttach_ = true;
     auto pipelineContext = Claim(context);
     int32_t newId = pipelineContext->GetInstanceId();
+    instanceId_ = newId;
     if (delegate_) {
         delegate_->OnAttachContext(pipelineContext);
     }
@@ -2416,6 +2489,7 @@ void WebPattern::OnModifyDone()
         // first create case,
         delegate_ = AceType::MakeRefPtr<WebDelegate>(PipelineContext::GetCurrentContext(), nullptr, "",
             Container::CurrentId());
+        instanceId_ = Container::CurrentId();
         CHECK_NULL_VOID(delegate_);
         observer_ = AceType::MakeRefPtr<WebDelegateObserver>(delegate_, PipelineContext::GetCurrentContext());
         CHECK_NULL_VOID(observer_);
@@ -2534,9 +2608,6 @@ void WebPattern::OnModifyDone()
         }
         isAllowWindowOpenMethod_ = SystemProperties::GetAllowWindowOpenMethodEnabled();
         delegate_->UpdateAllowWindowOpenMethod(GetAllowWindowOpenMethodValue(isAllowWindowOpenMethod_));
-        if (!webAccessibilityNode_) {
-            webAccessibilityNode_ = AceType::MakeRefPtr<WebAccessibilityNode>(Claim(this));
-        }
         delegate_->UpdateNativeEmbedModeEnabled(GetNativeEmbedModeEnabledValue(false));
         delegate_->UpdateNativeEmbedRuleTag(GetNativeEmbedRuleTagValue(""));
         delegate_->UpdateNativeEmbedRuleType(GetNativeEmbedRuleTypeValue(""));
@@ -2544,10 +2615,6 @@ void WebPattern::OnModifyDone()
         std::tuple<bool, bool> config = GetNativeVideoPlayerConfigValue({false, false});
         delegate_->UpdateNativeVideoPlayerConfig(std::get<0>(config), std::get<1>(config));
 
-        accessibilityState_ = AceApplicationInfo::GetInstance().IsAccessibilityEnabled();
-        if (accessibilityState_) {
-            delegate_->SetAccessibilityState(true);
-        }
         delegate_->UpdateSmoothDragResizeEnabled(GetSmoothDragResizeEnabledValue(false));
     }
 
@@ -2565,6 +2632,7 @@ void WebPattern::OnModifyDone()
     InitEvent();
     // Initialize web params.
     InitFeatureParam();
+    InitializeAccessibility();
 
     // Initialize scrollupdate listener
     if (renderMode_ == RenderMode::SYNC_RENDER) {
@@ -5305,51 +5373,44 @@ void WebPattern::UpdateJavaScriptOnDocumentEnd()
     }
 }
 
-RefPtr<WebAccessibilityNode> WebPattern::GetAccessibilityNodeById(int64_t accessibilityId)
+std::shared_ptr<NWeb::NWebAccessibilityNodeInfo> WebPattern::GetAccessibilityNodeById(int64_t accessibilityId)
 {
-    CHECK_NULL_RETURN(delegate_, nullptr);
-    CHECK_NULL_RETURN(webAccessibilityNode_, nullptr);
-    std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> info =
-        delegate_->GetAccessibilityNodeInfoById(accessibilityId);
-    if (!info) {
+    if (!accessibilityState_) {
         return nullptr;
     }
-    SetSelfAsParentOfWebCoreNode(info);
-    return webAccessibilityNode_;
+    CHECK_NULL_RETURN(delegate_, nullptr);
+    return delegate_->GetAccessibilityNodeInfoById(accessibilityId);
 }
 
-RefPtr<WebAccessibilityNode> WebPattern::GetFocusedAccessibilityNode(int64_t accessibilityId, bool isAccessibilityFocus)
+std::shared_ptr<NWeb::NWebAccessibilityNodeInfo> WebPattern::GetFocusedAccessibilityNode(
+    int64_t accessibilityId, bool isAccessibilityFocus)
 {
-    CHECK_NULL_RETURN(delegate_, nullptr);
-    CHECK_NULL_RETURN(webAccessibilityNode_, nullptr);
-    std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> info =
-        delegate_->GetFocusedAccessibilityNodeInfo(accessibilityId, isAccessibilityFocus);
-    if (!info) {
+    if (!accessibilityState_) {
         return nullptr;
     }
-    SetSelfAsParentOfWebCoreNode(info);
-    return webAccessibilityNode_;
-}
-
-RefPtr<WebAccessibilityNode> WebPattern::GetAccessibilityNodeByFocusMove(int64_t accessibilityId, int32_t direction)
-{
     CHECK_NULL_RETURN(delegate_, nullptr);
-    CHECK_NULL_RETURN(webAccessibilityNode_, nullptr);
-    std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> info =
-        delegate_->GetAccessibilityNodeInfoByFocusMove(accessibilityId, direction);
-    if (!info) {
-        return nullptr;
-    }
-    SetSelfAsParentOfWebCoreNode(info);
-    return webAccessibilityNode_;
+    return delegate_->GetFocusedAccessibilityNodeInfo(accessibilityId, isAccessibilityFocus);
 }
 
 
-void WebPattern::ExecuteAction(int64_t accessibilityId, AceAction action,
+std::shared_ptr<NWeb::NWebAccessibilityNodeInfo> WebPattern::GetAccessibilityNodeByFocusMove(int64_t accessibilityId,
+    int32_t direction)
+{
+    if (!accessibilityState_) {
+        return nullptr;
+    }
+    CHECK_NULL_RETURN(delegate_, nullptr);
+    return delegate_->GetAccessibilityNodeInfoByFocusMove(accessibilityId, direction);
+}
+
+bool WebPattern::ExecuteAction(int64_t accessibilityId, AceAction action,
     const std::map<std::string, std::string>& actionArguments) const
 {
-    CHECK_NULL_VOID(delegate_);
-    delegate_->ExecuteAction(accessibilityId, action, actionArguments);
+    CHECK_NULL_RETURN(delegate_, false);
+    if (!accessibilityState_) {
+        return false;
+    }
+    return delegate_->ExecuteAction(accessibilityId, action, actionArguments);
 }
 
 void WebPattern::SetAccessibilityState(bool state)
@@ -5371,18 +5432,11 @@ void WebPattern::SetAccessibilityState(bool state)
     }
 }
 
-void WebPattern::SetSelfAsParentOfWebCoreNode(std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> info) const
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    if (info->GetParentId() == -1) { // root node of web core
-        info->SetParentId(host->GetAccessibilityId());
-    }
-    webAccessibilityNode_->SetAccessibilityNodeInfo(info);
-}
-
 void WebPattern::UpdateFocusedAccessibilityId(int64_t accessibilityId)
 {
+    if (!accessibilityState_) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
@@ -5411,8 +5465,10 @@ std::shared_ptr<Rosen::RSNode> WebPattern::GetSurfaceRSNode() const
 
 bool WebPattern::GetAccessibilityFocusRect(RectT<int32_t>& paintRect, int64_t accessibilityId) const
 {
+    if (!accessibilityState_) {
+        return false;
+    }
     CHECK_NULL_RETURN(delegate_, false);
-    CHECK_NULL_RETURN(webAccessibilityNode_, false);
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> info =
         delegate_->GetAccessibilityNodeInfoById(accessibilityId);
     if (!info) {
@@ -5934,4 +5990,79 @@ void WebPattern::InitAiEngine()
         "ArkWebTextInitDataDetect");
     isInit = true;
 }
+
+void WebPattern::InitializeAccessibility()
+{
+    ContainerScope scope(instanceId_);
+    if (accessibilityChildTreeCallback_) {
+        return;
+    }
+    auto frameNode = frameNode_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    int64_t accessibilityId = frameNode->GetAccessibilityId();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto accessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityChildTreeCallback_ = std::make_shared<WebAccessibilityChildTreeCallback>(
+        WeakClaim(this), frameNode->GetAccessibilityId());
+    accessibilityManager->RegisterAccessibilityChildTreeCallback(accessibilityId, accessibilityChildTreeCallback_);
+    if (accessibilityManager->IsRegister()) {
+        accessibilityChildTreeCallback_->OnRegister(pipeline->GetWindowId(), accessibilityManager->GetTreeId());
+    }
+}
+
+void WebPattern::UninitializeAccessibility()
+{
+    ContainerScope scope(instanceId_);
+    auto frameNode = frameNode_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    int64_t accessibilityId = frameNode->GetAccessibilityId();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto accessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    if (accessibilityManager->IsRegister()) {
+        CHECK_NULL_VOID(accessibilityChildTreeCallback_);
+        accessibilityChildTreeCallback_->OnDeregister();
+    }
+    accessibilityManager->DeregisterAccessibilityChildTreeCallback(accessibilityId);
+    accessibilityChildTreeCallback_ = nullptr;
+}
+
+void WebPattern::OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId)
+{
+    treeId_ = childTreeId;
+    auto frameNode = frameNode_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    if (accessibilityProperty != nullptr) {
+        accessibilityProperty->SetChildWindowId(childWindowId);
+        accessibilityProperty->SetChildTreeId(childTreeId);
+    }
+}
+
+bool WebPattern::OnAccessibilityChildTreeRegister()
+{
+    ContainerScope scope(instanceId_);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto accessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_RETURN(accessibilityManager, false);
+    auto frameNode = frameNode_.Upgrade();
+    CHECK_NULL_RETURN(frameNode, false);
+    int64_t accessibilityId = frameNode->GetAccessibilityId();
+    return accessibilityManager->RegisterWebInteractionOperationAsChildTree(accessibilityId, WeakClaim(this));
+}
+
+bool WebPattern::OnAccessibilityChildTreeDeregister()
+{
+    ContainerScope scope(instanceId_);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto accessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_RETURN(accessibilityManager, false);
+    return accessibilityManager->DeregisterWebInteractionOperationAsChildTree(treeId_);
+}
+
 } // namespace OHOS::Ace::NG
