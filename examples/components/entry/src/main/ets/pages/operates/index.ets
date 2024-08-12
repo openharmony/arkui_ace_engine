@@ -16,6 +16,7 @@
 import { Route, RouteGroup } from '../../common/route';
 import { ButtonBootcamp } from './ButtonBootcamp';
 import { ChipBootcamp } from './ChipBootcamp';
+import { SelectBootcamp } from './SelectBootcamp';
 
 export const operatesRoute: RouteGroup = {
   name: 'operates',
@@ -23,6 +24,7 @@ export const operatesRoute: RouteGroup = {
   children: [
     { name: 'button', label: '按钮/Button' },
     { name: 'chip', label: '操作块/Chip' },
+    { name: 'select', label: '下拉按钮/Select' },
   ]
 };
 
@@ -32,6 +34,8 @@ export function OperatesDestination(name: string, route: Route) {
     ButtonBootcamp({ title: route.label })
   } else if (name === 'operates/chip') {
     ChipBootcamp({ title: route.label })
+  } else if (name === 'operates/select') {
+    SelectBootcamp({ title: route.label })
   }
 }
 
