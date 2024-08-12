@@ -162,6 +162,10 @@ void TextPickerColumnPattern::OnMiddleButtonTouchUp()
     } else {
         PlayPressAnimation(buttonBgColor_);
     }
+
+    if (useButtonFocusArea_) {
+        FlushCurrentOptions();
+    }
 }
 
 void TextPickerColumnPattern::InitSelectorButtonProperties(const RefPtr<PickerTheme>& pickerTheme)
@@ -394,7 +398,12 @@ void TextPickerColumnPattern::HandleMouseEvent(bool isHover)
     } else {
         PlayPressAnimation(buttonBgColor_);
     }
+    auto needUpdate = isHover_ != isHover;
     isHover_ = isHover;
+
+    if (useButtonFocusArea_ && needUpdate) {
+        FlushCurrentOptions();
+    }
 }
 
 #ifdef SUPPORT_DIGITAL_CROWN
@@ -565,7 +574,7 @@ void TextPickerColumnPattern::UpdateTexOverflow(bool isSel, const RefPtr<TextLay
     if (isTextFadeOut_) {
         textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
         textLayoutProperty->UpdateTextMarqueeFadeout(true);
-        textLayoutProperty->UpdateTextMarqueeStart(isSel && !isTossing_);
+        textLayoutProperty->UpdateTextMarqueeStart(isSel && !isTossing_ && (isFocusColumn_ || isHover_));
     }
 }
 
