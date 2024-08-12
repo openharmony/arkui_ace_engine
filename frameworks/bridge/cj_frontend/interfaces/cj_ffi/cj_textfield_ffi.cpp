@@ -123,9 +123,9 @@ void FfiOHOSAceFrameworkTextFieldSetPaddings(CJEdge params)
 {
     NG::PaddingProperty paddings;
     paddings.top = NG::CalcLength(Dimension(params.top, static_cast<DimensionUnit>(params.topUnit)));
-    paddings.bottom = NG::CalcLength(Dimension(params.right, static_cast<DimensionUnit>(params.rightUnit)));
-    paddings.left = NG::CalcLength(Dimension(params.bottom, static_cast<DimensionUnit>(params.bottomUnit)));
-    paddings.right = NG::CalcLength(Dimension(params.left, static_cast<DimensionUnit>(params.leftUnit)));
+    paddings.right = NG::CalcLength(Dimension(params.right, static_cast<DimensionUnit>(params.rightUnit)));
+    paddings.bottom = NG::CalcLength(Dimension(params.bottom, static_cast<DimensionUnit>(params.bottomUnit)));
+    paddings.left = NG::CalcLength(Dimension(params.left, static_cast<DimensionUnit>(params.leftUnit)));
     TextFieldModel::GetInstance()->SetPadding(paddings, Edge(), false);
 }
 
