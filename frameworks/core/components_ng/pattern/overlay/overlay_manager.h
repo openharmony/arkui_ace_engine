@@ -598,6 +598,7 @@ public:
     void OnUIExtensionWindowSizeChange();
 
     RefPtr<FrameNode> GetDialogNodeWithExistContent(const RefPtr<UINode>& node);
+    OffsetF CalculateMenuPosition(const RefPtr<FrameNode>& menuWrapperNode, const OffsetF& offset);
 
 private:
     void OnBindSheetInner(std::function<void(const std::string&)>&& callback,
