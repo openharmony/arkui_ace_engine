@@ -8680,7 +8680,7 @@ void RichEditorPattern::GetReplacedSpan(RichEditorChangeValue& changeValue, int3
     }
 
     auto it = textTemp.find(lineSeparator);
-    bool containNextLine = it != std::wstring::npos && textTemp.back() != L'\n';
+    bool containNextLine = it != std::wstring::npos;
     auto content = StringUtils::ToString(textTemp);
 
     if (textStyle || containNextLine) { // SpanNode Fission
