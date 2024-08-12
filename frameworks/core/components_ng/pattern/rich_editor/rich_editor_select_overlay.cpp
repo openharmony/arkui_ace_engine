@@ -128,7 +128,7 @@ void RichEditorSelectOverlay::CloseMagnifier()
 {
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->magnifierController_->UpdateShowMagnifier();
+    pattern->magnifierController_->RemoveMagnifierFrameNode();
 }
 
 void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
