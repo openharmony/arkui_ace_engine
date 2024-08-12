@@ -857,7 +857,11 @@ RefPtr<FrameNode> BubbleView::CreateButton(
     } else {
         buttonProp->UpdatePadding(buttonPadding);
     }
-    buttonProp->UpdateType(ButtonType::CAPSULE);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        buttonProp->UpdateType(ButtonType::ROUNDED_RECTANGLE);
+    } else {
+        buttonProp->UpdateType(ButtonType::CAPSULE);
+    }
     auto fontSize = popupTheme->GetFontSize();
     buttonProp->UpdateUserDefinedIdealSize(CalcSize(std::nullopt,
         CalcLength(GetAgeFontSize(fontSize) * AGE_FONT_DOUBLE_LINE_WITH_GAP)));
