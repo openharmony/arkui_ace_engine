@@ -556,6 +556,7 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     context->RequestFrame();
+    lastVsyncTime_ = context->GetVsyncTime();
 }
 
 void Scrollable::SetDelayedTask()

@@ -43,9 +43,7 @@ bool MagnifierController::UpdateMagnifierOffsetX(OffsetF& magnifierPaintOffset, 
         return false;
     }
     float left = basePaintOffset.GetX() + localOffset_.GetX() - magnifierNodeWidth_.ConvertToPx() / 2;
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, false);
-    auto rootUINode = pipelineContext->GetRootElement();
+    auto rootUINode = GetRootNode();
     CHECK_NULL_RETURN(rootUINode, false);
     auto rootGeometryNode = rootUINode->GetGeometryNode();
     CHECK_NULL_RETURN(rootGeometryNode, false);
@@ -79,7 +77,7 @@ bool MagnifierController::UpdateMagnifierOffsetY(OffsetF& magnifierPaintOffset, 
         UpdateShowMagnifier();
         return false;
     }
-    auto rootUINode = pipeline->GetRootElement();
+    auto rootUINode = GetRootNode();
     CHECK_NULL_RETURN(rootUINode, false);
     auto rootGeometryNode = rootUINode->GetGeometryNode();
     CHECK_NULL_RETURN(rootGeometryNode, false);
@@ -125,9 +123,7 @@ bool MagnifierController::UpdateMagnifierOffset()
 
 void MagnifierController::OpenMagnifier()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto rootUINode = pipeline->GetRootElement();
+    auto rootUINode = GetRootNode();
     CHECK_NULL_VOID(rootUINode);
     if ((!magnifierFrameNode_) || (rootUINode->GetChildIndexById(magnifierFrameNode_->GetId()) == -1) ||
         (colorModeChange_)) {
@@ -140,6 +136,35 @@ void MagnifierController::OpenMagnifier()
     }
     CHECK_NULL_VOID(UpdateMagnifierOffset());
     ChangeMagnifierVisibility(true);
+}
+
+RefPtr<FrameNode> MagnifierController::GetRootNode()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto rootNode = pipeline->GetRootElement();
+    CHECK_NULL_RETURN(rootNode, nullptr);
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, rootNode);
+    auto host = pattern->GetHost();
+    CHECK_NULL_RETURN(host, rootNode);
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
+        auto root = FindWindowScene(host);
+        rootNode = DynamicCast<FrameNode>(root);
+    }
+    return rootNode;
+}
+
+RefPtr<UINode> MagnifierController::FindWindowScene(const RefPtr<FrameNode>& targetNode)
+{
+    CHECK_NULL_RETURN(targetNode, nullptr);
+    auto parent = targetNode->GetParent();
+    while (parent && parent->GetTag() != V2::WINDOW_SCENE_ETS_TAG) {
+        parent = parent->GetParent();
+    }
+    CHECK_NULL_RETURN(parent, nullptr);
+    return parent;
 }
 
 void MagnifierController::ChangeMagnifierVisibility(const bool& visible)

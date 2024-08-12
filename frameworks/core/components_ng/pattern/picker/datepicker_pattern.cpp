@@ -287,8 +287,9 @@ void DatePickerPattern::OnColorConfigurationUpdate()
     auto normalStyle = pickerTheme->GetOptionStyle(false, false);
     auto pickerProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
-    pickerProperty->UpdateColor(normalStyle.GetTextColor());
-    pickerProperty->UpdateDisappearColor(disappearStyle.GetTextColor());
+    pickerProperty->UpdateColor(GetTextProperties().normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
+    pickerProperty->UpdateDisappearColor(
+        GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
     if (isPicker_) {
         return;
     }

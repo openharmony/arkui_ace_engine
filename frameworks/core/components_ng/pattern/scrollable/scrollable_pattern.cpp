@@ -561,6 +561,7 @@ void ScrollablePattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub
         switch (info.GetTouches().front().GetTouchType()) {
             case TouchType::DOWN:
                 scrollable->HandleTouchDown();
+                pattern->OnTouchDown(info);
                 break;
             case TouchType::UP:
                 scrollable->HandleTouchUp();
