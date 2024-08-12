@@ -37,7 +37,7 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone009, TestSize.Level1)
 {
     IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 0);
     model.SetAutoCollapse(true);
-    model.SetItemSize(Dimension(6, DimensionUnit::FP));
+    model.SetItemSize(Dimension(16, DimensionUnit::FP));
     CreateDone();
 
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -54,6 +54,7 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone009, TestSize.Level1)
     dirtySwapConfig.skipMeasure = false;
     dirtySwapConfig.skipLayout = false;
     pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    pattern_->OnModifyDone();
 
     std::vector<std::pair<std::string, bool>> arrayValueRst;
     arrayValueRst.push_back(std::pair("A", false));
@@ -85,7 +86,7 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0010, TestSize.Level1)
 {
     IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 0);
     model.SetAutoCollapse(true);
-    model.SetItemSize(Dimension(6, DimensionUnit::PX));
+    model.SetItemSize(Dimension(16, DimensionUnit::PX));
     CreateDone();
 
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -101,6 +102,7 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0010, TestSize.Level1)
     dirtySwapConfig.skipMeasure = false;
     dirtySwapConfig.skipLayout = false;
     pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    pattern_->OnModifyDone();
     std::vector<std::pair<std::string, bool>> arrayValueRst;
     arrayValueRst.push_back(std::pair("A", false));
     arrayValueRst.push_back(std::pair("B", true));
@@ -148,6 +150,7 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0011, TestSize.Level1)
     dirtySwapConfig.skipMeasure = false;
     dirtySwapConfig.skipLayout = false;
     pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    pattern_->OnModifyDone();
 
     std::vector<std::pair<std::string, bool>> arrayValueRst;
     arrayValueRst.push_back(std::pair("A", false));
@@ -178,7 +181,7 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0012, TestSize.Level1)
 {
     IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 0);
     model.SetAutoCollapse(true);
-    model.SetItemSize(Dimension(6, DimensionUnit::LPX));
+    model.SetItemSize(Dimension(16, DimensionUnit::LPX));
     CreateDone();
 
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -195,6 +198,7 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0012, TestSize.Level1)
     dirtySwapConfig.skipMeasure = false;
     dirtySwapConfig.skipLayout = false;
     pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    pattern_->OnModifyDone();
 
     std::vector<std::pair<std::string, bool>> arrayValueRst;
     arrayValueRst.push_back(std::pair("A", false));
@@ -243,6 +247,7 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0013, TestSize.Level1)
     dirtySwapConfig.skipMeasure = false;
     dirtySwapConfig.skipLayout = false;
     pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    pattern_->OnModifyDone();
 
     std::vector<std::pair<std::string, bool>> arrayValueRst;
     arrayValueRst.push_back(std::pair("A", false));
@@ -274,7 +279,7 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0014, TestSize.Level1)
 {
     IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 0);
     model.SetAutoCollapse(true);
-    model.SetItemSize(Dimension(9, DimensionUnit::FP));
+    model.SetItemSize(Dimension(19, DimensionUnit::FP));
     CreateDone();
 
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -291,6 +296,7 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0014, TestSize.Level1)
     dirtySwapConfig.skipMeasure = false;
     dirtySwapConfig.skipLayout = false;
     pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    pattern_->OnModifyDone();
 
     std::vector<std::pair<std::string, bool>> arrayValueRst;
     arrayValueRst.push_back(std::pair("A", false));
@@ -322,7 +328,7 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0015, TestSize.Level1)
 {
     IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 0);
     model.SetAutoCollapse(true);
-    model.SetItemSize(Dimension(9, DimensionUnit::PX));
+    model.SetItemSize(Dimension(19, DimensionUnit::PX));
     CreateDone();
 
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -339,6 +345,7 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0015, TestSize.Level1)
     dirtySwapConfig.skipMeasure = false;
     dirtySwapConfig.skipLayout = false;
     pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    pattern_->OnModifyDone();
 
     std::vector<std::pair<std::string, bool>> arrayValueRst;
     arrayValueRst.push_back(std::pair("A", false));
@@ -387,6 +394,7 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0016, TestSize.Level1)
     dirtySwapConfig.skipMeasure = false;
     dirtySwapConfig.skipLayout = false;
     pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    pattern_->OnModifyDone();
 
     std::vector<std::pair<std::string, bool>> arrayValueRst;
     arrayValueRst.push_back(std::pair("A", false));
@@ -417,7 +425,7 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0017, TestSize.Level1)
 {
     IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 0);
     model.SetAutoCollapse(true);
-    model.SetItemSize(Dimension(9, DimensionUnit::LPX));
+    model.SetItemSize(Dimension(19, DimensionUnit::LPX));
     CreateDone();
 
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -434,6 +442,7 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0017, TestSize.Level1)
     dirtySwapConfig.skipMeasure = false;
     dirtySwapConfig.skipLayout = false;
     pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    pattern_->OnModifyDone();
 
     std::vector<std::pair<std::string, bool>> arrayValueRst;
     arrayValueRst.push_back(std::pair("A", false));
@@ -465,7 +474,7 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0018, TestSize.Level1)
 {
     IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 0);
     model.SetAutoCollapse(true);
-    model.SetItemSize(Dimension(9, DimensionUnit::NONE));
+    model.SetItemSize(Dimension(19, DimensionUnit::NONE));
     CreateDone();
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<LayoutWrapperNode> layoutWrapper =
@@ -480,6 +489,7 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0018, TestSize.Level1)
     dirtySwapConfig.skipMeasure = false;
     dirtySwapConfig.skipLayout = false;
     pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    pattern_->OnModifyDone();
     std::vector<std::pair<std::string, bool>> arrayValueRst;
     arrayValueRst.push_back(std::pair("A", false));
     arrayValueRst.push_back(std::pair("B", true));
@@ -659,6 +669,7 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0025, TestSize.Level1)
     dirtySwapConfig.skipMeasure = false;
     dirtySwapConfig.skipLayout = false;
     pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    pattern_->OnModifyDone();
 
     std::vector<std::pair<std::string, bool>> arrayValueRst;
     arrayValueRst.push_back(std::pair("#", false));
@@ -709,6 +720,7 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0026, TestSize.Level1)
     dirtySwapConfig.skipMeasure = false;
     dirtySwapConfig.skipLayout = false;
     pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    pattern_->OnModifyDone();
 
     std::vector<std::pair<std::string, bool>> arrayValueRst;
     arrayValueRst.push_back(std::pair("#", false));
@@ -759,6 +771,7 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0027, TestSize.Level1)
     dirtySwapConfig.skipMeasure = false;
     dirtySwapConfig.skipLayout = false;
     pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    pattern_->OnModifyDone();
 
     std::vector<std::pair<std::string, bool>> arrayValueRst;
     arrayValueRst.push_back(std::pair("#", false));
@@ -809,6 +822,7 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0028, TestSize.Level1)
     dirtySwapConfig.skipMeasure = false;
     dirtySwapConfig.skipLayout = false;
     pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    pattern_->OnModifyDone();
 
     std::vector<std::pair<std::string, bool>> arrayValueRst;
     arrayValueRst.push_back(std::pair("#", false));
@@ -860,6 +874,7 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0029, TestSize.Level1)
     dirtySwapConfig.skipMeasure = false;
     dirtySwapConfig.skipLayout = false;
     pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    pattern_->OnModifyDone();
 
     std::vector<std::pair<std::string, bool>> arrayValueRst;
     arrayValueRst.push_back(std::pair("#", false));
@@ -910,6 +925,7 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0030, TestSize.Level1)
     dirtySwapConfig.skipMeasure = false;
     dirtySwapConfig.skipLayout = false;
     pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    pattern_->OnModifyDone();
 
     std::vector<std::pair<std::string, bool>> arrayValueRst;
     arrayValueRst.push_back(std::pair("#", false));
