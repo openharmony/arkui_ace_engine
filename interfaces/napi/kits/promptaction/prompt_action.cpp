@@ -294,6 +294,26 @@ void GetToastObjectShadow(napi_env env, napi_value shadowNApi, Shadow& shadowPro
     shadowProps.SetIsFilled(isFilled);
 }
 
+bool ParseResource(const ResourceInfo resource, CalcDimension& result)
+{
+    auto resourceWrapper = CreateResourceWrapper(resource);
+    CHECK_NULL_RETURN(resourceWrapper, false);
+    if (resource.type == static_cast<uint32_t>(ResourceType::STRING)) {
+        auto value = resourceWrapper->GetString(resource.resId);
+        return StringUtils::StringToCalcDimensionNG(value, result, false);
+    }
+    if (resource.type == static_cast<uint32_t>(ResourceType::INTEGER)) {
+        auto value = std::to_string(resourceWrapper->GetInt(resource.resId));
+        StringUtils::StringToDimensionWithUnitNG(value, result);
+        return true;
+    }
+    if (resource.type == static_cast<uint32_t>(ResourceType::FLOAT)) {
+        result = resourceWrapper->GetDimension(resource.resId);
+        return true;
+    }
+    return false;
+}
+
 void GetToastShadow(napi_env env, napi_value shadowNApi, std::optional<Shadow>& shadow)
 {
     Shadow shadowProps;
@@ -313,10 +333,11 @@ void GetToastShadow(napi_env env, napi_value shadowNApi, std::optional<Shadow>& 
         ResourceInfo recv;
         bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
         if (ParseResourceParam(env, offsetXApi, recv)) {
-            auto resourceWrapper = CreateResourceWrapper(recv);
-            auto offsetX = resourceWrapper->GetDimension(recv.resId);
-            double xValue = isRtl ? offsetX.Value() * (-1) : offsetX.Value();
-            shadowProps.SetOffsetX(xValue);
+            CalcDimension offsetX;
+            if (ParseResource(recv, offsetX)) {
+                double xValue = isRtl ? offsetX.Value() * (-1) : offsetX.Value();
+                shadowProps.SetOffsetX(xValue);
+            }
         } else {
             CalcDimension offsetX;
             if (ParseNapiDimension(env, offsetX, offsetXApi, DimensionUnit::VP)) {
@@ -325,9 +346,10 @@ void GetToastShadow(napi_env env, napi_value shadowNApi, std::optional<Shadow>& 
             }
         }
         if (ParseResourceParam(env, offsetYApi, recv)) {
-            auto resourceWrapper = CreateResourceWrapper(recv);
-            auto offsetY = resourceWrapper->GetDimension(recv.resId);
-            shadowProps.SetOffsetY(offsetY.Value());
+            CalcDimension offsetY;
+            if (ParseResource(recv, offsetY)) {
+                shadowProps.SetOffsetY(offsetY.Value());
+            }
         } else {
             CalcDimension offsetY;
             if (ParseNapiDimension(env, offsetY, offsetYApi, DimensionUnit::VP)) {
