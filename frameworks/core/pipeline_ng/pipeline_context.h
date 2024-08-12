@@ -792,13 +792,11 @@ public:
 
     void CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, AxisAction action) override;
 
-    void AddFrameCallback(FrameCallbackFunc&& frameCallbackFunc)
-    {
-        frameCallbackFuncs_.emplace_back(std::move(frameCallbackFunc));
-        RequestFrame();
-    }
+    void AddFrameCallback(FrameCallbackFunc&& frameCallbackFunc, FrameCallbackFunc&& idleCallbackFunc,
+        int64_t delayMillis);
 
     void FlushFrameCallback(uint64_t nanoTimestamp);
+    void TriggerIdleCallback(int64_t deadline);
 
     void RegisterTouchEventListener(const std::shared_ptr<ITouchEventCallback>& listener);
     void UnregisterTouchEventListener(const WeakPtr<NG::Pattern>& pattern);
@@ -1092,6 +1090,7 @@ private:
     std::string homePageConfig_;
 
     std::list<FrameCallbackFunc> frameCallbackFuncs_;
+    std::list<FrameCallbackFunc> idleCallbackFuncs_;
     uint32_t transform_ = 0;
     std::list<WeakPtr<FrameNode>> changeInfoListeners_;
     std::list<WeakPtr<FrameNode>> changedNodes_;
