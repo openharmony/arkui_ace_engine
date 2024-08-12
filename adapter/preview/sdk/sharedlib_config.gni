@@ -132,11 +132,13 @@ common_bin = [
     label = "//arkcompiler/toolchain/tooling:libark_ecma_debugger"
     subsystem_name = "arkcompiler"
     part_name = "toolchain"
+    lib_names = [ "ark_tooling" ]
   },
   {
     label = "//arkcompiler/toolchain/inspector:ark_debugger"
     subsystem_name = "arkcompiler"
     part_name = "toolchain"
+    lib_names = [ "ark_inspector" ]
   },
   {
     label = "//third_party/openssl:libssl_shared"
