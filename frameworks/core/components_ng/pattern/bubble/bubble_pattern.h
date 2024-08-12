@@ -214,7 +214,7 @@ public:
 
     void ResetFocusState()
     {
-        SetIsDefaultHasBeFocused(false);
+        FocusViewDidShow(nullptr);
         SetIsViewRootScopeFocused(true);
         SetIsViewHasFocused(false);
     }

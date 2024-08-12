@@ -243,12 +243,9 @@ bool FocusView::RequestDefaultFocus()
     isViewHasFocused_ = true;
 
     auto defaultFocusNode = focusViewHub->GetChildFocusNodeByType(FocusNodeType::DEFAULT);
-    if (defaultFocusNode && defaultFocusNode->IsCurrentFocus()) {
-        isDefaultHasBeFocused_ = true;
-    }
-
+    
     auto isViewRootScopeHasChildFocused = viewRootScope->HasFocusedChild();
-    if (!isDefaultHasBeFocused_ && !isViewRootScopeHasChildFocused) {
+    if (neverShown_ && !isViewRootScopeHasChildFocused) {
         if (!defaultFocusNode) {
             TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus view has no default focus.");
         } else if (!defaultFocusNode->IsFocusableWholePath()) {
@@ -257,7 +254,7 @@ bool FocusView::RequestDefaultFocus()
         } else {
             SetIsViewRootScopeFocused(false);
             auto ret = defaultFocusNode->RequestFocusImmediately();
-            isDefaultHasBeFocused_ = true;
+            FocusViewDidShow(defaultFocusNode);
             TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on default focus: %{public}s/%{public}d return: %{public}d.",
                 defaultFocusNode->GetFrameName().c_str(), defaultFocusNode->GetFrameId(), ret);
             return ret;
@@ -308,7 +305,7 @@ bool FocusView::TriggerFocusMove()
     viewFocusHub->CollectTabIndexNodes(tabIndexNodes);
     if (tabIndexNodes.empty()) {
         // No tabIndex node in current main view. Extend focus from viewRootScope to children.
-        isDefaultHasBeFocused_ = true;
+        FocusViewDidShow(viewFocusHub);
         SetIsViewRootScopeFocused(false);
         viewRootScope->InheritFocus();
         return true;
@@ -329,5 +326,31 @@ bool FocusView::GetFocusViewFocusable()
         return false;
     }
     return true;
+}
+
+void FocusView::FocusViewDidShow(const RefPtr<FocusHub>& focusHub)
+{
+    if (!focusHub) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus view: %{public}s/%{public}d reset shown flag.",
+            GetFrameName().c_str(), GetFrameId());
+        neverShown_ = false;
+    }
+    RefPtr<UINode> node = focusHub->GetFrameNode();
+    do {
+        auto frameNode = DynamicCast<FrameNode>(node);
+        if (frameNode) {
+            auto focusView = frameNode->GetPattern<FocusView>();
+            if (focusView) {
+                if (focusView->neverShown_) {
+                    TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus view: %{public}s/%{public}d is first shown.",
+                        focusView->GetFrameName().c_str(), focusView->GetFrameId());
+                    focusView->neverShown_ = false;
+                } else {
+                    return;
+                }
+            }
+        }
+        node = node->GetParent();
+    } while (node);
 }
 } // namespace OHOS::Ace::NG
