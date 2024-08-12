@@ -51,7 +51,7 @@ function uiNodeCleanUpIdleTask(maxTimeInMs: number): void {
     const deadline = Date.now() + maxTimeInMs;
     UINodeRegisterProxy.obtainDeletedElmtIds();
     UINodeRegisterProxy.unregisterElmtIdsFromIViews();
-    UINodeRegisterProxy.cleanUpDeadReferences(Math.max(0, deadline - Date.now()));
+    UINodeRegisterProxy.runIdleTasks(Math.max(0, deadline - Date.now()));
 }
 
 class UINodeRegisterProxy {
@@ -123,9 +123,9 @@ class UINodeRegisterProxy {
         this.removeElementsInfo_.length = 0;
     }
 
-    public static cleanUpDeadReferences(maxTimeInMs: number): void {
-        stateMgmtConsole.debug('UINodeRegisterProxy.cleanUpDeadReferences');
-        ObserveV2.getObserve().cleanUpDeadReferences(maxTimeInMs);
+    public static runIdleTasks(maxTimeInMs: number): void {
+        stateMgmtConsole.debug(`UINodeRegisterProxy.runIdleTasks(${maxTimeInMs})`);
+        ObserveV2.getObserve().runIdleTasks(maxTimeInMs);
     }
 
     public static instance_: UINodeRegisterProxy = new UINodeRegisterProxy();

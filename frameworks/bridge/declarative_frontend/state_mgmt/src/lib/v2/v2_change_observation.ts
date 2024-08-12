@@ -165,8 +165,24 @@ class ObserveV2 {
     // ViewPU is the likely case where no dependecy gets recorded
     // for others no dependencies are unlikely to happen
 
-    // once set, the value remains unchanged
-    this.id2cmp_[bound[0]] ??= new WeakRef<Object>(bound[1]);
+    const [id, cmp] = bound;
+    if (this.id2targets_[id]?.size) {
+      // only add IView | MonitorV2 | ComputedV2 if at least one dependency was
+      // recorded when rendering this ViewPU/ViewV2/Monitor/ComputedV2
+      // ViewPU is the likely case where no dependecy gets recorded
+      // for others no dependencies are unlikely to happen
+      const weakRef = WeakRefPool.get(cmp);
+      if (this.id2cmp_[id] === weakRef) {
+        return;
+      }
+
+      this.id2cmp_[id] = weakRef;
+      WeakRefPool.onGC(cmp, () => {
+        if (this.id2cmp_[id] === weakRef) {
+          delete this.id2cmp_[id];
+        }
+      });
+    }
   }
 
   // clear any previously created dependency view model object to elmtId
@@ -180,17 +196,10 @@ class ObserveV2 {
   }
 
   private clearBindingInternal(id: number): void {
-    // multiple weakRefs might point to the same target - here we get Set of unique targets
-    const targetSet = new Set<Object>();
-    this.id2targets_[id]?.forEach((weak : WeakRef<Object>) => {
-      if (weak.deref() instanceof Object) {
-        targetSet.add(weak.deref());
-      }
-    });
-
-    targetSet.forEach((target) => {
-      const idRefs: Object | undefined = target[ObserveV2.ID_REFS];
-      const symRefs: Object = target[ObserveV2.SYMBOL_REFS];
+    this.id2targets_[id]?.forEach((weakRef: WeakRef<Object>) => {
+      const target = weakRef.deref();
+      const idRefs: Object | undefined = target?.[ObserveV2.ID_REFS];
+      const symRefs: Object = target?.[ObserveV2.SYMBOL_REFS];
 
       if (idRefs) {
         idRefs[id]?.forEach(key =>
@@ -213,16 +222,6 @@ class ObserveV2 {
 
   /**
    *
-   * this cleanUpId2CmpDeadReferences()
-   * id2cmp is a 'map' object id => WeakRef<Object> where object is ViewV2, ViewPU, MonitorV2 or ComputedV2
-   * This method iterates over the object entries and deleted all those entries whose value can no longer
-   * be deref'ed.
-   *
-   * cleanUpId2TargetsDeadReferences()
-   * is2targets is a 'map' object id => Set<WeakRef<Object>>
-   * the method traverses over the object entries and for each value of type
-   * Set<WeakRef<Object>> removes all those items from the set that can no longer be deref'ed.
-   *
    * According to JS specifications, it is up to ArlTS runtime GC implementation when to collect unreferences objects.
    * Parameters such as available memory, ArkTS processing load, number and size of all JS objects for GC collection
    * can impact the time delay between an object loosing last reference and GC collecting this object.
@@ -234,15 +233,7 @@ class ObserveV2 {
    * MonitorV2, ComputedV2, and/or view model @Observed class objects that are no longer used / referenced by the application.
    * Only after ArkTS runtime GC has collected them, this function is able to clean up the id2cmp and is2targets.
    *
-   * This cleanUpDeadReferences() function gets called from UINodeRegisterProxy.uiNodeCleanUpIdleTask()
-   *
    */
-  public cleanUpDeadReferences(maxTimeInMs: number): void {
-    this.cleanUpId2CmpDeadReferences();
-    this.cleanUpId2TargetsDeadReferences();
-    // time slot is the max time until the next VSync (optimistic)
-    this.runIdleTasks(maxTimeInMs);
-  }
 
   // runs idleTasks until empty or maxExecutionTimeMs is reached
   public runIdleTasks(maxExecutionTimeMs: number = Infinity): void {
@@ -261,6 +252,8 @@ class ObserveV2 {
         return;
       }
     }
+    this.idleTasks_.first = 0;
+    this.idleTasks_.end = 0;
 
     // If there's still time, do low-priority cleanup
     for (let id in this.id2targets_) {
@@ -268,36 +261,8 @@ class ObserveV2 {
         delete this.id2targets_[id];
       }
     }
-
-    this.idleTasks_.first = 0;
-    this.idleTasks_.end = 0;
   }
 
-  private cleanUpId2CmpDeadReferences(): void {
-    stateMgmtConsole.debug(`cleanUpId2CmpDeadReferences ${JSON.stringify(this.id2cmp_)} `);
-    for (const id in this.id2cmp_) {
-      stateMgmtConsole.debug('cleanUpId2CmpDeadReferences loop');
-      let weakRef: WeakRef<object> = this.id2cmp_[id];
-      if (weakRef && typeof weakRef === 'object' && 'deref' in weakRef && weakRef.deref() === undefined) {
-        stateMgmtConsole.debug('cleanUpId2CmpDeadReferences cleanup hit');
-        delete this.id2cmp_[id];
-      }
-    }
-  }
-
-  private cleanUpId2TargetsDeadReferences(): void {
-    for (const id in this.id2targets_) {
-      const targetSet: Set<WeakRef<Object>> | undefined = this.id2targets_[id];
-      if (targetSet && targetSet instanceof Set) {
-        for (let weakTarget of targetSet) {
-          if (weakTarget.deref() === undefined) {
-            stateMgmtConsole.debug('cleanUpId2TargetsDeadReferences cleanup hit');
-            targetSet.delete(weakTarget);
-          }
-        } // for targetSet
-      }
-    } // for id2targets_
-  }
 
   /**
    * counts number of WeakRef<Object> entries in id2cmp_ 'map' object
@@ -318,10 +283,11 @@ class ObserveV2 {
     return [totalCount, aliveCount];
   }
 
-  /** counts number of target WeakRef<object> entries in all the Sets inside id2targets 'map' object
- * @returns total count and those can be dereferenced
- * Methods only for testing
- */
+  /**
+   * counts number of target WeakRef<object> entries in all the Sets inside id2targets 'map' object
+   * @returns total count and those can be dereferenced
+   * Methods only for testing
+   */
   public get id2TargetsDerefSize(): [ totalCount: number, aliveCount: number ] {
     let totalCount = 0;
     let aliveCount = 0;
@@ -410,8 +376,14 @@ class ObserveV2 {
       idRefs[id].add(attrName);
     }
 
-    const targetSet = this.id2targets_[id] ??= new Set<WeakRef<Object>>();
-    targetSet.add(new WeakRef<Object>(target));
+    const weakRef = WeakRefPool.get(target);
+    if (this.id2targets_?.[id]?.has(weakRef)) {
+      return;
+    }
+
+    this.id2targets_[id] ??= new Set<WeakRef<Object>>();
+    this.id2targets_[id].add(weakRef);
+    WeakRefPool.onGC(target, () => this.id2targets_?.[id]?.delete(weakRef) )
   }
 
   /**
@@ -641,9 +613,8 @@ class ObserveV2 {
     stateMgmtConsole.debug(`ObservedV2.updateDirtyComputedProps ${computed.length} props: ${JSON.stringify(computed)} ...`);
     aceDebugTrace.begin(`ObservedV2.updateDirtyComputedProps ${computed.length} @Computed`);
     computed.forEach((id) => {
-      let comp: ComputedV2 | undefined;
-      let weakComp: WeakRef<ComputedV2 | undefined> = this.id2cmp_[id];
-      if (weakComp && 'deref' in weakComp && (comp = weakComp.deref()) && comp instanceof ComputedV2) {
+      const comp = this.id2cmp_[id]?.deref();
+      if (comp instanceof ComputedV2) {
         const target = comp.getTarget();
         if (target instanceof ViewV2 && !target.isViewActive()) {
           // add delayed ComputedIds id
@@ -672,11 +643,10 @@ class ObserveV2 {
   }
 
   public updateDirtyMonitorsOnReuse(monitors: Set<number>): void {
-    let weakMonitor: WeakRef<MonitorV2 | undefined>;
     let monitor: MonitorV2 | undefined;
     monitors.forEach((watchId) => {
-      weakMonitor = this.id2cmp_[watchId];
-      if (weakMonitor && 'deref' in weakMonitor && (monitor = weakMonitor.deref()) && monitor instanceof MonitorV2) {
+      monitor = this.id2cmp_[watchId]?.deref();
+      if (monitor instanceof MonitorV2) {
         // only update dependency and reset value, no call monitor.
         monitor.notifyChangeOnReuse();
       }
@@ -686,13 +656,15 @@ class ObserveV2 {
   public updateDirtyMonitors(monitors: Set<number>): void {
     stateMgmtConsole.debug(`ObservedV3.updateDirtyMonitors: ${Array.from(monitors).length} @monitor funcs: ${JSON.stringify(Array.from(monitors))} ...`);
     aceDebugTrace.begin(`ObservedV3.updateDirtyMonitors: ${Array.from(monitors).length} @monitor`);
-    let weakMonitor: WeakRef<MonitorV2 | undefined>;
+    
     let monitor: MonitorV2 | undefined;
     let monitorTarget: Object;
+
     monitors.forEach((watchId) => {
-      weakMonitor = this.id2cmp_[watchId];
-      if (weakMonitor && 'deref' in weakMonitor && (monitor = weakMonitor.deref()) && monitor instanceof MonitorV2) {
-        if (((monitorTarget = monitor.getTarget()) instanceof ViewV2) && !monitorTarget.isViewActive()) {
+      monitor = this.id2cmp_[watchId]?.deref();
+      if (monitor instanceof MonitorV2) {
+        monitorTarget = monitor.getTarget();
+        if (monitorTarget instanceof ViewV2 && !monitorTarget.isViewActive()) {
           // monitor notifyChange delayed if target is a View that is not active
           monitorTarget.addDelayedMonitorIds(watchId);
         } else {
@@ -714,11 +686,10 @@ class ObserveV2 {
   private updateUINodesSynchronously(elmtIds: Array<number>): void {
     stateMgmtConsole.debug(`ObserveV2.updateUINodesSynchronously: ${elmtIds.length} elmtIds: ${JSON.stringify(elmtIds)} ...`);
     aceDebugTrace.begin(`ObserveV2.updateUINodesSynchronously: ${elmtIds.length} elmtId`);
-    let view: Object;
-    let weak: any;
+    
     elmtIds.forEach((elmtId) => {
-      if ((weak = this.id2cmp_[elmtId]) && (typeof weak === 'object') && ('deref' in weak) &&
-        (view = weak.deref()) && ((view instanceof ViewV2) || (view instanceof ViewPU))) {
+      const view = this.id2cmp_[elmtId]?.deref();
+      if ((view instanceof ViewV2) || (view instanceof ViewPU)) {
         if (view.isViewActive()) {
           // FIXME need to call syncInstanceId before update?
           view.UpdateElement(elmtId);
@@ -759,12 +730,10 @@ class ObserveV2 {
   private updateUINodes(elmtIds: Array<number>): void {
     stateMgmtConsole.debug(`ObserveV2.updateUINodes: ${elmtIds.length} elmtIds need rerender: ${JSON.stringify(elmtIds)} ...`);
     aceDebugTrace.begin(`ObserveV2.updateUINodes: ${elmtIds.length} elmtId`);
-    let viewWeak: WeakRef<Object>;
-    let view: Object | undefined;
+
     elmtIds.forEach((elmtId) => {
-      viewWeak = this.id2cmp_[elmtId];
-      if (viewWeak && 'deref' in viewWeak && (view = viewWeak.deref()) &&
-        ((view instanceof ViewV2) || (view instanceof ViewPU))) {
+      const view = this.id2cmp_[elmtId]?.deref();
+      if ((view instanceof ViewV2) || (view instanceof ViewPU)) {
         if (view.isViewActive()) {
           view.uiNodeNeedUpdateV2(elmtId);
         } else {
