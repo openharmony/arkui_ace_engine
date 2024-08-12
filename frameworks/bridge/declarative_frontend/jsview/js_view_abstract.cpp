@@ -3342,7 +3342,8 @@ void ParseMenuBorderRadius(const JSRef<JSObject>& menuOptions, NG::MenuParam& me
         CalcDimension topRight;
         CalcDimension bottomLeft;
         CalcDimension bottomRight;
-        JSViewAbstract::ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight);
+        bool hasSetBorderRadius =
+            JSViewAbstract::ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight);
         if (LessNotEqual(topLeft.Value(), 0.0f)) {
             topLeft.Reset();
         }
@@ -3355,10 +3356,11 @@ void ParseMenuBorderRadius(const JSRef<JSObject>& menuOptions, NG::MenuParam& me
         if (LessNotEqual(bottomRight.Value(), 0.0f)) {
             bottomRight.Reset();
         }
-        menuBorderRadius.radiusTopLeft = topLeft;
-        menuBorderRadius.radiusTopRight = topRight;
-        menuBorderRadius.radiusBottomLeft = bottomLeft;
-        menuBorderRadius.radiusBottomRight = bottomRight;
+        auto isRtl = hasSetBorderRadius && AceApplicationInfo::GetInstance().IsRightToLeft();
+        menuBorderRadius.radiusTopLeft = isRtl ? topRight : topLeft;
+        menuBorderRadius.radiusTopRight = isRtl ? topLeft : topRight;
+        menuBorderRadius.radiusBottomLeft = isRtl ? bottomRight : bottomLeft;
+        menuBorderRadius.radiusBottomRight = isRtl ? bottomLeft : bottomRight;
         menuBorderRadius.multiValued = true;
         menuParam.borderRadius = menuBorderRadius;
     }
@@ -9644,6 +9646,7 @@ void JSViewAbstract::JsOnClick(const JSCallbackInfo& info)
             distanceThreshold = std::numeric_limits<double>::infinity();
         }
     }
+    distanceThreshold = Dimension(distanceThreshold, DimensionUnit::VP).ConvertToPx();
     ViewAbstractModel::GetInstance()->SetOnClick(std::move(tmpOnTap), std::move(onClick), distanceThreshold);
 }
 
@@ -9698,8 +9701,8 @@ void JSViewAbstract::JsShouldBuiltInRecognizerParallelWith(const JSCallbackInfo&
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto shouldBuiltInRecognizerParallelWithFunc =
         [execCtx = info.GetExecutionContext(), func = jsParallelInnerGestureToFunc, node = frameNode](
-            const RefPtr<TouchEventTarget>& current,
-            const std::vector<RefPtr<TouchEventTarget>>& others) -> RefPtr<NG::NGGestureRecognizer> {
+            const RefPtr<NG::NGGestureRecognizer>& current,
+            const std::vector<RefPtr<NG::NGGestureRecognizer>>& others) -> RefPtr<NG::NGGestureRecognizer> {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, nullptr);
         ACE_SCORING_EVENT("shouldBuiltInRecognizerParallelWith");
         PipelineContext::SetCallBackNode(node);
@@ -10794,5 +10797,36 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_ParseJsMedia(void* value, void* resour
     res->src = src;
     res->bundleName = bundleName;
     res->moduleName = moduleName;
+}
+
+void JSViewAbstract::SetTextStyleApply(const JSCallbackInfo& info,
+    std::function<void(WeakPtr<NG::FrameNode>)>& textStyleApply, const JSRef<JSVal>& modifierObj)
+{
+    if (!modifierObj->IsObject()) {
+        textStyleApply = nullptr;
+        return;
+    }
+    auto vm = info.GetVm();
+    auto globalObj = JSNApi::GetGlobalObject(vm);
+    auto globalFunc = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "applyTextModifierToNode"));
+    JsiValue jsiValue(globalFunc);
+    JsiRef<JsiValue> globalFuncRef = JsiRef<JsiValue>::Make(jsiValue);
+    if (!globalFuncRef->IsFunction()) {
+        textStyleApply = nullptr;
+        return;
+    }
+    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(globalFuncRef));
+    auto onApply = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                    modifierParam = std::move(modifierObj)](WeakPtr<NG::FrameNode> frameNode) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto node = frameNode.Upgrade();
+        CHECK_NULL_VOID(node);
+        JSRef<JSVal> params[2];
+        params[0] = modifierParam;
+        params[1] = JSRef<JSVal>::Make(panda::NativePointerRef::New(execCtx.vm_, AceType::RawPtr(node)));
+        PipelineContext::SetCallBackNode(node);
+        func->ExecuteJS(2, params);
+    };
+    textStyleApply = onApply;
 }
 } // namespace OHOS::Ace::Framework

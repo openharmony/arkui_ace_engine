@@ -29,7 +29,6 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -569,11 +568,11 @@ void LazyForEachNode::InitAllChilrenDragManager(bool init)
 
 void LazyForEachNode::NotifyCountChange(int32_t index, int32_t count)
 {
-    auto parentNode = GetParentFrameNode();
-    CHECK_NULL_VOID(parentNode);
-    auto pattern = parentNode->GetPattern<ScrollablePattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->NotifyDataChange(index, count);
+    auto parent = GetParent();
+    int64_t accessibilityId = GetAccessibilityId();
+    if (parent) {
+        parent->NotifyDataChange(index, count, accessibilityId);
+    }
 }
 
 void LazyForEachNode::ParseOperations(const std::list<V2::Operation>& dataOperations)

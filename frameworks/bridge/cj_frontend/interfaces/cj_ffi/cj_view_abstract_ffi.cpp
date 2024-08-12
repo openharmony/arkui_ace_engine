@@ -15,19 +15,13 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
 
-#include <cinttypes>
 
 #include "cj_lambda.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/matrix4/cj_matrix4_ffi.h"
+#include "bridge/cj_frontend/interfaces/cj_ffi/cj_pixel_unit_convert_ffi.h"
 #include "bridge/common/utils/utils.h"
-#include "core/common/container.h"
-#include "core/components/theme/theme_manager.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "core/components_ng/pattern/overlay/modal_style.h"
-#include "bridge/cj_frontend/cppview/view_abstract.h"
 #include "bridge/cj_frontend/cppview/shape_abstract.h"
 
 using namespace OHOS::Ace;
@@ -578,6 +572,7 @@ void FfiOHOSAceFrameworkViewAbstractSetBackgroundImagePositionAlign(int32_t alig
         return;
     }
     BackgroundImagePosition bgImgPosition;
+    bgImgPosition.SetIsAlign(true);
     UpdateBackgroundImagePosition(static_cast<Align>(align), bgImgPosition);
     ViewAbstractModel::GetInstance()->SetBackgroundImagePosition(bgImgPosition);
 }
@@ -591,13 +586,19 @@ void FfiOHOSAceFrameworkViewAbstractSetBackgroundImagePositionXY(double x, int32
 
     DimensionUnit typeX = xDime.Unit();
     DimensionUnit typeY = yDime.Unit();
-    double valueX = xDime.Value();
-    double valueY = yDime.Value();
+    double valueX = xDime.ConvertToPx();
+    double valueY = yDime.ConvertToPx();
+    if (xDime.Unit() == DimensionUnit::LPX) {
+        valueX = FfiOHOSAceFrameworkLpx2Px(xDime.Value());
+    }
+    if (yDime.Unit() == DimensionUnit::LPX) {
+        valueY = FfiOHOSAceFrameworkLpx2Px(yDime.Value());
+    }
     if (xDime.Unit() == DimensionUnit::PERCENT) {
-        valueX = xDime.Value() * FULL_DIMENSION;
+        valueX = xDime.Value();
     }
     if (yDime.Unit() == DimensionUnit::PERCENT) {
-        valueY = yDime.Value() * FULL_DIMENSION;
+        valueY = yDime.Value();
     }
     UpdateBackgroundImagePosition(typeX, typeY, valueX, valueY, bgImgPosition);
 

@@ -1869,12 +1869,20 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg042, TestSize.Level1)
     RefPtr<FrameNode> menuNode =
         FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
             []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
-    auto child = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto child = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
     child->MountToParent(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     menuPattern->type_ = MenuType::CONTEXT_MENU;
     auto menuItemPattern = child->GetPattern<MenuItemPattern>();
     auto testInfo = menuPattern->GetMenuItemInfo(child, false);
+    EXPECT_FALSE(testInfo.isFindTargetId);
+    menuItemPattern->SetClickMenuItemId(child->GetId());
+    testInfo = menuPattern->GetMenuItemInfo(child, false);
+    EXPECT_TRUE(testInfo.isFindTargetId);
+    testInfo = menuPattern->GetMenuItemInfo(child, true);
+    EXPECT_TRUE(testInfo.isFindTargetId);
+
+    testInfo = menuPattern->GetMenuItemInfo(menuNode, false);
     EXPECT_FALSE(testInfo.isFindTargetId);
 }
 /**

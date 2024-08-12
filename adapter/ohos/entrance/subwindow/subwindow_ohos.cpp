@@ -540,6 +540,7 @@ bool SubwindowOhos::ShowPreviewNG()
     CHECK_NULL_RETURN(window_, false);
     ShowWindow(false);
     ResizeWindow();
+    window_->SetTouchable(false);
     return true;
 }
 
@@ -787,6 +788,16 @@ void SubwindowOhos::DeleteHotAreas(int32_t nodeId)
 {
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "delete hot area %{public}d", nodeId);
     hotAreasMap_.erase(nodeId);
+    if (hotAreasMap_.size() == 0) {
+        // Set min window hot area so that sub window can transparent event.
+        std::vector<Rosen::Rect> hotAreas;
+        Rosen::Rect rosenRect {};
+        RectConverter(MIN_WINDOW_HOT_AREA, rosenRect);
+        hotAreas.emplace_back(rosenRect);
+        window_->SetTouchHotAreas(hotAreas);
+        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "hotAreasMap_ has no item");
+        return;
+    }
     std::vector<Rosen::Rect> hotAreas;
     for (auto it = hotAreasMap_.begin(); it != hotAreasMap_.end(); it++) {
         hotAreas.insert(hotAreas.end(), it->second.begin(), it->second.end());
@@ -1157,7 +1168,6 @@ void SubwindowOhos::ShowToastForAbility(const NG::ToastInfo& toastInfo, std::fun
         toastInfo.showMode == NG::ToastShowMode::SYSTEM_TOP_MOST) {
         ResizeWindow();
         ShowWindow(false);
-        CHECK_NULL_VOID(window_);
     }
     delegate->ShowToast(toastInfo, std::move(callback));
 }

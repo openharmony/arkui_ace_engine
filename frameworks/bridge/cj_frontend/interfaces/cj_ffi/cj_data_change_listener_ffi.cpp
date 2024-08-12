@@ -16,7 +16,6 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_data_change_listener_ffi.h"
 
 #include "bridge/cj_frontend/cppview/data_change_listener.h"
-#include "ffi_remote_data.h"
 
 using namespace OHOS::FFI;
 using namespace OHOS::Ace::Framework;

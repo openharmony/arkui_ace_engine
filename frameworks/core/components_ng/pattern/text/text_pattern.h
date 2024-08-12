@@ -28,12 +28,12 @@
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
 #include "core/common/ai/data_detector_adapter.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/select_overlay/magnifier.h"
 #include "core/components_ng/pattern/text/layout_info_interface.h"
 #include "core/components_ng/pattern/text/multiple_click_recognizer.h"
 #include "core/components_ng/pattern/text/span/mutable_span_string.h"
@@ -57,6 +57,7 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 enum class Status { DRAGGING, ON_DROP, NONE };
 using CalculateHandleFunc = std::function<void()>;
 using ShowSelectOverlayFunc = std::function<void(const RectF&, const RectF&)>;
@@ -66,14 +67,20 @@ struct SpanNodeInfo {
 };
 
 // TextPattern is the base class for text render node to perform paint text.
-class TextPattern : public virtual Pattern, public TextDragBase, public TextBase, public LayoutInfoInterface {
-    DECLARE_ACE_TYPE(TextPattern, Pattern, TextDragBase, TextBase);
+class TextPattern : public virtual Pattern,
+                    public TextDragBase,
+                    public TextBase,
+                    public TextGestureSelector,
+                    public Magnifier,
+                    public LayoutInfoInterface {
+    DECLARE_ACE_TYPE(TextPattern, Pattern, TextDragBase, TextBase, TextGestureSelector, Magnifier);
 
 public:
     TextPattern()
     {
         selectOverlay_ = AceType::MakeRefPtr<TextSelectOverlay>(WeakClaim(this));
         pManager_ = AceType::MakeRefPtr<ParagraphManager>();
+        magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
     }
 
     ~TextPattern() override;
@@ -638,6 +645,13 @@ public:
 
     void MarkDirtyNodeRender();
 
+    uint64_t GetSystemTimestamp()
+    {
+        return static_cast<uint64_t>(
+            std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
+                .count());
+    }
+
 protected:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
@@ -704,6 +718,10 @@ protected:
     {
         isDetachFromMainTree_ = true;
     }
+
+    int32_t GetTouchIndex(const OffsetF& offset) override;
+    void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) override;
+    void OnTextGenstureSelectionEnd() override;
 
     bool enabled_ = true;
     Status status_ = Status::NONE;
@@ -815,6 +833,7 @@ private:
     bool isDoubleClick_ = false;
     bool showSelected_ = false;
     bool isSensitive_ = false;
+    bool hasSpanStringLongPressEvent_ = false;
     int32_t clickedSpanPosition_ = -1;
 
     RefPtr<ParagraphManager> pManager_;

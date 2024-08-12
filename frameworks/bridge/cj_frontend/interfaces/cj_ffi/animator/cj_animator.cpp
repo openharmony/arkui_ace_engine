@@ -14,8 +14,6 @@
  */
 
 #include "cj_animator.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
 #include "bridge/common/utils/utils.h"
 #include "cj_lambda.h"
 

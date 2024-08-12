@@ -1906,8 +1906,6 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern011, TestSize.Level1)
     EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEvent));
     EXPECT_EQ(timePickerRowPattern->focusKeyID_, 0);
 
-    auto frameWidth = frameNode->GetGeometryNode()->GetFrameSize().Width();
-    auto childSize = frameNode->GetChildren().size();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto pickerTheme = AceType::MakeRefPtr<PickerTheme>();
@@ -1948,7 +1946,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern011, TestSize.Level1)
     RoundRect paintRect2;
     timePickerRowPattern->GetInnerFocusPaintRect(paintRect2);
     auto rect2 = paintRect2.GetRect();
-    auto centerX = (frameWidth / childSize - pickerThemeWidth) / 2 +
+    auto centerX = (pickerChild->GetGeometryNode()->GetFrameSize().Width() - pickerThemeWidth) / 2 +
                    pickerChild->GetGeometryNode()->GetFrameRect().Width() * timePickerRowPattern->focusKeyID_ +
                    PRESS_INTERVAL.ConvertToPx() * 2;
     EXPECT_EQ(rect2.GetX(), centerX);

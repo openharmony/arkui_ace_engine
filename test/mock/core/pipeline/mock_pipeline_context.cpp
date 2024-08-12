@@ -325,7 +325,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight,
     const bool supportAvoidance, bool forceChange)
 {}
 
-void PipelineContext::OnVirtualKeyboardHeightChange(uint32_t keyboardHeight, double positionY, double height,
+void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double positionY, double height,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, bool forceChange)
 {}
 
@@ -643,7 +643,7 @@ void PipelineContext::ResetDragging() {}
 
 void PipelineContext::UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) {}
 
-void PipelineContext::CheckAndUpdateKeyboardInset(uint32_t keyboardHeight) {}
+void PipelineContext::CheckAndUpdateKeyboardInset(float keyboardHeight) {}
 
 bool PipelineContext::PrintVsyncInfoIfNeed() const
 {

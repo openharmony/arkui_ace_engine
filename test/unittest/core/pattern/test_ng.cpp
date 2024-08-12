@@ -155,4 +155,15 @@ RefPtr<FrameNode> TestNG::CreateColumn(const std::function<void(ColumnModelNG)>&
     ViewStackProcessor::GetInstance()->PopContainer();
     return AceType::DynamicCast<FrameNode>(element);
 }
+
+void TestNG::SetSize(Axis axis, const CalcLength& crossSize, const CalcLength& mainSize)
+{
+    if (axis == Axis::VERTICAL) {
+        ViewAbstract::SetWidth(crossSize);
+        ViewAbstract::SetHeight(mainSize);
+    } else {
+        ViewAbstract::SetWidth(mainSize);
+        ViewAbstract::SetHeight(crossSize);
+    }
+}
 } // namespace OHOS::Ace::NG

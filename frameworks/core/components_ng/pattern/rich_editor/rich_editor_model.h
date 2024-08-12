@@ -122,6 +122,16 @@ struct UpdateSpanStyle {
     bool useThemeDecorationColor = true;
     bool isSymbolStyle = false;
 
+    void UpdateColorByResourceId()
+    {
+        if (updateTextColor) {
+            updateTextColor->UpdateColorByResourceId();
+        }
+        if (updateTextDecorationColor) {
+            updateTextDecorationColor->UpdateColorByResourceId();
+        }
+    }
+
     std::string ToString() const
     {
         auto jsonValue = JsonUtil::Create(true);
@@ -264,6 +274,7 @@ public:
     virtual bool SetCaretOffset(int32_t caretPosition) = 0;
     virtual void SetTypingStyle(std::optional<struct UpdateSpanStyle> typingStyle,
         std::optional<TextStyle> textStyle) = 0;
+    virtual std::optional<struct UpdateSpanStyle> GetTypingStyle() = 0;
     virtual void CloseSelectionMenu() = 0;
     virtual bool IsEditing() = 0;
     virtual void StopEditing() = 0;

@@ -84,6 +84,9 @@ TextPattern::~TextPattern()
 
 void TextPattern::OnWindowHide()
 {
+    if (magnifierController_) {
+        magnifierController_->RemoveMagnifierFrameNode();
+    }
     CHECK_NULL_VOID(contentMod_);
     contentMod_->PauseAnimation();
     auto host = GetHost();
@@ -366,7 +369,10 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     parentGlobalOffset_ = GetParentGlobalOffset();
     CalculateHandleOffsetAndShowOverlay();
     CloseSelectOverlay(true);
-    ShowSelectOverlay({ .animation = true });
+    if (magnifierController_) {
+        magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() });
+    }
+    StartGestureSelection(textSelector_.GetStart(), textSelector_.GetEnd());
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -708,7 +714,7 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
 {
     if (selectOverlay_->SelectOverlayIsOn() && !selectOverlay_->IsUsingMouse() &&
         BetweenSelectedPosition(info.GetGlobalLocation())) {
-        selectOverlay_->ShowMenu();
+        selectOverlay_->ToggleMenu();
         return;
     }
     RectF textContentRect = contentRect_;
@@ -1203,7 +1209,7 @@ void TextPattern::InitTouchEvent()
 
 void TextPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
-    return;
+    DoGestureSelection(info);
 }
 
 void TextPattern::InitKeyEvent()
@@ -1625,7 +1631,7 @@ void TextPattern::OnDragEnd(const RefPtr<Ace::DragEvent>& event)
     }
     UpdateSpanItemDragStatus(dragResultObjects_, false);
     dragResultObjects_.clear();
-    if (event && event->GetResult() != DragRet::DRAG_SUCCESS) {
+    if (event && event->GetResult() != DragRet::DRAG_SUCCESS && IsSelectableAndCopy()) {
         HandleSelectionChange(recoverStart_, recoverEnd_);
         isShowMenu_ = false;
         if (GetCurrentDragTool() == SourceTool::FINGER) {
@@ -1647,7 +1653,7 @@ void TextPattern::OnDragEndNoChild(const RefPtr<Ace::DragEvent>& event)
         pattern->status_ = Status::NONE;
         pattern->MarkContentChange();
         pattern->contentMod_->ChangeDragStatus();
-        if (event && event->GetResult() != DragRet::DRAG_SUCCESS) {
+        if (event && event->GetResult() != DragRet::DRAG_SUCCESS && IsSelectableAndCopy()) {
             HandleSelectionChange(recoverStart_, recoverEnd_);
             isShowMenu_ = false;
             if (GetCurrentDragTool() == SourceTool::FINGER) {
@@ -2058,7 +2064,8 @@ void TextPattern::OnModifyDone()
 
     if (CheckNeedMeasure(textLayoutProperty->GetPropertyChangeFlag()) && pManager_) {
         // measure flag changed, reset paragraph.
-        ACE_TEXT_SCOPED_TRACE("OnModifyDone[Text][id:%d]", host->GetId());
+        auto nowTime = static_cast<unsigned long long>(GetSystemTimestamp());
+        ACE_SCOPED_TRACE("OnModifyDone[Text][id:%d][time:%llu]", host->GetId(), nowTime);
         pManager_->Reset();
     }
 
@@ -2120,6 +2127,8 @@ void TextPattern::OnModifyDone()
 
     auto gestureEventHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
     if (IsSelectableAndCopy()) {
         auto context = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_VOID(context);
@@ -2137,6 +2146,14 @@ void TextPattern::OnModifyDone()
     } else {
         if (host->IsDraggable() || gestureEventHub->GetTextDraggable()) {
             gestureEventHub->SetTextDraggable(false);
+            eventHub->SetDefaultOnDragStart(nullptr);
+            if (!eventHub->HasOnDragStart()) {
+                gestureEventHub->RemoveDragEvent();
+            }
+        }
+        if (longPressEvent_ && !hasSpanStringLongPressEvent_) {
+            gestureEventHub->SetLongPressEvent(nullptr);
+            longPressEvent_ = nullptr;
         }
     }
     if (onClick_ || IsSelectableAndCopy() || CanStartAITask()) {
@@ -2150,8 +2167,6 @@ void TextPattern::OnModifyDone()
             InitMouseEvent();
         }
     }
-    auto eventHub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
     bool enabledCache = eventHub->IsEnabled();
     if (textDetectEnable_ && enabledCache != enabled_) {
         enabled_ = enabledCache;
@@ -2390,7 +2405,6 @@ void TextPattern::InitSpanItem(std::stack<SpanNodeInfo> nodes)
 
     if (textCache != textForDisplay_) {
         host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, textForDisplay_);
-        dataDetectorAdapter_->aiDetectInitialized_ = false;
         OnAfterModifyDone();
         for (const auto& item : spans_) {
             if (item->inspectId.empty()) {
@@ -2403,6 +2417,9 @@ void TextPattern::InitSpanItem(std::stack<SpanNodeInfo> nodes)
     if (isSpanHasClick) {
         auto gestureEventHub = host->GetOrCreateGestureEventHub();
         InitClickEvent(gestureEventHub);
+    }
+    if (textForAICache != dataDetectorAdapter_->textForAI_) {
+        dataDetectorAdapter_->aiDetectInitialized_ = false;
     }
     if (CanStartAITask() && !dataDetectorAdapter_->aiDetectInitialized_) {
         ParseOriText(textLayoutProperty->GetContent().value_or(""));
@@ -2455,6 +2472,7 @@ void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanH
             UpdateChildProperty(spanNode);
             spanNode->MountToParagraph();
             textForDisplay_.append(StringUtils::Str16ToStr8(SYMBOL_TRANS));
+            dataDetectorAdapter_->textForAI_.append(StringUtils::Str16ToStr8(SYMBOL_TRANS));
             childNodes_.push_back(current.node);
         } else if (spanNode && tag != V2::PLACEHOLDER_SPAN_ETS_TAG) {
             CollectTextSpanNodes(spanNode, isSpanHasClick);
@@ -2730,6 +2748,8 @@ void TextPattern::DumpInfo()
     auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProp);
     auto& dumpLog = DumpLog::GetInstance();
+    auto nowTime = GetSystemTimestamp();
+    dumpLog.AddDesc(std::string("time: ").append(std::to_string(nowTime)));
     if (!IsSetObscured()) {
         dumpLog.AddDesc(std::string("Content: ").append(textLayoutProp->GetContent().value_or(" ")));
     }
@@ -2947,6 +2967,9 @@ void TextPattern::OnColorConfigurationUpdate()
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateTextColor(theme->GetTextStyle().GetTextColor());
+    if (magnifierController_) {
+        magnifierController_->SetColorModeChange(true);
+    }
 }
 
 OffsetF TextPattern::GetDragUpperLeftCoordinates()
@@ -3438,6 +3461,7 @@ void TextPattern::ProcessSpanString()
     childNodes_.clear();
     dataDetectorAdapter_->textForAI_.clear();
     host->Clean();
+    hasSpanStringLongPressEvent_ = false;
 
     // 适配AI&&挂载image节点
     auto imageChildren = host->GetChildren();
@@ -3456,6 +3480,7 @@ void TextPattern::ProcessSpanString()
         if (span->onLongPress) {
             auto gestureEventHub = host->GetOrCreateGestureEventHub();
             InitLongPressEvent(gestureEventHub);
+            hasSpanStringLongPressEvent_ = true;
         }
         textForDisplay_ += span->content;
     }
@@ -3662,5 +3687,33 @@ void TextPattern::BeforeCreatePaintWrapper()
     if (contentMod_) {
         contentMod_->ContentChange();
     }
+}
+
+int32_t TextPattern::GetTouchIndex(const OffsetF& offset)
+{
+    auto paragraphOffset =
+        offset - GetTextContentRect().GetOffset() + OffsetF(0.0f, std::min(GetBaselineOffset(), 0.0f));
+    return GetHandleIndex({ paragraphOffset.GetX(), paragraphOffset.GetY() });
+}
+
+void TextPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info)
+{
+    auto localOffset = info.GetTouches().front().GetLocalLocation();
+    if (magnifierController_) {
+        magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() });
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    HandleSelectionChange(start, end);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void TextPattern::OnTextGenstureSelectionEnd()
+{
+    if (magnifierController_) {
+        magnifierController_->RemoveMagnifierFrameNode();
+    }
+    CalculateHandleOffsetAndShowOverlay();
+    ShowSelectOverlay({ .animation = true });
 }
 } // namespace OHOS::Ace::NG

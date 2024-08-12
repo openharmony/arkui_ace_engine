@@ -674,6 +674,9 @@ class ImageMenuItem extends ViewPU {
         this.minFontSize = 1.75;
         this.maxFontSize = 3.2;
         this.longPressTime = 500;
+        this.isFollowingSystemFontScale = false;
+        this.maxFontScale = 1;
+        this.systemFontScale = 1;
         this.__fontSize = new SynchedPropertySimpleOneWayPU(e4.fontSize, this, 'fontSize');
         this.__isOnFocus = new ObservedPropertySimplePU(false, this, 'isOnFocus');
         this.__isOnHover = new ObservedPropertySimplePU(false, this, 'isOnHover');
@@ -730,6 +733,15 @@ class ImageMenuItem extends ViewPU {
         }
         if (c4.longPressTime !== undefined) {
             this.longPressTime = c4.longPressTime;
+        }
+        if (c4.isFollowingSystemFontScale !== undefined) {
+            this.isFollowingSystemFontScale = c4.isFollowingSystemFontScale;
+        }
+        if (c4.maxFontScale !== undefined) {
+            this.maxFontScale = c4.maxFontScale;
+        }
+        if (c4.systemFontScale !== undefined) {
+            this.systemFontScale = c4.systemFontScale;
         }
         if (c4.fontSize === undefined) {
             this.__fontSize.set(1);
@@ -841,6 +853,27 @@ class ImageMenuItem extends ViewPU {
             this.isOnClick = false;
         }
     }
+    aboutToAppear() {
+        let h = this.getUIContext();
+        this.isFollowingSystemFontScale = h.isFollowingSystemFontScale();
+        this.maxFontScale = h.getMaxFontScale();
+    }
+    decideFontScale() {
+        try {
+            let k2 = this.getUIContext();
+            this.systemFontScale = k2.getHostContext()?.config.fontSizeScale ?? 1;
+            if (!this.isFollowingSystemFontScale) {
+                return 1;
+            }
+            return Math.min(this.systemFontScale, this.maxFontScale);
+        }
+        catch (h2) {
+            let i2 = h2.code;
+            let j2 = h2.message;
+            hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${i2}, message: ${j2}`);
+            return 1;
+        }
+    }
     getBgColor() {
         if (this.isOnClick) {
             return this.editableTitleBarTheme.iconBackgroundPressedColor;
@@ -950,8 +983,7 @@ class ImageMenuItem extends ViewPU {
             Gesture.create(GesturePriority.Low);
             LongPressGesture.create({ repeat: false, duration: this.longPressTime });
             LongPressGesture.onAction((l3) => {
-                let m3 = this.getUIContext().getHostContext();
-                this.fontSize = m3.config?.fontSizeScale ?? 1;
+                this.fontSize = this.decideFontScale();
                 if (l3) {
                     if (this.fontSize >= this.minFontSize) {
                         this.dialogController?.open();
@@ -1054,8 +1086,7 @@ class ImageMenuItem extends ViewPU {
             Gesture.create(GesturePriority.Low);
             LongPressGesture.create({ repeat: false, duration: this.longPressTime });
             LongPressGesture.onAction((o2) => {
-                let p2 = this.getUIContext().getHostContext();
-                this.fontSize = p2.config?.fontSizeScale ?? 1;
+                this.fontSize = this.decideFontScale();
                 if (o2) {
                     if (this.fontSize >= this.minFontSize) {
                         this.dialogController?.open();

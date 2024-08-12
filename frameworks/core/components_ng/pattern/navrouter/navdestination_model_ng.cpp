@@ -34,9 +34,6 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-    constexpr int32_t TEXT_MAX_LINES_TWO = 2;
-} // namespace
 bool NavDestinationModelNG::ParseCommonTitle(
     bool hasSubTitle, bool hasMainTitle, const std::string& subtitle, const std::string& title)
 {
@@ -69,35 +66,13 @@ bool NavDestinationModelNG::ParseCommonTitle(
         if (mainTitle) {
             // update main title
             auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
-            textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : TEXT_MAX_LINES_TWO);
-            if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-                textLayoutProperty->UpdateHeightAdaptivePolicy(hasSubTitle ? TextHeightAdaptivePolicy::MAX_LINES_FIRST :
-                    TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
-            }
             textLayoutProperty->UpdateContent(title);
-            textLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
         } else {
             // create and init main title
             mainTitle = FrameNode::CreateFrameNode(
                 V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
             auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
-            textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : TEXT_MAX_LINES_TWO);
             textLayoutProperty->UpdateContent(title);
-            textLayoutProperty->UpdateTextColor(theme->GetTitleColor());
-            //max title font size should be 20.0 vp, because of backbutton
-            textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSizeMin());
-            //min title font size should be 14.0 vp
-            textLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_TITLE_FONT_SIZE);
-            textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
-            textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-            textLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
-            if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-                textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetMainTitleFontSizeS());
-                textLayoutProperty->UpdateTextColor(theme->GetMainTitleFontColor());
-                textLayoutProperty->UpdateFontWeight(FontWeight::BOLD);
-                textLayoutProperty->UpdateHeightAdaptivePolicy(hasSubTitle ? TextHeightAdaptivePolicy::MAX_LINES_FIRST :
-                    TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
-            }
             titleBarNode->SetTitle(mainTitle);
             titleBarNode->AddChild(mainTitle);
         }
@@ -119,27 +94,12 @@ bool NavDestinationModelNG::ParseCommonTitle(
         // update subtitle
         auto textLayoutProperty = subTitle->GetLayoutProperty<TextLayoutProperty>();
         textLayoutProperty->UpdateContent(subtitle);
-        textLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
     } else {
         // create and init subtitle
         subTitle = FrameNode::CreateFrameNode(
             V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         auto textLayoutProperty = subTitle->GetLayoutProperty<TextLayoutProperty>();
         textLayoutProperty->UpdateContent(subtitle);
-        //max title font size shoule be 14.0 vp
-        textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetSubTitleFontSize());
-        //min title font size should be 10.0 vp
-        textLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_SUBTITLE_FONT_SIZE);
-        textLayoutProperty->UpdateTextColor(theme->GetSubTitleColor());
-        textLayoutProperty->UpdateFontWeight(FontWeight::REGULAR);
-        textLayoutProperty->UpdateMaxLines(1);
-        textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-        textLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetSubTitleFontSizeS());
-            textLayoutProperty->UpdateTextColor(theme->GetSubTitleFontColor());
-            textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
-        }
         titleBarNode->SetSubtitle(subTitle);
         titleBarNode->AddChild(subTitle);
     }
@@ -386,6 +346,7 @@ void NavDestinationModelNG::SetTitle(const std::string& title, bool hasSubTitle)
 void NavDestinationModelNG::SetTitlebarOptions(NavigationTitlebarOptions&& opt)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestinationNode);
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
@@ -400,6 +361,7 @@ void NavDestinationModelNG::SetBackButtonIcon(const std::function<void(WeakPtr<N
     const std::vector<std::string>& nameList)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestinationNode);
 
@@ -426,6 +388,7 @@ void NavDestinationModelNG::SetCustomTitle(const RefPtr<AceType>& customNode)
     auto customTitle = AceType::DynamicCast<NG::UINode>(customNode);
     CHECK_NULL_VOID(customTitle);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestinationNode);
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
@@ -452,6 +415,7 @@ void NavDestinationModelNG::SetCustomTitle(const RefPtr<AceType>& customNode)
 void NavDestinationModelNG::SetTitleHeight(const Dimension& titleHeight, bool isValid)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestinationGroupNode);
 
@@ -469,6 +433,7 @@ void NavDestinationModelNG::SetTitleHeight(const Dimension& titleHeight, bool is
 void NavDestinationModelNG::SetOnShown(std::function<void()>&& onShow)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnShown(onShow);
@@ -477,6 +442,7 @@ void NavDestinationModelNG::SetOnShown(std::function<void()>&& onShow)
 void NavDestinationModelNG::SetOnHidden(std::function<void()>&& onHidden)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnHidden(onHidden);
@@ -485,6 +451,7 @@ void NavDestinationModelNG::SetOnHidden(std::function<void()>&& onHidden)
 void NavDestinationModelNG::SetOnBackPressed(std::function<bool()>&& onBackPressed)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnBackPressed(onBackPressed);
@@ -493,6 +460,7 @@ void NavDestinationModelNG::SetOnBackPressed(std::function<bool()>&& onBackPress
 void NavDestinationModelNG::SetOnReady(std::function<void(RefPtr<NavDestinationContext>)>&& onReady)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnReady(onReady);
@@ -546,6 +514,7 @@ void NavDestinationModelNG::SetNavDestinationMode(FrameNode* frameNode, NavDesti
 void NavDestinationModelNG::SetNavDestinationMode(NavDestinationMode mode)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestination);
     navDestination->SetNavDestinationMode(mode);
@@ -554,6 +523,7 @@ void NavDestinationModelNG::SetNavDestinationMode(NavDestinationMode mode)
 void NavDestinationModelNG::SetMenuItems(std::vector<NG::BarItem>&& menuItems)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestinationGroupNode);
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationGroupNode->GetTitleBarNode());
@@ -580,6 +550,7 @@ void NavDestinationModelNG::SetCustomMenu(const RefPtr<AceType>& customNode)
     auto customMenu = AceType::DynamicCast<NG::UINode>(customNode);
     CHECK_NULL_VOID(customMenu);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestinationGroupNode);
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationGroupNode->GetTitleBarNode());
@@ -604,6 +575,7 @@ void NavDestinationModelNG::SetCustomMenu(const RefPtr<AceType>& customNode)
 void NavDestinationModelNG::SetBackgroundColor(const Color& color, bool isVaild)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestinationNode);
     auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
@@ -633,6 +605,7 @@ void NavDestinationModelNG::SetBackgroundColor(FrameNode* frameNode, const Color
 void NavDestinationModelNG::SetOnWillAppear(std::function<void()>&& willAppear)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnWillAppear(willAppear);
@@ -641,6 +614,7 @@ void NavDestinationModelNG::SetOnWillAppear(std::function<void()>&& willAppear)
 void NavDestinationModelNG::SetOnWillHide(std::function<void()>&& willHide)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnWillHide(willHide);
@@ -649,6 +623,7 @@ void NavDestinationModelNG::SetOnWillHide(std::function<void()>&& willHide)
 void NavDestinationModelNG::SetOnWillShow(std::function<void()>&& willShow)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnWillShow(willShow);
@@ -657,6 +632,7 @@ void NavDestinationModelNG::SetOnWillShow(std::function<void()>&& willShow)
 void NavDestinationModelNG::SetOnWillDisAppear(std::function<void()>&& willDisAppear)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnWillDisAppear(willDisAppear);
@@ -665,6 +641,7 @@ void NavDestinationModelNG::SetOnWillDisAppear(std::function<void()>&& willDisAp
 void NavDestinationModelNG::SetIgnoreLayoutSafeArea(const SafeAreaExpandOpts& opts)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestination);
     auto navdestinationLayoutProperty = navDestination->GetLayoutProperty<NavDestinationLayoutProperty>();
@@ -684,6 +661,7 @@ void NavDestinationModelNG::SetIgnoreLayoutSafeArea(FrameNode* frameNode, const 
 void NavDestinationModelNG::SetNavDestinationPathInfo(const std::string& moduleName, const std::string& pagePath)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestination);
     navDestination->SetNavDestinationPathInfo(moduleName, pagePath);
@@ -692,6 +670,7 @@ void NavDestinationModelNG::SetNavDestinationPathInfo(const std::string& moduleN
 void NavDestinationModelNG::SetSystemBarStyle(const RefPtr<SystemBarStyle>& style)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestination);
     auto pattern = navDestination->GetPattern<NavDestinationPattern>();

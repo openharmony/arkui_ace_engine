@@ -51,6 +51,17 @@ void ClickRecognizer::ForceCleanRecognizer()
 
 bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
 {
+    if (distanceThreshold_ < std::numeric_limits<double>::infinity()) {
+        Offset offset = event.GetScreenOffset() - touchPoints_[event.id].GetScreenOffset();
+        if (offset.GetDistance() > distanceThreshold_) {
+            TAG_LOGI(AceLogTag::ACE_GESTURE, "Click move distance is larger than distanceThreshold_, "
+            "distanceThreshold_ is %{public}f", distanceThreshold_);
+            Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+            return false;
+        } else {
+            return true;
+        }
+    }
     PointF localPoint(event.x, event.y);
     auto frameNode = GetAttachedNode();
     if (!frameNode.Invalid()) {
@@ -339,16 +350,7 @@ void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         }
     }
-    if (distanceThreshold_ < std::numeric_limits<double>::infinity()) {
-        Offset offset = event.GetScreenOffset() - touchPoints_[event.id].GetScreenOffset();
-        if (offset.GetDistance() > distanceThreshold_) {
-            TAG_LOGI(AceLogTag::ACE_GESTURE, "Click move distance is larger than distanceThreshold_, "
-            "distanceThreshold_ is %{public}f", distanceThreshold_);
-            Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
-        }
-    } else {
-        IsPointInRegion(event);
-    }
+    IsPointInRegion(event);
     UpdateFingerListInfo();
 }
 
@@ -492,7 +494,9 @@ GestureJudgeResult ClickRecognizer::TriggerGestureJudgeCallback()
     info->SetSourceDevice(deviceType_);
     info->SetTarget(GetEventTarget().value_or(EventTarget()));
     info->SetForce(touchPoint.force);
-    gestureInfo_->SetInputEventType(inputEventType_);
+    if (gestureInfo_) {
+        gestureInfo_->SetInputEventType(inputEventType_);
+    }
     if (touchPoint.tiltX.has_value()) {
         info->SetTiltX(touchPoint.tiltX.value());
     }

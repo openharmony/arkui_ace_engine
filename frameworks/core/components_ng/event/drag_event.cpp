@@ -202,7 +202,7 @@ void DragEventActuator::RestartDragTask(const GestureEvent& info)
 }
 
 void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, TouchTestResult& responseLinkResult)
+    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, ResponseLinkResult& responseLinkResult)
 {
     CHECK_NULL_VOID(userCallback_);
     isDragUserReject_ = false;
@@ -1174,7 +1174,7 @@ void DragEventActuator::UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>&
     auto opacity = imageContext->GetOpacity();
 
     OptionsAfterApplied options = frameNode->GetDragPreviewOption().options;
-    if (opacity.has_value() && (opacity.value()) <= MAX_OPACITY && (opacity.value()) > MIN_OPACITY) {
+    if (opacity.has_value() && (opacity.value()) <= MAX_OPACITY && (opacity.value()) >= MIN_OPACITY) {
         options.opacity = opacity.value();
     } else {
         options.opacity = DEFAULT_OPACITY;
@@ -1218,7 +1218,7 @@ void DragEventActuator::UpdatePreviewOptionDefaultAttr(const RefPtr<FrameNode>& 
     } else {
         dragPreviewOption.options.shadow = std::nullopt;
     }
-    if (dragPreviewOption.isDefaultRadiusEnabled) {
+    if (dragPreviewOption.isDefaultRadiusEnabled || dragPreviewOption.isMultiSelectionEnabled) {
         dragPreviewOption.options.borderRadius = GetDefaultBorderRadius();
     } else {
         dragPreviewOption.options.borderRadius = std::nullopt;

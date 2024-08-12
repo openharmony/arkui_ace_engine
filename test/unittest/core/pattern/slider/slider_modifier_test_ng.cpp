@@ -754,6 +754,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest012, TestSize.Level1)
     sliderContentModifier.DrawStep(context);
     EXPECT_CALL(canvas, AttachBrush(_)).Times(0);
     EXPECT_CALL(canvas, AttachPen(_)).Times(0);
+    EXPECT_TRUE(sliderContentModifier.GetStepPointVec().empty());
 }
 
 /**
@@ -772,6 +773,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest013, TestSize.Level1)
     DrawingContext context { canvas, SLIDER_WIDTH, SLIDER_HEIGHT };
     sliderContentModifier.DrawStep(context);
     EXPECT_FALSE(sliderContentModifier.isShowStep_->Get());
+    EXPECT_TRUE(sliderContentModifier.GetStepPointVec().empty());
 }
 
 /**
@@ -1161,6 +1163,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest022, TestSize.Level1)
     sliderContentModifier.DrawStep(context);
     EXPECT_TRUE(NearEqual(backStart.GetX(), backEnd.GetX()));
     EXPECT_TRUE(NearEqual(backStart.GetY(), backEnd.GetY()));
+    EXPECT_TRUE(sliderContentModifier.GetStepPointVec().empty());
     /**
      * @tc.steps: step2. call DrawStep function and test stepSize.
      */
@@ -1169,6 +1172,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest022, TestSize.Level1)
     sliderContentModifier.SetTrackThickness(SLIDER_CONTENT_MODIFIER_TRACK_THICKNESS_DIFF);
     sliderContentModifier.DrawStep(context);
     EXPECT_TRUE(NearEqual(backStart.GetX(), backEnd.GetX()));
+    EXPECT_FALSE(sliderContentModifier.GetStepPointVec().empty());
     /**
      * @tc.steps: step3. call DrawStep function and test reverse_.
      */
@@ -1178,6 +1182,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest022, TestSize.Level1)
     EXPECT_TRUE(NearEqual(backStart.GetY(), backEnd.GetY()));
     EXPECT_TRUE(GreatOrEqual(backEnd.GetX(), backStart.GetX()));
     EXPECT_TRUE(GreatOrEqual(backEnd.GetY(), backStart.GetX()));
+    EXPECT_FALSE(sliderContentModifier.GetStepPointVec().empty());
 }
 
 /**

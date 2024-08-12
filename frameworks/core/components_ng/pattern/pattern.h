@@ -274,6 +274,8 @@ public:
 
     virtual void OnMountToParentDone() {}
 
+    virtual void AfterMountToParent() {}
+
     virtual void OnSensitiveStyleChange(bool isSensitive) {}
 
     virtual bool AllowVisibleAreaCheck() const
@@ -629,6 +631,8 @@ public:
     {
         return RectF();
     }
+
+    virtual void NotifyDataChange(int32_t index, int32_t count) {};
 
 protected:
     virtual void OnAttachToFrameNode() {}

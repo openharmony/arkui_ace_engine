@@ -509,6 +509,22 @@ class UIContext {
         return node;
     }
 
+    getAttachedFrameNodeById(id) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let nodePtr = getUINativeModule().getAttachedFrameNodeById(id);
+        if (!nodePtr) {
+            __JSScopeUtil__.restoreInstanceId();
+            return null;
+        }
+        let xNode = globalThis.__getArkUINode__();
+        let node = xNode.FrameNodeUtils.searchNodeInRegisterProxy(nodePtr);
+        if (!node) {
+            node = xNode.FrameNodeUtils.createFrameNode(this, nodePtr);
+        }
+        __JSScopeUtil__.restoreInstanceId();
+        return node;
+    }
+
     getFrameNodeByNodeId(id) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let nodePtr = getUINativeModule().getFrameNodeById(id);
@@ -618,6 +634,20 @@ class UIContext {
         }
         __JSScopeUtil__.restoreInstanceId();
         return [];
+    }
+
+    isFollowingSystemFontScale() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let isFollowing = Context.isFollowingSystemFontScale();
+        __JSScopeUtil__.restoreInstanceId();
+        return isFollowing;
+    }
+
+    getMaxFontScale() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let maxFontScale = Context.getMaxFontScale();
+        __JSScopeUtil__.restoreInstanceId();
+        return maxFontScale;
     }
 }
 

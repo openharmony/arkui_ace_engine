@@ -76,7 +76,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation002, TestSize.Level1
     pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo));
     pattern_->PlaySpringAnimation(dragVelocity);
     pattern_->StopAndResetSpringAnimation();
-    EXPECT_TRUE(pattern_->springAnimationIsRunning_);
+    EXPECT_FALSE(pattern_->springAnimationIsRunning_);
 }
 
 /**
@@ -901,7 +901,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPattern0009, TestSize.Level1)
     CreateWithItem([](SwiperModelNG model) {});
     pattern_->springAnimationIsRunning_ = true;
     pattern_->StopAndResetSpringAnimation();
-    EXPECT_TRUE(pattern_->springAnimationIsRunning_);
+    EXPECT_FALSE(pattern_->springAnimationIsRunning_);
 }
 
 /**

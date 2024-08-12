@@ -733,7 +733,7 @@ void MovingPhotoPattern::OnMediaPlayerStatusChanged(PlaybackStatus status)
 void MovingPhotoPattern::OnMediaPlayerInitialized()
 {
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer OnMediaPlayerInitialized.");
-    if (!isSetAutoPlayPeriod_ && autoAndRepeatLevel_ != PlaybackMode::AUTO) {
+    if (!isSetAutoPlayPeriod_ && autoAndRepeatLevel_ == PlaybackMode::AUTO) {
         isSetAutoPlayPeriod_ = true;
         SetAutoPlayPeriod(autoPlayPeriodStartTime_, autoPlayPeriodEndTime_);
     }
@@ -799,7 +799,7 @@ void MovingPhotoPattern::HideImageNode()
 void MovingPhotoPattern::VisiblePlayback()
 {
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto VisiblePlayback.");
-    if (isVisible_) {
+    if (!isVisible_) {
         return;
     }
     if (historyAutoAndRepeatLevel_ != PlaybackMode::NONE &&
@@ -1017,17 +1017,21 @@ void MovingPhotoPattern::RepeatPlay(bool isRepeatPlay)
 
 void MovingPhotoPattern::AutoPlayPeriod(int64_t startTime, int64_t endTime)
 {
-    if (startTime > VIDEO_PLAYTIME_START_POSITION && startTime < endTime
-            && endTime < VIDEO_PLAYTIME_END_POSITION) {
-        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer set Period error.");
-        return;
+    if (startTime >= VIDEO_PLAYTIME_START_POSITION && startTime < endTime
+            && endTime <= VIDEO_PLAYTIME_END_POSITION) {
+        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer set Period.");
+        autoPlayPeriodStartTime_ = startTime;
+        autoPlayPeriodEndTime_ = endTime;
     }
-    autoPlayPeriodStartTime_ = startTime;
-    autoPlayPeriodEndTime_ = endTime;
 }
 
 void MovingPhotoPattern::SetAutoPlayPeriod(int64_t startTime, int64_t endTime)
 {
+    if (startTime < VIDEO_PLAYTIME_START_POSITION || startTime >= endTime
+            || endTime > VIDEO_PLAYTIME_END_POSITION) {
+        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer SetAutoPlayPeriod error.");
+        return;
+    }
     if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer is null or invalid.");
         return;

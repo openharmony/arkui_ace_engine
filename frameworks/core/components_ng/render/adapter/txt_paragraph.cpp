@@ -16,16 +16,10 @@
 #include "core/components_ng/render/adapter/txt_paragraph.h"
 
 #include "base/log/ace_performance_monitor.h"
-#include "base/log/ace_trace.h"
-#include "base/utils/utils.h"
-#include "base/geometry/dimension.h"
 #include "core/components/font/constants_converter.h"
-#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/components_ng/render/adapter/txt_font_collection.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/components/common/properties/text_layout_info.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -525,15 +519,19 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
     prevChar = text_[std::max(0, extent - 1)];
     if (prevChar == NEWLINE_CODE && !text_[static_cast<size_t>(extent)] && !preIsPlaceholder) {
         // Return the start of next line.
-        result.offset.SetX(MakeEmptyOffsetX());
+        float y = 0.0f;
 #ifndef USE_GRAPHIC_TEXT_GINE
-        result.offset.SetY(textBox.rect.fBottom);
+        y = textBox.rect.fBottom;
         result.height = textBox.rect.fBottom - textBox.rect.fTop;
 #else
-        result.offset.SetY(textBox.rect.GetBottom());
+        y = textBox.rect.GetBottom();
         result.height = textBox.rect.GetBottom() - textBox.rect.GetTop();
 #endif
-        return true;
+        if (LessNotEqual(y, paragrah->GetHeight())) {
+            result.offset.SetX(MakeEmptyOffsetX());
+            result.offset.SetY(y);
+            return true;
+        }
     }
 
 #ifndef USE_GRAPHIC_TEXT_GINE

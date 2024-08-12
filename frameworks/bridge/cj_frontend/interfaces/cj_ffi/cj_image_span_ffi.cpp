@@ -15,10 +15,6 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_image_span_ffi.h"
 
-#include "cj_lambda.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
-#include "core/common/container.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/image/image_model.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
 

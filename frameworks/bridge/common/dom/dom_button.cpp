@@ -15,11 +15,6 @@
 
 #include "frameworks/bridge/common/dom/dom_button.h"
 
-#include "base/log/event_report.h"
-#include "core/common/ace_application_info.h"
-#include "frameworks/bridge/common/dom/dom_div.h"
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 namespace {
 

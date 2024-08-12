@@ -15,12 +15,7 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_qrcode_ffi.h"
 
-#include "cj_lambda.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
-#include "core/event/key_event.h"
-#include "core/event/touch_event.h"
-#include "core/gestures/click_recognizer.h"
 
 using namespace OHOS::Ace::Framework;
 using namespace OHOS::Ace;

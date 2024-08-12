@@ -1463,9 +1463,87 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg0410, TestSize.Level1)
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     ASSERT_NE(menuPattern, nullptr);
 
+    menuPattern->makeFunc_ = [](const MenuItemConfiguration& menuItemConfiguration) -> RefPtr<FrameNode> {
+        return FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    };
     menuPattern->FireBuilder();
     auto val = menuNode->isRestoreInfoUsed_;
 
     EXPECT_NE(val, false);
 }
+/**
+ * @tc.name: MenuPatternTest083
+ * @tc.desc: Test MenuPattern::IsMenuScrollable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPatternTestNg083, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menu and srcoll node, get menu frameNode.
+     * @tc.expected: call IsMenuScrollable and result is IsScrollable & GetScrollableDistance.
+     */
+    std::vector<OptionParam> optionParams;
+    optionParams.emplace_back("MenuItem1", "fakeIcon", nullptr);
+    optionParams.emplace_back("MenuItem2", "", nullptr);
+    MenuParam menuParam;
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), TARGET_ID, "", TYPE, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 1, AceType::MakeRefPtr<ScrollPattern>());
+    scrollNode->MountToParent(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto ret = menuPattern->IsMenuScrollable();
+    ASSERT_FALSE(ret);
+    /**
+     * @tc.steps: step2. Create menu and srcoll node, get menu frameNode.
+     * @tc.expected: call IsMenuScrollable and result is false.
+     */
+    RefPtr<FrameNode> menuWrapperNodeEx =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(menuWrapperNodeEx, nullptr);
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<TextPattern>());
+    textNode->MountToParent(menuWrapperNodeEx);
+    auto menuPatternEx = menuWrapperNodeEx->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPatternEx, nullptr);
+    ret = menuPatternEx->IsMenuScrollable();
+    ASSERT_FALSE(ret);
+}
+
+/**
+ * @tc.name: MenuPatternTest084
+ * @tc.desc: Test HideStackMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPatternTestNg084, TestSize.Level1)
+{
+    auto menuWrapperNode = GetPreviewMenuWrapper();
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+
+    menuPattern->HideStackMenu();
+    EXPECT_TRUE(true);
+}
+
+// /**
+//  * @tc.name: MenuPatternTest085
+//  * @tc.desc: Test OnTouchEvent
+//  * @tc.type: FUNC
+//  */
+HWTEST_F(MenuPatternTestNg, MenuPatternTestNg085, TestSize.Level1)
+{
+    MenuPattern* menuPattern = new MenuPattern(TARGET_ID, "", TYPE);
+    std::string type = "1";
+    TouchEventInfo info(type);
+    menuPattern->needHideAfterTouch_ = false;
+    menuPattern->OnTouchEvent(info);
+    EXPECT_TRUE(true);
+}
+
 } // namespace OHOS::Ace::NG

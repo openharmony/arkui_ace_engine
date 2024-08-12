@@ -30,6 +30,17 @@ interface UpdateFuncRecord {
   node?: object;
 }
 
+declare class ObserveV2 {
+  static getObserve(): ObserveV2;
+  public stopRecordDependencies(): void;
+  public startRecordDependencies(cmp: BaseNode, id: number, doClearBinding: boolean): void;
+}
+
+declare class ConfigureStateMgmt {
+  public static get instance(): ConfigureStateMgmt;
+  public needsV2Observe(): boolean;
+}
+
 declare function wrapBuilder<Args extends Object[]>(
   builder: (...args: Args) => void
 ): WrappedBuilder<Args>;

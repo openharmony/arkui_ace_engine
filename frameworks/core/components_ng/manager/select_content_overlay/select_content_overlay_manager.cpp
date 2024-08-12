@@ -206,6 +206,11 @@ void SelectContentOverlayManager::RegisterHandleCallback(SelectOverlayInfo& info
         CHECK_NULL_VOID(overlayCallback);
         overlayCallback->OnHandleReverse(isReverse);
     };
+    info.onHandleIsHidden = [weakCallback = WeakClaim(AceType::RawPtr(callback))]() {
+        auto overlayCallback = weakCallback.Upgrade();
+        CHECK_NULL_VOID(overlayCallback);
+        overlayCallback->OnHandleIsHidden();
+    };
 }
 
 void SelectContentOverlayManager::RegisterTouchCallback(SelectOverlayInfo& info)
@@ -1008,5 +1013,19 @@ bool SelectContentOverlayManager::IsTouchAtHandle(const PointF& localPoint, cons
         return selectOverlayNode->IsInSelectedOrSelectOverlayArea(localPoint);
     }
     return selectOverlayNode->IsInSelectedOrSelectOverlayArea(globalPoint);
+}
+
+void SelectContentOverlayManager::SetHandleCircleIsShow(bool isFirst, bool isShow)
+{
+    auto pattern = GetSelectHandlePattern(WeakClaim(this));
+    CHECK_NULL_VOID(pattern);
+    pattern->SetHandleCircleIsShow(isFirst, isShow);
+}
+
+void SelectContentOverlayManager::SetIsHandleLineShow(bool isShow)
+{
+    auto pattern = GetSelectHandlePattern(WeakClaim(this));
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsHandleLineShow(isShow);
 }
 } // namespace OHOS::Ace::NG

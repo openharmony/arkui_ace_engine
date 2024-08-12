@@ -79,6 +79,9 @@ UINode::~UINode()
     } else {
         ElementRegister::GetInstance()->RemoveItemSilently(nodeId_);
     }
+    if (propInspectorId_.has_value()) {
+        ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(propInspectorId_.value_or(""), nodeId_);
+    }
     if (!onMainTree_) {
         return;
     }
@@ -337,6 +340,7 @@ void UINode::MountToParent(const RefPtr<UINode>& parent,
     if (parent->GetPageId() != 0) {
         SetHostPageId(parent->GetPageId());
     }
+    AfterMountToParent();
 }
 
 void UINode::UpdateConfigurationUpdate(const ConfigurationChange& configurationChange)
@@ -977,7 +981,7 @@ RefPtr<PipelineContext> UINode::GetContextRefPtr() const
 
 HitTestResult UINode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
-    TouchTestResult& responseLinkResult, bool isDispatch)
+    ResponseLinkResult& responseLinkResult, bool isDispatch)
 {
     auto children = GetChildren();
     HitTestResult hitTestResult = HitTestResult::OUT_OF_REGION;
@@ -1595,6 +1599,24 @@ void UINode::GetContainerComponentText(std::string& text)
             break;
         }
         child->GetContainerComponentText(text);
+    }
+}
+
+void UINode::NotifyDataChange(int32_t index, int32_t count, int64_t id) const
+{
+    int32_t updateFrom = 0;
+    for (const auto& child : GetChildren()) {
+        if (child->GetAccessibilityId() == id) {
+            updateFrom += index;
+            break;
+        }
+        int32_t count = child->FrameCount();
+        updateFrom += count;
+    }
+    auto accessibilityId = GetAccessibilityId();
+    auto parent = GetParent();
+    if (parent) {
+        parent->NotifyDataChange(updateFrom, count, accessibilityId);
     }
 }
 } // namespace OHOS::Ace::NG

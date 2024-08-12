@@ -184,7 +184,8 @@ RefPtr<Asset> RosenFontLoader::GetAssetFromFile(const std::string& fileName) con
         return nullptr;
     }
     std::fclose(fp);
-    LOGI("[%{private}s] length: %{public}zu/%{public}zu success", fileName.c_str(), rsize, size);
+    TAG_LOGI(
+        AceLogTag::ACE_FONT, "[%{private}s] length: %{public}zu/%{public}zu success", fileName.c_str(), rsize, size);
     return AceType::MakeRefPtr<RSAsset>(std::move(data), rsize);
 }
 

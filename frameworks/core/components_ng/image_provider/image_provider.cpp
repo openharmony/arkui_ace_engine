@@ -140,8 +140,7 @@ void ImageProvider::FailCallback(const std::string& key, const std::string& erro
     }
 }
 
-void ImageProvider::SuccessCallback(
-    const RefPtr<CanvasImage>& canvasImage, const std::string& key, bool sync, bool loadInVipChannel)
+void ImageProvider::SuccessCallback(const RefPtr<CanvasImage>& canvasImage, const std::string& key, bool sync)
 {
     canvasImage->Cache(key);
     auto ctxs = EndTask(key);
@@ -358,7 +357,7 @@ void ImageProvider::MakeCanvasImageHelper(const RefPtr<ImageObject>& obj, const 
     }
 
     if (image) {
-        SuccessCallback(image, key, imageDecoderOptions.sync, imageDecoderOptions.loadInVipChannel);
+        SuccessCallback(image, key, imageDecoderOptions.sync);
     } else {
         FailCallback(key, "Failed to decode image");
     }

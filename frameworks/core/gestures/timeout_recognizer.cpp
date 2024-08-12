@@ -15,8 +15,6 @@
 
 #include "core/gestures/timeout_recognizer.h"
 
-#include <unordered_set>
-
 namespace OHOS::Ace {
 SingleChildGestureRecognizer::SingleChildGestureRecognizer(WeakPtr<PipelineBase> context)
     : context_(std::move(context))

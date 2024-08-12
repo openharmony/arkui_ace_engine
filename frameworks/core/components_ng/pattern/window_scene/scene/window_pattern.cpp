@@ -433,7 +433,6 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
     session_->SetNeedSnapshot(false);
     snapshotWindow_ = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-    snapshotWindow_->GetPattern<ImagePattern>()->SetLoadInVipChannel(true);
     auto imageLayoutProperty = snapshotWindow_->GetLayoutProperty<ImageLayoutProperty>();
     imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto imagePaintProperty = snapshotWindow_->GetPaintProperty<ImageRenderProperty>();

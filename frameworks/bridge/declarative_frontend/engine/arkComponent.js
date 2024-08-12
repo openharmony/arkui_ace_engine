@@ -1795,6 +1795,32 @@ class OnGestureJudgeBeginModifier extends ModifierWithKey {
   }
 }
 OnGestureJudgeBeginModifier.identity = Symbol('onGestureJudgeBegin');
+class OnGestureRecognizerJudgeBeginModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnGestureRecognizerJudgeBegin(node);
+    } else {
+      getUINativeModule().common.setOnGestureRecognizerJudgeBegin(node, this.value);
+    }
+  }
+}
+OnGestureRecognizerJudgeBeginModifier.identity = Symbol('onGestureRecognizerJudgeBegin');
+class ShouldBuiltInRecognizerParallelWithModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetShouldBuiltInRecognizerParallelWith(node);
+    } else {
+      getUINativeModule().common.setShouldBuiltInRecognizerParallelWith(node, this.value);
+    }
+  }
+}
+ShouldBuiltInRecognizerParallelWithModifier.identity = Symbol('shouldBuiltInRecognizerParallelWith');
 class MotionPathModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -3076,6 +3102,14 @@ class ArkComponent {
   }
   onGestureJudgeBegin(callback) {
     modifierWithKey(this._modifiersWithKeys, OnGestureJudgeBeginModifier.identity, OnGestureJudgeBeginModifier, callback);
+    return this;
+  }
+  onGestureRecognizerJudgeBegin(callback) {
+    modifierWithKey(this._modifiersWithKeys, OnGestureRecognizerJudgeBeginModifier.identity, OnGestureRecognizerJudgeBeginModifier, callback);
+    return this;
+  }
+  shouldBuiltInRecognizerParallelWith(callback) {
+    modifierWithKey(this._modifiersWithKeys, ShouldBuiltInRecognizerParallelWithModifier.identity, ShouldBuiltInRecognizerParallelWithModifier, callback);
     return this;
   }
   onSizeChange(callback) {
@@ -4903,6 +4937,12 @@ globalThis.applySymbolGlyphModifierToNode = function (modifier, nodePtr) {
 
 globalThis.applyImageModifierToNode = function (modifier, nodePtr) {
   let component = new ArkImageComponent(nodePtr);
+  applyUIAttributes(modifier, nodePtr, component);
+  component.applyModifierPatch();
+};
+
+globalThis.applyTextModifierToNode = function (modifier, nodePtr) {
+  let component = new ArkTextComponent(nodePtr);
   applyUIAttributes(modifier, nodePtr, component);
   component.applyModifierPatch();
 };
@@ -11059,6 +11099,24 @@ class TextHalfLeadingModifier extends ModifierWithKey {
 }
 TextHalfLeadingModifier.identity = Symbol('textHalfLeading');
 
+class TextOnClickModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetOnClick(node);
+    }
+    else {
+      getUINativeModule().text.setOnClick(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextOnClickModifier.identity = Symbol('textOnClick');
+
 class ArkTextComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -11243,6 +11301,10 @@ class ArkTextComponent extends ArkComponent {
   }
   halfLeading(value) {
     modifierWithKey(this._modifiersWithKeys, TextHalfLeadingModifier.identity, TextHalfLeadingModifier, value);
+    return this;
+  }
+  onClick(value) {
+    modifierWithKey(this._modifiersWithKeys, TextOnClickModifier.identity, TextOnClickModifier, value);
     return this;
   }
 }
@@ -18206,7 +18268,7 @@ class TextpickerDividerModifier extends ModifierWithKey {
     applyPeer(node, reset) {
         var _a, _b, _c, _d;
         if (reset) {
-            getUINativeModule().textpicker.resetDivider(node);
+            getUINativeModule().textpicker.resetDivider(node, this.value);
         }
         else {
             getUINativeModule().textpicker.setDivider(node, (_a = this.value) === null || _a === void 0 ? void 0 : _a.strokeWidth, (_b = this.value) === null || _b === void 0 ? void 0 : _b.color, (_c = this.value) === null || _c === void 0 ? void 0 : _c.startMargin, (_d = this.value) === null || _d === void 0 ? void 0 : _d.endMargin);
@@ -25926,13 +25988,13 @@ class SwiperIndicatorModifier extends ModifierWithKey {
       let mask;
       let color;
       let selectedColor;
-      let maxDisplayCount;
       let fontColor;
       let selectedFontColor;
       let digitFontSize;
       let digitFontWeight;
       let selectedDigitFontSize;
       let selectedDigitFontWeight;
+      let maxDisplayCount;
       if (typeof this.value === 'boolean') {
         getUINativeModule().swiper.setSwiperIndicator(node, 'boolean', this.value);
       }
@@ -25950,7 +26012,7 @@ class SwiperIndicatorModifier extends ModifierWithKey {
         selectedColor = this.value.selectedColorValue;
         maxDisplayCount = this.value.maxDisplayCountValue;
         getUINativeModule().swiper.setSwiperIndicator(node, 'ArkDotIndicator', itemWidth, itemHeight, selectedItemWidth,
-          selectedItemHeight, mask, color, selectedColor, maxDisplayCount, left, top, right, bottom);
+          selectedItemHeight, mask, color, selectedColor, left, top, right, bottom, maxDisplayCount);
       }
       else if (typeof this.value === 'object' && this.value.type === 'DigitIndicator') {
         left = this.value.leftValue;

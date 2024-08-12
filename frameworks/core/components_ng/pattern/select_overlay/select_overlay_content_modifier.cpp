@@ -31,7 +31,9 @@ SelectOverlayContentModifier::SelectOverlayContentModifier()
       handleReverse_(AceType::MakeRefPtr<PropertyBool>(false)),
       isSingleHandle_(AceType::MakeRefPtr<PropertyBool>(false)),
       firstHandleIsShow_(AceType::MakeRefPtr<PropertyBool>(false)),
+      firstCircleIsShow_(AceType::MakeRefPtr<PropertyBool>(true)),
       secondHandleIsShow_(AceType::MakeRefPtr<PropertyBool>(false)),
+      secondCircleIsShow_(AceType::MakeRefPtr<PropertyBool>(true)),
       isHiddenHandle_(AceType::MakeRefPtr<PropertyBool>(false)),
       isHandleLineShow_(AceType::MakeRefPtr<PropertyBool>(false)),
       viewPort_(AceType::MakeRefPtr<PropertyRectF>(RectF(0, 0, 0, 0))),
@@ -48,7 +50,9 @@ SelectOverlayContentModifier::SelectOverlayContentModifier()
     AttachProperty(handleReverse_);
     AttachProperty(isSingleHandle_);
     AttachProperty(firstHandleIsShow_);
+    AttachProperty(firstCircleIsShow_);
     AttachProperty(secondHandleIsShow_);
+    AttachProperty(secondCircleIsShow_);
     AttachProperty(isHiddenHandle_);
     AttachProperty(isHandleLineShow_);
     AttachProperty(viewPort_);
@@ -121,11 +125,14 @@ bool SelectOverlayContentModifier::PaintSingleHandleWithPoints(RSCanvas& canvas)
         startPoint.SetY(startPoint.GetY() + 1.0f);
         auto centerOffset = CalculateCenterPoint(
             firstHandlePaintInfo_.startPoint, firstHandlePaintInfo_.endPoint, GetDrawHandleRadius(), false);
-        HandleDrawInfo drawInfo = { .startPoint = startPoint - centerOffset,
+        HandleDrawInfo drawInfo = {
+            .startPoint = startPoint - centerOffset,
             .endPoint = firstHandlePaintInfo_.endPoint - centerOffset,
             .centerOffset = centerOffset,
             .handleWidth = firstHandlePaintInfo_.width,
-            .isHandleLineShow = isHandleLineShow_->Get() };
+            .isHandleLineShow = isHandleLineShow_->Get(),
+            .isCircleShow = firstCircleIsShow_->Get()
+        };
         PaintHandle(canvas, drawInfo);
     }
     if (secondHandleIsShow_->Get()) {
@@ -133,11 +140,14 @@ bool SelectOverlayContentModifier::PaintSingleHandleWithPoints(RSCanvas& canvas)
         startPoint.SetY(startPoint.GetY() + 1.0f);
         auto centerOffset = CalculateCenterPoint(
             secondHandlePaintInfo_.startPoint, secondHandlePaintInfo_.endPoint, GetDrawHandleRadius(), false);
-        HandleDrawInfo drawInfo = { .startPoint = startPoint - centerOffset,
+        HandleDrawInfo drawInfo = {
+            .startPoint = startPoint - centerOffset,
             .endPoint = secondHandlePaintInfo_.endPoint - centerOffset,
             .centerOffset = centerOffset,
             .handleWidth = secondHandlePaintInfo_.width,
-            .isHandleLineShow = isHandleLineShow_->Get() };
+            .isHandleLineShow = isHandleLineShow_->Get(),
+            .isCircleShow = secondCircleIsShow_->Get()
+        };
         PaintHandle(canvas, drawInfo);
     }
     return true;
@@ -146,11 +156,11 @@ bool SelectOverlayContentModifier::PaintSingleHandleWithPoints(RSCanvas& canvas)
 void SelectOverlayContentModifier::PaintSingleHandleWithRect(RSCanvas& canvas)
 {
     if (firstHandleIsShow_->Get()) {
-        PaintHandle(canvas, firstHandle_->Get(), false, isHandleLineShow_->Get());
+        PaintHandle(canvas, firstHandle_->Get(), false, isHandleLineShow_->Get(), firstCircleIsShow_->Get());
         return;
     }
     if (secondHandleIsShow_->Get()) {
-        PaintHandle(canvas, secondHandle_->Get(), false, isHandleLineShow_->Get());
+        PaintHandle(canvas, secondHandle_->Get(), false, isHandleLineShow_->Get(), secondCircleIsShow_->Get());
     }
 }
 
@@ -177,6 +187,7 @@ bool SelectOverlayContentModifier::PaintDoubleHandleWithPoint(RSCanvas& canvas)
             .endPoint = firstHandlePaintInfo_.endPoint - centerOffset,
             .centerOffset = centerOffset,
             .handleWidth = firstHandlePaintInfo_.width,
+            .isCircleShow = firstCircleIsShow_->Get()
         };
         PaintHandle(canvas, drawInfo);
     }
@@ -192,6 +203,7 @@ bool SelectOverlayContentModifier::PaintDoubleHandleWithPoint(RSCanvas& canvas)
             .endPoint = secondHandlePaintInfo_.endPoint - centerOffset,
             .centerOffset = centerOffset,
             .handleWidth = secondHandlePaintInfo_.width,
+            .isCircleShow = secondCircleIsShow_->Get()
         };
         PaintHandle(canvas, drawInfo);
     }
@@ -201,10 +213,10 @@ bool SelectOverlayContentModifier::PaintDoubleHandleWithPoint(RSCanvas& canvas)
 void SelectOverlayContentModifier::PaintDoubleHandleWithRect(RSCanvas& canvas)
 {
     if (firstHandleIsShow_->Get()) {
-        PaintHandle(canvas, firstHandle_->Get(), !handleReverse_->Get());
+        PaintHandle(canvas, firstHandle_->Get(), !handleReverse_->Get(), true, firstCircleIsShow_->Get());
     }
     if (secondHandleIsShow_->Get()) {
-        PaintHandle(canvas, secondHandle_->Get(), handleReverse_->Get());
+        PaintHandle(canvas, secondHandle_->Get(), handleReverse_->Get(), true, secondCircleIsShow_->Get());
     }
 }
 
@@ -282,7 +294,7 @@ RectF SelectOverlayContentModifier::GetSecondPaintRect() const
 }
 
 void SelectOverlayContentModifier::PaintHandle(
-    RSCanvas& canvas, const RectF& handleRect, bool handleOnTop, bool isHandleLineShow)
+    RSCanvas& canvas, const RectF& handleRect, bool handleOnTop, bool isHandleLineShow, bool isCircleShow)
 {
     auto rectTopX = (handleRect.Left() + handleRect.Right()) / 2.0f;
     auto centerOffset = OffsetF(rectTopX, 0.0f);
@@ -304,7 +316,8 @@ void SelectOverlayContentModifier::PaintHandle(
         .endPoint = endPoint,
         .centerOffset = centerOffset,
         .handleWidth = handleRect.Width(),
-        .isHandleLineShow = isHandleLineShow };
+        .isHandleLineShow = isHandleLineShow,
+        .isCircleShow = isCircleShow };
     PaintHandle(canvas, drawInfo);
 }
 
@@ -313,31 +326,32 @@ void SelectOverlayContentModifier::PaintHandle(RSCanvas& canvas, const HandleDra
     auto scaleX = isOverlayMode_ ? 1.0f : scale_.x;
     auto scaleY = isOverlayMode_ ? 1.0f : scale_.y;
     canvas.Save();
-    RSBrush brush;
-    brush.SetAntiAlias(true);
     canvas.Translate(handleInfo.centerOffset.GetX(), handleInfo.centerOffset.GetY());
-    canvas.Save();
-    canvas.Scale(scaleX, scaleY);
-    // Paint inner circle.
-    Color innerHandleColor = innerHandleColor_->Get();
-    innerHandleColor = innerHandleColor.BlendOpacity(handleOpacity_->Get());
-    brush.SetColor(innerHandleColor.GetValue());
-    canvas.AttachBrush(brush);
-    canvas.DrawCircle(RSPoint(0.0, 0.0), innerHandleRadius_->Get());
-    canvas.DetachBrush();
-    // Paint outer hollow circle.
     Color handleColor = handleColor_->Get();
     handleColor = handleColor.BlendOpacity(handleOpacity_->Get());
-    float strokeWidth = handleStrokeWidth_->Get();
-    RSPen strokePen;
-    strokePen.SetAntiAlias(true);
-    strokePen.SetColor(handleColor.GetValue());
-    strokePen.SetWidth(strokeWidth);
-    canvas.AttachPen(strokePen);
-    canvas.DrawCircle(RSPoint(0.0, 0.0), handleRadius_->Get());
-    canvas.DetachPen();
-    canvas.Restore();
-
+    if (handleInfo.isCircleShow) {
+        canvas.Save();
+        canvas.Scale(scaleX, scaleY);
+        // Paint inner circle.
+        Color innerHandleColor = innerHandleColor_->Get();
+        innerHandleColor = innerHandleColor.BlendOpacity(handleOpacity_->Get());
+        RSBrush brush;
+        brush.SetAntiAlias(true);
+        brush.SetColor(innerHandleColor.GetValue());
+        canvas.AttachBrush(brush);
+        canvas.DrawCircle(RSPoint(0.0, 0.0), innerHandleRadius_->Get());
+        canvas.DetachBrush();
+        // Paint outer hollow circle.
+        float strokeWidth = handleStrokeWidth_->Get();
+        RSPen strokePen;
+        strokePen.SetAntiAlias(true);
+        strokePen.SetColor(handleColor.GetValue());
+        strokePen.SetWidth(strokeWidth);
+        canvas.AttachPen(strokePen);
+        canvas.DrawCircle(RSPoint(0.0, 0.0), handleRadius_->Get());
+        canvas.DetachPen();
+        canvas.Restore();
+    }
     if (handleInfo.isHandleLineShow) {
         canvas.Save();
         canvas.Scale(scaleX, 1.0f);

@@ -80,7 +80,7 @@ txt::FontWeight ConvertTxtFontWeight(FontWeight fontWeight)
             convertValue = txt::FontWeight::w900;
             break;
         default:
-            LOGW("FontWeight setting error! Now using default FontWeight.");
+            TAG_LOGW(AceLogTag::ACE_FONT, "FontWeight set error! use default FontWeight.");
             convertValue = txt::FontWeight::w400;
             break;
     }
@@ -125,7 +125,7 @@ Rosen::FontWeight ConvertTxtFontWeight(FontWeight fontWeight)
             convertValue = Rosen::FontWeight::W900;
             break;
         default:
-            LOGW("FontWeight setting error! Now using default FontWeight.");
+            TAG_LOGW(AceLogTag::ACE_FONT, "FontWeight setting error! Now using default FontWeight.");
             convertValue = Rosen::FontWeight::W400;
             break;
     }
@@ -145,7 +145,7 @@ txt::FontStyle ConvertTxtFontStyle(FontStyle fontStyle)
             convertValue = txt::FontStyle::italic;
             break;
         default:
-            LOGW("FontStyle setting error! Now using default FontStyle");
+            TAG_LOGW(AceLogTag::ACE_FONT, "FontStyle set error! use default FontStyle");
             convertValue = txt::FontStyle::normal;
             break;
     }
@@ -163,7 +163,7 @@ Rosen::FontStyle ConvertTxtFontStyle(FontStyle fontStyle)
             convertValue = Rosen::FontStyle::ITALIC;
             break;
         default:
-            LOGW("FontStyle setting error! Now using default FontStyle");
+            TAG_LOGW(AceLogTag::ACE_FONT, "FontStyle setting error! Now using default FontStyle");
             convertValue = Rosen::FontStyle::NORMAL;
             break;
     }
@@ -231,7 +231,7 @@ txt::TextAlign ConvertTxtTextAlign(TextAlign textAlign)
             convertValue = txt::TextAlign::end;
             break;
         default:
-            LOGW("TextAlign setting error! Now using default TextAlign");
+            TAG_LOGW(AceLogTag::ACE_FONT, "TextAlign set error! use default TextAlign");
             convertValue = txt::TextAlign::start;
             break;
     }
@@ -261,7 +261,7 @@ Rosen::TextAlign ConvertTxtTextAlign(TextAlign textAlign)
             convertValue = Rosen::TextAlign::END;
             break;
         default:
-            LOGW("TextAlign setting error! Now using default TextAlign");
+            TAG_LOGW(AceLogTag::ACE_FONT, "TextAlign setting error! Now using default TextAlign");
             convertValue = Rosen::TextAlign::START;
             break;
     }
@@ -296,7 +296,7 @@ Rosen::TextDirection ConvertTxtTextDirection(TextDirection textDirection)
 #endif
             break;
         default:
-            LOGW("TextDirection setting error! Now using default TextDirection");
+            TAG_LOGW(AceLogTag::ACE_FONT, "TextDirection setting error! Now using default TextDirection");
 #ifndef USE_GRAPHIC_TEXT_GINE
             convertValue = txt::TextDirection::ltr;
 #else
@@ -330,7 +330,7 @@ txt::TextDecoration ConvertTxtTextDecoration(TextDecoration textDecoration)
             convertValue = txt::TextDecoration::kLineThrough;
             break;
         default:
-            LOGW("TextDecoration setting error! Now using default TextDecoration");
+            TAG_LOGW(AceLogTag::ACE_FONT, "TextDecoration set error! use default TextDecoration");
             break;
     }
     return convertValue;
@@ -353,7 +353,7 @@ Rosen::TextDecoration ConvertTxtTextDecoration(TextDecoration textDecoration)
             convertValue = Rosen::TextDecoration::LINE_THROUGH;
             break;
         default:
-            LOGW("TextDecoration setting error! Now using default TextDecoration");
+            TAG_LOGW(AceLogTag::ACE_FONT, "TextDecoration setting error! Now using default TextDecoration");
             break;
     }
     return convertValue;
@@ -380,7 +380,7 @@ txt::TextDecorationStyle ConvertTxtTextDecorationStyle(TextDecorationStyle textD
             convertValue = txt::TextDecorationStyle::kWavy;
             break;
         default:
-            LOGW("TextDecorationStyle setting error! Now using default TextDecorationStyle");
+            TAG_LOGW(AceLogTag::ACE_FONT, "TextDecorationStyle set error! use default TextDecorationStyle");
             break;
     }
     return convertValue;
@@ -406,7 +406,7 @@ Rosen::TextDecorationStyle ConvertTxtTextDecorationStyle(TextDecorationStyle tex
             convertValue = Rosen::TextDecorationStyle::WAVY;
             break;
         default:
-            LOGW("TextDecorationStyle setting error! Now using default TextDecorationStyle");
+            TAG_LOGW(AceLogTag::ACE_FONT, "TextDecorationStyle setting error! Now using default TextDecorationStyle");
             break;
     }
     return convertValue;
@@ -866,7 +866,7 @@ txt::PlaceholderAlignment ConvertPlaceholderAlignment(PlaceholderAlignment textD
             convertValue = txt::PlaceholderAlignment::kMiddle;
             break;
         default:
-            LOGW("PlaceholderAlignment setting error! Now using default PlaceholderAlignment");
+            TAG_LOGW(AceLogTag::ACE_FONT, "PlaceholderAlignment set error! use default PlaceholderAlignment");
             break;
     }
     return convertValue;
@@ -895,7 +895,7 @@ Rosen::PlaceholderVerticalAlignment ConvertPlaceholderAlignment(PlaceholderAlign
             convertValue = Rosen::PlaceholderVerticalAlignment::CENTER_OF_ROW_BOX;
             break;
         default:
-            LOGW("PlaceholderAlignment setting error! Now using default PlaceholderAlignment");
+            TAG_LOGW(AceLogTag::ACE_FONT, "PlaceholderAlignment setting error! Now using default PlaceholderAlignment");
             break;
     }
     return convertValue;

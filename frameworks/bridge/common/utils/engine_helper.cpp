@@ -15,16 +15,8 @@
 
 #include "bridge/common/utils/engine_helper.h"
 
-#include <regex>
-
 #include "base/log/ace_checker.h"
-#include "base/log/log_wrapper.h"
 #include "base/subwindow/subwindow_manager.h"
-#include "base/utils/string_utils.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
-#include "core/common/frontend.h"
 
 namespace OHOS::Ace {
 std::shared_mutex EngineHelper::mutex_;

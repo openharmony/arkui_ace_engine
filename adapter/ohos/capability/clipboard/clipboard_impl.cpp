@@ -368,6 +368,7 @@ void ClipboardImpl::ProcessPasteDataRecord(const std::shared_ptr<MiscServices::P
     if (pasteDataRecord == nullptr) {
         return;
     }
+    TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "mimeType:%{public}s", pasteDataRecord->GetMimeType().c_str());
     if (pasteDataRecord->GetHtmlText() != nullptr) {
         auto htmlText = pasteDataRecord->GetHtmlText();
         HtmlToSpan toSpan;

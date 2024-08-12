@@ -45,13 +45,11 @@ constexpr double MONTHDAYS_WIDTH_PERCENT_ONE = 0.4285;
 constexpr double TIME_WIDTH_PERCENT_ONE = 0.5714;
 constexpr double MONTHDAYS_WIDTH_PERCENT_TWO = 0.3636;
 constexpr double TIME_WIDTH_PERCENT_TWO = 0.6363;
-constexpr Dimension BUTTON_BOTTOM_TOP_MARGIN = 10.0_vp;
 constexpr Dimension LUNARSWITCH_HEIGHT = 48.0_vp;
 constexpr Dimension CHECKBOX_SIZE = 24.0_vp;
 constexpr Dimension PICKER_DIALOG_MARGIN_FORM_EDGE = 24.0_vp;
 constexpr Dimension TITLE_HEIGHT = 40.0_vp;
 constexpr Dimension TITLE_BUTTON_HEIGHT = 32.0_vp;
-constexpr Dimension TITLE_PADDING_HORIZONTAL = 16.0_vp;
 constexpr Dimension PICKER_MARGIN_FROM_TITLE_AND_BUTTON = 8.0_vp;
 constexpr int32_t HOVER_ANIMATION_DURATION = 250;
 constexpr int32_t BUFFER_NODE_NUMBER = 2;
@@ -814,16 +812,11 @@ void DatePickerDialogView::UpdateConfirmButtonMargin(
     const RefPtr<ButtonLayoutProperty>& buttonConfirmLayoutProperty, const RefPtr<DialogTheme>& dialogTheme)
 {
     MarginProperty margin;
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
-        margin.top = CalcLength(BUTTON_BOTTOM_TOP_MARGIN);
-        margin.bottom = CalcLength(BUTTON_BOTTOM_TOP_MARGIN);
-        margin.left = CalcLength(0.0_vp);
+        ModuleDialogTypeRtl::UpdateMarginIsRtl(isRtl, margin, dialogTheme, true, ModuleDialogType::DATEPICKER_DIALOG);
     } else {
-        margin.right = CalcLength(TITLE_PADDING_HORIZONTAL);
-        margin.top = CalcLength(TITLE_PADDING_HORIZONTAL);
-        margin.bottom = CalcLength(TITLE_PADDING_HORIZONTAL);
-        margin.left = CalcLength(0.0_vp);
+        ModuleDialogTypeRtl::UpdateMarginIsRtl(isRtl, margin, dialogTheme, false, ModuleDialogType::DATEPICKER_DIALOG);
     }
     buttonConfirmLayoutProperty->UpdateMargin(margin);
 }
@@ -832,16 +825,12 @@ void DatePickerDialogView::UpdateCancelButtonMargin(
     const RefPtr<ButtonLayoutProperty>& buttonCancelLayoutProperty, const RefPtr<DialogTheme>& dialogTheme)
 {
     MarginProperty margin;
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
-        margin.top = CalcLength(BUTTON_BOTTOM_TOP_MARGIN);
-        margin.bottom = CalcLength(BUTTON_BOTTOM_TOP_MARGIN);
-        margin.right = CalcLength(0.0_vp);
+        ModuleDialogTypeRtl::UpdateMarginIsRtl(!isRtl, margin, dialogTheme, true, ModuleDialogType::DATEPICKER_DIALOG);
     } else {
-        margin.left = CalcLength(TITLE_PADDING_HORIZONTAL);
-        margin.top = CalcLength(TITLE_PADDING_HORIZONTAL);
-        margin.bottom = CalcLength(TITLE_PADDING_HORIZONTAL);
-        margin.right = CalcLength(0.0_vp);
+        ModuleDialogTypeRtl::UpdateMarginIsRtl(!isRtl, margin, dialogTheme, false,
+            ModuleDialogType::DATEPICKER_DIALOG);
     }
     buttonCancelLayoutProperty->UpdateMargin(margin);
 }

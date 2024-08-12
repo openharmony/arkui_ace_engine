@@ -1014,7 +1014,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest062, TestSize.Level1)
     auto panHorizontal1 = AceType::MakeRefPtr<PanRecognizer>(
         DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
     std::list<RefPtr<TouchEventTarget>> result;
-    std::list<RefPtr<TouchEventTarget>> responseLinkRecognizers;
+    ResponseLinkResult responseLinkRecognizers;
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
     panHorizontal1->node_ = frameNode;
     result.emplace_back(panHorizontal1);
@@ -1544,7 +1544,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest080, TestSize.Level1)
         DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
 
     TouchTestResult resultList;
-    TouchTestResult responseLinkRecognizers;
+    ResponseLinkResult responseLinkRecognizers;
     resultList.emplace_back(recognizerGroup);
     resultList.emplace_back(panHorizontal);
     responseLinkRecognizers.emplace_back(targetLinkHorizontal);

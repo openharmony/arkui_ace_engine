@@ -506,7 +506,7 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endHandle,
         bool& isNewAvoid);
     void OnQuickMenuDismissed();
-    void HideHandleAndQuickMenuIfNecessary(bool hide);
+    void HideHandleAndQuickMenuIfNecessary(bool hide, bool isScroll = false);
     void OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
@@ -825,7 +825,7 @@ private:
     void HandleTouchCancel(const TouchEventInfo& info);
 
     bool IsTouchHandleValid(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle);
-    bool IsTouchHandleShow(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle);
+    void CheckHandles(SelectHandleInfo& handleInfo, const std::shared_ptr<OHOS::NWeb::NWebTouchHandleState>& handle);
 
     void SuggestionSelected(int32_t index);
     void RegisterSelectOverLayOnClose(SelectOverlayInfo& selectInfo);
@@ -835,6 +835,10 @@ private:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
 #endif
+    void OnParentScrollStartOrEndCallback(bool isEnd);
+    void RegisterSelectOverlayParentScrollCallback(int32_t parentId, int32_t callbackId);
+    void StartListenSelectOverlayParentScroll(const RefPtr<FrameNode>& host);
+    void StopListenSelectOverlayParentScroll(const RefPtr<FrameNode>& host);
     void RegisterSelectOverlayCallback(SelectOverlayInfo& selectInfo,
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
@@ -881,7 +885,7 @@ private:
     bool FilterScrollEventHandleOffset(const float offset);
     bool FilterScrollEventHandlevVlocity(const float velocity);
     void UpdateFlingReachEdgeState(const float value, bool status);
-    void CalculateTooltipMargin(RefPtr<FrameNode>& textNode, MarginProperty& textMargin);
+    void CalculateTooltipOffset(RefPtr<FrameNode>& tooltipNode, OffsetF& tooltipOfffset);
     void HandleShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     void ShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     void RegisterVisibleAreaChangeCallback(const RefPtr<PipelineContext> &context);
@@ -950,6 +954,9 @@ private:
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<PanEvent> panEvent_ = nullptr;
     bool selectTemporarilyHidden_ = false;
+    bool selectTemporarilyHiddenByScroll_ = false;
+    bool nodeAttach_ = false;
+    ScrollableParentInfo scrollableParentInfo_;
     RefPtr<SelectOverlayProxy> selectOverlayProxy_ = nullptr;
     RefPtr<WebPaintProperty> webPaintProperty_ = nullptr;
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle_ = nullptr;
@@ -995,7 +1002,6 @@ private:
     bool isCurrentStartHandleDragging_ = false;
     std::list<TouchInfo> touchOverlayInfo_;
     bool isPopup_ = false;
-    int32_t tooltipTextId_ = -1;
     int32_t tooltipId_ = -1;
     int32_t mouseHoveredX_ = -1;
     int32_t mouseHoveredY_ = -1;

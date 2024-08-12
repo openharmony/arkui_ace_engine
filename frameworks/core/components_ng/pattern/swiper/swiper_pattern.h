@@ -904,6 +904,8 @@ private:
 
     std::set<int32_t> CalcVisibleIndex(float offset = 0.0f) const;
 
+    bool IsItemOverlay() const;
+
     friend class SwiperHelper;
 
     RefPtr<PanEvent> panEvent_;

@@ -97,7 +97,7 @@ public:
      * @param keyboardHeight The height of the keyboard in pixels.
      * @return true if the safe area was modified, false otherwise.
      */
-    bool UpdateKeyboardSafeArea(uint32_t keyboardHeight, std::optional<uint32_t> rootHeight = std::nullopt);
+    bool UpdateKeyboardSafeArea(float keyboardHeight, std::optional<uint32_t> rootHeight = std::nullopt);
 
     /**
      * @brief Retrieves the inset of the safe area caused by the keyboard.

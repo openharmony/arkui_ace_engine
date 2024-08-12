@@ -15,7 +15,6 @@
 
 #include "base/log/ace_tracker.h"
 
-#include "base/log/log.h"
 #include "base/utils/time_util.h"
 
 namespace OHOS::Ace {

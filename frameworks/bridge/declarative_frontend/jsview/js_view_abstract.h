@@ -447,6 +447,8 @@ public:
     static void JsSetDragEventStrictReportingEnabled(const JSCallbackInfo& info);
     static void SetSymbolOptionApply(const JSCallbackInfo& info,
         std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const JSRef<JSVal> modifierObj);
+    static void SetTextStyleApply(const JSCallbackInfo& info,
+        std::function<void(WeakPtr<NG::FrameNode>)>& textStyleApply, const JSRef<JSVal>& modifierObj);
 
 #ifndef WEARABLE_PRODUCT
     static void JsBindPopup(const JSCallbackInfo& info);

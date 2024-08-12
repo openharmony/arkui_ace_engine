@@ -18,7 +18,6 @@
 #include "core/components/common/layout/grid_system_manager.h"
 #include "frameworks/bridge/common/dom/dom_grid_column.h"
 #include "frameworks/bridge/common/dom/dom_reflect_map.h"
-#include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {
 

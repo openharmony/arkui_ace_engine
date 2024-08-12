@@ -15,15 +15,7 @@
 
 #include "core/components_ng/render/adapter/rosen/drawing_image.h"
 
-#include <memory>
-#include <string>
-#include <utility>
-
-#include "draw/core_canvas.h"
 #include "include/core/SkGraphics.h"
-
-#include "base/image/pixel_map.h"
-#include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "frameworks/core/components_ng/render/adapter/image_painter_utils.h"
 #include "frameworks/core/image/sk_image_cache.h"

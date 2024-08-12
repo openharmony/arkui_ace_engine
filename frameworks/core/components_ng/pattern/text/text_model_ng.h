@@ -119,6 +119,8 @@ public:
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
     static void SetTextDetectConfig(FrameNode* frameNode, const std::string& value);
+    static void SetOnClick(FrameNode* frameNode, GestureEventFunc&& click);
+    static void ClearOnClick(FrameNode* frameNode);
     static void SetOnDetectResultUpdate(FrameNode* frameNode, std::function<void(const std::string&)>&& onResult);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
     static void SetTextContentWithStyledString(FrameNode* frameNode, ArkUI_StyledString* value);

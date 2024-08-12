@@ -295,6 +295,18 @@ ArkUINativeModuleValue ArkUINativeModule::GetFrameNodeByKey(ArkUIRuntimeCallInfo
     return panda::NativePointerRef::New(vm, nodePtr);
 }
 
+ArkUINativeModuleValue ArkUINativeModule::GetAttachedFrameNodeById(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto key = firstArg->ToString(vm)->ToString(vm);
+    auto nodePtr = GetArkUINodeModifiers()->getFrameNodeModifier()->getAttachedFrameNodeById(key.c_str());
+    if (!nodePtr) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    return panda::NativePointerRef::New(vm, nodePtr);
+}
+
 ArkUINativeModuleValue ArkUINativeModule::RequireDynamicSyncScene(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -362,6 +374,8 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SetSupportedUIState));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "getFrameNodeByKey"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GetFrameNodeByKey));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "getAttachedFrameNodeById"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GetAttachedFrameNodeById));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "requireDynamicSyncScene"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RequireDynamicSyncScene));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFrameRateRange"),
@@ -884,6 +898,15 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnGestureJudgeBegin));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnGestureJudgeBegin"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnGestureJudgeBegin));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnGestureRecognizerJudgeBegin"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnGestureRecognizerJudgeBegin));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnGestureRecognizerJudgeBegin"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnGestureRecognizerJudgeBegin));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShouldBuiltInRecognizerParallelWith"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetShouldBuiltInRecognizerParallelWith));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetShouldBuiltInRecognizerParallelWith"),
+        panda::FunctionRef::New(
+            const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetShouldBuiltInRecognizerParallelWith));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "addTapGesture"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::AddTapGesture));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "addLongPressGesture"),
@@ -1251,6 +1274,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetHalfLeading));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHalfLeading"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetHalfLeading));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnClick"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetOnClick));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnClick"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetOnClick));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "text"), text);
 
     auto search = panda::ObjectRef::New(vm);

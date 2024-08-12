@@ -1457,7 +1457,7 @@ void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea)
     }
 }
 
-void PipelineContext::CheckAndUpdateKeyboardInset(uint32_t keyboardHeight)
+void PipelineContext::CheckAndUpdateKeyboardInset(float keyboardHeight)
 {
     safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
 }
@@ -1749,7 +1749,7 @@ void PipelineContext::OriginalAvoidanceLogic(
     DoKeyboardAvoidAnimate(keyboardAnimationConfig_, keyboardHeight, func);
 }
 
-void PipelineContext::OnVirtualKeyboardHeightChange(uint32_t keyboardHeight, double positionY, double height,
+void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double positionY, double height,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, bool forceChange)
 {
     CHECK_RUN_ON(UI);
@@ -1837,15 +1837,17 @@ void PipelineContext::OnVirtualKeyboardHeightChange(uint32_t keyboardHeight, dou
             newKeyboardOffset = 0.0f;
         }
 
-        if (NearZero(keyboardHeight) || LessOrEqual(newKeyboardOffset, lastKeyboardOffset)) {
+        if (NearZero(keyboardHeight) || LessOrEqual(newKeyboardOffset, lastKeyboardOffset) ||
+            manager->GetOnFocusTextFieldId() == manager->GetLastAvoidFieldId()) {
             context->safeAreaManager_->UpdateKeyboardOffset(newKeyboardOffset);
         } else {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Calculated keyboardOffset %{public}f is smaller than current"
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Different field, Calculated offfset %{public}f is smaller than current"
                 "keyboardOffset, so keep current keyboardOffset", newKeyboardOffset);
         }
+        manager->SetLastAvoidFieldId(manager->GetOnFocusTextFieldId());
 
         TAG_LOGI(AceLogTag::ACE_KEYBOARD,
-            "keyboardHeight: %{public}d, positionY: %{public}f, textHeight: %{public}f, "
+            "keyboardHeight: %{public}f, positionY: %{public}f, textHeight: %{public}f, "
             "rootSize.Height() %{public}f final calculate keyboard offset is %{public}f",
             keyboardHeight, positionY, height, rootSize.Height(), context->safeAreaManager_->GetKeyboardOffset());
         context->SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
@@ -3286,7 +3288,6 @@ void PipelineContext::Destroy()
     dirtyFocusScope_.Reset();
     needRenderNode_.clear();
     dirtyRequestFocusNode_.Reset();
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "PipelineContext::Destroy Check If need to close Keyboard");
     if (textFieldManager_ && textFieldManager_->GetImeShow()) {
         InputMethodManager::GetInstance()->CloseKeyboardInPipelineDestroy();
     }

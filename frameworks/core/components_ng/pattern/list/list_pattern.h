@@ -104,7 +104,7 @@ public:
 
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
-    bool OutBoundaryCallback() override;
+    void OnTouchDown(const TouchEventInfo& info) override;
     OverScrollOffset GetOverScrollOffset(double delta) const override;
     float GetOffsetWithLimit(float offset) const override;
     void HandleScrollBarOutBoundary();
@@ -331,6 +331,7 @@ private:
     void HandleScrollEffect(float offset);
     void StartDefaultOrCustomSpringMotion(float start, float end, const RefPtr<InterpolatingSpring>& curve);
     bool IsScrollSnapAlignCenter() const;
+    void SetChainAnimationCallback();
     void SetChainAnimationToPosMap();
     void SetChainAnimationLayoutAlgorithm(
         RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm, RefPtr<ListLayoutProperty> listLayoutProperty);

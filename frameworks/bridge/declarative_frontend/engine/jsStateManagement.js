@@ -178,6 +178,21 @@ class UIUtils {
   static getTarget(source) {
     return UIUtils.uiUtilsImpl_.getTarget(source);
   }
+
+  /**
+   * Make non-observed data into observed data.
+   * Support non-observed class, JSON.parse, and collection.Set, collection.Map, collection.Array.
+   *
+   * @param { T } source input source object data.
+   * @returns { T } proxy object from the source object data.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @crossplatform
+   * @atomicservice
+   * @since 12
+   */
+  static makeObserved(source) {
+    return UIUtils.uiUtilsImpl_.makeObserved(source);
+  }
 }
 
 UIUtils.uiUtilsImpl_ = UIUtilsImpl.instance();

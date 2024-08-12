@@ -101,6 +101,8 @@ void SelectOverlayPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     selectOverlayContentModifier_->SetSecondHandlePaintInfo(info_.secondHandle.paintInfo - offset);
     selectOverlayContentModifier_->SetIsOverlayMode(isOverlayMode);
     selectOverlayContentModifier_->SetScale(info_.scale);
+    selectOverlayContentModifier_->SetFirstCircleIsShow(info_.firstHandle.isCircleShow);
+    selectOverlayContentModifier_->SetSecondCircleIsShow(info_.secondHandle.isCircleShow);
 }
 
 void SelectOverlayPaintMethod::CheckCirclesAndBackArrowIsShown()

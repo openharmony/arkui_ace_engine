@@ -1994,6 +1994,10 @@ typedef enum {
     ARKUI_ERROR_CODE_GET_INFO_FAILED = 106201,
     /** The buffer size is not large enough. */
     ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR = 106202,
+    /** The component is not a scroll container. */
+    ARKUI_ERROR_CODE_NON_SCROLLABLE_CONTAINER = 180001,
+    /** The buffer is not large enough. */
+    ARKUI_ERROR_CODE_BUFFER_SIZE_NOT_ENOUGH = 180002,
 } ArkUI_ErrorCode;
 
 /**

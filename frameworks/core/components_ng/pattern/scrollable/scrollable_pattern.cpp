@@ -561,6 +561,7 @@ void ScrollablePattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub
         switch (info.GetTouches().front().GetTouchType()) {
             case TouchType::DOWN:
                 scrollable->HandleTouchDown();
+                pattern->OnTouchDown(info);
                 break;
             case TouchType::UP:
                 scrollable->HandleTouchUp();
@@ -765,7 +766,7 @@ void ScrollablePattern::InitScrollBarGestureEvent()
     scrollableEvent_->SetBarCollectTouchTargetCallback(
         [weak = AceType::WeakClaim(AceType::RawPtr(scrollBar_))](const OffsetF& coordinateOffset,
             const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
-            const RefPtr<TargetComponent>& targetComponent, TouchTestResult& responseLinkResult) {
+            const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult) {
             auto scrollBar = weak.Upgrade();
             CHECK_NULL_VOID(scrollBar);
             scrollBar->OnCollectTouchTarget(
@@ -774,7 +775,7 @@ void ScrollablePattern::InitScrollBarGestureEvent()
     scrollableEvent_->SetBarCollectClickAndLongPressTargetCallback(
         [weak = AceType::WeakClaim(AceType::RawPtr(scrollBar_)), this](const OffsetF& coordinateOffset,
             const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
-            const RefPtr<TargetComponent>& targetComponent, TouchTestResult& responseLinkResult) {
+            const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult) {
             auto scrollBar = weak.Upgrade();
             CHECK_NULL_VOID(scrollBar);
             scrollBar->OnCollectLongPressTarget(
@@ -2780,7 +2781,7 @@ void ScrollablePattern::AddHotZoneSenceInterface(SceneStatus scene)
 
 void ScrollablePattern::OnCollectClickTarget(const OffsetF& coordinateOffset,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
-    const RefPtr<TargetComponent>& targetComponent, TouchTestResult& responseLinkResult)
+    const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult)
 {
     CHECK_NULL_VOID(GetScrollBar());
     if (clickRecognizer_) {

@@ -15,8 +15,6 @@
 
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_chart_bridge.h"
 
-#include "base/utils/linear_map.h"
-
 namespace OHOS::Ace::Framework {
 namespace {
 

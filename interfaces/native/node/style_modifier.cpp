@@ -4604,8 +4604,12 @@ void ResetTextInputContentType(ArkUI_NodeHandle node)
 int32_t SetTextInputPasswordRules(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto* fullImpl = GetFullImpl();
+    ArkUI_CharPtr itemString = item->string;
+    if (!itemString) {
+        itemString = "";
+    }
     fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputPasswordRules(
-        node->uiNodeHandle, item->string);
+        node->uiNodeHandle, itemString);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -4685,8 +4689,12 @@ void ResetTextInputCaretOffset(ArkUI_NodeHandle node)
 int32_t SetInputFilter(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto* fullImpl = GetFullImpl();
+    ArkUI_CharPtr itemString = item->string;
+    if (!itemString) {
+        itemString = "";
+    }
     fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputInputFilter(
-        node->uiNodeHandle, item->string);
+        node->uiNodeHandle, itemString);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -7360,8 +7368,13 @@ int32_t SetTextFontFamily(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
 
 const ArkUI_AttributeItem* GetTextFontFamily(ArkUI_NodeHandle node)
 {
-    auto resultValue = GetFullImpl()->getNodeModifiers()->getTextModifier()->getFontFamily(node->uiNodeHandle);
-    g_attributeItem.string = resultValue;
+    if (node->type == ARKUI_NODE_SPAN) {
+        auto resultValue = GetFullImpl()->getNodeModifiers()->getSpanModifier()->getSpanFontFamily(node->uiNodeHandle);
+        g_attributeItem.string = resultValue;
+    } else {
+        auto resultValue = GetFullImpl()->getNodeModifiers()->getTextModifier()->getFontFamily(node->uiNodeHandle);
+        g_attributeItem.string = resultValue;
+    }
     g_attributeItem.size = 0;
     return &g_attributeItem;
 }
@@ -7858,7 +7871,7 @@ void ResetTimePickerUseMilitaryTime(ArkUI_NodeHandle node)
 const ArkUI_AttributeItem* GetTimePickerDisappearTextStyle(ArkUI_NodeHandle node)
 {
     auto value =
-        GetFullImpl()->getNodeModifiers()->getTimepickerModifier()->getTimepickerSelectedTextStyle(node->uiNodeHandle);
+        GetFullImpl()->getNodeModifiers()->getTimepickerModifier()->getTimepickerDisappearTextStyle(node->uiNodeHandle);
     g_attributeItem.string = value;
     return &g_attributeItem;
 }

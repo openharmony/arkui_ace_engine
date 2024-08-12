@@ -14,10 +14,6 @@
  */
 #include "core/common/recorder/event_recorder.h"
 
-#include "base/json/json_util.h"
-#include "base/log/log_wrapper.h"
-#include "base/utils/string_utils.h"
-#include "base/utils/time_util.h"
 #include "core/common/container.h"
 #include "core/common/recorder/event_controller.h"
 #include "core/common/recorder/node_data_cache.h"

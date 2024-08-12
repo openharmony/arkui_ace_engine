@@ -156,12 +156,10 @@ private:
     void ToParagraphSpan(xmlNodePtr node, size_t len, size_t& pos, std::vector<SpanInfo>& spanInfos);
 
     void ParaseHtmlToSpanInfo(
-        xmlNodePtr node, size_t& pos, std::string& allContent, size_t paragraphPos, std::vector<SpanInfo>& spanInfos);
-    void ToSpan(xmlNodePtr curNode, size_t& pos, std::string& allContent, size_t paragraphPos,
-        std::vector<SpanInfo>& spanInfos);
-    void GetContent(
-        xmlNodePtr curNode, std::string& allContent, size_t& contentLen, size_t& curNodeLen, size_t& childLen);
+        xmlNodePtr node, size_t& pos, std::string& allContent, std::vector<SpanInfo>& spanInfos);
+    void ToSpan(xmlNodePtr curNode, size_t& pos, std::string& allContent, std::vector<SpanInfo>& spanInfos);
     void PrintSpanInfos(const std::vector<SpanInfo>& spanInfos);
+    void AfterProcSpanInfos(std::vector<SpanInfo>& spanInfos);
     bool IsValidNode(const std::string& name);
 
     RefPtr<SpanBase> CreateSpan(size_t index, const SpanInfo& info, StyleValue& value);

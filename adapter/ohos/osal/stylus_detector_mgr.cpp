@@ -66,7 +66,7 @@ void StylusDetectorMgr::StylusDetectorCallBack::RequestFocus(int32_t nodeId)
     CHECK_NULL_VOID(pattern);
     bool needToRequestKeyBoardOnFocus = pattern->NeedToRequestKeyboardOnFocus();
     if (!needToRequestKeyBoardOnFocus) {
-        pattern->RequestKeyboard(false, true, true);
+        pattern->RequestKeyboardNotByFocusSwitch(NG::RequestKeyboardReason::STYLUS_DETECTOR);
     }
 }
 

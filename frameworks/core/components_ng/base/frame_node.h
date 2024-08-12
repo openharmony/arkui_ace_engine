@@ -189,7 +189,9 @@ public:
         MarkDirtyNode(extraFlag);
     }
 
-    void OnMountToParentDone();
+    [[deprecated]] void OnMountToParentDone();
+
+    void AfterMountToParent() override;
 
     bool GetIsLayoutNode();
 
@@ -333,9 +335,12 @@ public:
         return eventHub_->GetFocusHub();
     }
 
-    RefPtr<AccessibilityProperty> GetVirtualAccessibilityProperty() override
+    bool HasVirtualNodeAccessibilityProperty() override
     {
-        return accessibilityProperty_;
+        if (accessibilityProperty_ && accessibilityProperty_->GetAccessibilityVirtualNodePtr()) {
+            return true;
+        }
+        return false;
     }
 
     FocusType GetFocusType() const
@@ -354,7 +359,7 @@ public:
 
     // If return true, will prevent TouchTest Bubbling to parent and brother nodes.
     HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const PointF& parentRevertPoint,
-        TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId, TouchTestResult& responseLinkResult,
+        TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId, ResponseLinkResult& responseLinkResult,
         bool isDispatch = false) override;
 
     HitTestResult MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint, MouseTestResult& onMouseResult,
@@ -1040,6 +1045,8 @@ public:
         dragHitTestBlock_ = dragHitTestBlock;
     }
 
+    void NotifyDataChange(int32_t index, int32_t count, int64_t id) const override;
+
 protected:
     void DumpInfo() override;
 
@@ -1139,7 +1146,7 @@ private:
     HitTestMode TriggerOnTouchIntercept(const TouchEvent& touchEvent);
 
     void TriggerShouldParallelInnerWith(
-        const TouchTestResult& currentRecognizers, const TouchTestResult& responseLinkRecognizers);
+        const ResponseLinkResult& currentRecognizers, const ResponseLinkResult& responseLinkRecognizers);
 
     void TriggerRsProfilerNodeMountCallbackIfExist();
 

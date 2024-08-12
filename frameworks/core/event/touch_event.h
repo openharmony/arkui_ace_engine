@@ -456,6 +456,7 @@ struct TouchEvent final : public UIInputEvent {
 namespace Platform {
 ACE_FORCE_EXPORT Offset GetTouchEventOriginOffset(const TouchEvent& event);
 ACE_FORCE_EXPORT TimeStamp GetTouchEventOriginTimeStamp(const TouchEvent& event);
+ACE_FORCE_EXPORT void UpdatePressedKeyCodes(std::vector<KeyCode>& pressedKeyCodes);
 } // namespace Platform
 
 struct TouchRestrict final {
@@ -905,6 +906,7 @@ protected:
 };
 
 using TouchTestResult = std::list<RefPtr<TouchEventTarget>>;
+using ResponseLinkResult = std::list<RefPtr<NG::NGGestureRecognizer>>;
 
 class TouchEventInfo : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(TouchEventInfo, BaseEventInfo);

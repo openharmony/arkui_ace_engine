@@ -298,7 +298,7 @@ public:
 
     virtual HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
         const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
-        TouchTestResult& responseLinkResult, bool isDispatch = false);
+        ResponseLinkResult& responseLinkResult, bool isDispatch = false);
     virtual HitTestMode GetHitTestMode() const
     {
         return HitTestMode::HTMDEFAULT;
@@ -606,9 +606,9 @@ public:
     static void DFSAllChild(const RefPtr<UINode>& root, std::vector<RefPtr<UINode>>& res);
     static void GetBestBreakPoint(RefPtr<UINode>& breakPointChild, RefPtr<UINode>& breakPointParent);
 
-    virtual RefPtr<NG::AccessibilityProperty> GetVirtualAccessibilityProperty()
+    virtual bool HasVirtualNodeAccessibilityProperty()
     {
-        return nullptr;
+        return false;
     }
 
     void AddFlag(uint32_t flag)
@@ -751,6 +751,8 @@ public:
     virtual void NotifyWebPattern(bool isRegister);
     void GetContainerComponentText(std::string& text);
 
+    virtual void NotifyDataChange(int32_t index, int32_t count, int64_t id) const;
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -776,6 +778,7 @@ protected:
         }
     }
 
+    virtual void AfterMountToParent() {}
     virtual void OnContextAttached() {}
     // dump self info.
     virtual void DumpInfo() {}

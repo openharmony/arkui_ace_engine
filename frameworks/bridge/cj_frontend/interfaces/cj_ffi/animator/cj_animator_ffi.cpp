@@ -13,14 +13,10 @@
  * limitations under the License.
  */
 
-#include <malloc.h>
 
 #include "bridge/common/utils/utils.h"
 #include "cj_animator.h"
 #include "cj_animator_ffi.h"
-#include "core/animation/curve.h"
-#include "core/animation/curve_animation.h"
-#include "bridge/cj_frontend/frontend/cj_frontend_abstract.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;

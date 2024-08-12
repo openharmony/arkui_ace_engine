@@ -43,6 +43,7 @@ constexpr int32_t MAX_LENGTH_OF_MILLIS = 3;
 constexpr int32_t SIZE_OF_AM_PM_STRING = 2;
 constexpr int32_t SIZE_OF_TIME_TEXT = 30;
 constexpr int32_t BOUNDARY_OF_AM_PM = 12;
+constexpr int32_t LOG_INTERVAL_TIME = 60 * 1000;
 constexpr bool ON_TIME_CHANGE = true;
 const char CHAR_0 = '0';
 const char CHAR_9 = '9';
@@ -247,6 +248,7 @@ void TextClockPattern::UpdateTimeText(bool isTimeChange)
     }
     std::string currentTime = GetCurrentFormatDateTime();
     if (currentTime.empty()) {
+        TAG_LOGE(AceLogTag::ACE_TEXT_CLOCK, "currentTime is empty");
         return;
     }
     if (currentTime != prevTime_ || isTimeChange) {
@@ -340,7 +342,8 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
     std::string dateTimeFormat = is24H_ ? FORMAT_24H : FORMAT_12H;
     std::strftime(buffer, sizeof(buffer), dateTimeFormat.c_str(), timeZoneTime);
     auto duration_cast_to_millis = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
-    auto millis = std::to_string(duration_cast_to_millis.count() % 1000);
+    auto timeValue = duration_cast_to_millis.count();
+    auto millis = std::to_string(timeValue % 1000);
     auto millisLength = millis.length();
     if (millisLength < MAX_LENGTH_OF_MILLIS) {
         millis = std::string(MAX_LENGTH_OF_MILLIS - millisLength, '0') + millis;
@@ -354,6 +357,10 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
     }
     std::string outputDateTime = ParseDateTime(dateTimeValue, timeZoneTime->tm_wday, timeZoneTime->tm_mon,
         timeZoneTime->tm_hour);
+    if (timeValue - timeValue_ > LOG_INTERVAL_TIME) {
+        timeValue_ = timeValue;
+        TAG_LOGI(AceLogTag::ACE_TEXT_CLOCK, "newTime:%{public}s", outputDateTime.c_str());
+    }
     return outputDateTime;
 }
 

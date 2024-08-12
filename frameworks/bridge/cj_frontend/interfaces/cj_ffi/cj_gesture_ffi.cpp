@@ -17,17 +17,11 @@
 
 #include "bridge/cj_frontend/cppview/gesture.h"
 #include "cj_lambda.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 #include "frameworks/core/components_ng/base/view_stack_processor.h"
-#include "frameworks/core/components_ng/gestures/gesture_group.h"
 #include "frameworks/core/components_ng/gestures/long_press_gesture.h"
-#include "frameworks/core/components_ng/gestures/pan_gesture.h"
 #include "frameworks/core/components_ng/gestures/pinch_gesture.h"
-#include "frameworks/core/components_ng/gestures/recognizers/exclusive_recognizer.h"
-#include "frameworks/core/components_ng/gestures/recognizers/parallel_recognizer.h"
 #include "frameworks/core/components_ng/gestures/rotation_gesture.h"
 #include "frameworks/core/components_ng/gestures/swipe_gesture.h"
-#include "frameworks/core/components_ng/gestures/tap_gesture.h"
 
 using namespace OHOS::FFI;
 using namespace OHOS::Ace;

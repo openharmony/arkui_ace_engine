@@ -96,6 +96,12 @@ auto g_onGetTypes4Range = [](uint32_t from, uint32_t to) -> std::list<std::strin
 };
 
 /**
+ * Function needed by RepeatVirtualScrollNode constructor
+ */
+auto g_onSetActiveRange = [](uint32_t from, uint32_t to) {
+};
+
+/**
  * Map needed by RepeatVirtualScrollCaches constructor
  */
 const std::map<std::string, std::pair<bool, uint32_t>> cacheCountL24ttype = {
@@ -227,7 +233,8 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest005, TestSize.Level1)
                           g_onCreateNode,
                           g_onUpdateNode,
                           g_onGetKeys4Range,
-                          g_onGetTypes4Range
+                          g_onGetTypes4Range,
+                          g_onSetActiveRange
                     );
     stack->Push(repeatNode);
     stack->PopContainer();
@@ -252,7 +259,8 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest006, TestSize.Level1)
                           g_onCreateNode,
                           g_onUpdateNode,
                           g_onGetKeys4Range,
-                          g_onGetTypes4Range
+                          g_onGetTypes4Range,
+                          g_onSetActiveRange
                     );
 
     /**
@@ -287,7 +295,8 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest007, TestSize.Level1)
                           g_onCreateNode,
                           g_onUpdateNode,
                           g_onGetKeys4Range,
-                          g_onGetTypes4Range
+                          g_onGetTypes4Range,
+                          g_onSetActiveRange
                     );
 
     /**
@@ -316,7 +325,8 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest008, TestSize.Level1)
                           g_onCreateNode,
                           g_onUpdateNode,
                           g_onGetKeys4Range,
-                          g_onGetTypes4Range
+                          g_onGetTypes4Range,
+                          g_onSetActiveRange
                     );
 
 
@@ -336,7 +346,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest008, TestSize.Level1)
     repeatNode->DoSetActiveChildRange(1, 2, 1, 1);
     repeatNode->DoSetActiveChildRange(activeItems, cachedItems, 1);
     repeatNode->DropFromL1("Key1");
-    repeatNode->InvalidateKeyCache();
+    repeatNode->UpdateRenderState(true);
     repeatNode->RecycleItems(0, 100);
     repeatNode->MoveData(0, 100);
 
@@ -367,7 +377,8 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest009, TestSize.Level1)
                           g_onCreateNode,
                           g_onUpdateNode,
                           g_onGetKeys4Range,
-                          g_onGetTypes4Range
+                          g_onGetTypes4Range,
+                          g_onSetActiveRange
                     );
 
     /**
@@ -648,7 +659,8 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest021, TestSize.Level1)
                           g_onCreateNode,
                           g_onUpdateNode,
                           g_onGetKeys4Range,
-                          g_onGetTypes4Range
+                          g_onGetTypes4Range,
+                          g_onSetActiveRange
                     );
 
     ConfigurationChange cfgChange;
@@ -707,5 +719,281 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest023, TestSize.Level1)
      */
     bool status = caches.FetchMoreKeysTTypes(1, 10);
     EXPECT_EQ(status, false);
+}
+
+/**
+ * @tc.name: RepeatNodeCacheTest024
+ * @tc.desc: Test DumpL1
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest024, TestSize.Level1)
+{
+    RepeatVirtualScrollCaches caches(
+        cacheCountL24ttype, g_onCreateNode, g_onUpdateNode, g_onGetKeys4Range, g_onGetTypes4Range);
+
+    std::string key("key1");
+    caches.activeNodeKeysInL1_.insert(key);
+    std::string l1Dump = caches.DumpL1();
+
+    caches.index4Key_.insert({ key, 0 });
+    l1Dump = caches.DumpL1();
+
+    const std::string expectedSubString = "total number=1";
+    EXPECT_NE(l1Dump.find(expectedSubString), std::string::npos);
+}
+
+/**
+ * @tc.name: RepeatNodeCacheTest025
+ * @tc.desc: Test GetDistanceFromRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest025, TestSize.Level1)
+{
+    RepeatVirtualScrollCaches caches(
+        cacheCountL24ttype, g_onCreateNode, g_onUpdateNode, g_onGetKeys4Range, g_onGetTypes4Range);
+
+    int32_t dist = caches.GetDistanceFromRange(UINT32_MAX);
+    EXPECT_EQ(dist, UINT32_MAX);
+
+    caches.lastActiveRanges_[0].first = 10;
+    caches.lastActiveRanges_[0].second = 30;
+    caches.lastActiveRanges_[1].first = 20;
+    dist = caches.GetDistanceFromRange(9);
+    EXPECT_EQ(dist, 0);
+
+    dist = caches.GetDistanceFromRange(11);
+    EXPECT_EQ(dist, 0);
+
+    caches.lastActiveRanges_[0].first = 10;
+    caches.lastActiveRanges_[0].second = 30;
+    caches.lastActiveRanges_[1].second = 20;
+    dist = caches.GetDistanceFromRange(29);
+    EXPECT_EQ(dist, 0);
+
+    dist = caches.GetDistanceFromRange(31);
+    EXPECT_EQ(dist, 0);
+}
+
+/**
+ * @tc.name: RepeatNodeCacheTest026
+ * @tc.desc: Test GetCachedNode4Key4Ttype
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest026, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create cached object with Keys function that limits keys to 5 (for unit testing)
+     * @tc.expected: Object is created correctly
+     */
+    RepeatVirtualScrollCaches caches(
+        cacheCountL24ttype, g_onCreateNode, g_onUpdateNode, g_onGetKeys4RangeMaxTo5, g_onGetTypes4Range);
+
+    auto ret = caches.GetCachedNode4Key4Ttype(std::nullopt, std::nullopt);
+    EXPECT_EQ(ret, nullptr);
+    ret = caches.GetCachedNode4Key4Ttype(std::string("a"), std::nullopt);
+    EXPECT_EQ(ret, nullptr);
+    ret = caches.GetCachedNode4Key4Ttype(std::nullopt, std::string("a"));
+    EXPECT_EQ(ret, nullptr);
+    ret = caches.GetCachedNode4Key4Ttype(std::string("a"), std::string("a"));
+    EXPECT_EQ(ret, nullptr);
+
+    // std::unordered_map<std::string, std::unordered_map<std::string, RefPtr<UINode>>> node4key4ttype_;
+    caches.node4key4ttype_.insert({ std::string("a"), { { std::string("a"), nullptr } } });
+    ret = caches.GetCachedNode4Key4Ttype(std::string("a"), std::string("a"));
+    EXPECT_EQ(ret, nullptr);
+    ret = caches.GetCachedNode4Key4Ttype(std::string("b"), std::string("a"));
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: RepeatNodeCacheTest027
+ * @tc.desc: Test GetCachedNode4Key
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest027, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create cached object with Keys function that limits keys to 5 (for unit testing)
+     * @tc.expected: Object is created correctly
+     */
+    RepeatVirtualScrollCaches caches(
+        cacheCountL24ttype, g_onCreateNode, g_onUpdateNode, g_onGetKeys4RangeMaxTo5, g_onGetTypes4Range);
+
+    auto ret = caches.GetCachedNode4Key(std::nullopt);
+    EXPECT_FALSE(ret.has_value());
+}
+
+/**
+ * @tc.name: RepeatNodeCacheTest028
+ * @tc.desc: Test GetTType4Index
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest028, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create cached object with Keys function that limits keys to 5 (for unit testing)
+     * @tc.expected: Object is created correctly
+     */
+    RepeatVirtualScrollCaches caches(
+        cacheCountL24ttype, g_onCreateNode, g_onUpdateNode, g_onGetKeys4RangeMaxTo5, g_onGetTypes4Range);
+    std::string val("0");
+    caches.ttype4index_.insert({ 0, val });
+    auto ret = caches.GetTType4Index(0);
+    EXPECT_TRUE(ret.has_value());
+}
+
+/**
+ * @tc.name: RepeatNodeCacheTest029
+ * @tc.desc: Test GetIndex4Key
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest029, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create cached object with Keys function that limits keys to 5 (for unit testing)
+     * @tc.expected: Object is created correctly
+     */
+    RepeatVirtualScrollCaches caches(
+        cacheCountL24ttype, g_onCreateNode, g_onUpdateNode, g_onGetKeys4RangeMaxTo5, g_onGetTypes4Range);
+
+    std::string key("key");
+    caches.index4Key_.insert({ key, 0 });
+    auto ret = caches.GetIndex4Key(key);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: RepeatNodeCacheTest030
+ * @tc.desc: Test FindUnusedKeys
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest030, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create cached object with Keys function that limits keys to 5 (for unit testing)
+     * @tc.expected: Object is created correctly
+     */
+    RepeatVirtualScrollCaches caches(
+        cacheCountL24ttype, g_onCreateNode, g_onUpdateNode, g_onGetKeys4RangeMaxTo5, g_onGetTypes4Range);
+
+    std::string key("key");
+    caches.node4key_.insert({ key, CacheItem() });
+    std::set<std::pair<bool, std::string>> result;
+    caches.FindUnusedKeys(result);
+    EXPECT_EQ(result.size(), 1);
+
+    result.clear();
+    caches.index4Key_.insert({ key, 0 });
+    caches.FindUnusedKeys(result);
+    EXPECT_EQ(result.size(), 0);
+}
+
+/**
+ * @tc.name: RepeatNodeCacheTest031
+ * @tc.desc: Test UINodeHasBeenUpdated
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest031, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create cached object with Keys function that limits keys to 5 (for unit testing)
+     * @tc.expected: Object is created correctly
+     */
+    RepeatVirtualScrollCaches caches(
+        cacheCountL24ttype, g_onCreateNode, g_onUpdateNode, g_onGetKeys4RangeMaxTo5, g_onGetTypes4Range);
+
+    std::string key("key");
+    std::string key2("key2");
+    caches.node4key4ttype_.insert({ key, { { key2, nullptr } } });
+    auto ret = caches.UINodeHasBeenUpdated(key, std::string("a"), std::string("a"));
+    EXPECT_EQ(ret, nullptr);
+    ret = caches.UINodeHasBeenUpdated(key, key2, std::string("a"));
+    EXPECT_EQ(ret, nullptr);
+
+    caches.node4key_.insert({ key2, CacheItem() });
+    ret = caches.UINodeHasBeenUpdated(key, key2, std::string("a"));
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: RepeatNodeCacheTest032
+ * @tc.desc: Test GetL1KeyToUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest032, TestSize.Level1)
+{
+    RepeatVirtualScrollCaches caches(
+        cacheCountL24ttype, g_onCreateNode, g_onUpdateNode, g_onGetKeys4Range, g_onGetTypes4Range);
+
+    std::string key("key");
+    std::string key1("key1");
+    caches.activeNodeKeysInL1_.insert(key);
+    std::optional<std::string> ret = caches.GetL1KeyToUpdate(key1);
+    EXPECT_EQ(ret, std::nullopt);
+
+    caches.index4Key_.insert({ key, 0 });
+    ret = caches.GetL1KeyToUpdate(key1);
+    EXPECT_EQ(ret, std::nullopt);
+
+    caches.index4Key_.clear();
+    caches.node4key4ttype_.insert({ key1, {} });
+    ret = caches.GetL1KeyToUpdate(key1);
+    EXPECT_EQ(ret, std::nullopt);
+
+    caches.node4key4ttype_.clear();
+    caches.node4key4ttype_.insert({ key1, { { key, nullptr } } });
+    ret = caches.GetL1KeyToUpdate(key1);
+    EXPECT_NE(ret, std::nullopt);
+}
+
+/**
+ * @tc.name: RepeatNodeCacheTest033
+ * @tc.desc: Test GetL2KeyToUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest033, TestSize.Level1)
+{
+    RepeatVirtualScrollCaches caches(
+        cacheCountL24ttype, g_onCreateNode, g_onUpdateNode, g_onGetKeys4Range, g_onGetTypes4Range);
+
+    auto ret = caches.GetL2KeyToUpdate(std::nullopt);
+    EXPECT_EQ(ret, std::nullopt);
+
+    std::string key("key");
+    ret = caches.GetL2KeyToUpdate(key);
+    EXPECT_EQ(ret, std::nullopt);
+
+    caches.node4key4ttype_.insert({ key, { { key, nullptr } } });
+    ret = caches.GetL2KeyToUpdate(key);
+    EXPECT_NE(ret, std::nullopt);
+
+    caches.node4key4ttype_.clear();
+    caches.node4key4ttype_.insert({ key, { { key, nullptr } } });
+    ret = caches.GetL2KeyToUpdate(key);
+    EXPECT_NE(ret, std::nullopt);
+}
+
+/**
+ * @tc.name: RepeatNodeCacheTest034
+ * @tc.desc: Test GetFrameNodeIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest034, TestSize.Level1)
+{
+    RepeatVirtualScrollCaches caches(
+        cacheCountL24ttype, g_onCreateNode, g_onUpdateNode, g_onGetKeys4Range, g_onGetTypes4Range);
+
+    auto ret = caches.GetFrameNodeIndex(nullptr);
+    EXPECT_EQ(ret, -1);
+
+    std::string key("key");
+    caches.activeNodeKeysInL1_.insert(key);
+    ret = caches.GetFrameNodeIndex(nullptr);
+    EXPECT_EQ(ret, -1);
+
+    caches.node4key_.insert({ key, CacheItem() });
+    caches.activeNodeKeysInL1_.insert(key);
+    ret = caches.GetFrameNodeIndex(nullptr);
+    EXPECT_EQ(ret, -1);
 }
 } // namespace OHOS::Ace::NG

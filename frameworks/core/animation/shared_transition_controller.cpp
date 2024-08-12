@@ -15,9 +15,7 @@
 
 #include "core/animation/shared_transition_controller.h"
 
-#include "core/components/common/properties/tween_option.h"
 #include "core/components/overlay/overlay_element.h"
-#include "core/components/page/page_element.h"
 #include "core/components/page_transition/page_transition_element.h"
 
 namespace OHOS::Ace {
