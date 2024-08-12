@@ -490,6 +490,9 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
         loadingCtx_->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize, hasValidSlice);
     }
     if (altLoadingCtx_) {
+        altLoadingCtx_->SetIsHdrDecoderNeed(isHdrDecoderNeed);
+        altLoadingCtx_->SetDynamicRangeMode(dynamicMode);
+        altLoadingCtx_->SetImageQuality(GetImageQuality());
         altLoadingCtx_->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize, hasValidSlice);
     }
 }
