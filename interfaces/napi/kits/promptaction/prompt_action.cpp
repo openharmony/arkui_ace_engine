@@ -498,24 +498,8 @@ napi_value JSPromptOpenToast(napi_env env, napi_callback_info info)
     return nullptr;
 }
 
-napi_value JSPromptCloseToast(napi_env env, napi_callback_info info)
+void CloseToast(napi_env env, int32_t toastId, NG::ToastShowMode showMode)
 {
-    size_t argc = 1;
-    napi_value args[1];
-    napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
-    if (argc != 1) {
-        NapiThrow(env, "The number of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
-        return nullptr;
-    }
-    int32_t id = -1;
-    napi_get_value_int32(env, args[0], &id);
-    int32_t showModeVal = id & 0b111;
-    int32_t toastId = id >> 3; // 3 : Move 3 bits to the right to get toastId, and the last 3 bits are the showMode
-    if (toastId < 0 || showModeVal < 0 || showModeVal > static_cast<int32_t>(NG::ToastShowMode::SYSTEM_TOP_MOST)) {
-        NapiThrow(env, "", ERROR_CODE_TOAST_NOT_FOUND);
-        return nullptr;
-    }
-    auto showMode = static_cast<NG::ToastShowMode>(showModeVal);
     std::function<void(int32_t)> toastCloseCallback = nullptr;
     toastCloseCallback = [env](int32_t errorCode) mutable {
         if (errorCode != ERROR_CODE_NO_ERROR) {
@@ -532,8 +516,7 @@ napi_value JSPromptCloseToast(napi_env env, napi_callback_info info)
             NapiThrow(env, "Can not get delegate.", ERROR_CODE_INTERNAL_ERROR);
         }
     } else if (SubwindowManager::GetInstance() != nullptr) {
-        SubwindowManager::GetInstance()->CloseToast(
-            toastId, static_cast<NG::ToastShowMode>(showMode), std::move(toastCloseCallback));
+        SubwindowManager::GetInstance()->CloseToast(toastId, showMode, std::move(toastCloseCallback));
     }
 #else
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
@@ -546,6 +529,33 @@ napi_value JSPromptCloseToast(napi_env env, napi_callback_info info)
         SubwindowManager::GetInstance()->CloseToast(toastId, showMode, std::move(toastCloseCallback));
     }
 #endif
+}
+
+napi_value JSPromptCloseToast(napi_env env, napi_callback_info info)
+{
+    size_t argc = 1;
+    napi_value args[1];
+    napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+    if (argc != 1) {
+        NapiThrow(env, "The number of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
+        return nullptr;
+    }
+    int32_t id = -1;
+    napi_get_value_int32(env, args[0], &id);
+    if (id < 0 || id > INT32_MAX) {
+        NapiThrow(env, "The toastId is invalid.", ERROR_CODE_PARAM_INVALID);
+        return nullptr;
+    }
+    int32_t showModeVal = id & 0b111;
+    int32_t toastId =
+        static_cast<int32_t>(static_cast<uint32_t>(id) >>
+                             3); // 3 : Move 3 bits to the right to get toastId, and the last 3 bits are the showMode
+    if (toastId < 0 || showModeVal < 0 || showModeVal > static_cast<int32_t>(NG::ToastShowMode::SYSTEM_TOP_MOST)) {
+        NapiThrow(env, "", ERROR_CODE_TOAST_NOT_FOUND);
+        return nullptr;
+    }
+    auto showMode = static_cast<NG::ToastShowMode>(showModeVal);
+    CloseToast(env, toastId, showMode);
     return nullptr;
 }
 
