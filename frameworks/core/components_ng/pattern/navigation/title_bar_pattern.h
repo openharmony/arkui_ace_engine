@@ -300,6 +300,15 @@ public:
         return isFontSizeSettedByDeveloper_;
     }
 
+    void SetNeedResetMainTitleProperty(bool reset)
+    {
+        shouldResetMainTitleProperty_ = reset;
+    }
+    void SetNeedResetSubTitleProperty(bool reset)
+    {
+        shouldResetSubTitleProperty_ = reset;
+    }
+
 private:
     void TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode);
 

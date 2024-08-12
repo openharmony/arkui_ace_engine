@@ -46,6 +46,8 @@ bool NavDestinationModelNG::ParseCommonTitle(
 
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
     CHECK_NULL_RETURN(titleBarNode, false);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_RETURN(titleBarPattern, false);
     if (navDestinationNode->GetPrevTitleIsCustomValue(false)) {
         // remove custom title if any.
         titleBarNode->RemoveChild(titleBarNode->GetTitle());
@@ -66,13 +68,20 @@ bool NavDestinationModelNG::ParseCommonTitle(
         if (mainTitle) {
             // update main title
             auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
+            textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : TITLEBAR_MAX_LINES);
+            if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                textLayoutProperty->UpdateHeightAdaptivePolicy(hasSubTitle ? TextHeightAdaptivePolicy::MAX_LINES_FIRST :
+                    TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+            }
             textLayoutProperty->UpdateContent(title);
+            textLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
         } else {
             // create and init main title
             mainTitle = FrameNode::CreateFrameNode(
                 V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
             auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
             textLayoutProperty->UpdateContent(title);
+            titleBarPattern->SetNeedResetMainTitleProperty(true);
             titleBarNode->SetTitle(mainTitle);
             titleBarNode->AddChild(mainTitle);
         }
@@ -94,12 +103,14 @@ bool NavDestinationModelNG::ParseCommonTitle(
         // update subtitle
         auto textLayoutProperty = subTitle->GetLayoutProperty<TextLayoutProperty>();
         textLayoutProperty->UpdateContent(subtitle);
+        textLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
     } else {
         // create and init subtitle
         subTitle = FrameNode::CreateFrameNode(
             V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         auto textLayoutProperty = subTitle->GetLayoutProperty<TextLayoutProperty>();
         textLayoutProperty->UpdateContent(subtitle);
+        titleBarPattern->SetNeedResetSubTitleProperty(true);
         titleBarNode->SetSubtitle(subTitle);
         titleBarNode->AddChild(subTitle);
     }
