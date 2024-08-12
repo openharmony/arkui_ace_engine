@@ -1005,10 +1005,6 @@ void ListPattern::MarkDirtyNodeSelf()
 
 float ListPattern::GetSnapCenterOverScrollPos(float startPos, float prevScroll)
 {
-    if (!IsScrollSnapAlignCenter()) {
-        return prevScroll;
-    }
-
     float overScroll = prevScroll;
     auto itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
     auto endPos = endMainPos_ - currentDelta_;
