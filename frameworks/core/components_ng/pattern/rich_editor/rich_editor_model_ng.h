@@ -40,7 +40,7 @@ public:
     void SetPlaceholder(PlaceholderOptions& options) override;
     void SetTextDetectEnable(bool value) override;
     void SetSupportPreviewText(bool value) override;
-    void SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult) override;
+    void SetTextDetectConfig(const TextDetectConfig& textDetectConfig) override;
     void SetSelectedBackgroundColor(const DynamicColor& selectedColor) override;
     void SetCaretColor(const DynamicColor& color) override;
     void SetOnEditingChange(std::function<void(const bool&)>&& func) override;

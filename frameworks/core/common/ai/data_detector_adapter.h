@@ -112,6 +112,11 @@ private:
     TimeStamp startDetectorTimeStamp_;
     std::vector<std::string> detectTexts_;
     int32_t mainContainerId_ = -1;
+    std::optional<Color> entityColor_;
+    std::optional<TextDecoration> entityDecorationType_;
+    std::optional<Color> entityDecorationColor_;
+    std::optional<TextDecorationStyle> entityDecorationStyle_;
+    std::string textDetectConfigStr_;
 };
 } // namespace OHOS::Ace
 
