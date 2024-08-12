@@ -50,7 +50,8 @@ template<typename T, typename P>
 void AssignOptionalTo(std::optional<T>& dst, const P& src);
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Number_Resource& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Number_Resource& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -64,51 +65,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_Number_Resource& src)
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Color_String_Resource_ColoringStrategy& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Length_Literal_Opt_Length_topLeft_topRight_bottomLeft_bottomRight& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Length_Literal_Opt_Length_top_right_bottom_left& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Color_Number_String_Resource& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Color_String_Resource_ColoringStrategy& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -124,7 +82,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_Color_Number_String_Resour
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_CustomObject_Literal_Opt_Length_topLeft_topRight_bottomLeft_bottomRight& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Length_Literal_Opt_Length_topLeft_topRight_bottomLeft_bottomRight& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -138,7 +97,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_CustomObject_Literal_Opt_L
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_CustomObject_Literal_Opt_Length_top_right_bottom_left& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Length_Literal_Opt_Length_top_right_bottom_left& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -152,7 +112,25 @@ void AssignUnionTo(std::optional<T>& dst, const Union_CustomObject_Literal_Opt_L
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_String_Resource& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Color_Number_String_Resource& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_CustomObject_Literal_Opt_Length_topLeft_topRight_bottomLeft_bottomRight& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -166,7 +144,38 @@ void AssignUnionTo(std::optional<T>& dst, const Union_String_Resource& src)
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_FontWeight_Number_String& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_CustomObject_Literal_Opt_Length_top_right_bottom_left& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_String_Resource& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_FontWeight_Number_String& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -181,7 +190,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_FontWeight_Number_String& 
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Length_LeadingMarginPlaceholder& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Length_LeadingMarginPlaceholder& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -195,22 +205,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_Length_LeadingMarginPlaceh
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Number_FontWeight_String& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Number_String_Resource& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Number_FontWeight_String& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -225,7 +221,24 @@ void AssignUnionTo(std::optional<T>& dst, const Union_Number_String_Resource& sr
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Number_LeadingMarginPlaceholder& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Number_String_Resource& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Number_LeadingMarginPlaceholder& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -239,7 +252,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_Number_LeadingMarginPlaceh
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Number_String& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Number_String& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -253,7 +267,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_Number_String& src)
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_ShadowOptions_Array_ShadowOptions& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_ShadowOptions_Array_ShadowOptions& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -267,7 +282,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_ShadowOptions_Array_Shadow
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Length_Number& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Length_Number& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -281,7 +297,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_Length_Number& src)
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Curve_ICurve& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Curve_ICurve& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -295,7 +312,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_Curve_ICurve& src)
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Number_Union_String_Resource& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Number_Union_String_Resource& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -309,7 +327,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_Number_Union_String_Resour
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Function_Undefined& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Function_Undefined& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -323,7 +342,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_Function_Undefined& src)
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Length_GridRowSizeOption& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Length_GridRowSizeOption& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -337,7 +357,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_Length_GridRowSizeOption& 
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_String_String_String_String_String_String& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_String_String_String_String_String_String& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -355,7 +376,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_String_String_String_Strin
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_String_String_String_String_String& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_String_String_String_String_String& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -372,7 +394,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_String_String_String_Strin
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_String_String_String& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_String_String_String& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -387,208 +410,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_String_String_String& src)
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_String_Number_CanvasGradient_CanvasPattern& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_SheetSize_Length& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_String_CustomObject_Resource& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Union_Color_Number_String_Resource_Undefined& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Literal_Opt_Length_top_right_bottom_left_Length_LocalizedPadding& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Literal_Opt_Length_top_right_bottom_left_Length& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_String_Number& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Number_String_Array_CustomObject& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_TitleHeight_Length& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_BadgePosition_Position& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_MenuPreviewMode_Union_Function_Undefined& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Boolean_Ark_Function& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_ShadowOptions_ShadowStyle& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Boolean_Literal_Union_Color_Number_String_Resource_color& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Color_String_Resource_Number& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_String_Number_CanvasGradient_CanvasPattern& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -604,7 +427,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_Color_String_Resource_Numb
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_String_WebResourceRequest& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_SheetSize_Length& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -618,7 +442,223 @@ void AssignUnionTo(std::optional<T>& dst, const Union_String_WebResourceRequest&
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_TextStyle_DecorationStyle_BaselineOffsetStyle_LetterSpacingStyle_TextShadowStyle_GestureStyle_ImageAttachment_ParagraphStyle_LineHeightStyle_CustomSpan_UserDataSpan& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_String_CustomObject_Resource& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Union_Color_Number_String_Resource_Undefined& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Literal_Opt_Length_top_right_bottom_left_Length_LocalizedPadding& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Literal_Opt_Length_top_right_bottom_left_Length& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_String_Number& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Number_String_Array_CustomObject& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_TitleHeight_Length& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_BadgePosition_Position& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_MenuPreviewMode_Union_Function_Undefined& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Boolean_Ark_Function& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_ShadowOptions_ShadowStyle& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Boolean_Literal_Union_Color_Number_String_Resource_color& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Color_String_Resource_Number& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_String_WebResourceRequest& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_TextStyle_DecorationStyle_BaselineOffsetStyle_LetterSpacingStyle_TextShadowStyle_GestureStyle_ImageAttachment_ParagraphStyle_LineHeightStyle_CustomSpan_UserDataSpan& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -641,7 +681,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_TextStyle_DecorationStyle_
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_ScrollAnimationOptions_Boolean& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_ScrollAnimationOptions_Boolean& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -655,7 +696,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_ScrollAnimationOptions_Boo
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_WebController_CustomObject& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_WebController_CustomObject& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -669,125 +711,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_WebController_CustomObject
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Number_String_PlaybackSpeed& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Number_Array_Number& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_String_Array_String& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Array_String_Array_Array_String_Resource_Array_TextPickerRangeContent_Array_TextCascadePickerRangeContent& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
-        case SELECTOR_ID_4: AssignTo(dst, src.value4); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_CircleAttribute_EllipseAttribute_PathAttribute_RectAttribute& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Length_Array_Length& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Union_String_Resource_Union_Function_Undefined& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Union_Function_Undefined_SwipeActionItem& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_String_Resource_CustomObject& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Number_String_PlaybackSpeed& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -802,7 +727,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_String_Resource_CustomObje
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Number_GridRowColumnOption& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Number_Array_Number& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -816,7 +742,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_Number_GridRowColumnOption
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Length_GutterOption& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_String_Array_String& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -830,1065 +757,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_Length_GutterOption& src)
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Number_GridColColumnOption& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Union_Color_Number_String_Resource_LinearGradient& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Resource_CustomObject& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_BorderStyle_Literal_Opt_BorderStyle_top_right_bottom_left& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Union_Color_Number_String_Resource_Literal_Opt_Union_Color_Number_String_Resource_top_right_bottom_left_LocalizedEdgeColors& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Length_Literal_Opt_Length_top_right_bottom_left_LocalizedEdgeWidths& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_SheetTitleOptions_Union_Function_Undefined& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Boolean_Resource& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Boolean_Number& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_DragPreviewMode_Array_DragPreviewMode& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Number_Literal_Number_span_offset& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Curve_String_ICurve& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Literal_Opt_OutlineStyle_top_right_bottom_left_OutlineStyle& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Literal_Opt_Length_topLeft_topRight_bottomLeft_bottomRight_Length& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Literal_Opt_Union_Color_Number_String_Resource_top_right_bottom_left_Union_Color_Number_String_Resource_LocalizedEdgeColors& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_String_Resource_LinearGradient& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Literal_Opt_Length_top_right_bottom_left_CustomObject_LocalizedEdgeWidths& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Literal_Opt_BorderStyle_top_right_bottom_left_BorderStyle& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Literal_Opt_Length_topLeft_topRight_bottomLeft_bottomRight_Length_LocalizedBorderRadiuses& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Literal_Opt_Length_top_right_bottom_left_Length_LocalizedEdgeWidths& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_RichEditorTextSpanResult_RichEditorImageSpanResult& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_String_Number_Resource_ArrayBuffer& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_String_ImageAttachment_CustomSpan& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_RichEditorUpdateTextSpanStyleOptions_RichEditorUpdateImageSpanStyleOptions_RichEditorUpdateSymbolSpanStyleOptions& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_CustomObject_Union_String_Resource& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_String_Ark_Undefined& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_String_String& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_ImageBitmap_CustomObject& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_DividerStyle_Ark_Undefined& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_DividerOptions_Ark_Undefined& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Union_Color_Number_String_Resource_UnderlineColor_Undefined& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Union_String_Resource_Undefined& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_TextInputStyle_TextContentStyle& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_SubTabBarStyle_BottomTabBarStyle& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_String_Resource_Union_Function_Undefined_Literal_Opt_Union_String_Resource_icon_text& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Number_String_Literal_Union_String_Number_minSize& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_ArrowStyle_Boolean& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_DotIndicator_DigitIndicator_Boolean& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Opt_DividerOptions_Ark_Undefined& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Length_OptionWidthMode& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_CancelButtonOptions_CancelButtonSymbolOptions& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_IconOptions_CustomObject& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Color_Number_String& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_ResponseType_RichEditorResponseType& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Literal_Opt_Union_Number_String_width_height_Opt_Union_Number_String_Array_CustomObject_radius_Literal_Opt_Union_Number_String_width_height_radiusWidth_radiusHeight& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Length_PanelHeight& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Array_ToolbarItem_Union_Function_Undefined& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_CustomObject_Union_Function_Undefined& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Array_NavigationMenuItem_Union_Function_Undefined& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Union_String_Resource_Union_Function_Undefined_NavigationCommonTitle_NavigationCustomTitle& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_String_CustomObject_Resource_CustomObject& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Union_String_Resource_CustomObject_CustomObject& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_String_Union_Function_Undefined_NavDestinationCommonTitle_NavDestinationCustomTitle& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Boolean_Union_String_Resource_CustomObject& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_MenuItemOptions_Union_Function_Undefined& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_DividerStyleOptions_Undefined& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_CustomObject_Union_String_Resource_CustomObject_ASTCResource& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Position_Edges_LocalizedEdges& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Literal_Length_strokeWidth_Opt_Union_Color_Number_String_Resource_color_Opt_Length_startMargin_endMargin_Ark_Undefined& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Boolean_EditMode& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Number_Literal_Length_minLength_maxLength& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_ColorFilter_CustomObject& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Union_String_Resource_CustomObject& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_CustomObject_Union_String_Resource_CustomObject& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_CustomObject_Union_String_Resource_CustomObject_ImageContent& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Union_Color_Number_String_Resource_LinearGradient_Array_Tuple_Union_Union_Color_Number_String_Resource_LinearGradient_Number& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_ColumnSplitDividerStyle_Ark_Undefined& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_CanvasRenderingContext2D_DrawingRenderingContext& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_SpringMotion_FrictionMotion_ScrollMotion& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_String_FunctionKey& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Array_MenuElement_Union_Function_Undefined& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_PopupOptions_CustomPopupOptions& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_CustomObject_CustomObject_CustomObject_CustomObject& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_CircleAttribute_EllipseAttribute_PathAttribute_RectAttribute_ProgressMask& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Array_String_Array_Array_String_Resource_Array_TextPickerRangeContent_Array_TextCascadePickerRangeContent& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -1905,7 +775,1247 @@ void AssignUnionTo(std::optional<T>& dst, const Union_CircleAttribute_EllipseAtt
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Boolean_CircleAttribute_EllipseAttribute_PathAttribute_RectAttribute& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_CircleAttribute_EllipseAttribute_PathAttribute_RectAttribute& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Length_Array_Length& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Union_String_Resource_Union_Function_Undefined& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Union_Function_Undefined_SwipeActionItem& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_String_Resource_CustomObject& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Number_GridRowColumnOption& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Length_GutterOption& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Number_GridColColumnOption& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Union_Color_Number_String_Resource_LinearGradient& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Resource_CustomObject& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_BorderStyle_Literal_Opt_BorderStyle_top_right_bottom_left& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Union_Color_Number_String_Resource_Literal_Opt_Union_Color_Number_String_Resource_top_right_bottom_left_LocalizedEdgeColors& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Length_Literal_Opt_Length_top_right_bottom_left_LocalizedEdgeWidths& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_SheetTitleOptions_Union_Function_Undefined& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Boolean_Resource& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Boolean_Number& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_DragPreviewMode_Array_DragPreviewMode& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Number_Literal_Number_span_offset& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Curve_String_ICurve& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Literal_Opt_OutlineStyle_top_right_bottom_left_OutlineStyle& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Literal_Opt_Length_topLeft_topRight_bottomLeft_bottomRight_Length& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Literal_Opt_Union_Color_Number_String_Resource_top_right_bottom_left_Union_Color_Number_String_Resource_LocalizedEdgeColors& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_String_Resource_LinearGradient& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Literal_Opt_Length_top_right_bottom_left_CustomObject_LocalizedEdgeWidths& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Literal_Opt_BorderStyle_top_right_bottom_left_BorderStyle& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Literal_Opt_Length_topLeft_topRight_bottomLeft_bottomRight_Length_LocalizedBorderRadiuses& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Literal_Opt_Length_top_right_bottom_left_Length_LocalizedEdgeWidths& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_RichEditorTextSpanResult_RichEditorImageSpanResult& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_String_Number_Resource_ArrayBuffer& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_String_ImageAttachment_CustomSpan& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_RichEditorUpdateTextSpanStyleOptions_RichEditorUpdateImageSpanStyleOptions_RichEditorUpdateSymbolSpanStyleOptions& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_CustomObject_Union_String_Resource& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_String_Ark_Undefined& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_String_String& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_ImageBitmap_CustomObject& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_DividerStyle_Ark_Undefined& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_DividerOptions_Ark_Undefined& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Union_Color_Number_String_Resource_UnderlineColor_Undefined& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Union_String_Resource_Undefined& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_TextInputStyle_TextContentStyle& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_SubTabBarStyle_BottomTabBarStyle& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_String_Resource_Union_Function_Undefined_Literal_Opt_Union_String_Resource_icon_text& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Number_String_Literal_Union_String_Number_minSize& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_ArrowStyle_Boolean& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_DotIndicator_DigitIndicator_Boolean& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Opt_DividerOptions_Ark_Undefined& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Length_OptionWidthMode& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_CancelButtonOptions_CancelButtonSymbolOptions& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_IconOptions_CustomObject& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Color_Number_String& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_ResponseType_RichEditorResponseType& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Literal_Opt_Union_Number_String_width_height_Opt_Union_Number_String_Array_CustomObject_radius_Literal_Opt_Union_Number_String_width_height_radiusWidth_radiusHeight& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Length_PanelHeight& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Array_ToolbarItem_Union_Function_Undefined& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_CustomObject_Union_Function_Undefined& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Array_NavigationMenuItem_Union_Function_Undefined& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Union_String_Resource_Union_Function_Undefined_NavigationCommonTitle_NavigationCustomTitle& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_String_CustomObject_Resource_CustomObject& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Union_String_Resource_CustomObject_CustomObject& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_String_Union_Function_Undefined_NavDestinationCommonTitle_NavDestinationCustomTitle& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Boolean_Union_String_Resource_CustomObject& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_MenuItemOptions_Union_Function_Undefined& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_DividerStyleOptions_Undefined& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_CustomObject_Union_String_Resource_CustomObject_ASTCResource& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Position_Edges_LocalizedEdges& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Literal_Length_strokeWidth_Opt_Union_Color_Number_String_Resource_color_Opt_Length_startMargin_endMargin_Ark_Undefined& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Boolean_EditMode& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Number_Literal_Length_minLength_maxLength& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_ColorFilter_CustomObject& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Union_String_Resource_CustomObject& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_CustomObject_Union_String_Resource_CustomObject& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_CustomObject_Union_String_Resource_CustomObject_ImageContent& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Union_Color_Number_String_Resource_LinearGradient_Array_Tuple_Union_Union_Color_Number_String_Resource_LinearGradient_Number& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_ColumnSplitDividerStyle_Ark_Undefined& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_CanvasRenderingContext2D_DrawingRenderingContext& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_SpringMotion_FrictionMotion_ScrollMotion& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_String_FunctionKey& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Array_MenuElement_Union_Function_Undefined& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_PopupOptions_CustomPopupOptions& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_CustomObject_CustomObject_CustomObject_CustomObject& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_CircleAttribute_EllipseAttribute_PathAttribute_RectAttribute_ProgressMask& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -1922,7 +2032,26 @@ void AssignUnionTo(std::optional<T>& dst, const Union_Boolean_CircleAttribute_El
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_String_Union_Function_Undefined_CustomObject& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Boolean_CircleAttribute_EllipseAttribute_PathAttribute_RectAttribute& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
+        case SELECTOR_ID_4: AssignTo(dst, src.value4); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_String_Union_Function_Undefined_CustomObject& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -1937,7 +2066,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_String_Union_Function_Unde
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Union_Function_Undefined_DragItemInfo_String& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Union_Function_Undefined_DragItemInfo_String& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -1952,7 +2082,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_Union_Function_Undefined_D
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Array_CustomObject_Ark_Undefined& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Array_CustomObject_Ark_Undefined& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -1966,7 +2097,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_Array_CustomObject_Ark_Und
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_ClickEffect_Ark_Undefined& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_ClickEffect_Ark_Undefined& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -1980,7 +2112,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_ClickEffect_Ark_Undefined&
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Position_LocalizedPosition& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Position_LocalizedPosition& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -1994,7 +2127,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_Position_LocalizedPosition
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Number_InvertOptions& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Number_InvertOptions& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -2008,7 +2142,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_Number_InvertOptions& src)
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Color_String_Resource& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Color_String_Resource& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -2023,7 +2158,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_Color_String_Resource& src
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_TapGestureInterface_LongPressGestureInterface_PanGestureInterface_PinchGestureInterface_SwipeGestureInterface_RotationGestureInterface_GestureGroupInterface& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_TapGestureInterface_LongPressGestureInterface_PanGestureInterface_PinchGestureInterface_SwipeGestureInterface_RotationGestureInterface_GestureGroupInterface& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -2042,7 +2178,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_TapGestureInterface_LongPr
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_TransitionOptions_TransitionEffect& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_TransitionOptions_TransitionEffect& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -2056,7 +2193,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_TransitionOptions_Transiti
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Union_Color_Number_String_Resource_ColoringStrategy& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Union_Color_Number_String_Resource_ColoringStrategy& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -2070,7 +2208,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_Union_Color_Number_String_
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_OutlineStyle_Literal_Opt_OutlineStyle_top_right_bottom_left& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_OutlineStyle_Literal_Opt_OutlineStyle_top_right_bottom_left& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -2084,7 +2223,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_OutlineStyle_Literal_Opt_O
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Length_Literal_Opt_Length_topLeft_topRight_bottomLeft_bottomRight_LocalizedBorderRadiuses& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Length_Literal_Opt_Length_topLeft_topRight_bottomLeft_bottomRight_LocalizedBorderRadiuses& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -2099,7 +2239,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_Length_Literal_Opt_Length_
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Position_Alignment& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Position_Alignment& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -2113,7 +2254,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_Position_Alignment& src)
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_SizeOptions_ImageSize& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_SizeOptions_ImageSize& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -2127,7 +2269,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_SizeOptions_ImageSize& src
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_Array_Rectangle_Rectangle& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_Array_Rectangle_Rectangle& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -2141,7 +2284,8 @@ void AssignUnionTo(std::optional<T>& dst, const Union_Array_Rectangle_Rectangle&
 }
 
 template<typename T>
-void AssignUnionTo(std::optional<T>& dst, const Union_DrawModifier_Undefined& src)
+void AssignUnionTo(std::optional<T>& dst,
+                   const Union_DrawModifier_Undefined& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -2158,403 +2302,470 @@ template<typename T, typename P>
 void AssignLiteralTo(std::optional<T>& dst, const P& src);
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Length_topLeft_topRight_bottomLeft_bottomRight& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Opt_Length_topLeft_topRight_bottomLeft_bottomRight& src)
 {
     AssignTo(dst, src.topLeft);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Length_top_right_bottom_left& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Opt_Length_top_right_bottom_left& src)
 {
     AssignTo(dst, src.top);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Union_Color_Number_String_Resource_color& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Union_Color_Number_String_Resource_color& src)
 {
     AssignTo(dst, src.color);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_BorderStyle_top_right_bottom_left& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Opt_BorderStyle_top_right_bottom_left& src)
 {
     AssignTo(dst, src.top);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Union_Color_Number_String_Resource_top_right_bottom_left& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Opt_Union_Color_Number_String_Resource_top_right_bottom_left& src)
 {
     AssignTo(dst, src.top);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_String_value_Function_action& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_String_value_Function_action& src)
 {
     AssignTo(dst, src.value);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Number_span_offset& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Number_span_offset& src)
 {
     AssignTo(dst, src.span);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_OutlineStyle_top_right_bottom_left& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Opt_OutlineStyle_top_right_bottom_left& src)
 {
     AssignTo(dst, src.top);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Union_String_CustomObject_Resource_shown_hidden_Opt_Union_String_CustomObject_Resource_switching& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Union_String_CustomObject_Resource_shown_hidden_Opt_Union_String_CustomObject_Resource_switching& src)
 {
     AssignTo(dst, src.shown);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Union_String_Resource_icon_text& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Opt_Union_String_Resource_icon_text& src)
 {
     AssignTo(dst, src.icon);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Union_String_Number_minSize& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Union_String_Number_minSize& src)
 {
     AssignTo(dst, src.minSize);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Union_Number_String_width_height_radiusWidth_radiusHeight& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Opt_Union_Number_String_width_height_radiusWidth_radiusHeight& src)
 {
     AssignTo(dst, src.width);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Union_Number_String_width_height_Opt_Union_Number_String_Array_CustomObject_radius& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Opt_Union_Number_String_width_height_Opt_Union_Number_String_Array_CustomObject_radius& src)
 {
     AssignTo(dst, src.width);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Length_strokeWidth_Opt_Union_Color_Number_String_Resource_color_Opt_Length_startMargin_endMargin& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Length_strokeWidth_Opt_Union_Color_Number_String_Resource_color_Opt_Length_startMargin_endMargin& src)
 {
     AssignTo(dst, src.strokeWidth);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Length_minLength_maxLength& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Length_minLength_maxLength& src)
 {
     AssignTo(dst, src.minLength);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Number_year_month_day& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Number_year_month_day& src)
 {
     AssignTo(dst, src.year);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_String_anchor_VerticalAlign_align& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_String_anchor_VerticalAlign_align& src)
 {
     AssignTo(dst, src.anchor);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_String_anchor_HorizontalAlign_align& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_String_anchor_HorizontalAlign_align& src)
 {
     AssignTo(dst, src.anchor);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Function_callback_CustomObject_fileSelector& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Function_callback_CustomObject_fileSelector& src)
 {
     AssignTo(dst, src.callback);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Function_handler_CustomObject_error& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Function_handler_CustomObject_error& src)
 {
     AssignTo(dst, src.handler);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Union_String_WebResourceRequest_data& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Union_String_WebResourceRequest_data& src)
 {
     AssignTo(dst, src.data);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Number_time& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Number_time& src)
 {
     AssignTo(dst, src.time);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Number_duration& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Number_duration& src)
 {
     AssignTo(dst, src.duration);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Boolean_fullscreen& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Boolean_fullscreen& src)
 {
     AssignTo(dst, src.fullscreen);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Number_errcode_String_msg& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Number_errcode_String_msg& src)
 {
     AssignTo(dst, src.errcode);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Number_width_height_componentWidth_componentHeight_loadingStatus_contentWidth_contentHeight_contentOffsetX_contentOffsetY& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Number_width_height_componentWidth_componentHeight_loadingStatus_contentWidth_contentHeight_contentOffsetX_contentOffsetY& src)
 {
     AssignTo(dst, src.width);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_FoldStatus_foldStatus& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_FoldStatus_foldStatus& src)
 {
     AssignTo(dst, src.foldStatus);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Number_surfaceWidth_surfaceHeight& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Number_surfaceWidth_surfaceHeight& src)
 {
     AssignTo(dst, src.surfaceWidth);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_CustomObject_object_String_name_Array_String_methodList& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_CustomObject_object_String_name_Array_String_methodList& src)
 {
     AssignTo(dst, src.object);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Union_String_Resource_url_Opt_Array_Header_headers& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Union_String_Resource_url_Opt_Array_Header_headers& src)
 {
     AssignTo(dst, src.url);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_String_data_mimeType_encoding_Opt_String_baseUrl_historyUrl& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_String_data_mimeType_encoding_Opt_String_baseUrl_historyUrl& src)
 {
     AssignTo(dst, src.data);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_String_script_Opt_Function_callback& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_String_script_Opt_Function_callback& src)
 {
     AssignTo(dst, src.script);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Boolean_next_Opt_Axis_direction& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Boolean_next_Opt_Axis_direction& src)
 {
     AssignTo(dst, src.next);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Union_Number_String_xOffset_yOffset_Opt_Union_ScrollAnimationOptions_Boolean_animation& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Union_Number_String_xOffset_yOffset_Opt_Union_ScrollAnimationOptions_Boolean_animation& src)
 {
     AssignTo(dst, src.xOffset);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Number_fingers_distance_Opt_PanDirection_direction& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Opt_Number_fingers_distance_Opt_PanDirection_direction& src)
 {
     AssignTo(dst, src.fingers);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_String_id_XComponentType_type_Opt_String_libraryname_Opt_XComponentController_controller& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_String_id_XComponentType_type_Opt_String_libraryname_Opt_XComponentController_controller& src)
 {
     AssignTo(dst, src.id);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_String_id_type_Opt_String_libraryname_Opt_XComponentController_controller& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_String_id_type_Opt_String_libraryname_Opt_XComponentController_controller& src)
 {
     AssignTo(dst, src.id);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_ToggleType_type_Opt_Boolean_isOn& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_ToggleType_type_Opt_Boolean_isOn& src)
 {
     AssignTo(dst, src.type);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_CancelButtonStyle_style_Opt_IconOptions_icon& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Opt_CancelButtonStyle_style_Opt_IconOptions_icon& src)
 {
     AssignTo(dst, src.style);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Number_timeZoneOffset_Opt_TextClockController_controller& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Opt_Number_timeZoneOffset_Opt_TextClockController_controller& src)
 {
     AssignTo(dst, src.timeZoneOffset);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_TextOverflow_overflow& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_TextOverflow_overflow& src)
 {
     AssignTo(dst, src.overflow);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_BarPosition_barPosition_Opt_Number_index_Opt_TabsController_controller& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Opt_BarPosition_barPosition_Opt_Number_index_Opt_TabsController_controller& src)
 {
     AssignTo(dst, src.barPosition);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Number_index& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Opt_Number_index& src)
 {
     AssignTo(dst, src.index);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Alignment_alignContent& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Opt_Alignment_alignContent& src)
 {
     AssignTo(dst, src.alignContent);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Union_Number_String_x_y_width_height& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Opt_Union_Number_String_x_y_width_height& src)
 {
     AssignTo(dst, src.x);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_String_value_icon_Opt_Union_String_Resource_placeholder_Opt_SearchController_controller& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Opt_String_value_icon_Opt_Union_String_Resource_placeholder_Opt_SearchController_controller& src)
 {
     AssignTo(dst, src.value);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Union_String_Number_space& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Opt_Union_String_Number_space& src)
 {
     AssignTo(dst, src.space);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_String_backgroundUri_foregroundUri_Opt_String_secondaryUri& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_String_backgroundUri_foregroundUri_Opt_String_secondaryUri& src)
 {
     AssignTo(dst, src.backgroundUri);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Number_rating_Opt_Boolean_indicator& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Number_rating_Opt_Boolean_indicator& src)
 {
     AssignTo(dst, src.rating);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Union_String_Number_width_height& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Opt_Union_String_Number_width_height& src)
 {
     AssignTo(dst, src.width);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_PluginComponentTemplate_template_CustomObject_data& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_PluginComponentTemplate_template_CustomObject_data& src)
 {
     AssignTo(dst, src.template_);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Union_Number_String_width_height_Opt_String_commands& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Opt_Union_Number_String_width_height_Opt_String_commands& src)
 {
     AssignTo(dst, src.width);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_String_target_Opt_NavigationType_type& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_String_target_Opt_NavigationType_type& src)
 {
     AssignTo(dst, src.target);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Boolean_start_Opt_Number_step_loop_Opt_Boolean_fromStart_String_src& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Boolean_start_Opt_Number_step_loop_Opt_Boolean_fromStart_String_src& src)
 {
     AssignTo(dst, src.start);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Number_initialIndex_Opt_Union_Number_String_space_Opt_Scroller_scroller& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Opt_Number_initialIndex_Opt_Union_Number_String_space_Opt_Scroller_scroller& src)
 {
     AssignTo(dst, src.initialIndex);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Number_width_height& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Number_width_height& src)
 {
     AssignTo(dst, src.width);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Number_value_Opt_Number_min_max& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Number_value_Opt_Number_min_max& src)
 {
     AssignTo(dst, src.value);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Array_String_upperItems& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Opt_Array_String_upperItems& src)
 {
     AssignTo(dst, src.upperItems);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Length_dx_dy& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Length_dx_dy& src)
 {
     AssignTo(dst, src.dx);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Literal_Number_year_month_day_date_MonthData_currentData_preData_nextData_Opt_CalendarController_controller& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Literal_Number_year_month_day_date_MonthData_currentData_preData_nextData_Opt_CalendarController_controller& src)
 {
     AssignTo(dst, src.date);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Array_String_arrayValue_Number_selected& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Array_String_arrayValue_Number_selected& src)
 {
     AssignTo(dst, src.arrayValue);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_CustomObject_want& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_CustomObject_want& src)
 {
     AssignTo(dst, src.want);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Tuple_Length_Length_center_Union_Number_String_radius_Array_Tuple_Union_Color_Number_String_Resource_Number_colors_Opt_Boolean_repeating& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Tuple_Length_Length_center_Union_Number_String_radius_Array_Tuple_Union_Color_Number_String_Resource_Number_colors_Opt_Boolean_repeating& src)
 {
     AssignTo(dst, src.center);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Tuple_Length_Length_center_Opt_Union_Number_String_start_end_rotation_Array_Tuple_Union_Color_Number_String_Resource_Number_colors_Opt_Boolean_repeating& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Tuple_Length_Length_center_Opt_Union_Number_String_start_end_rotation_Array_Tuple_Union_Color_Number_String_Resource_Number_colors_Opt_Boolean_repeating& src)
 {
     AssignTo(dst, src.center);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Union_Number_String_angle_Opt_GradientDirection_direction_Array_Tuple_Union_Color_Number_String_Resource_Number_colors_Opt_Boolean_repeating& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Opt_Union_Number_String_angle_Opt_GradientDirection_direction_Array_Tuple_Union_Color_Number_String_Resource_Number_colors_Opt_Boolean_repeating& src)
 {
     AssignTo(dst, src.angle);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Union_Number_Literal_Number_span_offset_xs_sm_md_lg& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Opt_Union_Number_Literal_Number_span_offset_xs_sm_md_lg& src)
 {
     AssignTo(dst, src.xs);
 }
 
 template<typename T>
-void AssignLiteralTo(std::optional<T>& dst, const Literal_Opt_Alignment_align& src)
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Opt_Alignment_align& src)
 {
     AssignTo(dst, src.align);
 }

@@ -153,7 +153,8 @@ namespace OHOS::Ace::NG::Converter {
     template<>
     inline Dimension Convert(const Ark_Length& src)
     {
-        return src.type == Ark_Tag::ARK_TAG_RESOURCE ? CalcDimension() : CalcDimension(src.value, (DimensionUnit)src.unit);
+        return src.type == Ark_Tag::ARK_TAG_RESOURCE ? 
+               CalcDimension() : CalcDimension(src.value, (DimensionUnit)src.unit);
     }
 
     template<>
