@@ -2935,6 +2935,13 @@ void RichEditorPattern::HandleDraggableFlag(bool isTouchSelectArea)
     }
 }
 
+void RichEditorPattern::SetIsTextDraggable(bool isTextDraggable)
+{
+    auto gestureHub = GetGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetIsTextDraggable(isTextDraggable);
+}
+
 bool RichEditorPattern::JudgeContentDraggable()
 {
     if (!IsSelected() || copyOption_ == CopyOptions::None) {
