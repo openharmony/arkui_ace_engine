@@ -24,7 +24,7 @@ enum class BlendMode : int16_t {
     NONE = 0, // Note: The NONE blend mode is different from SRC_OVER. When using it with
               // RSColorBlendApplyType::SAVE_LAYER, it does not create an offscreen buffer. However, when using it
               // with RSColorBlendApplyType::FAST, it does not modify the blend mode of subsequent content.
- 
+
     CLEAR,    // r = 0
     SRC,      // r = s
     DST,      // r = d
