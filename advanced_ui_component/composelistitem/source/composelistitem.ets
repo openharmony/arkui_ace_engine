@@ -571,6 +571,7 @@ struct OperateItemStruct {
       .checked(this.radioState)
       .onChange((isCheck: boolean) => {
         this.radioState = isCheck;
+        this.isOnClick = isCheck;
         this.radio?.onChange(isCheck);
       })
       .height(OPERATEITEM_ICONLIKE_SIZE)
