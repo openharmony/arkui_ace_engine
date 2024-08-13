@@ -102,6 +102,23 @@ public:
         return isScrollable_;
     }
 
+    void SetMaintainVisibleContentPosition(bool enabled)
+    {
+        maintainVisibleContentPosition_ = enabled;
+    }
+
+    bool GetMaintainVisibleContentPosition()
+    {
+        return maintainVisibleContentPosition_;
+    }
+
+    void MarkNeedReEstimateOffset()
+    {
+        needReEstimateOffset_ = true;
+    }
+
+    void NotifyDataChange(int32_t index, int32_t count) override;
+
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
     void OnTouchDown(const TouchEventInfo& info) override;
@@ -374,6 +391,7 @@ private:
     float contentMainSize_ = 0.0f;
     float contentStartOffset_ = 0.0f;
     float contentEndOffset_ = 0.0f;
+    bool maintainVisibleContentPosition_ = false;
 
     float currentDelta_ = 0.0f;
     bool crossMatchChild_ = false;

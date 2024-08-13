@@ -500,6 +500,16 @@ void JSList::SetFriction(const JSCallbackInfo& info)
     ListModel::GetInstance()->SetFriction(friction);
 }
 
+void JSList::MaintainVisibleContentPosition(const JSCallbackInfo& args)
+{
+    bool enabled = false;
+    JSRef<JSVal> arg0 = args[0];
+    if (arg0->IsBoolean()) {
+        enabled = arg0->ToBoolean();
+    }
+    ListModel::GetInstance()->SetMaintainVisibleContentPosition(enabled);
+}
+
 void JSList::ReachStartCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
@@ -837,6 +847,7 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("enableScrollInteraction", &JSList::SetScrollEnabled);
     JSClass<JSList>::StaticMethod("scrollSnapAlign", &JSList::SetScrollSnapAlign);
     JSClass<JSList>::StaticMethod("friction", &JSList::SetFriction);
+    JSClass<JSList>::StaticMethod("maintainVisibleContentPosition", &JSList::MaintainVisibleContentPosition);
     JSClass<JSList>::StaticMethod("onScroll", &JSList::ScrollCallback);
     JSClass<JSList>::StaticMethod("onReachStart", &JSList::ReachStartCallback);
     JSClass<JSList>::StaticMethod("onReachEnd", &JSList::ReachEndCallback);

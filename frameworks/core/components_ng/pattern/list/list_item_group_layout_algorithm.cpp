@@ -394,6 +394,7 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
         }
         itemPosition_.clear();
         jumpIndex_.reset();
+        layoutedItemInfo_.reset();
     } else if (!itemPosition_.empty()) {
         if (itemPosition_.begin()->first > 0 || (forwardLayout_ && Negative(referencePos_))) {
             startPos = itemPosition_.begin()->second.startPos;
