@@ -6068,7 +6068,13 @@ void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
         isOnlyImageDrag_ = false;
         HandleTouchUp();
     } else if (touchType == TouchType::MOVE) {
-        HandleTouchMove(info.GetTouches().front().GetLocalLocation());
+        auto touchGlobalOffset = info.GetTouches().front().GetGlobalLocation();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto offsetInScreen = host->GetOffsetInScreen();
+        auto localOffset =
+            Offset(touchGlobalOffset.GetX() - offsetInScreen.GetX(), touchGlobalOffset.GetY() - offsetInScreen.GetY());
+        HandleTouchMove(localOffset);
     }
 }
 
@@ -6151,13 +6157,11 @@ void RichEditorPattern::UpdateCaretByTouchMove(const Offset& offset)
     CHECK_NULL_VOID(moveCaretState_.isMoveCaret);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto caretMoveOffset =
-        offset - Offset(0, host->GetOffsetInScreen().GetY() - moveCaretState_.touchDownPaintOffset.GetY());
-    Offset textOffset = ConvertTouchOffsetToTextOffset(caretMoveOffset);
+    Offset textOffset = ConvertTouchOffsetToTextOffset(offset);
     auto position = paragraphs_.GetIndex(textOffset);
     SetCaretPosition(position);
     CalcAndRecordLastClickCaretInfo(textOffset);
-    auto localOffset = OffsetF(caretMoveOffset.GetX(), caretMoveOffset.GetY());
+    auto localOffset = OffsetF(offset.GetX(), offset.GetY());
     if (magnifierController_) {
         magnifierController_->SetLocalOffset(localOffset);
     }
