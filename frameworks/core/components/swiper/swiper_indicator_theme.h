@@ -128,6 +128,8 @@ public:
             theme->hoverColor_ = swiperPattern->GetAttr<Color>("indicator_color_hover", Color::TRANSPARENT);
             theme->pressedColor_ = swiperPattern->GetAttr<Color>("indicator_color_pressed", Color::TRANSPARENT);
             theme->focusedColor_ = swiperPattern->GetAttr<Color>("indicator_color_focused", Color::TRANSPARENT);
+            theme->indicatorFocusedPadding_ = swiperPattern->GetAttr<Dimension>("indicator_focused_padding", 0.0_vp);
+            theme->clipToBounds_ = static_cast<bool>(swiperPattern->GetAttr<int>("clip_bounds", 0));
             theme->focusedBorderWidth_ = SWIPER_FOCUSED_BORDER_WIDTH;
             theme->hoverArrowBackgroundColor_ =
                 swiperPattern->GetAttr<Color>(ARROW_COLOR_BOARDCOLOR_HOVER, Color::TRANSPARENT);
@@ -464,6 +466,16 @@ public:
         return indicatorBgHeight_;
     }
 
+    const Dimension& GetIndicatorFocusedPadding() const
+    {
+        return indicatorFocusedPadding_;
+    }
+
+    bool GetClipToBounds() const
+    {
+        return clipToBounds_;
+    }
+
     uint32_t GetLeftSymbolId() const
     {
         return leftSymbolId_;
@@ -550,6 +562,8 @@ private:
     Color focusedColor_;
     Dimension focusedBorderWidth_;
     Dimension indicatorBgHeight_;
+    Dimension indicatorFocusedPadding_;
+    bool clipToBounds_;
     Dimension size_;
     Dimension selectedSize_;
     Dimension indicatorPointPadding_;

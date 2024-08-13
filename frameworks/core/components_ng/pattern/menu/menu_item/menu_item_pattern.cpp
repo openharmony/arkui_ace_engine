@@ -152,6 +152,11 @@ void MenuItemPattern::OnMountToParentDone()
 
 void MenuItemPattern::OnAttachToFrameNode()
 {
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    focusPadding_ = selectTheme->GetOptionFocusedBoxPadding();
     RegisterOnKeyEvent();
     RegisterOnClick();
     RegisterOnTouch();
@@ -194,7 +199,7 @@ void MenuItemPattern::OnModifyDone()
     }
     SetAccessibilityAction();
 
-    host->GetRenderContext()->SetClipToBounds(true);
+    host->GetRenderContext()->SetClipToBounds(focusPadding_ == 0.0_vp);
 
     InitFocusEvent();
     if (!longPressEvent_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
