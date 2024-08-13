@@ -630,7 +630,7 @@ class UIContext {
         if (dynamicSceneInfo.tag == 'Swiper') {
             __JSScopeUtil__.restoreInstanceId();
             let nodeRef = dynamicSceneInfo.nativeRef;
-            return SwiperDynamicSyncScene.Create(nodeRef);
+            return SwiperDynamicSyncScene.createInstances(nodeRef);
         }
         __JSScopeUtil__.restoreInstanceId();
         return [];
