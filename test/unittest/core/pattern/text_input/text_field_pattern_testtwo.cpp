@@ -812,4 +812,73 @@ HWTEST_F(TextFieldPatternTestTwo, GetDragUpperLeftCoordinates001, TestSize.Level
 
     EXPECT_EQ(pattern->GetDragUpperLeftCoordinates(), OffsetF(100, 100));
 }
+
+/**
+ * @tc.name: HandleFocusEvent001
+ * @tc.desc: test testInput text HandleFocusEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, HandleFocusEvent001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateSelectAllValue(true);
+
+    pattern->dragStatus_ = DragStatus::DRAGGING;
+    pattern->HandleFocusEvent();
+
+    pattern->dragRecipientStatus_ = DragStatus::DRAGGING;
+    pattern->HandleFocusEvent();
+
+    pattern->isLongPress_ = true;
+    pattern->HandleFocusEvent();
+
+    pattern->contentController_->content_ = "Test";
+    pattern->needSelectAll_ = false;
+    pattern->HandleFocusEvent();
+    EXPECT_EQ(pattern->needSelectAll_, true);
+}
+
+/**
+ * @tc.name: ProcessFocusStyle001
+ * @tc.desc: test testInput text ProcessFocusStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, ProcessFocusStyle001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    pattern->ProcessFocusStyle();
+
+    pattern->contentController_->content_ = "Test";
+    pattern->blurReason_ = BlurReason::FOCUS_SWITCH;
+    pattern->ProcessFocusStyle();
+    EXPECT_EQ(pattern->inlineSelectAllFlag_, true);
+    pattern->blurReason_ = BlurReason::WINDOW_BLUR;
+    pattern->ProcessFocusStyle();
+    EXPECT_EQ(pattern->inlineSelectAllFlag_, false);
+
+    layoutProperty->UpdateShowErrorText(true);
+    layoutProperty->UpdateErrorText("ERROR");
+    layoutProperty->UpdateTextInputType(TextInputType::NUMBER);
+    pattern->inlineSelectAllFlag_ = true;
+    pattern->ProcessFocusStyle();
+    EXPECT_EQ(pattern->inlineSelectAllFlag_, true);
+}
 } // namespace OHOS::Ace::NG
