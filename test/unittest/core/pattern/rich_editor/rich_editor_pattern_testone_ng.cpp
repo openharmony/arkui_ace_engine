@@ -1172,4 +1172,302 @@ HWTEST_F(RichEditorPatternTestOneNg, CloseSystemMenu001, TestSize.Level1)
 
     EXPECT_EQ(richEditorPattern->SelectOverlayIsOn(), false);
 }
+
+/**
+ * @tc.name: CreateAndShowSingleHandle001
+ * @tc.desc: test CreateAndShowSingleHandle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, CreateAndShowSingleHandle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create richEditorPattern
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->caretPosition_ = -1;
+
+    /**
+     * @tc.steps: step2. Construct GestureEvent data and call CreatAndShowSingleHandle
+     */
+    ASSERT_NE(richEditorPattern->selectOverlay_, nullptr);
+    richEditorPattern->previewTextRecord_.previewContent = "abc";
+    richEditorPattern->previewTextRecord_.isPreviewTextInputting = true;
+    richEditorPattern->previewTextRecord_.startOffset = 0;
+    richEditorPattern->previewTextRecord_.endOffset = 0;
+    richEditorPattern->CreateAndShowSingleHandle();
+    EXPECT_FALSE(richEditorPattern->selectOverlay_->IsSingleHandle());
+}
+
+/**
+ * @tc.name: MoveCaretAndStartFocus001
+ * @tc.desc: test MoveCaretAndStartFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, MoveCaretAndStartFocus001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+
+    Offset textOffset;
+    richEditorPattern->overlayMod_ = nullptr;
+    richEditorPattern->MoveCaretAndStartFocus(textOffset);
+    EXPECT_TRUE(focusHub->RequestFocusImmediately());
+}
+
+/**
+ * @tc.name: HandleOnlyImageSelected001
+ * @tc.desc: test HandleOnlyImageSelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, HandleOnlyImageSelected001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richeditor pattern and add add text span
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(INIT_VALUE_1);
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 6);
+
+    /**
+     * @tc.steps: step2. request focus
+     */
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    focusHub->RequestFocusImmediately();
+
+    /**
+     * @tc.step: step3. create a scene where the text menu has popped up
+     */
+    richEditorPattern->OnModifyDone();
+    richEditorPattern->textSelector_.Update(1, 2);
+    richEditorPattern->CalculateHandleOffsetAndShowOverlay();
+    richEditorPattern->ShowSelectOverlay(
+        richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
+    EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
+
+    /**
+     * @tc.step: step4. test OnMenuItemAction
+     */
+    richEditorPattern->selectOverlay_->OnMenuItemAction(OptionMenuActionId::COPY, OptionMenuType::TOUCH_MENU);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 1);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 2);
+
+    richEditorPattern->selectOverlay_->OnMenuItemAction(OptionMenuActionId::PASTE, OptionMenuType::NO_MENU);
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 6);
+
+    Offset globalOffset;
+    auto selectOverlayInfo = richEditorPattern->selectOverlay_->GetSelectOverlayInfo();
+    auto selectInfoFirstHandle = selectOverlayInfo->firstHandle;
+    auto selectInfoSecHandle = selectOverlayInfo->secondHandle;
+    selectInfoFirstHandle.isShow = true;
+    selectInfoSecHandle.isShow = true;
+    richEditorPattern->HandleOnlyImageSelected(globalOffset, true);
+
+    selectInfoFirstHandle.isShow = false;
+    selectInfoSecHandle.isShow = true;
+    richEditorPattern->HandleOnlyImageSelected(globalOffset, true);
+
+    selectInfoFirstHandle.isShow = true;
+    selectInfoSecHandle.isShow = true;
+    richEditorPattern->HandleOnlyImageSelected(globalOffset, false);
+
+    selectInfoFirstHandle.isShow = false;
+    selectInfoSecHandle.isShow = true;
+    richEditorPattern->HandleOnlyImageSelected(globalOffset, false);
+
+    EXPECT_EQ(richEditorPattern->selectOverlay_->IsBothHandlesShow(), false);
+}
+
+/**
+ * @tc.name: HandleBlurEvent001
+ * @tc.desc: test HandleBlurEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, HandleBlurEvent001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+
+    auto func = []() {};
+
+    richEditorPattern->customKeyboardBuilder_ = func;
+    richEditorPattern->isCustomKeyboardAttached_ = true;
+    focusHub->blurReason_ = BlurReason::FRAME_DESTROY;
+    richEditorPattern->HandleBlurEvent();
+
+    richEditorPattern->customKeyboardBuilder_ = nullptr;
+    richEditorPattern->isCustomKeyboardAttached_ = true;
+    focusHub->blurReason_ = BlurReason::FRAME_DESTROY;
+    richEditorPattern->HandleBlurEvent();
+
+    richEditorPattern->customKeyboardBuilder_ = func;
+    richEditorPattern->isCustomKeyboardAttached_ = true;
+    focusHub->blurReason_ = BlurReason::WINDOW_BLUR;
+    richEditorPattern->HandleBlurEvent();
+
+    richEditorPattern->customKeyboardBuilder_ = nullptr;
+    richEditorPattern->isCustomKeyboardAttached_ = true;
+    focusHub->blurReason_ = BlurReason::WINDOW_BLUR;
+    richEditorPattern->HandleBlurEvent();
+    EXPECT_EQ(richEditorPattern->isMoveCaretAnywhere_, false);
+}
+
+/**
+ * @tc.name: HandleFocusEvent001
+ * @tc.desc: test HandleFocusEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, HandleFocusEvent001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->previewLongPress_ = true;
+    richEditorPattern->HandleFocusEvent();
+
+    richEditorPattern->previewLongPress_ = false;
+    richEditorPattern->isCaretInContentArea_ = true;
+
+    richEditorPattern->usingMouseRightButton_ = true;
+    richEditorPattern->isLongPress_ = true;
+    richEditorPattern->isDragging_ = true;
+    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
+    richEditorPattern->HandleFocusEvent();
+
+    richEditorPattern->usingMouseRightButton_ = false;
+    richEditorPattern->isLongPress_ = true;
+    richEditorPattern->isDragging_ = true;
+    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
+    richEditorPattern->HandleFocusEvent();
+
+    richEditorPattern->usingMouseRightButton_ = true;
+    richEditorPattern->isLongPress_ = false;
+    richEditorPattern->isDragging_ = true;
+    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
+    richEditorPattern->HandleFocusEvent();
+
+    richEditorPattern->usingMouseRightButton_ = true;
+    richEditorPattern->isLongPress_ = true;
+    richEditorPattern->isDragging_ = false;
+    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
+    richEditorPattern->HandleFocusEvent();
+
+    richEditorPattern->usingMouseRightButton_ = true;
+    richEditorPattern->isLongPress_ = true;
+    richEditorPattern->isDragging_ = true;
+    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = false;
+    richEditorPattern->HandleFocusEvent();
+
+    richEditorPattern->usingMouseRightButton_ = false;
+    richEditorPattern->isLongPress_ = false;
+    richEditorPattern->isDragging_ = true;
+    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
+    richEditorPattern->HandleFocusEvent();
+
+    richEditorPattern->usingMouseRightButton_ = false;
+    richEditorPattern->isLongPress_ = false;
+    richEditorPattern->isDragging_ = false;
+    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
+    richEditorPattern->HandleFocusEvent();
+
+    richEditorPattern->usingMouseRightButton_ = false;
+    richEditorPattern->isLongPress_ = false;
+    richEditorPattern->isDragging_ = false;
+    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = false;
+    richEditorPattern->HandleFocusEvent();
+
+    EXPECT_EQ(richEditorPattern->textSelector_.SelectNothing(), true);
+}
+
+/**
+ * @tc.name: CloseKeyboard001
+ * @tc.desc: test CloseKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, CloseKeyboard001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->CloseKeyboard(false);
+    EXPECT_EQ(richEditorPattern->HasConnection(), false);
+}
+
+/**
+ * @tc.name: CalculateEmptyValueCaretRect002
+ * @tc.desc: test CalculateEmptyValueCaretRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, CalculateEmptyValueCaretRect002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto layoutProperty = richEditorPattern->GetLayoutProperty<TextLayoutProperty>();
+
+    layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+    layoutProperty->UpdateTextAlign(TextAlign::LEFT);
+    richEditorPattern->CalculateEmptyValueCaretRect();
+
+    layoutProperty->UpdateLayoutDirection(TextDirection::INHERIT);
+    layoutProperty->UpdateTextAlign(TextAlign::CENTER);
+    richEditorPattern->CalculateEmptyValueCaretRect();
+
+    layoutProperty->UpdateLayoutDirection(TextDirection::INHERIT);
+    layoutProperty->UpdateTextAlign(TextAlign::LEFT);
+    richEditorPattern->CalculateEmptyValueCaretRect();
+
+    EXPECT_EQ(richEditorPattern->presetParagraph_, false);
+}
+
+/**
+ * @tc.name: HandleDoubleClickOrLongPress001
+ * @tc.desc: test HandleDoubleClickOrLongPress
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, HandleDoubleClickOrLongPress001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    GestureEvent info;
+    info.SetSourceTool(SourceTool::FINGER);
+    richEditorPattern->caretUpdateType_ = CaretUpdateType::DOUBLE_CLICK;
+
+    richEditorPattern->previewTextRecord_.previewContent = "123";
+    richEditorPattern->previewTextRecord_.isPreviewTextInputting = true;
+    richEditorPattern->previewTextRecord_.startOffset = 0;
+    richEditorPattern->previewTextRecord_.endOffset = 0;
+    richEditorPattern->HandleDoubleClickOrLongPress(info);
+
+    richEditorPattern->previewTextRecord_.previewContent = "123";
+    richEditorPattern->previewTextRecord_.isPreviewTextInputting = false;
+    richEditorPattern->previewTextRecord_.startOffset = 0;
+    richEditorPattern->previewTextRecord_.endOffset = 0;
+    richEditorPattern->status_ = Status::DRAGGING;
+    richEditorPattern->HandleDoubleClickOrLongPress(info);
+
+    richEditorPattern->status_ = Status::NONE;
+    richEditorPattern->HandleDoubleClickOrLongPress(info);
+
+    AddSpan("test");
+    richEditorPattern->textSelector_.Update(3, 4);
+    EXPECT_EQ(richEditorPattern->IsSelected(), true);
+    richEditorPattern->HandleDoubleClickOrLongPress(info);
+    EXPECT_EQ(richEditorPattern->IsSelected(), false);
+}
 } // namespace OHOS::Ace::NG
