@@ -110,8 +110,9 @@ config("lto_link_config") {
 
 ohos_shared_library("libace_compatible") {
   public_configs = [ ":ace_engine_public_config" ]
+  external_deps = []
   if (use_hilog) {
-    external_deps = [ "hilog:libhilog" ]
+    external_deps += [ "hilog:libhilog" ]
   }
   if (is_ohos) {
     sanitize = {
@@ -141,8 +142,9 @@ ohos_shared_library("libace_compatible") {
 
 if (!is_asan) {
   ohos_shared_library("libace") {
+    external_deps = []
     if (use_hilog) {
-      external_deps = [ "hilog:libhilog" ]
+      external_deps += [ "hilog:libhilog" ]
     }
     if (is_ohos) {
       sanitize = {

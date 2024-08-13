@@ -525,7 +525,7 @@ void NavigationTitleUtil::InitDragAndLongPressEvent(
     InitLongPressEvent(gestureHub, menuNode, menuItems);
     auto accessibilityProperty = menuNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO);
+    accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
 }
 
 RefPtr<FrameNode> NavigationTitleUtil::CreatePopupDialogNode(

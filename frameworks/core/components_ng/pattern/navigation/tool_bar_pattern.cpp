@@ -73,7 +73,7 @@ void NavToolbarPattern::OnModifyDone()
     InitDragEvent(gestureHub);
     auto accessibilityProperty = containerNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO);
+    accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
 }
 
 void NavToolbarPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
