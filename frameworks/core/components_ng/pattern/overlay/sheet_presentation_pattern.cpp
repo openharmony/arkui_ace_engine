@@ -130,10 +130,16 @@ float SheetPresentationPattern::GetSheetTopSafeArea()
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
     double deviceHeight = static_cast<double>(SystemProperties::GetDeviceHeight());
 
+    auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0.0f);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+
     // full screen subwindow sheet is also WINDOW_MODE_FLOATING, can not enter
     if (windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
         !NearEqual(windowGlobalRect.Height(), deviceHeight)) {
         sheetTopSafeArea = SHEET_BLANK_FLOATING_STATUS_BAR.ConvertToPx();
+    } else if (IsBottomLarge() && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        sheetTopSafeArea = GetTopAreaInWindow();
     } else if (sheetType == SheetType::SHEET_BOTTOMLANDSPACE &&
                AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         sheetTopSafeArea = 0.0f;
@@ -171,6 +177,8 @@ void SheetPresentationPattern::InitPageHeight()
     if (windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
         !NearEqual(windowGlobalRect.Height(), deviceHeight)) {
         sheetTopSafeArea_ = SHEET_BLANK_FLOATING_STATUS_BAR.ConvertToPx();
+    } else if (IsBottomLarge() && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        sheetTopSafeArea_ = GetTopAreaInWindow();
     }
     TAG_LOGD(AceLogTag::ACE_SHEET, "sheetTopSafeArea of sheet is : %{public}f", sheetTopSafeArea_);
     if (!NearEqual(currentTopSafeArea, sheetTopSafeArea_)) {
@@ -2291,5 +2299,50 @@ void SheetPresentationPattern::OverlaySheetSpringBack()
     auto overlayManager = GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->SheetSpringBack();
+}
+
+// No status bar and landscape
+bool SheetPresentationPattern::IsNoStatusBarAndLandscape() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto safeAreaInsets = pipelineContext->GetSafeAreaWithoutProcess();
+
+    if ((SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) &&
+        NearEqual(safeAreaInsets.top_.Length(), 0)) {
+        return true;
+    }
+    return false;
+}
+// The purpose is to not exceed the maximum size
+bool SheetPresentationPattern::IsBottomLarge()
+{
+    auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    auto sheetType = GetSheetType();
+    // We need to consider the height set by the developer here
+    if ((sheetType == SheetType::SHEET_BOTTOMLANDSPACE || sheetType == SheetType::SHEET_BOTTOM) &&
+        sheetStyle.sheetMode == SheetMode::LARGE) {
+        return true;
+    }
+    return false;
+}
+
+// Height of status bar
+float SheetPresentationPattern::GetTopAreaInWindow() const
+{
+    if (IsNoStatusBarAndLandscape()) {
+        return 0.0f;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.0f);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, 0.0f);
+    auto window = pipelineContext->GetWindow();
+    CHECK_NULL_RETURN(window, 0.0f);
+    return window->GetStatusBarHeight();
 }
 } // namespace OHOS::Ace::NG
