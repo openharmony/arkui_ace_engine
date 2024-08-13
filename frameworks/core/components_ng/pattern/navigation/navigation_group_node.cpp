@@ -666,6 +666,7 @@ void NavigationGroupNode::CreateAnimationWithPush(const RefPtr<FrameNode>& preNo
     auto mode = GetNavigationMode();
     /* set initial status of animation */
     /* preNode */
+    preNode->GetRenderContext()->RemoveClipWithRRect();
     preNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
     preTitleNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
     /* curNode */
