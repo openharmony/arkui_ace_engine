@@ -929,7 +929,8 @@ HWTEST_F(WaterFlowSegmentCommonTest, overScroll001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentCommonTest, Cache001, TestSize.Level1)
 {
-    auto model = CreateRepeatWaterFlow(30, [](int32_t i) { return 100.0f; });
+    auto model = CreateWaterFlow();
+    CreateItemsInRepeat(30, [](int32_t i) { return 100.0f; });
     model.SetCachedCount(3);
     model.SetRowsGap(Dimension(10));
     model.SetColumnsGap(Dimension(10));

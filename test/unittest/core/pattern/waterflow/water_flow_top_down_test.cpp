@@ -617,7 +617,8 @@ HWTEST_F(WaterFlowTestNg, ScrollToIndex005, TestSize.Level1)
  */
 HWTEST_F(WaterFlowTestNg, Cache002, TestSize.Level1)
 {
-    auto model = CreateRepeatWaterFlow(50, [](int32_t i) { return i % 2 ? 100.0f : 200.0f; });
+    auto model = CreateWaterFlow();
+    CreateItemsInRepeat(50, [](int32_t i) { return i % 2 ? 100.0f : 200.0f; });
     model.SetCachedCount(3);
     model.SetColumnsTemplate("1fr 1fr");
     model.SetRowsGap(Dimension(10));

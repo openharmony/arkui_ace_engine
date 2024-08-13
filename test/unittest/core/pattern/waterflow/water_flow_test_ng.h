@@ -56,7 +56,7 @@ protected:
     virtual void GetWaterFlow();
 
     WaterFlowModelNG CreateWaterFlow();
-    WaterFlowModelNG CreateRepeatWaterFlow(int32_t itemNumber, std::function<float(uint32_t)>&& getSize);
+    void CreateItemsInRepeat(int32_t itemNumber, std::function<float(uint32_t)>&& getSize);
     void CreateWaterFlowItems(int32_t itemNumber = TOTAL_LINE_NUMBER);
     WaterFlowItemModelNG CreateWaterFlowItem(float mainSize);
     void CreateFocusableWaterFlowItems(int32_t itemNumber = TOTAL_LINE_NUMBER);

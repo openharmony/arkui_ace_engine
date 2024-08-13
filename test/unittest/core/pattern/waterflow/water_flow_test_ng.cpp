@@ -124,9 +124,8 @@ void WaterFlowTestNg::CreateWaterFlowItems(int32_t itemNumber)
     }
 }
 
-WaterFlowModelNG WaterFlowTestNg::CreateRepeatWaterFlow(int32_t itemNumber, std::function<float(uint32_t)>&& getSize)
+void WaterFlowTestNg::CreateItemsInRepeat(int32_t itemNumber, std::function<float(uint32_t)>&& getSize)
 {
-    auto model = CreateWaterFlow();
     RepeatVirtualScrollModelNG repeatModel;
     std::function<void(uint32_t)> createFunc = [this, getSize](uint32_t idx) { CreateItemWithHeight(getSize(idx)); };
     std::function<void(const std::string&, uint32_t)> updateFunc =
@@ -146,7 +145,6 @@ WaterFlowModelNG WaterFlowTestNg::CreateRepeatWaterFlow(int32_t itemNumber, std:
         return keys;
     };
     repeatModel.Create(itemNumber, {}, createFunc, updateFunc, getKeys, getTypes, [](uint32_t start, uint32_t end) {});
-    return model;
 }
 
 WaterFlowItemModelNG WaterFlowTestNg::CreateWaterFlowItem(float mainSize)
@@ -1792,7 +1790,8 @@ HWTEST_F(WaterFlowTestNg, MeasureForAnimation001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowTestNg, Cache001, TestSize.Level1)
 {
-    auto model = CreateRepeatWaterFlow(50, [](int32_t i) { return i % 2 ? 100.0f : 200.0f; });
+    auto model = CreateWaterFlow();
+    CreateItemsInRepeat(50, [](int32_t i) { return i % 2 ? 100.0f : 200.0f; });
 
     model.SetCachedCount(3);
     model.SetColumnsTemplate("1fr 1fr");
