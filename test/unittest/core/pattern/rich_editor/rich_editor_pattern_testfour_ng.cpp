@@ -325,6 +325,47 @@ HWTEST_F(RichEditorPatternTestFourNg, UpdatePreviewText002, TestSize.Level1)
     previewRange.start = -2;
     previewRange.end = 9;
     res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
+
+    previewRange.start = -1;
+    previewRange.end = -1;
+    richEditorPattern->previewTextRecord_.previewContent="";
+    res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
+
+    previewRange.start = -1;
+    previewRange.end = -2;
+    richEditorPattern->previewTextRecord_.previewContent="";
+    res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
+
+    previewRange.start = -1;
+    previewRange.end = -2;
+    richEditorPattern->previewTextRecord_.previewContent="abc";
+    res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
+
+    previewRange.start = -1;
+    previewRange.end = -1;
+    richEditorPattern->previewTextRecord_.previewContent="abc";
+    res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
+
+    previewRange.start = -2;
+    previewRange.end = -1;
+    richEditorPattern->previewTextRecord_.previewContent="";
+    res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
+
+    previewRange.start = -2;
+    previewRange.end = -2;
+    richEditorPattern->previewTextRecord_.previewContent="";
+    res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
+
+    previewRange.start = -2;
+    previewRange.end = -2;
+    richEditorPattern->previewTextRecord_.previewContent="abc";
+    res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
+
+    previewRange.start = -2;
+    previewRange.end = -1;
+    richEditorPattern->previewTextRecord_.previewContent="abc";
+    res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
+
     ASSERT_NE(res, true);
 }
 
@@ -773,5 +814,87 @@ HWTEST_F(RichEditorPatternTestFourNg, CopyTextSpanLineStyle001, TestSize.Level1)
     richEditorPattern->CopyTextSpanLineStyle(source, target, false);
     richEditorPattern->CopyTextSpanLineStyle(source, target, true);
     ASSERT_EQ(richEditorPattern->spans_.empty(), true);
+}
+
+/**
+ * @tc.name: JudgeContentDraggable001
+ * @tc.desc: test JudgeContentDraggable
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, JudgeContentDraggable001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->copyOption_ = CopyOptions::None;
+    EXPECT_EQ(richEditorPattern->IsSelected(), false);
+    richEditorPattern->JudgeContentDraggable();
+
+    richEditorPattern->copyOption_ = CopyOptions::InApp;
+    EXPECT_EQ(richEditorPattern->IsSelected(), false);
+    richEditorPattern->JudgeContentDraggable();
+
+    AddSpan("test");
+    richEditorPattern->textSelector_.Update(3, 4);
+    EXPECT_EQ(richEditorPattern->IsSelected(), true);
+
+    richEditorPattern->copyOption_ = CopyOptions::None;
+    richEditorPattern->JudgeContentDraggable();
+
+    richEditorPattern->textSelector_.Update(3, 4);
+    EXPECT_EQ(richEditorPattern->IsSelected(), true);
+
+    richEditorPattern->copyOption_ = CopyOptions::InApp;
+    bool res = richEditorPattern->JudgeContentDraggable();
+
+    EXPECT_EQ(res, true);
+}
+
+/**
+ * @tc.name: HandleDraggableFlag001
+ * @tc.desc: test HandleDraggableFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, HandleDraggableFlag001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->copyOption_ = CopyOptions::InApp;
+    richEditorPattern->HandleDraggableFlag(true);
+    EXPECT_EQ(richEditorPattern->JudgeContentDraggable(), true);
+}
+
+/**
+ * @tc.name: GetDeletedSpan001
+ * @tc.desc: test GetDeletedSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, GetDeletedSpan001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. get richeditor pattern and add text span.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    int32_t innerPosition = 0;
+    RichEditorChangeValue changeValue;
+
+    richEditorPattern->usingMouseRightButton_ = false;
+    richEditorPattern->isLongPress_ = false;
+    richEditorPattern->isDragging_ = false;
+    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = false;
+    richEditorPattern->HandleFocusEvent();
+
+    richEditorPattern->GetDeletedSpan(changeValue, innerPosition, -99, RichEditorDeleteDirection::BACKWARD, true);
+
+    richEditorPattern->previewTextRecord_.previewContent = "abc";
+    richEditorPattern->GetDeletedSpan(changeValue, innerPosition, -99, RichEditorDeleteDirection::BACKWARD, true);
+
+    EXPECT_EQ(richEditorPattern->textSelector_.SelectNothing(), true);
 }
 } // namespace OHOS::Ace::NG
