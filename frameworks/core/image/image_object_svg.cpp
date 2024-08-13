@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include <memory>
 #include "core/image/image_object.h"
 
 namespace OHOS::Ace {
