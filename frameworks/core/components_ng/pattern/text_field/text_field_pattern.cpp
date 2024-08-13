@@ -6514,6 +6514,7 @@ void TextFieldPattern::DumpInfo()
         std::string("HeightAdaptivePolicy: ")
             .append(V2::ConvertWrapTextHeightAdaptivePolicyToString(
                 layoutProperty->GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST))));
+    dumpLog.AddDesc(std::string("IsAIWrite: ").append(std::to_string(IsShowAIWrite())));
     DumpPlaceHolderInfo();
     DumpScaleInfo();
     if (SystemProperties::GetDebugEnabled()) {
@@ -8051,5 +8052,96 @@ void TextFieldPattern::OnTextGenstureSelectionEnd()
     if (!IsContentRectNonPositive()) {
         ProcessOverlay({ .animation = true });
     }
+}
+
+bool TextFieldPattern::IsShowAIWrite()
+{
+    auto textFieldTheme = GetTheme();
+    CHECK_NULL_RETURN(textFieldTheme, false);
+    auto bundleName = textFieldTheme->GetAIWriteBundleName();
+    auto abilityName = textFieldTheme->GetAIWriteAbilityName();
+    aiWriteAdapter_->SetBundleName(bundleName);
+    aiWriteAdapter_->SetAbilityName(abilityName);
+    return IsUnspecifiedOrTextType() && !bundleName.empty() && !abilityName.empty();
+}
+
+void TextFieldPattern::GetAIWriteInfo(AIWriteInfo& info)
+{
+    // serialize the selected text
+    info.selectStart = selectController_->GetStartIndex();
+    info.selectEnd = selectController_->GetEndIndex();
+    auto selectContent = contentController_->GetSelectedValue(info.selectStart, info.selectEnd);
+    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(selectContent);
+    spanString->EncodeTlv(info.selectBuffer);
+    TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "Selected range=[%{public}d--%{public}d], content = %{public}s",
+        info.selectStart, info.selectEnd, spanString->GetString().c_str());
+
+    // serialize the sentenced-level text
+    auto textSize = static_cast<int32_t>(contentController_->GetWideText().length());
+    auto contentAll = contentController_->GetWideText();
+    auto sentenceStart = 0;
+    auto sentenceEnd = textSize;
+    for (int32_t i = info.selectStart; i >= 0; --i) {
+        if (aiWriteAdapter_->IsSentenceBoundary(contentAll[i])) {
+            sentenceStart = i + 1;
+            break;
+        }
+    }
+    for (int32_t i = info.selectEnd; i < textSize; i++) {
+        if (aiWriteAdapter_->IsSentenceBoundary(contentAll[i])) {
+            sentenceEnd = i;
+            break;
+        }
+    }
+    auto sentenceContent = contentController_->GetSelectedValue(sentenceStart, sentenceEnd);
+    spanString = AceType::MakeRefPtr<SpanString>(sentenceContent);
+    spanString->EncodeTlv(info.selectBuffer);
+    TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "Sentence range=[%{public}d--%{public}d], content = %{public}s",
+        sentenceStart, sentenceEnd, spanString->GetString().c_str());
+}
+
+void TextFieldPattern::HandleOnAIWrite()
+{
+    AIWriteInfo info;
+    GetAIWriteInfo(info);
+    CloseSelectOverlay();
+    CloseKeyboard(true);
+
+    auto callback = [weak = WeakClaim(this), info](std::vector<uint8_t>& buffer) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleAIWriteResult(info.selectStart, info.selectEnd, buffer);
+        auto aiWriteAdapter = pattern->aiWriteAdapter_;
+        CHECK_NULL_VOID(aiWriteAdapter);
+        aiWriteAdapter->CloseModalUIExtension();
+    };
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    aiWriteAdapter_->SetPipelineContext(pipeline);
+    aiWriteAdapter_->ShowModalUIExtension(info, callback);
+}
+
+void TextFieldPattern::HandleAIWriteResult(int32_t start, int32_t end, std::vector<uint8_t>& buffer)
+{
+    RefPtr<SpanString> spanString = SpanString::DecodeTlv(buffer);
+    auto resultText = spanString->GetString();
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "Backfilling results range=[%{public}d--%{public}d], content = %{public}s",
+        start, end, spanString->GetString().c_str());
+    if (spanString->GetSpanItems().empty()) {
+        return;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto value = contentController_->GetSelectedValue(start, end);
+    BeforeIMEDeleteValue(value, TextDeleteDirection::FORWARD, start);
+    BeforeIMEInsertValue(resultText, start);
+    contentController_->ReplaceSelectedValue(start, end, resultText);
+    AfterIMEDeleteValue(value, TextDeleteDirection::FORWARD);
+    AfterIMEInsertValue(resultText);
+    CloseSelectOverlay(true);
+    SetCaretPosition(start + spanString->GetLength());
+    StartTwinkling();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 } // namespace OHOS::Ace::NG

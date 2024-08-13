@@ -22,6 +22,7 @@
 #include <set>
 #include <string>
 
+#include "core/common/ai/ai_write_adapter.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_action.h"
 #include "core/common/ime/text_input_client.h"
@@ -743,7 +744,10 @@ public:
     bool SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList);
 
     void HandleOnCameraInput() override;
-
+    void HandleOnAIWrite();
+    void GetAIWriteInfo(AIWriteInfo& info);
+    void HandleAIWriteResult(int32_t start, int32_t end, std::vector<uint8_t>& buffer);
+    bool IsShowAIWrite();
     RefPtr<FocusHub> GetFocusHub() const;
     void ResetDragOption() override;
     bool NeedShowAIDetect() override;
@@ -1245,6 +1249,7 @@ private:
     std::function<void()> customKeyboardBuilder_;
     std::function<void(int32_t)> caretChangeListener_;
     RefPtr<OverlayManager> keyboardOverlay_;
+    RefPtr<AIWriteAdapter> aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
     Offset selectionMenuOffset_;
     // add for scroll
     RectF richTextRect_;

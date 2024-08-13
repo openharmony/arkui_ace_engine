@@ -89,8 +89,11 @@ public:
     void SetController(const RefPtr<SpanString>& spanString);
 
     static void FromHtml(const JSCallbackInfo& info);
-
+    static void Marshalling(const JSCallbackInfo& info);
+    static void Unmarshalling(const JSCallbackInfo& info);
 private:
+    static void UnmarshallingExec(napi_env env, void *data);
+    static void UnmarshallingComplete(napi_env env, napi_status status, void *data);
     ACE_DISALLOW_COPY_AND_MOVE(JSSpanString);
     RefPtr<SpanString> spanString_;
 };
