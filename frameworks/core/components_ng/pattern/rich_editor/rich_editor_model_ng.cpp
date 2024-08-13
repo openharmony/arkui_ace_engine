@@ -284,14 +284,12 @@ void RichEditorModelNG::SetTextDetectConfig(const TextDetectConfig& textDetectCo
     pattern->SetTextDetectConfig(textDetectConfig);
 }
 
-void RichEditorModelNG::SetTextDetectConfig(FrameNode* frameNode, const std::string& value,
-    std::function<void(const std::string&)>&& onResult)
+void RichEditorModelNG::SetTextDetectConfig(FrameNode* frameNode, const TextDetectConfig& textDetectConfig)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetTextDetectTypes(value);
-    pattern->SetOnResult(std::move(onResult));
+    pattern->SetTextDetectConfig(textDetectConfig);
 }
 
 void RichEditorModelNG::SetOnSelectionChange(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& callback)

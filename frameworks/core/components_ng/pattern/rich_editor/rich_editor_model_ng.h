@@ -53,8 +53,7 @@ public:
     void SetRequestKeyboardOnFocus(bool needToRequest) override;
 
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
-    static void SetTextDetectConfig(FrameNode* frameNode, const std::string& value,
-        std::function<void(const std::string&)>&& onResult);
+    static void SetTextDetectConfig(FrameNode* frameNode, const TextDetectConfig& textDetectConfig);
     static void SetOnIMEInputComplete(FrameNode* frameNode,
         std::function<void(const RichEditorAbstractSpanResult&)>&& callback);
     static void SetOnDidIMEInput(FrameNode* frameNode, std::function<void(const TextRange&)>&& callback);

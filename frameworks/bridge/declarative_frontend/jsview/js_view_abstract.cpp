@@ -9303,7 +9303,6 @@ bool JSViewAbstract::ParseAIEntityColor(const JSRef<JSObject>& obj, TextDetectCo
     JSRef<JSVal> colorValue = decorationObj->GetProperty("color");
     JSRef<JSVal> styleValue = decorationObj->GetProperty("style");
 
-    TextDecoration textDecoration;
     if (typeValue->IsNumber()) {
         textDetectConfig.entityDecorationType = static_cast<TextDecoration>(typeValue->ToNumber<int32_t>());
     } else {
