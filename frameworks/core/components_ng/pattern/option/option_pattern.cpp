@@ -162,7 +162,7 @@ void OptionPattern::SetFocusStyle()
 
     if (!isTextColorSetByUser_) {
         SetFontColor(selectTheme_->GetOptionFocusedFontColor());
-        text_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        text_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 
