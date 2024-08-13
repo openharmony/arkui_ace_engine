@@ -205,7 +205,7 @@ class __Repeat<T> implements RepeatAPI<T> {
         const typeGenFuncSafe = (item: T, index: number): string => {
             const itemType = typeGenFunc(item, index);
             const itemFunc = this.config.itemGenFuncs[itemType];
-            if (typeof itemFunc != 'function') {
+            if (typeof itemFunc !== 'function') {
                 stateMgmtConsole.applicationError(`Repeat with virtual scroll. Missing Repeat.template for id '${itemType}'`);
                 return '';
             }
