@@ -534,14 +534,24 @@ public:
         return isDrag_;
     }
 
-    void SetIsFoldable(bool isFoldable)
+    void SetFoldStatusChanged(bool isFoldStatusChanged)
     {
-        isFoldable_ = isFoldable;
+        isFoldStatusChanged_ = isFoldStatusChanged;
     }
 
-    bool IsFoldable() const
+    bool IsFoldStatusChanged() const
     {
-        return isFoldable_;
+        return isFoldStatusChanged_;
+    }
+
+    void UpdateFoldDisplayModeChangedCallbackId(std::optional<int32_t> id)
+    {
+        foldDisplayModeChangedCallbackId_ = id;
+    }
+
+    bool HasFoldDisplayModeChangedCallbackId()
+    {
+        return foldDisplayModeChangedCallbackId_.has_value();
     }
 
     // Get ScrollHeight before avoid keyboard
@@ -553,7 +563,7 @@ public:
         }
         return height_ - titleHeight;
     }
-    
+
     float GetFirstChildHeight() const;
 
     RefPtr<OverlayManager> GetOverlayManager();
@@ -697,10 +707,11 @@ private:
     std::vector<float> unSortedSheetDentents_;
 
     std::shared_ptr<AnimationUtils::Animation> animation_;
+    std::optional<int32_t> foldDisplayModeChangedCallbackId_;
 
     bool show_ = true;
     bool isDrag_ = false;
-    bool isFoldable_ = false;
+    bool isFoldStatusChanged_ = false;
     bool isNeedProcessHeight_ = false;
     bool isSheetNeedScroll_ = false; // true if Sheet is ready to receive scroll offset.
     bool isSheetPosChanged_ = false; // UpdateTransformTranslate end
