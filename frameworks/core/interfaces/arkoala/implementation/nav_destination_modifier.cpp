@@ -17,7 +17,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavDestinationInterfaceModifier {
-void _setNavDestinationOptionsImpl(Ark_NativePointer node)
+void SetNavDestinationOptionsImpl(Ark_NativePointer node)
 {
 }
 } // NavDestinationInterfaceModifier
@@ -88,7 +88,7 @@ void SystemBarStyleImpl(Ark_NativePointer node,
 const GENERATED_ArkUINavDestinationModifier* GetNavDestinationModifier()
 {
     static const GENERATED_ArkUINavDestinationModifier ArkUINavDestinationModifierImpl {
-        NavDestinationInterfaceModifier::_setNavDestinationOptionsImpl,
+        NavDestinationInterfaceModifier::SetNavDestinationOptionsImpl,
         NavDestinationAttributeModifier::TitleImpl,
         NavDestinationAttributeModifier::HideTitleBarImpl,
         NavDestinationAttributeModifier::OnShownImpl,

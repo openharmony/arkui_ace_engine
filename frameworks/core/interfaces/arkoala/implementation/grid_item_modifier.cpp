@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GridItemInterfaceModifier {
-void _setGridItemOptionsImpl(Ark_NativePointer node,
-                             const Opt_GridItemOptions* value)
+void SetGridItemOptionsImpl(Ark_NativePointer node,
+                            const Opt_GridItemOptions* value)
 {
 }
 } // GridItemInterfaceModifier
@@ -59,7 +59,7 @@ void OnSelectImpl(Ark_NativePointer node,
 const GENERATED_ArkUIGridItemModifier* GetGridItemModifier()
 {
     static const GENERATED_ArkUIGridItemModifier ArkUIGridItemModifierImpl {
-        GridItemInterfaceModifier::_setGridItemOptionsImpl,
+        GridItemInterfaceModifier::SetGridItemOptionsImpl,
         GridItemAttributeModifier::RowStartImpl,
         GridItemAttributeModifier::RowEndImpl,
         GridItemAttributeModifier::ColumnStartImpl,

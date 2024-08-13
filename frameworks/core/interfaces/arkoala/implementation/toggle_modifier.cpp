@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ToggleInterfaceModifier {
-void _setToggleOptionsImpl(Ark_NativePointer node,
-                           const Type_ToggleInterface__setToggleOptions_Arg0* options)
+void SetToggleOptionsImpl(Ark_NativePointer node,
+                          const Type_ToggleInterface_setToggleOptions_Arg0* options)
 {
 }
 } // ToggleInterfaceModifier
@@ -47,7 +47,7 @@ void SwitchStyleImpl(Ark_NativePointer node,
 const GENERATED_ArkUIToggleModifier* GetToggleModifier()
 {
     static const GENERATED_ArkUIToggleModifier ArkUIToggleModifierImpl {
-        ToggleInterfaceModifier::_setToggleOptionsImpl,
+        ToggleInterfaceModifier::SetToggleOptionsImpl,
         ToggleAttributeModifier::OnChangeImpl,
         ToggleAttributeModifier::ContentModifierImpl,
         ToggleAttributeModifier::SelectedColorImpl,

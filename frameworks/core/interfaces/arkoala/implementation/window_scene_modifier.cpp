@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WindowSceneInterfaceModifier {
-void _setWindowSceneOptionsImpl(Ark_NativePointer node,
-                                const Ark_Number* persistentId)
+void SetWindowSceneOptionsImpl(Ark_NativePointer node,
+                               const Ark_Number* persistentId)
 {
 }
 } // WindowSceneInterfaceModifier
@@ -32,7 +32,7 @@ void AttractionEffectImpl(Ark_NativePointer node,
 const GENERATED_ArkUIWindowSceneModifier* GetWindowSceneModifier()
 {
     static const GENERATED_ArkUIWindowSceneModifier ArkUIWindowSceneModifierImpl {
-        WindowSceneInterfaceModifier::_setWindowSceneOptionsImpl,
+        WindowSceneInterfaceModifier::SetWindowSceneOptionsImpl,
         WindowSceneAttributeModifier::AttractionEffectImpl,
     };
     return &ArkUIWindowSceneModifierImpl;

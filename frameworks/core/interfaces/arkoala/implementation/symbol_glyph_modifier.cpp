@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SymbolGlyphInterfaceModifier {
-void _setSymbolGlyphOptionsImpl(Ark_NativePointer node,
-                                const Opt_Resource* value)
+void SetSymbolGlyphOptionsImpl(Ark_NativePointer node,
+                               const Opt_Resource* value)
 {
 }
 } // SymbolGlyphInterfaceModifier
@@ -57,7 +57,7 @@ void SymbolEffect1Impl(Ark_NativePointer node,
 const GENERATED_ArkUISymbolGlyphModifier* GetSymbolGlyphModifier()
 {
     static const GENERATED_ArkUISymbolGlyphModifier ArkUISymbolGlyphModifierImpl {
-        SymbolGlyphInterfaceModifier::_setSymbolGlyphOptionsImpl,
+        SymbolGlyphInterfaceModifier::SetSymbolGlyphOptionsImpl,
         SymbolGlyphAttributeModifier::FontSizeImpl,
         SymbolGlyphAttributeModifier::FontColorImpl,
         SymbolGlyphAttributeModifier::FontWeightImpl,

@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PolygonInterfaceModifier {
-void _setPolygonOptionsImpl(Ark_NativePointer node,
-                            const Opt_Type_PolygonInterface__setPolygonOptions_Arg0* value)
+void SetPolygonOptionsImpl(Ark_NativePointer node,
+                           const Opt_Type_PolygonInterface_setPolygonOptions_Arg0* value)
 {
 }
 } // PolygonInterfaceModifier
@@ -31,7 +31,7 @@ void PointsImpl(Ark_NativePointer node,
 const GENERATED_ArkUIPolygonModifier* GetPolygonModifier()
 {
     static const GENERATED_ArkUIPolygonModifier ArkUIPolygonModifierImpl {
-        PolygonInterfaceModifier::_setPolygonOptionsImpl,
+        PolygonInterfaceModifier::SetPolygonOptionsImpl,
         PolygonAttributeModifier::PointsImpl,
     };
     return &ArkUIPolygonModifierImpl;

@@ -17,11 +17,11 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SaveButtonInterfaceModifier {
-void _setSaveButtonOptions0Impl(Ark_NativePointer node)
+void SetSaveButtonOptions0Impl(Ark_NativePointer node)
 {
 }
-void _setSaveButtonOptions1Impl(Ark_NativePointer node,
-                                const Ark_SaveButtonOptions* options)
+void SetSaveButtonOptions1Impl(Ark_NativePointer node,
+                               const Ark_SaveButtonOptions* options)
 {
 }
 } // SaveButtonInterfaceModifier
@@ -34,8 +34,8 @@ void OnClickImpl(Ark_NativePointer node,
 const GENERATED_ArkUISaveButtonModifier* GetSaveButtonModifier()
 {
     static const GENERATED_ArkUISaveButtonModifier ArkUISaveButtonModifierImpl {
-        SaveButtonInterfaceModifier::_setSaveButtonOptions0Impl,
-        SaveButtonInterfaceModifier::_setSaveButtonOptions1Impl,
+        SaveButtonInterfaceModifier::SetSaveButtonOptions0Impl,
+        SaveButtonInterfaceModifier::SetSaveButtonOptions1Impl,
         SaveButtonAttributeModifier::OnClickImpl,
     };
     return &ArkUISaveButtonModifierImpl;

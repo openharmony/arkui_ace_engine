@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DataPanelInterfaceModifier {
-void _setDataPanelOptionsImpl(Ark_NativePointer node,
-                              const Ark_DataPanelOptions* options)
+void SetDataPanelOptionsImpl(Ark_NativePointer node,
+                             const Ark_DataPanelOptions* options)
 {
 }
 } // DataPanelInterfaceModifier
@@ -51,7 +51,7 @@ void ContentModifierImpl(Ark_NativePointer node,
 const GENERATED_ArkUIDataPanelModifier* GetDataPanelModifier()
 {
     static const GENERATED_ArkUIDataPanelModifier ArkUIDataPanelModifierImpl {
-        DataPanelInterfaceModifier::_setDataPanelOptionsImpl,
+        DataPanelInterfaceModifier::SetDataPanelOptionsImpl,
         DataPanelAttributeModifier::CloseEffectImpl,
         DataPanelAttributeModifier::ValueColorsImpl,
         DataPanelAttributeModifier::TrackBackgroundColorImpl,

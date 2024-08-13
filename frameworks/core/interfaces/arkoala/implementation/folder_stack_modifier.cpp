@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FolderStackInterfaceModifier {
-void _setFolderStackOptionsImpl(Ark_NativePointer node,
-                                const Opt_Type_FolderStackInterface__setFolderStackOptions_Arg0* value)
+void SetFolderStackOptionsImpl(Ark_NativePointer node,
+                               const Opt_Type_FolderStackInterface_setFolderStackOptions_Arg0* value)
 {
 }
 } // FolderStackInterfaceModifier
@@ -47,7 +47,7 @@ void AutoHalfFoldImpl(Ark_NativePointer node,
 const GENERATED_ArkUIFolderStackModifier* GetFolderStackModifier()
 {
     static const GENERATED_ArkUIFolderStackModifier ArkUIFolderStackModifierImpl {
-        FolderStackInterfaceModifier::_setFolderStackOptionsImpl,
+        FolderStackInterfaceModifier::SetFolderStackOptionsImpl,
         FolderStackAttributeModifier::AlignContentImpl,
         FolderStackAttributeModifier::OnFolderStateChangeImpl,
         FolderStackAttributeModifier::OnHoverStatusChangeImpl,

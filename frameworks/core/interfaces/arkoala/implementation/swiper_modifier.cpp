@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SwiperInterfaceModifier {
-void _setSwiperOptionsImpl(Ark_NativePointer node,
-                           const Opt_SwiperController* controller)
+void SetSwiperOptionsImpl(Ark_NativePointer node,
+                          const Opt_SwiperController* controller)
 {
 }
 } // SwiperInterfaceModifier
@@ -135,7 +135,7 @@ void IndicatorInteractiveImpl(Ark_NativePointer node,
 const GENERATED_ArkUISwiperModifier* GetSwiperModifier()
 {
     static const GENERATED_ArkUISwiperModifier ArkUISwiperModifierImpl {
-        SwiperInterfaceModifier::_setSwiperOptionsImpl,
+        SwiperInterfaceModifier::SetSwiperOptionsImpl,
         SwiperAttributeModifier::IndexImpl,
         SwiperAttributeModifier::AutoPlayImpl,
         SwiperAttributeModifier::IntervalImpl,

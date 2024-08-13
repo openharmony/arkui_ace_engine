@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TabsInterfaceModifier {
-void _setTabsOptionsImpl(Ark_NativePointer node,
-                         const Opt_Type_TabsInterface__setTabsOptions_Arg0* value)
+void SetTabsOptionsImpl(Ark_NativePointer node,
+                        const Opt_Type_TabsInterface_setTabsOptions_Arg0* value)
 {
 }
 } // TabsInterfaceModifier
@@ -125,7 +125,7 @@ void OnContentWillChangeImpl(Ark_NativePointer node,
 const GENERATED_ArkUITabsModifier* GetTabsModifier()
 {
     static const GENERATED_ArkUITabsModifier ArkUITabsModifierImpl {
-        TabsInterfaceModifier::_setTabsOptionsImpl,
+        TabsInterfaceModifier::SetTabsOptionsImpl,
         TabsAttributeModifier::VerticalImpl,
         TabsAttributeModifier::BarPositionImpl,
         TabsAttributeModifier::ScrollableImpl,

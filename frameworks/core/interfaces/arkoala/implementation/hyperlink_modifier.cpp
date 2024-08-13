@@ -17,9 +17,9 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace HyperlinkInterfaceModifier {
-void _setHyperlinkOptionsImpl(Ark_NativePointer node,
-                              const Type_HyperlinkInterface__setHyperlinkOptions_Arg0* address,
-                              const Opt_Type_HyperlinkInterface__setHyperlinkOptions_Arg1* content)
+void SetHyperlinkOptionsImpl(Ark_NativePointer node,
+                             const Type_HyperlinkInterface_setHyperlinkOptions_Arg0* address,
+                             const Opt_Type_HyperlinkInterface_setHyperlinkOptions_Arg1* content)
 {
 }
 } // HyperlinkInterfaceModifier
@@ -32,7 +32,7 @@ void ColorImpl(Ark_NativePointer node,
 const GENERATED_ArkUIHyperlinkModifier* GetHyperlinkModifier()
 {
     static const GENERATED_ArkUIHyperlinkModifier ArkUIHyperlinkModifierImpl {
-        HyperlinkInterfaceModifier::_setHyperlinkOptionsImpl,
+        HyperlinkInterfaceModifier::SetHyperlinkOptionsImpl,
         HyperlinkAttributeModifier::ColorImpl,
     };
     return &ArkUIHyperlinkModifierImpl;

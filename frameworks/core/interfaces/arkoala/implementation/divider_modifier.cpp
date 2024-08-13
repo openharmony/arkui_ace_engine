@@ -17,7 +17,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DividerInterfaceModifier {
-void _setDividerOptionsImpl(Ark_NativePointer node)
+void SetDividerOptionsImpl(Ark_NativePointer node)
 {
 }
 } // DividerInterfaceModifier
@@ -42,7 +42,7 @@ void LineCapImpl(Ark_NativePointer node,
 const GENERATED_ArkUIDividerModifier* GetDividerModifier()
 {
     static const GENERATED_ArkUIDividerModifier ArkUIDividerModifierImpl {
-        DividerInterfaceModifier::_setDividerOptionsImpl,
+        DividerInterfaceModifier::SetDividerOptionsImpl,
         DividerAttributeModifier::VerticalImpl,
         DividerAttributeModifier::ColorImpl,
         DividerAttributeModifier::StrokeWidthImpl,

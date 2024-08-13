@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TimePickerInterfaceModifier {
-void _setTimePickerOptionsImpl(Ark_NativePointer node,
-                               const Opt_TimePickerOptions* options)
+void SetTimePickerOptionsImpl(Ark_NativePointer node,
+                              const Opt_TimePickerOptions* options)
 {
 }
 } // TimePickerInterfaceModifier
@@ -59,7 +59,7 @@ void EnableHapticFeedbackImpl(Ark_NativePointer node,
 const GENERATED_ArkUITimePickerModifier* GetTimePickerModifier()
 {
     static const GENERATED_ArkUITimePickerModifier ArkUITimePickerModifierImpl {
-        TimePickerInterfaceModifier::_setTimePickerOptionsImpl,
+        TimePickerInterfaceModifier::SetTimePickerOptionsImpl,
         TimePickerAttributeModifier::UseMilitaryTimeImpl,
         TimePickerAttributeModifier::LoopImpl,
         TimePickerAttributeModifier::DisappearTextStyleImpl,

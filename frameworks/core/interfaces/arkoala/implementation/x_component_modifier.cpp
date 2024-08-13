@@ -17,16 +17,16 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace XComponentInterfaceModifier {
-void _setXComponentOptions0Impl(Ark_NativePointer node,
-                                const Type_XComponentInterface__setXComponentOptions_Arg0* value)
+void SetXComponentOptions0Impl(Ark_NativePointer node,
+                               const Type_XComponentInterface_setXComponentOptions_Arg0* value)
 {
 }
-void _setXComponentOptions1Impl(Ark_NativePointer node,
-                                const Type_XComponentInterface__setXComponentOptions1_Arg0* value)
+void SetXComponentOptions1Impl(Ark_NativePointer node,
+                               const Type_XComponentInterface_setXComponentOptions1_Arg0* value)
 {
 }
-void _setXComponentOptions2Impl(Ark_NativePointer node,
-                                const Ark_XComponentOptions* options)
+void SetXComponentOptions2Impl(Ark_NativePointer node,
+                               const Ark_XComponentOptions* options)
 {
 }
 } // XComponentInterfaceModifier
@@ -47,9 +47,9 @@ void EnableAnalyzerImpl(Ark_NativePointer node,
 const GENERATED_ArkUIXComponentModifier* GetXComponentModifier()
 {
     static const GENERATED_ArkUIXComponentModifier ArkUIXComponentModifierImpl {
-        XComponentInterfaceModifier::_setXComponentOptions0Impl,
-        XComponentInterfaceModifier::_setXComponentOptions1Impl,
-        XComponentInterfaceModifier::_setXComponentOptions2Impl,
+        XComponentInterfaceModifier::SetXComponentOptions0Impl,
+        XComponentInterfaceModifier::SetXComponentOptions1Impl,
+        XComponentInterfaceModifier::SetXComponentOptions2Impl,
         XComponentAttributeModifier::OnLoadImpl,
         XComponentAttributeModifier::OnDestroyImpl,
         XComponentAttributeModifier::EnableAnalyzerImpl,

@@ -17,11 +17,11 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavRouterInterfaceModifier {
-void _setNavRouterOptions0Impl(Ark_NativePointer node)
+void SetNavRouterOptions0Impl(Ark_NativePointer node)
 {
 }
-void _setNavRouterOptions1Impl(Ark_NativePointer node,
-                               const Ark_RouteInfo* value)
+void SetNavRouterOptions1Impl(Ark_NativePointer node,
+                              const Ark_RouteInfo* value)
 {
 }
 } // NavRouterInterfaceModifier
@@ -38,8 +38,8 @@ void ModeImpl(Ark_NativePointer node,
 const GENERATED_ArkUINavRouterModifier* GetNavRouterModifier()
 {
     static const GENERATED_ArkUINavRouterModifier ArkUINavRouterModifierImpl {
-        NavRouterInterfaceModifier::_setNavRouterOptions0Impl,
-        NavRouterInterfaceModifier::_setNavRouterOptions1Impl,
+        NavRouterInterfaceModifier::SetNavRouterOptions0Impl,
+        NavRouterInterfaceModifier::SetNavRouterOptions1Impl,
         NavRouterAttributeModifier::OnStateChangeImpl,
         NavRouterAttributeModifier::ModeImpl,
     };

@@ -17,9 +17,9 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace UIExtensionComponentInterfaceModifier {
-void _setUIExtensionComponentOptionsImpl(Ark_NativePointer node,
-                                         const Ark_CustomObject* want,
-                                         const Opt_UIExtensionOptions* options)
+void SetUIExtensionComponentOptionsImpl(Ark_NativePointer node,
+                                        const Ark_CustomObject* want,
+                                        const Opt_UIExtensionOptions* options)
 {
 }
 } // UIExtensionComponentInterfaceModifier
@@ -52,7 +52,7 @@ void OnTerminatedImpl(Ark_NativePointer node,
 const GENERATED_ArkUIUIExtensionComponentModifier* GetUIExtensionComponentModifier()
 {
     static const GENERATED_ArkUIUIExtensionComponentModifier ArkUIUIExtensionComponentModifierImpl {
-        UIExtensionComponentInterfaceModifier::_setUIExtensionComponentOptionsImpl,
+        UIExtensionComponentInterfaceModifier::SetUIExtensionComponentOptionsImpl,
         UIExtensionComponentAttributeModifier::OnRemoteReadyImpl,
         UIExtensionComponentAttributeModifier::OnReceiveImpl,
         UIExtensionComponentAttributeModifier::OnResultImpl,

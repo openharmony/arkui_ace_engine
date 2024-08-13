@@ -17,7 +17,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LoadingProgressInterfaceModifier {
-void _setLoadingProgressOptionsImpl(Ark_NativePointer node)
+void SetLoadingProgressOptionsImpl(Ark_NativePointer node)
 {
 }
 } // LoadingProgressInterfaceModifier
@@ -38,7 +38,7 @@ void ContentModifierImpl(Ark_NativePointer node,
 const GENERATED_ArkUILoadingProgressModifier* GetLoadingProgressModifier()
 {
     static const GENERATED_ArkUILoadingProgressModifier ArkUILoadingProgressModifierImpl {
-        LoadingProgressInterfaceModifier::_setLoadingProgressOptionsImpl,
+        LoadingProgressInterfaceModifier::SetLoadingProgressOptionsImpl,
         LoadingProgressAttributeModifier::ColorImpl,
         LoadingProgressAttributeModifier::EnableLoadingImpl,
         LoadingProgressAttributeModifier::ContentModifierImpl,

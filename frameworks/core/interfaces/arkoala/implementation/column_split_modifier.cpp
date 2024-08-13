@@ -17,7 +17,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ColumnSplitInterfaceModifier {
-void _setColumnSplitOptionsImpl(Ark_NativePointer node)
+void SetColumnSplitOptionsImpl(Ark_NativePointer node)
 {
 }
 } // ColumnSplitInterfaceModifier
@@ -34,7 +34,7 @@ void DividerImpl(Ark_NativePointer node,
 const GENERATED_ArkUIColumnSplitModifier* GetColumnSplitModifier()
 {
     static const GENERATED_ArkUIColumnSplitModifier ArkUIColumnSplitModifierImpl {
-        ColumnSplitInterfaceModifier::_setColumnSplitOptionsImpl,
+        ColumnSplitInterfaceModifier::SetColumnSplitOptionsImpl,
         ColumnSplitAttributeModifier::ResizeableImpl,
         ColumnSplitAttributeModifier::DividerImpl,
     };

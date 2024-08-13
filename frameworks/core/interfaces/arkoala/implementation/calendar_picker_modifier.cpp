@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CalendarPickerInterfaceModifier {
-void _setCalendarPickerOptionsImpl(Ark_NativePointer node,
-                                   const Opt_CalendarOptions* options)
+void SetCalendarPickerOptionsImpl(Ark_NativePointer node,
+                                  const Opt_CalendarOptions* options)
 {
 }
 } // CalendarPickerInterfaceModifier
@@ -40,7 +40,7 @@ void OnChangeImpl(Ark_NativePointer node,
 const GENERATED_ArkUICalendarPickerModifier* GetCalendarPickerModifier()
 {
     static const GENERATED_ArkUICalendarPickerModifier ArkUICalendarPickerModifierImpl {
-        CalendarPickerInterfaceModifier::_setCalendarPickerOptionsImpl,
+        CalendarPickerInterfaceModifier::SetCalendarPickerOptionsImpl,
         CalendarPickerAttributeModifier::EdgeAlignImpl,
         CalendarPickerAttributeModifier::TextStyleImpl,
         CalendarPickerAttributeModifier::OnChangeImpl,

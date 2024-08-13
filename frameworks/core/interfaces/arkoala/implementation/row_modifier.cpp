@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RowInterfaceModifier {
-void _setRowOptionsImpl(Ark_NativePointer node,
-                        const Opt_Type_RowInterface__setRowOptions_Arg0* value)
+void SetRowOptionsImpl(Ark_NativePointer node,
+                       const Opt_Type_RowInterface_setRowOptions_Arg0* value)
 {
 }
 } // RowInterfaceModifier
@@ -39,7 +39,7 @@ void PointLightImpl(Ark_NativePointer node,
 const GENERATED_ArkUIRowModifier* GetRowModifier()
 {
     static const GENERATED_ArkUIRowModifier ArkUIRowModifierImpl {
-        RowInterfaceModifier::_setRowOptionsImpl,
+        RowInterfaceModifier::SetRowOptionsImpl,
         RowAttributeModifier::AlignItemsImpl,
         RowAttributeModifier::JustifyContentImpl,
         RowAttributeModifier::PointLightImpl,

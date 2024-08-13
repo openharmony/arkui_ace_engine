@@ -17,14 +17,14 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FlowItemInterfaceModifier {
-void _setFlowItemOptionsImpl(Ark_NativePointer node)
+void SetFlowItemOptionsImpl(Ark_NativePointer node)
 {
 }
 } // FlowItemInterfaceModifier
 const GENERATED_ArkUIFlowItemModifier* GetFlowItemModifier()
 {
     static const GENERATED_ArkUIFlowItemModifier ArkUIFlowItemModifierImpl {
-        FlowItemInterfaceModifier::_setFlowItemOptionsImpl,
+        FlowItemInterfaceModifier::SetFlowItemOptionsImpl,
     };
     return &ArkUIFlowItemModifierImpl;
 }

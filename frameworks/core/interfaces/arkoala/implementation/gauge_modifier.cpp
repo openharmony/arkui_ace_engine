@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GaugeInterfaceModifier {
-void _setGaugeOptionsImpl(Ark_NativePointer node,
-                          const Type_GaugeInterface__setGaugeOptions_Arg0* options)
+void SetGaugeOptionsImpl(Ark_NativePointer node,
+                         const Type_GaugeInterface_setGaugeOptions_Arg0* options)
 {
 }
 } // GaugeInterfaceModifier
@@ -67,7 +67,7 @@ void ContentModifierImpl(Ark_NativePointer node,
 const GENERATED_ArkUIGaugeModifier* GetGaugeModifier()
 {
     static const GENERATED_ArkUIGaugeModifier ArkUIGaugeModifierImpl {
-        GaugeInterfaceModifier::_setGaugeOptionsImpl,
+        GaugeInterfaceModifier::SetGaugeOptionsImpl,
         GaugeAttributeModifier::ValueImpl,
         GaugeAttributeModifier::StartAngleImpl,
         GaugeAttributeModifier::EndAngleImpl,

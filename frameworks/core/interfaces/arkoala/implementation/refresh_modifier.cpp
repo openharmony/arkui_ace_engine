@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RefreshInterfaceModifier {
-void _setRefreshOptionsImpl(Ark_NativePointer node,
-                            const Ark_RefreshOptions* value)
+void SetRefreshOptionsImpl(Ark_NativePointer node,
+                           const Ark_RefreshOptions* value)
 {
 }
 } // RefreshInterfaceModifier
@@ -51,7 +51,7 @@ void PullDownRatioImpl(Ark_NativePointer node,
 const GENERATED_ArkUIRefreshModifier* GetRefreshModifier()
 {
     static const GENERATED_ArkUIRefreshModifier ArkUIRefreshModifierImpl {
-        RefreshInterfaceModifier::_setRefreshOptionsImpl,
+        RefreshInterfaceModifier::SetRefreshOptionsImpl,
         RefreshAttributeModifier::OnStateChangeImpl,
         RefreshAttributeModifier::OnRefreshingImpl,
         RefreshAttributeModifier::RefreshOffsetImpl,

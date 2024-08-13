@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PolylineInterfaceModifier {
-void _setPolylineOptionsImpl(Ark_NativePointer node,
-                             const Opt_Type_PolylineInterface__setPolylineOptions_Arg0* value)
+void SetPolylineOptionsImpl(Ark_NativePointer node,
+                            const Opt_Type_PolylineInterface_setPolylineOptions_Arg0* value)
 {
 }
 } // PolylineInterfaceModifier
@@ -31,7 +31,7 @@ void PointsImpl(Ark_NativePointer node,
 const GENERATED_ArkUIPolylineModifier* GetPolylineModifier()
 {
     static const GENERATED_ArkUIPolylineModifier ArkUIPolylineModifierImpl {
-        PolylineInterfaceModifier::_setPolylineOptionsImpl,
+        PolylineInterfaceModifier::SetPolylineOptionsImpl,
         PolylineAttributeModifier::PointsImpl,
     };
     return &ArkUIPolylineModifierImpl;

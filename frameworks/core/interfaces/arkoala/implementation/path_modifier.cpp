@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PathInterfaceModifier {
-void _setPathOptionsImpl(Ark_NativePointer node,
-                         const Opt_Type_PathInterface__setPathOptions_Arg0* value)
+void SetPathOptionsImpl(Ark_NativePointer node,
+                        const Opt_Type_PathInterface_setPathOptions_Arg0* value)
 {
 }
 } // PathInterfaceModifier
@@ -31,7 +31,7 @@ void CommandsImpl(Ark_NativePointer node,
 const GENERATED_ArkUIPathModifier* GetPathModifier()
 {
     static const GENERATED_ArkUIPathModifier ArkUIPathModifierImpl {
-        PathInterfaceModifier::_setPathOptionsImpl,
+        PathInterfaceModifier::SetPathOptionsImpl,
         PathAttributeModifier::CommandsImpl,
     };
     return &ArkUIPathModifierImpl;

@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SideBarContainerInterfaceModifier {
-void _setSideBarContainerOptionsImpl(Ark_NativePointer node,
-                                     const Opt_SideBarContainerType* type)
+void SetSideBarContainerOptionsImpl(Ark_NativePointer node,
+                                    const Opt_SideBarContainerType* type)
 {
 }
 } // SideBarContainerInterfaceModifier
@@ -83,7 +83,7 @@ void MinContentWidthImpl(Ark_NativePointer node,
 const GENERATED_ArkUISideBarContainerModifier* GetSideBarContainerModifier()
 {
     static const GENERATED_ArkUISideBarContainerModifier ArkUISideBarContainerModifierImpl {
-        SideBarContainerInterfaceModifier::_setSideBarContainerOptionsImpl,
+        SideBarContainerInterfaceModifier::SetSideBarContainerOptionsImpl,
         SideBarContainerAttributeModifier::ShowSideBarImpl,
         SideBarContainerAttributeModifier::ControlButtonImpl,
         SideBarContainerAttributeModifier::ShowControlButtonImpl,

@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PanelInterfaceModifier {
-void _setPanelOptionsImpl(Ark_NativePointer node,
-                          Ark_Boolean show)
+void SetPanelOptionsImpl(Ark_NativePointer node,
+                         Ark_Boolean show)
 {
 }
 } // PanelInterfaceModifier
@@ -75,7 +75,7 @@ void OnHeightChangeImpl(Ark_NativePointer node,
 const GENERATED_ArkUIPanelModifier* GetPanelModifier()
 {
     static const GENERATED_ArkUIPanelModifier ArkUIPanelModifierImpl {
-        PanelInterfaceModifier::_setPanelOptionsImpl,
+        PanelInterfaceModifier::SetPanelOptionsImpl,
         PanelAttributeModifier::ModeImpl,
         PanelAttributeModifier::TypeImpl,
         PanelAttributeModifier::DragBarImpl,

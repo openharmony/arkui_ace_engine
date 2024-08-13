@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace VideoInterfaceModifier {
-void _setVideoOptionsImpl(Ark_NativePointer node,
-                          const Ark_VideoOptions* value)
+void SetVideoOptionsImpl(Ark_NativePointer node,
+                         const Ark_VideoOptions* value)
 {
 }
 } // VideoInterfaceModifier
@@ -95,7 +95,7 @@ void AnalyzerConfigImpl(Ark_NativePointer node,
 const GENERATED_ArkUIVideoModifier* GetVideoModifier()
 {
     static const GENERATED_ArkUIVideoModifier ArkUIVideoModifierImpl {
-        VideoInterfaceModifier::_setVideoOptionsImpl,
+        VideoInterfaceModifier::SetVideoOptionsImpl,
         VideoAttributeModifier::MutedImpl,
         VideoAttributeModifier::AutoPlayImpl,
         VideoAttributeModifier::ControlsImpl,

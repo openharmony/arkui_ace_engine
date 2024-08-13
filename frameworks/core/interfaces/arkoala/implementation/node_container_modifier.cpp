@@ -17,15 +17,15 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NodeContainerInterfaceModifier {
-void _setNodeContainerOptionsImpl(Ark_NativePointer node,
-                                  const Ark_CustomObject* controller)
+void SetNodeContainerOptionsImpl(Ark_NativePointer node,
+                                 const Ark_CustomObject* controller)
 {
 }
 } // NodeContainerInterfaceModifier
 const GENERATED_ArkUINodeContainerModifier* GetNodeContainerModifier()
 {
     static const GENERATED_ArkUINodeContainerModifier ArkUINodeContainerModifierImpl {
-        NodeContainerInterfaceModifier::_setNodeContainerOptionsImpl,
+        NodeContainerInterfaceModifier::SetNodeContainerOptionsImpl,
     };
     return &ArkUINodeContainerModifierImpl;
 }

@@ -17,7 +17,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageAnimatorInterfaceModifier {
-void _setImageAnimatorOptionsImpl(Ark_NativePointer node)
+void SetImageAnimatorOptionsImpl(Ark_NativePointer node)
 {
 }
 } // ImageAnimatorInterfaceModifier
@@ -78,7 +78,7 @@ void OnFinishImpl(Ark_NativePointer node,
 const GENERATED_ArkUIImageAnimatorModifier* GetImageAnimatorModifier()
 {
     static const GENERATED_ArkUIImageAnimatorModifier ArkUIImageAnimatorModifierImpl {
-        ImageAnimatorInterfaceModifier::_setImageAnimatorOptionsImpl,
+        ImageAnimatorInterfaceModifier::SetImageAnimatorOptionsImpl,
         ImageAnimatorAttributeModifier::ImagesImpl,
         ImageAnimatorAttributeModifier::StateImpl,
         ImageAnimatorAttributeModifier::DurationImpl,

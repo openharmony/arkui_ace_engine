@@ -17,14 +17,14 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CommonInterfaceModifier {
-void _setCommonOptionsImpl(Ark_NativePointer node)
+void SetCommonOptionsImpl(Ark_NativePointer node)
 {
 }
 } // CommonInterfaceModifier
 const GENERATED_ArkUICommonModifier* GetCommonModifier()
 {
     static const GENERATED_ArkUICommonModifier ArkUICommonModifierImpl {
-        CommonInterfaceModifier::_setCommonOptionsImpl,
+        CommonInterfaceModifier::SetCommonOptionsImpl,
     };
     return &ArkUICommonModifierImpl;
 }

@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SliderInterfaceModifier {
-void _setSliderOptionsImpl(Ark_NativePointer node,
-                           const Opt_SliderOptions* options)
+void SetSliderOptionsImpl(Ark_NativePointer node,
+                          const Opt_SliderOptions* options)
 {
 }
 } // SliderInterfaceModifier
@@ -112,7 +112,7 @@ void SlideRangeImpl(Ark_NativePointer node,
 const GENERATED_ArkUISliderModifier* GetSliderModifier()
 {
     static const GENERATED_ArkUISliderModifier ArkUISliderModifierImpl {
-        SliderInterfaceModifier::_setSliderOptionsImpl,
+        SliderInterfaceModifier::SetSliderOptionsImpl,
         SliderAttributeModifier::BlockColorImpl,
         SliderAttributeModifier::TrackColorImpl,
         SliderAttributeModifier::SelectedColorImpl,

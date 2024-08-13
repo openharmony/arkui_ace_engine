@@ -17,7 +17,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CounterInterfaceModifier {
-void _setCounterOptionsImpl(Ark_NativePointer node)
+void SetCounterOptionsImpl(Ark_NativePointer node)
 {
 }
 } // CounterInterfaceModifier
@@ -42,7 +42,7 @@ void EnableIncImpl(Ark_NativePointer node,
 const GENERATED_ArkUICounterModifier* GetCounterModifier()
 {
     static const GENERATED_ArkUICounterModifier ArkUICounterModifierImpl {
-        CounterInterfaceModifier::_setCounterOptionsImpl,
+        CounterInterfaceModifier::SetCounterOptionsImpl,
         CounterAttributeModifier::OnIncImpl,
         CounterAttributeModifier::OnDecImpl,
         CounterAttributeModifier::EnableDecImpl,

@@ -17,17 +17,17 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageInterfaceModifier {
-void _setImageOptions0Impl(Ark_NativePointer node,
-                           const Type_ImageInterface__setImageOptions_Arg0* src)
+void SetImageOptions0Impl(Ark_NativePointer node,
+                          const Type_ImageInterface_setImageOptions_Arg0* src)
 {
 }
-void _setImageOptions1Impl(Ark_NativePointer node,
-                           const Type_ImageInterface__setImageOptions1_Arg0* src)
+void SetImageOptions1Impl(Ark_NativePointer node,
+                          const Type_ImageInterface_setImageOptions1_Arg0* src)
 {
 }
-void _setImageOptions2Impl(Ark_NativePointer node,
-                           const Type_ImageInterface__setImageOptions2_Arg0* src,
-                           const Ark_ImageAIOptions* imageAIOptions)
+void SetImageOptions2Impl(Ark_NativePointer node,
+                          const Type_ImageInterface_setImageOptions2_Arg0* src,
+                          const Ark_ImageAIOptions* imageAIOptions)
 {
 }
 } // ImageInterfaceModifier
@@ -136,9 +136,9 @@ void EnhancedImageQualityImpl(Ark_NativePointer node,
 const GENERATED_ArkUIImageModifier* GetImageModifier()
 {
     static const GENERATED_ArkUIImageModifier ArkUIImageModifierImpl {
-        ImageInterfaceModifier::_setImageOptions0Impl,
-        ImageInterfaceModifier::_setImageOptions1Impl,
-        ImageInterfaceModifier::_setImageOptions2Impl,
+        ImageInterfaceModifier::SetImageOptions0Impl,
+        ImageInterfaceModifier::SetImageOptions1Impl,
+        ImageInterfaceModifier::SetImageOptions2Impl,
         ImageAttributeModifier::AltImpl,
         ImageAttributeModifier::MatchTextDirectionImpl,
         ImageAttributeModifier::FitOriginalSizeImpl,

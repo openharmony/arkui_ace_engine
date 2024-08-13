@@ -17,7 +17,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RowSplitInterfaceModifier {
-void _setRowSplitOptionsImpl(Ark_NativePointer node)
+void SetRowSplitOptionsImpl(Ark_NativePointer node)
 {
 }
 } // RowSplitInterfaceModifier
@@ -30,7 +30,7 @@ void ResizeableImpl(Ark_NativePointer node,
 const GENERATED_ArkUIRowSplitModifier* GetRowSplitModifier()
 {
     static const GENERATED_ArkUIRowSplitModifier ArkUIRowSplitModifierImpl {
-        RowSplitInterfaceModifier::_setRowSplitOptionsImpl,
+        RowSplitInterfaceModifier::SetRowSplitOptionsImpl,
         RowSplitAttributeModifier::ResizeableImpl,
     };
     return &ArkUIRowSplitModifierImpl;

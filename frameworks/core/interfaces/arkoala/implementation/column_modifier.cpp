@@ -22,8 +22,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ColumnInterfaceModifier {
-void _setColumnOptionsImpl(Ark_NativePointer node,
-                           const Opt_Type_ColumnInterface__setColumnOptions_Arg0* value)
+void SetColumnOptionsImpl(Ark_NativePointer node,
+                          const Opt_Type_ColumnInterface_setColumnOptions_Arg0* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     std::tuple<Ark_Float32, Ark_Int32> space = Converter::ConvertOrDefault(
@@ -70,7 +70,7 @@ void PointLightImpl(Ark_NativePointer node,
 const GENERATED_ArkUIColumnModifier* GetColumnModifier()
 {
     static const GENERATED_ArkUIColumnModifier ArkUIColumnModifierImpl {
-        ColumnInterfaceModifier::_setColumnOptionsImpl,
+        ColumnInterfaceModifier::SetColumnOptionsImpl,
         ColumnAttributeModifier::AlignItemsImpl,
         ColumnAttributeModifier::JustifyContentImpl,
         ColumnAttributeModifier::PointLightImpl,

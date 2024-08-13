@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextInputInterfaceModifier {
-void _setTextInputOptionsImpl(Ark_NativePointer node,
-                              const Opt_TextInputOptions* value)
+void SetTextInputOptionsImpl(Ark_NativePointer node,
+                             const Opt_TextInputOptions* value)
 {
 }
 } // TextInputInterfaceModifier
@@ -282,7 +282,7 @@ void EnablePreviewTextImpl(Ark_NativePointer node,
 const GENERATED_ArkUITextInputModifier* GetTextInputModifier()
 {
     static const GENERATED_ArkUITextInputModifier ArkUITextInputModifierImpl {
-        TextInputInterfaceModifier::_setTextInputOptionsImpl,
+        TextInputInterfaceModifier::SetTextInputOptionsImpl,
         TextInputAttributeModifier::TypeImpl,
         TextInputAttributeModifier::ContentTypeImpl,
         TextInputAttributeModifier::PlaceholderColorImpl,

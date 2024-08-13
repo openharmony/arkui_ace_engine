@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RectInterfaceModifier {
-void _setRectOptionsImpl(Ark_NativePointer node,
-                         const Opt_Type_RectInterface__setRectOptions_Arg0* value)
+void SetRectOptionsImpl(Ark_NativePointer node,
+                        const Opt_Type_RectInterface_setRectOptions_Arg0* value)
 {
 }
 } // RectInterfaceModifier
@@ -39,7 +39,7 @@ void RadiusImpl(Ark_NativePointer node,
 const GENERATED_ArkUIRectModifier* GetRectModifier()
 {
     static const GENERATED_ArkUIRectModifier ArkUIRectModifierImpl {
-        RectInterfaceModifier::_setRectOptionsImpl,
+        RectInterfaceModifier::SetRectOptionsImpl,
         RectAttributeModifier::RadiusWidthImpl,
         RectAttributeModifier::RadiusHeightImpl,
         RectAttributeModifier::RadiusImpl,

@@ -17,11 +17,11 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavigatorInterfaceModifier {
-void _setNavigatorOptions0Impl(Ark_NativePointer node,
-                               const Opt_Type_NavigatorInterface__setNavigatorOptions_Arg0* value)
+void SetNavigatorOptions0Impl(Ark_NativePointer node,
+                              const Opt_Type_NavigatorInterface_setNavigatorOptions_Arg0* value)
 {
 }
-void _setNavigatorOptions1Impl(Ark_NativePointer node)
+void SetNavigatorOptions1Impl(Ark_NativePointer node)
 {
 }
 } // NavigatorInterfaceModifier
@@ -46,8 +46,8 @@ void ParamsImpl(Ark_NativePointer node,
 const GENERATED_ArkUINavigatorModifier* GetNavigatorModifier()
 {
     static const GENERATED_ArkUINavigatorModifier ArkUINavigatorModifierImpl {
-        NavigatorInterfaceModifier::_setNavigatorOptions0Impl,
-        NavigatorInterfaceModifier::_setNavigatorOptions1Impl,
+        NavigatorInterfaceModifier::SetNavigatorOptions0Impl,
+        NavigatorInterfaceModifier::SetNavigatorOptions1Impl,
         NavigatorAttributeModifier::ActiveImpl,
         NavigatorAttributeModifier::TypeImpl,
         NavigatorAttributeModifier::TargetImpl,

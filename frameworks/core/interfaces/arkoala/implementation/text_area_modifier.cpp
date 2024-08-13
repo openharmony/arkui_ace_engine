@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextAreaInterfaceModifier {
-void _setTextAreaOptionsImpl(Ark_NativePointer node,
-                             const Opt_TextAreaOptions* value)
+void SetTextAreaOptionsImpl(Ark_NativePointer node,
+                            const Opt_TextAreaOptions* value)
 {
 }
 } // TextAreaInterfaceModifier
@@ -234,7 +234,7 @@ void EnablePreviewTextImpl(Ark_NativePointer node,
 const GENERATED_ArkUITextAreaModifier* GetTextAreaModifier()
 {
     static const GENERATED_ArkUITextAreaModifier ArkUITextAreaModifierImpl {
-        TextAreaInterfaceModifier::_setTextAreaOptionsImpl,
+        TextAreaInterfaceModifier::SetTextAreaOptionsImpl,
         TextAreaAttributeModifier::PlaceholderColorImpl,
         TextAreaAttributeModifier::PlaceholderFontImpl,
         TextAreaAttributeModifier::EnterKeyTypeImpl,

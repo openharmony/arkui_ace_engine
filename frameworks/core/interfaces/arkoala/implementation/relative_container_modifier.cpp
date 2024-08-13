@@ -17,7 +17,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RelativeContainerInterfaceModifier {
-void _setRelativeContainerOptionsImpl(Ark_NativePointer node)
+void SetRelativeContainerOptionsImpl(Ark_NativePointer node)
 {
 }
 } // RelativeContainerInterfaceModifier
@@ -38,7 +38,7 @@ void Barrier1Impl(Ark_NativePointer node,
 const GENERATED_ArkUIRelativeContainerModifier* GetRelativeContainerModifier()
 {
     static const GENERATED_ArkUIRelativeContainerModifier ArkUIRelativeContainerModifierImpl {
-        RelativeContainerInterfaceModifier::_setRelativeContainerOptionsImpl,
+        RelativeContainerInterfaceModifier::SetRelativeContainerOptionsImpl,
         RelativeContainerAttributeModifier::GuideLineImpl,
         RelativeContainerAttributeModifier::Barrier0Impl,
         RelativeContainerAttributeModifier::Barrier1Impl,

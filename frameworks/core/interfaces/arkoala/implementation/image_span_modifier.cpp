@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageSpanInterfaceModifier {
-void _setImageSpanOptionsImpl(Ark_NativePointer node,
-                              const Type_ImageSpanInterface__setImageSpanOptions_Arg0* value)
+void SetImageSpanOptionsImpl(Ark_NativePointer node,
+                             const Type_ImageSpanInterface_setImageSpanOptions_Arg0* value)
 {
 }
 } // ImageSpanInterfaceModifier
@@ -51,7 +51,7 @@ void AltImpl(Ark_NativePointer node,
 const GENERATED_ArkUIImageSpanModifier* GetImageSpanModifier()
 {
     static const GENERATED_ArkUIImageSpanModifier ArkUIImageSpanModifierImpl {
-        ImageSpanInterfaceModifier::_setImageSpanOptionsImpl,
+        ImageSpanInterfaceModifier::SetImageSpanOptionsImpl,
         ImageSpanAttributeModifier::VerticalAlignImpl,
         ImageSpanAttributeModifier::ColorFilterImpl,
         ImageSpanAttributeModifier::ObjectFitImpl,

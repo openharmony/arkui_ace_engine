@@ -17,7 +17,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ContainerSpanInterfaceModifier {
-void _setContainerSpanOptionsImpl(Ark_NativePointer node)
+void SetContainerSpanOptionsImpl(Ark_NativePointer node)
 {
 }
 } // ContainerSpanInterfaceModifier
@@ -30,7 +30,7 @@ void TextBackgroundStyleImpl(Ark_NativePointer node,
 const GENERATED_ArkUIContainerSpanModifier* GetContainerSpanModifier()
 {
     static const GENERATED_ArkUIContainerSpanModifier ArkUIContainerSpanModifierImpl {
-        ContainerSpanInterfaceModifier::_setContainerSpanOptionsImpl,
+        ContainerSpanInterfaceModifier::SetContainerSpanOptionsImpl,
         ContainerSpanAttributeModifier::TextBackgroundStyleImpl,
     };
     return &ArkUIContainerSpanModifierImpl;

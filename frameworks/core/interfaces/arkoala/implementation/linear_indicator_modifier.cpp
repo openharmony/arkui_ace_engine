@@ -17,9 +17,9 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LinearIndicatorInterfaceModifier {
-void _setLinearIndicatorOptionsImpl(Ark_NativePointer node,
-                                    const Opt_Number* count,
-                                    const Opt_LinearIndicatorController* controller)
+void SetLinearIndicatorOptionsImpl(Ark_NativePointer node,
+                                   const Opt_Number* count,
+                                   const Opt_LinearIndicatorController* controller)
 {
 }
 } // LinearIndicatorInterfaceModifier
@@ -40,7 +40,7 @@ void OnChangeImpl(Ark_NativePointer node,
 const GENERATED_ArkUILinearIndicatorModifier* GetLinearIndicatorModifier()
 {
     static const GENERATED_ArkUILinearIndicatorModifier ArkUILinearIndicatorModifierImpl {
-        LinearIndicatorInterfaceModifier::_setLinearIndicatorOptionsImpl,
+        LinearIndicatorInterfaceModifier::SetLinearIndicatorOptionsImpl,
         LinearIndicatorAttributeModifier::IndicatorStyleImpl,
         LinearIndicatorAttributeModifier::IndicatorLoopImpl,
         LinearIndicatorAttributeModifier::OnChangeImpl,

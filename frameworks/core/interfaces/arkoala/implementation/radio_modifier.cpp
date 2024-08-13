@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RadioInterfaceModifier {
-void _setRadioOptionsImpl(Ark_NativePointer node,
-                          const Ark_RadioOptions* options)
+void SetRadioOptionsImpl(Ark_NativePointer node,
+                         const Ark_RadioOptions* options)
 {
 }
 } // RadioInterfaceModifier
@@ -43,7 +43,7 @@ void ContentModifierImpl(Ark_NativePointer node,
 const GENERATED_ArkUIRadioModifier* GetRadioModifier()
 {
     static const GENERATED_ArkUIRadioModifier ArkUIRadioModifierImpl {
-        RadioInterfaceModifier::_setRadioOptionsImpl,
+        RadioInterfaceModifier::SetRadioOptionsImpl,
         RadioAttributeModifier::CheckedImpl,
         RadioAttributeModifier::OnChangeImpl,
         RadioAttributeModifier::RadioStyleImpl,

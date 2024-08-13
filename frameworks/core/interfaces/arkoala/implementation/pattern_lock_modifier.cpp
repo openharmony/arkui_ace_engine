@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PatternLockInterfaceModifier {
-void _setPatternLockOptionsImpl(Ark_NativePointer node,
-                                const Opt_PatternLockController* controller)
+void SetPatternLockOptionsImpl(Ark_NativePointer node,
+                               const Opt_PatternLockController* controller)
 {
 }
 } // PatternLockInterfaceModifier
@@ -75,7 +75,7 @@ void ActivateCircleStyleImpl(Ark_NativePointer node,
 const GENERATED_ArkUIPatternLockModifier* GetPatternLockModifier()
 {
     static const GENERATED_ArkUIPatternLockModifier ArkUIPatternLockModifierImpl {
-        PatternLockInterfaceModifier::_setPatternLockOptionsImpl,
+        PatternLockInterfaceModifier::SetPatternLockOptionsImpl,
         PatternLockAttributeModifier::SideLengthImpl,
         PatternLockAttributeModifier::CircleRadiusImpl,
         PatternLockAttributeModifier::BackgroundColorImpl,

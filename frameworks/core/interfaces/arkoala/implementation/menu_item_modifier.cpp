@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MenuItemInterfaceModifier {
-void _setMenuItemOptionsImpl(Ark_NativePointer node,
-                             const Opt_Type_MenuItemInterface__setMenuItemOptions_Arg0* value)
+void SetMenuItemOptionsImpl(Ark_NativePointer node,
+                            const Opt_Type_MenuItemInterface_setMenuItemOptions_Arg0* value)
 {
 }
 } // MenuItemInterfaceModifier
@@ -55,7 +55,7 @@ void LabelFontColorImpl(Ark_NativePointer node,
 const GENERATED_ArkUIMenuItemModifier* GetMenuItemModifier()
 {
     static const GENERATED_ArkUIMenuItemModifier ArkUIMenuItemModifierImpl {
-        MenuItemInterfaceModifier::_setMenuItemOptionsImpl,
+        MenuItemInterfaceModifier::SetMenuItemOptionsImpl,
         MenuItemAttributeModifier::SelectedImpl,
         MenuItemAttributeModifier::SelectIconImpl,
         MenuItemAttributeModifier::OnChangeImpl,

@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WaterFlowInterfaceModifier {
-void _setWaterFlowOptionsImpl(Ark_NativePointer node,
-                              const Opt_WaterFlowOptions* options)
+void SetWaterFlowOptionsImpl(Ark_NativePointer node,
+                             const Opt_WaterFlowOptions* options)
 {
 }
 } // WaterFlowInterfaceModifier
@@ -83,7 +83,7 @@ void OnScrollIndexImpl(Ark_NativePointer node,
 const GENERATED_ArkUIWaterFlowModifier* GetWaterFlowModifier()
 {
     static const GENERATED_ArkUIWaterFlowModifier ArkUIWaterFlowModifierImpl {
-        WaterFlowInterfaceModifier::_setWaterFlowOptionsImpl,
+        WaterFlowInterfaceModifier::SetWaterFlowOptionsImpl,
         WaterFlowAttributeModifier::ColumnsTemplateImpl,
         WaterFlowAttributeModifier::ItemConstraintSizeImpl,
         WaterFlowAttributeModifier::RowsTemplateImpl,

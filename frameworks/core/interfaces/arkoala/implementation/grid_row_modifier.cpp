@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GridRowInterfaceModifier {
-void _setGridRowOptionsImpl(Ark_NativePointer node,
-                            const Opt_GridRowOptions* option)
+void SetGridRowOptionsImpl(Ark_NativePointer node,
+                           const Opt_GridRowOptions* option)
 {
 }
 } // GridRowInterfaceModifier
@@ -35,7 +35,7 @@ void AlignItemsImpl(Ark_NativePointer node,
 const GENERATED_ArkUIGridRowModifier* GetGridRowModifier()
 {
     static const GENERATED_ArkUIGridRowModifier ArkUIGridRowModifierImpl {
-        GridRowInterfaceModifier::_setGridRowOptionsImpl,
+        GridRowInterfaceModifier::SetGridRowOptionsImpl,
         GridRowAttributeModifier::OnBreakpointChangeImpl,
         GridRowAttributeModifier::AlignItemsImpl,
     };

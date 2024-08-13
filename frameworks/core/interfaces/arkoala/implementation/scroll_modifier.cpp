@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScrollInterfaceModifier {
-void _setScrollOptionsImpl(Ark_NativePointer node,
-                           const Opt_Scroller* scroller)
+void SetScrollOptionsImpl(Ark_NativePointer node,
+                          const Opt_Scroller* scroller)
 {
 }
 } // ScrollInterfaceModifier
@@ -104,7 +104,7 @@ void InitialOffsetImpl(Ark_NativePointer node,
 const GENERATED_ArkUIScrollModifier* GetScrollModifier()
 {
     static const GENERATED_ArkUIScrollModifier ArkUIScrollModifierImpl {
-        ScrollInterfaceModifier::_setScrollOptionsImpl,
+        ScrollInterfaceModifier::SetScrollOptionsImpl,
         ScrollAttributeModifier::ScrollableImpl,
         ScrollAttributeModifier::OnScrollImpl,
         ScrollAttributeModifier::OnWillScrollImpl,

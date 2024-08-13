@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AlphabetIndexerInterfaceModifier {
-void _setAlphabetIndexerOptionsImpl(Ark_NativePointer node,
-                                    const Type_AlphabetIndexerInterface__setAlphabetIndexerOptions_Arg0* value)
+void SetAlphabetIndexerOptionsImpl(Ark_NativePointer node,
+                                   const Type_AlphabetIndexerInterface_setAlphabetIndexerOptions_Arg0* value)
 {
 }
 } // AlphabetIndexerInterfaceModifier
@@ -136,7 +136,7 @@ void EnableHapticFeedbackImpl(Ark_NativePointer node,
 const GENERATED_ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
 {
     static const GENERATED_ArkUIAlphabetIndexerModifier ArkUIAlphabetIndexerModifierImpl {
-        AlphabetIndexerInterfaceModifier::_setAlphabetIndexerOptionsImpl,
+        AlphabetIndexerInterfaceModifier::SetAlphabetIndexerOptionsImpl,
         AlphabetIndexerAttributeModifier::OnSelectedImpl,
         AlphabetIndexerAttributeModifier::ColorImpl,
         AlphabetIndexerAttributeModifier::SelectedColorImpl,

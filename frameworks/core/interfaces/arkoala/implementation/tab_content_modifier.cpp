@@ -17,7 +17,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TabContentInterfaceModifier {
-void _setTabContentOptionsImpl(Ark_NativePointer node)
+void SetTabContentOptionsImpl(Ark_NativePointer node)
 {
 }
 } // TabContentInterfaceModifier
@@ -42,7 +42,7 @@ void OnWillHideImpl(Ark_NativePointer node,
 const GENERATED_ArkUITabContentModifier* GetTabContentModifier()
 {
     static const GENERATED_ArkUITabContentModifier ArkUITabContentModifierImpl {
-        TabContentInterfaceModifier::_setTabContentOptionsImpl,
+        TabContentInterfaceModifier::SetTabContentOptionsImpl,
         TabContentAttributeModifier::TabBar0Impl,
         TabContentAttributeModifier::TabBar1Impl,
         TabContentAttributeModifier::OnWillShowImpl,

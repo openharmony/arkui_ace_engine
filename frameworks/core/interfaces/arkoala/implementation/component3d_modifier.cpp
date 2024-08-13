@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace Component3DInterfaceModifier {
-void _setComponent3DOptionsImpl(Ark_NativePointer node,
-                                const Opt_SceneOptions* sceneOptions)
+void SetComponent3DOptionsImpl(Ark_NativePointer node,
+                               const Opt_SceneOptions* sceneOptions)
 {
 }
 } // Component3DInterfaceModifier
@@ -56,7 +56,7 @@ void RenderHeightImpl(Ark_NativePointer node,
 const GENERATED_ArkUIComponent3DModifier* GetComponent3DModifier()
 {
     static const GENERATED_ArkUIComponent3DModifier ArkUIComponent3DModifierImpl {
-        Component3DInterfaceModifier::_setComponent3DOptionsImpl,
+        Component3DInterfaceModifier::SetComponent3DOptionsImpl,
         Component3DAttributeModifier::EnvironmentImpl,
         Component3DAttributeModifier::CustomRenderImpl,
         Component3DAttributeModifier::ShaderImpl,

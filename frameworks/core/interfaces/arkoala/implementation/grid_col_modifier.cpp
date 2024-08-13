@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GridColInterfaceModifier {
-void _setGridColOptionsImpl(Ark_NativePointer node,
-                            const Opt_GridColOptions* option)
+void SetGridColOptionsImpl(Ark_NativePointer node,
+                           const Opt_GridColOptions* option)
 {
 }
 } // GridColInterfaceModifier
@@ -39,7 +39,7 @@ void OrderImpl(Ark_NativePointer node,
 const GENERATED_ArkUIGridColModifier* GetGridColModifier()
 {
     static const GENERATED_ArkUIGridColModifier ArkUIGridColModifierImpl {
-        GridColInterfaceModifier::_setGridColOptionsImpl,
+        GridColInterfaceModifier::SetGridColOptionsImpl,
         GridColAttributeModifier::SpanImpl,
         GridColAttributeModifier::GridColOffsetImpl,
         GridColAttributeModifier::OrderImpl,

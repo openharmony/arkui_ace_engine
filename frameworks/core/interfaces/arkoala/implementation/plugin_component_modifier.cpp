@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PluginComponentInterfaceModifier {
-void _setPluginComponentOptionsImpl(Ark_NativePointer node,
-                                    const Type_PluginComponentInterface__setPluginComponentOptions_Arg0* value)
+void SetPluginComponentOptionsImpl(Ark_NativePointer node,
+                                   const Type_PluginComponentInterface_setPluginComponentOptions_Arg0* value)
 {
 }
 } // PluginComponentInterfaceModifier
@@ -35,7 +35,7 @@ void OnErrorImpl(Ark_NativePointer node,
 const GENERATED_ArkUIPluginComponentModifier* GetPluginComponentModifier()
 {
     static const GENERATED_ArkUIPluginComponentModifier ArkUIPluginComponentModifierImpl {
-        PluginComponentInterfaceModifier::_setPluginComponentOptionsImpl,
+        PluginComponentInterfaceModifier::SetPluginComponentOptionsImpl,
         PluginComponentAttributeModifier::OnCompleteImpl,
         PluginComponentAttributeModifier::OnErrorImpl,
     };

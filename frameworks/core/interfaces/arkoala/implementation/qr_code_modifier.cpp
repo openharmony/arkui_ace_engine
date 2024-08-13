@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace QRCodeInterfaceModifier {
-void _setQRCodeOptionsImpl(Ark_NativePointer node,
-                           const Ark_String* value)
+void SetQRCodeOptionsImpl(Ark_NativePointer node,
+                          const Ark_String* value)
 {
 }
 } // QRCodeInterfaceModifier
@@ -39,7 +39,7 @@ void ContentOpacityImpl(Ark_NativePointer node,
 const GENERATED_ArkUIQRCodeModifier* GetQRCodeModifier()
 {
     static const GENERATED_ArkUIQRCodeModifier ArkUIQRCodeModifierImpl {
-        QRCodeInterfaceModifier::_setQRCodeOptionsImpl,
+        QRCodeInterfaceModifier::SetQRCodeOptionsImpl,
         QRCodeAttributeModifier::ColorImpl,
         QRCodeAttributeModifier::BackgroundColorImpl,
         QRCodeAttributeModifier::ContentOpacityImpl,

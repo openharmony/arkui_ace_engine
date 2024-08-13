@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AnimatorInterfaceModifier {
-void _setAnimatorOptionsImpl(Ark_NativePointer node,
-                             const Ark_String* value)
+void SetAnimatorOptionsImpl(Ark_NativePointer node,
+                            const Ark_String* value)
 {
 }
 } // AnimatorInterfaceModifier
@@ -83,7 +83,7 @@ void OnFrameImpl(Ark_NativePointer node,
 const GENERATED_ArkUIAnimatorModifier* GetAnimatorModifier()
 {
     static const GENERATED_ArkUIAnimatorModifier ArkUIAnimatorModifierImpl {
-        AnimatorInterfaceModifier::_setAnimatorOptionsImpl,
+        AnimatorInterfaceModifier::SetAnimatorOptionsImpl,
         AnimatorAttributeModifier::StateImpl,
         AnimatorAttributeModifier::DurationImpl,
         AnimatorAttributeModifier::CurveImpl,

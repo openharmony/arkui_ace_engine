@@ -17,9 +17,9 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace EmbeddedComponentInterfaceModifier {
-void _setEmbeddedComponentOptionsImpl(Ark_NativePointer node,
-                                      const Ark_CustomObject* loader,
-                                      Ark_Int32 type)
+void SetEmbeddedComponentOptionsImpl(Ark_NativePointer node,
+                                     const Ark_CustomObject* loader,
+                                     Ark_Int32 type)
 {
 }
 } // EmbeddedComponentInterfaceModifier
@@ -36,7 +36,7 @@ void OnErrorImpl(Ark_NativePointer node,
 const GENERATED_ArkUIEmbeddedComponentModifier* GetEmbeddedComponentModifier()
 {
     static const GENERATED_ArkUIEmbeddedComponentModifier ArkUIEmbeddedComponentModifierImpl {
-        EmbeddedComponentInterfaceModifier::_setEmbeddedComponentOptionsImpl,
+        EmbeddedComponentInterfaceModifier::SetEmbeddedComponentOptionsImpl,
         EmbeddedComponentAttributeModifier::OnTerminatedImpl,
         EmbeddedComponentAttributeModifier::OnErrorImpl,
     };

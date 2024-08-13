@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ListInterfaceModifier {
-void _setListOptionsImpl(Ark_NativePointer node,
-                         const Opt_Type_ListInterface__setListOptions_Arg0* value)
+void SetListOptionsImpl(Ark_NativePointer node,
+                        const Opt_Type_ListInterface_setListOptions_Arg0* value)
 {
 }
 } // ListInterfaceModifier
@@ -169,7 +169,7 @@ void OnScrollFrameBeginImpl(Ark_NativePointer node,
 const GENERATED_ArkUIListModifier* GetListModifier()
 {
     static const GENERATED_ArkUIListModifier ArkUIListModifierImpl {
-        ListInterfaceModifier::_setListOptionsImpl,
+        ListInterfaceModifier::SetListOptionsImpl,
         ListAttributeModifier::LanesImpl,
         ListAttributeModifier::AlignListItemImpl,
         ListAttributeModifier::ListDirectionImpl,

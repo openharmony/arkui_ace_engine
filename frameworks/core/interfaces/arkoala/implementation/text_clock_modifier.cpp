@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextClockInterfaceModifier {
-void _setTextClockOptionsImpl(Ark_NativePointer node,
-                              const Opt_Type_TextClockInterface__setTextClockOptions_Arg0* options)
+void SetTextClockOptionsImpl(Ark_NativePointer node,
+                             const Opt_Type_TextClockInterface_setTextClockOptions_Arg0* options)
 {
 }
 } // TextClockInterfaceModifier
@@ -71,7 +71,7 @@ void DateTimeOptionsImpl(Ark_NativePointer node,
 const GENERATED_ArkUITextClockModifier* GetTextClockModifier()
 {
     static const GENERATED_ArkUITextClockModifier ArkUITextClockModifierImpl {
-        TextClockInterfaceModifier::_setTextClockOptionsImpl,
+        TextClockInterfaceModifier::SetTextClockOptionsImpl,
         TextClockAttributeModifier::FormatImpl,
         TextClockAttributeModifier::OnDateChangeImpl,
         TextClockAttributeModifier::FontColorImpl,

@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextTimerInterfaceModifier {
-void _setTextTimerOptionsImpl(Ark_NativePointer node,
-                              const Opt_TextTimerOptions* options)
+void SetTextTimerOptionsImpl(Ark_NativePointer node,
+                             const Opt_TextTimerOptions* options)
 {
 }
 } // TextTimerInterfaceModifier
@@ -63,7 +63,7 @@ void ContentModifierImpl(Ark_NativePointer node,
 const GENERATED_ArkUITextTimerModifier* GetTextTimerModifier()
 {
     static const GENERATED_ArkUITextTimerModifier ArkUITextTimerModifierImpl {
-        TextTimerInterfaceModifier::_setTextTimerOptionsImpl,
+        TextTimerInterfaceModifier::SetTextTimerOptionsImpl,
         TextTimerAttributeModifier::FormatImpl,
         TextTimerAttributeModifier::FontColorImpl,
         TextTimerAttributeModifier::FontSizeImpl,

@@ -17,9 +17,9 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextInterfaceModifier {
-void _setTextOptionsImpl(Ark_NativePointer node,
-                         const Opt_Type_TextInterface__setTextOptions_Arg0* content,
-                         const Opt_TextOptions* value)
+void SetTextOptionsImpl(Ark_NativePointer node,
+                        const Opt_Type_TextInterface_setTextOptions_Arg0* content,
+                        const Opt_TextOptions* value)
 {
 }
 } // TextInterfaceModifier
@@ -188,7 +188,7 @@ void EditMenuOptionsImpl(Ark_NativePointer node,
 const GENERATED_ArkUITextModifier* GetTextModifier()
 {
     static const GENERATED_ArkUITextModifier ArkUITextModifierImpl {
-        TextInterfaceModifier::_setTextOptionsImpl,
+        TextInterfaceModifier::SetTextOptionsImpl,
         TextAttributeModifier::FontImpl,
         TextAttributeModifier::FontColorImpl,
         TextAttributeModifier::FontSizeImpl,

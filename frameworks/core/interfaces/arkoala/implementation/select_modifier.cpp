@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SelectInterfaceModifier {
-void _setSelectOptionsImpl(Ark_NativePointer node,
-                           const Array_SelectOption* options)
+void SetSelectOptionsImpl(Ark_NativePointer node,
+                          const Array_SelectOption* options)
 {
 }
 } // SelectInterfaceModifier
@@ -112,7 +112,7 @@ void DividerImpl(Ark_NativePointer node,
 const GENERATED_ArkUISelectModifier* GetSelectModifier()
 {
     static const GENERATED_ArkUISelectModifier ArkUISelectModifierImpl {
-        SelectInterfaceModifier::_setSelectOptionsImpl,
+        SelectInterfaceModifier::SetSelectOptionsImpl,
         SelectAttributeModifier::SelectedImpl,
         SelectAttributeModifier::ValueImpl,
         SelectAttributeModifier::FontImpl,

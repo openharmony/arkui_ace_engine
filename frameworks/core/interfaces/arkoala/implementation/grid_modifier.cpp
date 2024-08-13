@@ -17,9 +17,9 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GridInterfaceModifier {
-void _setGridOptionsImpl(Ark_NativePointer node,
-                         const Opt_Scroller* scroller,
-                         const Opt_GridLayoutOptions* layoutOptions)
+void SetGridOptionsImpl(Ark_NativePointer node,
+                        const Opt_Scroller* scroller,
+                        const Opt_GridLayoutOptions* layoutOptions)
 {
 }
 } // GridInterfaceModifier
@@ -157,7 +157,7 @@ void OnScrollFrameBeginImpl(Ark_NativePointer node,
 const GENERATED_ArkUIGridModifier* GetGridModifier()
 {
     static const GENERATED_ArkUIGridModifier ArkUIGridModifierImpl {
-        GridInterfaceModifier::_setGridOptionsImpl,
+        GridInterfaceModifier::SetGridOptionsImpl,
         GridAttributeModifier::ColumnsTemplateImpl,
         GridAttributeModifier::RowsTemplateImpl,
         GridAttributeModifier::ColumnsGapImpl,

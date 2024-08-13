@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SpanInterfaceModifier {
-void _setSpanOptionsImpl(Ark_NativePointer node,
-                         const Type_SpanInterface__setSpanOptions_Arg0* value)
+void SetSpanOptionsImpl(Ark_NativePointer node,
+                        const Type_SpanInterface_setSpanOptions_Arg0* value)
 {
 }
 } // SpanInterfaceModifier
@@ -71,7 +71,7 @@ void TextShadowImpl(Ark_NativePointer node,
 const GENERATED_ArkUISpanModifier* GetSpanModifier()
 {
     static const GENERATED_ArkUISpanModifier ArkUISpanModifierImpl {
-        SpanInterfaceModifier::_setSpanOptionsImpl,
+        SpanInterfaceModifier::SetSpanOptionsImpl,
         SpanAttributeModifier::FontImpl,
         SpanAttributeModifier::FontColorImpl,
         SpanAttributeModifier::FontSizeImpl,

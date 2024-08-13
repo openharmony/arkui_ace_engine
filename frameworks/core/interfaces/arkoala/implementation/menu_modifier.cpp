@@ -17,7 +17,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MenuInterfaceModifier {
-void _setMenuOptionsImpl(Ark_NativePointer node)
+void SetMenuOptionsImpl(Ark_NativePointer node)
 {
 }
 } // MenuInterfaceModifier
@@ -54,7 +54,7 @@ void SubMenuExpandingModeImpl(Ark_NativePointer node,
 const GENERATED_ArkUIMenuModifier* GetMenuModifier()
 {
     static const GENERATED_ArkUIMenuModifier ArkUIMenuModifierImpl {
-        MenuInterfaceModifier::_setMenuOptionsImpl,
+        MenuInterfaceModifier::SetMenuOptionsImpl,
         MenuAttributeModifier::FontSizeImpl,
         MenuAttributeModifier::FontImpl,
         MenuAttributeModifier::FontColorImpl,

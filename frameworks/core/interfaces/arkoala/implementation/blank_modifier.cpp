@@ -21,8 +21,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BlankInterfaceModifier {
-void _setBlankOptionsImpl(Ark_NativePointer node,
-                          const Opt_Type_BlankInterface__setBlankOptions_Arg0* min)
+void SetBlankOptionsImpl(Ark_NativePointer node,
+                         const Opt_Type_BlankInterface_setBlankOptions_Arg0* min)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     std::tuple<Ark_Float32, Ark_Int32> dimension = Converter::ConvertOrDefault(
@@ -43,7 +43,7 @@ void ColorImpl(Ark_NativePointer node,
 const GENERATED_ArkUIBlankModifier* GetBlankModifier()
 {
     static const GENERATED_ArkUIBlankModifier ArkUIBlankModifierImpl {
-        BlankInterfaceModifier::_setBlankOptionsImpl,
+        BlankInterfaceModifier::SetBlankOptionsImpl,
         BlankAttributeModifier::ColorImpl,
     };
     return &ArkUIBlankModifierImpl;

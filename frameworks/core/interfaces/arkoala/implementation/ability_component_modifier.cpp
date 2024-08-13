@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AbilityComponentInterfaceModifier {
-void _setAbilityComponentOptionsImpl(Ark_NativePointer node,
-                                     const Type_AbilityComponentInterface__setAbilityComponentOptions_Arg0* value)
+void SetAbilityComponentOptionsImpl(Ark_NativePointer node,
+                                    const Type_AbilityComponentInterface_setAbilityComponentOptions_Arg0* value)
 {
 }
 } // AbilityComponentInterfaceModifier
@@ -35,7 +35,7 @@ void OnDisconnectImpl(Ark_NativePointer node,
 const GENERATED_ArkUIAbilityComponentModifier* GetAbilityComponentModifier()
 {
     static const GENERATED_ArkUIAbilityComponentModifier ArkUIAbilityComponentModifierImpl {
-        AbilityComponentInterfaceModifier::_setAbilityComponentOptionsImpl,
+        AbilityComponentInterfaceModifier::SetAbilityComponentOptionsImpl,
         AbilityComponentAttributeModifier::OnConnectImpl,
         AbilityComponentAttributeModifier::OnDisconnectImpl,
     };

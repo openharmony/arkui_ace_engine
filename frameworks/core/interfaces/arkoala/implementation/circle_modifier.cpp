@@ -17,15 +17,15 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CircleInterfaceModifier {
-void _setCircleOptionsImpl(Ark_NativePointer node,
-                           const Opt_CircleOptions* value)
+void SetCircleOptionsImpl(Ark_NativePointer node,
+                          const Opt_CircleOptions* value)
 {
 }
 } // CircleInterfaceModifier
 const GENERATED_ArkUICircleModifier* GetCircleModifier()
 {
     static const GENERATED_ArkUICircleModifier ArkUICircleModifierImpl {
-        CircleInterfaceModifier::_setCircleOptionsImpl,
+        CircleInterfaceModifier::SetCircleOptionsImpl,
     };
     return &ArkUICircleModifierImpl;
 }

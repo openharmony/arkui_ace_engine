@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SearchInterfaceModifier {
-void _setSearchOptionsImpl(Ark_NativePointer node,
-                           const Opt_Type_SearchInterface__setSearchOptions_Arg0* options)
+void SetSearchOptionsImpl(Ark_NativePointer node,
+                          const Opt_Type_SearchInterface_setSearchOptions_Arg0* options)
 {
 }
 } // SearchInterfaceModifier
@@ -186,7 +186,7 @@ void EnablePreviewTextImpl(Ark_NativePointer node,
 const GENERATED_ArkUISearchModifier* GetSearchModifier()
 {
     static const GENERATED_ArkUISearchModifier ArkUISearchModifierImpl {
-        SearchInterfaceModifier::_setSearchOptionsImpl,
+        SearchInterfaceModifier::SetSearchOptionsImpl,
         SearchAttributeModifier::SearchButtonImpl,
         SearchAttributeModifier::FontColorImpl,
         SearchAttributeModifier::SearchIconImpl,

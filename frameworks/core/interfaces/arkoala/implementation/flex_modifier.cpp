@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FlexInterfaceModifier {
-void _setFlexOptionsImpl(Ark_NativePointer node,
-                         const Opt_FlexOptions* value)
+void SetFlexOptionsImpl(Ark_NativePointer node,
+                        const Opt_FlexOptions* value)
 {
 }
 } // FlexInterfaceModifier
@@ -31,7 +31,7 @@ void PointLightImpl(Ark_NativePointer node,
 const GENERATED_ArkUIFlexModifier* GetFlexModifier()
 {
     static const GENERATED_ArkUIFlexModifier ArkUIFlexModifierImpl {
-        FlexInterfaceModifier::_setFlexOptionsImpl,
+        FlexInterfaceModifier::SetFlexOptionsImpl,
         FlexAttributeModifier::PointLightImpl,
     };
     return &ArkUIFlexModifierImpl;

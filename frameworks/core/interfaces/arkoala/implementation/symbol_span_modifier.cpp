@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SymbolSpanInterfaceModifier {
-void _setSymbolSpanOptionsImpl(Ark_NativePointer node,
-                               const Ark_Resource* value)
+void SetSymbolSpanOptionsImpl(Ark_NativePointer node,
+                              const Ark_Resource* value)
 {
 }
 } // SymbolSpanInterfaceModifier
@@ -47,7 +47,7 @@ void RenderingStrategyImpl(Ark_NativePointer node,
 const GENERATED_ArkUISymbolSpanModifier* GetSymbolSpanModifier()
 {
     static const GENERATED_ArkUISymbolSpanModifier ArkUISymbolSpanModifierImpl {
-        SymbolSpanInterfaceModifier::_setSymbolSpanOptionsImpl,
+        SymbolSpanInterfaceModifier::SetSymbolSpanOptionsImpl,
         SymbolSpanAttributeModifier::FontSizeImpl,
         SymbolSpanAttributeModifier::FontColorImpl,
         SymbolSpanAttributeModifier::FontWeightImpl,

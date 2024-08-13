@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FormComponentInterfaceModifier {
-void _setFormComponentOptionsImpl(Ark_NativePointer node,
-                                  const Ark_FormInfo* value)
+void SetFormComponentOptionsImpl(Ark_NativePointer node,
+                                 const Ark_FormInfo* value)
 {
 }
 } // FormComponentInterfaceModifier
@@ -67,7 +67,7 @@ void OnLoadImpl(Ark_NativePointer node,
 const GENERATED_ArkUIFormComponentModifier* GetFormComponentModifier()
 {
     static const GENERATED_ArkUIFormComponentModifier ArkUIFormComponentModifierImpl {
-        FormComponentInterfaceModifier::_setFormComponentOptionsImpl,
+        FormComponentInterfaceModifier::SetFormComponentOptionsImpl,
         FormComponentAttributeModifier::SizeImpl,
         FormComponentAttributeModifier::ModuleNameImpl,
         FormComponentAttributeModifier::DimensionImpl,

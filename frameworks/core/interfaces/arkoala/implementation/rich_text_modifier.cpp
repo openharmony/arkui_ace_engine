@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RichTextInterfaceModifier {
-void _setRichTextOptionsImpl(Ark_NativePointer node,
-                             const Ark_String* content)
+void SetRichTextOptionsImpl(Ark_NativePointer node,
+                            const Ark_String* content)
 {
 }
 } // RichTextInterfaceModifier
@@ -35,7 +35,7 @@ void OnCompleteImpl(Ark_NativePointer node,
 const GENERATED_ArkUIRichTextModifier* GetRichTextModifier()
 {
     static const GENERATED_ArkUIRichTextModifier ArkUIRichTextModifierImpl {
-        RichTextInterfaceModifier::_setRichTextOptionsImpl,
+        RichTextInterfaceModifier::SetRichTextOptionsImpl,
         RichTextAttributeModifier::OnStartImpl,
         RichTextAttributeModifier::OnCompleteImpl,
     };

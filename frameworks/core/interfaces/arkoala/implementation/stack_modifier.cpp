@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace StackInterfaceModifier {
-void _setStackOptionsImpl(Ark_NativePointer node,
-                          const Opt_Type_StackInterface__setStackOptions_Arg0* value)
+void SetStackOptionsImpl(Ark_NativePointer node,
+                         const Opt_Type_StackInterface_setStackOptions_Arg0* value)
 {
 }
 } // StackInterfaceModifier
@@ -35,7 +35,7 @@ void PointLightImpl(Ark_NativePointer node,
 const GENERATED_ArkUIStackModifier* GetStackModifier()
 {
     static const GENERATED_ArkUIStackModifier ArkUIStackModifierImpl {
-        StackInterfaceModifier::_setStackOptionsImpl,
+        StackInterfaceModifier::SetStackOptionsImpl,
         StackAttributeModifier::AlignContentImpl,
         StackAttributeModifier::PointLightImpl,
     };

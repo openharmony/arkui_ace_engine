@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DatePickerInterfaceModifier {
-void _setDatePickerOptionsImpl(Ark_NativePointer node,
-                               const Opt_DatePickerOptions* options)
+void SetDatePickerOptionsImpl(Ark_NativePointer node,
+                              const Opt_DatePickerOptions* options)
 {
 }
 } // DatePickerInterfaceModifier
@@ -51,7 +51,7 @@ void OnDateChangeImpl(Ark_NativePointer node,
 const GENERATED_ArkUIDatePickerModifier* GetDatePickerModifier()
 {
     static const GENERATED_ArkUIDatePickerModifier ArkUIDatePickerModifierImpl {
-        DatePickerInterfaceModifier::_setDatePickerOptionsImpl,
+        DatePickerInterfaceModifier::SetDatePickerOptionsImpl,
         DatePickerAttributeModifier::LunarImpl,
         DatePickerAttributeModifier::DisappearTextStyleImpl,
         DatePickerAttributeModifier::TextStyleImpl,

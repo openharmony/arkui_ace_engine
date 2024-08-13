@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LineInterfaceModifier {
-void _setLineOptionsImpl(Ark_NativePointer node,
-                         const Opt_Type_LineInterface__setLineOptions_Arg0* value)
+void SetLineOptionsImpl(Ark_NativePointer node,
+                        const Opt_Type_LineInterface_setLineOptions_Arg0* value)
 {
 }
 } // LineInterfaceModifier
@@ -35,7 +35,7 @@ void EndPointImpl(Ark_NativePointer node,
 const GENERATED_ArkUILineModifier* GetLineModifier()
 {
     static const GENERATED_ArkUILineModifier ArkUILineModifierImpl {
-        LineInterfaceModifier::_setLineOptionsImpl,
+        LineInterfaceModifier::SetLineOptionsImpl,
         LineAttributeModifier::StartPointImpl,
         LineAttributeModifier::EndPointImpl,
     };

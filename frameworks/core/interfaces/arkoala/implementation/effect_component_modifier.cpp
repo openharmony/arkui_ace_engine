@@ -17,14 +17,14 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace EffectComponentInterfaceModifier {
-void _setEffectComponentOptionsImpl(Ark_NativePointer node)
+void SetEffectComponentOptionsImpl(Ark_NativePointer node)
 {
 }
 } // EffectComponentInterfaceModifier
 const GENERATED_ArkUIEffectComponentModifier* GetEffectComponentModifier()
 {
     static const GENERATED_ArkUIEffectComponentModifier ArkUIEffectComponentModifierImpl {
-        EffectComponentInterfaceModifier::_setEffectComponentOptionsImpl,
+        EffectComponentInterfaceModifier::SetEffectComponentOptionsImpl,
     };
     return &ArkUIEffectComponentModifierImpl;
 }

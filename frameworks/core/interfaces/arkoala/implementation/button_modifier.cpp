@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ButtonInterfaceModifier {
-void _setButtonOptions0Impl(Ark_NativePointer node)
+void SetButtonOptions0Impl(Ark_NativePointer node)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -34,8 +34,8 @@ void _setButtonOptions0Impl(Ark_NativePointer node)
     ButtonModelNG::SetControlSize(frameNode, ControlSize::NORMAL);
     ButtonModelNG::SetButtonStyle(frameNode, ButtonStyleMode::EMPHASIZE);
 }
-void _setButtonOptions1Impl(Ark_NativePointer node,
-                            const Ark_ButtonOptions* options)
+void SetButtonOptions1Impl(Ark_NativePointer node,
+                           const Ark_ButtonOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -46,14 +46,14 @@ void _setButtonOptions1Impl(Ark_NativePointer node,
     ButtonModelNG::SetButtonStyle(frameNode, Converter::ConvertOrDefault(options->buttonStyle,
                                                                          ButtonStyleMode::EMPHASIZE));
 }
-void _setButtonOptions2Impl(Ark_NativePointer node,
-                            const ResourceStr* label,
-                            const Opt_ButtonOptions* options)
+void SetButtonOptions2Impl(Ark_NativePointer node,
+                           const ResourceStr* label,
+                           const Opt_ButtonOptions* options)
 {
     if (options->tag == ARK_TAG_UNDEFINED) {
-        _setButtonOptions0Impl(node);
+        SetButtonOptions0Impl(node);
     } else {
-        _setButtonOptions1Impl(node, &options->value);
+        SetButtonOptions1Impl(node, &options->value);
     }
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -171,9 +171,9 @@ void LabelStyleImpl(Ark_NativePointer node,
 const GENERATED_ArkUIButtonModifier* GetButtonModifier()
 {
     static const GENERATED_ArkUIButtonModifier ArkUIButtonModifierImpl {
-        ButtonInterfaceModifier::_setButtonOptions0Impl,
-        ButtonInterfaceModifier::_setButtonOptions1Impl,
-        ButtonInterfaceModifier::_setButtonOptions2Impl,
+        ButtonInterfaceModifier::SetButtonOptions0Impl,
+        ButtonInterfaceModifier::SetButtonOptions1Impl,
+        ButtonInterfaceModifier::SetButtonOptions2Impl,
         ButtonAttributeModifier::TypeImpl,
         ButtonAttributeModifier::StateEffectImpl,
         ButtonAttributeModifier::ButtonStyleImpl,

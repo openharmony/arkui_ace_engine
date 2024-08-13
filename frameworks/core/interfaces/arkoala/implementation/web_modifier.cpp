@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebInterfaceModifier {
-void _setWebOptionsImpl(Ark_NativePointer node,
-                        const Ark_WebOptions* value)
+void SetWebOptionsImpl(Ark_NativePointer node,
+                       const Ark_WebOptions* value)
 {
 }
 } // WebInterfaceModifier
@@ -496,7 +496,7 @@ void KeyboardAvoidModeImpl(Ark_NativePointer node,
 const GENERATED_ArkUIWebModifier* GetWebModifier()
 {
     static const GENERATED_ArkUIWebModifier ArkUIWebModifierImpl {
-        WebInterfaceModifier::_setWebOptionsImpl,
+        WebInterfaceModifier::SetWebOptionsImpl,
         WebAttributeModifier::JavaScriptAccessImpl,
         WebAttributeModifier::FileAccessImpl,
         WebAttributeModifier::OnlineImageAccessImpl,

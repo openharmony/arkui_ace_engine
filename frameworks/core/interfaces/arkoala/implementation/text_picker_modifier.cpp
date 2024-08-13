@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextPickerInterfaceModifier {
-void _setTextPickerOptionsImpl(Ark_NativePointer node,
-                               const Opt_TextPickerOptions* options)
+void SetTextPickerOptionsImpl(Ark_NativePointer node,
+                              const Opt_TextPickerOptions* options)
 {
 }
 } // TextPickerInterfaceModifier
@@ -71,7 +71,7 @@ void GradientHeightImpl(Ark_NativePointer node,
 const GENERATED_ArkUITextPickerModifier* GetTextPickerModifier()
 {
     static const GENERATED_ArkUITextPickerModifier ArkUITextPickerModifierImpl {
-        TextPickerInterfaceModifier::_setTextPickerOptionsImpl,
+        TextPickerInterfaceModifier::SetTextPickerOptionsImpl,
         TextPickerAttributeModifier::DefaultPickerItemHeightImpl,
         TextPickerAttributeModifier::CanLoopImpl,
         TextPickerAttributeModifier::DisappearTextStyleImpl,

@@ -17,8 +17,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ListItemGroupInterfaceModifier {
-void _setListItemGroupOptionsImpl(Ark_NativePointer node,
-                                  const Opt_ListItemGroupOptions* options)
+void SetListItemGroupOptionsImpl(Ark_NativePointer node,
+                                 const Opt_ListItemGroupOptions* options)
 {
 }
 } // ListItemGroupInterfaceModifier
@@ -35,7 +35,7 @@ void ChildrenMainSizeImpl(Ark_NativePointer node,
 const GENERATED_ArkUIListItemGroupModifier* GetListItemGroupModifier()
 {
     static const GENERATED_ArkUIListItemGroupModifier ArkUIListItemGroupModifierImpl {
-        ListItemGroupInterfaceModifier::_setListItemGroupOptionsImpl,
+        ListItemGroupInterfaceModifier::SetListItemGroupOptionsImpl,
         ListItemGroupAttributeModifier::DividerImpl,
         ListItemGroupAttributeModifier::ChildrenMainSizeImpl,
     };
