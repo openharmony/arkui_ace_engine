@@ -34,6 +34,7 @@
 #include "core/components/common/properties/popup_param.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/indexer/indexer_theme.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/indexer/indexer_theme.h"
@@ -953,7 +954,8 @@ void IndexerPattern::UpdateBubbleView()
             auto radius = Dimension(BUBBLE_RADIUS, DimensionUnit::VP);
             columnRenderContext->UpdateBorderRadius({ radius, radius, radius, radius });
         }
-        columnRenderContext->UpdateBackShadow(Shadow::CreateShadow(ShadowStyle::OuterDefaultLG));
+        Shadow shadow = GetPopupShadow();
+        columnRenderContext->UpdateBackShadow(shadow);
     } else {
         auto radius = Dimension(BUBBLE_BOX_RADIUS, DimensionUnit::VP);
         columnRenderContext->UpdateBorderRadius({ radius, radius, radius, radius });
@@ -963,6 +965,18 @@ void IndexerPattern::UpdateBubbleView()
     columnRenderContext->SetClipToBounds(true);
     popupNode_->MarkModifyDone();
     popupNode_->MarkDirtyNode();
+}
+
+Shadow IndexerPattern::GetPopupShadow()
+{
+    Shadow shadow;
+    auto colorMode = SystemProperties::GetColorMode();
+    auto pipelineContext = GetContext();
+    CHECK_NULL_RETURN(pipelineContext, shadow);
+    auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+    CHECK_NULL_RETURN(shadowTheme, shadow);
+    shadow = shadowTheme->GetShadow(ShadowStyle::OuterDefaultLG, colorMode);
+    return shadow;
 }
 
 void IndexerPattern::UpdateBubbleBackgroundView()
