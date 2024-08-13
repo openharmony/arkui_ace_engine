@@ -129,6 +129,9 @@ class ModifierUtils {
   }
 
   static applySetOnChange<T, M extends ArkComponent | ArkSpanComponent, C extends ArkComponent | ArkSpanComponent>(modifier: M): void {
+    // It is to make the stateMgmt can addRef of _changed,
+    // so that the modifier change can be observed by makeObserved when modifier._changed changed.
+    modifier._changed;
     let myMap = modifier._modifiersWithKeys as ModifierMap;
     if (modifier._classType === ModifierType.STATE) {
       myMap.setOnChange((key: Symbol, value: AttributeModifierWithKey) => {
