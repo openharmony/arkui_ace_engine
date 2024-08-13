@@ -393,6 +393,7 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
         }
         itemPosition_.clear();
         jumpIndex_.reset();
+        layoutedItemInfo_.reset();
     } else if (!itemPosition_.empty()) {
         if (itemPosition_.begin()->first > 0 || (forwardLayout_ && Negative(referencePos_))) {
             startPos = itemPosition_.begin()->second.startPos;
@@ -885,6 +886,7 @@ void ListItemGroupLayoutAlgorithm::AdjustItemPosition()
             pos.second.endPos += delta;
         }
         totalMainSize_ = std::max(totalMainSize_ + delta, GetEndPosition() + footerMainSize_);
+        adjustReferenceDelta_ = -delta;
     } else if (GetStartIndex() == 0 && currentStartPos > headerMainSize_) {
         auto delta = currentStartPos - headerMainSize_;
         for (auto& pos : itemPosition_) {
@@ -892,6 +894,7 @@ void ListItemGroupLayoutAlgorithm::AdjustItemPosition()
             pos.second.endPos -= delta;
         }
         totalMainSize_ -= delta;
+        adjustReferenceDelta_ = delta;
     }
     if (GetEndIndex() == totalItemCount_ - 1) {
         totalMainSize_ = GetEndPosition() + footerMainSize_;

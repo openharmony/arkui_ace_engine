@@ -24922,6 +24922,19 @@ class ListFrictionModifier extends ModifierWithKey {
   }
 }
 ListFrictionModifier.identity = Symbol('listFriction');
+class ListMaintainVisibleContentPositionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().list.resetListMaintainVisibleContentPosition(node);
+    } else {
+      getUINativeModule().list.setListMaintainVisibleContentPosition(node, this.value);
+    }
+  }
+}
+ListMaintainVisibleContentPositionModifier.identity = Symbol('listMaintainVisibleContentPosition');
 class ListNestedScrollModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -25213,6 +25226,11 @@ class ArkListComponent extends ArkComponent {
   }
   friction(value) {
     modifierWithKey(this._modifiersWithKeys, ListFrictionModifier.identity, ListFrictionModifier, value);
+    return this;
+  }
+  maintainVisibleContentPosition(value) {
+    modifierWithKey(this._modifiersWithKeys, ListMaintainVisibleContentPositionModifier.identity,
+      ListMaintainVisibleContentPositionModifier, value);
     return this;
   }
   clip(value) {

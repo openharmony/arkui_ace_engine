@@ -2105,6 +2105,7 @@ void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorF
     if (!itemPosition_.empty()) {
         json->PutExtAttr("itemStartPos", itemPosition_.begin()->second.startPos, filter);
     }
+    json->PutExtAttr("maintainVisibleContentPosition", maintainVisibleContentPosition_, filter);
 }
 
 void ListPattern::FromJson(const std::unique_ptr<JsonValue>& json)
@@ -2357,5 +2358,30 @@ void ListPattern::ResetChildrenSize()
         MarkDirtyNodeSelf();
         OnChildrenSizeChanged({ -1, -1, -1 }, LIST_UPDATE_CHILD_SIZE);
     }
+}
+
+void ListPattern::NotifyDataChange(int32_t index, int32_t count)
+{
+    if (!maintainVisibleContentPosition_ || itemPosition_.empty()) {
+        return;
+    }
+    auto startIndex = itemPosition_.begin()->first;
+    if (count == 0 || (count > 0 && index > startIndex) || (count < 0 && index >= startIndex)) {
+        return;
+    }
+    count = std::max(count, index - startIndex);
+    int32_t mod = 0;
+    if (count < 0 && lanes_ > 1 && !(itemPosition_.begin()->second.isGroup)) {
+        mod = -count % lanes_;
+    }
+    auto prevPosMap = std::move(itemPosition_);
+    for (auto &pos : prevPosMap) {
+        if (mod > 0) {
+            mod--;
+        } else {
+            itemPosition_[pos.first + count] = pos.second;
+        }
+    }
+    needReEstimateOffset_ = true;
 }
 } // namespace OHOS::Ace::NG
