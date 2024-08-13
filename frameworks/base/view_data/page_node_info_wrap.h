@@ -60,7 +60,10 @@ public:
     virtual const std::string& GetPlaceholder() const = 0;
 
     virtual void SetMetadata(const std::string& metadata) {}
-    virtual const std::string& GetMetadata() const = 0;
+    virtual const std::string& GetMetadata() const
+    {
+        return "";
+    }
 
     virtual void SetPasswordRules(const std::string& passwordRules) {}
     virtual const std::string& GetPasswordRules() const = 0;
