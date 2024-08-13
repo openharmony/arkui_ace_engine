@@ -37,6 +37,7 @@
 #include "core/common/asset_manager_impl.h"
 #include "core/common/render_boundary_manager.h"
 #include "core/common/update_config_manager.h"
+#include "core/components/common/properties/animation_option.h"
 #include "core/components/common/properties/popup_param.h"
 
 namespace OHOS::Accessibility {
@@ -331,6 +332,11 @@ public:
 
     void UpdateDialogContainerConfig(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
 
+    void SetViewportAnimationOption(AnimationOption opt)
+    {
+        viewportAnimationOption_ = opt;
+    }
+
 private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
@@ -391,6 +397,7 @@ private:
     std::unique_ptr<DistributedUIManager> uiManager_;
 
     bool isDynamicRender_ = false;
+    AnimationOption viewportAnimationOption_;
     UIContentType uIContentType_ = UIContentType::UNDEFINED;
     std::shared_ptr<TaskWrapper> taskWrapper_;
     std::vector<std::string> registerComponents_;
