@@ -451,6 +451,8 @@ void ListPattern::ProcessEvent(
         bool scrollDownToStart = (LessNotEqual(prevStartOffset, contentStartOffset_) || !isInitialized_) &&
             GreatOrEqual(startMainPos_, contentStartOffset_);
         if (scrollUpToStart || scrollDownToStart) {
+            TAG_LOGI(AceLogTag::ACE_LIST, "List:%{public}d onReachStart scrollUpToStart:%{public}d, "
+                "scrollDownToStart:%{public}d", host->GetId(), scrollUpToStart, scrollDownToStart);
             onReachStart();
             AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
         }
@@ -463,6 +465,8 @@ void ListPattern::ProcessEvent(
             (endIndexChanged_ || (Positive(prevEndOffset) || !isInitialized_)) && NonPositive(endOffset);
         bool scrollDownToEnd = Negative(prevEndOffset) && NonNegative(endOffset);
         if (scrollUpToEnd || (scrollDownToEnd && GetScrollSource() != SCROLL_FROM_NONE)) {
+            TAG_LOGI(AceLogTag::ACE_LIST, "List:%{public}d onReachEnd scrollUpToEnd:%{public}d, "
+                "scrollDownToEnd:%{public}d", host->GetId(), scrollUpToEnd, scrollDownToEnd);
             onReachEnd();
             AddEventsFiredInfo(ScrollableEventType::ON_REACH_END);
         }
