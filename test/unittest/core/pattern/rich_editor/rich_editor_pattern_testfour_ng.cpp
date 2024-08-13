@@ -530,7 +530,7 @@ HWTEST_F(RichEditorPatternTestFourNg, ProcessInsertValue001, TestSize.Level1)
     richEditorPattern->isDragSponsor_ = true;
     richEditorPattern->isSpanStringMode_ = false;
     richEditorPattern->previewTextRecord_.hasDiff = true;
-    richEditorPattern->ProcessInsertValue(insertValue, false, false);
+    richEditorPattern->ProcessInsertValue(insertValue, OperationType::DEFAULT, false);
 
     ASSERT_EQ(richEditorPattern->previewTextRecord_.IsValid(), false);
 }
@@ -550,6 +550,228 @@ HWTEST_F(RichEditorPatternTestFourNg, DeleteBackwardOperation001, TestSize.Level
     richEditorPattern->previewLongPress_ = true;
     richEditorPattern->DeleteBackwardOperation(0);
 
+    ASSERT_EQ(richEditorPattern->spans_.empty(), true);
+}
+
+/**
+ * @tc.name: ProcessStyledString001
+ * @tc.desc: test ProcessStyledString
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, ProcessStyledString001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
+
+    richEditorPattern->textDetectEnable_ = true;
+    richEditorPattern->dataDetectorAdapter_->aiDetectInitialized_ = true;
+    richEditorPattern->ProcessStyledString();
+
+    richEditorPattern->dataDetectorAdapter_->aiDetectInitialized_ = false;
+    richEditorPattern->ProcessStyledString();
+
+    ASSERT_EQ(richEditorPattern->spans_.empty(), true);
+}
+
+/**
+ * @tc.name: RemoveEmptySpanNodes001
+ * @tc.desc: test RemoveEmptySpanNodes
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, RemoveEmptySpanNodes001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto host = richEditorPattern->GetHost();
+    EXPECT_NE(host, nullptr);
+
+    richEditorPattern->spans_.clear();
+    host->children_.clear();
+    auto textframeNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textframeNode, nullptr);
+    host->AddChild(textframeNode);
+    textframeNode->SetParent(host);
+
+    auto imageSpanNode = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    EXPECT_NE(imageSpanNode, nullptr);
+    host->AddChild(imageSpanNode);
+    imageSpanNode->SetParent(host);
+
+    richEditorPattern->RemoveEmptySpanNodes();
+
+    ASSERT_EQ(host->GetChildren().empty(), false);
+}
+
+/**
+ * @tc.name: AddImageSpan001
+ * @tc.desc: test AddImageSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, AddImageSpan001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    ImageSpanOptions options;
+    int32_t res = richEditorPattern->AddImageSpan(options, true, 0, false);
+    ASSERT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: DeleteSpansByRange001
+ * @tc.desc: test DeleteSpansByRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, DeleteSpansByRange001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    SpanPositionInfo startInfo;
+    SpanPositionInfo endInfo;
+    startInfo.spanIndex_ = -1;
+
+    auto host = richEditorPattern->GetHost();
+    EXPECT_NE(host, nullptr);
+
+    richEditorPattern->spans_.clear();
+    host->children_.clear();
+    auto textframeNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textframeNode, nullptr);
+    host->AddChild(textframeNode);
+    textframeNode->SetParent(host);
+
+    auto imageSpanNode = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    EXPECT_NE(imageSpanNode, nullptr);
+    host->AddChild(imageSpanNode);
+    imageSpanNode->SetParent(host);
+
+    richEditorPattern->DeleteSpansByRange(0, 0, startInfo, endInfo);
+
+    ASSERT_EQ(startInfo.spanIndex_ >= static_cast<int32_t>(host->GetChildren().size()), false);
+}
+
+/**
+ * @tc.name: CalcCursorOffsetByPosition001
+ * @tc.desc: test CalcCursorOffsetByPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, CalcCursorOffsetByPosition001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    float selectLineHeight = 0;
+    richEditorPattern->CalcCursorOffsetByPosition(0, selectLineHeight, true, true);
+
+    AddSpan("test");
+    richEditorPattern->CalcCursorOffsetByPosition(0, selectLineHeight, true, true);
+
+    auto host = richEditorPattern->GetHost();
+    EXPECT_NE(host, nullptr);
+    auto imageSpanNode = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    EXPECT_NE(imageSpanNode, nullptr);
+    host->AddChild(imageSpanNode);
+    imageSpanNode->SetParent(host);
+    richEditorPattern->CalcCursorOffsetByPosition(0, selectLineHeight, true, true);
+
+    richEditorPattern->spans_.clear();
+    richEditorPattern->CalcCursorOffsetByPosition(0, selectLineHeight, true, true);
+
+    ASSERT_EQ(richEditorPattern->GetTextContentLength() == 0, true);
+}
+
+/**
+ * @tc.name: GetAdjustedSelectionInfo001
+ * @tc.desc: test GetAdjustedSelectionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, GetAdjustedSelectionInfo001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    SelectionInfo textSelectInfo;
+    std::list<ResultObject> resultObjectList;
+    ResultObject obj;
+
+    obj.type = SelectSpanType::TYPEIMAGE;
+    obj.valueString = " ";
+    obj.valuePixelMap = PixelMap::CreatePixelMap(nullptr);
+    resultObjectList.emplace_back(obj);
+
+    obj.type = SelectSpanType::TYPEIMAGE;
+    obj.valueString = "";
+    obj.valuePixelMap = PixelMap::CreatePixelMap(nullptr);
+    resultObjectList.emplace_back(obj);
+
+    obj.type = SelectSpanType::TYPEIMAGE;
+    obj.valueString = " ";
+    obj.valuePixelMap = nullptr;
+    resultObjectList.emplace_back(obj);
+
+    obj.type = SelectSpanType::TYPEIMAGE;
+    obj.valueString = "";
+    obj.valuePixelMap = nullptr;
+    resultObjectList.emplace_back(obj);
+
+    obj.type = SelectSpanType::TYPESYMBOLSPAN;
+    obj.valueString = " ";
+    obj.valuePixelMap = PixelMap::CreatePixelMap(nullptr);
+    resultObjectList.emplace_back(obj);
+
+    obj.type = SelectSpanType::TYPESYMBOLSPAN;
+    obj.valueString = "";
+    obj.valuePixelMap = PixelMap::CreatePixelMap(nullptr);
+    resultObjectList.emplace_back(obj);
+
+    obj.type = SelectSpanType::TYPESYMBOLSPAN;
+    obj.valueString = " ";
+    obj.valuePixelMap = nullptr;
+    resultObjectList.emplace_back(obj);
+
+    obj.type = SelectSpanType::TYPESYMBOLSPAN;
+    obj.valueString = "";
+    obj.valuePixelMap = nullptr;
+    resultObjectList.emplace_back(obj);
+
+    textSelectInfo.SetResultObjectList(resultObjectList);
+    richEditorPattern->GetAdjustedSelectionInfo(textSelectInfo);
+
+    ASSERT_EQ(resultObjectList.empty(), false);
+}
+
+/**
+ * @tc.name: CopyTextSpanLineStyle001
+ * @tc.desc: test CopyTextSpanLineStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, CopyTextSpanLineStyle001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    LeadingMargin margin;
+    RefPtr<SpanNode> source = OHOS::Ace::NG::SpanNode::CreateSpanNode(1);
+    RefPtr<SpanNode> target = OHOS::Ace::NG::SpanNode::CreateSpanNode(2);
+    source->UpdateLeadingMargin(margin);
+
+    richEditorPattern->CopyTextSpanLineStyle(source, target, false);
+    richEditorPattern->CopyTextSpanLineStyle(source, target, true);
     ASSERT_EQ(richEditorPattern->spans_.empty(), true);
 }
 } // namespace OHOS::Ace::NG
