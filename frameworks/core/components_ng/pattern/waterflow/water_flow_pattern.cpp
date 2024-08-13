@@ -619,7 +619,11 @@ int32_t WaterFlowPattern::GetChildrenCount() const
 void WaterFlowPattern::NotifyDataChange(int32_t index, int32_t count)
 {
     if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW && keepContentPosition_) {
-        layoutInfo_->NotifyDataChange(index, count);
+        if (footer_.Upgrade()) {
+            layoutInfo_->NotifyDataChange(index - 1, count);
+        } else {
+            layoutInfo_->NotifyDataChange(index, count);
+        }
     }
 }
 

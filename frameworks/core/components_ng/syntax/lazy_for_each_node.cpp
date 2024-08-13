@@ -29,7 +29,6 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -312,6 +311,7 @@ void LazyForEachNode::OnDatasetChange(const std::list<V2::Operation>& DataOperat
     tempChildren_.clear();
     tempChildren_.swap(children_);
     NotifyDataCountChanged(initialChangedIndex);
+    ParseOperations(DataOperations);
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
@@ -559,10 +559,44 @@ void LazyForEachNode::InitAllChilrenDragManager(bool init)
 
 void LazyForEachNode::NotifyCountChange(int32_t index, int32_t count)
 {
-    auto parentNode = GetParentFrameNode();
-    CHECK_NULL_VOID(parentNode);
-    auto pattern = parentNode->GetPattern<ScrollablePattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->NotifyDataChange(index, count);
+    auto parent = GetParent();
+    int64_t accessibilityId = GetAccessibilityId();
+    if (parent) {
+        parent->NotifyDataChange(index, count, accessibilityId);
+    }
+}
+
+void LazyForEachNode::ParseOperations(const std::list<V2::Operation>& dataOperations)
+{
+    std::map<std::string, int32_t> operationTypeMap = { { "add", 1 }, { "delete", 2 }, { "change", 3 }, { "move", 4 },
+        { "exchange", 5 }, { "reload", 6 } };
+    constexpr int ADDOP = 1;
+    constexpr int DELETEOP = 2;
+    constexpr int CHANGEOP = 3;
+    constexpr int MOVEOP = 4;
+    constexpr int EXCHANGEOP = 5;
+    constexpr int RELOADOP = 6;
+    for (const auto& operation : dataOperations) {
+        switch (operationTypeMap[operation.type]) {
+            case ADDOP:
+                NotifyCountChange(operation.index, operation.count);
+                break;
+            case DELETEOP:
+                NotifyCountChange(operation.index, -operation.count);
+                break;
+            case CHANGEOP:
+                NotifyCountChange(operation.index + operation.count - 1, 0);
+                break;
+            case MOVEOP:
+                NotifyCountChange(std::max(operation.coupleIndex.first, operation.coupleIndex.second), 0);
+                break;
+            case EXCHANGEOP:
+                NotifyCountChange(operation.coupleIndex.second, 0);
+                break;
+            case RELOADOP:
+                NotifyCountChange(static_cast<int32_t>(FrameCount()), 0);
+                break;
+        }
+    }
 }
 } // namespace OHOS::Ace::NG
