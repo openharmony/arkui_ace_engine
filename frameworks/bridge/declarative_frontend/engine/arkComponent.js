@@ -7252,23 +7252,6 @@ class ImageSpanOnErrorModifier extends ModifierWithKey {
   }
 }
 ImageSpanOnErrorModifier.identity = Symbol('imageSpanOnError');
-class ImageSpanColorFilterModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().imageSpan.resetColorFilter(node);
-    } else {
-      getUINativeModule().imageSpan.setColorFilter(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return true;
-  }
-}
-
-ImageSpanColorFilterModifier.identity = Symbol('ImageSpanColorFilter');
 class ArkImageSpanComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -7299,10 +7282,6 @@ class ArkImageSpanComponent extends ArkComponent {
   }
   onError(callback) {
     modifierWithKey(this._modifiersWithKeys, ImageSpanOnErrorModifier.identity, ImageSpanOnErrorModifier, callback);
-    return this;
-  }
-  colorFilter(value) {
-    modifierWithKey(this._modifiersWithKeys, ImageSpanColorFilterModifier.identity, ImageSpanColorFilterModifier, value);
     return this;
   }
 }
