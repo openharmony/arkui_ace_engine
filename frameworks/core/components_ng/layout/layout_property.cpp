@@ -948,9 +948,6 @@ void LayoutProperty::UpdateMargin(const MarginProperty& value)
     if (margin_->UpdateWithCheck(value)) {
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
     }
-    if (margin_->UpdateStartAndEnd(value)) {
-        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
-    }
 }
 
 void LayoutProperty::UpdatePadding(const PaddingProperty& value)
@@ -959,9 +956,6 @@ void LayoutProperty::UpdatePadding(const PaddingProperty& value)
         padding_ = std::make_unique<PaddingProperty>();
     }
     if (padding_->UpdateWithCheck(value)) {
-        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
-    }
-    if (padding_->UpdateStartAndEnd(value)) {
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
     }
 }
@@ -1460,7 +1454,6 @@ void LayoutProperty::CheckLocalizedBorderRadiuses(const TextDirection& direction
         return;
     }
     if (borderRadiusProperty.radiusTopStart.has_value()) {
-        borderRadius.radiusTopStart = borderRadiusProperty.radiusTopStart;
         if (direction == TextDirection::RTL) {
             borderRadius.radiusTopRight = borderRadiusProperty.radiusTopStart;
         } else {
@@ -1468,7 +1461,6 @@ void LayoutProperty::CheckLocalizedBorderRadiuses(const TextDirection& direction
         }
     }
     if (borderRadiusProperty.radiusTopEnd.has_value()) {
-        borderRadius.radiusTopEnd = borderRadiusProperty.radiusTopEnd;
         if (direction == TextDirection::RTL) {
             borderRadius.radiusTopLeft = borderRadiusProperty.radiusTopEnd;
         } else {
@@ -1476,7 +1468,6 @@ void LayoutProperty::CheckLocalizedBorderRadiuses(const TextDirection& direction
         }
     }
     if (borderRadiusProperty.radiusBottomStart.has_value()) {
-        borderRadius.radiusBottomStart = borderRadiusProperty.radiusBottomStart;
         if (direction == TextDirection::RTL) {
             borderRadius.radiusBottomRight = borderRadiusProperty.radiusBottomStart;
         } else {
@@ -1484,7 +1475,6 @@ void LayoutProperty::CheckLocalizedBorderRadiuses(const TextDirection& direction
         }
     }
     if (borderRadiusProperty.radiusBottomEnd.has_value()) {
-        borderRadius.radiusBottomEnd = borderRadiusProperty.radiusBottomEnd;
         if (direction == TextDirection::RTL) {
             borderRadius.radiusBottomLeft = borderRadiusProperty.radiusBottomEnd;
         } else {
@@ -1507,7 +1497,6 @@ void LayoutProperty::CheckLocalizedOuterBorderColor(const TextDirection& directi
         return;
     }
     if (outerBorderColorProperty.startColor.has_value()) {
-        borderColors.startColor = outerBorderColorProperty.startColor;
         if (direction == TextDirection::RTL) {
             borderColors.rightColor = outerBorderColorProperty.startColor;
         } else {
@@ -1515,7 +1504,6 @@ void LayoutProperty::CheckLocalizedOuterBorderColor(const TextDirection& directi
         }
     }
     if (outerBorderColorProperty.endColor.has_value()) {
-        borderColors.endColor = outerBorderColorProperty.endColor;
         if (direction == TextDirection::RTL) {
             borderColors.leftColor = outerBorderColorProperty.endColor;
         } else {
@@ -1529,86 +1517,6 @@ void LayoutProperty::CheckLocalizedOuterBorderColor(const TextDirection& directi
         borderColors.topColor = outerBorderColorProperty.bottomColor;
     }
     target->UpdateOuterBorderColor(borderColors);
-}
-
-void LayoutProperty::CheckLocalizedPadding(const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction)
-{
-    CHECK_NULL_VOID(layoutProperty);
-    const auto& paddingProperty = layoutProperty->GetPaddingProperty();
-    CHECK_NULL_VOID(paddingProperty);
-    if (!paddingProperty->start.has_value() && !paddingProperty->end.has_value()) {
-        return;
-    }
-    PaddingProperty padding;
-    if (paddingProperty->start.has_value()) {
-        padding.start = paddingProperty->start;
-        if (direction == TextDirection::RTL) {
-            padding.right = paddingProperty->start;
-        } else {
-            padding.left = paddingProperty->start;
-        }
-    }
-    if (paddingProperty->end.has_value()) {
-        padding.end = paddingProperty->end;
-        if (direction == TextDirection::RTL) {
-            padding.left = paddingProperty->end;
-        } else {
-            padding.right = paddingProperty->end;
-        }
-    }
-    if (paddingProperty->top.has_value()) {
-        padding.top = paddingProperty->top;
-    }
-    if (paddingProperty->bottom.has_value()) {
-        padding.bottom = paddingProperty->bottom;
-    }
-    if (padding.left.has_value() && !padding.right.has_value()) {
-        padding.right = std::optional<CalcLength>(CalcLength(0));
-    }
-    if (!padding.left.has_value() && padding.right.has_value()) {
-        padding.left = std::optional<CalcLength>(CalcLength(0));
-    }
-    layoutProperty->UpdatePadding(padding);
-}
-
-void LayoutProperty::CheckLocalizedMargin(const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction)
-{
-    CHECK_NULL_VOID(layoutProperty);
-    const auto& marginProperty = layoutProperty->GetMarginProperty();
-    CHECK_NULL_VOID(marginProperty);
-    if (!marginProperty->start.has_value() && !marginProperty->end.has_value()) {
-        return;
-    }
-    MarginProperty margin;
-    if (marginProperty->start.has_value()) {
-        margin.start = marginProperty->start;
-        if (direction == TextDirection::RTL) {
-            margin.right = marginProperty->start;
-        } else {
-            margin.left = marginProperty->start;
-        }
-    }
-    if (marginProperty->end.has_value()) {
-        margin.end = marginProperty->end;
-        if (direction == TextDirection::RTL) {
-            margin.left = marginProperty->end;
-        } else {
-            margin.right = marginProperty->end;
-        }
-    }
-    if (marginProperty->top.has_value()) {
-        margin.top = marginProperty->top;
-    }
-    if (marginProperty->bottom.has_value()) {
-        margin.bottom = marginProperty->bottom;
-    }
-    if (margin.left.has_value() && !margin.right.has_value()) {
-        margin.right = std::optional<CalcLength>(CalcLength(0));
-    }
-    if (!margin.left.has_value() && margin.right.has_value()) {
-        margin.left = std::optional<CalcLength>(CalcLength(0));
-    }
-    layoutProperty->UpdateMargin(margin);
 }
 
 void LayoutProperty::CheckLocalizedEdgeWidths(
@@ -1626,7 +1534,6 @@ void LayoutProperty::CheckLocalizedEdgeWidths(
     }
     BorderWidthProperty borderWidth;
     if (borderWidthProperty->startDimen.has_value()) {
-        borderWidth.startDimen = borderWidthProperty->startDimen;
         if (direction == TextDirection::RTL) {
             borderWidth.rightDimen = borderWidthProperty->startDimen;
         } else {
@@ -1634,7 +1541,6 @@ void LayoutProperty::CheckLocalizedEdgeWidths(
         }
     }
     if (borderWidthProperty->endDimen.has_value()) {
-        borderWidth.endDimen = borderWidthProperty->endDimen;
         if (direction == TextDirection::RTL) {
             borderWidth.leftDimen = borderWidthProperty->endDimen;
         } else {
@@ -1670,7 +1576,6 @@ void LayoutProperty::CheckLocalizedEdgeColors(const TextDirection& direction)
         return;
     }
     if (colorProperty.startColor.has_value()) {
-        borderColors.startColor = colorProperty.startColor;
         if (direction == TextDirection::RTL) {
             borderColors.rightColor = colorProperty.startColor;
         } else {
@@ -1678,7 +1583,6 @@ void LayoutProperty::CheckLocalizedEdgeColors(const TextDirection& direction)
         }
     }
     if (colorProperty.endColor.has_value()) {
-        borderColors.endColor = colorProperty.endColor;
         if (direction == TextDirection::RTL) {
             borderColors.leftColor = colorProperty.endColor;
         } else {
@@ -1710,11 +1614,7 @@ void LayoutProperty::CheckLocalizedBorderImageSlice(const TextDirection& directi
     }
     Dimension leftSlice;
     Dimension rightSlice;
-    Dimension startSlice;
-    Dimension endSlice;
     if (borderImageProperty->borderImageStart_.has_value()) {
-        startSlice = borderImageProperty->borderImageStart_->GetBorderImageSlice();
-        borderImageProperty->SetEdgeSlice(BorderImageDirection::START, startSlice);
         if (direction == TextDirection::RTL) {
             rightSlice = borderImageProperty->borderImageStart_->GetBorderImageSlice();
         } else {
@@ -1722,8 +1622,6 @@ void LayoutProperty::CheckLocalizedBorderImageSlice(const TextDirection& directi
         }
     }
     if (borderImageProperty->borderImageEnd_.has_value()) {
-        endSlice = borderImageProperty->borderImageEnd_->GetBorderImageSlice();
-        borderImageProperty->SetEdgeSlice(BorderImageDirection::END, endSlice);
         if (direction == TextDirection::RTL) {
             leftSlice = borderImageProperty->borderImageEnd_->GetBorderImageSlice();
         } else {
@@ -1750,11 +1648,7 @@ void LayoutProperty::CheckLocalizedBorderImageWidth(const TextDirection& directi
     }
     Dimension leftWidth;
     Dimension rightWidth;
-    Dimension startWidth;
-    Dimension endWidth;
     if (borderImageProperty->borderImageStart_.has_value()) {
-        startWidth = borderImageProperty->borderImageStart_->GetBorderImageWidth();
-        borderImageProperty->SetEdgeWidth(BorderImageDirection::START, startWidth);
         if (direction == TextDirection::RTL) {
             rightWidth = borderImageProperty->borderImageStart_->GetBorderImageWidth();
         } else {
@@ -1762,8 +1656,6 @@ void LayoutProperty::CheckLocalizedBorderImageWidth(const TextDirection& directi
         }
     }
     if (borderImageProperty->borderImageEnd_.has_value()) {
-        endWidth = borderImageProperty->borderImageEnd_->GetBorderImageWidth();
-        borderImageProperty->SetEdgeWidth(BorderImageDirection::END, endWidth);
         if (direction == TextDirection::RTL) {
             leftWidth = borderImageProperty->borderImageEnd_->GetBorderImageWidth();
         } else {
@@ -1790,11 +1682,7 @@ void LayoutProperty::CheckLocalizedBorderImageOutset(const TextDirection& direct
     }
     Dimension leftOutset;
     Dimension rightOutset;
-    Dimension startOutset;
-    Dimension endOutset;
     if (borderImageProperty->borderImageStart_.has_value()) {
-        startOutset = borderImageProperty->borderImageStart_->GetBorderImageOutset();
-        borderImageProperty->SetEdgeOutset(BorderImageDirection::START, startOutset);
         if (direction == TextDirection::RTL) {
             rightOutset = borderImageProperty->borderImageStart_->GetBorderImageOutset();
         } else {
@@ -1802,8 +1690,6 @@ void LayoutProperty::CheckLocalizedBorderImageOutset(const TextDirection& direct
         }
     }
     if (borderImageProperty->borderImageEnd_.has_value()) {
-        endOutset = borderImageProperty->borderImageEnd_->GetBorderImageOutset();
-        borderImageProperty->SetEdgeOutset(BorderImageDirection::END, endOutset);
         if (direction == TextDirection::RTL) {
             leftOutset = borderImageProperty->borderImageEnd_->GetBorderImageOutset();
         } else {

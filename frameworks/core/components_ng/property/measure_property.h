@@ -357,8 +357,6 @@ struct PaddingPropertyT {
     std::optional<T> right;
     std::optional<T> top;
     std::optional<T> bottom;
-    std::optional<T> start;
-    std::optional<T> end;
 
     void SetEdges(const T& padding)
     {
@@ -396,20 +394,6 @@ struct PaddingPropertyT {
             return true;
         }
         return false;
-    }
-
-    bool UpdateStartAndEnd(const PaddingPropertyT& value)
-    {
-        bool hasStartOrEnd = false;
-        if (value.start.has_value()) {
-            start = value.start;
-            hasStartOrEnd = true;
-        }
-        if (value.end.has_value()) {
-            end = value.end;
-            hasStartOrEnd = true;
-        }
-        return hasStartOrEnd;
     }
 
     std::string ToString() const

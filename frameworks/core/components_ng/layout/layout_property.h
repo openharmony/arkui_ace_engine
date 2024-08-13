@@ -377,8 +377,6 @@ public:
     void CheckOffsetLocalizedEdges(TextDirection layoutDirection);
     void CheckLocalizedBorderRadiuses(const TextDirection& direction);
     void CheckLocalizedOuterBorderColor(const TextDirection& direction);
-    void CheckLocalizedPadding(const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction);
-    void CheckLocalizedMargin(const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction);
     void CheckLocalizedEdgeWidths(const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction);
     void CheckLocalizedEdgeColors(const TextDirection& direction);
     void CheckLocalizedBorderImageSlice(const TextDirection& direction);
