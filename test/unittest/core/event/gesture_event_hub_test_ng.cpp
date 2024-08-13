@@ -1854,6 +1854,8 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart001, TestSize.Level1)
     auto frameNodeOfEvent = EventHub->GetFrameNode();
     EXPECT_TRUE(frameNodeOfEvent);
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    auto unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
+    event->SetData(unifiedData);
     RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     DragDropInfo dragDropInfo;
     dragDropInfo.customNode = customNode;
