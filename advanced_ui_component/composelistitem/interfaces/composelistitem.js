@@ -1024,13 +1024,13 @@ class OperateItemStruct extends ViewPU {
         }
     }
     aboutToAppear() {
-        if (this.switch != null) {
+        if (this.switch !== null) {
             this.isOnClick = this.switch.isCheck;
         }
-        if (this.radio != null) {
+        if (this.radio !== null) {
             this.isOnClick = this.radio.isCheck;
         }
-        if (this.checkBox != null) {
+        if (this.checkBox !== null) {
             this.isOnClick = this.checkBox.isCheck;
         }
         this.onPropChange();

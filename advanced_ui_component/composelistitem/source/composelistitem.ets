@@ -363,13 +363,13 @@ struct OperateItemStruct {
   }
 
   aboutToAppear() {
-    if (this.switch != null) {
+    if (this.switch !== null) {
       this.isOnClick = this.switch.isCheck as boolean;
     }
-    if (this.radio != null) {
+    if (this.radio !== null) {
       this.isOnClick = this.radio.isCheck as boolean;
     }
-    if (this.checkBox != null) {
+    if (this.checkBox !== null) {
       this.isOnClick = this.checkBox.isCheck as boolean;
     }
     this.onPropChange();
@@ -566,7 +566,7 @@ struct OperateItemStruct {
           this.radioState = !this.radioState;
           this.isOnClick = this.radioState;
         }
-       })
+      })
       .margin({ end: LengthMetrics.vp(OperateItemStruct.RIGHT_ITEM_OFFSET_LEVEL1) })
       .checked(this.radioState)
       .onChange((isCheck: boolean) => {
