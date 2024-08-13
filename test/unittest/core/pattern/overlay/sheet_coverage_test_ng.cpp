@@ -1367,4 +1367,82 @@ HWTEST_F(SheetCoverageTestNg, DismissTransition001, TestSize.Level1)
     sheetPattern->DismissTransition(false, 1);
     SheetCoverageTestNg::TearDownTestCase();
 }
+
+/**
+ * @tc.name: GetOffsetInAvoidanceRule001
+ * @tc.desc: Increase the coverage of SheetPresentationLayoutAlgorithm::GetOffsetInAvoidanceRule function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetCoverageTestNg, GetOffsetInAvoidanceRule001, TestSize.Level1)
+{
+    SheetCoverageTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 301,
+        AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto algorithm = AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
+    auto targetPlacement = algorithm->AvoidanceRuleOfPlacement(Placement::BOTTOM, SizeF(), OffsetF());
+    EXPECT_NE(algorithm->getOffsetFunc_.find(targetPlacement), algorithm->getOffsetFunc_.end());
+    algorithm->GetOffsetInAvoidanceRule(SizeF(), OffsetF());
+
+    algorithm->getOffsetFunc_.clear();
+    EXPECT_EQ(algorithm->getOffsetFunc_.find(targetPlacement), algorithm->getOffsetFunc_.end());
+    algorithm->GetOffsetInAvoidanceRule(SizeF(), OffsetF());
+    SheetCoverageTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: GetOffsetWithBottomLeft001
+ * @tc.desc: Increase the coverage of SheetPresentationLayoutAlgorithm::GetOffsetWithBottomLeft function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetCoverageTestNg, GetOffsetWithBottomLeft001, TestSize.Level1)
+{
+    SheetCoverageTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 301,
+        AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto algorithm = AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
+    SizeF targetSize(50, 50);
+    algorithm->sheetRadius_ = 10;
+    Dimension arrowVertical = 8.0_vp;
+    float arrowOffsetX = targetSize.Width() / 2;
+    EXPECT_FALSE(LessNotEqual(arrowOffsetX - arrowVertical.ConvertToPx(), algorithm->sheetRadius_));
+    algorithm->GetOffsetWithBottomLeft(targetSize, OffsetF());
+
+    algorithm->sheetRadius_ = 100;
+    EXPECT_TRUE(LessNotEqual(arrowOffsetX - arrowVertical.ConvertToPx(), algorithm->sheetRadius_));
+    algorithm->GetOffsetWithBottomLeft(targetSize, OffsetF());
+    SheetCoverageTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: GetOffsetWithBottomRight001
+ * @tc.desc: Increase the coverage of SheetPresentationLayoutAlgorithm::GetOffsetWithBottomRight function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetCoverageTestNg, GetOffsetWithBottomRight001, TestSize.Level1)
+{
+    SheetCoverageTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 301,
+        AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto algorithm = AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
+    SizeF targetSize(50, 50);
+    algorithm->sheetRadius_ = 10;
+    algorithm->sheetWidth_ = 100;
+    Dimension arrowVertical = 8.0_vp;
+    float arrowOffsetX = algorithm->sheetWidth_ - targetSize.Width() / 2;
+    EXPECT_FALSE(GreatNotEqual(arrowOffsetX + algorithm->sheetRadius_ + arrowVertical.ConvertToPx(),
+        algorithm->sheetWidth_));
+    algorithm->GetOffsetWithBottomRight(targetSize, OffsetF());
+
+    algorithm->sheetRadius_ = 50;
+    EXPECT_TRUE(GreatNotEqual(arrowOffsetX + algorithm->sheetRadius_ + arrowVertical.ConvertToPx(),
+        algorithm->sheetWidth_));
+    algorithm->GetOffsetWithBottomRight(targetSize, OffsetF());
+    SheetCoverageTestNg::TearDownTestCase();
+}
 } // namespace OHOS::Ace::NG
