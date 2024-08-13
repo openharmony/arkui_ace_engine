@@ -478,7 +478,7 @@ HWTEST_F(OverlayTestUpdate, ToastTest005, TestSize.Level1)
      */
     auto styleOption = toastContext->GetBackBlurStyle();
     auto testval1 = toastContext->GetBackgroundColorValue();
-    auto shadow1 = textContext->GetBackShadow().value();
+    auto shadow1 = toastContext->GetBackShadow().value();
     EXPECT_EQ(testval1, Color::BLUE);
     EXPECT_EQ(styleOption->blurStyle, BlurStyle::NO_MATERIAL);
     EXPECT_EQ(shadow1, ShadowConfig::DefaultShadowL);
