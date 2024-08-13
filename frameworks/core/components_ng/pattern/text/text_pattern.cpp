@@ -107,6 +107,7 @@ void TextPattern::OnAttachToFrameNode()
 {
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
+    pipeline_ = pipeline;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto fontManager = pipeline->GetFontManager();
@@ -132,7 +133,7 @@ void TextPattern::OnDetachFromFrameNode(FrameNode* node)
 {
     dataDetectorAdapter_->aiDetectDelayTask_.Cancel();
     CloseSelectOverlay();
-    auto pipeline = GetContext();
+    auto pipeline = pipeline_.Upgrade();
     CHECK_NULL_VOID(pipeline);
     if (HasSurfaceChangedCallback()) {
         pipeline->UnregisterSurfaceChangedCallback(surfaceChangedCallbackId_.value_or(-1));
@@ -310,7 +311,8 @@ SelectionInfo TextPattern::GetSpansInfo(int32_t start, int32_t end, GetSpansMeth
             if (!resultObject.valueString.empty()) {
                 resultObjects.emplace_back(resultObject);
             }
-        } else if (uinode->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG) {
+        } else if (uinode->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG ||
+            uinode->GetTag() == V2::CUSTOM_SPAN_NODE_ETS_TAG) {
             ResultObject resultObject = GetBuilderResultObject(uinode, index, realStart, realEnd);
             if (!resultObject.valueString.empty()) {
                 resultObjects.emplace_back(resultObject);
@@ -493,6 +495,12 @@ std::wstring TextPattern::GetWideText() const
     return StringUtils::ToWstring(textForDisplay_);
 }
 
+bool TextPattern::IsCustomSpanNode(const RefPtr<SpanItem>& span) const
+{
+    auto customSpanItem = AceType::DynamicCast<CustomSpanItem>(span);
+    return customSpanItem && customSpanItem->isNode;
+}
+
 std::string TextPattern::GetSelectedText(int32_t start, int32_t end) const
 {
     if (spans_.empty()) {
@@ -509,7 +517,9 @@ std::string TextPattern::GetSelectedText(int32_t start, int32_t end) const
             tag = span->position == -1 ? tag + 1 : span->position;
             continue;
         }
-        if (span->position - 1 >= start && span->placeholderIndex == -1 && span->position != -1) {
+        if (span->position - 1 >= start &&
+            (span->placeholderIndex == -1 || IsCustomSpanNode(span)) &&
+            span->position != -1) {
             auto wideString = StringUtils::ToWstring(span->GetSpanContent());
             auto max = std::min(span->position, end);
             auto min = std::max(start, tag);
@@ -1400,6 +1410,7 @@ bool TextPattern::IsDraggable(const Offset& offset)
         GreatNotEqual(textSelector_.GetTextEnd(), textSelector_.GetTextStart())) {
         // Determine if the pan location is in the selected area
         auto selectedRects = pManager_->GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
+        TextBase::CalculateSelectedRect(selectedRects, contentRect_.Width());
         auto panOffset = OffsetF(offset.GetX(), offset.GetY()) - contentRect_.GetOffset() +
                          OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
         for (const auto& selectedRect : selectedRects) {
@@ -2495,7 +2506,9 @@ void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanH
             continue;
         }
         if (tag == V2::CUSTOM_SPAN_NODE_ETS_TAG) {
+            placeholderCount_++;
             AddChildSpanItem(current.node);
+            dataDetectorAdapter_->textForAI_.append("\n");
             childNodes_.emplace_back(current.node);
         }
         const auto& nextChildren = current.node->GetChildren();

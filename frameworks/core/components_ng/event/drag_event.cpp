@@ -53,7 +53,11 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 #ifdef WEB_SUPPORTED
+#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "core/components_ng/pattern/web/web_pattern.h"
+#else
+#include "core/components_ng/pattern/web/cross_platform/web_pattern.h"
+#endif
 #endif // WEB_SUPPORTED
 
 namespace OHOS::Ace::NG {
@@ -396,10 +400,12 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         actuator->ResetResponseRegion();
         actuator->SetGatherNode(nullptr);
         auto contextMenuShowStatus = gestureHub->GetContextMenuShowStatus();
+        bool isContextMenuLongPress = gestureHub->GetMenuBindingType() == MenuBindingType::LONG_PRESS;
         if (actuator->GetIsNotInPreviewState() && !gestureHub->GetTextDraggable()) {
             DragEventActuator::ExecutePreDragAction(PreDragStatus::ACTION_CANCELED_BEFORE_DRAG, frameNode);
         }
-        if (!hasContextMenuUsingGesture && !contextMenuShowStatus) {
+        if ((!hasContextMenuUsingGesture && !contextMenuShowStatus) ||
+            (hasContextMenuUsingGesture && !isContextMenuLongPress)) {
             if (gestureHub->GetTextDraggable()) {
                 if (gestureHub->GetIsTextDraggable()) {
                     actuator->HideEventColumn();
@@ -563,7 +569,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         CHECK_NULL_VOID(manager);
         actuator->SetIsNotInPreviewState(false);
         actuator->SetGatherNodeAboveFilter(actuator);
-        if (!hasContextMenuUsingGesture) {
+        bool isContextMenuLongPress = gestureHub->GetMenuBindingType() == MenuBindingType::LONG_PRESS;
+        if (!hasContextMenuUsingGesture || !isContextMenuLongPress) {
             actuator->SetPixelMap(actuator);
         }
         auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(SPRING_RESPONSE, SPRING_DAMPING_FRACTION, 0);

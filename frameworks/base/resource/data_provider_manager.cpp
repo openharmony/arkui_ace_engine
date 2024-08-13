@@ -113,4 +113,12 @@ std::string DataProviderManagerStandard::GetMovingPhotoImageUri(const std::strin
     CHECK_NULL_RETURN(helper_, "");
     return helper_->GetMovingPhotoImageUri(uri);
 }
+
+int64_t DataProviderManagerStandard::GetMovingPhotoDateModified(const std::string& uri)
+{
+    InitHelper();
+    std::shared_lock lock(helperMutex_);
+    CHECK_NULL_RETURN(helper_, -1);
+    return helper_->GetMovingPhotoDateModified(uri);
+}
 } // namespace OHOS::Ace

@@ -134,7 +134,7 @@ struct ListFilterRow {
       Stack({ alignContent: Alignment.Start }) {
         List() {
           ForEach(this.filterRow.options, (option: Array<ResourceStr>, colIndex: number) => {
-            if (colIndex == 0) {
+            if (colIndex === 0) {
               ListItem()
                 .width($r('sys.float.ohos_id_max_padding_start'))
                 .height(LIST_ROW_HEIGHT)
@@ -206,7 +206,7 @@ struct ListFilterRow {
               }
             })
             .margin({ start: LengthMetrics.vp(colIndex === 0 ? -TEXT_HOT_AREA_WIDTH : 0) })
-            .tabIndex(colIndex == 0 ? this.rowIndex : -1)
+            .tabIndex(colIndex === 0 ? this.rowIndex : -1)
           })
         }
         .listDirection(Axis.Horizontal)
@@ -482,7 +482,8 @@ struct MultiFilterRow {
                   .height(LIST_ROW_HEIGHT)
                   .fontColor(this.colorRow[colIndex])
                   .fontWeight(this.fontWeightRow[colIndex])
-                  .backgroundColor(this.isBackgroundHoverRow[colIndex] ? this.backgroundColorRow[colIndex] : TRANS_COLOR)
+                  .backgroundColor(this.isBackgroundHoverRow[colIndex] ?
+                    this.backgroundColorRow[colIndex] : TRANS_COLOR)
                   .onClick(() => {
                     this.onItemClick(colIndex)
                   })
@@ -634,7 +635,7 @@ export struct Filter {
     this.initParams();
     try {
       let uiContent: UIContext = this.getUIContext();
-      this.isFollowingSystemFontScale= uiContent.isFollowingSystemFontScale();
+      this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
       this.maxAppFontScale = uiContent.getMaxFontScale();
     } catch (err) {
       let code: number = (err as BusinessError).code;
@@ -777,7 +778,7 @@ export struct Filter {
     .align(Alignment.Start)
     .onAreaChange((_oldValue: Area, newValue: Area) => {
       if (!this.isFloatShowAllFilterWithoutAnimation && !this.isFloatBarShowWithoutAnimation) {
-        if (this.additionFilters != null) {
+        if (this.additionFilters !== null) {
           this.filterDynamicHeight = parseInt(newValue.height.toString(), 0) + LIST_ROW_HEIGHT + FILTER_TOP_PADDING
         } else {
           this.filterDynamicHeight = parseInt(newValue.height.toString(), 0) + FILTER_TOP_PADDING
@@ -810,7 +811,7 @@ export struct Filter {
       })
     }.width(PERCENT_100)
     .onAreaChange((_oldValue: Area, newValue: Area) => {
-      if (this.additionFilters != null) {
+      if (this.additionFilters !== null) {
         this.filterDynamicHeight = parseInt(newValue.height.toString(), 0) + LIST_ROW_HEIGHT + FILTER_TOP_PADDING
       } else {
         this.filterDynamicHeight = parseInt(newValue.height.toString(), 0) + FILTER_TOP_PADDING
@@ -854,7 +855,7 @@ export struct Filter {
 
   @Builder AdditionFilterList() {
     if (this.additionFilters && this.additionFilters.name && this.additionFilters.options &&
-      this.additionFilters.options.length != 0) {
+      this.additionFilters.options.length !== 0) {
       Stack({ alignContent: Alignment.End }) {
         Stack({ alignContent: Alignment.Start }) {
           List() {
@@ -945,7 +946,7 @@ export struct Filter {
               .onClick(() => {
                 this.additionItemClick(index)
               })
-              .tabIndex(index == 0 ? this.multiFilters.length : -1)
+              .tabIndex(index === 0 ? this.multiFilters.length : -1)
             })
           }
           .listDirection(Axis.Horizontal)
@@ -1171,7 +1172,7 @@ export struct Filter {
         .height(PERCENT_100)
         .edgeEffect(EdgeEffect.Spring)
         .onScroll((_scrollOffset: number, scrollState: ScrollState) => {
-          if (this.isFloatShowAllFilterWithoutAnimation && scrollState == ScrollState.Scroll) {
+          if (this.isFloatShowAllFilterWithoutAnimation && scrollState === ScrollState.Scroll) {
             this.isFloatBarShowWithoutAnimation = true
             this.isFloatShowAllFilterWithoutAnimation = false
             animateTo({

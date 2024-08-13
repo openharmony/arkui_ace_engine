@@ -120,6 +120,14 @@ public:
         }
     }
 
+    void RemoveOnHiddenChange(int32_t id)
+    {
+        auto iter = onHiddenChange_.find(id);
+        if (iter != onHiddenChange_.end()) {
+            onHiddenChange_.erase(iter);
+        }
+    }
+
     void SetName(const std::string& name)
     {
         name_ = name;

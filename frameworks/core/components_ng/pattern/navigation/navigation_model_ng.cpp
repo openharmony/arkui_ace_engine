@@ -846,6 +846,7 @@ bool NavigationModelNG::ParseCommonTitle(
         if (mainTitle) {
             // update main title
             auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
+            textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : TITLEBAR_MAX_LINES);
             textLayoutProperty->UpdateContent(title);
             break;
         }
@@ -854,6 +855,7 @@ bool NavigationModelNG::ParseCommonTitle(
             V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
         textLayoutProperty->UpdateContent(title);
+        titleBarPattern->SetNeedResetMainTitleProperty(true);
         titleBarNode->SetTitle(mainTitle);
         titleBarNode->AddChild(mainTitle);
     } while (false);
@@ -878,6 +880,7 @@ bool NavigationModelNG::ParseCommonTitle(
             V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         auto textLayoutProperty = subTitle->GetLayoutProperty<TextLayoutProperty>();
         textLayoutProperty->UpdateContent(subtitle);
+        titleBarPattern->SetNeedResetSubTitleProperty(true);
         titleBarNode->SetSubtitle(subTitle);
         titleBarNode->AddChild(subTitle);
     }
@@ -1724,6 +1727,8 @@ void NavigationModelNG::SetSubtitle(FrameNode* frameNode, const std::string& sub
     CHECK_NULL_VOID(navBarNode);
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
     CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
     if (navBarNode->GetPrevTitleIsCustomValue(false)) {
         titleBarNode->RemoveChild(titleBarNode->GetTitle());
         titleBarNode->SetTitle(nullptr);
@@ -1749,6 +1754,7 @@ void NavigationModelNG::SetSubtitle(FrameNode* frameNode, const std::string& sub
             V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         auto textLayoutProperty = subTitle->GetLayoutProperty<TextLayoutProperty>();
         textLayoutProperty->UpdateContent(subtitle);
+        titleBarPattern->SetNeedResetSubTitleProperty(true);
         titleBarNode->SetSubtitle(subTitle);
         titleBarNode->AddChild(subTitle);
     }

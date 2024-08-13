@@ -12,25 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <cstdint>
 
 #include "interfaces/native/drag_and_drop.h"
 #include "interfaces/native/node/event_converter.h"
 #include "interfaces/native/node/node_model.h"
-#include "native_node.h"
-#include "native_type.h"
 #include "ndk_data_conversion.h"
 #include "pixelmap_native_impl.h"
 #include "securec.h"
-
-#include "base/error/error_code.h"
-#include "base/log/log_wrapper.h"
-#include "base/utils/utils.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
-#include "frameworks/bridge/common/utils/engine_helper.h"
-#include "frameworks/core/common/ace_engine.h"
-#include "frameworks/core/common/container.h"
-#include "frameworks/core/interfaces/native/node/node_api.h"
 
 #ifdef __cplusplus
 extern "C" {

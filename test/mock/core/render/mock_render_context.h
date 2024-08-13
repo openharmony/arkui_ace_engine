@@ -77,6 +77,11 @@ public:
         return rect_;
     }
 
+    void SetPaintRectWithTransform(const RectF rect)
+    {
+        rect_ = rect;
+    }
+
     RectF GetPaintRectWithoutTransform() override
     {
         return paintRect_;

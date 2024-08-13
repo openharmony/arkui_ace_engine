@@ -218,7 +218,7 @@ class __RepeatVirtualScrollImpl<T> {
                 const ttype = this.typeGenFunc_(this.arr_[i], i);
                 this.lastActiveRangeData_[i] = { item, ttype };
             }
-        }
+        };
 
         stateMgmtConsole.debug(`__RepeatVirtualScrollImpl(${this.repeatElmtId_}): initialRenderVirtualScroll`);
 

@@ -15,11 +15,7 @@
 
 #include "form_renderer.h"
 
-#include "configuration.h"
-#include "form_constants.h"
 #include "form_renderer_hilog.h"
-#include "event_handler.h"
-#include "refbase.h"
 
 #include "base/utils/utils.h"
 

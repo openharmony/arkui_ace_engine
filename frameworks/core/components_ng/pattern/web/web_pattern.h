@@ -39,7 +39,6 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/components_ng/pattern/web/touch_event_listener.h"
-#include "core/components_ng/pattern/web/web_accessibility_node.h"
 #include "core/components_ng/pattern/web/web_accessibility_property.h"
 #include "core/components_ng/pattern/web/web_context_select_overlay.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
@@ -601,10 +600,12 @@ public:
         return isVirtualKeyBoardShow_ == VkState::VK_SHOW;
     }
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
-    RefPtr<WebAccessibilityNode> GetFocusedAccessibilityNode(int64_t accessibilityId, bool isAccessibilityFocus);
-    RefPtr<WebAccessibilityNode> GetAccessibilityNodeById(int64_t accessibilityId);
-    RefPtr<WebAccessibilityNode> GetAccessibilityNodeByFocusMove(int64_t accessibilityId, int32_t direction);
-    void ExecuteAction(int64_t accessibilityId, AceAction action,
+    std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetFocusedAccessibilityNode(int64_t accessibilityId,
+        bool isAccessibilityFocus);
+    std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetAccessibilityNodeById(int64_t accessibilityId);
+    std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetAccessibilityNodeByFocusMove(int64_t accessibilityId,
+        int32_t direction);
+    bool ExecuteAction(int64_t accessibilityId, AceAction action,
         const std::map<std::string, std::string>& actionArguments) const;
     void SetAccessibilityState(bool state);
     void UpdateFocusedAccessibilityId(int64_t accessibilityId = -1);
@@ -664,6 +665,13 @@ public:
     void RegisterWebComponentClickCallback(WebComponentClickCallback&& callback);
     void UnregisterWebComponentClickCallback();
     WebComponentClickCallback GetWebComponentClickCallback() const { return webComponentClickCallback_; }
+    void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId);
+    bool OnAccessibilityChildTreeRegister();
+    bool OnAccessibilityChildTreeDeregister();
+    int32_t GetTreeId()
+    {
+        return treeId_;
+    }
 
 private:
     friend class WebContextSelectOverlay;
@@ -828,6 +836,8 @@ private:
 
     void SuggestionSelected(int32_t index);
     void RegisterSelectOverLayOnClose(SelectOverlayInfo& selectInfo);
+    void InitializeAccessibility();
+    void UninitializeAccessibility();
 #ifdef OHOS_STANDARD_SYSTEM
     WebOverlayType GetTouchHandleOverlayType(
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
@@ -855,7 +865,6 @@ private:
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
         const double& dipScale);
     OffsetF GetSelectPopupPostion(std::shared_ptr<OHOS::NWeb::NWebSelectMenuBound> bound);
-    void SetSelfAsParentOfWebCoreNode(std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> info) const;
     bool GetAccessibilityFocusRect(RectT<int32_t>& paintRect, int64_t accessibilityId) const;
     void SetTouchLocationInfo(const TouchEvent& touchEvent, const TouchLocationInfo& changedInfo,
         const TouchEventInfo& tempTouchInfo, TouchEventInfo& touchEventInfo);
@@ -1037,7 +1046,6 @@ private:
     bool offlineWebRendered_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
     bool accessibilityState_ = false;
-    RefPtr<WebAccessibilityNode> webAccessibilityNode_;
     TouchEventInfo touchEventInfo_{"touchEvent"};
     std::vector<TouchEventInfo> touchEventInfoList_ {};
     bool isParentReachEdge_ = false;
@@ -1067,6 +1075,9 @@ private:
     TextBlurCallback textBlurCallback_ = nullptr;
     WebComponentClickCallback webComponentClickCallback_ = nullptr;
     uint32_t autoFillSessionId_ = 0;
+    std::shared_ptr<AccessibilityChildTreeCallback> accessibilityChildTreeCallback_;
+    int32_t treeId_ = 0;
+    int32_t instanceId_ = -1;
     std::vector<RefPtr<PageNodeInfoWrap>> pageNodeInfo_;
     bool isAutoFillClosing_ = true;
     ViewDataCommon viewDataCommon_;

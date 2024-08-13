@@ -15,7 +15,6 @@
 
 #include "core/components/common/properties/shadow.h"
 
-#include "base/utils/system_properties.h"
 #include "core/animation/evaluator.h"
 #include "core/components/common/properties/shadow_config.h"
 

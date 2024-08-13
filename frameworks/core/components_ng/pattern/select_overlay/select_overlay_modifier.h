@@ -29,7 +29,7 @@ class SelectOverlayModifier : public OverlayModifier {
     DECLARE_ACE_TYPE(SelectOverlayModifier, OverlayModifier)
 
 public:
-    SelectOverlayModifier(const OffsetF& menuOptionOffset);
+    SelectOverlayModifier(const OffsetF& menuOptionOffset, bool isReverse);
 
     ~SelectOverlayModifier() override = default;
 

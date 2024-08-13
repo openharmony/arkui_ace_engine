@@ -15,13 +15,6 @@
 
 #include "js_drawable_descriptor.h"
 
-#include "drawable_descriptor.h"
-#include "interfaces/inner_api/drawable_descriptor/drawable_descriptor.h"
-#include "js_native_api.h"
-#include "js_native_api_types.h"
-#include "napi/native_api.h"
-#include "napi/native_common.h"
-#include "napi/native_node_api.h"
 #ifndef PREVIEW
 #include "pixel_map_napi.h"
 #endif

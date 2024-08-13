@@ -16,15 +16,8 @@
 #include "core/pipeline/base/composed_element.h"
 
 #include "base/log/dump_log.h"
-#include "base/log/log.h"
-#include "base/utils/utils.h"
 #include "core/common/container.h"
-#include "core/common/frontend.h"
-#include "core/components/flex/flex_item_element.h"
 #include "core/components/page/page_element.h"
-#include "core/event/ace_event_helper.h"
-#include "core/pipeline/base/composed_component.h"
-#include "core/pipeline/base/render_element.h"
 
 namespace OHOS::Ace {
 

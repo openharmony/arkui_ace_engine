@@ -16,10 +16,6 @@
 #include "xcomponent_controller.h"
 
 #include "js_native_api.h"
-#include "js_native_api_types.h"
-#include "jsnapi.h"
-#include "napi/native_common.h"
-#include "native_engine/impl/ark/ark_native_engine.h"
 #include "bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
 
 namespace OHOS::Ace {

@@ -3777,12 +3777,9 @@ void FrameNode::ProcessAccessibilityVirtualNode()
     auto virtualNode = accessibilityProperty->GetAccessibilityVirtualNode();
     auto virtualFrameNode = AceType::DynamicCast<NG::FrameNode>(virtualNode);
     if (virtualFrameNode) {
-        auto pipeline = GetContext();
-        CHECK_NULL_VOID(pipeline);
         auto constraint = GetLayoutConstraint();
         virtualFrameNode->ApplyConstraint(constraint);
         ProcessOffscreenNode(virtualFrameNode);
-        pipeline->SendUpdateVirtualNodeFocusEvent();
     }
 }
 
@@ -3857,6 +3854,9 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
     }
     layoutAlgorithm_.Reset();
     ProcessAccessibilityVirtualNode();
+    auto pipeline = GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    pipeline->SendUpdateVirtualNodeFocusEvent();
     return true;
 }
 
@@ -4639,13 +4639,13 @@ bool FrameNode::AllowVisibleAreaCheck() const
     return IsOnMainTree() || (pattern_ && pattern_->AllowVisibleAreaCheck());
 }
 
-void FrameNode::GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect) const
+void FrameNode::GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect)
 {
     visibleRect = GetPaintRectWithTransform();
     frameRect = visibleRect;
     visibleInnerRect = visibleRect;
     RefPtr<FrameNode> parentUi = GetAncestorNodeOfFrame(true);
-    if (!AllowVisibleAreaCheck() || !parentUi) {
+    if (!AllowVisibleAreaCheck() || !parentUi || IsFrameDisappear()) {
         visibleRect.SetWidth(0.0f);
         visibleRect.SetHeight(0.0f);
         visibleInnerRect.SetWidth(0.0f);

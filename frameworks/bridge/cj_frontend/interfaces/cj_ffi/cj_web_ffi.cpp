@@ -447,8 +447,14 @@ void MapToCFFIArrayToFreeMemory(MapToCFFIArray& mapToCFFIArray)
 void FfiOHOSAceFrameworkWebOnLoadIntercept(bool (*callback)(FfiWebResourceRequest event))
 {
     auto instanceId = Container::CurrentId();
-    auto onLoadIntercept = [func = CJLambda::Create(callback), instanceId](const BaseEventInfo* info) {
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onLoadIntercept = [func = CJLambda::Create(callback), instanceId, node = frameNode](
+        const BaseEventInfo* info) -> bool  {
         ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        pipelineContext->UpdateCurrentActiveNode(node);
+
         FfiWebResourceRequest cjWebResourceRequest {};
         auto* eventInfo = TypeInfoHelper::DynamicCast<LoadInterceptEvent>(info);
         auto request = eventInfo->GetRequest();

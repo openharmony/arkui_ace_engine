@@ -59,6 +59,10 @@ public:
     void UpdateHandleOffset();
     void UpdateSelectOverlayOnAreaChanged();
     void ToggleMenu();
+    bool GetIsHandleMoving()
+    {
+        return isHandleMoving_;
+    }
     void OnHandleIsHidden() override;
     void OnOverlayClick(const GestureEvent& event, bool isFirst) override;
     void OnAfterSelectOverlayShow(bool isCreate) override;

@@ -8536,26 +8536,6 @@ class ProviderConsumerUtilV2 {
         const aliasProp = ProviderConsumerUtilV2.metaAliasKey(aliasName, deco);
         meta[aliasProp] = { 'varName': varName, 'aliasName': aliasName, 'deco': deco };
     }
-    static setupConsumeVarsV2(view) {
-        const meta = view && view[ObserveV2.V2_DECO_META];
-        if (!meta) {
-            return;
-        }
-        for (const [key, value] of Object.entries(meta)) {
-            // check all entries of this format varName: { deco: '@Provider' | '@Consumer', aliasName: ..... }
-            // do not check alias entries
-            // 'varName' is only in alias entries, see addProvideConsumeVariableDecoMeta
-            if (typeof value === 'object' && value['deco'] === '@Consumer' && !('varName' in value)) {
-                let result = ProviderConsumerUtilV2.findProvider(view, value['aliasName']);
-                if (result && result[0] && result[1]) {
-                    ProviderConsumerUtilV2.connectConsumer2Provider(view, key, result[0], result[1]);
-                }
-                else {
-                    ProviderConsumerUtilV2.defineConsumerWithoutProvider(view, key);
-                }
-            }
-        }
-    }
     /**
     * find a @Provider'ed variable from its nearest ancestor ViewV2.
     * @param searchingAliasName The key name to search for.
@@ -8584,6 +8564,18 @@ class ProviderConsumerUtilV2 {
         stateMgmtConsole.warn(`findProvider: ${view.debugInfo__()} @Consumer('${aliasName}'), no matching @Provider found amongst ancestor @ComponentV2's!`);
         return undefined;
     }
+    /**
+    * Connects a consumer property of a view (`consumeView`) to a provider property of another view (`provideView`).
+    * This function establishes a link between the consumer and provider, allowing the consumer to access and update
+    * the provider's value directly. If the provider view is garbage collected, attempts to access the provider
+    * property will throw an error.
+    *
+    * @param consumeView - The view object that consumes data from the provider.
+    * @param consumeVarName - The name of the property in the consumer view that will be linked to the provider.
+    * @param provideView - The view object that provides the data to the consumer.
+    * @param provideVarName - The name of the property in the provider view that the consumer will access.
+    *
+    */
     static connectConsumer2Provider(consumeView, consumeVarName, provideView, provideVarName) {
         var _a;
         const weakView = new WeakRef(provideView);
@@ -8620,10 +8612,10 @@ class ProviderConsumerUtilV2 {
             enumerable: true
         });
     }
-    static defineConsumerWithoutProvider(consumeView, consumeVarName) {
+    static defineConsumerWithoutProvider(consumeView, consumeVarName, consumerLocalVal) {
         
         const storeProp = ObserveV2.OB_PREFIX + consumeVarName;
-        consumeView[storeProp] = consumeView[consumeVarName]; // use local init value, also as backing store
+        consumeView[storeProp] = consumerLocalVal; // use local init value, also as backing store
         Reflect.defineProperty(consumeView, consumeVarName, {
             get() {
                 ObserveV2.getObserve().addRef(this, consumeVarName);
@@ -9013,7 +9005,6 @@ class ViewV2 extends PUV2ViewBase {
      * otherwise it inherits from its parent instance if its freezeState is true
      */
     finalizeConstruction(freezeState) {
-        ProviderConsumerUtilV2.setupConsumeVarsV2(this);
         ObserveV2.getObserve().constructComputed(this, this.constructor.name);
         ObserveV2.getObserve().constructMonitor(this, this.constructor.name);
         // Always use ID_REFS in ViewV2
@@ -9549,6 +9540,32 @@ const Consumer = (aliasName) => {
         // redefining the property happens when owning ViewV2 gets constructed
         // and @Consumer gets connected to @provide counterpart
         ProviderConsumerUtilV2.addProvideConsumeVariableDecoMeta(proto, varName, searchForProvideWithName, '@Consumer');
+        const providerName = (aliasName === undefined || aliasName === null ||
+            (typeof aliasName === "string" && aliasName.trim() === "")) ? varName : aliasName;
+        let providerInfo;
+        Reflect.defineProperty(proto, varName, {
+            get() {
+                if (!providerInfo) {
+                    providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
+                    if (providerInfo && providerInfo[0] && providerInfo[1]) {
+                        ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
+                    }
+                }
+                return this[providerName !== null && providerName !== void 0 ? providerName : varName];
+            },
+            set(val) {
+                if (!providerInfo) {
+                    providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
+                    if (providerInfo && providerInfo[0] && providerInfo[1]) {
+                        ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
+                    }
+                    else {
+                        ProviderConsumerUtilV2.defineConsumerWithoutProvider(this, varName, val);
+                    }
+                }
+            },
+            enumerable: true
+        });
     };
 }; // @Consumer
 /**
@@ -10133,7 +10150,7 @@ class __Repeat {
         const typeGenFuncSafe = (item, index) => {
             const itemType = typeGenFunc(item, index);
             const itemFunc = this.config.itemGenFuncs[itemType];
-            if (typeof itemFunc != 'function') {
+            if (typeof itemFunc !== 'function') {
                 stateMgmtConsole.applicationError(`Repeat with virtual scroll. Missing Repeat.template for id '${itemType}'`);
                 return '';
             }

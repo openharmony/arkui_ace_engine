@@ -455,6 +455,15 @@ HWTEST_F(GridLayoutRangeTest, Jump001, TestSize.Level1)
     const auto& info = pattern_->gridLayoutInfo_;
     EXPECT_EQ(GetChildRect(frameNode_, 22).Bottom(), GRID_HEIGHT - itemHeight);
     EXPECT_EQ(info.startIndex_, 22);
+
+    pattern_->ScrollToIndex(88, false, ScrollAlign::AUTO, itemHeight);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info.startIndex_, 85);
+    EXPECT_EQ(info.endIndex_, 93);
+    for (int i = 85; i <= 93; ++i) {
+        EXPECT_TRUE(GetChildFrameNode(frameNode_, i)->IsActive());
+    }
+    EXPECT_EQ(GetChildY(frameNode_, 91), 520.0f);
 }
 
 /**

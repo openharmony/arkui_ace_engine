@@ -4831,6 +4831,9 @@ void WebDelegate::OnDownloadStart(const std::string& url, const std::string& use
 
 void WebDelegate::OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEventType eventType)
 {
+    if (!accessibilityState_) {
+        return;
+    }
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     AccessibilityEvent event;
@@ -4840,10 +4843,8 @@ void WebDelegate::OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEve
     CHECK_NULL_VOID(accessibilityManager);
     if (eventType == AccessibilityEventType::ACCESSIBILITY_FOCUSED) {
         webPattern->UpdateFocusedAccessibilityId(accessibilityId);
-        accessibilityManager->UpdateAccessibilityFocusId(context, accessibilityId, true);
     } else if (eventType == AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED) {
         webPattern->UpdateFocusedAccessibilityId();
-        accessibilityManager->UpdateAccessibilityFocusId(context, accessibilityId, false);
     }
     if (accessibilityId <= 0) {
         auto webNode = webPattern->GetHost();
@@ -4861,7 +4862,7 @@ void WebDelegate::OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEve
     }
     event.nodeId = accessibilityId;
     event.type = eventType;
-    context->SendEventToAccessibility(event);
+    accessibilityManager->SendWebAccessibilityAsyncEvent(event, webPattern);
 }
 
 void WebDelegate::TextBlurReportByFocusEvent(int64_t accessibilityId)
@@ -6566,14 +6567,14 @@ void WebDelegate::JavaScriptOnDocumentEnd()
     }
 }
 
-void WebDelegate::ExecuteAction(int64_t accessibilityId, AceAction action,
+bool WebDelegate::ExecuteAction(int64_t accessibilityId, AceAction action,
     const std::map<std::string, std::string>& actionArguments)
 {
     if (!accessibilityState_) {
-        return;
+        return false;
     }
     auto context = context_.Upgrade();
-    CHECK_NULL_VOID(context);
+    CHECK_NULL_RETURN(context, false);
     uint32_t nwebAction = static_cast<uint32_t>(action);
     context->GetTaskExecutor()->PostTask(
         [weak = WeakClaim(this), accessibilityId, nwebAction, actionArguments]() {
@@ -6583,6 +6584,7 @@ void WebDelegate::ExecuteAction(int64_t accessibilityId, AceAction action,
             delegate->nweb_->PerformAction(accessibilityId, nwebAction, actionArguments);
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebExecuteAction");
+    return true;
 }
 
 void WebDelegate::SetAccessibilityState(bool state)

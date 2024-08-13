@@ -15,8 +15,6 @@
 
 #include "core/pipeline/base/constants.h"
 
-#include "base/utils/macros.h"
-
 namespace OHOS::Ace {
 
 // base constants

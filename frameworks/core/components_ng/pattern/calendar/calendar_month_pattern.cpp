@@ -440,7 +440,7 @@ RefPtr<FrameNode> CalendarMonthPattern::AddButtonNodeIntoVirtual(const CalendarD
             auto calendar = weak.Upgrade();
             CHECK_NULL_VOID(calendar);
             if (calendar->isOnHover_) {
-                calendar->SetCalendarAccessibilityLevel(AccessibilityProperty::Level::NO);
+                calendar->SetCalendarAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
             }
         }
     });
@@ -512,7 +512,7 @@ void CalendarMonthPattern::HandleAccessibilityHoverEvent(bool isHover, Accessibi
         isOnHover_ = true;
     } else if (!isHover) {
         isOnHover_ = false;
-        SetCalendarAccessibilityLevel(AccessibilityProperty::Level::YES);
+        SetCalendarAccessibilityLevel(AccessibilityProperty::Level::YES_STR);
     }
 }
 
@@ -560,7 +560,7 @@ void CalendarMonthPattern::ChangeVirtualNodeContent(const CalendarDay& calendarD
     auto remainderWeek = calendarDay.index % CALENDAR_WEEK_DAYS;
     int32_t index = (textDirection == TextDirection::RTL ?
         CALENDAR_WEEK_DAYS - remainderWeek * 2 + calendarDay.index - 1 : calendarDay.index);
-    if (index >= buttonAccessibilityNodeVec_.size()) {
+    if (index >= static_cast<int32_t>(buttonAccessibilityNodeVec_.size())) {
         return;
     }
     std::string message;

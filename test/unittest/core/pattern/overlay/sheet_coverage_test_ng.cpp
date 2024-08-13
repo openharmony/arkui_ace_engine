@@ -828,7 +828,7 @@ HWTEST_F(SheetCoverageTestNg, HandleDragStartAndOnCoordScrollStart001, TestSize.
     sheetPattern->HandleDragStart();
     sheetPattern->OnCoordScrollStart();
 
-    sheetPattern->animation_ = AnimationUtils::StartAnimation(AnimationOption(), []() {}, []() {});;
+    sheetPattern->animation_ = AnimationUtils::StartAnimation(AnimationOption(), []() {}, []() {});
     sheetPattern->isAnimationProcess_ = false;
     EXPECT_NE(sheetPattern->animation_, nullptr);
     EXPECT_FALSE(sheetPattern->isAnimationProcess_);

@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import { Theme } from '@ohos.arkui.theme';
 import { LengthMetrics } from '@ohos.arkui.node';
 import { common } from '@kit.AbilityKit';
@@ -1964,20 +1963,33 @@ function delayUpdateParentChildNum(isAdd: boolean, count: number,
   nodeIdNodeItemMap: Map<number, NodeItem>, updateNodeIdList: Array<number>): void {
   let taskId: number = setTimeout(() => {
     updateNodeIdList.forEach((parentNodeId) => {
-      let tmpParentNodeId: number = parentNodeId;
-      while (tmpParentNodeId >= 0) {
-        if (nodeIdNodeItemMap.has(tmpParentNodeId)) {
-          let parent: NodeItem = nodeIdNodeItemMap.get(tmpParentNodeId) as NodeItem;
-          parent.getChildNodeInfo().allChildNum =
-            isAdd ? parent.getChildNodeInfo().allChildNum + count : parent.getChildNodeInfo().allChildNum - count;
-          tmpParentNodeId = parent.parentNodeId;
-        } else {
-          throw new Error('delayUpdateParentChildNum: Parent node not found.');
-        }
-      }
+      updateParentChildNumHandler(parentNodeId, nodeIdNodeItemMap, isAdd, count);
     });
     clearTimeout(taskId);
   }, DELAY_TIME);
+}
+
+/**
+ * delay update all parentnodes child number handler
+ * 
+ * @param parentNodeId parent node id
+ * @param nodeIdNodeItemMap nodeId and nodeItem relation map
+ * @param isAdd whether addNode or delete node
+ * @param count node count
+ */
+function updateParentChildNumHandler(parentNodeId: number, nodeIdNodeItemMap: Map<number, NodeItem>,
+  isAdd: boolean, count: number) {
+  let tmpParentNodeId: number = parentNodeId;
+  while (tmpParentNodeId >= 0) {
+    if (nodeIdNodeItemMap.has(tmpParentNodeId)) {
+      let parent: NodeItem = nodeIdNodeItemMap.get(tmpParentNodeId) as NodeItem;
+      parent.getChildNodeInfo().allChildNum =
+        isAdd ? parent.getChildNodeInfo().allChildNum + count : parent.getChildNodeInfo().allChildNum - count;
+      tmpParentNodeId = parent.parentNodeId;
+    } else {
+      throw new Error('delayUpdateParentChildNum: Parent node not found.');
+    }
+  }
 }
 
 /**

@@ -7636,7 +7636,7 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     if (responseType != ResponseType::LONG_PRESS) {
         menuParam.previewMode = MenuPreviewMode::NONE;
         menuParam.isShowHoverImage = false;
-        menuParam.menuBindType = NG::MenuBindingType::RIGHT_CLICK;
+        menuParam.menuBindType = MenuBindingType::RIGHT_CLICK;
     }
     menuParam.type = NG::MenuType::CONTEXT_MENU;
     ViewAbstractModel::GetInstance()->BindContextMenu(responseType, buildFunc, menuParam, previewBuildFunc);

@@ -1316,7 +1316,7 @@ static void NewCjRadialGradient(RadialGradientParam radialGradientParam, NG::Gra
     DimensionUnit rowUnitType = static_cast<DimensionUnit>(center.rowUnitType);
     newGradient.GetRadialGradient()->radialCenterX = CalcDimension(center.rowValue, rowUnitType);
     double hundredPercent = 100.0;
-    if (static_cast<DimensionUnit>(center.rowValue) == DimensionUnit::PERCENT) {
+    if (static_cast<DimensionUnit>(center.rowUnitType) == DimensionUnit::PERCENT) {
         // [0,1] -> [0, 100]
         double rowValue = center.rowValue * hundredPercent;
         newGradient.GetRadialGradient()->radialCenterX = CalcDimension(rowValue, DimensionUnit::PERCENT);

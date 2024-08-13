@@ -95,7 +95,11 @@
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline/pipeline_context.h"
 #ifdef WEB_SUPPORTED
+#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "core/components_ng/pattern/web/web_pattern.h"
+#else
+#include "core/components_ng/pattern/web/cross_platform/web_pattern.h"
+#endif
 #endif
 
 namespace OHOS::Ace::NG {
@@ -1028,6 +1032,7 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
     wrapperPattern->CallMenuAboutToAppearCallback();
     wrapperPattern->SetMenuStatus(MenuStatus::ON_SHOW_ANIMATION);
     SetIsMenuShow(true);
+    ResetContextMenuDragHideFinished();
     if (wrapperPattern->HasTransitionEffect()) {
         UpdateMenuVisibility(menu);
         auto renderContext = menu->GetRenderContext();
@@ -1339,9 +1344,10 @@ void OverlayManager::ShowToast(const NG::ToastInfo& toastInfo, const std::functi
     toastNode->MountToParent(rootNode);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     toastMap_[toastId] = toastNode;
-    if (callback != nullptr) {
-        auto callbackToastId = ((toastId << 3) | // 3 : Use the last 3 bits of callbackToastId to store showMode
-                                (static_cast<int32_t>(toastInfo.showMode) & 0b111));
+    if (callback != nullptr && GreatOrEqual(toastId, 0)) {
+        int32_t callbackToastId =
+            ((static_cast<uint32_t>(toastId) << 3) | // 3 : Use the last 3 bits of callbackToastId to store showMode
+                (static_cast<uint32_t>(toastInfo.showMode) & 0b111));
         callback(callbackToastId);
     }
     OpenToastAnimation(toastNode, toastInfo.duration);
@@ -1352,7 +1358,6 @@ void OverlayManager::CloseToast(int32_t toastId, const std::function<void(int32_
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "close toast enter");
     if (!callback) {
         TAG_LOGE(AceLogTag::ACE_OVERLAY, "Parameters of CloseToast are incomplete because of no callback.");
-        callback(ERROR_CODE_INTERNAL_ERROR);
         return;
     }
     auto rootNode = rootNodeWeak_.Upgrade();

@@ -91,11 +91,10 @@ void SetTextColor(const RefPtr<FrameNode>& textNode, const Color& color)
     CHECK_NULL_VOID(textPattern);
     auto property = textNode->GetLayoutPropertyPtr<TextLayoutProperty>();
     CHECK_NULL_VOID(property);
-    property->UpdateTextColorByRender(color);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, color, textNode);
+    property->UpdateTextColor(color);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, textNode);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, textNode);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, textNode);
-    textPattern->UpdateFontColor(color);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorFlag, textNode);
 }
 
 void SetImageSourceInfoFillColor(ImageSourceInfo& imageSourceInfo)
