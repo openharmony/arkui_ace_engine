@@ -5158,11 +5158,12 @@ bool WebPattern::FilterScrollEventHandleOffset(const float offset)
     } else if (((offset > 0) && nestedScroll.backward == NestedScrollMode::PARALLEL) ||
                ((offset < 0) && nestedScroll.forward == NestedScrollMode::PARALLEL)) {
         HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
-    } else if (parent.Upgrade()->NestedScrollOutOfBoundary() &&
-                ((Positive(offset) && nestedScroll.backward == NestedScrollMode::SELF_FIRST) ||
-               (Negative(offset) && nestedScroll.forward == NestedScrollMode::SELF_FIRST))) {
-        HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
-        return true;
+    } else if ((Positive(offset) && nestedScroll.backward == NestedScrollMode::SELF_FIRST) ||
+               (Negative(offset) && nestedScroll.forward == NestedScrollMode::SELF_FIRST)) {
+        if (parent.Upgrade() && parent.Upgrade()->NestedScrollOutOfBoundary()) {
+            HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
+            return true;
+        }
     }
     UpdateFlingReachEdgeState(offset, false);
     return false;
