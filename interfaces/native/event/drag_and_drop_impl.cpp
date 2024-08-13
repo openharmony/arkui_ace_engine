@@ -271,9 +271,6 @@ ArkUI_DragEvent* OH_ArkUI_DragAndDropInfo_GetDragEvent(ArkUI_DragAndDropInfo* dr
         return nullptr;
     }
     auto* dragAndDropInfos = reinterpret_cast<ArkUIDragAndDropInfo*>(dragAndDropInfo);
-    if (!dragAndDropInfos) {
-        return nullptr;
-    }
     return reinterpret_cast<ArkUI_DragEvent*>(dragAndDropInfos->dragEvent);
 }
 

@@ -33,6 +33,8 @@ namespace {
 static void DragActionConvert(
     ArkUIDragAction* dragAction, std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> internalDragAction)
 {
+    CHECK_NULL_VOID(dragAction);
+    CHECK_NULL_VOID(internalDragAction);
     internalDragAction->pointer = dragAction->pointerId;
     internalDragAction->size = dragAction->size;
     internalDragAction->previewOption.isScaleEnabled = dragAction->dragPreviewOption.isScaleEnabled;
