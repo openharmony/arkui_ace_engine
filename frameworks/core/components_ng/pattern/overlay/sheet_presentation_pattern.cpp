@@ -966,7 +966,6 @@ void SheetPresentationPattern::ChangeScrollHeight(float height)
     }
     scrollProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(scrollHeight)));
     scrollNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    firstMeasure_ = true;
 }
 
 void SheetPresentationPattern::UpdateDragBarStatus()
@@ -1196,9 +1195,7 @@ void SheetPresentationPattern::CheckSheetHeightChange()
             topSafeAreaChanged_ = false;
         }
     }
-    if (firstMeasure_) {
-        GetBuilderInitHeight();
-    }
+    GetBuilderInitHeight();
 }
 
 void SheetPresentationPattern::IsCustomDetentsChanged(SheetStyle sheetStyle)
@@ -1635,7 +1632,6 @@ void SheetPresentationPattern::OnWindowSizeChanged(int32_t width, int32_t height
     if ((type == WindowSizeChangeReason::ROTATION) &&
         ((sheetType == SheetType::SHEET_BOTTOM) || (sheetType == SheetType::SHEET_BOTTOMLANDSPACE))) {
         windowRotate_ = true;
-        firstMeasure_ = true;
         SetColumnMinSize(true);
         // Before rotation, reset to the initial mode sheet ratio of the current vertical or horizontal screen
         // It's actually a state where the soft keyboard is not pulled up
@@ -1968,7 +1964,6 @@ void SheetPresentationPattern::GetBuilderInitHeight()
     auto geometryNode = buildContent->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     builderHeight_ = geometryNode->GetFrameSize().Height();
-    firstMeasure_ = false;
 }
 
 RefPtr<FrameNode> SheetPresentationPattern::GetOverlayRoot()
