@@ -1241,7 +1241,9 @@ class OperateItemStruct extends ViewPU {
             Radio.checked(this.radioState);
             Radio.onChange((p) => {
                 this.radioState = p;
-                this.isOnClick = p;
+                if (!FOCUSABLE) {
+                    this.isOnClick = p;
+                }
                 this.radio?.onChange(p);
             });
             Radio.height(OPERATEITEM_ICONLIKE_SIZE);
