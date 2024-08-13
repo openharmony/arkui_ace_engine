@@ -400,6 +400,7 @@ void ResetSubTitleProperty(const RefPtr<FrameNode>& textNode, NavigationTitleMod
     titleLayoutProperty->UpdateMaxLines(1);
     titleLayoutProperty->UpdateFontWeight(FontWeight::REGULAR); // ohos_id_text_font_family_regular
     titleLayoutProperty->UpdateFontSize(subTitleSize);
+    titleLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     SetTextColor(textNode, color);
 
     textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
