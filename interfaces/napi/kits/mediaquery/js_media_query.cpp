@@ -12,19 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <algorithm>
-#include <map>
-#include <mutex>
-#include <set>
 
-#include "napi/native_api.h"
-#include "napi/native_common.h"
 #include "napi/native_node_api.h"
 
 #include "bridge/common/media_query/media_queryer.h"
 #include "bridge/common/utils/engine_helper.h"
-#include "bridge/js_frontend/engine/common/js_engine.h"
-#include "core/common/container.h"
 
 namespace OHOS::Ace::Napi {
 namespace {

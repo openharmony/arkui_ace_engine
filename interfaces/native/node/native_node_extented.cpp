@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "drawing_text_typography.h"
 #include "native_styled_string.h"
 #include "node_extened.h"
 #include "styled_string.h"

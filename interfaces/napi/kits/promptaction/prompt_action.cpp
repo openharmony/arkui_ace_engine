@@ -15,20 +15,13 @@
 
 #include "prompt_action.h"
 
-#include <cstddef>
-#include <memory>
-#include <string>
 
 #include "interfaces/napi/kits/utils/napi_utils.h"
 #include "base/i18n/localization.h"
-#include "base/log/log_wrapper.h"
 #include "base/subwindow/subwindow_manager.h"
-#include "base/utils/system_properties.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/ace_engine.h"
-#include "core/components/common/properties/shadow.h"
 #include "core/components/theme/shadow_theme.h"
-#include "core/components_ng/pattern/toast/toast_layout_property.h"
 
 namespace OHOS::Ace::Napi {
 namespace {

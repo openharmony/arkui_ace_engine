@@ -15,20 +15,12 @@
 
 #include "native_node_napi.h"
 
-#include <cstdint>
 
-#include "js_native_api.h"
-#include "js_native_api_types.h"
-#include "native_type.h"
 #include "node/node_extened.h"
 #include "node/node_model.h"
 
 #include "base/error/error_code.h"
-#include "base/image/pixel_map.h"
-#include "base/log/log_wrapper.h"
-#include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/ui_node.h"
 
 extern "C" {
 

@@ -24,7 +24,6 @@
 #include "napi/native_common.h"
 #include "native_engine/impl/ark/ark_native_engine.h"
 #include "native_value.h"
-#include "node_api.h"
 
 #if defined(ENABLE_DRAG_FRAMEWORK) && defined(PIXEL_MAP_SUPPORTED)
 #include "jsnapi.h"

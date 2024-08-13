@@ -14,7 +14,6 @@
  */
 
 #include "node/animate_impl.h"
-#include <cstddef>
 
 #include "node/node_model.h"
 

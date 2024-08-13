@@ -14,14 +14,11 @@
  */
 #include "js_plugin_callback.h"
 
-#include <memory>
-#include <mutex>
 
 #include "js_plugin_callback_mgr.h"
 #include "js_plugin_util.h"
 #include "js_plugin_want.h"
 
-#include "base/log/log_wrapper.h"
 #include "core/common/ace_engine.h"
 #include "core/components/plugin/plugin_component_manager.h"
 

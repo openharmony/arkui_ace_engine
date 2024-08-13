@@ -14,18 +14,13 @@
  */
 #include "node/event_converter.h"
 
-#include <cstdint>
 
-#include "native_node.h"
 #include "node/gesture_impl.h"
-#include "node/native_compatible.h"
 #include "node/node_model.h"
 #include "securec.h"
 
-#include "base/log/log_wrapper.h"
 #include "base/error/error_code.h"
 #include "core/event/touch_event.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
 #include "interfaces/native/drag_and_drop.h"
 
 namespace OHOS::Ace::NodeModel {
