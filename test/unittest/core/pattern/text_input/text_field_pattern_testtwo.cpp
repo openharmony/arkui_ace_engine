@@ -599,6 +599,161 @@ HWTEST_F(TextFieldPatternTestTwo, FireOnTextChangeEvent001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: HandleSelectionUp001
+ * @tc.desc: test HandleSelectionUp
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, HandleSelectionUp001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    ASSERT_NE(pattern->selectController_, nullptr);
+    pattern->selectController_->caretInfo_.rect.SetTop(60.0f);
+    pattern->paragraph_ = MockParagraph::GetOrCreateMockParagraph();
+
+    pattern->HandleSelectionUp();
+    EXPECT_EQ(pattern->showSelect_, false);
+}
+
+/**
+ * @tc.name: HandleSelectionDown001
+ * @tc.desc: test HandleSelectionDown
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, HandleSelectionDown001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    ASSERT_NE(pattern->selectController_, nullptr);
+    pattern->paragraph_ = MockParagraph::GetOrCreateMockParagraph();
+    pattern->textRect_.height_ = 150.0f;
+
+    pattern->HandleSelectionDown();
+    EXPECT_EQ(pattern->showSelect_, false);
+}
+
+/**
+ * @tc.name: SetSelectionFlag001
+ * @tc.desc: test SetSelectionFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, SetSelectionFlag001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto focushHub = pattern->GetFocusHub();
+    ASSERT_NE(focushHub, nullptr);
+    focushHub->currentFocus_ = true;
+    int32_t start = 0;
+    int32_t end = 4;
+
+    ASSERT_NE(pattern->contentController_, nullptr);
+    pattern->contentController_->content_ = "Test";
+    SelectionOptions options;
+    options.menuPolicy = MenuPolicy::HIDE;
+    ASSERT_NE(pattern->selectOverlay_, nullptr);
+    pattern->selectOverlay_->SetUsingMouse(true);
+    auto theme = GetTheme();
+    ASSERT_NE(theme, nullptr);
+    theme->textfieldShowHandle_ = false;
+    pattern->SetSelectionFlag(start, end, options, true);
+    EXPECT_EQ(pattern->IsShowMenu(options), false);
+    theme->textfieldShowHandle_ = true;
+    pattern->SetSelectionFlag(start, end, options, true);
+    EXPECT_EQ(pattern->IsShowHandle(), false);
+}
+
+/**
+ * @tc.name: OnBackPressed001
+ * @tc.desc: test OnBackPressed
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, OnBackPressed001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto manager = SelectContentOverlayManager::GetOverlayManager();
+    ASSERT_NE(manager, nullptr);
+    ASSERT_NE(pattern->selectOverlay_, nullptr);
+    pattern->selectOverlay_->OnBind(manager);
+
+    SelectOverlayInfo overlayInfo;
+    auto shareOverlayInfo = std::make_shared<SelectOverlayInfo>(overlayInfo);
+    auto overlayNode = SelectOverlayNode::CreateSelectOverlayNode(shareOverlayInfo);
+    overlayNode->MountToParent(textFieldNode);
+    ASSERT_NE(overlayNode, nullptr);
+    manager->selectOverlayNode_ = overlayNode;
+
+    bool ret = pattern->OnBackPressed();
+    EXPECT_EQ(ret, false);
+
+    manager->shareOverlayInfo_ = std::move(shareOverlayInfo);
+    manager->shareOverlayInfo_->menuInfo.menuIsShow = true;
+    ret = pattern->OnBackPressed();
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: GetPlaceholderFont001
+ * @tc.desc: test GetPlaceholderFont
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, GetPlaceholderFont001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto theme = GetTheme();
+    ASSERT_NE(theme, nullptr);
+    layoutProperty->UpdatePlaceholderItalicFontStyle(Ace::FontStyle::ITALIC);
+    layoutProperty->UpdatePlaceholderFontSize(Dimension(10));
+    theme->fontWeight_ = FontWeight::BOLD;
+    pattern->GetPlaceholderFont();
+    theme->fontWeight_ = FontWeight::W100;
+    auto jsonValue = pattern->GetPlaceholderFont();
+    auto value = JsonUtil::ParseJsonString(jsonValue);
+    ASSERT_NE(value, nullptr);
+    EXPECT_EQ(value->GetString("weight"), "100");
+    theme->fontWeight_ = FontWeight::W200;
+    pattern->GetPlaceholderFont();
+    theme->fontWeight_ = FontWeight::W300;
+    pattern->GetPlaceholderFont();
+    theme->fontWeight_ = FontWeight::W500;
+    pattern->GetPlaceholderFont();
+    theme->fontWeight_ = FontWeight::W600;
+    pattern->GetPlaceholderFont();
+    theme->fontWeight_ = FontWeight::W700;
+    pattern->GetPlaceholderFont();
+    theme->fontWeight_ = FontWeight::W800;
+    pattern->GetPlaceholderFont();
+    theme->fontWeight_ = FontWeight::W900;
+    jsonValue = pattern->GetPlaceholderFont();
+    value = JsonUtil::ParseJsonString(jsonValue);
+    ASSERT_NE(value, nullptr);
+    EXPECT_EQ(value->GetString("weight"), "900");
+}
+
+/**
  * @tc.name: OnDragDrop001
  * @tc.desc: test testInput text OnDragDrop
  * @tc.type: FUNC
