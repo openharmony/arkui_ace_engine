@@ -2413,7 +2413,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         if (focusManager_) {
             focusManager_->DumpFocusManager();
         }
-    } else if (params[0] == "-accessibility" || params[0] == "-inspector" || params[0] == "-simplify") {
+    } else if (params[0] == "-accessibility" || params[0] == "-inspector") {
         auto accessibilityManager = GetAccessibilityManager();
         if (accessibilityManager) {
             accessibilityManager->OnDumpInfoNG(params, windowId_);
@@ -2463,6 +2463,9 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         }
     } else if (params[0] == "--stylus") {
         StylusDetectorDefault::GetInstance()->ExecuteCommand(params);
+    } else if (params[0] == "-simplify") {
+        rootNode_->DumpTree(0);
+        DumpLog::GetInstance().OutPutDefault();
     }
     return true;
 }
