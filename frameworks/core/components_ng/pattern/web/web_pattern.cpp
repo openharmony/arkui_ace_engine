@@ -27,16 +27,25 @@
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
+#include "auto_fill_type.h"
+#include "page_node_info.h"
+
+#include "adapter/ohos/capability/html/span_to_html.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/geometry/rect.h"
 #include "base/image/file_uri_helper.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/utils/date_util.h"
 #include "base/utils/linear_map.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
+#include "core/common/ace_engine_ext.h"
 #include "core/common/ai/data_detector_mgr.h"
 #include "core/common/ai/image_analyzer_manager.h"
 #include "core/common/ime/input_method_manager.h"
+#include "core/common/udmf/udmf_client.h"
+#include "core/common/udmf/unified_data.h"
+#include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/picker/picker_data.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
@@ -59,14 +68,6 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/utils/system_properties.h"
 #include "frameworks/core/components_ng/base/ui_node.h"
-
-#include "adapter/ohos/capability/html/span_to_html.h"
-#include "base/geometry/rect.h"
-#include "core/common/ace_engine_ext.h"
-#include "core/common/udmf/udmf_client.h"
-#include "core/common/udmf/unified_data.h"
-#include "page_node_info.h"
-#include "auto_fill_type.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -409,6 +410,7 @@ void WebPattern::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info)
     CHECK_NULL_VOID(contextMenuParam_);
     contextMenuResult_ = eventInfo->GetContextMenuResult();
     CHECK_NULL_VOID(contextMenuResult_);
+    VibratorUtils::StartVibraFeedback("longPress.light");
     ShowContextSelectOverlay(RectF(), RectF());
 }
 
@@ -3470,6 +3472,7 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
     }
     RegisterSelectOverlayCallback(selectInfo, params, callback);
     RegisterSelectOverlayEvent(selectInfo);
+    VibratorUtils::StartVibraFeedback("longPress.light");
     selectOverlayProxy_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo, WeakClaim(this));
     if (selectInfo.isNewAvoid && selectOverlayProxy_) {
         selectOverlayProxy_->ShowOrHiddenMenu(false);
