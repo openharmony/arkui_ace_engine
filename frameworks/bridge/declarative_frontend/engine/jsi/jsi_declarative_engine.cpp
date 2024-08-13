@@ -61,6 +61,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_syscap_module.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_timer_module.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_local_storage.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_mock.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
@@ -589,6 +590,10 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleWorker(void* runtime)
 
     // preload js enums
     PreloadJsEnums(arkRuntime);
+
+    // preload requireNative
+    shared_ptr<JsValue> global = arkRuntime->GetGlobal();
+    JSMock::PreloadWorkerRequireNative(arkRuntime, global);
 }
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceModule(void* runtime)
