@@ -2127,6 +2127,11 @@ void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorF
         json->PutExtAttr("itemStartPos", itemPosition_.begin()->second.startPos, filter);
     }
     json->PutExtAttr("maintainVisibleContentPosition", maintainVisibleContentPosition_, filter);
+    auto nestedScrollOptions = JsonUtil::Create(true);
+    auto nestedScroll = GetNestedScroll();
+    nestedScrollOptions->Put("scrollForward", nestedScroll.GetNestedScrollModeStr(nestedScroll.forward).c_str());
+    nestedScrollOptions->Put("scrollBackward", nestedScroll.GetNestedScrollModeStr(nestedScroll.backward).c_str());
+    json->PutExtAttr("nestedScroll", nestedScrollOptions, filter);
 }
 
 void ListPattern::FromJson(const std::unique_ptr<JsonValue>& json)
