@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
+#include "test/mock/core/common/mock_clipboard.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -367,5 +368,89 @@ HWTEST_F(RichEditorPatternTestThreeNg, DeleteValueSetImageSpan001, TestSize.Leve
     richEditorPattern->DeleteValueSetImageSpan(imageSpanItem, spanResult);
     EXPECT_EQ(spanResult.GetObjectFit(), ImageFit::FILL);
     EXPECT_EQ(spanResult.GetVerticalAlign(), VerticalAlign::CENTER);
+}
+
+/**
+ * @tc.name: HandleTouchEvent001
+ * @tc.desc: test HandleTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, HandleTouchEvent001, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(INIT_VALUE_3);
+
+    Offset touchTargetOffset = { 10.0f, 2.0f };
+    TouchEventInfo touchDownInfo("touchDown");
+    TouchLocationInfo touchLocationInfo(1);
+    touchLocationInfo.SetTouchType(TouchType::DOWN);
+    touchLocationInfo.SetLocalLocation(touchTargetOffset);
+    touchDownInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    richEditorPattern->HandleTouchEvent(touchDownInfo);
+    EXPECT_FALSE(richEditorPattern->isMoveCaretAnywhere_);
+
+    richEditorPattern->textSelector_.Update(1, 2);
+    TouchEventInfo touchUpInfo("touchUp");
+    TouchLocationInfo touchUpLocationInfo(1);
+    touchUpLocationInfo.SetTouchType(TouchType::UP);
+    touchUpLocationInfo.SetLocalLocation(touchTargetOffset);
+    touchUpInfo.AddTouchLocationInfo(std::move(touchUpLocationInfo));
+    richEditorPattern->editingLongPress_ = true;
+    richEditorPattern->isEditing_ = true;
+    int32_t onSelectCallbackInfo = 0;
+    auto func = [&onSelectCallbackInfo](const BaseEventInfo* info) { onSelectCallbackInfo = 1; };
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetOnSelect(std::move(func));
+    richEditorPattern->HandleTouchEvent(touchUpInfo);
+    EXPECT_EQ(onSelectCallbackInfo, 1);
+
+    TouchEventInfo touchMoveInfo("touchMove");
+    TouchLocationInfo touchMoveLocationInfo(2);
+    touchMoveLocationInfo.SetTouchType(TouchType::MOVE);
+    touchMoveLocationInfo.SetLocalLocation(touchTargetOffset);
+    touchMoveInfo.AddTouchLocationInfo(std::move(touchMoveLocationInfo));
+    richEditorPattern->isTouchCaret_ = true;
+    richEditorPattern->HandleTouchEvent(touchMoveInfo);
+    auto magnifierController = richEditorPattern->GetMagnifierController();
+    ASSERT_NE(magnifierController, nullptr);
+    auto localOffset = OffsetF(touchTargetOffset.GetX(), touchTargetOffset.GetY());
+    EXPECT_TRUE(IsEqual(magnifierController->GetLocalOffset(), localOffset));
+}
+
+/**
+ * @tc.name: HandleOnCopyStyledString001
+ * @tc.desc: test HandleOnCopyStyledString
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, HandleOnCopyStyledString001, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(INIT_VALUE_1);
+
+    richEditorPattern->OnModifyDone();
+    richEditorPattern->SetSpanStringMode(true);
+    richEditorPattern->OnCopyOperation();
+    ASSERT_NE(richEditorPattern->GetClipboard(), nullptr);
+}
+
+/**
+ * @tc.name: OnCopyOperationExt001
+ * @tc.desc: test OnCopyOperationExt
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, OnCopyOperationExt001, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(INIT_VALUE_1);
+
+    richEditorPattern->OnModifyDone();
+    auto clipboard = richEditorPattern->GetClipboard();
+    ASSERT_NE(clipboard, nullptr);
+    auto pasteDataMix = clipboard->CreatePasteDataMix();
+    richEditorPattern->OnCopyOperationExt(pasteDataMix);
 }
 } // namespace OHOS::Ace::NG
