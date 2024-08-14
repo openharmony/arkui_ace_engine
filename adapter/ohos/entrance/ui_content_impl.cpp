@@ -2180,6 +2180,13 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
 void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
     const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)
 {
+    UpdateViewportConfigWithAnimation(config, reason, {}, rsTransaction);
+}
+
+void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& config,
+    OHOS::Rosen::WindowSizeChangeReason reason, AnimationOption animationOpt,
+    const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)
+{
     LOGI("[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s, windowSizeChangeReason %d",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, config.ToString().c_str(),
         static_cast<uint32_t>(reason));
@@ -2207,7 +2214,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         safeAreaManager = context->GetSafeAreaManager();
     }
     auto task = [config = modifyConfig, container, reason, rsTransaction, rsWindow = window_, safeAreaManager,
-                    isDynamicRender = isDynamicRender_, viewportAnimationOption = viewportAnimationOption_]() {
+                    isDynamicRender = isDynamicRender_, animationOpt]() {
         container->SetWindowPos(config.Left(), config.Top());
         auto pipelineContext = container->GetPipelineContext();
         if (pipelineContext) {
@@ -2238,8 +2245,8 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         CHECK_NULL_VOID(aceView);
         Platform::AceViewOhos::SetViewportMetrics(aceView, config); // update density into pipeline
         Platform::AceViewOhos::TransformHintChanged(aceView, config.TransformHint());
-        if (isDynamicRender && viewportAnimationOption.IsValid()) {
-            AnimationUtils::Animate(viewportAnimationOption, [pipelineContext, aceView, config, reason, rsTransaction] {
+        if (isDynamicRender && animationOpt.IsValid()) {
+            AnimationUtils::Animate(animationOpt, [pipelineContext, aceView, config, reason, rsTransaction] {
                 ContainerScope scope(aceView->GetInstanceId());
                 Platform::AceViewOhos::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
                     static_cast<WindowSizeChangeReason>(reason), rsTransaction);

@@ -425,8 +425,7 @@ void DynamicComponentRendererImpl::UpdateViewportConfig(
         renderer->viewport_.SetHeight(config.Height());
         TAG_LOGI(AceLogTag::ACE_ISOLATED_COMPONENT, "update card viewport: [%{public}d x %{public}d]",
             config.Width(), config.Height());
-        uiContent->SetViewportAnimationOption(animationOpt);
-        uiContent->UpdateViewportConfig(config, Rosen::WindowSizeChangeReason::UNDEFINED, nullptr);
+        uiContent->UpdateViewportConfigWithAnimation(config, Rosen::WindowSizeChangeReason::UNDEFINED, animationOpt);
     };
     bool contentReady = false;
     {

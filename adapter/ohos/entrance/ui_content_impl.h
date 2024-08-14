@@ -93,6 +93,8 @@ public:
     void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) override;
     void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr) override;
+    void UpdateViewportConfigWithAnimation(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
+        AnimationOption animationOpt, const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr);
     void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) override;
     void UpdateDecorVisible(bool visible, bool hasDeco) override;
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
@@ -332,11 +334,6 @@ public:
 
     void UpdateDialogContainerConfig(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
 
-    void SetViewportAnimationOption(AnimationOption opt)
-    {
-        viewportAnimationOption_ = opt;
-    }
-
 private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
@@ -397,7 +394,6 @@ private:
     std::unique_ptr<DistributedUIManager> uiManager_;
 
     bool isDynamicRender_ = false;
-    AnimationOption viewportAnimationOption_;
     UIContentType uIContentType_ = UIContentType::UNDEFINED;
     std::shared_ptr<TaskWrapper> taskWrapper_;
     std::vector<std::string> registerComponents_;
