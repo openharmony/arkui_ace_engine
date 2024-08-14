@@ -56,7 +56,7 @@ const TEXT_ARROW_HEIGHT = 32;
 const SAFE_LIST_PADDING = 32;
 const HEADSCULPTURE_SIZE = 40;
 const BUTTON_SIZE = 28;
-const APP_ICON_SIZE = 64;
+const APP_ICON_SIZE = LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_app_icon_size'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }).value;
 const PREVIEW_SIZE = 96;
 const LONGITUDINAL_SIZE = 96;
 const VERTICAL_SIZE = 96;
@@ -1024,6 +1024,15 @@ class OperateItemStruct extends ViewPU {
         }
     }
     aboutToAppear() {
+        if (this.switch !== null) {
+            this.isOnClick = this.switch.isCheck;
+        }
+        if (this.radio !== null) {
+            this.isOnClick = this.radio.isCheck;
+        }
+        if (this.checkBox !== null) {
+            this.isOnClick = this.checkBox.isCheck;
+        }
         this.onPropChange();
         this.onFocusChange();
     }
@@ -1230,27 +1239,33 @@ class OperateItemStruct extends ViewPU {
             });
             Radio.margin({ end: LengthMetrics.vp(OperateItemStruct.RIGHT_ITEM_OFFSET_LEVEL1) });
             Radio.checked(this.radioState);
-            Radio.onChange(this.radio?.onChange);
+            Radio.onChange((p) => {
+                this.radioState = p;
+                if (!FOCUSABLE) {
+                    this.isOnClick = p;
+                }
+                this.radio?.onChange(p);
+            });
             Radio.height(OPERATEITEM_ICONLIKE_SIZE);
             Radio.width(OPERATEITEM_ICONLIKE_SIZE);
             Radio.onFocus(() => {
                 this.parentCanFocus = false;
             });
             Radio.hitTestBehavior(HitTestMode.Block);
-            Radio.onTouch((g7) => {
-                if (g7.type == TouchType.Down) {
+            Radio.onTouch((o) => {
+                if (o.type == TouchType.Down) {
                     this.parentCanTouch = false;
                 }
-                if (g7.type == TouchType.Up) {
+                if (o.type == TouchType.Up) {
                     this.parentCanTouch = true;
                 }
             });
-            Radio.onHover((f7) => {
+            Radio.onHover((d) => {
                 this.parentCanHover = false;
-                if (f7 && this.parentFrontColor === this.hoveringColor) {
+                if (d && this.parentFrontColor === this.hoveringColor) {
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 }
-                if (!f7) {
+                if (!d) {
                     this.parentCanHover = true;
                     if (this.parentIsHover) {
                         this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
@@ -2079,7 +2094,12 @@ export class ComposeListItem extends ViewPU {
             Stack.borderRadius(this.isFocus ? { "id": -1, "type": 10002, params: ['sys.float.composeListItem_normal_radio'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : { "id": -1, "type": 10002, params: ['sys.float.composeListItem_focused_circular_bead'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
             Stack.onClick(() => {
                 if (!FOCUSABLE) {
-                    this.isOnClick = !this.isOnClick;
+                    if (this.operateItem?.radio !== null && this.isOnClick) {
+                        this.isOnClick = true;
+                    }
+                    else {
+                        this.isOnClick = !this.isOnClick;
+                    }
                     if (this.operateItem?.icon && this.operateItem.icon?.action) {
                         this.operateItem.icon.action();
                     }
@@ -2118,6 +2138,9 @@ export class ComposeListItem extends ViewPU {
                 this.canFocus = false;
             });
             Flex.onHover((y1) => {
+                if (this.isFocus && !FOCUSABLE) {
+                    return;
+                }
                 this.isHoverBlend = y1;
                 this.isHover = y1;
                 if (this.canHover) {
@@ -2128,7 +2151,10 @@ export class ComposeListItem extends ViewPU {
                     (this.isFocus ? { "id": -1, "type": 10001, params: ['sys.color.composeListItem_focused_backboard'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : { "id": -1, "type": 10001, params: ['sys.color.composeListItem_color_background_normal'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } ?? Color.Transparent.toString());
             });
             Flex.onTouch((x1) => {
-                if (this.isCanTouch) {
+                if (this.isFocus && !FOCUSABLE) {
+                    return;
+                }
+                if (this.isCanTouch || !FOCUSABLE) {
                     if (x1.type === TouchType.Down && this.canTouch) {
                         this.frontColor = { "id": -1, "type": 10001, params: ['sys.color.composeListItem_color_press'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } ?? this.touchDownColor;
                     }
@@ -2164,12 +2190,12 @@ export class ComposeListItem extends ViewPU {
                     {
                         this.observeComponentCreation2((l1, m1) => {
                             if (m1) {
-                                let n1 = new ContentItemStruct(this, {}, undefined, l1, () => { }, { page: "library/src/main/ets/components/mainpage/composelistitem.ets", line: 1038, col: 11 });
+                                let n1 = new ContentItemStruct(this, {}, undefined, l1, () => { }, { page: "library/src/main/ets/components/mainpage/composelistitem.ets", line: 1050, col: 11 });
                                 ViewPU.create(n1);
-                                let o1 = () => {
+                                let c = () => {
                                     return {};
                                 };
-                                n1.paramsGenerator_ = o1;
+                                n1.paramsGenerator_ = c;
                             }
                             else {
                                 this.updateStateVarsOfChildByElmtId(l1, {});
@@ -2209,9 +2235,9 @@ export class ComposeListItem extends ViewPU {
                                     itemDirection: this.contentItemDirection,
                                     isFocus: this.isFocus,
                                     itemHeight: this.itemHeight,
-                                }, undefined, a1, () => { }, { page: "library/src/main/ets/components/mainpage/composelistitem.ets", line: 1041, col: 11 });
+                                }, undefined, a1, () => { }, { page: "library/src/main/ets/components/mainpage/composelistitem.ets", line: 1053, col: 11 });
                                 ViewPU.create(c1);
-                                let d1 = () => {
+                                let b = () => {
                                     return {
                                         icon: this.contentItem?.icon,
                                         iconStyle: this.contentItem?.iconStyle,
@@ -2232,7 +2258,7 @@ export class ComposeListItem extends ViewPU {
                                         itemHeight: this.itemHeight
                                     };
                                 };
-                                c1.paramsGenerator_ = d1;
+                                c1.paramsGenerator_ = b;
                             }
                             else {
                                 this.updateStateVarsOfChildByElmtId(a1, {
@@ -2304,9 +2330,9 @@ export class ComposeListItem extends ViewPU {
                                     parentDirection: this.containerDirection,
                                     isFocus: this.__isFocus,
                                     isOnClick: this.__isOnClick,
-                                }, undefined, l, () => { }, { page: "library/src/main/ets/components/mainpage/composelistitem.ets", line: 1062, col: 11 });
+                                }, undefined, l, () => { }, { page: "library/src/main/ets/components/mainpage/composelistitem.ets", line: 1074, col: 11 });
                                 ViewPU.create(n);
-                                let o = () => {
+                                let a = () => {
                                     return {
                                         icon: this.operateItem?.icon,
                                         subIcon: this.operateItem?.subIcon,
@@ -2330,7 +2356,7 @@ export class ComposeListItem extends ViewPU {
                                         isOnClick: this.isOnClick
                                     };
                                 };
-                                n.paramsGenerator_ = o;
+                                n.paramsGenerator_ = a;
                             }
                             else {
                                 this.updateStateVarsOfChildByElmtId(l, {
