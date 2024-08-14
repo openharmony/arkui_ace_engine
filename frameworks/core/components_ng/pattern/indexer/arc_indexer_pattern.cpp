@@ -199,14 +199,12 @@ void ArcIndexerPattern::BuildArrayValueItems()
 void ArcIndexerPattern::BuildFullArrayValue()
 {
     arcArrayValue_.clear();
-    size_t indexSize = fullArrayValue_.size() > ARC_INDEXER_ITEM_MAX_COUNT-1 ?
-                       ARC_INDEXER_ITEM_MAX_COUNT-1 : fullArrayValue_.size();
-    size_t startIndex = (indexSize > 29) ? (indexSize - 29) : 0;
-    for (size_t i = startIndex; i < indexSize; ++i) {
+    size_t startIndex = (fullCount_ > 29) ? (fullCount_ - 29) : 0;
+    for (size_t i = startIndex; i < fullCount_; ++i) {
         arcArrayValue_.push_back(std::pair(fullArrayValue_.at(i), ArcIndexerBarState::INVALID));
     }
 
-    if (fullCount_ + sharpItemCount_ > ARC_INDEXER_COLLAPSE_ITEM_COUNT) {
+    if (fullCount_ > ARC_INDEXER_COLLAPSE_ITEM_COUNT) {
         arcArrayValue_.push_back(
             std::pair(StringUtils::Str16ToStr8(ARC_INDEXER_STR_COLLAPSED), ArcIndexerBarState::COLLAPSED));
     }
@@ -214,7 +212,7 @@ void ArcIndexerPattern::BuildFullArrayValue()
 
 void ArcIndexerPattern::CollapseArrayValue()
 {
-    if (fullCount_  <= ARC_INDEXER_COLLAPSE_ITEM_COUNT ||
+    if (fullCount_ <= ARC_INDEXER_COLLAPSE_ITEM_COUNT ||
         currectCollapsingMode_ == ArcIndexerCollapsingMode::NONE) {
         BuildFullArrayValue();
     } else {
