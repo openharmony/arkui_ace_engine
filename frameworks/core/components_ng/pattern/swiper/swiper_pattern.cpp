@@ -2979,10 +2979,11 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
                 ? swiper->itemPosition_.begin()->second.node->GetRenderContext()->GetTranslateXYProperty()
                 : OffsetF();
         TAG_LOGI(AceLogTag::ACE_SWIPER,
-            "Swiper finish property translate animation with offsetX: %{public}f, offsetY: %{public}f",
-            finalOffset.GetX(), finalOffset.GetY());
-        ACE_SCOPED_TRACE_COMMERCIAL("%s finish property animation, X: %f, Y: %f",
-            swiper->hasTabsAncestor_ ? V2::TABS_ETS_TAG : V2::SWIPER_ETS_TAG, finalOffset.GetX(), finalOffset.GetY());
+            "Swiper finish property animation with offsetX: %{public}f, offsetY: %{public}f isVerifiedSuc %{public}d",
+            finalOffset.GetX(), finalOffset.GetY(), !swiper->IsItemOverlay());
+        ACE_SCOPED_TRACE_COMMERCIAL("%s finish property animation, X: %f, Y: %f isVerifiedSuc %d",
+            swiper->hasTabsAncestor_ ? V2::TABS_ETS_TAG : V2::SWIPER_ETS_TAG, finalOffset.GetX(), finalOffset.GetY(),
+            !swiper->IsItemOverlay());
         swiper->OnPropertyTranslateAnimationFinish(offset);
     };
     // initial translate info.
@@ -3010,9 +3011,8 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
         } else {
             AceAsyncTraceBeginCommercial(0, APP_TABS_FLING);
         }
-        TAG_LOGI(AceLogTag::ACE_SWIPER,
-            "Swiper start property translate animation with offsetX: %{public}f, offsetY: %{public}f", offset.GetX(),
-            offset.GetY());
+        TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper start property animation with offsetX: %{public}f, offsetY: %{public}f",
+            offset.GetX(), offset.GetY());
         ACE_SCOPED_TRACE_COMMERCIAL("%s start property animation, X: %f, Y: %f",
             swiperPattern->hasTabsAncestor_ ? V2::TABS_ETS_TAG : V2::SWIPER_ETS_TAG, offset.GetX(), offset.GetY());
         for (auto& item : swiperPattern->itemPosition_) {
@@ -5904,5 +5904,34 @@ void SwiperPattern::SetSwiperController(const RefPtr<SwiperController>& controll
 {
     swiperController_ = controller;
     SwiperHelper::InitSwiperController(controller, WeakClaim(this));
+}
+
+bool SwiperPattern::IsItemOverlay() const
+{
+    if (itemPosition_.empty()) {
+        return false;
+    }
+    float lastItemEndPos = 0.0f;
+    for (auto& item : itemPosition_) {
+        auto frameNode = item.second.node;
+        if (!frameNode) {
+            continue;
+        }
+        auto renderContext = frameNode->GetRenderContext();
+        if (!renderContext) {
+            continue;
+        }
+        RectF rect = renderContext->GetPaintRectWithoutTransform();
+        if (item.first == itemPosition_.begin()->first) {
+            lastItemEndPos = direction_ == Axis::HORIZONTAL ? rect.Right() : rect.Bottom();
+            continue;
+        }
+        float currentItemStartPos = direction_ == Axis::HORIZONTAL ? rect.Left() : rect.Top();
+        if (GreatNotEqual(lastItemEndPos, currentItemStartPos)) {
+            return true;
+        }
+        lastItemEndPos = direction_ == Axis::HORIZONTAL ? rect.Right() : rect.Bottom();
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG
