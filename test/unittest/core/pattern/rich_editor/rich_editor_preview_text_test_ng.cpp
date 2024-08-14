@@ -218,4 +218,21 @@ HWTEST_F(RichEditorPreviewTextTestNg, FinishTextPreview002, TestSize.Level1)
     EXPECT_EQ((*it)->content, PREVIEW_TEXT_VALUE1);
 }
 
+/**
+ * @tc.name: GetPreviewTextInfo001
+ * @tc.desc: test RichEditorPattern GetPreviewTextInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPreviewTextTestNg, GetPreviewTextInfo001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    PreviewTextInfo info = richEditorPattern->GetPreviewTextInfo();
+    ASSERT_EQ(richEditorPattern->previewTextRecord_.previewContent.empty(), true);
+
+    richEditorPattern->previewTextRecord_.previewContent = "abc";
+    info = richEditorPattern->GetPreviewTextInfo();
+    ASSERT_EQ(richEditorPattern->previewTextRecord_.previewContent.empty(), false);
+}
 } // namespace OHOS::Ace::NG
