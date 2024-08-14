@@ -465,7 +465,14 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         CHECK_NULL_VOID(pipelineContext);
         auto manager = pipelineContext->GetOverlayManager();
         CHECK_NULL_VOID(manager);
-        manager->RemoveGatherNode();
+        auto dragDropManager = pipelineContext->GetDragDropManager();
+        CHECK_NULL_VOID(dragDropManager);
+        auto preDragStatus = dragDropManager->GetPreDragStatus();
+        if (preDragStatus <= PreDragStatus::READY_TO_TRIGGER_DRAG_ACTION) {
+            manager->RemoveGatherNode();
+        } else {
+            manager->RemoveGatherNodeWithAnimation();
+        }
     };
     panRecognizer_->SetOnReject(panOnReject);
     panRecognizer_->SetIsForDrag(true);
