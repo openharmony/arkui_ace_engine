@@ -1692,6 +1692,9 @@ void TextFieldPattern::HandleTouchDown(const Offset& offset)
 
 void TextFieldPattern::HandleTouchUp()
 {
+    if (GetIsPreviewText() && isTouchPreviewText_) {
+        StartTwinkling();
+    }
     if (moveCaretState_.isTouchCaret) {
         moveCaretState_.isTouchCaret = false;
         CheckScrollable();
