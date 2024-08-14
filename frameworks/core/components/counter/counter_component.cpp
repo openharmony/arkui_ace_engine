@@ -15,15 +15,7 @@
 
 #include "core/components/counter/counter_component.h"
 
-#include "base/log/log.h"
-#include "base/utils/string_utils.h"
-#include "core/components/box/box_component.h"
-#include "core/components/button/button_component.h"
-#include "core/components/common/properties/color.h"
 #include "core/components/counter/counter_element.h"
-#include "core/components/counter/render_counter.h"
-#include "core/components/padding/padding_component.h"
-#include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
 namespace {

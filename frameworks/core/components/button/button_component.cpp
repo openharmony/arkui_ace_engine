@@ -16,10 +16,8 @@
 #include "core/components/button/button_component.h"
 
 #include "core/components/button/button_element.h"
-#include "core/components/button/render_button.h"
 #include "core/components/padding/padding_component.h"
 #include "core/components/text/text_component.h"
-#include "core/components/theme/theme_manager.h"
 
 namespace OHOS::Ace {
 

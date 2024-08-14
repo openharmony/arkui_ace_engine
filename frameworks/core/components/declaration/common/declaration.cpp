@@ -15,13 +15,6 @@
 
 #include "core/components/declaration/common/declaration.h"
 
-#include "base/geometry/calc_dimension.h"
-#include "base/geometry/dimension.h"
-#include "base/log/ace_trace.h"
-#include "base/utils/string_utils.h"
-#include "core/common/ace_application_info.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/common/properties/decoration.h"
 #include "core/components/declaration/common/declaration_constants.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
