@@ -2849,7 +2849,7 @@ void JSViewAbstract::ParseBlurStyleOption(const JSRef<JSObject>& jsOption, BlurS
     }
 
     // policy
-    auto policy = static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE);
+    auto policy = static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_ACTIVE);
     ParseJsInt32(jsOption->GetProperty("policy"), policy);
     if (policy >= static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) &&
         policy <= static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_INACTIVE)) {
@@ -2987,7 +2987,7 @@ void JSViewAbstract::ParseEffectOption(const JSRef<JSObject>& jsOption, EffectOp
     effectOption.adaptiveColor = adaptiveColor;
 
     // policy
-    auto policy = static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE);
+    auto policy = static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_ACTIVE);
     ParseJsInt32(jsOption->GetProperty("policy"), policy);
     if (policy >= static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) &&
         policy <= static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_INACTIVE)) {
