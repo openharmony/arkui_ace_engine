@@ -7636,8 +7636,6 @@ void TextFieldPattern::SetPreviewTextOperation(PreviewTextInfo info)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
     if (!hasPreviewText_) {
         bodyTextInPreivewing_ = GetTextValue();
     }
@@ -7664,13 +7662,6 @@ void TextFieldPattern::SetPreviewTextOperation(PreviewTextInfo info)
     newCaretPosition = std::clamp(newCaretPosition, 0,
         static_cast<int32_t>(contentController_->GetWideText().length()));
     selectController_->UpdateCaretIndex(start + caretMoveLength);
-
-    if (layoutProperty->HasMaxLength()) {
-        int32_t sum = originLength + static_cast<int32_t>(StringUtils::ToWstring(info.text).length());
-        showCountBorderStyle_ = sum >
-            static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>()));
-        HandleCountStyle();
-    }
 
     UpdatePreviewIndex(start, newCaretPosition);
     hasPreviewText_ = true;
@@ -7699,6 +7690,28 @@ void TextFieldPattern::FinishTextPreviewOperation()
         return;
     }
 
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    if (layoutProperty->HasMaxLength()) {
+        int32_t len = static_cast<int32_t>(contentController_->GetWideText().length());
+        showCountBorderStyle_ = len >
+            static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>()));
+        HandleCountStyle();
+    }
+
+    auto start = GetPreviewTextStart();
+    auto end = GetPreviewTextEnd();
+    auto previewValue = GetPreviewTextValue();
+    hasPreviewText_ = false;
+
+    auto originLength = static_cast<int32_t>(contentController_->GetWideText().length()) - (end - start);
+    contentController_->ReplaceSelectedValue(start, end, previewValue);
+    int32_t caretMoveLength = abs(static_cast<int32_t>(contentController_->GetWideText().length()) - originLength);
+    selectController_->UpdateCaretIndex(start + caretMoveLength);
+
     UpdateEditingValueToRecord();
     if (HasFocus()) {
         cursorVisible_ = true;
@@ -7707,13 +7720,11 @@ void TextFieldPattern::FinishTextPreviewOperation()
         cursorVisible_ = false;
         StopTwinkling();
     }
-
-    hasPreviewText_ = false;
+ 
     bodyTextInPreivewing_ = "";
     previewTextStart_ = PREVIEW_TEXT_RANGE_DEFAULT;
     previewTextEnd_ = PREVIEW_TEXT_RANGE_DEFAULT;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
+
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
