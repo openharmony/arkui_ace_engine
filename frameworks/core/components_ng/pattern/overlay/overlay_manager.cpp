@@ -3788,7 +3788,7 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
 void OverlayManager::HandleModalPop(
     std::function<void()>&& onWillDisappear, const RefPtr<UINode> rootNode, int32_t targetId)
 {
-    auto topModalNode = modalStack_.top().Upgrade();
+    auto topModalNode = GetModal(targetId);
     CHECK_NULL_VOID(topModalNode);
     if (!CheckTopModalNode(topModalNode, targetId)) {
         return;
