@@ -32,6 +32,7 @@ void StackModelNG::Create()
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::STACK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StackPattern>(); });
     stack->Push(frameNode);
+    frameNode->SetExclusiveEventForChild(true);
 }
 
 void StackModelNG::Create(Alignment alignment)
