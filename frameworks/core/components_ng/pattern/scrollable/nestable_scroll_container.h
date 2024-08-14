@@ -67,11 +67,6 @@ public:
      */
     virtual void OnScrollEndRecursive(const std::optional<float>& velocity) = 0;
 
-    const std::unique_ptr<NestedScrollOptions>& GetNestedModeForChildren() const
-    {
-        return childNestedScroll_;
-    }
-
     /**
      * @brief Determine if a component is in an out-of-bounds state.
      */
@@ -89,6 +84,35 @@ public:
         return nestedScroll_;
     }
 
+    void SetParentScrollable();
+
+    RefPtr<NestableScrollContainer> GetNestedScrollParent()
+    {
+        return parent_.Upgrade();
+    }
+
+    /**
+     * @brief Passes the velocity of the current component to the child component for processing.
+     *
+     * @param remainVelocity the velocity of the current component.
+     */
+    virtual void RemainVelocityToChild(float remainVelocity) {}
+
+    virtual void OnScrollDragEndRecursive();
+
+protected:
+    /**
+     * @brief Helper function. Searches for the parent NestableScrollContainer of the current instance.
+     *
+     * @return RefPtr<NestableScrollContainer> A reference to the parent NestableScrollContainer.
+     */
+    virtual RefPtr<NestableScrollContainer> SearchParent();
+
+    const std::unique_ptr<NestedScrollOptions>& GetNestedModeForChildren() const
+    {
+        return childNestedScroll_;
+    }
+
     void SetIsFixedNestedScrollMode(bool isFixedNestedScrollMode)
     {
         isFixedNestedScrollMode_ = isFixedNestedScrollMode;
@@ -99,34 +123,10 @@ public:
         return isFixedNestedScrollMode_;
     }
 
-    void SetParentScrollable();
-
-    RefPtr<NestableScrollContainer> GetNestedScrollParent()
-    {
-        return parent_.Upgrade();
-    }
-
     void SetNestedScrollParent(RefPtr<NestableScrollContainer> parent)
     {
         parent_ = parent;
     }
-
-    void SetScrollOriginChild(const WeakPtr<NestableScrollContainer>& scrollOriginChild)
-    {
-        scrollOriginChild_ = scrollOriginChild;
-    }
-
-    RefPtr<NestableScrollContainer> GetScrollOriginChild()
-    {
-        return scrollOriginChild_.Upgrade();
-    }
-
-    /**
-     * @brief Passes the velocity of the current component to the child component for processing.
-     *
-     * @param remainVelocity the velocity of the current component.
-     */
-    virtual void RemainVelocityToChild(float remainVelocity) {}
 
     void SetIsSearchRefresh(bool isSearchRefresh)
     {
@@ -148,22 +148,9 @@ public:
         return isNestedInterrupt_;
     }
 
-    virtual void OnScrollDragEndRecursive();
-
-protected:
-    /**
-     * @brief Helper function. Searches for the parent NestableScrollContainer of the current instance.
-     *
-     * @return RefPtr<NestableScrollContainer> A reference to the parent NestableScrollContainer.
-     */
-    virtual RefPtr<NestableScrollContainer> SearchParent();
-
-    ACE_DISALLOW_COPY_AND_MOVE(NestableScrollContainer);
-
 private:
     std::unique_ptr<NestedScrollOptions> childNestedScroll_;
     WeakPtr<NestableScrollContainer> parent_;
-    WeakPtr<NestableScrollContainer> scrollOriginChild_;
 
     NestedScrollOptions nestedScroll_ = {
         .forward = NestedScrollMode::SELF_ONLY,
@@ -173,6 +160,7 @@ private:
     bool isFixedNestedScrollMode_ = false;
     bool isSearchRefresh_ = true;
     bool isNestedInterrupt_ = false; // nested scroll interrupted by change of nested mode
+    ACE_DISALLOW_COPY_AND_MOVE(NestableScrollContainer);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLLABLE_NESTABLE_SCROLL_CONTAINER_H

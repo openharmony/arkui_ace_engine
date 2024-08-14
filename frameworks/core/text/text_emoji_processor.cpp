@@ -17,9 +17,6 @@
 
 #include <unicode/uchar.h>
 
-#include "base/utils/string_utils.h"
-#include "base/utils/utils.h"
-
 namespace OHOS::Ace {
 namespace {
 

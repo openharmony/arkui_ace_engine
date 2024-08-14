@@ -14,19 +14,11 @@
  */
 #include "node_extened.h"
 
-#include <cstdint>
-#include <unordered_map>
 
-#include "event_converter.h"
 #include "node_model.h"
-#include "style_modifier.h"
 
 #include "base/error/error_code.h"
-#include "base/log/log_wrapper.h"
-#include "base/utils/utils.h"
 #include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/property/property.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
 
 namespace OHOS::Ace::NodeModel {
 

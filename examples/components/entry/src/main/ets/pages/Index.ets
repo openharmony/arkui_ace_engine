@@ -16,6 +16,7 @@
 import curves from '@ohos.curves';
 import { Route, RouteGroup } from '../common/route';
 import { OperatesDestination, operatesRoute } from './operates';
+import { DisplaysDestination, displaysRoute } from './displays';
 
 @Styles
 function CardPressedStyle() {
@@ -39,12 +40,22 @@ function CardDisabledStyle() {
   .animation({ curve: curves.cubicBezierCurve(0.33, 0, 0.67, 1), duration: 100 })
 }
 
+@Builder
+function Destination(name: string, route: Route) {
+  if (name.startsWith('displays/')) {
+    DisplaysDestination(name, route)
+  } else if (name.startsWith('operates/')) {
+    OperatesDestination(name, route)
+  }
+}
+
 @Entry
 @Component
 struct Index {
   @Provide('router') router: NavPathStack = new NavPathStack();
   @State routes: RouteGroup[] = [
     operatesRoute,
+    displaysRoute,
   ];
   @State selection: string | null = null;
 
@@ -157,6 +168,6 @@ struct Index {
     }
     .title('Component')
     .backgroundColor($r('sys.color.ohos_id_color_sub_background'))
-    .navDestination(OperatesDestination)
+    .navDestination(Destination)
   }
 }

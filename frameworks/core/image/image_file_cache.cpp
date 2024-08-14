@@ -15,19 +15,13 @@
 #include "core/image/image_file_cache.h"
 
 #include <dirent.h>
-#include <fstream>
 #include <sys/stat.h>
-#include <cstdio>
 
 #include "base/image/image_packer.h"
 #include "base/image/image_source.h"
-#include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
-#include "base/log/log_wrapper.h"
 #include "base/thread/background_task_executor.h"
-#include "base/utils/system_properties.h"
 #include "core/image/image_loader.h"
-#include "core/image/image_source_info.h"
 
 #ifdef USE_ROSEN_DRAWING
 #include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"

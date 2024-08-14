@@ -279,7 +279,7 @@ class ListFilterRow extends ViewPU {
                 const option = _item;
                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                     If.create();
-                    if (colIndex == 0) {
+                    if (colIndex === 0) {
                         this.ifElseBranchUpdateFunction(0, () => {
                             {
                                 const itemCreation = (elmtId, isInitialRender) => {
@@ -416,7 +416,7 @@ class ListFilterRow extends ViewPU {
                             }
                         });
                         ListItem.margin({ start: LengthMetrics.vp(colIndex === 0 ? -TEXT_HOT_AREA_WIDTH : 0) });
-                        ListItem.tabIndex(colIndex == 0 ? this.rowIndex : -1);
+                        ListItem.tabIndex(colIndex === 0 ? this.rowIndex : -1);
                     };
                     const deepRenderFunction = (elmtId, isInitialRender) => {
                         itemCreation(elmtId, isInitialRender);
@@ -1790,7 +1790,7 @@ export class Filter extends ViewPU {
             Column.align(Alignment.Start);
             Column.onAreaChange((_oldValue, newValue) => {
                 if (!this.isFloatShowAllFilterWithoutAnimation && !this.isFloatBarShowWithoutAnimation) {
-                    if (this.additionFilters != null) {
+                    if (this.additionFilters !== null) {
                         this.filterDynamicHeight =
                             parseInt(newValue.height.toString(), 0) + LIST_ROW_HEIGHT + FILTER_TOP_PADDING;
                     } else {
@@ -1858,7 +1858,7 @@ export class Filter extends ViewPU {
             Column.create();
             Column.width(PERCENT_100);
             Column.onAreaChange((_oldValue, newValue) => {
-                if (this.additionFilters != null) {
+                if (this.additionFilters !== null) {
                     this.filterDynamicHeight =
                         parseInt(newValue.height.toString(), 0) + LIST_ROW_HEIGHT + FILTER_TOP_PADDING;
                 } else {
@@ -2006,7 +2006,7 @@ export class Filter extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
             if (this.additionFilters && this.additionFilters.name && this.additionFilters.options &&
-                this.additionFilters.options.length != 0) {
+                this.additionFilters.options.length !== 0) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Stack.create({ alignContent: Alignment.End });
@@ -2204,7 +2204,7 @@ export class Filter extends ViewPU {
                                     ListItem.onClick(() => {
                                         this.additionItemClick(index);
                                     });
-                                    ListItem.tabIndex(index == 0 ? this.multiFilters.length : -1);
+                                    ListItem.tabIndex(index === 0 ? this.multiFilters.length : -1);
                                 };
                                 const deepRenderFunction = (elmtId, isInitialRender) => {
                                     itemCreation(elmtId, isInitialRender);
@@ -2597,7 +2597,7 @@ export class Filter extends ViewPU {
             List.height(PERCENT_100);
             List.edgeEffect(EdgeEffect.Spring);
             List.onScroll((_scrollOffset, scrollState) => {
-                if (this.isFloatShowAllFilterWithoutAnimation && scrollState == ScrollState.Scroll) {
+                if (this.isFloatShowAllFilterWithoutAnimation && scrollState === ScrollState.Scroll) {
                     this.isFloatBarShowWithoutAnimation = true;
                     this.isFloatShowAllFilterWithoutAnimation = false;
                     Context.animateTo({

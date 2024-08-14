@@ -14,11 +14,8 @@
  */
 #include "form_renderer_dispatcher_proxy.h"
 
-#include "appexecfwk_errors.h"
-#include "errors.h"
 #include "form_renderer_hilog.h"
 
-#include "core/event/touch_event.h"
 
 namespace OHOS {
 namespace Ace {

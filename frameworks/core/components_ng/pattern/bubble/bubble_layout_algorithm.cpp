@@ -1002,14 +1002,12 @@ void BubbleLayoutAlgorithm::UpdateChildPosition(OffsetF& childOffset)
 
 void BubbleLayoutAlgorithm::UpdateTouchRegion()
 {
-    OffsetF topLeft;
-    OffsetF bottomRight;
+    OffsetF topLeft = childOffset_;
+    OffsetF bottomRight = OffsetF(childSize_.Width(), childSize_.Height());
     switch (arrowPlacement_) {
         case Placement::TOP:
         case Placement::TOP_LEFT:
         case Placement::TOP_RIGHT:
-            topLeft = childOffset_;
-            bottomRight = OffsetF(childSize_.Width(), targetSpace_.ConvertToPx() + childSize_.Height());
             if (showArrow_) {
                 bottomRight += OffsetF(0.0, BUBBLE_ARROW_HEIGHT.ConvertToPx());
             }
@@ -1017,8 +1015,6 @@ void BubbleLayoutAlgorithm::UpdateTouchRegion()
         case Placement::BOTTOM:
         case Placement::BOTTOM_LEFT:
         case Placement::BOTTOM_RIGHT:
-            topLeft = childOffset_ + OffsetF(0.0, -targetSpace_.ConvertToPx());
-            bottomRight = OffsetF(childSize_.Width(), targetSpace_.ConvertToPx() + childSize_.Height());
             if (showArrow_) {
                 topLeft += OffsetF(0.0, -BUBBLE_ARROW_HEIGHT.ConvertToPx());
                 bottomRight += OffsetF(0.0, BUBBLE_ARROW_HEIGHT.ConvertToPx());
@@ -1027,8 +1023,6 @@ void BubbleLayoutAlgorithm::UpdateTouchRegion()
         case Placement::LEFT:
         case Placement::LEFT_TOP:
         case Placement::LEFT_BOTTOM:
-            topLeft = childOffset_;
-            bottomRight = OffsetF(targetSpace_.ConvertToPx() + childSize_.Width(), childSize_.Height());
             if (showArrow_) {
                 bottomRight += OffsetF(BUBBLE_ARROW_HEIGHT.ConvertToPx(), 0.0);
             }
@@ -1036,16 +1030,12 @@ void BubbleLayoutAlgorithm::UpdateTouchRegion()
         case Placement::RIGHT:
         case Placement::RIGHT_TOP:
         case Placement::RIGHT_BOTTOM:
-            topLeft = childOffset_ + OffsetF(-targetSpace_.ConvertToPx(), 0.0);
-            bottomRight = OffsetF(targetSpace_.ConvertToPx() + childSize_.Width(), childSize_.Height());
             if (showArrow_) {
                 topLeft += OffsetF(-BUBBLE_ARROW_HEIGHT.ConvertToPx(), 0.0);
                 bottomRight += OffsetF(BUBBLE_ARROW_HEIGHT.ConvertToPx(), 0.0);
             }
             break;
         default:
-            topLeft = childOffset_;
-            bottomRight = OffsetF(childSize_.Width(), targetSpace_.ConvertToPx() + childSize_.Height());
             break;
     }
     touchRegion_ = RectF(topLeft, topLeft + bottomRight);

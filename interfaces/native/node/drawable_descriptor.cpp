@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 
-#include <cstdint>
 
-#include "native_type.h"
 #include "node_extened.h"
 
 #include "base/utils/utils.h"

@@ -311,7 +311,8 @@ SelectionInfo TextPattern::GetSpansInfo(int32_t start, int32_t end, GetSpansMeth
             if (!resultObject.valueString.empty()) {
                 resultObjects.emplace_back(resultObject);
             }
-        } else if (uinode->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG) {
+        } else if (uinode->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG ||
+            uinode->GetTag() == V2::CUSTOM_SPAN_NODE_ETS_TAG) {
             ResultObject resultObject = GetBuilderResultObject(uinode, index, realStart, realEnd);
             if (!resultObject.valueString.empty()) {
                 resultObjects.emplace_back(resultObject);
@@ -494,6 +495,12 @@ std::wstring TextPattern::GetWideText() const
     return StringUtils::ToWstring(textForDisplay_);
 }
 
+bool TextPattern::IsCustomSpanNode(const RefPtr<SpanItem>& span) const
+{
+    auto customSpanItem = AceType::DynamicCast<CustomSpanItem>(span);
+    return customSpanItem && customSpanItem->isNode;
+}
+
 std::string TextPattern::GetSelectedText(int32_t start, int32_t end) const
 {
     if (spans_.empty()) {
@@ -510,7 +517,9 @@ std::string TextPattern::GetSelectedText(int32_t start, int32_t end) const
             tag = span->position == -1 ? tag + 1 : span->position;
             continue;
         }
-        if (span->position - 1 >= start && span->placeholderIndex == -1 && span->position != -1) {
+        if (span->position - 1 >= start &&
+            (span->placeholderIndex == -1 || IsCustomSpanNode(span)) &&
+            span->position != -1) {
             auto wideString = StringUtils::ToWstring(span->GetSpanContent());
             auto max = std::min(span->position, end);
             auto min = std::max(start, tag);
@@ -2497,7 +2506,9 @@ void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanH
             continue;
         }
         if (tag == V2::CUSTOM_SPAN_NODE_ETS_TAG) {
+            placeholderCount_++;
             AddChildSpanItem(current.node);
+            dataDetectorAdapter_->textForAI_.append("\n");
             childNodes_.emplace_back(current.node);
         }
         const auto& nextChildren = current.node->GetChildren();

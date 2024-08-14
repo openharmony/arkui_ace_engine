@@ -156,7 +156,7 @@ export struct ExceptionPrompt {
   aboutToAppear() {
     try {
       let uiContent: UIContext = this.getUIContext();
-      this.isFollowingSystemFontScale= uiContent.isFollowingSystemFontScale();
+      this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
       this.maxAppFontScale = uiContent.getMaxFontScale();
     } catch (err) {
       let code: number = (err as BusinessError).code;
