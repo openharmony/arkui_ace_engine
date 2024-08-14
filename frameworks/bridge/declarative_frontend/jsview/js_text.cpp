@@ -53,6 +53,7 @@
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/event/ace_event_handler.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace {
 
@@ -690,6 +691,7 @@ void JSText::Create(const JSCallbackInfo& info)
         }
     } else {
         ParseJsString(args, data);
+        data = TextEmojiProcessor::TryClampU8stringIllegalEmoji(data);
         TextModel::GetInstance()->Create(data);
     }
 
