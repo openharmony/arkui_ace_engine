@@ -23,6 +23,7 @@ namespace CheckboxInterfaceModifier {
 void SetCheckboxOptionsImpl(Ark_NativePointer node,
                             const Opt_CheckboxOptions* options)
 {
+    CHECK_NULL_VOID(options);
     if (options->tag != ARK_TAG_UNDEFINED) {
         auto frameNode = reinterpret_cast<FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
@@ -52,6 +53,7 @@ void SelectImpl(Ark_NativePointer node,
 void SelectedColorImpl(Ark_NativePointer node,
                        const ResourceColor* value)
 {
+    CHECK_NULL_VOID(value);
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto color = Converter::OptConvert<Color>(*value);
@@ -69,6 +71,7 @@ void ShapeImpl(Ark_NativePointer node,
 void UnselectedColorImpl(Ark_NativePointer node,
                          const ResourceColor* value)
 {
+    CHECK_NULL_VOID(value);
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto color = Converter::OptConvert<Color>(*value);
@@ -79,6 +82,7 @@ void UnselectedColorImpl(Ark_NativePointer node,
 void MarkImpl(Ark_NativePointer node,
               const Ark_MarkStyle* value)
 {
+    CHECK_NULL_VOID(value);
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 
