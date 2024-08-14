@@ -15,10 +15,8 @@
 
 #include "inspector.h"
 
-#include "inspector_composed_element.h"
 #include "shape_composed_element.h"
 
-#include "core/common/ace_application_info.h"
 #include "core/components/page/page_element.h"
 #include "core/components/root/root_element.h"
 

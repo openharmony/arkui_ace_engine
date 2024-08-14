@@ -15,9 +15,6 @@
 
 #include "core/components_v2/list/render_list.h"
 
-#include "base/geometry/axis.h"
-#include "base/log/ace_trace.h"
-#include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
@@ -29,12 +26,8 @@
 #include "core/components/scroll/scroll_spring_effect.h"
 #include "core/components/scroll/scrollable.h"
 #include "core/components/stack/stack_element.h"
-#include "core/components_v2/list/list_component.h"
 #include "core/components_v2/list/list_scroll_bar_controller.h"
 #include "core/components_v2/list/render_list_item_group.h"
-#include "core/event/axis_event.h"
-#include "core/gestures/long_press_recognizer.h"
-#include "core/gestures/pan_recognizer.h"
 #include "core/gestures/sequenced_recognizer.h"
 
 namespace OHOS::Ace::V2 {

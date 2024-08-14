@@ -15,7 +15,6 @@
 #include "core/components_v2/pattern_lock/pattern_lock_component.h"
 
 #include "core/components_v2/pattern_lock/pattern_lock_element.h"
-#include "core/components_v2/pattern_lock/render_pattern_lock.h"
 namespace OHOS::Ace::V2 {
 PatternLockComponent::PatternLockComponent()
 {

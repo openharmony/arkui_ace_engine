@@ -15,9 +15,7 @@
 
 #include "core/components_v2/indexer/render_indexer_item.h"
 
-#include "core/components/focus_animation/render_focus_animation.h"
 #include "core/components/text/render_text.h"
-#include "core/components_v2/indexer/indexer_component.h"
 #include "core/components_v2/indexer/indexer_item_component.h"
 
 namespace OHOS::Ace::V2 {

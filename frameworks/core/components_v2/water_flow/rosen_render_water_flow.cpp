@@ -17,7 +17,6 @@
 #include "render_service_client/core/ui/rs_node.h"
 
 #include "core/components/common/painter/rosen_scroll_bar_painter.h"
-#include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace::V2 {
 void RosenRenderWaterFlow::Update(const RefPtr<Component>& component)

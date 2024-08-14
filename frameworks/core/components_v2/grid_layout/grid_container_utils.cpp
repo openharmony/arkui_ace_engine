@@ -17,8 +17,6 @@
 
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/container_modal/container_modal_constants.h"
-#include "core/pipeline/container_window_manager.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::V2 {

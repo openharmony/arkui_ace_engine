@@ -16,9 +16,7 @@
 #include "core/components_v2/inspector/row_composed_element.h"
 
 #include "base/log/dump_log.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components/flex/render_flex.h"
-#include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::V2 {
 namespace {

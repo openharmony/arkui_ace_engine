@@ -16,8 +16,6 @@
 #include "core/components_v2/indexer/render_indexer.h"
 
 #include "base/log/event_report.h"
-#include "core/components/arc/render_arc.h"
-#include "core/components/text/render_text.h"
 
 namespace OHOS::Ace::V2 {
 namespace {

@@ -16,8 +16,6 @@
 #include "core/components_v2/inspector/texttimer_composed_element.h"
 
 #include "base/log/dump_log.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/text_field/text_field_element.h"
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::V2 {

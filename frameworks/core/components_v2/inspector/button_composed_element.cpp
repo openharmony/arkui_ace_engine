@@ -16,8 +16,6 @@
 #include "core/components_v2/inspector/button_composed_element.h"
 
 #include "base/log/dump_log.h"
-#include "core/components/button/button_element.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components/text/render_text.h"
 #include "core/components/text/text_element.h"
 #include "core/components_v2/inspector/utils.h"

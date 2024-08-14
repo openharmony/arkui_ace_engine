@@ -15,8 +15,6 @@
 
 #include "core/components_v2/indexer/indexer_element.h"
 
-#include "core/components_v2/indexer/indexer_component.h"
-
 namespace OHOS::Ace::V2 {
 void IndexerElement::PerformBuild()
 {

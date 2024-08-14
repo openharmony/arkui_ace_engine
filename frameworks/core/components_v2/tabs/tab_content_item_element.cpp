@@ -15,8 +15,6 @@
 
 #include "core/components_v2/tabs/tab_content_item_element.h"
 
-#include "core/components/tab_bar/tab_bar_item_element.h"
-#include "core/components_v2/tabs/tab_content_item_component.h"
 #include "core/components_v2/tabs/tabs_helper.h"
 
 namespace OHOS::Ace::V2 {

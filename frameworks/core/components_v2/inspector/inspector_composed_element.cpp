@@ -15,28 +15,16 @@
 
 #include "core/components_v2/inspector/inspector_composed_element.h"
 
-#include <atomic>
-
-#include "base/log/dump_log.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/utils.h"
-#include "core/common/ace_application_info.h"
 #include "core/components/box/box_element.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components/coverage/render_coverage.h"
 #include "core/components/display/render_display.h"
 #include "core/components/flex/flex_item_element.h"
 #include "core/components/flex/render_flex_item.h"
 #include "core/components/focusable/focusable_element.h"
-#include "core/components/popup/popup_element_v2.h"
-#include "core/components/text/render_text.h"
-#include "core/components/text/text_element.h"
 #include "core/components/transform/transform_element.h"
 #include "core/components_v2/inspector/inspector_composed_component.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/utils.h"
-#include "core/pipeline/base/component.h"
-#include "core/pipeline/base/composed_component.h"
 
 namespace OHOS::Ace::V2 {
 

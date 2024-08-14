@@ -16,7 +16,6 @@
 #include "core/components_v2/inspector/shape_composed_element.h"
 
 #include "base/log/dump_log.h"
-#include "core/components/shape/shape_element.h"
 #include "core/components_v2/inspector/shape_container_composed_element.h"
 #include "core/components_v2/inspector/utils.h"
 
