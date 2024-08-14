@@ -190,6 +190,10 @@ declare class ArkQRCodeComponent extends ArkComponent {}
 
 declare class ArkBadgeComponent extends ArkComponent {}
 
+declare class ArkGridComponent extends ArkComponent {}
+
+declare class ArkGridItemComponent extends ArkComponent {}
+
 declare class UICommonEvent {
   private _nodePtr: NodePtr;
   private _instanceId: number;

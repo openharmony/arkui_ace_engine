@@ -2566,6 +2566,7 @@ struct ArkUIGridItemModifier {
     void (*resetGridItemColumnStart)(ArkUINodeHandle node);
     void (*setGridItemColumnEnd)(ArkUINodeHandle node, ArkUI_Int32 columnEnd);
     void (*resetGridItemColumnEnd)(ArkUINodeHandle node);
+    void (*setGridItemOptions)(ArkUINodeHandle node, ArkUI_Int32 style);
 };
 
 struct ArkUIScrollModifier {
