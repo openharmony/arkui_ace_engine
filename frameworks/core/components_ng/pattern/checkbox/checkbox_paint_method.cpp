@@ -14,20 +14,6 @@
  */
 #include "core/components_ng/pattern/checkbox/checkbox_paint_method.h"
 
-#include <optional>
-
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/rect_t.h"
-#include "base/geometry/rect.h"
-#include "base/geometry/rrect.h"
-#include "base/utils/utils.h"
-#include "core/components/checkable/checkable_theme.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/theme/theme_manager.h"
-#include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
-#include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {

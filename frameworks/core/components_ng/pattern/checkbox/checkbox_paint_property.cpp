@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
 
-#include "core/components_ng/base/inspector_filter.h"
-
 namespace OHOS::Ace::NG {
 namespace {
 const Color DEFAULT_SELECTED_COLOR = Color(0xFF007DFF);

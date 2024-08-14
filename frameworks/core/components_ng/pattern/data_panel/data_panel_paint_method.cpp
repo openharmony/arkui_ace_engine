@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/data_panel/data_panel_paint_method.h"
 
-#include "core/components_ng/property/gradient_property.h"
 namespace OHOS::Ace::NG {
 
 RefPtr<Modifier> DataPanelPaintMethod::GetContentModifier(PaintWrapper* paintWrapper)

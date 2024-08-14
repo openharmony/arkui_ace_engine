@@ -14,17 +14,7 @@
  */
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
 
-#include "core/common/recorder/node_data_cache.h"
-#include "core/components/checkable/checkable_component.h"
-#include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
-#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
-#include "core/components_ng/pattern/stage/page_event_hub.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/property.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/event/touch_event.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {

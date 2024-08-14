@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/form_link/form_link_model_ng.h"
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/form_link/form_link_pattern.h"
 

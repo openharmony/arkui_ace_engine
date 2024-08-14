@@ -14,11 +14,6 @@
  */
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
 
-#include "base/memory/ace_type.h"
-#include "base/subwindow/subwindow_manager.h"
-#include "base/thread/task_executor.h"
-#include "core/common/container_scope.h"
-
 namespace OHOS::Ace::NG {
 void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProperties,
     const WeakPtr<AceType>& controller, std::vector<WeakPtr<AceType>>& dialogs,

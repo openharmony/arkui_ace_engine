@@ -16,14 +16,10 @@
 #include "core/components_ng/pattern/gesture/gesture_model_ng.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/gestures/gesture_group.h"
 #include "core/components_ng/gestures/long_press_gesture.h"
 #include "core/components_ng/gestures/rotation_gesture.h"
-#include "core/components_ng/gestures/pan_gesture.h"
 #include "core/components_ng/gestures/pinch_gesture.h"
 #include "core/components_ng/gestures/swipe_gesture.h"
-#include "core/components_ng/gestures/tap_gesture.h"
-#include "core/gestures/gesture_processor.h"
 
 namespace OHOS::Ace::NG {
 namespace {

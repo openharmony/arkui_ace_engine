@@ -18,7 +18,6 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/pattern/action_sheet/action_sheet_model_ng.h"
 
-#include "core/components_ng/event/click_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

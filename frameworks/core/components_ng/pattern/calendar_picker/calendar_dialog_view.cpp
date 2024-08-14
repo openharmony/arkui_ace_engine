@@ -29,14 +29,7 @@
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_event_hub.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/pattern/picker/date_time_animation_controller.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
-#include "core/components_ng/pattern/picker/datepicker_row_layout_property.h"
-#include "core/components_ng/pattern/stack/stack_pattern.h"
-#include "core/components_ng/pattern/swiper/swiper_pattern.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {

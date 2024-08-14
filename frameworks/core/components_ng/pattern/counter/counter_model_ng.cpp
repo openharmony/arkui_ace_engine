@@ -21,7 +21,6 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {

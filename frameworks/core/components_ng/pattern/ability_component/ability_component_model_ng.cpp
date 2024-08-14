@@ -15,11 +15,6 @@
 
 #include "frameworks/core/components_ng/pattern/ability_component/ability_component_model_ng.h"
 
-#include "frameworks/core/components/common/layout/constants.h"
-#include "frameworks/core/components_ng/base/frame_node.h"
-#include "frameworks/core/components_ng/base/view_stack_processor.h"
-#include "frameworks/core/components_ng/pattern/ability_component/ability_component_pattern.h"
-#include "frameworks/core/components_v2/inspector/inspector_constants.h"
 #include "frameworks/core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

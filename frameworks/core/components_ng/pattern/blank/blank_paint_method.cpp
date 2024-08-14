@@ -14,10 +14,6 @@
  */
 #include "core/components_ng/pattern/blank/blank_paint_method.h"
 
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/pattern/blank/blank_pattern.h"
-#include "core/components_ng/render/drawing.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/components_ng/pattern/blank/blank_paint_property.h"
 
 namespace OHOS::Ace::NG {

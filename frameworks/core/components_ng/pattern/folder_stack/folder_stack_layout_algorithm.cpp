@@ -15,23 +15,8 @@
 
 #include "core/components_ng/pattern/folder_stack/folder_stack_layout_algorithm.h"
 
-#include "base/memory/ace_type.h"
 #include "base/log/event_report.h"
-#include "base/subwindow/subwindow_manager.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
-#include "core/common/display_info.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/folder_stack/control_parts_stack_node.h"
-#include "core/components_ng/pattern/folder_stack/folder_stack_group_node.h"
-#include "core/components_ng/pattern/folder_stack/folder_stack_layout_property.h"
 #include "core/components_ng/pattern/folder_stack/folder_stack_pattern.h"
-#include "core/components_ng/pattern/folder_stack/hover_stack_node.h"
-#include "core/components_ng/pattern/stack/stack_layout_algorithm.h"
-#include "core/components_ng/pattern/stack/stack_layout_property.h"
-#include "core/components_ng/syntax/if_else_model.h"
-#include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

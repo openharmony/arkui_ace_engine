@@ -29,11 +29,8 @@
 #include "core/components/calendar/calendar_theme.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/calendar/calendar_pattern.h"
-#include "core/components_ng/pattern/calendar/calendar_paint_property.h"
 #include "core/components_ng/render/canvas_image.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
 

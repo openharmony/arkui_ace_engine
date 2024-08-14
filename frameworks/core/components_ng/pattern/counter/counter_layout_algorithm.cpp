@@ -15,10 +15,7 @@
 
 #include "core/components_ng/pattern/counter/counter_layout_algorithm.h"
 
-#include "base/utils/utils.h"
 #include "core/components/counter/counter_theme.h"
-#include "core/components_ng/layout/layout_wrapper.h"
-#include "core/pipeline/pipeline_base.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 
 namespace OHOS::Ace::NG {

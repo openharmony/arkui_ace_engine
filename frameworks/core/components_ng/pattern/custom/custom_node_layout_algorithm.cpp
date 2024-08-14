@@ -15,11 +15,6 @@
 
 #include "core/components_ng/pattern/custom/custom_node_layout_algorithm.h"
 
-#include "base/log/ace_trace.h"
-#include "base/log/log_wrapper.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 
 namespace OHOS::Ace::NG {

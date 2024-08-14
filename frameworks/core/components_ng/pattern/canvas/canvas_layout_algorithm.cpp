@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/canvas/canvas_layout_algorithm.h"
 
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
 
 namespace OHOS::Ace::NG {

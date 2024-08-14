@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/canvas/canvas_modifier.h"
 
-#include "base/utils/system_properties.h"
-#include "base/utils/utils.h"
 #include "core/components_ng/pattern/canvas/custom_paint_util.h"
 #include "core/components_ng/render/render_context.h"
 

@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_layout_algorithm.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_pattern.h"
-#include "core/components_ng/pattern/flex/flex_layout_property.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {

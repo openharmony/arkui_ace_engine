@@ -15,10 +15,6 @@
 
 #include "core/components_ng/pattern/divider/divider_modifier.h"
 
-#include "base/utils/utils.h"
-#include "core/components_ng/base/modifier.h"
-#include "core/components_ng/render/drawing.h"
-#include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/divider_painter.h"
 
 namespace OHOS::Ace::NG {

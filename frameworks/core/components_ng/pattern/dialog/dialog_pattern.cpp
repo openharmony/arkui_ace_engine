@@ -17,18 +17,12 @@
 #include <climits>
 #include <cstdint>
 #include <cstring>
-#include <optional>
-#include <string>
 
-#include "base/geometry/dimension.h"
-#include "base/json/json_util.h"
 #include "base/log/dump_log.h"
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/subwindow/subwindow_manager.h"
-#include "base/utils/utils.h"
-#include "bridge/common/dom/dom_type.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/recorder/event_recorder.h"

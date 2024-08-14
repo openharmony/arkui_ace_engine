@@ -15,11 +15,7 @@
 
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
 
-#include "core/components/divider/divider_theme.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 

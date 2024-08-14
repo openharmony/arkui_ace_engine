@@ -15,15 +15,9 @@
 
 #include "core/components_ng/pattern/badge/badge_model_ng.h"
 
-#include "base/utils/utils.h"
 #include "core/components/badge/badge_theme.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/badge/badge_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 void BadgeModelNG::Create(BadgeParameters& badgeParameters)
