@@ -1452,6 +1452,16 @@ const __creatorMap__ = new Map([
                 return new ArkTextTimerComponent(node, type);
             });
         }],
+    ['Marquee', (context) => {
+            return new TypedFrameNode(context, 'Marquee', (node, type) => {
+                return new ArkMarqueeComponent(node, type);
+            });
+        }],
+    ['TextArea', (context) => {
+            return new TypedFrameNode(context, 'TextArea', (node, type) => {
+                return new ArkTextAreaComponent(node, type);
+            });
+        }],
 ]);
 class typeNode {
     static createNode(context, type, options) {

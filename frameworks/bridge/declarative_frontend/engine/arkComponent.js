@@ -12681,9 +12681,45 @@ class TextAreaEditMenuOptionsModifier extends ModifierWithKey {
   }
 }
 TextAreaEditMenuOptionsModifier.identity = Symbol('textAreaEditMenuOptions');
+class TextAreaInitializeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    var _a, _b, _c;
+    if (reset) {
+      getUINativeModule().textArea.setTextAreaInitialize(node, undefined, undefined, undefined);
+    }
+    else {
+      getUINativeModule().textArea.setTextAreaInitialize(node,
+        (_a = this.value) === null || _a === void 0 ? void 0 : _a.placeholder,
+        (_b = this.value) === null || _b === void 0 ? void 0 : _b.text,
+        (_c = this.value) === null || _c === void 0 ? void 0 : _c.controller);
+    }
+  }
+  checkObjectDiff() {
+    var _a, _b, _c, _d, _e, _f;
+    return !isBaseOrResourceEqual((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.placeholder,
+      (_b = this.value) === null || _b === void 0 ? void 0 : _b.placeholder) ||
+      !isBaseOrResourceEqual((_c = this.stageValue) === null || _c === void 0 ? void 0 : _c.text,
+        (_d = this.value) === null || _d === void 0 ? void 0 : _d.text) ||
+      !isBaseOrResourceEqual((_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.controller,
+        (_f = this.value) === null || _f === void 0 ? void 0 : _f.controller);
+  }
+}
+TextAreaInitializeModifier.identity = Symbol('textAreaInitialize');
 class ArkTextAreaComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
+  }
+  allowChildCount() {
+    return 0;
+  }
+  initialize(value) {
+    if (value.length === 1 && isObject(value[0])) {
+      modifierWithKey(this._modifiersWithKeys, TextAreaInitializeModifier.identity, TextAreaInitializeModifier, value[0]);
+    }
+    return this;
   }
   type(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaTypeModifier.identity, TextAreaTypeModifier, value);
@@ -22413,6 +22449,17 @@ class ArkMarqueeComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
+  allowChildCount() {
+    return 0;
+  }
+  initialize(value) {
+    if (value.length === 1 && isObject(value[0])) {
+      modifierWithKey(this._modifiersWithKeys, MarqueeInitializeModifier.identity, MarqueeInitializeModifier, value[0]);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, MarqueeInitializeModifier.identity, MarqueeInitializeModifier, undefined);
+    }
+    return this;
+  }
   fontSize(value) {
     modifierWithKey(this._modifiersWithKeys, MarqueeFontSizeModifier.identity, MarqueeFontSizeModifier, value);
     return this;
@@ -22450,6 +22497,32 @@ class ArkMarqueeComponent extends ArkComponent {
     return this;
   }
 }
+class MarqueeInitializeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    var _a, _b, _c, _d, _e;
+    if (reset) {
+      getUINativeModule().marquee.setInitialize(node, undefined, undefined, undefined, undefined, undefined);
+    }
+    else {
+      getUINativeModule().marquee.setInitialize(node, (_a = this.value) === null || _a === void 0 ? void 0 : _a.start,
+        (_b = this.value) === null || _b === void 0 ? void 0 : _b.step, (_c = this.value) === null || _c === void 0 ? void 0 : _c.loop,
+        (_d = this.value) === null || _d === void 0 ? void 0 : _d.fromStart, (_e = this.value) === null || _e === void 0 ? void 0 : _e.src);
+    }
+  }
+
+  checkObjectDiff() {
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+    return !isBaseOrResourceEqual((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.start, (_b = this.value) === null || _b === void 0 ? void 0 : _b.start) ||
+        !isBaseOrResourceEqual((_c = this.stageValue) === null || _c === void 0 ? void 0 : _c.step, (_d = this.value) === null || _d === void 0 ? void 0 : _d.step) ||
+        !isBaseOrResourceEqual((_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.loop, (_f = this.value) === null || _f === void 0 ? void 0 : _f.loop) ||
+        !isBaseOrResourceEqual((_g = this.stageValue) === null || _g === void 0 ? void 0 : _g.fromStart, (_h = this.value) === null || _h === void 0 ? void 0 : _h.fromStart) ||
+        !isBaseOrResourceEqual((_j = this.stageValue) === null || _j === void 0 ? void 0 : _j.src, (_k = this.value) === null || _k === void 0 ? void 0 : _k.src);
+  }
+}
+MarqueeInitializeModifier.identity = Symbol('marqueeInitialize');
 class MarqueeFontColorModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
