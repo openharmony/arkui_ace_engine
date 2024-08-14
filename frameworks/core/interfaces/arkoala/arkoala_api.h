@@ -691,6 +691,7 @@ enum ArkUINodeType {
     ARKUI_TAB_CONTENT,
     ARKUI_NAVIGATION,
     ARKUI_CUSTOM_SPAN,
+    ARKUI_QRCODE,
 };
 
 enum ArkUIEventCategory {
@@ -4319,6 +4320,7 @@ struct ArkUIQRCodeModifier {
     void (*resetQRBackgroundColor)(ArkUINodeHandle node);
     void (*setContentOpacity)(ArkUINodeHandle node, ArkUI_Float32 opacity);
     void (*resetContentOpacity)(ArkUINodeHandle node);
+    void (*setQRValue)(ArkUINodeHandle node, ArkUI_CharPtr value);
 };
 
 struct ArkUIFormComponentModifier {
