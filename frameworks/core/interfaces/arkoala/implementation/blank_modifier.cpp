@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/arkoala/utility/converter.h"
+#include "base/log/log_wrapper.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BlankInterfaceModifier {

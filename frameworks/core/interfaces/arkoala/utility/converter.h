@@ -83,7 +83,6 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     // Implementation is in cpp
-    Color Convert(const Ark_Color& src);
     void ParseDimension(const Ark_String &string, Ark_Length *result);
     Ark_TouchObject ConvertTouchInfo(OHOS::Ace::TouchLocationInfo &info);
 
