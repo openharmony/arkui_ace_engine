@@ -34,6 +34,7 @@
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/render/animation_utils.h"
 
 #if !defined(ACE_UNITTEST)
 #include "core/components_ng/base/transparent_node_detector.h"
@@ -2179,6 +2180,13 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
 void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
     const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)
 {
+    UpdateViewportConfigWithAnimation(config, reason, {}, rsTransaction);
+}
+
+void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& config,
+    OHOS::Rosen::WindowSizeChangeReason reason, AnimationOption animationOpt,
+    const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)
+{
     LOGI("[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s, windowSizeChangeReason %d",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, config.ToString().c_str(),
         static_cast<uint32_t>(reason));
@@ -2215,7 +2223,8 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     if (context) {
         safeAreaManager = context->GetSafeAreaManager();
     }
-    auto task = [config = modifyConfig, container, reason, rsTransaction, rsWindow = window_, safeAreaManager]() {
+    auto task = [config = modifyConfig, container, reason, rsTransaction, rsWindow = window_, safeAreaManager,
+                    isDynamicRender = isDynamicRender_, animationOpt]() {
         container->SetWindowPos(config.Left(), config.Top());
         auto pipelineContext = container->GetPipelineContext();
         if (pipelineContext) {
@@ -2245,8 +2254,19 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
         CHECK_NULL_VOID(aceView);
         Platform::AceViewOhos::TransformHintChanged(aceView, config.TransformHint());
-        Platform::AceViewOhos::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
-            static_cast<WindowSizeChangeReason>(reason), rsTransaction);
+        if (isDynamicRender && animationOpt.IsValid()) {
+            AnimationUtils::Animate(animationOpt, [pipelineContext, aceView, config, reason, rsTransaction] {
+                ContainerScope scope(aceView->GetInstanceId());
+                Platform::AceViewOhos::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
+                    static_cast<WindowSizeChangeReason>(reason), rsTransaction);
+                pipelineContext->OnSurfaceChanged(
+                    config.Width(), config.Height(), static_cast<WindowSizeChangeReason>(reason), rsTransaction);
+                pipelineContext->FlushUITasks(true);
+            });
+        } else {
+            Platform::AceViewOhos::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
+                static_cast<WindowSizeChangeReason>(reason), rsTransaction);
+        }
         Platform::AceViewOhos::SurfacePositionChanged(aceView, config.Left(), config.Top());
         SubwindowManager::GetInstance()->OnWindowSizeChanged(container->GetInstanceId(),
             Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())),
