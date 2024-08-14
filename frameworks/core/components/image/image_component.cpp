@@ -15,9 +15,7 @@
 
 #include "core/components/image/image_component.h"
 
-#include "core/components/common/properties/decoration.h"
 #include "core/components/image/image_element.h"
-#include "core/components/image/render_image.h"
 
 namespace OHOS::Ace {
 

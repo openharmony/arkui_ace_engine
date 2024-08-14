@@ -14,8 +14,6 @@
  */
 #include "core/components/multimodal/rosen_render_multimodal.h"
 
-#include <cstdint>
-
 #ifndef USE_GRAPHIC_TEXT_GINE
 #include "txt/paragraph_builder.h"
 #include "txt/paragraph_style.h"
@@ -37,7 +35,6 @@
 #endif
 
 #include "base/i18n/localization.h"
-#include "base/utils/string_utils.h"
 #include "core/components/calendar/rosen_render_calendar.h"
 #include "core/components/font/constants_converter.h"
 #include "core/components/font/rosen_font_collection.h"

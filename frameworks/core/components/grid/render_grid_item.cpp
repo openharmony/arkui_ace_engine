@@ -15,7 +15,6 @@
 
 #include "core/components/grid/render_grid_item.h"
 
-#include "base/utils/utils.h"
 #include "core/components/grid/grid_item_component.h"
 
 namespace OHOS::Ace {
