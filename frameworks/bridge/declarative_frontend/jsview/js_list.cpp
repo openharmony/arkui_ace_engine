@@ -245,7 +245,7 @@ void JSList::SetChildrenMainSize(const JSCallbackInfo& args)
 void JSList::SetChildrenMainSize(const JSRef<JSObject>& childrenSizeObj)
 {
     double defaultSize = 0.0f;
-    if (!ParseJsDouble(childrenSizeObj->GetProperty("defaultMainSize"), defaultSize) || !NonNegative(defaultSize)) {
+    if (!ParseJsDouble(childrenSizeObj->GetProperty("childDefaultSize"), defaultSize) || !NonNegative(defaultSize)) {
         LOGW("JSList input parameter defaultSize check failed.");
         return;
     }
