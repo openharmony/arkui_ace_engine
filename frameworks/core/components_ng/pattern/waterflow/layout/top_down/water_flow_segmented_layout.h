@@ -67,7 +67,7 @@ public:
         overScroll_ = value;
     }
 
-    bool AppendCacheItem(LayoutWrapper* host, int32_t itemIdx) override;
+    bool AppendCacheItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline) override;
 
 private:
     /**
@@ -110,9 +110,10 @@ private:
      * If user has defined a size for any FlowItem, use that size instead of calling child->Measure.
      *
      * @param targetIdx index of the last FlowItem to measure.
-     * @param isCache if called during a cache layout. In cache layout, always measure the items.
+     * @param cacheDeadline when called during a cache layout, always measure the items and return early if deadline is
+     * reached.
      */
-    void MeasureToTarget(int32_t targetIdx, bool isCache);
+    void MeasureToTarget(int32_t targetIdx, std::optional<int64_t> cacheDeadline);
 
     /**
      * @brief Helper to measure a single FlowItems.

@@ -37,11 +37,11 @@ public:
         canOverScroll_ = canOverScroll;
     }
 
-    bool AppendCacheItem(LayoutWrapper* host, int32_t itemIdx) override;
+    bool AppendCacheItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline) override;
 
 private:
     FlowItemPosition GetItemPosition(int32_t index);
-    bool MeasureToTarget(LayoutWrapper* layoutWrapper, bool isCache);
+    bool MeasureToTarget(LayoutWrapper* layoutWrapper, std::optional<int64_t> cacheDeadline);
     void FillViewport(float mainSize, LayoutWrapper* layoutWrapper);
     void ModifyCurrentOffsetWhenReachEnd(float mainSize, LayoutWrapper* layoutWrapper);
     float ComputeCrossPosition(int32_t crossIndex) const;

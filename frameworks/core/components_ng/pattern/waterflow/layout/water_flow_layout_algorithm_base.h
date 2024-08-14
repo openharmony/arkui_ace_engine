@@ -34,9 +34,10 @@ public:
      * @brief Measure the cache item and append it to a lane.
      *
      * @param itemIdx index of the cache item to add.
+     * @param deadline of the preload task. Return early if deadline is reached.
      * @return true if the item is actually created and appended in lane.
      */
-    virtual bool AppendCacheItem(LayoutWrapper* host, int32_t itemIdx) = 0;
+    virtual bool AppendCacheItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline) = 0;
     virtual void EndCacheLayout()
     { /* callback when cache layout ends */
     }

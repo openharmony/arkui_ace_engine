@@ -83,8 +83,8 @@ void WaterFlowLayoutBase::PostIdleTask(const RefPtr<FrameNode>& frameNode)
                 PostIdleTask(host);
                 break;
             }
-            ACE_SCOPED_TRACE("FlowItem %d predict", *it);
-            needMarkDirty |= algo->AppendCacheItem(RawPtr(host), *it);
+            ACE_SCOPED_TRACE("Preload FlowItem %d", *it);
+            needMarkDirty |= algo->AppendCacheItem(RawPtr(host), *it, deadline);
         }
         if (needMarkDirty) {
             host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);

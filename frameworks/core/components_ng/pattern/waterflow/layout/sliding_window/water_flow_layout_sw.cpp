@@ -18,7 +18,6 @@
 #include <cfloat>
 #include <queue>
 
-#include "base/utils/utils.h"
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
@@ -260,6 +259,11 @@ void PrepareEndPosQueue(EndPosQ& q, const Lanes& lanes, float mainGap, float vie
         }
     }
 }
+
+bool OverDue(const std::optional<int64_t>& deadline)
+{
+    return deadline && GetSysTimestamp() > *deadline;
+}
 } // namespace
 
 void WaterFlowLayoutSW::FillBack(float viewportBound, int32_t idx, int32_t maxChildIdx)
@@ -288,6 +292,9 @@ bool WaterFlowLayoutSW::FillBackSection(float viewportBound, int32_t& idx, int32
 
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
     while (!q.empty() && idx <= maxChildIdx) {
+        if (OverDue(cacheDeadline_)) {
+            return true;
+        }
         auto [_, laneIdx] = q.top();
         q.pop();
         info_->idxToLane_[idx] = laneIdx;
@@ -326,6 +333,9 @@ bool WaterFlowLayoutSW::FillFrontSection(float viewportBound, int32_t& idx, int3
 
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
     while (!q.empty() && idx >= minChildIdx) {
+        if (OverDue(cacheDeadline_)) {
+            return true;
+        }
         auto [_, laneIdx] = q.top();
         q.pop();
         info_->idxToLane_[idx] = laneIdx;
@@ -382,6 +392,9 @@ void WaterFlowLayoutSW::RecoverBack(float viewportBound, int32_t& idx, int32_t m
         if (GreatOrEqual(endPos + mainGaps_[secIdx], viewportBound)) {
             lanes.erase(laneIdx);
         }
+        if (OverDue(cacheDeadline_)) {
+            return;
+        }
     }
 }
 
@@ -403,6 +416,9 @@ void WaterFlowLayoutSW::RecoverFront(float viewportBound, int32_t& idx, int32_t 
         float startPos = FillFrontHelper(mainLen, idx--, laneIdx);
         if (LessOrEqual(startPos, viewportBound)) {
             lanes.erase(laneIdx);
+        }
+        if (OverDue(cacheDeadline_)) {
+            return;
         }
     }
 }
@@ -580,7 +596,7 @@ void WaterFlowLayoutSW::AdjustOverScroll()
 
 float WaterFlowLayoutSW::MeasureChild(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, size_t lane)
 {
-    auto child = wrapper_->GetOrCreateChildByIndex(nodeIdx(idx), !isCache_, isCache_);
+    auto child = wrapper_->GetOrCreateChildByIndex(nodeIdx(idx), !cacheDeadline_, cacheDeadline_.has_value());
     CHECK_NULL_RETURN(child, 0.0f);
     float userHeight = WaterFlowLayoutUtils::GetUserDefHeight(sections_, info_->GetSegment(idx), idx);
     if (NonNegative(userHeight)) {
@@ -588,7 +604,7 @@ float WaterFlowLayoutSW::MeasureChild(const RefPtr<WaterFlowLayoutProperty>& pro
     }
     child->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
         { itemsCrossSize_[info_->GetSegment(idx)][lane], mainLen_, axis_ }, props, child));
-    if (isCache_) {
+    if (cacheDeadline_) {
         child->Layout();
         child->SetActive(false);
     }
@@ -635,9 +651,6 @@ void WaterFlowLayoutSW::LayoutSection(
             } else {
                 child->GetHostNode()->ForceSyncGeometryNode();
             }
-            if (isCache) {
-                child->SetActive(false);
-            }
             mainPos += item.mainSize + mainGaps_[idx];
         }
         if (!rtl) {
@@ -675,8 +688,9 @@ inline int32_t WaterFlowLayoutSW::nodeIdx(int32_t idx) const
     return idx + info_->footerIndex_ + 1;
 }
 
-bool WaterFlowLayoutSW::AppendCacheItem(LayoutWrapper* host, int32_t itemIdx)
+bool WaterFlowLayoutSW::AppendCacheItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline)
 {
+    cacheDeadline_ = deadline;
     wrapper_ = host;
     const int32_t start = info_->StartIndex();
     const int32_t end = info_->EndIndex();
@@ -692,11 +706,10 @@ bool WaterFlowLayoutSW::AppendCacheItem(LayoutWrapper* host, int32_t itemIdx)
 void WaterFlowLayoutSW::StartCacheLayout()
 {
     info_->BeginCacheUpdate();
-    isCache_ = true;
 }
 void WaterFlowLayoutSW::EndCacheLayout()
 {
-    isCache_ = false;
+    cacheDeadline_.reset();
     info_->EndCacheUpdate();
 }
 

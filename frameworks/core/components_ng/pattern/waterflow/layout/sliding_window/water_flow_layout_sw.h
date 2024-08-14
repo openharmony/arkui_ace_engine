@@ -38,7 +38,7 @@ public:
     }
 
     void StartCacheLayout() override;
-    bool AppendCacheItem(LayoutWrapper* host, int32_t itemIdx) override;
+    bool AppendCacheItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline) override;
     void EndCacheLayout() override;
 
 private:
@@ -89,7 +89,7 @@ private:
     /**
      * @brief fills backward with one section.
      *
-     * @return true if viewportBound is reached. False implies idx > maxChildIdx.
+     * @return true if fillFront should end. False implies section is completely filled or idx < minChildIdx.
      */
     bool FillFrontSection(float viewportBound, int32_t& idx, int32_t minChildIdx);
     /**
@@ -117,7 +117,7 @@ private:
     /**
      * @brief fills forward with one section.
      *
-     * @return true if viewportBound is reached. False implies idx > maxChildIdx.
+     * @return true if fillBack should end. False implies section is completely filled or idx > maxChildIdx.
      */
     bool FillBackSection(float viewportBound, int32_t& idx, int32_t maxChildIdx);
     /**
@@ -176,9 +176,9 @@ private:
 
     int32_t itemCnt_ = 0; // total number of FlowItems (excluding footer)
     float mainLen_ = 0.0f;
+    std::optional<int64_t> cacheDeadline_; // cache layout deadline
 
     bool overScroll_ = true;
-    bool isCache_ = false; // true if during cache layout
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_SW_LAYOUT_H

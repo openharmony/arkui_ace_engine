@@ -18,8 +18,6 @@
 #include <map>
 #include <memory>
 
-#include "base/utils/time_util.h"
-
 #ifndef TEST_SEGMENTED_WATER_FLOW
 #include "test/mock/base/mock_system_properties.h"
 #endif
@@ -1824,6 +1822,49 @@ HWTEST_F(WaterFlowTestNg, Cache001, TestSize.Level1)
     EXPECT_EQ(pattern_->preloadItems_, preloadList2);
     PipelineContext::GetCurrentContext()->OnIdle(GetSysTimestamp());
     EXPECT_EQ(pattern_->preloadItems_, preloadList2);
+}
+
+/**
+ * @tc.name: Cache004
+ * @tc.desc: Test cache item reaching deadline
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Cache004, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    CreateItemsInRepeat(50, [](int32_t i) { return i % 2 ? 100.0f : 200.0f; });
+
+    model.SetCachedCount(3);
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(10));
+    model.SetColumnsGap(Dimension(10));
+    CreateDone();
+    auto info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 10);
+
+    const std::list<int32_t> preloadList = { 11, 12, 13 };
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 11));
+    EXPECT_EQ(pattern_->preloadItems_, preloadList);
+    EXPECT_TRUE(pattern_->cacheLayout_);
+    // later expand to fuzz test
+    PipelineContext::GetCurrentContext()->OnIdle(100000);
+    // items still in preload list should not be created
+    for (auto&& item : pattern_->preloadItems_) {
+        EXPECT_FALSE(GetChildFrameNode(frameNode_, item));
+    }
+    for (auto&& itemIdx : preloadList) {
+        // check preloaded items
+        if (!pattern_->preloadItems_.empty() && itemIdx == *pattern_->preloadItems_.begin()) {
+            break;
+        }
+        EXPECT_TRUE(GetChildFrameNode(frameNode_, itemIdx));
+        EXPECT_EQ(GetChildHeight(frameNode_, itemIdx), itemIdx % 2 ? 100.0f : 200.0f);
+        EXPECT_EQ(GetChildWidth(frameNode_, itemIdx), (WATER_FLOW_WIDTH - 10.0f) / 2.0f);
+    }
+    if (pattern_->preloadItems_.size() != preloadList.size()) {
+        EXPECT_EQ(layoutProperty_->propertyChangeFlag_, PROPERTY_UPDATE_LAYOUT);
+    }
 }
 
 /**
