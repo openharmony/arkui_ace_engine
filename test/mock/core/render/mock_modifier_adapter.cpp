@@ -24,6 +24,10 @@ template<>
 void NodeAnimatableProperty<float, AnimatablePropertyFloat>::AnimateWithVelocity(
     const AnimationOption &option, float value, float velocity, const FinishCallback &finishCallback)
 {
+    Set(value);
+    if (finishCallback) {
+        finishCallback();       
+    }
 }
 template<>
 void NodeAnimatableProperty<float, AnimatablePropertyFloat>::SetThresholdType(ThresholdType type)
