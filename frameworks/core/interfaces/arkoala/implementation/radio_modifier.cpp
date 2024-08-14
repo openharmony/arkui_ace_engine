@@ -29,6 +29,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CHECK_NULL_VOID(frameNode);
             RadioModelNG::SetChecked(frameNode, value);
         }
+
         void OnChangeImpl(Ark_NativePointer node, Ark_Function callback) {
             auto frameNode = reinterpret_cast<FrameNode*>(node);
             CHECK_NULL_VOID(frameNode);
@@ -37,6 +38,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             };
             RadioModelNG::SetOnChange(frameNode, onEvent);
         }
+
         void RadioStyleImpl(Ark_NativePointer node, const Opt_RadioStyle* value) {
             auto frameNode = reinterpret_cast<FrameNode*>(node);
             CHECK_NULL_VOID(frameNode);
@@ -54,6 +56,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                 RadioModelNG::SetIndicatorColor(frameNode, indicatorColor.value());
             }
         }
+        
         void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* modifier) {
             LOGE("ARKOALA RadioAttributeModifier::ContentModifierImpl -> Method is not "
                 "implemented.");
