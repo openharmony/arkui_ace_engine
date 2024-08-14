@@ -3479,6 +3479,7 @@ void TextFieldPattern::UpdateTextFieldManager(const Offset& offset, float height
         offset.GetY() + selectController_->GetCaretRect().GetY() });
     textFieldManager->SetHeight(selectController_->GetCaretRect().Height());
     textFieldManager->SetOnFocusTextField(WeakClaim(this));
+    textFieldManager->SetUsingCustomKeyboardAvoid(keyboardAvoidance_);
     textFieldManager->SetIfFocusTextFieldIsInline(IsNormalInlineState());
 }
 
