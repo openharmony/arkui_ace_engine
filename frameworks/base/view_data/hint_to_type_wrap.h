@@ -12,21 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/components_ng/image_provider/adapter/image_decoder.h"
-#include "core/components_ng/render/adapter/pixelmap_image.h"
 
-namespace OHOS::Ace::NG {
+#ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_HINT_TO_TYPE_WRAP_H
+#define FOUNDATION_ACE_FRAMEWORKS_BASE_HINT_TO_TYPE_WRAP_H
 
-ImageDecoder::ImageDecoder(const RefPtr<ImageObject>& objW, const SizeF& targetSize, bool forceResize) {}
+#include "base/view_data/ace_auto_fill_type.h"
 
-RefPtr<CanvasImage> ImageDecoder::MakeDrawingImage()
-{
-    return MakeRefPtr<DrawingImage>(nullptr);
-}
-
-RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(AIImageQuality imageQuality, bool isHdrDecoderNeed)
-{
-    return MakeRefPtr<PixelMapImage>(nullptr);
-}
-
-} // namespace OHOS::Ace::NG
+namespace OHOS::Ace {
+struct HintToTypeWrap {
+    AceAutoFillType autoFillType = AceAutoFillType::ACE_UNSPECIFIED;
+    std::string metadata = "";
+};
+} // namespace OHOS::Ace
+#endif // FOUNDATION_ACE_FRAMEWORKS_BASE_HINT_TO_TYPE_WRAP_H

@@ -241,6 +241,8 @@ HWTEST_F(GestureEventHubTestCoverageNg, GestureEventHubTestCoverage005, TestSize
     auto pipeline = PipelineContext::GetCurrentContext();
     GestureEvent gestureEvent;
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    auto unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
+    event->SetData(unifiedData);
     auto textPattern = AceType::MakeRefPtr<TextPattern>();
     frameNode->pattern_ = textPattern;
     frameNode->GetOrCreateFocusHub();
@@ -283,6 +285,8 @@ HWTEST_F(GestureEventHubTestCoverageNg, GestureEventHubTestCoverage006, TestSize
     auto pipeline = PipelineContext::GetCurrentContext();
     GestureEvent gestureEvent;
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    auto unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
+    event->SetData(unifiedData);
     auto textPattern = AceType::MakeRefPtr<TextPattern>();
     frameNode->pattern_ = textPattern;
     frameNode->GetOrCreateFocusHub();

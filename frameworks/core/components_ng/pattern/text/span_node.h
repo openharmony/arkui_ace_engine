@@ -627,7 +627,6 @@ public:
     ACE_DISALLOW_COPY_AND_MOVE(CustomSpanItem);
     std::optional<std::function<CustomSpanMetrics(CustomSpanMeasureInfo)>> onMeasure;
     std::optional<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> onDraw;
-    bool isNode = false;
 };
 
 class ACE_EXPORT CustomSpanNode : public FrameNode {
@@ -638,8 +637,6 @@ public:
     {
         auto customSpanNode = AceType::MakeRefPtr<CustomSpanNode>(
             V2::CUSTOM_SPAN_NODE_ETS_TAG, nodeId);
-        customSpanNode->GetSpanItem()->content = " ";
-        customSpanNode->GetSpanItem()->isNode = true;
         customSpanNode->InitializePatternAndContext();
         ElementRegister::GetInstance()->AddUINode(customSpanNode);
         return customSpanNode;
@@ -651,8 +648,6 @@ public:
         auto frameNode = GetFrameNode(tag, nodeId);
         CHECK_NULL_RETURN(!frameNode, AceType::DynamicCast<CustomSpanNode>(frameNode));
         auto customSpanNode = AceType::MakeRefPtr<CustomSpanNode>(tag, nodeId);
-        customSpanNode->GetSpanItem()->content = " ";
-        customSpanNode->GetSpanItem()->isNode = true;
         customSpanNode->InitializePatternAndContext();
         ElementRegister::GetInstance()->AddUINode(customSpanNode);
         return customSpanNode;

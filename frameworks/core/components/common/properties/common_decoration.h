@@ -79,7 +79,13 @@ struct EffectOption {
             inactiveColor == other.inactiveColor && isValidColor == other.isValidColor &&
             isWindowFocused == other.isWindowFocused;
     }
+    
     void ToJsonValue(std::unique_ptr<JsonValue> &json, const NG::InspectorFilter &filter) const
+    {
+        json->PutExtAttr("backgroundEffect", ToJsonValue(), filter);
+    }
+
+    std::unique_ptr<JsonValue> ToJsonValue() const
     {
         static const char* ADAPTIVE_COLOR[] = { "AdaptiveColor.Default", "AdaptiveColor.Average" };
         static const char* POLICY[] = { "BlurStyleActivePolicy.FOLLOWS_WINDOW_ACTIVE_STATE",
@@ -103,7 +109,7 @@ struct EffectOption {
         }
         jsonBrightnessOption->Put("blurOption", grayscale);
         jsonEffect->Put("options", jsonBrightnessOption);
-        json->PutExtAttr("backgroundEffect", jsonEffect, filter);
+        return jsonEffect;
     }
 };
 } // namespace OHOS::Ace
