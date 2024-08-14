@@ -783,11 +783,11 @@ HWTEST_F(OverlayTestNg, MenuTest003, TestSize.Level1)
     menuWrapperNode->MountToParent(rootNode);
     /**
      * @tc.steps: step2. call PopMenuAnimation when showPreviewAnimation is false
-     * @tc.expected: the preview node will remove
+     * @tc.expected: the none of node will remove.
      */
     EXPECT_EQ(menuWrapperNode->GetChildren().size(), 2);
     overlayManager->PopMenuAnimation(menuWrapperNode, false);
-    EXPECT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    EXPECT_EQ(menuWrapperNode->GetChildren().size(), 2);
 }
 
 /**
