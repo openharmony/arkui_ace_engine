@@ -4245,6 +4245,20 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         this.dirtDescendantElementIds_.delete(elmtId);
         
     }
+    /**
+     * for C++ to judge whether a CustomNode has updateFunc with specified nodeId.
+     * use same judgement with UpdateElement, to make sure it can rerender if return true.
+     *
+     * @param elmtId query ID
+     *
+     * framework internal function
+     */
+    hasNodeUpdateFunc(elmtId) {
+        const entry = this.updateFuncByElmtId.get(elmtId);
+        const updateFunc = entry ? entry.getUpdateFunc() : undefined;
+        // if this component does not have updateFunc for elmtId, return false.
+        return typeof updateFunc === 'function';
+    }
     // KEEP
     static pauseRendering() {
         PUV2ViewBase.renderingPaused = true;
