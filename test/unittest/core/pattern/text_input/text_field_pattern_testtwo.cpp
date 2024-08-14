@@ -95,6 +95,10 @@ public:
     {
         return str;
     }
+    const std::string& GetMetadata() const
+    {
+        return str;
+    }
     const std::string& GetPasswordRules() const
     {
         return str;

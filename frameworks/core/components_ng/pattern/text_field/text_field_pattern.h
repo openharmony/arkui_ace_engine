@@ -29,6 +29,7 @@
 #include "base/memory/referenced.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/view_data/view_data_wrap.h"
+#include "base/view_data/hint_to_type_wrap.h"
 #include "core/common/autofill/auto_fill_trigger_state_holder.h"
 #include "core/common/clipboard/clipboard.h"
 #include "core/common/ime/text_edit_controller.h"
@@ -1624,7 +1625,8 @@ private:
     void ProcessScroll();
     void ProcessCounter();
     void HandleParentGlobalOffsetChange();
-    AceAutoFillType GetHintType();
+    HintToTypeWrap GetHintType();
+    HintToTypeWrap GetAutoFillTypeAndMetaData(bool isNeedToHitType = true);
     void SetThemeAttr();
     void SetThemeBorderAttr();
     void ProcessInlinePaddingAndMargin();

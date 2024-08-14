@@ -2242,13 +2242,14 @@ bool TextFieldPattern::IsAutoFillPasswordType(const AceAutoFillType& autoFillTyp
             autoFillType == AceAutoFillType::ACE_NEW_PASSWORD);
 }
 
-AceAutoFillType TextFieldPattern::GetHintType()
+HintToTypeWrap TextFieldPattern::GetHintType()
 {
+    HintToTypeWrap hintToTypeWrap;
     auto container = Container::Current();
-    CHECK_NULL_RETURN(container, AceAutoFillType::ACE_UNSPECIFIED);
+    CHECK_NULL_RETURN(container, hintToTypeWrap);
     auto onePlaceHolder = GetPlaceHolder();
     if (onePlaceHolder.empty()) {
-        return AceAutoFillType::ACE_UNSPECIFIED;
+        return hintToTypeWrap;
     }
     return container->PlaceHolderToType(onePlaceHolder);
 }
@@ -2312,14 +2313,36 @@ AceAutoFillType TextFieldPattern::GetAutoFillType(bool isNeedToHitType)
     if (aceContentType != AceAutoFillType::ACE_UNSPECIFIED) {
         return aceContentType;
     }
-    if (aceInputType != AceAutoFillType::ACE_UNSPECIFIED) {
-        if (IsAutoFillPasswordType(aceInputType)) {
-            return aceInputType;
-        } else {
-            return isNeedToHitType ? GetHintType() : AceAutoFillType::ACE_UNSPECIFIED;
-        }
+    if (aceInputType != AceAutoFillType::ACE_UNSPECIFIED && IsAutoFillPasswordType(aceInputType)) {
+        return aceInputType;
     }
-    return isNeedToHitType ? GetHintType() : AceAutoFillType::ACE_UNSPECIFIED;
+    if (isNeedToHitType) {
+        auto hintToTypeWrap = GetHintType();
+        return hintToTypeWrap.autoFillType;
+    }
+    return AceAutoFillType::ACE_UNSPECIFIED;
+}
+
+HintToTypeWrap TextFieldPattern::GetAutoFillTypeAndMetaData(bool isNeedToHitType)
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    HintToTypeWrap hintToTypeWrap;
+    CHECK_NULL_RETURN(layoutProperty, hintToTypeWrap);
+    auto aceContentType =
+        TextContentTypeToAceAutoFillType(layoutProperty->GetTextContentTypeValue(TextContentType::UNSPECIFIED));
+    auto aceInputType = ConvertToAceAutoFillType(layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED));
+    if (aceContentType != AceAutoFillType::ACE_UNSPECIFIED) {
+        hintToTypeWrap.autoFillType = aceContentType;
+        return hintToTypeWrap;
+    }
+    if (aceInputType != AceAutoFillType::ACE_UNSPECIFIED && IsAutoFillPasswordType(aceInputType)) {
+        hintToTypeWrap.autoFillType = aceInputType;
+        return hintToTypeWrap;
+    }
+    if (isNeedToHitType) {
+        hintToTypeWrap = GetHintType();
+    }
+    return hintToTypeWrap;
 }
 
 bool TextFieldPattern::CheckAutoFill(bool isFromKeyBoard)
@@ -6516,12 +6539,13 @@ void TextFieldPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, b
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto autoFillType = GetAutoFillType();
+    auto autoFillTypeAndMetaData = GetAutoFillTypeAndMetaData();
     auto info = PageNodeInfoWrap::CreatePageNodeInfoWrap();
     CHECK_NULL_VOID(info);
     info->SetId(host->GetId());
     info->SetDepth(host->GetDepth());
-    info->SetAutoFillType(autoFillType);
+    info->SetAutoFillType(autoFillTypeAndMetaData.autoFillType);
+    info->SetMetadata(autoFillTypeAndMetaData.metadata);
     info->SetTag(host->GetTag());
     if (autoFillOtherAccount_) {
         viewDataWrap->SetOtherAccount(true);
