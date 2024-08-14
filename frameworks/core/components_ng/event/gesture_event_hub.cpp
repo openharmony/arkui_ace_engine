@@ -735,9 +735,13 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     auto eventManager = pipeline->GetEventManager();
     CHECK_NULL_VOID(eventManager);
     if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && eventManager->IsLastMoveBeforeUp()) {
-        TAG_LOGD(AceLogTag::ACE_DRAG, "Drag stop because user release mouse button");
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Drag stop because user release mouse button");
         return;
     }
+    if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
+        SetMouseDragMonitorState(true);
+    }
+
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
         event->SetX(pipeline->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
@@ -862,6 +866,9 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     CHECK_NULL_VOID(dragEvent);
     auto eventRet = dragEvent->GetResult();
     if (eventRet == DragRet::DRAG_FAIL || eventRet == DragRet::DRAG_CANCEL) {
+        if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
+            SetMouseDragMonitorState(false);
+        }
         return;
     }
     std::string udKey;
@@ -905,6 +912,9 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         if (pixelMap_ == nullptr) {
             FireCustomerOnDragEnd(pipeline, eventHub);
             TAG_LOGW(AceLogTag::ACE_DRAG, "Thumbnail pixelMap is empty.");
+            if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
+                SetMouseDragMonitorState(false);
+            }
             return;
         }
         pixelMap = pixelMap_;
@@ -1962,4 +1972,15 @@ void GestureEventHub::CheckImageDecode(std::list<RefPtr<FrameNode>>& imageNodes)
     }
 }
 #endif
+
+void GestureEventHub::SetMouseDragMonitorState(bool state)
+{
+    auto ret = InteractionInterface::GetInstance()->SetMouseDragMonitorState(state);
+    if (ret != 0) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Set mouse drag monitor state %{public}d failed, return value is %{public}d",
+            state, ret);
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Set mouse drag monitor state %{public}d success", state);
+}
 } // namespace OHOS::Ace::NG
