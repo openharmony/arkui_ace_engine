@@ -107,6 +107,14 @@ public:
         imeAttachCalled_ = imeAttached;
     }
 
+    bool UsingCustomKeyboardAvoid() {
+        return usingCustomKeyboardAvoid_;
+    }
+
+    void SetUsingCustomKeyboardAvoid(bool usingCustomKeyboardAvoid) {
+        usingCustomKeyboardAvoid_ = usingCustomKeyboardAvoid;
+    }
+
     void SetUIExtensionImeShow(bool imeShow) override
     {
         uiExtensionImeShow_ = imeShow;
@@ -189,6 +197,7 @@ private:
     double inlineHeight_ = 0.0f;
     bool hasMove_ = false;
     bool imeShow_ = false;
+    bool usingCustomKeyboardAvoid_ = false;
     bool uiExtensionImeShow_ = false;
     bool prevHasTextFieldPattern_ = true;
     Offset position_;
