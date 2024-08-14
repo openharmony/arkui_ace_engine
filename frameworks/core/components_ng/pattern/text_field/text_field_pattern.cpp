@@ -3551,6 +3551,7 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     auto tmpHost = GetHost();
     CHECK_NULL_RETURN(tmpHost, false);
     if (customKeyboard_ || customKeyboardBuilder_) {
+        CHECK_NULL_RETURN(needShowSoftKeyboard, true);
         return RequestCustomKeyboard();
     }
     bool ok = true;
@@ -5278,7 +5279,8 @@ bool TextFieldPattern::OnBackPressed()
 {
     auto tmpHost = GetHost();
     CHECK_NULL_RETURN(tmpHost, false);
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Textfield %{public}d receives back press event", tmpHost->GetId());
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "%{public}d receives back press event, %{public}d",
+        tmpHost->GetId(), isCustomKeyboardAttached_);
     if (SelectOverlayIsOn()) {
         selectController_->UpdateCaretIndex(
             std::max(selectController_->GetFirstHandleIndex(), selectController_->GetSecondHandleIndex()));
