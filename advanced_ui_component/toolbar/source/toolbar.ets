@@ -133,8 +133,7 @@ export struct ToolBar {
   }
 
   @Builder MoreTabBuilder(index: number) {
-    Button({ type: ButtonType.Normal, stateEffect: (this.toolBarList[index]?.state !== ItemState.DISABLE) &&
-    this.toolBarModifier.stateEffectValue }) {
+    Button({ type: ButtonType.Normal, stateEffect: false }) {
       Column() {
         Image(PUBLIC_MORE)
           .width(IMAGE_SIZE)
@@ -212,8 +211,7 @@ export struct ToolBar {
   }
 
   @Builder TabBuilder(index: number) {
-    Button({ type: ButtonType.Normal, stateEffect: (this.toolBarList[index]?.state !== ItemState.DISABLE) &&
-    this.toolBarModifier.stateEffectValue }) {
+    Button({ type: ButtonType.Normal, stateEffect: false }) {
       Column() {
         if (this.toolBarList[index]?.toolBarSymbolOptions?.normal ||
           this.toolBarList[index]?.toolBarSymbolOptions?.activated) {
@@ -403,9 +401,9 @@ export struct ToolBar {
           enabled: this.toolBarList[i].state !== ItemState.DISABLE,
         }
       } else {
-        this.toolBarItemBackground[i] = Color.Transparent;
         this.menuContent = [];
       }
+      this.toolBarItemBackground[i] = Color.Transparent;
     }
     return true;
   }

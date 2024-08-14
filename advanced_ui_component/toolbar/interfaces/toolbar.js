@@ -408,8 +408,7 @@ export class ToolBar extends ViewPU {
 
   MoreTabBuilder(s5, t5 = null) {
     this.observeComponentCreation2((e6, f6) => {
-      Button.createWithChild({ type: ButtonType.Normal,
-        stateEffect: (this.toolBarList[s5]?.state !== ItemState.DISABLE) && this.toolBarModifier.stateEffectValue });
+      Button.createWithChild({ type: ButtonType.Normal, stateEffect: false });
       Button.width('100%');
       Button.height('100%');
       Button.bindMenu(ObservedObject.GetRawObject(this.menuContent),
@@ -566,8 +565,7 @@ export class ToolBar extends ViewPU {
 
   TabBuilder(m4, n4 = null) {
     this.observeComponentCreation2((g5, h5) => {
-      Button.createWithChild({ type: ButtonType.Normal,
-        stateEffect: (this.toolBarList[m4]?.state !== ItemState.DISABLE) && this.toolBarModifier.stateEffectValue });
+      Button.createWithChild({ type: ButtonType.Normal, stateEffect: false });
       Button.enabled(this.toolBarList[m4]?.state !== ItemState.DISABLE);
       Button.width('100%');
       Button.height('100%');
@@ -868,9 +866,9 @@ export class ToolBar extends ViewPU {
         };
       }
       else {
-        this.toolBarItemBackground[q1] = Color.Transparent;
         this.menuContent = [];
       }
+      this.toolBarItemBackground[q1] = Color.Transparent;
     }
     return true;
   }
