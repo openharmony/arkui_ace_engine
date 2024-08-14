@@ -119,10 +119,9 @@ void ArcIndexerPattern::InitTouchEvent ()
             auto offset = info.GetTouches().front().GetLocalLocation();
             auto indexerPattern = weak.Upgrade();
             CHECK_NULL_VOID(indexerPattern);
-            if (!indexerPattern->atomicAnimateOp_) {
-                return;
-            }
-            if (!indexerPattern->AtArcHotArea(offset)) {
+            if (!indexerPattern->AtArcHotArea(offset) || !indexerPattern->atomicAnimateOp_) {
+                indexerPattern->isTouch_ = false;
+                indexerPattern->StartDelayTask(ARC_INDEXER_BUBBLE_ENTER_DURATION + ARC_INDEXER_BUBBLE_WAIT_DURATION);
                 return;
             }
             auto touchType = info.GetTouches().front().GetTouchType();
@@ -238,10 +237,7 @@ void ArcIndexerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto onActionStart = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        if (!pattern->atomicAnimateOp_) {
-            return;
-        }
-        if (info.GetInputEventType() == InputEventType::AXIS) {
+        if (!pattern->atomicAnimateOp_ || info.GetInputEventType() == InputEventType::AXIS) {
             return;
         }
         pattern->MoveIndexByOffset(info.GetLocalLocation());
@@ -264,10 +260,16 @@ void ArcIndexerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         }
     };
 
+    auto onActionEnd = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->StartDelayTask(ARC_INDEXER_BUBBLE_ENTER_DURATION + ARC_INDEXER_BUBBLE_WAIT_DURATION);
+    };
+
     PanDirection panDirection;
     panDirection.type = PanDirection::VERTICAL;
     panEvent_ = MakeRefPtr<PanEvent>(
-        std::move(onActionStart), std::move(onActionUpdate), nullptr, nullptr);
+        std::move(onActionStart), std::move(onActionUpdate), std::move(onActionEnd), nullptr);
     gestureHub->AddPanEvent(panEvent_, panDirection, 1, 0.0_vp);
     gestureHub->SetOnGestureJudgeNativeBegin([weak = WeakClaim(this)](const RefPtr<NG::GestureInfo>& gestureInfo,
                                                  const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
