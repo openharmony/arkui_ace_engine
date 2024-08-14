@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_ROSEN_MEDIA_PLAYER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_ROSEN_MEDIA_PLAYER_H
 
-#include "foundation/multimedia/player_framework/interfaces/inner_api/native/player.h"
+#include "player.h"
 #include "surface.h"
 #include "window.h"
 
