@@ -31,6 +31,7 @@
 #include "core/components_ng/image_provider/pixel_map_image_object.h"
 #include "core/components_ng/image_provider/static_image_object.h"
 #include "core/components_ng/image_provider/svg_image_object.h"
+#include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/render/adapter/rosen/drawing_image.h"
 #include "core/image/image_loader.h"
 #include "core/image/sk_image_cache.h"
@@ -60,13 +61,12 @@ bool ImageProvider::PrepareImageData(const RefPtr<ImageObject>& imageObj)
     if (imageObj->GetData()) {
         return true;
     }
-    // if image object has no skData, reload data.
-    auto imageLoader = ImageLoader::CreateImageLoader(imageObj->GetSourceInfo());
-    CHECK_NULL_RETURN(imageLoader, false);
+
+    auto&& dfxConfig = imageObj->GetImageDfxConfig();
 
     auto container = Container::Current();
     if (container && container->IsSubContainer()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "subContainer's pipeline's dataProviderManager is null, cannot load image "
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "subContainer's pipeline's dataProviderManager is null, cannot load image "
                                        "source, need to switch pipeline in parentContainer.");
         auto currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
         container = Container::GetContainer(currentId);
@@ -74,6 +74,15 @@ bool ImageProvider::PrepareImageData(const RefPtr<ImageObject>& imageObj)
     CHECK_NULL_RETURN(container, false);
     auto pipeline = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipeline, false);
+    // if image object has no skData, reload data.
+    auto imageLoader = ImageLoader::CreateImageLoader(imageObj->GetSourceInfo());
+    if (!imageLoader) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE,
+            "Failed to create loader in prepareImageData. src = %{private}s, nodeId = %{public}d, accessibilityId = "
+            "%{public}lld.",
+            dfxConfig.imageSrc_.c_str(), dfxConfig.nodeId_, static_cast<long long>(dfxConfig.accessibilityId_));
+        return false;
+    }
     auto newLoadedData = imageLoader->GetImageData(imageObj->GetSourceInfo(), WeakClaim(RawPtr(pipeline)));
     CHECK_NULL_RETURN(newLoadedData, false);
     // load data success
@@ -152,10 +161,17 @@ void ImageProvider::SuccessCallback(const RefPtr<CanvasImage>& canvasImage, cons
 
 void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
 {
-    ACE_SCOPED_TRACE("CreateImageObj %s", src.ToString().c_str());
+    const ImageDfxConfig& imageDfxConfig = src.GetImageDfxConfig();
+    ACE_SCOPED_TRACE("CreateImageObj [%s]-[%d]-[%lld]", src.ToString().c_str(), imageDfxConfig.nodeId_,
+        static_cast<long long>(imageDfxConfig.accessibilityId_));
     // load image data
     auto imageLoader = ImageLoader::CreateImageLoader(src);
     if (!imageLoader) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE,
+            "Failed to create image loader, Image source type not supported. src = %{private}s, nodeId = "
+            "%{public}d-%{public}lld.",
+            imageDfxConfig.imageSrc_.c_str(), imageDfxConfig.nodeId_,
+            static_cast<long long>(imageDfxConfig.accessibilityId_));
         std::string errorMessage("Failed to create image loader, Image source type not supported");
         FailCallback(src.GetKey(), src.ToString() + errorMessage, sync);
         return;
@@ -163,6 +179,9 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
     auto pipeline = PipelineContext::GetCurrentContext();
     RefPtr<ImageData> data = imageLoader->GetImageData(src, WeakClaim(RawPtr(pipeline)));
     if (!data) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Fail load imageData. src = %{private}s, nodeId = %{public}d-%{public}lld.",
+            imageDfxConfig.imageSrc_.c_str(), imageDfxConfig.nodeId_,
+            static_cast<long long>(imageDfxConfig.accessibilityId_));
         FailCallback(src.GetKey(), "Failed to load image data", sync);
         return;
     }
@@ -170,6 +189,10 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
     // build ImageObject
     RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(src, data);
     if (!imageObj) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE,
+            "Failed to build image object. src = %{private}s, nodeId = %{public}d-%{public}lld.",
+            imageDfxConfig.imageSrc_.c_str(), imageDfxConfig.nodeId_,
+            static_cast<long long>(imageDfxConfig.accessibilityId_));
         FailCallback(src.GetKey(), "Failed to build image object", sync);
         return;
     }
@@ -266,9 +289,12 @@ void ImageProvider::CreateImageObject(const ImageSourceInfo& src, const WeakPtr<
 
 RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& src, const RefPtr<ImageData>& data)
 {
+    auto imageDfxConfig = src.GetImageDfxConfig();
     if (!data) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "data is null when try ParseImageObjectType, src: %{public}s",
-            src.ToString().c_str());
+        TAG_LOGW(AceLogTag::ACE_IMAGE,
+            "data is null when try ParseImageObjectType, src: %{public}s, nodeID = %{public}d-%{public}lld.",
+            imageDfxConfig.imageSrc_.c_str(), imageDfxConfig.nodeId_,
+            static_cast<long long>(imageDfxConfig.accessibilityId_));
         return nullptr;
     }
     if (src.IsSvg()) {
@@ -280,14 +306,20 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& src, 
     }
 
     auto rosenImageData = DynamicCast<DrawingImageData>(data);
-    CHECK_NULL_RETURN(rosenImageData, nullptr);
+    if (!rosenImageData) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "rosenImageData null, src: %{private}s, nodeID = %{public}d-%{public}lld.",
+            imageDfxConfig.imageSrc_.c_str(), imageDfxConfig.nodeId_,
+            static_cast<long long>(imageDfxConfig.accessibilityId_));
+        return nullptr;
+    }
+    rosenImageData->SetDfxConfig(imageDfxConfig.nodeId_, imageDfxConfig.accessibilityId_);
     auto [size, frameCount] = rosenImageData->Parse();
     if (!size.IsPositive()) {
         TAG_LOGW(AceLogTag::ACE_IMAGE,
             "Image of src: %{private}s, imageData's size = %{public}d is invalid, and the parsed size is invalid "
-            "%{public}s, "
-            "frameCount is %{public}d",
-            src.ToString().c_str(), static_cast<int32_t>(data->GetSize()), size.ToString().c_str(), frameCount);
+            "%{public}s, frameCount is %{public}d, nodeId = %{public}d-%{public}lld.",
+            src.ToString().c_str(), static_cast<int32_t>(data->GetSize()), size.ToString().c_str(), frameCount,
+            imageDfxConfig.nodeId_, static_cast<long long>(imageDfxConfig.accessibilityId_));
         return nullptr;
     }
     if (frameCount > 1) {
@@ -302,8 +334,12 @@ void ImageProvider::MakeCanvasImage(const RefPtr<ImageObject>& obj, const WeakPt
     const SizeF& size, const ImageDecoderOptions& imageDecoderOptions)
 {
     auto key = ImageUtils::GenerateImageKey(obj->GetSourceInfo(), size);
+    auto&& dfxConfig = obj->GetImageDfxConfig();
     // check if same task is already executing
     if (!RegisterTask(key, ctxWp)) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE,
+            "Register decoderTask fail. src = %{private}s, nodeId = %{public}d, accessibilityId = %{public}lld.",
+            dfxConfig.imageSrc_.c_str(), dfxConfig.nodeId_, static_cast<long long>(dfxConfig.accessibilityId_));
         return;
     }
     if (imageDecoderOptions.sync) {

@@ -24,6 +24,7 @@
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
+#include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/render/drawing_forward.h"
@@ -43,6 +44,7 @@ struct ImageColorFilter {
 struct ImagePaintConfig {
     RectF srcRect_;
     RectF dstRect_;
+    std::optional<Color> svgFillColor_;
     ImageColorFilter colorFilter_;
     std::shared_ptr<BorderRadiusArray> borderRadiusXY_ = nullptr;
     float scaleX_ = 1.0f;
