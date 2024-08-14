@@ -15,18 +15,9 @@
 
 #include "core/components/scroll/scrollable.h"
 
-#include <chrono>
-
-#include "base/log/ace_trace.h"
-#include "base/log/frame_report.h"
 #include "base/log/jank_frame_report.h"
-#include "base/log/log.h"
 #include "base/ressched/ressched_report.h"
-#include "base/utils/time_util.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
 #include "core/common/layout_inspector.h"
-#include "core/event/ace_events.h"
 
 namespace OHOS::Ace {
 namespace {

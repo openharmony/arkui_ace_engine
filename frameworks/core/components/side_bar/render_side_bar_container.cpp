@@ -15,23 +15,9 @@
 
 #include "core/components/side_bar/render_side_bar_container.h"
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/offset.h"
-#include "base/geometry/size.h"
-#include "base/log/ace_trace.h"
-#include "base/log/log_wrapper.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/utils.h"
-#include "core/components/box/render_box.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/layout/layout_param.h"
 #include "core/components/image/image_component.h"
 #include "core/components/image/render_image.h"
-#include "core/components/side_bar/side_bar_container_component.h"
-#include "core/gestures/long_press_recognizer.h"
-#include "core/gestures/pan_recognizer.h"
 #include "core/gestures/sequenced_recognizer.h"
-#include "core/pipeline/base/component.h"
 #include "core/pipeline/base/position_layout_utils.h"
 
 namespace OHOS::Ace {

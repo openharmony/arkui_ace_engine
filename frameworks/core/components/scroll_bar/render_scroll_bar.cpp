@@ -15,12 +15,7 @@
 
 #include "core/components/scroll_bar/render_scroll_bar.h"
 
-#include "base/utils/string_utils.h"
-#include "core/animation/curve_animation.h"
-#include "core/animation/keyframe.h"
-#include "core/animation/keyframe_animation.h"
 #include "core/components/display/render_display.h"
-#include "core/components/scroll_bar/scroll_bar_element.h"
 
 namespace OHOS::Ace {
 namespace {
