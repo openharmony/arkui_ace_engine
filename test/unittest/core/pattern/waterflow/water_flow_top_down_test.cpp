@@ -627,7 +627,7 @@ HWTEST_F(WaterFlowTestNg, Cache002, TestSize.Level1)
 
     pattern_->ScrollToIndex(30);
     FlushLayoutTask(frameNode_);
-    auto info = pattern_->layoutInfo_;
+    const auto info = pattern_->layoutInfo_;
     EXPECT_EQ(info->startIndex_, 28);
     EXPECT_EQ(info->endIndex_, 39);
     const std::list<int32_t> preloadList = { 40, 41, 42 };
@@ -638,5 +638,17 @@ HWTEST_F(WaterFlowTestNg, Cache002, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(GetChildY(frameNode_, 40), 850.0f);
     EXPECT_EQ(GetChildY(frameNode_, 26), -320.0f);
+
+    UpdateCurrentOffset(300.0f);
+    EXPECT_EQ(info->startIndex_, 24);
+    EXPECT_EQ(info->endIndex_, 35);
+    // item in cache range shouldn't be created yet
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 22));
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    ASSERT_TRUE(GetChildFrameNode(frameNode_, 22));
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 22)->IsActive());
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 22), -340.0f);
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 22)->IsActive());
 }
 } // namespace OHOS::Ace::NG

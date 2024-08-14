@@ -1000,5 +1000,17 @@ HWTEST_F(WaterFlowSWTest, Cache002, TestSize.Level1)
     info_->BeginUpdate();
     EXPECT_EQ(info_->StartIndex(), 30);
     EXPECT_EQ(info_->EndIndex(), 40);
+
+    UpdateCurrentOffset(300.0f);
+    EXPECT_EQ(info_->startIndex_, 25);
+    EXPECT_EQ(info_->endIndex_, 36);
+    // item in cache range shouldn't be created yet
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 22));
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    ASSERT_TRUE(GetChildFrameNode(frameNode_, 22));
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 22)->IsActive());
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 22), -440.0f);
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 22)->IsActive());
 }
 } // namespace OHOS::Ace::NG

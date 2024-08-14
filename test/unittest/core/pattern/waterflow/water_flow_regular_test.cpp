@@ -247,5 +247,8 @@ HWTEST_F(WaterFlowTestNg, Cache003, TestSize.Level1)
     EXPECT_EQ(info->startIndex_, 36);
     EXPECT_EQ(info->endIndex_, 49);
     EXPECT_TRUE(pattern_->preloadItems_.empty());
+    EXPECT_EQ(GetChildY(frameNode_, 36), -140.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 35), -250.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 34), -250.0f);
 }
 } // namespace OHOS::Ace::NG

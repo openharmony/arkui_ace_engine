@@ -709,6 +709,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest006, TestSize.Level1)
     CreateDone();
     pattern_->UpdateCurrentOffset(-100.f, SCROLL_FROM_UPDATE);
     FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->FirstIdx(), 1);
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 0)->IsActive());
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 1)->IsActive());
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 6)->IsActive());
