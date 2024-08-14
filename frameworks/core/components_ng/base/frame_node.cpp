@@ -3177,6 +3177,23 @@ void FrameNode::OnAccessibilityEvent(
     }
 }
 
+void FrameNode::OnAccessibilityEvent(
+    AccessibilityEventType eventType, std::string textAnnouncedForAccessibility)
+{
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        if (eventType != AccessibilityEventType::ANNOUNCE_FOR_ACCESSIBILITY) {
+            return;
+        }
+        AccessibilityEvent event;
+        event.type = eventType;
+        event.nodeId = GetAccessibilityId();
+        event.textAnnouncedForAccessibility = textAnnouncedForAccessibility;
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SendEventToAccessibilityWithNode(event, Claim(this));
+    }
+}
+
 void FrameNode::OnRecycle()
 {
     for (const auto& destroyCallback : destroyCallbacks_) {
