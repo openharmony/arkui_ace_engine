@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_clipboard.h"
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
 
@@ -403,5 +404,86 @@ HWTEST_F(RichEditorPatternTestThreeNg, OnCopyOperationExt001, TestSize.Level1)
     ASSERT_NE(clipboard, nullptr);
     auto pasteDataMix = clipboard->CreatePasteDataMix();
     richEditorPattern->OnCopyOperationExt(pasteDataMix);
+}
+
+/**
+ * @tc.name: ClearContent001
+ * @tc.desc: test ClearContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, ClearContent001, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto placeholderSpanNode = PlaceholderSpanNode::GetOrCreateSpanNode(V2::PLACEHOLDER_SPAN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<PlaceholderSpanPattern>(); });
+    auto placeholderSpanItem = placeholderSpanNode->GetSpanItem();
+    ASSERT_NE(placeholderSpanItem, nullptr);
+    placeholderSpanItem->content = " ";
+    placeholderSpanNode->MountToParent(richEditorNode_);
+    richEditorPattern->ClearContent(placeholderSpanNode);
+    EXPECT_TRUE(placeholderSpanItem->content.empty());
+}
+
+/**
+ * @tc.name: UpdateTextFieldManager001
+ * @tc.desc: test UpdateTextFieldManager
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, UpdateTextFieldManager001, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = context->GetTaskExecutor();
+    ASSERT_NE(taskExecutor, nullptr);
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    textFieldManager->SetHeight(20);
+    context->SetTextFieldManager(textFieldManager);
+
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    context->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    auto focusHub = richEditorPattern->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = true;
+    Offset Offset = { 1, 4 };
+    richEditorPattern->isTextChange_ = true;
+    richEditorPattern->UpdateTextFieldManager(Offset, 1.0f);
+    EXPECT_NE(textFieldManager->GetOnFocusTextField().Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: OnDirtyLayoutWrapperSwap001
+ * @tc.desc: test OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto rendenContext = richEditorNode_->GetRenderContext();
+    ASSERT_NE(rendenContext, nullptr);
+    rendenContext->UpdateClipEdge(false);
+    auto geometryNode = richEditorNode_->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto globalOffset = OffsetF(15.0f, 3.0f);
+    geometryNode->SetFrameSize(SizeF(20.0f, 5.0f));
+    geometryNode->SetFrameOffset(globalOffset);
+
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutAlgorithm->parentGlobalOffset_ = globalOffset;
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    DirtySwapConfig config;
+    richEditorPattern->baselineOffset_ = 6.0f;
+    richEditorPattern->CreateNodePaintMethod();
+    auto ret = richEditorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_FALSE(ret);
 }
 } // namespace OHOS::Ace::NG

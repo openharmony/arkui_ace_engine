@@ -346,10 +346,32 @@ HWTEST_F(RichEditorPatternTestFourNg, UpdatePreviewText002, TestSize.Level1)
     richEditorPattern->previewTextRecord_.previewContent="abc";
     res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
 
+    ASSERT_NE(res, true);
+}
+
+
+/**
+ * @tc.name: UpdatePreviewText003
+ * @tc.desc: test UpdatePreviewText
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, UpdatePreviewText003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->previewTextRecord_.startOffset = -99;
+    richEditorPattern->previewTextRecord_.endOffset = 99;
+
+    PreviewRange previewRange;
+
+    std::string previewTextValue;
+
     previewRange.start = -2;
     previewRange.end = -1;
     richEditorPattern->previewTextRecord_.previewContent="";
-    res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
+    bool res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
 
     previewRange.start = -2;
     previewRange.end = -2;
@@ -896,5 +918,68 @@ HWTEST_F(RichEditorPatternTestFourNg, GetDeletedSpan001, TestSize.Level1)
     richEditorPattern->GetDeletedSpan(changeValue, innerPosition, -99, RichEditorDeleteDirection::BACKWARD, true);
 
     EXPECT_EQ(richEditorPattern->textSelector_.SelectNothing(), true);
+}
+
+/**
+ * @tc.name: HandleTouchUp001
+ * @tc.desc: test HandleTouchUp
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, HandleTouchUp001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    EXPECT_EQ(richEditorPattern->OnBackPressed(), false);
+    richEditorPattern->editingLongPress_ = true;
+    richEditorPattern->isEditing_ = false;
+    richEditorPattern->HandleTouchUp();
+    EXPECT_EQ(richEditorPattern->isMoveCaretAnywhere_, false);
+    richEditorPattern->editingLongPress_ = true;
+    richEditorPattern->isEditing_ = true;
+    richEditorPattern->HandleTouchUp();
+    EXPECT_TRUE(richEditorPattern->selectOverlay_->IsSingleHandle());
+}
+
+/**
+ * @tc.name: CheckEditorTypeChange001
+ * @tc.desc: test CheckEditorTypeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, CheckEditorTypeChange001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->CheckEditorTypeChange();
+
+    SelectOverlayInfo selectOverlayInfo;
+    selectOverlayInfo.singleLineHeight = 143;
+    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr, false);
+    richEditorPattern->selectOverlayProxy_ = proxy;
+    richEditorPattern->UpdateSelectOverlayOrCreate(selectOverlayInfo, true);
+    richEditorPattern->CheckEditorTypeChange();
+
+    richEditorPattern->selectOverlayProxy_->GetSelectOverlayMangerInfo().menuInfo.editorType =
+        static_cast<int32_t>(TextSpanType::TEXT);
+    richEditorPattern->CheckEditorTypeChange();
+
+    richEditorPattern->selectOverlayProxy_->GetSelectOverlayMangerInfo().menuInfo.editorType =
+        static_cast<int32_t>(TextSpanType::NONE);
+    richEditorPattern->selectedType_ = TextSpanType::TEXT;
+    richEditorPattern->CheckEditorTypeChange();
+
+    richEditorPattern->selectOverlayProxy_->GetSelectOverlayMangerInfo().menuInfo.editorType =
+        static_cast<int32_t>(TextSpanType::TEXT);
+    richEditorPattern->selectedType_ = TextSpanType::TEXT;
+    richEditorPattern->CheckEditorTypeChange();
+
+    richEditorPattern->selectOverlayProxy_->selectOverlayId_ = 1;
+    richEditorPattern->CheckEditorTypeChange();
+
+    EXPECT_TRUE(richEditorPattern->selectOverlayProxy_);
 }
 } // namespace OHOS::Ace::NG
