@@ -137,7 +137,6 @@ HWTEST_F(SheetCoverageTestNg, InitClickEvent001, TestSize.Level1)
     ASSERT_NE(dragBarPattern, nullptr);
     EXPECT_EQ(dragBarPattern->clickListener_, nullptr);
     dragBarPattern->InitClickEvent();
-    
 
     EXPECT_NE(dragBarPattern->clickListener_, nullptr);
     dragBarPattern->InitClickEvent();
@@ -691,7 +690,7 @@ HWTEST_F(SheetCoverageTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
     EXPECT_TRUE(NearEqual(sheetPattern->sheetOffsetY_, sheetLayoutAlgorithm->GetSheetOffsetY()));
     EXPECT_EQ(sheetPattern->GetSheetType(), SheetType::SHEET_POPUP);
     sheetPattern->OnDirtyLayoutWrapperSwap(dirty, config);
-    
+
     config.skipMeasure = true;
     config.skipLayout = false;
     sheetPattern->sheetOffsetY_ = sheetLayoutAlgorithm->sheetOffsetY_ + 1.0f;
@@ -921,7 +920,7 @@ HWTEST_F(SheetCoverageTestNg, GetSheetTypeWithAuto001, TestSize.Level1)
     SheetType sheetType;
     sheetPattern->GetSheetTypeWithAuto(sheetType);
     EXPECT_EQ(sheetType, SheetType::SHEET_BOTTOM);
-    
+
     EXPECT_CALL(*foldablewindow, IsFoldExpand()).WillRepeatedly([]() -> bool { return true; });
     auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
     sheetTheme->sheetBottom_ = "bottom";
