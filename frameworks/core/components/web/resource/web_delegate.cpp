@@ -15,7 +15,6 @@
 
 #include "core/components/web/resource/web_delegate.h"
 
-#include <algorithm>
 #include <cctype>
 #include <cfloat>
 #include <iomanip>
@@ -35,18 +34,10 @@
 #include "core/accessibility/accessibility_manager.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/web/render_web.h"
-#include "core/components/web/web_event.h"
-#include "core/components/web/web_property.h"
-#include "core/components_ng/pattern/web/web_pattern.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "adapter/ohos/capability/html/span_to_html.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #endif
-#include "core/common/ace_application_info.h"
-#include "core/event/ace_event_helper.h"
-#include "core/event/ace_events.h"
-#include "core/event/back_end_event_manager.h"
 #include "frameworks/bridge/js_frontend/frontend_delegate_impl.h"
 #ifdef OHOS_STANDARD_SYSTEM
 #include "application_env.h"

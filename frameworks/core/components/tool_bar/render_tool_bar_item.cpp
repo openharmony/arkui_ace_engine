@@ -15,8 +15,6 @@
 
 #include "core/components/tool_bar/render_tool_bar_item.h"
 
-#include "core/event/ace_event_helper.h"
-
 namespace OHOS::Ace {
 
 constexpr Dimension TOOL_BAR_HEIGHT = 56.0_vp;

@@ -15,7 +15,6 @@
 
 #include "core/components/web/resource/web_client_impl.h"
 
-#include "core/common/container.h"
 #include "core/components/web/resource/web_delegate.h"
 
 namespace OHOS::Ace {

@@ -15,16 +15,7 @@
 
 #include "core/components/tween/tween_element.h"
 
-#include "base/geometry/transform_util.h"
-#include "core/animation/curve_animation.h"
-#include "core/common/frontend.h"
-#include "core/components/clip/render_clip.h"
-#include "core/components/display/display_component.h"
-#include "core/components/positioned/positioned_element.h"
-#include "core/components/shared_transition/shared_transition_element.h"
-#include "core/components/transform/transform_component.h"
 #include "core/components/tween/tween_component.h"
-#include "core/pipeline/base/render_element.h"
 
 namespace OHOS::Ace {
 namespace {

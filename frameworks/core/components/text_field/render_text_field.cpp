@@ -15,18 +15,9 @@
 
 #include "core/components/text_field/render_text_field.h"
 
-#include <regex>
-#include <string>
-#include <unordered_map>
-#include <utility>
-
-#include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
-#include "base/json/json_util.h"
-#include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
 #include "base/log/log_wrapper.h"
-#include "base/mousestyle/mouse_style.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
@@ -36,14 +27,9 @@
 #include "core/common/font_manager.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/common/text_field_manager.h"
-#include "core/components/stack/stack_element.h"
 #include "core/components/text/text_utils.h"
 #include "core/components/text_field/text_field_scroll_bar_controller.h"
-#include "core/components/text_overlay/text_overlay_component.h"
 #include "core/components/text_overlay/text_overlay_element.h"
-#include "core/components_v2/inspector/utils.h"
-#include "core/event/ace_event_helper.h"
-#include "core/event/mouse_event.h"
 #if defined(ENABLE_STANDARD_INPUT)
 #include "core/components/text_field/on_text_changed_listener_impl.h"
 #endif

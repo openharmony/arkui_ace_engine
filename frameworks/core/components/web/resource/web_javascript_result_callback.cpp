@@ -16,11 +16,6 @@
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components/web/resource/web_javascript_result_callback.h"
 
-#include "base/log/log.h"
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
-#include "core/components/web/resource/web_javascript_value.h"
-
 namespace OHOS::Ace {
 using namespace OHOS::Ace::Framework;
 using namespace OHOS::NWeb;
