@@ -163,7 +163,8 @@ void XComponentControllerNG::UpdateSurfaceBounds()
 {
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
-    pattern->UpdateSurfaceBounds(true);
+    const auto& [offsetChanged, sizeChanged, needFireNativeEvent] = pattern->UpdateSurfaceRect();
+    pattern->HandleSurfaceChangeEvent(true, offsetChanged, sizeChanged, needFireNativeEvent);
 }
 
 void XComponentControllerNG::StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnalyzed)
