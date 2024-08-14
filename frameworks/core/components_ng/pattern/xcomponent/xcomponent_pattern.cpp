@@ -638,7 +638,7 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
     if (IsSupportImageAnalyzerFeature()) {
         UpdateAnalyzerUIConfig(geometryNode);
     }
-
+    const auto& [offsetChanged, sizeChanged, needFireNativeEvent] = UpdateSurfaceRect();
     if (!hasXComponentInit_) {
         initSize_ = drawSize_;
         if (!SystemProperties::GetExtSurfaceEnabled()) {
@@ -657,7 +657,7 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
             static_cast<int32_t>(drawSize_.Width()), static_cast<int32_t>(drawSize_.Height()));
     }
 #endif
-    UpdateSurfaceBounds(false, config.frameOffsetChange);
+    HandleSurfaceChangeEvent(false, offsetChanged, sizeChanged, needFireNativeEvent, config.frameOffsetChange);
     if (type_ == XComponentType::SURFACE && renderType_ == NodeRenderType::RENDER_TYPE_TEXTURE) {
         AddAfterLayoutTaskForExportTexture();
     }
@@ -1509,32 +1509,18 @@ void XComponentPattern::ClearIdealSurfaceOffset(bool isXAxis)
     }
 }
 
-void XComponentPattern::UpdateSurfaceBounds(bool needForceRender, bool frameOffsetChange)
+void XComponentPattern::HandleSurfaceChangeEvent(
+    bool needForceRender, bool offsetChanged, bool sizeChanged, bool needFireNativeEvent, bool frameOffsetChange)
 {
     if (!drawSize_.IsPositive()) {
         return;
     }
-    auto preSurfaceSize = surfaceSize_;
-    auto preLocalPosition = localPosition_;
-    if (selfIdealSurfaceWidth_.has_value() && Positive(selfIdealSurfaceWidth_.value()) &&
-        selfIdealSurfaceHeight_.has_value() && Positive(selfIdealSurfaceHeight_.value())) {
-        localPosition_.SetX(selfIdealSurfaceOffsetX_.has_value()
-                                ? selfIdealSurfaceOffsetX_.value()
-                                : (drawSize_.Width() - selfIdealSurfaceWidth_.value()) / 2.0f);
-
-        localPosition_.SetY(selfIdealSurfaceOffsetY_.has_value()
-                                ? selfIdealSurfaceOffsetY_.value()
-                                : (drawSize_.Height() - selfIdealSurfaceHeight_.value()) / 2.0f);
-        surfaceSize_ = { selfIdealSurfaceWidth_.value(), selfIdealSurfaceHeight_.value() };
-    } else {
-        surfaceSize_ = drawSize_;
-    }
-    if (frameOffsetChange || preLocalPosition != localPosition_) {
+    if (frameOffsetChange || offsetChanged) {
         auto offset = globalPosition_ + localPosition_;
         NativeXComponentOffset(offset.GetX(), offset.GetY());
     }
-    if (preSurfaceSize != surfaceSize_) {
-        XComponentSizeChange({ localPosition_, surfaceSize_ }, preSurfaceSize.IsPositive());
+    if (sizeChanged) {
+        XComponentSizeChange({ localPosition_, surfaceSize_ }, needFireNativeEvent);
     }
     if (handlingSurfaceRenderContext_) {
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -1556,6 +1542,29 @@ void XComponentPattern::UpdateSurfaceBounds(bool needForceRender, bool frameOffs
         CHECK_NULL_VOID(host);
         host->MarkNeedRenderOnly();
     }
+}
+
+std::tuple<bool, bool, bool> XComponentPattern::UpdateSurfaceRect()
+{
+    if (!drawSize_.IsPositive()) {
+        return { false, false, false };
+    }
+    auto preSurfaceSize = surfaceSize_;
+    auto preLocalPosition = localPosition_;
+    if (selfIdealSurfaceWidth_.has_value() && Positive(selfIdealSurfaceWidth_.value()) &&
+        selfIdealSurfaceHeight_.has_value() && Positive(selfIdealSurfaceHeight_.value())) {
+        localPosition_.SetX(selfIdealSurfaceOffsetX_.has_value()
+                                ? selfIdealSurfaceOffsetX_.value()
+                                : (drawSize_.Width() - selfIdealSurfaceWidth_.value()) / 2.0f);
+
+        localPosition_.SetY(selfIdealSurfaceOffsetY_.has_value()
+                                ? selfIdealSurfaceOffsetY_.value()
+                                : (drawSize_.Height() - selfIdealSurfaceHeight_.value()) / 2.0f);
+        surfaceSize_ = { selfIdealSurfaceWidth_.value(), selfIdealSurfaceHeight_.value() };
+    } else {
+        surfaceSize_ = drawSize_;
+    }
+    return { preLocalPosition != localPosition_, preSurfaceSize != surfaceSize_, preSurfaceSize.IsPositive() };
 }
 
 void XComponentPattern::NativeSurfaceHide()
