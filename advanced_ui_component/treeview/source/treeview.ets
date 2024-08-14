@@ -1004,7 +1004,7 @@ export struct TreeView {
 
   decideFontScale() {
     let uiContent: UIContext = this.getUIContext();
-    let systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1;
+    let systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
     if (!this.followingSystemFontScale) {
       return 1;
     }
@@ -3765,7 +3765,7 @@ export struct TreeViewInner {
 
   decideFontScale() {
     let uiContent: UIContext = this.getUIContext();
-    let systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1;
+    let systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
     if (!this.followingSystemFontScale) {
       return 1;
     }
