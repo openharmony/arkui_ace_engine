@@ -900,6 +900,56 @@ HWTEST_F(TextClockTestNG, TextClockTest013, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextClockTest014
+ * @tc.desc: Test TextClock property.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockTestNG, TextClockTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create framenode and Init.
+     */
+    MockPipelineContext::SetUp();
+    auto frameNode = TextClockModelNG::CreateFrameNode(-1);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto controller = TextClockModelNG::InitTextController(node);
+    ASSERT_NE(controller, nullptr);
+    /**
+     * @tc.steps: step2. SetHoursWest.
+     */
+    TextClockModelNG::SetHoursWest(node, HOURS_WEST);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetHoursWestValue(), HOURS_WEST);
+    /**
+     * @tc.steps: step3. Set InitFontDefault.
+     */
+    TextStyle textStyle;
+    textStyle.SetFontSize(FONT_SIZE_VALUE);
+    textStyle.SetFontWeight(FONT_WEIGHT_VALUE);
+    textStyle.SetTextColor(TEXT_COLOR_VALUE);
+    textStyle.SetFontFamilies(FONT_FAMILY_VALUE);
+    textStyle.SetFontStyle(ITALIC_FONT_STYLE_VALUE);
+
+    TextClockModelNG::InitFontDefault(node, textStyle);
+    EXPECT_EQ(layoutProperty->GetFontSizeValue(), FONT_SIZE_VALUE);
+    EXPECT_EQ(layoutProperty->GetFontWeightValue(), FONT_WEIGHT_VALUE);
+    EXPECT_EQ(layoutProperty->GetTextColorValue(), TEXT_COLOR_VALUE);
+    EXPECT_EQ(layoutProperty->GetFontFamilyValue(), FONT_FAMILY_VALUE);
+    EXPECT_EQ(layoutProperty->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
+
+    /**
+     * @tc.steps: step4. SetJSTextClockController.
+     */
+    TextClockModelNG::SetJSTextClockController(node, controller);
+    auto result = TextClockModelNG::GetJSTextClockController(node);
+    ASSERT_NE(result, nullptr);
+    MockPipelineContext::TearDown();
+}
+
+/**
  * @tc.name: GetDateTimeIndex
  * @tc.desc: Test UpdateTextLayoutProperty of TextClockPattern.
  * @tc.type: FUNC

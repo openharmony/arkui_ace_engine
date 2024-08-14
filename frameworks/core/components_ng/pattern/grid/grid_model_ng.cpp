@@ -570,4 +570,31 @@ int32_t GridModelNG::GetCachedCount(FrameNode* frameNode)
         defCachedCount);
     return cachedCount;
 }
+
+void GridModelNG::InitScroller(FrameNode* frameNode, const RefPtr<ScrollControllerBase>& positionController,
+    const RefPtr<ScrollProxy>& scrollProxy)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (positionController) {
+        auto controller = AceType::DynamicCast<ScrollableController>(positionController);
+        pattern->SetPositionController(controller);
+    } else {
+        pattern->SetPositionController(nullptr);
+    }
+    if (scrollProxy) {
+        auto scrollBarProxy = AceType::DynamicCast<NG::ScrollBarProxy>(scrollProxy);
+        pattern->SetScrollBarProxy(scrollBarProxy);
+    } else {
+        pattern->SetScrollBarProxy(nullptr);
+    }
+    pattern->AddScrollableFrameInfo(SCROLL_FROM_NONE);
+}
+
+void GridModelNG::SetLayoutOptions(FrameNode* frameNode, GridLayoutOptions& options)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, LayoutOptions, options, frameNode);
+}
 } // namespace OHOS::Ace::NG

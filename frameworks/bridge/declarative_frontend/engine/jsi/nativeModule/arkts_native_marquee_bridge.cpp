@@ -24,6 +24,43 @@ static const std::vector<OHOS::Ace::MarqueeUpdateStrategy> MARQUEE_UPDATE_STRATE
 };
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t DEFAULT_MARQUEE_LOOP = -1;
+void SetMarqueeScrollAmount(const EcmaVM* vm, const Local<JSValueRef>& jsVal, ArkUINodeHandle nativeNode)
+{
+    if (jsVal->IsNumber()) {
+        bool isNumber = false;
+        auto step = jsVal->GetValueDouble(isNumber);
+        if (GreatNotEqual(step, 0.0)) {
+            double stepOpt = Dimension(step, DimensionUnit::VP).ConvertToPx();
+            GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeScrollAmount(nativeNode, stepOpt);
+            return;
+        }
+    }
+    GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeScrollAmount(nativeNode);
+}
+
+void SetMarqueeLoop(const EcmaVM* vm, const Local<JSValueRef>& jsVal, ArkUINodeHandle nativeNode)
+{
+    if (jsVal->IsNumber()) {
+        int32_t loopOpt = 0;
+        bool isNumber = false;
+        auto loopDouble = jsVal->GetValueDouble(isNumber);
+        int32_t loop = DEFAULT_MARQUEE_LOOP;
+        if (GreatNotEqual(loopDouble, 0.0)) {
+            loop = static_cast<int32_t>(loopDouble);
+            if (loop == std::numeric_limits<int32_t>::max() || loop < 0) {
+                loop = DEFAULT_MARQUEE_LOOP;
+            }
+        }
+        loopOpt = loop;
+        GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeLoop(nativeNode, loopOpt);
+        return;
+    }
+    GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeLoop(nativeNode);
+}
+} // namespace
+
 ArkUINativeModuleValue MarqueeBridge::SetAllowScale(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -285,6 +322,33 @@ ArkUINativeModuleValue MarqueeBridge::ResetMarqueeOnFinish(ArkUIRuntimeCallInfo*
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeOnFinish(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue MarqueeBridge::SetInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeVal = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> startVal = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> stepVal = runtimeCallInfo->GetCallArgRef(2);
+    Local<JSValueRef> loopVal = runtimeCallInfo->GetCallArgRef(3);
+    Local<JSValueRef> fromStartVal = runtimeCallInfo->GetCallArgRef(4);
+    Local<JSValueRef> srcVal = runtimeCallInfo->GetCallArgRef(5);
+    auto nativeNode = nodePtr(nodeVal->ToNativePointer(vm)->Value());
+    bool fromStart = fromStartVal->IsBoolean() ? fromStartVal->ToBoolean(vm)->Value() : true;
+    SetMarqueeScrollAmount(vm, stepVal, nativeNode);
+    SetMarqueeLoop(vm, loopVal, nativeNode);
+    GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueePlayerStatus(
+        nativeNode, startVal->IsBoolean() ? startVal->ToBoolean(vm)->Value() : false);
+    GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeDirection(nativeNode,
+        fromStart ? static_cast<int32_t>(MarqueeDirection::LEFT) : static_cast<int32_t>(MarqueeDirection::RIGHT));
+    if (srcVal->IsString(vm)) {
+        GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeSrcValue(
+            nativeNode, srcVal->ToString(vm)->ToString(vm).c_str());
+    } else {
+        GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeSrcValue(nativeNode);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

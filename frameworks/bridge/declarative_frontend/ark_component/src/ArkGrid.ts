@@ -18,6 +18,22 @@ class ArkGridComponent extends ArkComponent implements GridAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
+  allowChildTypes(): string[] {
+    return ['GridItem'];
+  }
+  initialize(value: Object[]): void {
+    if (value.length === 1 && isObject(value[0])) {
+      modifierWithKey(this._modifiersWithKeys, GridScrollerModifier.identity, GridScrollerModifier, value[0]);
+      modifierWithKey(this._modifiersWithKeys, GridLayoutOptionsModifier.identity, GridLayoutOptionsModifier, undefined);
+    } else if (value.length === 2 && isObject(value[0]) && isObject(value[1])) {
+      modifierWithKey(this._modifiersWithKeys, GridScrollerModifier.identity, GridScrollerModifier, value[0]);
+      modifierWithKey(this._modifiersWithKeys, GridLayoutOptionsModifier.identity, GridLayoutOptionsModifier, value[1]);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, GridScrollerModifier.identity, GridScrollerModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, GridLayoutOptionsModifier.identity, GridLayoutOptionsModifier, undefined);
+    }
+    return this;
+  }
   columnsTemplate(value: string): this {
     modifierWithKey(this._modifiersWithKeys, GridColumnsTemplateModifier.identity, GridColumnsTemplateModifier, value);
     return this;
@@ -147,6 +163,48 @@ class ArkGridComponent extends ArkComponent implements GridAttribute {
   alignItems(value: GridItemAlignment): this {
     modifierWithKey(this._modifiersWithKeys, GridAlignItemsModifier.identity, GridAlignItemsModifier, value);
     return this;
+  }
+}
+
+class GridScrollerModifier extends ModifierWithKey<Scroller> {
+  constructor(value: Scroller) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('gridScroller');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().grid.setGridScroller(node, undefined);
+    } else {
+      getUINativeModule().grid.setGridScroller(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class GridLayoutOptionsModifier extends ModifierWithKey<GridLayoutOptions> {
+  constructor(value: GridLayoutOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('gridLayoutOptions');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().grid.setGridLayoutOptions(node, undefined, undefined, undefined, undefined, undefined);
+    } else {
+      getUINativeModule().grid.setGridLayoutOptions(node,
+        isArray(this.value.regularSize) ? this.value.regularSize : undefined,
+        isArray(this.value?.irregularIndexes) ? this.value.irregularIndexes : undefined,
+        isArray(this.value?.irregularIndexes) ? this.value.irregularIndexes.length : undefined,
+        isFunction(this.value?.onGetIrregularSizeByIndex) ? this.value.onGetIrregularSizeByIndex : undefined,
+        isFunction(this.value?.onGetRectByIndex) ? this.value.onGetRectByIndex : undefined);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue?.regularSize, this.value?.regularSize) ||
+      !isBaseOrResourceEqual(this.stageValue?.irregularIndexes, this.value?.irregularIndexes) ||
+      !isBaseOrResourceEqual(this.stageValue?.onGetIrregularSizeByIndex, this.value?.onGetIrregularSizeByIndex) ||
+      !isBaseOrResourceEqual(this.stageValue?.onGetRectByIndex, this.value?.onGetRectByIndex);
   }
 }
 

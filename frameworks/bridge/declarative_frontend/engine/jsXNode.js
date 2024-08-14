@@ -1438,6 +1438,46 @@ const __creatorMap__ = new Map([
                 return new ArkFlowItemComponent(node, type);
             });
         }],
+    ['QRCode', (context) => {
+            return new TypedFrameNode(context, 'QRCode', (node, type) => {
+                return new ArkQRCodeComponent(node, type);
+            });
+        }],
+    ['Badge', (context) => {
+            return new TypedFrameNode(context, 'Badge', (node, type) => {
+                return new ArkBadgeComponent(node, type);
+            });
+        }],
+    ['Grid', (context) => {
+            return new TypedFrameNode(context, 'Grid', (node, type) => {
+                return new ArkGridComponent(node, type);
+            });
+        }],
+    ['GridItem', (context) => {
+            return new TypedFrameNode(context, 'GridItem', (node, type) => {
+                return new ArkGridItemComponent(node, type);
+            });
+        }],
+    ['TextClock', (context) => {
+            return new TypedFrameNode(context, 'TextClock', (node, type) => {
+                return new ArkTextClockComponent(node, type);
+            });
+        }],
+    ['TextTimer', (context) => {
+            return new TypedFrameNode(context, 'TextTimer', (node, type) => {
+                return new ArkTextTimerComponent(node, type);
+            });
+        }],
+    ['Marquee', (context) => {
+            return new TypedFrameNode(context, 'Marquee', (node, type) => {
+                return new ArkMarqueeComponent(node, type);
+            });
+        }],
+    ['TextArea', (context) => {
+            return new TypedFrameNode(context, 'TextArea', (node, type) => {
+                return new ArkTextAreaComponent(node, type);
+            });
+        }],
 ]);
 class typeNode {
     static createNode(context, type, options) {

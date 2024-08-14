@@ -189,6 +189,22 @@ declare class ArkFlowItemComponent extends ArkComponent {}
 
 declare class ArkSymbolGlyphComponent extends ArkComponent {}
 
+declare class ArkQRCodeComponent extends ArkComponent {}
+
+declare class ArkBadgeComponent extends ArkComponent {}
+
+declare class ArkGridComponent extends ArkComponent {}
+
+declare class ArkGridItemComponent extends ArkComponent {}
+
+declare class ArkTextClockComponent extends ArkComponent {}
+
+declare class ArkTextTimerComponent extends ArkComponent {}
+
+declare class ArkMarqueeComponent extends ArkComponent {}
+
+declare class ArkTextAreaComponent extends ArkComponent {}
+
 declare class UICommonEvent {
   private _nodePtr: NodePtr;
   private _instanceId: number;

@@ -866,4 +866,50 @@ HWTEST_F(BadgeTestNg, BadgeLayoutAlgorithmTestNg003, TestSize.Level1)
     EXPECT_EQ(layoutProperty_->GetBadgePositionValue(), BadgePosition::LEFT);
     EXPECT_EQ(layoutProperty_->GetLayoutDirection(), TextDirection::RTL);
 }
+
+/**
+ * @tc.name: BadgeModelNG001
+ * @tc.desc: Test badge property.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(BadgeTestNg, BadgeModelNG001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CreateFrameNode.
+     */
+    auto frameNode = BadgeModelNG::CreateFrameNode(-1);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. Set Value with String.
+     */
+    auto node = AceType::RawPtr(frameNode);
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeColor = Color::WHITE;
+    badgeParameters.badgeTextColor = Color::WHITE;
+    badgeParameters.badgeBorderColor = Color::WHITE;
+    badgeParameters.badgeValue = VALUE;
+    badgeParameters.badgePosition = static_cast<int32_t>(BadgePosition::LEFT);
+    badgeParameters.isPositionXy = false;
+    badgeParameters.badgePositionX = Dimension(1);
+    badgeParameters.badgePositionY = Dimension(1);
+
+    BadgeModelNG::SetBadgeParam(node, badgeParameters, false, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetBadgeColorValue(), Color::WHITE);
+    EXPECT_EQ(layoutProperty->GetBadgeBorderColorValue(), Color::WHITE);
+    EXPECT_EQ(layoutProperty->GetBadgeTextColorValue(), Color::WHITE);
+    EXPECT_EQ(layoutProperty->GetBadgeValueValue(), VALUE);
+    EXPECT_EQ(layoutProperty->GetBadgePosition(), BadgePosition::LEFT);
+    /**
+     * @tc.steps: step3. Set Value with Number.
+     */
+    badgeParameters.badgeCount = COUNT;
+    badgeParameters.isPositionXy = true;
+    BadgeModelNG::SetBadgeParam(node, badgeParameters, false, false);
+    EXPECT_EQ(layoutProperty->GetBadgeCountValue(), COUNT);
+    EXPECT_EQ(layoutProperty->GetBadgePositionXValue(), Dimension(1));
+    EXPECT_EQ(layoutProperty->GetBadgePositionYValue(), Dimension(1));
+}
 } // namespace OHOS::Ace::NG

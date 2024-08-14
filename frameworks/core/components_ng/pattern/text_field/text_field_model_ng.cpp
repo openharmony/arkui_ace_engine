@@ -2061,4 +2061,20 @@ void TextFieldModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool state)
     CHECK_NULL_VOID(pattern);
     pattern->SetEnableHapticFeedback(state);
 }
+
+void TextFieldModelNG::SetJSTextEditableController(FrameNode* frameNode, const RefPtr<Referenced>& controller)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetJSTextEditableController(controller);
+}
+
+RefPtr<Referenced> TextFieldModelNG::GetJSTextEditableController(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetJSTextEditableController();
+}
 } // namespace OHOS::Ace::NG

@@ -648,4 +648,23 @@ HWTEST_F(QRCodeTestNg, UpdateContentModifier001, TestSize.Level1)
     qrCodePaintMethod->UpdateContentModifier(paintWrapper2);
     EXPECT_FALSE(renderContext2->HasForegroundColor());
 }
+
+/**
+ * @tc.name: QRCodeModelNG001
+ * @tc.desc: test QRCodeModelNG static Method
+ * @tc.type: FUNC
+ */
+HWTEST_F(QRCodeTestNg, QRCodeModelNG001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create qrCodeModel
+     */
+    auto frameNode = QRCodeModelNG::CreateFrameNode(-1);
+    ASSERT_NE(frameNode, nullptr);
+
+    QRCodeModelNG::SetQRCodeValue(AceType::RawPtr(frameNode), CREATE_VALUE);
+    auto property = frameNode->GetPaintProperty<QRCodePaintProperty>();
+    ASSERT_NE(property, nullptr);
+    EXPECT_EQ(property->GetValueValue(), CREATE_VALUE);
+}
 } // namespace OHOS::Ace::NG
