@@ -192,6 +192,8 @@ public:
                 static_cast<bool>(pattern->GetAttr<double>("independent_control_keyboard", 0.0));
             theme->directionKeysMoveFocusOut_ =
                 static_cast<bool>(pattern->GetAttr<double>("direction_keys_move_focus_out", 0.0));
+            theme->needFocusBox_ = static_cast<bool>(pattern->GetAttr<double>("text_input_need_focus_box", 0.0));
+            theme->focusPadding_ = pattern->GetAttr<Dimension>("text_input_focus_padding", 0.0_vp);
         }
     };
 
@@ -582,6 +584,16 @@ public:
         return previewBoardColor_;
     }
 
+    bool NeedFocusBox() const
+    {
+        return needFocusBox_;
+    }
+
+    const Dimension& GetFocusPadding() const
+    {
+        return focusPadding_;
+    }
+
 protected:
     TextFieldTheme() = default;
 
@@ -680,6 +692,8 @@ private:
     CancelButtonStyle cancelButtonStyle_ = CancelButtonStyle::INPUT;
     Color previewUnderlineColor_;
     Color previewBoardColor_;
+    bool needFocusBox_ = false;
+    Dimension focusPadding_;
 };
 
 } // namespace OHOS::Ace
