@@ -795,6 +795,273 @@ HWTEST_F(TextFieldPatternTestTwo, OnDragDrop001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: GetMaxLines001
+ * @tc.desc: test GetMaxLines
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, GetMaxLines001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->GetOrCreateTextLineStyle();
+    ASSERT_NE(layoutProperty->propTextLineStyle_, nullptr);
+    layoutProperty->propTextLineStyle_->UpdateMaxLines(2);
+
+    auto ret = pattern->GetMaxLines();
+    EXPECT_EQ(ret, 2);
+}
+
+/**
+ * @tc.name: TextAreaInputRectUpdate001
+ * @tc.desc: test TextAreaInputRectUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, TextAreaInputRectUpdate001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    ASSERT_NE(pattern->contentController_, nullptr);
+    pattern->contentController_->content_ = "Test";
+    pattern->paragraph_ = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(pattern->paragraph_, nullptr);
+
+    auto layoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->GetOrCreateTextLineStyle();
+    ASSERT_NE(layoutProperty->propTextLineStyle_, nullptr);
+    layoutProperty->propTextLineStyle_->UpdateTextAlign(TextAlign::START);
+
+    auto rect = RectF(1.0f, 1.0f, 2.0f, 1.0f);
+    pattern->contentRect_ = RectF(1.0f, 1.0f, -10.0f, 10.0f);
+    layoutProperty->propTextLineStyle_->UpdateMaxLines(1);
+    pattern->TextAreaInputRectUpdate(rect);
+    EXPECT_EQ(rect.Width(), 2.0f);
+
+    layoutProperty->propTextLineStyle_->UpdateMaxLines(2);
+    pattern->TextAreaInputRectUpdate(rect);
+    layoutProperty->propTextLineStyle_->UpdateTextAlign(TextAlign::CENTER);
+    pattern->TextAreaInputRectUpdate(rect);
+    layoutProperty->propTextLineStyle_->UpdateTextAlign(TextAlign::END);
+    pattern->TextAreaInputRectUpdate(rect);
+    layoutProperty->propTextLineStyle_->UpdateTextAlign(TextAlign::LEFT);
+    pattern->TextAreaInputRectUpdate(rect);
+    EXPECT_EQ(rect.Width(), 2.0f);
+}
+
+/**
+ * @tc.name: GetMarginBottom001
+ * @tc.desc: test GetMarginBottom
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, GetMarginBottom001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto layoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    pattern->GetMarginBottom();
+
+    layoutProperty->margin_ = std::make_unique<MarginProperty>();
+    ASSERT_NE(layoutProperty->margin_, nullptr);
+    layoutProperty->margin_->bottom = std::nullopt;
+    float ret = pattern->GetMarginBottom();
+    EXPECT_EQ(ret, 0.0f);
+}
+
+/**
+ * @tc.name: GetScrollBarWidth001
+ * @tc.desc: test GetScrollBarWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, GetScrollBarWidth001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::AUTO);
+    auto with = pattern->GetScrollBarWidth();
+    EXPECT_EQ(with, 0.0);
+}
+
+/**
+ * @tc.name: OnScrollCallback001
+ * @tc.desc: test OnScrollCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, OnScrollCallback001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    float offset = 1.0f;
+    int32_t source = SCROLL_FROM_START;
+
+    auto manager = SelectContentOverlayManager::GetOverlayManager();
+    ASSERT_NE(manager, nullptr);
+    ASSERT_NE(pattern->selectOverlay_, nullptr);
+    pattern->selectOverlay_->OnBind(manager);
+    SelectOverlayInfo overlayInfo;
+    auto shareOverlayInfo = std::make_shared<SelectOverlayInfo>(overlayInfo);
+    auto overlayNode = SelectOverlayNode::CreateSelectOverlayNode(shareOverlayInfo);
+    ASSERT_NE(overlayNode, nullptr);
+    overlayNode->MountToParent(textFieldNode);
+    manager->selectOverlayNode_ = overlayNode;
+    manager->shareOverlayInfo_ = std::move(shareOverlayInfo);
+    ASSERT_NE(manager->shareOverlayInfo_, nullptr);
+    manager->shareOverlayInfo_->menuInfo.menuIsShow = true;
+
+    int32_t width = 1;
+    int32_t height = 2;
+    pattern->OnWindowSizeChanged(width, height, WindowSizeChangeReason::ROTATION);
+    pattern->OnWindowSizeChanged(width, height, WindowSizeChangeReason::MAXIMIZE);
+
+    pattern->OnScrollCallback(offset, source);
+    EXPECT_EQ(pattern->isTextSelectionMenuShow_, true);
+}
+
+/**
+ * @tc.name: UpdateErrorTextMargin001
+ * @tc.desc: test UpdateErrorTextMargin
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, UpdateErrorTextMargin001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto paintProperty = textFieldNode->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+    layoutProperty->UpdateShowErrorText(true);
+    layoutProperty->UpdateErrorText("error");
+    MarginProperty margin;
+    paintProperty->UpdateMarginByUser(margin);
+    layoutProperty->margin_ = std::make_unique<MarginProperty>();
+    ASSERT_NE(layoutProperty->margin_, nullptr);
+    layoutProperty->margin_->bottom.emplace(Dimension(100.0));
+    pattern->SetShowError();
+    pattern->UpdateErrorTextMargin();
+
+    MockParagraph::enabled_ = false;
+    pattern->UpdateErrorTextMargin();
+    MockParagraph::enabled_ = true;
+    EXPECT_NE(layoutProperty->margin_->bottom->GetDimension().ConvertToPx(), 100.0);
+}
+
+/**
+ * @tc.name: AddCounterNode001
+ * @tc.desc: test AddCounterNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, AddCounterNode001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT);
+
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto layoutProperty = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    pattern_->AddCounterNode();
+    EXPECT_TRUE(pattern_->counterTextNode_.Upgrade());
+    pattern_->AddCounterNode();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    layoutProperty->UpdateTextInputType(TextInputType::TEXT);
+    pattern_->AddCounterNode();
+    EXPECT_TRUE(frameNode_->GetChildren().empty());
+    layoutProperty->UpdateShowPasswordIcon(true);
+    layoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
+    pattern_->AddCounterNode();
+    pattern_->AddCounterNode();
+    pattern_->ClearCounterNode();
+    EXPECT_TRUE(frameNode_->GetChildren().empty());
+}
+
+/**
+ * @tc.name: TextTypeToString001
+ * @tc.desc: test TextContentTypeToString and TextInputTypeToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, TextTypeToString001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    int32_t intValue = 26;
+    layoutProperty->UpdateTextContentType(static_cast<TextContentType>(intValue));
+    auto ret1 = pattern->TextContentTypeToString();
+    EXPECT_EQ(ret1, "TextContentType.UNSPECIFIED");
+
+    layoutProperty->UpdateTextInputType(TextInputType::PHONE);
+    auto ret2 = pattern->TextInputTypeToString();
+    EXPECT_EQ(ret2, "TextAreaType.PHONE_NUMBER");
+}
+
+/**
+ * @tc.name: GetNakedCharPosition001
+ * @tc.desc: test GetNakedCharPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, GetNakedCharPosition001, TestSize.Level0)
+{
+    int32_t nakedCharPosition = -1;
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    layoutProperty->GetOrCreateTextLineStyle();
+    ASSERT_NE(layoutProperty->propTextLineStyle_, nullptr);
+    layoutProperty->propTextLineStyle_->UpdateMaxLines(1);
+    pattern->obscureTickCountDown_ = 1;
+    layoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
+
+    int32_t ret = pattern->GetNakedCharPosition();
+    EXPECT_EQ(ret, nakedCharPosition);
+
+    pattern->contentController_->content_ = "Test";
+    pattern->GetNakedCharPosition();
+
+    pattern->textObscured_ = false;
+    ret = pattern->GetNakedCharPosition();
+    EXPECT_EQ(ret, nakedCharPosition);
+}
+
+/**
  * @tc.name: ProcBorderAndUnderlineInBlurEvent001
  * @tc.desc: test testInput text ProcBorderAndUnderlineInBlurEvent
  * @tc.type: FUNC
