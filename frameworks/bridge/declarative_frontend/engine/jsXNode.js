@@ -1441,6 +1441,16 @@ const __creatorMap__ = new Map([
                 return new ArkGridItemComponent(node, type);
             });
         }],
+    ['TextClock', (context) => {
+            return new TypedFrameNode(context, 'TextClock', (node, type) => {
+                return new ArkTextClockComponent(node, type);
+            });
+        }],
+    ['TextTimer', (context) => {
+            return new TypedFrameNode(context, 'TextTimer', (node, type) => {
+                return new ArkTextTimerComponent(node, type);
+            });
+        }],
 ]);
 class typeNode {
     static createNode(context, type, options) {
