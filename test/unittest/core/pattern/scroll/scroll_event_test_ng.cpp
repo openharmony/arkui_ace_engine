@@ -440,11 +440,10 @@ HWTEST_F(ScrollEventTestNg, onWillScrollAndOnDidScroll001, TestSize.Level1)
 
     /**
      * @tc.steps: step5. Scroll 0 distance with IDLE
-     * @tc.expected: No trigger DisScrollEvent
+     * @tc.expected: No trigger onScrollStop and DisScrollEvent
      */
     willOffsetY = -1.f;
     didOffsetY = -1.f;
-    pattern_->scrollStop_ = true;
     pattern_->OnScrollCallback(0.f, SCROLL_FROM_FOCUS_JUMP);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(willOffsetY, 0.f);
