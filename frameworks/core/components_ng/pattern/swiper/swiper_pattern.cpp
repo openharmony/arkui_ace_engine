@@ -135,6 +135,11 @@ void SwiperPattern::OnDetachFromFrameNode(FrameNode* node)
     pipeline->RemoveWindowStateChangedCallback(node->GetId());
 }
 
+void SwiperPattern::OnDetachFromMainTree()
+{
+    RemoveOnHiddenChange();
+}
+
 RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
 {
     auto host = GetHost();
@@ -5669,7 +5674,7 @@ void SwiperPattern::SetOnHiddenChangeForParent()
     if (parent->GetTag() == V2::PAGE_ETS_TAG) {
         auto pagePattern = parent->GetPattern<PagePattern>();
         CHECK_NULL_VOID(pagePattern);
-        pagePattern->SetOnHiddenChange(std::move(onHiddenChange));
+        pagePattern->AddOnHiddenChange(host->GetId(), std::move(onHiddenChange));
     }
 
     if (parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
@@ -5677,7 +5682,34 @@ void SwiperPattern::SetOnHiddenChangeForParent()
         CHECK_NULL_VOID(navDestinationePattern);
         auto navDestinationEventHub = navDestinationePattern->GetEventHub<NavDestinationEventHub>();
         CHECK_NULL_VOID(navDestinationEventHub);
-        navDestinationEventHub->SetOnHiddenChange(std::move(onHiddenChange));
+        navDestinationEventHub->AddOnHiddenChange(host->GetId(), std::move(onHiddenChange));
+    }
+}
+
+void SwiperPattern::RemoveOnHiddenChange()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto parent = host->GetAncestorNodeOfFrame();
+    CHECK_NULL_VOID(parent);
+    while (parent) {
+        if (parent->GetTag() == V2::PAGE_ETS_TAG || parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+            break;
+        }
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+    CHECK_NULL_VOID(parent);
+    if (parent->GetTag() == V2::PAGE_ETS_TAG) {
+        auto pagePattern = parent->GetPattern<PagePattern>();
+        CHECK_NULL_VOID(pagePattern);
+        pagePattern->RemoveOnHiddenChange(host->GetId());
+    }
+    if (parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+        auto navDestinationePattern = parent->GetPattern<NavDestinationPattern>();
+        CHECK_NULL_VOID(navDestinationePattern);
+        auto navDestinationEventHub = navDestinationePattern->GetEventHub<NavDestinationEventHub>();
+        CHECK_NULL_VOID(navDestinationEventHub);
+        navDestinationEventHub->RemoveOnHiddenChange(host->GetId());
     }
 }
 
