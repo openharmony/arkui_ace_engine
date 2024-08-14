@@ -22,11 +22,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers();
     const GENERATED_ArkUIFullNodeAPI* GENERATED_GetFullAPI();
 
-    inline const struct GENERATED_ArkUINodeModifiers* GetGeneratedNodeModifiers() {
+    inline const struct GENERATED_ArkUINodeModifiers* GetGeneratedNodeModifiers()
+    {
         return GENERATED_GetArkUINodeModifiers();
     }
 
-    inline const struct GENERATED_ArkUIFullNodeAPI* GetFullAPI() {
+    inline const struct GENERATED_ArkUIFullNodeAPI* GetFullAPI()
+    {
         return GENERATED_GetFullAPI();
     }
 }
