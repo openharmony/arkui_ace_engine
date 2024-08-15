@@ -629,7 +629,7 @@ void CleanNodeResponseArea::UpdateCleanNode(bool isShow)
         imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0.0f), CalcLength(0.0f)));
     }
     imageFrameNode->MarkModifyDone();
-    imageFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    imageFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void CleanNodeResponseArea::ClearArea()
