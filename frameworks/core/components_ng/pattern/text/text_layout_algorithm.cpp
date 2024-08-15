@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/render/font_collection.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace::NG {
 
@@ -474,7 +475,12 @@ bool TextLayoutAlgorithm::UpdateSingleParagraph(LayoutWrapper* layoutWrapper, Pa
         } else {
             auto value = content;
             StringUtils::TransformStrCase(value, static_cast<int32_t>(textStyle.GetTextCase()));
-            paragraph->AddText(StringUtils::Str8ToStr16(value));
+            std::u16string result = StringUtils::Str8ToStr16(value);
+            if (result.length() == 0 && value.length() != 0) {
+                value = TextEmojiProcessor::ConvertU8stringUnpairedSurrogates(value);
+                result = StringUtils::Str8ToStr16(value);
+            }
+            paragraph->AddText(result);
         }
     }
     paragraph->Build();
