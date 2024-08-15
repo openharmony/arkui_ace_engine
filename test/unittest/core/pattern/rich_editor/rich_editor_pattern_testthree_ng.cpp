@@ -486,4 +486,35 @@ HWTEST_F(RichEditorPatternTestThreeNg, OnDirtyLayoutWrapperSwap001, TestSize.Lev
     auto ret = richEditorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_FALSE(ret);
 }
+
+/**
+ * @tc.name: HandleUserGestureEvent001
+ * @tc.desc: test HandleUserGestureEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, HandleUserGestureEvent001, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(EXCEPT_VALUE);
+    ASSERT_FALSE(richEditorPattern->spans_.empty());
+    auto firstSpanItem = richEditorPattern->spans_.front();
+    ASSERT_NE(firstSpanItem, nullptr);
+    firstSpanItem->leadingMargin = std::make_optional<NG::LeadingMargin>();
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    richEditorPattern->paragraphs_.AddParagraph(
+        { .paragraph = paragraph, .start = 0, .end = 10 });
+
+    std::vector<RectF> rects { RectF(0, 0, 5, 5) };
+    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<THIRD_PARAM>(rects));
+    EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(50));
+    GestureEvent info;
+    info.SetLocalLocation(Offset(3, 3));
+    richEditorPattern->contentRect_ = RectF(0, 0, 20.0, 20.0);
+    auto gestureFunc = [](RefPtr<SpanItem> item, GestureEvent& info) -> bool {
+        return true;
+    };
+    EXPECT_TRUE(richEditorPattern->HandleUserGestureEvent(info, std::move(gestureFunc)));
+}
 } // namespace OHOS::Ace::NG
