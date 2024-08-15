@@ -907,7 +907,9 @@ bool FocusHub::FocusToHeadOrTailChild(bool isHead)
     auto scrollIndexAbility = curPattern ? curPattern->GetScrollIndexAbility() : nullptr;
     if (scrollIndexAbility) {
         scrollIndexAbility(isHead ? FocusHub::SCROLL_TO_HEAD : FocusHub::SCROLL_TO_TAIL);
-        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        auto node = GetFrameNode();
+        CHECK_NULL_RETURN(node, false);
+        auto pipeline = node->GetContextRefPtr();
         if (pipeline) {
             pipeline->FlushUITasks();
         }
@@ -951,7 +953,9 @@ bool FocusHub::OnClick(const KeyEvent& event)
         info.SetLocalLocation(centerToNode);
         info.SetSourceDevice(event.sourceType);
         info.SetDeviceId(event.deviceId);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto node = GetFrameNode();
+        CHECK_NULL_RETURN(node, false);
+        auto pipelineContext = node->GetContextRefPtr();
         if (pipelineContext) {
             auto windowOffset = pipelineContext->GetCurrentWindowRect().GetOffset() + centerToWindow;
             info.SetScreenLocation(windowOffset);
@@ -1141,7 +1145,9 @@ void FocusHub::OnFocusNode()
     if (onFocusInternal_) {
         onFocusInternal_();
     }
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto node = GetFrameNode();
+    CHECK_NULL_VOID(node);
+    auto pipeline = node->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddAfterLayoutTask([weak = WeakClaim(this)]() {
         auto focusHub = weak.Upgrade();
@@ -1960,7 +1966,9 @@ bool FocusHub::ScrollByOffsetToParent(const RefPtr<FrameNode>& parentFrameNode) 
 
 bool FocusHub::RequestFocusImmediatelyById(const std::string& id, bool isSyncRequest)
 {
-    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+    auto node = GetFrameNode();
+    CHECK_NULL_RETURN(node, false);
+    auto pipeline = node->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, false);
     auto focusManager = pipeline->GetOrCreateFocusManager();
     CHECK_NULL_RETURN(focusManager, false);
@@ -2007,7 +2015,9 @@ bool FocusHub::HandleFocusByTabIndex(const KeyEvent& event)
     if (event.code != KeyCode::KEY_TAB || event.action != KeyAction::DOWN) {
         return false;
     }
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto node = GetFrameNode();
+    CHECK_NULL_RETURN(node, false);
+    auto pipeline = node->GetContextRefPtr();
     if (pipeline && pipeline->IsTabJustTriggerOnKeyEvent()) {
         return false;
     }
