@@ -853,7 +853,7 @@ typedef enum {
      */
     ARKUI_SCROLL_NESTED_MODE_SELF_ONLY = 0,
     /** The component scrolls first, and when it hits the boundary, the parent component scrolls.
-    * When the parent component hits the boundary, its edge effect is displayed. If no edge effect is specified for
+     * When the parent component hits the boundary, its edge effect is displayed. If no edge effect is specified for
      * the parent component, the edge effect of the child component is displayed instead.
      */
     ARKUI_SCROLL_NESTED_MODE_SELF_FIRST,

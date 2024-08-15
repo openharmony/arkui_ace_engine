@@ -36,6 +36,7 @@ int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkU
 {
     bool hasProperty = false;
     auto result = napi_has_named_property(env, value, "nodePtr_", &hasProperty);
+    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (result == napi_ok && hasProperty) {
         napi_value frameNodePtr = nullptr;
         auto result = napi_get_named_property(env, value, "nodePtr_", &frameNodePtr);
@@ -53,6 +54,9 @@ int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkU
         auto* uiNodePtr = reinterpret_cast<OHOS::Ace::NG::UINode*>(nativePtr);
         uiNodePtr->IncRefCount();
         *handle = new ArkUI_Node({ .type = -1, .uiNodeHandle = reinterpret_cast<ArkUINodeHandle>(nativePtr) });
+        if (impl) {
+            impl->getExtendedAPI()->setAttachNodePtr((*handle)->uiNodeHandle, reinterpret_cast<void*>(*handle));
+        }
         return OHOS::Ace::ERROR_CODE_NO_ERROR;
     }
     result = napi_has_named_property(env, value, "builderNode_", &hasProperty);
@@ -84,7 +88,6 @@ int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkU
         }
         if (frameNode->GetTag() == "BuilderProxyNode") {
             // need to get the really frameNode.
-            auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
             if (!impl) {
                 return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND;
             }
@@ -98,6 +101,9 @@ int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkU
         }
         frameNode->IncRefCount();
         *handle = new ArkUI_Node({ .type = -1, .uiNodeHandle = reinterpret_cast<ArkUINodeHandle>(frameNode) });
+        if (impl) {
+            impl->getExtendedAPI()->setAttachNodePtr((*handle)->uiNodeHandle, reinterpret_cast<void*>(*handle));
+        }
         return OHOS::Ace::ERROR_CODE_NO_ERROR;
     }
     return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
