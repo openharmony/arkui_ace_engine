@@ -8144,4 +8144,22 @@ void TextFieldPattern::HandleAIWriteResult(int32_t start, int32_t end, std::vect
     StartTwinkling();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
+
+bool TextFieldPattern::IsTextEditableForStylus()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto focusHub = host->GetFocusHub();
+    if (!focusHub->IsFocusable() || !host->IsVisible()) {
+        return false;
+    }
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    auto opacity = renderContext->GetOpacity();
+    // if opacity is 0.0f, no need to hit frameNode.
+    if (NearZero(opacity.value_or(1.0f))) {
+        return false;
+    }
+    return !IsInPasswordMode();
+}
 } // namespace OHOS::Ace::NG

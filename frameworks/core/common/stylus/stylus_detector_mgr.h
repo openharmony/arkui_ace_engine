@@ -82,8 +82,6 @@ private:
     bool IsHitCleanNodeResponseArea(
         const NG::PointF& point, const RefPtr<NG::FrameNode>& frameNode, uint64_t nanoTimestamp);
 
-    bool CheckTextEditable(const RefPtr<NG::FrameNode> frameNode);
-
     std::unordered_map<int32_t, WeakPtr<NG::FrameNode>> textFieldNodes_;
 
     StylusDetectorInstance engine_ = nullptr;

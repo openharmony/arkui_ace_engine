@@ -70,11 +70,6 @@ void StylusDetectorMgr::RemoveTextFieldFrameNode(const int32_t id) {}
 
 StylusDetectorMgr::StylusDetectorMgr() : engine_(nullptr), isRegistered_(false) {}
 
-bool StylusDetectorMgr::CheckTextEditable(const RefPtr<NG::FrameNode> frameNode)
-{
-    return false;
-}
-
 bool StylusDetectorMgr::IsStylusTouchEvent(const TouchEvent& touchEvent) const
 {
     return false;

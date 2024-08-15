@@ -10099,4 +10099,22 @@ void RichEditorPattern::HandleAIWriteResult(int32_t start, int32_t end, std::vec
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "Backfilling results range=[%{public}d--%{public}d], content = %{public}s",
         start, end, spanString->GetString().c_str());
 }
+
+bool RichEditorPattern::IsTextEditableForStylus()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto focusHub = host->GetFocusHub();
+    if (!focusHub->IsFocusable() || !host->IsVisible()) {
+        return false;
+    }
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    auto opacity = renderContext->GetOpacity();
+    // if opacity is 0.0f, no need to hit frameNode.
+    if (NearZero(opacity.value_or(1.0f))) {
+        return false;
+    }
+    return true;
+}
 } // namespace OHOS::Ace::NG
