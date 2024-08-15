@@ -970,7 +970,7 @@ export class TreeView extends ViewPU {
 
     decideFontScale() {
         let i25 = this.getUIContext();
-        let j25 = i25.getHostContext()?.config.fontSizeScale ?? 1;
+        let j25 = i25.getHostContext()?.config?.fontSizeScale ?? 1;
         if (!this.followingSystemFontScale) {
             return 1;
         }
@@ -3784,7 +3784,7 @@ export class TreeViewInner extends ViewPU {
 
     decideFontScale() {
         let g6 = this.getUIContext();
-        let h6 = g6.getHostContext()?.config.fontSizeScale ?? 1;
+        let h6 = g6.getHostContext()?.config?.fontSizeScale ?? 1;
         if (!this.followingSystemFontScale) {
             return 1;
         }
