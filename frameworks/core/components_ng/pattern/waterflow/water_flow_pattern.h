@@ -175,6 +175,7 @@ public:
     void AddSectionChangeStartPos(int32_t start)
     {
         sectionChangeStartPos_.emplace_back(start);
+        MarkDirtyNodeSelf();
     }
 
 private:
