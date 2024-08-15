@@ -35,13 +35,13 @@ void SetImageOptions0Impl(Ark_NativePointer node,
 void SetImageOptions1Impl(Ark_NativePointer node,
                           const Type_ImageInterface_setImageOptions1_Arg0* src)
 {
-    LOGE("Arkoala: Image._setImageOptions_PixelMapResourceStrDrawableDescriptorImageContentImpl - method not implemented");
+    LOGE("Arkoala: Image.SetImageOptions1Impl - method not implemented");
 }
 void SetImageOptions2Impl(Ark_NativePointer node,
                           const Type_ImageInterface_setImageOptions2_Arg0* src,
                           const Ark_ImageAIOptions* imageAIOptions)
 {
-    LOGE("Arkoala: Image._setImageOptions_PixelMapResourceStrDrawableDescriptor_ImageAIOptionsImpl - method not implemented");
+    LOGE("Arkoala: Image.SetImageOptions2Impl - method not implemented");
 }
 } // ImageInterfaceModifier
 namespace ImageAttributeModifier {
@@ -112,7 +112,8 @@ void RenderModeImpl(Ark_NativePointer node,
     if (renderMode < ImageRenderMode::ORIGINAL || renderMode > ImageRenderMode::TEMPLATE) {
         renderMode = ImageRenderMode::ORIGINAL;
     }
-    ImageModelNG::SetImageRenderMode(frameNode, Converter::ConvertOrDefault((Ark_Int32)renderMode, ImageRenderMode::ORIGINAL));
+    ImageModelNG::SetImageRenderMode(frameNode, Converter::ConvertOrDefault((Ark_Int32)renderMode,
+                                     ImageRenderMode::ORIGINAL));
 }
 void DynamicRangeModeImpl(Ark_NativePointer node,
                           Ark_Int32 value)
@@ -123,7 +124,8 @@ void DynamicRangeModeImpl(Ark_NativePointer node,
     if (dynamicRangeModeValue < DynamicRangeMode::HIGH || dynamicRangeModeValue > DynamicRangeMode::STANDARD) {
         dynamicRangeModeValue = DynamicRangeMode::STANDARD;
     }
-    ImageModelNG::SetDynamicRangeMode(frameNode, Converter::ConvertOrDefault((Ark_Int32)dynamicRangeModeValue, DynamicRangeMode::HIGH));
+    ImageModelNG::SetDynamicRangeMode(frameNode, Converter::ConvertOrDefault((Ark_Int32)dynamicRangeModeValue,
+                                                                             DynamicRangeMode::HIGH));
 }
 void InterpolationImpl(Ark_NativePointer node,
                        Ark_Int32 value)
@@ -134,7 +136,8 @@ void InterpolationImpl(Ark_NativePointer node,
     if (interpolation < Ace::ImageInterpolation::NONE || interpolation > Ace::ImageInterpolation::HIGH) {
         interpolation = Ace::ImageInterpolation::NONE;
     }
-    ImageModelNG::SetImageInterpolation(frameNode, Converter::ConvertOrDefault((Ark_Int32)interpolation, ImageInterpolation::NONE));
+    ImageModelNG::SetImageInterpolation(frameNode, Converter::ConvertOrDefault((Ark_Int32)interpolation,
+                                                                               ImageInterpolation::NONE));
 }
 void SourceSizeImpl(Ark_NativePointer node,
                     const Type_ImageAttribute_sourceSize_Arg0* value)
@@ -193,7 +196,7 @@ void OnCompleteImpl(Ark_NativePointer node,
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto onEvent = [frameNode](const LoadImageSuccessEvent& info) {
-        Opt_Literal_width_Number_height_Number_componentWidth_Number_componentHeight_Number_loadingStatus_Number_contentWidth_Number_contentHeight_Number_contentOffsetX_Number_contentOffsetY_Number event;
+        Opt_Literal_Number_width_height_componentWidth_componentHeight_loadingStatus_contentWidth_contentHeight_contentOffsetX_contentOffsetY event;
         event.value.width.tag = Ark_Tag::ARK_TAG_FLOAT32;
         event.value.width.f32 = info.GetWidth();
         event.value.height.tag = Ark_Tag::ARK_TAG_FLOAT32;
@@ -221,7 +224,7 @@ void OnErrorImpl(Ark_NativePointer node,
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [frameNode](const LoadImageFailEvent& info) {           
+    auto onEvent = [frameNode](const LoadImageFailEvent& info) {
         Ark_ImageError event;
         event.componentWidth.tag = Ark_Tag::ARK_TAG_FLOAT32;
         event.componentWidth.f32 = info.GetComponentWidth();
@@ -299,7 +302,7 @@ const GENERATED_ArkUIImageModifier* GetImageModifier()
         ImageAttributeModifier::CopyOptionImpl,
         ImageAttributeModifier::DraggableImpl,
         ImageAttributeModifier::PointLightImpl,
-        ImageAttributeModifier::EdgeAntialiasingImpl,
+        ImageAttributeModifier::EdgeAntialiasingImpl,_setImageOptions_PixelMapResourceStrDrawableDescriptor_ImageAIOptionsImpl
         ImageAttributeModifier::OnCompleteImpl,
         ImageAttributeModifier::OnErrorImpl,
         ImageAttributeModifier::OnFinishImpl,
