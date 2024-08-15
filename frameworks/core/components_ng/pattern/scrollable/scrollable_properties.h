@@ -156,6 +156,21 @@ struct NestedScrollOptions {
     }
 };
 
+struct NestedScrollOptionsExt {
+    NestedScrollMode scrollUp;
+    NestedScrollMode scrollDown;
+    NestedScrollMode scrollLeft;
+    NestedScrollMode scrollRight;
+
+    std::string ToString() const
+    {
+        return "NestedScrollOptionsExt scrollUp: " + std::to_string(static_cast<int32_t>(scrollUp)) +
+               ", scrollDown: " + std::to_string(static_cast<int32_t>(scrollDown)) +
+               ", scrollLeft: " + std::to_string(static_cast<int32_t>(scrollLeft)) +
+               ", scrollRight: " + std::to_string(static_cast<int32_t>(scrollRight));
+    }
+};
+
 struct ListItemIndex {
     int32_t index = -1;
     int32_t area = -1;
