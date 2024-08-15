@@ -496,7 +496,8 @@ void EventManager::HandleOutOfRectCallback(const Point& point, std::vector<RectC
             continue;
         }
         for (const auto& rect : rectList) {
-            LOGI("Point(%{public}f, %{public}f) out of Rect-[%{public}f, %{public}f, %{public}f, %{public}f]",
+            TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+                "Point(%{public}f, %{public}f) out of Rect-[%{public}f, %{public}f, %{public}f, %{public}f]",
                 point.GetX(), point.GetY(), rect.Left(), rect.Right(), rect.Top(), rect.Bottom());
         }
         if (point.GetSourceType() == SourceType::TOUCH) {
@@ -835,7 +836,7 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event)
 
     const auto curResultIter = axisTouchTestResults_.find(event.id);
     if (curResultIter == axisTouchTestResults_.end()) {
-        LOGI("the %{public}d axis test result does not exist!", event.id);
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "the %{public}d axis test result does not exist!", event.id);
         return false;
     }
     // rotate event is no need to add scope.
@@ -874,7 +875,7 @@ bool EventManager::DispatchTabIndexEvent(
     CHECK_NULL_RETURN(focusNode, false);
     CHECK_NULL_RETURN(mainNode, false);
     if (focusNode->HandleFocusByTabIndex(event, mainNode)) {
-        LOGI("Tab index focus system handled this event");
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "Tab index focus system handled this event");
         return true;
     }
     return false;
@@ -884,7 +885,7 @@ bool EventManager::DispatchKeyEvent(const KeyEvent& event, const RefPtr<FocusNod
 {
     CHECK_NULL_RETURN(focusNode, false);
     if (focusNode->HandleKeyEvent(event)) {
-        LOGI("Default focus system handled this event");
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "Default focus system handled this event");
         return true;
     }
     return false;
@@ -947,8 +948,8 @@ void EventManager::MouseTest(const MouseEvent& event, const RefPtr<RenderNode>& 
     }
     mouseHoverNodePre_ = mouseHoverNode_;
     mouseHoverNode_ = hoverNode;
-    LOGI("MouseDetect hit test last/new result size = %{public}zu/%{public}zu", mouseHoverTestResultsPre_.size(),
-        mouseHoverTestResults_.size());
+    TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "MouseDetect hit test last/new result size = %{public}zu/%{public}zu",
+        mouseHoverTestResultsPre_.size(), mouseHoverTestResults_.size());
 }
 
 bool EventManager::DispatchMouseEvent(const MouseEvent& event)
@@ -959,7 +960,8 @@ bool EventManager::DispatchMouseEvent(const MouseEvent& event)
             auto hoverNode = wp.Upgrade();
             if (hoverNode) {
                 if (hoverNode->HandleMouseEvent(event)) {
-                    LOGI("Do HandleMouseEvent. Dispatch node: %{public}s", AceType::TypeName(hoverNode));
+                    TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "Do HandleMouseEvent. Dispatch node: %{public}s",
+                        AceType::TypeName(hoverNode));
                     break;
                 }
             }
@@ -1383,7 +1385,7 @@ void EventManager::AxisTest(const AxisEvent& event, const RefPtr<RenderNode>& re
     WeakPtr<RenderNode> axisNode = nullptr;
     renderNode->AxisDetect(point, point, axisNode, event.GetDirection());
     axisNode_ = axisNode;
-    LOGI("Current axis node is %{public}s", AceType::TypeName(axisNode_.Upgrade()));
+    TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "Current axis node is %{public}s", AceType::TypeName(axisNode_.Upgrade()));
 }
 
 bool EventManager::DispatchAxisEvent(const AxisEvent& event)
@@ -1714,19 +1716,19 @@ void AddKeyboardShortcutKeys(
     // single key
     if (keys == CtrlKeysBit::CTRL || keys == CtrlKeysBit::SHIFT ||
         keys == CtrlKeysBit::ALT) {
-        LOGI("AddKeyboardShortcutKeys single key");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "AddKeyboardShortcutKeys single key");
         AddKeyboardShortcutSingleKey(keys, keyCodes, permutation);
     }
     // double keys
     if (keys == CtrlKeysBit::CTRL + CtrlKeysBit::SHIFT ||
         keys == CtrlKeysBit::CTRL + CtrlKeysBit::ALT ||
         keys == CtrlKeysBit::SHIFT + CtrlKeysBit::ALT) {
-        LOGI("AddKeyboardShortcutKeys double keys");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "AddKeyboardShortcutKeys double keys");
         AddKeyboardShortcutDoubleKeys(keys, keyCodes, permutation);
     }
     // triple keys
     if (keys == CtrlKeysBit::CTRL + CtrlKeysBit::SHIFT + CtrlKeysBit::ALT) {
-        LOGI("AddKeyboardShortcutKeys triple keys");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "AddKeyboardShortcutKeys triple keys");
         AddKeyboardShortcutTripleKeys(keys, keyCodes, permutation);
     }
 }
@@ -1765,13 +1767,13 @@ bool TriggerKeyboardShortcut(const KeyEvent& event, const std::vector<NG::Keyboa
 
                 if (keyboardShortcut.onKeyboardShortcutAction) {
                     keyboardShortcut.onKeyboardShortcutAction();
-                    LOGI("TriggerKeyboardShortcut action done.");
+                    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "TriggerKeyboardShortcut action done.");
                     return true;
                 } else {
                     auto gestureEventHub = eventHub->GetGestureEventHub();
                     if (gestureEventHub && gestureEventHub->IsClickable()) {
                         gestureEventHub->KeyBoardShortCutClick(event, node);
-                        LOGI("TriggerKeyboardShortcut click done.");
+                        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "TriggerKeyboardShortcut click done.");
                         return true;
                     }
                 }

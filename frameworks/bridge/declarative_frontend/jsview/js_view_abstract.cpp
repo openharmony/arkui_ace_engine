@@ -6916,7 +6916,7 @@ void JSViewAbstract::JsMotionPath(const JSCallbackInfo& info)
     if (ParseMotionPath(jsVal, motionPathOption)) {
         ViewAbstractModel::GetInstance()->SetMotionPath(motionPathOption);
     } else {
-        LOGI("Parse animation motionPath failed. %{public}s", jsVal->ToString().c_str());
+        TAG_LOGI(AceLogTag::ACE_ANIMATION, "Parse animation motionPath failed. %{public}s", jsVal->ToString().c_str());
         ViewAbstractModel::GetInstance()->SetMotionPath(MotionPathOption());
     }
 }

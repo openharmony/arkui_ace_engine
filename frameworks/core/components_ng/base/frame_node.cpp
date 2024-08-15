@@ -489,7 +489,6 @@ FrameNode::~FrameNode()
     pattern_->DetachFromFrameNode(this);
     if (IsOnMainTree()) {
         OnDetachFromMainTree(false, GetContext());
-        LOGW("%{public}s %{public}d should do detach before destroy function", GetTag().c_str(), GetId());
     }
     TriggerVisibleAreaChangeCallback(0, true);
     CleanVisibleAreaUserCallback();

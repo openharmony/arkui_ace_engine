@@ -438,12 +438,12 @@ RefPtr<FrameNode> Inspector::GetFrameNodeByKey(const std::string& key, bool notD
     }
     auto context = NG::PipelineContext::GetCurrentContextSafely();
     if (!context) {
-        LOGW("Internal error! The PipelineContext returned by the system is null. param: %{public}s", key.c_str());
+        LOGW("Internal error! Context is null. key: %{public}s", key.c_str());
         return nullptr;
     }
     auto rootNode = context->GetRootElement();
     if (!rootNode) {
-        LOGW("Internal error! The rootNode returned by the system is null. param: %{public}s", key.c_str());
+        LOGW("Internal error! RootNode is null. key: %{public}s", key.c_str());
         return nullptr;
     }
 
@@ -481,15 +481,13 @@ void Inspector::GetRectangleById(const std::string& key, Rectangle& rectangle)
 {
     auto frameNode = Inspector::GetFrameNodeByKey(key, true);
     if (!frameNode) {
-        LOGW("Can't find a component that id or key are %{public}s, Please check your parameters are correct",
-            key.c_str());
+        LOGW("Can't find component:%{public}s, check your parameters", key.c_str());
         return;
     }
     rectangle.size = frameNode->GetGeometryNode()->GetFrameSize();
     auto context = frameNode->GetRenderContext();
     if (!context) {
-        LOGW("Internal error! The RenderContext returned by the component(id=%{public}s) is null",
-            key.c_str());
+        LOGW("Internal error! Component(id=%{public}s) is null", key.c_str());
         return;
     }
     rectangle.localOffset = context->GetPaintRectWithTransform().GetOffset();
@@ -497,8 +495,8 @@ void Inspector::GetRectangleById(const std::string& key, Rectangle& rectangle)
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     rectangle.screenRect = pipeline->GetCurrentWindowRect();
-    LOGI("GetRectangleById Id = %{public}d key = %{public}s localOffset = %{public}s windowOffset = %{public}s "
-         "screenRect = %{public}s",
+    LOGI("GetRectangleById Id:%{public}d key:%{public}s localOffset:%{public}s windowOffset:%{public}s "
+         "screenRect:%{public}s",
         frameNode->GetId(), key.c_str(), rectangle.localOffset.ToString().c_str(),
         rectangle.windowOffset.ToString().c_str(), rectangle.screenRect.ToString().c_str());
     auto renderContext = frameNode->GetRenderContext();
