@@ -162,6 +162,15 @@ HWTEST_F(ScrollableCoverTestNg, SetScrollBarWidthTest001, TestSize.Level1)
     scrollablePn = scroll_->GetPaintProperty<ScrollablePaintProperty>();
     EXPECT_EQ(scrollablePn->GetBarWidth().Value(), SCROLLBAR_WIDTH_VALUE_VP);
     EXPECT_EQ(scrollablePn->GetBarWidth().Unit(), DimensionUnit::VP);
+    /**
+     * @tc.steps: step5. Set propScrollBarProperty_ nullptr in ScrollablePaintProperty and use defaultScrollBarWidth
+     */
+    scrollablePn = scroll_->GetPaintProperty<ScrollablePaintProperty>();
+    auto themeManager = MockPipelineContext::GetCurrent()->GetThemeManager();
+    auto scrollBarTheme = themeManager->GetTheme<ScrollBarTheme>();
+    scrollablePn->propScrollBarProperty_ = nullptr;
+    EXPECT_EQ(scrollablePn->GetBarWidth().Value(), scrollBarTheme->GetNormalWidth().Value());
+    EXPECT_EQ(scrollablePn->GetBarWidth().Unit(), scrollBarTheme->GetNormalWidth().Unit());
 }
 
 /**
@@ -193,6 +202,14 @@ HWTEST_F(ScrollableCoverTestNg, SetScrollBarColorTest001, TestSize.Level1)
     ScrollableModelNG::SetScrollBarColor(&(*scroll_), SCROLLBAR_COLOR_BLUE);
     scrollablePn = scroll_->GetPaintProperty<ScrollablePaintProperty>();
     EXPECT_EQ(scrollablePn->GetBarColor(), Color::FromString(SCROLLBAR_COLOR_BLUE));
+    /**
+     * @tc.steps: step4. Set propScrollBarProperty_ nullptr in ScrollablePaintProperty and use defaultScrollBarColor
+     */
+    scrollablePn = scroll_->GetPaintProperty<ScrollablePaintProperty>();
+    auto themeManager = MockPipelineContext::GetCurrent()->GetThemeManager();
+    auto scrollBarTheme = themeManager->GetTheme<ScrollBarTheme>();
+    scrollablePn->propScrollBarProperty_ = nullptr;
+    EXPECT_EQ(scrollablePn->GetBarColor(), scrollBarTheme->GetForegroundColor());
 }
 
 /**
@@ -226,6 +243,12 @@ HWTEST_F(ScrollableCoverTestNg, ToJsonValueTest001, TestSize.Level1)
     EXPECT_EQ(json->GetString("scrollBar"), BAR_STATE_AUTO);
     EXPECT_EQ(json->GetString("scrollBarColor"), SCROLLBAR_COLOR_BLUE);
     EXPECT_EQ(json->GetString("scrollBarWidth"), SCROLLBAR_WIDTH_PX);
+    /**
+     * @tc.steps: step5. call tojson when filter.IsFastFilter() true
+     */
+    filter.AddFilterAttr("id");
+    scrollablePn->ToJsonValue(json, filter);
+    EXPECT_TRUE(filter.IsFastFilter());
 }
 
 /**
