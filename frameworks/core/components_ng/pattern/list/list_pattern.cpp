@@ -52,6 +52,7 @@ constexpr float DEFAULT_MAX_SPACE_SCALE = 2.0f;
 
 void ListPattern::OnModifyDone()
 {
+    Pattern::CheckLocalized();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
