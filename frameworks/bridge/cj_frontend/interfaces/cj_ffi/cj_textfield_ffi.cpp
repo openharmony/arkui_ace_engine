@@ -100,6 +100,12 @@ void FfiOHOSAceFrameworkTextFieldSetBorderRadius(double value, uint32_t unit)
     TextFieldModel::GetInstance()->SetBackBorder();
 }
 
+void FfiOHOSAceFrameworkTextFieldSetAllBorderRadius(CJBorderRadius value)
+{
+    FfiOHOSAceFrameworkViewAbstractSetAllBorderRadius(value);
+    TextFieldModel::GetInstance()->SetBackBorder();
+}
+
 void FfiOHOSAceFrameworkTextFieldSetBackgroundColor(uint32_t value)
 {
     TextFieldModel::GetInstance()->SetBackgroundColor(Color(value), false);

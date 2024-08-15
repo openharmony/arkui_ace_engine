@@ -608,6 +608,12 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     auto info = layoutProperty->GetRequestFormInfo().value_or(RequestFormInfo());
     info.width = Dimension(size.Width());
     info.height = Dimension(size.Height());
+    if (std::isinf(info.width.Value()) || std::isnan(info.width.Value()) || std::isinf(info.height.Value())
+        || std::isnan(info.height.Value())) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "size invalid, width:%{public}f height:%{public}f",
+            info.width.Value(), info.height.Value());
+        return false;
+    }
     auto &&borderWidthProperty = layoutProperty->GetBorderWidthProperty();
     float borderWidth = 0.0f;
     if (borderWidthProperty && borderWidthProperty->topDimen) {
