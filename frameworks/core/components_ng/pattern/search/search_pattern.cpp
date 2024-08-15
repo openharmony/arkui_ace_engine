@@ -1751,9 +1751,6 @@ void SearchPattern::InitIconColorSize()
 void SearchPattern::CreateSearchIcon(const std::string& src)
 {
     CHECK_NULL_VOID(GetSearchNode());
-    if (GetSearchNode()->HasSearchIconNodeCreated()) {
-        return;
-    }
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
         src.empty()) {
         CreateOrUpdateSymbol(IMAGE_INDEX, !GetSearchNode()->HasSearchIconNodeCreated());
@@ -1770,9 +1767,6 @@ void SearchPattern::CreateSearchIcon(const std::string& src)
 void SearchPattern::CreateCancelIcon()
 {
     CHECK_NULL_VOID(GetSearchNode());
-    if (GetSearchNode()->HasCancelIconNodeCreated()) {
-        return;
-    }
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         CreateOrUpdateSymbol(CANCEL_IMAGE_INDEX, !GetSearchNode()->HasCancelIconNodeCreated());
     } else {
