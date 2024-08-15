@@ -249,6 +249,9 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionCon
     UIEXT_LOGI("The session is created with want = %{private}s", want.ToString().c_str());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    auto realHostWindowId = pipeline->GetRealHostWindowId();
     auto wantPtr = std::make_shared<Want>(want);
     if (sessionType_ == SessionType::UI_EXTENSION_ABILITY) {
         if (wantPtr->GetStringParam(UI_EXTENSION_TYPE_KEY) == EMBEDDED_UI) {
@@ -276,17 +279,20 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionCon
         wantPtr->SetParam(UI_EXTENSION_TYPE_KEY, EMBEDDED_UI);
     }
     isNotifyOccupiedAreaChange_ = want.GetBoolParam(OCCUPIED_AREA_CHANGE_KEY, true);
-    UIEXT_LOGD("Want param isNotifyOccupiedAreaChange is %{public}d.", isNotifyOccupiedAreaChange_);
+    UIEXT_LOGI("Want param isNotifyOccupiedAreaChange is %{public}d, realHostWindowId: %{public}u.",
+        isNotifyOccupiedAreaChange_, realHostWindowId);
     auto callerToken = container->GetToken();
     auto parentToken = container->GetParentToken();
-    Rosen::SessionInfo extensionSessionInfo;
-    extensionSessionInfo.bundleName_ = want.GetElement().GetBundleName();
-    extensionSessionInfo.abilityName_ = want.GetElement().GetAbilityName();
-    extensionSessionInfo.callerToken_ = callerToken;
-    extensionSessionInfo.rootToken_ = (isTransferringCaller_ && parentToken) ? parentToken : callerToken;
-    extensionSessionInfo.want = wantPtr;
-    extensionSessionInfo.isAsyncModalBinding_ = config.isAsyncModalBinding;
-    extensionSessionInfo.uiExtensionUsage_ = static_cast<uint32_t>(config.uiExtensionUsage);
+    Rosen::SessionInfo extensionSessionInfo = {
+        .bundleName_ = want.GetElement().GetBundleName(),
+        .abilityName_ = want.GetElement().GetAbilityName(),
+        .callerToken_ = callerToken,
+        .rootToken_ = (isTransferringCaller_ && parentToken) ? parentToken : callerToken,
+        .want = wantPtr,
+        .isAsyncModalBinding_ = config.isAsyncModalBinding,
+        .uiExtensionUsage_ = static_cast<uint32_t>(config.uiExtensionUsage),
+        .realParentId_ = static_cast<int32_t>(realHostWindowId);
+    };
     session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
     CHECK_NULL_VOID(session_);
     UpdateSessionConfig();
