@@ -1065,4 +1065,80 @@ HWTEST_F(RichEditorPatternTestFourNg, GetSelectSpansPositionInfo001, TestSize.Le
     richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_I);
     EXPECT_FALSE(richEditorPattern->hasClicked_);
 }
+
+/**
+ * @tc.name: DoDeleteActions001
+ * @tc.desc: test DoDeleteActions
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, DoDeleteActions001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto aboutToDeleteFunc = [](const RichEditorDeleteValue&) { return false; };
+    eventHub->SetAboutToDelete(std::move(aboutToDeleteFunc));
+    RichEditorDeleteValue info;
+    richEditorPattern->DoDeleteActions(0, 0, info);
+
+    richEditorPattern->previewTextRecord_.previewContent = "123";
+    richEditorPattern->previewTextRecord_.isPreviewTextInputting = true;
+    richEditorPattern->previewTextRecord_.startOffset = 0;
+    richEditorPattern->previewTextRecord_.endOffset = 0;
+    richEditorPattern->DeleteForward(0);
+    richEditorPattern->DoDeleteActions(0, 0, info);
+    ASSERT_EQ(richEditorPattern->IsPreviewTextInputting(), true);
+}
+
+/**
+ * @tc.name: HandleSingleClickEvent001
+ * @tc.desc: test RichEditorPattern HandleSingleClickEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, HandleSingleClickEvent001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    RichEditorPattern::OperationRecord record;
+    AddSpan("hello1");
+
+    RectF rect(0, 0, 5, 5);
+    richEditorPattern->CreateHandles();
+    richEditorPattern->textSelector_.Update(0, 5);
+    richEditorPattern->DeleteSelectOperation(&record);
+
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
+}
+
+/**
+ * @tc.name: SetPreviewText001
+ * @tc.desc: test RichEditorPattern SetPreviewText
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, SetPreviewText001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    std::string previewTextValue;
+    PreviewRange range;
+
+    range.start = -1;
+    range.end = 0;
+
+    richEditorPattern->previewTextRecord_.previewContent = "";
+    richEditorPattern->previewTextRecord_.isPreviewTextInputting = true;
+    richEditorPattern->previewTextRecord_.startOffset = 0;
+    richEditorPattern->previewTextRecord_.endOffset = 0;
+
+    richEditorPattern->SetPreviewText(previewTextValue, range);
+
+    ASSERT_EQ(richEditorPattern->InitPreviewText(previewTextValue, range), false);
+}
 } // namespace OHOS::Ace::NG
