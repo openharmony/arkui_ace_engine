@@ -81,7 +81,7 @@ public:
 
     void FireDisappearCallback()
     {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle chang to disappear state.", name_.c_str());
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to onDisappear state.", name_.c_str());
         EventHub::FireOnDisappear();
     }
 
@@ -105,9 +105,27 @@ public:
         }
     }
 
-    void SetOnHiddenChange(std::function<void(bool)>&& onHiddenChange)
+    void AddOnHiddenChange(int32_t id, OnStateChangeEvent&& onHiddenChange)
     {
-        onHiddenChange_ = std::move(onHiddenChange);
+        onHiddenChange_[id] = std::move(onHiddenChange);
+    }
+
+    void FireOnHiddenChange(bool flag)
+    {
+        for (auto& onHiddenChangeInfo : onHiddenChange_) {
+            if (onHiddenChangeInfo.second) {
+                auto onHiddenChange = onHiddenChangeInfo.second;
+                onHiddenChange(flag);
+            }
+        }
+    }
+
+    void RemoveOnHiddenChange(int32_t id)
+    {
+        auto iter = onHiddenChange_.find(id);
+        if (iter != onHiddenChange_.end()) {
+            onHiddenChange_.erase(iter);
+        }
     }
 
     void SetName(const std::string& name)
@@ -167,7 +185,7 @@ private:
     std::function<void()> onWillDisAppear_;
     std::function<bool()> onBackPressedEvent_;
     std::function<void(RefPtr<NavDestinationContext>)> onReadyEvent_;
-    std::function<void(bool)> onHiddenChange_;
+    std::unordered_map<int32_t, OnStateChangeEvent> onHiddenChange_;
     std::string name_;
     bool isActivated_ = false;
     NavDestinationState state_;

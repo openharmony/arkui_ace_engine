@@ -366,12 +366,12 @@ bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::S
         layoutProperty->GetTextIconSpace().value_or(theme->GetTextIconSpace()).ConvertToVp();
 
     if (!GetDisplayOffset(node, buttonInfo.rect_.x_, buttonInfo.rect_.y_)) {
-        LOGW("Get display offset failed");
+        LOGW("InitBaseInfoWarning: Get display offset failed");
         return false;
     }
 
     if (!GetWindowRect(node, buttonInfo.windowRect_)) {
-        LOGW("Get window rect failed");
+        LOGW("InitBaseInfoWarning: Get window rect failed");
         return false;
     }
     auto render = node->GetRenderContext();
@@ -612,7 +612,7 @@ bool SecurityComponentHandler::CheckRectIntersect(const RectF& dest, int32_t sec
     std::unordered_map<int32_t, int32_t>& nodeId2Zindex)
 {
     for (const auto& originRect : nodeId2Rect) {
-        if (originRect.second.IsInnerIntersectWith(dest) &&
+        if (originRect.second.IsInnerIntersectWithRound(dest) &&
             (nodeId2Zindex[secNodeId] <= nodeId2Zindex[originRect.first])) {
             return true;
         }
@@ -705,7 +705,7 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scI
     uint8_t defaultData = 0;
     std::vector<uint8_t> dataBuffer;
     if (pointerEvent == nullptr) {
-        LOGW("Receive a NULL pointerEvent, set default data.");
+        LOGW("SecurityComponentClickEventWarning: Receive a NULL pointerEvent, set default data.");
         secEvent.extraInfo.data = &defaultData;
         secEvent.extraInfo.dataSize = 1;
         secEvent.point.timestamp = 0;
@@ -721,8 +721,14 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scI
             static_cast<uint64_t>(time.time_since_epoch().count()) / SECOND_TO_MILLISECOND;
     }
 #endif
+    auto layoutProperty = AceType::DynamicCast<SecurityComponentLayoutProperty>(node->GetLayoutProperty());
+    if (layoutProperty && layoutProperty->GetIsTextLimitExceeded().has_value() &&
+        layoutProperty->GetIsTextLimitExceeded().value()) {
+        LOGW("The text of the security component is out of range.");
+        return -1;
+    }
     if (CheckComponentCoveredStatus(node->GetId())) {
-        LOGW("Security component is covered by another component.");
+        LOGW("SecurityComponentCheckFail: Security component is covered by another component.");
         return -1;
     }
 
@@ -744,8 +750,14 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scI
         secEvent.extraInfo.data = data.data();
         secEvent.extraInfo.dataSize = data.size();
     }
+    auto layoutProperty = AceType::DynamicCast<SecurityComponentLayoutProperty>(node->GetLayoutProperty());
+    if (layoutProperty && layoutProperty->GetIsTextLimitExceeded().has_value() &&
+        layoutProperty->GetIsTextLimitExceeded().value()) {
+        LOGW("The text of the security component is out of range.");
+        return -1;
+    }
     if (CheckComponentCoveredStatus(node->GetId())) {
-        LOGW("Security component is covered by another component.");
+        LOGW("SecurityComponentCheckFail: Security component is covered by another component.");
         return -1;
     }
     return ReportSecurityComponentClickEventInner(scId, node, secEvent, std::move(callback));

@@ -42,6 +42,8 @@ namespace OHOS::Ace::NG {
 namespace {
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 
+const int32_t MAX_NUM_SIZE = 4;
+
 double CalcCoordinatesDistance(double curFocusMain, double curFocusCross, double childMain, double childCross)
 {
     return std::sqrt(std::pow((curFocusMain - childMain), 2) + std::pow((curFocusCross - childCross), 2));
@@ -622,9 +624,9 @@ WeakPtr<FocusHub> GridPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
         TAG_LOGW(AceLogTag::ACE_GRID, "Can not find current main index: %{public}d", curMainIndex);
         return nullptr;
     }
-    LOGI("GetNextFocusNode: Current focused item is (%{public}d,%{public}d)-[%{public}d,%{public}d]. Focus step is "
-         "%{public}d",
-        curMainIndex, curCrossIndex, curMainSpan, curCrossSpan, step);
+    TAG_LOGI(AceLogTag::ACE_GRID,
+        "GetNextFocusNode: Current:(%{public}d,%{public}d)-[%{public}d,%{public}d]. Focus: %{public}d", curMainIndex,
+        curCrossIndex, curMainSpan, curCrossSpan, step);
     auto focusSteps = GetFocusSteps(curMainIndex, curCrossIndex, step);
     if (focusSteps.first != FocusStep::NONE && focusSteps.second != FocusStep::NONE) {
         auto firstStepRes = GetNextFocusNode(focusSteps.first, currentFocusNode);
@@ -665,8 +667,6 @@ WeakPtr<FocusHub> GridPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
 std::pair<int32_t, int32_t> GridPattern::GetNextIndexByStep(
     int32_t curMainIndex, int32_t curCrossIndex, int32_t curMainSpan, int32_t curCrossSpan, FocusStep step)
 {
-    LOGI("Current item: (%{public}d,%{public}d)-[%{public}d,%{public}d]. Grid axis: %{public}d, step: %{public}d",
-        curMainIndex, curCrossIndex, curMainSpan, curCrossSpan, gridLayoutInfo_.axis_, step);
     auto curMainStart = gridLayoutInfo_.startMainLineIndex_;
     auto curMainEnd = gridLayoutInfo_.endMainLineIndex_;
     auto curChildStartIndex = gridLayoutInfo_.startIndex_;
@@ -677,6 +677,9 @@ std::pair<int32_t, int32_t> GridPattern::GetNextIndexByStep(
         TAG_LOGW(AceLogTag::ACE_GRID, "Can not find current main index: %{public}d", curMainIndex);
         return { -1, -1 };
     }
+    TAG_LOGI(AceLogTag::ACE_GRID,
+        "Current: (%{public}d,%{public}d)-[%{public}d,%{public}d]. axis: %{public}d, step: %{public}d",
+        curMainIndex, curCrossIndex, curMainSpan, curCrossSpan, gridLayoutInfo_.axis_, step);
     auto curMaxCrossCount = GetCrossCount();
     auto nextMainIndex = curMainIndex;
     auto nextCrossIndex = curCrossIndex;
@@ -1670,6 +1673,12 @@ void GridPattern::DumpAdvanceInfo()
     auto property = GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_VOID(property);
     ScrollablePattern::DumpAdvanceInfo();
+    if (!property->HasLayoutOptions()) {
+        DumpLog::GetInstance().AddDesc("GridLayoutOptions:null");
+    } else {
+        DumpLog::GetInstance().AddDesc("GridLayoutOptions:true");
+        DumpLog::GetInstance().AddDesc(GetIrregularIndexesString());
+    }
     supportAnimation_ ? DumpLog::GetInstance().AddDesc("supportAnimation:true")
                       : DumpLog::GetInstance().AddDesc("supportAnimation:false");
     isConfigScrollable_ ? DumpLog::GetInstance().AddDesc("isConfigScrollable:true")
@@ -1790,6 +1799,33 @@ void GridPattern::DumpAdvanceInfo()
     }
 }
 
+std::string GridPattern::GetIrregularIndexesString() const
+{
+    auto property = GetLayoutProperty<GridLayoutProperty>();
+    if (!property || !property->HasLayoutOptions()) {
+        return std::string("");
+    }
+    const auto& options = *property->GetLayoutOptions();
+    if (options.irregularIndexes.empty()) {
+        return std::string("");
+    }
+    std::string irregularIndexes = std::string("IrregularIndexes: [");
+    int count = 0;
+    for (const auto& index : options.irregularIndexes) {
+        if (count > 0) {
+            irregularIndexes.append(", ");
+        }
+        irregularIndexes.append(std::to_string(index));
+        count++;
+        if (count == MAX_NUM_SIZE) {
+            irregularIndexes.append("...");
+            break;
+        }
+    }
+    irregularIndexes.append("]");
+    return irregularIndexes;
+}
+
 std::string GridPattern::ProvideRestoreInfo()
 {
     return std::to_string(gridLayoutInfo_.startIndex_);
@@ -1842,6 +1878,7 @@ void GridPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, s
 void GridPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
 {
     if (UseIrregularLayout() && scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) {
+        ScrollToIndex(LAST_ITEM, smooth);
         // for irregular layout, last item might not be at bottom
         gridLayoutInfo_.jumpIndex_ = JUMP_TO_BOTTOM_EDGE;
         auto host = GetHost();
@@ -1853,22 +1890,22 @@ void GridPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
 }
 
 // Turn on the scrolling animation
-void GridPattern::AnimateToTarget(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper)
+void GridPattern::AnimateToTarget(ScrollAlign align, const RefPtr<LayoutAlgorithmWrapper>& algo)
 {
     if (targetIndex_.has_value()) {
-        AnimateToTargetImp(align, layoutAlgorithmWrapper);
+        AnimateToTargetImpl(align, algo);
         targetIndex_.reset();
     }
 }
 
 // scroll to the item where the index is located
-bool GridPattern::AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper)
+bool GridPattern::AnimateToTargetImpl(ScrollAlign align, const RefPtr<LayoutAlgorithmWrapper>& algo)
 {
-    float mainGap = GetMainGap();
+    const float mainGap = GetMainGap();
     float targetPos = 0.0f;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto extraOffset = GetExtraOffset();
+    auto&& extraOffset = GetExtraOffset();
     bool success = true;
     if (UseIrregularLayout()) {
         auto host = GetHost();
@@ -1879,30 +1916,27 @@ bool GridPattern::AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWr
             success = false;
         }
     } else {
-        auto gridScrollLayoutAlgorithm =
-            DynamicCast<GridScrollLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+        auto gridScrollLayoutAlgorithm = DynamicCast<GridScrollLayoutAlgorithm>(algo->GetLayoutAlgorithm());
         scrollGridLayoutInfo_ = gridScrollLayoutAlgorithm->GetScrollGridLayoutInfo();
         // Based on the index, align gets the position to scroll to
         success = scrollGridLayoutInfo_.GetGridItemAnimatePos(
-            gridLayoutInfo_, targetIndex_.value(), align, mainGap, targetPos);
+            gridLayoutInfo_, *targetIndex_, align, mainGap, targetPos);
     }
     if (!success) {
-        if (extraOffset.has_value()) {
-            targetPos = GetTotalOffset();
-        } else {
+        if (NearZero(extraOffset.value_or(0.0f))) {
             return false;
         }
+        targetPos = GetTotalOffset();
     }
 
     isSmoothScrolling_ = true;
     if (extraOffset.has_value()) {
-        auto initPos = targetPos;
-        targetPos += extraOffset.value();
-        ACE_SCOPED_TRACE("AnimateToTargetImpl, success:%u, initPos:%f, extraOffset:%f, targetPos:%f", success, initPos,
-            extraOffset.value(), targetPos);
+        ACE_SCOPED_TRACE(
+            "AnimateToTargetImpl, success:%u, targetPos:%f, extraOffset:%f", success, targetPos, *extraOffset);
+        targetPos += *extraOffset;
         ResetExtraOffset();
     } else {
-        ACE_SCOPED_TRACE("AnimateToTargetImpl, extraOffset is null, targetPos:%f", targetPos);
+        ACE_SCOPED_TRACE("AnimateToTargetImpl, targetPos:%f", targetPos);
     }
     AnimateTo(targetPos, -1, nullptr, true);
     return true;

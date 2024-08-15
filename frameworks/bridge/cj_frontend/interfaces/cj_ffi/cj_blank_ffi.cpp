@@ -15,8 +15,6 @@
 
 #include "cj_blank_ffi.h"
 
-#include "utils.h"
-#include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
 
 using namespace OHOS::Ace;

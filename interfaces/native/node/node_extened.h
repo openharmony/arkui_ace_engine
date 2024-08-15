@@ -140,6 +140,22 @@ struct ArkUI_AccessibilityValue {
     ArkUI_OptionalCharPtr text;
 };
 
+struct ArkUI_CustomSpanMeasureInfo {
+    float fontSize;
+};
+
+struct ArkUI_CustomSpanMetrics {
+    float width;
+    float height;
+};
+
+struct ArkUI_CustomSpanDrawInfo {
+    float optionsX;
+    float optionsLineTop;
+    float optionsLineBottom;
+    float optionsBaseLine;
+};
+
 #ifdef __cplusplus
 };
 #endif

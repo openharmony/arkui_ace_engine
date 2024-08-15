@@ -15,14 +15,9 @@
 
 #include "base/log/jank_frame_report.h"
 
-#include <chrono>
-#include <string>
-
 #include "render_service_client/core/transaction/rs_interfaces.h"
-
 #include "base/log/ace_trace.h"
 #include "base/log/log_wrapper.h"
-#include "base/perfmonitor/perf_monitor.h"
 #include "base/log/event_report.h"
 
 namespace OHOS::Ace {

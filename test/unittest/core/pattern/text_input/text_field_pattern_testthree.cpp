@@ -1,0 +1,422 @@
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "text_input_base.h"
+
+#include "core/components/text_overlay/text_overlay_theme.h"
+#include "core/components_ng/pattern/indexer/indexer_layout_property.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
+#include "test/mock/core/common/mock_resource_adapter_v2.h"
+
+namespace OHOS::Ace::NG {
+
+namespace {} // namespace
+
+class TextFieldPatternTestThree : public TextInputBases {
+public:
+};
+
+void CustomKeyboardBuilder() {}
+/**
+ * @tc.name: UpdateFocusForward001
+ * @tc.desc: test testInput text UpdateFocusForward
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, UpdateFocusForward001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetIsShowCancelButton(true);
+        model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+    });
+    GetFocus();
+    auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
+    auto stackNode = cleanNodeResponseArea->cleanNode_;
+    auto imageFrameNode = AceType::DynamicCast<FrameNode>(stackNode->GetFirstChild());
+    auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    cleanNodeResponseArea->UpdateCleanNode(false);
+    pattern_->focusIndex_ = FocuseIndex::TEXT;
+    auto cleanNodeArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
+    cleanNodeArea->isShow_ = true;
+    EXPECT_TRUE(pattern_->UpdateFocusForward());
+}
+
+/**
+ * @tc.name: UpdateFocusBackward001
+ * @tc.desc: test testInput text UpdateFocusBackward001
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, UpdateFocusBackward001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetIsShowCancelButton(true);
+        model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+    });
+    GetFocus();
+    auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
+    auto stackNode = cleanNodeResponseArea->cleanNode_;
+    auto imageFrameNode = AceType::DynamicCast<FrameNode>(stackNode->GetFirstChild());
+    auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    cleanNodeResponseArea->UpdateCleanNode(false);
+    pattern_->focusIndex_ = FocuseIndex::UNIT;
+    auto cleanNodeArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
+    cleanNodeArea->isShow_ = true;
+    EXPECT_TRUE(pattern_->UpdateFocusBackward());
+}
+
+/**
+ * @tc.name: HandleCursorOnDragMoved001
+ * @tc.desc: test testInput text HandleCursorOnDragMoved001
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, HandleCursorOnDragMoved001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    frameNode_->MarkModifyDone();
+    pattern_->OnModifyDone();
+    auto focusHub = pattern_->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = false;
+    pattern_->HandleCursorOnDragMoved(nullptr);
+    EXPECT_TRUE(pattern_->IsNormalInlineState());
+}
+
+/**
+ * @tc.name: HandleCursorOnDragMoved002
+ * @tc.desc: test testInput text HandleCursorOnDragMoved002
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, HandleCursorOnDragMoved002, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::DEFAULT);
+    frameNode_->MarkModifyDone();
+    pattern_->OnModifyDone();
+    auto focusHub = pattern_->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = true;
+    SystemProperties::debugEnabled_ = true;
+    pattern_->HandleCursorOnDragMoved(nullptr);
+    EXPECT_TRUE(pattern_->isCursorAlwaysDisplayed_);
+}
+
+/**
+ * @tc.name: HandleCursorOnDragMoved003
+ * @tc.desc: test testInput text HandleCursorOnDragMoved003
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, HandleCursorOnDragMoved003, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::DEFAULT);
+    frameNode_->MarkModifyDone();
+    pattern_->OnModifyDone();
+    auto focusHub = pattern_->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = false;
+    auto host = pattern_->GetHost();
+    host->SetDisallowDropForcedly(true);
+    pattern_->HandleCursorOnDragMoved(nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto dragManager = pipeline->GetDragDropManager();
+    ASSERT_NE(dragManager, nullptr);
+    EXPECT_FALSE(dragManager->IsDropAllowed(host));
+}
+
+/**
+ * @tc.name: HandleCursorOnDragMoved004
+ * @tc.desc: test testInput text HandleCursorOnDragMoved004
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, HandleCursorOnDragMoved004, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::DEFAULT);
+    frameNode_->MarkModifyDone();
+    pattern_->OnModifyDone();
+    auto focusHub = pattern_->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = false;
+    focusHub->SetParentFocusable(false);
+    auto host = pattern_->GetHost();
+    host->SetDisallowDropForcedly(false);
+    pattern_->HandleCursorOnDragMoved(nullptr);
+    EXPECT_FALSE(pattern_->isCursorAlwaysDisplayed_);
+}
+
+/**
+ * @tc.name: HandleCursorOnDragEnded001
+ * @tc.desc: test testInput text HandleCursorOnDragEnded001
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, HandleCursorOnDragEnded001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    frameNode_->MarkModifyDone();
+    pattern_->OnModifyDone();
+    auto focusHub = pattern_->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    pattern_->isCursorAlwaysDisplayed_ = true;
+    pattern_->HandleCursorOnDragEnded(nullptr);
+    EXPECT_TRUE(pattern_->isCursorAlwaysDisplayed_);
+}
+
+/**
+ * @tc.name: RequestKeyboardAfterLongPress001
+ * @tc.desc: test testInput text RequestKeyboardAfterLongPress001
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, RequestKeyboardAfterLongPress001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    pattern_->isLongPress_ = false;
+    auto focusHub = pattern_->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = true;
+    pattern_->isCustomKeyboardAttached_ = true;
+    pattern_->RequestKeyboardAfterLongPress();
+    EXPECT_FALSE(pattern_->isLongPress_);
+    focusHub->currentFocus_ = false;
+    pattern_->RequestKeyboardAfterLongPress();
+    EXPECT_FALSE(pattern_->isLongPress_);
+    pattern_->isLongPress_ = true;
+    pattern_->RequestKeyboardAfterLongPress();
+    EXPECT_FALSE(pattern_->isLongPress_);
+    pattern_->isLongPress_ = true;
+    focusHub->currentFocus_ = true;
+    pattern_->RequestKeyboardAfterLongPress();
+    EXPECT_FALSE(pattern_->isLongPress_);
+}
+
+/**
+ * @tc.name: RequestKeyboardAfterLongPress002
+ * @tc.desc: test testInput text RequestKeyboardAfterLongPress002
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, RequestKeyboardAfterLongPress002, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    pattern_->isLongPress_ = false;
+    auto focusHub = pattern_->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = true;
+    pattern_->showKeyBoardOnFocus_ = true;
+    auto func = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    pattern_->customKeyboard_ = AceType::Claim<UINode>(func);
+    pattern_->customKeyboardBuilder_ = CustomKeyboardBuilder;
+    pattern_->isCustomKeyboardAttached_ = true;
+    pattern_->RequestKeyboardAfterLongPress();
+    EXPECT_FALSE(pattern_->isLongPress_);
+    focusHub->currentFocus_ = false;
+    pattern_->RequestKeyboardAfterLongPress();
+    EXPECT_FALSE(pattern_->isLongPress_);
+    pattern_->isLongPress_ = true;
+    pattern_->RequestKeyboardAfterLongPress();
+    EXPECT_FALSE(pattern_->isLongPress_);
+    pattern_->isLongPress_ = true;
+    focusHub->currentFocus_ = true;
+    pattern_->RequestKeyboardAfterLongPress();
+    EXPECT_FALSE(pattern_->isLongPress_);
+}
+
+/**
+ * @tc.name: GetAvoidSoftKeyboardOffset001
+ * @tc.desc: test testInput text GetAvoidSoftKeyboardOffset001
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, GetAvoidSoftKeyboardOffset001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    PipelineBase::GetCurrentContext()->themeManager_ = nullptr;
+    auto ret = pattern_->GetAvoidSoftKeyboardOffset();
+    EXPECT_EQ(ret, 24.0_vp);
+}
+
+/**
+ * @tc.name: SetPreviewTextOperation001
+ * @tc.desc: test testInput text SetPreviewTextOperation001
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, SetPreviewTextOperation001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetMaxLength(1000023);
+    });
+    GetFocus();
+
+    auto controller = pattern_->GetTextSelectController();
+    controller->UpdateCaretIndex(5);
+    pattern_->SetPreviewTextOperation(PREVIEW_ONE);
+    EXPECT_TRUE(pattern_->GetIsPreviewText());
+    FlushLayoutTask(frameNode_);
+
+    pattern_->InitEditingValueText("");
+    EXPECT_FALSE(pattern_->GetIsPreviewText());
+    FlushLayoutTask(frameNode_);
+}
+
+/**
+ * @tc.name: GetPreviewTextRects001
+ * @tc.desc: test testInput text GetPreviewTextRects001
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, GetPreviewTextRects001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    std::vector<RectF> rects { RectF(0, 0, 20, 20) };
+    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
+    pattern_->hasPreviewText_ = true;
+    auto ret = pattern_->GetPreviewTextRects();
+    EXPECT_FALSE(ret.empty());
+}
+
+/**
+ * @tc.name: GetPreviewTextRects002
+ * @tc.desc: test testInput text GetPreviewTextRects002
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, GetPreviewTextRects002, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    std::vector<RectF> rects { RectF(10, 10, 20, 20), RectF(0, 0, 20, 20) };
+    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
+    pattern_->hasPreviewText_ = true;
+    auto ret = pattern_->GetPreviewTextRects();
+    EXPECT_FALSE(ret.empty());
+}
+
+/**
+ * @tc.name: GetPreviewTextStyle001
+ * @tc.desc: test testInput text GetPreviewTextStyle001
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, GetPreviewTextStyle001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    pattern_->ReceivePreviewTextStyle("normal");
+    EXPECT_EQ(pattern_->GetPreviewTextStyle(), PreviewTextStyle::NORMAL);
+    pattern_->ReceivePreviewTextStyle("underline");
+    EXPECT_EQ(pattern_->GetPreviewTextStyle(), PreviewTextStyle::UNDERLINE);
+}
+
+/**
+ * @tc.name: CalculatePreviewingTextMovingLimit001
+ * @tc.desc: test testInput text CalculatePreviewingTextMovingLimit001
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, CalculatePreviewingTextMovingLimit001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    std::vector<RectF> rects { RectF(10, 10, 20, 20), RectF(0, 0, 20, 20) };
+    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
+    pattern_->hasPreviewText_ = true;
+    auto ret = pattern_->GetPreviewTextRects();
+    EXPECT_FALSE(ret.empty());
+    double limitL = 0.0;
+    double limitR = 0.0;
+    pattern_->CalculatePreviewingTextMovingLimit(Offset(100, 100), limitL, limitR);
+    ASSERT_NE(limitL, 0.0);
+    pattern_->CalculatePreviewingTextMovingLimit(Offset(11, 11), limitL, limitR);
+    ASSERT_NE(limitL, 0.0);
+    pattern_->CalculatePreviewingTextMovingLimit(Offset(0, 0), limitL, limitR);
+    ASSERT_NE(limitL, 0.0);
+}
+
+/**
+ * @tc.name: ScrollPage001
+ * @tc.desc: test testInput text ScrollPage001
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, ScrollPage001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    std::vector<RectF> rects { RectF(10, 10, 20, 20), RectF(0, 0, 20, 20) };
+    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
+    pattern_->hasPreviewText_ = true;
+    pattern_->ScrollPage(true, true, AccessibilityScrollType::SCROLL_HALF);
+    pattern_->ScrollPage(true, true, AccessibilityScrollType::SCROLL_MAX_TYPE);
+    auto ret = pattern_->GetPreviewTextRects();
+    EXPECT_FALSE(ret.empty());
+}
+
+/**
+ * @tc.name: IsResponseRegionExpandingNeededForStylus001
+ * @tc.desc: test testInput text IsResponseRegionExpandingNeededForStylus001
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, IsResponseRegionExpandingNeededForStylus001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.x = 10;
+    touchEvent.y = 10;
+    auto ret = pattern_->IsResponseRegionExpandingNeededForStylus(touchEvent);
+    EXPECT_FALSE(ret);
+    touchEvent.sourceTool = SourceTool::PEN;
+    ret = pattern_->IsResponseRegionExpandingNeededForStylus(touchEvent);
+    EXPECT_TRUE(ret);
+    touchEvent.sourceTool = SourceTool::FINGER;
+    touchEvent.type = TouchType::MOVE;
+    ret = pattern_->IsResponseRegionExpandingNeededForStylus(touchEvent);
+    EXPECT_FALSE(ret);
+    touchEvent.sourceTool = SourceTool::PEN;
+    touchEvent.type = TouchType::MOVE;
+    ret = pattern_->IsResponseRegionExpandingNeededForStylus(touchEvent);
+    EXPECT_FALSE(ret);
+}
+} // namespace OHOS::Ace::NG

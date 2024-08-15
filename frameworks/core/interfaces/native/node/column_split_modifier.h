@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIColumnSplitModifier* GetColumnSplitModifier();
+const CJUIColumnSplitModifier* GetCJUIColumnSplitModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_COLUMN_SPLIT_MODIFIER_H

@@ -53,5 +53,12 @@ const ArkUIPolygonModifier* GetPolygonModifier()
 
     return &modifier;
 }
+
+const CJUIPolygonModifier* GetCJUIPolygonModifier()
+{
+    static const CJUIPolygonModifier modifier = {SetPolygonPoints, ResetPolygonPoints};
+
+    return &modifier;
+}
 }
 }

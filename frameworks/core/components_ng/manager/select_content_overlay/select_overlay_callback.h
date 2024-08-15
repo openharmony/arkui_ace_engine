@@ -18,6 +18,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/event/gesture_info.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/event/ace_events.h"
 #include "core/event/touch_event.h"
@@ -76,6 +77,7 @@ public:
     virtual void OnOverlayTouchDown(const TouchEventInfo& event) {}
     virtual void OnOverlayTouchUp(const TouchEventInfo& event) {}
     virtual void OnOverlayTouchMove(const TouchEventInfo& event) {}
+    virtual void OnOverlayClick(const GestureEvent& event, bool isClickCaret) {}
     virtual bool IsRegisterTouchCallback()
     {
         return false;
@@ -132,6 +134,7 @@ public:
     virtual bool CheckSwitchToMode(HandleLevelMode mode) {
         return true;
     }
+    virtual void OnHandleIsHidden() {}
 
 private:
     bool isIntercept_ = false;

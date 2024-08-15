@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIPolygonModifier* GetPolygonModifier();
+const CJUIPolygonModifier* GetCJUIPolygonModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_POLYGON_MODIFIER_H

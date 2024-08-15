@@ -17,7 +17,6 @@
 
 #include "core/components/progress/progress_theme.h"
 #include "core/components/refresh/refresh_theme.h"
-#include "frameworks/bridge/common/dom/dom_type.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {

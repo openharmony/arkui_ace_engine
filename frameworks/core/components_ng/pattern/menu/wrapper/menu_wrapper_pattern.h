@@ -135,7 +135,9 @@ public:
 
     RefPtr<FrameNode> GetHoverImageStackNode() const
     {
-        auto node = AceType::DynamicCast<FrameNode>(GetHoverImageFlexNode()->GetChildAtIndex(0));
+        auto hoverImageFlexNode = GetHoverImageFlexNode();
+        CHECK_NULL_RETURN(hoverImageFlexNode, nullptr);
+        auto node = AceType::DynamicCast<FrameNode>(hoverImageFlexNode->GetChildAtIndex(0));
         CHECK_NULL_RETURN(node, nullptr);
         if (node->GetTag() != V2::STACK_ETS_TAG) {
             return nullptr;
@@ -145,7 +147,9 @@ public:
 
     RefPtr<FrameNode> GetHoverImagePreview() const
     {
-        auto node = AceType::DynamicCast<FrameNode>(GetHoverImageStackNode()->GetChildAtIndex(0));
+        auto hoverImageStackNode = GetHoverImageStackNode();
+        CHECK_NULL_RETURN(hoverImageStackNode, nullptr);
+        auto node = AceType::DynamicCast<FrameNode>(hoverImageStackNode->GetChildAtIndex(0));
         CHECK_NULL_RETURN(node, nullptr);
         if (node->GetTag() != V2::IMAGE_ETS_TAG) {
             return nullptr;
@@ -155,7 +159,9 @@ public:
 
     RefPtr<FrameNode> GetHoverImageCustomPreview() const
     {
-        auto node = AceType::DynamicCast<FrameNode>(GetHoverImageStackNode()->GetChildAtIndex(1));
+        auto hoverImageStackNode = GetHoverImageStackNode();
+        CHECK_NULL_RETURN(hoverImageStackNode, nullptr);
+        auto node = AceType::DynamicCast<FrameNode>(hoverImageStackNode->GetChildAtIndex(1));
         CHECK_NULL_RETURN(node, nullptr);
         if (node->GetTag() != V2::MENU_PREVIEW_ETS_TAG) {
             return nullptr;
@@ -182,12 +188,13 @@ public:
     {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
-        auto badgeNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(2));
-        CHECK_NULL_RETURN(badgeNode, nullptr);
-        if (badgeNode->GetTag() != V2::TEXT_ETS_TAG) {
-            return nullptr;
+        for (const auto& child : host->GetChildren()) {
+            auto node = DynamicCast<FrameNode>(child);
+            if (node && node->GetTag() == V2::TEXT_ETS_TAG) {
+                return node;
+            }
         }
-        return badgeNode;
+        return nullptr;
     }
 
     OffsetT<Dimension> GetAnimationOffset();
@@ -439,6 +446,7 @@ private:
     void HideMenu(const RefPtr<FrameNode>& menu);
     void HideMenu(const RefPtr<MenuPattern>& menuPattern, const RefPtr<FrameNode>& menu, const OffsetF& position);
     void SetExitAnimation(const RefPtr<FrameNode>& host);
+    void SendToAccessibility(const RefPtr<UINode>& subMenu, bool isShow);
     std::function<void()> onAppearCallback_ = nullptr;
     std::function<void()> onDisappearCallback_ = nullptr;
     std::function<void()> aboutToAppearCallback_ = nullptr;

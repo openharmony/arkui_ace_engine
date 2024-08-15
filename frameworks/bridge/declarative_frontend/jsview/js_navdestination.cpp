@@ -209,6 +209,7 @@ void JSNavDestination::SetTitle(const JSCallbackInfo& info)
     if (info.Length() > 1) {
         ParseBackgroundOptions(info[1], options.bgOptions);
         ParseBarOptions(info[1], options.brOptions);
+        ParseTextOptions(info, info[1], options.textOptions);
     }
     NavDestinationModel::GetInstance()->SetTitlebarOptions(std::move(options));
 }

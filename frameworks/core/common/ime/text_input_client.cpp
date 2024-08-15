@@ -15,13 +15,6 @@
 
 #include "core/common/ime/text_input_client.h"
 
-#include <cstdint>
-#include <functional>
-#include <map>
-
-#include "base/log/log_wrapper.h"
-#include "core/event/key_event.h"
-
 namespace OHOS::Ace {
 namespace {
 using tic = TextInputClient; // give it a shorter name to maintain a good code layout
@@ -62,6 +55,7 @@ std::map<KeyComb, std::function<void(TextInputClient*)>> TextInputClient::keyboa
     { KeyComb(KeyCode::KEY_FORWARD_DEL, KEY_CTRL), [](tic* c) -> void { c->HandleOnDeleteComb(false); } },
     { KeyComb(KeyCode::KEY_INSERT, KEY_CTRL), [](tic* c) -> void { c->HandleOnCopy(true); } },
     { KeyComb(KeyCode::KEY_INSERT, KEY_SHIFT), &tic::HandleOnPaste },
+    { KeyComb(KeyCode::KEY_PASTE), &tic::HandleOnPaste },
     { KeyComb(KeyCode::KEY_F10, KEY_SHIFT), &tic::HandleOnShowMenu },
     { KeyComb(KeyCode::KEY_MENU), &tic::HandleOnShowMenu },
     { KeyComb(KeyCode::KEY_ENTER), &tic::HandleOnEnter },

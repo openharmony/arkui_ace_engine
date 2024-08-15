@@ -36,7 +36,9 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& ho
     auto titleBarWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_RETURN(titleBarWrapper, 0.0f);
     auto constraint = navBarLayoutProperty->CreateChildConstraint();
-    if (navBarLayoutProperty->GetHideTitleBar().value_or(false)) {
+
+    // if titlebar is hidden or there is no child in titlebar, set zero to its size.
+    if (navBarLayoutProperty->GetHideTitleBar().value_or(false) || titleBarNode->GetChildren().empty()) {
         constraint.selfIdealSize = OptionalSizeF(0.0f, 0.0f);
         titleBarWrapper->Measure(constraint);
         return 0.0f;
@@ -217,7 +219,8 @@ NavSafeArea CheckIgnoreLayoutSafeArea(LayoutWrapper* layoutWrapper, const RefPtr
 
 bool CheckWhetherNeedToHideToolbar(const RefPtr<NavBarNode>& hostNode, const SizeF& navigationSize)
 {
-    if (hostNode->GetPrevMenuIsCustomValue(false)) {
+    // if current menu or toolBar is custom, no need to hide.
+    if (hostNode->GetPrevMenuIsCustomValue(false) || hostNode->GetPrevToolBarIsCustom().value_or(false)) {
         return false;
     }
 

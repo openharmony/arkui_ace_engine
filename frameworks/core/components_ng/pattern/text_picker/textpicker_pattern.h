@@ -417,8 +417,14 @@ public:
         closeDialogEvent_ = closeDialogEvent;
     }
 
-        void SetTextProperties(const PickerTextProperties& properties)
+    const PickerTextProperties& GetTextProperties() const
     {
+        return textProperties_;
+    }
+
+    void SetTextProperties(const PickerTextProperties& properties)
+    {
+        textProperties_ = properties;
         if (properties.disappearTextStyle_.fontSize.has_value() && properties.disappearTextStyle_.fontSize->IsValid()) {
             isUserSetGradientFont_ = true;
             gradientHeight_ = properties.disappearTextStyle_.fontSize.value();
@@ -499,6 +505,10 @@ private:
         const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme);
     void UpdateCancelButtonMargin(
         const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme);
+    void CheckFocusID(int32_t childSize);
+    bool ParseDirectionKey(RefPtr<TextPickerColumnPattern>& textPickerColumnPattern, KeyCode& code, int32_t childSize);
+    RectF CalculatePaintRect(int32_t currentFocusIndex,
+        float centerX, float centerY, float piantRectWidth, float piantRectHeight, float columnWidth);
 
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
@@ -537,6 +547,7 @@ private:
     bool isPicker_ = true;
     bool isFiredSelectsChange_ = false;
     std::optional<std::string> firedSelectsStr_;
+    
     ItemDivider divider_;
     bool customDividerFlag_ = false;
     Dimension value_;
@@ -548,6 +559,7 @@ private:
     Dimension dividerSpacing_;
     float paintDividerSpacing_ = 1.0f;
     bool isNeedUpdateSelectedIndex_ = true;
+    PickerTextProperties textProperties_;
 };
 } // namespace OHOS::Ace::NG
 

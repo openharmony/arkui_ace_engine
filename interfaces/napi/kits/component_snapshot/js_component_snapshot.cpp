@@ -16,19 +16,12 @@
 #include "js_component_snapshot.h"
 
 #include "interfaces/napi/kits/utils/napi_utils.h"
-#include "js_native_api.h"
-#include "js_native_api_types.h"
-#include "napi/native_common.h"
-#include "node_api_types.h"
-#include "base/utils/utils.h"
 #ifdef PIXEL_MAP_SUPPORTED
 #include "pixel_map.h"
 #include "pixel_map_napi.h"
 #endif
 
-#include "node_api.h"
 
-#include "bridge/common/utils/utils.h"
 #include "core/common/ace_engine.h"
 
 #include "frameworks/bridge/common/utils/engine_helper.h"
@@ -289,6 +282,7 @@ static napi_value JSSnapshotGet(napi_env env, napi_callback_info info)
     napi_value result = nullptr;
 
     if (!helper.CheckArgs(napi_valuetype::napi_string)) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Parsing the first argument failed, not of string type.");
         napi_close_escapable_handle_scope(env, scope);
         return result;
     }
@@ -301,7 +295,7 @@ static napi_value JSSnapshotGet(napi_env env, napi_callback_info info)
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-            "Can'nt get delegate of ace_engine. param: %{public}s",
+            "Can't get delegate of ace_engine. param: %{public}s",
             componentId.c_str());
         auto callback = helper.CreateCallback(&result);
         callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
@@ -325,20 +319,22 @@ static napi_value JSSnapshotFromBuilder(napi_env env, napi_callback_info info)
 
     JsComponentSnapshot helper(env, info);
     if (!helper.CheckArgs(napi_valuetype::napi_function)) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Parsing the first argument failed, not of function type.");
         napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
 
+    napi_value result = nullptr;
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
-        NapiThrow(env, "ace engine delegate is null", ERROR_CODE_INTERNAL_ERROR);
-        napi_close_escapable_handle_scope(env, scope);
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Can't get delegate of ace_engine. ");
+        auto callback = helper.CreateCallback(&result);
+        callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
         return nullptr;
     }
 
     // create builder closure
     auto builder = [build = helper.GetArgv(0), env] { napi_call_function(env, nullptr, build, 0, nullptr, nullptr); };
-    napi_value result = nullptr;
 
     NG::SnapshotParam param;
     helper.ParseParamForBuilder(param);
@@ -350,11 +346,67 @@ static napi_value JSSnapshotFromBuilder(napi_env env, napi_callback_info info)
     return result;
 }
 
+static napi_value JSSnapshotGetSync(napi_env env, napi_callback_info info)
+{
+    napi_escapable_handle_scope scope = nullptr;
+    napi_open_escapable_handle_scope(env, &scope);
+
+    JsComponentSnapshot helper(env, info);
+
+    napi_value result = nullptr;
+
+    if (!helper.CheckArgs(napi_valuetype::napi_string)) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Parsing the first argument failed, not of string type.");
+        napi_close_escapable_handle_scope(env, scope);
+        return result;
+    }
+
+    // parse id
+    std::string componentId;
+    napi_valuetype valueType = napi_null;
+    GetNapiString(env, helper.GetArgv(0), componentId, valueType);
+
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
+    if (!delegate) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+            "Can't get delegate of ace_engine. param: %{public}s",
+            componentId.c_str());
+        NapiThrow(env, "Delegate is null", ERROR_CODE_INTERNAL_ERROR);
+        napi_close_escapable_handle_scope(env, scope);
+        return result;
+    }
+
+    NG::SnapshotOptions options;
+    helper.ParseParamForGet(options);
+
+    auto pair = delegate->GetSyncSnapshot(componentId,  options);
+    
+    switch (pair.first) {
+        case ERROR_CODE_NO_ERROR :
+#ifdef PIXEL_MAP_SUPPORTED
+            result = Media::PixelMapNapi::CreatePixelMap(env, pair.second);
+#endif
+            break;
+        case ERROR_CODE_INTERNAL_ERROR :
+            napi_get_null(env, &result);
+            NapiThrow(env, "Internal error!", ERROR_CODE_INTERNAL_ERROR);
+            break;
+        case ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT :
+            napi_get_null(env, &result);
+            NapiThrow(env, "ComponentSnapshot timeout!", ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT);
+            break;
+    }
+    napi_escape_handle(env, scope, result, &result);
+    napi_close_escapable_handle_scope(env, scope);
+    return result;
+}
+
 static napi_value ComponentSnapshotExport(napi_env env, napi_value exports)
 {
     napi_property_descriptor snapshotDesc[] = {
         DECLARE_NAPI_FUNCTION("get", JSSnapshotGet),
         DECLARE_NAPI_FUNCTION("createFromBuilder", JSSnapshotFromBuilder),
+        DECLARE_NAPI_FUNCTION("getSync", JSSnapshotGetSync),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(snapshotDesc) / sizeof(snapshotDesc[0]), snapshotDesc));
 

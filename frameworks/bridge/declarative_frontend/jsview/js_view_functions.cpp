@@ -133,6 +133,20 @@ void ViewFunctions::ExecuteForceNodeRerender(int32_t elemId)
     }
 }
 
+bool ViewFunctions::ExecuteHasNodeUpdateFunc(int32_t elmtId)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_, false)
+    auto func = jsHasNodeUpdateFunc_.Lock();
+    if (func->IsEmpty()) {
+        LOGE("the hasNodeUpdateFunc is null");
+        return false;
+    }
+    JSRef<JSVal> params[1];
+    params[0] = JSRef<JSVal>(JSVal(JsiValueConvertor::toJsiValue(elmtId)));
+    auto result = func->Call(jsObject_.Lock(), 1, params);
+    return result->IsBoolean() && result->ToBoolean();
+}
+
 // recycleSelf
 void ViewFunctions::ExecuteRecycle(const std::string& viewName)
 {
@@ -245,6 +259,11 @@ void ViewFunctions::InitViewFunctions(
             LOGE("View lacks mandatory 'forceRerenderNode()' function, fatal internal error.");
         }
 
+        JSRef<JSVal> jsHasNodeUpdateFunc = jsObject->GetProperty("hasNodeUpdateFunc");
+        if (jsHasNodeUpdateFunc->IsFunction()) {
+            jsHasNodeUpdateFunc_ = JSRef<JSFunc>::Cast(jsHasNodeUpdateFunc);
+        }
+
         JSRef<JSVal> jsRecycleFunc = jsObject->GetProperty("recycleSelf");
         if (jsRecycleFunc->IsFunction()) {
             jsRecycleFunc_ = JSRef<JSFunc>::Cast(jsRecycleFunc);
@@ -309,6 +328,11 @@ void ViewFunctions::InitViewFunctions(
     JSRef<JSVal> jsAboutToBeDeletedFunc = jsObject->GetProperty("aboutToBeDeleted");
     if (jsAboutToBeDeletedFunc->IsFunction()) {
         jsAboutToBeDeletedFunc_ = JSRef<JSFunc>::Cast(jsAboutToBeDeletedFunc);
+    } else {
+        jsAboutToBeDeletedFunc = jsObject->GetProperty("aboutToBeDeletedInternal");
+        if (jsAboutToBeDeletedFunc->IsFunction()) {
+            jsAboutToBeDeletedFunc_ = JSRef<JSFunc>::Cast(jsAboutToBeDeletedFunc);
+        }
     }
 
     JSRef<JSVal> jsAboutToRenderFunc = jsObject->GetProperty("aboutToRender");

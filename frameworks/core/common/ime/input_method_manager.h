@@ -29,6 +29,7 @@ public:
     bool NeedSoftKeyboard() const;
     // Close the keyboard in-process
     void CloseKeyboard();
+    void CloseKeyboardInPipelineDestroy();
     void CloseKeyboard(const RefPtr<NG::FrameNode>& focusNode);
     // Hide the keyboard across processes
     void HideKeyboardAcrossProcesses();
@@ -47,6 +48,7 @@ private:
 
     std::optional<bool> windowFocus_;
     WeakPtr<NG::FrameNode> curFocusNode_;
+    bool lastKeep_ = false;
 };
 } // namespace OHOS::Ace
 

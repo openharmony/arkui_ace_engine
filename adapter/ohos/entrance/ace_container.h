@@ -35,6 +35,7 @@
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
 #include "base/view_data/view_data_wrap.h"
+#include "base/view_data/hint_to_type_wrap.h"
 #include "core/common/ace_view.h"
 #include "core/common/container.h"
 #include "core/common/display_info.h"
@@ -546,6 +547,8 @@ public:
 
     NG::SafeAreaInsets GetKeyboardSafeArea() override;
 
+    Rect GetSessionAvoidAreaByType(uint32_t safeAreaType) override;
+
     Rosen::AvoidArea GetAvoidAreaByType(Rosen::AvoidAreaType type);
 
     // ArkTSCard
@@ -574,11 +577,12 @@ public:
         bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative = true) override;
     bool IsNeedToCreatePopupWindow(const AceAutoFillType& autoFillType) override;
     bool RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std::function<void()>& onFinish,
-        const std::function<void()>& onUIExtNodeBindingCompleted, bool isNative = true) override;
+        const std::function<void()>& onUIExtNodeBindingCompleted, bool isNative = true,
+        int32_t instanceId = -1) override;
     std::shared_ptr<NavigationController> GetNavigationController(const std::string& navigationId) override;
     void OverwritePageNodeInfo(const RefPtr<NG::FrameNode>& frameNode, AbilityBase::ViewData& viewData);
     bool ChangeType(AbilityBase::ViewData& viewData);
-    AceAutoFillType PlaceHolderToType(const std::string& onePlaceHolder) override;
+    HintToTypeWrap PlaceHolderToType(const std::string& onePlaceHolder) override;
 
     void SearchElementInfoByAccessibilityIdNG(
         int64_t elementId, int32_t mode, int64_t baseParent,

@@ -16,8 +16,6 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_image_animator_ffi.h"
 
 #include "cj_lambda.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
-#include "core/common/container.h"
 #include "core/components_ng/pattern/image_animator/image_animator_model.h"
 
 using namespace OHOS::Ace;

@@ -26,6 +26,10 @@
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/ui_node.h"
 
+namespace OHOS::Accessibility {
+class ExtraElementInfo;
+}
+
 namespace OHOS::Ace::NG {
 using ActionNoParam = std::function<void()>;
 using ActionSetTextImpl = std::function<void(const std::string&)>;
@@ -41,10 +45,12 @@ using ActionSelectImpl = ActionNoParam;
 using ActionClearSelectionImpl = ActionNoParam;
 using ActionMoveTextImpl = std::function<void(int32_t moveUnit, bool forward)>;
 using ActionSetCursorIndexImpl = std::function<void(int32_t index)>;
+using ActionExecSubComponentImpl = std::function<void(int32_t spanId)>;
 using ActionGetCursorIndexImpl = std::function<int32_t(void)>;
 using ActionClickImpl = ActionNoParam;
 using ActionLongClickImpl = ActionNoParam;
 using ActionsImpl = std::function<void((uint32_t actionType))>;
+using GetRelatedElementInfoImpl = std::function<void(Accessibility::ExtraElementInfo& extraElementInfo)>;
 using OnAccessibilityFocusCallbackImpl = std::function<void((bool isFocus))>;
 
 class FrameNode;
@@ -144,6 +150,13 @@ public:
     {
         return false;
     }
+
+    virtual bool HasSubComponent() const
+    {
+        return false;
+    }
+
+    virtual void GetSubComponentInfo(std::vector<SubComponentInfo>& subComponentInfos) const {}
 
     virtual AccessibilityValue GetAccessibilityValue() const
     {
@@ -257,6 +270,20 @@ public:
     {
         if (actionSetCursorIndexImpl_) {
             actionSetCursorIndexImpl_(index);
+            return true;
+        }
+        return false;
+    }
+
+    void SetActionExecSubComponent(const ActionExecSubComponentImpl& actionExecSubComponentImpl)
+    {
+        actionExecSubComponentImpl_ = actionExecSubComponentImpl;
+    }
+
+    bool ActActionExecSubComponent(int32_t spanId)
+    {
+        if (actionExecSubComponentImpl_) {
+            actionExecSubComponentImpl_(spanId);
             return true;
         }
         return false;
@@ -530,6 +557,11 @@ public:
         return accessibilityVirtualNode_;
     }
 
+    NG::UINode* GetAccessibilityVirtualNodePtr()
+    {
+        return Referenced::RawPtr(accessibilityVirtualNode_);
+    }
+
     bool HasAccessibilityVirtualNode() const
     {
         return accessibilityVirtualNode_ != nullptr;
@@ -553,8 +585,8 @@ public:
     class Level {
     public:
         inline static const std::string AUTO = "auto";
-        inline static const std::string YES = "yes";
-        inline static const std::string NO = "no";
+        inline static const std::string YES_STR = "yes";
+        inline static const std::string NO_STR = "no";
         inline static const std::string NO_HIDE_DESCENDANTS = "no-hide-descendants";
     };
 
@@ -568,8 +600,8 @@ public:
 
     void SetAccessibilityLevel(const std::string& accessibilityLevel)
     {
-        if (accessibilityLevel == Level::YES ||
-            accessibilityLevel == Level::NO ||
+        if (accessibilityLevel == Level::YES_STR ||
+            accessibilityLevel == Level::NO_STR ||
             accessibilityLevel == Level::NO_HIDE_DESCENDANTS) {
             accessibilityLevel_ = accessibilityLevel;
         } else {
@@ -604,6 +636,21 @@ public:
     * param: {node}, {info} should be not-null
     */
     static bool IsAccessibilityFocusableDebug(const RefPtr<FrameNode>& node, std::unique_ptr<JsonValue>& info);
+
+    virtual void GetExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo) {}
+
+    void SetRelatedElementInfoCallback(const GetRelatedElementInfoImpl& getRelatedElementInfoImpl)
+    {
+        getRelatedElementInfoImpl_ = getRelatedElementInfoImpl;
+    }
+    
+    void GetAllExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo)
+    {
+        if (getRelatedElementInfoImpl_) {
+            getRelatedElementInfoImpl_(extraElementInfo);
+        }
+        GetExtraElementInfo(extraElementInfo);
+    }
 
     void SetAccessibilityActions(uint32_t actions);
     void ResetAccessibilityActions();
@@ -700,10 +747,12 @@ protected:
     ActionSelectImpl actionSelectImpl_;
     ActionClearSelectionImpl actionClearSelectionImpl_;
     ActionSetCursorIndexImpl actionSetCursorIndexImpl_;
+    ActionExecSubComponentImpl actionExecSubComponentImpl_;
     ActionGetCursorIndexImpl actionGetCursorIndexImpl_;
     ActionClickImpl actionClickImpl_;
     ActionLongClickImpl actionLongClickImpl_;
     ActionsImpl actionsImpl_;
+    GetRelatedElementInfoImpl getRelatedElementInfoImpl_;
     OnAccessibilityFocusCallbackImpl onAccessibilityFocusCallbackImpl_;
     bool accessibilityGroup_ = false;
     int32_t childTreeId_ = -1;

@@ -87,7 +87,12 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             item->GetGeometryNode()->SetFrameSize(childSize);
         }
 
-        float itemHeight = childSize.Height() + margin.Height();
+        float itemHeight;
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            itemHeight = childSize.Height() + margin.Height();
+        } else {
+            itemHeight = childSize.Height();
+        }
         float endPos = totalHeight + itemHeight;
         itemPosition_[currentIndex] = { totalHeight, endPos };
         totalHeight = endPos;

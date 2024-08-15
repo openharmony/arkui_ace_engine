@@ -25,7 +25,12 @@ extern "C" {
 void FfiOHOSAceFrameworkPolygonCreate(double width, int32_t widthUnit, double height, int32_t heightUnit)
 {
     PolygonModel::GetInstance()->Create(true);
-    FfiOHOSAceFrameworkShapeSetSize(width, widthUnit, height, heightUnit);
+    if (width > 0.0) {
+        FfiOHOSAceFrameworkShapeSetWidth(width, widthUnit);
+    }
+    if (height > 0.0) {
+        FfiOHOSAceFrameworkShapeSetHeight(height, heightUnit);
+    }
 }
 
 void FfiOHOSAceFrameworkPolygonSetPoints(VectorFloat64Ptr xPointVec, VectorFloat64Ptr yPointVec)

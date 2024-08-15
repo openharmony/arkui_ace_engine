@@ -78,6 +78,8 @@ void SelectContentOverlayPattern::CancelHiddenHandleTask()
     isHiddenHandle_ = false;
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
+    UpdateHandleHotZone();
+    host->GetOrCreateGestureEventHub()->SetHitTestMode(info_->hitTestMode);
     host->GetOrCreateGestureEventHub()->AddClickEvent(clickEvent_);
     host->GetOrCreateGestureEventHub()->AddPanEvent(panEvent_, { PanDirection::ALL }, 1, DEFAULT_PAN_DISTANCE);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -217,5 +219,34 @@ void SelectContentOverlayPattern::UpdateViewPort(const std::optional<RectF>& vie
     CHECK_NULL_VOID(host);
     info_->ancestorViewPort = viewPort;
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+}
+
+void SelectContentOverlayPattern::UpdateSelectArea(const RectF& selectArea)
+{
+    SelectOverlayPattern::UpdateSelectArea(selectArea);
+    if (info_->menuInfo.menuIsShow && selectArea.IsEmpty()) {
+        UpdateMenuIsShow(false);
+    }
+}
+
+void SelectContentOverlayPattern::SetHandleCircleIsShow(bool isFirst, bool isShow)
+{
+    auto& handleInfo = isFirst ? info_->firstHandle : info_->secondHandle;
+    if (handleInfo.isCircleShow != isShow) {
+        handleInfo.isCircleShow = isShow;
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void SelectContentOverlayPattern::SetIsHandleLineShow(bool isShow)
+{
+    if (info_->isHandleLineShow != isShow) {
+        info_->isHandleLineShow = isShow;
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 } // namespace OHOS::Ace::NG

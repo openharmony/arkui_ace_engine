@@ -36,20 +36,29 @@ public:
 
     void FireChangeEvent(float value, int32_t mode)
     {
+        constexpr int32_t BEGIN_MODE = 0;
+        constexpr int32_t END_MODE = 2;
+        if (mode == END_MODE) {
+            inAction_ = false;
+        }
+        if (mode == BEGIN_MODE) {
+            inAction_ = true;
+        }
         if (onChangeEvent_) {
             onChangeEvent_(value);
         }
-        constexpr int32_t BEGIN_MODE = 0;
         CHECK_NULL_VOID(changeEvent_);
         changeEvent_(value, mode);
         if (mode > BEGIN_MODE) {
-            SetValue(value);
+            value_ = value;
         }
     }
 
     void SetValue(float value)
     {
-        value_ = value;
+        if (!inAction_) {
+            value_ = value;
+        }
     }
 
     float GetValue() const
@@ -63,6 +72,7 @@ public:
     }
 
 private:
+    bool inAction_ = false;
     SliderOnChangeEvent changeEvent_;
     SliderOnValueChangeEvent onChangeEvent_;
     float value_ = .0f;

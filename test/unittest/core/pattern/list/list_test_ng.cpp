@@ -382,7 +382,6 @@ void ListTestNg::ScrollSnap(double offset, double endVelocity)
     info.SetMainVelocity(velocity);
     info.SetMainDelta(offset);
     scrollable->HandleDragUpdate(info);
-    scrollable->isDragging_ = false;
     FlushLayoutTask(frameNode_);
 
     // Lift finger and end List sliding.
@@ -390,6 +389,7 @@ void ListTestNg::ScrollSnap(double offset, double endVelocity)
     info.SetMainDelta(0.0);
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
+    scrollable->isDragging_ = false;
     FlushLayoutTask(frameNode_);
 
     if (scrollable->IsSpringMotionRunning()) {
@@ -532,7 +532,9 @@ void ListTestNg::CreateRepeatVirtualScrollNode(int32_t itemNumber, const std::fu
         }
         return keys;
     };
-    repeatModel.Create(itemNumber, {}, createFunc, updateFunc, getKeys, getTypes);
+    std::function<void(uint32_t, uint32_t)> setActiveRange = [](uint32_t start, uint32_t end) {
+    };
+    repeatModel.Create(itemNumber, {}, createFunc, updateFunc, getKeys, getTypes, setActiveRange);
 }
 
 void ListTestNg::FlushIdleTask(const RefPtr<ListPattern>& listPattern)

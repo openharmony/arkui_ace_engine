@@ -544,9 +544,6 @@ class SelectItem extends ViewPU {
                             y: this.zoomScaleArray[this.selectedIndexes[0]]
                         });
                         Stack.shadow(ShadowStyle.OUTER_DEFAULT_XS);
-                        Stack.pixelRound({
-                            top: PixelRoundCalcPolicy.FORCE_FLOOR
-                        });
                     }, Stack);
                     Stack.pop();
                 });
@@ -958,6 +955,7 @@ class PressAndHoverEffect extends ViewPU {
         }
         this.__buttonItemsSize = this.initializeConsume("buttonItemsSize", "buttonItemsSize");
         this.__press = new SynchedPropertySimpleOneWayPU(k42.press, this, "press");
+        this.__hover = new SynchedPropertySimpleOneWayPU(k42.hover, this, "hover");
         this.__colorProperty = new SynchedPropertyNesedObjectPU(k42.colorProperty, this, "colorProperty");
         this.__buttonBorderRadius = this.initializeConsume("buttonBorderRadius", "buttonBorderRadius");
         this.__options = new SynchedPropertyNesedObjectPU(k42.options, this, "options");
@@ -980,6 +978,7 @@ class PressAndHoverEffect extends ViewPU {
 
     updateStateVars(h42) {
         this.__press.reset(h42.press);
+        this.__hover.reset(h42.hover);
         this.__colorProperty.set(h42.colorProperty);
         this.__options.set(h42.options);
     }
@@ -987,6 +986,7 @@ class PressAndHoverEffect extends ViewPU {
     purgeVariableDependenciesOnElmtId(g42) {
         this.__buttonItemsSize.purgeDependencyOnElmtId(g42);
         this.__press.purgeDependencyOnElmtId(g42);
+        this.__hover.purgeDependencyOnElmtId(g42);
         this.__colorProperty.purgeDependencyOnElmtId(g42);
         this.__buttonBorderRadius.purgeDependencyOnElmtId(g42);
         this.__options.purgeDependencyOnElmtId(g42);
@@ -995,6 +995,7 @@ class PressAndHoverEffect extends ViewPU {
     aboutToBeDeleted() {
         this.__buttonItemsSize.aboutToBeDeleted();
         this.__press.aboutToBeDeleted();
+        this.__hover.aboutToBeDeleted();
         this.__colorProperty.aboutToBeDeleted();
         this.__buttonBorderRadius.aboutToBeDeleted();
         this.__options.aboutToBeDeleted();
@@ -1018,6 +1019,14 @@ class PressAndHoverEffect extends ViewPU {
         this.__press.set(e42);
     }
 
+    get hover() {
+        return this.__hover.get();
+    }
+
+    set hover(u42) {
+        this.__hover.set(u42);
+    }
+
     get colorProperty() {
         return this.__colorProperty.get();
     }
@@ -1039,7 +1048,7 @@ class PressAndHoverEffect extends ViewPU {
             Stack.create();
             Stack.direction(this.options.direction);
             Stack.size(this.buttonItemsSize[this.pressIndex]);
-            Stack.backgroundColor(this.press ? this.pressColor : this.colorProperty.hoverColor);
+            Stack.backgroundColor(this.press && this.hover ? this.pressColor : this.colorProperty.hoverColor);
             Stack.borderRadius(this.buttonBorderRadius[this.pressIndex]);
         }, Stack);
         Stack.pop();
@@ -1068,6 +1077,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
         this.__buttonItemProperty = this.initializeConsume("buttonItemProperty", "buttonItemProperty");
         this.__buttonItemsSelected = this.initializeConsume("buttonItemsSelected", "buttonItemsSelected");
         this.__pressArray = new SynchedPropertyObjectTwoWayPU(m41.pressArray, this, "pressArray");
+        this.__hoverArray = new SynchedPropertyObjectTwoWayPU(m41.hoverArray, this, "hoverArray");
         this.__hoverColorArray = new SynchedPropertyObjectTwoWayPU(m41.hoverColorArray, this, "hoverColorArray");
         this.__buttonWidth = new ObservedPropertyObjectPU(Array.from({
             length: MAX_ITEM_COUNT
@@ -1119,6 +1129,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
         this.__buttonItemProperty.purgeDependencyOnElmtId(i41);
         this.__buttonItemsSelected.purgeDependencyOnElmtId(i41);
         this.__pressArray.purgeDependencyOnElmtId(i41);
+        this.__hoverArray.purgeDependencyOnElmtId(i41);
         this.__hoverColorArray.purgeDependencyOnElmtId(i41);
         this.__buttonWidth.purgeDependencyOnElmtId(i41);
         this.__buttonHeight.purgeDependencyOnElmtId(i41);
@@ -1137,6 +1148,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
         this.__buttonItemProperty.aboutToBeDeleted();
         this.__buttonItemsSelected.aboutToBeDeleted();
         this.__pressArray.aboutToBeDeleted();
+        this.__hoverArray.aboutToBeDeleted();
         this.__hoverColorArray.aboutToBeDeleted();
         this.__buttonWidth.aboutToBeDeleted();
         this.__buttonHeight.aboutToBeDeleted();
@@ -1230,6 +1242,14 @@ class SegmentButtonItemArrayComponent extends ViewPU {
 
     set pressArray(y40) {
         this.__pressArray.set(y40);
+    }
+
+    get hoverArray() {
+        return this.__hoverArray.get();
+    }
+
+    set hoverArray(n40) {
+        this.__hoverArray.set(n40);
     }
 
     get hoverColorArray() {
@@ -1470,7 +1490,8 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                                                     this.buttonItemsPosition[s37] = {
                                                         start: LengthMetrics.vp(Number.parseFloat(this.options.componentPadding.toString()) +
                                                             (Number.parseFloat(i39.width.toString()) + 1) * s37),
-                                                        top: LengthMetrics.vp(Number.parseFloat(this.options.componentPadding.toString()))
+                                                        top: LengthMetrics.px(Math.floor(this.getUIContext()
+                                                            .vp2px(Number.parseFloat(this.options.componentPadding.toString()))))
                                                     };
                                                 }
                                             });
@@ -1508,6 +1529,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                                                 }
                                             });
                                             Stack.onHover((b39) => {
+                                                this.hoverArray[s37] = b39;
                                                 if (b39) {
                                                     Context.animateTo({ duration: 250, curve: Curve.Friction }, () => {
                                                         this.hoverColorArray[s37].hoverColor = (segmentButtonTheme.HOVER_COLOR);
@@ -1692,6 +1714,9 @@ export class SegmentButton extends ViewPU {
         this.__pressArray = new ObservedPropertyObjectPU(Array.from({
             length: MAX_ITEM_COUNT
         }, (s36, t36) => false), this, "pressArray");
+        this.__hoverArray = new ObservedPropertyObjectPU(Array.from({
+            length: MAX_ITEM_COUNT
+        }, (f36, g36) => false), this, "hoverArray");
         this.__hoverColorArray = new ObservedPropertyObjectPU(Array.from({
             length: MAX_ITEM_COUNT
         }, (q36, r36) => new HoverColorProperty()), this, "hoverColorArray");
@@ -1776,6 +1801,7 @@ export class SegmentButton extends ViewPU {
         this.__selectedItemPosition.purgeDependencyOnElmtId(z35);
         this.__zoomScaleArray.purgeDependencyOnElmtId(z35);
         this.__pressArray.purgeDependencyOnElmtId(z35);
+        this.__hoverArray.purgeDependencyOnElmtId(z35);
         this.__hoverColorArray.purgeDependencyOnElmtId(z35);
         this.__shouldMirror.purgeDependencyOnElmtId(z35);
     }
@@ -1793,6 +1819,7 @@ export class SegmentButton extends ViewPU {
         this.__selectedItemPosition.aboutToBeDeleted();
         this.__zoomScaleArray.aboutToBeDeleted();
         this.__pressArray.aboutToBeDeleted();
+        this.__hoverArray.aboutToBeDeleted();
         this.__hoverColorArray.aboutToBeDeleted();
         this.__shouldMirror.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
@@ -1889,6 +1916,14 @@ export class SegmentButton extends ViewPU {
 
     set pressArray(o35) {
         this.__pressArray.set(o35);
+    }
+
+    get hoverArray() {
+        return this.__hoverArray.get();
+    }
+
+    set hoverArray(z35) {
+        this.__hoverArray.set(z35);
     }
 
     get hoverColorArray() {
@@ -2267,6 +2302,7 @@ export class SegmentButton extends ViewPU {
                                         this.ifElseBranchUpdateFunction(0, () => {
                                             this.observeComponentCreation2((d33, e33) => {
                                                 Row.create({ space: 1 });
+                                                Row.direction(this.options.direction);
                                             }, Row);
                                             this.observeComponentCreation2((h32, i32) => {
                                                 ForEach.create();
@@ -2278,6 +2314,7 @@ export class SegmentButton extends ViewPU {
                                                             this.ifElseBranchUpdateFunction(0, () => {
                                                                 this.observeComponentCreation2((b33, c33) => {
                                                                     Stack.create();
+                                                                    Stack.direction(this.options.direction);
                                                                     Stack.scale({
                                                                         x: this.options.type === 'capsule' && (this.options.multiply ?? false) ? 1 : this.zoomScaleArray[m32],
                                                                         y: this.options.type === 'capsule' && (this.options.multiply ?? false) ? 1 : this.zoomScaleArray[m32]
@@ -2290,6 +2327,7 @@ export class SegmentButton extends ViewPU {
                                                                                 pressIndex: m32,
                                                                                 colorProperty: this.hoverColorArray[m32],
                                                                                 press: this.pressArray[m32],
+                                                                                hover: this.hoverArray[m32],
                                                                                 options: this.options,
                                                                             }, undefined, v32, () => {
                                                                             }, {
@@ -2303,6 +2341,7 @@ export class SegmentButton extends ViewPU {
                                                                                     pressIndex: m32,
                                                                                     colorProperty: this.hoverColorArray[m32],
                                                                                     press: this.pressArray[m32],
+                                                                                    hover: this.hoverArray[m32],
                                                                                     options: this.options
                                                                                 };
                                                                             };
@@ -2312,6 +2351,7 @@ export class SegmentButton extends ViewPU {
                                                                             this.updateStateVarsOfChildByElmtId(v32, {
                                                                                 colorProperty: this.hoverColorArray[m32],
                                                                                 press: this.pressArray[m32],
+                                                                                hover: this.hoverArray[m32],
                                                                                 options: this.options
                                                                             });
                                                                         }
@@ -2346,8 +2386,10 @@ export class SegmentButton extends ViewPU {
                     If.pop();
                     this.observeComponentCreation2((u31, v31) => {
                         Stack.create();
+                        Context.animation({ duration: 0 });
                         Stack.direction(this.options.direction);
                         Stack.size(ObservedObject.GetRawObject(this.componentSize));
+                        Context.animation(null);
                         Stack.borderRadius((this.options.type === 'capsule' && (this.options.multiply ?? false) ?
                         this.options.iconTextRadius : this.options.iconTextBackgroundRadius) ??
                             this.componentSize.height / 2);
@@ -2433,6 +2475,7 @@ export class SegmentButton extends ViewPU {
                             if (x30) {
                                 let y30 = new SegmentButtonItemArrayComponent(this, {
                                     pressArray: this.__pressArray,
+                                    hoverArray: this.__hoverArray,
                                     hoverColorArray: this.__hoverColorArray,
                                     optionsArray: this.options.buttons,
                                     options: this.options,

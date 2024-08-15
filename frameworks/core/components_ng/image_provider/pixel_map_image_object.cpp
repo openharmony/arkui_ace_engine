@@ -22,8 +22,8 @@
 
 namespace OHOS::Ace::NG {
 
-void PixelMapImageObject::MakeCanvasImage(const RefPtr<ImageLoadingContext>& ctx, const SizeF& /*resizeTarget*/,
-    bool /*forceResize*/, bool syncLoad, bool loadInVipChannel)
+void PixelMapImageObject::MakeCanvasImage(
+    const RefPtr<ImageLoadingContext>& ctx, const SizeF& /*resizeTarget*/, bool /*forceResize*/, bool syncLoad)
 {
     if (!pixmap_) {
         ctx->FailCallback("pixmap is null when PixelMapImageObject try MakeCanvasImage");

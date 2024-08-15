@@ -53,14 +53,14 @@ public:
 
     void TriggerGarbageCollection();
     void NotifyContainers(const std::function<void(const RefPtr<Container>&)>& callback);
+    void NotifyContainersOrderly(const std::function<void(const RefPtr<Container>&)>& callback);
     bool HasContainer(int32_t containerId) const;
 
 private:
     AceEngine();
 
     mutable std::shared_mutex mutex_;
-    // ordered container
-    std::map<int32_t, RefPtr<Container>> containerMap_;
+    std::unordered_map<int32_t, RefPtr<Container>> containerMap_;
     RefPtr<WatchDog> watchDog_;
     ACE_DISALLOW_COPY_AND_MOVE(AceEngine);
 };

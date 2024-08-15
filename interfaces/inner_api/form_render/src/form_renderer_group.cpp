@@ -15,7 +15,6 @@
 
 #include "form_renderer_group.h"
 
-#include "configuration.h"
 #include "form_renderer.h"
 #include "form_renderer_hilog.h"
 

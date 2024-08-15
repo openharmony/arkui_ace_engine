@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_SNAPSHOT_PARAM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_SNAPSHOT_PARAM_H
 
+#include <string>
 #include <utility>
 
 namespace OHOS::Ace::NG {
@@ -28,6 +29,10 @@ struct SnapshotOptions {
     bool waitUntilRenderFinished;
     explicit SnapshotOptions(float scale = DEFAULT_SNAPSHOT_SCALE, bool waitUntilRenderFinished = false)
         : scale(scale), waitUntilRenderFinished(waitUntilRenderFinished) {}
+    std::string ToString() const
+    {
+        return "{" + std::to_string(scale) + ", " + (waitUntilRenderFinished ? "true}" : "false}");
+    }
 };
 struct SnapshotParam {
     int32_t delay;
@@ -36,6 +41,11 @@ struct SnapshotParam {
     explicit SnapshotParam(int32_t delay = DEFAULT_DELAY_TIME, bool checkImageStatus = false,
         SnapshotOptions options = SnapshotOptions()) : delay(delay), checkImageStatus(checkImageStatus),
         options(options) {}
+    std::string ToString() const
+    {
+        return "{" + std::to_string(delay) + ", " + (checkImageStatus ? "true" : "false") + ", " +
+            std::to_string(options.scale) + ", " + (options.waitUntilRenderFinished ? "true}" : "false}");
+    }
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_LINE_PAINTER_H

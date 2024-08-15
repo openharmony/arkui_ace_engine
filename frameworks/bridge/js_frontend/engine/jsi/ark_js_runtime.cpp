@@ -18,9 +18,6 @@
 #include <unistd.h>
 
 #include "ecmascript/napi/include/dfx_jsnapi.h"
-
-#include "frameworks/base/log/log_wrapper.h"
-#include "frameworks/base/utils/system_properties.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "frameworks/core/common/ace_application_info.h"
@@ -105,8 +102,8 @@ void ArkJSRuntime::Reset()
     if (vm_ != nullptr) {
         if (!usingExistVM_) {
 #if !defined(PREVIEW)
-            HdcRegister::Get().StopHdcRegister(instanceId_);
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
+            HdcRegister::Get().StopHdcRegister(instanceId_);
             ConnectServerManager::Get().RemoveInstance(instanceId_);
 #endif
             JSNApi::StopDebugger(vm_);
@@ -125,7 +122,7 @@ void ArkJSRuntime::SetLogPrint(LOG_PRINT out)
     print_ = out;
 }
 
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 static int ParseHdcRegisterOption(std::string& option)
 {
     LOGI("hdc option is %{public}s ", option.c_str());
@@ -160,6 +157,7 @@ bool ArkJSRuntime::StartDebugger()
 #if !defined(PREVIEW)
     if (!libPath_.empty()) {
         bool isDebugApp = AceApplicationInfo::GetInstance().IsDebugVersion();
+#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
         auto callback = [instanceId = instanceId_,
                             weak = weak_from_this(), isDebugApp](int socketFd, std::string option) {
             LOGI("HdcRegister callback socket %{public}d, option %{public}s.", socketFd, option.c_str());
@@ -180,6 +178,7 @@ bool ArkJSRuntime::StartDebugger()
 
         HdcRegister::Get().StartHdcRegister(instanceId_, callback);
         ConnectServerManager::Get().SetDebugMode();
+#endif
         JSNApi::DebugOption debugOption = { libPath_.c_str(), isDebugApp ? isDebugMode_ : false };
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
         ConnectServerManager::Get().AddInstance(gettid(), language_);

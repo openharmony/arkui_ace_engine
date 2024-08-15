@@ -87,8 +87,9 @@ JSRef<JSVal> TitleModeChangeEventToJSValue(const NavigationTitleModeChangeEvent&
 }
 } // namespace
 
-void JSNavigation::ParseToolBarItems(const JSRef<JSArray>& jsArray, std::list<RefPtr<AceType>>& items)
+void JSNavigation::ParseToolBarItems(const JSCallbackInfo& info, std::list<RefPtr<AceType>>& items)
 {
+    JSRef<JSArray> jsArray = JSRef<JSArray>::Cast(info[0]);
     auto length = jsArray->Length();
     for (size_t i = 0; i < length; i++) {
         auto item = jsArray->GetValueAt(i);
@@ -110,14 +111,18 @@ void JSNavigation::ParseToolBarItems(const JSRef<JSArray>& jsArray, std::list<Re
         if (itemActionValue->IsFunction()) {
             auto onClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(itemActionValue));
             auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-            toolBarItem->action = EventMarker([func = std::move(onClickFunc), node = targetNode]() {
-                ACE_SCORING_EVENT("Navigation.toolBarItemClick");
-                PipelineContext::SetCallBackNode(node);
-                func->Execute();
-            });
+            toolBarItem->action =
+                EventMarker([func = std::move(onClickFunc), node = targetNode, execCtx = info.GetExecutionContext()]() {
+                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                    ACE_SCORING_EVENT("Navigation.toolBarItemClick");
+                    PipelineContext::SetCallBackNode(node);
+                    func->Execute();
+                });
             auto onClickWithParamFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(itemActionValue));
             toolBarItem->actionWithParam =
-                EventMarker([func = std::move(onClickWithParamFunc), node = targetNode](const BaseEventInfo* info) {
+                EventMarker([func = std::move(onClickWithParamFunc), node = targetNode,
+                                execCtx = info.GetExecutionContext()](const BaseEventInfo* info) {
+                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                     ACE_SCORING_EVENT("Navigation.menuItemButtonClick");
                     PipelineContext::SetCallBackNode(node);
                     func->Execute();
@@ -324,6 +329,7 @@ void JSNavigation::Create(const JSCallbackInfo& info)
         NavigationModel::GetInstance()->SetNavigationStackProvided(!newObj->IsEmpty());
         auto jsStack = AceType::DynamicCast<JSNavigationStack>(stack);
         CHECK_NULL_VOID(jsStack);
+        jsStack->SetJSExecutionContext(info.GetExecutionContext());
         const auto& oldObj = jsStack->GetDataSourceObj();
         if (oldObj->IsEmpty()) {
             if (newObj->IsEmpty()) {
@@ -343,7 +349,6 @@ void JSNavigation::Create(const JSCallbackInfo& info)
             JSNavPathStack::SetNativeNavPathStack(newObj, nativeObj);
             jsStack->SetDataSourceObj(newObj);
         }
-        jsStack->SetJSExecutionContext(info.GetExecutionContext());
     };
     NavigationModel::GetInstance()->SetNavigationStackWithCreatorAndUpdater(stackCreator, stackUpdater);
     NavigationModel::GetInstance()->SetNavigationPathInfo(moduleName, pagePath);
@@ -458,6 +463,7 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
     if (info.Length() > 1) {
         ParseBackgroundOptions(info[1], options.bgOptions);
         ParseBarOptions(info[1], options.brOptions);
+        ParseTextOptions(info, info[1], options.textOptions);
     }
     NavigationModel::GetInstance()->SetTitlebarOptions(std::move(options));
 }
@@ -561,7 +567,7 @@ void JSNavigation::SetToolBar(const JSCallbackInfo& info)
     }
     std::list<RefPtr<AceType>> items;
     NavigationModel::GetInstance()->GetToolBarItems(items);
-    ParseToolBarItems(JSRef<JSArray>::Cast(itemsValue), items);
+    ParseToolBarItems(info, items);
 }
 
 void JSNavigation::SetToolbarConfiguration(const JSCallbackInfo& info)
@@ -578,7 +584,7 @@ void JSNavigation::SetToolbarConfiguration(const JSCallbackInfo& info)
         } else {
             std::list<RefPtr<AceType>> items;
             NavigationModel::GetInstance()->GetToolBarItems(items);
-            ParseToolBarItems(JSRef<JSArray>::Cast(info[0]), items);
+            ParseToolBarItems(info, items);
         }
     } else if (info[0]->IsObject()) {
         auto builderFuncParam = JSRef<JSObject>::Cast(info[0])->GetProperty("builder");
@@ -628,7 +634,7 @@ void JSNavigation::SetMenus(const JSCallbackInfo& info)
         }
         std::list<RefPtr<AceType>> items;
         NavigationModel::GetInstance()->GetMenuItems(items);
-        ParseToolBarItems(JSRef<JSArray>::Cast(info[0]), items);
+        ParseToolBarItems(info, items);
     } else if (info[0]->IsObject()) {
         auto builderObject = JSRef<JSObject>::Cast(info[0])->GetProperty("builder");
         if (builderObject->IsFunction()) {

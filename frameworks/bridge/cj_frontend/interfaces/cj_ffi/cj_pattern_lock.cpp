@@ -14,13 +14,9 @@
  */
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_pattern_lock.h"
 
-#include <cinttypes>
 
 #include "cj_lambda.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 #include "core/components_ng/pattern/patternlock/patternlock_model_ng.h"
-#include "core/components_v2/pattern_lock/pattern_lock_component.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;

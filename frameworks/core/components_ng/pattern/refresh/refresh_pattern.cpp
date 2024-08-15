@@ -85,12 +85,13 @@ void RefreshPattern::OnAttachToFrameNode()
 bool RefreshPattern::OnDirtyLayoutWrapperSwap(
     const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (isRemoveCustomBuilder_) {
+    if (isRemoveCustomBuilder_ || isTextNodeChanged_) {
         UpdateFirstChildPlacement();
         if (isRefreshing_) {
             UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, GetFollowRatio());
         }
         isRemoveCustomBuilder_ = false;
+        isTextNodeChanged_ = false;
     }
     return false;
 }
@@ -225,9 +226,6 @@ void RefreshPattern::InitProgressNode()
     }
     layoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
     host->AddChild(progressChild_, 0);
-    if (hasLoadingText_) {
-        InitProgressColumn();
-    }
     progressChild_->MarkDirtyNode();
 }
 
@@ -260,6 +258,7 @@ void RefreshPattern::InitProgressColumn()
     CHECK_NULL_VOID(layoutProperty);
     loadingTextLayoutProperty->UpdateContent(layoutProperty->GetLoadingTextValue());
     loadingTextLayoutProperty->UpdateMaxLines(1);
+    loadingTextLayoutProperty->UpdateMaxFontScale(2.0f);
     loadingTextLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
@@ -324,7 +323,6 @@ void RefreshPattern::InitChildNode()
             auto progressContext = progressChild_->GetRenderContext();
             CHECK_NULL_VOID(progressContext);
             progressContext->UpdateOpacity(0.0f);
-            UpdateLoadingTextOpacity(0.0f);
         } else {
             UpdateLoadingProgress();
         }
@@ -332,6 +330,17 @@ void RefreshPattern::InitChildNode()
     auto progressAccessibilityProperty = progressChild_->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(progressAccessibilityProperty);
     progressAccessibilityProperty->SetAccessibilityLevel(accessibilityLevel);
+
+    if (hasLoadingText_ && !loadingTextNode_) {
+        InitProgressColumn();
+        isTextNodeChanged_ = true;
+    } else if (!hasLoadingText_ && loadingTextNode_) {
+        host->RemoveChild(columnNode_);
+        columnNode_ = nullptr;
+        loadingTextNode_ = nullptr;
+        isTextNodeChanged_ = true;
+        host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    }
 
     if (hasLoadingText_ && loadingTextNode_) {
         auto loadingTextLayoutProperty = loadingTextNode_->GetLayoutProperty<TextLayoutProperty>();

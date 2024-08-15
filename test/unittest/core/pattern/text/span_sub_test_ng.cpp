@@ -1203,8 +1203,11 @@ HWTEST_F(SpanTestNg, ImageSpanSetBaselineOffset014, TestSize.Level1)
 HWTEST_F(SpanTestNg, ImageSpanSetBaselineOffset015, TestSize.Level1)
 {
     ImageModelNG imageSpan;
-    ImageInfoConfig imageInfoConfig;
     RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>("");
+    imageInfoConfig.bundleName = "";
+    imageInfoConfig.moduleName = "";
     imageSpan.Create(imageInfoConfig, pixMap);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -1225,8 +1228,11 @@ HWTEST_F(SpanTestNg, ImageSpanSetBaselineOffset015, TestSize.Level1)
 HWTEST_F(SpanTestNg, ImageSpanSetBaselineOffset016, TestSize.Level1)
 {
     ImageModelNG imageSpan;
-    ImageInfoConfig imageInfoConfig;
     RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>("");
+    imageInfoConfig.bundleName = "";
+    imageInfoConfig.moduleName = "";
     imageSpan.Create(imageInfoConfig, pixMap);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);

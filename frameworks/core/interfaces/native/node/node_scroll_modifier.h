@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIScrollModifier* GetScrollModifier();
+const CJUIScrollModifier* GetCJUIScrollModifier();
 
 void SetOnScroll(ArkUINodeHandle node, void* extraParam);
 void SetOnScrollFrameBegin(ArkUINodeHandle node, void* extraParam);
@@ -51,5 +52,9 @@ void ResetScrollOnScroll(ArkUINodeHandle node);
 void SetScrollOnScrollEdge(ArkUINodeHandle node, void* callback);
 void ResetScrollOnScrollEdge(ArkUINodeHandle node);
 void SetScrollOnDidScrollCallBack(ArkUINodeHandle node, void* callback);
+void SetOnScrollFrameBeginCallBack(ArkUINodeHandle node, void* extraParam);
+void ResetOnScrollFrameBeginCallBack(ArkUINodeHandle node);
+void SetScrollOnWillScrollCallBack(ArkUINodeHandle node, void* extraParam);
+void ResetScrollOnWillScrollCallBack(ArkUINodeHandle node);
 } // namespace OHOS::Ace::NG::NodeModifier
 #endif // FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_SCROLL_MODIFIER_H

@@ -38,7 +38,19 @@ void TextFieldManagerNG::ClearOnFocusTextField(int32_t id)
 {
     if (onFocusTextFieldId == id) {
         onFocusTextField_ = nullptr;
+        focusFieldIsInline = false;
+        optionalPosition_ = std::nullopt;
+        usingCustomKeyboardAvoid_ = false;
     }
+}
+
+bool TextFieldManagerNG::OnBackPressed()
+{
+    auto pattern = onFocusTextField_.Upgrade();
+    CHECK_NULL_RETURN(pattern, false);
+    auto textBasePattern = AceType::DynamicCast<TextBase>(pattern);
+    CHECK_NULL_RETURN(textBasePattern, false);
+    return textBasePattern->OnBackPressed();
 }
 
 void TextFieldManagerNG::SetClickPosition(const Offset& position)
@@ -50,19 +62,11 @@ void TextFieldManagerNG::SetClickPosition(const Offset& position)
         return;
     }
     auto rootWidth = pipeline->GetRootWidth();
-    if (GreatOrEqual(position.GetX(), rootWidth) || LessOrEqual(position.GetX(), 0.0f)) {
+    if (GreatOrEqual(position.GetX(), rootWidth) || LessNotEqual(position.GetX(), 0.0f)) {
         return;
     }
     position_ = position;
-}
-
-bool TextFieldManagerNG::OnBackPressed()
-{
-    auto pattern = onFocusTextField_.Upgrade();
-    CHECK_NULL_RETURN(pattern, false);
-    auto textBasePattern = AceType::DynamicCast<TextBase>(pattern);
-    CHECK_NULL_RETURN(textBasePattern, false);
-    return textBasePattern->OnBackPressed();
+    optionalPosition_ = position;
 }
 
 RefPtr<FrameNode> TextFieldManagerNG::FindScrollableOfFocusedTextField(const RefPtr<FrameNode>& textField)
@@ -154,7 +158,7 @@ bool TextFieldManagerNG::ScrollTextFieldToSafeArea()
         return ScrollToSafeAreaHelper(bottomInset, isShowKeyboard);
     } else if (pipeline->GetSafeAreaManager()->KeyboardSafeAreaEnabled()) {
         // hide keyboard only scroll when keyboard avoid mode is resize
-        return ScrollToSafeAreaHelper({ 0, 0 }, isShowKeyboard);
+        return ScrollToSafeAreaHelper({0, 0}, isShowKeyboard);
     }
     return false;
 }
@@ -197,6 +201,25 @@ void TextFieldManagerNG::AvoidKeyBoardInNavigation()
     CHECK_NULL_VOID(navNode);
     weakNavNode_ = navNode;
     SetNavContentAvoidKeyboardOffset(navNode, avoidKeyboardOffset);
+}
+
+void TextFieldManagerNG::AvoidKeyboardInSheet(const RefPtr<FrameNode>& textField)
+{
+    CHECK_NULL_VOID(textField);
+    auto parent = textField->GetAncestorNodeOfFrame();
+    bool findSheet = false;
+    while (parent) {
+        if (parent->GetHostTag() == V2::SHEET_PAGE_TAG) {
+            findSheet = true;
+            break;
+        }
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+    CHECK_NULL_VOID(parent);
+    auto sheetNodePattern = parent->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetNodePattern);
+    TAG_LOGI(ACE_KEYBOARD, "Force AvoidKeyboard in sheet");
+    sheetNodePattern->AvoidSafeArea(true);
 }
 
 RefPtr<FrameNode> TextFieldManagerNG::FindNavNode(const RefPtr<FrameNode>& textField)

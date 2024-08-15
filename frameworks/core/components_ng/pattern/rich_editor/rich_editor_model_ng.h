@@ -29,6 +29,7 @@ public:
     void SetOnSelectionChange(std::function<void(const BaseEventInfo*)>&& func) override;
     void SetAboutToIMEInput(std::function<bool(const RichEditorInsertValue&)>&& func) override;
     void SetOnIMEInputComplete(std::function<void(const RichEditorAbstractSpanResult&)>&& func) override;
+    void SetOnDidIMEInput(std::function<void(const TextRange&)>&& func) override;
     void SetAboutToDelete(std::function<bool(const RichEditorDeleteValue&)>&& func) override;
     void SetOnDeleteComplete(std::function<void()>&& func) override;
     void SetCustomKeyboard(std::function<void()>&& func, bool supportAvoidance) override;
@@ -49,12 +50,14 @@ public:
     void SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func) override;
     void SetSelectionMenuOptions(const OnCreateMenuCallback&& onCreateMenuCallback,
         const OnMenuItemClickCallback&& onMenuItemClick) override;
+    void SetRequestKeyboardOnFocus(bool needToRequest) override;
 
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
     static void SetTextDetectConfig(FrameNode* frameNode, const std::string& value,
         std::function<void(const std::string&)>&& onResult);
     static void SetOnIMEInputComplete(FrameNode* frameNode,
         std::function<void(const RichEditorAbstractSpanResult&)>&& callback);
+    static void SetOnDidIMEInput(FrameNode* frameNode, std::function<void(const TextRange&)>&& callback);
     static void SetCopyOption(FrameNode* frameNode, CopyOptions& copyOptions);
     static void SetOnSelectionChange(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& callback);
     static void SetCaretColor(FrameNode* frameNode, const DynamicColor& color);
@@ -71,6 +74,7 @@ public:
     void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) override;
     static void SetOnSubmit(FrameNode* frameNode, std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& callback);
     static void SetAboutToIMEInput(FrameNode* frameNode, std::function<bool(const RichEditorInsertValue&)>&& callback);
+    static void SetRequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest);
 
 private:
     void SetDraggable(bool draggable);

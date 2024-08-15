@@ -437,7 +437,7 @@ RefPtr<FrameNode> Inspector::GetFrameNodeByKey(const std::string& key, bool notD
             }
         }
     }
-    auto context = NG::PipelineContext::GetCurrentContext();
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
     if (!context) {
         LOGW("Internal error! The PipelineContext returned by the system is null. param: %{public}s", key.c_str());
         return nullptr;
@@ -495,12 +495,13 @@ void Inspector::GetRectangleById(const std::string& key, Rectangle& rectangle)
     }
     rectangle.localOffset = context->GetPaintRectWithTransform().GetOffset();
     rectangle.windowOffset = frameNode->GetOffsetRelativeToWindow();
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     rectangle.screenRect = pipeline->GetCurrentWindowRect();
-    LOGD("GetRectangleById Id = %{public}s localOffset = %{public}s windowOffset = %{public}s screenRect = %{public}s",
-        key.c_str(), rectangle.localOffset.ToString().c_str(), rectangle.windowOffset.ToString().c_str(),
-        rectangle.screenRect.ToString().c_str());
+    LOGI("GetRectangleById Id = %{public}d key = %{public}s localOffset = %{public}s windowOffset = %{public}s "
+         "screenRect = %{public}s",
+        frameNode->GetId(), key.c_str(), rectangle.localOffset.ToString().c_str(),
+        rectangle.windowOffset.ToString().c_str(), rectangle.screenRect.ToString().c_str());
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     Matrix4 defMatrix4 = Matrix4::CreateIdentity();

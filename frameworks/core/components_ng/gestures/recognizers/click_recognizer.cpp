@@ -51,6 +51,17 @@ void ClickRecognizer::ForceCleanRecognizer()
 
 bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
 {
+    if (distanceThreshold_ < std::numeric_limits<double>::infinity()) {
+        Offset offset = event.GetScreenOffset() - touchPoints_[event.id].GetScreenOffset();
+        if (offset.GetDistance() > distanceThreshold_) {
+            TAG_LOGI(AceLogTag::ACE_GESTURE, "Click move distance is larger than distanceThreshold_, "
+            "distanceThreshold_ is %{public}f", distanceThreshold_);
+            Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+            return false;
+        } else {
+            return true;
+        }
+    }
     PointF localPoint(event.x, event.y);
     auto frameNode = GetAttachedNode();
     if (!frameNode.Invalid()) {
@@ -72,10 +83,14 @@ bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
     return true;
 }
 
-ClickRecognizer::ClickRecognizer(int32_t fingers, int32_t count) : MultiFingersRecognizer(fingers), count_(count)
+ClickRecognizer::ClickRecognizer(int32_t fingers, int32_t count, double distanceThreshold)
+    : MultiFingersRecognizer(fingers), count_(count), distanceThreshold_(distanceThreshold)
 {
     if (fingers_ > MAX_TAP_FINGERS || fingers_ < DEFAULT_TAP_FINGERS) {
         fingers_ = DEFAULT_TAP_FINGERS;
+    }
+    if (distanceThreshold_ < 0) {
+        distanceThreshold_ = std::numeric_limits<double>::infinity();
     }
 }
 
@@ -144,8 +159,8 @@ void ClickRecognizer::OnAccepted()
     firstInputTime_.reset();
 
     auto node = GetAttachedNode().Upgrade();
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Click accepted, tag: %{public}s, id: %{public}s",
-        node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Click accepted, tag: %{public}s",
+        node ? node->GetTag().c_str() : "null");
     if (onAccessibilityEventFunc_) {
         onAccessibilityEventFunc_(AccessibilityEventType::CLICK);
     }
@@ -479,6 +494,9 @@ GestureJudgeResult ClickRecognizer::TriggerGestureJudgeCallback()
     info->SetSourceDevice(deviceType_);
     info->SetTarget(GetEventTarget().value_or(EventTarget()));
     info->SetForce(touchPoint.force);
+    if (gestureInfo_) {
+        gestureInfo_->SetInputEventType(inputEventType_);
+    }
     if (touchPoint.tiltX.has_value()) {
         info->SetTiltX(touchPoint.tiltX.value());
     }
@@ -503,7 +521,8 @@ bool ClickRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognize
         return false;
     }
 
-    if (curr->count_ != count_ || curr->fingers_ != fingers_ || curr->priorityMask_ != priorityMask_) {
+    if (curr->count_ != count_ || curr->fingers_ != fingers_ || curr->priorityMask_ != priorityMask_ ||
+        curr->distanceThreshold_ != distanceThreshold_) {
         ResetStatus();
         return false;
     }
@@ -524,7 +543,7 @@ RefPtr<GestureSnapshot> ClickRecognizer::Dump() const
 
 RefPtr<Gesture> ClickRecognizer::CreateGestureFromRecognizer() const
 {
-    return AceType::MakeRefPtr<TapGesture>(count_, fingers_);
+    return AceType::MakeRefPtr<TapGesture>(count_, fingers_, distanceThreshold_);
 }
 
 void ClickRecognizer::CleanRecognizerState()

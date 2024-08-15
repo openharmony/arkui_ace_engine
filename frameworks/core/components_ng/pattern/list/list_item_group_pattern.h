@@ -68,6 +68,8 @@ public:
         return false;
     }
 
+    void NotifyDataChange(int32_t index, int32_t count) override;
+
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<ListItemGroupLayoutProperty>();

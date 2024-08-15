@@ -898,9 +898,9 @@ public:
         ViewAbstract::SetClickEffectLevel(level, scaleValue);
     }
 
-    void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) override
+    void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc, double distanceThreshold) override
     {
-        ViewAbstract::SetOnClick(std::move(tapEventFunc));
+        ViewAbstract::SetOnClick(std::move(tapEventFunc), distanceThreshold);
     }
 
     void SetOnGestureJudgeBegin(NG::GestureJudgeFunc&& gestureJudgeFunc) override

@@ -16,10 +16,8 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_column_ffi.h"
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 #include "core/components_ng/pattern/flex/flex_model.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
-#include "core/common/container.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;

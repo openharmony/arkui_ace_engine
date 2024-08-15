@@ -287,6 +287,16 @@ public:
         pressedKeyCodes_ = pressedKeyCodes;
     }
 
+    void SetCapi(bool isCapi)
+    {
+        isCapi_ = isCapi;
+    }
+
+    bool IsCapi()
+    {
+        return isCapi_;
+    }
+
 private:
     RefPtr<PasteData> pasteData_;
     double screenX_ = 0.0;
@@ -310,6 +320,7 @@ private:
     RefPtr<UnifiedData> dragInfo_;
     Velocity velocity_;
     std::vector<KeyCode> pressedKeyCodes_;
+    bool isCapi_ = false;
 };
 
 class NotifyDragEvent : public DragEvent {

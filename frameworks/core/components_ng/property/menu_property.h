@@ -47,11 +47,6 @@ enum class ContextMenuRegisterType : char {
     CUSTOM_TYPE = 1,
 };
 
-enum class MenuBindingType {
-    LONG_PRESS,
-    RIGHT_CLICK,
-};
-
 struct MenuParam {
     std::string title;
     OffsetF positionOffset;

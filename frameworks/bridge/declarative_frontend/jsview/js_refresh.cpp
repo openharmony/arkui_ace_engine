@@ -185,6 +185,8 @@ void JSRefresh::Create(const JSCallbackInfo& info)
     std::string loadingStr = "";
     if (ParseJsString(promptText, loadingStr)) {
         RefreshModel::GetInstance()->SetLoadingText(loadingStr);
+    } else {
+        RefreshModel::GetInstance()->ResetLoadingText();
     }
 }
 

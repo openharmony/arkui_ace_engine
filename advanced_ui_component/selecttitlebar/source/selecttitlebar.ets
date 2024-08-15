@@ -14,16 +14,27 @@
  */
 
 import { KeyCode } from '@ohos.multimodalInput.keyCode'
+import window from '@ohos.window'
+import common from '@ohos.app.ability.common'
+import { BusinessError } from '@kit.BasicServicesKit'
+import { hilog } from '@kit.PerformanceAnalysisKit'
 
 export interface SelectTitleBarMenuItem {
   value: ResourceStr;
   isEnabled?: boolean;
   action?: () => void;
+  label?: ResourceStr;
 }
 
 const PUBLIC_MORE: Resource = $r('sys.media.ohos_ic_public_more');
 
 const PUBLIC_BACK: Resource = $r('sys.media.ohos_ic_back');
+
+const TEXT_EDITABLE_DIALOG = '18.3fp'
+const IMAGE_SIZE = '64vp'
+const MAX_DIALOG = '256vp'
+const MIN_DIALOG = '216vp'
+
 
 @Component
 export struct SelectTitleBar {
@@ -49,6 +60,7 @@ export struct SelectTitleBar {
 
   @State selectMaxWidth: number = 0;
   @State backActive: boolean = false;
+  @State fontSize: number = 1;
 
   build() {
     Flex({
@@ -167,7 +179,16 @@ export struct SelectTitleBar {
 @Component
 struct CollapsibleMenuSection {
   menuItems: Array<SelectTitleBarMenuItem> = [];
+  item: SelectTitleBarMenuItem = {
+    value: PUBLIC_MORE,
+    label: $r('sys.string.ohos_toolbar_more'),
+  } as SelectTitleBarMenuItem;
   index: number = 0;
+  longPressTime: number = 500;
+  minFontSize: number = 1.75;
+  isFollowingSystemFontScale: boolean = false;
+  maxFontScale: number = 1;
+  systemFontScale?: number = 1;
 
   static readonly maxCountOfVisibleItems = 3
   private static readonly focusPadding = 4
@@ -179,6 +200,22 @@ struct CollapsibleMenuSection {
   @State isMoreIconOnFocus: boolean = false
   @State isMoreIconOnHover: boolean = false
   @State isMoreIconOnClick: boolean = false
+  @State fontSize: number = 1
+
+  dialogController: CustomDialogController | null = new CustomDialogController({
+    builder: SelectTitleBarDialog({
+      cancel: () => {
+      },
+      confirm: () => {
+      },
+      SelectTitleDialog: this.item,
+      SelectTitleBarDialog: this.item.label ? this.item.label : '',
+      fontSize: this.fontSize,
+    }),
+    maskColor: Color.Transparent,
+    isModal: true,
+    customStyle: true,
+  })
 
   getMoreIconFgColor() {
     return this.isMoreIconOnClick
@@ -197,12 +234,31 @@ struct CollapsibleMenuSection {
   }
 
   aboutToAppear() {
+    let uiContent: UIContext = this.getUIContext();
+    this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
+    this.maxFontScale = uiContent.getMaxFontScale();
     this.menuItems.forEach((item, index) => {
       if (item.isEnabled && this.firstFocusableIndex == -1 &&
         index > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
         this.firstFocusableIndex = this.index * 1000 + index + 1
       }
     })
+  }
+
+  decideFontScale(): number {
+    try {
+      let uiContent: UIContext = this.getUIContext();
+      this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1;
+      if (!this.isFollowingSystemFontScale) {
+        return 1;
+      }
+      return Math.min(this.systemFontScale, this.maxFontScale);
+    } catch (exception) {
+      let code: number = (exception as BusinessError).code;
+      let message: string = (exception as BusinessError).message;
+      hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
+      return 1;
+    }
   }
 
   build() {
@@ -215,14 +271,15 @@ struct CollapsibleMenuSection {
         } else {
           ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1),
             (item: SelectTitleBarMenuItem, index) => {
-              ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
-            })
+            ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
+          })
 
           Row() {
             Image(PUBLIC_MORE)
               .width(ImageMenuItem.imageSize)
               .height(ImageMenuItem.imageSize)
               .focusable(true)
+              .draggable(false)
               .fillColor($r('sys.color.icon_primary'))
           }
           .width(ImageMenuItem.imageHotZoneWidth)
@@ -265,11 +322,24 @@ struct CollapsibleMenuSection {
             if (event.type === TouchType.Down) {
               this.isMoreIconOnClick = true
             }
-            if (event.type === TouchType.Up) {
+            if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
               this.isMoreIconOnClick = false
+              if (this.fontSize >= this.minFontSize) {
+                this.dialogController?.close()
+              }
             }
           })
           .onClick(() => this.isPopupShown = true)
+          .gesture(
+            LongPressGesture({ repeat: false, duration: this.longPressTime })
+              .onAction((event: GestureEvent) => {
+                this.fontSize = this.decideFontScale();
+                if (event) {
+                  if (this.fontSize >= this.minFontSize) {
+                    this.dialogController?.open()
+                  }
+                }
+              }))
           .bindPopup(this.isPopupShown, {
             builder: this.popupBuilder,
             placement: Placement.Bottom,
@@ -310,6 +380,11 @@ struct CollapsibleMenuSection {
 struct ImageMenuItem {
   item: SelectTitleBarMenuItem = {} as SelectTitleBarMenuItem;
   index: number = 0;
+  longPressTime: number = 500;
+  minFontSize: number = 1.75;
+  isFollowingSystemFontScale: boolean = false;
+  maxFontScale: number = 1;
+  systemFontScale?: number = 1;
 
   static readonly imageSize = 24
   static readonly imageHotZoneWidth = 48
@@ -321,6 +396,32 @@ struct ImageMenuItem {
   @State isOnFocus: boolean = false
   @State isOnHover: boolean = false
   @State isOnClick: boolean = false
+  @Prop fontSize: number = 1
+
+  dialogController: CustomDialogController | null = new CustomDialogController({
+    builder: SelectTitleBarDialog({
+      cancel: () => {
+      },
+      confirm: () => {
+      },
+      SelectTitleDialog: this.item,
+      SelectTitleBarDialog: this.item.label ? this.item.label : this.textDialog(),
+      fontSize: this.fontSize,
+    }),
+    maskColor: Color.Transparent,
+    isModal: true,
+    customStyle: true,
+  })
+
+  private textDialog(): ResourceStr {
+    if (this.item.value === PUBLIC_MORE) {
+      return $r('sys.string.ohos_toolbar_more');
+    } else if (this.item.value === PUBLIC_BACK) {
+      return $r('sys.string.icon_back');
+    } else {
+      return this.item.label ? this.item.label : '';
+    }
+  }
 
   getFgColor() {
     return this.isOnClick
@@ -338,9 +439,32 @@ struct ImageMenuItem {
     }
   }
 
+  aboutToAppear(): void {
+    let uiContent: UIContext = this.getUIContext();
+    this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
+    this.maxFontScale = uiContent.getMaxFontScale();
+  }
+
+  decideFontScale(): number {
+    try {
+      let uiContent: UIContext = this.getUIContext();
+      this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1;
+      if (!this.isFollowingSystemFontScale) {
+        return 1;
+      }
+      return Math.min(this.systemFontScale, this.maxFontScale);
+    } catch (exception) {
+      let code: number = (exception as BusinessError).code;
+      let message: string = (exception as BusinessError).message;
+      hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
+      return 1;
+    }
+  }
+
   build() {
     Row() {
       Image(this.item.value)
+        .draggable(false)
         .width(ImageMenuItem.imageSize)
         .height(ImageMenuItem.imageSize)
         .focusable(this.item.isEnabled)
@@ -404,10 +528,108 @@ struct ImageMenuItem {
       if (event.type === TouchType.Down) {
         this.isOnClick = true
       }
-      if (event.type === TouchType.Up) {
+      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
         this.isOnClick = false
+        if (this.fontSize >= this.minFontSize) {
+          this.dialogController?.close()
+        }
       }
     })
     .onClick(() => this.item.isEnabled && this.item.action && this.item.action())
+    .gesture(
+      LongPressGesture({ repeat: false, duration: this.longPressTime })
+        .onAction((event: GestureEvent) => {
+          this.fontSize = this.decideFontScale();
+          if (event) {
+            if (this.fontSize >= this.minFontSize) {
+              this.dialogController?.open()
+            }
+          }
+        }))
+  }
+}
+
+/**
+ *  SelectTitleBarDialog
+ */
+@CustomDialog
+struct SelectTitleBarDialog {
+  SelectTitleDialog: SelectTitleBarMenuItem = {} as SelectTitleBarMenuItem;
+  callbackId: number | undefined = undefined;
+  SelectTitleBarDialog?: ResourceStr = '';
+  mainWindowStage: window.Window | undefined = undefined;
+  controller?: CustomDialogController
+  minFontSize: number = 1.75;
+  maxFontSize: number = 3.2;
+  screenWidth: number = 640;
+  verticalScreenLines: number = 6;
+  horizontalsScreenLines: number = 1;
+  @StorageLink('mainWindow') mainWindow: Promise<window.Window> | undefined = undefined;
+  @State fontSize: number = 1;
+  @State maxLines: number = 1;
+  @StorageProp('windowStandardHeight') windowStandardHeight: number = 0;
+  cancel: () => void = () => {
+  }
+  confirm: () => void = () => {
+  }
+
+  build() {
+    if (this.SelectTitleBarDialog) {
+      Column() {
+        Image(this.SelectTitleDialog.value)
+          .width(IMAGE_SIZE)
+          .height(IMAGE_SIZE)
+          .margin({
+            top: $r('sys.float.padding_level24'),
+            bottom: $r('sys.float.padding_level8'),
+          })
+          .fillColor($r('sys.color.icon_primary'))
+        Column() {
+          Text(this.SelectTitleBarDialog)
+            .fontSize(TEXT_EDITABLE_DIALOG)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
+            .maxLines(this.maxLines)
+            .width('100%')
+            .textAlign(TextAlign.Center)
+            .fontColor($r('sys.color.font_primary'))
+        }
+        .width('100%')
+        .padding({
+          left: $r('sys.float.padding_level4'),
+          right: $r('sys.float.padding_level4'),
+          bottom: $r('sys.float.padding_level12'),
+        })
+      }
+      .width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG)
+      .constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG })
+      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
+      .shadow(ShadowStyle.OUTER_DEFAULT_LG)
+      .borderRadius($r('sys.float.corner_radius_level10'))
+    } else {
+      Column() {
+        Image(this.SelectTitleDialog.value)
+          .width(IMAGE_SIZE)
+          .height(IMAGE_SIZE)
+          .fillColor($r('sys.color.icon_primary'))
+      }
+      .width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG)
+      .constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG })
+      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
+      .shadow(ShadowStyle.OUTER_DEFAULT_LG)
+      .borderRadius($r('sys.float.corner_radius_level10'))
+      .justifyContent(FlexAlign.Center)
+    }
+  }
+
+  async aboutToAppear(): Promise<void> {
+    let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
+    this.mainWindowStage = context.windowStage.getMainWindowSync();
+    let properties: window.WindowProperties = this.mainWindowStage.getWindowProperties();
+    let rect = properties.windowRect;
+    if (px2vp(rect.height) > this.screenWidth) {
+      this.maxLines = this.verticalScreenLines;
+    } else {
+      this.maxLines = this.horizontalsScreenLines;
+    }
   }
 }

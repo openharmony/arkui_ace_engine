@@ -57,8 +57,8 @@ void RotationRecognizer::OnAccepted()
     }
     
     auto node = GetAttachedNode().Upgrade();
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Rotation accepted, tag = %{public}s, id = %{public}s",
-        node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Rotation accepted, tag = %{public}s",
+        node ? node->GetTag().c_str() : "null");
     refereeState_ = RefereeState::SUCCEED;
     SendCallbackMsg(onActionStart_);
 }
@@ -355,11 +355,12 @@ void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>
             info.SetVerticalAxis(lastAxisEvent_.verticalAxis);
             info.SetHorizontalAxis(lastAxisEvent_.horizontalAxis);
             info.SetSourceTool(lastAxisEvent_.sourceTool);
+            info.SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
         } else {
             info.SetSourceTool(touchPoint.sourceTool);
+            info.SetPressedKeyCodes(touchPoint.pressedKeyCodes_);
         }
         info.SetPointerEvent(lastPointEvent_);
-        info.SetPressedKeyCodes(touchPoint.pressedKeyCodes_);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);
@@ -388,6 +389,9 @@ GestureJudgeResult RotationRecognizer::TriggerGestureJudgeCallback()
         touchPoint = touchPoints_.begin()->second;
     }
     info->SetForce(touchPoint.force);
+    if (gestureInfo_) {
+        gestureInfo_->SetInputEventType(inputEventType_);
+    }
     if (touchPoint.tiltX.has_value()) {
         info->SetTiltX(touchPoint.tiltX.value());
     }

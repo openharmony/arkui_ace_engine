@@ -315,6 +315,7 @@ float NavigationLayoutAlgorithm::CalculateNavigationWidth(const RefPtr<Navigatio
 {
     auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(hostNode->GetLayoutProperty());
     auto pipeline = hostNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, 0.0f);
     auto currentPlatformVersion = pipeline->GetMinPlatformVersion();
     auto navigationWidth = 0.0f;
     if (currentPlatformVersion >= PLATFORM_VERSION_TEN) {
@@ -366,6 +367,7 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayo
     }
 
     auto pipeline = hostNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
     pipeline->AddAfterLayoutTask([weakNavigationPattern = WeakPtr<NavigationPattern>(navigationPattern),
         modeChange, doModeSwitchAnimationInAnotherTask]() {
         auto navigationPattern = weakNavigationPattern.Upgrade();

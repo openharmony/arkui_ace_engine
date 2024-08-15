@@ -54,7 +54,7 @@ HWTEST_F(GridIrregularLayoutTest, LayoutChildren001, TestSize.Level1)
     algorithm->crossLens_ = { 50.0f, 50.0f, 100.0f };
     algorithm->crossGap_ = 5.0f;
     algorithm->mainGap_ = 1.0f;
-    algorithm->LayoutChildren(0.0f);
+    algorithm->LayoutChildren(0.0f, 0);
 
     EXPECT_EQ(frameNode_->GetChildByIndex(0)->GetGeometryNode()->GetFrameOffset().GetX(), 5.0f);
     EXPECT_EQ(frameNode_->GetChildByIndex(0)->GetGeometryNode()->GetFrameOffset().GetY(), 3.0f);
@@ -837,6 +837,27 @@ HWTEST_F(GridIrregularLayoutTest, TargetPos002, TestSize.Level1)
     pattern_->ScrollToIndex(0, true, ScrollAlign::CENTER);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->finalPosition_, 0.0f);
+
+    EXPECT_EQ(
+        GetChildAccessibilityProperty<GridItemAccessibilityProperty>(frameNode_, 0)->GetCollectionItemInfo().row, 0);
+    EXPECT_EQ(
+        GetChildAccessibilityProperty<GridItemAccessibilityProperty>(frameNode_, 0)->GetCollectionItemInfo().column, 0);
+    EXPECT_EQ(
+        GetChildAccessibilityProperty<GridItemAccessibilityProperty>(frameNode_, 1)->GetCollectionItemInfo().row, 0);
+    EXPECT_EQ(
+        GetChildAccessibilityProperty<GridItemAccessibilityProperty>(frameNode_, 1)->GetCollectionItemInfo().column, 1);
+    EXPECT_EQ(
+        GetChildAccessibilityProperty<GridItemAccessibilityProperty>(frameNode_, 2)->GetCollectionItemInfo().row, 1);
+    EXPECT_EQ(
+        GetChildAccessibilityProperty<GridItemAccessibilityProperty>(frameNode_, 2)->GetCollectionItemInfo().column, 0);
+    EXPECT_EQ(
+        GetChildAccessibilityProperty<GridItemAccessibilityProperty>(frameNode_, 3)->GetCollectionItemInfo().row, 1);
+    EXPECT_EQ(
+        GetChildAccessibilityProperty<GridItemAccessibilityProperty>(frameNode_, 3)->GetCollectionItemInfo().column, 1);
+    EXPECT_EQ(
+        GetChildAccessibilityProperty<GridItemAccessibilityProperty>(frameNode_, 4)->GetCollectionItemInfo().row, 2);
+    EXPECT_EQ(
+        GetChildAccessibilityProperty<GridItemAccessibilityProperty>(frameNode_, 4)->GetCollectionItemInfo().column, 0);
 }
 
 /**
@@ -1610,7 +1631,7 @@ HWTEST_F(GridIrregularLayoutTest, Horizontal001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     // print all content of gridMatrix_
     auto& info = pattern_->gridLayoutInfo_;
-    EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_14);
+    EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_14_HORIZONTAL);
     for (int i = 0; i < 200; ++i) {
         UpdateCurrentOffset(50.0f);
     }

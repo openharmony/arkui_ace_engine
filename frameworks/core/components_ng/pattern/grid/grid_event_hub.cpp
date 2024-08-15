@@ -207,7 +207,7 @@ void GridEventHub::HandleOnItemDragStart(const GestureEvent& info)
     };
     SnapshotParam param;
     param.delay = CREATE_PIXELMAP_TIME;
-    NG::ComponentSnapshot::Create(customNode, std::move(callback), false, param);
+    NG::ComponentSnapshot::Create(customNode, std::move(callback), true, param);
 #else
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
@@ -323,6 +323,13 @@ void GridEventHub::FireOnItemDragMove(const ItemDragInfo& dragInfo, int32_t item
     MoveItems(itemIndex, insertIndex);
 
     if (onItemDragMove_) {
+        auto host = GetFrameNode();
+        CHECK_NULL_VOID(host);
+        auto pattern = AceType::DynamicCast<GridPattern>(host->GetPattern());
+        CHECK_NULL_VOID(pattern);
+        if (pattern->SupportAnimation()) {
+            insertIndex = (itemIndex == -1 || insertIndex == -1) ? insertIndex : pattern->GetOriginalIndex();
+        }
         onItemDragMove_(dragInfo, itemIndex, insertIndex);
     }
 }

@@ -475,6 +475,7 @@ private:
         const RefPtr<NavDestinationGroupNode>& topDestination,
         bool isPopPage, const RefPtr<NavigationTransitionProxy>& proxy,
         NavigationTransition navigationTransition);
+    bool GetIsFocusable(const RefPtr<FrameNode>& frameNode);
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;
@@ -511,7 +512,7 @@ private:
 #if defined(ENABLE_NAV_SPLIT_MODE)
     bool isBackPage_ = false;
 #endif
-    FoldStatus currentfoldStatus_ = FoldStatus::UNKNOWN;  // only used for mode-switch animation
+    FoldStatus currentFoldStatus_ = FoldStatus::UNKNOWN;  // only used for mode-switch animation
     bool isReplace_ = false;
     bool isFinishInteractiveAnimation_ = true;
     int32_t lastPreIndex_ = false;

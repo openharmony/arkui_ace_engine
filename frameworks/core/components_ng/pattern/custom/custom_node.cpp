@@ -84,6 +84,16 @@ void CustomNode::Render()
     needMarkParent_ = needMarkParentBak;
 }
 
+void CustomNode::DetachFromMainTree(bool recursive)
+{
+    auto context = GetContext();
+    if (context && context->IsDestroyed()) {
+        FireOnDisappear();
+        Reset();
+    }
+    UINode::DetachFromMainTree(recursive);
+}
+
 // used in HotReload to update root view @Component
 void CustomNode::FlushReload()
 {

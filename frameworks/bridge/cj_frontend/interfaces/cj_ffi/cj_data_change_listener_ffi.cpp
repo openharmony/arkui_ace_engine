@@ -16,7 +16,6 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_data_change_listener_ffi.h"
 
 #include "bridge/cj_frontend/cppview/data_change_listener.h"
-#include "ffi_remote_data.h"
 
 using namespace OHOS::FFI;
 using namespace OHOS::Ace::Framework;
@@ -25,30 +24,45 @@ extern "C" {
 void FfiOHOSAceFrameworkDataChangeListenerOnDataReloaded(int64_t listenerId)
 {
     auto listener = FFIData::GetData<CJDataChangeListener>(listenerId);
+    if (listener == nullptr) {
+        return;
+    }
     listener->OnDataReloaded();
 }
 
 void FfiOHOSAceFrameworkDataChangeListenerOnDataAdded(int64_t listenerId, int64_t index)
 {
     auto listener = FFIData::GetData<CJDataChangeListener>(listenerId);
+    if (listener == nullptr) {
+        return;
+    }
     listener->OnDataAdded(static_cast<size_t>(index));
 }
 
 void FfiOHOSAceFrameworkDataChangeListenerOnDataDeleted(int64_t listenerId, int64_t index)
 {
     auto listener = FFIData::GetData<CJDataChangeListener>(listenerId);
+    if (listener == nullptr) {
+        return;
+    }
     listener->OnDataDeleted(static_cast<size_t>(index));
 }
 
 void FfiOHOSAceFrameworkDataChangeListenerOnDataChanged(int64_t listenerId, int64_t index)
 {
     auto listener = FFIData::GetData<CJDataChangeListener>(listenerId);
+    if (listener == nullptr) {
+        return;
+    }
     listener->OnDataChanged(static_cast<size_t>(index));
 }
 
 void FfiOHOSAceFrameworkDataChangeListenerOnDataMoved(int64_t listenerId, int64_t from, int64_t to)
 {
     auto listener = FFIData::GetData<CJDataChangeListener>(listenerId);
+    if (listener == nullptr) {
+        return;
+    }
     listener->OnDataMoved(static_cast<size_t>(from), static_cast<size_t>(to));
 }
 }

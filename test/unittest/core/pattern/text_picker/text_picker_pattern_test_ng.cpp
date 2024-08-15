@@ -1675,6 +1675,8 @@ HWTEST_F(TextPickerPatternTestNg, TextPickerPatternUpdateColumnChildPosition001,
     textPickerColumnPattern_->isReboundInProgress_ = true;
     textPickerColumnPattern_->SetYLast(1.0);
     textPickerColumnPattern_->UpdateColumnChildPosition(2.0);
+    std::vector<NG::RangeContent> range = { { "", "" } };
+    textPickerColumnPattern_->SetOptions(range);
     EXPECT_EQ(textPickerColumnPattern_->scrollDelta_, 1.0f);
     /**
      * @tc.cases: case. cover isReboundInProgress_ == true && canLoop_ == false
@@ -1713,6 +1715,8 @@ HWTEST_F(TextPickerPatternTestNg, TextPickerPatternUpdateColumnChildPosition002,
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    std::vector<NG::RangeContent> range = { { "", "" } };
+    textPickerColumnPattern_->SetOptions(range);
     /**
      * @tc.cases: case. covering the false branch
      */

@@ -176,14 +176,17 @@ void HyperlinkPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
     if (onTouchEvent_) {
         return;
     }
-    auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->OnTouchEvent(info);
+    auto touchAfterTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+        auto hyperlinkPattern = weak.Upgrade();
+        CHECK_NULL_VOID(hyperlinkPattern);
+        if (info.IsPreventDefault() && !hyperlinkPattern->isTouchPreventDefault_) {
+            hyperlinkPattern->isTouchPreventDefault_ = info.IsPreventDefault();
+        }
+        hyperlinkPattern->OnTouchEvent(info);
     };
     gestureHub->RemoveTouchEvent(onTouchEvent_);
-    onTouchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
-    gestureHub->AddTouchEvent(onTouchEvent_);
+    onTouchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchAfterTask));
+    gestureHub->AddTouchAfterEvent(onTouchEvent_);
 }
 
 void HyperlinkPattern::OnTouchEvent(const TouchEventInfo& info)
@@ -235,13 +238,16 @@ void HyperlinkPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
     if (clickListener_) {
         return;
     }
-    auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->LinkToAddress();
+    auto clickAfterCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+        auto hyperlinkPattern = weak.Upgrade();
+        CHECK_NULL_VOID(hyperlinkPattern);
+        if (!info.IsPreventDefault() && !hyperlinkPattern->isTouchPreventDefault_) {
+            hyperlinkPattern->LinkToAddress();
+        }
+        hyperlinkPattern->isTouchPreventDefault_ = false;
     };
-    clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
-    gestureHub->AddClickEvent(clickListener_);
+    clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickAfterCallback));
+    gestureHub->AddClickAfterEvent(clickListener_);
 }
 
 void HyperlinkPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
@@ -304,11 +310,12 @@ void HyperlinkPattern::OnMouseEvent(MouseInfo& info)
     auto frame = GetHost();
     CHECK_NULL_VOID(frame);
     auto frameId = frame->GetId();
+    TouchEvent touchEvent;
 
     if (frame->IsOutOfTouchTestRegion(
         { static_cast<float>(info.GetLocalLocation().GetX()) + GetHostFrameOffset()->GetX(),
             static_cast<float>(info.GetLocalLocation().GetY()) + GetHostFrameOffset()->GetY() },
-        0)) {
+        touchEvent)) {
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
         pipeline->FreeMouseStyleHoldNode(frameId);
     } else {

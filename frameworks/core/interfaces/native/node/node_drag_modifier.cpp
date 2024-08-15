@@ -57,9 +57,9 @@
 
 namespace OHOS::Ace::NG {
 namespace NodeModifier {
-int64_t CalculateModifierKeyState(const std::vector<OHOS::Ace::KeyCode>& status)
+uint64_t CalculateModifierKeyState(const std::vector<OHOS::Ace::KeyCode>& status)
 {
-    int64_t modifierKeysState = 0;
+    uint64_t modifierKeysState = 0;
     // check ctrl
     if ((std::find(status.begin(), status.end(), OHOS::Ace::KeyCode::KEY_CTRL_LEFT) != std::end(status)) ||
         (std::find(status.begin(), status.end(), OHOS::Ace::KeyCode::KEY_CTRL_RIGHT) != std::end(status))) {
@@ -83,7 +83,8 @@ int64_t CalculateModifierKeyState(const std::vector<OHOS::Ace::KeyCode>& status)
     return modifierKeysState;
 }
 
-void SetDragEventProperty(const RefPtr<OHOS::Ace::DragEvent>& info, ArkUINodeEvent& event)
+void SetDragEventProperty(const RefPtr<OHOS::Ace::DragEvent>& info, ArkUINodeEvent& event,
+    std::vector<const char*>& strList, std::vector<std::string>& keepStr)
 {
     event.dragEvent.touchPointX = info->GetPreviewRect().GetOffset().GetX();
     event.dragEvent.touchPointY = info->GetPreviewRect().GetOffset().GetY();
@@ -102,21 +103,19 @@ void SetDragEventProperty(const RefPtr<OHOS::Ace::DragEvent>& info, ArkUINodeEve
     event.dragEvent.velocity = info->GetVelocity().GetVelocityValue();
     event.dragEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info->GetPressedKeyCodes());
     auto summary = info->GetSummary();
-    event.dragEvent.dataTypesCount = summary.size();
+    event.dragEvent.dataTypesCount = static_cast<int32_t>(summary.size());
 
     int32_t index = 0;
     int32_t maxLength = 0;
-    std::vector<const char*> strList;
-    std::vector<std::string> keepStr(summary.size());
     for (auto it = summary.begin(); it != summary.end(); it++) {
-        int32_t keyLength = it->first.length();
+        int32_t keyLength = static_cast<int32_t>(it->first.length());
         maxLength = std::max(maxLength, keyLength);
         keepStr[index] = it->first;
         strList.push_back(keepStr[index].c_str());
         ++index;
     }
     event.dragEvent.dataTypes = strList.data();
-    event.dragEvent.dataTypesMaxStrLength = maxLength;
+    event.dragEvent.dataTypesMaxStrLength = maxLength + 1;
 }
 
 void SetOnDragDrop(ArkUINodeHandle node, void* extraParam)
@@ -131,17 +130,23 @@ void SetOnDragDrop(ArkUINodeHandle node, void* extraParam)
         event.nodeId = nodeId;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.dragEvent.subKind = ON_DRAG_DROP;
+        auto summary = info->GetSummary();
+        std::vector<const char*> strList;
+        std::vector<std::string> keepStr(summary.size());
 
-        SetDragEventProperty(info, event);
+        SetDragEventProperty(info, event, strList, keepStr);
+        event.dragEvent.isSuitGetData = true;
 
         auto unifiedData = UdmfClient::GetInstance()->TransformUnifiedDataPtr(info->GetData());
 
         event.dragEvent.unifiedData = unifiedData;
+        event.dragEvent.dragBehavior = static_cast<ArkUI_Int32>(DragBehavior::UNKNOWN);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         SendArkUIAsyncEvent(&event);
         info->UseCustomAnimation(event.dragEvent.useCustomDropAnimation);
         info->SetResult(static_cast<DragRet>(event.dragEvent.dragResult));
         info->SetDragBehavior(static_cast<DragBehavior>(event.dragEvent.dragBehavior));
+        info->SetCapi(true);
     };
     ViewAbstract::SetOnDrop(frameNode, onDragDrop);
 }
@@ -158,7 +163,12 @@ void SetOnDragStart(ArkUINodeHandle node, void* extraParam)
         event.nodeId = nodeId;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.dragEvent.subKind = ON_DRAG_START;
-        SetDragEventProperty(info, event);
+        auto summary = info->GetSummary();
+        std::vector<const char*> strList;
+        std::vector<std::string> keepStr(summary.size());
+
+        SetDragEventProperty(info, event, strList, keepStr);
+        event.dragEvent.isSuitGetData = false;
 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         SendArkUIAsyncEvent(&event);
@@ -185,15 +195,21 @@ void SetOnDragEnter(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.dragEvent.subKind = ON_DRAG_ENTER;
 
-        SetDragEventProperty(info, event);
-        auto unifiedData = UdmfClient::GetInstance()->TransformUnifiedDataPtr(info->GetData());
+        auto summary = info->GetSummary();
+        std::vector<const char*> strList;
+        std::vector<std::string> keepStr(summary.size());
 
+        SetDragEventProperty(info, event, strList, keepStr);
+        auto unifiedData = UdmfClient::GetInstance()->TransformUnifiedDataPtr(info->GetData());
+        event.dragEvent.dragBehavior = static_cast<ArkUI_Int32>(DragBehavior::UNKNOWN);
         event.dragEvent.unifiedData = unifiedData;
+        event.dragEvent.isSuitGetData = false;
 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         SendArkUIAsyncEvent(&event);
         info->SetResult(static_cast<DragRet>(event.dragEvent.dragResult));
         info->SetDragBehavior(static_cast<DragBehavior>(event.dragEvent.dragBehavior));
+        info->SetCapi(true);
     };
     ViewAbstract::SetOnDragEnter(frameNode, onDragEnter);
 }
@@ -210,13 +226,21 @@ void SetOnDragMove(ArkUINodeHandle node, void* extraParam)
         event.nodeId = nodeId;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.dragEvent.subKind = ON_DRAG_MOVE;
-        SetDragEventProperty(info, event);
+        auto summary = info->GetSummary();
+        std::vector<const char*> strList;
+        std::vector<std::string> keepStr(summary.size());
+
+        SetDragEventProperty(info, event, strList, keepStr);
         auto unifiedData = UdmfClient::GetInstance()->TransformUnifiedDataPtr(info->GetData());
+        event.dragEvent.dragBehavior = static_cast<ArkUI_Int32>(DragBehavior::UNKNOWN);
         event.dragEvent.unifiedData = unifiedData;
+        event.dragEvent.isSuitGetData = false;
+
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         SendArkUIAsyncEvent(&event);
         info->SetResult(static_cast<DragRet>(event.dragEvent.dragResult));
         info->SetDragBehavior(static_cast<DragBehavior>(event.dragEvent.dragBehavior));
+        info->SetCapi(true);
     };
     ViewAbstract::SetOnDragMove(frameNode, onDragMove);
 }
@@ -234,14 +258,21 @@ void SetOnDragLeave(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.dragEvent.subKind = ON_DRAG_LEAVE;
 
-        SetDragEventProperty(info, event);
-        auto unifiedData = UdmfClient::GetInstance()->TransformUnifiedDataPtr(info->GetData());
+        auto summary = info->GetSummary();
+        std::vector<const char*> strList;
+        std::vector<std::string> keepStr(summary.size());
 
+        SetDragEventProperty(info, event, strList, keepStr);
+        auto unifiedData = UdmfClient::GetInstance()->TransformUnifiedDataPtr(info->GetData());
+        event.dragEvent.dragBehavior = static_cast<ArkUI_Int32>(DragBehavior::UNKNOWN);
         event.dragEvent.unifiedData = unifiedData;
+        event.dragEvent.isSuitGetData = false;
+
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         SendArkUIAsyncEvent(&event);
         info->SetResult(static_cast<DragRet>(event.dragEvent.dragResult));
         info->SetDragBehavior(static_cast<DragBehavior>(event.dragEvent.dragBehavior));
+        info->SetCapi(true);
     };
     ViewAbstract::SetOnDragLeave(frameNode, onDragLeave);
 }
@@ -258,25 +289,26 @@ void SetOnDragEnd(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.dragEvent.subKind = ON_DRAG_END;
         auto summary = info->GetSummary();
-        event.dragEvent.dataTypesCount = summary.size();
+        event.dragEvent.dataTypesCount = static_cast<int32_t>(summary.size());
 
         int32_t index = 0;
         int32_t maxLength = 0;
         std::vector<const char*> strList;
         std::vector<std::string> keepStr(summary.size());
         for (auto it = summary.begin(); it != summary.end(); it++) {
-            int32_t keyLength = it->first.length();
+            int32_t keyLength = static_cast<int32_t>(it->first.length());
             maxLength = std::max(maxLength, keyLength);
             keepStr[index] = it->first;
             strList.push_back(keepStr[index].c_str());
             ++index;
         }
         event.dragEvent.dataTypes = strList.data();
-        event.dragEvent.dataTypesMaxStrLength = maxLength;
+        event.dragEvent.dataTypesMaxStrLength = maxLength + 1;
 
         auto unifiedData = UdmfClient::GetInstance()->TransformUnifiedDataPtr(info->GetData());
 
         event.dragEvent.unifiedData = unifiedData;
+        event.dragEvent.isSuitGetData = false;
 
         // Did NOT define pressCode, so will NOT pass presscode to UI.
         event.dragEvent.dragResult = static_cast<ArkUI_Int32>(info->GetResult());
@@ -302,6 +334,8 @@ void SetOnPreDrag(ArkUINodeHandle node, void* extraParam)
 
         // Did NOT define pressCode, so will NOT pass presscode to UI.
         event.componentAsyncEvent.data[0].i32 = static_cast<ArkUI_Int32>(preDragStatus);
+        event.dragEvent.isSuitGetData = false;
+
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         SendArkUIAsyncEvent(&event);
     };

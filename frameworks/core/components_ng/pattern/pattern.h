@@ -85,7 +85,7 @@ public:
         return true;
     }
 
-    virtual bool StopExpandMark()
+    virtual bool ConsumeChildrenAdjustment(const OffsetF& /* offset */)
     {
         return false;
     }
@@ -274,7 +274,14 @@ public:
 
     virtual void OnMountToParentDone() {}
 
+    virtual void AfterMountToParent() {}
+
     virtual void OnSensitiveStyleChange(bool isSensitive) {}
+
+    virtual bool AllowVisibleAreaCheck() const
+    {
+        return false;
+    }
 
     virtual bool IsRootPattern() const
     {
@@ -503,6 +510,7 @@ public:
     virtual void OnDpiConfigurationUpdate() {}
     virtual void OnIconConfigurationUpdate() {}
     virtual void OnFontConfigurationUpdate() {}
+    virtual void OnFontScaleConfigurationUpdate() {}
 
     virtual bool ShouldDelayChildPressedState() const
     {
@@ -608,6 +616,23 @@ public:
     {
         return false;
     }
+
+    virtual uint32_t GetWindowPatternType() const
+    {
+        return 0;
+    }
+    
+    virtual bool IsResponseRegionExpandingNeededForStylus(const TouchEvent& touchEvent) const
+    {
+        return false;
+    }
+
+    virtual RectF ExpandDefaultResponseRegion(RectF& rect)
+    {
+        return RectF();
+    }
+
+    virtual void NotifyDataChange(int32_t index, int32_t count) {};
 
 protected:
     virtual void OnAttachToFrameNode() {}

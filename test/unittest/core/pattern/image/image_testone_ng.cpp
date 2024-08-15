@@ -65,7 +65,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest002, TestSize.Level1)
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(imagePattern->image_, true);
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, { .selected = true });
     ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
 
     auto& config = imagePaintMethod.canvasImage_->paintConfig_;
@@ -124,7 +124,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest003, TestSize.Level1)
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(imagePattern->image_, true);
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, { .selected = true });
     ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
 
     auto& config = imagePaintMethod.canvasImage_->paintConfig_;
@@ -183,7 +183,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest004, TestSize.Level1)
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(imagePattern->image_, true);
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, { .selected = true });
     ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
 
     auto& config = imagePaintMethod.canvasImage_->paintConfig_;
@@ -237,7 +237,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest005, TestSize.Level1)
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(imagePattern->image_, true);
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, { .selected = true });
     ASSERT_NE(imagePattern->loadingCtx_, nullptr);
     ASSERT_NE(imagePattern->altLoadingCtx_, nullptr);
     EXPECT_EQ(imagePattern->altLoadingCtx_->GetSourceInfo().GetSrc(), RESOURCE_URL);
@@ -279,7 +279,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest006, TestSize.Level1)
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(imagePattern->image_, true);
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, { .selected = true });
 
     ASSERT_NE(imagePattern->loadingCtx_, nullptr);
     ASSERT_NE(imagePattern->altLoadingCtx_, nullptr);
@@ -322,7 +322,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest007, TestSize.Level1)
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(imagePattern->image_, true);
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, { .selected = true });
 
     ASSERT_NE(imagePattern->loadingCtx_, nullptr);
     ASSERT_NE(imagePattern->altLoadingCtx_, nullptr);
@@ -368,7 +368,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest008, TestSize.Level1)
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(imagePattern->image_, true);
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, { .selected = true });
 
     ASSERT_NE(imagePattern->loadingCtx_, nullptr);
     ASSERT_NE(imagePattern->altLoadingCtx_, nullptr);
@@ -430,7 +430,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest009, TestSize.Level1)
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(imagePattern->image_, true);
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, { .selected = true });
 
     ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
 
@@ -510,7 +510,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest010, TestSize.Level1)
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(imagePattern->image_, true);
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, { .selected = true });
 
     ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
 
@@ -576,7 +576,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest011, TestSize.Level1)
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(imagePattern->image_, true);
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, { .selected = true });
 
     ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
 
@@ -635,7 +635,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest012, TestSize.Level1)
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(imagePattern->image_, true);
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, { .selected = true });
 
     ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
 
@@ -707,7 +707,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest013, TestSize.Level1)
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(imagePattern->image_, true);
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, { .selected = true });
 
     ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
 
@@ -758,7 +758,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest014, TestSize.Level1)
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(imagePattern->image_, true);
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, { .selected = true });
 
     ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
 
@@ -860,7 +860,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest015, TestSize.Level1)
     */
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(imagePattern->image_, true);
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, { .selected = true });
 
     ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
 
@@ -921,7 +921,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest016, TestSize.Level1)
      */
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(imagePattern->image_, true);
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, { .selected = true });
 
     ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
 
@@ -973,7 +973,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest017, TestSize.Level1)
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(imagePattern->image_, true);
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, { .selected = true });
     /**
      * @tc.steps: step4. ImagePaintMethod GetContentDrawFunction.
      */
@@ -1037,7 +1037,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest018, TestSize.Level1)
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(imagePattern->image_, true);
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, { .selected = true });
 
     ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
 
@@ -1121,7 +1121,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest019, TestSize.Level1)
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(imagePattern->image_, true);
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, { .selected = true });
 
     ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
     /**
@@ -1189,7 +1189,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest020, TestSize.Level1)
     */
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(imagePattern->image_, true);
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, { .selected = true });
 
     ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
 
@@ -1234,7 +1234,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest021, TestSize.Level1)
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(imagePattern->image_, true);
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, { .selected = true });
 
     ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
 
@@ -1314,7 +1314,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest022, TestSize.Level1)
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(imagePattern->image_, true);
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, { .selected = true });
 
     ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
 
@@ -1394,7 +1394,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest023, TestSize.Level1)
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(imagePattern->image_, true);
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, { .selected = true });
 
     ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
 
@@ -1474,7 +1474,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest024, TestSize.Level1)
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(imagePattern->image_, true);
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, { .selected = true });
 
     ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
 
@@ -1583,7 +1583,7 @@ void ImageModelNGTest001_SetRenderProperty01(ImageModelNG &image)
 
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(imagePattern->image_, true);
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, { .selected = true });
     ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
     auto& config = imagePaintMethod.canvasImage_->paintConfig_;
     auto drawingColorFilter = config->colorFilter_.colorFilterDrawing_;
@@ -1955,9 +1955,6 @@ void ImageModelNGFailedTest001_Properties03(ImageModelNG &image)
 
     ImageModelNG::SetDrawingColorFilter(frameNodeNull, drawingColorFilter);
     EXPECT_EQ(imageRenderProperty->GetDrawingColorFilter().has_value(), false);
-
-    image.SetDraggable(false);
-    EXPECT_NE(frameNode->IsDraggable(), false);
 
     /* recover node*/
     PushUINodes(uiNodes);

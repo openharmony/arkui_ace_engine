@@ -13,13 +13,8 @@
  * limitations under the License.
  */
 #include "core/components_ng/render/adapter/media_player_impl.h"
-#include <cstdint>
 
 #include "base/i18n/localization.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
-#include "core/components/video/video_utils.h"
 #include "core/components_ng/render/adapter/render_surface_impl.h"
 #ifdef RENDER_EXTRACT_SUPPORTED
 #include "core/components_ng/render/adapter/render_texture_impl.h"
@@ -77,20 +72,17 @@ void MediaPlayerImpl::InitListener()
 
     auto onPrepared = [uiTaskExecutor, weak = WeakClaim(this)](uint32_t width, uint32_t height, bool isPlaying,
                           uint32_t duration, uint32_t currentPos, bool needFireEvent) {
-        uiTaskExecutor.PostSyncTask(
-            [weak, width, height, isPlaying, duration, currentPos, needFireEvent] {
+        uiTaskExecutor.PostSyncTask([weak, width, height, isPlaying, duration, currentPos, needFireEvent] {
                 auto player = weak.Upgrade();
                 CHECK_NULL_VOID(player);
                 if (player->stateChangeCallback_) {
                     player->stateChangeCallback_(PlaybackStatus::PREPARED);
                 }
-            },
-            "ArkUIVideoPlayerPrepared");
+            }, "ArkUIVideoPlayerPrepared");
     };
 
     auto onPlayerStatus = [weak = WeakClaim(this), uiTaskExecutor](bool isPlaying) {
-        uiTaskExecutor.PostSyncTask(
-            [weak, isPlaying] {
+        uiTaskExecutor.PostSyncTask([weak, isPlaying] {
                 auto player = weak.Upgrade();
                 CHECK_NULL_VOID(player);
                 if (player->stateChangeCallback_) {
@@ -101,32 +93,27 @@ void MediaPlayerImpl::InitListener()
                     player->startRenderFrameCallback_();
                 }
 #endif
-            },
-            "ArkUIVideoPlayerStatusChanged");
+            }, "ArkUIVideoPlayerStatusChanged");
     };
 
     auto onCurrentTimeChange = [weak = WeakClaim(this), uiTaskExecutor](uint32_t currentPos) {
-        uiTaskExecutor.PostSyncTask(
-            [weak, currentPos] {
+        uiTaskExecutor.PostSyncTask([weak, currentPos] {
                 auto player = weak.Upgrade();
                 CHECK_NULL_VOID(player);
                 if (player->positionUpdateCallback_) {
                     player->positionUpdateCallback_(currentPos);
                 }
-            },
-            "ArkUIVideoPlayerCurrentTimeChanged");
+            }, "ArkUIVideoPlayerCurrentTimeChanged");
     };
 
     auto onCompletion = [weak = WeakClaim(this), uiTaskExecutor] {
-        uiTaskExecutor.PostSyncTask(
-            [weak] {
+        uiTaskExecutor.PostSyncTask([weak] {
                 auto player = weak.Upgrade();
                 CHECK_NULL_VOID(player);
                 if (player->stateChangeCallback_) {
                     player->stateChangeCallback_(PlaybackStatus::PLAYBACK_COMPLETE);
                 }
-            },
-            "ArkUIVideoPlayerCompletion");
+            }, "ArkUIVideoPlayerCompletion");
     };
 
     player_->AddPreparedListener(onPrepared);

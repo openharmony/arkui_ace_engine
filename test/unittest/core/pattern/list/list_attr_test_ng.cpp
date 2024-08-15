@@ -1164,6 +1164,95 @@ HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign007, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AttrScrollSnapAlign008
+ * @tc.desc: Test FixPredictSnapOffsetAlignStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign008, TestSize.Level1)
+{
+    CreateSnapList(V2::ScrollSnapAlign::START);
+    pattern_->OnScrollSnapCallback(-1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+    pattern_->OnScrollSnapCallback(1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+
+    // EdgeEffect::FADE
+    ListModelNG model = CreateList();
+    model.SetEdgeEffect(EdgeEffect::FADE, false);
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
+    pattern_->OnScrollSnapCallback(-1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+    pattern_->OnScrollSnapCallback(1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+}
+
+/**
+ * @tc.name: AttrScrollSnapAlign009
+ * @tc.desc: Test FixPredictSnapOffsetAlignEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign009, TestSize.Level1)
+{
+    CreateSnapList(V2::ScrollSnapAlign::END);
+    pattern_->OnScrollSnapCallback(-1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+    pattern_->OnScrollSnapCallback(1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+
+    // EdgeEffect::FADE
+    ListModelNG model = CreateList();
+    model.SetEdgeEffect(EdgeEffect::FADE, false);
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::END);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
+    pattern_->OnScrollSnapCallback(-1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+    pattern_->OnScrollSnapCallback(1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+}
+
+/**
+ * @tc.name: AttrScrollSnapAlign010
+ * @tc.desc: Test FixPredictSnapOffsetAlignCenter
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign010, TestSize.Level1)
+{
+    float defaultOffset = -(LIST_HEIGHT - DEVIATION_HEIGHT - ITEM_HEIGHT) / 2; // -140.f
+    CreateSnapList(V2::ScrollSnapAlign::CENTER);
+    pattern_->OnScrollSnapCallback(-1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset);
+    pattern_->OnScrollSnapCallback(1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset);
+
+    // EdgeEffect::FADE
+    defaultOffset = -(LIST_HEIGHT - ITEM_HEIGHT) / 2;
+    ListModelNG model = CreateList();
+    model.SetEdgeEffect(EdgeEffect::FADE, false);
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
+    pattern_->OnScrollSnapCallback(-1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset);
+    pattern_->OnScrollSnapCallback(1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset);
+}
+
+/**
  * @tc.name: AttrSLECM001
  * @tc.desc: Test property about edgeEffect/chainAnimation/multiSelectable
  * @tc.type: FUNC
@@ -1579,81 +1668,6 @@ HWTEST_F(ListAttrTestNg, ChainAnimation003, TestSize.Level1)
 }
 
 /**
- * @tc.name: FadingEdge001
- * @tc.desc: Test SetFadingEdge
- * @tc.type: FUNC
- */
-HWTEST_F(ListAttrTestNg, FadingEdge001, TestSize.Level1)
-{
-    /**
-     * @tc.cases: SetFadingEdge false
-     * @tc.expected: FadingEdge false
-     */
-    ListModelNG model = CreateList();
-    model.SetFadingEdge(false);
-    CreateListItems(1);
-    CreateDone(frameNode_);
-    EXPECT_FALSE(layoutProperty_->GetFadingEdgeValue(true));
-
-    /**
-     * @tc.cases: SetFadingEdge true
-     * @tc.expected: FadingEdge true
-     */
-    model = CreateList();
-    model.SetFadingEdge(true);
-    CreateListItems(1);
-    CreateDone(frameNode_);
-    EXPECT_TRUE(layoutProperty_->GetFadingEdgeValue(false));
-    frameNode_->SetOverlayNode(nullptr);
-    FlushLayoutTask(frameNode_);
-}
-
-/**
- * @tc.name: FadingEdge002
- * @tc.desc: Test SetFadingEdge
- * @tc.type: FUNC
- */
-HWTEST_F(ListAttrTestNg, FadingEdge002, TestSize.Level1)
-{
-    /**
-     * @tc.cases: ContentStartOffset 50.f and Space 10.f
-     * @tc.expected: startMainPos_ >= 0 and endMainPos_ > contentMainSize_
-     */
-    ListModelNG model = CreateList();
-    model.SetFadingEdge(true);
-    model.SetContentStartOffset(50.f);
-    model.SetContentEndOffset(50.f);
-    model.SetSpace(Dimension(10.f));
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    EXPECT_EQ(pattern_->GetTotalOffset(), -50);
-    EXPECT_EQ(pattern_->startMainPos_, 50.f);
-    EXPECT_EQ(pattern_->endMainPos_, 490.f);
-    EXPECT_EQ(pattern_->contentStartOffset_, 50.f);
-    EXPECT_EQ(pattern_->contentEndOffset_, 50.f);
-
-    /**
-     * @tc.cases: ScrollTo 0.f
-     * @tc.expected: startMainPos_ >= 0 and endMainPos_ > contentMainSize_
-     */
-    pattern_->ScrollTo(0);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->startMainPos_, 0.f);
-    EXPECT_EQ(pattern_->endMainPos_, 440.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
-
-    /**
-     * @tc.cases: ScrollTo 50.f
-     * @tc.expected: startMainPos_ < 0
-     */
-    pattern_->ScrollTo(50);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->startMainPos_, -50.f);
-    EXPECT_EQ(pattern_->endMainPos_, 490.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), 50.f);
-}
-
-/**
  * @tc.name: GetOrCreateController001
  * @tc.desc: Test GetOrCreateController
  * @tc.type: FUNC
@@ -1691,4 +1705,375 @@ HWTEST_F(ListAttrTestNg, ListItemCreate001, TestSize.Level1)
     CreateDone(frameNode_);
     EXPECT_EQ(frameNode_->GetTotalChildCount(), 2);
 }
+
+/**
+ * @tc.name: ListMaintainVisibleContentPosition001
+ * @tc.desc: Test maintain visible content position
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, ListMaintainVisibleContentPosition001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ListItem LazyForEach
+     * @tc.expected: Created successful
+     */
+    ListModelNG model = CreateList();
+    model.SetMaintainVisibleContentPosition(true);
+    CreateListItems(10);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step1. Current start index is 2, insert Item in 0.
+     * @tc.expected: Current index is 3.
+     */
+    ScrollToIndex(2, false, ScrollAlign::START);
+    pattern_->NotifyDataChange(0, 1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->startIndex_, 3);
+    EXPECT_EQ(pattern_->currentOffset_, 300);
+
+    /**
+     * @tc.steps: step2. Current start index is 3, insert Item in 3.
+     * @tc.expected: Current index is 4.
+     */
+    pattern_->NotifyDataChange(3, 1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->startIndex_, 4);
+    EXPECT_EQ(pattern_->currentOffset_, 400);
+
+    /**
+     * @tc.steps: step3. Current start index is 4, delete Item in 1.
+     * @tc.expected: Current index is 3.
+     */
+    pattern_->NotifyDataChange(1, -1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->startIndex_, 3);
+    EXPECT_EQ(pattern_->currentOffset_, 300);
+
+    /**
+     * @tc.steps: step4. Current start index is 3, delete 3 Item in 1.
+     * @tc.expected: Current index is 1.
+     */
+    pattern_->NotifyDataChange(1, -3);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->startIndex_, 1);
+    EXPECT_EQ(pattern_->currentOffset_, 100);
+
+    /**
+     * @tc.steps: step5. Current start index is 1, delete 1 Item in 2.
+     * @tc.expected: Current index is 1.
+     */
+    pattern_->NotifyDataChange(2, -1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->startIndex_, 1);
+    EXPECT_EQ(pattern_->currentOffset_, 100);
+
+    /**
+     * @tc.steps: step6. Current start index is 1, add Item in 2.
+     * @tc.expected: Current index is 1.
+     */
+    pattern_->NotifyDataChange(2, 1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->startIndex_, 1);
+    EXPECT_EQ(pattern_->currentOffset_, 100);
+}
+
+/**
+ * @tc.name: ListMaintainVisibleContentPosition002
+ * @tc.desc: Test Test maintain visible content position with lanes
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, ListMaintainVisibleContentPosition002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ListItem LazyForEach
+     * @tc.expected: Created successful
+     */
+    ListModelNG model = CreateList();
+    model.SetMaintainVisibleContentPosition(true);
+    model.SetLanes(2);
+    CreateListItems(20);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step1. Current start index is 4, insert Item in 0.
+     * @tc.expected: Current start index is 4.
+     */
+    ScrollToIndex(4, false, ScrollAlign::START);
+    pattern_->NotifyDataChange(0, 1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->startIndex_, 4);
+    EXPECT_EQ(pattern_->currentOffset_, 200);
+
+    /**
+     * @tc.steps: step2. Current start index is 4, insert 2 Item in 0.
+     * @tc.expected: Current index is 6.
+     */
+    pattern_->NotifyDataChange(0, 2);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->startIndex_, 6);
+    EXPECT_EQ(pattern_->currentOffset_, 300);
+
+    /**
+     * @tc.steps: step3. Current start index is 6, delete Item in 0.
+     * @tc.expected: Current index is 4.
+     */
+    pattern_->NotifyDataChange(0, -1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->startIndex_, 6);
+    EXPECT_EQ(pattern_->currentOffset_, 300);
+
+    /**
+     * @tc.steps: step4. Current start index is 6, delete 2 Item in 0.
+     * @tc.expected: Current index is 2.
+     */
+    pattern_->NotifyDataChange(0, -2);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->startIndex_, 4);
+    EXPECT_EQ(pattern_->currentOffset_, 200);
+
+    /**
+     * @tc.steps: step5. Current start index is 4, delete 2 Item in 4.
+     * @tc.expected: Current index is 2.
+     */
+    pattern_->NotifyDataChange(4, -1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->startIndex_, 4);
+    EXPECT_EQ(pattern_->currentOffset_, 200);
+
+    /**
+     * @tc.steps: step6. Current start index is 4, add Item in 2.
+     * @tc.expected: Current index is 6.
+     */
+    pattern_->NotifyDataChange(4, 2);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->startIndex_, 6);
+    EXPECT_EQ(pattern_->currentOffset_, 300);
+}
+
+/**
+ * @tc.name: ListMaintainVisibleContentPosition002
+ * @tc.desc: Test Test maintain visible content position with ListItemGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, ListMaintainVisibleContentPosition003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ListItem LazyForEach
+     * @tc.expected: Created successful
+     */
+    ListModelNG model = CreateList();
+    model.SetMaintainVisibleContentPosition(true);
+    CreateListItemGroup();
+    CreateListItems(10);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step1. Current start index is 2, insert Item in 0.
+     * @tc.expected: Current index is 3.
+     */
+    ScrollToItemInGroup(0, 2, false, ScrollAlign::START);
+    EXPECT_EQ(pattern_->currentOffset_, 200);
+    auto groupNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    auto groupPattern = groupNode->GetPattern<ListItemGroupPattern>();
+    groupPattern->NotifyDataChange(0, 1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 3);
+    EXPECT_EQ(pattern_->currentOffset_, 300);
+
+    /**
+     * @tc.steps: step2. Current start index is 3, insert Item in 3.
+     * @tc.expected: Current index is 4.
+     */
+    groupPattern->NotifyDataChange(3, 1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 4);
+    EXPECT_EQ(pattern_->currentOffset_, 400);
+
+    /**
+     * @tc.steps: step3. Current start index is 4, delete Item in 1.
+     * @tc.expected: Current index is 3.
+     */
+    groupPattern->NotifyDataChange(1, -1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 3);
+    EXPECT_EQ(pattern_->currentOffset_, 300);
+
+    /**
+     * @tc.steps: step4. Current start index is 3, delete 3 Item in 1.
+     * @tc.expected: Current index is 1.
+     */
+    groupPattern->NotifyDataChange(1, -3);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 1);
+    EXPECT_EQ(pattern_->currentOffset_, 100);
+
+    /**
+     * @tc.steps: step5. Current start index is 1, delete 1 Item in 2.
+     * @tc.expected: Current index is 1.
+     */
+    groupPattern->NotifyDataChange(2, -1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 1);
+    EXPECT_EQ(pattern_->currentOffset_, 100);
+
+    /**
+     * @tc.steps: step6. Current start index is 1, add Item in 2.
+     * @tc.expected: Current index is 1.
+     */
+    groupPattern->NotifyDataChange(2, 1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 1);
+    EXPECT_EQ(pattern_->currentOffset_, 100);
+}
+
+/**
+ * @tc.name: ListMaintainVisibleContentPosition004
+ * @tc.desc: Test Test maintain visible content position with ListItemGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, ListMaintainVisibleContentPosition004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ListItem LazyForEach
+     * @tc.expected: Created successful
+     */
+    ListModelNG model = CreateList();
+    model.SetLanes(2);
+    model.SetMaintainVisibleContentPosition(true);
+    CreateListItemGroup();
+    CreateListItems(20);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step1. Current start index is 2, insert Item in 0.
+     * @tc.expected: Current index is 3.
+     */
+    ScrollToItemInGroup(0, 4, false, ScrollAlign::START);
+    auto groupNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    auto groupPattern = groupNode->GetPattern<ListItemGroupPattern>();
+    groupPattern->NotifyDataChange(0, 1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 4);
+    EXPECT_EQ(pattern_->currentOffset_, 200);
+
+    /**
+     * @tc.steps: step2. Current start index is 4, insert 2 Item in 0.
+     * @tc.expected: Current index is 6.
+     */
+    groupPattern->NotifyDataChange(0, 2);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 6);
+    EXPECT_EQ(pattern_->currentOffset_, 300);
+
+    /**
+     * @tc.steps: step3. Current start index is 6, delete Item in 0.
+     * @tc.expected: Current index is 4.
+     */
+    groupPattern->NotifyDataChange(0, -1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 6);
+    EXPECT_EQ(pattern_->currentOffset_, 300);
+
+    /**
+     * @tc.steps: step4. Current start index is 6, delete 2 Item in 0.
+     * @tc.expected: Current index is 2.
+     */
+    groupPattern->NotifyDataChange(0, -2);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 4);
+    EXPECT_EQ(pattern_->currentOffset_, 200);
+
+    /**
+     * @tc.steps: step5. Current start index is 4, delete 2 Item in 4.
+     * @tc.expected: Current index is 2.
+     */
+    groupPattern->NotifyDataChange(4, -1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 4);
+    EXPECT_EQ(pattern_->currentOffset_, 200);
+
+    /**
+     * @tc.steps: step6. Current start index is 4, add Item in 4.
+     * @tc.expected: Current index is 4.
+     */
+    groupPattern->NotifyDataChange(4, 2);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 6);
+    EXPECT_EQ(pattern_->currentOffset_, 300);
+}
+
+/**
+ * @tc.name: ListMaintainVisibleContentPosition005
+ * @tc.desc: Test Test maintain visible content position with ListItemGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, ListMaintainVisibleContentPosition005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ListItem LazyForEach
+     * @tc.expected: Created successful
+     */
+    ListModelNG model = CreateList();
+    model.SetLanes(2);
+    model.SetMaintainVisibleContentPosition(true);
+    CreateListItemGroups(10);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step1. Current start index is 2, insert Item in 0.
+     * @tc.expected: Current index is 3.
+     */
+    ScrollToIndex(2, false, ScrollAlign::START);
+    pattern_->NotifyDataChange(0, 1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->startIndex_, 3);
+    EXPECT_EQ(pattern_->currentOffset_, 300);
+
+    /**
+     * @tc.steps: step2. Current start index is 3, insert Item in 3.
+     * @tc.expected: Current index is 4.
+     */
+    pattern_->NotifyDataChange(3, 1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->startIndex_, 4);
+    EXPECT_EQ(pattern_->currentOffset_, 400);
+
+    /**
+     * @tc.steps: step3. Current start index is 4, delete Item in 1.
+     * @tc.expected: Current index is 3.
+     */
+    pattern_->NotifyDataChange(1, -1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->startIndex_, 3);
+    EXPECT_EQ(pattern_->currentOffset_, 300);
+
+    /**
+     * @tc.steps: step4. Current start index is 3, delete 3 Item in 1.
+     * @tc.expected: Current index is 1.
+     */
+    pattern_->NotifyDataChange(1, -3);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->startIndex_, 1);
+    EXPECT_EQ(pattern_->currentOffset_, 100);
+
+    /**
+     * @tc.steps: step5. Current start index is 1, delete 1 Item in 2.
+     * @tc.expected: Current index is 1.
+     */
+    pattern_->NotifyDataChange(2, -1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->startIndex_, 1);
+    EXPECT_EQ(pattern_->currentOffset_, 100);
+
+    /**
+     * @tc.steps: step6. Current start index is 1, add Item in 2.
+     * @tc.expected: Current index is 1.
+     */
+    pattern_->NotifyDataChange(2, 1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->startIndex_, 1);
+    EXPECT_EQ(pattern_->currentOffset_, 100);
+}
+
 } // namespace OHOS::Ace::NG

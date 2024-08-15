@@ -281,6 +281,7 @@ void GridItemPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
         static_cast<float>(radius.radiusBottomRight->ConvertToPx() + focusPaintPadding),
         static_cast<float>(radius.radiusBottomRight->ConvertToPx() + focusPaintPadding));
 }
+
 void GridItemPattern::DumpAdvanceInfo()
 {
     auto property = GetLayoutProperty<GridItemLayoutProperty>();

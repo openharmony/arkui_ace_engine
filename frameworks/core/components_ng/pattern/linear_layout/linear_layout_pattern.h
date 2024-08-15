@@ -21,7 +21,6 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_algorithm.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_theme.h"
 
 namespace OHOS::Ace::NG {
 // PagePattern is the base class for page render node.
@@ -54,17 +53,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        FocusPattern focusPattern(FocusType::SCOPE, true);
-        auto pipline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipline, focusPattern);
-        auto theme = pipline->GetTheme<LinearLayoutTheme>();
-        CHECK_NULL_RETURN(theme, focusPattern);
-        FocusPaintParam focusPaintParam;
-        focusPaintParam.SetPaintColor(theme->GetFocusBorderColor());
-        focusPaintParam.SetPaintWidth(theme->GetFocusBorderWidth());
-        focusPaintParam.SetFocusBoxGlow(theme->IsFocusBoxGlow());
-        focusPattern.SetFocusPaintParams(focusPaintParam);
-        return focusPattern;
+        return { FocusType::SCOPE, true };
     }
 
     ScopeFocusAlgorithm GetScopeFocusAlgorithm() override

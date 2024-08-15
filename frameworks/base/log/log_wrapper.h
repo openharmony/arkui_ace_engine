@@ -190,9 +190,13 @@ enum AceLogTag : uint8_t {
     ACE_ARK_COMPONENT,        // C0394D
     ACE_WINDOW,               // C0394E
     ACE_SECURITYUIEXTENSION,  // C0394F
-    ACE_INPUTKEYFLOW,         // C03950
-    ACE_WINDOW_PIPELINE,      // C03951
-    ACE_LAYOUT_INSPECTOR,     // C03952
+    ACE_WINDOW_PIPELINE,      // C03950
+    ACE_INPUTKEYFLOW,         // C03951
+    ACE_APPBAR,               // C03952
+    ACE_SELECT_OVERLAY,       // C03953
+    ACE_CLIPBOARD,            // C03954
+    ACE_VISUAL_EFFECT,        // C03955
+    ACE_LAYOUT_INSPECTOR,     // C03956
 
     FORM_RENDER = 255, // C039FF FormRenderer, last domain, do not add
 };

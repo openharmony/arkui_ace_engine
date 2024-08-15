@@ -29,7 +29,6 @@
 #include "core/components_ng/pattern/toggle/switch_paint_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline/pipeline_base.h"
-#include "core/components/toggle/toggle_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -89,7 +88,6 @@ void SwitchPattern::OnModifyDone()
     InitPanEvent(gestureHub);
     InitTouchEvent();
     InitMouseEvent();
-    InitFocusEvent();
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
@@ -97,117 +95,6 @@ void SwitchPattern::OnModifyDone()
     FireBuilder();
 }
 
-void SwitchPattern::InitFocusEvent()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto switchPaintProperty = host->GetPaintProperty<SwitchPaintProperty>();
-    CHECK_NULL_VOID(switchPaintProperty);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto switchTheme = pipeline->GetTheme<SwitchTheme>();
-    CHECK_NULL_VOID(switchTheme);
-
-    auto focusHub = host->GetOrCreateFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    auto focusTask = [weak = WeakClaim(this), paintProperty = switchPaintProperty,
-        theme = switchTheme]() {
-        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "switch button handle focus event");
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandleFocusEvent(paintProperty, theme);
-    };
-    focusHub->SetOnFocusInternal(focusTask);
-
-    auto blurTask = [weak = WeakClaim(this), paintProperty = switchPaintProperty,
-        theme = switchTheme]() {
-        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "switch button handle blur event");
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandleBlurEvent(paintProperty, theme);
-    };
-    focusHub->SetOnBlurInternal(blurTask);
-}
-
-void SwitchPattern::HandleBlurEvent(const RefPtr<SwitchPaintProperty>& switchPaintProperty,
-    const RefPtr<SwitchTheme>& switchTheme)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    CHECK_NULL_VOID(paintMethod_);
-    auto switchModifier = paintMethod_->GetSwitchModifier();
-    CHECK_NULL_VOID(switchModifier);
-    RemoveIsFocusActiveUpdateEvent();
-    isFocus_ = false;
-    switchModifier->SetIsFocused(false);
-    if (isBgColorUnselectFocus_) {
-        isBgColorUnselectFocus_ = false;
-        switchPaintProperty->UpdateUnselectedColor(switchTheme->GetInactiveColor());
-    }
-    if (isPointColorUnselectFocus_) {
-        isPointColorUnselectFocus_ = false;
-        switchPaintProperty->UpdateSwitchPointColor(switchTheme->GetPointColor());
-    }
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-}
-
-void SwitchPattern::HandleFocusEvent(const RefPtr<SwitchPaintProperty>& switchPaintProperty,
-    const RefPtr<SwitchTheme>& switchTheme)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    CHECK_NULL_VOID(paintMethod_);
-    auto switchModifier = paintMethod_->GetSwitchModifier();
-    CHECK_NULL_VOID(switchModifier);
-    AddIsFocusActiveUpdateEvent();
-    isFocus_ = true;
-    switchModifier->SetIsFocused(true);
-    Color bgColor = switchTheme->GetInactiveColor();
-    if (!isOn_.value_or(false)) {
-        if (!switchPaintProperty->HasUnselectedColor() || switchPaintProperty->GetUnselectedColor() == bgColor) {
-            isBgColorUnselectFocus_ = true;
-            Color focusedBGColor = switchTheme->GetFocusedBGColorUnselected();
-            switchPaintProperty->UpdateUnselectedColor(focusedBGColor);
-        }
-        Color pointColor = switchTheme->GetPointColor();
-        if (!switchPaintProperty->HasSwitchPointColor() || switchPaintProperty->GetSwitchPointColor() == pointColor) {
-            isPointColorUnselectFocus_ = true;
-            Color focusPointColor = switchTheme->GetPointColorUnselectedFocus();
-            switchPaintProperty->UpdateSwitchPointColor(focusPointColor);
-        }
-        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    }
-}
-
-void SwitchPattern::AddIsFocusActiveUpdateEvent()
-{
-    if (!isFocusActiveUpdateEvent_) {
-        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->OnIsFocusActiveUpdate(isFocusAcitve);
-        };
-    }
-
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
-}
-
-void SwitchPattern::RemoveIsFocusActiveUpdateEvent()
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->RemoveIsFocusActiveUpdateEvent(GetHost());
-}
-
-void SwitchPattern::OnIsFocusActiveUpdate(bool isFocusAcitve)
-{
-    CHECK_NULL_VOID(paintMethod_);
-    auto switchModifier = paintMethod_->GetSwitchModifier();
-    CHECK_NULL_VOID(switchModifier);
-    switchModifier->SetIsFocused(isFocusAcitve);
-}
 void SwitchPattern::UpdateSwitchPaintProperty()
 {
     auto host = GetHost();
@@ -343,10 +230,6 @@ void SwitchPattern::OnChange()
     CHECK_NULL_VOID(host);
     auto switchPaintProperty = host->GetPaintProperty<SwitchPaintProperty>();
     CHECK_NULL_VOID(switchPaintProperty);
-    CHECK_NULL_VOID(paintMethod_);
-    auto switchModifier = paintMethod_->GetSwitchModifier();
-    CHECK_NULL_VOID(switchModifier);
-    switchModifier->SetIsOn(isOn_.value());
     switchPaintProperty->UpdateIsOn(isOn_.value_or(false));
     UpdateChangeEvent();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -385,45 +268,10 @@ void SwitchPattern::OnClick()
     }
     isOn_ = !isOn_.value_or(false);
     TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "switch click result %{public}d", isOn_.value_or(false));
-    UpdateColorWhenIsOn(isOn_.value_or(false));
     OnChange();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->OnAccessibilityEvent(AccessibilityEventType::COMPONENT_CHANGE);
-}
-
-void SwitchPattern::UpdateColorWhenIsOn(bool isOn)
-{
-    if (!isFocus_) {
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto switchPaintProperty = host->GetPaintProperty<SwitchPaintProperty>();
-    CHECK_NULL_VOID(switchPaintProperty);
-    auto pipeline = GetHost()->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto switchTheme = pipeline->GetTheme<SwitchTheme>();
-    CHECK_NULL_VOID(switchTheme);
-    if (isOn) {
-        isBgColorUnselectFocus_ = false;
-        isPointColorUnselectFocus_ = false;
-        switchPaintProperty->UpdateSwitchPointColor(switchTheme->GetPointColor());
-        switchPaintProperty->UpdateUnselectedColor(switchTheme->GetInactiveColor());
-    } else {
-        Color bgColor = switchTheme->GetInactiveColor();
-        if (!switchPaintProperty->HasUnselectedColor() || switchPaintProperty->GetUnselectedColor() == bgColor) {
-            isBgColorUnselectFocus_ = true;
-            Color focusedBGColor = switchTheme->GetFocusedBGColorUnselected();
-            switchPaintProperty->UpdateUnselectedColor(focusedBGColor);
-        }
-        Color pointColor = switchTheme->GetPointColor();
-        if (!switchPaintProperty->HasSwitchPointColor() || switchPaintProperty->GetSwitchPointColor() == pointColor) {
-            isPointColorUnselectFocus_ = true;
-            Color focusPointColor = switchTheme->GetPointColorUnselectedFocus();
-            switchPaintProperty->UpdateSwitchPointColor(focusPointColor);
-        }
-    }
 }
 
 void SwitchPattern::OnTouchDown()

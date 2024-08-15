@@ -113,6 +113,11 @@ void RefreshModelNG::SetLoadingText(const std::string& loadingText)
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, LoadingText, loadingText);
 }
 
+void RefreshModelNG::ResetLoadingText()
+{
+    ACE_RESET_LAYOUT_PROPERTY(RefreshLayoutProperty, LoadingText);
+}
+
 void RefreshModelNG::SetOnStateChange(StateChangeEvent&& stateChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

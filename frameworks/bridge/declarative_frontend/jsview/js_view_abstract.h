@@ -447,6 +447,8 @@ public:
     static void JsSetDragEventStrictReportingEnabled(const JSCallbackInfo& info);
     static void SetSymbolOptionApply(const JSCallbackInfo& info,
         std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const JSRef<JSVal> modifierObj);
+    static void SetTextStyleApply(const JSCallbackInfo& info,
+        std::function<void(WeakPtr<NG::FrameNode>)>& textStyleApply, const JSRef<JSVal>& modifierObj);
 
 #ifndef WEARABLE_PRODUCT
     static void JsBindPopup(const JSCallbackInfo& info);
@@ -520,7 +522,6 @@ public:
         }
 
         if (!jsValue->IsObject()) {
-            LOGE("arg is not number or Object.");
             return false;
         }
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
@@ -531,7 +532,6 @@ public:
 
         JSRef<JSVal> resId = jsObj->GetProperty("id");
         if (!resId->IsNumber()) {
-            LOGW("resId is not number");
             return false;
         }
 

@@ -52,7 +52,7 @@ extern "C" {
  */
 typedef enum {
     /** The drag and drop operation succeeded. */
-    ARKUI_DRAG_RESULT_SUCCESSFUL,
+    ARKUI_DRAG_RESULT_SUCCESSFUL = 0,
     /** The drag and drop operation failed. */
     ARKUI_DRAG_RESULT_FAILED,
     /** The drag and drop operation was canceled. */
@@ -66,7 +66,7 @@ typedef enum {
  */
 typedef enum {
     /** Copy. */
-    ARKUI_DROP_OPERATION_COPY,
+    ARKUI_DROP_OPERATION_COPY = 0,
     /** Cut. */
     ARKUI_DROP_OPERATION_MOVE,
 } ArkUI_DropOperation;
@@ -78,22 +78,22 @@ typedef enum {
  */
 typedef enum {
     /** Unknown. */
-    ARKUI_PREVIEW_DRAG_STATUS_UNKNOWN = -1,
+    ARKUI_PRE_DRAG_STATUS_UNKNOWN = -1,
     /** A drag gesture is being detected. */
-    ARKUI_PREVIEW_DRAG_STATUS_ACTION_DETECTING,
+    ARKUI_PRE_DRAG_STATUS_ACTION_DETECTING,
     /** The component is ready to be dragged. */
-    ARKUI_PREVIEW_DRAG_STATUS_READY_TO_TRIGGER_DRAG,
+    ARKUI_PRE_DRAG_STATUS_READY_TO_TRIGGER_DRAG,
     /** A lift animation is started. */
-    ARKUI_PREVIEW_DRAG_STATUS_PREVIEW_LIFT_STARTED,
+    ARKUI_PRE_DRAG_STATUS_PREVIEW_LIFT_STARTED,
     /** A lift animation is finished. */
-    ARKUI_PREVIEW_DRAG_STATUS_PREVIEW_LIFT_FINISHED,
+    ARKUI_PRE_DRAG_STATUS_PREVIEW_LIFT_FINISHED,
     /** A drop animation is started. */
-    ARKUI_PREVIEW_DRAG_STATUS_PREVIEW_LANDING_STARTED,
+    ARKUI_PRE_DRAG_STATUS_PREVIEW_LANDING_STARTED,
     /** A drop animation is finished. */
-    ARKUI_PREVIEW_DRAG_STATUS_PREVIEW_LANDING_FINISHED,
+    ARKUI_PRE_DRAG_STATUS_PREVIEW_LANDING_FINISHED,
     /** A drop animation is terminated. */
-    ARKUI_PREVIEW_DRAG_STATUS_CANCELED_BEFORE_DRAG,
-} ArkUI_PreviewDragStatus;
+    ARKUI_PRE_DRAG_STATUS_CANCELED_BEFORE_DRAG,
+} ArkUI_PreDragStatus;
 
 /**
  * @brief Defines an enum for drag preview scale modes.
@@ -105,7 +105,7 @@ typedef enum {
      * The system automatically changes the position of the dragged point based on the scenario and
      * scales the drag preview based on set rules.
      */
-    ARKUI_DRAG_PREVIEW_SCALE_AUTO,
+    ARKUI_DRAG_PREVIEW_SCALE_AUTO = 0,
     /** The system does not scale the drag preview. */
     ARKUI_DRAG_PREVIEW_SCALE_DISABLED,
 } ArkUI_DragPreviewScaleMode;
@@ -117,7 +117,7 @@ typedef enum {
  */
 typedef enum {
     /** Unknown. */
-    ARKUI_DRAG_STATUS_UNKNOWN = 0,
+    ARKUI_DRAG_STATUS_UNKNOWN = -1,
     /** Started. */
     ARKUI_DRAG_STATUS_STARTED,
     /** Ended. */
@@ -204,7 +204,7 @@ ArkUI_DragEvent* OH_ArkUI_NodeEvent_GetDragEvent(ArkUI_NodeEvent* nodeEvent);
  * @return Returns the interaction state prior to the drop and drop operation.
  * @since 12
  */
-ArkUI_PreviewDragStatus OH_ArkUI_NodeEvent_GetPreviewDragStatus(ArkUI_NodeEvent* nodeEvent);
+ArkUI_PreDragStatus OH_ArkUI_NodeEvent_GetPreDragStatus(ArkUI_NodeEvent* nodeEvent);
 
 /**
  * @brief Sets whether to disable the default drop animation.
@@ -221,16 +221,29 @@ ArkUI_PreviewDragStatus OH_ArkUI_NodeEvent_GetPreviewDragStatus(ArkUI_NodeEvent*
 int32_t OH_ArkUI_DragEvent_DisableDefaultDropAnimation(ArkUI_DragEvent* event, bool disable);
 
 /**
- * @brief Sets the data processing mode.
+ * @brief Obtains the drop operation from a drag event.
  *
  * @param event Indicates the pointer to an <b>ArkUI_DragEvent</b> object.
- * @param dropOperation Indicates the data processing mode.
+ * @param operation Indicates the drop operation which the data receiver set.
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ *                 Possible causes: 1. The given parameters are null or the given event is not a valid DragEvent.
  * @since 12
  */
 int32_t OH_ArkUI_DragEvent_SetSuggestedDropOperation(ArkUI_DragEvent* event, ArkUI_DropOperation dropOperation);
+
+/**
+ * @brief Obtains the drop operation from a drag event.
+ *
+ * @param event Indicates the pointer to an <b>ArkUI_DragEvent</b> object.
+ * @param operation Indicates the drop operation which the data receiver set.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operations successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 12
+ */
+int32_t OH_ArkUI_DragEvent_GetDropOperation(ArkUI_DragEvent* event, ArkUI_DropOperation* operation);
 
 /**
  * @brief Sets the result for a drag event.
@@ -431,7 +444,7 @@ float OH_ArkUI_DragEvent_GetVelocity(ArkUI_DragEvent* event);
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
  * @since 12
  */
-int32_t OH_ArkUI_DragEvent_GetModifierKeyStates(ArkUI_DragEvent* event, int64_t* keys);
+int32_t OH_ArkUI_DragEvent_GetModifierKeyStates(ArkUI_DragEvent* event, uint64_t* keys);
 
 /**
  * @brief Sets whether to enable strict reporting on drag events.

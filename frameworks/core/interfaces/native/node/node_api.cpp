@@ -34,7 +34,9 @@
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
 #include "core/interfaces/native/node/canvas_rendering_context_2d_modifier.h"
 #include "core/interfaces/native/node/custom_dialog_model.h"
+#include "core/interfaces/native/node/drag_adapter_impl.h"
 #include "core/interfaces/native/node/grid_modifier.h"
+#include "core/interfaces/native/node/image_animator_modifier.h"
 #include "core/interfaces/native/node/node_adapter_impl.h"
 #include "core/interfaces/native/node/node_animate.h"
 #include "core/interfaces/native/node/node_canvas_modifier.h"
@@ -43,29 +45,25 @@
 #include "core/interfaces/native/node/node_drag_modifier.h"
 #include "core/interfaces/native/node/node_date_picker_modifier.h"
 #include "core/interfaces/native/node/node_image_modifier.h"
+#include "core/interfaces/native/node/node_list_item_modifier.h"
 #include "core/interfaces/native/node/node_list_modifier.h"
 #include "core/interfaces/native/node/node_refresh_modifier.h"
 #include "core/interfaces/native/node/node_scroll_modifier.h"
 #include "core/interfaces/native/node/node_slider_modifier.h"
 #include "core/interfaces/native/node/node_swiper_modifier.h"
+#include "core/interfaces/native/node/node_span_modifier.h"
 #include "core/interfaces/native/node/node_text_area_modifier.h"
 #include "core/interfaces/native/node/node_text_input_modifier.h"
 #include "core/interfaces/native/node/node_text_modifier.h"
 #include "core/interfaces/native/node/node_textpicker_modifier.h"
 #include "core/interfaces/native/node/node_timepicker_modifier.h"
 #include "core/interfaces/native/node/node_toggle_modifier.h"
-#include "core/interfaces/native/node/image_animator_modifier.h"
-#include "core/interfaces/native/node/util_modifier.h"
-#include "core/interfaces/native/node/grid_modifier.h"
-#include "core/interfaces/native/node/alphabet_indexer_modifier.h"
-#include "core/interfaces/native/node/search_modifier.h"
 #include "core/interfaces/native/node/radio_modifier.h"
 #include "core/interfaces/native/node/search_modifier.h"
 #include "core/interfaces/native/node/select_modifier.h"
 #include "core/interfaces/native/node/util_modifier.h"
 #include "core/interfaces/native/node/view_model.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
-#include "core/interfaces/native/node/node_list_item_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -140,6 +138,15 @@ namespace NodeModifier {
 const ArkUIStateModifier* GetUIStateModifier()
 {
     static const ArkUIStateModifier modifier = { GetUIState, SetSupportedUIState };
+    return &modifier;
+}
+
+const CJUIStateModifier* GetCJUIStateModifier()
+{
+    static const CJUIStateModifier modifier = {
+        GetUIState,
+        SetSupportedUIState
+    };
     return &modifier;
 }
 } // namespace NodeModifier
@@ -1326,6 +1333,20 @@ void RegisterCustomNodeAsyncEvent(ArkUINodeHandle node, int32_t eventType, void*
     }
 }
 
+void RegisterCustomSpanAsyncEvent(ArkUINodeHandle node, int32_t eventType, void* extraParam)
+{
+    switch (eventType) {
+        case ArkUIAPINodeFlags::CUSTOM_MEASURE:
+            NodeModifier::SetCustomSpanOnMeasure(node, extraParam);
+            break;
+        case ArkUIAPINodeFlags::CUSTOM_DRAW:
+            NodeModifier::SetCustomSpanOnDraw(node, extraParam);
+            break;
+        default:
+            break;
+    }
+}
+
 ArkUI_Int32 UnregisterCustomNodeEvent(ArkUINodeHandle node, ArkUI_Int32 eventType)
 {
     auto companion = ViewModel::GetCompanion(node);
@@ -1630,6 +1651,43 @@ const ArkUIBasicAPI* GetBasicAPI()
     return &basicImpl;
 }
 
+const CJUIBasicAPI* GetCJUIBasicAPI()
+{
+    /* clang-format off */
+    static const CJUIBasicAPI basicImpl = {
+        CreateNode,
+        DisposeNode,
+        GetName,
+        DumpTreeNode,
+
+        AddChild,
+        RemoveChild,
+        InsertChildAfter,
+        InsertChildBefore,
+        InsertChildAt,
+        GetAttribute,
+        SetAttribute,
+        ResetAttribute,
+
+        NotifyComponentAsyncEvent,
+        NotifyResetComponentAsyncEvent,
+        RegisterNodeAsyncEventReceiver,
+        UnregisterNodeAsyncEventReceiver,
+
+        nullptr,
+
+        ApplyModifierFinish,
+        MarkDirty,
+        IsBuilderNode,
+        ConvertLengthMetricsUnit,
+
+        GetContextByNode,
+    };
+    /* clang-format on */
+
+    return &basicImpl;
+}
+
 ArkUIDialogHandle CreateDialog()
 {
     return CustomDialog::CreateDialog();
@@ -1766,6 +1824,7 @@ ArkUIExtendedNodeAPI impl_extended = {
     SetCustomMethodFlag,
     GetCustomMethodFlag,
     RegisterCustomNodeAsyncEvent,
+    RegisterCustomSpanAsyncEvent,
     UnregisterCustomNodeEvent,
     RegisterCustomNodeEventReceiver,
     SetCustomCallback, // setCustomCallback
@@ -2018,13 +2077,161 @@ ArkUIFullNodeAPI impl_full = {
     GetDialogAPI,
     GetExtendedAPI,         // Extended
     NodeAdapter::GetNodeAdapterAPI,         // adapter.
+    DragAdapter::GetDragAdapterAPI,        // drag adapter.
 };
 /* clang-format on */
+
+const CJUIAnimation* GetCJUIAnimationAPI()
+{
+    static const CJUIAnimation modifier = {
+        nullptr,
+        nullptr,
+        nullptr,
+        AnimateTo,
+        KeyframeAnimateTo,
+        CreateAnimator,
+        DisposeAnimator,
+        AnimatorReset,
+        AnimatorPlay,
+        AnimatorFinish,
+        AnimatorPause,
+        AnimatorCancel,
+        AnimatorReverse,
+        CreateCurve,
+        CreateStepsCurve,
+        CreateCubicBezierCurve,
+        CreateSpringCurve,
+        CreateSpringMotion,
+        CreateResponsiveSpringMotion,
+        CreateInterpolatingSpring,
+        CreateCustomCurve,
+        DisposeCurve,
+    };
+    return &modifier;
+}
+
+const CJUINavigation* GetCJUINavigationAPI()
+{
+    static const CJUINavigation modifier = {
+        nullptr,
+        nullptr,
+        GetNavigationId,
+        GetNavDestinationName,
+        GetStackLength,
+        GetNavDesNameByIndex,
+        GetNavDestinationId,
+        GetNavDestinationState,
+        GetNavDestinationIndex,
+        GetNavDestinationParam,
+        GetRouterPageIndex,
+        GetRouterPageName,
+        GetRouterPagePath,
+        GetRouterPageState,
+        GetRouterPageId,
+    };
+    return &modifier;
+}
+
+const CJUIGraphicsAPI* GetCJUIGraphicsAPI()
+{
+    static const CJUIGraphicsAPI api = {
+        ARKUI_NODE_GRAPHICS_API_VERSION, SetCallbackMethod, GetCanvasAPI, GetPaintAPI, GetFontAPI
+    };
+    return &api;
+}
+
+const CJUIDialogAPI* GetCJUIDialogAPI()
+{
+    static const CJUIDialogAPI dialogImpl = {
+        CreateDialog,
+        DisposeDialog,
+        SetDialogContent,
+        RemoveDialogContent,
+        SetDialogContentAlignment,
+        ResetDialogContentAlignment,
+        SetDialogModalMode,
+        SetDialogAutoCancel,
+        SetDialogMask,
+        SetDialogBackgroundColor,
+        SetDialogCornerRadius,
+        SetDialogGridColumnCount,
+        EnableDialogCustomStyle,
+        EnableDialogCustomAnimation,
+        ShowDialog,
+        CloseDialog,
+        RegisterOnWillDialogDismiss,
+    };
+    return &dialogImpl;
+}
+
+const CJUIExtendedNodeAPI* GetCJUIExtendedAPI()
+{
+    static CJUIExtendedNodeAPI impl_extended = {
+        ARKUI_EXTENDED_API_VERSION,
+
+        NodeModifier::GetUtilsModifier,
+        NodeModifier::GetCanvasRenderingContext2DModifier,
+
+        SetCallbackMethod,
+        SetCustomMethodFlag,
+        GetCustomMethodFlag,
+        RegisterCustomNodeAsyncEvent,
+        UnregisterCustomNodeEvent,
+        RegisterCustomNodeEventReceiver,
+        SetCustomCallback, // setCustomCallback
+        MeasureLayoutAndDraw,
+        MeasureNode,
+        LayoutNode,
+        DrawNode,
+        SetAttachNodePtr,
+        GetAttachNodePtr,
+        SetMeasureWidth, // setMeasureWidth
+        GetMeasureWidth, // getMeasureWidth
+        SetMeasureHeight, // setMeasureHeight
+        GetMeasureHeight, // getMeasureHeight
+        SetX, // setX
+        SetY, // setY
+        GetX, // getX
+        GetY, // getY
+        GetLayoutConstraint,
+        SetAlignment,
+        GetAlignment,
+        nullptr, // indexerChecker
+        nullptr, // setRangeUpdater
+        nullptr, // setLazyItemIndexer
+        GetPipelineContext,
+        SetVsyncCallback,
+        UnblockVsyncWait,
+        NodeEvent::CheckEvent,
+        NodeEvent::SendArkUIAsyncEvent,
+        nullptr, // callContinuation
+        nullptr, // setChildTotalCount
+        ShowCrash,
+    };
+    return &impl_extended;
+}
+
+CJUIFullNodeAPI fullCJUIApi {
+    SetCallbackMethod,
+    GetCJUIBasicAPI,            // BasicAPI
+    GetCJUINodeModifiers,       // NodeModifiers
+    GetCJUIAnimationAPI,        // Animation
+    GetCJUINavigationAPI,       // Navigation
+    GetCJUIGraphicsAPI,         // Graphics
+    GetCJUIDialogAPI,
+    GetCJUIExtendedAPI,         // Extended
+    NodeAdapter::GetCJUINodeAdapterAPI,         // adapter.
+};
 } // namespace
 
 } // namespace OHOS::Ace::NG
 
 extern "C" {
+
+ACE_FORCE_EXPORT CJUIFullNodeAPI* GetCJUIFullNodeAPI()
+{
+    return &OHOS::Ace::NG::fullCJUIApi;
+}
 
 ACE_FORCE_EXPORT ArkUIAnyAPI* GetArkUIAnyFullNodeAPI(int version)
 {

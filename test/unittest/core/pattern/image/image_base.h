@@ -57,6 +57,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/mouse_event.h"
 #include "core/image/image_source_info.h"
+#include "interfaces/native/node/resource.h"
 
 #undef private
 #undef protected
@@ -114,6 +115,7 @@ constexpr Dimension IMAGE_HEIGHT = 120.0_vp;
 constexpr Dimension IMAGE_TOP = 0.0_vp;
 constexpr Dimension IMAGE_LEFT = 0.0_vp;
 const std::vector<float> COLOR_FILTER_NULL;
+const std::string tagName = "TestNode";
 
 class ImageBases : public testing::Test {
 public:
@@ -144,6 +146,25 @@ auto GetCompoment()
     EXPECT_NE(renderProperty, nullptr);
     return std::make_tuple(frameNode, layoutProperty, pattern, renderProperty);
 }
+
+class TestNode : public UINode {
+    DECLARE_ACE_TYPE(TestNode, UINode);
+
+public:
+    static RefPtr<TestNode> CreateTestNode(int32_t nodeId)
+    {
+        auto node = MakeRefPtr<TestNode>(nodeId);
+        return node;
+    }
+
+    bool IsAtomicNode() const override
+    {
+        return true;
+    }
+
+    explicit TestNode(int32_t nodeId) : UINode(tagName, nodeId) {}
+    ~TestNode() override = default;
+};
 
 std::vector<RefPtr<UINode>> PopUINodes();
 void PushUINodes(std::vector<RefPtr<UINode>> &vec);

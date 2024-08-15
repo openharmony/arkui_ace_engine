@@ -146,6 +146,7 @@ private:
     void ChangeListItemsSelectedStyle(int32_t clickIndex);
     RefPtr<FrameNode> CreatePopupNode();
     void UpdateBubbleView();
+    Shadow GetPopupShadow();
     void UpdateBubbleSize();
     void UpdateBubbleLetterView(bool showDivider, std::vector<std::string>& currentListData);
     void CreateBubbleListView(std::vector<std::string>& currentListData);
@@ -154,7 +155,7 @@ private:
     void UpdatePopupVisibility(VisibleType visible);
     bool NeedShowPopupView();
     bool NeedShowBubble();
-    void ShowBubble();
+    void ShowBubble(bool fromTouchUp = false);
     bool IfSelectIndexValid();
     int32_t GetSelectChildIndex(const Offset& offset);
     void StartBubbleAppearAnimation();
@@ -169,6 +170,8 @@ private:
     void ItemSelectedOutAnimation(RefPtr<FrameNode>& itemNode);
     void FireOnSelect(int32_t selectIndex, bool fromPress);
     void SetAccessibilityAction();
+    void SetActionSelect(RefPtr<FrameNode>& textNode, RefPtr<AccessibilityProperty>& accessibilityProperty);
+    void SetActionClearSelection(RefPtr<FrameNode>& textNode, RefPtr<AccessibilityProperty>& accessibilityProperty);
     void RemoveBubble();
     void UpdateBubbleBackgroundView();
     CalcSize CalcBubbleListSize(int32_t popupSize, int32_t maxItemsSize);
@@ -215,7 +218,7 @@ private:
     int32_t lastPopupIndex_ = -1;
     uint32_t lastPopupSize_ = 0;
     int32_t currentPopupIndex_ = -1;
-    float itemSizeRender_ = 0.0f;
+    float itemHeight_ = 0.0f;
     int32_t popupClickedIndex_ = -1;
     int32_t lastFireSelectIndex_ = -1;
     float lastItemSize_ = -1.0f;
@@ -224,7 +227,7 @@ private:
     bool autoCollapse_ = true;
     bool lastAutoCollapse_ = true;
     bool enableHapticFeedback_ = true;
-    float actualIndexerHeight_ = 0.0f;
+    float maxContentHeight_ = 0.0f;
     bool isNewHeightCalculated_ = false;
     bool selectedChangedForHaptic_ = false;
     IndexerCollapsingMode lastCollapsingMode_ = IndexerCollapsingMode::INVALID;

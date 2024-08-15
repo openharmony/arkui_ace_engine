@@ -55,5 +55,15 @@ const ArkUIUtilsModifier* GetUtilsModifier()
     };
     return &modifier;
 }
+
+const CJUIUtilsModifier* GetCJUIUtilsModifier()
+{
+    static const CJUIUtilsModifier modifier = {
+        GetDensity,
+        GetFontScale,
+        GetDesignWidthScale,
+    };
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

@@ -740,36 +740,6 @@ HWTEST_F(BadgeTestNg, BadgePatternTest010, TestSize.Level1)
 }
 
 /**
- * @tc.name: BadgePatternTest011
- * @tc.desc: Test badge measure and layout.
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(BadgeTestNg, BadgePatternTest011, TestSize.Level1)
-{
-    int32_t minPlatformVersion = MockPipelineContext::GetCurrent()->GetMinPlatformVersion();
-    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    BadgeModelNG badge;
-    BadgeParameters badgeParameters;
-    badge.Create(badgeParameters);
-    {
-        TextModelNG model;
-        model.Create("text");
-        ViewStackProcessor::GetInstance()->Pop();
-        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
-    }
-    GetInstance();
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(pattern_->lastBadgeVisible_);
-
-    layoutProperty_->UpdateBadgeCircleSize(Dimension(10));
-    pattern_->OnModifyDone();
-    EXPECT_FALSE(pattern_->lastBadgeVisible_);
-    pattern_->OnModifyDone();
-    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(minPlatformVersion);
-}
-
-/**
  * @tc.name: BadgeAccessibilityPropertyTestNg001
  * @tc.desc: Test Text property for BadgeValue of Badge.
  * @tc.type: FUNC

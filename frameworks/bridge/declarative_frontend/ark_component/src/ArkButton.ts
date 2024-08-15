@@ -273,6 +273,7 @@ class ButtonTypeModifier extends ModifierWithKey<number> {
       this.applyPeer(node, true, component);
       return true;
     }
+    this.value = this.stageValue;
     this.applyPeer(node, false, component);
     return false;
   }
@@ -625,7 +626,7 @@ globalThis.Button.attributeModifier = function (modifier: ArkComponent): void {
 };
 
 // @ts-ignore
-globalThis.Button.contentModifier = function (modifier) {
+globalThis.Button.contentModifier = function (modifier: ContentModifier<ButtonConfiguration>): void {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {

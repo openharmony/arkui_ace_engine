@@ -102,12 +102,17 @@ config("ace_engine_public_config") {
 
 config("lto_link_config") {
   ldflags = [ "-Wl,--lto-O2" ]
+  if (ace_engine_feature_enable_pgo && enable_enhanced_opt) {
+    ldflags +=
+        [ "-Wl,-mllvm,-force-sched-model=${ace_engine_feature_sched_model}" ]
+  }
 }
 
 ohos_shared_library("libace_compatible") {
   public_configs = [ ":ace_engine_public_config" ]
+  external_deps = []
   if (use_hilog) {
-    external_deps = [ "hilog:libhilog" ]
+    external_deps += [ "hilog:libhilog" ]
   }
   if (is_ohos) {
     sanitize = {
@@ -137,8 +142,9 @@ ohos_shared_library("libace_compatible") {
 
 if (!is_asan) {
   ohos_shared_library("libace") {
+    external_deps = []
     if (use_hilog) {
-      external_deps = [ "hilog:libhilog" ]
+      external_deps += [ "hilog:libhilog" ]
     }
     if (is_ohos) {
       sanitize = {

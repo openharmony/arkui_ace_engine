@@ -21,6 +21,7 @@ import { Theme } from '@ohos.arkui.theme';
 import { LengthMetrics } from '@ohos.arkui.node';
 import common from '@ohos.app.ability.common';
 import window from '@ohos.window';
+import { Context } from '@ohos.arkui.UIContext';
 
 export enum EditableLeftIconType {
   Back,
@@ -133,7 +134,6 @@ export struct EditableTitleBar {
     this.editableTitleBarTheme.iconColor = theme.colors.iconPrimary;
     this.editableTitleBarTheme.titleColor = theme.colors.fontPrimary;
     this.editableTitleBarTheme.subTitleColor = theme.colors.fontSecondary;
-    this.editableTitleBarTheme.iconBackgroundColor = theme.colors.compBackgroundTertiary;
     this.editableTitleBarTheme.iconBackgroundPressedColor = theme.colors.interactivePressed;
     this.editableTitleBarTheme.iconBackgroundHoverColor = theme.colors.interactiveHover;
     this.editableTitleBarTheme.iconBackgroundFocusOutlineColor = theme.colors.interactiveFocus;
@@ -344,6 +344,10 @@ struct ImageMenuItem {
   minFontSize: number = 1.75;
   maxFontSize: number = 3.2;
   longPressTime: number = 500;
+  isFollowingSystemFontScale: boolean = false;
+  maxFontScale: number = 1;
+  systemFontScale?: number = 1;
+
   @Prop fontSize: number = 1;
   @State isOnFocus: boolean = false;
   @State isOnHover: boolean = false;
@@ -433,6 +437,28 @@ struct ImageMenuItem {
     }
   }
 
+  aboutToAppear(): void {
+    let uiContent: UIContext = this.getUIContext();
+    this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
+    this.maxFontScale = uiContent.getMaxFontScale();
+  }
+
+  decideFontScale(): number {
+    try {
+      let uiContent: UIContext = this.getUIContext();
+      this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1;
+      if (!this.isFollowingSystemFontScale) {
+        return 1;
+      }
+      return Math.min(this.systemFontScale, this.maxFontScale);
+    } catch (exception) {
+      let code: number = (exception as BusinessError).code;
+      let message: string = (exception as BusinessError).message;
+      hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
+      return 1;
+    }
+  }
+
   @Styles
   buttonEventStyle() {
     .onFocus(() => {
@@ -460,8 +486,7 @@ struct ImageMenuItem {
     .gesture(
       LongPressGesture({ repeat: false, duration: this.longPressTime })
         .onAction((event: GestureEvent) => {
-          let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
-          this.fontSize = context.config?.fontSizeScale ?? 1;
+          this.fontSize = this.decideFontScale();
           if (event) {
             if (this.fontSize >= this.minFontSize) {
               this.dialogController?.open()
@@ -498,17 +523,31 @@ struct ImageMenuItem {
     }
   }
 
+  private getAccessibilityReadText(): Resource | undefined {
+    if (this.item.value === PUBLIC_OK) {
+      return $r('sys.string.icon_save');
+    } else if (this.item.value === PUBLIC_CANCEL) {
+      return $r('sys.string.icon_cancel');
+    } else if (this.item.value === PUBLIC_BACK) {
+      return $r('sys.string.icon_back');
+    } else if (this.item.label) {
+      return this.item.label as Resource;
+    }
+    return undefined;
+  }
+
   @Builder
   IconBuilder(): void {
     Button({ type: ButtonType.Normal, stateEffect: this.item.isEnabled }) {
       Image(this.item.value)
+        .fillColor(this.editableTitleBarTheme.iconColor)
+        .matchTextDirection(this.item.value === PUBLIC_BACK ? true : false)
         .width($r('sys.float.titlebar_icon_width'))
         .height($r('sys.float.titlebar_icon_height'))
-        .fillColor(this.editableTitleBarTheme.iconColor)
         .focusable(this.item.isEnabled)
         .enabled(this.item.isEnabled)
-        .matchTextDirection(this.item.value === PUBLIC_BACK ? true : false)
         .draggable(false)
+        .accessibilityText(this.getAccessibilityReadText())
     }
     .backgroundButtonStyle()
     .borderRadius($r('sys.float.titlebar_icon_background_shape'))

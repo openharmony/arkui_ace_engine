@@ -2849,7 +2849,7 @@ void JSViewAbstract::ParseBlurStyleOption(const JSRef<JSObject>& jsOption, BlurS
     }
 
     // policy
-    auto policy = static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE);
+    auto policy = static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_ACTIVE);
     ParseJsInt32(jsOption->GetProperty("policy"), policy);
     if (policy >= static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) &&
         policy <= static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_INACTIVE)) {
@@ -2987,7 +2987,7 @@ void JSViewAbstract::ParseEffectOption(const JSRef<JSObject>& jsOption, EffectOp
     effectOption.adaptiveColor = adaptiveColor;
 
     // policy
-    auto policy = static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE);
+    auto policy = static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_ACTIVE);
     ParseJsInt32(jsOption->GetProperty("policy"), policy);
     if (policy >= static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) &&
         policy <= static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_INACTIVE)) {
@@ -3342,7 +3342,8 @@ void ParseMenuBorderRadius(const JSRef<JSObject>& menuOptions, NG::MenuParam& me
         CalcDimension topRight;
         CalcDimension bottomLeft;
         CalcDimension bottomRight;
-        JSViewAbstract::ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight);
+        bool hasSetBorderRadius =
+            JSViewAbstract::ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight);
         if (LessNotEqual(topLeft.Value(), 0.0f)) {
             topLeft.Reset();
         }
@@ -3355,10 +3356,11 @@ void ParseMenuBorderRadius(const JSRef<JSObject>& menuOptions, NG::MenuParam& me
         if (LessNotEqual(bottomRight.Value(), 0.0f)) {
             bottomRight.Reset();
         }
-        menuBorderRadius.radiusTopLeft = topLeft;
-        menuBorderRadius.radiusTopRight = topRight;
-        menuBorderRadius.radiusBottomLeft = bottomLeft;
-        menuBorderRadius.radiusBottomRight = bottomRight;
+        auto isRtl = hasSetBorderRadius && AceApplicationInfo::GetInstance().IsRightToLeft();
+        menuBorderRadius.radiusTopLeft = isRtl ? topRight : topLeft;
+        menuBorderRadius.radiusTopRight = isRtl ? topLeft : topRight;
+        menuBorderRadius.radiusBottomLeft = isRtl ? bottomRight : bottomLeft;
+        menuBorderRadius.radiusBottomRight = isRtl ? bottomLeft : bottomRight;
         menuBorderRadius.multiValued = true;
         menuParam.borderRadius = menuBorderRadius;
     }
@@ -3685,7 +3687,7 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
         auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc), node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("BuildMenu");
-            PipelineContext::SetCallBackNode(node);
+            auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
             func->Execute();
         };
         ViewAbstractModel::GetInstance()->BindMenu({}, std::move(buildFunc), menuParam);
@@ -7634,7 +7636,7 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     if (responseType != ResponseType::LONG_PRESS) {
         menuParam.previewMode = MenuPreviewMode::NONE;
         menuParam.isShowHoverImage = false;
-        menuParam.menuBindType = NG::MenuBindingType::RIGHT_CLICK;
+        menuParam.menuBindType = MenuBindingType::RIGHT_CLICK;
     }
     menuParam.type = NG::MenuType::CONTEXT_MENU;
     ViewAbstractModel::GetInstance()->BindContextMenu(responseType, buildFunc, menuParam, previewBuildFunc);
@@ -9636,7 +9638,16 @@ void JSViewAbstract::JsOnClick(const JSCallbackInfo& info)
         JSInteractableView::ReportClickEvent(node);
 #endif
     };
-    ViewAbstractModel::GetInstance()->SetOnClick(std::move(tmpOnTap), std::move(onClick));
+
+    double distanceThreshold = std::numeric_limits<double>::infinity();
+    if (info.Length() > 1 && info[1]->IsNumber()) {
+        distanceThreshold = info[1]->ToNumber<double>();
+        if (distanceThreshold < 0) {
+            distanceThreshold = std::numeric_limits<double>::infinity();
+        }
+    }
+    distanceThreshold = Dimension(distanceThreshold, DimensionUnit::VP).ConvertToPx();
+    ViewAbstractModel::GetInstance()->SetOnClick(std::move(tmpOnTap), std::move(onClick), distanceThreshold);
 }
 
 void JSViewAbstract::JsOnGestureJudgeBegin(const JSCallbackInfo& info)
@@ -9690,8 +9701,8 @@ void JSViewAbstract::JsShouldBuiltInRecognizerParallelWith(const JSCallbackInfo&
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto shouldBuiltInRecognizerParallelWithFunc =
         [execCtx = info.GetExecutionContext(), func = jsParallelInnerGestureToFunc, node = frameNode](
-            const RefPtr<TouchEventTarget>& current,
-            const std::vector<RefPtr<TouchEventTarget>>& others) -> RefPtr<NG::NGGestureRecognizer> {
+            const RefPtr<NG::NGGestureRecognizer>& current,
+            const std::vector<RefPtr<NG::NGGestureRecognizer>>& others) -> RefPtr<NG::NGGestureRecognizer> {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, nullptr);
         ACE_SCORING_EVENT("shouldBuiltInRecognizerParallelWith");
         PipelineContext::SetCallBackNode(node);
@@ -10786,5 +10797,36 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_ParseJsMedia(void* value, void* resour
     res->src = src;
     res->bundleName = bundleName;
     res->moduleName = moduleName;
+}
+
+void JSViewAbstract::SetTextStyleApply(const JSCallbackInfo& info,
+    std::function<void(WeakPtr<NG::FrameNode>)>& textStyleApply, const JSRef<JSVal>& modifierObj)
+{
+    if (!modifierObj->IsObject()) {
+        textStyleApply = nullptr;
+        return;
+    }
+    auto vm = info.GetVm();
+    auto globalObj = JSNApi::GetGlobalObject(vm);
+    auto globalFunc = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "applyTextModifierToNode"));
+    JsiValue jsiValue(globalFunc);
+    JsiRef<JsiValue> globalFuncRef = JsiRef<JsiValue>::Make(jsiValue);
+    if (!globalFuncRef->IsFunction()) {
+        textStyleApply = nullptr;
+        return;
+    }
+    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(globalFuncRef));
+    auto onApply = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                    modifierParam = std::move(modifierObj)](WeakPtr<NG::FrameNode> frameNode) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto node = frameNode.Upgrade();
+        CHECK_NULL_VOID(node);
+        JSRef<JSVal> params[2];
+        params[0] = modifierParam;
+        params[1] = JSRef<JSVal>::Make(panda::NativePointerRef::New(execCtx.vm_, AceType::RawPtr(node)));
+        PipelineContext::SetCallBackNode(node);
+        func->ExecuteJS(2, params);
+    };
+    textStyleApply = onApply;
 }
 } // namespace OHOS::Ace::Framework

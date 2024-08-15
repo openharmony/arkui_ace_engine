@@ -81,6 +81,7 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     originFontSizeScale_ = tabTheme->GetSubTabBarOriginFontSizeScale();
     leftAndRightMargin_ = tabTheme->GetSubTabBarLeftRightMargin();
     indicatorStyleMarginTop_ = tabTheme->GetSubTabBarIndicatorstyleMarginTop();
+    thirdLargeFontSizeScale_ = tabTheme->GetsubTabBarThirdLargeFontSizeScale();
     fontscale_ = pipelineContext->GetFontScale();
     if (axis_ == Axis::VERTICAL && constraint->selfIdealSize.Width().has_value() &&
         constraint->selfIdealSize.Width().value() < constraint->parentIdealSize.Width().value_or(0.0f) &&
@@ -128,6 +129,9 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             ? static_cast<float>(tabTheme->GetBottomTabBarDefaultWidth().ConvertToPx())
             : static_cast<float>(tabTheme->GetTabBarDefaultHeight().ConvertToPx());
     }
+    if (NearEqual(lastFontScale_, thirdLargeFontSizeScale_) && NearEqual(fontscale_, thirdLargeFontSizeScale_)) {
+        thirdLargeFontHeight_ = tabBarPattern->GetThirdLargeFontHeight();
+    }
     if (!IsSetMinMaxFontSize(layoutWrapper, pipelineContext)) {
         if (tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE) {
             tabBarFixAging(layoutWrapper, frameSize);
@@ -144,10 +148,15 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     } else {
         layoutWrapper->SetActiveChildRange(visibleItemPosition_.begin()->first, visibleItemPosition_.rbegin()->first);
     }
-
+    if (!isBarAdaptiveHeight_ && thirdLargeFontHeight_) {
+        maxHeight_ = std::max(thirdLargeFontHeight_.value_or(0.0f), maxHeight_.value_or(0.0f));
+    }
     if (defaultHeight_ || maxHeight_) {
         if (LessNotEqual(fontscale_, bigFontSizeScale_) || GreatNotEqual(fontscale_, maxFontSizeScale_)) {
             frameSize.SetHeight(std::max(defaultHeight_.value_or(0.0f), maxHeight_.value_or(0.0f)));
+            if (NearEqual(fontscale_, thirdLargeFontSizeScale_) && !NearEqual(fontscale_, lastFontScale_)) {
+                tabBarPattern->SetThirdLargeFontHeight(frameSize.Height());
+            }
         }
     }
     geometryNode->SetFrameSize(frameSize);
@@ -277,7 +286,9 @@ LayoutConstraintF TabBarLayoutAlgorithm::GetChildConstraint(LayoutWrapper* layou
     CHECK_NULL_RETURN(tabTheme, {});
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     if (axis_ == Axis::HORIZONTAL) {
-        isBarAdaptiveHeight_ = layoutProperty->GetBarAdaptiveHeight().value_or(false) && defaultHeight_;
+        isBarAdaptiveHeight_ = (layoutProperty->GetBarAdaptiveHeight().value_or(false)
+            || (NearEqual(fontscale_, thirdLargeFontSizeScale_) && !NearEqual(fontscale_, lastFontScale_)))
+            && defaultHeight_;
         childLayoutConstraint.maxSize.SetWidth(Infinity<float>());
         if (tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE) {
             childLayoutConstraint.minSize.SetWidth(tabTheme->GetSubTabBarMinWidth().ConvertToPx());
@@ -288,6 +299,9 @@ LayoutConstraintF TabBarLayoutAlgorithm::GetChildConstraint(LayoutWrapper* layou
         } else if (!isBarAdaptiveHeight_) {
             if (LessNotEqual(fontscale_, bigFontSizeScale_) || GreatNotEqual(fontscale_, maxFontSizeScale_)) {
                 frameSize.SetHeight(defaultHeight_.value());
+            }
+            if (NearEqual(fontscale_, thirdLargeFontSizeScale_) && NearEqual(fontscale_, lastFontScale_)) {
+                frameSize.SetHeight(thirdLargeFontHeight_.value_or(0.0f));
             }
             childLayoutConstraint.parentIdealSize = OptionalSizeF(frameSize);
             childLayoutConstraint.selfIdealSize.SetHeight(frameSize.Height());
@@ -437,12 +451,16 @@ void TabBarLayoutAlgorithm::AdjustPosition(LayoutWrapper* layoutWrapper, LayoutC
 void TabBarLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint,
     int32_t& endIndex, float& endPos)
 {
-    while (endIndex < childCount_ && (LessNotEqual(endPos, endMainPos_) || isBarAdaptiveHeight_ ||
+    // 1.When first item is invisible and located to the right or below the tab bar, measure at least one item.
+    // 2.When set the height of tab bar to auto, measure all items to find max height of items.
+    // 3.If target index exists, measure items from the end index to target index.
+    while (endIndex < childCount_ && (endIndex == 0 || LessNotEqual(endPos, endMainPos_) || isBarAdaptiveHeight_ ||
         (targetIndex_ && endIndex <= targetIndex_.value()))) {
         MeasureItem(layoutWrapper, childLayoutConstraint, endIndex);
         visibleItemPosition_[endIndex] = { endPos, endPos + visibleItemLength_[endIndex] };
         endPos += visibleItemLength_[endIndex];
-        if (LessOrEqual(endPos, startMainPos_) && !isBarAdaptiveHeight_ && !targetIndex_.has_value()) {
+        if (endIndex < childCount_ - 1 && LessOrEqual(endPos, startMainPos_) && !isBarAdaptiveHeight_ &&
+            !targetIndex_.has_value()) {
             visibleChildrenMainSize_ -= visibleItemLength_[endIndex];
             visibleItemLength_.erase(endIndex);
             visibleItemPosition_.erase(endIndex);
@@ -454,12 +472,16 @@ void TabBarLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, LayoutCo
 void TabBarLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint,
     int32_t& startIndex, float& startPos)
 {
-    while (startIndex >= 0 && (GreatNotEqual(startPos, startMainPos_) || isBarAdaptiveHeight_ ||
-        (targetIndex_ && startIndex >= targetIndex_.value()))) {
+    // 1.When last item is invisible and located to the left or above the tab bar, measure at least one item.
+    // 2.When set the height of tab bar to auto, measure all items to find max height of items.
+    // 3.If target index exists, measure items from the start index to target index.
+    while (startIndex >= 0 && (startIndex == childCount_ - 1 || GreatNotEqual(startPos, startMainPos_) ||
+        isBarAdaptiveHeight_ || (targetIndex_ && startIndex >= targetIndex_.value()))) {
         MeasureItem(layoutWrapper, childLayoutConstraint, startIndex);
         visibleItemPosition_[startIndex] = { startPos - visibleItemLength_[startIndex], startPos };
         startPos -= visibleItemLength_[startIndex];
-        if (GreatOrEqual(startPos, endMainPos_) && !isBarAdaptiveHeight_ && !targetIndex_.has_value()) {
+        if (startIndex > 0 && GreatOrEqual(startPos, endMainPos_) && !isBarAdaptiveHeight_ &&
+            !targetIndex_.has_value()) {
             visibleChildrenMainSize_ -= visibleItemLength_[startIndex];
             visibleItemLength_.erase(startIndex);
             visibleItemPosition_.erase(startIndex);
@@ -1065,8 +1087,6 @@ bool TabBarLayoutAlgorithm::IsSetMinMaxFontSize(LayoutWrapper* layoutWrapper, Re
         }
         if (tabBarPattern->GetBottomTabLabelStyle(index).minFontSize.value_or(0.0_vp).IsValid() ||
         tabBarPattern->GetBottomTabLabelStyle(index).maxFontSize.value_or(0.0_vp).IsValid()) {
-            pipelineContext->SetFontScale(originFontSizeScale_);
-            fontscale_ = originFontSizeScale_;
             return true;
         }
     }

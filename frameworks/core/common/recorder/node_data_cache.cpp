@@ -14,12 +14,6 @@
  */
 #include "core/common/recorder/node_data_cache.h"
 
-#include <string>
-
-#include "base/json/json_util.h"
-#include "base/log/log_wrapper.h"
-#include "core/common/container.h"
-#include "core/common/recorder/event_recorder.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
 namespace OHOS::Ace::Recorder {

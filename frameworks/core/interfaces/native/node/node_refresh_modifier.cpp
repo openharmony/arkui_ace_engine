@@ -50,6 +50,7 @@ void SetRefreshOffset(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 uni
     CHECK_NULL_VOID(frameNode);
     RefreshModelNG::SetRefreshOffset(frameNode, Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit)));
 }
+
 void ResetRefreshOffset(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -130,6 +131,14 @@ const ArkUIRefreshModifier* GetRefreshModifier()
 {
     static const ArkUIRefreshModifier modifier = { SetRefreshing, GetRefreshing, SetRefreshOffset, ResetRefreshOffset,
         SetPullToRefresh, ResetPullToRefresh, SetRefreshContent, SetPullDownRatio, ResetPullDownRatio,
+        GetPullDownRatio, GetRefreshOffset, GetPullToRefresh };
+    return &modifier;
+}
+
+const CJUIRefreshModifier* GetCJUIRefreshModifier()
+{
+    static const CJUIRefreshModifier modifier = { SetRefreshing, GetRefreshing, SetRefreshContent, SetRefreshOffset,
+        ResetRefreshOffset, SetPullToRefresh, ResetPullToRefresh, SetPullDownRatio, ResetPullDownRatio,
         GetPullDownRatio, GetRefreshOffset, GetPullToRefresh };
     return &modifier;
 }

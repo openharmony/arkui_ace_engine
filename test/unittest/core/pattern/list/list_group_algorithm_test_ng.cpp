@@ -376,11 +376,12 @@ HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayout002, TestSize.Level1)
     RectF firstItemRect = GetChildRect(groupNode, FOOTER_INDEX + 1);
     RectF secondItemRect = GetChildRect(groupNode, FOOTER_INDEX + 2);
     RectF footRect = GetChildRect(groupNode, 1);
-    EXPECT_TRUE(IsEqual(groupRect, RectF(12.f, 0, -60.f, groupHeight)));
-    EXPECT_TRUE(IsEqual(headRect, RectF(0, 0, 216.f, GROUP_HEADER_LEN)));
-    EXPECT_TRUE(IsEqual(footRect, RectF(0, groupHeight - GROUP_HEADER_LEN, 216.f, GROUP_HEADER_LEN)));
-    EXPECT_TRUE(IsEqual(firstItemRect, RectF(0, GROUP_HEADER_LEN, 16.f, ITEM_HEIGHT)));
-    EXPECT_TRUE(IsEqual(secondItemRect, RectF(0, GROUP_HEADER_LEN + SPACE + ITEM_HEIGHT, 16.f, ITEM_HEIGHT)));
+    float expectWidth = 216.f;
+    EXPECT_TRUE(IsEqual(groupRect, RectF(12.f, 0, expectWidth, groupHeight)));
+    EXPECT_TRUE(IsEqual(headRect, RectF(0, 0, expectWidth, GROUP_HEADER_LEN)));
+    EXPECT_TRUE(IsEqual(footRect, RectF(0, groupHeight - GROUP_HEADER_LEN, expectWidth, GROUP_HEADER_LEN)));
+    EXPECT_TRUE(IsEqual(firstItemRect, RectF(0, GROUP_HEADER_LEN, expectWidth, ITEM_HEIGHT)));
+    EXPECT_TRUE(IsEqual(secondItemRect, RectF(0, GROUP_HEADER_LEN + SPACE + ITEM_HEIGHT, expectWidth, ITEM_HEIGHT)));
 }
 
 /**

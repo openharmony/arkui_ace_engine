@@ -53,4 +53,8 @@ void UIExtensionModelNG::SetOnRemoteReady(std::function<void(const RefPtr<UIExte
 void UIExtensionModelNG::SetOnError(
     std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError)
 {}
+
+void UIExtensionModelNG::SetPlatformOnError(
+    std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError)
+{}
 } // namespace OHOS::Ace::NG

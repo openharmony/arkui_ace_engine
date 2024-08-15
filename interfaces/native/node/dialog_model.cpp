@@ -14,8 +14,6 @@
  */
 #include "dialog_model.h"
 
-#include "native_dialog.h"
-#include "native_type.h"
 #include "node_model.h"
 
 #include "base/error/error_code.h"
@@ -189,7 +187,7 @@ int32_t RegisterOnWillDismissWithUserData(
     ArkUI_NativeDialogHandle handle, void* userData, void (*callback)(ArkUI_DialogDismissEvent* event))
 {
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handle || !callback) {
+    if (!impl || !handle) {
         return ERROR_CODE_PARAM_INVALID;
     }
     int result = impl->getDialogAPI()->registerOnWillDismissWithUserData(handle->controller, userData, callback);
@@ -197,6 +195,10 @@ int32_t RegisterOnWillDismissWithUserData(
 }
 
 } // namespace OHOS::Ace::NG::DialogModel
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void OH_ArkUI_DialogDismissEvent_SetShouldBlockDismiss(ArkUI_DialogDismissEvent* event, bool shouldBlockDismiss)
 {
@@ -221,3 +223,7 @@ int32_t OH_ArkUI_DialogDismissEvent_GetDismissReason(ArkUI_DialogDismissEvent* e
     }
     return event->reason;
 }
+
+#ifdef __cplusplus
+};
+#endif

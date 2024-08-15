@@ -15,17 +15,6 @@
 
 #include "base/subwindow/subwindow_manager.h"
 
-#include <memory>
-#include <mutex>
-
-#include "unistd.h"
-
-#include "base/geometry/rect.h"
-#include "base/log/log.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-#include "core/common/ace_page.h"
-#include "core/common/container.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
@@ -197,7 +186,7 @@ Rect SubwindowManager::GetParentWindowRect()
     return currentSubwindow_->GetParentWindowRect();
 }
 
-RefPtr<Subwindow> SubwindowManager::ShowDragPreviewWindowNG()
+RefPtr<Subwindow> SubwindowManager::ShowPreviewNG()
 {
     auto containerId = Container::CurrentId();
     auto subwindow =
@@ -206,7 +195,7 @@ RefPtr<Subwindow> SubwindowManager::ShowDragPreviewWindowNG()
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "get or create subwindow failed");
         return nullptr;
     }
-    if (!subwindow->ShowDragPreviewWindowNG()) {
+    if (!subwindow->ShowPreviewNG()) {
         return nullptr;
     }
     return subwindow;
@@ -244,11 +233,11 @@ void SubwindowManager::ShowMenuNG(std::function<void()>&& buildFunc, std::functi
     subwindow->ShowMenuNG(std::move(buildFunc), std::move(previewBuildFunc), menuParam, targetNode, offset);
 }
 
-void SubwindowManager::HideDragPreviewWindowNG()
+void SubwindowManager::HidePreviewNG()
 {
     auto subwindow = GetCurrentWindow();
     if (subwindow) {
-        subwindow->HideDragPreviewWindowNG();
+        subwindow->HidePreviewNG();
     }
 }
 
@@ -270,11 +259,12 @@ void SubwindowManager::HideMenuNG(bool showPreviewAnimation, bool startDrag)
     }
 }
 
-void SubwindowManager::UpdateHideMenuOffsetNG(const NG::OffsetF& offset, float menuScale, bool isRedragStart)
+void SubwindowManager::UpdateHideMenuOffsetNG(
+    const NG::OffsetF& offset, float menuScale, bool isRedragStart, int32_t menuWrapperId)
 {
     auto subwindow = GetCurrentWindow();
     if (subwindow) {
-        subwindow->UpdateHideMenuOffsetNG(offset, menuScale, isRedragStart);
+        subwindow->UpdateHideMenuOffsetNG(offset, menuScale, isRedragStart, menuWrapperId);
     }
 }
 
@@ -294,6 +284,15 @@ void SubwindowManager::UpdatePreviewPosition()
     if (subwindow) {
         subwindow->UpdatePreviewPosition();
     }
+}
+
+bool SubwindowManager::GetMenuPreviewCenter(NG::OffsetF& offset)
+{
+    auto subwindow = GetCurrentWindow();
+    if (subwindow) {
+        return subwindow->GetMenuPreviewCenter(offset);
+    }
+    return false;
 }
 
 void SubwindowManager::ClearMenuNG(int32_t instanceId, int32_t targetId, bool inWindow, bool showAnimation)
@@ -594,7 +593,7 @@ const RefPtr<Subwindow>& SubwindowManager::GetCurrentDialogWindow()
     return currentDialogSubwindow_;
 }
 
-RefPtr<Subwindow> SubwindowManager::GetOrCreateSubWindow(bool isDialog)
+RefPtr<Subwindow> SubwindowManager::GetOrCreateSubWindow()
 {
     auto containerId = Container::CurrentId();
     auto subwindow = GetDialogSubwindow(containerId);
@@ -736,7 +735,7 @@ void SubwindowManager::ShowDialog(const std::string& title, const std::string& m
     }
     // for pa service
     if (containerId >= MIN_PA_SERVICE_ID || containerId < 0) {
-        auto subwindow = GetOrCreateSubWindow(true);
+        auto subwindow = GetOrCreateSubWindow();
         CHECK_NULL_VOID(subwindow);
         subwindow->ShowDialog(title, message, buttons, autoCancel, std::move(napiCallback), dialogCallbacks);
         // for ability
@@ -764,7 +763,7 @@ void SubwindowManager::ShowDialog(const PromptDialogAttr& dialogAttr, const std:
     }
     // for pa service
     if (containerId >= MIN_PA_SERVICE_ID || containerId < 0) {
-        auto subwindow = GetOrCreateSubWindow(true);
+        auto subwindow = GetOrCreateSubWindow();
         CHECK_NULL_VOID(subwindow);
         subwindow->ShowDialog(dialogAttr, buttons, std::move(napiCallback), dialogCallbacks);
         // for ability
@@ -792,7 +791,7 @@ void SubwindowManager::ShowActionMenu(
     }
     // for pa service
     if (containerId >= MIN_PA_SERVICE_ID || containerId < 0) {
-        auto subwindow = GetOrCreateSubWindow(true);
+        auto subwindow = GetOrCreateSubWindow();
         CHECK_NULL_VOID(subwindow);
         subwindow->ShowActionMenu(title, button, std::move(callback));
         // for ability
@@ -833,7 +832,7 @@ void SubwindowManager::OpenCustomDialog(const PromptDialogAttr &dialogAttr, std:
     // for pa service
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "container %{public}d open the custom dialog", containerId);
     if (containerId >= MIN_PA_SERVICE_ID || containerId < 0) {
-        auto subwindow = GetOrCreateSubWindow(true);
+        auto subwindow = GetOrCreateSubWindow();
         CHECK_NULL_VOID(subwindow);
         subwindow->OpenCustomDialog(tmpPromptAttr, std::move(callback));
         // for ability

@@ -89,7 +89,7 @@ public:
     static RefPtr<PipelineContext> GetCurrentContextSafelyWithCheck();
 
     static PipelineContext* GetCurrentContextPtrSafely();
-    
+
     static PipelineContext* GetCurrentContextPtrSafelyWithCheck();
 
 
@@ -301,7 +301,9 @@ public:
 
     float GetPageAvoidOffset() override;
 
-    void CheckAndUpdateKeyboardInset() override;
+    bool CheckNeedAvoidInSubWindow() override;
+
+    void CheckAndUpdateKeyboardInset(float keyboardHeight) override;
 
     void UpdateSizeChangeReason(
         WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -316,6 +318,9 @@ public:
     }
     void SetEnableKeyBoardAvoidMode(bool value) override;
     bool IsEnableKeyBoardAvoidMode() override;
+
+    void RequireSummary() override;
+
     const RefPtr<SafeAreaManager>& GetSafeAreaManager() const
     {
         return safeAreaManager_;
@@ -599,7 +604,7 @@ public:
     {
         for (auto iter = delayedTasks_.begin(); iter != delayedTasks_.end();) {
             if (iter->recognizer == task.recognizer) {
-                delayedTasks_.erase(iter++);
+                iter = delayedTasks_.erase(iter);
             } else {
                 ++iter;
             }
@@ -787,13 +792,11 @@ public:
 
     void CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, AxisAction action) override;
 
-    void AddFrameCallback(FrameCallbackFunc&& frameCallbackFunc)
-    {
-        frameCallbackFuncs_.emplace_back(std::move(frameCallbackFunc));
-        RequestFrame();
-    }
+    void AddFrameCallback(FrameCallbackFunc&& frameCallbackFunc, FrameCallbackFunc&& idleCallbackFunc,
+        int64_t delayMillis);
 
     void FlushFrameCallback(uint64_t nanoTimestamp);
+    void TriggerIdleCallback(int64_t deadline);
 
     void RegisterTouchEventListener(const std::shared_ptr<ITouchEventCallback>& listener);
     void UnregisterTouchEventListener(const WeakPtr<NG::Pattern>& pattern);
@@ -821,15 +824,21 @@ public:
     void RemoveFrameNodeChangeListener(int32_t nodeId);
     bool AddChangedFrameNode(const WeakPtr<FrameNode>& node);
     void RemoveChangedFrameNode(int32_t nodeId);
-    void SetForceSplitEnable(bool isForceSplit)
+    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage)
     {
         TAG_LOGI(AceLogTag::ACE_ROUTER, "set force split %{public}s", isForceSplit ? "enable" : "disable");
         isForceSplit_ = isForceSplit;
+        homePageConfig_ = homePage;
     }
 
     bool GetForceSplitEnable() const
     {
         return isForceSplit_;
+    }
+
+    std::string GetHomePageConfig() const
+    {
+        return homePageConfig_;
     }
 
     bool IsWindowFocused() const override
@@ -881,7 +890,7 @@ private:
     void FlushWindowSizeChangeCallback(int32_t width, int32_t height, WindowSizeChangeReason type);
 
     void FlushTouchEvents();
-
+    void FlushWindowPatternInfo();
     void FlushFocusView();
     void FlushFocusScroll();
 
@@ -1078,8 +1087,10 @@ private:
     int32_t lastAnimatorExpectedFrameRate_ = -1;
     bool isDoKeyboardAvoidAnimate_ = true;
     bool isForceSplit_ = false;
+    std::string homePageConfig_;
 
     std::list<FrameCallbackFunc> frameCallbackFuncs_;
+    std::list<FrameCallbackFunc> idleCallbackFuncs_;
     uint32_t transform_ = 0;
     std::list<WeakPtr<FrameNode>> changeInfoListeners_;
     std::list<WeakPtr<FrameNode>> changedNodes_;

@@ -118,9 +118,19 @@ struct UpdateSpanStyle {
     std::optional<ImageFit> updateImageFit = std::nullopt;
     std::optional<OHOS::Ace::NG::MarginProperty> marginProp = std::nullopt;
     std::optional<OHOS::Ace::NG::BorderRadiusProperty> borderRadius = std::nullopt;
-    bool hasResourceFontColor = false;
-    bool hasResourceDecorationColor = false;
+    bool useThemeFontColor = true;
+    bool useThemeDecorationColor = true;
     bool isSymbolStyle = false;
+
+    void UpdateColorByResourceId()
+    {
+        if (updateTextColor) {
+            updateTextColor->UpdateColorByResourceId();
+        }
+        if (updateTextDecorationColor) {
+            updateTextDecorationColor->UpdateColorByResourceId();
+        }
+    }
 
     std::string ToString() const
     {
@@ -140,8 +150,8 @@ struct UpdateSpanStyle {
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, updateImageFit);
         JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, marginProp);
         JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, borderRadius);
-        JSON_STRING_PUT_BOOL(jsonValue, hasResourceFontColor);
-        JSON_STRING_PUT_BOOL(jsonValue, hasResourceDecorationColor);
+        JSON_STRING_PUT_BOOL(jsonValue, useThemeFontColor);
+        JSON_STRING_PUT_BOOL(jsonValue, useThemeDecorationColor);
         JSON_STRING_PUT_BOOL(jsonValue, isSymbolStyle);
         return jsonValue->ToString();
     }
@@ -191,8 +201,8 @@ struct TextSpanOptions : SpanOptionBase {
     std::optional<TextStyle> style;
     std::optional<UpdateParagraphStyle> paraStyle;
     UserGestureOptions userGestureOption;
-    bool hasResourceFontColor = false;
-    bool hasResourceDecorationColor = false;
+    bool useThemeFontColor = true;
+    bool useThemeDecorationColor = true;
 
     std::string ToString() const
     {
@@ -201,8 +211,8 @@ struct TextSpanOptions : SpanOptionBase {
         JSON_STRING_PUT_STRING(jsonValue, value);
         JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, style);
         JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, paraStyle);
-        JSON_STRING_PUT_BOOL(jsonValue, hasResourceFontColor);
-        JSON_STRING_PUT_BOOL(jsonValue, hasResourceDecorationColor);
+        JSON_STRING_PUT_BOOL(jsonValue, useThemeFontColor);
+        JSON_STRING_PUT_BOOL(jsonValue, useThemeDecorationColor);
         return jsonValue->ToString();
     }
 };
@@ -262,7 +272,9 @@ class ACE_EXPORT RichEditorBaseControllerBase : public AceType {
 public:
     virtual int32_t GetCaretOffset() = 0;
     virtual bool SetCaretOffset(int32_t caretPosition) = 0;
-    virtual void SetTypingStyle(struct UpdateSpanStyle& typingStyle, TextStyle textStyle) = 0;
+    virtual void SetTypingStyle(std::optional<struct UpdateSpanStyle> typingStyle,
+        std::optional<TextStyle> textStyle) = 0;
+    virtual std::optional<struct UpdateSpanStyle> GetTypingStyle() = 0;
     virtual void CloseSelectionMenu() = 0;
     virtual bool IsEditing() = 0;
     virtual void StopEditing() = 0;
@@ -314,6 +326,7 @@ public:
     virtual void SetOnSelectionChange(std::function<void(const BaseEventInfo*)>&& func) = 0;
     virtual void SetAboutToIMEInput(std::function<bool(const NG::RichEditorInsertValue&)>&& func) = 0;
     virtual void SetOnIMEInputComplete(std::function<void(const NG::RichEditorAbstractSpanResult&)>&& func) = 0;
+    virtual void SetOnDidIMEInput(std::function<void(const TextRange&)>&& func) = 0;
     virtual void SetAboutToDelete(std::function<bool(const NG::RichEditorDeleteValue&)>&& func) = 0;
     virtual void SetOnDeleteComplete(std::function<void()>&& func) = 0;
     virtual void SetCustomKeyboard(std::function<void()>&& func, bool supportAvoidance = false) = 0;
@@ -335,8 +348,8 @@ public:
     virtual void SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
     virtual void SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
     virtual void SetSelectionMenuOptions(
-        const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick) {};
-
+        const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick) {}
+    virtual void SetRequestKeyboardOnFocus(bool needToRequest) {}
 private:
     static std::unique_ptr<RichEditorModel> instance_;
     static std::mutex mutex_;

@@ -31,11 +31,13 @@ struct ModalStyle {
     std::optional<ModalTransition> modalTransition;
     std::optional<Color> backgroundColor;
     bool isUIExtension = false;
+    bool prohibitedRemoveByRouter = false;
 
     bool operator==(const ModalStyle& modelStyle) const
     {
         return !(modalTransition != modelStyle.modalTransition || backgroundColor != modelStyle.backgroundColor ||
-            isUIExtension != modelStyle.isUIExtension);
+            isUIExtension != modelStyle.isUIExtension ||
+            prohibitedRemoveByRouter != modelStyle.prohibitedRemoveByRouter);
     }
 };
 } // namespace OHOS::Ace::NG

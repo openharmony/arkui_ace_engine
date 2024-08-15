@@ -15,7 +15,6 @@
 
 #include "core/gestures/slide_gesture.h"
 
-#include "base/geometry/dimension.h"
 #include "core/gestures/slide_recognizer.h"
 
 namespace OHOS::Ace {

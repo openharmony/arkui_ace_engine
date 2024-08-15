@@ -90,5 +90,18 @@ const ArkUIScrollerModifier* GetScrollerModifier()
     };
     return &modifier;
 }
+
+const CJUIScrollerModifier* GetCJUIScrollerModifier()
+{
+    static const CJUIScrollerModifier modifier = {
+        GetScroller,
+        GetScrollerProxy,
+        SetScrollToIndex,
+        ScrollBy,
+        GetCurrentOffset,
+        ScrollTo
+    };
+    return &modifier;
+}
 }
 }

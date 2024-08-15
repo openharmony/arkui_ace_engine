@@ -37,8 +37,14 @@ public:
         outBoundaryCallback_ = outBoundaryCallback;
     }
 
+    void SetOnWillStartSpringCallback(const std::function<void()>& onWillStartSpringCallback)
+    {
+        onWillStartSpringCallback_ = onWillStartSpringCallback;
+    }
+
 private:
     OutBoundaryCallback outBoundaryCallback_;
+    std::function<void()> onWillStartSpringCallback_;
 };
 
 } // namespace OHOS::Ace::NG

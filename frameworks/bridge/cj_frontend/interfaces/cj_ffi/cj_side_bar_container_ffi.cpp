@@ -15,10 +15,8 @@
 
 #include "cj_side_bar_container_ffi.h"
 
-#include "base/geometry/dimension.h"
 #include "cj_lambda.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_model.h"
 

@@ -87,6 +87,9 @@ class ModifierUtils {
     }
   }
   static applySetOnChange(modifier) {
+    // It is to make the stateMgmt can addRef of _changed,
+    // so that the modifier change can be observed by makeObserved when modifier._changed changed.
+    modifier._changed;
     let myMap = modifier._modifiersWithKeys;
     if (modifier._classType === ModifierType.STATE) {
       myMap.setOnChange((key, value) => {
@@ -115,6 +118,9 @@ class ModifierUtils {
   }
   static requestFrame() {
     const frameCallback = () => {
+      if (this.timeoutId !== -1) {
+        clearTimeout(this.timeoutId);
+      }
       this.dirtyComponentSet.forEach((item) => {
         const nativePtrValid = !item._weakPtr.invalid();
         if (item._nativePtrChanged && nativePtrValid) {
@@ -130,12 +136,18 @@ class ModifierUtils {
       });
       this.dirtyComponentSet.clear();
       this.dirtyFlag = false;
+      this.timeoutId = -1;
     };
+    if (this.timeoutId !== -1) {
+      clearTimeout(this.timeoutId);
+    }
+    this.timeoutId = setTimeout(frameCallback, 100);
     getUINativeModule().frameNode.registerFrameCallback(frameCallback);
   }
 }
 ModifierUtils.dirtyComponentSet = new Set();
 ModifierUtils.dirtyFlag = false;
+ModifierUtils.timeoutId = -1;
 class ModifierMap {
   constructor() {
     this.map_ = new Map();
@@ -1003,6 +1015,17 @@ class ParticleModifier extends ArkParticleComponent {
   }
 }
 
+class MediaCachedImageModifier extends ArkMediaCachedImageComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    this._modifiersWithKeys = new ModifierMap();
+  }
+  applyNormalAttribute(instance) {
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier(instance, this);
+  }
+}
+
 class SymbolGlyphModifier extends ArkSymbolGlyphComponent {
   constructor(src, nativePtr, classType) {
     super(nativePtr, classType);
@@ -1053,7 +1076,19 @@ class ContainerSpanModifier extends ArkContainerSpanComponent {
   }
 }
 
-export default { CommonModifier, AlphabetIndexerModifier, BlankModifier, ButtonModifier, CalendarPickerModifier, CheckboxModifier, CheckboxGroupModifier, CircleModifier,
+class LinearIndicatorModifier extends ArkLinearIndicatorComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    this._modifiersWithKeys = new ModifierMap();
+  }
+  applyNormalAttribute(instance) {
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier(instance, this);
+  }
+}
+
+export default {
+  CommonModifier, AlphabetIndexerModifier, BlankModifier, ButtonModifier, CalendarPickerModifier, CheckboxModifier, CheckboxGroupModifier, CircleModifier,
   ColumnModifier, ColumnSplitModifier, CounterModifier, DataPanelModifier, DatePickerModifier, DividerModifier, FormComponentModifier, GaugeModifier,
   GridModifier, GridColModifier, GridItemModifier, GridRowModifier, HyperlinkModifier, ImageAnimatorModifier, ImageModifier, ImageSpanModifier, LineModifier,
   ListModifier, ListItemModifier, ListItemGroupModifier, LoadingProgressModifier, MarqueeModifier, MenuModifier, MenuItemModifier, NavDestinationModifier,
@@ -1062,4 +1097,5 @@ export default { CommonModifier, AlphabetIndexerModifier, BlankModifier, ButtonM
   ScrollModifier, SearchModifier, SelectModifier, ShapeModifier, SideBarContainerModifier, SliderModifier, SpanModifier, StackModifier, StepperItemModifier,
   SwiperModifier, TabsModifier, TextAreaModifier, TextModifier, TextClockModifier, TextInputModifier, TextPickerModifier, TextTimerModifier, TimePickerModifier,
   ToggleModifier, VideoModifier, WaterFlowModifier, FlexModifier, PluginComponentModifier, RefreshModifier, TabContentModifier, ModifierUtils, AttributeUpdater,
-  ParticleModifier, SymbolGlyphModifier, SymbolSpanModifier, Component3DModifier, ContainerSpanModifier };
+  ParticleModifier, MediaCachedImageModifier, SymbolGlyphModifier, SymbolSpanModifier, Component3DModifier, ContainerSpanModifier, LinearIndicatorModifier
+};

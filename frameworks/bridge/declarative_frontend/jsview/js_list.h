@@ -29,14 +29,13 @@ public:
     static void Destructor(JSListScroller* scroller);
 
     void GetItemRectInGroup(const JSCallbackInfo& args);
-    void ScrollToItemInGroup(const JSCallbackInfo& args);
     void CloseAllSwipeActions(const JSCallbackInfo& args);
+    void ScrollToItemInGroup(const JSCallbackInfo& args);
 };
 
 class JSList : public JSScrollableBase {
 public:
     static void JSBind(BindingTarget globalObj);
-    static void BindInteractableViewMethods();
     static void SetScroller(RefPtr<JSScroller> scroller);
     static void Create(const JSCallbackInfo& args);
 
@@ -76,13 +75,13 @@ public:
     static void SetScrollEnabled(const JSCallbackInfo& args);
     static void SetScrollSnapAlign(int32_t scrollSnapAlign);
     static void SetFriction(const JSCallbackInfo& info);
+    static void MaintainVisibleContentPosition(const JSCallbackInfo& args);
 
     static void ItemDragStartCallback(const JSCallbackInfo& info);
     static void ItemDragEnterCallback(const JSCallbackInfo& info);
     static void ItemDragMoveCallback(const JSCallbackInfo& info);
     static void ItemDragLeaveCallback(const JSCallbackInfo& info);
     static void ItemDropCallback(const JSCallbackInfo& info);
-    static void SetFadingEdge(bool fadingEdge);
     static void SetListItemIndex(JSRef<JSObject> listItemInfo, ListItemIndex indexInfo);
 };
 

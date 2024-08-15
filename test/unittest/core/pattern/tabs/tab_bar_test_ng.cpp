@@ -36,41 +36,41 @@ HWTEST_F(TabBarTestNg, TabBarPatternUpdateSubTabBoard001, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
     auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
-    tabBarPattern_->UpdateSubTabBoard();
+    tabBarPattern_->UpdateSubTabBoard(0);
     EXPECT_EQ(swiperNode_->GetTag(), V2::SWIPER_ETS_TAG);
     pipeline->fontScale_ = BIG_FONT_SIZE_SCALE;
-    tabBarPattern_->UpdateSubTabBoard();
+    tabBarPattern_->UpdateSubTabBoard(0);
 
     EXPECT_EQ(tabBarPattern_->selectedModes_[0], SelectedMode::INDICATOR);
     tabBarPattern_->SetSelectedMode(SelectedMode::BOARD, 0);
     EXPECT_EQ(tabBarPattern_->selectedModes_[0], SelectedMode::BOARD);
     pipeline->fontScale_ = LARGE_FONT_SIZE_SCALE;
-    tabBarPattern_->UpdateSubTabBoard();
+    tabBarPattern_->UpdateSubTabBoard(0);
     EXPECT_EQ(tabBarPattern_->indicator_, 0);
 
     tabBarPattern_->indicator_ = 1;
     pipeline->fontScale_ = MAX_FONT_SIZE_SCALE;
-    tabBarPattern_->UpdateSubTabBoard();
+    tabBarPattern_->UpdateSubTabBoard(tabBarPattern_->indicator_);
     EXPECT_EQ(tabBarPattern_->indicator_, 1);
 
     IndicatorStyle style;
     tabBarPattern_->SetIndicatorStyle(style, 1);
-    tabBarPattern_->UpdateSubTabBoard();
+    tabBarPattern_->UpdateSubTabBoard(tabBarPattern_->indicator_);
     EXPECT_EQ(tabBarPattern_->indicator_, 1);
 
     tabBarLayoutProperty_->UpdateAxis(Axis::VERTICAL);
-    tabBarPattern_->UpdateSubTabBoard();
+    tabBarPattern_->UpdateSubTabBoard(tabBarPattern_->indicator_);
     EXPECT_EQ(tabBarPattern_->indicator_, 1);
 
     tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
-    tabBarPattern_->UpdateSubTabBoard();
+    tabBarPattern_->UpdateSubTabBoard(tabBarPattern_->indicator_);
     EXPECT_EQ(tabBarPattern_->indicator_, 1);
 
     tabBarPattern_->indicator_ = 0;
     tabBarPattern_->tabBarStyles_[0] = TabBarStyle::SUBTABBATSTYLE;
     tabBarPattern_->selectedModes_[0] = SelectedMode::BOARD;
     tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
-    tabBarPattern_->UpdateSubTabBoard();
+    tabBarPattern_->UpdateSubTabBoard(tabBarPattern_->indicator_);
     EXPECT_EQ(tabBarPattern_->indicator_, 0);
     pipeline->fontScale_ = 1.f;
 }

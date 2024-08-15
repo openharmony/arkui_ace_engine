@@ -15,8 +15,6 @@
 
 #include "bridge/common/plugin_adapter/plugin_bridge.h"
 
-#include "base/utils/system_properties.h"
-#include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 
 namespace OHOS::Ace::Framework {

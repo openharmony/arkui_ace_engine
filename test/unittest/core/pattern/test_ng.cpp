@@ -79,6 +79,13 @@ RefPtr<PaintWrapper> TestNG::CreateDone(const RefPtr<FrameNode>& frameNode)
     return FlushLayoutTask(layoutNode);
 }
 
+void TestNG::CreateLayoutTask(const RefPtr<FrameNode>& frameNode)
+{
+    frameNode->SetActive();
+    frameNode->SetLayoutDirtyMarked(true);
+    frameNode->CreateLayoutTask();
+}
+
 uint64_t TestNG::GetActions(const RefPtr<AccessibilityProperty>& accessibilityProperty)
 {
     std::unordered_set<AceAction> supportAceActions = accessibilityProperty->GetSupportAction();
@@ -111,5 +118,52 @@ RefPtr<ThemeConstants> TestNG::CreateThemeConstants(const std::string& patternNa
     themeConstants->currentThemeStyle_ = AceType::MakeRefPtr<ThemeStyle>();
     themeConstants->currentThemeStyle_->SetAttributes(attributes);
     return themeConstants;
+}
+
+RefPtr<FrameNode> TestNG::CreateText(const std::string& content, const std::function<void(TextModelNG)>& callback)
+{
+    TextModelNG model;
+    model.Create(content);
+    if (callback) {
+        callback(model);
+    }
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ViewStackProcessor::GetInstance()->PopContainer();
+    return AceType::DynamicCast<FrameNode>(element);
+}
+
+RefPtr<FrameNode> TestNG::CreateRow(const std::function<void(RowModelNG)>& callback)
+{
+    RowModelNG model;
+    model.Create(std::nullopt, nullptr, "");
+    if (callback) {
+        callback(model);
+    }
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ViewStackProcessor::GetInstance()->PopContainer();
+    return AceType::DynamicCast<FrameNode>(element);
+}
+
+RefPtr<FrameNode> TestNG::CreateColumn(const std::function<void(ColumnModelNG)>& callback)
+{
+    ColumnModelNG model;
+    model.Create(std::nullopt, nullptr, "");
+    if (callback) {
+        callback(model);
+    }
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ViewStackProcessor::GetInstance()->PopContainer();
+    return AceType::DynamicCast<FrameNode>(element);
+}
+
+void TestNG::SetSize(Axis axis, const CalcLength& crossSize, const CalcLength& mainSize)
+{
+    if (axis == Axis::VERTICAL) {
+        ViewAbstract::SetWidth(crossSize);
+        ViewAbstract::SetHeight(mainSize);
+    } else {
+        ViewAbstract::SetWidth(mainSize);
+        ViewAbstract::SetHeight(crossSize);
+    }
 }
 } // namespace OHOS::Ace::NG

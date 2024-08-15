@@ -16,11 +16,6 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_panel_ffi.h"
 
 #include "cj_lambda.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
-#include "core/components/panel/sliding_events.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_abstract_model_ng.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/panel/sliding_panel_model_ng.h"
 
 using namespace OHOS::Ace;

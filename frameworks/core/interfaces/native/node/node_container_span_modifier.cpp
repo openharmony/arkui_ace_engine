@@ -75,5 +75,13 @@ const ArkUIContainerSpanModifier* GetContainerSpanModifier()
         ResetContainerSpanTextBackgroundStyle };
     return &modifier;
 }
+
+const CJUIContainerSpanModifier* GetCJUIContainerSpanModifier()
+{
+    static const CJUIContainerSpanModifier modifier = {
+        SetContainerSpanTextBackgroundStyle,
+        ResetContainerSpanTextBackgroundStyle };
+    return &modifier;
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

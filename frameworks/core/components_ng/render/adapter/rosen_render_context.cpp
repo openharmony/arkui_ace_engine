@@ -15,14 +15,6 @@
 
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
-#include <algorithm>
-#include <cstddef>
-#include <cstdint>
-#include <memory>
-#include <string>
-#include <utility>
-
-#include "common/rs_vector2.h"
 #include "include/utils/SkParsePath.h"
 #include "modifier/rs_property.h"
 #include "render_service_base/include/property/rs_properties_def.h"
@@ -34,56 +26,27 @@
 #include "render_service_client/core/ui/rs_canvas_node.h"
 #include "render_service_client/core/ui/rs_effect_node.h"
 #include "render_service_client/core/ui/rs_root_node.h"
+#include "render_service_client/core/ui/rs_node.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
 #include "rosen_render_context.h"
-
 #include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/rect_t.h"
-#include "base/geometry/offset.h"
-#include "base/geometry/shape.h"
 #include "base/log/dump_log.h"
-#include "base/log/log_wrapper.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
 #include "core/animation/native_curve_helper.h"
-#include "core/animation/page_transition_common.h"
-#include "core/animation/spring_curve.h"
-#include "core/common/container.h"
-#include "core/common/rosen/rosen_convert_helper.h"
-#include "core/components/common/layout/position_param.h"
-#include "core/components/common/properties/blend_mode.h"
-#include "core/components/common/properties/blur_parameter.h"
-#include "core/components/common/properties/decoration.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components/theme/blur_style_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/geometry_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/particle/particle_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
-#include "core/components_ng/pattern/stage/stage_pattern.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/render/adapter/background_modifier.h"
 #include "core/components_ng/render/adapter/border_image_modifier.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/components_ng/render/adapter/debug_boundary_modifier.h"
 #include "core/components_ng/render/adapter/focus_state_modifier.h"
 #include "core/components_ng/render/adapter/gradient_style_modifier.h"
-#include "core/components_ng/render/adapter/graphic_modifier.h"
-#include "core/components_ng/render/adapter/moon_progress_modifier.h"
 #include "core/components_ng/render/adapter/mouse_select_modifier.h"
 #include "core/components_ng/render/adapter/overlay_modifier.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
-#include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
-#include "core/components_ng/render/adapter/rosen_transition_effect.h"
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
 #include "render_service_client/core/pipeline/rs_render_thread.h"
 #endif
@@ -95,13 +58,9 @@
 #include "core/components_ng/render/adapter/rosen/drawing_image.h"
 #endif
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
-#include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/border_image_painter.h"
 #include "core/components_ng/render/debug_boundary_painter.h"
-#include "core/components_ng/render/drawing.h"
-#include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/image_painter.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -2640,7 +2599,7 @@ void RosenRenderContext::PaintAccessibilityFocus()
             localRect.Width() - (2 * lineWidth), localRect.Height() - (2 * lineWidth));
         frameRect.SetRect(globalRect);
     }
-    PaintFocusState(frameRect, focusPaddingVp, paintColor, paintWidth, { true, false });
+    PaintFocusState(frameRect, focusPaddingVp, paintColor, paintWidth, true);
 }
 
 void RosenRenderContext::ClearAccessibilityFocus()
@@ -3579,8 +3538,8 @@ void RosenRenderContext::BlendBorderColor(const Color& color)
     RequestNextFrame();
 }
 
-void RosenRenderContext::PaintFocusState(const RoundRect& paintRect, const Color& paintColor,
-    const Dimension& paintWidth, bool isAccessibilityFocus, bool isFocusBoxGlow)
+void RosenRenderContext::PaintFocusState(
+    const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth, bool isAccessibilityFocus)
 {
     TAG_LOGD(AceLogTag::ACE_FOCUS,
         "PaintFocusState rect is (%{public}f, %{public}f, %{public}f, %{public}f). Color is %{public}s, PainWidth is "
@@ -3590,78 +3549,73 @@ void RosenRenderContext::PaintFocusState(const RoundRect& paintRect, const Color
     CHECK_NULL_VOID(paintRect.GetRect().IsValid());
     CHECK_NULL_VOID(rsNode_);
     auto borderWidthPx = static_cast<float>(paintWidth.ConvertToPx());
-    isFocusBoxGlow_ = isFocusBoxGlow;
+    auto frameNode = GetHost();
+    auto paintTask = [paintColor, borderWidthPx, weak = WeakClaim(AceType::RawPtr(frameNode))]
+    (const RSRoundRect& rrect, RSCanvas& rsCanvas) mutable {
+        RSPen pen;
+        pen.SetAntiAlias(true);
+        pen.SetColor(ToRSColor(paintColor));
+        pen.SetWidth(borderWidthPx);
+        rsCanvas.AttachPen(pen);
+        auto delegatePtr = weak.Upgrade();
+        CHECK_NULL_VOID(delegatePtr);
+        if (!delegatePtr->GetCheckboxFlag()) {
+            rsCanvas.DrawRoundRect(rrect);
+        } else {
+            auto paintProperty = delegatePtr->GetPaintProperty<CheckBoxPaintProperty>();
+            CHECK_NULL_VOID(paintProperty);
+            CheckBoxStyle checkboxStyle = CheckBoxStyle::CIRCULAR_STYLE;
+            if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+                checkboxStyle = CheckBoxStyle::CIRCULAR_STYLE;
+            } else {
+                checkboxStyle = CheckBoxStyle::SQUARE_STYLE;
+            }
+            if (paintProperty->HasCheckBoxSelectedStyle()) {
+                checkboxStyle = paintProperty->GetCheckBoxSelectedStyleValue(CheckBoxStyle::CIRCULAR_STYLE);
+            }
+            RSScalar halfDenominator = 2.0f;
+            RSScalar radius = 0.0f;
+            RSRect rect = rrect.GetRect();
+            RSScalar x = (rect.GetLeft() + rect.GetRight()) / halfDenominator;
+            RSScalar y = (rect.GetTop() + rect.GetBottom()) / halfDenominator;
+            RSPoint centerPt(x, y);
+            if (rect.GetWidth() > rect.GetHeight()) {
+                radius = rect.GetHeight() / halfDenominator;
+            } else {
+                radius = rect.GetWidth() / halfDenominator;
+            }
+            if (CheckBoxStyle::SQUARE_STYLE == checkboxStyle) {
+                rsCanvas.DrawRoundRect(rrect);
+            } else {
+                rsCanvas.DrawCircle(centerPt, radius);
+            }
+        }
+        rsCanvas.DetachPen();
+    };
+    std::shared_ptr<FocusStateModifier> modifier;
     if (isAccessibilityFocus) {
-        InitAccessibilityFocusModidifer(paintRect, paintColor, borderWidthPx);
-        UpdateDrawRegion(
-            DRAW_REGION_ACCESSIBILITY_FOCUS_MODIFIER_INDEX, accessibilityFocusStateModifier_->GetOverlayRect());
-        rsNode_->AddModifier(accessibilityFocusStateModifier_);
-        RequestNextFrame();
-        return;
-    }
-    if (!isFocusBoxGlow_) {
-        InitFocusStateModidifer(paintRect, paintColor, borderWidthPx);
-        UpdateDrawRegion(DRAW_REGION_FOCUS_MODIFIER_INDEX, focusStateModifier_->GetOverlayRect());
-        rsNode_->AddModifier(focusStateModifier_);
+        if (!accessibilityFocusStateModifier_) {
+            accessibilityFocusStateModifier_ = std::make_shared<FocusStateModifier>();
+        }
+        modifier = accessibilityFocusStateModifier_;
+        modifier->SetRoundRect(paintRect, borderWidthPx);
+        UpdateDrawRegion(DRAW_REGION_ACCESSIBILITY_FOCUS_MODIFIER_INDEX, modifier->GetOverlayRect());
     } else {
-        InitFocusAnimationModidifer(paintRect, paintColor, borderWidthPx);
-        UpdateDrawRegion(DRAW_REGION_FOCUS_MODIFIER_INDEX, focusAnimationModifier_->GetOverlayRect());
-        auto modifierAdapter =
-            std::static_pointer_cast<OverlayModifierAdapter>(ConvertOverlayModifier(focusAnimationModifier_));
-        rsNode_->AddModifier(modifierAdapter);
-        modifierAdapter->AttachProperties();
-        focusAnimationModifier_->StartFocusAnimation();
+        if (!focusStateModifier_) {
+            // TODO: Add property data
+            focusStateModifier_ = std::make_shared<FocusStateModifier>();
+        }
+        modifier = focusStateModifier_;
+        modifier->SetRoundRect(paintRect, borderWidthPx);
+        UpdateDrawRegion(DRAW_REGION_FOCUS_MODIFIER_INDEX, modifier->GetOverlayRect());
     }
+    modifier->SetPaintTask(std::move(paintTask));
+    rsNode_->AddModifier(modifier);
     RequestNextFrame();
 }
 
-void RosenRenderContext::InitAccessibilityFocusModidifer(
-    const RoundRect& paintRect, const Color& paintColor, float borderWidthPx)
-{
-    auto frameNode = GetHost();
-    if (!accessibilityFocusStateModifier_) {
-        accessibilityFocusStateModifier_ = std::make_shared<FocusStateModifier>();
-    }
-    accessibilityFocusStateModifier_->SetRoundRect(paintRect, borderWidthPx);
-    accessibilityFocusStateModifier_->SetPaintColor(paintColor);
-    accessibilityFocusStateModifier_->SetFrameNode(frameNode);
-}
-
-void RosenRenderContext::InitFocusStateModidifer(
-    const RoundRect& paintRect, const Color& paintColor, float borderWidthPx)
-{
-    auto frameNode = GetHost();
-    if (!focusStateModifier_) {
-        focusStateModifier_ = std::make_shared<FocusStateModifier>();
-    }
-    focusStateModifier_->SetRoundRect(paintRect, borderWidthPx);
-    focusStateModifier_->SetPaintColor(paintColor);
-    focusStateModifier_->SetFrameNode(frameNode);
-}
-
-void RosenRenderContext::InitFocusAnimationModidifer(
-    const RoundRect& paintRect, const Color& paintColor, float borderWidthPx)
-{
-    auto frameNode = GetHost();
-    if (!focusAnimationModifier_) {
-        focusAnimationModifier_ = AceType::MakeRefPtr<FocusAnimationModifier>();
-    }
-    auto onPointLightPosUpdate = [this](float x, float y, float z) {
-        this->OnLightPositionUpdate(TranslateOptions { x, y, z });
-    };
-    auto onPointLightUpdate = [this](uint32_t lightIlluminated, float lighgIntensity) {
-        this->OnLightIntensityUpdate(lighgIntensity);
-        this->OnLightIlluminatedUpdate(lightIlluminated);
-    };
-    focusAnimationModifier_->SetPointLightPosUpdateTask(onPointLightPosUpdate);
-    focusAnimationModifier_->SetPointLightUpdateTask(onPointLightUpdate);
-    focusAnimationModifier_->SetRoundRect(paintRect, borderWidthPx);
-    focusAnimationModifier_->SetPaintColor(paintColor);
-    focusAnimationModifier_->SetFrameNode(frameNode);
-}
-
 void RosenRenderContext::PaintFocusState(const RoundRect& paintRect, const Dimension& focusPaddingVp,
-    const Color& paintColor, const Dimension& paintWidth, const PaintFocusExtraInfo& paintFocusExtraInfo)
+    const Color& paintColor, const Dimension& paintWidth, bool isAccessibilityFocus)
 {
     auto paintWidthPx = static_cast<float>(paintWidth.ConvertToPx());
     auto borderPaddingPx = static_cast<float>(focusPaddingVp.ConvertToPx());
@@ -3687,12 +3641,11 @@ void RosenRenderContext::PaintFocusState(const RoundRect& paintRect, const Dimen
     focusPaintRect.SetCornerRadius(
         RoundRect::CornerPos::BOTTOM_RIGHT_POS, focusPaintCornerBottomRight.x, focusPaintCornerBottomRight.y);
 
-    PaintFocusState(focusPaintRect, paintColor, paintWidth, paintFocusExtraInfo.isAccessibilityFocus,
-        paintFocusExtraInfo.isFocusBoxGlow);
+    PaintFocusState(focusPaintRect, paintColor, paintWidth, isAccessibilityFocus);
 }
 
 void RosenRenderContext::PaintFocusState(
-    const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth, bool isFocusBoxGlow)
+    const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth)
 {
     CHECK_NULL_VOID(rsNode_);
     const auto& bounds = rsNode_->GetStagingProperties().GetBounds();
@@ -3705,7 +3658,7 @@ void RosenRenderContext::PaintFocusState(
     frameRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, radius.z_, radius.z_);
     frameRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS, radius.w_, radius.w_);
 
-    PaintFocusState(frameRect, focusPaddingVp, paintColor, paintWidth, { false, isFocusBoxGlow });
+    PaintFocusState(frameRect, focusPaddingVp, paintColor, paintWidth);
 }
 
 void RosenRenderContext::ClearFocusState()
@@ -3714,19 +3667,10 @@ void RosenRenderContext::ClearFocusState()
     CHECK_NULL_VOID(rsNode_);
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    if (!isFocusBoxGlow_) {
-        CHECK_NULL_VOID(focusStateModifier_);
-        UpdateDrawRegion(DRAW_REGION_FOCUS_MODIFIER_INDEX, focusStateModifier_->GetOverlayRect());
-        rsNode_->RemoveModifier(focusStateModifier_);
-        RequestNextFrame();
-        return;
-    }
-    CHECK_NULL_VOID(focusAnimationModifier_);
-    focusAnimationModifier_->StopFocusAnimation();
-    UpdateDrawRegion(DRAW_REGION_FOCUS_MODIFIER_INDEX, focusAnimationModifier_->GetOverlayRect());
-    auto modifierAdapter =
-        std::static_pointer_cast<OverlayModifierAdapter>(ConvertOverlayModifier(focusAnimationModifier_));
-    rsNode_->RemoveModifier(modifierAdapter);
+    CHECK_NULL_VOID(focusStateModifier_);
+
+    UpdateDrawRegion(DRAW_REGION_FOCUS_MODIFIER_INDEX, focusStateModifier_->GetOverlayRect());
+    rsNode_->RemoveModifier(focusStateModifier_);
     RequestNextFrame();
 }
 
@@ -4326,6 +4270,28 @@ void RosenRenderContext::OnLinearGradientBlurUpdate(const NG::LinearGradientBlur
     RequestNextFrame();
 }
 
+void RosenRenderContext::OnMagnifierUpdate(const MagnifierParams& magnifierParams)
+{
+    CHECK_NULL_VOID(rsNode_);
+    std::shared_ptr<Rosen::RSMagnifierParams> rsMagnifierParams(std::make_shared<Rosen::RSMagnifierParams>());
+    rsMagnifierParams->factor_ = magnifierParams.factor_;
+    rsMagnifierParams->width_ = magnifierParams.width_;
+    rsMagnifierParams->height_ = magnifierParams.height_;
+    rsMagnifierParams->borderWidth_ = magnifierParams.borderWidth_;
+    rsMagnifierParams->cornerRadius_ = magnifierParams.cornerRadius_;
+    rsMagnifierParams->offsetX_ = magnifierParams.offsetX_;
+    rsMagnifierParams->offsetY_ = magnifierParams.offsetY_;
+    rsMagnifierParams->shadowOffsetX_ = magnifierParams.shadowOffsetX_;
+    rsMagnifierParams->shadowOffsetY_ = magnifierParams.shadowOffsetY_;
+    rsMagnifierParams->shadowSize_ = magnifierParams.shadowSize_;
+    rsMagnifierParams->shadowStrength_ = magnifierParams.shadowStrength_;
+    rsMagnifierParams->gradientMaskColor1_ = magnifierParams.gradientMaskColor1_;
+    rsMagnifierParams->gradientMaskColor2_ = magnifierParams.gradientMaskColor2_;
+    rsMagnifierParams->outerContourColor1_ = magnifierParams.outerContourColor1_;
+    rsMagnifierParams->outerContourColor2_ = magnifierParams.outerContourColor2_;
+    rsNode_->SetMagnifierParams(rsMagnifierParams);
+    RequestNextFrame();
+}
 void RosenRenderContext::OnDynamicDimDegreeUpdate(const float degree)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -5281,6 +5247,16 @@ void RosenRenderContext::DumpInfo()
         if (!res.empty()) {
             DumpLog::GetInstance().AddDesc(res);
             res.clear();
+        }
+        std::string backgroundFilter = rsNode_->GetBackgroundFilterDescription();
+        DumpLog::GetInstance().AddDesc(
+        std::string("backgroundFilter:").append(backgroundFilter));
+
+        const auto& groupProperty = GetOrCreateBackground();
+        if (groupProperty->propEffectOption.has_value()) {
+            auto backgroundEffect = groupProperty->propEffectOption->ToJsonValue()->ToString();
+            DumpLog::GetInstance().AddDesc(
+                 std::string("backgroundEffect:").append(backgroundEffect));
         }
         if (!NearZero(rsNode_->GetStagingProperties().GetCameraDistance())) {
             DumpLog::GetInstance().AddDesc(

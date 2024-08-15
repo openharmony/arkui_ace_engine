@@ -302,7 +302,9 @@ public:
     void SetIdealSurfaceOffsetX(float offsetX);
     void SetIdealSurfaceOffsetY(float offsetY);
     void ClearIdealSurfaceOffset(bool isXAxis);
-    void UpdateSurfaceBounds(bool needForceRender, bool frameOffsetChange = false);
+    std::tuple<bool, bool, bool> UpdateSurfaceRect();
+    void HandleSurfaceChangeEvent(bool needForceRender, bool offsetChanged, bool sizeChanged, bool needFireNativeEvent,
+        bool frameOffsetChange = false);
     void EnableAnalyzer(bool enable);
     void SetImageAIOptions(void* options);
     void StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnalyzed);
@@ -415,7 +417,7 @@ private:
     OffsetF globalPosition_;
     SizeF drawSize_;
     SizeF surfaceSize_;
-    RefPtr<UIDisplaySync> displaySync_ = AceType::MakeRefPtr<UIDisplaySync>();
+    RefPtr<UIDisplaySync> displaySync_ = AceType::MakeRefPtr<UIDisplaySync>(UIObjectType::DISPLAYSYNC_XCOMPONENT);
 
     std::optional<float> selfIdealSurfaceWidth_;
     std::optional<float> selfIdealSurfaceHeight_;

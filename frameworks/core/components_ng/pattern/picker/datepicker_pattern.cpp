@@ -150,6 +150,33 @@ void DatePickerPattern::InitDisabled()
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void DatePickerPattern::UpdateConfirmButtonMargin(
+    const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme)
+{
+    MarginProperty margin;
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        ModuleDialogTypeRtl::UpdateMarginIsRtl(isRtl, margin, dialogTheme, true, ModuleDialogType::DATEPICKER_DIALOG);
+    } else {
+        ModuleDialogTypeRtl::UpdateMarginIsRtl(isRtl, margin, dialogTheme, false, ModuleDialogType::DATEPICKER_DIALOG);
+    }
+    buttonConfirmNode->GetLayoutProperty()->UpdateMargin(margin);
+}
+
+void DatePickerPattern::UpdateCancelButtonMargin(
+    const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme)
+{
+    MarginProperty margin;
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        ModuleDialogTypeRtl::UpdateMarginIsRtl(!isRtl, margin, dialogTheme, true, ModuleDialogType::DATEPICKER_DIALOG);
+    } else {
+        ModuleDialogTypeRtl::UpdateMarginIsRtl(!isRtl, margin, dialogTheme, false,
+            ModuleDialogType::DATEPICKER_DIALOG);
+    }
+    buttonCancelNode->GetLayoutProperty()->UpdateMargin(margin);
+}
+
 void DatePickerPattern::OnLanguageConfigurationUpdate()
 {
     auto buttonConfirmNode = weakButtonConfirm_.Upgrade();
@@ -159,6 +186,11 @@ void DatePickerPattern::OnLanguageConfigurationUpdate()
     auto confirmNodeLayout = confirmNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(confirmNodeLayout);
     confirmNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    auto pipeline = confirmNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
+    UpdateConfirmButtonMargin(buttonConfirmNode, dialogTheme);
     confirmNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
     auto buttonCancelNode = weakButtonCancel_.Upgrade();
@@ -168,6 +200,7 @@ void DatePickerPattern::OnLanguageConfigurationUpdate()
     auto cancelNodeLayout = cancelNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(cancelNodeLayout);
     cancelNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    UpdateCancelButtonMargin(buttonCancelNode, dialogTheme);
     cancelNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
     auto lunarSwitchNode = weakLunarSwitchText_.Upgrade();
@@ -254,8 +287,9 @@ void DatePickerPattern::OnColorConfigurationUpdate()
     auto normalStyle = pickerTheme->GetOptionStyle(false, false);
     auto pickerProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
-    pickerProperty->UpdateColor(normalStyle.GetTextColor());
-    pickerProperty->UpdateDisappearColor(disappearStyle.GetTextColor());
+    pickerProperty->UpdateColor(GetTextProperties().normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
+    pickerProperty->UpdateDisappearColor(
+        GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
     if (isPicker_) {
         return;
     }
@@ -331,6 +365,12 @@ void DatePickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     if (!ShowMonthDays()) {
         childSize = static_cast<float>(host->GetChildren().size());
     }
+    auto leftTotalColumnWith = 0.0f;
+    for (int32_t index = 0; index < focusKeyID_; ++index) {
+        auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(index));
+        CHECK_NULL_VOID(stackChild);
+        leftTotalColumnWith += stackChild->GetGeometryNode()->GetFrameSize().Width();
+    }
     auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
     CHECK_NULL_VOID(stackChild);
     auto blendChild = DynamicCast<FrameNode>(stackChild->GetLastChild());
@@ -342,20 +382,17 @@ void DatePickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
-    auto frameWidth = host->GetGeometryNode()->GetFrameSize().Width();
     auto dividerSpacing = pickerTheme->GetDividerSpacing().ConvertToPx();
     auto pickerThemeWidth = dividerSpacing * 2;
 
-    auto centerX = (frameWidth / childSize - pickerThemeWidth) / 2 +
-                   pickerChild->GetGeometryNode()->GetFrameRect().Width() * focusKeyID_ +
-                   PRESS_INTERVAL.ConvertToPx() * 2;
+    auto centerX = (columnWidth - pickerThemeWidth) / 2 + leftTotalColumnWith + PRESS_INTERVAL.ConvertToPx() * 2;
     auto centerY =
         (host->GetGeometryNode()->GetFrameSize().Height() - dividerSpacing) / 2 + PRESS_INTERVAL.ConvertToPx();
     float piantRectWidth = (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * 2;
     float piantRectHeight = dividerSpacing - PRESS_INTERVAL.ConvertToPx() * 2;
     if (piantRectWidth > columnWidth) {
         piantRectWidth = columnWidth;
-        centerX = focusKeyID_ * columnWidth;
+        centerX = leftTotalColumnWith;
     }
     paintRect.SetRect(RectF(centerX, centerY, piantRectWidth, piantRectHeight));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
@@ -2142,6 +2179,8 @@ const std::string DatePickerPattern::GetFormatString(PickerDateF date)
         OrderResult orderResult = sequence.GetDateOrder(language);
         if (language == "ug") {
             return date.month.has_value() ? (dayStr + "-" + monthStr) : dayStr;
+        } else if (language == "en") {
+            return date.month.has_value() ? (monthStr + " " + dayStr) : dayStr;
         } else {
             return date.month.has_value() ? (monthStr + dayStr) : dayStr;
         }

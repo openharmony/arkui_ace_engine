@@ -352,5 +352,16 @@ const ArkUIRichEditorModifier* GetRichEditorModifier()
         SetRichEditorEnterKeyType, ResetRichEditorEnterKeyType };
     return &modifier;
 }
+
+const CJUIRichEditorModifier* GetCJUIRichEditorModifier()
+{
+    static const CJUIRichEditorModifier modifier = { SetRichEditorDetectEnable, ResetRichEditorDetectEnable,
+        SetRichEditorCopyOptions, ResetRichEditorCopyOptions, SetRichEditorCaretColor, ResetRichEditorCaretColor,
+        SetRichEditorOnReady, ResetRichEditorOnReady, SetRichEditorOnDeleteComplete, ResetRichEditorOnDeleteComplete,
+        SetRichEditorOnEditingChange, ResetRichEditorOnEditingChange,
+        SetRichEditorSelectedBackgroundColor, ResetRichEditorSelectedBackgroundColor, SetRichEditorEnterKeyType,
+        ResetRichEditorEnterKeyType };
+    return &modifier;
+}
 }
 }

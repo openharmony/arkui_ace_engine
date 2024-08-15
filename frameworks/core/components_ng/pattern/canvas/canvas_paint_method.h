@@ -58,6 +58,15 @@ public:
     bool HasTask() const;
     void FlushTask();
 
+    void FlushUITasks()
+    {
+        CHECK_EQUAL_VOID(HasTask(), false);
+        auto context = context_.Upgrade();
+        if (context) {
+            context->FlushUITasks();
+        }
+    }
+
     double GetWidth()
     {
         return lastLayoutSize_.Width();
@@ -91,20 +100,17 @@ public:
 
     void CloseImageBitmap(const std::string& src);
     void DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage);
-    std::unique_ptr<Ace::ImageData> GetImageData(
-        RefPtr<RenderContext> renderContext, double left, double top, double width, double height);
-    void GetImageData(const RefPtr<RenderContext>& renderContext, const std::shared_ptr<Ace::ImageData>& imageData);
+    std::unique_ptr<Ace::ImageData> GetImageData(double left, double top, double width, double height);
+    void GetImageData(const std::shared_ptr<Ace::ImageData>& imageData);
 #ifdef PIXEL_MAP_SUPPORTED
     void TransferFromImageBitmap(const RefPtr<PixelMap>& pixelMap);
 #endif
-    std::string ToDataURL(RefPtr<RenderContext> renderContext, const std::string& args);
+    std::string ToDataURL(const std::string& type, const double quality);
     bool DrawBitmap(RefPtr<RenderContext> renderContext, RSBitmap& currentBitmap);
     std::string GetJsonData(const std::string& path);
 
-    void FillText(const std::string& text, double x, double y, std::optional<double> maxWidth);
-    void StrokeText(const std::string& text, double x, double y, std::optional<double> maxWidth);
     void Reset();
-
+    std::string GetDumpInfo();
 private:
     void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) override;
     void ImageObjFailed() override;

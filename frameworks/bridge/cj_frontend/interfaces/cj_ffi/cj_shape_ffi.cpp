@@ -15,7 +15,6 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_shape_ffi.h"
 
-#include <cinttypes>
 
 #include "bridge/cj_frontend/cppview/shape_abstract.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"

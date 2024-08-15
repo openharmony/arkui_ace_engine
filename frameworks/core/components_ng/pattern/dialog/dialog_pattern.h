@@ -23,6 +23,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/common/autofill/auto_fill_trigger_state_holder.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/manager/focus/focus_view.h"
@@ -47,8 +48,8 @@ enum class DialogDismissReason {
     DIALOG_TOUCH_OUTSIDE,
     DIALOG_CLOSE_BUTTON,
 };
-class DialogPattern : public PopupBasePattern, public FocusView {
-    DECLARE_ACE_TYPE(DialogPattern, PopupBasePattern, FocusView);
+class DialogPattern : public PopupBasePattern, public FocusView, public AutoFillTriggerStateHolder {
+    DECLARE_ACE_TYPE(DialogPattern, PopupBasePattern, FocusView, AutoFillTriggerStateHolder);
 
 public:
     DialogPattern(const RefPtr<DialogTheme>& dialogTheme, const RefPtr<UINode>& customNode)
@@ -315,10 +316,8 @@ private:
 
     // set render context properties of content frame
     void UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode, const DialogProperties& props);
-    void UpdateBgBlurStyle(const RefPtr<RenderContext>& contentRenderContext, const DialogProperties& props);
     void BuildCustomChild(const DialogProperties& props, const RefPtr<UINode>& customNode);
     RefPtr<FrameNode> BuildMainTitle(const DialogProperties& dialogProperties);
-    void CreateTitleRowNode(const DialogProperties& dialogProperties, PaddingProperty& titlePadding);
     RefPtr<FrameNode> BuildSubTitle(const DialogProperties& dialogProperties);
     void ParseButtonFontColorAndBgColor(
         const ButtonInfo& params, std::string& textColor, std::optional<Color>& bgColor);

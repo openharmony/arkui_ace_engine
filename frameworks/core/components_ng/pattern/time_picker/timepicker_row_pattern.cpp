@@ -94,13 +94,35 @@ void TimePickerRowPattern::SetButtonIdeaSize()
     }
 }
 
+void TimePickerRowPattern::ColumnPatternInitHapticController()
+{
+    if (!isHapticChanged_) {
+        return;
+    }
+
+    isHapticChanged_ = false;
+    for (auto iter = allChildNode_.begin(); iter != allChildNode_.end(); iter++) {
+        auto columnNode = iter->second.Upgrade();
+        if (!columnNode) {
+            continue;
+        }
+        auto pattern = columnNode->GetPattern<TimePickerColumnPattern>();
+        if (!pattern) {
+            continue;
+        }
+        pattern->InitHapticController(columnNode);
+    }
+}
+
 void TimePickerRowPattern::OnModifyDone()
 {
     if (isFiredTimeChange_ && !isForceUpdate_ && !isDateTimeOptionUpdate_) {
         isFiredTimeChange_ = false;
+        ColumnPatternInitHapticController();
         return;
     }
 
+    isHapticChanged_ = false;
     isForceUpdate_ = false;
     isDateTimeOptionUpdate_ = false;
     auto host = GetHost();
@@ -413,6 +435,34 @@ void TimePickerRowPattern::OnFontConfigurationUpdate()
     CHECK_NULL_VOID(closeDialogEvent_);
     closeDialogEvent_();
 }
+
+void TimePickerRowPattern::UpdateConfirmButtonMargin(
+    const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme)
+{
+    MarginProperty margin;
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        ModuleDialogTypeRtl::UpdateMarginIsRtl(isRtl, margin, dialogTheme, true, ModuleDialogType::TIMEPICKER_DIALOG);
+    } else {
+        ModuleDialogTypeRtl::UpdateMarginIsRtl(isRtl, margin, dialogTheme, false, ModuleDialogType::TIMEPICKER_DIALOG);
+    }
+    buttonConfirmNode->GetLayoutProperty()->UpdateMargin(margin);
+}
+
+void TimePickerRowPattern::UpdateCancelButtonMargin(
+    const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme)
+{
+    MarginProperty margin;
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        ModuleDialogTypeRtl::UpdateMarginIsRtl(!isRtl, margin, dialogTheme, true, ModuleDialogType::TIMEPICKER_DIALOG);
+    } else {
+        ModuleDialogTypeRtl::UpdateMarginIsRtl(!isRtl, margin, dialogTheme, false,
+            ModuleDialogType::TIMEPICKER_DIALOG);
+    }
+    buttonCancelNode->GetLayoutProperty()->UpdateMargin(margin);
+}
+
 void TimePickerRowPattern::OnLanguageConfigurationUpdate()
 {
     FlushAmPmFormatString();
@@ -448,6 +498,11 @@ void TimePickerRowPattern::OnLanguageConfigurationUpdate()
     auto confirmNodeLayout = confirmNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(confirmNodeLayout);
     confirmNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    auto pipeline = confirmNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
+    UpdateConfirmButtonMargin(buttonConfirmNode, dialogTheme);
     confirmNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
     auto buttonCancelNode = weakButtonCancel_.Upgrade();
@@ -457,6 +512,7 @@ void TimePickerRowPattern::OnLanguageConfigurationUpdate()
     auto cancelNodeLayout = cancelNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(cancelNodeLayout);
     cancelNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    UpdateCancelButtonMargin(buttonCancelNode, dialogTheme);
     cancelNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -1032,6 +1088,12 @@ void TimePickerRowPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto leftTotalColumnWith = 0.0f;
+    for (int32_t index = 0; index < focusKeyID_; ++index) {
+        auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(index));
+        CHECK_NULL_VOID(stackChild);
+        leftTotalColumnWith += stackChild->GetGeometryNode()->GetFrameSize().Width();
+    }
     auto childSize = host->GetChildren().size();
     auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
     CHECK_NULL_VOID(stackChild);
@@ -1044,21 +1106,18 @@ void TimePickerRowPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
-    auto frameWidth = host->GetGeometryNode()->GetFrameSize().Width();
     auto dividerSpacing = pipeline->NormalizeToPx(pickerTheme->GetDividerSpacing());
     auto pickerThemeWidth = dividerSpacing * 2;
 
     CHECK_EQUAL_VOID(childSize, 0);
-    auto centerX = (frameWidth / childSize - pickerThemeWidth) / 2 +
-                   pickerChild->GetGeometryNode()->GetFrameRect().Width() * focusKeyID_ +
-                   PRESS_INTERVAL.ConvertToPx() * 2;
+    auto centerX = (columnWidth - pickerThemeWidth) / 2 + leftTotalColumnWith + PRESS_INTERVAL.ConvertToPx() * 2;
     auto centerY =
         (host->GetGeometryNode()->GetFrameSize().Height() - dividerSpacing) / 2 + PRESS_INTERVAL.ConvertToPx();
     float piantRectWidth = (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * 2;
     float piantRectHeight = dividerSpacing - PRESS_INTERVAL.ConvertToPx() * 2;
     if (piantRectWidth > columnWidth) {
         piantRectWidth = columnWidth;
-        centerX = focusKeyID_ * columnWidth;
+        centerX = leftTotalColumnWith;
     }
     paintRect.SetRect(RectF(centerX, centerY, piantRectWidth, piantRectHeight));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
@@ -1174,8 +1233,9 @@ void TimePickerRowPattern::OnColorConfigurationUpdate()
     auto normalStyle = pickerTheme->GetOptionStyle(false, false);
     auto pickerProperty = host->GetLayoutProperty<TimePickerLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
-    pickerProperty->UpdateColor(normalStyle.GetTextColor());
-    pickerProperty->UpdateDisappearColor(disappearStyle.GetTextColor());
+    pickerProperty->UpdateColor(GetTextProperties().normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
+    pickerProperty->UpdateDisappearColor(
+        GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
     if (isPicker_) {
         return;
     }

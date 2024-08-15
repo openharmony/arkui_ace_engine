@@ -34,6 +34,7 @@ const int32_t DIVIDER_ROWS_THREE = 3;
 const int32_t MARGIN_HALF = 2;
 const int32_t BUFFER_NODE_NUMBER = 2;
 constexpr Dimension PICKER_DIALOG_MARGIN_FORM_EDGE = 24.0_vp;
+constexpr Dimension TITLE_BUTTON_HEIGHT = 32.0_vp;
 constexpr size_t ACCEPT_BUTTON_INDEX = 0;
 constexpr size_t CANCEL_BUTTON_INDEX = 1;
 } // namespace
@@ -450,6 +451,10 @@ RefPtr<FrameNode> TimePickerDialogView::CreateTitleButtonNode(const RefPtr<Frame
     margin.top = CalcLength(dialogTheme->GetDividerHeight() / MARGIN_HALF);
     margin.bottom = CalcLength(dialogTheme->GetDividerHeight() / MARGIN_HALF);
     buttonTitleNode->GetLayoutProperty()->UpdateMargin(margin);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        buttonTitleNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+            CalcSize(std::nullopt, CalcLength(TITLE_BUTTON_HEIGHT)));
+    }
     textTitleNode->MountToParent(buttonTitleNode);
     return buttonTitleNode;
 }
@@ -673,16 +678,11 @@ void TimePickerDialogView::UpdateConfirmButtonMargin(
     const RefPtr<ButtonLayoutProperty>& buttonConfirmLayoutProperty, const RefPtr<DialogTheme>& dialogTheme)
 {
     MarginProperty margin;
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
-        margin.top = CalcLength(dialogTheme->GetDividerHeight());
-        margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
-        margin.left = CalcLength(0.0_vp);
+        ModuleDialogTypeRtl::UpdateMarginIsRtl(isRtl, margin, dialogTheme, true, ModuleDialogType::TIMEPICKER_DIALOG);
     } else {
-        margin.right = CalcLength(dialogTheme->GetActionsPadding().Right());
-        margin.top = CalcLength(dialogTheme->GetActionsPadding().Bottom());
-        margin.bottom = CalcLength(dialogTheme->GetActionsPadding().Bottom());
-        margin.left = CalcLength(0.0_vp);
+        ModuleDialogTypeRtl::UpdateMarginIsRtl(isRtl, margin, dialogTheme, false, ModuleDialogType::TIMEPICKER_DIALOG);
     }
     buttonConfirmLayoutProperty->UpdateMargin(margin);
 }
@@ -705,16 +705,12 @@ void TimePickerDialogView::UpdateCancelButtonMargin(
     const RefPtr<ButtonLayoutProperty>& buttonCancelLayoutProperty, const RefPtr<DialogTheme>& dialogTheme)
 {
     MarginProperty margin;
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
-        margin.top = CalcLength(dialogTheme->GetDividerHeight());
-        margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
-        margin.right = CalcLength(0.0_vp);
+        ModuleDialogTypeRtl::UpdateMarginIsRtl(!isRtl, margin, dialogTheme, true, ModuleDialogType::TIMEPICKER_DIALOG);
     } else {
-        margin.left = CalcLength(dialogTheme->GetActionsPadding().Left());
-        margin.top = CalcLength(dialogTheme->GetActionsPadding().Bottom());
-        margin.bottom = CalcLength(dialogTheme->GetActionsPadding().Bottom());
-        margin.right = CalcLength(0.0_vp);
+        ModuleDialogTypeRtl::UpdateMarginIsRtl(!isRtl, margin, dialogTheme, false,
+            ModuleDialogType::TIMEPICKER_DIALOG);
     }
     buttonCancelLayoutProperty->UpdateMargin(margin);
 }

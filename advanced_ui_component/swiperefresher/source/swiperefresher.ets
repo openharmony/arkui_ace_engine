@@ -14,6 +14,10 @@
  */
 
 import { LengthMetrics } from '@ohos.arkui.node';
+import { common } from '@kit.AbilityKit';
+import { BusinessError } from '@kit.BasicServicesKit';
+import { hilog } from '@kit.PerformanceAnalysisKit';
+
 const LOADINGPROGRESS_SIZE = 24
 const DEFAULT_MARGIN = 16
 const ITEM_SPACE = 4
@@ -24,6 +28,29 @@ export struct SwipeRefresher {
   content: string = '';
   @Prop
   isLoading: boolean = false;
+  maxAppFontScale: number = 1;
+  isFollowingSystemFontScale: boolean = false;
+
+  aboutToAppear() {
+    try {
+      let uiContent: UIContext = this.getUIContext();
+      this.isFollowingSystemFontScale= uiContent.isFollowingSystemFontScale();
+      this.maxAppFontScale = uiContent.getMaxFontScale();
+    } catch (err) {
+      let code: number = (err as BusinessError).code;
+      let message: string = (err as BusinessError).message;
+      hilog.error(0x3900, 'Ace', `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
+    }
+  }
+
+  updateFontScale(): number {
+    let uiContent: UIContext = this.getUIContext();
+    let systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1;
+    if (!this.isFollowingSystemFontScale) {
+      return 1;
+    }
+    return Math.min(systemFontScale, this.maxAppFontScale);
+  }
 
   build() {
     Flex({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center }) {
@@ -38,6 +65,8 @@ export struct SwipeRefresher {
       Text(this.content)
         .fontColor($r('sys.color.ohos_id_color_text_secondary'))
         .fontSize($r('sys.float.ohos_id_text_size_body2'))
+        .minFontScale(1)
+        .maxFontScale(Math.min(this.updateFontScale(), 2))
         .padding({
           top: DEFAULT_MARGIN,
           bottom: DEFAULT_MARGIN

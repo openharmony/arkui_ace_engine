@@ -736,6 +736,22 @@ bool WebClientImpl::RunQuickMenu(std::shared_ptr<NWeb::NWebQuickMenuParams> para
     return delegate->RunQuickMenu(params, callback);
 }
 
+void WebClientImpl::HideHandleAndQuickMenuIfNecessary(bool hide)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->HideHandleAndQuickMenuIfNecessary(hide);
+}
+
+void WebClientImpl::ChangeVisibilityOfQuickMenu()
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->ChangeVisibilityOfQuickMenu();
+}
+
 void WebClientImpl::OnQuickMenuDismissed()
 {
     auto delegate = webDelegate_.Upgrade();

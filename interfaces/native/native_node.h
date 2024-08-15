@@ -121,6 +121,8 @@ typedef enum {
     ARKUI_NODE_GRID,
     /** Grid item. */
     ARKUI_NODE_GRID_ITEM,
+    /** Custom_Span. */
+    ARKUI_NODE_CUSTOM_SPAN,
 } ArkUI_NodeType;
 
 /**
@@ -1647,7 +1649,21 @@ typedef enum {
      *
      */
     NODE_UNIQUE_ID = 95,
-    
+
+    /**
+     * @brief Set the current component system focus box style.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].f32: The distance between the focus box and the edge of the component. \n
+     * Positive numbers represent the outer side, negative numbers represent the inner side. \n
+     * Percentage is not supported. \n
+     * .value[1].f32: Focus box width. Negative numbers and percentages are not supported. \n
+     * .value[2].u32: Focus box color. \n
+     * \n
+     *
+     */
+    NODE_FOCUS_BOX = 96,
+
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
@@ -2007,6 +2023,18 @@ typedef enum {
     * .object indicates ArkUI_StyledString formatted string data. The parameter type is {@link ArkUI_StyledString}. \n
     */
     NODE_TEXT_CONTENT_WITH_STYLED_STRING,
+
+    /**
+     * @brief 设置文本居中显示。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：文本是否居中，默认值false。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：文本是否居中。\n
+     *
+     */
+    NODE_TEXT_HALF_LEADING = 1029,
 
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
@@ -5316,7 +5344,7 @@ typedef enum {
      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
      * {@link ArkUI_NodeComponentEvent}. \n
      * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
-     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: corresponds to {@link ArkUI_PreViewDragStatus}. \n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: corresponds to {@link ArkUI_PreDragStatus}. \n
      */
     NODE_ON_PRE_DRAG = 14,
     /**
@@ -6036,7 +6064,8 @@ typedef enum {
      * settings, such as keyboard and mouse operations. \n
      * 2. Scrolling can be initiated by calling the controller API. \n
      * 3. The out-of-bounds bounce effect is supported. \n
-     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is {@link ArkUI_NodeComponentEvent}. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
      * {@link ArkUI_NodeComponentEvent} contains two parameters: \n
      * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: scroll offset of each frame. The offset is positive when the list
      * is scrolled up and negative when the list is scrolled down. \n
@@ -7117,6 +7146,45 @@ ArkUI_NodeHandle OH_ArkUI_NodeCustomEvent_GetNodeHandle(ArkUI_NodeCustomEvent* e
 ArkUI_NodeCustomEventType OH_ArkUI_NodeCustomEvent_GetEventType(ArkUI_NodeCustomEvent* event);
 
 /**
+* @brief 通过自定义组件事件获取自定义段落组件的测量信息。
+*
+* @param event 自定义组件事件。
+* @param info 需要获取的测量信息。
+* @return 错误码。
+*         {@link ARKUI_ERROR_CODE_NO_ERROR} 成功。
+*         {@link ARKUI_ERROR_CODE_PARAM_INVALID} 函数参数异常。
+* @since 12
+*/
+int32_t OH_ArkUI_NodeCustomEvent_GetCustomSpanMeasureInfo(
+    ArkUI_NodeCustomEvent* event, ArkUI_CustomSpanMeasureInfo* info);
+
+/**
+* @brief 通过自定义组件事件设置自定义段落的度量指标。
+*
+* @param event 自定义组件事件。
+* @param metrics 需要获取的度量指标信息。
+* @return 错误码。
+*         {@link ARKUI_ERROR_CODE_NO_ERROR} 成功。
+*         {@link ARKUI_ERROR_CODE_PARAM_INVALID} 函数参数异常。
+* @since 12
+*/
+int32_t OH_ArkUI_NodeCustomEvent_SetCustomSpanMetrics(
+    ArkUI_NodeCustomEvent* event, ArkUI_CustomSpanMetrics* metrics);
+
+/**
+* @brief 通过自定义组件事件获取自定义段落组件的绘制信息。
+*
+* @param event 自定义组件事件。
+* @param event 需要获取的绘制信息。
+* @return 错误码。
+*         {@link ARKUI_ERROR_CODE_NO_ERROR} 成功。
+*         {@link ARKUI_ERROR_CODE_PARAM_INVALID} 函数参数异常。
+* @since 12
+*/
+int32_t OH_ArkUI_NodeCustomEvent_GetCustomSpanDrawInfo(
+    ArkUI_NodeCustomEvent* event, ArkUI_CustomSpanDrawInfo* info);
+
+/**
  * @brief Adds a component to a node content.
  *
  * @param content Indicates the pointer to the node content instance.
@@ -7326,6 +7394,74 @@ int32_t OH_ArkUI_List_CloseAllSwipeActions(ArkUI_NodeHandle node, void* userData
 * @since 12
 */
 ArkUI_ContextHandle OH_ArkUI_GetContextByNode(ArkUI_NodeHandle node);
+
+/**
+ * @brief The event called when the system color mode changes.
+ *        Only one system color change callback can be registered for the same component.
+ *
+ * @param node Indicates the target node.
+ * @param userData Indicates the custom data to be saved.
+ * @param onColorModeChange Callback Events.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ *         {@link ARKUI_ERROR_CODE_ATTRIBUTE_OR_EVENT_NOT_SUPPORTED} The component does not support this event.
+ * @since 12
+ */
+int32_t OH_ArkUI_RegisterSystemColorModeChangeEvent(
+    ArkUI_NodeHandle node, void* userData, void (*onColorModeChange)(ArkUI_SystemColorMode colorMode, void* userData));
+
+/**
+ * @brief Unregister the event callback when the system color mode changes.
+ *
+ * @param node Indicates the target node.
+ * @since 12
+ */
+void OH_ArkUI_UnregisterSystemColorModeChangeEvent(ArkUI_NodeHandle node);
+
+/**
+ * @brief The event called when the system font style changes.
+ *        Only one system font change callback can be registered for the same component.
+ *
+ * @param node Indicates the target node.
+ * @param userData Indicates the custom data to be saved.
+ * @param onFontStyleChange Callback Events.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ *         {@link ARKUI_ERROR_CODE_ATTRIBUTE_OR_EVENT_NOT_SUPPORTED} The component does not support this event.
+ * @since 12
+ */
+int32_t OH_ArkUI_RegisterSystemFontStyleChangeEvent(ArkUI_NodeHandle node, void* userData,
+    void (*onFontStyleChange)(ArkUI_SystemFontStyleEvent* event, void* userData));
+
+/**
+ * @brief Unregister the event callback when the system font style changes.
+ *
+ * @param node Indicates the target node.
+ * @since 12
+ */
+void OH_ArkUI_UnregisterSystemFontStyleChangeEvent(ArkUI_NodeHandle node);
+
+/**
+ * @brief Retrieve the font size value for system font change events.
+ *
+ * @param event Indicates a pointer to the current system font change event.
+ * @return Updated system font size scaling factor. Default value: 1.0.
+ *         -1 indicates a retrieval error.
+ * @since 12
+ */
+float OH_ArkUI_SystemFontStyleEvent_GetFontSizeScale(const ArkUI_SystemFontStyleEvent* event);
+
+/**
+ * @brief Retrieve the font thickness values for system font change events.
+ *
+ * @param event Indicates a pointer to the current system font change event.
+ * @return The updated system font thickness scaling factor. Default value: 1.0.
+ *         -1 indicates a retrieval error.
+ * @since 12
+ */
+float OH_ArkUI_SystemFontStyleEvent_GetFontWeightScale(const ArkUI_SystemFontStyleEvent* event);
 
 #ifdef __cplusplus
 };

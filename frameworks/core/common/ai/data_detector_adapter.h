@@ -80,7 +80,7 @@ public:
         aiDetectInitialized_ = false;
     }
     bool ShowAIEntityMenu(const AISpan& aiSpan, const NG::RectF& aiRect, const RefPtr<NG::FrameNode>& targetNode,
-        bool isShowSelectText = true);
+        bool isShowCopy = true, bool isShowSelectText = true);
     void ResponseBestMatchItem(const AISpan& aiSpan);
 
 private:
@@ -97,6 +97,7 @@ private:
     bool hasClickedAISpan_ = false;
     bool pressedByLeftMouse_ = false;
     bool typeChanged_ = false;
+    bool hasClickedMenuOption_ = false;
     AISpan clickedAISpan_;
     std::string textDetectTypes_;
     std::string textForAI_;

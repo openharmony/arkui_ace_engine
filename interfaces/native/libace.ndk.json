@@ -185,6 +185,70 @@
     },
     {
         "first_introduced": "12",
+        "name": "OH_ArkUI_GetResponseRecognizersFromInterruptInfo"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_SetGestureRecognizerEnabled"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetGestureRecognizerEnabled"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetGestureRecognizerState"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetGestureEventTargetInfo"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GestureEventTargetInfo_IsScrollBegin"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GestureEventTargetInfo_IsScrollEnd"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetPanGestureDirectionMask"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_IsBuiltInGesture"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetGestureTag"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetGestureBindNodeId"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_IsGestureRecognizerValid"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ParallelInnerGestureEvent_GetUserData"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ParallelInnerGestureEvent_GetCurrentRecognizer"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ParallelInnerGestureEvent_GetConflictRecognizers"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_SetArkUIGestureRecognizerDisposeNotify"
+    },
+    {
+        "first_introduced": "12",
         "name": "OH_NativeXComponent_RegisterUIInputEventCallback"
     },
     {
@@ -1765,11 +1829,35 @@
     },
     {
         "first_introduced": "12",
+        "name": "OH_ArkUI_RegisterSystemColorModeChangeEvent"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_UnregisterSystemColorModeChangeEvent"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_RegisterSystemFontStyleChangeEvent"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_UnregisterSystemFontStyleChangeEvent"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_SystemFontStyleEvent_GetFontSizeScale"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_SystemFontStyleEvent_GetFontWeightScale"
+    },
+    {
+        "first_introduced": "12",
         "name": "OH_ArkUI_NodeEvent_GetDragEvent"
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_NodeEvent_GetPreviewDragStatus"
+        "name": "OH_ArkUI_NodeEvent_GetPreDragStatus"
     },
     {
         "first_introduced": "12",
@@ -1778,6 +1866,10 @@
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_DragEvent_SetSuggestedDropOperation"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragEvent_GetDropOperation"
     },
     {
         "first_introduced": "12",
@@ -1982,5 +2074,69 @@
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_DialogDismissEvent_GetDismissReason"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeCustomEvent_GetCustomSpanMeasureInfo"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeCustomEvent_SetCustomSpanMetrics"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeCustomEvent_GetCustomSpanDrawInfo"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CustomSpanMeasureInfo_Create"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CustomSpanMeasureInfo_Dispose"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CustomSpanMeasureInfo_GetFontSize"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CustomSpanMetrics_Create"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CustomSpanMetrics_Dispose"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CustomSpanMetrics_SetWidth"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CustomSpanMetrics_SetHeight"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CustomSpanDrawInfo_Create"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CustomSpanDrawInfo_Dispose"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CustomSpanDrawInfo_GetXOffset"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CustomSpanDrawInfo_GetLineTop"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CustomSpanDrawInfo_GetLineBottom"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CustomSpanDrawInfo_GetBaseline"
     }
 ]

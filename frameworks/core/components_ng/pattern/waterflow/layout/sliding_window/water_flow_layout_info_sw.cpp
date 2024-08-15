@@ -156,6 +156,11 @@ float WaterFlowLayoutInfoSW::CalcOverScroll(float mainSize, float delta) const
 
 namespace {
 using Lane = WaterFlowLayoutInfoSW::Lane;
+inline bool SectionEmpty(const std::vector<WaterFlowLayoutInfoSW::Lane>& section)
+{
+    return section.empty() ||
+           std::all_of(section.begin(), section.end(), [](const auto& lane) { return lane.items_.empty(); });
+}
 inline float SectionEndPos(const std::vector<WaterFlowLayoutInfoSW::Lane>& section)
 {
     return std::max_element(section.begin(), section.end(), [](const Lane& left, const Lane& right) {
@@ -177,7 +182,7 @@ float WaterFlowLayoutInfoSW::EndPos() const
         return endPos_;
     }
     for (auto it = lanes_.rbegin(); it != lanes_.rend(); ++it) {
-        if (std::all_of(it->begin(), it->end(), [](const auto& lane) { return lane.items_.empty(); })) {
+        if (SectionEmpty(*it)) {
             continue;
         }
         return SectionEndPos(*it);
@@ -191,7 +196,7 @@ float WaterFlowLayoutInfoSW::StartPos() const
         return startPos_;
     }
     for (const auto& section : lanes_) {
-        if (std::all_of(section.begin(), section.end(), [](const auto& lane) { return lane.items_.empty(); })) {
+        if (SectionEmpty(section)) {
             continue;
         }
         return SectionStartPos(section);
@@ -228,7 +233,7 @@ int32_t WaterFlowLayoutInfoSW::GetMainCount() const
         return 0;
     }
     for (const auto& section : lanes_) {
-        if (std::all_of(section.begin(), section.end(), [](const auto& lane) { return lane.items_.empty(); })) {
+        if (SectionEmpty(section)) {
             continue;
         }
         return static_cast<int32_t>(
@@ -440,21 +445,34 @@ bool WaterFlowLayoutInfoSW::IsMisaligned() const
     }
 
     const int32_t startIdx = StartIndex();
-    const int32_t startSeg = GetSegment(startIdx);
+    int32_t startSeg = GetSegment(startIdx);
     if (startSeg < 0) {
         return false;
     }
     if (startSeg == 0) {
         if (startIdx > 0) {
-            return false;
+            ++startSeg;
         }
     } else if (startIdx != segmentTails_[startSeg - 1] + 1) {
-        return false;
+        ++startSeg;
     }
 
-    const bool laneNotAligned = std::any_of(lanes_[startSeg].begin(), lanes_[startSeg].end(),
-        [this](const auto& lane) { return !NearEqual(lane.startPos, StartPos()); });
-    return laneNotAligned || lanes_[startSeg][0].items_.front().idx != startIdx;
+    const int32_t endSeg = GetSegment(EndIndex());
+    for (int32_t i = startSeg; i <= endSeg; ++i) {
+        if (SectionEmpty(lanes_[i])) {
+            continue;
+        }
+        const float startPos = SectionStartPos(lanes_[i]);
+        if (std::any_of(lanes_[i].begin(), lanes_[i].end(),
+                        [&startPos](const auto& lane) { return !NearEqual(lane.startPos, startPos); })) {
+            return true;
+        }
+        const int32_t sectionStart = (i == 0) ? 0 : segmentTails_[i - 1] + 1;
+        if (sectionStart != lanes_[i][0].items_.front().idx) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void WaterFlowLayoutInfoSW::InitSegments(const std::vector<WaterFlowSections::Section>& sections, int32_t start)
@@ -477,6 +495,10 @@ void WaterFlowLayoutInfoSW::PrepareSectionPos(int32_t idx, bool fillBack)
     int32_t prevSeg = GetSegment(fillBack ? idx - 1 : idx + 1);
     int32_t curSeg = GetSegment(idx);
     if (prevSeg == curSeg) {
+        return;
+    }
+    if (SectionEmpty(lanes_[prevSeg])) {
+        // previous section is invalid
         return;
     }
     // prepare sections below
@@ -626,7 +648,7 @@ void WaterFlowLayoutInfoSW::NotifyDataChange(int32_t index, int32_t count)
     if (!PrepareNewStartIndex()) {
         return;
     }
-    //更新的index是否在newStartIndex_上方、是否会影响newStartIndex_
+    // 更新的index是否在newStartIndex_上方、是否会影响newStartIndex_
     if (index >= newStartIndex_ || (count < 0 && newStartIndex_ <= index - count - 1)) {
         newStartIndex_ = INVALID_NEW_START_INDEX;
         return;

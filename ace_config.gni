@@ -38,11 +38,17 @@ declare_args() {
   # Enable atomic for building.
   ace_engine_feature_enable_atomic = false
 
+  # Set Instruction Sched Model
+  ace_engine_feature_sched_model = ""
+
   # Enable test coverage
   ace_engine_feature_enable_coverage = false
 
   # Enalbe point light
   ace_engine_feature_enable_point_light = true
+
+  # Set atomicservice basic engine so path
+  ace_engine_feature_asbng_path = ""
 
   # Disable in OH Core
   ace_engine_standard_fonts_enable = true
@@ -220,7 +226,7 @@ if (defined(global_parts_info.multimedia_camera_framework)) {
   enable_camera_framework = false
 }
 
-if (defined(global_parts_info.multimedia_player_framework)) {
+if (defined(global_parts_info.multimedia_player_framework) || is_arkui_x) {
   enable_player_framework = true
   ace_common_defines += [ "PLAYER_FRAMEWORK_EXISTS" ]
 } else {
@@ -254,6 +260,12 @@ if (defined(global_parts_info) &&
   uiservice_xcollie_enable = true
 } else {
   uiservice_xcollie_enable = false
+}
+
+if (ace_engine_feature_asbng_path == "") {
+  ace_engine_feature_asbng_path_enable = false
+} else {
+  ace_engine_feature_asbng_path_enable = true
 }
 
 ace_platforms = []

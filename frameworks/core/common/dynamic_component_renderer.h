@@ -56,7 +56,8 @@ public:
     virtual void CreateContent() = 0;
     virtual void DestroyContent() = 0;
 
-    virtual void UpdateViewportConfig(const SizeF& size, float density, int32_t orientation) = 0;
+    virtual void UpdateViewportConfig(
+        const SizeF& size, float density, int32_t orientation, AnimationOption animationOpt) = 0;
 
     virtual void TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) = 0;
     virtual bool TransferKeyEvent(const KeyEvent& event) = 0;

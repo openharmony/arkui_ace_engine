@@ -199,4 +199,16 @@ HWTEST_F(FocusBoxTestNg, FocusBoxTest009, TestSize.Level1)
     focusBox->ToJsonValue(*focusBox);
     EXPECT_EQ(RESULT_SUCCESS_ONE, "sucess1");
 }
+
+/**
+ * @tc.name: FocusBoxTest010
+ * @tc.desc: Create ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusBoxTestNg, FocusBoxTest010, TestSize.Level1)
+{
+    auto focusBox = AceType::MakeRefPtr<FocusBox>();
+    focusBox->ToJsonValue(*focusBox);
+    EXPECT_EQ(RESULT_SUCCESS_ONE, "sucess1");
+}
 } // namespace OHOS::Ace::NG

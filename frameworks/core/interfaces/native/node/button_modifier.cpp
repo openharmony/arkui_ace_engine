@@ -651,5 +651,19 @@ const ArkUIButtonModifier* GetButtonModifier()
         SetButtonOptions, ResetButtonOptions, SetCreateWithLabel };
     return &modifier;
 }
+
+const CJUIButtonModifier* GetCJUIButtonModifier()
+{
+    static const CJUIButtonModifier modifier = { SetButtonLabel, ResetButtonLabel, SetButtonType, ResetButtonType,
+        SetButtonStateEffect, ResetButtonStateEffect, SetButtonFontColor, ResetButtonFontColor, SetButtonFontSize,
+        ResetButtonFontSize, SetButtonFontWeight, ResetButtonFontWeight, SetButtonFontStyle, ResetButtonFontStyle,
+        SetButtonFontFamily, ResetButtonFontFamily, SetButtonLabelStyle, ResetButtonLabelStyle,
+        SetButtonBackgroundColor, ResetButtonBackgroundColor, SetButtonBorderRadius, ResetButtonBorderRadius,
+        SetButtonFontWeightEnum, SetButtonSize, ResetButtonSize, GetButtonLabel, GetButtonFontSize, GetButtonFontWeight,
+        GetButtonFontColor, SetButtonRole, ResetButtonRole, SetButtonStyle, ResetButtonStyle, SetButtonControlSize,
+        ResetButtonControlSize, GetButtonType, SetButtonLabelWithCheck, ResetButtonLabelWithCheck,
+        SetButtonOptions, ResetButtonOptions, SetCreateWithLabel };
+    return &modifier;
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

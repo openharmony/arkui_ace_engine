@@ -15,10 +15,6 @@
 
 #include "frameworks/bridge/common/dom/dom_picker_base.h"
 
-#include "base/utils/linear_map.h"
-#include "base/utils/string_utils.h"
-#include "base/utils/utils.h"
-#include "frameworks/bridge/common/dom/dom_reflect_map.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {
