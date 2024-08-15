@@ -132,6 +132,7 @@ public:
 
     void SetPointColor(const Color& color)
     {
+        hasPointColor_ = true;
         animatePointColor_->Set(LinearColor(color));
     }
 
@@ -308,6 +309,7 @@ private:
     RefPtr<PropertyBool> isHover_;
     RefPtr<PropertyBool> isFocused_;
     RefPtr<PropertyBool> isOn_;
+    bool hasPointColor_ = false;
     RefPtr<AnimatablePropertyOffsetF> offset_;
     RefPtr<AnimatablePropertySizeF> size_;
     RefPtr<PropertyBool> enabled_;
