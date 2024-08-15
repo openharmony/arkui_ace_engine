@@ -265,7 +265,7 @@ void TimePickerColumnPattern::HandleCrownEndEvent(const CrownEvent& event)
         InnerHandleScroll(LessNotEqual(scrollDelta_, 0.0), true);
         scrollDelta_ = scrollDelta_ - std::abs(shiftDistance) * (dir == TimePickerScrollDirection::UP ? -1 : 1);
 #ifdef SUPPORT_DIGITAL_CROWN
-        VibratorImpl::StartVibraFeedback(OHOS::Ace::NG::WATCHHAPTIC_CROWN_STRENGTH1, OHOS::Ace::NG::VIBRATOR_TYPE_ONE);
+        VibratorUtils::StartVibraFeedback(OHOS::Ace::NG::WATCHHAPTIC_CROWN_STRENGTH1);
 #endif
     }
     CreateAnimation(scrollDelta_, 0.0);
@@ -457,8 +457,7 @@ void TimePickerColumnPattern::FlushCurrentOptions(bool isDown, bool isUpateTextC
         textNode->MarkModifyDone();
         textNode->MarkDirtyNode();
 #ifdef SUPPORT_DIGITAL_CROWN
-        VibratorImpl::StartVibraFeedback(OHOS::Ace::NG::WATCHHAPTIC_CROWN_STRENGTH1,
-            OHOS::Ace::NG::VIBRATOR_TYPE_ONE);
+        VibratorUtils::StartVibraFeedback(OHOS::Ace::NG::WATCHHAPTIC_CROWN_STRENGTH1);
 #endif
     }
 }
@@ -1208,7 +1207,7 @@ void TimePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
         InnerHandleScroll(LessNotEqual(dragDelta, 0.0), true);
         dragDelta = dragDelta % static_cast<int>(std::abs(shiftDistance));
 #ifdef SUPPORT_DIGITAL_CROWN
-        VibratorImpl::StartVibraFeedback(OHOS::Ace::NG::WATCHHAPTIC_CROWN_STRENGTH1, OHOS::Ace::NG::VIBRATOR_TYPE_ONE);
+        VibratorUtils::StartVibraFeedback(OHOS::Ace::NG::WATCHHAPTIC_CROWN_STRENGTH1);
 #endif
         if (!NearZero(dragDelta) && !CanMove(LessNotEqual(dragDelta, 0))) {
             dragDelta = 0.0;

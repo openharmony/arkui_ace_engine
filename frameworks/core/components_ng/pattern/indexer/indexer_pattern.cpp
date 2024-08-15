@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
 
-#include "adapter/ohos/entrance/vibrator/vibrator_impl.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/log/dump_log.h"
@@ -24,6 +23,7 @@
 #include "base/utils/utils.h"
 #include "core/animation/animator.h"
 #include "core/common/container.h"
+#include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/popup_param.h"
@@ -212,7 +212,7 @@ void IndexerPattern::BuildArrayValueItems()
 void IndexerPattern::BuildFullArrayValue()
 {
     arrayValue_.clear();
-    
+
     for (auto indexerLetter : fullArrayValue_) {
         arrayValue_.push_back(std::pair(indexerLetter, false));
     }
@@ -277,7 +277,7 @@ void IndexerPattern::ApplySevenPlusOneMode(int32_t fullArraySize)
     }
 
     auto lastPushedIndex = sharpItemCount_;
-    
+
     for (int32_t groupIndex = 0; groupIndex < gmin; groupIndex++) { // push groups of minimum items count
         int32_t firstIndex = lastPushedIndex + 1;
         int32_t lastIndex = firstIndex + cmin - 1;
@@ -809,7 +809,7 @@ void IndexerPattern::ApplyIndexChanged(
     if (selectChanged) {
         ShowBubble();
         if (enableHapticFeedback_) {
-            VibratorImpl::StartVibraFeedback();
+            VibratorUtils::StartVibraFeedback();
         }
     }
 }

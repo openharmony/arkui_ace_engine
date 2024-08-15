@@ -32,7 +32,7 @@
 #include "core/components_ng/pattern/text_picker/toss_animation_controller.h"
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
-#include "adapter/ohos/entrance/vibrator/vibrator_impl.h"
+#include "core/common/vibrator/vibrator_utils.h"
 #endif
 #include "core/components_ng/pattern/picker_utils/picker_column_pattern_utils.h"
 
