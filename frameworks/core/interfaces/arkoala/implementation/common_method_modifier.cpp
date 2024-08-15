@@ -13,17 +13,31 @@
  * limitations under the License.
  */
 
-#include "arkoala_api_generated.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/components_ng/pattern/text/span_model_ng.h"
+#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/generated/interface/node_api.h"
+#include "base/log/log_wrapper.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CommonMethodModifier {
 void WidthImpl(Ark_NativePointer node,
                const Ark_Length* value)
 {
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto result = Converter::ConvertOrDefault(*value, CalcLength());
+    ViewAbstract::SetWidth(frameNode, result);
 }
 void HeightImpl(Ark_NativePointer node,
                 const Ark_Length* value)
 {
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto result = Converter::ConvertOrDefault(*value, CalcLength());
+    ViewAbstract::SetHeight(frameNode, result);
 }
 void DrawModifierImpl(Ark_NativePointer node,
                       const Type_CommonMethod_drawModifier_Arg0* modifier)
@@ -87,6 +101,13 @@ void BackgroundImpl(Ark_NativePointer node,
 void BackgroundColorImpl(Ark_NativePointer node,
                          const ResourceColor* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto color = Converter::OptConvert<Color>(*value);
+    if (color) {
+        ViewAbstract::SetBackgroundColor(frameNode, color.value());
+    } else {
+        LOGI("#### CommonMethod::BackgroundColor impl: color is empty");
+    }
 }
 void PixelRoundImpl(Ark_NativePointer node,
                     const Ark_PixelRoundPolicy* value)
@@ -198,6 +219,77 @@ void ForegroundColorImpl(Ark_NativePointer node,
 void OnClickImpl(Ark_NativePointer node,
                  Ark_Function event)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [frameNode](GestureEvent& info) {
+        Ark_ClickEvent onClick;
+
+        Offset globalOffset = info.GetGlobalLocation();
+        Offset localOffset = info.GetLocalLocation();
+        Offset screenOffset = info.GetScreenLocation();
+
+        onClick.axisHorizontal.tag = Ark_Tag::ARK_TAG_UNDEFINED;
+        onClick.axisVertical.tag = Ark_Tag::ARK_TAG_UNDEFINED;
+        onClick.displayX.tag = Ark_Tag::ARK_TAG_FLOAT32;
+        onClick.displayX.f32 = static_cast<float>(
+                PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
+
+        onClick.displayY.tag = Ark_Tag::ARK_TAG_FLOAT32;
+        onClick.displayY.f32 = static_cast<float>(
+                PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
+
+        onClick.pressure.tag = Ark_Tag::ARK_TAG_FLOAT32;
+        onClick.pressure.f32 = 0.0f;
+        onClick.preventDefault.id = 0;
+
+        onClick.screenX.tag = Ark_Tag::ARK_TAG_FLOAT32;
+        onClick.screenX.f32 = static_cast<float>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
+
+        onClick.screenY.tag = Ark_Tag::ARK_TAG_FLOAT32;
+        onClick.screenY.f32 = static_cast<float>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
+
+        onClick.source = static_cast<int32_t>(info.GetSourceDevice());
+
+        onClick.sourceTool = 0;
+        onClick.target.area.globalPosition.x.tag = Ark_Tag::ARK_TAG_UNDEFINED;
+        onClick.target.area.globalPosition.y.tag = Ark_Tag::ARK_TAG_UNDEFINED;
+        onClick.target.area.height.type = 0;
+        onClick.target.area.height.unit = 1;
+        onClick.target.area.height.value = 0;
+        onClick.target.area.width.type = 0;
+        onClick.target.area.width.unit = 1;
+        onClick.target.area.width.value = 0;
+        onClick.target.area.position.x.tag = Ark_Tag::ARK_TAG_UNDEFINED;
+        onClick.target.area.position.y.tag = Ark_Tag::ARK_TAG_UNDEFINED;
+
+        onClick.tiltX.tag = Ark_Tag::ARK_TAG_FLOAT32;
+        onClick.tiltX.f32 = 0;
+        onClick.tiltY.tag = Ark_Tag::ARK_TAG_FLOAT32;
+        onClick.tiltY.f32 = 0;
+        
+        onClick.timestamp.tag = Ark_Tag::ARK_TAG_FLOAT32;
+        onClick.timestamp.f32 = static_cast<float>(info.GetTimeStamp().time_since_epoch().count());
+
+        onClick.windowX.tag = Ark_Tag::ARK_TAG_FLOAT32;
+        onClick.windowX.f32 = static_cast<float>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
+
+        onClick.windowY.tag = Ark_Tag::ARK_TAG_FLOAT32;
+        onClick.windowY.f32 = static_cast<float>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
+
+        onClick.x.tag = Ark_Tag::ARK_TAG_FLOAT32;
+        onClick.x.f32 = static_cast<float>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
+
+        onClick.y.tag = Ark_Tag::ARK_TAG_FLOAT32;
+        onClick.y.f32 = static_cast<float>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
+
+        GetFullAPI()->getEventsAPI()->getCommonMethodEventsReceiver()->onClick(frameNode->GetId(), onClick);
+    };
+
+    if (frameNode->GetTag() == "Span") {
+        SpanModelNG::SetOnClick(reinterpret_cast<UINode *>(node), std::move(onEvent));
+    } else {
+        ViewAbstract::SetOnClick(frameNode, std::move(onEvent));
+    }
 }
 void OnHoverImpl(Ark_NativePointer node,
                  Ark_Function event)
