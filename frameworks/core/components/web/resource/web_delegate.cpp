@@ -7087,6 +7087,7 @@ void WebDelegate::OnTextSelected()
     auto delegate = WeakClaim(this).Upgrade();
     CHECK_NULL_VOID(delegate);
     if (delegate->nweb_) {
+        OnContextMenuHide("");
         return delegate->nweb_->OnTextSelected();
     }
 }
