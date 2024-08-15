@@ -131,9 +131,9 @@ void ConnectServerManager::InitConnectServer()
 {
 #if !defined(IOS_PLATFORM)
 #if defined(ANDROID_PLATFORM)
-    const std::string soDir = "libconnectserver_debugger.so";
+    const std::string soDir = "libark_connect_inspector.so";
 #else
-    const std::string soDir = "libconnectserver_debugger.z.so";
+    const std::string soDir = "libark_connect_inspector.z.so";
 #endif // ANDROID_PLATFORM
     handlerConnectServerSo_ = dlopen(soDir.c_str(), RTLD_LAZY);
     if (handlerConnectServerSo_ == nullptr) {
@@ -156,7 +156,7 @@ void ConnectServerManager::InitConnectServer()
 
 void ConnectServerManager::StartConnectServerWithSocketPair(int32_t socketFd)
 {
-    handlerConnectServerSo_ = dlopen("libconnectserver_debugger.z.so", RTLD_LAZY);
+    handlerConnectServerSo_ = dlopen("libark_connect_inspector.z.so", RTLD_LAZY);
     CHECK_NULL_VOID(handlerConnectServerSo_);
 
     auto startServerForSocketPair =
