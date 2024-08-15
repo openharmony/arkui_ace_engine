@@ -1982,14 +1982,7 @@ void TextFieldPattern::InitDragDropCallBack()
                            const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
-        if (pattern->GetIsPreviewText()) {
-#if defined(ENABLE_STANDARD_INPUT)
-            MiscServices::InputMethodController::GetInstance()->OnSelectionChange(
-                StringUtils::Str8ToStr16(""), 0, 0);
-#endif
-            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield onDragEnter when has previewText");
-            pattern->FinishTextPreview();
-        }
+        pattern->ResetPreviewTextState();
         pattern->showSelect_ = false;
         if (pattern->dragStatus_ == DragStatus::ON_DROP) {
             pattern->dragStatus_ = DragStatus::NONE;
@@ -2540,6 +2533,7 @@ void TextFieldPattern::CheckIfNeedToResetKeyboard()
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d Keyboard type %{public}d changed to %{public}d",
             tmpHost->GetId(), (int)keyboard_, layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED));
         keyboard_ = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
+        ResetPreviewTextState();
         needToResetKeyboard = true;
     }
     if (!needToResetKeyboard && action_ != TextInputAction::UNSPECIFIED) {
@@ -7750,29 +7744,24 @@ void TextFieldPattern::FinishTextPreviewOperation()
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "input state now is not at previewing text");
         return;
     }
-
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-
     if (layoutProperty->HasMaxLength()) {
         int32_t len = static_cast<int32_t>(contentController_->GetWideText().length());
         showCountBorderStyle_ = len >
             static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>()));
         HandleCountStyle();
     }
-
     auto start = GetPreviewTextStart();
     auto end = GetPreviewTextEnd();
     auto previewValue = GetPreviewTextValue();
     hasPreviewText_ = false;
-
     auto originLength = static_cast<int32_t>(contentController_->GetWideText().length()) - (end - start);
     contentController_->ReplaceSelectedValue(start, end, previewValue);
     int32_t caretMoveLength = abs(static_cast<int32_t>(contentController_->GetWideText().length()) - originLength);
     selectController_->UpdateCaretIndex(start + caretMoveLength);
-
     UpdateEditingValueToRecord();
     if (HasFocus()) {
         cursorVisible_ = true;
@@ -7781,11 +7770,9 @@ void TextFieldPattern::FinishTextPreviewOperation()
         cursorVisible_ = false;
         StopTwinkling();
     }
- 
     bodyTextInPreivewing_ = "";
     previewTextStart_ = PREVIEW_TEXT_RANGE_DEFAULT;
     previewTextEnd_ = PREVIEW_TEXT_RANGE_DEFAULT;
-
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
@@ -7831,7 +7818,7 @@ bool TextFieldPattern::NeedDrawPreviewText()
     auto paintStart = paintProperty->GetPreviewTextStart();
     auto paintEnd =paintProperty->GetPreviewTextEnd();
     if (!GetIsPreviewText()) {
-        if (!paintStart.has_value() || paintEnd.has_value()) {
+        if (!paintStart.has_value() || !paintEnd.has_value()) {
             paintProperty->UpdatePreviewTextStart(caretInfo.index);
             paintProperty->UpdatePreviewTextEnd(caretInfo.index);
             return false;
@@ -7914,6 +7901,20 @@ void TextFieldPattern::CalculatePreviewingTextMovingLimit(const Offset& touchOff
             }
         }
     }
+}
+
+void TextFieldPattern::ResetPreviewTextState()
+{
+    if (!GetIsPreviewText()) {
+        return;
+    }
+#if defined(ENABLE_STANDARD_INPUT)
+    MiscServices::InputMethodController::GetInstance()->OnSelectionChange(
+        StringUtils::Str8ToStr16(""), 0, 0);
+    UpdateCaretInfoToController(true);
+#endif
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield onDragEnter when has previewText");
+    FinishTextPreview();
 }
 
 void TextFieldPattern::SetShowKeyBoardOnFocus(bool value)

@@ -1658,6 +1658,7 @@ private:
     bool IsContentRectNonPositive();
     bool IsHandleDragging();
     void ReportEvent();
+    void ResetPreviewTextState();
 
     RectF frameRect_;
     RectF textRect_;
