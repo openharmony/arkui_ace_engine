@@ -16,36 +16,13 @@
 #ifndef FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_REFRESH_REFRESH_TEST_NG_H
 #define FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_REFRESH_REFRESH_TEST_NG_H
 
-#include "gtest/gtest.h"
-
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
+#include "test/unittest/core/pattern/test_ng.h"
 #define private public
 #define protected public
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/unittest/core/pattern/test_ng.h"
-
-#include "core/components/common/layout/constants.h"
-#include "core/components/refresh/refresh_theme.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/pattern/refresh/refresh_event_hub.h"
-#include "core/components_ng/pattern/refresh/refresh_layout_property.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
-#include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
-#include "core/components_ng/pattern/text/text_model_ng.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "frameworks/core/components_ng/pattern/loading_progress/loading_progress_paint_property.h"
-#include "frameworks/core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
-#include "frameworks/core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;

@@ -12,7 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "test/unittest/core/pattern/waterflow/water_flow_test_ng.h"
+
+#include "water_flow_test_ng.h"
+
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {

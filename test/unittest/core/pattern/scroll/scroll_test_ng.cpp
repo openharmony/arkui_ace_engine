@@ -15,6 +15,17 @@
 
 #include "scroll_test_ng.h"
 
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
+#include "core/components/common/layout/grid_system_manager.h"
+#include "core/components/scroll/scroll_bar_theme.h"
+#include "core/components_ng/pattern/linear_layout/column_model_ng.h"
+#include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
+#include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
+
 namespace OHOS::Ace::NG {
 void ScrollTestNg::SetUpTestSuite()
 {
