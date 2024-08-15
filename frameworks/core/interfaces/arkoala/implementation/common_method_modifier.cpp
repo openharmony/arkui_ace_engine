@@ -151,8 +151,7 @@ void MarginImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     PaddingProperty indents;
-    switch (value->selector)
-    {
+    switch (value->selector) {
         case CASE_0:
             indents.left = Converter::OptConvert<CalcLength>(value->value0.left);
             indents.top = Converter::OptConvert<CalcLength>(value->value0.top);
@@ -714,26 +713,25 @@ void PositionImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     switch (value->selector) {
-        case 0:
-        {
+        case CASE_0: {
             auto x = Converter::ConvertOrDefault(value->value0.x, Dimension());
             auto y = Converter::ConvertOrDefault(value->value0.y, Dimension());
             ViewAbstract::SetPosition(frameNode, { x, y });
             break;
         }
-        case 1:
-        {
+        case CASE_1: {
             auto result = Converter::ConvertOrDefault(value->value1, EdgesParam());
             ViewAbstract::SetPositionEdges(frameNode, result);
             break;
         }
-        case 2:
-        {
+        case CASE_2:
             LOGE("ARKOALA: LocalizedEdges is not fully support.");
             ViewAbstract::SetPositionLocalizedEdges(frameNode, true);
             break;
-        }
-        default: LOGE("ARKOALA:PositionImpl: Unexpected value->selector: %{public}d\n", value->selector); abort();
+
+        default:
+            LOGE("ARKOALA:PositionImpl: Unexpected value->selector: %{public}d\n", value->selector);
+            return;
     }
 }
 void MarkAnchorImpl(Ark_NativePointer node,
@@ -745,25 +743,25 @@ void OffsetImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    switch (value->selector)
-    {
-        case 0: {
+    switch (value->selector) {
+        case CASE_0: {
             auto x = Converter::ConvertOrDefault(value->value0.x, Dimension());
             auto y = Converter::ConvertOrDefault(value->value0.y, Dimension());
             ViewAbstract::SetOffset(frameNode, { x, y });
             break;
         }
-        case 1: {
+        case CASE_1: {
             auto result = Converter::ConvertOrDefault(value->value1, EdgesParam());
             ViewAbstract::SetOffsetEdges(frameNode, result);
             break;
         }
-        case 2: {
+        case CASE_2:
             LOGE("ARKOALA: LocalizedEdges is not fully support.");
             ViewAbstract::SetOffsetLocalizedEdges(frameNode, true);
             break;
-        }
-        default: LOGE("ARKOALA:OffsetImpl: Unexpected value->selector: %{public}d\n", value->selector); abort();
+        default:
+            LOGE("ARKOALA:OffsetImpl: Unexpected value->selector: %{public}d\n", value->selector);
+            return;
     }
 }
 void EnabledImpl(Ark_NativePointer node,
