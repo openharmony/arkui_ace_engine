@@ -1,44 +1,28 @@
 /*
  * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
+ * distributed under the License is distributed on an 'AS IS' BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 
-if (!("finalizeConstruction" in ViewPU.prototype)) {
-  Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
+if (!('finalizeConstruction' in ViewPU.prototype)) {
+  Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
 }
 if (PUV2ViewBase.contextStack === undefined) {
-  Reflect.set(PUV2ViewBase, "contextStack", []);
+  Reflect.set(PUV2ViewBase, 'contextStack', []);
 }
-const KeyCode = requireNapi("multimodalInput.keyCode").KeyCode;
+const KeyCode = requireNapi('multimodalInput.keyCode').KeyCode;
 const hilog = requireNapi('ohos.hilog');
-const PUBLIC_MORE = { "id": -1, "type": 20000, params: ['sys.media.ohos_ic_public_more'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
-const PUBLIC_BACK = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAY' +
-  'AAABS3GwHAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAA' +
-  'XNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAA8VJREFUeNrt3LFLlHEYwPFXz0G' +
-  'iIZpEoikkwsFRIiK3gqCigxIC/4Kmhv6OoChouaGoqKCgCKducGh0cDAIamhwiCaHCIeelztpUszee/vl8/nAM3Vd8nufr' +
-  '+fddVYVAAAAAAAAAAAAAAAAAAAAAABQijFH0KhrMd2Y2ZitmNWYRzHLjkYAB9lUzMOYizv8eS/mZsymoypLxxE0svzvY07' +
-  'vcpu5mOmY145LAAdx+U/u4bZzwx+JPjq2cow7glaWf1vXsQkg6/JvPwoggJTLjwDSL/8nRyiAzN/5nzpGAWRd/n7MM0cpg' +
-  'IzLvx6z6CjL453gdpZ/IWbDcQrA8iMAy48ALD8CsPwIwPIjAMuPACw/ArD8CMDyIwDLjwAsPwKw/AjA8iMAy48ALD8CsPw' +
-  'IwPIjAMuPACw/ArD85A3A8pM2AMtP2gAsP2kDsPykDcDykzYAy0/aACw/aQOw/KQNwPKTNgDLT9oALD9pA7D8pA3A8pM2A' +
-  'MtP2gAsP2kDsPykDcDykzYAy0/aACw/aQOw/KQNwPKTNgDLT9oALD9pA7D8pA3A8pM2AMtP2gAsP2kDsPykDcDykzYAy0/' +
-  'aACw/aQOw/KQNwPLz3xlv6H4mYp5YfrI+AizF9BwnI/AlZi3mbsxy03feaeh+HsQcc60YgSMxMzE3YmZj3sX8LOlHoPoLn' +
-  'HedaEE35n5pzwF856dN9SPBpZICmHRNaNnlkgL46nrQsvmSAqhftlx1TWjR4ZICqPVcE1q0XloA96rBa7XQhl5pAWzFXKm' +
-  '8i8vo9WMeN3VnnQa/sO8xL2POxEy7Toxo+RdjNpu6w1F9HuBqNXi99lw1eKMM9utHzIeYV8MftbccCQAAAAAAsBdt/XLc+s' +
-  'Py9W+MmPqL+1iJuVA1+C4gdFr6d77FvK0GH2nb739lPR5zNuZ51eBnQhFAJQIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIE' +
-  'IAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAI' +
-  'EIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIE8M8jmBlGgABSRnAqZiXms+MUQNYIDnkUKMu4I/gj6z' +
-  'ELMRv7/PsnHKEAMkcw6fgEkDmCNUcngMwRvHFsngRnfWJcL/9tRyaAgxrB+ZijO9ymH7MUs+m4yjLmCBozEXMr5nr1+9We1' +
-  'ZgXMXccDwAAAAAAAAAAAAAAAAAAAAAAwO5+AfVgtqHKRnawAAAAAElFTkSuQmCC';
+const PUBLIC_MORE = { 'id': -1, 'type': 20000, params: ['sys.media.ohos_ic_public_more'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+const PUBLIC_BACK = { 'id': -1, 'type': 20000, params: ['sys.media.ohos_ic_back'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
 const TEXT_EDITABLE_DIALOG = '18.3fp';
 const IMAGE_SIZE = '64vp';
 const MAX_DIALOG = '256vp';
@@ -46,16 +30,16 @@ const MIN_DIALOG = '216vp';
 class ComposeTitleBar extends ViewPU {
   constructor(o10, p10, q10, r10 = -1, s10 = undefined, t10) {
     super(o10, q10, r10, t10);
-    if (typeof s10 === "function") {
+    if (typeof s10 === 'function') {
       this.paramsGenerator_ = s10;
     }
     this.item = undefined;
     this.title = '';
     this.subtitle = '';
-    this.menuItems = undefined;
-    this.__titleMaxWidth = new ObservedPropertySimplePU(0, this, "titleMaxWidth");
-    this.__backActive = new ObservedPropertySimplePU(false, this, "backActive");
-    this.__fontSize = new ObservedPropertySimplePU(1, this, "fontSize");
+    this.menuItems = [];
+    this.__titleMaxWidth = new ObservedPropertySimplePU(0, this, 'titleMaxWidth');
+    this.__backActive = new ObservedPropertySimplePU(false, this, 'backActive');
+    this.__fontSize = new ObservedPropertySimplePU(1, this, 'fontSize');
     this.setInitiallyProvidedValue(p10);
     this.finalizeConstruction();
   }
@@ -124,7 +108,7 @@ class ComposeTitleBar extends ViewPU {
       });
       Flex.width('100%');
       Flex.height(ComposeTitleBar.totalHeight);
-      Flex.backgroundColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_background'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+      Flex.backgroundColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_background'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
       Flex.onAreaChange((e10, f10) => {
         let g10 = Number(f10.width);
         if (this.menuItems !== undefined) {
@@ -154,7 +138,7 @@ class ComposeTitleBar extends ViewPU {
     this.observeComponentCreation((z9, a10) => {
       ViewStackProcessor.StartGetAccessRecordingFor(z9);
       Row.create();
-      Row.margin({ left: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_default_padding_start'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } });
+      Row.margin({ left: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_default_padding_start'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } });
       if (!a10) {
         Row.pop();
       }
@@ -175,15 +159,15 @@ class ComposeTitleBar extends ViewPU {
         ViewStackProcessor.StartGetAccessRecordingFor(r9);
         if (s9) {
           let t9 = new ImageMenuItem(this, { item: {
-            value: { "id": -1, "type": 20000, params: ['sys.media.ohos_ic_back'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+            value: PUBLIC_BACK,
             isEnabled: true,
             action: () => this.backActive = true
-          }, index: -1 }, undefined, r9, () => { }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 84, col: 9 });
+          }, index: -1 }, undefined, r9, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 66, col: 9 });
           ViewPU.create(t9);
           let u9 = () => {
             return {
               item: {
-                value: { "id": -1, "type": 20000, params: ['sys.media.ohos_ic_back'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                value: PUBLIC_BACK,
                 isEnabled: true,
                 action: () => this.backActive = true
               },
@@ -209,8 +193,8 @@ class ComposeTitleBar extends ViewPU {
             Image.width(ComposeTitleBar.portraitImageSize);
             Image.height(ComposeTitleBar.portraitImageSize);
             Image.margin({
-              left: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_paragraph_margin_xs'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-              right: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_paragraph_margin_m'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
+              left: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_paragraph_margin_xs'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+              right: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_paragraph_margin_m'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
             });
             Image.focusable(false);
             Image.borderRadius(ImageMenuItem.buttonBorderRadius);
@@ -260,8 +244,8 @@ class ComposeTitleBar extends ViewPU {
             ViewStackProcessor.StartGetAccessRecordingFor(d9);
             Text.create(this.title);
             Text.fontWeight(FontWeight.Medium);
-            Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_headline8'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-            Text.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_titlebar_text'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_headline8'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_text'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Text.maxLines(this.subtitle !== undefined ? 1 : 2);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.constraintSize({ maxWidth: this.titleMaxWidth });
@@ -301,8 +285,8 @@ class ComposeTitleBar extends ViewPU {
           this.observeComponentCreation((t8, u8) => {
             ViewStackProcessor.StartGetAccessRecordingFor(t8);
             Text.create(this.subtitle);
-            Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_over_line'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-            Text.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_titlebar_subtitle_text'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_over_line'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_subtitle_text'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Text.maxLines(1);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.constraintSize({ maxWidth: this.titleMaxWidth });
@@ -336,7 +320,7 @@ class ComposeTitleBar extends ViewPU {
             this.observeComponentCreation((h8, i8) => {
               ViewStackProcessor.StartGetAccessRecordingFor(h8);
               if (i8) {
-                let j8 = new CollapsibleMenuSection(this, { menuItems: this.menuItems, index: 1 + ComposeTitleBar.instanceCount++ }, undefined, h8, () => { }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 134, col: 9 });
+                let j8 = new CollapsibleMenuSection(this, { menuItems: this.menuItems, index: 1 + ComposeTitleBar.instanceCount++ }, undefined, h8, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 116, col: 9 });
                 ViewPU.create(j8);
                 let k8 = () => {
                   return {
@@ -383,13 +367,13 @@ ComposeTitleBar.instanceCount = 0;
 class CollapsibleMenuSection extends ViewPU {
   constructor(k7, l7, m7, n7 = -1, o7 = undefined, p7) {
     super(k7, m7, n7, p7);
-    if (typeof o7 === "function") {
+    if (typeof o7 === 'function') {
       this.paramsGenerator_ = o7;
     }
-    this.menuItems = undefined;
+    this.menuItems = [];
     this.item = {
       value: PUBLIC_MORE,
-      label: { "id": -1, "type": 10003, params: ['sys.string.ohos_toolbar_more'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+      label: { 'id': -1, 'type': 10003, params: ['sys.string.ohos_toolbar_more'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
     };
     this.index = 0;
     this.longPressTime = 500;
@@ -398,11 +382,11 @@ class CollapsibleMenuSection extends ViewPU {
     this.maxFontScale = 1;
     this.systemFontScale = 1;
     this.firstFocusableIndex = -1;
-    this.__isPopupShown = new ObservedPropertySimplePU(false, this, "isPopupShown");
-    this.__isMoreIconOnFocus = new ObservedPropertySimplePU(false, this, "isMoreIconOnFocus");
-    this.__isMoreIconOnHover = new ObservedPropertySimplePU(false, this, "isMoreIconOnHover");
-    this.__isMoreIconOnClick = new ObservedPropertySimplePU(false, this, "isMoreIconOnClick");
-    this.__fontSize = new ObservedPropertySimplePU(1, this, "fontSize");
+    this.__isPopupShown = new ObservedPropertySimplePU(false, this, 'isPopupShown');
+    this.__isMoreIconOnFocus = new ObservedPropertySimplePU(false, this, 'isMoreIconOnFocus');
+    this.__isMoreIconOnHover = new ObservedPropertySimplePU(false, this, 'isMoreIconOnHover');
+    this.__isMoreIconOnClick = new ObservedPropertySimplePU(false, this, 'isMoreIconOnClick');
+    this.__fontSize = new ObservedPropertySimplePU(1, this, 'fontSize');
     this.dialogController = new CustomDialogController({
       builder: () => {
         let q7 = new ComposeTitleBarDialog(this, {
@@ -411,9 +395,9 @@ class CollapsibleMenuSection extends ViewPU {
           confirm: () => {
           },
           itemComposeTitleDialog: this.item,
-          ComposeTitleBarDialog: this.item.label ? this.item.label : '',
+          composeTitleBarDialog: this.item.label ? this.item.label : '',
           fontSize: this.fontSize,
-        }, undefined, -1, () => { }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 190, col: 14 });
+        }, undefined, -1, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 172, col: 14 });
         q7.setController(this.dialogController);
         ViewPU.create(q7);
         let r7 = () => {
@@ -423,7 +407,7 @@ class CollapsibleMenuSection extends ViewPU {
             confirm: () => {
             },
             itemComposeTitleDialog: this.item,
-            ComposeTitleBarDialog: this.item.label ? this.item.label : '',
+            composeTitleBarDialog: this.item.label ? this.item.label : '',
             fontSize: this.fontSize
           };
         };
@@ -532,14 +516,14 @@ class CollapsibleMenuSection extends ViewPU {
     this.__fontSize.set(c7);
   }
   getMoreIconFgColor() {
-    return this.isMoreIconOnClick ? { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_titlebar_icon_pressed'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_titlebar_icon'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+    return this.isMoreIconOnClick ? { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon_pressed'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
   }
   getMoreIconBgColor() {
     if (this.isMoreIconOnClick) {
-      return { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_click_effect'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+      return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_click_effect'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
     }
     else if (this.isMoreIconOnHover) {
-      return { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_hover'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+      return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_hover'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
     }
     else {
       return Color.Transparent;
@@ -554,7 +538,7 @@ class CollapsibleMenuSection extends ViewPU {
     catch (y6) {
       let z6 = y6.code;
       let a7 = y6.message;
-      hilog.error(0x3900, 'Ace', `Failed to init fontsizescale info, cause, code: ${z6}, message: ${a7}`);
+      hilog.error(0x3900, 'ComposeTitleBar', `Failed to init fontsizescale info, cause, code: ${z6}, message: ${a7}`);
     }
     if (this.menuItems) {
       this.menuItems.forEach((w6, x6) => {
@@ -568,7 +552,7 @@ class CollapsibleMenuSection extends ViewPU {
   decideFontScale() {
     try {
       let u6 = this.getUIContext();
-      this.systemFontScale = u6.getHostContext()?.config.fontSizeScale ?? 1;
+      this.systemFontScale = u6.getHostContext()?.config?.fontSizeScale ?? 1;
       if (!this.isFollowingSystemFontScale) {
         return 1;
       }
@@ -577,7 +561,7 @@ class CollapsibleMenuSection extends ViewPU {
     catch (r6) {
       let s6 = r6.code;
       let t6 = r6.message;
-      hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${s6}, message: ${t6}`);
+      hilog.error(0x3900, 'ComposeTitleBar', `Faild to decideFontScale,cause, code: ${s6}, message: ${t6}`);
       return 1;
     }
   }
@@ -587,7 +571,7 @@ class CollapsibleMenuSection extends ViewPU {
       ViewStackProcessor.StartGetAccessRecordingFor(p6);
       Column.create();
       Column.height('100%');
-      Column.margin({ right: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_default_padding_end'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } });
+      Column.margin({ right: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_default_padding_end'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } });
       Column.justifyContent(FlexAlign.Center);
       if (!q6) {
         Column.pop();
@@ -621,7 +605,7 @@ class CollapsibleMenuSection extends ViewPU {
                       this.observeComponentCreation((h6, i6) => {
                         ViewStackProcessor.StartGetAccessRecordingFor(h6);
                         if (i6) {
-                          let j6 = new ImageMenuItem(this, { item: f6, index: this.index * 1000 + e6 + 1 }, undefined, h6, () => { }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 263, col: 15 });
+                          let j6 = new ImageMenuItem(this, { item: f6, index: this.index * 1000 + e6 + 1 }, undefined, h6, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 245, col: 15 });
                           ViewPU.create(j6);
                           let k6 = () => {
                             return {
@@ -658,7 +642,7 @@ class CollapsibleMenuSection extends ViewPU {
                       this.observeComponentCreation((r5, s5) => {
                         ViewStackProcessor.StartGetAccessRecordingFor(r5);
                         if (s5) {
-                          let t5 = new ImageMenuItem(this, { item: p5, index: this.index * 1000 + o5 + 1 }, undefined, r5, () => { }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 268, col: 17 });
+                          let t5 = new ImageMenuItem(this, { item: p5, index: this.index * 1000 + o5 + 1 }, undefined, r5, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 250, col: 17 });
                           ViewPU.create(t5);
                           let u5 = () => {
                             return {
@@ -691,16 +675,16 @@ class CollapsibleMenuSection extends ViewPU {
                   Row.foregroundColor(this.getMoreIconFgColor());
                   Row.backgroundColor(this.getMoreIconBgColor());
                   Row.justifyContent(FlexAlign.Center);
-                  ViewStackProcessor.visualState("focused");
+                  ViewStackProcessor.visualState('focused');
                   Row.border({
-                    radius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                    radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                     width: ImageMenuItem.focusBorderWidth,
-                    color: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_focused_outline'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                    color: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_focused_outline'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                     style: BorderStyle.Solid
                   });
-                  ViewStackProcessor.visualState("normal");
+                  ViewStackProcessor.visualState('normal');
                   Row.border({
-                    radius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                    radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                     width: 0
                   });
                   ViewStackProcessor.visualState();
@@ -766,7 +750,7 @@ class CollapsibleMenuSection extends ViewPU {
                   Image.width(ImageMenuItem.imageSize);
                   Image.draggable(false);
                   Image.height(ImageMenuItem.imageSize);
-                  Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.icon_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                  Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                   Image.focusable(true);
                   if (!u4) {
                     Image.pop();
@@ -829,7 +813,7 @@ class CollapsibleMenuSection extends ViewPU {
                   ViewStackProcessor.StartGetAccessRecordingFor(w3);
                   if (x3) {
                     let y3 = new ImageMenuItem(this, { item: u3, index: this.index * 1000 +
-                    CollapsibleMenuSection.maxCountOfVisibleItems + t3 }, undefined, w3, () => { }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 366, col: 13 });
+                    CollapsibleMenuSection.maxCountOfVisibleItems + t3 }, undefined, w3, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 348, col: 13 });
                     ViewPU.create(y3);
                     let z3 = () => {
                       return {
@@ -880,20 +864,20 @@ CollapsibleMenuSection.marginsNum = 2;
 class ImageMenuItem extends ViewPU {
   constructor(w2, x2, y2, z2 = -1, a3 = undefined, b3) {
     super(w2, y2, z2, b3);
-    if (typeof a3 === "function") {
+    if (typeof a3 === 'function') {
       this.paramsGenerator_ = a3;
     }
-    this.item = null;
+    this.item = {};
     this.index = 0;
     this.longPressTime = 500;
     this.minFontSize = 1.75;
     this.isFollowingSystemFontScale = false;
     this.maxFontScale = 1;
     this.systemFontScale = 1;
-    this.__isOnFocus = new ObservedPropertySimplePU(false, this, "isOnFocus");
-    this.__isOnHover = new ObservedPropertySimplePU(false, this, "isOnHover");
-    this.__isOnClick = new ObservedPropertySimplePU(false, this, "isOnClick");
-    this.__fontSize = new SynchedPropertySimpleOneWayPU(x2.fontSize, this, "fontSize");
+    this.__isOnFocus = new ObservedPropertySimplePU(false, this, 'isOnFocus');
+    this.__isOnHover = new ObservedPropertySimplePU(false, this, 'isOnHover');
+    this.__isOnClick = new ObservedPropertySimplePU(false, this, 'isOnClick');
+    this.__fontSize = new SynchedPropertySimpleOneWayPU(x2.fontSize, this, 'fontSize');
     this.dialogController = new CustomDialogController({
       builder: () => {
         let c3 = new ComposeTitleBarDialog(this, {
@@ -902,9 +886,9 @@ class ImageMenuItem extends ViewPU {
           confirm: () => {
           },
           itemComposeTitleDialog: this.item,
-          ComposeTitleBarDialog: this.item.label ? this.item.label : this.textDialog(),
+          composeTitleBarDialog: this.item.label ? this.item.label : this.textDialog(),
           fontSize: this.fontSize,
-        }, undefined, -1, () => { }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 404, col: 14 });
+        }, undefined, -1, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 386, col: 14 });
         c3.setController(this.dialogController);
         ViewPU.create(c3);
         let d3 = () => {
@@ -914,7 +898,7 @@ class ImageMenuItem extends ViewPU {
             confirm: () => {
             },
             itemComposeTitleDialog: this.item,
-            ComposeTitleBarDialog: this.item.label ? this.item.label : this.textDialog(),
+            composeTitleBarDialog: this.item.label ? this.item.label : this.textDialog(),
             fontSize: this.fontSize
           };
         };
@@ -1008,10 +992,10 @@ class ImageMenuItem extends ViewPU {
   }
   textDialog() {
     if (this.item.value === PUBLIC_MORE) {
-      return { "id": -1, "type": 10003, params: ['sys.string.ohos_toolbar_more'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+      return { 'id': -1, 'type': 10003, params: ['sys.string.ohos_toolbar_more'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
     }
     else if (this.item.value === PUBLIC_BACK) {
-      return { "id": -1, "type": 10003, params: ['sys.string.icon_back'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+      return { 'id': -1, 'type': 10003, params: ['sys.string.icon_back'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
     }
     else {
       return this.item.label ? this.item.label : '';
@@ -1019,14 +1003,14 @@ class ImageMenuItem extends ViewPU {
   }
   getFgColor() {
     return this.isOnClick
-      ? { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_titlebar_icon_pressed'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_titlebar_icon'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+      ? { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon_pressed'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
   }
   getBgColor() {
     if (this.isOnClick) {
-      return { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_click_effect'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+      return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_click_effect'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
     }
     else if (this.isOnHover) {
-      return { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_hover'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+      return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_hover'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
     }
     else {
       return Color.Transparent;
@@ -1041,13 +1025,13 @@ class ImageMenuItem extends ViewPU {
     catch (l2) {
       let m2 = l2.code;
       let n2 = l2.message;
-      hilog.error(0x3900, 'Ace', `Failed to init fontsizescale info, cause, code: ${m2}, message: ${n2}`);
+      hilog.error(0x3900, 'ComposeTitleBar', `Failed to init fontsizescale info, cause, code: ${m2}, message: ${n2}`);
     }
   }
   decideFontScale() {
     try {
       let k2 = this.getUIContext();
-      this.systemFontScale = k2.getHostContext()?.config.fontSizeScale ?? 1;
+      this.systemFontScale = k2.getHostContext()?.config?.fontSizeScale ?? 1;
       if (!this.isFollowingSystemFontScale) {
         return 1;
       }
@@ -1056,7 +1040,7 @@ class ImageMenuItem extends ViewPU {
     catch (h2) {
       let i2 = h2.code;
       let j2 = h2.message;
-      hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${i2}, message: ${j2}`);
+      hilog.error(0x3900, 'ComposeTitleBar', `Faild to decideFontScale,cause, code: ${i2}, message: ${j2}`);
       return 1;
     }
   }
@@ -1072,16 +1056,16 @@ class ImageMenuItem extends ViewPU {
       Row.backgroundColor(this.getBgColor());
       Row.justifyContent(FlexAlign.Center);
       Row.opacity(this.item?.isEnabled ? 1 : ImageMenuItem.disabledImageOpacity);
-      ViewStackProcessor.visualState("focused");
+      ViewStackProcessor.visualState('focused');
       Row.border({
-        radius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
         width: ImageMenuItem.focusBorderWidth,
-        color: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_focused_outline'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        color: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_focused_outline'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
         style: BorderStyle.Solid
       });
-      ViewStackProcessor.visualState("normal");
+      ViewStackProcessor.visualState('normal');
       Row.border({
-        radius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
         width: 0
       });
       ViewStackProcessor.visualState();
@@ -1152,12 +1136,13 @@ class ImageMenuItem extends ViewPU {
     this.observeComponentCreation((s1, t1) => {
       ViewStackProcessor.StartGetAccessRecordingFor(s1);
       Image.create(this.item?.value);
+      Image.matchTextDirection(this.item.value === PUBLIC_BACK ? true : false);
       Image.width(ImageMenuItem.imageSize);
       Image.draggable(false);
       Image.height(ImageMenuItem.imageSize);
       Image.focusable(this.item?.isEnabled);
       Image.key(ImageMenuItem.focusablePrefix + this.index);
-      Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+      Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
       if (!t1) {
         Image.pop();
       }
@@ -1177,27 +1162,27 @@ ImageMenuItem.imageHotZoneWidth = 48;
 ImageMenuItem.buttonBorderRadius = 8;
 ImageMenuItem.focusBorderWidth = 2;
 ImageMenuItem.disabledImageOpacity = 0.4;
-ImageMenuItem.focusablePrefix = "Id-ComposeTitleBar-ImageMenuItem-";
+ImageMenuItem.focusablePrefix = 'Id-ComposeTitleBar-ImageMenuItem-';
 class ComposeTitleBarDialog extends ViewPU {
   constructor(i1, j1, k1, l1 = -1, m1 = undefined, n1) {
     super(i1, k1, l1, n1);
-    if (typeof m1 === "function") {
+    if (typeof m1 === 'function') {
       this.paramsGenerator_ = m1;
     }
     this.itemComposeTitleDialog = {};
     this.callbackId = undefined;
-    this.ComposeTitleBarDialog = '';
+    this.composeTitleBarDialog = '';
     this.mainWindowStage = undefined;
     this.controller = undefined;
     this.minFontSize = 1.75;
-    this.maxFontSize = 3.25;
+    this.maxFontSize = 3.2;
     this.screenWidth = 640;
     this.verticalScreenLines = 6;
     this.horizontalsScreenLines = 1;
-    this.__mainWindow = this.createStorageLink('mainWindow', undefined, "mainWindow");
-    this.__fontSize = new ObservedPropertySimplePU(1, this, "fontSize");
-    this.__maxLines = new ObservedPropertySimplePU(1, this, "maxLines");
-    this.__windowStandardHeight = this.createStorageProp('windowStandardHeight', 0, "windowStandardHeight");
+    this.__mainWindow = this.createStorageLink('mainWindow', undefined, 'mainWindow');
+    this.__fontSize = new ObservedPropertySimplePU(1, this, 'fontSize');
+    this.__maxLines = new ObservedPropertySimplePU(1, this, 'maxLines');
+    this.__windowStandardHeight = this.createStorageProp('windowStandardHeight', 0, 'windowStandardHeight');
     this.cancel = () => {
     };
     this.confirm = () => {
@@ -1212,8 +1197,8 @@ class ComposeTitleBarDialog extends ViewPU {
     if (h1.callbackId !== undefined) {
       this.callbackId = h1.callbackId;
     }
-    if (h1.ComposeTitleBarDialog !== undefined) {
-      this.ComposeTitleBarDialog = h1.ComposeTitleBarDialog;
+    if (h1.composeTitleBarDialog !== undefined) {
+      this.composeTitleBarDialog = h1.composeTitleBarDialog;
     }
     if (h1.mainWindowStage !== undefined) {
       this.mainWindowStage = h1.mainWindowStage;
@@ -1297,7 +1282,7 @@ class ComposeTitleBarDialog extends ViewPU {
     this.observeComponentCreation((e, f) => {
       ViewStackProcessor.StartGetAccessRecordingFor(e);
       If.create();
-      if (this.ComposeTitleBarDialog) {
+      if (this.composeTitleBarDialog) {
         this.ifElseBranchUpdateFunction(0, () => {
           this.observeComponentCreation((y, z) => {
             ViewStackProcessor.StartGetAccessRecordingFor(y);
@@ -1306,7 +1291,7 @@ class ComposeTitleBarDialog extends ViewPU {
             Column.constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG });
             Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK);
             Column.shadow(ShadowStyle.OUTER_DEFAULT_LG);
-            Column.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.corner_radius_level10'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Column.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level10'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             if (!z) {
               Column.pop();
             }
@@ -1318,10 +1303,10 @@ class ComposeTitleBarDialog extends ViewPU {
             Image.width(IMAGE_SIZE);
             Image.height(IMAGE_SIZE);
             Image.margin({
-              top: { "id": -1, "type": 10002, params: ['sys.float.padding_level24'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-              bottom: { "id": -1, "type": 10002, params: ['sys.float.padding_level8'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+              top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level24'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+              bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
             });
-            Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.icon_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             if (!x) {
               Image.pop();
             }
@@ -1332,9 +1317,9 @@ class ComposeTitleBarDialog extends ViewPU {
             Column.create();
             Column.width('100%');
             Column.padding({
-              left: { "id": -1, "type": 10002, params: ['sys.float.padding_level4'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-              right: { "id": -1, "type": 10002, params: ['sys.float.padding_level4'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-              bottom: { "id": -1, "type": 10002, params: ['sys.float.padding_level12'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+              left: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+              right: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+              bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level12'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
             });
             if (!v) {
               Column.pop();
@@ -1343,13 +1328,13 @@ class ComposeTitleBarDialog extends ViewPU {
           });
           this.observeComponentCreation((s, t) => {
             ViewStackProcessor.StartGetAccessRecordingFor(s);
-            Text.create(this.ComposeTitleBarDialog);
+            Text.create(this.composeTitleBarDialog);
             Text.fontSize(TEXT_EDITABLE_DIALOG);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.maxLines(this.maxLines);
             Text.width('100%');
             Text.textAlign(TextAlign.Center);
-            Text.fontColor({ "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             if (!t) {
               Text.pop();
             }
@@ -1369,7 +1354,7 @@ class ComposeTitleBarDialog extends ViewPU {
             Column.constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG });
             Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK);
             Column.shadow(ShadowStyle.OUTER_DEFAULT_LG);
-            Column.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.corner_radius_level10'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Column.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level10'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Column.justifyContent(FlexAlign.Center);
             if (!m) {
               Column.pop();
@@ -1381,7 +1366,7 @@ class ComposeTitleBarDialog extends ViewPU {
             Image.create(this.itemComposeTitleDialog.value);
             Image.width(IMAGE_SIZE);
             Image.height(IMAGE_SIZE);
-            Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.icon_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             if (!k) {
               Image.pop();
             }

@@ -19,33 +19,15 @@ import common from '@ohos.app.ability.common'
 import { BusinessError } from '@kit.BasicServicesKit'
 import { hilog } from '@kit.PerformanceAnalysisKit'
 
-export declare interface ComposeTitleBarMenuItem {
-  value: ResourceStr
-  isEnabled: boolean
-  action?: () => void
-  label?: ResourceStr
+export interface ComposeTitleBarMenuItem {
+  value: ResourceStr;
+  isEnabled?: boolean;
+  action?: () => void;
+  label?: ResourceStr;
 }
 
 const PUBLIC_MORE = $r('sys.media.ohos_ic_public_more')
-
-const PUBLIC_BACK = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAY' +
-  'AAABS3GwHAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAA' +
-  'XNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAA8VJREFUeNrt3LFLlHEYwPFXz0G' +
-  'iIZpEoikkwsFRIiK3gqCigxIC/4Kmhv6OoChouaGoqKCgCKducGh0cDAIamhwiCaHCIeelztpUszee/vl8/nAM3Vd8nufr' +
-  '+fddVYVAAAAAAAAAAAAAAAAAAAAAABQijFH0KhrMd2Y2ZitmNWYRzHLjkYAB9lUzMOYizv8eS/mZsymoypLxxE0svzvY07' +
-  'vcpu5mOmY145LAAdx+U/u4bZzwx+JPjq2cow7glaWf1vXsQkg6/JvPwoggJTLjwDSL/8nRyiAzN/5nzpGAWRd/n7MM0cpg' +
-  'IzLvx6z6CjL453gdpZ/IWbDcQrA8iMAy48ALD8CsPwIwPIjAMuPACw/ArD8CMDyIwDLjwAsPwKw/AjA8iMAy48ALD8CsPw' +
-  'IwPIjAMuPACw/ArD85A3A8pM2AMtP2gAsP2kDsPykDcDykzYAy0/aACw/aQOw/KQNwPKTNgDLT9oALD9pA7D8pA3A8pM2A' +
-  'MtP2gAsP2kDsPykDcDykzYAy0/aACw/aQOw/KQNwPKTNgDLT9oALD9pA7D8pA3A8pM2AMtP2gAsP2kDsPykDcDykzYAy0/' +
-  'aACw/aQOw/KQNwPLz3xlv6H4mYp5YfrI+AizF9BwnI/AlZi3mbsxy03feaeh+HsQcc60YgSMxMzE3YmZj3sX8LOlHoPoLn' +
-  'HedaEE35n5pzwF856dN9SPBpZICmHRNaNnlkgL46nrQsvmSAqhftlx1TWjR4ZICqPVcE1q0XloA96rBa7XQhl5pAWzFXKm' +
-  '8i8vo9WMeN3VnnQa/sO8xL2POxEy7Toxo+RdjNpu6w1F9HuBqNXi99lw1eKMM9utHzIeYV8MftbccCQAAAAAAsBdt/XLc+s' +
-  'Py9W+MmPqL+1iJuVA1+C4gdFr6d77FvK0GH2nb739lPR5zNuZ51eBnQhFAJQIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIE' +
-  'IAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAI' +
-  'EIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIE8M8jmBlGgABSRnAqZiXms+MUQNYIDnkUKMu4I/gj6z' +
-  'ELMRv7/PsnHKEAMkcw6fgEkDmCNUcngMwRvHFsngRnfWJcL/9tRyaAgxrB+ZijO9ymH7MUs+m4yjLmCBozEXMr5nr1+9We1' +
-  'ZgXMXccDwAAAAAAAAAAAAAAAAAAAAAAwO5+AfVgtqHKRnawAAAAAElFTkSuQmCC'
-
+const PUBLIC_BACK: Resource = $r('sys.media.ohos_ic_back')
 const TEXT_EDITABLE_DIALOG = '18.3fp'
 const IMAGE_SIZE = '64vp'
 const MAX_DIALOG = '256vp'
@@ -56,7 +38,7 @@ struct ComposeTitleBar {
   item: ComposeTitleBarMenuItem | undefined = undefined
   title: ResourceStr = ''
   subtitle: ResourceStr = ''
-  menuItems?: Array<ComposeTitleBarMenuItem>
+  menuItems?: Array<ComposeTitleBarMenuItem> = [];
 
   @State titleMaxWidth: number = 0
   @State backActive: boolean = false
@@ -80,7 +62,7 @@ struct ComposeTitleBar {
           .active(this.backActive)
 
         ImageMenuItem({ item: {
-          value: $r('sys.media.ohos_ic_back'),
+          value: PUBLIC_BACK,
           isEnabled: true,
           action: () => this.backActive = true
         }, index: -1 })
@@ -160,7 +142,7 @@ struct ComposeTitleBar {
 
 @Component
 struct CollapsibleMenuSection {
-  menuItems?: Array<ComposeTitleBarMenuItem>
+  menuItems?: Array<ComposeTitleBarMenuItem> = [];
   item: ComposeTitleBarMenuItem = {
     value: PUBLIC_MORE,
     label: $r('sys.string.ohos_toolbar_more'),
@@ -191,7 +173,7 @@ struct CollapsibleMenuSection {
       confirm: () => {
       },
       itemComposeTitleDialog: this.item,
-      ComposeTitleBarDialog: this.item.label ? this.item.label : '',
+      composeTitleBarDialog: this.item.label ? this.item.label : '',
       fontSize: this.fontSize,
     }),
     maskColor: Color.Transparent,
@@ -223,7 +205,7 @@ struct CollapsibleMenuSection {
     } catch (err) {
       let code: number = (err as BusinessError).code;
       let message: string = (err as BusinessError).message;
-      hilog.error(0x3900, 'Ace', `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
+      hilog.error(0x3900, 'ComposeTitleBar', `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
     }
     if (this.menuItems) {
       this.menuItems.forEach((item, index) => {
@@ -238,7 +220,7 @@ struct CollapsibleMenuSection {
   decideFontScale(): number {
     try {
       let uiContent: UIContext = this.getUIContext();
-      this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1;
+      this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
       if (!this.isFollowingSystemFontScale) {
         return 1;
       }
@@ -246,7 +228,7 @@ struct CollapsibleMenuSection {
     } catch (exception) {
       let code: number = (exception as BusinessError).code;
       let message: string = (exception as BusinessError).message;
-      hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
+      hilog.error(0x3900, 'ComposeTitleBar', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
       return 1;
     }
   }
@@ -378,7 +360,7 @@ struct CollapsibleMenuSection {
 
 @Component
 struct ImageMenuItem {
-  item: ComposeTitleBarMenuItem | null = null
+  item: ComposeTitleBarMenuItem = {} as ComposeTitleBarMenuItem;
   index: number = 0
   longPressTime: number = 500;
   minFontSize: number = 1.75;
@@ -405,7 +387,7 @@ struct ImageMenuItem {
       confirm: () => {
       },
       itemComposeTitleDialog: this.item,
-      ComposeTitleBarDialog: this.item.label ? this.item.label : this.textDialog(),
+      composeTitleBarDialog: this.item.label ? this.item.label : this.textDialog(),
       fontSize: this.fontSize,
     }),
     maskColor: Color.Transparent,
@@ -447,7 +429,7 @@ struct ImageMenuItem {
     } catch (err) {
       let code: number = (err as BusinessError).code;
       let message: string = (err as BusinessError).message;
-      hilog.error(0x3900, 'Ace', `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
+      hilog.error(0x3900, 'ComposeTitleBar', `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
     }
   }
 
@@ -455,7 +437,7 @@ struct ImageMenuItem {
   decideFontScale(): number {
     try {
       let uiContent: UIContext = this.getUIContext();
-      this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1;
+      this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
       if (!this.isFollowingSystemFontScale) {
         return 1;
       }
@@ -463,7 +445,7 @@ struct ImageMenuItem {
     } catch (exception) {
       let code: number = (exception as BusinessError).code;
       let message: string = (exception as BusinessError).message;
-      hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
+      hilog.error(0x3900, 'ComposeTitleBar', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
       return 1;
     }
   }
@@ -472,6 +454,7 @@ struct ImageMenuItem {
   build() {
     Row() {
       Image(this.item?.value)
+        .matchTextDirection(this.item.value === PUBLIC_BACK ? true : false)
         .width(ImageMenuItem.imageSize)
         .draggable(false)
         .height(ImageMenuItem.imageSize)
@@ -570,11 +553,11 @@ struct ImageMenuItem {
 struct ComposeTitleBarDialog {
   itemComposeTitleDialog: ComposeTitleBarMenuItem = {} as ComposeTitleBarMenuItem;
   callbackId: number | undefined = undefined;
-  ComposeTitleBarDialog?: ResourceStr = '';
+  composeTitleBarDialog?: ResourceStr = '';
   mainWindowStage: window.Window | undefined = undefined;
-  controller?: CustomDialogController
+  controller?: CustomDialogController;
   minFontSize: number = 1.75;
-  maxFontSize: number = 3.25;
+  maxFontSize: number = 3.2;
   screenWidth: number = 640;
   verticalScreenLines: number = 6;
   horizontalsScreenLines: number = 1;
@@ -588,7 +571,7 @@ struct ComposeTitleBarDialog {
   }
 
   build() {
-    if (this.ComposeTitleBarDialog) {
+    if (this.composeTitleBarDialog) {
       Column() {
         Image(this.itemComposeTitleDialog.value)
           .width(IMAGE_SIZE)
@@ -599,7 +582,7 @@ struct ComposeTitleBarDialog {
           })
           .fillColor($r('sys.color.icon_primary'))
         Column() {
-          Text(this.ComposeTitleBarDialog)
+          Text(this.composeTitleBarDialog)
             .fontSize(TEXT_EDITABLE_DIALOG)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
             .maxLines(this.maxLines)
