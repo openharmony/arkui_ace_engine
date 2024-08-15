@@ -57,7 +57,7 @@ void CanvasRenderingContext2DModelNG::SetFontWeight(const FontWeight& weight)
     pattern_->UpdateFontWeight(weight);
 }
 
-void CanvasRenderingContext2DModelNG::SetFontStyle(const FontStyle& fontStyle)
+void CanvasRenderingContext2DModelNG::SetFontStyle(const Ace::FontStyle& fontStyle)
 {
     CHECK_NULL_VOID(pattern_);
     pattern_->UpdateFontStyle(fontStyle);

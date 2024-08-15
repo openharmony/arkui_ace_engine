@@ -640,7 +640,8 @@ struct CJUITextModifier {
     void (*resetTextSelection)(ArkUINodeHandle node);
     void (*setTextSelectableMode)(ArkUINodeHandle node, ArkUI_Uint32 textSelectableMode);
     void (*resetTextSelectableMode)(ArkUINodeHandle node);
-    void (*setTextDataDetectorConfigWithEvent)(ArkUINodeHandle node, ArkUI_CharPtr types, void* callback);
+    void (*setTextDataDetectorConfigWithEvent)(
+        ArkUINodeHandle node, const struct ArkUITextDetectConfigStruct* arkUITextDetectConfig);
     void (*resetTextDataDetectorConfigWithEvent)(ArkUINodeHandle node);
     void (*setTextOnCopy)(ArkUINodeHandle node, void* callback);
     void (*resetTextOnCopy)(ArkUINodeHandle node);
