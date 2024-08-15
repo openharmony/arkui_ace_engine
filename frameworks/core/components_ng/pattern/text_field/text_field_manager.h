@@ -36,6 +36,18 @@ public:
     {
         return position_;
     }
+
+    const std::optional<Offset>& GetOptionalClickPosition()
+    {
+        return optionalPosition_;
+    }
+
+    void ResetOptionalClickPosition() {
+        optionalPosition_ = std::nullopt;
+    }
+
+    void AvoidKeyboardInSheet(const RefPtr<FrameNode>& textField);
+
     void MovePage(int32_t pageId, const Offset& rootRect, double offsetHeight) override {}
     void RemovePageId(int32_t pageId) override {}
 
@@ -157,6 +169,7 @@ private:
     bool uiExtensionImeShow_ = false;
     bool prevHasTextFieldPattern_ = true;
     Offset position_;
+    std::optional<Offset> optionalPosition_;
     float height_ = 0.0f;
     WeakPtr<Pattern> onFocusTextField_;
     WeakPtr<FrameNode> weakNavNode_;

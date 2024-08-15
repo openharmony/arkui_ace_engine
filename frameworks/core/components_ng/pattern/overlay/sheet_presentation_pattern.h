@@ -290,7 +290,7 @@ public:
     bool IsScrollable() const;
     void AvoidAiBar();
 
-    void AvoidSafeArea();
+    void AvoidSafeArea(bool forceChange = false);
     void CheckBuilderChange();
     float GetSheetHeightChange();
     void ScrollTo(float height);

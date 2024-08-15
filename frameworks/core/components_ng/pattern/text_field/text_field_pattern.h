@@ -604,8 +604,6 @@ public:
         isKeyboardClosedByUser_ = false;
     }
 
-    void OnDirectionConfigurationUpdate() override;
-
     void NotifyKeyboardClosed() override
     {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyKeyboardClosed");
