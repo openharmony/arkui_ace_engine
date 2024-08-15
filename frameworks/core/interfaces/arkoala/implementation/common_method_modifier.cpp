@@ -22,6 +22,10 @@
 #include "base/log/log_wrapper.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+constexpr int32_t CASE_0 = 0;
+constexpr int32_t CASE_1 = 1;
+constexpr int32_t CASE_2 = 2;
+
 namespace CommonMethodModifier {
 void WidthImpl(Ark_NativePointer node,
                const Ark_Length* value)
@@ -122,18 +126,22 @@ void PaddingImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     PaddingProperty indents;
-    switch (value->selector)
-    {
-        case 0: {
+    switch (value->selector) {
+        case CASE_0:
             indents.left = Converter::OptConvert<CalcLength>(value->value0.left);
             indents.top = Converter::OptConvert<CalcLength>(value->value0.top);
             indents.right = Converter::OptConvert<CalcLength>(value->value0.right);
             indents.bottom = Converter::OptConvert<CalcLength>(value->value0.bottom);
             break;
-        }
-        case 1: indents = Converter::OptConvert<PaddingProperty>(value->value1).value(); break;
-        case 2: indents = Converter::Convert<PaddingProperty>(value->value2); break;
-        default: LOGE("ARKOALA: CommonMethod::PaddingImpl: Unexpected selector: %{public}d\n", value->selector); abort(); 
+        case CASE_1:
+            indents = Converter::OptConvert<PaddingProperty>(value->value1).value();
+            break;
+        case CASE_2:
+            indents = Converter::Convert<PaddingProperty>(value->value2);
+            break;
+        default:
+            LOGE("ARKOALA: CommonMethod::PaddingImpl: Unexpected selector: %{public}d\n", value->selector);
+            return;
     }
     ViewAbstract::SetPadding(frameNode, indents);
 }
@@ -145,16 +153,21 @@ void MarginImpl(Ark_NativePointer node,
     PaddingProperty indents;
     switch (value->selector)
     {
-        case 0: {
+        case CASE_0:
             indents.left = Converter::OptConvert<CalcLength>(value->value0.left);
             indents.top = Converter::OptConvert<CalcLength>(value->value0.top);
             indents.right = Converter::OptConvert<CalcLength>(value->value0.right);
             indents.bottom = Converter::OptConvert<CalcLength>(value->value0.bottom);
             break;
-        }
-        case 1: indents = Converter::OptConvert<PaddingProperty>(value->value1).value(); break;
-        case 2: indents = Converter::OptConvert<PaddingProperty>(value->value2).value(); break;
-        default: LOGE("ARKOALA: CommonMethod::MarginImpl: Unexpected selector: %{public}d\n", value->selector); abort(); 
+        case CASE_1:
+            indents = Converter::OptConvert<PaddingProperty>(value->value1).value();
+            break;
+        case CASE_2:
+            indents = Converter::OptConvert<PaddingProperty>(value->value2).value();
+            break;
+        default:
+            LOGE("ARKOALA: CommonMethod::MarginImpl: Unexpected selector: %{public}d\n", value->selector);
+            return;
     }
     ViewAbstract::SetMargin(frameNode, indents);
 }
@@ -700,25 +713,27 @@ void PositionImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    switch (value->selector)
-    {
-    case 0: {
-        auto x = Converter::ConvertOrDefault(value->value0.x, Dimension());
-        auto y = Converter::ConvertOrDefault(value->value0.y, Dimension());
-        ViewAbstract::SetPosition(frameNode, { x, y });
-        break;
-    }
-    case 1: {
-        auto result = Converter::ConvertOrDefault(value->value1, EdgesParam());
-        ViewAbstract::SetPositionEdges(frameNode, result);
-        break;
-    }
-    case 2: {
-        LOGE("ARKOALA: LocalizedEdges is not fully support.");
-        ViewAbstract::SetPositionLocalizedEdges(frameNode, true);
-        break;
-    }
-    default: LOGE("ARKOALA:PositionImpl: Unexpected value->selector: %{public}d\n", value->selector); abort();
+    switch (value->selector) {
+        case 0:
+        {
+            auto x = Converter::ConvertOrDefault(value->value0.x, Dimension());
+            auto y = Converter::ConvertOrDefault(value->value0.y, Dimension());
+            ViewAbstract::SetPosition(frameNode, { x, y });
+            break;
+        }
+        case 1:
+        {
+            auto result = Converter::ConvertOrDefault(value->value1, EdgesParam());
+            ViewAbstract::SetPositionEdges(frameNode, result);
+            break;
+        }
+        case 2:
+        {
+            LOGE("ARKOALA: LocalizedEdges is not fully support.");
+            ViewAbstract::SetPositionLocalizedEdges(frameNode, true);
+            break;
+        }
+        default: LOGE("ARKOALA:PositionImpl: Unexpected value->selector: %{public}d\n", value->selector); abort();
     }
 }
 void MarkAnchorImpl(Ark_NativePointer node,
