@@ -8051,7 +8051,7 @@ void RichEditorPattern::HandleCursorOnDragEnded(const RefPtr<NotifyDragEvent>& n
     if (!isCursorAlwaysDisplayed_) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "In OnDragEnded,"
             " the released location is not in the current richEditor, id:%{public}d", host->GetId());
-        focusHub->LostFocusToViewRoot();
+        focusHub->LostFocus();
         StopTwinkling();
         return;
     }
@@ -8448,19 +8448,17 @@ void RichEditorPattern::HandleOnDragDropTextOperation(const std::string& insertV
     CHECK_NULL_VOID(BeforeChangeText(changeValue, record, RecordType::DRAG));
     if (isDeleteSelect) {
         if (currentPosition < dragRange_.first) {
-            HandleOnDragInsertValue(insertValue);
+            InsertValueByOperationType(insertValue, OperationType::DRAG);
             dragRange_.first += strLength;
             dragRange_.second += strLength;
             HandleOnDragDeleteForward();
-            caretPosition_ += strLength;
         } else if (currentPosition > dragRange_.second) {
-            HandleOnDragInsertValue(insertValue);
+            InsertValueByOperationType(insertValue, OperationType::DRAG);
             int32_t delLength = HandleOnDragDeleteForward();
-            caretPosition_ -= (delLength - strLength);
+            caretPosition_ -= delLength;
         }
     } else {
-        HandleOnDragInsertValue(insertValue);
-        caretPosition_ += strLength;
+        InsertValueByOperationType(insertValue, OperationType::DRAG);
     }
     AfterChangeText(changeValue);
 }
@@ -8507,7 +8505,7 @@ void RichEditorPattern::HandleOnDragInsertValue(const std::string& insertValue)
     }
     record.addText = insertValue;
     ClearRedoOperationRecords();
-    HandleOnDragInsertValueOperation(insertValue);
+    InsertValueByOperationType(insertValue, OperationType::DRAG);
     int32_t length = dragRange_.second - dragRange_.first;
     record.afterCaretPosition = record.beforeCaretPosition + length;
     record.deleteCaretPostion = dragRange_.first;
