@@ -5218,6 +5218,15 @@ void GetMask(ArkUINodeHandle node, ArkUIMaskOptions* options, ArkUI_Int32 unit)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto basicShape = ViewAbstract::GetMask(frameNode);
+    if (basicShape == nullptr) {
+        auto process = ViewAbstract::GetMaskProgress(frameNode);
+        CHECK_NULL_VOID(process);
+        options->type = static_cast<ArkUI_Int32>(ArkUI_MaskType::ARKUI_MASK_TYPE_PROGRESS);
+        options->value = process->GetValue();
+        options->color = process->GetColor().GetValue();
+        options->maxValue = process->GetMaxValue();
+        return;
+    }
     options->type = static_cast<ArkUI_Int32>(basicShape->GetBasicShapeType());
     options->fill = basicShape->GetColor().GetValue();
     options->strokeColor = basicShape->GetStrokeColor();
@@ -5241,11 +5250,6 @@ void GetMask(ArkUINodeHandle node, ArkUIMaskOptions* options, ArkUI_Int32 unit)
             shapeRect->GetTopRightRadius().GetX().GetNativeValue(static_cast<DimensionUnit>(unit));
         options->bottomRightRadius =
             shapeRect->GetBottomRightRadius().GetX().GetNativeValue(static_cast<DimensionUnit>(unit));
-    } else {
-        auto process = ViewAbstract::GetMaskProgress(frameNode);
-        options->value = process->GetValue();
-        options->color = process->GetColor().GetValue();
-        options->maxValue = process->GetMaxValue();
     }
 }
 
