@@ -756,4 +756,88 @@ HWTEST_F(RichEditorPatternTestTwoNg, RefreshSelectOverlay002, TestSize.Level1)
     richEditorPattern->RefreshSelectOverlay(true, true);
     EXPECT_NE(proxy, nullptr);
 }
+
+/**
+ * @tc.name: HideMenu001
+ * @tc.desc: test HideMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, HideMenu001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->HideMenu();
+    EXPECT_NE(richEditorPattern->selectOverlay_, nullptr);
+}
+
+/**
+ * @tc.name: ResetKeyboardIfNeed001
+ * @tc.desc: test ResetKeyboardIfNeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, ResetKeyboardIfNeed001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto focusHub = richEditorPattern->GetFocusHub();
+    EXPECT_NE(focusHub, nullptr);
+
+    focusHub->currentFocus_ = true;
+    richEditorPattern->action_ = TextInputAction::UNSPECIFIED;
+    richEditorPattern->ResetKeyboardIfNeed();
+    EXPECT_NE(richEditorPattern->action_, TextInputAction::UNSPECIFIED);
+}
+
+/**
+ * @tc.name: ResetKeyboardIfNeed002
+ * @tc.desc: test ResetKeyboardIfNeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, ResetKeyboardIfNeed002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto focusHub = richEditorPattern->GetFocusHub();
+    EXPECT_NE(focusHub, nullptr);
+
+    richEditorPattern->imeShown_ = false;
+    richEditorPattern->isCustomKeyboardAttached_ = true;
+    focusHub->currentFocus_ = false;
+    richEditorPattern->action_ = TextInputAction::SEARCH;
+    richEditorPattern->ResetKeyboardIfNeed();
+    EXPECT_NE(richEditorPattern->action_, TextInputAction::SEARCH);
+}
+
+/**
+ * @tc.name: ResetKeyboardIfNeed003
+ * @tc.desc: test ResetKeyboardIfNeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, ResetKeyboardIfNeed003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto focusHub = richEditorPattern->GetFocusHub();
+    EXPECT_NE(focusHub, nullptr);
+
+    richEditorPattern->imeShown_ = false;
+    richEditorPattern->isCustomKeyboardAttached_ = false;
+    focusHub->currentFocus_ = true;
+    richEditorPattern->action_ = TextInputAction::SEARCH;
+    richEditorPattern->ResetKeyboardIfNeed();
+    EXPECT_NE(richEditorPattern->action_, TextInputAction::SEARCH);
+}
 } // namespace OHOS::Ace::NG
