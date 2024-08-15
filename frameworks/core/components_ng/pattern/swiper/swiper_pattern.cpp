@@ -5621,6 +5621,9 @@ void SwiperPattern::StopIndicatorAnimation(bool ifImmediately)
 
 void SwiperPattern::FireWillHideEvent(int32_t willHideIndex) const
 {
+    if (!hasTabsAncestor_) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto tabContentNode = AceType::DynamicCast<TabContentNode>(host->GetChildByIndex(willHideIndex));
@@ -5632,6 +5635,9 @@ void SwiperPattern::FireWillHideEvent(int32_t willHideIndex) const
 
 void SwiperPattern::FireWillShowEvent(int32_t willShowIndex) const
 {
+    if (!hasTabsAncestor_) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto tabContentNode = AceType::DynamicCast<TabContentNode>(host->GetChildByIndex(willShowIndex));
