@@ -149,7 +149,9 @@ export struct ToolBar {
           .maxLines(1)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .textAlign(TextAlign.Center)
-      }.width('100%').height('100%')
+      }
+      .width('100%')
+      .height('100%')
       .justifyContent(FlexAlign.Center)
       .padding({
         start: LengthMetrics.resource($r('sys.float.padding_level2')),
