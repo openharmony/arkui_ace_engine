@@ -400,6 +400,13 @@ public:
         }
     }
 
+    void SetRealHostWindowId(uint32_t realHostWindowId)
+    {
+        if (pipelineContext_) {
+            pipelineContext_->SetRealHostWindowId(realHostWindowId);
+        }
+    }
+
     bool IsUseCustomBg() const
     {
         return isUseCustomBg_;
