@@ -909,6 +909,8 @@ public:
     }
     void HandleOnUndoAction() override;
     void HandleOnRedoAction() override;
+    bool CanUndo();
+    bool CanRedo();
     void HandleOnSelectAll(bool isKeyEvent, bool inlineStyle = false, bool showMenu = false);
     void HandleOnSelectAll() override
     {
