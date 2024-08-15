@@ -292,7 +292,7 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionCon
         .want = wantPtr,
         .isAsyncModalBinding_ = config.isAsyncModalBinding,
         .uiExtensionUsage_ = static_cast<uint32_t>(config.uiExtensionUsage),
-        .realParentId_ = static_cast<int32_t>(realHostWindowId);
+        .realParentId_ = static_cast<int32_t>(realHostWindowId),
     };
     session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
     CHECK_NULL_VOID(session_);
@@ -470,6 +470,9 @@ void SessionWrapperImpl::NotifyForeground()
     UIEXT_LOGI("NotifyForeground, persistentid = %{public}d, hostWindowId = %{public}u,"
         " windowSceneId = %{public}d, IsScenceBoardWindow: %{public}d.",
         session_->GetPersistentId(), hostWindowId, windowSceneId, container->IsScenceBoardWindow());
+    if (container->IsScenceBoardWindow() && windowSceneId != INVALID_WINDOW_ID) {
+        hostWindowId = windowSceneId;
+    }
     Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionActivation(
         session_, hostWindowId, std::move(foregroundCallback_));
 }
