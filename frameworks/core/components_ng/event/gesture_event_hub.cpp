@@ -1030,6 +1030,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     auto arkExtraInfoJson = JsonUtil::Create(true);
     auto dragNodeGrayscale = pipeline->GetDragNodeGrayscale();
     auto dipScale = pipeline->GetDipScale();
+    arkExtraInfoJson->Put("scale", scale);
     arkExtraInfoJson->Put("dip_scale", dipScale);
     arkExtraInfoJson->Put("drag_node_gray_scale", dragNodeGrayscale);
     UpdateExtraInfo(frameNode, arkExtraInfoJson, scale);
