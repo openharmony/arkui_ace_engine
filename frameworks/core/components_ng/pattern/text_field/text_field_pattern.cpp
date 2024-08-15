@@ -1330,6 +1330,16 @@ void TextFieldPattern::HandleOnRedoAction()
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
+bool TextFieldPattern::CanUndo()
+{
+    return operationRecords_.size() > 1;
+}
+
+bool TextFieldPattern::CanRedo()
+{
+    return !redoOperationRecords_.empty();
+}
+
 void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle, bool showMenu)
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnSelectAll");

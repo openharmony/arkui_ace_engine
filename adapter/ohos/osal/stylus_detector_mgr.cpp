@@ -99,6 +99,30 @@ std::string StylusDetectorMgr::StylusDetectorCallBack::GetText(int32_t nodeId)
     return pattern->GetTextValue();
 }
 
+void StylusDetectorMgr::StylusDetectorCallBack::Redo(int32_t nodeId)
+{
+    auto UiNode = ElementRegister::GetInstance()->GetUINodeById(nodeId);
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(UiNode);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_EQUAL_VOID(frameNode->GetTag(), V2::RICH_EDITOR_ETS_TAG);
+    auto pattern = frameNode->GetPattern<NG::TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->HandleOnRedoAction();
+    frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void StylusDetectorMgr::StylusDetectorCallBack::Undo(int32_t nodeId)
+{
+    auto UiNode = ElementRegister::GetInstance()->GetUINodeById(nodeId);
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(UiNode);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_EQUAL_VOID(frameNode->GetTag(), V2::RICH_EDITOR_ETS_TAG);
+    auto pattern = frameNode->GetPattern<NG::TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->HandleOnUndoAction();
+    frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE_SELF);
+}
+
 void StylusDetectorMgr::StylusDetectorCallBack::OnDetector(
     const CommandType& command, std::string args, std::shared_ptr<IAceStylusCallback> callback)
 {
@@ -131,6 +155,12 @@ void StylusDetectorMgr::StylusDetectorCallBack::OnDetector(
                 case COMMAND_GET_TEXT:
                     res.resultData = StylusDetectorMgr::StylusDetectorCallBack::GetText(nodeId);
                     break;
+                case COMMAND_UNDO:
+                    StylusDetectorMgr::StylusDetectorCallBack::Undo(nodeId);
+                    break;
+                case COMMAND_REDO:
+                    StylusDetectorMgr::StylusDetectorCallBack::Redo(nodeId);
+                    break;
                 case COMMAND_INVALID:
                     LOGE("StylusDetector received error command.");
                     res.errorMessage = "StylusDetector received error command.";
@@ -144,6 +174,43 @@ void StylusDetectorMgr::StylusDetectorCallBack::OnDetector(
             }
         },
         TaskExecutor::TaskType::UI, "ArkUIDetectorStylusAction");
+}
+
+bool StylusDetectorMgr::StylusDetectorCallBack::OnDetectorSync(const CommandType& command)
+{
+    bool result = false;
+    auto nodeId = StylusDetectorMgr::GetInstance()->GetDefaultNodeId();
+    CHECK_EQUAL_RETURN(nodeId, 0, result);
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_RETURN(container, result);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, result);
+    auto taskScheduler = pipelineContext->GetTaskExecutor();
+    CHECK_NULL_RETURN(taskScheduler, result);
+
+    LOGI("Stylus received commandType:%{public}d", static_cast<int32_t>(command));
+    taskScheduler->PostSyncTask(
+        [nodeId, command, &result]() {
+            auto UiNode = ElementRegister::GetInstance()->GetUINodeById(nodeId);
+            auto frameNode = AceType::DynamicCast<NG::FrameNode>(UiNode);
+            CHECK_NULL_VOID(frameNode);
+            CHECK_EQUAL_VOID(frameNode->GetTag(), V2::RICH_EDITOR_ETS_TAG);
+            auto pattern = frameNode->GetPattern<NG::TextFieldPattern>();
+            CHECK_NULL_VOID(pattern);
+
+            switch (command) {
+                case COMMAND_CANUNDO:
+                    result = pattern->CanUndo();
+                    break;
+                case COMMAND_CANREDO:
+                    result = pattern->CanRedo();
+                    break;
+                default:
+                    break;
+            }
+        },
+        TaskExecutor::TaskType::UI, "ArkUIDetectorSyncStylusAction");
+    return result;
 }
 
 StylusDetectorMgr* StylusDetectorMgr::GetInstance()
