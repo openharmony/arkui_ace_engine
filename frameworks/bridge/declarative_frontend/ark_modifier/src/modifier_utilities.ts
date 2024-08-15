@@ -148,6 +148,8 @@ class ModifierUtils {
     if (!arkModifier._weakPtr.invalid()) {
       attributeModifierWithKey.applyPeer(arkModifier.nativePtr,
         (attributeModifierWithKey.value === undefined || attributeModifierWithKey.value === null));
+    } else {
+      ArkLogConsole.warn("pointer is invalid when putDirtyModifier");
     }
     this.dirtyComponentSet.add(arkModifier);
     if (!this.dirtyFlag) {
