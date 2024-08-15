@@ -804,6 +804,7 @@ bool TextEmojiProcessor::HandleDeleteAction(std::u32string& u32Content, int32_t 
     if (isBackward) {
         if (deleteCount > 0) {
             int32_t start = static_cast<int32_t>(u32Content.length()) - deleteCount;
+            start = std::max(start, 0);
             u32Content.erase(start, deleteCount);
             return true;
         }
