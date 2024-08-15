@@ -1307,4 +1307,141 @@ HWTEST_F(TextFieldPatternTestTwo, ProcessFocusStyle001, TestSize.Level0)
     pattern->ProcessFocusStyle();
     EXPECT_EQ(pattern->inlineSelectAllFlag_, true);
 }
+
+/**
+ * @tc.name: HandleOnSelectAll001
+ * @tc.desc: test testInput text HandleOnSelectAll
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, HandleOnSelectAll001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->contentController_->content_ = "Test.dat";
+    pattern->HandleOnSelectAll(true, true, true);
+    EXPECT_EQ(pattern->selectController_->GetEndIndex(), 4);
+
+    pattern->contentController_->content_ = "Test.";
+    pattern->HandleOnSelectAll(false, true, true);
+    EXPECT_EQ(pattern->selectController_->GetEndIndex(), 0);
+
+    pattern->selectOverlay_->SetUsingMouse(true);
+    pattern->HandleOnSelectAll(false, true, true);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    ASSERT_NE(theme, nullptr);
+    theme->textfieldShowHandle_ = true;
+    pattern->HandleOnSelectAll(false, true, true);
+    EXPECT_EQ(pattern->selectController_->GetEndIndex(), 5);
+}
+
+/**
+ * @tc.name: AutoFillValueChanged001
+ * @tc.desc: test testInput text AutoFillValueChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, AutoFillValueChanged001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    pattern->isFillRequestFinish_ = false;
+    pattern->AutoFillValueChanged();
+
+    layoutProperty->UpdateTextContentType(TextContentType::USER_NAME);
+    pattern->AutoFillValueChanged();
+
+    layoutProperty->UpdateTextContentType(TextContentType::VISIBLE_PASSWORD);
+    pattern->AutoFillValueChanged();
+
+    layoutProperty->UpdateTextContentType(TextContentType::FORMAT_ADDRESS);
+    pattern->FireOnTextChangeEvent();
+    pattern->AutoFillValueChanged();
+
+    layoutProperty->UpdateTextContentType(TextContentType::FORMAT_ADDRESS);
+    /* Because the AutoFillValueChanged function does not return a value,
+        the FireOnTextChangeEvent function is used for indirect calling */
+    EXPECT_EQ(pattern->FireOnTextChangeEvent(), false);
+}
+
+/**
+ * @tc.name: UpdateCaretByTouchMove001
+ * @tc.desc: test testInput text UpdateCaretByTouchMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, UpdateCaretByTouchMove001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->contentController_->SetTextValue("Test");
+
+    TouchEventInfo touchEventInfo("onTouch");
+    TouchLocationInfo touchLocationInfo(0);
+    touchLocationInfo.touchType_ = TouchType::MOVE;
+    touchLocationInfo.localLocation_ = Offset(0.0f, 0.0f);
+    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    pattern->UpdateCaretByTouchMove(touchEventInfo);
+    pattern->UpdateCaretByTouchMove(touchEventInfo);
+
+    auto magnifierController = pattern->magnifierController_;
+    pattern->magnifierController_ = nullptr;
+    pattern->UpdateCaretByTouchMove(touchEventInfo);
+    pattern->magnifierController_ = magnifierController;
+
+    /* Make the GetIsPreviewText function return true */
+    pattern->hasPreviewText_ = true;
+
+    /* Make the IsTextArea function return false */
+    auto layoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateMaxLines(1);
+
+    pattern->UpdateCaretByTouchMove(touchEventInfo);
+    EXPECT_EQ(pattern->selectController_->GetCaretIndex(), 0);
+}
+
+/**
+ * @tc.name: CheckIfNeedToResetKeyboard001
+ * @tc.desc: test testInput text CheckIfNeedToResetKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, CheckIfNeedToResetKeyboard001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto layoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateTextInputType(TextInputType::TEXT);
+
+    /* Give the pattern focus */
+    auto focusHub = pattern->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = true;
+    pattern->CheckIfNeedToResetKeyboard();
+
+    pattern->isCustomKeyboardAttached_ = true;
+    pattern->keyboard_ = TextInputType::UNSPECIFIED;
+    pattern->CheckIfNeedToResetKeyboard();
+    EXPECT_EQ(pattern->keyboard_, TextInputType::TEXT);
+}
 } // namespace OHOS::Ace::NG
