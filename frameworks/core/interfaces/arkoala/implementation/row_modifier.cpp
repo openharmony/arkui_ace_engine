@@ -68,29 +68,4 @@ const GENERATED_ArkUIRowModifier* GetRowModifier()
     };
     return &ArkUIRowModifierImpl;
 }
-
-}
-} // RowInterface
-
-namespace RowAttribute {
-void AlignItemsImpl(Ark_NativePointer node, Ark_Int32 value) {
-}
-void JustifyContentImpl(Ark_NativePointer node, Ark_Int32 value) {
-  auto frameNode = reinterpret_cast<FrameNode *>(node);
-  RowModelNG::SetJustifyContent(frameNode, static_cast<FlexAlign>(value));
-}
-void PointLightImpl(Ark_NativePointer node, const Ark_PointLightStyle* value) {
-}
-} // RowAttribute
-
-const GENERATED_ArkUIRowModifier* GetRowModifier() {
-    static const GENERATED_ArkUIRowModifier ArkUIRowModifierImpl {
-        RowInterface::_setRowOptionsImpl,
-        RowAttribute::AlignItemsImpl,
-        RowAttribute::JustifyContentImpl,
-        RowAttribute::PointLightImpl,
-    };
-    return &ArkUIRowModifierImpl;
-}
-
 } // namespace OHOS::Ace::NG::GeneratedModifier
