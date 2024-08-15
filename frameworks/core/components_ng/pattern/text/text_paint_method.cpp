@@ -136,8 +136,9 @@ void TextPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     auto contentRect = textPattern->GetTextContentRect();
     std::vector<RectF> selectedRects;
     if (selection.GetTextStart() != selection.GetTextEnd()) {
-        selectedRects = pManager->GetRects(selection.GetTextStart(), selection.GetTextEnd());
-        TextBase::CalculateSelectedRect(selectedRects, contentRect.Width());
+        auto rects = pManager->GetParagraphsRects(selection.GetTextStart(), selection.GetTextEnd());
+        auto paragraphInfos = pManager->GetParagraphs();
+        selectedRects = CalculateSelectedRect(rects, paragraphInfos, contentRect.Width());
     }
     textOverlayModifier_->SetContentRect(contentRect);
     textOverlayModifier_->SetShowSelect(textPattern->GetShowSelect());
@@ -155,5 +156,21 @@ void TextPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     if (context->GetClipEdge().has_value()) {
         textOverlayModifier_->SetIsClip(context->GetClipEdge().value());
     }
+}
+
+std::vector<RectF> TextPaintMethod::CalculateSelectedRect(const std::vector<std::vector<RectF>>& selectedRects,
+    const std::list<ParagraphManager::ParagraphInfo>& paragraphInfos, float contentWidth)
+{
+    std::vector<RectF> result;
+    if (paragraphInfos.size() != selectedRects.size()) {
+        return result;
+    }
+    int32_t index = 0;
+    for (const auto& info : paragraphInfos) {
+        std::vector<RectF> rects = selectedRects[index];
+        TextBase::CalculateSelectedRect(rects, contentWidth, info.paragraphStyle.direction);
+        result.insert(result.end(), rects.begin(), rects.end());
+    }
+    return result;
 }
 } // namespace OHOS::Ace::NG

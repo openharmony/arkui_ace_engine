@@ -1444,14 +1444,14 @@ HWTEST_F(TextTestFiveNg, GetSpanParagraphStyle001, TestSize.Level1)
     auto textLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
     ASSERT_NE(textLayoutAlgorithm, nullptr);
 
-    std::unique_ptr<TextLineStyle> lineStyle = std::make_unique<TextLineStyle>();
     ParagraphStyle pStyle;
 
-    lineStyle->UpdateMaxLines(1024);
-    lineStyle->UpdateEllipsisMode(EllipsisMode::HEAD);
-    lineStyle->UpdateLineBreakStrategy(LineBreakStrategy::GREEDY);
-    lineStyle->UpdateLeadingMargin(LeadingMargin());
-    textLayoutAlgorithm->GetSpanParagraphStyle(lineStyle, pStyle);
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->textLineStyle->UpdateMaxLines(1024);
+    spanItem->textLineStyle->UpdateEllipsisMode(EllipsisMode::HEAD);
+    spanItem->textLineStyle->UpdateLineBreakStrategy(LineBreakStrategy::GREEDY);
+    spanItem->textLineStyle->UpdateLeadingMargin(LeadingMargin());
+    textLayoutAlgorithm->GetSpanParagraphStyle(nullptr, spanItem, pStyle);
     EXPECT_EQ(pStyle.maxLines, 1024);
     EXPECT_EQ(pStyle.ellipsisMode, EllipsisMode::HEAD);
     EXPECT_EQ(pStyle.lineBreakStrategy, LineBreakStrategy::GREEDY);

@@ -52,7 +52,7 @@ public:
     RefPtr<Paragraph> GetSingleParagraph() const;
 
 protected:
-    virtual void GetSpanParagraphStyle(const std::unique_ptr<TextLineStyle>& lineStyle, ParagraphStyle& pStyle);
+    void GetSpanParagraphStyle(LayoutWrapper* layoutWrapper, const RefPtr<SpanItem>& spanItem, ParagraphStyle& pStyle);
     virtual ParagraphStyle GetParagraphStyle(
         const TextStyle& textStyle, const std::string& content, LayoutWrapper* layoutWrapper) const;
     virtual bool CreateParagraph(
@@ -111,6 +111,7 @@ private:
         return 0.0f;
     }
     static TextDirection GetTextDirection(const std::string& content, LayoutWrapper* layoutWrapper);
+    static TextDirection GetTextDirectionByContent(const std::string& content);
 
     void UpdateSymbolSpanEffect(
         RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph, const std::list<RefPtr<SpanItem>>& spans);

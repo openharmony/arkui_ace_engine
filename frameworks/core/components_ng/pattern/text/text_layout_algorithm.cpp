@@ -72,7 +72,7 @@ void TextLayoutAlgorithm::ConstructParagraphSpanGroup(std::list<RefPtr<SpanItem>
     // split spans into groups by mew paragraph style
     auto it = spans.begin();
     ParagraphStyle pStyle;
-    GetSpanParagraphStyle((*it)->textLineStyle, pStyle);
+    GetSpanParagraphStyle(nullptr, (*it), pStyle);
     while (it != spans.end()) {
         auto spanItem = *it;
         if (!spanItem) {
@@ -88,7 +88,7 @@ void TextLayoutAlgorithm::ConstructParagraphSpanGroup(std::list<RefPtr<SpanItem>
             auto next = *(std::next(it));
             ParagraphStyle nextSpanParagraphStyle;
             if (next) {
-                GetSpanParagraphStyle(next->textLineStyle, nextSpanParagraphStyle);
+                GetSpanParagraphStyle(nullptr, next, nextSpanParagraphStyle);
             } else {
                 break;
             }
