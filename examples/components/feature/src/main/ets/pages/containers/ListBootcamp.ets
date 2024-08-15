@@ -14,6 +14,7 @@
  */
 import { Drawer } from 'common/src/main/ets/components/Drawer';
 import { RadioBlock, SliderBlock, ColorBlock, useEnabled } from 'common';
+import { LengthMetrics, LengthUnit } from '@ohos.arkui.node';
 
 @Component
 export struct ListBootcamp {
@@ -37,6 +38,14 @@ export struct ListBootcamp {
   @State dividerValue: boolean = false;
   @State enableDirection: boolean = false;
   @State currentDirection: Direction = Direction.Auto;
+  @State enableFadingEdge: boolean = false;
+  @State fadingEdge: boolean = false;
+  @State enableFadingEdgeLengthValue: boolean = false;
+  @State fadingEdgeLengthValue: number = 32;
+  @State enableFadingEdgeLengthUnit: boolean = false;
+  @State fadingEdgeLengthUnit: LengthUnit = LengthUnit.VP;
+  @State enableAxis: boolean = false;
+  @State axis: Axis = Axis.Vertical;
 
   build() {
     NavDestination() {
@@ -107,6 +116,13 @@ export struct ListBootcamp {
           endMargin: useEnabled(this.enableDividerEndMargin, this.dividerEndMargin)
         } : null)
       .scrollBar(useEnabled(this.enableScrollBar, this.scrollBar))
+      .listDirection(useEnabled(this.enableAxis, this.axis))
+      .fadingEdge(
+        useEnabled(this.enableFadingEdge, this.fadingEdge),
+        useEnabled<FadingEdgeOptions>(this.fadingEdge, {
+          fadingEdgeLength: new LengthMetrics(this.fadingEdgeLengthValue, this.fadingEdgeLengthUnit)
+        })
+      )
 
     }
   }
@@ -152,6 +168,45 @@ export struct ListBootcamp {
           dataSource: [
             { label: '自定义', value: true },
             { label: '不显示', value: false }
+          ]
+        })
+        RadioBlock({
+          title: '开启渐隐效果',
+          isEnabled: this.enableFadingEdge,
+          value: this.fadingEdge,
+          dataSource: [
+            { label: '开启', value: true },
+            { label: '关闭', value: false }
+          ]
+        })
+        if (this.fadingEdge) {
+          SliderBlock({
+            title: '渐隐长度值',
+            isEnabled: this.enableFadingEdgeLengthValue,
+            value: this.fadingEdgeLengthValue,
+            min: 0,
+            max: 500
+          })
+          RadioBlock({
+            title: '渐隐长度单位',
+            isEnabled: this.enableFadingEdgeLengthUnit,
+            value: this.fadingEdgeLengthUnit,
+            dataSource: [
+              { label: 'px', value: LengthUnit.PX },
+              { label: 'vp', value: LengthUnit.VP },
+              { label: 'fp', value: LengthUnit.FP },
+              { label: 'percent', value: LengthUnit.PERCENT },
+              { label: 'lpx', value: LengthUnit.LPX }
+            ]
+          })
+        }
+        RadioBlock({
+          title: '布局方向',
+          isEnabled: this.enableAxis,
+          value: this.axis,
+          dataSource: [
+            { label: '竖直', value: Axis.Vertical },
+            { label: '水平', value: Axis.Horizontal }
           ]
         })
         if (this.dividerValue) {
