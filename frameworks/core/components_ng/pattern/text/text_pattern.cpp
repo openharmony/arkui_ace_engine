@@ -2119,13 +2119,8 @@ void TextPattern::OnModifyDone()
             ResetSelection();
         }
 
-        if (textDetectEnable_) {
-            auto entityJson = JsonUtil::ParseJsonString(textForDisplay_);
-            TAG_LOGI(AceLogTag::ACE_TEXT, "text content is the json format: %{public}d", entityJson->IsNull());
-            if (!entityJson->IsNull() && !entityJson->GetValue("bundleName")->IsNull() &&
-                dataDetectorAdapter_->ParseOriText(entityJson, textForDisplay_)) {
-                textLayoutProperty->UpdateContent(textForDisplay_);
-            }
+        if (CanStartAITask() && !dataDetectorAdapter_->aiDetectInitialized_) {
+            ParseOriText(textForDisplay_);
         }
     }
 
@@ -2449,8 +2444,9 @@ void TextPattern::ResetAfterTextChange()
 void TextPattern::ParseOriText(const std::string& currentText)
 {
     auto entityJson = JsonUtil::ParseJsonString(currentText);
-    TAG_LOGI(AceLogTag::ACE_TEXT, "text content is the json format: %{public}d", entityJson->IsNull());
-    if (!entityJson->IsNull() && !entityJson->GetValue("bundleName")->IsNull() &&
+    bool entityIsJson = !entityJson->IsNull();
+    TAG_LOGI(AceLogTag::ACE_TEXT, "text content is the json format: %{public}d", entityIsJson);
+    if (entityIsJson && !entityJson->GetValue("bundleName")->IsNull() &&
         dataDetectorAdapter_->ParseOriText(entityJson, textForDisplay_)) {
         if (childNodes_.empty()) {
             auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
@@ -3164,6 +3160,41 @@ void TextPattern::RemoveAreaChangeInner()
         return;
     }
     pipeline->RemoveOnAreaChangeNode(host->GetId());
+}
+
+void TextPattern::SetTextDetectEnable(bool enable)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    dataDetectorAdapter_->frameNode_ = host;
+    if (enable == textDetectEnable_) {
+        return;
+    }
+    textDetectEnable_ = enable;
+    if (textDetectEnable_) {
+        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        CHECK_NULL_VOID(pipeline);
+        auto callback = [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->dataDetectorAdapter_->GetAIEntityMenu();
+        };
+        pipeline->SetConfigChangedCallback(host->GetId(), callback);
+    } else {
+        dataDetectorAdapter_->CancelAITask();
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+bool TextPattern::CanStartAITask()
+{
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    if (textLayoutProperty) {
+        return textDetectEnable_ && enabled_ && !IsSetObscured() &&
+               textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) != TextOverflow::MARQUEE;
+    } else {
+        return textDetectEnable_ && enabled_;
+    }
 }
 
 bool TextPattern::NeedShowAIDetect()
