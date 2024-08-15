@@ -268,6 +268,13 @@ void DatePickerPattern::OnColorConfigurationUpdate()
         !titleLayoutRenderContext->IsUniRenderEnabled()) {
         titleLayoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
     }
+    UpdateTitleTextColor(buttonTitleNode, pickerTheme);
+    OnModifyDone();
+}
+
+void DatePickerPattern::UpdateTitleTextColor(
+    const RefPtr<FrameNode>& buttonTitleNode, const RefPtr<PickerTheme>& pickerTheme)
+{
     auto childButton = buttonTitleNode->GetFirstChild();
     CHECK_NULL_VOID(childButton);
     auto ButtonNode = DynamicCast<FrameNode>(childButton);
@@ -275,19 +282,24 @@ void DatePickerPattern::OnColorConfigurationUpdate()
     auto buttonTitleRenderContext = ButtonNode->GetRenderContext();
     CHECK_NULL_VOID(buttonTitleRenderContext);
     buttonTitleRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    auto childText = ButtonNode->GetFirstChild();
+    auto childColumn = ButtonNode->GetFirstChild();
+    CHECK_NULL_VOID(childColumn);
+    auto childText = childColumn->GetFirstChild();
     CHECK_NULL_VOID(childText);
     auto textTitleNode = DynamicCast<FrameNode>(childText);
     CHECK_NULL_VOID(textTitleNode);
     auto textLayoutProperty = textTitleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateTextColor(pickerTheme->GetTitleStyle().GetTextColor());
-    auto contentRowNode = contentRowNode_.Upgrade();
-    CHECK_NULL_VOID(contentRowNode);
-    auto layoutRenderContext = contentRowNode->GetRenderContext();
-    CHECK_NULL_VOID(layoutRenderContext);
-    layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
-    OnModifyDone();
+    if (childColumn->GetChildren().size() > 1) {
+        auto spinner = childColumn->GetLastChild();
+        CHECK_NULL_VOID(spinner);
+        auto spinnerNode = DynamicCast<FrameNode>(spinner);
+        CHECK_NULL_VOID(spinnerNode);
+        auto spinnerRenderProperty = spinnerNode->GetPaintProperty<ImageRenderProperty>();
+        CHECK_NULL_VOID(spinnerRenderProperty);
+        spinnerRenderProperty->UpdateSvgFillColor(pickerTheme->GetTitleStyle().GetTextColor());
+    }
 }
 
 void DatePickerPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
