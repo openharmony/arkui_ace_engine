@@ -133,28 +133,34 @@ export struct ToolBar {
   }
 
   @Builder MoreTabBuilder(index: number) {
-    Column() {
-      Image(PUBLIC_MORE)
-        .width(IMAGE_SIZE)
-        .height(IMAGE_SIZE)
-        .fillColor(this.iconPrimaryColor)
-        .margin({ bottom: $r('sys.float.padding_level1') })
-        .objectFit(ImageFit.Contain)
-        .draggable(false)
-      Text(this.moreText)
-        .fontColor(this.fontPrimaryColor)
-        .fontSize($r('sys.float.ohos_id_text_size_caption'))
-        .fontWeight(FontWeight.Medium)
-        .maxLines(1)
-        .textOverflow({ overflow: TextOverflow.Ellipsis })
-        .textAlign(TextAlign.Center)
-    }.width('100%').height('100%')
-    .justifyContent(FlexAlign.Center)
+    Button({ type: ButtonType.Normal, stateEffect: false }) {
+      Column() {
+        Image(PUBLIC_MORE)
+          .width(IMAGE_SIZE)
+          .height(IMAGE_SIZE)
+          .fillColor(this.iconPrimaryColor)
+          .margin({ bottom: $r('sys.float.padding_level1') })
+          .objectFit(ImageFit.Contain)
+          .draggable(false)
+        Text(this.moreText)
+          .fontColor(this.fontPrimaryColor)
+          .fontSize($r('sys.float.ohos_id_text_size_caption'))
+          .fontWeight(FontWeight.Medium)
+          .maxLines(1)
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .textAlign(TextAlign.Center)
+      }
+      .width('100%')
+      .height('100%')
+      .justifyContent(FlexAlign.Center)
+      .padding({
+        start: LengthMetrics.resource($r('sys.float.padding_level2')),
+        end: LengthMetrics.resource($r('sys.float.padding_level2')),
+      })
+      .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
+    }
+    .width('100%').height('100%')
     .bindMenu(this.menuContent, { placement: Placement.TopRight, offset: { x: -12, y : -10 } })
-    .padding({
-      start: LengthMetrics.resource($r('sys.float.padding_level2')),
-      end: LengthMetrics.resource($r('sys.float.padding_level2')),
-    })
     .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
     .backgroundColor(this.itemBackground)
     .onHover((isHover: boolean) => {
@@ -207,45 +213,52 @@ export struct ToolBar {
   }
 
   @Builder TabBuilder(index: number) {
-    Column() {
-      if (this.toolBarList[index]?.toolBarSymbolOptions?.normal ||
-        this.toolBarList[index]?.toolBarSymbolOptions?.activated) {
-        SymbolGlyph()
-          .fontSize(IMAGE_SIZE)
-          .symbolEffect(this.symbolEffect, false)
-          .attributeModifier(this.getToolBarSymbolModifier(index))
+    Button({ type: ButtonType.Normal, stateEffect: false }) {
+      Column() {
+        if (this.toolBarList[index]?.toolBarSymbolOptions?.normal ||
+          this.toolBarList[index]?.toolBarSymbolOptions?.activated) {
+          SymbolGlyph()
+            .fontSize(IMAGE_SIZE)
+            .symbolEffect(this.symbolEffect, false)
+            .attributeModifier(this.getToolBarSymbolModifier(index))
+            .opacity((this.toolBarList[index]?.state === ItemState.DISABLE) ? $r('sys.float.interactive_disable') : 1)
+            .margin({ bottom: $r('sys.float.padding_level1') })
+        } else {
+          Image(this.toolBarList[index]?.icon)
+            .width(IMAGE_SIZE)
+            .height(IMAGE_SIZE)
+            .fillColor(this.getIconColor(index))
+            .opacity((this.toolBarList[index]?.state === ItemState.DISABLE) ? $r('sys.float.interactive_disable') : 1)
+            .margin({ bottom: $r('sys.float.padding_level1') })
+            .objectFit(ImageFit.Contain)
+            .draggable(false)
+        }
+        Text(this.toolBarList[index]?.content)
+          .fontColor(this.getTextColor(index))
+          .fontSize($r('sys.float.ohos_id_text_size_caption'))
+          .maxFontSize($r('sys.float.ohos_id_text_size_caption'))
+          .minFontSize(9)
+          .fontWeight(FontWeight.Medium)
+          .maxLines(1)
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
           .opacity((this.toolBarList[index]?.state === ItemState.DISABLE) ? $r('sys.float.interactive_disable') : 1)
-          .margin({ bottom: $r('sys.float.padding_level1') })
-      } else {
-        Image(this.toolBarList[index]?.icon)
-          .width(IMAGE_SIZE)
-          .height(IMAGE_SIZE)
-          .fillColor(this.getIconColor(index))
-          .opacity((this.toolBarList[index]?.state === ItemState.DISABLE) ? $r('sys.float.interactive_disable') : 1)
-          .margin({ bottom: $r('sys.float.padding_level1') })
-          .objectFit(ImageFit.Contain)
-          .draggable(false)
+          .textAlign(TextAlign.Center)
       }
-      Text(this.toolBarList[index]?.content)
-        .fontColor(this.getTextColor(index))
-        .fontSize($r('sys.float.ohos_id_text_size_caption'))
-        .maxFontSize($r('sys.float.ohos_id_text_size_caption'))
-        .minFontSize(9)
-        .fontWeight(FontWeight.Medium)
-        .maxLines(1)
-        .textOverflow({ overflow: TextOverflow.Ellipsis })
-        .opacity((this.toolBarList[index]?.state === ItemState.DISABLE) ? $r('sys.float.interactive_disable') : 1)
-        .textAlign(TextAlign.Center)
+      .justifyContent(FlexAlign.Center)
+      .width('100%')
+      .height('100%')
+      .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
+      .padding({
+        start: LengthMetrics.resource($r('sys.float.padding_level2')),
+        end: LengthMetrics.resource($r('sys.float.padding_level2')),
+      })
     }
-    .justifyContent(FlexAlign.Center)
-    .width('100%').height('100%')
+    .enabled(this.toolBarList[index]?.state !== ItemState.DISABLE)
+    .width('100%')
+    .height('100%')
+    .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
     .focusable(!(this.toolBarList[index]?.state === ItemState.DISABLE))
     .focusOnTouch(!(this.toolBarList[index]?.state === ItemState.DISABLE))
-    .padding({
-      start: LengthMetrics.resource($r('sys.float.padding_level2')),
-      end: LengthMetrics.resource($r('sys.float.padding_level2')),
-    })
-    .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
     .backgroundColor(this.itemBackground)
     .onHover((isHover: boolean) => {
       if (isHover) {
@@ -390,9 +403,9 @@ export struct ToolBar {
           enabled: this.toolBarList[i].state !== ItemState.DISABLE,
         }
       } else {
-        this.toolBarItemBackground[i] = Color.Transparent;
         this.menuContent = [];
       }
+      this.toolBarItemBackground[i] = Color.Transparent;
     }
     return true;
   }
