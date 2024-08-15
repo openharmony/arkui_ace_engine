@@ -341,6 +341,8 @@ private:
     MarkProcessedEventInfo lastReceivedEvent_;
     MarkProcessedEventInfo lastConsumedEvent_;
     int32_t lastDownFingerNumber_ = 0;
+    // used to pseudo cancel event.
+    TouchEvent lastTouchEvent_;
 };
 
 } // namespace OHOS::Ace

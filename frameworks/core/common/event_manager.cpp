@@ -649,6 +649,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
         lastDownFingerNumber_ = static_cast<int32_t>(downFingerIds_.size());
         return false;
     }
+    lastTouchEvent_ = event;
 
     if (point.type == TouchType::DOWN) {
         refereeNG_->CleanGestureRefereeState(event.id);
@@ -2064,6 +2065,7 @@ void EventManager::MockCancelEventAndDispatch(const TouchEvent& touchPoint)
     mockedEvent.type = TouchType::CANCEL;
     for (const auto& iter : downFingerIds_) {
         mockedEvent.id = iter.first;
+        mockedEvent.pointers = lastTouchEvent_.pointers;
         DispatchTouchEvent(mockedEvent);
     }
 }
