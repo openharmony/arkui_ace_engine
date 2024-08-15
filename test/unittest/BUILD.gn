@@ -62,6 +62,7 @@ config("ace_unittest_config") {
     "$hilog_root/interfaces/native/innerkits/include",
     "$root_out_dir/arkui/framework",
     "//third_party/icu/icu4c/source/common",
+    "//third_party/skia",
     "//foundation/window/window_manager/interfaces/innerkits",
   ]
   if (ace_engine_feature_enable_split_mode &&
@@ -534,6 +535,7 @@ ohos_source_set("ace_components_mock") {
     "$ace_root/test/mock/core/pattern/mock_container_modal_utils.cpp",
     "$ace_root/test/mock/core/pipeline/mock_element_register.cpp",
     "$ace_root/test/mock/core/pipeline/mock_pipeline_context.cpp",
+    "$ace_root/test/mock/core/render/mock_animated_image.cpp",
     "$ace_root/test/mock/core/render/mock_animation_utils.cpp",
     "$ace_root/test/mock/core/render/mock_canvas_image.cpp",
     "$ace_root/test/mock/core/render/mock_component_snapshot.cpp",

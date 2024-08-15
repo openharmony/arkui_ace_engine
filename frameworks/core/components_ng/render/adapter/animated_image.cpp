@@ -135,6 +135,12 @@ void AnimatedImage::ControlAnimation(bool play)
     (play) ? animator_->Play() : animator_->Pause();
 }
 
+
+Animator::Status AnimatedImage::GetAnimatorStatus() const
+{
+    return animator_ ? animator_->GetStatus() : Animator::Status::IDLE;
+}
+
 void AnimatedImage::RenderFrame(uint32_t idx)
 {
     if (GetCachedFrame(idx)) {
