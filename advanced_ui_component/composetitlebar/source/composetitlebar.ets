@@ -454,7 +454,7 @@ struct ImageMenuItem {
   build() {
     Row() {
       Image(this.item?.value)
-        .matchTextDirection(this.item.value === PUBLIC_BACK ? true : false)
+        .matchTextDirection(this.item?.value === PUBLIC_BACK ? true : false)
         .width(ImageMenuItem.imageSize)
         .draggable(false)
         .height(ImageMenuItem.imageSize)

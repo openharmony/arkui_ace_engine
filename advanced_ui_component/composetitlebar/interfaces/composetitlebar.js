@@ -1136,7 +1136,7 @@ class ImageMenuItem extends ViewPU {
     this.observeComponentCreation((s1, t1) => {
       ViewStackProcessor.StartGetAccessRecordingFor(s1);
       Image.create(this.item?.value);
-      Image.matchTextDirection(this.item.value === PUBLIC_BACK ? true : false);
+      Image.matchTextDirection(this.item?.value === PUBLIC_BACK ? true : false);
       Image.width(ImageMenuItem.imageSize);
       Image.draggable(false);
       Image.height(ImageMenuItem.imageSize);
