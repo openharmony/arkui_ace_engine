@@ -859,7 +859,30 @@ void AceContainer::InitializeCallback()
             axisTask, TaskExecutor::TaskType::UI, "ArkUIAceContainerAxisEvent", PriorityType::VIP);
     };
     aceView_->RegisterAxisEventCallback(axisEventCallback);
-
+#ifdef SUPPORT_DIGITAL_CROWN
+    auto&& crownEventCallback = [context = pipelineContext_, id = instanceId_](
+                                   const CrownEvent& event, const std::function<void()>& markProcess,
+                                   const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
+        ContainerScope scope(id);
+        auto crownTask = [context, event, markProcess, node]() {
+            if (node) {
+                context->OnCrownEvent(event, node);
+            } else {
+                context->OnCrownEvent(event);
+            }
+            CHECK_NULL_VOID(markProcess);
+            markProcess();
+        };
+        auto uiTaskRunner = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        if (uiTaskRunner.IsRunOnCurrentThread()) {
+            crownTask();
+            return;
+        }
+        context->GetTaskExecutor()->PostTask(
+            crownTask, TaskExecutor::TaskType::UI, "ArkUIAceContainerCrownEvent", PriorityType::VIP);
+    };
+    aceView_->RegisterCrownEventCallback(crownEventCallback);
+#endif
     auto&& keyEventCallback = [context = pipelineContext_, id = instanceId_](const KeyEvent& event) {
         ContainerScope scope(id);
         bool result = false;

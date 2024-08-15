@@ -188,6 +188,9 @@ void CheckBoxModifier::DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& siz
     if (HoverEffectType::NONE == hoverEffectType_) {
         return;
     }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto checkboxTheme = pipeline->GetTheme<CheckboxTheme>();
     RSBrush brush;
     brush.SetColor(ToRSColor(animateTouchHoverColor_->Get()));
     brush.SetAntiAlias(true);
@@ -196,10 +199,12 @@ void CheckBoxModifier::DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& siz
     float endX;
     float endY;
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        originX = offset.GetX() - defaultPaddingSize_.ConvertToPx();
-        originY = offset.GetY() - defaultPaddingSize_.ConvertToPx();
-        endX = size.Width() + originX + CHECKBOX_DOUBLE_RATIO * defaultPaddingSize_.ConvertToPx();
-        endY = size.Height() + originY + CHECKBOX_DOUBLE_RATIO * defaultPaddingSize_.ConvertToPx();
+        originX = offset.GetX() - checkboxTheme->GetHoverPaddingSize().ConvertToPx();
+        originY = offset.GetY() - checkboxTheme->GetHoverPaddingSize().ConvertToPx();
+        endX = size.Width() + originX +
+            CHECKBOX_DOUBLE_RATIO * checkboxTheme->GetHoverPaddingSize().ConvertToPx();
+        endY = size.Height() + originY +
+            CHECKBOX_DOUBLE_RATIO * checkboxTheme->GetHoverPaddingSize().ConvertToPx();
     } else {
         originX = offset.GetX() - hotZoneHorizontalPadding_.ConvertToPx();
         originY = offset.GetY() - hotZoneVerticalPadding_.ConvertToPx();

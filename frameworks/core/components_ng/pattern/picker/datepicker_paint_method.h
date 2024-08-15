@@ -24,10 +24,11 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/render/divider_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
+#include "core/components_ng/pattern/picker_utils/picker_paint_method_utils.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT DatePickerPaintMethod : public NodePaintMethod {
+class ACE_EXPORT DatePickerPaintMethod : public PickerPaintMethodUtils, public NodePaintMethod {
     DECLARE_ACE_TYPE(DatePickerPaintMethod, NodePaintMethod)
 public:
     DatePickerPaintMethod() = default;
@@ -38,6 +39,7 @@ public:
         pattern_ = pattern;
     }
 
+    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
     CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
     void PaintDisable(RSCanvas& canvas, double X, double Y);
 

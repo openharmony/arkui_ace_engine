@@ -90,8 +90,10 @@ void DatePickerColumnPattern::OnModifyDone()
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
+    useButtonFocusArea_ = theme->NeedButtonFocusAreaType();
     pressColor_ = theme->GetPressColor();
     hoverColor_ = theme->GetHoverColor();
+    InitSelectorButtonProperties(theme);
     auto showCount = theme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     InitMouseAndPressEvent();
     SetAccessibilityAction();
@@ -247,10 +249,10 @@ void DatePickerColumnPattern::HandleMouseEvent(bool isHover)
 {
     if (isHover) {
         hoverd_ = true;
-        PlayHoverAnimation(hoverColor_);
+        PlayHoverAnimation(GetButtonHoverColor());
     } else {
         hoverd_ = false;
-        PlayHoverAnimation(Color::TRANSPARENT);
+        PlayHoverAnimation(buttonBgColor_);
     }
 }
 
@@ -261,10 +263,16 @@ void DatePickerColumnPattern::OnTouchDown()
 
 void DatePickerColumnPattern::OnTouchUp()
 {
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    SetSelectedMark(pickerTheme, true);
+
     if (hoverd_) {
-        PlayPressAnimation(hoverColor_);
+        PlayPressAnimation(GetButtonHoverColor());
     } else {
-        PlayPressAnimation(Color::TRANSPARENT);
+        PlayPressAnimation(buttonBgColor_);
     }
 }
 
@@ -307,6 +315,83 @@ void DatePickerColumnPattern::PlayHoverAnimation(const Color& color)
         CHECK_NULL_VOID(picker);
         picker->SetButtonBackgroundColor(color);
     });
+}
+
+void DatePickerColumnPattern::InitSelectorButtonProperties(const RefPtr<PickerTheme>& pickerTheme)
+{
+    CHECK_NULL_VOID(pickerTheme);
+    if (useButtonFocusArea_) {
+        buttonDefaultBgColor_ = pickerTheme->GetSelectorItemNormalBgColor();
+        buttonFocusBgColor_ = pickerTheme->GetSelectorItemFocusBgColor();
+        buttonDefaultBorderColor_ = pickerTheme->GetSelectorItemBorderColor();
+        buttonFocusBorderColor_ = pickerTheme->GetSelectorItemFocusBorderColor();
+        selectorTextFocusColor_ = pickerTheme->GetOptionStyle(true, true).GetTextColor();
+        pressColor_ = buttonDefaultBgColor_.BlendColor(pickerTheme->GetPressColor());
+        hoverColor_ = buttonDefaultBgColor_.BlendColor(pickerTheme->GetHoverColor());
+
+        buttonDefaultBorderWidth_ = pickerTheme->GetSelectorItemFocusBorderWidth();
+        buttonFocusBorderWidth_ = pickerTheme->GetSelectorItemBorderWidth();
+    }
+}
+
+const Color& DatePickerColumnPattern::GetButtonHoverColor() const
+{
+    return useButtonFocusArea_ && isFocusColumn_ ? buttonFocusBgColor_ : hoverColor_;
+}
+
+void DatePickerColumnPattern::UpdateColumnButtonFocusState(bool haveFocus, bool needMarkDirty)
+{
+    auto isInitUpdate = isFirstTimeUpdateButtonProps_ && (!haveFocus);
+    auto isFocusChanged = isFocusColumn_ != haveFocus;
+
+    if (isFocusChanged || isInitUpdate) {
+        isFocusColumn_ = haveFocus;
+        UpdateSelectorButtonProps(isFocusColumn_, needMarkDirty);
+    }
+    if (isFocusChanged) {
+        FlushCurrentOptions();
+    }
+    if (isInitUpdate) {
+        isFirstTimeUpdateButtonProps_ = false;
+    }
+}
+
+void DatePickerColumnPattern::UpdateSelectorButtonProps(bool haveFocus, bool needMarkDirty)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto blend = host->GetParent();
+    CHECK_NULL_VOID(blend);
+    auto stack = blend->GetParent();
+    CHECK_NULL_VOID(stack);
+    auto buttonNode = DynamicCast<FrameNode>(stack->GetFirstChild());
+    CHECK_NULL_VOID(buttonNode);
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    auto renderContext = buttonNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    BorderWidthProperty borderWidth;
+    BorderColorProperty borderColor;
+
+    if (haveFocus) {
+        buttonBgColor_ = buttonFocusBgColor_;
+        borderWidth.SetBorderWidth(buttonFocusBorderWidth_);
+        borderColor.SetColor(buttonFocusBorderColor_);
+    } else {
+        buttonBgColor_ = buttonDefaultBgColor_;
+        borderWidth.SetBorderWidth(buttonDefaultBorderWidth_);
+        borderColor.SetColor(buttonDefaultBorderColor_);
+    }
+
+    buttonLayoutProperty->UpdateBorderWidth(borderWidth);
+    renderContext->UpdateBorderColor(borderColor);
+    renderContext->UpdateBackgroundColor(buttonBgColor_);
+
+    if (needMarkDirty) {
+        buttonNode->MarkModifyDone();
+        buttonNode->MarkDirtyNode();
+    }
 }
 
 bool DatePickerColumnPattern::OnDirtyLayoutWrapperSwap(
@@ -476,8 +561,20 @@ void DatePickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
     const RefPtr<DataPickerRowLayoutProperty>& dataPickerRowLayoutProperty)
 {
     auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
-    textLayoutProperty->UpdateTextColor(dataPickerRowLayoutProperty->GetSelectedColor().value_or(
-        pickerTheme->GetOptionStyle(true, false).GetTextColor()));
+
+    if (selectedMarkPaint_) {
+        textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, true).GetTextColor());
+    } else {
+        auto selectTextThemeColor = pickerTheme->GetOptionStyle(true, false).GetTextColor();
+        auto selectTextColor = dataPickerRowLayoutProperty->GetSelectedColor().value_or(selectTextThemeColor);
+        if (isFocusColumn_) {
+            if (selectTextColor == selectTextThemeColor) {
+                selectTextColor = pickerTheme->GetOptionStyle(true, true).GetTextColor();
+            }
+        }
+        textLayoutProperty->UpdateTextColor(selectTextColor);
+    }
+
     if (dataPickerRowLayoutProperty->HasSelectedFontSize()) {
         textLayoutProperty->UpdateFontSize(dataPickerRowLayoutProperty->GetSelectedFontSize().value());
     } else {
@@ -639,6 +736,14 @@ void DatePickerColumnPattern::TextPropertiesLinearAnimation(
     textLayoutProperty->UpdateFontSize(updateSize);
     auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
     Color updateColor = colorEvaluator->Evaluate(startColor, endColor, distancePercent_);
+    if (selectedMarkPaint_ && (index == showCount / PICKER_SELECT_AVERAGE)) {
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+        CHECK_NULL_VOID(pickerTheme);
+        updateColor = pickerTheme->GetOptionStyle(true, true).GetTextColor();
+    }
+
     textLayoutProperty->UpdateTextColor(updateColor);
     if (scale < FONTWEIGHT) {
         textLayoutProperty->UpdateFontWeight(animationProperties_[index].fontWeight);
@@ -744,6 +849,12 @@ void DatePickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
 
 void DatePickerColumnPattern::HandleDragStart(const GestureEvent& event)
 {
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    SetSelectedMark(pickerTheme, true, true, true);
+
     CHECK_NULL_VOID(GetHost());
     CHECK_NULL_VOID(GetToss());
     auto toss = GetToss();
@@ -1101,6 +1212,9 @@ void DatePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
     if (GreatOrEqual(std::abs(dragDelta), std::abs(shiftDistance))) {
         InnerHandleScroll(LessNotEqual(dragDelta, 0.0), true, false);
         dragDelta = dragDelta % static_cast<int>(std::abs(shiftDistance));
+#ifdef SUPPORT_DIGITAL_CROWN
+        VibratorImpl::StartVibraFeedback(OHOS::Ace::NG::WATCHHAPTIC_CROWN_STRENGTH1, OHOS::Ace::NG::VIBRATOR_TYPE_ONE);
+#endif
     }
     // update selected option
     ScrollOption(dragDelta);
@@ -1208,6 +1322,12 @@ void DatePickerColumnPattern::OnAroundButtonClick(RefPtr<DatePickerEventParam> p
         CHECK_NULL_VOID(pipeline);
         pipeline->RequestFrame();
     }
+
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    SetSelectedMark(pickerTheme, true, true, true);
 }
 
 void DatePickerColumnPattern::PlayRestAnimation()
@@ -1282,5 +1402,107 @@ void DatePickerColumnPattern::AddHotZoneRectToText()
         DimensionRect hotZoneRegion = CalculateHotZone(i, midSize, middleChildHeight, otherChildHeight);
         childNode->AddHotZoneRect(hotZoneRegion);
     }
+}
+
+#ifdef SUPPORT_DIGITAL_CROWN
+void DatePickerColumnPattern::HandleCrownBeginEvent(const CrownEvent& event)
+{
+    auto toss = GetToss();
+    CHECK_NULL_VOID(toss);
+    auto offsetY = 0;
+    toss->SetStart(offsetY);
+    yLast_ = offsetY;
+    pressed_ = true;
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, event.angularVelocity, SceneStatus::START);
+}
+
+void DatePickerColumnPattern::HandleCrownMoveEvent(const CrownEvent& event)
+{
+    LOGD("DatePickerColumnPattern::HandleCrownMoveEvent event.degree=%{public}lf,Velocity=%{public}lf",
+        event.degree, event.angularVelocity);
+    SetMainVelocity(event.angularVelocity);
+    animationBreak_ = false;
+    CHECK_NULL_VOID(pressed_);
+    auto toss = GetToss();
+    CHECK_NULL_VOID(toss);
+    auto offsetY = GetCrownRotatePx(event);
+    LOGD("DatePickerColumnPattern::HandleCrownMoveEvent offsetY=%{public}lf", offsetY);
+
+    offsetY += yLast_;
+    toss->SetEnd(offsetY);
+    UpdateColumnChildPosition(offsetY);
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, event.angularVelocity, SceneStatus::RUNNING);
+}
+
+void DatePickerColumnPattern::HandleCrownEndEvent(const CrownEvent& event)
+{
+    SetMainVelocity(event.angularVelocity);
+    pressed_ = false;
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+
+    yOffset_ = 0.0;
+    yLast_ = 0.0;
+    if (!animationCreated_) {
+        ScrollOption(0.0);
+        return;
+    }
+    DatePickerScrollDirection dir =
+        scrollDelta_ > 0.0 ? DatePickerScrollDirection::DOWN : DatePickerScrollDirection::UP;
+    int32_t middleIndex = GetShowCount() / 2;
+    auto shiftDistance = (dir == DatePickerScrollDirection::UP) ? optionProperties_[middleIndex].prevDistance
+                                                                : optionProperties_[middleIndex].nextDistance;
+    auto shiftThreshold = shiftDistance / 2;
+    if (std::abs(scrollDelta_) >= std::abs(shiftThreshold)) {
+        InnerHandleScroll(LessNotEqual(scrollDelta_, 0.0), true, false);
+        scrollDelta_ = scrollDelta_ - std::abs(shiftDistance) * (dir == DatePickerScrollDirection::UP ? -1 : 1);
+#ifdef SUPPORT_DIGITAL_CROWN
+        VibratorImpl::StartVibraFeedback(OHOS::Ace::NG::WATCHHAPTIC_CROWN_STRENGTH1, OHOS::Ace::NG::VIBRATOR_TYPE_ONE);
+#endif
+    }
+    CreateAnimation(scrollDelta_, 0.0);
+    frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, mainVelocity_, SceneStatus::END);
+}
+#endif
+
+void DatePickerColumnPattern::ToUpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(blendNode);
+    auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
+    CHECK_NULL_VOID(stackNode);
+    auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
+    CHECK_NULL_VOID(parentNode);
+
+    auto dataPickerLayoutProperty = host->GetLayoutProperty<DataPickerLayoutProperty>();
+    CHECK_NULL_VOID(dataPickerLayoutProperty);
+    dataPickerLayoutProperty->UpdatePadding(PaddingProperty { CalcLength(PADDING_WEIGHT, DimensionUnit::PX) });
+    dataPickerLayoutProperty->UpdateAlignSelf(FlexAlign::CENTER);
+
+    auto datePickerPattern = parentNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    auto dataPickerRowLayoutProperty = parentNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    CHECK_NULL_VOID(dataPickerRowLayoutProperty);
+
+    auto&& child = host->GetChildren();
+    auto iter = child.begin();
+    CHECK_NULL_VOID(iter != child.end());
+    std::advance (iter, GetShowCount() / PICKER_SELECT_AVERAGE);
+    CHECK_NULL_VOID(iter != child.end());
+    auto textNode = DynamicCast<FrameNode>(*iter);
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+
+    UpdateSelectedTextProperties(pickerTheme, textLayoutProperty, dataPickerRowLayoutProperty);
+
+    textNode->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
+    host->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
 }
 } // namespace OHOS::Ace::NG

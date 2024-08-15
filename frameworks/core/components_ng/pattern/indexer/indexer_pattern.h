@@ -96,7 +96,22 @@ public:
 
     bool IsMeasureBoundary() const override;
     void UpdateChildBoundary(RefPtr<FrameNode>& frameNode);
- 
+protected:
+    void SetAccessibilityAction();
+    bool MoveIndexByStep(int32_t step);
+    void FireOnSelect(int32_t selectIndex, bool fromPress);
+    void RemoveBubble();
+    void StartCollapseDelayTask(RefPtr<FrameNode>& hostNode, uint32_t duration = INDEXER_COLLAPSE_WAIT_DURATION);
+    void OnSelect(bool changed = false);
+    int32_t GetSkipChildIndex(int32_t step);
+    void UpdatePopupOpacity(float ratio);
+    void UpdatePopupVisibility(VisibleType visible);
+    int32_t GenerateAnimationId();
+    void UpdateBubbleBackgroundView();
+    void ItemSelectedInAnimation(RefPtr<FrameNode>& itemNode);
+    void ItemSelectedOutAnimation(RefPtr<FrameNode>& itemNode);
+    void ShowBubble();
+
 private:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -112,13 +127,11 @@ private:
     void OnTouchDown(const TouchEventInfo& info);
     void OnTouchUp(const TouchEventInfo& info);
     void MoveIndexByOffset(const Offset& offset);
-    bool MoveIndexByStep(int32_t step);
+
     bool KeyIndexByStep(int32_t step);
     bool MoveIndexBySearch(const std::string& searchStr);
     void ApplyIndexChanged(
         bool isTextNodeInTree, bool refreshBubble = true, bool fromTouchUp = false, bool indexerSizeChanged = false);
-    void OnSelect(bool changed = false);
-    int32_t GetSkipChildIndex(int32_t step);
     int32_t GetFocusChildIndex(const std::string& searchStr);
 
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -145,14 +158,12 @@ private:
     RefPtr<FrameNode> CreatePopupNode();
     void UpdateBubbleView();
     void UpdateBubbleSize();
-    void UpdateBubbleLetterView(bool showDivider, std::vector<std::string>& currentListData);
+
     void CreateBubbleListView(std::vector<std::string>& currentListData);
     void UpdateBubbleListView(std::vector<std::string>& currentListData);
-    void UpdatePopupOpacity(float ratio);
-    void UpdatePopupVisibility(VisibleType visible);
     bool NeedShowPopupView();
     bool NeedShowBubble();
-    void ShowBubble();
+
     bool IfSelectIndexValid();
     int32_t GetSelectChildIndex(const Offset& offset);
     void StartBubbleAppearAnimation();
@@ -162,15 +173,10 @@ private:
     void IndexerHoverOutAnimation();
     void IndexerPressInAnimation();
     void IndexerPressOutAnimation();
-    int32_t GenerateAnimationId();
-    void ItemSelectedInAnimation(RefPtr<FrameNode>& itemNode);
-    void ItemSelectedOutAnimation(RefPtr<FrameNode>& itemNode);
-    void FireOnSelect(int32_t selectIndex, bool fromPress);
-    void SetAccessibilityAction();
-    void RemoveBubble();
-    void UpdateBubbleBackgroundView();
+
     CalcSize CalcBubbleListSize(int32_t popupSize, int32_t maxItemsSize);
     GradientColor CreatePercentGradientColor(float percent, Color color);
+    void UpdateBubbleLetterView(bool showDivider, std::vector<std::string>& currentListData);
     void UpdateBubbleLetterStackAndLetterTextView();
     void DrawPopupListGradient(PopupListGradientStatus gradientStatus);
     void UpdatePopupListGradientView(int32_t popupSize, int32_t maxItemsSize);
@@ -180,8 +186,8 @@ private:
     void UpdateBubbleListItemContext(
         const RefPtr<FrameNode>& listNode, RefPtr<IndexerTheme>& indexerTheme, uint32_t pos);
     void UpdateBubbleListItemMarkModify(RefPtr<FrameNode>& textNode, RefPtr<FrameNode>& listItemNode);
-    void StartCollapseDelayTask(RefPtr<FrameNode>& hostNode, uint32_t duration = INDEXER_COLLAPSE_WAIT_DURATION);
-
+    
+protected:
     RefPtr<FrameNode> popupNode_;
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<PanEvent> panEvent_;

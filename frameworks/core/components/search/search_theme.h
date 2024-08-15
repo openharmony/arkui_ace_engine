@@ -73,6 +73,9 @@ public:
             theme->fontWeight_ = FontWeight(static_cast<int32_t>(pattern->GetAttr<double>("search_font_weight", 0.0)));
             theme->borderRadius_ = Radius(pattern->GetAttr<Dimension>("search_text_field_border_radius", 0.0_vp));
             theme->blockRightShade_ = static_cast<int32_t>(pattern->GetAttr<double>("search_block_right_shade", 0.0));
+            theme->needFocusBox_ = static_cast<bool>(pattern->GetAttr<double>("search_need_focus_box", 0.0));
+            theme->borderColor_ = pattern->GetAttr<Color>("search_border_color", Color());
+            theme->borderWidth_ = pattern->GetAttr<Dimension>("search_border_width", 0.0_vp);
             theme->placeholderColor_ = pattern->GetAttr<Color>("tips_text_color", Color());
             theme->focusPlaceholderColor_ = pattern->GetAttr<Color>("tips_text_color_focused", Color());
             theme->textColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color());
@@ -92,6 +95,10 @@ public:
             theme->symbolIconColor_ = pattern->GetAttr<Color>("search_symbol_icon_color", Color());
             theme->searchSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.magnifyingglass");
             theme->cancelSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.xmark");
+            theme->focusBgColor_ = pattern->GetAttr<Color>("search_focus_bg_color", Color());
+            theme->focusIconColor_ = pattern->GetAttr<Color>("search_focus_icon_color", Color());
+            theme->cancelButtonStyle_ = static_cast<CancelButtonStyle>(
+                static_cast<int32_t>(pattern->GetAttr<double>("search_cancel_button_style", 2.0f)));
         }
     };
 
@@ -177,9 +184,34 @@ public:
         return borderRadius_;
     }
 
+    const Color& GetBorderColor() const
+    {
+        return borderColor_;
+    }
+
+    const Dimension& GetBorderWidth() const
+    {
+        return borderWidth_;
+    }
+
+    const Color& GetFocusBgColor() const
+    {
+        return focusBgColor_;
+    }
+
+    const Color& GetFocusIconColor() const
+    {
+        return focusIconColor_;
+    }
+
     bool GetBlockRightShade() const
     {
         return blockRightShade_;
+    }
+
+    bool NeedFocusBox() const
+    {
+        return needFocusBox_;
     }
 
     const Dimension& GetDividerSideSpace() const
@@ -267,6 +299,8 @@ private:
     Color focusTextColor_;
     Color touchColor_;
     Color hoverColor_;
+    Color focusBgColor_;
+    Color focusIconColor_;
     Dimension height_;
     Dimension fontSize_;
     Dimension iconSize_;
@@ -277,7 +311,10 @@ private:
     Dimension rightPadding_;
     FontWeight fontWeight_ = FontWeight::NORMAL;
     Radius borderRadius_;
+    Color borderColor_;
+    Dimension borderWidth_;
     bool blockRightShade_ = false;
+    bool needFocusBox_ = false;
     Dimension dividerSideSpace_;
     Dimension searchDividerWidth_ = 1.0_px;
     Dimension searchButtonTextPadding_;

@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/search/search_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_algorithm.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -420,7 +421,9 @@ double SearchLayoutAlgorithm::CalcSearchHeight(
         searchHeightAdapt = std::max(searchHeightAdapt, CalcSearchAdaptHeight(layoutWrapper));
         renderContext->SetClipToBounds(false);
     } else {
-        renderContext->SetClipToBounds(true);
+        auto pattern = host->GetPattern<SearchPattern>();
+        CHECK_NULL_RETURN(pattern, 0.0);
+        renderContext->SetClipToBounds(!pattern->NeedFocusBox());
     }
 
     const auto& calcLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint();
@@ -645,6 +648,7 @@ void SearchLayoutAlgorithm::LayoutCancelButton(const LayoutSearchParams& params)
 {
     auto dividerSideSpace = params.searchTheme->GetDividerSideSpace().ConvertToPx();
     auto dividerWidth = params.searchTheme->GetSearchDividerWidth().ConvertToPx();
+    auto borderWidth = params.searchTheme->GetBorderWidth().ConvertToPx();
 
     auto cancelButtonWrapper = params.layoutWrapper->GetOrCreateChildByIndex(CANCEL_BUTTON_INDEX);
     CHECK_NULL_VOID(cancelButtonWrapper);
@@ -678,7 +682,7 @@ void SearchLayoutAlgorithm::LayoutCancelButton(const LayoutSearchParams& params)
             cancelButtonHorizontalOffset =
                 std::max(searchButtonHorizontalOffset - cancelButtonOffsetToSearchButton, 0.0);
         } else {
-            cancelButtonHorizontalOffset = params.searchFrameWidth - cancelButtonFrameWidth;
+            cancelButtonHorizontalOffset = params.searchFrameWidth - cancelButtonFrameWidth - borderWidth;
         }
     }
     auto cancelButtonOffset = OffsetF(cancelButtonHorizontalOffset, cancelButtonVerticalOffset);
@@ -715,6 +719,10 @@ void SearchLayoutAlgorithm::LayoutTextField(const LayoutSearchParams& params)
 {
     auto searchIconLeftSpace = params.searchTheme->GetSearchIconLeftSpace().ConvertToPx();
     auto searchIconRightSpace = params.searchTheme->GetSearchIconRightSpace().ConvertToPx();
+    auto searchIconWidth = searchIconSizeMeasure_.Width();
+    auto layoutProperty = DynamicCast<SearchLayoutProperty>(params.layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto padding = layoutProperty->CreatePaddingAndBorder();
     auto dividerSideSpace = params.searchTheme->GetDividerSideSpace().ConvertToPx();
     auto dividerWidth = params.searchTheme->GetSearchDividerWidth().ConvertToPx();
 
@@ -735,8 +743,7 @@ void SearchLayoutAlgorithm::LayoutTextField(const LayoutSearchParams& params)
     auto cancelButtonGeometryNode = cancelButtonWrapper->GetGeometryNode();
     auto cancelButtonFrameWidth = cancelButtonGeometryNode->GetFrameSize().Width();
 
-    auto searchButtonNode = searchButtonWrapper->GetHostNode();
-    auto searchButtonEvent = searchButtonNode->GetEventHub<ButtonEventHub>();
+    auto searchButtonEvent = searchButtonWrapper->GetHostNode()->GetEventHub<ButtonEventHub>();
 
     auto style = params.layoutProperty->GetCancelButtonStyle().value_or(CancelButtonStyle::INPUT);
     if (params.isRTL) {
@@ -757,7 +764,8 @@ void SearchLayoutAlgorithm::LayoutTextField(const LayoutSearchParams& params)
             }
         }
     } else {
-        textFieldHorizontalOffset = searchIconLeftSpace + searchIconRightSpace + searchIconRightSpace;
+        textFieldHorizontalOffset = searchIconWidth + searchIconLeftSpace
+            + searchIconRightSpace + padding.left.value_or(0.0f);
     }
 
     auto textFieldVerticalOffset = (params.searchFrameHeight - textFieldGeometryNode->GetFrameSize().Height()) / 2;

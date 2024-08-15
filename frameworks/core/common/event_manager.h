@@ -26,6 +26,9 @@
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/event/axis_event.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
 #include "core/event/rotation_event.h"
@@ -105,6 +108,9 @@ public:
     // Distribute the key event to the corresponding root node. If the root node is not processed, return false and the
     // platform will handle it.
     bool DispatchKeyEventNG(const KeyEvent& event, const RefPtr<NG::FrameNode>& focusNode);
+#ifdef SUPPORT_DIGITAL_CROWN
+    bool DispatchCrownEventNG(const CrownEvent& event, const RefPtr<NG::FrameNode>& focusNode);
+#endif
     bool DispatchTabIndexEventNG(const KeyEvent& event, const RefPtr<NG::FrameNode>& mainView);
 
     // Distribute the rotation event to the corresponding render tree or requested render node. If the render is not

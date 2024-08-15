@@ -30,6 +30,10 @@
 #include "core/components_ng/pattern/time_picker/timepicker_paint_method.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_accessibility_property.h"
 #include "core/components_v2/inspector/utils.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
+
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -433,8 +437,17 @@ public:
         amPmTimeOrder_ = DateTimeSequence::GetAmPmTimeOrder(language_).amPmTimeOrder;
         preAmPmTimeOrder == amPmTimeOrder_ ? isAmPmTimeOrderUpdate_ = false : isAmPmTimeOrderUpdate_ = true;
     }
-
+    void SetDigitalCrownSensitivity(int32_t crownSensitivity);
 private:
+    bool SetDefaultColoumnFocus(std::unordered_map<std::string, WeakPtr<FrameNode>>::iterator& it,
+        const std::string &id, bool focus, const std::function<void(const std::string&)>& call);
+    void ClearFocus();
+    void SetDefaultFocus();
+#ifdef SUPPORT_DIGITAL_CROWN
+    void InitOnCrownEvent(const RefPtr<FocusHub>& focusHub);
+    bool OnCrownEvent(const CrownEvent& event);
+#endif
+
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -501,6 +514,7 @@ private:
     std::string amPmTimeOrder_;
     bool isAmPmTimeOrderUpdate_ = false;
     bool isPreLanguageUg_ = false;
+    std::string selectedColumnId_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/components_ng/pattern/slider/slider_paint_method.h"
 #include "core/components_ng/pattern/slider/slider_paint_property.h"
+#include "core/components/theme/app_theme.h"
 
 namespace OHOS::Ace::NG {
 class SliderPattern : public Pattern {
@@ -105,7 +106,19 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION };
+        FocusPattern focusPattern { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION };
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, focusPattern);
+        auto theme = pipeline->GetTheme<AppTheme>();
+        CHECK_NULL_RETURN(theme, focusPattern);
+        if (theme->IsFocusBoxGlow()) {
+            FocusPaintParam focusPaintParam;
+            focusPaintParam.SetPaintColor(theme->GetFocusBorderColor());
+            focusPaintParam.SetPaintWidth(theme->GetFocusBorderWidth());
+            focusPaintParam.SetFocusBoxGlow(true);
+            focusPattern.SetFocusPaintParams(focusPaintParam);
+        }
+        return focusPattern;
     }
 
     const OffsetF& GetBlockCenter() const
@@ -154,6 +167,18 @@ public:
 
     void SetSliderValue(double value, int32_t mode);
 
+#ifdef SUPPORT_DIGITAL_CROWN
+    void SetDigitalCrownSensitivity(CrownSensitivity sensitivity)
+    {
+        crownSensitivity_ = sensitivity;
+    }
+
+    CrownSensitivity GetDigitalCrownSensitivity()
+    {
+        return crownSensitivity_;
+    }
+#endif
+
 private:
     void OnModifyDone() override;
     void CalcSliderValue();
@@ -169,7 +194,8 @@ private:
     void UpdateBubbleSizeAndLayout();
     void UpdateBubble();
     void InitializeBubble();
-
+    void UpdatePaintRect(RefPtr<SliderTheme> theme, SliderModel::SliderMode& sliderMode, RoundRect& paintRect,
+        const RectF& rect, float rectRadius);
     bool AtMousePanArea(const Offset& offsetInFrame);
     bool AtTouchPanArea(const Offset& offsetInFrame);
     bool AtPanArea(const Offset& offset, const SourceType& sourceType);
@@ -201,7 +227,13 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
     void PaintFocusState();
     bool MoveStep(int32_t stepCount);
-
+#ifdef SUPPORT_DIGITAL_CROWN
+    void InitDigitalCrownEvent(const RefPtr<FocusHub>& focusHub);
+    void HandleCrownEvent(const CrownEvent& event);
+    double GetCrownRotatePx(const CrownEvent& event) const;
+    void HandleCrownAction(double mainDelta);
+    void StartVibrateFeedback();
+#endif
     bool IsSliderVisible();
     void OnWindowHide() override;
     void OnWindowShow() override;
@@ -280,6 +312,14 @@ private:
     float trackThickness_ = 0.0f;
     SizeF blockHotSize_;
     SizeF blockSize_;
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    CrownSensitivity crownSensitivity_ = CrownSensitivity::MEDIUM;
+    double crownDisplayControlRatio_ = 1.0;
+    double crownMovingLength_ = 0.0;
+    int32_t crownEventNum_ = 0;
+    bool reachBoundary_ = false;
+#endif
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<ClickEvent> clickListener_;

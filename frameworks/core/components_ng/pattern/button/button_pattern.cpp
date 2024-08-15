@@ -215,7 +215,6 @@ void ButtonPattern::HandleFocusStyleTask(RefPtr<ButtonLayoutProperty> layoutProp
 {
     ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
     ButtonRole buttonRole = layoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
-    ControlSize controlSize = layoutProperty->GetControlSize().value_or(ControlSize::NORMAL);
     auto && graphics = buttonRenderContext->GetOrCreateGraphics();
     auto && transform = buttonRenderContext->GetOrCreateTransform();
     CHECK_NULL_VOID(graphics);
@@ -225,8 +224,6 @@ void ButtonPattern::HandleFocusStyleTask(RefPtr<ButtonLayoutProperty> layoutProp
         Shadow shadow = Shadow::CreateShadow(static_cast<ShadowStyle>(buttonTheme->GetShadowNormal()));
         if (!graphics->HasBackShadow() || graphics->GetBackShadowValue() == shadow) {
             shadowModify_ = true;
-        }
-        if (shadowModify_) {
             ShadowStyle shadowStyle = static_cast<ShadowStyle>(buttonTheme->GetShadowFocus());
             buttonRenderContext->UpdateBackShadow(Shadow::CreateShadow(shadowStyle));
         }
@@ -235,13 +232,11 @@ void ButtonPattern::HandleFocusStyleTask(RefPtr<ButtonLayoutProperty> layoutProp
     VectorF scale(scaleFocus, scaleFocus);
     if (!transform->HasTransformScale() || transform->GetTransformScale() == scale) {
         scaleModify_ = true;
-    }
-    if (scaleModify_) {
         buttonRenderContext->SetScale(scaleFocus, scaleFocus);
     }
     bgColorModify_ = buttonRenderContext->GetBackgroundColor() == buttonTheme->GetBgColor(buttonStyle, buttonRole);
     if (bgColorModify_) {
-        if (buttonStyle == ButtonStyleMode::TEXT && controlSize == ControlSize::NORMAL) {
+        if (buttonStyle == ButtonStyleMode::TEXT) {
             buttonRenderContext->UpdateBackgroundColor(buttonTheme->GetTextBackgroundFocus());
         } else if (buttonStyle == ButtonStyleMode::NORMAL) {
             buttonRenderContext->UpdateBackgroundColor(buttonTheme->GetNormalBackgroundFocus());
@@ -256,13 +251,14 @@ void ButtonPattern::HandleFocusStyleTask(RefPtr<ButtonLayoutProperty> layoutProp
             auto textRenderContext = textNode->GetRenderContext();
             CHECK_NULL_VOID(textRenderContext);
             textRenderContext->UpdateForegroundColor(buttonTheme->GetFocusTextColor(buttonStyle, buttonRole));
+            textNode->MarkDirtyNode();
         }
     }
     isFocus_ = true;
     if (isTextFadeOut_) {
         textLayoutProperty->UpdateTextMarqueeStart(true);
+        textNode->MarkDirtyNode();
     }
-    textNode->MarkDirtyNode();
 }
 
 void ButtonPattern::HandleBlurStyleTask(RefPtr<ButtonLayoutProperty> layoutProperty,

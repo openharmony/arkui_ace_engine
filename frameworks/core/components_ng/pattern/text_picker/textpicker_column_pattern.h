@@ -30,6 +30,11 @@
 #include "core/components_ng/pattern/text_picker/textpicker_overscroll.h"
 #include "core/components_ng/pattern/text_picker/textpicker_paint_method.h"
 #include "core/components_ng/pattern/text_picker/toss_animation_controller.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#include "adapter/ohos/entrance/vibrator/vibrator_impl.h"
+#endif
+#include "core/components_ng/pattern/picker_utils/picker_column_pattern_utils.h"
 
 namespace OHOS::Ace::NG {
 using EventCallback = std::function<void(bool)>;
@@ -78,11 +83,11 @@ enum class OptionIndex {
     COLUMN_INDEX_6
 };
 
-class TextPickerColumnPattern : public LinearLayoutPattern {
+class TextPickerColumnPattern : public LinearLayoutPattern, public PickerColumnPatternUtils<int32_t> {
     DECLARE_ACE_TYPE(TextPickerColumnPattern, LinearLayoutPattern);
 
 public:
-    TextPickerColumnPattern() : LinearLayoutPattern(true) {};
+    TextPickerColumnPattern() : LinearLayoutPattern(true), PickerColumnPatternUtils(-1) {};
 
     ~TextPickerColumnPattern() override = default;
 
@@ -352,14 +357,24 @@ public:
         return isDownScroll_;
     }
 
+    void UpdateColumnButtonFocusState(bool haveFocus, bool needMarkDirty);
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void InitSelectorButtonProperties(const RefPtr<PickerTheme>& pickerTheme);
+    void UpdateSelectorButtonProps(bool haveFocus, bool needMarkDirty);
+    const Color& GetButtonHoverColor() const;
 
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
-
+#ifdef SUPPORT_DIGITAL_CROWN
+    void HandleCrownBeginEvent(const CrownEvent& event) override;
+    void HandleCrownMoveEvent(const CrownEvent& event) override;
+    void HandleCrownEndEvent(const CrownEvent& event) override;
+#endif
+    void ToUpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme) override;
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart(const GestureEvent& event);
     void HandleDragMove(const GestureEvent& event);
@@ -429,11 +444,22 @@ private:
     bool IsTextFadeOut();
     void UpdateTexOverflow(bool isSel, const RefPtr<TextLayoutProperty>& textLayoutProperty);
 
+    bool isFocusColumn_ = false;
     bool isTossing_ = false;
     bool isTextFadeOut_ = false;
     float localDownDistance_ = 0.0f;
     Color pressColor_;
     Color hoverColor_;
+    Color buttonBgColor_ = Color::TRANSPARENT;
+    Color buttonDefaultBgColor_ = Color::TRANSPARENT;
+    Color buttonFocusBgColor_ = Color::TRANSPARENT;
+    Color buttonDefaultBorderColor_ = Color::TRANSPARENT;
+    Color buttonFocusBorderColor_ = Color::TRANSPARENT;
+    Color selectorTextFocusColor_ = Color::WHITE;
+    Dimension buttonDefaultBorderWidth_ = 0.0_vp;
+    Dimension buttonFocusBorderWidth_ = 0.0_vp;
+    bool isFirstTimeUpdateButtonProps_ = true;
+    bool useButtonFocusArea_ = false;
     EventCallback EventCallback_;
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;

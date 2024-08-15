@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_paint_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components/theme/app_theme.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT MenuItemPattern : public Pattern {
@@ -45,7 +46,20 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
+        FocusPattern focusPattern(FocusType::NODE, true, FocusStyleType::INNER_BORDER);
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, focusPattern);
+        auto theme = pipelineContext->GetTheme<AppTheme>();
+        CHECK_NULL_RETURN(theme, focusPattern);
+        FocusPaintParam focusPaintParam;
+        if (theme->IsFocusBoxGlow()) {
+            focusPaintParam.SetPaintColor(theme->GetFocusBorderColor());
+            focusPaintParam.SetPaintWidth(theme->GetFocusBorderWidth());
+            focusPaintParam.SetFocusBoxGlow(theme->IsFocusBoxGlow());
+            focusPaintParam.SetFocusPadding(focusPadding_);
+            focusPattern.SetFocusPaintParams(focusPaintParam);
+        }
+        return focusPattern;
     }
 
     RefPtr<EventHub> CreateEventHub() override
@@ -278,6 +292,7 @@ private:
 
     RefPtr<InputEvent> wrapperMouseEvent_;
 
+    Dimension focusPadding_ = 0.0_vp;
     bool isTextFadeOut_ = false;
     bool isSelected_ = false;
     bool isSubMenuShowed_ = false;

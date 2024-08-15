@@ -29,4 +29,28 @@ void VibratorImpl::StartVibraFeedback()
     }
 #endif
 }
+
+bool VibratorImpl::StartVibraFeedback(const char* effectId)
+{
+    bool state { false };
+    Sensors::IsSupportEffect(effectId, &state);
+    if (state) {
+        Sensors::StartVibrator(effectId);
+    }
+    return state;
+}
+
+bool VibratorImpl::StartVibraFeedback(const char* effectId, int32_t usage)
+{
+    bool state { false };
+    Sensors::IsSupportEffect(effectId, &state);
+    if (state) {
+        if (Sensors::SetUsage(usage)) {
+            Sensors::StartVibrator(effectId);
+        }
+    }
+
+    return state;
+}
+
 } // namespace OHOS::Ace::NG

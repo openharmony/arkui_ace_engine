@@ -68,6 +68,7 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/pattern/text_input/text_input_layout_algorithm.h"
 #include "core/components_ng/property/property.h"
+#include "core/components/theme/app_theme.h"
 
 #if not defined(ACE_UNITTEST)
 #if defined(ENABLE_STANDARD_INPUT)
@@ -326,6 +327,18 @@ public:
     {
         FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::FORCE_NONE };
         focusPattern.SetIsFocusActiveWhenFocused(true);
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, focusPattern);
+        auto theme = pipelineContext->GetTheme<AppTheme>();
+        CHECK_NULL_RETURN(theme, focusPattern);
+        FocusPaintParam focusPaintParam;
+        if (theme->IsFocusBoxGlow()) {
+            focusPaintParam.SetPaintColor(theme->GetFocusBorderColor());
+            focusPaintParam.SetPaintWidth(theme->GetFocusBorderWidth());
+            focusPaintParam.SetFocusBoxGlow(theme->IsFocusBoxGlow());
+            focusPattern.SetStyleType(FocusStyleType::OUTER_BORDER);
+            focusPattern.SetFocusPaintParams(focusPaintParam);
+        }
         return focusPattern;
     }
 
@@ -468,6 +481,11 @@ public:
     const RectF& GetTextRect() override
     {
         return textRect_;
+    }
+
+    float GetTextIndent() const
+    {
+        return textIndent_;
     }
 
     void SetTextRect(const RectF& textRect)
@@ -1429,6 +1447,7 @@ private:
     void PaintTextRect();
     void GetIconPaintRect(const RefPtr<TextInputResponseArea>& responseArea, RoundRect& paintRect);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
+    void GetTextInputFocusPaintRect(RoundRect& paintRect);
     void PaintResponseAreaRect();
     void PaintCancelRect();
     void PaintUnitRect();
@@ -1516,9 +1535,13 @@ private:
     void TwinklingByFocus();
 
     bool FinishTextPreviewByPreview(const std::string& insertValue);
+    bool GetIndependentControlKeyboard();
+    bool IsMoveFocusOutFromLeft(const KeyEvent& event);
+    bool IsMoveFocusOutFromRight(const KeyEvent& event);
 
     RectF frameRect_;
     RectF textRect_;
+    float textIndent_ = 0.0;
     RefPtr<Paragraph> paragraph_;
     RefPtr<Paragraph> errorParagraph_;
     RefPtr<Paragraph> dragParagraph_;
@@ -1702,6 +1725,8 @@ private:
     bool showKeyBoardOnFocus_ = true;
     bool isTextSelectionMenuShow_ = true;
     int32_t clickTimes_ = -1;
+    bool independentControlKeyboard_ = false;
+    bool directionKeysMoveFocusOut_ = false;
 };
 } // namespace OHOS::Ace::NG
 

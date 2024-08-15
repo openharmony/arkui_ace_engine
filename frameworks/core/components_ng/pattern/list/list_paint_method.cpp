@@ -18,6 +18,11 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 #include "core/components_ng/render/divider_painter.h"
 
+#ifdef ARKUI_CIRCLE_FEATURE
+#include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
+#include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
+#endif // ARKUI_CIRCLE_FEATURE
+
 namespace OHOS::Ace::NG {
 constexpr double PERCENT_100 = 100.0;
 constexpr float LINEAR_GRADIENT_ANGLE = 90.0f;
@@ -195,9 +200,26 @@ void ListPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     if (scrollBar->GetPositionModeUpdate()) {
         scrollBarOverlayModifier->SetPositionMode(scrollBar->GetPositionMode());
     }
-    OffsetF fgOffset(scrollBar->GetActiveRect().Left(), scrollBar->GetActiveRect().Top());
+
+#ifdef ARKUI_CIRCLE_FEATURE
+    auto shapeMode = scrollBar->GetShapeMode();
+    if (shapeMode == ShapeMode::ROUND) {
+        auto arcScrollBarOverlayModifier = AceType::DynamicCast<ArcScrollBarOverlayModifier>(scrollBarOverlayModifier);
+        CHECK_NULL_VOID(arcScrollBarOverlayModifier);
+        auto arcScrollBar = AceType::DynamicCast<ArcScrollBar>(scrollBar);
+        CHECK_NULL_VOID(arcScrollBar);
+        arcScrollBarOverlayModifier->SetBackgroundBarColor(arcScrollBar->GetBackgroundColor());
+        arcScrollBarOverlayModifier->StartArcBarAnimation(arcScrollBar->GetHoverAnimationType(),
+            arcScrollBar->GetOpacityAnimationType(), arcScrollBar->GetNeedAdaptAnimation(),
+            arcScrollBar->GetArcActiveRect(), arcScrollBar->GetArcBarRect());
+    } else {
+        scrollBarOverlayModifier->StartBarAnimation(scrollBar->GetHoverAnimationType(),
+            scrollBar->GetOpacityAnimationType(), scrollBar->GetNeedAdaptAnimation(), scrollBar->GetActiveRect());
+    }
+#else
     scrollBarOverlayModifier->StartBarAnimation(scrollBar->GetHoverAnimationType(),
         scrollBar->GetOpacityAnimationType(), scrollBar->GetNeedAdaptAnimation(), scrollBar->GetActiveRect());
+#endif // ARKUI_CIRCLE_FEATURE
     scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     scrollBarOverlayModifier->SetBarColor(scrollBar->GetForegroundColor());
     scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
@@ -210,12 +232,12 @@ void ListPaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& listRend
     NG::Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::LINEAR);
     if (isFadingTop_) {
-        gradient.AddColor(CreatePercentGradientColor(0, Color::TRANSPARENT));
-        gradient.AddColor(CreatePercentGradientColor(percentFading_, Color::WHITE));
+        gradient.AddColor(CreatePercentGradientColor(startPercent_, Color::TRANSPARENT));
+        gradient.AddColor(CreatePercentGradientColor(startPercent_ + percentFading_, Color::WHITE));
     }
     if (isFadingBottom_) {
-        gradient.AddColor(CreatePercentGradientColor(1 - percentFading_, Color::WHITE));
-        gradient.AddColor(CreatePercentGradientColor(1, Color::TRANSPARENT));
+        gradient.AddColor(CreatePercentGradientColor(endPercent_ - percentFading_, Color::WHITE));
+        gradient.AddColor(CreatePercentGradientColor(endPercent_, Color::TRANSPARENT));
     }
     Axis axis = vertical_ ? Axis::HORIZONTAL : Axis::VERTICAL;
     if (axis == Axis::HORIZONTAL) {

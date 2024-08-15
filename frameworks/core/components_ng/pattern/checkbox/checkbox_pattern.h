@@ -242,6 +242,7 @@ private:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
+    void InitDefaultParams(const RefPtr<FrameNode>& host);
     void InitClickEvent();
     void InitTouchEvent();
     void InitMouseEvent();
@@ -267,6 +268,7 @@ private:
     void SetPrePageIdToLastPageId();
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    bool OnKeyEvent(const KeyEvent& event);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void AddHotZoneRect();
     void RemoveLastHotZoneRect() const;

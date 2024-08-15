@@ -697,7 +697,7 @@ HWTEST_F(TabsTestNg, Layout001, TestSize.Level1)
     AceType::DynamicCast<TabsLayoutProperty>(layoutWrapper.GetLayoutProperty())
         ->UpdateLayoutConstraint(layoutConstrain);
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabsLayoutAlgorithm));
-    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();;
+    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
     tabsLayoutAlgorithm->Layout(&layoutWrapper);
     ASSERT_NE(&layoutWrapper, nullptr);
 

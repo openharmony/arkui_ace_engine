@@ -57,6 +57,8 @@ group("linux_core_unittest") {
     "manager:core_manager_unittest",
     "pattern/animator:animator_test_ng",
     "pattern/app_bar:app_bar_test_ng",
+    "pattern/arc_list:arc_list_test_ng",
+    "pattern/arcscroll:arc_scroll_test_ng",
     "pattern/badge:badge_test_ng",
     "pattern/blank:blank_test_ng",
     "pattern/bubble:bubble_test_ng",
@@ -132,7 +134,7 @@ group("linux_core_unittest") {
     "pattern/text_drag:text_drag_test_ng",
 
     # "pattern/text_input:TextInputTest",
-    # "pattern/text_picker:text_picker_test_ng",
+    "pattern/text_picker:text_picker_test_ng",
     "pattern/text_timer:text_timer_test_ng",
     "pattern/time_picker:time_picker_test_ng",
     "pattern/toggle:toggle_test_ng",

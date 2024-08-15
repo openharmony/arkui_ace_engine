@@ -83,9 +83,7 @@ RefPtr<SearchNode> SearchModelNG::CreateSearchNode(int32_t nodeId, const std::op
     bool hasTextFieldNode = frameNode->HasTextFieldNode();
     bool hasButtonNode = frameNode->HasButtonNode();
     bool hasCancelButtonNode = frameNode->HasCancelButtonNode();
-
     CreateTextField(frameNode, placeholder, value, hasTextFieldNode);
-
     std::string src;
     if (icon.has_value()) {
         src = icon.value();
@@ -104,6 +102,21 @@ RefPtr<SearchNode> SearchModelNG::CreateSearchNode(int32_t nodeId, const std::op
     renderContext->UpdateBorderRadius(borderRadius);
 
     auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    auto searchTheme = PipelineBase::GetCurrentContext()->GetTheme<SearchTheme>();
+    BorderColorProperty borderColor;
+    BorderWidthProperty borderWidth;
+    borderColor.SetColor(searchTheme->GetBorderColor());
+    borderWidth.SetBorderWidth(searchTheme->GetBorderWidth());
+    layoutProperty->UpdateCancelButtonStyle(searchTheme->GetCancelButtonStyle());
+    if (!layoutProperty->GetBorderWidthProperty()) {
+        if (!renderContext->HasBorderWidth()) {
+            layoutProperty->UpdateBorderWidth(borderWidth);
+            renderContext->UpdateBorderWidth(borderWidth);
+        }
+        if (!renderContext->HasBorderColor()) {
+            renderContext->UpdateBorderColor(borderColor);
+        }
+    }
     auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     pattern->SetSearchController(textFieldPattern->GetTextFieldController());
@@ -655,7 +668,6 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const 
         V2::SEARCH_Field_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SearchTextFieldPattern>(); });
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     auto textFieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
-    
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     auto textValue = pattern->GetTextValue();
     if (textFieldLayoutProperty) {
@@ -663,9 +675,10 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const 
             pattern->InitEditingValueText(value.value());
         }
         textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(""));
+        textFieldLayoutProperty->UpdatePlaceholderTextColor(searchTheme->GetPlaceholderColor());
         textFieldLayoutProperty->UpdateMaxLines(1);
         textFieldLayoutProperty->UpdatePlaceholderMaxLines(1);
-        if (!textFieldPaintProperty || !textFieldPaintProperty->HasTextColorFlagByUser()) {
+        if (!hasTextFieldNode) {
             textFieldLayoutProperty->UpdateTextColor(searchTheme->GetTextColor());
         }
     }

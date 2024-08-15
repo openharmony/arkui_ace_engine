@@ -16,6 +16,8 @@ group("core_pattern_unittest") {
   deps = [
     "animator:animator_test_ng",
     "app_bar:app_bar_test_ng",
+    "arc_list:arc_list_test_ng",
+    "arcscroll:arc_scroll_test_ng",
     "badge:badge_test_ng",
     "blank:blank_test_ng",
     "bubble:bubble_test_ng",
@@ -94,7 +96,7 @@ group("core_pattern_unittest") {
     "text_drag:text_drag_test_ng",
 
     # "text_input:TextInputTest",
-    # "text_picker:text_picker_test_ng",
+    "text_picker:text_picker_test_ng",
     "text_timer:text_timer_test_ng",
     "time_picker:time_picker_test_ng",
     "toggle:toggle_test_ng",

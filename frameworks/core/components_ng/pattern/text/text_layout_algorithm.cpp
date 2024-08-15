@@ -24,6 +24,7 @@
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/hyperlink/hyperlink_theme.h"
+#include "core/components/text/text_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"

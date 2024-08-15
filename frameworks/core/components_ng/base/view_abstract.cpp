@@ -836,6 +836,22 @@ void ViewAbstract::DisableOnKeyEvent()
     focusHub->ClearUserOnKey();
 }
 
+#ifdef SUPPORT_DIGITAL_CROWN
+void ViewAbstract::DisableOnCrownEvent()
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ClearUserOnCrown();
+}
+
+void ViewAbstract::DisableOnCrownEvent(FrameNode* frameNode)
+{
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ClearUserOnCrown();
+}
+#endif
+
 void ViewAbstract::DisableOnHover()
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
@@ -1104,6 +1120,15 @@ void ViewAbstract::SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback)
     CHECK_NULL_VOID(focusHub);
     focusHub->SetOnKeyCallback(std::move(onKeyCallback));
 }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+void ViewAbstract::SetOnCrownEvent(OnCrownCallbackFunc &&onCrownCallback)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetOnCrownCallback(std::move(onCrownCallback));
+}
+#endif
 
 void ViewAbstract::SetTabIndex(int32_t index)
 {

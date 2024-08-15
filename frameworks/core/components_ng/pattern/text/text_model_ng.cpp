@@ -605,6 +605,12 @@ void TextModelNG::SetMarqueeOptions(const TextMarqueeOptions& options)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    SetMarqueeOptions(frameNode, options);
+}
+
+void TextModelNG::SetMarqueeOptions(FrameNode* frameNode, const TextMarqueeOptions& options)
+{
+    CHECK_NULL_VOID(frameNode);
     if (options.HasTextMarqueeStart()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
             TextLayoutProperty, TextMarqueeStart, options.GetTextMarqueeStartValue(), frameNode);
@@ -652,6 +658,14 @@ void TextModelNG::SetMarqueeOptions(const TextMarqueeOptions& options)
 void TextModelNG::SetOnMarqueeStateChange(std::function<void(int32_t)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnMarqueeStateChange(std::move(func));
+}
+
+void TextModelNG::SetOnMarqueeStateChange(FrameNode* frameNode, std::function<void(int32_t)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnMarqueeStateChange(std::move(func));
 }

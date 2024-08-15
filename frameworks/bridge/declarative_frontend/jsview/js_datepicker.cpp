@@ -314,7 +314,17 @@ void JSDatePicker::JSBind(BindingTarget globalObj)
     JSClass<JSDatePicker>::StaticMethod("disappearTextStyle", &JSDatePicker::SetDisappearTextStyle);
     JSClass<JSDatePicker>::StaticMethod("textStyle", &JSDatePicker::SetTextStyle);
     JSClass<JSDatePicker>::StaticMethod("selectedTextStyle", &JSDatePicker::SetSelectedTextStyle);
+    JSClass<JSDatePicker>::StaticMethod("digitalCrownSensitivity", &JSDatePicker::SetDigitalCrownSensitivity);
     JSClass<JSDatePicker>::InheritAndBind<JSViewAbstract>(globalObj);
+}
+
+void JSDatePicker::SetDigitalCrownSensitivity(const JSCallbackInfo& info)
+{
+    int32_t value = OHOS::Ace::NG::DEFAULT_CROWNSENSITIVITY;
+    if (info[0]->IsNumber()) {
+        value = info[0]->ToNumber<int32_t>();
+    }
+    DatePickerModel::GetInstance()->SetDigitalCrownSensitivity(value);
 }
 
 void JSDatePicker::Create(const JSCallbackInfo& info)
@@ -1283,7 +1293,17 @@ void JSTimePicker::JSBind(BindingTarget globalObj)
     JSClass<JSTimePicker>::StaticMethod("textStyle", &JSTimePicker::SetTextStyle);
     JSClass<JSTimePicker>::StaticMethod("selectedTextStyle", &JSTimePicker::SetSelectedTextStyle);
     JSClass<JSTimePicker>::StaticMethod("dateTimeOptions", &JSTimePicker::DateTimeOptions);
+    JSClass<JSTimePicker>::StaticMethod("digitalCrownSensitivity", &JSTimePicker::SetDigitalCrownSensitivity);
     JSClass<JSTimePicker>::InheritAndBind<JSViewAbstract>(globalObj);
+}
+
+void JSTimePicker::SetDigitalCrownSensitivity(const JSCallbackInfo& info)
+{
+    int32_t value = OHOS::Ace::NG::DEFAULT_CROWNSENSITIVITY;
+    if (info[0]->IsNumber()) {
+        value = info[0]->ToNumber<int32_t>();
+    }
+    TimePickerModel::GetInstance()->SetDigitalCrownSensitivity(value);
 }
 
 void JSTimePicker::Create(const JSCallbackInfo& info)

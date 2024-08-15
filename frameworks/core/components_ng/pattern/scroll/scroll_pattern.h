@@ -27,6 +27,9 @@
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#ifdef ARKUI_CIRCLE_FEATURE
+#include "core/components_ng/pattern/arc_scroll/arc_scroll_paint_method.h"
+#endif
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
@@ -62,8 +65,18 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        auto paint = MakeRefPtr<ScrollPaintMethod>();
-        paint->SetScrollBar(GetScrollBar());
+        auto scrollBar = GetScrollBar();
+        CHECK_NULL_RETURN(scrollBar, nullptr);
+        RefPtr<ScrollPaintMethod> paint = nullptr;
+#ifdef ARKUI_CIRCLE_FEATURE
+        if (scrollBar->GetShapeMode() == ShapeMode::ROUND) {
+            paint = MakeRefPtr<ArcScrollPaintMethod>();
+        }
+#endif
+        if (paint == nullptr) {
+            paint = MakeRefPtr<ScrollPaintMethod>();
+        }
+        paint->SetScrollBar(scrollBar);
         CreateScrollBarOverlayModifier();
         paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
         auto scrollEffect = GetScrollEdgeEffect();

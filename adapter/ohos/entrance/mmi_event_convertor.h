@@ -25,6 +25,9 @@
 #include "base/log/log.h"
 #include "base/utils/macros.h"
 #include "core/event/axis_event.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
@@ -71,6 +74,10 @@ void GetEventDevice(int32_t sourceType, E& event)
 }
 
 TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+
+#ifdef SUPPORT_DIGITAL_CROWN
+void ConvertCrownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, CrownEvent& event);
+#endif
 
 void SetTouchEventType(int32_t orgAction, TouchEvent& event);
 

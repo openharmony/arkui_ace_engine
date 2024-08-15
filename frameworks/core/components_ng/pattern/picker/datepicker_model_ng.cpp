@@ -132,8 +132,12 @@ void DatePickerModelNG::CreateDatePicker(RefPtr<PickerTheme> pickerTheme)
             createMonthOrDayColumnNode(dayColumnNode, dateNode, Color::GRAY);
         }
     }
-    
     stack->Push(dateNode);
+
+    if (pickerTheme->IsCircleDial()) {
+        auto renderContext = dateNode->GetRenderContext();
+        renderContext->UpdateBackgroundColor(pickerTheme->GetBackgroundColor());
+    }
 }
 
 void DatePickerModelNG::createMonthOrDayColumnNode(const RefPtr<FrameNode>& columnNode,
@@ -515,6 +519,18 @@ void DatePickerModelNG::SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, Weight, normalStyle.GetFontWeight(), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, FontFamily, normalStyle.GetFontFamilies(), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, FontStyle, normalStyle.GetFontStyle(), frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, DigitalCrownSensitivity, DEFAULT_CROWNSENSITIVITY,
+        frameNode);
+}
+
+void DatePickerModelNG::SetDigitalCrownSensitivity(int32_t crownSensitivity)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    datePickerPattern->SetDigitalCrownSensitivity(crownSensitivity);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, DigitalCrownSensitivity, crownSensitivity, frameNode);
 }
 
 void DatePickerModelNG::SetBackgroundColor(const Color& color)
@@ -568,6 +584,14 @@ void DatePickerModelNG::SetChangeEvent(DateChangeEvent&& onChange)
     auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(onChange));
+}
+
+void DatePickerModelNG::SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t crownSensitivity)
+{
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    datePickerPattern->SetDigitalCrownSensitivity(crownSensitivity);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, DigitalCrownSensitivity, crownSensitivity, frameNode);
 }
 
 void DatePickerDialogModelNG::SetDatePickerDialogShow(PickerDialogInfo& pickerDialog,

@@ -38,6 +38,8 @@ constexpr Dimension SWIPER_INDICATOR_DIGIT_HEIGHT = 32.0_vp;
 constexpr Dimension SWIPER_INDICATOR_DOT_PADDING_DEFAULT = 12.0_vp;
 constexpr Dimension SWIPER_INDICATOR_DOT_ITEM_SPACE = 8.0_vp;
 constexpr double INDICATOR_ZOOM_IN_SCALE = 1.33;
+constexpr double INDICATOR_DRAG_MIN_ANGLE = 6.0f;
+constexpr double INDICATOR_DRAG_MAX_ANGLE = 10.0f;
 } // namespace
 
 enum class GestureState {
@@ -53,6 +55,13 @@ enum class TouchBottomTypeLoop {
     TOUCH_BOTTOM_TYPE_LOOP_NONE,
     TOUCH_BOTTOM_TYPE_LOOP_LEFT,
     TOUCH_BOTTOM_TYPE_LOOP_RIGHT,
+};
+
+enum class FadeOutState {
+    FADE_OUT_NONE,
+    FADE_OUT_LEFT,
+    FADE_OUT_RIGHT,
+    FADE_OUT_BILATERAL
 };
 class SwiperIndicatorTheme : public virtual Theme {
     DECLARE_ACE_TYPE(SwiperIndicatorTheme, Theme);
@@ -119,6 +128,8 @@ public:
             theme->hoverColor_ = swiperPattern->GetAttr<Color>("indicator_color_hover", Color::TRANSPARENT);
             theme->pressedColor_ = swiperPattern->GetAttr<Color>("indicator_color_pressed", Color::TRANSPARENT);
             theme->focusedColor_ = swiperPattern->GetAttr<Color>("indicator_color_focused", Color::TRANSPARENT);
+            theme->indicatorFocusedPadding_ = swiperPattern->GetAttr<Dimension>("indicator_focused_padding", 0.0_vp);
+            theme->clipToBounds_ = static_cast<bool>(swiperPattern->GetAttr<int>("clip_bounds", 0));
             theme->focusedBorderWidth_ = SWIPER_FOCUSED_BORDER_WIDTH;
             theme->hoverArrowBackgroundColor_ =
                 swiperPattern->GetAttr<Color>(ARROW_COLOR_BOARDCOLOR_HOVER, Color::TRANSPARENT);
@@ -154,6 +165,20 @@ public:
             theme->arcMaskStartColor_ = swiperPattern->GetAttr<Color>("mask_color_start", Color::TRANSPARENT);
             theme->arcMaskEndColor_ = swiperPattern->GetAttr<Color>("mask_color_end", Color::TRANSPARENT);
             theme->arcContainerColor_ = swiperPattern->GetAttr<Color>("container_color", Color::TRANSPARENT);
+#ifdef SUPPORT_DIGITAL_CROWN
+            theme->slowVelocityThreshold_ = swiperPattern->GetAttr<double>("swiper_slow_velocity_threshold", 0.0f);
+            theme->displayControlRatioSlow_ = swiperPattern->GetAttr<double>("swiper_display_control_ratio_slow", 0.0f);
+            theme->displayControlRatioFast_ = swiperPattern->GetAttr<double>("swiper_display_control_ratio_fast", 0.0f);
+            theme->crownSensitivityLow_ = swiperPattern->GetAttr<double>("swiper_crown_sensitivity_low", 0.0f);
+            theme->crownSensitivityMedium_ = swiperPattern->GetAttr<double>("swiper_crown_sensitivity_medium", 0.0f);
+            theme->crownSensitivityHigh_ = swiperPattern->GetAttr<double>("swiper_crown_sensitivity_high", 0.0f);
+            theme->springVelocityThreshold_ = swiperPattern->GetAttr<double>("swiper_spring_velocity_threshold", 0.0f);
+            theme->crownTranslocationRatio_ = swiperPattern->GetAttr<double>("swiper_crown_translocation_ratio", 0.0f);
+#endif
+            theme->indicatorDragMinAngle_ =
+                swiperPattern->GetAttr<double>("swiper_indicator_drag_min_angle", INDICATOR_DRAG_MIN_ANGLE);
+            theme->indicatorDragMaxAngle_ =
+                swiperPattern->GetAttr<double>("swiper_indicator_drag_max_angle", INDICATOR_DRAG_MAX_ANGLE);
         }
     };
 
@@ -441,6 +466,16 @@ public:
         return indicatorBgHeight_;
     }
 
+    const Dimension& GetIndicatorFocusedPadding() const
+    {
+        return indicatorFocusedPadding_;
+    }
+
+    bool GetClipToBounds() const
+    {
+        return clipToBounds_;
+    }
+
     uint32_t GetLeftSymbolId() const
     {
         return leftSymbolId_;
@@ -461,6 +496,58 @@ public:
         return downSymbolId_;
     }
 
+#ifdef SUPPORT_DIGITAL_CROWN
+    double GetSlowVelocityThreshold() const
+    {
+        return slowVelocityThreshold_;
+    }
+
+    double GetDisplayControlRatioSlow() const
+    {
+        return displayControlRatioSlow_;
+    }
+
+    double GetDisplayControlRatioFast() const
+    {
+        return displayControlRatioFast_;
+    }
+
+    double GetCrownSensitivityLow() const
+    {
+        return crownSensitivityLow_;
+    }
+
+    double GetCrownSensitivityMedium() const
+    {
+        return crownSensitivityMedium_;
+    }
+
+    double GetCrownSensitivityHigh() const
+    {
+        return crownSensitivityHigh_;
+    }
+
+    double GetSpringVelocityThreshold() const
+    {
+        return springVelocityThreshold_;
+    }
+
+    double GetCrownTranslocationRatio() const
+    {
+        return crownTranslocationRatio_;
+    }
+#endif
+
+    double GetIndicatorDragMinAngle() const
+    {
+        return indicatorDragMinAngle_;
+    }
+
+    double GetIndicatorDragMaxAngle() const
+    {
+        return indicatorDragMaxAngle_;
+    }
+
 protected:
     SwiperIndicatorTheme() = default;
 
@@ -475,6 +562,8 @@ private:
     Color focusedColor_;
     Dimension focusedBorderWidth_;
     Dimension indicatorBgHeight_;
+    Dimension indicatorFocusedPadding_;
+    bool clipToBounds_;
     Dimension size_;
     Dimension selectedSize_;
     Dimension indicatorPointPadding_;
@@ -525,6 +614,18 @@ private:
     uint32_t rightSymbolId_ = 0;
     uint32_t upSymbolId_ = 0;
     uint32_t downSymbolId_ = 0;
+#ifdef SUPPORT_DIGITAL_CROWN
+    double slowVelocityThreshold_ = 0.0f;
+    double displayControlRatioSlow_ = 0.0f;
+    double displayControlRatioFast_ = 0.0f;
+    double crownSensitivityLow_ = 0.0f;
+    double crownSensitivityMedium_ = 0.0f;
+    double crownSensitivityHigh_ = 0.0f;
+    double springVelocityThreshold_ = 0.0f;
+    double crownTranslocationRatio_ = 0.0f;
+#endif
+    double indicatorDragMinAngle_ = INDICATOR_DRAG_MIN_ANGLE;
+    double indicatorDragMaxAngle_ = INDICATOR_DRAG_MAX_ANGLE;
 };
 
 } // namespace OHOS::Ace

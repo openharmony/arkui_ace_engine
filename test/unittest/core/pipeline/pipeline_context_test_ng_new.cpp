@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -1645,5 +1646,32 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg087, TestSize.Level1)
     EXPECT_NE(context_->activeNode_, frameNode_);
     EXPECT_NE(context_->focusNode_, frameNode_);
 }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+/**
+ * @tc.name: PipelineContextTestNg088
+ * @tc.desc: Test the function OnCrownEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg088, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: create the framenode.
+     * @tc.expected: expect framenode is not nullptr.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode("test", 1, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps1: .Calling func CrownEventDispatch.
+     * @tc.expected: expect status is same with true.
+     */
+    CrownEvent event;
+    context_->OnCrownEvent(event);
+    context_->OnCrownEvent(event, frameNode);
+    auto status = context_->CrownEventDispatch(event);
+    ASSERT_EQ(status, false);
+}
+#endif
 } // namespace NG
 } // namespace OHOS::Ace

@@ -42,6 +42,7 @@ public:
     static void ParseTextProperties(const JSRef<JSObject>& paramObj, NG::PickerTextProperties& result);
     // keep compatible, need remove after
     static void UseMilitaryTime(bool isUseMilitaryTime);
+    static void SetDigitalCrownSensitivity(const JSCallbackInfo& info);
 
 private:
     static void CreateDatePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj);
@@ -85,7 +86,7 @@ public:
     static void SetTextStyle(const JSCallbackInfo& info);
     static void SetSelectedTextStyle(const JSCallbackInfo& info);
     static void DateTimeOptions(const JSCallbackInfo& info);
-
+    static void SetDigitalCrownSensitivity(const JSCallbackInfo& info);
 private:
     static void CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj);
     static void SetDefaultAttributes();

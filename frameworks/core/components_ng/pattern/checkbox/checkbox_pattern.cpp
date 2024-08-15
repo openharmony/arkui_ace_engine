@@ -29,6 +29,7 @@
 #include "core/event/touch_event.h"
 #include "core/pipeline/base/constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/theme/app_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -82,6 +83,19 @@ void CheckBoxPattern::OnModifyDone()
     UpdateState();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    InitDefaultParams(host);
+    InitClickEvent();
+    InitTouchEvent();
+    InitMouseEvent();
+    InitFocusEvent();
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    InitOnKeyEvent(focusHub);
+    SetAccessibilityAction();
+}
+
+void CheckBoxPattern::InitDefaultParams(const RefPtr<FrameNode>& host)
+{
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
@@ -111,14 +125,6 @@ void CheckBoxPattern::OnModifyDone()
     layoutProperty->UpdateMargin(margin);
     hotZoneHorizontalPadding_ = checkBoxTheme->GetHotZoneHorizontalPadding();
     hotZoneVerticalPadding_ = checkBoxTheme->GetHotZoneVerticalPadding();
-    InitClickEvent();
-    InitTouchEvent();
-    InitMouseEvent();
-    InitFocusEvent();
-    auto focusHub = host->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    InitOnKeyEvent(focusHub);
-    SetAccessibilityAction();
 }
 
 void CheckBoxPattern::SetAccessibilityAction()
@@ -711,6 +717,27 @@ void CheckBoxPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
         }
     };
     focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
+
+    auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            return pattern->OnKeyEvent(event);
+        }
+        return false;
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+}
+
+bool CheckBoxPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.action != KeyAction::DOWN) {
+        return false;
+    }
+    if (event.code == KeyCode::KEY_FUNCTION) {
+        OnClick();
+        return true;
+    }
+    return false;
 }
 
 void CheckBoxPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
@@ -741,6 +768,15 @@ FocusPattern CheckBoxPattern::GetFocusPattern() const
     auto activeColor = checkBoxTheme->GetActiveColor();
     FocusPaintParam focusPaintParam;
     focusPaintParam.SetPaintColor(activeColor);
+    auto theme = pipeline->GetTheme<AppTheme>();
+    if (!theme) {
+        return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParam };
+    }
+    if (theme->IsFocusBoxGlow()) {
+        focusPaintParam.SetPaintColor(theme->GetFocusBorderColor());
+        focusPaintParam.SetPaintWidth(theme->GetFocusBorderWidth());
+        focusPaintParam.SetFocusBoxGlow(theme->IsFocusBoxGlow());
+    }
     return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParam };
 }
 

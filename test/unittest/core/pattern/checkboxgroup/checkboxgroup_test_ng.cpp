@@ -48,6 +48,7 @@
 #include "core/pipeline/base/render_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/common/mock_container.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -94,6 +95,7 @@ constexpr Dimension VERTICAL_PADDING = Dimension(4.0);
 constexpr Dimension SHADOW_WIDTH_FORUPDATE = Dimension(6.0);
 constexpr float CHECKBOX_GROUP_LENGTH_ZERO = 0.0f;
 constexpr Dimension PADDING_SIZE = Dimension(2.0);
+const int32_t VERSION_TWELVE = 12;
 } // namespace
 
 class CheckBoxGroupTestNG : public testing::Test {
@@ -2011,5 +2013,86 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest030, TestSize.Level1)
     EXPECT_NE(checkBoxPaintProperty, nullptr);
     EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxSelectedStyleValue(), CheckBoxStyle::CIRCULAR_STYLE);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: CheckBoxGroupPatternTest031
+ * @tc.desc: Test CheckBoxGroupPattern InitOnKeyEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest031, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CheckBoxGroupPattern.
+     * @tc.expected: Create successfully.
+     */
+    CheckBoxGroupModelNG CheckBoxGroupModelNG;
+    CheckBoxGroupModelNG.Create(GROUP_NAME);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto checkBoxGroupPattern = frameNode->GetPattern<CheckBoxGroupPattern>();
+    ASSERT_NE(checkBoxGroupPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Get onKeyEventCallback.
+     * @tc.expected: Get successfully.
+     */
+    RefPtr<EventHub> eventHub = AccessibilityManager::MakeRefPtr<EventHub>();
+    RefPtr<FocusHub> focusHub = AccessibilityManager::MakeRefPtr<FocusHub>(eventHub, FocusType::DISABLE, false);
+    checkBoxGroupPattern->InitOnKeyEvent(focusHub);
+
+    /**
+     * test event.action != KeyAction::DOWN
+     */
+    KeyEvent keyEventOne(KeyCode::KEY_FUNCTION, KeyAction::UP);
+    EXPECT_FALSE(focusHub->ProcessOnKeyEventInternal(keyEventOne));
+    /**
+     * test event.action == KeyAction::DOWN and event.code != KeyCode::KEY_FUNCTION
+     */
+    KeyEvent keyEventTwo(KeyCode::KEY_A, KeyAction::DOWN);
+    EXPECT_FALSE(focusHub->ProcessOnKeyEventInternal(keyEventTwo));
+    /**
+     * test event.action == KeyAction::DOWN and event.code == KeyCode::KEY_FUNCTION
+     */
+    KeyEvent keyEventThr(KeyCode::KEY_FUNCTION, KeyAction::DOWN);
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEventThr));
+}
+
+/**
+ * @tc.name: CheckBoxGroupModifierTest004
+ * @tc.desc: Test CheckBoxGroupModifier PaintCheckBox method in different situation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupModifierTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. MockContainer.apiTargetVersion_ = VERSION_TWELVE.
+     */
+    MockContainer::SetUp();
+    MockContainer::Current()->SetApiTargetVersion(VERSION_TWELVE);
+
+    /**
+     * @tc.steps: step2. Create CheckBoxGroupModifier.
+     * @tc.expected: Create successfully.
+     */
+    CheckBoxGroupModifier::Parameters parameters = CheckBoxGroupCreateDefModifierParam();
+    auto checkBoxGroupModifier = AceType::MakeRefPtr<CheckBoxGroupModifier>(parameters);
+    ASSERT_NE(checkBoxGroupModifier, nullptr);
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, COMPONENT_WIDTH, COMPONENT_HEIGHT };
+
+    /**
+     * @tc.steps: step3. Call PaintCheckBox method.
+     * @tc.expected: Call method successfully.
+     */
+    checkBoxGroupModifier->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::PART);
+    checkBoxGroupModifier->SetEnabled(false);
+    checkBoxGroupModifier->SetCheckStroke(CHECKBOX_GROUP_LENGTH_ZERO);
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    checkBoxGroupModifier->PaintCheckBox(context, CONTENT_OFFSET, CONTENT_SIZE);
+    MockContainer::TearDown();
 }
 } // namespace OHOS::Ace::NG

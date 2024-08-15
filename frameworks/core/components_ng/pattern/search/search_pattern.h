@@ -175,6 +175,11 @@ public:
         return searchNode_;
     }
 
+    bool NeedFocusBox() const
+    {
+        return needFocusBox_;
+    }
+
     void ResetDragOption() override;
     void OnColorConfigurationUpdate() override;
 
@@ -210,7 +215,10 @@ private:
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     void PaintFocusState(bool recoverFlag = false);
+    void PaintSearchFocusState();
     void GetInnerFocusPaintRect(RoundRect& paintRect);
+    void GetSearchFocusPaintRadius(float& radiusTopLeft, float& radiusTopRight,
+        float& radiusBottomLeft, float& radiusBottomRight);
     void RequestKeyboard();
     // Init touch and hover event
     void InitTextFieldValueChangeEvent();
@@ -239,6 +247,8 @@ private:
 
     void AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
         int32_t duration, const RefPtr<Curve>& curve);
+    void AnimateSearchTouchAndHover(RefPtr<RenderContext>& renderContext, Color& blendColorFrom, Color& blendColorTo,
+        int32_t duration, const RefPtr<Curve>& curve);
     void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
     void HandleFocusEvent(bool forwardFocusMovement, bool backwardFocusMovement);
     void HandleBlurEvent();
@@ -246,6 +256,12 @@ private:
     void HandleClickEvent(GestureEvent& info);
     void UpdateIconChangeEvent();
     bool IsEventEnabled(const std::string& textValue, int16_t style);
+    void InitAllEvent();
+    void InitHoverEvent();
+    void InitTouchEvent();
+    void InitSearchTheme();
+    void OnTouchDownOrUp(bool isDown);
+    void HandleHoverEvent(bool isHover);
 
     void CreateOrUpdateSymbol(int32_t index, bool isCreateNode);
     void CreateOrUpdateImage(int32_t index, const std::string& src, bool isCreateNode, const std::string& bundleName,
@@ -258,6 +274,9 @@ private:
     void UpdateIconSrc(int32_t index, const std::string& src);
     void UpdateIconColor(int32_t index, const Color& color);
     void UpdateIconSize(int32_t index, const Dimension& value);
+    Color GetDefaultIconColor(int32_t index);
+    bool IsConsumeEvent();
+    void HandleFocusChoiceSearch(const RefPtr<TextFieldPattern>& textFieldPattern, bool recoverFlag);
 
     uint32_t GetMaxLength() const;
     std::string SearchTypeToString() const;
@@ -277,16 +296,37 @@ private:
     RefPtr<TextFieldController> searchController_;
     FocusChoice focusChoice_ = FocusChoice::SEARCH;
 
+    RefPtr<TouchEventImpl> searchTouchListener_;
     RefPtr<TouchEventImpl> searchButtonTouchListener_;
     RefPtr<TouchEventImpl> cancelButtonTouchListener_;
+    RefPtr<InputEvent> searchHoverListener_;
     RefPtr<InputEvent> searchButtonMouseEvent_;
     RefPtr<InputEvent> cancelButtonMouseEvent_;
     RefPtr<InputEvent> textFieldHoverEvent_ = nullptr;
     RefPtr<ClickEvent> clickListener_;
 
+    bool isSearchHover_ = false;
+    bool isSearchPress_ = false;
     bool isCancelButtonHover_ = false;
     bool isSearchButtonHover_ = false;
     bool isSearchButtonEnabled_ = false;
+    bool needFocusBox_ = false;
+    bool isFocusPlaceholderColorSet_ = false;
+    bool isFocusBgColorSet_ = false;
+    bool isFocusIconColorSet_ = false;
+    bool isFocusTextColorSet_ = false;
+    bool directionKeysMoveFocusOut_ = false;
+    Color searchHoverColor_;
+    Color searchTouchColor_;
+    Color searchNormalColor_;
+    Color focusBgColor_;
+    Color focusIconColor_;
+    Color normalIconColor_;
+    Color focusTextColor_;
+    Color normalTextColor_;
+    Color focusPlaceholderColor_;
+    Color normalPlaceholderColor_;
+    Color transparentColor_ = Color::TRANSPARENT;
 
     RefPtr<FrameNode> cancelButtonNode_;
     RefPtr<FrameNode> buttonNode_;

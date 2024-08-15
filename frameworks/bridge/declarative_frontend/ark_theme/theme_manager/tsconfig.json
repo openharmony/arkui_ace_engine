@@ -7,6 +7,7 @@
         // styles
         "src/styles/lazyforeach/ArkLazyForEachBindings.ts",
         "src/styles/listitem/ArkListItemBindings.ts",
+        "src/styles/arclistitem/ArkArcListItemBindings.ts",
 
         // theme management
         "src/theme/system/ArkSystemColors.ts",

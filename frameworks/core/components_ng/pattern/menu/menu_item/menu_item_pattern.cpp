@@ -152,6 +152,11 @@ void MenuItemPattern::OnMountToParentDone()
 
 void MenuItemPattern::OnAttachToFrameNode()
 {
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    focusPadding_ = selectTheme->GetOptionFocusedBoxPadding();
     RegisterOnKeyEvent();
     RegisterOnClick();
     RegisterOnTouch();
@@ -194,7 +199,7 @@ void MenuItemPattern::OnModifyDone()
     }
     SetAccessibilityAction();
 
-    host->GetRenderContext()->SetClipToBounds(true);
+    host->GetRenderContext()->SetClipToBounds(focusPadding_ == 0.0_vp);
 
     InitFocusEvent();
     if (!longPressEvent_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -1454,7 +1459,7 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     CHECK_NULL_VOID(textProperty);
     auto renderContext = node->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateClipEdge(false);
+    renderContext->UpdateClipEdge(isTextFadeOut_);
     auto context = PipelineBase::GetCurrentContext();
     auto theme = context ? context->GetTheme<SelectTheme>() : nullptr;
     CHECK_NULL_VOID(theme);

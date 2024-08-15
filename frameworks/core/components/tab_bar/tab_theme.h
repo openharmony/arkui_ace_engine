@@ -54,6 +54,8 @@ public:
                 theme->subTabIndicatorHeight_ = pattern->GetAttr<Dimension>("subtab_indicator_height", 0.0_vp);
                 theme->subTabTextOnColor_ = pattern->GetAttr<Color>("subtab_text_on_color", Color::WHITE);
                 theme->subTabTextOffColor_ = pattern->GetAttr<Color>("subtab_text_off_color", Color::WHITE);
+                theme->subTabTextFocusedColor_ =
+                    pattern->GetAttr<Color>("subtab_text_focused_color", theme->subTabTextOffColor_);
                 theme->subTabIndicatorGap_ = pattern->GetAttr<Dimension>("subtab_indicator_gap", 0.0_vp);
                 theme->subTabHorizontalPadding_ = pattern->GetAttr<Dimension>("subtab_horizontal_padding", 0.0_vp);
                 theme->subTabTopPadding_ = pattern->GetAttr<Dimension>("subtab_top_padding", 0.0_vp);
@@ -83,6 +85,7 @@ public:
                 theme->horizontalBottomTabBarSpace_ =
                     pattern->GetAttr<Dimension>("horizontal_bottom_tab_bar_space", 0.0_vp);
                 theme->subTabBarHoverDuration_ = pattern->GetAttr<double>("sub_tab_bar_hover_duration", 0.0);
+                theme->isChangeFocusTextStyle_ = static_cast<bool>(pattern->GetAttr<int>("subtab_focused_style", 0));
                 theme->subTabBarHoverToPressDuration_ =
                     pattern->GetAttr<double>("sub_tab_bar_hover_to_press_duration", 0.0);
                 theme->tabContentAnimationDuration_ =
@@ -102,6 +105,8 @@ public:
             theme->bottomTabBarDefaultHeight_ =
                 pattern->GetAttr<Dimension>("bottom_tab_bar_default_height", 0.0_vp);
             theme->tabBarDefaultWidth_ = pattern->GetAttr<Dimension>("tab_bar_default_width", 0.0_vp);
+            theme->tabBarDefaultMargin_ = pattern->GetAttr<Dimension>("tab_bar_margin_width", 0.0_vp);
+            theme->tabBarFocusedColor_ = pattern->GetAttr<Color>("tab_bar_focused_color", Color::TRANSPARENT);
             theme->subTabBarMinWidth_ = pattern->GetAttr<Dimension>("sub_tab_bar_min_width", 0.0_vp);
             theme->dividerColor_ = pattern->GetAttr<Color>("divider_color", Color::BLACK);
             theme->tabBarShadowMargin_ = pattern->GetAttr<Dimension>("tab_bar_shadow_margin", 0.0_vp);
@@ -129,6 +134,7 @@ public:
             theme->dialog_radius_level10_ = pattern->GetAttr<Dimension>("dialog_radius_level10", 20.0_vp);
             theme->dialog_iconColor_ = pattern->GetAttr<Color>("dialog_icon_primary", Color(0xff182431));
             theme->dialog_fontColor_ = pattern->GetAttr<Color>("dialog_font_primary", Color(0xff182431));
+            theme->focusPadding_ = pattern->GetAttr<Dimension>("tab_bar_focus_padding", 0.0_vp);
         }
     };
 
@@ -217,6 +223,11 @@ public:
     const Color& GetSubTabTextOffColor() const
     {
         return subTabTextOffColor_;
+    }
+
+    const Color& GetSubTabTextFocusedColor() const
+    {
+        return subTabTextFocusedColor_;
     }
 
     const Dimension& GetSubTabIndicatorHeight() const
@@ -344,6 +355,11 @@ public:
         return subTabBarHoverDuration_;
     }
 
+    bool GetIsChangeFocusTextStyle() const
+    {
+        return isChangeFocusTextStyle_;
+    }
+
     double GetSubTabBarHoverToPressDuration() const
     {
         return subTabBarHoverToPressDuration_;
@@ -364,6 +380,11 @@ public:
         return tabBarDefaultWidth_;
     }
 
+    const Dimension& GetTabBarDefaultMargin() const
+    {
+        return tabBarDefaultMargin_;
+    }
+
     const Dimension& GetSubTabBarMinWidth() const
     {
         return subTabBarMinWidth_;
@@ -372,6 +393,11 @@ public:
     const Color& GetDividerColor() const
     {
         return dividerColor_;
+    }
+
+    const Color& GetTabBarFocusedColor() const
+    {
+        return tabBarFocusedColor_;
     }
 
     const Dimension& GetTabBarShadowMargin() const
@@ -424,7 +450,12 @@ public:
     {
         return dialog_fontColor_;
     }
-    
+
+    const Dimension& GetFocusPadding() const
+    {
+        return focusPadding_;
+    }
+
 protected:
     TabTheme() = default;
 
@@ -446,6 +477,7 @@ private:
     Dimension focusIndicatorVerticalPadding_;
     Color subTabTextOnColor_;
     Color subTabTextOffColor_;
+    Color subTabTextFocusedColor_;
     Dimension subTabIndicatorHeight_;
     Dimension subTabIndicatorGap_;
     Dimension subTabHorizontalPadding_;
@@ -470,12 +502,15 @@ private:
     Dimension bottomTabBarSpace_;
     Dimension horizontalBottomTabBarSpace_;
     double subTabBarHoverDuration_;
+    bool isChangeFocusTextStyle_;
     double subTabBarHoverToPressDuration_;
     double tabContentAnimationDuration_;
     Dimension tabBarDefaultHeight_;
     Dimension bottomTabBarDefaultHeight_;
     Dimension tabBarDefaultWidth_;
     Dimension subTabBarMinWidth_;
+    Dimension tabBarDefaultMargin_;
+    Color tabBarFocusedColor_;
     Color dividerColor_;
     Dimension tabBarShadowMargin_;
     Dimension tabBarGradientWidth_;
@@ -488,6 +523,7 @@ private:
     Color dialog_iconColor_;
     Color dialog_fontColor_;
     int bottomTabBackgroundBlurStyle_;
+    Dimension focusPadding_;
 };
 
 } // namespace OHOS::Ace

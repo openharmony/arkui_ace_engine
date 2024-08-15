@@ -841,6 +841,19 @@ bool EventManager::DispatchKeyEventNG(const KeyEvent& event, const RefPtr<NG::Fr
     return isKeyConsumed_;
 }
 
+#ifdef SUPPORT_DIGITAL_CROWN
+bool EventManager::DispatchCrownEventNG(const CrownEvent& event, const RefPtr<NG::FrameNode>& focusNode)
+{
+    CHECK_NULL_RETURN(focusNode, false);
+    TAG_LOGI(AceLogTag::ACE_FOCUS,
+        "Dispatch Crown event: action:%{public}d angularVelocity:%{public}f degree:%{public}f",
+        event.action, event.angularVelocity, event.degree);
+    auto focusNodeHub = focusNode->GetFocusHub();
+    CHECK_NULL_RETURN(focusNodeHub, false);
+    return focusNodeHub->HandleCrownEvent(event);
+}
+#endif
+
 void EventManager::MouseTest(const MouseEvent& event, const RefPtr<RenderNode>& renderNode)
 {
     CHECK_NULL_VOID(renderNode);

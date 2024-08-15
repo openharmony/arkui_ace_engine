@@ -41,14 +41,20 @@
 #include "core/components_ng/render/animation_utils.h"
 #include "core/event/mouse_event.h"
 #include "core/components_ng/event/scrollable_event.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 #ifndef WEARABLE_PRODUCT
 constexpr double FRICTION = 0.6;
 constexpr double NEW_FRICTION = 0.7;
+constexpr double VELOCITY_SCALE = 1.0;
+constexpr double NEW_VELOCITY_SCALE = 1.5;
 constexpr double MAX_VELOCITY = 4200.0;
 #else
 constexpr double FRICTION = 0.9;
+constexpr double VELOCITY_SCALE = 0.8;
 constexpr double MAX_VELOCITY = 5000.0;
 #endif
 enum class ModalSheetCoordinationMode : char {
@@ -177,8 +183,12 @@ public:
     // scrollBar
     virtual void UpdateScrollBarOffset() = 0;
     void SetScrollBar(const std::unique_ptr<ScrollBarProperty>& property);
+    
+    virtual RefPtr<ScrollBar> CreateScrollBar();
     void SetScrollBar(DisplayMode displayMode);
     void SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBarProxy);
+
+    virtual RefPtr<ScrollBarOverlayModifier> CreateOverlayModifier();
     void CreateScrollBarOverlayModifier();
 
     float GetScrollableDistance() const
@@ -283,12 +293,14 @@ public:
         }
     }
 
-    void SetFriction(double friction);
+    virtual void SetFriction(double friction);
 
     double GetFriction() const
     {
         return friction_;
     }
+
+    void SetVelocityScale(double scale);
 
     void SetMaxFlingVelocity(double max);
 
@@ -612,6 +624,21 @@ public:
         hotZoneScrollCallback_ = func;
     }
 
+#ifdef SUPPORT_DIGITAL_CROWN
+    void SetDigitalCrownEvent();
+    void SetDigitalCrownSensitivity(CrownSensitivity sensitivity);
+    CrownSensitivity GetDigitalCrownSensitivity()
+    {
+        return crownSensitivity_;
+    }
+    bool GetCrownEventDragging() const
+    {
+        CHECK_NULL_RETURN(scrollableEvent_, false);
+        auto scrollable = scrollableEvent_->GetScrollable();
+        CHECK_NULL_RETURN(scrollable, false);
+        return scrollable->GetCrownEventDragging();
+    }
+#endif
 protected:
     void SuggestOpIncGroup(bool flag);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -694,7 +721,16 @@ protected:
     {
         return true;
     }
+#ifdef ARKUI_CIRCLE_FEATURE
+    void SetRoundScroll()
+    {
+        isRoundScroll_ = true;
+    }
+#endif
 
+#ifdef SUPPORT_DIGITAL_CROWN
+    CrownSensitivity crownSensitivity_ = CrownSensitivity::MEDIUM;
+#endif
 private:
     virtual void OnScrollEndCallback() {};
 
@@ -800,6 +836,7 @@ private:
     bool isCoordEventNeedSpring_ = true;
     double scrollBarOutBoundaryExtent_ = 0.0;
     double friction_ = 0.0;
+    double velocityScale_ = 0.0;
     double maxFlingVelocity_ = MAX_VELOCITY;
     // scroller
     RefPtr<Animator> animator_;
@@ -854,6 +891,10 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     bool isMousePressed_ = false;
     bool lastCanOverScroll_ = false;
+
+#ifdef ARKUI_CIRCLE_FEATURE
+    bool isRoundScroll_ = false;
+#endif
 
     // dump info
     std::list<ScrollableEventsFiredInfo> eventsFiredInfos_;

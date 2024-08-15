@@ -224,6 +224,11 @@ public:
     // Called by view when axis event received.
     void OnAxisEvent(const AxisEvent& event) override;
 
+#ifdef SUPPORT_DIGITAL_CROWN
+    void OnCrownEvent(const CrownEvent& event, const RefPtr<NG::FrameNode>& node) override {};
+    void OnCrownEvent(const CrownEvent& event) override {};
+#endif
+
     // Called by container when rotation event received.
     // if return false, then this event needs platform to handle it.
     bool OnRotationEvent(const RotationEvent& event) const override;

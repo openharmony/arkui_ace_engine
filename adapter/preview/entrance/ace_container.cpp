@@ -369,6 +369,22 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterAxisEventCallback(axisEventCallback);
 
+#ifdef SUPPORT_DIGITAL_CROWN
+    auto&& crownEventCallback = [weak, id = instanceId_](
+        const CrownEvent& event, const std::function<void()>& ignoreMark,
+        const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
+        ContainerScope scope(id);
+        auto context = weak.Upgrade();
+        if (context == nullptr) {
+            return;
+        }
+        context->GetTaskExecutor()->PostTask(
+            [context, event]() { context->OnCrownEvent(event); },
+            TaskExecutor::TaskType::UI, "ArkUIAceContainerCrownEvent");
+    };
+    aceView_->RegisterCrownEventCallback(crownEventCallback);
+#endif
+
     auto&& rotationEventCallback = [weak, id = instanceId_](const RotationEvent& event) {
         ContainerScope scope(id);
         auto context = weak.Upgrade();

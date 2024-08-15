@@ -43,16 +43,18 @@ constexpr float ACTIVE_ITEM_ANGLE = 4.0f;
 constexpr float ADD_HOT_REG_ANGLE = 8.0f;
 constexpr Dimension CONTAINER_BORDER_WIDTH = 24.0_vp;
 constexpr Dimension CIRCLE_DIAMETER_OFFSET = 16.0_vp;
-constexpr float INDICATOR_DRAG_MIN_ANGLE = 6.0;
-constexpr float INDICATOR_DRAG_MAX_ANGLE = 23.0;
 constexpr float INDICATOR_TOUCH_BOTTOM_MAX_ANGLE = 120.0;
 } // namespace
 
 void SwiperIndicatorPattern::OnAttachToFrameNode()
 {
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto swiperTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(swiperTheme);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetRenderContext()->SetClipToBounds(true);
+    host->GetRenderContext()->SetClipToBounds(swiperTheme->GetClipToBounds());
 }
 
 void SwiperIndicatorPattern::OnModifyDone()
@@ -868,6 +870,21 @@ float SwiperIndicatorPattern::GetAngleWithPoint(const PointF& conter, const Poin
     return ConvertAngleWithArcDirection(arcDirection, angle);
 }
 
+double SwiperIndicatorPattern::GetIndicatorDragAngleThreshold(bool isMaxAngle)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.0f);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, 0.0f);
+    auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_RETURN(theme, 0.0f);
+    if (isMaxAngle) {
+        return theme->GetIndicatorDragMaxAngle();
+    } else {
+        return theme->GetIndicatorDragMinAngle();
+    }
+}
+
 void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
 {
     auto swiperNode = GetSwiperNode();
@@ -895,10 +912,10 @@ void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
         float startAngle = GetAngleWithPoint(center, dragStartPoint_);
         float endAngle = GetAngleWithPoint(center, dragPoint);
         turnPageRateOffset = startAngle - endAngle;
-        if (LessNotEqual(std::abs(turnPageRateOffset), INDICATOR_DRAG_MIN_ANGLE)) {
+        if (LessNotEqual(std::abs(turnPageRateOffset), GetIndicatorDragAngleThreshold(false))) {
             return;
         }
-        turnPageRate = -(turnPageRateOffset / INDICATOR_DRAG_MAX_ANGLE);
+        turnPageRate = -(turnPageRateOffset / GetIndicatorDragAngleThreshold(true));
     } else {
         auto offset = dragPoint - dragStartPoint_;
         turnPageRateOffset = swiperPattern->GetDirection() == Axis::HORIZONTAL ? offset.GetX() : offset.GetY();

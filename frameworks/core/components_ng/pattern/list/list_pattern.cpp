@@ -52,6 +52,7 @@ constexpr float DEFAULT_MAX_SPACE_SCALE = 2.0f;
 constexpr float LIST_FADINGEDGE_DEFAULT = 32.0f;
 constexpr float LIST_START_MAIN_POS = 0.0f;
 constexpr float LIST_FADE_ERROR_RANGE = 1.0f;
+static constexpr float FLOAT_TWO = 2.0f;
 } // namespace
 
 void ListPattern::OnModifyDone()
@@ -71,6 +72,9 @@ void ListPattern::OnModifyDone()
         auto scrollableEvent = GetScrollableEvent();
         CHECK_NULL_VOID(scrollableEvent);
         scrollable_ = scrollableEvent->GetScrollable();
+#ifdef SUPPORT_DIGITAL_CROWN
+        SetDigitalCrownEvent();
+#endif
     }
 
     SetEdgeEffect();
@@ -246,6 +250,10 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     }
     CheckScrollable();
 
+    if (centerIndex_ != listLayoutAlgorithm->GetMidIndex(AceType::RawPtr(dirty))) {
+        OnMidIndexChanged(centerIndex_, listLayoutAlgorithm->GetMidIndex(AceType::RawPtr(dirty)));
+    }
+
     bool indexChanged = false;
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         indexChanged = (startIndex_ != listLayoutAlgorithm->GetStartIndex()) ||
@@ -354,7 +362,7 @@ void ListPattern::CreateAnalyzerOverlay(const RefPtr<FrameNode> listNode)
     CHECK_NULL_VOID(overlayProperty);
     overlayProperty->SetIsOverlayNode(true);
     overlayProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    overlayProperty->UpdateAlignment(Alignment::CENTER);
+    overlayProperty->UpdateAlignment(Alignment::TOP_LEFT);
     auto overlayOffsetX = std::make_optional<Dimension>(Dimension::FromString("0px"));
     auto overlayOffsetY = std::make_optional<Dimension>(Dimension::FromString("0px"));
     overlayProperty->SetOverlayOffset(overlayOffsetX, overlayOffsetY);
@@ -413,8 +421,15 @@ void ListPattern::UpdateFadingEdge(const RefPtr<ListPaintMethod> paint)
     CHECK_NULL_VOID(host);
     auto overlayNode = host->GetOverlayNode();
     CHECK_NULL_VOID(overlayNode);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameSize = geometryNode->GetMarginFrameRect();
     auto overlayRenderContext = overlayNode->GetRenderContext();
     CHECK_NULL_VOID(overlayRenderContext);
+    auto fadeFrameSize = GetAxis() == Axis::HORIZONTAL ? frameSize.Width() : frameSize.Height();
+    if (fadeFrameSize == 0) {
+        return;
+    }
     if (!isFadingEdge_) {
         paint->SetOverlayRenderContext(overlayRenderContext);
         paint->SetFadingInfo(false, false);
@@ -422,35 +437,65 @@ void ListPattern::UpdateFadingEdge(const RefPtr<ListPaintMethod> paint)
         isLowerEdgeFading_ = false;
         return;
     }
+    auto isUpdatePadding = UpdateFadingForPadding(fadeFrameSize);
     auto isFadingTop = LessNotEqual(startMainPos_, LIST_START_MAIN_POS - LIST_FADE_ERROR_RANGE);
     auto isFadingBottom = GreatNotEqual(endMainPos_, contentMainSize_ + LIST_FADE_ERROR_RANGE);
     if (isFadingTop || isFadingBottom) {
         auto isTopEdgeFadingUpdate = isTopEdgeFading_ != isFadingTop;
         auto isLowerEdgeFadingUpdate = isLowerEdgeFading_ != isFadingBottom;
-        if (isTopEdgeFadingUpdate || isLowerEdgeFadingUpdate || (fadingAxis_ != GetAxis())) {
+        if (isTopEdgeFadingUpdate || isLowerEdgeFadingUpdate ||
+            (fadingAxis_ != GetAxis()) || isUpdatePadding) {
             paint->SetOverlayRenderContext(overlayRenderContext);
-            UpdateFadeInfo(isFadingTop, isFadingBottom, paint);
+            UpdateFadeInfo(isFadingTop, isFadingBottom, fadeFrameSize, paint);
             fadingAxis_ = GetAxis();
         }
     } else if (isTopEdgeFading_ || isLowerEdgeFading_) {
         paint->SetOverlayRenderContext(overlayRenderContext);
-        UpdateFadeInfo(isFadingTop, isFadingBottom, paint);
+        UpdateFadeInfo(isFadingTop, isFadingBottom, fadeFrameSize, paint);
     }
     isTopEdgeFading_ = isFadingTop;
     isLowerEdgeFading_ = isFadingBottom;
 }
 
-void ListPattern::UpdateFadeInfo(bool isFadingTop, bool isFadingBottom, const RefPtr<ListPaintMethod> paint)
+bool ListPattern::UpdateFadingForPadding(float fadeFrameSize)
 {
+    if (fadeFrameSize == 0) {
+        return false;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto& padding = geometryNode->GetPadding();
+    if (!padding) {
+        return false;
+    }
+    float paddingBeforeContent = GetAxis() == Axis::HORIZONTAL ? *padding->left : *padding->top;
+    float paddingAfterContent = GetAxis() == Axis::HORIZONTAL ? *padding->right : *padding->bottom;
+    float startPercent = paddingBeforeContent / fadeFrameSize;
+    float endPercent = (fadeFrameSize - paddingAfterContent) / fadeFrameSize;
+    if ((startPercent != startPercent_) || (endPercent != endPercent_)) {
+        startPercent_= startPercent;
+        endPercent_= endPercent;
+        return true;
+    }
+    return false;
+}
+
+void ListPattern::UpdateFadeInfo(bool isFadingTop, bool isFadingBottom,
+    float fadeFrameSize, const RefPtr<ListPaintMethod> paint)
+{
+    if (fadeFrameSize == 0) {
+        return;
+    }
     if (startIndex_ > 0) {
         isFadingTop = true;
     }
     if (endIndex_ < maxListItemIndex_) {
         isFadingBottom = true;
     }
-    auto percentFading = CalcDimension(LIST_FADINGEDGE_DEFAULT, DimensionUnit::VP).ConvertToPx() /
-        std::abs(contentMainSize_ - LIST_START_MAIN_POS);
-    paint->SetFadingInfo(isFadingTop, isFadingBottom, percentFading);
+    auto percentFading = CalcDimension(LIST_FADINGEDGE_DEFAULT, DimensionUnit::VP).ConvertToPx() / fadeFrameSize;
+    paint->SetFadingInfo(isFadingTop, isFadingBottom, percentFading, startPercent_, endPercent_);
 }
 
 bool ListPattern::UpdateStartListItemIndex()
@@ -538,14 +583,7 @@ void ListPattern::ProcessEvent(
         }
     }
 
-    auto onScrollVisibleContentChange = listEventHub->GetOnScrollVisibleContentChange();
-    if (onScrollVisibleContentChange) {
-        bool startChanged = UpdateStartListItemIndex();
-        bool endChanged = UpdateEndListItemIndex();
-        if (indexChanged || startChanged || endChanged) {
-            onScrollVisibleContentChange(startInfo_, endInfo_);
-        }
-    }
+    OnScrollVisibleContentChange(listEventHub, indexChanged);
 
     auto onReachStart = listEventHub->GetOnReachStart();
     if (onReachStart && (startIndex_ == 0)) {
@@ -715,7 +753,7 @@ void ListPattern::SetChainAnimationToPosMap()
 }
 
 void ListPattern::SetChainAnimationLayoutAlgorithm(
-    RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm, RefPtr<ListLayoutProperty> listLayoutProperty)
+    RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm, const RefPtr<ListLayoutProperty>& listLayoutProperty)
 {
     CHECK_NULL_VOID(listLayoutAlgorithm);
     CHECK_NULL_VOID(listLayoutProperty);
@@ -913,6 +951,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
         }
         return false;
     }
+
     SetScrollSource(source);
     FireAndCleanScrollingListener();
     auto lastDelta = currentDelta_;
@@ -939,19 +978,12 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
         overScroll = contentMainSize_ - contentEndOffset_ - (endMainPos_ - currentDelta_);
     }
     if (IsScrollSnapAlignCenter()) {
-        auto itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
-        auto endPos = endMainPos_ - currentDelta_;
-        if (startIndex_ == 0 && Positive(startPos + itemHeight / 2.0f - contentMainSize_ / 2.0f)) {
-            overScroll = startPos + itemHeight / 2.0f - contentMainSize_ / 2.0f;
-        } else if ((endIndex_ == maxListItemIndex_) &&
-                   LessNotEqual(endPos - itemHeight / 2.0f, contentMainSize_ / 2.0f)) {
-            overScroll = endPos - itemHeight / 2.0f - contentMainSize_ / 2.0f;
-        }
+        overScroll = GetSnapCenterOverScrollPos(startPos, overScroll);
     }
 
     if (GetScrollSource() == SCROLL_FROM_UPDATE) {
         // adjust offset.
-        auto friction = ScrollablePattern::CalculateFriction(std::abs(overScroll) / contentMainSize_);
+        auto friction = GetScrollUpdateFriction(overScroll);
         currentDelta_ = currentDelta_ * friction;
     }
 
@@ -969,6 +1001,20 @@ void ListPattern::MarkDirtyNodeSelf()
     } else {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     }
+}
+
+float ListPattern::GetSnapCenterOverScrollPos(float startPos, float prevScroll)
+{
+    float overScroll = prevScroll;
+    auto itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
+    auto endPos = endMainPos_ - currentDelta_;
+    if (startIndex_ == 0 && Positive(startPos + itemHeight / FLOAT_TWO - contentMainSize_ / FLOAT_TWO)) {
+        overScroll = startPos + itemHeight / FLOAT_TWO - contentMainSize_ / FLOAT_TWO;
+    } else if ((endIndex_ == maxListItemIndex_) &&
+                LessNotEqual(endPos - itemHeight / FLOAT_TWO, contentMainSize_ / FLOAT_TWO)) {
+        overScroll = endPos - itemHeight / FLOAT_TWO - contentMainSize_ / FLOAT_TWO;
+    }
+    return overScroll;
 }
 
 void ListPattern::OnScrollEndCallback()
@@ -1312,7 +1358,7 @@ bool ListPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     auto focusPattern = focusFrameNode->GetPattern<ListItemPattern>();
     CHECK_NULL_RETURN(focusPattern, false);
     auto curIndex = focusPattern->GetIndexInList();
-    ScrollToIndex(curIndex, smooth_, ScrollAlign::AUTO);
+    ScrollToIndex(curIndex, smooth_, GetScrollToNodeAlign());
     auto pipeline = GetContext();
     if (pipeline) {
         pipeline->FlushUITasks();
@@ -2465,4 +2511,23 @@ void ListPattern::ResetChildrenSize()
         OnChildrenSizeChanged({ -1, -1, -1 }, LIST_UPDATE_CHILD_SIZE);
     }
 }
+
+void ListPattern::OnScrollVisibleContentChange(const RefPtr<ListEventHub>& listEventHub, bool indexChanged)
+{
+    CHECK_NULL_VOID(listEventHub);
+    auto onScrollVisibleContentChange = listEventHub->GetOnScrollVisibleContentChange();
+    if (onScrollVisibleContentChange) {
+        bool startChanged = UpdateStartListItemIndex();
+        bool endChanged = UpdateEndListItemIndex();
+        if (indexChanged || startChanged || endChanged) {
+            onScrollVisibleContentChange(startInfo_, endInfo_);
+        }
+    }
+}
+
+float ListPattern::GetScrollUpdateFriction(float overScroll)
+{
+    return ScrollablePattern::CalculateFriction(std::abs(overScroll) / contentMainSize_);
+}
+
 } // namespace OHOS::Ace::NG

@@ -182,7 +182,12 @@ void ToastPattern::BeforeCreateLayoutWrapper()
     UpdateTextSizeConstraint(textNode);
     // TextAlign should be START when lines of text are greater than 1
     if (GetLineCount(textNode) > 1) {
-        textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextAlign(TextAlign::START);
+        auto context = textNode->GetContext();
+        CHECK_NULL_VOID(context);
+        auto toastTheme = context->GetTheme<ToastTheme>();
+        CHECK_NULL_VOID(toastTheme);
+        auto alignToastText = toastTheme->GetMultiLineTextAlign();
+        textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextAlign(alignToastText);
     }
 }
 

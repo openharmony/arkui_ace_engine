@@ -49,6 +49,9 @@
 #include "bridge/declarative_frontend/engine/functions/js_gesture_judge_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_hover_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_key_function.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "bridge/declarative_frontend/engine/functions/js_crown_function.h"
+#endif
 #include "bridge/declarative_frontend/engine/functions/js_on_area_change_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_on_size_change_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
@@ -302,9 +305,9 @@ void ParseJsRotate(const JSRef<JSVal>& jsValue, NG::RotateOptions& rotate, std::
     auto jsRotateX = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::X));
     auto jsRotateY = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::Y));
     auto jsRotateZ = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::Z));
-    if (!jsRotateX->IsUndefined()
-        && !jsRotateY->IsUndefined()
-        && !jsRotateZ->IsUndefined()) {
+    if (jsRotateX->IsUndefined()
+        && jsRotateY->IsUndefined()
+        && jsRotateZ->IsUndefined()) {
         GetDefaultRotateVector(dxVal, dyVal, dzVal);
     } else {
         JSViewAbstract::ParseJsDouble(jsRotateX, dxVal);
@@ -7072,6 +7075,31 @@ void JSViewAbstract::JsOnKeyEvent(const JSCallbackInfo& args)
     ViewAbstractModel::GetInstance()->SetOnKeyEvent(std::move(onKeyEvent));
 }
 
+void JSViewAbstract::JsOnCrownEvent(const JSCallbackInfo& args)
+{
+#ifdef SUPPORT_DIGITAL_CROWN
+    if (args.Length() <= 0) {
+        return;
+    }
+    JSRef<JSVal> arg = args[0];
+    if (args[0]->IsFunction()) {
+        RefPtr<JsCrownFunction> JsOnCrownEventfunc = AceType::MakeRefPtr<JsCrownFunction>(JSRef<JSFunc>::Cast(arg));
+        WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->
+            GetMainFrameNode());
+        auto onCrownEvent = [execCtx = args.GetExecutionContext(), func = std::move(JsOnCrownEventfunc),
+            node = frameNode](CrownEventInfo& info) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("onCrown");
+                PipelineContext::SetCallBackNode(node);
+                func->Execute(info);
+            };
+        ViewAbstractModel::GetInstance()->SetOnCrownEvent(std::move(onCrownEvent));
+    } else {
+        ViewAbstractModel::GetInstance()->DisableOnCrownEvent();
+    }
+#endif
+}
+
 void JSViewAbstract::JsOnFocus(const JSCallbackInfo& args)
 {
     JSRef<JSVal> arg = args[0];
@@ -7530,10 +7558,11 @@ void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
         func->Execute();
     };
     // parse SheetStyle and callbacks
+    auto sheetTheme = GetTheme<OHOS::Ace::NG::SheetTheme>();
     NG::SheetStyle sheetStyle;
     sheetStyle.sheetMode = NG::SheetMode::LARGE;
     sheetStyle.showDragBar = true;
-    sheetStyle.showCloseIcon = true;
+    sheetStyle.showCloseIcon = sheetTheme ? sheetTheme->GetShowCloseIcon() : true;
     sheetStyle.showInPage = false;
     std::function<void()> onAppearCallback;
     std::function<void()> onDisappearCallback;
@@ -7595,7 +7624,8 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
     }
     bool showClose = true;
     if (showCloseIcon->IsNull() || showCloseIcon->IsUndefined()) {
-        sheetStyle.showCloseIcon = showClose;
+        auto sheetTheme = GetTheme<OHOS::Ace::NG::SheetTheme>();
+        sheetStyle.showCloseIcon = sheetTheme ? sheetTheme->GetShowCloseIcon() : showClose;
     } else {
         if (ParseJsBool(showCloseIcon, showClose)) {
             sheetStyle.showCloseIcon = showClose;
@@ -8328,6 +8358,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("hoverEffect", &JSViewAbstract::JsHoverEffect);
     JSClass<JSViewAbstract>::StaticMethod("onMouse", &JSViewAbstract::JsOnMouse);
     JSClass<JSViewAbstract>::StaticMethod("onHover", &JSViewAbstract::JsOnHover);
+    JSClass<JSViewAbstract>::StaticMethod("onDigitalCrown", &JSViewAbstract::JsOnCrownEvent);
     JSClass<JSViewAbstract>::StaticMethod("onClick", &JSViewAbstract::JsOnClick);
     JSClass<JSViewAbstract>::StaticMethod("onGestureJudgeBegin", &JSViewAbstract::JsOnGestureJudgeBegin);
     JSClass<JSViewAbstract>::StaticMethod("onTouchIntercept", &JSViewAbstract::JsOnTouchIntercept);

@@ -170,6 +170,14 @@ public:
     // if return false, then this event needs platform to handle it.
     virtual bool OnKeyEvent(const KeyEvent& event) = 0;
 
+#ifdef SUPPORT_DIGITAL_CROWN
+    // Called by view when crown event received.
+    virtual void OnCrownEvent(const CrownEvent& event) = 0;
+
+    // Called by ohos AceContainer when crown event received.
+    virtual void OnCrownEvent(const CrownEvent& event, const RefPtr<NG::FrameNode>& node) {}
+#endif
+
     // Called by view when mouse event received.
     virtual void OnMouseEvent(const MouseEvent& event) = 0;
 

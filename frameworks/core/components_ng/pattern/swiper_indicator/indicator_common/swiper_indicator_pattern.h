@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components/theme/app_theme.h"
 namespace OHOS::Ace::NG {
 class SwiperIndicatorPattern : public Pattern {
     DECLARE_ACE_TYPE(SwiperIndicatorPattern, Pattern);
@@ -127,7 +128,9 @@ public:
         if (mouseClickIndex_) {
             mouseClickIndex_ = swiperPattern->GetLoopIndex(mouseClickIndex_.value());
         }
+        paintMethod->SetIsTouchBottom(touchBottomType_);
         paintMethod->SetMouseClickIndex(mouseClickIndex_);
+        paintMethod->SetTouchBottomRate(swiperPattern->GetTouchBottomRate());
         mouseClickIndex_ = std::nullopt;
         return paintMethod;
     }
@@ -174,6 +177,7 @@ public:
         } else if (swiperPattern->GetIndicatorType() == SwiperIndicatorType::ARC_DOT) {
             if (!circleDotIndicatorModifier_) {
                 circleDotIndicatorModifier_ = AceType::MakeRefPtr<CircleDotIndicatorModifier>();
+                circleDotIndicatorModifier_->SetLongPointHeadCurve(swiperPattern->GetCurveIncludeMotion());
             }
 
             auto paintMethod = CreateCircleDotIndicatorPaintMethod(swiperPattern);
@@ -201,6 +205,16 @@ public:
         FocusPaintParam paintParam;
         paintParam.SetPaintWidth(swiperTheme->GetFocusedBorderWidth());
         paintParam.SetPaintColor(swiperTheme->GetFocusedColor());
+        auto theme = pipelineContext->GetTheme<AppTheme>();
+        if (!theme) {
+            return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, paintParam };
+        }
+        if (theme->IsFocusBoxGlow()) {
+            paintParam.SetPaintColor(theme->GetFocusBorderColor());
+            paintParam.SetPaintWidth(theme->GetFocusBorderWidth());
+            paintParam.SetFocusBoxGlow(theme->IsFocusBoxGlow());
+            paintParam.SetFocusPadding(swiperTheme->GetIndicatorFocusedPadding());
+        }
         return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, paintParam };
     }
 
@@ -252,6 +266,7 @@ private:
     void AddIsFocusActiveUpdateEvent();
     void RemoveIsFocusActiveUpdateEvent();
     void OnIsFocusActiveUpdate(bool isFocusAcitve);
+    double GetIndicatorDragAngleThreshold(bool isMaxAngle);
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<TouchEventImpl> touchEvent_;

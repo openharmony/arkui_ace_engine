@@ -32,12 +32,32 @@ constexpr uint8_t ENABLED_ALPHA = 255;
 constexpr uint8_t DISABLED_ALPHA = 102;
 } // namespace
 
+CanvasDrawFunction DatePickerPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    CanvasDrawFunction drawFun = GetContentDrawFunctionL<DataPickerRowLayoutProperty>(paintWrapper, pipeline);
+    if (!drawFun) {
+        return nullptr;
+    }
+
+    return [weak = WeakClaim(this), drawFun](RSCanvas& canvas) {
+        auto picker = weak.Upgrade();
+        CHECK_NULL_VOID(picker);
+        drawFun(canvas);
+    };
+}
+
 CanvasDrawFunction DatePickerPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
+    if (theme->IsCircleDial()) {
+        return nullptr;
+    }
+
     auto dividerColor = theme->GetDividerColor();
 
     auto dividerSpacing = pipeline->NormalizeToPx(theme->GetDividerSpacing());

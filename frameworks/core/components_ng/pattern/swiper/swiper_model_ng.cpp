@@ -420,6 +420,17 @@ void SwiperModelNG::SetOnContentDidScroll(FrameNode* frameNode, ContentDidScroll
     pattern->SetOnContentDidScroll(std::move(onContentDidScroll));
 }
 
+void SwiperModelNG::SetDigitalCrownSensitivity(int32_t sensitivity)
+{
+#ifdef SUPPORT_DIGITAL_CROWN
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetDigitalCrownSensitivity(static_cast<CrownSensitivity>(sensitivity));
+#endif
+}
+
 void SwiperModelNG::SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin, bool ignoreBlank)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMargin, nextMargin, frameNode);

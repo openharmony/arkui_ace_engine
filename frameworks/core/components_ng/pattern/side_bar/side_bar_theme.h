@@ -63,6 +63,7 @@ public:
                 = sideBarPattern->GetAttr<std::string>("section_unfocus_effect_enable", "0");
             theme->sideBarUnfocusEffectEnable_ = StringUtils::StringToInt(sideBarUnfocusEffectEnable);
             theme->sideBarUnfocusColor_ = sideBarPattern->GetAttr<Color>("color_panel_bg", Color::TRANSPARENT);
+            theme->sideBarWidth_ = sideBarPattern->GetAttr<Dimension>("side_bar_width", -1.0_vp);
         }
     };
 
@@ -98,6 +99,11 @@ public:
         return sideBarUnfocusColor_;
     }
 
+    const Dimension& GetSideBarWidth() const
+    {
+        return sideBarWidth_;
+    }
+
 protected:
     SideBarTheme() = default;
 
@@ -108,6 +114,7 @@ private:
     int32_t dividerShadowEnable_ = 0;
     int32_t sideBarUnfocusEffectEnable_ = 0;
     Color sideBarUnfocusColor_ = Color::TRANSPARENT;
+    Dimension sideBarWidth_ = -1.0_vp;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SIDE_BAR_SIDE_BAR_THEME_H

@@ -23,9 +23,19 @@ import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
 import componentUtils from '@ohos.arkui.componentUtils';
 import hilog from '@ohos.hilog';
 
+const resourceFn = resourceManager.getSystemResourceManager();
+const shadowRange: number = 6;
+const fontWeightMin: number = 100;
+const fontWeightMax: number = 900;
+
 export enum ChipSize {
   NORMAL = "NORMAL",
   SMALL = "SMALL"
+}
+
+enum IconType {
+  PREFIX_ICON = "PREFIXICON",
+  SUFFIX_ICON = "SUFFIXICON",
 }
 
 enum BreakPointsType {
@@ -73,9 +83,12 @@ export interface LabelOptions {
 }
 
 interface IconTheme {
-  size: SizeOptions;
+  normalSize: SizeOptions;
+  smallSize: SizeOptions;
   fillColor: ResourceColor;
   activatedFillColor: ResourceColor;
+  focusFillColor: ResourceColor;
+  focusActivatedColor: ResourceColor;
 }
 
 interface PrefixIconTheme extends IconTheme {}
@@ -88,18 +101,25 @@ interface SuffixIconTheme extends IconTheme {
 interface DefaultSymbolTheme {
   normalFontColor: Array<ResourceColor>;
   activatedFontColor: Array<ResourceColor>;
-  fontSize: Length;
+  smallFontSize: Length;
+  normalFontSize: Length;
 }
 
 interface LabelTheme {
   normalFontSize: Dimension;
   smallFontSize: Dimension;
+  normalFocusFontSize: Dimension;
+  smallFocusFontSize: Dimension;
+  focusFontColor: ResourceColor;
   fontColor: ResourceColor;
+  activatedFontWeight: Dimension;
   activatedFontColor: ResourceColor;
   fontFamily: string;
   normalMargin: Margin;
+  normalDefaultMargin: Margin;
   localizedNormalMargin: LocalizedMargin;
   smallMargin: Margin;
+  smallDefaultMargin: Margin;
   localizedSmallMargin: LocalizedMargin;
   defaultFontSize: Dimension;
 }
@@ -112,10 +132,10 @@ interface ChipNodeOpacity {
 }
 
 interface ChipNodeConstraintWidth {
-  breakPointMinWidth: number,
-  breakPointSmMaxWidth: number,
-  breakPointMdMaxWidth: number,
-  breakPointLgMaxWidth: number,
+  breakPointMinWidth: number;
+  breakPointSmMaxWidth: number;
+  breakPointMdMaxWidth: number;
+  breakPointLgMaxWidth: number;
 }
 
 interface ChipNodeTheme {
@@ -128,14 +148,27 @@ interface ChipNodeTheme {
   backgroundColor: ResourceColor;
   activatedBackgroundColor: ResourceColor;
   focusOutlineColor: ResourceColor;
+  normalBorderColor: ResourceColor,
+  smallBorderColor: ResourceColor,
+  normalBorderWidth: Dimension;
+  smallBorderWidth: Dimension;
+  normalActivatedBorderColor: ResourceColor,
+  smallActivatedBorderColor: ResourceColor,
   normalBorderRadius: Dimension;
   smallBorderRadius: Dimension;
   borderWidth: number;
+  focusBtnScaleX: Resource;
+  focusBtnScaleY: Resource;
   localizedNormalPadding: LocalizedPadding;
   localizedSmallPadding: LocalizedPadding;
+  hoverAndPressedBlendColor: ResourceColor;
   hoverBlendColor: ResourceColor;
   pressedBlendColor: ResourceColor;
+  focusBgColor: ResourceColor;
+  focusActivatedBgColor: ResourceColor;
   opacity: ChipNodeOpacity;
+  normalShadowStyle: ShadowStyle | undefined;
+  smallShadowStyle: ShadowStyle | undefined;
   breakPointConstraintWidth: ChipNodeConstraintWidth;
 }
 
@@ -147,20 +180,58 @@ interface ChipTheme {
   chipNode: ChipNodeTheme;
 }
 
+function getShadowStyle(resourceNum: Resource): ShadowStyle | undefined {
+  let index = LengthMetrics.resource(resourceNum).value;
+  return index < shadowRange ? index as ShadowStyle : undefined;
+}
+
 export const defaultTheme: ChipTheme = {
   prefixIcon: {
-    size: { width: 16, height: 16 },
-    fillColor: $r('sys.color.ohos_id_color_secondary'),
-    activatedFillColor: $r('sys.color.ohos_id_color_text_primary_contrary'),
+    normalSize: {
+      width: $r('sys.float.chip_normal_suffix_icon_size_width'),
+      height: $r('sys.float.chip_normal_suffix_icon_size_height')
+    },
+    smallSize: {
+      width: $r('sys.float.chip_small_suffix_icon_size_width'),
+      height: $r('sys.float.chip_small_suffix_icon_size_height')
+    },
+    fillColor: $r('sys.color.chip_usually_icon_color'),
+    activatedFillColor: $r('sys.color.chip_active_icon_color'),
+    focusFillColor: $r('sys.color.chip_icon_focus_fill'),
+    focusActivatedColor: $r('sys.color.chip_icon_focus_activated'),
   },
   label: {
-    normalFontSize: $r('sys.float.ohos_id_text_size_button2'),
-    smallFontSize: $r('sys.float.ohos_id_text_size_button2'),
-    fontColor: $r('sys.color.ohos_id_color_text_primary'),
-    activatedFontColor: $r('sys.color.ohos_id_color_text_primary_contrary'),
+    normalFontSize: $r('sys.float.chip_normal_font_size'),
+    smallFontSize: $r('sys.float.chip_small_font_size'),
+    normalFocusFontSize: $r('sys.float.chip_normal_focused_fontsize'),
+    smallFocusFontSize: $r('sys.float.chip_small_focused_fontsize'),
+    focusFontColor: $r('sys.color.chip_focus_text'),
+    fontColor: $r('sys.color.chip_font_color'),
+    activatedFontWeight: $r('sys.float.chip_activated_fontweight'),
+    activatedFontColor: $r('sys.color.chip_activated_fontcolor'),
     fontFamily: "HarmonyOS Sans",
-    normalMargin: { left: 6, right: 6, top: 0, bottom: 0 },
-    smallMargin: { left: 4, right: 4, top: 0, bottom: 0 },
+    normalDefaultMargin: {
+      left: $r('sys.float.chip_normal_text_margin_left'),
+      right: $r('sys.float.chip_normal_text_margin_right'),
+      top: 0,
+      bottom: 0 },
+    smallDefaultMargin: {
+      left: $r('sys.float.chip_small_text_margin_left'),
+      right: $r('sys.float.chip_small_text_margin_right'),
+      top: 0,
+      bottom: 0
+    },
+    normalMargin: {
+      left: 6,
+      right: 6,
+      top: 0,
+      bottom: 0 },
+    smallMargin: {
+      left: 4,
+      right: 4,
+      top: 0,
+      bottom: 0
+    },
     defaultFontSize: 14,
     localizedNormalMargin: {
       start: LengthMetrics.vp(16),
@@ -176,45 +247,68 @@ export const defaultTheme: ChipTheme = {
     }
   },
   suffixIcon: {
-    size: { width: 16, height: 16 },
-    fillColor: $r('sys.color.ohos_id_color_secondary'),
-    activatedFillColor: $r('sys.color.ohos_id_color_text_primary_contrary'),
+    normalSize: {
+      width: $r('sys.float.chip_normal_suffix_icon_size_width'),
+      height: $r('sys.float.chip_normal_suffix_icon_size_height')
+    },
+    smallSize: {
+      width: $r('sys.float.chip_small_suffix_icon_size_width'),
+      height: $r('sys.float.chip_small_suffix_icon_size_height')
+    },
+    fillColor: $r('sys.color.chip_usually_icon_color'),
+    activatedFillColor: $r('sys.color.chip_active_icon_color'),
+    focusFillColor: $r('sys.color.chip_icon_focus_fill'),
+    focusActivatedColor: $r('sys.color.chip_icon_focus_activated'),
     defaultDeleteIcon: $r('sys.media.ohos_ic_public_cancel', 16, 16),
     focusable: false,
   },
   defaultSymbol: {
-    normalFontColor: [$r('sys.color.ohos_id_color_secondary')],
-    activatedFontColor: [$r('sys.color.ohos_id_color_text_primary_contrary')],
-    fontSize: 16,
+    normalFontColor: [$r('sys.color.chip_usually_icon_color')],
+    activatedFontColor: [$r('sys.color.chip_active_icon_color')],
+    normalFontSize: $r('sys.float.chip_normal_suffix_icon_size_default'),
+    smallFontSize: $r('sys.float.chip_small_suffix_icon_size_default'),
   },
   chipNode: {
     suitAgeScale: 1.75,
     minLabelWidth: 12,
-    normalHeight: 36,
-    smallHeight: 28,
+    normalHeight: $r('sys.float.chip_normal_height'),
+    smallHeight: $r('sys.float.chip_small_height'),
     enabled: true,
     activated: false,
-    backgroundColor: $r('sys.color.ohos_id_color_button_normal'),
-    activatedBackgroundColor: $r('sys.color.ohos_id_color_emphasize'),
+    backgroundColor: $r('sys.color.chip_background_color'),
+    activatedBackgroundColor: $r('sys.color.chip_activated_background_color'),
     focusOutlineColor: $r('sys.color.ohos_id_color_focused_outline'),
-    normalBorderRadius: $r('sys.float.ohos_id_corner_radius_tips_instant_tip'),
-    smallBorderRadius: $r('sys.float.ohos_id_corner_radius_piece'),
+    normalBorderColor: $r('sys.color.chip_normal_border_color'),
+    smallBorderColor: $r('sys.color.chip_small_border_color'),
+    normalBorderWidth: $r('sys.float.chip_normal_border_width'),
+    smallBorderWidth: $r('sys.float.chip_small_border_width'),
+    normalActivatedBorderColor: $r('sys.color.chip_normal_activated_border_color'),
+    smallActivatedBorderColor: $r('sys.color.chip_small_activated_border_color'),
+    normalBorderRadius: $r('sys.float.chip_normal_radius'),
+    smallBorderRadius: $r('sys.float.chip_small_radius'),
     borderWidth: 2,
+    focusBtnScaleX: $r('sys.float.chip_focused_btn_scale_x'),
+    focusBtnScaleY: $r('sys.float.chip_focused_btn_scale_y'),
     localizedNormalPadding: {
-      start: LengthMetrics.vp(16),
-      end: LengthMetrics.vp(16),
+      start: LengthMetrics.resource($r('sys.float.chip_normal_text_padding_left')),
+      end: LengthMetrics.resource($r('sys.float.chip_normal_text_padding_right')),
       top: LengthMetrics.vp(4),
       bottom: LengthMetrics.vp(4)
     },
     localizedSmallPadding: {
-      start: LengthMetrics.vp(12),
-      end: LengthMetrics.vp(12),
+      start: LengthMetrics.resource($r('sys.float.chip_small_text_padding_left')),
+      end: LengthMetrics.resource($r('sys.float.chip_small_text_padding_right')),
       top: LengthMetrics.vp(4),
       bottom: LengthMetrics.vp(4)
     },
-    hoverBlendColor: $r('sys.color.ohos_id_color_hover'),
-    pressedBlendColor: $r('sys.color.ohos_id_color_click_effect'),
+    hoverAndPressedBlendColor: $r('sys.color.ohos_id_picker_press_color'),
+    hoverBlendColor: $r('sys.color.chip_hover_fg'),
+    pressedBlendColor: $r('sys.color.chip_press_color'),
+    focusBgColor: $r('sys.color.chip_focus_bg'),
+    focusActivatedBgColor: $r('sys.color.chip_focus_activated_bg'),
     opacity: { normal: 1, hover: 0.95, pressed: 0.9, disabled: 0.4 },
+    normalShadowStyle: getShadowStyle($r('sys.float.chip_normal_shadow_style')),
+    smallShadowStyle: getShadowStyle($r('sys.float.chip_small_shadow_style')),
     breakPointConstraintWidth: {
       breakPointMinWidth: 128,
       breakPointSmMaxWidth: 156,
@@ -241,8 +335,8 @@ interface ChipOptions {
   borderRadius?: Dimension;
   size?: ChipSize | SizeOptions;
   direction?: Direction;
-  onClose?: () => void
-  onClicked?: () => void
+  onClose?: () => void;
+  onClicked?: () => void;
 }
 
 @Builder
@@ -269,92 +363,169 @@ export function Chip(options: ChipOptions) {
 @Component
 export struct ChipComponent {
   private theme: ChipTheme = defaultTheme;
-  @Prop chipSize: ChipSize | SizeOptions = ChipSize.NORMAL
-  @Prop allowClose: boolean = true
-  @Prop chipDirection: Direction = Direction.Auto
-  @Prop prefixIcon: PrefixIconOptions = { src: "" }
-  @Prop prefixSymbol: SymbolOptions
-  @Prop label: LabelOptions = { text: "" }
-  @Prop suffixIcon: SuffixIconOptions = { src: "" }
-  @Prop suffixSymbol: SymbolOptions
-  @Prop chipNodeBackgroundColor: ResourceColor = this.theme.chipNode.backgroundColor
-  @Prop chipNodeActivatedBackgroundColor: ResourceColor = this.theme.chipNode.activatedBackgroundColor
-  @Prop chipNodeRadius: Dimension | undefined = void (0)
-  @Prop chipEnabled: boolean = true
-  @Prop chipActivated: boolean = false
-  @State isHover: boolean = false
-  @State chipScale: ScaleOptions = { x: 1, y: 1 }
-  @State chipOpacity: number = 1
-  @State chipBlendColor: ResourceColor = Color.Transparent
-  @State deleteChip: boolean = false
-  @State chipNodeOnFocus: boolean = false
-  @State useDefaultSuffixIcon: boolean = false
-  private chipNodeSize: SizeOptions = {}
-  private onClose: () => void = noop
-  private onClicked: () => void = noop
-  @State suffixIconOnFocus: boolean = false
-  @State chipBreakPoints: BreakPointsType = BreakPointsType.SM
-  private smListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("0vp<width<600vp")
-  private mdListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("600vp<=width<840vp")
-  private lgListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("840vp<=width")
-  @State private isShowPressedBackGroundColor: boolean = false
-  @State fontSizeScale: number | undefined = 0
-  @State fontWeightScale: number | undefined = 0
+  @Prop chipSize: ChipSize | SizeOptions = ChipSize.NORMAL;
+  @Prop allowClose: boolean = true;
+  @Prop chipDirection: Direction = Direction.Auto;
+  @Prop prefixIcon: PrefixIconOptions = { src: "" };
+  @Prop prefixSymbol: SymbolOptions;
+  @Prop label: LabelOptions = { text: "" };
+  @Prop suffixIcon: SuffixIconOptions = { src: "" };
+  @Prop suffixSymbol: SymbolOptions;
+  @Prop chipNodeBackgroundColor: ResourceColor;
+  @State isHaveBg: boolean = false;
+  @Prop chipNodeActivatedBackgroundColor: ResourceColor;
+  @State isHaveActiveBg: boolean = false;
+  @Prop chipNodeRadius: Dimension | undefined = void (0);
+  @Prop chipEnabled: boolean = true;
+  @Prop chipActivated: boolean = false;
+  @State isHover: boolean = false;
+  @State isHovering: boolean = false;
+  @State chipScale: ScaleOptions = { x: 1, y: 1 };
+  @State iconScale: ScaleOptions = { x: 1, y: 1 };
+  @State chipOpacity: number = 1;
+  @State chipBlendColor: ResourceColor = Color.Transparent;
+  @State deleteChip: boolean = false;
+  @State chipNodeOnFocus: boolean = false;
+  @State useDefaultSuffixIcon: boolean = false;
+  private chipNodeSize: SizeOptions = {};
+  private onClose: () => void = noop;
+  private onClicked: () => void = noop;
+  @State suffixIconOnFocus: boolean = false;
+  @State chipBreakPoints: BreakPointsType = BreakPointsType.SM;
+  private smListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("0vp<width<600vp");
+  private mdListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("600vp<=width<840vp");
+  private lgListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("840vp<=width");
+  @State private isShowPressedBackGroundColor: boolean = false;
+  @State fontSizeScale: number | undefined = 0;
+  @State fontWeightScale: number | undefined = 0;
   private callbacks: EnvironmentCallback = {
     onConfigurationUpdated: (configuration) => {
       this.fontSizeScale = configuration.fontSizeScale;
       this.fontWeightScale = configuration.fontWeightScale;
     }, onMemoryLevel() {
     }
-  }
-  private callbackId: number | undefined = undefined
-  @State prefixSymbolWidth: Length | undefined = this.toVp(componentUtils.getRectangleById("PrefixSymbolGlyph")?.size?.width);
-  @State suffixSymbolWidth: Length | undefined = this.toVp(componentUtils.getRectangleById("SuffixSymbolGlyph")?.size?.width);
+  };
+  private callbackId: number | undefined = undefined;
+  @State prefixSymbolWidth: Length | undefined = this.toVp(componentUtils
+    .getRectangleById("PrefixSymbolGlyph")?.size?.width);
+  @State suffixSymbolWidth: Length | undefined = this.toVp(componentUtils
+    .getRectangleById("SuffixSymbolGlyph")?.size?.width);
 
   private isChipSizeEnum(): boolean {
-    return typeof (this.chipSize) === 'string'
+    return typeof (this.chipSize) === 'string';
+  }
+
+  private getIconSizeWidth(): Resource {
+    if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
+      return this.theme.prefixIcon.smallSize.width as Resource;
+    } else {
+      return this.theme.prefixIcon.normalSize.width as Resource;
+    }
+  }
+
+  private defaultSymbolFontsize(): Resource {
+    if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
+      return this.theme.defaultSymbol.smallFontSize as Resource;
+    } else {
+      return this.theme.defaultSymbol.normalFontSize as Resource;
+    }
+  }
+
+  private getIconSizeHeight(): Resource {
+    if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
+      return this.theme.prefixIcon.smallSize.height as Resource;
+    } else {
+      return this.theme.prefixIcon.normalSize.height as Resource;
+    }
+  }
+
+  private sizeToVp(sizeResource: Resource): number {
+    let getUIContext = this.getUIContext();
+    let metrics = LengthMetrics.resource(sizeResource);
+    let value = metrics.value;
+    let unit = metrics.unit;
+    if (unit === LengthUnit.PX) {
+      return getUIContext.px2vp(value);
+    } else if (unit === LengthUnit.VP) {
+      return value;
+    } else if (unit === LengthUnit.FP) {
+      return getUIContext.px2vp(getUIContext.fp2px(value));
+    } else if (unit === LengthUnit.LPX) {
+      return getUIContext.px2vp(getUIContext.lpx2px((value)));
+    }
+    return value;
+  }
+
+  private getFocusFontSize(): Dimension {
+    if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
+      try {
+        resourceFn.getNumberByName((((this.theme.label.smallFocusFontSize as Resource)
+          .params as string[])[0]).split('.')[2]);
+        return this.theme.label.smallFocusFontSize;
+      } catch (error) {
+        return this.theme.label.defaultFontSize;
+      }
+    } else {
+      try {
+        resourceFn.getNumberByName((((this.theme.label.normalFocusFontSize as Resource)
+          .params as string[])[0]).split('.')[2]);
+        return this.theme.label.normalFocusFontSize;
+      } catch (error) {
+        return this.theme.label.defaultFontSize;
+      }
+    }
   }
 
   private getLabelFontSize(): Dimension {
     if (this.label?.fontSize !== void (0) && this.toVp(this.label.fontSize) >= 0) {
-      return this.label.fontSize
+      return this.label.fontSize;
     } else {
-      if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
-        try {
-          resourceManager.getSystemResourceManager()
-            .getNumberByName((((this.theme.label.smallFontSize as Resource).params as string[])[0]).split('.')[2])
-          return this.theme.label.smallFontSize
-        } catch (error) {
-          return this.theme.label.defaultFontSize
-        }
+      if (this.chipNodeOnFocus) {
+        return this.getFocusFontSize();
       } else {
-        try {
-          resourceManager.getSystemResourceManager()
-            .getNumberByName((((this.theme.label.normalFontSize as Resource).params as string[])[0]).split('.')[2])
-          return this.theme.label.normalFontSize
-        } catch (error) {
-          return this.theme.label.defaultFontSize
+        if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
+          try {
+            resourceFn.getNumberByName((((this.theme.label.smallFontSize as Resource)
+              .params as string[])[0]).split('.')[2]);
+            return this.theme.label.smallFontSize;
+          } catch (error) {
+            return this.theme.label.defaultFontSize;
+          }
+        } else {
+          try {
+            resourceFn.getNumberByName((((this.theme.label.normalFontSize as Resource)
+              .params as string[])[0]).split('.')[2]);
+            return this.theme.label.normalFontSize;
+          } catch (error) {
+            return this.theme.label.defaultFontSize;
+          }
         }
       }
     }
   }
 
+  private getFontColor(): ResourceColor {
+    return this.chipNodeOnFocus ? this.theme.label.focusFontColor : this.theme.label.fontColor;
+  }
+
   private getLabelFontColor(): ResourceColor {
-    if (this.getChipActive()) {
-      return this.label?.activatedFontColor ?? this.theme.label.activatedFontColor
+    if (this.getChipActive() && !this.chipNodeOnFocus) {
+      return this.label?.activatedFontColor ?? this.theme.label.activatedFontColor;
     }
-    return this.label?.fontColor ?? this.theme.label.fontColor
+    return this.label?.fontColor ?? this.getFontColor();
   }
 
   private getLabelFontFamily(): string {
-    return this.label?.fontFamily ?? this.theme.label.fontFamily
+    return this.label?.fontFamily ?? this.theme.label.fontFamily;
   }
 
-  private getLabelFontWeight(): FontWeight {
+  private getLabelFontWeight(): FontWeight | number {
     if (this.getChipActive()) {
-      return FontWeight.Medium
+      let index = LengthMetrics.resource(this.theme.label.activatedFontWeight as Resource).value;
+      return (index >= fontWeightMin && index <= fontWeightMax) ?
+        index : FontWeight.Medium;
     }
-    return FontWeight.Regular
+    return FontWeight.Regular;
   }
 
   private lengthMetricsToVp(lengthMetrics?: LengthMetrics): number {
@@ -362,16 +533,16 @@ export struct ChipComponent {
     if (lengthMetrics) {
       switch (lengthMetrics.unit) {
         case LengthUnit.PX:
-          return px2vp(lengthMetrics.value)
+          return px2vp(lengthMetrics.value);
         case LengthUnit.VP:
-          return lengthMetrics.value
+          return lengthMetrics.value;
         case LengthUnit.FP:
-          px2vp(fp2px(lengthMetrics.value))
-          break
+          px2vp(fp2px(lengthMetrics.value));
+          break;
         case LengthUnit.PERCENT:
-          return Number.NEGATIVE_INFINITY
+          return Number.NEGATIVE_INFINITY;
         case LengthUnit.LPX:
-          return px2vp(lpx2px(lengthMetrics.value))
+          return px2vp(lpx2px(lengthMetrics.value));
       }
     }
     return defaultValue;
@@ -379,267 +550,387 @@ export struct ChipComponent {
 
   private toVp(value: Dimension | Length | undefined): number {
     if (value === void (0)) {
-      return Number.NEGATIVE_INFINITY
+      return Number.NEGATIVE_INFINITY;
     }
     switch (typeof (value)) {
       case 'number':
-        return value as number
+        return value as number;
       case 'object':
         try {
           if ((value as Resource).id !== -1) {
-            return px2vp(getContext(this).resourceManager.getNumber((value as Resource).id))
+            return px2vp(getContext(this).resourceManager.getNumber((value as Resource).id));
           } else {
             return px2vp(getContext(this)
               .resourceManager
-              .getNumberByName(((value.params as string[])[0]).split('.')[2]))
+              .getNumberByName(((value.params as string[])[0]).split('.')[2]));
           }
         } catch (error) {
-          return Number.NEGATIVE_INFINITY
+          return Number.NEGATIVE_INFINITY;
         }
       case 'string':
         let regex: RegExp = new RegExp("(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$", "i");
         let matches: RegExpMatchArray | null = value.match(regex);
         if (!matches) {
-          return Number.NEGATIVE_INFINITY
+          return Number.NEGATIVE_INFINITY;
         }
         let length: number = Number(matches?.[1] ?? 0);
-        let unit: string = matches?.[2] ?? 'vp'
+        let unit: string = matches?.[2] ?? 'vp';
         switch (unit.toLowerCase()) {
           case 'px':
-            length = px2vp(length)
-            break
+            length = px2vp(length);
+            break;
           case 'fp':
-            length = px2vp(fp2px(length))
-            break
+            length = px2vp(fp2px(length));
+            break;
           case 'lpx':
-            length = px2vp(lpx2px(length))
-            break
+            length = px2vp(lpx2px(length));
+            break;
           case '%':
-            length = Number.NEGATIVE_INFINITY
-            break
+            length = Number.NEGATIVE_INFINITY;
+            break;
           case 'vp':
-            break
+            break;
           default:
-            break
+            break;
         }
-        return length
+        return length;
       default:
-        return Number.NEGATIVE_INFINITY
+        return Number.NEGATIVE_INFINITY;
     }
+  }
+
+  private getChipNodeBorderWidth(): Dimension {
+    if (this.chipSize === ChipSize.NORMAL && !this.isSetbackgroundColor()) {
+      return this.sizeToVp(this.theme.chipNode.normalBorderWidth as Resource);
+    } else if (this.chipSize === ChipSize.SMALL && !this.isSetbackgroundColor()) {
+      return this.sizeToVp(this.theme.chipNode.smallBorderWidth as Resource);
+    } else {
+      return 0;
+    }
+  }
+
+  private getActivatedChipNodeBorderColor(): ResourceColor {
+    if (this.chipSize === ChipSize.NORMAL && !this.isSetbackgroundColor()) {
+      return this.theme.chipNode.normalActivatedBorderColor;
+    } else if (this.chipSize === ChipSize.SMALL && !this.isSetbackgroundColor()) {
+      return this.theme.chipNode.smallActivatedBorderColor;
+    } else {
+      return this.theme.chipNode.activatedBackgroundColor;
+    }
+  }
+
+  private getChipNodeBorderColor(): ResourceColor {
+    if (this.getChipActive() && !this.chipNodeOnFocus) {
+      return this.getActivatedChipNodeBorderColor();
+    }
+    if (this.chipSize === ChipSize.NORMAL && !this.isSetbackgroundColor()) {
+      return this.theme.chipNode.normalBorderColor;
+    } else if (this.chipSize === ChipSize.SMALL && !this.isSetbackgroundColor()) {
+      return this.theme.chipNode.smallBorderColor;
+    } else {
+      return this.theme.chipNode.backgroundColor;
+    }
+  }
+
+  private getLabelDefaultMargin(): Margin {
+    let labelMargin: Margin = { left: 0, right: 0 }
+    if ((this.prefixSymbol?.normal || this.prefixSymbol?.activated) ||
+      this.prefixIcon?.src) {
+      labelMargin.left = (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) ?
+      this.sizeToVp(this.theme.label.smallDefaultMargin.left as Resource) :
+      this.sizeToVp(this.theme.label.normalDefaultMargin.left as Resource);
+    }
+    if ((this.suffixSymbol?.normal || this.suffixSymbol?.activated) ||
+      this.suffixIcon?.src || this.useDefaultSuffixIcon || this.allowClose) {
+      labelMargin.right = (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) ?
+      this.sizeToVp(this.theme.label.smallDefaultMargin.right as Resource) :
+      this.sizeToVp(this.theme.label.normalDefaultMargin.right as Resource);
+    }
+    return labelMargin;
   }
 
   private getLabelMargin(): Margin {
     let labelMargin: Margin = { left: 0, right: 0 }
-    if (this.label?.labelMargin?.left !== void (0) && this.toVp(this.label.labelMargin.left) >= 0) {
-      labelMargin.left = this.label?.labelMargin?.left
-    } else if ((this.prefixSymbol?.normal || this.prefixSymbol?.activated) || this.prefixIcon?.src) {
-      if (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) {
-        labelMargin.left = this.theme.label.smallMargin.left
-      } else {
-        labelMargin.left = this.theme.label.normalMargin.left
-      }
+    if (this.label?.labelMargin?.left !== void (0) &&
+      this.toVp(this.label.labelMargin.left) >= 0) {
+      labelMargin.left = this.label?.labelMargin?.left;
+    } else if ((this.prefixSymbol?.normal || this.prefixSymbol?.activated) ||
+      this.prefixIcon?.src) {
+      labelMargin.left = (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) ?
+      this.sizeToVp(this.theme.label.smallMargin.left as Resource) :
+      this.sizeToVp(this.theme.label.smallMargin.left as Resource);
     }
-    if (this.label?.labelMargin?.right !== void (0) && this.toVp(this.label.labelMargin.right) >= 0) {
-      labelMargin.right = this.label?.labelMargin?.right
+    if (this.label?.labelMargin?.right !== void (0) &&
+      this.toVp(this.label.labelMargin.right) >= 0) {
+      labelMargin.right = this.label?.labelMargin?.right;
     } else if ((this.suffixSymbol?.normal || this.suffixSymbol?.activated) ||
-      this.suffixIcon?.src || this.useDefaultSuffixIcon) {
-      if (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) {
-        labelMargin.right = this.theme.label.smallMargin.right
-      } else {
-        labelMargin.right = this.theme.label.normalMargin.right
-      }
+      this.suffixIcon?.src || this.useDefaultSuffixIcon || this.allowClose) {
+      labelMargin.right = (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) ?
+      this.sizeToVp(this.theme.label.smallMargin.right as Resource) :
+      this.sizeToVp(this.theme.label.smallMargin.right as Resource);
     }
-    return labelMargin
+    return labelMargin;
   }
 
   private getLocalizedLabelMargin(): LocalizedMargin {
-    let localizedLabelMargin: LocalizedMargin = { start: LengthMetrics.vp(0), end: LengthMetrics.vp(0) }
-    if (this.label?.localizedLabelMargin?.start.value !== void (0) &&
+    let localizedLabelMargin: LocalizedMargin = {
+      start: LengthMetrics.vp(0),
+      end: LengthMetrics.vp(0)
+    }
+    if (this.label?.localizedLabelMargin?.start?.value !== void (0) &&
       this.lengthMetricsToVp(this.label.localizedLabelMargin.start) >= 0) {
-      localizedLabelMargin.start = this.label?.localizedLabelMargin?.start
-    } else if ((this.prefixSymbol?.normal || this.prefixSymbol?.activated) || this.prefixIcon?.src) {
+      localizedLabelMargin.start = this.label?.localizedLabelMargin?.start;
+    } else if ((this.prefixSymbol?.normal || this.prefixSymbol?.activated) ||
+      this.prefixIcon?.src) {
       if (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) {
-        localizedLabelMargin.start = this.theme.label.localizedSmallMargin.start
+        localizedLabelMargin.start = this.theme.label.localizedSmallMargin.start;
       } else {
-        localizedLabelMargin.start = this.theme.label.localizedNormalMargin.start
+        localizedLabelMargin.start = this.theme.label.localizedNormalMargin.start;
       }
     }
-    if (this.label?.localizedLabelMargin?.end.value !== void (0) &&
+    if (this.label?.localizedLabelMargin?.end?.value !== void (0) &&
       this.lengthMetricsToVp(this.label.localizedLabelMargin.end) >= 0) {
-      localizedLabelMargin.end = this.label?.localizedLabelMargin?.end
+      localizedLabelMargin.end = this.label?.localizedLabelMargin?.end;
     } else if ((this.suffixSymbol?.normal || this.suffixSymbol?.activated) ||
       this.suffixIcon?.src || this.useDefaultSuffixIcon) {
       if (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) {
-        localizedLabelMargin.end = this.theme.label.localizedSmallMargin.end
+        localizedLabelMargin.end = this.theme.label.localizedSmallMargin.end;
       } else {
-        localizedLabelMargin.end = this.theme.label.localizedNormalMargin.end
+        localizedLabelMargin.end = this.theme.label.localizedNormalMargin.end;
       }
     }
-    return localizedLabelMargin
+    return localizedLabelMargin;
   }
 
   private getLabelStartEndVp(): LocalizedMargin {
-    let labelMargin: LocalizedMargin = { start: LengthMetrics.vp(0), end: LengthMetrics.vp(0) }
+    let margin: Margin = this.getLabelDefaultMargin();
+    let labelMargin: LocalizedMargin = {
+      start: LengthMetrics.vp(this.toVp(margin.left)),
+      end: LengthMetrics.vp(this.toVp(margin.right))
+    };
     if (this.label && this.label.labelMargin) {
-      let margin: Margin = this.getLabelMargin()
-      return { start: LengthMetrics.vp(this.toVp(margin.left)), end: LengthMetrics.vp(this.toVp(margin.right)) }
+      let margin: Margin = this.getLabelMargin();
+      return {
+        start: LengthMetrics.vp(this.toVp(margin.left)),
+        end: LengthMetrics.vp(this.toVp(margin.right))
+      };
     }
     if (this.label && this.label.localizedLabelMargin) {
-      let localizedMargin: LocalizedMargin = this.getLocalizedLabelMargin()
+      let localizedMargin: LocalizedMargin = this.getLocalizedLabelMargin();
       return {
         start: LengthMetrics.vp(this.lengthMetricsToVp(localizedMargin.start)),
         end: LengthMetrics.vp(this.lengthMetricsToVp(localizedMargin.end))
-      }
+      };
     }
-    return labelMargin
+    return labelMargin;
   }
 
   private getActualLabelMargin(): Margin | LocalizedMargin {
-    let localizedLabelMargin: LocalizedMargin = { start: LengthMetrics.vp(0), end: LengthMetrics.vp(0) }
+    let localizedLabelMargin: Margin | LocalizedMargin = this.getLabelDefaultMargin();
     if (this.label && this.label.labelMargin) {
-      return this.getLabelMargin()
+      return this.getLabelMargin();
     }
     if (this.label && this.label.localizedLabelMargin) {
-      return this.getLocalizedLabelMargin()
+      return this.getLocalizedLabelMargin();
     }
-    return localizedLabelMargin
+    return localizedLabelMargin;
   }
 
   private getSuffixIconSize(): SizeOptions {
-    let suffixIconSize: SizeOptions = { width: 0, height: 0 }
-    if (this.suffixIcon?.size?.width !== void (0) && this.toVp(this.suffixIcon?.size?.width) >= 0) {
-      suffixIconSize.width = this.suffixIcon?.size?.width
+    let suffixIconSize: SizeOptions = { width: 0, height: 0 };
+    if (this.suffixIcon?.size?.width !== void (0) &&
+      this.toVp(this.suffixIcon?.size?.width) >= 0) {
+      suffixIconSize.width = this.suffixIcon?.size?.width;
     } else {
       if (this.getSuffixIconSrc()) {
-        suffixIconSize.width = this.theme.suffixIcon.size.width
+        suffixIconSize.width = this.sizeToVp(this.getIconSizeWidth());
       } else {
-        suffixIconSize.width = 0
+        suffixIconSize.width = 0;
       }
     }
-    if (this.suffixIcon?.size?.height !== void (0) && this.toVp(this.suffixIcon?.size?.height) >= 0) {
-      suffixIconSize.height = this.suffixIcon?.size?.height
+    if (this.suffixIcon?.size?.height !== void (0) &&
+      this.toVp(this.suffixIcon?.size?.height) >= 0) {
+      suffixIconSize.height = this.suffixIcon?.size?.height;
     } else {
       if (this.getSuffixIconSrc()) {
-        suffixIconSize.height = this.theme.suffixIcon.size.height
+        suffixIconSize.height = this.getIconSizeHeight();
       } else {
-        suffixIconSize.height = 0
+        suffixIconSize.height = 0;
       }
     }
-    return suffixIconSize
+    return suffixIconSize;
   }
 
   private getPrefixIconSize(): SizeOptions {
     let prefixIconSize: SizeOptions = { width: 0, height: 0 }
     if (this.prefixIcon?.size?.width !== void (0) && this.toVp(this.prefixIcon?.size?.width) >= 0) {
-      prefixIconSize.width = this.prefixIcon?.size?.width
+      prefixIconSize.width = this.prefixIcon?.size?.width;
     } else {
       if (this.prefixIcon?.src) {
-        prefixIconSize.width = this.theme.prefixIcon.size.width
+        prefixIconSize.width = this.sizeToVp(this.getIconSizeWidth());
       } else {
-        prefixIconSize.width = 0
+        prefixIconSize.width = 0;
       }
     }
-    if (this.prefixIcon?.size?.height !== void (0) && this.toVp(this.prefixIcon?.size?.height) >= 0) {
-      prefixIconSize.height = this.prefixIcon?.size?.height
+    if (this.prefixIcon?.size?.height !== void (0) &&
+      this.toVp(this.prefixIcon?.size?.height) >= 0) {
+      prefixIconSize.height = this.prefixIcon?.size?.height;
     } else {
       if (this.prefixIcon?.src) {
-        prefixIconSize.height = this.theme.prefixIcon.size.height
+        prefixIconSize.height = this.getIconSizeHeight();
       } else {
-        prefixIconSize.height = 0
+        prefixIconSize.height = 0;
       }
     }
-    return prefixIconSize
+    return prefixIconSize;
+  }
+
+  private getActiveIconColor(): ResourceColor {
+    return this.chipNodeOnFocus ? this.theme.prefixIcon.focusActivatedColor :
+    this.theme.prefixIcon.activatedFillColor;
+  }
+
+  private getFillIconColor(iconType: string): ResourceColor {
+    if (iconType === IconType.PREFIX_ICON) {
+      if (this.prefixIcon?.fillColor) {
+        return this.prefixIcon.fillColor;
+      }
+      return this.chipNodeOnFocus ? this.theme.prefixIcon.focusFillColor : this.theme.prefixIcon.fillColor;
+    } else {
+      if (this.suffixIcon?.fillColor) {
+        return this.suffixIcon.fillColor;
+      }
+      return this.chipNodeOnFocus ? this.theme.suffixIcon.focusFillColor : this.theme.suffixIcon.fillColor;
+    }
+  }
+
+  private getActiveIconColorArray(iconType: string): ResourceColor[] {
+    if (iconType === IconType.PREFIX_ICON) {
+      return this.getColorArray(this.prefixIcon?.activatedFillColor,
+        this.theme.prefixIcon.focusActivatedColor, this.theme.prefixIcon.activatedFillColor);
+    } else {
+      return this.getColorArray(this.suffixIcon?.activatedFillColor,
+        this.theme.suffixIcon.focusActivatedColor, this.theme.suffixIcon.activatedFillColor);
+    }
+  }
+
+  private getColorArray(userDefined: ResourceColor | undefined, focusColor: ResourceColor,
+                        normalColor: ResourceColor): ResourceColor[] {
+    if (userDefined) {
+      return [userDefined];
+    }
+    return this.chipNodeOnFocus ? [focusColor] : [normalColor];
+  }
+
+  private getFillIconColorArray(iconType: string): ResourceColor[] {
+    if (iconType === 'prefixIcon') {
+      return this.getColorArray(this.prefixIcon?.fillColor,
+        this.theme.prefixIcon.focusFillColor, this.theme.prefixIcon.fillColor)
+    } else {
+      return this.getColorArray(this.suffixIcon?.fillColor,
+        this.theme.suffixIcon.focusFillColor, this.theme.suffixIcon.fillColor)
+    }
   }
 
   private getPrefixIconFilledColor(): ResourceColor {
     if (this.getChipActive()) {
-      return this.prefixIcon?.activatedFillColor ?? this.theme.prefixIcon.activatedFillColor
+      return this.prefixIcon?.activatedFillColor ?? this.getActiveIconColor();
     }
-    return this.prefixIcon?.fillColor ?? this.theme.prefixIcon.fillColor
+    return this.prefixIcon?.fillColor ?? this.getFillIconColor(IconType.PREFIX_ICON);
   }
 
   private getSuffixIconFilledColor(): ResourceColor {
     if (this.getChipActive()) {
-      return this.suffixIcon?.activatedFillColor ?? this.theme.suffixIcon.activatedFillColor
+      return this.suffixIcon?.activatedFillColor ?? this.getActiveIconColor();
     }
-    return this.suffixIcon?.fillColor ?? this.theme.suffixIcon.fillColor
+    return this.suffixIcon?.fillColor ?? this.getFillIconColor(IconType.SUFFIX_ICON);
   }
 
-  private getDefaultSymbolColor(): Array<ResourceColor> {
+  private getDefaultSymbolColor(iconType: string): Array<ResourceColor> {
     if (this.getChipActive()) {
-      return this.theme.defaultSymbol.activatedFontColor
+      return this.getActiveIconColorArray(iconType);
     }
-    return this.theme.defaultSymbol.normalFontColor
+    return this.getFillIconColorArray(iconType);
   }
 
   private getPrefixSymbolModifier(): SymbolGlyphModifier | undefined {
     if (this.getChipActive()) {
-      return this.prefixSymbol?.activated
+      return this.prefixSymbol?.activated;
     }
-    return this.prefixSymbol?.normal
+    return this.prefixSymbol?.normal;
   }
 
   private getSuffixSymbolModifier(): SymbolGlyphModifier | undefined {
     if (this.getChipActive()) {
-      return this.suffixSymbol?.activated
+      return this.suffixSymbol?.activated;
     }
-    return this.suffixSymbol?.normal
+    return this.suffixSymbol?.normal;
   }
 
   private getSuffixIconFocusable(): boolean {
-    return (this.useDefaultSuffixIcon && this.allowClose) || this.suffixIcon?.action !== void (0)
+    return (this.useDefaultSuffixIcon && this.allowClose) || this.suffixIcon?.action !== void (0);
   }
 
   private getChipNodePadding(): LocalizedPadding {
-    return (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) ? this.theme.chipNode.localizedSmallPadding : this.theme.chipNode.localizedNormalPadding
+    return (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL)
+      ? this.theme.chipNode.localizedSmallPadding
+      : this.theme.chipNode.localizedNormalPadding;
   }
 
   private getChipNodeRadius(): Dimension {
     if (this.chipNodeRadius !== void (0) && this.toVp(this.chipNodeRadius) >= 0) {
-      return this.chipNodeRadius as Dimension
+      return this.chipNodeRadius as Dimension;
     } else {
       return ((this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) ?
-      this.theme.chipNode.smallBorderRadius : this.theme.chipNode.normalBorderRadius)
+      this.sizeToVp(this.theme.chipNode.smallBorderRadius as Resource) :
+      this.sizeToVp(this.theme.chipNode.normalBorderRadius as Resource));
     }
   }
 
   private getChipNodeBackGroundColor(): ResourceColor {
     let currentColor: ResourceColor;
-
-    if (this.getChipActive()) {
-      currentColor = this.chipNodeActivatedBackgroundColor ?? this.theme.chipNode.activatedBackgroundColor
-    } else {
-      currentColor = this.chipNodeBackgroundColor ?? this.theme.chipNode.backgroundColor
+    if (this.chipNodeOnFocus && !this.isSetbackgroundColor()) {
+      currentColor = this.getChipActive() ? this.theme.chipNode.focusActivatedBgColor :
+      this.theme.chipNode.focusBgColor;
+      return currentColor;
     }
-
-    if (!this.isShowPressedBackGroundColor) {
-      return currentColor
+    if (this.getChipActive()) {
+      currentColor = this.chipNodeActivatedBackgroundColor ?? this.theme.chipNode.activatedBackgroundColor;
+    } else {
+      currentColor = this.chipNodeBackgroundColor ?? this.theme.chipNode.backgroundColor;
     }
     let sourceColor: ColorMetrics;
-
     try {
       sourceColor = ColorMetrics.resourceColor(currentColor);
     } catch (err) {
       hilog.error(0x3900, 'Ace', `Chip resourceColor, error: ${err.toString()}`);
-      if (this.getChipActive()) {
-        sourceColor = ColorMetrics.resourceColor(this.theme.chipNode.activatedBackgroundColor);
-      } else {
-        sourceColor = ColorMetrics.resourceColor(this.theme.chipNode.backgroundColor);
-      }
+      sourceColor = ColorMetrics.resourceColor(this.getChipActive() ?
+      this.theme.chipNode.activatedBackgroundColor : this.theme.chipNode.backgroundColor);
     }
-
-    return sourceColor
-      .blendColor(ColorMetrics.resourceColor("#19000000"))
-      .color
+    if (this.isShowPressedBackGroundColor) {
+      return sourceColor
+        .blendColor(ColorMetrics.resourceColor(this.isSetbackgroundColor() ?
+        this.theme.chipNode.hoverAndPressedBlendColor : this.theme.chipNode.pressedBlendColor))
+        .color;
+    }
+    if (this.isHovering) {
+      return sourceColor
+        .blendColor(ColorMetrics.resourceColor(this.isSetbackgroundColor() ?
+        this.theme.chipNode.hoverAndPressedBlendColor : this.theme.chipNode.hoverBlendColor))
+        .color;
+    }
+    return currentColor;
   }
 
   private getChipNodeHeight(): Length {
     if (this.isChipSizeEnum()) {
-      return this.chipSize === ChipSize.SMALL ? this.theme.chipNode.smallHeight : this.theme.chipNode.normalHeight
+      return this.chipSize === ChipSize.SMALL
+        ? this.theme.chipNode.smallHeight
+        : this.theme.chipNode.normalHeight;
     } else {
-      this.chipNodeSize = this.chipSize as SizeOptions
+      this.chipNodeSize = this.chipSize as SizeOptions;
       return (this.chipNodeSize?.height !== void (0) && this.toVp(this.chipNodeSize?.height) >= 0) ?
-      this.toVp(this.chipNodeSize?.height) : this.theme.chipNode.normalHeight
+      this.toVp(this.chipNodeSize?.height) : this.theme.chipNode.normalHeight;
     }
   }
 
@@ -652,121 +943,148 @@ export struct ChipComponent {
       maxLines: 1,
       overflow: TextOverflow.Ellipsis,
       textAlign: TextAlign.Center
-    }))
+    }));
   }
 
   private getCalculateChipNodeWidth(): number {
-    let calWidth: number = 0
-    let startEndVp: LocalizedMargin = this.getLabelStartEndVp()
-    calWidth += this.getChipNodePadding().start.value
-    calWidth += this.toVp(this.getPrefixChipWidth())
-    calWidth += this.toVp(startEndVp.start.value)
-    calWidth += this.getLabelWidth()
-    calWidth += this.toVp(startEndVp.end.value)
-    calWidth += this.toVp(this.getSuffixChipWidth())
-    calWidth += this.getChipNodePadding().end.value
-    return calWidth
+    let calWidth: number = 0;
+    let startEndVp: LocalizedMargin = this.getLabelStartEndVp();
+    calWidth += (this.getChipNodeBorderWidth() as number) * 2;
+    calWidth += this.getChipNodePadding().start?.value || 0;
+    calWidth += this.toVp(this.getPrefixChipWidth());
+    calWidth += this.toVp(startEndVp.start?.value);
+    calWidth += this.getLabelWidth();
+    calWidth += this.toVp(startEndVp.end?.value);
+    calWidth += this.toVp(this.getSuffixChipWidth());
+    calWidth += this.getChipNodePadding().end?.value || 0;
+    return calWidth;
   }
 
   private getPrefixChipWidth(): Length | undefined {
     if (this.prefixSymbol?.normal || this.prefixSymbol?.activated) {
-      return this.prefixSymbolWidth
+      return this.prefixSymbolWidth;
     } else if (this.prefixIcon?.src) {
-      return this.getPrefixIconSize().width
+      return this.getPrefixIconSize().width;
     } else {
-      return 0
+      return 0;
     }
   }
 
   private getSuffixChipWidth(): Length | undefined {
     if (this.suffixSymbol?.normal || this.suffixSymbol?.activated) {
-      return this.suffixSymbolWidth
+      return this.suffixSymbolWidth;
     } else if (this.suffixIcon?.src) {
-      return this.getSuffixIconSize().width
+      return this.getSuffixIconSize().width;
     } else if (!this.suffixIcon?.src && this.allowClose) {
-      return this.theme.defaultSymbol.fontSize
+      return this.sizeToVp(this.defaultSymbolFontsize());
     } else {
-      return 0
+      return 0;
     }
   }
 
   private getReserveChipNodeWidth(): number {
-    return this.getCalculateChipNodeWidth() - this.getLabelWidth() + (this.theme.chipNode.minLabelWidth as number)
+    return this.getCalculateChipNodeWidth() - this.getLabelWidth() +
+      (this.theme.chipNode.minLabelWidth as number);
   }
 
   private getChipEnable(): boolean {
-    return this.chipEnabled || this.chipEnabled === void (0)
+    return this.chipEnabled || this.chipEnabled === void (0);
   }
 
   private getChipActive(): boolean {
-    return this.chipActivated
+    return this.chipActivated;
   }
 
   private getChipNodeOpacity(): number {
-    return this.getChipEnable() ? this.chipOpacity : this.theme.chipNode.opacity.disabled
+    return this.getChipEnable()
+      ? this.chipOpacity
+      : this.theme.chipNode.opacity.disabled;
+  }
+
+  private getfocusBox(): FocusBoxStyle {
+    return this.chipNodeOnFocus ? { strokeWidth: LengthMetrics.vp(2) } : { strokeWidth: LengthMetrics.vp(0) }
   }
 
   private handleTouch(event: TouchEvent) {
     if (!this.getChipEnable()) {
-      return
+      return;
     }
     if (this.isHover) {
       if (event.type === TouchType.Down) {
-        this.isShowPressedBackGroundColor = true
-
+        this.isShowPressedBackGroundColor = true;
       } else if (event.type === TouchType.Up) {
-        this.isShowPressedBackGroundColor = false
-
+        this.isShowPressedBackGroundColor = false;
       }
     } else {
       if (event.type === TouchType.Down) {
-        this.isShowPressedBackGroundColor = true
-
+        this.isShowPressedBackGroundColor = true;
       } else if (event.type === TouchType.Up) {
-        this.isShowPressedBackGroundColor = false
-
+        this.isShowPressedBackGroundColor = false;
       }
     }
   }
 
   private hoverAnimate(isHover: boolean) {
     if (!this.getChipEnable()) {
-      return
+      return;
     }
     this.isHover = isHover
     if (this.isHover) {
-      this.isShowPressedBackGroundColor = true
+      this.isShowPressedBackGroundColor = true;
     } else {
-      this.isShowPressedBackGroundColor = false
+      this.isShowPressedBackGroundColor = false;
     }
   }
 
   private deleteChipNodeAnimate() {
     animateTo({ duration: 150, curve: Curve.Sharp }, () => {
-      this.chipOpacity = 0
-      this.chipBlendColor = Color.Transparent
+      this.chipOpacity = 0;
+      this.chipBlendColor = Color.Transparent;
     })
     animateTo({ duration: 150, curve: Curve.FastOutLinearIn, onFinish: () => {
-      this.deleteChip = true
+      this.deleteChip = true;
     } },
       () => {
-        this.chipScale = { x: 0.85, y: 0.85 }
+        this.chipScale = {
+          x: 0.85,
+          y: 0.85
+        };
+      })
+  }
+
+  private focusBtnChipNodeAnimate() {
+    this.chipScale = {
+      x: LengthMetrics.resource(this.theme.chipNode.focusBtnScaleX).value,
+      y: LengthMetrics.resource(this.theme.chipNode.focusBtnScaleY).value,
+    };
+  }
+
+  private blurBtnChipNodeAnimate() {
+    animateTo({ duration: 150, curve: Curve.FastOutLinearIn },
+      () => {
+        this.chipScale = {
+          x: 1,
+          y: 1,
+        };
       })
   }
 
   private getSuffixIconSrc(): ResourceStr | undefined {
-    this.useDefaultSuffixIcon = !this.suffixIcon?.src && this.allowClose
-    return this.useDefaultSuffixIcon ? this.theme.suffixIcon.defaultDeleteIcon : (this.suffixIcon?.src ?? void (0))
+    this.useDefaultSuffixIcon = !this.suffixIcon?.src && this.allowClose;
+    return this.useDefaultSuffixIcon
+      ? this.theme.suffixIcon.defaultDeleteIcon
+      : (this.suffixIcon?.src ?? void (0));
   }
 
   private getChipNodeWidth(): Length {
     if (!this.isChipSizeEnum()) {
-      this.chipNodeSize = this.chipSize as SizeOptions
-      if (this.chipNodeSize?.width !== void (0) && this.toVp(this.chipNodeSize.width) >= 0) {
-        return this.toVp(this.chipNodeSize.width)
+      this.chipNodeSize = this.chipSize as SizeOptions;
+      if (this.chipNodeSize?.width !== void (0) &&
+        this.toVp(this.chipNodeSize.width) >= 0) {
+        return this.toVp(this.chipNodeSize.width);
       }
     }
-    let constraintWidth: ConstraintSizeOptions = this.getChipConstraintWidth()
+    let constraintWidth: ConstraintSizeOptions = this.getChipConstraintWidth();
     return Math.min(Math.max(this.getCalculateChipNodeWidth(),
       constraintWidth.minWidth as number), constraintWidth.maxWidth as number);
   }
@@ -775,52 +1093,53 @@ export struct ChipComponent {
     return {
       width: Math.max(this.getChipNodeWidth() as number, this.getChipConstraintWidth().minWidth as number) + 8,
       height: this.getChipNodeHeight() as number + 8
-    }
+    };
   }
 
   private getChipConstraintWidth(): ConstraintSizeOptions {
-    let calcMinWidth: number = this.getReserveChipNodeWidth()
-
-    let constraintWidth: number = this.getCalculateChipNodeWidth()
-    let constraintSize: ConstraintSizeOptions
+    let calcMinWidth: number = this.getReserveChipNodeWidth();
+    let constraintWidth: number = this.getCalculateChipNodeWidth();
+    let constraintSize: ConstraintSizeOptions;
     switch (this.chipBreakPoints) {
       case BreakPointsType.SM:
         constraintSize = {
           minWidth: calcMinWidth,
           maxWidth: Math.min(constraintWidth, this.theme.chipNode.breakPointConstraintWidth.breakPointSmMaxWidth)
-        }
-        break
+        };
+        break;
       case BreakPointsType.MD:
         constraintSize = {
           minWidth: Math.max(constraintWidth, this.theme.chipNode.breakPointConstraintWidth.breakPointMinWidth),
           maxWidth: Math.min(constraintWidth, this.theme.chipNode.breakPointConstraintWidth.breakPointMdMaxWidth)
-        }
-        break
+        };
+        break;
       case BreakPointsType.LG:
         constraintSize = {
           minWidth: Math.max(constraintWidth, this.theme.chipNode.breakPointConstraintWidth.breakPointMinWidth),
           maxWidth: Math.min(constraintWidth, this.theme.chipNode.breakPointConstraintWidth.breakPointLgMaxWidth)
-        }
-        break
+        };
+        break;
       default:
-        constraintSize = { minWidth: calcMinWidth, maxWidth: constraintWidth }
-        break
+        constraintSize = { minWidth: calcMinWidth, maxWidth: constraintWidth };
+        break;
     }
     constraintSize.minWidth = Math.min(Math.max(this.getCalculateChipNodeWidth(),
-      constraintSize.minWidth as number), constraintSize.maxWidth as number)
-    constraintSize.minHeight = this.getChipNodeHeight()
-    if (!this.isChipSizeEnum() && this.chipNodeSize?.height !== void (0) && this.toVp(this.chipNodeSize?.height) >= 0) {
-      constraintSize.maxHeight = this.toVp(this.chipNodeSize.height)
-      constraintSize.minHeight = this.toVp(this.chipNodeSize.height)
+      constraintSize.minWidth as number), constraintSize.maxWidth as number);
+    constraintSize.minHeight = this.getChipNodeHeight();
+    if (!this.isChipSizeEnum() && this.chipNodeSize?.height !== void (0) &&
+      this.toVp(this.chipNodeSize?.height) >= 0) {
+      constraintSize.maxHeight = this.toVp(this.chipNodeSize.height);
+      constraintSize.minHeight = this.toVp(this.chipNodeSize.height);
     }
-    if (!this.isChipSizeEnum() && this.chipNodeSize?.width !== void (0) && this.toVp(this.chipNodeSize?.width) >= 0) {
-      constraintSize.minWidth = this.toVp(this.chipNodeSize.width)
-      constraintSize.maxWidth = this.toVp(this.chipNodeSize.width)
+    if (!this.isChipSizeEnum() && this.chipNodeSize?.width !== void (0) &&
+      this.toVp(this.chipNodeSize?.width) >= 0) {
+      constraintSize.minWidth = this.toVp(this.chipNodeSize.width);
+      constraintSize.maxWidth = this.toVp(this.chipNodeSize.width);
     } else if (this.toVp(this.fontSizeScale) >= this.theme.chipNode.suitAgeScale) {
-      constraintSize.minWidth = void (0)
-      constraintSize.maxWidth = void (0)
+      constraintSize.minWidth = void (0);
+      constraintSize.maxWidth = void (0);
     }
-    return constraintSize
+    return constraintSize;
   }
 
   @Builder
@@ -853,21 +1172,36 @@ export struct ChipComponent {
   }
 
   aboutToAppear() {
-    this.smListener.on("change", (mediaQueryResult: mediaquery.MediaQueryResult) => {
-      if (mediaQueryResult.matches) {
-        this.chipBreakPoints = BreakPointsType.SM
-      }
-    })
-    this.mdListener.on("change", (mediaQueryResult: mediaquery.MediaQueryResult) => {
-      if (mediaQueryResult.matches) {
-        this.chipBreakPoints = BreakPointsType.MD
-      }
-    })
-    this.lgListener.on("change", (mediaQueryResult: mediaquery.MediaQueryResult) => {
-      if (mediaQueryResult.matches) {
-        this.chipBreakPoints = BreakPointsType.LG
-      }
-    })
+    if (this.chipNodeBackgroundColor) {
+      this.isHaveBg = true;
+    } else {
+      this.isHaveBg = false;
+      this.chipNodeBackgroundColor = this.theme.chipNode.backgroundColor;
+    }
+    if (this.chipNodeActivatedBackgroundColor && this.chipActivated) {
+      this.isHaveActiveBg = true;
+    } else {
+      this.isHaveActiveBg = false;
+      this.chipNodeActivatedBackgroundColor = this.theme.chipNode.activatedBackgroundColor;
+    }
+    this.smListener.on("change",
+      (mediaQueryResult: mediaquery.MediaQueryResult) => {
+        if (mediaQueryResult.matches) {
+          this.chipBreakPoints = BreakPointsType.SM;
+        }
+      })
+    this.mdListener.on("change",
+      (mediaQueryResult: mediaquery.MediaQueryResult) => {
+        if (mediaQueryResult.matches) {
+          this.chipBreakPoints = BreakPointsType.MD;
+        }
+      })
+    this.lgListener.on("change",
+      (mediaQueryResult: mediaquery.MediaQueryResult) => {
+        if (mediaQueryResult.matches) {
+          this.chipBreakPoints = BreakPointsType.LG;
+        }
+      })
     this.callbackId = this.getUIContext()
       .getHostContext()
     ?.getApplicationContext()
@@ -876,22 +1210,34 @@ export struct ChipComponent {
 
   private getVisibility(): Visibility {
     if (this.toVp(this.getChipNodeHeight()) > 0) {
-      return Visibility.Visible
+      return Visibility.Visible;
     } else {
-      return Visibility.None
+      return Visibility.None;
+    }
+  }
+
+  private isSetbackgroundColor(): boolean {
+    return this.isHaveBg || this.isHaveActiveBg;
+  }
+
+  private getShadowStyles(): ShadowStyle | undefined {
+    if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
+      return this.theme.chipNode.smallShadowStyle;
+    } else {
+      return this.theme.chipNode.normalShadowStyle;
     }
   }
 
   aboutToDisappear() {
-    this.smListener.off("change")
-    this.mdListener.off("change")
-    this.lgListener.off("change")
+    this.smListener.off("change");
+    this.mdListener.off("change");
+    this.lgListener.off("change");
     if (this.callbackId) {
       this.getUIContext()
         .getHostContext()
       ?.getApplicationContext()
       ?.off('environment', this.callbackId);
-      this.callbackId = void (0)
+      this.callbackId = void (0);
     }
   }
 
@@ -901,8 +1247,8 @@ export struct ChipComponent {
       Row() {
         if (this.prefixSymbol?.normal || this.prefixSymbol?.activated) {
           SymbolGlyph()
-            .fontSize(this.theme.defaultSymbol.fontSize)
-            .fontColor(this.getDefaultSymbolColor())
+            .fontSize(this.defaultSymbolFontsize())
+            .fontColor(this.getDefaultSymbolColor(IconType.PREFIX_ICON))
             .attributeModifier(this.getPrefixSymbolModifier())
             .onSizeChange((oldValue, newValue) => {
               this.prefixSymbolWidth = newValue?.width
@@ -939,14 +1285,15 @@ export struct ChipComponent {
           .textAlign(TextAlign.Center)
           .visibility(this.getVisibility())
           .draggable(false)
+          .backgroundColor('#51ef1313')
 
         if (this.suffixSymbol?.normal || this.suffixSymbol?.activated) {
           SymbolGlyph()
-            .fontSize(this.theme.defaultSymbol.fontSize)
-            .fontColor(this.getDefaultSymbolColor())
+            .fontSize(this.defaultSymbolFontsize())
+            .fontColor(this.getDefaultSymbolColor(IconType.SUFFIX_ICON))
             .attributeModifier(this.getSuffixSymbolModifier())
             .onSizeChange((oldValue, newValue) => {
-              this.suffixSymbolWidth = newValue?.width
+              this.suffixSymbolWidth = newValue?.width;
             })
             .key("SuffixSymbolGlyph")
         } else if (this.suffixIcon?.src !== "") {
@@ -963,39 +1310,38 @@ export struct ChipComponent {
             .visibility(this.getVisibility())
             .draggable(false)
             .onFocus(() => {
-              this.suffixIconOnFocus = true
+              this.suffixIconOnFocus = true;
             })
             .onBlur(() => {
-              this.suffixIconOnFocus = false
+              this.suffixIconOnFocus = false;
             })
             .onClick(() => {
               if (!this.getChipEnable()) {
-                return
+                return;
               }
               if (this.suffixIcon?.action) {
-                this.suffixIcon.action()
-                return
+                this.suffixIcon.action();
+                return;
               }
               if (this.allowClose && this.useDefaultSuffixIcon) {
-                this.onClose()
-                this.deleteChipNodeAnimate()
-                return
+                this.onClose();
+                this.deleteChipNodeAnimate();
+                return;
               }
-              this.onClicked()
+              this.onClicked();
             })
         } else if (this.allowClose) {
           SymbolGlyph($r('sys.symbol.xmark'))
-            .fontSize(this.theme.defaultSymbol.fontSize)
-            .fontColor(this.getDefaultSymbolColor())
+            .fontSize(this.defaultSymbolFontsize())
+            .fontColor(this.getDefaultSymbolColor(IconType.SUFFIX_ICON))
             .onClick(() => {
               if (!this.getChipEnable()) {
-                return
+                return;
               }
-              this.onClose()
-              this.deleteChipNodeAnimate()
+              this.onClose();
+              this.deleteChipNodeAnimate();
             })
         }
-
       }
       .direction(this.chipDirection)
       .alignItems(VerticalAlign.Center)
@@ -1008,31 +1354,41 @@ export struct ChipComponent {
     .type(ButtonType.Normal)
     .clip(false)
     .backgroundColor(this.getChipNodeBackGroundColor())
+    .borderWidth(this.getChipNodeBorderWidth())
+    .borderColor(this.getChipNodeBorderColor())
     .borderRadius(this.getChipNodeRadius())
     .enabled(this.getChipEnable())
     .scale(this.chipScale)
     .focusable(true)
     .opacity(this.getChipNodeOpacity())
+    .focusBox(this.getfocusBox())
+    .stateStyles({
+      normal: {
+        .shadow(this.chipNodeOnFocus ? this.getShadowStyles() : undefined)
+      },
+    })
     .onFocus(() => {
-      this.chipNodeOnFocus = true
+      this.focusBtnChipNodeAnimate();
+      this.chipNodeOnFocus = true;
     })
     .onBlur(() => {
-      this.chipNodeOnFocus = false
+      this.chipNodeOnFocus = false;
+      this.blurBtnChipNodeAnimate()
     })
     .onTouch((event) => {
-      this.handleTouch(event)
+      this.handleTouch(event);
     })
     .onHover((isHover: boolean) => {
-      if (this.isShowPressedBackGroundColor == false) {
-        this.isShowPressedBackGroundColor = true
-      } else {
-        this.isShowPressedBackGroundColor = false
-      }
-
+      this.isHovering = isHover;
     })
     .onKeyEvent((event) => {
-      if (event.type === KeyType.Down && event.keyCode === KeyCode.KEYCODE_FORWARD_DEL && !this.suffixIconOnFocus) {
-        this.deleteChipNodeAnimate()
+      if (event && event.type === KeyType.Down && event.keyCode === KeyCode.KEYCODE_FORWARD_DEL &&
+        !this.suffixIconOnFocus) {
+        this.deleteChipNodeAnimate();
+      }
+      if (event && event.keyCode === KeyCode.KEYCODE_DPAD_CENTER && this.allowClose && !this.suffixIcon?.src
+      ) {
+        this.deleteChipNodeAnimate();
       }
     })
     .onClick(this.onClicked === noop ? undefined : this.onClicked.bind(this))
@@ -1040,7 +1396,7 @@ export struct ChipComponent {
 
   build() {
     if (!this.deleteChip) {
-      this.chipBuilder()
+      this.chipBuilder();
     }
   }
 }

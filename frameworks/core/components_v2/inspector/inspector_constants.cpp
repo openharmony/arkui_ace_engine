@@ -597,4 +597,12 @@ const char CUSTOM_FRAME_NODE_ETS_TAG[] = "CustomFrameNode";
 // MovingPhoto
 const char MOVING_PHOTO_COMPONENT_TAG[] = "MovingPhotoComponent";
 const char MOVING_PHOTO_ETS_TAG[] = "MovingPhoto";
+
+// ArcList
+const char ARC_LIST_COMPONENT_TAG[] = "ArcListComponent";
+const char ARC_LIST_ETS_TAG[] = "ArcList";
+
+// ArcListItem
+const char ARC_LIST_ITEM_COMPONENT_TAG[] = "ArcListItemComponent";
+const char ARC_LIST_ITEM_ETS_TAG[] = "ArcListItem";
 } // namespace OHOS::Ace::V2

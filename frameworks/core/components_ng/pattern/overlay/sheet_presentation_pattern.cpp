@@ -468,13 +468,18 @@ float SheetPresentationPattern::InitialSingleGearHeight(NG::SheetStyle& sheetSty
     auto sheetNode = GetHost();
     CHECK_NULL_RETURN(sheetNode, sheetHeight);
     if (sheetStyle.sheetMode.has_value()) {
+        auto pipelineContext = sheetNode->GetContext();
+        CHECK_NULL_RETURN(pipelineContext, sheetHeight);
+        auto sheetTheme = pipelineContext->GetTheme<SheetTheme>();
+        CHECK_NULL_RETURN(sheetTheme, sheetHeight);
         if (sheetStyle.sheetMode == SheetMode::MEDIUM) {
-            sheetHeight = pageHeight_ * MEDIUM_SIZE;
+            sheetHeight = pageHeight_ * sheetTheme->GetMediumPercent();
             if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
                 sheetHeight = pageHeight_ * MEDIUM_SIZE_PRE;
             }
         } else if (sheetStyle.sheetMode == SheetMode::LARGE) {
-            sheetHeight = largeHeight;
+            double largePercent = sheetTheme->GetLargePercent();
+            sheetHeight = NearEqual(largePercent, LARGE_SIZE) ? largeHeight : pageHeight_ * largePercent;
         } else if (sheetStyle.sheetMode == SheetMode::AUTO) {
             sheetHeight = GetFitContentHeight();
             if (sheetHeight > largeHeight) {
@@ -922,10 +927,13 @@ void SheetPresentationPattern::UpdateFontScaleStatus()
             layoutProps->ClearUserDefinedIdealSize(false, true);
             titleLayoutProps->ClearUserDefinedIdealSize(false, true);
         } else if (sheetStyle.isTitleBuilder.has_value()) {
+            auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+            CHECK_NULL_VOID(sheetTheme);
+            auto operationAreaHeight = sheetTheme->GetOperationAreaHeight();
+
             layoutProps->UpdateUserDefinedIdealSize(
-                CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT - SHEET_TITLE_AERA_MARGIN)));
-            titleLayoutProps->UpdateUserDefinedIdealSize(
-                CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT)));
+                CalcSize(std::nullopt, CalcLength(operationAreaHeight - SHEET_TITLE_AERA_MARGIN)));
+            titleLayoutProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(operationAreaHeight)));
             if (sheetStyle.sheetSubtitle.has_value()) {
                 layoutProps->UpdateUserDefinedIdealSize(
                     CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - SHEET_TITLE_AERA_MARGIN)));
@@ -1009,13 +1017,21 @@ void SheetPresentationPattern::InitSheetDetents()
     auto largeHeight = sheetMaxHeight_ - SHEET_BLANK_MINI_HEIGHT.ConvertToPx();
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    auto pipelineContext = sheetNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto sheetTheme = pipelineContext->GetTheme<SheetTheme>();
+    CHECK_NULL_VOID(sheetTheme);
+
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
     auto sheetType = GetSheetType();
     auto sheetFrameHeight = geometryNode->GetFrameSize().Height();
-    auto mediumSize = MEDIUM_SIZE;
+    auto mediumSize = sheetTheme->GetMediumPercent();
     if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         mediumSize = MEDIUM_SIZE_PRE;
     }
+    float largePercent = sheetTheme->GetLargePercent();
+    float largeHeightOfTheme = NearEqual(largePercent, LARGE_SIZE) ? largeHeight : pageHeight_ * largePercent;
+
     switch (sheetType) {
         case SheetType::SHEET_BOTTOMLANDSPACE:
             if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -1035,7 +1051,7 @@ void SheetPresentationPattern::InitSheetDetents()
                     if (iter.sheetMode == SheetMode::MEDIUM) {
                         height = pageHeight_ * mediumSize;
                     } else if (iter.sheetMode == SheetMode::LARGE) {
-                        height = largeHeight;
+                        height = largeHeightOfTheme;
                     } else if (iter.sheetMode == SheetMode::AUTO) {
                         height = GetFitContentHeight();
                         height = GreatNotEqual(height, largeHeight) ? largeHeight : height;

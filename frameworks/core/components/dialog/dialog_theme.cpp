@@ -27,6 +27,7 @@ void DialogTheme::Builder::ParsePattern(
     if (!dialogPattern) {
         return;
     }
+    theme->normalButtonFontSize_ = dialogPattern->GetAttr<Dimension>("normal_button_text_font_size", 16.0_fp);
     theme->titleTextStyle_.SetTextColor(dialogPattern->GetAttr<Color>("title_text_color", Color::BLACK));
     theme->titleTextStyle_.SetFontSize(dialogPattern->GetAttr<Dimension>("title_text_font_size", 20.0_fp));
     theme->titleTextStyle_.SetFontWeight(FontWeight::MEDIUM);

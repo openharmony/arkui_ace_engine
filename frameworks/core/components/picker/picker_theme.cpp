@@ -89,10 +89,12 @@ void PickerTheme::Builder::Parse(const RefPtr<ThemeStyle>& style, const RefPtr<P
     theme->focusColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_FOCUSED, theme->focusColor_);
     theme->selectedOptionStyle_.SetTextColor(
         pattern->GetAttr<Color>("selected_text_color", theme->selectedOptionStyle_.GetTextColor()));
-    theme->focusOptionStyle_.SetTextColor(theme->selectedOptionStyle_.GetTextColor());
+    if (!theme->IsCircleDial()) {
+        theme->focusOptionStyle_.SetTextColor(theme->selectedOptionStyle_.GetTextColor());
+    }
     theme->normalOptionStyle_.SetTextColor(
         pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, theme->normalOptionStyle_.GetTextColor()));
-    theme->disappearOptionStyle_.SetTextColor(theme->normalOptionStyle_.GetTextColor());
+    theme->disappearOptionStyle_.SetTextColor(theme->disappearOptionStyle_.GetTextColor());
     theme->titleStyle_.SetTextColor(theme->normalOptionStyle_.GetTextColor());
     theme->dividerColor_ = pattern->GetAttr<Color>("divider_color", theme->dividerColor_);
     theme->dividerThickness_ = pattern->GetAttr<Dimension>("divider_thickness", 2.0_px);
@@ -105,5 +107,6 @@ void PickerTheme::Builder::Parse(const RefPtr<ThemeStyle>& style, const RefPtr<P
     auto showCountPortrait = static_cast<int32_t>(pattern->GetAttr<double>("picker_show_count_portrait", 5));
     theme->showCountPortrait_ =
         showCountPortrait < 0 ? theme->showCountPortrait_ : static_cast<uint32_t>(showCountPortrait);
+    theme->paddingVertical_ = pattern->GetAttr<Dimension>("text_picker_vertical_padding", 0.0_vp);
 }
 } // namespace OHOS::Ace

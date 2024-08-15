@@ -36,6 +36,11 @@ public:
         scrollBar_ = scrollBar;
     }
 
+    RefPtr<ScrollBar> GetScrollBar()
+    {
+        return scrollBar_.Upgrade();
+    }
+
     void SetEdgeEffect(WeakPtr<ScrollEdgeEffect>&& edgeEffect)
     {
         edgeEffect_ = edgeEffect;

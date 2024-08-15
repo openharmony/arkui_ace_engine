@@ -31,6 +31,11 @@
 #include "core/components_ng/pattern/picker/toss_animation_controller.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#include "adapter/ohos/entrance/vibrator/vibrator_impl.h"
+#endif
+#include "core/components_ng/pattern/picker_utils/picker_column_pattern_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -80,11 +85,11 @@ enum class DatePickerOptionIndex {
     COLUMN_INDEX_6,
 };
 
-class DatePickerColumnPattern : public LinearLayoutPattern {
+class DatePickerColumnPattern : public LinearLayoutPattern, public PickerColumnPatternUtils<std::string> {
     DECLARE_ACE_TYPE(DatePickerColumnPattern, LinearLayoutPattern);
 
 public:
-    DatePickerColumnPattern() : LinearLayoutPattern(true) {};
+    DatePickerColumnPattern() : LinearLayoutPattern(true), PickerColumnPatternUtils("") {};
 
     ~DatePickerColumnPattern() override = default;
 
@@ -272,6 +277,8 @@ public:
         clickBreak_ = value;
     }
 
+    void UpdateColumnButtonFocusState(bool haveFocus, bool needMarkDirty);
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -286,6 +293,9 @@ private:
     void SetButtonBackgroundColor(const Color& pressColor);
     void PlayPressAnimation(const Color& pressColor);
     void PlayHoverAnimation(const Color& color);
+    void InitSelectorButtonProperties(const RefPtr<PickerTheme>& pickerTheme);
+    void UpdateSelectorButtonProps(bool haveFocus, bool needMarkDirty);
+    const Color& GetButtonHoverColor() const;
 
     std::vector<DatePickerOptionProperty> optionProperties_;
     RefPtr<ClickEvent> CreateItemClickEventListener(RefPtr<DatePickerEventParam> param);
@@ -304,6 +314,11 @@ private:
     void HandleDragStart(const GestureEvent& event);
     void HandleDragMove(const GestureEvent& event);
     void HandleDragEnd();
+#ifdef SUPPORT_DIGITAL_CROWN
+    void HandleCrownBeginEvent(const CrownEvent& event) override;
+    void HandleCrownMoveEvent(const CrownEvent& event) override;
+    void HandleCrownEndEvent(const CrownEvent& event) override;
+#endif
     void CreateAnimation();
     void CreateAnimation(double from, double to);
     void ScrollOption(double delta, bool isJump = false);
@@ -327,6 +342,7 @@ private:
     Dimension LinearFontSize(const Dimension& startFontSize, const Dimension& endFontSize, double percent);
     void SetAccessibilityAction();
     DimensionRect CalculateHotZone(int32_t index, int32_t midSize, float middleChildHeight, float otherChildHeight);
+    void ToUpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme) override;
     void AddHotZoneRectToText();
     float localDownDistance_ = 0.0f;
     RefPtr<TouchEventImpl> touchListener_;
@@ -351,6 +367,17 @@ private:
     double distancePercent_ = 0.0;
     Color pressColor_;
     Color hoverColor_;
+    Color buttonBgColor_ = Color::TRANSPARENT;
+    Color buttonDefaultBgColor_ = Color::TRANSPARENT;
+    Color buttonFocusBgColor_ = Color::TRANSPARENT;
+    Color buttonDefaultBorderColor_ = Color::TRANSPARENT;
+    Color buttonFocusBorderColor_ = Color::TRANSPARENT;
+    Color selectorTextFocusColor_ = Color::WHITE;
+    Dimension buttonDefaultBorderWidth_ = 0.0_vp;
+    Dimension buttonFocusBorderWidth_ = 0.0_vp;
+    bool isFirstTimeUpdateButtonProps_ = true;
+    bool useButtonFocusArea_ = false;
+    bool isFocusColumn_ = false;
     bool isTossStatus_ = false;
     bool clickBreak_ = false;
     bool touchBreak_ = false;

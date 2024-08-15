@@ -59,6 +59,10 @@ using MouseEventCallback = std::function<void(const MouseEvent&, const std::func
     const RefPtr<NG::FrameNode>&)>;
 using AxisEventCallback = std::function<void(const AxisEvent&, const std::function<void()>&,
     const RefPtr<NG::FrameNode>&)>;
+#ifdef SUPPORT_DIGITAL_CROWN
+using CrownEventCallback = std::function<void(const CrownEvent&, const std::function<void()>&,
+    const RefPtr<NG::FrameNode>&)>;
+#endif
 using RotationEventCallBack = std::function<bool(const RotationEvent&)>;
 using CardViewPositionCallBack = std::function<void(int id, float offsetX, float offsetY)>;
 using DragEventCallBack = std::function<void(const PointerEvent& pointerEvent, const DragEventAction& action)>;

@@ -87,16 +87,13 @@ private:
     void HandleEnabled();
     void InitClickEvent();
     void InitButtonAndText();
-    void InitButtonShadow();
     void InitOnKeyEvent();
-    void InitFocusEvent();
     void HandleBlurEvent(RefPtr<RenderContext> renderContext, RefPtr<ToggleTheme> toggleTheme,
         RefPtr<FrameNode> textNode, RefPtr<TextLayoutProperty> textLayoutProperty,
         RefPtr<ToggleButtonPaintProperty> paintProperty);
     void HandleFocusEvent(RefPtr<RenderContext> renderContext, RefPtr<ToggleTheme> toggleTheme,
         RefPtr<FrameNode> textNode, RefPtr<TextLayoutProperty> textLayoutProperty,
         RefPtr<ToggleButtonPaintProperty> paintProperty);
-    void HandleBorderColorAndWidth();
     bool OnKeyEvent(const KeyEvent& event);
     void SetAccessibilityAction();
     void UpdateSelectStatus(bool isSelected);
@@ -105,7 +102,14 @@ private:
     void OnTouchUp();
     void FireBuilder();
     void HandleOnOffStyle(bool isOnToOff, bool isFocus);
-
+    void HandleOverlayStyle();
+    void HandleShadowStyle(RefPtr<ToggleButtonPaintProperty>& paintProperty,
+        RefPtr<RenderContext>& renderContext, RefPtr<ToggleTheme>& toggleTheme);
+    void HandleBorderStyle(RefPtr<ToggleButtonPaintProperty>& paintProperty,
+        RefPtr<RenderContext>& renderContext, RefPtr<ToggleTheme>& toggleTheme);
+    void HandleFocusStyle(RefPtr<ToggleButtonPaintProperty>& paintProperty,
+        RefPtr<RenderContext>& renderContext, RefPtr<ToggleTheme>& toggleTheme);
+    
     RefPtr<FrameNode> BuildContentModifierNode();
     std::optional<SwitchMakeCallback> toggleMakeFunc_;
     RefPtr<FrameNode> contentModifierNode_;

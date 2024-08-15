@@ -19,6 +19,8 @@
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "core/components_ng/pattern/picker/picker_type_define.h"
+
 namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
@@ -257,4 +259,31 @@ ArkUINativeModuleValue DatePickerBridge::ResetBackgroundColor(ArkUIRuntimeCallIn
     GetArkUINodeModifiers()->getDatePickerModifier()->resetDatePickerBackgroundColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue DatePickerBridge::SetDigitalCrownSensitivity(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> crownSensitivityArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    uint32_t crownSensitivity = OHOS::Ace::NG::DEFAULT_CROWNSENSITIVITY;
+    if (crownSensitivityArg->IsNumber()) {
+        crownSensitivity = crownSensitivityArg->ToNumber(vm)->Value();
+    }
+    GetArkUINodeModifiers()->getDatePickerModifier()->setDatePickerDigitalCrownSensitivity(nativeNode,
+        crownSensitivity);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue DatePickerBridge::ResetDigitalCrownSensitivity(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getDatePickerModifier()->resetDatePickerDigitalCrownSensitivity(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 } // namespace OHOS::Ace::NG

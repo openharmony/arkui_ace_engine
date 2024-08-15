@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/toggle/switch_paint_method.h"
 #include "core/components_ng/pattern/toggle/switch_paint_property.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
+#include "core/components/theme/app_theme.h"
 
 namespace OHOS::Ace::NG {
 
@@ -101,6 +102,15 @@ public:
         auto focusPaintcolor = switchTheme->GetActiveColor();
         focusPaintParams.SetPaintColor(focusPaintcolor);
         focusPaintParams.SetFocusPadding(Dimension(2.0_vp));
+        auto theme = pipelineContext->GetTheme<AppTheme>();
+        if (!theme) {
+            return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
+        }
+        if (theme->IsFocusBoxGlow()) {
+            focusPaintParams.SetPaintColor(theme->GetFocusBorderColor());
+            focusPaintParams.SetPaintWidth(theme->GetFocusBorderWidth());
+            focusPaintParams.SetFocusBoxGlow(theme->IsFocusBoxGlow());
+        }
 
         return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
     }
@@ -163,10 +173,8 @@ private:
     void OnTouchDown();
     void OnTouchUp();
     void HandleMouseEvent(bool isHover);
-    void HandleFocusEvent(const RefPtr<SwitchPaintProperty>& switchPaintProperty,
-        const RefPtr<SwitchTheme>& switchTheme);
-    void HandleBlurEvent(const RefPtr<SwitchPaintProperty>& switchPaintProperty,
-        const RefPtr<SwitchTheme>& switchTheme);
+    void HandleFocusEvent();
+    void HandleBlurEvent();
     void UpdateColorWhenIsOn(bool isOn);
     float GetSwitchWidth() const;
     float GetSwitchContentOffsetX() const;
@@ -181,6 +189,7 @@ private:
     void AddIsFocusActiveUpdateEvent();
     void RemoveIsFocusActiveUpdateEvent();
     void OnIsFocusActiveUpdate(bool isFocusAcitve);
+    void UpdateSwitchStyle();
 
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
@@ -197,7 +206,7 @@ private:
     void UpdateSwitchPaintProperty();
     void UpdateSwitchLayoutProperty();
     void FireBuilder();
-
+    bool OnKeyEvent(const KeyEvent& keyEventInfo);
     RefPtr<FrameNode> BuildContentModifierNode();
     std::optional<SwitchMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
@@ -218,7 +227,6 @@ private:
     bool showHoverEffect_ = true;
     bool enabled_ = true;
     bool isBgColorUnselectFocus_ = false;
-    bool isPointColorUnselectFocus_ = false;
 
     float width_ = 0.0f;
     float height_ = 0.0f;

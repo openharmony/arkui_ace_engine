@@ -23,7 +23,7 @@
 #include "base/geometry/dimension.h"
 #include "base/log/dump_log.h"
 #include "core/components_ng/pattern/qrcode/qrcode_paint_property.h"
-
+#include "core/components/theme/app_theme.h"
 namespace OHOS::Ace::NG {
 
 void QRCodePattern::OnAttachToFrameNode()
@@ -79,11 +79,12 @@ FocusPattern QRCodePattern::GetFocusPattern() const
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, FocusPattern());
-    auto qrCodeTheme = pipeline->GetTheme<QrcodeTheme>();
-    CHECK_NULL_RETURN(qrCodeTheme, FocusPattern());
-    auto focusedColor = qrCodeTheme->GetFocusedColor();
+    auto theme = pipeline->GetTheme<AppTheme>();
+    CHECK_NULL_RETURN(theme, FocusPattern());
     FocusPaintParam focusPaintParam;
-    focusPaintParam.SetPaintColor(focusedColor);
+    focusPaintParam.SetPaintColor(theme->GetFocusBorderColor());
+    focusPaintParam.SetPaintWidth(theme->GetFocusBorderWidth());
+    focusPaintParam.SetFocusBoxGlow(theme->IsFocusBoxGlow());
     return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, focusPaintParam };
 }
 } // namespace OHOS::Ace::NG

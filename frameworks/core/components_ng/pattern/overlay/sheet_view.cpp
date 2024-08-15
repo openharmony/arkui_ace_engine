@@ -95,7 +95,7 @@ RefPtr<FrameNode> SheetView::CreateOperationColumnNode(
     layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
     if (sheetStyle.isTitleBuilder.has_value() && pipeline->GetFontScale() == SHEET_NORMAL_SCALE) {
         layoutProps->UpdateUserDefinedIdealSize(
-            CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT - SHEET_TITLE_AERA_MARGIN)));
+            CalcSize(std::nullopt, CalcLength(sheetTheme->GetOperationAreaHeight() - SHEET_TITLE_AERA_MARGIN)));
         if (sheetStyle.sheetTitle.has_value() && sheetStyle.sheetSubtitle.has_value()) {
             layoutProps->UpdateUserDefinedIdealSize(
                 CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - SHEET_TITLE_AERA_MARGIN)));
@@ -328,9 +328,13 @@ RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::S
     CHECK_NULL_RETURN(layoutProperty, nullptr);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
+    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    CHECK_NULL_RETURN(sheetTheme, nullptr);
+    
     layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
     if (pipeline->GetFontScale() == SHEET_NORMAL_SCALE) {
-        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT)));
+        layoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(std::nullopt, CalcLength(sheetTheme->GetOperationAreaHeight())));
     }
     MarginProperty margin;
     margin.top = CalcLength(SHEET_TITLE_AERA_MARGIN);

@@ -44,12 +44,8 @@ const FontWeight FONT_WEIGHT_CONVERT_MAP[] = {
     FontWeight::W400,
 };
 constexpr float ROUND_VALUE = 0.5f;
-constexpr float RACE_MOVE_PERCENT_MIN = 0.0f;
-constexpr float RACE_MOVE_PERCENT_MAX = 100.0f;
-constexpr float RACE_TEMPO = 0.2f;
-constexpr uint32_t RACE_DURATION = 2000;
-constexpr float RACE_SPACE_WIDTH = 48.0f;
 constexpr Dimension DEFAULT_FADEOUT_VP = 16.0_vp;
+constexpr double MAX_TEXTFADEOUT_PERCENT = 0.5;
 
 inline FontWeight ConvertFontWeight(FontWeight fontWeight)
 {
@@ -168,7 +164,6 @@ void TextFieldContentModifier::SetDefaultPropertyValue()
     fontFamilyString_ = AceType::MakeRefPtr<PropertyString>("");
     fontReady_ = AceType::MakeRefPtr<PropertyBool>(false);
     contentChange_ = AceType::MakeRefPtr<PropertyBool>(false);
-    racePercentFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0);
     AttachProperty(contentOffset_);
     AttachProperty(contentSize_);
     AttachProperty(textValue_);
@@ -184,7 +179,6 @@ void TextFieldContentModifier::SetDefaultPropertyValue()
     AttachProperty(fontFamilyString_);
     AttachProperty(fontReady_);
     AttachProperty(contentChange_);
-    AttachProperty(racePercentFloat_);
 }
 
 void TextFieldContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
@@ -561,52 +555,6 @@ void TextFieldContentModifier::UpdateTextDecorationMeasureFlag(PropertyChangeFla
     }
 }
 
-void TextFieldContentModifier::StartTextRace()
-{
-    if (textRacing_) {
-        return;
-    }
-
-    textRacing_ = true;
-
-    textRaceSpaceWidth_ = RACE_SPACE_WIDTH;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    if (pipeline) {
-        textRaceSpaceWidth_ *= pipeline->GetDipScale();
-    }
-
-    AnimationOption option = AnimationOption();
-    RefPtr<Curve> curve = MakeRefPtr<LinearCurve>();
-    option.SetDuration(RACE_DURATION);
-    option.SetDelay(0);
-    option.SetCurve(curve);
-    option.SetIteration(-1);
-    option.SetTempo(RACE_TEMPO);
-    raceAnimation_ = AnimationUtils::StartAnimation(option, [&]() { racePercentFloat_->Set(RACE_MOVE_PERCENT_MAX); });
-}
-
-void TextFieldContentModifier::StopTextRace()
-{
-    if (!textRacing_) {
-        return;
-    }
-
-    if (raceAnimation_) {
-        AnimationUtils::StopAnimation(raceAnimation_);
-    }
-
-    textRacing_ = false;
-    racePercentFloat_->Set(RACE_MOVE_PERCENT_MIN);
-}
-
-float TextFieldContentModifier::GetTextRacePercent()
-{
-    if (racePercentFloat_) {
-        return racePercentFloat_->Get();
-    }
-    return 0;
-}
-
 void TextFieldContentModifier::DoNormalDraw(DrawingContext& context)
 {
     auto& canvas = context.canvas;
@@ -718,41 +666,35 @@ void TextFieldContentModifier::DrawTextFadeout(DrawingContext& context)
     auto contentOffset = contentOffset_->Get();
     auto contentRect = frameNode->GetGeometryNode()->GetContentRect();
     auto contentRectX = contentRect.GetX();
-    auto textRectX = textFieldPattern->GetTextRect().GetX();
+    auto textRect = textFieldPattern->GetTextRect();
+    auto textRectX = textRect.GetX();
     auto textWidth = paragraph->GetTextWidth();
     auto leftFadeOn = false;
     auto rigthFadeOn = false;
-    auto gradientPercent = DEFAULT_FADEOUT_VP.ConvertToPx() / context.width;
-
-    if (!textRacing_) {
-        if (GreatNotEqual(textWidth, contentRect.Width())) {
-            leftFadeOn = LessNotEqual(textRectX, contentRectX);
-            rigthFadeOn = GreatNotEqual((textRectX + textWidth), contentRect.Right());
-        }
-        paragraph->Paint(canvas, textRectX, contentOffset.GetY());
-    } else {
-        float textRacePercent = GetTextRacePercent();
-        float paragraph1Offset = (textWidth + textRaceSpaceWidth_) * textRacePercent / RACE_MOVE_PERCENT_MAX * -1;
-        auto textStartX = textRectX + paragraph1Offset;
-
-        if ((paragraph1Offset + textWidth) > 0) {
-            leftFadeOn = true;
-            rigthFadeOn = GreatNotEqual(textStartX + textWidth, contentRect.Right());
-            paragraph->Paint(canvas, textStartX, contentOffset.GetY());
-        }
-        float paragraph2Offset = paragraph1Offset + (textWidth + textRaceSpaceWidth_);
-        if (paragraph2Offset < contentRect.Width()) {
-            textStartX = textRectX + paragraph2Offset;
-            rigthFadeOn = true;
-            if (!leftFadeOn) {
-                leftFadeOn = LessNotEqual(textStartX, contentRect.Left());
-            }
-            paragraph->Paint(canvas, textStartX, contentOffset.GetY());
-        }
-    }
-
-    auto textFadeRect = contentRect;
+    auto textFadeoutWidth = DEFAULT_FADEOUT_VP.ConvertToPx();
+    auto gradientPercent = std::min(MAX_TEXTFADEOUT_PERCENT,
+        textFadeoutWidth / std::max(static_cast<double>(contentRect.Width()), textFadeoutWidth));
+    auto textFadeRect = RectF(contentRect.GetX(), contentOffset.GetY(), contentRect.Width(),
+        std::max(textRect.Height(), contentRect.Height()));
     AdjustTextFadeRect(textFadeRect);
+
+    RSRect clipRect;
+    std::vector<RSPoint> clipRadius;
+    GetFrameRectClip(clipRect, clipRadius);
+    canvas.ClipRoundRect(clipRect, clipRadius, true);
+
+    canvas.Save();
+    RSRect clipTextInnerRect = RSRect(textFadeRect.GetX(), textFadeRect.GetY(),
+        textFadeRect.Width() + textFadeRect.GetX(), textFadeRect.GetY() + textFadeRect.Height());
+    canvas.ClipRect(clipTextInnerRect, RSClipOp::INTERSECT);
+    paragraph->Paint(canvas, textRectX, contentOffset.GetY());
+    canvas.Restore();
+
+    auto textIndent = std::max(textFieldPattern->GetTextIndent(), 0.0f);
+    if (GreatNotEqual(textWidth + textIndent, contentRect.Width())) {
+        leftFadeOn = LessNotEqual(textRectX, contentRectX);
+        rigthFadeOn = GreatNotEqual((textRectX + textWidth + textIndent), contentRect.Right());
+    }
     UpdateTextFadeout(canvas, textFadeRect, gradientPercent, leftFadeOn, rigthFadeOn);
 }
 

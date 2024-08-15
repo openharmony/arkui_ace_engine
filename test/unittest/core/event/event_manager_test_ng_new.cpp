@@ -374,6 +374,40 @@ HWTEST_F(EventManagerTestNg, EventManagerTest042, TestSize.Level1)
     EXPECT_EQ(hoverNodeCur, nullptr);
 }
 
+#ifdef SUPPORT_DIGITAL_CROWN
+/**
+ * @tc.name: EventManagerTest044
+ * @tc.desc: Test DispatchCrownEventNG (frameNode)
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest044, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+    * @tc.steps: step1. Create renderNode.
+    * @tc.expected: status is false.
+    */
+    CrownEvent event;
+    const int nodeId = 10001;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LOCATION_BUTTON_ETS_TAG, nodeId, nullptr);
+    auto status = eventManager->DispatchCrownEventNG(event, frameNode);
+    EXPECT_FALSE(status);
+
+    auto eventHubFour = AceType::MakeRefPtr<EventHub>();
+    auto focusHubFour = AceType::MakeRefPtr<FocusHub>(eventHubFour, FocusType::DISABLE);
+
+    frameNode->eventHub_->focusHub_ = focusHubFour;
+    auto status1 = eventManager->DispatchCrownEventNG(event, frameNode);
+    EXPECT_FALSE(status1);
+}
+#endif
+
 /**
  * @tc.name: EventManagerTest043
  * @tc.desc: Test DispatchTouchEvent

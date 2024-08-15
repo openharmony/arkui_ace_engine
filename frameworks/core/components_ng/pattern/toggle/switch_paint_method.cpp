@@ -90,6 +90,8 @@ void SwitchModifier::InitializeParam()
     touchDuration_ = switchTheme->GetTouchDuration();
     colorAnimationDuration_ = switchTheme->GetColorAnimationDuration();
     pointAnimationDuration_ = switchTheme->GetPointAnimationDuration();
+    pointColorUnchecked_ = switchTheme->GetPointColorUnchecked();
+    isDiffPointColor_ = switchTheme->GetSwitchDifferentPointColor();
 }
 
 void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset, const SizeF& contentSize)
@@ -168,7 +170,15 @@ void SwitchModifier::DrawRectCircle(RSCanvas& canvas, const OffsetF& contentOffs
     canvas.AttachBrush(brush);
     canvas.DrawRoundRect(roundRect);
     canvas.DetachBrush();
-    brush.SetColor(ToRSColor(animatePointColor_->Get()));
+    if (isDiffPointColor_) {
+        if (isFocused_->Get()) {
+            brush.SetColor(ToRSColor(isSelect_->Get() ? animatePointColor_->Get() : LinearColor(pointColor_)));
+        } else {
+            brush.SetColor(ToRSColor(isSelect_->Get() ? animatePointColor_->Get() : LinearColor(pointColorUnchecked_)));
+        }
+    } else {
+        brush.SetColor(ToRSColor(animatePointColor_->Get()));
+    }
     brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
 

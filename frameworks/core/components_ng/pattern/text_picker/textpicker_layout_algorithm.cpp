@@ -32,6 +32,8 @@ const int32_t MAX_HALF_DISPLAY_COUNT = 2;
 const int32_t BUFFER_NODE_NUMBER = 2;
 const float DOUBLE_VALUE = 2.0f;
 constexpr double PERCENT_100 = 100.0;
+constexpr size_t MIX_CHILD_COUNT = 2;
+const Dimension ICON_TEXT_SPACE = 8.0_vp;
 
 GradientColor CreatePercentGradientColor(float percent, Color color)
 {
@@ -211,27 +213,26 @@ void TextPickerLayoutAlgorithm::ChangeTextStyle(uint32_t index, uint32_t showOpt
 void TextPickerLayoutAlgorithm::UpdateContentSize(const SizeF& size, const RefPtr<LayoutWrapper> layoutWrapper)
 {
     SizeF frameSize = size;
-    auto contentWrapper = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto contentWrapper = layoutProperty->CreateChildConstraint();
     auto children = layoutWrapper->GetAllChildrenWithBuild();
     CHECK_NULL_VOID(!children.empty());
-    for (const auto& child : children) {
-        if (child == children.back()) {
-            auto frameNode  = child->GetHostNode();
-            CHECK_NULL_VOID(frameNode);
-            auto overlayNode = frameNode ->GetOverlayNode();
-            CHECK_NULL_VOID(overlayNode);
-            auto geometryNode = frameNode->GetGeometryNode();
-            CHECK_NULL_VOID(geometryNode);
-            auto overlayGeometryNode = overlayNode->GetGeometryNode();
-            CHECK_NULL_VOID(overlayGeometryNode);
-            auto textRect = geometryNode->GetFrameRect();
-            contentWrapper.selfIdealSize = { frameSize.Width() - textRect.Left(), textRect.Height() };
-            child->Measure(contentWrapper);
-            auto textFrameSize_ = geometryNode->GetMarginFrameSize();
-            overlayGeometryNode->SetFrameSize(textFrameSize_);
-            overlayNode->Layout();
-        }
+    if (children.size() != MIX_CHILD_COUNT) {
+        return;
     }
+    auto iconChild = children.front();
+    CHECK_NULL_VOID(iconChild);
+    auto frameNode  = iconChild->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto geometryNode = frameNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto iconRect = geometryNode->GetFrameRect();
+    contentWrapper.selfIdealSize = { frameSize.Width() - iconRect.Width() -
+        ICON_TEXT_SPACE.ConvertToPx(), frameSize.Height() };
+    auto textChild = children.back();
+    CHECK_NULL_VOID(textChild);
+    textChild->Measure(contentWrapper);
 }
 
 void TextPickerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -256,17 +257,17 @@ void TextPickerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             static_cast<float>(size.Height() / ITEM_HEIGHT_HALF - defaultPickerItemHeight_ * PICKER_HEIGHT_HALF);
         halfDisplayCounts_ =
             std::clamp(static_cast<int32_t>(
-                           std::ceil((size.Height() / ITEM_HEIGHT_HALF - defaultPickerItemHeight_ / ITEM_HEIGHT_HALF) /
-                                     defaultPickerItemHeight_)),
-                0, MAX_HALF_DISPLAY_COUNT);
+                std::ceil((size.Height() / ITEM_HEIGHT_HALF - defaultPickerItemHeight_ / ITEM_HEIGHT_HALF) /
+                ((defaultPickerItemHeight_ != 0) ? defaultPickerItemHeight_ : 1.0f))), 0, MAX_HALF_DISPLAY_COUNT);
     } else {
         childStartCoordinate += static_cast<float>(pickerItemHeight_ / ITEM_HEIGHT_HALF -
                                     pickerTheme->GetGradientHeight().ConvertToPx() * (ITEM_HEIGHT_HALF + 1) -
                                     pickerTheme->GetDividerSpacing().ConvertToPx() / ITEM_HEIGHT_HALF);
+        auto gradientHeight = pickerTheme->GetGradientHeight().ConvertToPx();
         halfDisplayCounts_ = std::clamp(
             static_cast<int32_t>(std::ceil((pickerItemHeight_ / ITEM_HEIGHT_HALF -
-                                               pickerTheme->GetDividerSpacing().ConvertToPx() / ITEM_HEIGHT_HALF) /
-                                           pickerTheme->GetGradientHeight().ConvertToPx())),
+                pickerTheme->GetDividerSpacing().ConvertToPx() / ITEM_HEIGHT_HALF) /
+                    (gradientHeight != 0 ? gradientHeight : 1.0f))),
             0, MAX_HALF_DISPLAY_COUNT);
     }
     int32_t i = 0;

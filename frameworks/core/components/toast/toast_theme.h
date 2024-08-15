@@ -46,6 +46,7 @@ public:
                 return theme;
             }
             ParsePattern(themeConstants, theme);
+            Parse(themeConstants, theme);
             return theme;
         }
     private:
@@ -55,7 +56,6 @@ public:
             if (!toastPattern) {
                 return;
             }
-
             theme->minWidth_ = toastPattern->GetAttr<Dimension>("toast_content_min_width", 0.0_vp);
             theme->minHeight_ = toastPattern->GetAttr<Dimension>("toast_content_min_height", 0.0_vp);
             theme->bottom_ = toastPattern->GetAttr<Dimension>("toast_bottom", 0.0_vp);
@@ -65,6 +65,11 @@ public:
             theme->backgroundColor_ = toastPattern->GetAttr<Color>(PATTERN_BG_COLOR, Color());
             theme->blurStyleTextColor_ = toastPattern->GetAttr<Color>(PATTERN_TEXT_COLOR_BLUR, Color());
 
+            theme->borderColor_ = toastPattern->GetAttr<Color>("toast_border_color", Color());
+            theme->borderWidth_ = toastPattern->GetAttr<Dimension>("toast_border_width", 0.0_vp);
+            theme->shadowNormal_ = static_cast<uint32_t>(toastPattern->GetAttr<double>("toast_shadow_default", 0.0));
+            theme->toastAlign_ = static_cast<int32_t>(toastPattern->GetAttr<double>("toast_align", 0.0));
+            theme->multiLineTextAlign_ = static_cast<TextAlign>(toastPattern->GetAttr<double>("toast_text_align", 0.0));
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
                 theme->padding_ = Edge(toastPattern->GetAttr<Dimension>("toast_padding_level8", 0.0_vp).Value(),
                     toastPattern->GetAttr<Dimension>("toast_padding_level4", 0.0_vp).Value(),
@@ -99,6 +104,17 @@ public:
                     toastPattern->GetAttr<Dimension>("toast_border_radius", 24.0_vp));
             }
         }
+        void Parse(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<ToastTheme>& theme) const
+        {
+            RefPtr<ThemeStyle> toastPattern = themeConstants->GetPatternByName(THEME_PATTERN_TOAST);
+            if (!toastPattern) {
+                return;
+            }
+
+            theme->defaultBGColor_ = toastPattern->GetAttr<Color>("toast_default_bg_color", Color::TRANSPARENT);
+            theme->bgThemeColorMode_ =
+                static_cast<uint32_t>(toastPattern->GetAttr<double>("toast_bg_theme_color_mode", 0));
+        }
     };
 
     ~ToastTheme() override = default;
@@ -126,6 +142,11 @@ public:
     const Color& GetBackgroundColor() const
     {
         return backgroundColor_;
+    }
+
+    Color GetDefaultBGColor() const
+    {
+        return defaultBGColor_;
     }
 
     const TextStyle& GetTextStyle() const
@@ -163,6 +184,36 @@ public:
         return blurStyleTextColor_;
     }
 
+    const Color& GetBorderColor() const
+    {
+        return borderColor_;
+    }
+
+    const Dimension& GetBorderWidth() const
+    {
+        return borderWidth_;
+    }
+    
+    uint32_t GetShadowNormal() const
+    {
+        return shadowNormal_;
+    }
+
+    uint32_t GetBgThemeColorMode() const
+    {
+        return bgThemeColorMode_;
+    }
+
+    int32_t GetAlign() const
+    {
+        return toastAlign_;
+    }
+
+    TextAlign GetMultiLineTextAlign() const
+    {
+        return multiLineTextAlign_;
+    }
+
 protected:
     ToastTheme() = default;
 
@@ -172,13 +223,20 @@ private:
     Dimension minWidth_;
     Dimension minHeight_;
     Color backgroundColor_;
+    Color borderColor_;
     TextStyle textStyle_;
     Radius radius_;
     Dimension bottom_;
     Dimension minFontSize_;
+    Dimension borderWidth_;
     uint32_t textMaxLines_ = 1;
+    uint32_t shadowNormal_ = 6;  // no shadow
+    uint32_t bgThemeColorMode_ = 0;
     Edge marging_;
     Color blurStyleTextColor_;
+    Color defaultBGColor_;
+    TextAlign multiLineTextAlign_;
+    int32_t toastAlign_ = 0;
 };
 
 } // namespace OHOS::Ace

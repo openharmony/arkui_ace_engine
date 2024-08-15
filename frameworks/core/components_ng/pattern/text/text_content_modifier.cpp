@@ -381,16 +381,18 @@ FadeoutInfo TextContentModifier::GetFadeoutInfo(DrawingContext& drawingContext)
     CHECK_NULL_RETURN(textPattern, info);
     auto pManager = textPattern->GetParagraphManager();
     CHECK_NULL_RETURN(pManager, info);
+    marqueeGradientPercent_ = GetFadeoutPercent();
 
     if (!marqueeSet_ || !marqueeOption_.fadeout) {
         return info;
     }
 
     if (marqueeGradientPercent_ > RACE_MIN_GRADIENTPERCENT) {
-        return info;
+        marqueeGradientPercent_ = RACE_MIN_GRADIENTPERCENT;
     }
 
-    bool isOverlength = pManager->GetTextWidth() > drawingContext.width;
+    auto contentSize = contentSize_->Get();
+    bool isOverlength = pManager->GetTextWidth() > contentSize.Width();
 
     if (!marqueeOption_.start) {
         info.isLeftFadeout = false;
@@ -406,7 +408,7 @@ FadeoutInfo TextContentModifier::GetFadeoutInfo(DrawingContext& drawingContext)
     if (raceLength > 0) {
         spacePercent = textRaceSpaceWidth_ / raceLength * RACE_MOVE_PERCENT_MAX;
         textPercent = pManager->GetTextWidth() / raceLength * RACE_MOVE_PERCENT_MAX;
-        drawPercent = drawingContext.width / raceLength * RACE_MOVE_PERCENT_MAX;
+        drawPercent = contentSize.Width() / raceLength * RACE_MOVE_PERCENT_MAX;
     }
 
     float racePercent = GetTextRacePercent();
@@ -488,7 +490,8 @@ void TextContentModifier::DrawFadeout(DrawingContext& drawingContext, const Fade
 
     RSCanvas& canvas = drawingContext.canvas;
     auto contentRect = textPattern->GetTextContentRect();
-    RSRect clipInnerRect = RSRect(0, 0, contentRect.Width(), contentRect.Height());
+    auto contentSize = contentSize_->Get();
+    RSRect clipInnerRect = RSRect(0, 0, drawingContext.width, drawingContext.height);
 
     RSSaveLayerOps slo(&clipInnerRect, nullptr);
     canvas.SaveLayer(slo);
@@ -501,7 +504,9 @@ void TextContentModifier::DrawFadeout(DrawingContext& drawingContext, const Fade
     PaintCustomSpan(drawingContext);
 
     RSBrush brush;
-    std::vector<RSPoint> points = { RSPoint(0, 0.0f), RSPoint(contentRect.Width(), 0.0f) };
+    auto contentOffset = contentOffset_->Get();
+    std::vector<RSPoint> points = { RSPoint(contentRect.Left(), contentRect.Top()),
+        RSPoint(contentSize.Width() + contentOffset.GetX(), contentRect.Top()) };
     std::vector<RSColorQuad> colors = { Color::TRANSPARENT.GetValue(), Color::WHITE.GetValue(), Color::WHITE.GetValue(),
         Color::TRANSPARENT.GetValue() };
     std::vector<RSScalar> pos = { 0.0f, info.isLeftFadeout ? info.fadeoutPercent : 0.0f,
@@ -901,6 +906,22 @@ void TextContentModifier::SetIsFocused(const bool& isFocused)
     DetermineTextRace();
 }
 
+float TextContentModifier::GetFadeoutPercent()
+{
+    marqueeGradientPercent_ = 0;
+
+    auto contentWidth = contentSize_->Get().Width();
+    if (contentWidth > 0) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, true);
+        auto theme = pipeline->GetTheme<TextTheme>();
+        CHECK_NULL_RETURN(theme, true);
+        auto fadeoutWidth = theme->GetFadeoutWidth();
+        marqueeGradientPercent_ = fadeoutWidth.ConvertToPx() / contentWidth;
+    }
+    return marqueeGradientPercent_;
+}
+
 void TextContentModifier::SetIsHovered(const bool& isHovered)
 {
     marqueeHovered_ = isHovered;
@@ -935,17 +956,7 @@ bool TextContentModifier::SetTextRace(const MarqueeOption& option)
 
     marqueeDuration_ = duration;
     marqueeOption_ = option;
-    marqueeGradientPercent_ = 0;
-
-    auto contentWidth = contentSize_->Get().Width();
-    if (contentWidth > 0) {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, true);
-        auto theme = pipeline->GetTheme<TextTheme>();
-        CHECK_NULL_RETURN(theme, true);
-        auto fadeoutWidth = theme->GetFadeoutWidth();
-        marqueeGradientPercent_ = fadeoutWidth.ConvertToPx() / contentWidth;
-    }
+    marqueeGradientPercent_ = GetFadeoutPercent();
 
     return true;
 }
@@ -1002,6 +1013,7 @@ void TextContentModifier::ResumeTextRace(bool bounce)
     }
 
     if (!bounce) {
+        marqueeCount_ = 0;
         auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
         CHECK_NULL_VOID(textPattern);
         textPattern->FireOnMarqueeStateChange(TextMarqueeState::START);

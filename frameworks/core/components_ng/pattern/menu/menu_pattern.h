@@ -477,6 +477,7 @@ public:
     {
         return canExpand_;
     }
+    float GetSelectMenuWidthFromTheme();
 protected:
     void UpdateMenuItemChildren(RefPtr<FrameNode>& host);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -520,7 +521,7 @@ private:
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragEnd(float offsetX, float offsetY, float velocity);
     void HandleScrollDragEnd(float offsetX, float offsetY, float velocity);
-
+    void UpdateMenuBorderAndBackgroundBlur();
     RefPtr<FrameNode> BuildContentModifierNode(int index);
     RefPtr<ClickEvent> onClick_;
     RefPtr<TouchEventImpl> onTouch_;
@@ -586,6 +587,7 @@ private:
     void ApplyMultiMenuTheme();
 
     void RecordItemsAndGroups();
+    void InitDefaultBorder(const RefPtr<FrameNode>& host);
 
     // Record menu's items and groups at first level,
     // use for group header and footer padding

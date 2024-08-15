@@ -31,6 +31,8 @@ public:
 private:
     static void UpdateTextLayoutProperty(
         const RefPtr<FrameNode>& textNode, const std::string& message, bool isRightToLeft);
+    static void UpdateTextLayoutBorderShadowProperty(
+        const RefPtr<FrameNode>& textNode);
     static void UpdateTextContext(const RefPtr<FrameNode>& textNode);
 };
 } // namespace OHOS::Ace::NG

@@ -845,6 +845,17 @@ void SideBarContainerPattern::UpdateSideBarPosition(float value)
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+Dimension SideBarContainerPattern::GetSideBarWidth()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, -1.0_vp);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, -1.0_vp);
+    auto sideBarTheme = context->GetTheme<SideBarTheme>();
+    CHECK_NULL_RETURN(sideBarTheme, -1.0_vp);
+    return sideBarTheme->GetSideBarWidth();
+}
+
 void SideBarContainerPattern::FireChangeEvent(bool isShow)
 {
     auto sideBarContainerEventHub = GetEventHub<SideBarContainerEventHub>();

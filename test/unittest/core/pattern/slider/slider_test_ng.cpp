@@ -147,6 +147,8 @@ void SliderTestNg::SetSliderContentModifier(SliderContentModifier& sliderContent
     sliderContentModifier.SetBackgroundSize(POINTF_START, POINTF_END);
     sliderContentModifier.SetSelectColor(SliderModelNG::CreateSolidGradient(TEST_COLOR));
     sliderContentModifier.SetBlockColor(TEST_COLOR);
+    sliderContentModifier.SetIsPress(true);
+    sliderContentModifier.SetIsHover(true);
     SizeF blockSize;
     sliderContentModifier.SetBlockSize(blockSize);
 }
@@ -377,7 +379,7 @@ HWTEST_F(SliderTestNg, SliderTestNg004, TestSize.Level1)
     sliderTheme->tipColor_ = Color::BLUE;
     sliderTheme->tipFontSize_ = Dimension(16.0);
     sliderTheme->tipTextColor_ = Color::BLACK;
-    EXPECT_CALL(*theme, GetTheme(_)).WillOnce(Return(sliderTheme));
+    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
     /**
      * @tc.steps: step3. get sliderPattern and test init parameter.
      */
@@ -789,6 +791,8 @@ HWTEST_F(SliderTestNg, SliderTestNg012, TestSize.Level1)
     frameNode->geometryNode_->SetContentSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
     auto sliderPattern = frameNode->GetPattern<SliderPattern>();
     ASSERT_NE(sliderPattern, nullptr);
+    SliderContentModifier::Parameters parameters;
+    sliderPattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr, nullptr);
     auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
     ASSERT_NE(sliderLayoutProperty, nullptr);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -1431,6 +1435,8 @@ HWTEST_F(SliderTestNg, SliderTestNgInteractionMode008, TestSize.Level1)
     PipelineBase::GetCurrentContext()->SetThemeManager(themeManager);
     auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    SliderContentModifier::Parameters parameters;
+    sliderPattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr, nullptr);
     sliderPattern->mouseHoverFlag_ = true;
     sliderPattern->showTips_ = true;
     /**
@@ -1488,6 +1494,8 @@ HWTEST_F(SliderTestNg, SliderTestNgInteractionMode009, TestSize.Level1)
     frameNode->geometryNode_->SetContentSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
     auto sliderPattern = frameNode->GetPattern<SliderPattern>();
     ASSERT_NE(sliderPattern, nullptr);
+    SliderContentModifier::Parameters parameters;
+    sliderPattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr, nullptr);
     auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
     ASSERT_NE(sliderLayoutProperty, nullptr);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();

@@ -458,6 +458,8 @@ public:
 
     void ComputeDetentsSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode);
 
+    void ComputeWithoutSheetMode(std::optional<Dimension>& styleHeight, float sheetMaxHeight, float statusBarHeight);
+
     void SetSheetHeight(float height)
     {
         sheetHeight_ = height;

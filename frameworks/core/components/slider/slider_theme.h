@@ -45,6 +45,9 @@ public:
         static constexpr Dimension OUTSET_HOT_BLOCK_SHADOW_WIDTH = 4.0_vp;
         static constexpr Dimension INSET_HOT_BLOCK_SHADOW_WIDTH = 6.0_vp;
         static constexpr Dimension FOCUS_SIDE_DISTANCE = 2.0_vp;
+#ifdef SUPPORT_DIGITAL_CROWN
+        static constexpr double CROWN_DISPLAY_CONTROL_RATIO = 2.1;
+#endif
 
         RefPtr<SliderTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
@@ -64,6 +67,7 @@ public:
                 const double defaultMarkColorAplpa = 0.1;
                 theme->trackBgColor_ = pattern->GetAttr<Color>("track_bg_color", Color::RED);
                 theme->trackSelectedColor_ = pattern->GetAttr<Color>("track_color_selected", Color::RED);
+                theme->outsetAndNoneTrackColor_ = pattern->GetAttr<Color>("outset_and_none_track_color", Color::RED);
                 theme->markerColor_ = pattern->GetAttr<Color>("marker_color", Color::RED)
                     .BlendOpacity(pattern->GetAttr<double>("marker_color_alpha", defaultMarkColorAplpa));
                 theme->tipTextColor_ = pattern->GetAttr<Color>("tip_text_color", Color::RED);
@@ -76,6 +80,8 @@ public:
                     pattern->GetAttr<Dimension>("bubble_to_circle_center_distance", BUBBLE_TO_CIRCLE_CENTER_DISTANCE);
                 theme->measureContentDefaultWidth_ =
                     pattern->GetAttr<Dimension>("measure_content_default_width", MEASURE_CONTENT_DEFAULT_WIDTH);
+                theme->measureContentOutsetWidth_ =
+                    pattern->GetAttr<Dimension>("measure_content_outset_width", MEASURE_CONTENT_DEFAULT_WIDTH);
                 theme->outsetHotBlockShadowWidth_ =
                     pattern->GetAttr<Dimension>("outset_hot_block_shadow_width", OUTSET_HOT_BLOCK_SHADOW_WIDTH);
                 theme->insetHotBlockShadowWidth_ =
@@ -98,7 +104,13 @@ public:
                 theme->markerSize_ = pattern->GetAttr<Dimension>("marker_size", 4.0_vp);
                 theme->tipFontSize_ = pattern->GetAttr<Dimension>("tip_font_size", 14.0_fp);
                 theme->tipTextPadding_ = pattern->GetAttr<Dimension>("tip_text_padding_size", 8.0_vp);
-                theme->blockShadowColor_ = BLOCK_SHADOW_COLOR;
+                theme->blockShadowColor_ = pattern->GetAttr<Color>("block_shadow_color", BLOCK_SHADOW_COLOR);
+                theme->controlFocusFrame_ = pattern->GetAttr<double>("control_focus_frame", 0.0);
+                theme->scaleValue_ = pattern->GetAttr<double>("scale_value", 1.0);
+#ifdef SUPPORT_DIGITAL_CROWN
+                theme->crownDisplayControlRatio_ =
+                    pattern->GetAttr<double>("crown_display_control_ratio", CROWN_DISPLAY_CONTROL_RATIO);
+#endif
             } else {
                 LOGW("find pattern of slider fail");
             }
@@ -226,6 +238,11 @@ public:
         return trackSelectedColor_;
     }
 
+    Color GetOutsetAndNoneTrackColor() const
+    {
+        return outsetAndNoneTrackColor_;
+    }
+
     Color GetBlockShadowColor() const
     {
         return blockShadowColor_;
@@ -256,6 +273,28 @@ public:
         return moveAnimationDuration_;
     }
 
+    double GetControlFocusFrame() const
+    {
+        return controlFocusFrame_;
+    }
+
+    double GetScaleValue() const
+    {
+        return scaleValue_;
+    }
+
+    Dimension GetMeasureContentOutsetWidth() const
+    {
+        return measureContentOutsetWidth_;
+    }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    double GetCrownDisplayControlRatio() const
+    {
+        return crownDisplayControlRatio_;
+    }
+#endif
+
 protected:
     SliderTheme() = default;
 
@@ -282,6 +321,7 @@ private:
     Dimension tipTextPadding_;
     Dimension bubbleToCircleCenterDistance_;
     Dimension measureContentDefaultWidth_;
+    Dimension measureContentOutsetWidth_;
     Color blockColor_;
     Color blockHoverColor_;
     Color blockPressedColor_;
@@ -291,6 +331,7 @@ private:
     Color markerColor_;
     Color trackBgColor_;
     Color trackSelectedColor_;
+    Color outsetAndNoneTrackColor_;
     Color blockShadowColor_;
 
     // others
@@ -299,6 +340,11 @@ private:
     double hoverAnimationDuration_ = 0.0;
     double pressAnimationDuration_ = 0.0;
     double moveAnimationDuration_ = 0.0;
+    double controlFocusFrame_ = 0.0;
+    double scaleValue_ = 1.0;
+#ifdef SUPPORT_DIGITAL_CROWN
+    double crownDisplayControlRatio_ = 1.0;
+#endif
 };
 
 } // namespace OHOS::Ace

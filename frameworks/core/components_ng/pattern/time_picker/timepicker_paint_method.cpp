@@ -29,13 +29,31 @@ constexpr uint8_t ENABLED_ALPHA = 255;
 constexpr uint8_t DISABLED_ALPHA = 102;
 } // namespace
 
+CanvasDrawFunction TimePickerPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    CanvasDrawFunction drawFun = GetContentDrawFunctionL<TimePickerLayoutProperty>(paintWrapper, pipeline);
+    if (!drawFun) {
+        return nullptr;
+    }
+
+    return [weak = WeakClaim(this), drawFun](RSCanvas& canvas) {
+        auto picker = weak.Upgrade();
+        CHECK_NULL_VOID(picker);
+        drawFun(canvas);
+    };
+}
+
 CanvasDrawFunction TimePickerPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<PickerTheme>();
+    if (theme->IsCircleDial()) {
+        return nullptr;
+    }
     auto dividerColor = theme->GetDividerColor();
-
     auto dividerSpacing = pipeline->NormalizeToPx(theme->GetDividerSpacing());
     const auto& geometryNode = paintWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, nullptr);

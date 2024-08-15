@@ -339,4 +339,38 @@ std::unique_ptr<JsonValue> ExtNapiUtils::PutJsonValue(napi_env env, napi_value v
     }
     return result;
 }
+
+bool ExtNapiUtils::ParseLengthMetrics(napi_env env, napi_value param, CalcDimension& result)
+{
+    if (CheckTypeForNapiValue(env, param, napi_object)) {
+        napi_value jsValue = GetNamedProperty(env, param, "value");
+        napi_value jsUnit = GetNamedProperty(env, param, "unit");
+        double value = 0;
+        int32_t unit = static_cast<int32_t>(DimensionUnit::VP);
+        if (CheckTypeForNapiValue(env, jsValue, napi_number) && CheckTypeForNapiValue(env, jsUnit, napi_number) &&
+            napi_get_value_double(env, jsValue, &value) == napi_ok &&
+            napi_get_value_int32(env, jsUnit, &unit) == napi_ok && GreatOrEqual(value, 0.0f)) {
+            result = CalcDimension(value, static_cast<DimensionUnit>(unit));
+            return true;
+        }
+    }
+    return false;
+}
+
+bool ExtNapiUtils::ParseColorMetrics(napi_env env, napi_value param, Color& result)
+{
+    if (CheckTypeForNapiValue(env, param, napi_object)) {
+        napi_value jsToNumeric = GetNamedProperty(env, param, "toNumeric");
+        napi_value jsColor;
+        uint32_t colorVal = 0;
+        if (CheckTypeForNapiValue(env, jsToNumeric, napi_function) &&
+            napi_call_function(env, param, jsToNumeric, 0, nullptr, &jsColor) == napi_ok &&
+            CheckTypeForNapiValue(env, jsColor, napi_number) &&
+            napi_get_value_uint32(env, jsColor, &colorVal) == napi_ok) {
+            result.SetValue(colorVal);
+            return true;
+        }
+    }
+    return false;
+}
 } // namespace OHOS::Ace

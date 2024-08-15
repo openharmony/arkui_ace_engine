@@ -30,6 +30,9 @@
 #include "base/utils/noncopyable.h"
 #include "core/common/ace_view.h"
 #include "core/common/container.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
 #include "core/common/js_message_dispatcher.h"
 #include "core/common/platform_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
@@ -304,6 +307,13 @@ public:
     {
         moduleName_ = moduleName;
     }
+#ifdef SUPPORT_DIGITAL_CROWN
+    void RegisterCrownEventCallback(CrownEventCallback&& callback)
+    {
+        ACE_DCHECK(callback);
+        crownEventCallback_ = std::move(callback);
+    }
+#endif
 
 private:
     void InitializeFrontend();
@@ -353,6 +363,9 @@ private:
     std::string containerSdkPath_;
 
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
+#ifdef SUPPORT_DIGITAL_CROWN
+    CrownEventCallback crownEventCallback_;
+#endif
 };
 
 } // namespace OHOS::Ace::Platform

@@ -3185,3 +3185,17 @@ var GestureRecognizerState;
   GestureRecognizerState[GestureRecognizerState["SUCCESSFUL"] = 4] = "SUCCESSFUL";
   GestureRecognizerState[GestureRecognizerState["FAILED"] = 5] = "FAILED";
 })(GestureRecognizerState || (GestureRecognizerState = {}));
+
+var CrownSensitivity;
+(function (CrownSensitivity) {
+  CrownSensitivity[CrownSensitivity["LOW"] = 0] = "LOW";
+  CrownSensitivity[CrownSensitivity["MEDIUM"] = 1] = "MEDIUM";
+  CrownSensitivity[CrownSensitivity["HIGH"] = 2] = "HIGH";
+})(CrownSensitivity || (CrownSensitivity = {}));
+
+var CrownAction;
+(function (CrownAction) {
+  CrownAction[CrownAction["BEGIN"] = 0] = "BEGIN";
+  CrownAction[CrownAction["UPDATE"] = 1] = "UPDATE";
+  CrownAction[CrownAction["END"] = 2] = "END";
+})(CrownAction || (CrownAction = {}));

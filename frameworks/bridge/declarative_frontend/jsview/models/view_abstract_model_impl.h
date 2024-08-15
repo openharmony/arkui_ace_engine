@@ -171,6 +171,9 @@ public:
     void SetOnGestureRecognizerJudgeBegin(NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) override {}
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override;
     void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) override;
+#ifdef SUPPORT_DIGITAL_CROWN
+    void SetOnCrownEvent(OnCrownCallbackFunc&& onCrownCallback) override {};
+#endif
     void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) override;
     void SetOnHover(OnHoverFunc&& onHoverEventFunc) override;
     void SetOnDelete(std::function<void()>&& onDeleteCallback) override;
@@ -225,6 +228,9 @@ public:
     void DisableOnClick() override {};
     void DisableOnTouch() override {};
     void DisableOnKeyEvent() override {};
+#ifdef SUPPORT_DIGITAL_CROWN
+    void DisableOnCrownEvent() override {};
+#endif
     void DisableOnHover() override {};
     void DisableOnMouse() override {};
     void DisableOnAppear() override {};

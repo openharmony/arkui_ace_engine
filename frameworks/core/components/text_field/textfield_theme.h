@@ -124,6 +124,8 @@ public:
             theme->underlineFontSize_ = pattern->GetAttr<Dimension>(UNDERLINE_FONT_SIZE, 0.0_fp);
             theme->errorTextStyle_.SetTextColor(pattern->GetAttr<Color>(ERROR_UNDERLINE_TEXT_COLOR, Color()));
             theme->errorTextStyle_.SetFontSize(pattern->GetAttr<Dimension>(ERROR_UNDERLINE_TEXT_SIZE, 0.0_fp));
+            theme->errorTextStyle_.SetTextAlign(
+                static_cast<TextAlign>(pattern->GetAttr<double>("textfield_error_text_align", 0.0)));
 
             theme->countTextStyle_.SetTextColor(pattern->GetAttr<Color>("count_text_color", Color()));
             theme->countTextStyle_.SetFontSize(pattern->GetAttr<Dimension>("count_text_font_size", 0.0_fp));
@@ -186,6 +188,12 @@ public:
             theme->cancelButtonIconColor_ = pattern->GetAttr<Color>("cancel_button_icon_color", Color());
             theme->previewUnderlineColor_ = pattern->GetAttr<Color>(PREVIEW_UNDERLINE_COLOR, Color());
             theme->previewBoardColor_ = pattern->GetAttr<Color>(PREVIEW_BOARD_COLOR, Color());
+            theme->independentControlKeyboard_ =
+                static_cast<bool>(pattern->GetAttr<double>("independent_control_keyboard", 0.0));
+            theme->directionKeysMoveFocusOut_ =
+                static_cast<bool>(pattern->GetAttr<double>("direction_keys_move_focus_out", 0.0));
+            theme->needFocusBox_ = static_cast<bool>(pattern->GetAttr<double>("text_input_need_focus_box", 0.0));
+            theme->focusPadding_ = pattern->GetAttr<Dimension>("text_input_focus_padding", 0.0_vp);
         }
     };
 
@@ -359,6 +367,16 @@ public:
     bool GetErrorIsInner() const
     {
         return errorIsInner_;
+    }
+
+    bool GetIndependentControlKeyboard() const
+    {
+        return independentControlKeyboard_;
+    }
+
+    bool GetDirectionKeysMoveFocusOut() const
+    {
+        return directionKeysMoveFocusOut_;
     }
 
     const Dimension& GetErrorBorderWidth() const
@@ -566,6 +584,16 @@ public:
         return previewBoardColor_;
     }
 
+    bool NeedFocusBox() const
+    {
+        return needFocusBox_;
+    }
+
+    const Dimension& GetFocusPadding() const
+    {
+        return focusPadding_;
+    }
+
 protected:
     TextFieldTheme() = default;
 
@@ -656,12 +684,16 @@ private:
     bool showPasswordIcon_ = true;
 
     bool textFadeoutEnabled_ = false;
+    bool independentControlKeyboard_ = false;
+    bool directionKeysMoveFocusOut_ = false;
     
     // cancelButton
     Color cancelButtonIconColor_;
     CancelButtonStyle cancelButtonStyle_ = CancelButtonStyle::INPUT;
     Color previewUnderlineColor_;
     Color previewBoardColor_;
+    bool needFocusBox_ = false;
+    Dimension focusPadding_;
 };
 
 } // namespace OHOS::Ace
