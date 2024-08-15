@@ -191,6 +191,8 @@ enum AceLogTag : uint8_t {
     ACE_WINDOW,               // C0394E
     ACE_SECURITYUIEXTENSION,  // C0394F
     ACE_INPUTKEYFLOW,         // C03950
+    ACE_WINDOW_PIPELINE,      // C03951
+    ACE_LAYOUT_INSPECTOR,     // C03952
 
     FORM_RENDER = 255, // C039FF FormRenderer, last domain, do not add
 };
