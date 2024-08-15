@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/common/vibrator/vibrator_utils.h"
+
 #include <vector>
 
 #include "vibrator_agent.h"
@@ -31,6 +32,12 @@ namespace {
     const char* VIBRATOR_TYPE_INVALID = "vibrator.type.invalid";
     const char* GetVibratorType(const std::string& vibratorType)
     {
+#ifdef SUPPORT_DIGITAL_CROWN
+        std::string watchhaptic = "watchhaptic.crown";
+        if (vibratorType.find(watchhaptic) != std::string::npos) {
+            return vibratorType.c_str();
+        }
+#endif
         if (vibratorType == "longPress.light") {
             return VIBRATOR_TYPE_LONG_PRESS_LIGHT;
         } else if (vibratorType == "slide") {
@@ -38,12 +45,6 @@ namespace {
         } else if (vibratorType == "slide.light") {
             return VIBRATOR_TYPE_SLIDE_LIGHT;
         }
-#ifdef SUPPORT_DIGITAL_CROWN
-        std::string watchhaptic = "watchhaptic.crown";
-        if (vibratorType.find(watchhaptic) != std::string::npos) {
-            return vibratorType.c_str();
-        }
-#endif
         return VIBRATOR_TYPE_INVALID;
     }
 };
@@ -53,7 +54,7 @@ const char* VibratorUtils::supportedEffectId = nullptr;
 const char* VibratorUtils::GetFirstSupportedId()
 {
     bool state = false;
-    for (auto item : effectIdNames) {
+    for (auto&& item : effectIdNames) {
         Sensors::IsSupportEffect(item, &state);
         if (state) {
             return item;
