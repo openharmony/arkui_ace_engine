@@ -670,15 +670,25 @@ HWTEST_F(TabsEventTestNg, SetOnContentWillChangeTest002, TestSize.Level1)
      * @tc.expected: isShow = false
      */
     auto callback = parentNode->GetPattern<PagePattern>()->onHiddenChange_;
-    ASSERT_NE(callback, nullptr);
-    callback(false);
+    EXPECT_FALSE(callback.empty());
+    for (auto& OnHiddenChangeInfo : callback) {
+        if (OnHiddenChangeInfo.second) {
+            auto OnHiddenChange = OnHiddenChangeInfo.second;
+            OnHiddenChange(false);
+        }
+    }
     EXPECT_FALSE(isShow);
 
     /**
      * @tc.steps: step5. callback.
      * @tc.expected: isShow = true
      */
-    callback(true);
+    for (auto& OnHiddenChangeInfo : callback) {
+        if (OnHiddenChangeInfo.second) {
+            auto OnHiddenChange = OnHiddenChangeInfo.second;
+            OnHiddenChange(true);
+        }
+    }
     EXPECT_TRUE(isShow);
 }
 
@@ -720,15 +730,25 @@ HWTEST_F(TabsEventTestNg, SetOnContentWillChangeTest003, TestSize.Level1)
      */
     auto callback =
         parentNode->GetPattern<NavDestinationPattern>()->GetEventHub<NavDestinationEventHub>()->onHiddenChange_;
-    ASSERT_NE(callback, nullptr);
-    callback(false);
+    EXPECT_FALSE(callback.empty());
+    for (auto& OnHiddenChangeInfo : callback) {
+        if (OnHiddenChangeInfo.second) {
+            auto OnHiddenChange = OnHiddenChangeInfo.second;
+            OnHiddenChange(false);
+        }
+    }
     EXPECT_FALSE(isShow);
 
     /**
      * @tc.steps: step4. callback.
      * @tc.expected: isShow = true
      */
-    callback(true);
+    for (auto& OnHiddenChangeInfo : callback) {
+        if (OnHiddenChangeInfo.second) {
+            auto OnHiddenChange = OnHiddenChangeInfo.second;
+            OnHiddenChange(true);
+        }
+    }
     EXPECT_TRUE(isShow);
 }
 
