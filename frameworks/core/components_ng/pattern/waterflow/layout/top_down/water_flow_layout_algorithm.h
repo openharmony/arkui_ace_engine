@@ -41,7 +41,7 @@ public:
 
 private:
     FlowItemPosition GetItemPosition(int32_t index);
-    bool MeasureToTarget(LayoutWrapper* layoutWrapper, std::optional<int64_t> cacheDeadline);
+    bool MeasureToTarget(LayoutWrapper* layoutWrapper, int32_t startFrom, std::optional<int64_t> cacheDeadline);
     void FillViewport(float mainSize, LayoutWrapper* layoutWrapper);
     void ModifyCurrentOffsetWhenReachEnd(float mainSize, LayoutWrapper* layoutWrapper);
     float ComputeCrossPosition(int32_t crossIndex) const;

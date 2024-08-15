@@ -128,7 +128,7 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     FillViewport(mainSize_, layoutWrapper);
     if (layoutInfo_->targetIndex_.has_value()) {
-        MeasureToTarget(layoutWrapper, std::nullopt);
+        MeasureToTarget(layoutWrapper, layoutInfo_->endIndex_, std::nullopt);
     }
     if (layoutInfo_->jumpIndex_ != EMPTY_JUMP_INDEX) {
         if (layoutInfo_->extraOffset_.has_value() && Negative(layoutInfo_->extraOffset_.value())) {
@@ -147,19 +147,20 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->SetCacheCount(layoutProperty->GetCachedCountValue(1));
 }
 
-bool WaterFlowLayoutAlgorithm::MeasureToTarget(LayoutWrapper* layoutWrapper, std::optional<int64_t> cacheDeadline)
+bool WaterFlowLayoutAlgorithm::MeasureToTarget(
+    LayoutWrapper* layoutWrapper, int32_t startFrom, std::optional<int64_t> cacheDeadline)
 {
     if (layoutInfo_->targetIndex_.value() > layoutInfo_->childrenCount_) {
         layoutInfo_->targetIndex_.reset();
         return false;
     }
     auto layoutProperty = AceType::DynamicCast<WaterFlowLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    auto currentIndex = layoutInfo_->endIndex_;
+    int32_t currentIndex = startFrom;
     auto position = GetItemPosition(currentIndex);
     if (layoutInfo_->targetIndex_.value() == LAST_ITEM) {
         layoutInfo_->targetIndex_ = layoutInfo_->childrenCount_ - 1;
     }
-    while (layoutInfo_->targetIndex_.has_value() && (layoutInfo_->endIndex_ < layoutInfo_->targetIndex_.value())) {
+    while (layoutInfo_->targetIndex_.has_value() && (startFrom < layoutInfo_->targetIndex_.value())) {
         auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(
             GetChildIndexWithFooter(currentIndex), !cacheDeadline, cacheDeadline.has_value());
         if (!itemWrapper) {
@@ -416,12 +417,14 @@ void WaterFlowLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, L
 
 bool WaterFlowLayoutAlgorithm::AppendCacheItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline)
 {
-    if (itemIdx <= layoutInfo_->endIndex_) {
+    const int32_t lastItem = layoutInfo_->GetLastItem();
+    if (itemIdx <= lastItem) {
         return host->GetOrCreateChildByIndex(itemIdx, false, true);
     }
+    const auto sub = layoutInfo_->targetIndex_;
     layoutInfo_->targetIndex_ = itemIdx;
-    const bool res = MeasureToTarget(host, deadline);
-    layoutInfo_->targetIndex_.reset();
+    const bool res = MeasureToTarget(host, lastItem, deadline);
+    layoutInfo_->targetIndex_ = sub;
     return res;
 }
 } // namespace OHOS::Ace::NG
