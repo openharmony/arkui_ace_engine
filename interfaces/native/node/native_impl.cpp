@@ -14,12 +14,9 @@
  */
 
 #include "native_interface.h"
-#include "native_node.h"
-#include "native_animate.h"
 #include "node/animate_impl.h"
 #include "node/dialog_model.h"
 #include "node/gesture_impl.h"
-#include "node/native_compatible.h"
 #include "node/node_model.h"
 #include "node_extened.h"
 

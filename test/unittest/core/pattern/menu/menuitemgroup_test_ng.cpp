@@ -808,7 +808,7 @@ HWTEST_F(MenuItemGroupTestNg, MenuItemGroupPattern003, TestSize.Level1)
     textNode->MountToParent(menuItemGroup2);
     menuItemGroupPattern2->OnIntItemPressed(index, press);
     auto needHeaderDivider = menuItemGroup3->GetPaintProperty<MenuItemGroupPaintProperty>()->propNeedHeaderDivider_;
-    EXPECT_EQ(needHeaderDivider, std::nullopt);
+    EXPECT_EQ(needHeaderDivider, false);
 }
 
 /**

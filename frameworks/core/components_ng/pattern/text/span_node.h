@@ -218,13 +218,12 @@ public:
     virtual int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
         bool isSpanStringMode = false, PlaceholderStyle placeholderStyle = PlaceholderStyle(), bool isMarquee = false);
     virtual void UpdateSymbolSpanColor(const RefPtr<FrameNode>& frameNode, TextStyle& symbolSpanStyle);
-    virtual void UpdateTextStyleForAISpan(
-        const std::string& content, const RefPtr<Paragraph>& builder, const TextStyle& textStyle);
+    virtual void UpdateTextStyleForAISpan(const std::string& content, const RefPtr<Paragraph>& builder,
+        const TextStyle& textStyle, const TextStyle& aiSpanStyle);
     virtual void UpdateTextStyle(const std::string& content, const RefPtr<Paragraph>& builder,
         const TextStyle& textStyle, const int32_t selStart, const int32_t selEnd);
     virtual void UpdateContentTextStyle(
         const std::string& content, const RefPtr<Paragraph>& builder, const TextStyle& textStyle);
-    virtual void SetAiSpanTextStyle(std::optional<TextStyle>& textStyle);
     virtual void GetIndex(int32_t& start, int32_t& end) const;
     virtual void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
@@ -627,7 +626,6 @@ public:
     ACE_DISALLOW_COPY_AND_MOVE(CustomSpanItem);
     std::optional<std::function<CustomSpanMetrics(CustomSpanMeasureInfo)>> onMeasure;
     std::optional<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> onDraw;
-    bool isNode = false;
 };
 
 class ACE_EXPORT CustomSpanNode : public FrameNode {
@@ -638,8 +636,6 @@ public:
     {
         auto customSpanNode = AceType::MakeRefPtr<CustomSpanNode>(
             V2::CUSTOM_SPAN_NODE_ETS_TAG, nodeId);
-        customSpanNode->GetSpanItem()->content = " ";
-        customSpanNode->GetSpanItem()->isNode = true;
         customSpanNode->InitializePatternAndContext();
         ElementRegister::GetInstance()->AddUINode(customSpanNode);
         return customSpanNode;
@@ -651,8 +647,6 @@ public:
         auto frameNode = GetFrameNode(tag, nodeId);
         CHECK_NULL_RETURN(!frameNode, AceType::DynamicCast<CustomSpanNode>(frameNode));
         auto customSpanNode = AceType::MakeRefPtr<CustomSpanNode>(tag, nodeId);
-        customSpanNode->GetSpanItem()->content = " ";
-        customSpanNode->GetSpanItem()->isNode = true;
         customSpanNode->InitializePatternAndContext();
         ElementRegister::GetInstance()->AddUINode(customSpanNode);
         return customSpanNode;

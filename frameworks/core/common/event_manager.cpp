@@ -2024,11 +2024,11 @@ void EventManager::CheckAndLogLastConsumedEventInfo(int32_t eventId, bool logImm
     if (logImmediately) {
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
             "Consumed new event id=%{public}d in ace_container, lastEventInfo: id:%{public}d", eventId,
-            lastReceivedEvent_.eventId);
+            lastConsumedEvent_.eventId);
         return;
     }
     auto currentTime = GetSysTimestamp();
-    auto lastLogTimeStamp = lastReceivedEvent_.lastLogTimeStamp;
+    auto lastLogTimeStamp = lastConsumedEvent_.lastLogTimeStamp;
     if (lastConsumedEvent_.lastLogTimeStamp != 0 &&
         (currentTime - lastConsumedEvent_.lastLogTimeStamp) > EVENT_CLEAR_DURATION * TRANSLATE_NS_TO_MS) {
         TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,

@@ -13,17 +13,11 @@
  * limitations under the License.
  */
 
-#include <cstdint>
 
-#include "native_gesture.h"
-#include "native_node.h"
-#include "native_type.h"
 #include "node_model.h"
 #include "gesture_impl.h"
 
-#include "base/utils/utils.h"
 #include "core/gestures/gesture_event.h"
-#include "frameworks/core/interfaces/arkoala/arkoala_api.h"
 #include "interfaces/native/event/ui_input_event_impl.h"
 
 #ifdef __cplusplus

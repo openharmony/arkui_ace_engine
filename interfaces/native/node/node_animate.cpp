@@ -13,11 +13,8 @@
  * limitations under the License.
  */
 
-#include <cstddef>
-#include <cstdint>
 
 #include "animate_impl.h"
-#include "native_type.h"
 #include "node/node_model.h"
 
 #include "base/error/error_code.h"

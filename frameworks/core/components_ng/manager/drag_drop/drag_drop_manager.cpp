@@ -401,7 +401,7 @@ std::unordered_set<int32_t> DragDropManager::FindHitFrameNodes(const Point& poin
     std::unordered_set<int32_t> frameNodeList;
     for (auto iter = nodesForDragNotify_.begin(); iter != nodesForDragNotify_.end(); iter++) {
         auto frameNode = iter->second.Upgrade();
-        if (!frameNode || !frameNode->IsActive() || !frameNode->IsVisible()) {
+        if (!frameNode || !frameNode->IsActive() || !frameNode->IsVisible() || frameNode->GetDepth() < 0) {
             continue;
         }
         auto geometryNode = frameNode->GetGeometryNode();
@@ -1026,14 +1026,6 @@ void DragDropManager::onDragCancel()
 {
     preTargetFrameNode_ = nullptr;
     draggedFrameNode_ = nullptr;
-}
-
-void DragDropManager::EnsureStatusForPullIn()
-{
-    preTargetFrameNode_ = nullptr;
-    draggedFrameNode_ = nullptr;
-    hasNotifiedTransformation_ = false;
-    isDragFwkShow_ = true;
 }
 
 void DragDropManager::FireOnDragEventWithDragType(const RefPtr<EventHub>& eventHub, DragEventType type,

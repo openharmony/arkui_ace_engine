@@ -25,6 +25,9 @@ namespace OHOS::Ace::Framework {
 class JSMock {
 public:
     static void JSBind(BindingTarget globalObj);
+    static bool PreloadWorkerRequireNative(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& global);
+    static bool InitModule(const shared_ptr<JsRuntime>& runtime, shared_ptr<JsValue>& thisObj,
+        const std::string& moduleName);
 };
 
 class JSMockBaseNode {

@@ -616,6 +616,7 @@ void CheckBoxPattern::CheckBoxGroupIsTrue()
         }
     }
     const auto& groupPaintProperty = checkBoxGroupNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    CHECK_NULL_VOID(groupPaintProperty);
     if (!groupManager->GetCheckboxGroupIsChange(group) && groupPaintProperty->GetIsCheckBoxCallbackDealed()) {
         return;
     }

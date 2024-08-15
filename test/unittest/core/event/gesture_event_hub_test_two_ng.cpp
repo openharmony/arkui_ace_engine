@@ -134,9 +134,11 @@ HWTEST_F(GestureEventHubTestNg, SetDragData001, TestSize.Level1)
     EXPECT_TRUE(dragEvent->GetData());
     EXPECT_EQ(dragDropInfo.extraInfo, "default extraInfo");
 
+    auto newUnifiedData = AceType::MakeRefPtr<MockUnifiedData>();
+    ASSERT_NE(newUnifiedData, nullptr);
     std::string udKey;
-    auto ret = gestureEventHub->SetDragData(unifiedData, udKey);
-    ASSERT_NE(ret, 0);
+    auto ret = gestureEventHub->SetDragData(newUnifiedData, udKey);
+    ASSERT_NE(ret, -1);
 }
 /**
  * @tc.name: SetMouseDragMonitorState
@@ -245,6 +247,8 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart002, TestSize.Level1)
     RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     DragDropInfo dragDropInfo = {customNode, pixelMap};
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    auto unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
+    event->SetData(unifiedData);
     NG::DragPreviewOption option { true, false, true, true};
     webFrameNode->SetDragPreviewOptions(option);
     gestureHub->dragEventActuator_->preScaledPixelMap_ = pixelMap;
@@ -255,6 +259,7 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart002, TestSize.Level1)
     ASSERT_NE(gestureHub->pixelMap_, nullptr);
     ASSERT_NE(gestureHub->dragEventActuator_, nullptr);
     ASSERT_NE(gestureHub->GetPreScaledPixelMapIfExist(1.0f, pixelMap), nullptr);
+
     SubwindowManager::GetInstance()->subwindowMap_.clear();
     MockContainer::TearDown();
 }
@@ -311,8 +316,15 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart003, TestSize.Level1)
     DragDropInfo dragDropInfo = {customNode, pixelMap};
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     NG::DragPreviewOption option { true, false, true, true};
+    option.badgeNumber = 4;
     buttonFrameNode->SetDragPreviewOptions(option);
     gestureHub->dragEventActuator_->preScaledPixelMap_ = pixelMap;
+
+    GestureEvent infoEvent = GestureEvent();
+    gestureHub->dragEventActuator_->userCallback_->actionEnd_(infoEvent);
+    gestureHub->dragEventActuator_->userCallback_->actionStart_(infoEvent);
+    gestureHub->dragEventActuator_->userCallback_->actionCancel_();
+    gestureHub->dragEventActuator_->userCallback_->actionUpdate_(infoEvent);
      /**
      * @tc.steps: step5. call OnDragStart
      */
@@ -322,5 +334,38 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart003, TestSize.Level1)
     ASSERT_NE(gestureHub->GetPreScaledPixelMapIfExist(1.0f, pixelMap), nullptr);
     SubwindowManager::GetInstance()->subwindowMap_.clear();
     MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: OnDragStart004
+ * @tc.desc: Test DragStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, OnDragStart004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create webFrameNode and overlayManager
+     */
+    auto [buttonFrameNode, columnNode] = InitFrameNodes("myButton");
+    auto pipline = PipelineContext::GetMainPipelineContext();
+    pipline->SetupRootElement();
+    buttonFrameNode->GetOrCreateFocusHub();
+    auto gestureHub = buttonFrameNode->GetOrCreateGestureEventHub();
+    gestureHub->InitDragDropEvent();
+    /**
+     * @tc.steps: step4. create OnDragStart params
+     */
+    GestureEvent info;
+    info.SetInputEventType(InputEventType::MOUSE_BUTTON);
+    DragDropInfo dragDropInfo;
+    RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+     /**
+     * @tc.steps: step5. call OnDragStart abnormal
+     */
+    event->SetResult(DragRet::DRAG_FAIL);
+    auto pixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    gestureHub->OnDragStart(info, pipline, buttonFrameNode, dragDropInfo, event);
+    ASSERT_EQ(event->GetResult(), DragRet::DRAG_FAIL);
+    ASSERT_EQ(info.GetInputEventType(), InputEventType::MOUSE_BUTTON);
 }
 } // namespace OHOS::Ace::NG

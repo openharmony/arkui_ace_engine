@@ -30,7 +30,7 @@
 #include "core/pipeline/base/render_element.h"
 
 #ifdef OHOS_STANDARD_SYSTEM
-#include "foundation/multimedia/player_framework/interfaces/inner_api/native/player.h"
+#include "player.h"
 #include "surface_delegate.h"
 
 #include "core/components/video/media_player_callback.h"

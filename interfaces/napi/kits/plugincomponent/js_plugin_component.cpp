@@ -12,18 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <cstdint>
 
 #include "ipc_skeleton.h"
-#include "js_plugin_callback.h"
 #include "js_plugin_callback_mgr.h"
 #include "js_plugin_util.h"
 #include "js_plugin_want.h"
-#include "napi/native_api.h"
-#include "napi/native_node_api.h"
 #include "tokenid_kit.h"
 
-#include "base/log/log_wrapper.h"
 #include "core/components/plugin/plugin_component_manager.h"
 
 namespace OHOS::Ace::Napi {

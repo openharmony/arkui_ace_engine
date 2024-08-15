@@ -25,10 +25,8 @@
 #include "long_wrapper.h"
 #include "short_wrapper.h"
 #include "string_wrapper.h"
-#include "want_params_wrapper.h"
 #include "zchar_wrapper.h"
 
-#include "base/log/log_wrapper.h"
 
 namespace OHOS::Ace::Napi {
 /**

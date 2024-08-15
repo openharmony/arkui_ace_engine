@@ -495,12 +495,6 @@ std::wstring TextPattern::GetWideText() const
     return StringUtils::ToWstring(textForDisplay_);
 }
 
-bool TextPattern::IsCustomSpanNode(const RefPtr<SpanItem>& span) const
-{
-    auto customSpanItem = AceType::DynamicCast<CustomSpanItem>(span);
-    return customSpanItem && customSpanItem->isNode;
-}
-
 std::string TextPattern::GetSelectedText(int32_t start, int32_t end) const
 {
     if (spans_.empty()) {
@@ -517,15 +511,16 @@ std::string TextPattern::GetSelectedText(int32_t start, int32_t end) const
             tag = span->position == -1 ? tag + 1 : span->position;
             continue;
         }
-        if (span->position - 1 >= start &&
-            (span->placeholderIndex == -1 || IsCustomSpanNode(span)) &&
-            span->position != -1) {
+        if (span->position - 1 >= start && span->placeholderIndex == -1 && span->position != -1) {
             auto wideString = StringUtils::ToWstring(span->GetSpanContent());
             auto max = std::min(span->position, end);
             auto min = std::max(start, tag);
             value += StringUtils::ToString(
                 wideString.substr(std::clamp((min - tag), 0, static_cast<int32_t>(wideString.length())),
                     std::clamp((max - min), 0, static_cast<int32_t>(wideString.length()))));
+        } else if (span->position - 1 >= start && span->position != -1) {
+            // image span or custom span (span->placeholderIndex != -1)
+            value += " ";
         }
         tag = span->position == -1 ? tag + 1 : span->position;
         if (span->position >= end) {
@@ -2501,15 +2496,14 @@ void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanH
                 isSpanHasClick = true;
             }
             childNodes_.push_back(current.node);
-        }
-        if (tag == V2::PLACEHOLDER_SPAN_ETS_TAG) {
-            continue;
-        }
-        if (tag == V2::CUSTOM_SPAN_NODE_ETS_TAG) {
+        } else if (tag == V2::CUSTOM_SPAN_NODE_ETS_TAG) {
             placeholderCount_++;
             AddChildSpanItem(current.node);
             dataDetectorAdapter_->textForAI_.append("\n");
             childNodes_.emplace_back(current.node);
+        }
+        if (tag == V2::PLACEHOLDER_SPAN_ETS_TAG) {
+            continue;
         }
         const auto& nextChildren = current.node->GetChildren();
         if (nextChildren.empty()) {

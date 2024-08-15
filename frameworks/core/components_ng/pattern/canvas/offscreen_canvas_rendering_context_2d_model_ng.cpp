@@ -61,7 +61,7 @@ void OffscreenCanvasRenderingContext2DModelNG::SetFontWeight(const FontWeight& w
     pattern_->SetFontWeight(weight);
 }
 
-void OffscreenCanvasRenderingContext2DModelNG::SetFontStyle(const FontStyle& fontStyle)
+void OffscreenCanvasRenderingContext2DModelNG::SetFontStyle(const Ace::FontStyle& fontStyle)
 {
     CHECK_NULL_VOID(pattern_);
     pattern_->SetFontStyle(fontStyle);

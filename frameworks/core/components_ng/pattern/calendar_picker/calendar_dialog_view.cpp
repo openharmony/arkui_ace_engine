@@ -397,6 +397,11 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarNode(const RefPtr<FrameNode>
             calendarNodeId, settingData, changeEvent == dialogEvent.end() ? nullptr : changeEvent->second);
         auto monthLayoutProperty = monthFrameNode->GetLayoutProperty();
         CHECK_NULL_RETURN(monthLayoutProperty, nullptr);
+        if (i == CURRENT_MONTH_INDEX) {
+            auto currentPattern = monthFrameNode->GetPattern<CalendarMonthPattern>();
+            CHECK_NULL_RETURN(currentPattern, nullptr);
+            currentPattern->SetIsFirstEnter(true);
+        }
         monthLayoutProperty->UpdateLayoutDirection(textDirection);
         monthFrameNode->MountToParent(swiperNode);
         monthFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);

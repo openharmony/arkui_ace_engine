@@ -550,6 +550,7 @@ HWTEST_F(GestureEventHubTestNg, GetUnifiedData001, TestSize.Level1)
     auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     EXPECT_TRUE(gestureEventHub);
 
+    gestureEventHub->InitDragDropEvent();
     /**
      * @tc.steps: step2. set OnDragStart for eventHub
      *            case: user not set onDragStart callback function
@@ -624,6 +625,7 @@ HWTEST_F(GestureEventHubTestNg, GetUnifiedData002, TestSize.Level1)
      *            case: user do not set unifiedData and extraInfo
      * @tc.expected: unifiedData is not null, extraInfo is not empty.
      */
+    gestureEventHub->InitDragDropEvent();
     DragDropInfo dragDropInfo;
     gestureEventHub->GetUnifiedData("", dragDropInfo, dragEvent);
     EXPECT_TRUE(dragEvent->GetData());

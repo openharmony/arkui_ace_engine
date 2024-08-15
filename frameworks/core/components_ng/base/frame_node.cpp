@@ -3177,6 +3177,23 @@ void FrameNode::OnAccessibilityEvent(
     }
 }
 
+void FrameNode::OnAccessibilityEvent(
+    AccessibilityEventType eventType, std::string textAnnouncedForAccessibility)
+{
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        if (eventType != AccessibilityEventType::ANNOUNCE_FOR_ACCESSIBILITY) {
+            return;
+        }
+        AccessibilityEvent event;
+        event.type = eventType;
+        event.nodeId = GetAccessibilityId();
+        event.textAnnouncedForAccessibility = textAnnouncedForAccessibility;
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SendEventToAccessibilityWithNode(event, Claim(this));
+    }
+}
+
 void FrameNode::OnRecycle()
 {
     for (const auto& destroyCallback : destroyCallbacks_) {
@@ -3777,12 +3794,9 @@ void FrameNode::ProcessAccessibilityVirtualNode()
     auto virtualNode = accessibilityProperty->GetAccessibilityVirtualNode();
     auto virtualFrameNode = AceType::DynamicCast<NG::FrameNode>(virtualNode);
     if (virtualFrameNode) {
-        auto pipeline = GetContext();
-        CHECK_NULL_VOID(pipeline);
         auto constraint = GetLayoutConstraint();
         virtualFrameNode->ApplyConstraint(constraint);
         ProcessOffscreenNode(virtualFrameNode);
-        pipeline->SendUpdateVirtualNodeFocusEvent();
     }
 }
 
@@ -3857,6 +3871,9 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
     }
     layoutAlgorithm_.Reset();
     ProcessAccessibilityVirtualNode();
+    auto pipeline = GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    pipeline->SendUpdateVirtualNodeFocusEvent();
     return true;
 }
 

@@ -1155,12 +1155,11 @@ void JSRichEditor::JsDataDetectorConfig(const JSCallbackInfo& info)
         return;
     }
 
-    std::string textTypes;
-    std::function<void(const std::string&)> onResult;
-    if (!ParseDataDetectorConfig(info, textTypes, onResult)) {
+    TextDetectConfig textDetectConfig;
+    if (!ParseDataDetectorConfig(info, textDetectConfig)) {
         return;
     }
-    RichEditorModel::GetInstance()->SetTextDetectConfig(textTypes, std::move(onResult));
+    RichEditorModel::GetInstance()->SetTextDetectConfig(textDetectConfig);
 }
 
 void JSRichEditor::SetCaretColor(const JSCallbackInfo& info)
@@ -1773,7 +1772,12 @@ void JSRichEditorController::GetSpansInfo(const JSCallbackInfo& args)
     }
     auto controller = controllerWeak_.Upgrade();
     auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
-    CHECK_NULL_VOID(richEditorController);
+    if (!richEditorController) {
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "GetSpansInfo failed, richEditorController is null");
+        JSRef<JSArray> spanObjectArray = JSRef<JSArray>::New();
+        args.SetReturnValue(JSRef<JSVal>::Cast(spanObjectArray));
+        return;
+    }
     SelectionInfo value = richEditorController->GetSpansInfo(start, end);
     args.SetReturnValue(CreateJSSpansInfo(value));
 }

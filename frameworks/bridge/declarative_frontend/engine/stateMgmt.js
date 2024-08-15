@@ -4245,6 +4245,20 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         this.dirtDescendantElementIds_.delete(elmtId);
         
     }
+    /**
+     * for C++ to judge whether a CustomNode has updateFunc with specified nodeId.
+     * use same judgement with UpdateElement, to make sure it can rerender if return true.
+     *
+     * @param elmtId query ID
+     *
+     * framework internal function
+     */
+    hasNodeUpdateFunc(elmtId) {
+        const entry = this.updateFuncByElmtId.get(elmtId);
+        const updateFunc = entry ? entry.getUpdateFunc() : undefined;
+        // if this component does not have updateFunc for elmtId, return false.
+        return typeof updateFunc === 'function';
+    }
     // KEEP
     static pauseRendering() {
         PUV2ViewBase.renderingPaused = true;
@@ -8799,7 +8813,12 @@ class MonitorV2 {
         ObserveV2.getObserve().startRecordDependencies(this, this.watchId_);
         let ret = false;
         this.values_.forEach((item) => {
-            let dirty = item.setValue(isInit, this.analysisProp(isInit, item));
+            const [success, value] = this.analysisProp(isInit, item);
+            if (!success) {
+                
+                return;
+            }
+            let dirty = item.setValue(isInit, value);
             ret = ret || dirty;
         });
         ObserveV2.getObserve().stopRecordDependencies();
@@ -8815,10 +8834,10 @@ class MonitorV2 {
             }
             else {
                 isInit && stateMgmtConsole.warn(`watch prop ${monitoredValue.path} initialize not found, make sure it exists!`);
-                return undefined;
+                return [false, undefined];
             }
         }
-        return obj;
+        return [true, obj];
     }
     static clearWatchesFromTarget(target) {
         var _a;
@@ -9541,7 +9560,7 @@ const Consumer = (aliasName) => {
         // and @Consumer gets connected to @provide counterpart
         ProviderConsumerUtilV2.addProvideConsumeVariableDecoMeta(proto, varName, searchForProvideWithName, '@Consumer');
         const providerName = (aliasName === undefined || aliasName === null ||
-            (typeof aliasName === "string" && aliasName.trim() === "")) ? varName : aliasName;
+            (typeof aliasName === 'string' && aliasName.trim() === '')) ? varName : aliasName;
         let providerInfo;
         Reflect.defineProperty(proto, varName, {
             get() {
@@ -10150,7 +10169,7 @@ class __Repeat {
         const typeGenFuncSafe = (item, index) => {
             const itemType = typeGenFunc(item, index);
             const itemFunc = this.config.itemGenFuncs[itemType];
-            if (typeof itemFunc != 'function') {
+            if (typeof itemFunc !== 'function') {
                 stateMgmtConsole.applicationError(`Repeat with virtual scroll. Missing Repeat.template for id '${itemType}'`);
                 return '';
             }

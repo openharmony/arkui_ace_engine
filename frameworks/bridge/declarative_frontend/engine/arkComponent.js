@@ -7596,12 +7596,17 @@ class RichEditorDataDetectorConfigModifier extends ModifierWithKey {
     if (reset) {
       getUINativeModule().richEditor.resetDataDetectorConfig(node);
     } else {
-      getUINativeModule().richEditor.setDataDetectorConfig(node, this.value.types, this.value.onDetectResultUpdate);
+      getUINativeModule().richEditor.setDataDetectorConfig(node, this.value.types, this.value.onDetectResultUpdate,
+        this.value.color, this.value.decorationType, this.value.decorationColor, this.value.decorationStyle);
     }
   }
   checkObjectDiff() {
     return !isBaseOrResourceEqual(this.stageValue.types, this.value.types) ||
-    !isBaseOrResourceEqual(this.stageValue.onDetectResultUpdate, this.value.onDetectResultUpdate);
+    !isBaseOrResourceEqual(this.stageValue.onDetectResultUpdate, this.value.onDetectResultUpdate) ||
+    !isBaseOrResourceEqual(this.stageValue.color, this.value.color) ||
+    !isBaseOrResourceEqual(this.stageValue.decorationType, this.value.decorationType) ||
+    !isBaseOrResourceEqual(this.stageValue.decorationColor, this.value.decorationColor) ||
+    !isBaseOrResourceEqual(this.stageValue.decorationStyle, this.value.decorationStyle);
   }
 }
 RichEditorDataDetectorConfigModifier.identity = Symbol('richEditorDataDetectorConfig');
@@ -7844,6 +7849,12 @@ class ArkRichEditorComponent extends ArkComponent {
     let detectorConfig = new TextDataDetectorConfig();
     detectorConfig.types = config.types;
     detectorConfig.onDetectResultUpdate = config.onDetectResultUpdate;
+    detectorConfig.color = config.color;
+    if (config.decoration) {
+      detectorConfig.decorationType = config.decoration.type;
+      detectorConfig.decorationColor = config.decoration.color;
+      detectorConfig.decorationStyle = config.decoration.style;
+    }
     modifierWithKey(this._modifiersWithKeys, RichEditorDataDetectorConfigModifier.identity, RichEditorDataDetectorConfigModifier, detectorConfig);
     return this;
   }
@@ -11031,12 +11042,17 @@ class TextDataDetectorConfigModifier extends ModifierWithKey {
     if (reset) {
       getUINativeModule().text.resetDataDetectorConfig(node);
     } else {
-      getUINativeModule().text.setDataDetectorConfig(node, this.value.types, this.value.onDetectResultUpdate);
+      getUINativeModule().text.setDataDetectorConfig(node, this.value.types, this.value.onDetectResultUpdate,
+        this.value.color, this.value.decorationType, this.value.decorationColor, this.value.decorationStyle);
     }
   }
   checkObjectDiff() {
     return !isBaseOrResourceEqual(this.stageValue.types, this.value.types) ||
-    !isBaseOrResourceEqual(this.stageValue.onDetectResultUpdate, this.value.onDetectResultUpdate);
+    !isBaseOrResourceEqual(this.stageValue.onDetectResultUpdate, this.value.onDetectResultUpdate) ||
+    !isBaseOrResourceEqual(this.stageValue.color, this.value.color) ||
+    !isBaseOrResourceEqual(this.stageValue.decorationType, this.value.decorationType) ||
+    !isBaseOrResourceEqual(this.stageValue.decorationColor, this.value.decorationColor) ||
+    !isBaseOrResourceEqual(this.stageValue.decorationStyle, this.value.decorationStyle);
   }
 }
 TextDataDetectorConfigModifier.identity = Symbol('textDataDetectorConfig');
@@ -11137,6 +11153,12 @@ class ArkTextComponent extends ArkComponent {
     let detectorConfig = new TextDataDetectorConfig();
     detectorConfig.types = config.types;
     detectorConfig.onDetectResultUpdate = config.onDetectResultUpdate;
+    detectorConfig.color = config.color;
+    if (config.decoration) {
+      detectorConfig.decorationType = config.decoration.type;
+      detectorConfig.decorationColor = config.decoration.color;
+      detectorConfig.decorationStyle = config.decoration.style;
+    }
     modifierWithKey(this._modifiersWithKeys, TextDataDetectorConfigModifier.identity, TextDataDetectorConfigModifier, detectorConfig);
     return this;
   }
@@ -14748,10 +14770,15 @@ class TextDataDetectorConfig {
   constructor() {
     this.types = undefined;
     this.onDetectResultUpdate = undefined;
+    this.color = undefined;
+    this.decorationType = undefined;
+    this.decorationColor = undefined;
+    this.decorationStyle = undefined;
   }
   isEqual(another) {
-    return (this.types === another.types) &&
-      (this.onDetectResultUpdate === another.onDetectResultUpdate);
+    return (this.types === another.types) && (this.onDetectResultUpdate === another.onDetectResultUpdate) &&
+    (this.color === another.color) && (this.decorationType === another.decorationType) &&
+    (this.decorationColor=== another.decorationColor) && (this.decorationStyle === another.decorationStyle);
   }
 }
 
@@ -25060,6 +25087,19 @@ class ListFrictionModifier extends ModifierWithKey {
   }
 }
 ListFrictionModifier.identity = Symbol('listFriction');
+class ListMaintainVisibleContentPositionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().list.resetListMaintainVisibleContentPosition(node);
+    } else {
+      getUINativeModule().list.setListMaintainVisibleContentPosition(node, this.value);
+    }
+  }
+}
+ListMaintainVisibleContentPositionModifier.identity = Symbol('listMaintainVisibleContentPosition');
 class ListNestedScrollModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -25351,6 +25391,11 @@ class ArkListComponent extends ArkComponent {
   }
   friction(value) {
     modifierWithKey(this._modifiersWithKeys, ListFrictionModifier.identity, ListFrictionModifier, value);
+    return this;
+  }
+  maintainVisibleContentPosition(value) {
+    modifierWithKey(this._modifiersWithKeys, ListMaintainVisibleContentPositionModifier.identity,
+      ListMaintainVisibleContentPositionModifier, value);
     return this;
   }
   clip(value) {

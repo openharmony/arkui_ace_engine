@@ -171,7 +171,7 @@ class ObserveV2 {
     const targetSet = new Set<Object>();
     this.id2targets_[id]?.forEach((weak : WeakRef<Object>) => {
       if (weak.deref() instanceof Object) {
-        targetSet.add(weak.deref())
+        targetSet.add(weak.deref());
       }
     });
 

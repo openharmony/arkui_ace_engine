@@ -16,8 +16,6 @@
 #include "interfaces/inner_api/ace/uicast/uicast_subscriber.h"
 
 #include <dlfcn.h>
-#include <string>
-#include <unistd.h>
 
 #include "arkui_log.h"
 

@@ -26,6 +26,7 @@
 #include "interfaces/inner_api/ace/navigation_controller.h"
 
 #include "base/memory/ace_type.h"
+#include "base/view_data/hint_to_type_wrap.h"
 #include "base/resource/asset_manager.h"
 #include "base/resource/shared_image_manager.h"
 #include "base/thread/task_executor.h"
@@ -94,9 +95,10 @@ public:
         return false;
     }
 
-    virtual AceAutoFillType PlaceHolderToType(const std::string& onePlaceHolder)
+    virtual HintToTypeWrap PlaceHolderToType(const std::string& onePlaceHolder)
     {
-        return AceAutoFillType::ACE_UNSPECIFIED;
+        HintToTypeWrap hintToTypeWrap;
+        return hintToTypeWrap;
     }
 
     // Get the instance id of this container
