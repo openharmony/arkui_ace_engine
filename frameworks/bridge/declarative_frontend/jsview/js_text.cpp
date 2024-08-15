@@ -691,7 +691,6 @@ void JSText::Create(const JSCallbackInfo& info)
         }
     } else {
         ParseJsString(args, data);
-        data = TextEmojiProcessor::TryClampU8stringIllegalEmoji(data);
         TextModel::GetInstance()->Create(data);
     }
 

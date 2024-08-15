@@ -64,7 +64,7 @@ public:
     static TextEmojiSubStringRange CalSubWstringRange(int32_t index, int32_t length,
         const std::wstring& content, bool includeHalf);
     static int32_t GetCharacterNum(const std::string& content);
-    static std::string TryClampU8stringIllegalEmoji(const std::string& value);
+    static std::string ConvertU8stringUnpairedSurrogates(const std::string& value);
 
 private:
     static void OnBeginState(uint32_t codePoint, int& state, int& deleteCount, bool isBackward);

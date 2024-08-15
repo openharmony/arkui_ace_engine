@@ -19,6 +19,7 @@
 
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
+#include "unicode/unistr.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -44,7 +45,6 @@ constexpr int32_t STATE_IN_TAG_QUEUE = 12;
 constexpr int32_t STATE_EVEN_RIS = 13;
 constexpr int32_t STATE_ODD_RIS = 14;
 constexpr int32_t STATE_FINISHED = 20;
-constexpr int32_t EMOJI_CHAR_U8_LENGTH = 3;
 
 } // namespace
 
@@ -291,34 +291,13 @@ TextEmojiSubStringRange TextEmojiProcessor::CalSubWstringRange(
     return result;
 }
 
-std::string TextEmojiProcessor::TryClampU8stringIllegalEmoji(const std::string& value)
+std::string TextEmojiProcessor::ConvertU8stringUnpairedSurrogates(const std::string& value)
 {
-    if (value.length() < EMOJI_CHAR_U8_LENGTH) {
-        return value;
-    }
-    std::string result = value;
-    if (StringUtils::ToWstring(result).length() != 0) {
-        return result;
-    }
-    // try clamp right illegal emoji
-    result = value.substr(0, result.length() - EMOJI_CHAR_U8_LENGTH);
-    if (StringUtils::ToWstring(result).length() != 0) {
-        return result;
-    }
-    // try clamp left illegal emoji
-    result = value.substr(EMOJI_CHAR_U8_LENGTH, result.length());
-    if (StringUtils::ToWstring(result).length() != 0) {
-        return result;
-    }
-    // try clamp left and right illegal emoji
-    if (value.length() < EMOJI_CHAR_U8_LENGTH + EMOJI_CHAR_U8_LENGTH) {
-        return value;
-    }
-    result = value.substr(EMOJI_CHAR_U8_LENGTH, result.length() - EMOJI_CHAR_U8_LENGTH);
-    if (StringUtils::ToWstring(result).length() != 0) {
-        return result;
-    }
-    return "";
+    // Unpaired surrogates are replaced with U+FFFD
+    icu::UnicodeString ustring = icu::UnicodeString::fromUTF8(value);
+    std::string result;
+    ustring.toUTF8String(result);
+    return result;
 }
 
 std::u16string TextEmojiProcessor::U32ToU16string(const std::u32string& u32str)
