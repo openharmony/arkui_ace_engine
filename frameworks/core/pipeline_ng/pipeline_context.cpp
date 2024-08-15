@@ -554,6 +554,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     UIObserverHandler::GetInstance().HandleLayoutDoneCallBack();
     // flush correct rect again
     taskScheduler_->FlushPersistAfterLayoutTask();
+    taskScheduler_->FlushLastestFrameLayoutFinishTask();
     taskScheduler_->FinishRecordFrameInfo();
     FlushNodeChangeFlag();
     FlushAnimationClosure();
@@ -3572,6 +3573,11 @@ void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task, bool isFl
 void PipelineContext::AddPersistAfterLayoutTask(std::function<void()>&& task)
 {
     taskScheduler_->AddPersistAfterLayoutTask(std::move(task));
+}
+
+void PipelineContext::AddLastestFrameLayoutFinishTask(std::function<void()>&& task)
+{
+    taskScheduler_->AddLastestFrameLayoutFinishTask(std::move(task));
 }
 
 void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)
