@@ -85,6 +85,9 @@ private:
     void CalcBarrier(LayoutWrapper* layoutWrapper);
     bool IsGuideline(const std::string& id);
     bool IsBarrier(const std::string& id);
+    bool IsGuidelineOrBarrier(const std::string& id);
+    std::optional<float>& GetMarginLeftWithoutDirection(
+        TextDirection textDirection, const std::unique_ptr<MarginPropertyF>& marginProp);
     BarrierRect GetBarrierRectByReferencedIds(const std::vector<std::string>& referencedIds);
     void MeasureBarrier(const std::string& barrierName);
     void CheckNodeInHorizontalChain(std::string& currentNode, std::string& nextNode,
@@ -118,6 +121,7 @@ private:
     float CalcHorizontalOffsetAlignRight(const HorizontalAlign& alignRule, float& anchorWidth, float& flexItemWidth);
     float CalcHorizontalOffset(
         AlignDirection alignDirection, const AlignRule& alignRule, float containerWidth, const std::string& nodeName);
+    float CalcAnchorWidth(bool anchorIsContainer, float& containerWidth, const std::string& anchor);
     float CalcVerticalOffsetAlignTop(const VerticalAlign& alignRule, float& anchorHeight);
     float CalcVerticalOffsetAlignCenter(const VerticalAlign& alignRule, float& anchorHeight, float& flexItemHeight);
     float CalcVerticalOffsetAlignBottom(const VerticalAlign& alignRule, float& anchorHeight, float& flexItemHeight);
