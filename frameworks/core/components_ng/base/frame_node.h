@@ -1161,6 +1161,8 @@ private:
     CacheVisibleRectResult CalculateCacheVisibleRect(CacheVisibleRectResult& parentCacheVisibleRect,
         const RefPtr<FrameNode>& parentUi, RectF& rectToParent, VectorF scale, uint64_t timestamp);
 
+    void NotifyConfigurationChangeNdk(const ConfigurationChange& configurationChange);
+
     bool AllowVisibleAreaCheck() const;
 
     // sort in ZIndex.
