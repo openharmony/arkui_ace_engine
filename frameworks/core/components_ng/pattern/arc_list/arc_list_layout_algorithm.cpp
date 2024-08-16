@@ -50,10 +50,10 @@ static constexpr float FLOAT_TWO = 2.0f;
 } // namespace
 
 // map data from UX, mark for scale ratio according to distance between item center and list center
-ArcListLayoutAlgorithm::CenterPos2ScaleMap ArcListLayoutAlgorithm::centerPos2ScaleMap_ = { {224, 0.56}, {192, 0.7},
+ArcListLayoutAlgorithm::CenterPos2ScaleMap ArcListLayoutAlgorithm::centerPos2ScaleMap_ = { { 224, 0.56 }, { 192, 0.7 },
     { 141, 0.78 }, { 118, 0.88 }, { 94, 0.97 }, { 70.6, 1.03 }, { 47, 1.07 }, { 23.5, 1.075 }, { 0, 1.08 },
-    { -23, 1.075 }, { -45, 1.07 }, { -66, 1.03 }, { -89, 0.98 }, { -112, 0.9 }, { -132, 0.82 }, {-192, 0.7},
-    {-224, 0.56} };
+    { -23, 1.075 }, { -45, 1.07 }, { -66, 1.03 }, { -89, 0.98 }, { -112, 0.9 }, { -132, 0.82 }, { -192, 0.7 },
+    { -224, 0.56 } };
 
 float ArcListLayoutAlgorithm::GetNearScale(float pos)
 {

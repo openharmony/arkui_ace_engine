@@ -221,8 +221,7 @@ private:
     void HandleBlurStyleTask();
     void SetFocusStyle();
     void ClearFocusStyle();
-    void SetFocusIconStyle(RefPtr<SelectTheme> selectTheme);
-    void ClearFocusIconStyle(RefPtr<SelectTheme> selectTheme);
+    void ModFocusIconStyle(RefPtr<SelectTheme> selectTheme, bool focusedFlag);
     void InitFocusEvent();
     void AddIsFocusActiveUpdateEvent();
     void RemoveIsFocusActiveUpdateEvent();

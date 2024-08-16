@@ -49,7 +49,9 @@ ArcIndexerContentModifier::ArcIndexerContentModifier()
 
 void ArcIndexerContentModifier::onDraw(DrawingContext& context)
 {
-    DrawArc(context);
+    if (sweepAngle_ > 0) {
+        DrawArc(context);
+    }
 }
 
 void ArcIndexerContentModifier::DrawArc(DrawingContext& context)

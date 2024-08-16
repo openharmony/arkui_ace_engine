@@ -83,11 +83,7 @@ RefPtr<SearchNode> SearchModelNG::CreateSearchNode(int32_t nodeId, const std::op
     bool hasTextFieldNode = frameNode->HasTextFieldNode();
     bool hasButtonNode = frameNode->HasButtonNode();
     bool hasCancelButtonNode = frameNode->HasCancelButtonNode();
-
-    if (!hasTextFieldNode) {
-        CreateTextField(frameNode, placeholder, value, hasTextFieldNode);
-    }
-
+    CreateTextField(frameNode, placeholder, value, hasTextFieldNode);
     std::string src;
     if (icon.has_value()) {
         src = icon.value();
@@ -672,7 +668,6 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const 
         V2::SEARCH_Field_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SearchTextFieldPattern>(); });
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     auto textFieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
-    
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     auto textValue = pattern->GetTextValue();
     if (textFieldLayoutProperty) {
@@ -683,7 +678,7 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const 
         textFieldLayoutProperty->UpdatePlaceholderTextColor(searchTheme->GetPlaceholderColor());
         textFieldLayoutProperty->UpdateMaxLines(1);
         textFieldLayoutProperty->UpdatePlaceholderMaxLines(1);
-        if (!textFieldPaintProperty || !textFieldPaintProperty->HasTextColorFlagByUser()) {
+        if (!hasTextFieldNode) {
             textFieldLayoutProperty->UpdateTextColor(searchTheme->GetTextColor());
         }
     }
@@ -746,6 +741,9 @@ void SearchModelNG::CreateButton(const RefPtr<SearchNode>& parentNode, bool hasB
     auto buttonRenderContext = frameNode->GetRenderContext();
     buttonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     buttonRenderContext->UpdateClipEdge(true);
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    CHECK_NULL_VOID(buttonPattern);
+    buttonPattern->SetApplyShadow(false);
     auto textFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
     std::string defaultText = "Search";

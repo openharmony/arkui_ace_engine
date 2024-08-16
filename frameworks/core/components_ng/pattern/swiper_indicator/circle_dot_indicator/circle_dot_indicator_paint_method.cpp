@@ -155,11 +155,11 @@ void CircleDotIndicatorPaintMethod::PaintPressIndicator(const PaintWrapper* pain
     itemSizes.emplace_back(ITEM_DILATE_MINI_PADDING);
 
     longPointAngle_ = CalculatePointAngle(itemSizes, currentIndex_);
-    if (touchBottomType_ != TouchBottomType::NONE) {
-        UpdateBackground(paintWrapper);
-        return;
-    }
     if (circleDotIndicatorModifier_->GetIsPressed()) {
+        if (touchBottomType_ != TouchBottomType::NONE) {
+            UpdateBackground(paintWrapper);
+            return;
+        }
         circleDotIndicatorModifier_->PlayIndicatorAnimation(vectorBlackPointAngle_, vectorBlackPointRadius_,
                                                             longPointAngle_, gestureState_);
     } else {

@@ -50,12 +50,13 @@ public:
         auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipelineContext, focusPattern);
         auto theme = pipelineContext->GetTheme<AppTheme>();
-        CHECK_NULL_RETURN(pipelineContext, focusPattern);
+        CHECK_NULL_RETURN(theme, focusPattern);
         FocusPaintParam focusPaintParam;
         if (theme->IsFocusBoxGlow()) {
             focusPaintParam.SetPaintColor(theme->GetFocusBorderColor());
             focusPaintParam.SetPaintWidth(theme->GetFocusBorderWidth());
             focusPaintParam.SetFocusBoxGlow(theme->IsFocusBoxGlow());
+            focusPaintParam.SetFocusPadding(focusPadding_);
             focusPattern.SetFocusPaintParams(focusPaintParam);
         }
         return focusPattern;
@@ -291,6 +292,7 @@ private:
 
     RefPtr<InputEvent> wrapperMouseEvent_;
 
+    Dimension focusPadding_ = 0.0_vp;
     bool isTextFadeOut_ = false;
     bool isSelected_ = false;
     bool isSubMenuShowed_ = false;
