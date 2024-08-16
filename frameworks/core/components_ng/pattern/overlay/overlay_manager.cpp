@@ -4081,6 +4081,7 @@ void OverlayManager::InitSheetMask(
     CHECK_NULL_VOID(pipeline);
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
+    sheetMaskColor_ = sheetStyle.maskColor.value_or(sheetTheme->GetMaskColor());
     auto sheetLayoutProps = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(sheetLayoutProps);
     maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMDEFAULT);
@@ -4892,10 +4893,21 @@ void OverlayManager::PlaySheetMaskTransition(RefPtr<FrameNode> maskNode, bool is
         AceType::MakeRefPtr<InterpolatingSpring>(0.0f, CURVE_MASS, CURVE_STIFFNESS, CURVE_DAMPING);
     option.SetCurve(curve);
     option.SetFillMode(FillMode::FORWARDS);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    CHECK_NULL_VOID(sheetTheme);
     auto context = maskNode->GetRenderContext();
     CHECK_NULL_VOID(context);
+    auto backgroundColor = sheetMaskColor_.value_or(sheetTheme->GetMaskColor());
     if (isTransitionIn) {
-        context->OpacityAnimation(option, 0.0, 1.0);
+        context->UpdateBackgroundColor(backgroundColor.ChangeOpacity(0.0f));
+        AnimationUtils::Animate(
+            option,
+            [context, backgroundColor]() {
+                CHECK_NULL_VOID(context);
+                context->UpdateBackgroundColor(backgroundColor);
+            });
     } else {
         auto iter = sheetMaskClickEventMap_.find(maskNode->GetId());
         if (iter != sheetMaskClickEventMap_.end()) {
@@ -4903,18 +4915,14 @@ void OverlayManager::PlaySheetMaskTransition(RefPtr<FrameNode> maskNode, bool is
             CHECK_NULL_VOID(eventConfirmHub);
             eventConfirmHub->RemoveClickEvent(iter->second);
         }
-        option.SetOnFinishEvent(
-            [rootWeak = rootNodeWeak_, maskNodeWK = WeakClaim(RawPtr(maskNode)),
-                    weakOverlayManager = WeakClaim(this)] {
-                auto mask = maskNodeWK.Upgrade();
-                auto overlayManager = weakOverlayManager.Upgrade();
-                CHECK_NULL_VOID(mask && overlayManager);
-
-                auto root = overlayManager->FindWindowScene(mask);
-                CHECK_NULL_VOID(root);
-            });
         maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
-        context->OpacityAnimation(option, 1.0, 0.0);
+        context->UpdateBackgroundColor(backgroundColor);
+        AnimationUtils::Animate(
+            option,
+            [context, backgroundColor]() {
+                CHECK_NULL_VOID(context);
+                context->UpdateBackgroundColor(backgroundColor.ChangeOpacity(0.0f));
+            });
     }
 }
 
