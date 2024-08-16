@@ -242,3 +242,4 @@ HWTEST_F(MenuLayout3TestNg, CheckNeedExpandContent001, TestSize.Level1)
     menuItemLayoutAlgorithm_->CheckNeedExpandContent(&layoutWrapper, childConstraint);
     ASSERT_TRUE(menuItemLayoutAlgorithm_->needExpandContent_ == false);
 }
+} // namespace OHOS::Ace::NG

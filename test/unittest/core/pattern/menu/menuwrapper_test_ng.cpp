@@ -1129,4 +1129,69 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg021, TestSize.Level1)
     wrapperPattern->OnTouchEvent(info);
     EXPECT_EQ(wrapperPattern->currentTouchItem_, 1);
 }
+
+/**
+ * @tc.name: MenuWrapperPatternTestNg022
+ * @tc.desc: Verify OnTouchEvent when TouchType is up.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg022, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::SELECT_OVERLAY_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+
+    MenuModelNG model;
+    model.Create();
+    auto menu = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(menu, nullptr);
+
+    menu->MountToParent(wrapperNode);
+
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
+    menuItemNode->MountToParent(menu);
+
+    TouchEventInfo info(MENU_TOUCH_EVENT_TYPE);
+    TouchLocationInfo locationInfo(TARGET_ID);
+    locationInfo.SetTouchType(TouchType::DOWN);
+    info.touches_.emplace_back(locationInfo);
+
+    wrapperPattern->currentTouchItem_ = menuItemNode;
+    wrapperPattern->menuStatus_ = MenuStatus::ON_HIDE_ANIMATION;
+    wrapperPattern->OnTouchEvent(info);
+    EXPECT_EQ(wrapperPattern->IsHide(), true);
+}
+
+/**
+ * @tc.name: MenuWrapperPatternTestNg023
+ * @tc.desc: Verify OnTouchEvent when TouchType is up.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg023, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::SELECT_OVERLAY_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+
+    MenuModelNG model;
+    model.Create();
+    auto menu = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(menu, nullptr);
+
+    menu->MountToParent(wrapperNode);
+
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
+    menuItemNode->MountToParent(menu);
+
+    TouchEventInfo info(MENU_TOUCH_EVENT_TYPE);
+    TouchLocationInfo locationInfo(TARGET_ID);
+    locationInfo.SetTouchType(TouchType::UP);
+    info.touches_.emplace_back(locationInfo);
+
+    wrapperPattern->currentTouchItem_ = menuItemNode;
+    wrapperPattern->OnTouchEvent(info);
+    EXPECT_EQ(wrapperPattern->IsHide(), false);
+}
 } // namespace OHOS::Ace::NG
