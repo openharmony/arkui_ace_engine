@@ -443,6 +443,10 @@ void CalendarMonthPattern::InitializeCalendarAccessibility()
     accessibilityManager->RegisterAccessibilitySAObserverCallback(host->GetAccessibilityId(),
         accessibilitySAObserverCallback_);
     if (margin_ == 0) {
+        auto paintProperty = host->GetPaintProperty<CalendarPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        dayHeight_ = paintProperty->GetDayHeight().value_or(Dimension(0.0f)).ConvertToPx();
+        dayWidth_ = paintProperty->GetDayWidth().value_or(Dimension(0.0f)).ConvertToPx();
         RefPtr<CalendarTheme> theme = pipeline->GetTheme<CalendarTheme>();
         CHECK_NULL_VOID(theme);
         auto sliderTheme = pipeline->GetTheme<SliderTheme>();
@@ -455,9 +459,12 @@ void CalendarMonthPattern::InitializeCalendarAccessibility()
 
 void CalendarMonthPattern::InitCurrentVirtualNode()
 {
-    if ((!isInitVirtualNode_ || buttonAccessibilityNodeVec_.size() != obtainedMonth_.days.size()) &&
+    auto deviceOrientation = SystemProperties::GetDeviceOrientation();
+    if ((!isInitVirtualNode_ || buttonAccessibilityNodeVec_.size() != obtainedMonth_.days.size() ||
+        deviceOrientation_ != deviceOrientation) &&
         monthState_ == MonthState::CUR_MONTH) {
         isInitVirtualNode_ = InitCalendarVirtualNode();
+        deviceOrientation_ = deviceOrientation;
     } else {
         FireModifyAccessibilityVirtualNode(obtainedMonth_);
     }
@@ -472,6 +479,15 @@ void CalendarMonthPattern::ClearCalendarVirtualNode()
     auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SaveAccessibilityVirtualNode(nullptr);
+}
+
+void CalendarMonthPattern::SetLineNodeSize(RefPtr<FrameNode> lineNode)
+{
+    CHECK_NULL_VOID(lineNode);
+    auto layoutProperty = lineNode->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(dayWidth_ * CALENDAR_WEEK_DAYS), CalcLength(dayHeight_ * DAILY_FIVE_ROWSPACE)));
 }
 
 bool CalendarMonthPattern::InitCalendarVirtualNode()
@@ -491,6 +507,7 @@ bool CalendarMonthPattern::InitCalendarVirtualNode()
         buttonAccessibilityNodeVec_.emplace_back(buttonNode);
         ChangeVirtualNodeContent(day);
     }
+    SetLineNodeSize(lineNode);
     SetCalendarAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
     accessibilityProperty->SetAccessibilityText(" ");
     auto virtualFrameNode = AceType::DynamicCast<NG::FrameNode>(lineNode);
