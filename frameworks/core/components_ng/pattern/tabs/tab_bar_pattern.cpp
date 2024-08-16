@@ -1128,7 +1128,7 @@ void TabBarPattern::ClickTo(const RefPtr<FrameNode>& host, int32_t index)
 
 void TabBarPattern::HandleBottomTabBarChange(int32_t index)
 {
-    AnimationUtils::CloseImplicitAnimation();
+    AnimationUtils::StopAnimation(maskAnimation_);
     auto preIndex = GetImageColorOnIndex().value_or(indicator_);
     if (preIndex == index) {
         return;
@@ -1313,37 +1313,42 @@ void TabBarPattern::PlayMaskAnimation(float selectedImageSize,
     option.SetDuration(MASK_ANIMATION_DURATION);
     option.SetCurve(curve);
 
-    AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), [weak = AceType::WeakClaim(this),
-        selectedIndex, unselectedIndex]() {
-        auto tabBar = weak.Upgrade();
-        if (tabBar) {
-            auto host = tabBar->GetHost();
-            CHECK_NULL_VOID(host);
-            MaskAnimationFinish(host, selectedIndex, true);
-            MaskAnimationFinish(host, unselectedIndex, false);
-        }
-    });
-    AnimationUtils::AddKeyFrame(HALF_PROGRESS, [weak = AceType::WeakClaim(this), selectedIndex, unselectedIndex,
-        selectedImageSize, originalSelectedMaskOffset, unselectedImageSize, originalUnselectedMaskOffset]() {
-        auto tabBar = weak.Upgrade();
-        if (tabBar) {
-            tabBar->ChangeMask(selectedIndex, selectedImageSize, originalSelectedMaskOffset, FULL_OPACITY,
-                INVALID_RATIO, true);
-            tabBar->ChangeMask(unselectedIndex, unselectedImageSize, originalUnselectedMaskOffset, NEAR_FULL_OPACITY,
-                INVALID_RATIO, false);
-        }
-    });
-    AnimationUtils::AddKeyFrame(FULL_PROGRESS, [weak = AceType::WeakClaim(this), selectedIndex, unselectedIndex,
-        selectedImageSize, originalSelectedMaskOffset, unselectedImageSize, originalUnselectedMaskOffset]() {
-        auto tabBar = weak.Upgrade();
-        if (tabBar) {
-            tabBar->ChangeMask(selectedIndex, selectedImageSize, originalSelectedMaskOffset, FULL_OPACITY,
-                FULL_MASK_RADIUS_RATIO, true);
-            tabBar->ChangeMask(unselectedIndex, unselectedImageSize, originalUnselectedMaskOffset, NO_OPACITY,
-                HALF_MASK_RADIUS_RATIO, false);
-        }
-    });
-    AnimationUtils::CloseImplicitAnimation();
+    maskAnimation_ = AnimationUtils::StartAnimation(
+        option,
+        [weak = AceType::WeakClaim(this), selectedIndex, unselectedIndex, selectedImageSize, originalSelectedMaskOffset,
+            unselectedImageSize, originalUnselectedMaskOffset]() {
+            AnimationUtils::AddKeyFrame(
+                HALF_PROGRESS, [weak, selectedIndex, unselectedIndex, selectedImageSize, originalSelectedMaskOffset,
+                                   unselectedImageSize, originalUnselectedMaskOffset]() {
+                    auto tabBar = weak.Upgrade();
+                    if (tabBar) {
+                        tabBar->ChangeMask(selectedIndex, selectedImageSize, originalSelectedMaskOffset, FULL_OPACITY,
+                            INVALID_RATIO, true);
+                        tabBar->ChangeMask(unselectedIndex, unselectedImageSize, originalUnselectedMaskOffset,
+                            NEAR_FULL_OPACITY, INVALID_RATIO, false);
+                    }
+                });
+            AnimationUtils::AddKeyFrame(
+                FULL_PROGRESS, [weak, selectedIndex, unselectedIndex, selectedImageSize, originalSelectedMaskOffset,
+                                   unselectedImageSize, originalUnselectedMaskOffset]() {
+                    auto tabBar = weak.Upgrade();
+                    if (tabBar) {
+                        tabBar->ChangeMask(selectedIndex, selectedImageSize, originalSelectedMaskOffset, FULL_OPACITY,
+                            FULL_MASK_RADIUS_RATIO, true);
+                        tabBar->ChangeMask(unselectedIndex, unselectedImageSize, originalUnselectedMaskOffset,
+                            NO_OPACITY, HALF_MASK_RADIUS_RATIO, false);
+                    }
+                });
+        },
+        [weak = AceType::WeakClaim(this), selectedIndex, unselectedIndex]() {
+            auto tabBar = weak.Upgrade();
+            if (tabBar) {
+                auto host = tabBar->GetHost();
+                CHECK_NULL_VOID(host);
+                MaskAnimationFinish(host, selectedIndex, true);
+                MaskAnimationFinish(host, unselectedIndex, false);
+            }
+        });
 }
 
 void TabBarPattern::MaskAnimationFinish(const RefPtr<FrameNode>& host, int32_t selectedIndex,
