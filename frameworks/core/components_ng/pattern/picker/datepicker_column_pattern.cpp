@@ -269,11 +269,7 @@ void DatePickerColumnPattern::OnTouchUp()
     CHECK_NULL_VOID(pickerTheme);
     SetSelectedMark(pickerTheme, true);
 
-    if (hoverd_) {
-        PlayPressAnimation(GetButtonHoverColor());
-    } else {
-        PlayPressAnimation(buttonBgColor_);
-    }
+    PlayPressAnimation(hoverd_ ? GetButtonHoverColor() : buttonBgColor_);
 }
 
 void DatePickerColumnPattern::SetButtonBackgroundColor(const Color& pressColor)
@@ -329,8 +325,8 @@ void DatePickerColumnPattern::InitSelectorButtonProperties(const RefPtr<PickerTh
         pressColor_ = buttonDefaultBgColor_.BlendColor(pickerTheme->GetPressColor());
         hoverColor_ = buttonDefaultBgColor_.BlendColor(pickerTheme->GetHoverColor());
 
-        buttonDefaultBorderWidth_ = pickerTheme->GetSelectorItemFocusBorderWidth();
-        buttonFocusBorderWidth_ = pickerTheme->GetSelectorItemBorderWidth();
+        buttonFocusBorderWidth_ = pickerTheme->GetSelectorItemFocusBorderWidth();
+        buttonDefaultBorderWidth_ = pickerTheme->GetSelectorItemBorderWidth();
     }
 }
 
@@ -341,7 +337,7 @@ const Color& DatePickerColumnPattern::GetButtonHoverColor() const
 
 void DatePickerColumnPattern::UpdateColumnButtonFocusState(bool haveFocus, bool needMarkDirty)
 {
-    auto isInitUpdate = isFirstTimeUpdateButtonProps_ && (!haveFocus);
+    auto isInitUpdate = isFirstTimeUpdateButtonProps_ && !haveFocus;
     auto isFocusChanged = isFocusColumn_ != haveFocus;
 
     if (isFocusChanged || isInitUpdate) {

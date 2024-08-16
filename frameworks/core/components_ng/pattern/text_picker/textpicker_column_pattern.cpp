@@ -157,11 +157,7 @@ void TextPickerColumnPattern::OnMiddleButtonTouchMove()
 
 void TextPickerColumnPattern::OnMiddleButtonTouchUp()
 {
-    if (isHover_) {
-        PlayPressAnimation(GetButtonHoverColor());
-    } else {
-        PlayPressAnimation(buttonBgColor_);
-    }
+    PlayPressAnimation(isHover_ ? GetButtonHoverColor() : buttonBgColor_);
 
     if (useButtonFocusArea_) {
         FlushCurrentOptions();
@@ -180,8 +176,8 @@ void TextPickerColumnPattern::InitSelectorButtonProperties(const RefPtr<PickerTh
         pressColor_ = buttonDefaultBgColor_.BlendColor(pickerTheme->GetPressColor());
         hoverColor_ = buttonDefaultBgColor_.BlendColor(pickerTheme->GetHoverColor());
 
-        buttonDefaultBorderWidth_ = pickerTheme->GetSelectorItemFocusBorderWidth();
-        buttonFocusBorderWidth_ = pickerTheme->GetSelectorItemBorderWidth();
+        buttonFocusBorderWidth_ = pickerTheme->GetSelectorItemFocusBorderWidth();
+        buttonDefaultBorderWidth_ = pickerTheme->GetSelectorItemBorderWidth();
     }
 }
 
@@ -192,7 +188,7 @@ const Color& TextPickerColumnPattern::GetButtonHoverColor() const
 
 void TextPickerColumnPattern::UpdateColumnButtonFocusState(bool haveFocus, bool needMarkDirty)
 {
-    auto isInitUpdate = isFirstTimeUpdateButtonProps_ && (!haveFocus);
+    auto isInitUpdate = isFirstTimeUpdateButtonProps_ && !haveFocus;
     auto isFocusChanged = isFocusColumn_ != haveFocus;
 
     if (isFocusChanged || isInitUpdate) {
@@ -393,11 +389,7 @@ void TextPickerColumnPattern::InitMouseAndPressEvent()
 
 void TextPickerColumnPattern::HandleMouseEvent(bool isHover)
 {
-    if (isHover) {
-        PlayPressAnimation(GetButtonHoverColor());
-    } else {
-        PlayPressAnimation(buttonBgColor_);
-    }
+    PlayPressAnimation(isHover ? GetButtonHoverColor() : buttonBgColor_);
     auto needUpdate = isHover_ != isHover;
     isHover_ = isHover;
 
@@ -865,11 +857,22 @@ void TextPickerColumnPattern::FlushAnimationTextProperties(bool isDown)
         }
     }
 }
+void TextPickerColumnPattern::UpdateTextAreaPadding(const RefPtr<PickerTheme>& pickerTheme,
+    const RefPtr<TextLayoutProperty>& textLayoutProperty)
+{
+    if (useButtonFocusArea_) {
+        auto padding = pickerTheme->GetSelectorItemSpace();
+        PaddingProperty defaultPadding = { CalcLength(padding), CalcLength(padding),
+            CalcLength(0.0_vp), CalcLength(0.0_vp) };
+        textLayoutProperty->UpdatePadding(defaultPadding);
+    }
+}
 
 void TextPickerColumnPattern::UpdateDisappearTextProperties(const RefPtr<PickerTheme>& pickerTheme,
     const RefPtr<TextLayoutProperty>& textLayoutProperty,
     const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty)
 {
+    UpdateTextAreaPadding(pickerTheme, textLayoutProperty);
     auto normalOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize();
     textLayoutProperty->UpdateTextColor(textPickerLayoutProperty->GetDisappearColor().value_or(
         pickerTheme->GetOptionStyle(false, false).GetTextColor()));
@@ -892,6 +895,7 @@ void TextPickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerT
     const RefPtr<TextLayoutProperty>& textLayoutProperty,
     const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty)
 {
+    UpdateTextAreaPadding(pickerTheme, textLayoutProperty);
     auto focusOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize() + FONT_SIZE;
     textLayoutProperty->UpdateTextColor(
         textPickerLayoutProperty->GetColor().value_or(pickerTheme->GetOptionStyle(false, false).GetTextColor()));
@@ -915,12 +919,7 @@ void TextPickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
     const RefPtr<TextLayoutProperty>& textLayoutProperty,
     const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty)
 {
-    if (useButtonFocusArea_) {
-        auto padding = pickerTheme->GetSelectorItemSpace();
-        PaddingProperty defaultPadding = { CalcLength(padding), CalcLength(padding),
-            CalcLength(0.0_vp), CalcLength(0.0_vp) };
-        textLayoutProperty->UpdatePadding(defaultPadding);
-    }
+    UpdateTextAreaPadding(pickerTheme, textLayoutProperty);
     auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
     if (selectedMarkPaint_) {
         textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, true).GetTextColor());
