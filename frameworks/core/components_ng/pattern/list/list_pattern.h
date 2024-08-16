@@ -122,6 +122,7 @@ public:
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
     void OnTouchDown(const TouchEventInfo& info) override;
+    OverScrollOffset GetOutBoundaryOffset(bool useCurrentDelta) const;
     OverScrollOffset GetOverScrollOffset(double delta) const override;
     float GetOffsetWithLimit(float offset) const override;
     void HandleScrollBarOutBoundary();
