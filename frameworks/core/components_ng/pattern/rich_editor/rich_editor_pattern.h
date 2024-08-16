@@ -186,7 +186,7 @@ public:
         bool isMoveCaret = false;
         Offset touchDownOffset;
         OffsetF touchDownPaintOffset;
-        const Dimension minDinstance = 5.0_vp;
+        const Dimension minDistance = 5.0_vp;
 
         void Reset()
         {
@@ -948,6 +948,7 @@ private:
     void UpdateImageStyle(RefPtr<FrameNode>& imageNode, const ImageSpanAttribute& imageStyle);
     void UpdateImageAttribute(RefPtr<FrameNode>& imageNode, const ImageSpanAttribute& imageStyle);
     void InitTouchEvent();
+    void InitPanEvent();
     bool SelectOverlayIsOn();
     void HandleLongPress(GestureEvent& info);
     void HandleDoubleClickOrLongPress(GestureEvent& info);
@@ -1229,6 +1230,7 @@ private:
     std::vector<OperationRecord> redoOperationRecords_;
 
     RefPtr<TouchEventImpl> touchListener_;
+    RefPtr<PanEvent> panEvent_;
     struct UpdateSpanStyle updateSpanStyle_;
     CancelableCallback<void()> caretTwinklingTask_;
     RefPtr<RichEditorController> richEditorController_;
