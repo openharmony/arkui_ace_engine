@@ -1245,6 +1245,7 @@ void TextFieldPattern::HandleBlurEvent()
     }
     isCursorAlwaysDisplayed_ = false;
     ReportEvent();
+    ScheduleDisappearDelayTask();
 }
 
 void TextFieldPattern::ModifyInnerStateInBlurEvent()

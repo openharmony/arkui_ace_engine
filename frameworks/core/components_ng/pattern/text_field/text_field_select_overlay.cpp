@@ -576,6 +576,7 @@ void TextFieldSelectOverlay::OnHandleIsHidden()
 
 void TextFieldSelectOverlay::OnHandleMoveStart(bool isFirst)
 {
+    BaseTextSelectOverlay::OnHandleMoveStart(isFirst);
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     manager->SetHandleCircleIsShow(isFirst, false);

@@ -2148,7 +2148,7 @@ void TextPattern::OnModifyDone()
         if (host->IsDraggable() || gestureEventHub->GetTextDraggable()) {
             gestureEventHub->SetTextDraggable(false);
             eventHub->SetDefaultOnDragStart(nullptr);
-            if (!eventHub->HasOnDragStart()) {
+            if (!eventHub->HasOnDragStart() && IsTextNode()) {
                 gestureEventHub->RemoveDragEvent();
             }
         }

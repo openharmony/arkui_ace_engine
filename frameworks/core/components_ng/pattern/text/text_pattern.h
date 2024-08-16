@@ -130,6 +130,13 @@ public:
         return host->GetTag() == V2::SYMBOL_ETS_TAG;
     }
 
+    bool IsTextNode() const
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        return host->GetTag() == V2::TEXT_ETS_TAG;
+    }
+
     bool DefaultSupportDrag() override
     {
         return true;
