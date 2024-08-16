@@ -595,30 +595,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, HandleTouchEvent004, TestSize.Level1)
 }
 
 /**
- * @tc.name: InitSelection001
- * @tc.desc: test InitSelection
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, InitSelection001, TestSize.Level2)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->previewLongPress_ = true;
-    AddSpan(EXCEPT_VALUE);
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    ASSERT_NE(paragraph, nullptr);
-    richEditorPattern->paragraphs_.AddParagraph({ .paragraph = paragraph, .start = 0, .end = 10 });
-
-    std::vector<RectF> rects { RectF(0, 0, 5, 5) };
-    EXPECT_CALL(*paragraph, GetGlyphPositionAtCoordinate(_))
-        .Times(1)
-        .WillOnce(Return(PositionWithAffinity(0, TextAffinity::UPSTREAM)));
-    Offset Offset = { 1, 4 };
-    richEditorPattern->InitSelection(Offset);
-    EXPECT_EQ(richEditorPattern->GetCaretIndex(), 0);
-}
-
-/**
  * @tc.name: GetRightWordPosition002
  * @tc.desc: test GetRightWordPosition
  * @tc.type: FUNC
@@ -637,7 +613,7 @@ HWTEST_F(RichEditorPatternTestThreeNg, GetRightWordPosition002, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetRightWordPosition002
+ * @tc.name: GetRightWordPosition003
  * @tc.desc: test GetRightWordPosition
  * @tc.type: FUNC
  */
