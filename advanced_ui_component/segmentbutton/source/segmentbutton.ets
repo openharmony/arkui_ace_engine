@@ -479,9 +479,8 @@ struct SegmentButtonItem {
   @ObjectLink property: ItemProperty
   @Prop index: number
   @Prop marquee: boolean;
-  @Prop focusedIndex: number = -1;
   @Prop @Watch('onIsMarqueeAndFadeout') isMarqueeAndFadeout: boolean;
-  @State isMarquee?: boolean = false;
+  @State isMarquee?: boolean = true;
   @State isFadeout?: boolean = false;
   private groupId: string = ""
 
@@ -520,11 +519,10 @@ struct SegmentButtonItem {
 
   onIsMarqueeAndFadeout() {
     this.isFadeout = true;
-    this.isMarquee = this.focusedIndex === this.index;
+    this.isMarquee = this.focusIndex === this.index;
   }
 
   aboutToAppear(): void {
-    this.isMarquee = true;
     this.isFadeout = this.marquee;
   }
 
@@ -537,11 +535,11 @@ struct SegmentButtonItem {
   }
 
   private getFillColor(): ResourceColor {
-    return this.marquee && this.focusedIndex === this.index ? segmentButtonTheme.SEGMENT_BUTTON_FOCUS_TEXT_COLOR : this.setFontColor();
+    return this.marquee && this.focusIndex === this.index ? segmentButtonTheme.SEGMENT_BUTTON_FOCUS_TEXT_COLOR : this.setFontColor();
   }
 
   private getFontColor() {
-    return this.marquee && this.focusedIndex === this.index ? this.options.selectedFontColor ?? segmentButtonTheme.SEGMENT_BUTTON_FOCUS_TEXT_COLOR : this.setFontColor();
+    return this.marquee && this.focusIndex === this.index ? this.options.selectedFontColor ?? segmentButtonTheme.SEGMENT_BUTTON_FOCUS_TEXT_COLOR : this.setFontColor();
   }
 
   build() {
@@ -617,8 +615,6 @@ struct PressAndHoverEffect {
 
 @Component
 struct SegmentButtonItemArrayComponent {
-  @State @Watch('onFocusIndex') focusedIndex: number = -1;
-  @State focusIdx: number | null = null;
   @ObjectLink @Watch('onOptionsArrayChange') optionsArray: SegmentButtonItemOptionsArray
   @ObjectLink @Watch('onOptionsChange') options: SegmentButtonOptions
   @Link selectedIndexes: number[]
@@ -626,7 +622,7 @@ struct SegmentButtonItemArrayComponent {
   @Consume buttonBorderRadius: LocalizedBorderRadiuses[]
   @Consume @Watch('onButtonItemsSizeChange') buttonItemsSize: SizeOptions[]
   @Consume buttonItemsPosition: Position[]
-  @Consume focusIndex: number
+  @Consume @Watch('onFocusIndex') focusIndex: number
   @Consume zoomScaleArray: number[]
   @Consume buttonItemProperty: ItemProperty[]
   @Consume buttonItemsSelected: boolean[]
@@ -825,7 +821,6 @@ struct SegmentButtonItemArrayComponent {
       })
       SegmentButtonItem({
         isMarqueeAndFadeout: this.isMarqueeAndFadeout,
-        focusedIndex: this.focusedIndex,
         selectedIndexes: $selectedIndexes,
         focusIndex: this.focusIndex,
         index: index,
@@ -907,7 +902,6 @@ struct SegmentButtonItemArrayComponent {
             .focusable(true)
             .focusScopePriority(this.groupId, Math.min(...this.selectedIndexes) === index ? FocusPriority.PREVIOUS : FocusPriority.AUTO)
             .onFocus(() => {
-              this.focusedIndex = index;
               this.focusIndex = index;
               this.marquee = segmentButtonTheme.SEGMENT_MARQUEE === 0;
               if (this.marquee) {
@@ -915,7 +909,7 @@ struct SegmentButtonItemArrayComponent {
               }
             })
             .onBlur(() => {
-              this.focusedIndex = -1;
+              this.focusIndex = -1;
               this.hoverColorArray[index].hoverColor = Color.Transparent;
             })
             .onTouch((event: TouchEvent) => {
@@ -935,7 +929,7 @@ struct SegmentButtonItemArrayComponent {
             .onHover((isHover: boolean) => {
               if (isHover) {
                 animateTo({ duration: 250, curve: Curve.Friction }, () => {
-                  if (this.marquee && this.focusedIndex === index) {
+                  if (this.marquee && this.focusIndex === index) {
                     this.hoverColorArray[index].hoverColor = $r('sys.color.segment_button_focus_backboard_primary');
                   } else {
                     this.hoverColorArray[index].hoverColor = (segmentButtonTheme.HOVER_COLOR)
@@ -943,7 +937,7 @@ struct SegmentButtonItemArrayComponent {
                 })
               } else {
                 animateTo({ duration: 250, curve: Curve.Friction }, () => {
-                  if (this.marquee && this.focusedIndex === index) {
+                  if (this.marquee && this.focusIndex === index) {
                     this.hoverColorArray[index].hoverColor = $r('sys.color.segment_button_focus_backboard_primary');
                   } else {
                     this.hoverColorArray[index].hoverColor = Color.Transparent
