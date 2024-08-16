@@ -174,6 +174,8 @@ const SymbolSpanOptions SYMBOL_SPAN_OPTIONS_1 = {
     .style = TEXT_STYLE_1,
     .resourceObject = nullptr
 };
+auto BUILDER_NODE_1 = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
 } // namespace
 
 struct TestCursorItem {
