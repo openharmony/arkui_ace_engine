@@ -49,6 +49,10 @@ const SUBTITLE_HEIGHT = 56;
 const TEXT_MAX_LINES = 1;
 const MIN_FONT_SCALE = 1;
 const MAX_FONT_SCALE = 2;
+const DEFAULT_TEXT_SIZE = 12;
+const DEFAULT_FONT_SIZE_SCALE = 1;
+const DEFAULT_BLOCK_TEXT_ITEM_SAFE_MARGIN = 8;
+const EDIT_BLOCK_TEXT_ITEM_SAFE_MARGIN = 16;
 const ENTER_EXIT_ICON_DURATION = 200;
 const COMMON_BEZIER = curves.cubicBezierCurve(0.33, 0, 0.67, 1);
 const DRAG_SPRING = curves.interpolatingSpring(0, 1, 400, 38);
@@ -769,22 +773,24 @@ export class GridObjectSortComponent extends ViewPU {
     calcTextItemEditHeight() {
         let h14 = MeasureText.measureTextSize({
             textContent: this.dataList[0]?.text ?? '',
-            fontSize: `${(LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_button3'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" })?.value ?? 12) * (this.fontSizeScale ?? 1)}vp`,
+            fontSize: `${(LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_button3'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" })?.value ??
+                DEFAULT_TEXT_SIZE) * (this.fontSizeScale ?? DEFAULT_FONT_SIZE_SCALE)}vp`,
             overflow: TextOverflow.Ellipsis,
             maxLines: TEXT_MAX_LINES
         });
-        this.textItemEditHeight = this.fontSizeScale === 1 ? GRID_ITEM_HEIGHT_TEXT : px2vp(h14.height);
-        this.textItemEditHeight = this.textItemEditHeight + 8;
+        this.textItemEditHeight = this.fontSizeScale === DEFAULT_FONT_SIZE_SCALE ?
+            GRID_ITEM_HEIGHT_TEXT : px2vp(h14.height);
+        this.textItemEditHeight = this.textItemEditHeight + PADDING_EIGHT * 2;
     }
     decideFontScale(f14) {
         if (!this.isFollowingSystemFontScale) {
             return 1;
         }
-        let g14 = f14.getHostContext()?.config.fontSizeScale ?? 1;
+        let g14 = f14.getHostContext()?.config.fontSizeScale ?? DEFAULT_FONT_SIZE_SCALE;
         return Math.min(g14, this.maxAppFontScale, MAX_FONT_SCALE);
     }
     calcColNum() {
-        if (this.imageText || (this.fontSizeScale && this.fontSizeScale > 1)) {
+        if (this.imageText || (this.fontSizeScale && this.fontSizeScale > DEFAULT_FONT_SIZE_SCALE)) {
             this.customColumns = GRID_COL_3;
             this.colNum = COL_IMAGE_TEXT;
         }
@@ -824,8 +830,8 @@ export class GridObjectSortComponent extends ViewPU {
         this.textItemEditWidth = this.gridComState ? this.blockWidth - 24 : this.blockWidth - 16;
         if (!this.imageText) {
             this.blockHeight = this.gridComState ?
-                this.textItemEditHeight + 16 :
-                this.textItemEditHeight + 8;
+                this.textItemEditHeight + EDIT_BLOCK_TEXT_ITEM_SAFE_MARGIN :
+                this.textItemEditHeight + DEFAULT_BLOCK_TEXT_ITEM_SAFE_MARGIN;
         }
     }
     sortBy() {
@@ -1283,15 +1289,15 @@ export class GridObjectSortComponent extends ViewPU {
                     let x8 = new ComposeTitleBar(this, {
                         title: this.options.normalTitle || { "id": -1, "type": 10003, params: ['sys.string.ohos_grid_edit_title_chanel'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
                         menuItems: this.menuItems,
-                    }, undefined, v8, () => { }, { page: "librarys/gridobjectsortcomponent/src/main/ets/components/GridObjectSortComponent.ets", line: 757, col: 5 });
+                    }, undefined, v8, () => { }, { page: "librarys/gridobjectsortcomponent/src/main/ets/components/GridObjectSortComponent.ets", line: 764, col: 5 });
                     ViewPU.create(x8);
-                    let y8 = () => {
+                    let r17 = () => {
                         return {
                             title: this.options.normalTitle || { "id": -1, "type": 10003, params: ['sys.string.ohos_grid_edit_title_chanel'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
                             menuItems: this.menuItems
                         };
                     };
-                    x8.paramsGenerator_ = y8;
+                    x8.paramsGenerator_ = r17;
                 }
                 else {
                     this.updateStateVarsOfChildByElmtId(v8, {});
@@ -1317,9 +1323,9 @@ export class GridObjectSortComponent extends ViewPU {
                             this.saveClick = true;
                             this.onSaveEdit();
                         }
-                    }, undefined, m8, () => { }, { page: "librarys/gridobjectsortcomponent/src/main/ets/components/GridObjectSortComponent.ets", line: 762, col: 5 });
+                    }, undefined, m8, () => { }, { page: "librarys/gridobjectsortcomponent/src/main/ets/components/GridObjectSortComponent.ets", line: 769, col: 5 });
                     ViewPU.create(o8);
-                    let p8 = () => {
+                    let q17 = () => {
                         return {
                             leftIconStyle: EditableLeftIconType.Cancel,
                             menuItems: [],
@@ -1333,7 +1339,7 @@ export class GridObjectSortComponent extends ViewPU {
                             }
                         };
                     };
-                    o8.paramsGenerator_ = p8;
+                    o8.paramsGenerator_ = q17;
                 }
                 else {
                     this.updateStateVarsOfChildByElmtId(m8, {});
@@ -1652,10 +1658,10 @@ export class GridObjectSortComponent extends ViewPU {
         }, Grid);
         this.observeComponentCreation2((r3, s3) => {
             ForEach.create();
-            const t3 = (x3, y3) => {
+            const n17 = (x3, y3) => {
                 const z3 = x3;
                 {
-                    const a4 = (f5, g5) => {
+                    const o17 = (f5, g5) => {
                         GridItem.create(() => { }, false);
                         Context.animation({
                             curve: this.clickRemoveBtn ? DRAG_SPRING : y3 === this.unSelectedIndex ? REMOVE_ADD_SPRING : DRAG_SPRING
@@ -1664,8 +1670,8 @@ export class GridObjectSortComponent extends ViewPU {
                         GridItem.translate(this.getAddAreaItemTranslate(y3));
                         Context.animation(null);
                     };
-                    const b4 = () => {
-                        this.observeComponentCreation2(a4, GridItem);
+                    const p17 = () => {
+                        this.observeComponentCreation2(o17, GridItem);
                         this.observeComponentCreation2((k4, l4) => {
                             Stack.create();
                             Stack.onHover((e5) => {
@@ -1790,10 +1796,10 @@ export class GridObjectSortComponent extends ViewPU {
                         Stack.pop();
                         GridItem.pop();
                     };
-                    b4();
+                    p17();
                 }
             };
-            this.forEachUpdateFunction(r3, this.unSelected, t3, (w3) => w3.id.toString(), true, false);
+            this.forEachUpdateFunction(r3, this.unSelected, n17, (w3) => w3.id.toString(), true, false);
         }, ForEach);
         ForEach.pop();
         Grid.pop();
@@ -1878,10 +1884,10 @@ export class GridObjectSortComponent extends ViewPU {
         }, Grid);
         this.observeComponentCreation2((q1, r1) => {
             ForEach.create();
-            const s1 = (w1, x1) => {
+            const k17 = (w1, x1) => {
                 const y1 = w1;
                 {
-                    const z1 = (q2, r2) => {
+                    const l17 = (q2, r2) => {
                         GridItem.create(() => { }, false);
                         Context.animation({
                             curve: this.isStartDrag ? DRAG_SPRING : x1 === this.selectedIndex ? REMOVE_ADD_SPRING : DRAG_SPRING,
@@ -1891,8 +1897,8 @@ export class GridObjectSortComponent extends ViewPU {
                         Context.animation(null);
                         GridItem.visibility(y1.visibility);
                     };
-                    const a2 = () => {
-                        this.observeComponentCreation2(z1, GridItem);
+                    const m17 = () => {
+                        this.observeComponentCreation2(l17, GridItem);
                         this.observeComponentCreation2((j2, k2) => {
                             Stack.create();
                             Stack.onHover((p2) => {
@@ -1944,10 +1950,10 @@ export class GridObjectSortComponent extends ViewPU {
                         Stack.pop();
                         GridItem.pop();
                     };
-                    a2();
+                    m17();
                 }
             };
-            this.forEachUpdateFunction(q1, this.selected, s1, (v1) => v1.id.toString(), true, false);
+            this.forEachUpdateFunction(q1, this.selected, k17, (v1) => v1.id.toString(), true, false);
         }, ForEach);
         ForEach.pop();
         Grid.pop();
@@ -1978,9 +1984,9 @@ export class GridObjectSortComponent extends ViewPU {
         this.textItemEditWidth = this.gridComState ? this.blockWidth - 24 : this.blockWidth - 16;
         this.imageItemWidth = this.blockWidth - 16;
         this.calcTextItemEditHeight();
-        this.blockHeight = this.imageText ? this.imageItemWidth + 16 : this.gridComState ?
-            this.textItemEditHeight + 16 :
-            this.textItemEditHeight + 8;
+        this.blockHeight = this.imageText ? this.imageItemWidth + EDIT_BLOCK_TEXT_ITEM_SAFE_MARGIN : this.gridComState ?
+            this.textItemEditHeight + EDIT_BLOCK_TEXT_ITEM_SAFE_MARGIN :
+            this.textItemEditHeight + DEFAULT_BLOCK_TEXT_ITEM_SAFE_MARGIN;
         this.calcGridHeight();
     }
     initialRender() {
@@ -2013,9 +2019,9 @@ export class GridObjectSortComponent extends ViewPU {
                         secondaryTitle: this.options.showAreaTitle || { "id": -1, "type": 10003, params: ['sys.string.ohos_grid_edit_subtitle_sort'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
                         icon: '',
                         operationType: OperationType.BUTTON
-                    }, undefined, s, () => { }, { page: "librarys/gridobjectsortcomponent/src/main/ets/components/GridObjectSortComponent.ets", line: 1326, col: 11 });
+                    }, undefined, s, () => { }, { page: "librarys/gridobjectsortcomponent/src/main/ets/components/GridObjectSortComponent.ets", line: 1333, col: 11 });
                     ViewPU.create(u);
-                    let v = () => {
+                    let j17 = () => {
                         return {
                             primaryTitle: '',
                             secondaryTitle: this.options.showAreaTitle || { "id": -1, "type": 10003, params: ['sys.string.ohos_grid_edit_subtitle_sort'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
@@ -2023,7 +2029,7 @@ export class GridObjectSortComponent extends ViewPU {
                             operationType: OperationType.BUTTON
                         };
                     };
-                    u.paramsGenerator_ = v;
+                    u.paramsGenerator_ = j17;
                 }
                 else {
                     this.updateStateVarsOfChildByElmtId(s, {
@@ -2058,9 +2064,9 @@ export class GridObjectSortComponent extends ViewPU {
                         secondaryTitle: this.options.addAreaTitle || { "id": -1, "type": 10003, params: ['sys.string.ohos_grid_edit_subtitle_add'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
                         icon: '',
                         operationType: OperationType.BUTTON
-                    }, undefined, g, () => { }, { page: "librarys/gridobjectsortcomponent/src/main/ets/components/GridObjectSortComponent.ets", line: 1335, col: 11 });
+                    }, undefined, g, () => { }, { page: "librarys/gridobjectsortcomponent/src/main/ets/components/GridObjectSortComponent.ets", line: 1342, col: 11 });
                     ViewPU.create(i);
-                    let j = () => {
+                    let i17 = () => {
                         return {
                             primaryTitle: '',
                             secondaryTitle: this.options.addAreaTitle || { "id": -1, "type": 10003, params: ['sys.string.ohos_grid_edit_subtitle_add'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
@@ -2068,7 +2074,7 @@ export class GridObjectSortComponent extends ViewPU {
                             operationType: OperationType.BUTTON
                         };
                     };
-                    i.paramsGenerator_ = j;
+                    i.paramsGenerator_ = i17;
                 }
                 else {
                     this.updateStateVarsOfChildByElmtId(g, {

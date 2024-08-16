@@ -17,9 +17,10 @@ import vibrator from '@ohos.vibrator';
 import curves from '@ohos.curves';
 
 // import component
-import { ComposeTitleBar, LengthMetrics, MeasureText } from '@kit.ArkUI';
-import { EditableTitleBar, EditableLeftIconType } from '@kit.ArkUI';
-import { SubHeader, OperationType } from '@kit.ArkUI';
+import {
+  ComposeTitleBar, LengthMetrics, MeasureText, EditableTitleBar,
+  EditableLeftIconType, SubHeader, OperationType
+} from '@kit.ArkUI';
 import { common, EnvironmentCallback } from '@kit.AbilityKit';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
@@ -40,6 +41,10 @@ const SUBTITLE_HEIGHT = 56;
 const TEXT_MAX_LINES = 1;
 const MIN_FONT_SCALE = 1;
 const MAX_FONT_SCALE = 2;
+const DEFAULT_TEXT_SIZE = 12;
+const DEFAULT_FONT_SIZE_SCALE = 1;
+const DEFAULT_BLOCK_TEXT_ITEM_SAFE_MARGIN = 8;
+const EDIT_BLOCK_TEXT_ITEM_SAFE_MARGIN = 16;
 // Animation Parameters
 const ENTER_EXIT_ICON_DURATION = 200;
 const COMMON_BEZIER = curves.cubicBezierCurve(0.33, 0, 0.67, 1); // Curve of entering and exiting the editing state
@@ -207,12 +212,14 @@ export struct GridObjectSortComponent {
   calcTextItemEditHeight() {
     let sizeOptions: SizeOptions = MeasureText.measureTextSize({
       textContent: this.dataList[0]?.text ?? '',
-      fontSize: `${ (LengthMetrics.resource($r('sys.float.ohos_id_text_size_button3'))?.value ?? 12) * (this.fontSizeScale ?? 1) }vp`,
+      fontSize: `${ (LengthMetrics.resource($r('sys.float.ohos_id_text_size_button3'))?.value ??
+        DEFAULT_TEXT_SIZE) * (this.fontSizeScale ?? DEFAULT_FONT_SIZE_SCALE) }vp`,
       overflow: TextOverflow.Ellipsis,
       maxLines: TEXT_MAX_LINES
     });
-    this.textItemEditHeight = this.fontSizeScale === 1 ? GRID_ITEM_HEIGHT_TEXT : px2vp(sizeOptions.height as number);
-    this.textItemEditHeight = this.textItemEditHeight + 8;
+    this.textItemEditHeight = this.fontSizeScale === DEFAULT_FONT_SIZE_SCALE ?
+      GRID_ITEM_HEIGHT_TEXT : px2vp(sizeOptions.height as number);
+    this.textItemEditHeight = this.textItemEditHeight + PADDING_EIGHT * 2;
   }
 
   private envCallback: EnvironmentCallback = {
@@ -228,12 +235,12 @@ export struct GridObjectSortComponent {
       return 1;
     }
     let systemFontScale: number | undefined =
-      (uiContent.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1;
+      (uiContent.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? DEFAULT_FONT_SIZE_SCALE;
     return Math.min(systemFontScale, this.maxAppFontScale, MAX_FONT_SCALE);
   }
 
   private calcColNum() {
-    if (this.imageText || (this.fontSizeScale && this.fontSizeScale > 1)) {
+    if (this.imageText || (this.fontSizeScale && this.fontSizeScale > DEFAULT_FONT_SIZE_SCALE)) {
       this.customColumns = GRID_COL_3;
       this.colNum = COL_IMAGE_TEXT;
     } else {
@@ -278,8 +285,8 @@ export struct GridObjectSortComponent {
     this.textItemEditWidth = this.gridComState ? this.blockWidth - 24 : this.blockWidth - 16;
     if (!this.imageText) {
       this.blockHeight = this.gridComState ?
-        this.textItemEditHeight + 16 :
-        this.textItemEditHeight + 8;
+        this.textItemEditHeight + EDIT_BLOCK_TEXT_ITEM_SAFE_MARGIN :
+        this.textItemEditHeight + DEFAULT_BLOCK_TEXT_ITEM_SAFE_MARGIN;
     }
   }
 
@@ -454,7 +461,7 @@ export struct GridObjectSortComponent {
   imageTextRemoveIcon(select: GridObjectSortComponentItem): Resource {
     const clickRemoveIcon: boolean = this.clickRemoveBtn && this.content.id === select.id;
     const icon = clickRemoveIcon ?
-    $r('sys.media.ohos_ic_public_add_norm_filled') : $r('sys.media.ohos_ic_public_remove_filled');
+      $r('sys.media.ohos_ic_public_add_norm_filled') : $r('sys.media.ohos_ic_public_remove_filled');
     return icon;
   }
 
@@ -462,7 +469,7 @@ export struct GridObjectSortComponent {
   imageTextAddIcon(select: GridObjectSortComponentItem): Resource {
     const clickAddIcon: boolean = this.clickAddBtn && this.content.id === select.id && this.gridComState;
     const icon = clickAddIcon ?
-    $r('sys.media.ohos_ic_public_remove_filled') : $r('sys.media.ohos_ic_public_add_norm_filled');
+      $r('sys.media.ohos_ic_public_remove_filled') : $r('sys.media.ohos_ic_public_add_norm_filled');
     return icon;
   }
   // Displaying and hiding area icons in image_text mode
@@ -1309,9 +1316,9 @@ export struct GridObjectSortComponent {
     this.textItemEditWidth = this.gridComState ? this.blockWidth - 24 : this.blockWidth - 16;
     this.imageItemWidth = this.blockWidth - 16; // image Width
     this.calcTextItemEditHeight();
-    this.blockHeight = this.imageText ? this.imageItemWidth + 16 : this.gridComState ?
-      this.textItemEditHeight + 16 :
-      this.textItemEditHeight + 8;
+    this.blockHeight = this.imageText ? this.imageItemWidth + EDIT_BLOCK_TEXT_ITEM_SAFE_MARGIN : this.gridComState ?
+      this.textItemEditHeight + EDIT_BLOCK_TEXT_ITEM_SAFE_MARGIN :
+      this.textItemEditHeight + DEFAULT_BLOCK_TEXT_ITEM_SAFE_MARGIN;
     this.calcGridHeight();
   }
 
