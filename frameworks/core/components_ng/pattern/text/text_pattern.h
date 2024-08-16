@@ -665,6 +665,8 @@ public:
         isUserSetResponseRegion_ = isUserSetResponseRegion;
     }
 
+    size_t GetSubComponentInfos(std::vector<SubComponentInfo>& subComponentInfos);
+
     void UpdateFontColor(const Color& value);
     void BeforeCreatePaintWrapper() override;
 
@@ -746,6 +748,17 @@ protected:
         isDetachFromMainTree_ = true;
     }
 
+    bool SetActionExecSubComponent();
+    void GetSubComponentInfosForAISpans(std::vector<SubComponentInfo>& subComponentInfos);
+    void GetSubComponentInfosForSpans(std::vector<SubComponentInfo>& subComponentInfos);
+    bool ExecSubComponent(int32_t spanId);
+    void AddSubComponentInfosByDataDetectorForSpan(std::vector<SubComponentInfo>& subComponentInfos,
+        const RefPtr<SpanItem>& span);
+    void AddSubComponentInfoForAISpan(std::vector<SubComponentInfo>& subComponentInfos, const std::string& content,
+        const AISpan& aiSpan);
+    void AddSubComponentInfoForSpan(std::vector<SubComponentInfo>& subComponentInfos, const std::string& content,
+        const RefPtr<SpanItem>& span);
+
     int32_t GetTouchIndex(const OffsetF& offset) override;
     void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) override;
     void OnTextGenstureSelectionEnd() override;
@@ -791,6 +804,12 @@ protected:
 
     OffsetF parentGlobalOffset_;
     std::optional<TextResponseType> textResponseType_;
+
+    struct SubComponentInfoEx {
+        std::optional<AISpan> aiSpan;
+        WeakPtr<SpanItem> span;
+    };
+    std::vector<SubComponentInfoEx> subComponentInfos_;
 
 private:
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
