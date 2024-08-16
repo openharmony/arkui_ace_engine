@@ -1653,4 +1653,48 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNg027, TestSize.Level1)
     EXPECT_FALSE(menuItemPattern->isSubMenuShowed_);
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
+
+HWTEST_F(MenuItemPatternTestNg, CustomMenuItemPattern020, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    MenuItemModelNG model;
+    auto customNode = FrameNode::CreateFrameNode("", -1, AceType::MakeRefPtr<Pattern>());
+    model.Create(customNode);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_TRUE(itemNode);
+    auto pattern = itemNode->GetPattern<CustomMenuItemPattern>();
+    ASSERT_TRUE(pattern);
+    ASSERT_TRUE(itemNode->GetEventHub<EventHub>());
+    auto touch = itemNode->GetOrCreateGestureEventHub()->touchEventActuator_;
+    ASSERT_TRUE(touch);
+    ASSERT_FALSE(touch->touchEvents_.empty());
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNg021, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    MenuItemProperties itemOption;
+    itemOption.content = "content";
+    MenuItemModelNG MneuItemModelInstance;
+    MneuItemModelInstance.Create(itemOption);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto menuItemPattern = frameNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    auto menuItemEventHub = frameNode->GetEventHub<MenuItemEventHub>();
+    ASSERT_NE(menuItemEventHub, nullptr);
+
+    bool isSelected = true;
+    auto changeEvent = [&isSelected](bool select) { isSelected = select; };
+    menuItemEventHub->SetSelectedChangeEvent(changeEvent);
+    menuItemEventHub->SetOnChange(changeEvent);
+    menuItemPattern->OnClick();
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
 } // namespace OHOS::Ace::NG
