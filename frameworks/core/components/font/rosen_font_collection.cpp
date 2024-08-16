@@ -150,7 +150,7 @@ void RosenFontCollection::LoadThemeFont(const char* fontFamily, std::unique_ptr<
 #endif
 #else
         fontCollection_->LoadThemeFont("", nullptr, 0);
-        TAG_LOGD(AceLogTag::ACE_FONT, "LoadThemeFont [%{public}s:%{public}d]", familyName.c_str(),
+        TAG_LOGI(AceLogTag::ACE_FONT, "LoadThemeFont [%{public}s:%{public}d]", familyName.c_str(),
             static_cast<int32_t>(size));
         fontCollection_->LoadThemeFont(familyName, data, size);
 #endif
