@@ -451,7 +451,7 @@ public:
     void CloseSelectionMenu();
     bool SetCaretOffset(int32_t caretPosition);
     void ResetFirstNodeStyle();
-    void DoDeleteActions(const RichEditorDeleteValue& info);
+    void DoDeleteActions(int32_t currentPosition, int32_t length, RichEditorDeleteValue& info);
 
     void UpdateSpanStyle(int32_t start, int32_t end, const TextStyle& textStyle, const ImageSpanAttribute& imageStyle);
     std::string GetContentBySpans();

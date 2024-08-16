@@ -4773,11 +4773,13 @@ void RichEditorPattern::ResetFirstNodeStyle()
     }
 }
 
-void RichEditorPattern::DoDeleteActions(const RichEditorDeleteValue& info)
+void RichEditorPattern::DoDeleteActions(int32_t currentPosition, int32_t length, RichEditorDeleteValue& info)
 {
     auto eventHub = GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto isDelete = eventHub->FireAboutToDelete(info);
+    info.ResetRichEditorDeleteSpans();
+    CalcDeleteValueObj(currentPosition, length, info);
     if (isDelete || IsPreviewTextInputting()) {
         CloseSelectOverlay();
         ResetSelection();
@@ -4898,7 +4900,7 @@ std::wstring RichEditorPattern::DeleteBackwardOperation(int32_t length)
     if (caretPosition_ == 0) {
         info.SetLength(0);
         ResetFirstNodeStyle();
-        DoDeleteActions(info);
+        DoDeleteActions(0, 0, info);
         return deleteText;
     }
     info.SetOffset(caretPosition_ - 1);
@@ -4906,7 +4908,7 @@ std::wstring RichEditorPattern::DeleteBackwardOperation(int32_t length)
     int32_t currentPosition = std::clamp((caretPosition_ - length), 0, static_cast<int32_t>(GetTextContentLength()));
     if (!spans_.empty()) {
         CalcDeleteValueObj(currentPosition, length, info);
-        DoDeleteActions(info);
+        DoDeleteActions(currentPosition, length, info);
     }
     auto host = GetHost();
     if (host && host->GetChildren().empty()) {
@@ -4973,7 +4975,7 @@ std::wstring RichEditorPattern::DeleteForwardOperation(int32_t length)
     int32_t currentPosition = caretPosition_;
     if (!spans_.empty()) {
         CalcDeleteValueObj(currentPosition, length, info);
-        DoDeleteActions(info);
+        DoDeleteActions(currentPosition, length, info);
     }
     return deleteText;
 }
