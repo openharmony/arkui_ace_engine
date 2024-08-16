@@ -1601,10 +1601,10 @@ bool RelativeContainerLayoutAlgorithm::IsGuidelineOrBarrier(const std::string& i
     return IsGuideline(id) || IsBarrier(id);
 }
 
-std::optional<float>& RelativeContainerLayoutAlgorithm::GetMarginLeftWithoutDirection(
+std::optional<float> RelativeContainerLayoutAlgorithm::GetOriginMarginLeft(
     TextDirection textDirection, const std::unique_ptr<MarginPropertyF>& marginProp)
 {
-    CHECK_NULL_VOID(marginProp);
+    CHECK_NULL_RETURN(marginProp, 0);
     return textDirection != TextDirection::RTL ? marginProp->left:marginProp->right;
 }
 
@@ -1621,8 +1621,7 @@ float RelativeContainerLayoutAlgorithm::CalcHorizontalOffset(
     if (!anchorIsContainer && !IsGuidelineOrBarrier(alignRule.anchor)) {
         auto anchorWrapper = idNodeMap_[alignRule.anchor].layoutWrapper;
         auto textDirection = anchorWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
-        auto marginProp = anchorWrapper->GetGeometryNode()->GetMargin()
-        marginLeft = GetMarginLeftWithoutDirection(textDirection, marginProp);
+        marginLeft = GetOriginMarginLeft(textDirection, anchorWrapper->GetGeometryNode()->GetMargin());
     }
     switch (alignDirection) {
         case AlignDirection::LEFT:

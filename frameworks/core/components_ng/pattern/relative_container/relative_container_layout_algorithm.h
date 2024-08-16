@@ -86,7 +86,7 @@ private:
     bool IsGuideline(const std::string& id);
     bool IsBarrier(const std::string& id);
     bool IsGuidelineOrBarrier(const std::string& id);
-    std::optional<float>& GetMarginLeftWithoutDirection(
+    std::optional<float> GetOriginMarginLeft(
         TextDirection textDirection, const std::unique_ptr<MarginPropertyF>& marginProp);
     BarrierRect GetBarrierRectByReferencedIds(const std::vector<std::string>& referencedIds);
     void MeasureBarrier(const std::string& barrierName);
