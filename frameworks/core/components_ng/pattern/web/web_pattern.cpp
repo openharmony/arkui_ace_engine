@@ -1643,8 +1643,8 @@ void WebPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 
 void WebPattern::HandleFocusEvent()
 {
-    TAG_LOGD(AceLogTag::ACE_WEB,
-        "WebPattern::HandleFocusEvent needOnFocus: %{public}d.", needOnFocus_);
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::HandleFocusEvent webId:%{public}d, needOnFocus: %{public}d.", GetWebId(),
+        needOnFocus_);
     CHECK_NULL_VOID(delegate_);
     isFocus_ = true;
     if (needOnFocus_) {
@@ -1657,9 +1657,9 @@ void WebPattern::HandleFocusEvent()
 
 void WebPattern::HandleBlurEvent(const BlurReason& blurReason)
 {
-    TAG_LOGD(AceLogTag::ACE_WEB,
-        "HandleBlurEvent selectPopupMenuShowing: %{public}d, isReceivedArkDrag: %{public}d.",
-        selectPopupMenuShowing_, isReceivedArkDrag_);
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "HandleBlurEvent webId:%{public}d, selectPopupMenuShowing: %{public}d, isReceivedArkDrag: %{public}d",
+        GetWebId(), selectPopupMenuShowing_, isReceivedArkDrag_);
     CHECK_NULL_VOID(delegate_);
     isFocus_ = false;
 
@@ -1672,6 +1672,10 @@ void WebPattern::HandleBlurEvent(const BlurReason& blurReason)
     }
     OnQuickMenuDismissed();
     CloseContextSelectionMenu();
+    if (!isVisible_ && isActive_ && IsDialogNested()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "HandleBlurEvent, dialog nested blur but invisible while active, set inactive.");
+        OnInActive();
+    }
 }
 
 bool WebPattern::HandleKeyEvent(const KeyEvent& keyEvent)
@@ -4829,9 +4833,11 @@ void WebPattern::OnActive()
 
 void WebPattern::OnVisibleAreaChange(bool isVisible)
 {
-    TAG_LOGD(AceLogTag::ACE_WEB,
-        "WebPattern::OnVisibleAreaChange webId:%{public}d, isVisible:%{public}d, old_isVisible:%{public}d",
-        GetWebId(), isVisible, isVisible_);
+    bool isDialogNested = IsDialogNested();
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "WebPattern::OnVisibleAreaChange webId:%{public}d, isVisible:%{public}d, old_isVisible:%{public}d, "
+        "isVisibleActiveEnable:%{public}d, isDialogNested:%{public}d, isFocus:%{public}d",
+        GetWebId(), isVisible, isVisible_, isVisibleActiveEnable_, isDialogNested, isFocus_);
     if (isVisible_ == isVisible) {
         return;
     }
@@ -4841,7 +4847,7 @@ void WebPattern::OnVisibleAreaChange(bool isVisible)
         CloseSelectOverlay();
         SelectCancel();
         isDragEndMenuShow_ = false;
-        if (isVisibleActiveEnable_) {
+        if (isVisibleActiveEnable_ && (!isDialogNested || !isFocus_)) {
             OnInActive();
         }
     } else {
