@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
 #define private public
 #define protected public
@@ -328,27 +329,26 @@ HWTEST_F(RichEditorPatternTestFourNg, UpdatePreviewText002, TestSize.Level1)
 
     previewRange.start = -1;
     previewRange.end = -1;
-    richEditorPattern->previewTextRecord_.previewContent="";
+    richEditorPattern->previewTextRecord_.previewContent = "";
     res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
 
     previewRange.start = -1;
     previewRange.end = -2;
-    richEditorPattern->previewTextRecord_.previewContent="";
+    richEditorPattern->previewTextRecord_.previewContent = "";
     res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
 
     previewRange.start = -1;
     previewRange.end = -2;
-    richEditorPattern->previewTextRecord_.previewContent="abc";
+    richEditorPattern->previewTextRecord_.previewContent = "abc";
     res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
 
     previewRange.start = -1;
     previewRange.end = -1;
-    richEditorPattern->previewTextRecord_.previewContent="abc";
+    richEditorPattern->previewTextRecord_.previewContent = "abc";
     res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
 
     ASSERT_NE(res, false);
 }
-
 
 /**
  * @tc.name: UpdatePreviewText003
@@ -370,22 +370,22 @@ HWTEST_F(RichEditorPatternTestFourNg, UpdatePreviewText003, TestSize.Level1)
 
     previewRange.start = -2;
     previewRange.end = -1;
-    richEditorPattern->previewTextRecord_.previewContent="";
+    richEditorPattern->previewTextRecord_.previewContent = "";
     bool res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
 
     previewRange.start = -2;
     previewRange.end = -2;
-    richEditorPattern->previewTextRecord_.previewContent="";
+    richEditorPattern->previewTextRecord_.previewContent = "";
     res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
 
     previewRange.start = -2;
     previewRange.end = -2;
-    richEditorPattern->previewTextRecord_.previewContent="abc";
+    richEditorPattern->previewTextRecord_.previewContent = "abc";
     res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
 
     previewRange.start = -2;
     previewRange.end = -1;
-    richEditorPattern->previewTextRecord_.previewContent="abc";
+    richEditorPattern->previewTextRecord_.previewContent = "abc";
     res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
 
     ASSERT_NE(res, true);
@@ -1140,5 +1140,138 @@ HWTEST_F(RichEditorPatternTestFourNg, SetPreviewText001, TestSize.Level1)
     richEditorPattern->SetPreviewText(previewTextValue, range);
 
     ASSERT_EQ(richEditorPattern->InitPreviewText(previewTextValue, range), false);
+}
+
+/**
+ * @tc.name: DeleteValueInStyledString002
+ * @tc.desc: test RichEditorPattern DeleteValueInStyledString
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, DeleteValueInStyledString002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>("abc");
+    richEditorPattern->caretVisible_ = false;
+    richEditorPattern->previewLongPress_ = true;
+
+    ASSERT_EQ(!richEditorPattern->BeforeStyledStringChange(0, 10, ""), false);
+
+    richEditorPattern->DeleteValueInStyledString(0, 0, true, false);
+
+    richEditorPattern->DeleteValueInStyledString(0, 0, false, false);
+
+    ASSERT_EQ(!richEditorPattern->textSelector_.SelectNothing(), false);
+}
+
+/**
+ * @tc.name: InsertValueOperation001
+ * @tc.desc: test InsertValueOperation
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, InsertValueOperation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init and call function.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+
+    struct UpdateSpanStyle typingStyle;
+    TextStyle textStyle(5);
+    richEditorPattern->SetTypingStyle(typingStyle, textStyle);
+    std::string insertValue = "test123";
+    RichEditorPattern::OperationRecord record;
+
+    richEditorPattern->InsertValueOperation(insertValue, &record, OperationType::DEFAULT);
+
+    EXPECT_TRUE(richEditorPattern->typingStyle_.has_value());
+}
+
+/**
+ * @tc.name: GetLeftWordPosition001
+ * @tc.desc: test GetLeftWordPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, GetLeftWordPosition001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    AddSpan("hello1");
+    int32_t res = richEditorPattern->GetLeftWordPosition(-9999);
+
+    EXPECT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: ProcessDeleteNodes001
+ * @tc.desc: test ProcessDeleteNodes
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, ProcessDeleteNodes001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    RichEditorAbstractSpanResult a;
+    a.SetSpanType(SpanResultType::SYMBOL);
+    std::list<RichEditorAbstractSpanResult> list;
+    list.emplace_back(a);
+    int32_t res = richEditorPattern->ProcessDeleteNodes(list);
+    EXPECT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: HandleSurfaceChanged001
+ * @tc.desc: test HandleSurfaceChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, HandleSurfaceChanged001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->magnifierController_->isShowMagnifier_ = true;
+    richEditorPattern->HandleSurfaceChanged(0, 0, 0, 0);
+
+    EXPECT_EQ(richEditorPattern->magnifierController_->GetShowMagnifier(), true);
+}
+
+/**
+ * @tc.name: InitSelection_ABOVE_LINE
+ * @tc.desc: test InitSelection with SELECT_ABOVE_LINE
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, InitSelection_ABOVE_LINE, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    AddSpan("ab\n\nab");
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+
+    PositionWithAffinity positionWithAffinity(3, TextAffinity::DOWNSTREAM);
+    EXPECT_CALL(*paragraph, GetGlyphPositionAtCoordinate(_)).WillRepeatedly(Return(positionWithAffinity));
+
+    Offset touchOffset = Offset(0.0f, 0.0f);
+    richEditorPattern->previewLongPress_ = true;
+    richEditorPattern->InitSelection(touchOffset);
+
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
 }
 } // namespace OHOS::Ace::NG

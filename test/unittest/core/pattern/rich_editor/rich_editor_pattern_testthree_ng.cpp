@@ -21,9 +21,9 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-    constexpr uint32_t RECORD_MAX_LENGTH = 20;
-    constexpr int32_t SYMBOL_SPAN_LENGTH = 2;
-    const std::string TEST_INSERT_LINE_SPACE = " ";
+constexpr uint32_t RECORD_MAX_LENGTH = 20;
+constexpr int32_t SYMBOL_SPAN_LENGTH = 2;
+const std::string TEST_INSERT_LINE_SPACE = " ";
 } // namespace
 
 class RichEditorPatternTestThreeNg : public RichEditorCommonTestNg {
@@ -158,7 +158,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, CursorMoveEnd001, TestSize.Level2)
     ASSERT_NE(richEditorPattern, nullptr);
     EXPECT_FALSE(richEditorPattern->CursorMoveToParagraphBegin());
 }
-
 
 /**
  * @tc.name: GetLeftWordPosition001
@@ -503,8 +502,7 @@ HWTEST_F(RichEditorPatternTestThreeNg, HandleUserGestureEvent001, TestSize.Level
     firstSpanItem->leadingMargin = std::make_optional<NG::LeadingMargin>();
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     ASSERT_NE(paragraph, nullptr);
-    richEditorPattern->paragraphs_.AddParagraph(
-        { .paragraph = paragraph, .start = 0, .end = 10 });
+    richEditorPattern->paragraphs_.AddParagraph({ .paragraph = paragraph, .start = 0, .end = 10 });
 
     std::vector<RectF> rects { RectF(0, 0, 5, 5) };
     EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<THIRD_PARAM>(rects));
@@ -512,9 +510,150 @@ HWTEST_F(RichEditorPatternTestThreeNg, HandleUserGestureEvent001, TestSize.Level
     GestureEvent info;
     info.SetLocalLocation(Offset(3, 3));
     richEditorPattern->contentRect_ = RectF(0, 0, 20.0, 20.0);
-    auto gestureFunc = [](RefPtr<SpanItem> item, GestureEvent& info) -> bool {
-        return true;
-    };
+    auto gestureFunc = [](RefPtr<SpanItem> item, GestureEvent& info) -> bool { return true; };
     EXPECT_TRUE(richEditorPattern->HandleUserGestureEvent(info, std::move(gestureFunc)));
+}
+
+/**
+ * @tc.name: HandleTouchEvent001
+ * @tc.desc: test HandleTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, HandleTouchEvent001, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    TouchEventInfo touchEventInfo("");
+    TouchLocationInfo touchLocationInfo(0);
+    touchLocationInfo.touchType_ = TouchType::DOWN;
+    touchLocationInfo.localLocation_ = Offset(0.0f, 0.0f);
+    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    richEditorPattern->HandleTouchEvent(touchEventInfo);
+    auto touchInfo = touchEventInfo.GetTouches().front();
+    auto touchType = touchInfo.GetTouchType();
+    EXPECT_EQ(touchType, TouchType::DOWN);
+}
+
+/**
+ * @tc.name: HandleTouchEvent002
+ * @tc.desc: test HandleTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, HandleTouchEvent002, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    TouchEventInfo touchEventInfo("");
+    TouchLocationInfo touchLocationInfo(0);
+    touchLocationInfo.touchType_ = TouchType::UP;
+    touchLocationInfo.localLocation_ = Offset(0.0f, 0.0f);
+    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    richEditorPattern->HandleTouchEvent(touchEventInfo);
+    auto touchInfo = touchEventInfo.GetTouches().front();
+    auto touchType = touchInfo.GetTouchType();
+    EXPECT_EQ(touchType, TouchType::UP);
+}
+
+/**
+ * @tc.name: HandleTouchEvent003
+ * @tc.desc: test HandleTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, HandleTouchEvent003, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    TouchEventInfo touchEventInfo("");
+    TouchLocationInfo touchLocationInfo(0);
+    touchLocationInfo.touchType_ = TouchType::MOVE;
+    touchLocationInfo.localLocation_ = Offset(0.0f, 0.0f);
+    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    richEditorPattern->HandleTouchEvent(touchEventInfo);
+    auto touchInfo = touchEventInfo.GetTouches().front();
+    auto touchType = touchInfo.GetTouchType();
+    EXPECT_EQ(touchType, TouchType::MOVE);
+}
+
+/**
+ * @tc.name: HandleTouchEvent004
+ * @tc.desc: test HandleTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, HandleTouchEvent004, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    TouchEventInfo touchEventInfo("");
+    TouchLocationInfo touchLocationInfo(0);
+    touchLocationInfo.touchType_ = TouchType::UNKNOWN;
+    touchLocationInfo.localLocation_ = Offset(0.0f, 0.0f);
+    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    richEditorPattern->HandleTouchEvent(touchEventInfo);
+    auto touchInfo = touchEventInfo.GetTouches().front();
+    auto touchType = touchInfo.GetTouchType();
+    EXPECT_EQ(touchType, TouchType::UNKNOWN);
+}
+
+/**
+ * @tc.name: GetRightWordPosition002
+ * @tc.desc: test GetRightWordPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, GetRightWordPosition002, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    std::string firstText = "text";
+    AddSpan(firstText);
+    std::string space = " ";
+    std::string secondText = "content";
+    AddSpan(space + secondText);
+    auto initCaretPosition = firstText.size();
+    EXPECT_EQ(richEditorPattern->GetRightWordPosition(initCaretPosition), initCaretPosition + space.size());
+}
+
+/**
+ * @tc.name: GetRightWordPosition003
+ * @tc.desc: test GetRightWordPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, GetRightWordPosition003, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    std::string firstText = "Text ";
+    AddSpan(firstText);
+    std::string secondText = "Content\n";
+    AddSpan(secondText);
+    AddSpan(INIT_VALUE_3);
+
+    auto initCaretPosition = firstText.size() + secondText.size() - 1;
+    EXPECT_EQ(richEditorPattern->GetRightWordPosition(initCaretPosition), initCaretPosition + 1);
+}
+
+/**
+ * @tc.name: InitScrollablePattern001
+ * @tc.desc: test InitScrollablePattern when update padding property
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, InitScrollablePattern001, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto layoutProperty = richEditorPattern->GetLayoutProperty<RichEditorLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    PaddingProperty padding;
+    padding.top = CalcLength(10);
+    padding.left = CalcLength(10);
+    padding.right = CalcLength(10);
+    padding.bottom = CalcLength(10);
+    layoutProperty->UpdatePadding(padding);
+    richEditorPattern->InitScrollablePattern();
+    EXPECT_TRUE(IsEqual(richEditorPattern->richTextRect_.GetOffset(), OffsetF(10.0f, 10.0f)));
 }
 } // namespace OHOS::Ace::NG
