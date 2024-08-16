@@ -1230,22 +1230,84 @@ void SwiperPattern::HandleSwiperCustomAnimation(float offset)
     indexsInAnimation_.clear();
     CalculateAndUpdateItemInfo(offset);
 
-    SwiperLayoutAlgorithm::PositionMap itemsAnimationFinished;
+    auto visibleIndex = CalcVisibleIndex();
+    auto visibleIndexWithOffset = CalcVisibleIndex(offset);
+    std::set<int32_t> unmountIndexs;
     for (auto& item : itemPositionInAnimation_) {
         if (indexsInAnimation_.find(item.first) == indexsInAnimation_.end() &&
-            needUnmountIndexs_.find(item.first) == needUnmountIndexs_.end()) {
+            needUnmountIndexs_.find(item.first) == needUnmountIndexs_.end() &&
+            visibleIndex.find(item.first) != visibleIndex.end() &&
+            visibleIndexWithOffset.find(item.first) == visibleIndexWithOffset.end()) {
             indexsInAnimation_.insert(item.first);
             needUnmountIndexs_.insert(item.first);
             item.second.startPos += offset;
             item.second.endPos += offset;
-            itemsAnimationFinished.insert(item);
+            unmountIndexs.insert(item.first);
         }
     }
-    for (auto& item : itemsAnimationFinished) {
-        OnSwiperCustomAnimationFinish(item);
+    for (const auto& index : unmountIndexs) {
+        auto iter = itemPositionInAnimation_.find(index);
+        if (iter == itemPositionInAnimation_.end()) {
+            continue;
+        }
+
+        OnSwiperCustomAnimationFinish(iter->second.task, index, iter->second.isFinishAnimation);
     }
 
     FireSwiperCustomAnimationEvent();
+}
+
+std::set<int32_t> SwiperPattern::CalcVisibleIndex(float offset) const
+{
+    auto prevMargin = GetPrevMargin();
+    auto nextMargin = GetNextMargin();
+    auto visibleSize = CalculateVisibleSize();
+    auto itemSpace = GetItemSpace();
+    auto isLoop = IsLoop();
+    auto displayCount = GetDisplayCount();
+    auto swipeByGroup = IsSwipeByGroup();
+    std::set<int32_t> visibleIndex;
+
+    for (auto& item : itemPosition_) {
+        auto index = item.first;
+        auto startPos = item.second.startPos + offset;
+        auto endPos = item.second.endPos + offset;
+        auto itemPosDiff = endPos - startPos + itemSpace;
+        auto pageStartIndex = swipeByGroup ? SwiperUtils::ComputePageIndex(index, displayCount) : index;
+        auto pageEndIndex = swipeByGroup ? SwiperUtils::ComputePageEndIndex(index, displayCount) : index;
+        auto pageStartPos = swipeByGroup ? startPos - itemPosDiff * (index - pageStartIndex) : startPos;
+        auto pageEndPos = swipeByGroup ? endPos + itemPosDiff * (pageEndIndex - index) : endPos;
+
+        if (LessOrEqual(pageEndPos, NearZero(prevMargin) ? 0.0f : -prevMargin - itemSpace)) {
+            continue;
+        }
+        if (GreatOrEqual(pageStartPos, NearZero(nextMargin) ? visibleSize : visibleSize + nextMargin + itemSpace)) {
+            continue;
+        }
+
+        if (GreatNotEqual(startPos - itemSpace, NearZero(prevMargin) ? 0.0f : -prevMargin - itemSpace) &&
+            itemPosition_.find(index - 1) == itemPosition_.end() && (isLoop || index > 0)) {
+            pageStartIndex = swipeByGroup ? SwiperUtils::ComputePageIndex(index - 1, displayCount) : index - 1;
+        }
+        if (LessNotEqual(
+            endPos + itemSpace, NearZero(nextMargin) ? visibleSize : visibleSize + nextMargin + itemSpace) &&
+            itemPosition_.find(index + 1) == itemPosition_.end() && (isLoop || index < RealTotalCount() - 1)) {
+            pageEndIndex = swipeByGroup ? SwiperUtils::ComputePageEndIndex(index + 1, displayCount) : index + 1;
+        }
+        auto currentIndex = index - 1;
+        while (currentIndex >= pageStartIndex && itemPosition_.find(currentIndex) == itemPosition_.end()) {
+            visibleIndex.insert(GetLoopIndex(currentIndex));
+            currentIndex--;
+        }
+        currentIndex = index + 1;
+        while (currentIndex <= pageEndIndex && itemPosition_.find(currentIndex) == itemPosition_.end()) {
+            visibleIndex.insert(GetLoopIndex(currentIndex));
+            currentIndex++;
+        }
+        visibleIndex.insert(GetLoopIndex(index));
+    }
+
+    return visibleIndex;
 }
 
 void SwiperPattern::CalculateAndUpdateItemInfo(float offset)
@@ -1353,7 +1415,7 @@ void SwiperPattern::FireSwiperCustomAnimationEvent()
                 return;
             }
             item->second.isFinishAnimation = true;
-            swiper->OnSwiperCustomAnimationFinish(*item);
+            swiper->OnSwiperCustomAnimationFinish(item->second.task, index, true);
         });
         transition(proxy);
     }
@@ -1383,19 +1445,21 @@ void SwiperPattern::FireContentDidScrollEvent()
     indexsInAnimation_.clear();
 }
 
-void SwiperPattern::OnSwiperCustomAnimationFinish(std::pair<int32_t, SwiperItemInfo> item)
+void SwiperPattern::OnSwiperCustomAnimationFinish(
+    CancelableCallback<void()>& task, int32_t index, bool isFinishAnimation)
 {
-    if (needUnmountIndexs_.find(item.first) == needUnmountIndexs_.end()) {
+    if (needUnmountIndexs_.find(index) == needUnmountIndexs_.end()) {
         return;
     }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    if (item.second.task) {
-        item.second.task.Cancel();
+    if (task) {
+        task.Cancel();
     }
-    item.second.task.Reset([weak = AceType::WeakClaim(this), index = item.first] {
+
+    task.Reset([weak = AceType::WeakClaim(this), index] {
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
         swiper->needUnmountIndexs_.erase(index);
@@ -1403,11 +1467,10 @@ void SwiperPattern::OnSwiperCustomAnimationFinish(std::pair<int32_t, SwiperItemI
         swiper->MarkDirtyNodeSelf();
     });
     int32_t timeout = 0;
-    if (onSwiperCustomContentTransition_ && !item.second.isFinishAnimation) {
+    if (onSwiperCustomContentTransition_ && !isFinishAnimation) {
         timeout = onSwiperCustomContentTransition_->timeout;
     }
-    taskExecutor->PostDelayedTask(
-        item.second.task, TaskExecutor::TaskType::UI, timeout, "ArkUISwiperDelayedCustomAnimation");
+    taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI, timeout, "ArkUISwiperDelayedCustomAnimation");
 }
 
 void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
