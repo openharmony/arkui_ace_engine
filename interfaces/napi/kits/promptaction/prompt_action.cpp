@@ -547,7 +547,7 @@ napi_value JSPromptCloseToast(napi_env env, napi_callback_info info)
         NapiThrow(env, "The toastId is invalid.", ERROR_CODE_PARAM_INVALID);
         return nullptr;
     }
-    int32_t showModeVal = id & 0b111;
+    int32_t showModeVal = static_cast<int32_t>(static_cast<uint32_t>(id) & 0b111);
     int32_t toastId =
         static_cast<int32_t>(static_cast<uint32_t>(id) >>
                              3); // 3 : Move 3 bits to the right to get toastId, and the last 3 bits are the showMode
