@@ -63,13 +63,15 @@ public:
         return it->second.stagingValue_;
     }
 
-    T CalculateDelta(const WeakPtr<AnimatableProperty<T>>& ptr, int32_t ticks)
+    /* move staging value by one frame */
+    void Next(const WeakPtr<AnimatableProperty<T>>& ptr, int32_t remainingTicks)
     {
         auto it = props_.find(ptr);
-        if (it == props_.end() || ticks == 0) {
-            return {};
+        if (it == props_.end() || remainingTicks == 0) {
+            return;
         }
-        return (it->second.endValue_ - it->second.stagingValue_) / ticks;
+        T delta = (it->second.endValue_ - it->second.stagingValue_) / remainingTicks;
+        it->second.stagingValue_ += delta;
     }
 
 private:

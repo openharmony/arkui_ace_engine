@@ -30,7 +30,7 @@ public:
         : params_(std::move(param)), props_(std::move(props)), remainingTicks_(ticks)
     {}
 
-    void Tick();
+    void Next();
 
     bool Finished() const
     {
@@ -38,6 +38,8 @@ public:
     }
 
 private:
+    void UpdateProp(const WeakPtr<NG::PropertyBase>& propWk) const;
+
     AnimationParam params_;
     std::set<WeakPtr<NG::PropertyBase>> props_;
     int32_t remainingTicks_ = 0;

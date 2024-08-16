@@ -35,10 +35,10 @@ std::shared_ptr<AnimationUtils::Animation> MockAnimationManager::CloseAnimation(
 void MockAnimationManager::Tick()
 {
     for (auto it = animations_.begin(); it != animations_.end();) {
-        if ((*it)->Finished()) {
+        if (*it == nullptr || (*it)->Finished()) {
             it = animations_.erase(it);
         } else {
-            (*it)->Tick();
+            (*it)->Next();
         }
     }
 }

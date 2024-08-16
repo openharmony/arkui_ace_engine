@@ -22,20 +22,27 @@
 #include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace {
-void AnimationUtils::Animation::Tick()
+void AnimationUtils::Animation::UpdateProp(const WeakPtr<NG::PropertyBase>& propWk) const
+{
+#ifdef ENHANCED_ANIMATION
+    if (auto prop = AceType::DynamicCast<NG::AnimatablePropertyFloat>(propWk.Upgrade()); prop) {
+        NG::MockAnimationProxy<float>::GetInstance().Next(prop, remainingTicks_);
+        auto cb = prop->GetUpdateCallback();
+        if (cb) {
+            cb(NG::MockAnimationProxy<float>::GetInstance().GetStagingValue(prop));
+        }
+    }
+    /* add update code for other types */
+#endif
+}
+
+void AnimationUtils::Animation::Next()
 {
     if (Finished()) {
         return;
     }
     for (const auto& propWk : props_) {
-        if (auto prop = AceType::DynamicCast<NG::AnimatablePropertyFloat>(propWk.Upgrade()); prop) {
-            float delta = NG::MockAnimationProxy<float>::GetInstance().CalculateDelta(prop, remainingTicks_);
-            auto cb = prop->GetUpdateCallback();
-            if (cb) {
-                cb(delta);
-            }
-        }
-        /* add update code for other types */
+        UpdateProp(propWk);
     }
     if (params_.repeatCb) {
         params_.repeatCb();
@@ -57,7 +64,9 @@ public:
 void AnimationUtils::OpenImplicitAnimation(
     const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& wrapFinishCallback)
 {
+#ifdef ENHANCED_ANIMATION
     AnimManager::GetInstance().OpenAnimation();
+#endif
     if (wrapFinishCallback) {
         wrapFinishCallback();
     }
@@ -77,15 +86,19 @@ bool AnimationUtils::IsImplicitAnimationOpen()
 void AnimationUtils::Animate(const AnimationOption& option, const PropertyCallback& callback,
     const FinishCallback& finishCallback, const RepeatCallback& repeatCallback)
 {
+#ifdef ENHANCED_ANIMATION
     AnimManager::GetInstance().SetParams({ finishCallback, repeatCallback });
     AnimManager::GetInstance().OpenAnimation();
+#endif
     if (callback) {
         callback();
     }
+#ifdef ENHANCED_ANIMATION
     AnimManager::GetInstance().CloseAnimation();
     if (AnimManager::Enabled()) {
         return;
     }
+#endif
 
     if (repeatCallback) {
         repeatCallback();
