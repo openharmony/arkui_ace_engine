@@ -633,7 +633,7 @@ void ListPattern::DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper)
         int32_t indexStep = 0;
         int32_t startIndex = itemPosition_.empty() ? 0 : itemPosition_.begin()->first;
         for (auto& pos : itemPosition_) {
-            auto wrapper = layoutWrapper->GetOrCreateChildByIndex(pos.first);
+            auto wrapper = layoutWrapper->GetOrCreateChildByIndex(pos.first + itemStartIndex_);
             CHECK_NULL_VOID(wrapper);
             auto itemHost = wrapper->GetHostNode();
             CHECK_NULL_VOID(itemHost);
@@ -1800,7 +1800,7 @@ Rect ListPattern::GetItemRect(int32_t index) const
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, Rect());
-    auto item = host->GetChildByIndex(index);
+    auto item = host->GetChildByIndex(index + itemStartIndex_);
     CHECK_NULL_RETURN(item, Rect());
     auto itemGeometry = item->GetGeometryNode();
     CHECK_NULL_RETURN(itemGeometry, Rect());
@@ -2449,7 +2449,7 @@ std::vector<RefPtr<FrameNode>> ListPattern::GetVisibleSelectedItems()
     auto host = GetHost();
     CHECK_NULL_RETURN(host, children);
     for (int32_t index = startIndex_; index <= endIndex_; ++index) {
-        auto item = host->GetChildByIndex(index);
+        auto item = host->GetChildByIndex(index + itemStartIndex_);
         if (!AceType::InstanceOf<FrameNode>(item)) {
             continue;
         }
