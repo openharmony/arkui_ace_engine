@@ -31,9 +31,9 @@
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/image/image_source_info.h"
+#include "core/interfaces/native/node/node_api.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/arkoala/utility/generated/converter_generated.h"
-#include "utils.h"
 
 
 namespace OHOS::Ace::NG::Converter {
@@ -361,6 +361,17 @@ namespace OHOS::Ace::NG::Converter {
         PaddingProperty padding;
         return padding;
     }
+    struct ImageResource {
+        uint32_t type;
+        std::string bundleName;
+        std::string moduleName;
+        int32_t id;
+        std::vector<std::string> params;
+    };
+
+    ImageSourceInfo Convert(Ark_NativePointer node, const Type_ImageInterface_setImageOptions_Arg0& value);
+    ImageSourceInfo Convert(Ark_NativePointer node, const Type_ImageAttribute_alt_Arg0& value);
+    ImageResource Convert(const Ark_Resource& value);
 
 } // namespace OHOS::Ace::NG::Converter
 

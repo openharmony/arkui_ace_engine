@@ -12,13 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "core/interfaces/arkoala/utility/converter.h"
 
-#include "arkoala_api_generated.h"
-#include "core/interfaces/arkoala/generated/interface/node_api.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
-#include "core/interfaces/arkoala/utility/converter.h"
-#include "core/interfaces/arkoala/utility/utils.h"
+#include "core/interfaces/arkoala/generated/interface/node_api.h"
 #include "frameworks/core/components/common/layout/constants.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -26,10 +24,11 @@ namespace ImageInterfaceModifier {
 void SetImageOptions0Impl(Ark_NativePointer node,
                           const Type_ImageInterface_setImageOptions_Arg0* src)
 {
+    ImageSourceInfo info = Converter::Convert(node, *src);
+    std::string imageSrc = info.GetSrc();
+
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageSourceInfo info = OHOS::Ace::NG::Utils::Convert(frameNode, *src);
-    std::string imageSrc = info.GetSrc();
     ImageModelNG::InitImage(frameNode, imageSrc);
 }
 void SetImageOptions1Impl(Ark_NativePointer node,
@@ -50,7 +49,7 @@ void AltImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageSourceInfo info = OHOS::Ace::NG::Utils::Convert(frameNode, *value);
+    ImageSourceInfo info = Converter::Convert(frameNode, *value);
     ImageModelNG::SetAlt(frameNode, info);
 }
 void MatchTextDirectionImpl(Ark_NativePointer node,
@@ -302,7 +301,7 @@ const GENERATED_ArkUIImageModifier* GetImageModifier()
         ImageAttributeModifier::CopyOptionImpl,
         ImageAttributeModifier::DraggableImpl,
         ImageAttributeModifier::PointLightImpl,
-        ImageAttributeModifier::EdgeAntialiasingImpl,_setImageOptions_PixelMapResourceStrDrawableDescriptor_ImageAIOptionsImpl
+        ImageAttributeModifier::EdgeAntialiasingImpl,
         ImageAttributeModifier::OnCompleteImpl,
         ImageAttributeModifier::OnErrorImpl,
         ImageAttributeModifier::OnFinishImpl,
