@@ -141,7 +141,7 @@ void ImagePainter::DrawObscuration(RSCanvas& canvas, const OffsetF& offset, cons
 void ImagePainter::DrawImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const
 {
     if (!canvasImage_) {
-        TAG_LOGE(AceLogTag::ACE_IMAGE, "canvasImage is null");
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "canvasImage is null");
         return;
     }
     const auto config = canvasImage_->GetPaintConfig();

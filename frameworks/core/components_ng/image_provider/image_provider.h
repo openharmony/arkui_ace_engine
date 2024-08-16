@@ -23,6 +23,7 @@
 #include "base/thread/cancelable_callback.h"
 #include "core/components_ng/image_provider/image_data.h"
 #include "core/components_ng/image_provider/image_state_manager.h"
+#include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/image/image_source_info.h"
 
@@ -52,6 +53,7 @@ struct ImageDecoderOptions {
     DynamicRangeMode dynamicMode = DynamicRangeMode::STANDARD;
     AIImageQuality imageQuality = AIImageQuality::NONE;
     bool isHdrDecoderNeed = false;
+    ImageDfxConfig imageDfxConfig;
 };
 
 class ImageObject;

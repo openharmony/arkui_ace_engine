@@ -41,6 +41,15 @@ public:
         return "";
     }
 
+    void SetDfxConfig(int32_t nodeId, int64_t accessibilityId)
+    {
+        nodeId_ = nodeId;
+        accessibilityId_ = accessibilityId;
+    }
+
+    int32_t nodeId_ = -1;
+    int64_t accessibilityId_ = -1;
+
     ACE_DISALLOW_COPY_AND_MOVE(ImageData);
 };
 
