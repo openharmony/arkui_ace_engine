@@ -170,8 +170,9 @@ void MultipleParagraphLayoutAlgorithm::GetChildrenPlaceholderIndex(std::vector<i
 }
 
 void MultipleParagraphLayoutAlgorithm::GetSpanParagraphStyle(
-    const std::unique_ptr<TextLineStyle>& lineStyle, ParagraphStyle& pStyle)
+    LayoutWrapper* layoutWrapper, const RefPtr<SpanItem>& spanItem, ParagraphStyle& pStyle)
 {
+    const auto& lineStyle = spanItem->textLineStyle;
     CHECK_NULL_VOID(lineStyle);
     if (lineStyle->HasTextAlign()) {
         pStyle.align = lineStyle->GetTextAlignValue();
@@ -199,6 +200,11 @@ void MultipleParagraphLayoutAlgorithm::GetSpanParagraphStyle(
     }
     if (lineStyle->HasLineHeight()) {
         pStyle.lineHeight = lineStyle->GetLineHeightValue();
+    }
+    if (layoutWrapper) {
+        pStyle.direction = GetTextDirection(spanItem->content, layoutWrapper);
+    } else {
+        pStyle.direction = GetTextDirectionByContent(spanItem->content);
     }
 }
 
@@ -389,7 +395,7 @@ TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirection(
 {
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(textLayoutProperty, TextDirection::LTR);
-    
+
     auto direction = textLayoutProperty->GetLayoutDirection();
     if (direction == TextDirection::LTR || direction == TextDirection::RTL) {
         return direction;
@@ -400,6 +406,11 @@ TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirection(
         return TextDirection::RTL;
     }
 
+    return GetTextDirectionByContent(content);
+}
+
+TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirectionByContent(const std::string& content)
+{
     TextDirection textDirection = TextDirection::LTR;
     auto showingTextForWString = StringUtils::ToWstring(content);
     for (const auto& charOfShowingText : showingTextForWString) {
@@ -468,7 +479,7 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
         ParagraphStyle spanParagraphStyle = paraStyle;
         RefPtr<SpanItem> paraStyleSpanItem = GetParagraphStyleSpanItem(group);
         if (paraStyleSpanItem) {
-            GetSpanParagraphStyle(paraStyleSpanItem->textLineStyle, spanParagraphStyle);
+            GetSpanParagraphStyle(layoutWrapper, paraStyleSpanItem, spanParagraphStyle);
             if (paraStyleSpanItem->fontStyle->HasFontSize()) {
                 spanParagraphStyle.fontSize = paraStyleSpanItem->fontStyle->GetFontSizeValue().ConvertToPxDistribute(
                     textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
