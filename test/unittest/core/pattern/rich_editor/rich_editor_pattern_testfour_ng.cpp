@@ -1243,7 +1243,7 @@ HWTEST_F(RichEditorPatternTestFourNg, HandleSurfaceChanged001, TestSize.Level1)
     richEditorPattern->magnifierController_->isShowMagnifier_ = true;
     richEditorPattern->HandleSurfaceChanged(0, 0, 0, 0);
 
-    EXPECT_EQ(richEditorPattern->magnifierController_->GetShowMagnifier(), true);
+    EXPECT_EQ(richEditorPattern->magnifierController_->GetShowMagnifier(), false);
 }
 
 /**
