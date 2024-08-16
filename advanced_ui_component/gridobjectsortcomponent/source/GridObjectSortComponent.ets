@@ -17,8 +17,8 @@ import vibrator from '@ohos.vibrator';
 import curves from '@ohos.curves';
 
 // import component
-import { ComposeTitleBar } from "@kit.ArkUI";
-import { EditableTitleBar, EditableLeftIconType } from "@kit.ArkUI";
+import { ComposeTitleBar, LengthMetrics, MeasureText } from '@kit.ArkUI';
+import { EditableTitleBar, EditableLeftIconType } from '@kit.ArkUI';
 import { SubHeader, OperationType } from '@kit.ArkUI';
 import { common, EnvironmentCallback } from '@kit.AbilityKit';
 import { BusinessError } from '@kit.BasicServicesKit';
@@ -29,10 +29,11 @@ const COL_IMAGE_TEXT = 3;
 const COL_TEXT = 4;
 const GRID_COL_3 = '1fr 1fr 1fr';
 const GRID_COL_4 = '1fr 1fr 1fr 1fr';
-const BLOCK_TEXT_HEIGHT = 36;
 const ICON_SIZE = 24;
 const IMAGE_DEFAULT = 56;
 const TEXT_PADDING_LEFT_RIGHT = 12;
+const PADDING_EIGHT = 4;
+const GRID_ITEM_HEIGHT_TEXT = 28;
 const MARGIN_EIGHT = 8;
 const ROW_GAP = 16;
 const SUBTITLE_HEIGHT = 56;
@@ -139,6 +140,7 @@ export struct GridObjectSortComponent {
   @State arraySelectIsChange: number = 0;
   @State arrayUnSelectIsChange: number = 0;
   @State textItemEditWidth: number = 0;
+  @State textItemEditHeight: number = 0;
   @State imageItemWidth: number = 0;
   @State saveClick: boolean = false;
   @State imageTextAddIconShow: boolean = false;
@@ -185,17 +187,32 @@ export struct GridObjectSortComponent {
     } catch (exception) {
       let code = (exception as BusinessError).code;
       let message = (exception as BusinessError).message;
-      hilog.error(0x3900, 'Ace', `Faild to init fontsizescale info,cause, code:${code}, message: ${message}`);
+      hilog.error(0x3900, 'Ace',
+        `GridObjectSortComponent Faild to init fontsizescale info, code:${code}, message: ${message}`);
     }
     try {
       this.callbackId = getContext()?.getApplicationContext()?.on('environment', this.envCallback);
     } catch (paramError) {
-      console.error(`error: ${(paramError as BusinessError).code}, ${(paramError as BusinessError).message}`);
+      let code = (paramError as BusinessError).code;
+      let message = (paramError as BusinessError).message;
+      hilog.error(0x3900, 'Ace',
+        `GridObjectSortComponent Faild to get environment param error: ${code}, ${message}`);
     }
     this.calcGridHeight();
     setTimeout(() => {
       this.firstIn = false;
     }, 500);
+  }
+
+  calcTextItemEditHeight() {
+    let sizeOptions: SizeOptions = MeasureText.measureTextSize({
+      textContent: this.dataList[0]?.text ?? '',
+      fontSize: `${ (LengthMetrics.resource($r('sys.float.ohos_id_text_size_button3'))?.value ?? 12) * (this.fontSizeScale ?? 1) }vp`,
+      overflow: TextOverflow.Ellipsis,
+      maxLines: TEXT_MAX_LINES
+    });
+    this.textItemEditHeight = this.fontSizeScale === 1 ? GRID_ITEM_HEIGHT_TEXT : px2vp(sizeOptions.height as number);
+    this.textItemEditHeight = this.textItemEditHeight + 8;
   }
 
   private envCallback: EnvironmentCallback = {
@@ -260,7 +277,9 @@ export struct GridObjectSortComponent {
   onGridComStateChange() {
     this.textItemEditWidth = this.gridComState ? this.blockWidth - 24 : this.blockWidth - 16;
     if (!this.imageText) {
-      this.blockHeight = this.gridComState ? 44 : BLOCK_TEXT_HEIGHT;
+      this.blockHeight = this.gridComState ?
+        this.textItemEditHeight + 16 :
+        this.textItemEditHeight + 8;
     }
   }
 
@@ -309,6 +328,9 @@ export struct GridObjectSortComponent {
 
   // save data
   onSaveEdit() {
+    if (this.isStartDrag) {
+      return;
+    }
     animateTo({
       duration: ENTER_EXIT_ICON_DURATION,
       curve: LONG_TOUCH_SCALE
@@ -395,7 +417,7 @@ export struct GridObjectSortComponent {
     return blockWidth;
   }
 
-  calcGridHeight(){
+  calcGridHeight() {
     this.editGridHeight = this.getGridHeight(this.selected, 'edit');
     this.addGridHeight = this.getGridHeight(this.unSelected);
   }
@@ -432,7 +454,7 @@ export struct GridObjectSortComponent {
   imageTextRemoveIcon(select: GridObjectSortComponentItem): Resource {
     const clickRemoveIcon: boolean = this.clickRemoveBtn && this.content.id === select.id;
     const icon = clickRemoveIcon ?
-      $r("sys.media.ohos_ic_public_add_norm_filled") : $r("sys.media.ohos_ic_public_remove_filled");
+    $r('sys.media.ohos_ic_public_add_norm_filled') : $r('sys.media.ohos_ic_public_remove_filled');
     return icon;
   }
 
@@ -440,7 +462,7 @@ export struct GridObjectSortComponent {
   imageTextAddIcon(select: GridObjectSortComponentItem): Resource {
     const clickAddIcon: boolean = this.clickAddBtn && this.content.id === select.id && this.gridComState;
     const icon = clickAddIcon ?
-      $r("sys.media.ohos_ic_public_remove_filled") : $r("sys.media.ohos_ic_public_add_norm_filled");
+    $r('sys.media.ohos_ic_public_remove_filled') : $r('sys.media.ohos_ic_public_add_norm_filled');
     return icon;
   }
   // Displaying and hiding area icons in image_text mode
@@ -505,7 +527,7 @@ export struct GridObjectSortComponent {
     const removeNumY: number = totalRows - currentLine;
     const minusLine: number = len % col;
     const line: number = minusLine === 1 ? removeNumY : removeNumY + 1;
-    if(this.fontSizeScale && this.fontSizeScale > 1){
+    if (this.fontSizeScale && this.fontSizeScale > 1) {
       subTitleHeight = this.subTitleHeight;
     }
     yNew = line * this.blockHeight + subTitleHeight;
@@ -555,7 +577,7 @@ export struct GridObjectSortComponent {
     } else {
       itemHeight = (removeRow + 1) * this.blockHeight;
     }
-    if(this.fontSizeScale && this.fontSizeScale > 1){
+    if (this.fontSizeScale && this.fontSizeScale > 1) {
       subTitleHeight = this.subTitleHeight;
     }
     yNew = itemHeight + subTitleHeight;
@@ -674,9 +696,9 @@ export struct GridObjectSortComponent {
             .minFontScale(MIN_FONT_SCALE)
             .maxFontScale(this.fontSizeScale)
 
-          Image($r("sys.media.ohos_ic_public_remove_filled"))
+          Image($r('sys.media.ohos_ic_public_remove_filled'))
             .draggable(false)
-            .fillColor($r("sys.color.ohos_id_color_secondary"))
+            .fillColor($r('sys.color.ohos_id_color_secondary'))
             .width(ICON_SIZE)
             .height(ICON_SIZE)
             .position({
@@ -702,9 +724,9 @@ export struct GridObjectSortComponent {
             .maxLines(TEXT_MAX_LINES)
             .minFontScale(MIN_FONT_SCALE)
             .maxFontScale(this.fontSizeScale)
-          Image($r("sys.media.ohos_ic_public_remove_filled"))
+          Image($r('sys.media.ohos_ic_public_remove_filled'))
             .draggable(false)
-            .fillColor($r("sys.color.ohos_id_color_secondary"))
+            .fillColor($r('sys.color.ohos_id_color_secondary'))
             .width(ICON_SIZE)
             .height(ICON_SIZE)
             .position({
@@ -722,7 +744,7 @@ export struct GridObjectSortComponent {
         .justifyContent(FlexAlign.Center)
         .backgroundColor($r('sys.color.ohos_id_color_button_normal'))
         .width(this.textItemEditWidth)
-        .height(28)
+        .height(this.textItemEditHeight)
       }
     }
     .clip(false)
@@ -768,11 +790,15 @@ export struct GridObjectSortComponent {
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .minFontScale(MIN_FONT_SCALE)
           .maxFontScale(this.fontSizeScale)
+          .padding({
+            top: PADDING_EIGHT,
+            bottom: PADDING_EIGHT
+          })
 
         Image(this.imageTextAddIcon(select))
           .draggable(false)
-          .visibility(type === "add" ? this.imageTextAddIconVisible(select) : Visibility.Hidden)
-          .fillColor($r("sys.color.ohos_id_color_secondary"))
+          .visibility(type === 'add' ? this.imageTextAddIconVisible(select) : Visibility.Hidden)
+          .fillColor($r('sys.color.ohos_id_color_secondary'))
           .width(ICON_SIZE)
           .height(ICON_SIZE)
           .position({
@@ -817,8 +843,8 @@ export struct GridObjectSortComponent {
 
         Image(this.imageTextRemoveIcon(select))
           .draggable(false)
-          .fillColor($r("sys.color.ohos_id_color_secondary"))
-          .visibility(type === "delete" && this.gridComState ? Visibility.Visible : Visibility.Hidden)
+          .fillColor($r('sys.color.ohos_id_color_secondary'))
+          .visibility(type === 'delete' && this.gridComState ? Visibility.Visible : Visibility.Hidden)
           .width(ICON_SIZE)
           .height(ICON_SIZE)
           .position({
@@ -849,7 +875,6 @@ export struct GridObjectSortComponent {
   TextBlockBuilder(select: GridObjectSortComponentItem) {
     Stack() {
       Row() {
-
       }
       .borderRadius(50)
       .width(this.clickRemoveBtn && select.id === this.content.id ? this.textItemEditWidth + 8 : this.textItemEditWidth)
@@ -861,9 +886,8 @@ export struct GridObjectSortComponent {
         curve: this.gridComState ? DRAG_SPRING : COMMON_BEZIER
       } : { duration: 0 })
       .backgroundColor($r('sys.color.ohos_id_color_button_normal'))
-
       Flex({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center }) {
-        Image($r("sys.media.ohos_ic_public_add"))
+        Image($r('sys.media.ohos_ic_public_add'))
           .width(12)
           .height(12)
           .draggable(false)
@@ -875,7 +899,6 @@ export struct GridObjectSortComponent {
             duration: ENTER_EXIT_ICON_DURATION,
             curve: COMMON_BEZIER
           })
-
         Text(select.text)
           .fontColor($r('sys.color.ohos_id_color_text_primary'))
           .fontSize($r('sys.float.ohos_id_text_size_button3'))
@@ -884,9 +907,9 @@ export struct GridObjectSortComponent {
           .maxLines(TEXT_MAX_LINES)
           .minFontScale(MIN_FONT_SCALE)
           .maxFontScale(this.fontSizeScale)
-        Image($r("sys.media.ohos_ic_public_remove_filled"))
+        Image($r('sys.media.ohos_ic_public_remove_filled'))
           .draggable(false)
-          .fillColor($r("sys.color.ohos_id_color_secondary"))
+          .fillColor($r('sys.color.ohos_id_color_secondary'))
           .width(ICON_SIZE)
           .transition({ type: TransitionType.All, scale: { x: 0, y: 0, centerX: '50%' } })
           .scale(select.id === this.content.id ? { x: this.scaleIcon, y: this.scaleIcon } : {})
@@ -925,7 +948,7 @@ export struct GridObjectSortComponent {
       left: MARGIN_EIGHT,
       right: MARGIN_EIGHT
     })
-    .height(28)
+    .height(this.textItemEditHeight)
   }
 
   // 文本模式添加区域item
@@ -933,7 +956,6 @@ export struct GridObjectSortComponent {
   TextBlockAddItemBuilder(select: GridObjectSortComponentItem) {
     Stack() {
       Row() {
-
       }
       .borderRadius(50)
       .height('100%')
@@ -946,7 +968,7 @@ export struct GridObjectSortComponent {
       .backgroundColor($r('sys.color.ohos_id_color_button_normal'))
 
       Flex({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center }) {
-        Image($r("sys.media.ohos_ic_public_add"))
+        Image($r('sys.media.ohos_ic_public_add'))
           .draggable(false)
           .fillColor($r('sys.color.ohos_id_color_text_secondary'))
           .width(12)
@@ -968,10 +990,10 @@ export struct GridObjectSortComponent {
           .maxFontScale(this.fontSizeScale)
 
         if (this.gridComState && this.addIconShow && select.id === this.content.id) {
-          Image($r("sys.media.ohos_ic_public_remove_filled"))
+          Image($r('sys.media.ohos_ic_public_remove_filled'))
             .draggable(false)
             .transition({ type: TransitionType.All, scale: { x: 0, y: 0 } })
-            .fillColor($r("sys.color.ohos_id_color_secondary"))
+            .fillColor($r('sys.color.ohos_id_color_secondary'))
             .width(ICON_SIZE)
             .translate(this.gridComState ? { x: -MARGIN_EIGHT } : {})
             .position({
@@ -1000,7 +1022,7 @@ export struct GridObjectSortComponent {
       left: MARGIN_EIGHT,
       right: MARGIN_EIGHT
     })
-    .height(28)
+    .height(this.textItemEditHeight)
   }
 
   @Builder
@@ -1010,7 +1032,7 @@ export struct GridObjectSortComponent {
         GridItem() {
           Stack() {
             if (this.imageText) {
-              this.ImageTextBuilder(item, "add");
+              this.ImageTextBuilder(item, 'add');
             } else {
               this.TextBlockAddItemBuilder(item);
             }
@@ -1286,7 +1308,10 @@ export struct GridObjectSortComponent {
     this.blockWidth = this.getBlockWidth(); // gridItem width
     this.textItemEditWidth = this.gridComState ? this.blockWidth - 24 : this.blockWidth - 16;
     this.imageItemWidth = this.blockWidth - 16; // image Width
-    this.blockHeight = this.imageText ? this.imageItemWidth + 16 : this.gridComState ? 44 : BLOCK_TEXT_HEIGHT;
+    this.calcTextItemEditHeight();
+    this.blockHeight = this.imageText ? this.imageItemWidth + 16 : this.gridComState ?
+      this.textItemEditHeight + 16 :
+      this.textItemEditHeight + 8;
     this.calcGridHeight();
   }
 
@@ -1327,7 +1352,7 @@ export struct GridObjectSortComponent {
         .onAreaChange((oldValue: Area, newValue: Area) => {
           this.areaWidth = Number(newValue.width);
           this.calcAreaInfo();
-        }).width("100%")
+        }).width('100%')
       }
     }
     .width('100%')
