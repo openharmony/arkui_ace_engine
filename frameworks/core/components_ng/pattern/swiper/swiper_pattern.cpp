@@ -1459,6 +1459,18 @@ void SwiperPattern::OnSwiperCustomAnimationFinish(
         task.Cancel();
     }
 
+    int32_t timeout = 0;
+    if (onSwiperCustomContentTransition_ && !isFinishAnimation) {
+        timeout = onSwiperCustomContentTransition_->timeout;
+    }
+
+    if (timeout == 0) {
+        needUnmountIndexs_.erase(index);
+        itemPositionInAnimation_.erase(index);
+        MarkDirtyNodeSelf();
+        return;
+    }
+
     task.Reset([weak = AceType::WeakClaim(this), index] {
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
@@ -1466,10 +1478,6 @@ void SwiperPattern::OnSwiperCustomAnimationFinish(
         swiper->itemPositionInAnimation_.erase(index);
         swiper->MarkDirtyNodeSelf();
     });
-    int32_t timeout = 0;
-    if (onSwiperCustomContentTransition_ && !isFinishAnimation) {
-        timeout = onSwiperCustomContentTransition_->timeout;
-    }
     taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI, timeout, "ArkUISwiperDelayedCustomAnimation");
 }
 
