@@ -481,6 +481,7 @@ void RichEditorPattern::OnModifyDone()
     InitClickEvent(gestureEventHub);
     InitLongPressEvent(gestureEventHub);
     InitTouchEvent();
+    InitPanEvent();
     HandleEnabled();
     ProcessInnerPadding();
     InitScrollablePattern();
@@ -2552,9 +2553,10 @@ bool RichEditorPattern::RepeatClickCaret(const Offset& offset, int32_t lastCaret
 bool RichEditorPattern::RepeatClickCaret(const Offset& offset, const RectF& lastCaretRect)
 {
     auto lastCaretHeight = lastCaretRect.Height();
-    auto caretRect =
-        RectF(lastCaretRect.GetX() - lastCaretHeight / 2.0f, lastCaretRect.GetY(), lastCaretHeight, lastCaretHeight);
-    return caretRect.IsInRegion(PointF(offset.GetX(), offset.GetY()));
+    auto handleHotZone = selectOverlay_->GetHandleHotZoneRadius();
+    auto caretHotZoneRect =
+        RectF(lastCaretRect.GetX() - handleHotZone, lastCaretRect.GetY(), handleHotZone * 2, lastCaretHeight);
+    return caretHotZoneRect.IsInRegion(PointF(offset.GetX(), offset.GetY()));
 }
 
 void RichEditorPattern::CreateAndShowSingleHandle()
@@ -2815,6 +2817,7 @@ void RichEditorPattern::HandleBlurEvent()
     isLongPress_ = false;
     previewLongPress_ = false;
     editingLongPress_ = false;
+    moveCaretState_.Reset();
     StopTwinkling();
     auto reason = GetBlurReason();
     // The pattern handles blurevent, Need to close the softkeyboard first.
@@ -6056,6 +6059,36 @@ void RichEditorPattern::InitTouchEvent()
     gesture->AddTouchEvent(touchListener_);
 }
 
+void RichEditorPattern::InitPanEvent()
+{
+    CHECK_NULL_VOID(!panEvent_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    auto actionStartTask = [](const GestureEvent& info) {};
+    auto actionUpdateTask = [](const GestureEvent& info) {};
+    auto actionEndTask = [](const GestureEvent& info) {};
+    GestureEventNoParameter actionCancelTask;
+    panEvent_ = MakeRefPtr<PanEvent>(std::move(actionStartTask), std::move(actionUpdateTask),
+        std::move(actionEndTask), std::move(actionCancelTask));
+    PanDirection panDirection = { .type = PanDirection::ALL };
+    gestureHub->AddPanEvent(panEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
+    gestureHub->SetPanEventType(GestureTypeName::PAN_GESTURE);
+    gestureHub->SetOnGestureJudgeNativeBegin([weak = WeakClaim(this)](const RefPtr<NG::GestureInfo>& gestureInfo,
+                                                 const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, GestureJudgeResult::CONTINUE);
+        if (gestureInfo->GetType() == GestureTypeName::PAN_GESTURE &&
+            gestureInfo->GetInputEventType() == InputEventType::TOUCH_SCREEN &&
+            pattern->moveCaretState_.isMoveCaret) {
+            return GestureJudgeResult::CONTINUE;
+        }
+        CHECK_NULL_RETURN(gestureInfo->GetType() != GestureTypeName::PAN_GESTURE, GestureJudgeResult::REJECT);
+        return GestureJudgeResult::CONTINUE;
+    });
+}
+
 void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
     CHECK_NULL_VOID(!selectOverlay_->IsTouchAtHandle(info));
@@ -6144,7 +6177,8 @@ void RichEditorPattern::HandleTouchMove(const Offset& offset)
     CHECK_NULL_VOID(moveCaretState_.isTouchCaret);
     if (!moveCaretState_.isMoveCaret) {
         auto moveDistance = (offset - moveCaretState_.touchDownOffset).GetDistance();
-        if (GreatNotEqual(moveDistance, moveCaretState_.minDinstance.ConvertToPx())) {
+        if (GreatNotEqual(moveDistance, moveCaretState_.minDistance.ConvertToPx())) {
+            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Move caret distance greater than minDistance");
             moveCaretState_.isMoveCaret = true;
             ShowCaretWithoutTwinkling();
         }
@@ -6157,6 +6191,10 @@ void RichEditorPattern::UpdateCaretByTouchMove(const Offset& offset)
     CHECK_NULL_VOID(moveCaretState_.isMoveCaret);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    if (SelectOverlayIsOn()) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Close select overlay while dragging caret");
+        selectOverlay_->CloseOverlay(false, CloseReason::CLOSE_REASON_NORMAL);
+    }
     Offset textOffset = ConvertTouchOffsetToTextOffset(offset);
     auto position = paragraphs_.GetIndex(textOffset);
     SetCaretPosition(position);
