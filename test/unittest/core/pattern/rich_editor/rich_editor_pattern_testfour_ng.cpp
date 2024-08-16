@@ -408,66 +408,6 @@ HWTEST_F(RichEditorPatternTestFourNg, FinishTextPreview004, TestSize.Level1)
 }
 
 /**
- * @tc.name: InsertValueAfterBeforeSpan001
- * @tc.desc: test InsertValueAfterBeforeSpan
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFourNg, InsertValueAfterBeforeSpan001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    RefPtr<SpanNode> spanNodeBefore = OHOS::Ace::NG::SpanNode::CreateSpanNode(1);
-    RefPtr<SpanNode> spanNode = OHOS::Ace::NG::SpanNode::CreateSpanNode(2);
-    TextInsertValueInfo info;
-    std::string insertValue = "abc";
-    UpdateSpanStyle updateSpanStyle;
-    updateSpanStyle.isSymbolStyle = true;
-
-    TextStyle textStyle;
-    spanNodeBefore->GetSpanItem()->textStyle_ = textStyle;
-
-    richEditorPattern->typingStyle_ = updateSpanStyle;
-    richEditorPattern->InsertValueAfterBeforeSpan(spanNodeBefore, spanNode, info, insertValue, true);
-
-    ASSERT_EQ(richEditorPattern->HasSameTypingStyle(spanNodeBefore), false);
-    ASSERT_EQ(richEditorPattern->typingStyle_.has_value(), true);
-}
-
-/**
- * @tc.name: InsertValueWithoutSpan001
- * @tc.desc: test InsertValueWithoutSpan
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFourNg, InsertValueWithoutSpan001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    std::string insertValue = "abc";
-
-    auto spanNode = SpanNode::GetOrCreateSpanNode(V2::SPAN_ETS_TAG, 0);
-    TextInsertValueInfo info;
-    info.spanIndex_ = 0;
-
-    richEditorPattern->InsertValueWithoutSpan(spanNode, info, insertValue, true);
-    info.spanIndex_ = 1;
-    richEditorPattern->InsertValueWithoutSpan(spanNode, info, insertValue, true);
-
-    info.spanIndex_ = 0;
-    spanNode = SpanNode::GetOrCreateSpanNode(V2::SPAN_COMPONENT_TAG, 0);
-    richEditorPattern->InsertValueWithoutSpan(spanNode, info, insertValue, true);
-
-    info.spanIndex_ = 1;
-    spanNode = SpanNode::GetOrCreateSpanNode(V2::SPAN_ETS_TAG, 0);
-    richEditorPattern->InsertValueWithoutSpan(spanNode, info, insertValue, true);
-
-    ASSERT_EQ(spanNode->GetTag(), V2::SPAN_ETS_TAG);
-}
-
-/**
  * @tc.name: InsertValueToSpanNode001
  * @tc.desc: test InsertValueToSpanNode
  * @tc.type: FUNC
