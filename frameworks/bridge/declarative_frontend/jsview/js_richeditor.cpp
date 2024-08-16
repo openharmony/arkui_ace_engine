@@ -1774,12 +1774,7 @@ void JSRichEditorController::GetSpansInfo(const JSCallbackInfo& args)
     }
     auto controller = controllerWeak_.Upgrade();
     auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
-    if (!richEditorController) {
-        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "GetSpansInfo failed, richEditorController is null");
-        JSRef<JSArray> spanObjectArray = JSRef<JSArray>::New();
-        args.SetReturnValue(JSRef<JSVal>::Cast(spanObjectArray));
-        return;
-    }
+    CHECK_NULL_VOID(richEditorController);
     SelectionInfo value = richEditorController->GetSpansInfo(start, end);
     args.SetReturnValue(CreateJSSpansInfo(value));
 }
