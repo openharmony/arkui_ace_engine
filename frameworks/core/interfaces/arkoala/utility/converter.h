@@ -201,37 +201,44 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<>
-    inline ImageInterpolation Convert(const Ark_ImageInterpolation& src) {
+    inline ImageInterpolation Convert(const Ark_ImageInterpolation& src)
+    {
         return static_cast<ImageInterpolation>(src);
     }
 
     template<>
-    inline DynamicRangeMode Convert(const Ark_DynamicRangeMode& src) {
+    inline DynamicRangeMode Convert(const Ark_DynamicRangeMode& src)
+    {
         return static_cast<DynamicRangeMode>(src);
     }
 
     template<>
-    inline ImageRenderMode Convert(const Ark_ImageRenderMode& src) {
+    inline ImageRenderMode Convert(const Ark_ImageRenderMode& src)
+    {
         return static_cast<ImageRenderMode>(src);
     }
 
     template<>
-    inline ImageRepeat Convert(const Ark_ImageRepeat& src) {
+    inline ImageRepeat Convert(const Ark_ImageRepeat& src)
+    {
         return static_cast<ImageRepeat>(src);
     }
 
     template<>
-    inline ImageFit Convert(const Ark_ImageFit& src) {
+    inline ImageFit Convert(const Ark_ImageFit& src)
+    {
         return static_cast<ImageFit>(src);
     }
 
     template<>
-    inline CopyOptions Convert(const Ark_CopyOptions& src) {
+    inline CopyOptions Convert(const Ark_CopyOptions& src)
+    {
         return static_cast<CopyOptions>(src);
     }
 
     template<>
-    inline bool Convert(const Ark_Boolean& src) {
+    inline bool Convert(const Ark_Boolean& src)
+    {
         return static_cast<bool>(src);
     }
 

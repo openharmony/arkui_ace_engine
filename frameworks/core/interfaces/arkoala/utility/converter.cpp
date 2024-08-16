@@ -184,8 +184,7 @@ ImageSourceInfo Convert(Ark_NativePointer node, const Type_ImageInterface_setIma
     ImageSourceInfo info;
 
     switch (value.selector) {
-        case OFFSET_0: {// CustomObject
-            // TODO: not implemented
+        case OFFSET_0: { // CustomObject
             break;
         }
         case OFFSET_1: {
@@ -195,16 +194,17 @@ ImageSourceInfo Convert(Ark_NativePointer node, const Type_ImageInterface_setIma
                     break;
                 }
                 case OFFSET_1: { // ArkResource
-                    info = ImageSourceInfo(ResourceToString(node, value.value1.value1), value.value1.value1.bundleName.chars, value.value1.value1.moduleName.chars);
+                    info = ImageSourceInfo(ResourceToString(node, value.value1.value1),
+                                           value.value1.value1.bundleName.chars,
+                                           value.value1.value1.moduleName.chars);
                     break;
-                } 
+                }
                 default:
                     LOGE("Unexpected src->selector: %{public}d\n", value.value1.selector);
             }
             break;
         }
         case OFFSET_2: { // CustomObject
-            // TODO: not implemented
             break;
         }
         default:
@@ -225,11 +225,12 @@ ImageSourceInfo Convert(Ark_NativePointer node, const Type_ImageAttribute_alt_Ar
             break;
         }
         case OFFSET_1: { // Resource
-            info = ImageSourceInfo(ResourceToString(node, value.value1), value.value1.bundleName.chars, value.value1.moduleName.chars);
+            info = ImageSourceInfo(ResourceToString(node, value.value1),
+                                   value.value1.bundleName.chars,
+                                   value.value1.moduleName.chars);
             break;
         }
         case OFFSET_2: { // CustomObject
-            // TODO: not implemented
             break;
         }
         default:
