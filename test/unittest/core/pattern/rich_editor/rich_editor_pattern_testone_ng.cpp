@@ -1249,8 +1249,10 @@ HWTEST_F(RichEditorPatternTestOneNg, AdjustPlaceholderSelection001, TestSize.Lev
     TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
     AddParagraph(paragraphItem);
     CaretMetricsF metrics = { { 10.0f, 50.0f }, 20.0f };
-    EXPECT_CALL(*paragraph, ComputeOffsetForCaretUpstream(_, _, _)).WillRepeatedly(DoAll(SetArgReferee<1>(metrics),Return(true)));
-    EXPECT_CALL(*paragraph, ComputeOffsetForCaretDownstream(_, _, _)).WillRepeatedly(DoAll(SetArgReferee<1>(metrics),Return(true)));
+    EXPECT_CALL(*paragraph, ComputeOffsetForCaretUpstream(_, _, _))
+        .WillRepeatedly(DoAll(SetArgReferee<1>(metrics), Return(true)));
+    EXPECT_CALL(*paragraph, ComputeOffsetForCaretDownstream(_, _, _))
+        .WillRepeatedly(DoAll(SetArgReferee<1>(metrics), Return(true)));
     TestParagraphRect paragraphRectSec = { .start = 7, .end = 12, .rects = { { 40.0, 50.0, 60.0, 70.0 } } };
     TestParagraphItem paragraphItemSec = { .start = 7, .end = 12, .testParagraphRects = { paragraphRectSec } };
     AddParagraph(paragraphItemSec);
@@ -1265,7 +1267,7 @@ HWTEST_F(RichEditorPatternTestOneNg, AdjustPlaceholderSelection001, TestSize.Lev
     Offset touchPos(8.0f, 350.0f);
     richEditorPattern->AdjustPlaceholderSelection(start, end, touchPos);
 
-    for(auto iter: richEditorPattern->spans_) {
+    for (auto iter : richEditorPattern->spans_) {
         iter->position = start;
     }
     richEditorPattern->AdjustPlaceholderSelection(start, end, touchPos);

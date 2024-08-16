@@ -21,9 +21,9 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-    constexpr uint32_t RECORD_MAX_LENGTH = 20;
-    constexpr int32_t SYMBOL_SPAN_LENGTH = 2;
-    const std::string TEST_INSERT_LINE_SPACE = " ";
+constexpr uint32_t RECORD_MAX_LENGTH = 20;
+constexpr int32_t SYMBOL_SPAN_LENGTH = 2;
+const std::string TEST_INSERT_LINE_SPACE = " ";
 } // namespace
 
 class RichEditorPatternTestThreeNg : public RichEditorCommonTestNg {
@@ -158,7 +158,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, CursorMoveEnd001, TestSize.Level2)
     ASSERT_NE(richEditorPattern, nullptr);
     EXPECT_FALSE(richEditorPattern->CursorMoveToParagraphBegin());
 }
-
 
 /**
  * @tc.name: GetLeftWordPosition001
@@ -503,8 +502,7 @@ HWTEST_F(RichEditorPatternTestThreeNg, HandleUserGestureEvent001, TestSize.Level
     firstSpanItem->leadingMargin = std::make_optional<NG::LeadingMargin>();
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     ASSERT_NE(paragraph, nullptr);
-    richEditorPattern->paragraphs_.AddParagraph(
-        { .paragraph = paragraph, .start = 0, .end = 10 });
+    richEditorPattern->paragraphs_.AddParagraph({ .paragraph = paragraph, .start = 0, .end = 10 });
 
     std::vector<RectF> rects { RectF(0, 0, 5, 5) };
     EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<THIRD_PARAM>(rects));
@@ -512,9 +510,7 @@ HWTEST_F(RichEditorPatternTestThreeNg, HandleUserGestureEvent001, TestSize.Level
     GestureEvent info;
     info.SetLocalLocation(Offset(3, 3));
     richEditorPattern->contentRect_ = RectF(0, 0, 20.0, 20.0);
-    auto gestureFunc = [](RefPtr<SpanItem> item, GestureEvent& info) -> bool {
-        return true;
-    };
+    auto gestureFunc = [](RefPtr<SpanItem> item, GestureEvent& info) -> bool { return true; };
     EXPECT_TRUE(richEditorPattern->HandleUserGestureEvent(info, std::move(gestureFunc)));
 }
 
@@ -611,12 +607,12 @@ HWTEST_F(RichEditorPatternTestThreeNg, InitSelection001, TestSize.Level2)
     AddSpan(EXCEPT_VALUE);
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     ASSERT_NE(paragraph, nullptr);
-    richEditorPattern->paragraphs_.AddParagraph(
-        { .paragraph = paragraph, .start = 0, .end = 10 });
+    richEditorPattern->paragraphs_.AddParagraph({ .paragraph = paragraph, .start = 0, .end = 10 });
 
     std::vector<RectF> rects { RectF(0, 0, 5, 5) };
     EXPECT_CALL(*paragraph, GetGlyphPositionAtCoordinate(_))
-        .Times(1).WillOnce(Return(PositionWithAffinity(0, TextAffinity::UPSTREAM)));
+        .Times(1)
+        .WillOnce(Return(PositionWithAffinity(0, TextAffinity::UPSTREAM)));
     Offset Offset = { 1, 4 };
     richEditorPattern->InitSelection(Offset);
     EXPECT_EQ(richEditorPattern->GetCaretIndex(), 0);
