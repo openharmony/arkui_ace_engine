@@ -225,6 +225,18 @@ public:
         return hostWindowRect_;
     }
 
+    void RegisterPopupStateChangeCallback(const std::function<void(const std::string&)>& callback)
+    {
+        onStateChangeCallback_ = callback;
+    }
+
+    void CallPopupStateChangeCallback(const std::string& value)
+    {
+        if (onStateChangeCallback_) {
+            onStateChangeCallback_(value);
+        }
+    }
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
@@ -310,6 +322,7 @@ private:
 
     bool hasTransition_ = false;
     bool hasOnAreaChange_ = false;
+    std::function<void(const std::string&)> onStateChangeCallback_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 

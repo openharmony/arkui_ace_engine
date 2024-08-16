@@ -1791,6 +1791,7 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
             subwindow->HideSubWindowNG();
         }
     };
+    popupPattern->CallPopupStateChangeCallback("false");
     HidePopupAnimation(popupNode, onFinish);
     auto accessibilityProperty = popupNode->GetAccessibilityProperty<BubbleAccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
