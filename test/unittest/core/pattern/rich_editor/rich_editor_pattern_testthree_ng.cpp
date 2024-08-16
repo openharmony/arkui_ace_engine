@@ -517,4 +517,84 @@ HWTEST_F(RichEditorPatternTestThreeNg, HandleUserGestureEvent001, TestSize.Level
     };
     EXPECT_TRUE(richEditorPattern->HandleUserGestureEvent(info, std::move(gestureFunc)));
 }
+
+/**
+ * @tc.name: HandleTouchEvent001
+ * @tc.desc: test HandleTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, HandleTouchEvent001, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    TouchEventInfo touchEventInfo("");
+    TouchLocationInfo touchLocationInfo(0);
+    touchLocationInfo.touchType_ = TouchType::DOWN;
+    touchLocationInfo.localLocation_ = Offset(0.0f, 0.0f);
+    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    richEditorPattern->HandleTouchEvent(touchEventInfo);
+    auto touchInfo = touchEventInfo.GetTouches().front();
+    auto touchType = touchInfo.GetTouchType();
+    EXPECT_EQ(touchType, TouchType::DOWN);
+}
+
+/**
+ * @tc.name: HandleTouchEvent002
+ * @tc.desc: test HandleTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, HandleTouchEvent002, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    TouchEventInfo touchEventInfo("");
+    TouchLocationInfo touchLocationInfo(0);
+    touchLocationInfo.touchType_ = TouchType::UP;
+    touchLocationInfo.localLocation_ = Offset(0.0f, 0.0f);
+    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    richEditorPattern->HandleTouchEvent(touchEventInfo);
+    auto touchInfo = touchEventInfo.GetTouches().front();
+    auto touchType = touchInfo.GetTouchType();
+    EXPECT_EQ(touchType, TouchType::UP);
+}
+
+/**
+ * @tc.name: HandleTouchEvent003
+ * @tc.desc: test HandleTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, HandleTouchEvent003, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    TouchEventInfo touchEventInfo("");
+    TouchLocationInfo touchLocationInfo(0);
+    touchLocationInfo.touchType_ = TouchType::MOVE;
+    touchLocationInfo.localLocation_ = Offset(0.0f, 0.0f);
+    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    richEditorPattern->HandleTouchEvent(touchEventInfo);
+    auto touchInfo = touchEventInfo.GetTouches().front();
+    auto touchType = touchInfo.GetTouchType();
+    EXPECT_EQ(touchType, TouchType::MOVE);
+}
+
+/**
+ * @tc.name: HandleTouchEvent004
+ * @tc.desc: test HandleTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, HandleTouchEvent004, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    TouchEventInfo touchEventInfo("");
+    TouchLocationInfo touchLocationInfo(0);
+    touchLocationInfo.touchType_ = TouchType::UNKNOWN;
+    touchLocationInfo.localLocation_ = Offset(0.0f, 0.0f);
+    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    richEditorPattern->HandleTouchEvent(touchEventInfo);
+    auto touchInfo = touchEventInfo.GetTouches().front();
+    auto touchType = touchInfo.GetTouchType();
+    EXPECT_EQ(touchType, TouchType::UNKNOWN);
+}
 } // namespace OHOS::Ace::NG
