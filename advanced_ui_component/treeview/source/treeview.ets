@@ -1832,7 +1832,8 @@ export class TreeController {
       }
       if (nodeParam.parentNodeId !== undefined) {
         if (nodeParam.currentNodeId !== undefined) {
-          addNodeResult = this.listNodeDataSource.addNode(nodeParam.parentNodeId, nodeParam.currentNodeId, nodeParam, this.initBuild);
+          addNodeResult =
+            this.listNodeDataSource.addNode(nodeParam.parentNodeId, nodeParam.currentNodeId, nodeParam, this.initBuild);
         }
       }
       if (!addNodeResult) {
@@ -2160,7 +2161,7 @@ class ListNodeDataSource extends BasicDataSource {
     let nodeInfo: NodeInfo = this.listNode[index];
     if (nodeInfo.getNodeItem().imageCollapse !== undefined) {
       nodeInfo.getNodeItem().imageCollapse = CollapseImageNodeFlyweightFactory.getCollapseImageNode(interactionStatus,
-        this.expandAndCollapseInfo.get(nodeInfo.getNodeCurrentNodeId()), nodeInfo.getNodeItem().imageCollapse!.type);
+        this.expandAndCollapseInfo.get(nodeInfo.getNodeCurrentNodeId()), nodeInfo.getNodeItem().imageCollapse?.type);
     }
   }
 
@@ -2197,14 +2198,14 @@ class ListNodeDataSource extends BasicDataSource {
     let nodeId: number = this.listNode[clickIndex].getNodeCurrentNodeId();
     if (this.expandAndCollapseInfo.get(nodeId) === NodeStatus.EXPAND) {
       this.expandAndCollapseInfo.set(nodeId, NodeStatus.COLLAPSE);
-      this.listNode[thisIndex].getNodeItem().imageCollapse = this.listNode[thisIndex].getNodeItem().imageCollapse ?
-      CollapseImageNodeFlyweightFactory.changeImageCollapseSource(NodeStatus.COLLAPSE,
-        this.listNode[thisIndex].getNodeItem().imageCollapse!.isCollapse) : undefined;
+      this.listNode[thisIndex].getNodeItem()
+        .imageCollapse = CollapseImageNodeFlyweightFactory.changeImageCollapseSource(NodeStatus.COLLAPSE,
+          this.listNode[thisIndex].getNodeItem().imageCollapse?.isCollapse);
     } else if (this.expandAndCollapseInfo.get(nodeId) === NodeStatus.COLLAPSE) {
       this.expandAndCollapseInfo.set(nodeId, NodeStatus.EXPAND);
-      this.listNode[thisIndex].getNodeItem().imageCollapse = this.listNode[thisIndex].getNodeItem().imageCollapse ?
-      CollapseImageNodeFlyweightFactory.changeImageCollapseSource(NodeStatus.EXPAND,
-        this.listNode[thisIndex].getNodeItem().imageCollapse!.isCollapse) : undefined;
+      this.listNode[thisIndex].getNodeItem()
+        .imageCollapse = CollapseImageNodeFlyweightFactory.changeImageCollapseSource(NodeStatus.EXPAND,
+        this.listNode[thisIndex].getNodeItem().imageCollapse?.isCollapse);
     }
   }
 
@@ -2281,23 +2282,7 @@ class ListNodeDataSource extends BasicDataSource {
           nodeInfo.addImageCollapse(node.getChildNodeInfo().isHasChildNode);
           listNode.push(nodeInfo);
           this.nodeIdAndNodeIndexMap.set(nodeInfo.getNodeCurrentNodeId(), listIndex++);
-          if (nodeInfo.getChildNodeInfo().isHasChildNode) {
-            this.expandAndCollapseInfo.set(nodeInfo.getNodeCurrentNodeId(), NodeStatus.COLLAPSE);
-          }
-          if (nodeInfo.getNodeIsShow()) {
-            this.loadedNodeIdAndIndexMap.set(nodeInfo.getNodeCurrentNodeId(), index++);
-            this.loadedListNode.push(nodeInfo);
-          }
-          if (nodeInfo.getIsFolder()) {
-            if (nodeInfo.getNodeInfoData().secondaryTitle !== undefined) {
-              this.nodeIdAndSubtitleMap.set(
-                nodeInfo.getNodeCurrentNodeId(),
-                nodeInfo.getNodeInfoData().secondaryTitle as ResourceStr,
-              );
-            } else {
-              this.nodeIdAndSubtitleMap.set(nodeInfo.getNodeCurrentNodeId(), '');
-            }
-          }
+          index = this.nodeDFHandler(nodeInfo, index);
         }
         return false;
       }, this._root, startLevel, endLevel);
@@ -2305,6 +2290,27 @@ class ListNodeDataSource extends BasicDataSource {
       hilog.error(0x3900, 'TreeView', 'traverseSectionNodeDF function callbacks error.');
       this.resetData(listNode);
     }
+  }
+
+  private nodeDFHandler(nodeInfo: NodeInfo, index: number): number {
+    if (nodeInfo.getChildNodeInfo().isHasChildNode) {
+      this.expandAndCollapseInfo.set(nodeInfo.getNodeCurrentNodeId(), NodeStatus.COLLAPSE);
+    }
+    if (nodeInfo.getNodeIsShow()) {
+      this.loadedNodeIdAndIndexMap.set(nodeInfo.getNodeCurrentNodeId(), index++);
+      this.loadedListNode.push(nodeInfo);
+    }
+    if (nodeInfo.getIsFolder()) {
+      if (nodeInfo.getNodeInfoData().secondaryTitle !== undefined) {
+        this.nodeIdAndSubtitleMap.set(
+          nodeInfo.getNodeCurrentNodeId(),
+          nodeInfo.getNodeInfoData().secondaryTitle as ResourceStr
+        );
+      } else {
+        this.nodeIdAndSubtitleMap.set(nodeInfo.getNodeCurrentNodeId(), '');
+      }
+    }
+    return index;
   }
 
   /**
@@ -3286,13 +3292,13 @@ class ListNodeDataSource extends BasicDataSource {
           this.listNode.push(nodeInfo);
           this.nodeIdAndNodeIndexMap.set(nodeInfo.getNodeCurrentNodeId(), listIndex++);
           if (this.expandAndCollapseInfo.get(currentNodeId) === NodeStatus.EXPAND) {
-            nodeInfo.getNodeItem().imageCollapse = nodeInfo.getNodeItem().imageCollapse ?
-            CollapseImageNodeFlyweightFactory.changeImageCollapseSource(NodeStatus.EXPAND,
-              nodeInfo.getNodeItem().imageCollapse!.isCollapse) : undefined;
+            nodeInfo.getNodeItem()
+              .imageCollapse = CollapseImageNodeFlyweightFactory.changeImageCollapseSource(NodeStatus.EXPAND,
+              nodeInfo.getNodeItem().imageCollapse?.isCollapse);
           } else if (this.expandAndCollapseInfo.get(currentNodeId) === NodeStatus.COLLAPSE) {
-            nodeInfo.getNodeItem().imageCollapse = nodeInfo.getNodeItem().imageCollapse ?
-            CollapseImageNodeFlyweightFactory.changeImageCollapseSource(NodeStatus.COLLAPSE,
-              nodeInfo.getNodeItem().imageCollapse!.isCollapse) : undefined;
+            nodeInfo.getNodeItem()
+              .imageCollapse = CollapseImageNodeFlyweightFactory.changeImageCollapseSource(NodeStatus.COLLAPSE,
+              nodeInfo.getNodeItem().imageCollapse?.isCollapse);
           }
 
           for (let i: number = 0; i < tmp.length; i++) {
@@ -4379,7 +4385,10 @@ class CollapseImageNodeFlyweightFactory {
    * @returns collapse image node
    */
   static getCollapseImageNode(interactionStatus: InteractionStatus, nodeStatus: NodeStatus | undefined,
-    defaultType: CollapseImageType): CollapseImageNode {
+    defaultType?: CollapseImageType): CollapseImageNode | undefined {
+    if (defaultType === undefined) {
+      return undefined;
+    }
     let type: CollapseImageType = defaultType;
     if (interactionStatus == InteractionStatus.EDIT ||
       interactionStatus === InteractionStatus.DRAG_INSERT) {
@@ -4406,7 +4415,10 @@ class CollapseImageNodeFlyweightFactory {
    * @param isImageCollapse whether collapse image or white collapse image
    * @returns collapse image node
    */
-  static changeImageCollapseSource(nodeStatus: NodeStatus, isImageCollapse: boolean): CollapseImageNode {
+  static changeImageCollapseSource(nodeStatus: NodeStatus, isImageCollapse?: boolean): CollapseImageNode | undefined {
+    if (isImageCollapse === undefined) {
+      return undefined;
+    }
     let type: CollapseImageType;
     if (!isImageCollapse) {
       if (nodeStatus === NodeStatus.COLLAPSE) {
