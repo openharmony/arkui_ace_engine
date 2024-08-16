@@ -189,7 +189,6 @@ generated_sources = [
   "../arkoala/implementation/time_picker_modifier.cpp",
   "../arkoala/implementation/toggle_modifier.cpp",
   "../arkoala/implementation/ui_extension_component_modifier.cpp",
-  "../arkoala/implementation/utils.cpp",
   "../arkoala/implementation/video_controller_modifier.cpp",
   "../arkoala/implementation/video_modifier.cpp",
   "../arkoala/implementation/view_model_bridge.cpp",
@@ -208,4 +207,5 @@ generated_sources = [
   "../arkoala/implementation/x_component_controller_modifier.cpp",
   "../arkoala/implementation/x_component_modifier.cpp",
   "../arkoala/utility/converter.cpp",
+  "../arkoala/utility/utils.cpp",
 ]
