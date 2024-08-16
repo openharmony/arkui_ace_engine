@@ -1030,6 +1030,8 @@ public:
         dragHitTestBlock_ = dragHitTestBlock;
     }
 
+    void NotifyDataChange(int32_t index, int32_t count, int64_t id) const override;
+
 protected:
     void DumpInfo() override;
 

@@ -5117,4 +5117,19 @@ uint32_t FrameNode::GetWindowPatternType() const
     CHECK_NULL_RETURN(pattern_, 0);
     return pattern_->GetWindowPatternType();
 }
+
+void FrameNode::NotifyDataChange(int32_t index, int32_t count, int64_t id) const
+{
+    int32_t updateFrom = 0;
+    for (const auto& child : GetChildren()) {
+        if (child->GetAccessibilityId() == id) {
+            updateFrom += index;
+            break;
+        }
+        int32_t count = child->FrameCount();
+        updateFrom += count;
+    }
+    auto pattern = GetPattern();
+    pattern->NotifyDataChange(updateFrom, count);
+}
 } // namespace OHOS::Ace::NG

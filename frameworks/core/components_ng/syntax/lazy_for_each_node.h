@@ -165,7 +165,22 @@ public:
     int32_t GetFrameNodeIndex(const RefPtr<FrameNode>& node, bool isExpanded = true) override;
     void InitDragManager(const RefPtr<FrameNode>& childNode);
     void InitAllChilrenDragManager(bool init);
+    
+    /**
+     * @brief Notify the change of dataSource to component.
+     *
+     * @param index the last position of change.
+     * @param count the count of change in [index].
+     */
     void NotifyCountChange(int32_t index, int32_t count);
+
+    /**
+     * @brief Parse OnDatasetChange for NotifyCountChange.
+     *
+     * @param dataOperations bulk change operations.
+     */
+    void ParseOperations(const std::list<V2::Operation>& dataOperations);
+
 private:
     void OnAttachToMainTree(bool recursive) override
     {

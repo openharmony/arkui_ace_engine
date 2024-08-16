@@ -751,6 +751,8 @@ public:
     virtual void NotifyWebPattern(bool isRegister);
     void GetContainerComponentText(std::string& text);
 
+    virtual void NotifyDataChange(int32_t index, int32_t count, int64_t id) const;
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
