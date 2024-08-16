@@ -28,7 +28,6 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
-#include "core/components/common/properties/color.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 #include "arkoala_api_generated.h"
@@ -238,11 +237,16 @@ namespace OHOS::Ace::NG::Converter {
         return Color::FromString(src.chars);
     }
     
+    bool ParseColorFromArkResource(const Ark_Resource &res, Color &result);
+
     template<>
     inline Color Convert(const Ark_Resource& src)
     {
-        LOGE("ARKOALA Converter -> Resource support (Color) is not implemented.");
-        return Color();
+        Color color;
+        if (!ParseColorFromArkResource(src, color)) {
+            LOGE("ARKOALA Converter -> Resource support (Color) failed.");
+        }
+        return color;
     }
 
     template<>
