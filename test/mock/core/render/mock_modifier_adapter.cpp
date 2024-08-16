@@ -13,28 +13,31 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/render/modifier_adapter.h"
+#include "test/mock/core/render/mock_animation_manager.h"
 #include "core/components_ng/base/modifier.h"
+#include "core/components_ng/render/modifier_adapter.h"
 
 namespace OHOS::Ace::NG {
-void ModifierAdapter::RemoveModifier(int32_t modifierId)
-{
-}
+void ModifierAdapter::RemoveModifier(int32_t modifierId) {}
 template<>
 void NodeAnimatableProperty<float, AnimatablePropertyFloat>::AnimateWithVelocity(
-    const AnimationOption &option, float value, float velocity, const FinishCallback &finishCallback)
+    const AnimationOption& option, float value, float velocity, const FinishCallback& finishCallback)
 {
+    MockAnimationManager::GetInstance().OpenAnimation();
     Set(value);
+    MockAnimationManager::GetInstance().CloseAnimation();
+    if (MockAnimationManager::Enabled()) {
+        return;
+    }
+
     if (finishCallback) {
-        finishCallback();       
+        finishCallback();
     }
 }
 template<>
 void NodeAnimatableProperty<float, AnimatablePropertyFloat>::SetThresholdType(ThresholdType type)
-{
-}
+{}
 template<>
 void NodeAnimatableProperty<float, AnimatablePropertyFloat>::SetPropertyUnit(PropertyUnit unit)
-{
-}
+{}
 } // namespace OHOS::Ace::NG

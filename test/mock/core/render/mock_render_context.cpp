@@ -36,6 +36,7 @@ void MockRenderContext::AttachNodeAnimatableProperty(RefPtr<NodeAnimatableProper
                 return MockAnimationProxy<float>::GetInstance().GetStagingValue(weak.Upgrade());
             });
     }
+    /* add code for other types */
 }
 
 } // namespace OHOS::Ace::NG

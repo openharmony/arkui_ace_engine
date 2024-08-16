@@ -35,7 +35,7 @@ void AnimationUtils::Animation::Tick()
                 cb(delta);
             }
         }
-        /* TODO: add update code for other types */
+        /* add update code for other types */
     }
     if (params_.repeatCb) {
         params_.repeatCb();

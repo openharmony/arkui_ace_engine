@@ -66,7 +66,7 @@ public:
     T CalculateDelta(const WeakPtr<AnimatableProperty<T>>& ptr, int32_t ticks)
     {
         auto it = props_.find(ptr);
-        if (it == props_.end()) {
+        if (it == props_.end() || ticks == 0) {
             return {};
         }
         return (it->second.endValue_ - it->second.stagingValue_) / ticks;
