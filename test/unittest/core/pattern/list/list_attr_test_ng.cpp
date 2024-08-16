@@ -1492,10 +1492,15 @@ HWTEST_F(ListAttrTestNg, SetEdgeEffectCallback002, TestSize.Level1)
     CreateDone(frameNode_);
     RefPtr<ScrollEdgeEffect> scrollEdgeEffect = pattern_->GetScrollEdgeEffect();
     EXPECT_EQ(scrollEdgeEffect->currentPositionCallback_(), 150.0);
-    EXPECT_EQ(scrollEdgeEffect->leadingCallback_(), -50.0);
     EXPECT_EQ(scrollEdgeEffect->trailingCallback_(), 150.f);
-    EXPECT_EQ(scrollEdgeEffect->initLeadingCallback_(), -50.0);
     EXPECT_EQ(scrollEdgeEffect->initTrailingCallback_(), 150.f);
+    EXPECT_TRUE(GreatNotEqual(150.0, scrollEdgeEffect->leadingCallback_()));
+
+    ScrollToIndex(TOTAL_ITEM_NUMBER - 1, false, ScrollAlign::CENTER);
+    EXPECT_EQ(scrollEdgeEffect->currentPositionCallback_(), -50.0);
+    EXPECT_EQ(scrollEdgeEffect->leadingCallback_(), -50.0);
+    EXPECT_EQ(scrollEdgeEffect->initLeadingCallback_(), -50.0);
+    EXPECT_TRUE(LessNotEqual(-50, scrollEdgeEffect->trailingCallback_()));
 }
 
 /**
