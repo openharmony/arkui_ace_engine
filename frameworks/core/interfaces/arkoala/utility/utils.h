@@ -1,4 +1,4 @@
-    /*
+/*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
 
 #ifndef GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_UTILITY_UTILS_H
 #define GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_UTILITY_UTILS_H
@@ -52,12 +51,11 @@ namespace OHOS::Ace::NG::Utils
 
     std::string ResourceToString(FrameNode* node, const Ark_Resource& resource);
 
-    ImageSourceInfo Convert(FrameNode* node, const Type_ImageInterface__setImageOptions_Arg0& value);
+    ImageSourceInfo Convert(FrameNode* node, const Type_ImageInterface_setImageOptions_Arg0& value);
     ImageSourceInfo Convert(FrameNode* node, const Type_ImageAttribute_alt_Arg0& value);
 
     ImageResource Convert(const Ark_Resource& value);
 
 }
-
 
 #endif  // GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_UTILITY_UTILS_H
