@@ -368,13 +368,16 @@ void ScrollBar::SetGestureEvent()
                     inRegion = scrollBar->InBarHoverRegion(point);
                     scrollBar->MarkNeedRender();
                 }
-                scrollBar->SetPressed(inRegion);
+                if (!scrollBar->IsPressed()) {
+                    scrollBar->SetPressed(inRegion);
+                }
                 if (inRegion && !scrollBar->IsHover()) {
                     scrollBar->PlayScrollBarGrowAnimation();
                 }
             }
-            if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
-                info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
+            if ((info.GetTouches().front().GetTouchType() == TouchType::UP ||
+                    info.GetTouches().front().GetTouchType() == TouchType::CANCEL) &&
+                info.GetTouches().size() <= 1) {
                 if (scrollBar->IsPressed() && !scrollBar->IsHover()) {
                     scrollBar->PlayScrollBarShrinkAnimation();
                     scrollBar->ScheduleDisappearDelayTask();
