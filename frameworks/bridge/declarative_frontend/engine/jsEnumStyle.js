@@ -2200,9 +2200,18 @@ class NavPathStack {
         reject({ message: 'Internal error.', code: 100001 });
       })
     }
-    info.index = this.findInPopArray(name);
-    this.pathArray.push(info);
-    this.nativeStack?.onStateChanged();
+    promise.then(() => {
+      return new Promise((resolve, reject) => {
+        info.index = this.findInPopArray(name);
+        this.pathArray.push(info);
+        this.nativeStack?.onStateChanged();
+        resolve({code: 0});
+      }).catch((err) => {
+        return new Promise((resolve, reject) => {
+          reject(err);
+        })
+      })
+    })
     return promise;
   }
   parseNavigationOptions(param) {
@@ -2272,12 +2281,21 @@ class NavPathStack {
         reject({ message: 'Internal error.', code: 100001 });
       })
     }
-    info.index = this.findInPopArray(info.name);
-    if (launchMode === LaunchMode.NEW_INSTANCE) {
-      info.needBuildNewInstance = true;
-    }
-    this.pathArray.push(info);
-    this.nativeStack?.onStateChanged();
+    promise.then(() => {
+      return new Promise((resolve, reject) => {
+        info.index = this.findInPopArray(info.name);
+        if (launchMode === LaunchMode.NEW_INSTANCE) {
+          info.needBuildNewInstance = true;
+        }
+        this.pathArray.push(info);
+        this.nativeStack?.onStateChanged();
+        resolve({code: 0});
+      }).catch((err) => {
+        return new Promise((resolve, reject) => {
+          reject(err);
+        })
+      })
+    })
     return promise;
   }
   replacePath(info, optionParam) {
