@@ -19,6 +19,7 @@ ace_unittest("capi_all_modifiers_test") {
   sources = [ "capi-ut-modifiers-stubs.cpp" ]
   sources += [
     # place here your UT source code
+    "blank_modifier_test.cpp",
   ]
   extra_deps = []
   extra_deps += [ "${ace_root}/frameworks/core/interfaces/native:ace_core_interfaces_native_node_linux_unittest" ]
