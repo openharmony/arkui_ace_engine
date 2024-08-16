@@ -258,6 +258,9 @@ class __RepeatVirtualScrollImpl<T> {
 
         // has any item or ttype in the active range changed?
         for (let i in this.lastActiveRangeData_) {
+            if (!(i in this.arr_)) {
+                return true;
+            }
             const oldItem = this.lastActiveRangeData_[+i]?.item;
             const oldType = this.lastActiveRangeData_[+i]?.ttype;
             const newItem = this.arr_[+i];
