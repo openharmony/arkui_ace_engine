@@ -67,6 +67,8 @@ const BUTTON_HORIZONTAL_PADDING: number = getNumberByResourceId(125830927, 16);
 const BUTTON_HORIZONTAL_SPACE: number = getNumberByResourceId(125831051, 8);
 // 'sys.float.Body_L'
 const BODY_L = getNumberByResourceId(125830970, 16);
+// 'sys.float.Body_M'
+const BODY_M = getNumberByResourceId(125830971, 14);
 // 'sys.float.Body_S'
 const BODY_S = getNumberByResourceId(125830972, 12);
 // 'sys.float.Title_S'
@@ -76,9 +78,9 @@ const SUBTITLE_S = getNumberByResourceId(125830969, 14);
 // 'sys.float.padding_level8'
 const PADDING_LEVEL_8 = getNumberByResourceId(125830927, 16);
 // 'sys.float.dialog_divider_show'
-const DIALOG_DIVIDER_SHOW = getNumberByResourceId(125831202, 1);
+const DIALOG_DIVIDER_SHOW = getNumberByResourceId(125831202, 1, true);
 // 'sys.float.alert_button_style'
-const ALERT_BUTTON_STYLE = getNumberByResourceId(125831085, 2);
+const ALERT_BUTTON_STYLE = getNumberByResourceId(125831085, 2, true);
 // 'sys.float.alert_title_alignment'
 const ALERT_TITLE_ALIGNMENT = getEnumNumberByResourceId(125831126, 1);
 
@@ -171,7 +173,7 @@ export struct TipsDialog {
           .accessibilityLevel('yes')
           .margin({ right: $r('sys.float.padding_level4') })
         Text(this.checkTips)
-          .fontSize($r('sys.float.Body_L'))
+          .fontSize(`${BODY_L}fp`)
           .fontWeight(FontWeight.Regular)
           .fontColor(this.fontColorWithTheme)
           .maxLines(CONTENT_MAX_LINES)
@@ -213,7 +215,7 @@ export struct TipsDialog {
         if (this.title !== null) {
           Row() {
             Text(this.title)
-              .fontSize($r('sys.float.Title_S'))
+              .fontSize(`${TITLE_S}fp`)
               .fontWeight(FontWeight.Medium)
               .fontColor(this.fontColorWithTheme)
               .textAlign(TextAlign.Center)
@@ -408,7 +410,7 @@ export struct SelectDialog {
         if (this.content) {
           Row() {
             Text(this.content)
-              .fontSize($r('sys.float.Body_M'))
+              .fontSize(`${BODY_M}fp`)
               .fontWeight(FontWeight.Regular)
               .fontColor(this.fontColorWithTheme)
               .textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -421,7 +423,7 @@ export struct SelectDialog {
                 Button() {
                   Row() {
                     Text(item.title)
-                      .fontSize($r('sys.float.Body_L'))
+                      .fontSize(`${BODY_L}fp`)
                       .fontWeight(FontWeight.Medium)
                       .fontColor(this.fontColorWithTheme)
                       .layoutWeight(1)
@@ -654,7 +656,7 @@ export struct ConfirmDialog {
           Text(this.content)
             .focusable(true)
             .defaultFocus(!(this.primaryButton?.value || this.secondaryButton?.value))
-            .fontSize($r('sys.float.Body_L'))
+            .fontSize(`${BODY_L}fp`)
             .fontWeight(FontWeight.Medium)
             .fontColor(this.fontColorWithTheme)
             .textAlign(this.textAlign)
@@ -687,7 +689,7 @@ export struct ConfirmDialog {
         .margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(8) })
 
       Text(this.checkTips)
-        .fontSize($r('sys.float.Body_M'))
+        .fontSize(`${BODY_M}fp`)
         .fontWeight(FontWeight.Medium)
         .fontColor(this.fontColorWithTheme)
         .maxLines(CONTENT_MAX_LINES)
@@ -799,7 +801,7 @@ export struct AlertDialog {
         Text(this.content)
           .focusable(true)
           .defaultFocus(!(this.primaryButton || this.secondaryButton))
-          .fontSize($r('sys.float.Body_L'))
+          .fontSize(`${BODY_L}fp`)
           .fontWeight(this.getFontWeight())
           .fontColor(this.fontColorWithTheme)
           .margin({ right: $r('sys.float.padding_level8'), })
@@ -987,19 +989,19 @@ struct CustomDialogContentComponent {
   @State contentMaxHeight: Length = '100%';
   @Link fontSizeScale: number;
   @State customStyle: boolean | undefined = undefined;
-  @State buttonMaxFontSize: Length = $r('sys.float.Body_L');
+  @State buttonMaxFontSize: Length = `${BODY_L}fp`;
   @State buttonMinFontSize: Length = 9;
-  @State primaryTitleMaxFontSize: Length = $r('sys.float.Title_S');
-  @State primaryTitleMinFontSize: Length = $r('sys.float.Body_L');
-  @State secondaryTitleMaxFontSize: Length = $r('sys.float.Subtitle_S');
-  @State secondaryTitleMinFontSize: Length = $r('sys.float.Body_S');
+  @State primaryTitleMaxFontSize: Length = `${TITLE_S}fp`;
+  @State primaryTitleMinFontSize: Length = `${BODY_L}fp`;
+  @State secondaryTitleMaxFontSize: Length = `${SUBTITLE_S}fp`;
+  @State secondaryTitleMinFontSize: Length = `${BODY_S}fp`;
   @State primaryTitleFontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   @State secondaryTitleFontColorWithTheme: ResourceColor = $r('sys.color.font_secondary');
   @State titleTextAlign: TextAlign = TextAlign.Center;
   @State isButtonVertical: boolean = false;
   @State titleMinHeight: Length = 0;
-  @State isFollowingSystemFontScale: boolean = false;
-  @State appMaxFontScale: number = 3.2;
+  isFollowingSystemFontScale: boolean = false;
+  appMaxFontScale: number = 3.2;
   titleIndex: number = 0;
   contentIndex: number = 1;
   buttonIndex: number = 2;
@@ -1182,8 +1184,7 @@ struct CustomDialogContentComponent {
 
       if (this.primaryTitle && this.secondaryTitle) {
         Row() {
-          Divider().margin($r('sys.float.padding_level1')).color(Color.Transparent)
-        }
+        }.height($r('sys.float.padding_level1'))
       }
 
       Row() {
@@ -1467,10 +1468,10 @@ function setButtonProperties(buttonOptions: ButtonOptions, controller?: CustomDi
  * @param defaultValue default value
  * @returns resource size
  */
-function getNumberByResourceId(resourceId: number, defaultValue: number): number {
+function getNumberByResourceId(resourceId: number, defaultValue: number, allowZero?: boolean): number {
   try {
     let sourceValue: number = resourceManager.getSystemResourceManager().getNumber(resourceId);
-    if (sourceValue > 0) {
+    if (sourceValue > 0 || allowZero) {
       return sourceValue;
     } else {
       return defaultValue;
@@ -1599,7 +1600,7 @@ export struct LoadingDialog {
     Column() {
       Row() {
         Text(this.content)
-          .fontSize($r('sys.float.Body_L'))
+          .fontSize(`${BODY_L}fp`)
           .fontWeight(FontWeight.Regular)
           .fontColor(this.fontColorWithTheme)
           .layoutWeight(LOADING_TEXT_LAYOUT_WEIGHT)
