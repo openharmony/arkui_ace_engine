@@ -163,7 +163,7 @@ struct ContentItemStruct {
           .width(ICON_SIZE_MAP.get(this.iconStyle))
           .height(ICON_SIZE_MAP.get(this.iconStyle))
           .borderRadius($r('sys.float.ohos_id_corner_radius_default_m'))
-          .focusable(true)
+          .focusable(false)
           .draggable(false)
           .fillColor($r('sys.color.ohos_id_color_secondary'))
           .flexShrink(0)
@@ -177,7 +177,7 @@ struct ContentItemStruct {
             maxHeight: ICON_SIZE_MAP.get(this.iconStyle)
           })
           .borderRadius($r('sys.float.ohos_id_corner_radius_default_m'))
-          .focusable(true)
+          .focusable(false)
           .draggable(false)
           .fillColor($r('sys.color.ohos_id_color_secondary'))
           .flexShrink(0)
@@ -331,6 +331,7 @@ struct OperateItemStruct {
         right: TEXT_SAFE_MARGIN
       })
     }
+    .padding({ top: 0, bottom: 0 })
     .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
     .hitTestBehavior(HitTestMode.Block)
     .fontSize($r('sys.float.ohos_id_text_size_button3'))
@@ -609,7 +610,7 @@ struct OperateItemStruct {
             .height(OPERATEITEM_ICONLIKE_SIZE)
             .width(OPERATEITEM_ARROW_WIDTH)
             .fillColor($r('sys.color.ohos_id_color_fourth'))
-            .focusable(true)
+            .focusable(false)
             .draggable(false)
         }
         .padding({
@@ -630,7 +631,7 @@ struct OperateItemStruct {
             .height(OPERATEITEM_ICONLIKE_SIZE)
             .width(OPERATEITEM_ARROW_WIDTH)
             .fillColor($r('sys.color.ohos_id_color_fourth'))
-            .focusable(true)
+            .focusable(false)
             .draggable(false)
         }
         .padding({
@@ -644,7 +645,7 @@ struct OperateItemStruct {
       maxLines: TEXT_MAX_LINE
     })
     .backgroundColor(Color.Transparent)
-    .height(this.parentDirection === FlexDirection.Column ? undefined : TEXT_ARROW_HEIGHT)
+    .constraintSize({ minHeight: TEXT_ARROW_HEIGHT })
     .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
     .onFocus(() => {
       this.parentCanFocus = false;
