@@ -1133,10 +1133,10 @@ ArkUINativeModuleValue TextBridge::SetDataDetectorConfig(ArkUIRuntimeCallInfo* r
         types.append(TEXT_DETECT_TYPES[index]);
     }
     arkUITextDetectConfig.types = types.c_str();
+    std::function<void(const std::string&)> callback;
     if (callbackArg->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-        std::function<void(const std::string&)> callback = [vm, frameNode,
-            func = panda::CopyableGlobal(vm, func)](const std::string& info) {
+        callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](const std::string& info) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
             PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
