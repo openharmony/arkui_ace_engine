@@ -19,7 +19,9 @@
 #include <iomanip>
 #include <memory>
 #include <sstream>
+
 #include "form_info_base.h"
+
 #include "base/log/log.h"
 #include "core/common/container.h"
 #include "core/components_ng/gestures/gesture_group.h"
