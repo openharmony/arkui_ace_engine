@@ -479,7 +479,7 @@ struct SegmentButtonItem {
   @ObjectLink property: ItemProperty
   @Prop index: number
   @Prop marquee: boolean;
-  @Prop @Watch('onFocusIndex') focusedIndex: number = -1;
+  @Prop focusedIndex: number = -1;
   @Prop @Watch('onIsMarqueeAndFadeout') isMarqueeAndFadeout: boolean;
   @State isMarquee?: boolean = false;
   @State isFadeout?: boolean = false;
@@ -528,11 +528,6 @@ struct SegmentButtonItem {
     this.isFadeout = this.marquee;
   }
 
-  onFocusIndex() {
-    this.getFillColor();
-    this.getFontColor();
-  }
-
   setFontColor() {
     if (this.property.isSelected) {
       return this.options.selectedFontColor ?? segmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR;
@@ -546,8 +541,7 @@ struct SegmentButtonItem {
   }
 
   private getFontColor() {
-    return this.marquee ? (this.focusedIndex === this.index ? segmentButtonTheme.SEGMENT_BUTTON_FOCUS_TEXT_COLOR : this.property.fontColor)
-      : this.property.fontColor;
+    return this.marquee && this.focusedIndex === this.index ? this.options.selectedFontColor ?? segmentButtonTheme.SEGMENT_BUTTON_FOCUS_TEXT_COLOR : this.setFontColor();
   }
 
   build() {
@@ -643,10 +637,10 @@ struct SegmentButtonItemArrayComponent {
   @State buttonWidth: number[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => 0)
   @State buttonHeight: number[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => 0)
   @State marquee: boolean = LengthMetrics.resource($r('sys.float.segment_marquee')).value === 0;
-  @State segmentFocusControl: number = LengthMetrics.resource($r('sys.float.segment_focus_control')).value;
   @State isMarqueeAndFadeout: boolean = false;
   private buttonItemsRealHeight: number[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => 0)
   private groupId: string = util.generateRandomUUID(true)
+  private segmentFocusControl: boolean = LengthMetrics.resource($r('sys.float.segment_focus_control')).value === 1;
 
   onButtonItemsSizeChange() {
     this.buttonItemsSize.forEach((value, index) => {
@@ -860,7 +854,7 @@ struct SegmentButtonItemArrayComponent {
         ForEach(this.optionsArray, (item: SegmentButtonItemOptions, index) => {
           if (index < MAX_ITEM_COUNT) {
             Stack() {
-              if (this.segmentFocusControl === 1) {
+              if (this.segmentFocusControl) {
                 Stack() {
                   this.SegmentButtonFocus(index,item)
                 }
