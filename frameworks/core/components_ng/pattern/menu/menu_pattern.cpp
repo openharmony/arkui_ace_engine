@@ -48,6 +48,7 @@
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/theme/shadow_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -569,19 +570,25 @@ void MenuPattern::UpdateSelectParam(const std::vector<SelectParam>& params)
 
 void MenuPattern::HideMenu(bool isMenuOnTouch, OffsetF position) const
 {
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    auto expandDisplay = theme->GetExpandDisplay();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto rootMenuPattern = AceType::DynamicCast<MenuPattern>(host->GetPattern());
+    CHECK_NULL_VOID(rootMenuPattern);
+    // copy menu pattern properties to rootMenu
+    auto layoutProperty = rootMenuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    bool isShowInSubWindow = layoutProperty->GetShowInSubWindowValue(true);
     auto wrapper = GetMenuWrapper();
     CHECK_NULL_VOID(wrapper);
     if (wrapper->GetTag() == V2::SELECT_OVERLAY_ETS_TAG) {
         return;
     }
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto containerId = pipelineContext->GetInstanceId();
-    bool isShowInSubWindow = containerId >= MIN_SUBCONTAINER_ID;
-    if (isShowInSubWindow) {
+    if (((IsContextMenu() || (expandDisplay && isShowInSubWindow))) && (targetTag_ != V2::SELECT_ETS_TAG)) {
         TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu, tagetNode id %{public}d.", targetId_);
         SubwindowManager::GetInstance()->HideMenuNG(wrapper, targetId_);
         return;
@@ -591,7 +598,7 @@ void MenuPattern::HideMenu(bool isMenuOnTouch, OffsetF position) const
         return;
     }
 
-    auto overlayManager = pipelineContext->GetOverlayManager();
+    auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu, tagetNode id %{public}d.", targetId_);
     overlayManager->HideMenu(wrapper, targetId_, isMenuOnTouch);
@@ -861,8 +868,23 @@ RefPtr<LayoutAlgorithm> MenuPattern::CreateLayoutAlgorithm()
         case MenuType::SELECT_OVERLAY_SUB_MENU:
             return MakeRefPtr<SubMenuLayoutAlgorithm>();
         default:
-            return MakeRefPtr<MenuLayoutAlgorithm>(targetId_, targetTag_);
+            return MakeRefPtr<MenuLayoutAlgorithm>(targetId_, targetTag_, lastPosition_);
     }
+}
+
+bool MenuPattern::GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
+{
+    auto colorMode = SystemProperties::GetColorMode();
+    if (shadowStyle == ShadowStyle::None) {
+        return true;
+    }
+    auto host = GetHost();
+    auto pipelineContext = host->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+    CHECK_NULL_RETURN(shadowTheme, false);
+    shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
+    return true;
 }
 
 void MenuPattern::ResetTheme(const RefPtr<FrameNode>& host, bool resetForDesktopMenu)
@@ -874,9 +896,15 @@ void MenuPattern::ResetTheme(const RefPtr<FrameNode>& host, bool resetForDesktop
 
     if (resetForDesktopMenu) {
         // DesktopMenu apply shadow on inner Menu node
-        renderContext->UpdateBackShadow(ShadowConfig::NoneShadow);
+        Shadow shadow;
+        if (GetShadowFromTheme(ShadowStyle::None, shadow)) {
+            renderContext->UpdateBackShadow(shadow);
+        }
     } else {
-        renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
+        Shadow shadow;
+        if (GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadow)) {
+            renderContext->UpdateBackShadow(shadow);
+        }
     }
     // to enable inner menu shadow effect for desktopMenu, need to remove clipping from container
     bool clip = !resetForDesktopMenu;
@@ -911,7 +939,10 @@ void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
         auto bgColor = theme->GetBackgroundColor();
         renderContext->UpdateBackgroundColor(bgColor);
     }
-    renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
+    Shadow shadow;
+    if (GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadow)) {
+        renderContext->UpdateBackShadow(shadow);
+    }
     // make menu round rect
     BorderRadiusProperty borderRadius;
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -990,7 +1021,6 @@ Offset MenuPattern::GetTransformCenter() const
     auto placement = layoutAlgorithm->GetPlacement();
     switch (placement) {
         case Placement::BOTTOM_LEFT:
-            return Offset(size.Width(), 0.0f);
         case Placement::RIGHT_TOP:
             return Offset();
         case Placement::BOTTOM_RIGHT:
@@ -1497,14 +1527,20 @@ void InnerMenuPattern::ApplyDesktopMenuTheme()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetRenderContext()->UpdateBackShadow(ShadowConfig::DefaultShadowS);
+    Shadow shadow;
+    if (GetShadowFromTheme(ShadowStyle::OuterDefaultSM, shadow)) {
+        host->GetRenderContext()->UpdateBackShadow(shadow);
+    }
 }
 
 void InnerMenuPattern::ApplyMultiMenuTheme()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetRenderContext()->UpdateBackShadow(ShadowConfig::NoneShadow);
+    Shadow shadow;
+    if (GetShadowFromTheme(ShadowStyle::None, shadow)) {
+        host->GetRenderContext()->UpdateBackShadow(shadow);
+    }
 }
 
 void MenuPattern::OnColorConfigurationUpdate()
@@ -1646,8 +1682,8 @@ void MenuPattern::OnItemPressed(const RefPtr<UINode>& parent, int32_t index, boo
     if (parent->GetTag() == V2::JS_SYNTAX_ITEM_ETS_TAG) {
         nextNode = GetForEachMenuItem(parent, true);
     } else {
-        const auto& children = parent->GetChildren();
-        if (index >= static_cast<int32_t>(children.size() - 1)) {
+        const size_t size = parent->GetChildren().size();
+        if (size == 0 || index >= static_cast<int32_t>(size - 1)) {
             return;
         }
         nextNode = parent->GetChildAtIndex(index + 1);
@@ -1694,9 +1730,9 @@ RefPtr<UINode> MenuPattern::GetForEachMenuItem(const RefPtr<UINode>& parent, boo
         auto forEachNode = AceType::DynamicCast<UINode>(parent->GetParent());
         CHECK_NULL_RETURN(forEachNode, nullptr);
         auto syntIndex = forEachNode->GetChildIndex(parent);
-        const auto& children = forEachNode->GetChildren();
+        const size_t size = forEachNode->GetChildren().size();
         if (next) {
-            if (syntIndex < static_cast<int32_t>(children.size() - 1)) { // next is inside forEach
+            if (size > 0 && syntIndex < static_cast<int32_t>(size - 1)) { // next is inside forEach
                 auto nextSyntax = forEachNode->GetChildAtIndex(syntIndex + 1);
                 CHECK_NULL_RETURN(nextSyntax, nullptr);
                 return nextSyntax->GetFirstChild();
@@ -1727,13 +1763,12 @@ RefPtr<UINode> MenuPattern::GetOutsideForEachMenuItem(const RefPtr<UINode>& forE
     CHECK_NULL_RETURN(parentForEachNode, nullptr);
     auto forEachIndex = parentForEachNode->GetChildIndex(forEachNode);
     int32_t shift = next ? 1 : -1;
-    const auto& children = parentForEachNode->GetChildren();
-    if ((forEachIndex + shift) >= 0 && (forEachIndex + shift) <= static_cast<int32_t>(children.size() - 1)) {
+    const size_t size = parentForEachNode->GetChildren().size();
+    if (size > 0 && (forEachIndex + shift) >= 0 && (forEachIndex + shift) <= static_cast<int32_t>(size - 1)) {
         return parentForEachNode->GetChildAtIndex(forEachIndex + shift);
     } else {
         return nullptr;
     }
-
 }
 
 bool MenuPattern::IsMenuScrollable() const

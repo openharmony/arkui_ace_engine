@@ -16,8 +16,6 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_texttimer_ffi.h"
 
 #include "cj_lambda.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 #include "bridge/common/utils/utils.h"
 
 using namespace OHOS::Ace;
@@ -135,6 +133,9 @@ void FfiOHOSAceFrameworkTextTimerSetOnTimer(void (*callback)(int64_t utc, int64_
 int64_t FfiOHOSAceFrameworkTextTimerControllerCtor()
 {
     auto controller = FFIData::Create<NativeTextTimerController>();
+    if (controller == nullptr) {
+        return FFI_ERROR_CODE;
+    }
     return controller->GetID();
 }
 

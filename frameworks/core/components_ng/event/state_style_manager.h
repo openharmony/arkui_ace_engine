@@ -28,6 +28,7 @@ namespace OHOS::Ace::NG {
 
 class FrameNode;
 class TouchEventImpl;
+class CustomNodeBase;
 
 using UIState = uint64_t;
 inline constexpr UIState UI_STATE_NORMAL = 0;
@@ -120,6 +121,11 @@ public:
 
     RefPtr<FrameNode> GetFrameNode() const;
 
+    void ClearStateStyleTask()
+    {
+        ResetPressedState();
+    }
+
 private:
     void FireStateFunc(bool isReset);
 
@@ -191,6 +197,8 @@ private:
         const Offset& location) const;
     void Transform(PointF& localPointF, const WeakPtr<FrameNode>& node) const;
     void CleanScrollingParentListener();
+
+    void GetCustomNode(RefPtr<CustomNodeBase>& customNode, RefPtr<FrameNode>& node);
 
     WeakPtr<FrameNode> host_;
     RefPtr<TouchEventImpl> pressedFunc_;

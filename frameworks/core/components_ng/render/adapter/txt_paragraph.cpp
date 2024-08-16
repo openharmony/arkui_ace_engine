@@ -16,16 +16,10 @@
 #include "core/components_ng/render/adapter/txt_paragraph.h"
 
 #include "base/log/ace_performance_monitor.h"
-#include "base/log/ace_trace.h"
-#include "base/utils/utils.h"
-#include "base/geometry/dimension.h"
 #include "core/components/font/constants_converter.h"
-#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/components_ng/render/adapter/txt_font_collection.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/components/common/properties/text_layout_info.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -71,8 +65,8 @@ void TxtParagraph::CreateBuilder()
     style.textAlign = Constants::ConvertTxtTextAlign(paraStyle_.align);
     style.maxLines = paraStyle_.maxLines == UINT32_MAX ? UINT32_MAX - 1 : paraStyle_.maxLines;
     style.fontSize = paraStyle_.fontSize; // Rosen style.fontSize
-    style.ellipsisModal = static_cast<Rosen::EllipsisModal>(paraStyle_.ellipsisMode);
     style.wordBreakType = static_cast<Rosen::WordBreakType>(paraStyle_.wordBreak);
+    style.ellipsisModal = static_cast<Rosen::EllipsisModal>(paraStyle_.ellipsisMode);
     style.textSplitRatio = TEXT_SPLIT_RATIO;
     style.breakStrategy = static_cast<Rosen::BreakStrategy>(paraStyle_.lineBreakStrategy);
 #endif
@@ -519,20 +513,25 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
     }
 
     const auto& textBox = boxes.back();
+
     // when text_ ends with a \n, return the top position of the next line.
     auto preIsPlaceholder = CalCulateAndCheckPreIsPlaceholder(extent - 1, extent);
     prevChar = text_[std::max(0, extent - 1)];
     if (prevChar == NEWLINE_CODE && !text_[static_cast<size_t>(extent)] && !preIsPlaceholder) {
         // Return the start of next line.
-        result.offset.SetX(MakeEmptyOffsetX());
+        float y = 0.0f;
 #ifndef USE_GRAPHIC_TEXT_GINE
-        result.offset.SetY(textBox.rect.fBottom);
+        y = textBox.rect.fBottom;
         result.height = textBox.rect.fBottom - textBox.rect.fTop;
 #else
-        result.offset.SetY(textBox.rect.GetBottom());
+        y = textBox.rect.GetBottom();
         result.height = textBox.rect.GetBottom() - textBox.rect.GetTop();
 #endif
-        return true;
+        if (LessNotEqual(y, paragrah->GetHeight())) {
+            result.offset.SetX(MakeEmptyOffsetX());
+            result.offset.SetY(y);
+            return true;
+        }
     }
 
 #ifndef USE_GRAPHIC_TEXT_GINE
@@ -1043,4 +1042,13 @@ RSParagraph* TxtParagraph::GetParagraph()
     return externalParagraph_;
 }
 #endif
+
+void TxtParagraph::UpdateColor(size_t from, size_t to, const Color& color)
+{
+#ifndef USE_GRAPHIC_TEXT_GINE
+#else
+    auto* paragraphTxt = static_cast<OHOS::Rosen::Typography*>(GetParagraph());
+    paragraphTxt->UpdateColor(from, to, ToRSColor(color));
+#endif
+}
 } // namespace OHOS::Ace::NG

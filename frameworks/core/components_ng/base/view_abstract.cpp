@@ -30,7 +30,6 @@
 #include "base/subwindow/subwindow.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
-#include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components/common/layout/constants.h"
@@ -1021,13 +1020,13 @@ void ViewAbstract::DisableOnAreaChange(FrameNode* frameNode)
     frameNode->ClearUserOnAreaChange();
 }
 
-void ViewAbstract::SetOnClick(GestureEventFunc&& clickEventFunc)
+void ViewAbstract::SetOnClick(GestureEventFunc&& clickEventFunc, double distanceThreshold)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    gestureHub->SetUserOnClick(std::move(clickEventFunc));
+    gestureHub->SetUserOnClick(std::move(clickEventFunc), distanceThreshold);
 
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -1900,7 +1899,7 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params, const Re
     auto overlayManager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
 
-    if (expandDisplay && menuParam.isShowInSubWindow) {
+    if (expandDisplay && menuParam.isShowInSubWindow && targetNode->GetTag() != V2::SELECT_ETS_TAG) {
         bool isShown = SubwindowManager::GetInstance()->GetShown();
         if (!isShown) {
             SubwindowManager::GetInstance()->ShowMenuNG(menuNode, menuParam, targetNode, offset);
@@ -1934,18 +1933,13 @@ void ViewAbstract::BindMenuWithCustomNode(std::function<void()>&& buildFunc, con
     CHECK_NULL_VOID(pipelineContext);
     auto overlayManager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-
-    auto containerId = pipelineContext->GetInstanceId();
-    RefPtr<Container> container = AceEngine::Get().GetContainer(containerId);
-    CHECK_NULL_VOID(container);
-
-    // contextMenu not use subWindow in such cases: not expandDisplay and not in UIExtendsion.
-    if (menuParam.type == MenuType::CONTEXT_MENU && (expandDisplay || container->IsUIExtensionWindow())) {
+    if (menuParam.type == MenuType::CONTEXT_MENU) {
         SubwindowManager::GetInstance()->ShowMenuNG(
             std::move(buildFunc), std::move(previewBuildFunc), menuParam, targetNode, offset);
         return;
     }
-    if (menuParam.type == MenuType::MENU && expandDisplay && menuParam.isShowInSubWindow) {
+    if (menuParam.type == MenuType::MENU && expandDisplay && menuParam.isShowInSubWindow &&
+        targetNode->GetTag() != V2::SELECT_ETS_TAG) {
         bool isShown = SubwindowManager::GetInstance()->GetShown();
         if (!isShown) {
             SubwindowManager::GetInstance()->ShowMenuNG(
@@ -2134,6 +2128,10 @@ void ViewAbstract::SetInspectorId(const std::string& inspectorId)
 {
     auto& uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     if (uiNode) {
+        if (uiNode->GetInspectorId().has_value() && uiNode->GetInspectorIdValue() != inspectorId) {
+            ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(
+                uiNode->GetInspectorIdValue(), uiNode->GetId());
+        }
         uiNode->UpdateInspectorId(inspectorId);
     }
 }
@@ -3001,6 +2999,16 @@ void ViewAbstract::SetLinearGradientBlur(FrameNode *frameNode, const NG::LinearG
     ACE_UPDATE_NODE_RENDER_CONTEXT(LinearGradientBlur, blurPara, frameNode);
 }
 
+void ViewAbstract::SetMagnifier(FrameNode* frameNode, const MagnifierParams& magnifierOffset)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(Magnifier, magnifierOffset, frameNode);
+}
+
+void ViewAbstract::ReSetMagnifier(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, Magnifier, frameNode);
+}
+
 void ViewAbstract::SetBackgroundBlurStyle(FrameNode *frameNode, const BlurStyleOption& bgBlurStyle)
 {
     auto pipeline = frameNode->GetContext();
@@ -3455,6 +3463,10 @@ void ViewAbstract::SetAllowDrop(FrameNode* frameNode, const std::set<std::string
 void ViewAbstract::SetInspectorId(FrameNode* frameNode, const std::string& inspectorId)
 {
     if (frameNode) {
+        if (frameNode->GetInspectorId().has_value() && frameNode->GetInspectorIdValue() != inspectorId) {
+            ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(
+                frameNode->GetInspectorIdValue(), frameNode->GetId());
+        }
         frameNode->UpdateInspectorId(inspectorId);
     }
 }
@@ -3747,11 +3759,11 @@ void ViewAbstract::SetOnBlur(FrameNode* frameNode, OnBlurFunc&& onBlurCallback)
     focusHub->SetOnBlurCallback(std::move(onBlurCallback));
 }
 
-void ViewAbstract::SetOnClick(FrameNode* frameNode, GestureEventFunc&& clickEventFunc)
+void ViewAbstract::SetOnClick(FrameNode* frameNode, GestureEventFunc&& clickEventFunc, double distanceThreshold)
 {
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    gestureHub->SetUserOnClick(std::move(clickEventFunc));
+    gestureHub->SetUserOnClick(std::move(clickEventFunc), distanceThreshold);
 
     auto focusHub = frameNode->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -3988,16 +4000,22 @@ RefPtr<BasicShape> ViewAbstract::GetMask(FrameNode* frameNode)
 {
     RefPtr<BasicShape> value = AceType::MakeRefPtr<BasicShape>();
     const auto& target = frameNode->GetRenderContext();
-    CHECK_NULL_RETURN(target, value);
-    return target->GetClipMaskValue(value);
+    CHECK_NULL_RETURN(target, nullptr);
+    if (target->HasClipMask()) {
+        return target->GetClipMaskValue(value);
+    }
+    return nullptr;
 }
 
 RefPtr<ProgressMaskProperty> ViewAbstract::GetMaskProgress(FrameNode* frameNode)
 {
     RefPtr<ProgressMaskProperty> value = AceType::MakeRefPtr<ProgressMaskProperty>();
     const auto& target = frameNode->GetRenderContext();
-    CHECK_NULL_RETURN(target, value);
-    return target->GetProgressMaskValue(value);
+    CHECK_NULL_RETURN(target, nullptr);
+    if (target->HasProgressMask()) {
+        return target->GetProgressMaskValue(value);
+    }
+    return nullptr;
 }
 
 BlendMode ViewAbstract::GetBlendMode(FrameNode* frameNode)
@@ -4615,6 +4633,24 @@ void ViewAbstract::SetOnSizeChanged(
     frameNode->SetOnSizeChangeCallback(std::move(onSizeChanged));
 }
 
+void ViewAbstract::SetOnGestureRecognizerJudgeBegin(
+    FrameNode* frameNode, GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc));
+}
+
+void ViewAbstract::SetShouldBuiltInRecognizerParallelWith(
+    FrameNode* frameNode, NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetShouldBuildinRecognizerParallelWithFunc(std::move(shouldBuiltInRecognizerParallelWithFunc));
+}
+
 void ViewAbstract::SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style)
 {
     CHECK_NULL_VOID(frameNode);
@@ -4910,5 +4946,18 @@ void ViewAbstract::SetOffsetLocalizedEdges(bool needLocalized)
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateNeedOffsetLocalizedEdges(needLocalized);
+}
+
+void ViewAbstract::SetSystemColorModeChangeEvent(
+    FrameNode* frameNode, std::function<void(int32_t)>&& onColorModeChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetNDKColorModeUpdateCallback(std::move(onColorModeChange));
+}
+
+void ViewAbstract::SetSystemFontChangeEvent(FrameNode* frameNode, std::function<void(float, float)>&& onFontChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetNDKFontUpdateCallback(std::move(onFontChange));
 }
 } // namespace OHOS::Ace::NG

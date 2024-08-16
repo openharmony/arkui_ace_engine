@@ -159,7 +159,7 @@ public:
         }
     }
 
-    void SetResponseLinkRecognizersRecursively(const TouchTestResult& responseLinkResult)
+    void SetResponseLinkRecognizersRecursively(const ResponseLinkResult& responseLinkResult)
     {
         for (const auto& item : recognizers_) {
             auto group = AceType::DynamicCast<RecognizerGroup>(item);
@@ -167,14 +167,11 @@ public:
                 group->SetResponseLinkRecognizersRecursively(responseLinkResult);
                 continue;
             }
-            auto recognizer = AceType::DynamicCast<NG::NGGestureRecognizer>(item);
-            if (recognizer) {
-                recognizer->SetResponseLinkRecognizers(responseLinkResult);
-            }
+            item->SetResponseLinkRecognizers(responseLinkResult);
         }
     }
 
-    void CollectResponseLinkRecognizersRecursively(TouchTestResult& responseLinkResult)
+    void CollectResponseLinkRecognizersRecursively(ResponseLinkResult& responseLinkResult)
     {
         for (const auto& item : recognizers_) {
             auto group = AceType::DynamicCast<RecognizerGroup>(item);

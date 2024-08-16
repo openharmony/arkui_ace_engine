@@ -13,14 +13,10 @@
  * limitations under the License.
  */
 
-#include <cstdint>
-#include <vector>
 
-#include "native_type.h"
 #include "node_model.h"
 
 #include "base/error/error_code.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -108,6 +104,60 @@ int32_t OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen(ArkUI_NodeHandle nod
     translateOffset->y = tempOffset[1];
 
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_RegisterSystemColorModeChangeEvent(
+    ArkUI_NodeHandle node, void* userData, void (*onColorModeChange)(ArkUI_SystemColorMode colorMode, void* userData))
+{
+    if (node == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    impl->getNodeModifiers()->getFrameNodeModifier()->setSystemColorModeChangeEvent(
+        node->uiNodeHandle, userData, reinterpret_cast<void*>(onColorModeChange));
+
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+void OH_ArkUI_UnregisterSystemColorModeChangeEvent(ArkUI_NodeHandle node)
+{
+    if (node == nullptr) {
+        return;
+    }
+    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    impl->getNodeModifiers()->getFrameNodeModifier()->resetSystemColorModeChangeEvent(node->uiNodeHandle);
+}
+
+int32_t OH_ArkUI_RegisterSystemFontStyleChangeEvent(
+    ArkUI_NodeHandle node, void* userData, void (*onFontStyleChange)(ArkUI_SystemFontStyleEvent* event, void* userData))
+{
+    if (node == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    impl->getNodeModifiers()->getFrameNodeModifier()->setSystemFontStyleChangeEvent(
+        node->uiNodeHandle, userData, reinterpret_cast<void*>(onFontStyleChange));
+
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+void OH_ArkUI_UnregisterSystemFontStyleChangeEvent(ArkUI_NodeHandle node)
+{
+    if (node == nullptr) {
+        return;
+    }
+    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    impl->getNodeModifiers()->getFrameNodeModifier()->resetSystemFontStyleChangeEvent(node->uiNodeHandle);
+}
+
+float OH_ArkUI_SystemFontStyleEvent_GetFontSizeScale(const ArkUI_SystemFontStyleEvent* event)
+{
+    return event->fontSize;
+}
+
+float OH_ArkUI_SystemFontStyleEvent_GetFontWeightScale(const ArkUI_SystemFontStyleEvent* event)
+{
+    return event->fontWeight;
 }
 
 #ifdef __cplusplus

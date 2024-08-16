@@ -34,7 +34,7 @@ constexpr float HTMBLOCK_VELOCITY = 200;
 class GestureEventHub;
 
 using BarCollectTouchTargetCallback = std::function<void(const OffsetF&, const GetEventTargetImpl&, TouchTestResult&,
-    const RefPtr<FrameNode>&, const RefPtr<TargetComponent>&, TouchTestResult& responseLinkResult)>;
+    const RefPtr<FrameNode>&, const RefPtr<TargetComponent>&, ResponseLinkResult& responseLinkResult)>;
 using InBarRegionCallback = std::function<bool(const PointF&, SourceType source)>;
 using GetAnimateVelocityCallback = std::function<double()>;
 using ClickJudgeCallback = std::function<bool(const PointF&)>;
@@ -115,7 +115,7 @@ public:
 
     void BarCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-        TouchTestResult& responseLinkResult)
+        ResponseLinkResult& responseLinkResult)
     {
         if (barCollectTouchTarget_) {
             barCollectTouchTarget_(
@@ -135,7 +135,7 @@ public:
         }
     }
 
-    void SetBarCollectLongPressTargetCallback(const BarCollectTouchTargetCallback&& barCollectLongPressTarget)
+    void SetBarCollectClickAndLongPressTargetCallback(const BarCollectTouchTargetCallback&& barCollectLongPressTarget)
     {
         barCollectLongPressTarget_ = std::move(barCollectLongPressTarget);
     }
@@ -153,7 +153,7 @@ public:
 
     void BarCollectLongPressTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-        TouchTestResult& responseLinkResult)
+        ResponseLinkResult& responseLinkResult)
     {
         if (barCollectLongPressTarget_) {
             barCollectLongPressTarget_(
@@ -173,7 +173,7 @@ public:
 
     void CollectScrollableTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-        TouchTestResult& responseLinkResult);
+        ResponseLinkResult& responseLinkResult);
 
 private:
     Axis axis_ = Axis::VERTICAL;
@@ -221,7 +221,7 @@ public:
     void CollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const PointF& localPoint,
         const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-        TouchTestResult& responseLinkResult);
+        ResponseLinkResult& responseLinkResult);
 
     void InitClickRecognizer(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,

@@ -15,7 +15,6 @@
 
 #include "cj_menu_item_ffi.h"
 #include "core/components_ng/base/view_stack_model.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "cj_lambda.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/models/menu_item_model_impl.h"

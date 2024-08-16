@@ -179,5 +179,25 @@ const ArkUISymbolGlyphModifier* GetSymbolGlyphModifier()
 
     return &modifier;
 }
+
+const CJUISymbolGlyphModifier* GetCJUISymbolGlyphModifier()
+{
+    static const CJUISymbolGlyphModifier modifier = {
+        SetFontColor,
+        ResetFontColor,
+        SetFontSize,
+        ResetFontSize,
+        SetFontWeightStr,
+        SetFontWeight,
+        ResetFontWeight,
+        SetRenderingStrategy,
+        ResetRenderingStrategy,
+        SetEffectStrategy,
+        ResetEffectStrategy,
+        SetSymbolId,
+    };
+
+    return &modifier;
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

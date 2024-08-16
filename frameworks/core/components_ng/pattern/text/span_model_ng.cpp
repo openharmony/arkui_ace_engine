@@ -83,7 +83,10 @@ void SpanModelNG::SetFontSize(const Dimension& value)
 
 void SpanModelNG::SetTextColor(const Color& value)
 {
-    ACE_UPDATE_SPAN_PROPERTY(TextColor, value, PropertyInfo::FONTCOLOR);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    CHECK_NULL_VOID(spanNode);
+    spanNode->UpdateSpanTextColor(value);
+    spanNode->AddPropertyInfo(PropertyInfo::FONTCOLOR);
 }
 
 void SpanModelNG::SetItalicFontStyle(Ace::FontStyle value)
@@ -248,7 +251,7 @@ void SpanModelNG::SetTextColor(UINode* uiNode, const Color& value)
 {
     auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
     CHECK_NULL_VOID(spanNode);
-    spanNode->UpdateTextColor(value);
+    spanNode->UpdateSpanTextColor(value);
     spanNode->AddPropertyInfo(PropertyInfo::FONTCOLOR);
 }
 
@@ -428,5 +431,13 @@ std::vector<Shadow> SpanModelNG::GetTextShadow(UINode* uiNode)
     auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
     CHECK_NULL_RETURN(uiNode, defaultShadow);
     return spanNode->GetTextShadow().value_or(defaultShadow);
+}
+
+std::vector<std::string> SpanModelNG::GetSpanFontFamily(UINode* uiNode)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    std::vector<std::string> value;
+    CHECK_NULL_RETURN(spanNode, value);
+    return spanNode->GetFontFamily().value_or(value);
 }
 } // namespace OHOS::Ace::NG

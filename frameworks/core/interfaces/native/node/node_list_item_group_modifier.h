@@ -19,6 +19,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIListItemGroupModifier* GetListItemGroupModifier();
+const CJUIListItemGroupModifier* GetCJUIListItemGroupModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_ARKTS_NATIVE_NODE_LIST_ITEM_GROUP_BRIDGE_MODIFIER_H

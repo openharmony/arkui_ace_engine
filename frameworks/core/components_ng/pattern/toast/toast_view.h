@@ -30,9 +30,9 @@ public:
 
 private:
     static void UpdateTextLayoutProperty(
-        const RefPtr<FrameNode>& textNode, const std::string& message, bool isRightToLeft);
+        const RefPtr<FrameNode>& textNode, const std::string& message, bool isRightToLeft,
+        const std::optional<Color>& textColor);
     static void UpdateToastContext(const RefPtr<FrameNode>& toastContext);
-    static bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow);
 };
 } // namespace OHOS::Ace::NG
 

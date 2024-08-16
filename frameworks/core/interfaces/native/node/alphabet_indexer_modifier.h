@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier();
+const CJUIAlphabetIndexerModifier* GetCJUIAlphabetIndexerModifier();
 void SetOnIndexerSelected(ArkUINodeHandle node, void* extraParam);
 void SetOnIndexerRequestPopupData(ArkUINodeHandle node, void* extraParam);
 void SetOnIndexerPopupSelected(ArkUINodeHandle node, void* extraParam);

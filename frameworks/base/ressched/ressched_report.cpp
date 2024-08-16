@@ -12,10 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <cmath>
 
-#include "core/common/ace_application_info.h"
-#include "base/log/log.h"
 #include "base/ressched/ressched_report.h"
 
 #define LIKELY(x) __builtin_expect(!!(x), 1)
@@ -36,7 +33,6 @@ constexpr int32_t CLICK_EVENT               = 2;
 constexpr int32_t TOUCH_UP_EVENT            = 3;
 constexpr int32_t TOUCH_PULL_UP_EVENT = 4;
 constexpr int32_t SLIDE_DETECTING = 2;
-constexpr int32_t MILL_SECOND_UNIT = 1000 * 1000;
 constexpr int32_t AUTO_PLAY_ON_EVENT = 5;
 constexpr int32_t AUTO_PLAY_OFF_EVENT = 6;
 constexpr int32_t PUSH_PAGE_START_EVENT = 0;
@@ -255,16 +251,16 @@ void ResSchedReport::HandleTouchPullMove(const TouchEvent& touchEvent)
     RecordTouchEvent(touchEvent);
 }
 
-float ResSchedReport::GetUpVelocity(const TouchEvent& lastMoveInfo,
+double ResSchedReport::GetUpVelocity(const TouchEvent& lastMoveInfo,
     const TouchEvent& upEventInfo)
 {
-    float distance = sqrt(pow(lastMoveInfo.x - upEventInfo.x, SQUARE) + pow(lastMoveInfo.y - upEventInfo.y, SQUARE));
-    int64_t time = std::abs(lastMoveInfo.GetTimeStamp().time_since_epoch().count() -
-        upEventInfo.GetTimeStamp().time_since_epoch().count());
-    if (time < MILL_SECOND_UNIT) {
+    double distance = sqrt(pow(lastMoveInfo.x - upEventInfo.x, SQUARE) + pow(lastMoveInfo.y - upEventInfo.y, SQUARE));
+    int64_t time = std::chrono::duration_cast<std::chrono::milliseconds>(upEventInfo.GetTimeStamp() -
+        lastMoveInfo.GetTimeStamp()).count();
+    if (time <= 0) {
         return 0.0f;
     }
-    return distance * dpi_ / (time / MILL_SECOND_UNIT); //unit: pixel/ms
+    return distance * dpi_ / static_cast<double>(time); //unit: pixel/ms
 }
 
 void ResSchedReport::LoadPageEvent(int32_t value)

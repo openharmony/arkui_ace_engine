@@ -398,7 +398,7 @@ void UpdatePreivewVisibleArea(const RefPtr<FrameNode>& hoverImageStackNode, cons
         previewPattern->GetHoverImageAfterScaleHeight();
     auto clipEndValue = previewPattern->GetIsWidthDistLarger() ?
         previewPattern->GetCustomPreviewAfterScaleWidth() : previewPattern->GetCustomPreviewAfterScaleHeight();
-
+    CHECK_NULL_VOID(hoverImageStackNode);
     hoverImageStackNode->CreateAnimatablePropertyFloat(HOVER_IMAGE_CLIP_PROPERTY_NAME, 0,
         [weak = AceType::WeakClaim(AceType::RawPtr(hoverImageStackNode)),
             previewWeak = AceType::WeakClaim(AceType::RawPtr(previewNode))](float value) {
@@ -439,6 +439,7 @@ void UpdatePreivewVisibleArea(const RefPtr<FrameNode>& hoverImageStackNode, cons
     if (isScaleNearEqual) { option.SetDelay(menuTheme->GetHoverImageDelayDuration()); }
     hoverImageStackNode->UpdateAnimatablePropertyFloat(HOVER_IMAGE_CLIP_PROPERTY_NAME, clipStartValue);
     auto clipAnimation_ = AnimationUtils::StartAnimation(option, [hoverImageStackNode, clipEndValue]() {
+            CHECK_NULL_VOID(hoverImageStackNode);
             hoverImageStackNode->UpdateAnimatablePropertyFloat(HOVER_IMAGE_CLIP_PROPERTY_NAME, clipEndValue);
         });
 }
@@ -465,6 +466,12 @@ void UpdateHoverImagePreviewScale(const RefPtr<FrameNode>& hoverImageStackNode,
     if (isScaleNearEqual) {
         scaleOption.SetDelay(menuTheme->GetHoverImageDelayDuration());
     }
+    previewPattern->SetIsHoverImageScalePlaying(true);
+    scaleOption.SetOnFinishEvent([weak = WeakPtr<MenuPreviewPattern>(previewPattern)] {
+        auto previewPattern = weak.Upgrade();
+        CHECK_NULL_VOID(previewPattern);
+        previewPattern->SetIsHoverImageScalePlaying(false);
+    });
     AnimationUtils::Animate(
         scaleOption, [stackContext, scaleTo]() {
             CHECK_NULL_VOID(stackContext);

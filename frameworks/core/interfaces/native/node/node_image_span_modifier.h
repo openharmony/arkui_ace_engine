@@ -20,5 +20,6 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIImageSpanModifier* GetImageSpanModifier();
+const CJUIImageSpanModifier* GetCJUIImageSpanModifier();
 }
 #endif

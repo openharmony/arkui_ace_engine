@@ -627,7 +627,18 @@ int32_t PageRouterManager::GetCurrentPageIndex() const
         return static_cast<int32_t>(restorePageStack_.size()) + 1;
     } else {
         // Page has been inserted into top position of pageRouterStack_.
-        return static_cast<int32_t>(restorePageStack_.size() + pageRouterStack_.size());
+        auto index = static_cast<int32_t>(restorePageStack_.size() + pageRouterStack_.size());
+        if (isNewPageReplacing_) {
+            /**
+             * example:
+             *  stack bottom -> stack top
+             *  [1]PageA -> [2]PageB
+             *   call router.replace(PageC)
+             *   then we need keep index of PageC same with PageB, that is 2
+             */
+            index--;
+        }
+        return index;
     }
 }
 
@@ -1162,7 +1173,9 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
     if (!manifestParser_) {
         return;
     }
-    if (GetStackSize() >= MAX_ROUTER_STACK_SIZE) {
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    if (GetStackSize() >= MAX_ROUTER_STACK_SIZE && !context->GetForceSplitEnable()) {
         LOGW("Router stack size is larger than max size 32.");
         if (target.errorCallback != nullptr) {
             target.errorCallback("The pages are pushed too much.", ERROR_CODE_PAGE_STACK_FULL);
@@ -1388,7 +1401,7 @@ void PageRouterManager::BackToIndexCheckAlert(int32_t index, const std::string& 
 }
 
 void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, bool needHideLast, bool needTransition,
-    bool isPush)
+    bool  /*isPush*/)
 {
     ACE_SCOPED_TRACE_COMMERCIAL("load page: %s(id:%d)", target.url.c_str(), pageId);
     CHECK_RUN_ON(JS);
@@ -1399,7 +1412,7 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
     }
 
     pageRouterStack_.emplace_back(pageNode);
-    if (!OnPageReady(pageNode, needHideLast, needTransition, false, 0, isPush)) {
+    if (!OnPageReady(pageNode, needHideLast, needTransition)) {
         pageRouterStack_.pop_back();
         LOGW("LoadPage OnPageReady Failed");
         return;
@@ -1555,7 +1568,7 @@ void PageRouterManager::MovePageToFront(int32_t index, const RefPtr<FrameNode>& 
     auto pageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
     CHECK_NULL_VOID(pageInfo);
 
-    if (index == static_cast<int32_t>(pageRouterStack_.size() - 1)) {
+    if (index == static_cast<int32_t>(pageRouterStack_.size()) - 1) {
         pageInfo->ReplacePageParams(target.params);
         pageInfo->ReplaceRecoverable(target.recoverable);
         if (forceShowCurrent) {
@@ -1885,7 +1898,7 @@ void PageRouterManager::PopPageToIndex(int32_t index, const std::string& params,
 }
 
 bool PageRouterManager::OnPageReady(const RefPtr<FrameNode>& pageNode, bool needHideLast, bool needTransition,
-    bool isCardRouter, int64_t cardId, bool isPush)
+    bool isCardRouter, int64_t cardId)
 {
     Recorder::NodeDataCache::Get().OnPageReady();
     auto container = Container::Current();
@@ -1903,7 +1916,7 @@ bool PageRouterManager::OnPageReady(const RefPtr<FrameNode>& pageNode, bool need
     auto context = DynamicCast<NG::PipelineContext>(pipeline);
     auto stageManager = context ? context->GetStageManager() : nullptr;
     if (stageManager) {
-        return stageManager->PushPage(pageNode, needHideLast, needTransition, isPush);
+        return stageManager->PushPage(pageNode, needHideLast, needTransition);
     }
     return false;
 }
@@ -2048,7 +2061,7 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
         "router replace in new lifecycle(API version > 11), replace mode: %{public}d, url: %{public}s",
         static_cast<int32_t>(info.routerMode), info.url.c_str());
     auto popNode = GetCurrentPageNode();
-    int32_t popIndex = static_cast<int32_t>(pageRouterStack_.size() - 1);
+    int32_t popIndex = static_cast<int32_t>(pageRouterStack_.size()) - 1;
     bool findPage = false;
     if (info.routerMode == RouterMode::SINGLE) {
         auto pageInfo = FindPageInStack(info.url);
@@ -2234,6 +2247,7 @@ void PageRouterManager::LoadOhmUrlPage(const std::string& url, std::function<voi
     auto silentInstallErrorCallBack = [errorCb = errorCallback, taskExecutor, instanceId, errorCallbackTaskName](
         int32_t errorCode, const std::string& errorMsg) {
         if (!errorCb) {
+            TAG_LOGW(AceLogTag::ACE_ROUTER, "errorCallback is null");
             return;
         }
         ContainerScope scope(instanceId);

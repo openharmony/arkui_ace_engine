@@ -98,12 +98,10 @@ void OptionPattern::OnSelectProcess()
     CHECK_NULL_VOID(hub);
     auto JsAction = hub->GetJsCallback();
     if (JsAction) {
-        LOGI("Option's callback executing");
         JsAction();
     }
     auto onSelect = hub->GetOnSelect();
     if (onSelect) {
-        LOGI("selecting option %d", index_);
         onSelect(index_);
     }
     host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);

@@ -17,20 +17,12 @@
 #include "application_context.h"
 #endif
 #include "drawable_descriptor.h"
-
-#include <cstddef>
-#include <memory>
-#include <string>
-
-#include "include/core/SkSamplingOptions.h"
 #include "third_party/cJSON/cJSON.h"
-
 #ifndef PREVIEW
 #include "image_source.h"
 #endif
 #include "include/core/SkImage.h"
 #include "include/core/SkRect.h"
-
 #ifdef PREVIEW
 #ifdef WINDOWS_PLATFORM
 #include <direct.h>
@@ -154,10 +146,10 @@ void LayeredDrawableDescriptor::InitialResource(const std::shared_ptr<Global::Re
     InitialMask(resourceMgr);
     // preprocess get background and foreground
     if (!PreGetPixelMapFromJsonBuf(resourceMgr, true)) {
-        HILOGE("Create background Item imageSource from json buffer failed");
+        HILOGD("Create background Item imageSource from json buffer failed");
     }
     if (!PreGetPixelMapFromJsonBuf(resourceMgr, false)) {
-        HILOGE("Create foreground Item imageSource from json buffer failed");
+        HILOGD("Create foreground Item imageSource from json buffer failed");
     }
 }
 

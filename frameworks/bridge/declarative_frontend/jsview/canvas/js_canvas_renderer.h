@@ -48,6 +48,7 @@ public:
 
     static RefPtr<CanvasPath2D> JsMakePath2D(const JSCallbackInfo& info);
     void SetAntiAlias();
+    void SetDensity();
 
     void ParseImageData(const JSCallbackInfo& info, ImageData& imageData);
     void JsCloseImageBitmap(const std::string& src);
@@ -214,7 +215,7 @@ private:
     void DrawPixelMap(const JSCallbackInfo& info);
 
     PaintState paintState_;
-    TextStyle style_;
+    std::vector<PaintState> savePaintState_;
     static std::unordered_map<int32_t, std::shared_ptr<Pattern>> pattern_;
     static unsigned int patternCount_;
     std::weak_ptr<Ace::Pattern> GetPatternNG(int32_t id);

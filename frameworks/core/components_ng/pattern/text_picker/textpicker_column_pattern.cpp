@@ -35,7 +35,6 @@
 #include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
 #include "core/components_ng/pattern/text_picker/toss_animation_controller.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
-#include "core/components/text/text_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -231,7 +230,8 @@ void TextPickerColumnPattern::ParseTouchListener()
             pattern->OnMiddleButtonTouchDown();
             return;
         }
-        if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
+        if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
+            info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
             pattern->OnMiddleButtonTouchUp();
             pattern->SetLocalDownDistance(0.0f);
             return;
@@ -387,24 +387,6 @@ void TextPickerColumnPattern::ResetOptionPropertyHeight()
     }
 }
 
-bool TextPickerColumnPattern::IsTextFadeOut()
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, false);
-    auto textTheme = pipeline->GetTheme<TextTheme>();
-    CHECK_NULL_RETURN(textTheme, false);
-    return textTheme->GetIsTextFadeout();
-}
-
-void TextPickerColumnPattern::UpdateTexOverflow(bool isSel, const RefPtr<TextLayoutProperty>& textLayoutProperty)
-{
-    if (isTextFadeOut_) {
-        textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
-        textLayoutProperty->UpdateTextMarqueeFadeout(true);
-        textLayoutProperty->UpdateTextMarqueeStart(isSel && !isTossing_);
-    }
-}
-
 void TextPickerColumnPattern::InitTextFontFamily()
 {
     auto host = GetHost();
@@ -456,7 +438,6 @@ void TextPickerColumnPattern::FlushCurrentOptions(
     CHECK_NULL_VOID(parentNode);
     auto textPickerLayoutProperty = parentNode->GetLayoutProperty<TextPickerLayoutProperty>();
     CHECK_NULL_VOID(textPickerLayoutProperty);
-    isTextFadeOut_ = IsTextFadeOut();
 
     InitTextFontFamily();
 
@@ -529,7 +510,6 @@ void TextPickerColumnPattern::FlushCurrentTextOptions(
         CHECK_NULL_VOID(textPattern);
         auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        UpdateTexOverflow(index == middleIndex, textLayoutProperty);
         if (!isUpateTextContentOnly) {
             UpdatePickerTextProperties(textLayoutProperty, textPickerLayoutProperty, index, middleIndex, showCount);
         }
@@ -652,7 +632,6 @@ void TextPickerColumnPattern::FlushCurrentMixtureOptions(
         CHECK_NULL_VOID(textPattern);
         auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        UpdateTexOverflow(index == middleIndex, textLayoutProperty);
         if (!isUpateTextContentOnly) {
             UpdatePickerTextProperties(textLayoutProperty, textPickerLayoutProperty, index, middleIndex, showCount);
         }
@@ -679,25 +658,24 @@ void TextPickerColumnPattern::FlushCurrentMixtureOptions(
 
 void TextPickerColumnPattern::FlushAnimationTextProperties(bool isDown)
 {
-    if (!animationProperties_.size()) {
+    const size_t size = animationProperties_.size();
+    if (size == 0) {
         return;
     }
     if (isDown) {
-        for (size_t i = 0; i < animationProperties_.size(); i++) {
+        for (size_t i = 0; i < size; i++) {
             if (i > 0) {
                 animationProperties_[i - 1].upFontSize = animationProperties_[i].upFontSize;
                 animationProperties_[i - 1].fontSize = animationProperties_[i].fontSize;
                 animationProperties_[i - 1].downFontSize = animationProperties_[i].downFontSize;
-
                 animationProperties_[i - 1].upColor = animationProperties_[i].upColor;
                 animationProperties_[i - 1].currentColor = animationProperties_[i].currentColor;
                 animationProperties_[i - 1].downColor = animationProperties_[i].downColor;
             }
-            if (i + 1 == animationProperties_.size()) {
+            if (i + 1 == size) {
                 animationProperties_[i].upFontSize = animationProperties_[i].fontSize;
                 animationProperties_[i].fontSize = animationProperties_[i].fontSize * 0.5;
                 animationProperties_[i].downFontSize = Dimension();
-
                 animationProperties_[i].upColor = animationProperties_[i].currentColor;
                 auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
                 animationProperties_[i].currentColor =
@@ -706,12 +684,11 @@ void TextPickerColumnPattern::FlushAnimationTextProperties(bool isDown)
             }
         }
     } else {
-        for (size_t i = animationProperties_.size() ? animationProperties_.size() - 1 : 0;; i--) {
+        for (size_t i = size - 1;; i--) {
             if (i == 0) {
                 animationProperties_[i].upFontSize = Dimension();
                 animationProperties_[i].downFontSize = animationProperties_[i].fontSize;
                 animationProperties_[i].fontSize = animationProperties_[i].fontSize * 0.5;
-
                 animationProperties_[i].upColor = Color();
                 animationProperties_[i].downColor = animationProperties_[i].currentColor;
                 auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
@@ -722,7 +699,6 @@ void TextPickerColumnPattern::FlushAnimationTextProperties(bool isDown)
                 animationProperties_[i].upFontSize = animationProperties_[i - 1].upFontSize;
                 animationProperties_[i].fontSize = animationProperties_[i - 1].fontSize;
                 animationProperties_[i].downFontSize = animationProperties_[i - 1].downFontSize;
-
                 animationProperties_[i].upColor = animationProperties_[i - 1].upColor;
                 animationProperties_[i].currentColor = animationProperties_[i - 1].currentColor;
                 animationProperties_[i].downColor = animationProperties_[i - 1].downColor;
@@ -950,7 +926,6 @@ void TextPickerColumnPattern::UpdateTextPropertiesLinear(bool isDown, double sca
     CHECK_NULL_VOID(host);
     uint32_t showCount = GetShowOptionCount();
     auto child = host->GetChildren();
-    auto middleIndex = showCount / 2;
     auto iter = child.begin();
     if (child.size() != showCount) {
         return;
@@ -964,11 +939,7 @@ void TextPickerColumnPattern::UpdateTextPropertiesLinear(bool isDown, double sca
             CHECK_NULL_VOID(textPattern);
             textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(textLayoutProperty);
-            if (!isTossing_) {
-                UpdateTexOverflow(index == middleIndex, textLayoutProperty);
-            } else {
-                TextPropertiesLinearAnimation(textLayoutProperty, index, showCount, isDown, scale);
-            }
+            TextPropertiesLinearAnimation(textLayoutProperty, index, showCount, isDown, scale);
         } else if (columnkind_ == MIXTURE) {
             auto children = rangeNode->GetChildren();
             if (children.size() != MIXTURE_CHILD_COUNT) {
@@ -978,11 +949,7 @@ void TextPickerColumnPattern::UpdateTextPropertiesLinear(bool isDown, double sca
             auto textPattern = textNode->GetPattern<TextPattern>();
             textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(textLayoutProperty);
-            if (!isTossing_) {
-                UpdateTexOverflow(index == middleIndex, textLayoutProperty);
-            } else {
-                TextPropertiesLinearAnimation(textLayoutProperty, index, showCount, isDown, scale);
-            }
+            TextPropertiesLinearAnimation(textLayoutProperty, index, showCount, isDown, scale);
             textNode->MarkModifyDone();
             textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
@@ -1259,6 +1226,9 @@ void TextPickerColumnPattern::CalcAlgorithmOffset(double distancePercent)
 
 double TextPickerColumnPattern::GetShiftDistance(int32_t index, ScrollDirection dir)
 {
+    if (optionProperties_.empty()) {
+        return 0.0;
+    }
     int32_t optionCounts = static_cast<int32_t>(GetShowOptionCount());
     if (optionCounts == 0) {
         return 0.0;

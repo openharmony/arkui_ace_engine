@@ -16,10 +16,6 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_richeditor_ffi.h"
 
 #include "cj_lambda.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
@@ -233,6 +229,9 @@ void FfiOHOSAceFrameworkRichEditorOnPaste(void(*callback)(int64_t))
 {
     auto onPast = [cjCallback = CJLambda::Create(callback)](NG::TextCommonEvent& info) {
         auto nativePasteEvent = FFIData::Create<NativePasteEvent>(&info);
+        if (nativePasteEvent == nullptr) {
+            return;
+        }
         cjCallback(nativePasteEvent->GetID());
     };
     RichEditorModel::GetInstance()->SetOnPaste(std::move(onPast));

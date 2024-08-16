@@ -27,6 +27,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/syntax/lazy_for_each_builder.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/interfaces/cjui/cjui_api.h"
 
 namespace OHOS::Ace::NG {
 class NativeLazyForEachBuilder : public LazyForEachBuilder {
@@ -232,5 +233,6 @@ private:
 
 namespace OHOS::Ace::NodeAdapter {
 const ArkUINodeAdapterAPI* GetNodeAdapterAPI();
+const CJUINodeAdapterAPI* GetCJUINodeAdapterAPI();
 } // namespace OHOS::Ace::NodeAdapter
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_ADAPTER_IMPL_H

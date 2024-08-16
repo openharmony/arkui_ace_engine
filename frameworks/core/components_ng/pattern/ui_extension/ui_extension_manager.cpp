@@ -172,8 +172,8 @@ bool UIExtensionManager::NotifyOccupiedAreaChangeInfo(const sptr<Rosen::Occupied
     return ret;
 }
 
-void UIExtensionManager::NotifySizeChangeReason(WindowSizeChangeReason type,
-    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+void UIExtensionManager::NotifySizeChangeReason(
+    WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     for (const auto& it : aliveUIExtensions_) {
         auto uiExtension = it.second.Upgrade();

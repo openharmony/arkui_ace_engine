@@ -269,12 +269,15 @@ export struct ChipGroup {
 
   aboutToAppear() {
     this.itemStyleOnChange();
+    if (this.getSelectedIndexes().length === 0) {
+      this.selectedIndexes = [0];
+    }
   }
 
   private getChipSize(): ChipSize | SizeOptions {
     if (this.itemStyle && this.itemStyle.size) {
       if (typeof this.itemStyle.size === 'object') {
-        if ( !this.itemStyle.size.width || !this.itemStyle.size.height || !this.itemStyle.size) {
+        if (!this.itemStyle.size.width || !this.itemStyle.size.height || !this.itemStyle.size) {
           return defaultTheme.itemStyle.size;
         }
       }
@@ -377,9 +380,6 @@ export struct ChipGroup {
             array.indexOf(element) === index &&
             element < (this.items || []).length);
       });
-    if (temp.length == 0) {
-      temp = [0];
-    }
     return temp;
   }
 
@@ -434,20 +434,6 @@ export struct ChipGroup {
       return this.getSelectedIndexes().some((element, index, array) => {
         return (element == itemIndex);
       })
-    }
-  }
-
-  private getChipGroupHeight() {
-    if (typeof this.chipSize === 'string') {
-      if (this.chipSize === ChipSize.NORMAL) {
-        return ChipGroupHeight.NORMAL;
-      } else {
-        return ChipGroupHeight.SMALL;
-      }
-    } else if (typeof this.chipSize === 'object') {
-      return this.chipSize.height as number
-    } else {
-      return ChipGroupHeight.NORMAL
     }
   }
 
@@ -533,7 +519,10 @@ export struct ChipGroup {
             });
           }
           .padding({ left: this.getChipGroupStartSpace(),
-            right: this.getChipGroupEndSpace() })
+            right: this.getChipGroupEndSpace(),
+            top: this.getPaddingTop(),
+            bottom: this.getPaddingBottom()
+          })
           .constraintSize({ minWidth: '100%' })
         }
         .scrollable(ScrollDirection.Horizontal)
@@ -548,13 +537,12 @@ export struct ChipGroup {
         if (this.suffix && !this.isReachEnd) {
           Stack()
             .width(iconGroupSuffixTheme.normalBackgroundSize)
-            .height(this.getChipGroupHeight() + (this.getPaddingTop() as number) + (this.getPaddingBottom() as number))
+            .padding({ top: this.getPaddingTop(), bottom: this.getPaddingBottom() })
             .linearGradient({ angle: 90, colors: colorStops })
             .blendMode(BlendMode.DST_IN, BlendApplyType.OFFSCREEN)
             .hitTestBehavior(HitTestMode.None)
         }
       }
-      .height(this.getChipGroupHeight() + (this.getPaddingTop() as number) + (this.getPaddingBottom() as number))
       .layoutWeight(1)
       .blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN)
       .alignContent(Alignment.End)
@@ -562,12 +550,15 @@ export struct ChipGroup {
       if (this.suffix) {
         Row() {
           this.suffix();
-        }.padding({ left: iconGroupSuffixTheme.marginLeft, right: iconGroupSuffixTheme.marginRight })
+        }.padding({ left: iconGroupSuffixTheme.marginLeft,
+          right: iconGroupSuffixTheme.marginRight,
+          top: this.getPaddingTop(),
+          bottom: this.getPaddingBottom()
+        })
       }
     }
     .align(Alignment.End)
     .width("100%")
-    .height(this.getChipGroupHeight() + (this.getPaddingTop() as number) + (this.getPaddingBottom() as number))
     .padding({ top: this.getPaddingTop(), bottom: this.getPaddingBottom() })
   }
 }

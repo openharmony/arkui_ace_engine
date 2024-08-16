@@ -17,12 +17,7 @@
 
 #include "cj_lambda.h"
 
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
-#include "bridge/common/utils/utils.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "frameworks/base/memory/referenced.h"
-#include "frameworks/bridge/common/utils/engine_helper.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
@@ -176,6 +171,9 @@ extern "C" {
 int64_t FfiOHOSAceFrameworkCustomDialogControllerCtor(NativeCustomDialogControllerOptions options)
 {
     auto controller = FFIData::Create<NativeCustomDialogController>(options);
+    if (controller == nullptr) {
+        return FFI_ERROR_CODE;
+    }
     return controller->GetID();
 }
 

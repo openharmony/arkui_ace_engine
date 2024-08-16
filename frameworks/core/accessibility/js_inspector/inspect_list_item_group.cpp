@@ -15,8 +15,6 @@
 
 #include "inspect_list_item_group.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 InspectListItemGroup::InspectListItemGroup(NodeId nodeId, const std::string& nodeName)
     : InspectNode(nodeId, nodeName) {}

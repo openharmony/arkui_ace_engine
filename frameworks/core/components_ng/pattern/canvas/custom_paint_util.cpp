@@ -14,46 +14,51 @@
  */
 
 #include "core/components_ng/pattern/canvas/custom_paint_util.h"
-
 #include "base/utils/string_utils.h"
 
 namespace OHOS::Ace::NG {
 
-const int32_t MIME_TYPE_COLUMN_NUM = 2;
-
-// If args is empty or invalid format, use default: image/png
-std::string GetMimeType(const std::string& args)
+// If type is empty or invalid format, use default: "image/png"
+std::string GetMimeType(const std::string& type)
 {
-    // args example: ["image/png", 0.8]
-    std::vector<std::string> values;
-    StringUtils::StringSplitter(args, ',', values);
-    if ((values.size() > MIME_TYPE_COLUMN_NUM) || values.empty()) {
-        return IMAGE_PNG;
-    }
+    // type example: ["image/png"]
+    std::string str = type;
     // convert to lowercase string, e.g. "image/png"
-    for (size_t i = 0; i < values[0].size(); ++i) {
-        values[0][i] = static_cast<uint8_t>(tolower(values[0][i]));
-    }
-    return values[0];
+    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::tolower(c); });
+    return str;
 }
 
-// Quality needs to be between 0.0 and 1.0 for MimeType jpeg and webp
-double GetQuality(const std::string& args)
+double GetQuality(const std::string& type, const double quality)
 {
-    // Args example: ["image/jpeg", 0.8]
-    std::vector<std::string> values;
-    StringUtils::StringSplitter(args, ',', values);
-    if (values.size() < MIME_TYPE_COLUMN_NUM) {
-        return DEFAULT_QUALITY;
+    // type example: "image/jpeg", quality example: 0.8
+    double qua = quality;
+    if (type != IMAGE_JPEG && type != IMAGE_WEBP) {
+        qua =  DEFAULT_QUALITY;
     }
-    auto mimeType = GetMimeType(args);
-    if (mimeType != IMAGE_JPEG && mimeType != IMAGE_WEBP) {
-        return DEFAULT_QUALITY;
-    }
-    double quality = StringUtils::StringToDouble(values[1]);
     if (quality < 0.0 || quality > 1.0) {
-        return DEFAULT_QUALITY;
+        qua =  DEFAULT_QUALITY;
     }
-    return quality;
+    return qua * QUALITY_COEFFICIENT;
 }
+
+#ifndef ACE_UNITTEST
+bool EncodeImage(std::string& type, const double quality, SkPixmap& src, SkDynamicMemoryWStream& dst)
+{
+    bool encodeImageResult = false;
+    if (type == IMAGE_JPEG) {
+        SkJpegEncoder::Options options;
+        options.fQuality = quality;
+        encodeImageResult = SkJpegEncoder::Encode(&dst, src, options);
+    } else if (type == IMAGE_WEBP) {
+        SkWebpEncoder::Options options;
+        options.fQuality = quality;
+        encodeImageResult = SkWebpEncoder::Encode(&dst, src, options);
+    } else {
+        type = IMAGE_PNG;
+        SkPngEncoder::Options options;
+        encodeImageResult = SkPngEncoder::Encode(&dst, src, options);
+    }
+    return encodeImageResult;
+}
+#endif
 } // namespace OHOS::Ace::NG

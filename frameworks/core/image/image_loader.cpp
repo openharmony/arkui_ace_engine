@@ -15,22 +15,9 @@
 
 #include "core/image/image_loader.h"
 
-#include <condition_variable>
-#include <memory>
-#include <mutex>
-#include <ratio>
-#include <regex>
-#include <string_view>
-#include <unistd.h>
-
 #include "include/utils/SkBase64.h"
-
-#include "base/memory/ace_type.h"
-#include "base/utils/system_properties.h"
 #include "core/common/resource/resource_manager.h"
-#include "core/common/resource/resource_object.h"
 #include "core/common/resource/resource_wrapper.h"
-#include "core/components/theme/theme_utils.h"
 
 #ifdef USE_ROSEN_DRAWING
 #include "drawing/engine_adapter/skia_adapter/skia_data.h"
@@ -38,24 +25,12 @@
 
 #include "base/image/file_uri_helper.h"
 #include "base/image/image_source.h"
-#include "base/log/ace_trace.h"
-#include "base/network/download_manager.h"
-#include "base/resource/ace_res_config.h"
-#include "base/resource/asset_manager.h"
 #include "base/thread/background_task_executor.h"
-#include "base/utils/string_utils.h"
-#include "base/utils/utils.h"
-#include "core/common/ace_application_info.h"
 #include "core/common/container.h"
-#include "core/common/thread_checker.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/image_provider/image_data.h"
 #ifdef USE_ROSEN_DRAWING
 #include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
 #endif
-#include "core/image/image_cache.h"
 #include "core/image/image_file_cache.h"
-#include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -319,17 +294,13 @@ std::shared_ptr<RSData> FileImageLoader::LoadImageData(
         return nullptr;
     }
     char realPath[PATH_MAX] = { 0x00 };
-    if (realpath(filePath.c_str(), realPath) == nullptr) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "realpath fail! filePath: %{public}s, fail reason: %{public}s src:%{public}s",
-            filePath.c_str(), strerror(errno), src.c_str());
-        return nullptr;
-    }
+    realpath(filePath.c_str(), realPath);
     auto result = SkData::MakeFromFileName(realPath);
     if (!result) {
         TAG_LOGW(AceLogTag::ACE_IMAGE,
-            "read data failed, filePath: %{public}s, src: %{public}s, fail reason: "
+            "read data failed, filePath: %{public}s, realPath: %{public}s, src: %{public}s, fail reason: "
             "%{public}s",
-            filePath.c_str(), src.c_str(), strerror(errno));
+            filePath.c_str(), src.c_str(), realPath, strerror(errno));
     }
 #ifndef USE_ROSEN_DRAWING
 #ifdef PREVIEW

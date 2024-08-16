@@ -528,7 +528,7 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest012, TestSize.Lev
     auto accessibilityPropertyNew = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     EXPECT_NE(accessibilityPropertyNew, nullptr);
     auto levelBak = accessibilityPropertyNew->GetAccessibilityLevel();
-    accessibilityPropertyNew->SetAccessibilityLevel(AccessibilityProperty::Level::YES);
+    accessibilityPropertyNew->SetAccessibilityLevel(AccessibilityProperty::Level::YES_STR);
     result = accessibilityProperty.GetSearchStrategy(frameNode, ancestorGroupFlag);
     EXPECT_EQ(result, std::make_tuple(true, true, false));
 
@@ -553,7 +553,7 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest012, TestSize.Lev
     EXPECT_EQ(result, std::make_tuple(true, true, true));
     accessibilityPropertyNew->SetAccessibilityGroup(hasGroupOrVirtualNodeBak);
 
-    accessibilityPropertyNew->SetAccessibilityLevel(AccessibilityProperty::Level::NO);
+    accessibilityPropertyNew->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
     result = accessibilityProperty.GetSearchStrategy(frameNode, ancestorGroupFlag);
     EXPECT_EQ(result, std::make_tuple(false, true, false));
 
@@ -616,11 +616,11 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest014, TestSize.Lev
     auto levelBak = accessibilityProperty->GetAccessibilityLevel();
     EXPECT_NE(accessibilityProperty, nullptr);
 
-    accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::YES);
+    accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::YES_STR);
     result = accessibilityProperty->IsAccessibilityFocusable(frameNode);
     EXPECT_EQ(result, true);
 
-    accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO);
+    accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
     result = accessibilityProperty->IsAccessibilityFocusable(frameNode);
     EXPECT_EQ(result, false);
 
@@ -850,7 +850,7 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest027, TestSize.Lev
     EXPECT_EQ(text, "");
 
     std::string levelBak = accessibilityProperty.GetAccessibilityLevel();
-    accessibilityProperty.SetAccessibilityLevel(AccessibilityProperty::Level::YES);
+    accessibilityProperty.SetAccessibilityLevel(AccessibilityProperty::Level::YES_STR);
     accessibilityProperty.GetGroupTextRecursive(false, text);
     EXPECT_EQ(text, "");
     size_t found = text.find(',');
@@ -866,7 +866,7 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest027, TestSize.Lev
 
     text = "";
     levelBak = accessibilityProperty.GetAccessibilityLevel();
-    accessibilityProperty.SetAccessibilityLevel(AccessibilityProperty::Level::NO);
+    accessibilityProperty.SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
     accessibilityProperty.GetGroupTextRecursive(false, text);
     EXPECT_EQ(text, "");
     accessibilityProperty.SetAccessibilityLevel(levelBak);
@@ -970,7 +970,7 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest030, TestSize.Lev
     auto accessibilityPropertyNew = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     EXPECT_NE(accessibilityPropertyNew, nullptr);
     auto levelBak = accessibilityPropertyNew->GetAccessibilityLevel();
-    accessibilityPropertyNew->SetAccessibilityLevel(AccessibilityProperty::Level::YES);
+    accessibilityPropertyNew->SetAccessibilityLevel(AccessibilityProperty::Level::YES_STR);
     auto result = accessibilityProperty.GetSearchStrategy(frameNode, ancestorGroupFlag);
     EXPECT_EQ(result, std::make_tuple(true, true, false));
 
@@ -1011,5 +1011,50 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest030, TestSize.Lev
     frameNode->SetHitTestMode(HitTestMode::HTMNONE);
     result = accessibilityProperty.GetSearchStrategy(frameNode, ancestorGroupFlag);
     EXPECT_EQ(result, std::make_tuple(false, false, false));
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest031
+ * @tc.desc: GetSearchStrategy
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest031, TestSize.Level1)
+{
+    bool ancestorGroupFlag = true;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, 14, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto vNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto vChildNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ButtonPattern>());
+    vNode->AddChild(vChildNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    accessibilityProperty->SetAccessibilityLevel("yes");
+    accessibilityProperty->SetAccessibilityGroup(false);
+    accessibilityProperty->SaveAccessibilityVirtualNode(vNode);
+
+    auto result = accessibilityProperty->GetSearchStrategy(frameNode, ancestorGroupFlag);
+    EXPECT_EQ(accessibilityProperty->HasAccessibilityVirtualNode(), true);
+    EXPECT_EQ(result, std::make_tuple(true, true, true));
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest032
+ * @tc.desc: ProcessHoverTestRecursive
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest032, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    AccessibilityHoverTestPath path;
+    auto root = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, 13, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    NG::PointF hoverPoint(0, 0);
+    auto debugInfo = std::make_unique<AccessibilityProperty::HoverTestDebugTraceInfo>();
+    AccessibilityProperty::RecursiveParam recursiveParam;
+    recursiveParam.hitTarget = true;
+    recursiveParam.ancestorGroupFlag = true;
+    auto result = accessibilityProperty.ProcessHoverTestRecursive(hoverPoint, root, path, debugInfo, recursiveParam);
+    EXPECT_EQ(result, true);
 }
 } // namespace OHOS::Ace::NG

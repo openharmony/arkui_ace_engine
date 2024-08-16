@@ -153,6 +153,7 @@ public:
     TextLineMetrics GetLineMetrics(size_t lineNumber) override;
     void SetRunMetrics(RunMetrics& runMetrics, const OHOS::Rosen::RunMetrics& runMetricsRes);
     bool GetLineMetricsByCoordinate(const Offset& offset, LineMetrics& lineMetrics) override;
+    void UpdateColor(size_t from, size_t to, const Color& color) override;
 
 private:
     void CreateBuilder();

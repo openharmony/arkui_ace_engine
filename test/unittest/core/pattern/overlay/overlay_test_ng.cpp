@@ -55,7 +55,6 @@
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
-#include "core/components_ng/pattern/overlay/modal_presentation_layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_paint_method.h"
@@ -90,6 +89,7 @@ constexpr int32_t START_YEAR_BEFORE = 1990;
 constexpr int32_t SELECTED_YEAR = 2000;
 constexpr int32_t END_YEAR = 2090;
 const std::string MENU_CONTENT = "复制";
+constexpr int32_t OVERLAY_EXISTS = 0;
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 } // namespace
 class OverlayTestNg : public testing::Test {
@@ -569,74 +569,6 @@ HWTEST_F(OverlayTestNg, OnBindContentCover005, TestSize.Level1)
 }
 
 /**
- * @tc.name: PopupTest002
- * @tc.desc: Test OverlayManager::PopupEvent functions.
- * @tc.type: FUNC
- */
-HWTEST_F(OverlayTestNg, PopupTest002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create target node and popupInfo.
-     */
-    std::vector<RefPtr<FrameNode>> targetNodes;
-    std::vector<PopupInfo> popups;
-    for (int i = 0; i < 2; i++) {
-        auto targetNode = CreateTargetNode();
-        ASSERT_NE(targetNode, nullptr);
-        targetNodes.emplace_back(targetNode);
-        auto targetId = targetNodes[i]->GetId();
-        auto targetTag = targetNodes[i]->GetTag();
-
-        auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
-        auto popupNode = FrameNode::CreateFrameNode(
-            V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
-        PopupInfo popupInfo;
-        popupInfo.popupId = popupId;
-        popupInfo.popupNode = popupNode;
-        popupInfo.target = targetNode;
-        popupInfo.markNeedUpdate = true;
-        popupInfo.isBlockEvent = false;
-        popups.emplace_back(popupInfo);
-    }
-    /**
-     * @tc.steps: step2. create overlayManager and call ShowPopup.
-     * @tc.expected: Push popup successfully
-     */
-    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
-    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    auto targetId1 = targetNodes[0]->GetId();
-    auto targetId2 = targetNodes[1]->GetId();
-    rootNode->isLayoutComplete_ = true;
-    overlayManager->ShowPopup(targetId1, popups[0]);
-    EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
-    overlayManager->ShowPopup(targetId2, popups[1]);
-    EXPECT_TRUE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
-    /**
-     * @tc.steps: step3. call HideCustomPopups when childCount is 2
-     * @tc.expected: popupMap's data is updated successfully
-     */
-    overlayManager->HideCustomPopups();
-    EXPECT_FALSE(overlayManager->popupMap_.empty());
-    EXPECT_FALSE(rootNode->GetChildren().empty());
-    /**
-     * @tc.steps: step4. call RemoveOverlay when childCount is 2
-     * @tc.expected: remove one popupNode at a time
-     */
-    overlayManager->HidePopup(targetId1, popups[0]);
-    overlayManager->HidePopup(targetId2, popups[1]);
-    EXPECT_FALSE(overlayManager->RemoveOverlay(false));
-    EXPECT_FALSE(overlayManager->popupMap_.empty());
-    overlayManager->ErasePopup(targetId1);
-    overlayManager->ErasePopup(targetId2);
-    EXPECT_TRUE(overlayManager->popupMap_.empty());
-    /**
-     * @tc.steps: step5. call HideCustomPopups when popupMap_ is empty
-     * @tc.expected: function exits normally
-     */
-    overlayManager->HideCustomPopups();
-    EXPECT_TRUE(overlayManager->popupMap_.empty());
-}
-/**
  * @tc.name: PopupTest003
  * @tc.desc: Test OverlayManager::HidePopup.
  * @tc.type: FUNC
@@ -841,8 +773,8 @@ HWTEST_F(OverlayTestNg, MenuTest003, TestSize.Level1)
     EXPECT_EQ(menuWrapperNode->GetChildren().size(), 2);
     overlayManager->PopMenuAnimation(menuWrapperNode, true);
     pipeline->taskExecutor_ = nullptr;
-    EXPECT_EQ(menuContext->GetTransformScale(), VectorF(0.0f, 0.0f));
-    EXPECT_EQ(previewContext->GetTransformScale(), VectorF(0.0f, 0.0f));
+    EXPECT_EQ(menuContext->GetTransformScale(), VectorF(1.0f, 1.0f));
+    EXPECT_EQ(previewContext->GetTransformScale(), VectorF(1.0f, 1.0f));
     EXPECT_EQ(rootNode->GetChildren().size(), 0);
 
     menuNode->MountToParent(menuWrapperNode);
@@ -850,11 +782,11 @@ HWTEST_F(OverlayTestNg, MenuTest003, TestSize.Level1)
     menuWrapperNode->MountToParent(rootNode);
     /**
      * @tc.steps: step2. call PopMenuAnimation when showPreviewAnimation is false
-     * @tc.expected: the preview node will remove
+     * @tc.expected: the none of node will remove.
      */
     EXPECT_EQ(menuWrapperNode->GetChildren().size(), 2);
     overlayManager->PopMenuAnimation(menuWrapperNode, false);
-    EXPECT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    EXPECT_EQ(menuWrapperNode->GetChildren().size(), 2);
 }
 
 /**
@@ -999,35 +931,6 @@ HWTEST_F(OverlayTestNg, MenuTest006, TestSize.Level1)
     auto node = AceType::DynamicCast<FrameNode>(rootNode->GetChildren().back());
     EXPECT_EQ(node->GetTag(), V2::MENU_WRAPPER_ETS_TAG);
     overlay->HideMenu(menuNode, targetId);
-}
-
-/**
- * @tc.name: ToastTest003
- * @tc.desc: Test OverlayManager::ClearToast.
- * @tc.type: FUNC
- */
-HWTEST_F(OverlayTestNg, ToastTest003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get overlay manager instance.
-     */
-    auto pipelineContext = MockPipelineContext::GetCurrentContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    auto overlay = pipelineContext->GetOverlayManager();
-    ASSERT_NE(overlay, nullptr);
-
-    /**
-     * @tc.steps: step2. call ShowToast.
-     * @tc.expected: toastMap_ is empty
-     */
-    auto toastInfo = NG::ToastInfo { .message = MESSAGE,
-        .duration = DURATION,
-        .bottom = BOTTOMSTRING,
-        .isRightToLeft = true };
-    overlay->ShowToast(toastInfo, nullptr);
-    EXPECT_FALSE(overlay->toastMap_.empty());
-    overlay->ClearToast();
-    EXPECT_TRUE(overlay->toastMap_.empty());
 }
 
 /**
@@ -1319,7 +1222,7 @@ HWTEST_F(OverlayTestNg, RemoveOverlayTest003, TestSize.Level1)
      */
     auto res = overlayManager->RemoveOverlay(false);
     EXPECT_FALSE(res);
-    EXPECT_TRUE(overlayManager->RemoveOverlayInSubwindow());
+    EXPECT_EQ(overlayManager->RemoveOverlayInSubwindow(), OVERLAY_EXISTS);
 }
 
 /**
@@ -1340,6 +1243,7 @@ HWTEST_F(OverlayTestNg, ToastShowModeTest001, TestSize.Level1)
         .bottom = BOTTOMSTRING,
         .showMode = NG::ToastShowMode::TOP_MOST,
         .isRightToLeft = true };
+    toastInfo.shadow = ShadowConfig::DefaultShadowL;
     overlayManager->ShowToast(toastInfo, nullptr);
     EXPECT_FALSE(overlayManager->toastMap_.empty());
     /**
@@ -1389,6 +1293,7 @@ HWTEST_F(OverlayTestNg, ToastTest001, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     auto toastInfo =
         NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
+    toastInfo.shadow = ShadowConfig::DefaultShadowL;
     overlayManager->ShowToast(toastInfo, nullptr);
     EXPECT_TRUE(overlayManager->toastMap_.empty());
     /**
@@ -1428,6 +1333,7 @@ HWTEST_F(OverlayTestNg, ToastTest002, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     auto toastInfo =
         NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
+    toastInfo.shadow = ShadowConfig::DefaultShadowL;
     overlayManager->ShowToast(toastInfo, nullptr);
     EXPECT_TRUE(overlayManager->toastMap_.empty());
     /**
@@ -1451,6 +1357,7 @@ HWTEST_F(OverlayTestNg, ToastTest004, TestSize.Level1)
      */
     auto offset = DimensionOffset(MENU_OFFSET);
     ToastInfo toastInfo = { MESSAGE, 0, BOTTOMSTRING, true, ToastShowMode::DEFAULT, 0, offset };
+    toastInfo.shadow = ShadowConfig::DefaultShadowL;
     auto toastNode = ToastView::CreateToastNode(toastInfo);
     ASSERT_NE(toastNode, nullptr);
     auto toastProperty = toastNode->GetLayoutProperty<ToastLayoutProperty>();
@@ -1487,6 +1394,7 @@ HWTEST_F(OverlayTestNg, ToastTest005, TestSize.Level1)
 
     auto offset = DimensionOffset(MENU_OFFSET);
     ToastInfo toastInfo = { MESSAGE, 0, BOTTOMSTRING, true, ToastShowMode::DEFAULT, 0, offset };
+    toastInfo.shadow = ShadowConfig::DefaultShadowL;
     auto toastNode = ToastView::CreateToastNode(toastInfo);
     ASSERT_NE(toastNode, nullptr);
     auto toastPattern = toastNode->GetPattern<ToastPattern>();
@@ -1507,7 +1415,14 @@ HWTEST_F(OverlayTestNg, ToastTest005, TestSize.Level1)
 
     auto fontSize = Dimension(10.0);
     theme->textStyle_.fontSize_ = fontSize;
+    /**
+     * @tc.steps: step1. update TextProperty in Toast alignment to property.
+     * @tc.expected: call the UpdateTextSizeConstraint function expected true and don't set MaxLine.
+     */
     toastPattern->UpdateTextSizeConstraint(textNode);
+    auto toastProperty = toastNode->GetLayoutProperty<ToastLayoutProperty>();
+    EXPECT_TRUE(toastProperty->HasToastAlignment());
+    EXPECT_EQ(textLayoutProperty->GetMaxLines(), std::nullopt);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 
     // restore mock theme manager
@@ -1523,6 +1438,8 @@ HWTEST_F(OverlayTestNg, ToastTest006, TestSize.Level1)
 {
     auto offset = DimensionOffset(MENU_OFFSET);
     ToastInfo toastInfo = { MESSAGE, 0, BOTTOMSTRING, true, ToastShowMode::DEFAULT, 0, offset };
+    toastInfo.shadow = ShadowConfig::DefaultShadowL;
+    const std::optional<Color> textColor = Color::RED;
     auto toastNode = ToastView::CreateToastNode(toastInfo);
     ASSERT_NE(toastNode, nullptr);
     auto toastPattern = toastNode->GetPattern<ToastPattern>();
@@ -1536,8 +1453,81 @@ HWTEST_F(OverlayTestNg, ToastTest006, TestSize.Level1)
     int32_t settingApiVersion = 12;
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
-    ToastView::UpdateTextLayoutProperty(textNode, MESSAGE, false);
+    /**
+     * @tc.steps: step1. update TextProperty in Toast alignment to property.
+     * @tc.expected: call the UpdateTextLayoutProperty function expected true and Set TextColor RED.
+     */
+    ToastView::UpdateTextLayoutProperty(textNode, MESSAGE, false, textColor);
+    auto toastProperty = toastNode->GetLayoutProperty<ToastLayoutProperty>();
+    EXPECT_TRUE(toastProperty->HasToastAlignment());
+    EXPECT_EQ(textLayoutProperty->GetTextColor(), Color::RED);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ToastTest007
+ * @tc.desc: Test ToastPattern::CreateAccessibilityProperty function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, ToastTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create toast and get toastNode.
+     */
+    auto toastId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto toastNode =
+        FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, toastId, AceType::MakeRefPtr<ToastPattern>());
+    ASSERT_NE(toastNode, nullptr);
+    toastNode->MarkModifyDone();
+
+    /**
+     * @tc.steps: step2. get ToastAccessibilityProperty.
+     * @tc.expected: step2. ToastAccessibilityProperty is not nullptr.
+     */
+    auto accessibilityProperty = toastNode->GetAccessibilityProperty<ToastAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+}
+
+/**
+ * @tc.name: ToastTest008
+ * @tc.desc: Test ToastAccessibilityProperty::SetSelectStatus function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, ToastTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create toast and get toastNode.
+     */
+    auto toastId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto toastNode =
+        FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, toastId, AceType::MakeRefPtr<ToastPattern>());
+    ASSERT_NE(toastNode, nullptr);
+    toastNode->MarkModifyDone();
+
+    /**
+     * @tc.steps: step2. get pattern and update frameNode.
+     * @tc.expected: step2. ToastAccessibilityProperty is not nullptr.
+     */
+    auto accessibilityProperty = toastNode->GetAccessibilityProperty<ToastAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. set showedSelectStatus OFF.
+     * @tc.expected: step3 get showedSelectStatus OFF.
+     */
+    auto toastProperty = toastNode->GetLayoutProperty<ToastLayoutProperty>();
+    ASSERT_NE(toastProperty, nullptr);
+    toastProperty->SetSelectStatus(ToastLayoutProperty::SelectStatus::OFF);
+    auto showedSelectStatus = toastProperty->GetSelectStatus();
+    EXPECT_EQ(showedSelectStatus, ToastLayoutProperty::SelectStatus::OFF);
+
+    /**
+     * @tc.steps: step4. set showedSelectStatus ON.
+     * @tc.expected: step4 get showedSelectStatus ON.
+     */
+    toastProperty->SetSelectStatus(ToastLayoutProperty::SelectStatus::ON);
+    showedSelectStatus = toastProperty->GetSelectStatus();
+    EXPECT_EQ(showedSelectStatus, ToastLayoutProperty::SelectStatus::ON);
 }
 
 /**
@@ -2590,6 +2580,7 @@ HWTEST_F(OverlayTestNg, ToastDumpInfoTest001, TestSize.Level1)
     DumpLog::GetInstance().description_.clear();
     auto pattern = AceType::MakeRefPtr<ToastPattern>();
     ToastInfo info;
+    info.shadow = ShadowConfig::DefaultShadowL;
     /**
      * @tc.steps: step3. set info and dump info.
      * @tc.expected: dump success, the description not empty

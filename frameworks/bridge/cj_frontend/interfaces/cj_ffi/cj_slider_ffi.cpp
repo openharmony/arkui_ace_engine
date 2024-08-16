@@ -16,8 +16,6 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_slider_ffi.h"
 
 #include "cj_lambda.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
-#include "bridge/common/utils/utils.h"
 #include "core/components_ng/pattern/slider/slider_model.h"
 
 using namespace OHOS::Ace;

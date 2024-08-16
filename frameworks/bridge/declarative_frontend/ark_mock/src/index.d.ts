@@ -13,12 +13,6 @@
  * limitations under the License.
  */
 
-declare interface TouchEvent {}
-
-declare type NodePtr = Object | null;
-
-declare interface RenderOptions {}
-
 declare type KNode = number | null;
 
 declare enum ModifierType {

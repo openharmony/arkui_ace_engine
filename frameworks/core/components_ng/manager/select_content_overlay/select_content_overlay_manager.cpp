@@ -206,6 +206,11 @@ void SelectContentOverlayManager::RegisterHandleCallback(SelectOverlayInfo& info
         CHECK_NULL_VOID(overlayCallback);
         overlayCallback->OnHandleReverse(isReverse);
     };
+    info.onHandleIsHidden = [weakCallback = WeakClaim(AceType::RawPtr(callback))]() {
+        auto overlayCallback = weakCallback.Upgrade();
+        CHECK_NULL_VOID(overlayCallback);
+        overlayCallback->OnHandleIsHidden();
+    };
 }
 
 void SelectContentOverlayManager::RegisterTouchCallback(SelectOverlayInfo& info)
@@ -230,6 +235,11 @@ void SelectContentOverlayManager::RegisterTouchCallback(SelectOverlayInfo& info)
         auto callback = weakCallback.Upgrade();
         CHECK_NULL_VOID(callback);
         callback->OnOverlayTouchMove(event);
+    };
+    info.onClick = [weakCallback = WeakClaim(AceType::RawPtr(callback))](const GestureEvent& event, bool isClickCaret) {
+        auto callback = weakCallback.Upgrade();
+        CHECK_NULL_VOID(callback);
+        callback->OnOverlayClick(event, isClickCaret);
     };
 }
 
@@ -263,7 +273,8 @@ void SelectContentOverlayManager::UpdateExistOverlay(const SelectOverlayInfo& in
         handlePattern->UpdateIsSingleHandle(info.isSingleHandle);
         handlePattern->UpdateIsShowHandleLine(info.isHandleLineShow);
         handlePattern->UpdateFirstAndSecondHandleInfo(info.firstHandle, info.secondHandle);
-        LOGI("SelectOverlay: Update first %{public}s isShow %{public}d, second %{public}s isShow %{public}d",
+        TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY,
+            "Update first %{public}s isShow %{public}d, second %{public}s isShow %{public}d",
             info.firstHandle.paintRect.ToString().c_str(), info.firstHandle.isShow,
             info.secondHandle.paintRect.ToString().c_str(), info.secondHandle.isShow);
         if (info.isSingleHandle) {
@@ -290,7 +301,7 @@ void SelectContentOverlayManager::SwitchToHandleMode(HandleLevelMode mode, bool 
         }
         selectOverlayHolder_->GetCallback()->OnHandleLevelModeChanged(mode);
     }
-    LOGI("SelectOverlay: Set handle node to mode: %{public}d", mode);
+    TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Set handle mode: %{public}d", mode);
     shareOverlayInfo_->handleLevelMode = mode;
     auto handleNode = handleNode_.Upgrade();
     CHECK_NULL_VOID(handleNode);
@@ -425,7 +436,8 @@ void SelectContentOverlayManager::CreateNormalSelectOverlay(SelectOverlayInfo& i
 void SelectContentOverlayManager::CreateHandleLevelSelectOverlay(
     SelectOverlayInfo& info, bool animation, HandleLevelMode mode)
 {
-    LOGI("Show SelectOverlay, first %{public}s isShow %{public}d, second %{public}s isShow %{public}d",
+    TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY,
+        "Show SelectOverlay, first %{public}s isShow %{public}d, second %{public}s isShow %{public}d",
         info.firstHandle.paintRect.ToString().c_str(), info.firstHandle.isShow,
         info.secondHandle.paintRect.ToString().c_str(), info.secondHandle.isShow);
     shareOverlayInfo_ = std::make_shared<SelectOverlayInfo>(info);
@@ -459,19 +471,23 @@ void SelectContentOverlayManager::MountNodeToRoot(const RefPtr<FrameNode>& overl
 {
     auto rootNode = GetSelectOverlayRoot();
     CHECK_NULL_VOID(rootNode);
-    // get keyboard index to put selet_overlay before keyboard node
-    int32_t slot = DEFAULT_NODE_SLOT;
-    int32_t index = 0;
-    for (const auto& it : rootNode->GetChildren()) {
-        if (it->GetTag() == V2::KEYBOARD_ETS_TAG) {
+    const auto& children = rootNode->GetChildren();
+    auto slotIt = FindSelectOverlaySlot(rootNode, children);
+    auto index = static_cast<int32_t>(std::distance(children.begin(), slotIt));
+    auto slot = (index > 0) ? index : DEFAULT_NODE_SLOT;
+    for (auto it = slotIt; it != children.end(); ++it) {
+        // get keyboard index to put selet_overlay before keyboard node
+        if ((*it)->GetTag() == V2::KEYBOARD_ETS_TAG) {
             slot = index;
             break;
         }
-        if (it->GetTag() == V2::SELECT_OVERLAY_ETS_TAG) {
+        // keep handle node before menu node
+        if ((*it)->GetTag() == V2::SELECT_OVERLAY_ETS_TAG) {
             slot = index;
             break;
         }
-        if (it->GetTag() == V2::TEXTINPUT_ETS_TAG) {
+        // keep handle and menu node before magnifier
+        if ((*it)->GetTag() == V2::TEXTINPUT_ETS_TAG) {
             slot = index;
             break;
         }
@@ -495,13 +511,40 @@ void SelectContentOverlayManager::MountNodeToRoot(const RefPtr<FrameNode>& overl
     });
 }
 
+std::list<RefPtr<UINode>>::const_iterator SelectContentOverlayManager::FindSelectOverlaySlot(
+    const RefPtr<FrameNode>& root, const std::list<RefPtr<UINode>>& children)
+{
+    auto begin = children.begin();
+    CHECK_NULL_RETURN(selectOverlayHolder_, begin);
+    auto callerNode = selectOverlayHolder_->GetOwner();
+    CHECK_NULL_RETURN(callerNode, begin);
+    RefPtr<UINode> prevNode = nullptr;
+    auto parent = callerNode->GetParent();
+    while (parent) {
+        if (parent == root) {
+            break;
+        }
+        prevNode = parent;
+        parent = parent->GetParent();
+    }
+    CHECK_NULL_RETURN(parent, begin);
+    CHECK_NULL_RETURN(prevNode, begin);
+    for (auto it = begin; it != children.end(); ++it) {
+        if (prevNode == *it) {
+            return ++it;
+        }
+    }
+    return begin;
+}
+
 void SelectContentOverlayManager::MountNodeToCaller(const RefPtr<FrameNode>& overlayNode, bool animation)
 {
     CHECK_NULL_VOID(selectOverlayHolder_);
     auto ownerFrameNode = selectOverlayHolder_->GetOwner();
     CHECK_NULL_VOID(ownerFrameNode);
-    LOGI("SelectOverlay: Mount SelectOverlay node to tag: %{public}s, id: %{public}d",
-        ownerFrameNode->GetTag().c_str(), ownerFrameNode->GetId());
+    TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY,
+        "Mount SelectOverlay node: %{public}s, id: %{public}d", ownerFrameNode->GetTag().c_str(),
+        ownerFrameNode->GetId());
     ownerFrameNode->SetOverlayNode(overlayNode);
     overlayNode->SetParent(AceType::WeakClaim(AceType::RawPtr(ownerFrameNode)));
     overlayNode->SetActive(true);
@@ -563,13 +606,14 @@ RefPtr<UINode> SelectContentOverlayManager::FindWindowScene(RefPtr<FrameNode> ta
     return parent;
 }
 
-void SelectContentOverlayManager::CloseInternal(int32_t id, bool animation, CloseReason reason)
+bool SelectContentOverlayManager::CloseInternal(int32_t id, bool animation, CloseReason reason)
 {
-    CHECK_NULL_VOID(selectOverlayHolder_);
-    CHECK_NULL_VOID(selectOverlayHolder_->GetOwnerId() == id);
-    LOGI("SelectOverlay: Close selectoverlay by id %{public}d, reason %{public}d", id, reason);
+    CHECK_NULL_RETURN(selectOverlayHolder_, false);
+    CHECK_NULL_RETURN(selectOverlayHolder_->GetOwnerId() == id, false);
+    CHECK_NULL_RETURN(shareOverlayInfo_, false);
+    TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Close selectoverlay, id:%{public}d, reason %{public}d",
+        id, reason);
     auto callback = selectOverlayHolder_->GetCallback();
-    CHECK_NULL_VOID(shareOverlayInfo_);
     auto menuType = shareOverlayInfo_->menuInfo.menuType;
     auto pattern = GetSelectHandlePattern(WeakClaim(this));
     RefPtr<OverlayInfo> info = nullptr;
@@ -596,6 +640,7 @@ void SelectContentOverlayManager::CloseInternal(int32_t id, bool animation, Clos
     if (callback) {
         callback->OnCloseOverlay(menuType, reason, info);
     }
+    return true;
 }
 
 void SelectContentOverlayManager::DestroySelectOverlayNodeWithAnimation(const RefPtr<FrameNode>& node)
@@ -623,7 +668,8 @@ void SelectContentOverlayManager::DestroySelectOverlayNode(const RefPtr<FrameNod
             overlay->SetParent(nullptr);
         }
     }
-    LOGI("SelectOverlay: Remove node [%{public}s, %{public}d] from [%{public}s, %{public}d]", overlay->GetTag().c_str(),
+    TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY,
+        "Remove node [%{public}s, %{public}d] from [%{public}s, %{public}d]", overlay->GetTag().c_str(),
         overlay->GetId(), parentNode->GetTag().c_str(), parentNode->GetId());
     parentNode->RemoveChild(overlay);
     parentNode->MarkNeedSyncRenderTree();
@@ -661,8 +707,7 @@ bool SelectContentOverlayManager::CloseCurrent(bool animation, CloseReason reaso
 {
     CHECK_NULL_RETURN(selectOverlayHolder_, false);
     CHECK_NULL_RETURN(selectOverlayNode_.Upgrade() || menuNode_.Upgrade() || handleNode_.Upgrade(), false);
-    CloseInternal(selectOverlayHolder_->GetOwnerId(), animation, reason);
-    return true;
+    return CloseInternal(selectOverlayHolder_->GetOwnerId(), animation, reason);
 }
 
 void SelectContentOverlayManager::CloseWithOverlayId(int32_t overlayId, CloseReason reason, bool animation)
@@ -830,10 +875,10 @@ bool SelectContentOverlayManager::IsTouchInNormalSelectOverlayArea(const PointF&
     const auto& children = current->GetChildren();
     for (const auto& it : children) {
         auto child = DynamicCast<FrameNode>(it);
-        if (child == nullptr) {
+        if (child == nullptr || !child->GetGeometryNode()) {
             continue;
         }
-        auto frameRect = child->GetGeometryNode()->GetFrameRect();
+        auto frameRect = RectF(child->GetTransformRelativeOffset(), child->GetGeometryNode()->GetFrameSize());
         if (frameRect.IsInRegion(point)) {
             return true;
         }
@@ -968,5 +1013,19 @@ bool SelectContentOverlayManager::IsTouchAtHandle(const PointF& localPoint, cons
         return selectOverlayNode->IsInSelectedOrSelectOverlayArea(localPoint);
     }
     return selectOverlayNode->IsInSelectedOrSelectOverlayArea(globalPoint);
+}
+
+void SelectContentOverlayManager::SetHandleCircleIsShow(bool isFirst, bool isShow)
+{
+    auto pattern = GetSelectHandlePattern(WeakClaim(this));
+    CHECK_NULL_VOID(pattern);
+    pattern->SetHandleCircleIsShow(isFirst, isShow);
+}
+
+void SelectContentOverlayManager::SetIsHandleLineShow(bool isShow)
+{
+    auto pattern = GetSelectHandlePattern(WeakClaim(this));
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsHandleLineShow(isShow);
 }
 } // namespace OHOS::Ace::NG

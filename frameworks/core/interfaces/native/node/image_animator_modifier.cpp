@@ -298,6 +298,36 @@ const ArkUIImageAnimatorModifier* GetImageAnimatorModifier()
     return &modifier;
 }
 
+const CJUIImageAnimatorModifier* GetCJUIImageAnimatorModifier()
+{
+    static const CJUIImageAnimatorModifier modifier = {
+        ImageAnimatorModifier::SetState,
+        ImageAnimatorModifier::ResetState,
+        ImageAnimatorModifier::SetDuration,
+        ImageAnimatorModifier::SetFixedSize,
+        ImageAnimatorModifier::ResetFixedSize,
+        ImageAnimatorModifier::SetFillMode,
+        ImageAnimatorModifier::ResetFillMode,
+        ImageAnimatorModifier::SetReverse,
+        ImageAnimatorModifier::ResetReverse,
+        ImageAnimatorModifier::SetImages,
+        ImageAnimatorModifier::ResetImages,
+        ImageAnimatorModifier::SetImageAnimatorIteration,
+        ImageAnimatorModifier::ResetImageAnimatorIteration,
+        ImageAnimatorModifier::SetImageAnimatorSrc,
+        ImageAnimatorModifier::ResetDuration,
+        ImageAnimatorModifier::GetIsReverse,
+        ImageAnimatorModifier::GetDuration,
+        ImageAnimatorModifier::GetState,
+        ImageAnimatorModifier::GetIsFixedSize,
+        ImageAnimatorModifier::GetFillMode,
+        ImageAnimatorModifier::GetIteration,
+        ImageAnimatorModifier::GetImagesSize
+    };
+
+    return &modifier;
+}
+
 void SetImageAnimatorOnStart(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);

@@ -15,16 +15,6 @@
 
 #include "core/pipeline/pipeline_context.h"
 
-#include <unordered_set>
-#include <utility>
-
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/event/ace_events.h"
-#include "core/event/axis_event.h"
-#include "core/event/mouse_event.h"
-#include "core/event/touch_event.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_base/include/platform/common/rs_system_properties.h"
@@ -36,65 +26,33 @@
 #include "core/animation/native_curve_helper.h"
 #endif
 
-#include "base/log/ace_trace.h"
 #include "base/log/ace_tracker.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
-#include "base/log/frame_report.h"
-#include "base/perfmonitor/perf_monitor.h"
-#include "base/log/log.h"
 #include "base/ressched/ressched_report.h"
-#include "base/thread/task_executor.h"
-#include "base/utils/macros.h"
-#include "base/utils/string_utils.h"
-#include "base/utils/system_properties.h"
 #include "core/animation/card_transition_controller.h"
 #include "core/animation/shared_transition_controller.h"
-#include "core/common/ace_application_info.h"
-#include "core/common/ace_engine.h"
-#include "core/common/container_scope.h"
-#include "core/common/event_manager.h"
 #include "core/common/font_manager.h"
-#include "core/common/frontend.h"
 #include "core/common/layout_inspector.h"
-#include "core/common/manager_interface.h"
 #include "core/common/text_field_manager.h"
-#include "core/common/thread_checker.h"
-#include "core/components/checkable/render_checkable.h"
-#include "core/components/common/layout/screen_system_manager.h"
-#include "core/components/container_modal/container_modal_component.h"
 #include "core/components/container_modal/container_modal_element.h"
-#include "core/components/custom_paint/offscreen_canvas.h"
-#include "core/components/custom_paint/render_custom_paint.h"
 #include "core/components/dialog/dialog_component.h"
-#include "core/components/dialog/dialog_element.h"
 #include "core/components/dialog_modal/dialog_modal_component.h"
 #include "core/components/dialog_modal/dialog_modal_element.h"
-#include "core/components/display/display_component.h"
 #include "core/components/focus_animation/render_focus_animation.h"
 #include "core/components/overlay/overlay_component.h"
-#include "core/components/overlay/overlay_element.h"
-#include "core/components/page/page_element.h"
-#include "core/components/page_transition/page_transition_component.h"
 #include "core/components/root/render_root.h"
 #include "core/components/root/root_component.h"
 #include "core/components/root/root_element.h"
-#include "core/components/scroll/scrollable.h"
 #include "core/components/select_popup/select_popup_component.h"
 #include "core/components/semi_modal/semi_modal_component.h"
 #include "core/components/semi_modal/semi_modal_element.h"
 #include "core/components/semi_modal/semi_modal_theme.h"
 #include "core/components/stage/stage_component.h"
-#include "core/components/stage/stage_element.h"
-#include "core/components/text_field/render_text_field.h"
 #include "core/components/theme/app_theme.h"
-#include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/components_v2/inspector/shape_composed_element.h"
 #include "core/components_v2/list/render_list.h"
-#include "core/image/image_provider.h"
-#include "core/pipeline/base/composed_element.h"
 #include "core/pipeline/base/factories/flutter_render_factory.h"
-#include "core/pipeline/base/render_context.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -1624,7 +1582,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
             auto movePoint = (*iter).CreateScalePoint(GetViewScale());
             if (scalePoint.id == movePoint.id) {
                 lastMoveEvent = movePoint;
-                touchEvents_.erase(iter++);
+                iter = touchEvents_.erase(iter);
             }
         }
         if (lastMoveEvent.has_value()) {
@@ -2915,7 +2873,7 @@ void PipelineContext::ClearDeactivateElements()
         auto element = iter->second;
         RefPtr<RenderNode> render = element ? element->GetRenderNode() : nullptr;
         if (!render || !render->IsDisappearing()) {
-            deactivateElements_.erase(iter++);
+            iter = deactivateElements_.erase(iter);
         } else {
             iter++;
         }

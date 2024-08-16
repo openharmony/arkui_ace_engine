@@ -15,7 +15,6 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_textarea_ffi.h"
 
-#include <cinttypes>
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
@@ -51,6 +50,9 @@ void FfiOHOSAceFrameworkTextAreaCreate(const char* placeholder, const char* text
 int64_t FfiOHOSAceFrameworkTextAreaControllerCtor()
 {
     auto controller = FFIData::Create<NGNativeTextAreaController>();
+    if (controller == nullptr) {
+        return FFI_ERROR_CODE;
+    }
     return controller->GetID();
 }
 

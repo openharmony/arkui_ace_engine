@@ -111,7 +111,7 @@ private:
         const RefPtr<LayoutWrapper>& childLayoutWrapper, int32_t crossStart, int32_t crossSpan);
 
     // Compote position of grid item in cross axis.
-    float ComputeItemCrossPosition(LayoutWrapper* layoutWrapper, int32_t crossStart) const;
+    float ComputeItemCrossPosition(int32_t crossStart) const;
     virtual void LargeItemLineHeight(const RefPtr<LayoutWrapper>& itemWrapper, bool& hasNormalItem);
     // Find next valid cell when current is not valid.
     bool GetNextGrid(int32_t& curMain, int32_t& curCross, bool reverse) const;
@@ -182,6 +182,10 @@ private:
     bool IsIrregularLine(int32_t lineIndex) const override;
     
     void ResetOffsetWhenHeightChanged();
+
+    void MergeRemainingLines(std::map<int32_t, std::map<int32_t, int32_t>> matrix, int32_t forwardLines);
+
+    bool SkipLargeLineHeightLines(float mainSize);
 
 protected:
     uint32_t crossCount_ = 0;

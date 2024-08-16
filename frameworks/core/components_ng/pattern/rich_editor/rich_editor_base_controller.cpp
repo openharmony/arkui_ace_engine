@@ -45,11 +45,19 @@ bool RichEditorBaseController::SetCaretOffset(int32_t caretPosition)
     return richEditorPattern->SetCaretOffset(caretPosition);
 }
 
-void RichEditorBaseController::SetTypingStyle(struct UpdateSpanStyle& typingStyle, TextStyle textStyle)
+void RichEditorBaseController::SetTypingStyle(std::optional<struct UpdateSpanStyle> typingStyle,
+    std::optional<TextStyle> textStyle)
 {
     auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(richEditorPattern);
     richEditorPattern->SetTypingStyle(typingStyle, textStyle);
+}
+
+std::optional<struct UpdateSpanStyle> RichEditorBaseController::GetTypingStyle()
+{
+    auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
+    CHECK_NULL_RETURN(richEditorPattern, {});
+    return richEditorPattern->GetTypingStyle();
 }
 
 void RichEditorBaseController::CloseSelectionMenu()

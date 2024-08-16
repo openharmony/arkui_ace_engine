@@ -16,6 +16,7 @@ class stateMgmtDFX {
   // enable profile
   public static enableProfiler: boolean = false;
   public static inRenderingElementId: Array<number> = new Array<number>();
+  private static readonly DUMP_MAX_PROPERTY_COUNT: number = 50;
   private static readonly DUMP_MAX_LENGTH: number = 10;
   private static readonly DUMP_LAST_LENGTH: number = 3;
 
@@ -64,12 +65,16 @@ class stateMgmtDFX {
   private static dumpObjectProperty(value: any): DumpObjectType | string {
     let tempObj: DumpObjectType = {};
     try {
-      Object.getOwnPropertyNames(value)
-        .slice(0, 50)
+      let properties: string[] = Object.getOwnPropertyNames(value);
+      properties
+        .slice(0, stateMgmtDFX.DUMP_MAX_PROPERTY_COUNT)
         .forEach((varName: string) => {
           const propertyValue = Reflect.get(value as Object, varName);
           tempObj[varName] = typeof propertyValue === 'object' ? this.getType(propertyValue) : propertyValue;
-        })
+        });
+      if (properties.length > stateMgmtDFX.DUMP_MAX_PROPERTY_COUNT) {
+        tempObj['...'] = '...';
+      }
     } catch (e) {
       stateMgmtConsole.warn(`can not dump Obj, error msg ${e.message}`);
       return "unknown type";

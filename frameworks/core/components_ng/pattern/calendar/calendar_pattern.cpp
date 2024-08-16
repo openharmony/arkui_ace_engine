@@ -25,15 +25,13 @@
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/badge/badge_layout_property.h"
 #include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-constexpr double DEVICE_HEIGHT_LIMIT = 640.0;
-} // namespace
 void CalendarPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -128,7 +126,6 @@ void CalendarPattern::OnModifyDone()
     CHECK_NULL_VOID(swiperPattern);
     auto currentIndex = swiperPattern->GetCurrentIndex();
     currentMonthIndex_ = currentIndex;
-    LOGI("The current index is %{public}d", currentIndex);
 
     // Set calendat data according to the index.
     switch (currentIndex) {
@@ -211,6 +208,7 @@ void CalendarPattern::InitSwiperChangeDoneEvent()
             pattern->FireRequestData(MonthState::PRE_MONTH);
             pattern->SetMoveDirection(NG::Direction::PRE);
         }
+        pattern->ReadTitleNode();
     };
     swiperEventHub->SetChangeDoneEvent(requestDataCallBack);
     for (const auto& calendarMonthNode : swiperNode->GetChildren()) {
@@ -263,7 +261,6 @@ void CalendarPattern::FireRequestData(MonthState monthState)
 
 void CalendarPattern::FireGoToRequestData(int32_t year, int32_t month, int32_t day)
 {
-    LOGI("Jump to date %{public}d-%{public}d-%{public}d.", year, month, day);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = GetEventHub<CalendarEventHub>();
@@ -400,6 +397,13 @@ void CalendarPattern::FlushDialogMonthData(ObtainedMonth& obtainedMonth)
     }
 }
 
+void CalendarPattern::ReadTitleNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->OnAccessibilityEvent(AccessibilityEventType::ANNOUNCE_FOR_ACCESSIBILITY, selectedMonth_);
+}
+
 void CalendarPattern::UpdateTitleNode()
 {
     if (!HasTitleNode()) {
@@ -416,16 +420,16 @@ void CalendarPattern::UpdateTitleNode()
     date.month = currentMonth_.month - 1 < 0
                      ? 0
                      : static_cast<uint32_t>(currentMonth_.month - 1); // W3C's month start from 0 to 11
-    textLayoutProperty->UpdateContent(Localization::GetInstance()->FormatDateTime(date, "YYYYMM"));
-
+    auto titleDate = Localization::GetInstance()->FormatDateTime(date, "YYYYMM");
+    textLayoutProperty->UpdateContent(titleDate);
+    selectedMonth_ = titleDate;
     auto pipelineContext = GetHost()->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
     auto fontSizeScale = pipelineContext->GetFontScale();
     auto fontSize = theme->GetCalendarTitleFontSize();
-    if (fontSizeScale < theme->GetCalendarPickerLargeScale() ||
-        Dimension(pipelineContext->GetRootHeight()).ConvertToVp() < DEVICE_HEIGHT_LIMIT) {
+    if (fontSizeScale < theme->GetCalendarPickerLargeScale() || CalendarDialogView::CheckOrientationChange()) {
         textLayoutProperty->UpdateFontSize(fontSize);
     } else {
         textLayoutProperty->UpdateMaxLines(2);

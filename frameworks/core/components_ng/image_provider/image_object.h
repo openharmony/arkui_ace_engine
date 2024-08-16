@@ -20,6 +20,7 @@
 #include "core/components_ng/image_provider/image_data.h"
 #include "core/components_ng/image_provider/image_provider.h"
 #include "core/components_ng/image_provider/svg_dom_base.h"
+#include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/image/image_source_info.h"
 
@@ -57,8 +58,18 @@ public:
         return src_.SupportObjCache();
     }
 
-    virtual void MakeCanvasImage(const RefPtr<ImageLoadingContext>& ctx, const SizeF& resizeTarget, bool forceResize,
-        bool syncLoad, bool loadInVipChannel = false) = 0;
+    void SetImageDfxConfig(const ImageDfxConfig& imageDfxConfig)
+    {
+        imageDfxConfig_ = imageDfxConfig;
+    }
+
+    ImageDfxConfig GetImageDfxConfig()
+    {
+        return imageDfxConfig_;
+    }
+
+    virtual void MakeCanvasImage(
+        const RefPtr<ImageLoadingContext>& ctx, const SizeF& resizeTarget, bool forceResize, bool syncLoad) = 0;
 
 protected:
     const ImageSourceInfo src_;
@@ -66,6 +77,7 @@ protected:
     // no longer needed after making canvas image
     RefPtr<ImageData> data_;
     int32_t frameCount_ = 1;
+    ImageDfxConfig imageDfxConfig_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImageObject);
 };

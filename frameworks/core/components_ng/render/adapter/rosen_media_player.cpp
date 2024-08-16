@@ -15,15 +15,8 @@
 #include "core/components_ng/render/adapter/rosen_media_player.h"
 
 #include <fcntl.h>
-#include <iomanip>
-#include <sstream>
-#include <string>
 #include <sys/stat.h>
-#include <unistd.h>
-
 #include "base/image/file_uri_helper.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -441,6 +434,13 @@ int32_t RosenMediaPlayer::Seek(int32_t mSeconds, OHOS::Ace::SeekMode mode)
     LOGI("Media player start to seek.");
     CHECK_NULL_RETURN(mediaPlayer_, -1);
     return mediaPlayer_->Seek(mSeconds, ConvertToMediaSeekMode(mode));
+}
+
+int32_t RosenMediaPlayer::SetPlayRange(int64_t startTime, int64_t endTime)
+{
+    LOGI("Media player start to SetPlayRange.");
+    CHECK_NULL_RETURN(mediaPlayer_, -1);
+    return mediaPlayer_->SetPlayRange(startTime, endTime);
 }
 
 } // namespace OHOS::Ace::NG

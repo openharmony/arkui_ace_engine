@@ -16,7 +16,6 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_stack_processor_ffi.h"
 
 #include "bridge/cj_frontend/cppview/view_stack_processor.h"
-#include "core/components_ng/base/view_stack_processor.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;

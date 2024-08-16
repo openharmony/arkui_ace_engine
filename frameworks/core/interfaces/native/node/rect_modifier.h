@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIRectModifier* GetRectModifier();
+const CJUIRectModifier* GetCJUIRectModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_RECT_MODIFIER_H

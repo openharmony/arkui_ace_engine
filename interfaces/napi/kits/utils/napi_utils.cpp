@@ -14,16 +14,7 @@
  */
 
 #include "napi_utils.h"
-
-#include <cstddef>
-
-#include "js_native_api_types.h"
-
-#include "base/utils/string_utils.h"
-#include "core/animation/curve.h"
 #include "core/common/resource/resource_manager.h"
-#include "core/common/resource/resource_object.h"
-#include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Napi {
 using namespace OHOS::Ace;
@@ -484,9 +475,7 @@ napi_value ParseCurve(napi_env env, napi_value value, std::string& curveTypeStri
         curve = Framework::CreateCurve(params);
     }
     std::string curveString = curve->ToString();
-    LOGI("curveString %{public}s", curveString.c_str());
     ParseCurveInfo(curveString, curveTypeString, curveValue);
-    LOGI("curveTypeString %{public}s", curveTypeString.c_str());
     return nullptr;
 }
 

@@ -15,24 +15,13 @@
 
 #include "core/pipeline/pipeline_base.h"
 
-#include <cinttypes>
-
 #include "base/log/ace_tracker.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/subwindow/subwindow_manager.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/time_util.h"
-#include "base/utils/utils.h"
-#include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
-#include "core/common/display_info.h"
 #include "core/common/font_manager.h"
-#include "core/common/frontend.h"
 #include "core/common/manager_interface.h"
-#include "core/common/thread_checker.h"
 #include "core/common/window.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/container_modal/container_modal_constants.h"
@@ -233,15 +222,12 @@ void PipelineBase::SetRootSize(double density, float width, float height)
         }
         context->SetRootRect(width, height);
     };
-#ifdef NG_BUILD
+
     if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         task();
     } else {
         taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI, "ArkUISetRootSize");
     }
-#else
-    taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI, "ArkUISetRootSize");
-#endif
 }
 
 void PipelineBase::SetFontScale(float fontScale)
@@ -477,12 +463,12 @@ void PipelineBase::UpdateRootSizeAndScale(int32_t width, int32_t height)
     }
     if (GetIsDeclarative()) {
         viewScale_ = DEFAULT_VIEW_SCALE;
-        int32_t pageWidth = width;
+        double pageWidth = width;
         if (IsContainerModalVisible()) {
             pageWidth -= 2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
         }
         designWidthScale_ =
-            windowConfig.autoDesignWidth ? density_ : static_cast<double>(pageWidth) / windowConfig.designWidth;
+            windowConfig.autoDesignWidth ? density_ : pageWidth / windowConfig.designWidth;
         windowConfig.designWidthScale = designWidthScale_;
     } else {
         viewScale_ = windowConfig.autoDesignWidth ? density_ : static_cast<double>(width) / windowConfig.designWidth;
@@ -754,15 +740,16 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positio
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, bool forceChange)
 {
     auto currentContainer = Container::Current();
+    float keyboardHeight = keyboardArea.Height();
     if (currentContainer && !currentContainer->IsSubContainer()) {
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentContainer->GetInstanceId());
         if (subwindow && subwindow->GetShown() && subwindow->IsFocused() && !CheckNeedAvoidInSubWindow()) {
             // subwindow is shown, main window doesn't lift,  no need to handle the keyboard event
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "subwindow is shown and pageOffset is zero, main window doesn't lift");
+            CheckAndUpdateKeyboardInset(keyboardHeight);
             return;
         }
     }
-    double keyboardHeight = keyboardArea.Height();
     if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight)) {
         return;
     }
@@ -933,6 +920,7 @@ void PipelineBase::Destroy()
     TAG_LOGI(AceLogTag::ACE_ANIMATION, "pipeline destroyed, has %{public}zu finish callbacks not executed",
         finishFunctions_.size());
     finishFunctions_.clear();
+    animationOption_ = {};
     {
         // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker
         // thread.

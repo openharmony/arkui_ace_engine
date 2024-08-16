@@ -15,19 +15,6 @@
 
 #include "frameworks/bridge/common/dom/dom_node.h"
 
-#include <sstream>
-#include <unordered_set>
-
-#include "base/json/json_util.h"
-#include "base/log/ace_trace.h"
-#include "base/utils/string_utils.h"
-#include "core/animation/animatable_data.h"
-#include "core/common/ace_application_info.h"
-#include "core/common/frontend.h"
-#include "core/components/declaration/common/declaration_creator_manager.h"
-#include "core/components/scroll/scroll_bar_theme.h"
-#include "core/components/scroll/scroll_fade_effect.h"
-#include "core/components/scroll/scroll_spring_effect.h"
 #include "core/components/text_field/text_field_component.h"
 #include "core/components/video/texture_component.h"
 #include "core/components/web/web_component.h"

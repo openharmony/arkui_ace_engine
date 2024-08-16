@@ -16,9 +16,7 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_navigation_ffi.h"
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_collection_ffi.h"
-#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_model.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "cj_lambda.h"
 
 using namespace OHOS::Ace;

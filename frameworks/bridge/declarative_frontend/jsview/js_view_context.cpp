@@ -178,7 +178,7 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
             option.GetDuration(), option.GetCurve()->ToString().c_str(), option.GetIteration());
     }
     NG::ScopedViewStackProcessor scopedProcessor;
-    AceEngine::Get().NotifyContainers([triggerId](const RefPtr<Container>& container) {
+    AceEngine::Get().NotifyContainersOrderly([triggerId](const RefPtr<Container>& container) {
         if (!CheckContainer(container)) {
             return;
         }
@@ -191,11 +191,12 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
         context->PrepareOpenImplicitAnimation();
     });
     pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), option.GetOnFinishEvent());
+    auto previousOption = pipelineContext->GetSyncAnimationOption();
     pipelineContext->SetSyncAnimationOption(option);
     // Execute the function.
     jsAnimateToFunc->Call(jsAnimateToFunc);
     pipelineContext->FlushOnceVsyncTask();
-    AceEngine::Get().NotifyContainers([triggerId](const RefPtr<Container>& container) {
+    AceEngine::Get().NotifyContainersOrderly([triggerId](const RefPtr<Container>& container) {
         if (!CheckContainer(container)) {
             return;
         }
@@ -208,11 +209,12 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
         context->PrepareCloseImplicitAnimation();
     });
     pipelineContext->CloseImplicitAnimation();
-    pipelineContext->SetSyncAnimationOption(AnimationOption());
+    pipelineContext->SetSyncAnimationOption(previousOption);
     pipelineContext->FlushAfterLayoutCallbackInImplicitAnimationTask();
     if (immediately) {
         pipelineContext->FlushModifier();
         pipelineContext->FlushMessages();
+        JankFrameReport::GetInstance().RecordAnimateEnd();
     } else {
         pipelineContext->RequestFrame();
     }
@@ -234,14 +236,16 @@ void AnimateToForFaMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOp
     NG::ScopedViewStackProcessor scopedProcessor;
     pipelineContext->FlushBuild();
     pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), option.GetOnFinishEvent());
+    auto previousOption = pipelineContext->GetSyncAnimationOption();
     pipelineContext->SetSyncAnimationOption(option);
     jsAnimateToFunc->Call(jsAnimateToFunc);
     pipelineContext->FlushBuild();
     pipelineContext->CloseImplicitAnimation();
-    pipelineContext->SetSyncAnimationOption(AnimationOption());
+    pipelineContext->SetSyncAnimationOption(previousOption);
     if (immediately) {
         pipelineContext->FlushModifier();
         pipelineContext->FlushMessages();
+        JankFrameReport::GetInstance().RecordAnimateEnd();
     } else {
         pipelineContext->RequestFrame();
     }
@@ -880,6 +884,29 @@ void JSViewContext::JSCloseBindSheet(const JSCallbackInfo& info)
     ReturnPromise(info, ret);
     return;
 }
+void JSViewContext::IsFollowingSystemFontScale(const JSCallbackInfo& info)
+{
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto follow = pipelineContext->IsFollowSystem();
+    auto followRef = JSRef<JSVal>::Make(JSVal(ToJSValue(follow)));
+    info.SetReturnValue(followRef);
+    return;
+}
+
+void JSViewContext::GetMaxFontScale(const JSCallbackInfo& info)
+{
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto maxFontScale = pipelineContext->GetMaxAppFontScale();
+    auto maxFontScaleRef = JSRef<JSVal>::Make(JSVal(ToJSValue(maxFontScale)));
+    info.SetReturnValue(maxFontScaleRef);
+    return;
+}
 
 void JSViewContext::JSBind(BindingTarget globalObj)
 {
@@ -892,6 +919,8 @@ void JSViewContext::JSBind(BindingTarget globalObj)
     JSClass<JSViewContext>::StaticMethod("openBindSheet", JSOpenBindSheet);
     JSClass<JSViewContext>::StaticMethod("updateBindSheet", JSUpdateBindSheet);
     JSClass<JSViewContext>::StaticMethod("closeBindSheet", JSCloseBindSheet);
+    JSClass<JSViewContext>::StaticMethod("isFollowingSystemFontScale", IsFollowingSystemFontScale);
+    JSClass<JSViewContext>::StaticMethod("getMaxFontScale", GetMaxFontScale);
     JSClass<JSViewContext>::Bind<>(globalObj);
 }
 

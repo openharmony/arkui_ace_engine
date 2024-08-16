@@ -124,6 +124,7 @@ private:
     LastAnimationParam lastAnimationParam_;
     int32_t lastWindowHeight_ = 0.0;
     int32_t lastWindowWidth_ = 0.0;
+    float marqueeWidth_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 

@@ -147,6 +147,7 @@ HWTEST_F(AccessibilityNodeTestNg, accessibilityNodeTest003, TestSize.Level1)
     vec.emplace_back(std::make_pair(ID, "ID"));
     vec.emplace_back(std::make_pair(SHOW, "ACCESSIBILITY_SHOW"));
 
+    accessibilityNode.SetStyle(vec);
     accessibilityNode.SetAttr(vec);
     EXPECT_EQ(accessibilityNode.inputType_, "ACCESSIBILITY_TYPE");
     EXPECT_TRUE(accessibilityNode.isEnabled_);
@@ -322,7 +323,7 @@ HWTEST_F(AccessibilityNodeTestNg, accessibilityNodeTest007, TestSize.Level1)
     auto marker = EventMarker("", "event", pageId);
     std::string nodeName = "text";
     AccessibilityNode accessibilityNode(id, nodeName);
-
+    accessibilityNode.Mount(0);
     /**
      * @tc.steps: step2. call SetFocusChangeEventMarker function.
      * @tc.expected: the param focusChangeEventId_ in accessibilityNode is null.

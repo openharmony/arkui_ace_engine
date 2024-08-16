@@ -15,8 +15,6 @@
 
 #include "inspect_button.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 InspectButton::InspectButton(NodeId nodeId, const std::string& nodeName) : InspectNode(nodeId, nodeName) {
 }

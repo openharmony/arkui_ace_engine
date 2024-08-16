@@ -28,6 +28,7 @@ namespace OHOS::Ace::NG {
 class FrameNode;
 class ACE_FORCE_EXPORT DragDropFuncWrapper {
 public:
+    static int32_t StartDragAction(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction);
     static void SetDraggingPointerAndPressedState(int32_t currentPointerId, int32_t containerId);
     static void DecideWhetherToStopDragging(const PointerEvent& pointerEvent,
         const std::string& extraParams, int32_t currentPointerId, int32_t containerId);
@@ -44,6 +45,8 @@ public:
     static std::optional<BorderRadiusProperty> GetDefaultBorderRadius();
     static float RadiusToSigma(float radius);
     static std::optional<EffectOption> BrulStyleToEffection(const std::optional<BlurStyleOption>& blurStyleOp);
+    [[maybe_unused]] static double GetScaleWidth(int32_t containerId);
+    static void SetExtraInfo(int32_t containerId, std::string extraInfo);
 };
 } // namespace OHOS::Ace::NG
 

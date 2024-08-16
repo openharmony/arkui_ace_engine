@@ -141,6 +141,14 @@ void RichEditorModelNG::SetOnIMEInputComplete(std::function<void(const RichEdito
     eventHub->SetOnIMEInputComplete(std::move(func));
 }
 
+void RichEditorModelNG::SetOnDidIMEInput(std::function<void(const TextRange&)>&& func)
+{
+    CHECK_NULL_VOID(!isStyledStringMode_);
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidIMEInput(std::move(func));
+}
+
 void RichEditorModelNG::SetOnIMEInputComplete(FrameNode* frameNode,
     std::function<void(const RichEditorAbstractSpanResult&)>&& callback)
 {
@@ -148,6 +156,14 @@ void RichEditorModelNG::SetOnIMEInputComplete(FrameNode* frameNode,
     auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnIMEInputComplete(std::move(callback));
+}
+
+void RichEditorModelNG::SetOnDidIMEInput(FrameNode* frameNode, std::function<void(const TextRange&)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidIMEInput(std::move(callback));
 }
 
 void RichEditorModelNG::SetAboutToDelete(std::function<bool(const RichEditorDeleteValue&)>&& func)
@@ -259,25 +275,21 @@ void RichEditorModelNG::SetSupportPreviewText(bool value)
     pattern->SetSupportPreviewText(value);
 }
 
-void RichEditorModelNG::SetTextDetectConfig(const std::string& value,
-    std::function<void(const std::string&)>&& onResult)
+void RichEditorModelNG::SetTextDetectConfig(const TextDetectConfig& textDetectConfig)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetTextDetectTypes(value);
-    pattern->SetOnResult(std::move(onResult));
+    pattern->SetTextDetectConfig(textDetectConfig);
 }
 
-void RichEditorModelNG::SetTextDetectConfig(FrameNode* frameNode, const std::string& value,
-    std::function<void(const std::string&)>&& onResult)
+void RichEditorModelNG::SetTextDetectConfig(FrameNode* frameNode, const TextDetectConfig& textDetectConfig)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetTextDetectTypes(value);
-    pattern->SetOnResult(std::move(onResult));
+    pattern->SetTextDetectConfig(textDetectConfig);
 }
 
 void RichEditorModelNG::SetOnSelectionChange(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& callback)
@@ -431,4 +443,21 @@ void RichEditorModelNG::SetSelectionMenuOptions(
     CHECK_NULL_VOID(richEditorPattern);
     richEditorPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
+
+void RichEditorModelNG::SetRequestKeyboardOnFocus(bool needToRequest)
+{
+    CHECK_NULL_VOID(!isStyledStringMode_);
+    auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetRequestKeyboardOnFocus(needToRequest);
+}
+
+void RichEditorModelNG::SetRequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetRequestKeyboardOnFocus(needToRequest);
+}
+
 } // namespace OHOS::Ace::NG

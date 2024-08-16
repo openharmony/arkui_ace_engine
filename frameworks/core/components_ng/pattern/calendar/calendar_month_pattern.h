@@ -36,7 +36,7 @@ class CalendarMonthPattern : public Pattern {
 
 public:
     CalendarMonthPattern() = default;
-    ~CalendarMonthPattern() override = default;
+    ~CalendarMonthPattern() override;
 
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
@@ -55,8 +55,8 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        if (!isInitVirtualNode_ && AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
-            isInitVirtualNode_ = InitCalendarVirtualNode();
+        if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+            InitCurrentVirtualNode();
         }
         return MakeRefPtr<CalendarPaintMethod>(obtainedMonth_, calendarDay_, isCalendarDialog_);
     }
@@ -110,6 +110,20 @@ public:
         return hoverState_;
     }
 
+    void UpdateColRowSpace()
+    {
+        SetColRowSpace();
+    }
+
+    void SetIsFirstEnter(bool isFirstEnter)
+    {
+        isFirstEnter_ = isFirstEnter;
+    }
+
+    void InitCurrentVirtualNode();
+
+    void ClearCalendarVirtualNode();
+
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -125,6 +139,7 @@ private:
     Dimension GetDaySize(const RefPtr<CalendarTheme>& theme);
     RefPtr<FrameNode> AddButtonNodeIntoVirtual(const CalendarDay& calendarDay);
     void UpdateAccessibilityButtonNode(RefPtr<FrameNode> frameNode, int32_t index);
+    void UpdateButtonNodeWithoutTheme(RefPtr<FrameNode> frameNode, int32_t index);
     void ModifyAccessibilityVirtualNode(const ObtainedMonth& currentData);
     void ChangeVirtualNodeContent(const CalendarDay& calendarDay);
     bool InitCalendarVirtualNode();
@@ -134,11 +149,19 @@ private:
     void InitAccessibilityHoverEvent();
     void HandleAccessibilityHoverEvent(bool state, AccessibilityHoverInfo& info);
     void SetCalendarAccessibilityLevel(const std::string& level);
+    void InitializeCalendarAccessibility();
+    void ChangeVirtualNodeState(const CalendarDay& calendarDay);
     bool isCalendarDialog_ = false;
     bool hoverState_ = false;
     bool isOnHover_ = false;
+    bool isFirstEnter_ = false;
+    int32_t selectedIndex_ = 0;
+    double margin_ = 0;
+    std::string selectedTxt_;
+    std::string disabledDesc_;
     std::vector<RefPtr<AccessibilityProperty>> accessibilityPropertyVec_;
     std::vector<RefPtr<FrameNode>> buttonAccessibilityNodeVec_;
+    std::shared_ptr<AccessibilitySAObserverCallback> accessibilitySAObserverCallback_;
     bool isInitVirtualNode_ = false;
     CalendarDay calendarDay_;
     ObtainedMonth obtainedMonth_;

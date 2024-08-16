@@ -356,7 +356,7 @@ public:
 
     virtual void GetBoundingRectData(int32_t nodeId, Rect& rect) {}
 
-    virtual void CheckAndUpdateKeyboardInset() {}
+    virtual void CheckAndUpdateKeyboardInset(float keyboardHeight) {}
 
     virtual RefPtr<AccessibilityManager> GetAccessibilityManager() const;
 
@@ -754,6 +754,21 @@ public:
         return focusWindowId_.has_value();
     }
 
+    void SetRealHostWindowId(uint32_t realHostWindowId)
+    {
+        realHostWindowId_ = realHostWindowId;
+    }
+
+    uint32_t GetRealHostWindowId() const
+    {
+        return realHostWindowId_.value_or(GetFocusWindowId());
+    }
+
+    bool IsRealHostWindowIdSetted() const
+    {
+        return realHostWindowId_.has_value();
+    }
+
     float GetViewScale() const
     {
         return viewScale_;
@@ -956,6 +971,8 @@ public:
     virtual bool IsEnableKeyBoardAvoidMode() {
         return false;
     }
+
+    virtual void RequireSummary() {}
 
     void SetPluginOffset(const Offset& offset)
     {
@@ -1380,6 +1397,7 @@ protected:
     uint32_t windowId_ = 0;
     // UIExtensionAbility need component windowID
     std::optional<uint32_t> focusWindowId_;
+    std::optional<uint32_t> realHostWindowId_;
 
     int32_t appLabelId_ = 0;
     float fontScale_ = 1.0f;
@@ -1494,7 +1512,7 @@ private:
     WindowSizeChangeReason type_ = WindowSizeChangeReason::UNDEFINED;
     std::shared_ptr<Rosen::RSTransaction> rsTransaction_;
     uint32_t frameCount_ = 0;
-    bool followSystem_ = true;
+    bool followSystem_ = false;
     float maxAppFontScale_ = static_cast<float>(INT32_MAX);
     float dragNodeGrayscale_ = 0.0f;
     

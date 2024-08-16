@@ -29,6 +29,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetBorderWidth(double value, uint32_t
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetBorderColor(uint32_t color);
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetBorderStyle(int32_t style);
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetBorderRadius(double value, uint32_t unit);
+CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetAllBorderRadius(CJBorderRadius value);
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetBackgroundColor(uint32_t color);
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetPadding(double value, int32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetPaddings(CJEdge params);

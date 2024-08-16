@@ -94,9 +94,11 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
             });
         return;
     }
+    ACE_SCOPED_TRACE_COMMERCIAL("Router Page Transition Start");
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
     pagePattern->TriggerPageTransition(
         transitionType, [weak = WeakPtr<FrameNode>(page)]() {
+            ACE_SCOPED_TRACE_COMMERCIAL("Router Page Transition End");
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
             auto page = weak.Upgrade();
             CHECK_NULL_VOID(page);
@@ -178,7 +180,7 @@ void StageManager::PageChangeCloseKeyboard()
 #endif
 }
 
-bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bool needTransition, bool  /*isPush*/)
+bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bool needTransition)
 {
     CHECK_NULL_RETURN(stageNode_, false);
     CHECK_NULL_RETURN(node, false);
@@ -238,7 +240,12 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
             CHECK_NULL_VOID(stage);
             auto pageNode = weakNode.Upgrade();
             int64_t endTime = GetSysTimestamp();
-            stage->PerformanceCheck(pageNode, endTime - startTime);
+            auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+            CHECK_NULL_VOID(pagePattern);
+            auto pageInfo = pagePattern->GetPageInfo();
+            CHECK_NULL_VOID(pageInfo);
+            auto pagePath = pageInfo->GetFullPath();
+            stage->PerformanceCheck(pageNode, endTime - startTime, pagePath);
         });
     }
 #if !defined(ACE_UNITTEST)
@@ -263,7 +270,6 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     // flush layout task.
     if (!stageNode_->GetGeometryNode()->GetMarginFrameSize().IsPositive()) {
         // in first load case, wait for window size.
-        LOGI("waiting for window size");
         return true;
     }
     stageNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -304,12 +310,12 @@ bool StageManager::InsertPage(const RefPtr<FrameNode>& node, bool bellowTopOrBot
     return true;
 }
 
-void StageManager::PerformanceCheck(const RefPtr<FrameNode>& pageNode, int64_t vsyncTimeout)
+void StageManager::PerformanceCheck(const RefPtr<FrameNode>& pageNode, int64_t vsyncTimeout, std::string path)
 {
     CHECK_NULL_VOID(pageNode);
     PerformanceCheckNodeMap nodeMap;
     pageNode->GetPerformanceCheckData(nodeMap);
-    AceScopedPerformanceCheck::RecordPerformanceCheckData(nodeMap, vsyncTimeout);
+    AceScopedPerformanceCheck::RecordPerformanceCheckData(nodeMap, vsyncTimeout, path);
 }
 
 bool StageManager::PopPage(bool needShowNext, bool needTransition)

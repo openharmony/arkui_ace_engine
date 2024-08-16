@@ -14,13 +14,6 @@
  */
 #include "js_inspector.h"
 
-#include <algorithm>
-
-#include "napi/native_common.h"
-#include "napi/native_node_api.h"
-
-#include "base/memory/referenced.h"
-
 namespace OHOS::Ace::Napi {
 namespace {
 constexpr size_t STR_BUFFER_SIZE = 1024;

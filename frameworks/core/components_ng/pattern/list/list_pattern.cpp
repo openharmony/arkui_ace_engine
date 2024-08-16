@@ -26,7 +26,6 @@
 #include "core/animation/spring_model.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/list/list_theme.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/list/list_height_offset_calculator.h"
@@ -49,13 +48,11 @@ constexpr double CHAIN_SPRING_DAMPING = 30.0;
 constexpr double CHAIN_SPRING_STIFFNESS = 228;
 constexpr float DEFAULT_MIN_SPACE_SCALE = 0.75f;
 constexpr float DEFAULT_MAX_SPACE_SCALE = 2.0f;
-constexpr float LIST_FADINGEDGE_DEFAULT = 32.0f;
-constexpr float LIST_START_MAIN_POS = 0.0f;
-constexpr float LIST_FADE_ERROR_RANGE = 1.0f;
 } // namespace
 
 void ListPattern::OnModifyDone()
 {
+    Pattern::CheckLocalized();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
@@ -96,31 +93,6 @@ void ListPattern::OnModifyDone()
     if (IsNeedInitClickEventRecorder()) {
         Pattern::InitClickEventRecorder();
     }
-    ReadThemeToFadingEdge();
-}
-
-void ListPattern::ReadThemeToFadingEdge()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
-    CHECK_NULL_VOID(listLayoutProperty);
-    auto conlist = PipelineBase::GetCurrentContextSafely();
-    CHECK_NULL_VOID(conlist);
-    auto listTheme = conlist->GetTheme<ListTheme>();
-    CHECK_NULL_VOID(listTheme);
-    auto listThemeFadingEdge = listTheme->GetFadingEdge();
-    if (listLayoutProperty->GetFadingEdge().has_value()) {
-        isFadingEdge_ = listLayoutProperty->GetFadingEdge().value_or(listThemeFadingEdge);
-    } else if (GetAxis() == Axis::HORIZONTAL) {
-        isFadingEdge_ = false;
-    } else {
-        isFadingEdge_ = listThemeFadingEdge;
-    }
-    auto overlayNode = host->GetOverlayNode();
-    if (!overlayNode && isFadingEdge_) {
-        CreateAnalyzerOverlay(host);
-    }
 }
 
 void ListPattern::ChangeAxis(RefPtr<UINode> node)
@@ -159,7 +131,6 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     itemPosition_ = listLayoutAlgorithm->GetItemPosition();
     maxListItemIndex_ = listLayoutAlgorithm->GetMaxListItemIndex();
     spaceWidth_ = listLayoutAlgorithm->GetSpaceWidth();
-    float relativeOffset = listLayoutAlgorithm->GetCurrentOffset();
     auto predictSnapOffset = listLayoutAlgorithm->GetPredictSnapOffset();
     auto predictSnapEndPos = listLayoutAlgorithm->GetPredictSnapEndPosition();
     bool isJump = listLayoutAlgorithm->NeedEstimateOffset();
@@ -178,21 +149,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     } else {
         lanes_ = listLayoutAlgorithm->GetLanes();
     }
-    if (childrenSize_) {
-        listTotalHeight_ = posMap_->GetTotalHeight();
-        currentOffset_ = itemPosition_.empty() ? 0.0f :
-            posMap_->GetPos(itemPosition_.begin()->first, itemPosition_.begin()->second.startPos);
-    } else {
-        if (isJump || needReEstimateOffset_) {
-            auto calculate = ListHeightOffsetCalculator(itemPosition_, spaceWidth_, lanes_, GetAxis());
-            calculate.GetEstimateHeightAndOffset(GetHost());
-            currentOffset_ = calculate.GetEstimateOffset();
-            relativeOffset = 0.0f;
-            needReEstimateOffset_ = false;
-            posMap_->ClearPosMap();
-        }
-        CalculateCurrentOffset(relativeOffset, listLayoutAlgorithm->GetRecycledItemPosition());
-    }
+    float relativeOffset = UpdateTotalOffset(listLayoutAlgorithm, isJump);
     if (targetIndex_) {
         AnimateToTarget(targetIndex_.value(), targetIndexInGroup_, scrollAlign_);
         targetIndex_.reset();
@@ -243,7 +200,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     startMainPos_ = listLayoutAlgorithm->GetStartPosition();
     endMainPos_ = listLayoutAlgorithm->GetEndPosition();
     crossMatchChild_ = listLayoutAlgorithm->IsCrossMatchChild();
-    bool sizeDiminished =
+    bool sizeDiminished = !chainAnimation_ &&
         LessNotEqual(endMainPos_ - startMainPos_, contentMainSize_ - contentStartOffset_ - contentEndOffset_) &&
         GreatOrEqual(prevTotalSize, prevContentSize) && LessNotEqual(endMainPos_ - startMainPos_, prevTotalSize);
     CheckScrollable();
@@ -337,35 +294,6 @@ float ListPattern::CalculateTargetPos(float startPos, float endPos)
     return 0.0f;
 }
 
-void ListPattern::CreateAnalyzerOverlay(const RefPtr<FrameNode> listNode)
-{
-    auto builderFunc = []() -> RefPtr<UINode> {
-        auto uiNode = FrameNode::GetOrCreateFrameNode(V2::STACK_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(), []() {
-                return AceType::MakeRefPtr<LinearLayoutPattern>(true);
-            });
-        return uiNode;
-    };
-    auto overlayNode = AceType::DynamicCast<FrameNode>(builderFunc());
-    CHECK_NULL_VOID(overlayNode);
-    listNode->SetOverlayNode(overlayNode);
-    overlayNode->SetParent(AceType::WeakClaim(AceType::RawPtr(listNode)));
-    overlayNode->SetActive(true);
-    overlayNode->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
-    auto overlayProperty = AceType::DynamicCast<LayoutProperty>(overlayNode->GetLayoutProperty());
-    CHECK_NULL_VOID(overlayProperty);
-    overlayProperty->SetIsOverlayNode(true);
-    overlayProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    overlayProperty->UpdateAlignment(Alignment::CENTER);
-    auto overlayOffsetX = std::make_optional<Dimension>(Dimension::FromString("0px"));
-    auto overlayOffsetY = std::make_optional<Dimension>(Dimension::FromString("0px"));
-    overlayProperty->SetOverlayOffset(overlayOffsetX, overlayOffsetY);
-    auto focusHub = overlayNode->GetOrCreateFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    focusHub->SetFocusable(false);
-    overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-}
-
 RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
 {
     auto listLayoutProperty = GetLayoutProperty<ListLayoutProperty>();
@@ -405,58 +333,7 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
     paint->SetLaneGutter(laneGutter_);
     paint->SetItemsPosition(itemPosition_, pressedItem_);
     paint->SetContentModifier(listContentModifier_);
-
-    UpdateFadingEdge(paint);
     return paint;
-}
-
-void ListPattern::UpdateFadingEdge(const RefPtr<ListPaintMethod> paint)
-{
-    if (LIST_START_MAIN_POS == contentMainSize_) {
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto overlayNode = host->GetOverlayNode();
-    CHECK_NULL_VOID(overlayNode);
-    auto overlayRenderContext = overlayNode->GetRenderContext();
-    CHECK_NULL_VOID(overlayRenderContext);
-    if (!isFadingEdge_) {
-        paint->SetOverlayRenderContext(overlayRenderContext);
-        paint->SetFadingInfo(false, false);
-        isTopEdgeFading_ = false;
-        isLowerEdgeFading_ = false;
-        return;
-    }
-    auto isFadingTop = LessNotEqual(startMainPos_, LIST_START_MAIN_POS - LIST_FADE_ERROR_RANGE);
-    auto isFadingBottom = GreatNotEqual(endMainPos_, contentMainSize_ + LIST_FADE_ERROR_RANGE);
-    if (isFadingTop || isFadingBottom) {
-        auto isTopEdgeFadingUpdate = isTopEdgeFading_ != isFadingTop;
-        auto isLowerEdgeFadingUpdate = isLowerEdgeFading_ != isFadingBottom;
-        if (isTopEdgeFadingUpdate || isLowerEdgeFadingUpdate || (fadingAxis_ != GetAxis())) {
-            paint->SetOverlayRenderContext(overlayRenderContext);
-            UpdateFadeInfo(isFadingTop, isFadingBottom, paint);
-            fadingAxis_ = GetAxis();
-        }
-    } else if (isTopEdgeFading_ || isLowerEdgeFading_) {
-        paint->SetOverlayRenderContext(overlayRenderContext);
-        UpdateFadeInfo(isFadingTop, isFadingBottom, paint);
-    }
-    isTopEdgeFading_ = isFadingTop;
-    isLowerEdgeFading_ = isFadingBottom;
-}
-
-void ListPattern::UpdateFadeInfo(bool isFadingTop, bool isFadingBottom, const RefPtr<ListPaintMethod> paint)
-{
-    if (startIndex_ > 0) {
-        isFadingTop = true;
-    }
-    if (endIndex_ < maxListItemIndex_) {
-        isFadingBottom = true;
-    }
-    auto percentFading = CalcDimension(LIST_FADINGEDGE_DEFAULT, DimensionUnit::VP).ConvertToPx() /
-        std::abs(contentMainSize_ - LIST_START_MAIN_POS);
-    paint->SetFadingInfo(isFadingTop, isFadingBottom, percentFading);
 }
 
 bool ListPattern::UpdateStartListItemIndex()
@@ -687,6 +564,7 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     }
     if (predictSnapOffset_.has_value()) {
         listLayoutAlgorithm->SetPredictSnapOffset(predictSnapOffset_.value());
+        listLayoutAlgorithm->SetScrollSnapVelocity(scrollSnapVelocity_);
     }
     listLayoutAlgorithm->SetTotalOffset(GetTotalOffset());
     listLayoutAlgorithm->SetCurrentDelta(currentDelta_);
@@ -749,14 +627,6 @@ bool ListPattern::IsScrollSnapAlignCenter() const
     return false;
 }
 
-void ListPattern::UpdateScrollSnap()
-{
-    if (!AnimateStoped()) {
-        return;
-    }
-    predictSnapOffset_ = 0.0f;
-}
-
 bool ListPattern::NeedScrollSnapAlignEffect() const
 {
     auto host = GetHost();
@@ -801,18 +671,6 @@ bool ListPattern::IsAtBottom() const
     }
     return (endIndex == maxListItemIndex_ && groupAtEnd) &&
            LessOrEqual(endMainPos - currentDelta_ + GetChainDelta(endIndex), contentMainSize_ - contentEndOffset_);
-}
-
-bool ListPattern::OutBoundaryCallback()
-{
-    bool outBoundary = IsOutOfBoundary();
-    if (!dragFromSpring_ && outBoundary && chainAnimation_) {
-        chainAnimation_->SetOverDrag(false);
-        auto delta = chainAnimation_->SetControlIndex(IsAtTop() ? 0 : maxListItemIndex_);
-        currentDelta_ -= delta;
-        dragFromSpring_ = true;
-    }
-    return outBoundary;
 }
 
 void ListPattern::GetListItemGroupEdge(bool& groupAtStart, bool& groupAtEnd) const
@@ -894,8 +752,9 @@ float ListPattern::GetEndOverScrollOffset(float offset, float endMainPos, float 
     float ChainDelta = chainAnimation_ ? chainAnimation_->GetValuePredict(endIndex_, -offset) : 0.f;
     auto endPos = endMainPos + ChainDelta - currentDelta_;
     auto contentEndPos = contentMainSize_ - contentEndOffset_;
-    if (GreatNotEqual(contentEndPos, endMainPos - startMainPos)) {
-        endPos = startMainPos + contentEndPos;
+    auto contentMainSize = contentMainSize_ - contentEndOffset_ - contentStartOffset_;
+    if (GreatNotEqual(contentMainSize, endMainPos - startMainPos)) {
+        endPos = startMainPos + contentMainSize;
     }
     auto newEndPos = endPos + offset;
     if (endPos < contentEndPos && newEndPos < contentEndPos) {
@@ -1029,7 +888,6 @@ bool ListPattern::IsOutOfBoundary(bool useCurrentDelta)
 bool ListPattern::OnScrollCallback(float offset, int32_t source)
 {
     if (source == SCROLL_FROM_START) {
-        ProcessDragStart(offset);
         auto item = swiperItem_.Upgrade();
         if (item) {
             item->ResetSwipeStatus();
@@ -1806,6 +1664,28 @@ Rect ListPattern::GetItemRectInGroup(int32_t index, int32_t indexInGroup) const
         groupItemGeometry->GetFrameRect().Width(), groupItemGeometry->GetFrameRect().Height());
 }
 
+float ListPattern::UpdateTotalOffset(const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm, bool isJump)
+{
+    float relativeOffset = listLayoutAlgorithm->GetCurrentOffset();
+    float prevOffset = currentOffset_;
+    if (childrenSize_) {
+        listTotalHeight_ = posMap_->GetTotalHeight();
+        currentOffset_ = itemPosition_.empty() ? 0.0f :
+            posMap_->GetPos(itemPosition_.begin()->first, itemPosition_.begin()->second.startPos);
+    } else {
+        if (isJump || needReEstimateOffset_) {
+            auto calculate = ListHeightOffsetCalculator(itemPosition_, spaceWidth_, lanes_, GetAxis());
+            calculate.GetEstimateHeightAndOffset(GetHost());
+            currentOffset_ = calculate.GetEstimateOffset();
+            relativeOffset = 0;
+            needReEstimateOffset_ = false;
+            posMap_->ClearPosMap();
+        }
+        CalculateCurrentOffset(relativeOffset, listLayoutAlgorithm->GetRecycledItemPosition());
+    }
+    return currentOffset_ - prevOffset;
+}
+
 void ListPattern::CalculateCurrentOffset(float delta, const ListLayoutAlgorithm::PositionMap& recycledItemPosition)
 {
     posMap_->UpdateTotalCount(maxListItemIndex_ + 1);
@@ -1894,6 +1774,28 @@ void ListPattern::TriggerModifyDone()
     OnModifyDone();
 }
 
+void ListPattern::SetChainAnimationCallback()
+{
+    CHECK_NULL_VOID(chainAnimation_);
+    chainAnimation_->SetAnimationCallback([weak = AceType::WeakClaim(this)]() {
+        auto list = weak.Upgrade();
+        CHECK_NULL_VOID(list);
+        list->MarkDirtyNodeSelf();
+    });
+    auto scrollEffect = AceType::DynamicCast<ScrollSpringEffect>(GetScrollEdgeEffect());
+    CHECK_NULL_VOID(scrollEffect);
+    scrollEffect->SetOnWillStartSpringCallback([weak = AceType::WeakClaim(this)]() {
+        auto list = weak.Upgrade();
+        CHECK_NULL_VOID(list);
+        if (!list->dragFromSpring_ && list->chainAnimation_) {
+            list->chainAnimation_->SetOverDrag(false);
+            auto delta = list->chainAnimation_->SetControlIndex(list->IsAtTop() ? 0 : list->maxListItemIndex_);
+            list->currentDelta_ -= delta;
+            list->dragFromSpring_ = true;
+        }
+    });
+}
+
 void ListPattern::SetChainAnimation()
 {
     auto listLayoutProperty = GetLayoutProperty<ListLayoutProperty>();
@@ -1940,11 +1842,7 @@ void ListPattern::SetChainAnimation()
             auto maxSpace = space * DEFAULT_MAX_SPACE_SCALE;
             chainAnimation_ = AceType::MakeRefPtr<ChainAnimation>(space, maxSpace, minSpace, springProperty_);
         }
-        chainAnimation_->SetAnimationCallback([weak = AceType::WeakClaim(this)]() {
-            auto list = weak.Upgrade();
-            CHECK_NULL_VOID(list);
-            list->MarkDirtyNodeSelf();
-        });
+        SetChainAnimationCallback();
     }
 }
 
@@ -1983,6 +1881,17 @@ void ListPattern::SetChainAnimationOptions(const ChainAnimationOptions& options)
     }
 }
 
+void ListPattern::OnTouchDown(const TouchEventInfo& info)
+{
+    auto& touches = info.GetTouches();
+    if (touches.empty()) {
+        return;
+    }
+    auto offset = touches.front().GetLocalLocation();
+    float startPosition = GetAxis() == Axis::HORIZONTAL ? offset.GetX() : offset.GetY();
+    ProcessDragStart(startPosition);
+}
+
 void ListPattern::ProcessDragStart(float startPosition)
 {
     CHECK_NULL_VOID(chainAnimation_);
@@ -1999,8 +1908,12 @@ void ListPattern::ProcessDragStart(float startPosition)
         index = itemPosition_.rbegin()->first + 1;
     }
     dragFromSpring_ = false;
-    chainAnimation_->SetControlIndex(index);
+    float delta = chainAnimation_->SetControlIndex(index);
+    currentDelta_ -= delta;
     chainAnimation_->SetMaxIndex(maxListItemIndex_);
+    if (IsOutOfBoundary()) {
+        chainAnimation_->SetOverDrag(true);
+    }
 }
 
 void ListPattern::ProcessDragUpdate(float dragOffset, int32_t source)
@@ -2213,6 +2126,7 @@ void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorF
     if (!itemPosition_.empty()) {
         json->PutExtAttr("itemStartPos", itemPosition_.begin()->second.startPos, filter);
     }
+    json->PutExtAttr("maintainVisibleContentPosition", maintainVisibleContentPosition_, filter);
 }
 
 void ListPattern::FromJson(const std::unique_ptr<JsonValue>& json)
@@ -2289,7 +2203,7 @@ void ListPattern::RefreshLanesItemRange()
         if (it->second < updatePos) {
             it++;
         } else if (it->first >= updatePos) {
-            lanesItemRange_.erase(it++);
+            it = lanesItemRange_.erase(it);
         } else {
             it->second = updatePos - 1;
             it++;
@@ -2465,5 +2379,29 @@ void ListPattern::ResetChildrenSize()
         MarkDirtyNodeSelf();
         OnChildrenSizeChanged({ -1, -1, -1 }, LIST_UPDATE_CHILD_SIZE);
     }
+}
+
+void ListPattern::NotifyDataChange(int32_t index, int32_t count)
+{
+    if (!maintainVisibleContentPosition_ || itemPosition_.empty()) {
+        return;
+    }
+    if (count == 0 || (count > 0 && index > startIndex_) || (count < 0 && index >= startIndex_)) {
+        return;
+    }
+    count = std::max(count, index - startIndex_);
+    int32_t mod = 0;
+    if (count < 0 && lanes_ > 1 && !(itemPosition_.begin()->second.isGroup)) {
+        mod = -count % lanes_;
+    }
+    auto prevPosMap = std::move(itemPosition_);
+    for (auto &pos : prevPosMap) {
+        if (mod > 0) {
+            mod--;
+        } else {
+            itemPosition_[pos.first + count] = pos.second;
+        }
+    }
+    needReEstimateOffset_ = true;
 }
 } // namespace OHOS::Ace::NG

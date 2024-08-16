@@ -13,6 +13,21 @@
  * limitations under the License.
  */
 
+var __decorate = (this && this.__decorate) || function (a12, b12, c12, d12) {
+    var e12 = arguments.length,
+        f12 = e12 < 3 ? b12 : d12 === null ? d12 = Object.getOwnPropertyDescriptor(b12, c12) : d12, g12;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") {
+        f12 = Reflect.decorate(a12, b12, c12, d12);
+    } else {
+        for (var h12 = a12.length - 1; h12 >= 0; h12--) {
+            if (g12 = a12[h12]) {
+                f12 = (e12 < 3 ? g12(f12) : e12 > 3 ? g12(b12, c12, f12) : g12(b12, c12)) || f12;
+            }
+        }
+    }
+    return e12 > 3 && f12 && Object.defineProperty(b12, c12, f12), f12;
+};
+
 if (!("finalizeConstruction" in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, "finalizeConstruction", () => {
     });
@@ -56,8 +71,8 @@ const UPLOAD_IMAGE_CACHE_DIR = '/cache/';
 const JAVA_SCRIPT_PROXY_OBJECT_NAME = 'atomicServiceProxy';
 const JAVA_SCRIPT_PROXY_API_NAME_LIST = ['invokeJsApi'];
 const ATOMIC_SERVICE_JS_API_MAP = new Map();
-const registerJsApi = (d11, e11, f11, g11, h11) => {
-    ATOMIC_SERVICE_JS_API_MAP.set(d11, new JsApiConfig(e11, f11, g11, h11));
+const registerJsApi = (u11, v11, w11, x11, y11) => {
+    ATOMIC_SERVICE_JS_API_MAP.set(u11, new JsApiConfig(v11, w11, x11, y11));
 };
 const MAX_VERSION = '99.99.99';
 const ATOMIC_SERVICE_JS_SDK_CURRENT_VERSION = '1.0.0';
@@ -106,6 +121,10 @@ export class AtomicServiceWeb extends ViewPU {
         }
         this.src = undefined;
         this.navPathStack = undefined;
+        this.__mixedMode = new SynchedPropertySimpleOneWayPU(t10.mixedMode, this, "mixedMode");
+        this.__darkMode = new SynchedPropertySimpleOneWayPU(t10.darkMode, this, "darkMode");
+        this.__forceDarkAccess = new SynchedPropertySimpleOneWayPU(t10.forceDarkAccess, this, "forceDarkAccess");
+        this.__controller = new SynchedPropertyNesedObjectPU(t10.controller, this, "controller");
         this.onMessage = () => {
         };
         this.onErrorReceive = () => {
@@ -116,8 +135,12 @@ export class AtomicServiceWeb extends ViewPU {
         };
         this.onPageEnd = () => {
         };
+        this.onProgressChange = () => {
+        };
+        this.onControllerAttached = undefined;
+        this.onLoadIntercept = undefined;
         this.context = this.getUIContext().getHostContext();
-        this.controller = new web_webview.WebviewController();
+        this.webViewController = new web_webview.WebviewController();
         this.schemeHandler = new web_webview.WebSchemeHandler();
         this.atomicService = undefined;
         this.atomicServiceProxy = undefined;
@@ -132,6 +155,7 @@ export class AtomicServiceWeb extends ViewPU {
         if (r10.navPathStack !== undefined) {
             this.navPathStack = r10.navPathStack;
         }
+        this.__controller.set(r10.controller);
         if (r10.onMessage !== undefined) {
             this.onMessage = r10.onMessage;
         }
@@ -147,11 +171,20 @@ export class AtomicServiceWeb extends ViewPU {
         if (r10.onPageEnd !== undefined) {
             this.onPageEnd = r10.onPageEnd;
         }
+        if (r10.onProgressChange !== undefined) {
+            this.onProgressChange = r10.onProgressChange;
+        }
+        if (r10.onControllerAttached !== undefined) {
+            this.onControllerAttached = r10.onControllerAttached;
+        }
+        if (r10.onLoadIntercept !== undefined) {
+            this.onLoadIntercept = r10.onLoadIntercept;
+        }
         if (r10.context !== undefined) {
             this.context = r10.context;
         }
-        if (r10.controller !== undefined) {
-            this.controller = r10.controller;
+        if (r10.webViewController !== undefined) {
+            this.webViewController = r10.webViewController;
         }
         if (r10.schemeHandler !== undefined) {
             this.schemeHandler = r10.schemeHandler;
@@ -165,20 +198,69 @@ export class AtomicServiceWeb extends ViewPU {
     }
 
     updateStateVars(q10) {
+        this.__mixedMode.reset(q10.mixedMode);
+        this.__darkMode.reset(q10.darkMode);
+        this.__forceDarkAccess.reset(q10.forceDarkAccess);
+        this.__controller.set(q10.controller);
     }
 
     purgeVariableDependenciesOnElmtId(p10) {
+        this.__mixedMode.purgeDependencyOnElmtId(p10);
+        this.__darkMode.purgeDependencyOnElmtId(p10);
+        this.__forceDarkAccess.purgeDependencyOnElmtId(p10);
+        this.__controller.purgeDependencyOnElmtId(p10);
     }
 
     aboutToBeDeleted() {
+        this.__mixedMode.aboutToBeDeleted();
+        this.__darkMode.aboutToBeDeleted();
+        this.__forceDarkAccess.aboutToBeDeleted();
+        this.__controller.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
+    }
+
+    get mixedMode() {
+        return this.__mixedMode.get();
+    }
+
+    set mixedMode(t11) {
+        this.__mixedMode.set(t11);
+    }
+
+    get darkMode() {
+        return this.__darkMode.get();
+    }
+
+    set darkMode(s11) {
+        this.__darkMode.set(s11);
+    }
+
+    get forceDarkAccess() {
+        return this.__forceDarkAccess.get();
+    }
+
+    set forceDarkAccess(r11) {
+        this.__forceDarkAccess.set(r11);
+    }
+
+    get controller() {
+        return this.__controller.get();
     }
 
     aboutToAppear() {
         if (!this.atomicService) {
             this.atomicService = new AtomicServiceApi(this.context, this.navPathStack, this.onMessage);
             this.atomicServiceProxy = new AtomicServiceProxy(this.atomicService);
+        }
+        try {
+            let h2 = bundleManager.getBundleInfoForSelfSync(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION);
+            if (h2?.appInfo?.appProvisionType === 'debug') {
+                console.log(`AtomicServiceWeb setWebDebuggingAccess`);
+                web_webview.WebviewController.setWebDebuggingAccess(true);
+            }
+        } catch (d2) {
+            console.error(`AtomicServiceWeb set Web Debug Mode failed, code is ${d2.code}, message is ${d2.message}`);
         }
     }
 
@@ -188,39 +270,75 @@ export class AtomicServiceWeb extends ViewPU {
 
     initialRender() {
         this.observeComponentCreation2((g10, h10) => {
-            Web.create({ src: this.src, controller: this.controller });
+            Web.create({ src: this.src, controller: this.webViewController });
             Web.zoomAccess(false);
-            Web.overviewModeAccess(false);
             Web.allowWindowOpenMethod(false);
+            Web.domStorageAccess(true);
             Web.layoutMode(WebLayoutMode.NONE);
-            Web.onErrorReceive(this.onErrorReceive);
-            Web.onHttpErrorReceive(this.onHttpErrorReceive);
-            Web.onPageBegin(this.onPageBegin);
-            Web.onPageEnd(this.onPageEnd);
+            Web.mixedMode(this.mixedMode);
+            Web.darkMode(this.darkMode);
+            Web.forceDarkAccess(this.forceDarkAccess);
+            Web.onErrorReceive((q11) => this.onCommonCallBack('onErrorReceive', q11, this.onErrorReceive));
+            Web.onHttpErrorReceive((p11) => this.onCommonCallBack('onHttpErrorReceive', p11, this.onHttpErrorReceive));
+            Web.onPageBegin((l10) => this.onCommonCallBack('onPageBegin', l10, this.onPageBegin));
+            Web.onPageEnd((b11) => this.onCommonCallBack('onPageEnd', b11, this.onPageEnd));
+            Web.onProgressChange((a11) => this.onCommonCallBack('onProgressChange', a11, this.onProgressChange));
             Web.onControllerAttached(() => {
                 this.registerJavaScriptProxy();
-                this.schemeHandler.onRequestStart((o10) => {
-                    return !this.checkUrl(o10.getRequestUrl());
+                this.schemeHandler.onRequestStart((z10) => {
+                    return !this.checkUrl(z10.getRequestUrl());
                 });
-                this.controller.setWebSchemeHandler('https', this.schemeHandler);
+                this.webViewController.setWebSchemeHandler('https', this.schemeHandler);
+                this.initAtomicServiceWebController();
+                if (this.onControllerAttached) {
+                    try {
+                        this.onControllerAttached();
+                    } catch (y10) {
+                        console.error(`AtomicServiceWeb onControllerAttached failed, code is ${y10.code}, message is ${y10.message}`);
+                    }
+                }
             });
-            Web.onOverrideUrlLoading((m10) => {
-                return !this.checkUrl(m10.getRequestUrl());
+            Web.onOverrideUrlLoading((i10) => {
+                return !this.checkUrl(i10.getRequestUrl());
             });
-            Web.onLoadIntercept(l10 => {
-                return !this.checkUrl(l10.data.getRequestUrl());
+            Web.onLoadIntercept(m7 => {
+                let n7 = !this.checkUrl(m7.data.getRequestUrl());
+                if (!n7 && this.onLoadIntercept) {
+                    try {
+                        return this.onLoadIntercept(m7);
+                    } catch (u7) {
+                        console.error(`AtomicServiceWeb onLoadIntercept failed, code is ${u7.code}, message is ${u7.message}`);
+                        return true;
+                    }
+                }
+                return n7;
             });
         }, Web);
     }
 
+    onCommonCallBack(q5, e6, j6) {
+        try {
+            j6 && j6(e6);
+        } catch (k7) {
+            console.error(`AtomicServiceWeb ${q5} failed, code is ${k7.code}, message is ${k7.message}`);
+        }
+    }
+
     registerJavaScriptProxy() {
         try {
-            this.controller.registerJavaScriptProxy(this.atomicServiceProxy, JAVA_SCRIPT_PROXY_OBJECT_NAME,
+            this.webViewController.registerJavaScriptProxy(this.atomicServiceProxy, JAVA_SCRIPT_PROXY_OBJECT_NAME,
                 JAVA_SCRIPT_PROXY_API_NAME_LIST);
         } catch (d10) {
             let e10 = d10;
             console.error(`AtomicServiceWeb registerJavaScriptProxy failed, code is ${e10.code}, message is ${e10.message}`);
         }
+    }
+
+    initAtomicServiceWebController() {
+        if (!this.controller) {
+            return;
+        }
+        this.controller.setWebviewController(this.webViewController);
     }
 
     cutUrl(b10) {
@@ -245,7 +363,6 @@ export class AtomicServiceWeb extends ViewPU {
             let t1 = 'webView';
             q1 = this.cutUrl(q1);
             let res = atomicServiceWebNapi.checkUrl(w1, t1, q1);
-            console.log(`AtomicServiceWeb checkUrl res=${res} bundleName=${w1} domainType=${t1} url=${q1}`);
             return res === 0;
         } catch (j2) {
             let n2 = j2;
@@ -258,6 +375,81 @@ export class AtomicServiceWeb extends ViewPU {
         this.updateDirtyElements();
     }
 }
+let AtomicServiceWebController = class AtomicServiceWebController {
+    setWebviewController(l5) {
+        this.webViewController = l5;
+    }
+
+    checkWebviewController() {
+        if (!this.webViewController) {
+            const d5 = {
+                name: '',
+                message: 'Init error. The AtomicServiceWebController must be associated with a AtomicServiceWeb component.',
+                code: 17100001,
+            };
+            throw d5;
+        }
+    }
+
+    getUserAgent() {
+        this.checkWebviewController();
+        return this.webViewController?.getUserAgent();
+    }
+
+    getCustomUserAgent() {
+        this.checkWebviewController();
+        return this.webViewController?.getCustomUserAgent();
+    }
+
+    setCustomUserAgent(z4) {
+        this.checkWebviewController();
+        this.webViewController?.setCustomUserAgent(z4);
+    }
+
+    accessForward() {
+        this.checkWebviewController();
+        return this.webViewController?.accessForward();
+    }
+
+    accessBackward() {
+        this.checkWebviewController();
+        return this.webViewController?.accessBackward();
+    }
+
+    accessStep(d4) {
+        this.checkWebviewController();
+        return this.webViewController?.accessStep(d4);
+    }
+
+    forward() {
+        this.checkWebviewController();
+        this.webViewController?.forward();
+    }
+
+    backward() {
+        this.checkWebviewController();
+        this.webViewController?.backward();
+    }
+
+    refresh() {
+        this.checkWebviewController();
+        this.webViewController?.refresh();
+    }
+
+    loadUrl(t3, y3) {
+        this.checkWebviewController();
+        if (y3) {
+            this.webViewController?.loadUrl(t3, y3);
+        } else {
+            this.webViewController?.loadUrl(t3);
+        }
+    }
+};
+AtomicServiceWebController = __decorate([
+    Observed
+], AtomicServiceWebController);
+
+export { AtomicServiceWebController };
 
 class AtomicServiceProxy {
     constructor(z9) {
@@ -271,7 +463,6 @@ class AtomicServiceProxy {
                 this.atomicService.errorWithCodeAndMsg(JS_API_INVALID_INVOKE_ERROR, v9);
                 return;
             }
-            this.atomicService.logOptions(u9, v9);
             let x9 = ATOMIC_SERVICE_JS_API_MAP.get(u9);
             if (!this.atomicService.checkRequiredFieldInOptions(x9, v9)) {
                 return;
@@ -295,16 +486,28 @@ class AtomicService {
     }
 
     success(o9, p9) {
-        p9?.callback && p9?.callback(undefined, o9);
+        try {
+            p9?.callback && p9?.callback(undefined, o9);
+        } catch (f3) {
+            this.consoleError(`callback error, code is ${f3.code}, message is ${f3.message}`);
+        }
     }
 
     error(m9, n9) {
-        n9?.callback && n9?.callback(new AsError(m9.code ? m9.code : SYSTEM_INTERNAL_ERROR.code,
-            m9.message ? m9.message : SYSTEM_INTERNAL_ERROR.message));
+        try {
+            n9?.callback && n9?.callback(new AsError(m9.code ? m9.code : SYSTEM_INTERNAL_ERROR.code,
+                m9.message ? m9.message : SYSTEM_INTERNAL_ERROR.message));
+        } catch (a3) {
+            this.consoleError(`callback error, code is ${a3.code}, message is ${a3.message}`);
+        }
     }
 
     errorWithCodeAndMsg(k9, l9) {
-        l9?.callback && l9?.callback(k9);
+        try {
+            l9?.callback && l9?.callback(k9);
+        } catch (u2) {
+            this.consoleError(`callback error, code is ${u2.code}, message is ${u2.message}`);
+        }
     }
 
     consoleLog(j9) {
@@ -433,7 +636,11 @@ class AtomicService {
         if (this.messageDataList.length <= 0) {
             return;
         }
-        this.onMessage(new OnMessageEvent(this.messageDataList));
+        try {
+            this.onMessage(new OnMessageEvent(this.messageDataList));
+        } catch (q2) {
+            this.consoleError(`onMessage failed, code is ${q2.code}, message is ${q2.message}`);
+        }
         this.messageDataList = [];
     }
 
@@ -498,14 +705,11 @@ class AtomicService {
             let i7 = h7.uri;
             let j7 = h7.uri;
             if (j7.indexOf(UPLOAD_IMAGE_CACHE_DIR) < 0) {
-                let k7 = true;
                 let l7 = j7.startsWith('file://') ? j7 : fileUri.getUriFromPath(h7.uri);
                 j7 = this.context.cacheDir + '/' + j7.substring(j7.lastIndexOf('/') + 1);
-                await fs.copy(l7, fileUri.getUriFromPath(j7)).catch((n7) => {
-                    this.error(n7, e7);
-                    k7 = false;
-                });
-                if (!k7) {
+                try {
+                    await fs.copy(l7, fileUri.getUriFromPath(j7));
+                } catch (x1) {
                     this.errorWithCodeAndMsg(UPLOAD_FILE_ERROR, e7);
                     return new CheckUploadFileResult(false);
                 }
@@ -823,7 +1027,6 @@ class AtomicServiceApi extends AtomicService {
                 files: this.convertToFile(z2.files),
                 data: this.convertToRequestData(z2.data)
             };
-            this.consoleLog('uploadFile uploadConfig=' + JSON.stringify(e3));
             request.uploadFile(this.context, e3).then((i3) => {
                 i3.on('complete', (m3) => {
                     this.handleUploadFileResult(m3, d3.uriMap, z2);
@@ -1022,6 +1225,13 @@ export class OnPageEndEvent {
     }
 }
 
+export class WebHeader {
+    constructor(j3, p3) {
+        this.headerKey = j3;
+        this.headerValue = p3;
+    }
+}
+
 class GetEnvOptions extends BaseOptions {
 }
 
@@ -1133,5 +1343,6 @@ class GetLocationResult {
 }
 
 export default {
-    AtomicServiceWeb
+    AtomicServiceWeb,
+    AtomicServiceWebController
 }

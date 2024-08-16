@@ -555,6 +555,7 @@ bool PipelineContext::IsEnableKeyBoardAvoidMode()
 {
     return false;
 }
+void PipelineContext::RequireSummary() {};
 void PipelineContext::SetIgnoreViewSafeArea(bool value) {};
 void PipelineContext::SetIsLayoutFullScreen(bool value) {};
 void PipelineContext::SetIsNeedAvoidWindow(bool value) {};
@@ -642,7 +643,7 @@ void PipelineContext::ResetDragging() {}
 
 void PipelineContext::UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) {}
 
-void PipelineContext::CheckAndUpdateKeyboardInset() {}
+void PipelineContext::CheckAndUpdateKeyboardInset(float keyboardHeight) {}
 
 bool PipelineContext::PrintVsyncInfoIfNeed() const
 {
@@ -726,9 +727,6 @@ bool PipelineContext::HasOnAreaChangeNode(int32_t nodeId)
 namespace OHOS::Ace {
 class ManagerInterface : public AceType {
     DECLARE_ACE_TYPE(ManagerInterface, AceType);
-};
-class FontManager : public AceType {
-    DECLARE_ACE_TYPE(FontManager, AceType);
 };
 
 void PipelineBase::OpenImplicitAnimation(

@@ -40,7 +40,11 @@ public:
     LeadingMarginSize() = default;
     ~LeadingMarginSize() = default;
 
-    LeadingMarginSize(Dimension width, Dimension height) : width_(width), height_(height) {}
+    LeadingMarginSize(Dimension width, Dimension height)
+    {
+        width_ = UnitFilter(width);
+        height_ = UnitFilter(height);
+    }
 
     std::string ToString() const
     {
@@ -68,6 +72,11 @@ public:
     }
 
 private:
+    Dimension UnitFilter(Dimension& value)
+    {
+        return value.Unit() == DimensionUnit::PERCENT ? Dimension(0.0) : value;
+    }
+
     Dimension width_;
     Dimension height_;
 };
@@ -263,6 +272,7 @@ public:
     virtual LineMetrics GetLineMetricsByRectF(RectF& rect) = 0;
     virtual TextLineMetrics GetLineMetrics(size_t lineNumber) = 0;
     virtual bool GetLineMetricsByCoordinate(const Offset& offset, LineMetrics& lineMetrics) = 0;
+    virtual void UpdateColor(size_t from, size_t to, const Color& color) = 0;
 };
 } // namespace OHOS::Ace::NG
 

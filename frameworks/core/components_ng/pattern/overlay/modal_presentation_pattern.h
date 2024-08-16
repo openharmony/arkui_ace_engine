@@ -19,8 +19,8 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/autofill/auto_fill_trigger_state_holder.h"
 #include "core/components_ng/manager/focus/focus_view.h"
-#include "core/components_ng/pattern/overlay/modal_presentation_layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 
@@ -31,8 +31,9 @@ enum class ContentCoverDismissReason {
     CLOSE_BUTTON,
 };
 
-class ACE_EXPORT ModalPresentationPattern : public PopupBasePattern, public FocusView {
-    DECLARE_ACE_TYPE(ModalPresentationPattern, PopupBasePattern, FocusView);
+class ACE_EXPORT ModalPresentationPattern : public PopupBasePattern,
+    public FocusView, public AutoFillTriggerStateHolder {
+    DECLARE_ACE_TYPE(ModalPresentationPattern, PopupBasePattern, FocusView, AutoFillTriggerStateHolder);
 
 public:
     ModalPresentationPattern(int32_t targetId, ModalTransition type, std::function<void(const std::string&)>&& callback)
@@ -155,6 +156,21 @@ public:
         return isExecuteOnDisappear_;
     }
 
+    bool IsUIExtension() const
+    {
+        return isUIExtension_;
+    }
+
+    void SetProhibitedRemoveByRouter(bool prohibitedRemoveByRouter)
+    {
+        prohibitedRemoveByRouter_ = prohibitedRemoveByRouter;
+    }
+
+    bool IsProhibitedRemoveByRouter() const
+    {
+        return prohibitedRemoveByRouter_;
+    }
+
     bool AvoidKeyboard() const override
     {
         // If UIExtensionComponent uses ModalPage, ModalPage will avoid KeyBoard.
@@ -168,25 +184,14 @@ public:
 
     bool AvoidBottom() const override
     {
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            // ModalPage will not avoid bottom in any scenes.
-            return false;
-        }
         // If UIExtensionComponent uses ModalPage, ModalPage will not avoid bottom.
         return !isUIExtension_;
-    }
-
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
-    {
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            return MakeRefPtr<ModalPresentationLayoutAlgorithm>();
-        }
-        return MakeRefPtr<BoxLayoutAlgorithm>();
     }
 
 private:
     void OnAttachToFrameNode() override;
     bool isUIExtension_ = false;
+    bool prohibitedRemoveByRouter_ = false;
     int32_t targetId_ = -1;
     ModalTransition type_ = ModalTransition::DEFAULT;
     bool hasTransitionEffect_ = false;

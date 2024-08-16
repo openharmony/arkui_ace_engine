@@ -75,17 +75,7 @@ public:
             focusPaintParam.SetPaintWidth(focusBorderWidth_);
             return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, focusPaintParam };
         }
-        FocusPattern focusPattern(FocusType::NODE, true, FocusStyleType::OUTER_BORDER);
-        auto pipline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipline, focusPattern);
-        auto theme = pipline->GetTheme<ButtonTheme>();
-        CHECK_NULL_RETURN(theme, focusPattern);
-        FocusPaintParam focusPaintParam;
-        focusPaintParam.SetPaintColor(theme->GetFocusBorderColor());
-        focusPaintParam.SetPaintWidth(theme->GetFocusBorderWidth());
-        focusPaintParam.SetFocusBoxGlow(theme->IsFocusBoxGlow());
-        focusPattern.SetFocusPaintParams(focusPaintParam);
-        return focusPattern;
+        return { FocusType::NODE, true, FocusStyleType::OUTER_BORDER };
     }
 
     bool IsNeedAdjustByAspectRatio() override
@@ -347,6 +337,16 @@ public:
         return preFrameSize_;
     }
 
+    void SetHasCustomPadding(bool hasCustomPadding)
+    {
+        hasCustomPadding_ = hasCustomPadding;
+    }
+
+    bool GetHasCustomPadding()
+    {
+        return hasCustomPadding_;
+    }
+
 protected:
     bool IsNeedInitClickEventRecorder() const override
     {
@@ -403,6 +403,7 @@ private:
 
     bool isColorUpdateFlag_ = false;
     SizeF preFrameSize_;
+    bool hasCustomPadding_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(ButtonPattern);
 };
 } // namespace OHOS::Ace::NG

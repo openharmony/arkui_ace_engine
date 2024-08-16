@@ -19,6 +19,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUINavDestinationModifier* GetNavDestinationModifier();
+const CJUINavDestinationModifier* GetCJUINavDestinationModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_NAV_DESTINATION_MODIFIER_H

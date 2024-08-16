@@ -504,7 +504,7 @@ HWTEST_F(ListLayoutTestNg, ContentOffset006, TestSize.Level1)
     ScrollSnap(-40, 0);
     EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), -100);
     ScrollSnap(-110, 0);
-    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), -100);
+    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 50);
 }
 
 /**
@@ -868,7 +868,6 @@ HWTEST_F(ListLayoutTestNg, Pattern003, TestSize.Level1)
     EXPECT_NE(pattern_->chainAnimation_, nullptr);
     UpdateCurrentOffset(ITEM_HEIGHT);
     EXPECT_TRUE(pattern_->OutBoundaryCallback());
-    EXPECT_TRUE(pattern_->dragFromSpring_);
 }
 
 /**

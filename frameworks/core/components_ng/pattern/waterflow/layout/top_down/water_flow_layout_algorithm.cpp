@@ -131,6 +131,9 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         MeasureForAnimation(layoutWrapper);
     }
     if (layoutInfo_->jumpIndex_ != EMPTY_JUMP_INDEX) {
+        if (layoutInfo_->extraOffset_.has_value() && Negative(layoutInfo_->extraOffset_.value())) {
+            layoutInfo_->extraOffset_.reset();
+        }
         layoutInfo_->JumpTo({ footerMainStartPos_, footerMainSize_ });
     }
     if (matchChildren) {

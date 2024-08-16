@@ -315,6 +315,17 @@ const ArkUIRadioModifier* GetRadioModifier()
     return &modifier;
 }
 
+const CJUIRadioModifier* GetCJUIRadioModifier()
+{
+    static const CJUIRadioModifier modifier = { SetRadioChecked, ResetRadioChecked, SetRadioStyle, ResetRadioStyle,
+        SetRadioWidth, ResetRadioWidth, SetRadioHeight, ResetRadioHeight, SetRadioSize, ResetRadioSize,
+        SetRadioHoverEffect, ResetRadioHoverEffect, SetRadioPadding, ResetRadioPadding, SetRadioResponseRegion,
+        ResetRadioResponseRegion, GetRadioChecked, GetRadioStyle, SetRadioValue, ResetRadioValue, GetSetRadioValue,
+        SetRadioGroup, ResetRadioGroup, GetRadioGroup };
+
+    return &modifier;
+}
+
 void SetOnRadioChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);

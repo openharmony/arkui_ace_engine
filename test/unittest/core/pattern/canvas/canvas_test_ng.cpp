@@ -280,59 +280,49 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest005, TestSize.Level1)
 
 /**
  * @tc.name: CanvasPatternTest006
- * @tc.desc: GetMimeType && GetQuality
+ * @tc.desc: GetQuality
  * @tc.type: FUNC
  */
 HWTEST_F(CanvasTestNg, CanvasPatternTest006, TestSize.Level1)
 {
     double dRet = 0.0;
     std::string strRet = "";
+
     /**
-     * @tc.steps: step1. GetQuality：values.size() < MIME_TYPE_COLUMN_NUM
+     * @tc.steps: step1. GetQuality：type != IMAGE_JPEG && type != IMAGE_WEBP, quality > 0.0 || quality < 1.0
      */
-    dRet = GetQuality("");
-    EXPECT_EQ(dRet, DEFAULT_QUALITY);
+    dRet = GetQuality("", 0.8);
+    EXPECT_EQ(dRet, DEFAULT_QUALITY * QUALITY_COEFFICIENT);
+
     /**
-     * @tc.steps: step2. GetMimeType：values.empty()
+     * @tc.steps: step2. GetQuality：type != IMAGE_JPEG && type != IMAGE_WEBP, quality > 0.0 || quality < 1.0
      */
-    strRet = GetMimeType("");
-    EXPECT_EQ(strRet, IMAGE_PNG);
+    dRet = GetQuality(IMAGE_PNG, 0.8);
+    EXPECT_EQ(dRet, DEFAULT_QUALITY * QUALITY_COEFFICIENT);
+
     /**
-     * @tc.steps: step3. GetQuality：mimeType != IMAGE_JPEG && mimeType != IMAGE_WEBP
+     * @tc.steps: step4. GetQuality：mimeType == IMAGE_JPEG, quality > 0.0 || quality < 1.0
      */
-    std::string mimeArgs = "image/png,0.92";
-    dRet = GetQuality(mimeArgs);
-    EXPECT_EQ(dRet, DEFAULT_QUALITY);
+    dRet = GetQuality(IMAGE_JPEG, 0.8);
+    EXPECT_EQ(dRet, 0.8 * QUALITY_COEFFICIENT);
+
     /**
-     * @tc.steps: step4. GetQuality：mimeType == IMAGE_JPEG
+     * @tc.steps: step5. GetQuality：mimeType == IMAGE_WEBP, quality > 0.0 || quality < 1.0
      */
-    mimeArgs = "image/jpeg,0.92";
-    dRet = GetQuality(mimeArgs);
-    EXPECT_EQ(dRet, DEFAULT_QUALITY);
+    dRet = GetQuality(IMAGE_WEBP, 0.8);
+    EXPECT_EQ(dRet, 0.8 * QUALITY_COEFFICIENT);
+
     /**
-     * @tc.steps: step5. GetQuality：mimeType == IMAGE_WEBP
+     * @tc.steps: step6. mimeType == IMAGE_WEBP, GetQuality：quality > 1.0
      */
-    mimeArgs = "image/webp,0.92";
-    dRet = GetQuality(mimeArgs);
-    EXPECT_EQ(dRet, DEFAULT_QUALITY);
+    dRet = GetQuality(IMAGE_WEBP, 1.1);
+    EXPECT_EQ(dRet, DEFAULT_QUALITY * QUALITY_COEFFICIENT);
+
     /**
-     * @tc.steps: step6. GetQuality：quality > 1.0
+     * @tc.steps: step7. mimeType == IMAGE_WEBP, GetQuality：quality < 0.0
      */
-    mimeArgs = "image/webp,1.1";
-    dRet = GetQuality(mimeArgs);
-    EXPECT_EQ(dRet, DEFAULT_QUALITY);
-    /**
-     * @tc.steps: step7. GetQuality：quality < 0.0
-     */
-    mimeArgs = "image/webp,-1.1";
-    dRet = GetQuality(mimeArgs);
-    EXPECT_EQ(dRet, DEFAULT_QUALITY);
-    /**
-     * @tc.steps: step8. GetMimeType：values.size() > MIME_TYPE_COLUMN_NUM
-     */
-    mimeArgs = "image/webp,0.8,0.92";
-    strRet = GetMimeType(mimeArgs);
-    EXPECT_EQ(strRet, IMAGE_PNG);
+    dRet = GetQuality(IMAGE_WEBP, -1.1);
+    EXPECT_EQ(dRet, DEFAULT_QUALITY * QUALITY_COEFFICIENT);
 }
 
 /**
@@ -377,7 +367,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest007, TestSize.Level1)
 
 /**
  * @tc.name: CanvasPatternTest008
- * @tc.desc: OffscreenCanvasPaintMethod::FillText && StrokeText
+ * @tc.desc: CustomPaintPaintMethod::FillText && StrokeText
  * @tc.type: FUNC
  */
 HWTEST_F(CanvasTestNg, CanvasPatternTest008, TestSize.Level1)
@@ -394,8 +384,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest008, TestSize.Level1)
     /**
      * @tc.steps: step1. FillText : ret == false
      */
-    PaintState state;
-    offPattern->offscreenPaintMethod_->FillText("test", 0.0, 0.0, 50, state);
+    offPattern->offscreenPaintMethod_->FillText("test", 0.0, 0.0, 50);
     EXPECT_FALSE(offPattern->offscreenPaintMethod_->UpdateParagraph("test", false, false));
 
     /**
@@ -405,13 +394,12 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest008, TestSize.Level1)
     Shadow shadow2 = Shadow(5.0f, Offset(10.0, 10.0), Color(0x32000000), ShadowStyle::OuterDefaultXS);
     offPattern->offscreenPaintMethod_->state_.shadow = shadow1;
     EXPECT_FALSE(offPattern->offscreenPaintMethod_->HasShadow());
-    offPattern->offscreenPaintMethod_->StrokeText("test", 0.0, 0.0, 50, state);
+    offPattern->offscreenPaintMethod_->StrokeText("test", 0.0, 0.0, 50);
     /**
      * @tc.steps: step3. StrokeText : HasShadow() == true
      */
     offPattern->offscreenPaintMethod_->state_.shadow = shadow2;
     EXPECT_TRUE(offPattern->offscreenPaintMethod_->HasShadow());
-    offPattern->offscreenPaintMethod_->FillText("test", 0.0, 0.0, 50, state);
+    offPattern->offscreenPaintMethod_->FillText("test", 0.0, 0.0, 50);
 }
-
 } // namespace OHOS::Ace::NG

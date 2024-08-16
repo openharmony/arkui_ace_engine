@@ -32,7 +32,8 @@ public:
 
 class ACE_EXPORT TapGestureModelNG : public OHOS::Ace::TapGestureModel {
 public:
-    void Create(int32_t countNum, int32_t fingersNum) override;
+    void Create(int32_t countNum, int32_t fingersNum,
+        double distanceThreshold = std::numeric_limits<double>::infinity()) override;
 };
 
 class ACE_EXPORT LongPressGestureModelNG : public OHOS::Ace::LongPressGestureModel {

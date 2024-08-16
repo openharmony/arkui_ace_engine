@@ -19,4 +19,11 @@ Offset GetTouchEventOriginOffset(const TouchEvent& event)
 {
     return Offset();
 }
-} // namespace OHOS::Ace
+
+TimeStamp GetTouchEventOriginTimeStamp(const TouchEvent& event)
+{
+    return event.time;
+}
+
+void UpdatePressedKeyCodes(std::vector<KeyCode>& pressedKeyCodes) {}
+} // namespace OHOS::Ace::Platform

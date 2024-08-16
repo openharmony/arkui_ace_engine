@@ -282,6 +282,8 @@ public:
 
     void CheckAndLogLastConsumedEventInfo(int32_t eventId, bool logImmediately = false);
 
+    void ClearTouchTestTargetForPenStylus(TouchEvent& touchEvent);
+
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
     bool TouchTargetHitTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
         TouchRestrict& touchRestrict, const Offset& offset = Offset(), float viewScale = 1.0f,
@@ -297,7 +299,7 @@ private:
     void DispatchTouchEventToTouchTestResult(TouchEvent touchEvent, TouchTestResult touchTestResult,
         bool sendOnTouch);
     void CleanRecognizersForDragBegin(TouchEvent& touchEvent);
-    void SetResponseLinkRecognizers(const TouchTestResult& result, const TouchTestResult& responseLinkRecognizers);
+    void SetResponseLinkRecognizers(const TouchTestResult& result, const ResponseLinkResult& responseLinkRecognizers);
     void MockCancelEventAndDispatch(const TouchEvent& touchPoint);
     void MockCancelEventAndDispatch(const AxisEvent& axisEvent);
     void MockHoverCancelEventAndDispatch(const TouchEvent& touchPoint);
@@ -334,11 +336,13 @@ private:
     RefPtr<NG::ResponseCtrl> responseCtrl_;
     TimeStamp lastEventTime_;
     int64_t lastTouchEventEndTimestamp_ = 0;
-    std::set<int32_t> downFingerIds_;
+    std::unordered_map<int32_t, int32_t> downFingerIds_;
     std::set<WeakPtr<NG::FrameNode>> hittedFrameNode_;
     MarkProcessedEventInfo lastReceivedEvent_;
     MarkProcessedEventInfo lastConsumedEvent_;
     int32_t lastDownFingerNumber_ = 0;
+    // used to pseudo cancel event.
+    TouchEvent lastTouchEvent_;
 };
 
 } // namespace OHOS::Ace

@@ -135,18 +135,27 @@ void JSView::RenderJSExecution()
 
 void JSView::SyncInstanceId()
 {
-    restoreInstanceIdStack_.emplace_back(Container::CurrentId());
+    if (primaryStackSize_ >= PRIMARY_ID_STACK_SIZE) {
+        restoreInstanceIdStack_.emplace_back(Container::CurrentId());
+    } else {
+        primaryIdStack_[primaryStackSize_++] = Container::CurrentId();
+    }
     ContainerScope::UpdateCurrent(instanceId_);
 }
 
 void JSView::RestoreInstanceId()
 {
-    if (restoreInstanceIdStack_.empty()) {
+    if (primaryStackSize_ >= PRIMARY_ID_STACK_SIZE && !restoreInstanceIdStack_.empty()) {
+        // Checking primaryStackSize_ is necessary, because the pointer in restoreInstanceIdStack_ may be corrupted.
+        ContainerScope::UpdateCurrent(restoreInstanceIdStack_.back());
+        restoreInstanceIdStack_.pop_back();
+        return;
+    }
+    if (primaryStackSize_ == 0) {
         ContainerScope::UpdateCurrent(-1);
         return;
     }
-    ContainerScope::UpdateCurrent(restoreInstanceIdStack_.back());
-    restoreInstanceIdStack_.pop_back();
+    ContainerScope::UpdateCurrent(primaryIdStack_[--primaryStackSize_]);
 }
 
 void JSView::GetInstanceId(const JSCallbackInfo& info)
@@ -630,9 +639,18 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
         jsView->jsViewFunction_->ExecuteForceNodeRerender(nodeId);
     };
 
+    auto hasNodeUpdateFunc = [weak = AceType::WeakClaim(this)](int32_t nodeId) -> bool {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_RETURN(jsView, false);
+        CHECK_NULL_RETURN(jsView->jsViewFunction_, false);
+        ContainerScope scope(jsView->GetInstanceId());
+        return jsView->jsViewFunction_->ExecuteHasNodeUpdateFunc(nodeId);
+    };
+
     auto recycleCustomNode = [weak = AceType::WeakClaim(this)](const RefPtr<NG::CustomNodeBase>& recycleNode) -> void {
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
+        CHECK_NULL_VOID(jsView->jsViewFunction_);
         ContainerScope scope(jsView->GetInstanceId());
         auto name = jsView->GetRecycleCustomNodeName();
         if (name.empty()) {
@@ -687,6 +705,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
         .reloadFunc = std::move(reloadFunction),
         .completeReloadFunc = std::move(completeReloadFunc),
         .nodeUpdateFunc = std::move(nodeUpdateFunc),
+        .hasNodeUpdateFunc = std::move(hasNodeUpdateFunc),
         .recycleCustomNodeFunc = recycleCustomNode,
         .setActiveFunc = std::move(setActiveFunc),
         .onDumpInfoFunc = std::move(onDumpInfoFunc),

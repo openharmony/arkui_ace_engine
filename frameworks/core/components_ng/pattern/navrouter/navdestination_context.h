@@ -129,9 +129,9 @@ protected:
     int32_t index_ = -1;
     int32_t preIndex_ = -1;
     uint64_t navDestinationId_ = 0;
-    bool isEmpty_ = false;
     NavDestinationMode mode_;
     RefPtr<NavPathInfo> pathInfo_;
+    bool isEmpty_ = false;
     WeakPtr<NavigationStack> navigationStack_;
 };
 } // namespace OHOS::Ace::NG

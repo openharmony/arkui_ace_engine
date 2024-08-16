@@ -15,6 +15,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_bridge.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/jsview/js_grid.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -606,6 +607,36 @@ ArkUINativeModuleValue GridBridge::ResetFlingSpeedLimit(ArkUIRuntimeCallInfo* ru
     Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getGridModifier()->resetFlingSpeedLimit(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue GridBridge::SetAlignItems(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> arg_alignItems = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    int32_t itemAlignment = static_cast<int32_t>(GridItemAlignment::DEFAULT);
+    if (!arg_alignItems->IsUndefined() && !arg_alignItems->IsNull()) {
+        itemAlignment = arg_alignItems->Int32Value(vm);
+    }
+
+    if (itemAlignment != static_cast<int32_t>(GridItemAlignment::DEFAULT) &&
+        itemAlignment != static_cast<int32_t>(GridItemAlignment::STRETCH)) {
+        itemAlignment = static_cast<int32_t>(GridItemAlignment::DEFAULT);
+    }
+        
+    GetArkUINodeModifiers()->getGridModifier()->setGridAlignItems(nativeNode, itemAlignment);
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue GridBridge::ResetAlignItems(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getGridModifier()->resetGridAlignItems(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

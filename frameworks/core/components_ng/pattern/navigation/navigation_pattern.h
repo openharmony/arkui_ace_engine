@@ -512,7 +512,7 @@ private:
 #if defined(ENABLE_NAV_SPLIT_MODE)
     bool isBackPage_ = false;
 #endif
-    FoldStatus currentfoldStatus_ = FoldStatus::UNKNOWN;  // only used for mode-switch animation
+    FoldStatus currentFoldStatus_ = FoldStatus::UNKNOWN;  // only used for mode-switch animation
     bool isReplace_ = false;
     bool isFinishInteractiveAnimation_ = true;
     int32_t lastPreIndex_ = false;

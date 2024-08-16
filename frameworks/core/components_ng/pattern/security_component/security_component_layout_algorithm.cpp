@@ -90,6 +90,9 @@ void SecurityComponentLayoutAlgorithm::MeasureButton(LayoutWrapper* layoutWrappe
     }
 
     buttonWrapper->Measure(std::optional<LayoutConstraintF>(buttonConstraint));
+    auto geometryNode = buttonWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    geometryNode->SetFrameSize(SizeF(componentWidth_, componentHeight_));
 }
 
 void SecurityComponentLayoutAlgorithm::InitPadding(RefPtr<SecurityComponentLayoutProperty>& property)
@@ -425,6 +428,7 @@ void SecurityComponentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     FillBlank();
 
     icon_.DoMeasure();
+    securityComponentLayoutProperty->UpdateIsTextLimitExceeded(text_.GetTextLimitExceededFlag(componentHeight_));
     MeasureButton(layoutWrapper, securityComponentLayoutProperty);
     layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(componentWidth_, componentHeight_));
 }

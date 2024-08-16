@@ -148,6 +148,8 @@ public:
 
     double ShrinkHeight(double reduceSize) override;
 
+    bool GetTextLimitExceededFlag(double maxHeight);
+
 private:
     void UpdateSize(bool isWidth);
     void MeasureMinTextSize();

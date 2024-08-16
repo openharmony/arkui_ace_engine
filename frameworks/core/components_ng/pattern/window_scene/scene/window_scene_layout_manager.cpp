@@ -152,7 +152,7 @@ void WindowSceneLayoutManager::FillWindowSceneInfo(const RefPtr<FrameNode>& node
                                            : GetGlobalGeometry(node);
     auto localGeometry = GetLocalGeometry(node);
     if (!globalGeometry || !localGeometry) {
-        TAG_LOGE(AceLogTag::ACE_WINDOW_PIPELINE, "name:%{public}s globalGeo is null:%{public}d localGeo:%{public}d",
+        TAG_LOGD(AceLogTag::ACE_WINDOW_PIPELINE, "name:%{public}s globalGeo is null:%{public}d localGeo:%{public}d",
             GetWindowName(node).c_str(), globalGeometry == nullptr, localGeometry == nullptr);
         return;
     }
@@ -171,7 +171,7 @@ void WindowSceneLayoutManager::FillWindowSceneInfo(const RefPtr<FrameNode>& node
     uiParam.scaleY_ = matrix.Get(Rosen::Drawing::Matrix::SCALE_Y);
     uiParam.pivotX_ = globalGeometry->GetPivotX();
     uiParam.pivotY_ = globalGeometry->GetPivotY();
-    uiParam.zOrder_ = res.zOrderCnt_;
+    uiParam.zOrder_ = static_cast<uint32_t>(res.zOrderCnt_);
     auto windowId = GetWindowId(node);
     uiParam.sessionName_ = GetWindowName(node);
     if (isAncestorRecent) {
@@ -238,9 +238,9 @@ void WindowSceneLayoutManager::TraverseTree(const RefPtr<FrameNode>& rootNode, T
             continue;
         }
         // once delete in recent, need update Zorder
-        int32_t currentZorder = res.zOrderCnt_;
+        uint32_t currentZorder = res.zOrderCnt_;
         if (WindowSceneHelper::IsWindowPattern(node)) {
-            currentZorder = std::max(res.zOrderCnt_, GetNodeZIndex(node));
+            currentZorder = std::max(res.zOrderCnt_, static_cast<uint32_t>(GetNodeZIndex(node)));
         }
         // only window pattern need cal zorder
         bool hasWindowSession = WindowSceneHelper::HasWindowSession(node);
@@ -271,7 +271,7 @@ void WindowSceneLayoutManager::TraverseTree(const RefPtr<FrameNode>& rootNode, T
         }
         if (isCoreDebugEnable_) {
             TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "finish TraverseTree winId:%{public}d name:%{public}s"
-                "nodeName:%{public}s tag:%{public}s zorder:%{public}d isAncestorRecent:%{public}d "
+                "nodeName:%{public}s tag:%{public}s zorder:%{public}u isAncestorRecent:%{public}d "
                 "isAncestorDirty:%{public}d", GetWindowId(node), GetWindowName(node).c_str(),
                 node->GetInspectorId()->c_str(), node->GetTag().c_str(), res.zOrderCnt_,
                 isAncestorRecent, isAncestorDirty);
@@ -381,7 +381,7 @@ void WindowSceneLayoutManager::DumpFlushInfo(uint64_t screenId, TraverseResult& 
     for (auto& [winId, uiParam] : res.uiParams_) {
         TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "screenId:%{public}" PRIu64 " windowId:%{public}d name:%{public}s "
             "rect:%{public}s, scaleX:%{public}f, scaleY:%{public}f, pivotX:%{public}f, pivotY:%{public}f "
-            "zOrder:%{public}d, interactive:%{public}d",
+            "zOrder:%{public}u, interactive:%{public}d",
             screenId, winId, uiParam.sessionName_.c_str(), uiParam.rect_.ToString().c_str(), uiParam.scaleX_,
             uiParam.scaleY_, uiParam.pivotX_, uiParam.pivotY_, uiParam.zOrder_, uiParam.interactive_);
     }

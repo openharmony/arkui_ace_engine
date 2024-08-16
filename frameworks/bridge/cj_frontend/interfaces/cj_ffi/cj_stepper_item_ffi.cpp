@@ -15,8 +15,6 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_stepper_item_ffi.h"
 
-#include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 #include "core/components_ng/pattern/stepper/stepper_item_model_ng.h"
 
 using namespace OHOS::Ace;

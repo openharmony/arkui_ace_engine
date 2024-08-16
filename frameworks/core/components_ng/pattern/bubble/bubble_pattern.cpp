@@ -88,6 +88,7 @@ void BubblePattern::OnModifyDone()
         colorMode_ = SystemProperties::GetColorMode();
         UpdateBubbleText();
     }
+    UpdateAgingTextSize();
     Pattern::OnModifyDone();
     InitTouchEvent();
     RegisterButtonOnHover();
@@ -196,7 +197,6 @@ void BubblePattern::HandleTouchDown(const Offset& clickPosition)
     auto bubbleRenderProp = host->GetPaintProperty<BubbleRenderProperty>();
     CHECK_NULL_VOID(bubbleRenderProp);
     if (touchRegion_.IsInRegion(PointF(clickPosition.GetX(), clickPosition.GetY()))) {
-        LOGI("Contains the touch region.");
         return;
     }
     auto autoCancel = bubbleRenderProp->GetAutoCancel().value_or(true);
@@ -372,7 +372,6 @@ RefPtr<FrameNode> BubblePattern::GetButtonRowNode()
 
 void BubblePattern::PopBubble()
 {
-    LOGI("BubblePattern::PopBubble from click");
     auto pipelineNg = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineNg);
     auto overlayManager = pipelineNg->GetOverlayManager();
@@ -791,4 +790,12 @@ void BubblePattern::OnColorConfigurationUpdate()
     UpdateBubbleText();
 }
 
+void BubblePattern::UpdateAgingTextSize()
+{
+    if (isCustomPopup_) {
+        return;
+    }
+    CHECK_NULL_VOID(messageNode_);
+    messageNode_->MarkDirtyNode();
+}
 } // namespace OHOS::Ace::NG

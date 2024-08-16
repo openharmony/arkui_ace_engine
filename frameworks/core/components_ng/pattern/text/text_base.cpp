@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text/text_base.h"
+#include <cstdint>
 
 #include "base/utils/utils.h"
 #include "core/common/container.h"
@@ -40,8 +41,7 @@ int32_t TextBase::GetGraphemeClusterLength(
         }
     } else {
         if (static_cast<size_t>(extend) <= (text.length())) {
-            aroundChar =
-                text[std::min(static_cast<int32_t>(text.length() ? text.length() - 1 : 0), extend)];
+            aroundChar = text[std::min(text.length() ? static_cast<int32_t>(text.length()) - 1 : 0, extend)];
         }
     }
     return StringUtils::NotInUtf16Bmp(aroundChar) ? 2 : 1;
@@ -81,4 +81,30 @@ void TextBase::CalculateSelectedRect(std::vector<RectF>& selectedRect, float lon
     selectedRect.emplace_back(RectF(end.second.Left(), lastLineBottom, end.second.Width(), end.second.Height()));
 }
 
+void TextGestureSelector::DoGestureSelection(const TouchEventInfo& info)
+{
+    if (info.GetTouches().empty()) {
+        return;
+    }
+    auto touchType = info.GetTouches().front().GetTouchType();
+    if (touchType == TouchType::UP) {
+        EndGestureSelection();
+        return;
+    }
+    if (touchType == TouchType::MOVE) {
+        DoTextSelectionTouchMove(info);
+    }
+}
+
+void TextGestureSelector::DoTextSelectionTouchMove(const TouchEventInfo& info)
+{
+    if (!isStarted) {
+        return;
+    }
+    auto localOffset = info.GetTouches().front().GetLocalLocation();
+    auto index = GetTouchIndex({ localOffset.GetX(), localOffset.GetY() });
+    auto start = std::min(index, start_);
+    auto end = std::max(index, end_);
+    OnTextGestureSelectionUpdate(start, end, info);
+}
 }

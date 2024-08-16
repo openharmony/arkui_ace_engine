@@ -14,12 +14,8 @@
  */
 
 #include "interfaces/napi/kits/utils/napi_utils.h"
-#include "napi/native_api.h"
-#include "native_value.h"
-#include "napi/native_node_api.h"
 
 #include "bridge/common/utils/engine_helper.h"
-#include "bridge/js_frontend/engine/common/js_engine.h"
 
 namespace OHOS::Ace::Napi {
 static NG::FrameNode* ParseFrameNode(napi_env env, napi_callback_info info)

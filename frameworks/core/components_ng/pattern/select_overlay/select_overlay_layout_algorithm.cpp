@@ -171,11 +171,11 @@ void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto pattern = host->GetPattern<SelectOverlayPattern>();
     CHECK_NULL_VOID(pattern);
     if (pattern->GetMode() != SelectOverlayMode::HANDLE_ONLY) {
-        LayoutChild(layoutWrapper);
+        LayoutChild(layoutWrapper, pattern->GetMode());
     }
 }
 
-void SelectOverlayLayoutAlgorithm::LayoutChild(LayoutWrapper* layoutWrapper)
+void SelectOverlayLayoutAlgorithm::LayoutChild(LayoutWrapper* layoutWrapper, SelectOverlayMode mode)
 {
     auto menu = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(menu);
@@ -204,7 +204,7 @@ void SelectOverlayLayoutAlgorithm::LayoutChild(LayoutWrapper* layoutWrapper)
     menu->Layout();
     auto button = layoutWrapper->GetOrCreateChildByIndex(1);
     CHECK_NULL_VOID(button);
-    if (!info_->menuInfo.menuIsShow || info_->menuInfo.menuDisable) {
+    if ((!info_->menuInfo.menuIsShow || info_->menuInfo.menuDisable) && mode != SelectOverlayMode::MENU_ONLY) {
         hasExtensionMenu_ = false;
         return;
     }
@@ -464,6 +464,10 @@ OffsetF SelectOverlayLayoutAlgorithm::AdjustSelectMenuOffset(
         auto menuSpace = NearEqual(upPaint.Top(), downPaint.Top()) ? spaceBetweenHandle : spaceBetweenText;
         auto offsetY = downPaint.GetY() - menuSpace - menuRect.Height();
         if ((shouldAvoidKeyboard || shouldAvoidBottom) && offsetY > 0) {
+            auto topArea = safeAreaManager->GetSystemSafeArea().top_.Length();
+            if (topArea > offsetY) {
+                offsetY = downPaint.Bottom() - spaceBetweenText - menuRect.Height();
+            }
             menuOffset.SetY(offsetY);
         }
     }

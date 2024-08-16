@@ -1679,13 +1679,14 @@ HWTEST_F(PatternLockTestNg, PatternLockAccessibilityTest001, TestSize.Level1)
     AccessibilityHoverInfo info;
     info.SetActionType(AccessibilityHoverAction::HOVER_ENTER);
     pattern_->HandleAccessibilityHoverEvent(true, info);
-    EXPECT_TRUE(pattern_->accessibilityPropertyVec_[0]->GetAccessibilityLevel() == AccessibilityProperty::Level::YES);
+    EXPECT_TRUE(pattern_->accessibilityPropertyVec_[0]->GetAccessibilityLevel() ==
+        AccessibilityProperty::Level::YES_STR);
     /**
      * @tc.case: case3 HandleTextOnAccessibilityFocusCallback 1.
      */
     pattern_->HandleTextOnAccessibilityFocusCallback(0, 0);
     auto accessibilityProperty = frameNode_->GetAccessibilityProperty<AccessibilityProperty>();
-    EXPECT_TRUE(accessibilityProperty->GetAccessibilityLevel() == AccessibilityProperty::Level::NO);
+    EXPECT_TRUE(accessibilityProperty->GetAccessibilityLevel() == AccessibilityProperty::Level::NO_STR);
     /**
      * @tc.case: case4 HandleTextOnAccessibilityFocusCallback 2.
      */
@@ -1709,8 +1710,9 @@ HWTEST_F(PatternLockTestNg, PatternLockAccessibilityTest001, TestSize.Level1)
      */
     info.SetActionType(AccessibilityHoverAction::HOVER_MOVE);
     pattern_->HandleAccessibilityHoverEvent(false, info);
-    EXPECT_TRUE(pattern_->accessibilityPropertyVec_[0]->GetAccessibilityLevel() == AccessibilityProperty::Level::NO);
-    EXPECT_TRUE(accessibilityProperty->GetAccessibilityLevel() == AccessibilityProperty::Level::YES);
+    EXPECT_TRUE(pattern_->accessibilityPropertyVec_[0]->GetAccessibilityLevel() ==
+        AccessibilityProperty::Level::NO_STR);
+    EXPECT_TRUE(accessibilityProperty->GetAccessibilityLevel() == AccessibilityProperty::Level::YES_STR);
     /**
      * @tc.case: case6 HandleAccessibilityHoverEvent 3.
      */
@@ -1719,5 +1721,95 @@ HWTEST_F(PatternLockTestNg, PatternLockAccessibilityTest001, TestSize.Level1)
     info.SetActionType(AccessibilityHoverAction::HOVER_MOVE);
     pattern_->HandleAccessibilityHoverEvent(false, info);
     EXPECT_TRUE(pattern_->choosePoint_.size() == 0);
+}
+
+/**
+ * @tc.name: StartModifierCanceledAnimate
+ * @tc.desc: Test MeasureContent function .
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockTestNg, StartModifierCanceledAnimate, TestSize.Level1)
+{
+    ScrollModelNG model;
+    model.Create();
+    ViewAbstract::SetWidth(CalcLength(SCROLL_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(SCROLL_HEIGHT));
+    {
+        ColumnModelNG colModel;
+        colModel.Create(Dimension(0), nullptr, "");
+        ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
+        ViewAbstract::SetHeight(CalcLength(SCROLL_HEIGHT + 100));
+        PaddingProperty padding;
+        padding.top = CalcLength(100);
+        ViewAbstract::SetPadding(padding);
+        {
+            PatternLockModelNG patternLockModelNG;
+            patternLockModelNG.Create();
+            ViewAbstract::SetWidth(CalcLength(PATTERNLOCK_WIDTH));
+            ViewAbstract::SetHeight(CalcLength(PATTERNLOCK_HEIGHT));
+            ViewStackProcessor::GetInstance()->Pop();
+        }
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    auto scrollNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    FlushLayoutTask(scrollNode);
+
+    /**
+     * @tc.steps: step1. because colNode padding, patternLockNode offsetY is 100
+     */
+    auto colNode = GetChildFrameNode(scrollNode, 0);
+    auto patternLockNode = GetChildFrameNode(colNode, 0);
+    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    auto patternLockPattern = patternLockNode->GetPattern<PatternLockPattern>();
+    patternLockPattern->patternLockModifier_ = AceType::MakeRefPtr<PatternLockModifier>();
+    patternLockPattern->isMoveEventValid_ = true;
+    patternLockPattern->StartModifierCanceledAnimate();
+    patternLockPattern->isMoveEventValid_ = false;
+    patternLockPattern->StartModifierCanceledAnimate();
+}
+
+/**
+ * @tc.name: AddPassPointToChoosePoint
+ * @tc.desc: Test MeasureContent function .
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockTestNg, AddPassPointToChoosePoint, TestSize.Level1)
+{
+    ScrollModelNG model;
+    model.Create();
+    ViewAbstract::SetWidth(CalcLength(SCROLL_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(SCROLL_HEIGHT));
+    {
+        ColumnModelNG colModel;
+        colModel.Create(Dimension(0), nullptr, "");
+        ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
+        ViewAbstract::SetHeight(CalcLength(SCROLL_HEIGHT + 100));
+        PaddingProperty padding;
+        padding.top = CalcLength(100);
+        ViewAbstract::SetPadding(padding);
+        {
+            PatternLockModelNG patternLockModelNG;
+            patternLockModelNG.Create();
+            ViewAbstract::SetWidth(CalcLength(PATTERNLOCK_WIDTH));
+            ViewAbstract::SetHeight(CalcLength(PATTERNLOCK_HEIGHT));
+            ViewStackProcessor::GetInstance()->Pop();
+        }
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    auto scrollNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    FlushLayoutTask(scrollNode);
+
+    /**
+     * @tc.steps: step1. because colNode padding, patternLockNode offsetY is 100
+     */
+    auto colNode = GetChildFrameNode(scrollNode, 0);
+    auto patternLockNode = GetChildFrameNode(colNode, 0);
+    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    auto patternLockPattern = patternLockNode->GetPattern<PatternLockPattern>();
+    std::vector<PatternLockCell> choosePoint;
+    choosePoint.push_back(PatternLockCell(1, 1));
+    choosePoint.push_back(PatternLockCell(2, 2));
+    patternLockPattern->AddPassPointToChoosePoint(2, 1, choosePoint);
+    patternLockPattern->AddPassPointToChoosePoint(1, 2, choosePoint);
 }
 } // namespace OHOS::Ace::NG

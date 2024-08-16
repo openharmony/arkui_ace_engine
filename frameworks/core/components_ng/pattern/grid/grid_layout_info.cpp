@@ -647,6 +647,20 @@ bool CheckRow(int32_t& maxV, const std::map<int, int>& row, int32_t target)
 }
 
 using MatIter = decltype(GridLayoutInfo::gridMatrix_)::const_iterator;
+
+MatIter SearchInReverse(const decltype(GridLayoutInfo::gridMatrix_)& mat, int32_t target, int32_t crossCnt)
+{
+    for (auto it = mat.rbegin(); it != mat.rend(); ++it) {
+        int32_t maxV = -1;
+        if (CheckRow(maxV, it->second, target)) {
+            return (++it).base();
+        }
+        if (static_cast<int32_t>(it->second.size()) == crossCnt && maxV < target) {
+            break;
+        }
+    }
+    return mat.end();
+}
 } // namespace
 
 MatIter GridLayoutInfo::FindInMatrix(int32_t index) const
@@ -677,7 +691,29 @@ MatIter GridLayoutInfo::FindInMatrix(int32_t index) const
             count -= step + 1;
         }
     }
-    return gridMatrix_.end();
+    /*
+    Fallback to linear to handle this situation:
+        1 | 2 | 3
+        x | 2 | x
+        x | 2 | x
+        x | 2 | x
+    When iterator points to Line 1 ~ 3, Item 3 can never be found.
+    */
+    return SearchInReverse(gridMatrix_, index, crossCount_);
+}
+
+std::pair<int32_t, int32_t> GridLayoutInfo::GetItemPos(int32_t itemIdx) const
+{
+    auto it = FindInMatrix(itemIdx);
+    if (it == gridMatrix_.end()) {
+        return { -1, -1 };
+    }
+    for (auto col : it->second) {
+        if (col.second == itemIdx) {
+            return { col.first, it->first };
+        }
+    }
+    return { -1, -1 };
 }
 
 GridLayoutInfo::EndIndexInfo GridLayoutInfo::FindEndIdx(int32_t endLine) const
@@ -931,7 +967,7 @@ float GridLayoutInfo::GetHeightInRange(int32_t startLine, int32_t endLine, float
     if (endLine <= startLine) {
         return 0.0f;
     }
-    auto endIt = lineHeightMap_.find(endLine);
+    auto endIt = lineHeightMap_.lower_bound(endLine);
     auto it = lineHeightMap_.find(startLine);
     if (it == lineHeightMap_.end()) {
         return 0.0f;

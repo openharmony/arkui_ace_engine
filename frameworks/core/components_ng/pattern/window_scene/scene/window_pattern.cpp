@@ -28,7 +28,7 @@
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #ifdef ATOMIC_SERVICE_ATTRIBUTION_ENABLE
-#include "hag_serviceability_client.h"
+#include "core/components_ng/pattern/window_scene/scene/atomicservice_basic_engine_plugin.h"
 #endif
 
 namespace OHOS::Ace::NG {
@@ -37,6 +37,9 @@ constexpr uint32_t COLOR_BLACK = 0xff000000;
 constexpr uint32_t COLOR_WHITE = 0xffffffff;
 
 #ifdef ATOMIC_SERVICE_ATTRIBUTION_ENABLE
+constexpr uint32_t ASENGINE_ATTRIBUTIONS_COUNT = 3;
+constexpr uint32_t CIRCLE_ICON_INDEX = 1;
+constexpr uint32_t EYELASHRING_ICON_INDEX = 2;
 constexpr float HALF_PERCENT_TAG = 0.5f;
 constexpr float BASE_X_OFFSET = 0.25f;
 constexpr float BASE_Y_OFFSET = 0.4f;
@@ -139,14 +142,11 @@ void WindowPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto state = session_->GetSessionState();
-    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
-        "[WMSMain] id: %{public}d, node id: %{public}d, state: %{public}u, name: %{public}s, in recents: %{public}d",
-        session_->GetPersistentId(), host->GetId(),
-        state, session_->GetSessionInfo().bundleName_.c_str(), session_->GetShowRecent());
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "[WMSMain]OnAttachToFrameNode id: %{public}d, node id: %{public}d, "
+        "name: %{public}s, state: %{public}u, in recents: %{public}d", session_->GetPersistentId(), host->GetId(),
+        session_->GetSessionInfo().bundleName_.c_str(), state, session_->GetShowRecent());
     if (state == Rosen::SessionState::STATE_DISCONNECT) {
-        if (!HasStartingPage()) {
-            return;
-        }
+        CHECK_EQUAL_VOID(HasStartingPage(), false);
         if (session_->GetShowRecent() && session_->GetScenePersistence() &&
             (session_->GetScenePersistence()->IsSnapshotExisted() ||
             session_->GetScenePersistence()->IsSavingSnapshot())) {
@@ -178,11 +178,14 @@ void WindowPattern::OnAttachToFrameNode()
 
     AddChild(host, appWindow_, appWindowName_, 0);
     auto surfaceNode = session_->GetSurfaceNode();
-    if (surfaceNode && !surfaceNode->IsBufferAvailable()) {
+    CHECK_NULL_VOID(surfaceNode);
+    if (!surfaceNode->IsBufferAvailable()) {
         CreateStartingWindow();
         AddChild(host, startingWindow_, startingWindowName_);
         surfaceNode->SetBufferAvailableCallback(coldStartCallback_);
+        return;
     }
+    attachToFrameNodeFlag_ = true;
 }
 
 void WindowPattern::CreateBlankWindow()
@@ -213,7 +216,7 @@ void WindowPattern::CreateAppWindow()
         auto context = AceType::DynamicCast<NG::RosenRenderContext>(appWindow_->GetRenderContext());
         CHECK_NULL_VOID(context);
         context->SetRSNode(surfaceNode);
-        context->SetOpacity(1);
+        surfaceNode->SetVisible(true);
     }
 }
 
@@ -333,12 +336,20 @@ void WindowPattern::CreateASStartingWindow()
     CHECK_NULL_VOID(session_);
     const auto& sessionInfo = session_->GetSessionInfo();
     // get atomic service resources
-    OHOS::AppExecFwk::AtomicserviceEcologicalRuleManager::AtomicserviceIconInfo atomicserviceIconInfo;
-    OHOS::AppExecFwk::AtomicserviceEcologicalRuleManager::HagServiceablityClient::GetInstance()->
-        GetAtomicserviceIconInfo(sessionInfo.bundleName_, atomicserviceIconInfo);
-    const auto& appNameInfo = atomicserviceIconInfo.GetAppName();
-    const auto& eyelashRingIcon = atomicserviceIconInfo.GetEyelashRingIcon();
-    const auto& circleIcon = atomicserviceIconInfo.GetCircleIcon();
+    std::string appNameInfo = "";
+    std::string eyelashRingIcon = "";
+    std::string circleIcon = "";
+
+#ifdef ACE_ENGINE_PLUGIN_PATH
+    std::vector<std::string> atomicServiceIconInfo = AtomicServiceBasicEnginePlugin::GetInstance().
+        getParamsFromAtomicServiceBasicEngine(sessionInfo.bundleName_);
+    if (atomicServiceIconInfo.size() >= ASENGINE_ATTRIBUTIONS_COUNT) {
+        appNameInfo = atomicServiceIconInfo[0];
+        circleIcon = atomicServiceIconInfo[CIRCLE_ICON_INDEX];
+        eyelashRingIcon = atomicServiceIconInfo[EYELASHRING_ICON_INDEX];
+    }
+    AtomicServiceBasicEnginePlugin::GetInstance().releaseData();
+#endif // ACE_ENGINE_PLUGIN_PATH
 
     startingWindow_ = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StackPattern>());
@@ -422,7 +433,6 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
     session_->SetNeedSnapshot(false);
     snapshotWindow_ = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-    snapshotWindow_->GetPattern<ImagePattern>()->SetLoadInVipChannel(true);
     auto imageLayoutProperty = snapshotWindow_->GetLayoutProperty<ImageLayoutProperty>();
     imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto imagePaintProperty = snapshotWindow_->GetPaintProperty<ImageRenderProperty>();
@@ -605,7 +615,9 @@ void WindowPattern::FilterInvalidPointerItem(const std::shared_ptr<MMI::PointerE
             continue;
         }
         const NG::PointF point { static_cast<float>(item.GetDisplayX()), static_cast<float>(item.GetDisplayY()) };
-        if (host->IsOutOfTouchTestRegion(point, MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN)) {
+        OHOS::Ace::TouchEvent touchEvent;
+        touchEvent.sourceType = static_cast<SourceType>(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
+        if (host->IsOutOfTouchTestRegion(point, touchEvent)) {
             pointerEvent->RemovePointerItem(id);
         }
     }

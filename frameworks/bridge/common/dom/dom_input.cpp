@@ -17,8 +17,6 @@
 
 #include <set>
 
-#include "core/components/checkable/checkable_component.h"
-#include "core/components/text_field/text_field_component.h"
 #include "frameworks/bridge/common/dom/dom_form.h"
 #include "frameworks/bridge/common/dom/input/dom_button_util.h"
 #include "frameworks/bridge/common/dom/input/dom_checkbox_util.h"

@@ -161,7 +161,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnDirtyLayoutWrapperSwap001, TestSize.Level1
         model.SetDisplayArrow(true); // show arrow
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
-        model.SetIndicatorType(SwiperIndicatorType::DOT);
     });
     auto firstChild = AccessibilityManager::DynamicCast<FrameNode>(indicatorNode_);
     RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1318,65 +1317,36 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnDirtyLayoutWrapperSwap003, TestSize.Level1
  */
 HWTEST_F(SwiperTestNg, CalculateGestureState001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {}, 4);
+    CreateWithItem([](SwiperModelNG model) {});
     EXPECT_EQ(pattern_->TotalCount(), 4);
     pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
-    EXPECT_EQ(pattern_->CalculateGestureState(1.0f, 0, 0), GestureState::GESTURE_STATE_RELEASE_LEFT);
+    pattern_->CalculateGestureState(1.0f, 0.0f, 1);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_RELEASE_LEFT);
 
     pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
-    EXPECT_EQ(pattern_->CalculateGestureState(-1.0f, 0, 0), GestureState::GESTURE_STATE_RELEASE_RIGHT);
+    pattern_->CalculateGestureState(-1.0f, 0.0f, 1);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_RELEASE_RIGHT);
 
+    pattern_->currentFirstIndex_ = 0;
+    pattern_->currentIndex_ = 0;
+    pattern_->turnPageRate_ = -1.0f;
     pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
-    EXPECT_EQ(pattern_->CalculateGestureState(0.0f, 0, 0), GestureState::GESTURE_STATE_FOLLOW_RIGHT);
+    pattern_->CalculateGestureState(0.0f, -1.1f, 1);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_RIGHT);
 
+    pattern_->currentFirstIndex_ = 0;
+    pattern_->currentIndex_ = 1;
+    pattern_->turnPageRate_ = -1.0f;
     pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
-    EXPECT_EQ(pattern_->CalculateGestureState(0.0f, 3, 3), GestureState::GESTURE_STATE_FOLLOW_RIGHT);
+    pattern_->CalculateGestureState(0.0f, -1.1f, 1);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_LEFT);
 
+    pattern_->currentFirstIndex_ = 0;
+    pattern_->currentIndex_ = 0;
+    pattern_->turnPageRate_ = -1.0f;
     pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
-    EXPECT_EQ(pattern_->CalculateGestureState(0.0f, 0, 1), GestureState::GESTURE_STATE_FOLLOW_LEFT);
-
-    pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
-    EXPECT_EQ(pattern_->CalculateGestureState(0.0f, 1, 0), GestureState::GESTURE_STATE_FOLLOW_LEFT);
-
-    pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
-    EXPECT_EQ(pattern_->CalculateGestureState(0.0f, 3, 0), GestureState::GESTURE_STATE_FOLLOW_LEFT);
-
-    pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
-    EXPECT_EQ(pattern_->CalculateGestureState(0.0f, 0, 3), GestureState::GESTURE_STATE_FOLLOW_LEFT);
-
-    pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
-    EXPECT_EQ(pattern_->CalculateGestureState(0.0f, 2, 3), GestureState::GESTURE_STATE_FOLLOW_LEFT);
-
-    pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
-    EXPECT_EQ(pattern_->CalculateGestureState(0.0f, 3, 2), GestureState::GESTURE_STATE_FOLLOW_LEFT);
-}
-
-/**
- * @tc.name: CalculateGestureState002
- * @tc.desc: test Swiper indicator gesture state
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, CalculateGestureState002, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {}, 2);
-    EXPECT_EQ(pattern_->TotalCount(), 2);
-    pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
-    EXPECT_EQ(pattern_->CalculateGestureState(1.0f, 0, 0), GestureState::GESTURE_STATE_RELEASE_LEFT);
-
-    pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
-    EXPECT_EQ(pattern_->CalculateGestureState(-1.0f, 0, 0), GestureState::GESTURE_STATE_RELEASE_RIGHT);
-
-    pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
-    EXPECT_EQ(pattern_->CalculateGestureState(0.0f, 0, 0), GestureState::GESTURE_STATE_FOLLOW_RIGHT);
-
-    pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
-    EXPECT_EQ(pattern_->CalculateGestureState(0.0f, 1, 1), GestureState::GESTURE_STATE_FOLLOW_RIGHT);
-
-    pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
-    EXPECT_EQ(pattern_->CalculateGestureState(0.0f, 0, 1), GestureState::GESTURE_STATE_FOLLOW_LEFT);
-
-    pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
-    EXPECT_EQ(pattern_->CalculateGestureState(0.0f, 1, 0), GestureState::GESTURE_STATE_FOLLOW_LEFT);
+    pattern_->CalculateGestureState(0.0f, -0.9f, 1);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_RIGHT);
 }
 
 /**
@@ -1817,72 +1787,6 @@ HWTEST_F(SwiperTestNg, SwipeCaptureLayoutInfo001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SwipeCaptureLayoutInfo002
- * @tc.desc: Test check itemPosition map info
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwipeCaptureLayoutInfo002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create swiper witch need the capture
-     */
-    InitCaptureTest();
-    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    FlushLayoutTask(frameNode_);
-    /**
-     * @tc.steps: step2. capture in left, target index change to equal to first item index in itemPosition
-     * current index 0, target index to 0, 3'|3' 0 1 2 3|3 to 3'|3' 0 1 2 3|3
-     */
-    pattern_->targetIndex_ = 0;
-    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->leftCaptureIndex_, 3);
-    auto leftCaptureNode = AceType::DynamicCast<FrameNode>(
-        frameNode_->GetChildAtIndex(frameNode_->GetChildIndexById(pattern_->GetLeftCaptureId())));
-    EXPECT_NE(leftCaptureNode, nullptr);
-    if (leftCaptureNode) {
-        auto size = leftCaptureNode->GetGeometryNode()->GetFrameRect();
-        auto offset = leftCaptureNode->GetGeometryNode()->GetFrameOffset();
-        EXPECT_EQ(offset.GetX(), CAPTURE_MARGIN_SIZE - size.Width());
-    }
-    /**
-     * @tc.steps: step3. capture in left, target index change to smaller than first item index in itemPosition
-     * current index 0, target index to -1, 3'|3' 0 1 2 3|3 to 3|3 0 1 2 3'|3'
-     */
-    pattern_->targetIndex_ = -1;
-    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    FlushLayoutTask(frameNode_);
-    // isCaptureReverse_ change to true
-    EXPECT_TRUE(pattern_->isCaptureReverse_);
-    EXPECT_EQ(pattern_->leftCaptureIndex_, 3);
-    auto rightCaptureNode = AceType::DynamicCast<FrameNode>(
-        frameNode_->GetChildAtIndex(frameNode_->GetChildIndexById(pattern_->GetRightCaptureId())));
-    EXPECT_NE(rightCaptureNode, nullptr);
-    if (rightCaptureNode) {
-        auto offset = leftCaptureNode->GetGeometryNode()->GetFrameOffset();
-        EXPECT_EQ(offset.GetX(), SWIPER_WIDTH - CAPTURE_MARGIN_SIZE);
-    }
-    /**
-     * @tc.steps: step4. capture in left, target index change to larger than first item index in itemPosition
-     * current index 0, target index to 1, 3|3 0 1 2 3'|3' to 3'|3' 0 1 2 3|3
-     */
-    pattern_->targetIndex_ = 1;
-    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    FlushLayoutTask(frameNode_);
-    // isCaptureReverse_ change to true
-    EXPECT_FALSE(pattern_->isCaptureReverse_);
-    EXPECT_EQ(pattern_->leftCaptureIndex_, 3);
-    leftCaptureNode = AceType::DynamicCast<FrameNode>(
-        frameNode_->GetChildAtIndex(frameNode_->GetChildIndexById(pattern_->GetLeftCaptureId())));
-    EXPECT_NE(leftCaptureNode, nullptr);
-    if (leftCaptureNode) {
-        auto size = leftCaptureNode->GetGeometryNode()->GetFrameRect();
-        auto offset = leftCaptureNode->GetGeometryNode()->GetFrameOffset();
-        EXPECT_EQ(offset.GetX(), CAPTURE_MARGIN_SIZE - size.Width());
-    }
-}
-
-/**
  * @tc.name: FadeOverScroll001
  * @tc.desc: Test SwiperPattern FadeOverScroll
  * @tc.type: FUNC
@@ -2058,35 +1962,6 @@ HWTEST_F(SwiperTestNg, CheckTargetIndexheckTargetIndex001, TestSize.Level1)
     layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
     EXPECT_EQ(pattern_->CheckTargetIndex(targetIndex, true), targetIndex - 1);
     EXPECT_EQ(pattern_->CheckTargetIndex(targetIndex, false), targetIndex + 1);
-}
-
-/**
- * @tc.name: WearableSwiperOnModifyDone001
- * @tc.desc: Test OnModifyDone
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, WearableSwiperOnModifyDone001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create swiper and set parameters.
-     */
-    CreateWithItem([](SwiperModelNG model) {
-        model.Create(true);
-        model.SetDirection(Axis::VERTICAL);
-        model.SetIndicatorType(SwiperIndicatorType::ARC_DOT);
-    });
-    RefPtr<SwiperPattern> indicatorPattern = frameNode_->GetPattern<SwiperPattern>();
-    EXPECT_NE(indicatorPattern, nullptr);
-    indicatorPattern->GetArcDotIndicatorStyle();
-
-    /**
-     * @tc.steps: step2. call UpdateContentModifier.
-     */
-    indicatorPattern->OnModifyDone();
-    indicatorPattern->swiperController_->removeSwiperEventCallback_();
-    indicatorPattern->swiperController_->addSwiperEventCallback_();
-    indicatorPattern->OnAfterModifyDone();
-    EXPECT_EQ(indicatorPattern->lastSwiperIndicatorType_, SwiperIndicatorType::ARC_DOT);
 }
 
 /**

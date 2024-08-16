@@ -102,7 +102,6 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
         config.resizableSlice_ = renderProps->GetImageResizableSliceValue({});
         config.resizableLattice_ = renderProps->GetImageResizableLatticeValue(nullptr);
     }
-    auto pipelineCtx = PipelineBase::GetCurrentContext();
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     config.flipHorizontally_ = isRightToLeft && renderProps->GetMatchTextDirection().value_or(false);
     config.colorFilter_.Reset();
@@ -125,7 +124,12 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
 
 CanvasDrawFunction ImagePaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
 {
-    CHECK_NULL_RETURN(canvasImage_, nullptr);
+    if (!canvasImage_) {
+        TAG_LOGE(AceLogTag::ACE_IMAGE,
+            "canvasImage is null id = %{public}d, accessId = %{public}lld, src = %{public}s.", imageDfxConfig_.nodeId_,
+            static_cast<long long>(imageDfxConfig_.accessibilityId_), imageDfxConfig_.imageSrc_.c_str());
+        return nullptr;
+    }
     auto contentSize = paintWrapper->GetContentSize();
     auto&& paintConfig = canvasImage_->GetPaintConfig();
 
@@ -136,12 +140,7 @@ CanvasDrawFunction ImagePaintMethod::GetContentDrawFunction(PaintWrapper* paintW
     auto svgCanvas = DynamicCast<SvgCanvasImage>(canvasImage_);
     if (svgCanvas && InstanceOf<SvgCanvasImage>(canvasImage_)) {
         svgCanvas->SetFillColor(props->GetSvgFillColor());
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, nullptr);
-        auto theme = pipeline->GetTheme<ImageTheme>();
-        CHECK_NULL_RETURN(theme, nullptr);
-        auto smoothEdgeValue = std::max(theme->GetMinEdgeAntialiasing(), props->GetSmoothEdge().value_or(0.0f));
-        svgCanvas->SetSmoothEdge(smoothEdgeValue);
+        svgCanvas->SetSmoothEdge(props->GetSmoothEdgeValue(0.0f));
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             std::optional<ImageColorFilter> imageColorFilter = std::nullopt;
             if (paintConfig.colorFilter_.colorFilterMatrix_ || paintConfig.colorFilter_.colorFilterDrawing_) {
@@ -150,9 +149,8 @@ CanvasDrawFunction ImagePaintMethod::GetContentDrawFunction(PaintWrapper* paintW
             svgCanvas->SetColorFilter(imageColorFilter);
         }
     }
-    ImagePainter imagePainter(canvasImage_);
-    auto sensitive = sensitive_;
-    return [imagePainter, contentSize, sensitive](RSCanvas& canvas) {
+    ImagePainter imagePainter(canvasImage_, imageDfxConfig_);
+    return [imagePainter, contentSize, sensitive = sensitive_](RSCanvas& canvas) {
         if (!sensitive) {
             imagePainter.DrawImage(canvas, {}, contentSize);
         }

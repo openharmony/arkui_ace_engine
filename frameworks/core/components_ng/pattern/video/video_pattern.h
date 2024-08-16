@@ -228,7 +228,7 @@ public:
 
     void OnResolutionChange() const;
 
-    void OnStartRenderFrameCb() const;
+    void OnStartRenderFrameCb();
 
     void ResetLastBoundsRect()
     {
@@ -306,7 +306,7 @@ private:
     void UpdateControllerBar();
     void UpdateVideoProperty();
 
-    static RefPtr<FrameNode> CreateSVG();
+    RefPtr<FrameNode> CreateSVG();
     RefPtr<FrameNode> CreateText(uint32_t time);
     RefPtr<FrameNode> CreateSlider();
     void ChangePlayButtonTag();

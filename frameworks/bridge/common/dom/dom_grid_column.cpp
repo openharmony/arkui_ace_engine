@@ -15,8 +15,6 @@
 
 #include "frameworks/bridge/common/dom/dom_grid_column.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 
 DomGridColumn::DomGridColumn(NodeId nodeId, const std::string& nodeName) : DOMDiv(nodeId, nodeName)

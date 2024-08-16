@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUISwiperControllerModifier* GetSwiperControllerModifier();
+const CJUISwiperControllerModifier* GetCJUISwiperControllerModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_SWIPER_CONTROLLER_MODIFIER_H

@@ -40,9 +40,9 @@
 #include "core/components_ng/pattern/web/web_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "adapter/ohos/capability/html/span_to_html.h"
+#include "core/common/vibrator/vibrator_utils.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"
-#include "core/components_ng/render/adapter/rosen_render_surface.h"
 #endif
 #include "core/common/ace_application_info.h"
 #include "core/event/ace_event_helper.h"
@@ -1710,6 +1710,9 @@ void WebDelegate::InitOHOSWeb(const RefPtr<PipelineBase>& context, const RefPtr<
         }
         return;
     }
+    if (renderMode_ == static_cast<int32_t>(RenderMode::SYNC_RENDER)) {
+        renderSurface_ = rosenRenderSurface;
+    }
     SetSurface(rosenRenderSurface->GetSurface());
     InitOHOSWeb(context);
 #endif
@@ -2114,14 +2117,11 @@ void WebDelegate::RegisterConfigObserver()
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             CHECK_NULL_VOID(delegate->nweb_);
-            auto appMgrClient = std::make_shared<AppExecFwk::AppMgrClient>();
-            if (appMgrClient->ConnectAppMgrService()) {
-                return;
-            }
-            delegate->configChangeObserver_ =
-                sptr<AppExecFwk::IConfigurationObserver>(new (std::nothrow) WebConfigurationObserver(delegate));
-            if (appMgrClient->RegisterConfigurationObserver(delegate->configChangeObserver_)) {
-                return;
+            auto abilityContext = OHOS::AbilityRuntime::Context::GetApplicationContext();
+            CHECK_NULL_VOID(abilityContext);
+            delegate->configChangeObserver_ = std::make_shared<WebConfigurationObserver>(delegate);
+            if (delegate->configChangeObserver_) {
+                abilityContext->RegisterEnvironmentCallback(delegate->configChangeObserver_);
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebAddConfigObserver");
@@ -2138,14 +2138,11 @@ void WebDelegate::UnRegisterConfigObserver()
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             CHECK_NULL_VOID(delegate->nweb_);
-            if (delegate->configChangeObserver_) {
-                auto appMgrClient = std::make_shared<AppExecFwk::AppMgrClient>();
-                if (appMgrClient->ConnectAppMgrService()) {
-                    return;
-                }
-                appMgrClient->UnregisterConfigurationObserver(delegate->configChangeObserver_);
-                delegate->configChangeObserver_ = nullptr;
-            }
+            CHECK_NULL_VOID(delegate->configChangeObserver_);
+            auto abilityContext = OHOS::AbilityRuntime::Context::GetApplicationContext();
+            CHECK_NULL_VOID(abilityContext);
+            abilityContext->UnregisterEnvironmentCallback(delegate->configChangeObserver_);
+            delegate->configChangeObserver_.reset();
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebRemoveConfigObserver");
 }
@@ -2796,7 +2793,9 @@ public:
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
         auto delegate = delegate_.Upgrade();
         CHECK_NULL_VOID(delegate);
-        delegate->HandleAutoFillEvent(result);
+        bool ret = delegate->HandleAutoFillEvent(result);
+        result->SetType(NWebValue::Type::BOOLEAN);
+        result->SetBoolean(ret);
     }
 
 private:
@@ -3265,14 +3264,12 @@ void WebDelegate::UpdateDarkMode(const WebDarkMode& mode)
 
 void WebDelegate::UpdateDarkModeAuto(RefPtr<WebDelegate> delegate, std::shared_ptr<OHOS::NWeb::NWebPreference> setting)
 {
-    auto appMgrClient = std::make_shared<AppExecFwk::AppMgrClient>();
-    if (appMgrClient->ConnectAppMgrService()) {
-        return;
-    }
-    auto systemConfig = OHOS::AppExecFwk::Configuration();
-    appMgrClient->GetConfiguration(systemConfig);
-    std::string colorMode = systemConfig.GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     CHECK_NULL_VOID(setting);
+    auto abilityContext = OHOS::AbilityRuntime::Context::GetApplicationContext();
+    CHECK_NULL_VOID(abilityContext);
+    auto appConfig = abilityContext->GetConfiguration();
+    CHECK_NULL_VOID(appConfig);
+    auto colorMode = appConfig->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     if (colorMode == "dark") {
         setting->PutDarkSchemeEnabled(true);
         if (delegate->GetForceDarkMode()) {
@@ -4835,6 +4832,9 @@ void WebDelegate::OnDownloadStart(const std::string& url, const std::string& use
 
 void WebDelegate::OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEventType eventType)
 {
+    if (!accessibilityState_) {
+        return;
+    }
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     AccessibilityEvent event;
@@ -4844,10 +4844,8 @@ void WebDelegate::OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEve
     CHECK_NULL_VOID(accessibilityManager);
     if (eventType == AccessibilityEventType::ACCESSIBILITY_FOCUSED) {
         webPattern->UpdateFocusedAccessibilityId(accessibilityId);
-        accessibilityManager->UpdateAccessibilityFocusId(context, accessibilityId, true);
     } else if (eventType == AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED) {
         webPattern->UpdateFocusedAccessibilityId();
-        accessibilityManager->UpdateAccessibilityFocusId(context, accessibilityId, false);
     }
     if (accessibilityId <= 0) {
         auto webNode = webPattern->GetHost();
@@ -4865,7 +4863,7 @@ void WebDelegate::OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEve
     }
     event.nodeId = accessibilityId;
     event.type = eventType;
-    context->SendEventToAccessibility(event);
+    accessibilityManager->SendWebAccessibilityAsyncEvent(event, webPattern);
 }
 
 void WebDelegate::TextBlurReportByFocusEvent(int64_t accessibilityId)
@@ -5177,6 +5175,7 @@ bool WebDelegate::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info)
         CHECK_NULL_VOID(webEventHub);
         auto propOnContextMenuShowEvent = webEventHub->GetOnContextMenuShowEvent();
         CHECK_NULL_VOID(propOnContextMenuShowEvent);
+        NG::VibratorUtils::StartVibraFeedback("longPress.light");
         result = propOnContextMenuShowEvent(info);
         return;
 #else
@@ -5191,6 +5190,7 @@ bool WebDelegate::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info)
             CHECK_NULL_VOID(webEventHub);
             auto propOnContextMenuShowEvent = webEventHub->GetOnContextMenuShowEvent();
             CHECK_NULL_VOID(propOnContextMenuShowEvent);
+            NG::VibratorUtils::StartVibraFeedback("longPress.light");
             result = propOnContextMenuShowEvent(info);
             return;
         }
@@ -5723,6 +5723,20 @@ bool WebDelegate::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> 
 #endif
 }
 
+void WebDelegate::HideHandleAndQuickMenuIfNecessary(bool hide)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->HideHandleAndQuickMenuIfNecessary(hide);
+}
+
+void WebDelegate::ChangeVisibilityOfQuickMenu()
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->ChangeVisibilityOfQuickMenu();
+}
+
 void WebDelegate::OnQuickMenuDismissed()
 {
 #ifdef NG_BUILD
@@ -5875,11 +5889,25 @@ void WebDelegate::NotifyAutoFillViewData(const std::string& jsonStr)
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebNotifyAutoFillViewData");
 }
 
-void WebDelegate::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)
+void WebDelegate::AutofillCancel(const std::string& fillContent)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), fillContent]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            delegate->nweb_->OnAutofillCancel(fillContent);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIWebAutofillCancel");
+}
+
+bool WebDelegate::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)
 {
     auto pattern = webPattern_.Upgrade();
-    CHECK_NULL_VOID(pattern);
-    pattern->HandleAutoFillEvent(viewDataJson);
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->HandleAutoFillEvent(viewDataJson);
 }
 
 #endif
@@ -6549,14 +6577,14 @@ void WebDelegate::JavaScriptOnDocumentEnd()
     }
 }
 
-void WebDelegate::ExecuteAction(int64_t accessibilityId, AceAction action,
+bool WebDelegate::ExecuteAction(int64_t accessibilityId, AceAction action,
     const std::map<std::string, std::string>& actionArguments)
 {
     if (!accessibilityState_) {
-        return;
+        return false;
     }
     auto context = context_.Upgrade();
-    CHECK_NULL_VOID(context);
+    CHECK_NULL_RETURN(context, false);
     uint32_t nwebAction = static_cast<uint32_t>(action);
     context->GetTaskExecutor()->PostTask(
         [weak = WeakClaim(this), accessibilityId, nwebAction, actionArguments]() {
@@ -6566,6 +6594,7 @@ void WebDelegate::ExecuteAction(int64_t accessibilityId, AceAction action,
             delegate->nweb_->PerformAction(accessibilityId, nwebAction, actionArguments);
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebExecuteAction");
+    return true;
 }
 
 void WebDelegate::SetAccessibilityState(bool state)
@@ -6573,17 +6602,25 @@ void WebDelegate::SetAccessibilityState(bool state)
     if (state == accessibilityState_) {
         return;
     }
-    CHECK_NULL_VOID(nweb_);
     accessibilityState_ = state;
-    nweb_->SetAccessibilityState(state);
-    if (state) {
-        auto accessibilityEventListenerImpl =
-            std::make_shared<AccessibilityEventListenerImpl>();
-        CHECK_NULL_VOID(accessibilityEventListenerImpl);
-        accessibilityEventListenerImpl->SetWebDelegate(WeakClaim(this));
-        nweb_->PutAccessibilityIdGenerator(NG::UINode::GenerateAccessibilityId);
-        nweb_->PutAccessibilityEventCallback(accessibilityEventListenerImpl);
-    }
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), state]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            delegate->nweb_->SetAccessibilityState(state);
+            if (state) {
+                auto accessibilityEventListenerImpl =
+                    std::make_shared<AccessibilityEventListenerImpl>();
+                CHECK_NULL_VOID(accessibilityEventListenerImpl);
+                accessibilityEventListenerImpl->SetWebDelegate(weak);
+                delegate->nweb_->PutAccessibilityIdGenerator(NG::UINode::GenerateAccessibilityId);
+                delegate->nweb_->PutAccessibilityEventCallback(accessibilityEventListenerImpl);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetAccessibilityState");
 }
 
 std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetFocusedAccessibilityNodeInfo(
@@ -7050,6 +7087,7 @@ void WebDelegate::OnTextSelected()
     auto delegate = WeakClaim(this).Upgrade();
     CHECK_NULL_VOID(delegate);
     if (delegate->nweb_) {
+        OnContextMenuHide("");
         return delegate->nweb_->OnTextSelected();
     }
 }

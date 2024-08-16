@@ -18,11 +18,11 @@ class ComponentContent extends Content {
   private builderNode_: BuilderNode;
   private attachNodeRef_: NativeStrongRef;
   private parentWeak_: WeakRef<FrameNode> | undefined;
-  constructor(uiContext: UIContext, builder: WrappedBuilder<[]> | WrappedBuilder<[Object]>, params?: Object) {
+  constructor(uiContext: UIContext, builder: WrappedBuilder<[]> | WrappedBuilder<[Object]>, params?: Object, options?: BuildOptions) {
     super();
     let builderNode = new BuilderNode(uiContext, {});
     this.builderNode_ = builderNode;
-    this.builderNode_.build(builder, params ?? undefined);
+    this.builderNode_.build(builder, params ?? undefined, options);
   }
 
   public update(params: Object) {

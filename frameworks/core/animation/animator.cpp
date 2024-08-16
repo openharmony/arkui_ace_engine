@@ -16,13 +16,7 @@
 #include "core/animation/animator.h"
 
 #include "base/log/jank_frame_report.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/utils.h"
-#include "core/animation/scheduler.h"
 #include "core/common/container.h"
-#include "core/common/container_scope.h"
-#include "core/common/thread_checker.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -230,6 +224,7 @@ bool Animator::SetIteration(int32_t iteration)
     }
     UpdateIteration(iteration);
     repeatTimesLeft_ = repeatTimes_;
+    isOddRound_ = true;
     for (auto& controller : proxyControllers_) {
         controller->SetIteration(iteration);
     }
@@ -316,9 +311,8 @@ bool Animator::GetInitAnimationDirection()
         return !isReverse_;
     }
     // for Alternate and Alternate_Reverse
-    bool isOddRound = ((repeatTimes_ - repeatTimesLeft_ + 1) % 2) == 1;
     bool oddRoundDirectionNormal = direction_ == AnimationDirection::ALTERNATE;
-    if (isOddRound != oddRoundDirectionNormal) {
+    if (isOddRound_ != oddRoundDirectionNormal) {
         // if isOddRound is different from oddRoundDirectionNormal, same with AnimationDirection::REVERSE
         return !isReverse_;
     }
@@ -505,6 +499,7 @@ void Animator::Stop()
 
     elapsedTime_ = 0;
     repeatTimesLeft_ = repeatTimes_;
+    isOddRound_ = true;
     isBothBackwards = false;
     UpdateScaledTime();
     if (scheduler_ && scheduler_->IsActive()) {
@@ -554,6 +549,7 @@ void Animator::Cancel()
     status_ = Status::IDLE;
     elapsedTime_ = 0;
     repeatTimesLeft_ = repeatTimes_;
+    isOddRound_ = true;
     UpdateScaledTime();
     NotifyPrepareListener();
     float normalizedTime = GetNormalizedTime(0.0f, true);
@@ -630,9 +626,9 @@ void Animator::NotifyInterpolator(int32_t playedTime)
             isCurDirection_ = !isCurDirection_;
         }
         // make playedTime in range 0 ~ INTERPOLATE_DURATION_MAX
-        if (repeatTimesLeft_ == 0 || (scaledDuration_ == 0 && repeatTimesLeft_ != ANIMATION_REPEAT_INFINITE)) {
+        needStop = repeatTimesLeft_ == 0 || (scaledDuration_ == 0 && repeatTimesLeft_ != ANIMATION_REPEAT_INFINITE);
+        if (needStop) {
             repeatTimesLeft_ = 0;
-            needStop = true;
         } else {
             auto playedLoops = GetPlayedLoopsAndRemaining(playedTime);
             if (repeatTimesLeft_ != ANIMATION_REPEAT_INFINITE) {
@@ -641,6 +637,8 @@ void Animator::NotifyInterpolator(int32_t playedTime)
             if (isAlternateDirection) {
                 isCurDirection_ = !isCurDirection_;
             }
+            // use 2 to check whether playedLoops is Odd.
+            isOddRound_ = playedLoops % 2 == 0 ? isOddRound_ : !isOddRound_;
         }
 
         // after the above branches, playedTime in range 0 ~ INTERPOLATE_DURATION_MAX
@@ -943,6 +941,7 @@ void Animator::Copy(const RefPtr<Animator>& controller)
     fillMode_ = controller->fillMode_;
     direction_ = controller->direction_;
     isCurDirection_ = controller->isCurDirection_;
+    isOddRound_ = controller->isOddRound_;
     toggleDirectionPending_ = controller->toggleDirectionPending_;
     duration_ = controller->duration_;
     elapsedTime_ = controller->elapsedTime_;

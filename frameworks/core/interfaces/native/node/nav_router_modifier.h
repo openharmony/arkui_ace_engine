@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUINavRouterModifier* GetNavRouterModifier();
+const CJUINavRouterModifier* GetCJUINavRouterModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_NAVROUTER_MODIFIER_H

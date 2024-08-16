@@ -32,6 +32,29 @@ public:
     static RefPtr<FrameNode> Show(const DialogProperties& dialogProperties, const CalendarSettingData& settingData,
         const std::vector<ButtonInfo>& buttonInfos, const std::map<std::string, NG::DialogEvent>& dialogEvent,
         const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent);
+    static void UpdateIdealSize(const RefPtr<CalendarTheme>& calendarTheme,
+        const RefPtr<LinearLayoutProperty>& layoutProps, const RefPtr<LayoutProperty>& calendarLayoutProperty);
+    static void UpdatePaintProperties(const RefPtr<FrameNode>& monthFrameNode, const CalendarSettingData& settingData);
+    static void UpdateButtons(
+        const RefPtr<FrameNode>& buttonNode, size_t buttonIndex, std::vector<ButtonInfo>& buttonInfos);
+    static void SetPreviousOrientation()
+    {
+        previousOrientation_ = SystemProperties::GetDeviceOrientation();
+    }
+
+    static bool CheckOrientationChange()
+    {
+        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        CHECK_NULL_RETURN(pipeline, true);
+        return (!(SystemProperties::GetDeviceOrientation() == previousOrientation_)
+                    ? Dimension(pipeline->GetRootWidth()).ConvertToVp() < deviceHeightLimit
+                    : Dimension(pipeline->GetRootHeight()).ConvertToVp() < deviceHeightLimit);
+    }
+
+    static DeviceOrientation GetPreviousOrientation()
+    {
+        return previousOrientation_;
+    }
 
 private:
     static RefPtr<FrameNode> CreateTitleNode(const RefPtr<FrameNode>& calendarNode);
@@ -80,14 +103,16 @@ private:
         const std::vector<ButtonInfo>& buttonInfos, const RefPtr<PipelineContext>& pipeline);
     static void UpdateOptionLayoutProps(
         const RefPtr<FrameNode>& contentRow, const RefPtr<PipelineContext>& pipelineContext);
-    static void SetCalendarIdealSize(
-        const RefPtr<CalendarTheme>& theme, const RefPtr<LayoutProperty>& calendarLayoutProperty);
-    static void SetTitleIdealSize(const RefPtr<CalendarTheme>& theme, const RefPtr<LinearLayoutProperty>& layoutProps);
     static void OperationsToPattern(const RefPtr<FrameNode>& frameNode, const CalendarSettingData& settingData,
         const DialogProperties& dialogProperties, const std::vector<ButtonInfo>& buttonInfos);
     static void CreateChildNode(const RefPtr<FrameNode>& contentColumn,
         const RefPtr<FrameNode>& dialogNode, const DialogProperties& dialogProperties);
     static void InitCalendarProperty(const RefPtr<FrameNode>& calendarNode);
+    static void SetCalendarIdealSize(
+        const RefPtr<CalendarTheme>& theme, const RefPtr<LayoutProperty>& calendarLayoutProperty);
+    static void SetTitleIdealSize(const RefPtr<CalendarTheme>& theme, const RefPtr<LinearLayoutProperty>& layoutProps);
+    static constexpr double deviceHeightLimit = 640.0;
+    static DeviceOrientation previousOrientation_;
 };
 } // namespace OHOS::Ace::NG
 

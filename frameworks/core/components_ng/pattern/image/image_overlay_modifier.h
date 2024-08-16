@@ -29,7 +29,7 @@ class ImageOverlayModifier : public OverlayModifier {
     DECLARE_ACE_TYPE(ImageOverlayModifier, OverlayModifier)
 
 public:
-    ImageOverlayModifier();
+    ImageOverlayModifier(const Color& selectedColor);
 
     void onDraw(DrawingContext& drawingContext) override;
     
@@ -55,6 +55,7 @@ private:
     RefPtr<PropertyBool> isSelected_;
     RefPtr<PropertySizeF> size_;
     RefPtr<PropertyOffsetF> offset_;
+    const Color& selectedColor_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImageOverlayModifier);
 };

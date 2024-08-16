@@ -15,18 +15,10 @@
 
 #include "js_ui_observer.h"
 #include "ui_observer.h"
-#include "ui_observer_listener.h"
 
-#include <map>
-#include <optional>
-#include <string>
 
 #include "interfaces/napi/kits/utils/napi_utils.h"
-#include "js_native_api.h"
-#include "js_native_api_types.h"
 
-#include "core/components_ng/base/observer_handler.h"
-#include "core/common/container_scope.h"
 
 namespace OHOS::Ace::Napi {
 namespace {

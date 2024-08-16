@@ -13,44 +13,9 @@
  * limitations under the License.
  */
 
-class ViewPU {
-    id__() { return 0; }
-    updateStateVars(params) {}
-    aboutToReuseInternal(param) {}
-    aboutToRecycleInternal() {}
-    updateDirtyElements() {}
-}
-globalThis.ViewPU = ViewPU;
-
-class __JSBaseNode__ {
-    constructor(options) {}
-    create(builder, params, update, updateConfiguration) {
-        return null;
-    }
-    finishUpdateFunc() {}
-    postTouchEvent(touchEvent) { return false; }
-    disposeNode() {}
-    updateStart() {}
-    updateEnd() {}
-}
-globalThis.__JSBaseNode__ = __JSBaseNode__;
-
-class __JSScopeUtil__ {
-    static syncInstanceId(instanceId) {}
-    static restoreInstanceId() {}
-}
-globalThis.__JSScopeUtil__ = __JSScopeUtil__;
-
-class CustomDialogController {
-    constructor(arg, view) {}
-    open() {}
-    close() {}
-}
-globalThis.CustomDialogController = CustomDialogController;
-
 class TextModifier {
     constructor(nativePtr, classType) {}
     applyNormalAttribute(instance) {}
 }
 
-export default { ViewPU, __JSBaseNode__, __JSScopeUtil__, CustomDialogController, TextModifier };
+export default { TextModifier };

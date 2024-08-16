@@ -107,7 +107,7 @@ void CanvasPattern::OnSizeChanged(const DirtySwapConfig& config, bool needReset)
     }
 
     if (needReset) {
-        if (IsSupportImageAnalyzerFeature() && imageAnalyzerManager_) {
+        if (IsSupportImageAnalyzerFeature()) {
             imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode);
         }
         auto renderContext = host->GetRenderContext();
@@ -438,27 +438,15 @@ std::unique_ptr<Ace::ImageData> CanvasPattern::GetImageData(double left, double 
         return data;
     }
     // Rely on the single-threaded model. Should guarantee the timing between Render Task of pipeline and GetImageData
-    if (paintMethod_->HasTask()) {
-        paintMethod_->FlushUITasks();
-    }
-    auto host = GetHost();
-    if (!host) {
-        return paintMethod_->GetImageData(nullptr, left, top, width, height);
-    }
-    return paintMethod_->GetImageData(host->GetRenderContext(), left, top, width, height);
+    paintMethod_->FlushUITasks();
+    return paintMethod_->GetImageData(left, top, width, height);
 }
 
 void CanvasPattern::GetImageData(const std::shared_ptr<Ace::ImageData>& imageData)
 {
     CHECK_NULL_VOID(paintMethod_);
-    if (paintMethod_->HasTask()) {
-        paintMethod_->FlushUITasks();
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    paintMethod_->GetImageData(renderContext, imageData);
+    paintMethod_->FlushUITasks();
+    paintMethod_->GetImageData(imageData);
 }
 
 void CanvasPattern::PutImageData(const Ace::ImageData& imageData)
@@ -952,17 +940,11 @@ void CanvasPattern::Translate(double x, double y)
     paintMethod_->TranslateMatrix(x, y);
 }
 
-std::string CanvasPattern::ToDataURL(const std::string& args)
+std::string CanvasPattern::ToDataURL(const std::string& type, double quality)
 {
     // Rely on the single-threaded model. Should guarantee the timing between Render Task of pipeline and ToDataURL
-    if (paintMethod_->HasTask()) {
-        paintMethod_->FlushUITasks();
-    }
-    auto host = GetHost();
-    if (!host) {
-        return paintMethod_->ToDataURL(nullptr, args);
-    }
-    return paintMethod_->ToDataURL(host->GetRenderContext(), args);
+    paintMethod_->FlushUITasks();
+    return paintMethod_->ToDataURL(type, quality);
 }
 
 std::string CanvasPattern::GetJsonData(const std::string& path)
@@ -1167,6 +1149,7 @@ void CanvasPattern::DumpInfo()
 {
     CHECK_NULL_VOID(paintMethod_);
     DumpLog::GetInstance().AddDesc(paintMethod_->GetDumpInfo());
+    CHECK_NULL_VOID(contentModifier_);
     DumpLog::GetInstance().AddDesc(contentModifier_->GetDumpInfo());
 }
 
@@ -1200,5 +1183,10 @@ void CanvasPattern::UpdateTextDefaultDirection()
         return;
     }
     SetTextDirection(TextDirection::INHERIT);
+}
+
+void CanvasPattern::SetDensity(double density)
+{
+    paintMethod_->SetDensity(density);
 }
 } // namespace OHOS::Ace::NG

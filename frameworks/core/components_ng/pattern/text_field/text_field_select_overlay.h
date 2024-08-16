@@ -63,6 +63,8 @@ public:
     void OnAfterSelectOverlayShow(bool isCreate) override;
     void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info = nullptr) override;
     void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType) override;
+    void OnHandleIsHidden() override;
+    void OnHandleMoveStart(bool isFirst) override;
 
     void HandleOnShowMenu();
 
@@ -78,12 +80,21 @@ public:
         return lastSourceType_ == SourceType::TOUCH;
     }
 
+    void OnHandleLevelModeChanged(HandleLevelMode mode) override;
+    void OnOverlayClick(const GestureEvent& event, bool isFirst) override;
+    bool IsRegisterTouchCallback() override
+    {
+        return true;
+    }
+
+    int32_t GetCaretPositionOnHandleMove(const OffsetF& localOffset, bool isFirst);
+
 private:
     std::optional<SelectHandleInfo> GetHandleInfo(const RectF& handlePaintRect);
     void UpdatePattern(const OverlayRequest& request);
-    int32_t GetCaretPositionOnHandleMove(const OffsetF& localOffset);
     int32_t GetTextAreaCaretPosition(const OffsetF& localOffset);
-    int32_t GetTextInputCaretPosition(const OffsetF& localOffset);
+    int32_t GetTextInputCaretPosition(const OffsetF& localOffset, bool isFirst);
+    void StartVibratorByCaretIndexChange(const int32_t currentIndex, const int32_t preIndex);
     void CloseMagnifier();
     SourceType lastSourceType_ = SourceType::NONE;
     std::vector<std::string> pasteMimeTypes_ = { "text/plain", "text/html" };

@@ -26,8 +26,8 @@ void DataDetectorAdapter::ParseAIJson(
     const std::unique_ptr<JsonValue>& jsonValue, TextDataDetectType type, int32_t startPos) {}
 void DataDetectorAdapter::StartAITask() {}
 
-bool DataDetectorAdapter::ShowAIEntityMenu(
-    const AISpan& aiSpan, const NG::RectF& aiRect, const RefPtr<NG::FrameNode>& targetNode, bool isShowSelectText)
+bool DataDetectorAdapter::ShowAIEntityMenu(const AISpan& aiSpan, const NG::RectF& aiRect,
+    const RefPtr<NG::FrameNode>& targetNode, bool isShowCopy, bool isShowSelectText)
 {
     return true;
 }

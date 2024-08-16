@@ -12,16 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <sys/time.h>
 
 #include "base/perfmonitor/perf_monitor.h"
 
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
-#include "base/log/jank_frame_report.h"
-#include "base/log/log.h"
 #include "base/perfmonitor/perf_constants.h"
-#include "base/utils/system_properties.h"
 #include "core/common/ace_application_info.h"
 #include "render_service_client/core/transaction/rs_interfaces.h"
 
@@ -344,7 +340,7 @@ void PerfMonitor::SetFrameTime(int64_t vsyncTime, int64_t duration, double jank,
             if ((it->second)->IsTimeOut(vsyncTime + duration)) {
                 CheckTimeOutOfExceptAnimatorStatus(it->second->sceneId);
                 delete it->second;
-                mRecords.erase(it++);
+                it = mRecords.erase(it);
                 continue;
             }
             if ((it->second)->IsFirstFrame()) {
@@ -358,7 +354,7 @@ void PerfMonitor::SetFrameTime(int64_t vsyncTime, int64_t duration, double jank,
 
 void PerfMonitor::ReportJankFrameApp(double jank)
 {
-    if (jank >= static_cast<double>(JANK_SKIPPED_THRESHOLD)) {
+    if (jank >= static_cast<double>(JANK_SKIPPED_THRESHOLD) && !isBackgroundApp) {
         JankInfo jankInfo;
         jankInfo.skippedFrameTime = static_cast<int64_t>(jank * SINGLE_FRAME_TIME);
         RecordBaseInfo(nullptr);
@@ -534,7 +530,7 @@ bool PerfMonitor::IsExceptResponseTime(int64_t time, const std::string& sceneId)
         PerfConstants::WINDOW_TITLE_BAR_MINIMIZED, PerfConstants::WINDOW_RECT_MOVE,
         PerfConstants::APP_EXIT_FROM_WINDOW_TITLE_BAR_CLOSED, PerfConstants::WINDOW_TITLE_BAR_RECOVER,
         PerfConstants::LAUNCHER_APP_LAUNCH_FROM_OTHER, PerfConstants::WINDOW_RECT_RESIZE,
-        PerfConstants::WINDOW_TITLE_BAR_MAXIMIZED, PerfConstants::LAUNCHER_APP_LAUNCHE_FROM_TRANSITION
+        PerfConstants::WINDOW_TITLE_BAR_MAXIMIZED, PerfConstants::LAUNCHER_APP_LAUNCH_FROM_TRANSITION
     };
     if (exceptSceneSet.find(sceneId) != exceptSceneSet.end()) {
         return true;

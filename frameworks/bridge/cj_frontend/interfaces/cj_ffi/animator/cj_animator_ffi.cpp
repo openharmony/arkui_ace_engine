@@ -13,14 +13,10 @@
  * limitations under the License.
  */
 
-#include <malloc.h>
 
 #include "bridge/common/utils/utils.h"
 #include "cj_animator.h"
 #include "cj_animator_ffi.h"
-#include "core/animation/curve.h"
-#include "core/animation/curve_animation.h"
-#include "bridge/cj_frontend/frontend/cj_frontend_abstract.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
@@ -43,6 +39,9 @@ extern "C" {
         opt->fill = std::string(option.fill);
         opt->direction = std::string(option.direction);
         auto nativeAnimatorResult = FFIData::Create<AnimatorResultImpl>(std::move(animator), std::move(opt));
+        if (nativeAnimatorResult == nullptr) {
+            return INIT_ERROR;
+        }
         int64_t id = nativeAnimatorResult->GetID();
         return id;
     }

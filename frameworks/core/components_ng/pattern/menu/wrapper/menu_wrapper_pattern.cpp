@@ -122,12 +122,12 @@ RefPtr<FrameNode> MenuWrapperPattern::FindTouchedMenuItem(const RefPtr<UINode>& 
 
 void MenuWrapperPattern::HandleInteraction(const TouchEventInfo& info)
 {
-    auto touch = info.GetTouches().front();
+    CHECK_NULL_VOID(!info.GetChangedTouches().empty());
+    auto touch = info.GetChangedTouches().front();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto position = OffsetF(
         static_cast<float>(touch.GetGlobalLocation().GetX()), static_cast<float>(touch.GetGlobalLocation().GetY()));
-    position -= host->GetPaintRectOffset();
     RefPtr<UINode> innerMenuNode = nullptr;
     auto menuZone = GetMenuZone(innerMenuNode);
     CHECK_NULL_VOID(innerMenuNode);
@@ -201,7 +201,6 @@ void MenuWrapperPattern::HandleMouseEvent(const MouseInfo& info, RefPtr<MenuItem
     const auto& mousePosition = info.GetGlobalLocation();
     if (!menuItemPattern->IsInHoverRegions(mousePosition.GetX(), mousePosition.GetY()) &&
         menuItemPattern->IsSubMenuShowed()) {
-        LOGI("MenuWrapperPattern Hide SubMenu");
         HideSubMenu();
         menuItemPattern->SetIsSubMenuShowed(false);
         menuItemPattern->ClearHoverRegions();
@@ -247,6 +246,7 @@ void MenuWrapperPattern::HideSubMenu()
     auto innerMenu = GetMenuChild(focusMenu);
     if (!innerMenu) {
         UpdateMenuAnimation(host);
+        SendToAccessibility(subMenu, false);
         host->RemoveChild(subMenu);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
         return;
@@ -264,9 +264,20 @@ void MenuWrapperPattern::HideSubMenu()
         HideStackExpandMenu(subMenu);
     } else {
         UpdateMenuAnimation(host);
+        SendToAccessibility(subMenu, false);
         host->RemoveChild(subMenu);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     }
+}
+
+void MenuWrapperPattern::SendToAccessibility(const RefPtr<UINode>& subMenu, bool isShow)
+{
+    auto subMenuNode = AceType::DynamicCast<FrameNode>(subMenu);
+    CHECK_NULL_VOID(subMenuNode);
+    auto accessibilityProperty = subMenuNode->GetAccessibilityProperty<MenuAccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityIsShow(isShow);
+    subMenuNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CLOSE);
 }
 
 bool MenuWrapperPattern::HasStackSubMenu()
@@ -376,8 +387,8 @@ void MenuWrapperPattern::RegisterOnTouch()
 
 void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
 {
-    CHECK_NULL_VOID(!info.GetTouches().empty());
-    auto touch = info.GetTouches().front();
+    CHECK_NULL_VOID(!info.GetChangedTouches().empty());
+    auto touch = info.GetChangedTouches().front();
     // filter out other touch types
     if (touch.GetTouchType() != TouchType::DOWN &&
         Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -500,16 +511,22 @@ void MenuWrapperPattern::CheckAndShowAnimation()
 
 bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, false);
+    auto expandDisplay = theme->GetExpandDisplay();
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_RETURN(pipelineContext, false);
-
-    auto containerId = pipelineContext->GetInstanceId();
-    isShowInSubWindow_ = containerId >= MIN_SUBCONTAINER_ID;
-
-    if (isShowInSubWindow_ && !IsHide()) {
+    auto menuNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+    CHECK_NULL_RETURN(menuNode, false);
+    auto menuPattern = AceType::DynamicCast<MenuPattern>(menuNode->GetPattern());
+    CHECK_NULL_RETURN(menuPattern, false);
+    // copy menu pattern properties to rootMenu
+    auto layoutProperty = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    isShowInSubWindow_ = layoutProperty->GetShowInSubWindowValue(true);
+    if ((IsContextMenu() && !IsHide()) || ((expandDisplay && isShowInSubWindow_) && !IsHide())) {
         SetHotAreas(dirty);
     }
     CheckAndShowAnimation();
@@ -518,7 +535,13 @@ bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
 
 void MenuWrapperPattern::SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper)
 {
-    if (layoutWrapper->GetAllChildrenWithBuild().empty()) {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    auto expandDisplay = theme->GetExpandDisplay();
+    if ((layoutWrapper->GetAllChildrenWithBuild().empty() || !IsContextMenu()) &&
+        !(expandDisplay && isShowInSubWindow_)) {
         return;
     }
     auto layoutProps = layoutWrapper->GetLayoutProperty();

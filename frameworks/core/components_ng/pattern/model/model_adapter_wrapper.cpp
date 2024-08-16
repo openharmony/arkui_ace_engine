@@ -134,18 +134,16 @@ void ModelAdapterWrapper::OnAttachToFrameNode(const RefPtr<RenderContext>& conte
         return;
     }
 #endif
-    CreateTextureLayer();
-    CreateWidgetAdapter();
 
 #ifdef ENABLE_ROSEN_BACKEND
-    Render3D::GraphicsTask::GetInstance().PushAsyncMessage([context] {
-        auto rsContext = DynamicCast<NG::RosenRenderContext>(context);
-        CHECK_NULL_VOID(rsContext);
-        auto rsNode = rsContext->GetRSNode();
-        CHECK_NULL_VOID(rsNode);
-        rsNode->SetFrameGravity(Rosen::Gravity::RESIZE);
-    });
+    auto rsContext = DynamicCast<NG::RosenRenderContext>(context);
+    CHECK_NULL_VOID(rsContext);
+    auto rsNode = rsContext->GetRSNode();
+    CHECK_NULL_VOID(rsNode);
+    rsNode->SetFrameGravity(Rosen::Gravity::RESIZE);
 #endif
+    CreateTextureLayer();
+    CreateWidgetAdapter();
 }
 
 void ModelAdapterWrapper::OnDirtyLayoutWrapperSwap(const Render3D::WindowChangeInfo& windowChangeInfo)
@@ -171,12 +169,21 @@ void ModelAdapterWrapper::OnDirtyLayoutWrapperSwap(const Render3D::WindowChangeI
 void ModelAdapterWrapper::OnRebuildFrame(RefPtr<RenderContext>& context)
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    Render3D::GraphicsTask::GetInstance().PushAsyncMessage([weak = WeakClaim(this), context] {
+    auto rsContext = DynamicCast<NG::RosenRenderContext>(context);
+    CHECK_NULL_VOID(rsContext);
+    auto rsNode = rsContext->GetRSNode();
+#if defined(KIT_3D_ENABLE)
+    if (sceneAdapter_) {
+        CHECK_NULL_VOID(textureLayer_);
+        textureLayer_->SetParent(rsNode);
+        return;
+    }
+#endif
+    Render3D::GraphicsTask::GetInstance().PushAsyncMessage([weak = WeakClaim(this), rsNode]() mutable {
         auto adapter = weak.Upgrade();
         CHECK_NULL_VOID(adapter);
         CHECK_NULL_VOID(adapter->textureLayer_);
 
-        auto rsNode = DynamicCast<NG::RosenRenderContext>(context)->GetRSNode();
         adapter->textureLayer_->SetParent(rsNode);
     });
 #endif

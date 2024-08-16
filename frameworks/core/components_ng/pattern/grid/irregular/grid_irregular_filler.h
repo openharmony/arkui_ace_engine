@@ -125,6 +125,17 @@ public:
      */
     void MeasureLineWithIrregulars(const FillParameters& params, int32_t line);
 
+    /**
+     * @brief Measures a GridItem and updates the grid layout information.
+     *
+     * @param params The FillParameters object containing the fill parameters.
+     * @param itemIdx The index of the GridItem.
+     * @param col The column index where the item is being added.
+     * @param row The row index where the item is being added.
+     */
+    LayoutConstraintF MeasureItem(
+        const FillParameters& params, int32_t itemIdx, int32_t col, int32_t row, bool isCache);
+
 private:
     /**
      * @brief Fills one GridItem into the Grid.
@@ -143,16 +154,6 @@ private:
      * @return true if len >= targetLen after adding height of [row]. At this point, row = last
      */
     bool UpdateLength(float& len, float targetLen, int32_t& row, int32_t rowBound, float mainGap) const;
-
-    /**
-     * @brief Measures a GridItem at endIndex_ and updates the grid layout information.
-     *
-     * @param params The FillParameters object containing the fill parameters.
-     * @param itemIdx The index of the GridItem.
-     * @param col The column index where the item is being added.
-     * @param row The row index where the item is being added.
-     */
-    void MeasureItem(const FillParameters& params, int32_t itemIdx, int32_t col, int32_t row);
 
     /**
      * @brief Initializes the position of the filler in the grid to GridLayoutInfo::startIndex_.
@@ -222,7 +223,7 @@ private:
      * @param col column index of item's top-left corner
      * @param size size of the item.
      */
-    void SetItemInfo(int32_t idx, int32_t row, int32_t col, const GridItemSize& size);
+    void SetItemInfo(int32_t idx, int32_t row, int32_t col, GridItemSize size);
 
     int32_t posY_ = 0;  /**< The current row index in the grid. */
     int32_t posX_ = -1; /**< The current column index in the grid. */

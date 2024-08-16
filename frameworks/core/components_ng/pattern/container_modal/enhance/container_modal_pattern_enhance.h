@@ -51,8 +51,19 @@ protected:
     void ChangeTitleButtonIcon(
         const RefPtr<FrameNode>& buttonNode, InternalResource::ResourceId icon, bool isFocus, bool isCloseBtn) override;
 
+    void AddPointLight();
+
+    void SetPointLight(RefPtr<FrameNode>& containerTitleRow, RefPtr<FrameNode>& maximizeBtn,
+        RefPtr<FrameNode>& minimizeBtn, RefPtr<FrameNode>& closeBtn);
+
+    void UpdateLightColor();
+
+    void UpdateLightIntensity();
+
 private:
     VisibleType controlButtonVisibleBeforeAnim_;
+    RefPtr<RenderContext> closeBtnRenderContext_;
+    bool isTitleRowHovered_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_PATTERN_ENHANCE_H

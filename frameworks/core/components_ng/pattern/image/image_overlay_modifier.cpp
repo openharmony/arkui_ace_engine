@@ -17,13 +17,12 @@
 
 #include "base/utils/utils.h"
 #include "core/common/container.h"
-#include "core/components/text/text_theme.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-ImageOverlayModifier::ImageOverlayModifier()
+ImageOverlayModifier::ImageOverlayModifier(const Color& selectedColor) : selectedColor_(selectedColor)
 {
     offset_ = AceType::MakeRefPtr<PropertyOffsetF>(OffsetF());
     AttachProperty(offset_);
@@ -36,16 +35,11 @@ ImageOverlayModifier::ImageOverlayModifier()
 void ImageOverlayModifier::onDraw(DrawingContext& drawingContext)
 {
     CHECK_NULL_VOID(isSelected_->Get());
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<TextTheme>();
-    CHECK_NULL_VOID(theme);
-    auto selectedColor = theme->GetSelectedColor();
     auto& canvas = drawingContext.canvas;
     canvas.Save();
     RSBrush brush;
     brush.SetAntiAlias(true);
-    brush.SetColor(selectedColor.GetValue());
+    brush.SetColor(selectedColor_.GetValue());
     canvas.AttachBrush(brush);
 
     auto offset = offset_->Get();

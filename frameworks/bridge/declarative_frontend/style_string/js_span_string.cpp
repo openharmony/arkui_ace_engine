@@ -18,14 +18,97 @@
 #include <unordered_set>
 
 #include "base/utils/utils.h"
+#include "core/common/ace_engine.h"
+#include "core/common/container.h"
+#include "core/common/container_scope.h"
 #include "core/components_ng/pattern/text/span/mutable_span_string.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
+#include "core/text/html_utils.h"
+#include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/common/utils/utils.h"
+#include "frameworks/bridge/declarative_frontend/engine/js_converter.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/bridge/declarative_frontend/style_string/js_span_object.h"
+
 namespace OHOS::Ace::Framework {
+namespace {
+struct HtmlConverterAsyncCtx {
+    napi_env env = nullptr;
+    napi_deferred deferred = nullptr;
+    int32_t errCode = -1;
+    int32_t instanceId = -1;
+};
+
+std::unordered_map<int32_t, std::string> FROM_HTML_ERROR_MAP = {
+    { ERROR_CODE_FROM_HTML_CONVERT_ERROR, "Convert error." },
+    { ERROR_CODE_PARAM_INVALID, "Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;"
+        "2. Incorrect parameter types; 3. Parameter verification failed." }
+};
+
+napi_value CreateErrorValue(napi_env env, int32_t errCode, const std::string& errMsg = "")
+{
+    napi_value code = nullptr;
+    std::string codeStr = std::to_string(errCode);
+    napi_create_string_utf8(env, codeStr.c_str(), codeStr.length(), &code);
+    napi_value msg = nullptr;
+    napi_create_string_utf8(env, errMsg.c_str(), errMsg.length(), &msg);
+    napi_value error = nullptr;
+    napi_create_error(env, code, msg, &error);
+    return error;
+}
+
+void ProcessPromiseCallback(std::shared_ptr<HtmlConverterAsyncCtx> asyncContext,
+    int32_t callbackCode, napi_value spanStr = nullptr)
+{
+    CHECK_NULL_VOID(asyncContext);
+    CHECK_NULL_VOID(asyncContext->env);
+    CHECK_NULL_VOID(asyncContext->deferred);
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(asyncContext->env, &scope);
+    if (status != napi_ok) {
+        return;
+    }
+    CHECK_NULL_VOID(scope);
+    if (callbackCode == ERROR_CODE_NO_ERROR) {
+        napi_resolve_deferred(asyncContext->env, asyncContext->deferred, spanStr);
+    } else {
+        napi_value error = CreateErrorValue(asyncContext->env, callbackCode, FROM_HTML_ERROR_MAP[callbackCode]);
+        napi_reject_deferred(asyncContext->env, asyncContext->deferred, error);
+    }
+    napi_close_handle_scope(asyncContext->env, scope);
+}
+
+void ReturnPromise(const JSCallbackInfo& info, int32_t errCode)
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    auto env = reinterpret_cast<napi_env>(nativeEngine);
+    napi_deferred deferred = nullptr;
+    napi_value promise = nullptr;
+    napi_create_promise(env, &deferred, &promise);
+
+    if (errCode != ERROR_CODE_NO_ERROR) {
+        napi_value result = CreateErrorValue(env, errCode, FROM_HTML_ERROR_MAP[errCode]);
+        napi_reject_deferred(env, deferred, result);
+    } else {
+        napi_value result = nullptr;
+        napi_get_undefined(env, &result);
+        napi_resolve_deferred(env, deferred, result);
+    }
+    CHECK_NULL_VOID(promise);
+    auto jsPromise = JsConverter::ConvertNapiValueToJsVal(promise);
+    if (!jsPromise->IsObject()) {
+        TAG_LOGE(AceLogTag::ACE_TEXT, "Return promise failed.");
+        return;
+    }
+    info.SetReturnValue(JSRef<JSObject>::Cast(jsPromise));
+}
+
+};
+
 const std::unordered_set<SpanType> types = { SpanType::Font, SpanType::Gesture, SpanType::BaselineOffset,
     SpanType::Decoration, SpanType::LetterSpacing, SpanType::TextShadow, SpanType::LineHeight, SpanType::Image,
     SpanType::CustomSpan, SpanType::ParagraphStyle, SpanType::ExtSpan };
@@ -91,6 +174,7 @@ void JSSpanString::JSBind(BindingTarget globalObj)
     JSClass<JSSpanString>::CustomMethod("equals", &JSSpanString::IsEqualToSpanString);
     JSClass<JSSpanString>::CustomMethod("subStyledString", &JSSpanString::GetSubSpanString);
     JSClass<JSSpanString>::CustomMethod("getStyles", &JSSpanString::GetSpans);
+    JSClass<JSSpanString>::StaticMethod("fromHtml", &JSSpanString::FromHtml);
     JSClass<JSSpanString>::Bind(globalObj, JSSpanString::Constructor, JSSpanString::Destructor);
 }
 
@@ -559,6 +643,60 @@ ImageSpanOptions JSSpanString::ParseJsImageAttachment(const JSRef<JSObject>& inf
 RefPtr<CustomSpan> JSSpanString::ParseJsCustomSpan(const JSCallbackInfo& args)
 {
     return AceType::MakeRefPtr<JSCustomSpan>(args[0], args);
+}
+
+void JSSpanString::FromHtml(const JSCallbackInfo& info)
+{
+    ContainerScope scope(Container::CurrentIdSafely());
+    if (info.Length() != 1 || !info[0]->IsString()) {
+        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+    std::string arg = info[0]->ToString();
+    auto container = Container::CurrentSafely();
+    if (!container) {
+        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_VOID(nativeEngine);
+    auto asyncContext = std::make_shared<HtmlConverterAsyncCtx>();
+    asyncContext->instanceId = Container::CurrentIdSafely();
+    asyncContext->env = reinterpret_cast<napi_env>(nativeEngine);
+    napi_value result = nullptr;
+    napi_create_promise(asyncContext->env, &asyncContext->deferred, &result);
+    taskExecutor->PostTask(
+        [htmlStr = arg, asyncContext]() mutable {
+            ContainerScope scope(asyncContext->instanceId);
+            // FromHtml may cost much time because of pixelmap.
+            // Therefore this function should be called in Background thread.
+            auto styledString = HtmlUtils::FromHtml(htmlStr);
+            auto container = AceEngine::Get().GetContainer(asyncContext->instanceId);
+            CHECK_NULL_VOID(container);
+            auto taskExecutor = container->GetTaskExecutor();
+            taskExecutor->PostTask(
+                [styledString, asyncContext]() mutable {
+                    ContainerScope scope(asyncContext->instanceId);
+                    if (!styledString) {
+                        ProcessPromiseCallback(asyncContext, ERROR_CODE_FROM_HTML_CONVERT_ERROR);
+                        return;
+                    }
+                    JSRef<JSObject> obj = JSClass<JSSpanString>::NewInstance();
+                    auto jsSpanString = Referenced::Claim(obj->Unwrap<JSSpanString>());
+                    jsSpanString->SetController(styledString);
+                    auto spanStrNapi = JsConverter::ConvertJsValToNapiValue(obj);
+                    ProcessPromiseCallback(asyncContext, ERROR_CODE_NO_ERROR, spanStrNapi);
+                },
+                TaskExecutor::TaskType::UI, "FromHtmlReturnPromise", PriorityType::IMMEDIATE);
+        },
+        TaskExecutor::TaskType::BACKGROUND, "FromHtml", PriorityType::IMMEDIATE);
+    auto jsPromise = JsConverter::ConvertNapiValueToJsVal(result);
+    CHECK_NULL_VOID(jsPromise->IsObject());
+    info.SetReturnValue(JSRef<JSObject>::Cast(jsPromise));
 }
 
 // JSMutableSpanString
