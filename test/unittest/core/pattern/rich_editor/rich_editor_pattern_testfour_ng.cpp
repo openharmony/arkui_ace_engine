@@ -1246,4 +1246,33 @@ HWTEST_F(RichEditorPatternTestFourNg, HandleSurfaceChanged001, TestSize.Level1)
 
     EXPECT_EQ(richEditorPattern->magnifierController_->GetShowMagnifier(), true);
 }
+
+/**
+ * @tc.name: InitSelection_ABOVE_LINE
+ * @tc.desc: test InitSelection with SELECT_ABOVE_LINE
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, InitSelection_ABOVE_LINE, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    AddSpan("ab\n\nab");
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+
+    PositionWithAffinity positionWithAffinity(3, TextAffinity::DOWNSTREAM);
+    EXPECT_CALL(*paragraph, GetGlyphPositionAtCoordinate(_)).WillRepeatedly(Return(positionWithAffinity));
+
+    Offset touchOffset = Offset(0.0f, 0.0f);
+    richEditorPattern->previewLongPress_ = true;
+    richEditorPattern->InitSelection(touchOffset);
+
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
+}
 } // namespace OHOS::Ace::NG
