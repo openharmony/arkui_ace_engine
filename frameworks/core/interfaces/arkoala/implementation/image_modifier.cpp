@@ -111,8 +111,8 @@ void RenderModeImpl(Ark_NativePointer node,
     if (renderMode < ImageRenderMode::ORIGINAL || renderMode > ImageRenderMode::TEMPLATE) {
         renderMode = ImageRenderMode::ORIGINAL;
     }
-    ImageModelNG::SetImageRenderMode(frameNode, Converter::ConvertOrDefault((Ark_Int32)renderMode,
-                                     ImageRenderMode::ORIGINAL));
+    ImageModelNG::SetImageRenderMode(frameNode,
+                                     Converter::ConvertOrDefault((Ark_Int32)renderMode, ImageRenderMode::ORIGINAL));
 }
 void DynamicRangeModeImpl(Ark_NativePointer node,
                           Ark_Int32 value)

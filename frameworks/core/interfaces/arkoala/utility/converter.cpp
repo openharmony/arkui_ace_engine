@@ -109,7 +109,7 @@ bool ParseColorFromArkResource(const Ark_Resource &res, Color &result)
     constexpr int32_t ERROR_COLOR_ID = -1;
 
     auto themeConstants = NodeModifier::GetThemeConstants(0, res.bundleName.chars, res.moduleName.chars);
-    CHECK_NULL_RETURN(themeConstants, false);>
+    CHECK_NULL_RETURN(themeConstants, false);
 
     CHECK_NULL_RETURN(res.id.tag == ARK_TAG_INT32, false);
     auto resId = res.id.i32;
@@ -136,6 +136,7 @@ bool ParseColorFromArkResource(const Ark_Resource &res, Color &result)
         return true;
     }
     return false;
+}
 
 static std::string ResourceToString(Ark_NativePointer node, const Ark_Resource& resource)
 {
