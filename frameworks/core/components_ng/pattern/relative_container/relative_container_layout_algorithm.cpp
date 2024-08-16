@@ -1604,7 +1604,7 @@ bool RelativeContainerLayoutAlgorithm::IsGuidelineOrBarrier(const std::string& i
 std::optional<float>& RelativeContainerLayoutAlgorithm::GetMarginLeftWithoutDirection(
     TextDirection textDirection, const std::unique_ptr<MarginPropertyF>& marginProp)
 {
-    CHECK_NULL_RETURN(marginProp, 0);
+    CHECK_NULL_VOID(marginProp);
     return textDirection != TextDirection::RTL ? marginProp->left:marginProp->right;
 }
 
