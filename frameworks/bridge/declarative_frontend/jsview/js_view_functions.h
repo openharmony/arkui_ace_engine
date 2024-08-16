@@ -47,6 +47,7 @@ public:
     void ExecuteRerender();
     void ExecuteReload(bool deep);
     void ExecuteForceNodeRerender(int32_t elemId);
+    bool ExecuteHasNodeUpdateFunc(int32_t elmtId);
     void ExecuteAppear();
     void ExecuteDisappear();
     void ExecuteDidBuild();
@@ -108,6 +109,7 @@ private:
     JSWeak<JSFunc> jsRerenderFunc_;
     JSWeak<JSFunc> jsReloadFunc_;
     JSWeak<JSFunc> jsForceRerenderNodeFunc_;
+    JSWeak<JSFunc> jsHasNodeUpdateFunc_;
     JSWeak<JSFunc> jsTransitionFunc_;
     JSWeak<JSVal> jsRenderResult_;
 
