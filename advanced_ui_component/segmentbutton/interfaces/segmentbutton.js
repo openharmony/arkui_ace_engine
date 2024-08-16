@@ -303,7 +303,7 @@ class MultiSelectBackground extends ViewPU {
         }, Row);
         this.observeComponentCreation2((z15, a16) => {
             ForEach.create();
-            const o1 = (d16, e16) => {
+            const e2 = (d16, e16) => {
                 const f16 = d16;
                 this.observeComponentCreation2((h16, i16) => {
                     If.create();
@@ -328,7 +328,7 @@ class MultiSelectBackground extends ViewPU {
                 }, If);
                 If.pop();
             };
-            this.forEachUpdateFunction(z15, this.optionsArray, o1, undefined, true, false);
+            this.forEachUpdateFunction(z15, this.optionsArray, e2, undefined, true, false);
         }, ForEach);
         ForEach.pop();
         Row.pop();
@@ -565,7 +565,7 @@ class MultiSelectItemArray extends ViewPU {
         }, Row);
         this.observeComponentCreation2((p13, q13) => {
             ForEach.create();
-            const h1 = (t13, u13) => {
+            const p1 = (t13, u13) => {
                 const v13 = t13;
                 this.observeComponentCreation2((x13, y13) => {
                     If.create();
@@ -589,7 +589,7 @@ class MultiSelectItemArray extends ViewPU {
                 }, If);
                 If.pop();
             };
-            this.forEachUpdateFunction(p13, this.optionsArray, h1, undefined, true, false);
+            this.forEachUpdateFunction(p13, this.optionsArray, p1, undefined, true, false);
         }, ForEach);
         ForEach.pop();
         Row.pop();
@@ -617,7 +617,6 @@ class SegmentButtonItem extends ViewPU {
         this.__isFadeout = new ObservedPropertySimplePU(false, this, "isFadeout");
         this.groupId = "";
         this.setInitiallyProvidedValue(i13);
-        this.declareWatch("focusedIndex", this.onFocusIndex);
         this.declareWatch("isMarqueeAndFadeout", this.onIsMarqueeAndFadeout);
         this.finalizeConstruction();
     }
@@ -771,10 +770,6 @@ class SegmentButtonItem extends ViewPU {
         this.isMarquee = true;
         this.isFadeout = this.marquee;
     }
-    onFocusIndex() {
-        this.getFillColor();
-        this.getFontColor();
-    }
     setFontColor() {
         if (this.property.isSelected) {
             return this.options.selectedFontColor ?? segmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR;
@@ -787,8 +782,7 @@ class SegmentButtonItem extends ViewPU {
         return this.marquee && this.focusedIndex === this.index ? segmentButtonTheme.SEGMENT_BUTTON_FOCUS_TEXT_COLOR : this.setFontColor();
     }
     getFontColor() {
-        return this.marquee ? (this.focusedIndex === this.index ? segmentButtonTheme.SEGMENT_BUTTON_FOCUS_TEXT_COLOR : this.property.fontColor)
-            : this.property.fontColor;
+        return this.marquee && this.focusedIndex === this.index ? this.options.selectedFontColor ?? segmentButtonTheme.SEGMENT_BUTTON_FOCUS_TEXT_COLOR : this.setFontColor();
     }
     initialRender() {
         this.observeComponentCreation2((u12, v12) => {
@@ -991,10 +985,10 @@ class SegmentButtonItemArrayComponent extends ViewPU {
         this.__buttonWidth = new ObservedPropertyObjectPU(Array.from({ length: MAX_ITEM_COUNT }, (h11, i11) => 0), this, "buttonWidth");
         this.__buttonHeight = new ObservedPropertyObjectPU(Array.from({ length: MAX_ITEM_COUNT }, (f11, g11) => 0), this, "buttonHeight");
         this.__marquee = new ObservedPropertySimplePU(LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.segment_marquee'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }).value === 0, this, "marquee");
-        this.__segmentFocusControl = new ObservedPropertySimplePU(LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.segment_focus_control'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }).value, this, "segmentFocusControl");
         this.__isMarqueeAndFadeout = new ObservedPropertySimplePU(false, this, "isMarqueeAndFadeout");
-        this.buttonItemsRealHeight = Array.from({ length: MAX_ITEM_COUNT }, (d11, e11) => 0);
+        this.buttonItemsRealHeight = Array.from({ length: MAX_ITEM_COUNT }, (h1, o1) => 0);
         this.groupId = util.generateRandomUUID(true);
+        this.segmentFocusControl = LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.segment_focus_control'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }).value === 1;
         this.setInitiallyProvidedValue(t10);
         this.declareWatch("focusedIndex", this.onFocusIndex);
         this.declareWatch("optionsArray", this.onOptionsArrayChange);
@@ -1026,9 +1020,6 @@ class SegmentButtonItemArrayComponent extends ViewPU {
         if (r10.marquee !== undefined) {
             this.marquee = r10.marquee;
         }
-        if (r10.segmentFocusControl !== undefined) {
-            this.segmentFocusControl = r10.segmentFocusControl;
-        }
         if (r10.isMarqueeAndFadeout !== undefined) {
             this.isMarqueeAndFadeout = r10.isMarqueeAndFadeout;
         }
@@ -1037,6 +1028,9 @@ class SegmentButtonItemArrayComponent extends ViewPU {
         }
         if (r10.groupId !== undefined) {
             this.groupId = r10.groupId;
+        }
+        if (r10.segmentFocusControl !== undefined) {
+            this.segmentFocusControl = r10.segmentFocusControl;
         }
     }
     updateStateVars(q10) {
@@ -1062,7 +1056,6 @@ class SegmentButtonItemArrayComponent extends ViewPU {
         this.__buttonWidth.purgeDependencyOnElmtId(p10);
         this.__buttonHeight.purgeDependencyOnElmtId(p10);
         this.__marquee.purgeDependencyOnElmtId(p10);
-        this.__segmentFocusControl.purgeDependencyOnElmtId(p10);
         this.__isMarqueeAndFadeout.purgeDependencyOnElmtId(p10);
     }
     aboutToBeDeleted() {
@@ -1084,7 +1077,6 @@ class SegmentButtonItemArrayComponent extends ViewPU {
         this.__buttonWidth.aboutToBeDeleted();
         this.__buttonHeight.aboutToBeDeleted();
         this.__marquee.aboutToBeDeleted();
-        this.__segmentFocusControl.aboutToBeDeleted();
         this.__isMarqueeAndFadeout.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
@@ -1190,12 +1182,6 @@ class SegmentButtonItemArrayComponent extends ViewPU {
     }
     set marquee(z9) {
         this.__marquee.set(z9);
-    }
-    get segmentFocusControl() {
-        return this.__segmentFocusControl.get();
-    }
-    set segmentFocusControl(y9) {
-        this.__segmentFocusControl.set(y9);
     }
     get isMarqueeAndFadeout() {
         return this.__isMarqueeAndFadeout.get();
@@ -1383,7 +1369,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                         colorProperty: this.hoverColorArray[o7],
                         press: this.pressArray[o7],
                         options: this.options,
-                    }, undefined, i8, () => { }, { page: "library/src/main/ets/components/mainpage/segmentbutton2.ets", line: 827, col: 7 });
+                    }, undefined, i8, () => { }, { page: "library/src/main/ets/components/mainpage/segmentbutton2.ets", line: 822, col: 7 });
                     ViewPU.create(k8);
                     let g1 = () => {
                         return {
@@ -1430,7 +1416,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                         property: this.buttonItemProperty[o7],
                         groupId: this.groupId,
                         marquee: this.marquee
-                    }, undefined, u7, () => { }, { page: "library/src/main/ets/components/mainpage/segmentbutton2.ets", line: 833, col: 7 });
+                    }, undefined, u7, () => { }, { page: "library/src/main/ets/components/mainpage/segmentbutton2.ets", line: 828, col: 7 });
                     ViewPU.create(w7);
                     let x = () => {
                         return {
@@ -1592,7 +1578,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                                         }, Stack);
                                         this.observeComponentCreation2((f6, g6) => {
                                             If.create();
-                                            if (this.segmentFocusControl === 1) {
+                                            if (this.segmentFocusControl) {
                                                 this.ifElseBranchUpdateFunction(0, () => {
                                                     this.observeComponentCreation2((k6, l6) => {
                                                         Stack.create();
@@ -2138,7 +2124,7 @@ export class SegmentButton extends ViewPU {
                                             let d2 = new MultiSelectBackground(this, {
                                                 optionsArray: this.options.buttons,
                                                 options: this.options,
-                                            }, undefined, b2, () => { }, { page: "library/src/main/ets/components/mainpage/segmentbutton2.ets", line: 1139, col: 11 });
+                                            }, undefined, b2, () => { }, { page: "library/src/main/ets/components/mainpage/segmentbutton2.ets", line: 1134, col: 11 });
                                             ViewPU.create(d2);
                                             let q = () => {
                                                 return {
@@ -2193,7 +2179,7 @@ export class SegmentButton extends ViewPU {
                                                 optionsArray: this.options.buttons,
                                                 options: this.options,
                                                 selectedIndexes: this.__selectedIndexes
-                                            }, undefined, l1, () => { }, { page: "library/src/main/ets/components/mainpage/segmentbutton2.ets", line: 1153, col: 13 });
+                                            }, undefined, l1, () => { }, { page: "library/src/main/ets/components/mainpage/segmentbutton2.ets", line: 1148, col: 13 });
                                             ViewPU.create(n1);
                                             let p = () => {
                                                 return {
@@ -2223,7 +2209,7 @@ export class SegmentButton extends ViewPU {
                                                 optionsArray: this.options.buttons,
                                                 options: this.options,
                                                 selectedIndexes: this.__selectedIndexes
-                                            }, undefined, d1, () => { }, { page: "library/src/main/ets/components/mainpage/segmentbutton2.ets", line: 1159, col: 13 });
+                                            }, undefined, d1, () => { }, { page: "library/src/main/ets/components/mainpage/segmentbutton2.ets", line: 1154, col: 13 });
                                             ViewPU.create(f1);
                                             let j = () => {
                                                 return {
@@ -2254,7 +2240,7 @@ export class SegmentButton extends ViewPU {
                                     optionsArray: this.options.buttons,
                                     options: this.options,
                                     selectedIndexes: this.__selectedIndexes,
-                                }, undefined, t, () => { }, { page: "library/src/main/ets/components/mainpage/segmentbutton2.ets", line: 1173, col: 9 });
+                                }, undefined, t, () => { }, { page: "library/src/main/ets/components/mainpage/segmentbutton2.ets", line: 1168, col: 9 });
                                 ViewPU.create(v);
                                 let c = () => {
                                     return {
