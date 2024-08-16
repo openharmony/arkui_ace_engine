@@ -12,8 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#define private public
-#define protected public
+
 #include "adapter/ohos/entrance/dynamic_component/dynamic_component_renderer_impl.h"
 
 namespace OHOS::Ace::NG {
@@ -38,8 +37,8 @@ void DynamicComponentRendererImpl::CreateContent() {}
 
 void DynamicComponentRendererImpl::DestroyContent() {}
 
-void DynamicComponentRendererImpl::UpdateViewportConfig(
-    const SizeF& size, float density, int32_t orientation, AnimationOption animationOpt) {}
+void DynamicComponentRendererImpl::UpdateViewportConfig(const SizeF& size, float density,
+    int32_t orientation, AnimationOption animationOpt) {}
 
 void DynamicComponentRendererImpl::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) {}
 

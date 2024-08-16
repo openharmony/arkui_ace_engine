@@ -32,7 +32,7 @@ export interface TabTitleBarTabItem {
   icon?: ResourceStr;
 }
 
-const PUBLIC_MORE =  $r('sys.media.ohos_ic_public_more')
+const PUBLIC_MORE = $r('sys.media.ohos_ic_public_more')
 const TEXT_EDITABLE_DIALOG = '18.3fp'
 const IMAGE_SIZE = '64vp'
 const MAX_DIALOG = '256vp'
@@ -232,8 +232,8 @@ struct CollapsibleMenuSection {
       },
       confirm: () => {
       },
-      TabTitleDialog: this.item,
-      TabTitleBarDialog: this.item.label ? this.item.label : '',
+      tabTitleDialog: this.item,
+      tabTitleBarDialog: this.item.label ? this.item.label : '',
       fontSize: this.fontSize,
     }),
     maskColor: Color.Transparent,
@@ -258,9 +258,15 @@ struct CollapsibleMenuSection {
   }
 
   aboutToAppear() {
-    let uiContent: UIContext = this.getUIContext();
-    this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
-    this.maxFontScale = uiContent.getMaxFontScale();
+    try {
+      let uiContent: UIContext = this.getUIContext();
+      this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
+      this.maxFontScale = uiContent.getMaxFontScale();
+    } catch (exception) {
+      let code: number = (exception as BusinessError).code;
+      let message: string = (exception as BusinessError).message;
+      hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
+    }
     this.menuItems.forEach((item, index) => {
       if (item.isEnabled && this.firstFocusableIndex == -1 &&
         index > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
@@ -270,19 +276,12 @@ struct CollapsibleMenuSection {
   }
 
   decideFontScale(): number {
-    try {
-      let uiContent: UIContext = this.getUIContext();
-      this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1;
-      if (!this.isFollowingSystemFontScale) {
-        return 1;
-      }
-      return Math.min(this.systemFontScale, this.maxFontScale);
-    } catch (exception) {
-      let code: number = (exception as BusinessError).code;
-      let message: string = (exception as BusinessError).message;
-      hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
+    let uiContent: UIContext = this.getUIContext();
+    this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+    if (!this.isFollowingSystemFontScale) {
       return 1;
     }
+    return Math.min(this.systemFontScale, this.maxFontScale);
   }
 
   build() {
@@ -295,8 +294,8 @@ struct CollapsibleMenuSection {
         } else {
           ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1),
             (item: TabTitleBarMenuItem, index: number) => {
-            ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
-          })
+             ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
+            })
 
           Row() {
             Image(PUBLIC_MORE)
@@ -388,8 +387,9 @@ struct CollapsibleMenuSection {
     Column() {
       ForEach(this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length),
         (item: TabTitleBarMenuItem, index: number) => {
-        ImageMenuItem({ item: item, index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + index })
-      })
+          ImageMenuItem({ item: item, index: this.index * 1000 +
+          CollapsibleMenuSection.maxCountOfVisibleItems + index })
+        })
     }
     .width(ImageMenuItem.imageHotZoneWidth + CollapsibleMenuSection.focusPadding * CollapsibleMenuSection.marginsNum)
     .margin({ top: CollapsibleMenuSection.focusPadding, bottom: CollapsibleMenuSection.focusPadding })
@@ -402,19 +402,12 @@ struct CollapsibleMenuSection {
 @Component
 struct TabContentItem {
   item: TabTitleBarTabItem = { title: '' };
-  TabItem: TabTitleBarMenuItem = {} as TabTitleBarMenuItem
   index: number = 0;
   maxIndex: number = 0;
   onCustomClick?: (index: number) => void
   onImageComplete?: (width: number) => void
-  longPressTime: number = 500
-  minFontSize: number = 1.75
-  isFollowingSystemFontScale: boolean = false;
-  maxFontScale: number = 1;
-  systemFontScale?: number = 1;
 
   @Prop currentIndex: number
-  @Prop fontSize: number = 1
 
   @State isOnFocus: boolean = false
   @State isOnHover: boolean = false
@@ -432,31 +425,6 @@ struct TabContentItem {
   static readonly paddingLeft = 8
   static readonly paddingRight = 8
   static readonly marginFirst = 16
-
-  private ToTabItem(item: TabTitleBarTabItem): TabTitleBarMenuItem {
-    if (item.title) {
-      this.TabItem.label = item.title;
-    }
-    if (item.icon) {
-      this.TabItem.value = item.icon;
-    }
-    return this.TabItem;
-  }
-
-  dialogController: CustomDialogController | null = new CustomDialogController({
-    builder: TabTitleBarDialog({
-      cancel: () => {
-      },
-      confirm: () => {
-      },
-      TabTitleDialog: this.ToTabItem(this.item),
-      TabTitleBarDialog: this.ToTabItem(this.item).label ? this.ToTabItem(this.item).label : '',
-      fontSize: this.fontSize,
-    }),
-    maskColor: Color.Transparent,
-    isModal: true,
-    customStyle: true,
-  })
 
   getBgColor() {
     if (this.isOnClick) {
@@ -486,28 +454,6 @@ struct TabContentItem {
 
   getImageLayoutWidth(): number {
     return TabContentItem.imageSize / Math.max(this.imageHeight, 1.0) * this.imageWidth
-  }
-
-  aboutToAppear(): void {
-    let uiContent: UIContext = this.getUIContext();
-    this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
-    this.maxFontScale = uiContent.getMaxFontScale();
-  }
-
-  decideFontScale(): number {
-    try {
-      let uiContent: UIContext = this.getUIContext();
-      this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1;
-      if (!this.isFollowingSystemFontScale) {
-        return 1;
-      }
-      return Math.min(this.systemFontScale, this.maxFontScale);
-    } catch (exception) {
-      let code: number = (exception as BusinessError).code;
-      let message: string = (exception as BusinessError).message;
-      hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
-      return 1;
-    }
   }
 
   build() {
@@ -561,7 +507,6 @@ struct TabContentItem {
                 .width(this.getImageLayoutWidth())
                 .height(TabContentItem.imageSize)
                 .objectFit(ImageFit.Fill)
-                .draggable(false)
                 .scale({
                   x: this.getImageScaleFactor(),
                   y: this.getImageScaleFactor()
@@ -612,24 +557,11 @@ struct TabContentItem {
               if (event.type === TouchType.Down) {
                 this.isOnClick = true
               }
-              if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+              if (event.type === TouchType.Up) {
                 this.isOnClick = false
-                if (this.fontSize >= this.minFontSize) {
-                  this.dialogController?.close()
-                }
               }
             })
             .onClick(() => this.onCustomClick && this.onCustomClick(this.index))
-            .gesture(
-              LongPressGesture({ repeat: false, duration: this.longPressTime })
-                .onAction((event: GestureEvent) => {
-                  this.fontSize = this.decideFontScale();
-                  if (event) {
-                    if (this.fontSize >= this.minFontSize) {
-                      this.dialogController?.open()
-                    }
-                  }
-                }))
           }
         }
         .justifyContent(FlexAlign.Center)
@@ -673,11 +605,6 @@ struct TabContentItem {
 struct ImageMenuItem {
   item: TabTitleBarMenuItem = { value: '' };
   index: number = 0;
-  longPressTime: number = 500;
-  minFontSize: number = 1.75;
-  isFollowingSystemFontScale: boolean = false;
-  maxFontScale: number = 1;
-  systemFontScale?: number = 1;
 
   static readonly imageSize = 24
   static readonly imageHotZoneWidth = 48
@@ -686,33 +613,9 @@ struct ImageMenuItem {
   static readonly disabledImageOpacity = 0.4
   static readonly focusablePrefix = "Id-TabTitleBar-ImageMenuItem-"
 
-  @Prop fontSize: number = 1;
   @State isOnFocus: boolean = false
   @State isOnHover: boolean = false
   @State isOnClick: boolean = false
-
-  dialogController: CustomDialogController | null = new CustomDialogController({
-    builder: TabTitleBarDialog({
-      cancel: () => {
-      },
-      confirm: () => {
-      },
-      TabTitleDialog: this.item,
-      TabTitleBarDialog: this.item.label ? this.item.label : this.textDialog(),
-      fontSize: this.fontSize,
-    }),
-    maskColor: Color.Transparent,
-    isModal: true,
-    customStyle: true,
-  })
-
-  private textDialog(): ResourceStr {
-    if (this.item.value === PUBLIC_MORE) {
-      return $r('sys.string.ohos_toolbar_more');
-    } else {
-      return this.item.label ? this.item.label : '';
-    }
-  }
 
   getFgColor() {
     return this.isOnClick
@@ -730,28 +633,6 @@ struct ImageMenuItem {
     }
   }
 
-  aboutToAppear(): void {
-    let uiContent: UIContext = this.getUIContext();
-    this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
-    this.maxFontScale = uiContent.getMaxFontScale();
-  }
-
-  decideFontScale(): number {
-    try {
-      let uiContent: UIContext = this.getUIContext();
-      this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1;
-      if (!this.isFollowingSystemFontScale) {
-        return 1;
-      }
-      return Math.min(this.systemFontScale, this.maxFontScale);
-    } catch (exception) {
-      let code: number = (exception as BusinessError).code;
-      let message: string = (exception as BusinessError).message;
-      hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
-      return 1;
-    }
-  }
-
   build() {
     Row() {
       Image(this.item.value)
@@ -759,7 +640,6 @@ struct ImageMenuItem {
         .height(ImageMenuItem.imageSize)
         .focusable(this.item.isEnabled)
         .key(ImageMenuItem.focusablePrefix + this.index)
-        .draggable(false)
     }
     .width(ImageMenuItem.imageHotZoneWidth)
     .height(ImageMenuItem.imageHotZoneWidth)
@@ -818,24 +698,11 @@ struct ImageMenuItem {
       if (event.type === TouchType.Down) {
         this.isOnClick = true
       }
-      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+      if (event.type === TouchType.Up) {
         this.isOnClick = false
-        if (this.fontSize >= this.minFontSize) {
-          this.dialogController?.close()
-        }
       }
     })
     .onClick(() => this.item.isEnabled && this.item.action && this.item.action())
-    .gesture(
-      LongPressGesture({ repeat: false, duration: this.longPressTime })
-        .onAction((event: GestureEvent) => {
-          this.fontSize = this.decideFontScale();
-          if (event) {
-            if (this.fontSize >= this.minFontSize) {
-              this.dialogController?.open()
-            }
-          }
-        }))
   }
 }
 
@@ -844,9 +711,9 @@ struct ImageMenuItem {
  */
 @CustomDialog
 struct TabTitleBarDialog {
-  TabTitleDialog: TabTitleBarMenuItem = { value: '' };
+  tabTitleDialog: TabTitleBarMenuItem = { value: '' };
   callbackId: number | undefined = undefined;
-  TabTitleBarDialog?: ResourceStr = '';
+  tabTitleBarDialog?: ResourceStr = '';
   mainWindowStage: window.Window | undefined = undefined;
   controller?: CustomDialogController
   minFontSize: number = 1.75;
@@ -864,9 +731,9 @@ struct TabTitleBarDialog {
   }
 
   build() {
-    if (this.TabTitleBarDialog) {
+    if (this.tabTitleBarDialog) {
       Column() {
-        Image(this.TabTitleDialog.value)
+        Image(this.tabTitleDialog.value)
           .width(IMAGE_SIZE)
           .height(IMAGE_SIZE)
           .margin({
@@ -875,7 +742,7 @@ struct TabTitleBarDialog {
           })
           .fillColor($r('sys.color.icon_primary'))
         Column() {
-          Text(this.TabTitleBarDialog)
+          Text(this.tabTitleBarDialog)
             .fontSize(TEXT_EDITABLE_DIALOG)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
             .maxLines(this.maxLines)
@@ -897,7 +764,7 @@ struct TabTitleBarDialog {
       .borderRadius($r('sys.float.corner_radius_level10'))
     } else {
       Column() {
-        Image(this.TabTitleDialog.value)
+        Image(this.tabTitleDialog.value)
           .width(IMAGE_SIZE)
           .height(IMAGE_SIZE)
           .fillColor($r('sys.color.icon_primary'))

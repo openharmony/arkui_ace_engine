@@ -208,8 +208,8 @@ struct CollapsibleMenuSection {
       },
       confirm: () => {
       },
-      SelectTitleDialog: this.item,
-      SelectTitleBarDialog: this.item.label ? this.item.label : '',
+      selectTitleDialog: this.item,
+      selectTitleBarDialog: this.item.label ? this.item.label : '',
       fontSize: this.fontSize,
     }),
     maskColor: Color.Transparent,
@@ -234,9 +234,15 @@ struct CollapsibleMenuSection {
   }
 
   aboutToAppear() {
-    let uiContent: UIContext = this.getUIContext();
-    this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
-    this.maxFontScale = uiContent.getMaxFontScale();
+    try {
+      let uiContent: UIContext = this.getUIContext();
+      this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
+      this.maxFontScale = uiContent.getMaxFontScale();
+    } catch (exception) {
+      let code: number = (exception as BusinessError).code;
+      let message: string = (exception as BusinessError).message;
+      hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
+    }
     this.menuItems.forEach((item, index) => {
       if (item.isEnabled && this.firstFocusableIndex == -1 &&
         index > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
@@ -246,19 +252,12 @@ struct CollapsibleMenuSection {
   }
 
   decideFontScale(): number {
-    try {
-      let uiContent: UIContext = this.getUIContext();
-      this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1;
-      if (!this.isFollowingSystemFontScale) {
-        return 1;
-      }
-      return Math.min(this.systemFontScale, this.maxFontScale);
-    } catch (exception) {
-      let code: number = (exception as BusinessError).code;
-      let message: string = (exception as BusinessError).message;
-      hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
+    let uiContent: UIContext = this.getUIContext();
+    this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+    if (!this.isFollowingSystemFontScale) {
       return 1;
     }
+    return Math.min(this.systemFontScale, this.maxFontScale);
   }
 
   build() {
@@ -271,8 +270,8 @@ struct CollapsibleMenuSection {
         } else {
           ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1),
             (item: SelectTitleBarMenuItem, index) => {
-            ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
-          })
+              ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
+            })
 
           Row() {
             Image(PUBLIC_MORE)
@@ -365,7 +364,8 @@ struct CollapsibleMenuSection {
     Column() {
       ForEach(this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length),
         (item: SelectTitleBarMenuItem, index) => {
-          ImageMenuItem({ item: item, index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + index })
+          ImageMenuItem({ item: item, index: this.index * 1000 +
+          CollapsibleMenuSection.maxCountOfVisibleItems + index, isPopup: true })
         })
     }
     .width(ImageMenuItem.imageHotZoneWidth + CollapsibleMenuSection.focusPadding * CollapsibleMenuSection.marginsNum)
@@ -385,6 +385,7 @@ struct ImageMenuItem {
   isFollowingSystemFontScale: boolean = false;
   maxFontScale: number = 1;
   systemFontScale?: number = 1;
+  isPopup: boolean = false;
 
   static readonly imageSize = 24
   static readonly imageHotZoneWidth = 48
@@ -404,8 +405,8 @@ struct ImageMenuItem {
       },
       confirm: () => {
       },
-      SelectTitleDialog: this.item,
-      SelectTitleBarDialog: this.item.label ? this.item.label : this.textDialog(),
+      selectTitleDialog: this.item,
+      selectTitleBarDialog: this.item.label ? this.item.label : this.textDialog(),
       fontSize: this.fontSize,
     }),
     maskColor: Color.Transparent,
@@ -440,25 +441,24 @@ struct ImageMenuItem {
   }
 
   aboutToAppear(): void {
-    let uiContent: UIContext = this.getUIContext();
-    this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
-    this.maxFontScale = uiContent.getMaxFontScale();
-  }
-
-  decideFontScale(): number {
     try {
       let uiContent: UIContext = this.getUIContext();
-      this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1;
-      if (!this.isFollowingSystemFontScale) {
-        return 1;
-      }
-      return Math.min(this.systemFontScale, this.maxFontScale);
+      this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
+      this.maxFontScale = uiContent.getMaxFontScale();
     } catch (exception) {
       let code: number = (exception as BusinessError).code;
       let message: string = (exception as BusinessError).message;
       hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
+    }
+  }
+
+  decideFontScale(): number {
+    let uiContent: UIContext = this.getUIContext();
+    this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+    if (!this.isFollowingSystemFontScale) {
       return 1;
     }
+    return Math.min(this.systemFontScale, this.maxFontScale);
   }
 
   build() {
@@ -530,7 +530,7 @@ struct ImageMenuItem {
       }
       if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
         this.isOnClick = false
-        if (this.fontSize >= this.minFontSize) {
+        if (this.fontSize >= this.minFontSize && this.isPopup === false) {
           this.dialogController?.close()
         }
       }
@@ -541,7 +541,7 @@ struct ImageMenuItem {
         .onAction((event: GestureEvent) => {
           this.fontSize = this.decideFontScale();
           if (event) {
-            if (this.fontSize >= this.minFontSize) {
+            if (this.fontSize >= this.minFontSize && this.isPopup === false) {
               this.dialogController?.open()
             }
           }
@@ -554,9 +554,9 @@ struct ImageMenuItem {
  */
 @CustomDialog
 struct SelectTitleBarDialog {
-  SelectTitleDialog: SelectTitleBarMenuItem = {} as SelectTitleBarMenuItem;
+  selectTitleDialog: SelectTitleBarMenuItem = {} as SelectTitleBarMenuItem;
   callbackId: number | undefined = undefined;
-  SelectTitleBarDialog?: ResourceStr = '';
+  selectTitleBarDialog?: ResourceStr = '';
   mainWindowStage: window.Window | undefined = undefined;
   controller?: CustomDialogController
   minFontSize: number = 1.75;
@@ -574,9 +574,9 @@ struct SelectTitleBarDialog {
   }
 
   build() {
-    if (this.SelectTitleBarDialog) {
+    if (this.selectTitleBarDialog) {
       Column() {
-        Image(this.SelectTitleDialog.value)
+        Image(this.selectTitleDialog.value)
           .width(IMAGE_SIZE)
           .height(IMAGE_SIZE)
           .margin({
@@ -585,7 +585,7 @@ struct SelectTitleBarDialog {
           })
           .fillColor($r('sys.color.icon_primary'))
         Column() {
-          Text(this.SelectTitleBarDialog)
+          Text(this.selectTitleBarDialog)
             .fontSize(TEXT_EDITABLE_DIALOG)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
             .maxLines(this.maxLines)
@@ -607,7 +607,7 @@ struct SelectTitleBarDialog {
       .borderRadius($r('sys.float.corner_radius_level10'))
     } else {
       Column() {
-        Image(this.SelectTitleDialog.value)
+        Image(this.selectTitleDialog.value)
           .width(IMAGE_SIZE)
           .height(IMAGE_SIZE)
           .fillColor($r('sys.color.icon_primary'))

@@ -649,7 +649,7 @@ ArkUI_Int32 getGestureTag(ArkUIGestureRecognizer* recognizer, char* buffer, ArkU
     CHECK_NULL_RETURN(rawRecognizer, ERROR_CODE_PARAM_INVALID);
     auto gestureRecognizer = AceType::Claim(rawRecognizer);
     auto gestureInfo = gestureRecognizer->GetGestureInfo();
-    CHECK_NULL_RETURN(gestureRecognizer, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(gestureInfo, ERROR_CODE_PARAM_INVALID);
     auto gestureTag = gestureInfo->GetTag();
     CHECK_NULL_RETURN(gestureTag.has_value(), ERROR_CODE_PARAM_INVALID);
     auto actualSize = static_cast<int32_t>(gestureTag.value().size());

@@ -42,6 +42,7 @@ struct AccessibilityEvent {
     std::string componentType;
     std::string beforeText;
     std::string latestContent;
+    std::string textAnnouncedForAccessibility;
     double currentItemIndex = 0.0;
     double itemCount = 0.0;
     AccessibilityEventType type = AccessibilityEventType::UNKNOWN;
@@ -50,6 +51,21 @@ struct AccessibilityEvent {
 enum class AccessibilityVersion {
     JS_VERSION = 1,
     JS_DECLARATIVE_VERSION,
+};
+
+class AccessibilitySAObserverCallback {
+public:
+    explicit AccessibilitySAObserverCallback(int64_t accessibilityId) : accessibilityId_(accessibilityId)
+    {}
+    virtual ~AccessibilitySAObserverCallback() = default;
+    virtual bool OnState(bool state) = 0;
+
+    int64_t GetAccessibilityId() const
+    {
+        return accessibilityId_;
+    }
+private:
+    int64_t accessibilityId_ = -1;
 };
 
 class AccessibilityChildTreeCallback {
@@ -174,6 +190,12 @@ public:
     virtual void DeregisterInteractionOperationAsChildTree() {};
     virtual void SendEventToAccessibilityWithNode(const AccessibilityEvent& accessibilityEvent,
         const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context) {};
+
+    virtual void RegisterAccessibilitySAObserverCallback(
+        int64_t elementId, const std::shared_ptr<AccessibilitySAObserverCallback> &callback) {};
+
+    virtual void DeregisterAccessibilitySAObserverCallback(int64_t elementId) {};
+
     bool IsRegister()
     {
         return isReg_;

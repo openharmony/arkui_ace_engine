@@ -72,6 +72,7 @@ constexpr int32_t USED_ID_FIND_FLAG = 3;                 // if args >3 , it mean
 constexpr int32_t MILLISECONDS_TO_NANOSECONDS = 1000000; // Milliseconds to nanoseconds
 constexpr int32_t RESAMPLE_COORD_TIME_THRESHOLD = 20 * 1000 * 1000;
 constexpr int32_t VSYNC_PERIOD_COUNT = 5;
+constexpr int32_t MIN_IDLE_TIME = 1000;
 constexpr uint8_t SINGLECOLOR_UPDATE_ALPHA = 75;
 constexpr int8_t RENDERING_SINGLE_COLOR = 1;
 
@@ -553,6 +554,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     UIObserverHandler::GetInstance().HandleLayoutDoneCallBack();
     // flush correct rect again
     taskScheduler_->FlushPersistAfterLayoutTask();
+    taskScheduler_->FlushLastestFrameLayoutFinishTask();
     taskScheduler_->FinishRecordFrameInfo();
     FlushNodeChangeFlag();
     FlushAnimationClosure();
@@ -1615,7 +1617,7 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
         auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
         float keyboardOffset = safeAreaManager_->GetKeyboardOffset();
         if (manager) {
-            positionY = static_cast<float>(manager->GetClickPosition().GetY());
+            positionY = static_cast<float>(manager->GetClickPosition().GetY()) - keyboardOffset;
             textfieldHeight = manager->GetHeight();
         }
         if (!NearZero(keyboardOffset)) {
@@ -1728,6 +1730,11 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         prevKeyboardAvoidMode_ == safeAreaManager_->KeyboardSafeAreaEnabled() && manager->PrevHasTextFieldPattern()) {
         TAG_LOGI(
             AceLogTag::ACE_KEYBOARD, "Ignore ileagal keyboard height change");
+        return;
+    }
+
+    if (manager->UsingCustomKeyboardAvoid()) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Using Custom Avoid Instead");
         return;
     }
 
@@ -2412,7 +2419,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         if (focusManager_) {
             focusManager_->DumpFocusManager();
         }
-    } else if (params[0] == "-accessibility" || params[0] == "-inspector" || params[0] == "-simplify") {
+    } else if (params[0] == "-accessibility" || params[0] == "-inspector") {
         auto accessibilityManager = GetAccessibilityManager();
         if (accessibilityManager) {
             accessibilityManager->OnDumpInfoNG(params, windowId_);
@@ -2462,6 +2469,9 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         }
     } else if (params[0] == "--stylus") {
         StylusDetectorDefault::GetInstance()->ExecuteCommand(params);
+    } else if (params[0] == "-simplify") {
+        rootNode_->DumpTree(0);
+        DumpLog::GetInstance().OutPutDefault();
     }
     return true;
 }
@@ -3410,7 +3420,7 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
     }
 
     if (action == DragEventAction::DRAG_EVENT_START) {
-        manager->EnsureStatusForPullIn();
+        manager->ResetPreTargetFrameNode();
         manager->RequireSummary();
         manager->SetDragCursorStyleCore(DragCursorStyleCore::DEFAULT);
         TAG_LOGI(AceLogTag::ACE_DRAG, "start drag, current windowId is %{public}d", container->GetWindowId());
@@ -3455,6 +3465,62 @@ void PipelineContext::AddPredictTask(PredictTask&& task)
     RequestFrame();
 }
 
+void PipelineContext::AddFrameCallback(FrameCallbackFunc&& frameCallbackFunc, FrameCallbackFunc&& idleCallbackFunc,
+    int64_t delayMillis)
+{
+    if (delayMillis <= 0) {
+        if (frameCallbackFunc != nullptr) {
+            frameCallbackFuncs_.emplace_back(std::move(frameCallbackFunc));
+        }
+        if (idleCallbackFunc != nullptr) {
+            idleCallbackFuncs_.emplace_back(std::move(idleCallbackFunc));
+        }
+        RequestFrame();
+        return;
+    }
+    auto taskScheduler = GetTaskExecutor();
+    CHECK_NULL_VOID(taskScheduler);
+    if (frameCallbackFunc != nullptr) {
+        taskScheduler->PostDelayedTask(
+            [weak = WeakClaim(this), callbackFunc = std::move(frameCallbackFunc)]() -> void {
+                auto pipeline = weak.Upgrade();
+                CHECK_NULL_VOID(pipeline);
+                auto callback = const_cast<FrameCallbackFunc&>(callbackFunc);
+                pipeline->frameCallbackFuncs_.emplace_back(std::move(callback));
+                pipeline->RequestFrame();
+            },
+            TaskExecutor::TaskType::UI, delayMillis, "ArkUIPostFrameCallbackFuncDelayed");
+    }
+    if (idleCallbackFunc != nullptr) {
+        taskScheduler->PostDelayedTask(
+            [weak = WeakClaim(this), callbackFunc = std::move(idleCallbackFunc)]() -> void {
+                auto pipeline = weak.Upgrade();
+                CHECK_NULL_VOID(pipeline);
+                auto callback = const_cast<FrameCallbackFunc&>(callbackFunc);
+                pipeline->idleCallbackFuncs_.emplace_back(std::move(callback));
+                pipeline->RequestFrame();
+            },
+            TaskExecutor::TaskType::UI, delayMillis, "ArkUIPostIdleCallbackFuncDelayed");
+    }
+}
+
+void PipelineContext::TriggerIdleCallback(int64_t deadline)
+{
+    if (idleCallbackFuncs_.empty()) {
+        return;
+    }
+    int64_t currentTime = GetSysTimestamp();
+    if (deadline - currentTime < MIN_IDLE_TIME) {
+        RequestFrame();
+        return;
+    }
+    decltype(idleCallbackFuncs_) tasks(std::move(idleCallbackFuncs_));
+    for (const auto& idleCallbackFunc : tasks) {
+        idleCallbackFunc(deadline - currentTime);
+        currentTime = GetSysTimestamp();
+    }
+}
+
 void PipelineContext::OnIdle(int64_t deadline)
 {
     int64_t currentTime = GetSysTimestamp();
@@ -3488,6 +3554,7 @@ void PipelineContext::OnIdle(int64_t deadline)
     if (currentTime < deadline) {
         ElementRegister::GetInstance()->CallJSCleanUpIdleTaskFunc();
     }
+    TriggerIdleCallback(deadline);
 }
 
 void PipelineContext::Finish(bool /* autoFinish */) const
@@ -3506,6 +3573,11 @@ void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task, bool isFl
 void PipelineContext::AddPersistAfterLayoutTask(std::function<void()>&& task)
 {
     taskScheduler_->AddPersistAfterLayoutTask(std::move(task));
+}
+
+void PipelineContext::AddLastestFrameLayoutFinishTask(std::function<void()>&& task)
+{
+    taskScheduler_->AddLastestFrameLayoutFinishTask(std::move(task));
 }
 
 void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)

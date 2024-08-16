@@ -27,16 +27,25 @@
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
+#include "auto_fill_type.h"
+#include "page_node_info.h"
+
+#include "adapter/ohos/capability/html/span_to_html.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/geometry/rect.h"
 #include "base/image/file_uri_helper.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/utils/date_util.h"
 #include "base/utils/linear_map.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
+#include "core/common/ace_engine_ext.h"
 #include "core/common/ai/data_detector_mgr.h"
 #include "core/common/ai/image_analyzer_manager.h"
 #include "core/common/ime/input_method_manager.h"
+#include "core/common/udmf/udmf_client.h"
+#include "core/common/udmf/unified_data.h"
+#include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/picker/picker_data.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
@@ -59,14 +68,6 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/utils/system_properties.h"
 #include "frameworks/core/components_ng/base/ui_node.h"
-
-#include "adapter/ohos/capability/html/span_to_html.h"
-#include "base/geometry/rect.h"
-#include "core/common/ace_engine_ext.h"
-#include "core/common/udmf/udmf_client.h"
-#include "core/common/udmf/unified_data.h"
-#include "page_node_info.h"
-#include "auto_fill_type.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -409,6 +410,7 @@ void WebPattern::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info)
     CHECK_NULL_VOID(contextMenuParam_);
     contextMenuResult_ = eventInfo->GetContextMenuResult();
     CHECK_NULL_VOID(contextMenuResult_);
+    VibratorUtils::StartVibraFeedback("longPress.light");
     ShowContextSelectOverlay(RectF(), RectF());
 }
 
@@ -1815,8 +1817,18 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
     CHECK_NULL_RETURN(delegate_, false);
     CHECK_NULL_RETURN(dirty, false);
 
-    auto geometryNode = dirty->GetGeometryNode();
-    auto drawSize = Size(geometryNode->GetContentSize().Width(), geometryNode->GetContentSize().Height());
+    Size drawSize = Size(1, 1);
+    if (layoutMode_ == WebLayoutMode::FIT_CONTENT) {
+        auto geometryNode = dirty->GetGeometryNode();
+        drawSize = Size(geometryNode->GetContentSize().Width(), geometryNode->GetContentSize().Height());
+    } else {
+        auto frameNode = GetHost();
+        CHECK_NULL_RETURN(frameNode, false);
+        auto renderContext = frameNode->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, false);
+        auto rect = renderContext->GetPaintRectWithoutTransform();
+        drawSize = Size(rect.Width(), rect.Height());
+    }
     if (drawSize.IsInfinite() || drawSize.IsEmpty()) {
         return false;
     }
@@ -3277,23 +3289,26 @@ void WebPattern::RegisterSelectOverlayEvent(SelectOverlayInfo& selectInfo)
         CHECK_NULL_VOID(webPattern);
         webPattern->UpdateTouchHandleForOverlay(true);
         webPattern->SetSelectOverlayDragging(false);
+        if (!webPattern->IsQuickMenuShow()) {
+            webPattern->ChangeVisibilityOfQuickMenu();
+        }
     };
     selectInfo.onTouchDown = [weak = AceType::WeakClaim(this)](const TouchEventInfo& info) {
         auto webPattern = weak.Upgrade();
         CHECK_NULL_VOID(webPattern);
+        webPattern->SetSelectOverlayDragging(true);
         webPattern->HandleTouchDown(info, true);
     };
     selectInfo.onTouchUp = [weak = AceType::WeakClaim(this)](const TouchEventInfo& info) {
         auto webPattern = weak.Upgrade();
         CHECK_NULL_VOID(webPattern);
+        webPattern->SetSelectOverlayDragging(false);
         webPattern->HandleTouchUp(info, true);
     };
     selectInfo.onTouchMove = [weak = AceType::WeakClaim(this)](const TouchEventInfo& info) {
         auto webPattern = weak.Upgrade();
         CHECK_NULL_VOID(webPattern);
-        if (webPattern->IsSelectOverlayDragging()) {
-            webPattern->HandleTouchMove(info, true);
-        }
+        webPattern->HandleTouchMove(info, true);
     };
     selectInfo.onHandleMoveStart = [weak = AceType::WeakClaim(this)](bool isFirst) {
         auto webPattern = weak.Upgrade();
@@ -3437,6 +3452,23 @@ void WebPattern::HideHandleAndQuickMenuIfNecessary(bool hide, bool isScroll)
     }
 }
 
+void WebPattern::ChangeVisibilityOfQuickMenu()
+{
+    CHECK_NULL_VOID(selectOverlayProxy_);
+    WebOverlayType overlayType = GetTouchHandleOverlayType(insertHandle_, startSelectionHandle_, endSelectionHandle_);
+    if (overlayType == SELECTION_OVERLAY && !selectTemporarilyHidden_ && !selectTemporarilyHiddenByScroll_) {
+        bool isMenuShow = selectOverlayProxy_->IsMenuShow();
+        selectOverlayProxy_->ShowOrHiddenMenu(isMenuShow);
+        TAG_LOGI(AceLogTag::ACE_WEB, "Current menu display status is %{public}d.", isMenuShow);
+    }
+}
+
+bool WebPattern::IsQuickMenuShow()
+{
+    CHECK_NULL_RETURN(selectOverlayProxy_, false);
+    return selectOverlayProxy_->IsMenuShow();
+}
+
 bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback)
 {
@@ -3470,6 +3502,7 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
     }
     RegisterSelectOverlayCallback(selectInfo, params, callback);
     RegisterSelectOverlayEvent(selectInfo);
+    VibratorUtils::StartVibraFeedback("longPress.light");
     selectOverlayProxy_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo, WeakClaim(this));
     if (selectInfo.isNewAvoid && selectOverlayProxy_) {
         selectOverlayProxy_->ShowOrHiddenMenu(false);
@@ -4609,6 +4642,7 @@ void WebPattern::UpdateTouchHandleForOverlay(bool fromOverlay)
         }
         selectOverlayProxy_->UpdateFirstSelectHandleInfo(firstHandleInfo);
         selectOverlayProxy_->UpdateSecondSelectHandleInfo(secondHandleInfo);
+        selectMenuInfo_.menuIsShow = selectOverlayProxy_->IsMenuShow();
         selectOverlayProxy_->UpdateSelectMenuInfo(selectMenuInfo_);
         selectOverlayProxy_->SetHandleReverse(false);
     }
@@ -5158,11 +5192,12 @@ bool WebPattern::FilterScrollEventHandleOffset(const float offset)
     } else if (((offset > 0) && nestedScroll.backward == NestedScrollMode::PARALLEL) ||
                ((offset < 0) && nestedScroll.forward == NestedScrollMode::PARALLEL)) {
         HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
-    } else if (parent.Upgrade()->NestedScrollOutOfBoundary() &&
-                ((Positive(offset) && nestedScroll.backward == NestedScrollMode::SELF_FIRST) ||
-               (Negative(offset) && nestedScroll.forward == NestedScrollMode::SELF_FIRST))) {
-        HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
-        return true;
+    } else if ((Positive(offset) && nestedScroll.backward == NestedScrollMode::SELF_FIRST) ||
+               (Negative(offset) && nestedScroll.forward == NestedScrollMode::SELF_FIRST)) {
+        if (parent.Upgrade() && parent.Upgrade()->NestedScrollOutOfBoundary()) {
+            HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
+            return true;
+        }
     }
     UpdateFlingReachEdgeState(offset, false);
     return false;

@@ -28,6 +28,7 @@
 #include "core/components_ng/render/image_painter.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/core/components_ng/render/adapter/animated_image.h"
 #include "frameworks/core/components_ng/render/adapter/pixelmap_image.h"
 
 namespace OHOS::Ace::NG {
@@ -297,6 +298,12 @@ bool TextContentModifier::DrawImage(const RefPtr<FrameNode>& imageNode, RSCanvas
     auto canvasImage = imagePattern->GetCanvasImage();
     if (!canvasImage) {
         canvasImage = imagePattern->GetAltCanvasImage();
+    }
+    if (AceType::InstanceOf<AnimatedImage>(canvasImage)) {
+        auto animatedImage = DynamicCast<AnimatedImage>(canvasImage);
+        if (animatedImage->GetAnimatorStatus() == Animator::Status::PAUSED) {
+            animatedImage->ControlAnimation(true);
+        }
     }
     auto geometryNode = imageNode->GetGeometryNode();
     if (!canvasImage || !geometryNode) {
@@ -809,13 +816,13 @@ void TextContentModifier::SetContentSize(SizeF& value)
 
 void TextContentModifier::StartTextRace()
 {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        UpdateImageNodeVisible(VisibleType::INVISIBLE);
+    }
     if (!CheckMarqueeState(MarqueeState::IDLE) && !CheckMarqueeState(MarqueeState::STOPPED)) {
         return;
     }
 
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        UpdateImageNodeVisible(VisibleType::VISIBLE);
-    }
     textRaceSpaceWidth_ = RACE_SPACE_WIDTH;
     auto pipeline = PipelineContext::GetCurrentContext();
     if (pipeline) {

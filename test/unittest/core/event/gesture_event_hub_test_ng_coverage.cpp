@@ -176,7 +176,6 @@ HWTEST_F(GestureEventHubTestCoverageNg, GestureEventHubTestCoverage004, TestSize
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::RICH_EDITOR_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
     auto patternNode = AceType::MakeRefPtr<FrameNode>(V2::RICH_EDITOR_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    ASSERT_NE(patternNode, nullptr);
     frameNode->AddChild(childNode);
     DragDropInfo dragDropInfo;
     eventHub->AttachHost(frameNode);
@@ -212,8 +211,9 @@ HWTEST_F(GestureEventHubTestCoverageNg, GestureEventHubTestCoverage004, TestSize
     overlayManager->pixmapColumnNodeWeak_ = WeakPtr<FrameNode>(AceType::DynamicCast<FrameNode>(frameNode));
     gestureEvent.inputEventType_ = InputEventType::MOUSE_BUTTON;
     auto mock = AceType::DynamicCast<MockInteractionInterface>(InteractionInterface::GetInstance());
-    ASSERT_NE(mock, nullptr);
-    EXPECT_CALL(*mock, RegisterCoordinationListener(testing::_)).WillRepeatedly(Return(50));
+    if (mock->gDragOutCallback) {
+        mock->gDragOutCallback();
+    }
     gestureEventHub->OnDragStart(gestureEvent, pipeline, frameNode, dragDropInfo, event);
     SUCCEED();
 }
@@ -241,6 +241,8 @@ HWTEST_F(GestureEventHubTestCoverageNg, GestureEventHubTestCoverage005, TestSize
     auto pipeline = PipelineContext::GetCurrentContext();
     GestureEvent gestureEvent;
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    auto unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
+    event->SetData(unifiedData);
     auto textPattern = AceType::MakeRefPtr<TextPattern>();
     frameNode->pattern_ = textPattern;
     frameNode->GetOrCreateFocusHub();
@@ -283,6 +285,8 @@ HWTEST_F(GestureEventHubTestCoverageNg, GestureEventHubTestCoverage006, TestSize
     auto pipeline = PipelineContext::GetCurrentContext();
     GestureEvent gestureEvent;
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    auto unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
+    event->SetData(unifiedData);
     auto textPattern = AceType::MakeRefPtr<TextPattern>();
     frameNode->pattern_ = textPattern;
     frameNode->GetOrCreateFocusHub();

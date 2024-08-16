@@ -510,20 +510,23 @@ HWTEST_F(ListScrollerTestNg, ScrollToIndex014, TestSize.Level1)
     /**
      * @tc.steps: step2. scroll to the group(index:0).
      * @tc.cases: jumpIndex < StartIndex
-     * @tc.expected: pattern_->GetTotalOffset() == 190.f.
+     * @tc.expected: pattern_->GetTotalOffset() == 620.
+     *     GroupHight = Header(50) + footer(50) + (item(100) + space(10))*count(8) - space(10) = 970
+     *     Offset = GroupHight(970) - (ListHeight(400) - ContentEndOffset(50)) = 620
      */
     ScrollToIndex(0, false, ScrollAlign::AUTO);
-    EXPECT_EQ(pattern_->GetTotalOffset(), 190.f);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 620.f);
     auto itemHeight = GetChildFrameNode(frameNode_, 0)->GetGeometryNode()->GetMarginFrameSize().Height();
     EXPECT_GT(itemHeight, pattern_->contentMainSize_);
 
     /**
      * @tc.steps: step2. scroll to group(index:1).
      * @tc.cases: jumpIndex < StartIndex
-     * @tc.expected: pattern_->GetTotalOffset() == 490.f.
+     * @tc.expected: pattern_->GetTotalOffset() == 920.f.
+     *     Offset = GroupHight(970) - ContentStartOffset(50) = 920
      */
     ScrollToIndex(1, false, ScrollAlign::AUTO);
-    EXPECT_EQ(pattern_->GetTotalOffset(), 490.f);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 920.f);
     itemHeight = GetChildFrameNode(frameNode_, 1)->GetGeometryNode()->GetMarginFrameSize().Height();
     EXPECT_GT(itemHeight, pattern_->contentMainSize_);
 }

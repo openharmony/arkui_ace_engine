@@ -504,6 +504,8 @@ void SetCustomSpanOnMeasure(ArkUINodeHandle node, void* extraParam)
         event.kind = ArkUIAPINodeFlags::CUSTOM_MEASURE;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.numberData[0].f32 = customSpanMeasureInfo.fontSize;
+        event.numberReturnData[0].f32 = 0.0f;
+        event.numberReturnData[1].f32 = 0.0f;
         SendArkUIAsyncCustomEvent(&event);
         float width = std::max(event.numberReturnData[0].f32, 0.0f);
         float height = std::max(event.numberReturnData[1].f32, 0.0f);

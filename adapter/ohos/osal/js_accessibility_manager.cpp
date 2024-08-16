@@ -223,8 +223,11 @@ Accessibility::EventType ConvertAceEventType(AccessibilityEventType type)
         { AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED,
             Accessibility::EventType::TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED_EVENT },
         { AccessibilityEventType::TEXT_MOVE_UNIT, Accessibility::EventType::TYPE_VIEW_TEXT_MOVE_UNIT_EVENT },
+        { AccessibilityEventType::REQUEST_FOCUS, Accessibility::EventType::TYPE_VIEW_REQUEST_FOCUS_FOR_ACCESSIBILITY },
         { AccessibilityEventType::SCROLL_START, Accessibility::EventType::TYPE_VIEW_SCROLLED_START },
         { AccessibilityEventType::PAGE_CLOSE, Accessibility::EventType::TYPE_PAGE_CLOSE },
+        { AccessibilityEventType::ANNOUNCE_FOR_ACCESSIBILITY,
+            Accessibility::EventType::TYPE_VIEW_ANNOUNCE_FOR_ACCESSIBILITY },
         { AccessibilityEventType::PAGE_OPEN, Accessibility::EventType::TYPE_PAGE_OPEN },
     };
     Accessibility::EventType eventType = Accessibility::EventType::TYPE_VIEW_INVALID;
@@ -2031,6 +2034,7 @@ void GenerateAccessibilityEventInfo(const AccessibilityEvent& accessibilityEvent
     eventInfo.SetTimeStamp(GetMicroTickCount());
     eventInfo.SetBeforeText(accessibilityEvent.beforeText);
     eventInfo.SetLatestContent(accessibilityEvent.latestContent);
+    eventInfo.SetTextAnnouncedForAccessibility(accessibilityEvent.textAnnouncedForAccessibility);
     eventInfo.SetWindowChangeTypes(static_cast<Accessibility::WindowUpdateType>(accessibilityEvent.windowChangeTypes));
     eventInfo.SetWindowContentChangeTypes(
         static_cast<Accessibility::WindowsContentChangeTypes>(accessibilityEvent.windowContentChangeTypes));
@@ -2274,7 +2278,7 @@ void JsAccessibilityManager::SendEventToAccessibilityWithNode(
     ACE_ACCESS_SCOPED_TRACE("SendAccessibilityAsyncEvent");
     CHECK_NULL_VOID(node);
     CHECK_NULL_VOID(context);
-    int32_t windowId = static_cast<int32_t>(context->GetFocusWindowId());
+    int32_t windowId = static_cast<int32_t>(context->GetRealHostWindowId());
     if (windowId == 0) {
         return;
     }
@@ -2330,7 +2334,7 @@ void GetRealEventWindowId(
     if ((ngPipeline != nullptr) && (ngPipeline->IsFormRender())) {
         return;
     }
-    windowId = ngPipeline->GetFocusWindowId();
+    windowId = ngPipeline->GetRealHostWindowId();
 }
 
 void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent)
@@ -2338,7 +2342,7 @@ void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEven
     ACE_ACCESS_SCOPED_TRACE("SendAccessibilityAsyncEvent");
     auto context = GetPipelineContext().Upgrade();
     CHECK_NULL_VOID(context);
-    int32_t windowId = static_cast<int32_t>(context->GetFocusWindowId());
+    int32_t windowId = static_cast<int32_t>(context->GetRealHostWindowId());
     if (windowId == 0) {
         return;
     }
@@ -2392,7 +2396,7 @@ void JsAccessibilityManager::SendWebAccessibilityAsyncEvent(
     ACE_ACCESS_SCOPED_TRACE("SendWebAccessibilityAsyncEvent");
     auto context = GetPipelineContext().Upgrade();
     CHECK_NULL_VOID(context);
-    int32_t windowId = static_cast<int32_t>(context->GetFocusWindowId());
+    int32_t windowId = static_cast<int32_t>(context->GetRealHostWindowId());
     if (windowId == 0) {
         return;
     }
@@ -2402,9 +2406,9 @@ void JsAccessibilityManager::SendWebAccessibilityAsyncEvent(
     CHECK_NULL_VOID(ngPipeline);
     FillWebEventInfo(eventInfo, ngPipeline, Claim(this),
         FillEventInfoParam {
-                accessibilityEvent.nodeId, accessibilityEvent.stackNodeId, ngPipeline->GetFocusWindowId() },
+                accessibilityEvent.nodeId, accessibilityEvent.stackNodeId, ngPipeline->GetRealHostWindowId() },
         webPattern);
-    eventInfo.SetWindowId(ngPipeline->GetFocusWindowId());
+    eventInfo.SetWindowId(ngPipeline->GetRealHostWindowId());
     
     if (accessibilityEvent.type == AccessibilityEventType::PAGE_CHANGE && accessibilityEvent.windowId != 0) {
         eventInfo.SetWindowId(accessibilityEvent.windowId);
@@ -4477,7 +4481,7 @@ bool JsAccessibilityManager::RegisterWebInteractionOperationAsChildTree(int64_t 
     CHECK_NULL_RETURN(pipelineContext, false);
     auto container = Platform::AceContainer::GetContainer(pipelineContext->GetInstanceId());
     if (container != nullptr && container->IsUIExtensionWindow()) {
-        windowId_ = pipelineContext->GetFocusWindowId();
+        windowId_ = pipelineContext->GetRealHostWindowId();
     }
 
     AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(treeId_, accessibilityId);
@@ -4627,6 +4631,30 @@ void JsAccessibilityManager::DeregisterAccessibilityChildTreeCallback(int64_t el
     childTreeCallbackMap_.erase(elementId);
 }
 
+void JsAccessibilityManager::RegisterAccessibilitySAObserverCallback(
+    int64_t elementId, const std::shared_ptr<AccessibilitySAObserverCallback> &callback)
+{
+    std::lock_guard<std::mutex> lock(componentSACallbackMutex_);
+    componentSACallbackMap_[elementId] = callback;
+}
+
+void JsAccessibilityManager::DeregisterAccessibilitySAObserverCallback(int64_t elementId)
+{
+    std::lock_guard<std::mutex> lock(componentSACallbackMutex_);
+    componentSACallbackMap_.erase(elementId);
+}
+
+void JsAccessibilityManager::NotifyAccessibilitySAStateChange(bool state)
+{
+    std::lock_guard<std::mutex> lock(componentSACallbackMutex_);
+    for (auto &item : componentSACallbackMap_) {
+        if (item.second == nullptr) {
+            continue;
+        }
+        item.second->OnState(state);
+    }
+}
+
 void JsAccessibilityManager::NotifyChildTreeOnRegister(int32_t treeId)
 {
     TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "NotifyChildTreeOnRegister size: %{public}zu", childTreeCallbackMap_.size());
@@ -4726,7 +4754,7 @@ void JsAccessibilityManager::RegisterInteractionOperationAsChildTree(
     CHECK_NULL_VOID(pipelineContext);
     auto container = Platform::AceContainer::GetContainer(pipelineContext->GetInstanceId());
     if (container != nullptr && container->IsUIExtensionWindow()) {
-        windowId_ = pipelineContext->GetFocusWindowId();
+        windowId_ = pipelineContext->GetRealHostWindowId();
     } else if (pipelineContext->IsFormRender()) {
         windowId_ = parentWindowId;
     }
@@ -4891,6 +4919,7 @@ void JsAccessibilityManager::JsAccessibilityStateObserver::OnStateChanged(const 
                 jsAccessibilityManager->DeregisterInteractionOperation();
             }
             AceApplicationInfo::GetInstance().SetAccessibilityEnabled(state);
+            jsAccessibilityManager->NotifyAccessibilitySAStateChange(state);
         },
         TaskExecutor::TaskType::UI, "ArkUIAccessibilityStateChanged");
 }
@@ -5415,7 +5444,7 @@ void JsAccessibilityManager::GenerateCommonProperty(const RefPtr<PipelineBase>& 
     auto stageManager = ngPipeline->GetStageManager();
     CHECK_NULL_VOID(stageManager);
     if (!ngPipeline->IsFormRender()) {
-        output.windowId = static_cast<int32_t>(ngPipeline->GetFocusWindowId());
+        output.windowId = static_cast<int32_t>(ngPipeline->GetRealHostWindowId());
     } else {
         output.windowId = static_cast<int32_t>(GetWindowId());
     }

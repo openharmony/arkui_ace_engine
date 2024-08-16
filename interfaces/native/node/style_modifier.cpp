@@ -2744,6 +2744,14 @@ const ArkUI_AttributeItem* GetMask(ArkUI_NodeHandle node)
     ArkUIMaskOptions options;
     auto unit = GetDefaultUnit(node, UNIT_VP);
     GetFullImpl()->getNodeModifiers()->getCommonModifier()->getMask(node->uiNodeHandle, &options, unit);
+    CHECK_NULL_RETURN(&options, nullptr);
+    if (options.type == static_cast<ArkUI_Int32>(ArkUI_MaskType::ARKUI_MASK_TYPE_PROGRESS)) {
+        g_numberValues[NUM_0].i32 = options.type;
+        g_numberValues[NUM_1].f32 = options.value;
+        g_numberValues[NUM_2].f32 = options.maxValue;
+        g_numberValues[NUM_3].u32 = options.color;
+        return &g_attributeItem;
+    }
     switch (static_cast<BasicShapeType>(options.type)) {
         case BasicShapeType::RECT:
             g_numberValues[NUM_0].u32 = options.fill;
@@ -2785,11 +2793,7 @@ const ArkUI_AttributeItem* GetMask(ArkUI_NodeHandle node)
             g_attributeItem.string = options.commands;
             break;
         default:
-            g_numberValues[NUM_0].i32 = static_cast<ArkUI_Int32>(ArkUI_MaskType::ARKUI_MASK_TYPE_PROGRESS);
-            g_numberValues[NUM_1].f32 = options.value;
-            g_numberValues[NUM_2].f32 = options.maxValue;
-            g_numberValues[NUM_3].u32 = options.color;
-            break;
+            return nullptr;
     }
     return &g_attributeItem;
 }

@@ -181,7 +181,11 @@ float ListItemGroupPattern::GetEstimateOffset(float height, const std::pair<floa
     if (layoutedItemInfo_.has_value() && layoutedItemInfo_.value().startIndex > 0) {
         float averageHeight = 0.0f;
         float estimateHeight = GetEstimateHeight(averageHeight);
-        return height + estimateHeight - targetPos.second;
+        if (layoutedItemInfo_.value().endIndex >= itemTotalCount_ - 1) {
+            return height + estimateHeight - targetPos.second;
+        } else {
+            return height - targetPos.first + layoutedItemInfo_.value().startIndex * averageHeight - spaceWidth_;
+        }
     }
     return height - targetPos.first;
 }
@@ -450,5 +454,50 @@ void ListItemGroupPattern::SetListItemGroupStyle(V2::ListItemGroupStyle style)
         listItemGroupStyle_ = style;
         SetListItemGroupDefaultAttributes(host);
     }
+}
+
+void ListItemGroupPattern::NotifyDataChange(int32_t index, int32_t count)
+{
+    if (itemPosition_.empty()) {
+        return;
+    }
+    if (count == 0 || (count > 0 && index > itemDisplayStartIndex_) ||
+        (count < 0 && index >= itemDisplayStartIndex_)) {
+        return;
+    }
+
+    RefPtr<FrameNode> listNode = GetListFrameNode();
+    CHECK_NULL_VOID(listNode);
+    auto listPattern = listNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(listPattern);
+    if (!listPattern->GetMaintainVisibleContentPosition()) {
+        return;
+    }
+
+    count = std::max(count, index - itemDisplayStartIndex_);
+    int32_t mod = 0;
+    if (count < 0 && lanes_ > 1) {
+        mod = -count % lanes_;
+    }
+    auto prevPosMap = std::move(itemPosition_);
+    for (auto &pos : prevPosMap) {
+        if (mod > 0) {
+            mod--;
+        } else {
+            itemPosition_[pos.first + count] = pos.second;
+        }
+    }
+    if (layoutedItemInfo_ && layoutedItemInfo_.value().startIndex >= index) {
+        layoutedItemInfo_.value().startIndex += count;
+        layoutedItemInfo_.value().endIndex += count;
+        if (lanes_ > 1) {
+            if (count < 0) {
+                layoutedItemInfo_.value().startIndex += -count % lanes_;
+            } else {
+                layoutedItemInfo_.value().endIndex -= count % lanes_;
+            }
+        }
+    }
+    listPattern->MarkNeedReEstimateOffset();
 }
 } // namespace OHOS::Ace::NG

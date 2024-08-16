@@ -32,6 +32,7 @@ const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const resourceManager = requireNapi('resourceManager');
 const BusinessError = requireNapi('base');
 const common = requireNapi('app.ability.common');
+const hilog = requireNapi('hilog');
 
 const INDEX_TWO = 2;
 const SINGLE_LINE_NUM = 1;

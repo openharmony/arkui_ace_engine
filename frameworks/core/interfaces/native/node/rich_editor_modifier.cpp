@@ -38,23 +38,30 @@ void ResetRichEditorDetectEnable(ArkUINodeHandle node)
     RichEditorModelNG::SetTextDetectEnable(frameNode, DEFAULT_ENABLE_TEXT_DETECTOR);
 }
 
-void SetRichEditorDataDetectorConfigWithEvent(ArkUINodeHandle node, ArkUI_CharPtr types, void* callback)
+void SetRichEditorDataDetectorConfigWithEvent(
+    ArkUINodeHandle node, const struct ArkUITextDetectConfigStruct* arkUITextDetectConfig)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    std::string strValue = types;
-    std::function<void(const std::string&)>* onResult = nullptr;
-    if (callback) {
-        onResult = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+    TextDetectConfig textDetectConfig;
+    textDetectConfig.types = arkUITextDetectConfig->types;
+    if (arkUITextDetectConfig->onResult) {
+        textDetectConfig.onResult =
+            std::move(*(reinterpret_cast<std::function<void(const std::string&)>*>(arkUITextDetectConfig->onResult)));
     }
-    RichEditorModelNG::SetTextDetectConfig(frameNode, strValue, std::move(*onResult));
+    textDetectConfig.entityColor = Color(arkUITextDetectConfig->entityColor);
+    textDetectConfig.entityDecorationType = TextDecoration(arkUITextDetectConfig->entityDecorationType);
+    textDetectConfig.entityDecorationColor = Color(arkUITextDetectConfig->entityDecorationColor);
+    textDetectConfig.entityDecorationStyle = TextDecorationStyle(arkUITextDetectConfig->entityDecorationStyle);
+    RichEditorModelNG::SetTextDetectConfig(frameNode, textDetectConfig);
 }
 
 void ResetRichEditorDataDetectorConfigWithEvent(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    RichEditorModelNG::SetTextDetectConfig(frameNode, "", nullptr);
+    TextDetectConfig textDetectConfig;
+    RichEditorModelNG::SetTextDetectConfig(frameNode, textDetectConfig);
 }
 
 void SetRichEditorOnIMEInputComplete(ArkUINodeHandle node, void* callback)

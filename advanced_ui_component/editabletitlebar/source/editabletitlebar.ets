@@ -438,25 +438,24 @@ struct ImageMenuItem {
   }
 
   aboutToAppear(): void {
-    let uiContent: UIContext = this.getUIContext();
-    this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
-    this.maxFontScale = uiContent.getMaxFontScale();
-  }
-
-  decideFontScale(): number {
     try {
       let uiContent: UIContext = this.getUIContext();
-      this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1;
-      if (!this.isFollowingSystemFontScale) {
-        return 1;
-      }
-      return Math.min(this.systemFontScale, this.maxFontScale);
+      this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
+      this.maxFontScale = uiContent.getMaxFontScale();
     } catch (exception) {
       let code: number = (exception as BusinessError).code;
       let message: string = (exception as BusinessError).message;
       hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
+    }
+  }
+
+  decideFontScale(): number {
+    let uiContent: UIContext = this.getUIContext();
+    this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+    if (!this.isFollowingSystemFontScale) {
       return 1;
     }
+    return Math.min(this.systemFontScale, this.maxFontScale);
   }
 
   @Styles

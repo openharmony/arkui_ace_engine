@@ -3193,6 +3193,8 @@ let NativeEmbedStatus;
   NativeEmbedStatus['DESTROY'] = 2;
   NativeEmbedStatus['ENTER_BFCACHE'] = 3;
   NativeEmbedStatus['LEAVE_BFCACHE'] = 4;
+  NativeEmbedStatus['VISIBLE'] = 5;
+  NativeEmbedStatus['HIDDEN'] = 6;
 })(NativeEmbedStatus || (NativeEmbedStatus = {}));
 
 let RenderMode;

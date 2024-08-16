@@ -551,12 +551,12 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_
             auto pipelineContext = container->GetPipelineContext();
             if (pipelineContext) {
                 uint32_t windowId = pipelineContext->GetWindowId();
-                LOGI("pointdown windowId: %{public}u", windowId);
+                TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "pointdown windowId: %{public}u", windowId);
             }
         }
     }
     if (SystemProperties::GetDebugEnabled()) {
-        LOGD("point source: %{public}d", pointerEvent->GetSourceType());
+        TAG_LOGD(AceLogTag::ACE_DRAG, "point source: %{public}d", pointerEvent->GetSourceType());
         auto actionId = pointerEvent->GetPointerId();
         MMI::PointerEvent::PointerItem item;
         if (pointerEvent->GetPointerItem(actionId, item)) {

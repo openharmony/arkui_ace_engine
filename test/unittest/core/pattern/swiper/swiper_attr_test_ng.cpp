@@ -1173,4 +1173,88 @@ HWTEST_F(SwiperAttrTestNg, SwiperPaintProperty001, TestSize.Level1)
     paintProperty_->FromJson(jsonFrom);
     EXPECT_TRUE(jsonFrom);
 }
+
+/**
+ * @tc.name: SetNestedScroll001
+ * @tc.desc: Test SetNestedScroll method about NestableScrollContainer
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAttrTestNg, SetNestedScroll001, TestSize.Level1)
+{
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::SELF_FIRST,
+        .backward = NestedScrollMode::SELF_ONLY,
+    };
+    CreateWithItem([nestedOpt](SwiperModelNG model) {
+        model.SetLoop(false);
+        model.SetNestedScroll(nestedOpt);
+    });
+    auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
+    /**
+     * @tc.steps: step1. call SetNestedScroll when parent && !nestedScroll.NeedParent() && nestedScroll_.NeedParent()
+     */
+    pattern_->parent_ = mockScroll;
+    nestedOpt = {
+        .forward = NestedScrollMode::SELF_ONLY,
+        .backward = NestedScrollMode::SELF_ONLY,
+    };
+    pattern_->isNestedInterrupt_ = false;
+    pattern_->isFixedNestedScrollMode_ = true;
+    pattern_->SetNestedScroll(nestedOpt);
+    EXPECT_FALSE(pattern_->isFixedNestedScrollMode_);
+    EXPECT_TRUE(pattern_->isNestedInterrupt_);
+}
+
+/**
+ * @tc.name: OnScrollDragEndRecursive001
+ * @tc.desc: Test OnScrollDragEndRecursive method about NestableScrollContainer
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAttrTestNg, OnScrollDragEndRecursive001, TestSize.Level1)
+{
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::SELF_FIRST,
+        .backward = NestedScrollMode::SELF_ONLY,
+    };
+    CreateWithItem([nestedOpt](SwiperModelNG model) {
+        model.SetLoop(false);
+        model.SetNestedScroll(nestedOpt);
+    });
+    auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
+    EXPECT_CALL(*mockScroll, OnScrollDragEndRecursive()).Times(1);
+    ASSERT_EQ(mockScroll->parent_.Upgrade(), nullptr);
+    /**
+     * @tc.steps: step1. call OnScrollDragEndRecursive in parent and nestedScroll_.NeedParent() combined condition
+     */
+    pattern_->parent_ = mockScroll;
+    ASSERT_NE(pattern_->parent_.Upgrade(), nullptr);
+    EXPECT_TRUE(pattern_->nestedScroll_.NeedParent());
+    pattern_->OnScrollDragEndRecursive();
+
+    nestedOpt = {
+        .forward = NestedScrollMode::SELF_ONLY,
+        .backward = NestedScrollMode::SELF_ONLY,
+    };
+    pattern_->nestedScroll_ = nestedOpt;
+    ASSERT_NE(pattern_->parent_.Upgrade(), nullptr);
+    EXPECT_FALSE(pattern_->nestedScroll_.NeedParent());
+    pattern_->OnScrollDragEndRecursive();
+
+    nestedOpt = {
+        .forward = NestedScrollMode::SELF_FIRST,
+        .backward = NestedScrollMode::SELF_ONLY,
+    };
+    pattern_->nestedScroll_ = nestedOpt;
+    pattern_->parent_ = nullptr;
+    EXPECT_TRUE(pattern_->nestedScroll_.NeedParent());
+    pattern_->OnScrollDragEndRecursive();
+
+    nestedOpt = {
+        .forward = NestedScrollMode::SELF_ONLY,
+        .backward = NestedScrollMode::SELF_ONLY,
+    };
+    pattern_->nestedScroll_ = nestedOpt;
+    EXPECT_FALSE(pattern_->nestedScroll_.NeedParent());
+    pattern_->OnScrollDragEndRecursive();
+}
 } // namespace OHOS::Ace::NG
