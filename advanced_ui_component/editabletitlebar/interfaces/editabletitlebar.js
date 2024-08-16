@@ -854,25 +854,24 @@ class ImageMenuItem extends ViewPU {
         }
     }
     aboutToAppear() {
-        let h = this.getUIContext();
-        this.isFollowingSystemFontScale = h.isFollowingSystemFontScale();
-        this.maxFontScale = h.getMaxFontScale();
-    }
-    decideFontScale() {
         try {
-            let k2 = this.getUIContext();
-            this.systemFontScale = k2.getHostContext()?.config.fontSizeScale ?? 1;
-            if (!this.isFollowingSystemFontScale) {
-                return 1;
-            }
-            return Math.min(this.systemFontScale, this.maxFontScale);
+            let h = this.getUIContext();
+            this.isFollowingSystemFontScale = h.isFollowingSystemFontScale();
+            this.maxFontScale = h.getMaxFontScale();
         }
         catch (h2) {
             let i2 = h2.code;
             let j2 = h2.message;
             hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${i2}, message: ${j2}`);
+        }
+    }
+    decideFontScale() {
+        let k2 = this.getUIContext();
+        this.systemFontScale = k2.getHostContext()?.config?.fontSizeScale ?? 1;
+        if (!this.isFollowingSystemFontScale) {
             return 1;
         }
+        return Math.min(this.systemFontScale, this.maxFontScale);
     }
     getBgColor() {
         if (this.isOnClick) {

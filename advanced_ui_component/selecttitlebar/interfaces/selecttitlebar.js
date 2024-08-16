@@ -566,9 +566,16 @@ class CollapsibleMenuSection extends ViewPU {
   }
 
   aboutToAppear() {
-    let h = this.getUIContext();
-    this.isFollowingSystemFontScale = h.isFollowingSystemFontScale();
-    this.maxFontScale = h.getMaxFontScale();
+    try {
+      let h = this.getUIContext();
+      this.isFollowingSystemFontScale = h.isFollowingSystemFontScale();
+      this.maxFontScale = h.getMaxFontScale();
+    }
+    catch (j9) {
+      let k9 = j9.code;
+      let l9 = j9.message;
+      hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${k9}, message: ${l9}`);
+    }
     this.menuItems.forEach((c6, d6) => {
       if (c6.isEnabled && this.firstFocusableIndex == -1 &&
         d6 > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
@@ -577,20 +584,12 @@ class CollapsibleMenuSection extends ViewPU {
     });
   }
   decideFontScale() {
-    try {
-      let m9 = this.getUIContext();
-      this.systemFontScale = m9.getHostContext()?.config.fontSizeScale ?? 1;
-      if (!this.isFollowingSystemFontScale) {
-        return 1;
-      }
-      return Math.min(this.systemFontScale, this.maxFontScale);
-    }
-    catch (j9) {
-      let k9 = j9.code;
-      let l9 = j9.message;
-      hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${k9}, message: ${l9}`);
+    let m9 = this.getUIContext();
+    this.systemFontScale = m9.getHostContext()?.config?.fontSizeScale ?? 1;
+    if (!this.isFollowingSystemFontScale) {
       return 1;
     }
+    return Math.min(this.systemFontScale, this.maxFontScale);
   }
 
   initialRender() {
@@ -781,13 +780,14 @@ class CollapsibleMenuSection extends ViewPU {
           this.observeComponentCreation2((k3, l3) => {
             if (l3) {
               let m3 = new ImageMenuItem(this, { item: i3,
-                index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + h3 }, undefined, k3,
-                () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 345, col: 11 });
+                index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + h3, isPopup: true },
+                undefined, k3, () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 345, col: 11 });
               ViewPU.create(m3);
               let n3 = () => {
                 return {
                   item: i3,
-                  index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + h3
+                  index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + h3,
+                  isPopup: true
                 };
               };
               m3.paramsGenerator_ = n3;
@@ -827,6 +827,7 @@ class ImageMenuItem extends ViewPU {
     this.isFollowingSystemFontScale = false;
     this.maxFontScale = 1;
     this.systemFontScale = 1;
+    this.isPopup = false;
     this.__isOnFocus = new ObservedPropertySimplePU(false, this, 'isOnFocus');
     this.__isOnHover = new ObservedPropertySimplePU(false, this, 'isOnHover');
     this.__isOnClick = new ObservedPropertySimplePU(false, this, 'isOnClick');
@@ -886,6 +887,9 @@ class ImageMenuItem extends ViewPU {
     }
     if (o2.systemFontScale !== undefined) {
       this.systemFontScale = o2.systemFontScale;
+    }
+    if (o2.isPopup !== undefined) {
+      this.isPopup = o2.isPopup;
     }
     if (o2.isOnFocus !== undefined) {
       this.isOnFocus = o2.isOnFocus;
@@ -988,25 +992,24 @@ class ImageMenuItem extends ViewPU {
     }
   }
   aboutToAppear() {
-    let h = this.getUIContext();
-    this.isFollowingSystemFontScale = h.isFollowingSystemFontScale();
-    this.maxFontScale = h.getMaxFontScale();
-  }
-  decideFontScale() {
     try {
-      let k2 = this.getUIContext();
-      this.systemFontScale = k2.getHostContext()?.config.fontSizeScale ?? 1;
-      if (!this.isFollowingSystemFontScale) {
-        return 1;
-      }
-      return Math.min(this.systemFontScale, this.maxFontScale);
+      let h = this.getUIContext();
+      this.isFollowingSystemFontScale = h.isFollowingSystemFontScale();
+      this.maxFontScale = h.getMaxFontScale();
     }
     catch (h2) {
       let i2 = h2.code;
       let j2 = h2.message;
       hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${i2}, message: ${j2}`);
+    }
+  }
+  decideFontScale() {
+    let k2 = this.getUIContext();
+    this.systemFontScale = k2.getHostContext()?.config?.fontSizeScale ?? 1;
+    if (!this.isFollowingSystemFontScale) {
       return 1;
     }
+    return Math.min(this.systemFontScale, this.maxFontScale);
   }
 
   initialRender() {
@@ -1072,7 +1075,7 @@ class ImageMenuItem extends ViewPU {
         }
         if (f2.type === TouchType.Up || f2.type === TouchType.Cancel) {
           this.isOnClick = false;
-          if (this.fontSize >= this.minFontSize) {
+          if (this.fontSize >= this.minFontSize && this.isPopup === false) {
             this.dialogController?.close();
           }
         }
@@ -1083,7 +1086,7 @@ class ImageMenuItem extends ViewPU {
       LongPressGesture.onAction((d2) => {
         this.fontSize = this.decideFontScale();
         if (d2) {
-          if (this.fontSize >= this.minFontSize) {
+          if (this.fontSize >= this.minFontSize && this.isPopup === false) {
             this.dialogController?.open();
           }
         }
