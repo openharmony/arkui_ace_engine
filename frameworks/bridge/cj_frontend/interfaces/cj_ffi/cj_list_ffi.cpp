@@ -120,7 +120,7 @@ void FfiOHOSAceFrameworkListSetDirection(int32_t direction)
     ListModel::GetInstance()->SetListDirection(AXIS[direction]);
 }
 
-void FfiOHOSAceFrameworkListSetDivider(DividerParams& params)
+void FfiOHOSAceFrameworkListSetDivider(DividerParams params)
 {
     Dimension widthDime(params.width, static_cast<DimensionUnit>(params.widthUnit));
     Dimension startMarginDime(params.startMargin, static_cast<DimensionUnit>(params.startMarginUnit));

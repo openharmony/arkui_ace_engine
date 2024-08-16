@@ -96,4 +96,18 @@ void FfiOHOSAceFrameworkTogglePop()
 {
     ToggleModel::GetInstance()->Pop();
 }
+
+void FfiToggleSetResponseRegion(CJResponseRegion value)
+{
+    std::vector<DimensionRect> result;
+    ParseCJResponseRegion(value, result);
+    ToggleModel::GetInstance()->SetResponseRegion(result);
+}
+
+void FfiToggleSetResponseRegionArray(VectorStringPtr vecContent)
+{
+    std::vector<DimensionRect> result;
+    ParseVectorStringPtr(vecContent, result);
+    ToggleModel::GetInstance()->SetResponseRegion(result);
+}
 }

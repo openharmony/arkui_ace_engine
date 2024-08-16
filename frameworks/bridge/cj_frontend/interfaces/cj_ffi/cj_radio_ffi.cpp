@@ -35,4 +35,18 @@ void FfiOHOSAceFrameworkRadioOnChange(void (*callback)(bool isChecked))
 {
     RadioModel::GetInstance()->SetOnChange(CJLambda::Create(callback));
 }
+
+void FfiRadioSetResponseRegion(CJResponseRegion value)
+{
+    std::vector<DimensionRect> result;
+    ParseCJResponseRegion(value, result);
+    RadioModel::GetInstance()->SetResponseRegion(result);
+}
+
+void FfiRadioSetResponseRegionArray(VectorStringPtr vecContent)
+{
+    std::vector<DimensionRect> result;
+    ParseVectorStringPtr(vecContent, result);
+    RadioModel::GetInstance()->SetResponseRegion(result);
+}
 }
