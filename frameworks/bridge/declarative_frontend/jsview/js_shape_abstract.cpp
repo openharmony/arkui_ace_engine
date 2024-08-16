@@ -18,6 +18,7 @@
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/models/shape_abstract_model_impl.h"
 #include "core/common/container.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
@@ -458,6 +459,9 @@ void JSShapeAbstract::SetForegroundColor(const JSCallbackInfo& info)
     }
     Color foregroundColor;
     ForegroundColorStrategy strategy;
+    if (!OHOS::Ace::NG::ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
     if (ParseJsColorStrategy(info[0], strategy)) {
         ShapeAbstractModel::GetInstance()->SetFill(Color::FOREGROUND);
         ViewAbstractModel::GetInstance()->SetForegroundColorStrategy(strategy);
