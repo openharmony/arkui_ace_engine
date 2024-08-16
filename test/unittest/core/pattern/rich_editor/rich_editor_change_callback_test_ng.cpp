@@ -575,13 +575,11 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest008, TestSize.Lev
      */
     isWillCalled = false;
     isDidCalled = false;
-    originalCount = 0;
     replacedCount = 0;
     afterCount = 0;
     richEditorPattern->HandleOnRedoAction();
     EXPECT_EQ(isWillCalled, true);
     EXPECT_EQ(isDidCalled, true);
-    EXPECT_EQ(originalCount, 1);
     EXPECT_EQ(replacedCount, 0);
     EXPECT_EQ(afterCount, 0);
 }

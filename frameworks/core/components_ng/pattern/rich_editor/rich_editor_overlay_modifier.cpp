@@ -225,6 +225,7 @@ void RichEditorOverlayModifier::onDraw(DrawingContext& drawingContext)
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
+        CHECK_NULL_VOID(richEditorTheme);
         auto defaultCaretHeight = richEditorTheme->GetDefaultCaretHeight().ConvertToPx();
         if (contentRect.Height() < defaultCaretHeight) {
             contentRect.SetHeight(defaultCaretHeight);
