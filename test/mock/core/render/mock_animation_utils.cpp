@@ -54,7 +54,9 @@ void AnimationUtils::Animation::Next()
     }
 }
 
+#ifdef ENHANCED_ANIMATION
 using AnimManager = NG::MockAnimationManager;
+#endif
 
 class AnimationUtils::InteractiveAnimation {
 public:
@@ -74,7 +76,9 @@ void AnimationUtils::OpenImplicitAnimation(
 
 bool AnimationUtils::CloseImplicitAnimation()
 {
+#ifdef ENHANCED_ANIMATION
     AnimManager::GetInstance().CloseAnimation();
+#endif
     return false;
 }
 
@@ -133,15 +137,19 @@ void AnimationUtils::AnimateWithCurrentCallback(const AnimationOption& option, c
 std::shared_ptr<AnimationUtils::Animation> AnimationUtils::StartAnimation(const AnimationOption& option,
     const PropertyCallback& callback, const FinishCallback& finishCallback, const RepeatCallback& repeatCallback)
 {
+#ifdef ENHANCED_ANIMATION
     AnimManager::GetInstance().SetParams({ finishCallback, repeatCallback });
     AnimManager::GetInstance().OpenAnimation();
+#endif
     if (callback) {
         callback();
     }
+#ifdef ENHANCED_ANIMATION
     auto animation = AnimManager::GetInstance().CloseAnimation();
     if (AnimManager::Enabled()) {
         return animation;
     }
+#endif
 
     if (finishCallback) {
         finishCallback();

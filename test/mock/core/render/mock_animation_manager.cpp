@@ -16,9 +16,6 @@
 #include "test/mock/core/render/mock_animation_manager.h"
 
 namespace OHOS::Ace::NG {
-MockAnimationManager::MockAnimationManager() = default;
-MockAnimationManager::~MockAnimationManager() = default;
-
 std::shared_ptr<AnimationUtils::Animation> MockAnimationManager::CloseAnimation()
 {
     inScope_ = false;

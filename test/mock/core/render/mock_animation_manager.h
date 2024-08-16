@@ -22,7 +22,11 @@
 namespace OHOS::Ace::NG {
 
 class MockAnimationManager : public Singleton<MockAnimationManager> {
-    DECLARE_SINGLETON(MockAnimationManager)
+private:
+    MockAnimationManager() = default;
+    ~MockAnimationManager() override = default;
+    friend Singleton<MockAnimationManager>;
+    ACE_DISALLOW_COPY_AND_MOVE(MockAnimationManager);
 public:
     static void Enable(bool value)
     {

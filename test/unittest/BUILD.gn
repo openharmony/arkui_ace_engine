@@ -480,6 +480,7 @@ ohos_source_set("ace_engine_unittest_flutter_deps") {
 
 ohos_source_set("ace_components_mock") {
   testonly = true
+  defines = [ "ENHANCED_ANIMATION" ]
   sources = [
     "$ace_root/test/mock/adapter/mock_file_uri_helper_ohos.cpp",
     "$ace_root/test/mock/adapter/mock_image_packer_ohos.cpp",

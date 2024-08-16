@@ -14,6 +14,7 @@
  */
 
 #include "test/mock/core/render/mock_animation_manager.h"
+
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/render/modifier_adapter.h"
 
@@ -23,16 +24,15 @@ template<>
 void NodeAnimatableProperty<float, AnimatablePropertyFloat>::AnimateWithVelocity(
     const AnimationOption& option, float value, float velocity, const FinishCallback& finishCallback)
 {
+#ifdef ENHANCED_ANIMATION
+    if (!MockAnimationManager::Enabled()) {
+        return;
+    }
+    MockAnimationManager::GetInstance().SetParams({ finishCallback, nullptr });
     MockAnimationManager::GetInstance().OpenAnimation();
     Set(value);
     MockAnimationManager::GetInstance().CloseAnimation();
-    if (MockAnimationManager::Enabled()) {
-        return;
-    }
-
-    if (finishCallback) {
-        finishCallback();
-    }
+#endif
 }
 template<>
 void NodeAnimatableProperty<float, AnimatablePropertyFloat>::SetThresholdType(ThresholdType type)
