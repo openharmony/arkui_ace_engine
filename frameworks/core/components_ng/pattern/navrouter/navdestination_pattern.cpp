@@ -327,7 +327,7 @@ void NavDestinationPattern::InitBackButtonLongPressEvent(RefPtr<NavDestinationGr
 
     auto accessibilityProperty = backButtonNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO);
+    accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
 }
 
 void NavDestinationPattern::HandleLongPress()

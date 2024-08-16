@@ -403,10 +403,10 @@ void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, Accessib
         nodeInfo.AddAction(action);
     }
 
-    if (node->GetImportantForAccessibility() == NG::AccessibilityProperty::Level::YES) {
+    if (node->GetImportantForAccessibility() == NG::AccessibilityProperty::Level::YES_STR) {
         actions.emplace_back(ActionType::ACCESSIBILITY_ACTION_FOCUS);
         nodeInfo.SetCheckable(true);
-    } else if (node->GetImportantForAccessibility() == NG::AccessibilityProperty::Level::NO ||
+    } else if (node->GetImportantForAccessibility() == NG::AccessibilityProperty::Level::NO_STR ||
                node->GetImportantForAccessibility() == NG::AccessibilityProperty::Level::NO_HIDE_DESCENDANTS) {
         nodeInfo.SetVisible(false);
     }
@@ -1812,7 +1812,7 @@ bool CanAccessibilityFocusedNG(const RefPtr<NG::FrameNode>& node)
     auto level = accessibilityProperty->GetAccessibilityLevel();
     return !node->IsRootNode() &&
            node->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::VISIBLE &&
-           level != NG::AccessibilityProperty::Level::NO &&
+           level != NG::AccessibilityProperty::Level::NO_STR &&
            level != NG::AccessibilityProperty::Level::NO_HIDE_DESCENDANTS;
 }
 // focus move search
