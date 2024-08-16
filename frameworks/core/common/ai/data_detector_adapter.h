@@ -82,6 +82,7 @@ public:
     bool ShowAIEntityMenu(const AISpan& aiSpan, const NG::RectF& aiRect, const RefPtr<NG::FrameNode>& targetNode,
         bool isShowCopy = true, bool isShowSelectText = true);
     void ResponseBestMatchItem(const AISpan& aiSpan);
+    void GetAIEntityMenu();
 
 private:
     friend class NG::TextPattern;
@@ -90,7 +91,6 @@ private:
     std::function<void()> GetDetectDelayTask(const std::map<int32_t, AISpan>& aiSpanMap);
     void OnClickAIMenuOption(const AISpan& aiSpan, const std::pair<std::string, FuncVariant>& menuOption,
         const RefPtr<NG::FrameNode>& targetNode = nullptr);
-    void GetAIEntityMenu();
 
     WeakPtr<NG::FrameNode> frameNode_;
     bool aiDetectInitialized_ = false;
