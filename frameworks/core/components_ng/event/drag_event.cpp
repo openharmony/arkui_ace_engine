@@ -198,6 +198,10 @@ bool DragEventActuator::IsCurrentNodeStatusSuitableForDragging(
 
 void DragEventActuator::RestartDragTask(const GestureEvent& info)
 {
+    if (info.GetInputEventType() == InputEventType::AXIS) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger drag pan event by axis");
+        return;
+    }
     auto gestureInfo = const_cast<GestureEvent&>(info);
     if (actionStart_) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Restart drag for lifting status");
