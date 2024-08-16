@@ -1842,10 +1842,12 @@ void IndexerPattern::StartCollapseDelayTask(RefPtr<FrameNode>& hostNode, uint32_
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     CHECK_NULL_VOID(context->GetTaskExecutor());
-    delayCollapseTask_.Reset([hostNode] {
+    delayCollapseTask_.Reset([node = WeakClaim(RawPtr(hostNode))]() {
+        auto hostNode = node.Upgrade();
+        CHECK_NULL_VOID(hostNode);
         hostNode->MarkModifyDone();
         hostNode->MarkDirtyNode();
-        });
+    });
     context->GetTaskExecutor()->PostDelayedTask(
         delayCollapseTask_, TaskExecutor::TaskType::UI, duration, "ArkUIAlphabetIndexerCollapse");
 }
