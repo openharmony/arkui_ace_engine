@@ -4778,4 +4778,152 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerEnableHapticFeedback003, TestSize.Le
         EXPECT_EQ(timePickerRowPattern->GetIsEnableHaptic(), testValue);
     }
 }
+
+/**
+ * @tc.name: TimePickerDialogViewConvertFontScaleValue001
+ * @tc.desc: Test TimePickerDialogView ConvertFontScaleValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewConvertFontScaleValue001, TestSize.Level1)
+{
+    Dimension fontSizeValue = 50.0_vp;
+    Dimension fontSizeLimit = 40.0_vp;
+
+    auto result = TimePickerDialogView::ConvertFontScaleValue(fontSizeValue,
+        fontSizeLimit, true);
+    EXPECT_EQ(fontSizeLimit.Value(), result.Value());
+}
+
+/**
+ * @tc.name: TimePickerDialogViewConvertFontScaleValue002
+ * @tc.desc: Test TimePickerDialogView ConvertFontScaleValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewConvertFontScaleValue002, TestSize.Level1)
+{
+    Dimension fontSizeValue = 20.0_vp;
+    Dimension fontSizeLimit = 40.0_vp;
+
+    auto result = TimePickerDialogView::ConvertFontScaleValue(fontSizeValue,
+        fontSizeLimit, true);
+    EXPECT_EQ(fontSizeValue.Value(), result.Value());
+}
+
+/**
+ * @tc.name: TimePickerDialogViewConvertFontSizeLimitTest001
+ * @tc.desc: Test TimePickerDialogView ConvertFontSizeLimit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewConvertFontSizeLimitTest001, TestSize.Level1)
+{
+    Dimension fontSizeValue(20.0);
+    Dimension fontSizeLimit(30.0);
+    bool isUserSetFont = false;
+    Dimension result = TimePickerDialogView::ConvertFontSizeLimit(fontSizeValue,
+        fontSizeLimit, isUserSetFont);
+    EXPECT_EQ(result, fontSizeValue);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewConvertFontSizeLimitTest002
+ * @tc.desc: Test TimePickerDialogView ConvertFontSizeLimit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewConvertFontSizeLimitTest002, TestSize.Level1)
+{
+    Dimension fontSizeValue(20.0);
+    Dimension fontSizeLimit(30.0);
+    bool isUserSetFont = true;
+    Dimension result = TimePickerDialogView::ConvertFontSizeLimit(fontSizeValue,
+        fontSizeLimit, isUserSetFont);
+    EXPECT_EQ(result, fontSizeValue);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewConvertFontSizeLimitTest003
+ * @tc.desc: Test TimePickerDialogView ConvertFontSizeLimit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewConvertFontSizeLimitTest003, TestSize.Level1)
+{
+    Dimension fontSizeValue(40.0);
+    Dimension fontSizeLimit(30.0);
+    bool isUserSetFont = true;
+    double fontScale = 2.0f;
+    MockPipelineContext::GetCurrent()->SetFontScale(fontScale);
+    Dimension result = TimePickerDialogView::ConvertFontSizeLimit(fontSizeValue,
+        fontSizeLimit, isUserSetFont);
+    Dimension expected = fontSizeLimit / fontScale;
+    EXPECT_EQ(result, expected);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewConvertFontSizeLimitTest004
+ * @tc.desc: Test TimePickerDialogView ConvertFontSizeLimit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewConvertFontSizeLimitTest004, TestSize.Level1)
+{
+    Dimension fontSizeValue(10.0);
+    Dimension fontSizeLimit(30.0);
+    bool isUserSetFont = true;
+    double fontScale = 2.0f;
+    MockPipelineContext::GetCurrent()->SetFontScale(fontScale);
+    Dimension result = TimePickerDialogView::ConvertFontSizeLimit(fontSizeValue,
+        fontSizeLimit, isUserSetFont);
+    EXPECT_EQ(result, fontSizeValue);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewGetUserSettingLimitTest001
+ * @tc.desc: Test TimePickerDialogView AdjustFontSizeScale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewGetUserSettingLimitTest001, TestSize.Level1)
+{
+    double fontScale = 1.0f;
+    Dimension fontSizeValue(10.0);
+    Dimension result = TimePickerDialogView::AdjustFontSizeScale(fontSizeValue, fontScale);
+    EXPECT_EQ(result, fontSizeValue * fontScale);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewGetUserSettingLimitTest002
+ * @tc.desc: Test TimePickerDialogView AdjustFontSizeScale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewGetUserSettingLimitTest002, TestSize.Level1)
+{
+    double fontScale = 1.75f;
+    Dimension fontSizeValue(10.0);
+    Dimension result = TimePickerDialogView::AdjustFontSizeScale(fontSizeValue, fontScale);
+    EXPECT_EQ(result, fontSizeValue * fontScale);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewGetUserSettingLimitTest003
+ * @tc.desc: Test TimePickerDialogView AdjustFontSizeScale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewGetUserSettingLimitTest003, TestSize.Level1)
+{
+    double fontScale = 2.0f;
+    Dimension fontSizeValue(10.0);
+    Dimension result = TimePickerDialogView::AdjustFontSizeScale(fontSizeValue, fontScale);
+    EXPECT_EQ(result, fontSizeValue * fontScale);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewGetUserSettingLimitTest004
+ * @tc.desc: Test TimePickerDialogView AdjustFontSizeScale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewGetUserSettingLimitTest004, TestSize.Level1)
+{
+    double fontScale = 3.2f;
+    Dimension fontSizeValue(10.0);
+    Dimension result = TimePickerDialogView::AdjustFontSizeScale(fontSizeValue, fontScale);
+    EXPECT_NE(result, fontSizeValue * fontScale);
+}
+
 } // namespace OHOS::Ace::NG
