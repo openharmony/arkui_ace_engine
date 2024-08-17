@@ -32,6 +32,8 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
+constexpr float CONTENT_OFFSET_PERCENT  = 0.2f;
+constexpr float TITLE_OFFSET_PERCENT  = 0.02f;
 
 RefPtr<NavBarNode> NavBarNode::GetOrCreateNavBarNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
@@ -136,4 +138,53 @@ void NavBarNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFi
     json->PutExtAttr("toolBar", GetBarItemsString(false).c_str(), filter);
 }
 
+void NavBarNode::InitSystemTransitionPop()
+{
+    // navabr do enter pop initialization
+    float isRTL = GetLanguageDirection();
+    SetTransitionType(PageTransitionType::ENTER_POP);
+    auto curFrameSize = GetGeometryNode()->GetFrameSize();
+    GetRenderContext()->RemoveClipWithRRect();
+    GetRenderContext()->UpdateTranslateInXY({ -curFrameSize.Width() * CONTENT_OFFSET_PERCENT * isRTL, 0.0f });
+    auto curTitleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
+    CHECK_NULL_VOID(curTitleBarNode);
+    curTitleBarNode->GetRenderContext()->UpdateTranslateInXY(
+        { curFrameSize.Width() * TITLE_OFFSET_PERCENT * isRTL, 0.0f });
+}
+
+void NavBarNode::SystemTransitionPushAction(bool isFinish)
+{
+    // initialization or finish callBack
+    if (isFinish) {
+        SetTransitionType(PageTransitionType::EXIT_PUSH);
+    } else {
+        GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT);
+    }
+    GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+    auto titleNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
+    CHECK_NULL_VOID(titleNode);
+    titleNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+}
+
+void NavBarNode::StartSystemTransitionPush()
+{
+    // start EXIT_PUSH transition animation
+    float isRTL = GetLanguageDirection();
+    auto frameSize = GetGeometryNode()->GetFrameSize();
+    GetRenderContext()->UpdateTranslateInXY(
+        { -frameSize.Width() * CONTENT_OFFSET_PERCENT * isRTL, 0.0f });
+    auto titleNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
+    CHECK_NULL_VOID(titleNode);
+    titleNode->GetRenderContext()->UpdateTranslateInXY(
+        { frameSize.Width() * TITLE_OFFSET_PERCENT * isRTL, 0.0f });
+}
+
+void NavBarNode::StartSystemTransitionPop()
+{
+    // navabr start to do ENTER_POP animation
+    GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+    auto titleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    titleBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+}
 } // namespace OHOS::Ace::NG

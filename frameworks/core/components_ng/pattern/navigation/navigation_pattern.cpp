@@ -836,7 +836,7 @@ void NavigationPattern::CheckTopNavPathChange(
         disableAllAnimation, animated, isPopPage);
     if (isDialog && !isCustomAnimation_) {
         // dialog navDestination no need transition animation.
-        StartTransition(preTopNavDestination, newTopNavDestination, false, isPopPage, isShow);
+        StartTransition(preTopNavDestination, newTopNavDestination, true, isPopPage, isShow);
         hostNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
         return;
     }
@@ -1006,6 +1006,25 @@ void NavigationPattern::NotifyPageShow(const std::string& pageName)
     }
 }
 
+void NavigationPattern::ReplaceAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
+    const RefPtr<NavDestinationGroupNode>& newTopNavDestination)
+{
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(navigationNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    if (newTopNavDestination && preTopNavDestination) {
+        navigationNode->DealNavigationExit(preTopNavDestination, false, false);
+    } else if (newTopNavDestination && navigationMode_ == NavigationMode::STACK) {
+        navigationNode->DealNavigationExit(navBarNode, true, false);
+    }
+    navigationNode->RemoveDialogDestination();
+    auto id = navigationNode->GetTopDestination() ? navigationNode->GetTopDestination()->GetAccessibilityId() : -1;
+    navigationNode->OnAccessibilityEvent(
+        AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
+    navigationStack_->UpdateReplaceValue(0);
+}
+
 void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
     const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage, bool needVisible)
 {
@@ -1020,16 +1039,7 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
     // replace
     auto replaceVal = navigationStack_->GetReplaceValue();
     if (replaceVal != 0) {
-        if (newTopNavDestination && preTopNavDestination) {
-            navigationNode->DealNavigationExit(preTopNavDestination, false, false);
-        } else if (newTopNavDestination && navigationMode_ == NavigationMode::STACK) {
-            navigationNode->DealNavigationExit(navBarNode, true, false);
-        }
-        navigationNode->RemoveDialogDestination();
-        auto id = navigationNode->GetTopDestination() ? navigationNode->GetTopDestination()->GetAccessibilityId() : -1;
-        navigationNode->OnAccessibilityEvent(
-            AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
-        navigationStack_->UpdateReplaceValue(0);
+        ReplaceAnimation(preTopNavDestination, newTopNavDestination);
         return;
     }
 
@@ -1133,6 +1143,16 @@ void NavigationPattern::TransitionWithAnimation(const RefPtr<NavDestinationGroup
     StartDefaultAnimation(preTopNavDestination, newTopNavDestination, isPopPage, isNeedVisible);
 }
 
+void NavigationPattern::DialogAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
+    const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage, bool isNeedVisible)
+{
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        TransitionWithDialogAnimation(preTopNavDestination, newTopNavDestination, isPopPage);
+    } else {
+        TransitionWithOutAnimation(preTopNavDestination, newTopNavDestination, isPopPage, isNeedVisible);
+    }
+}
+
 void NavigationPattern::StartDefaultAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
     const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage, bool isNeedVisible)
 {
@@ -1140,11 +1160,12 @@ void NavigationPattern::StartDefaultAnimation(const RefPtr<NavDestinationGroupNo
         currentProxy_->SetIsFinished(true);
     }
     navigationStack_->ClearRecoveryList();
-    bool isDialog =
-        (preTopNavDestination && preTopNavDestination->GetNavDestinationMode() == NavDestinationMode::DIALOG) ||
-        (newTopNavDestination && newTopNavDestination->GetNavDestinationMode() == NavDestinationMode::DIALOG);
-    if (isDialog) {
-        TransitionWithOutAnimation(preTopNavDestination, newTopNavDestination, isPopPage, isNeedVisible);
+    bool isPreDialog = preTopNavDestination &&
+        preTopNavDestination->GetNavDestinationMode() == NavDestinationMode::DIALOG;
+    bool isNewDialog = newTopNavDestination &&
+        newTopNavDestination->GetNavDestinationMode() == NavDestinationMode::DIALOG;
+    if (isPreDialog || isNewDialog) {
+        DialogAnimation(preTopNavDestination, newTopNavDestination, isPopPage, isNeedVisible);
         return;
     }
     auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
@@ -1162,7 +1183,6 @@ void NavigationPattern::StartDefaultAnimation(const RefPtr<NavDestinationGroupNo
         navigationStack_->UpdateReplaceValue(0);
         return;
     }
-
     // navDestination push/pop navDestination
     if (newTopNavDestination && preTopNavDestination) {
         if (isPopPage) {
@@ -1172,13 +1192,11 @@ void NavigationPattern::StartDefaultAnimation(const RefPtr<NavDestinationGroupNo
         }
         return;
     }
-
     // navBar push navDestination
     if (newTopNavDestination && navigationMode_ == NavigationMode::STACK) {
         navigationNode->TransitionWithPush(navBarNode, newTopNavDestination, true);
         return;
     }
-
     // navDestination pop to navBar
     if (preTopNavDestination) {
         if (navigationMode_ == NavigationMode::SPLIT) {
@@ -2537,5 +2555,87 @@ bool NavigationPattern::GetIsFocusable(const RefPtr<FrameNode>& frameNode)
     auto currentFocusHub = frameNode->GetFocusHub();
     CHECK_NULL_RETURN(currentFocusHub, false);
     return currentFocusHub->IsFocusableNode();
+}
+
+bool NavigationPattern::IsLastStdChange()
+{
+    // check whether last std navdestination id is changed, change return true, not change return false
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_RETURN(navigationNode, false);
+    auto& navPathList = navigationStack_->GetAllNavDestinationNodes();
+    auto& preNavPathList = navigationStack_->GetAllNavDestinationNodesPrev();
+    auto lastStdIndex = navigationNode->GetLastStandardIndex();
+    auto preLastStdIndex = navigationNode->GetPreLastStandardIndex();
+    if (preLastStdIndex == -1 && lastStdIndex == -1) {
+        return false;
+    }
+    if (preLastStdIndex != -1 && lastStdIndex != -1) {
+        // check new and pre std navdestination id changed or not
+        auto preStd = NavigationGroupNode::GetNavDestinationNode(preNavPathList[preLastStdIndex].second.Upgrade());
+        auto newStd = NavigationGroupNode::GetNavDestinationNode(navPathList[lastStdIndex].second);
+        if (preStd && newStd) {
+            return preStd != newStd;
+        }
+    }
+    return true;
+}
+
+void NavigationPattern::FollowStdNavdestinationAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
+    const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage)
+{
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(navigationNode);
+    if (preTopNavDestination && newTopNavDestination) {
+        if (isPopPage) {
+            navigationNode->TransitionWithDialogPop(preTopNavDestination, newTopNavDestination);
+        } else {
+            navigationNode->TransitionWithDialogPush(preTopNavDestination, newTopNavDestination);
+        }
+        return;
+    }
+    if (newTopNavDestination && navigationMode_ == NavigationMode::STACK) {
+        auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
+        CHECK_NULL_VOID(navBarNode);
+        navigationNode->TransitionWithDialogPush(navBarNode, newTopNavDestination, true);
+        return;
+    }
+    if (preTopNavDestination) {
+        if (navigationMode_ == NavigationMode::SPLIT) {
+            navigationNode->TransitionWithDialogPop(preTopNavDestination, nullptr);
+        }
+        if (navigationMode_ == NavigationMode::STACK) {
+            auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
+            CHECK_NULL_VOID(navBarNode);
+            navigationNode->TransitionWithDialogPop(preTopNavDestination, navBarNode, true);
+        }
+    }
+}
+
+void NavigationPattern::TransitionWithDialogAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
+    const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage)
+{
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(navigationNode);
+
+    // if last standard id is not changed and new top navdestination is standard
+    if (!isPopPage && !IsLastStdChange() && newTopNavDestination &&
+        newTopNavDestination->GetNavDestinationMode() == NavDestinationMode::STANDARD) {
+        return;
+    }
+    auto replaceVal = navigationStack_->GetReplaceValue();
+    if (replaceVal != 0) {
+        ReplaceAnimation(preTopNavDestination, newTopNavDestination);
+        return;
+    }
+    // last std id is not change, but new dialogs came into stack and upward animation
+    if (!IsLastStdChange()) {
+        if (isPopPage) {
+            navigationNode->StartDialogtransition(preTopNavDestination, newTopNavDestination, false);
+        } else {
+            navigationNode->StartDialogtransition(preTopNavDestination, newTopNavDestination, true);
+        }
+        return;
+    }
+    FollowStdNavdestinationAnimation(preTopNavDestination, newTopNavDestination, isPopPage);
 }
 } // namespace OHOS::Ace::NG
