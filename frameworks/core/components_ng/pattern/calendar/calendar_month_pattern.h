@@ -151,12 +151,16 @@ private:
     void SetCalendarAccessibilityLevel(const std::string& level);
     void InitializeCalendarAccessibility();
     void ChangeVirtualNodeState(const CalendarDay& calendarDay);
+    void SetLineNodeSize(RefPtr<FrameNode> lineNode);
     bool isCalendarDialog_ = false;
     bool hoverState_ = false;
     bool isOnHover_ = false;
     bool isFirstEnter_ = false;
     int32_t selectedIndex_ = 0;
     double margin_ = 0;
+    double dayHeight_ = 0;
+    double dayWidth_ = 0;
+    DeviceOrientation deviceOrientation_ = DeviceOrientation::ORIENTATION_UNDEFINED;
     std::string selectedTxt_;
     std::string disabledDesc_;
     std::vector<RefPtr<AccessibilityProperty>> accessibilityPropertyVec_;
