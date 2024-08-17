@@ -797,4 +797,61 @@ HWTEST_F(ScrollBarEventTestNg, HandleLongPress003, TestSize.Level1)
     EXPECT_FALSE(pattern_->scrollingUp_);
     EXPECT_FALSE(pattern_->scrollingDown_);
 }
+
+/**
+ * @tc.name: HandleOnHover001
+ * @tc.desc: Test mouse onhover show bar
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarEventTestNg, HandleOnHover001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create CreateScrollBar and MouseInfo.
+     * @tc.expected: create CreateScrollBar and MouseInfo created successfully.
+     */
+    const int32_t apiTargetVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::AUTO);
+    CreateScrollBarChild();
+    CreateDone();
+    pattern_->SetControlDistance(1.f);
+    pattern_->CreateScrollBarOverlayModifier();
+    auto context = PipelineContext::GetCurrentContext();
+    EXPECT_NE(context, nullptr);
+    if (context->taskExecutor_ == nullptr) {
+        context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    }
+    EXPECT_NE(context->taskExecutor_, nullptr);
+
+    /**
+     * @tc.steps: step2. Test not hover on bar.
+     * @tc.expect: Opacity = 0 .
+     */
+    pattern_->InitMouseEvent();
+    pattern_->SetScrollBar(DisplayMode::AUTO);
+    HoverInfo info;
+    auto inputHub = pattern_->GetInputHub();
+    auto& inputEvents = pattern_->GetEventHub<EventHub>()->GetInputEventHub()->hoverEventActuator_->inputEvents_;
+    EXPECT_TRUE(inputEvents.size() > 1);
+    for (const auto& callback : inputEvents) {
+        if (callback) {
+            (*callback)(false, info);
+        }
+    }
+    EXPECT_EQ(pattern_->opacity_, 0);
+
+    /**
+     * @tc.steps: step2. Test hover on bar.
+     * @tc.expect: Opacity = UINT8_MAX .
+     */
+    for (const auto& callback : inputEvents) {
+        if (callback) {
+            (*callback)(true, info);
+        }
+    }
+    EXPECT_EQ(pattern_->opacity_, UINT8_MAX);
+    Container::Current()->SetApiTargetVersion(apiTargetVersion);
+}
 } // namespace OHOS::Ace::NG
