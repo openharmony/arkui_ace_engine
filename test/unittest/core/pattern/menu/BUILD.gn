@@ -20,7 +20,6 @@ ace_unittest("menu_test_ng") {
     "menu_layoutFst_test_ng.cpp",
     "menu_layoutScd_test_ng.cpp",
     "menu_layoutThi_test_ng.cpp",
-    "menu_layoutThird_test_ng.cpp",
     "menu_origin_test_ng.cpp",
     "menu_patternEx_test_ng.cpp",
     "menu_patternMore_test_ng.cpp",
@@ -29,6 +28,7 @@ ace_unittest("menu_test_ng") {
     "menuitem_pattern_test_ng.cpp",
     "menuitem_pattern_testone_ng.cpp",
     "menuitem_test_ng.cpp",
+    "menuitem_testone_ng.cpp",
     "menuitemgroup_test_ng.cpp",
     "menuwrapper_test_ng.cpp",
   ]
