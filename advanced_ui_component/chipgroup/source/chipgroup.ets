@@ -201,7 +201,7 @@ export struct IconGroupSuffix {
   }
 
   build() {
-    Row() {
+    Row({space: 8}) {
       ForEach(this.items || [], (suffixItem: IconItemOptions | SymbolGlyphModifier) => {
         Button() {
           if (suffixItem instanceof SymbolGlyphModifier) {
@@ -461,6 +461,20 @@ export struct ChipGroup {
     );
   }
 
+  private getChipGroupHeight() {
+    if (typeof this.chipSize === 'string') {
+      if (this.chipSize === ChipSize.NORMAL) {
+        return ChipGroupHeight.NORMAL;
+      } else {
+        return ChipGroupHeight.SMALL;
+      }
+    } else if (typeof this.chipSize === 'object') {
+      return this.chipSize.height as number
+    } else {
+      return ChipGroupHeight.NORMAL
+    }
+  }
+
   build() {
     Row() {
       Stack() {
@@ -543,6 +557,7 @@ export struct ChipGroup {
             .hitTestBehavior(HitTestMode.None)
         }
       }
+      .height(this.getChipGroupHeight())
       .layoutWeight(1)
       .blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN)
       .alignContent(Alignment.End)
