@@ -217,7 +217,7 @@ float SubMenuLayoutAlgorithm::HorizontalLayoutSubMenu(
     const SizeF& size, float position, const SizeF& menuItemSize, LayoutWrapper* layoutWrapper)
 {
     float wrapperWidth = wrapperSize_.Width();
-    float rightSpace = wrapperWidth - position;
+    float rightSpace = wrapperWidth - position - paddingEnd_;
     float leftSpace = position - menuItemSize.Width();
     if (layoutWrapper != nullptr) {
         auto menuLayoutProperty = layoutWrapper->GetLayoutProperty();
