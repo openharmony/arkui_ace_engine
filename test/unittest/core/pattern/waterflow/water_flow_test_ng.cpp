@@ -48,7 +48,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #undef private
 #undef protected
-#include "test/mock/core/render/mock_animation_manager.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -61,6 +61,9 @@ void WaterFlowTestNg::SetUpTestSuite()
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
     EXPECT_CALL(*MockPipelineContext::GetCurrent(), FlushUITasks).Times(AnyNumber());
     MockAnimationManager::Enable(true);
+    auto container = Container::Current();
+    ASSERT_TRUE(container);
+    container->SetUseNewPipeline();
 #ifndef TEST_SEGMENTED_WATER_FLOW
     g_segmentedWaterflow = false;
 #endif
@@ -71,7 +74,10 @@ void WaterFlowTestNg::TearDownTestSuite()
     TestNG::TearDownTestSuite();
 }
 
-void WaterFlowTestNg::SetUp() {}
+void WaterFlowTestNg::SetUp()
+{
+    MockAnimationManager::GetInstance().Reset();
+}
 
 void WaterFlowTestNg::TearDown()
 {
