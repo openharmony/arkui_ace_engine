@@ -398,10 +398,21 @@ void SwitchPattern::UpdateColorWhenIsOn(bool isOn)
 
     Color onBgColor = switchTheme->GetActiveColor();
     Color offBgColor = switchTheme->GetInactiveColor();
-    Color bgColor = isOn ? offBgColor : onBgColor;
-    if (!switchPaintProperty->HasUnselectedColor() || switchPaintProperty->GetUnselectedColor() == bgColor) {
-        switchPaintProperty->UpdateUnselectedColor(isOn ? onBgColor : offBgColor);
+    if (isOn) {
+        if (!switchPaintProperty->HasSelectedColor() || switchPaintProperty->GetSelectedColor() == onBgColor) {
+            switchPaintProperty->UpdateSelectedColor(onBgColor);
+        }
+    } else {
+        if (!switchPaintProperty->HasUnselectedColor() || switchPaintProperty->GetUnselectedColor() == offBgColor) {
+            Color bgColor = isFocus_ ? switchTheme->GetFocusedBGColorUnselected() : switchTheme->GetInactiveColor();
+            switchPaintProperty->UpdateUnselectedColor(bgColor);
+        }
+        if (isFocus_) {
+            switchModifier_->SetFocusPointColor(switchTheme->GetPointColorUnselectedFocus());
+        }
     }
+
+    isBgColorUnselectFocus_ = isFocus_;
 }
 
 void SwitchPattern::OnTouchDown()
