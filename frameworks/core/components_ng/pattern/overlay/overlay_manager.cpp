@@ -1042,6 +1042,7 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
                 auto overlayManager = weak.Upgrade();
                 CHECK_NULL_VOID(overlayManager);
                 overlayManager->OnShowMenuAnimationFinished(menuWK, weak, id);
+                overlayManager->SendToAccessibility(menuWK, true);
             });
         return;
     }
@@ -1197,6 +1198,7 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
                     ContainerScope scope(id);
                     auto overlayManager = weak.Upgrade();
                     CHECK_NULL_VOID(overlayManager);
+                    overlayManager->SendToAccessibility(menuWK, false);
                     overlayManager->OnPopMenuAnimationFinished(menuWK, rootWeak, weak, id);
                 });
         } else {
@@ -1210,6 +1212,7 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
                     ContainerScope scope(id);
                     auto overlayManager = weak.Upgrade();
                     CHECK_NULL_VOID(overlayManager);
+                    overlayManager->SendToAccessibility(menuWK, false);
                     overlayManager->OnPopMenuAnimationFinished(menuWK, rootWeak, weak, id);
                 },
                 TaskExecutor::TaskType::UI, "ArkUIOverlayPopMenuAnimation");
@@ -2032,7 +2035,6 @@ void OverlayManager::ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPt
         ShowMenuAnimation(menu);
         menu->MarkModifyDone();
     }
-    menu->OnAccessibilityEvent(AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 }
 
 // subwindow only contains one menu instance.
@@ -2130,7 +2132,6 @@ void OverlayManager::HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, b
 {
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "hide menu enter");
     PopMenuAnimation(menu);
-    menu->OnAccessibilityEvent(AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     RemoveEventColumn();
     if (isMenuOnTouch) {
         RemovePixelMap();
