@@ -248,9 +248,9 @@ void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
     auto transactionController = Rosen::RSSyncTransactionController::GetInstance();
     if (transactionController && (session_->GetSessionRect() != windowRect)) {
         session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED,
-            transactionController->GetRSTransaction());
+            "OnBoundsChanged", transactionController->GetRSTransaction());
     } else {
-        session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED);
+        session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED, "OnBoundsChanged");
     }
 }
 

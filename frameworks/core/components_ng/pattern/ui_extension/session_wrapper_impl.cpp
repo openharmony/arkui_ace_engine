@@ -653,7 +653,8 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
         "reason = %{public}d, duration = %{public}d, persistentId = %{public}d.",
         displayArea_.ToString().c_str(), curWindow.ToString().c_str(), reason, duration, persistentId);
     session_->UpdateRect({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),
-        std::round(displayArea_.Width()), std::round(displayArea_.Height()) }, reason, transaction);
+        std::round(displayArea_.Width()), std::round(displayArea_.Height()) }, reason, "NotifyDisplayArea",
+        transaction);
 }
 
 void SessionWrapperImpl::NotifySizeChangeReason(

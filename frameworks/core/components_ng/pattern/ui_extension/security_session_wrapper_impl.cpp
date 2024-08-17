@@ -601,7 +601,8 @@ void SecuritySessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
         }
     }
     session_->UpdateRect({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),
-        std::round(displayArea_.Width()), std::round(displayArea_.Height()) }, reason, transaction);
+        std::round(displayArea_.Width()), std::round(displayArea_.Height()) },
+        reason, "NotifyDisplayArea", transaction);
 }
 
 void SecuritySessionWrapperImpl::NotifySizeChangeReason(
