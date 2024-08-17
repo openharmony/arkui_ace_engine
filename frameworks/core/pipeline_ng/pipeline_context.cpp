@@ -1289,11 +1289,7 @@ void PipelineContext::StartWindowMaximizeAnimation(
     int32_t duration = 400;
     MaximizeMode maximizeMode = GetWindowManager()->GetWindowMaximizeMode();
     if (maximizeMode == MaximizeMode::MODE_FULL_FILL || maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
-        int32_t preWidth = GetRootRect().Width();
-        int32_t preHeight = GetRootRect().Height();
-        if (width > preWidth && height > preHeight) {
-            duration = 0;
-        }
+        duration = 0;
     }
     option.SetDuration(duration);
     auto curve = Curves::EASE_OUT;
