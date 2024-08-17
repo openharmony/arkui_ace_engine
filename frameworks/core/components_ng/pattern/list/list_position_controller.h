@@ -27,6 +27,7 @@ public:
     ~ListPositionController() override = default;
 
     Rect GetItemRectInGroup(int32_t index, int32_t indexInGroup) const override;
+    ListItemGroupIndex GetItemIndexInGroup(double x, double y) const override;
 
     void JumpToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth,
         ScrollAlign align, int32_t source) override;

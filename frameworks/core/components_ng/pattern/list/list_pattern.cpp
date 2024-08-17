@@ -1627,6 +1627,66 @@ Rect ListPattern::GetItemRect(int32_t index) const
         itemGeometry->GetFrameRect().Width(), itemGeometry->GetFrameRect().Height());
 }
 
+int32_t ListPattern::GetItemIndex(double x, double y) const
+{
+    for (int32_t index = startIndex_; index <= endIndex_; ++index) {
+        Rect rect = GetItemRect(index);
+        if (rect.IsInRegion({x, y})) {
+            return index;
+        }
+    }
+    return -1;
+}
+
+ListItemIndex ListPattern::GetItemIndexInGroup(double x, double y) const
+{
+    ListItemIndex itemIndex = { -1, -1, -1 };
+
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, itemIndex);
+    for (int32_t index = startIndex_; index <= endIndex_; ++index) {
+        auto item = host->GetChildByIndex(index);
+        if (!AceType::InstanceOf<FrameNode>(item)) {
+            continue;
+        }
+        auto itemFrameNode = AceType::DynamicCast<FrameNode>(item);
+        auto groupItemPattern  = itemFrameNode->GetPattern<ListItemGroupPattern>();
+        if (groupItemPattern) {
+            if (GetGroupItemIndex(x, y, itemFrameNode, index, itemIndex)) {
+                return itemIndex;
+            }
+        } else {
+            Rect rect = GetItemRect(index);
+            if (rect.IsInRegion({x, y})) {
+                itemIndex.index = index;
+                return itemIndex;
+            }
+        }
+    }
+    return itemIndex;
+}
+
+bool ListPattern::GetGroupItemIndex(double x, double y, RefPtr<FrameNode> itemFrameNode,
+    int32_t& index, ListItemIndex& itemIndex) const
+{
+    auto groupItemPattern = itemFrameNode->GetPattern<ListItemGroupPattern>();
+    Rect rect = GetItemRect(index);
+    if (groupItemPattern && rect.IsInRegion({x, y})) {
+        itemIndex.index = index;
+        for (int32_t groupIndex = groupItemPattern->GetDisplayStartIndexInGroup();
+            groupIndex <= groupItemPattern->GetDisplayEndIndexInGroup(); ++groupIndex) {
+            Rect groupRect = GetItemRectInGroup(index, groupIndex);
+            if (groupRect.IsInRegion({x, y})) {
+                itemIndex.index = index;
+                itemIndex.area = 1; // item area
+                itemIndex.indexInGroup = groupIndex;
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 Rect ListPattern::GetItemRectInGroup(int32_t index, int32_t indexInGroup) const
 {
     if (index < 0 || indexInGroup < 0 || index < startIndex_ || index > endIndex_) {
