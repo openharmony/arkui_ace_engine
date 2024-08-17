@@ -34,6 +34,21 @@
 #include "core/components_ng/property/templates_parser.h"
 #include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
+namespace {
+void AddCacheItemsInFront(int32_t startIdx, LayoutWrapper* host, int32_t cacheCnt, std::list<int32_t>& buildList)
+{
+    for (int32_t i = 1; i <= cacheCnt; ++i) {
+        int32_t item = startIdx - i;
+        if (item < 0) {
+            break;
+        }
+        if (!host->GetChildByIndex(item, true)) {
+            buildList.push_back(item);
+        }
+    }
+}
+} // namespace
+
 void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -77,7 +92,8 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     // update cache info.
-    layoutWrapper->SetCacheCount(static_cast<int32_t>(gridLayoutProperty->GetCachedCountValue(1) * crossCount_));
+    const int32_t cacheCnt = static_cast<int32_t>(gridLayoutProperty->GetCachedCountValue(1) * crossCount_);
+    layoutWrapper->SetCacheCount(cacheCnt);
 
     gridLayoutInfo_.lastMainSize_ = mainSize;
     gridLayoutInfo_.lastCrossSize_ = crossSize;
@@ -90,6 +106,7 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     if (SystemProperties::GetGridCacheEnabled()) {
         FillCacheLineAtEnd(mainSize, crossSize, layoutWrapper);
+        AddCacheItemsInFront(gridLayoutInfo_.startIndex_, layoutWrapper, cacheCnt, predictBuildList_);
         if (!predictBuildList_.empty()) {
             GridLayoutUtils::PreloadGridItems(layoutWrapper->GetHostNode()->GetPattern<GridPattern>(),
                 std::move(predictBuildList_),
@@ -333,8 +350,7 @@ void GridScrollLayoutAlgorithm::LayoutBackwardCachedLine(LayoutWrapper* layoutWr
             itemIdex = iter.second;
             auto crossIter = itemsCrossPosition_.find(itemIdex);
             if (crossIter == itemsCrossPosition_.end()) {
-                crossIter =
-                    itemsCrossPosition_.emplace(itemIdex, ComputeItemCrossPosition(iter.first)).first;
+                crossIter = itemsCrossPosition_.emplace(itemIdex, ComputeItemCrossPosition(iter.first)).first;
             }
             bool prevLineNotContains =
                 std::none_of(prevLine.begin(), prevLine.end(), [itemIdex](auto ite) { return ite.second == itemIdex; });
