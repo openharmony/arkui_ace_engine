@@ -1544,6 +1544,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateAndMountMonthDaysNode(const DatePi
     };
     auto monthDaysPickerPattern = monthDaysNode->GetPattern<DatePickerPattern>();
     CHECK_NULL_RETURN(monthDaysPickerPattern, nullptr);
+    monthDaysPickerPattern->SetTextProperties(settingData.properties);
     auto pickerPattern = dateNode->GetPattern<DatePickerPattern>();
     CHECK_NULL_RETURN(pickerPattern, nullptr);
     monthDaysPickerPattern->SetTitleId(pickerPattern->GetTitleId());
@@ -1572,6 +1573,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateAndMountTimeNode(const DatePickerS
     CHECK_NULL_RETURN(timePickerEventHub, nullptr);
     auto timePickerRowPattern = timeNode->GetPattern<TimePickerRowPattern>();
     CHECK_NULL_RETURN(timePickerRowPattern, nullptr);
+    timePickerRowPattern->SetTextProperties(settingData.properties);
     auto timePickerLayout = timeNode->GetLayoutProperty<TimePickerLayoutProperty>();
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         ZeroPrefixType hourOptions = settingData.dateTimeOptions.hourType;
