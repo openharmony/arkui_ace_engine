@@ -294,6 +294,8 @@ public:
 
     void OnCursorUpdate(double x, double y, double width, double height) override;
 
+    void StartVibraFeedback(const std::string& vibratorType) override;
+
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;

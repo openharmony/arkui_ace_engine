@@ -1014,6 +1014,8 @@ public:
         }
     }
 
+    void StartVibraFeedback(const std::string& vibratorType);
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();
