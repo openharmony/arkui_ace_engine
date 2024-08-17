@@ -147,6 +147,11 @@ public:
     {
         return state_;
     }
+    
+    void SetState(NavDestinationState state)
+    {
+        state_ = state;
+    }
 
 private:
     WeakPtr<AceType> GetNavDestinationPattern() const
