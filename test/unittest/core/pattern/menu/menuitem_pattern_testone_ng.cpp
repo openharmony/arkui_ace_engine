@@ -64,7 +64,10 @@ using namespace testing::ext;
 using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {
-namespace {} // namespace
+namespace {
+const std::string TEXT_TAG = "text";
+const std::string MENU_TOUCH_EVENT_TYPE = "1";
+} // namespace
 class MenuItemPatternTestOneNg : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -387,5 +390,117 @@ HWTEST_F(MenuItemPatternTestOneNg, RegisterOnKeyEvent001, TestSize.Level1)
 
     auto clickableAreaGestureHub = menuItemPattern->clickableArea_->GetOrCreateGestureEventHub();
     ASSERT_NE(clickableAreaGestureHub, nullptr);
+}
+
+/**
+ * @tc.name: OnTouch001
+ * @tc.desc: Verify OnTouch
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, OnTouch001, TestSize.Level1)
+{
+    std::function<void()> buildFun = []() {
+        MenuModelNG MenuModelInstance;
+        MenuModelInstance.Create();
+    };
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto subMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::SUB_MENU));
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    auto subMenuParent = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 5, AceType::MakeRefPtr<MenuItemPattern>());
+    menuItemNode->MountToParent(mainMenu);
+    mainMenu->MountToParent(wrapperNode);
+    subMenu->MountToParent(wrapperNode);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->ShowSubMenu();
+    menuItemPattern->SetSubBuilder(buildFun);
+    menuItemPattern->SetIsSubMenuShowed(false);
+    auto mainMenuPattern = mainMenu->GetPattern<MenuPattern>();
+    ASSERT_NE(mainMenuPattern, nullptr);
+
+    TouchEventInfo itemTouchDownEventInfo(MENU_TOUCH_EVENT_TYPE);
+    TouchLocationInfo downLocationInfo(3);
+    Offset touchDownGlobalLocation(1, 1);
+    downLocationInfo.SetTouchType(TouchType::DOWN);
+    auto touchDownLocationInfo = downLocationInfo.SetGlobalLocation(touchDownGlobalLocation);
+    itemTouchDownEventInfo.touches_.emplace_back(touchDownLocationInfo);
+    menuItemPattern->OnTouch(itemTouchDownEventInfo);
+    EXPECT_EQ(itemTouchDownEventInfo.touches_.size(), 1);
+
+    TouchEventInfo itemTouchDownEventInfo2(MENU_TOUCH_EVENT_TYPE);
+    TouchLocationInfo downLocationInfo2(3);
+    downLocationInfo2.SetTouchType(TouchType::UP);
+    auto touchDownLocationInfo2 = downLocationInfo2.SetGlobalLocation(touchDownGlobalLocation);
+    itemTouchDownEventInfo2.touches_.emplace_back(touchDownLocationInfo2);
+    menuItemPattern->OnTouch(itemTouchDownEventInfo2);
+
+    TouchEventInfo itemTouchDownEventInfo3(MENU_TOUCH_EVENT_TYPE);
+    TouchLocationInfo downLocationInfo3(3);
+    downLocationInfo3.SetTouchType(TouchType::MOVE);
+    auto touchDownLocationInfo3 = downLocationInfo2.SetGlobalLocation(touchDownGlobalLocation);
+    itemTouchDownEventInfo3.touches_.emplace_back(touchDownLocationInfo3);
+    menuItemPattern->OnTouch(itemTouchDownEventInfo3);
+
+    ASSERT_EQ(itemTouchDownEventInfo.GetTouches().front().GetTouchType(), TouchType::DOWN);
+}
+
+/**
+ * @tc.name: HandleOnChange001
+ * @tc.desc: Verify HandleOnChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, HandleOnChange001, TestSize.Level1)
+{
+    MenuItemModelNG model;
+    auto customNode = FrameNode::CreateFrameNode("", -1, AceType::MakeRefPtr<Pattern>());
+    model.Create(customNode);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_TRUE(itemNode);
+    auto pattern = itemNode->GetPattern<CustomMenuItemPattern>();
+    ASSERT_TRUE(pattern);
+
+    pattern->HandleOnChange();
+
+    auto host = pattern->GetHost();
+    auto hub = host->GetEventHub<MenuItemEventHub>();
+    ASSERT_NE(hub, nullptr);
+
+    bool isSelected = true;
+    auto changeEvent = [&isSelected](bool select) { isSelected = select; };
+    hub->SetSelectedChangeEvent(changeEvent);
+    hub->SetOnChange(changeEvent);
+
+    pattern->HandleOnChange();
+
+    auto onChange = hub->GetOnChange();
+    ASSERT_NE(onChange, nullptr);
+}
+
+/**
+ * @tc.name: OnVisibleChange001
+ * @tc.desc: Verify OnVisibleChange().
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, OnVisibleChange001, TestSize.Level1)
+{
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(mainMenu, nullptr);
+    menuItemNode->MountToParent(mainMenu);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+
+    auto parentNode = menuItemPattern->GetHost()->GetParent();
+
+    ASSERT_NE(parentNode, nullptr);
+    parentNode->tag_ = V2::MENU_ITEM_GROUP_ETS_TAG;
+    menuItemPattern->OnVisibleChange(false);
+    ASSERT_EQ(parentNode->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG, true);
 }
 } // namespace OHOS::Ace::NG
