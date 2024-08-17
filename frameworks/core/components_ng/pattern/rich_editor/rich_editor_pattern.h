@@ -662,6 +662,7 @@ public:
         selectionMenuMap_.clear();
     }
     void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void MouseDoubleClickParagraphEnd(int32_t& index);
     void AdjustSelectionExcludeSymbol(int32_t& start, int32_t& end);
     void InitSelection(const Offset& pos);
@@ -848,6 +849,7 @@ public:
     std::list<RefPtr<SpanItem>>::iterator GetSpanIter(int32_t index);
 
     void DumpAdvanceInfo() override {}
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override  {}
 
     void SetContentChange(bool onChange)
     {

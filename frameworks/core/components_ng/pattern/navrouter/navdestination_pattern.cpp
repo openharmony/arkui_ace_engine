@@ -464,4 +464,9 @@ void NavDestinationPattern::OnWindowHide()
     auto index = navDestinationContext_->GetIndex();
     stack->SetIsEntryByIndex(index, false);
 }
+
+void NavDestinationPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("name", name_.c_str());
+}
 } // namespace OHOS::Ace::NG

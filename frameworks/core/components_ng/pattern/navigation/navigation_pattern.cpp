@@ -2559,4 +2559,12 @@ bool NavigationPattern::GetIsFocusable(const RefPtr<FrameNode>& frameNode)
     CHECK_NULL_RETURN(currentFocusHub, false);
     return currentFocusHub->IsFocusableNode();
 }
+
+void NavigationPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    if (!navigationStack_) {
+        return;
+    }
+    json->Put("size", std::to_string(navigationStack_->Size()).c_str());
+}
 } // namespace OHOS::Ace::NG

@@ -10098,4 +10098,34 @@ bool RichEditorPattern::IsTextEditableForStylus()
     }
     return true;
 }
+
+void RichEditorPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    if (customKeyboardBuilder_) {
+        json->Put("CustomKeyboard, Attached", std::to_string(isCustomKeyboardAttached_).c_str());
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto richEditorTheme = context->GetTheme<RichEditorTheme>();
+    CHECK_NULL_VOID(richEditorTheme);
+    json->Put("caret offset", GetCaretRect().GetOffset().ToString().c_str());
+    json->Put("caret height",
+        std::to_string(NearZero(GetCaretRect().Height()) ? richEditorTheme->GetDefaultCaretHeight().ConvertToPx()
+                                                         : GetCaretRect().Height())
+            .c_str());
+    json->Put("text rect", richTextRect_.ToString().c_str());
+    json->Put("content rect", contentRect_.ToString().c_str());
+    auto richEditorPaintOffset = host->GetPaintRectOffset();
+    bool hasRenderTransform = selectOverlay_->HasRenderTransform();
+    if (hasRenderTransform) {
+        richEditorPaintOffset = selectOverlay_->GetPaintOffsetWithoutTransform();
+    }
+    json->Put("hasRenderTransform", std::to_string(hasRenderTransform).c_str());
+    json->Put("richEditorPaintOffset", richEditorPaintOffset.ToString().c_str());
+    auto selectOverlayInfo = selectOverlay_->GetSelectOverlayInfo();
+    CHECK_NULL_VOID(selectOverlayInfo);
+    json->Put("selectOverlay info", selectOverlayInfo->ToString().c_str());
+}
 } // namespace OHOS::Ace::NG
