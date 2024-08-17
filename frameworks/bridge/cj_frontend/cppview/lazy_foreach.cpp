@@ -108,16 +108,18 @@ void CJLazyForEachBuilder::ReleaseChildGroupById(const std::string& id)
 
 void CJLazyForEachBuilder::RegisterDataChangeListener(const RefPtr<V2::DataChangeListener>& listener)
 {
-    auto listenerManager = weakListenerManager_.promote();
-    if (!listenerManager) {
-        listenerManager = FFIData::Create<CJDataChangeListener>();
-        if (listenerManager == nullptr) {
-            return;
-        }
-        weakListenerManager_ = listenerManager;
-        cjBuilder_->RegisterListenerFunc(listenerManager);
+    if (!listener) {
+        return;
     }
+    auto listenerManager = weakListenerManager_.promote();
+    if (listenerManager) {
+        listenerManager->AddListener(listener);
+        return;
+    }
+    listenerManager = FFIData::Create<CJDataChangeListener>();
     listenerManager->AddListener(listener);
+    weakListenerManager_ = listenerManager;
+    cjBuilder_->RegisterListenerFunc(listenerManager);
 }
 
 void CJLazyForEachBuilder::UnregisterDataChangeListener(V2::DataChangeListener* listener)
