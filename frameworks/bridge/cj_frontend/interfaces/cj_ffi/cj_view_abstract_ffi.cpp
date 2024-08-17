@@ -579,6 +579,7 @@ void FfiOHOSAceFrameworkViewAbstractSetBackgroundImagePositionAlign(int32_t alig
         return;
     }
     BackgroundImagePosition bgImgPosition;
+    bgImgPosition.SetIsAlign(true);
     UpdateBackgroundImagePosition(static_cast<Align>(align), bgImgPosition);
     ViewAbstractModel::GetInstance()->SetBackgroundImagePosition(bgImgPosition);
 }
