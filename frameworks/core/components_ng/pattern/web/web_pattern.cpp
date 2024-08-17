@@ -5160,10 +5160,18 @@ bool WebPattern::FilterScrollEvent(const float x, const float y, const float xVe
         expectedScrollAxis_ = (x != 0 || y != 0)
             ? (abs(x) > abs(y) ? Axis::HORIZONTAL : Axis::VERTICAL)
             : (abs(xVelocity) > abs(yVelocity) ? Axis::HORIZONTAL : Axis::VERTICAL);
-        isNeedUpdateScrollAxis_ = false;
-        TAG_LOGI(AceLogTag::ACE_WEB,"WebPattern::FilterScrollEvent updateScrollAxis, x=%{public}f, y=%{public}f, "
-            "vx=%{public}f, vy=%{public}f, scrolAxis=%{public}d",
-            x, y, xVelocity, yVelocity, static_cast<int32_t>(expectedScrollAxis_));
+        // if there is a parent component in the sliding direction, there is no need to update the direction.
+        if (parentsMap_.find(expectedScrollAxis_) != parentsMap_.end()) {
+            isNeedUpdateScrollAxis_ = false;
+            TAG_LOGI(AceLogTag::ACE_WEB,
+                "WebPattern::FilterScrollEvent updateScrollAxis, x=%{public}f, y=%{public}f, "
+                "vx=%{public}f, vy=%{public}f, scrolAxis=%{public}d",
+                x,
+                y,
+                xVelocity,
+                yVelocity,
+                static_cast<int32_t>(expectedScrollAxis_));
+        }
     }
     float offset = expectedScrollAxis_ == Axis::HORIZONTAL ? x : y;
     float velocity = expectedScrollAxis_ == Axis::HORIZONTAL ? xVelocity : yVelocity;
