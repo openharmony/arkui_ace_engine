@@ -27,14 +27,15 @@
 namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
-constexpr float CUSTOM_NODE_WIDTH = 100.f;
-constexpr float CUSTOM_NODE_HEIGHT = 10.f;
 constexpr float REFRESH_HEIGHT = 400.f;
-constexpr int32_t DEFAULT_FRICTION_RATIO = 62;
-constexpr float PERCENT = 0.01;
-constexpr float RADIO = DEFAULT_FRICTION_RATIO * PERCENT;
 constexpr Dimension TRIGGER_LOADING_DISTANCE = 16.0_vp;
 constexpr Dimension TRIGGER_REFRESH_DISTANCE = 64.0_vp;
+constexpr Dimension TRIGGER_REFRESH_WITH_TEXT_DISTANCE = 96.0_vp;
+constexpr int32_t DEFAULT_FRICTION_RATIO = 62;
+constexpr float PERCENT = 0.01;
+constexpr float RATIO = DEFAULT_FRICTION_RATIO * PERCENT;
+constexpr float CUSTOM_NODE_WIDTH = 100.f;
+constexpr float CUSTOM_NODE_HEIGHT = 10.f;
 
 class RefreshTestNg : public TestNG {
 public:
@@ -45,10 +46,7 @@ public:
     void GetRefresh();
 
     RefreshModelNG CreateRefresh();
-    void CreateScroll();
-    void CreateColumn();
     void CreateText();
-    void CreateNestedSwiper();
     RefPtr<FrameNode> CreateCustomNode();
 
     RefPtr<FrameNode> frameNode_;
@@ -56,12 +54,6 @@ public:
     RefPtr<RefreshEventHub> eventHub_;
     RefPtr<RefreshLayoutProperty> layoutProperty_;
     RefPtr<RefreshAccessibilityProperty> accessibilityProperty_;
-
-    RefPtr<FrameNode> swiperNode_;
-    RefPtr<SwiperPattern> swiperPattern_;
-
-    RefPtr<FrameNode> scrollNode_;
-    RefPtr<ScrollPattern> scrollPattern_;
 };
 } // namespace OHOS::Ace::NG
 
