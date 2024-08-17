@@ -16,19 +16,27 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ANIMATION_UTILS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ANIMATION_UTILS_H
 
+#include "base/memory/ace_type.h"
 #include "core/components_ng/render/animation_utils.h"
 namespace OHOS::Ace {
-struct AnimationParam {
+
+struct AnimationCallbacks {
     std::function<void()> finishCb;
     std::function<void()> repeatCb;
 };
+class MockImplicitAnimation : public AceType {
+    DECLARE_ACE_TYPE(MockImplicitAnimation, AceType);
 
-class AnimationUtils::Animation {
 public:
-    Animation() = default;
-    Animation(std::set<WeakPtr<NG::PropertyBase>>&& props, AnimationParam&& param, int32_t ticks)
-        : params_(std::move(param)), props_(std::move(props)), remainingTicks_(ticks)
+    MockImplicitAnimation(WeakPtr<NG::PropertyBase> prop, AnimationCallbacks cbs, int32_t ticks)
+        : cbs_(std::move(cbs)), prop_(std::move(prop)), remainingTicks_(ticks)
     {}
+
+    void Update(AnimationCallbacks cbs, int32_t ticks)
+    {
+        cbs_ = std::move(cbs);
+        remainingTicks_ = ticks;
+    }
 
     void Next();
 
@@ -37,11 +45,16 @@ public:
         return remainingTicks_ <= 0;
     }
 
+    void End()
+    {
+        remainingTicks_ = 0;
+    }
+
 private:
     void UpdateProp(const WeakPtr<NG::PropertyBase>& propWk) const;
 
-    AnimationParam params_;
-    std::set<WeakPtr<NG::PropertyBase>> props_;
+    AnimationCallbacks cbs_;
+    WeakPtr<NG::PropertyBase> prop_;
     int32_t remainingTicks_ = 0;
 };
 } // namespace OHOS::Ace
