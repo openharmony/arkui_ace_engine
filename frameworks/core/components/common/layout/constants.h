@@ -597,6 +597,10 @@ enum class SwiperDynamicSyncSceneType {
     ANIMATE,
 };
 
+enum class MarqueeDynamicSyncSceneType {
+    ANIMATE = 1,
+};
+
 namespace StringUtils {
 inline std::string ToString(const VerticalAlign& verticalAlign)
 {

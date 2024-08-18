@@ -47,6 +47,8 @@ public:
     static void SetOnStart(FrameNode* frameNode, std::function<void()>&& onChange);
     static void SetOnBounce(FrameNode* frameNode, std::function<void()>&& onChange);
     static void SetOnFinish(FrameNode* frameNode, std::function<void()>&& onChange);
+    static void SetMarqueeFrameRateRange(
+        FrameNode* frameNode, const RefPtr<FrameRateRange>& rateRange, MarqueeDynamicSyncSceneType type);
 };
 } // namespace OHOS::Ace::NG
 
