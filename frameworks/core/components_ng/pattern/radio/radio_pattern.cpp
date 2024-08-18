@@ -46,11 +46,6 @@ constexpr float DEFAULT_INTERPOLATINGSPRING_MASS = 1.0f;
 constexpr float DEFAULT_INTERPOLATINGSPRING_STIFFNESS = 728.0f;
 constexpr float DEFAULT_INTERPOLATINGSPRING_DAMPING = 46.0f;
 
-enum class RadioIndicatorType {
-    TICK = 0,
-    DOT,
-    CUSTOM,
-};
 } // namespace
 
 void RadioPattern::OnAttachToFrameNode()

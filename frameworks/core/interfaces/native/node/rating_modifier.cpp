@@ -87,18 +87,25 @@ void ResetStarStyle(ArkUINodeHandle node)
     RatingModelNG::SetSecondarySrc(frameNode, "", true);
 }
 
+void SetRatingOptions(ArkUINodeHandle node, ArkUI_Float64 rating, ArkUI_Bool indicator)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RatingModelNG::SetRatingOptions(frameNode, rating, static_cast<bool>(indicator));
+}
+
 namespace NodeModifier {
 const ArkUIRatingModifier* GetRatingModifier()
 {
     static const ArkUIRatingModifier modifier = {SetStars, SetRatingStepSize, SetStarStyle,
-        ResetStars, ResetRatingStepSize, ResetStarStyle};
+        ResetStars, ResetRatingStepSize, ResetStarStyle, SetRatingOptions};
     return &modifier;
 }
 
 const CJUIRatingModifier* GetCJUIRatingModifier()
 {
     static const CJUIRatingModifier modifier = {SetStars, SetRatingStepSize, SetStarStyle,
-        ResetStars, ResetRatingStepSize, ResetStarStyle};
+        ResetStars, ResetRatingStepSize, ResetStarStyle };
     return &modifier;
 }
 }

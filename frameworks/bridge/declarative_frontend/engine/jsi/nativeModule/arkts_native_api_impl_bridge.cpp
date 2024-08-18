@@ -2823,6 +2823,8 @@ void ArkUINativeModule::RegisterRatingAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RatingBridge::ResetStarStyle));
     rating->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentModifierBuilder"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RatingBridge::SetContentModifierBuilder));
+    rating->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRatingOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RatingBridge::SetRatingOptions));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "rating"), rating);
 }
 
@@ -2939,6 +2941,8 @@ void ArkUINativeModule::RegisterRadioAttributes(Local<panda::ObjectRef> object, 
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::ResetRadioResponseRegion));
     radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentModifierBuilder"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::SetContentModifierBuilder));
+    radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRadioOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::SetRadioOptions));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "radio"), radio);
 }
 

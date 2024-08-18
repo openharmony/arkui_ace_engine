@@ -18271,6 +18271,17 @@ class ArkRadioComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
+  allowChildCount() {
+    return 0;
+  }
+  initialize(value) {
+    if (isObject(value[0])) {
+      modifierWithKey(this._modifiersWithKeys, RadioOptionsModifier.identity, RadioOptionsModifier, value[0]);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, RadioOptionsModifier.identity, RadioOptionsModifier, undefined);
+    }
+    return this;
+  }
   checked(value) {
     modifierWithKey(this._modifiersWithKeys, RadioCheckedModifier.identity, RadioCheckedModifier, value);
     return this;
@@ -18336,6 +18347,25 @@ class ArkRadioComponent extends ArkComponent {
     return this.radioNode.getFrameNode();
   }
 }
+class RadioOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().radio.setRadioOptions(node, undefined, undefined, undefined);
+    } else {
+      getUINativeModule().radio.setRadioOptions(node, this.value.value, this.value.group, this.value.indicatorType);
+    }
+  }
+
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.value, this.value.value) ||
+      !isBaseOrResourceEqual(this.stageValue.group, this.value.group) ||
+      !isBaseOrResourceEqual(this.stageValue.indicatorType, this.value.indicatorType);
+  }
+}
+RadioOptionsModifier.identity = Symbol('radioOptions');
 class RadioCheckedModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -19568,6 +19598,17 @@ class ArkRatingComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
+  allowChildCount() {
+    return 0;
+  }
+  initialize(value) {
+    if (isObject(value[0])) {
+      modifierWithKey(this._modifiersWithKeys, RatingOptionsModifier.identity, RatingOptionsModifier, value[0]);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, RatingOptionsModifier.identity, RatingOptionsModifier, undefined);
+    }
+    return this;
+  }
   stars(value) {
     modifierWithKey(this._modifiersWithKeys, RatingStarsModifier.identity, RatingStarsModifier, value);
     return this;
@@ -19622,6 +19663,24 @@ class ArkRatingComponent extends ArkComponent {
     return this.ratingNode.getFrameNode();
   }
 }
+class RatingOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().rating.setRatingOptions(node, undefined, undefined);
+    } else {
+      getUINativeModule().rating.setRatingOptions(node, this.value?.rating, this.value?.indicator);
+    }
+  }
+
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue?.rating, this.value?.rating) ||
+      !isBaseOrResourceEqual(this.stageValue?.indicator, this.value?.indicator);
+  }
+}
+RatingOptionsModifier.identity = Symbol('ratingOptions');
 // @ts-ignore
 if (globalThis.Rating !== undefined) {
   globalThis.Rating.attributeModifier = function (modifier) {

@@ -82,6 +82,17 @@ class ArkRatingComponent extends ArkComponent implements RatingAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
+  allowChildCount(): number {
+    return 0;
+  }
+  initialize(value: Object[]): this {
+    if (isObject(value[0])) {
+      modifierWithKey(this._modifiersWithKeys, RatingOptionsModifier.identity, RatingOptionsModifier, value[0]);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, RatingOptionsModifier.identity, RatingOptionsModifier, undefined);
+    }
+    return this;
+  }
   stars(value: number): this {
     modifierWithKey(this._modifiersWithKeys, RatingStarsModifier.identity, RatingStarsModifier, value);
     return this;
@@ -136,6 +147,26 @@ class ArkRatingComponent extends ArkComponent implements RatingAttribute {
     return this.ratingNode.getFrameNode();
   }
 }
+
+class RatingOptionsModifier extends ModifierWithKey<object> {
+  constructor(value: object) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('ratingOptions');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().radio.setRatingOptions(node, undefined, undefined);
+    } else {
+      getUINativeModule().radio.setRatingOptions(node, this.value?.rating, this.value?.indicator);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue?.rating, this.value?.rating) ||
+      !isBaseOrResourceEqual(this.stageValue?.indicator, this.value?.indicator);
+  }
+}
+
 // @ts-ignore
 globalThis.Rating.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
