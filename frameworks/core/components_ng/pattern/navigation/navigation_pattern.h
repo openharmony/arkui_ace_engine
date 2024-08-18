@@ -449,7 +449,7 @@ private:
     bool UpdateTitleModeChangeEventHub(const RefPtr<NavigationGroupNode>& hostNode);
     void NotifyPageShow(const std::string& pageName);
     int32_t FireNavDestinationStateChange(NavDestinationLifecycle lifecycle);
-    void UpdatePreNavDesZIndex(const RefPtr<NavDestinationGroupNode> &preTopNavDestination,
+    void UpdatePreNavDesZIndex(const RefPtr<FrameNode> &preTopNavDestination,
         const RefPtr<FrameNode> &newTopNavDestination, int32_t preLastStandardIndex = -1);
     void UpdateNavPathList();
     void RefreshNavDestination();
