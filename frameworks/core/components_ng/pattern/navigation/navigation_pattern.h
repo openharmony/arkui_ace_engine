@@ -450,7 +450,7 @@ private:
     void NotifyPageShow(const std::string& pageName);
     int32_t FireNavDestinationStateChange(NavDestinationLifecycle lifecycle);
     void UpdatePreNavDesZIndex(const RefPtr<NavDestinationGroupNode> &preTopNavDestination,
-        const RefPtr<FrameNode> &newTopNavDestination, int32_t preLastStandardIndex);
+        const RefPtr<FrameNode> &newTopNavDestination, int32_t preLastStandardIndex = -1);
     void UpdateNavPathList();
     void RefreshNavDestination();
     RefPtr<NavigationPattern> GetParentNavigationPattern();
