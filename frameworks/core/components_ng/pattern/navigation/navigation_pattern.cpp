@@ -1919,7 +1919,7 @@ void NavigationPattern::OnColorConfigurationUpdate()
     dividerNode->GetRenderContext()->UpdateBackgroundColor(theme->GetNavigationDividerColor());
 }
 
-void NavigationPattern::UpdatePreNavDesZIndex(const RefPtr<NavDestinationGroupNode> &preTopNavDestination,
+void NavigationPattern::UpdatePreNavDesZIndex(const RefPtr<FrameNode> &preTopNavDestination,
     const RefPtr<FrameNode> &newTopNavDestination, int32_t preLastStandardIndex)
 {
     auto replaceVal = navigationStack_->GetReplaceValue();
