@@ -130,6 +130,9 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             contentMainSize_ = GetMainAxisSize(parentMaxSize, axis_);
             mainSizeIsDefined_ = false;
         }
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            contentMainSize_ = std::max(contentMainSize_, GetMainAxisSize(contentConstraint.minSize, axis_));
+        }
     } else {
         contentMainSize_ = GetMainAxisSize(contentIdealSize.ConvertToSizeT(), axis_);
         mainSizeIsDefined_ = true;
