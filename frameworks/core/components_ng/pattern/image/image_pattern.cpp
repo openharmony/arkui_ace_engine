@@ -772,7 +772,7 @@ void ImagePattern::InitOnKeyEvent()
     if (keyEventCallback_) {
         return;
     }
-    
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<EventHub>();
@@ -1051,6 +1051,9 @@ void ImagePattern::OnReuse()
     auto renderProp = GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_VOID(renderProp);
     renderProp->UpdateNeedBorderRadius(needBorderRadius_);
+    auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    imageLayoutProperty->UpdateImageSourceInfoCacheKey();
     LoadImageDataIfNeed();
 }
 
@@ -1534,8 +1537,8 @@ void ImagePattern::OnConfigurationUpdate()
 
     auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
+    imageLayoutProperty->UpdateImageSourceInfoCacheKey();
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
-    src.GenerateCacheKey();
     UpdateInternalResource(src);
 
     LoadImage(src, imageLayoutProperty->GetPropertyChangeFlag(),
