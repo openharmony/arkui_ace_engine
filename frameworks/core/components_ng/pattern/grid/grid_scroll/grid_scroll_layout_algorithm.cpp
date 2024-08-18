@@ -643,8 +643,27 @@ bool GridScrollLayoutAlgorithm::FillBlankAtStart(float mainSize, float crossSize
         gridLayoutInfo_.reachStart_ = true;
         break;
     }
-    if (gridLayoutInfo_.gridMatrix_[gridLayoutInfo_.startMainLineIndex_].size() < crossCount_ &&
-        gridLayoutInfo_.startIndex_ > 0) {
+
+    FillOneLineForwardWithoutUpdatingStartIndex(crossSize, mainSize, layoutWrapper);
+
+    gridLayoutInfo_.currentOffset_ = blankAtStart;
+    gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
+    return fillNewLine;
+}
+
+// If there is a multi-line item in the current line and its starting line is not within this line,
+// it may result in an incomplete layout.
+void GridScrollLayoutAlgorithm::FillOneLineForwardWithoutUpdatingStartIndex(
+    float crossSize, float mainSize, LayoutWrapper* layoutWrapper)
+{
+    if (gridLayoutInfo_.gridMatrix_.empty()) {
+        return;
+    }
+    auto startLine = gridLayoutInfo_.gridMatrix_.find(gridLayoutInfo_.startMainLineIndex_);
+    if (startLine == gridLayoutInfo_.gridMatrix_.end() || startLine->second.empty()) {
+        return;
+    }
+    if (startLine->second.size() < crossCount_ && gridLayoutInfo_.startIndex_ > 0) {
         auto tempStartIndex = gridLayoutInfo_.startIndex_;
         auto tempStartMainLineIndex = gridLayoutInfo_.startMainLineIndex_;
         auto tempCurrentMainLineIndex = currentMainLineIndex_;
@@ -660,10 +679,6 @@ bool GridScrollLayoutAlgorithm::FillBlankAtStart(float mainSize, float crossSize
         currentMainLineIndex_ = tempCurrentMainLineIndex;
         gridLayoutInfo_.reachStart_ = tempReachStart;
     }
-
-    gridLayoutInfo_.currentOffset_ = blankAtStart;
-    gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
-    return fillNewLine;
 }
 
 // When a moving up event comes, the [currentOffset_] may have been reduced too much than the items really need to
