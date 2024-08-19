@@ -30,8 +30,11 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/image/image_source_info.h"
+#include "core/interfaces/native/node/node_api.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/arkoala/utility/generated/converter_generated.h"
+
 
 namespace OHOS::Ace::NG::Converter {
     template<typename To, typename From>
@@ -198,6 +201,42 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<>
+    inline ImageInterpolation Convert(const Ark_ImageInterpolation& src)
+    {
+        return static_cast<ImageInterpolation>(src);
+    }
+
+    template<>
+    inline DynamicRangeMode Convert(const Ark_DynamicRangeMode& src)
+    {
+        return static_cast<DynamicRangeMode>(src);
+    }
+
+    template<>
+    inline ImageRenderMode Convert(const Ark_ImageRenderMode& src)
+    {
+        return static_cast<ImageRenderMode>(src);
+    }
+
+    template<>
+    inline ImageRepeat Convert(const Ark_ImageRepeat& src)
+    {
+        return static_cast<ImageRepeat>(src);
+    }
+
+    template<>
+    inline ImageFit Convert(const Ark_ImageFit& src)
+    {
+        return static_cast<ImageFit>(src);
+    }
+
+    template<>
+    inline CopyOptions Convert(const Ark_CopyOptions& src)
+    {
+        return static_cast<CopyOptions>(src);
+    }
+
+    template<>
     inline bool Convert(const Ark_Boolean& src)
     {
         return static_cast<bool>(src);
@@ -329,6 +368,17 @@ namespace OHOS::Ace::NG::Converter {
         PaddingProperty padding;
         return padding;
     }
+    struct ImageResource {
+        uint32_t type;
+        std::string bundleName;
+        std::string moduleName;
+        int32_t id;
+        std::vector<std::string> params;
+    };
+
+    ImageSourceInfo Convert(Ark_NativePointer node, const Type_ImageInterface_setImageOptions_Arg0& value);
+    ImageSourceInfo Convert(Ark_NativePointer node, const Type_ImageAttribute_alt_Arg0& value);
+    ImageResource Convert(const Ark_Resource& value);
 
 } // namespace OHOS::Ace::NG::Converter
 

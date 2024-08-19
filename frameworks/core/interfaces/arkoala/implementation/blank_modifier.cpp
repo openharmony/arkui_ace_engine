@@ -37,7 +37,12 @@ void ColorImpl(Ark_NativePointer node,
                const ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
-    BlankModelNG::SetColor(frameNode, Converter::ConvertOrDefault(*value, Color()));
+    auto color = Converter::OptConvert<Color>(*value);
+    if (color) {
+        BlankModelNG::SetColor(frameNode, color.value());
+    } else {
+        LOGI("#### BlankAttribute::ColorImpl: color is empty");
+    }
 }
 } // BlankAttributeModifier
 

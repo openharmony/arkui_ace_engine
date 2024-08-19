@@ -21,14 +21,14 @@ OHOS_DIR_ARG=$5
 OHOS_DIR=${OHOS_DIR_ARG:=../../../../../../..}
 
 if [[ ! -d $IDLIZE_PATH ]]; then
-    echo "Please define IDLIZE_PATH environment that points to idlize source directory."
-    exit 1
+   echo "Please define IDLIZE_PATH environment that points to idlize source directory."
+   exit 1
 fi
 
 DEST_DIR=${DEST_DIR_ARG:=.}
 DTS_DIR=${DTS_DIR_ARG:=${OHOS_DIR}/interface/sdk-js/api/@internal/component/ets}
 TMP_DIR=${TMP_DIR_ARG:=${OHOS_DIR}/out/libace_c_api_generated}
-# GENERATOR=${GENERATOR_ARG:=npx --yes @azanat/idlize --dts2peer}
+# GENERATOR=${GENERATOR_ARG:=npx --yes @azanat/idlize@1.3.5 --dts2peer}
 # Use the below to run generator from your idlize workspace
 GENERATOR=${GENERATOR_ARG:=node $IDLIZE_PATH/lib/index.js --dts2peer}
 

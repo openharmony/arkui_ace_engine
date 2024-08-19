@@ -732,8 +732,11 @@ public:
     static uint32_t GetSafeAreaExpandType(FrameNode* frameNode);
     static uint32_t GetSafeAreaExpandEdges(FrameNode* frameNode);
     static void SetPositionLocalizedEdges(bool needLocalized);
+    static void SetPositionLocalizedEdges(FrameNode* frameNode, bool needLocalized);
     static void SetLocalizedMarkAnchor(bool needLocalized);
+    static void SetLocalizedMarkAnchor(FrameNode* frameNode, bool needLocalized);
     static void SetOffsetLocalizedEdges(bool needLocalized);
+    static void SetOffsetLocalizedEdges(FrameNode* frameNode, bool needLocalized);
 
 private:
     static void AddDragFrameNodeToManager();

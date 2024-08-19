@@ -13,27 +13,49 @@
  * limitations under the License.
  */
 
+#include "core/interfaces/native/node/node_api.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/common/container.h"
+#include "core/components_ng/pattern/linear_layout/row_model_ng.h"
+#include "core/components_ng/base/view_stack_processor.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RowInterfaceModifier {
 void SetRowOptionsImpl(Ark_NativePointer node,
                        const Opt_Type_RowInterface_setRowOptions_Arg0* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    std::tuple<Ark_Float32, Ark_Int32> space = Converter::ConvertOrDefault(
+        *value, std::make_tuple(0.0f, (int)DimensionUnit::PX));
+    RowModelNG::SetSpace(
+        frameNode,
+        CalcDimension(std::get<0>(space), (DimensionUnit)std::get<1>(space)));
 }
 } // RowInterfaceModifier
 namespace RowAttributeModifier {
 void AlignItemsImpl(Ark_NativePointer node,
                     Ark_Int32 value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    RowModelNG::SetAlignItems(frameNode, static_cast<FlexAlign>(value + 1));
 }
 void JustifyContentImpl(Ark_NativePointer node,
                         Ark_Int32 value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    RowModelNG::SetJustifyContent(frameNode, static_cast<FlexAlign>(value));
 }
 void PointLightImpl(Ark_NativePointer node,
                     const Ark_PointLightStyle* value)
 {
+    LOGW("ARKOALA RowAttribute_PointLightImpl -> Method is not FULLY implemented.");
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(
+        LightIlluminated, (float)Converter::ConvertOrDefault(value->illuminated, 0),
+        frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(
+        Bloom, (float)Converter::ConvertOrDefault(value->bloom, 0), frameNode);
 }
 } // RowAttributeModifier
 const GENERATED_ArkUIRowModifier* GetRowModifier()
@@ -46,5 +68,4 @@ const GENERATED_ArkUIRowModifier* GetRowModifier()
     };
     return &ArkUIRowModifierImpl;
 }
-
-}
+} // namespace OHOS::Ace::NG::GeneratedModifier

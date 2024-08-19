@@ -50,7 +50,48 @@ void ParseDimension(const Ark_String &string, Ark_Length *result)
     }
     result->unit = static_cast<Ark_Int32>(unit);
 }
+Ark_TouchObject ConvertTouchInfo(OHOS::Ace::TouchLocationInfo& info)
+{
+    Ark_TouchObject touch;
+    Offset globalOffset = info.GetGlobalLocation();
+    Offset localOffset = info.GetLocalLocation();
+    Offset screenOffset = info.GetScreenLocation();
 
+    touch.displayX.tag = Ark_Tag::ARK_TAG_FLOAT32;
+    touch.displayX.f32 = static_cast<float>(
+        PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
+    touch.displayY.tag = Ark_Tag::ARK_TAG_FLOAT32;
+    touch.displayY.f32 = static_cast<float>(
+        PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
+
+    touch.id.tag = Ark_Tag::ARK_TAG_INT32;
+    touch.id.i32 = static_cast<int32_t>(info.GetTouchDeviceId());
+
+    touch.screenX.tag = Ark_Tag::ARK_TAG_FLOAT32;
+    touch.screenX.f32 = static_cast<float>(
+        PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
+    touch.screenY.tag = Ark_Tag::ARK_TAG_FLOAT32;
+    touch.screenY.f32 = static_cast<float>(
+        PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
+
+    touch.type = static_cast<int32_t>(info.GetTouchType());
+
+    touch.windowX.tag = Ark_Tag::ARK_TAG_FLOAT32;
+    touch.windowX.f32 = static_cast<float>(
+        PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
+    touch.windowY.tag = Ark_Tag::ARK_TAG_FLOAT32;
+    touch.windowY.f32 = static_cast<float>(
+        PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
+
+    touch.x.tag = Ark_Tag::ARK_TAG_FLOAT32;
+    touch.x.f32 = static_cast<float>(
+        PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
+    touch.y.tag = Ark_Tag::ARK_TAG_FLOAT32;
+    touch.y.f32 = static_cast<float>(
+        PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
+
+    return touch;
+}
 uint32_t ColorAlphaAdapt(uint32_t origin)
 {
     constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
@@ -95,5 +136,109 @@ bool ParseColorFromArkResource(const Ark_Resource &res, Color &result)
         return true;
     }
     return false;
+}
+
+static std::string ResourceToString(Ark_NativePointer node, const Ark_Resource& resource)
+{
+    std::string src;
+    ImageResource image = Convert(resource);
+
+    auto themeConstants = NodeModifier::GetThemeConstants(reinterpret_cast<Ark_NodeHandle>(node),
+                                                          image.bundleName.c_str(), image.moduleName.c_str());
+
+    if (themeConstants) {
+        if (image.type == static_cast<int32_t>(NodeModifier::ResourceType::RAWFILE)) {
+            if (image.params.size() > 0) {
+                src = themeConstants->GetRawfile(image.params.at(0));
+            }
+        }
+        if (image.type == static_cast<int32_t>(NodeModifier::ResourceType::MEDIA)) {
+            if (image.id == -1) {
+                if (image.params.size() > 0) {
+                    src = themeConstants->GetMediaPathByName(image.params.at(0));
+                }
+            } else {
+                src = themeConstants->GetMediaPath(image.id);
+            }
+        }
+    }
+    return src;
+}
+
+ImageResource Convert(const Ark_Resource& value)
+{
+    ImageResource resource;
+    resource.id = value.id.i32;
+    resource.type = value.type.i32;
+    resource.bundleName = std::string(value.bundleName.chars);
+    resource.moduleName = std::string(value.moduleName.chars);
+    if (value.params.tag != ARK_TAG_UNDEFINED) {
+        for (int i = 0; i < value.params.value.length; i++) {
+            resource.params[i] = std::string(value.params.value.array[i].chars);
+        }
+    }
+    return resource;
+}
+
+ImageSourceInfo Convert(Ark_NativePointer node, const Type_ImageInterface_setImageOptions_Arg0& value)
+{
+    ImageSourceInfo info;
+
+    switch (value.selector) {
+        case OFFSET_0: { // CustomObject
+            break;
+        }
+        case OFFSET_1: {
+            switch (value.value1.selector) {
+                case OFFSET_0: { // String
+                    info = ImageSourceInfo(value.value1.value0.chars);
+                    break;
+                }
+                case OFFSET_1: { // ArkResource
+                    info = ImageSourceInfo(ResourceToString(node, value.value1.value1),
+                                           value.value1.value1.bundleName.chars,
+                                           value.value1.value1.moduleName.chars);
+                    break;
+                }
+                default:
+                    LOGE("Unexpected src->selector: %{public}d\n", value.value1.selector);
+            }
+            break;
+        }
+        case OFFSET_2: { // CustomObject
+            break;
+        }
+        default:
+            LOGE("Unexpected src->selector: %{public}d\n", value.selector);
+            break;
+    }
+
+    return info;
+}
+
+ImageSourceInfo Convert(Ark_NativePointer node, const Type_ImageAttribute_alt_Arg0& value)
+{
+    ImageSourceInfo info;
+
+    switch (value.selector) {
+        case OFFSET_0: { // String
+            info = ImageSourceInfo(value.value0.chars);
+            break;
+        }
+        case OFFSET_1: { // Resource
+            info = ImageSourceInfo(ResourceToString(node, value.value1),
+                                   value.value1.bundleName.chars,
+                                   value.value1.moduleName.chars);
+            break;
+        }
+        case OFFSET_2: { // CustomObject
+            break;
+        }
+        default:
+            LOGE("Unexpected src->selector: %{public}d\n", value.selector);
+            break;
+    }
+
+    return info;
 }
 } // namespace OHOS::Ace::NG::Converter
