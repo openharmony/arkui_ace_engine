@@ -197,6 +197,16 @@ public:
     bool IsSafeAreaValid() const;
     // check if the page node needs to be avoid keyboard
     bool CheckPageNeedAvoidKeyboard(const RefPtr<FrameNode>& frameNode);
+    PaddingPropertyF SafeAreaToPadding(bool withoutProcess = false);
+
+    uint32_t GetkeyboardHeightConsideringUIExtension()
+    {
+        return keyboardHeightConsideringUIExtension_;
+    }
+    void SetkeyboardHeightConsideringUIExtension(uint32_t height)
+    {
+        keyboardHeightConsideringUIExtension_ = height;
+    }
 private:
     bool isAtomicService_ = false;
 
@@ -261,6 +271,8 @@ private:
     static constexpr float SAFE_AREA_DAMPING = 30.0f;
     RefPtr<InterpolatingSpring> safeAreaCurve_ = AceType::MakeRefPtr<InterpolatingSpring>(
         SAFE_AREA_VELOCITY, SAFE_AREA_MASS, SAFE_AREA_STIFFNESS, SAFE_AREA_DAMPING);
+
+    uint32_t keyboardHeightConsideringUIExtension_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(SafeAreaManager);
 };
