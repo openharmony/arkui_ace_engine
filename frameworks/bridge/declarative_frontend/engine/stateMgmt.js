@@ -10165,9 +10165,18 @@ class __Repeat {
     }
     // function to decide which template to use, each template has an id
     templateId(typeGenFunc) {
+        const typeGenFuncImpl = (item, index) => {
+            try {
+                return typeGenFunc(item, index);
+            }
+            catch (e) {
+                stateMgmtConsole.applicationError(`Repeat with virtual scroll. Exception in templateId():`, e === null || e === void 0 ? void 0 : e.message);
+                return '';
+            }
+        };
         // typeGenFunc wrapper with ttype validation
         const typeGenFuncSafe = (item, index) => {
-            const itemType = typeGenFunc(item, index);
+            const itemType = typeGenFuncImpl(item, index);
             const itemFunc = this.config.itemGenFuncs[itemType];
             if (typeof itemFunc !== 'function') {
                 stateMgmtConsole.applicationError(`Repeat with virtual scroll. Missing Repeat.template for id '${itemType}'`);
@@ -10592,6 +10601,9 @@ class __RepeatVirtualScrollImpl {
         let lastActiveRangeIndex = 0;
         // has any item or ttype in the active range changed?
         for (let i in this.lastActiveRangeData_) {
+            if (!(i in this.arr_)) {
+                return true;
+            }
             const oldItem = (_a = this.lastActiveRangeData_[+i]) === null || _a === void 0 ? void 0 : _a.item;
             const oldType = (_b = this.lastActiveRangeData_[+i]) === null || _b === void 0 ? void 0 : _b.ttype;
             const newItem = this.arr_[+i];
