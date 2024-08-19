@@ -473,14 +473,14 @@ struct MultiSelectItemArray {
 @Component
 struct SegmentButtonItem {
   @Link selectedIndexes: number[]
-  @Link focusIndex: number
+  @Link @Watch('onFocusIndex') focusIndex: number
   @ObjectLink itemOptions: SegmentButtonItemOptions
   @ObjectLink options: SegmentButtonOptions;
   @ObjectLink property: ItemProperty
   @Prop index: number
   @Prop marquee: boolean;
-  @Prop @Watch('onIsMarqueeAndFadeout') isMarqueeAndFadeout: boolean;
-  @State isMarquee?: boolean = true;
+  @Prop isMarqueeAndFadeout: boolean;
+  @State isMarquee?: boolean = false;
   @State isFadeout?: boolean = false;
   private groupId: string = ""
 
@@ -517,13 +517,12 @@ struct SegmentButtonItem {
     }
   }
 
-  onIsMarqueeAndFadeout() {
-    this.isFadeout = true;
-    this.isMarquee = this.focusIndex === this.index;
+  onFocusIndex(){
+    this.isMarquee = this.marquee && this.focusIndex === this.index
   }
 
   aboutToAppear(): void {
-    this.isFadeout = this.marquee;
+    this.isFadeout = this.marquee
   }
 
   setFontColor() {
@@ -535,11 +534,13 @@ struct SegmentButtonItem {
   }
 
   private getFillColor(): ResourceColor {
-    return this.marquee && this.focusIndex === this.index ? segmentButtonTheme.SEGMENT_BUTTON_FOCUS_TEXT_COLOR : this.setFontColor();
+    return this.marquee && this.focusIndex === this.index ?
+    segmentButtonTheme.SEGMENT_BUTTON_FOCUS_TEXT_COLOR : this.setFontColor();
   }
 
   private getFontColor() {
-    return this.marquee && this.focusIndex === this.index ? this.options.selectedFontColor ?? segmentButtonTheme.SEGMENT_BUTTON_FOCUS_TEXT_COLOR : this.setFontColor();
+    return this.options.selectedFontColor ? this.marquee && this.focusIndex === this.index ?
+    segmentButtonTheme.SEGMENT_BUTTON_FOCUS_TEXT_COLOR : this.setFontColor() : this.setFontColor();
   }
 
   build() {
@@ -811,7 +812,7 @@ struct SegmentButtonItemArrayComponent {
   }
 
   @Builder
-  SegmentButtonFocus(index:number,item: SegmentButtonItemOptions) {
+  SegmentButtonFocus (index: number, item: SegmentButtonItemOptions) {
     Stack() {
       PressAndHoverEffect({
         pressIndex: index,
@@ -851,7 +852,7 @@ struct SegmentButtonItemArrayComponent {
             Stack() {
               if (this.segmentFocusControl) {
                 Stack() {
-                  this.SegmentButtonFocus(index,item)
+                  this.SegmentButtonFocus (index, item);
                 }
                 .stateStyles({
                   normal: {
@@ -865,9 +866,8 @@ struct SegmentButtonItemArrayComponent {
                 })
                 .onClick(() => {
                 })
-              }
-              else {
-                this.SegmentButtonFocus(index,item)
+              } else {
+                this.SegmentButtonFocus (index, item);
               }
             }
             .direction(this.options.direction)
@@ -878,14 +878,14 @@ struct SegmentButtonItemArrayComponent {
             })
             .layoutWeight(1)
             .onSizeChange((_, newValue) => {
-              this.buttonItemsSize[index] = { width: newValue.width, height: this.buttonItemsSize[index].height }
+              this.buttonItemsSize[index] = { width: newValue.width, height: this.buttonItemsSize[index].height };
               //measure position
               if (newValue.width) {
                 this.buttonItemsPosition[index] = {
                   x: this.options.multiply ? 0 : Number(segmentButtonTheme.SEGMENT_BUTTON_PADDING_NUMBER) +
                     (Number.parseFloat(newValue.width.toString()) + 1) * index,
                   y: Number(segmentButtonTheme.SEGMENT_BUTTON_PADDING_NUMBER)
-                }
+                };
               }
             })
             .onClick(() => {
@@ -900,7 +900,8 @@ struct SegmentButtonItemArrayComponent {
               }
             })
             .focusable(true)
-            .focusScopePriority(this.groupId, Math.min(...this.selectedIndexes) === index ? FocusPriority.PREVIOUS : FocusPriority.AUTO)
+            .focusScopePriority(this.groupId, Math.min(...this.selectedIndexes) === index ?
+            FocusPriority.PREVIOUS : FocusPriority.AUTO)
             .onFocus(() => {
               this.focusIndex = index;
               this.marquee = segmentButtonTheme.SEGMENT_MARQUEE === 0;
@@ -920,6 +921,9 @@ struct SegmentButtonItemArrayComponent {
                 animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
                   this.zoomScaleArray[index] = 0.95
                 })
+                if (this.marquee) {
+                  this.getUIContext().getFocusController().clearFocus();
+                }
               } else if (event.type === TouchType.Up) {
                 animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
                   this.zoomScaleArray[index] = 1
@@ -929,19 +933,13 @@ struct SegmentButtonItemArrayComponent {
             .onHover((isHover: boolean) => {
               if (isHover) {
                 animateTo({ duration: 250, curve: Curve.Friction }, () => {
-                  if (this.marquee && this.focusIndex === index) {
-                    this.hoverColorArray[index].hoverColor = $r('sys.color.segment_button_focus_backboard_primary');
-                  } else {
-                    this.hoverColorArray[index].hoverColor = (segmentButtonTheme.HOVER_COLOR)
-                  }
+                  this.hoverColorArray[index].hoverColor = this.marquee && this.focusIndex === index ?
+                  $r('sys.color.segment_button_focus_backboard_primary') : (segmentButtonTheme.HOVER_COLOR)
                 })
               } else {
                 animateTo({ duration: 250, curve: Curve.Friction }, () => {
-                  if (this.marquee && this.focusIndex === index) {
-                    this.hoverColorArray[index].hoverColor = $r('sys.color.segment_button_focus_backboard_primary');
-                  } else {
-                    this.hoverColorArray[index].hoverColor = Color.Transparent
-                  }
+                  this.hoverColorArray[index].hoverColor = this.marquee && this.focusIndex === index ?
+                  $r('sys.color.segment_button_focus_backboard_primary') : Color.Transparent
                 })
               }
             })
@@ -1132,7 +1130,7 @@ export struct SegmentButton {
             .direction(this.options.direction)
             .size(this.componentSize)
             .backgroundColor(this.options.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR)
-            .borderRadius(this.options.iconTextBackgroundRadius ?? this.componentSize.height as number / (LengthMetrics.resource($r('sys.float.segment_button_normal_border_radius')).value as number) )
+            .borderRadius(this.options.iconTextBackgroundRadius ?? this.componentSize.height as number / 2)
             .backgroundBlurStyle(this.options.backgroundBlurStyle)
         }
         Stack() {
