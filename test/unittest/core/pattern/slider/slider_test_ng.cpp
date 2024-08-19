@@ -1736,6 +1736,38 @@ HWTEST_F(SliderTestNg, SliderTestNgInteractionMode012, TestSize.Level1)
     sliderPattern->FireChangeEvent(SliderPattern::SliderChangeMode::End);
 }
 
+
+/**
+ * @tc.name: SliderTestNgInteractionMode013
+ * @tc.desc: Test Slider InteractionMode Set Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderTestNg, SliderTestNgInteractionMode013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create slider and set the properties ,and then get frameNode.
+     */
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    sliderModelNG.SetSliderInteractionMode(SliderModelNG::SliderInteraction::SLIDE_AND_CLICK_UP);
+    std::function<void(float, int32_t)> eventOnChange = [](float floatValue, int32_t intValue) {};
+    sliderModelNG.SetOnChange(std::move(eventOnChange));
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get SliderIntecationMode.
+     * @tc.expected: step2. check whether the properties is correct.
+     */
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    EXPECT_NE(sliderPaintProperty, nullptr);
+    EXPECT_EQ(sliderPaintProperty->GetMax(), MAX);
+    EXPECT_EQ(sliderPaintProperty->GetMin(), MIN);
+    EXPECT_EQ(sliderPaintProperty->GetStep(), STEP);
+    EXPECT_EQ(sliderPaintProperty->GetValue(), VALUE);
+    EXPECT_EQ(sliderPaintProperty->GetSliderInteractionMode(), SliderModelNG::SliderInteraction::SLIDE_AND_CLICK_UP);
+}
+
 /**
  * @tc.name: SliderTestNgMinResponse001
  * @tc.desc: Test Slider MinResponse as default
