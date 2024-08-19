@@ -480,6 +480,7 @@ ohos_source_set("ace_engine_unittest_flutter_deps") {
 
 ohos_source_set("ace_components_mock") {
   testonly = true
+  defines = [ "ENHANCED_ANIMATION" ]
   sources = [
     "$ace_root/test/mock/adapter/mock_file_uri_helper_ohos.cpp",
     "$ace_root/test/mock/adapter/mock_image_packer_ohos.cpp",
@@ -537,6 +538,7 @@ ohos_source_set("ace_components_mock") {
     "$ace_root/test/mock/core/pipeline/mock_element_register.cpp",
     "$ace_root/test/mock/core/pipeline/mock_pipeline_context.cpp",
     "$ace_root/test/mock/core/render/mock_animated_image.cpp",
+    "$ace_root/test/mock/core/render/mock_animation_manager.cpp",
     "$ace_root/test/mock/core/render/mock_animation_utils.cpp",
     "$ace_root/test/mock/core/render/mock_canvas_image.cpp",
     "$ace_root/test/mock/core/render/mock_component_snapshot.cpp",
@@ -546,6 +548,7 @@ ohos_source_set("ace_components_mock") {
     "$ace_root/test/mock/core/render/mock_paragraph.cpp",
     "$ace_root/test/mock/core/render/mock_path_painter.cpp",
     "$ace_root/test/mock/core/render/mock_pixmap_image.cpp",
+    "$ace_root/test/mock/core/render/mock_render_context.cpp",
     "$ace_root/test/mock/core/render/mock_render_context_creator.cpp",
     "$ace_root/test/mock/core/render/mock_render_surface_creator.cpp",
     "$ace_root/test/mock/core/rosen/testing_typography_style.cpp",

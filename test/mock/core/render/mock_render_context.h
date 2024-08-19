@@ -87,6 +87,15 @@ public:
         return paintRect_;
     }
 
+    void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> modifier) override
+#ifdef ENHANCED_ANIMATION
+        ;
+#else
+    {}
+#endif
+
+    void DetachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& modifier) override {}
+
     void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle)
     {
         const auto& groupProperty = GetOrCreateBackground();

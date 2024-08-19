@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "test/mock/core/render/mock_animation_manager.h"
 #include "water_flow_test_ng.h"
 
 namespace OHOS::Ace::NG {
@@ -521,24 +522,30 @@ HWTEST_F(WaterFlowScrollerTestNg, ScrollToIndex003, TestSize.Level1)
     CreateDone();
 
     pattern_->ScrollToIndex(3, true, ScrollAlign::START);
+    MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(frameNode_);
     EXPECT_FLOAT_EQ(pattern_->finalPosition_, 200.f);
 
     pattern_->ScrollToIndex(3, true, ScrollAlign::END);
+    MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(frameNode_);
     EXPECT_FLOAT_EQ(pattern_->finalPosition_, -400.f);
 
     pattern_->ScrollToIndex(15, true, ScrollAlign::AUTO);
+    MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(frameNode_);
     EXPECT_FLOAT_EQ(pattern_->finalPosition_, 500.f);
 
     pattern_->ScrollToIndex(15, true, ScrollAlign::CENTER);
+    MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(frameNode_);
     EXPECT_FLOAT_EQ(pattern_->finalPosition_, 800.f);
 
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 11);
     pattern_->ScrollToIndex(3, true, ScrollAlign::AUTO);
+    MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(frameNode_);
-    EXPECT_FLOAT_EQ(pattern_->finalPosition_, 800.f);
+    EXPECT_FLOAT_EQ(pattern_->finalPosition_, 200.f);
 
     pattern_->ScrollPage(false);
     FlushLayoutTask(frameNode_);
