@@ -492,8 +492,14 @@ public:
         return hasUserDefinedSelectedFontFamily_;
     }
 
+    const PickerTextProperties& GetTextProperties() const
+    {
+        return textProperties_;
+    }
+
     void SetTextProperties(const PickerTextProperties& properties)
     {
+        textProperties_ = properties;
         if (properties.disappearTextStyle_.fontSize.has_value() && properties.disappearTextStyle_.fontSize->IsValid()) {
             isUserSetGradientFont_ = true;
             gradientHeight_ = properties.disappearTextStyle_.fontSize.value();
@@ -620,6 +626,7 @@ private:
     Dimension gradientHeight_;
     Dimension dividerSpacing_;
     float paintDividerSpacing_ = 1.0f;
+    PickerTextProperties textProperties_;
 };
 } // namespace OHOS::Ace::NG
 
