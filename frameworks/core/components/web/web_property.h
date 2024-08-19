@@ -18,8 +18,6 @@
 
 #include <functional>
 #include <utility>
-#include <optional>
-#include <string>
 
 #include "base/geometry/size.h"
 #include "base/utils/utils.h"
@@ -30,6 +28,7 @@
 #include "core/components_v2/common/common_def.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
+#include "core/components_ng/pattern/text/text_menu_extension.h"
 
 namespace OHOS::Ace {
 
@@ -73,57 +72,6 @@ enum class WebKeyboardAvoidMode : int32_t {
     OVERLAYS_CONTENT,
     DEFAULT
 };
-
-struct WebMenuOptionsParam {
-    std::vector<NG::MenuOptionsParam> menuOption;
-    bool operator==(const WebMenuOptionsParam& webMenuOption) const
-    {
-        return menuOption.data() == webMenuOption.menuOption.data();
-    }
-};
-
-struct MenuOptionsParam {
-    std::optional<std::string> content;
-    std::optional<std::string> icon;
-    std::string id;
-    std::function<void(const std::string&)> action;
-
-    // Used for the display of the first options extra-long.
-    bool isFirstOption = false;
-    
-    std::string ToString() const
-    {
-        std::string result;
-        result.append("id: ");
-        result.append(id);
-        result.append(", content: ");
-        result.append(content.value_or("na"));
-        result.append(", icon: ");
-        result.append(icon.value_or("na"));
-        return result;
-    }
-};
-
-struct MenuItemParam {
-    MenuOptionsParam menuOptionsParam;
-    int32_t start = -1;
-    int32_t end = -1;
-
-    std::string ToString() const
-    {
-        std::string result;
-        result.append("[start: ");
-        result.append(std::to_string(start));
-        result.append(", end: ");
-        result.append(std::to_string(end));
-        result.append("], ");
-        result.append(menuOptionsParam.ToString());
-        return result;
-    }
-};
-
-using OnCreateMenuCallback = std::function<std::vector<MenuOptionsParam>(const std::vector<NG::MenuItemParam>&)>;
-using OnMenuItemClickCallback = std::function<bool(const NG::MenuItemParam&)>;
 
 constexpr int32_t DEFAULT_TEXT_ZOOM_RATIO = 100;
 constexpr int32_t DEFAULT_FIXED_FONT_SIZE = 13;
