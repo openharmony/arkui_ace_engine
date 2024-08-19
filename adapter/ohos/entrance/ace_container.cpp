@@ -1347,7 +1347,7 @@ private:
     AceAutoFillType autoFillType_ = AceAutoFillType::ACE_UNSPECIFIED;
     bool isNative_ = true;
     AbilityBase::Rect rect_;
-    Rosen::Rect windowRect_;
+    Rosen::Rect windowRect_ { 0, 0, 0, 0 };
 };
 
 bool AceContainer::UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node,
