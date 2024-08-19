@@ -87,7 +87,7 @@ const std::vector<SelectParam> CREATE_VALUE = { { "content1", "icon1" }, { "cont
 const std::vector<SelectParam> CREATE_VALUE_NEW = { { "content1_new", "" }, { "", "icon4_new" },
     { "", "" }, { "", "icon4_new" } };
 } // namespace
-class MenuLayout3TestNg : public testing::Test {
+class MenuItemTestOneNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -99,11 +99,11 @@ public:
     RefPtr<MenuItemLayoutAlgorithm> menuItemLayoutAlgorithm_;
 };
 
-void MenuLayout3TestNg::SetUpTestCase() {}
+void MenuItemTestOneNg::SetUpTestCase() {}
 
-void MenuLayout3TestNg::TearDownTestCase() {}
+void MenuItemTestOneNg::TearDownTestCase() {}
 
-void MenuLayout3TestNg::SetUp()
+void MenuItemTestOneNg::SetUp()
 {
     MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -112,7 +112,7 @@ void MenuLayout3TestNg::SetUp()
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
 }
 
-void MenuLayout3TestNg::TearDown()
+void MenuItemTestOneNg::TearDown()
 {
     MockPipelineContext::TearDown();
     menuItemLayoutAlgorithm_ = nullptr;
@@ -121,7 +121,7 @@ void MenuLayout3TestNg::TearDown()
     SystemProperties::orientation_ = DeviceOrientation::PORTRAIT;
 }
 
-RefPtr<FrameNode> MenuLayout3TestNg::GetPreviewMenuWrapper(
+RefPtr<FrameNode> MenuItemTestOneNg::GetPreviewMenuWrapper(
     SizeF itemSize, std::optional<MenuPreviewAnimationOptions> scaleOptions)
 {
     auto rootNode = FrameNode::CreateFrameNode(
@@ -156,7 +156,7 @@ RefPtr<FrameNode> MenuLayout3TestNg::GetPreviewMenuWrapper(
     return menuWrapperNode;
 }
 
-void MenuLayout3TestNg::MockPipelineContextGetTheme()
+void MenuItemTestOneNg::MockPipelineContextGetTheme()
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
@@ -178,7 +178,7 @@ void MenuLayout3TestNg::MockPipelineContextGetTheme()
  * @tc.desc: Test UpdateSelfSize func .
  * @tc.type: FUNC
  */
-HWTEST_F(MenuLayout3TestNg, UpdateSelfSize001, TestSize.Level1)
+HWTEST_F(MenuItemTestOneNg, UpdateSelfSize001, TestSize.Level1)
 {
     ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
     MockPipelineContextGetTheme();
@@ -213,7 +213,7 @@ HWTEST_F(MenuLayout3TestNg, UpdateSelfSize001, TestSize.Level1)
  * @tc.desc: Test CheckNeedExpandContent func .
  * @tc.type: FUNC
  */
-HWTEST_F(MenuLayout3TestNg, CheckNeedExpandContent001, TestSize.Level1)
+HWTEST_F(MenuItemTestOneNg, CheckNeedExpandContent001, TestSize.Level1)
 {
     ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
     MockPipelineContextGetTheme();
@@ -248,7 +248,7 @@ HWTEST_F(MenuLayout3TestNg, CheckNeedExpandContent001, TestSize.Level1)
  * @tc.desc: Test Measure func .
  * @tc.type: FUNC
  */
-HWTEST_F(MenuLayout3TestNg, Measure001, TestSize.Level1)
+HWTEST_F(MenuItemTestOneNg, Measure001, TestSize.Level1)
 {
     ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
     MockPipelineContextGetTheme();
@@ -294,7 +294,7 @@ HWTEST_F(MenuLayout3TestNg, Measure001, TestSize.Level1)
  * @tc.desc: Test Measure func .
  * @tc.type: FUNC
  */
-HWTEST_F(MenuLayout3TestNg, Measure002, TestSize.Level1)
+HWTEST_F(MenuItemTestOneNg, Measure002, TestSize.Level1)
 {
     ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
     MockPipelineContextGetTheme();
@@ -340,7 +340,7 @@ HWTEST_F(MenuLayout3TestNg, Measure002, TestSize.Level1)
  * @tc.desc: Test Measure func .
  * @tc.type: FUNC
  */
-HWTEST_F(MenuLayout3TestNg, Measure003, TestSize.Level1)
+HWTEST_F(MenuItemTestOneNg, Measure003, TestSize.Level1)
 {
     ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
     MockPipelineContextGetTheme();

@@ -66,6 +66,8 @@ using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t TARGET_ID = 3;
+constexpr int32_t TARGET = 0;
 constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
 constexpr float TARGET_SIZE_WIDTH = 50.0f;
@@ -145,7 +147,7 @@ RefPtr<FrameNode> MenuLayout3TestNg::CreateMenuWrapperElement(MenuType type)
     MenuParam menuParam;
     menuParam.placement = Placement::BOTTOM_RIGHT;
     std::vector<OptionParam> params;
-    for (int32_t i = 0; i < 3; ++i) {
+    for (int32_t i = TARGET; i < TARGET_ID; ++i) {
         OptionParam param;
         params.emplace_back(param);
     }

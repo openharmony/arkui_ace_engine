@@ -66,6 +66,7 @@ namespace OHOS::Ace::NG {
 namespace {
 const InspectorFilter filter;
 constexpr int32_t TARGET_ID = 3;
+constexpr float TARGET_FONT = 25.0f;
 constexpr MenuType TYPE = MenuType::MENU;
 constexpr float TARGET_SIZE_WIDTH = 100.0f;
 constexpr float TARGET_SIZE_HEIGHT = 100.0f;
@@ -181,6 +182,35 @@ RefPtr<FrameNode> MenuPattern2TestNg::GetPreviewMenuWrapper(
     return menuWrapperNode;
 }
 
+void CheckTestResult(RefPtr<MenuItemPattern> itemPattern)
+{
+    auto contentNode = itemPattern->GetContentNode();
+    ASSERT_NE(contentNode, nullptr);
+    auto textProperty = contentNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textProperty, nullptr);
+    ASSERT_TRUE(textProperty->GetContent().has_value());
+    EXPECT_EQ(textProperty->GetContent().value(), "content");
+    ASSERT_TRUE(textProperty->GetFontSize().has_value());
+    EXPECT_EQ(textProperty->GetFontSize().value(), Dimension(TARGET_FONT));
+    ASSERT_TRUE(textProperty->GetFontWeight().has_value());
+    EXPECT_EQ(textProperty->GetFontWeight().value(), FontWeight::BOLD);
+    ASSERT_TRUE(textProperty->GetTextColor().has_value());
+    EXPECT_EQ(textProperty->GetTextColor().value(), Color::RED);
+
+    auto labelNode = itemPattern->GetLabelNode();
+    ASSERT_NE(labelNode, nullptr);
+    auto labelProperty = labelNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(labelProperty, nullptr);
+    ASSERT_TRUE(labelProperty->GetContent().has_value());
+    EXPECT_EQ(labelProperty->GetContent().value(), "label");
+    ASSERT_TRUE(labelProperty->GetFontSize().has_value());
+    EXPECT_EQ(labelProperty->GetFontSize().value(), Dimension(TARGET_FONT));
+    ASSERT_TRUE(labelProperty->GetFontWeight().has_value());
+    EXPECT_EQ(labelProperty->GetFontWeight().value(), FontWeight::BOLD);
+    ASSERT_TRUE(labelProperty->GetTextColor().has_value());
+    EXPECT_EQ(labelProperty->GetTextColor().value(), Color::RED);
+}
+
 /**
  * @tc.name: ModifyDivider
  * @tc.desc: test ModifyDivider and SetItemGroupDivider.
@@ -191,7 +221,7 @@ HWTEST_F(MenuPattern2TestNg, ModifyDivider, TestSize.Level1)
     MenuModelNG MneuModelInstance;
     MenuItemModelNG MneuItemModelInstance;
     MneuModelInstance.Create();
-    MneuModelInstance.SetFontSize(Dimension(25.0));
+    MneuModelInstance.SetFontSize(Dimension(TARGET_FONT));
     MneuModelInstance.SetFontColor(Color::RED);
     MneuModelInstance.SetFontWeight(FontWeight::BOLD);
     MneuModelInstance.SetItemDivider(ITEM_DIVIDER);
@@ -233,31 +263,6 @@ HWTEST_F(MenuPattern2TestNg, ModifyDivider, TestSize.Level1)
     // call UpdateMenuItemChildren
     menuPattern->OnModifyDone();
     groupPattern->UpdateMenuItemIconInfo();
-
-    auto contentNode = itemPattern->GetContentNode();
-    ASSERT_NE(contentNode, nullptr);
-    auto textProperty = contentNode->GetLayoutProperty<TextLayoutProperty>();
-    ASSERT_NE(textProperty, nullptr);
-    ASSERT_TRUE(textProperty->GetContent().has_value());
-    EXPECT_EQ(textProperty->GetContent().value(), "content");
-    ASSERT_TRUE(textProperty->GetFontSize().has_value());
-    EXPECT_EQ(textProperty->GetFontSize().value(), Dimension(25.0));
-    ASSERT_TRUE(textProperty->GetFontWeight().has_value());
-    EXPECT_EQ(textProperty->GetFontWeight().value(), FontWeight::BOLD);
-    ASSERT_TRUE(textProperty->GetTextColor().has_value());
-    EXPECT_EQ(textProperty->GetTextColor().value(), Color::RED);
-
-    auto labelNode = itemPattern->GetLabelNode();
-    ASSERT_NE(labelNode, nullptr);
-    auto labelProperty = labelNode->GetLayoutProperty<TextLayoutProperty>();
-    ASSERT_NE(labelProperty, nullptr);
-    ASSERT_TRUE(labelProperty->GetContent().has_value());
-    EXPECT_EQ(labelProperty->GetContent().value(), "label");
-    ASSERT_TRUE(labelProperty->GetFontSize().has_value());
-    EXPECT_EQ(labelProperty->GetFontSize().value(), Dimension(25.0));
-    ASSERT_TRUE(labelProperty->GetFontWeight().has_value());
-    EXPECT_EQ(labelProperty->GetFontWeight().value(), FontWeight::BOLD);
-    ASSERT_TRUE(labelProperty->GetTextColor().has_value());
-    EXPECT_EQ(labelProperty->GetTextColor().value(), Color::RED);
+    CheckTestResult(itemPattern);
 }
 } // namespace OHOS::Ace::NG
