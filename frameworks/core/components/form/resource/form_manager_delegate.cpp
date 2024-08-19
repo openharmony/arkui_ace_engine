@@ -112,6 +112,7 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
 #endif
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    std::lock_guard<std::mutex> lock(recycleMutex_);
     // dynamic add new form should release the running form first.
     if (runningCardId_ > 0) {
         TAG_LOGI(AceLogTag::ACE_FORM, "Add new form, release platform resource about old form:%{public}s.",
