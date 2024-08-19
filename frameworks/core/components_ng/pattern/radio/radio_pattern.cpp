@@ -188,7 +188,11 @@ void RadioPattern::HandleFocusEvent()
 {
     CHECK_NULL_VOID(radioModifier_);
     AddIsFocusActiveUpdateEvent();
-    OnIsFocusActiveUpdate(true);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetIsFocusActive()) {
+        OnIsFocusActiveUpdate(true);
+    }
 }
 
 void RadioPattern::HandleBlurEvent()

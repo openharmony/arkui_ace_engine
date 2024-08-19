@@ -296,7 +296,11 @@ void CheckBoxPattern::HandleFocusEvent()
 {
     CHECK_NULL_VOID(checkboxModifier_);
     AddIsFocusActiveUpdateEvent();
-    OnIsFocusActiveUpdate(true);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetIsFocusActive()) {
+        OnIsFocusActiveUpdate(true);
+    }
 }
 
 void CheckBoxPattern::HandleBlurEvent()
