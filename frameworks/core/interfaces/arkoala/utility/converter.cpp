@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/interfaces/native/node/node_api.h"
 #include "converter.h"
 
 namespace OHOS::Ace::NG::Converter {
@@ -50,4 +51,49 @@ void ParseDimension(const Ark_String &string, Ark_Length *result)
     result->unit = static_cast<Ark_Int32>(unit);
 }
 
+uint32_t ColorAlphaAdapt(uint32_t origin)
+{
+    constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
+    constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
+
+    uint32_t result = origin;
+    if ((origin >> COLOR_ALPHA_OFFSET) == 0) {
+        result = origin | COLOR_ALPHA_VALUE;
+    }
+    return result;
+}
+
+bool ParseColorFromArkResource(const Ark_Resource &res, Color &result)
+{
+    constexpr int32_t ERROR_COLOR_ID = -1;
+
+    auto themeConstants = NodeModifier::GetThemeConstants(0, res.bundleName.chars, res.moduleName.chars);
+    CHECK_NULL_RETURN(themeConstants, false);
+
+    CHECK_NULL_RETURN(res.id.tag == ARK_TAG_INT32, false);
+    auto resId = res.id.i32;
+    if (resId == ERROR_COLOR_ID) {
+        CHECK_NULL_RETURN(res.params.value.array, false);
+        std::string colorName = res.params.value.array[0].chars;
+        result = themeConstants->GetColorByName(colorName);
+        return true;
+    }
+
+    CHECK_NULL_RETURN(res.type.tag == ARK_TAG_INT32, false);
+    auto type = res.type.i32;
+    if (type == static_cast<int32_t>(NodeModifier::ResourceType::STRING)) {
+        auto value = themeConstants->GetString(resId);
+        return Color::ParseColorString(value, result);
+    }
+    if (type == static_cast<int32_t>(NodeModifier::ResourceType::INTEGER)) {
+        auto value = themeConstants->GetInt(resId);
+        result = Color(ColorAlphaAdapt(value));
+        return true;
+    }
+    if (type == static_cast<int32_t>(NodeModifier::ResourceType::COLOR)) {
+        result = themeConstants->GetColor(resId);
+        return true;
+    }
+    return false;
+}
 } // namespace OHOS::Ace::NG::Converter
