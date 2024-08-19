@@ -95,6 +95,7 @@ void DialogModelTestNg::TearDownTestCase()
 {
     MockPipelineContext::GetCurrent()->themeManager_ = nullptr;
     MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 
 /**
@@ -1036,35 +1037,6 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg024, TestSize.Level1)
     EXPECT_EQ(borderRadius.radiusTopRight, dialogTheme->GetRadius().GetX());
     EXPECT_EQ(borderRadius.radiusBottomLeft, dialogTheme->GetRadius().GetX());
     EXPECT_EQ(borderRadius.radiusBottomRight, dialogTheme->GetRadius().GetX());
-}
-
-/**
- * @tc.name: DialogModelTestNg025
- * @tc.desc: Test dialogPattern.HandleBlurEvent/HandleFocusEvent function
- * @tc.type: FUNC
- */
-HWTEST_F(DialogModelTestNg, DialogModelTestNg025, TestSize.Level1)
-{
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
-    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
-    ASSERT_NE(dialogTheme, nullptr);
-
-    DialogProperties props;
-    auto dialog = DialogView::CreateDialogNode(props, nullptr);
-    ASSERT_NE(dialog, nullptr);
-    auto dialogPattern = dialog->GetPattern<DialogPattern>();
-    ASSERT_NE(dialogPattern, nullptr);
-
-    auto renderContext = dialogPattern->contentRenderContext_;
-    ASSERT_NE(renderContext, nullptr);
-    dialogPattern->HandleBlurEvent();
-    auto defaultShadowOff = static_cast<ShadowStyle>(dialogTheme->GetDefaultShadowOff());
-    EXPECT_EQ(renderContext->GetBackShadow().value(), Shadow::CreateShadow(defaultShadowOff));
-    dialogPattern->HandleFocusEvent();
-    auto defaultShadowOn = static_cast<ShadowStyle>(dialogTheme->GetDefaultShadowOn());
-    EXPECT_EQ(renderContext->GetBackShadow().value(), Shadow::CreateShadow(defaultShadowOn));
 }
 
 /**

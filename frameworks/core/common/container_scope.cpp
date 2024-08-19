@@ -15,7 +15,6 @@
 
 #include "core/common/container_scope.h"
 #include "core/common/container_consts.h"
-#include "base/utils/utils.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -42,7 +41,7 @@ int32_t ContainerScope::DefaultId()
 {
     if (ContainerCount() > 0) {
         std::shared_lock<std::shared_mutex> lock(mutex_);
-        return *containerSet_.end();
+        return *containerSet_.rbegin();
     }
     return INSTANCE_ID_UNDEFINED;
 }

@@ -46,6 +46,8 @@ void ArkUIPerfMonitor::RecordLayoutNode(int64_t num) {}
 
 void ArkUIPerfMonitor::RecordRenderNode(int64_t num) {}
 
+void ArkUIPerfMonitor::RecordDisplaySyncRate(int32_t displaySyncRate) {}
+
 void ArkUIPerfMonitor::SetRecordingStatus(MonitorTag tag, MonitorStatus status) {}
 
 void ArkUIPerfMonitor::InitPerfMonitor() {}

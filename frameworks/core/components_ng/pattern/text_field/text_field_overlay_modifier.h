@@ -32,7 +32,6 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing.h"
-#include "core/components_ng/pattern/select_overlay/magnifier_painter.h"
 
 namespace OHOS::Ace::NG {
 class TextFieldOverlayModifier : public ScrollBarOverlayModifier {
@@ -73,6 +72,7 @@ public:
     void SetPreviewTextRects(bool value);
     void SetPreviewTextDecorationColor(const Color& value);
     void SetPreviewTextStyle(PreviewTextStyle style);
+    void ContentChange();
 
 private:
     void PaintSelection(DrawingContext& context) const;
@@ -112,9 +112,9 @@ private:
     RefPtr<PropertyBool> changeSelectedRects_;
     RefPtr<PropertyBool> showPreviewText_;
     RefPtr<PropertyBool> changePreviewTextRects_;
+    RefPtr<PropertyBool> contentChange_;
     RefPtr<PropertyColor> previewTextDecorationColor_;
     RectF textRect_;
-    MagnifierPainter magnifierPainter_;
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldOverlayModifier);
 };
 } // namespace OHOS::Ace::NG

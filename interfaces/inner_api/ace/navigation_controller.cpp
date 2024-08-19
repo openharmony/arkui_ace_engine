@@ -15,10 +15,8 @@
 
 #include "navigation_controller.h"
 
-#include <string>
 
 #include "ace_forward_compatibility.h"
-#include "ui_content.h"
 #include "utils.h"
 
 namespace OHOS {

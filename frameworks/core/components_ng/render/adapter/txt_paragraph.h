@@ -110,6 +110,7 @@ public:
     float GetMaxIntrinsicWidth() override;
     bool DidExceedMaxLines() override;
     float GetLongestLine() override;
+    float GetLongestLineWithIndent() override;
     float GetMaxWidth() override;
     float GetAlphabeticBaseline() override;
     float GetCharacterWidth(int32_t index) override;
@@ -125,6 +126,7 @@ public:
     PositionWithAffinity GetGlyphPositionAtCoordinate(const Offset& offset) override;
     void AdjustIndexForward(const Offset& offset, bool compareOffset, int32_t& index);
     void GetRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects) override;
+    void GetTightRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects) override;
     void GetRectsForPlaceholders(std::vector<RectF>& selectedRects) override;
     bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF& result, bool needLineHighest = true) override;
     bool ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& result, bool needLineHighest = true) override;
@@ -151,6 +153,7 @@ public:
     TextLineMetrics GetLineMetrics(size_t lineNumber) override;
     void SetRunMetrics(RunMetrics& runMetrics, const OHOS::Rosen::RunMetrics& runMetricsRes);
     bool GetLineMetricsByCoordinate(const Offset& offset, LineMetrics& lineMetrics) override;
+    void UpdateColor(size_t from, size_t to, const Color& color) override;
 
 private:
     void CreateBuilder();
@@ -163,9 +166,11 @@ private:
     bool HandleCaretWhenEmpty(CaretMetricsF& result);
     void HandleTextAlign(CaretMetricsF& result, TextAlign align);
     void HandleLeadingMargin(CaretMetricsF& result, LeadingMargin leadingMargin);
-    void GetRectsForRangeInner(int32_t start, int32_t end, std::vector<RectF>& selectedRects);
+    void GetRectsForRangeInner(int32_t start, int32_t end, std::vector<RectF>& selectedRects,
+        RectHeightPolicy rectHeightPolicy = RectHeightPolicy::COVER_LINE);
     int32_t AdjustIndexForEmoji(int32_t index);
     bool IsIndexInEmoji(int32_t index, int32_t& emojiStart, int32_t& emojiEnd);
+    void CalculateLeadingMarginOffest(float& x, float& y);
 
     ParagraphStyle paraStyle_;
 #ifndef USE_GRAPHIC_TEXT_GINE

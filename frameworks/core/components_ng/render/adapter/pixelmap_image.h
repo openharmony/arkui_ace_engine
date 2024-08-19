@@ -47,9 +47,14 @@ public:
         RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY) override;
     void DrawToRSCanvasWithBrush(
         RSCanvas& canvas, RSBrush& brush, const RSRect& srcRect, const RSRect& dstRect);
+    void DrawRect(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect) override;
     void DrawRect(RSCanvas& canvas, const RSRect& dstRect);
 
-    bool DrawImageNine(
+    bool CheckIfNeedForStretching(
+        RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY);
+    bool StretchImageWithSlice(
+        RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY);
+    bool StretchImageWithLattice(
         RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY);
 
     static RefPtr<CanvasImage> QueryFromCache(const std::string& key);

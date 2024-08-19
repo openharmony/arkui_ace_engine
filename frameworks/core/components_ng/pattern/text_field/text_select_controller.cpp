@@ -161,7 +161,6 @@ void TextSelectController::UpdateCaretInfoByOffset(const Offset& localOffset)
     auto index = ConvertTouchOffsetToPosition(localOffset);
     AdjustCursorPosition(index, localOffset);
     UpdateCaretIndex(index);
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "now caret index = [%{public}d]", index);
     if (!contentController_->IsEmpty()) {
         UpdateCaretRectByPositionNearTouchOffset(index, localOffset);
         MoveHandleToContentRect(caretInfo_.rect, 0.0f);
@@ -288,7 +287,7 @@ std::pair<int32_t, int32_t> TextSelectController::GetSelectParagraphByOffset(con
     if (!textFiled->IsUsingMouse()) {
         smartSelect = AdjustWordSelection(pos, start, end, localOffset);
     }
-    
+
     GetSubParagraphByOffset(pos, start, end);
 
     if (SystemProperties::GetDebugEnabled()) {
@@ -404,6 +403,8 @@ std::vector<RectF> TextSelectController::GetSelectedRects() const
 
 void TextSelectController::MoveHandleToContentRect(RectF& handleRect, float boundaryAdjustment) const
 {
+    TAG_LOGI(AceLogTag::ACE_TEXTINPUT, "before move, handleRect.GetX():%{public}f,handleRect.GetY():%{public}f",
+        handleRect.GetX(), handleRect.GetY());
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
     auto textFiled = DynamicCast<TextFieldPattern>(pattern);
@@ -438,6 +439,8 @@ void TextSelectController::MoveHandleToContentRect(RectF& handleRect, float boun
     textFiled->SetTextRect(textRect);
     AdjustHandleAtEdge(handleRect);
     textFiled->UpdateScrollBarOffset();
+    TAG_LOGI(AceLogTag::ACE_TEXTINPUT, "after move, handleRect.GetX():%{public}f,handleRect.GetY():%{public}f",
+        handleRect.GetX(), handleRect.GetY());
 }
 
 void TextSelectController::AdjustHandleAtEdge(RectF& handleRect) const
@@ -477,7 +480,8 @@ void TextSelectController::MoveFirstHandleToContentRect(int32_t index, bool move
 {
     CaretMetricsF firstHandleMetrics;
     firstHandleInfo_.index = index;
-    CalcCaretMetricsByPosition(GetFirstHandleIndex(), firstHandleMetrics, TextAffinity::DOWNSTREAM);
+    CalcCaretMetricsByPosition(
+        GetFirstHandleIndex(), firstHandleMetrics, HasReverse() ? TextAffinity::UPSTREAM : TextAffinity::DOWNSTREAM);
     OffsetF firstHandleOffset = firstHandleMetrics.offset;
     RectF firstHandle;
     firstHandle.SetOffset(firstHandleOffset);
@@ -494,7 +498,8 @@ void TextSelectController::MoveSecondHandleToContentRect(int32_t index, bool mov
 {
     CaretMetricsF secondHandleMetrics;
     secondHandleInfo_.index = index;
-    CalcCaretMetricsByPosition(GetSecondHandleIndex(), secondHandleMetrics, TextAffinity::UPSTREAM);
+    CalcCaretMetricsByPosition(
+        GetSecondHandleIndex(), secondHandleMetrics, HasReverse() ? TextAffinity::DOWNSTREAM : TextAffinity::UPSTREAM);
     OffsetF secondHandleOffset = secondHandleMetrics.offset;
     RectF secondHandle;
     secondHandle.SetOffset(secondHandleOffset);
@@ -582,7 +587,8 @@ void TextSelectController::MoveCaretAnywhere(const Offset& touchOffset)
 void TextSelectController::UpdateFirstHandleOffset()
 {
     CaretMetricsF caretMetrics;
-    CalcCaretMetricsByPosition(GetFirstHandleIndex(), caretMetrics, TextAffinity::DOWNSTREAM);
+    CalcCaretMetricsByPosition(
+        GetFirstHandleIndex(), caretMetrics, HasReverse() ? TextAffinity::UPSTREAM : TextAffinity::DOWNSTREAM);
     firstHandleInfo_.rect.SetOffset(caretMetrics.offset);
     firstHandleInfo_.rect.SetHeight(caretMetrics.height);
     AdjustHandleOffset(firstHandleInfo_.rect);
@@ -591,7 +597,8 @@ void TextSelectController::UpdateFirstHandleOffset()
 void TextSelectController::UpdateSecondHandleOffset()
 {
     CaretMetricsF caretMetrics;
-    CalcCaretMetricsByPosition(GetSecondHandleIndex(), caretMetrics, TextAffinity::UPSTREAM);
+    CalcCaretMetricsByPosition(
+        GetSecondHandleIndex(), caretMetrics, HasReverse() ? TextAffinity::DOWNSTREAM : TextAffinity::UPSTREAM);
     secondHandleInfo_.rect.SetOffset(caretMetrics.offset);
     secondHandleInfo_.rect.SetHeight(caretMetrics.height);
     AdjustHandleOffset(secondHandleInfo_.rect);

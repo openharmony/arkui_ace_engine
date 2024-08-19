@@ -16,7 +16,6 @@
 #include "interfaces/inner_api/ace/ui_event_func.h"
 
 #include "ace_forward_compatibility.h"
-#include "utils.h"
 
 namespace OHOS::Ace {
 constexpr char REGISTER_UI_EVENT_OBSERVER_FUNC[] = "OHOS_ACE_RegisterUIEventObserver";

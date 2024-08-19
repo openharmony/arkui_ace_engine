@@ -107,5 +107,14 @@ const ArkUIFormComponentModifier* GetFormComponentModifier()
 
     return &modifier;
 }
+
+const CJUIFormComponentModifier* GetCJUIFormComponentModifier()
+{
+    static const CJUIFormComponentModifier modifier = { SetFormVisibility, AllowUpdate, SetDimension,
+        SetModuleName, SetFormSize, ResetFormVisibility, DisallowUpdate, ResetDimension, ResetModuleName,
+        ResetFormSize };
+
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

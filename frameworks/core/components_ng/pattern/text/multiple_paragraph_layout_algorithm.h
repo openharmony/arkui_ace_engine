@@ -52,16 +52,25 @@ public:
     RefPtr<Paragraph> GetSingleParagraph() const;
 
 protected:
-    virtual void GetSpanParagraphStyle(const std::unique_ptr<TextLineStyle>& lineStyle, ParagraphStyle& pStyle);
+    void GetSpanParagraphStyle(LayoutWrapper* layoutWrapper, const RefPtr<SpanItem>& spanItem, ParagraphStyle& pStyle);
     virtual ParagraphStyle GetParagraphStyle(
         const TextStyle& textStyle, const std::string& content, LayoutWrapper* layoutWrapper) const;
     virtual bool CreateParagraph(
         const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper, double maxWidth = 0.0) = 0;
-    void ApplyIndent(ParagraphStyle& paragraphStyle, const RefPtr<Paragraph>& paragraph, double width);
+    virtual void HandleEmptyParagraph(RefPtr<Paragraph> paragraph, const std::list<RefPtr<SpanItem>>& spanGroup) {}
+    virtual RefPtr<SpanItem> GetParagraphStyleSpanItem(const std::list<RefPtr<SpanItem>>& spanGroup)
+    {
+        CHECK_NULL_RETURN(!spanGroup.empty(), nullptr);
+        return spanGroup.front();
+    }
+
+    void ApplyIndent(ParagraphStyle& paragraphStyle, const RefPtr<Paragraph>& paragraph, double width,
+        const TextStyle& textStyle);
     void ConstructTextStyles(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, TextStyle& textStyle);
     bool ParagraphReLayout(const LayoutConstraintF& contentConstraint);
-    bool UpdateParagraphBySpan(LayoutWrapper* layoutWrapper, ParagraphStyle paraStyle, double maxWidth);
+    bool UpdateParagraphBySpan(LayoutWrapper* layoutWrapper, ParagraphStyle paraStyle, double maxWidth,
+        const TextStyle& textStyle);
     OffsetF SetContentOffset(LayoutWrapper* layoutWrapper);
     std::string SpansToString()
     {
@@ -93,6 +102,7 @@ protected:
     float shadowOffset_ = 0.0f;
     bool spanStringHasMaxLines_ = false;
     bool isSpanStringMode_ = false;
+    bool isMarquee_ = false;
 
 private:
     virtual OffsetF GetContentOffset(LayoutWrapper* layoutWrapper) = 0;
@@ -101,16 +111,22 @@ private:
         return 0.0f;
     }
     static TextDirection GetTextDirection(const std::string& content, LayoutWrapper* layoutWrapper);
+    static TextDirection GetTextDirectionByContent(const std::string& content);
 
     void UpdateSymbolSpanEffect(
         RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph, const std::list<RefPtr<SpanItem>>& spans);
     void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
     void UpdateTextColorIfForeground(const RefPtr<FrameNode>& frameNode, TextStyle& textStyle);
-    void SetPropertyToModifier(const RefPtr<TextLayoutProperty>& layoutProperty, RefPtr<TextContentModifier> modifier,
-        TextStyle& textStyle);
+    void SetPropertyToModifier(const RefPtr<TextLayoutProperty>& layoutProperty,
+        const RefPtr<TextContentModifier>& modifier, const TextStyle& textStyle);
+    void SetDecorationPropertyToModifier(const RefPtr<TextLayoutProperty>& layoutProperty,
+        const RefPtr<TextContentModifier>& modifier, const TextStyle& textStyle);
+    void SetFontSizePropertyToModifier(const RefPtr<TextLayoutProperty>& layoutProperty,
+        const RefPtr<TextContentModifier>&, const TextStyle& textStyle);
 
     void AddImageToParagraph(RefPtr<ImageSpanItem>& imageSpanItem, const RefPtr<LayoutWrapper>& iterItem,
-        const LayoutConstraintF& layoutConstrain, const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength);
+        const LayoutConstraintF& layoutConstrain, const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength,
+        const TextStyle& textStyle);
     void AddPlaceHolderToParagraph(RefPtr<PlaceholderSpanItem>& placeholderSpanItem,
         const RefPtr<LayoutWrapper>& layoutWrapper, const LayoutConstraintF& layoutConstrain,
         const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength);

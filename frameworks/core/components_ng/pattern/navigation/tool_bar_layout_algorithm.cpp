@@ -153,8 +153,11 @@ void UpdateToolbarItemSize(LayoutWrapper* layoutWrapper, NG::SizeF& toolbarItemS
     CHECK_NULL_VOID(containerWrapper);
     for (const auto& toolbarItemWrapper : containerWrapper->GetAllChildrenWithBuild()) {
         auto layoutProperty = AceType::DynamicCast<ButtonLayoutProperty>(toolbarItemWrapper->GetLayoutProperty());
-        layoutProperty->UpdateUserDefinedIdealSize(
-            CalcSize(CalcLength(toolbarItemSize.Width()), CalcLength(toolbarItemSize.Height())));
+        CHECK_NULL_VOID(layoutProperty);
+        auto constraint = layoutProperty->GetLayoutConstraint();
+        CHECK_NULL_VOID(constraint);
+        constraint->selfIdealSize.SetHeight(toolbarItemSize.Height());
+        constraint->selfIdealSize.SetWidth(toolbarItemSize.Width());
     }
 }
 } // namespace

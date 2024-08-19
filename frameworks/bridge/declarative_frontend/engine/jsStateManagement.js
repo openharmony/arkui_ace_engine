@@ -148,8 +148,58 @@ PersistenceV2.persistenceV2Impl_ = PersistenceV2Impl.instance();
 
 const Type = __Type__;
 
+/**
+ * UIUtils is a state management tool class for operating the observed data.
+ *
+ * @syscap SystemCapability.ArkUI.ArkUI.Full
+ * @crossplatform
+ * @atomicservice
+ * @since 12
+ */
+class UIUtils {
+  /**
+   * Get raw object from the Object wrapped with Proxy added by statemanagement framework.
+   * If input parameter is a regular Object without Proxy, return Object itself.
+   *
+   * 1. For StateManagement V1, when source is a @Observed decorated object,
+   * or a Object/Array/Map/Set/Date decorated by state decorators like @State,
+   * getTarget will return its raw object without Proxy.
+   * 2. For StateManagement V2, when source is a Array/Map/Set/Date decorated by state decorators
+   * like @Trace or @Local, getTarget will return its raw object without Proxy.
+   * 3. For other situation, getTarget will return the source directly.
+   *
+   * @param { T } source input source Object data.
+   * @returns { T } raw object from the Object wrapped with an ObservedObject.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @crossplatform
+   * @atomicservice
+   * @since 12
+   */
+  static getTarget(source) {
+    return UIUtils.uiUtilsImpl_.getTarget(source);
+  }
+
+  /**
+   * Make non-observed data into observed data.
+   * Support non-observed class, JSON.parse, and collection.Set, collection.Map, collection.Array.
+   *
+   * @param { T } source input source object data.
+   * @returns { T } proxy object from the source object data.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @crossplatform
+   * @atomicservice
+   * @since 12
+   */
+  static makeObserved(source) {
+    return UIUtils.uiUtilsImpl_.makeObserved(source);
+  }
+}
+
+UIUtils.uiUtilsImpl_ = UIUtilsImpl.instance();
+
 export default {
   AppStorageV2,
   PersistenceV2,
-  Type
+  Type,
+  UIUtils
 };

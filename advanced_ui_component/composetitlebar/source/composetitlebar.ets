@@ -14,60 +14,35 @@
  */
 
 import { KeyCode } from '@ohos.multimodalInput.keyCode'
+import window from '@ohos.window'
+import common from '@ohos.app.ability.common'
+import { BusinessError } from '@kit.BasicServicesKit'
+import { hilog } from '@kit.PerformanceAnalysisKit'
 
-export declare interface ComposeTitleBarMenuItem {
-  value: ResourceStr
-  isEnabled: boolean
-  action?: () => void
+export interface ComposeTitleBarMenuItem {
+  value: ResourceStr;
+  isEnabled?: boolean;
+  action?: () => void;
+  label?: ResourceStr;
 }
 
-const PUBLIC_MORE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAY' +
-  'AAABS3GwHAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAA' +
-  'AAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAAOxAAADsQBlSsOGwAABEZJREFUeNrt3D1rFFEUBuA' +
-  'xhmAhFlYpUohYiYWFRcAmKAhWK2pjo1iKf8BCMIKFf8BarCyMhVj4VZhGSKEg2FqJyCKWIhYWnstMINgYsh+cmfs88BI' +
-  'Cydxw7jmzu2HvNg0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADBN+3r6dx+LXIqsRpa7FF8j48hm5Fn3Peo9mAEYRdY' +
-  'jJ3f582Vj7nZfUe/eDsCRyMPI2h5/fyNyI/JDT6v3Tvt7sBllE15ETkxwjeORi5G3ke/6W737MgBnI68jh6ZwrcORq5H' +
-  'nhkC9+zAA5YXXy8jBKV5zKXIu8jjyS7+rd+YBeNVtyrSVO9PRyBM9r94LSTfjWuTUDK9/eYIXeENUbb0zDsBi5PYc1rm' +
-  'j79U74wCszuih+F/ljrSi/+uud8YBGA10rayqrnfGAVgb6FpZVV3vjAOwPNC1sqq63hkHYGWga2VVdb0XKt/8Rf1fd70' +
-  'zDsB4jmt5u3Tl9a59AMb6v+56ZxyArYGulVXV9c44ABtzXOup/q+73hkH4N2cHio/Rj7r/7rrnXEAfkfuz2Gddb2v3ln' +
-  '/DfpgxneLzaY9xE3l9c46AH8iVyI/Z3Dt8nB/Xc+rd5H5QMy3yJemPVs6zY0edc9HUe/0Z4I/dQ/N5Vjd0oTXKp9QcKF' +
-  'pD2qj3r0YgO1NeRM507TH6/bifeR85IMeV++d+vTBWOV9JDcjt5rdv6uw3M3uRR7pa/Xu+wBsOxA53bTnTP/3UX1b3fN' +
-  'Q1BsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKqyr6d/97HIpchqZLlL8TUyjmxGnnX' +
-  'fo96DGYBRZD1ycpc/XzbmbvcV9e7tAByJPIys7fH3NyI3Ij/0tHrvtL8Hm1E24UXkxATXOB65GHkb+a6/1bsvA3A28jp' +
-  'yaArXOhy5GnluCNS7DwNQXni9jByc4jWXIucijyO/9Lt6Zx6AV92mTFu5Mx2NPNHz6r2QdDOuRU7N8PqXJ3iBN0TV1jv' +
-  'jACxGbs9hnTv6Xr0zDsDqjB6K/1XuSCv6v+56ZxyA0UDXyqrqemccgLWBrpVV1fXOOADLA10rq6rrnXEAVga6VlZV13u' +
-  'h8s1f1P911zvjAIznuJa3S1de79oHYKz/6653xgHYGuhaWVVd74wDsDHHtZ7q/7rrnXEA3s3pofJj5LP+r7veGQfgd+T' +
-  '+HNZZ1/vqnfXfoA9mfLfYbNpD3FRe76wD8CdyJfJzBtcuD/fX9bx6F5kPxHyLfGnas6XT3OhR93wU9U5/JvhT99BcjtU' +
-  'tTXit8gkFF5r2oDbq3YsB2N6UN5EzTXu8bi/eR85HPuhx9d6pTx+MVd5HcjNyq9n9uwrL3exe5JG+Vu++D8C2A5HTTXv' +
-  'O9H8f1bfVPQ9FvQEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgCn7C9HjBtwWfXpKAAAAAElFTkSuQmCC'
-
-const PUBLIC_BACK = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAY' +
-  'AAABS3GwHAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAA' +
-  'XNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAA8VJREFUeNrt3LFLlHEYwPFXz0G' +
-  'iIZpEoikkwsFRIiK3gqCigxIC/4Kmhv6OoChouaGoqKCgCKducGh0cDAIamhwiCaHCIeelztpUszee/vl8/nAM3Vd8nufr' +
-  '+fddVYVAAAAAAAAAAAAAAAAAAAAAABQijFH0KhrMd2Y2ZitmNWYRzHLjkYAB9lUzMOYizv8eS/mZsymoypLxxE0svzvY07' +
-  'vcpu5mOmY145LAAdx+U/u4bZzwx+JPjq2cow7glaWf1vXsQkg6/JvPwoggJTLjwDSL/8nRyiAzN/5nzpGAWRd/n7MM0cpg' +
-  'IzLvx6z6CjL453gdpZ/IWbDcQrA8iMAy48ALD8CsPwIwPIjAMuPACw/ArD8CMDyIwDLjwAsPwKw/AjA8iMAy48ALD8CsPw' +
-  'IwPIjAMuPACw/ArD85A3A8pM2AMtP2gAsP2kDsPykDcDykzYAy0/aACw/aQOw/KQNwPKTNgDLT9oALD9pA7D8pA3A8pM2A' +
-  'MtP2gAsP2kDsPykDcDykzYAy0/aACw/aQOw/KQNwPKTNgDLT9oALD9pA7D8pA3A8pM2AMtP2gAsP2kDsPykDcDykzYAy0/' +
-  'aACw/aQOw/KQNwPLz3xlv6H4mYp5YfrI+AizF9BwnI/AlZi3mbsxy03feaeh+HsQcc60YgSMxMzE3YmZj3sX8LOlHoPoLn' +
-  'HedaEE35n5pzwF856dN9SPBpZICmHRNaNnlkgL46nrQsvmSAqhftlx1TWjR4ZICqPVcE1q0XloA96rBa7XQhl5pAWzFXKm' +
-  '8i8vo9WMeN3VnnQa/sO8xL2POxEy7Toxo+RdjNpu6w1F9HuBqNXi99lw1eKMM9utHzIeYV8MftbccCQAAAAAAsBdt/XLc+s' +
-  'Py9W+MmPqL+1iJuVA1+C4gdFr6d77FvK0GH2nb739lPR5zNuZ51eBnQhFAJQIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIE' +
-  'IAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAI' +
-  'EIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIEIAIE8M8jmBlGgABSRnAqZiXms+MUQNYIDnkUKMu4I/gj6z' +
-  'ELMRv7/PsnHKEAMkcw6fgEkDmCNUcngMwRvHFsngRnfWJcL/9tRyaAgxrB+ZijO9ymH7MUs+m4yjLmCBozEXMr5nr1+9We1' +
-  'ZgXMXccDwAAAAAAAAAAAAAAAAAAAAAAwO5+AfVgtqHKRnawAAAAAElFTkSuQmCC'
+const PUBLIC_MORE = $r('sys.media.ohos_ic_public_more')
+const PUBLIC_BACK: Resource = $r('sys.media.ohos_ic_back')
+const TEXT_EDITABLE_DIALOG = '18.3fp'
+const IMAGE_SIZE = '64vp'
+const MAX_DIALOG = '256vp'
+const MIN_DIALOG = '216vp'
 
 @Component
 struct ComposeTitleBar {
   item: ComposeTitleBarMenuItem | undefined = undefined
   title: ResourceStr = ''
   subtitle: ResourceStr = ''
-  menuItems?: Array<ComposeTitleBarMenuItem>
+  menuItems?: Array<ComposeTitleBarMenuItem> = [];
 
   @State titleMaxWidth: number = 0
   @State backActive: boolean = false
+  @State fontSize: number = 1;
 
   private static readonly totalHeight = 56
   private static readonly leftPadding = 12
@@ -87,7 +62,7 @@ struct ComposeTitleBar {
           .active(this.backActive)
 
         ImageMenuItem({ item: {
-          value: $r('sys.media.ohos_ic_back'),
+          value: PUBLIC_BACK,
           isEnabled: true,
           action: () => this.backActive = true
         }, index: -1 })
@@ -167,8 +142,17 @@ struct ComposeTitleBar {
 
 @Component
 struct CollapsibleMenuSection {
-  menuItems?: Array<ComposeTitleBarMenuItem>
+  menuItems?: Array<ComposeTitleBarMenuItem> = [];
+  item: ComposeTitleBarMenuItem = {
+    value: PUBLIC_MORE,
+    label: $r('sys.string.ohos_toolbar_more'),
+  } as ComposeTitleBarMenuItem;
   index: number = 0
+  longPressTime: number = 500;
+  minFontSize: number = 1.75;
+  isFollowingSystemFontScale: boolean = false;
+  maxFontScale: number = 1;
+  systemFontScale?: number = 1;
 
   static readonly maxCountOfVisibleItems = 3
   private static readonly focusPadding = 4
@@ -180,11 +164,27 @@ struct CollapsibleMenuSection {
   @State isMoreIconOnFocus: boolean = false
   @State isMoreIconOnHover: boolean = false
   @State isMoreIconOnClick: boolean = false
+  @State fontSize: number = 1
+
+  dialogController: CustomDialogController | null = new CustomDialogController({
+    builder: ComposeTitleBarDialog({
+      cancel: () => {
+      },
+      confirm: () => {
+      },
+      itemComposeTitleDialog: this.item,
+      composeTitleBarDialog: this.item.label ? this.item.label : '',
+      fontSize: this.fontSize,
+    }),
+    maskColor: Color.Transparent,
+    isModal: true,
+    customStyle: true,
+  })
 
   getMoreIconFgColor() {
-    return this.isMoreIconOnClick
-      ? $r('sys.color.ohos_id_color_titlebar_icon_pressed')
-      : $r('sys.color.ohos_id_color_titlebar_icon')
+    return this.isMoreIconOnClick ?
+    $r('sys.color.ohos_id_color_titlebar_icon_pressed') :
+    $r('sys.color.ohos_id_color_titlebar_icon')
   }
 
   getMoreIconBgColor() {
@@ -198,14 +198,41 @@ struct CollapsibleMenuSection {
   }
 
   aboutToAppear() {
+    try {
+      let uiContent: UIContext = this.getUIContext();
+      this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
+      this.maxFontScale = uiContent.getMaxFontScale();
+    } catch (err) {
+      let code: number = (err as BusinessError).code;
+      let message: string = (err as BusinessError).message;
+      hilog.error(0x3900, 'ComposeTitleBar', `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
+    }
     if (this.menuItems) {
       this.menuItems.forEach((item, index) => {
-        if (item.isEnabled && this.firstFocusableIndex == -1 && index > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
+        if (item.isEnabled && this.firstFocusableIndex == -1 &&
+          index > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
           this.firstFocusableIndex = this.index * 1000 + index + 1
         }
       })
     }
   }
+
+  decideFontScale(): number {
+    try {
+      let uiContent: UIContext = this.getUIContext();
+      this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+      if (!this.isFollowingSystemFontScale) {
+        return 1;
+      }
+      return Math.min(this.systemFontScale, this.maxFontScale);
+    } catch (exception) {
+      let code: number = (exception as BusinessError).code;
+      let message: string = (exception as BusinessError).message;
+      hilog.error(0x3900, 'ComposeTitleBar', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
+      return 1;
+    }
+  }
+
 
   build() {
     Column() {
@@ -216,14 +243,17 @@ struct CollapsibleMenuSection {
               ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
             })
           } else {
-            ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), (item:ComposeTitleBarMenuItem, index:number) => {
-              ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
-            })
+            ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1),
+              (item:ComposeTitleBarMenuItem, index:number) => {
+                ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
+              })
 
             Row() {
               Image(PUBLIC_MORE)
                 .width(ImageMenuItem.imageSize)
+                .draggable(false)
                 .height(ImageMenuItem.imageSize)
+                .fillColor($r('sys.color.icon_primary'))
                 .focusable(true)
             }
             .width(ImageMenuItem.imageHotZoneWidth)
@@ -252,7 +282,8 @@ struct CollapsibleMenuSection {
             .onBlur(() => this.isMoreIconOnFocus = false)
             .onHover((isOn) => this.isMoreIconOnHover = isOn)
             .onKeyEvent((event) => {
-              if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
+              if (event.keyCode !== KeyCode.KEYCODE_ENTER &&
+                event.keyCode !== KeyCode.KEYCODE_SPACE) {
                 return
               }
               if (event.type === KeyType.Down) {
@@ -266,11 +297,24 @@ struct CollapsibleMenuSection {
               if (event.type === TouchType.Down) {
                 this.isMoreIconOnClick = true
               }
-              if (event.type === TouchType.Up) {
+              if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
                 this.isMoreIconOnClick = false
+                if (this.fontSize >= this.minFontSize) {
+                  this.dialogController?.close()
+                }
               }
             })
             .onClick(() => this.isPopupShown = true)
+            .gesture(
+              LongPressGesture({ repeat: false, duration: this.longPressTime })
+                .onAction((event: GestureEvent) => {
+                  this.fontSize = this.decideFontScale();
+                  if (event) {
+                    if (this.fontSize >= this.minFontSize) {
+                      this.dialogController?.open()
+                    }
+                  }
+                }))
             .bindPopup(this.isPopupShown, {
               builder: this.popupBuilder,
               placement: Placement.Bottom,
@@ -296,23 +340,33 @@ struct CollapsibleMenuSection {
   popupBuilder() {
     Column() {
       if (this.menuItems) {
-        ForEach(this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length), (item:ComposeTitleBarMenuItem, index:number) => {
-          ImageMenuItem({ item: item, index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + index })
-        })
+        ForEach(this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1,
+          this.menuItems.length),
+          (item:ComposeTitleBarMenuItem, index:number) => {
+            ImageMenuItem({ item: item, index: this.index * 1000 +
+            CollapsibleMenuSection.maxCountOfVisibleItems + index })
+          })
       }
     }
-    .width(ImageMenuItem.imageHotZoneWidth + CollapsibleMenuSection.focusPadding * CollapsibleMenuSection.marginsNum)
+    .width(ImageMenuItem.imageHotZoneWidth +
+      CollapsibleMenuSection.focusPadding * CollapsibleMenuSection.marginsNum)
     .margin({ top: CollapsibleMenuSection.focusPadding, bottom: CollapsibleMenuSection.focusPadding })
     .onAppear(() => {
-      focusControl.requestFocus(ImageMenuItem.focusablePrefix + this.firstFocusableIndex)
+      focusControl.requestFocus(ImageMenuItem.focusablePrefix +
+      this.firstFocusableIndex)
     })
   }
 }
 
 @Component
 struct ImageMenuItem {
-  item: ComposeTitleBarMenuItem | null = null
+  item: ComposeTitleBarMenuItem = {} as ComposeTitleBarMenuItem;
   index: number = 0
+  longPressTime: number = 500;
+  minFontSize: number = 1.75;
+  isFollowingSystemFontScale: boolean = false;
+  maxFontScale: number = 1;
+  systemFontScale?: number = 1;
 
   static readonly imageSize = 24
   static readonly imageHotZoneWidth = 48
@@ -324,6 +378,32 @@ struct ImageMenuItem {
   @State isOnFocus: boolean = false
   @State isOnHover: boolean = false
   @State isOnClick: boolean = false
+  @Prop fontSize: number = 1
+
+  dialogController: CustomDialogController | null = new CustomDialogController({
+    builder: ComposeTitleBarDialog({
+      cancel: () => {
+      },
+      confirm: () => {
+      },
+      itemComposeTitleDialog: this.item,
+      composeTitleBarDialog: this.item.label ? this.item.label : this.textDialog(),
+      fontSize: this.fontSize,
+    }),
+    maskColor: Color.Transparent,
+    isModal: true,
+    customStyle: true,
+  })
+
+  private textDialog(): ResourceStr {
+    if (this.item.value === PUBLIC_MORE) {
+      return $r('sys.string.ohos_toolbar_more');
+    } else if (this.item.value === PUBLIC_BACK) {
+      return $r('sys.string.icon_back');
+    } else {
+      return this.item.label ? this.item.label : '';
+    }
+  }
 
   getFgColor() {
     return this.isOnClick
@@ -341,10 +421,42 @@ struct ImageMenuItem {
     }
   }
 
+  aboutToAppear() {
+    try {
+      let uiContent: UIContext = this.getUIContext();
+      this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
+      this.maxFontScale = uiContent.getMaxFontScale();
+    } catch (err) {
+      let code: number = (err as BusinessError).code;
+      let message: string = (err as BusinessError).message;
+      hilog.error(0x3900, 'ComposeTitleBar', `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
+    }
+  }
+
+
+  decideFontScale(): number {
+    try {
+      let uiContent: UIContext = this.getUIContext();
+      this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+      if (!this.isFollowingSystemFontScale) {
+        return 1;
+      }
+      return Math.min(this.systemFontScale, this.maxFontScale);
+    } catch (exception) {
+      let code: number = (exception as BusinessError).code;
+      let message: string = (exception as BusinessError).message;
+      hilog.error(0x3900, 'ComposeTitleBar', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
+      return 1;
+    }
+  }
+
+
   build() {
     Row() {
       Image(this.item?.value)
+        .matchTextDirection(this.item?.value === PUBLIC_BACK ? true : false)
         .width(ImageMenuItem.imageSize)
+        .draggable(false)
         .height(ImageMenuItem.imageSize)
         .focusable(this.item?.isEnabled)
         .key(ImageMenuItem.focusablePrefix + this.index)
@@ -390,7 +502,8 @@ struct ImageMenuItem {
       if (!this.item?.isEnabled) {
         return
       }
-      if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
+      if (event.keyCode !== KeyCode.KEYCODE_ENTER &&
+        event.keyCode !== KeyCode.KEYCODE_SPACE) {
         return
       }
       if (event.type === KeyType.Down) {
@@ -407,8 +520,11 @@ struct ImageMenuItem {
       if (event.type === TouchType.Down) {
         this.isOnClick = true
       }
-      if (event.type === TouchType.Up) {
+      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
         this.isOnClick = false
+        if (this.fontSize >= this.minFontSize) {
+          this.dialogController?.close()
+        }
       }
     })
     .onClick(() => {
@@ -416,7 +532,103 @@ struct ImageMenuItem {
         return this.item.isEnabled && this.item.action?.()
       }
     })
+    .gesture(
+      LongPressGesture({ repeat: false, duration: this.longPressTime })
+        .onAction((event: GestureEvent) => {
+          this.fontSize = this.decideFontScale();
+          if (event) {
+            if (this.fontSize >= this.minFontSize) {
+              this.dialogController?.open()
+            }
+          }
+        }))
   }
 }
 
-export  { ComposeTitleBar }
+
+/**
+ *  ComposeTitleBarDialog
+ */
+@CustomDialog
+struct ComposeTitleBarDialog {
+  itemComposeTitleDialog: ComposeTitleBarMenuItem = {} as ComposeTitleBarMenuItem;
+  callbackId: number | undefined = undefined;
+  composeTitleBarDialog?: ResourceStr = '';
+  mainWindowStage: window.Window | undefined = undefined;
+  controller?: CustomDialogController;
+  minFontSize: number = 1.75;
+  maxFontSize: number = 3.2;
+  screenWidth: number = 640;
+  verticalScreenLines: number = 6;
+  horizontalsScreenLines: number = 1;
+  @StorageLink('mainWindow') mainWindow: Promise<window.Window> | undefined = undefined;
+  @State fontSize: number = 1;
+  @State maxLines: number = 1;
+  @StorageProp('windowStandardHeight') windowStandardHeight: number = 0;
+  cancel: () => void = () => {
+  }
+  confirm: () => void = () => {
+  }
+
+  build() {
+    if (this.composeTitleBarDialog) {
+      Column() {
+        Image(this.itemComposeTitleDialog.value)
+          .width(IMAGE_SIZE)
+          .height(IMAGE_SIZE)
+          .margin({
+            top: $r('sys.float.padding_level24'),
+            bottom: $r('sys.float.padding_level8'),
+          })
+          .fillColor($r('sys.color.icon_primary'))
+        Column() {
+          Text(this.composeTitleBarDialog)
+            .fontSize(TEXT_EDITABLE_DIALOG)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
+            .maxLines(this.maxLines)
+            .width('100%')
+            .textAlign(TextAlign.Center)
+            .fontColor($r('sys.color.font_primary'))
+        }
+        .width('100%')
+        .padding({
+          left: $r('sys.float.padding_level4'),
+          right: $r('sys.float.padding_level4'),
+          bottom: $r('sys.float.padding_level12'),
+        })
+      }
+      .width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG)
+      .constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG })
+      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
+      .shadow(ShadowStyle.OUTER_DEFAULT_LG)
+      .borderRadius($r('sys.float.corner_radius_level10'))
+    } else {
+      Column() {
+        Image(this.itemComposeTitleDialog.value)
+          .width(IMAGE_SIZE)
+          .height(IMAGE_SIZE)
+          .fillColor($r('sys.color.icon_primary'))
+      }
+      .width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG)
+      .constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG })
+      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
+      .shadow(ShadowStyle.OUTER_DEFAULT_LG)
+      .borderRadius($r('sys.float.corner_radius_level10'))
+      .justifyContent(FlexAlign.Center)
+    }
+  }
+
+  async aboutToAppear(): Promise<void> {
+    let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
+    this.mainWindowStage = context.windowStage.getMainWindowSync();
+    let properties: window.WindowProperties = this.mainWindowStage.getWindowProperties();
+    let rect = properties.windowRect;
+    if (px2vp(rect.height) > this.screenWidth) {
+      this.maxLines = this.verticalScreenLines;
+    } else {
+      this.maxLines = this.horizontalsScreenLines;
+    }
+  }
+}
+
+export { ComposeTitleBar }

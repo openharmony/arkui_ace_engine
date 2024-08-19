@@ -149,6 +149,7 @@ public:
         json->PutExtAttr("loop", propLoop_.value_or(true) ? "true" : "false", filter);
         json->PutExtAttr("indicatorInteractive", propIndicatorInteractive_.value_or(true) ? "true" : "false", filter);
         json->PutExtAttr("disableSwipe", GetDisableSwipe().value_or(false) ? "true" : "false", filter);
+        json->PutExtAttr("swipeByGroup", propSwipeByGroup_.value_or(false) ? "true" : "false", filter);
     }
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override
@@ -191,6 +192,8 @@ public:
     void MarkIgnorePrevMarginAndNextMargin()
     {
         ignorePrevMarginAndNextMargin_ = true;
+        propPrevMargin_ = Dimension(0.0_px);
+        propNextMargin_ = Dimension(0.0_px);
     }
 
     float GetCalculatedPrevMargin() const
@@ -235,7 +238,7 @@ public:
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Direction, Axis, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Index, int32_t, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Index, int32_t, PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ItemSpace, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CachedCount, int32_t, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisplayMode, SwiperDisplayMode, PROPERTY_UPDATE_MEASURE);
@@ -262,7 +265,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Loop, bool, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IndicatorInteractive, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsCustomAnimation, bool, PROPERTY_UPDATE_MEASURE_SELF);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisableSwipe, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisableSwipe, bool, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SwipeByGroup, bool, PROPERTY_UPDATE_MEASURE_SELF);
 
 private:

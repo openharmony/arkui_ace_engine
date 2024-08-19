@@ -263,4 +263,98 @@ HWTEST_F(TransformUtilTest, TransformUtilTest009, TestSize.Level1)
     EXPECT_EQ(TransformUtil::ComposeTransform(decomposedTransform).GetScaleX(), 1.0);
     EXPECT_EQ(TransformUtil::ComposeTransform(decomposedTransform).GetScaleY(), 1.0);
 }
+
+/**
+ * @tc.name: TransformUtilTest010
+ * @tc.desc: Test the functions of  BuildTranslationMatrix.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TransformUtilTest, TransformUtilTest010, TestSize.Level1)
+{
+    DecomposedTransform decomposedTransform;
+    // 0.000001 true false false
+    decomposedTransform.translate[0] = 0.000001f;
+    decomposedTransform.translate[1] = 1.0f;
+    decomposedTransform.translate[2] = 1.0f;
+    EXPECT_EQ(TransformUtil::ComposeTransform(decomposedTransform).GetScaleX(), 1.0);
+    EXPECT_EQ(TransformUtil::ComposeTransform(decomposedTransform).GetScaleY(), 1.0);
+    // 0.000001 true true false
+    decomposedTransform.translate[0] = 0.000001f;
+    decomposedTransform.translate[1] = 0.000001f;
+    decomposedTransform.translate[2] = 1.0f;
+    EXPECT_EQ(TransformUtil::ComposeTransform(decomposedTransform).GetScaleX(), 1.0);
+    EXPECT_EQ(TransformUtil::ComposeTransform(decomposedTransform).GetScaleY(), 1.0);
+    // 0.000001 true true true
+    decomposedTransform.translate[0] = 0.000001f;
+    decomposedTransform.translate[1] = 0.000001f;
+    decomposedTransform.translate[2] = 0.000001f;
+    EXPECT_EQ(TransformUtil::ComposeTransform(decomposedTransform).GetScaleX(), 1.0);
+    EXPECT_EQ(TransformUtil::ComposeTransform(decomposedTransform).GetScaleY(), 1.0);
+    // 0.000001 false true true
+    decomposedTransform.translate[0] = 1.0f;
+    decomposedTransform.translate[1] = 0.000001f;
+    decomposedTransform.translate[2] = 0.000001f;
+    EXPECT_EQ(TransformUtil::ComposeTransform(decomposedTransform).GetScaleX(), 1.0);
+    EXPECT_EQ(TransformUtil::ComposeTransform(decomposedTransform).GetScaleY(), 1.0);
+    // 0.000001 true false true
+    decomposedTransform.translate[0] = 0.000001f;
+    decomposedTransform.translate[1] = 1.0f;
+    decomposedTransform.translate[2] = 0.000001f;
+    EXPECT_EQ(TransformUtil::ComposeTransform(decomposedTransform).GetScaleX(), 1.0);
+    EXPECT_EQ(TransformUtil::ComposeTransform(decomposedTransform).GetScaleY(), 1.0);
+}
+
+/**
+ * @tc.name: TransformUtilTest011
+ * @tc.desc: Test the functions of the BuildSkewMatrix
+ * @tc.type: FUNC
+ */
+HWTEST_F(TransformUtilTest, TransformUtilTest011, TestSize.Level1)
+{
+    DecomposedTransform decomposedTransform;
+    decomposedTransform.skew[0] = 0.0f;
+    decomposedTransform.skew[1] = 0.0f;
+    decomposedTransform.skew[2] = 0.0f;
+    EXPECT_EQ(TransformUtil::ComposeTransform(decomposedTransform).GetScaleX(), 1.0);
+    EXPECT_EQ(TransformUtil::ComposeTransform(decomposedTransform).GetScaleY(), 1.0);
+}
+
+/**
+ * @tc.name: TransformUtilTest012
+ * @tc.desc: Test the functions of the DecomposeTransform
+ * @tc.type: FUNC
+ */
+HWTEST_F(TransformUtilTest, TransformUtilTest012, TestSize.Level1)
+{
+    // Normalize is false
+    DecomposedTransform out;
+    Matrix4 transform = Matrix4::CreateIdentity();
+    transform.Set(3, 3, 0.000001f);
+    TransformUtil::DecomposeTransform(out, transform);
+    EXPECT_EQ(transform.Get(3, 3) == 0.000001f, true);
+    // Normalize is true
+    transform.Set(3, 3, 1.0f);
+    // NearZero false false false
+    transform.Set(3, 0, 1.0f);
+    transform.Set(3, 1, 1.0f);
+    transform.Set(3, 2, 1.0f);
+    TransformUtil::DecomposeTransform(out, transform);
+    EXPECT_EQ(out.perspective[0] == 1.0f, true);
+    // NearZero true false false
+    transform.Set(3, 0, 0.000001f);
+    transform.Set(3, 1, 1.0f);
+    transform.Set(3, 2, 1.0f);
+    TransformUtil::DecomposeTransform(out, transform);
+    EXPECT_EQ(out.perspective[0] == 0.000001f, true);
+    // NearZero true true false
+    transform.Set(3, 0, 0.000001f);
+    transform.Set(3, 1, 1.0f);
+    transform.Set(3, 2, 1.0f);
+    TransformUtil::DecomposeTransform(out, transform);
+    EXPECT_EQ(out.perspective[0] == 0.000001f, true);
+    // CreateScale 0.0f
+    Matrix4 transform2 = Matrix4::CreateScale(0.0f, 0.0f, 0.0f);
+    TransformUtil::DecomposeTransform(out, transform2);
+    EXPECT_EQ(out.scale[0] == 0.0f, true);
+}
 } // namespace OHOS::Ace

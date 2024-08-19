@@ -84,7 +84,7 @@ public:
         const AAFwk::Want& want, const SessionConfig& config) = 0;
     virtual void DestroySession() = 0;
     virtual bool IsSessionValid() = 0;
-    virtual int32_t GetSessionId() = 0;
+    virtual int32_t GetSessionId() const = 0;
     virtual const std::shared_ptr<AAFwk::Want> GetWant() = 0;
 
     // Synchronous interface for event notify
@@ -118,18 +118,12 @@ public:
     virtual void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t offset) = 0;
 
     // The interface about the accessibility
-    virtual bool TransferExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
-        int32_t action, int64_t offset) = 0;
-    virtual void SearchExtensionElementInfoByAccessibilityId(int64_t elementId, int32_t mode, int64_t baseParent,
-        std::list<Accessibility::AccessibilityElementInfo>& output) = 0;
-    virtual void SearchElementInfosByText(int64_t elementId, const std::string& text, int64_t baseParent,
-        std::list<Accessibility::AccessibilityElementInfo>& output) = 0;
-    virtual void FindFocusedElementInfo(
-        int64_t elementId, int32_t focusType, int64_t baseParent, Accessibility::AccessibilityElementInfo& output) = 0;
-    virtual void FocusMoveSearch(
-        int64_t elementId, int32_t direction, int64_t baseParent, Accessibility::AccessibilityElementInfo& output) = 0;
     virtual void TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType, int32_t eventType,
         int64_t timeMs) = 0;
+    virtual void TransferAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId) = 0;
+    virtual void TransferAccessibilityChildTreeDeregister() = 0;
+    virtual void TransferAccessibilityDumpChildInfo(
+        const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
 
     // The interface to control the display area and the avoid area
     virtual std::shared_ptr<Rosen::RSSurfaceNode> GetSurfaceNode() const = 0;

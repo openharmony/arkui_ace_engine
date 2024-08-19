@@ -40,7 +40,6 @@
 #include "core/components_ng/property/progress_mask_property.h"
 #include "core/components_ng/render/adapter/graphic_modifier.h"
 #include "core/components_ng/render/adapter/moon_progress_modifier.h"
-#include "core/components_ng/render/adapter/focus_animation_modifier.h"
 #include "core/components_ng/render/adapter/rosen_modifier_property.h"
 #include "core/components_ng/render/adapter/rosen_transition_effect.h"
 #include "core/components_ng/render/render_context.h"
@@ -54,6 +53,7 @@ class FocusStateModifier;
 class PageTransitionEffect;
 class OverlayTextModifier;
 class GradientStyleModifier;
+class PipelineContext;
 class RosenRenderContext : public RenderContext {
     DECLARE_ACE_TYPE(RosenRenderContext, NG::RenderContext)
 public:
@@ -127,19 +127,25 @@ public:
 
     // Paint focus state by component's setting. It will paint along the paintRect
     void PaintFocusState(const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth,
-        bool isAccessibilityFocus = false, bool isFocusBoxGlow = false) override;
+        bool isAccessibilityFocus = false) override;
     // Paint focus state by component's setting. It will paint along the frameRect(padding: focusPaddingVp)
     void PaintFocusState(const RoundRect& paintRect, const Dimension& focusPaddingVp, const Color& paintColor,
-        const Dimension& paintWidth, const PaintFocusExtraInfo& paintFocusExtraInfo) override;
+        const Dimension& paintWidth, bool isAccessibilityFocus = false) override;
     // Paint focus state by default. It will paint along the component rect(padding: focusPaddingVp)
-    void PaintFocusState(const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth,
-        bool isFocusBoxGlow = false) override;
+    void PaintFocusState(
+        const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth) override;
 
     void ClearFocusState() override;
 
     const std::shared_ptr<Rosen::RSNode>& GetRSNode();
 
     void SetRSNode(const std::shared_ptr<Rosen::RSNode>& rsNode);
+
+    uint64_t GetNodeId() const override
+    {
+        CHECK_NULL_RETURN(rsNode_, 0);
+        return static_cast<uint64_t>(rsNode_->GetId());
+    }
 
     void StartRecording() override;
 
@@ -227,7 +233,11 @@ public:
     void SetTransitionUserCallback(TransitionFinishCallback&& callback) override;
     void ClipWithRect(const RectF& rectF) override;
     void ClipWithRRect(const RectF& rectF, const RadiusF& radiusF) override;
+    void ClipWithRoundRect(const RoundRect& roundRect) override;
+    void ClipWithOval(const RectF& rectF) override;
+    void ClipWithCircle(const Circle& circle) override;
     void RemoveClipWithRRect() override;
+    void UpdateWindowFocusState(bool isFocused) override;
 
     bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) override;
     void MaskAnimation(const Color& initialBackgroundColor, const Color& backgroundColor);
@@ -261,6 +271,7 @@ public:
     bool DoTextureExport(uint64_t surfaceId) override;
     bool StopTextureExport() override;
     void SetSurfaceRotation(bool isLock) override;
+    PipelineContext* GetPipelineContext() const;
 
     RectF GetPaintRectWithTransform() override;
 
@@ -298,7 +309,8 @@ public:
 
     void ClearAccessibilityFocus() override;
 
-    void OnAccessibilityFocusUpdate(bool isAccessibilityFocus) override;
+    void OnAccessibilityFocusUpdate(
+        bool isAccessibilityFocus, const int64_t accessibilityIdForVirtualNode = INVALID_PARENT_ID) override;
     void OnAccessibilityFocusRectUpdate(RectT<int32_t> accessibilityFocusRect) override;
 
     void OnMouseSelectUpdate(bool isSelected, const Color& fillColor, const Color& strokeColor) override;
@@ -392,8 +404,9 @@ public:
     void UpdatePaintRect(const RectF& paintRect) override;
     Matrix4 GetRevertMatrix() override;
     void SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate) override;
+    void SetOpacityMultiplier(float opacity) override;
 
-private:
+protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
     void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) override;
     void OnBackgroundImageSizeUpdate(const BackgroundImageSize& bgImgSize) override;
@@ -450,6 +463,7 @@ private:
     void OnFrontHueRotateUpdate(float hueRotate) override;
     void OnFrontColorBlendUpdate(const Color& colorBlend) override;
     void OnLinearGradientBlurUpdate(const NG::LinearGradientBlurPara& blurPara) override;
+    void OnMagnifierUpdate(const MagnifierParams& magnifierParams) override;
     void OnDynamicLightUpRateUpdate(const float rate) override;
     void OnDynamicDimDegreeUpdate(const float degree) override;
     void OnDynamicLightUpDegreeUpdate(const float degree) override;
@@ -498,7 +512,7 @@ private:
     void SetPivot(float xPivot, float yPivot, float zPivot = 0.0f);
     void SetPositionToRSNode();
 
-    RefPtr<PageTransitionEffect> GetDefaultPageTransition(PageTransitionType type);
+    virtual RefPtr<PageTransitionEffect> GetDefaultPageTransition(PageTransitionType type);
     RefPtr<PageTransitionEffect> GetPageTransitionEffect(const RefPtr<PageTransitionEffect>& transition);
 
     // Convert BorderRadiusProperty to Rosen::Vector4f
@@ -539,6 +553,8 @@ private:
     void PaintMouseSelectRect(const RectF& rect, const Color& fillColor, const Color& strokeColor);
     void SetBackBlurFilter();
     void SetFrontBlurFilter();
+    bool UpdateBlurBackgroundColor(const std::optional<BlurStyleOption>& bgBlurStyle);
+    bool UpdateBlurBackgroundColor(const std::optional<EffectOption>& efffectOption);
     void GetPaddingOfFirstFrameNodeParent(Dimension& parentPaddingLeft, Dimension& parentPaddingTop);
     void CombineMarginAndPosition(Dimension& resultX, Dimension& resultY, const Dimension& parentPaddingLeft,
         const Dimension& parentPaddingTop, float widthPercentReference, float heightPercentReference);
@@ -596,13 +612,7 @@ private:
     void AddFrameNodeInfoToRsNode();
     // Use rect to update the drawRegion rect at index.
     void UpdateDrawRegion(uint32_t index, const std::shared_ptr<Rosen::RectF>& rect);
-    void NotifyHostTransformUpdated();
-
-    void InitAccessibilityFocusModidifer(const RoundRect&, const Color&, float);
-
-    void InitFocusStateModidifer(const RoundRect&, const Color&, float);
-
-    void InitFocusAnimationModidifer(const RoundRect&, const Color&, float);
+    void NotifyHostTransformUpdated(bool changed = true);
 
     std::shared_ptr<Rosen::RSNode> CreateHardwareSurface(
         const std::optional<ContextParam>& param, bool isTextureExportNode);
@@ -634,7 +644,7 @@ private:
     int appearingTransitionCount_ = 0;
     int disappearingTransitionCount_ = 0;
     int sandBoxCount_ = 0;
-    bool isFocusBoxGlow_ = true;
+    static constexpr int32_t INVALID_PARENT_ID = -2100000;
     static constexpr uint32_t DRAW_REGION_RECT_COUNT = 6;
     std::map<std::string, RefPtr<ImageLoadingContext>> particleImageContextMap_;
     std::map<std::string, RefPtr<CanvasImage>> particleImageMap_;
@@ -664,7 +674,7 @@ private:
     std::shared_ptr<Rosen::RSTranslateZModifier> translateZUserModifier_;
     std::shared_ptr<Rosen::RSScaleModifier> scaleXYUserModifier_;
     std::shared_ptr<Rosen::RectF> drawRegionRects_[DRAW_REGION_RECT_COUNT] = { nullptr };
-    RefPtr<FocusAnimationModifier> focusAnimationModifier_;
+    std::shared_ptr<Rosen::RSAlphaModifier> alphaModifier_;
 
     // translate modifiers for interruption
     std::shared_ptr<Rosen::RSTranslateModifier> translateXY_;

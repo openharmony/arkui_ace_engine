@@ -23,6 +23,7 @@
 #include "base/i18n/time_format.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/inspector_filter.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"
@@ -72,12 +73,27 @@ public:
         weakButtonConfirm_ = buttonConfirmNode;
     }
 
+    void updateFontConfigurationEvent(const std::function<void()>& closeDialogEvent)
+    {
+        closeDialogEvent_ = closeDialogEvent;
+    }
+
+    void SetIsShowInDialog(bool isShowInDialog)
+    {
+        isShowInDialog_ = isShowInDialog;
+    }
+
+    bool GetIsShowInDialog() const
+    {
+        return isShowInDialog_;
+    }
     void SetCancelNode(WeakPtr<FrameNode> buttonCancelNode)
     {
         weakButtonCancel_ = buttonCancelNode;
     }
 
     void OnLanguageConfigurationUpdate() override;
+    void OnFontConfigurationUpdate() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
@@ -363,6 +379,19 @@ public:
         return backgroundColor_;
     }
 
+    void SetIsEnableHaptic(bool value)
+    {
+        if (isEnableHaptic_ != value) {
+            isHapticChanged_ = true;
+        }
+        isEnableHaptic_ = value;
+    }
+
+    bool GetIsEnableHaptic() const
+    {
+        return isEnableHaptic_;
+    }
+
     bool IsAmHour(uint32_t hourOf24) const;
 
     uint32_t GetAmPmHour(uint32_t hourOf24) const;
@@ -463,6 +492,60 @@ public:
     {
         return hasUserDefinedSelectedFontFamily_;
     }
+ 
+    const PickerTextProperties& GetTextProperties() const
+    {
+        return textProperties_;
+    }
+
+    void SetTextProperties(const PickerTextProperties& properties)
+    {
+        textProperties_ = properties;
+        if (properties.disappearTextStyle_.fontSize.has_value() && properties.disappearTextStyle_.fontSize->IsValid()) {
+            isUserSetGradientFont_ = true;
+            gradientHeight_ = properties.disappearTextStyle_.fontSize.value();
+        }
+
+        if (properties.normalTextStyle_.fontSize.has_value() && properties.normalTextStyle_.fontSize->IsValid()) {
+            isUserSetGradientFont_ = true;
+            gradientHeight_ = std::max(properties.normalTextStyle_.fontSize.value(), gradientHeight_);
+        }
+
+        if (properties.selectedTextStyle_.fontSize.has_value() && properties.selectedTextStyle_.fontSize->IsValid()) {
+            isUserSetDividerSpacingFont_ = true;
+            dividerSpacing_ = properties.selectedTextStyle_.fontSize.value();
+        }
+    }
+
+    bool GetIsUserSetDividerSpacingFont()
+    {
+        return isUserSetDividerSpacingFont_;
+    }
+
+    bool GetIsUserSetGradientFont()
+    {
+        return isUserSetGradientFont_;
+    }
+
+    Dimension GetDividerSpacing()
+    {
+        return dividerSpacing_;
+    }
+
+    Dimension GetGradientHeight()
+    {
+        return gradientHeight_;
+    }
+
+    void SetPaintDividerSpacing(float& value)
+    {
+        paintDividerSpacing_ = value;
+    }
+
+    float GetPaintDividerSpacing()
+    {
+        return paintDividerSpacing_;
+    }
 
 private:
     void OnModifyDone() override;
@@ -487,6 +570,11 @@ private:
     void UpdateNodePositionForUg();
     void MountSecondNode(const RefPtr<FrameNode>& stackSecondNode);
     void RemoveSecondNode();
+    void ColumnPatternInitHapticController();
+    void UpdateConfirmButtonMargin(
+        const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme);
+    void UpdateCancelButtonMargin(
+        const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme);
 
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
@@ -512,7 +600,7 @@ private:
     std::optional<int32_t> DividerId_;
     WeakPtr<FrameNode> weakButtonConfirm_;
     WeakPtr<FrameNode> weakButtonCancel_;
-
+    std::function<void()> closeDialogEvent_;
     bool hasSecond_ = false;
     bool wheelModeEnabled_ = true;
     std::vector<WeakPtr<FrameNode>> timePickerColumns_;
@@ -530,11 +618,20 @@ private:
     bool isFiredTimeChange_ = false;
     bool isForceUpdate_ = false;
     bool isDateTimeOptionUpdate_ = false;
+    bool isEnableHaptic_ = true;
+    bool isHapticChanged_ = false;
     std::optional<std::string> firedTimeStr_;
     std::string language_;
     std::string amPmTimeOrder_;
     bool isAmPmTimeOrderUpdate_ = false;
     bool isPreLanguageUg_ = false;
+    bool isShowInDialog_ = false;
+    bool isUserSetDividerSpacingFont_ = false;
+    bool isUserSetGradientFont_ = false;
+    Dimension gradientHeight_;
+    Dimension dividerSpacing_;
+    float paintDividerSpacing_ = 1.0f;
+    PickerTextProperties textProperties_;
 };
 } // namespace OHOS::Ace::NG
 

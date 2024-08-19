@@ -16,12 +16,9 @@
 #include "frameworks/bridge/common/dom/dom_list_item.h"
 
 #include "base/log/event_report.h"
-#include "base/utils/linear_map.h"
-#include "base/utils/utils.h"
 #include "core/components/focus_animation/focus_animation_theme.h"
 #include "frameworks/bridge/common/dom/dom_list.h"
 #include "frameworks/bridge/common/dom/dom_list_item_group.h"
-#include "frameworks/bridge/common/dom/dom_reflect_map.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {
@@ -205,7 +202,7 @@ bool DOMListItem::SetSpecializedStyle(const std::pair<std::string, std::string>&
     };
     // The radius still needs to be set to the radius of the box component, so return false.
     auto radiusIter = BinarySearchFindIndex(listItemRadiusStyleOperators,
-                            ArraySize(listItemRadiusStyleOperators), style.first.c_str());
+        ArraySize(listItemRadiusStyleOperators), style.first.c_str());
     if (radiusIter != -1) {
         listItemRadiusStyleOperators[radiusIter].value(style.second, *this);
         return false;

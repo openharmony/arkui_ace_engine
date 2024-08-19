@@ -53,9 +53,8 @@ using namespace testing::ext;
 constexpr float CUSTOM_NODE_WIDTH = 100.f;
 constexpr float CUSTOM_NODE_HEIGHT = 10.f;
 constexpr float REFRESH_HEIGHT = 400.f;
-
 constexpr int32_t DEFAULT_FRICTION_RATIO = 62;
-constexpr float PERCENT = 0.01; // Percent
+constexpr float PERCENT = 0.01;
 constexpr float RADIO = DEFAULT_FRICTION_RATIO * PERCENT;
 constexpr Dimension TRIGGER_LOADING_DISTANCE = 16.0_vp;
 constexpr Dimension TRIGGER_REFRESH_DISTANCE = 64.0_vp;
@@ -66,24 +65,26 @@ public:
     static void TearDownTestSuite();
     void SetUp() override;
     void TearDown() override;
-    void GetInstance();
+    void GetRefresh();
 
-    void Create(const std::function<void(RefreshModelNG)>& callback = nullptr);
-    void CreateRefresh(const std::function<void(RefreshModelNG)>& callback = nullptr);
-    void CreateNestedSwiper();
+    RefreshModelNG CreateRefresh();
     void CreateScroll();
-    static RefPtr<FrameNode> CreateCustomNode();
-    void VersionElevenHandleDragEnd(float speed, float targetOffsetY);
+    void CreateColumn();
+    void CreateText();
+    void CreateNestedSwiper();
+    RefPtr<FrameNode> CreateCustomNode();
 
     RefPtr<FrameNode> frameNode_;
-    RefPtr<FrameNode> swiper_;
-    RefPtr<FrameNode> scroll_;
     RefPtr<RefreshPattern> pattern_;
-    RefPtr<SwiperPattern> swiperPattern_;
-    RefPtr<ScrollPattern> scrollPattern_;
     RefPtr<RefreshEventHub> eventHub_;
     RefPtr<RefreshLayoutProperty> layoutProperty_;
     RefPtr<RefreshAccessibilityProperty> accessibilityProperty_;
+
+    RefPtr<FrameNode> swiperNode_;
+    RefPtr<SwiperPattern> swiperPattern_;
+
+    RefPtr<FrameNode> scrollNode_;
+    RefPtr<ScrollPattern> scrollPattern_;
 };
 } // namespace OHOS::Ace::NG
 

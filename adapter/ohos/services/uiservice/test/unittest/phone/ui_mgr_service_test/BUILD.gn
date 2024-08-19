@@ -45,7 +45,6 @@ ohos_unittest("UIMgrServiceTest") {
   external_deps = [
     "ability_base:want",
     "ability_runtime:runtime",
-    "appspawn:appspawn_socket_client",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "eventhandler:libeventhandler",

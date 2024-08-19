@@ -16,12 +16,6 @@
 #include "core/components/common/layout/grid_column_info.h"
 #include "core/components/common/layout/grid_system_manager.h"
 
-#include <map>
-#include <vector>
-
-#include "base/json/json_util.h"
-#include "base/log/log.h"
-
 namespace OHOS::Ace {
 namespace {
 
@@ -175,22 +169,5 @@ SystemGridInfo GridSystemManager::GetSystemGridInfo(const GridTemplateType& temp
     } else {
         return GRID_TEMPLATE_COLUMNS_12;
     }
-}
-
-double GridSystemManager::GetMaxWidthWithColumnType(GridColumnType gridColumnType)
-{
-    RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(gridColumnType);
-    if (columnInfo->GetParent()) {
-        columnInfo->GetParent()->BuildColumnWidth();
-    }
-    auto gridSizeType = GridSystemManager::GetInstance().GetCurrentSize();
-    if (gridSizeType > GridSizeType::LG) {
-        gridSizeType = GridSizeType::LG;
-    }
-    if (gridSizeType < GridSizeType::SM) {
-        gridSizeType = GridSizeType::SM;
-    }
-    auto columns = columnInfo->GetColumns(gridSizeType);
-    return columnInfo->GetWidth(columns);
 }
 } // namespace OHOS::Ace

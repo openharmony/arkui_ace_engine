@@ -27,7 +27,7 @@
 namespace OHOS::Ace::NG {
 TextFieldOverlayModifier::TextFieldOverlayModifier(
     const WeakPtr<OHOS::Ace::NG::Pattern>& pattern, WeakPtr<ScrollEdgeEffect>&& edgeEffect)
-    : pattern_(pattern), edgeEffect_(edgeEffect), magnifierPainter_(pattern)
+    : pattern_(pattern), edgeEffect_(edgeEffect)
 {
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
@@ -53,6 +53,7 @@ TextFieldOverlayModifier::TextFieldOverlayModifier(
     changePreviewTextRects_ = AceType::MakeRefPtr<PropertyBool>(false);
     previewTextDecorationColor_ = AceType::MakeRefPtr<PropertyColor>(Color());
     previewTextStyle_ = PreviewTextStyle::NORMAL;
+    contentChange_ = AceType::MakeRefPtr<PropertyBool>(false);
 
     AttachProperty(cursorColor_);
     AttachProperty(cursorWidth_);
@@ -72,6 +73,13 @@ TextFieldOverlayModifier::TextFieldOverlayModifier(
     AttachProperty(showPreviewText_);
     AttachProperty(changePreviewTextRects_);
     AttachProperty(previewTextDecorationColor_);
+    AttachProperty(contentChange_);
+}
+
+void TextFieldOverlayModifier::ContentChange()
+{
+    CHECK_NULL_VOID(contentChange_);
+    contentChange_->Set(!contentChange_->Get());
 }
 
 void TextFieldOverlayModifier::SetFirstHandleOffset(const OffsetF& offset)
@@ -103,7 +111,6 @@ void TextFieldOverlayModifier::onDraw(DrawingContext& context)
     PaintEdgeEffect(frameSize_->Get(), context.canvas);
     PaintUnderline(context.canvas);
     PaintPreviewTextDecoration(context);
-    magnifierPainter_.PaintMagnifier(context.canvas);
 }
 
 void TextFieldOverlayModifier::GetFrameRectClip(RSRect& clipRect, std::vector<RSPoint>& clipRadius)
@@ -137,7 +144,6 @@ void TextFieldOverlayModifier::PaintUnderline(RSCanvas& canvas) const
     CHECK_NULL_VOID(textFieldPattern);
     auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     if (!(layoutProperty->GetShowUnderlineValue(false) && textFieldPattern->IsUnspecifiedOrTextType())) {
         return;
     }
@@ -147,26 +153,23 @@ void TextFieldOverlayModifier::PaintUnderline(RSCanvas& canvas) const
     auto contentRect = textFieldPattern->GetContentRect();
     auto textFrameRect = textFieldPattern->GetFrameRect();
     auto responseArea = textFieldPattern->GetResponseArea();
-    Point leftPoint, rightPoint;
     auto responseAreaWidth = responseArea ? responseArea->GetAreaRect().Width() : 0.0f;
-    if (layoutProperty->GetShowCounterValue(false)) {
-        leftPoint.SetX(contentRect.Left());
-        leftPoint.SetY(textFrameRect.Height());
+    auto clearNodeResponseArea = textFieldPattern->GetCleanNodeResponseArea();
+    responseAreaWidth += clearNodeResponseArea ? clearNodeResponseArea->GetAreaRect().Width() : 0.0f;
+    auto hasResponseArea = GreatNotEqual(responseAreaWidth, 0.0f);
+    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    Point leftPoint, rightPoint;
+    if (isRTL) {
+        leftPoint.SetX(hasResponseArea ? 0.0 : contentRect.Left());
         rightPoint.SetX(contentRect.Right());
-        rightPoint.SetY(textFrameRect.Height());
     } else {
-        if (isRTL) {
-            leftPoint.SetX(contentRect.Left() - responseAreaWidth);
-            leftPoint.SetY(textFrameRect.Height());
-            rightPoint.SetX(contentRect.Right());
-            rightPoint.SetY(textFrameRect.Height());
-        } else {
-            leftPoint.SetX(contentRect.Left());
-            leftPoint.SetY(textFrameRect.Height());
-            rightPoint.SetX(contentRect.Right() + responseAreaWidth);
-            rightPoint.SetY(textFrameRect.Height());
-        }
+        leftPoint.SetX(contentRect.Left());
+        rightPoint.SetX(hasResponseArea ? textFrameRect.Width() : contentRect.Right());
     }
+
+    leftPoint.SetY(textFrameRect.Height());
+    rightPoint.SetY(textFrameRect.Height());
+
     RSPen pen;
     pen.SetColor(ToRSColor(underlineColor_->Get()));
     pen.SetWidth(underlineWidth_->Get());
@@ -229,6 +232,11 @@ void TextFieldOverlayModifier::PaintSelection(DrawingContext& context) const
 
 void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
 {
+    float cursorWidth = static_cast<float>(cursorWidth_->Get());
+    if (NearZero(cursorWidth)) {
+        return; // will not draw cursor
+    }
+
     auto& canvas = context.canvas;
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
@@ -238,10 +246,13 @@ void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
         return;
     }
     canvas.Save();
-    RSBrush brush;
-    brush.SetAntiAlias(true);
-    brush.SetColor(ToRSColor(cursorColor_->Get()));
-    canvas.AttachBrush(brush);
+
+    RSPen pen;
+    pen.SetAntiAlias(true);
+    pen.SetWidth(cursorWidth);
+    pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
+    pen.SetColor(ToRSColor(cursorColor_->Get()));
+    canvas.AttachPen(pen);
     auto paintOffset = contentOffset_->Get();
     float clipRectHeight = 0.0f;
     clipRectHeight = paintOffset.GetY() + contentSize_->Get().Height();
@@ -251,10 +262,15 @@ void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
             (LessOrEqual(contentSize_->Get().Width(), 0.0) ? cursorWidth_->Get() : 0.0f),
         clipRectHeight);
     canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
+
     auto caretRect = textFieldPattern->GetCaretRect();
-    canvas.DrawRect(RSRect(caretRect.GetX(), caretRect.GetY(),
-        caretRect.GetX() + (static_cast<float>(cursorWidth_->Get())), caretRect.GetY() + caretRect.Height()));
-    canvas.DetachBrush();
+    float midPosX = caretRect.GetX() + cursorWidth / 2;
+    float startPosY = caretRect.GetY();
+    float endPosY = caretRect.GetY() + caretRect.Height();
+    float roundCapRadius = static_cast<float>(cursorWidth_->Get()) / 2;
+    canvas.DrawLine(RSPoint(midPosX, startPosY + roundCapRadius),
+        RSPoint(midPosX, endPosY - roundCapRadius));
+    canvas.DetachPen();
     canvas.Restore();
 }
 

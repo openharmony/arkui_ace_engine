@@ -26,6 +26,8 @@
 #include "core/common/thread_checker.h"
 #include "core/components/navigator/navigator_component.h"
 #include "frameworks/bridge/card_frontend/form_frontend_delegate_declarative.h"
+#include "frameworks/bridge/declarative_frontend/ng/page_router_manager_factory.h"
+
 namespace OHOS::Ace {
 namespace {
 
@@ -603,7 +605,7 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
             return jsEngine->PreloadNamedRouter(name, std::move(loadFinishCallback));
         };
 
-        auto pageRouterManager = AceType::MakeRefPtr<NG::PageRouterManager>();
+        auto pageRouterManager = NG::PageRouterManagerFactory::CreateManager();
         pageRouterManager->SetLoadJsCallback(std::move(loadPageCallback));
         pageRouterManager->SetLoadJsByBufferCallback(std::move(loadPageByBufferCallback));
         pageRouterManager->SetLoadNamedRouterCallback(std::move(loadNamedRouterCallback));
@@ -1110,7 +1112,7 @@ void DeclarativeFrontend::DumpFrontend() const
     std::string params;
     int32_t stackSize = delegate_->GetStackSize();
     DumpLog::GetInstance().Print(0, "Router stack size " + std::to_string(stackSize));
-    for (int32_t i = 0; i <= stackSize; ++i) {
+    for (int32_t i = 1; i <= stackSize; ++i) {
         delegate_->GetRouterStateByIndex(i, name, path, params);
         unrestore = delegate_->IsUnrestoreByIndex(i);
         DumpLog::GetInstance().Print(1, "Page[" + std::to_string(i) + "], name: " + name);

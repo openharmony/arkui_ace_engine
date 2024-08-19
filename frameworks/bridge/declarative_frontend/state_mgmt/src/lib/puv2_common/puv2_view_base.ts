@@ -298,7 +298,9 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
       return;
     }
     const child = iChild as ViewPU | ViewV2;
-    child.updateStateVars(params);
+    if ('updateStateVars' in child) {
+      child.updateStateVars(params);
+    }
     stateMgmtConsole.debug(`${this.debugInfo__()}: updateChildViewById(${elmtId}) - end`);
     stateMgmtProfiler.end();
   }
@@ -326,7 +328,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
   */
   public forceCompleteRerender(deep: boolean = false): void {
     stateMgmtProfiler.begin('ViewPU/V2.forceCompleteRerender');
-    stateMgmtConsole.warn(`${this.debugInfo__()}: forceCompleteRerender - start.`);
+    stateMgmtConsole.debug(`${this.debugInfo__()}: forceCompleteRerender - start.`);
 
     // see which elmtIds are managed by this View
     // and clean up all book keeping for them
@@ -363,6 +365,21 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
     // remove elemtId from dirtDescendantElementIds.
     this.dirtDescendantElementIds_.delete(elmtId);
     stateMgmtProfiler.end();
+  }
+
+  /**
+   * for C++ to judge whether a CustomNode has updateFunc with specified nodeId.
+   * use same judgement with UpdateElement, to make sure it can rerender if return true.
+   *
+   * @param elmtId query ID
+   *
+   * framework internal function
+   */
+  public hasNodeUpdateFunc(elmtId: number): boolean {
+    const entry: UpdateFuncRecord | undefined = this.updateFuncByElmtId.get(elmtId);
+    const updateFunc = entry ? entry.getUpdateFunc() : undefined;
+    // if this component does not have updateFunc for elmtId, return false.
+    return typeof updateFunc === 'function';
   }
 
   // KEEP

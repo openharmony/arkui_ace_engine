@@ -50,10 +50,8 @@ void RichEditorDragOverlayModifier::onDraw(DrawingContext& context)
     auto hostPattern = hostPattern_.Upgrade();
     auto richEditor = DynamicCast<RichEditorPattern>(hostPattern);
     std::shared_ptr<RSPath> path;
-    if (richEditor && isAnimating_) {
+    if (isAnimating_) {
         path = textDragPattern->GenerateBackgroundPath(backgroundOffset_->Get(), 1 - selectedBackgroundOpacity_->Get());
-    } else if (isAnimating_) {
-        path = textDragPattern->GenerateBackgroundPath(backgroundOffset_->Get());
     } else {
         path = textDragPattern->GetBackgroundPath();
     }
@@ -203,7 +201,6 @@ void RichEditorDragOverlayModifier::PaintBackground(const RSPath& path, RSCanvas
 void RichEditorDragOverlayModifier::PaintSelBackground(RSCanvas& canvas, RefPtr<TextDragPattern> textDragPattern,
     RefPtr<RichEditorPattern> richEditorPattern)
 {
-    CHECK_NULL_VOID(richEditorPattern);
     if (type_ == DragAnimType::DEFAULT || NearZero(selectedBackgroundOpacity_->Get())) {
         return;
     }
@@ -323,14 +320,6 @@ void RichEditorDragOverlayModifier::PaintShadow(const RSPath& path, const Shadow
 
 void RichEditorDragOverlayModifier::StartFloatingAnimate()
 {
-    auto pattern = DynamicCast<RichEditorPattern>(hostPattern_.Upgrade());
-    if (!pattern) {
-        type_ = DragAnimType::DEFAULT;
-        SetSelectedBackgroundOpacity(0.0);
-        SetHandleOpacity(0.0);
-        TextDragOverlayModifier::StartFloatingAnimate();
-        return;
-    }
     type_ = DragAnimType::FLOATING;
     isAnimating_ = true;
 

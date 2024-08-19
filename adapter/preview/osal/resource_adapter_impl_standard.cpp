@@ -99,9 +99,8 @@ const char* PATTERN_MAP[] = {
     THEME_BLUR_STYLE_COMMON,
     THEME_PATTERN_SHADOW,
     THEME_PATTERN_RICH_EDITOR,
-    THEME_PATTERN_LINEAR_LAYOUT,
-    THEME_PATTERN_STACK,
-    THEME_PATTERN_CONTAINER_MODAL
+    THEME_PATTERN_CONTAINER_MODAL,
+    THEME_PATTERN_LINEAR_INDICATOR
 };
 } // namespace
 
@@ -129,6 +128,7 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
 {
     std::string appResPath = resourceInfo.GetPackagePath();
     std::string sysResPath = resourceInfo.GetSystemPackagePath();
+    std::string hmsResPath = resourceInfo.GetHmsPackagePath();
     auto resConfig = ConvertConfigToGlobal(resourceInfo.GetResourceConfiguration());
     std::shared_ptr<Global::Resource::ResourceManager> newResMgr(Global::Resource::CreateResourceManager());
 
@@ -136,6 +136,11 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
     auto appResRet = newResMgr->AddResource(appResIndexPath.c_str());
     std::string sysResIndexPath = sysResPath + DELIMITER + "resources.index";
     auto sysResRet = newResMgr->AddResource(sysResIndexPath.c_str());
+    if (!hmsResPath.empty()) {
+        std::string hmsResIndexPath =
+            hmsResPath + DELIMITER + "resources" + DELIMITER + "resources" + DELIMITER + "resources.index";
+        newResMgr->AddResource(hmsResIndexPath.c_str());
+    }
 
     if (resConfig != nullptr) {
         auto configRet = newResMgr->UpdateResConfig(*resConfig);
@@ -531,5 +536,13 @@ uint32_t ResourceAdapterImpl::GetSymbolByName(const char* resName) const
         }
     }
     return result;
+}
+
+ColorMode ResourceAdapterImpl::GetResourceColorMode() const
+{
+    CHECK_NULL_RETURN(resourceManager_, ColorMode::LIGHT);
+    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    resourceManager_->GetResConfig(*resConfig);
+    return resConfig->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK ? ColorMode::DARK : ColorMode::LIGHT;
 }
 } // namespace OHOS::Ace

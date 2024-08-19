@@ -161,6 +161,7 @@ public:
     static void OnInterceptKeyboardAttach(const JSCallbackInfo& args);
     static void OnAdsBlocked(const JSCallbackInfo& args);
     static void ForceDisplayScrollBar(const JSCallbackInfo& args);
+    static void KeyboardAvoidMode(int32_t mode);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);
@@ -170,6 +171,7 @@ protected:
 
 private:
     static void ParseScriptItems(const JSCallbackInfo& args, ScriptItems& scriptItems);
+    static bool CheckNestedScrollMode(const int32_t& modeValue);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_WEB_H

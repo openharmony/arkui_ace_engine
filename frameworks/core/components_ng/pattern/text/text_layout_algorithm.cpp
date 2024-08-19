@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/render/font_collection.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace::NG {
 
@@ -71,7 +72,7 @@ void TextLayoutAlgorithm::ConstructParagraphSpanGroup(std::list<RefPtr<SpanItem>
     // split spans into groups by mew paragraph style
     auto it = spans.begin();
     ParagraphStyle pStyle;
-    GetSpanParagraphStyle((*it)->textLineStyle, pStyle);
+    GetSpanParagraphStyle(nullptr, (*it), pStyle);
     while (it != spans.end()) {
         auto spanItem = *it;
         if (!spanItem) {
@@ -87,7 +88,7 @@ void TextLayoutAlgorithm::ConstructParagraphSpanGroup(std::list<RefPtr<SpanItem>
             auto next = *(std::next(it));
             ParagraphStyle nextSpanParagraphStyle;
             if (next) {
-                GetSpanParagraphStyle(next->textLineStyle, nextSpanParagraphStyle);
+                GetSpanParagraphStyle(nullptr, next, nextSpanParagraphStyle);
             } else {
                 break;
             }
@@ -113,16 +114,17 @@ void TextLayoutAlgorithm::OnReset() {}
 std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
-    ACE_TEXT_SCOPED_TRACE("TextLayoutAlgorithm::MeasureContent");
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, std::nullopt);
+    ACE_SCOPED_TRACE("TextLayoutAlgorithm::MeasureContent[id:%d]", host->GetId());
     TextStyle textStyle;
     ConstructTextStyles(contentConstraint, layoutWrapper, textStyle);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(textLayoutProperty, std::nullopt);
-
     if (textStyle.GetTextOverflow() == TextOverflow::MARQUEE) { // create a paragraph with all text in 1 line
+        isMarquee_ = true;
         return BuildTextRaceParagraph(textStyle, textLayoutProperty, contentConstraint, layoutWrapper);
     }
-
     if (isSpanStringMode_) {
         if (spanStringHasMaxLines_) {
             textStyle.SetMaxLines(UINT32_MAX);
@@ -133,31 +135,34 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
             return std::nullopt;
         }
     }
-
     textStyle_ = textStyle;
-    baselineOffset_ = static_cast<float>(textStyle.GetBaselineOffset().ConvertToPx());
+    baselineOffset_ = textStyle.GetBaselineOffset().ConvertToPxDistribute(
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     if (NearZero(contentConstraint.maxSize.Height()) || NearZero(contentConstraint.maxSize.Width())) {
         return SizeF {};
     }
     CHECK_NULL_RETURN(paragraphManager_, std::nullopt);
     auto height = paragraphManager_->GetHeight();
-
+    auto maxWidth = paragraphManager_->GetMaxWidth();
+    auto longestLine = paragraphManager_->GetLongestLine();
     auto heightFinal = static_cast<float>(height + std::fabs(baselineOffset_));
     if (contentConstraint.selfIdealSize.Height().has_value()) {
         heightFinal = std::min(heightFinal, contentConstraint.selfIdealSize.Height().value());
     } else {
         heightFinal = std::min(heightFinal, contentConstraint.maxSize.Height());
     }
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(frameNode, std::nullopt);
-    if (frameNode->GetTag() == V2::TEXT_ETS_TAG && textLayoutProperty->GetContent().value_or("").empty() &&
-        NonPositive(paragraphManager_->GetLongestLine())) {
-        // text content is empty
-        ACE_SCOPED_TRACE("TextHeightFinal [%f], TextContentWidth [%f], FontSize [%lf]", heightFinal,
-            paragraphManager_->GetMaxWidth(), textStyle.GetFontSize().ConvertToPx());
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT, "MeasureContent[id:%d][w:%f][h:%f][lineW:%f][height:%f]", host->GetId(), maxWidth,
+            heightFinal, longestLine, height);
+    }
+    if (host->GetTag() == V2::TEXT_ETS_TAG && textLayoutProperty->GetContent().value_or("").empty() &&
+        NonPositive(longestLine)) {
+        ACE_SCOPED_TRACE("TextHeightFinal [%f], TextContentWidth [%f], FontSize [%lf]", heightFinal, maxWidth,
+            textStyle.GetFontSize().ConvertToPxDistribute(
+                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale()));
         return SizeF {};
     }
-    return SizeF(paragraphManager_->GetMaxWidth(), heightFinal);
+    return SizeF(maxWidth, heightFinal);
 }
 
 bool TextLayoutAlgorithm::AddPropertiesAndAnimations(TextStyle& textStyle,
@@ -200,8 +205,8 @@ void TextLayoutAlgorithm::UpdateParagraphForAISpan(
     dragSpanPosition.dragStart = pattern->GetRecoverStart();
     dragSpanPosition.dragEnd = pattern->GetRecoverEnd();
     bool isDragging = pattern->IsDragging();
-    TextStyle aiSpanTextStyle = textStyle;
-    ResetAiSpanTextStyle(frameNode, aiSpanTextStyle);
+    TextStyle aiSpanStyle = textStyle;
+    pattern->ModifyAISpanStyle(aiSpanStyle);
     for (auto kv : pattern->GetAISpanMap()) {
         if (preEnd >= wTextForAILength) {
             break;
@@ -219,37 +224,13 @@ void TextLayoutAlgorithm::UpdateParagraphForAISpan(
         preEnd = aiSpan.end;
         dragSpanPosition.spanStart = aiSpan.start;
         dragSpanPosition.spanEnd = aiSpan.end;
-        GrayDisplayAISpan(dragSpanPosition, wTextForAI, aiSpanTextStyle, isDragging, paragraph);
+        GrayDisplayAISpan(dragSpanPosition, wTextForAI, aiSpanStyle, isDragging, paragraph);
     }
     if (preEnd < wTextForAILength) {
         dragSpanPosition.spanStart = preEnd;
         dragSpanPosition.spanEnd = wTextForAILength;
         GrayDisplayAISpan(dragSpanPosition, wTextForAI, textStyle, isDragging, paragraph);
     }
-}
-
-void TextLayoutAlgorithm::ResetAiSpanTextStyle(const RefPtr<FrameNode>& frameNode, TextStyle& aiSpanTextStyle)
-{
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto hyerlinkTheme = pipeline->GetTheme<HyperlinkTheme>();
-    CHECK_NULL_VOID(hyerlinkTheme);
-    auto hyerlinkColor = hyerlinkTheme->GetTextColor();
-    aiSpanTextStyle.SetTextColor(hyerlinkColor);
-    aiSpanTextStyle.SetTextDecoration(TextDecoration::UNDERLINE);
-    aiSpanTextStyle.SetTextDecorationColor(hyerlinkColor);
-    aiSpanTextStyle.SetTextDecorationStyle(TextDecorationStyle::SOLID);
-}
-
-float TextLayoutAlgorithm::GetFontScaleValue(TextStyle& textStyle)
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, 0.0f);
-    float fontSacleValue = pipeline->GetFontScale();
-    if (textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
-        fontSacleValue = std::clamp(fontSacleValue, textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
-    }
-    return fontSacleValue;
 }
 
 void TextLayoutAlgorithm::GrayDisplayAISpan(const DragSpanPosition& dragSpanPosition, const std::wstring wTextForAI,
@@ -309,7 +290,6 @@ bool TextLayoutAlgorithm::CreateParagraph(
     }
     auto useExternalParagraph = pattern->GetExternalParagraph() && !pattern->NeedShowAIDetect();
     auto externalParagraphStyle = pattern->GetExternalParagraphStyle();
-    // default paragraph style
     auto paraStyle = GetParagraphStyle(textStyle, content, layoutWrapper);
     if (pattern->GetExternalParagraph()) {
         if (!useExternalParagraph && externalParagraphStyle) {
@@ -317,10 +297,10 @@ bool TextLayoutAlgorithm::CreateParagraph(
         }
     }
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) || isSpanStringMode_) {
-        paraStyle.fontSize = textStyle.GetFontSize().ConvertToPx();
+        paraStyle.fontSize = textStyle.GetFontSize().ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     }
     paraStyle.leadingMarginAlign = Alignment::CENTER;
-
     // SymbolGlyph
     if (frameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
         return UpdateSymbolTextStyle(textStyle, paraStyle, layoutWrapper, frameNode);
@@ -329,7 +309,7 @@ bool TextLayoutAlgorithm::CreateParagraph(
         // only use for text.
         return UpdateSingleParagraph(layoutWrapper, paraStyle, textStyle, content, maxWidth);
     } else {
-        return UpdateParagraphBySpan(layoutWrapper, paraStyle, maxWidth);
+        return UpdateParagraphBySpan(layoutWrapper, paraStyle, maxWidth, textStyle);
     }
 }
 
@@ -373,6 +353,8 @@ void TextLayoutAlgorithm::CreateParagraphDrag(
     TextStyle dragTextStyle = textStyle;
     Color color = textStyle.GetTextColor().ChangeAlpha(DRAGGED_TEXT_TRANSPARENCY);
     dragTextStyle.SetTextColor(color);
+    Color textDecorationColor = textStyle.GetTextDecorationColor().ChangeAlpha(DRAGGED_TEXT_TRANSPARENCY);
+    dragTextStyle.SetTextDecorationColor(textDecorationColor);
     std::vector<TextStyle> textStyles { textStyle, dragTextStyle, textStyle };
 
     CHECK_NULL_VOID(paragraph);
@@ -392,8 +374,9 @@ void TextLayoutAlgorithm::CreateParagraphDrag(
 bool TextLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout)
 {
-    ACE_TEXT_SCOPED_TRACE("CreateParagraphAndLayout");
     auto maxSize = MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(contentConstraint);
+    ACE_TEXT_SCOPED_TRACE("CreateParagraphAndLayout[maxSize:%s][Len:%d]", maxSize.ToString().c_str(),
+        static_cast<int32_t>(content.length()));
     if (!CreateParagraph(textStyle, content, layoutWrapper, maxSize.Width())) {
         return false;
     }
@@ -415,20 +398,16 @@ OffsetF TextLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper)
 bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::string& content,
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
-    ACE_TEXT_SCOPED_TRACE("TextLayoutAlgorithm::AdaptMinTextSize");
+    ACE_TEXT_SCOPED_TRACE("TextLayoutAlgorithm::AdaptMinTextSize[Length:%d]", static_cast<int32_t>(content.length()));
     double maxFontSize = 0.0;
     double minFontSize = 0.0;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
-    float fontSacleValue = GetFontScaleValue(textStyle);
-    if (!textStyle.GetAdaptMaxFontSize().NormalizeToPx(pipeline->GetDipScale(), fontSacleValue,
-            pipeline->GetLogicScale(), contentConstraint.maxSize.Height(), maxFontSize)) {
-        return false;
-    }
-    if (!textStyle.GetAdaptMinFontSize().NormalizeToPx(pipeline->GetDipScale(), fontSacleValue,
-            pipeline->GetLogicScale(), contentConstraint.maxSize.Height(), minFontSize)) {
-        return false;
-    }
+    auto maxFontSizeDimension = textStyle.GetAdaptMaxFontSize();
+    maxFontSize = maxFontSizeDimension.ConvertToPxDistribute(
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    minFontSize = textStyle.GetAdaptMinFontSize().ConvertToPxDistribute(
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     if (LessNotEqual(maxFontSize, minFontSize) || LessOrEqual(minFontSize, 0.0)) {
         if (!CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper)) {
             TAG_LOGE(AceLogTag::ACE_TEXT, "create paragraph error");
@@ -436,16 +415,13 @@ bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::stri
         }
         return true;
     }
-    constexpr Dimension ADAPT_UNIT = 1.0_fp;
-    Dimension step = ADAPT_UNIT;
+    auto adaptUnit = maxFontSizeDimension.GetAdaptDimensionUnit(textStyle.GetAdaptMinFontSize());
+    Dimension step(1.0f, adaptUnit);
     if (GreatNotEqual(textStyle.GetAdaptFontSizeStep().Value(), 0.0)) {
         step = textStyle.GetAdaptFontSizeStep();
     }
-    double stepSize = 0.0;
-    if (!step.NormalizeToPx(pipeline->GetDipScale(), fontSacleValue, pipeline->GetLogicScale(),
-            contentConstraint.maxSize.Height(), stepSize)) {
-        return false;
-    }
+    double stepSize =
+        step.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     auto maxSize = MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(contentConstraint);
     while (GreatOrEqual(maxFontSize, minFontSize)) {
         textStyle.SetFontSize(Dimension(maxFontSize));
@@ -473,10 +449,11 @@ float TextLayoutAlgorithm::GetBaselineOffset() const
 bool TextLayoutAlgorithm::UpdateSingleParagraph(LayoutWrapper* layoutWrapper, ParagraphStyle paraStyle,
     const TextStyle& textStyle, const std::string& content, double maxWidth)
 {
-    ACE_TEXT_SCOPED_TRACE("TextLayoutAlgorithm::UpdateSingleParagraph");
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(frameNode, false);
-    auto pattern = frameNode->GetPattern<TextPattern>();
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, false);
+    ACE_TEXT_SCOPED_TRACE("TextLayoutAlgorithm::UpdateSingleParagraph[id:%d][length:%d][w:%f]", host->GetId(),
+        static_cast<int32_t>(content.length()), maxWidth);
+    auto pattern = host->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, false);
     auto externalParagraph = pattern->GetExternalParagraph();
     RefPtr<Paragraph> paragraph;
@@ -498,11 +475,16 @@ bool TextLayoutAlgorithm::UpdateSingleParagraph(LayoutWrapper* layoutWrapper, Pa
         } else {
             auto value = content;
             StringUtils::TransformStrCase(value, static_cast<int32_t>(textStyle.GetTextCase()));
-            paragraph->AddText(StringUtils::Str8ToStr16(value));
+            std::u16string result = StringUtils::Str8ToStr16(value);
+            if (result.length() == 0 && value.length() != 0) {
+                value = TextEmojiProcessor::ConvertU8stringUnpairedSurrogates(value);
+                result = StringUtils::Str8ToStr16(value);
+            }
+            paragraph->AddText(result);
         }
     }
     paragraph->Build();
-    ApplyIndent(paraStyle, paragraph, maxWidth);
+    ApplyIndent(paraStyle, paragraph, maxWidth, textStyle);
     paragraphManager_->AddParagraph({ .paragraph = paragraph,
         .paragraphStyle = paraStyle,
         .start = 0,
@@ -559,26 +541,26 @@ bool TextLayoutAlgorithm::BuildParagraphAdaptUseLayoutConstraint(TextStyle& text
     if (!BuildParagraph(textStyle, layoutProperty, contentConstraint, layoutWrapper)) {
         return false;
     }
-    auto paragraph = GetSingleParagraph();
-    CHECK_NULL_RETURN(paragraph, false);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, false);
-    auto height = static_cast<float>(paragraph->GetHeight());
-    double minTextSizeHeight = 0.0;
-    textStyle.GetAdaptMinFontSize().NormalizeToPx(
-        pipeline->GetDipScale(), GetFontScaleValue(textStyle), pipeline->GetLogicScale(), height, minTextSizeHeight);
+    CHECK_NULL_RETURN(GetSingleParagraph(), false);
+    auto height = static_cast<float>(GetSingleParagraph()->GetHeight());
+    double minTextSizeHeight = textStyle.GetAdaptMinFontSize().ConvertToPxDistribute(
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     if (LessOrEqual(minTextSizeHeight, 0.0)) {
-        textStyle.GetFontSize().NormalizeToPx(pipeline->GetDipScale(), GetFontScaleValue(textStyle),
-            pipeline->GetLogicScale(), height, minTextSizeHeight);
+        minTextSizeHeight = textStyle.GetFontSize().ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     }
     if (textStyle.GetMaxLines() == UINT32_MAX) {
-        double baselineOffset = 0.0;
-        textStyle.GetBaselineOffset().NormalizeToPx(pipeline->GetDipScale(), GetFontScaleValue(textStyle),
-            pipeline->GetLogicScale(), contentConstraint.maxSize.Height(), baselineOffset);
+        double baselineOffset =
+            textStyle.GetBaselineOffset().Unit() == DimensionUnit::PERCENT
+                ? textStyle.GetBaselineOffset().ConvertToPxWithSize(contentConstraint.maxSize.Height())
+                : textStyle.GetBaselineOffset().ConvertToPxDistribute(
+                    textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
         double lineHeight = minTextSizeHeight;
         if (textStyle.HasHeightOverride()) {
-            textStyle.GetLineHeight().NormalizeToPx(pipeline->GetDipScale(), GetFontScaleValue(textStyle),
-                pipeline->GetLogicScale(), minTextSizeHeight, lineHeight);
+            lineHeight = textStyle.GetLineHeight().Unit() == DimensionUnit::PERCENT
+                             ? textStyle.GetLineHeight().ConvertToPxWithSize(contentConstraint.maxSize.Height())
+                             : textStyle.GetLineHeight().ConvertToPxDistribute(
+                                 textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
         }
         uint32_t maxLines = (contentConstraint.maxSize.Height() - baselineOffset - minTextSizeHeight) / (lineHeight);
         textStyle.SetMaxLines(maxLines);
@@ -587,8 +569,7 @@ bool TextLayoutAlgorithm::BuildParagraphAdaptUseLayoutConstraint(TextStyle& text
             return false;
         }
     }
-    // Reducing the value of MaxLines to make sure the parapraph could be layout in the constraint of height.
-    paragraph = GetSingleParagraph();
+    auto paragraph = GetSingleParagraph();
     height = static_cast<float>(paragraph->GetHeight());
     while (GreatNotEqual(height, contentConstraint.maxSize.Height())) {
         auto maxLines = textStyle.GetMaxLines();
@@ -615,19 +596,14 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
     textStyle.SetTextOverflow(TextOverflow::CLIP);
     textStyle.SetMaxLines(1);
     textStyle.SetTextIndent(Dimension(0.0f));
-
-    if (!textStyle.GetAdaptTextSize()) {
-        if (!CreateParagraph(textStyle, layoutProperty->GetContent().value_or(""), layoutWrapper)) {
-            return std::nullopt;
-        }
-    } else {
-        if (!AdaptMinTextSize(textStyle, layoutProperty->GetContent().value_or(""), contentConstraint, layoutWrapper)) {
-            return std::nullopt;
-        }
+    std::string content = layoutProperty->GetContent().value_or("");
+    std::replace(content.begin(), content.end(), '\n', ' ');
+    if (!CreateParagraph(textStyle, content, layoutWrapper)) {
+        return std::nullopt;
     }
+ 
     textStyle_ = textStyle;
     auto paragraph = GetSingleParagraph();
-
     // layout the paragraph to the width of text
     paragraph->Layout(std::numeric_limits<float>::max());
     float paragraphWidth = paragraph->GetLongestLine();
@@ -642,7 +618,9 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
     auto pipeline = PipelineContext::GetCurrentContext();
     // calculate the content size
     auto height = static_cast<float>(paragraph->GetHeight());
-    baselineOffset_ = static_cast<float>(layoutProperty->GetBaselineOffsetValue(Dimension()).ConvertToPx());
+    baselineOffset_ = static_cast<float>(
+        layoutProperty->GetBaselineOffsetValue(Dimension())
+            .ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale()));
     float heightFinal =
         std::min(static_cast<float>(height + std::fabs(baselineOffset_)), contentConstraint.maxSize.Height());
 
@@ -667,11 +645,6 @@ bool TextLayoutAlgorithm::AdaptMaxTextSize(TextStyle& textStyle, const std::stri
     return AdaptMaxFontSize(textStyle, content, step, contentConstraint, layoutWrapper);
 }
 
-std::optional<TextStyle> TextLayoutAlgorithm::GetTextStyle() const
-{
-    return textStyle_;
-}
-
 void TextLayoutAlgorithm::UpdateSensitiveContent(std::string& content)
 {
     auto wContent = StringUtils::ToWstring(content);
@@ -681,6 +654,11 @@ void TextLayoutAlgorithm::UpdateSensitiveContent(std::string& content)
             return ch != L'\n';
         }, L'-');
     content = StringUtils::ToString(wContent);
+}
+
+std::optional<TextStyle> TextLayoutAlgorithm::GetTextStyle() const
+{
+    return textStyle_;
 }
 
 size_t TextLayoutAlgorithm::GetLineCount() const

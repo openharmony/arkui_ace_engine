@@ -94,8 +94,10 @@ public:
             json->PutFixedAttr("src", src.c_str(), filter, FIXED_ATTR_SRC);
             return;
         }
-        static const char* OBJECTFITVALUE[] = { "ImageFit.Fill", "ImageFit.Contain", "ImageFit.Cover",
-            "ImageFit.Auto", "ImageFit.FitHeight", "ImageFit.None", "ImageFit.ScaleDown" };
+        static const char* OBJECTFITVALUE[] = { "ImageFit.Fill", "ImageFit.Contain", "ImageFit.Cover", "ImageFit.Auto",
+            "ImageFit.FitHeight", "ImageFit.None", "ImageFit.ScaleDown", "ImageFit.TOP_START", "ImageFit.TOP",
+            "ImageFit.TOP_END", "ImageFit.START", "ImageFit.CENTER", "ImageFit.END", "ImageFit.BOTTOM_START",
+            "ImageFit.BOTTOM", "ImageFit.BOTTOM_END" };
         static const char* VERTICALALIGNVALUE[] = { "VerticalAlign.NONE", "VerticalAlign.TOP", "VerticalAlign.CENTER",
             "VerticalAlign.BOTTOM", "VerticalAlign.BASELINE", "VerticalAlign.NONE" };
         json->PutExtAttr("alt", propAlt_.value_or(ImageSourceInfo("")).GetSrc().c_str(), filter);
@@ -122,6 +124,15 @@ public:
             { "ImageFit.FitHeight", ImageFit::FITHEIGHT },
             { "ImageFit.None", ImageFit::NONE },
             { "ImageFit.ScaleDown", ImageFit::SCALE_DOWN },
+            { "ImageFit.TOP_START", ImageFit::TOP_LEFT },
+            { "ImageFit.TOP", ImageFit::TOP },
+            { "ImageFit.TOP_END", ImageFit::TOP_END },
+            { "ImageFit.START", ImageFit::START },
+            { "ImageFit.CENTER", ImageFit::CENTER },
+            { "ImageFit.END", ImageFit::END },
+            { "ImageFit.BOTTOM_START", ImageFit::BOTTOM_START },
+            { "ImageFit.BOTTOM", ImageFit::BOTTOM },
+            { "ImageFit.BOTTOM_END", ImageFit::BOTTOM_END },
         };
 
         std::string src = json->GetString("rawSrc");
@@ -146,6 +157,13 @@ public:
         pipeline->AddNodesToNotifyMemoryLevel(frameNode->GetId());
         pipeline->AddWindowStateChangedCallback(frameNode->GetId());
         LayoutProperty::FromJson(json);
+    }
+
+    void UpdateImageSourceInfoCacheKey()
+    {
+        if (propImageSourceInfo_.has_value()) {
+            propImageSourceInfo_.value().GenerateCacheKey();
+        }
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageFit, ImageFit, PROPERTY_UPDATE_LAYOUT);

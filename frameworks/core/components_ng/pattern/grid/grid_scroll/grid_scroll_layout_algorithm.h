@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_SCROLL_GRID_SCROLL_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_SCROLL_GRID_SCROLL_LAYOUT_ALGORITHM_H
 
-#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_layout_base_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
@@ -94,6 +93,8 @@ private:
     float FillNewLineForward(float crossSize, float mainSize, LayoutWrapper* layoutWrapper);
     void AddForwardLines(int32_t currentIndex, float crossSize, float mainSize, LayoutWrapper* layoutWrapper);
     void UpdateMatrixForAddedItems();
+    // Fill forward one line, but do not update startMainLineIndex_ and startIndex_
+    void FillOneLineForwardWithoutUpdatingStartIndex(float crossSize, float mainSize, LayoutWrapper* layoutWrapper);
 
     // fill end of viewport
     void FillBlankAtEnd(float mainSize, float crossSize, LayoutWrapper* layoutWrapper, float& mainLength);
@@ -106,11 +107,13 @@ private:
     int32_t MeasureChildPlaced(const SizeF& frameSize, int32_t itemIndex, int32_t crossStart,
         LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& childLayoutWrapper);
     bool CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper, const LayoutConstraintF& layoutConstraint) const;
+    bool CheckNeedMeasureWhenStretch(
+        const RefPtr<LayoutWrapper>& layoutWrapper, const LayoutConstraintF& layoutConstraint) const;
     void MeasureChild(LayoutWrapper* layoutWrapper, const SizeF& frameSize,
         const RefPtr<LayoutWrapper>& childLayoutWrapper, int32_t crossStart, int32_t crossSpan);
 
     // Compote position of grid item in cross axis.
-    float ComputeItemCrossPosition(LayoutWrapper* layoutWrapper, int32_t crossStart) const;
+    float ComputeItemCrossPosition(int32_t crossStart) const;
     virtual void LargeItemLineHeight(const RefPtr<LayoutWrapper>& itemWrapper, bool& hasNormalItem);
     // Find next valid cell when current is not valid.
     bool GetNextGrid(int32_t& curMain, int32_t& curCross, bool reverse) const;
@@ -161,8 +164,7 @@ private:
     void LayoutForwardCachedLine(LayoutWrapper* layoutWrapper, int32_t cacheCount);
     void CreateCachedChildConstraint(LayoutWrapper* layoutWrapper, float mainSize, float crossSize);
 
-    static void PostIdleTask(RefPtr<FrameNode> frameNode, const GridPredictLayoutParam& param);
-    static bool PredictBuildItem(RefPtr<LayoutWrapper> wrapper, const LayoutConstraintF& constraint);
+    static bool PredictBuildItem(const RefPtr<FrameNode>& host, int32_t itemIdx, const GridPredictLayoutParam& param);
     static void SyncGeometry(RefPtr<LayoutWrapper>& wrapper);
     void CompleteItemCrossPosition(LayoutWrapper* layoutWrapper, std::map<int32_t, int32_t> items);
     /**
@@ -178,6 +180,14 @@ private:
     void CheckReset(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
 
     bool CheckLastLineItemFullyShowed(LayoutWrapper* layoutWrapper);
+
+    bool IsIrregularLine(int32_t lineIndex) const override;
+    
+    void ResetOffsetWhenHeightChanged();
+
+    void MergeRemainingLines(std::map<int32_t, std::map<int32_t, int32_t>> matrix, int32_t forwardLines);
+
+    bool SkipLargeLineHeightLines(float mainSize);
 
 protected:
     uint32_t crossCount_ = 0;

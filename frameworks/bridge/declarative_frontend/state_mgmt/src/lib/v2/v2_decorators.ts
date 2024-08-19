@@ -99,9 +99,18 @@ const Param = (proto: Object, propertyKey: string): void => {
       ObserveV2.getObserve().addRef(this, propertyKey);
       return ObserveV2.autoProxyObject(this, ObserveV2.OB_PREFIX + propertyKey);
     },
-    set(_) {
-      stateMgmtConsole.applicationError(`@param ${propertyKey.toString()}: can not assign a new value, application error.`);
-      return;
+    set(val) {
+      const meta = proto[ObserveV2.V2_DECO_META]?.[propertyKey];
+      if (meta && meta.deco2 !== '@once') {
+        stateMgmtConsole.applicationError(`@param ${propertyKey.toString()}: can not assign a new value, application error.`);
+        return;
+      }
+      if (val !== this[storeProp]) {
+        this[storeProp] = val;
+        if (this[ObserveV2.SYMBOL_REFS]) { // This condition can improve performance.
+          ObserveV2.getObserve().fireChange(this, propertyKey);
+        }
+      }
     },
     // @param can not be assigned, no setter
     enumerable: true
@@ -194,6 +203,34 @@ const Consumer = (aliasName?: string) => {
     // redefining the property happens when owning ViewV2 gets constructed
     // and @Consumer gets connected to @provide counterpart
     ProviderConsumerUtilV2.addProvideConsumeVariableDecoMeta(proto, varName, searchForProvideWithName, '@Consumer');
+    const providerName = (aliasName === undefined || aliasName === null ||
+      (typeof aliasName === 'string' && aliasName.trim() === '')
+    ) ? varName : aliasName;
+
+    let providerInfo;
+
+    Reflect.defineProperty(proto, varName, {
+      get() {
+        if (!providerInfo) {
+          providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
+          if (providerInfo && providerInfo[0] && providerInfo[1]) {
+            ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
+          }
+        }
+        return this[providerName ?? varName];
+      },
+      set(val) {
+        if (!providerInfo) {
+          providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
+          if (providerInfo && providerInfo[0] && providerInfo[1]) {
+            ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
+          } else {
+            ProviderConsumerUtilV2.defineConsumerWithoutProvider(this, varName, val);
+          }
+        }
+      },
+      enumerable: true
+    });
   };
 }; // @Consumer
 

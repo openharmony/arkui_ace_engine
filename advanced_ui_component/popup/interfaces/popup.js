@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+if (!("finalizeConstruction" in ViewPU.prototype)) {
+    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
+}
+
 const display = requireNapi('display');
 const mediaquery = requireNapi('mediaquery');
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
@@ -699,7 +703,7 @@ export class PopupComponent extends ViewPU {
     }
 
     getButtonTextMargin() {
-        return { top: LengthMetrics.vp(this.theme.button.textMargin.bottom.value / 2) };
+        return { top: LengthMetrics.vp(this.theme.button.textMargin.bottom.value ) };
     }
 
     getButtonTextPadding() {
@@ -1080,7 +1084,6 @@ export class PopupComponent extends ViewPU {
                         Row.create();
                         Row.direction(this.popupDirection);
                         Row.alignItems(VerticalAlign.Top);
-                        Row.margin(this.getTitleMargin());
                     }, Row);
                     this.observeComponentCreation2((u24, v24) => {
                         Scroll.create();

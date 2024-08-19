@@ -204,10 +204,22 @@ public:
         onActionCancel_ = std::make_unique<GestureEventNoParameter>(onActionCancel);
     }
 
+    void SetOnReject(const GestureEventNoParameter& onReject)
+    {
+        onReject_ = std::make_unique<GestureEventNoParameter>(onReject);
+    }
+
     inline void SendCancelMsg()
     {
         if (onActionCancel_ && *onActionCancel_) {
             (*onActionCancel_)();
+        }
+    }
+
+    inline void SendRejectMsg()
+    {
+        if (onReject_ && *onReject_) {
+            (*onReject_)();
         }
     }
 
@@ -347,6 +359,13 @@ public:
         }
     }
 
+    void SetDisposeNotifyCallback(std::function<void(void*)>&& callback)
+    {
+        if (gestureInfo_) {
+            gestureInfo_->SetDisposeNotifyFunc(std::move(callback));
+        }
+    }
+
     void SetBridgeMode(bool bridgeMode)
     {
         bridgeMode_ = bridgeMode;
@@ -387,7 +406,9 @@ public:
         return refereeState_;
     }
 
-    void SetResponseLinkRecognizers(const std::list<RefPtr<TouchEventTarget>>& responseLinkResult);
+    void SetResponseLinkRecognizers(const ResponseLinkResult& responseLinkResult);
+
+    bool IsInResponseLinkRecognizers();
 
     virtual bool IsReady()
     {
@@ -437,6 +458,8 @@ protected:
     std::unique_ptr<GestureEventFunc> onActionUpdate_;
     std::unique_ptr<GestureEventFunc> onActionEnd_;
     std::unique_ptr<GestureEventNoParameter> onActionCancel_;
+    // triggered when the recongnizer is rejected
+    std::unique_ptr<GestureEventNoParameter> onReject_;
 
     int64_t deviceId_ = 0;
     SourceType deviceType_ = SourceType::NONE;
@@ -451,7 +474,7 @@ protected:
     bool bridgeMode_ = false;
     std::list<WeakPtr<NGGestureRecognizer>> bridgeObjList_;
     bool enabled_ = true;
-    std::list<RefPtr<NGGestureRecognizer>> responseLinkRecognizer_;
+    ResponseLinkResult responseLinkRecognizer_;
 private:
     WeakPtr<NGGestureRecognizer> gestureGroup_;
     WeakPtr<NGGestureRecognizer> eventImportGestureGroup_;

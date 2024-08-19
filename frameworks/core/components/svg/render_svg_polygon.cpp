@@ -66,8 +66,7 @@ bool RenderSvgPolygon::PrepareSelfAnimation(const RefPtr<SvgAnimate>& component)
 
     PrepareWeightAnimate(svgAnimate, pointsVector_, points_, isBy_);
 
-    std::function<void(double)> callback;
-    callback = [weak = AceType::WeakClaim(this)](double value) {
+    std::function<void(double)> callback = [weak = AceType::WeakClaim(this)](double value) {
         auto svgPath = weak.Upgrade();
         if (!svgPath) {
             LOGE("svgPolygon is null");

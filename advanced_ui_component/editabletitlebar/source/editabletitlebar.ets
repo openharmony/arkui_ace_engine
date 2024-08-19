@@ -21,6 +21,7 @@ import { Theme } from '@ohos.arkui.theme';
 import { LengthMetrics } from '@ohos.arkui.node';
 import common from '@ohos.app.ability.common';
 import window from '@ohos.window';
+import { Context } from '@ohos.arkui.UIContext';
 
 export enum EditableLeftIconType {
   Back,
@@ -68,8 +69,12 @@ const MAX_DIALOG = '256vp';
 const MIN_DIALOG = '216vp';
 const TITLE_VP: number = 20;
 const SUBTITLE_VP: number = 14;
-const TITLE_F: number = getNumberByResource('titlebar_title_tertiary_size');
-const SUBTITLE_F: number = getNumberByResource('titlebar_subheader_size');
+
+// 'sys.float.titlebar_title_tertiary_size' id,value: 20vp
+const TITLE_F: number = getNumberByResource(125831095, TITLE_VP);
+// 'sys.float.titlebar_subheader_size' id,value: 14vp
+const SUBTITLE_F: number = getNumberByResource(125831097, SUBTITLE_VP);
+
 const TITLE_F_VP: string = (TITLE_F > 0 ? TITLE_F : TITLE_VP) + 'vp';
 const SUBTITLE_F_VP: string = (SUBTITLE_F > 0 ? SUBTITLE_F : SUBTITLE_VP) + 'vp';
 
@@ -102,11 +107,10 @@ export struct EditableTitleBar {
   public static readonly maxOtherCountOfExtraItems = 2;
   public static readonly commonZero = 0;
   public static readonly noneColor = '#00000000';
-  public static readonly defaultHeight: number = getNumberByResource('titlebar_default_height');
-  public static readonly defaultMarginLevel1: number = getNumberByResource('margin_level1');
-  public static readonly defaultMarginLevel2: number = getNumberByResource('margin_level2');
-  public static readonly defaultMarginLevel3: number = getNumberByResource('margin_level3');
-  public static readonly defaultTitlePadding: number = getNumberByResource('titlebar_icon_background_space_horizontal');
+  // 'sys.float.titlebar_default_height' id,value: 56vp
+  public static readonly defaultHeight: number = getNumberByResource(125831115, DEFAULT_TITLE_BAR_HEIGHT);
+  // 'sys.float.padding_level1' id,value: 2vp
+  public static readonly defaultTitlePadding: number = getNumberByResource(125830920, DEFAULT_TITLE_PADDING);
   public static readonly totalHeight: number =
     EditableTitleBar.defaultHeight === EditableTitleBar.commonZero ? DEFAULT_TITLE_BAR_HEIGHT :
     EditableTitleBar.defaultHeight;
@@ -130,7 +134,6 @@ export struct EditableTitleBar {
     this.editableTitleBarTheme.iconColor = theme.colors.iconPrimary;
     this.editableTitleBarTheme.titleColor = theme.colors.fontPrimary;
     this.editableTitleBarTheme.subTitleColor = theme.colors.fontSecondary;
-    this.editableTitleBarTheme.iconBackgroundColor = theme.colors.compBackgroundTertiary;
     this.editableTitleBarTheme.iconBackgroundPressedColor = theme.colors.interactivePressed;
     this.editableTitleBarTheme.iconBackgroundHoverColor = theme.colors.interactiveHover;
     this.editableTitleBarTheme.iconBackgroundFocusOutlineColor = theme.colors.interactiveFocus;
@@ -258,7 +261,8 @@ export struct EditableTitleBar {
     .height(EditableTitleBar.totalHeight)
     .justifyContent(FlexAlign.Center)
     .margin({
-      start: LengthMetrics.vp(EditableTitleBar.titlePadding),
+      // 'sys.float.titlebar_icon_background_space_horizontal' id,value: 8vp
+      start: LengthMetrics.resource($r('sys.float.titlebar_icon_background_space_horizontal')),
     })
     .alignItems(HorizontalAlign.Start)
   }
@@ -340,6 +344,10 @@ struct ImageMenuItem {
   minFontSize: number = 1.75;
   maxFontSize: number = 3.2;
   longPressTime: number = 500;
+  isFollowingSystemFontScale: boolean = false;
+  maxFontScale: number = 1;
+  systemFontScale?: number = 1;
+
   @Prop fontSize: number = 1;
   @State isOnFocus: boolean = false;
   @State isOnHover: boolean = false;
@@ -406,7 +414,7 @@ struct ImageMenuItem {
     if (event.type === TouchType.Down) {
       this.isOnClick = true;
     }
-    if (event.type === TouchType.Up) {
+    if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
       if (this.fontSize >= this.minFontSize) {
         this.dialogController?.close()
       }
@@ -427,6 +435,27 @@ struct ImageMenuItem {
     if (event.type === KeyType.Up) {
       this.isOnClick = false;
     }
+  }
+
+  aboutToAppear(): void {
+    try {
+      let uiContent: UIContext = this.getUIContext();
+      this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
+      this.maxFontScale = uiContent.getMaxFontScale();
+    } catch (exception) {
+      let code: number = (exception as BusinessError).code;
+      let message: string = (exception as BusinessError).message;
+      hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
+    }
+  }
+
+  decideFontScale(): number {
+    let uiContent: UIContext = this.getUIContext();
+    this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+    if (!this.isFollowingSystemFontScale) {
+      return 1;
+    }
+    return Math.min(this.systemFontScale, this.maxFontScale);
   }
 
   @Styles
@@ -450,22 +479,19 @@ struct ImageMenuItem {
     .onTouch((event) => {
       this.touchEventAction(event);
     })
-    .gesture(GestureGroup(GestureMode.Exclusive,
+    .onClick(() => {
+      this.item.isEnabled && this.item.action && this.item.action()
+    })
+    .gesture(
       LongPressGesture({ repeat: false, duration: this.longPressTime })
         .onAction((event: GestureEvent) => {
-          let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
-          this.fontSize = context.config?.fontSizeScale ?? 1;
+          this.fontSize = this.decideFontScale();
           if (event) {
             if (this.fontSize >= this.minFontSize) {
               this.dialogController?.open()
             }
           }
-        }),
-      TapGesture()
-        .onAction((event: GestureEvent) => {
-          this.item.isEnabled && this.item.action && this.item.action()
-        })
-    ))
+        }))
   }
 
   @Styles
@@ -496,17 +522,31 @@ struct ImageMenuItem {
     }
   }
 
+  private getAccessibilityReadText(): Resource | undefined {
+    if (this.item.value === PUBLIC_OK) {
+      return $r('sys.string.icon_save');
+    } else if (this.item.value === PUBLIC_CANCEL) {
+      return $r('sys.string.icon_cancel');
+    } else if (this.item.value === PUBLIC_BACK) {
+      return $r('sys.string.icon_back');
+    } else if (this.item.label) {
+      return this.item.label as Resource;
+    }
+    return undefined;
+  }
+
   @Builder
   IconBuilder(): void {
     Button({ type: ButtonType.Normal, stateEffect: this.item.isEnabled }) {
       Image(this.item.value)
+        .fillColor(this.editableTitleBarTheme.iconColor)
+        .matchTextDirection(this.item.value === PUBLIC_BACK ? true : false)
         .width($r('sys.float.titlebar_icon_width'))
         .height($r('sys.float.titlebar_icon_height'))
-        .fillColor(this.editableTitleBarTheme.iconColor)
         .focusable(this.item.isEnabled)
         .enabled(this.item.isEnabled)
-        .matchTextDirection(this.item.value === PUBLIC_BACK ? true : false)
         .draggable(false)
+        .accessibilityText(this.getAccessibilityReadText())
     }
     .backgroundButtonStyle()
     .borderRadius($r('sys.float.titlebar_icon_background_shape'))
@@ -514,6 +554,7 @@ struct ImageMenuItem {
       start: this.attribute === ItemType.LeftIcon ? LengthMetrics.vp(EditableTitleBar.commonZero) :
       LengthMetrics.resource($r('sys.float.titlebar_icon_background_space_horizontal')),
     })
+    .focusOnTouch(true)
     .foregroundColor(this.getFgColor())
     .backgroundColor(this.getBgColor())
     .buttonStateStyles()
@@ -645,16 +686,21 @@ struct EditableTitleBarDialog {
 /**
  * get resource size
  *
- * @param resourceName resource name
+ * @param resourceId resource id
  * @return resource size
  */
-function getNumberByResource(resourceName: string): number {
+function getNumberByResource(resourceId: number, defaultNumber: number): number {
   try {
-    return resourceManager.getSystemResourceManager().getNumberByName(resourceName);
+    let resourceNumber: number = resourceManager.getSystemResourceManager().getNumber(resourceId);
+    if (resourceNumber === 0) {
+      return defaultNumber;
+    } else {
+      return resourceNumber;
+    }
   } catch (error) {
     let code: number = (error as BusinessError).code;
     let message: string = (error as BusinessError).message;
     hilog.error(0x3900, 'Ace', `EditableTitleBar getNumberByResource error, code: ${code},message:${message}`);
-    return EditableTitleBar.commonZero;
+    return 0;
   }
 }

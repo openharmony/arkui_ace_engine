@@ -124,25 +124,11 @@ public:
 
     void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
 
-    void SetOverlayRenderContext(const RefPtr<RenderContext>& overlayRenderContext)
-    {
-        overlayRenderContext_ = overlayRenderContext;
-    }
-
-    void SetFadingInfo(bool isFadingTop, bool isFadingBottom, float percentFading = 0.0f)
-    {
-        isFadingTop_ = isFadingTop;
-        isFadingBottom_ = isFadingBottom;
-        percentFading_ = percentFading;
-    }
-
-    void UpdateFadingGradient(const RefPtr<RenderContext>& listRenderContext);
-
 private:
     V2::ItemDivider divider_;
     bool vertical_ = false;
     int32_t lanes_ = 1;
-    int32_t totalItemCount_;
+    int32_t totalItemCount_ = 0;
     float space_;
     float laneGutter_ = 0.0f;
     PositionMap itemPosition_;
@@ -151,11 +137,6 @@ private:
     WeakPtr<ScrollBar> scrollBar_;
     WeakPtr<ScrollEdgeEffect> edgeEffect_;
     WeakPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier_;
-
-    RefPtr<RenderContext> overlayRenderContext_;
-    bool isFadingTop_ = false;
-    bool isFadingBottom_ = false;
-    float percentFading_ = 0.0f;
     bool isReverse_ = false;
 };
 } // namespace OHOS::Ace::NG

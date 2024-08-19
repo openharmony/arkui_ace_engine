@@ -42,6 +42,7 @@ public:
     void DeleteChildFromGroup(int32_t slot = DEFAULT_NODE_SLOT) override;
     static RefPtr<NavDestinationGroupNode> GetOrCreateGroupNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void SetTitleBarNode(const RefPtr<UINode>& title)
     {
@@ -104,6 +105,11 @@ public:
     }
 
     RefPtr<CustomNodeBase> GetNavDestinationCustomNode();
+    
+    void SetNavDestinationCustomNode(WeakPtr<CustomNodeBase> customNode)
+    {
+        customNode_ = customNode;
+    }
 
     void SetNavDestinationMode(NavDestinationMode mode);
 
@@ -163,9 +169,20 @@ public:
         return navDestinationPathInfo_;
     }
 
+    void SetNeedRemoveInPush(bool need)
+    {
+        needRemoveInPush_ = need;
+    }
+
+    bool NeedRemoveInPush() const
+    {
+        return needRemoveInPush_;
+    }
+
 private:
     RefPtr<UINode> titleBarNode_;
     RefPtr<UINode> contentNode_;
+    WeakPtr<CustomNodeBase> customNode_; // nearest parent customNode
     NavDestinationBackButtonEvent backButtonEvent_;
     bool isOnAnimation_ = false;
     int32_t index_ = -1;
@@ -176,6 +193,7 @@ private:
     bool canReused_ = true;
     std::string navDestinationPathInfo_;
     std::string navDestinationModuleName_;
+    bool needRemoveInPush_ = false;
 };
 
 } // namespace OHOS::Ace::NG

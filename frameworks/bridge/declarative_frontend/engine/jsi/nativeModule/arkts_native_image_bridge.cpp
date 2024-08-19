@@ -21,6 +21,7 @@
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/jsview/js_image.h"
@@ -37,9 +38,7 @@ constexpr int32_t INDEX_2 = 2;      // Arg Index
 constexpr int32_t INDEX_3 = 3;      // Arg Index
 constexpr int32_t INDEX_4 = 4;      // Arg Index
 constexpr int32_t SIZE_OF_FOUR = 4; // Border Radius array size
-const std::vector<float> DEFAULT_COLOR_FILTER_MATRIX = {
-    1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0
-};
+const std::vector<float> DEFAULT_COLOR_FILTER_MATRIX = { 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0 };
 
 void ParseResizableCalcDimensions(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t offset, uint32_t count,
     std::vector<std::optional<CalcDimension>>& results, const CalcDimension& defValue)
@@ -64,8 +63,8 @@ void ParseResizableCalcDimensions(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_
     }
 }
 
-void PushDimensionsToVector(std::vector<ArkUIStringAndFloat>& results,
-    const std::vector<std::optional<CalcDimension>>& optDimensions)
+void PushDimensionsToVector(
+    std::vector<ArkUIStringAndFloat>& results, const std::vector<std::optional<CalcDimension>>& optDimensions)
 {
     for (uint32_t index = 0; index < optDimensions.size(); index++) {
         auto optDimension = optDimensions[index];
@@ -86,6 +85,15 @@ void PushDimensionsToVector(std::vector<ArkUIStringAndFloat>& results,
     }
 }
 
+bool ImageBridge::CheckIsCard()
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(context, false);
+    return context->IsFormRender() && !container->IsDynamicRender();
+}
+
 ArkUINativeModuleValue ImageBridge::SetImageShowSrc(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -95,13 +103,13 @@ ArkUINativeModuleValue ImageBridge::SetImageShowSrc(ArkUIRuntimeCallInfo* runtim
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
 
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, panda::NativePointerRef::New(vm, nullptr));
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(context, panda::NativePointerRef::New(vm, nullptr));
-    bool isCard = context->IsFormRender() && !container->IsDynamicRender();
+    bool isCard = CheckIsCard();
     std::string src;
     int32_t resId = 0;
+    if (info[1]->IsNumber()) {
+        GetArkUINodeModifiers()->getImageModifier()->resetImageContent(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
     if (info[0]->IsObject()) {
         Framework::JSRef<Framework::JSObject> jsObj = Framework::JSRef<Framework::JSObject>::Cast(info[0]);
         Framework::JSRef<Framework::JSVal> tmp = jsObj->GetProperty("id");
@@ -122,7 +130,7 @@ ArkUINativeModuleValue ImageBridge::SetImageShowSrc(ArkUIRuntimeCallInfo* runtim
     ArkTSUtils::GetJsMediaBundleInfo(vm, secondArg, bundleName, moduleName);
     RefPtr<PixelMap> pixmap = nullptr;
     if (!srcValid && !isCard) {
-#if defined (PIXEL_MAP_SUPPORTED)
+#if defined(PIXEL_MAP_SUPPORTED)
         if (Framework::IsDrawable(info[1])) {
             pixmap = Framework::GetDrawablePixmap(info[1]);
         } else {
@@ -240,6 +248,22 @@ ArkUINativeModuleValue ImageBridge::ResetEdgeAntialiasing(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getImageModifier()->resetEdgeAntialiasing(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ImageBridge::SetResizableLattice(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        auto drawingLattice = Ace::Framework::CreateDrawingLattice(info[1]);
+        if (drawingLattice) {
+            Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(INDEX_0);
+            auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+            ImageModelNG::SetResizableLattice(reinterpret_cast<FrameNode*>(nativeNode), drawingLattice);
+        }
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -582,16 +606,16 @@ ArkUINativeModuleValue ImageBridge::ResetImageInterpolation(ArkUIRuntimeCallInfo
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto *nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getImageModifier()->resetImageInterpolation(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
 void SetColorFilterObject(const EcmaVM* vm, const Local<JSValueRef>& jsObjArg, ArkUINodeHandle nativeNode)
 {
-    Framework::JSColorFilter* colorFilter;
+    Framework::JSColorFilter* colorFilter = nullptr;
     if (!jsObjArg->IsUndefined() && !jsObjArg->IsNull()) {
-        colorFilter = static_cast<Framework::JSColorFilter*>(jsObjArg->ToObject(vm)->GetNativePointerField(0));
+        colorFilter = static_cast<Framework::JSColorFilter*>(jsObjArg->ToObject(vm)->GetNativePointerField(vm, 0));
     } else {
         GetArkUINodeModifiers()->getImageModifier()->setColorFilter(
             nativeNode, &(*DEFAULT_COLOR_FILTER_MATRIX.begin()), COLOR_FILTER_MATRIX_SIZE);
@@ -600,9 +624,6 @@ void SetColorFilterObject(const EcmaVM* vm, const Local<JSValueRef>& jsObjArg, A
     if (colorFilter && colorFilter->GetColorFilterMatrix().size() == COLOR_FILTER_MATRIX_SIZE) {
         GetArkUINodeModifiers()->getImageModifier()->setColorFilter(
             nativeNode, &(*colorFilter->GetColorFilterMatrix().begin()), COLOR_FILTER_MATRIX_SIZE);
-    } else {
-        GetArkUINodeModifiers()->getImageModifier()->setColorFilter(
-            nativeNode, &(*DEFAULT_COLOR_FILTER_MATRIX.begin()), COLOR_FILTER_MATRIX_SIZE);
         return;
     }
     GetArkUINodeModifiers()->getImageModifier()->setColorFilter(
@@ -692,9 +713,9 @@ ArkUINativeModuleValue ImageBridge::ResetDraggable(ArkUIRuntimeCallInfo* runtime
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue ImageBridge::SetBorderRadius(ArkUIRuntimeCallInfo *runtimeCallInfo)
+ArkUINativeModuleValue ImageBridge::SetBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM *vm = runtimeCallInfo->GetVM();
+    EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
@@ -713,32 +734,40 @@ ArkUINativeModuleValue ImageBridge::SetBorderRadius(ArkUIRuntimeCallInfo *runtim
     CalcDimension bottomLeft;
     CalcDimension bottomRight;
 
-    ArkTSUtils::ParseAllBorder(vm, topLeftArgs, topLeft);
-    ArkTSUtils::ParseAllBorder(vm, topRightArgs, topRight);
-    ArkTSUtils::ParseAllBorder(vm, bottomLeftArgs, bottomLeft);
-    ArkTSUtils::ParseAllBorder(vm, bottomRightArgs, bottomRight);
-
+    bool isLengthMetrics = false;
+    if (ArkTSUtils::ParseJsLengthMetrics(vm, topLeftArgs, topLeft) ||
+        ArkTSUtils::ParseJsLengthMetrics(vm, topRightArgs, topRight) ||
+        ArkTSUtils::ParseJsLengthMetrics(vm, bottomLeftArgs, bottomLeft) ||
+        ArkTSUtils::ParseJsLengthMetrics(vm, bottomRightArgs, bottomRight)) {
+        isLengthMetrics = true;
+    } else {
+        ArkTSUtils::ParseAllBorder(vm, topLeftArgs, topLeft);
+        ArkTSUtils::ParseAllBorder(vm, topRightArgs, topRight);
+        ArkTSUtils::ParseAllBorder(vm, bottomLeftArgs, bottomLeft);
+        ArkTSUtils::ParseAllBorder(vm, bottomRightArgs, bottomRight);
+    }
+    auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    auto directionChanged = isRightToLeft && isLengthMetrics;
     uint32_t size = SIZE_OF_FOUR;
     ArkUI_Float32 values[size];
     int units[size];
-
-    values[INDEX_0] = topLeft.Value();
-    units[INDEX_0] = static_cast<int>(topLeft.Unit());
-    values[INDEX_1] = topRight.Value();
-    units[INDEX_1] = static_cast<int>(topRight.Unit());
-    values[INDEX_2] = bottomLeft.Value();
-    units[INDEX_2] = static_cast<int>(bottomLeft.Unit());
-    values[INDEX_3] = bottomRight.Value();
-    units[INDEX_3] = static_cast<int>(bottomRight.Unit());
+    values[INDEX_0] = directionChanged ? topRight.Value() : topLeft.Value();
+    units[INDEX_0] = directionChanged ? static_cast<int>(topRight.Unit()) : static_cast<int>(topLeft.Unit());
+    values[INDEX_1] = directionChanged ? topLeft.Value() : topRight.Value();
+    units[INDEX_1] = directionChanged ? static_cast<int>(topLeft.Unit()) : static_cast<int>(topRight.Unit());
+    values[INDEX_2] = directionChanged ? bottomRight.Value() : bottomLeft.Value();
+    units[INDEX_2] = directionChanged ? static_cast<int>(bottomRight.Unit()) : static_cast<int>(bottomLeft.Unit());
+    values[INDEX_3] = directionChanged ? bottomLeft.Value() : bottomRight.Value();
+    units[INDEX_3] = directionChanged ? static_cast<int>(bottomLeft.Unit()) : static_cast<int>(bottomRight.Unit());
 
     GetArkUINodeModifiers()->getImageModifier()->setImageBorderRadius(nativeNode, values, units, SIZE_OF_FOUR);
 
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue ImageBridge::ResetBorderRadius(ArkUIRuntimeCallInfo *runtimeCallInfo)
+ArkUINativeModuleValue ImageBridge::ResetBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM *vm = runtimeCallInfo->GetVM();
+    EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
@@ -860,9 +889,9 @@ ArkUINativeModuleValue ImageBridge::AnalyzerConfig(ArkUIRuntimeCallInfo* runtime
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue ImageBridge::SetOnComplete(ArkUIRuntimeCallInfo *runtimeCallInfo)
+ArkUINativeModuleValue ImageBridge::SetOnComplete(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM *vm = runtimeCallInfo->GetVM();
+    EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
@@ -874,24 +903,19 @@ ArkUINativeModuleValue ImageBridge::SetOnComplete(ArkUIRuntimeCallInfo *runtimeC
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(LoadImageSuccessEvent&)> callback = [vm, frameNode,
-        func = panda::CopyableGlobal(vm, func)](LoadImageSuccessEvent& event) {
+    std::function<void(LoadImageSuccessEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+                                                               LoadImageSuccessEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         const char* keys[] = { "width", "height", "componentWidth", "componentHeight", "loadingStatus", "contentWidth",
             "contentHeight", "contentOffsetX", "contentOffsetY" };
-        Local<JSValueRef> values[] = {
-            panda::NumberRef::New(vm, event.GetWidth()),
-            panda::NumberRef::New(vm, event.GetHeight()),
-            panda::NumberRef::New(vm, event.GetComponentWidth()),
-            panda::NumberRef::New(vm, event.GetComponentHeight()),
-            panda::NumberRef::New(vm, event.GetLoadingStatus()),
-            panda::NumberRef::New(vm, event.GetContentWidth()),
-            panda::NumberRef::New(vm, event.GetContentHeight()),
+        Local<JSValueRef> values[] = { panda::NumberRef::New(vm, event.GetWidth()),
+            panda::NumberRef::New(vm, event.GetHeight()), panda::NumberRef::New(vm, event.GetComponentWidth()),
+            panda::NumberRef::New(vm, event.GetComponentHeight()), panda::NumberRef::New(vm, event.GetLoadingStatus()),
+            panda::NumberRef::New(vm, event.GetContentWidth()), panda::NumberRef::New(vm, event.GetContentHeight()),
             panda::NumberRef::New(vm, event.GetContentOffsetX()),
-            panda::NumberRef::New(vm, event.GetContentOffsetY())
-        };
+            panda::NumberRef::New(vm, event.GetContentOffsetY()) };
         auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
         eventObject->SetNativePointerFieldCount(vm, 1);
         eventObject->SetNativePointerField(vm, 0, static_cast<void*>(&event));
@@ -926,8 +950,8 @@ ArkUINativeModuleValue ImageBridge::SetOnError(ArkUIRuntimeCallInfo* runtimeCall
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(LoadImageFailEvent&)> callback = [vm, frameNode,
-        func = panda::CopyableGlobal(vm, func)](LoadImageFailEvent& event) {
+    std::function<void(LoadImageFailEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+                                                            LoadImageFailEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
@@ -941,8 +965,7 @@ ArkUINativeModuleValue ImageBridge::SetOnError(ArkUIRuntimeCallInfo* runtimeCall
         panda::Local<panda::JSValueRef> params[1] = { eventObject };
         func->Call(vm, func.ToLocal(), params, 1);
     };
-    GetArkUINodeModifiers()->getImageModifier()->setOnError(
-        nativeNode, reinterpret_cast<void*>(&callback));
+    GetArkUINodeModifiers()->getImageModifier()->setOnError(nativeNode, reinterpret_cast<void*>(&callback));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -958,7 +981,7 @@ ArkUINativeModuleValue ImageBridge::ResetOnError(ArkUIRuntimeCallInfo* runtimeCa
 
 ArkUINativeModuleValue ImageBridge::SetOnFinish(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM *vm = runtimeCallInfo->GetVM();
+    EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);

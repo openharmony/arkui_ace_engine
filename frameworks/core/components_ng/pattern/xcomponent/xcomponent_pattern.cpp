@@ -56,22 +56,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-#ifdef OHOS_PLATFORM
-constexpr int64_t INCREASE_CPU_TIME_ONCE = 4000000000; // 4s(unit: ns)
-constexpr double INFLEXION = 0.35;
-constexpr double FLING_FRICTION = 0.002;
-constexpr double GRAVITY = 9.8;
-const double DECELERATION  = log(0.78) / log(0.9);
-const double DECEL_MINUS_ONE = DECELERATION - 1.0;
-constexpr int32_t MAX_SLIE_TIME = 5000;
-constexpr int32_t SECOND_UNIT = 1000;
-constexpr int32_t SQUARE = 2;
-constexpr int32_t DISTANCE_UNIT = 1000 * 1000;
-constexpr int32_t DELAY_TIME = 1;
-constexpr int32_t DPI_DENISTY_RATE = 160;
-constexpr double INCH_UNIT = 39.37;
-constexpr double TUNNING_FACTOR = 0.84;
-#endif
 std::string XComponentTypeToString(XComponentType type)
 {
     switch (type) {
@@ -370,9 +354,6 @@ void XComponentPattern::PrepareSurface()
 void XComponentPattern::OnAttachToFrameNode()
 {
     Initialize();
-#ifdef OHOS_PLATFORM
-    physicalCoeff_ = GRAVITY * INCH_UNIT * PipelineBase::GetCurrentDensity() * DPI_DENISTY_RATE * TUNNING_FACTOR;
-#endif
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContextRefPtr();
@@ -442,12 +423,6 @@ void XComponentPattern::OnModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto bkColor = renderContext->GetBackgroundColor();
-    if (bkColor.has_value() && handlingSurfaceRenderContext_) {
-        handlingSurfaceRenderContext_->UpdateBackgroundColor(Color::TRANSPARENT);
-    }
 #ifdef PLATFORM_VIEW_SUPPORTED
     if (type_ == XComponentType::PLATFORM_VIEW) {
         ContainerScope scope(GetHostInstanceId());
@@ -462,6 +437,15 @@ void XComponentPattern::OnModifyDone()
             }, "ArkUIXComponentPatternOnModifyDone");
     }
 #endif
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    CHECK_NULL_VOID(handlingSurfaceRenderContext_);
+    auto bkColor = renderContext->GetBackgroundColor();
+    if (bkColor.has_value() && bkColor.value() != Color::BLACK) {
+        handlingSurfaceRenderContext_->UpdateBackgroundColor(Color::TRANSPARENT);
+    } else {
+        handlingSurfaceRenderContext_->UpdateBackgroundColor(Color::BLACK);
+    }
 }
 
 void XComponentPattern::OnAreaChangedInner()
@@ -654,7 +638,7 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
     if (IsSupportImageAnalyzerFeature()) {
         UpdateAnalyzerUIConfig(geometryNode);
     }
-
+    const auto& [offsetChanged, sizeChanged, needFireNativeEvent] = UpdateSurfaceRect();
     if (!hasXComponentInit_) {
         initSize_ = drawSize_;
         if (!SystemProperties::GetExtSurfaceEnabled()) {
@@ -673,7 +657,7 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
             static_cast<int32_t>(drawSize_.Width()), static_cast<int32_t>(drawSize_.Height()));
     }
 #endif
-    UpdateSurfaceBounds(false, config.frameOffsetChange);
+    HandleSurfaceChangeEvent(false, offsetChanged, sizeChanged, needFireNativeEvent, config.frameOffsetChange);
     if (type_ == XComponentType::SURFACE && renderType_ == NodeRenderType::RENDER_TYPE_TEXTURE) {
         AddAfterLayoutTaskForExportTexture();
     }
@@ -1069,20 +1053,6 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
         "%{public}u",
         touchEventPoint_.x, touchEventPoint_.y, touchEventPoint_.id, touchType,
         static_cast<uint32_t>(info.GetTouches().size()));
-#ifdef OHOS_PLATFORM
-    // increase cpu frequency
-    if (touchType == TouchType::MOVE) {
-        auto currentTime = GetSysTimestamp();
-        auto increaseCpuTime = currentTime - startIncreaseTime_;
-        if (increaseCpuTime >= INCREASE_CPU_TIME_ONCE) {
-            startIncreaseTime_ = currentTime;
-            ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
-        }
-        lastTouchInfo_ = touchEventPoint_;
-    } else if (touchType == TouchType::UP) {
-        ReportSlideToRss();
-    }
-#endif
     SetTouchPoint(info.GetTouches(), timeStamp, touchType);
 
     if (nativeXComponent_ && nativeXComponentImpl_) {
@@ -1098,8 +1068,10 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
     }
 #endif
 #ifdef PLATFORM_VIEW_SUPPORTED
-    const auto& changedPoint = touchInfoList.front();
-    PlatformViewDispatchTouchEvent(changedPoint);
+    if (type_ == XComponentType::PLATFORM_VIEW) {
+        const auto& changedPoint = touchInfoList.front();
+        PlatformViewDispatchTouchEvent(changedPoint);
+    }
 #endif
 }
 
@@ -1123,49 +1095,6 @@ void XComponentPattern::PlatformViewDispatchTouchEvent(const TouchLocationInfo& 
     } else if (changedPoint.GetTouchType() == TouchType::CANCEL) {
         platformView_->HandleTouchCancel(pointOffset);
     }
-}
-#endif
-
-#ifdef OHOS_PLATFORM
-void XComponentPattern::ReportSlideToRss()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto* context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-    uiTaskExecutor.PostDelayedTask([weakThis = WeakClaim(this)] {
-        auto self = weakThis.Upgrade();
-        CHECK_NULL_VOID(self);
-        self->slideCount_ ++;
-        ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
-    }, DELAY_TIME, "ArkUIXComponentSlideOn");
-    uiTaskExecutor.PostDelayedTask([weakThis = WeakClaim(this)] {
-        auto self = weakThis.Upgrade();
-        CHECK_NULL_VOID(self);
-        self->slideCount_ --;
-        if (self->slideCount_.load() == 0) {
-            ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
-        }
-    }, GetFlingDuration(GetUpVelocity(lastTouchInfo_, touchEventPoint_)) + DELAY_TIME, "ArkUIXComponentSlideOff");
-}
-
-float XComponentPattern::GetUpVelocity(OH_NativeXComponent_TouchEvent lastMoveInfo,
-    OH_NativeXComponent_TouchEvent upEventInfo)
-{
-    float distance = sqrt(pow(lastMoveInfo.x - upEventInfo.x, SQUARE) + pow(lastMoveInfo.y - upEventInfo.y, SQUARE));
-    int64_t time = abs(lastMoveInfo.timeStamp - upEventInfo.timeStamp);
-    if (time == 0) {
-        return 0.0f;
-    }
-    return distance * DISTANCE_UNIT / (time / SECOND_UNIT); // unit: pixel/ms
-}
-
-
-int XComponentPattern::GetFlingDuration(float velocity)
-{
-    double splineDeceleration = log(INFLEXION * velocity / (FLING_FRICTION * physicalCoeff_));
-    return std::min((int)(SECOND_UNIT * exp(splineDeceleration / DECEL_MINUS_ONE)), MAX_SLIE_TIME);
 }
 #endif
 
@@ -1371,12 +1300,12 @@ void XComponentPattern::SetHandlingRenderContextForSurface(const RefPtr<RenderCo
     renderContext->AddChild(handlingSurfaceRenderContext_, 0);
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         auto paintRect = AdjustPaintRect(
-            localPosition_.GetX(), localPosition_.GetY(), drawSize_.Width(), drawSize_.Height(), true);
+            localPosition_.GetX(), localPosition_.GetY(), surfaceSize_.Width(), surfaceSize_.Height(), true);
         handlingSurfaceRenderContext_->SetBounds(
             paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
     } else {
         handlingSurfaceRenderContext_->SetBounds(
-            localPosition_.GetX(), localPosition_.GetY(), drawSize_.Width(), drawSize_.Height());
+            localPosition_.GetX(), localPosition_.GetY(), surfaceSize_.Width(), surfaceSize_.Height());
     }
 }
 
@@ -1582,32 +1511,18 @@ void XComponentPattern::ClearIdealSurfaceOffset(bool isXAxis)
     }
 }
 
-void XComponentPattern::UpdateSurfaceBounds(bool needForceRender, bool frameOffsetChange)
+void XComponentPattern::HandleSurfaceChangeEvent(
+    bool needForceRender, bool offsetChanged, bool sizeChanged, bool needFireNativeEvent, bool frameOffsetChange)
 {
     if (!drawSize_.IsPositive()) {
         return;
     }
-    auto preSurfaceSize = surfaceSize_;
-    auto preLocalPosition = localPosition_;
-    if (selfIdealSurfaceWidth_.has_value() && Positive(selfIdealSurfaceWidth_.value()) &&
-        selfIdealSurfaceHeight_.has_value() && Positive(selfIdealSurfaceHeight_.value())) {
-        localPosition_.SetX(selfIdealSurfaceOffsetX_.has_value()
-                                ? selfIdealSurfaceOffsetX_.value()
-                                : (drawSize_.Width() - selfIdealSurfaceWidth_.value()) / 2.0f);
-
-        localPosition_.SetY(selfIdealSurfaceOffsetY_.has_value()
-                                ? selfIdealSurfaceOffsetY_.value()
-                                : (drawSize_.Height() - selfIdealSurfaceHeight_.value()) / 2.0f);
-        surfaceSize_ = { selfIdealSurfaceWidth_.value(), selfIdealSurfaceHeight_.value() };
-    } else {
-        surfaceSize_ = drawSize_;
-    }
-    if (frameOffsetChange || preLocalPosition != localPosition_) {
+    if (frameOffsetChange || offsetChanged) {
         auto offset = globalPosition_ + localPosition_;
         NativeXComponentOffset(offset.GetX(), offset.GetY());
     }
-    if (preSurfaceSize != surfaceSize_) {
-        XComponentSizeChange({ localPosition_, surfaceSize_ }, preSurfaceSize.IsPositive());
+    if (sizeChanged) {
+        XComponentSizeChange({ localPosition_, surfaceSize_ }, needFireNativeEvent);
     }
     if (handlingSurfaceRenderContext_) {
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -1629,6 +1544,29 @@ void XComponentPattern::UpdateSurfaceBounds(bool needForceRender, bool frameOffs
         CHECK_NULL_VOID(host);
         host->MarkNeedRenderOnly();
     }
+}
+
+std::tuple<bool, bool, bool> XComponentPattern::UpdateSurfaceRect()
+{
+    if (!drawSize_.IsPositive()) {
+        return { false, false, false };
+    }
+    auto preSurfaceSize = surfaceSize_;
+    auto preLocalPosition = localPosition_;
+    if (selfIdealSurfaceWidth_.has_value() && Positive(selfIdealSurfaceWidth_.value()) &&
+        selfIdealSurfaceHeight_.has_value() && Positive(selfIdealSurfaceHeight_.value())) {
+        localPosition_.SetX(selfIdealSurfaceOffsetX_.has_value()
+                                ? selfIdealSurfaceOffsetX_.value()
+                                : (drawSize_.Width() - selfIdealSurfaceWidth_.value()) / 2.0f);
+
+        localPosition_.SetY(selfIdealSurfaceOffsetY_.has_value()
+                                ? selfIdealSurfaceOffsetY_.value()
+                                : (drawSize_.Height() - selfIdealSurfaceHeight_.value()) / 2.0f);
+        surfaceSize_ = { selfIdealSurfaceWidth_.value(), selfIdealSurfaceHeight_.value() };
+    } else {
+        surfaceSize_ = drawSize_;
+    }
+    return { preLocalPosition != localPosition_, preSurfaceSize != surfaceSize_, preSurfaceSize.IsPositive() };
 }
 
 void XComponentPattern::NativeSurfaceHide()
@@ -1715,11 +1653,13 @@ void XComponentPattern::StartImageAnalyzer(void* config, OnAnalyzedCallback& onA
     auto* context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-    uiTaskExecutor.PostTask([weak = WeakClaim(this)] {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->CreateAnalyzerOverlay();
-    }, "ArkUIXComponentCreateAnalyzerOverlay");
+    uiTaskExecutor.PostTask(
+        [weak = WeakClaim(this)] {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->CreateAnalyzerOverlay();
+        },
+        "ArkUIXComponentCreateAnalyzerOverlay");
 }
 
 void XComponentPattern::StopImageAnalyzer()

@@ -48,6 +48,7 @@ public:
     virtual void SetStrokePattern(const std::shared_ptr<Ace::Pattern>& pattern) = 0;
     virtual void SetStrokeColor(const Color& color, bool colorFlag) = 0;
     virtual void DrawImage(const ImageInfo& imageInfo) = 0;
+    virtual void DrawSvgImage(const ImageInfo& imageInfo) {}
     virtual void PutImageData(const ImageData& imageData) = 0;
     virtual void CloseImageBitmap(const std::string& src) {}
     virtual std::unique_ptr<ImageData> GetImageData(const ImageSize& imageSize) = 0;
@@ -107,6 +108,7 @@ public:
     virtual void SaveLayer() {};
     virtual void RestoreLayer() {};
     virtual void Reset() {};
+    virtual void SetDensity(double density) {};
     virtual TextMetrics GetMeasureTextMetrics(const PaintState& state, const std::string& text)
     {
         return { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };

@@ -70,12 +70,17 @@ void* ImageAnalyzerAdapterImpl::GetImageAnalyzerConfig()
 void* ImageAnalyzerAdapterImpl::ConvertPixmapNapi(const RefPtr<PixelMap>& pixelMap)
 {
 #if defined(PIXEL_MAP_SUPPORTED)
+    napi_handle_scope scope = nullptr;
+    napi_open_handle_scope(env_, &scope);
     auto engine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_RETURN(engine, {});
     NativeEngine* nativeEngine = engine->GetNativeEngine();
     auto env = reinterpret_cast<napi_env>(nativeEngine);
     auto napiValue = OHOS::Media::PixelMapNapi::CreatePixelMap(env, pixelMap->GetPixelMapSharedPtr());
-    return napiValue;
+    napi_ref napiValueRef = nullptr;
+    napi_create_reference(env_, napiValue, 1, &napiValueRef);
+    napi_close_handle_scope(env_, scope);
+    return napiValueRef;
 #else
     return nullptr;
 #endif

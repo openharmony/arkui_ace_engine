@@ -111,7 +111,7 @@ public:
                 pattern->GetAttr<Color>("ring_progress_fg_color_begin", theme->trackSelectedColor_);
             theme->ringProgressBackgroundColor_ =
                 pattern->GetAttr<Color>("ring_progress_bg_color", Color::GRAY);
-            
+
             if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
                 theme->capsuleBgColor_ = theme->trackBgColor_;
                 theme->capsuleSelectColor_ = theme->trackSelectedColor_;

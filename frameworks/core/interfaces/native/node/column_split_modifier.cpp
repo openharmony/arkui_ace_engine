@@ -65,5 +65,12 @@ const ArkUIColumnSplitModifier* GetColumnSplitModifier()
                                                        SetColumnSplitResizable, ResetColumnSplitResizable };
     return &modifier;
 }
+
+const CJUIColumnSplitModifier* GetCJUIColumnSplitModifier()
+{
+    static const CJUIColumnSplitModifier modifier = { SetColumnSplitDivider, ResetColumnSplitDivider,
+        SetColumnSplitResizable, ResetColumnSplitResizable };
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

@@ -267,6 +267,137 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerModelNGTest003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CalendarPickerModelNGTest004
+ * @tc.desc: Create Calendar Picker Function Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestNg, CalendarPickerModelNGTest004, TestSize.Level1)
+{
+    const std::string language = "false";
+    const std::string countryOrRegion = "";
+    const std::string script = "";
+    const std::string keywordsAndValues = "";
+    const std::string selected = "";
+    Localization::GetInstance()->SetLocaleImpl(language, countryOrRegion, script, selected, keywordsAndValues);
+
+    CalendarSettingData settingData;
+    CalendarPickerModelNG calendarPickerModel;
+
+    calendarPickerModel.Create(settingData);
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    auto json = JsonUtil::Create(true);
+    json->Put("year", 2000);
+    json->Put("month", 2);
+    json->Put("day", 29);
+    pickerPattern->SetDate(json->ToString());
+    auto yearTextNode = calendarPickerModel.GetYearNode(AceType::RawPtr(frameNode));
+    auto yearTextLayoutProperty = yearTextNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(yearTextLayoutProperty->GetContentValue(), "2000");
+
+    auto monthTextNode = calendarPickerModel.GetMonthNode(AceType::RawPtr(frameNode));
+    auto monthTextLayoutProperty = monthTextNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(monthTextLayoutProperty->GetContentValue(), "02");
+
+    auto dayTextNode = calendarPickerModel.GetDayNode(AceType::RawPtr(frameNode));
+    auto dayTextLayoutProperty = dayTextNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(dayTextLayoutProperty->GetContentValue(), "29");
+}
+
+/**
+ * @tc.name: CalendarPickerModelNGTest005
+ * @tc.desc: Create Calendar Picker Function Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestNg, CalendarPickerModelNGTest005, TestSize.Level1)
+{
+    const std::string language = "zh";
+    const std::string countryOrRegion = "";
+    const std::string script = "";
+    const std::string keywordsAndValues = "";
+    const std::string selected = "";
+    Localization::GetInstance()->SetLocaleImpl(language, countryOrRegion, script, selected, keywordsAndValues);
+
+    CalendarSettingData settingData;
+    CalendarPickerModelNG calendarPickerModel;
+
+    calendarPickerModel.Create(settingData);
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    auto json = JsonUtil::Create(true);
+    json->Put("year", 2000);
+    json->Put("month", 2);
+    json->Put("day", 29);
+    pickerPattern->SetDate(json->ToString());
+
+    auto yearTextNode = calendarPickerModel.GetYearNode(AceType::RawPtr(frameNode));
+    auto yearTextLayoutProperty = yearTextNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(yearTextLayoutProperty->GetContentValue(), "2000");
+
+    auto monthTextNode = calendarPickerModel.GetMonthNode(AceType::RawPtr(frameNode));
+    auto monthTextLayoutProperty = monthTextNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(monthTextLayoutProperty->GetContentValue(), "02");
+
+    auto dayTextNode = calendarPickerModel.GetDayNode(AceType::RawPtr(frameNode));
+    auto dayTextLayoutProperty = dayTextNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(dayTextLayoutProperty->GetContentValue(), "29");
+}
+
+/**
+ * @tc.name: CalendarPickerModelNGTest006
+ * @tc.desc: Create Calendar Picker Function Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestNg, CalendarPickerModelNGTest006, TestSize.Level1)
+{
+    const std::string language = "ug";
+    const std::string countryOrRegion = "";
+    const std::string script = "";
+    const std::string keywordsAndValues = "";
+    const std::string selected = "";
+    Localization::GetInstance()->SetLocaleImpl(language, countryOrRegion, script, selected, keywordsAndValues);
+
+    CalendarSettingData settingData;
+    CalendarPickerModelNG calendarPickerModel;
+
+    calendarPickerModel.Create(settingData);
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    auto json = JsonUtil::Create(true);
+    json->Put("year", 2000);
+    json->Put("month", 2);
+    json->Put("day", 29);
+    pickerPattern->SetDate(json->ToString());
+
+    auto yearTextNode = calendarPickerModel.GetYearNode(AceType::RawPtr(frameNode));
+    auto yearTextLayoutProperty = yearTextNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(yearTextLayoutProperty->GetContentValue(), "2000");
+
+    auto monthTextNode = calendarPickerModel.GetMonthNode(AceType::RawPtr(frameNode));
+    auto monthTextLayoutProperty = monthTextNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(monthTextLayoutProperty->GetContentValue(), "02");
+
+    auto dayTextNode = calendarPickerModel.GetDayNode(AceType::RawPtr(frameNode));
+    auto dayTextLayoutProperty = dayTextNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(dayTextLayoutProperty->GetContentValue(), "29");
+}
+
+/**
  * @tc.name: CalendarPickerPatternTest001
  * @tc.desc: HandleFocusEvent Function Test
  * @tc.type: FUNC
@@ -1757,6 +1888,95 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest049, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CalendarPickerPatternTest050
+ * @tc.desc: InitDateIndex Function Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest050, TestSize.Level1)
+{
+    const std::string language = "false";
+    const std::string countryOrRegion = "";
+    const std::string script = "";
+    const std::string keywordsAndValues = "";
+    const std::string selected = "";
+    Localization::GetInstance()->SetLocaleImpl(language, countryOrRegion, script, selected, keywordsAndValues);
+    CreateCalendarPicker();
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    pickerPattern->InitDateIndex();
+    EXPECT_EQ(pickerPattern->yearIndex_, 0);
+    EXPECT_EQ(pickerPattern->monthIndex_, 2);
+    EXPECT_EQ(pickerPattern->dayIndex_, 4);
+}
+
+/**
+ * @tc.name: CalendarPickerPatternTest051
+ * @tc.desc: InitDateIndex Function Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest051, TestSize.Level1)
+{
+    const std::string language = "zh";
+    const std::string countryOrRegion = "";
+    const std::string script = "";
+    const std::string keywordsAndValues = "";
+    const std::string selected = "";
+    Localization::GetInstance()->SetLocaleImpl(language, countryOrRegion, script, selected, keywordsAndValues);
+    CreateCalendarPicker();
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    pickerPattern->InitDateIndex();
+
+    EXPECT_EQ(pickerPattern->yearIndex_, 0);
+    EXPECT_EQ(pickerPattern->monthIndex_, 2);
+    EXPECT_EQ(pickerPattern->dayIndex_, 4);
+}
+
+/**
+ * @tc.name: CalendarPickerPatternTest052
+ * @tc.desc: InitDateIndex Function Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest052, TestSize.Level1)
+{
+    const std::string language = "ug";
+    const std::string countryOrRegion = "";
+    const std::string script = "";
+    const std::string keywordsAndValues = "";
+    const std::string selected = "";
+    Localization::GetInstance()->SetLocaleImpl(language, countryOrRegion, script, selected, keywordsAndValues);
+    CreateCalendarPicker();
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    pickerPattern->InitDateIndex();
+
+    EXPECT_EQ(pickerPattern->yearIndex_, 4);
+    EXPECT_EQ(pickerPattern->monthIndex_, 0);
+    EXPECT_EQ(pickerPattern->dayIndex_, 2);
+}
+
+/**
  * @tc.name: CalendarDialogViewTest001
  * @tc.desc: Calendar Dialog Show Function Test
  * @tc.type: FUNC
@@ -3174,6 +3394,28 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest028, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CalendarPickerTextDirectionTest001
+ * @tc.desc: CalendarPicker TextDirection Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestNg, CalendarPickerTextDirectionTest001, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    CreateCalendarPicker();
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto contentFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(0));
+    ASSERT_NE(contentFrameNode, nullptr);
+    auto contentLayoutProperty = contentFrameNode->GetLayoutProperty<LinearLayoutProperty>();
+    ASSERT_NE(contentLayoutProperty, nullptr);
+    EXPECT_EQ(contentLayoutProperty->GetLayoutDirection(), TextDirection::LTR);
+}
+
+/**
  * @tc.name: CalendarPickerLayoutPropertyTest001
  * @tc.desc: Calendar Picker LayoutProperty  Function Test
  * @tc.type: FUNC
@@ -3501,8 +3743,12 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerUpdateButtonStyles001, TestSize.Lev
  */
 HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest0050, TestSize.Level1)
 {
-    CalendarPickerTestNg::SetUpTestCase();
-
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto calendarTheme = AceType::MakeRefPtr<CalendarTheme>();
+    ASSERT_NE(calendarTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(calendarTheme));
     CalendarDialogView calendarDialogView;
     CalendarSettingData settingData;
     DialogProperties properties;
@@ -3512,6 +3758,9 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest0050, TestSize.Level1)
     auto selectedDate = PickerDate(2000, 1, 1);
     settingData.selectedDate = selectedDate;
     settingData.dayRadius = TEST_SETTING_RADIUS;
+    auto entryColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<CalendarDialogPattern>());
+    settingData.entryNode = AceType::WeakClaim(AceType::RawPtr(entryColumn));
     std::map<std::string, NG::DialogEvent> dialogEvent;
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
 
@@ -3521,7 +3770,11 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest0050, TestSize.Level1)
     buttonInfos.push_back(info1);
 
     auto dialogNode = calendarDialogView.Show(properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
-    ASSERT_NE(dialogNode, nullptr);
+    auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<CalendarDialogPattern>());
+    calendarDialogView.OperationsToPattern(contentColumn, settingData, properties, buttonInfos);
+    auto pattern = contentColumn->GetPattern<CalendarDialogPattern>();
+    ASSERT_NE(pattern->entryNode_.Upgrade(), nullptr);
 }
 
 /**

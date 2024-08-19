@@ -24,7 +24,8 @@
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
 
 namespace OHOS::Ace::NG {
-
+constexpr int32_t EMPTY_NEW_START_INDEX = -1;
+constexpr int32_t INVALID_NEW_START_INDEX = -2;
 /**
  * @brief Layout data structure for Sliding Window version of WaterFlowLayout
  */
@@ -149,10 +150,18 @@ public:
      * @return maximum end position of items in lanes_.
      */
     float EndPos() const;
+    inline float EndPosWithMargin() const
+    {
+        return EndPos() + BotMargin();
+    }
     /**
      * @return minimum start position of items in lanes_.
      */
     float StartPos() const;
+    inline float StartPosWithMargin() const
+    {
+        return StartPos() - TopMargin();
+    }
 
     void ClearDataFrom(int32_t idx, const std::vector<float>& mainGap);
 
@@ -179,6 +188,11 @@ public:
      */
     void PrepareSectionPos(int32_t idx, bool fillBack);
 
+    void NotifyDataChange(int32_t index, int32_t count) override;
+    void UpdateLanesIndex(int32_t updateIdx);
+    void InitSegmentsForKeepPositionMode(const std::vector<WaterFlowSections::Section>& sections,
+        const std::vector<WaterFlowSections::Section>& prevSections, int32_t start) override;
+
     struct Lane;
     std::vector<std::vector<Lane>> lanes_; // lanes in multiple sections
     // mapping of all items previously or currently in lanes_.
@@ -192,8 +206,33 @@ public:
     float maxHeight_ = 0.0f;
     float footerHeight_ = 0.0f;
 
+    // record the new startIndex_ after changing the datasource, corresponding to the old startIndex_.
+    int32_t newStartIndex_ = EMPTY_NEW_START_INDEX;
+
 private:
     inline void PrepareJump();
+
+    void InitSegmentTails(const std::vector<WaterFlowSections::Section>& sections);
+    void InitLanes(const std::vector<WaterFlowSections::Section>& sections, const int32_t start);
+
+    /**
+     * @brief prepare newStartIndex_
+     *
+     * @return false if the value of newStartIndex_ is INVALID.
+     */
+    bool PrepareNewStartIndex();
+
+    /**
+     * @brief Adjust Lanes_ when the change happens in front of lane.
+     *
+     * @param sections the new sections after change.
+     * @param start segment index of the first change section.
+     * @param prevSegIdx segment index of original startIndex_ belongs to.
+     *
+     * @return true if adjust successfully.
+     */
+    bool AdjustLanes(const std::vector<WaterFlowSections::Section>& sections,
+        const WaterFlowSections::Section& prevSection, int32_t start, int32_t prevSegIdx);
 
     /* cache */
     float startPos_ = 0.0f;

@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIRowModifier* GetRowModifier();
+const CJUIRowModifier* GetCJUIRowModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_ROW_MODIFIER_H

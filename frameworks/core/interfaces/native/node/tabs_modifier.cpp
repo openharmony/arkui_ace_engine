@@ -288,6 +288,20 @@ void ResetTabClip(ArkUINodeHandle node)
     TabsModelNG::SetClipEdge(frameNode, false);
 }
 
+void SetTabEdgeEffect(ArkUINodeHandle node, ArkUI_Uint32 edgeEffect)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetEdgeEffect(frameNode, edgeEffect);
+}
+
+void ResetTabEdgeEffect(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetEdgeEffect(frameNode, NUM_0);
+}
+
 void SetTabWidthAuto(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -336,6 +350,54 @@ namespace NodeModifier {
 const ArkUITabsModifier* GetTabsModifier()
 {
     static const ArkUITabsModifier modifier = {
+        SetTabBarMode,
+        SetScrollableBarModeOptions,
+        SetBarGridAlign,
+        SetDivider,
+        SetFadingEdge,
+        SetBarBackgroundColor,
+        SetBarBackgroundBlurStyle,
+        SetBarOverlap,
+        SetIsVertical,
+        SetTabBarPosition,
+        SetScrollable,
+        SetTabBarWidth,
+        SetTabBarHeight,
+        SetBarAdaptiveHeight,
+        SetAnimationDuration,
+        ResetTabBarMode,
+        ResetScrollableBarModeOptions,
+        ResetBarGridAlign,
+        ResetDivider,
+        ResetFadingEdge,
+        ResetBarBackgroundColor,
+        ResetBarBackgroundBlurStyle,
+        ResetBarOverlap,
+        ResetIsVertical,
+        ResetTabBarPosition,
+        ResetScrollable,
+        ResetTabBarWidth,
+        ResetTabBarHeight,
+        ResetBarAdaptiveHeight,
+        ResetAnimationDuration,
+        SetTabClip,
+        ResetTabClip,
+        SetTabEdgeEffect,
+        ResetTabEdgeEffect,
+        SetTabWidthAuto,
+        ResetTabWidthAuto,
+        SetTabHeightAuto,
+        ResetTabHeightAuto,
+        SetAnimateMode,
+        ResetAnimateMode,
+    };
+
+    return &modifier;
+}
+
+const CJUITabsModifier* GetCJUITabsModifier()
+{
+    static const CJUITabsModifier modifier = {
         SetTabBarMode,
         SetScrollableBarModeOptions,
         SetBarGridAlign,

@@ -17,17 +17,9 @@
 
 #include <unistd.h>
 
-#include "base/log/frame_report.h"
 #ifdef FFRT_EXISTS
 #include "base/longframe/long_frame_report.h"
 #endif
-#include "base/memory/referenced.h"
-#include "base/utils/time_util.h"
-#include "base/utils/utils.h"
-#include "core/common/thread_checker.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/custom/custom_node.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -47,6 +39,7 @@ UITaskScheduler::UITaskScheduler()
 UITaskScheduler::~UITaskScheduler()
 {
     persistAfterLayoutTasks_.clear();
+    lastestFrameLayoutFinishTasks_.clear();
 }
 
 void UITaskScheduler::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
@@ -136,6 +129,7 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
     // Pause GC during long frame
     std::unique_ptr<ILongFrame> longFrame = std::make_unique<ILongFrame>();
     if (is64BitSystem_) {
+        ACE_LAYOUT_SCOPED_TRACE("ReportStartEvent");
         longFrame->ReportStartEvent();
     }
 #endif
@@ -161,6 +155,7 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
     FlushSyncGeometryNodeTasks();
 #ifdef FFRT_EXISTS
     if (is64BitSystem_) {
+        ACE_LAYOUT_SCOPED_TRACE("ReportEndEvent");
         longFrame->ReportEndEvent();
     }
 #endif
@@ -236,11 +231,53 @@ void UITaskScheduler::FlushTask(bool triggeredByImplicitAnimation)
     if (!afterLayoutTasks_.empty()) {
         FlushAfterLayoutTask();
     }
+    FlushSafeAreaPaddingProcess();
     if (!triggeredByImplicitAnimation && !afterLayoutCallbacksInImplicitAnimationTask_.empty()) {
         FlushAfterLayoutCallbackInImplicitAnimationTask();
     }
     ElementRegister::GetInstance()->ClearPendingRemoveNodes();
     FlushRenderTask();
+}
+
+void UITaskScheduler::AddSafeAreaPaddingProcessTask(FrameNode* node)
+{
+    safeAreaPaddingProcessTasks_.insert(node);
+}
+
+void UITaskScheduler::RemoveSafeAreaPaddingProcessTask(FrameNode* node)
+{
+    safeAreaPaddingProcessTasks_.erase(node);
+}
+
+void UITaskScheduler::FlushSafeAreaPaddingProcess()
+{
+    if (safeAreaPaddingProcessTasks_.empty()) {
+        return;
+    }
+    auto iter = safeAreaPaddingProcessTasks_.begin();
+    while (iter != safeAreaPaddingProcessTasks_.end()) {
+        auto node = *iter;
+        if (!node) {
+            iter = safeAreaPaddingProcessTasks_.erase(iter);
+        } else {
+            node->ProcessSafeAreaPadding();
+            ++iter;
+        }
+    }
+    // clear caches after all process tasks
+    iter = safeAreaPaddingProcessTasks_.begin();
+    while (iter != safeAreaPaddingProcessTasks_.end()) {
+        auto node = *iter;
+        if (!node) {
+            iter = safeAreaPaddingProcessTasks_.erase(iter);
+        } else {
+            const auto& geometryNode = node->GetGeometryNode();
+            if (geometryNode) {
+                geometryNode->ResetAccumulatedSafeAreaPadding();
+            }
+            ++iter;
+        }
+    }
 }
 
 void UITaskScheduler::AddPredictTask(PredictTask&& task)
@@ -284,6 +321,13 @@ void UITaskScheduler::AddPersistAfterLayoutTask(std::function<void()>&& task)
     LOGI("AddPersistAfterLayoutTask size: %{public}u", static_cast<uint32_t>(persistAfterLayoutTasks_.size()));
 }
 
+void UITaskScheduler::AddLastestFrameLayoutFinishTask(std::function<void()>&& task)
+{
+    lastestFrameLayoutFinishTasks_.emplace_back(std::move(task));
+    LOGI("AddLastestFrameLayoutFinishTask size: %{public}u",
+        static_cast<uint32_t>(lastestFrameLayoutFinishTasks_.size()));
+}
+
 void UITaskScheduler::FlushAfterLayoutTask()
 {
     decltype(afterLayoutTasks_) tasks(std::move(afterLayoutTasks_));
@@ -315,6 +359,20 @@ void UITaskScheduler::FlushPersistAfterLayoutTask()
     }
     ACE_SCOPED_TRACE("UITaskScheduler::FlushPersistAfterLayoutTask");
     for (const auto& task : persistAfterLayoutTasks_) {
+        if (task) {
+            task();
+        }
+    }
+}
+
+void UITaskScheduler::FlushLastestFrameLayoutFinishTask()
+{
+    // only execute after lastest layout finish
+    if (lastestFrameLayoutFinishTasks_.empty()) {
+        return;
+    }
+    ACE_SCOPED_TRACE("UITaskScheduler::FlushLastestFrameLayoutFinishTask");
+    for (const auto& task : lastestFrameLayoutFinishTasks_) {
         if (task) {
             task();
         }

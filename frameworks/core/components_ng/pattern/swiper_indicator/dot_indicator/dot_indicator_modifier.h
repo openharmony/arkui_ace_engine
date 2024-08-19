@@ -22,8 +22,7 @@
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_property.h"
-#include "core/components_ng/render/paint_wrapper.h"
+
 namespace OHOS::Ace::NG {
 constexpr int32_t ITEM_SIZE = 4;
 constexpr float INIT_SIZE_RATE = 1.0f;
@@ -56,7 +55,6 @@ public:
           itemHalfSizes_(AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(LinearVector<float>(ITEM_SIZE))),
           backgroundWidthDilateRatio_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1)),
           backgroundHeightDilateRatio_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1)),
-          isFocused_(AceType::MakeRefPtr<PropertyBool>(false)),
           unselectedColor_(AceType::MakeRefPtr<PropertyColor>(Color::TRANSPARENT)),
           selectedColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::TRANSPARENT)),
           touchBottomPointColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::TRANSPARENT))
@@ -71,7 +69,6 @@ public:
         AttachProperty(indicatorPadding_);
         AttachProperty(indicatorMargin_);
         AttachProperty(itemHalfSizes_);
-        AttachProperty(isFocused_);
         AttachProperty(unselectedColor_);
         AttachProperty(selectedColor_);
         AttachProperty(backgroundWidthDilateRatio_);
@@ -122,7 +119,6 @@ public:
     void PaintMask(DrawingContext& context);
     void PaintBackground(DrawingContext& context, const ContentProperty& contentProperty);
     virtual LinearVector<float> GetItemHalfSizes(size_t index, ContentProperty& contentProperty);
-    void SetFocusedAndSelectedColor(ContentProperty& contentProperty);
     // Update property
     void UpdateShrinkPaintProperty(const OffsetF& margin, const LinearVector<float>& normalItemHalfSizes,
         const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX);
@@ -189,13 +185,6 @@ public:
     void SetNormalToHoverIndex(const std::optional<int32_t>& normalToHoverIndex)
     {
         normalToHoverIndex_ = normalToHoverIndex;
-    }
-
-    void SetIsFocused(bool isFocused)
-    {
-        if (isFocused_) {
-            isFocused_->Set(isFocused);
-        }
     }
 
     void SetHoverToNormalIndex(const std::optional<int32_t>& hoverToNormalIndex)
@@ -287,15 +276,6 @@ public:
     {
         animationDuration_ = duration;
     }
-    void PlayIndicatorAnimation(const LinearVector<float>& vectorBlackPointCenterX,
-        const std::vector<std::pair<float, float>>& longPointCenterX, GestureState gestureState,
-        TouchBottomTypeLoop touchBottomTypeLoop);
-    virtual void StopAnimation(bool ifImmediately = false);
-    void SetLongPointHeadCurve(RefPtr<Curve> curve, float motionVelocity)
-    {
-        headCurve_ = curve;
-        motionVelocity_ = motionVelocity;
-    }
 
     inline void UpdateVectorBlackPointCenterX(const LinearVector<float>& value)
     {
@@ -305,6 +285,16 @@ public:
     std::pair<float, float> GetLongPointCenterX()
     {
         return { longPointLeftCenterX_->Get(), longPointRightCenterX_->Get() };
+    }
+
+    void PlayIndicatorAnimation(const LinearVector<float>& vectorBlackPointCenterX,
+        const std::vector<std::pair<float, float>>& longPointCenterX, GestureState gestureState,
+        TouchBottomTypeLoop touchBottomTypeLoop);
+    virtual void StopAnimation(bool ifImmediately = false);
+    void SetLongPointHeadCurve(RefPtr<Curve> curve, float motionVelocity)
+    {
+        headCurve_ = curve;
+        motionVelocity_ = motionVelocity;
     }
 
     void SetIsOverlong(bool isOverlong)
@@ -332,6 +322,8 @@ protected:
     std::pair<float, float> GetTouchBottomCenterX(ContentProperty& contentProperty);
     int32_t GetLoopTranslateDuration() const;
     int32_t GetLoopOpacityDuration() const;
+    float CalculateMinimumAmplitudeRatio(
+        const std::vector<std::pair<float, float>>& longPointCenterX, GestureState gestureState) const;
 
     RefPtr<AnimatablePropertyColor> backgroundColor_;
     RefPtr<AnimatablePropertyVectorFloat> vectorBlackPointCenterX_;
@@ -345,7 +337,6 @@ protected:
     RefPtr<AnimatablePropertyVectorFloat> itemHalfSizes_;
     RefPtr<AnimatablePropertyFloat> backgroundWidthDilateRatio_;
     RefPtr<AnimatablePropertyFloat> backgroundHeightDilateRatio_;
-    RefPtr<PropertyBool> isFocused_;
 
     RefPtr<Curve> headCurve_;
     float motionVelocity_ = 0;
@@ -376,8 +367,6 @@ protected:
     float itemHeight_ = 0.0f;
     float selectedItemWidth_ = 0.0f;
     float selectedItemHeight_ = 0.0f;
-    Color originalUnselectColor_;
-    Color originalSelectColor_;
     TouchBottomType touchBottomType_ = TouchBottomType::NONE;
     bool isOverlong_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(DotIndicatorModifier);

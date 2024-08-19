@@ -78,7 +78,7 @@ void ResetMinSideBarWidth(ArkUINodeHandle node)
     SideBarContainerModelNG::SetMinSideBarWidth(frameNode, DEFAULT_MIN_SIDE_BAR_WIDTH);
 }
 
-void SetControlButton(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valueLength,
+void SetControlButton(ArkUINodeHandle node, const ArkUI_Float32* values, int32_t valueLength,
     const struct ArkUIIconsStruct* iconsStruct)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -239,6 +239,17 @@ namespace NodeModifier {
 const ArkUISideBarContainerModifier* GetSideBarContainerModifier()
 {
     static const ArkUISideBarContainerModifier modifier = { SetSideBarWidth, ResetSideBarWidth, SetMinSideBarWidth,
+        ResetMinSideBarWidth, SetControlButton, ResetControlButton, SetShowControlButton, ResetShowControlButton,
+        SetAutoHide, ResetAutoHide, SetSideBarContainerMaxSideBarWidth, ResetSideBarContainerMaxSideBarWidth,
+        SetSideBarContainerMinContentWidth, ResetSideBarContainerMinContentWidth, SetSideBarPosition,
+        ResetSideBarPosition, SetShowSideBar, ResetShowSideBar, SetSideBarContainerDivider,
+        ResetSideBarContainerDivider };
+    return &modifier;
+}
+
+const CJUISideBarContainerModifier* GetCJUISideBarContainerModifier()
+{
+    static const CJUISideBarContainerModifier modifier = { SetSideBarWidth, ResetSideBarWidth, SetMinSideBarWidth,
         ResetMinSideBarWidth, SetControlButton, ResetControlButton, SetShowControlButton, ResetShowControlButton,
         SetAutoHide, ResetAutoHide, SetSideBarContainerMaxSideBarWidth, ResetSideBarContainerMaxSideBarWidth,
         SetSideBarContainerMinContentWidth, ResetSideBarContainerMinContentWidth, SetSideBarPosition,

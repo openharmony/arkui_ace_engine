@@ -68,7 +68,7 @@ const char INSPECTOR_VISIBILITY[] = "visibility";
 const uint32_t LONG_PRESS_DELAY = 1000;
 RectF deviceRect;
 
-RefPtr<UINode> GetInspectorByKey(const RefPtr<FrameNode>& root, const std::string& key)
+RefPtr<UINode> GetInspectorByKey(const RefPtr<FrameNode>& root, const std::string& key, bool notDetach = false)
 {
     std::queue<RefPtr<UINode>> elements;
     elements.push(root);
@@ -80,7 +80,7 @@ RefPtr<UINode> GetInspectorByKey(const RefPtr<FrameNode>& root, const std::strin
             return current;
         }
 
-        const auto& children = current->GetChildren();
+        const auto& children = current->GetChildren(notDetach);
         for (const auto& child : children) {
             elements.push(child);
         }
@@ -426,28 +426,28 @@ std::string GetInspectorInfo(std::vector<RefPtr<NG::UINode>> children, int32_t p
 
 std::set<RefPtr<FrameNode>> Inspector::offscreenNodes;
 
-RefPtr<FrameNode> Inspector::GetFrameNodeByKey(const std::string& key)
+RefPtr<FrameNode> Inspector::GetFrameNodeByKey(const std::string& key, bool notDetach)
 {
     if (!offscreenNodes.empty()) {
         for (auto node : offscreenNodes) {
-            auto frameNode = AceType::DynamicCast<FrameNode>(GetInspectorByKey(node, key));
+            auto frameNode = AceType::DynamicCast<FrameNode>(GetInspectorByKey(node, key, notDetach));
             if (frameNode) {
                 return frameNode;
             }
         }
     }
-    auto context = NG::PipelineContext::GetCurrentContext();
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
     if (!context) {
-        LOGW("Internal error! The PipelineContext returned by the system is null. param: %{public}s", key.c_str());
+        LOGW("Internal error! Context is null. key: %{public}s", key.c_str());
         return nullptr;
     }
     auto rootNode = context->GetRootElement();
     if (!rootNode) {
-        LOGW("Internal error! The rootNode returned by the system is null. param: %{public}s", key.c_str());
+        LOGW("Internal error! RootNode is null. key: %{public}s", key.c_str());
         return nullptr;
     }
 
-    return AceType::DynamicCast<FrameNode>(GetInspectorByKey(rootNode, key));
+    return AceType::DynamicCast<FrameNode>(GetInspectorByKey(rootNode, key, notDetach));
 }
 
 std::string Inspector::GetInspectorNodeByKey(const std::string& key, const InspectorFilter& filter)
@@ -479,27 +479,26 @@ std::string Inspector::GetInspectorNodeByKey(const std::string& key, const Inspe
 
 void Inspector::GetRectangleById(const std::string& key, Rectangle& rectangle)
 {
-    auto frameNode = Inspector::GetFrameNodeByKey(key);
+    auto frameNode = Inspector::GetFrameNodeByKey(key, true);
     if (!frameNode) {
-        LOGW("Can't find a component that id or key are %{public}s, Please check your parameters are correct",
-            key.c_str());
+        LOGW("Can't find component:%{public}s, check your parameters", key.c_str());
         return;
     }
     rectangle.size = frameNode->GetGeometryNode()->GetFrameSize();
     auto context = frameNode->GetRenderContext();
     if (!context) {
-        LOGW("Internal error! The RenderContext returned by the component(id=%{public}s) is null",
-            key.c_str());
+        LOGW("Internal error! Component(id=%{public}s) is null", key.c_str());
         return;
     }
     rectangle.localOffset = context->GetPaintRectWithTransform().GetOffset();
     rectangle.windowOffset = frameNode->GetOffsetRelativeToWindow();
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     rectangle.screenRect = pipeline->GetCurrentWindowRect();
-    LOGD("GetRectangleById Id = %{public}s localOffset = %{public}s windowOffset = %{public}s screenRect = %{public}s",
-        key.c_str(), rectangle.localOffset.ToString().c_str(), rectangle.windowOffset.ToString().c_str(),
-        rectangle.screenRect.ToString().c_str());
+    LOGI("GetRectangleById Id:%{public}d key:%{public}s localOffset:%{public}s windowOffset:%{public}s "
+         "screenRect:%{public}s",
+        frameNode->GetId(), key.c_str(), rectangle.localOffset.ToString().c_str(),
+        rectangle.windowOffset.ToString().c_str(), rectangle.screenRect.ToString().c_str());
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     Matrix4 defMatrix4 = Matrix4::CreateIdentity();

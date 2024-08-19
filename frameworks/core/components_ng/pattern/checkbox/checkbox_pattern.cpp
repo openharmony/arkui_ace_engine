@@ -114,7 +114,6 @@ void CheckBoxPattern::OnModifyDone()
     InitClickEvent();
     InitTouchEvent();
     InitMouseEvent();
-    InitFocusEvent();
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
@@ -197,7 +196,7 @@ void CheckBoxPattern::InitClickEvent()
         CHECK_NULL_VOID(checkboxPattern);
         if (info.GetSourceDevice() == SourceType::TOUCH &&
             (info.IsPreventDefault() || checkboxPattern->isTouchPreventDefault_)) {
-            TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkbox preventDefault successfully");
+            TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "checkbox preventDefault successfully");
             checkboxPattern->isTouchPreventDefault_ = false;
             return;
         }
@@ -258,7 +257,7 @@ void CheckBoxPattern::InitMouseEvent()
 
 void CheckBoxPattern::HandleMouseEvent(bool isHover)
 {
-    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkbox on hover %{public}d", isHover);
+    TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "checkbox on hover %{public}d", isHover);
     isHover_ = isHover;
     if (isHover) {
         touchHoverType_ = TouchHoverAnimationType::HOVER;
@@ -270,79 +269,12 @@ void CheckBoxPattern::HandleMouseEvent(bool isHover)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void CheckBoxPattern::InitFocusEvent()
-{
-    if (focusEventInitialized_) {
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto focusHub = host->GetOrCreateFocusHub();
-    auto focusTask = [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleFocusEvent();
-        }
-    };
-    focusHub->SetOnFocusInternal(focusTask);
-    auto blurTask = [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandleBlurEvent();
-    };
-    focusHub->SetOnBlurInternal(blurTask);
-
-    focusEventInitialized_ = true;
-}
-
-void CheckBoxPattern::HandleFocusEvent()
-{
-    CHECK_NULL_VOID(checkboxModifier_);
-    AddIsFocusActiveUpdateEvent();
-    OnIsFocusActiveUpdate(true);
-}
-
-void CheckBoxPattern::HandleBlurEvent()
-{
-    CHECK_NULL_VOID(checkboxModifier_);
-    RemoveIsFocusActiveUpdateEvent();
-    OnIsFocusActiveUpdate(false);
-}
-
-void CheckBoxPattern::AddIsFocusActiveUpdateEvent()
-{
-    if (!isFocusActiveUpdateEvent_) {
-        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->OnIsFocusActiveUpdate(isFocusAcitve);
-        };
-    }
-
-    auto pipline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipline);
-    pipline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
-}
-
-void CheckBoxPattern::RemoveIsFocusActiveUpdateEvent()
-{
-    auto pipline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipline);
-    pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
-}
-
-void CheckBoxPattern::OnIsFocusActiveUpdate(bool isFocusAcitve)
-{
-    CHECK_NULL_VOID(checkboxModifier_);
-    checkboxModifier_->SetIsFocused(isFocusAcitve);
-}
-
 void CheckBoxPattern::OnClick()
 {
     if (UseContentModifier()) {
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkbox onclick");
+    TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "checkbox onclick");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
@@ -362,7 +294,7 @@ void CheckBoxPattern::OnTouchDown()
     if (UseContentModifier()) {
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkbox touch down %{public}d", isHover_);
+    TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "checkbox touch down %{public}d", isHover_);
     if (isHover_) {
         touchHoverType_ = TouchHoverAnimationType::HOVER_TO_PRESS;
     } else {
@@ -379,7 +311,7 @@ void CheckBoxPattern::OnTouchUp()
     if (UseContentModifier()) {
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkbox touch up %{public}d", isHover_);
+    TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "checkbox touch up %{public}d", isHover_);
     if (isHover_) {
         touchHoverType_ = TouchHoverAnimationType::PRESS_TO_HOVER;
     } else {
@@ -539,7 +471,12 @@ void CheckBoxPattern::StartEnterAnimation()
         eventHub->SetEnabled(true);
     }
     AnimationUtils::Animate(
-        option, [&]() { renderContext->UpdateOpacity(1); }, nullptr);
+        option,
+        [&]() {
+            TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "check enter animation");
+            renderContext->UpdateOpacity(1);
+        },
+        nullptr);
 }
 
 void CheckBoxPattern::StartExitAnimation()
@@ -551,7 +488,12 @@ void CheckBoxPattern::StartExitAnimation()
     const auto& renderContext = builderNode_->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     AnimationUtils::Animate(
-        option, [&]() { renderContext->UpdateOpacity(0); }, nullptr);
+        option,
+        [&]() {
+            TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "check exit animation");
+            renderContext->UpdateOpacity(0);
+        },
+        nullptr);
     const auto& eventHub = builderNode_->GetEventHub<EventHub>();
     if (eventHub) {
         eventHub->SetEnabled(false);
@@ -674,7 +616,8 @@ void CheckBoxPattern::CheckBoxGroupIsTrue()
         }
     }
     const auto& groupPaintProperty = checkBoxGroupNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
-    if (groupPaintProperty->GetIsCheckBoxCallbackDealed()) {
+    CHECK_NULL_VOID(groupPaintProperty);
+    if (!groupManager->GetCheckboxGroupIsChange(group) && groupPaintProperty->GetIsCheckBoxCallbackDealed()) {
         return;
     }
     // All checkboxes do not set select status.
@@ -686,6 +629,7 @@ void CheckBoxPattern::CheckBoxGroupIsTrue()
         UpdateCheckBoxGroupStatus(checkBoxGroupNode, list);
     }
     groupPaintProperty->SetIsCheckBoxCallbackDealed(true);
+    groupManager->SetCheckboxGroupIsChange(group, false);
 }
 
 void CheckBoxPattern::InitCheckBoxStatusByGroup(RefPtr<FrameNode> checkBoxGroupNode,

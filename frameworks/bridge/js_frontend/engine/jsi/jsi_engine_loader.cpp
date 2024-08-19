@@ -15,9 +15,7 @@
 
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_engine_loader.h"
 
-#include "base/utils/macros.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_canvas_bridge.h"
-#include "frameworks/bridge/js_frontend/engine/jsi/jsi_engine.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_xcomponent_bridge.h"
 
 namespace OHOS::Ace::Framework {

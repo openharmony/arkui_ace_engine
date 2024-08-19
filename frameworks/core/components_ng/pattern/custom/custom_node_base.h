@@ -25,10 +25,10 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_node_pattern.h"
+#include "core/components_ng/pattern/recycle_view/recycle_manager.h"
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
-
 class ACE_FORCE_EXPORT CustomNodeBase : public virtual AceType {
     DECLARE_ACE_TYPE(CustomNodeBase, AceType);
 
@@ -118,6 +118,16 @@ public:
         } else {
             LOGE("fail to find node update func to execute %{public}d node update", id);
         }
+    }
+
+    void SetHasNodeUpdateFunc(std::function<bool(int32_t)>&& hasNodeUpdateFunc)
+    {
+        hasNodeUpdateFunc_ = std::move(hasNodeUpdateFunc);
+    }
+
+    bool FireHasNodeUpdateFunc(ElementIdType id)
+    {
+        return hasNodeUpdateFunc_ && hasNodeUpdateFunc_(id);
     }
 
     void FireRecycleSelf();
@@ -253,6 +263,7 @@ private:
     std::function<void(bool)> reloadFunc_;
     std::function<void()> completeReloadFunc_;
     std::function<void(int32_t)> forceNodeUpdateFunc_;
+    std::function<bool(int32_t)> hasNodeUpdateFunc_;
     std::function<void(RefPtr<CustomNodeBase>)> recycleCustomNodeFunc_;
     std::function<void()> recycleRenderFunc_;
     std::function<void(bool)> setActiveFunc_;
@@ -261,6 +272,7 @@ private:
     std::function<void*()> getThisFunc_;
     bool needRebuild_ = false;
     bool executeFireOnAppear_ = false;
+    RecycleNodeInfo recycleInfo_;
 };
 } // namespace OHOS::Ace::NG
 

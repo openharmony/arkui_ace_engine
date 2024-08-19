@@ -13,12 +13,14 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_COMMON_MODIFIER_H
+#define FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_COMMON_MODIFIER_H
 
 #include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUICommonModifier* GetCommonModifier();
+const CJUICommonModifier* GetCJUICommonModifier();
 
 void SetOnAppear(ArkUINodeHandle node,  void* extraParam);
 void SetOnDisappear(ArkUINodeHandle node,  void* extraParam);
@@ -48,3 +50,4 @@ void ResetOnTouchIntercept(ArkUINodeHandle node);
 void ResetOnHover(ArkUINodeHandle node);
 void ResetOnMouse(ArkUINodeHandle node);
 } // namespace OHOS::Ace::NG::NodeModifier
+#endif // FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_COMMON_MODIFIER_H

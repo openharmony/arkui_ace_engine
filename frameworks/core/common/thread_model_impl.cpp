@@ -15,7 +15,6 @@
 
 #include "core/common/thread_model_impl.h"
 
-#include "base/log/log.h"
 #include "core/common/task_runner_adapter_factory.h"
 
 namespace OHOS::Ace {

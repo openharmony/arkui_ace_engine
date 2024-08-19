@@ -82,6 +82,20 @@ void RefreshPattern::OnAttachToFrameNode()
     host->GetRenderContext()->UpdateClipEdge(true);
 }
 
+bool RefreshPattern::OnDirtyLayoutWrapperSwap(
+    const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+{
+    if (isRemoveCustomBuilder_ || isTextNodeChanged_) {
+        UpdateFirstChildPlacement();
+        if (isRefreshing_) {
+            UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, GetFollowRatio());
+        }
+        isRemoveCustomBuilder_ = false;
+        isTextNodeChanged_ = false;
+    }
+    return false;
+}
+
 void RefreshPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -93,10 +107,12 @@ void RefreshPattern::OnModifyDone()
     CHECK_NULL_VOID(gestureHub);
     auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    refreshOffset_ = layoutProperty->GetRefreshOffset().value_or(GetTriggerRefreshDisTance()).Value() > 0 ?
-        layoutProperty->GetRefreshOffset().value_or(GetTriggerRefreshDisTance()) : GetTriggerRefreshDisTance();
-    pullToRefresh_ = layoutProperty->GetPullToRefresh().value_or(true);
     hasLoadingText_ = layoutProperty->HasLoadingText();
+    refreshOffset_ = layoutProperty->GetRefreshOffset().value_or(GetTriggerRefreshDisTance());
+    if (LessOrEqual(refreshOffset_.Value(), 0)) {
+        refreshOffset_ = GetTriggerRefreshDisTance();
+    }
+    pullToRefresh_ = layoutProperty->GetPullToRefresh().value_or(true);
     InitPanEvent(gestureHub);
     InitOnKeyEvent();
     InitChildNode();
@@ -210,9 +226,6 @@ void RefreshPattern::InitProgressNode()
     }
     layoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
     host->AddChild(progressChild_, 0);
-    if (hasLoadingText_) {
-        InitProgressColumn();
-    }
     progressChild_->MarkDirtyNode();
 }
 
@@ -245,6 +258,7 @@ void RefreshPattern::InitProgressColumn()
     CHECK_NULL_VOID(layoutProperty);
     loadingTextLayoutProperty->UpdateContent(layoutProperty->GetLoadingTextValue());
     loadingTextLayoutProperty->UpdateMaxLines(1);
+    loadingTextLayoutProperty->UpdateMaxFontScale(2.0f);
     loadingTextLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
@@ -293,41 +307,39 @@ void RefreshPattern::OnColorConfigurationUpdate()
     }
 }
 
-// the child need to add to be added to the first position in customBuilder mode,
-// the child need to add to be added to the last position in loadingProgress mode.
 void RefreshPattern::InitChildNode()
 {
+    if (isCustomBuilderExist_) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto accessibilityProperty = host->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     auto accessibilityLevel = accessibilityProperty->GetAccessibilityLevel();
-    if (isCustomBuilderExist_) {
-        if (progressChild_) {
-            if (hasLoadingText_) {
-                CHECK_NULL_VOID(columnNode_);
-                host->RemoveChild(columnNode_);
-                columnNode_ = nullptr;
-                loadingTextNode_ = nullptr;
-            }
-            host->RemoveChild(progressChild_);
-            progressChild_ = nullptr;
+    if (!progressChild_) {
+        InitProgressNode();
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            auto progressContext = progressChild_->GetRenderContext();
+            CHECK_NULL_VOID(progressContext);
+            progressContext->UpdateOpacity(0.0f);
+        } else {
+            UpdateLoadingProgress();
         }
-    } else {
-        if (!progressChild_) {
-            InitProgressNode();
-            if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-                auto progressContext = progressChild_->GetRenderContext();
-                CHECK_NULL_VOID(progressContext);
-                progressContext->UpdateOpacity(0.0);
-                UpdateLoadingTextOpacity(0.0f);
-            } else {
-                UpdateLoadingProgress();
-            }
-        }
-        auto progressAccessibilityProperty = progressChild_->GetAccessibilityProperty<AccessibilityProperty>();
-        CHECK_NULL_VOID(progressAccessibilityProperty);
-        progressAccessibilityProperty->SetAccessibilityLevel(accessibilityLevel);
+    }
+    auto progressAccessibilityProperty = progressChild_->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(progressAccessibilityProperty);
+    progressAccessibilityProperty->SetAccessibilityLevel(accessibilityLevel);
+
+    if (hasLoadingText_ && !loadingTextNode_) {
+        InitProgressColumn();
+        isTextNodeChanged_ = true;
+    } else if (!hasLoadingText_ && loadingTextNode_) {
+        host->RemoveChild(columnNode_);
+        columnNode_ = nullptr;
+        loadingTextNode_ = nullptr;
+        isTextNodeChanged_ = true;
+        host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     }
 
     if (hasLoadingText_ && loadingTextNode_) {
@@ -529,20 +541,38 @@ void RefreshPattern::FireOnOffsetChange(float value)
 
 void RefreshPattern::AddCustomBuilderNode(const RefPtr<NG::UINode>& builder)
 {
-    if (!builder) {
-        isCustomBuilderExist_ = false;
-        customBuilder_ = nullptr;
-        return;
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    if (!builder) {
+        if (isCustomBuilderExist_) {
+            host->RemoveChild(customBuilder_);
+            isCustomBuilderExist_ = false;
+            customBuilder_ = nullptr;
+            isRemoveCustomBuilder_ = true;
+        }
+        return;
+    }
 
     if (!isCustomBuilderExist_) {
+        if (progressChild_) {
+            if (hasLoadingText_) {
+                host->RemoveChild(columnNode_);
+                columnNode_ = nullptr;
+                loadingTextNode_ = nullptr;
+            }
+            host->RemoveChild(progressChild_);
+            progressChild_ = nullptr;
+        }
         host->AddChild(builder, 0);
+        UpdateFirstChildPlacement();
+        UpdateScrollTransition(0.f);
     } else {
         auto customNodeChild = host->GetFirstChild();
         CHECK_NULL_VOID(customNodeChild);
-        host->ReplaceChild(customNodeChild, builder);
+        if (customNodeChild != builder) {
+            host->ReplaceChild(customNodeChild, builder);
+            host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        }
     }
     customBuilder_ = AceType::DynamicCast<FrameNode>(builder);
     isCustomBuilderExist_ = true;
@@ -1167,7 +1197,7 @@ void RefreshPattern::OnScrollStartRecursive(float position, float velocity)
     }
 }
 
-bool RefreshPattern::HandleScrollVelocity(float velocity)
+bool RefreshPattern::HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child)
 {
     auto parent = GetNestedScrollParent();
     auto nestedScroll = GetNestedScroll();

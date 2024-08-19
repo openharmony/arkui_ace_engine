@@ -15,11 +15,16 @@
 
 import { KeyCode } from '@ohos.multimodalInput.keyCode'
 import MeasureText from '@ohos.measure'
+import window from '@ohos.window'
+import common from '@ohos.app.ability.common'
+import { BusinessError } from '@kit.BasicServicesKit'
+import { hilog } from '@kit.PerformanceAnalysisKit'
 
 export interface TabTitleBarMenuItem {
   value: ResourceStr;
   isEnabled?: boolean;
   action?: () => void;
+  label?: ResourceStr;
 }
 
 export interface TabTitleBarTabItem {
@@ -27,22 +32,11 @@ export interface TabTitleBarTabItem {
   icon?: ResourceStr;
 }
 
-const PUBLIC_MORE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAAIGNIUk0AAHomAACAhAAA+' +
-  'gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAAO' +
-  'xAAADsQBlSsOGwAABEZJREFUeNrt3D1rFFEUBuAxhmAhFlYpUohYiYWFRcAmKAhWK2pjo1iKf8BCMIKFf8BarCyMhVj4VZhGSKEg2FqJyCKWIhY' +
-  'WnstMINgYsh+cmfs88BICydxw7jmzu2HvNg0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADBN+3r6dx+LXIqsRpa7FF8j48hm5Fn3Peo9mAEYRd' +
-  'YjJ3f582Vj7nZfUe/eDsCRyMPI2h5/fyNyI/JDT6v3Tvt7sBllE15ETkxwjeORi5G3ke/6W737MgBnI68jh6ZwrcORq5HnhkC9+zAA5YXXy8jBK' +
-  'V5zKXIu8jjyS7+rd+YBeNVtyrSVO9PRyBM9r94LSTfjWuTUDK9/eYIXeENUbb0zDsBi5PYc1rmj79U74wCszuih+F/ljrSi/+uud8YBGA10rayq' +
-  'rnfGAVgb6FpZVV3vjAOwPNC1sqq63hkHYGWga2VVdb0XKt/8Rf1fd70zDsB4jmt5u3Tl9a59AMb6v+56ZxyArYGulVXV9c44ABtzXOup/q+73hk' +
-  'H4N2cHio/Rj7r/7rrnXEAfkfuz2Gddb2v3ln/DfpgxneLzaY9xE3l9c46AH8iVyI/Z3Dt8nB/Xc+rd5H5QMy3yJemPVs6zY0edc9HUe/0Z4I/dQ' +
-  '/N5Vjd0oTXKp9QcKFpD2qj3r0YgO1NeRM507TH6/bifeR85IMeV++d+vTBWOV9JDcjt5rdv6uw3M3uRR7pa/Xu+wBsOxA53bTnTP/3UX1b3fNQ1' +
-  'BsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKqyr6d/97HIpchqZLlL8TUyjmxGnnXfo96DGYBRZD1ycpc/Xzbm' +
-  'bvcV9e7tAByJPIys7fH3NyI3Ij/0tHrvtL8Hm1E24UXkxATXOB65GHkb+a6/1bsvA3A28jpyaArXOhy5GnluCNS7DwNQXni9jByc4jWXIucijyO' +
-  '/9Lt6Zx6AV92mTFu5Mx2NPNHz6r2QdDOuRU7N8PqXJ3iBN0TV1jvjACxGbs9hnTv6Xr0zDsDqjB6K/1XuSCv6v+56ZxyA0UDXyqrqemccgLWBrp' +
-  'VV1fXOOADLA10rq6rrnXEAVga6VlZV13uh8s1f1P911zvjAIznuJa3S1de79oHYKz/6653xgHYGuhaWVVd74wDsDHHtZ7q/7rrnXEA3s3pofJj5' +
-  'LP+r7veGQfgd+T+HNZZ1/vqnfXfoA9mfLfYbNpD3FRe76wD8CdyJfJzBtcuD/fX9bx6F5kPxHyLfGnas6XT3OhR93wU9U5/JvhT99BcjtUtTXit' +
-  '8gkFF5r2oDbq3YsB2N6UN5EzTXu8bi/eR85HPuhx9d6pTx+MVd5HcjNyq9n9uwrL3exe5JG+Vu++D8C2A5HTTXvO9H8f1bfVPQ9FvQEAAAAAAAA' +
-  'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgCn7C9HjBtwWfXpKAAAAAElFTkSuQmCC'
+const PUBLIC_MORE = $r('sys.media.ohos_ic_public_more')
+const TEXT_EDITABLE_DIALOG = '18.3fp'
+const IMAGE_SIZE = '64vp'
+const MAX_DIALOG = '256vp'
+const MIN_DIALOG = '216vp'
 
 @Component
 export struct TabTitleBar {
@@ -52,6 +46,7 @@ export struct TabTitleBar {
 
   @State tabWidth: number = 0
   @State currentIndex: number = 0
+  @State fontSize: number = 1
 
   static readonly totalHeight = 56
   static readonly correctionOffset = -40.0
@@ -82,6 +77,7 @@ export struct TabTitleBar {
           context2D.fillRect(0, 0, TabTitleBar.gradientMaskWidth, TabTitleBar.totalHeight)
         })
     }
+    .blendMode(BlendMode.DST_OUT)
     .width(TabTitleBar.gradientMaskWidth)
     .height(TabTitleBar.totalHeight)
   }
@@ -159,6 +155,7 @@ export struct TabTitleBar {
           this.GradientMask(this.rightContext2D, TabTitleBar.gradientMaskWidth,
             TabTitleBar.totalHeight / 2, 0, TabTitleBar.totalHeight / 2)
         }
+        .blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN)
 
         if (this.menuItems !== undefined && this.menuItems.length > 0) {
           CollapsibleMenuSection({ menuItems: this.menuItems, index: 1 + TabTitleBar.instanceCount++ })
@@ -207,6 +204,15 @@ export struct TabTitleBar {
 struct CollapsibleMenuSection {
   menuItems: Array<TabTitleBarMenuItem> = [];
   index: number = 0;
+  item: TabTitleBarMenuItem = {
+    value: PUBLIC_MORE,
+    label: $r('sys.string.ohos_toolbar_more'),
+  } as TabTitleBarMenuItem;
+  longPressTime: number = 500;
+  minFontSize: number = 1.75;
+  isFollowingSystemFontScale: boolean = false;
+  maxFontScale: number = 1;
+  systemFontScale?: number = 1;
 
   static readonly maxCountOfVisibleItems = 1
   private static readonly focusPadding = 4
@@ -218,6 +224,22 @@ struct CollapsibleMenuSection {
   @State isMoreIconOnFocus: boolean = false
   @State isMoreIconOnHover: boolean = false
   @State isMoreIconOnClick: boolean = false
+  @Prop fontSize: number = 1
+
+  dialogController: CustomDialogController | null = new CustomDialogController({
+    builder: TabTitleBarDialog({
+      cancel: () => {
+      },
+      confirm: () => {
+      },
+      tabTitleDialog: this.item,
+      tabTitleBarDialog: this.item.label ? this.item.label : '',
+      fontSize: this.fontSize,
+    }),
+    maskColor: Color.Transparent,
+    isModal: true,
+    customStyle: true,
+  })
 
   getMoreIconFgColor() {
     return this.isMoreIconOnClick
@@ -236,12 +258,30 @@ struct CollapsibleMenuSection {
   }
 
   aboutToAppear() {
+    try {
+      let uiContent: UIContext = this.getUIContext();
+      this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
+      this.maxFontScale = uiContent.getMaxFontScale();
+    } catch (exception) {
+      let code: number = (exception as BusinessError).code;
+      let message: string = (exception as BusinessError).message;
+      hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
+    }
     this.menuItems.forEach((item, index) => {
       if (item.isEnabled && this.firstFocusableIndex == -1 &&
         index > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
           this.firstFocusableIndex = this.index * 1000 + index + 1
       }
     })
+  }
+
+  decideFontScale(): number {
+    let uiContent: UIContext = this.getUIContext();
+    this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+    if (!this.isFollowingSystemFontScale) {
+      return 1;
+    }
+    return Math.min(this.systemFontScale, this.maxFontScale);
   }
 
   build() {
@@ -254,14 +294,16 @@ struct CollapsibleMenuSection {
         } else {
           ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1),
             (item: TabTitleBarMenuItem, index: number) => {
-            ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
-          })
+             ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
+            })
 
           Row() {
             Image(PUBLIC_MORE)
               .width(ImageMenuItem.imageSize)
               .height(ImageMenuItem.imageSize)
               .focusable(true)
+              .draggable(false)
+              .fillColor($r('sys.color.icon_primary'))
           }
           .width(ImageMenuItem.imageHotZoneWidth)
           .height(ImageMenuItem.imageHotZoneWidth)
@@ -303,11 +345,24 @@ struct CollapsibleMenuSection {
             if (event.type === TouchType.Down) {
               this.isMoreIconOnClick = true
             }
-            if (event.type === TouchType.Up) {
+            if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
               this.isMoreIconOnClick = false
+              if (this.fontSize >= this.minFontSize) {
+                this.dialogController?.close()
+              }
             }
           })
           .onClick(() => this.isPopupShown = true)
+          .gesture(
+            LongPressGesture({ repeat: false, duration: this.longPressTime })
+              .onAction((event: GestureEvent) => {
+                this.fontSize = this.decideFontScale();
+                if (event) {
+                  if (this.fontSize >= this.minFontSize) {
+                    this.dialogController?.open()
+                  }
+                }
+              }))
           .bindPopup(this.isPopupShown, {
             builder: this.popupBuilder,
             placement: Placement.Bottom,
@@ -332,8 +387,9 @@ struct CollapsibleMenuSection {
     Column() {
       ForEach(this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length),
         (item: TabTitleBarMenuItem, index: number) => {
-        ImageMenuItem({ item: item, index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + index })
-      })
+          ImageMenuItem({ item: item, index: this.index * 1000 +
+          CollapsibleMenuSection.maxCountOfVisibleItems + index })
+        })
     }
     .width(ImageMenuItem.imageHotZoneWidth + CollapsibleMenuSection.focusPadding * CollapsibleMenuSection.marginsNum)
     .margin({ top: CollapsibleMenuSection.focusPadding, bottom: CollapsibleMenuSection.focusPadding })
@@ -647,5 +703,90 @@ struct ImageMenuItem {
       }
     })
     .onClick(() => this.item.isEnabled && this.item.action && this.item.action())
+  }
+}
+
+/**
+ *  TabTitleBarDialog
+ */
+@CustomDialog
+struct TabTitleBarDialog {
+  tabTitleDialog: TabTitleBarMenuItem = { value: '' };
+  callbackId: number | undefined = undefined;
+  tabTitleBarDialog?: ResourceStr = '';
+  mainWindowStage: window.Window | undefined = undefined;
+  controller?: CustomDialogController
+  minFontSize: number = 1.75;
+  maxFontSize: number = 3.2;
+  screenWidth: number = 640;
+  verticalScreenLines: number = 6;
+  horizontalsScreenLines: number = 1;
+  @StorageLink('mainWindow') mainWindow: Promise<window.Window> | undefined = undefined;
+  @State fontSize: number = 1;
+  @State maxLines: number = 1;
+  @StorageProp('windowStandardHeight') windowStandardHeight: number = 0;
+  cancel: () => void = () => {
+  }
+  confirm: () => void = () => {
+  }
+
+  build() {
+    if (this.tabTitleBarDialog) {
+      Column() {
+        Image(this.tabTitleDialog.value)
+          .width(IMAGE_SIZE)
+          .height(IMAGE_SIZE)
+          .margin({
+            top: $r('sys.float.padding_level24'),
+            bottom: $r('sys.float.padding_level8'),
+          })
+          .fillColor($r('sys.color.icon_primary'))
+        Column() {
+          Text(this.tabTitleBarDialog)
+            .fontSize(TEXT_EDITABLE_DIALOG)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
+            .maxLines(this.maxLines)
+            .width('100%')
+            .textAlign(TextAlign.Center)
+            .fontColor($r('sys.color.font_primary'))
+        }
+        .width('100%')
+        .padding({
+          left: $r('sys.float.padding_level4'),
+          right: $r('sys.float.padding_level4'),
+          bottom: $r('sys.float.padding_level12'),
+        })
+      }
+      .width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG)
+      .constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG })
+      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
+      .shadow(ShadowStyle.OUTER_DEFAULT_LG)
+      .borderRadius($r('sys.float.corner_radius_level10'))
+    } else {
+      Column() {
+        Image(this.tabTitleDialog.value)
+          .width(IMAGE_SIZE)
+          .height(IMAGE_SIZE)
+          .fillColor($r('sys.color.icon_primary'))
+      }
+      .width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG)
+      .constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG })
+      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
+      .shadow(ShadowStyle.OUTER_DEFAULT_LG)
+      .borderRadius($r('sys.float.corner_radius_level10'))
+      .justifyContent(FlexAlign.Center)
+    }
+  }
+
+  async aboutToAppear(): Promise<void> {
+    let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
+    this.mainWindowStage = context.windowStage.getMainWindowSync();
+    let properties: window.WindowProperties = this.mainWindowStage.getWindowProperties();
+    let rect = properties.windowRect;
+    if (px2vp(rect.height) > this.screenWidth) {
+      this.maxLines = this.verticalScreenLines;
+    } else {
+      this.maxLines = this.horizontalsScreenLines;
+    }
   }
 }

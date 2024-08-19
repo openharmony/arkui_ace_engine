@@ -14,8 +14,6 @@
  */
 #include "core/common/recorder/event_config.h"
 
-#include "base/log/log_wrapper.h"
-#include "base/json/json_util.h"
 #include "core/common/recorder/event_recorder.h"
 
 namespace OHOS::Ace::Recorder {

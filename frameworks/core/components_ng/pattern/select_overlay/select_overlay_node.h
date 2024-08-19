@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <memory>
 
+#include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
@@ -31,7 +32,8 @@ struct OptionParam;
 enum class FrameNodeType {
     SELECTMENU,
     EXTENSIONMENU,
-    BACKBUTTON
+    BACKBUTTON,
+    MENUONLY
 };
 
 enum class FrameNodeStatus {
@@ -60,7 +62,7 @@ public:
 
     void UpdateToolBar(bool menuItemChanged, bool noAnimation = false);
 
-    void UpdateMenuInner(const std::shared_ptr<SelectOverlayInfo>& info);
+    void UpdateMenuInner(const std::shared_ptr<SelectOverlayInfo>& info, bool noAnimation = false);
 
     void SetSelectInfo(const std::string& selectInfo)
     {
@@ -74,7 +76,7 @@ public:
 
     void ChangeToolBar(bool isUseExtensionMenu);
 
-    void MoreOrBackAnimation(bool isMore);
+    void MoreOrBackAnimation(bool isMore, bool noAnimation = false);
 
     bool IsInSelectedOrSelectOverlayArea(const PointF& point);
 
@@ -93,14 +95,24 @@ public:
     void ShowSelectOverlay(bool animation);
 
     void HideSelectOverlay(const std::function<void()>& callback);
+    void HideOrShowCirclesAndBackArrow(FrameNodeType type, float value);
 
     void SwitchToOverlayMode();
 
 private:
     void CreateToolBar();
+    void SelectMenuAndInnerInitProperty();
+    void AddMenuItemByCreateMenuCallback(const std::shared_ptr<SelectOverlayInfo>& info, float maxWidth);
+    static const std::vector<MenuItemParam> GetSystemMenuItemParams(const std::shared_ptr<SelectOverlayInfo>& info);
+    int32_t AddCreateMenuItems(const std::vector<NG::MenuOptionsParam>& menuItems,
+        const std::shared_ptr<SelectOverlayInfo>& info, float maxWidth);
     bool AddSystemDefaultOptions(float maxWidth, float& allocatedSize);
-    void ShowCutCopy(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
-    void ShowPasteCopyAll(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
+    void LandscapeMenuAddMenuOptions(const std::vector<MenuOptionsParam>& menuOptionItems, bool isDefaultOverMaxWidth,
+        float maxWidth, float allocatedSize, int32_t& extensionOptionStartIndex);
+    void ShowCut(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
+    void ShowCopy(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
+    void ShowPaste(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
+    void ShowCopyAll(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
     void ShowShare(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
     void ShowCamera(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
     std::function<void()> GetDefaultOptionCallback();
@@ -108,10 +120,17 @@ private:
     void addMenuOptionItemsParams(
         std::vector<OptionParam>& params, const std::shared_ptr<SelectOverlayInfo>& info, int32_t index);
     void AddExtensionMenuOptions(const std::shared_ptr<SelectOverlayInfo>& info, int32_t index);
+    void AddCreateMenuExtensionMenuOptions(const std::vector<MenuOptionsParam>& menuOptionItems,
+        const std::shared_ptr<SelectOverlayInfo>& info, int32_t startIndex);
+    void AddCreateMenuExtensionMenuParams(const std::vector<MenuOptionsParam>& menuOptionItems,
+        const std::shared_ptr<SelectOverlayInfo>& info, int32_t startIndex, std::vector<OptionParam>& params);
+    std::function<void()> CreateExtensionMenuOptionCallback(int32_t id, const OnMenuItemCallback& onCreateCallback,
+        const std::function<void()>& systemEvent, const MenuOptionsParam& item);
+    void CreatExtensionMenu(std::vector<OptionParam>&& params);
     void GetDefaultButtonAndMenuWidth(float& maxWidth);
 
-    void MoreAnimation();
-    void BackAnimation();
+    void MoreAnimation(bool noAnimation);
+    void BackAnimation(bool noAnimation);
 
     void DispatchVisibleState(FrameNodeType type, FrameNodeTrigger trigger);
     void DispatchVisibleToGoneState(FrameNodeType type, FrameNodeTrigger trigger);
@@ -126,6 +145,10 @@ private:
     void SetBackButtonOpacity(float value);
     void HideFrameNodeImmediately(FrameNodeType type);
     void CreateCustomSelectOverlay(const std::shared_ptr<SelectOverlayInfo>& info);
+    void MenuOnlyStatusChange(const std::shared_ptr<SelectOverlayInfo>& info, bool noAnimation);
+    void HideMenuOnlyImmediately();
+    void InitSelectMenuStatus(
+        SelectOverlayMode mode, const std::shared_ptr<SelectOverlayInfo>& info, bool changeOpacity = true);
 
     void SetAnimationStatus(bool toDoAnimation)
     {
@@ -133,8 +156,11 @@ private:
     }
 
     static RefPtr<FrameNode> CreateMenuNode(const std::shared_ptr<SelectOverlayInfo>& info);
+    static std::pair<std::vector<MenuOptionsParam>, bool> HandleCollaborationMenuItem(
+        const std::vector<MenuOptionsParam>& params);
 
     void NotifyUpdateToolBar(bool itemChanged);
+    void SetSelectMenuInnerSize();
 
     using ExecuteStateFunc = void (SelectOverlayNode::*)(FrameNodeType type, FrameNodeTrigger trigger);
 
@@ -163,6 +189,7 @@ private:
     FrameNodeStatus selectMenuStatus_ = FrameNodeStatus::VISIBLE;
     FrameNodeStatus extensionMenuStatus_ = FrameNodeStatus::GONE;
     FrameNodeStatus backButtonStatus_ = FrameNodeStatus::GONE;
+    FrameNodeStatus menuOnlyStatus_ = FrameNodeStatus::VISIBLE;
 
     std::map<FrameNodeStatus, ExecuteStateFunc> stateFuncs_;
 

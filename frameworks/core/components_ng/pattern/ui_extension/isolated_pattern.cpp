@@ -19,8 +19,10 @@
 #include <sys/statfs.h>
 
 #include "adapter/ohos/osal/want_wrap_ohos.h"
+#include "base/log/log_wrapper.h"
 #include "core/common/dynamic_component_renderer.h"
 #include "base/log/dump_log.h"
+#include "core/components_ng/render/animation_utils.h"
 #include "core/event/key_event.h"
 #include "core/event/pointer_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -160,7 +162,13 @@ bool IsolatedPattern::HandleKeyEvent(const KeyEvent& event)
 void IsolatedPattern::HandleFocusEvent()
 {
     CHECK_NULL_VOID(dynamicComponentRenderer_);
-    dynamicComponentRenderer_->TransferFocusActiveEvent(true);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetIsFocusActive()) {
+        dynamicComponentRenderer_->TransferFocusActiveEvent(true);
+    }
     dynamicComponentRenderer_->TransferFocusState(true);
 }
 
@@ -197,7 +205,13 @@ bool IsolatedPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
         density = defaultDisplay->GetVirtualPixelRatio();
         orientation = static_cast<int32_t>(defaultDisplay->GetOrientation());
     }
-    dynamicComponentRenderer_->UpdateViewportConfig(size, density, orientation);
+
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto animationOption = pipeline->GetSyncAnimationOption();
+    dynamicComponentRenderer_->UpdateViewportConfig(size, density, orientation, animationOption);
     return false;
 }
 

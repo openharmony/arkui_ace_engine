@@ -95,5 +95,15 @@ const ArkUILoadingProgressModifier* GetLoadingProgressModifier()
 
     return &modifier;
 }
+
+const CJUILoadingProgressModifier* GetCJUILoadingProgressModifier()
+{
+    static const CJUILoadingProgressModifier modifier = {
+        GetLoadingProgressColor, SetLoadingProgressColor, ResetLoadingProgressColor,
+        GetEnableLoading, SetEnableLoading, ResetEnableLoading,
+        SetLoadingProgressForegroundColor, ResetLoadingProgressForegroundColor };
+
+    return &modifier;
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

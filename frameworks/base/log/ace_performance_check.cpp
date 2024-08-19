@@ -14,27 +14,11 @@
  */
 
 #include "base/log/ace_performance_check.h"
-
-#include <chrono>
-#include <cstdint>
-#include <ctime>
-#include <fstream>
-#include <memory>
-#include <numeric>
-#include <ostream>
-#include <string>
-#include <unordered_map>
-#include <utility>
-#include <vector>
-
 #include "base/i18n/localization.h"
-#include "base/json/json_util.h"
 #include "base/log/ace_checker.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
-#include "base/utils/time_util.h"
-#include "base/utils/utils.h"
-#include "bridge/common/utils/engine_helper.h"
+#include "bridge/common/utils/utils.h"
 #include "core/common/container.h"
 
 namespace OHOS::Ace {
@@ -43,12 +27,17 @@ constexpr int32_t BASE_YEAR = 1900;
 constexpr char DATE_FORMAT[] = "MM-dd HH:mm:ss";
 constexpr int32_t CONVERT_NANOSECONDS = 1000000;
 constexpr int32_t FUNCTION_TIMEOUT = 150;
+constexpr char ETS_PATH[] = "/src/main/ets/";
+constexpr char DEBUG_PATH[] = "entry/build/default/cache/default/default@CompileArkTS/esmodule/debug/";
+constexpr char NEW_PATH[] = "entry|entry|1.0.0|src/main/ets/";
+constexpr char TS_SUFFIX[] = ".ts";
+constexpr char ETS_SUFFIX[] = ".ets";
 } // namespace
 
 // ============================== survival interval of JSON files ============================================
 
 std::unique_ptr<JsonValue> AcePerformanceCheck::performanceInfo_ = nullptr;
-
+std::string AceScopedPerformanceCheck::currentPath_;
 void AcePerformanceCheck::Start()
 {
     if (AceChecker::IsPerformanceCheckEnabled()) {
@@ -138,11 +127,7 @@ std::string AceScopedPerformanceCheck::GetCurrentTime()
 
 CodeInfo AceScopedPerformanceCheck::GetCodeInfo(int32_t row, int32_t col)
 {
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, {});
-    auto frontend = container->GetFrontend();
-    CHECK_NULL_RETURN(frontend, {});
-    auto sourceMap = frontend->GetCurrentPageSourceMap();
+    auto sourceMap = GetCurrentSourceMap();
     CHECK_NULL_RETURN(sourceMap, {});
     // There is no same row and column info of viewPU in sourcemap, but the row info is correct.
     auto codeInfo = sourceMap->Find(row, col, false);
@@ -157,49 +142,11 @@ bool AceScopedPerformanceCheck::CheckPage(const CodeInfo& codeInfo, const std::s
     return false;
 }
 
-void AceScopedPerformanceCheck::RecordPerformanceCheckData(const PerformanceCheckNodeMap& nodeMap, int64_t vsyncTimeout)
+void AceScopedPerformanceCheck::RecordPerformanceCheckData(
+    const PerformanceCheckNodeMap& nodeMap, int64_t vsyncTimeout, std::string path)
 {
+    currentPath_ = path;
     auto codeInfo = GetCodeInfo(1, 1);
-    std::vector<PerformanceCheckNode> pageNodeList;
-    std::vector<PerformanceCheckNode> flexNodeList;
-    std::unordered_map<int32_t, PerformanceCheckNode> foreachNodeMap;
-    int32_t itemCount = 0;
-    int32_t maxDepth = 0;
-    for (const auto& node : nodeMap) {
-        if (node.second.childrenSize >= AceChecker::GetNodeChildren()) {
-            pageNodeList.emplace_back(node.second);
-        }
-        if (node.second.pageDepth > maxDepth) {
-            maxDepth = node.second.pageDepth;
-        }
-        if (node.second.flexLayouts != 0 && node.second.flexLayouts >= AceChecker::GetFlexLayouts()) {
-            flexNodeList.emplace_back(node.second);
-        }
-        if (node.second.isForEachItem) {
-            itemCount++;
-            auto iter = foreachNodeMap.find(node.second.codeRow);
-            if (iter != foreachNodeMap.end()) {
-                iter->second.foreachItems++;
-            } else {
-                foreachNodeMap.insert(std::make_pair(node.second.codeRow, node.second));
-            }
-        }
-    }
-    RecordPageNodeCountAndDepth(nodeMap.size(), maxDepth, pageNodeList, codeInfo);
-    RecordForEachItemsCount(itemCount, foreachNodeMap, codeInfo);
-    RecordFlexLayoutsCount(flexNodeList, codeInfo);
-    RecordVsyncTimeout(nodeMap, vsyncTimeout / CONVERT_NANOSECONDS, codeInfo);
-}
-
-void AceScopedPerformanceCheck::RecordPerformanceCheckDataForNavigation(
-    const PerformanceCheckNodeMap& nodeMap, int64_t vsyncTimeout, const std::string& navPath)
-{
-    auto codeInfo = GetCodeInfo(1, 1);
-    codeInfo.sources = navPath;
-    if (navPath.find("pagePath") != navPath.npos) {
-        std::string pagePath = navPath.substr(navPath.find("pagePath") + 9, navPath.length());
-        codeInfo.sources = pagePath;
-    }
     std::vector<PerformanceCheckNode> pageNodeList;
     std::vector<PerformanceCheckNode> flexNodeList;
     std::unordered_map<int32_t, PerformanceCheckNode> foreachNodeMap;
@@ -378,5 +325,49 @@ void AceScopedPerformanceCheck::RecordFlexLayoutsCount(
         }
     }
     ruleJson->Put(pageJson);
+}
+
+RefPtr<Framework::RevSourceMap> AceScopedPerformanceCheck::GetCurrentSourceMap()
+{
+    std::string jsSourceMap;
+    auto sourceMap = AceType::MakeRefPtr<Framework::RevSourceMap>();
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    auto pos = currentPath_.find("pages");
+    if (pos != std::string::npos) {
+        currentPath_ = currentPath_.substr(pos, currentPath_.size());
+    }
+    pos = currentPath_.find(".js");
+    if (pos != std::string::npos) {
+        currentPath_ = currentPath_.substr(0, pos);
+    }
+    if (container->IsUseStageModel()) {
+        auto pagePath = currentPath_;
+        auto moduleName = container->GetModuleName();
+        std::string judgePath = "";
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            judgePath = DEBUG_PATH + moduleName + ETS_PATH + pagePath + TS_SUFFIX;
+        } else {
+            judgePath = moduleName + ETS_PATH + pagePath + ETS_SUFFIX;
+        }
+        if (Framework::GetAssetContentImpl(container->GetAssetManager(), "sourceMaps.map", jsSourceMap)) {
+            auto jsonPages = JsonUtil::ParseJsonString(jsSourceMap);
+            auto child = jsonPages->GetChild();
+            if (!child->GetValue("entry-package-info")->IsNull()) {
+                judgePath = NEW_PATH + pagePath + TS_SUFFIX;
+            }
+            auto jsonPage = jsonPages->GetValue(judgePath)->ToString();
+            sourceMap = AceType::MakeRefPtr<Framework::RevSourceMap>();
+            sourceMap->Init(jsonPage);
+            return sourceMap;
+        }
+    } else {
+        if (Framework::GetAssetContentImpl(container->GetAssetManager(), currentPath_ + ".map", jsSourceMap)) {
+            auto faPageMap = AceType::MakeRefPtr<Framework::RevSourceMap>();
+            faPageMap->Init(jsSourceMap);
+            return faPageMap;
+        }
+    }
+    return nullptr;
 }
 } // namespace OHOS::Ace

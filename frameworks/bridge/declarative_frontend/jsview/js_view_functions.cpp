@@ -21,7 +21,6 @@
 #include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension.h"
 #include "base/log/ace_performance_check.h"
-#include "base/log/ace_performance_monitor.h"
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
@@ -132,6 +131,20 @@ void ViewFunctions::ExecuteForceNodeRerender(int32_t elemId)
     } else {
         LOGE("the force node rerender func is null");
     }
+}
+
+bool ViewFunctions::ExecuteHasNodeUpdateFunc(int32_t elmtId)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_, false)
+    auto func = jsHasNodeUpdateFunc_.Lock();
+    if (func->IsEmpty()) {
+        LOGE("the hasNodeUpdateFunc is null");
+        return false;
+    }
+    JSRef<JSVal> params[1];
+    params[0] = JSRef<JSVal>(JSVal(JsiValueConvertor::toJsiValue(elmtId)));
+    auto result = func->Call(jsObject_.Lock(), 1, params);
+    return result->IsBoolean() && result->ToBoolean();
 }
 
 // recycleSelf
@@ -246,6 +259,11 @@ void ViewFunctions::InitViewFunctions(
             LOGE("View lacks mandatory 'forceRerenderNode()' function, fatal internal error.");
         }
 
+        JSRef<JSVal> jsHasNodeUpdateFunc = jsObject->GetProperty("hasNodeUpdateFunc");
+        if (jsHasNodeUpdateFunc->IsFunction()) {
+            jsHasNodeUpdateFunc_ = JSRef<JSFunc>::Cast(jsHasNodeUpdateFunc);
+        }
+
         JSRef<JSVal> jsRecycleFunc = jsObject->GetProperty("recycleSelf");
         if (jsRecycleFunc->IsFunction()) {
             jsRecycleFunc_ = JSRef<JSFunc>::Cast(jsRecycleFunc);
@@ -310,6 +328,11 @@ void ViewFunctions::InitViewFunctions(
     JSRef<JSVal> jsAboutToBeDeletedFunc = jsObject->GetProperty("aboutToBeDeleted");
     if (jsAboutToBeDeletedFunc->IsFunction()) {
         jsAboutToBeDeletedFunc_ = JSRef<JSFunc>::Cast(jsAboutToBeDeletedFunc);
+    } else {
+        jsAboutToBeDeletedFunc = jsObject->GetProperty("aboutToBeDeletedInternal");
+        if (jsAboutToBeDeletedFunc->IsFunction()) {
+            jsAboutToBeDeletedFunc_ = JSRef<JSFunc>::Cast(jsAboutToBeDeletedFunc);
+        }
     }
 
     JSRef<JSVal> jsAboutToRenderFunc = jsObject->GetProperty("aboutToRender");
@@ -401,13 +424,11 @@ void ViewFunctions::ExecuteRender()
 
 void ViewFunctions::ExecuteAppear()
 {
-    COMPONENT_LIFECYCLE_DURATION();
     ExecuteFunction(jsAppearFunc_, "aboutToAppear");
 }
 
 void ViewFunctions::ExecuteDisappear()
 {
-    COMPONENT_LIFECYCLE_DURATION();
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     if (jsDisappearFunc_.IsEmpty()) {
         return;
@@ -425,13 +446,11 @@ void ViewFunctions::ExecuteDisappear()
 
 void ViewFunctions::ExecuteDidBuild()
 {
-    COMPONENT_LIFECYCLE_DURATION();
     ExecuteFunction(jsDidBuildFunc_, "onDidBuild");
 }
 
 void ViewFunctions::ExecuteAboutToRecycle()
 {
-    COMPONENT_LIFECYCLE_DURATION();
     ExecuteFunction(jsAboutToRecycleFunc_, "aboutToRecycleInternal");
 }
 

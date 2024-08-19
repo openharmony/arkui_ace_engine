@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIListModifier* GetListModifier();
+const CJUIListModifier* GetCJUIListModifier();
 void SetOnListScroll(ArkUINodeHandle node, void* extraParam);
 void SetOnListScrollIndex(ArkUINodeHandle node, void* extraParam);
 void SetOnListScrollStart(ArkUINodeHandle node, void* extraParam);

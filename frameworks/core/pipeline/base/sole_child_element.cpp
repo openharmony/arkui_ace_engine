@@ -15,10 +15,6 @@
 
 #include "core/pipeline/base/sole_child_element.h"
 
-#include "base/log/log.h"
-#include "base/utils/macros.h"
-#include "core/pipeline/base/sole_child_component.h"
-#include "core/components/grid_layout/grid_layout_item_component.h"
 #include "core/components_v2/list/list_item_component.h"
 
 namespace OHOS::Ace {

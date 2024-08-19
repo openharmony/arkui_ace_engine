@@ -49,7 +49,7 @@ RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(const RefPtr<FrameNode>&
     CHECK_NULL_RETURN(dragPattern, nullptr);
     auto data = CalculateTextDragData(hostPattern, dragNode);
     dragPattern->Initialize(data);
-    dragPattern->SetLastLineHeight(data.lineHeight_);
+    dragPattern->SetLastLineHeight(data.lastLineHeight_);
     float frameWidth = dragPattern->GetFrameWidth();
     float frameHeight = dragPattern->GetFrameHeight();
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "CreateDragNode width=%{public}f, height=%{public}f", frameWidth, frameHeight);
@@ -75,10 +75,10 @@ RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(
     CHECK_NULL_RETURN(dragNode, nullptr);
     auto dragPattern = dragNode->GetPattern<RichEditorDragPattern>();
     CHECK_NULL_RETURN(dragPattern, nullptr);
-    auto richEditor = hostNode->GetPattern<TextPattern>();
-    CHECK_NULL_RETURN(richEditor, nullptr);
-    auto placeholderIndex = richEditor->GetPlaceHolderIndex();
-    auto rectsForPlaceholders = richEditor->GetRectsForPlaceholders();
+    auto textPattern = hostNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, nullptr);
+    auto placeholderIndex = textPattern->GetPlaceHolderIndex();
+    auto rectsForPlaceholders = textPattern->GetRectsForPlaceholders();
 
     size_t index = 0;
     std::vector<RectF> realRectsForPlaceholders;
@@ -102,9 +102,6 @@ RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(
             }
         }
         ++index;
-    }
-    if (!boxes.empty()) {
-        dragPattern->SetLastLineHeight(boxes.back().Height());
     }
     dragPattern->InitSpanImageLayout(realImageChildren, realRectsForPlaceholders);
     return dragNode;

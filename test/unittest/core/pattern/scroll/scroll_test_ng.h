@@ -95,8 +95,8 @@ public:
     void ScrollTo(float offset);
     Axis GetAxis();
     float GetOffset(float childNumber);
-    AssertionResult UpdateAndVerifyPosition(float offset, float expectOffset, int32_t source = SCROLL_FROM_UPDATE);
-    AssertionResult ScrollToNode(int32_t childIndex, float expectChildNumber);
+    AssertionResult UpdateAndVerifyPosition(float delta, int32_t source, float expectOffset);
+    AssertionResult ScrollToNode(int32_t childIndex, float expectOffset);
     AssertionResult IsEqualCurrentPosition(float expectOffset);
 
     RefPtr<FrameNode> frameNode_;

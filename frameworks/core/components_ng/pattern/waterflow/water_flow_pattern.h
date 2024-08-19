@@ -102,8 +102,6 @@ public:
 
     int32_t GetColumns() const;
 
-    void SetAccessibilityAction();
-
     void OnAnimateStop() override;
     /**
      * @brief LayoutMode::SLIDING_WINDOW doesn't support scrollTo and animateTo
@@ -115,7 +113,8 @@ public:
     void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll,
         bool useTotalOffset = true) override;
 
-    void ScrollPage(bool reverse, bool smooth = false) override;
+    void ScrollPage(bool reverse, bool smooth = false,
+        AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL) override;
 
     void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START,
         std::optional<float> extraOffset = std::nullopt) override;
@@ -138,6 +137,7 @@ public:
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
     Rect GetItemRect(int32_t index) const override;
+    int32_t GetItemIndex(double x, double y) const override;
 
     RefPtr<WaterFlowSections> GetSections() const;
     RefPtr<WaterFlowSections> GetOrCreateWaterFlowSections();
@@ -161,6 +161,8 @@ public:
         return predictLayoutParam_;
     }
 
+    void NotifyDataChange(int32_t index, int32_t count) override;
+
     // ------------------------ Focus adapter --------------------------------
     FocusPattern GetFocusPattern() const override
     {
@@ -169,6 +171,14 @@ public:
     ScopeFocusAlgorithm GetScopeFocusAlgorithm() override;
     std::function<bool(int32_t)> GetScrollIndexAbility() override;
     // ------------------------ Focus ^^^ --------------------------------
+    void BeforeCreateLayoutWrapper() override;
+
+    void AddSectionChangeStartPos(int32_t start)
+    {
+        sectionChangeStartPos_.emplace_back(start);
+        MarkDirtyNodeSelf();
+    }
+
 private:
     DisplayMode GetDefaultScrollBarDisplayMode() const override
     {
@@ -203,11 +213,15 @@ private:
     SizeF lastSize_;
     std::pair<int32_t, int32_t> itemRange_ = { -1, -1 };
     WeakPtr<UINode> footer_;
+    //for keepVisiableContentPosition mode temporarily.
+    bool keepContentPosition_ = true;
 
     // clip padding of WaterFlow
     RefPtr<WaterFlowContentModifier> contentModifier_;
 
     std::optional<WaterFlowLayoutBase::PredictLayoutParam> predictLayoutParam_;
+
+    std::vector<int32_t> sectionChangeStartPos_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WATERFLOW_WATER_FLOW_PATTERN_H

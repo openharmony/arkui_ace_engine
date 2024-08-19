@@ -141,5 +141,13 @@ const ArkUIMenuModifier* GetMenuModifier()
 
     return &modifier;
 }
+
+const CJUIMenuModifier* GetCJUIMenuModifier()
+{
+    static const CJUIMenuModifier modifier = { SetMenuFontColor, ResetMenuFontColor, SetMenuFont, ResetMenuFont,
+        SetRadius, ResetRadius, SetMenuWidth, ResetMenuWidth };
+
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

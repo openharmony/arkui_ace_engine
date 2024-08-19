@@ -88,27 +88,33 @@ class ComponentSnapshot {
         this.instanceId_ = instanceId;
         this.ohos_componentSnapshot = globalThis.requireNapi('arkui.componentSnapshot');
     }
-    get(id, callback) {
+    get(id, callback, options) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        if (typeof callback === 'undefined') {
-            let promise = this.ohos_componentSnapshot.get(id);
+        if (typeof callback !== 'function') {
+            let promise = this.ohos_componentSnapshot.get(id, callback);
             __JSScopeUtil__.restoreInstanceId();
             return promise;
         } else {
-            this.ohos_componentSnapshot.get(id, callback);
+            this.ohos_componentSnapshot.get(id, callback, options);
             __JSScopeUtil__.restoreInstanceId();
         }
     }
-    createFromBuilder(builder, callback) {
+    createFromBuilder(builder, callback, delay, checkImageStatus, options) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        if (typeof callback === 'undefined') {
-            let promise = this.ohos_componentSnapshot.createFromBuilder(builder);
+        if (typeof callback !== 'function') {
+            let promise = this.ohos_componentSnapshot.createFromBuilder(builder, callback, delay, checkImageStatus);
             __JSScopeUtil__.restoreInstanceId();
             return promise;
         } else {
-            this.ohos_componentSnapshot.createFromBuilder(builder, callback);
+            this.ohos_componentSnapshot.createFromBuilder(builder, callback, delay, checkImageStatus, options);
             __JSScopeUtil__.restoreInstanceId();
         }
+    }
+    getSync(id, options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let pixelmap = this.ohos_componentSnapshot.getSync(id, options);
+        __JSScopeUtil__.restoreInstanceId();
+        return pixelmap;
     }
 }
 
@@ -333,20 +339,20 @@ class UIContext {
     openBindSheet(content, options, targetId) {
         let paramErrMsg =
             'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;' +
-            ' 2. Incorrect parameter types; 3. Parameter verification failed.'
+            ' 2. Incorrect parameter types; 3. Parameter verification failed.';
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let argLength = arguments.length;
-        if (argLength < 1 || content == null || content == undefined) {
+        if (argLength < 1 || content === null || content === undefined) {
             __JSScopeUtil__.restoreInstanceId();
             return new Promise((resolve, reject) => {
                 reject({ message: paramErrMsg, code: 401 });
-            })
+            });
         }
-        if ((argLength >= 3 && (targetId == null || targetId == undefined))) {
+        if ((argLength >= 3 && (targetId === null || targetId === undefined))) {
             __JSScopeUtil__.restoreInstanceId();
             return new Promise((resolve, reject) => {
                 reject({ message: paramErrMsg, code: 401 });
-            })
+            });
         }
         let result_;
         if (argLength === 1) {
@@ -361,13 +367,16 @@ class UIContext {
     }
 
     updateBindSheet(content, options, partialUpdate) {
+        let paramErrMsg =
+            'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;' +
+            ' 2. Incorrect parameter types; 3. Parameter verification failed.';
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let argLength = arguments.length;
-        if (argLength < 2 || content == null || content == undefined) {
+        if (argLength < 2 || content === null || content === undefined) {
             __JSScopeUtil__.restoreInstanceId();
             return new Promise((resolve, reject) => {
-                reject({ message: 'Parameter error.', code: 401 });
-            })
+                reject({ message: paramErrMsg, code: 401 });
+            });
         }
         let result_;
         if (argLength === 2) {
@@ -380,12 +389,15 @@ class UIContext {
     }
 
     closeBindSheet(content) {
+        let paramErrMsg =
+            'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;' +
+            ' 2. Incorrect parameter types; 3. Parameter verification failed.';
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        if (arguments.length < 1 || content == null || content == undefined) {
+        if (arguments.length < 1 || content === null || content === undefined) {
             __JSScopeUtil__.restoreInstanceId();
             return new Promise((resolve, reject) => {
-                reject({ message: 'Parameter error.', code: 401 });
-            })
+                reject({ message: paramErrMsg, code: 401 });
+            });
         }
         let result_ = Context.closeBindSheet(content.getNodePtr());
         __JSScopeUtil__.restoreInstanceId();
@@ -433,6 +445,9 @@ class UIContext {
 
     getAtomicServiceBar() {
         const bundleMgr = globalThis.requireNapi('bundle.bundleManager');
+        if (!bundleMgr || !bundleMgr.BundleFlag) {
+            return undefined;
+        }
         let data = bundleMgr.getBundleInfoForSelfSync(bundleMgr.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION);
         if (data.appInfo.bundleType == 1) {
             this.atomServiceBar = new AtomicServiceBar(this.instanceId_);
@@ -485,7 +500,23 @@ class UIContext {
             __JSScopeUtil__.restoreInstanceId();
             return null;
         }
-        let xNode = globalThis.requireNapi('arkui.node');
+        let xNode = globalThis.__getArkUINode__();
+        let node = xNode.FrameNodeUtils.searchNodeInRegisterProxy(nodePtr);
+        if (!node) {
+            node = xNode.FrameNodeUtils.createFrameNode(this, nodePtr);
+        }
+        __JSScopeUtil__.restoreInstanceId();
+        return node;
+    }
+
+    getAttachedFrameNodeById(id) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let nodePtr = getUINativeModule().getAttachedFrameNodeById(id);
+        if (!nodePtr) {
+            __JSScopeUtil__.restoreInstanceId();
+            return null;
+        }
+        let xNode = globalThis.__getArkUINode__();
         let node = xNode.FrameNodeUtils.searchNodeInRegisterProxy(nodePtr);
         if (!node) {
             node = xNode.FrameNodeUtils.createFrameNode(this, nodePtr);
@@ -497,7 +528,7 @@ class UIContext {
     getFrameNodeByNodeId(id) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let nodePtr = getUINativeModule().getFrameNodeById(id);
-        let xNode = globalThis.requireNapi('arkui.node');
+        let xNode = globalThis.__getArkUINode__();
         let node = xNode.FrameNodeUtils.searchNodeInRegisterProxy(nodePtr);
         if (!node) {
             node = xNode.FrameNodeUtils.createFrameNode(this, nodePtr);
@@ -513,7 +544,7 @@ class UIContext {
             __JSScopeUtil__.restoreInstanceId();
             return null;
         }
-        let xNode = globalThis.requireNapi('arkui.node');
+        let xNode = globalThis.__getArkUINode__();
         let node = xNode.FrameNodeUtils.searchNodeInRegisterProxy(nodePtr);
         if (!node) {
             node = xNode.FrameNodeUtils.createFrameNode(this, nodePtr);
@@ -599,10 +630,24 @@ class UIContext {
         if (dynamicSceneInfo.tag == 'Swiper') {
             __JSScopeUtil__.restoreInstanceId();
             let nodeRef = dynamicSceneInfo.nativeRef;
-            return SwiperDynamicSyncScene.Create(nodeRef);
+            return SwiperDynamicSyncScene.createInstances(nodeRef);
         }
         __JSScopeUtil__.restoreInstanceId();
         return [];
+    }
+
+    isFollowingSystemFontScale() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let isFollowing = Context.isFollowingSystemFontScale();
+        __JSScopeUtil__.restoreInstanceId();
+        return isFollowing;
+    }
+
+    getMaxFontScale() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let maxFontScale = Context.getMaxFontScale();
+        __JSScopeUtil__.restoreInstanceId();
+        return maxFontScale;
     }
 }
 
@@ -610,35 +655,52 @@ class DynamicSyncScene {
     /**
      * Construct new instance of DynamicSyncScene.
      * initialize with instanceId.
-     * @param nodeRef obtained on the c++ side.
-     * @param frameRateRange frameRateRange
+     * @param {Object} nodeRef - obtained on the c++ side.
+     * @param {Object} frameRateRange - frameRateRange
      * @since 12
      */
     constructor(nodeRef, frameRateRange) {
-        this.frameRateRange = frameRateRange;
+        this.frameRateRange = { ...frameRateRange }; // 确保每个实例有独立的frameRateRange
         this.nodeRef = nodeRef;
         this.nodePtr = this.nodeRef.getNativeHandle();
     }
 
+    /**
+     * Get the frame rate range.
+     * @returns {Object} The frame rate range.
+     */
     getFrameRateRange() {
         return this.frameRateRange;
     }
 }
 
 class SwiperDynamicSyncScene extends DynamicSyncScene {
-    static Create(nodeRef) {
-        let swiperDynamicSyncScene = [new SwiperDynamicSyncScene(nodeRef, 0), new SwiperDynamicSyncScene(nodeRef, 1)];
-        return swiperDynamicSyncScene;
+    /**
+     * Create instances of SwiperDynamicSyncScene.
+     * @param {Object} nodeRef - obtained on the c++ side.
+     * @returns {SwiperDynamicSyncScene[]} Array of SwiperDynamicSyncScene instances.
+     */
+    static createInstances(nodeRef) {
+        return [new SwiperDynamicSyncScene(nodeRef, 0), new SwiperDynamicSyncScene(nodeRef, 1)];
     }
 
+    /**
+     * Construct new instance of SwiperDynamicSyncScene.
+     * @param {Object} nodeRef - obtained on the c++ side.
+     * @param {number} type - type of the scenes.
+     */
     constructor(nodeRef, type) {
         super(nodeRef, { min: 0, max: 120, expected: 120 });
         this.type = type;
     }
 
+    /**
+     * Set the frame rate range.
+     * @param {Object} frameRateRange - The new frame rate range.
+     */
     setFrameRateRange(frameRateRange) {
-        this.frameRateRange = frameRateRange;
-        getUINativeModule().setFrameRateRange(this.nodePtr, frameRateRange, this.type); // -> this.nodeRef -> SetFrameRate.
+        this.frameRateRange = { ...frameRateRange }; // 确保每个实例有独立的frameRateRange
+        getUINativeModule().setFrameRateRange(this.nodePtr, frameRateRange, this.type);
     }
 }
 
@@ -722,7 +784,10 @@ class ComponentUtils {
     }
     getRectangleById(id) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        let componentInformation = this.ohos_componentUtils.getRectangleById(id);
+        if (typeof this.ohos_componentUtils.getRectangleById !== 'function'){
+            throw Error('getRectangleById is not callable');
+        }
+        let componentInformation = this.ohos_componentUtils?.getRectangleById?.(id);
         __JSScopeUtil__.restoreInstanceId();
         return componentInformation;
     }
@@ -902,6 +967,19 @@ class PromptAction {
         __JSScopeUtil__.restoreInstanceId();
     }
 
+    openToast(options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let promise = this.ohos_prompt.openToast(options);
+        __JSScopeUtil__.restoreInstanceId();
+        return promise;
+    }
+
+    closeToast(toastId) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_prompt.closeToast(toastId);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
     showDialog(options, callback) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         if (typeof callback !== 'undefined') {
@@ -923,9 +1001,16 @@ class PromptAction {
             return result_;
         }
         else {
-            let result_ = this.ohos_prompt.openCustomDialog(content.getFrameNode());
-            __JSScopeUtil__.restoreInstanceId();
-            return result_;
+            if (content.builderNode_ === undefined) {
+                let result_ = this.ohos_prompt.openCustomDialog(content);
+                __JSScopeUtil__.restoreInstanceId();
+                return result_;
+            }
+            else {
+                let result_ = this.ohos_prompt.openCustomDialog(content.getFrameNode());
+                __JSScopeUtil__.restoreInstanceId();
+                return result_;
+            }
         }
     }
 
@@ -938,9 +1023,15 @@ class PromptAction {
 
     closeCustomDialog(content) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        let result_ = this.ohos_prompt.closeCustomDialog(content.getFrameNode());
-        __JSScopeUtil__.restoreInstanceId();
-        return result_;
+        if (typeof content === 'number') {
+            this.ohos_prompt.closeCustomDialog(content);
+            __JSScopeUtil__.restoreInstanceId();
+        }
+        else {
+            let result_ = this.ohos_prompt.closeCustomDialog(content.getFrameNode());
+            __JSScopeUtil__.restoreInstanceId();
+            return result_;
+        }
     }
 
     showActionMenu(options, callback) {

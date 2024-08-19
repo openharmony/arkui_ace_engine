@@ -15,9 +15,6 @@
 
 #include "core/components_ng/render/render_property.h"
 
-#include "core/common/ace_application_info.h"
-#include "core/components/common/properties/blend_mode.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -390,6 +387,8 @@ void BorderProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
     propBorderColor.value_or(BorderColorProperty()).ToJsonValue(json, jsonBorder, filter);
     propBorderWidth.value_or(BorderWidthProperty()).ToJsonValue(json, jsonBorder, filter);
     propBorderRadius.value_or(BorderRadiusProperty()).ToJsonValue(json, jsonBorder, filter);
+    propDashGap.value_or(BorderWidthProperty()).ToDashJsonValue(json, jsonBorder, filter, "dashGap");
+    propDashWidth.value_or(BorderWidthProperty()).ToDashJsonValue(json, jsonBorder, filter, "dashWidth");
 
     json->PutExtAttr("border", jsonBorder->ToString().c_str(), filter);
 }

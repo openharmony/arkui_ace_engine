@@ -128,6 +128,8 @@ public:
 
     std::unique_ptr<JsonValue> GetStateInspectorInfo();
 
+    void DetachFromMainTree(bool recursive) override;
+
 private:
     std::string viewKey_;
     RenderFunction renderFunction_;

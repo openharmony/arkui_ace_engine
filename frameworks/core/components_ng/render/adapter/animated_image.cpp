@@ -15,15 +15,11 @@
 
 #include "core/components_ng/render/adapter/animated_image.h"
 
-#include <mutex>
-
 #ifdef USE_ROSEN_DRAWING
 #include "drawing/engine_adapter/skia_adapter/skia_bitmap.h"
 #include "drawing/engine_adapter/skia_adapter/skia_data.h"
 #include "drawing/engine_adapter/skia_adapter/skia_image_info.h"
 #endif
-
-#include "core/animation/animator.h"
 #include "core/animation/picture_animation.h"
 #ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/image_provider/adapter/skia_image_data.h"
@@ -32,7 +28,6 @@
 #endif
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/image/sk_image_cache.h"
-#include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t STANDARD_FRAME_DURATION = 100;
@@ -140,16 +135,24 @@ void AnimatedImage::ControlAnimation(bool play)
     (play) ? animator_->Play() : animator_->Pause();
 }
 
+
+Animator::Status AnimatedImage::GetAnimatorStatus() const
+{
+    return animator_ ? animator_->GetStatus() : Animator::Status::IDLE;
+}
+
 void AnimatedImage::RenderFrame(uint32_t idx)
 {
     if (GetCachedFrame(idx)) {
         return;
     }
-    ImageUtils::PostToBg([weak = WeakClaim(this), idx] {
-        auto self = weak.Upgrade();
-        CHECK_NULL_VOID(self);
-        self->DecodeFrame(idx);
-    }, "ArkUIImageRenderAnimatedFrame");
+    ImageUtils::PostToBg(
+        [weak = WeakClaim(this), idx] {
+            auto self = weak.Upgrade();
+            CHECK_NULL_VOID(self);
+            self->DecodeFrame(idx);
+        },
+        "ArkUIImageRenderAnimatedFrame");
 }
 
 // runs on Background threads
@@ -166,11 +169,13 @@ void AnimatedImage::DecodeFrame(uint32_t idx)
     std::scoped_lock<std::mutex> lock(decodeMtx_);
     DecodeImpl(idx);
 
-    ImageUtils::PostToUI([weak = WeakClaim(this)] {
-        auto self = weak.Upgrade();
-        CHECK_NULL_VOID(self && self->redraw_);
-        self->redraw_();
-    }, "ArkUIImageDecodeAnimatedFrame");
+    ImageUtils::PostToUI(
+        [weak = WeakClaim(this)] {
+            auto self = weak.Upgrade();
+            CHECK_NULL_VOID(self && self->redraw_);
+            self->redraw_();
+        },
+        "ArkUIImageDecodeAnimatedFrame");
 
     CacheFrame(cacheKey_ + std::to_string(idx));
     --queueSize_;
@@ -223,7 +228,7 @@ void AnimatedRSImage::DecodeImpl(uint32_t idx)
 #endif
 
     SkCodec::Options options;
-    options.fFrameIndex = idx;
+    options.fFrameIndex = static_cast<int32_t>(idx);
 
     SkCodec::FrameInfo info {};
     codec_->getFrameInfo(idx, &info);

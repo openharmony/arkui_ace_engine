@@ -19,6 +19,10 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
 #include "base/geometry/dimension.h"
 #include "base/log/ace_scoring_log.h"
@@ -49,6 +53,7 @@
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/event/ace_event_handler.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace {
 
@@ -180,6 +185,36 @@ void JSText::SetFontSize(const JSCallbackInfo& info)
 void JSText::SetFontWeight(const std::string& value)
 {
     TextModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(value));
+}
+
+void JSText::SetMinFontScale(const JSCallbackInfo& info)
+{
+    double minFontScale;
+    if (info.Length() < 1 || !ParseJsDouble(info[0], minFontScale)) {
+        return;
+    }
+    if (LessOrEqual(minFontScale, 0.0f)) {
+        TextModel::GetInstance()->SetMinFontScale(0.0f);
+        return;
+    }
+    if (GreatOrEqual(minFontScale, 1.0f)) {
+        TextModel::GetInstance()->SetMinFontScale(1.0f);
+        return;
+    }
+    TextModel::GetInstance()->SetMinFontScale(static_cast<float>(minFontScale));
+}
+
+void JSText::SetMaxFontScale(const JSCallbackInfo& info)
+{
+    double maxFontScale;
+    if (info.Length() < 1 || !ParseJsDouble(info[0], maxFontScale)) {
+        return;
+    }
+    if (LessOrEqual(maxFontScale, 1.0f)) {
+        TextModel::GetInstance()->SetMaxFontScale(1.0f);
+        return;
+    }
+    TextModel::GetInstance()->SetMaxFontScale(static_cast<float>(maxFontScale));
 }
 
 void JSText::SetForegroundColor(const JSCallbackInfo& info)
@@ -333,7 +368,7 @@ void JSText::SetTextSelectableMode(const JSCallbackInfo& info)
 void JSText::SetMaxLines(const JSCallbackInfo& info)
 {
     JSRef<JSVal> args = info[0];
-    int32_t value = Infinity<uint32_t>();
+    auto value = Infinity<int32_t>();
     if (args->ToString() != "Infinity") {
         ParseJsInt32(args, value);
     }
@@ -528,7 +563,11 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
     if (!ParseJsColor(colorValue, result)) {
         auto theme = GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
-        result = theme->GetTextStyle().GetTextDecorationColor();
+        if (SystemProperties::GetColorMode() == ColorMode::DARK) {
+            result = theme->GetTextStyle().GetTextColor();
+        } else {
+            result = theme->GetTextStyle().GetTextDecorationColor();
+        }
     }
     std::optional<TextDecorationStyle> textDecorationStyle;
     if (styleValue->IsNumber()) {
@@ -575,6 +614,17 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
             ACE_SCORING_EVENT("Text.onClick");
             PipelineContext::SetCallBackNode(node);
             func->Execute(*clickInfo);
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+            std::string label = "";
+            if (!node.Invalid()) {
+                auto pattern = node.GetRawPtr()->GetPattern();
+                CHECK_NULL_VOID(pattern);
+                auto layoutProperty = pattern->GetLayoutProperty<NG::TextLayoutProperty>();
+                CHECK_NULL_VOID(layoutProperty);
+                label = layoutProperty->GetContent().value_or("");
+            }
+            JSInteractableView::ReportClickEvent(node, label);
+#endif
         };
         TextModel::GetInstance()->SetOnClick(std::move(onClick));
 
@@ -582,28 +632,34 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
         CHECK_NULL_VOID(focusHub);
         focusHub->SetFocusable(true, false);
     } else {
-#ifndef NG_BUILD
-        if (args->IsFunction()) {
-            auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
-            auto impl = inspector ? inspector->GetInspectorFunctionImpl() : nullptr;
-            auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-            RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(args));
-            auto onClickId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl,
-                                 node = frameNode](const BaseEventInfo* info) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                const auto* clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
-                auto newInfo = *clickInfo;
-                if (impl) {
-                    impl->UpdateEventInfo(newInfo);
-                }
-                ACE_SCORING_EVENT("Text.onClick");
-                PipelineContext::SetCallBackNode(node);
-                func->Execute(newInfo);
-            };
-            TextModel::GetInstance()->SetOnClick(std::move(onClickId));
-        }
-#endif
+        JsOnClickWithoutNGBUILD(info);
     }
+}
+
+void JSText::JsOnClickWithoutNGBUILD(const JSCallbackInfo& info)
+{
+#ifndef NG_BUILD
+    JSRef<JSVal> args = info[0];
+    if (args->IsFunction()) {
+        auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+        auto impl = inspector ? inspector->GetInspectorFunctionImpl() : nullptr;
+        auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(args));
+        auto onClickId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl,
+                             node = frameNode](const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            const auto* clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
+            auto newInfo = *clickInfo;
+            if (impl) {
+                impl->UpdateEventInfo(newInfo);
+            }
+            ACE_SCORING_EVENT("Text.onClick");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute(newInfo);
+        };
+        TextModel::GetInstance()->SetOnClick(std::move(onClickId));
+    }
+#endif
 }
 
 void JSText::JsRemoteMessage(const JSCallbackInfo& info)
@@ -795,18 +851,6 @@ void JSText::JsDraggable(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetDraggable(tmpInfo->ToBoolean());
 }
 
-void JSText::JsMenuOptionsExtension(const JSCallbackInfo& info)
-{
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto tmpInfo = info[0];
-        if (tmpInfo->IsArray()) {
-            std::vector<NG::MenuOptionsParam> menuOptionsItems;
-            JSViewAbstract::ParseMenuOptions(info, JSRef<JSArray>::Cast(tmpInfo), menuOptionsItems);
-            TextModel::GetInstance()->SetMenuOptionItems(std::move(menuOptionsItems));
-        }
-    }
-}
-
 void JSText::JsEnableDataDetector(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -831,12 +875,11 @@ void JSText::JsDataDetectorConfig(const JSCallbackInfo& info)
         return;
     }
 
-    std::string textTypes;
-    std::function<void(const std::string&)> onResult;
-    if (!ParseDataDetectorConfig(info, textTypes, onResult)) {
+    TextDetectConfig textDetectConfig;
+    if (!ParseDataDetectorConfig(info, textDetectConfig)) {
         return;
     }
-    TextModel::GetInstance()->SetTextDetectConfig(textTypes, std::move(onResult));
+    TextModel::GetInstance()->SetTextDetectConfig(textDetectConfig);
 }
 
 void JSText::BindSelectionMenu(const JSCallbackInfo& info)
@@ -922,6 +965,26 @@ void JSText::SetFontFeature(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
 }
 
+void JSText::JsResponseRegion(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsResponseRegion(info);
+    TextModel::GetInstance()->SetResponseRegion(true);
+}
+
+void JSText::SetHalfLeading(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto halfLeading = info[0];
+    if (!halfLeading->IsBoolean()) {
+        TextModel::GetInstance()->SetHalfLeading(false);
+        return;
+    }
+    auto enable = halfLeading->ToBoolean();
+    TextModel::GetInstance()->SetHalfLeading(enable);
+}
+
 void JSText::JSBind(BindingTarget globalObj)
 {
     JSClass<JSText>::Declare("Text");
@@ -934,6 +997,8 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("textShadow", &JSText::SetTextShadow, opt);
     JSClass<JSText>::StaticMethod("fontSize", &JSText::SetFontSize, opt);
     JSClass<JSText>::StaticMethod("fontWeight", &JSText::SetFontWeight, opt);
+    JSClass<JSText>::StaticMethod("minFontScale", &JSText::SetMinFontScale, opt);
+    JSClass<JSText>::StaticMethod("maxFontScale", &JSText::SetMaxFontScale, opt);
     JSClass<JSText>::StaticMethod("wordBreak", &JSText::SetWordBreak, opt);
     JSClass<JSText>::StaticMethod("lineBreakStrategy", &JSText::SetLineBreakStrategy, opt);
     JSClass<JSText>::StaticMethod("ellipsisMode", &JSText::SetEllipsisMode, opt);
@@ -974,7 +1039,6 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("onDrop", &JSText::JsOnDrop);
     JSClass<JSText>::StaticMethod("focusable", &JSText::JsFocusable);
     JSClass<JSText>::StaticMethod("draggable", &JSText::JsDraggable);
-    JSClass<JSText>::StaticMethod("textMenuOptions", &JSText::JsMenuOptionsExtension);
     JSClass<JSText>::StaticMethod("enableDataDetector", &JSText::JsEnableDataDetector);
     JSClass<JSText>::StaticMethod("dataDetectorConfig", &JSText::JsDataDetectorConfig);
     JSClass<JSText>::StaticMethod("bindSelectionMenu", &JSText::BindSelectionMenu);
@@ -982,9 +1046,9 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("clip", &JSText::JsClip);
     JSClass<JSText>::StaticMethod("fontFeature", &JSText::SetFontFeature);
     JSClass<JSText>::StaticMethod("foregroundColor", &JSText::SetForegroundColor);
-    JSClass<JSText>::StaticMethod("marqueeOptions", &JSText::SetMarqueeOptions);
-    JSClass<JSText>::StaticMethod("onMarqueeStateChange", &JSText::SetOnMarqueeStateChange);
-    JSClass<JSText>::StaticMethod("selectionMenuOptions", &JSText::SelectionMenuOptions);
+    JSClass<JSText>::StaticMethod("editMenuOptions", &JSText::EditMenuOptions);
+    JSClass<JSText>::StaticMethod("responseRegion", &JSText::JsResponseRegion);
+    JSClass<JSText>::StaticMethod("halfLeading", &JSText::SetHalfLeading);
     JSClass<JSText>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -1072,103 +1136,11 @@ void JSText::ParseMenuParam(
     }
 }
 
-void JSText::SetMarqueeOptions(const JSCallbackInfo& info)
+void JSText::EditMenuOptions(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        return;
-    }
-
-    auto args = info[0];
-    NG::TextMarqueeOptions options;
-
-    if (!args->IsObject()) {
-        TextModel::GetInstance()->SetMarqueeOptions(options);
-        return;
-    }
-
-    auto paramObject = JSRef<JSObject>::Cast(args);
-    ParseMarqueeParam(paramObject, options);
-    TextModel::GetInstance()->SetMarqueeOptions(options);
-}
-
-void JSText::ParseMarqueeParam(const JSRef<JSObject>& paramObject, NG::TextMarqueeOptions& options)
-{
-    auto getStart = paramObject->GetProperty("start");
-    if (getStart->IsBoolean()) {
-        options.UpdateTextMarqueeStart(getStart->ToBoolean());
-    }
-
-    auto getLoop = paramObject->GetProperty("loop");
-    if (getLoop->IsNumber()) {
-        int32_t loop = static_cast<int32_t>(getLoop->ToNumber<double>());
-        if (loop == std::numeric_limits<int32_t>::max() || loop <= 0) {
-            loop = -1;
-        }
-        options.UpdateTextMarqueeLoop(loop);
-    }
-
-    auto getStep = paramObject->GetProperty("step");
-    if (getStep->IsNumber()) {
-        auto step = getStep->ToNumber<double>();
-        if (GreatNotEqual(step, 0.0)) {
-            options.UpdateTextMarqueeStep(Dimension(step, DimensionUnit::VP).ConvertToPx());
-        }
-    }
-
-    auto delay = paramObject->GetProperty("delay");
-    if (delay->IsNumber()) {
-        auto delayDouble = delay->ToNumber<double>();
-        auto delayValue = static_cast<int32_t>(delayDouble);
-        if (delayValue < 0) {
-            delayValue = 0;
-        }
-        options.UpdateTextMarqueeDelay(delayValue);
-    }
-
-    auto getFromStart = paramObject->GetProperty("fromStart");
-    if (getFromStart->IsBoolean()) {
-        options.UpdateTextMarqueeDirection(
-            getFromStart->ToBoolean() ? MarqueeDirection::LEFT : MarqueeDirection::RIGHT);
-    }
-
-    auto getFadeout = paramObject->GetProperty("fadeout");
-    if (getFadeout->IsBoolean()) {
-        options.UpdateTextMarqueeFadeout(getFadeout->ToBoolean());
-    }
-
-    auto getStartPolicy = paramObject->GetProperty("marqueeStartPolicy");
-    if (getStartPolicy->IsNumber()) {
-        auto startPolicy = static_cast<MarqueeStartPolicy>(getStartPolicy->ToNumber<int32_t>());
-        options.UpdateTextMarqueeStartPolicy(startPolicy);
-    }
-}
-
-void JSText::SetOnMarqueeStateChange(const JSCallbackInfo& info)
-{
-    if (!info[0]->IsFunction()) {
-        return;
-    }
-
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onMarqueeStateChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
-                                    int32_t value) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("Text.onMarqueeStateChange");
-        PipelineContext::SetCallBackNode(node);
-        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
-        func->ExecuteJS(1, &newJSVal);
-    };
-
-    TextModel::GetInstance()->SetOnMarqueeStateChange(std::move(onMarqueeStateChange));
-}
-
-void JSText::SelectionMenuOptions(const JSCallbackInfo& info)
-{
-    std::vector<NG::MenuOptionsParam> menuOptionsItems;
-    if (!JSViewAbstract::ParseSelectionMenuOptions(info, menuOptionsItems)) {
-        return;
-    }
-    TextModel::GetInstance()->SetSelectionMenuOptions(std::move(menuOptionsItems));
+    NG::OnCreateMenuCallback onCreateMenuCallback;
+    NG::OnMenuItemClickCallback onMenuItemClick;
+    JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick);
+    TextModel::GetInstance()->SetSelectionMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
 } // namespace OHOS::Ace::Framework

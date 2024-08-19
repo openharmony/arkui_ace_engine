@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 
-#include <cmath>
-
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
@@ -28,24 +26,17 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr Dimension INDICATOR_PADDING_DOT = 12.0_vp;
+constexpr float INDICATOR_ZOOM_IN_SCALE = 1.33f;
 constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
+constexpr Dimension INDICATOR_PADDING_DEFAULT = 12.0_vp;
 constexpr uint32_t INDICATOR_HAS_CHILD = 2;
 constexpr Dimension INDICATOR_DRAG_MIN_DISTANCE = 4.0_vp;
 constexpr Dimension INDICATOR_DRAG_MAX_DISTANCE = 18.0_vp;
 constexpr Dimension INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE = 80.0_vp;
 constexpr int32_t LONG_PRESS_DELAY = 300;
-constexpr double QUARTER_CIRCLE_ANGLE = 90.0;
-constexpr double HALF_CIRCLE_ANGLE = 180.0;
-constexpr double THREE_QUARTER_CIRCLE_ANGLE = 270.0;
-constexpr double FULL_CIRCLE_ANGLE = 360.0;
-constexpr float ITEM_PADDING = 5.0f;
-constexpr float ACTIVE_ITEM_ANGLE = 4.0f;
-constexpr float ADD_HOT_REG_ANGLE = 8.0f;
-constexpr Dimension CONTAINER_BORDER_WIDTH = 24.0_vp;
-constexpr Dimension CIRCLE_DIAMETER_OFFSET = 16.0_vp;
-constexpr float INDICATOR_DRAG_MIN_ANGLE = 6.0;
-constexpr float INDICATOR_DRAG_MAX_ANGLE = 23.0;
-constexpr float INDICATOR_TOUCH_BOTTOM_MAX_ANGLE = 120.0;
+constexpr float HALF_FLOAT = 0.5f;
+constexpr float MAX_FONT_SCALE = 2.0f;
 } // namespace
 
 void SwiperIndicatorPattern::OnAttachToFrameNode()
@@ -125,88 +116,11 @@ void SwiperIndicatorPattern::OnModifyDone()
         InitHoverMouseEvent();
         InitTouchEvent(gestureHub);
         InitLongPressEvent(gestureHub);
-        InitFocusEvent();
     }
-    if (swiperLayoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::DOT) == SwiperIndicatorType::ARC_DOT) {
-        auto gestureHub = host->GetOrCreateGestureEventHub();
-        CHECK_NULL_VOID(gestureHub);
-        InitTouchEvent(gestureHub);
-        InitLongPressEvent(gestureHub);
-    }
-}
-
-void SwiperIndicatorPattern::InitFocusEvent()
-{
-    if (focusEventInitialized_) {
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto focusHub = host->GetOrCreateFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    auto focusTask = [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleFocusEvent();
-        }
-    };
-    focusHub->SetOnFocusInternal(focusTask);
-    auto blurTask = [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandleBlurEvent();
-    };
-    focusHub->SetOnBlurInternal(blurTask);
-    focusEventInitialized_ = true;
-}
-
-void SwiperIndicatorPattern::HandleFocusEvent()
-{
-    CHECK_NULL_VOID(dotIndicatorModifier_);
-    AddIsFocusActiveUpdateEvent();
-    OnIsFocusActiveUpdate(true);
-}
-
-void SwiperIndicatorPattern::HandleBlurEvent()
-{
-    CHECK_NULL_VOID(dotIndicatorModifier_);
-    RemoveIsFocusActiveUpdateEvent();
-    OnIsFocusActiveUpdate(false);
-}
-
-void SwiperIndicatorPattern::AddIsFocusActiveUpdateEvent()
-{
-    if (!isFocusActiveUpdateEvent_) {
-        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->OnIsFocusActiveUpdate(isFocusAcitve);
-        };
-    }
-
-    auto pipline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipline);
-    pipline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
-}
-
-void SwiperIndicatorPattern::RemoveIsFocusActiveUpdateEvent()
-{
-    auto pipline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipline);
-    pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
-}
-
-void SwiperIndicatorPattern::OnIsFocusActiveUpdate(bool isFocusAcitve)
-{
-    CHECK_NULL_VOID(dotIndicatorModifier_);
-    dotIndicatorModifier_->SetIsFocused(isFocusAcitve);
 }
 
 bool SwiperIndicatorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (swiperIndicatorType_ == SwiperIndicatorType::ARC_DOT) {
-        return SetArcIndicatorHotRegion(dirty, config);
-    }
     CHECK_NULL_RETURN(config.frameSizeChange, false);
     return true;
 }
@@ -285,18 +199,24 @@ void SwiperIndicatorPattern::HandleTouchClick(const GestureEvent& info)
     CHECK_NULL_VOID(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
+
+    auto isRtl = swiperPattern->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    auto indicatorCount = swiperPattern->RealTotalCount();
     auto currentIndex = swiperPattern->GetCurrentIndex();
+    if (isRtl) {
+        currentIndex = indicatorCount - 1 - currentIndex;
+    }
+
     auto margin = HandleTouchClickMargin();
-    Dimension paddingSide = theme->GetIndicatorPaddingDot();
-    auto lengthBeforeCurrentIndex = margin + paddingSide.ConvertToPx() +
+    auto lengthBeforeCurrentIndex = margin + INDICATOR_PADDING_DEFAULT.ConvertToPx() +
                                     (INDICATOR_ITEM_SPACE.ConvertToPx() + itemWidth) * currentIndex;
     auto lengthWithCurrentIndex = lengthBeforeCurrentIndex + selectedItemWidth;
     auto axis = swiperPattern->GetDirection();
     auto mainClickOffset = axis == Axis::HORIZONTAL ? info.GetLocalLocation().GetX() : info.GetLocalLocation().GetY();
     if (mainClickOffset < lengthBeforeCurrentIndex) {
-        swiperPattern->ShowPrevious();
+        isRtl ? swiperPattern->ShowNext() : swiperPattern->ShowPrevious();
     } else if (mainClickOffset > lengthWithCurrentIndex) {
-        swiperPattern->ShowNext();
+        isRtl ? swiperPattern->ShowPrevious() : swiperPattern->ShowNext();
     }
 }
 
@@ -469,17 +389,16 @@ void SwiperIndicatorPattern::GetMouseClickIndex()
         static_cast<float>(paintProperty->GetSelectedItemWidthValue(swiperTheme->GetSize()).ConvertToPx() * 2);
     paintProperty->GetIsCustomSizeValue(false) ? selectedItemWidthValue *= 0.5f : selectedItemWidthValue;
     // diameter calculation
-    double scaleIndicator = swiperTheme->GetScaleSwiper();
-    float itemWidth = itemWidthValue * scaleIndicator;
-    float itemHeight = itemHeightValue * scaleIndicator;
-    float selectedItemWidth = selectedItemWidthValue * scaleIndicator;
+    float itemWidth = itemWidthValue * INDICATOR_ZOOM_IN_SCALE;
+    float itemHeight = itemHeightValue * INDICATOR_ZOOM_IN_SCALE;
+    float selectedItemWidth = selectedItemWidthValue * INDICATOR_ZOOM_IN_SCALE;
     float space = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx());
     int32_t currentIndex = swiperPattern->GetCurrentShownIndex();
     int32_t itemCount = swiperPattern->RealTotalCount();
     int32_t loopCount = itemCount == 0 ? 0 : std::abs(currentIndex / itemCount);
     auto frameSize = host->GetGeometryNode()->GetFrameSize();
     auto axis = swiperPattern->GetDirection();
-    float centerX = static_cast<float>((swiperTheme->GetIndicatorPaddingDot()).ConvertToPx());
+    float centerX = static_cast<float>(INDICATOR_PADDING_DOT.ConvertToPx());
     float centerY = ((axis == Axis::HORIZONTAL ? frameSize.Height() : frameSize.Width()) - itemHeight) * 0.5f;
     PointF hoverPoint = axis == Axis::HORIZONTAL ? hoverPoint_ : PointF(hoverPoint_.GetY(), hoverPoint_.GetX());
     int start = currentIndex >= 0 ? loopCount * itemCount : -(loopCount + 1) * itemCount;
@@ -527,6 +446,7 @@ void SwiperIndicatorPattern::UpdateTextContent(const RefPtr<SwiperIndicatorLayou
     firstTextLayoutProperty->UpdateTextColor(selectedFontColor);
     firstTextLayoutProperty->UpdateFontSize(selectedFontSize);
     firstTextLayoutProperty->UpdateFontWeight(selectedFontWeight);
+    firstTextLayoutProperty->UpdateMaxFontScale(MAX_FONT_SCALE);
     UpdateTextContentSub(layoutProperty, firstTextNode, lastTextNode);
 }
 
@@ -556,14 +476,10 @@ void SwiperIndicatorPattern::UpdateTextContentSub(const RefPtr<SwiperIndicatorLa
     CHECK_NULL_VOID(swiperNode);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
-    auto firstTextLayoutProperty = firstTextNode->GetLayoutProperty<TextLayoutProperty>();
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
     auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(swiperLayoutProperty);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto currentIndex = swiperPattern->GetCurrentFirstIndex() + 1;
     if (currentIndex > swiperPattern->RealTotalCount()) {
         currentIndex = 1;
@@ -581,9 +497,11 @@ void SwiperIndicatorPattern::UpdateTextContentSub(const RefPtr<SwiperIndicatorLa
     std::string lastContent = isRtl ? std::to_string(currentIndex) + "\\" :
         "/" + std::to_string(swiperPattern->RealTotalCount());
 
+    auto firstTextLayoutProperty = firstTextNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(firstTextLayoutProperty);
     firstTextLayoutProperty->UpdateContent(firstContent);
-    lastTextLayoutProperty = lastTextNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(lastTextLayoutProperty);
+    auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(theme);
     auto fontColor = layoutProperty->GetFontColorValue(theme->GetDigitalIndicatorTextStyle().GetTextColor());
     auto fontSize = layoutProperty->GetFontSizeValue(theme->GetDigitalIndicatorTextStyle().GetFontSize());
     if (!fontSize.IsValid()) {
@@ -594,6 +512,7 @@ void SwiperIndicatorPattern::UpdateTextContentSub(const RefPtr<SwiperIndicatorLa
     lastTextLayoutProperty->UpdateFontSize(fontSize);
     lastTextLayoutProperty->UpdateFontWeight(fontWeight);
     lastTextLayoutProperty->UpdateContent(lastContent);
+    lastTextLayoutProperty->UpdateMaxFontScale(MAX_FONT_SCALE);
     firstTextNode->MarkModifyDone();
     firstTextNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     lastTextNode->MarkModifyDone();
@@ -619,9 +538,6 @@ void SwiperIndicatorPattern::HandleDragEnd(double dragVelocity)
     if (autoPlay) {
         swiperPattern->SetIndicatorLongPress(false);
         swiperPattern->StartAutoPlay();
-    }
-    if (swiperPattern->GetIndicatorType() == SwiperIndicatorType::ARC_DOT) {
-        isLongPressed_ = false;
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -658,28 +574,21 @@ bool SwiperIndicatorPattern::CheckIsTouchBottom(const GestureEvent& info)
     auto dragPoint =
         PointF(static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()));
     auto offset = dragPoint - dragStartPoint_;
-    float touchBottomRate = 0.0;
-    float touchOffset = 0.0;
-    if (swiperIndicatorType_ == SwiperIndicatorType::ARC_DOT) {
-        auto center = GetCenterPointF();
-        float startAngle = GetAngleWithPoint(center, dragStartPoint_);
-        float endAngle = GetAngleWithPoint(center, dragPoint);
-        touchOffset = startAngle - endAngle;
-        touchBottomRate = LessOrEqual(std::abs(touchOffset), INDICATOR_TOUCH_BOTTOM_MAX_ANGLE)
-                                ? touchOffset / INDICATOR_TOUCH_BOTTOM_MAX_ANGLE : 1;
-    } else {
-        touchOffset = swiperPattern->GetDirection() == Axis::HORIZONTAL ? offset.GetX() : offset.GetY();
-        touchBottomRate = LessOrEqual(std::abs(touchOffset), INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE.ConvertToPx())
-                                ? touchOffset / INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE.ConvertToPx() : 1;
-    }
+    auto touchOffset = swiperPattern->GetDirection() == Axis::HORIZONTAL ? offset.GetX() : offset.GetY();
+    auto touchBottomRate = LessOrEqual(std::abs(touchOffset), INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE.ConvertToPx())
+                               ? touchOffset / INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE.ConvertToPx()
+                               : 1;
+
     swiperPattern->SetTurnPageRate(0);
     swiperPattern->SetTouchBottomRate(std::abs(touchBottomRate));
     TouchBottomType touchBottomType = TouchBottomType::NONE;
+
     if ((currentIndex <= 0) && !isLoop) {
         if (Negative(info.GetMainDelta()) || NonPositive(touchOffset)) {
             touchBottomType = TouchBottomType::START;
         }
     }
+
     if ((currentIndex >= childrenSize - displayCount) && !isLoop) {
         if (Positive(info.GetMainDelta()) || NonNegative(touchOffset)) {
             touchBottomType = TouchBottomType::END;
@@ -711,21 +620,12 @@ bool SwiperIndicatorPattern::CheckIsTouchBottom(const TouchLocationInfo& info)
 
     auto dragPoint =
         PointF(static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()));
-    float touchBottomRate = 0.0;
-    float touchOffset = 0.0;
-    if (swiperIndicatorType_ == SwiperIndicatorType::ARC_DOT) {
-        auto center = GetCenterPointF();
-        float startAngle = GetAngleWithPoint(center, dragStartPoint_);
-        float endAngle = GetAngleWithPoint(center, dragPoint);
-        touchOffset = startAngle - endAngle;
-        touchBottomRate = LessOrEqual(std::abs(touchOffset), INDICATOR_TOUCH_BOTTOM_MAX_ANGLE)
-                                ? touchOffset / INDICATOR_TOUCH_BOTTOM_MAX_ANGLE : 1;
-    } else {
-        auto offset = dragPoint - dragStartPoint_;
-        touchOffset = swiperPattern->GetDirection() == Axis::HORIZONTAL ? offset.GetX() : offset.GetY();
-        touchBottomRate = LessOrEqual(std::abs(touchOffset), INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE.ConvertToPx())
-                                ? touchOffset / INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE.ConvertToPx() : 1;
-    }
+    auto offset = dragPoint - dragStartPoint_;
+    auto touchOffset = swiperPattern->GetDirection() == Axis::HORIZONTAL ? offset.GetX() : offset.GetY();
+    auto touchBottomRate = LessOrEqual(std::abs(touchOffset), INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE.ConvertToPx())
+                               ? touchOffset / INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE.ConvertToPx()
+                               : 1;
+
     swiperPattern->SetTurnPageRate(0);
     swiperPattern->SetTouchBottomRate(std::abs(touchBottomRate));
     TouchBottomType touchBottomType = TouchBottomType::NONE;
@@ -741,6 +641,7 @@ bool SwiperIndicatorPattern::CheckIsTouchBottom(const TouchLocationInfo& info)
             }
         }
     }
+
     if (currentIndex >= childrenSize - displayCount) {
         if (swiperPattern->IsHorizontalAndRightToLeft()) {
             if (NonPositive(touchOffset)) {
@@ -789,87 +690,6 @@ void SwiperIndicatorPattern::HandleLongPress(GestureEvent& info)
         swiperPattern->StopSpringAnimation();
         swiperPattern->StopAutoPlay();
     }
-    if (swiperPattern->GetIndicatorType() == SwiperIndicatorType::ARC_DOT) {
-        isLongPressed_ = true;
-    }
-}
-
-PointF SwiperIndicatorPattern::GetCenterPointF()
-{
-    auto center = PointF(0.0, 0.0);
-    auto swiperNode = GetSwiperNode();
-    CHECK_NULL_RETURN(swiperNode, center);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_RETURN(swiperPattern, center);
-
-    const auto& geometryNode = swiperNode->GetGeometryNode();
-    const auto& contentSize = geometryNode->GetFrameSize();
-    float centerY_ = (swiperPattern->GetDirection() == Axis::HORIZONTAL ?
-        contentSize.Height() : contentSize.Width()) * 0.5;
-    float centerX_ = (swiperPattern->GetDirection() == Axis::HORIZONTAL ?
-        contentSize.Width() : contentSize.Height()) * 0.5;
-    center = PointF(centerX_, centerY_);
-    return center;
-}
-
-float SwiperIndicatorPattern::ConvertAngleWithArcDirection(SwiperArcDirection arcDirection, const float& angle)
-{
-    float result = 0.0;
-    if (arcDirection == SwiperArcDirection::SIX_CLOCK_DIRECTION) {
-        result = angle;
-    } else if (arcDirection == SwiperArcDirection::THREE_CLOCK_DIRECTION) {
-        if (angle > QUARTER_CIRCLE_ANGLE) {
-            result = -THREE_QUARTER_CIRCLE_ANGLE + angle;
-        } else {
-            result  = angle + QUARTER_CIRCLE_ANGLE;
-        }
-    } else {
-        if (angle < -QUARTER_CIRCLE_ANGLE) {
-            result = THREE_QUARTER_CIRCLE_ANGLE + angle;
-        } else {
-            result = angle - QUARTER_CIRCLE_ANGLE;
-        }
-    }
-
-    return result;
-}
-
-float SwiperIndicatorPattern::GetAngleWithPoint(const PointF& conter, const PointF& point)
-{
-    float angle = 0.0;
-    auto swiperNode = GetSwiperNode();
-    CHECK_NULL_RETURN(swiperNode, angle);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_RETURN(swiperPattern, angle);
-
-    float centerX = swiperPattern->GetDirection() == Axis::HORIZONTAL ? conter.GetX() : conter.GetY();
-    float centerY = swiperPattern->GetDirection() == Axis::HORIZONTAL ? conter.GetY() : conter.GetX();
-    float pointX = swiperPattern->GetDirection() == Axis::HORIZONTAL ? point.GetX() : point.GetY();
-    float pointY = swiperPattern->GetDirection() == Axis::HORIZONTAL ? point.GetY() : point.GetX();
-    const auto& arcDotParameters = swiperPattern->GetSwiperArcDotParameters();
-    CHECK_NULL_RETURN(arcDotParameters, angle);
-    std::optional<SwiperArcDirection> swiperArcDirection = arcDotParameters->arcDirection;
-    CHECK_NULL_RETURN(swiperArcDirection.has_value(), angle);
-    auto arcDirection = swiperArcDirection.value();
-    if (NearEqual(centerY, pointY) && LessOrEqual(centerX, pointX)) {
-        angle = -QUARTER_CIRCLE_ANGLE;
-    } else if (NearEqual(centerX, pointX) && pointY > centerY) {
-        angle = 0.0;
-    } else if (NearEqual(centerY, pointY) && pointX < centerX) {
-        angle = QUARTER_CIRCLE_ANGLE;
-    } else if (NearEqual(centerX, pointX) && pointY < centerY) {
-        angle = HALF_CIRCLE_ANGLE;
-    } else if (pointX > centerX && pointY > centerY) {
-        angle = atan((pointY - centerY) / (pointX - centerX)) * HALF_CIRCLE_ANGLE / M_PI - QUARTER_CIRCLE_ANGLE;
-    } else if (pointX < centerX && pointY > centerY) {
-        angle = QUARTER_CIRCLE_ANGLE - atan((pointY - centerY) / (centerX - pointX)) * HALF_CIRCLE_ANGLE / M_PI;
-    } else if (pointX < centerX && pointY < centerY) {
-        angle = QUARTER_CIRCLE_ANGLE + atan((centerY - pointY) / (centerX - pointX)) * HALF_CIRCLE_ANGLE / M_PI;
-    } else {
-        angle = -QUARTER_CIRCLE_ANGLE - atan((centerY - pointY) / (pointX - centerX)) * HALF_CIRCLE_ANGLE / M_PI;
-    }
-
-    return ConvertAngleWithArcDirection(arcDirection, angle);
 }
 
 void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
@@ -890,30 +710,17 @@ void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
     if (CheckIsTouchBottom(info)) {
         return;
     }
-    float turnPageRate = 0.0;
-    float turnPageRateOffset = 0.0;
     auto dragPoint =
         PointF(static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()));
-    if (swiperIndicatorType_ == SwiperIndicatorType::ARC_DOT) {
-        auto center = GetCenterPointF();
-        float startAngle = GetAngleWithPoint(center, dragStartPoint_);
-        float endAngle = GetAngleWithPoint(center, dragPoint);
-        turnPageRateOffset = startAngle - endAngle;
-        if (LessNotEqual(std::abs(turnPageRateOffset), INDICATOR_DRAG_MIN_ANGLE)) {
-            return;
-        }
-        turnPageRate = -(turnPageRateOffset / INDICATOR_DRAG_MAX_ANGLE);
-    } else {
-        auto offset = dragPoint - dragStartPoint_;
-        turnPageRateOffset = swiperPattern->GetDirection() == Axis::HORIZONTAL ? offset.GetX() : offset.GetY();
-        if (LessNotEqual(std::abs(turnPageRateOffset), INDICATOR_DRAG_MIN_DISTANCE.ConvertToPx())) {
-            return;
-        }
-        if (swiperPattern->IsHorizontalAndRightToLeft()) {
-            turnPageRateOffset = -turnPageRateOffset;
-        }
-        turnPageRate = -(turnPageRateOffset / INDICATOR_DRAG_MAX_DISTANCE.ConvertToPx());
+    auto offset = dragPoint - dragStartPoint_;
+    auto turnPageRateOffset = swiperPattern->GetDirection() == Axis::HORIZONTAL ? offset.GetX() : offset.GetY();
+    if (LessNotEqual(std::abs(turnPageRateOffset), INDICATOR_DRAG_MIN_DISTANCE.ConvertToPx())) {
+        return;
     }
+    if (swiperPattern->IsHorizontalAndRightToLeft()) {
+        turnPageRateOffset = -turnPageRateOffset;
+    }
+    auto turnPageRate = -(turnPageRateOffset / INDICATOR_DRAG_MAX_DISTANCE.ConvertToPx());
     swiperPattern->SetTurnPageRate(turnPageRate);
     if (std::abs(turnPageRate) >= 1) {
         if (Positive(turnPageRateOffset)) {
@@ -949,8 +756,7 @@ float SwiperIndicatorPattern::HandleTouchClickMargin()
     int32_t itemCount = swiperPattern->RealTotalCount();
     auto allPointDiameterSum = itemWidth * static_cast<float>(itemCount - 1) + selectedItemWidth;
     auto allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx() * (itemCount - 1));
-    Dimension paddingSide = theme->GetIndicatorPaddingDot();
-    auto indicatorPadding = static_cast<float>(paddingSide.ConvertToPx());
+    auto indicatorPadding = static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx());
     auto contentWidth = indicatorPadding + allPointDiameterSum + allPointSpaceSum + indicatorPadding;
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, 0.0f);
@@ -975,128 +781,10 @@ void SwiperIndicatorPattern::DumpAdvanceInfo()
             DumpLog::GetInstance().AddDesc("SwiperIndicatorType:DIGIT");
             break;
         }
-        case SwiperIndicatorType::ARC_DOT: {
-            DumpLog::GetInstance().AddDesc("SwiperIndicatorType:ARC_DOT");
-            break;
-        }
         default: {
             break;
         }
     }
-}
-
-bool SwiperIndicatorPattern::SetArcIndicatorHotRegion(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
-{
-    if (config.skipMeasure && config.skipLayout) {
-        return false;
-    }
-
-    const auto& indicatorGeometryNode = dirty->GetGeometryNode();
-    CHECK_NULL_RETURN(indicatorGeometryNode, false);
-    const auto& frameRect = indicatorGeometryNode->GetFrameRect();
-    if (NonPositive(frameRect.Width()) || NonPositive(frameRect.Height())) {
-        return false;
-    }
-    return CalculateArcIndicatorHotRegion(frameRect, indicatorGeometryNode->GetContentOffset());
-}
-
-bool SwiperIndicatorPattern::CalculateArcIndicatorHotRegion(const RectF& frameRect, const OffsetF& contentOffset)
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto gestureHub = host->GetOrCreateGestureEventHub();
-    CHECK_NULL_RETURN(gestureHub, false);
-    auto swiperNode = DynamicCast<FrameNode>(host->GetParent());
-    CHECK_NULL_RETURN(swiperNode, false);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_RETURN(swiperPattern, false);
-    int32_t itemCount = swiperPattern->RealTotalCount();
-    if (itemCount <= 0) {
-        return false;
-    }
-    auto allPointArcAngle = (itemCount - 1) * ITEM_PADDING + ACTIVE_ITEM_ANGLE + ADD_HOT_REG_ANGLE;
-    auto centerX = frameRect.Width() * 0.5 + contentOffset.GetX();
-    auto centerY = frameRect.Height() * 0.5 + contentOffset.GetY();
-    auto minEdgeLength = LessNotEqual(frameRect.Width(), frameRect.Height()) ? frameRect.Width() : frameRect.Height();
-    if (LessOrEqual(minEdgeLength, CIRCLE_DIAMETER_OFFSET.ConvertToPx())) {
-        return false;
-    }
-    auto radius = (minEdgeLength - CIRCLE_DIAMETER_OFFSET.ConvertToPx()) * 0.5;
-    const auto& parameter = swiperPattern->GetSwiperArcDotParameters();
-    CHECK_NULL_RETURN(parameter, false);
-    SwiperArcDirection arcDirection = parameter->arcDirection.value_or(SwiperArcDirection::SIX_CLOCK_DIRECTION);
-    std::vector<DimensionRect> responseRegion;
-    int32_t allAngleCount = static_cast<int32_t>(allPointArcAngle);
-    for (int32_t i = 0; i <= allAngleCount; i++) {
-        double angle = 0.0;
-        // The number 0.5 represents equal division
-        if (arcDirection == SwiperArcDirection::THREE_CLOCK_DIRECTION) {
-            angle = - allPointArcAngle * 0.5 + i;
-        } else if (arcDirection == SwiperArcDirection::NINE_CLOCK_DIRECTION) {
-            angle = HALF_CIRCLE_ANGLE - allPointArcAngle * 0.5 + i;
-        } else {
-            angle = QUARTER_CIRCLE_ANGLE - allPointArcAngle * 0.5 + i;
-        }
-        if (LessNotEqual(angle, 0.0)) {
-            angle = FULL_CIRCLE_ANGLE + angle;
-        }
-
-        OffsetF angleOffset = CalculateAngleOffset(centerX, centerY, radius, angle);
-        Dimension width;
-        Dimension height;
-        OffsetF hotRegionOffset = CalculateRectLayout(angle, radius, angleOffset, width, height);
-
-        DimensionRect responseRect(width, height, DimensionOffset(hotRegionOffset));
-        responseRegion.emplace_back(responseRect);
-    }
-
-    gestureHub->SetResponseRegion(responseRegion);
-    return true;
-}
-
-OffsetF SwiperIndicatorPattern::CalculateAngleOffset(float centerX, float centerY, float radius, double angle)
-{
-    double radians = 0.0;
-    OffsetF angleOffset;
-    if (GreatOrEqual(angle, 0.0) && LessNotEqual(angle, QUARTER_CIRCLE_ANGLE)) {
-        radians = std::abs(angle) * M_PI / HALF_CIRCLE_ANGLE;
-        angleOffset.SetX(centerX + cos(radians) * radius);
-        angleOffset.SetY(centerY + sin(radians) * radius);
-    } else if (GreatOrEqual(angle, QUARTER_CIRCLE_ANGLE) && LessNotEqual(angle, HALF_CIRCLE_ANGLE)) {
-        radians = std::abs(HALF_CIRCLE_ANGLE - angle) * M_PI / HALF_CIRCLE_ANGLE;
-        angleOffset.SetX(centerX - cos(radians) * radius);
-        angleOffset.SetY(centerY + sin(radians) * radius);
-    } else if (GreatOrEqual(angle, HALF_CIRCLE_ANGLE) && LessNotEqual(angle, THREE_QUARTER_CIRCLE_ANGLE)) {
-        radians = std::abs(angle - HALF_CIRCLE_ANGLE) * M_PI / HALF_CIRCLE_ANGLE;
-        angleOffset.SetX(centerX - cos(radians) * radius);
-        angleOffset.SetY(centerY - sin(radians) * radius);
-    } else if (GreatOrEqual(angle, THREE_QUARTER_CIRCLE_ANGLE) && LessNotEqual(angle, FULL_CIRCLE_ANGLE)) {
-        radians = std::abs(FULL_CIRCLE_ANGLE - angle) * M_PI / HALF_CIRCLE_ANGLE;
-        angleOffset.SetX(centerX + cos(radians) * radius);
-        angleOffset.SetY(centerY - sin(radians) * radius);
-    }
-    return angleOffset;
-}
-
-OffsetF SwiperIndicatorPattern::CalculateRectLayout(
-    double angle, float radius, OffsetF angleOffset, Dimension& width, Dimension& height)
-{
-    OffsetF hotRegionOffset = angleOffset;
-    Dimension oneAngleLength = Dimension(sin(M_PI / HALF_CIRCLE_ANGLE) * radius, DimensionUnit::PX);
-    // The number 0.5 represents equal division
-    if ((GreatOrEqual(angle, QUARTER_CIRCLE_ANGLE * 0.5) &&
-            LessNotEqual(angle, QUARTER_CIRCLE_ANGLE * 0.5 + QUARTER_CIRCLE_ANGLE)) ||
-        (GreatOrEqual(angle, QUARTER_CIRCLE_ANGLE * 0.5 + HALF_CIRCLE_ANGLE) &&
-            LessNotEqual(angle, QUARTER_CIRCLE_ANGLE * 0.5 + THREE_QUARTER_CIRCLE_ANGLE))) {
-        hotRegionOffset.SetY(angleOffset.GetY() - CONTAINER_BORDER_WIDTH.ConvertToPx() * 0.5);
-        width = oneAngleLength;
-        height = CONTAINER_BORDER_WIDTH;
-    } else {
-        hotRegionOffset.SetX(angleOffset.GetX() - CONTAINER_BORDER_WIDTH.ConvertToPx() * 0.5);
-        width = CONTAINER_BORDER_WIDTH;
-        height = oneAngleLength;
-    }
-    return hotRegionOffset;
 }
 
 RefPtr<OverlengthDotIndicatorPaintMethod> SwiperIndicatorPattern::CreateOverlongDotIndicatorPaintMethod(
@@ -1120,33 +808,7 @@ RefPtr<OverlengthDotIndicatorPaintMethod> SwiperIndicatorPattern::CreateOverlong
     auto overlongPaintMethod = MakeRefPtr<OverlengthDotIndicatorPaintMethod>(overlongDotIndicatorModifier_);
     auto paintMethodTemp = DynamicCast<DotIndicatorPaintMethod>(overlongPaintMethod);
     SetDotIndicatorPaintMethodInfo(swiperPattern, paintMethodTemp, swiperLayoutProperty);
-    overlongPaintMethod->SetMaxDisplayCount(swiperPattern->GetMaxDisplayCount());
-    auto animationStartIndex = swiperPattern->GetLoopIndex(swiperPattern->GetCurrentIndex());
-    auto animationEndIndex = swiperPattern->GetLoopIndex(swiperPattern->GetCurrentFirstIndex());
-
-    if (changeIndexWithAnimation_ && !changeIndexWithAnimation_.value()) {
-        animationStartIndex = overlongDotIndicatorModifier_->GetAnimationEndIndex();
-        paintMethodTemp->SetGestureState(GestureState::GESTURE_STATE_NONE);
-    }
-
-    if (jumpIndex_) {
-        paintMethodTemp->SetGestureState(GestureState::GESTURE_STATE_NONE);
-
-        if (!changeIndexWithAnimation_) {
-            overlongDotIndicatorModifier_->SetCurrentOverlongType(OverlongType::NONE);
-        }
-    }
-
-    auto isSwiperAnimationRunning = swiperPattern->IsPropertyAnimationRunning();
-    auto keepStatus =
-        !isSwiperAnimationRunning && animationStartIndex != animationEndIndex && !changeIndexWithAnimation_;
-    overlongPaintMethod->SetKeepStatus(keepStatus);
-    overlongPaintMethod->SetAnimationStartIndex(animationStartIndex);
-    overlongPaintMethod->SetAnimationEndIndex(animationEndIndex);
-    overlongDotIndicatorModifier_->SetIsSwiperTouchDown(swiperPattern->IsTouchDown());
-    overlongDotIndicatorModifier_->SetBoundsRect(CalcBoundsRect());
-    changeIndexWithAnimation_.reset();
-    jumpIndex_.reset();
+    UpdateOverlongPaintMethod(swiperPattern, overlongPaintMethod);
 
     return overlongPaintMethod;
 }
@@ -1204,5 +866,62 @@ RectF SwiperIndicatorPattern::CalcBoundsRect() const
     RectF boundsRect(boundsRectOriginX, boundsRectOriginY, boundsRectWidth, boundsRectHeight);
 
     return boundsRect;
+}
+
+void SwiperIndicatorPattern::UpdateOverlongPaintMethod(
+    const RefPtr<SwiperPattern>& swiperPattern, RefPtr<OverlengthDotIndicatorPaintMethod>& overlongPaintMethod)
+{
+    auto animationStartIndex = swiperPattern->GetLoopIndex(swiperPattern->GetCurrentIndex());
+    auto animationEndIndex = swiperPattern->GetLoopIndex(swiperPattern->GetCurrentFirstIndex());
+
+    auto paintMethodTemp = DynamicCast<DotIndicatorPaintMethod>(overlongPaintMethod);
+    if (changeIndexWithAnimation_ && !changeIndexWithAnimation_.value()) {
+        animationStartIndex = startIndex_ ? startIndex_.value() : overlongDotIndicatorModifier_->GetAnimationEndIndex();
+        paintMethodTemp->SetGestureState(GestureState::GESTURE_STATE_NONE);
+    }
+
+    if (jumpIndex_) {
+        paintMethodTemp->SetGestureState(GestureState::GESTURE_STATE_NONE);
+
+        if (!changeIndexWithAnimation_) {
+            overlongDotIndicatorModifier_->StopAnimation(true);
+            overlongDotIndicatorModifier_->SetCurrentOverlongType(OverlongType::NONE);
+        }
+    }
+
+    auto isSwiperTouchDown = swiperPattern->IsTouchDownOnOverlong();
+    auto isSwiperAnimationRunning = swiperPattern->IsPropertyAnimationRunning();
+    auto keepStatus = !isSwiperTouchDown && !isSwiperAnimationRunning && animationStartIndex != animationEndIndex &&
+                      !changeIndexWithAnimation_;
+
+    if (!changeIndexWithAnimation_ && gestureState_ == GestureState::GESTURE_STATE_NONE) {
+        keepStatus = true;
+    }
+
+    auto bottomTouchLoop = swiperPattern->GetTouchBottomTypeLoop();
+    auto turnPageRateAbs = std::abs(swiperPattern->GetTurnPageRate());
+    auto totalCount = swiperPattern->RealTotalCount();
+    auto loopDrag = (animationStartIndex == 0 && animationEndIndex == totalCount - 1 && turnPageRateAbs < HALF_FLOAT &&
+                        turnPageRateAbs > 0.0f) ||
+                    (animationStartIndex == animationEndIndex && animationEndIndex == totalCount - 1 &&
+                        turnPageRateAbs > HALF_FLOAT);
+    auto nonLoopDrag = bottomTouchLoop == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE &&
+                       ((gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT && turnPageRateAbs > HALF_FLOAT) ||
+                           (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT && turnPageRateAbs < HALF_FLOAT &&
+                               turnPageRateAbs > 0.0f));
+
+    if (isSwiperTouchDown && (loopDrag || nonLoopDrag)) {
+        overlongDotIndicatorModifier_->UpdateCurrentStatus();
+    }
+
+    overlongPaintMethod->SetMaxDisplayCount(swiperPattern->GetMaxDisplayCount());
+    overlongPaintMethod->SetKeepStatus(keepStatus);
+    overlongPaintMethod->SetAnimationStartIndex(animationStartIndex);
+    overlongPaintMethod->SetAnimationEndIndex(animationEndIndex);
+    overlongDotIndicatorModifier_->SetIsSwiperTouchDown(isSwiperTouchDown);
+    overlongDotIndicatorModifier_->SetBoundsRect(CalcBoundsRect());
+    changeIndexWithAnimation_.reset();
+    jumpIndex_.reset();
+    startIndex_.reset();
 }
 } // namespace OHOS::Ace::NG

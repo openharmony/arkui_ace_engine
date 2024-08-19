@@ -15,12 +15,6 @@
 
 #include "frameworks/bridge/common/dom/dom_image.h"
 
-#include "base/utils/linear_map.h"
-#include "base/utils/utils.h"
-#include "frameworks/bridge/common/dom/dom_type.h"
-#include "frameworks/bridge/common/utils/utils.h"
-#include "frameworks/core/components/common/properties/decoration.h"
-
 namespace OHOS::Ace::Framework {
 namespace {
 

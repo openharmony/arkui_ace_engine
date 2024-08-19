@@ -23,6 +23,12 @@ constexpr int32_t DAY_COUNTS_OF_WEEK = 7;
 struct LocaleProxy final {};
 Localization::~Localization() = default;
 
+void Localization::SetLocaleImpl(const std::string& language, const std::string& countryOrRegion,
+    const std::string& script, const std::string& selectLanguage, const std::string& keywordsAndValues)
+{
+    languageTag_ = language;
+}
+
 std::string Localization::GetFontLocale()
 {
     return fontLocale_;
@@ -37,7 +43,18 @@ std::shared_ptr<Localization> Localization::GetInstance()
 bool Localization::GetDateOrder(std::vector<std::string>& outOrder)
 {
     outOrder.clear();
-    return false;
+    if (languageTag_ == "ug") {
+        outOrder.emplace_back("month");
+        outOrder.emplace_back("day");
+        outOrder.emplace_back("year");
+    } else if (languageTag_ == "zh") {
+        outOrder.emplace_back("year");
+        outOrder.emplace_back("month");
+        outOrder.emplace_back("day");
+    } else if (languageTag_ == "false") {
+        return false;
+    }
+    return true;
 }
 
 std::string Localization::FormatDuration(uint32_t duration, const std::string& format)

@@ -16,7 +16,6 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_stepper_ffi.h"
 
 #include "cj_lambda.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 #include "core/components_ng/pattern/stepper/stepper_model_ng.h"
 

@@ -77,6 +77,12 @@ void JSListItem::Create(const JSCallbackInfo& args)
     args.ReturnSelf();
 }
 
+void JSListItem::Pop()
+{
+    JSContainerBase::Pop();
+    ListItemModel::GetInstance()->OnDidPop();
+}
+
 void JSListItem::CreateForPartialUpdate(const JSCallbackInfo& args)
 {
     const int32_t ARGS_LENGTH = 2;
@@ -106,7 +112,11 @@ void JSListItem::CreateForPartialUpdate(const JSCallbackInfo& args)
     }
 
     if (!isLazy) {
-        ListItemModel::GetInstance()->Create(nullptr, listItemStyle);
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            ListItemModel::GetInstance()->Create(nullptr, listItemStyle);
+        } else {
+            ListItemModel::GetInstance()->Create();
+        }
     } else {
         RefPtr<JsFunction> jsDeepRender = AceType::MakeRefPtr<JsFunction>(args.This(), JSRef<JSFunc>::Cast(arg0));
         auto listItemDeepRenderFunc = [execCtx = args.GetExecutionContext(),
@@ -380,6 +390,7 @@ void JSListItem::JSBind(BindingTarget globalObj)
     JSClass<JSListItem>::Declare("ListItem");
     JSClass<JSListItem>::StaticMethod("createInternal", &JSListItem::Create);
     JSClass<JSListItem>::StaticMethod("create", &JSListItem::Create);
+    JSClass<JSListItem>::StaticMethod("pop", &JSListItem::Pop);
 
     JSClass<JSListItem>::StaticMethod("sticky", &JSListItem::SetSticky);
     JSClass<JSListItem>::StaticMethod("editable", &JSListItem::SetEditable);

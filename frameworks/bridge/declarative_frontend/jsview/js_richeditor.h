@@ -31,11 +31,13 @@ public:
     static void SetOnSelectionChange(const JSCallbackInfo& args);
     static void SetAboutToIMEInput(const JSCallbackInfo& args);
     static void SetOnIMEInputComplete(const JSCallbackInfo& args);
+    static void SetOnDidIMEInput(const JSCallbackInfo& args);
     static void SetAboutToDelete(const JSCallbackInfo& args);
     static void SetOnDeleteComplete(const JSCallbackInfo& args);
     static void SetCustomKeyboard(const JSCallbackInfo& args);
     static JSRef<JSVal> CreateJsAboutToIMEInputObj(const NG::RichEditorInsertValue& insertValue);
     static JSRef<JSVal> CreateJsOnIMEInputComplete(const NG::RichEditorAbstractSpanResult& textSpanResult);
+    static JSRef<JSVal> CreateJsOnDidIMEInput(const TextRange& textRange);
     static JSRef<JSVal> CreateJsAboutToDelet(const NG::RichEditorDeleteValue& deleteValue);
     static void SetChangeTextSpans(
         JSRef<JSArray>& jsArray, const std::vector<NG::RichEditorAbstractSpanResult>& spanList);
@@ -75,7 +77,11 @@ public:
     static std::optional<NG::BorderRadiusProperty> ParseBorderRadiusAttr(JsiRef<JSVal> args);
     static std::optional<NG::MarginProperty> ParseMarginAttr(JsiRef<JSVal> marginAttr);
     static CalcDimension ParseLengthMetrics(const JSRef<JSObject>& obj);
-    static void SelectionMenuOptions(const JSCallbackInfo& info);
+    static void EditMenuOptions(const JSCallbackInfo& info);
+    static std::optional<uint32_t> ParseColorResourceId(JSRef<JSVal> colorVal);
+    static void SetEnableKeyboardOnFocus(const JSCallbackInfo& info);
+    static JSRef<JSArray> CreateJsTextShadowObjectArray(const TextStyleResult& textStyleResult);
+    static JSRef<JSArray> CreateJsTextShadowObjectArray(const std::vector<Shadow>& textShadows);
 private:
     static void CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult);
     static void CreateImageStyleObj(JSRef<JSObject>& imageStyleObj, JSRef<JSObject>& spanResultObj,
@@ -90,6 +96,8 @@ private:
         const NG::RichEditorAbstractSpanResult& spanResult);
     static void SetSymbolChangeSpanResult(JSRef<JSObject>& resultObj,
         const NG::RichEditorAbstractSpanResult& spanResult);
+    static void SetJSSpanResultObject(JSRef<JSObject>& resultObj, const ResultObject& resultObject);
+    static void SetJSDeleteSpan(JSRef<JSObject>& spanResultObj, const NG::RichEditorAbstractSpanResult& it);
 };
 
 class JSRichEditorBaseController : public Referenced {
@@ -115,6 +123,7 @@ public:
     void SetSelection(const JSCallbackInfo& args);
     bool FontSizeRangeIsNegative(const CalcDimension& size);
     void GetLayoutManager(const JSCallbackInfo& args);
+    void GetPreviewTextInfo(const JSCallbackInfo& args);
 
     void SetInstanceId(int32_t id)
     {
@@ -143,6 +152,7 @@ protected:
         const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
     JSRef<JSObject> JSObjectCast(JSRef<JSVal> jsValue);
     void ParseJsSelectionOptions(const JSCallbackInfo& args, std::optional<SelectionOptions>& options);
+    JSRef<JSObject> CreateJSPreviewTextInfo(const PreviewTextInfo& info);
 };
 
 class JSRichEditorController final : public JSRichEditorBaseController {

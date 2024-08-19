@@ -61,6 +61,7 @@ const char PLAYER_ERROR_CODE_CREATEFAIL[] = "error_video_000001";
 const char PLAYER_ERROR_MSG_CREATEFAIL[] = "Create player failed.";
 const char PLAYER_ERROR_CODE_FILEINVALID[] = "error_video_000002";
 const char PLAYER_ERROR_MSG_FILEINVALID[] = "File invalid.";
+const int32_t DURATION_THOUSAND = 1000;
 
 void Player::Create(const std::function<void(int64_t)>& onCreate)
 {
@@ -201,9 +202,9 @@ void Player::SetSurfaceId(int64_t id, bool isTexture)
 void Player::OnPrepared(const std::string& param)
 {
     currentPos_ = 0;
-    width_ = GetIntParam(param, PLAYER_PARAM_WIDTH);
-    height_ = GetIntParam(param, PLAYER_PARAM_HEIGHT);
-    duration_ = GetIntParam(param, PLAYER_PARAM_DURATION) / 1000;
+    width_ = static_cast<uint32_t>(GetIntParam(param, PLAYER_PARAM_WIDTH));
+    height_ = static_cast<uint32_t>(GetIntParam(param, PLAYER_PARAM_HEIGHT));
+    duration_ = static_cast<uint32_t>(GetIntParam(param, PLAYER_PARAM_DURATION) / DURATION_THOUSAND);
     isPlaying_ = GetIntParam(param, PLAYER_PARAM_ISPLAYING) == 1;
     isNeedFreshForce_ = GetIntParam(param, PLAYER_PARAM_NEEDFRESHFORCE) == 1;
     isPrepared_ = true;
@@ -246,7 +247,7 @@ void Player::OnCompletion(const std::string& param)
 
 void Player::OnSeekComplete(const std::string& param)
 {
-    currentPos_ = GetIntParam(param, PLAYER_PARAM_CURRENTPOS);
+    currentPos_ = static_cast<uint32_t>(GetIntParam(param, PLAYER_PARAM_CURRENTPOS));
     if (!onCurrentPosListener_.empty()) {
         onCurrentPosListener_.back()(currentPos_);
     }
@@ -304,7 +305,7 @@ void Player::GetCurrentTime()
 
 void Player::OnTimeGetted(const std::string& result)
 {
-    currentPos_ = GetIntParam(result, PLAYER_PARAM_CURRENTPOS);
+    currentPos_ = static_cast<uint32_t>(GetIntParam(result, PLAYER_PARAM_CURRENTPOS));
     if (!onCurrentPosListener_.empty()) {
         onCurrentPosListener_.back()(currentPos_);
     }

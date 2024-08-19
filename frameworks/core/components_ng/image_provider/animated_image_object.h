@@ -28,8 +28,8 @@ public:
     {}
     ~AnimatedImageObject() override = default;
 
-    void MakeCanvasImage(const RefPtr<ImageLoadingContext>& ctx, const SizeF& resizeTarget, bool forceResize,
-        bool syncLoad, bool loadInVipChannel) override;
+    void MakeCanvasImage(
+        const RefPtr<ImageLoadingContext>& ctx, const SizeF& resizeTarget, bool forceResize, bool syncLoad) override;
 
     RefPtr<ImageObject> Clone() override;
 

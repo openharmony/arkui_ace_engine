@@ -15,9 +15,6 @@
 
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_image_animator_bridge.h"
 
-#include "frameworks/bridge/common/dom/dom_image_animator.h"
-#include "frameworks/bridge/js_frontend/engine/jsi/jsi_engine.h"
-
 namespace OHOS::Ace::Framework {
 
 shared_ptr<JsValue> JsiImageAnimatorBridge::JsGetState(const shared_ptr<JsRuntime>& runtime, NodeId nodeId)

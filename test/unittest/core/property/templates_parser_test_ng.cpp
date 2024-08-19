@@ -26,6 +26,10 @@
 #define protected public
 #define private public
 
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
 #include "core/components_ng/property/templates_parser.h"
 
 using namespace testing;
@@ -192,6 +196,11 @@ HWTEST_F(TemplatesParserTestNg, TemplatesParserTestNg001, TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: TemplatesParserTestNg002
+ * @tc.desc: Test ParseTemplateArgs.
+ * @tc.type: FUNC
+ */
 HWTEST_F(TemplatesParserTestNg, TemplatesParserTestNg002, TestSize.Level1)
 {
     /**
@@ -300,28 +309,93 @@ HWTEST_F(TemplatesParserTestNg, TemplatesParserTestNg003, TestSize.Level1)
     EXPECT_EQ(retVal.second, 2);
 
     /**
-     * @tc.steps: step4. Test ParseArgsWithAutoStretch with vp args.
+     * @tc.steps: step5. Test ParseArgsWithAutoStretch with % args.
+     * @tc.expected: retVal.first is empty .
+     */
+    args = "repeat(auto-stretch, 5%)";
+    size = 35;
+    gap = 2;
+    gt = { 5, 5, 5, 5, 5 };
+    retVal = ParseTemplateArgs(args, size, gap, childrenCount);
+    EXPECT_TRUE(retVal.first.empty());
+}
+
+/**
+ * @tc.name: TemplatesParserTestNg004
+ * @tc.desc: Test ParseArgsWithoutAutoFill.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TemplatesParserTestNg, TemplatesParserTestNg004, TestSize.Level1)
+{
+    std::string args = "auto-fill 4px) 4";
+    double size = 0;
+    double gap = -1;
+    int32_t childrenCount = 2;
+    vector<int> gt { 4, 4 };
+    auto retVal = ParseTemplateArgs(args, size, gap, childrenCount);
+
+    /**
+     * @tc.steps:. Test ParseArgsWithAutoStretch with vp args.
      * @tc.expected: retVal.first is { 5, 5, 5, 5, 5 } and retVal.second is 2.5 .
      */
     args = "repeat(auto-stretch, 5vp)";
     size = 35;
     gap = 2;
     gt = { 5, 5, 5, 5, 5 };
-
+    MockPipelineContext::SetUp();
+    MockContainer::SetUp();
+    MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
     retVal = ParseTemplateArgs(args, size, gap, childrenCount);
     EXPECT_EQ(retVal.first.size(), gt.size());
     for (int i = 0; i < retVal.first.size(); i++) {
         EXPECT_EQ(retVal.first[i], gt[i]);
     }
     EXPECT_EQ(retVal.second, 2.5);
+    MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 
-    /**
-     * @tc.steps: step5. Test ParseArgsWithAutoStretch with % args.
-     * @tc.expected: retVal.first is empty .
-     */
-    args = "repeat(auto-stretch, 5%)";
-
+    args = "repeat(auto-stretch, 10vp)";
+    size = 1;
+    gap = 2;
+    gt = { 5, 5, 5, 5, 5 };
     retVal = ParseTemplateArgs(args, size, gap, childrenCount);
-    EXPECT_TRUE(retVal.first.empty());
+
+    args = "repeat(auto-fill,0vp)";
+    size = 6;
+    gap = 100;
+    childrenCount = 6;
+    gt = { 4, 2, 2, 2 };
+    retVal = ParseTemplateArgs(args, size, gap, childrenCount);
+    EXPECT_EQ(gap, 100);
+}
+
+/**
+ * @tc.name: TemplatesParserTestNg005
+ * @tc.desc: Test ParseArgsWithoutAutoFill.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TemplatesParserTestNg, TemplatesParserTestNg005, TestSize.Level1)
+{
+    std::string args = "repeat(auto-fill,0vp)";
+    double size = 6;
+    double gap = 100;
+    int32_t childrenCount = -1;
+    vector<int> gt = { 4, 2, 2, 2 };
+    auto retVal = ParseTemplateArgs(args, size, gap, childrenCount);
+
+    args = "repeat(auto-fit,0vp)";
+    size = 6;
+    gap = 100;
+    childrenCount = 6;
+    gt = { 4, 2, 2, 2 };
+    retVal = ParseTemplateArgs(args, size, gap, childrenCount);
+
+    args = "repeat(auto-fit,0vp)";
+    size = 6;
+    gap = 100;
+    childrenCount = -1;
+    gt = { 4, 2, 2, 2 };
+    retVal = ParseTemplateArgs(args, size, gap, childrenCount);
+    EXPECT_EQ(gap, 100);
 }
 } // namespace OHOS::Ace::NG

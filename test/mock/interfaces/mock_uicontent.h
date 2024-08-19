@@ -109,6 +109,7 @@ public:
     MOCK_METHOD0(IsUIExtensionSubWindow, bool());
     MOCK_METHOD0(IsUIExtensionAbilityProcess, bool());
     MOCK_METHOD0(IsUIExtensionAbilityHost, bool());
+    MOCK_METHOD2(SetForceSplitEnable, void(bool isForceSplit, const std::string& homePage));
 
 #ifndef PREVIEW
     MOCK_METHOD4(

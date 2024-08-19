@@ -60,17 +60,18 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
+        auto layoutProps = GetLayoutProperty<LayoutProperty>();
+        CHECK_NULL_RETURN(layoutProps, nullptr);
+        bool isReverse = layoutProps->GetNonAutoLayoutDirection() == TextDirection::RTL;
         if (!selectOverlayModifier_ && CheckIfNeedMenu()) {
-            selectOverlayModifier_ = AceType::MakeRefPtr<SelectOverlayModifier>(defaultMenuEndOffset_);
+            selectOverlayModifier_ = AceType::MakeRefPtr<SelectOverlayModifier>(defaultMenuEndOffset_, isReverse);
         }
         if (!selectOverlayContentModifier_ && CheckIfNeedHandle()) {
             selectOverlayContentModifier_ = AceType::MakeRefPtr<SelectOverlayContentModifier>();
         }
         SetContentModifierBounds(selectOverlayContentModifier_);
         SetSelectMenuHeight();
-        auto layoutProps = GetLayoutProperty<LayoutProperty>();
-        CHECK_NULL_RETURN(layoutProps, nullptr);
-        bool isReverse = layoutProps->GetNonAutoLayoutDirection() == TextDirection::RTL;
+
         if (paintMethodCreated_) {
             return MakeRefPtr<SelectOverlayPaintMethod>(selectOverlayModifier_, selectOverlayContentModifier_, *info_,
                 defaultMenuEndOffset_, selectMenuHeight_, hasExtensionMenu_, hasShowAnimation_, true, isHiddenHandle_,
@@ -129,9 +130,14 @@ public:
         return defaultMenuEndOffset_;
     }
 
-    float GetMenuWidth() const
+    std::optional<float> GetMenuWidth() const
     {
-        return menuWidth_.value_or(0);
+        return menuWidth_;
+    }
+
+    std::optional<float> GetMenuHeight() const
+    {
+        return menuHeight_;
     }
 
     const RectF& GetHandleRegion(bool isFirst) const
@@ -172,7 +178,7 @@ public:
     }
 
     void StartHiddenHandleTask(bool isDelay = true);
-    void UpdateSelectArea(const RectF& selectArea);
+    virtual void UpdateSelectArea(const RectF& selectArea);
 
     void SetIsNewAvoid(bool isNewAvoid);
 
@@ -187,6 +193,7 @@ public:
     void SetGestureEvent();
 
     static float GetHandleDiameter();
+    void OnDpiConfigurationUpdate() override;
 
 protected:
     virtual void CheckHandleReverse();
@@ -252,6 +259,7 @@ private:
     bool closedByGlobalTouchEvent_ = false;
     SelectOverlayMode overlayMode_ = SelectOverlayMode::ALL;
     bool isSimulateOnClick_ = false;
+    bool clickConsumeBySimulate_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayPattern);
 };

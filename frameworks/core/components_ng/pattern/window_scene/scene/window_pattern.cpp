@@ -20,16 +20,43 @@
 
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "base/utils/system_properties.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/window_scene/scene/window_event_process.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#ifdef ATOMIC_SERVICE_ATTRIBUTION_ENABLE
+#include "core/components_ng/pattern/window_scene/scene/atomicservice_basic_engine_plugin.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t COLOR_BLACK = 0xff000000;
 constexpr uint32_t COLOR_WHITE = 0xffffffff;
+
+#ifdef ATOMIC_SERVICE_ATTRIBUTION_ENABLE
+constexpr uint32_t ASENGINE_ATTRIBUTIONS_COUNT = 3;
+constexpr uint32_t CIRCLE_ICON_INDEX = 1;
+constexpr uint32_t EYELASHRING_ICON_INDEX = 2;
+constexpr float HALF_PERCENT_TAG = 0.5f;
+constexpr float BASE_X_OFFSET = 0.25f;
+constexpr float BASE_Y_OFFSET = 0.4f;
+constexpr float ROTATION_ANGLE = 360.0f;
+constexpr uint32_t TEXT_NODE_HEIGHT = 42;
+constexpr uint32_t TEXT_OFFSET_Y = 44;
+constexpr uint32_t TEXT_NODE_FONT_SIZE = 16;
+constexpr uint32_t TEXT_MAX_LINE = 2;
+constexpr uint32_t IMAGE_NODE_SIZE = 72;
+constexpr uint32_t ANIMATION_DURATION = 1750;
+constexpr Dimension IMAGE_NODE_OFFSET = Dimension(-36, DimensionUnit::VP);
+const Rosen::RSAnimationTimingCurve NODE_ANIMATION_TIMING_CURVE =
+    Rosen::RSAnimationTimingCurve::CreateCubicCurve(0.40f, 0.08f, 0.60f, 0.92f);
+#endif
+
+constexpr uint32_t COLOR_TRANSLUCENT_WHITE = 0x66ffffff;
+constexpr Dimension SNAPSHOT_RADIUS = 16.0_vp;
 } // namespace
 
 class LifecycleListener : public Rosen::ILifecycleListener {
@@ -115,14 +142,11 @@ void WindowPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto state = session_->GetSessionState();
-    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
-        "[WMSMain] id: %{public}d, node id: %{public}d, state: %{public}u, name: %{public}s, in recents: %{public}d",
-        session_->GetPersistentId(), host->GetId(),
-        state, session_->GetSessionInfo().bundleName_.c_str(), session_->GetShowRecent());
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "[WMSMain]OnAttachToFrameNode id: %{public}d, node id: %{public}d, "
+        "name: %{public}s, state: %{public}u, in recents: %{public}d", session_->GetPersistentId(), host->GetId(),
+        session_->GetSessionInfo().bundleName_.c_str(), state, session_->GetShowRecent());
     if (state == Rosen::SessionState::STATE_DISCONNECT) {
-        if (!HasStartingPage()) {
-            return;
-        }
+        CHECK_EQUAL_VOID(HasStartingPage(), false);
         if (session_->GetShowRecent() && session_->GetScenePersistence() &&
             (session_->GetScenePersistence()->IsSnapshotExisted() ||
             session_->GetScenePersistence()->IsSavingSnapshot())) {
@@ -154,11 +178,14 @@ void WindowPattern::OnAttachToFrameNode()
 
     AddChild(host, appWindow_, appWindowName_, 0);
     auto surfaceNode = session_->GetSurfaceNode();
-    if (surfaceNode && !surfaceNode->IsBufferAvailable()) {
+    CHECK_NULL_VOID(surfaceNode);
+    if (!surfaceNode->IsBufferAvailable()) {
         CreateStartingWindow();
         AddChild(host, startingWindow_, startingWindowName_);
-        surfaceNode->SetBufferAvailableCallback(callback_);
+        surfaceNode->SetBufferAvailableCallback(coldStartCallback_);
+        return;
     }
+    attachToFrameNodeFlag_ = true;
 }
 
 void WindowPattern::CreateBlankWindow()
@@ -189,11 +216,172 @@ void WindowPattern::CreateAppWindow()
         auto context = AceType::DynamicCast<NG::RosenRenderContext>(appWindow_->GetRenderContext());
         CHECK_NULL_VOID(context);
         context->SetRSNode(surfaceNode);
+        surfaceNode->SetVisible(true);
     }
 }
 
+#ifdef ATOMIC_SERVICE_ATTRIBUTION_ENABLE
+RefPtr<FrameNode> WindowPattern::BuildTextNode(const std::string& appNameInfo)
+{
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(textNode, nullptr);
+    // set size
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, nullptr);
+    auto textNodeHeight = CalcLength(Dimension(TEXT_NODE_HEIGHT, DimensionUnit::VP));
+    auto textNodeWidth = CalcLength(Dimension(HALF_PERCENT_TAG, DimensionUnit::PERCENT));
+    textLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(textNodeWidth, textNodeHeight));
+    // set basic attributions
+    textLayoutProperty->UpdateContent(appNameInfo);
+    textLayoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
+    textLayoutProperty->UpdateFontSize(Dimension(TEXT_NODE_FONT_SIZE, DimensionUnit::FP));
+    textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
+    textLayoutProperty->UpdateMaxLines(TEXT_MAX_LINE);
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+    // set position
+    double textOffsetY = Dimension(TEXT_OFFSET_Y, DimensionUnit::VP).ConvertToPx();
+    auto basePositionX = Dimension(BASE_X_OFFSET, DimensionUnit::PERCENT);
+    auto basePositionY = Dimension(BASE_Y_OFFSET, DimensionUnit::PERCENT);
+    auto textContext = AceType::DynamicCast<RosenRenderContext>(textNode->GetRenderContext());
+    CHECK_NULL_RETURN(textContext, nullptr);
+    textContext->UpdatePosition(OffsetT<Dimension>(basePositionX, basePositionY));
+    textContext->SetTranslate(0, textOffsetY, 0);
+    textNode->MarkModifyDone();
+    return textNode;
+}
+
+RefPtr<FrameNode> WindowPattern::BuildAnimateNode(const std::string& base64Resource)
+{
+    CHECK_NULL_RETURN(session_, nullptr);
+    const auto& sessionInfo = session_->GetSessionInfo();
+    auto testImageSource = ImageSourceInfo(
+        base64Resource, sessionInfo.bundleName_, sessionInfo.moduleName_);
+    auto animateNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    CHECK_NULL_RETURN(animateNode, nullptr);
+    auto animateLayoutProperty = animateNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(animateLayoutProperty, nullptr);
+    animateLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    animateLayoutProperty->UpdateImageSourceInfo(testImageSource);
+    animateLayoutProperty->UpdateImageFit(ImageFit::FILL);
+    auto animateContext = AceType::DynamicCast<RosenRenderContext>(animateNode->GetRenderContext());
+    CHECK_NULL_RETURN(animateContext, nullptr);
+    auto animateRSNode = animateContext->GetRSNode();
+    CHECK_NULL_RETURN(animateRSNode, nullptr);
+    auto animatePaintProperty = animateNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(animatePaintProperty, nullptr);
+    animatePaintProperty->UpdateImageInterpolation(ImageInterpolation::HIGH);
+    // set position
+    auto basePositionX = Dimension(HALF_PERCENT_TAG, DimensionUnit::PERCENT);
+    auto basePositionY = Dimension(BASE_Y_OFFSET, DimensionUnit::PERCENT);
+    animateContext->UpdatePosition(OffsetT<Dimension>(basePositionX, basePositionY));
+    animateContext->SetTranslate(IMAGE_NODE_OFFSET.ConvertToPx(), IMAGE_NODE_OFFSET.ConvertToPx(), 0);
+    // set size
+    auto animateNodeHeight = CalcLength(Dimension(IMAGE_NODE_SIZE, DimensionUnit::VP));
+    auto animateNodeWidth = CalcLength(Dimension(IMAGE_NODE_SIZE, DimensionUnit::VP));
+    animateLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(animateNodeWidth, animateNodeHeight));
+    // set animation
+    Rosen::RSAnimationTimingProtocol protocol;
+    animateContext->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, 0.0f, 0.0f));
+    protocol.SetDuration(ANIMATION_DURATION);
+    protocol.SetRepeatCount(-1);
+    Rosen::RSNode::Animate(protocol, NODE_ANIMATION_TIMING_CURVE, [animateContext] {
+        animateContext->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, ROTATION_ANGLE, 0.0f));
+    });
+    animateNode->MarkModifyDone();
+    return animateNode;
+}
+
+RefPtr<FrameNode> WindowPattern::BuildStaticImageNode(const std::string& base64Resource)
+{
+    CHECK_NULL_RETURN(session_, nullptr);
+    const auto& sessionInfo = session_->GetSessionInfo();
+    auto testImageSource = ImageSourceInfo(
+        base64Resource, sessionInfo.bundleName_, sessionInfo.moduleName_);
+    auto staticNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    CHECK_NULL_RETURN(staticNode, nullptr);
+    auto staticLayoutProperty = staticNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(staticLayoutProperty, nullptr);
+    staticLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    staticLayoutProperty->UpdateImageSourceInfo(testImageSource);
+    staticLayoutProperty->UpdateImageFit(ImageFit::CONTAIN);
+    // set size
+    auto staticNodeHeight = CalcLength(Dimension(IMAGE_NODE_SIZE, DimensionUnit::VP));
+    auto staticNodeWidth = CalcLength(Dimension(IMAGE_NODE_SIZE, DimensionUnit::VP));
+    staticLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(staticNodeWidth, staticNodeHeight));
+    // get context and property
+    auto staticContext = AceType::DynamicCast<RosenRenderContext>(staticNode->GetRenderContext());
+    CHECK_NULL_RETURN(staticContext, nullptr);
+    auto staticPaintProperty = staticNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(staticPaintProperty, nullptr);
+    staticPaintProperty->UpdateImageInterpolation(ImageInterpolation::HIGH);
+    // set position
+    auto basePositionX = Dimension(HALF_PERCENT_TAG, DimensionUnit::PERCENT);
+    auto basePositionY = Dimension(BASE_Y_OFFSET, DimensionUnit::PERCENT);
+    staticContext->UpdatePosition(OffsetT<Dimension>(basePositionX, basePositionY));
+    staticContext->SetTranslate(IMAGE_NODE_OFFSET.ConvertToPx(), IMAGE_NODE_OFFSET.ConvertToPx(), 0);
+    staticNode->MarkModifyDone();
+    return staticNode;
+}
+
+void WindowPattern::CreateASStartingWindow()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    ACE_SCOPED_TRACE("CreateASStartingWindow[id:%d][self:%d]", session_->GetPersistentId(), host->GetId());
+    
+    CHECK_NULL_VOID(session_);
+    const auto& sessionInfo = session_->GetSessionInfo();
+    // get atomic service resources
+    std::string appNameInfo = "";
+    std::string eyelashRingIcon = "";
+    std::string circleIcon = "";
+
+#ifdef ACE_ENGINE_PLUGIN_PATH
+    std::vector<std::string> atomicServiceIconInfo = AtomicServiceBasicEnginePlugin::GetInstance().
+        getParamsFromAtomicServiceBasicEngine(sessionInfo.bundleName_);
+    if (atomicServiceIconInfo.size() >= ASENGINE_ATTRIBUTIONS_COUNT) {
+        appNameInfo = atomicServiceIconInfo[0];
+        circleIcon = atomicServiceIconInfo[CIRCLE_ICON_INDEX];
+        eyelashRingIcon = atomicServiceIconInfo[EYELASHRING_ICON_INDEX];
+    }
+    AtomicServiceBasicEnginePlugin::GetInstance().releaseData();
+#endif // ACE_ENGINE_PLUGIN_PATH
+
+    startingWindow_ = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StackPattern>());
+    CHECK_NULL_VOID(startingWindow_);
+    auto asStartingLayoutProperty = startingWindow_->GetLayoutProperty<StackLayoutProperty>();
+    CHECK_NULL_VOID(asStartingLayoutProperty);
+    asStartingLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    startingWindow_->SetHitTestMode(HitTestMode::HTMNONE);
+    startingWindow_->GetRenderContext()->UpdateBackgroundColor(
+        SystemProperties::GetColorMode() == ColorMode::DARK ? Color::BLACK : Color::WHITE);
+
+    auto staticNode = BuildStaticImageNode(circleIcon);
+    auto animateNode = BuildAnimateNode(eyelashRingIcon);
+    auto textNode = BuildTextNode(appNameInfo);
+
+    startingWindow_->AddChild(staticNode);
+    startingWindow_->AddChild(animateNode);
+    startingWindow_->AddChild(textNode);
+    startingWindow_->MarkModifyDone();
+}
+#endif
+
 void WindowPattern::CreateStartingWindow()
 {
+    const auto& sessionInfo = session_->GetSessionInfo();
+#ifdef ATOMIC_SERVICE_ATTRIBUTION_ENABLE
+    if (sessionInfo.isAtomicService_) {
+        CreateASStartingWindow();
+        return;
+    }
+#endif
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     ACE_SCOPED_TRACE("CreateStartingWindow[id:%d][self:%d]", session_->GetPersistentId(), host->GetId());
@@ -205,14 +393,36 @@ void WindowPattern::CreateStartingWindow()
 
     std::string startupPagePath;
     auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
-    const auto& sessionInfo = session_->GetSessionInfo();
     Rosen::SceneSessionManager::GetInstance().GetStartupPage(sessionInfo, startupPagePath, backgroundColor);
-
     startingWindow_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
     imageLayoutProperty->UpdateImageSourceInfo(
         ImageSourceInfo(startupPagePath, sessionInfo.bundleName_, sessionInfo.moduleName_));
     imageLayoutProperty->UpdateImageFit(ImageFit::NONE);
     startingWindow_->MarkModifyDone();
+}
+
+void WindowPattern::UpdateSnapshotWindowProperty()
+{
+    CHECK_NULL_VOID(snapshotWindow_ && session_);
+    auto isExitSplitOnBackground = session_->IsExitSplitOnBackground();
+    if (isExitSplitOnBackground) {
+        auto imagePattern = snapshotWindow_->GetPattern<ImagePattern>();
+        auto renderContext = snapshotWindow_->GetRenderContext();
+        auto imageRenderProperty = snapshotWindow_->GetPaintProperty<ImageRenderProperty>();
+        CHECK_NULL_VOID(imagePattern && renderContext && imageRenderProperty);
+
+        BorderRadiusProperty borderRadius;
+        borderRadius.SetRadius(SNAPSHOT_RADIUS);
+        borderRadius.multiValued = false;
+        renderContext->UpdateBorderRadius(borderRadius);
+        renderContext->UpdateBackgroundColor(Color(COLOR_TRANSLUCENT_WHITE));
+        imagePattern->SetNeedBorderRadius(true);
+        imageRenderProperty->UpdateNeedBorderRadius(true);
+    }
+    auto imageLayoutProperty = snapshotWindow_->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    imageLayoutProperty->UpdateImageFit(isExitSplitOnBackground ? ImageFit::CONTAIN : ImageFit::COVER_TOP_LEFT);
+    snapshotWindow_->MarkModifyDone();
 }
 
 void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::PixelMap>> snapshot)
@@ -223,7 +433,6 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
     session_->SetNeedSnapshot(false);
     snapshotWindow_ = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-    snapshotWindow_->GetPattern<ImagePattern>()->SetLoadInVipChannel(true);
     auto imageLayoutProperty = snapshotWindow_->GetLayoutProperty<ImageLayoutProperty>();
     imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto imagePaintProperty = snapshotWindow_->GetPaintProperty<ImageRenderProperty>();
@@ -257,8 +466,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
             self->snapshotWindow_->MarkNeedRenderOnly();
         });
     }
-    imageLayoutProperty->UpdateImageFit(ImageFit::COVER_TOP_LEFT);
-    snapshotWindow_->MarkModifyDone();
+    UpdateSnapshotWindowProperty();
 }
 
 void WindowPattern::ClearImageCache(const ImageSourceInfo& sourceInfo)
@@ -407,7 +615,9 @@ void WindowPattern::FilterInvalidPointerItem(const std::shared_ptr<MMI::PointerE
             continue;
         }
         const NG::PointF point { static_cast<float>(item.GetDisplayX()), static_cast<float>(item.GetDisplayY()) };
-        if (host->IsOutOfTouchTestRegion(point, MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN)) {
+        OHOS::Ace::TouchEvent touchEvent;
+        touchEvent.sourceType = static_cast<SourceType>(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
+        if (host->IsOutOfTouchTestRegion(point, touchEvent)) {
             pointerEvent->RemovePointerItem(id);
         }
     }
@@ -505,10 +715,10 @@ void WindowPattern::AddChild(const RefPtr<FrameNode>& host, const RefPtr<FrameNo
 }
 
 void WindowPattern::RemoveChild(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& child,
-    const std::string& nodeType)
+    const std::string& nodeType, bool allowTransition)
 {
     ACE_SCOPED_TRACE("WindowScene::RemoveChild[%s][self:%d]", nodeType.c_str(), host->GetId());
-    host->RemoveChild(child);
+    host->RemoveChild(child, allowTransition);
     TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "RemoveChild %{public}s, %{public}d", nodeType.c_str(), host->GetId());
 }
 } // namespace OHOS::Ace::NG

@@ -30,6 +30,7 @@ class JSImage : public JSViewAbstract, public JSInteractableView {
 public:
     static void Create(const JSCallbackInfo& info);
     static bool CheckIsCard();
+    static bool CheckResetImage(const JSCallbackInfo& info);
     static void CreateImage(const JSCallbackInfo& info, bool isImageSpan = false);
     static void CreateImageAnimation(std::vector<RefPtr<PixelMap>>& pixelMaps,
         int32_t duration, int32_t iterations);
@@ -70,6 +71,8 @@ public:
 
     static void EnableAnalyzer(bool isEnableAnalyzer);
     static void AnalyzerConfig(const JSCallbackInfo &info);
+    static void ParseResizableSlice(const JSRef<JSObject>& info);
+    static void ParseResizableLattice(const JSRef<JSObject>& info);
     static void JsImageResizable(const JSCallbackInfo& info);
     static bool IsDrawable(const JSRef<JSVal>& jsValue);
 

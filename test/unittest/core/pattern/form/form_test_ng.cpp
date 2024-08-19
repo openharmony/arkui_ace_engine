@@ -18,13 +18,15 @@
 
 #include "gtest/gtest.h"
 
+#define private public
+#define protected public
+
 #include "core/components/form/resource/form_utils.h"
 #include "core/pipeline/pipeline_base.h"
 
-#define private public
-#define protected public
 #include "mock/mock_form_utils.h"
 #include "mock/mock_sub_container.h"
+#include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
@@ -77,6 +79,9 @@ void FormTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
     MockContainer::SetUp();
+    MockContainer::Current()->pipelineContext_ = NG::MockPipelineContext::GetCurrent();
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockContainer::Current()->pipelineContext_->taskExecutor_ = MockContainer::Current()->taskExecutor_;
 }
 
 void FormTestNg::TearDownTestSuite()
@@ -150,7 +155,11 @@ HWTEST_F(FormTestNg, OnDirtyLayoutWrapperSwap, TestSize.Level1)
             auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm, skipMeasures[i]);
             layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
             auto isSwap = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-            ASSERT_EQ(isSwap, false);
+            if (config.skipMeasure && config.skipLayout) {
+                ASSERT_EQ(isSwap, false);
+            } else {
+                ASSERT_EQ(isSwap, true);
+            }
         }
     }
 
@@ -164,7 +173,7 @@ HWTEST_F(FormTestNg, OnDirtyLayoutWrapperSwap, TestSize.Level1)
     pattern->cardInfo_.allowUpdate = !formInfo.allowUpdate;
     auto isSwap = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     ASSERT_EQ(pattern->cardInfo_.allowUpdate, formInfo.allowUpdate);
-    ASSERT_EQ(isSwap, false);
+    ASSERT_EQ(isSwap, true);
 
     /**
      * @tc.steps: ste4. Set call methods OnDirtyLayoutWrapperSwap when card info dose not change , but the value of
@@ -176,7 +185,7 @@ HWTEST_F(FormTestNg, OnDirtyLayoutWrapperSwap, TestSize.Level1)
     pattern->cardInfo_.allowUpdate = !formInfo.allowUpdate;
     isSwap = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     ASSERT_EQ(pattern->cardInfo_.allowUpdate, formInfo.allowUpdate);
-    ASSERT_EQ(isSwap, false);
+    ASSERT_EQ(isSwap, true);
 
     /**
      * @tc.steps: step5. Set call methods OnDirtyLayoutWrapperSwap when card info dose not change , and the value of
@@ -186,7 +195,7 @@ HWTEST_F(FormTestNg, OnDirtyLayoutWrapperSwap, TestSize.Level1)
     pattern->formManagerBridge_ = nullptr;
     isSwap = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     ASSERT_EQ(pattern->cardInfo_.allowUpdate, formInfo.allowUpdate);
-    ASSERT_EQ(isSwap, false);
+    ASSERT_EQ(isSwap, true);
 }
 
 /**
@@ -345,7 +354,7 @@ HWTEST_F(FormTestNg, OnDirtyLayoutWrapperSwap002, TestSize.Level1)
             auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm, false);
             layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
             auto isSwap = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-            ASSERT_EQ(isSwap, false);
+            ASSERT_EQ(isSwap, true);
             if (i == 1 && j == 1) {
                 ASSERT_EQ(pattern->cardInfo_.bundleName, formInfo.bundleName);
             } else {
@@ -369,7 +378,7 @@ HWTEST_F(FormTestNg, OnDirtyLayoutWrapperSwap002, TestSize.Level1)
             auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm, false);
             layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
             auto isSwap = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-            ASSERT_EQ(isSwap, false);
+            ASSERT_EQ(isSwap, true);
             ASSERT_EQ(pattern->cardInfo_.width, Dimension(length[i]));
             ASSERT_EQ(pattern->cardInfo_.height, Dimension(length[j]));
         }
@@ -416,7 +425,7 @@ HWTEST_F(FormTestNg, OnDirtyLayoutWrapperSwap003, TestSize.Level1)
     auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm, false);
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
     auto isSwap = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    ASSERT_EQ(isSwap, false);
+    ASSERT_EQ(isSwap, true);
     ASSERT_EQ(pattern->cardInfo_.allowUpdate, true);
     ASSERT_EQ(pattern->cardInfo_.width, Dimension(NORMAL_LENGTH));
     ASSERT_EQ(pattern->cardInfo_.height, Dimension(NORMAL_LENGTH));
@@ -1495,5 +1504,49 @@ HWTEST_F(FormTestNg, CreateTimeLimitNode, TestSize.Level1)
     auto host = pattern->GetHost();
     pattern->CreateTimeLimitNode();
     ASSERT_NE(host, nullptr);
+}
+
+/**
+ * @tc.name: UpdateChildNodeOpacity
+ * @tc.desc: Test UpdateChildNodeOpacity in Form Pattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, UpdateChildNodeOpacity, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    pattern->UpdateChildNodeOpacity(FormChildNodeType::FORM_SURFACE_NODE, 0);
+    ASSERT_NE(host, nullptr);
+}
+
+/**
+ * @tc.name: SnapshotSurfaceNode
+ * @tc.desc: Test SnapshotSurfaceNode in Form Pattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, SnapshotSurfaceNode, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    pattern->SnapshotSurfaceNode();
+    ASSERT_NE(host, nullptr);
+}
+
+/**
+ * @tc.name: CheckFormBundleForbidden
+ * @tc.desc: Test CheckFormBundleForbidden in Form Pattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, CheckFormBundleForbidden, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    bool isForbidden = pattern->CheckFormBundleForbidden("MyBundleName");
+    ASSERT_EQ(isForbidden, false);
 }
 } // namespace OHOS::Ace::NG

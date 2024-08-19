@@ -28,6 +28,10 @@ class MovingPhotoView extends JSViewAbstract {
         __MovingPhotoView__.objectFit(value);
     }
 
+    static onComplete(value) {
+        __MovingPhotoView__.onComplete(value);
+    }
+
     static onStart(value) {
         __MovingPhotoView__.onStart(value);
     }
@@ -78,6 +82,18 @@ class MovingPhotoView extends JSViewAbstract {
 
     static remoteMessage(value) {
         __Common__.remoteMessage(value);
+    }
+
+    static autoPlayPeriod(startTime, endTime) {
+        __MovingPhotoView__.autoPlayPeriod(startTime, endTime);
+    }
+
+    static autoPlay(value) {
+        __MovingPhotoView__.autoPlay(value);
+    }
+
+    static repeatPlay(value) {
+        __MovingPhotoView__.repeatPlay(value);
     }
 }
 

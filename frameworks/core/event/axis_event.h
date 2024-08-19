@@ -36,7 +36,6 @@ constexpr Dimension LINE_HEIGHT_DESKTOP = 21.0_vp;
 constexpr int32_t LINE_NUMBER_DESKTOP = 3;
 constexpr int32_t DP_PER_LINE_PHONE = 64;
 constexpr int32_t LINE_NUMBER_PHONE = 1;
-constexpr int32_t AXIS_BASE_ID = 400;
 
 enum class AxisDirection : int32_t {
     NONE = 0,
@@ -95,12 +94,12 @@ struct AxisEvent final : public UIInputEvent {
     AxisEvent(int32_t id, float x, float y, float screenX, float screenY, double verticalAxis, double horizontalAxis,
         double pinchAxisScale, double rotateAxisAngle, bool isRotationEvent, AxisAction action, TimeStamp timestamp,
         int64_t deviceId, SourceType sourceType, SourceTool sourceTool, std::shared_ptr<MMI::PointerEvent> pointerEvent,
-        int32_t targetDisplayId, int32_t originalId, bool isInjected)
+        std::vector<KeyCode> pressedCodes, int32_t targetDisplayId, int32_t originalId, bool isInjected)
         : id(id), x(x), y(y), screenX(screenX), screenY(screenY), verticalAxis(verticalAxis),
           horizontalAxis(horizontalAxis), pinchAxisScale(pinchAxisScale), rotateAxisAngle(rotateAxisAngle),
           isRotationEvent(isRotationEvent), action(action), deviceId(deviceId), sourceType(sourceType),
-          sourceTool(sourceTool), pointerEvent(std::move(pointerEvent)), targetDisplayId(targetDisplayId),
-          originalId(originalId), isInjected(isInjected)
+          sourceTool(sourceTool), pointerEvent(std::move(pointerEvent)), pressedCodes(pressedCodes),
+          targetDisplayId(targetDisplayId), originalId(originalId), isInjected(isInjected)
     {
         time = timestamp;
     }
@@ -109,12 +108,12 @@ struct AxisEvent final : public UIInputEvent {
     {
         if (NearZero(scale)) {
             return { id, x, y, screenX, screenY, verticalAxis, horizontalAxis, pinchAxisScale, rotateAxisAngle,
-                isRotationEvent, action, time, deviceId, sourceType, sourceTool, pointerEvent, targetDisplayId,
-                originalId, isInjected };
+                isRotationEvent, action, time, deviceId, sourceType, sourceTool, pointerEvent, pressedCodes,
+                targetDisplayId, originalId, isInjected };
         }
         return { id, x / scale, y / scale, screenX / scale, screenY / scale, verticalAxis, horizontalAxis,
             pinchAxisScale, rotateAxisAngle, isRotationEvent, action, time, deviceId, sourceType, sourceTool,
-            pointerEvent, targetDisplayId, originalId, isInjected };
+            pointerEvent, pressedCodes, targetDisplayId, originalId, isInjected };
     }
 
     Offset GetOffset() const

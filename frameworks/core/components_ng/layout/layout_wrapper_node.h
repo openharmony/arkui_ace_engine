@@ -132,7 +132,7 @@ public:
         return isActive_;
     }
 
-    void SetActive(bool active = true) override
+    void SetActive(bool active = true, bool needRebuildRenderContext = false) override
     {
         isActive_ = active;
     }

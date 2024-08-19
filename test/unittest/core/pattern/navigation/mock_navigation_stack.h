@@ -28,6 +28,13 @@ struct MockReplace {
     int32_t isReplace_ = 0;
 };
 
+struct MockNavPathInfo {
+    std::string name = "";
+    std::string navDestinationId = "undefined";
+
+    explicit MockNavPathInfo(std::string name) : name(std::move(name)) {}
+};
+
 using NavigationInterceptionEvent = std::function<void(const OHOS::Ace::RefPtr<OHOS::Ace::NG::NavDestinationContext>,
     const OHOS::Ace::RefPtr<OHOS::Ace::NG::NavDestinationContext>, OHOS::Ace::NG::NavigationOperation, bool)>;
 class MockNavigationStack : public OHOS::Ace::NG::NavigationStack {
@@ -109,7 +116,7 @@ public:
                 return OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::NG::NavDestinationPattern>();
             });
         EXPECT_NE(frameNode, nullptr);
-        auto name = names_[index];
+        auto name = mockPathArray_[index].name;
         auto container = OHOS::Ace::MockContainer::Current();
         auto navigationRoute = container->GetNavigationRoute();
         if (!navigationRoute) {
@@ -129,26 +136,30 @@ public:
 
     void Push(const std::string& name, int32_t index) override
     {
-        names_.push_back(name);
+        mockPathArray_.push_back(MockNavPathInfo(name));
     }
 
     void Push(const std::string& name, const OHOS::Ace::RefPtr<OHOS::Ace::NG::RouteInfo>& routeInfo = nullptr) override
     {
-        names_.push_back(name);
+        mockPathArray_.push_back(MockNavPathInfo(name));
     }
 
     std::vector<std::string> GetAllPathName() override
     {
-        return names_;
+        std::vector<std::string> pathNames;
+        for (int32_t i = 0; i < static_cast<int32_t>(mockPathArray_.size()); i++) {
+            pathNames.emplace_back(mockPathArray_[i].name);
+        }
+        return pathNames;
     }
 
     std::vector<int32_t> GetAllPathIndex() override
     {
-        if (names_.empty()) {
+        if (mockPathArray_.empty()) {
             return {};
         }
         std::vector<int32_t> pathIndex;
-        for (int32_t i = 0; i < static_cast<int32_t>(names_.size()); i++) {
+        for (int32_t i = 0; i < static_cast<int32_t>(mockPathArray_.size()); i++) {
             pathIndex.emplace_back(i);
         }
         return pathIndex;
@@ -157,12 +168,19 @@ public:
     void Clear() override
     {
         OHOS::Ace::NG::NavigationStack::Clear();
-        names_.clear();
+        mockPathArray_.clear();
     }
 
     void Pop() override
     {
-        names_.pop_back();
+        mockPathArray_.pop_back();
+    }
+
+    void PopToIndex(int32_t index)
+    {
+        auto iter = mockPathArray_.begin();
+        std::advance(iter, index + 1);
+        mockPathArray_.erase(iter, mockPathArray_.end());
     }
 
     void SetLifecycleIndex(int8_t index)
@@ -180,6 +198,19 @@ public:
         return navPathList_;
     }
 
+    void SetDestinationIdToJsStack(int32_t index, const std::string& navDestinationId) override
+    {
+        if (index < 0 || index >= static_cast<int32_t>(mockPathArray_.size())) {
+            return;
+        }
+        mockPathArray_[index].navDestinationId = navDestinationId;
+    }
+
+    std::string GetNavPathId(int32_t index)
+    {
+        return mockPathArray_[index].navDestinationId;
+    }
+
 private:
     int8_t lifecycleIndex_ = 0;
     std::function<void()> onStateChangedCallback_;
@@ -187,6 +218,6 @@ private:
     NavigationInterceptionEvent afterCallback_;
     std::function<void(OHOS::Ace::NG::NavigationMode)> modeCallback_;
     MockReplace *mockReplace_ = new MockReplace();
-    std::vector<std::string> names_;
+    std::vector<MockNavPathInfo> mockPathArray_;
 };
 #endif

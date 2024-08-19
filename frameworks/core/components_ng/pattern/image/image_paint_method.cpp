@@ -98,10 +98,10 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
     config.imageRepeat_ = renderProps->GetImageRepeat().value_or(ImageRepeat::NO_REPEAT);
     config.smoothEdge_ = renderProps->GetSmoothEdge().value_or(0.0f);
     config.dynamicMode = renderProps->GetDynamicModeValue(DynamicRangeMode::STANDARD);
-    if (renderProps) {
-        config.resizableSlice_ = renderProps->GetImageResizableSliceValue({});
-    }
-    auto pipelineCtx = PipelineBase::GetCurrentContext();
+    config.svgFillColor_ = renderProps->GetSvgFillColor();
+    config.resizableSlice_ = renderProps->GetImageResizableSliceValue({});
+    config.resizableLattice_ = renderProps->GetImageResizableLatticeValue(nullptr);
+
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     config.flipHorizontally_ = isRightToLeft && renderProps->GetMatchTextDirection().value_or(false);
     config.colorFilter_.Reset();
@@ -114,8 +114,9 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
         config.colorFilter_.colorFilterDrawing_ = drawingColorFilter.value();
     }
     auto renderCtx = paintWrapper->GetRenderContext();
-    CHECK_NULL_VOID(renderCtx);
-    config.obscuredReasons_ = renderCtx->GetObscured().value_or(std::vector<ObscuredReasons>());
+    if (renderCtx) {
+        config.obscuredReasons_ = renderCtx->GetObscured().value_or(std::vector<ObscuredReasons>());
+    }
 
     if (renderProps->GetNeedBorderRadiusValue(false)) {
         UpdateBorderRadius(paintWrapper);
@@ -124,7 +125,12 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
 
 CanvasDrawFunction ImagePaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
 {
-    CHECK_NULL_RETURN(canvasImage_, nullptr);
+    if (!canvasImage_) {
+        TAG_LOGE(AceLogTag::ACE_IMAGE,
+            "canvasImage is null id = %{public}d, accessId = %{public}lld, src = %{public}s.", imageDfxConfig_.nodeId_,
+            static_cast<long long>(imageDfxConfig_.accessibilityId_), imageDfxConfig_.imageSrc_.c_str());
+        return nullptr;
+    }
     auto contentSize = paintWrapper->GetContentSize();
     auto&& paintConfig = canvasImage_->GetPaintConfig();
 
@@ -134,13 +140,8 @@ CanvasDrawFunction ImagePaintMethod::GetContentDrawFunction(PaintWrapper* paintW
     UpdatePaintConfig(props, paintWrapper);
     auto svgCanvas = DynamicCast<SvgCanvasImage>(canvasImage_);
     if (svgCanvas && InstanceOf<SvgCanvasImage>(canvasImage_)) {
-        svgCanvas->SetFillColor(props->GetSvgFillColor());
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, nullptr);
-        auto theme = pipeline->GetTheme<ImageTheme>();
-        CHECK_NULL_RETURN(theme, nullptr);
-        auto smoothEdgeValue = std::max(theme->GetMinEdgeAntialiasing(), props->GetSmoothEdge().value_or(0.0f));
-        svgCanvas->SetSmoothEdge(smoothEdgeValue);
+        svgCanvas->SetFillColor(paintConfig.svgFillColor_);
+        svgCanvas->SetSmoothEdge(paintConfig.smoothEdge_);
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             std::optional<ImageColorFilter> imageColorFilter = std::nullopt;
             if (paintConfig.colorFilter_.colorFilterMatrix_ || paintConfig.colorFilter_.colorFilterDrawing_) {
@@ -149,9 +150,8 @@ CanvasDrawFunction ImagePaintMethod::GetContentDrawFunction(PaintWrapper* paintW
             svgCanvas->SetColorFilter(imageColorFilter);
         }
     }
-    ImagePainter imagePainter(canvasImage_);
-    auto sensitive = sensitive_;
-    return [imagePainter, contentSize, sensitive](RSCanvas& canvas) {
+    ImagePainter imagePainter(canvasImage_, imageDfxConfig_);
+    return [imagePainter, contentSize, sensitive = sensitive_](RSCanvas& canvas) {
         if (!sensitive) {
             imagePainter.DrawImage(canvas, {}, contentSize);
         }

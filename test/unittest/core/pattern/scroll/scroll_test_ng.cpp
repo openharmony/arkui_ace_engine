@@ -50,6 +50,7 @@ void ScrollTestNg::TearDown()
     accessibilityProperty_ = nullptr;
     scrollBar_ = nullptr;
     ClearOldNodes();  // Each testcase will create new list at begin
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
 }
 
 void ScrollTestNg::GetScroll()
@@ -195,16 +196,18 @@ float ScrollTestNg::GetOffset(float childNumber)
     return offset;
 }
 
-AssertionResult ScrollTestNg::UpdateAndVerifyPosition(float childNumber, float expectChildNumber, int32_t source)
+AssertionResult ScrollTestNg::UpdateAndVerifyPosition(float delta, int32_t source, float expectOffset)
 {
-    pattern_->UpdateCurrentOffset(GetOffset(childNumber), source);
-    return IsEqualCurrentPosition(GetOffset(expectChildNumber));
+    pattern_->UpdateCurrentOffset(delta, source);
+    FlushLayoutTask(frameNode_);
+    return IsEqual(pattern_->GetTotalOffset(), expectOffset);
 }
 
-AssertionResult ScrollTestNg::ScrollToNode(int32_t childIndex, float expectChildNumber)
+AssertionResult ScrollTestNg::ScrollToNode(int32_t childIndex, float expectOffset)
 {
     pattern_->ScrollToNode(GetContentChild(childIndex));
-    return IsEqualCurrentPosition(GetOffset(expectChildNumber));
+    FlushLayoutTask(frameNode_);
+    return IsEqual(pattern_->GetTotalOffset(), expectOffset);
 }
 
 AssertionResult ScrollTestNg::IsEqualCurrentPosition(float expectOffset)
@@ -227,7 +230,7 @@ HWTEST_F(ScrollTestNg, AttrScrollable001, TestSize.Level1)
     CreateScroll();
     CreateContent(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
-    EXPECT_TRUE(UpdateAndVerifyPosition(-1, -1));
+    EXPECT_TRUE(UpdateAndVerifyPosition(-ITEM_HEIGHT, SCROLL_FROM_JUMP, ITEM_HEIGHT));
 
     /**
      * @tc.steps: step2. Text set value: HORIZONTAL
@@ -237,7 +240,7 @@ HWTEST_F(ScrollTestNg, AttrScrollable001, TestSize.Level1)
     model.SetAxis(Axis::HORIZONTAL);
     CreateContent(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
-    EXPECT_TRUE(UpdateAndVerifyPosition(-1, -1));
+    EXPECT_TRUE(UpdateAndVerifyPosition(-ITEM_WIDTH, SCROLL_FROM_JUMP, ITEM_WIDTH));
 
     /**
      * @tc.steps: step3. Text set value: NONE
@@ -247,7 +250,7 @@ HWTEST_F(ScrollTestNg, AttrScrollable001, TestSize.Level1)
     model.SetAxis(Axis::NONE);
     CreateContent(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
-    EXPECT_TRUE(UpdateAndVerifyPosition(-1, -1));
+    EXPECT_TRUE(UpdateAndVerifyPosition(-ITEM_HEIGHT, SCROLL_FROM_JUMP, ITEM_HEIGHT));
 }
 
 /**
@@ -420,7 +423,7 @@ HWTEST_F(ScrollTestNg, UpdateCurrentOffset001, TestSize.Level1)
      */
     CreateScroll();
     CreateDone(frameNode_);
-    EXPECT_TRUE(UpdateAndVerifyPosition(-1, 0, SCROLL_FROM_UPDATE));
+    EXPECT_TRUE(UpdateAndVerifyPosition(-ITEM_HEIGHT, SCROLL_FROM_UPDATE, 0.f));
 
     /**
      * @tc.steps: step2. When !HandleEdgeEffect and !IsOutOfBoundary
@@ -430,7 +433,7 @@ HWTEST_F(ScrollTestNg, UpdateCurrentOffset001, TestSize.Level1)
     CreateScroll();
     CreateContent(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
-    EXPECT_TRUE(UpdateAndVerifyPosition(1, 0, SCROLL_FROM_UPDATE));
+    EXPECT_TRUE(UpdateAndVerifyPosition(ITEM_HEIGHT, SCROLL_FROM_UPDATE, 0.f));
 
     /**
      * @tc.steps: step3. When !HandleEdgeEffect and IsOutOfBoundary
@@ -441,7 +444,7 @@ HWTEST_F(ScrollTestNg, UpdateCurrentOffset001, TestSize.Level1)
     CreateContent(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
     pattern_->currentOffset_ = 10.f;
-    EXPECT_TRUE(UpdateAndVerifyPosition(1, 0, SCROLL_FROM_UPDATE));
+    EXPECT_TRUE(UpdateAndVerifyPosition(ITEM_HEIGHT, SCROLL_FROM_UPDATE, 0.f));
 }
 
 /**
@@ -457,11 +460,11 @@ HWTEST_F(ScrollTestNg, UpdateCurrentOffset002, TestSize.Level1)
     CreateScroll();
     CreateContent(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
-    EXPECT_TRUE(UpdateAndVerifyPosition(-1, -1, SCROLL_FROM_JUMP));
-    EXPECT_TRUE(UpdateAndVerifyPosition(1, 0, SCROLL_FROM_BAR));
-    EXPECT_TRUE(UpdateAndVerifyPosition(-1, -1, SCROLL_FROM_ROTATE));
-    EXPECT_TRUE(UpdateAndVerifyPosition(1, 0, SCROLL_FROM_ANIMATION));
-    EXPECT_TRUE(UpdateAndVerifyPosition(-1, -1, SCROLL_FROM_ANIMATION_SPRING));
+    EXPECT_TRUE(UpdateAndVerifyPosition(-ITEM_HEIGHT, SCROLL_FROM_JUMP, ITEM_HEIGHT));
+    EXPECT_TRUE(UpdateAndVerifyPosition(ITEM_HEIGHT, SCROLL_FROM_BAR, 0.f));
+    EXPECT_TRUE(UpdateAndVerifyPosition(-ITEM_HEIGHT, SCROLL_FROM_ROTATE, ITEM_HEIGHT));
+    EXPECT_TRUE(UpdateAndVerifyPosition(ITEM_HEIGHT, SCROLL_FROM_ANIMATION, 0.f));
+    EXPECT_TRUE(UpdateAndVerifyPosition(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_SPRING, ITEM_HEIGHT));
 
     /**
      * @tc.steps: step2. When Axis::HORIZONTAL
@@ -471,14 +474,30 @@ HWTEST_F(ScrollTestNg, UpdateCurrentOffset002, TestSize.Level1)
     model.SetAxis(Axis::HORIZONTAL);
     CreateContent(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
-    EXPECT_TRUE(UpdateAndVerifyPosition(-1, -1, SCROLL_FROM_JUMP));
-    EXPECT_TRUE(UpdateAndVerifyPosition(1, 0, SCROLL_FROM_BAR));
-    EXPECT_TRUE(UpdateAndVerifyPosition(-1, -1, SCROLL_FROM_ROTATE));
-    EXPECT_TRUE(UpdateAndVerifyPosition(1, 0, SCROLL_FROM_ANIMATION));
-    EXPECT_TRUE(UpdateAndVerifyPosition(-1, -1, SCROLL_FROM_ANIMATION_SPRING));
+    EXPECT_TRUE(UpdateAndVerifyPosition(-ITEM_WIDTH, SCROLL_FROM_JUMP, ITEM_WIDTH));
+    EXPECT_TRUE(UpdateAndVerifyPosition(ITEM_WIDTH, SCROLL_FROM_BAR, 0.f));
+    EXPECT_TRUE(UpdateAndVerifyPosition(-ITEM_WIDTH, SCROLL_FROM_ROTATE, ITEM_WIDTH));
+    EXPECT_TRUE(UpdateAndVerifyPosition(ITEM_WIDTH, SCROLL_FROM_ANIMATION, 0.f));
+    EXPECT_TRUE(UpdateAndVerifyPosition(-ITEM_WIDTH, SCROLL_FROM_ANIMATION_SPRING, ITEM_WIDTH));
 
     /**
-     * @tc.steps: step3. When EdgeEffect::SPRING, Test ValidateOffset
+     * @tc.steps: step3. When Axis::HORIZONTAL and ROW_REVERSE
+     */
+    ClearOldNodes();
+    model = CreateScroll();
+    model.SetAxis(Axis::HORIZONTAL);
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
+    pattern_->SetDirection(FlexDirection::ROW_REVERSE);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_TRUE(UpdateAndVerifyPosition(-ITEM_WIDTH, SCROLL_FROM_JUMP, ITEM_WIDTH));
+    EXPECT_TRUE(UpdateAndVerifyPosition(ITEM_WIDTH, SCROLL_FROM_BAR, 0.f));
+    EXPECT_TRUE(UpdateAndVerifyPosition(-ITEM_WIDTH, SCROLL_FROM_ROTATE, 0.f));
+    EXPECT_TRUE(UpdateAndVerifyPosition(ITEM_WIDTH, SCROLL_FROM_ANIMATION, 0.f));
+    EXPECT_TRUE(UpdateAndVerifyPosition(-ITEM_WIDTH, SCROLL_FROM_ANIMATION_SPRING, 0.f));
+
+    /**
+     * @tc.steps: step4. When EdgeEffect::SPRING, Test ValidateOffset
      */
     ClearOldNodes();
     model = CreateScroll();
@@ -486,10 +505,10 @@ HWTEST_F(ScrollTestNg, UpdateCurrentOffset002, TestSize.Level1)
     CreateContent(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
     EXPECT_FALSE(pattern_->IsRestrictBoundary());
-    EXPECT_TRUE(UpdateAndVerifyPosition(-1, -1, SCROLL_FROM_JUMP));
-    EXPECT_TRUE(UpdateAndVerifyPosition(1, 0, SCROLL_FROM_BAR));
-    EXPECT_TRUE(UpdateAndVerifyPosition(-1, -1, SCROLL_FROM_BAR_FLING));
-    EXPECT_TRUE(UpdateAndVerifyPosition(1, 0, SCROLL_FROM_ROTATE));
+    EXPECT_TRUE(UpdateAndVerifyPosition(-ITEM_HEIGHT, SCROLL_FROM_JUMP, ITEM_HEIGHT));
+    EXPECT_TRUE(UpdateAndVerifyPosition(ITEM_HEIGHT, SCROLL_FROM_BAR, 0.f));
+    EXPECT_TRUE(UpdateAndVerifyPosition(-ITEM_HEIGHT, SCROLL_FROM_BAR_FLING, ITEM_HEIGHT));
+    EXPECT_TRUE(UpdateAndVerifyPosition(ITEM_HEIGHT, SCROLL_FROM_ROTATE, 0.f));
 
     pattern_->currentOffset_ = -10.f;
     pattern_->UpdateScrollBarOffset();
@@ -639,11 +658,11 @@ HWTEST_F(ScrollTestNg, ScrollToNode001, TestSize.Level1)
     CreateScroll();
     CreateContent(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
-    EXPECT_TRUE(ScrollToNode(5, 0));
-    EXPECT_TRUE(ScrollToNode(8, -1));
-    EXPECT_TRUE(ScrollToNode(9, -2));
-    EXPECT_TRUE(ScrollToNode(5, -2));
-    EXPECT_TRUE(ScrollToNode(0, 0));
+    EXPECT_TRUE(ScrollToNode(5, 0.f));
+    EXPECT_TRUE(ScrollToNode(8, ITEM_HEIGHT * 1));
+    EXPECT_TRUE(ScrollToNode(9, ITEM_HEIGHT * 2));
+    EXPECT_TRUE(ScrollToNode(5, ITEM_HEIGHT * 2));
+    EXPECT_TRUE(ScrollToNode(0, 0.f));
 
     /**
      * @tc.steps: step2. ScrollToNode in HORIZONTAL
@@ -654,11 +673,11 @@ HWTEST_F(ScrollTestNg, ScrollToNode001, TestSize.Level1)
     model.SetAxis(Axis::HORIZONTAL);
     CreateContent(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
-    EXPECT_TRUE(ScrollToNode(5, 0));
-    EXPECT_TRUE(ScrollToNode(8, -1));
-    EXPECT_TRUE(ScrollToNode(9, -2));
-    EXPECT_TRUE(ScrollToNode(5, -2));
-    EXPECT_TRUE(ScrollToNode(0, 0));
+    EXPECT_TRUE(ScrollToNode(5, 0.f));
+    EXPECT_TRUE(ScrollToNode(8, ITEM_WIDTH * 1));
+    EXPECT_TRUE(ScrollToNode(9, ITEM_WIDTH * 2));
+    EXPECT_TRUE(ScrollToNode(5, ITEM_WIDTH * 2));
+    EXPECT_TRUE(ScrollToNode(0, 0.f));
 
     /**
      * @tc.steps: step1. ScrollToNode itSelf
@@ -672,6 +691,25 @@ HWTEST_F(ScrollTestNg, ScrollToNode001, TestSize.Level1)
     EXPECT_TRUE(IsEqualCurrentPosition(0));
     pattern_->ScrollToNode(GetChildFrameNode(frameNode_, 0));
     EXPECT_TRUE(IsEqualCurrentPosition(0));
+}
+
+/**
+ * @tc.name: ScrollToNode002
+ * @tc.desc: Test ScrollToNode when animate is running, can not scroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, ScrollToNode002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Play animate
+     * @tc.expected: ScrollToNode can not scroll
+     */
+    CreateScroll();
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
+    pattern_->isAnimationStop_ = false;
+    EXPECT_FALSE(pattern_->AnimateStoped());
+    EXPECT_TRUE(ScrollToNode(8, 0.f));
 }
 
 /**
@@ -850,8 +888,8 @@ HWTEST_F(ScrollTestNg, OnModifyDone001, TestSize.Level1)
     CreateContent(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
     ASSERT_NE(pattern_->GetScrollableEvent(), nullptr);
-    ASSERT_NE(accessibilityProperty_->actionScrollForwardImpl_, nullptr);
-    ASSERT_NE(accessibilityProperty_->actionScrollBackwardImpl_, nullptr);
+    ASSERT_NE(accessibilityProperty_->actionScrollForwardWithParamImpl_, nullptr);
+    ASSERT_NE(accessibilityProperty_->actionScrollBackwardWithParamImpl_, nullptr);
     EXPECT_EQ(pattern_->GetAxis(), Axis::VERTICAL);
 
     /**
@@ -884,10 +922,10 @@ HWTEST_F(ScrollTestNg, Pattern002, TestSize.Level1)
     CreateScroll();
     CreateContent(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
-    accessibilityProperty_->actionScrollForwardImpl_();
+    accessibilityProperty_->actionScrollForwardWithParamImpl_(AccessibilityScrollType::SCROLL_FULL);
     ASSERT_NE(pattern_->springAnimation_, nullptr);
     pattern_->springAnimation_ = nullptr;
-    accessibilityProperty_->actionScrollBackwardImpl_();
+    accessibilityProperty_->actionScrollBackwardWithParamImpl_(AccessibilityScrollType::SCROLL_FULL);
     ASSERT_NE(pattern_->springAnimation_, nullptr);
 
     /**
@@ -896,9 +934,9 @@ HWTEST_F(ScrollTestNg, Pattern002, TestSize.Level1)
      */
     CreateScroll();
     CreateDone(frameNode_);
-    accessibilityProperty_->actionScrollForwardImpl_();
+    accessibilityProperty_->actionScrollForwardWithParamImpl_(AccessibilityScrollType::SCROLL_FULL);
     EXPECT_EQ(pattern_->animator_, nullptr);
-    accessibilityProperty_->actionScrollBackwardImpl_();
+    accessibilityProperty_->actionScrollBackwardWithParamImpl_(AccessibilityScrollType::SCROLL_FULL);
     EXPECT_EQ(pattern_->animator_, nullptr);
 
     /**
@@ -910,9 +948,9 @@ HWTEST_F(ScrollTestNg, Pattern002, TestSize.Level1)
     model.SetAxis(Axis::NONE);
     CreateContent(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
-    accessibilityProperty_->actionScrollForwardImpl_();
+    accessibilityProperty_->actionScrollForwardWithParamImpl_(AccessibilityScrollType::SCROLL_FULL);
     EXPECT_EQ(pattern_->animator_, nullptr);
-    accessibilityProperty_->actionScrollBackwardImpl_();
+    accessibilityProperty_->actionScrollBackwardWithParamImpl_(AccessibilityScrollType::SCROLL_FULL);
     EXPECT_EQ(pattern_->animator_, nullptr);
 }
 
@@ -1903,5 +1941,142 @@ HWTEST_F(ScrollTestNg, Model001, TestSize.Level1)
     pattern_->SetAxis(Axis::NONE);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(model.GetOnScrollEdge(AceType::RawPtr(frameNode_)), ScrollEdgeType::SCROLL_NONE);
+}
+
+/**
+ * @tc.name: Alignment001
+ * @tc.desc: Test UpdateScrollAlignment in RTL Layout, content size less than scroll size
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, Alignment001, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    CreateScroll();
+    CreateContent(1); // Set content height less than scroll height
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step1. Set content width less than scroll width
+     */
+    float contentWidth = SCROLL_WIDTH / 2;
+    auto contentNode = GetChildFrameNode(frameNode_, 0);
+    ViewAbstract::SetWidth(AceType::RawPtr(contentNode), CalcLength(contentWidth));
+    FlushLayoutTask(frameNode_);
+    float centerPosition = (SCROLL_HEIGHT - ITEM_HEIGHT) / 2;
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(0.f, centerPosition)));
+
+    layoutProperty_->UpdateAlignment(Alignment::TOP_LEFT);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(contentWidth, 0.f)));
+
+    layoutProperty_->UpdateAlignment(Alignment::TOP_RIGHT);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF()));
+
+    layoutProperty_->UpdateAlignment(Alignment::BOTTOM_LEFT);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(contentWidth, SCROLL_HEIGHT - ITEM_HEIGHT)));
+
+    layoutProperty_->UpdateAlignment(Alignment::BOTTOM_RIGHT);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(0.f, SCROLL_HEIGHT - ITEM_HEIGHT)));
+
+    layoutProperty_->UpdateAlignment(Alignment::CENTER_RIGHT);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(0.f, centerPosition)));
+
+    layoutProperty_->UpdateAlignment(Alignment::CENTER_LEFT);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(contentWidth, centerPosition)));
+
+    layoutProperty_->UpdateAlignment(Alignment::CENTER);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(contentWidth / 2, centerPosition)));
+}
+
+/**
+ * @tc.name: Alignment002
+ * @tc.desc: Test UpdateScrollAlignment in RTL Layout, content size greater than scroll size
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, Alignment002, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    CreateScroll();
+    CreateContent(TOTAL_ITEM_NUMBER); // Set content height less than scroll height
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step1. Set content width greater than scroll width
+     */
+    float contentWidth = SCROLL_WIDTH * 2;
+    auto contentNode = GetChildFrameNode(frameNode_, 0);
+    ViewAbstract::SetWidth(AceType::RawPtr(contentNode), CalcLength(contentWidth));
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF()));
+
+    layoutProperty_->UpdateAlignment(Alignment::TOP_LEFT);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(-SCROLL_WIDTH, 0.f)));
+
+    layoutProperty_->UpdateAlignment(Alignment::TOP_RIGHT);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(-SCROLL_WIDTH, 0.f)));
+
+    layoutProperty_->UpdateAlignment(Alignment::BOTTOM_LEFT);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(-SCROLL_WIDTH, 0.f)));
+
+    layoutProperty_->UpdateAlignment(Alignment::BOTTOM_RIGHT);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(-SCROLL_WIDTH, 0.f)));
+
+    layoutProperty_->UpdateAlignment(Alignment::CENTER_RIGHT);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(-SCROLL_WIDTH, 0.f)));
+
+    layoutProperty_->UpdateAlignment(Alignment::CENTER_LEFT);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(-SCROLL_WIDTH, 0.f)));
+
+    layoutProperty_->UpdateAlignment(Alignment::CENTER);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(-SCROLL_WIDTH, 0.f)));
+}
+
+/**
+ * @tc.name: ToJsonValue001
+ * @tc.desc: Test ToJsonValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, ToJsonValue001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetInitialOffset(OffsetT(CalcDimension(10.f), CalcDimension(20.f)));
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
+    EXPECT_EQ(pattern_->GetInitialOffset().GetX().ToString(), "10.00px");
+    EXPECT_EQ(pattern_->GetInitialOffset().GetY().ToString(), "20.00px");
+
+    /**
+     * @tc.steps: step1. !IsFastFilter
+     */
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    pattern_->ToJsonValue(json, filter);
+    auto initialOffset = json->GetObject("initialOffset");
+    EXPECT_EQ(initialOffset->GetString("xOffset"), "10.00px");
+    EXPECT_EQ(initialOffset->GetString("yOffset"), "20.00px");
+
+    /**
+     * @tc.steps: step2. IsFastFilter
+     */
+    std::string attr = "id";
+    filter.AddFilterAttr(attr);
+    json = JsonUtil::Create(true);
+    pattern_->ToJsonValue(json, filter);
+    initialOffset = json->GetObject("initialOffset");
+    EXPECT_EQ(initialOffset->GetString("xOffset"), "");
+    EXPECT_EQ(initialOffset->GetString("yOffset"), "");
 }
 } // namespace OHOS::Ace::NG

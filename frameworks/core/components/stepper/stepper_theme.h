@@ -25,6 +25,7 @@
 
 namespace OHOS::Ace {
 namespace {
+constexpr double DEFAULT_ALPHA_VALUE = 0.9;
 constexpr Dimension STEPPER_FOCUSED_BORDER_WIDTH = 2.0_vp;
 constexpr Dimension STEPPER_SCREEN_MARGIN = 4.0_vp;
 } // namespace
@@ -63,7 +64,8 @@ public:
                     theme->progressColor_ = pattern->GetAttr<Color>("progress_color", Color::RED);
                     theme->disabledColor_ = pattern->GetAttr<Color>("button_bg_color_disabled", Color::RED);
                     theme->disabledAlpha_ = pattern->GetAttr<double>("button_bg_color_disabled_alpha", 0.0);
-                    theme->defaultAlpha_ = pattern->GetAttr<double>("attribute_alpha_content_primary", 0.9);
+                    theme->defaultAlpha_ =
+                        pattern->GetAttr<double>("attribute_alpha_content_primary", DEFAULT_ALPHA_VALUE);
                     theme->focusColor_ = pattern->GetAttr<Color>(STEPPER_FOCUS_COLOR, Color::RED);
                     theme->focusBorderWidth_ = STEPPER_FOCUSED_BORDER_WIDTH;
                     theme->controlMargin_ = STEPPER_SCREEN_MARGIN;

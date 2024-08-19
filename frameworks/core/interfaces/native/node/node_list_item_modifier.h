@@ -19,6 +19,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIListItemModifier* GetListItemModifier();
+const CJUIListItemModifier* GetCJUIListItemModifier();
 void SetListItemOnSelect(ArkUINodeHandle node, void* extraParam);
 void ResetListItemOnSelect(ArkUINodeHandle node);
 }

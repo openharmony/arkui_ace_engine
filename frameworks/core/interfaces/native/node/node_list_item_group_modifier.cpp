@@ -145,5 +145,13 @@ const ArkUIListItemGroupModifier* GetListItemGroupModifier()
         SetListItemGroupStyle, ResetListItemGroupStyle };
     return &modifier;
 }
+
+const CJUIListItemGroupModifier* GetCJUIListItemGroupModifier()
+{
+    static const CJUIListItemGroupModifier modifier = { ListItemGroupSetDivider, ListItemGroupResetDivider,
+        ListItemGroupSetHeader, ListItemGroupSetFooter, SetListItemGroupChildrenMainSize,
+        ResetListItemGroupChildrenMainSize };
+    return &modifier;
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

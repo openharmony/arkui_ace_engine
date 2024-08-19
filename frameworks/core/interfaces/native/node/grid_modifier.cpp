@@ -360,6 +360,20 @@ void ResetFlingSpeedLimit(ArkUINodeHandle node)
     ScrollableModelNG::SetMaxFlingSpeed(frameNode, flingSpeedLimit);
 }
 
+void SetGridAlignItems(ArkUINodeHandle node, int32_t alignItems)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridModelNG::SetAlignItems(frameNode, static_cast<GridItemAlignment>(alignItems));
+}
+
+void ResetGridAlignItems(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridModelNG::SetAlignItems(frameNode, GridItemAlignment::DEFAULT);
+}
+
 ArkUI_CharPtr GetColumnsTemplate(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -438,6 +452,23 @@ const ArkUIGridModifier* GetGridModifier()
 {
     static const ArkUIGridModifier modifier = { SetGridColumnsTemplate, ResetGridColumnsTemplate, SetGridRowsTemplate,
         ResetGridRowsTemplate, SetGridColumnsGap, ResetGridColumnsGap, SetGridRowsGap, ResetGridRowsGap,
+        SetGridScrollBar, ResetGridScrollBar, SetGridScrollBarWidth, ResetGridScrollBarWidth, SetGridScrollBarColor,
+        ResetGridScrollBarColor, SetGridCachedCount, ResetGridCachedCount, SetGridEditMode, ResetGridEditMode,
+        SetGridMultiSelectable, ResetGridMultiSelectable, SetGridMaxCount, ResetGridMaxCount, SetGridMinCount,
+        ResetGridMinCount, SetGridCellLength, ResetGridCellLength, SetGridLayoutDirection, ResetGridLayoutDirection,
+        SetGridSupportAnimation, ResetGridSupportAnimation, SetEdgeEffect, ResetEdgeEffect, SetNestedScroll,
+        ResetNestedScroll, SetEnableScroll, ResetEnableScroll, SetFriction, ResetFriction, GetColumnsTemplate,
+        GetRowsTemplate, GetColumnsGap, GetRowsGap, SetNodeAdapter, ResetNodeAdapter, GetNodeAdapter, SetCachedCount,
+        ResetCachedCount, GetCachedCount, SetFlingSpeedLimit, ResetFlingSpeedLimit, SetGridAlignItems,
+        ResetGridAlignItems };
+    return &modifier;
+}
+
+const CJUIGridModifier* GetCJUIGridModifier()
+{
+    static const CJUIGridModifier modifier = {
+        SetGridColumnsTemplate, ResetGridColumnsTemplate, SetGridRowsTemplate, ResetGridRowsTemplate,
+        SetGridColumnsGap, ResetGridColumnsGap, SetGridRowsGap, ResetGridRowsGap,
         SetGridScrollBar, ResetGridScrollBar, SetGridScrollBarWidth, ResetGridScrollBarWidth, SetGridScrollBarColor,
         ResetGridScrollBarColor, SetGridCachedCount, ResetGridCachedCount, SetGridEditMode, ResetGridEditMode,
         SetGridMultiSelectable, ResetGridMultiSelectable, SetGridMaxCount, ResetGridMaxCount, SetGridMinCount,

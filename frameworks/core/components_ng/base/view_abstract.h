@@ -59,6 +59,9 @@ struct OptionParam {
     std::function<void(WeakPtr<NG::FrameNode>)> symbol = nullptr;
     std::optional<Dimension> symbolUserDefinedIdealFontSize = std::nullopt;
 
+    // Used for security controls.
+    bool isPasteOption = false;
+
     OptionParam() = default;
     OptionParam(const std::string &valueParam, const std::string &iconParam, const std::function<void()> &actionParam)
         : value(valueParam), icon(iconParam), enabled(true), action(actionParam)
@@ -141,6 +144,12 @@ public:
     static void SetLightUpEffect(double radio);
     static void SetPadding(const CalcLength &value);
     static void SetPadding(const PaddingProperty &value);
+    static void SetSafeAreaPadding(const CalcLength& value);
+    static void SetSafeAreaPadding(const PaddingProperty& value);
+    static void SetSafeAreaPadding(FrameNode* frameNode, const CalcLength& value);
+    static void SetSafeAreaPadding(FrameNode* frameNode, const PaddingProperty& value);
+    static void ResetSafeAreaPadding();
+    static void ResetSafeAreaPadding(FrameNode* frameNode);
     static void SetMargin(const CalcLength &value);
     static void SetMargin(const PaddingProperty &value);
     static void SetBorderRadius(const BorderRadiusProperty &value);
@@ -251,7 +260,8 @@ public:
     static void SetTransformMatrix(const Matrix4 &matrix);
 
     // event
-    static void SetOnClick(GestureEventFunc &&clickEventFunc);
+    static void SetOnClick(GestureEventFunc &&clickEventFunc,
+        double distanceThreshold = std::numeric_limits<double>::infinity());
     static void SetOnGestureJudgeBegin(GestureJudgeFunc &&gestureJudgeFunc);
     static void SetOnTouchIntercept(TouchInterceptFunc &&touchInterceptFunc);
     static void SetShouldBuiltInRecognizerParallelWith(
@@ -260,6 +270,7 @@ public:
     static void SetOnTouch(TouchEventFunc &&touchEventFunc);
     static void SetOnMouse(OnMouseEventFunc &&onMouseEventFunc);
     static void SetOnHover(OnHoverFunc &&onHoverEventFunc);
+    static void SetOnAccessibilityHover(OnAccessibilityHoverFunc &&onAccessibilityHoverEventFunc);
     static void SetHoverEffect(HoverEffectType hoverEffect);
     static void SetHoverEffectAuto(HoverEffectType hoverEffect);
     static void SetEnabled(bool enabled);
@@ -292,6 +303,7 @@ public:
         std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent> &, const std::string &)> &&onDragStart);
     static void SetOnPreDrag(
         std::function<void(const PreDragStatus)> &&onPreDragFunc);
+    static void SetOnPreDrag(FrameNode* frameNode, std::function<void(const PreDragStatus)>&& onPreDragFunc);
     static void SetOnDragEnter(
         std::function<void(const RefPtr<OHOS::Ace::DragEvent> &, const std::string &)> &&onDragEnter);
     static void SetOnDragLeave(
@@ -299,8 +311,11 @@ public:
     static void SetOnDragMove(
         std::function<void(const RefPtr<OHOS::Ace::DragEvent> &, const std::string &)> &&onDragMove);
     static void SetOnDrop(std::function<void(const RefPtr<OHOS::Ace::DragEvent> &, const std::string &)> &&onDrop);
+    static void SetOnDrop(FrameNode* frameNode, NG::OnDragDropFunc&& onDrop);
 
     static void SetOnDragEnd(std::function<void(const RefPtr<OHOS::Ace::DragEvent> &)> &&onDragEnd);
+    static void SetOnDragEnd(
+        FrameNode* frameNode, std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>&& onDragEnd);
     static void SetMonopolizeEvents(bool monopolizeEvents);
     static void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled);
 
@@ -370,6 +385,7 @@ public:
     static void DisableOnTouch();
     static void DisableOnKeyEvent();
     static void DisableOnHover();
+    static void DisableOnAccessibilityHover();
     static void DisableOnMouse();
     static void DisableOnAppear();
     static void DisableOnDisAppear();
@@ -492,6 +508,8 @@ public:
     static void SetBorderImageGradient(FrameNode* frameNode, const NG::Gradient& gradient);
     static void SetForegroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& fgBlurStyle);
     static void SetLinearGradientBlur(FrameNode* frameNode, const NG::LinearGradientBlurPara& blurPara);
+    static void SetMagnifier(FrameNode* frameNode, const MagnifierParams& magnifierOffset);
+    static void ReSetMagnifier(FrameNode* frameNode);
     static void SetBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& bgBlurStyle);
     static void SetBackgroundImagePosition(FrameNode* frameNode, const BackgroundImagePosition& bgImgPosition);
     static void SetBackgroundImageSize(FrameNode* frameNode, const BackgroundImageSize& bgImgSize);
@@ -565,6 +583,7 @@ public:
     static void SetBgDynamicBrightness(FrameNode* frameNode, const BrightnessOption& brightnessOption);
     static void SetFgDynamicBrightness(FrameNode* frameNode, const BrightnessOption& brightnessOption);
     static void SetDragPreviewOptions(FrameNode* frameNode, const DragPreviewOption& previewOption);
+    static void SetDragPreview(FrameNode* frameNode, const DragDropInfo& dragDropInfo);
     static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
     static void SetMouseResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& mouseResponseRegion);
     static void SetSharedTransition(
@@ -594,14 +613,30 @@ public:
         const OffsetF &oldOrigin, const RectF &rect, const OffsetF &origin)> &&onAreaChanged);
     static void SetOnFocus(FrameNode* frameNode, OnFocusFunc &&onFocusCallback);
     static void SetOnBlur(FrameNode* frameNode, OnBlurFunc &&onBlurCallback);
-    static void SetOnClick(FrameNode* frameNode, GestureEventFunc &&clickEventFunc);
+    static void SetOnClick(FrameNode* frameNode, GestureEventFunc &&clickEventFunc,
+        double distanceThreshold = std::numeric_limits<double>::infinity());
     static void SetOnTouch(FrameNode* frameNode, TouchEventFunc &&touchEventFunc);
+    static void SetOnDragStart(FrameNode* frameNode,
+        std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragStart);
+    static void SetOnDragEnter(FrameNode* frameNode,
+        std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragEnter);
+    static void SetOnDragMove(FrameNode* frameNode,
+        std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragMove);
+    static void SetOnDragLeave(FrameNode* frameNode,
+        std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragLeave);
     static void SetOnMouse(FrameNode* frameNode, OnMouseEventFunc &&onMouseEventFunc);
     static void SetOnHover(FrameNode* frameNode, OnHoverFunc &&onHoverEventFunc);
     static void SetOnKeyEvent(FrameNode* frameNode, OnKeyCallbackFunc &&onKeyCallback);
     static void SetOnGestureJudgeBegin(FrameNode* frameNode, GestureJudgeFunc&& gestureJudgeFunc);
     static void SetOnSizeChanged(
         FrameNode* frameNode, std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged);
+    static void SetOnGestureRecognizerJudgeBegin(
+        FrameNode* frameNode, GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc);
+    static void SetShouldBuiltInRecognizerParallelWith(
+        FrameNode* frameNode, NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc);
+    static void SetSystemColorModeChangeEvent(FrameNode* frameNode, std::function<void(int32_t)>&& onColorModeChange);
+    static void SetSystemFontChangeEvent(FrameNode* frameNode, std::function<void(float, float)>&& onFontChange);
+    static void SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style);
 
     static bool GetFocusable(FrameNode* frameNode);
     static bool GetDefaultFocus(FrameNode* frameNode);
@@ -631,6 +666,7 @@ public:
     static TextDirection GetDirection(FrameNode* frameNode);
     static std::map<AlignDirection, AlignRule> GetAlignRules(FrameNode* frameNode);
     static FlexAlign GetAlignSelf(FrameNode* frameNode);
+    static void SetDragEventStrictReportingEnabled(int32_t instanceId, bool dragEventStrictReportingEnabled);
     // used in JS FrameNode
     static void SetJSFrameNodeOnClick(FrameNode* frameNode, GestureEventFunc&& clickEventFunc);
     static void SetJSFrameNodeOnTouch(FrameNode* frameNode, TouchEventFunc&& touchEventFunc);
@@ -725,6 +761,7 @@ public:
 
 private:
     static void AddDragFrameNodeToManager();
+    static void AddDragFrameNodeToManager(FrameNode* frameNode);
     static void AddOverlayToFrameNode(const RefPtr<NG::FrameNode>& overlayNode,
         const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
         const std::optional<Dimension>& offsetY);

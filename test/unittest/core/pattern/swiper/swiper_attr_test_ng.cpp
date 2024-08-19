@@ -86,6 +86,69 @@ HWTEST_F(SwiperAttrTestNg, AttrIndex004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AttrIndex005
+ * @tc.desc: Test currentIndex_ when loop change to false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAttrTestNg, AttrIndex005, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Set index=0
+     * @tc.expected: When loop change to false, 0 <= currentIndex_ <= totalCount - 1
+     */
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetIndex(0);
+        model.SetLoop(true);
+    });
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+    pattern_->ShowPrevious();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->currentIndex_, -1);
+    layoutProperty_->UpdateLoop(false);
+    pattern_->OnModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->currentIndex_, 3);
+}
+
+/**
+ * @tc.name: AttrIndex006
+ * @tc.desc: Test property about index
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAttrTestNg, AttrIndex006, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Set invalid index = ITEM_NUMBER - 1, loop = false, displayCount = 2
+     * @tc.expected: Default show(currentIndex_ = 0) first item
+     */
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetLoop(false);
+        model.SetDisplayCount(2);
+        model.SetIndex(ITEM_NUMBER - 1);
+    });
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+}
+
+/**
+ * @tc.name: AttrIndex007
+ * @tc.desc: Test property about index
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAttrTestNg, AttrIndex007, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Set index = ITEM_NUMBER - 2, loop = false, displayCount = 2
+     * @tc.expected: Default show currentIndex_ = ITEM_NUMBER - 2 item
+     */
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetLoop(false);
+        model.SetDisplayCount(2);
+        model.SetIndex(ITEM_NUMBER - 2);
+    });
+    EXPECT_EQ(pattern_->currentIndex_, ITEM_NUMBER - 2);
+}
+
+/**
  * @tc.name: AttrAutoPlay001
  * @tc.desc: Test property about autoPlay/interval/loop
  * @tc.type: FUNC
@@ -544,10 +607,7 @@ HWTEST_F(SwiperAttrTestNg, AttrDisplayCount003, TestSize.Level1)
      * @tc.cases: Set displayCount to ITEM_NUMBER+1
      * @tc.expected: DisplayCount is ITEM_NUMBER+1, last item place has placeholder child
      */
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayCount(ITEM_NUMBER + 1);
-        model.SetIndicatorType(SwiperIndicatorType::DOT);
-    });
+    CreateWithItem([](SwiperModelNG model) { model.SetDisplayCount(ITEM_NUMBER + 1); });
     EXPECT_EQ(pattern_->GetDisplayCount(), 5);
     EXPECT_EQ(pattern_->TotalCount(), ITEM_NUMBER); // child number still is 4
     EXPECT_GT(GetChildWidth(frameNode_, 3), 0.f); // item size > 0
@@ -565,10 +625,7 @@ HWTEST_F(SwiperAttrTestNg, AttrDisplayCount004, TestSize.Level1)
      * @tc.cases: Set minsize to half of swiper width
      * @tc.expected: show 2 item in one page
      */
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetMinSize(Dimension(SWIPER_WIDTH / 3));
-        model.SetIndicatorType(SwiperIndicatorType::DOT);
-    });
+    CreateWithItem([](SwiperModelNG model) { model.SetMinSize(Dimension(SWIPER_WIDTH / 3)); });
     EXPECT_TRUE(pattern_->IsAutoFill());
     EXPECT_EQ(pattern_->GetDisplayCount(), 2);
     EXPECT_GT(GetChildWidth(frameNode_, 0), 0.f); // item size > 0
@@ -691,6 +748,8 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin001, TestSize.Level1)
     CreateWithItem([](SwiperModelNG model) {});
     EXPECT_EQ(pattern_->GetNextMargin(), 0.f);
     EXPECT_EQ(pattern_->GetPrevMargin(), 0.f);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 0.f);
+    EXPECT_EQ(GetChildWidth(frameNode_, 0), SWIPER_WIDTH);
 }
 
 /**
@@ -701,15 +760,16 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin001, TestSize.Level1)
 HWTEST_F(SwiperAttrTestNg, AttrMargin002, TestSize.Level1)
 {
     /**
-     * @tc.cases: Set margin to 10,5
-     * @tc.expected: Margin is 10,5
+     * @tc.cases: Set margin
      */
     CreateWithItem([](SwiperModelNG model) {
-        model.SetNextMargin(Dimension(10.f), false);
-        model.SetPreviousMargin(Dimension(5.f), false);
+        model.SetPreviousMargin(Dimension(PRE_MARGIN), false);
+        model.SetNextMargin(Dimension(NEXT_MARGIN), false);
     });
-    EXPECT_EQ(pattern_->GetNextMargin(), 10.f);
-    EXPECT_EQ(pattern_->GetPrevMargin(), 5.f);
+    EXPECT_EQ(pattern_->GetPrevMargin(), PRE_MARGIN);
+    EXPECT_EQ(pattern_->GetNextMargin(), NEXT_MARGIN);
+    EXPECT_EQ(GetChildX(frameNode_, 0), PRE_MARGIN);
+    EXPECT_EQ(GetChildWidth(frameNode_, 0), SWIPER_WIDTH - PRE_MARGIN - NEXT_MARGIN);
 }
 
 /**
@@ -761,9 +821,9 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin005, TestSize.Level1)
      * @tc.cases: Only set nextMargin
      */
     CreateWithItem([](SwiperModelNG model) {
-        model.SetNextMargin(Dimension(10.f), false);
+        model.SetNextMargin(Dimension(NEXT_MARGIN), false);
     });
-    EXPECT_EQ(pattern_->GetNextMargin(), 10.f);
+    EXPECT_EQ(pattern_->GetNextMargin(), NEXT_MARGIN);
     EXPECT_EQ(pattern_->GetPrevMargin(), 0.f);
 }
 
@@ -778,10 +838,10 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin006, TestSize.Level1)
      * @tc.cases: Only set preMargin
      */
     CreateWithItem([](SwiperModelNG model) {
-        model.SetPreviousMargin(Dimension(5.f), false);
+        model.SetPreviousMargin(Dimension(PRE_MARGIN), false);
     });
     EXPECT_EQ(pattern_->GetNextMargin(), 0.f);
-    EXPECT_EQ(pattern_->GetPrevMargin(), 5.f);
+    EXPECT_EQ(pattern_->GetPrevMargin(), PRE_MARGIN);
 }
 /**
  * @tc.name: AttrNestedScroll001
@@ -1178,51 +1238,86 @@ HWTEST_F(SwiperAttrTestNg, SwiperPaintProperty001, TestSize.Level1)
 }
 
 /**
- * @tc.name: ArcDotIndicator001
- * @tc.desc: Test property about indicator
+ * @tc.name: SetNestedScroll001
+ * @tc.desc: Test SetNestedScroll method about NestableScrollContainer
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, ArcDotIndicator001, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, SetNestedScroll001, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. create swiper and set parameters.
-     */
-    SwiperArcDotParameters swiperArcDotParameters;
-    swiperArcDotParameters.arcDirection = SwiperArcDirection::NINE_CLOCK_DIRECTION;
-    swiperArcDotParameters.itemColor = Color::GREEN;
-    swiperArcDotParameters.selectedItemColor = Color::RED;
-    swiperArcDotParameters.containerColor = Color::BLUE;
-    CreateWithItem([=](SwiperModelNG model) {
-        model.Create(true);
-        model.SetIndicatorType(SwiperIndicatorType::ARC_DOT);
-        model.SetArcDotIndicatorStyle(swiperArcDotParameters);
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::SELF_FIRST,
+        .backward = NestedScrollMode::SELF_ONLY,
+    };
+    CreateWithItem([nestedOpt](SwiperModelNG model) {
+        model.SetLoop(false);
+        model.SetNestedScroll(nestedOpt);
     });
-    auto paintProperty = indicatorNode_->GetPaintProperty<CircleDotIndicatorPaintProperty>();
-    RefPtr<SwiperPattern> indicatorPattern = frameNode_->GetPattern<SwiperPattern>();
-    indicatorPattern->OnModifyDone();
-    EXPECT_EQ(pattern_->GetIndicatorType(), SwiperIndicatorType::ARC_DOT);
-    EXPECT_EQ(paintProperty->GetArcDirection(), SwiperArcDirection::NINE_CLOCK_DIRECTION);
-    EXPECT_EQ(paintProperty->GetColor(), Color::GREEN);
-    EXPECT_EQ(paintProperty->GetSelectedColor(), Color::RED);
-    EXPECT_EQ(paintProperty->GetContainerColor(), Color::BLUE);
+    auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
+    /**
+     * @tc.steps: step1. call SetNestedScroll when parent && !nestedScroll.NeedParent() && nestedScroll_.NeedParent()
+     */
+    pattern_->parent_ = mockScroll;
+    nestedOpt = {
+        .forward = NestedScrollMode::SELF_ONLY,
+        .backward = NestedScrollMode::SELF_ONLY,
+    };
+    pattern_->isNestedInterrupt_ = false;
+    pattern_->isFixedNestedScrollMode_ = true;
+    pattern_->SetNestedScroll(nestedOpt);
+    EXPECT_FALSE(pattern_->isFixedNestedScrollMode_);
+    EXPECT_TRUE(pattern_->isNestedInterrupt_);
 }
 
 /**
- * @tc.name: ArcDotIndicator001
- * @tc.desc: Test property about indicator
+ * @tc.name: OnScrollDragEndRecursive001
+ * @tc.desc: Test OnScrollDragEndRecursive method about NestableScrollContainer
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, ArcDotIndicator002, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, OnScrollDragEndRecursive001, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. create swiper and set parameters.
-     */
-    CreateWithItem([=](SwiperModelNG model) {
-        model.Create(true);
-        model.SetIndicatorType(SwiperIndicatorType::ARC_DOT);
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::SELF_FIRST,
+        .backward = NestedScrollMode::SELF_ONLY,
+    };
+    CreateWithItem([nestedOpt](SwiperModelNG model) {
+        model.SetLoop(false);
+        model.SetNestedScroll(nestedOpt);
     });
-    RefPtr<ArcSwiperPattern> indicatorPattern = frameNode_->GetPattern<ArcSwiperPattern>();
-    indicatorPattern->GetSwiperArcDotParameters();
-    EXPECT_NE(indicatorPattern->swiperArcDotParameters_, nullptr);
+    auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
+    EXPECT_CALL(*mockScroll, OnScrollDragEndRecursive()).Times(1);
+    ASSERT_EQ(mockScroll->parent_.Upgrade(), nullptr);
+    /**
+     * @tc.steps: step1. call OnScrollDragEndRecursive in parent and nestedScroll_.NeedParent() combined condition
+     */
+    pattern_->parent_ = mockScroll;
+    ASSERT_NE(pattern_->parent_.Upgrade(), nullptr);
+    EXPECT_TRUE(pattern_->nestedScroll_.NeedParent());
+    pattern_->OnScrollDragEndRecursive();
+
+    nestedOpt = {
+        .forward = NestedScrollMode::SELF_ONLY,
+        .backward = NestedScrollMode::SELF_ONLY,
+    };
+    pattern_->nestedScroll_ = nestedOpt;
+    ASSERT_NE(pattern_->parent_.Upgrade(), nullptr);
+    EXPECT_FALSE(pattern_->nestedScroll_.NeedParent());
+    pattern_->OnScrollDragEndRecursive();
+
+    nestedOpt = {
+        .forward = NestedScrollMode::SELF_FIRST,
+        .backward = NestedScrollMode::SELF_ONLY,
+    };
+    pattern_->nestedScroll_ = nestedOpt;
+    pattern_->parent_ = nullptr;
+    EXPECT_TRUE(pattern_->nestedScroll_.NeedParent());
+    pattern_->OnScrollDragEndRecursive();
+
+    nestedOpt = {
+        .forward = NestedScrollMode::SELF_ONLY,
+        .backward = NestedScrollMode::SELF_ONLY,
+    };
+    pattern_->nestedScroll_ = nestedOpt;
+    EXPECT_FALSE(pattern_->nestedScroll_.NeedParent());
+    pattern_->OnScrollDragEndRecursive();
 }
 } // namespace OHOS::Ace::NG

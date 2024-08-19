@@ -1624,12 +1624,10 @@ int32_t RenderGridScroll::GetIndexByPosition(double position) const
         if (!item || item->GetChildren().empty()) {
             continue;
         }
-
         auto gridItem = AceType::DynamicCast<RenderGridLayoutItem>(item);
         if (!gridItem) {
             break;
         }
-
         startPosition = item->GetPosition().GetY();
         endPosition = item->GetPosition().GetY() + item->GetLayoutSize().Height();
         if ((position > startPosition && position < endPosition) || NearEqual(position, startPosition) ||

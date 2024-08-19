@@ -46,7 +46,7 @@ std::string SpanToHtml::FontStyleToHtml(const std::optional<Ace::FontStyle>& val
 
 std::string SpanToHtml::FontSizeToHtml(const std::optional<Dimension>& value)
 {
-    return ToHtmlStyleFormat("font-size", GetFontSizeInJson(value));
+    return ToHtmlStyleFormat("font-size", DimensionToString(value.value_or(TEXT_DEFAULT_FONT_SIZE)));
 }
 
 std::string SpanToHtml::FontWeightToHtml(const std::optional<FontWeight>& value)
@@ -90,6 +90,13 @@ void SpanToHtml::ToHtmlColor(std::string& color)
 std::string SpanToHtml::ColorToHtml(const std::optional<Color>& value)
 {
     auto color = value.value_or(Color::BLACK).ColorToString();
+    ToHtmlColor(color);
+    return ToHtmlStyleFormat("color", color);
+}
+
+std::string SpanToHtml::ColorToHtml(const std::optional<DynamicColor>& value)
+{
+    auto color = value.value_or(DynamicColor(Color::BLACK)).ToColor().ColorToString();
     ToHtmlColor(color);
     return ToHtmlStyleFormat("color", color);
 }
@@ -457,10 +464,10 @@ std::string SpanToHtml::ToHtml(const std::optional<OHOS::Ace::TextAlign>& object
     }
 
     static const LinearEnumMapNode<TextAlign, std::string> table[] = {
-        { TextAlign::CENTER, "center" },
-        { TextAlign::JUSTIFY, "justify" },
         { TextAlign::START, "start" },
+        { TextAlign::CENTER, "center" },
         { TextAlign::END, "end" },
+        { TextAlign::JUSTIFY, "justify" },
     };
     auto index = BinarySearchFindIndex(table, ArraySize(table), *object);
     if (index < 0) {

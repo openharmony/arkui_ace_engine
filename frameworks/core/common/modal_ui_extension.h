@@ -32,7 +32,7 @@ namespace OHOS::Ace {
 class ModalUIExtension final {
 public:
     static RefPtr<NG::FrameNode> Create(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks,
-        bool isAsyncModalBinding = false);
+        bool isAsyncModalBinding = false, bool isModal = true);
 
     static int32_t GetSessionId(const RefPtr<NG::FrameNode>& uiExtNode);
 

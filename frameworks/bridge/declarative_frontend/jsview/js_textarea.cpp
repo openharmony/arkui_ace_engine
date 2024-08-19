@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 20212022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -81,7 +81,6 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTextArea>::StaticMethod("onEditChange", &JSTextField::SetOnEditChanged);
     JSClass<JSTextArea>::StaticMethod("copyOption", &JSTextField::SetCopyOption);
-    JSClass<JSTextArea>::StaticMethod("textMenuOptions", &JSTextField::JsMenuOptionsExtension);
     JSClass<JSTextArea>::StaticMethod("foregroundColor", &JSTextField::SetForegroundColor);
     JSClass<JSTextArea>::StaticMethod("enableKeyboardOnFocus", &JSTextField::SetEnableKeyboardOnFocus);
     JSClass<JSTextArea>::StaticMethod("selectionMenuHidden", &JSTextField::SetSelectionMenuHidden);
@@ -89,6 +88,7 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("onSubmit", &JSTextField::SetOnSubmit);
     JSClass<JSTextArea>::StaticMethod("enterKeyType", &JSTextField::SetEnterKeyType);
     JSClass<JSTextArea>::StaticMethod("type", &JSTextField::SetType);
+    JSClass<JSTextArea>::StaticMethod("fontFeature", &JSTextField::SetFontFeature);
     JSClass<JSTextArea>::StaticMethod("lineBreakStrategy", &JSTextField::SetLineBreakStrategy);
     JSClass<JSTextArea>::StaticMethod("decoration", &JSTextField::SetDecoration);
     JSClass<JSTextArea>::StaticMethod("minFontSize", &JSTextField::SetMinFontSize);
@@ -98,7 +98,6 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("lineHeight", &JSTextField::SetLineHeight);
     JSClass<JSTextArea>::StaticMethod("lineSpacing", &JSTextField::SetLineSpacing);
     JSClass<JSTextArea>::StaticMethod("wordBreak", &JSTextField::SetWordBreak);
-    JSClass<JSTextArea>::StaticMethod("fontFeature", &JSTextField::SetFontFeature);
     JSClass<JSTextArea>::StaticMethod("contentType", &JSTextField::SetContentType);
     JSClass<JSTextArea>::StaticMethod("enableAutoFill", &JSTextField::SetEnableAutoFill);
     JSClass<JSTextArea>::StaticMethod("selectedBackgroundColor", &JSTextField::SetSelectedBackgroundColor);
@@ -109,7 +108,7 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("onDidInsert", &JSTextField::OnDidInsertValue);
     JSClass<JSTextArea>::StaticMethod("onWillDelete", &JSTextField::OnWillDelete);
     JSClass<JSTextArea>::StaticMethod("onDidDelete", &JSTextField::OnDidDelete);
-    JSClass<JSTextArea>::StaticMethod("selectionMenuOptions", &JSTextField::SelectionMenuOptions);
+    JSClass<JSTextArea>::StaticMethod("editMenuOptions", &JSTextField::EditMenuOptions);
     JSClass<JSTextArea>::StaticMethod("enablePreviewText", &JSTextField::SetEnablePreviewText);
     JSClass<JSTextArea>::InheritAndBind<JSViewAbstract>(globalObj);
 }

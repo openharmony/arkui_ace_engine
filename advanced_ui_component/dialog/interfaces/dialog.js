@@ -18,14 +18,20 @@ const hilog = requireNapi('hilog');
 const measure = requireNapi('measure');
 const resourceManager = requireNapi('resourceManager');
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
+const LengthUnit = requireNapi('arkui.node').LengthUnit;
+
 if (!('finalizeConstruction' in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {
     });
 }
 
+if (PUV2ViewBase.contextStack === undefined) {
+    Reflect.set(PUV2ViewBase, 'contextStack', []);
+}
+
 class CustomThemeImpl {
-    constructor(t29) {
-        this.colors = t29;
+    constructor(k42) {
+        this.colors = k42;
     }
 }
 
@@ -55,24 +61,25 @@ const FIRST_ITEM_INDEX = 0;
 const VERSION_TWELVE = 50000012;
 const BUTTON_MIN_FONT_SIZE = 9;
 const MAX_FONT_SCALE = 2;
-const MAX_DIALOG_WIDTH = getNumberByResourceId(125831042) ?? 400;
-const BUTTON_HORIZONTAL_MARGIN = getNumberByResourceId(125831054) ?? 16;
-const BUTTON_HORIZONTAL_PADDING = getNumberByResourceId(125830927) ?? 16;
-const BUTTON_HORIZONTAL_SPACE = getNumberByResourceId(125831051) ?? 8;
-const BODY_L = getNumberByResourceId(125830970) ?? 16;
-const BODY_S = getNumberByResourceId(125830972) ?? 12;
-const TITLE_S = getNumberByResourceId(125830966) ?? 20;
-const SUBTITLE_S = getNumberByResourceId(125830969) ?? 14;
-const PADDING_LEVEL_8 = getNumberByResourceId(125830927);
-const DIALOG_DIVIDER_SHOW = getNumberByResourceId(125831202);
-const ALERT_BUTTON_STYLE = getNumberByResourceId(125831085);
-const ALERT_TITLE_ALIGNMENT = getEnumNumberByResourceId(125831126);
+const MAX_DIALOG_WIDTH = getNumberByResourceId(125831042, 400);
+const BUTTON_HORIZONTAL_MARGIN = getNumberByResourceId(125831054, 16);
+const BUTTON_HORIZONTAL_PADDING = getNumberByResourceId(125830927, 16);
+const BUTTON_HORIZONTAL_SPACE = getNumberByResourceId(125831051, 8);
+const BODY_L = getNumberByResourceId(125830970, 16);
+const BODY_M = getNumberByResourceId(125830971, 14);
+const BODY_S = getNumberByResourceId(125830972, 12);
+const TITLE_S = getNumberByResourceId(125830966, 20);
+const SUBTITLE_S = getNumberByResourceId(125830969, 14);
+const PADDING_LEVEL_8 = getNumberByResourceId(125830927, 16);
+const DIALOG_DIVIDER_SHOW = getNumberByResourceId(125831202, 1, true);
+const ALERT_BUTTON_STYLE = getNumberByResourceId(125831085, 2, true);
+const ALERT_TITLE_ALIGNMENT = getEnumNumberByResourceId(125831126, 1);
 
 export class TipsDialog extends ViewPU {
-    constructor(l29, m29, n29, o29 = -1, p29 = undefined, q29) {
-        super(l29, n29, o29, q29);
-        if (typeof p29 === 'function') {
-            this.paramsGenerator_ = p29;
+    constructor(c42, d42, e42, f42 = -1, g42 = undefined, h42) {
+        super(c42, e42, f42, h42);
+        if (typeof g42 === 'function') {
+            this.paramsGenerator_ = g42;
         }
         this.controller = undefined;
         this.imageRes = null;
@@ -101,103 +108,103 @@ export class TipsDialog extends ViewPU {
         this.themeColorMode = ThemeColorMode.SYSTEM;
         this.__fontSizeScale = new ObservedPropertySimplePU(1, this, 'fontSizeScale');
         this.__minContentHeight = new ObservedPropertySimplePU(160, this, 'minContentHeight');
-        this.updateTextAlign = (s29) => {
+        this.updateTextAlign = (j42) => {
             if (this.content) {
-                this.textAlignment = getTextAlign(s29, this.content, `${BODY_L}fp`);
+                this.textAlignment = getTextAlign(j42, this.content, `${BODY_L * this.fontSizeScale}vp`);
             }
         };
         this.imageIndex = 0;
         this.textIndex = 1;
         this.checkBoxIndex = 2;
-        this.setInitiallyProvidedValue(m29);
+        this.setInitiallyProvidedValue(d42);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(k29) {
-        if (k29.controller !== undefined) {
-            this.controller = k29.controller;
+    setInitiallyProvidedValue(b42) {
+        if (b42.controller !== undefined) {
+            this.controller = b42.controller;
         }
-        if (k29.imageRes !== undefined) {
-            this.imageRes = k29.imageRes;
+        if (b42.imageRes !== undefined) {
+            this.imageRes = b42.imageRes;
         }
-        if (k29.imageSize !== undefined) {
-            this.imageSize = k29.imageSize;
+        if (b42.imageSize !== undefined) {
+            this.imageSize = b42.imageSize;
         }
-        if (k29.title !== undefined) {
-            this.title = k29.title;
+        if (b42.title !== undefined) {
+            this.title = b42.title;
         }
-        if (k29.content !== undefined) {
-            this.content = k29.content;
+        if (b42.content !== undefined) {
+            this.content = b42.content;
         }
-        if (k29.checkAction !== undefined) {
-            this.checkAction = k29.checkAction;
+        if (b42.checkAction !== undefined) {
+            this.checkAction = b42.checkAction;
         }
-        if (k29.onCheckedChange !== undefined) {
-            this.onCheckedChange = k29.onCheckedChange;
+        if (b42.onCheckedChange !== undefined) {
+            this.onCheckedChange = b42.onCheckedChange;
         }
-        if (k29.checkTips !== undefined) {
-            this.checkTips = k29.checkTips;
+        if (b42.checkTips !== undefined) {
+            this.checkTips = b42.checkTips;
         }
-        if (k29.isChecked !== undefined) {
-            this.isChecked = k29.isChecked;
+        if (b42.isChecked !== undefined) {
+            this.isChecked = b42.isChecked;
         }
-        if (k29.primaryButton !== undefined) {
-            this.primaryButton = k29.primaryButton;
+        if (b42.primaryButton !== undefined) {
+            this.primaryButton = b42.primaryButton;
         }
-        if (k29.secondaryButton !== undefined) {
-            this.secondaryButton = k29.secondaryButton;
+        if (b42.secondaryButton !== undefined) {
+            this.secondaryButton = b42.secondaryButton;
         }
-        if (k29.buttons !== undefined) {
-            this.buttons = k29.buttons;
+        if (b42.buttons !== undefined) {
+            this.buttons = b42.buttons;
         }
-        if (k29.textAlignment !== undefined) {
-            this.textAlignment = k29.textAlignment;
+        if (b42.textAlignment !== undefined) {
+            this.textAlignment = b42.textAlignment;
         }
-        if (k29.marginOffset !== undefined) {
-            this.marginOffset = k29.marginOffset;
+        if (b42.marginOffset !== undefined) {
+            this.marginOffset = b42.marginOffset;
         }
-        if (k29.contentScroller !== undefined) {
-            this.contentScroller = k29.contentScroller;
+        if (b42.contentScroller !== undefined) {
+            this.contentScroller = b42.contentScroller;
         }
-        if (k29.fontColorWithTheme !== undefined) {
-            this.fontColorWithTheme = k29.fontColorWithTheme;
+        if (b42.fontColorWithTheme !== undefined) {
+            this.fontColorWithTheme = b42.fontColorWithTheme;
         }
-        if (k29.theme !== undefined) {
-            this.theme = k29.theme;
+        if (b42.theme !== undefined) {
+            this.theme = b42.theme;
         }
-        if (k29.themeColorMode !== undefined) {
-            this.themeColorMode = k29.themeColorMode;
+        if (b42.themeColorMode !== undefined) {
+            this.themeColorMode = b42.themeColorMode;
         }
-        if (k29.fontSizeScale !== undefined) {
-            this.fontSizeScale = k29.fontSizeScale;
+        if (b42.fontSizeScale !== undefined) {
+            this.fontSizeScale = b42.fontSizeScale;
         }
-        if (k29.minContentHeight !== undefined) {
-            this.minContentHeight = k29.minContentHeight;
+        if (b42.minContentHeight !== undefined) {
+            this.minContentHeight = b42.minContentHeight;
         }
-        if (k29.updateTextAlign !== undefined) {
-            this.updateTextAlign = k29.updateTextAlign;
+        if (b42.updateTextAlign !== undefined) {
+            this.updateTextAlign = b42.updateTextAlign;
         }
-        if (k29.imageIndex !== undefined) {
-            this.imageIndex = k29.imageIndex;
+        if (b42.imageIndex !== undefined) {
+            this.imageIndex = b42.imageIndex;
         }
-        if (k29.textIndex !== undefined) {
-            this.textIndex = k29.textIndex;
+        if (b42.textIndex !== undefined) {
+            this.textIndex = b42.textIndex;
         }
-        if (k29.checkBoxIndex !== undefined) {
-            this.checkBoxIndex = k29.checkBoxIndex;
+        if (b42.checkBoxIndex !== undefined) {
+            this.checkBoxIndex = b42.checkBoxIndex;
         }
     }
 
-    updateStateVars(j29) {
+    updateStateVars(a42) {
     }
 
-    purgeVariableDependenciesOnElmtId(i29) {
-        this.__imageSize.purgeDependencyOnElmtId(i29);
-        this.__isChecked.purgeDependencyOnElmtId(i29);
-        this.__textAlignment.purgeDependencyOnElmtId(i29);
-        this.__fontColorWithTheme.purgeDependencyOnElmtId(i29);
-        this.__fontSizeScale.purgeDependencyOnElmtId(i29);
-        this.__minContentHeight.purgeDependencyOnElmtId(i29);
+    purgeVariableDependenciesOnElmtId(z41) {
+        this.__imageSize.purgeDependencyOnElmtId(z41);
+        this.__isChecked.purgeDependencyOnElmtId(z41);
+        this.__textAlignment.purgeDependencyOnElmtId(z41);
+        this.__fontColorWithTheme.purgeDependencyOnElmtId(z41);
+        this.__fontSizeScale.purgeDependencyOnElmtId(z41);
+        this.__minContentHeight.purgeDependencyOnElmtId(z41);
     }
 
     aboutToBeDeleted() {
@@ -211,67 +218,68 @@ export class TipsDialog extends ViewPU {
         this.aboutToBeDeletedInternal();
     }
 
-    setController(h29) {
-        this.controller = h29;
+    setController(y41) {
+        this.controller = y41;
     }
 
     get imageSize() {
         return this.__imageSize.get();
     }
 
-    set imageSize(g29) {
-        this.__imageSize.set(g29);
+    set imageSize(x41) {
+        this.__imageSize.set(x41);
     }
 
     get isChecked() {
         return this.__isChecked.get();
     }
 
-    set isChecked(f29) {
-        this.__isChecked.set(f29);
+    set isChecked(w41) {
+        this.__isChecked.set(w41);
     }
 
     get textAlignment() {
         return this.__textAlignment.get();
     }
 
-    set textAlignment(e29) {
-        this.__textAlignment.set(e29);
+    set textAlignment(v41) {
+        this.__textAlignment.set(v41);
     }
 
     get fontColorWithTheme() {
         return this.__fontColorWithTheme.get();
     }
 
-    set fontColorWithTheme(d29) {
-        this.__fontColorWithTheme.set(d29);
+    set fontColorWithTheme(u41) {
+        this.__fontColorWithTheme.set(u41);
     }
 
     get fontSizeScale() {
         return this.__fontSizeScale.get();
     }
 
-    set fontSizeScale(c29) {
-        this.__fontSizeScale.set(c29);
+    set fontSizeScale(t41) {
+        this.__fontSizeScale.set(t41);
     }
 
     get minContentHeight() {
         return this.__minContentHeight.get();
     }
 
-    set minContentHeight(b29) {
-        this.__minContentHeight.set(b29);
+    set minContentHeight(s41) {
+        this.__minContentHeight.set(s41);
     }
 
     initialRender() {
-        this.observeComponentCreation2((z28, a29) => {
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
+        this.observeComponentCreation2((q41, r41) => {
             __Common__.create();
             __Common__.constraintSize({ maxHeight: '100%' });
         }, __Common__);
         {
-            this.observeComponentCreation2((t28, u28) => {
-                if (u28) {
-                    let v28 = new CustomDialogContentComponent(this, {
+            this.observeComponentCreation2((k41, l41) => {
+                if (l41) {
+                    let m41 = new CustomDialogContentComponent(this, {
                         controller: this.controller,
                         contentBuilder: () => {
                             this.contentBuilder();
@@ -281,10 +289,10 @@ export class TipsDialog extends ViewPU {
                         themeColorMode: this.themeColorMode,
                         fontSizeScale: this.__fontSizeScale,
                         minContentHeight: this.__minContentHeight,
-                    }, undefined, t28, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 118, col: 5 });
-                    ViewPU.create(v28);
-                    let w28 = () => {
+                    }, undefined, k41, () => {
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 120, col: 5 });
+                    ViewPU.create(m41);
+                    let b1 = () => {
                         return {
                             controller: this.controller,
                             contentBuilder: () => {
@@ -297,39 +305,40 @@ export class TipsDialog extends ViewPU {
                             minContentHeight: this.minContentHeight
                         };
                     };
-                    v28.paramsGenerator_ = w28;
+                    m41.paramsGenerator_ = b1;
                 } else {
-                    this.updateStateVarsOfChildByElmtId(t28, {});
+                    this.updateStateVarsOfChildByElmtId(k41, {});
                 }
             }, { name: 'CustomDialogContentComponent' });
         }
         __Common__.pop();
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 
-    contentBuilder(d27 = null) {
+    contentBuilder(o39 = null) {
         {
-            this.observeComponentCreation2((f27, g27) => {
-                if (g27) {
-                    let h27 = new TipsDialogContentLayout(d27 ? d27 : this, {
+            this.observeComponentCreation2((q39, r39) => {
+                if (r39) {
+                    let s39 = new TipsDialogContentLayout(this, {
                         title: this.title,
                         content: this.content,
                         checkTips: this.checkTips,
                         minContentHeight: this.__minContentHeight,
                         updateTextAlign: this.updateTextAlign,
                         dialogBuilder: () => {
-                            this.observeComponentCreation2((c28, d28) => {
+                            this.observeComponentCreation2((q40, r40) => {
                                 ForEach.create();
-                                const e28 = g28 => {
-                                    const h28 = g28;
-                                    this.observeComponentCreation2((j28, k28) => {
+                                const a1 = u40 => {
+                                    const v40 = u40;
+                                    this.observeComponentCreation2((x40, y40) => {
                                         If.create();
-                                        if (h28 === this.imageIndex) {
+                                        if (v40 === this.imageIndex) {
                                             this.ifElseBranchUpdateFunction(0, () => {
-                                                this.imagePart.bind(this)(d27 ? d27 : this);
+                                                this.imagePart.bind(this)();
                                             });
-                                        } else if (h28 === this.textIndex) {
+                                        } else if (v40 === this.textIndex) {
                                             this.ifElseBranchUpdateFunction(1, () => {
-                                                this.observeComponentCreation2((o28, p28) => {
+                                                this.observeComponentCreation2((f41, g41) => {
                                                     Column.create();
                                                     Column.padding({
                                                         top: {
@@ -341,26 +350,33 @@ export class TipsDialog extends ViewPU {
                                                         }
                                                     });
                                                 }, Column);
-                                                this.textPart.bind(this)(d27 ? d27 : this);
+                                                this.textPart.bind(this)();
                                                 Column.pop();
                                             });
                                         } else {
                                             this.ifElseBranchUpdateFunction(2, () => {
-                                                this.checkBoxPart.bind(this)(d27 ? d27 : this);
+                                                this.observeComponentCreation2((b41, c41) => {
+                                                    WithTheme.create({
+                                                        theme: this.theme,
+                                                        colorMode: this.themeColorMode
+                                                    });
+                                                }, WithTheme);
+                                                this.checkBoxPart.bind(this)();
+                                                WithTheme.pop();
                                             });
                                         }
                                     }, If);
                                     If.pop();
                                 };
-                                this.forEachUpdateFunction(c28, [this.imageIndex, this.textIndex, this.checkBoxIndex],
-                                    e28);
+                                this.forEachUpdateFunction(q40, [this.imageIndex, this.textIndex, this.checkBoxIndex],
+                                    a1);
                             }, ForEach);
                             ForEach.pop();
                         }
-                    }, undefined, f27, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 133, col: 5 });
-                    ViewPU.create(h27);
-                    let i27 = () => {
+                    }, undefined, q39, () => {
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 135, col: 5 });
+                    ViewPU.create(s39);
+                    let y = () => {
                         return {
                             title: this.title,
                             content: this.content,
@@ -368,19 +384,19 @@ export class TipsDialog extends ViewPU {
                             minContentHeight: this.minContentHeight,
                             updateTextAlign: this.updateTextAlign,
                             dialogBuilder: () => {
-                                this.observeComponentCreation2((m27, n27) => {
+                                this.observeComponentCreation2((x39, y39) => {
                                     ForEach.create();
-                                    const o27 = q27 => {
-                                        const r27 = q27;
-                                        this.observeComponentCreation2((t27, u27) => {
+                                    const z = b40 => {
+                                        const c40 = b40;
+                                        this.observeComponentCreation2((e40, f40) => {
                                             If.create();
-                                            if (r27 === this.imageIndex) {
+                                            if (c40 === this.imageIndex) {
                                                 this.ifElseBranchUpdateFunction(0, () => {
-                                                    this.imagePart.bind(this)(d27 ? d27 : this);
+                                                    this.imagePart.bind(this)();
                                                 });
-                                            } else if (r27 === this.textIndex) {
+                                            } else if (c40 === this.textIndex) {
                                                 this.ifElseBranchUpdateFunction(1, () => {
-                                                    this.observeComponentCreation2((y27, z27) => {
+                                                    this.observeComponentCreation2((m40, n40) => {
                                                         Column.create();
                                                         Column.padding({
                                                             top: {
@@ -392,55 +408,70 @@ export class TipsDialog extends ViewPU {
                                                             }
                                                         });
                                                     }, Column);
-                                                    this.textPart.bind(this)(d27 ? d27 : this);
+                                                    this.textPart.bind(this)();
                                                     Column.pop();
                                                 });
                                             } else {
                                                 this.ifElseBranchUpdateFunction(2, () => {
-                                                    this.checkBoxPart.bind(this)(d27 ? d27 : this);
+                                                    this.observeComponentCreation2((i40, j40) => {
+                                                        WithTheme.create({
+                                                            theme: this.theme,
+                                                            colorMode: this.themeColorMode
+                                                        });
+                                                    }, WithTheme);
+                                                    this.checkBoxPart.bind(this)();
+                                                    WithTheme.pop();
                                                 });
                                             }
                                         }, If);
                                         If.pop();
                                     };
-                                    this.forEachUpdateFunction(m27,
-                                        [this.imageIndex, this.textIndex, this.checkBoxIndex], o27);
+                                    this.forEachUpdateFunction(x39,
+                                        [this.imageIndex, this.textIndex, this.checkBoxIndex], z);
                                 }, ForEach);
                                 ForEach.pop();
                             }
                         };
                     };
-                    h27.paramsGenerator_ = i27;
+                    s39.paramsGenerator_ = y;
                 } else {
-                    this.updateStateVarsOfChildByElmtId(f27, {});
+                    this.updateStateVarsOfChildByElmtId(q39, {});
                 }
             }, { name: 'TipsDialogContentLayout' });
         }
     }
 
-    checkBoxPart(l26 = null) {
-        this.observeComponentCreation2((b27, c27) => {
+    checkBoxPart(w38 = null) {
+        this.observeComponentCreation2((l39, m39) => {
             Row.create();
+            Row.accessibilityGroup(true);
+            Row.onClick(() => {
+                this.isChecked = !this.isChecked;
+                if (this.checkAction) {
+                    this.checkAction(this.isChecked);
+                }
+            });
             Row.padding({ top: 8, bottom: 8 });
             Row.constraintSize({ minHeight: CHECKBOX_CONTAINER_HEIGHT });
             Row.width('100%');
         }, Row);
-        this.observeComponentCreation2((o26, p26) => {
+        this.observeComponentCreation2((z38, a39) => {
             If.create();
             if (this.checkTips !== null) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((x26, y26) => {
-                        Checkbox.create({ name: 'checkbox', group: 'checkboxGroup' });
+                    this.observeComponentCreation2((h39, i39) => {
+                        Checkbox.create({ name: '', group: 'checkboxGroup' });
                         Checkbox.select(this.isChecked);
-                        Checkbox.onChange((a27) => {
-                            this.isChecked = a27;
+                        Checkbox.onChange((k39) => {
+                            this.isChecked = k39;
                             if (this.checkAction) {
-                                this.checkAction(a27);
+                                this.checkAction(k39);
                             }
                             if (this.onCheckedChange) {
-                                this.onCheckedChange(a27);
+                                this.onCheckedChange(k39);
                             }
                         });
+                        Checkbox.accessibilityLevel('yes');
                         Checkbox.margin({
                             right: {
                                 'id': -1,
@@ -452,27 +483,15 @@ export class TipsDialog extends ViewPU {
                         });
                     }, Checkbox);
                     Checkbox.pop();
-                    this.observeComponentCreation2((u26, v26) => {
+                    this.observeComponentCreation2((f39, g39) => {
                         Text.create(this.checkTips);
-                        Text.fontSize({
-                            'id': -1,
-                            'type': 10002,
-                            params: ['sys.float.Body_L'],
-                            'bundleName': '__harDefaultBundleName__',
-                            'moduleName': '__harDefaultModuleName__'
-                        });
+                        Text.fontSize(`${BODY_L}fp`);
                         Text.fontWeight(FontWeight.Regular);
                         Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
                         Text.maxLines(CONTENT_MAX_LINES);
                         Text.layoutWeight(1);
                         Text.focusable(false);
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-                        Text.onClick(() => {
-                            this.isChecked = !this.isChecked;
-                            if (this.checkAction) {
-                                this.checkAction(this.isChecked);
-                            }
-                        });
                     }, Text);
                     Text.pop();
                 });
@@ -485,12 +504,12 @@ export class TipsDialog extends ViewPU {
         Row.pop();
     }
 
-    imagePart(e26 = null) {
-        this.observeComponentCreation2((j26, k26) => {
+    imagePart(p38 = null) {
+        this.observeComponentCreation2((u38, v38) => {
             Column.create();
             Column.width('100%');
         }, Column);
-        this.observeComponentCreation2((h26, i26) => {
+        this.observeComponentCreation2((s38, t38) => {
             Image.create(this.imageRes);
             Image.objectFit(ImageFit.Contain);
             Image.borderRadius({
@@ -508,8 +527,8 @@ export class TipsDialog extends ViewPU {
         Column.pop();
     }
 
-    textPart(z24 = null) {
-        this.observeComponentCreation2((c26, d26) => {
+    textPart(k37 = null) {
+        this.observeComponentCreation2((n38, o38) => {
             Scroll.create(this.contentScroller);
             Scroll.nestedScroll({
                 scrollForward: NestedScrollMode.PARALLEL,
@@ -517,7 +536,7 @@ export class TipsDialog extends ViewPU {
             });
             Scroll.margin({ right: `${this.marginOffset}vp` });
         }, Scroll);
-        this.observeComponentCreation2((a26, b26) => {
+        this.observeComponentCreation2((l38, m38) => {
             Column.create();
             Column.margin({
                 right: {
@@ -529,11 +548,11 @@ export class TipsDialog extends ViewPU {
                 }
             });
         }, Column);
-        this.observeComponentCreation2((q25, r25) => {
+        this.observeComponentCreation2((b38, c38) => {
             If.create();
-            if (this.title != null) {
+            if (this.title !== null) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((y25, z25) => {
+                    this.observeComponentCreation2((j38, k38) => {
                         Row.create();
                         Row.padding({
                             bottom: {
@@ -545,15 +564,9 @@ export class TipsDialog extends ViewPU {
                             }
                         });
                     }, Row);
-                    this.observeComponentCreation2((w25, x25) => {
+                    this.observeComponentCreation2((h38, i38) => {
                         Text.create(this.title);
-                        Text.fontSize({
-                            'id': -1,
-                            'type': 10002,
-                            params: ['sys.float.Title_S'],
-                            'bundleName': '__harDefaultBundleName__',
-                            'moduleName': '__harDefaultModuleName__'
-                        });
+                        Text.fontSize(`${TITLE_S}fp`);
                         Text.fontWeight(FontWeight.Medium);
                         Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
                         Text.textAlign(TextAlign.Center);
@@ -570,14 +583,14 @@ export class TipsDialog extends ViewPU {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((e25, f25) => {
+        this.observeComponentCreation2((p37, q37) => {
             If.create();
-            if (this.content != null) {
+            if (this.content !== null) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((o25, p25) => {
+                    this.observeComponentCreation2((z37, a38) => {
                         Row.create();
                     }, Row);
-                    this.observeComponentCreation2((k25, l25) => {
+                    this.observeComponentCreation2((v37, w37) => {
                         Text.create(this.content);
                         Text.focusable(true);
                         Text.defaultFocus(!(this.primaryButton || this.secondaryButton));
@@ -586,9 +599,9 @@ export class TipsDialog extends ViewPU {
                         Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
                         Text.textAlign(this.textAlignment);
                         Text.width('100%');
-                        Text.onKeyEvent((n25) => {
-                            if (n25) {
-                                resolveKeyEvent(n25, this.contentScroller);
+                        Text.onKeyEvent((y37) => {
+                            if (y37) {
+                                resolveKeyEvent(y37, this.contentScroller);
                             }
                         });
                     }, Text);
@@ -640,66 +653,68 @@ export class TipsDialog extends ViewPU {
     }
 
     rerender() {
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.updateDirtyElements();
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 }
 
 class TipsDialogContentLayout extends ViewPU {
-    constructor(r24, s24, t24, u24 = -1, v24 = undefined, w24) {
-        super(r24, t24, u24, w24);
-        if (typeof v24 === 'function') {
-            this.paramsGenerator_ = v24;
+    constructor(c37, d37, e37, f37 = -1, g37 = undefined, h37) {
+        super(c37, e37, f37, h37);
+        if (typeof g37 === 'function') {
+            this.paramsGenerator_ = g37;
         }
         this.title = null;
         this.content = null;
         this.checkTips = null;
-        this.updateTextAlign = (y24) => {
+        this.updateTextAlign = (j37) => {
         };
-        this.__minContentHeight = new SynchedPropertySimpleTwoWayPU(s24.minContentHeight, this, 'minContentHeight');
+        this.__minContentHeight = new SynchedPropertySimpleTwoWayPU(d37.minContentHeight, this, 'minContentHeight');
         this.dialogBuilder = this.doNothingBuilder;
         this.imageIndex = 0;
         this.textIndex = 1;
         this.checkBoxIndex = 2;
         this.childrenSize = 3;
-        this.setInitiallyProvidedValue(s24);
+        this.setInitiallyProvidedValue(d37);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(q24) {
-        if (q24.title !== undefined) {
-            this.title = q24.title;
+    setInitiallyProvidedValue(b37) {
+        if (b37.title !== undefined) {
+            this.title = b37.title;
         }
-        if (q24.content !== undefined) {
-            this.content = q24.content;
+        if (b37.content !== undefined) {
+            this.content = b37.content;
         }
-        if (q24.checkTips !== undefined) {
-            this.checkTips = q24.checkTips;
+        if (b37.checkTips !== undefined) {
+            this.checkTips = b37.checkTips;
         }
-        if (q24.updateTextAlign !== undefined) {
-            this.updateTextAlign = q24.updateTextAlign;
+        if (b37.updateTextAlign !== undefined) {
+            this.updateTextAlign = b37.updateTextAlign;
         }
-        if (q24.dialogBuilder !== undefined) {
-            this.dialogBuilder = q24.dialogBuilder;
+        if (b37.dialogBuilder !== undefined) {
+            this.dialogBuilder = b37.dialogBuilder;
         }
-        if (q24.imageIndex !== undefined) {
-            this.imageIndex = q24.imageIndex;
+        if (b37.imageIndex !== undefined) {
+            this.imageIndex = b37.imageIndex;
         }
-        if (q24.textIndex !== undefined) {
-            this.textIndex = q24.textIndex;
+        if (b37.textIndex !== undefined) {
+            this.textIndex = b37.textIndex;
         }
-        if (q24.checkBoxIndex !== undefined) {
-            this.checkBoxIndex = q24.checkBoxIndex;
+        if (b37.checkBoxIndex !== undefined) {
+            this.checkBoxIndex = b37.checkBoxIndex;
         }
-        if (q24.childrenSize !== undefined) {
-            this.childrenSize = q24.childrenSize;
+        if (b37.childrenSize !== undefined) {
+            this.childrenSize = b37.childrenSize;
         }
     }
 
-    updateStateVars(p24) {
+    updateStateVars(a37) {
     }
 
-    purgeVariableDependenciesOnElmtId(o24) {
-        this.__minContentHeight.purgeDependencyOnElmtId(o24);
+    purgeVariableDependenciesOnElmtId(z36) {
+        this.__minContentHeight.purgeDependencyOnElmtId(z36);
     }
 
     aboutToBeDeleted() {
@@ -708,92 +723,95 @@ class TipsDialogContentLayout extends ViewPU {
         this.aboutToBeDeletedInternal();
     }
 
-    doNothingBuilder(n24 = null) {
+    doNothingBuilder(y36 = null) {
     }
 
     get minContentHeight() {
         return this.__minContentHeight.get();
     }
 
-    set minContentHeight(m24) {
-        this.__minContentHeight.set(m24);
+    set minContentHeight(x36) {
+        this.__minContentHeight.set(x36);
     }
 
-    onPlaceChildren(f24, g24, h24) {
-        let i24 = 0;
-        let j24 = 0;
-        for (let k24 = 0; k24 < g24.length; k24++) {
-            let l24 = g24[k24];
-            l24.layout({ x: i24, y: j24 });
-            j24 += l24.measureResult.height;
+    onPlaceChildren(q36, r36, s36) {
+        let t36 = 0;
+        let u36 = 0;
+        for (let v36 = 0; v36 < r36.length; v36++) {
+            let w36 = r36[v36];
+            w36.layout({ x: t36, y: u36 });
+            u36 += w36.measureResult.height;
         }
     }
 
-    onMeasureSize(n23, o23, p23) {
-        let q23 = { width: Number(p23.maxWidth), height: 0 };
-        if (o23.length < this.childrenSize) {
-            return q23;
+    onMeasureSize(y35, z35, a36) {
+        let b36 = { width: Number(a36.maxWidth), height: 0 };
+        if (z35.length < this.childrenSize) {
+            return b36;
         }
-        let r23 = 0;
-        let s23 = 0;
+        let c36 = 0;
+        let d36 = 0;
         if (this.checkTips !== null) {
-            let c24 = o23[this.checkBoxIndex];
-            let d24 = {
-                maxWidth: p23.maxWidth,
+            let n36 = z35[this.checkBoxIndex];
+            let o36 = {
+                maxWidth: a36.maxWidth,
                 minHeight: CHECKBOX_CONTAINER_HEIGHT,
-                maxHeight: p23.maxHeight
+                maxHeight: a36.maxHeight
             };
-            let e24 = c24.measure(d24);
-            s23 = e24.height;
-            r23 += s23;
+            let p36 = n36.measure(o36);
+            d36 = p36.height;
+            c36 += d36;
         }
-        let t23 = o23[this.imageIndex];
-        let u23 = 0;
+        let e36 = z35[this.imageIndex];
+        let f36 = 0;
         if (this.title !== null || this.content !== null) {
-            u23 = TEXT_MIN_HEIGHT + PADDING_LEVEL_8;
+            f36 = TEXT_MIN_HEIGHT + PADDING_LEVEL_8;
         }
-        let v23 = Number(p23.maxHeight) - s23 - u23;
-        let w23 = {
-            maxWidth: p23.maxWidth,
-            maxHeight: v23
+        let g36 = Number(a36.maxHeight) - d36 - f36;
+        let h36 = {
+            maxWidth: a36.maxWidth,
+            maxHeight: g36
         };
-        let x23 = t23.measure(w23);
-        r23 += x23.height;
+        let i36 = e36.measure(h36);
+        c36 += i36.height;
         if (this.title !== null || this.content !== null) {
-            let y23 = o23[this.textIndex];
-            this.updateTextAlign(q23.width);
-            let z23 = Number(p23.maxHeight) - x23.height - s23;
-            let a24 = {
-                maxWidth: p23.maxWidth,
-                maxHeight: Math.max(z23, TEXT_MIN_HEIGHT)
+            let j36 = z35[this.textIndex];
+            this.updateTextAlign(b36.width);
+            let k36 = Number(a36.maxHeight) - i36.height - d36;
+            let l36 = {
+                maxWidth: a36.maxWidth,
+                maxHeight: Math.max(k36, TEXT_MIN_HEIGHT)
             };
-            let b24 = y23.measure(a24);
-            r23 += b24.height;
+            let m36 = j36.measure(l36);
+            c36 += m36.height;
         }
-        q23.height = r23;
-        this.minContentHeight = Math.max(s23 + x23.height + u23, MIN_CONTENT_HEIGHT);
-        return q23;
+        b36.height = c36;
+        this.minContentHeight = Math.max(d36 + i36.height + f36, MIN_CONTENT_HEIGHT);
+        return b36;
     }
 
     initialRender() {
-        this.dialogBuilder.bind(this)(this);
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
+        this.dialogBuilder.bind(this)();
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 
     rerender() {
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.updateDirtyElements();
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 }
 
 export class SelectDialog extends ViewPU {
-    constructor(h23, i23, j23, k23 = -1, l23 = undefined, m23) {
-        super(h23, j23, k23, m23);
-        if (typeof l23 === 'function') {
-            this.paramsGenerator_ = l23;
+    constructor(s35, t35, u35, v35 = -1, w35 = undefined, x35) {
+        super(s35, u35, v35, x35);
+        if (typeof w35 === 'function') {
+            this.paramsGenerator_ = w35;
         }
         this.controller = undefined;
         this.title = '';
         this.content = '';
-        this.selectedIndex = -1;
         this.confirm = null;
         this.radioContent = [];
         this.buttons = [];
@@ -802,6 +820,7 @@ export class SelectDialog extends ViewPU {
         this.currentFocusIndex = -1;
         this.radioHeight = 0;
         this.itemHeight = 0;
+        this.__selectedIndex = new ObservedPropertySimplePU(-1, this, 'selectedIndex');
         this.contentBuilder = this.buildContent;
         this.__fontColorWithTheme = new ObservedPropertyObjectPU({
             'id': -1,
@@ -822,84 +841,86 @@ export class SelectDialog extends ViewPU {
         this.contentScroller = new Scroller();
         this.__fontSizeScale = new ObservedPropertySimplePU(1, this, 'fontSizeScale');
         this.__minContentHeight = new ObservedPropertySimplePU(MIN_CONTENT_HEIGHT, this, 'minContentHeight');
-        this.setInitiallyProvidedValue(i23);
+        this.setInitiallyProvidedValue(t35);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(g23) {
-        if (g23.controller !== undefined) {
-            this.controller = g23.controller;
+    setInitiallyProvidedValue(r35) {
+        if (r35.controller !== undefined) {
+            this.controller = r35.controller;
         }
-        if (g23.title !== undefined) {
-            this.title = g23.title;
+        if (r35.title !== undefined) {
+            this.title = r35.title;
         }
-        if (g23.content !== undefined) {
-            this.content = g23.content;
+        if (r35.content !== undefined) {
+            this.content = r35.content;
         }
-        if (g23.selectedIndex !== undefined) {
-            this.selectedIndex = g23.selectedIndex;
+        if (r35.confirm !== undefined) {
+            this.confirm = r35.confirm;
         }
-        if (g23.confirm !== undefined) {
-            this.confirm = g23.confirm;
+        if (r35.radioContent !== undefined) {
+            this.radioContent = r35.radioContent;
         }
-        if (g23.radioContent !== undefined) {
-            this.radioContent = g23.radioContent;
+        if (r35.buttons !== undefined) {
+            this.buttons = r35.buttons;
         }
-        if (g23.buttons !== undefined) {
-            this.buttons = g23.buttons;
+        if (r35.contentPadding !== undefined) {
+            this.contentPadding = r35.contentPadding;
         }
-        if (g23.contentPadding !== undefined) {
-            this.contentPadding = g23.contentPadding;
+        if (r35.isFocus !== undefined) {
+            this.isFocus = r35.isFocus;
         }
-        if (g23.isFocus !== undefined) {
-            this.isFocus = g23.isFocus;
+        if (r35.currentFocusIndex !== undefined) {
+            this.currentFocusIndex = r35.currentFocusIndex;
         }
-        if (g23.currentFocusIndex !== undefined) {
-            this.currentFocusIndex = g23.currentFocusIndex;
+        if (r35.radioHeight !== undefined) {
+            this.radioHeight = r35.radioHeight;
         }
-        if (g23.radioHeight !== undefined) {
-            this.radioHeight = g23.radioHeight;
+        if (r35.itemHeight !== undefined) {
+            this.itemHeight = r35.itemHeight;
         }
-        if (g23.itemHeight !== undefined) {
-            this.itemHeight = g23.itemHeight;
+        if (r35.selectedIndex !== undefined) {
+            this.selectedIndex = r35.selectedIndex;
         }
-        if (g23.contentBuilder !== undefined) {
-            this.contentBuilder = g23.contentBuilder;
+        if (r35.contentBuilder !== undefined) {
+            this.contentBuilder = r35.contentBuilder;
         }
-        if (g23.fontColorWithTheme !== undefined) {
-            this.fontColorWithTheme = g23.fontColorWithTheme;
+        if (r35.fontColorWithTheme !== undefined) {
+            this.fontColorWithTheme = r35.fontColorWithTheme;
         }
-        if (g23.dividerColorWithTheme !== undefined) {
-            this.dividerColorWithTheme = g23.dividerColorWithTheme;
+        if (r35.dividerColorWithTheme !== undefined) {
+            this.dividerColorWithTheme = r35.dividerColorWithTheme;
         }
-        if (g23.theme !== undefined) {
-            this.theme = g23.theme;
+        if (r35.theme !== undefined) {
+            this.theme = r35.theme;
         }
-        if (g23.themeColorMode !== undefined) {
-            this.themeColorMode = g23.themeColorMode;
+        if (r35.themeColorMode !== undefined) {
+            this.themeColorMode = r35.themeColorMode;
         }
-        if (g23.contentScroller !== undefined) {
-            this.contentScroller = g23.contentScroller;
+        if (r35.contentScroller !== undefined) {
+            this.contentScroller = r35.contentScroller;
         }
-        if (g23.fontSizeScale !== undefined) {
-            this.fontSizeScale = g23.fontSizeScale;
+        if (r35.fontSizeScale !== undefined) {
+            this.fontSizeScale = r35.fontSizeScale;
         }
-        if (g23.minContentHeight !== undefined) {
-            this.minContentHeight = g23.minContentHeight;
+        if (r35.minContentHeight !== undefined) {
+            this.minContentHeight = r35.minContentHeight;
         }
     }
 
-    updateStateVars(f23) {
+    updateStateVars(q35) {
     }
 
-    purgeVariableDependenciesOnElmtId(e23) {
-        this.__fontColorWithTheme.purgeDependencyOnElmtId(e23);
-        this.__dividerColorWithTheme.purgeDependencyOnElmtId(e23);
-        this.__fontSizeScale.purgeDependencyOnElmtId(e23);
-        this.__minContentHeight.purgeDependencyOnElmtId(e23);
+    purgeVariableDependenciesOnElmtId(p35) {
+        this.__selectedIndex.purgeDependencyOnElmtId(p35);
+        this.__fontColorWithTheme.purgeDependencyOnElmtId(p35);
+        this.__dividerColorWithTheme.purgeDependencyOnElmtId(p35);
+        this.__fontSizeScale.purgeDependencyOnElmtId(p35);
+        this.__minContentHeight.purgeDependencyOnElmtId(p35);
     }
 
     aboutToBeDeleted() {
+        this.__selectedIndex.aboutToBeDeleted();
         this.__fontColorWithTheme.aboutToBeDeleted();
         this.__dividerColorWithTheme.aboutToBeDeleted();
         this.__fontSizeScale.aboutToBeDeleted();
@@ -908,52 +929,60 @@ export class SelectDialog extends ViewPU {
         this.aboutToBeDeletedInternal();
     }
 
-    setController(d23) {
-        this.controller = d23;
+    setController(o35) {
+        this.controller = o35;
+    }
+
+    get selectedIndex() {
+        return this.__selectedIndex.get();
+    }
+
+    set selectedIndex(n35) {
+        this.__selectedIndex.set(n35);
     }
 
     get fontColorWithTheme() {
         return this.__fontColorWithTheme.get();
     }
 
-    set fontColorWithTheme(c23) {
-        this.__fontColorWithTheme.set(c23);
+    set fontColorWithTheme(m35) {
+        this.__fontColorWithTheme.set(m35);
     }
 
     get dividerColorWithTheme() {
         return this.__dividerColorWithTheme.get();
     }
 
-    set dividerColorWithTheme(b23) {
-        this.__dividerColorWithTheme.set(b23);
+    set dividerColorWithTheme(l35) {
+        this.__dividerColorWithTheme.set(l35);
     }
 
     get fontSizeScale() {
         return this.__fontSizeScale.get();
     }
 
-    set fontSizeScale(a23) {
-        this.__fontSizeScale.set(a23);
+    set fontSizeScale(k35) {
+        this.__fontSizeScale.set(k35);
     }
 
     get minContentHeight() {
         return this.__minContentHeight.get();
     }
 
-    set minContentHeight(z22) {
-        this.__minContentHeight.set(z22);
+    set minContentHeight(j35) {
+        this.__minContentHeight.set(j35);
     }
 
-    buildContent(a20 = null) {
-        this.observeComponentCreation2((t22, u22) => {
+    buildContent(k32 = null) {
+        this.observeComponentCreation2((d35, e35) => {
             Scroll.create(this.contentScroller);
             Scroll.scrollBar(BarState.Auto);
             Scroll.nestedScroll({
                 scrollForward: NestedScrollMode.PARALLEL,
                 scrollBackward: NestedScrollMode.PARALLEL
             });
-            Scroll.onDidScroll((w22, x22) => {
-                let y22 = (this.itemHeight - this.radioHeight) / 2;
+            Scroll.onDidScroll((g35, h35) => {
+                let i35 = (this.itemHeight - this.radioHeight) / 2;
                 if (this.isFocus) {
                     if (this.currentFocusIndex === this.radioContent.length - 1) {
                         this.contentScroller.scrollEdge(Edge.Bottom);
@@ -962,24 +991,24 @@ export class SelectDialog extends ViewPU {
                         this.contentScroller.scrollEdge(Edge.Top);
                         this.currentFocusIndex = -1;
                     } else {
-                        if (x22 > 0) {
-                            this.contentScroller.scrollBy(0, y22);
-                        } else if (x22 < 0) {
-                            this.contentScroller.scrollBy(0, 0 - y22);
+                        if (h35 > 0) {
+                            this.contentScroller.scrollBy(0, i35);
+                        } else if (h35 < 0) {
+                            this.contentScroller.scrollBy(0, 0 - i35);
                         }
                     }
                     this.isFocus = false;
                 }
             });
         }, Scroll);
-        this.observeComponentCreation2((r22, s22) => {
+        this.observeComponentCreation2((b35, c35) => {
             Column.create();
         }, Column);
-        this.observeComponentCreation2((h22, i22) => {
+        this.observeComponentCreation2((r34, s34) => {
             If.create();
             if (this.content) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((p22, q22) => {
+                    this.observeComponentCreation2((z34, a35) => {
                         Row.create();
                         Row.padding({
                             left: {
@@ -1006,15 +1035,9 @@ export class SelectDialog extends ViewPU {
                         });
                         Row.width('100%');
                     }, Row);
-                    this.observeComponentCreation2((n22, o22) => {
+                    this.observeComponentCreation2((x34, y34) => {
                         Text.create(this.content);
-                        Text.fontSize({
-                            'id': -1,
-                            'type': 10002,
-                            params: ['sys.float.Body_M'],
-                            'bundleName': '__harDefaultBundleName__',
-                            'moduleName': '__harDefaultModuleName__'
-                        });
+                        Text.fontSize(`${BODY_M}fp`);
                         Text.fontWeight(FontWeight.Regular);
                         Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
@@ -1028,8 +1051,8 @@ export class SelectDialog extends ViewPU {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((e22, f22) => {
-            List.create({ space: 1 });
+        this.observeComponentCreation2((o34, p34) => {
+            List.create();
             List.width('100%');
             List.clip(false);
             List.onFocus(() => {
@@ -1038,30 +1061,30 @@ export class SelectDialog extends ViewPU {
                     focusControl.requestFocus(String(FIRST_ITEM_INDEX));
                 }
             });
-            List.defaultFocus(this.buttons?.length == 0 ? true : false);
+            List.defaultFocus(this.buttons?.length === 0 ? true : false);
         }, List);
-        this.observeComponentCreation2((g20, h20) => {
+        this.observeComponentCreation2((q32, r32) => {
             ForEach.create();
-            const i20 = (k20, l20) => {
-                const m20 = k20;
+            const u = (u32, v32) => {
+                const w32 = u32;
                 {
-                    const n20 = (c22, d22) => {
-                        ViewStackProcessor.StartGetAccessRecordingFor(c22);
-                        o20(c22, d22);
-                        if (!d22) {
+                    const v = (m34, n34) => {
+                        ViewStackProcessor.StartGetAccessRecordingFor(m34);
+                        w(m34, n34);
+                        if (!n34) {
                             ListItem.pop();
                         }
                         ViewStackProcessor.StopGetAccessRecording();
                     };
-                    const o20 = (x21, y21) => {
-                        ListItem.create(p20, true);
-                        ListItem.onSizeChange((a22, b22) => {
-                            this.itemHeight = Number(b22.height);
+                    const w = (h34, i34) => {
+                        ListItem.create(x, true);
+                        ListItem.onSizeChange((k34, l34) => {
+                            this.itemHeight = Number(l34.height);
                         });
                     };
-                    const p20 = (t20, u20) => {
-                        n20(t20, u20);
-                        this.observeComponentCreation2((v21, w21) => {
+                    const x = (d33, e33) => {
+                        v(d33, e33);
+                        this.observeComponentCreation2((f34, g34) => {
                             Column.create();
                             Column.padding({
                                 left: {
@@ -1080,7 +1103,7 @@ export class SelectDialog extends ViewPU {
                                 }
                             });
                         }, Column);
-                        this.observeComponentCreation2((s21, t21) => {
+                        this.observeComponentCreation2((c34, d34) => {
                             Button.createWithChild();
                             Button.type(ButtonType.Normal);
                             Button.borderRadius({
@@ -1107,12 +1130,16 @@ export class SelectDialog extends ViewPU {
                                     'moduleName': '__harDefaultModuleName__'
                                 }
                             });
+                            Button.focusBox({
+                                margin: { value: -2, unit: LengthUnit.VP }
+                            });
                             Button.onClick(() => {
-                                m20.action && m20.action();
-                                this.controller.close();
+                                this.selectedIndex = v32;
+                                w32.action && w32.action();
+                                this.controller?.close();
                             });
                         }, Button);
-                        this.observeComponentCreation2((q21, r21) => {
+                        this.observeComponentCreation2((a34, b34) => {
                             Row.create();
                             Row.constraintSize({ minHeight: LIST_MIN_HEIGHT });
                             Row.clip(false);
@@ -1133,46 +1160,42 @@ export class SelectDialog extends ViewPU {
                                 }
                             });
                         }, Row);
-                        this.observeComponentCreation2((o21, p21) => {
-                            Text.create(m20.title);
-                            Text.fontSize({
-                                'id': -1,
-                                'type': 10002,
-                                params: ['sys.float.Body_L'],
-                                'bundleName': '__harDefaultBundleName__',
-                                'moduleName': '__harDefaultModuleName__'
-                            });
+                        this.observeComponentCreation2((y33, z33) => {
+                            Text.create(w32.title);
+                            Text.fontSize(`${BODY_L}fp`);
                             Text.fontWeight(FontWeight.Medium);
                             Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
                             Text.layoutWeight(1);
                         }, Text);
                         Text.pop();
-                        this.observeComponentCreation2((i21, j21) => {
+                        this.observeComponentCreation2((s33, t33) => {
                             Radio.create({ value: 'item.title', group: 'radioGroup' });
                             Radio.size({ width: CHECKBOX_CONTAINER_LENGTH, height: CHECKBOX_CONTAINER_LENGTH });
-                            Radio.checked(this.selectedIndex === l20);
+                            Radio.checked(this.selectedIndex === v32);
                             Radio.hitTestBehavior(HitTestMode.None);
-                            Radio.id(String(l20));
+                            Radio.id(String(v32));
+                            Radio.focusable(false);
+                            Radio.accessibilityLevel('no');
                             Radio.onFocus(() => {
                                 this.isFocus = true;
-                                this.currentFocusIndex = l20;
-                                if (l20 == FIRST_ITEM_INDEX) {
+                                this.currentFocusIndex = v32;
+                                if (v32 === FIRST_ITEM_INDEX) {
                                     this.contentScroller.scrollEdge(Edge.Top);
-                                } else if (l20 == this.radioContent.length - 1) {
+                                } else if (v32 === this.radioContent.length - 1) {
                                     this.contentScroller.scrollEdge(Edge.Bottom);
                                 }
                             });
-                            Radio.onSizeChange((m21, n21) => {
-                                this.radioHeight = Number(n21.height);
+                            Radio.onSizeChange((w33, x33) => {
+                                this.radioHeight = Number(x33.height);
                             });
                         }, Radio);
                         Row.pop();
                         Button.pop();
-                        this.observeComponentCreation2((b21, c21) => {
+                        this.observeComponentCreation2((l33, m33) => {
                             If.create();
-                            if (l20 < this.radioContent.length - 1) {
+                            if (v32 < this.radioContent.length - 1) {
                                 this.ifElseBranchUpdateFunction(0, () => {
-                                    this.observeComponentCreation2((g21, h21) => {
+                                    this.observeComponentCreation2((q33, r33) => {
                                         Divider.create();
                                         Divider.color(ObservedObject.GetRawObject(this.dividerColorWithTheme));
                                         Divider.padding({
@@ -1202,11 +1225,11 @@ export class SelectDialog extends ViewPU {
                         Column.pop();
                         ListItem.pop();
                     };
-                    this.observeComponentCreation2(o20, ListItem);
+                    this.observeComponentCreation2(w, ListItem);
                     ListItem.pop();
                 }
             };
-            this.forEachUpdateFunction(g20, this.radioContent, i20, undefined, true, false);
+            this.forEachUpdateFunction(q32, this.radioContent, u, undefined, true, false);
         }, ForEach);
         ForEach.pop();
         List.pop();
@@ -1215,14 +1238,15 @@ export class SelectDialog extends ViewPU {
     }
 
     initialRender() {
-        this.observeComponentCreation2((y19, z19) => {
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
+        this.observeComponentCreation2((i32, j32) => {
             __Common__.create();
             __Common__.constraintSize({ maxHeight: '100%' });
         }, __Common__);
         {
-            this.observeComponentCreation2((s19, t19) => {
-                if (t19) {
-                    let u19 = new CustomDialogContentComponent(this, {
+            this.observeComponentCreation2((c32, d32) => {
+                if (d32) {
+                    let e32 = new CustomDialogContentComponent(this, {
                         controller: this.controller,
                         primaryTitle: this.title,
                         contentBuilder: () => {
@@ -1234,10 +1258,10 @@ export class SelectDialog extends ViewPU {
                         themeColorMode: this.themeColorMode,
                         fontSizeScale: this.__fontSizeScale,
                         minContentHeight: this.__minContentHeight,
-                    }, undefined, s19, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 495, col: 5 });
-                    ViewPU.create(u19);
-                    let v19 = () => {
+                    }, undefined, c32, () => {
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 507, col: 5 });
+                    ViewPU.create(e32);
+                    let t = () => {
                         return {
                             controller: this.controller,
                             primaryTitle: this.title,
@@ -1252,13 +1276,14 @@ export class SelectDialog extends ViewPU {
                             minContentHeight: this.minContentHeight
                         };
                     };
-                    u19.paramsGenerator_ = v19;
+                    e32.paramsGenerator_ = t;
                 } else {
-                    this.updateStateVarsOfChildByElmtId(s19, {});
+                    this.updateStateVarsOfChildByElmtId(c32, {});
                 }
             }, { name: 'CustomDialogContentComponent' });
         }
         __Common__.pop();
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 
     aboutToAppear() {
@@ -1349,46 +1374,48 @@ export class SelectDialog extends ViewPU {
     }
 
     rerender() {
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.updateDirtyElements();
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 }
 
 class ConfirmDialogContentLayout extends ViewPU {
-    constructor(i19, j19, k19, l19 = -1, m19 = undefined, n19) {
-        super(i19, k19, l19, n19);
-        if (typeof m19 === 'function') {
-            this.paramsGenerator_ = m19;
+    constructor(s31, t31, u31, v31 = -1, w31 = undefined, x31) {
+        super(s31, u31, v31, x31);
+        if (typeof w31 === 'function') {
+            this.paramsGenerator_ = w31;
         }
         this.textIndex = 0;
         this.checkboxIndex = 1;
-        this.__minContentHeight = new SynchedPropertySimpleTwoWayPU(j19.minContentHeight, this, 'minContentHeight');
-        this.updateTextAlign = (p19) => {
+        this.__minContentHeight = new SynchedPropertySimpleTwoWayPU(t31.minContentHeight, this, 'minContentHeight');
+        this.updateTextAlign = (z31) => {
         };
         this.dialogBuilder = this.doNothingBuilder;
-        this.setInitiallyProvidedValue(j19);
+        this.setInitiallyProvidedValue(t31);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(h19) {
-        if (h19.textIndex !== undefined) {
-            this.textIndex = h19.textIndex;
+    setInitiallyProvidedValue(r31) {
+        if (r31.textIndex !== undefined) {
+            this.textIndex = r31.textIndex;
         }
-        if (h19.checkboxIndex !== undefined) {
-            this.checkboxIndex = h19.checkboxIndex;
+        if (r31.checkboxIndex !== undefined) {
+            this.checkboxIndex = r31.checkboxIndex;
         }
-        if (h19.updateTextAlign !== undefined) {
-            this.updateTextAlign = h19.updateTextAlign;
+        if (r31.updateTextAlign !== undefined) {
+            this.updateTextAlign = r31.updateTextAlign;
         }
-        if (h19.dialogBuilder !== undefined) {
-            this.dialogBuilder = h19.dialogBuilder;
+        if (r31.dialogBuilder !== undefined) {
+            this.dialogBuilder = r31.dialogBuilder;
         }
     }
 
-    updateStateVars(g19) {
+    updateStateVars(q31) {
     }
 
-    purgeVariableDependenciesOnElmtId(f19) {
-        this.__minContentHeight.purgeDependencyOnElmtId(f19);
+    purgeVariableDependenciesOnElmtId(p31) {
+        this.__minContentHeight.purgeDependencyOnElmtId(p31);
     }
 
     aboutToBeDeleted() {
@@ -1401,65 +1428,69 @@ class ConfirmDialogContentLayout extends ViewPU {
         return this.__minContentHeight.get();
     }
 
-    set minContentHeight(e19) {
-        this.__minContentHeight.set(e19);
+    set minContentHeight(o31) {
+        this.__minContentHeight.set(o31);
     }
 
-    doNothingBuilder(d19 = null) {
+    doNothingBuilder(n31 = null) {
     }
 
-    onPlaceChildren(w18, x18, y18) {
-        let z18 = 0;
-        let a19 = 0;
-        for (let b19 = 0; b19 < x18.length; b19++) {
-            let c19 = x18[b19];
-            c19.layout({ x: z18, y: a19 });
-            a19 += c19.measureResult.height;
+    onPlaceChildren(g31, h31, i31) {
+        let j31 = 0;
+        let k31 = 0;
+        for (let l31 = 0; l31 < h31.length; l31++) {
+            let m31 = h31[l31];
+            m31.layout({ x: j31, y: k31 });
+            k31 += m31.measureResult.height;
         }
     }
 
-    onMeasureSize(k18, l18, m18) {
-        let n18 = { width: Number(m18.maxWidth), height: 0 };
-        let o18 = 2;
-        if (l18.length < o18) {
-            return n18;
+    onMeasureSize(u30, v30, w30) {
+        let x30 = { width: Number(w30.maxWidth), height: 0 };
+        let y30 = 2;
+        if (v30.length < y30) {
+            return x30;
         }
-        this.updateTextAlign(n18.width);
-        let p18 = 0;
-        let q18 = l18[this.checkboxIndex];
-        let r18 = {
-            maxWidth: m18.maxWidth,
+        this.updateTextAlign(x30.width);
+        let z30 = 0;
+        let a31 = v30[this.checkboxIndex];
+        let b31 = {
+            maxWidth: w30.maxWidth,
             minHeight: CHECKBOX_CONTAINER_HEIGHT,
-            maxHeight: m18.maxHeight
+            maxHeight: w30.maxHeight
         };
-        let s18 = q18.measure(r18);
-        p18 += s18.height;
-        let t18 = l18[this.textIndex];
-        let u18 = {
-            maxWidth: m18.maxWidth,
-            maxHeight: Number(m18.maxHeight) - p18
+        let c31 = a31.measure(b31);
+        z30 += c31.height;
+        let d31 = v30[this.textIndex];
+        let e31 = {
+            maxWidth: w30.maxWidth,
+            maxHeight: Number(w30.maxHeight) - z30
         };
-        let v18 = t18.measure(u18);
-        p18 += v18.height;
-        n18.height = p18;
-        this.minContentHeight = Math.max(s18.height + TEXT_MIN_HEIGHT, MIN_CONTENT_HEIGHT);
-        return n18;
+        let f31 = d31.measure(e31);
+        z30 += f31.height;
+        x30.height = z30;
+        this.minContentHeight = Math.max(c31.height + TEXT_MIN_HEIGHT, MIN_CONTENT_HEIGHT);
+        return x30;
     }
 
     initialRender() {
-        this.dialogBuilder.bind(this)(this);
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
+        this.dialogBuilder.bind(this)();
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 
     rerender() {
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.updateDirtyElements();
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 }
 
 export class ConfirmDialog extends ViewPU {
-    constructor(c18, d18, e18, f18 = -1, g18 = undefined, h18) {
-        super(c18, e18, f18, h18);
-        if (typeof g18 === 'function') {
-            this.paramsGenerator_ = g18;
+    constructor(m30, n30, o30, p30 = -1, q30 = undefined, r30) {
+        super(m30, o30, p30, r30);
+        if (typeof q30 === 'function') {
+            this.paramsGenerator_ = q30;
         }
         this.controller = undefined;
         this.title = '';
@@ -1486,87 +1517,87 @@ export class ConfirmDialog extends ViewPU {
         this.__minContentHeight = new ObservedPropertySimplePU(MIN_CONTENT_HEIGHT, this, 'minContentHeight');
         this.textIndex = 0;
         this.checkboxIndex = 1;
-        this.updateTextAlign = (j18) => {
+        this.updateTextAlign = (t30) => {
             if (this.content) {
-                this.textAlign = getTextAlign(j18, this.content, `${BODY_L}fp`);
+                this.textAlign = getTextAlign(t30, this.content, `${BODY_L * this.fontSizeScale}vp`);
             }
         };
-        this.setInitiallyProvidedValue(d18);
+        this.setInitiallyProvidedValue(n30);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(b18) {
-        if (b18.controller !== undefined) {
-            this.controller = b18.controller;
+    setInitiallyProvidedValue(l30) {
+        if (l30.controller !== undefined) {
+            this.controller = l30.controller;
         }
-        if (b18.title !== undefined) {
-            this.title = b18.title;
+        if (l30.title !== undefined) {
+            this.title = l30.title;
         }
-        if (b18.content !== undefined) {
-            this.content = b18.content;
+        if (l30.content !== undefined) {
+            this.content = l30.content;
         }
-        if (b18.checkTips !== undefined) {
-            this.checkTips = b18.checkTips;
+        if (l30.checkTips !== undefined) {
+            this.checkTips = l30.checkTips;
         }
-        if (b18.isChecked !== undefined) {
-            this.isChecked = b18.isChecked;
+        if (l30.isChecked !== undefined) {
+            this.isChecked = l30.isChecked;
         }
-        if (b18.primaryButton !== undefined) {
-            this.primaryButton = b18.primaryButton;
+        if (l30.primaryButton !== undefined) {
+            this.primaryButton = l30.primaryButton;
         }
-        if (b18.secondaryButton !== undefined) {
-            this.secondaryButton = b18.secondaryButton;
+        if (l30.secondaryButton !== undefined) {
+            this.secondaryButton = l30.secondaryButton;
         }
-        if (b18.fontColorWithTheme !== undefined) {
-            this.fontColorWithTheme = b18.fontColorWithTheme;
+        if (l30.fontColorWithTheme !== undefined) {
+            this.fontColorWithTheme = l30.fontColorWithTheme;
         }
-        if (b18.theme !== undefined) {
-            this.theme = b18.theme;
+        if (l30.theme !== undefined) {
+            this.theme = l30.theme;
         }
-        if (b18.themeColorMode !== undefined) {
-            this.themeColorMode = b18.themeColorMode;
+        if (l30.themeColorMode !== undefined) {
+            this.themeColorMode = l30.themeColorMode;
         }
-        if (b18.onCheckedChange !== undefined) {
-            this.onCheckedChange = b18.onCheckedChange;
+        if (l30.onCheckedChange !== undefined) {
+            this.onCheckedChange = l30.onCheckedChange;
         }
-        if (b18.contentScroller !== undefined) {
-            this.contentScroller = b18.contentScroller;
+        if (l30.contentScroller !== undefined) {
+            this.contentScroller = l30.contentScroller;
         }
-        if (b18.buttons !== undefined) {
-            this.buttons = b18.buttons;
+        if (l30.buttons !== undefined) {
+            this.buttons = l30.buttons;
         }
-        if (b18.textAlign !== undefined) {
-            this.textAlign = b18.textAlign;
+        if (l30.textAlign !== undefined) {
+            this.textAlign = l30.textAlign;
         }
-        if (b18.marginOffset !== undefined) {
-            this.marginOffset = b18.marginOffset;
+        if (l30.marginOffset !== undefined) {
+            this.marginOffset = l30.marginOffset;
         }
-        if (b18.fontSizeScale !== undefined) {
-            this.fontSizeScale = b18.fontSizeScale;
+        if (l30.fontSizeScale !== undefined) {
+            this.fontSizeScale = l30.fontSizeScale;
         }
-        if (b18.minContentHeight !== undefined) {
-            this.minContentHeight = b18.minContentHeight;
+        if (l30.minContentHeight !== undefined) {
+            this.minContentHeight = l30.minContentHeight;
         }
-        if (b18.textIndex !== undefined) {
-            this.textIndex = b18.textIndex;
+        if (l30.textIndex !== undefined) {
+            this.textIndex = l30.textIndex;
         }
-        if (b18.checkboxIndex !== undefined) {
-            this.checkboxIndex = b18.checkboxIndex;
+        if (l30.checkboxIndex !== undefined) {
+            this.checkboxIndex = l30.checkboxIndex;
         }
-        if (b18.updateTextAlign !== undefined) {
-            this.updateTextAlign = b18.updateTextAlign;
+        if (l30.updateTextAlign !== undefined) {
+            this.updateTextAlign = l30.updateTextAlign;
         }
     }
 
-    updateStateVars(a18) {
+    updateStateVars(k30) {
     }
 
-    purgeVariableDependenciesOnElmtId(z17) {
-        this.__isChecked.purgeDependencyOnElmtId(z17);
-        this.__fontColorWithTheme.purgeDependencyOnElmtId(z17);
-        this.__textAlign.purgeDependencyOnElmtId(z17);
-        this.__fontSizeScale.purgeDependencyOnElmtId(z17);
-        this.__minContentHeight.purgeDependencyOnElmtId(z17);
+    purgeVariableDependenciesOnElmtId(j30) {
+        this.__isChecked.purgeDependencyOnElmtId(j30);
+        this.__fontColorWithTheme.purgeDependencyOnElmtId(j30);
+        this.__textAlign.purgeDependencyOnElmtId(j30);
+        this.__fontSizeScale.purgeDependencyOnElmtId(j30);
+        this.__minContentHeight.purgeDependencyOnElmtId(j30);
     }
 
     aboutToBeDeleted() {
@@ -1579,55 +1610,55 @@ export class ConfirmDialog extends ViewPU {
         this.aboutToBeDeletedInternal();
     }
 
-    setController(y17) {
-        this.controller = y17;
+    setController(i30) {
+        this.controller = i30;
     }
 
     get isChecked() {
         return this.__isChecked.get();
     }
 
-    set isChecked(x17) {
-        this.__isChecked.set(x17);
+    set isChecked(h30) {
+        this.__isChecked.set(h30);
     }
 
     get fontColorWithTheme() {
         return this.__fontColorWithTheme.get();
     }
 
-    set fontColorWithTheme(w17) {
-        this.__fontColorWithTheme.set(w17);
+    set fontColorWithTheme(g30) {
+        this.__fontColorWithTheme.set(g30);
     }
 
     get textAlign() {
         return this.__textAlign.get();
     }
 
-    set textAlign(v17) {
-        this.__textAlign.set(v17);
+    set textAlign(f30) {
+        this.__textAlign.set(f30);
     }
 
     get fontSizeScale() {
         return this.__fontSizeScale.get();
     }
 
-    set fontSizeScale(u17) {
-        this.__fontSizeScale.set(u17);
+    set fontSizeScale(e30) {
+        this.__fontSizeScale.set(e30);
     }
 
     get minContentHeight() {
         return this.__minContentHeight.get();
     }
 
-    set minContentHeight(t17) {
-        this.__minContentHeight.set(t17);
+    set minContentHeight(d30) {
+        this.__minContentHeight.set(d30);
     }
 
-    textBuilder(e17 = null) {
-        this.observeComponentCreation2((r17, s17) => {
+    textBuilder(o29 = null) {
+        this.observeComponentCreation2((b30, c30) => {
             Column.create();
         }, Column);
-        this.observeComponentCreation2((p17, q17) => {
+        this.observeComponentCreation2((z29, a30) => {
             Scroll.create(this.contentScroller);
             Scroll.nestedScroll({
                 scrollForward: NestedScrollMode.PARALLEL,
@@ -1635,7 +1666,7 @@ export class ConfirmDialog extends ViewPU {
             });
             Scroll.margin({ right: `${this.marginOffset}vp` });
         }, Scroll);
-        this.observeComponentCreation2((n17, o17) => {
+        this.observeComponentCreation2((x29, y29) => {
             Column.create();
             Column.margin({
                 right: {
@@ -1647,23 +1678,17 @@ export class ConfirmDialog extends ViewPU {
                 }
             });
         }, Column);
-        this.observeComponentCreation2((j17, k17) => {
+        this.observeComponentCreation2((t29, u29) => {
             Text.create(this.content);
             Text.focusable(true);
             Text.defaultFocus(!(this.primaryButton?.value || this.secondaryButton?.value));
-            Text.fontSize({
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.Body_L'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            });
+            Text.fontSize(`${BODY_L}fp`);
             Text.fontWeight(FontWeight.Medium);
             Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
             Text.textAlign(this.textAlign);
-            Text.onKeyEvent((m17) => {
-                if (m17) {
-                    resolveKeyEvent(m17, this.contentScroller);
+            Text.onKeyEvent((s) => {
+                if (s) {
+                    resolveKeyEvent(s, this.contentScroller);
                 }
             });
             Text.width('100%');
@@ -1674,68 +1699,71 @@ export class ConfirmDialog extends ViewPU {
         Column.pop();
     }
 
-    checkBoxBuilder(r16 = null) {
-        this.observeComponentCreation2((c17, d17) => {
+    checkBoxBuilder(b29 = null) {
+        this.observeComponentCreation2((l29, m29) => {
             Row.create();
+            Row.accessibilityGroup(true);
+            Row.onClick(() => {
+                this.isChecked = !this.isChecked;
+            });
             Row.width('100%');
             Row.padding({ top: 8, bottom: 8 });
         }, Row);
-        this.observeComponentCreation2((y16, z16) => {
-            Checkbox.create({ name: 'checkbox', group: 'checkboxGroup' });
+        this.observeComponentCreation2((h29, i29) => {
+            Checkbox.create({ name: '', group: 'checkboxGroup' });
             Checkbox.select(this.isChecked);
-            Checkbox.onChange((b17) => {
-                this.isChecked = b17;
+            Checkbox.onChange((k29) => {
+                this.isChecked = k29;
                 if (this.onCheckedChange) {
                     this.onCheckedChange(this.isChecked);
                 }
             });
             Checkbox.hitTestBehavior(HitTestMode.Block);
+            Checkbox.accessibilityLevel('yes');
             Checkbox.margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(8) });
         }, Checkbox);
         Checkbox.pop();
-        this.observeComponentCreation2((v16, w16) => {
+        this.observeComponentCreation2((f29, g29) => {
             Text.create(this.checkTips);
-            Text.fontSize({
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.Body_M'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            });
+            Text.fontSize(`${BODY_M}fp`);
             Text.fontWeight(FontWeight.Medium);
             Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
             Text.maxLines(CONTENT_MAX_LINES);
             Text.focusable(false);
             Text.layoutWeight(1);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-            Text.onClick(() => {
-                this.isChecked = !this.isChecked;
-            });
         }, Text);
         Text.pop();
         Row.pop();
     }
 
-    buildContent(j15 = null) {
+    buildContent(n27 = null) {
         {
-            this.observeComponentCreation2((l15, m15) => {
-                if (m15) {
-                    let n15 = new ConfirmDialogContentLayout(j15 ? j15 : this, {
+            this.observeComponentCreation2((p27, q27) => {
+                if (q27) {
+                    let r27 = new ConfirmDialogContentLayout(this, {
                         minContentHeight: this.__minContentHeight, updateTextAlign: this.updateTextAlign,
                         dialogBuilder: () => {
-                            this.observeComponentCreation2((f16, g16) => {
+                            this.observeComponentCreation2((m28, n28) => {
                                 ForEach.create();
-                                const h16 = j16 => {
-                                    const k16 = j16;
-                                    this.observeComponentCreation2((m16, n16) => {
+                                const r = q28 => {
+                                    const r28 = q28;
+                                    this.observeComponentCreation2((t28, u28) => {
                                         If.create();
-                                        if (k16 === this.textIndex) {
+                                        if (r28 === this.textIndex) {
                                             this.ifElseBranchUpdateFunction(0, () => {
-                                                this.textBuilder.bind(this)(j15 ? j15 : this);
+                                                this.textBuilder.bind(this)();
                                             });
-                                        } else if (k16 === this.checkboxIndex) {
+                                        } else if (r28 === this.checkboxIndex) {
                                             this.ifElseBranchUpdateFunction(1, () => {
-                                                this.checkBoxBuilder.bind(this)(j15 ? j15 : this);
+                                                this.observeComponentCreation2((y28, z28) => {
+                                                    WithTheme.create({
+                                                        theme: this.theme,
+                                                        colorMode: this.themeColorMode
+                                                    });
+                                                }, WithTheme);
+                                                this.checkBoxBuilder.bind(this)();
+                                                WithTheme.pop();
                                             });
                                         } else {
                                             this.ifElseBranchUpdateFunction(2, () => {
@@ -1744,31 +1772,38 @@ export class ConfirmDialog extends ViewPU {
                                     }, If);
                                     If.pop();
                                 };
-                                this.forEachUpdateFunction(f16, [this.textIndex, this.checkboxIndex], h16);
+                                this.forEachUpdateFunction(m28, [this.textIndex, this.checkboxIndex], r);
                             }, ForEach);
                             ForEach.pop();
                         }
-                    }, undefined, l15, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 696, col: 5 });
-                    ViewPU.create(n15);
-                    let o15 = () => {
+                    }, undefined, p27, () => {
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 710, col: 5 });
+                    ViewPU.create(r27);
+                    let m = () => {
                         return {
                             minContentHeight: this.minContentHeight,
                             updateTextAlign: this.updateTextAlign,
                             dialogBuilder: () => {
-                                this.observeComponentCreation2((s15, t15) => {
+                                this.observeComponentCreation2((w27, x27) => {
                                     ForEach.create();
-                                    const u15 = w15 => {
-                                        const x15 = w15;
-                                        this.observeComponentCreation2((z15, a16) => {
+                                    const n = a28 => {
+                                        const b28 = a28;
+                                        this.observeComponentCreation2((d28, e28) => {
                                             If.create();
-                                            if (x15 === this.textIndex) {
+                                            if (b28 === this.textIndex) {
                                                 this.ifElseBranchUpdateFunction(0, () => {
-                                                    this.textBuilder.bind(this)(j15 ? j15 : this);
+                                                    this.textBuilder.bind(this)();
                                                 });
-                                            } else if (x15 === this.checkboxIndex) {
+                                            } else if (b28 === this.checkboxIndex) {
                                                 this.ifElseBranchUpdateFunction(1, () => {
-                                                    this.checkBoxBuilder.bind(this)(j15 ? j15 : this);
+                                                    this.observeComponentCreation2((i28, j28) => {
+                                                        WithTheme.create({
+                                                            theme: this.theme,
+                                                            colorMode: this.themeColorMode
+                                                        });
+                                                    }, WithTheme);
+                                                    this.checkBoxBuilder.bind(this)();
+                                                    WithTheme.pop();
                                                 });
                                             } else {
                                                 this.ifElseBranchUpdateFunction(2, () => {
@@ -1777,29 +1812,30 @@ export class ConfirmDialog extends ViewPU {
                                         }, If);
                                         If.pop();
                                     };
-                                    this.forEachUpdateFunction(s15, [this.textIndex, this.checkboxIndex], u15);
+                                    this.forEachUpdateFunction(w27, [this.textIndex, this.checkboxIndex], n);
                                 }, ForEach);
                                 ForEach.pop();
                             }
                         };
                     };
-                    n15.paramsGenerator_ = o15;
+                    r27.paramsGenerator_ = m;
                 } else {
-                    this.updateStateVarsOfChildByElmtId(l15, {});
+                    this.updateStateVarsOfChildByElmtId(p27, {});
                 }
-            }, { name: 'ConfirmDialogContentLayout' });
+            }, { name: "ConfirmDialogContentLayout" });
         }
     }
 
     initialRender() {
-        this.observeComponentCreation2((h15, i15) => {
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
+        this.observeComponentCreation2((l27, m27) => {
             __Common__.create();
             __Common__.constraintSize({ maxHeight: '100%' });
         }, __Common__);
         {
-            this.observeComponentCreation2((b15, c15) => {
-                if (c15) {
-                    let d15 = new CustomDialogContentComponent(this, {
+            this.observeComponentCreation2((f27, g27) => {
+                if (g27) {
+                    let h27 = new CustomDialogContentComponent(this, {
                         primaryTitle: this.title,
                         controller: this.controller,
                         contentBuilder: () => {
@@ -1810,10 +1846,10 @@ export class ConfirmDialog extends ViewPU {
                         theme: this.theme,
                         themeColorMode: this.themeColorMode,
                         fontSizeScale: this.__fontSizeScale,
-                    }, undefined, b15, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 708, col: 5 });
-                    ViewPU.create(d15);
-                    let e15 = () => {
+                    }, undefined, f27, () => {
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 724, col: 5 });
+                    ViewPU.create(h27);
+                    let l = () => {
                         return {
                             primaryTitle: this.title,
                             controller: this.controller,
@@ -1827,13 +1863,14 @@ export class ConfirmDialog extends ViewPU {
                             fontSizeScale: this.fontSizeScale
                         };
                     };
-                    d15.paramsGenerator_ = e15;
+                    h27.paramsGenerator_ = l;
                 } else {
-                    this.updateStateVarsOfChildByElmtId(b15, {});
+                    this.updateStateVarsOfChildByElmtId(f27, {});
                 }
-            }, { name: 'CustomDialogContentComponent' });
+            }, { name: "CustomDialogContentComponent" });
         }
         __Common__.pop();
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 
     aboutToAppear() {
@@ -1867,15 +1904,17 @@ export class ConfirmDialog extends ViewPU {
     }
 
     rerender() {
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.updateDirtyElements();
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 }
 
 export class AlertDialog extends ViewPU {
-    constructor(t14, u14, v14, w14 = -1, x14 = undefined, y14) {
-        super(t14, v14, w14, y14);
-        if (typeof x14 === 'function') {
-            this.paramsGenerator_ = x14;
+    constructor(x26, y26, z26, a27 = -1, b27 = undefined, c27) {
+        super(x26, z26, a27, c27);
+        if (typeof b27 === 'function') {
+            this.paramsGenerator_ = b27;
         }
         this.controller = undefined;
         this.primaryTitle = undefined;
@@ -1897,63 +1936,63 @@ export class AlertDialog extends ViewPU {
         this.themeColorMode = ThemeColorMode.SYSTEM;
         this.__fontSizeScale = new ObservedPropertySimplePU(1, this, 'fontSizeScale');
         this.__minContentHeight = new ObservedPropertySimplePU(MIN_CONTENT_HEIGHT, this, 'minContentHeight');
-        this.setInitiallyProvidedValue(u14);
+        this.setInitiallyProvidedValue(y26);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(s14) {
-        if (s14.controller !== undefined) {
-            this.controller = s14.controller;
+    setInitiallyProvidedValue(w26) {
+        if (w26.controller !== undefined) {
+            this.controller = w26.controller;
         }
-        if (s14.primaryTitle !== undefined) {
-            this.primaryTitle = s14.primaryTitle;
+        if (w26.primaryTitle !== undefined) {
+            this.primaryTitle = w26.primaryTitle;
         }
-        if (s14.secondaryTitle !== undefined) {
-            this.secondaryTitle = s14.secondaryTitle;
+        if (w26.secondaryTitle !== undefined) {
+            this.secondaryTitle = w26.secondaryTitle;
         }
-        if (s14.content !== undefined) {
-            this.content = s14.content;
+        if (w26.content !== undefined) {
+            this.content = w26.content;
         }
-        if (s14.primaryButton !== undefined) {
-            this.primaryButton = s14.primaryButton;
+        if (w26.primaryButton !== undefined) {
+            this.primaryButton = w26.primaryButton;
         }
-        if (s14.secondaryButton !== undefined) {
-            this.secondaryButton = s14.secondaryButton;
+        if (w26.secondaryButton !== undefined) {
+            this.secondaryButton = w26.secondaryButton;
         }
-        if (s14.buttons !== undefined) {
-            this.buttons = s14.buttons;
+        if (w26.buttons !== undefined) {
+            this.buttons = w26.buttons;
         }
-        if (s14.textAlign !== undefined) {
-            this.textAlign = s14.textAlign;
+        if (w26.textAlign !== undefined) {
+            this.textAlign = w26.textAlign;
         }
-        if (s14.contentScroller !== undefined) {
-            this.contentScroller = s14.contentScroller;
+        if (w26.contentScroller !== undefined) {
+            this.contentScroller = w26.contentScroller;
         }
-        if (s14.fontColorWithTheme !== undefined) {
-            this.fontColorWithTheme = s14.fontColorWithTheme;
+        if (w26.fontColorWithTheme !== undefined) {
+            this.fontColorWithTheme = w26.fontColorWithTheme;
         }
-        if (s14.theme !== undefined) {
-            this.theme = s14.theme;
+        if (w26.theme !== undefined) {
+            this.theme = w26.theme;
         }
-        if (s14.themeColorMode !== undefined) {
-            this.themeColorMode = s14.themeColorMode;
+        if (w26.themeColorMode !== undefined) {
+            this.themeColorMode = w26.themeColorMode;
         }
-        if (s14.fontSizeScale !== undefined) {
-            this.fontSizeScale = s14.fontSizeScale;
+        if (w26.fontSizeScale !== undefined) {
+            this.fontSizeScale = w26.fontSizeScale;
         }
-        if (s14.minContentHeight !== undefined) {
-            this.minContentHeight = s14.minContentHeight;
+        if (w26.minContentHeight !== undefined) {
+            this.minContentHeight = w26.minContentHeight;
         }
     }
 
-    updateStateVars(r14) {
+    updateStateVars(v26) {
     }
 
-    purgeVariableDependenciesOnElmtId(q14) {
-        this.__textAlign.purgeDependencyOnElmtId(q14);
-        this.__fontColorWithTheme.purgeDependencyOnElmtId(q14);
-        this.__fontSizeScale.purgeDependencyOnElmtId(q14);
-        this.__minContentHeight.purgeDependencyOnElmtId(q14);
+    purgeVariableDependenciesOnElmtId(u26) {
+        this.__textAlign.purgeDependencyOnElmtId(u26);
+        this.__fontColorWithTheme.purgeDependencyOnElmtId(u26);
+        this.__fontSizeScale.purgeDependencyOnElmtId(u26);
+        this.__minContentHeight.purgeDependencyOnElmtId(u26);
     }
 
     aboutToBeDeleted() {
@@ -1965,51 +2004,52 @@ export class AlertDialog extends ViewPU {
         this.aboutToBeDeletedInternal();
     }
 
-    setController(p14) {
-        this.controller = p14;
+    setController(t26) {
+        this.controller = t26;
     }
 
     get textAlign() {
         return this.__textAlign.get();
     }
 
-    set textAlign(o14) {
-        this.__textAlign.set(o14);
+    set textAlign(s26) {
+        this.__textAlign.set(s26);
     }
 
     get fontColorWithTheme() {
         return this.__fontColorWithTheme.get();
     }
 
-    set fontColorWithTheme(n14) {
-        this.__fontColorWithTheme.set(n14);
+    set fontColorWithTheme(r26) {
+        this.__fontColorWithTheme.set(r26);
     }
 
     get fontSizeScale() {
         return this.__fontSizeScale.get();
     }
 
-    set fontSizeScale(m14) {
-        this.__fontSizeScale.set(m14);
+    set fontSizeScale(q26) {
+        this.__fontSizeScale.set(q26);
     }
 
     get minContentHeight() {
         return this.__minContentHeight.get();
     }
 
-    set minContentHeight(l14) {
-        this.__minContentHeight.set(l14);
+    set minContentHeight(p26) {
+        this.__minContentHeight.set(p26);
     }
 
     initialRender() {
-        this.observeComponentCreation2((j14, k14) => {
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
+        this.observeComponentCreation2((n26, o26) => {
             __Common__.create();
             __Common__.constraintSize({ maxHeight: '100%' });
         }, __Common__);
         {
-            this.observeComponentCreation2((d14, e14) => {
-                if (e14) {
-                    let f14 = new CustomDialogContentComponent(this, {
+            this.observeComponentCreation2((h26, i26) => {
+                if (i26) {
+                    let j26 = new CustomDialogContentComponent(this, {
                         primaryTitle: this.primaryTitle,
                         secondaryTitle: this.secondaryTitle,
                         controller: this.controller,
@@ -2021,10 +2061,10 @@ export class AlertDialog extends ViewPU {
                         themeColorMode: this.themeColorMode,
                         fontSizeScale: this.__fontSizeScale,
                         minContentHeight: this.__minContentHeight,
-                    }, undefined, d14, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 766, col: 5 });
-                    ViewPU.create(f14);
-                    let g14 = () => {
+                    }, undefined, h26, () => {
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 782, col: 5 });
+                    ViewPU.create(j26);
+                    let k = () => {
                         return {
                             primaryTitle: this.primaryTitle,
                             secondaryTitle: this.secondaryTitle,
@@ -2039,21 +2079,22 @@ export class AlertDialog extends ViewPU {
                             minContentHeight: this.minContentHeight
                         };
                     };
-                    f14.paramsGenerator_ = g14;
+                    j26.paramsGenerator_ = k;
                 } else {
-                    this.updateStateVarsOfChildByElmtId(d14, {});
+                    this.updateStateVarsOfChildByElmtId(h26, {});
                 }
-            }, { name: 'CustomDialogContentComponent' });
+            }, { name: "CustomDialogContentComponent" });
         }
         __Common__.pop();
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 
-    AlertDialogContentBuilder(m13 = null) {
-        this.observeComponentCreation2((z13, a14) => {
+    AlertDialogContentBuilder(q25 = null) {
+        this.observeComponentCreation2((d26, e26) => {
             Column.create();
             Column.margin({ right: `${this.getMargin()}vp`, });
         }, Column);
-        this.observeComponentCreation2((x13, y13) => {
+        this.observeComponentCreation2((b26, c26) => {
             Scroll.create(this.contentScroller);
             Scroll.nestedScroll({
                 scrollForward: NestedScrollMode.PARALLEL,
@@ -2061,17 +2102,11 @@ export class AlertDialog extends ViewPU {
             });
             Scroll.width('100%');
         }, Scroll);
-        this.observeComponentCreation2((q13, r13) => {
+        this.observeComponentCreation2((u25, v25) => {
             Text.create(this.content);
             Text.focusable(true);
             Text.defaultFocus(!(this.primaryButton || this.secondaryButton));
-            Text.fontSize({
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.Body_L'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            });
+            Text.fontSize(`${BODY_L}fp`);
             Text.fontWeight(this.getFontWeight());
             Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
             Text.margin({
@@ -2085,12 +2120,12 @@ export class AlertDialog extends ViewPU {
             });
             Text.width(`calc(100% - ${PADDING_LEVEL_8}vp)`);
             Text.textAlign(this.textAlign);
-            Text.onAreaChange((v13, w13) => {
-                this.updateTextAlign(Number(w13.width));
+            Text.onAreaChange((i, j) => {
+                this.updateTextAlign(Number(j.width));
             });
-            Text.onKeyEvent((u13) => {
-                if (u13) {
-                    resolveKeyEvent(u13, this.contentScroller);
+            Text.onKeyEvent((g) => {
+                if (g) {
+                    resolveKeyEvent(g, this.contentScroller);
                 }
             });
         }, Text);
@@ -2111,14 +2146,8 @@ export class AlertDialog extends ViewPU {
         this.initButtons();
     }
 
-    updateTextAlign(l13) {
-        this.textAlign = getTextAlign(l13, this.content, {
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.Body_L'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        });
+    updateTextAlign(p25) {
+        this.textAlign = getTextAlign(p25, this.content, `${BODY_L * this.fontSizeScale}vp`);
     }
 
     initButtons() {
@@ -2146,69 +2175,75 @@ export class AlertDialog extends ViewPU {
     }
 
     rerender() {
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.updateDirtyElements();
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 }
 
 export class CustomContentDialog extends ViewPU {
-    constructor(f13, g13, h13, i13 = -1, j13 = undefined, k13) {
-        super(f13, h13, i13, k13);
-        if (typeof j13 === 'function') {
-            this.paramsGenerator_ = j13;
+    constructor(j25, k25, l25, m25 = -1, n25 = undefined, o25) {
+        super(j25, l25, m25, o25);
+        if (typeof n25 === 'function') {
+            this.paramsGenerator_ = n25;
         }
         this.controller = undefined;
         this.primaryTitle = undefined;
         this.secondaryTitle = undefined;
         this.contentBuilder = undefined;
         this.contentAreaPadding = undefined;
+        this.localizedContentAreaPadding = undefined;
         this.buttons = undefined;
         this.theme = new CustomThemeImpl({});
         this.themeColorMode = ThemeColorMode.SYSTEM;
         this.__fontSizeScale = new ObservedPropertySimplePU(1, this, 'fontSizeScale');
         this.__minContentHeight = new ObservedPropertySimplePU(MIN_CONTENT_HEIGHT, this, 'minContentHeight');
-        this.setInitiallyProvidedValue(g13);
+        this.setInitiallyProvidedValue(k25);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(e13) {
-        if (e13.controller !== undefined) {
-            this.controller = e13.controller;
+    setInitiallyProvidedValue(i25) {
+        if (i25.controller !== undefined) {
+            this.controller = i25.controller;
         }
-        if (e13.primaryTitle !== undefined) {
-            this.primaryTitle = e13.primaryTitle;
+        if (i25.primaryTitle !== undefined) {
+            this.primaryTitle = i25.primaryTitle;
         }
-        if (e13.secondaryTitle !== undefined) {
-            this.secondaryTitle = e13.secondaryTitle;
+        if (i25.secondaryTitle !== undefined) {
+            this.secondaryTitle = i25.secondaryTitle;
         }
-        if (e13.contentBuilder !== undefined) {
-            this.contentBuilder = e13.contentBuilder;
+        if (i25.contentBuilder !== undefined) {
+            this.contentBuilder = i25.contentBuilder;
         }
-        if (e13.contentAreaPadding !== undefined) {
-            this.contentAreaPadding = e13.contentAreaPadding;
+        if (i25.contentAreaPadding !== undefined) {
+            this.contentAreaPadding = i25.contentAreaPadding;
         }
-        if (e13.buttons !== undefined) {
-            this.buttons = e13.buttons;
+        if (i25.localizedContentAreaPadding !== undefined) {
+            this.localizedContentAreaPadding = i25.localizedContentAreaPadding;
         }
-        if (e13.theme !== undefined) {
-            this.theme = e13.theme;
+        if (i25.buttons !== undefined) {
+            this.buttons = i25.buttons;
         }
-        if (e13.themeColorMode !== undefined) {
-            this.themeColorMode = e13.themeColorMode;
+        if (i25.theme !== undefined) {
+            this.theme = i25.theme;
         }
-        if (e13.fontSizeScale !== undefined) {
-            this.fontSizeScale = e13.fontSizeScale;
+        if (i25.themeColorMode !== undefined) {
+            this.themeColorMode = i25.themeColorMode;
         }
-        if (e13.minContentHeight !== undefined) {
-            this.minContentHeight = e13.minContentHeight;
+        if (i25.fontSizeScale !== undefined) {
+            this.fontSizeScale = i25.fontSizeScale;
+        }
+        if (i25.minContentHeight !== undefined) {
+            this.minContentHeight = i25.minContentHeight;
         }
     }
 
-    updateStateVars(d13) {
+    updateStateVars(h25) {
     }
 
-    purgeVariableDependenciesOnElmtId(c13) {
-        this.__fontSizeScale.purgeDependencyOnElmtId(c13);
-        this.__minContentHeight.purgeDependencyOnElmtId(c13);
+    purgeVariableDependenciesOnElmtId(g25) {
+        this.__fontSizeScale.purgeDependencyOnElmtId(g25);
+        this.__minContentHeight.purgeDependencyOnElmtId(g25);
     }
 
     aboutToBeDeleted() {
@@ -2218,35 +2253,36 @@ export class CustomContentDialog extends ViewPU {
         this.aboutToBeDeletedInternal();
     }
 
-    setController(b13) {
-        this.controller = b13;
+    setController(f25) {
+        this.controller = f25;
     }
 
     get fontSizeScale() {
         return this.__fontSizeScale.get();
     }
 
-    set fontSizeScale(a13) {
-        this.__fontSizeScale.set(a13);
+    set fontSizeScale(e25) {
+        this.__fontSizeScale.set(e25);
     }
 
     get minContentHeight() {
         return this.__minContentHeight.get();
     }
 
-    set minContentHeight(z12) {
-        this.__minContentHeight.set(z12);
+    set minContentHeight(d25) {
+        this.__minContentHeight.set(d25);
     }
 
     initialRender() {
-        this.observeComponentCreation2((x12, y12) => {
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
+        this.observeComponentCreation2((b25, c25) => {
             __Common__.create();
             __Common__.constraintSize({ maxHeight: '100%' });
         }, __Common__);
         {
-            this.observeComponentCreation2((r12, s12) => {
-                if (s12) {
-                    let t12 = new CustomDialogContentComponent(this, {
+            this.observeComponentCreation2((v24, w24) => {
+                if (w24) {
+                    let x24 = new CustomDialogContentComponent(this, {
                         controller: this.controller,
                         primaryTitle: this.primaryTitle,
                         secondaryTitle: this.secondaryTitle,
@@ -2254,15 +2290,17 @@ export class CustomContentDialog extends ViewPU {
                             this.contentBuilder();
                         },
                         contentAreaPadding: this.contentAreaPadding,
+                        localizedContentAreaPadding: this.localizedContentAreaPadding,
                         buttons: this.buttons,
                         theme: this.theme,
                         themeColorMode: this.themeColorMode,
                         fontSizeScale: this.__fontSizeScale,
                         minContentHeight: this.__minContentHeight,
-                    }, undefined, r12, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 858, col: 5 });
-                    ViewPU.create(t12);
-                    let u12 = () => {
+                        customStyle: false
+                    }, undefined, v24, () => {
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 875, col: 5 });
+                    ViewPU.create(x24);
+                    let f = () => {
                         return {
                             controller: this.controller,
                             primaryTitle: this.primaryTitle,
@@ -2271,73 +2309,78 @@ export class CustomContentDialog extends ViewPU {
                                 this.contentBuilder();
                             },
                             contentAreaPadding: this.contentAreaPadding,
+                            localizedContentAreaPadding: this.localizedContentAreaPadding,
                             buttons: this.buttons,
                             theme: this.theme,
                             themeColorMode: this.themeColorMode,
                             fontSizeScale: this.fontSizeScale,
-                            minContentHeight: this.minContentHeight
+                            minContentHeight: this.minContentHeight,
+                            customStyle: false
                         };
                     };
-                    t12.paramsGenerator_ = u12;
+                    x24.paramsGenerator_ = f;
                 } else {
-                    this.updateStateVarsOfChildByElmtId(r12, {});
+                    this.updateStateVarsOfChildByElmtId(v24, {});
                 }
             }, { name: 'CustomDialogContentComponent' });
         }
         __Common__.pop();
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 
     rerender() {
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.updateDirtyElements();
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 }
 
 class CustomDialogControllerExtend extends CustomDialogController {
-    constructor(o12) {
-        super(o12);
-        this.arg_ = o12;
+    constructor(s24) {
+        super(s24);
+        this.arg_ = s24;
     }
 }
 
 class CustomDialogLayout extends ViewPU {
-    constructor(i12, j12, k12, l12 = -1, m12 = undefined, n12) {
-        super(i12, k12, l12, n12);
-        if (typeof m12 === 'function') {
-            this.paramsGenerator_ = m12;
+    constructor(m24, n24, o24, p24 = -1, q24 = undefined, r24) {
+        super(m24, o24, p24, r24);
+        if (typeof q24 === 'function') {
+            this.paramsGenerator_ = q24;
         }
-        this.__titleHeight = new SynchedPropertySimpleTwoWayPU(j12.titleHeight, this, 'titleHeight');
-        this.__buttonHeight = new SynchedPropertySimpleTwoWayPU(j12.buttonHeight, this, 'buttonHeight');
-        this.__titleMinHeight = new SynchedPropertyObjectTwoWayPU(j12.titleMinHeight, this, 'titleMinHeight');
+        this.__titleHeight = new SynchedPropertySimpleTwoWayPU(n24.titleHeight, this, 'titleHeight');
+        this.__buttonHeight = new SynchedPropertySimpleTwoWayPU(n24.buttonHeight, this, 'buttonHeight');
+        this.__titleMinHeight = new SynchedPropertyObjectTwoWayPU(n24.titleMinHeight, this, 'titleMinHeight');
         this.dialogBuilder = this.doNothingBuilder;
         this.titleIndex = 0;
         this.contentIndex = 1;
         this.buttonIndex = 2;
-        this.setInitiallyProvidedValue(j12);
+        this.setInitiallyProvidedValue(n24);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(h12) {
-        if (h12.dialogBuilder !== undefined) {
-            this.dialogBuilder = h12.dialogBuilder;
+    setInitiallyProvidedValue(l24) {
+        if (l24.dialogBuilder !== undefined) {
+            this.dialogBuilder = l24.dialogBuilder;
         }
-        if (h12.titleIndex !== undefined) {
-            this.titleIndex = h12.titleIndex;
+        if (l24.titleIndex !== undefined) {
+            this.titleIndex = l24.titleIndex;
         }
-        if (h12.contentIndex !== undefined) {
-            this.contentIndex = h12.contentIndex;
+        if (l24.contentIndex !== undefined) {
+            this.contentIndex = l24.contentIndex;
         }
-        if (h12.buttonIndex !== undefined) {
-            this.buttonIndex = h12.buttonIndex;
+        if (l24.buttonIndex !== undefined) {
+            this.buttonIndex = l24.buttonIndex;
         }
     }
 
-    updateStateVars(g12) {
+    updateStateVars(k24) {
     }
 
-    purgeVariableDependenciesOnElmtId(f12) {
-        this.__titleHeight.purgeDependencyOnElmtId(f12);
-        this.__buttonHeight.purgeDependencyOnElmtId(f12);
-        this.__titleMinHeight.purgeDependencyOnElmtId(f12);
+    purgeVariableDependenciesOnElmtId(j24) {
+        this.__titleHeight.purgeDependencyOnElmtId(j24);
+        this.__buttonHeight.purgeDependencyOnElmtId(j24);
+        this.__titleMinHeight.purgeDependencyOnElmtId(j24);
     }
 
     aboutToBeDeleted() {
@@ -2348,140 +2391,115 @@ class CustomDialogLayout extends ViewPU {
         this.aboutToBeDeletedInternal();
     }
 
-    doNothingBuilder(e12 = null) {
+    doNothingBuilder(i24 = null) {
     }
 
     get titleHeight() {
         return this.__titleHeight.get();
     }
 
-    set titleHeight(d12) {
-        this.__titleHeight.set(d12);
+    set titleHeight(h24) {
+        this.__titleHeight.set(h24);
     }
 
     get buttonHeight() {
         return this.__buttonHeight.get();
     }
 
-    set buttonHeight(c12) {
-        this.__buttonHeight.set(c12);
+    set buttonHeight(g24) {
+        this.__buttonHeight.set(g24);
     }
 
     get titleMinHeight() {
         return this.__titleMinHeight.get();
     }
 
-    set titleMinHeight(b12) {
-        this.__titleMinHeight.set(b12);
+    set titleMinHeight(f24) {
+        this.__titleMinHeight.set(f24);
     }
 
-    onPlaceChildren(u11, v11, w11) {
-        let x11 = 0;
-        let y11 = 0;
-        for (let z11 = 0; z11 < v11.length; z11++) {
-            let a12 = v11[z11];
-            a12.layout({ x: x11, y: y11 });
-            y11 += a12.measureResult.height;
+    onPlaceChildren(y23, z23, a24) {
+        let b24 = 0;
+        let c24 = 0;
+        for (let d24 = 0; d24 < z23.length; d24++) {
+            let e24 = z23[d24];
+            e24.layout({ x: b24, y: c24 });
+            c24 += e24.measureResult.height;
         }
     }
 
-    onMeasureSize(g11, h11, i11) {
-        let j11 = { width: Number(i11.maxWidth), height: 0 };
-        let k11 = 3;
-        if (h11.length < k11) {
-            return j11;
+    onMeasureSize(k23, l23, m23) {
+        let n23 = { width: Number(m23.maxWidth), height: 0 };
+        let o23 = 3;
+        if (l23.length < o23) {
+            return n23;
         }
-        let l11 = 0;
-        let m11 = h11[this.titleIndex];
-        let n11 = {
-            maxWidth: i11.maxWidth,
+        let p23 = 0;
+        let q23 = l23[this.titleIndex];
+        let r23 = {
+            maxWidth: m23.maxWidth,
             minHeight: this.titleMinHeight,
-            maxHeight: i11.maxHeight
+            maxHeight: m23.maxHeight
         };
-        let o11 = m11.measure(n11);
-        this.titleHeight = o11.height;
-        l11 += this.titleHeight;
-        let p11 = h11[this.buttonIndex];
-        let q11 = p11.measure(i11);
-        this.buttonHeight = q11.height;
-        l11 += this.buttonHeight;
-        let r11 = h11[this.contentIndex];
-        let s11 = {
-            maxWidth: i11.maxWidth,
-            maxHeight: Number(i11.maxHeight) - l11
+        let s23 = q23.measure(r23);
+        this.titleHeight = s23.height;
+        p23 += this.titleHeight;
+        let t23 = l23[this.buttonIndex];
+        let u23 = t23.measure(m23);
+        this.buttonHeight = u23.height;
+        p23 += this.buttonHeight;
+        let v23 = l23[this.contentIndex];
+        let w23 = {
+            maxWidth: m23.maxWidth,
+            maxHeight: Number(m23.maxHeight) - p23
         };
-        let t11 = r11.measure(s11);
-        l11 += t11.height;
-        j11.height = l11;
-        return j11;
+        let x23 = v23.measure(w23);
+        p23 += x23.height;
+        n23.height = p23;
+        return n23;
     }
 
     initialRender() {
-        this.dialogBuilder.bind(this)(this);
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
+        this.dialogBuilder.bind(this)();
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 
     rerender() {
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.updateDirtyElements();
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 }
 
 class CustomDialogContentComponent extends ViewPU {
-    constructor(a11, b11, c11, d11 = -1, e11 = undefined, f11) {
-        super(a11, c11, d11, f11);
-        if (typeof e11 === 'function') {
-            this.paramsGenerator_ = e11;
+    constructor(e23, f23, g23, h23 = -1, i23 = undefined, j23) {
+        super(e23, g23, h23, j23);
+        if (typeof i23 === 'function') {
+            this.paramsGenerator_ = i23;
         }
         this.controller = undefined;
         this.primaryTitle = undefined;
         this.secondaryTitle = undefined;
+        this.localizedContentAreaPadding = undefined;
         this.contentBuilder = this.defaultContentBuilder;
         this.buttons = undefined;
         this.contentAreaPadding = undefined;
         this.keyIndex = 0;
         this.theme = new CustomThemeImpl({});
         this.themeColorMode = ThemeColorMode.SYSTEM;
-        this.__minContentHeight = new SynchedPropertySimpleTwoWayPU(b11.minContentHeight, this, 'minContentHeight');
+        this.__minContentHeight = new SynchedPropertySimpleTwoWayPU(f23.minContentHeight, this, 'minContentHeight');
         this.__titleHeight = new ObservedPropertySimplePU(0, this, 'titleHeight');
         this.__buttonHeight = new ObservedPropertySimplePU(0, this, 'buttonHeight');
         this.__contentMaxHeight = new ObservedPropertyObjectPU('100%', this, 'contentMaxHeight');
-        this.__fontSizeScale = new SynchedPropertySimpleTwoWayPU(b11.fontSizeScale, this, 'fontSizeScale');
-        this.__customStyle = new ObservedPropertySimplePU(false, this, 'customStyle');
-        this.__buttonMaxFontSize = new ObservedPropertyObjectPU({
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.Body_L'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        }, this, 'buttonMaxFontSize');
+        this.__fontSizeScale = new SynchedPropertySimpleTwoWayPU(f23.fontSizeScale, this, 'fontSizeScale');
+        this.__customStyle = new ObservedPropertySimplePU(undefined, this, 'customStyle');
+        this.__buttonMaxFontSize = new ObservedPropertyObjectPU(`${BODY_L}fp`, this, 'buttonMaxFontSize');
         this.__buttonMinFontSize = new ObservedPropertyObjectPU(9, this, 'buttonMinFontSize');
-        this.__primaryTitleMaxFontSize = new ObservedPropertyObjectPU({
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.Title_S'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        }, this, 'primaryTitleMaxFontSize');
-        this.__primaryTitleMinFontSize = new ObservedPropertyObjectPU({
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.Body_L'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        }, this, 'primaryTitleMinFontSize');
-        this.__secondaryTitleMaxFontSize = new ObservedPropertyObjectPU({
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.Subtitle_S'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        }, this, 'secondaryTitleMaxFontSize');
-        this.__secondaryTitleMinFontSize = new ObservedPropertyObjectPU({
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.Body_S'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        }, this, 'secondaryTitleMinFontSize');
+        this.__primaryTitleMaxFontSize = new ObservedPropertyObjectPU(`${TITLE_S}fp`, this, 'primaryTitleMaxFontSize');
+        this.__primaryTitleMinFontSize = new ObservedPropertyObjectPU(`${BODY_L}fp`, this, 'primaryTitleMinFontSize');
+        this.__secondaryTitleMaxFontSize = new ObservedPropertyObjectPU(`${SUBTITLE_S}fp`, this, 'secondaryTitleMaxFontSize');
+        this.__secondaryTitleMinFontSize = new ObservedPropertyObjectPU(`${BODY_S}fp`, this, 'secondaryTitleMinFontSize');
         this.__primaryTitleFontColorWithTheme = new ObservedPropertyObjectPU({
             'id': -1,
             'type': 10001,
@@ -2499,118 +2517,129 @@ class CustomDialogContentComponent extends ViewPU {
         this.__titleTextAlign = new ObservedPropertySimplePU(TextAlign.Center, this, 'titleTextAlign');
         this.__isButtonVertical = new ObservedPropertySimplePU(false, this, 'isButtonVertical');
         this.__titleMinHeight = new ObservedPropertyObjectPU(0, this, 'titleMinHeight');
+        this.isFollowingSystemFontScale = false;
+        this.appMaxFontScale = 3.2;
         this.titleIndex = 0;
         this.contentIndex = 1;
         this.buttonIndex = 2;
-        this.setInitiallyProvidedValue(b11);
+        this.setInitiallyProvidedValue(f23);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(z10) {
-        if (z10.controller !== undefined) {
-            this.controller = z10.controller;
+    setInitiallyProvidedValue(d23) {
+        if (d23.controller !== undefined) {
+            this.controller = d23.controller;
         }
-        if (z10.primaryTitle !== undefined) {
-            this.primaryTitle = z10.primaryTitle;
+        if (d23.primaryTitle !== undefined) {
+            this.primaryTitle = d23.primaryTitle;
         }
-        if (z10.secondaryTitle !== undefined) {
-            this.secondaryTitle = z10.secondaryTitle;
+        if (d23.secondaryTitle !== undefined) {
+            this.secondaryTitle = d23.secondaryTitle;
         }
-        if (z10.contentBuilder !== undefined) {
-            this.contentBuilder = z10.contentBuilder;
+        if (d23.localizedContentAreaPadding !== undefined) {
+            this.localizedContentAreaPadding = d23.localizedContentAreaPadding;
         }
-        if (z10.buttons !== undefined) {
-            this.buttons = z10.buttons;
+        if (d23.contentBuilder !== undefined) {
+            this.contentBuilder = d23.contentBuilder;
         }
-        if (z10.contentAreaPadding !== undefined) {
-            this.contentAreaPadding = z10.contentAreaPadding;
+        if (d23.buttons !== undefined) {
+            this.buttons = d23.buttons;
         }
-        if (z10.keyIndex !== undefined) {
-            this.keyIndex = z10.keyIndex;
+        if (d23.contentAreaPadding !== undefined) {
+            this.contentAreaPadding = d23.contentAreaPadding;
         }
-        if (z10.theme !== undefined) {
-            this.theme = z10.theme;
+        if (d23.keyIndex !== undefined) {
+            this.keyIndex = d23.keyIndex;
         }
-        if (z10.themeColorMode !== undefined) {
-            this.themeColorMode = z10.themeColorMode;
+        if (d23.theme !== undefined) {
+            this.theme = d23.theme;
         }
-        if (z10.titleHeight !== undefined) {
-            this.titleHeight = z10.titleHeight;
+        if (d23.themeColorMode !== undefined) {
+            this.themeColorMode = d23.themeColorMode;
         }
-        if (z10.buttonHeight !== undefined) {
-            this.buttonHeight = z10.buttonHeight;
+        if (d23.titleHeight !== undefined) {
+            this.titleHeight = d23.titleHeight;
         }
-        if (z10.contentMaxHeight !== undefined) {
-            this.contentMaxHeight = z10.contentMaxHeight;
+        if (d23.buttonHeight !== undefined) {
+            this.buttonHeight = d23.buttonHeight;
         }
-        if (z10.customStyle !== undefined) {
-            this.customStyle = z10.customStyle;
+        if (d23.contentMaxHeight !== undefined) {
+            this.contentMaxHeight = d23.contentMaxHeight;
         }
-        if (z10.buttonMaxFontSize !== undefined) {
-            this.buttonMaxFontSize = z10.buttonMaxFontSize;
+        if (d23.customStyle !== undefined) {
+            this.customStyle = d23.customStyle;
         }
-        if (z10.buttonMinFontSize !== undefined) {
-            this.buttonMinFontSize = z10.buttonMinFontSize;
+        if (d23.buttonMaxFontSize !== undefined) {
+            this.buttonMaxFontSize = d23.buttonMaxFontSize;
         }
-        if (z10.primaryTitleMaxFontSize !== undefined) {
-            this.primaryTitleMaxFontSize = z10.primaryTitleMaxFontSize;
+        if (d23.buttonMinFontSize !== undefined) {
+            this.buttonMinFontSize = d23.buttonMinFontSize;
         }
-        if (z10.primaryTitleMinFontSize !== undefined) {
-            this.primaryTitleMinFontSize = z10.primaryTitleMinFontSize;
+        if (d23.primaryTitleMaxFontSize !== undefined) {
+            this.primaryTitleMaxFontSize = d23.primaryTitleMaxFontSize;
         }
-        if (z10.secondaryTitleMaxFontSize !== undefined) {
-            this.secondaryTitleMaxFontSize = z10.secondaryTitleMaxFontSize;
+        if (d23.primaryTitleMinFontSize !== undefined) {
+            this.primaryTitleMinFontSize = d23.primaryTitleMinFontSize;
         }
-        if (z10.secondaryTitleMinFontSize !== undefined) {
-            this.secondaryTitleMinFontSize = z10.secondaryTitleMinFontSize;
+        if (d23.secondaryTitleMaxFontSize !== undefined) {
+            this.secondaryTitleMaxFontSize = d23.secondaryTitleMaxFontSize;
         }
-        if (z10.primaryTitleFontColorWithTheme !== undefined) {
-            this.primaryTitleFontColorWithTheme = z10.primaryTitleFontColorWithTheme;
+        if (d23.secondaryTitleMinFontSize !== undefined) {
+            this.secondaryTitleMinFontSize = d23.secondaryTitleMinFontSize;
         }
-        if (z10.secondaryTitleFontColorWithTheme !== undefined) {
-            this.secondaryTitleFontColorWithTheme = z10.secondaryTitleFontColorWithTheme;
+        if (d23.primaryTitleFontColorWithTheme !== undefined) {
+            this.primaryTitleFontColorWithTheme = d23.primaryTitleFontColorWithTheme;
         }
-        if (z10.titleTextAlign !== undefined) {
-            this.titleTextAlign = z10.titleTextAlign;
+        if (d23.secondaryTitleFontColorWithTheme !== undefined) {
+            this.secondaryTitleFontColorWithTheme = d23.secondaryTitleFontColorWithTheme;
         }
-        if (z10.isButtonVertical !== undefined) {
-            this.isButtonVertical = z10.isButtonVertical;
+        if (d23.titleTextAlign !== undefined) {
+            this.titleTextAlign = d23.titleTextAlign;
         }
-        if (z10.titleMinHeight !== undefined) {
-            this.titleMinHeight = z10.titleMinHeight;
+        if (d23.isButtonVertical !== undefined) {
+            this.isButtonVertical = d23.isButtonVertical;
         }
-        if (z10.titleIndex !== undefined) {
-            this.titleIndex = z10.titleIndex;
+        if (d23.titleMinHeight !== undefined) {
+            this.titleMinHeight = d23.titleMinHeight;
         }
-        if (z10.contentIndex !== undefined) {
-            this.contentIndex = z10.contentIndex;
+        if (d23.isFollowingSystemFontScale !== undefined) {
+            this.isFollowingSystemFontScale = d23.isFollowingSystemFontScale;
         }
-        if (z10.buttonIndex !== undefined) {
-            this.buttonIndex = z10.buttonIndex;
+        if (d23.appMaxFontScale !== undefined) {
+            this.appMaxFontScale = d23.appMaxFontScale;
+        }
+        if (d23.titleIndex !== undefined) {
+            this.titleIndex = d23.titleIndex;
+        }
+        if (d23.contentIndex !== undefined) {
+            this.contentIndex = d23.contentIndex;
+        }
+        if (d23.buttonIndex !== undefined) {
+            this.buttonIndex = d23.buttonIndex;
         }
     }
 
-    updateStateVars(y10) {
+    updateStateVars(c23) {
     }
 
-    purgeVariableDependenciesOnElmtId(x10) {
-        this.__minContentHeight.purgeDependencyOnElmtId(x10);
-        this.__titleHeight.purgeDependencyOnElmtId(x10);
-        this.__buttonHeight.purgeDependencyOnElmtId(x10);
-        this.__contentMaxHeight.purgeDependencyOnElmtId(x10);
-        this.__fontSizeScale.purgeDependencyOnElmtId(x10);
-        this.__customStyle.purgeDependencyOnElmtId(x10);
-        this.__buttonMaxFontSize.purgeDependencyOnElmtId(x10);
-        this.__buttonMinFontSize.purgeDependencyOnElmtId(x10);
-        this.__primaryTitleMaxFontSize.purgeDependencyOnElmtId(x10);
-        this.__primaryTitleMinFontSize.purgeDependencyOnElmtId(x10);
-        this.__secondaryTitleMaxFontSize.purgeDependencyOnElmtId(x10);
-        this.__secondaryTitleMinFontSize.purgeDependencyOnElmtId(x10);
-        this.__primaryTitleFontColorWithTheme.purgeDependencyOnElmtId(x10);
-        this.__secondaryTitleFontColorWithTheme.purgeDependencyOnElmtId(x10);
-        this.__titleTextAlign.purgeDependencyOnElmtId(x10);
-        this.__isButtonVertical.purgeDependencyOnElmtId(x10);
-        this.__titleMinHeight.purgeDependencyOnElmtId(x10);
+    purgeVariableDependenciesOnElmtId(b23) {
+        this.__minContentHeight.purgeDependencyOnElmtId(b23);
+        this.__titleHeight.purgeDependencyOnElmtId(b23);
+        this.__buttonHeight.purgeDependencyOnElmtId(b23);
+        this.__contentMaxHeight.purgeDependencyOnElmtId(b23);
+        this.__fontSizeScale.purgeDependencyOnElmtId(b23);
+        this.__customStyle.purgeDependencyOnElmtId(b23);
+        this.__buttonMaxFontSize.purgeDependencyOnElmtId(b23);
+        this.__buttonMinFontSize.purgeDependencyOnElmtId(b23);
+        this.__primaryTitleMaxFontSize.purgeDependencyOnElmtId(b23);
+        this.__primaryTitleMinFontSize.purgeDependencyOnElmtId(b23);
+        this.__secondaryTitleMaxFontSize.purgeDependencyOnElmtId(b23);
+        this.__secondaryTitleMinFontSize.purgeDependencyOnElmtId(b23);
+        this.__primaryTitleFontColorWithTheme.purgeDependencyOnElmtId(b23);
+        this.__secondaryTitleFontColorWithTheme.purgeDependencyOnElmtId(b23);
+        this.__titleTextAlign.purgeDependencyOnElmtId(b23);
+        this.__isButtonVertical.purgeDependencyOnElmtId(b23);
+        this.__titleMinHeight.purgeDependencyOnElmtId(b23);
     }
 
     aboutToBeDeleted() {
@@ -2639,146 +2668,146 @@ class CustomDialogContentComponent extends ViewPU {
         return this.__minContentHeight.get();
     }
 
-    set minContentHeight(w10) {
-        this.__minContentHeight.set(w10);
+    set minContentHeight(a23) {
+        this.__minContentHeight.set(a23);
     }
 
-    defaultContentBuilder(v10 = null) {
+    defaultContentBuilder(z22 = null) {
     }
 
     get titleHeight() {
         return this.__titleHeight.get();
     }
 
-    set titleHeight(u10) {
-        this.__titleHeight.set(u10);
+    set titleHeight(y22) {
+        this.__titleHeight.set(y22);
     }
 
     get buttonHeight() {
         return this.__buttonHeight.get();
     }
 
-    set buttonHeight(t10) {
-        this.__buttonHeight.set(t10);
+    set buttonHeight(x22) {
+        this.__buttonHeight.set(x22);
     }
 
     get contentMaxHeight() {
         return this.__contentMaxHeight.get();
     }
 
-    set contentMaxHeight(s10) {
-        this.__contentMaxHeight.set(s10);
+    set contentMaxHeight(w22) {
+        this.__contentMaxHeight.set(w22);
     }
 
     get fontSizeScale() {
         return this.__fontSizeScale.get();
     }
 
-    set fontSizeScale(r10) {
-        this.__fontSizeScale.set(r10);
+    set fontSizeScale(v22) {
+        this.__fontSizeScale.set(v22);
     }
 
     get customStyle() {
         return this.__customStyle.get();
     }
 
-    set customStyle(q10) {
-        this.__customStyle.set(q10);
+    set customStyle(u22) {
+        this.__customStyle.set(u22);
     }
 
     get buttonMaxFontSize() {
         return this.__buttonMaxFontSize.get();
     }
 
-    set buttonMaxFontSize(p10) {
-        this.__buttonMaxFontSize.set(p10);
+    set buttonMaxFontSize(t22) {
+        this.__buttonMaxFontSize.set(t22);
     }
 
     get buttonMinFontSize() {
         return this.__buttonMinFontSize.get();
     }
 
-    set buttonMinFontSize(o10) {
-        this.__buttonMinFontSize.set(o10);
+    set buttonMinFontSize(s22) {
+        this.__buttonMinFontSize.set(s22);
     }
 
     get primaryTitleMaxFontSize() {
         return this.__primaryTitleMaxFontSize.get();
     }
 
-    set primaryTitleMaxFontSize(n10) {
-        this.__primaryTitleMaxFontSize.set(n10);
+    set primaryTitleMaxFontSize(r22) {
+        this.__primaryTitleMaxFontSize.set(r22);
     }
 
     get primaryTitleMinFontSize() {
         return this.__primaryTitleMinFontSize.get();
     }
 
-    set primaryTitleMinFontSize(m10) {
-        this.__primaryTitleMinFontSize.set(m10);
+    set primaryTitleMinFontSize(q22) {
+        this.__primaryTitleMinFontSize.set(q22);
     }
 
     get secondaryTitleMaxFontSize() {
         return this.__secondaryTitleMaxFontSize.get();
     }
 
-    set secondaryTitleMaxFontSize(l10) {
-        this.__secondaryTitleMaxFontSize.set(l10);
+    set secondaryTitleMaxFontSize(p22) {
+        this.__secondaryTitleMaxFontSize.set(p22);
     }
 
     get secondaryTitleMinFontSize() {
         return this.__secondaryTitleMinFontSize.get();
     }
 
-    set secondaryTitleMinFontSize(k10) {
-        this.__secondaryTitleMinFontSize.set(k10);
+    set secondaryTitleMinFontSize(o22) {
+        this.__secondaryTitleMinFontSize.set(o22);
     }
 
     get primaryTitleFontColorWithTheme() {
         return this.__primaryTitleFontColorWithTheme.get();
     }
 
-    set primaryTitleFontColorWithTheme(j10) {
-        this.__primaryTitleFontColorWithTheme.set(j10);
+    set primaryTitleFontColorWithTheme(n22) {
+        this.__primaryTitleFontColorWithTheme.set(n22);
     }
 
     get secondaryTitleFontColorWithTheme() {
         return this.__secondaryTitleFontColorWithTheme.get();
     }
 
-    set secondaryTitleFontColorWithTheme(i10) {
-        this.__secondaryTitleFontColorWithTheme.set(i10);
+    set secondaryTitleFontColorWithTheme(m22) {
+        this.__secondaryTitleFontColorWithTheme.set(m22);
     }
 
     get titleTextAlign() {
         return this.__titleTextAlign.get();
     }
 
-    set titleTextAlign(h10) {
-        this.__titleTextAlign.set(h10);
+    set titleTextAlign(l22) {
+        this.__titleTextAlign.set(l22);
     }
 
     get isButtonVertical() {
         return this.__isButtonVertical.get();
     }
 
-    set isButtonVertical(g10) {
-        this.__isButtonVertical.set(g10);
+    set isButtonVertical(k22) {
+        this.__isButtonVertical.set(k22);
     }
 
     get titleMinHeight() {
         return this.__titleMinHeight.get();
     }
 
-    set titleMinHeight(f10) {
-        this.__titleMinHeight.set(f10);
+    set titleMinHeight(j22) {
+        this.__titleMinHeight.set(j22);
     }
-
     initialRender() {
-        this.observeComponentCreation2((d10, e10) => {
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
+        this.observeComponentCreation2((f22, g22) => {
             WithTheme.create({ theme: this.theme, colorMode: this.themeColorMode });
         }, WithTheme);
-        this.observeComponentCreation2((b10, c10) => {
+        this.observeComponentCreation2((d22, e22) => {
             Scroll.create();
             Scroll.backgroundColor(this.themeColorMode === ThemeColorMode.SYSTEM || undefined ?
             Color.Transparent : {
@@ -2789,7 +2818,7 @@ class CustomDialogContentComponent extends ViewPU {
                     'moduleName': '__harDefaultModuleName__'
                 });
         }, Scroll);
-        this.observeComponentCreation2((z9, a10) => {
+        this.observeComponentCreation2((b22, c22) => {
             Column.create();
             Column.constraintSize({ maxHeight: this.contentMaxHeight });
             Column.backgroundBlurStyle(this.customStyle ? BlurStyle.Thick : BlurStyle.NONE);
@@ -2832,130 +2861,178 @@ class CustomDialogContentComponent extends ViewPU {
             } : Color.Transparent);
         }, Column);
         {
-            this.observeComponentCreation2((n8, o8) => {
-                if (o8) {
-                    let p8 = new CustomDialogLayout(this, {
+            this.observeComponentCreation2((x19, y19) => {
+                if (y19) {
+                    let z19 = new CustomDialogLayout(this, {
                         buttonHeight: this.__buttonHeight,
                         titleHeight: this.__titleHeight,
                         titleMinHeight: this.__titleMinHeight,
                         dialogBuilder: () => {
-                            this.observeComponentCreation2((k9, l9) => {
+                            this.observeComponentCreation2((d21, e21) => {
                                 ForEach.create();
-                                const m9 = o9 => {
-                                    const p9 = o9;
-                                    this.observeComponentCreation2((r9, s9) => {
+                                const e = h21 => {
+                                    const i21 = h21;
+                                    this.observeComponentCreation2((k21, l21) => {
                                         If.create();
-                                        if (p9 === this.titleIndex) {
+                                        if (i21 === this.titleIndex) {
                                             this.ifElseBranchUpdateFunction(0, () => {
-                                                this.titleBuilder.bind(this)(this);
+                                                this.observeComponentCreation2((z21, a22) => {
+                                                    WithTheme.create({
+                                                        theme: this.theme,
+                                                        colorMode: this.themeColorMode
+                                                    });
+                                                }, WithTheme);
+                                                this.titleBuilder.bind(this)();
+                                                WithTheme.pop();
                                             });
-                                        } else if (p9 === this.contentIndex) {
+                                        } else if (i21 === this.contentIndex) {
                                             this.ifElseBranchUpdateFunction(1, () => {
-                                                this.observeComponentCreation2((w9, x9) => {
+                                                this.observeComponentCreation2((v21, w21) => {
                                                     Column.create();
                                                     Column.padding(this.getContentPadding());
                                                 }, Column);
-                                                this.contentBuilder.bind(this)(this);
+                                                this.observeComponentCreation2((t21, u21) => {
+                                                    WithTheme.create({
+                                                        theme: this.theme,
+                                                        colorMode: this.themeColorMode
+                                                    });
+                                                }, WithTheme);
+                                                this.contentBuilder.bind(this)();
+                                                WithTheme.pop();
                                                 Column.pop();
                                             });
                                         } else {
                                             this.ifElseBranchUpdateFunction(2, () => {
-                                                this.ButtonBuilder.bind(this)(this);
+                                                this.observeComponentCreation2((o21, p21) => {
+                                                    WithTheme.create({
+                                                        theme: this.theme,
+                                                        colorMode: this.themeColorMode
+                                                    });
+                                                }, WithTheme);
+                                                this.ButtonBuilder.bind(this)();
+                                                WithTheme.pop();
                                             });
                                         }
                                     }, If);
                                     If.pop();
                                 };
-                                this.forEachUpdateFunction(k9, [this.titleIndex, this.contentIndex, this.buttonIndex],
-                                    m9);
+                                this.forEachUpdateFunction(d21, [this.titleIndex, this.contentIndex, this.buttonIndex],
+                                    e);
                             }, ForEach);
                             ForEach.pop();
                         }
-                    }, undefined, n8, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 991, col: 11 });
-                    ViewPU.create(p8);
-                    let q8 = () => {
+                    }, undefined, x19, () => {
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 1013, col: 11 });
+                    ViewPU.create(z19);
+                    let c = () => {
                         return {
                             buttonHeight: this.buttonHeight,
                             titleHeight: this.titleHeight,
                             titleMinHeight: this.titleMinHeight,
                             dialogBuilder: () => {
-                                this.observeComponentCreation2((u8, v8) => {
+                                this.observeComponentCreation2((e20, f20) => {
                                     ForEach.create();
-                                    const w8 = y8 => {
-                                        const z8 = y8;
-                                        this.observeComponentCreation2((b9, c9) => {
+                                    const d = i20 => {
+                                        const j20 = i20;
+                                        this.observeComponentCreation2((l20, m20) => {
                                             If.create();
-                                            if (z8 === this.titleIndex) {
+                                            if (j20 === this.titleIndex) {
                                                 this.ifElseBranchUpdateFunction(0, () => {
-                                                    this.titleBuilder.bind(this)(this);
+                                                    this.observeComponentCreation2((a21, b21) => {
+                                                        WithTheme.create({
+                                                            theme: this.theme,
+                                                            colorMode: this.themeColorMode
+                                                        });
+                                                    }, WithTheme);
+                                                    this.titleBuilder.bind(this)();
+                                                    WithTheme.pop();
                                                 });
-                                            } else if (z8 === this.contentIndex) {
+                                            } else if (j20 === this.contentIndex) {
                                                 this.ifElseBranchUpdateFunction(1, () => {
-                                                    this.observeComponentCreation2((g9, h9) => {
+                                                    this.observeComponentCreation2((w20, x20) => {
                                                         Column.create();
                                                         Column.padding(this.getContentPadding());
                                                     }, Column);
-                                                    this.contentBuilder.bind(this)(this);
+                                                    this.observeComponentCreation2((u20, v20) => {
+                                                        WithTheme.create({
+                                                            theme: this.theme,
+                                                            colorMode: this.themeColorMode
+                                                        });
+                                                    }, WithTheme);
+                                                    this.contentBuilder.bind(this)();
+                                                    WithTheme.pop();
                                                     Column.pop();
                                                 });
                                             } else {
                                                 this.ifElseBranchUpdateFunction(2, () => {
-                                                    this.ButtonBuilder.bind(this)(this);
+                                                    this.observeComponentCreation2((p20, q20) => {
+                                                        WithTheme.create({
+                                                            theme: this.theme,
+                                                            colorMode: this.themeColorMode
+                                                        });
+                                                    }, WithTheme);
+                                                    this.ButtonBuilder.bind(this)();
+                                                    WithTheme.pop();
                                                 });
                                             }
                                         }, If);
                                         If.pop();
                                     };
-                                    this.forEachUpdateFunction(u8,
-                                        [this.titleIndex, this.contentIndex, this.buttonIndex], w8);
+                                    this.forEachUpdateFunction(e20,
+                                        [this.titleIndex, this.contentIndex, this.buttonIndex], d);
                                 }, ForEach);
                                 ForEach.pop();
                             }
                         };
                     };
-                    p8.paramsGenerator_ = q8;
+                    z19.paramsGenerator_ = c;
                 } else {
-                    this.updateStateVarsOfChildByElmtId(n8, {});
+                    this.updateStateVarsOfChildByElmtId(x19, {});
                 }
             }, { name: 'CustomDialogLayout' });
         }
         Column.pop();
         Scroll.pop();
         WithTheme.pop();
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 
-    onMeasureSize(z7, a8, b8) {
-        let c8 = { width: z7.width, height: z7.height };
-        let d8 = Number(b8.maxWidth);
-        let e8 = Number(b8.maxHeight);
-        this.updateFontScale();
+    onMeasureSize(j19, k19, l19) {
+        let m19 = { width: j19.width, height: j19.height };
+        let n19 = Number(l19.maxWidth);
+        let o19 = Number(l19.maxHeight);
+        this.fontSizeScale = this.updateFontScale();
         this.updateFontSize();
-        this.isButtonVertical =
-            this.isVerticalAlignButton(Math.min(d8 - BUTTON_HORIZONTAL_MARGIN * 2, MAX_DIALOG_WIDTH));
+        this.isButtonVertical = this.isVerticalAlignButton(n19 - BUTTON_HORIZONTAL_MARGIN * 2);
         this.titleMinHeight = this.getTitleAreaMinHeight();
-        let f8 = 0;
-        a8.forEach((h8) => {
+        let p19 = 0;
+        k19.forEach((r19) => {
             this.contentMaxHeight = '100%';
-            let i8 = h8.measure(b8);
-            if (e8 - this.buttonHeight - this.titleHeight < this.minContentHeight) {
+            let s19 = r19.measure(l19);
+            if (o19 - this.buttonHeight - this.titleHeight < this.minContentHeight) {
                 this.contentMaxHeight = MAX_CONTENT_HEIGHT;
-                i8 = h8.measure(b8);
+                s19 = r19.measure(l19);
             }
-            f8 += i8.height;
+            p19 += s19.height;
         });
-        c8.height = f8;
-        c8.width = d8;
-        return c8;
+        m19.height = p19;
+        m19.width = n19;
+        return m19;
     }
 
     aboutToAppear() {
-        this.updateFontScale();
-        if (this.controller) {
-            let y7 = this.controller;
-            if (y7.arg_ && y7.arg_.customStyle && y7.arg_.customStyle === true) {
+        let h19 = this.getUIContext();
+        this.isFollowingSystemFontScale = h19.isFollowingSystemFontScale();
+        this.appMaxFontScale = h19.getMaxFontScale();
+        this.fontSizeScale = this.updateFontScale();
+        if (this.controller && this.customStyle === undefined) {
+            let i19 = this.controller;
+            if (i19.arg_ && i19.arg_.customStyle && i19.arg_.customStyle === true) {
                 this.customStyle = true;
             }
+        }
+        if (this.customStyle === undefined) {
+            this.customStyle = false;
         }
         this.primaryTitleFontColorWithTheme = this.theme?.colors?.fontPrimary ?
         this.theme.colors.fontPrimary : {
@@ -2980,15 +3057,7 @@ class CustomDialogContentComponent extends ViewPU {
         if (this.fontSizeScale > MAX_FONT_SCALE) {
             this.buttonMaxFontSize = BODY_L * MAX_FONT_SCALE + 'vp';
             this.buttonMinFontSize = BUTTON_MIN_FONT_SIZE * MAX_FONT_SCALE + 'vp';
-            this.primaryTitleMaxFontSize = TITLE_S * MAX_FONT_SCALE + 'vp';
-            this.primaryTitleMinFontSize = BODY_L * MAX_FONT_SCALE + 'vp';
-            this.secondaryTitleMaxFontSize = SUBTITLE_S * MAX_FONT_SCALE + 'vp';
-            this.secondaryTitleMinFontSize = BODY_S * MAX_FONT_SCALE + 'vp';
         } else {
-            this.primaryTitleMaxFontSize = TITLE_S + 'fp';
-            this.primaryTitleMinFontSize = BODY_L + 'fp';
-            this.secondaryTitleMaxFontSize = SUBTITLE_S + 'fp';
-            this.secondaryTitleMinFontSize = BODY_S + 'fp';
             this.buttonMaxFontSize = BODY_L + 'fp';
             this.buttonMinFontSize = BUTTON_MIN_FONT_SIZE + 'fp';
         }
@@ -2996,16 +3065,25 @@ class CustomDialogContentComponent extends ViewPU {
 
     updateFontScale() {
         try {
-            let x7 = this.getUIContext().getHostContext();
-            this.fontSizeScale = x7.config?.fontSizeScale ?? this.fontSizeScale;
-        } catch (u7) {
-            let v7 = u7.code;
-            let w7 = u7.message;
-            hilog.error(0x3900, 'Ace', `Faild to init fontsizescale info,cause, code: ${v7}, message: ${w7}`);
+            let f19 = this.getUIContext();
+            let g19 = f19.getHostContext()?.config.fontSizeScale ?? 1;
+            if (!this.isFollowingSystemFontScale) {
+                return 1;
+            }
+            return Math.min(g19, this.appMaxFontScale);
+        }
+        catch (c19) {
+            let d19 = c19.code;
+            let e19 = c19.message;
+            hilog.error(0x3900, 'Ace', `Faild to init fontsizescale info,cause, code: ${d19}, message: ${e19}`);
+            return 1;
         }
     }
 
     getContentPadding() {
+        if (this.localizedContentAreaPadding) {
+            return this.localizedContentAreaPadding;
+        }
         if (this.contentAreaPadding) {
             return this.contentAreaPadding;
         }
@@ -3112,24 +3190,25 @@ class CustomDialogContentComponent extends ViewPU {
         }
     }
 
-    titleBuilder(t6 = null) {
-        this.observeComponentCreation2((s7, t7) => {
+    titleBuilder(b18 = null) {
+        this.observeComponentCreation2((a19, b19) => {
             Column.create();
             Column.justifyContent(FlexAlign.Center);
             Column.width('100%');
             Column.padding(this.getTitleAreaPadding());
         }, Column);
-        this.observeComponentCreation2((q7, r7) => {
+        this.observeComponentCreation2((y18, z18) => {
             Row.create();
             Row.width('100%');
         }, Row);
-        this.observeComponentCreation2((o7, p7) => {
+        this.observeComponentCreation2((w18, x18) => {
             Text.create(this.primaryTitle);
             Text.fontWeight(FontWeight.Bold);
             Text.fontColor(ObservedObject.GetRawObject(this.primaryTitleFontColorWithTheme));
             Text.textAlign(this.titleTextAlign);
             Text.maxFontSize(ObservedObject.GetRawObject(this.primaryTitleMaxFontSize));
             Text.minFontSize(ObservedObject.GetRawObject(this.primaryTitleMinFontSize));
+            Text.maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE));
             Text.maxLines(TITLE_MAX_LINES);
             Text.heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
@@ -3137,24 +3216,20 @@ class CustomDialogContentComponent extends ViewPU {
         }, Text);
         Text.pop();
         Row.pop();
-        this.observeComponentCreation2((e7, f7) => {
+        this.observeComponentCreation2((m18, n18) => {
             If.create();
             if (this.primaryTitle && this.secondaryTitle) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((m7, n7) => {
+                    this.observeComponentCreation2((u18, v18) => {
                         Row.create();
-                    }, Row);
-                    this.observeComponentCreation2((k7, l7) => {
-                        Divider.create();
-                        Divider.margin({
+                        Row.height({
                             'id': -1,
                             'type': 10002,
                             params: ['sys.float.padding_level1'],
                             'bundleName': '__harDefaultBundleName__',
                             'moduleName': '__harDefaultModuleName__'
                         });
-                        Divider.color(Color.Transparent);
-                    }, Divider);
+                    }, Row);
                     Row.pop();
                 });
             } else {
@@ -3163,17 +3238,18 @@ class CustomDialogContentComponent extends ViewPU {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((c7, d7) => {
+        this.observeComponentCreation2((k18, l18) => {
             Row.create();
             Row.width('100%');
         }, Row);
-        this.observeComponentCreation2((a7, b7) => {
+        this.observeComponentCreation2((i18, j18) => {
             Text.create(this.secondaryTitle);
             Text.fontWeight(FontWeight.Regular);
             Text.fontColor(ObservedObject.GetRawObject(this.secondaryTitleFontColorWithTheme));
             Text.textAlign(this.titleTextAlign);
             Text.maxFontSize(ObservedObject.GetRawObject(this.secondaryTitleMaxFontSize));
             Text.minFontSize(ObservedObject.GetRawObject(this.secondaryTitleMinFontSize));
+            Text.maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE));
             Text.maxLines(TITLE_MAX_LINES);
             Text.heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
@@ -3238,14 +3314,14 @@ class CustomDialogContentComponent extends ViewPU {
     }
 
     initTitleTextAlign() {
-        let s6 = ALERT_TITLE_ALIGNMENT;
-        if (s6 === TextAlign.Start) {
+        let a18 = ALERT_TITLE_ALIGNMENT;
+        if (a18 === TextAlign.Start) {
             this.titleTextAlign = TextAlign.Start;
-        } else if (s6 === TextAlign.Center) {
+        } else if (a18 === TextAlign.Center) {
             this.titleTextAlign = TextAlign.Center;
-        } else if (s6 === TextAlign.End) {
+        } else if (a18 === TextAlign.End) {
             this.titleTextAlign = TextAlign.End;
-        } else if (s6 === TextAlign.JUSTIFY) {
+        } else if (a18 === TextAlign.JUSTIFY) {
             this.titleTextAlign = TextAlign.JUSTIFY;
         } else {
             this.titleTextAlign = TextAlign.Center;
@@ -3274,25 +3350,25 @@ class CustomDialogContentComponent extends ViewPU {
         }
     }
 
-    ButtonBuilder(e6 = null) {
-        this.observeComponentCreation2((q6, r6) => {
+    ButtonBuilder(m17 = null) {
+        this.observeComponentCreation2((y17, z17) => {
             Column.create();
             Column.width('100%');
             Column.padding(this.getOperationAreaPadding());
         }, Column);
-        this.observeComponentCreation2((h6, i6) => {
+        this.observeComponentCreation2((p17, q17) => {
             If.create();
             if (this.buttons && this.buttons.length > 0) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((m6, n6) => {
+                    this.observeComponentCreation2((u17, v17) => {
                         If.create();
                         if (this.isButtonVertical) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.buildVerticalAlignButtons.bind(this)(e6 ? e6 : this);
+                                this.buildVerticalAlignButtons.bind(this)();
                             });
                         } else {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.buildHorizontalAlignButtons.bind(this)(e6 ? e6 : this);
+                                this.buildHorizontalAlignButtons.bind(this)();
                             });
                         }
                     }, If);
@@ -3372,15 +3448,15 @@ class CustomDialogContentComponent extends ViewPU {
         };
     }
 
-    buildSingleButton(j5, k5 = null) {
-        this.observeComponentCreation2((m5, n5) => {
+    buildSingleButton(r16, s16 = null) {
+        this.observeComponentCreation2((u16, v16) => {
             If.create();
-            if (this.isNewPropertiesHighPriority(j5)) {
+            if (this.isNewPropertiesHighPriority(r16)) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((c6, d6) => {
-                        Button.createWithLabel(j5.value);
-                        __Button__setButtonProperties(j5, this.controller);
-                        Button.role(j5.role ?? ButtonRole.NORMAL);
+                    this.observeComponentCreation2((k17, l17) => {
+                        Button.createWithLabel(r16.value);
+                        __Button__setButtonProperties(r16, this.controller);
+                        Button.role(r16.role ?? ButtonRole.NORMAL);
                         Button.key(`advanced_dialog_button_${this.keyIndex++}`);
                         Button.labelStyle({
                             maxLines: 1,
@@ -3390,13 +3466,13 @@ class CustomDialogContentComponent extends ViewPU {
                     }, Button);
                     Button.pop();
                 });
-            } else if (j5.background !== undefined && j5.fontColor !== undefined) {
+            } else if (r16.background !== undefined && r16.fontColor !== undefined) {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((y5, z5) => {
-                        Button.createWithLabel(j5.value);
-                        __Button__setButtonProperties(j5, this.controller);
-                        Button.backgroundColor(j5.background);
-                        Button.fontColor(j5.fontColor);
+                    this.observeComponentCreation2((g17, h17) => {
+                        Button.createWithLabel(r16.value);
+                        __Button__setButtonProperties(r16, this.controller);
+                        Button.backgroundColor(r16.background);
+                        Button.fontColor(r16.fontColor);
                         Button.key(`advanced_dialog_button_${this.keyIndex++}`);
                         Button.labelStyle({
                             maxLines: 1,
@@ -3406,12 +3482,12 @@ class CustomDialogContentComponent extends ViewPU {
                     }, Button);
                     Button.pop();
                 });
-            } else if (j5.background !== undefined) {
+            } else if (r16.background !== undefined) {
                 this.ifElseBranchUpdateFunction(2, () => {
-                    this.observeComponentCreation2((u5, v5) => {
-                        Button.createWithLabel(j5.value);
-                        __Button__setButtonProperties(j5, this.controller);
-                        Button.backgroundColor(j5.background);
+                    this.observeComponentCreation2((c17, d17) => {
+                        Button.createWithLabel(r16.value);
+                        __Button__setButtonProperties(r16, this.controller);
+                        Button.backgroundColor(r16.background);
                         Button.key(`advanced_dialog_button_${this.keyIndex++}`);
                         Button.labelStyle({
                             maxLines: 1,
@@ -3423,10 +3499,10 @@ class CustomDialogContentComponent extends ViewPU {
                 });
             } else {
                 this.ifElseBranchUpdateFunction(3, () => {
-                    this.observeComponentCreation2((q5, r5) => {
-                        Button.createWithLabel(j5.value);
-                        __Button__setButtonProperties(j5, this.controller);
-                        Button.fontColor(j5.fontColor);
+                    this.observeComponentCreation2((y16, z16) => {
+                        Button.createWithLabel(r16.value);
+                        __Button__setButtonProperties(r16, this.controller);
+                        Button.fontColor(r16.fontColor);
                         Button.key(`advanced_dialog_button_${this.keyIndex++}`);
                         Button.labelStyle({
                             maxLines: 1,
@@ -3441,20 +3517,20 @@ class CustomDialogContentComponent extends ViewPU {
         If.pop();
     }
 
-    buildHorizontalAlignButtons(s4 = null) {
-        this.observeComponentCreation2((u4, v4) => {
+    buildHorizontalAlignButtons(a16 = null) {
+        this.observeComponentCreation2((c16, d16) => {
             If.create();
             if (this.buttons && this.buttons.length > 0) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((h5, i5) => {
+                    this.observeComponentCreation2((p16, q16) => {
                         Row.create();
                     }, Row);
-                    this.buildSingleButton.bind(this)(this.buttons[0], s4 ? s4 : this);
-                    this.observeComponentCreation2((a5, b5) => {
+                    this.buildSingleButton.bind(this)(this.buttons[0]);
+                    this.observeComponentCreation2((i16, j16) => {
                         If.create();
                         if (this.buttons.length === HORIZON_BUTTON_MAX_COUNT) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((f5, g5) => {
+                                this.observeComponentCreation2((n16, o16) => {
                                     Divider.create();
                                     Divider.width({
                                         'id': -1,
@@ -3489,8 +3565,7 @@ class CustomDialogContentComponent extends ViewPU {
                                         },
                                     });
                                 }, Divider);
-                                this.buildSingleButton.bind(this)(this.buttons[HORIZON_BUTTON_MAX_COUNT - 1],
-                                    s4 ? s4 : this);
+                                this.buildSingleButton.bind(this)(this.buttons[HORIZON_BUTTON_MAX_COUNT - 1]);
                             });
                         } else {
                             this.ifElseBranchUpdateFunction(1, () => {
@@ -3508,22 +3583,22 @@ class CustomDialogContentComponent extends ViewPU {
         If.pop();
     }
 
-    buildVerticalAlignButtons(z3 = null) {
-        this.observeComponentCreation2((b4, c4) => {
+    buildVerticalAlignButtons(h15 = null) {
+        this.observeComponentCreation2((j15, k15) => {
             If.create();
             if (this.buttons) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((q4, r4) => {
+                    this.observeComponentCreation2((y15, z15) => {
                         Column.create();
                     }, Column);
-                    this.observeComponentCreation2((h4, i4) => {
+                    this.observeComponentCreation2((p15, q15) => {
                         ForEach.create();
-                        const j4 = (n4, o4) => {
-                            const p4 = n4;
-                            this.buildButtonWithDivider.bind(this)(o4, z3 ? z3 : this);
+                        const b = (v15, w15) => {
+                            const x15 = v15;
+                            this.buildButtonWithDivider.bind(this)(this.buttons?.length === HORIZON_BUTTON_MAX_COUNT ?
+                                HORIZON_BUTTON_MAX_COUNT - w15 - 1 : w15);
                         };
-                        this.forEachUpdateFunction(h4, this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT), j4,
-                            (m4) => m4.value.toString(), true, false);
+                        this.forEachUpdateFunction(p15, this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT), b, (u15) => u15.value.toString(), true, false);
                     }, ForEach);
                     ForEach.pop();
                     Column.pop();
@@ -3555,35 +3630,36 @@ class CustomDialogContentComponent extends ViewPU {
         return Color.Transparent;
     }
 
-    isNewPropertiesHighPriority(y3) {
-        if (y3.role === ButtonRole.ERROR) {
+    isNewPropertiesHighPriority(g15) {
+        if (g15.role === ButtonRole.ERROR) {
             return true;
         }
-        if (y3.buttonStyle !== undefined &&
-            y3.buttonStyle !== ALERT_BUTTON_STYLE) {
+        if (g15.buttonStyle !== undefined &&
+            g15.buttonStyle !== ALERT_BUTTON_STYLE) {
             return true;
         }
-        if (y3.background === undefined && y3.fontColor === undefined) {
+        if (g15.background === undefined && g15.fontColor === undefined) {
             return true;
         }
         return false;
     }
 
-    buildButtonWithDivider(g3, h3 = null) {
-        this.observeComponentCreation2((j3, k3) => {
+    buildButtonWithDivider(o14, p14 = null) {
+        this.observeComponentCreation2((r14, s14) => {
             If.create();
-            if (this.buttons && this.buttons[g3]) {
+            if (this.buttons && this.buttons[o14]) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((w3, x3) => {
+                    this.observeComponentCreation2((e15, f15) => {
                         Row.create();
                     }, Row);
-                    this.buildSingleButton.bind(this)(this.buttons[g3], h3 ? h3 : this);
+                    this.buildSingleButton.bind(this)(this.buttons[o14]);
                     Row.pop();
-                    this.observeComponentCreation2((p3, q3) => {
+                    this.observeComponentCreation2((x14, y14) => {
                         If.create();
-                        if (g3 < Math.min(this.buttons.length, VERTICAL_BUTTON_MAX_COUNT) - 1) {
+                        if ((this.buttons.length === HORIZON_BUTTON_MAX_COUNT ? HORIZON_BUTTON_MAX_COUNT - o14 - 1 : o14) <
+                            Math.min(this.buttons.length, VERTICAL_BUTTON_MAX_COUNT) - 1) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((u3, v3) => {
+                                this.observeComponentCreation2((c15, d15) => {
                                     Row.create();
                                     Row.height({
                                         'id': -1,
@@ -3610,7 +3686,7 @@ class CustomDialogContentComponent extends ViewPU {
         If.pop();
     }
 
-    isVerticalAlignButton(a3) {
+    isVerticalAlignButton(i14) {
         if (this.buttons) {
             if (this.buttons.length === 1) {
                 return false;
@@ -3618,107 +3694,127 @@ class CustomDialogContentComponent extends ViewPU {
             if (this.buttons.length !== HORIZON_BUTTON_MAX_COUNT) {
                 return true;
             }
-            let b3 = false;
-            let c3 = vp2px(a3 / HORIZON_BUTTON_MAX_COUNT - BUTTON_HORIZONTAL_MARGIN -
+            let j14 = false;
+            let k14 = vp2px(i14 / HORIZON_BUTTON_MAX_COUNT - BUTTON_HORIZONTAL_MARGIN -
                 BUTTON_HORIZONTAL_SPACE - 2 * BUTTON_HORIZONTAL_PADDING);
-            this.buttons.forEach((e3) => {
-                let f3 = measure.measureTextSize({
-                    textContent: e3.value,
+            this.buttons.forEach((m14) => {
+                let n14 = measure.measureTextSize({
+                    textContent: m14.value,
                     fontSize: this.buttonMaxFontSize
                 });
-                if (Number(f3.width) > c3) {
-                    b3 = true;
+                if (Number(n14.width) > k14) {
+                    j14 = true;
                 }
             });
-            return b3;
+            return j14;
         }
         return false;
     }
 
     rerender() {
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.updateDirtyElements();
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 }
 
-function __Button__setButtonProperties(x2, y2) {
+function __Button__setButtonProperties(f14, g14) {
     Button.onClick(() => {
-        if (x2.action) {
-            x2.action();
+        if (f14.action) {
+            f14.action();
         }
-        y2?.close();
+        g14?.close();
     });
     Button.defaultFocus(true);
-    Button.buttonStyle(x2.buttonStyle ?? ALERT_BUTTON_STYLE);
+    Button.buttonStyle(f14.buttonStyle ?? ALERT_BUTTON_STYLE);
     Button.layoutWeight(BUTTON_LAYOUT_WEIGHT);
+    Button.type(ButtonType.Normal);
+    Button.borderRadius({
+        'id': -1,
+        'type': 10002,
+        params: ['sys.float.corner_radius_level10'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
+    });
 }
 
-function getNumberByResourceId(t2) {
+function getNumberByResourceId(y13, z13, a14) {
     try {
-        return resourceManager.getSystemResourceManager().getNumber(t2);
-    } catch (u2) {
-        let v2 = u2.code;
-        let w2 = u2.message;
-        hilog.error(0x3900, 'Ace', `CustomContentDialog getNumberByResourceId error, code: ${v2}, message: ${w2}`);
-        return 0;
+        let e14 = resourceManager.getSystemResourceManager().getNumber(y13);
+        if (e14 > 0 || a14) {
+            return e14;
+        } else {
+            return z13;
+        }
+    } catch (b14) {
+        let c14 = b14.code;
+        let d14 = b14.message;
+        hilog.error(0x3900, 'Ace', `CustomContentDialog getNumberByResourceId error, code: ${c14}, message: ${d14}`);
+        return z13;
     }
 }
 
-function getEnumNumberByResourceId(p2) {
+function getEnumNumberByResourceId(o11, p11) {
     try {
-        return getContext().resourceManager.getNumber(p2);
-    } catch (q2) {
-        let r2 = q2.code;
-        let s2 = q2.message;
-        hilog.error(0x3900, 'Ace', `getEnumNumberByResourceId error, code: ${r2}, message: ${s2}`);
-        return -1;
+        let x13 = getContext().resourceManager.getNumber(o11);
+        if (x13 > 0) {
+            return x13;
+        } else {
+            return p11;
+        }
+    } catch (a13) {
+        let v13 = a13.code;
+        let w13 = a13.message;
+        hilog.error(0x3900, 'Ace', `getEnumNumberByResourceId error, code: ${v13}, message: ${w13}`);
+        return p11;
     }
 }
 
-function getTextAlign(k2, l2, m2) {
-    let n2 = measure.measureTextSize({
-        textContent: l2,
-        fontSize: m2,
-        constraintWidth: k2,
+function getTextAlign(c11, d11, e11) {
+    let f11 = measure.measureTextSize({
+        textContent: d11,
+        fontSize: e11,
+        constraintWidth: c11,
     });
-    let o2 = measure.measureTextSize({
-        textContent: l2,
-        fontSize: m2,
+    let g11 = measure.measureTextSize({
+        textContent: d11,
+        fontSize: e11,
     });
-    if (getTextHeight(n2) <= getTextHeight(o2)) {
+    if (getTextHeight(f11) <= getTextHeight(g11)) {
         return TextAlign.Center;
     }
     return TextAlign.Start;
 }
 
-function getTextHeight(j2) {
-    if (j2 && j2.height !== null && j2.height !== undefined) {
-        return Number(j2.height);
+function getTextHeight(x10) {
+    if (x10 && x10.height !== null && x10.height !== undefined) {
+        return Number(x10.height);
     }
     return 0;
 }
 
-function resolveKeyEvent(h2, i2) {
-    if (h2.type == IGNORE_KEY_EVENT_TYPE) {
+function resolveKeyEvent(n10, o10) {
+    if (n10.type === IGNORE_KEY_EVENT_TYPE) {
         return;
     }
-    if (h2.keyCode == KEYCODE_UP) {
-        i2.scrollPage({ next: false });
-        h2.stopPropagation();
-    } else if (h2.keyCode == KEYCODE_DOWN) {
-        if (i2.isAtEnd()) {
+    if (n10.keyCode === KEYCODE_UP) {
+        o10.scrollPage({ next: false });
+        n10.stopPropagation();
+    } else if (n10.keyCode === KEYCODE_DOWN) {
+        if (o10.isAtEnd()) {
             return;
         } else {
-            i2.scrollPage({ next: true });
-            h2.stopPropagation();
+            o10.scrollPage({ next: true });
+            n10.stopPropagation();
         }
     }
 }
 
 export class LoadingDialog extends ViewPU {
-    constructor(b2, c2, d2, e2 = -1, f2 = undefined, g2) {
-        super(b2, d2, e2, g2);
-        if (typeof f2 === 'function') {
-            this.paramsGenerator_ = f2;
+    constructor(q9, r9, s9, t9 = -1, u9 = undefined, y9) {
+        super(q9, s9, t9, y9);
+        if (typeof u9 === 'function') {
+            this.paramsGenerator_ = u9;
         }
         this.controller = undefined;
         this.content = '';
@@ -3740,45 +3836,45 @@ export class LoadingDialog extends ViewPU {
         this.themeColorMode = ThemeColorMode.SYSTEM;
         this.__fontSizeScale = new ObservedPropertySimplePU(1, this, 'fontSizeScale');
         this.__minContentHeight = new ObservedPropertySimplePU(MIN_CONTENT_HEIGHT, this, 'minContentHeight');
-        this.setInitiallyProvidedValue(c2);
+        this.setInitiallyProvidedValue(r9);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(a2) {
-        if (a2.controller !== undefined) {
-            this.controller = a2.controller;
+    setInitiallyProvidedValue(p9) {
+        if (p9.controller !== undefined) {
+            this.controller = p9.controller;
         }
-        if (a2.content !== undefined) {
-            this.content = a2.content;
+        if (p9.content !== undefined) {
+            this.content = p9.content;
         }
-        if (a2.fontColorWithTheme !== undefined) {
-            this.fontColorWithTheme = a2.fontColorWithTheme;
+        if (p9.fontColorWithTheme !== undefined) {
+            this.fontColorWithTheme = p9.fontColorWithTheme;
         }
-        if (a2.loadingProgressIconColorWithTheme !== undefined) {
-            this.loadingProgressIconColorWithTheme = a2.loadingProgressIconColorWithTheme;
+        if (p9.loadingProgressIconColorWithTheme !== undefined) {
+            this.loadingProgressIconColorWithTheme = p9.loadingProgressIconColorWithTheme;
         }
-        if (a2.theme !== undefined) {
-            this.theme = a2.theme;
+        if (p9.theme !== undefined) {
+            this.theme = p9.theme;
         }
-        if (a2.themeColorMode !== undefined) {
-            this.themeColorMode = a2.themeColorMode;
+        if (p9.themeColorMode !== undefined) {
+            this.themeColorMode = p9.themeColorMode;
         }
-        if (a2.fontSizeScale !== undefined) {
-            this.fontSizeScale = a2.fontSizeScale;
+        if (p9.fontSizeScale !== undefined) {
+            this.fontSizeScale = p9.fontSizeScale;
         }
-        if (a2.minContentHeight !== undefined) {
-            this.minContentHeight = a2.minContentHeight;
+        if (p9.minContentHeight !== undefined) {
+            this.minContentHeight = p9.minContentHeight;
         }
     }
 
-    updateStateVars(z1) {
+    updateStateVars(o9) {
     }
 
-    purgeVariableDependenciesOnElmtId(y1) {
-        this.__fontColorWithTheme.purgeDependencyOnElmtId(y1);
-        this.__loadingProgressIconColorWithTheme.purgeDependencyOnElmtId(y1);
-        this.__fontSizeScale.purgeDependencyOnElmtId(y1);
-        this.__minContentHeight.purgeDependencyOnElmtId(y1);
+    purgeVariableDependenciesOnElmtId(n9) {
+        this.__fontColorWithTheme.purgeDependencyOnElmtId(n9);
+        this.__loadingProgressIconColorWithTheme.purgeDependencyOnElmtId(n9);
+        this.__fontSizeScale.purgeDependencyOnElmtId(n9);
+        this.__minContentHeight.purgeDependencyOnElmtId(n9);
     }
 
     aboutToBeDeleted() {
@@ -3790,54 +3886,55 @@ export class LoadingDialog extends ViewPU {
         this.aboutToBeDeletedInternal();
     }
 
-    setController(x1) {
-        this.controller = x1;
+    setController(m9) {
+        this.controller = m9;
     }
 
     get fontColorWithTheme() {
         return this.__fontColorWithTheme.get();
     }
 
-    set fontColorWithTheme(w1) {
-        this.__fontColorWithTheme.set(w1);
+    set fontColorWithTheme(k9) {
+        this.__fontColorWithTheme.set(k9);
     }
 
     get loadingProgressIconColorWithTheme() {
         return this.__loadingProgressIconColorWithTheme.get();
     }
 
-    set loadingProgressIconColorWithTheme(v1) {
-        this.__loadingProgressIconColorWithTheme.set(v1);
+    set loadingProgressIconColorWithTheme(j9) {
+        this.__loadingProgressIconColorWithTheme.set(j9);
     }
 
     get fontSizeScale() {
         return this.__fontSizeScale.get();
     }
 
-    set fontSizeScale(u1) {
-        this.__fontSizeScale.set(u1);
+    set fontSizeScale(g8) {
+        this.__fontSizeScale.set(g8);
     }
 
     get minContentHeight() {
         return this.__minContentHeight.get();
     }
 
-    set minContentHeight(t1) {
-        this.__minContentHeight.set(t1);
+    set minContentHeight(f8) {
+        this.__minContentHeight.set(f8);
     }
 
     initialRender() {
-        this.observeComponentCreation2((r1, s1) => {
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
+        this.observeComponentCreation2((q7, w7) => {
             Column.create();
         }, Column);
-        this.observeComponentCreation2((p1, q1) => {
+        this.observeComponentCreation2((g7, p7) => {
             __Common__.create();
             __Common__.constraintSize({ maxHeight: '100%' });
         }, __Common__);
         {
-            this.observeComponentCreation2((j1, k1) => {
-                if (k1) {
-                    let l1 = new CustomDialogContentComponent(this, {
+            this.observeComponentCreation2((s6, t6) => {
+                if (t6) {
+                    let u6 = new CustomDialogContentComponent(this, {
                         controller: this.controller,
                         contentBuilder: () => {
                             this.contentBuilder();
@@ -3846,10 +3943,10 @@ export class LoadingDialog extends ViewPU {
                         themeColorMode: this.themeColorMode,
                         fontSizeScale: this.__fontSizeScale,
                         minContentHeight: this.__minContentHeight,
-                    }, undefined, j1, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 1535, col: 7 });
-                    ViewPU.create(l1);
-                    let m1 = () => {
+                    }, undefined, s6, () => {
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 1585, col: 7 });
+                    ViewPU.create(u6);
+                    let a = () => {
                         return {
                             controller: this.controller,
                             contentBuilder: () => {
@@ -3861,33 +3958,28 @@ export class LoadingDialog extends ViewPU {
                             minContentHeight: this.minContentHeight
                         };
                     };
-                    l1.paramsGenerator_ = m1;
+                    u6.paramsGenerator_ = a;
                 } else {
-                    this.updateStateVarsOfChildByElmtId(j1, {});
+                    this.updateStateVarsOfChildByElmtId(s6, {});
                 }
             }, { name: 'CustomDialogContentComponent' });
         }
         __Common__.pop();
         Column.pop();
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 
-    contentBuilder(t = null) {
-        this.observeComponentCreation2((e1, f1) => {
+    contentBuilder(s3 = null) {
+        this.observeComponentCreation2((a6, f6) => {
             Column.create();
         }, Column);
-        this.observeComponentCreation2((c1, d1) => {
+        this.observeComponentCreation2((q5, z5) => {
             Row.create();
             Row.constraintSize({ minHeight: LOADING_MIN_HEIGHT });
         }, Row);
-        this.observeComponentCreation2((a1, b1) => {
+        this.observeComponentCreation2((h4, m5) => {
             Text.create(this.content);
-            Text.fontSize({
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.Body_L'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            });
+            Text.fontSize(`${BODY_L}fp`);
             Text.fontWeight(FontWeight.Regular);
             Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
             Text.layoutWeight(LOADING_TEXT_LAYOUT_WEIGHT);
@@ -3897,7 +3989,7 @@ export class LoadingDialog extends ViewPU {
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
         }, Text);
         Text.pop();
-        this.observeComponentCreation2((y, z) => {
+        this.observeComponentCreation2((f4, g4) => {
             LoadingProgress.create();
             LoadingProgress.color(ObservedObject.GetRawObject(this.loadingProgressIconColorWithTheme));
             LoadingProgress.width(LOADING_PROGRESS_WIDTH);
@@ -3928,41 +4020,43 @@ export class LoadingDialog extends ViewPU {
     }
 
     rerender() {
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.updateDirtyElements();
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 }
 
 export class PopupDialog extends ViewPU {
-    constructor(n, o, p, q = -1, r = undefined, s) {
-        super(n, p, q, s);
-        if (typeof r === 'function') {
-            this.paramsGenerator_ = r;
+    constructor(t2, u2, g3, k3 = -1, q3 = undefined, r3) {
+        super(t2, g3, k3, r3);
+        if (typeof q3 === 'function') {
+            this.paramsGenerator_ = q3;
         }
-        this.__show = new SynchedPropertySimpleTwoWayPU(o.show, this, 'show');
-        this.__popup = new SynchedPropertyObjectOneWayPU(o.popup, this, 'popup');
+        this.__show = new SynchedPropertySimpleTwoWayPU(u2.show, this, 'show');
+        this.__popup = new SynchedPropertyObjectOneWayPU(u2.popup, this, 'popup');
         this.targetBuilder = undefined;
         this.__dialogWidth = new ObservedPropertyObjectPU(this.popup.width, this, 'dialogWidth');
-        this.setInitiallyProvidedValue(o);
+        this.setInitiallyProvidedValue(u2);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(m) {
-        if (m.targetBuilder !== undefined) {
-            this.targetBuilder = m.targetBuilder;
+    setInitiallyProvidedValue(s2) {
+        if (s2.targetBuilder !== undefined) {
+            this.targetBuilder = s2.targetBuilder;
         }
-        if (m.dialogWidth !== undefined) {
-            this.dialogWidth = m.dialogWidth;
+        if (s2.dialogWidth !== undefined) {
+            this.dialogWidth = s2.dialogWidth;
         }
     }
 
-    updateStateVars(l) {
-        this.__popup.reset(l.popup);
+    updateStateVars(r2) {
+        this.__popup.reset(r2.popup);
     }
 
-    purgeVariableDependenciesOnElmtId(k) {
-        this.__show.purgeDependencyOnElmtId(k);
-        this.__popup.purgeDependencyOnElmtId(k);
-        this.__dialogWidth.purgeDependencyOnElmtId(k);
+    purgeVariableDependenciesOnElmtId(a2) {
+        this.__show.purgeDependencyOnElmtId(a2);
+        this.__popup.purgeDependencyOnElmtId(a2);
+        this.__dialogWidth.purgeDependencyOnElmtId(a2);
     }
 
     aboutToBeDeleted() {
@@ -3977,33 +4071,34 @@ export class PopupDialog extends ViewPU {
         return this.__show.get();
     }
 
-    set show(j) {
-        this.__show.set(j);
+    set show(z1) {
+        this.__show.set(z1);
     }
 
     get popup() {
         return this.__popup.get();
     }
 
-    set popup(i) {
-        this.__popup.set(i);
+    set popup(y1) {
+        this.__popup.set(y1);
     }
 
     get dialogWidth() {
         return this.__dialogWidth.get();
     }
 
-    set dialogWidth(h) {
-        this.__dialogWidth.set(h);
+    set dialogWidth(x1) {
+        this.__dialogWidth.set(x1);
     }
 
     initialRender() {
-        this.observeComponentCreation2((b, c) => {
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
+        this.observeComponentCreation2((o, p) => {
             Column.create();
             Column.onClick(() => {
-                let f = display.getDefaultDisplaySync();
-                let g = px2vp(f.width);
-                if (g - BUTTON_HORIZONTAL_MARGIN - BUTTON_HORIZONTAL_MARGIN > MAX_DIALOG_WIDTH) {
+                let q1 = display.getDefaultDisplaySync();
+                let w1 = px2vp(q1.width);
+                if (w1 - BUTTON_HORIZONTAL_MARGIN - BUTTON_HORIZONTAL_MARGIN > MAX_DIALOG_WIDTH) {
                     this.popup.width = this.popup?.width ?? MAX_DIALOG_WIDTH;
                 } else {
                     this.popup.width = this.dialogWidth;
@@ -4016,8 +4111,8 @@ export class PopupDialog extends ViewPU {
                 popupColor: this.popup?.popupColor,
                 enableArrow: this.popup?.enableArrow ?? true,
                 autoCancel: this.popup?.autoCancel,
-                onStateChange: this.popup?.onStateChange ?? ((e) => {
-                    if (!e.isVisible) {
+                onStateChange: this.popup?.onStateChange ?? ((o1) => {
+                    if (!o1.isVisible) {
                         this.show = false;
                     }
                 }),
@@ -4044,12 +4139,15 @@ export class PopupDialog extends ViewPU {
                 onWillDismiss: this.popup?.onWillDismiss
             });
         }, Column);
-        this.targetBuilder.bind(this)(this);
+        this.targetBuilder.bind(this)();
         Column.pop();
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 
     rerender() {
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.updateDirtyElements();
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 }
 

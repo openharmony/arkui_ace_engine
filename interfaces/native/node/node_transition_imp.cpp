@@ -13,10 +13,7 @@
  * limitations under the License.
  */
 
-#include <algorithm>
-#include <cstddef>
 
-#include "native_type.h"
 #include "node/node_transition.h"
 
 #include "base/utils/utils.h"
@@ -34,6 +31,7 @@ ArkUI_TransitionEffect* OH_ArkUI_CreateOpacityTransitionEffect(float opacity)
     option->appear = nullptr;
     option->disappear = nullptr;
     option->combine = nullptr;
+    option->animation = nullptr;
     option->opacity = std::clamp(opacity, 0.0f, 1.0f);
     return option;
 }
@@ -47,6 +45,7 @@ ArkUI_TransitionEffect* OH_ArkUI_CreateTranslationTransitionEffect(ArkUI_Transla
     option->appear = nullptr;
     option->disappear = nullptr;
     option->combine = nullptr;
+    option->animation = nullptr;
     option->translate = translate;
     return option;
 }
@@ -60,6 +59,7 @@ ArkUI_TransitionEffect* OH_ArkUI_CreateScaleTransitionEffect(ArkUI_ScaleOptions*
     option->appear = nullptr;
     option->disappear = nullptr;
     option->combine = nullptr;
+    option->animation = nullptr;
     option->scale = scale;
     return option;
 }
@@ -73,6 +73,7 @@ ArkUI_TransitionEffect* OH_ArkUI_CreateRotationTransitionEffect(ArkUI_RotationOp
     option->appear = nullptr;
     option->disappear = nullptr;
     option->combine = nullptr;
+    option->animation = nullptr;
     option->rotate = rotate;
     return option;
 }
@@ -89,6 +90,7 @@ ArkUI_TransitionEffect* OH_ArkUI_CreateMovementTransitionEffect(ArkUI_Transition
     option->appear = nullptr;
     option->disappear = nullptr;
     option->combine = nullptr;
+    option->animation = nullptr;
     option->move = move;
     return option;
 }
@@ -104,6 +106,7 @@ ArkUI_TransitionEffect* OH_ArkUI_CreateAsymmetricTransitionEffect(
     option->scale = nullptr;
     option->rotate = nullptr;
     option->combine = nullptr;
+    option->animation = nullptr;
     option->appear = appear;
     option->disappear = disappear;
     return option;

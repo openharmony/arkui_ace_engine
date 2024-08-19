@@ -19,6 +19,7 @@
 #include "test/mock/core/rosen/mock_canvas.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/grid/grid_item_accessibility_property.h"
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_item_theme.h"
@@ -681,5 +682,163 @@ HWTEST_F(GridOptionLayoutTestNg, GridLayout006, TestSize.Level1)
     EXPECT_EQ(retItemRect.rowSpan, 20);
     EXPECT_EQ(retItemRect.columnStart, 1);
     EXPECT_EQ(retItemRect.columnSpan, 20);
+}
+
+/**
+ * @tc.name: LayoutOptions001
+ * @tc.desc: Test LayoutOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridOptionLayoutTestNg, LayoutOptions001, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Set GridLayoutOptions:irregularIndexes
+     * @tc.expected: Each gridItem rect is correct
+     */
+    GridLayoutOptions option;
+    option.irregularIndexes = { 6, 1, 4 };
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetLayoutOptions(option);
+    CreateGridItems(10, -2, ITEM_HEIGHT);
+    CreateDone(frameNode_);
+    EXPECT_EQ(GetChildRect(frameNode_, 0), RectF(0.f, ITEM_HEIGHT * 0, ITEM_WIDTH, ITEM_HEIGHT));
+    EXPECT_EQ(GetChildRect(frameNode_, 1), RectF(0.f, ITEM_HEIGHT * 1, GRID_WIDTH, ITEM_HEIGHT));
+    EXPECT_EQ(GetChildRect(frameNode_, 2), RectF(0.f, ITEM_HEIGHT * 2, ITEM_WIDTH, ITEM_HEIGHT));
+    EXPECT_EQ(GetChildRect(frameNode_, 3), RectF(ITEM_WIDTH, ITEM_HEIGHT * 2, ITEM_WIDTH, ITEM_HEIGHT));
+    EXPECT_EQ(GetChildRect(frameNode_, 4), RectF(0.f, ITEM_HEIGHT * 3, GRID_WIDTH, ITEM_HEIGHT));
+    EXPECT_EQ(GetChildRect(frameNode_, 5), RectF()); // out of view
+    EXPECT_EQ(
+        GetChildAccessibilityProperty<GridItemAccessibilityProperty>(frameNode_, 0)->GetCollectionItemInfo().row, 0);
+    EXPECT_EQ(
+        GetChildAccessibilityProperty<GridItemAccessibilityProperty>(frameNode_, 0)->GetCollectionItemInfo().column, 0);
+    EXPECT_EQ(
+        GetChildAccessibilityProperty<GridItemAccessibilityProperty>(frameNode_, 1)->GetCollectionItemInfo().row, 1);
+    EXPECT_EQ(
+        GetChildAccessibilityProperty<GridItemAccessibilityProperty>(frameNode_, 1)->GetCollectionItemInfo().column, 0);
+    EXPECT_EQ(
+        GetChildAccessibilityProperty<GridItemAccessibilityProperty>(frameNode_, 2)->GetCollectionItemInfo().row, 2);
+    EXPECT_EQ(
+        GetChildAccessibilityProperty<GridItemAccessibilityProperty>(frameNode_, 2)->GetCollectionItemInfo().column, 0);
+    EXPECT_EQ(
+        GetChildAccessibilityProperty<GridItemAccessibilityProperty>(frameNode_, 3)->GetCollectionItemInfo().row, 2);
+    EXPECT_EQ(
+        GetChildAccessibilityProperty<GridItemAccessibilityProperty>(frameNode_, 3)->GetCollectionItemInfo().column, 1);
+    EXPECT_EQ(
+        GetChildAccessibilityProperty<GridItemAccessibilityProperty>(frameNode_, 4)->GetCollectionItemInfo().row, 3);
+    EXPECT_EQ(
+        GetChildAccessibilityProperty<GridItemAccessibilityProperty>(frameNode_, 4)->GetCollectionItemInfo().column, 0);
+}
+
+/**
+ * @tc.name: SyncLayoutBeforeSpring001
+ * @tc.desc: Test SyncLayoutBeforeSpring's invariant
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridOptionLayoutTestNg, SyncLayoutBeforeSpring001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test OnModifyDone
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetLayoutOptions({});
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 9), 400.0f);
+
+    pattern_->gridLayoutInfo_.currentOffset_ = -100.0f;
+    pattern_->gridLayoutInfo_.synced_ = false;
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    // in a realistic scenario, this function only gets called during spring animation.
+    // here we only test the invariant that overScroll is enabled during the sync layout before spring animation.
+    pattern_->SyncLayoutBeforeSpring();
+    EXPECT_EQ(GetChildY(frameNode_, 9), 300.0f);
+    EXPECT_TRUE(pattern_->gridLayoutInfo_.synced_);
+    EXPECT_FALSE(pattern_->forceOverScroll_);
+}
+
+/**
+ * @tc.name: LayoutOptions002
+ * @tc.desc: Test LayoutOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridOptionLayoutTestNg, LayoutOptions002, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Set GridLayoutOptions:irregularIndexes getSizeByIndex
+     * @tc.expected: Each gridItem rect is correct
+     */
+    GridLayoutOptions option;
+    option.irregularIndexes = { 6, 1, 3, 4, 5, 0 };
+    GetSizeByIndex onGetIrregularSizeByIndex = [](int32_t index) {
+        if (index == 3) {
+            return GridItemSize { 1, 2 };
+        }
+        return GridItemSize { 1, 4 };
+    };
+    option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetLayoutOptions(option);
+    CreateGridItems(10, -2, ITEM_HEIGHT);
+    CreateDone(frameNode_);
+    EXPECT_EQ(GetChildRect(frameNode_, 0), RectF(0.f, ITEM_HEIGHT * 0, GRID_WIDTH, ITEM_HEIGHT));
+    EXPECT_EQ(GetChildRect(frameNode_, 1), RectF(0.f, ITEM_HEIGHT * 1, GRID_WIDTH, ITEM_HEIGHT));
+    EXPECT_EQ(GetChildRect(frameNode_, 2), RectF(0.f, ITEM_HEIGHT * 2, ITEM_WIDTH * 1, ITEM_HEIGHT));
+    EXPECT_EQ(GetChildRect(frameNode_, 3), RectF(ITEM_WIDTH, ITEM_HEIGHT * 2, ITEM_WIDTH * 2, ITEM_HEIGHT));
+    EXPECT_EQ(GetChildRect(frameNode_, 4), RectF(0.f, ITEM_HEIGHT * 3, GRID_WIDTH, ITEM_HEIGHT));
+    EXPECT_EQ(GetChildRect(frameNode_, 5), RectF()); // out of view
+}
+
+/**
+ * @tc.name: OutOfBounds001
+ * @tc.desc: Test LayoutOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridOptionLayoutTestNg, OutOfBounds001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetLayoutOptions({});
+    CreateFixedHeightItems(30, 200.0f);
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateDone(frameNode_);
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildRect(frameNode_, 29).Bottom(), GRID_HEIGHT);
+    EXPECT_FALSE(pattern_->IsOutOfBoundary(true));
+
+    pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
+    UpdateCurrentOffset(-100.0f);
+    EXPECT_TRUE(pattern_->IsOutOfBoundary(true));
+
+    UpdateCurrentOffset(150.0f);
+    EXPECT_GT(GetChildRect(frameNode_, 29).Bottom(), GRID_HEIGHT);
+    EXPECT_FALSE(pattern_->IsOutOfBoundary(true));
+}
+
+/**
+ * @tc.name: ScrollTo001
+ * @tc.desc: Test ScrollTo Function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridOptionLayoutTestNg, ScrollTo001, TestSize.Level1)
+{
+    GridLayoutOptions option;
+    option.irregularIndexes = { 45 };
+    GridModelNG model = CreateGrid();
+    model.SetLayoutOptions(option);
+    model.SetColumnsTemplate("1fr");
+    CreateFixedItems(50);
+    CreateDone(frameNode_);
+
+    pattern_->ScrollTo(ITEM_HEIGHT * 40);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().startIndex_, 40);
+
+    pattern_->ScrollTo(ITEM_HEIGHT * 20);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().startIndex_, 20);
 }
 } // namespace OHOS::Ace::NG

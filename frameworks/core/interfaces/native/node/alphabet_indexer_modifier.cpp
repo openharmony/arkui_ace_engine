@@ -531,7 +531,7 @@ void ResetAutoCollapse(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    IndexerModelNG::SetAutoCollapse(frameNode, false);
+    IndexerModelNG::SetAutoCollapse(frameNode, true);
 }
 
 void SetEnableHapticFeedback(ArkUINodeHandle node, ArkUI_Bool value)
@@ -563,6 +563,24 @@ const ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
         ResetItemBorderRadius, SetPopupBackgroundBlurStyle, ResetPopupBackgroundBlurStyle, SetPopupTitleBackground,
         ResetPopupTitleBackground, SetAdaptiveWidth, ResetAdaptiveWidth, SetArrayValue, ResetArrayValue,
         SetAutoCollapse, ResetAutoCollapse, SetEnableHapticFeedback, ResetEnableHapticFeedback };
+
+    return &modifier;
+}
+
+const CJUIAlphabetIndexerModifier* GetCJUIAlphabetIndexerModifier()
+{
+    static const CJUIAlphabetIndexerModifier modifier = { SetPopupItemFont, ResetPopupItemFont, SetSelectedFont,
+        ResetSelectedFont, SetPopupFont, ResetPopupFont, SetAlphabetIndexerFont, ResetAlphabetIndexerFont,
+        SetPopupItemBackgroundColor, ResetPopupItemBackgroundColor, SetAlphabetIndexerColor, ResetAlphabetIndexerColor,
+        SetPopupColor, ResetPopupColor, SetAlphabetIndexerSelectedColor, ResetAlphabetIndexerSelectedColor,
+        SetPopupBackground, ResetPopupBackground, SetSelectedBackgroundColor, ResetSelectedBackgroundColor,
+        SetPopupUnselectedColor, ResetPopupUnselectedColor, SetAlignStyle, ResetAlignStyle, SetUsingPopup,
+        ResetUsingPopup, SetAlphabetIndexerSelected, ResetAlphabetIndexerSelected, SetPopupHorizontalSpace,
+        ResetPopupHorizontalSpace, SetPopupSelectedColor, ResetPopupSelectedColor, SetItemSize, ResetItemSize,
+        SetPopupPosition, ResetPopupPosition, SetPopupItemBorderRadius, ResetPopupItemBorderRadius, SetItemBorderRadius,
+        ResetItemBorderRadius, SetPopupBackgroundBlurStyle, ResetPopupBackgroundBlurStyle, SetPopupTitleBackground,
+        ResetPopupTitleBackground, SetAdaptiveWidth, ResetAdaptiveWidth, SetAutoCollapse, ResetAutoCollapse,
+        SetEnableHapticFeedback, ResetEnableHapticFeedback, SetArrayValue, ResetArrayValue };
 
     return &modifier;
 }

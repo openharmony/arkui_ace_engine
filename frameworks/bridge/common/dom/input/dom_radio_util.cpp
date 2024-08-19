@@ -15,9 +15,6 @@
 
 #include "frameworks/bridge/common/dom/input/dom_radio_util.h"
 
-#include "core/components/common/layout/constants.h"
-#include "frameworks/bridge/common/utils/utils.h"
-#include "frameworks/bridge/js_frontend/js_ace_page.h"
 #include "frameworks/bridge/js_frontend/js_frontend.h"
 
 namespace OHOS::Ace::Framework {

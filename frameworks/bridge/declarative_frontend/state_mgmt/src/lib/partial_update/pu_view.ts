@@ -39,6 +39,8 @@ abstract class ViewPU extends PUV2ViewBase
 
   private hasBeenRecycled_: boolean = false;
 
+  private preventRecursiveRecycle_: boolean = false;
+
   private delayRecycleNodeRerender: boolean = false;
 
   private delayRecycleNodeRerenderDeep: boolean = false;
@@ -674,6 +676,9 @@ abstract class ViewPU extends PUV2ViewBase
       return;
     }
     const _componentName: string = (classObject && ('name' in classObject)) ? Reflect.get(classObject, 'name') as string : 'unspecified UINode';
+    if (_componentName === '__Recycle__') {
+      return;
+    }
     const _popFunc: () => void = (classObject && 'pop' in classObject) ? classObject.pop! : (): void => { };
     const updateFunc = (elmtId: number, isFirstRender: boolean): void => {
       this.syncInstanceId();
@@ -686,7 +691,7 @@ abstract class ViewPU extends PUV2ViewBase
       if (!this.isViewV3) {
         // Enable PU state tracking only in PU @Components
         this.currentlyRenderedElmtIdStack_.push(elmtId);
-        stateMgmtDFX.inRenderingElementId_.push(elmtId);
+        stateMgmtDFX.inRenderingElementId.push(elmtId);
       }
 
       // if V2 @Observed/@Track used anywhere in the app (there is no more fine grained criteria),
@@ -713,7 +718,7 @@ abstract class ViewPU extends PUV2ViewBase
       }
       if (!this.isViewV3) {
         this.currentlyRenderedElmtIdStack_.pop();
-        stateMgmtDFX.inRenderingElementId_.pop();
+        stateMgmtDFX.inRenderingElementId.pop();
       }
       ViewStackProcessor.StopGetAccessRecording();
 
@@ -846,11 +851,19 @@ abstract class ViewPU extends PUV2ViewBase
     this.runReuse_ = false;
   }
 
+  stopRecursiveRecycle() {
+    this.preventRecursiveRecycle_ = true;
+  }
+
   aboutToRecycleInternal() {
     this.runReuse_ = true;
     stateMgmtTrace.scopedTrace(() => {
       this.aboutToRecycle();
     }, 'aboutToRecycle', this.constructor.name);
+    if (this.preventRecursiveRecycle_) {
+      this.preventRecursiveRecycle_ = false;
+      return;
+    }
     this.childrenWeakrefMap_.forEach((weakRefChild) => {
       const child = weakRefChild.deref();
       if (child) {
@@ -874,10 +887,8 @@ abstract class ViewPU extends PUV2ViewBase
       const parentPU : ViewPU = this.getParent() as ViewPU;
       parentPU.getOrCreateRecycleManager().pushRecycleNode(name, this);
       this.hasBeenRecycled_ = true;
-      this.setActiveInternal(false);
     } else {
       this.resetRecycleCustomNode();
-      stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: recycleNode must have a parent`);
     }
   }
 
@@ -1117,16 +1128,9 @@ abstract class ViewPU extends PUV2ViewBase
       .filter((varName: string) => varName.startsWith('__') && !varName.startsWith(ObserveV2.OB_PREFIX))
       .forEach((varName) => {
         const prop: any = Reflect.get(this, varName);
-        if ('debugInfoDecorator' in prop) {
+        if (typeof prop === 'object' && 'debugInfoDecorator' in prop) {
           const observedProp: ObservedPropertyAbstractPU<any> = prop as ObservedPropertyAbstractPU<any>;
-          let rawValue: any = observedProp.getRawObjectValue();
-          let observedPropertyInfo: ObservedPropertyInfo<any> = {
-            decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(),
-            value: typeof rawValue === 'object' ? 'Only support to dump simple type: string, number, boolean, enum type' : rawValue,
-            dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() == 'object' ? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()) : false, false),
-            owningView: { componentName: this.constructor.name, id: this.id__() }, syncPeers: observedProp.dumpSyncPeers(false)
-          };
-          res.observedPropertiesInfo.push(observedPropertyInfo);
+          res.observedPropertiesInfo.push(stateMgmtDFX.getObservedPropertyInfo(observedProp, false));
         }
       });
     let resInfo: string = '';
@@ -1149,9 +1153,9 @@ abstract class ViewPU extends PUV2ViewBase
   public __mkRepeatAPI: <I>(arr: Array<I>) => RepeatAPI<I> = <I>(arr: Array<I>): RepeatAPI<I> => {
     // factory is for future extensions, currently always return the same
     const elmtId = this.getCurrentlyRenderedElmtId();
-    let repeat = this.elmtId2Repeat_.get(elmtId) as __RepeatPU<I>;
+    let repeat = this.elmtId2Repeat_.get(elmtId) as __Repeat<I>;
     if (!repeat) {
-        repeat = new __RepeatPU<I>(this, arr);
+        repeat = new __Repeat<I>(this, arr);
         this.elmtId2Repeat_.set(elmtId, repeat);
     } else {
         repeat.updateArr(arr);

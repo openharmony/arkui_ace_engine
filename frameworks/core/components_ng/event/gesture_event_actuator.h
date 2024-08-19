@@ -33,13 +33,16 @@ public:
     ~GestureEventActuator() override = default;
 
     virtual void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-        const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, TouchTestResult& responseLinkResult)
+        const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, ResponseLinkResult& responseLinkResult)
     {}
 
     void SetOnAccessibility(OnAccessibilityEventFunc onAccessibilityEvent)
     {
         onAccessibilityEventFunc_ = std::move(onAccessibilityEvent);
     }
+
+    virtual void AddTouchListener(const TouchRestrict& touchRestrict)
+    {}
 
 protected:
     OnAccessibilityEventFunc onAccessibilityEventFunc_ = nullptr;

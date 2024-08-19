@@ -58,9 +58,9 @@ bool AceNewPipeJudgement::QueryAceNewPipeEnabledFA(const std::string& packagenam
     uint32_t apiTargetVersion, const std::string& apiReleaseType)
 {
     if (((apiTargetVersion == NEW_PIPE_MIN_VERSION &&
-             (apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE || apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE_NEW ||
-                 apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE_RELEASE ||
-                 SystemProperties::GetExtSurfaceEnabled())) ||
+            (apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE || apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE_NEW ||
+                apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE_RELEASE ||
+                SystemProperties::GetExtSurfaceEnabled())) ||
             apiTargetVersion > NEW_PIPE_MIN_VERSION) &&
         apiCompatibleVersion >= NEW_PIPE_MIN_VERSION) {
         return true;

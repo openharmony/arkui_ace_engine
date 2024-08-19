@@ -16,11 +16,8 @@
 #include "frameworks/bridge/js_frontend/js_command.h"
 
 #include "base/log/event_report.h"
-#include "base/log/log.h"
-#include "frameworks/bridge/common/dom/dom_proxy.h"
 #include "frameworks/bridge/common/dom/dom_search.h"
 #include "frameworks/bridge/common/dom/dom_textarea.h"
-#include "frameworks/bridge/common/dom/dom_type.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine_loader.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
 
@@ -61,8 +58,8 @@ inline void TrySaveTargetAndIdNode(const std::string& id, const std::string& tar
     }
 }
 
-std::vector<std::string> g_declarationNodes =
-{   DOM_NODE_TAG_BADGE,
+std::vector<std::string> g_declarationNodes = {
+    DOM_NODE_TAG_BADGE,
     DOM_NODE_TAG_BUTTON,
     DOM_NODE_TAG_LABEL,
     DOM_NODE_TAG_PIECE,

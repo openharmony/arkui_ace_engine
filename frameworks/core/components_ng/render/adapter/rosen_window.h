@@ -53,7 +53,7 @@ public:
 
     void SetRootFrameNode(const RefPtr<NG::FrameNode>& root) override;
 
-    void FlushFrameRate(int32_t rate, bool isAnimatorStopped, int32_t rateType) override;
+    void FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate, int32_t rateType) override;
 
     std::shared_ptr<Rosen::RSUIDirector> GetRSUIDirector() const override
     {
@@ -87,9 +87,9 @@ public:
         rsUIDirector_->FlushModifier();
     }
 
-    bool HasUIAnimation() override
+    bool HasUIRunningAnimation() override
     {
-        return rsUIDirector_->HasUIAnimation();
+        return rsUIDirector_->HasUIRunningAnimation();
     }
 
     void OnShow() override;

@@ -39,7 +39,18 @@ public:
     explicit GestureInfo(std::string tag) : tag_(std::move(tag)) {}
     explicit GestureInfo(GestureTypeName type) : type_(type) {}
     explicit GestureInfo(bool isSystemGesture) : isSystemGesture_(isSystemGesture) {}
-    ~GestureInfo() override = default;
+    ~GestureInfo() override
+    {
+        if (isCapi_) {
+            return;
+        }
+        if (disposeNotifyFunc_) {
+            disposeNotifyFunc_(userData_);
+        }
+        if (disposeJSRecognizerInfoFunc_) {
+            disposeJSRecognizerInfoFunc_();
+        }
+    }
 
     std::optional<std::string> GetTag() const
     {
@@ -111,6 +122,26 @@ public:
         return disposeTag_;
     }
 
+    void SetIsCapi(bool isCapi)
+    {
+        isCapi_ = isCapi;
+    }
+
+    bool IsCapi() const
+    {
+        return isCapi_;
+    }
+
+    void SetDisposeNotifyFunc(std::function<void(void*)>&& func)
+    {
+        disposeNotifyFunc_ = std::move(func);
+    }
+
+    void SetDisposeJSRecognizerInfoFunc(std::function<void()>&& func)
+    {
+        disposeJSRecognizerInfoFunc_ = std::move(func);
+    }
+
 private:
     std::optional<std::string> tag_;
     GestureTypeName type_ = GestureTypeName::UNKNOWN;
@@ -120,6 +151,9 @@ private:
     bool isSystemGesture_ = false;
     void* userData_ = nullptr;
     bool disposeTag_ = false;
+    bool isCapi_ = true;
+    std::function<void(void*)> disposeNotifyFunc_;
+    std::function<void()> disposeJSRecognizerInfoFunc_;
 };
 } // namespace OHOS::Ace::NG
 

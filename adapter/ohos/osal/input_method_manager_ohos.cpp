@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/ime/input_method_manager.h"
 #include "core/components_ng/event/focus_hub.h"
@@ -45,8 +44,7 @@ InputMethodManager* InputMethodManager::GetInstance()
 void InputMethodManager::OnFocusNodeChange(const RefPtr<NG::FrameNode>& curFocusNode)
 {
     auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    if (container->IsKeyboard()) {
+    if (container && container->IsKeyboard()) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "focus in input method.");
         return;
     }
@@ -79,6 +77,11 @@ void InputMethodManager::OnFocusNodeChange(const RefPtr<NG::FrameNode>& curFocus
 
 void InputMethodManager::ProcessKeyboardInWindowScene(const RefPtr<NG::FrameNode>& curFocusNode)
 {
+    if (curFocusNode && NG::WindowSceneHelper::IsFocusWindowSceneCloseKeyboard(curFocusNode)) {
+        lastKeep_ = true;
+    } else {
+        lastKeep_ = false;
+    }
     // Frame other window to SCB window Or inSCB window changes,hide keyboard.
     if ((windowFocus_.has_value() && windowFocus_.value())) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SCB Window focus first, ready to hide keyboard.");
@@ -96,6 +99,11 @@ void InputMethodManager::ProcessKeyboardInWindowScene(const RefPtr<NG::FrameNode
 
 void InputMethodManager::ProcessKeyboard(const RefPtr<NG::FrameNode>& curFocusNode)
 {
+    if (curFocusNode && curFocusNode->GetTag() == V2::SCREEN_ETS_TAG && lastKeep_) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "node is screen and last node want to save keyboard Ignore");
+        lastKeep_ = false;
+        return;
+    }
     auto pipeline = curFocusNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     if (windowFocus_.has_value() && windowFocus_.value()) {
@@ -103,9 +111,15 @@ void InputMethodManager::ProcessKeyboard(const RefPtr<NG::FrameNode>& curFocusNo
         windowFocus_.reset();
         auto callback = pipeline->GetWindowFocusCallback();
         if (callback) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Trigger Window Focus Callback");
             callback();
-            return;
+        } else {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "No Window Focus Callback");
+            if (!pipeline->NeedSoftKeyboard()) {
+                HideKeyboardAcrossProcesses();
+            }
         }
+        return;
     }
 
     if (curFocusNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG ||
@@ -116,8 +130,7 @@ void InputMethodManager::ProcessKeyboard(const RefPtr<NG::FrameNode>& curFocusNo
     }
 
     auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto isUIExtension = container->IsUIExtensionWindow();
+    auto isUIExtension = container && container->IsUIExtensionWindow();
     auto pattern = curFocusNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     if (isUIExtension && !pattern->NeedSoftKeyboard()) {
@@ -136,16 +149,25 @@ bool InputMethodManager::NeedSoftKeyboard() const
 {
     auto currentFocusNode = curFocusNode_.Upgrade();
     CHECK_NULL_RETURN(currentFocusNode, false);
+    auto pipeline = currentFocusNode->GetContextRefPtr();
+    if (pipeline) {
+        auto manager = AceType::DynamicCast<NG::TextFieldManagerNG>(pipeline->GetTextFieldManager());
+        if (manager && manager->GetLastRequestKeyboardId() == currentFocusNode->GetId()) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Last RequestKeyboard node is current focus node, So keep");
+            return true;
+        }
+    }
     if (currentFocusNode && (currentFocusNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG ||
                              currentFocusNode->GetTag() == V2::EMBEDDED_COMPONENT_ETS_TAG)) {
         return true;
     }
     auto pattern = currentFocusNode->GetPattern();
-    return pattern->NeedSoftKeyboard();
+    return pattern->NeedSoftKeyboard() && pattern->NeedToRequestKeyboardOnFocus();
 }
 
 void InputMethodManager::CloseKeyboard()
 {
+    ACE_LAYOUT_SCOPED_TRACE("CloseKeyboard");
     auto currentFocusNode = curFocusNode_.Upgrade();
     CHECK_NULL_VOID(currentFocusNode);
     auto pipeline = currentFocusNode->GetContext();
@@ -153,8 +175,10 @@ void InputMethodManager::CloseKeyboard()
     auto textFieldManager = pipeline->GetTextFieldManager();
     CHECK_NULL_VOID(textFieldManager);
     if (!textFieldManager->GetImeShow()) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Ime Not Shown, No need to close keyboard");
         return;
     }
+    textFieldManager->SetNeedToRequestKeyboard(false);
 #if defined(ENABLE_STANDARD_INPUT)
     // If pushpage, close it
     TAG_LOGI(AceLogTag::ACE_KEYBOARD, "PageChange CloseKeyboard FrameNode notNeedSoftKeyboard.");
@@ -166,12 +190,23 @@ void InputMethodManager::CloseKeyboard()
 #endif
 }
 
+void InputMethodManager::CloseKeyboardInPipelineDestroy()
+{
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Pipeline Destroyed, Ready to close SoftKeyboard.");
+    auto inputMethod = MiscServices::InputMethodController::GetInstance();
+    if (inputMethod) {
+        inputMethod->Close();
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Pipelinne Destroyed, Close SoftKeyboard Successfully.");
+    }
+}
+
 void InputMethodManager::CloseKeyboard(const RefPtr<NG::FrameNode>& focusNode)
 {
 #if defined(ENABLE_STANDARD_INPUT)
     // If focus pattern does not need softkeyboard, close it, not in windowScene.
     auto curPattern = focusNode->GetPattern<NG::Pattern>();
     CHECK_NULL_VOID(curPattern);
+    ACE_LAYOUT_SCOPED_TRACE("CloseKeyboard[id:%d]", focusNode->GetId());
     bool isNeedKeyBoard = curPattern->NeedSoftKeyboard();
     if (!isNeedKeyBoard) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "FrameNode(%{public}s/%{public}d) notNeedSoftKeyboard.",
@@ -198,6 +233,7 @@ void InputMethodManager::HideKeyboardAcrossProcesses()
 void InputMethodManager::ProcessModalPageScene()
 {
     auto currentFocusNode = curFocusNode_.Upgrade();
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "ProcessModalPageScene");
     if (currentFocusNode && currentFocusNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG) {
         HideKeyboardAcrossProcesses();
     } else {

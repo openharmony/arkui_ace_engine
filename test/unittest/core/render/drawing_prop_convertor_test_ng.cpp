@@ -570,4 +570,52 @@ HWTEST_F(DrawingPropConvertorTestNg, DrawingPropConvertorTestNg014, TestSize.Lev
     EXPECT_FALSE(retTextStyle.heightOnly);
 #endif
 }
+
+/**
+ * @tc.name: DrawingPropConvertorTestNg015
+ * @tc.desc: Test function to ToRSTextAlign ToRSEllipsisMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawingPropConvertorTestNg, DrawingPropConvertorTestNg015, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: call ToRSTextAlign ToRSEllipsisMode.
+     * @tc.expected: the return result is the same as input align.
+     */
+    auto testTextAlign = static_cast<TextAlign>(7); // 7 is not a valid TextAlign.
+
+    RSTextAlign retTextAlign = ToRSTextAlign(testTextAlign);
+    EXPECT_EQ(retTextAlign, RSTextAlign::START);
+    EXPECT_EQ(ToRSTextAlign(TextAlign::LEFT), RSTextAlign::LEFT);
+    EXPECT_EQ(ToRSTextAlign(TextAlign::RIGHT), RSTextAlign::RIGHT);
+    EXPECT_EQ(ToRSTextAlign(TextAlign::JUSTIFY), RSTextAlign::JUSTIFY);
+    EXPECT_EQ(ToRSTextAlign(TextAlign::END), RSTextAlign::END);
+    EXPECT_EQ(ToRSTextAlign(TextAlign::CENTER), RSTextAlign::CENTER);
+    EXPECT_EQ(ToRSTextAlign(TextAlign::START), RSTextAlign::START);
+    EXPECT_EQ(ToRSEllipsisMode(EllipsisMode::HEAD), RSEllipsisMode::HEAD);
+}
+
+/**
+ * @tc.name: DrawingPropConvertorTestNg016
+ * @tc.desc: Test function to ToRSTextDecorationStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawingPropConvertorTestNg, DrawingPropConvertorTestNg016, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: call ToRSTextDecorationStyle.
+     * @tc.expected: the return result is the same as input align.
+     */
+    TextStyle textStyle;
+    textStyle.SetTextDecorationStyle(TextDecorationStyle::DASHED);
+    EXPECT_EQ(ToRSTextStyle(nullptr, textStyle).decorationStyle_, RSTextDecorationStyle::DASHED);
+    textStyle.SetTextDecorationStyle(TextDecorationStyle::DOTTED);
+    EXPECT_EQ(ToRSTextStyle(nullptr, textStyle).decorationStyle_, RSTextDecorationStyle::DOTTED);
+    textStyle.SetTextDecorationStyle(TextDecorationStyle::DOUBLE);
+    EXPECT_EQ(ToRSTextStyle(nullptr, textStyle).decorationStyle_, RSTextDecorationStyle::DOUBLE);
+    textStyle.SetTextDecorationStyle(TextDecorationStyle::WAVY);
+    EXPECT_EQ(ToRSTextStyle(nullptr, textStyle).decorationStyle_, RSTextDecorationStyle::WAVY);
+    textStyle.SetTextDecorationStyle(TextDecorationStyle::INHERIT);
+    EXPECT_EQ(ToRSTextStyle(nullptr, textStyle).decorationStyle_, RSTextDecorationStyle::SOLID);
+}
 } // namespace OHOS::Ace

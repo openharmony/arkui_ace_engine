@@ -252,6 +252,20 @@ class ListFrictionModifier extends ModifierWithKey<number | Resource> {
   }
 }
 
+class ListMaintainVisibleContentPositionModifier extends ModifierWithKey<boolean | undefined> {
+  constructor(value: boolean | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listMaintainVisibleContentPosition');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetListMaintainVisibleContentPosition(node);
+    } else {
+      getUINativeModule().list.setListMaintainVisibleContentPosition(node, this.value);
+    }
+  }
+}
+
 class ListNestedScrollModifier extends ModifierWithKey<NestedScrollOptions> {
   constructor(value: NestedScrollOptions) {
     super(value);
@@ -366,20 +380,6 @@ class ListClipModifier extends ModifierWithKey<boolean | object> {
   }
 }
 
-class ListFadingEdgeModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('fadingEdge');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().list.resetFadingEdge(node);
-    } else {
-      getUINativeModule().list.setFadingEdge(node, this.value!);
-    }
-  }
-}
-
 class ListChildrenMainSizeModifier extends ModifierWithKey<ChildrenMainSize> {
   constructor(value: ChildrenMainSize) {
     super(value);
@@ -427,9 +427,25 @@ class ListInitialIndexModifier extends ModifierWithKey<number> {
   }
 }
 
+class ListInitialScrollerModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listInitialScroller');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetInitialScroller(node);
+    }
+    else {
+      getUINativeModule().list.setInitialScroller(node, this.value);
+    }
+  }
+}
+
 interface ListParam {
   initialIndex?: number;
-  space?: number | string
+  space?: number | string;
+  scroller?: Scroller;
 }
 
 class ArkListComponent extends ArkComponent implements ListAttribute {
@@ -443,6 +459,9 @@ class ArkListComponent extends ArkComponent implements ListAttribute {
       }
       if ((value[0] as ListParam).space !== undefined) {
         modifierWithKey(this._modifiersWithKeys, ListSpaceModifier.identity, ListSpaceModifier, (value[0] as ListParam).space);
+      }
+      if ((value[0] as ListParam).scroller !== undefined) {
+        modifierWithKey(this._modifiersWithKeys, ListInitialScrollerModifier.identity, ListInitialScrollerModifier, (value[0] as ListParam).scroller);
       }
     }
     return this;
@@ -548,6 +567,11 @@ class ArkListComponent extends ArkComponent implements ListAttribute {
     modifierWithKey(this._modifiersWithKeys, ListFrictionModifier.identity, ListFrictionModifier, value);
     return this;
   }
+  maintainVisibleContentPosition(value: any): this {
+    modifierWithKey(this._modifiersWithKeys, ListMaintainVisibleContentPositionModifier.identity,
+      ListMaintainVisibleContentPositionModifier, value);
+    return this;
+  }
   clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this {
     modifierWithKey(this._modifiersWithKeys, ListClipModifier.identity, ListClipModifier, value);
     return this;
@@ -593,10 +617,6 @@ class ArkListComponent extends ArkComponent implements ListAttribute {
   }
   onScrollFrameBegin(event: (offset: number, state: ScrollState) => { offsetRemain: number; }): this {
     throw new Error('Method not implemented.');
-  }
-  fadingEdge(value: boolean): this {
-    modifierWithKey(this._modifiersWithKeys, ListFadingEdgeModifier.identity, ListFadingEdgeModifier, value);
-    return this;
   }
   childrenMainSize(value: ChildrenMainSize): this {
     modifierWithKey(this._modifiersWithKeys, ListChildrenMainSizeModifier.identity, ListChildrenMainSizeModifier, value);

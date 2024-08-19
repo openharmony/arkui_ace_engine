@@ -21,12 +21,12 @@ namespace {} // namespace
 
 class TabsCommonTestNg : public TabsTestNg {
 public:
-    AssertionResult IsEqualNextFocusNode(FocusStep step,
-        const RefPtr<FrameNode>& currentNode, const RefPtr<FrameNode>& expectNextNode);
+    AssertionResult IsEqualNextFocusNode(
+        FocusStep step, const RefPtr<FrameNode>& currentNode, const RefPtr<FrameNode>& expectNextNode);
 };
 
-AssertionResult TabsCommonTestNg::IsEqualNextFocusNode(FocusStep step,
-    const RefPtr<FrameNode>& currentNode, const RefPtr<FrameNode>& expectNextNode)
+AssertionResult TabsCommonTestNg::IsEqualNextFocusNode(
+    FocusStep step, const RefPtr<FrameNode>& currentNode, const RefPtr<FrameNode>& expectNextNode)
 {
     RefPtr<FocusHub> currentFocusNode = currentNode->GetOrCreateFocusHub();
     currentFocusNode->RequestFocusImmediately();
@@ -286,10 +286,10 @@ HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty006, TestSize.Level1)
 }
 
 /**
-* @tc.name: TabBarAccessibilityProperty007
-* @tc.desc: test SetSpecificSupportAction
-* @tc.type: FUNC
-*/
+ * @tc.name: TabBarAccessibilityProperty007
+ * @tc.desc: test SetSpecificSupportAction
+ * @tc.type: FUNC
+ */
 HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty007, TestSize.Level1)
 {
     /**
@@ -344,10 +344,10 @@ HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty008, TestSize.Level1)
 }
 
 /**
-* @tc.name: TabBarAccessibilityProperty009
-* @tc.desc: test SetSpecificSupportAction
-* @tc.type: FUNC
-*/
+ * @tc.name: TabBarAccessibilityProperty009
+ * @tc.desc: test SetSpecificSupportAction
+ * @tc.type: FUNC
+ */
 HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty009, TestSize.Level1)
 {
     /**
@@ -440,5 +440,68 @@ HWTEST_F(TabsCommonTestNg, PerformActionTest001, TestSize.Level1)
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::FIXED);
     EXPECT_TRUE(tabBarAccessibilityProperty_->ActActionScrollForward());
     EXPECT_TRUE(tabBarAccessibilityProperty_->ActActionScrollBackward());
+}
+
+/**
+ * @tc.name: TabBarItemAccessibilityProperty001
+ * @tc.desc: Test TabBarItemAccessibilityProperty ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsCommonTestNg, TabBarItemAccessibilityProperty001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create tabs with items.
+     */
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step1. Call ToJsonValue function.
+     * @tc.expected: label is default tab bar name.
+     */
+    auto tabBarItem = AceType::DynamicCast<FrameNode>(GetChildFrameNode(tabBarNode_, 0));
+    auto accessibilityProperty = tabBarItem->GetAccessibilityProperty<TabBarItemAccessibilityProperty>();
+    auto json = JsonUtil::Create(true);
+    InspectorFilter filter;
+    accessibilityProperty->ToJsonValue(json, filter);
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto tabTheme = pipeline->GetTheme<TabTheme>();
+    auto defaultTabBarName = tabTheme->GetDefaultTabBarName();
+    EXPECT_EQ(json->GetString("label"), defaultTabBarName);
+}
+
+/**
+ * @tc.name: TabBarItemAccessibilityProperty002
+ * @tc.desc: Test TabBarItemAccessibilityProperty ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsCommonTestNg, TabBarItemAccessibilityProperty002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create tabs with builder.
+     */
+    TabsModelNG model = CreateTabs();
+    const std::string textTest = "text_test";
+    TabContentModelNG tabContentModel = CreateTabContent();
+    auto tabBarItemFunc = [textTest]() {
+        TextModelNG model;
+        model.Create(textTest);
+    };
+    tabContentModel.SetTabBar(textTest, "", std::nullopt, std::move(tabBarItemFunc), true);
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step1. Call ToJsonValue function.
+     * @tc.expected: check label value.
+     */
+    auto tabBarItem = AceType::DynamicCast<FrameNode>(GetChildFrameNode(tabBarNode_, 0));
+    auto accessibilityProperty = tabBarItem->GetAccessibilityProperty<TabBarItemAccessibilityProperty>();
+    auto json = JsonUtil::Create(true);
+    InspectorFilter filter;
+    accessibilityProperty->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("label"), textTest);
 }
 } // namespace OHOS::Ace::NG

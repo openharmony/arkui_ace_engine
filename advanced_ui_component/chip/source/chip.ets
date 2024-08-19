@@ -296,9 +296,9 @@ export struct ChipComponent {
   private onClicked: () => void = noop
   @State suffixIconOnFocus: boolean = false
   @State chipBreakPoints: BreakPointsType = BreakPointsType.SM
-  private smListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("0vp<width<600vp")
-  private mdListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("600vp<=width<840vp")
-  private lgListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("840vp<=width")
+  private smListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("(0vp<width) and (width<600vp)")
+  private mdListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("(600vp<=width) and (width<840vp)")
+  private lgListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("(840vp<=width)")
   @State private isShowPressedBackGroundColor: boolean = false
   @State fontSizeScale: number | undefined = 0
   @State fontWeightScale: number | undefined = 0
@@ -312,6 +312,7 @@ export struct ChipComponent {
   private callbackId: number | undefined = undefined
   @State prefixSymbolWidth: Length | undefined = this.toVp(componentUtils.getRectangleById("PrefixSymbolGlyph")?.size?.width);
   @State suffixSymbolWidth: Length | undefined = this.toVp(componentUtils.getRectangleById("SuffixSymbolGlyph")?.size?.width);
+  @State allowCloseSymbolWidth: Length | undefined = this.toVp(componentUtils.getRectangleById("AllowCloseSymbolGlyph")?.size?.width);
   @State symbolEffect: SymbolEffect = new SymbolEffect();
 
   private isChipSizeEnum(): boolean {
@@ -620,14 +621,7 @@ export struct ChipComponent {
       sourceColor = ColorMetrics.resourceColor(currentColor);
     } catch (err) {
       hilog.error(0x3900, 'Ace', `Chip resourceColor, error: ${err.toString()}`);
-      if (this.getChipActive()) {
-        sourceColor = ColorMetrics.resourceColor(this.theme.chipNode.activatedBackgroundColor);
-      } else {
-        sourceColor = ColorMetrics.resourceColor(this.theme.chipNode.backgroundColor);
-      }
-      if (!this.isShowPressedBackGroundColor) {
-        return Color.Transparent
-      }
+      sourceColor = ColorMetrics.resourceColor(Color.Transparent);
     }
     if (!this.isShowPressedBackGroundColor) {
       return sourceColor.color
@@ -689,7 +683,7 @@ export struct ChipComponent {
     } else if (this.suffixIcon?.src) {
       return this.getSuffixIconSize().width
     } else if (!this.suffixIcon?.src && (this.allowClose ?? true)) {
-      return this.theme.defaultSymbol.fontSize
+      return this.allowCloseSymbolWidth
     } else {
       return 0
     }
@@ -716,7 +710,7 @@ export struct ChipComponent {
       return
     }
     if (this.isHover) {
-      if (event.type === TouchType.Down || event.type == TouchEvent.Move) {
+      if (event.type === TouchType.Down || event.type === TouchType.Move) {
         this.isShowPressedBackGroundColor = true
       } else if (event.type === TouchType.Up) {
         this.isShowPressedBackGroundColor = false
@@ -724,7 +718,7 @@ export struct ChipComponent {
         this.isShowPressedBackGroundColor = false
       }
     } else {
-      if (event.type === TouchType.Down || event.type == TouchType.Move) {
+      if (event.type === TouchType.Down || event.type === TouchType.Move) {
         this.isShowPressedBackGroundColor = true
       } else if (event.type === TouchType.Up) {
         this.isShowPressedBackGroundColor = false
@@ -921,7 +915,6 @@ export struct ChipComponent {
         } else if (this.prefixIcon?.src !== "") {
           Image(this.prefixIcon?.src)
             .direction(this.chipDirection)
-            .matchTextDirection(this.chipDirection == Direction.Ltr ? false : true)
             .opacity(this.getChipNodeOpacity())
             .size(this.getPrefixIconSize())
             .fillColor(this.getPrefixIconFilledColor())
@@ -965,7 +958,6 @@ export struct ChipComponent {
         } else if (this.suffixIcon?.src !== "") {
           Image(this.getSuffixIconSrc())
             .direction(this.chipDirection)
-            .matchTextDirection(this.chipDirection == Direction.Ltr ? false : true)
             .opacity(this.getChipNodeOpacity())
             .size(this.getSuffixIconSize())
             .fillColor(this.getSuffixIconFilledColor())
@@ -1000,6 +992,10 @@ export struct ChipComponent {
           SymbolGlyph($r('sys.symbol.xmark'))
             .fontSize(this.theme.defaultSymbol.fontSize)
             .fontColor(this.getDefaultSymbolColor())
+            .onSizeChange((oldValue, newValue) => {
+              this.allowCloseSymbolWidth = newValue?.width
+            })
+            .key("AllowCloseSymbolGlyph")
             .onClick(() => {
               if (!this.getChipEnable()) {
                 return

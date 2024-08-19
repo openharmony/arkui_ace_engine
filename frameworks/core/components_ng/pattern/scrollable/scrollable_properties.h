@@ -136,6 +136,37 @@ struct NestedScrollOptions {
         return "NestedScrollOptions forward: " + std::to_string(static_cast<int32_t>(forward)) +
                ", backward: " + std::to_string(static_cast<int32_t>(backward));
     }
+
+    std::string GetNestedScrollModeStr(NestedScrollMode mode) const
+    {
+        switch (mode) {
+            case NestedScrollMode::SELF_ONLY:
+                return "NestedScrollMode.SELF_ONLY";
+            case NestedScrollMode::SELF_FIRST:
+                return "NestedScrollMode.SELF_FIRST";
+            case NestedScrollMode::PARENT_FIRST:
+                return "NestedScrollMode.PARENT_FIRST";
+            case NestedScrollMode::PARALLEL:
+                return "NestedScrollMode.PARALLEL";
+            default:
+                return "";
+        }
+    }
+};
+
+struct NestedScrollOptionsExt {
+    NestedScrollMode scrollUp;
+    NestedScrollMode scrollDown;
+    NestedScrollMode scrollLeft;
+    NestedScrollMode scrollRight;
+
+    std::string ToString() const
+    {
+        return "NestedScrollOptionsExt scrollUp: " + std::to_string(static_cast<int32_t>(scrollUp)) +
+               ", scrollDown: " + std::to_string(static_cast<int32_t>(scrollDown)) +
+               ", scrollLeft: " + std::to_string(static_cast<int32_t>(scrollLeft)) +
+               ", scrollRight: " + std::to_string(static_cast<int32_t>(scrollRight));
+    }
 };
 
 struct ListItemIndex {
@@ -356,7 +387,7 @@ enum class ScrollSource {
 constexpr char TRAILING_ANIMATION[] = "TRAILING_ANIMATION ";
 
 // scroller animation, such as scrollTo, scrollPage
-constexpr char SCROLLER_ANIMATION[] = "SCROLLER_ANIMATION ";
+constexpr char SCROLLER_ANIMATION[] = "CUSTOM_ANIMATOR_SCROLLER_ANIMATION ";
 
 // scrollToEdge at a fixed speed
 constexpr char SCROLLER_FIX_VELOCITY_ANIMATION[] = "SCROLLER_FIX_VELOCITY_ANIMATION ";

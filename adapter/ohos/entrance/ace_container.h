@@ -35,6 +35,7 @@
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
 #include "base/view_data/view_data_wrap.h"
+#include "base/view_data/hint_to_type_wrap.h"
 #include "core/common/ace_view.h"
 #include "core/common/container.h"
 #include "core/common/display_info.h"
@@ -44,7 +45,6 @@
 #include "core/common/router_recover_record.h"
 #include "core/components/common/layout/constants.h"
 #include "core/pipeline/pipeline_context.h"
-#include "interfaces/inner_api/ace/constants.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
@@ -99,7 +99,10 @@ public:
 
     ~AceContainer() override;
 
-    bool UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node, uint32_t autoFillSessionId) override;
+    bool UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node,
+        uint32_t autoFillSessionId, bool isNative = true) override;
+
+    bool ClosePopupUIExtension(uint32_t autoFillSessionId) override;
 
     void Initialize() override;
 
@@ -178,16 +181,6 @@ public:
     RefPtr<PlatformResRegister> GetPlatformResRegister() const override
     {
         return resRegister_;
-    }
-
-    UIContentType GetUIContentType() const
-    {
-        return uIContentType_;
-    }
-
-    void SetUIContentType(UIContentType uIContentType)
-    {
-        uIContentType_ = uIContentType;
     }
 
     RefPtr<PipelineBase> GetPipelineContext() const override
@@ -293,6 +286,12 @@ public:
     }
 
     RefPtr<DisplayInfo> GetDisplayInfo() override;
+
+    void InitIsFoldable() override;
+
+    bool IsFoldable() const override;
+
+    FoldStatus GetCurrentFoldStatus() override;
 
     void SetHapPath(const std::string& hapPath);
 
@@ -401,6 +400,13 @@ public:
         }
     }
 
+    void SetRealHostWindowId(uint32_t realHostWindowId)
+    {
+        if (pipelineContext_) {
+            pipelineContext_->SetRealHostWindowId(realHostWindowId);
+        }
+    }
+
     bool IsUseCustomBg() const
     {
         return isUseCustomBg_;
@@ -449,8 +455,6 @@ public:
     static sptr<OHOS::Rosen::Window> GetUIWindow(int32_t instanceId);
     static OHOS::AppExecFwk::Ability* GetAbility(int32_t instanceId);
     static OHOS::AbilityRuntime::Context* GetRuntimeContext(int32_t instanceId);
-    static void SetFontScale(int32_t instanceId, float fontScale);
-    static void SetFontWeightScale(int32_t instanceId, float fontScale);
     static void SetWindowStyle(int32_t instanceId, WindowModal windowModal, ColorScheme colorScheme);
     static std::pair<RouterRecoverRecord, UIContentErrorCode> RestoreRouterStack(
         int32_t instanceId, const std::string& contentInfo, ContentInfoType type);
@@ -458,6 +462,7 @@ public:
 
     static RefPtr<AceContainer> GetContainer(int32_t instanceId);
     static bool UpdatePage(int32_t instanceId, int32_t pageId, const std::string& content);
+    static bool RemoveOverlayBySubwindowManager(int32_t instanceId);
 
     // ArkTsCard
     static std::shared_ptr<Rosen::RSSurfaceNode> GetFormSurfaceNode(int32_t instanceId);
@@ -549,6 +554,8 @@ public:
 
     NG::SafeAreaInsets GetKeyboardSafeArea() override;
 
+    Rect GetSessionAvoidAreaByType(uint32_t safeAreaType) override;
+
     Rosen::AvoidArea GetAvoidAreaByType(Rosen::AvoidAreaType type);
 
     // ArkTSCard
@@ -568,16 +575,21 @@ public:
     bool IsSceneBoardEnabled() override;
 
     void SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent);
-    bool GetCurPointerEventInfo(int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
+    bool GetCurPointerEventInfo(int32_t& pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
         int32_t& sourceTool, StopDragCallback&& stopDragCallback) override;
 
+    bool GetCurPointerEventSourceType(int32_t& sourceType) override;
+
     bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
-        bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId) override;
+        bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative = true) override;
+    bool IsNeedToCreatePopupWindow(const AceAutoFillType& autoFillType) override;
     bool RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std::function<void()>& onFinish,
-        const std::function<void()>& onUIExtNodeBindingCompleted) override;
+        const std::function<void()>& onUIExtNodeBindingCompleted, bool isNative = true,
+        int32_t instanceId = -1) override;
     std::shared_ptr<NavigationController> GetNavigationController(const std::string& navigationId) override;
+    void OverwritePageNodeInfo(const RefPtr<NG::FrameNode>& frameNode, AbilityBase::ViewData& viewData);
     bool ChangeType(AbilityBase::ViewData& viewData);
-    AceAutoFillType PlaceHolderToType(const std::string& onePlaceHolder) override;
+    HintToTypeWrap PlaceHolderToType(const std::string& onePlaceHolder) override;
 
     void SearchElementInfoByAccessibilityIdNG(
         int64_t elementId, int32_t mode, int64_t baseParent,
@@ -679,7 +691,7 @@ private:
     std::weak_ptr<OHOS::AbilityRuntime::Context> GetRuntimeContextInner() const;
 
     void RegisterStopDragCallback(int32_t pointerId, StopDragCallback&& stopDragCallback);
-    void SetFontScaleAndWeightScale(const ParsedConfig& parsedConfig);
+    void SetFontScaleAndWeightScale(const ParsedConfig& parsedConfig, ConfigurationChange& configurationChange);
     void ReleaseResourceAdapter();
     void FillAutoFillViewData(const RefPtr<NG::FrameNode> &node, RefPtr<ViewDataWrap> &viewDataWrap);
 
@@ -743,7 +755,6 @@ private:
     mutable std::mutex cardTokensMutex_;
 
     std::string webHapPath_;
-    UIContentType uIContentType_ = UIContentType::UNDEFINED;
 
     bool installationFree_ = false;
     SharePanelCallback sharePanelCallback_ = nullptr;
@@ -754,6 +765,7 @@ private:
     std::mutex pointerEventMutex_;
     std::shared_ptr<MMI::PointerEvent> currentPointerEvent_;
     std::unordered_map<int32_t, std::list<StopDragCallback>> stopDragCallbackMap_;
+    std::map<int32_t, std::shared_ptr<MMI::PointerEvent>> currentEvents_;
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
 };
 

@@ -29,17 +29,13 @@ bool TextAdaptFontSizer::AdaptMaxFontSize(TextStyle& textStyle, const std::strin
 {
     double maxFontSize = 0.0;
     double minFontSize = 0.0;
-    if (!GetAdaptMaxMinFontSize(textStyle, maxFontSize, minFontSize, contentConstraint)) {
-        return false;
-    }
+    GetAdaptMaxMinFontSize(textStyle, maxFontSize, minFontSize, contentConstraint);
     if (LessNotEqual(maxFontSize, minFontSize) || LessOrEqual(minFontSize, 0.0)) {
         // minFontSize or maxFontSize is invalid
         return CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper, false);
     }
     double stepSize = 0.0;
-    if (!GetAdaptFontSizeStep(textStyle, stepSize, stepUnit, contentConstraint)) {
-        return false;
-    }
+    GetAdaptFontSizeStep(textStyle, stepSize, stepUnit, contentConstraint);
     auto maxSize = GetMaxMeasureSize(contentConstraint);
     GetSuitableSize(maxSize, layoutWrapper);
     // Use the minFontSize to layout the paragraph. While using the minFontSize, if the paragraph could be layout in 1
@@ -81,16 +77,12 @@ bool TextAdaptFontSizer::AdaptMinFontSize(TextStyle& textStyle, const std::strin
 {
     double maxFontSize = 0.0;
     double minFontSize = 0.0;
-    if (!GetAdaptMaxMinFontSize(textStyle, maxFontSize, minFontSize, contentConstraint)) {
-        return false;
-    }
+    GetAdaptMaxMinFontSize(textStyle, maxFontSize, minFontSize, contentConstraint);
     if (LessNotEqual(maxFontSize, minFontSize) || LessOrEqual(minFontSize, 0.0)) {
         return CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper, false);
     }
     double stepSize = 0.0;
-    if (!GetAdaptFontSizeStep(textStyle, stepSize, stepUnit, contentConstraint)) {
-        return false;
-    }
+    GetAdaptFontSizeStep(textStyle, stepSize, stepUnit, contentConstraint);
     auto maxSize = GetMaxMeasureSize(contentConstraint);
     GetSuitableSize(maxSize, layoutWrapper);
     while (GreatOrEqual(maxFontSize, minFontSize)) {
@@ -106,45 +98,24 @@ bool TextAdaptFontSizer::AdaptMinFontSize(TextStyle& textStyle, const std::strin
     return true;
 }
 
-bool TextAdaptFontSizer::GetAdaptMaxMinFontSize(const TextStyle& textStyle, double& maxFontSize, double& minFontSize,
+void TextAdaptFontSizer::GetAdaptMaxMinFontSize(const TextStyle& textStyle, double& maxFontSize, double& minFontSize,
     const LayoutConstraintF& contentConstraint)
 {
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, false);
-    float fontSacleValue = pipeline->GetFontScale();
-    if (textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
-        fontSacleValue = std::clamp(fontSacleValue, textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
-    }
-    if (!textStyle.GetAdaptMaxFontSize().NormalizeToPx(pipeline->GetDipScale(), fontSacleValue,
-        pipeline->GetLogicScale(), contentConstraint.maxSize.Height(), maxFontSize)) {
-        return false;
-    }
-    if (!textStyle.GetAdaptMinFontSize().NormalizeToPx(pipeline->GetDipScale(), fontSacleValue,
-        pipeline->GetLogicScale(), contentConstraint.maxSize.Height(), minFontSize)) {
-        return false;
-    }
-    return true;
+    maxFontSize = textStyle.GetAdaptMaxFontSize().ConvertToPxDistribute(
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    minFontSize = textStyle.GetAdaptMinFontSize().ConvertToPxDistribute(
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
 }
 
-bool TextAdaptFontSizer::GetAdaptFontSizeStep(const TextStyle& textStyle, double& stepSize, const Dimension& stepUnit,
+void TextAdaptFontSizer::GetAdaptFontSizeStep(const TextStyle& textStyle, double& stepSize, const Dimension& stepUnit,
     const LayoutConstraintF& contentConstraint)
 {
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, false);
-    float fontSacleValue = pipeline->GetFontScale();
-    if (textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
-        fontSacleValue = std::clamp(fontSacleValue, textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
-    }
     Dimension step = stepUnit;
     if (GreatNotEqual(textStyle.GetAdaptFontSizeStep().Value(), 0.0)) {
         step = textStyle.GetAdaptFontSizeStep();
     }
-    stepSize = 0.0;
-    if (!step.NormalizeToPx(pipeline->GetDipScale(), fontSacleValue,
-        pipeline->GetLogicScale(), contentConstraint.maxSize.Height(), stepSize)) {
-        return false;
-    }
-    return true;
+    stepSize =
+        step.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
 }
 
 SizeF TextAdaptFontSizer::GetMaxMeasureSize(const LayoutConstraintF& contentConstraint)
@@ -184,15 +155,14 @@ bool TextAdaptFontSizer::IsNeedAdaptFontSize(const TextStyle& textStyle, const L
 {
     double maxFontSize = 0.0;
     double minFontSize = 0.0;
-    if (!GetAdaptMaxMinFontSize(textStyle, maxFontSize, minFontSize, contentConstraint)) {
-        return false;
-    }
+    GetAdaptMaxMinFontSize(textStyle, maxFontSize, minFontSize, contentConstraint);
     return IsNeedAdaptFontSize(maxFontSize, minFontSize);
 }
 
-void TextAdaptFontSizer::SetAdaptFontSizeLineHeight(const Dimension& lineHeight)
+void TextAdaptFontSizer::SetAdaptFontSizeLineHeight(const Dimension& lineHeight, const TextStyle& textStyle)
 {
-    lineHeight_ = lineHeight.ConvertToPx();
+    lineHeight_ = lineHeight.ConvertToPxDistribute(
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
 }
 
 bool TextAdaptFontSizer::IsAdaptFontSizeExceedLineHeight(const RefPtr<Paragraph>& paragraph)

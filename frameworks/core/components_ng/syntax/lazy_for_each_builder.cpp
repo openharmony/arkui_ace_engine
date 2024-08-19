@@ -331,9 +331,11 @@ namespace OHOS::Ace::NG {
         for (auto& [index, child] : cachedTemp) {
             auto iter = indexChangedMap.find(index);
             if (iter == indexChangedMap.end()) {
-                iter--;
-                if (iter->first < index) {
-                    changedIndex = iter->second;
+                if (!indexChangedMap.empty()) {
+                    iter--;
+                    if (iter->first < index) {
+                        changedIndex = iter->second;
+                    }
                 }
             } else {
                 changedIndex = iter->second;
@@ -342,7 +344,9 @@ namespace OHOS::Ace::NG {
                 expiringTempItem_.try_emplace(index + changedIndex, child);
                 continue;
             }
-            changedIndex = iter->second;
+            if (!indexChangedMap.empty()) {
+                changedIndex = iter->second;
+            }
             auto info = operationList_.find(index)->second;
             if (info.isDeleting) {
                 nodeList_.emplace_back(child.first, child.second);
@@ -354,13 +358,29 @@ namespace OHOS::Ace::NG {
                     expiringTempItem_.try_emplace(index + i, LazyForEachChild(info.extraKey[i], nullptr));
                 }
             } else if (info.node != nullptr) {
-                expiringTempItem_.try_emplace(index, LazyForEachChild(info.key, info.node));
-                if (info.moveIn) {
-                    expiringTempItem_.try_emplace(index - 1, child);
-                }
+                RepairMoveOrExchange(expiringTempItem_, info, child, index, changedIndex);
             } else {
                 expiringTempItem_.try_emplace(index + changedIndex, child);
             }
+        }
+    }
+
+    void LazyForEachBuilder::RepairMoveOrExchange(std::map<int32_t, LazyForEachChild>& expiringTempItem_,
+        OperationInfo& info, LazyForEachChild& child, int32_t index, int32_t changedIndex)
+    {
+        if (info.isExchange) {
+            expiringTempItem_.try_emplace(index + changedIndex, LazyForEachChild(info.key, info.node));
+            return;
+        }
+        if (info.moveIn) {
+            int32_t fromIndex = index + changedIndex - 1;
+            int32_t toIndex = index + changedIndex;
+            if (info.fromDiffTo > 0) {
+                fromIndex = index + changedIndex;
+                toIndex = index + changedIndex - 1;
+            }
+            expiringTempItem_.try_emplace(toIndex, LazyForEachChild(info.key, info.node));
+            expiringTempItem_.try_emplace(fromIndex, child);
         }
     }
 
@@ -411,11 +431,20 @@ namespace OHOS::Ace::NG {
         return false;
     }
 
+    bool LazyForEachBuilder::ValidateIndex(int32_t index, std::string type)
+    {
+        if (index >= totalCountForDataset_ || index < 0) {
+            TAG_LOGE(AceLogTag::ACE_LAZY_FOREACH,
+                "%{public}s(%{public}d) Operation is out of range", type.c_str(), index);
+            return true;
+        }
+        return false;
+    }
+
     void LazyForEachBuilder::OperateAdd(V2::Operation& operation, int32_t& initialIndex)
     {
         OperationInfo itemInfo;
-        if (operation.index >= totalCountForDataset_) {
-            TAG_LOGE(AceLogTag::ACE_LAZY_FOREACH, "Add(%{public}d) Operation is out of range", operation.index);
+        if (ValidateIndex(operation.index, operation.type)) {
             return;
         }
         auto indexExist = operationList_.find(operation.index);
@@ -438,8 +467,7 @@ namespace OHOS::Ace::NG {
     void LazyForEachBuilder::OperateDelete(V2::Operation& operation, int32_t& initialIndex)
     {
         OperationInfo itemInfo;
-        if (operation.index >= totalCountForDataset_) {
-            TAG_LOGE(AceLogTag::ACE_LAZY_FOREACH, "Delete(%{public}d) Operation is out of range", operation.index);
+        if (ValidateIndex(operation.index, operation.type)) {
             return;
         }
         auto indexExist = operationList_.find(operation.index);
@@ -466,8 +494,7 @@ namespace OHOS::Ace::NG {
         std::map<int32_t, LazyForEachChild>& cachedTemp, std::map<int32_t, LazyForEachChild>& expiringTemp)
     {
         OperationInfo itemInfo;
-        if (operation.index >= totalCountForDataset_) {
-            TAG_LOGE(AceLogTag::ACE_LAZY_FOREACH, "Change(%{public}d) Operation is out of range", operation.index);
+        if (ValidateIndex(operation.index, operation.type)) {
             return;
         }
         auto indexExist = operationList_.find(operation.index);
@@ -497,10 +524,8 @@ namespace OHOS::Ace::NG {
     {
         OperationInfo fromInfo;
         OperationInfo toInfo;
-        if (operation.coupleIndex.first >= totalCountForDataset_ ||
-            operation.coupleIndex.second >= totalCountForDataset_) {
-            TAG_LOGE(AceLogTag::ACE_LAZY_FOREACH, "Move(%{public}d, %{public}d) Operation is out of range",
-                operation.coupleIndex.first, operation.coupleIndex.second);
+        if (ValidateIndex(operation.coupleIndex.first, operation.type) ||
+            ValidateIndex(operation.coupleIndex.second, operation.type)) {
             return;
         }
         auto fromIndexExist = operationList_.find(operation.coupleIndex.first);
@@ -524,6 +549,7 @@ namespace OHOS::Ace::NG {
             }
             toInfo.node = iter->second.second;
             toInfo.moveIn = true;
+            toInfo.fromDiffTo = operation.coupleIndex.first - operation.coupleIndex.second;
             if (!operation.key.empty()) {
                 toInfo.key = operation.key;
             } else {
@@ -541,19 +567,14 @@ namespace OHOS::Ace::NG {
     {
         OperationInfo startInfo;
         OperationInfo endInfo;
-        if (operation.coupleIndex.first >= totalCountForDataset_ ||
-            operation.coupleIndex.second >= totalCountForDataset_) {
-            TAG_LOGE(AceLogTag::ACE_LAZY_FOREACH, "Exchange(%{public}d, %{public}d) Operation is out of range",
-                operation.coupleIndex.first, operation.coupleIndex.second);
+        if (ValidateIndex(operation.coupleIndex.first, operation.type) ||
+            ValidateIndex(operation.coupleIndex.second, operation.type)) {
             return;
         }
         auto startIndexExist = operationList_.find(operation.coupleIndex.first);
         auto endIndexExist = operationList_.find(operation.coupleIndex.second);
         if (startIndexExist == operationList_.end()) {
-            auto iter = cachedTemp.find(operation.coupleIndex.first);
-            if (iter == cachedTemp.end()) {
-                iter = expiringTemp.find(operation.coupleIndex.first);
-            }
+            auto iter = FindItem(operation.coupleIndex.first, cachedTemp, expiringTemp);
             if (iter == expiringTemp.end()) {
                 return;
             }
@@ -563,16 +584,14 @@ namespace OHOS::Ace::NG {
             } else {
                 startInfo.key = iter->second.first;
             }
+            startInfo.isExchange = true;
             initialIndex = std::min(initialIndex, operation.coupleIndex.second);
             operationList_.try_emplace(operation.coupleIndex.second, startInfo);
         } else {
             ThrowRepeatOperationError(operation.coupleIndex.first);
         }
         if (endIndexExist == operationList_.end()) {
-            auto iter = cachedTemp.find(operation.coupleIndex.second);
-            if (iter == cachedTemp.end()) {
-                iter = expiringTemp.find(operation.coupleIndex.second);
-            }
+            auto iter = FindItem(operation.coupleIndex.second, cachedTemp, expiringTemp);
             if (iter == expiringTemp.end()) {
                 return;
             }
@@ -582,11 +601,22 @@ namespace OHOS::Ace::NG {
             } else {
                 endInfo.key = iter->second.first;
             }
+            endInfo.isExchange = true;
             initialIndex = std::min(initialIndex, operation.coupleIndex.first);
             operationList_.try_emplace(operation.coupleIndex.first, endInfo);
         } else {
             ThrowRepeatOperationError(operation.coupleIndex.second);
         }
+    }
+
+    std::map<int32_t, LazyForEachChild>::iterator LazyForEachBuilder::FindItem(int32_t index,
+        std::map<int32_t, LazyForEachChild>& cachedTemp, std::map<int32_t, LazyForEachChild>& expiringTemp)
+    {
+        auto iter = cachedTemp.find(index);
+        if (iter == cachedTemp.end()) {
+            iter = expiringTemp.find(index);
+        }
+        return iter;
     }
 
     void LazyForEachBuilder::OperateReload(V2::Operation& operation, int32_t& initialIndex)
@@ -622,7 +652,7 @@ namespace OHOS::Ace::NG {
     bool LazyForEachBuilder::PreBuild(int64_t deadline, const std::optional<LayoutConstraintF>& itemConstraint,
         bool canRunLongPredictTask)
     {
-        ACE_SCOPED_TRACE("expiringItem_ count:[%zu]", expiringItem_.size());
+        ACE_SYNTAX_SCOPED_TRACE("expiringItem_ count:[%zu]", expiringItem_.size());
         outOfBoundaryNodes_.clear();
         if (itemConstraint && !canRunLongPredictTask) {
             return false;

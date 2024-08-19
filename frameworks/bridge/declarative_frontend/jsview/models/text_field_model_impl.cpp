@@ -402,15 +402,15 @@ void TextFieldModelImpl::SetOnSubmit(std::function<void(int32_t)>&& func)
     component->SetOnSubmit(std::move(func));
 }
 
-void TextFieldModelImpl::SetOnChange(std::function<void(const std::string&, TextRange&)>&& func)
+void TextFieldModelImpl::SetOnChange(std::function<void(const std::string&, PreviewText&)>&& func)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
     CHECK_NULL_VOID(component);
     auto onChange = [func] (const std::string& value) {
         if (!func) {
-            TextRange range {};
-            func(value, range);
+            PreviewText previewText {};
+            func(value, previewText);
         }
     };
     component->SetOnChange(std::move(onChange));
@@ -439,8 +439,6 @@ void TextFieldModelImpl::SetOnPaste(std::function<void(const std::string&)>&& fu
     CHECK_NULL_VOID(component);
     component->SetOnPaste(std::move(func));
 }
-
-void TextFieldModelImpl::SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) {}
 
 void TextFieldModelImpl::SetCopyOption(CopyOptions copyOption)
 {

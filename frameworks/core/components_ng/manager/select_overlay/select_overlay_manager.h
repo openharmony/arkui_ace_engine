@@ -23,6 +23,8 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
+#include "core/common/font_change_observer.h"
+#include "core/common/font_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_proxy.h"
@@ -36,12 +38,12 @@ namespace OHOS::Ace::NG {
 using ScrollableParentCallback = std::function<void(Axis, float, int32_t)>;
 
 // SelectOverlayManager is the class to show and control select handle and select menu.
-class ACE_EXPORT SelectOverlayManager : public virtual AceType {
-    DECLARE_ACE_TYPE(SelectOverlayManager, AceType);
+class ACE_EXPORT SelectOverlayManager : public FontChangeObserver {
+    DECLARE_ACE_TYPE(SelectOverlayManager, FontChangeObserver);
 
 public:
     explicit SelectOverlayManager(const RefPtr<FrameNode>& rootNode) : rootNodeWeak_(rootNode) {}
-    ~SelectOverlayManager() override = default;
+    ~SelectOverlayManager();
 
     // Create and display selection pop-ups.
     RefPtr<SelectOverlayProxy> CreateAndShowSelectOverlay(
@@ -112,6 +114,8 @@ public:
 
     const RefPtr<SelectContentOverlayManager>& GetSelectContentOverlayManager();
     void CloseSelectContentOverlay(int32_t overlayId, CloseReason reason, bool animation);
+
+    void OnFontChanged() override;
 
 private:
     void DestroyHelper(const RefPtr<FrameNode>& overlay, bool animation = false);

@@ -15,14 +15,7 @@
 
 #include "core/components_ng/render/adapter/form_render_window.h"
 
-#include <memory>
-
-#include "base/log/log.h"
 #include "core/common/container.h"
-#include "core/common/container_scope.h"
-#include "core/common/thread_checker.h"
-#include "core/components_ng/base/frame_node.h"
-
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "transaction/rs_interfaces.h"
@@ -61,6 +54,7 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
     onVsyncCallback_ = [weakTask = taskExecutor_, id = id_, refreshPeriod](
                            int64_t timeStampNanos, int64_t frameCount, void* data) {
         auto taskExecutor = weakTask.Upgrade();
+        CHECK_NULL_VOID(taskExecutor);
         auto onVsync = [id, timeStampNanos, frameCount, refreshPeriod] {
             int64_t ts = GetSysTimestamp();
             ContainerScope scope(id);
@@ -82,9 +76,7 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
             return;
         }
 
-        uiTaskRunner.PostTask([callback = std::move(onVsync)]() {
-            callback();
-        }, "ArkUIFormRenderWindowVsync");
+        taskExecutor->PostTask(onVsync, TaskExecutor::TaskType::UI, "ArkUIFormRenderWindowVsync", PriorityType::VIP);
     };
 
     frameCallback_.userData_ = nullptr;

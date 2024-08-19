@@ -27,6 +27,8 @@ struct MeasureContext {
     std::string textContent;
     std::string fontWeight;
     std::string fontFamily;
+    bool isFontSizeUseDefaultUnit = false;
+    bool isReturnActualWidth = false;
     std::optional<Dimension> constraintWidth = std::nullopt;
     std::optional<Dimension> fontSize = std::nullopt;
     std::optional<Dimension> lineHeight = std::nullopt;

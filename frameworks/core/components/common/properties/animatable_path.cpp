@@ -15,7 +15,6 @@
 
 #include "core/components/common/properties/animatable_path.h"
 
-#include "include/core/SkPath.h"
 #include "include/core/SkString.h"
 #include "include/utils/SkParsePath.h"
 
@@ -31,8 +30,7 @@ AnimatablePath& AnimatablePath::operator=(const AnimatablePath& newValue)
         SetValue(newValue.GetValue());
         return *this;
     }
-    AnimationOption explicitAnim;
-    explicitAnim = context->GetExplicitAnimationOption();
+    AnimationOption explicitAnim = context->GetExplicitAnimationOption();
     if (explicitAnim.IsValid()) {
         SetAnimationOption(explicitAnim);
         AnimateTo(newValue.GetValue());

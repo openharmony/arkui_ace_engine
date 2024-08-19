@@ -52,7 +52,7 @@ Result GridIrregularFiller::Fill(const FillParameters& params, float targetLen, 
             return { len, row, idx - 1 };
         }
 
-        MeasureItem(params, idx, posX_, posY_);
+        MeasureItem(params, idx, posX_, posY_, false);
     }
 
     if (info_->lineHeightMap_.empty()) {
@@ -76,7 +76,7 @@ void GridIrregularFiller::FillToTarget(const FillParameters& params, int32_t tar
         if (!FindNextItem(++idx)) {
             FillOne(idx);
         }
-        MeasureItem(params, idx, posX_, posY_);
+        MeasureItem(params, idx, posX_, posY_, false);
     }
 }
 
@@ -87,7 +87,7 @@ int32_t GridIrregularFiller::FitItem(const decltype(GridLayoutInfo::gridMatrix_)
         return 0;
     }
 
-    if (it->second.size() + itemWidth > info_->crossCount_) {
+    if (static_cast<int32_t>(it->second.size()) + itemWidth > info_->crossCount_) {
         // not enough space
         return -1;
     }
@@ -136,7 +136,6 @@ void GridIrregularFiller::FillOne(const int32_t idx)
     }
 
     info_->gridMatrix_[row][col] = idx;
-    SetItemInfo(idx, row, col, size);
 
     posY_ = row;
     posX_ = col;
@@ -199,21 +198,20 @@ bool GridIrregularFiller::UpdateLength(float& len, float targetLen, int32_t& row
     return false;
 }
 
-void GridIrregularFiller::MeasureItem(const FillParameters& params, int32_t itemIdx, int32_t col, int32_t row)
+LayoutConstraintF GridIrregularFiller::MeasureItem(
+    const FillParameters& params, int32_t itemIdx, int32_t col, int32_t row, bool isCache)
 {
-    auto child = wrapper_->GetOrCreateChildByIndex(itemIdx);
-    CHECK_NULL_VOID(child);
     auto props = AceType::DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
     auto constraint = props->CreateChildConstraint();
+    auto child = wrapper_->GetOrCreateChildByIndex(itemIdx, !isCache, isCache);
+    CHECK_NULL_RETURN(child, constraint);
 
-    auto itemSize = GridLayoutUtils::GetItemSize(info_, wrapper_, itemIdx);
-    // should cache child constraint result
+    const auto itemSize = GridLayoutUtils::GetItemSize(info_, wrapper_, itemIdx);
     float crossLen = 0.0f;
     for (int32_t i = 0; i < itemSize.columns; ++i) {
         crossLen += params.crossLens[i + col];
     }
     crossLen += params.crossGap * (itemSize.columns - 1);
-
     constraint.percentReference.SetCrossSize(crossLen, info_->axis_);
     if (info_->axis_ == Axis::VERTICAL) {
         constraint.maxSize = SizeF { crossLen, Infinity<float>() };
@@ -224,6 +222,7 @@ void GridIrregularFiller::MeasureItem(const FillParameters& params, int32_t item
     }
 
     child->Measure(constraint);
+    SetItemInfo(itemIdx, row, col, itemSize);
 
     float childHeight = child->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
     // spread height to each row.
@@ -231,6 +230,7 @@ void GridIrregularFiller::MeasureItem(const FillParameters& params, int32_t item
     for (int32_t i = 0; i < itemSize.rows; ++i) {
         info_->lineHeightMap_[row + i] = std::max(info_->lineHeightMap_[row + i], heightPerRow);
     }
+    return constraint;
 }
 
 int32_t GridIrregularFiller::InitPosToLastItem(int32_t lineIdx)
@@ -298,6 +298,32 @@ void GridIrregularFiller::MeasureBackwardToTarget(
     }
 }
 
+void GridIrregularFiller::MeasureLineWithIrregulars(const FillParameters& params, const int32_t line)
+{
+    if (line == 0) {
+        return;
+    }
+    const auto it = info_->gridMatrix_.find(line);
+    if (it == info_->gridMatrix_.end()) {
+        return;
+    }
+    std::unordered_set<int32_t> visited;
+    int32_t topRow = line;
+    for (const auto& [c, itemIdx] : it->second) {
+        if (itemIdx == 0) {
+            topRow = 0;
+            break;
+        }
+        if (itemIdx < 0 && !visited.count(std::abs(itemIdx))) {
+            topRow = std::min(FindItemTopRow(it->first, c), topRow);
+        }
+        visited.insert(std::abs(itemIdx));
+    }
+    if (topRow < line) {
+        MeasureBackwardToTarget(params, topRow, line);
+    }
+}
+
 void GridIrregularFiller::BackwardImpl(std::unordered_set<int32_t>& measured, const FillParameters& params)
 {
     auto it = info_->gridMatrix_.find(posY_);
@@ -314,7 +340,7 @@ void GridIrregularFiller::BackwardImpl(std::unordered_set<int32_t>& measured, co
         }
 
         const int32_t topRow = FindItemTopRow(posY_, c);
-        MeasureItem(params, itemIdx, c, topRow);
+        MeasureItem(params, itemIdx, c, topRow, false);
         // measure irregular items only once from the bottom-left tile
         measured.insert(itemIdx);
     }
@@ -332,38 +358,30 @@ int32_t GridIrregularFiller::FindItemTopRow(int32_t row, int32_t col) const
     return row;
 }
 
-void GridIrregularFiller::SetItemInfo(int32_t idx, int32_t row, int32_t col, const GridItemSize& size)
+void GridIrregularFiller::SetItemInfo(int32_t idx, int32_t row, int32_t col, GridItemSize size)
 {
-    if (size.rows == 1 && size.columns == 1) {
-        return;
+    if (info_->axis_ == Axis::HORIZONTAL) {
+        std::swap(row, col);
+        std::swap(size.rows, size.columns);
     }
-    auto item = wrapper_->GetOrCreateChildByIndex(idx);
+    auto item = wrapper_->GetChildByIndex(idx);
     CHECK_NULL_VOID(item);
     auto pattern = item->GetHostNode()->GetPattern<GridItemPattern>();
     CHECK_NULL_VOID(pattern);
     auto props = pattern->GetLayoutProperty<GridItemLayoutProperty>();
-    if (info_->axis_ == Axis::VERTICAL) {
-        pattern->SetIrregularItemInfo({ .mainIndex = row,
-            .crossIndex = col,
-            .mainSpan = size.rows,
-            .crossSpan = size.columns,
-            .mainStart = row,
-            .mainEnd = row + size.rows - 1,
-            .crossStart = col,
-            .crossEnd = col + size.columns - 1 });
-        props->UpdateMainIndex(row);
-        props->UpdateCrossIndex(col);
-    } else {
-        pattern->SetIrregularItemInfo({ .mainIndex = col,
-            .crossIndex = row,
-            .mainSpan = size.columns,
-            .crossSpan = size.rows,
-            .mainStart = col,
-            .mainEnd = col + size.columns - 1,
-            .crossStart = row,
-            .crossEnd = row + size.rows - 1 });
-        props->UpdateMainIndex(col);
-        props->UpdateCrossIndex(row);
+    props->UpdateMainIndex(row);
+    props->UpdateCrossIndex(col);
+
+    if (size.rows == 1 && size.columns == 1) {
+        return;
     }
+    pattern->SetIrregularItemInfo({ .mainIndex = row,
+        .crossIndex = col,
+        .mainSpan = size.rows,
+        .crossSpan = size.columns,
+        .mainStart = row,
+        .mainEnd = row + size.rows - 1,
+        .crossStart = col,
+        .crossEnd = col + size.columns - 1 });
 }
 } // namespace OHOS::Ace::NG

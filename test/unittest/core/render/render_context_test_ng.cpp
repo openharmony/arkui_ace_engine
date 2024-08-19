@@ -18,6 +18,9 @@
 #include "base/utils/utils.h"
 #define protected public
 #define private public
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
+#include "core/components_ng/render/debug_boundary_painter.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -71,7 +74,21 @@ void MakeProperty(NG::RenderContext& renderContext)
 };
 }
 
-class RenderContextTestNg : public testing::Test {};
+class RenderContextTestNg : public testing::Test {
+public:
+    void SetUp() override;
+    void TearDown() override;
+};
+
+void RenderContextTestNg::SetUp()
+{
+    NG::MockPipelineContext::SetUp();
+}
+
+void RenderContextTestNg::TearDown()
+{
+    NG::MockPipelineContext::TearDown();
+}
 
 /**
  * @tc.name: RenderContextTest001
@@ -319,5 +336,139 @@ HWTEST_F(RenderContextTestNg, RenderContextTest008, TestSize.Level1)
      */
     EXPECT_EQ(json->GetValue("transform")->GetString("type"), "matrix");
     EXPECT_EQ(json->GetValue("transform")->GetString("matrix"), MATRIX_STRING1 + MATRIX_STRING2);
+}
+
+/**
+ * @tc.name: RenderContextTest009
+ * @tc.desc: Test function RequestNextFrame
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderContextTestNg, RenderContextTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a frameNode ande update renderContext.
+     */
+    auto frameNode = NG::FrameNode::CreateFrameNode(TAG_ROOT, 0, AceType::MakeRefPtr<NG::LinearLayoutPattern>(false));
+    frameNode->UpdateInspectorId("123");
+    auto renderContext = frameNode->GetRenderContext();
+    renderContext->requestFrame_ = []() {};
+    NG::BorderWidthProperty borderWidth = { 1.0_vp, 1.0_vp, 1.0_vp, 1.0_vp };
+    auto layoutProperty = AceType::MakeRefPtr<NG::LayoutProperty>();
+    layoutProperty->UpdateBorderWidth(borderWidth);
+    RefPtr<NG::LayoutWrapper> layoutWrapper = frameNode->CreateLayoutWrapper(true, true);
+    layoutWrapper->SetActive(true);
+    auto builderFunc = []() -> RefPtr<NG::UINode> { return nullptr; };
+    frameNode->SetBackgroundFunction(builderFunc);
+    frameNode->SetLayoutProperty(layoutProperty);
+    frameNode->SwapDirtyLayoutWrapperOnMainThread(layoutWrapper);
+
+    /**
+     * @tc.steps: step2. call the function RequestNextFrame.
+     */
+    renderContext->RequestNextFrame();
+    EXPECT_EQ(renderContext->GetBorderColor()->leftColor.value(), Color::BLACK);
+    EXPECT_NE(renderContext->GetUnsafeHost(), nullptr);
+    EXPECT_FALSE(renderContext->HasSharedTransition());
+}
+
+/**
+ * @tc.name: RenderContextTest010
+ * @tc.desc: Test cast to RenderContextTestNg
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderContextTestNg, RenderContextTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a object renderContext.
+     */
+    NG::RenderContext renderContext;
+    auto json = JsonUtil::Create(true);
+    NG::InspectorFilter testFilter;
+    testFilter.AddFilterAttr("focusable");
+
+    /**
+     * @tc.steps: step2. callback ToJsonValue.push propTransformMatrix_ is CreateIdentity.
+     */
+    MakeProperty(renderContext);
+    renderContext.propTransformMatrix_ = Matrix4::CreateIdentity();;
+    renderContext.ToJsonValue(json, testFilter);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(json->GetValue("transform")->GetString("type"), "");
+}
+
+/**
+ * @tc.name: RenderContextTest011
+ * @tc.desc: Test cast to RenderContextTestNg
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderContextTestNg, RenderContextTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a object renderContext.
+     */
+    NG::RenderContext renderContext;
+    auto json = JsonUtil::Create(true);
+    NG::DebugBoundaryPainter painter;
+    RSCanvas canvas;
+    painter.PaintDebugBoundary(canvas, NG::OffsetF(1.0, 1.0));
+    painter.PaintDebugCorner(canvas, NG::OffsetF(1.0, 1.0));
+    painter.PaintDebugMargin(canvas, NG::OffsetF(1.0, 1.0));
+
+    /**
+     * @tc.steps: step2. callback ToJsonValue.push propTransformMatrix_ is CreateIdentity.
+     */
+    MakeProperty(renderContext);
+    renderContext.propTransformMatrix_ = Matrix4::CreateIdentity();
+    ClickEffectInfo clickEffect;
+    clickEffect.level = ClickEffectLevel::LIGHT;
+    renderContext.UpdateClickEffectLevel(clickEffect);
+    std::vector<ObscuredReasons> obscuredReasons;
+    obscuredReasons.emplace_back(ObscuredReasons::PLACEHOLDER);
+    renderContext.UpdateObscured(obscuredReasons);
+    renderContext.ToJsonValue(json, filter);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(json->GetValue("transform")->GetString("type"), "matrix");
+    EXPECT_EQ(json->GetValue("transform")->GetString("matrix"), MATRIX_STRING1 + MATRIX_STRING2);
+}
+
+/**
+ * @tc.name: RenderContextTest012
+ * @tc.desc: Test cast to RenderContextTestNg
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderContextTestNg, RenderContextTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a object renderContext.
+     */
+    NG::RenderContext renderContextOne;
+    NG::RenderContext renderContextTwo;
+    NG::RenderContext renderContextThree;
+    auto jsonOne = JsonUtil::Create(true);
+    auto jsonTwo = JsonUtil::Create(true);
+    auto jsonThree = JsonUtil::Create(true);
+
+    /**
+     * @tc.steps: step2. callback ToJsonValue.push propTransformMatrix_ is CreateIdentity.
+     */
+    MakeProperty(renderContextOne);
+    MakeProperty(renderContextTwo);
+    MakeProperty(renderContextThree);
+    jsonOne->Put("clip", "false");
+    renderContextOne.FromJson(jsonOne);
+    EXPECT_FALSE(renderContextOne.GetClipEdge().value());
+    renderContextTwo.UpdateClipEdge(false);
+    jsonTwo->Put("clip", "normal");
+    renderContextTwo.FromJson(jsonTwo);
+    EXPECT_FALSE(renderContextTwo.GetClipEdge().value());
+    jsonThree->Put("clip", "true");
+    renderContextThree.FromJson(jsonThree);
+    EXPECT_TRUE(renderContextThree.GetClipEdge().value());
 }
 } // namespace OHOS::Ace

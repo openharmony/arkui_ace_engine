@@ -89,7 +89,8 @@ void ImageAnalyzerManager::CreateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMa
     analyzerUIConfig_.onAnalyzed = std::nullopt;
 }
 
-void ImageAnalyzerManager::UpdateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap)
+void ImageAnalyzerManager::UpdateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap,
+    const NG::OffsetF& offset)
 {
     if (!isAnalyzerOverlayBuild_) {
         return;
@@ -106,6 +107,12 @@ void ImageAnalyzerManager::UpdateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMa
     }
 
     CHECK_NULL_VOID(pixelMap);
+    if (holder_ == ImageAnalyzerHolder::VIDEO_CUSTOM) {
+        analyzerUIConfig_.pixelMapWidth = pixelMap->GetWidth();
+        analyzerUIConfig_.pixelMapHeight = pixelMap->GetHeight();
+        analyzerUIConfig_.overlayOffset = offset;
+    }
+
     if (holder_ != ImageAnalyzerHolder::IMAGE) {
         analyzerUIConfig_.contentWidth = pixelMap->GetWidth();
         analyzerUIConfig_.contentHeight = pixelMap->GetHeight();
@@ -122,6 +129,8 @@ void ImageAnalyzerManager::UpdateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMa
 
 void ImageAnalyzerManager::DestroyAnalyzerOverlay()
 {
+    ReleaseImageAnalyzer();
+    
     if (!isAnalyzerOverlayBuild_) {
         return;
     }
@@ -266,7 +275,8 @@ bool ImageAnalyzerManager::UpdateVideoConfig(const PixelMapInfo& info)
     }
 
     bool shouldUpdateSize = analyzerUIConfig_.contentWidth != info.width ||
-                            analyzerUIConfig_.contentHeight != info.height;
+                            analyzerUIConfig_.contentHeight != info.height ||
+                            analyzerUIConfig_.overlayOffset != info.overlayOffset;
     if (shouldUpdateSize) {
         analyzerUIConfig_.UpdateFromInfo(info);
     }
@@ -357,5 +367,17 @@ void ImageAnalyzerManager::UpdateOverlayStatus(bool status, int offsetX, int off
         analyzerUIConfig_.menuStatus = Status::MENU_HIDE;
     }
     ImageAnalyzerMgr::GetInstance().UpdateOverlayStatus(&overlayData_, &analyzerUIConfig_);
+}
+
+void ImageAnalyzerManager::UpdateAIButtonConfig(AIButtonConfig config)
+{
+    CHECK_NULL_VOID(isAnalyzerOverlayBuild_);
+    ImageAnalyzerMgr::GetInstance().UpdateAIButtonConfig(&overlayData_, &config);
+}
+
+void ImageAnalyzerManager::UpdateOverlayActiveStatus(bool status)
+{
+    CHECK_NULL_VOID(isAnalyzerOverlayBuild_);
+    ImageAnalyzerMgr::GetInstance().UpdateOverlayActiveStatus(&overlayData_, status);
 }
 } // namespace OHOS::Ace

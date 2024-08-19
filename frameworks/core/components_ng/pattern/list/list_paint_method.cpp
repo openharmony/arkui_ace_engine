@@ -19,18 +19,6 @@
 #include "core/components_ng/render/divider_painter.h"
 
 namespace OHOS::Ace::NG {
-constexpr double PERCENT_100 = 100.0;
-constexpr float LINEAR_GRADIENT_ANGLE = 90.0f;
-
-namespace {
-    GradientColor CreatePercentGradientColor(float percent, Color color)
-    {
-        NG::GradientColor gredient = GradientColor(color);
-        gredient.SetDimension(CalcDimension(percent * PERCENT_100, DimensionUnit::PERCENT));
-        return gredient;
-    }
-} // namespace
-
 void ListPaintMethod::PaintEdgeEffect(PaintWrapper* paintWrapper, RSCanvas& canvas)
 {
     auto edgeEffect = edgeEffect_.Upgrade();
@@ -63,8 +51,8 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     if (padding) {
         frameSize.MinusPadding(*padding->left, *padding->right, *padding->top, *padding->bottom);
     }
-    UpdateFadingGradient(renderContext);
-    bool clip = !renderContext || renderContext->GetClipEdge().value_or(true);
+    bool hasPadding = padding && padding->HasValue();
+    bool clip = hasPadding && (!renderContext || renderContext->GetClipEdge().value_or(true));
     listContentModifier_->SetClipOffset(paddingOffset);
     listContentModifier_->SetClipSize(frameSize);
     listContentModifier_->SetClip(clip);
@@ -153,9 +141,13 @@ ListDivider ListPaintMethod::HandleDividerList(
     float divOffset = (dividerInfo.space + dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
     float mainPos = itemPosition_.at(index).startPos - divOffset + dividerInfo.mainPadding;
     float crossPos = dividerInfo.startMargin + dividerInfo.crossPadding;
-    if (isReverse_ && dividerInfo.isVertical) {
-        float divOffset = (dividerInfo.space - dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
-        mainPos = dividerInfo.mainSize - itemPosition_.at(index).startPos + divOffset - dividerInfo.mainPadding;
+    if (isReverse_) {
+        if (dividerInfo.isVertical) {
+            float divOffset = (dividerInfo.space - dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
+            mainPos = dividerInfo.mainSize - itemPosition_.at(index).startPos + divOffset - dividerInfo.mainPadding;
+        } else {
+            crossPos = dividerInfo.endMargin + dividerInfo.crossPadding;
+        }
     }
     if (dividerInfo.lanes > 1 && !lastIsGroup && !itemPosition_.at(index).isGroup) {
         crossPos +=
@@ -179,9 +171,13 @@ ListDivider ListPaintMethod::HandleLastLineIndex(int32_t index, int32_t laneIdx,
     float divOffset = (dividerInfo.space - dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
     float mainPos = itemPosition_.at(index).endPos + divOffset + dividerInfo.mainPadding;
     float crossPos = dividerInfo.startMargin + dividerInfo.crossPadding;
-    if (isReverse_ && dividerInfo.isVertical) {
-        float divOffset = (dividerInfo.space + dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
-        mainPos = dividerInfo.mainSize - itemPosition_.at(index).endPos - divOffset - dividerInfo.mainPadding;
+    if (isReverse_) {
+        if (dividerInfo.isVertical) {
+            float divOffset = (dividerInfo.space + dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
+            mainPos = dividerInfo.mainSize - itemPosition_.at(index).endPos - divOffset - dividerInfo.mainPadding;
+        } else {
+            crossPos = dividerInfo.endMargin + dividerInfo.crossPadding;
+        }
     }
     if (dividerInfo.lanes > 1 && !itemPosition_.at(index).isGroup) {
         crossPos +=
@@ -211,36 +207,5 @@ void ListPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     scrollBarOverlayModifier->SetBarColor(scrollBar->GetForegroundColor());
     scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
-}
-
-void ListPaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& listRenderContext)
-{
-    CHECK_NULL_VOID(listRenderContext);
-    CHECK_NULL_VOID(overlayRenderContext_);
-    NG::Gradient gradient;
-    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
-    if (isFadingTop_) {
-        gradient.AddColor(CreatePercentGradientColor(0, Color::TRANSPARENT));
-        gradient.AddColor(CreatePercentGradientColor(percentFading_, Color::WHITE));
-    }
-    if (isFadingBottom_) {
-        gradient.AddColor(CreatePercentGradientColor(1 - percentFading_, Color::WHITE));
-        gradient.AddColor(CreatePercentGradientColor(1, Color::TRANSPARENT));
-    }
-    Axis axis = vertical_ ? Axis::HORIZONTAL : Axis::VERTICAL;
-    if (axis == Axis::HORIZONTAL) {
-        gradient.GetLinearGradient()->angle = CalcDimension(LINEAR_GRADIENT_ANGLE, DimensionUnit::PX);
-    }
-    listRenderContext->UpdateBackBlendMode(BlendMode::SRC_OVER);
-    listRenderContext->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
-
-    overlayRenderContext_->UpdateZIndex(INT32_MAX);
-    overlayRenderContext_->UpdateLinearGradient(gradient);
-    if (!isFadingTop_ && !isFadingBottom_) {
-        overlayRenderContext_->UpdateBackBlendMode(BlendMode::SRC_OVER);
-    } else {
-        overlayRenderContext_->UpdateBackBlendMode(BlendMode::DST_IN);
-    }
-    overlayRenderContext_->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
 }
 } // namespace OHOS::Ace::NG

@@ -283,9 +283,23 @@ void ParseOffset(DialogProperties& properties, JSRef<JSObject> obj)
         JSActionSheet::ParseJsDimensionVp(dyValue, dy);
         properties.offset = DimensionOffset(dx, dy);
         bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-        double xValue = isRtl ? properties.offset.GetX().Value() * (-1) : properties.offset.GetX().Value();
-        Dimension offsetX = Dimension(xValue);
+        Dimension offsetX = isRtl ? properties.offset.GetX() * (-1) : properties.offset.GetX();
         properties.offset.SetX(offsetX);
+    }
+}
+
+void ParseMaskRect(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    // Parse maskRect.
+    auto maskRectValue = obj->GetProperty("maskRect");
+    DimensionRect maskRect;
+    if (JSViewAbstract::ParseJsDimensionRect(maskRectValue, maskRect)) {
+        properties.maskRect = maskRect;
+        bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+        auto offset = maskRect.GetOffset();
+        Dimension offsetX = isRtl ? offset.GetX() * (-1) : offset.GetX();
+        offset.SetX(offsetX);
+        properties.maskRect->SetOffset(offset);
     }
 }
 
@@ -316,11 +330,13 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
     ParseRadius(properties, obj);
     ParseDialogAlignment(properties, obj);
     ParseOffset(properties, obj);
+    ParseMaskRect(properties, obj);
 
     auto onLanguageChange = [execContext, obj, parseContent = ParseTitleAndMessage, parseButton = ParseConfirmButton,
                                 parseShadow = ParseShadow, parseBorderProps = ParseBorderWidthAndColor,
                                 parseRadius = ParseRadius, parseAlignment = ParseDialogAlignment,
-                                parseOffset = ParseOffset, node = dialogNode](DialogProperties& dialogProps) {
+                                parseOffset = ParseOffset,  parseMaskRect = ParseMaskRect,
+                                node = dialogNode](DialogProperties& dialogProps) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execContext);
         ACE_SCORING_EVENT("ActionSheet.property.onLanguageChange");
         auto pipelineContext = PipelineContext::GetCurrentContextSafely();
@@ -333,6 +349,7 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
         parseRadius(dialogProps, obj);
         ParseDialogAlignment(dialogProps, obj);
         parseOffset(dialogProps, obj);
+        parseMaskRect(dialogProps, obj);
         // Parse sheets
         auto sheetsVal = obj->GetProperty("sheets");
         if (sheetsVal->IsArray()) {
@@ -382,13 +399,6 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
         properties.sheetsInfo = std::move(sheetsInfo);
     }
 
-    // Parse maskRect.
-    auto maskRectValue = obj->GetProperty("maskRect");
-    DimensionRect maskRect;
-    if (JSViewAbstract::ParseJsDimensionRect(maskRectValue, maskRect)) {
-        properties.maskRect = maskRect;
-    }
-
     // Parses gridCount.
     auto gridCountValue = obj->GetProperty("gridCount");
     if (gridCountValue->IsNumber()) {
@@ -420,7 +430,6 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
     }
 
     auto backgroundBlurStyle = obj->GetProperty("backgroundBlurStyle");
-    BlurStyleOption styleOption;
     if (backgroundBlurStyle->IsNumber()) {
         auto blurStyle = backgroundBlurStyle->ToNumber<int32_t>();
         if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&

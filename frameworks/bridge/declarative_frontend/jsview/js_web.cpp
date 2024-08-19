@@ -25,7 +25,11 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "base/web/webview/ohos_nweb/include/nweb.h"
+#else
+#include "base/web/webview/ohos_interface/include/ohos_nweb/nweb.h"
+#endif
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
@@ -1936,6 +1940,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onInterceptKeyboardAttach", &JSWeb::OnInterceptKeyboardAttach);
     JSClass<JSWeb>::StaticMethod("onAdsBlocked", &JSWeb::OnAdsBlocked);
     JSClass<JSWeb>::StaticMethod("forceDisplayScrollBar", &JSWeb::ForceDisplayScrollBar);
+    JSClass<JSWeb>::StaticMethod("keyboardAvoidMode", &JSWeb::KeyboardAvoidMode);
 
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -3201,6 +3206,7 @@ void JSWeb::JavaScriptProxy(const JSCallbackInfo& args)
     auto name = JSRef<JSVal>::Cast(paramObject->GetProperty("name"));
     auto methodList = JSRef<JSVal>::Cast(paramObject->GetProperty("methodList"));
     auto asyncMethodList = JSRef<JSVal>::Cast(paramObject->GetProperty("asyncMethodList"));
+    auto permission = JSRef<JSVal>::Cast(paramObject->GetProperty("permission"));
     if (!controllerObj->IsObject()) {
         return;
     }
@@ -3208,9 +3214,9 @@ void JSWeb::JavaScriptProxy(const JSCallbackInfo& args)
     auto jsProxyFunction = controller->GetProperty("jsProxy");
     if (jsProxyFunction->IsFunction()) {
         auto jsProxyCallback = [webviewController = controller, func = JSRef<JSFunc>::Cast(jsProxyFunction), object,
-                                   name, methodList, asyncMethodList]() {
-            JSRef<JSVal> argv[] = { object, name, methodList, asyncMethodList };
-            func->Call(webviewController, 4, argv);
+                                   name, methodList, asyncMethodList, permission]() {
+            JSRef<JSVal> argv[] = { object, name, methodList, asyncMethodList, permission };
+            func->Call(webviewController, 5, argv);
         };
 
         WebModel::GetInstance()->SetJsProxyCallback(jsProxyCallback);
@@ -3890,6 +3896,7 @@ JSRef<JSVal> PageVisibleEventToJSValue(const PageVisibleEvent& eventInfo)
 
 void JSWeb::OnPageVisible(const JSCallbackInfo& args)
 {
+    TAG_LOGI(AceLogTag::ACE_WEB, "JSWeb::OnPageVisible init by developer");
     if (!args[0]->IsFunction()) {
         return;
     }
@@ -3900,12 +3907,14 @@ void JSWeb::OnPageVisible(const JSCallbackInfo& args)
     auto instanceId = Container::CurrentId();
     auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const std::shared_ptr<BaseEventInfo>& info) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "JSWeb::OnPageVisible uiCallback enter");
         ContainerScope scope(instanceId);
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
         context->UpdateCurrentActiveNode(node);
         context->PostAsyncEvent([execCtx, postFunc = func, info]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            TAG_LOGI(AceLogTag::ACE_WEB, "JSWeb::OnPageVisible async event execute");
             auto* eventInfo = TypeInfoHelper::DynamicCast<PageVisibleEvent>(info.get());
             postFunc->Execute(*eventInfo);
         }, "ArkUIWebPageVisible");
@@ -4612,31 +4621,57 @@ void JSWeb::SetLayoutMode(int32_t layoutMode)
 
 void JSWeb::SetNestedScroll(const JSCallbackInfo& args)
 {
-    NestedScrollOptions nestedOpt = {
-        .forward = NestedScrollMode::SELF_ONLY,
-        .backward = NestedScrollMode::SELF_ONLY,
+    NestedScrollOptionsExt nestedOpt = {
+        .scrollUp = NestedScrollMode::SELF_ONLY,
+        .scrollDown = NestedScrollMode::SELF_ONLY,
+        .scrollLeft = NestedScrollMode::SELF_ONLY,
+        .scrollRight = NestedScrollMode::SELF_ONLY,
     };
     if (args.Length() < 1 || !args[0]->IsObject()) {
-        WebModel::GetInstance()->SetNestedScroll(nestedOpt);
+        WebModel::GetInstance()->SetNestedScrollExt(nestedOpt);
         return;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
     int32_t froward = 0;
     JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollForward"), froward);
-    if (froward < static_cast<int32_t>(NestedScrollMode::SELF_ONLY) ||
-        froward > static_cast<int32_t>(NestedScrollMode::PARALLEL)) {
-        froward = 0;
+    if (CheckNestedScrollMode(froward)) {
+        nestedOpt.scrollDown = static_cast<NestedScrollMode>(froward);
+        nestedOpt.scrollRight = static_cast<NestedScrollMode>(froward);
     }
     int32_t backward = 0;
     JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollBackward"), backward);
-    if (backward < static_cast<int32_t>(NestedScrollMode::SELF_ONLY) ||
-        backward > static_cast<int32_t>(NestedScrollMode::PARALLEL)) {
-        backward = 0;
+    if (CheckNestedScrollMode(backward)) {
+        nestedOpt.scrollUp = static_cast<NestedScrollMode>(backward);
+        nestedOpt.scrollLeft = static_cast<NestedScrollMode>(backward);
     }
-    nestedOpt.forward = static_cast<NestedScrollMode>(froward);
-    nestedOpt.backward = static_cast<NestedScrollMode>(backward);
-    WebModel::GetInstance()->SetNestedScroll(nestedOpt);
+    int32_t scrollUp = 0;
+    JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollUp"), scrollUp);
+    if (CheckNestedScrollMode(scrollUp)) {
+        nestedOpt.scrollUp = static_cast<NestedScrollMode>(scrollUp);
+    }
+    int32_t scrollDown = 0;
+    JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollDown"), scrollDown);
+    if (CheckNestedScrollMode(scrollDown)) {
+        nestedOpt.scrollDown = static_cast<NestedScrollMode>(scrollDown);
+    }
+    int32_t scrollLeft = 0;
+    JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollLeft"), scrollLeft);
+    if (CheckNestedScrollMode(scrollLeft)) {
+        nestedOpt.scrollLeft = static_cast<NestedScrollMode>(scrollLeft);
+    }
+    int32_t scrollRight = 0;
+    JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollRight"), scrollRight);
+    if (CheckNestedScrollMode(scrollRight)) {
+        nestedOpt.scrollRight = static_cast<NestedScrollMode>(scrollRight);
+    }
+    WebModel::GetInstance()->SetNestedScrollExt(nestedOpt);
     args.ReturnSelf();
+}
+
+bool JSWeb::CheckNestedScrollMode(const int32_t& modeValue)
+{
+    return modeValue > static_cast<int32_t>(NestedScrollMode::SELF_ONLY) &&
+           modeValue <= static_cast<int32_t>(NestedScrollMode::PARALLEL);
 }
 
 void JSWeb::SetMetaViewport(const JSCallbackInfo& args)
@@ -5050,5 +5085,16 @@ void JSWeb::ForceDisplayScrollBar(const JSCallbackInfo& args)
     }
     bool isEnabled = args[0]->ToBoolean();
     WebModel::GetInstance()->SetOverlayScrollbarEnabled(isEnabled);
+}
+
+void JSWeb::KeyboardAvoidMode(int32_t mode)
+{
+    if (mode < static_cast<int32_t>(WebKeyboardAvoidMode::RESIZE_VISUAL) ||
+        mode > static_cast<int32_t>(WebKeyboardAvoidMode::DEFAULT)) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "KeyboardAvoidMode param err");
+        return;
+    }
+    WebKeyboardAvoidMode avoidMode = static_cast<WebKeyboardAvoidMode>(mode);
+    WebModel::GetInstance()->SetKeyboardAvoidMode(avoidMode);
 }
 } // namespace OHOS::Ace::Framework

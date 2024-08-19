@@ -51,8 +51,9 @@ protected:
 
 private:
     void UpdateParagraphAndImageSpanNodeList();
-
-    void DoStartTextRace();
+    void UpdateObscuredRects();
+    std::vector<RectF> CalculateSelectedRect(
+        const std::vector<std::pair<std::vector<RectF>, TextDirection>>& selectedRects, float contentWidth);
 
     WeakPtr<Pattern> pattern_;
     float baselineOffset_;

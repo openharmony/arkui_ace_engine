@@ -22,7 +22,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/canvas/canvas_renderer_type.h"
-#include "core/components_ng/pattern/custom_paint/canvas_model_ng.h"
+#include "core/components_ng/pattern/canvas/canvas_model_ng.h"
 
 namespace OHOS::Ace::NG {
 
@@ -240,6 +240,32 @@ namespace NodeModifier {
 const ArkUICanvasRenderingContext2DModifier* GetCanvasRenderingContext2DModifier()
 {
     static const ArkUICanvasRenderingContext2DModifier modifier = {
+        nullptr,
+        SetCanvasBeginPath,
+        SetCanvasClosePath,
+        SetCanvasFill,
+        SetCanvasMoveTo,
+        SetCanvasArc,
+        SetCanvasLineTo,
+        SetCanvasStrokeStyle,
+        GetCanvasStrokeStyle,
+        SetCanvasLineWidth,
+        GetCanvasLineWidth,
+        SetCanvasStroke,
+        SetCanvasAntiAlias,
+        SetCanvasFillColor,
+        GetCanvasFillColor,
+        SetCanvasGlobalAlpha,
+        GetCanvasGlobalAlpha,
+        SetCanvasFillRect,
+        SetCanvasFillText,
+    };
+    return &modifier;
+}
+
+const CJUICanvasRenderingContext2DModifier* GetCJUICanvasRenderingContext2DModifier()
+{
+    static const CJUICanvasRenderingContext2DModifier modifier = {
         nullptr,
         SetCanvasBeginPath,
         SetCanvasClosePath,

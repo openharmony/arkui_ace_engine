@@ -56,10 +56,14 @@ public:
 
     virtual void SetPrimaryPage(const RefPtr<FrameNode>& primaryPage) {}
 
-private:
+    void SetCurrentPageIndex(int32_t index)
+    {
+        currentPageIndex_ = index;
+    }
+
+protected:
     std::function<void()> onRebuildFrameCallback_;
     int32_t currentPageIndex_ = 0;
-    friend class StageManager;
 
     ACE_DISALLOW_COPY_AND_MOVE(StagePattern);
 };

@@ -14,6 +14,7 @@
  */
 
 #include "grid_test_ng.h"
+#include "test/mock/core/render/mock_render_context.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
@@ -109,7 +110,7 @@ HWTEST_F(GridAttrTestNg, Property002, TestSize.Level1)
     /**
      * @tc.cases: Invalid GapValue
      * @tc.expected: Gap would be null
-    */
+     */
     GridModelNG model = CreateGrid();
     model.SetRowsGap(Dimension(-5));
     model.SetColumnsGap(Dimension(-10));
@@ -633,9 +634,9 @@ HWTEST_F(GridAttrTestNg, BigItem001, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetRowsTemplate("1fr 1fr 1fr 1fr");
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateBigItem(1, 2, 1, 2);
-        CreateBigItem(NULL_VALUE, NULL_VALUE, 1, 3);
-        CreateBigItem(1, 3, NULL_VALUE, NULL_VALUE);
+    CreateBigItem(1, 2, 1, 2);
+    CreateBigItem(NULL_VALUE, NULL_VALUE, 1, 3);
+    CreateBigItem(1, 3, NULL_VALUE, NULL_VALUE);
     CreateGridItems(7);
     CreateDone(frameNode_);
     EXPECT_TRUE(VerifyBigItemRect(0, RectF(ITEM_WIDTH, ITEM_HEIGHT, ITEM_WIDTH * 2, ITEM_HEIGHT * 2)));
@@ -664,9 +665,9 @@ HWTEST_F(GridAttrTestNg, BigItem002, TestSize.Level1)
      */
     GridModelNG model = CreateGrid();
     model.SetRowsTemplate("1fr 1fr 1fr 1fr");
-        CreateBigRowItem(1, 2);
-        CreateBigRowItem(0, 2);
-        CreateBigRowItem(2, 3);
+    CreateBigRowItem(1, 2);
+    CreateBigRowItem(0, 2);
+    CreateBigRowItem(2, 3);
     CreateFixedItems(7);
     CreateDone(frameNode_);
     EXPECT_TRUE(VerifyBigItemRect(0, RectF(0.f, ITEM_HEIGHT, ITEM_WIDTH, ITEM_HEIGHT * 2)));
@@ -695,9 +696,9 @@ HWTEST_F(GridAttrTestNg, BigItem003, TestSize.Level1)
      */
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateBigColItem(2, 3);
-        CreateBigColItem(0, 2);
-        CreateBigColItem(2, 1);
+    CreateBigColItem(2, 3);
+    CreateBigColItem(0, 2);
+    CreateBigColItem(2, 1);
     CreateFixedItems(7);
     CreateDone(frameNode_);
     EXPECT_TRUE(VerifyBigItemRect(0, RectF(ITEM_WIDTH * 2, 0.f, ITEM_WIDTH * 2, ITEM_HEIGHT)));
@@ -726,7 +727,7 @@ HWTEST_F(GridAttrTestNg, BigItem004, TestSize.Level1)
      */
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateBigColItem(2, 3);
+    CreateBigColItem(2, 3);
     CreateFixedItems(7);
     CreateDone(frameNode_);
     EXPECT_TRUE(VerifyBigItemRect(0, RectF(ITEM_WIDTH * 2, 0.f, ITEM_WIDTH * 2, ITEM_HEIGHT))); // big item
@@ -1001,7 +1002,7 @@ HWTEST_F(GridAttrTestNg, GridSetFriction003, TestSize.Level1)
 
 /**
  * @tc.name: GridItemHoverEventTest001
- * @tc.desc: GirdItem hover event test.
+ * @tc.desc: GridItem hover event test.
  * @tc.type: FUNC
  */
 HWTEST_F(GridAttrTestNg, GridItemHoverEventTest001, TestSize.Level1)
@@ -1033,7 +1034,7 @@ HWTEST_F(GridAttrTestNg, GridItemHoverEventTest001, TestSize.Level1)
 
 /**
  * @tc.name: GridItemPressEventTest001
- * @tc.desc: GirdItem press event test.
+ * @tc.desc: GridItem press event test.
  * @tc.type: FUNC
  */
 HWTEST_F(GridAttrTestNg, GridItemPressEventTest001, TestSize.Level1)
@@ -1074,95 +1075,8 @@ HWTEST_F(GridAttrTestNg, GridItemPressEventTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: LayoutOptions001
- * @tc.desc: Test LayoutOptions
- * @tc.type: FUNC
- */
-HWTEST_F(GridAttrTestNg, LayoutOptions001, TestSize.Level1)
-{
-    /**
-     * @tc.cases: Set GridLayoutOptions:irregularIndexes
-     * @tc.expected: Each gridItem rect is correct
-     */
-    GridLayoutOptions option;
-    option.irregularIndexes = { 6, 1, 4 };
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-    model.SetLayoutOptions(option);
-    CreateGridItems(10, -2, ITEM_HEIGHT);
-    CreateDone(frameNode_);
-    EXPECT_TRUE(VerifyBigItemRect(0, RectF(0.f, ITEM_HEIGHT * 0, ITEM_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(VerifyBigItemRect(1, RectF(0.f, ITEM_HEIGHT * 1, GRID_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(VerifyBigItemRect(2, RectF(0.f, ITEM_HEIGHT * 2, ITEM_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(VerifyBigItemRect(3, RectF(ITEM_WIDTH, ITEM_HEIGHT * 2, ITEM_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(VerifyBigItemRect(4, RectF(0.f, ITEM_HEIGHT * 3, GRID_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(VerifyBigItemRect(5, RectF())); // out of view
-}
-
-/**
- * @tc.name: LayoutOptions002
- * @tc.desc: Test LayoutOptions
- * @tc.type: FUNC
- */
-HWTEST_F(GridAttrTestNg, LayoutOptions002, TestSize.Level1)
-{
-    /**
-     * @tc.cases: Set GridLayoutOptions:irregularIndexes getSizeByIndex
-     * @tc.expected: Each gridItem rect is correct
-     */
-    GridLayoutOptions option;
-    option.irregularIndexes = { 6, 1, 3, 4, 5, 0 };
-    GetSizeByIndex onGetIrregularSizeByIndex = [](int32_t index) {
-        if (index == 3) {
-            return GridItemSize { 1, 2 };
-        }
-        return GridItemSize { 1, 4 };
-    };
-    option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-    model.SetLayoutOptions(option);
-    CreateGridItems(10, -2, ITEM_HEIGHT);
-    CreateDone(frameNode_);
-    EXPECT_TRUE(VerifyBigItemRect(0, RectF(0.f, ITEM_HEIGHT * 0, GRID_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(VerifyBigItemRect(1, RectF(0.f, ITEM_HEIGHT * 1, GRID_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(VerifyBigItemRect(2, RectF(0.f, ITEM_HEIGHT * 2, ITEM_WIDTH * 1, ITEM_HEIGHT)));
-    EXPECT_TRUE(VerifyBigItemRect(3, RectF(ITEM_WIDTH, ITEM_HEIGHT * 2, ITEM_WIDTH * 2, ITEM_HEIGHT)));
-    EXPECT_TRUE(VerifyBigItemRect(4, RectF(0.f, ITEM_HEIGHT * 3, GRID_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(VerifyBigItemRect(5, RectF())); // out of view
-}
-
-/**
- * @tc.name: GridItemDumpAdvanceInfoTest001
- * @tc.desc: GirdItem dumpadvanceinfo test.
- * @tc.type: FUNC
- */
-HWTEST_F(GridAttrTestNg, GridItemDumpAdvanceInfoTest001, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr");
-    model.SetRowsTemplate("1fr 1fr 1fr");
-    model.SetColumnsGap(Dimension(COL_GAP));
-    model.SetRowsGap(Dimension(ROW_GAP));
-    CreateFixedItems(10);
-    CreateDone(frameNode_);
-
-    /**
-     * @tc.steps: step1. Get gridItemPattern and call dumpAdvanceInfo.
-     * @tc.expected: Related function is called.
-     */
-    auto gridItemPattern = GetChildPattern<GridItemPattern>(frameNode_, 0);
-    gridItemPattern->DumpAdvanceInfo();
-    EXPECT_EQ(gridItemPattern->gridItemStyle_, GridItemStyle::NONE);
-
-    gridItemPattern->gridItemStyle_ = GridItemStyle::PLAIN;
-    gridItemPattern->DumpAdvanceInfo();
-    EXPECT_EQ(gridItemPattern->gridItemStyle_, GridItemStyle::PLAIN);
-}
-
-/**
  * @tc.name: GridItemSetSelectableTest001
- * @tc.desc: GirdItem setselectable test.
+ * @tc.desc: GridItem setselectable test.
  * @tc.type: FUNC
  */
 HWTEST_F(GridAttrTestNg, GridItemSetSelectableTest001, TestSize.Level1)
@@ -1185,5 +1099,62 @@ HWTEST_F(GridAttrTestNg, GridItemSetSelectableTest001, TestSize.Level1)
     gridItemPattern->selectable_ = true;
     gridItemPattern->SetSelectable(false);
     EXPECT_FALSE(gridItemPattern->selectable_);
+}
+
+/**
+ * @tc.name: GridItemDisableEventTest001
+ * @tc.desc: GridItem disable event test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAttrTestNg, GridItemDisableEventTest001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    CreateFixedItems(10, GridItemStyle::PLAIN);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step2. Get gridItem frameNode and pattern, set callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto gridItemPattern = GetChildPattern<GridItemPattern>(frameNode_, 0);
+    auto gridItemEventHub = GetChildEventHub<GridItemEventHub>(frameNode_, 0);
+    auto gridItemFrameNode = GetChildFrameNode(frameNode_, 0);
+    auto renderContext = gridItemFrameNode->renderContext_;
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    EXPECT_EQ(mockRenderContext->opacityMultiplier_, 1.0f);
+    gridItemEventHub->SetEnabled(false);
+    gridItemPattern->InitDisableStyle();
+    EXPECT_EQ(mockRenderContext->opacityMultiplier_, 0.4f);
+    gridItemEventHub->SetEnabled(true);
+    gridItemPattern->InitDisableStyle();
+    EXPECT_EQ(mockRenderContext->opacityMultiplier_, 1.0f);
+}
+
+/**
+ * @tc.name: GridItemDisableEventTest002
+ * @tc.desc: GridItem disable event test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAttrTestNg, GridItemDisableEventTest002, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    CreateFixedItems(10, GridItemStyle::PLAIN);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step2. Get gridItem frameNode and pattern, set callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto gridItemPattern = GetChildPattern<GridItemPattern>(frameNode_, 0);
+    auto gridItemEventHub = GetChildEventHub<GridItemEventHub>(frameNode_, 0);
+    auto gridItemFrameNode = GetChildFrameNode(frameNode_, 0);
+    auto renderContext = gridItemFrameNode->renderContext_;
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    EXPECT_EQ(mockRenderContext->opacityMultiplier_, 1.0f);
+    gridItemEventHub->SetEnabled(false);
+    gridItemPattern->InitDisableStyle();
+    EXPECT_EQ(mockRenderContext->opacityMultiplier_, 0.4f);
+    gridItemPattern->InitDisableStyle();
+    EXPECT_EQ(mockRenderContext->opacityMultiplier_, 0.4f);
 }
 } // namespace OHOS::Ace::NG

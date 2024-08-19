@@ -33,7 +33,6 @@ RosenRenderSvgText::RosenRenderSvgText()
 void RosenRenderSvgText::Paint(RenderContext& context, const Offset& offset)
 {
     auto rsNode = static_cast<RosenRenderContext*>(&context)->GetRSNode();
-
     if (rsNode && NeedTransform()) {
         auto [transform, pivotX, pivotY] = GetRawTransformInfo();
         rsNode->SetPivot(pivotX, pivotY);

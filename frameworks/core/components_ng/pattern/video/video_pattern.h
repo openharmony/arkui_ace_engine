@@ -228,7 +228,7 @@ public:
 
     void OnResolutionChange() const;
 
-    void OnStartRenderFrameCb() const;
+    void OnStartRenderFrameCb();
 
     void ResetLastBoundsRect()
     {
@@ -243,6 +243,10 @@ public:
     void UpdateAnalyzerState(bool isCreated)
     {
         isAnalyzerCreated_ = isCreated;
+    }
+    void SetIsSeeking(bool isSeeking)
+    {
+        isSeeking_ = isSeeking;
     }
 
 #ifdef RENDER_EXTRACT_SUPPORTED
@@ -302,7 +306,7 @@ private:
     void UpdateControllerBar();
     void UpdateVideoProperty();
 
-    static RefPtr<FrameNode> CreateSVG();
+    RefPtr<FrameNode> CreateSVG();
     RefPtr<FrameNode> CreateText(uint32_t time);
     RefPtr<FrameNode> CreateSlider();
     void ChangePlayButtonTag();
@@ -337,11 +341,14 @@ private:
     void ChangePlayerStatus(bool isPlaying, const PlaybackStatus& status);
 
     bool IsSupportImageAnalyzer();
+    bool ShouldUpdateImageAnalyzer();
     void StartImageAnalyzer();
+    void StartUpdateImageAnalyzer();
     void CreateAnalyzerOverlay();
     void DestroyAnalyzerOverlay();
     void UpdateAnalyzerOverlay();
     void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
+    void UpdateOverlayVisibility(VisibleType type);
 
     RefPtr<VideoControllerV2> videoControllerV2_;
     RefPtr<FrameNode> controlBar_;
@@ -368,6 +375,8 @@ private:
     bool isEnableAnalyzer_ = false;
     bool isAnalyzerCreated_ = false;
     bool isPaused_ = false;
+    bool isContentSizeChanged_ = false;
+    bool isSeeking_ = false;
 
     uint32_t currentPos_ = 0;
     uint32_t duration_ = 0;

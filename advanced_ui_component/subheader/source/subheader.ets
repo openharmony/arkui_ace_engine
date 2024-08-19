@@ -21,8 +21,6 @@ import { BusinessError } from '@ohos.base';
 import hilog from '@ohos.hilog';
 import common from '@ohos.app.ability.common';
 
-const INDEX_ZERO: number = 0;
-const INDEX_ONE: number = 1;
 const INDEX_TWO: number = 2;
 // 行数及整体高度
 const SINGLE_LINE_NUM: number = 1;
@@ -30,23 +28,25 @@ const DOUBLE_LINE_NUM: number = 2;
 const SINGLE_LINE_HEIGHT: number = 56;
 const DOUBLE_LINE_HEIGHT: number = 72;
 // 资源数值
-const BORDER_WIDTH: number = 2;
 const RESOURCE_TYPE_SYMBOL: number = 40000;
 // 左边尺寸常量
 const LEFT_ICON_SIZE: ResourceStr = '16vp';
 const LEFT_ICON_SIZE_NUMBER: number = 16;
 const LEFT_TEXT_NUMBER: number = 8;
 // 右边尺寸常量
-const BUTTON_ZONE_SIZE: number = 32;
-const BUTTON_HEIGHT: number = 28;
+const OPERATE_ITEM_LENGTH: number = 24;
 const ARROW_ICON_WIDTH: number = 12;
-const ARROW_ICON_HEIGHT: number = 24;
 const SINGLE_ICON_ZONE_SIZE: number = 28;
 const RIGHT_SINGLE_ICON_SIZE: ResourceStr = '24vp';
-const LOADING_SIZE: number = 24;
 const PADDING_LEVEL_2: number = 4;
 const MAX_RIGHT_WIDTH: Length = '34%';
 const MIN_FONT_SIZE: number = 1.75;
+const MIN_HOT_AREA_LENGTH: number = 40;
+const MULTI_ICON_REGION_WIDTH: number = 37;
+const ICON_REGION_X: number = -9;
+const ICON_REGION_Y: number = -6;
+const SINGLE_ICON_REGION_X: number = -12;
+const SINGLE_ICON_NUMBER: number = 1;
 
 export enum OperationType {
   TEXT_ARROW = 0,
@@ -137,6 +137,7 @@ function disabledStyle() {
 
 class SubHeaderModifier implements AttributeModifier<RowAttribute> {
   public isAgeing: boolean = false
+
   applyNormalAttribute(instance: RowAttribute): void {
     if (this.isAgeing) {
       instance.width('100%')
@@ -164,6 +165,8 @@ export struct SubHeader {
   // 内部变量
   @State textArrowBgColor: ResourceColor = $r('sys.color.ohos_id_color_sub_background_transparent');
   @State buttonBgColor: ResourceColor = $r('sys.color.ohos_id_color_sub_background_transparent');
+  @State buttonStyleWidth: number = 0;
+  @State buttonStyleHeight: number = 0;
   @State textArrowStyleWidth: number = 0;
   @State textArrowStyleHeight: number = 0;
   @State iconWidth: number = 0;
@@ -175,10 +178,13 @@ export struct SubHeader {
   @Prop contentPadding: LocalizedPadding;
   @State subHeaderMargin: LocalizedMargin = {
     start: LengthMetrics.resource($r('sys.float.margin_left')),
-    end: LengthMetrics.resource($r('sys.float.margin_right'))
+    end: LengthMetrics.resource($r('sys.float.margin_right')),
   };
   @Provide subHeaderTheme: SubHeaderTheme = new SubHeaderTheme();
+  isFollowingSystemFontScale: boolean = false;
+  appMaxFontScale: number = 3.2;
   constraintWidth: number = 0;
+  paddingLeft: number = 2;
 
   onWillApplyTheme(theme: Theme) {
     this.subHeaderTheme.fontPrimaryColor = theme.colors.fontPrimary;
@@ -195,8 +201,10 @@ export struct SubHeader {
   private commonContentPadding() {
     .padding({
       end: LengthMetrics.resource($r('sys.float.padding_level0')),
-      top: LengthMetrics.resource($r('sys.float.padding_level4')),
-      bottom: LengthMetrics.resource($r('sys.float.padding_level4')),
+      top: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.resource($r('sys.float.padding_level0'))
+        : LengthMetrics.resource($r('sys.float.padding_level4')),
+      bottom: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.resource($r('sys.float.padding_level0'))
+        : LengthMetrics.resource($r('sys.float.padding_level4')),
     })
   }
 
@@ -204,14 +212,62 @@ export struct SubHeader {
   private commonListPadding() {
     .padding({
       end: LengthMetrics.resource($r('sys.float.padding_level6')),
-      top: LengthMetrics.resource($r('sys.float.padding_level4')),
-      bottom: LengthMetrics.resource($r('sys.float.padding_level4')),
+      top: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.resource($r('sys.float.padding_level0'))
+        : LengthMetrics.resource($r('sys.float.padding_level4')),
+      bottom: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.resource($r('sys.float.padding_level0'))
+        : LengthMetrics.resource($r('sys.float.padding_level4')),
     })
   }
 
+  @Styles
+  private rightAreaClickEvent() {
+    .onClick(() => {
+      if ((this.operationType === OperationType.TEXT_ARROW || this.operationType === OperationType.BUTTON) &&
+      this.operationItem && this.operationItem.length > 0 && this.operationItem[0].action) {
+        this.operationItem[0].action();
+      }
+    })
+    .onTouch((event) => {
+      if (event.type === TouchType.Down) {
+        if (this.operationType === OperationType.TEXT_ARROW) {
+          this.textArrowBgColor = $r('sys.color.interactive_pressed');
+        }
+        if (this.operationType === OperationType.BUTTON) {
+          this.buttonBgColor = $r('sys.color.interactive_pressed');
+        }
+      }
+      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+        if (this.operationType === OperationType.TEXT_ARROW) {
+          this.textArrowBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
+        }
+        if (this.operationType === OperationType.BUTTON) {
+          this.buttonBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
+        }
+      }
+    })
+  }
+
+  updateFontScale(): number {
+    try {
+      let uiContext: UIContext = this.getUIContext();
+      let systemFontScale = (uiContext.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1;
+      if(!this.isFollowingSystemFontScale) {
+        return 1;
+      }
+      return Math.min(systemFontScale, this.appMaxFontScale);
+    } catch (exception) {
+      let code: number = (exception as BusinessError).code;
+      let message: string = (exception as BusinessError).message;
+      hilog.error(0x3900, 'Ace', `Faild to init fontsizescale info,cause, code: ${code}, message: ${message}`);
+      return 1;
+    }
+  }
+
   async aboutToAppear(): Promise<void> {
-    let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
-    this.fontSize = context.config?.fontSizeScale ?? 1;
+    let uiContext: UIContext = this.getUIContext();
+    this.isFollowingSystemFontScale = uiContext.isFollowingSystemFontScale();
+    this.appMaxFontScale = uiContext.getMaxFontScale();
+    this.fontSize = this.updateFontScale();
     if (this.isSuitableAging()) {
       this.ageing = true;
       this.subHeaderModifier.isAgeing = this.ageing;
@@ -238,8 +294,12 @@ export struct SubHeader {
           this.leftArea();
         }
         .margin({
-          top: $r('sys.float.padding_level8'),
-          bottom: $r('sys.float.padding_level1'),
+          top: LengthMetrics.resource($r('sys.float.padding_level8')),
+          bottom: LengthMetrics.resource($r('sys.float.padding_level1')),
+        })
+        .padding({
+          start: LengthMetrics.resource($r('sys.float.margin_left')),
+          end: LengthMetrics.resource($r('sys.float.margin_right')),
         })
         .width('100%')
 
@@ -249,17 +309,26 @@ export struct SubHeader {
         .margin({
           bottom: $r('sys.float.padding_level4'),
         })
+        .padding({
+          // 'sys.float.margin_left' id,value: 16vp
+          start: LengthMetrics.vp(Util.getNumberByResource(125830936, LEFT_ICON_SIZE_NUMBER) - this.paddingLeft),
+          // 'sys.float.margin_right' id,value: 16vp
+          end: LengthMetrics.vp(Util.getNumberByResource(125830937, LEFT_ICON_SIZE_NUMBER)),
+        })
         .justifyContent(FlexAlign.Start)
         .width('100%')
+        .rightAreaClickEvent()
       }
       .constraintSize({ minHeight: this.getMinHeight() })
-      .margin(this.contentMargin ?? this.subHeaderMargin)
       .padding(this.getAreaPadding())
     } else {
       Flex({ direction: FlexDirection.Row, alignItems: ItemAlign.End }) {
         Row() {
           this.leftArea();
         }
+        .margin({
+          top: this.fontSize >= MIN_FONT_SIZE ? $r('sys.float.padding_level8') : ''
+        })
         .width('100%')
         .flexShrink(1)
 
@@ -267,20 +336,25 @@ export struct SubHeader {
           this.rightArea();
         }
         .justifyContent(FlexAlign.End)
-        .constraintSize({ maxWidth: this.getMaxWidth() })
+        .alignItems(VerticalAlign.Bottom)
+        .constraintSize({
+          maxWidth: this.getRightAreaMaxWidth(),
+          minWidth: this.getRightAreaMinWidth(),
+          minHeight: MIN_HOT_AREA_LENGTH,
+        })
         .flexShrink(0)
+        .rightAreaClickEvent()
       }
       .constraintSize({ minHeight: this.getMinHeight() })
       .margin(this.contentMargin ?? this.subHeaderMargin)
       .padding(this.getAreaPadding())
     }
-
   }
 
   onMeasureSize(selfLayoutInfo: GeometryInfo, children: Measurable[], constraint: ConstraintSizeOptions): SizeResult {
     let result: SizeResult = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
     let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
-    this.fontSize = context.config?.fontSizeScale ?? 1;
+    this.fontSize = this.updateFontScale();
     if (this.isSuitableAging()) {
       this.ageing = true;
       this.subHeaderModifier.isAgeing = this.ageing;
@@ -302,12 +376,18 @@ export struct SubHeader {
     })
   }
 
-  private getMaxWidth(): Length {
+  private getRightAreaMaxWidth(): Length {
     if (this.operationType === OperationType.ICON_GROUP && (this.operationItem && this.operationItem.length > 0)) {
       return '100%';
-    } else {
-      return MAX_RIGHT_WIDTH;
     }
+    return MAX_RIGHT_WIDTH;
+  }
+
+  private getRightAreaMinWidth(): Length {
+    if (this.operationItem && this.operationItem.length > 0) {
+      return MIN_HOT_AREA_LENGTH;
+    }
+    return 0;
   }
 
   private getMinHeight(): Length {
@@ -439,6 +519,7 @@ export struct SubHeader {
           fontColor: this.subHeaderTheme.fontPrimaryColor,
         })
         .attributeModifier(this.primaryTitleModifier)
+        .accessibilityLevel('yes')
         .width('100%')
       Text($$.subContent)
         .secondaryTitleStyles({
@@ -452,6 +533,7 @@ export struct SubHeader {
           top: $r('sys.float.padding_level1'),
         })
         .attributeModifier(this.secondaryTitleModifier)
+        .accessibilityLevel('yes')
     }
     .commonContentPadding()
     .alignItems(HorizontalAlign.Start)
@@ -475,6 +557,7 @@ export struct SubHeader {
           this.changeFlexAlign(FlexAlign.SpaceBetween);
         })
         .attributeModifier(this.secondaryTitleModifier)
+        .accessibilityLevel('yes')
     }
     .alignItems(HorizontalAlign.Start)
     .commonListPadding()
@@ -523,6 +606,7 @@ export struct SubHeader {
           this.changeFlexAlign(FlexAlign.SpaceBetween);
         })
         .attributeModifier(this.primaryTitleModifier)
+        .accessibilityLevel('yes')
     }
     .alignItems(HorizontalAlign.Start)
     .commonContentPadding()
@@ -540,11 +624,9 @@ export struct SubHeader {
                 maxLines: DOUBLE_LINE_NUM,
                 fontColor: this.subHeaderTheme.fontButtonColor,
               })
-              .focusable(true)
           }
           .padding({
-            start: LengthMetrics.resource(this.ageing ? $r('sys.float.padding_level0') :
-            $r('sys.float.padding_level1')),
+            start: LengthMetrics.resource($r('sys.float.padding_level1')),
             end: LengthMetrics.resource($r('sys.float.padding_level1')),
             top: LengthMetrics.resource($r('sys.float.padding_level2')),
             bottom: LengthMetrics.resource($r('sys.float.padding_level2')),
@@ -555,27 +637,9 @@ export struct SubHeader {
           })
           .backgroundColor(this.buttonBgColor)
           .focusable(true)
-          .constraintSize({ minHeight: BUTTON_HEIGHT })
+          .constraintSize({ minHeight: OPERATE_ITEM_LENGTH })
           .justifyContent(FlexAlign.End)
           .borderRadius($r('sys.float.corner_radius_level4'))
-          .stateStyles({
-            focused: {
-              .border({
-                radius: $r('sys.float.corner_radius_level4'),
-                width: $r('sys.float.outline_extra_larger'),
-                color: this.subHeaderTheme.borderFocusColor,
-              })
-            },
-            pressed: pressedStyle,
-            disabled: disabledStyle,
-            normal: {
-              .border({
-                radius: $r('sys.float.corner_radius_level4'),
-                width: $r('sys.float.border_none'),
-                color: $r('sys.color.ohos_id_color_focused_outline_transparent'),
-              })
-            }
-          })
           .onHover((isHover: boolean) => {
             if (isHover) {
               this.buttonBgColor = this.subHeaderTheme.textArrowHoverBgColor;
@@ -583,25 +647,41 @@ export struct SubHeader {
               this.buttonBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
             }
           })
-          .onTouch((event) => {
-            if (event.type === TouchType.Down) {
-              this.buttonBgColor = $r('sys.color.interactive_pressed');
-            }
-            if (event.type === TouchType.Up) {
-              this.buttonBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
-            }
+          .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
+            this.buttonStyleWidth = Number(newValue.width);
+            this.buttonStyleHeight = Number(newValue.height);
           })
-          .onClick((event) => {
-            if (button.action) {
-              button.action();
-            }
-          })
+
+          Text()
+            .focusable(true)
+            .width(this.buttonStyleWidth)
+            .height(this.buttonStyleHeight)
+            .hitTestBehavior(HitTestMode.None)
+            .stateStyles({
+              focused: {
+                .border({
+                  radius: $r('sys.float.corner_radius_level4'),
+                  width: $r('sys.float.outline_extra_larger'),
+                  color: this.subHeaderTheme.borderFocusColor,
+                })
+              },
+              pressed: pressedStyle,
+              disabled: disabledStyle,
+              normal: {
+                .border({
+                  radius: $r('sys.float.corner_radius_level4'),
+                  width: $r('sys.float.border_none'),
+                  color: $r('sys.color.ohos_id_color_focused_outline_transparent'),
+                })
+              }
+            })
         }
       }
       .focusable(true)
     }
     .margin({
       start: LengthMetrics.resource(this.ageing ? $r('sys.float.padding_level0') : $r('sys.float.padding_level4')),
+      bottom: LengthMetrics.resource(this.ageing ? $r('sys.float.padding_level0') : $r('sys.float.padding_level2')),
     })
     .justifyContent(FlexAlign.End)
   }
@@ -615,7 +695,6 @@ export struct SubHeader {
       return (this.ageing && this.icon) ? LengthMetrics.vp(LEFT_ICON_SIZE_NUMBER +
         LEFT_TEXT_NUMBER) : LengthMetrics.vp(0);
     }
-
   }
 
   @Builder
@@ -641,7 +720,7 @@ export struct SubHeader {
         .borderRadius($r('sys.float.corner_radius_level4'))
         .focusable(true)
         .backgroundColor(this.textArrowBgColor)
-        .constraintSize({ minHeight: BUTTON_ZONE_SIZE })
+        .constraintSize({ minHeight: OPERATE_ITEM_LENGTH })
         .padding({
           start: this.getTextArrowPaddingLeft(),
           top: this.ageing ? LengthMetrics.vp(0) : LengthMetrics.resource($r('sys.float.padding_level2')),
@@ -656,7 +735,7 @@ export struct SubHeader {
           Image($r('sys.media.ohos_ic_public_arrow_right'))
             .fillColor(this.subHeaderTheme.iconArrowColor)
             .width(ARROW_ICON_WIDTH)
-            .height(ARROW_ICON_HEIGHT)
+            .height(OPERATE_ITEM_LENGTH)
             .focusable(true)
             .draggable(false)
             .matchTextDirection(true)
@@ -665,11 +744,6 @@ export struct SubHeader {
         .height(this.textArrowStyleHeight)
         .width(this.textArrowStyleWidth)
         .hitTestBehavior(HitTestMode.None)
-        .border({
-          radius: $r('sys.float.corner_radius_level4'),
-          width: $r('sys.float.outline_extra_larger'),
-          color: $r('sys.color.interactive_focus'),
-        })
         .stateStyles({
           focused: {
             .border({
@@ -699,19 +773,6 @@ export struct SubHeader {
           this.textArrowBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
         }
       })
-      .onTouch((event) => {
-        if (event.type === TouchType.Down) {
-          this.textArrowBgColor = $r('sys.color.interactive_pressed');
-        }
-        if (event.type === TouchType.Up) {
-          this.textArrowBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
-        }
-      })
-      .onClick((event) => {
-        if (textArrow.action) {
-          textArrow.action();
-        }
-      })
     }
     .attributeModifier(this.subHeaderModifier)
     .focusable(true)
@@ -725,9 +786,9 @@ export struct SubHeader {
   @Builder
   IconGroupStyle(operationItem: Array<OperationOption>): void {
     Row() {
-      ForEach(operationItem, (item: OperationOption, index?: number) => {
+      ForEach(operationItem, (item: OperationOption, index: number) => {
         if (Util.isResourceType(item.value)) {
-          if (index === INDEX_ZERO) {
+          if (index <= INDEX_TWO) {
             SingleIconStyle({
               item: {
                 iconOptions: {
@@ -736,41 +797,29 @@ export struct SubHeader {
                   this.operationSymbolOptions[index] : null,
                 },
                 action: item.action,
-              }
-            })
-          } else if (index === INDEX_ONE || index === INDEX_TWO) {
-            SingleIconStyle({
-              item: {
-                action: item.action,
-                iconOptions: {
-                  icon: item.value as Resource,
-                  symbolicIconOption: this.operationSymbolOptions && this.operationSymbolOptions.length > index ?
-                  this.operationSymbolOptions[index] : null,
-                },
-              }
+              },
+              isSingleIcon: this.operationItem?.length === SINGLE_ICON_NUMBER,
             })
               .margin({
                 start: LengthMetrics.resource($r('sys.float.padding_level4')),
+                bottom: LengthMetrics.resource($r('sys.float.padding_level3')),
               })
           } else {
             // 最大支持3个ICON,此场景不支持
           }
         }
-      });
+      })
     }
     .justifyContent(FlexAlign.End)
     .focusable(true)
-    .margin({
-      start: LengthMetrics.resource($r('sys.float.padding_level4')),
-    })
   }
 
   @Builder
   LoadingProcessStyle(): void {
     Row() {
       LoadingProgress()
-        .width(LOADING_SIZE)
-        .height(LOADING_SIZE)
+        .width(OPERATE_ITEM_LENGTH)
+        .height(OPERATE_ITEM_LENGTH)
         .color($r('sys.color.icon_secondary'))
     }
     .justifyContent(FlexAlign.End)
@@ -805,6 +854,7 @@ struct SingleIconStyle {
   @State isFocus: boolean = false;
   item: ContentIconOption | null = null;
   @Consume subHeaderTheme: SubHeaderTheme;
+  isSingleIcon: boolean = true;
 
   build() {
     if (this.item && this.item.iconOptions) {
@@ -814,21 +864,20 @@ struct SingleIconStyle {
       .focusable(true)
       .width(SINGLE_ICON_ZONE_SIZE)
       .height(SINGLE_ICON_ZONE_SIZE)
-      .margin({
-        bottom: $r('sys.float.padding_level2'),
-      })
       .justifyContent(FlexAlign.Center)
-      .borderRadius($r('sys.float.corner_radius_level4'))
       .backgroundColor(this.bgColor)
       .stateStyles({
         normal: {
-          .border({ width: 0 })
-          .backgroundColor($r('sys.color.ohos_id_color_sub_background_transparent'))
+          .border({
+            radius: $r('sys.float.corner_radius_level4'),
+            width: $r('sys.float.border_none'),
+            color: $r('sys.color.ohos_id_color_sub_background_transparent'),
+          })
         },
         focused: {
           .border({
             radius: $r('sys.float.corner_radius_level4'),
-            width: BORDER_WIDTH,
+            width: $r('sys.float.outline_extra_larger'),
             color: this.subHeaderTheme.borderFocusColor,
             style: BorderStyle.Solid,
           })
@@ -837,7 +886,7 @@ struct SingleIconStyle {
         disabled: disabledStyle,
       })
       .onTouch((event) => {
-        if (event.type === TouchType.Down) {
+        if (event.type === TouchType.Down || TouchType.Cancel) {
           this.bgColor = $r('sys.color.interactive_pressed');
         }
         if (event.type === TouchType.Up) {
@@ -851,12 +900,20 @@ struct SingleIconStyle {
           this.bgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
         }
       })
+      .responseRegion(this.iconResponseRegion())
       .onClick((event) => {
         if (this.item?.action) {
           this.item?.action();
         }
       })
     }
+  }
+
+  private iconResponseRegion(): Rectangle {
+    if (this.isSingleIcon) {
+      return { x: SINGLE_ICON_REGION_X, y: ICON_REGION_Y, width: MIN_HOT_AREA_LENGTH, height: MIN_HOT_AREA_LENGTH };
+    }
+    return { x: ICON_REGION_X, y: ICON_REGION_Y, width: MULTI_ICON_REGION_WIDTH, height: MIN_HOT_AREA_LENGTH };
   }
 
   private fontSizeValue(item: ContentIconOption): Length {
@@ -888,16 +945,6 @@ struct SingleIconStyle {
 }
 
 class Util {
-  private static readonly DEFAULT_VALUE: number = 0;
-  private static readonly DEFAULT_BREAKPOINT_S: number = 600;
-  private static readonly DEFAULT_BREAKPOINT_M: number = 840;
-  private static readonly CALCULATE_BREAKPOINT_S: number = this.getNumberByResource('breakpoint_horizontal_s');
-  private static readonly CALCULATE_BREAKPOINT_M: number = this.getNumberByResource('breakpoint_horizontal_m');
-  public static readonly BREAKPOINT_S: number =
-    this.CALCULATE_BREAKPOINT_S === this.DEFAULT_VALUE ? this.DEFAULT_BREAKPOINT_S : this.CALCULATE_BREAKPOINT_S;
-  public static readonly BREAKPOINT_M: number =
-    this.CALCULATE_BREAKPOINT_M === this.DEFAULT_VALUE ? this.DEFAULT_BREAKPOINT_M : this.CALCULATE_BREAKPOINT_M;
-
   /**
    * 是否symbol资源
    * @param resourceStr  资源
@@ -929,17 +976,22 @@ class Util {
   /**
    * get resource size
    *
-   * @param resourceName resource name
+   * @param resourceName resource id
    * @returns resource size
    */
-  public static getNumberByResource(resourceName: string): number {
+  public static getNumberByResource(resourceId: number, defaultNumber: number): number {
     try {
-      return resourceManager.getSystemResourceManager().getNumberByName(resourceName);
+      let resourceNumber: number = resourceManager.getSystemResourceManager().getNumber(resourceId);
+      if (resourceNumber === 0) {
+        return defaultNumber;
+      } else {
+        return resourceNumber;
+      }
     } catch (error) {
       let code: number = (error as BusinessError).code;
       let message: string = (error as BusinessError).message;
       hilog.error(0x3900, 'Ace', `SubHeader getNumberByResource error, code: ${code}, message: ${message}`);
-      return Util.DEFAULT_VALUE;
+      return 0;
     }
   }
 
@@ -950,7 +1002,7 @@ class Util {
     } else if (typeof fontSize === 'number') {
       return fontSize;
     } else {
-      return resourceManager.getSystemResourceManager().getNumber(fontSize);
+      return getContext().resourceManager.getNumber(fontSize);
     }
   }
 

@@ -121,6 +121,8 @@ typedef enum {
     ARKUI_NODE_GRID,
     /** Grid item. */
     ARKUI_NODE_GRID_ITEM,
+    /** Custom_Span. */
+    ARKUI_NODE_CUSTOM_SPAN,
 } ArkUI_NodeType;
 
 /**
@@ -617,8 +619,8 @@ typedef enum {
      * .value[0]?.f32: blur radius of the shadow, in vp.\n
      * .value[1]?.i32: whether to enable the coloring strategy. The value <b>1</b> means to enable the coloring
      * strategy, and <b>0</b> (default value) means the opposite.\n
-     * .value[2]?.f32: offset of the shadow along the x-axis, in vp.\n
-     * .value[3]?.f32: offset of the shadow along the y-axis, in vp.\n
+     * .value[2]?.f32: offset of the shadow along the x-axis, in px.\n
+     * .value[3]?.f32: offset of the shadow along the y-axis, in px.\n
      * .value[4]?.i32: shadow type {@link ArkUI_ShadowType}. The default value is <b>ARKUI_SHADOW_TYPE_COLOR</b>.\n
      * .value[5]?.u32: shadow color, in 0xARGB format. For example, 0xFFFF0000 indicates red.\n
      * .value[6]?.u32: whether to fill the shadow. The value <b>1</b> means to fill the shadow, and <b>0</b>
@@ -628,8 +630,8 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].f32: blur radius of the shadow, in vp.\n
      * .value[1].i32: whether to enable the coloring strategy. \n
-     * .value[2].f32: offset of the shadow along the x-axis, in vp.\n
-     * .value[3].f32: offset of the shadow along the y-axis, in vp.\n
+     * .value[2].f32: offset of the shadow along the x-axis, in px.\n
+     * .value[3].f32: offset of the shadow along the y-axis, in px.\n
      * .value[4].i32: shadow type {@link ArkUI_ShadowType}. The default value is <b>ARKUI_SHADOW_TYPE_COLOR</b>.\n
      * .value[5].u32: shadow color, in 0xARGB format. For example, 0xFFFF0000 indicates red.\n
      * .value[6].u32: whether to fill the shadow. The value <b>1</b> means to fill the shadow, and <b>0</b>
@@ -1206,12 +1208,12 @@ typedef enum {
      * the upper left corner of the component. This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].f32: position along the x-axis, in vp. \n
-     * .value[1].f32: position along the y-axis, in vp. \n
+     * .value[0].f32: position along the x-axis, in px. \n
+     * .value[1].f32: position along the y-axis, in px. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].f32: position along the x-axis, in vp. \n
-     * .value[1].f32: position along the y-axis, in vp. \n
+     * .value[0].f32: position along the x-axis, in px. \n
+     * .value[1].f32: position along the y-axis, in px. \n
      *
      */
     NODE_BACKGROUND_IMAGE_POSITION,
@@ -1598,7 +1600,6 @@ typedef enum {
      */
     NODE_ACCESSIBILITY_VALUE = 91,
     
-    
     /**
      * @brief 定义控制组件扩展其安全区域，支持属性设置，属性重置和属性获取。
      *
@@ -1615,16 +1616,17 @@ typedef enum {
      */
     NODE_EXPAND_SAFE_AREA = 92,
     /**
-     * @brief 定义控制组件触发可视区域面积变更事件的可视区域面积占组件本身面积的比例。
+     * @brief Defines the visible area ratio (visible area/total area of the component) threshold for invoking the
+     * visible area change event of the component.
      *
-     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
-     * .value[...].f32：占比数值，输入范围0-1
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[...].f32: threshold array. The value range is 0 to 1.
      * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[...].f32：占比数值；\n。 \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[...].f32: threshold array. \n
      *
      */
-    NODE_VISIBLE_AREA_CHANGE_RADIO = 93,
+    NODE_VISIBLE_AREA_CHANGE_RATIO = 93,
 
     /**
      * @brief 定义组件插入和删除时显示过渡动效，支持属性设置，属性获取。
@@ -1637,6 +1639,30 @@ typedef enum {
      *
      */
     NODE_TRANSITION = 94,
+
+    /**
+     * @brief Defines the component ID.
+     * This attribute can be obtained through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for obtaining the attribute:\n
+     * .value[0].i32: component ID. \n
+     *
+     */
+    NODE_UNIQUE_ID = 95,
+
+    /**
+     * @brief Set the current component system focus box style.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].f32: The distance between the focus box and the edge of the component. \n
+     * Positive numbers represent the outer side, negative numbers represent the inner side. \n
+     * Percentage is not supported. \n
+     * .value[1].f32: Focus box width. Negative numbers and percentages are not supported. \n
+     * .value[2].u32: Focus box color. \n
+     * \n
+     *
+     */
+    NODE_FOCUS_BOX = 96,
 
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
@@ -1997,6 +2023,18 @@ typedef enum {
     * .object indicates ArkUI_StyledString formatted string data. The parameter type is {@link ArkUI_StyledString}. \n
     */
     NODE_TEXT_CONTENT_WITH_STYLED_STRING,
+
+    /**
+     * @brief 设置文本居中显示。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：文本是否居中，默认值false。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：文本是否居中。\n
+     *
+     */
+    NODE_TEXT_HALF_LEADING = 1029,
 
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
@@ -4535,6 +4573,18 @@ typedef enum {
     NODE_SWIPER_SWIPE_TO_INDEX,
 
     /**
+    * @brief Set to disable component navigation point interactions.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .value[0].i32: Set to disable component navigation point interaction, set to true to indicate the navigation point
+    * is interactive, default value is true.\n
+    * \n
+    * The return value of the attribute acquisition method {@link ArkUI_AttributeItem} format: \n
+    * .value[0].i32: Set to disable component navigation point interactions. \n
+    */
+    NODE_SWIPER_INDICATOR_INTERACTIVE,
+
+    /**
      * @brief: Set the delineation component of the ListItem, supporting property settings, property resets, and
      * property acquisition interfaces.
      *
@@ -5222,31 +5272,40 @@ typedef enum {
      */
     NODE_ON_TOUCH_INTERCEPT,
     /**
-     * @brief 组件可见区域变化事件。
+     * @brief Defines the visible area change event.
      *
-     * 触发该事件的条件：组件可见面积与自身面积的比值接近设置的阈值时触发回调。\n
-     * 传入参数{@link ArkUI_AttributeItem}格式： \n
-     * .value[0...].f32: 阈值数组，阈值表示组件可见面积与组件自身面积的比值。每个阈值的取值范围均为[0.0, 1.0]\n
-     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
-     * {@link ArkUI_NodeComponentEvent}中包含2个参数：\n
-     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：组件可见面积与自身面积的比值与上次变化相比的情况，变大为1，变小为0。\n
-     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>：触发回调时组件可见面积与自身面积的比值。\n
+     * This event is triggered when the ratio of the component's visible area to its total area is greater than or less
+     * than the threshold.
+     * Before registering this event, you must set <b>NODE_VISIBLE_AREA_CHANGE_RATIO</b>. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains two parameters:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: how the ratio of the component's visible area to its total area
+     * changes compared to the previous one. The value <b>1</b> indicates an increase, and <b>0</b> indicates a
+     * decrease. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>: ratio of the component's visible area to its total area when this
+     * callback is invoked. \n
      */
     NODE_EVENT_ON_VISIBLE_AREA_CHANGE,
     /**
-     * @brief 鼠标进入或退出组件事件。
+     * @brief Defines the event triggered when the mouse pointer is moved over or away from the component.
      *
-     * 触发该事件的条件：鼠标进入或退出组件时触发回调。\n
-     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
-     * {@link ArkUI_NodeComponentEvent}中包含1个参数：\n
-     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：鼠标是否悬浮在组件上，鼠标进入时为1，退出时为0。\n
+      \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: whether the mouse pointer is hovered over the component.
+     * The value <b>1</b> indicates that the mouse pointer is hovered over the component, and <b>0</b> indicates that
+     * the mouse pointer is moved away from the component. \n
      */
     NODE_ON_HOVER,
     /**
-     * @brief 组件点击事件。
+     * @brief Defines the click event.
      *
-     * 触发该事件的条件：组件被鼠标按键点击或者鼠标在组件上悬浮移动时触发该回调。\n
-     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_UIInputEvent}。\n
+     * This event is triggered when the component is clicked by a mouse device button or when the mouse pointer moves
+     * within the component. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_UIInputEvent}. \n
      */
     NODE_ON_MOUSE,
     /**
@@ -5277,6 +5336,67 @@ typedef enum {
      *
      */
     NODE_ON_ACCESSIBILITY_ACTIONS,
+
+    /**
+     * @brief Notifies the listener of the interaction state prior to a drop and drop operation.
+     *
+     * This event is triggered when a drag operation is about to start on a draggable item. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: corresponds to {@link ArkUI_PreDragStatus}. \n
+     */
+    NODE_ON_PRE_DRAG = 14,
+    /**
+     * @brief Called when the user starts to drag an ite
+     *
+     * A drag operation is recognized only when the dragged item is moved far enough. \n
+     * When the event callback occurs, the {@link ArkUI_DragEvent} object can be obtained from the
+     * {@link ArkUI_NodeEvent} object. \n
+     */
+    NODE_ON_DRAG_START = 15,
+    /**
+     * @brief Called when a dragged item enters the boundaries of the current component.
+     *
+     * The current component refers to the component that listens for this event. \n
+     * When the event callback occurs, the {@link ArkUI_DragEvent} object can be obtained from the
+     * {@link ArkUI_NodeEvent} object. \n
+     */
+    NODE_ON_DRAG_ENTER = 16,
+    /**
+     * @brief Called  when a dragged item moves in the current component.
+     *
+     * The current component refers to the component that listens for this event. \n
+     * When the event callback occurs, the {@link ArkUI_DragEvent} object can be obtained from the
+     * {@link ArkUI_NodeEvent} object. \n
+     */
+    NODE_ON_DRAG_MOVE = 17,
+    /**
+     * @brief Called when a dragged item leaves the boundaries of the current component.
+     *
+     * The current component refers to the component that listens for this event. \n
+     * When the event callback occurs, the {@link ArkUI_DragEvent} object can be obtained from the
+     * {@link ArkUI_NodeEvent} object. \n
+     */
+    NODE_ON_DRAG_LEAVE = 18,
+    /**
+     * @brief Called when a dragged item is dropped on the current component.
+     * The component can obtain the drag data for processing through the callback.
+     *
+     * The current component refers to the component that listens for this event. \n
+     * When the event callback occurs, the {@link ArkUI_DragEvent} object can be obtained from the
+     * {@link ArkUI_NodeEvent} object. \n
+     */
+    NODE_ON_DROP = 19,
+    /**
+     * @brief Called when a drag operation ends.
+     * The drag source can obtain the drag result by registering this callback.
+     *
+     * A drag operation ends when the dragged item is released.
+     * When the event callback occurs, the {@link ArkUI_DragEvent} object can be obtained from the
+     * {@link ArkUI_NodeEvent} object. \n
+     */
+    NODE_ON_DRAG_END = 20,
     /**
      * @brief 文本设置TextDataDetectorConfig且识别成功时，触发onDetectResultUpdate回调。
      *
@@ -5457,6 +5577,44 @@ typedef enum {
      */
     NODE_TEXT_INPUT_ON_CONTENT_SCROLL,
     /**
+     * @brief 定义在将要输入时，触发回调的枚举值。
+     *
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为0的value.f32：插入的值的位置信息。\n
+     * 通过OH_ArkUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：插入的值。
+     * @return 在返回true时，表示正常插入，返回false时，表示不插入。
+     * 可通过OH_ArKUI_NodeEvent_SetReturnValue设置返回值。\n
+     */
+    NODE_TEXT_INPUT_ON_WILL_INSERT = 7009,
+    /**
+     * @brief 定义在输入完成时，触发回调的枚举值。
+     *
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为0的value.f32：插入的值的位置信息。\n
+     * 通过OH_ArkUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：插入的值。
+     */
+    NODE_TEXT_INPUT_ON_DID_INSERT = 7010,
+    /**
+     * @brief 定义在将要删除时，触发回调的枚举值。
+     *
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为0的value.f32：删除的值的位置信息。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为1的value.i32：删除值的方向。\n
+     * 通过OH_ArkUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：删除的值。
+     * @return 在返回true时，表示正常插入，返回false时，表示不插入。\n
+     * 可通过OH_ArKUI_NodeEvent_SetReturnValue设置返回值。\n
+     */
+    NODE_TEXT_INPUT_ON_WILL_DELETE = 7011,
+    /**
+     * @brief 定义在删除完成时，触发回调的枚举值。
+     *
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为0的value.f32：删除的值的位置信息。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为1的value.i32：删除值的方向。\n
+     * 通过OH_ArkUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：删除的值。
+     */
+    NODE_TEXT_INPUT_ON_DID_DELETE = 7012,
+    /**
      * @brief Defines the event triggered when the input in the text box changes.
      *
       \n
@@ -5546,7 +5704,44 @@ typedef enum {
      *
      */
     NODE_TEXT_AREA_ON_CONTENT_SIZE_CHANGE,
-
+/**
+     * @brief 定义在将要输入时，触发回调的枚举值。
+     *
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为0的value.f32：插入的值的位置信息。\n
+     * 通过OH_ArkUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：插入的值。
+     * @return 在返回true时，表示正常插入，返回false时，表示不插入。
+     * 可通过OH_ArKUI_NodeEvent_SetReturnValue设置返回值。\n
+     */
+    NODE_TEXT_AREA_ON_WILL_INSERT = 8008,
+    /**
+     * @brief 定义在输入完成时，触发回调的枚举值。
+     *
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为0的value.f32：插入的值的位置信息。\n
+     * 通过OH_ArkUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：插入的值。
+     */
+    NODE_TEXT_AREA_ON_DID_INSERT = 8009,
+    /**
+     * @brief 定义在将要删除时，触发回调的枚举值。
+     *
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为0的value.f32：删除的值的位置信息。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为1的value.i32：删除值的方向。\n
+     * 通过OH_ArkUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：删除的值。
+     * @return 在返回true时，表示正常插入，返回false时，表示不插入。\n
+     * 可通过OH_ArKUI_NodeEvent_SetReturnValue设置返回值。\n
+     */
+    NODE_TEXT_AREA_ON_WILL_DELETE = 8010,
+    /**
+     * @brief 定义在删除完成时，触发回调的枚举值。
+     *
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为0的value.f32：删除的值的位置信息。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为1的value.i32：删除值的方向。\n
+     * 通过OH_ArkUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：删除的值。
+     */
+    NODE_TEXT_AREA_ON_DID_DELETE = 8011,
     /**
      * @brief Defines the event triggered when the selected status of the <b>ARKUI_NODE_CHECKBOX</b> component changes.
      *
@@ -5869,7 +6064,8 @@ typedef enum {
      * settings, such as keyboard and mouse operations. \n
      * 2. Scrolling can be initiated by calling the controller API. \n
      * 3. The out-of-bounds bounce effect is supported. \n
-     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is {@link ArkUI_NodeComponentEvent}. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
      * {@link ArkUI_NodeComponentEvent} contains two parameters: \n
      * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: scroll offset of each frame. The offset is positive when the list
      * is scrolled up and negative when the list is scrolled down. \n
@@ -6080,10 +6276,52 @@ ArkUI_StringAsyncEvent* OH_ArkUI_NodeEvent_GetStringAsyncEvent(ArkUI_NodeEvent* 
 void* OH_ArkUI_NodeEvent_GetUserData(ArkUI_NodeEvent* event);
 
 /**
- * @brief Defines the dirty area flag passed in the <b>::markDirty</b> API.
+ * @brief 获取组件回调事件的数字类型参数。
  *
+ * @param event 组件事件指针。
+ * @param index 返回值索引。
+ * @param value 具体返回值。
+ * @return 错误码。
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} 成功。
+ *         {@link ARKUI_ERROR_CODE_NODE_EVENT_PARAM_INVALID} 组件事件中参数长度超限。
+ *         {@link ARKUI_ERROR_CODE_NODE_EVENT_NO_RETURN} 组件事件不支持返回值。
  * @since 12
  */
+int32_t OH_ArkUI_NodeEvent_GetNumberValue(ArkUI_NodeEvent* event, int32_t index, ArkUI_NumberValue* value);
+
+    /**
+ * @brief 获取组件回调事件的字符串类型参数，字符串数据仅在事件回调过程中有效，需要在事件回调外使用建议进行额外拷贝处理。
+ *
+ * @param event 组件事件指针。
+ * @param index 返回值索引。
+ * @param string 字符串数组的指针。
+ * @param stringSize 字符串数组的长度。
+ * @return 错误码。
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} 成功。
+ *         {@link ARKUI_ERROR_CODE_NODE_EVENT_PARAM_INDEX_OUT_OF_RANGE} 组件事件中参数长度超限。
+ *         {@link ARKUI_ERROR_CODE_NODE_EVENT_PARAM_INVALID} 组件事件中不存在该数据。
+ * @since 12
+ */
+int32_t OH_ArkUI_NodeEvent_GetStringValue(ArkUI_NodeEvent* event, int32_t index, char** string, int32_t* stringSize);
+
+/**
+    * @brief 设置组件回调事件的返回值。
+    *
+    * @param event 组件事件指针。
+    * @param value 事件数字类型数组。
+    * @param size 数组长度。
+    * @return 错误码。
+    *         {@link ARKUI_ERROR_CODE_NO_ERROR} 成功。
+    *         {@link ARKUI_ERROR_CODE_NODE_EVENT_NO_RETURN} 组件事件不支持返回值。
+    * @since 12
+    */
+int32_t OH_ArkUI_NodeEvent_SetReturnNumberValue(ArkUI_NodeEvent* event, ArkUI_NumberValue* value, int32_t size);
+
+/**
+    * @brief Defines the dirty area flag passed in the <b>::markDirty</b> API.
+    *
+    * @since 12
+    */
 typedef enum {
     /**
      * @brief Remeasure.
@@ -6160,7 +6398,7 @@ typedef enum {
 *
 * @since 12
 */
-ArkUI_NodeAdapterHandle OH_ArkUI_NodeAdapter_Create();
+ArkUI_NodeAdapterHandle OH_ArkUI_NodeAdapter_Create(void);
 
 /**
 * @brief Destroys a component adapter.
@@ -6908,6 +7146,45 @@ ArkUI_NodeHandle OH_ArkUI_NodeCustomEvent_GetNodeHandle(ArkUI_NodeCustomEvent* e
 ArkUI_NodeCustomEventType OH_ArkUI_NodeCustomEvent_GetEventType(ArkUI_NodeCustomEvent* event);
 
 /**
+* @brief 通过自定义组件事件获取自定义段落组件的测量信息。
+*
+* @param event 自定义组件事件。
+* @param info 需要获取的测量信息。
+* @return 错误码。
+*         {@link ARKUI_ERROR_CODE_NO_ERROR} 成功。
+*         {@link ARKUI_ERROR_CODE_PARAM_INVALID} 函数参数异常。
+* @since 12
+*/
+int32_t OH_ArkUI_NodeCustomEvent_GetCustomSpanMeasureInfo(
+    ArkUI_NodeCustomEvent* event, ArkUI_CustomSpanMeasureInfo* info);
+
+/**
+* @brief 通过自定义组件事件设置自定义段落的度量指标。
+*
+* @param event 自定义组件事件。
+* @param metrics 需要获取的度量指标信息。
+* @return 错误码。
+*         {@link ARKUI_ERROR_CODE_NO_ERROR} 成功。
+*         {@link ARKUI_ERROR_CODE_PARAM_INVALID} 函数参数异常。
+* @since 12
+*/
+int32_t OH_ArkUI_NodeCustomEvent_SetCustomSpanMetrics(
+    ArkUI_NodeCustomEvent* event, ArkUI_CustomSpanMetrics* metrics);
+
+/**
+* @brief 通过自定义组件事件获取自定义段落组件的绘制信息。
+*
+* @param event 自定义组件事件。
+* @param event 需要获取的绘制信息。
+* @return 错误码。
+*         {@link ARKUI_ERROR_CODE_NO_ERROR} 成功。
+*         {@link ARKUI_ERROR_CODE_PARAM_INVALID} 函数参数异常。
+* @since 12
+*/
+int32_t OH_ArkUI_NodeCustomEvent_GetCustomSpanDrawInfo(
+    ArkUI_NodeCustomEvent* event, ArkUI_CustomSpanDrawInfo* info);
+
+/**
  * @brief Adds a component to a node content.
  *
  * @param content Indicates the pointer to the node content instance.
@@ -7094,19 +7371,97 @@ int32_t OH_ArkUI_NodeUtils_GetPositionWithTranslateInWindow(ArkUI_NodeHandle nod
 int32_t OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen(ArkUI_NodeHandle node, ArkUI_IntOffset* translateOffset);
 
 /**
-* @brief The event called when the sliding operation offset changes.
+ * @brief The event called when the sliding operation offset changes.
+ *
+ * @param node Indicates the target node.
+ * @param userData Indicates the custom data to be saved.
+ * @param onFinish Callback Events.
+ *        offset Slide offset.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ *         {@link ARKUI_ERROR_CODE_ATTRIBUTE_OR_EVENT_NOT_SUPPORTED} The component does not support this event.
+ * @since 12
+ */
+int32_t OH_ArkUI_List_CloseAllSwipeActions(ArkUI_NodeHandle node, void* userData, void (*onFinish)(void* userData));
+
+/**
+* @brief Obtain the UIContext pointer to the page where the node is located.
 *
-* @param node Indicates the target node.
-* @param userData Indicates the custom data to be saved.
-* @param onFinish Callback Events.
-*        offset Slide offset.
-* @return Error code.
-*         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
-*         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
-*         {@link ARKUI_ERROR_CODE_ATTRIBUTE_OR_EVENT_NOT_SUPPORTED} The component does not support this event.
+* @param node The node.
+* @return The UIContext pointer.
+*         If a null pointer is returned, it may be because the node is empty.
 * @since 12
 */
-int32_t OH_ArkUI_List_CloseAllSwipeActions(ArkUI_NodeHandle node, void* userData, void (*onFinish)(void* userData));
+ArkUI_ContextHandle OH_ArkUI_GetContextByNode(ArkUI_NodeHandle node);
+
+/**
+ * @brief The event called when the system color mode changes.
+ *        Only one system color change callback can be registered for the same component.
+ *
+ * @param node Indicates the target node.
+ * @param userData Indicates the custom data to be saved.
+ * @param onColorModeChange Callback Events.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ *         {@link ARKUI_ERROR_CODE_ATTRIBUTE_OR_EVENT_NOT_SUPPORTED} The component does not support this event.
+ * @since 12
+ */
+int32_t OH_ArkUI_RegisterSystemColorModeChangeEvent(
+    ArkUI_NodeHandle node, void* userData, void (*onColorModeChange)(ArkUI_SystemColorMode colorMode, void* userData));
+
+/**
+ * @brief Unregister the event callback when the system color mode changes.
+ *
+ * @param node Indicates the target node.
+ * @since 12
+ */
+void OH_ArkUI_UnregisterSystemColorModeChangeEvent(ArkUI_NodeHandle node);
+
+/**
+ * @brief The event called when the system font style changes.
+ *        Only one system font change callback can be registered for the same component.
+ *
+ * @param node Indicates the target node.
+ * @param userData Indicates the custom data to be saved.
+ * @param onFontStyleChange Callback Events.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ *         {@link ARKUI_ERROR_CODE_ATTRIBUTE_OR_EVENT_NOT_SUPPORTED} The component does not support this event.
+ * @since 12
+ */
+int32_t OH_ArkUI_RegisterSystemFontStyleChangeEvent(ArkUI_NodeHandle node, void* userData,
+    void (*onFontStyleChange)(ArkUI_SystemFontStyleEvent* event, void* userData));
+
+/**
+ * @brief Unregister the event callback when the system font style changes.
+ *
+ * @param node Indicates the target node.
+ * @since 12
+ */
+void OH_ArkUI_UnregisterSystemFontStyleChangeEvent(ArkUI_NodeHandle node);
+
+/**
+ * @brief Retrieve the font size value for system font change events.
+ *
+ * @param event Indicates a pointer to the current system font change event.
+ * @return Updated system font size scaling factor. Default value: 1.0.
+ *         -1 indicates a retrieval error.
+ * @since 12
+ */
+float OH_ArkUI_SystemFontStyleEvent_GetFontSizeScale(const ArkUI_SystemFontStyleEvent* event);
+
+/**
+ * @brief Retrieve the font thickness values for system font change events.
+ *
+ * @param event Indicates a pointer to the current system font change event.
+ * @return The updated system font thickness scaling factor. Default value: 1.0.
+ *         -1 indicates a retrieval error.
+ * @since 12
+ */
+float OH_ArkUI_SystemFontStyleEvent_GetFontWeightScale(const ArkUI_SystemFontStyleEvent* event);
 
 #ifdef __cplusplus
 };

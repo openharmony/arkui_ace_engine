@@ -17,7 +17,6 @@
 
 #include "base/network/download_manager.h"
 #include "core/common/resource/resource_manager.h"
-#include "core/common/resource/resource_object.h"
 #include "core/common/resource/resource_wrapper.h"
 #include "core/components/font/rosen_font_collection.h"
 #include "core/pipeline/base/rosen_render_context.h"
@@ -99,8 +98,8 @@ void RosenFontLoader::LoadFromNetwork(const RefPtr<PipelineBase>& context)
                     AceLogTag::ACE_FONT, "Sync Download font Failed,errorMessage is %{public}s", errorMessage.c_str());
             };
             downloadCallback.cancelCallback = downloadCallback.failCallback;
-            if (!DownloadManager::GetInstance()->DownloadSync(
-                    std::move(downloadCallback), fontLoader->familySrc_, context->GetInstanceId())) {
+            if (!DownloadManager::GetInstance()->DownloadSync(std::move(downloadCallback),
+                fontLoader->familySrc_, context->GetInstanceId(), -1)) {
                 return;
             }
         },
@@ -184,7 +183,8 @@ RefPtr<Asset> RosenFontLoader::GetAssetFromFile(const std::string& fileName) con
         return nullptr;
     }
     std::fclose(fp);
-    LOGI("[%{private}s] length: %{public}zu/%{public}zu success", fileName.c_str(), rsize, size);
+    TAG_LOGI(
+        AceLogTag::ACE_FONT, "[%{private}s] length: %{public}zu/%{public}zu success", fileName.c_str(), rsize, size);
     return AceType::MakeRefPtr<RSAsset>(std::move(data), rsize);
 }
 

@@ -702,7 +702,7 @@ void WebDelegateCross::CreatePluginResource(
         webDelegate->hash_ = webDelegate->MakeResourceHash();
         webDelegate->RegisterWebEvent();
         webDelegate->RegisterWebObjectEvent();
-    }, "ArkUIWebCreatePluginResource");
+        }, "ArkUIWebCreatePluginResource");
 }
 
 int WebDelegateCross::GetWebId()
@@ -1719,6 +1719,12 @@ void WebDelegateCross::SetBoundsOrResize(const Size& drawSize, const Offset& off
 }
 
 void WebDelegateCross::SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height)
+{
+    // cross platform is not support now;
+}
+
+void WebDelegateCross::DragResize(
+    const double& width, const double& height, const double& preHeight, const double& preWidth)
 {
     // cross platform is not support now;
 }

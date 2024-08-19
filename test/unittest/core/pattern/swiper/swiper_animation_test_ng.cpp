@@ -21,7 +21,22 @@ namespace {} // namespace
 
 class SwiperAnimationTestNg : public SwiperTestNg {
 public:
+    void CreateWithCustomAnimation();
 };
+
+void SwiperAnimationTestNg::CreateWithCustomAnimation()
+{
+    CreateWithItem([](SwiperModelNG model) {
+        SwiperContentAnimatedTransition transitionInfo;
+        transitionInfo.timeout = 0;
+        transitionInfo.transition = [](const RefPtr<SwiperContentTransitionProxy>& proxy) {};
+        model.SetCustomContentTransition(transitionInfo);
+        auto onContentDidScroll = [](int32_t selectedIndex, int32_t index, float position, float mainAxisLength) {};
+        model.SetOnContentDidScroll(std::move(onContentDidScroll));
+    });
+    pattern_->contentMainSize_ = SWIPER_WIDTH;
+    EXPECT_TRUE(pattern_->SupportSwiperCustomAnimation());
+}
 
 /**
  * @tc.name: SwiperPatternSpringAnimation001
@@ -40,7 +55,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation001, TestSize.Level1
     swiperItemInfo.endPos = -1.0f;
     pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo));
     pattern_->PlaySpringAnimation(dragVelocity);
-    EXPECT_FALSE(pattern_->springAnimationIsRunning_);
+    EXPECT_TRUE(pattern_->springAnimationIsRunning_);
 }
 
 /**
@@ -61,7 +76,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation002, TestSize.Level1
     pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo));
     pattern_->PlaySpringAnimation(dragVelocity);
     pattern_->StopAndResetSpringAnimation();
-    EXPECT_FALSE(pattern_->springAnimationIsRunning_);
+    EXPECT_TRUE(pattern_->springAnimationIsRunning_);
 }
 
 /**
@@ -106,6 +121,8 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation004, TestSize.Level1
     pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo));
     pattern_->PlaySpringAnimation(dragVelocity);
     pattern_->StopSpringAnimation();
+    EXPECT_TRUE(pattern_->springAnimationIsRunning_);
+    pattern_->StopSpringAnimationImmediately();
     EXPECT_FALSE(pattern_->springAnimationIsRunning_);
 }
 
@@ -148,29 +165,6 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation006, TestSize.Level1
     EXPECT_EQ(
         AceType::DynamicCast<NodeAnimatablePropertyFloat>(frameNode_->GetAnimatablePropertyFloat("spring"))->Get(),
         0.0f);
-}
-
-/**
- * @tc.name: SwiperPatternFinishAnimation001
- * @tc.desc: FinishAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAnimationTestNg, SwiperPatternFinishAnimation001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-
-    /**
-     * @tc.steps: step2. call FinishAnimation.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            pattern_->FinishAnimation();
-            pattern_->usePropertyAnimation_ = true;
-            pattern_->isUserFinish_ = true;
-        }
-        pattern_->swiperController_->SetFinishCallback([]() {});
-    }
 }
 
 /**
@@ -832,68 +826,66 @@ HWTEST_F(SwiperAnimationTestNg, SwipeCustomAnimationTest002, TestSize.Level1)
  */
 HWTEST_F(SwiperAnimationTestNg, SwipeCustomAnimationTest003, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. create swiper and set SetCustomContentTransition interface
-     */
-    CreateWithCustomAnimation();
+    bool isTrigger = false;
+    auto onContentDidScroll = [&isTrigger](int32_t selectedIndex, int32_t index, float position, float mainAxisLength) {
+        isTrigger = true;
+    };
+    CreateWithItem([onContentDidScroll](SwiperModelNG model) {
+        SwiperContentAnimatedTransition transitionInfo;
+        transitionInfo.timeout = 0;
+        transitionInfo.transition = [](const RefPtr<SwiperContentTransitionProxy>& proxy) {};
+        model.SetLoop(false);
+        model.SetEdgeEffect(EdgeEffect::FADE);
+        model.SetCustomContentTransition(transitionInfo);
+        model.SetOnContentDidScroll(std::move(onContentDidScroll));
+    });
 
     /**
-     * @tc.steps: step2. set loop to false, isDragging to true, init itemPosition map info.
+     * @tc.steps: step2. set isDragging to true
      */
-    layoutProperty_->UpdateLoop(false);
     pattern_->isDragging_ = true;
 
-    struct SwiperItemInfo swiperItemInfo1;
-    swiperItemInfo1.startPos = 0.0f;
-    swiperItemInfo1.endPos = SWIPER_WIDTH;
-    pattern_->itemPosition_.clear();
-    pattern_->itemPosition_.emplace(std::make_pair(0, swiperItemInfo1));
-
     /**
-     * @tc.steps: step3. set different offset in fade edge effect, calculate and update itemPositionInAnimation info.
+     * @tc.steps: step3. calculate and update itemPositionInAnimation info.
      */
-    frameNode_->GetPaintProperty<SwiperPaintProperty>()->UpdateEdgeEffect(EdgeEffect::FADE);
-
     auto offset1 = -10.0f;
     pattern_->UpdateCurrentOffset(offset1);
-    EXPECT_EQ(pattern_->itemPositionInAnimation_[0].startPos, offset1);
-    EXPECT_EQ(pattern_->itemPositionInAnimation_[0].endPos, SWIPER_WIDTH + offset1);
-    pattern_->itemPosition_ = pattern_->itemPositionInAnimation_;
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), offset1);
+    EXPECT_TRUE(isTrigger);
 
+    isTrigger = false;
     auto offset2 = 20.0f;
     pattern_->UpdateCurrentOffset(offset2);
-    EXPECT_EQ(pattern_->itemPositionInAnimation_[0].startPos, 0.0f);
-    EXPECT_EQ(pattern_->itemPositionInAnimation_[0].endPos, SWIPER_WIDTH);
-    pattern_->itemPosition_ = pattern_->itemPositionInAnimation_;
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 0.f);
+    EXPECT_TRUE(isTrigger);
 
     /**
      * @tc.steps: step4. set different offset without edge effect, calculate and update itemPositionInAnimation info.
      */
-    frameNode_->GetPaintProperty<SwiperPaintProperty>()->UpdateEdgeEffect(EdgeEffect::NONE);
+    paintProperty_->UpdateEdgeEffect(EdgeEffect::NONE);
 
     pattern_->UpdateCurrentOffset(offset1);
-    EXPECT_EQ(pattern_->itemPositionInAnimation_[0].startPos, offset1);
-    EXPECT_EQ(pattern_->itemPositionInAnimation_[0].endPos, SWIPER_WIDTH + offset1);
-    pattern_->itemPosition_ = pattern_->itemPositionInAnimation_;
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), offset1);
 
     pattern_->UpdateCurrentOffset(offset2);
-    EXPECT_EQ(pattern_->itemPositionInAnimation_[0].startPos, 0.0f);
-    EXPECT_EQ(pattern_->itemPositionInAnimation_[0].endPos, SWIPER_WIDTH);
-    pattern_->itemPosition_ = pattern_->itemPositionInAnimation_;
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 0.f);
 
     /**
      * @tc.steps: step5. set different offset in spring edge effect, calculate and update itemPositionInAnimation info.
      */
-    frameNode_->GetPaintProperty<SwiperPaintProperty>()->UpdateEdgeEffect(EdgeEffect::SPRING);
+    paintProperty_->UpdateEdgeEffect(EdgeEffect::SPRING);
 
     pattern_->UpdateCurrentOffset(offset1);
-    EXPECT_EQ(pattern_->itemPositionInAnimation_[0].startPos, offset1);
-    EXPECT_EQ(pattern_->itemPositionInAnimation_[0].endPos, SWIPER_WIDTH + offset1);
-    pattern_->itemPosition_ = pattern_->itemPositionInAnimation_;
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), offset1);
 
     pattern_->UpdateCurrentOffset(offset2);
-    EXPECT_EQ(pattern_->itemPositionInAnimation_[0].startPos, offset1 + offset2);
-    EXPECT_EQ(pattern_->itemPositionInAnimation_[0].endPos, SWIPER_WIDTH + offset1 + offset2);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), offset1 + offset2);
 }
 
 /**
@@ -909,7 +901,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPattern0009, TestSize.Level1)
     CreateWithItem([](SwiperModelNG model) {});
     pattern_->springAnimationIsRunning_ = true;
     pattern_->StopAndResetSpringAnimation();
-    EXPECT_FALSE(pattern_->springAnimationIsRunning_);
+    EXPECT_TRUE(pattern_->springAnimationIsRunning_);
 }
 
 /**
@@ -925,7 +917,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPattern0010, TestSize.Level1)
     CreateWithItem([](SwiperModelNG model) {});
     bool isCustomSize = true;
     pattern_->SetIsIndicatorCustomSize(isCustomSize);
-    EXPECT_TRUE(pattern_->IsCustomSize_);
+    EXPECT_TRUE(pattern_->isCustomSize_);
 }
 
 /**
@@ -1051,5 +1043,42 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternAutoPlay002, TestSize.Level1)
      * @tc.expected: Related functions run ok.
      */
     pattern_->StartAutoPlay();
+}
+
+/**
+ * @tc.name: StopTranslateAnimation001
+ * @tc.desc: Swipe with animate, than forceStop animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, StopTranslateAnimation001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDisplayCount(2);
+        model.SetSwipeByGroup(true);
+    });
+
+    /**
+     * @tc.steps: step1. ShowPrevious with animate, than forceStop animation
+     */
+    pattern_->isFinishAnimation_ = false;
+    pattern_->isVisibleArea_ = true;
+    pattern_->ShowPrevious();
+    FlushLayoutTask(frameNode_);
+    pattern_->translateAnimationIsRunning_ = true;
+    pattern_->pauseTargetIndex_ = -2;
+    pattern_->StopTranslateAnimation();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), -2);
+
+    /**
+     * @tc.steps: step2. ShowNext with animate, than forceStop animation
+     */
+    pattern_->ShowNext();
+    FlushLayoutTask(frameNode_);
+    pattern_->translateAnimationIsRunning_ = true;
+    pattern_->pauseTargetIndex_ = 0;
+    pattern_->StopTranslateAnimation();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
 }
 } // namespace OHOS::Ace::NG

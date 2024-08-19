@@ -15,14 +15,9 @@
 
 #include "base/log/jank_frame_report.h"
 
-#include <chrono>
-#include <string>
-
 #include "render_service_client/core/transaction/rs_interfaces.h"
-
 #include "base/log/ace_trace.h"
 #include "base/log/log_wrapper.h"
-#include "base/perfmonitor/perf_monitor.h"
 #include "base/log/event_report.h"
 
 namespace OHOS::Ace {
@@ -123,7 +118,8 @@ void JankFrameReport::JankFrameRecord(int64_t timeStampNanos, const std::string&
         return;
     }
     int64_t now = GetSteadyTimestamp<std::chrono::nanoseconds>();
-    int64_t duration = now - std::max(timeStampNanos, prevEndTimeStamp_);
+    int64_t durationTmp = now - std::max(timeStampNanos, prevEndTimeStamp_);
+    int64_t duration = (now <= timeStampNanos) ? 0 : durationTmp;
     double jank = double(duration) / refreshPeriod_;
     // perf monitor jank frame
     PerfMonitor::GetPerfMonitor()->SetFrameTime(timeStampNanos, duration, jank, windowName);
@@ -247,5 +243,10 @@ void JankFrameReport::ReportJSAnimation()
     if (animatorEndTime_ != 0) {
         hasJsAnimation_ = true;
     }
+}
+
+void JankFrameReport::RecordAnimateEnd()
+{
+    prevEndTimeStamp_ = GetSteadyTimestamp<std::chrono::nanoseconds>();
 }
 } // namespace OHOS::Ace

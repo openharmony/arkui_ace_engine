@@ -317,6 +317,8 @@ SwiperParameters GetDotIndicatorProps(FrameNode* frameNode, ArkUISwiperIndicator
         indicator->colorValue.isSet == 1 ? Color(indicator->colorValue.value) : swiperIndicatorTheme->GetColor();
     swiperParameters.selectedColorVal = indicator->selectedColorValue.isSet == 1 ?
         Color(indicator->selectedColorValue.value) : swiperIndicatorTheme->GetSelectedColor();
+    swiperParameters.maxDisplayCountVal = indicator->maxDisplayCount.isSet == 1 ?
+        indicator->maxDisplayCount.value : NUM_0;
     return swiperParameters;
 }
 
@@ -405,7 +407,19 @@ void SetIndicatorInteractive(ArkUINodeHandle node, ArkUI_Bool value)
     SwiperModelNG::SetIndicatorInteractive(frameNode, static_cast<bool>(value));
 }
 
-void ResetIndicatorInteractive(ArkUINodeHandle node) {}
+void ResetIndicatorInteractive(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetIndicatorInteractive(frameNode, true);
+}
+
+ArkUI_Int32 GetIndicatorInteractive(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(SwiperModelNG::GetIndicatorInteractive(frameNode));
+}
 
 void SetSwiperNextMargin(
     ArkUINodeHandle node, ArkUI_Float32 nextMarginValue, ArkUI_Int32 nextMarginUnit, ArkUI_Bool ignoreBlank)
@@ -987,6 +1001,7 @@ void GetSwiperIndicator(ArkUINodeHandle node, ArkUISwiperIndicator* props)
     int32_t type = SwiperModelNG::GetIndicatorType(frameNode);
     props->type = static_cast<ArkUISwiperIndicatorType>(type);
     auto params = SwiperModelNG::GetDotIndicator(frameNode);
+    CHECK_NULL_VOID(params);
     bool hasValue = false;
     float value = ZERO_F;
     ParseIndicatorAttribute(params->dimLeft, hasValue, value);
@@ -1010,6 +1025,7 @@ void GetSwiperIndicator(ArkUINodeHandle node, ArkUISwiperIndicator* props)
         props->maskValue = ArkUIOptionalInt { 1, params->maskValue.value_or(0) };
         props->colorValue = ArkUIOptionalUint { 1, params->colorVal.value().GetValue() };
         props->selectedColorValue = ArkUIOptionalUint { 1, params->selectedColorVal.value().GetValue() };
+        props->maxDisplayCount = ArkUIOptionalInt { 1, params->maxDisplayCountVal.value() };
     }
 }
 
@@ -1138,7 +1154,28 @@ const ArkUISwiperModifier* GetSwiperModifier()
         GetSwiperNextMargin, SetSwiperIndicatorStyle, GetSwiperIndicator, GetSwiperController,
         SetSwiperOnChange, ResetSwiperOnChange, SetSwiperOnAnimationStart, ResetSwiperOnAnimationStart,
         SetSwiperOnAnimationEnd, ResetSwiperOnAnimationEnd, SetSwiperOnGestureSwipe, ResetSwiperOnGestureSwipe,
-        SetOnContentDidScroll, ResetOnContentDidScroll };
+        SetOnContentDidScroll, ResetOnContentDidScroll, GetIndicatorInteractive };
+    return &modifier;
+}
+
+const CJUISwiperModifier* GetCJUISwiperModifier()
+{
+    static const CJUISwiperModifier modifier = { SetSwiperNextMargin, ResetSwiperNextMargin, SetSwiperPrevMargin,
+        ResetSwiperPrevMargin, SetSwiperDisplayCount, ResetSwiperDisplayCount, SetSwiperSwipeByGroup,
+        ResetSwiperSwipeByGroup, SetSwiperDisplayArrow, ResetSwiperDisplayArrow, SetSwiperCurve, ResetSwiperCurve,
+        SetSwiperDisableSwipe, ResetSwiperDisableSwipe, SetSwiperEffectMode, ResetSwiperEffectMode,
+        SetSwiperCachedCount, ResetSwiperCachedCount, SetSwiperDisplayMode, ResetSwiperDisplayMode, SetSwiperItemSpace,
+        ResetSwiperItemSpace, SetSwiperVertical, ResetSwiperVertical, SetSwiperLoop, ResetSwiperLoop, SetSwiperInterval,
+        ResetSwiperInterval, SetSwiperAutoPlay, ResetSwiperAutoPlay, SetSwiperIndex, ResetSwiperIndex,
+        SetSwiperIndicator, ResetSwiperIndicator, SetSwiperDuration, ResetSwiperDuration, SetSwiperEnabled,
+        ResetSwiperEnabled, GetSwiperLoop, GetSwiperAutoPlay, GetSwiperIndex, GetSwiperVertical, GetSwiperDuration,
+        GetSwiperDisplayCount, GetSwiperInterval, GetSwiperCurve, GetSwiperDisableSwipe, GetSwiperItemSpace,
+        GetSwiperShowIndicator, GetSwiperShowDisplayArrow, GetSwiperEffectMode, SetIndicatorInteractive,
+        ResetIndicatorInteractive, SetNodeAdapter, ResetNodeAdapter, GetNodeAdapter, GetCachedCount,
+        SetSwiperNestedScroll, ResetSwiperNestedScroll, GetSwiperNestedScroll, SetSwiperToIndex, GetSwiperPrevMargin,
+        GetSwiperNextMargin, SetSwiperIndicatorStyle, GetSwiperIndicator, GetSwiperController,
+        SetSwiperOnChange, ResetSwiperOnChange, SetSwiperOnAnimationStart, ResetSwiperOnAnimationStart,
+        SetSwiperOnAnimationEnd, ResetSwiperOnAnimationEnd, SetSwiperOnGestureSwipe, ResetSwiperOnGestureSwipe };
     return &modifier;
 }
 

@@ -19,6 +19,7 @@
 #include "core/common/recorder/node_data_cache.h"
 #include "core/common/thread_checker.h"
 #include "frameworks/bridge/common/utils/utils.h"
+#include "frameworks/bridge/declarative_frontend/ng/page_router_manager_factory.h"
 
 namespace OHOS::Ace {
 
@@ -89,7 +90,7 @@ void DeclarativeFrontendNG::SetAssetManager(const RefPtr<AssetManager>& assetMan
 
 void DeclarativeFrontendNG::InitializeDelegate(const RefPtr<TaskExecutor>& taskExecutor)
 {
-    auto pageRouterManager = AceType::MakeRefPtr<NG::PageRouterManager>();
+    auto pageRouterManager = NG::PageRouterManagerFactory::CreateManager();
     auto loadPageCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const std::string& url,
                                 const std::function<void(const std::string&, int32_t)>& errorCallback) {
         auto jsEngine = weakEngine.Upgrade();

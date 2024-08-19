@@ -15,13 +15,9 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_foreach_ffi.h"
 
-#include <cstdlib>
-#include <string>
-#include <unordered_set>
 
 #include "cj_lambda.h"
 
-#include "bridge/cj_frontend/runtime/cj_runtime_delegate.h"
 #include "core/components_ng/syntax/for_each_model.h"
 
 using namespace OHOS::Ace;

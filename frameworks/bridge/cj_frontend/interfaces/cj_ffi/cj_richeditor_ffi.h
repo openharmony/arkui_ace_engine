@@ -28,6 +28,11 @@ struct NativeRichEditorInsertValue {
     const char* insertValue;
 };
 
+struct CJTextRange {
+    int32_t start;
+    int32_t end;
+};
+
 class ACE_EXPORT NativePasteEvent : public OHOS::FFI::FFIData {
     DECL_TYPE(NativeTextCommonEvent, OHOS::FFI::FFIData)
 public:
@@ -62,6 +67,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkRichEditorOnSelect(void(*callback)(NativeRichE
 CJ_EXPORT void FfiOHOSAceFrameworkRichEditorAboutToDelete(bool(*callback)(NativeRichEditorDeleteValue));
 CJ_EXPORT void FfiOHOSAceFrameworkRichEditorOnPaste(void(*callback)(int64_t));
 CJ_EXPORT void FfiOHOSAceFrameworkRichEditorPreventDefault(int64_t controller);
+CJ_EXPORT void FfiOHOSAceFrameworkRichEditorOnDidChange(
+    void(*callback)(CJTextRange rangeBefore, CJTextRange rangeAfter));
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_RICHEDITOR_FFI_H

@@ -391,7 +391,7 @@ export struct PopupComponent {
   }
 
   private getButtonTextMargin(): LocalizedMargin {
-    return { top: LengthMetrics.vp(this.theme.button.textMargin.bottom.value / 2) }
+    return { top: LengthMetrics.vp(this.theme.button.textMargin.bottom.value) }
   }
 
   private getButtonTextPadding(): LocalizedPadding {
@@ -728,7 +728,6 @@ export struct PopupComponent {
           }
           .direction(this.popupDirection)
           .alignItems(VerticalAlign.Top)
-          .margin(this.getTitleMargin())
 
           Flex({ wrap: FlexWrap.Wrap }) {
             if (this.buttons?.[0]?.text !== '' && this.buttons?.[0]?.text !== void (0)) {

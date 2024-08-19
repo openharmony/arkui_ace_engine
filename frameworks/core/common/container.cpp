@@ -15,9 +15,7 @@
 
 #include "core/common/container.h"
 
-#include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
-#include "core/common/container_scope.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
 #endif
@@ -81,6 +79,17 @@ RefPtr<Container> Container::CurrentSafelyWithCheck()
     return GetContainer(currentId);
 }
 
+int32_t Container::CurrentIdSafelyWithCheck()
+{
+    int32_t currentId = CurrentId();
+    if (currentId >= 0) {
+        if (AceEngine::Get().HasContainer(currentId)) {
+            return currentId;
+        }
+    }
+    return SafelyId();
+}
+
 RefPtr<Container> Container::GetContainer(int32_t containerId)
 {
     return AceEngine::Get().GetContainer(containerId);
@@ -115,7 +124,7 @@ RefPtr<Container> Container::GetFoucsed()
     RefPtr<Container> foucsContainer;
     AceEngine::Get().NotifyContainers([&foucsContainer](const RefPtr<Container>& container) {
         auto pipeline = container->GetPipelineContext();
-        if (pipeline && pipeline->GetOnFoucs()) {
+        if (pipeline && pipeline->IsWindowFocused()) {
             foucsContainer = container;
         }
     });
@@ -169,6 +178,26 @@ bool Container::Dump(const std::vector<std::string>& params, std::vector<std::st
 bool Container::IsIdAvailable(int32_t id)
 {
     return !AceEngine::Get().GetContainer(id);
+}
+
+void Container::SetFontScale(int32_t instanceId, float fontScale)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->SetFontScale(fontScale);
+}
+
+void Container::SetFontWeightScale(int32_t instanceId, float fontWeightScale)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->SetFontWeightScale(fontWeightScale);
 }
 
 template<>

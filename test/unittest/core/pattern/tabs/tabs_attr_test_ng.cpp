@@ -16,9 +16,6 @@
 #include "tabs_test_ng.h"
 
 namespace OHOS::Ace::NG {
-
-namespace {} // namespace
-
 class TabsAttrTestNg : public TabsTestNg {
 public:
 };
@@ -335,26 +332,6 @@ HWTEST_F(TabsAttrTestNg, BarGridAlign002, TestSize.Level1)
 }
 
 /**
- * @tc.name: TabsModelSetFadingEdge001
- * @tc.desc: test SetFadingEdge
- * @tc.type: FUNC
- */
-HWTEST_F(TabsAttrTestNg, TabsModelSetFadingEdge001, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    model.SetFadingEdge(true);
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    EXPECT_EQ(frameNode_->GetTag(), V2::TABS_ETS_TAG);
-    EXPECT_EQ(tabBarNode_->GetTag(), V2::TAB_BAR_ETS_TAG);
-    EXPECT_TRUE(tabBarPaintProperty_->GetFadingEdgeValue());
-
-    auto json = JsonUtil::Create(true);
-    frameNode_->ToJsonValue(json, filter);
-    EXPECT_EQ(json->GetString("fadingEdge"), "true");
-}
-
-/**
  * @tc.name: TabsModelOnUpdateShowDivider001
  * @tc.desc: Test tabs OnUpdateShowDivider.
  * @tc.type: FUNC
@@ -413,22 +390,6 @@ HWTEST_F(TabsAttrTestNg, TabsModelOnUpdateShowDivider004, TestSize.Level1)
     pattern_->OnUpdateShowDivider();
     auto childNode = frameNode_->GetChildAtIndex(1);
     EXPECT_EQ(childNode->GetTag(), V2::DIVIDER_ETS_TAG);
-}
-
-/**
- * @tc.name: TabsModelToJsonValue001
- * @tc.desc: Test tabs ToJsonValue when host has not child.
- * @tc.type: FUNC
- */
-HWTEST_F(TabsAttrTestNg, TabsModelToJsonValue001, TestSize.Level2)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
-    frameNode_->ToJsonValue(json, filter);
-    auto dividerJson = json->GetValue("divider");
-    EXPECT_TRUE(dividerJson->IsNull());
 }
 
 /**
@@ -696,33 +657,6 @@ HWTEST_F(TabsAttrTestNg, TabContentModelUpdateLabelStyle002, TestSize.Level1)
 }
 
 /**
- * @tc.name: TabContentModelToJsonValue001
- * @tc.desc: test SetIndicator
- * @tc.type: FUNC
- */
-HWTEST_F(TabsAttrTestNg, TabContentModelToJsonValue001, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
-    auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
-    LabelStyle labelStyle;
-    labelStyle.textOverflow = TextOverflow::CLIP;
-    labelStyle.maxLines = 0;
-    labelStyle.minFontSize = 0.0_vp;
-    labelStyle.maxFontSize = 0.0_vp;
-    labelStyle.heightAdaptivePolicy = TextHeightAdaptivePolicy::MAX_LINES_FIRST;
-    labelStyle.fontSize = 0.0_vp;
-    labelStyle.fontWeight = FontWeight::NORMAL;
-    labelStyle.fontFamily = { "unknown", "unknow2" };
-    tabContentPattern->SetLabelStyle(labelStyle);
-    std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
-    tabContentFrameNode->ToJsonValue(json, filter);
-    EXPECT_NE(json, nullptr);
-}
-
-/**
  * @tc.name: TabContentModel001
  * @tc.desc: test TabsModel
  * @tc.type: FUNC
@@ -744,8 +678,8 @@ HWTEST_F(TabsAttrTestNg, TabContentModel001, TestSize.Level1)
     auto tabContentFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     auto tabContentNode = AceType::DynamicCast<TabContentNode>(tabContentFrameNode);
     tabContentNode->UpdateRecycleElmtId(0); // for AddChildToGroup
-    tabContentNode->GetTabBarItemId();           // for AddTabBarItem
-    tabContentNode->SetParent(weakTab);          // for AddTabBarItem
+    tabContentNode->GetTabBarItemId();      // for AddTabBarItem
+    tabContentNode->SetParent(weakTab);     // for AddTabBarItem
     tabContentModel.Pop();
     CreateTabsDone(model);
     auto colNode = GetChildFrameNode(tabBarNode_, 0);
@@ -776,15 +710,15 @@ HWTEST_F(TabsAttrTestNg, TabContentModel002, TestSize.Level1)
     auto tabContentFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     auto tabContentNode = AceType::DynamicCast<TabContentNode>(tabContentFrameNode);
     tabContentNode->UpdateRecycleElmtId(0); // for AddChildToGroup
-    tabContentNode->GetTabBarItemId();           // for AddTabBarItem
-    tabContentNode->SetParent(weakTab);          // for AddTabBarItem
+    tabContentNode->GetTabBarItemId();      // for AddTabBarItem
+    tabContentNode->SetParent(weakTab);     // for AddTabBarItem
     tabContentModel.AddTabBarItem(tabContentFrameNode, 0, true);
     ViewStackProcessor::GetInstance()->PopContainer();
     CreateTabsDone(model);
     auto colNode = GetChildFrameNode(tabBarNode_, 0);
     EXPECT_EQ(colNode->GetTag(), V2::COLUMN_ETS_TAG);
     EXPECT_EQ(colNode->GetTotalChildCount(), 2);
-    
+
     auto symbolNode = GetChildFrameNode(colNode, 0);
     EXPECT_EQ(symbolNode->GetTag(), V2::SYMBOL_ETS_TAG);
 
@@ -857,10 +791,10 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetBarBackgroundColor001, TestSize.Level1)
  */
 HWTEST_F(TabsAttrTestNg, TabsModelSetWidthAuto001, TestSize.Level1)
 {
- /**
-  * @tc.steps: step1. Test function SetWidthAuto and SetHeightAuto When isAuto is true.
-  * @tc.expected: Related functions run ok.
-  */
+    /**
+     * @tc.steps: step1. Test function SetWidthAuto and SetHeightAuto When isAuto is true.
+     * @tc.expected: Related functions run ok.
+     */
     TabsModelNG model = CreateTabs();
     model.SetWidthAuto(true);
     model.SetHeightAuto(true);
@@ -909,25 +843,6 @@ HWTEST_F(TabsAttrTestNg, TabsModelGetOrCreateTabsNode001, TestSize.Level1)
     int32_t nodeId = 1;
     auto frameNode = TabsModelNG::GetOrCreateTabsNode(tag, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
     ASSERT_NE(frameNode, nullptr);
-}
-
-/**
- * @tc.name: TabsModelSetOnChange001
- * @tc.desc: test SetOnChange
- * @tc.type: FUNC
- */
-HWTEST_F(TabsAttrTestNg, TabsModelSetOnChange001, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    model.SetOnChange(nullptr);
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-
-    /**
-     * @tc.steps: step2. Test function SetOnChange.
-     * @tc.expected: Related function runs ok.
-     */
-    ASSERT_NE(frameNode_, nullptr);
 }
 
 /**
@@ -1154,7 +1069,7 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetScrollableBarModeOptions001, TestSize.Level
      */
     option.margin = Dimension(0.f);
     option.nonScrollableLayoutStyle = LayoutStyle::SPACE_BETWEEN_OR_CENTER;
-    const float tabsWidth  = BARITEM_SIZE * (TABCONTENT_NUMBER + 1);
+    const float tabsWidth = BARITEM_SIZE * (TABCONTENT_NUMBER + 1);
     ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(tabsWidth));
     tabBarLayoutProperty_->UpdateScrollableBarModeOptions(option);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -1370,10 +1285,10 @@ HWTEST_F(TabsAttrTestNg, TabsModelGetOrCreateTabsNode002, TestSize.Level1)
 }
 
 /**
-* @tc.name: TabsModelMeasure007
-* @tc.desc: test Measure
-* @tc.type: FUNC
-*/
+ * @tc.name: TabsModelMeasure007
+ * @tc.desc: test Measure
+ * @tc.type: FUNC
+ */
 HWTEST_F(TabsAttrTestNg, TabsModelMeasure007, TestSize.Level1)
 {
     /**
@@ -1392,8 +1307,7 @@ HWTEST_F(TabsAttrTestNg, TabsModelMeasure007, TestSize.Level1)
     auto tabsLayoutAlgorithm = pattern_->CreateLayoutAlgorithm();
 
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(frameNode_, geometryNode, frameNode_->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode_, geometryNode, frameNode_->GetLayoutProperty());
     LayoutConstraintF layoutConstraintVaild;
 
     float layoutSize = 10000.0f;

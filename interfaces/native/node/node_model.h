@@ -13,9 +13,11 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_MODEL_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_MODEL_H
 
 #include <cstdint>
+#include <set>
 #include <vector>
 #include <string>
 
@@ -144,6 +146,7 @@ int32_t CheckEvent(ArkUI_NodeEvent* event);
 void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent);
 int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent);
 void HandleNodeEvent(ArkUI_NodeEvent* event);
+void TriggerNodeEvent(ArkUI_NodeEvent* event, std::set<void (*)(ArkUI_NodeEvent*)>* eventListenersSet);
 void ApplyModifierFinish(ArkUI_NodeHandle nodePtr);
 void MarkDirty(ArkUI_NodeHandle nodePtr, ArkUI_NodeDirtyFlag dirtyFlag);
 
@@ -154,3 +157,4 @@ int32_t AddNodeEventReceiver(ArkUI_NodeHandle node, void (*eventReceiver)(ArkUI_
 int32_t RemoveNodeEventReceiver(ArkUI_NodeHandle node, void (*eventReceiver)(ArkUI_NodeEvent* event));
 void* GetParseJsMedia();
 }; // namespace OHOS::Ace::NodeModel
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_MODEL_H

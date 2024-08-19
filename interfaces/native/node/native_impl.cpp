@@ -14,12 +14,9 @@
  */
 
 #include "native_interface.h"
-#include "native_node.h"
-#include "native_animate.h"
 #include "node/animate_impl.h"
 #include "node/dialog_model.h"
 #include "node/gesture_impl.h"
-#include "node/native_compatible.h"
 #include "node/node_model.h"
 #include "node_extened.h"
 
@@ -110,6 +107,7 @@ ArkUI_NativeDialogAPI_1 dialogImpl_1 = {
     OHOS::Ace::DialogModel::RegisterOnWillDismiss,
     OHOS::Ace::DialogModel::Show,
     OHOS::Ace::DialogModel::Close,
+    OHOS::Ace::DialogModel::RegisterOnWillDismissWithUserData,
 };
 
 constexpr int32_t CURRENT_NATIVE_GESTURE_API_VERSION = 1;
@@ -130,6 +128,8 @@ ArkUI_NativeGestureAPI_1 gestureImpl_1 = {
     OHOS::Ace::GestureModel::RemoveGestureFromNode,
     OHOS::Ace::GestureModel::SetGestureInterrupterToNode,
     OHOS::Ace::GestureModel::GetGestureType,
+    OHOS::Ace::GestureModel::SetInnerGestureParallelTo,
+    OHOS::Ace::GestureModel::CreateTapGestureWithDistanceThreshold,
 };
 
 ArkUI_NativeAnimateAPI_1 animateImpl_1 = {

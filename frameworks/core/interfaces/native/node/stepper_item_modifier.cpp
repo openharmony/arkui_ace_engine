@@ -78,5 +78,19 @@ const ArkUIStepperItemModifier* GetStepperItemModifier()
 
     return &modifier;
 }
+
+const CJUIStepperItemModifier* GetCJUIStepperItemModifier()
+{
+    static const CJUIStepperItemModifier modifier = {
+        SetNextLabel,
+        ResetNextLabel,
+        SetPrevLabel,
+        ResetPrevLabel,
+        SetStatus,
+        ResetStatus,
+    };
+
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

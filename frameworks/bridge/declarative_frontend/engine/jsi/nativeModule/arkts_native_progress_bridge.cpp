@@ -88,7 +88,7 @@ bool ConvertProgressResourceColor(
         return ConvertProgressRResourceColor(vm, itemParam, gradient);
     }
     Framework::JSLinearGradient* jsLinearGradient =
-        static_cast<Framework::JSLinearGradient*>(itemParam->ToObject(vm)->GetNativePointerField(0));
+        static_cast<Framework::JSLinearGradient*>(itemParam->ToObject(vm)->GetNativePointerField(vm, 0));
     if (!jsLinearGradient) {
         return ConvertProgressRResourceColor(vm, itemParam, gradient);
     }
@@ -202,7 +202,7 @@ void ParseStrokeWidth(
     auto theme = ArkTSUtils::GetTheme<ProgressTheme>();
 
     if (strokeWidthArg->IsString(vm)) {
-        const std::string& value = strokeWidthArg->ToString(vm)->ToString();
+        const std::string& value = strokeWidthArg->ToString(vm)->ToString(vm);
         strokeWidth = StringUtils::StringToDimensionWithUnit(value, DimensionUnit::VP, DEFAULT_STROKE_WIDTH);
     } else {
         ArkTSUtils::ParseJsDimension(vm, strokeWidthArg, strokeWidth, DimensionUnit::VP, false);
@@ -227,7 +227,7 @@ void ParseBorderWidth(
     CalcDimension borderWidth = CalcDimension(DEFAULT_BORDER_WIDTH, DimensionUnit::VP);
 
     if (borderWidthArg->IsString(vm)) {
-        const std::string& value = borderWidthArg->ToString(vm)->ToString();
+        const std::string& value = borderWidthArg->ToString(vm)->ToString(vm);
         borderWidth = StringUtils::StringToDimensionWithUnit(value, DimensionUnit::VP, DEFAULT_BORDER_WIDTH);
     } else {
         ArkTSUtils::ParseJsDimension(vm, borderWidthArg, borderWidth, DimensionUnit::VP, false);
@@ -287,7 +287,7 @@ void ParseScaleWidth(
     CalcDimension scaleWidth = CalcDimension(DEFAULT_SCALE_WIDTH, DimensionUnit::VP);
 
     if (scaleWidthArg->IsString(vm)) {
-        const std::string& value = scaleWidthArg->ToString(vm)->ToString();
+        const std::string& value = scaleWidthArg->ToString(vm)->ToString(vm);
         scaleWidth = StringUtils::StringToDimensionWithUnit(value, DimensionUnit::VP, DEFAULT_SCALE_WIDTH);
     } else {
         ArkTSUtils::ParseJsDimension(vm, scaleWidthArg, scaleWidth, DimensionUnit::VP, false);
@@ -352,7 +352,7 @@ void ParseContent(
     const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle, int32_t index)
 {
     Local<JSValueRef> contentArg = runtimeCallInfo->GetCallArgRef(index);
-    std::string content = contentArg->ToString(vm)->ToString();
+    std::string content = contentArg->ToString(vm)->ToString(vm);
     progressStyle.content = (contentArg->IsString(vm)) ? content.c_str() : nullptr;
 }
 
@@ -407,7 +407,7 @@ void ParseCapsuleFontWeight(
         if (weightArg->IsNumber()) {
             weight = std::to_string(weightArg->Int32Value(vm));
         } else if (weightArg->IsString(vm)) {
-            weight = weightArg->ToString(vm)->ToString();
+            weight = weightArg->ToString(vm)->ToString(vm);
         }
         progressStyle.fontInfo.fontWeight = static_cast<uint8_t>(Framework::ConvertStrToFontWeight(weight));
     } else {

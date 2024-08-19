@@ -24,6 +24,7 @@
 
 namespace OHOS::Ace::Framework {
 
+constexpr int32_t REVERSE_OFFSET_ZOOM = 2;
 void JSFlexImpl::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -106,6 +107,30 @@ void JSFlexImpl::CreateWrapComponent(const JSCallbackInfo& info, int32_t wrapVal
         return;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    WrapComponent(obj, wrapVal);
+    if (obj->HasProperty("space")) {
+        JSRef<JSVal> spaceVal = obj->GetProperty("space");
+        if (spaceVal->IsUndefined()) {
+            return;
+        }
+        CalcDimension mainValue;
+        CalcDimension crossValue;
+        JSRef<JSObject> spaceObj = JSRef<JSObject>::Cast(obj->GetProperty("space"));
+        JSRef<JSVal> mainSpaceVal = spaceObj->GetProperty("main");
+        JSRef<JSVal> crossSpaceVal = spaceObj->GetProperty("cross");
+        if (!ParseLengthMetricsToPositiveDimension(mainSpaceVal, mainValue) || mainValue.IsNegative()) {
+            mainValue.Reset();
+        }
+        if (!ParseLengthMetricsToPositiveDimension(crossSpaceVal, crossValue) || crossValue.IsNegative()) {
+            crossValue.Reset();
+        }
+        FlexModel::GetInstance()->SetMainSpace(mainValue);
+        FlexModel::GetInstance()->SetCrossSpace(crossValue);
+    }
+}
+
+void JSFlexImpl::WrapComponent(const JSRef<JSObject>& obj, int32_t wrapVal)
+{
     JSRef<JSVal> directionVal = obj->GetProperty("direction");
     JSRef<JSVal> justifyVal = obj->GetProperty("justifyContent");
     JSRef<JSVal> alignItemVal = obj->GetProperty("alignItems");
@@ -117,9 +142,9 @@ void JSFlexImpl::CreateWrapComponent(const JSCallbackInfo& info, int32_t wrapVal
             FlexModel::GetInstance()->SetDirection(static_cast<FlexDirection>(direction));
             // WrapReverse means wrapVal = 2. Wrap means wrapVal = 1.
             if (direction <= 1) {
-                direction += 2 * (wrapVal - 1);
+                direction += REVERSE_OFFSET_ZOOM * (wrapVal - 1);
             } else {
-                direction -= 2 * (wrapVal - 1);
+                direction -= REVERSE_OFFSET_ZOOM * (wrapVal - 1);
             }
             FlexModel::GetInstance()->SetWrapDirection(static_cast<WrapDirection>(direction));
         }
@@ -145,25 +170,6 @@ void JSFlexImpl::CreateWrapComponent(const JSCallbackInfo& info, int32_t wrapVal
         if (alignContent >= 0 && alignContent <= MAIN_ALIGN_MAX_VALUE) {
             FlexModel::GetInstance()->SetWrapAlignment(WRAP_TABLE[alignContent]);
         }
-    }
-    if (obj->HasProperty("space")) {
-        JSRef<JSVal> spaceVal = obj->GetProperty("space");
-        if (spaceVal->IsUndefined()) {
-            return;
-        }
-        CalcDimension mainValue;
-        CalcDimension crossValue;
-        JSRef<JSObject> spaceObj = JSRef<JSObject>::Cast(obj->GetProperty("space"));
-        JSRef<JSVal> mainSpaceVal = spaceObj->GetProperty("main");
-        JSRef<JSVal> crossSpaceVal = spaceObj->GetProperty("cross");
-        if (!ParseLengthMetricsToPositiveDimension(mainSpaceVal, mainValue) || mainValue.IsNegative()) {
-            mainValue.Reset();
-        }
-        if (!ParseLengthMetricsToPositiveDimension(crossSpaceVal, crossValue) || crossValue.IsNegative()) {
-            crossValue.Reset();
-        }
-        FlexModel::GetInstance()->SetMainSpace(mainValue);
-        FlexModel::GetInstance()->SetCrossSpace(crossValue);
     }
 }
 

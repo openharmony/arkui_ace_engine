@@ -15,16 +15,6 @@
 
 #include "frameworks/bridge/common/dom/dom_stack.h"
 
-#include "base/utils/linear_map.h"
-#include "base/utils/utils.h"
-#include "core/common/ace_application_info.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/scroll/scroll_bar_theme.h"
-#include "core/components/scroll/scroll_fade_effect.h"
-#include "core/components/scroll/scroll_spring_effect.h"
-#include "core/components/theme/theme_manager.h"
-
 namespace OHOS::Ace::Framework {
 
 DOMStack::DOMStack(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, nodeName)

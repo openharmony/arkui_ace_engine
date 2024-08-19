@@ -32,8 +32,8 @@ public:
     static RefPtr<FrameNode> Create(const std::string& bundleName, const std::string& abilityName,
         const std::map<std::string, std::string>& params, std::function<void(int32_t)>&& onRelease,
         std::function<void(int32_t, const std::string&, const std::string&)>&& onError);
-    static RefPtr<FrameNode> Create(
-        const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks, bool isAsyncModalBinding = false);
+    static RefPtr<FrameNode> Create(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks,
+        bool isAsyncModalBinding = false, bool isModal = true);
 
     void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, const RefPtr<NG::FrameNode>& placeholderNode = nullptr,
         bool transferringCaller = false, bool densityDpi = true) override;
@@ -46,6 +46,8 @@ public:
         const std::string& abcPath, const std::string& entryPoint, void* runtime) override;
     void InitializeIsolatedComponent(const RefPtr<NG::FrameNode>& frameNode,
         const RefPtr<OHOS::Ace::WantWrap>& wantWrap, void* runtime) override;
+    void SetPlatformOnError(std::function<void(
+        int32_t code, const std::string& name, const std::string& message)>&& onError) override;
     void SetAdaptiveWidth(bool state) override;
     void SetAdaptiveHeight(bool state) override;
 
@@ -61,8 +63,6 @@ public:
     void SetOnError(
         std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError,
         NG::SessionType sessionType = NG::SessionType::UI_EXTENSION_ABILITY) override;
-    void SetPlatformOnError(std::function<void(
-        int32_t code, const std::string& name, const std::string& message)>&& onError) override;
 
 private:
     void CreateSecurityUIExtension(const UIExtensionConfig& config);

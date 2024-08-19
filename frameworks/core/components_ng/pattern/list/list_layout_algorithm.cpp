@@ -49,6 +49,7 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr Dimension RESERVE_BOTTOM_HEIGHT = 24.0_vp;
+constexpr float SCROLL_SNAP_VELOCITY_TH = 780;
 } // namespace
 
 void ListLayoutAlgorithm::UpdateListItemConstraint(
@@ -116,7 +117,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     paddingAfterContent_ = axis_ == Axis::HORIZONTAL ? padding.right.value_or(0) : padding.bottom.value_or(0);
     contentMainSize_ = 0.0f;
     totalItemCount_ = layoutWrapper->GetTotalChildCount();
-    isSnapCenter_ = IsScrollSnapAlignCenter(layoutWrapper);
+    scrollSnapAlign_ = listLayoutProperty->GetScrollSnapAlign().value_or(V2::ScrollSnapAlign::NONE);
     if (childrenSize_) {
         childrenSize_->ResizeChildrenSize(totalItemCount_);
     }
@@ -128,6 +129,9 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             auto parentMaxSize = contentConstraint.maxSize;
             contentMainSize_ = GetMainAxisSize(parentMaxSize, axis_);
             mainSizeIsDefined_ = false;
+        }
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            contentMainSize_ = std::max(contentMainSize_, GetMainAxisSize(contentConstraint.minSize, axis_));
         }
     } else {
         contentMainSize_ = GetMainAxisSize(contentIdealSize.ConvertToSizeT(), axis_);
@@ -167,12 +171,16 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
     }
 
-    SetActiveChildRange(layoutWrapper, listLayoutProperty->GetCachedCountValue(1));
-
+    // In the secondary layout scenario, the previous contentMainSize_ is used as the next prevContentMainSize_.
+    prevContentMainSize_ = contentMainSize_;
+    
     auto crossSize = contentIdealSize.CrossSize(axis_);
     if (crossSize.has_value() && GreaterOrEqualToInfinity(crossSize.value())) {
         contentIdealSize.SetCrossSize(GetChildMaxCrossSize(layoutWrapper, axis_), axis_);
         crossMatchChild_ = true;
+    }
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && !mainSizeIsDefined_) {
+        contentMainSize_ = std::max(contentMainSize_, GetMainAxisSize(contentConstraint.minSize, axis_));
     }
     contentIdealSize.SetMainSize(contentMainSize_, axis_);
     AddPaddingToSize(padding, contentIdealSize);
@@ -192,14 +200,14 @@ void ListLayoutAlgorithm::SetCacheCount(LayoutWrapper* layoutWrapper, int32_t ca
     layoutWrapper->SetCacheCount(cacheCount);
 }
 
-void ListLayoutAlgorithm::SetActiveChildRange(LayoutWrapper* layoutWrapper, int32_t cacheCount)
+void ListLayoutAlgorithm::SetActiveChildRange(LayoutWrapper* layoutWrapper, int32_t cacheStart, int32_t cacheEnd)
 {
     if (itemPosition_.empty()) {
         layoutWrapper->SetActiveChildRange(-1, -1);
         return;
     }
     layoutWrapper->SetActiveChildRange(
-        itemPosition_.begin()->first, itemPosition_.rbegin()->first, cacheCount, cacheCount);
+        itemPosition_.begin()->first, itemPosition_.rbegin()->first, cacheStart, cacheEnd);
 }
 
 bool ListLayoutAlgorithm::CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper) const
@@ -220,7 +228,7 @@ float ListLayoutAlgorithm::GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Ax
         return 0.0f;
     }
     float maxCrossSize = 0.0f;
-    float crossSize = 0.0f;
+    float crossSize = -laneGutter_;
     float prevPos = GetItemPosition().begin()->second.startPos;
     for (const auto& pos : GetItemPosition()) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(pos.first, false);
@@ -232,7 +240,7 @@ float ListLayoutAlgorithm::GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Ax
             continue;
         }
         if (NearEqual(prevPos, pos.second.startPos)) {
-            crossSize += getGeometryNode->GetMarginFrameSize().CrossSize(axis);
+            crossSize = crossSize + getGeometryNode->GetMarginFrameSize().CrossSize(axis) + laneGutter_;
         } else {
             crossSize = getGeometryNode->GetMarginFrameSize().CrossSize(axis);
         }
@@ -698,7 +706,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
     int32_t endIndex = 0;
     int32_t midIndex = 0;
     float midItemMidPos = contentMainSize_ / 2.0f;
-    float startPos = 0.0f;
+    float startPos = contentStartOffset_;
     float endPos = 0.0f;
     float itemTotalSize = 0.0f;
     float jumpIndexStartPos = 0.0f;
@@ -790,12 +798,12 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
         }
         needEstimateOffset_ = true;
     } else if (targetIndex_.has_value()) {
-        if (LessOrEqual(startIndex, targetIndex_.value())) {
+        if (startIndex < targetIndex_.value()) {
             LayoutForward(layoutWrapper, startIndex, startPos);
             if (GetStartIndex() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_)) {
                 LayoutBackward(layoutWrapper, GetStartIndex() - 1, GetStartPosition());
             }
-        } else if (GreatNotEqual(startIndex, targetIndex_.value())) {
+        } else if (startIndex >= targetIndex_.value()) {
             LayoutBackward(layoutWrapper, endIndex, endPos);
             if (GetEndIndex() < (totalItemCount_ - 1) && LessNotEqual(GetEndPosition(), endMainPos_)) {
                 LayoutForward(layoutWrapper, GetEndIndex() + 1, GetEndPosition());
@@ -853,7 +861,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
 
 void ListLayoutAlgorithm::RecycleGroupItem(LayoutWrapper* layoutWrapper) const
 {
-    if (!isSnapCenter_ || childrenSize_) {
+    if (scrollSnapAlign_ != V2::ScrollSnapAlign::CENTER || childrenSize_) {
         return;
     }
     auto startChild = itemPosition_.begin();
@@ -967,8 +975,8 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
         chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(currentIndex) : 0.0f;
         // reach the valid target index
         if (forwardFeature_ && targetIndex_ && GreatNotEqual(currentIndex, targetIndex_.value())) {
-            endMainPos = GetEndPosition() + contentMainSize_;
-            targetIndex_.reset();
+            endMainPos = layoutEndMainPos_.value_or(endMainPos_);
+            forwardFeature_ = false;
         }
     } while (LessNotEqual(currentEndPos + chainOffset, endMainPos));
     currentEndPos += chainOffset;
@@ -995,7 +1003,6 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
             // adjust offset. If edgeEffect is SPRING, jump adjust to allow list scroll through boundary
             if (!canOverScroll_ || jumpIndex_.has_value()) {
                 currentOffset_ = currentEndPos + contentEndOffset_ - contentMainSize_;
-                adjustOffset_ = currentOffset_;
             }
         }
     }
@@ -1042,8 +1049,8 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
         chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(currentIndex) : 0.0f;
         // reach the valid target index
         if (backwardFeature_ && targetIndex_ && LessOrEqual(currentIndex, targetIndex_.value())) {
-            startMainPos = GetStartPosition() - contentMainSize_;
-            targetIndex_.reset();
+            startMainPos = layoutStartMainPos_.value_or(startMainPos_);
+            backwardFeature_ = false;
         }
     } while (GreatNotEqual(currentStartPos + chainOffset, startMainPos));
 
@@ -1061,7 +1068,6 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
         }
         if (!canOverScroll_ || jumpIndex_.has_value()) {
             currentOffset_ = currentStartPos - contentStartOffset_;
-            adjustOffset_ = currentOffset_;
         }
         endMainPos_ = currentStartPos - contentStartOffset_ + contentMainSize_;
         startMainPos_ = currentStartPos - contentStartOffset_;
@@ -1094,6 +1100,9 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
 
 void ListLayoutAlgorithm::ReMeasureListItemGroup(LayoutWrapper* layoutWrapper, bool forwardLayout)
 {
+    if (forwardFeature_ || backwardFeature_) {
+        return;
+    }
     if (forwardLayout) {
         if (itemPosition_.begin()->second.isGroup) {
             AdjustPostionForListItemGroup(layoutWrapper, axis_, GetStartIndex(), forwardLayout);
@@ -1113,7 +1122,7 @@ void ListLayoutAlgorithm::ReMeasureListItemGroup(LayoutWrapper* layoutWrapper, b
 
 void ListLayoutAlgorithm::FixPredictSnapOffset(const RefPtr<ListLayoutProperty>& listLayoutProperty)
 {
-    if (!predictSnapOffset_.has_value()) {
+    if (!predictSnapOffset_.has_value() || itemPosition_.empty()) {
         return;
     }
     auto scrollSnapAlign = listLayoutProperty->GetScrollSnapAlign().value_or(V2::ScrollSnapAlign::NONE);
@@ -1126,13 +1135,12 @@ void ListLayoutAlgorithm::FixPredictSnapOffset(const RefPtr<ListLayoutProperty>&
 
     auto predictEndPos = totalOffset_ - predictSnapOffset_.value();
     int32_t endIndex = FindPredictSnapEndIndexInItemPositions(predictEndPos, scrollSnapAlign);
-    if (endIndex != -1) {
+    if (GetStartIndex() <= endIndex && endIndex <= GetEndIndex()) {
         predictEndPos = CalculatePredictSnapEndPositionByIndex(endIndex, scrollSnapAlign);
         predictSnapOffset_ = totalOffset_ - predictEndPos + currentOffset_;
         predictSnapEndPos_.reset();
     } else {
         if (IsUniformHeightProbably()) {
-            auto scrollSnapAlign = listLayoutProperty->GetScrollSnapAlign().value_or(V2::ScrollSnapAlign::NONE);
             if (scrollSnapAlign == V2::ScrollSnapAlign::START) {
                 FixPredictSnapOffsetAlignStart();
             } else if (scrollSnapAlign == V2::ScrollSnapAlign::CENTER) {
@@ -1169,17 +1177,18 @@ void ListLayoutAlgorithm::FixPredictSnapOffsetAlignStart()
     auto itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos + spaceWidth_;
     float startPos = contentStartOffset_;
     float endPos = contentMainSize_ - contentEndOffset_;
+    float maxPos = itemHeight * totalItemCount_ - spaceWidth_ - endPos;
 
     if (LessNotEqual(predictEndPos, -startPos)) {
         if (isSpringEffect_) {
             return;
         }
         predictEndPos = -startPos;
-    } else if (GreatNotEqual(predictEndPos, itemHeight * GetMaxListItemIndex() + spaceWidth_)) {
+    } else if (GreatNotEqual(predictEndPos, maxPos)) {
         if (isSpringEffect_) {
             return;
         }
-        predictEndPos = itemHeight * totalItemCount_ - spaceWidth_ - endPos;
+        predictEndPos = maxPos;
     } else {
         int32_t index;
         for (index = 0; index <= GetMaxListItemIndex(); index++) {
@@ -1190,8 +1199,8 @@ void ListLayoutAlgorithm::FixPredictSnapOffsetAlignStart()
         predictEndPos = index * itemHeight - startPos;
         if (LessNotEqual(predictEndPos, -startPos)) {
             predictEndPos = -startPos;
-        } else if (GreatNotEqual(predictEndPos, itemHeight * GetMaxListItemIndex() + spaceWidth_)) {
-            predictEndPos = itemHeight * totalItemCount_ - spaceWidth_ - endPos;
+        } else if (GreatNotEqual(predictEndPos, maxPos)) {
+            predictEndPos = maxPos;
         }
     }
 
@@ -1204,7 +1213,6 @@ void ListLayoutAlgorithm::FixPredictSnapOffsetAlignCenter()
     if (itemPosition_.empty()) {
         return;
     }
-
     auto predictEndPos = totalOffset_ - predictSnapOffset_.value();
     auto itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos + spaceWidth_;
     if (LessNotEqual(predictEndPos, itemHeight / 2.0f - contentMainSize_ / 2.0f - spaceWidth_ / 2.0f)) {
@@ -1249,17 +1257,18 @@ void ListLayoutAlgorithm::FixPredictSnapOffsetAlignEnd()
     auto itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos + spaceWidth_;
     float startPos = contentStartOffset_;
     float endPos = contentMainSize_ - contentEndOffset_;
+    float maxPos = itemHeight * totalItemCount_ - spaceWidth_ - endPos;
 
     if (LessNotEqual(predictEndPos, -startPos)) {
         if (isSpringEffect_) {
             return;
         }
         predictEndPos = -startPos;
-    } else if (GreatNotEqual(predictEndPos, itemHeight * GetMaxListItemIndex() + spaceWidth_)) {
+    } else if (GreatNotEqual(predictEndPos, maxPos)) {
         if (isSpringEffect_) {
             return;
         }
-        predictEndPos = itemHeight * totalItemCount_ - spaceWidth_ - endPos;
+        predictEndPos = maxPos;
     } else {
         int32_t index;
         for (index = 0; index <= GetMaxListItemIndex(); index++) {
@@ -1270,8 +1279,8 @@ void ListLayoutAlgorithm::FixPredictSnapOffsetAlignEnd()
         predictEndPos = index * itemHeight - endPos - spaceWidth_;
         if (LessNotEqual(predictEndPos, -startPos)) {
             predictEndPos = -startPos;
-        } else if (GreatNotEqual(predictEndPos, itemHeight * GetMaxListItemIndex() + spaceWidth_)) {
-            predictEndPos = itemHeight * totalItemCount_ - spaceWidth_ - endPos;
+        } else if (GreatNotEqual(predictEndPos, maxPos)) {
+            predictEndPos = maxPos;
         }
     }
 
@@ -1301,8 +1310,7 @@ void ListLayoutAlgorithm::LayoutItem(RefPtr<LayoutWrapper>& wrapper, int32_t ind
         crossOffset = CalculateLaneCrossOffset(crossSize, childCrossSize);
     }
     auto chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(index) : 0.0f;
-    auto layoutDirection = wrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
-    if (layoutDirection == TextDirection::RTL) {
+    if (isReverse_) {
         if (axis_ == Axis::VERTICAL) {
             auto size = wrapper->GetGeometryNode()->GetMarginFrameSize();
             offset = offset + OffsetF(crossSize - crossOffset - size.Width(), pos.startPos + chainOffset);
@@ -1320,6 +1328,34 @@ void ListLayoutAlgorithm::LayoutItem(RefPtr<LayoutWrapper>& wrapper, int32_t ind
     SetListItemIndex(wrapper, index);
 }
 
+void ListLayoutAlgorithm::ProcessCacheCount(LayoutWrapper* layoutWrapper, int32_t cacheCount)
+{
+    if (!itemPosition_.empty() && cacheCount > 0) {
+        auto items = LayoutCachedItemV2(layoutWrapper, cacheCount);
+        auto host = layoutWrapper->GetHostNode();
+        CHECK_NULL_VOID(host);
+        if (!items.empty()) {
+            PostIdleTaskV2(host, { items, childLayoutConstraint_, GetGroupLayoutConstraint() });
+        } else {
+            auto pattern = host->GetPattern<ListPattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetPredictLayoutParamV2(std::nullopt);
+        }
+    } else {
+        SetActiveChildRange(layoutWrapper, cacheCount, cacheCount);
+    }
+}
+
+std::optional<ListItemGroupLayoutInfo> ListLayoutAlgorithm::GetListItemGroupLayoutInfo(
+    const RefPtr<LayoutWrapper>& wrapper) const
+{
+    auto layoutAlgorithmWrapper = wrapper->GetLayoutAlgorithm(true);
+    CHECK_NULL_RETURN(layoutAlgorithmWrapper, std::nullopt);
+    auto itemGroup = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(itemGroup, std::nullopt);
+    return itemGroup->GetLayoutInfo();
+}
+
 void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -1333,6 +1369,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     totalItemCount_ = layoutWrapper->GetTotalChildCount();
     listItemAlign_ = listLayoutProperty->GetListItemAlign().value_or(V2::ListItemAlign::START);
     int32_t startIndex = GetStartIndex();
+    isReverse_ = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::RTL;
 
     totalOffset_ += currentOffset_;
     FixPredictSnapOffset(listLayoutProperty);
@@ -1344,6 +1381,11 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
         pos.second.startPos -= currentOffset_;
         pos.second.endPos -= currentOffset_;
+        if (pos.second.isGroup) {
+            pos.second.groupInfo = GetListItemGroupLayoutInfo(wrapper);
+        } else {
+            pos.second.groupInfo.reset();
+        }
         LayoutItem(wrapper, pos.first, pos.second, startIndex, crossSize);
         if (expandSafeArea_ || wrapper->CheckNeedForceMeasureAndLayout()) {
             wrapper->Layout();
@@ -1360,18 +1402,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         pos.second.endPos -= currentOffset_;
     }
     auto cacheCount = listLayoutProperty->GetCachedCountValue(1);
-    if (!itemPosition_.empty() && cacheCount > 0) {
-        auto items = LayoutCachedItemV2(layoutWrapper, cacheCount);
-        auto host = layoutWrapper->GetHostNode();
-        CHECK_NULL_VOID(host);
-        if (!items.empty()) {
-            PostIdleTaskV2(host, { items, childLayoutConstraint_, GetGroupLayoutConstraint() });
-        } else {
-            auto pattern = host->GetPattern<ListPattern>();
-            CHECK_NULL_VOID(pattern);
-            pattern->SetPredictLayoutParamV2(std::nullopt);
-        }
-    }
+    ProcessCacheCount(layoutWrapper, cacheCount);
 }
 
 float ListLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, float childCrossSize)
@@ -1448,7 +1479,8 @@ void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& lay
     }
     itemGroup->SetNeedAdjustRefPos(needAdjustRefPos);
     itemGroup->SetListLayoutProperty(layoutProperty);
-    if (!isSnapCenter_) {
+    itemGroup->SetNeedCheckOffset(isNeedCheckOffset_);
+    if (scrollSnapAlign_ != V2::ScrollSnapAlign::CENTER) {
         itemGroup->SetContentOffset(contentStartOffset_, contentEndOffset_);
     }
     if (jumpIndex_.has_value() && jumpIndex_.value() == index) {
@@ -1469,9 +1501,10 @@ void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& lay
         }
     }
 
-    if (groupNeedAllLayout || (targetIndex_ && targetIndex_.value() == index) || (isSnapCenter_ && !childrenSize_)) {
+    if (groupNeedAllLayout || (targetIndex_ && targetIndex_.value() == index) ||
+        (scrollSnapAlign_ != V2::ScrollSnapAlign::NONE && !childrenSize_)) {
         itemGroup->SetNeedAllLayout();
-    } else if (targetIndex_) {
+    } else if (forwardFeature_ || backwardFeature_) {
         itemGroup->CheckNeedAllLayout(layoutWrapper, forwardLayout);
     }
     layoutWrapper->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
@@ -1515,7 +1548,7 @@ void ListLayoutAlgorithm::SetListItemIndex(const RefPtr<LayoutWrapper>& layoutWr
 void ListLayoutAlgorithm::CheckListItemGroupRecycle(LayoutWrapper* layoutWrapper, int32_t index,
     float referencePos, bool forwardLayout) const
 {
-    if (targetIndex_.has_value()) {
+    if (forwardFeature_ || backwardFeature_) {
         return;
     }
     auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
@@ -1559,12 +1592,12 @@ void ListLayoutAlgorithm::AdjustPostionForListItemGroup(LayoutWrapper* layoutWra
 
 void ListLayoutAlgorithm::OffScreenLayoutDirection()
 {
-    if (!targetIndex_ || itemPosition_.empty() || (itemPosition_.find(targetIndex_.value()) != itemPosition_.end())) {
+    if (!targetIndex_ || itemPosition_.empty()) {
         forwardFeature_ = false;
         backwardFeature_ = false;
         return;
     }
-    if (GreatNotEqual(targetIndex_.value(), GetEndIndex())) {
+    if (targetIndex_.value() > GetStartIndex()) {
         forwardFeature_ = true;
         backwardFeature_ = false;
     } else {
@@ -1599,6 +1632,7 @@ void ListLayoutAlgorithm::SyncGeometry(RefPtr<LayoutWrapper>& wrapper)
     auto host = wrapper->GetHostNode();
     CHECK_NULL_VOID(host);
     host->ForceSyncGeometryNode();
+    host->ResetLayoutAlgorithm();
 }
 
 bool ListLayoutAlgorithm::LayoutCachedALine(LayoutWrapper* layoutWrapper, int32_t index,
@@ -1719,7 +1753,7 @@ void ListLayoutAlgorithm::PostIdleTask(RefPtr<FrameNode> frameNode, const ListPr
 
 // return current CachedCount and max CacheCount
 std::pair<int32_t, int32_t> ListLayoutAlgorithm::GetLayoutGroupCachedCount(
-    const RefPtr<LayoutWrapper>& wrapper, bool forward, int32_t cacheCount)
+    const RefPtr<LayoutWrapper>& wrapper, bool forward, int32_t cacheCount, bool outOfView)
 {
     ACE_FUNCTION_TRACE();
     std::pair<int32_t, int32_t> res = { 0, 0 };
@@ -1729,30 +1763,33 @@ std::pair<int32_t, int32_t> ListLayoutAlgorithm::GetLayoutGroupCachedCount(
     CHECK_NULL_RETURN(groupPattern, res);
     const auto& itemPos = groupPattern->GetItemPosition();
     int32_t itemCount = groupPattern->GetTotalItemCount();
+    int32_t lanes = groupPattern->GetLanesInGroup();
+    lanes = lanes > 1 ? lanes : 1;
     if (groupNode->CheckNeedForceMeasureAndLayout()) {
         groupPattern->CalculateItemStartIndex();
         itemCount = groupNode->GetTotalChildCount() - groupPattern->GetItemStartIndex();
     }
     if (forward) {
-        int32_t cachedIndex = groupPattern->GetForwardCachedIndex(cacheCount);
-        int32_t endIndex = itemPos.empty() ? -1 : itemPos.rbegin()->first;
-        res.first = cachedIndex - endIndex;
-        res.second = itemCount - 1 - endIndex;
+        int32_t cachedIndex = groupPattern->UpdateForwardCachedIndex(cacheCount, outOfView);
+        int32_t endIndex = (outOfView || itemPos.empty()) ? -1 : itemPos.rbegin()->first;
+        res.first = (cachedIndex - endIndex) / lanes;
+        res.second = (itemCount - 1 - endIndex) / lanes;
     } else {
-        int32_t cachedIndex = groupPattern->GetBackwardCachedIndex(cacheCount);
-        int32_t startIndex = itemPos.empty() ? itemCount : itemPos.begin()->first;
-        res.first = startIndex - cachedIndex;
-        res.second = startIndex;
+        int32_t cachedIndex = groupPattern->UpdateBackwardCachedIndex(cacheCount, outOfView);
+        int32_t startIndex = (outOfView || itemPos.empty()) ? itemCount : itemPos.begin()->first;
+        res.first = (startIndex - cachedIndex) / lanes;
+        res.second = startIndex / lanes;
     }
     return res;
 }
 
-int32_t ListLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapper, int32_t cacheCount, int32_t cached)
+int32_t ListLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapper,
+    int32_t cacheCount, int32_t cached, int32_t& currIndex)
 {
     ACE_SCOPED_TRACE("LayoutCachedForward:%d,%d", cacheCount, cached);
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     float crossSize = GetCrossAxisSize(size, axis_);
-    int32_t currIndex = itemPosition_.rbegin()->first + 1;
+    currIndex = itemPosition_.rbegin()->first + 1;
     auto currPos = itemPosition_.rbegin()->second.endPos + spaceWidth_;
     while (cached < cacheCount && currIndex < totalItemCount_) {
         auto wrapper = layoutWrapper->GetChildByIndex(currIndex, true);
@@ -1773,7 +1810,7 @@ int32_t ListLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapper, i
         SyncGeometry(wrapper);
         wrapper->SetActive(false);
         if (isGroup) {
-            auto res = GetLayoutGroupCachedCount(wrapper, true, cacheCount);
+            auto res = GetLayoutGroupCachedCount(wrapper, true, cacheCount - cached, true);
             if (res.first < res.second && res.first < cacheCount - cached) {
                 return currIndex;
             }
@@ -1786,12 +1823,13 @@ int32_t ListLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapper, i
     return -1;
 }
 
-int32_t ListLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrapper, int32_t cacheCount, int32_t cached)
+int32_t ListLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrapper,
+    int32_t cacheCount, int32_t cached, int32_t& currIndex)
 {
     ACE_SCOPED_TRACE("LayoutCachedBackward:%d,%d", cacheCount, cached);
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     float crossSize = GetCrossAxisSize(size, axis_);
-    int32_t currIndex = itemPosition_.begin()->first - 1;
+    currIndex = itemPosition_.begin()->first - 1;
     auto currPos = itemPosition_.begin()->second.startPos - spaceWidth_;
     while (cached < cacheCount && currIndex >= 0) {
         auto wrapper = layoutWrapper->GetChildByIndex(currIndex, true);
@@ -1812,7 +1850,7 @@ int32_t ListLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrapper, 
         SyncGeometry(wrapper);
         wrapper->SetActive(false);
         if (isGroup) {
-            auto res = GetLayoutGroupCachedCount(wrapper, false, cacheCount);
+            auto res = GetLayoutGroupCachedCount(wrapper, false, cacheCount - cached, true);
             if (res.first < res.second && res.first < cacheCount - cached) {
                 return currIndex;
             }
@@ -1833,34 +1871,41 @@ std::list<PredictLayoutItem> ListLayoutAlgorithm::LayoutCachedItemV2(LayoutWrapp
     int32_t endIndex = itemPosition_.rbegin()->first;
     if (itemPosition_.rbegin()->second.isGroup) {
         auto wrapper = layoutWrapper->GetChildByIndex(endIndex);
-        auto res = GetLayoutGroupCachedCount(wrapper, true, cacheCount);
+        auto res = GetLayoutGroupCachedCount(wrapper, true, cacheCount, false);
         if (res.first < res.second && res.first < cacheCount) {
             predictBuildList.emplace_back(PredictLayoutItem { endIndex, true, cachedForward });
         }
         cachedForward += res.second;
     }
     if (cachedForward < cacheCount && endIndex < totalItemCount_ - 1) {
-        int32_t index = LayoutCachedForward(layoutWrapper, cacheCount, cachedForward);
+        int32_t index = LayoutCachedForward(layoutWrapper, cacheCount, cachedForward, endIndex);
         if (index >= 0) {
             predictBuildList.emplace_back(PredictLayoutItem { index, true, cachedForward });
+        } else {
+            endIndex--;
         }
     }
     int32_t cachedBackward = 0;
     int32_t startIndex = itemPosition_.begin()->first;
     if (itemPosition_.begin()->second.isGroup) {
         auto wrapper = layoutWrapper->GetChildByIndex(startIndex);
-        auto res = GetLayoutGroupCachedCount(wrapper, false, cacheCount);
+        auto res = GetLayoutGroupCachedCount(wrapper, false, cacheCount, false);
         if (res.first < res.second && res.first < cacheCount) {
             predictBuildList.emplace_back(PredictLayoutItem { startIndex, false, cachedBackward });
         }
         cachedBackward += res.second;
     }
     if (cachedBackward < cacheCount && startIndex > 0) {
-        auto index = LayoutCachedBackward(layoutWrapper, cacheCount, cachedBackward);
+        auto index = LayoutCachedBackward(layoutWrapper, cacheCount, cachedBackward, startIndex);
         if (index >= 0) {
             predictBuildList.emplace_back(PredictLayoutItem { index, false, cachedBackward });
+        } else {
+            startIndex++;
         }
     }
+    int32_t cacheStart = itemPosition_.begin()->first - startIndex;
+    int32_t cacheEnd = endIndex - itemPosition_.rbegin()->first;
+    SetActiveChildRange(layoutWrapper, cacheStart, cacheEnd);
     return predictBuildList;
 }
 
@@ -1939,7 +1984,7 @@ void ListLayoutAlgorithm::PostIdleTaskV2(RefPtr<FrameNode> frameNode, const List
     });
 }
 
-float ListLayoutAlgorithm::GetStopOnScreenOffset(V2::ScrollSnapAlign scrollSnapAlign)
+float ListLayoutAlgorithm::GetStopOnScreenOffset(V2::ScrollSnapAlign scrollSnapAlign) const
 {
     float stopOnScreen = 0;
     if (scrollSnapAlign == V2::ScrollSnapAlign::START) {
@@ -1952,46 +1997,88 @@ float ListLayoutAlgorithm::GetStopOnScreenOffset(V2::ScrollSnapAlign scrollSnapA
     return stopOnScreen;
 }
 
+void ListLayoutAlgorithm::FindPredictSnapIndexInItemPositionsStart(
+    float predictEndPos, int32_t& endIndex, int32_t& currIndex) const
+{
+    float stopOnScreen = GetStopOnScreenOffset(V2::ScrollSnapAlign::START);
+    float itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
+    for (const auto& positionInfo : itemPosition_) {
+        auto startPos = positionInfo.second.startPos - itemHeight / 2.0f - spaceWidth_;
+        float itemHeight = positionInfo.second.endPos - positionInfo.second.startPos;
+        auto endPos = positionInfo.second.startPos + itemHeight / 2.0f;
+        if (GreatOrEqual(predictEndPos + stopOnScreen, totalOffset_ + startPos) &&
+            LessNotEqual(predictEndPos + stopOnScreen, totalOffset_ + endPos)) {
+            endIndex = positionInfo.first;
+        }
+        if (GreatOrEqual(stopOnScreen, startPos) && LessNotEqual(stopOnScreen, endPos)) {
+            currIndex = positionInfo.first;
+        }
+        if (endIndex >= 0 && currIndex >= 0) {
+            break;
+        }
+    }
+}
+
+void ListLayoutAlgorithm::FindPredictSnapIndexInItemPositionsCenter(
+    float predictEndPos, int32_t& endIndex, int32_t& currIndex) const
+{
+    float stopOnScreen = GetStopOnScreenOffset(V2::ScrollSnapAlign::CENTER);
+    for (const auto& positionInfo : itemPosition_) {
+        auto startPos = positionInfo.second.startPos - spaceWidth_ / 2.0f;
+        auto endPos = positionInfo.second.endPos + spaceWidth_ / 2.0f;
+        if (GreatOrEqual(predictEndPos + stopOnScreen, totalOffset_ + startPos) &&
+            LessNotEqual(predictEndPos + stopOnScreen, totalOffset_ + endPos)) {
+            endIndex = positionInfo.first;
+        }
+        if (GreatOrEqual(stopOnScreen, startPos) && LessNotEqual(stopOnScreen, endPos)) {
+            currIndex = positionInfo.first;
+        }
+        if (endIndex >= 0 && currIndex >= 0) {
+            break;
+        }
+    }
+}
+
+void ListLayoutAlgorithm::FindPredictSnapIndexInItemPositionsEnd(
+    float predictEndPos, int32_t& endIndex, int32_t& currIndex) const
+{
+    float stopOnScreen = GetStopOnScreenOffset(V2::ScrollSnapAlign::END);
+    float itemHeight = itemPosition_.rbegin()->second.endPos - itemPosition_.rbegin()->second.startPos;
+    for (auto pos = itemPosition_.rbegin(); pos != itemPosition_.rend(); ++pos) {
+        auto endPos = pos->second.endPos + itemHeight / 2.0f + spaceWidth_;
+        itemHeight = pos->second.endPos - pos->second.startPos;
+        auto startPos = pos->second.endPos - itemHeight / 2.0f;
+        if (GreatOrEqual(predictEndPos + stopOnScreen, totalOffset_ + startPos) &&
+            LessNotEqual(predictEndPos + stopOnScreen, totalOffset_ + endPos)) {
+            endIndex = pos->first;
+        }
+        if (GreatOrEqual(stopOnScreen, startPos) && LessNotEqual(stopOnScreen, endPos)) {
+            currIndex = pos->first;
+        }
+        if (endIndex >= 0 && currIndex >= 0) {
+            break;
+        }
+    }
+}
+
 int32_t ListLayoutAlgorithm::FindPredictSnapEndIndexInItemPositions(
     float predictEndPos, V2::ScrollSnapAlign scrollSnapAlign)
 {
     int32_t endIndex = -1;
-    float stopOnScreen = GetStopOnScreenOffset(scrollSnapAlign);
-    float startPos = 0.0f;
-    float endPos = 0.0f;
-    float itemHeight = 0.0f;
+    int32_t currIndex = -1;
 
     if (scrollSnapAlign == V2::ScrollSnapAlign::START) {
-        for (const auto& positionInfo : itemPosition_) {
-            startPos = totalOffset_ + positionInfo.second.startPos - itemHeight / 2.0f - spaceWidth_;
-            itemHeight = positionInfo.second.endPos - positionInfo.second.startPos;
-            endPos = totalOffset_ + positionInfo.second.startPos + itemHeight / 2.0f;
-            if (GreatOrEqual(predictEndPos + stopOnScreen, startPos) &&
-                LessNotEqual(predictEndPos + stopOnScreen, endPos)) {
-                endIndex = positionInfo.first;
-                break;
-            }
-        }
+        FindPredictSnapIndexInItemPositionsStart(predictEndPos, endIndex, currIndex);
     } else if (scrollSnapAlign == V2::ScrollSnapAlign::CENTER) {
-        for (const auto& positionInfo : itemPosition_) {
-            startPos = totalOffset_ + positionInfo.second.startPos - spaceWidth_ / 2.0f;
-            endPos = totalOffset_ + positionInfo.second.endPos + spaceWidth_ / 2.0f;
-            if (GreatOrEqual(predictEndPos + stopOnScreen, startPos) &&
-                LessNotEqual(predictEndPos + stopOnScreen, endPos)) {
-                endIndex = positionInfo.first;
-                break;
-            }
-        }
+        FindPredictSnapIndexInItemPositionsCenter(predictEndPos, endIndex, currIndex);
     } else if (scrollSnapAlign == V2::ScrollSnapAlign::END) {
-        for (auto pos = itemPosition_.rbegin(); pos != itemPosition_.rend(); ++pos) {
-            endPos = totalOffset_ + pos->second.endPos + itemHeight / 2.0f + spaceWidth_;
-            itemHeight = pos->second.endPos - pos->second.startPos;
-            startPos = totalOffset_ + pos->second.endPos - itemHeight / 2.0f;
-            if (GreatOrEqual(predictEndPos + stopOnScreen, startPos) &&
-                LessNotEqual(predictEndPos + stopOnScreen, endPos)) {
-                endIndex = pos->first;
-                break;
-            }
+        FindPredictSnapIndexInItemPositionsEnd(predictEndPos, endIndex, currIndex);
+    }
+    if (endIndex == currIndex && currIndex >= 0) {
+        if (scrollSnapVelocity_ < -SCROLL_SNAP_VELOCITY_TH * Scrollable::GetVelocityScale()) {
+            endIndex = std::min(GetEndIndex(), endIndex + 1);
+        } else if (scrollSnapVelocity_ > SCROLL_SNAP_VELOCITY_TH * Scrollable::GetVelocityScale()) {
+            endIndex = std::min(GetStartIndex(), endIndex - 1);
         }
     }
     return endIndex;
@@ -2014,7 +2101,7 @@ bool ListLayoutAlgorithm::IsUniformHeightProbably()
     return isUniformHeightProbably;
 }
 
-float ListLayoutAlgorithm::CalculatePredictSnapEndPositionByIndex(uint32_t index, V2::ScrollSnapAlign scrollSnapAlign)
+float ListLayoutAlgorithm::CalculatePredictSnapEndPositionByIndex(int32_t index, V2::ScrollSnapAlign scrollSnapAlign)
 {
     float predictSnapEndPos = 0;
     if (scrollSnapAlign == V2::ScrollSnapAlign::START) {
@@ -2028,14 +2115,14 @@ float ListLayoutAlgorithm::CalculatePredictSnapEndPositionByIndex(uint32_t index
         predictSnapEndPos = totalOffset_ + itemPosition_[index].startPos + itemHeight / 2.0f - contentMainSize_ / 2.0f;
     } else if (scrollSnapAlign == V2::ScrollSnapAlign::END) {
         predictSnapEndPos = totalOffset_ + itemPosition_[index].endPos - contentMainSize_ + contentEndOffset_;
-        if (GetStartIndex() == 0 && LessNotEqual(predictSnapEndPos, contentStartOffset_)) {
+        if (GetStartIndex() == 0 && LessNotEqual(predictSnapEndPos, totalOffset_ + GetStartPosition())) {
             predictSnapEndPos = totalOffset_ + GetStartPosition() - contentStartOffset_;
         }
     }
     return predictSnapEndPos;
 }
 
-void ListLayoutAlgorithm::OnItemPositionAddOrUpdate(LayoutWrapper* layoutWrapper, uint32_t index)
+void ListLayoutAlgorithm::OnItemPositionAddOrUpdate(LayoutWrapper* layoutWrapper, int32_t index)
 {
     if (!predictSnapEndPos_.has_value()) {
         return;
@@ -2086,6 +2173,7 @@ std::pair<int32_t, float> ListLayoutAlgorithm::GetSnapStartIndexAndPos()
                 NearEqual(GetEndPosition(), prevContentMainSize_ - prevContentEndOffset_) && !canOverScroll_) {
                 startIndex = pos.first;
                 startPos = contentStartOffset_;
+                adjustOffset_ = pos.second.startPos - prevContentStartOffset_;
             }
             break;
         }
@@ -2106,6 +2194,7 @@ std::pair<int32_t, float> ListLayoutAlgorithm::GetSnapEndIndexAndPos()
             if ((GetStartIndex() == 0) && NearEqual(GetStartPosition(), prevContentStartOffset_) && !canOverScroll_) {
                 endIndex = pos->first;
                 endPos = prevContentMainSize_ - contentEndOffset_;
+                adjustOffset_ = pos->second.endPos + prevContentEndOffset_ - prevContentMainSize_;
             }
             break;
         }

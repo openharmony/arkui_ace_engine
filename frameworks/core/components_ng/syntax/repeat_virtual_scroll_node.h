@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <list>
 #include <string>
+#include <functional>
 
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
@@ -37,31 +38,31 @@ class ACE_EXPORT RepeatVirtualScrollNode : public ForEachBaseNode {
 
 public:
     static RefPtr<RepeatVirtualScrollNode> GetOrCreateRepeatNode(int32_t nodeId, uint32_t totalCount,
-        const std::map<std::string, uint32_t>& templateCachedCountMap,
+        const std::map<std::string, std::pair<bool, uint32_t>>& templateCachedCountMap,
         const std::function<void(uint32_t)>& onCreateNode,
         const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
-        const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range);
+        const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range,
+        const std::function<void(uint32_t, uint32_t)>& onSetActiveRange);
 
     RepeatVirtualScrollNode(int32_t nodeId, int32_t totalCount,
-        const std::map<std::string, uint32_t>& templateCacheCountMap, const std::function<void(uint32_t)>& onCreateNode,
+        const std::map<std::string, std::pair<bool, uint32_t>>& templateCacheCountMap,
+        const std::function<void(uint32_t)>& onCreateNode,
         const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
-        const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range);
+        const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range,
+        const std::function<void(uint32_t, uint32_t)>& onSetActiveRange);
 
     ~RepeatVirtualScrollNode() override = default;
 
-    void UpdateTotalCount(uint32_t totalCount)
-    {
-        totalCount_ = totalCount;
-    }
+    void UpdateTotalCount(uint32_t totalCount);
 
     // Number of children that Repeat can product
     // returns TotalCount
     int32_t FrameCount() const override;
 
     // called from TS upon Repeat rerender
-    void InvalidateKeyCache();
+    void UpdateRenderState(bool visibleItemsChanged);
 
     /**
      * GetChildren re-assembles children_ and cleanup the L1 cache
@@ -70,14 +71,23 @@ public:
      * function returns children_
      * function runs as part of idle task
      */
-    const std::list<RefPtr<UINode>>& GetChildren() const override;
+    const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = false) const override;
 
     /**
-     * update range of Active items inside Repeat:
-     * iterative L1 cache entries
+     * scenario: called by layout informs:
+     *   - start: the first visible index
+     *   - end: the last visible index
+     *   - cacheStart: number of items cached before start
+     *   - cacheEnd: number of items cached after end
+     *
+     * Total L1 cache includes items from start-cacheStart to end+cacheEnd,
+     * but the active items are only start...end.
+     *
      * those items with index in range [ start ... end ] are marked active
      * those out of range marked inactive.
-     * retests idle task
+     *
+     * those items out of cached range are removed from L1
+     * requests idle task
      */
     void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd) override;
 
@@ -150,7 +160,7 @@ private:
     // try to find entry for given index in L1 or L2 cache
     RefPtr<UINode> GetFromCaches(uint32_t forIndex)
     {
-        return caches_.GetNode4Index(forIndex);
+        return caches_.GetCachedNode4Index(forIndex);
     }
 
     // index is not in L1 or L2 cache, need to make it
@@ -160,6 +170,10 @@ private:
 
     // get farthest (from L1 indexes) index in L2 cache or -1
     int32_t GetFarthestL2CacheIndex();
+
+    // drop UINode with given key from L1 but keep in L2
+    // detach from tree and request tree sync
+    void DropFromL1(const std::string& key);
 
     // RepeatVirtualScrollNode is not instance of FrameNode
     // needs to propagate active state to all items inside
@@ -171,6 +185,9 @@ private:
     // caches:
     mutable RepeatVirtualScrollCaches caches_;
 
+    // get active child range
+    std::function<void(uint32_t, uint32_t)> onSetActiveRange_;
+
     // used by one of the unknown functions
     std::list<std::string> ids_;
 
@@ -180,6 +197,7 @@ private:
     // true in the time from requesting idle / predict task until exec predict tsk.
     bool postUpdateTaskHasBeenScheduled_;
 
+    // STATE_MGMT_NOTE: What are these?
     OffscreenItems offscreenItems_;
     int32_t startIndex_ = 0;
 

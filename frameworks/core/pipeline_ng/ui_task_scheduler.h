@@ -81,6 +81,7 @@ public:
     void AddAfterLayoutTask(std::function<void()>&& task, bool isFlushInImplicitAnimationTask = false);
     void AddAfterRenderTask(std::function<void()>&& task);
     void AddPersistAfterLayoutTask(std::function<void()>&& task);
+    void AddLastestFrameLayoutFinishTask(std::function<void()>&& task);
 
     void FlushLayoutTask(bool forceUseMainThread = false);
     void FlushRenderTask(bool forceUseMainThread = false);
@@ -90,6 +91,7 @@ public:
     void FlushAfterLayoutCallbackInImplicitAnimationTask();
     void FlushAfterRenderTask();
     void FlushPersistAfterLayoutTask();
+    void FlushLastestFrameLayoutFinishTask();
     void ExpandSafeArea();
 
     void FlushDelayJsActive();
@@ -135,6 +137,10 @@ public:
         syncGeometryNodeTasks_.emplace_back(task);
     }
 
+    void AddSafeAreaPaddingProcessTask(FrameNode* node);
+    void RemoveSafeAreaPaddingProcessTask(FrameNode* node);
+    void FlushSafeAreaPaddingProcess();
+
     void SetIsLayouting(bool layouting)
     {
         isLayouting_ = layouting;
@@ -179,7 +185,9 @@ private:
     std::list<std::function<void()>> afterLayoutCallbacksInImplicitAnimationTask_;
     std::list<std::function<void()>> afterRenderTasks_;
     std::list<std::function<void()>> persistAfterLayoutTasks_;
+    std::list<std::function<void()>> lastestFrameLayoutFinishTasks_;
     std::list<std::function<void()>> syncGeometryNodeTasks_;
+    std::set<FrameNode*, NodeCompare<FrameNode*>> safeAreaPaddingProcessTasks_;
 
     uint32_t currentPageId_ = 0;
     bool is64BitSystem_ = false;

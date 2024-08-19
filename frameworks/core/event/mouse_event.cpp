@@ -15,10 +15,6 @@
 
 #include "core/event/mouse_event.h"
 
-#include "base/log/log.h"
-#include "core/accessibility/accessibility_utils.h"
-#include "core/common/ace_application_info.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
@@ -35,5 +31,54 @@ bool HoverEventTarget::HandleHoverEvent(bool isHovered, const MouseEvent& event)
     hoverInfo.SetPressedKeyCodes(event.pressedKeyCodes_);
     onHoverEventCallback_(isHovered, hoverInfo);
     return !hoverInfo.IsStopPropagation();
+}
+
+void HoverEventTarget::HandleAccessibilityHoverEvent(bool isHovered, const TouchEvent& event)
+{
+    if (!onAccessibilityHoverCallback_) {
+        return;
+    }
+    AccessibilityHoverInfo hoverInfo;
+    hoverInfo.SetTimeStamp(event.time);
+    hoverInfo.SetDeviceId(event.deviceId);
+    hoverInfo.SetSourceDevice(event.sourceType);
+    hoverInfo.SetSourceTool(event.sourceTool);
+    hoverInfo.SetPressedKeyCodes(event.pressedKeyCodes_);
+    NG::PointF lastLocalPoint(event.x, event.y);
+    NG::NGGestureRecognizer::Transform(lastLocalPoint, GetAttachedNode(), false,
+        isPostEventResult_, event.postEventNodeId);
+    auto localX = static_cast<float>(lastLocalPoint.GetX());
+    auto localY = static_cast<float>(lastLocalPoint.GetY());
+    hoverInfo.SetLocalLocation(Offset(localX, localY));
+    hoverInfo.SetGlobalLocation(Offset(event.x, event.y));
+    hoverInfo.SetScreenLocation(Offset(event.screenX, event.screenY));
+    hoverInfo.SetActionType(ConvertAccessibilityHoverAction(event.type));
+    hoverInfo.SetTarget(GetEventTarget().value_or(EventTarget()));
+    onAccessibilityHoverCallback_(isHovered, hoverInfo);
+}
+
+AccessibilityHoverAction HoverEventTarget::ConvertAccessibilityHoverAction(TouchType type)
+{
+    switch (type) {
+        case TouchType::HOVER_ENTER:
+            return AccessibilityHoverAction::HOVER_ENTER;
+        case TouchType::HOVER_MOVE:
+            return AccessibilityHoverAction::HOVER_MOVE;
+        case TouchType::HOVER_EXIT:
+            return AccessibilityHoverAction::HOVER_EXIT;
+        case TouchType::HOVER_CANCEL:
+            return AccessibilityHoverAction::HOVER_CANCEL;
+        case TouchType::DOWN:
+        case TouchType::UP:
+        case TouchType::MOVE:
+        case TouchType::CANCEL:
+        case TouchType::PULL_DOWN:
+        case TouchType::PULL_UP:
+        case TouchType::PULL_MOVE:
+        case TouchType::PULL_IN_WINDOW:
+        case TouchType::PULL_OUT_WINDOW:
+        case TouchType::UNKNOWN:
+            return AccessibilityHoverAction::UNKNOWN;
+    }
 }
 } // namespace OHOS::Ace

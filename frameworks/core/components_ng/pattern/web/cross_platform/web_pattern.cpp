@@ -57,20 +57,17 @@ const std::vector<int32_t> DEFAULT_ORIGN_GEAR {0, 2000, 4000, 6000, 8000};
 
 WebPattern::WebPattern() = default;
 
-WebPattern::WebPattern(const std::string& webSrc,
-                       const RefPtr<WebController>& webController,
-                       RenderMode renderMode,
-                       bool incognitoMode)
-    : webSrc_(std::move(webSrc)), webController_(webController), renderMode_(renderMode),
-      incognitoMode_(incognitoMode)
+WebPattern::WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController, RenderMode renderMode,
+    bool incognitoMode, const std::string& sharedRenderProcessToken)
+    : webSrc_(std::move(webSrc)), webController_(webController), renderMode_(renderMode), incognitoMode_(incognitoMode),
+      sharedRenderProcessToken_(sharedRenderProcessToken)
 {}
 
-WebPattern::WebPattern(const std::string& webSrc,
-                       const SetWebIdCallback& setWebIdCallback,
-                       RenderMode renderMode,
-                       bool incognitoMode)
+WebPattern::WebPattern(const std::string& webSrc, const SetWebIdCallback& setWebIdCallback, RenderMode renderMode,
+    bool incognitoMode, const std::string& sharedRenderProcessToken)
     : webSrc_(std::move(webSrc)), setWebIdCallback_(setWebIdCallback), renderMode_(renderMode),
-      incognitoMode_(incognitoMode) {}
+      incognitoMode_(incognitoMode), sharedRenderProcessToken_(sharedRenderProcessToken)
+{}
 
 WebPattern::~WebPattern()
 {
@@ -145,7 +142,7 @@ void WebPattern::InitEvent()
         CHECK_NULL_VOID(WebPattern);
         WebPattern->UpdateLocale();
     };
-    context->SetConfigChangedCallback(std::move(langTask));
+    context->SetConfigChangedCallback(GetHost()->GetId(), std::move(langTask));
 }
 
 void WebPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -250,6 +247,11 @@ Offset WebPattern::GetDragOffset() const
     webDragOffset.SetY(y);
 
     return webDragOffset;
+}
+
+SizeF WebPattern::GetDragPixelMapSize() const
+{
+    return SizeF(0, 0);
 }
 
 bool WebPattern::HandleDoubleClickEvent(const MouseInfo& info)
@@ -383,6 +385,11 @@ void WebPattern::WebRequestFocus()
     CHECK_NULL_VOID(focusHub);
 
     focusHub->RequestFocusImmediately();
+}
+
+WebInfoType WebPattern::GetWebInfoType()
+{
+    return WebInfoType::TYPE_MOBILE;
 }
 
 void WebPattern::UpdateContentOffset(const RefPtr<LayoutWrapper>& dirty)
@@ -718,6 +725,11 @@ void WebPattern::OnVerticalScrollBarAccessEnabledUpdate(bool value)
     if (delegate_) {
         delegate_->UpdateVerticalScrollBarAccess(value);
     }
+}
+
+void WebPattern::SetUpdateInstanceIdCallback(std::function<void(int32_t)>&& callback)
+{
+    updateInstanceIdCallback_ = callback;
 }
 
 void WebPattern::OnScrollBarColorUpdate(const std::string& value)
@@ -1092,6 +1104,19 @@ bool WebPattern::OnBackPressed() const
     return true;
 }
 
+bool WebPattern::OnBackPressedForFullScreen() const
+{
+    if (!isFullScreen_) {
+        return false;
+    }
+
+    CHECK_NULL_RETURN(fullScreenExitHandler_, false);
+    auto webFullScreenExitHandler = fullScreenExitHandler_->GetHandler();
+    CHECK_NULL_RETURN(webFullScreenExitHandler, false);
+    webFullScreenExitHandler->ExitFullScreen();
+    return true;
+}
+
 void WebPattern::SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterEvent>& fullScreenExitHandler)
 {
     fullScreenExitHandler_ = fullScreenExitHandler;
@@ -1146,9 +1171,14 @@ void WebPattern::UpdateBackgroundColorRightNow(int32_t color)
     renderContext->UpdateBackgroundColor(Color(static_cast<uint32_t>(color)));
 }
 
+void WebPattern::OnSmoothDragResizeEnabledUpdate(bool value)
+{
+    // cross platform is not support now;
+}
+
 void WebPattern::OnRootLayerChanged(int width, int height)
 {
-     // cross platform is not support now;
+    // cross platform is not support now;
 }
 
 void WebPattern::SetNestedScroll(const NestedScrollOptions& nestedOpt)
@@ -1176,9 +1206,14 @@ void WebPattern::OnOverScrollModeUpdate(int mode)
    // cross platform is not support now;
 }
 
+void WebPattern::OnCopyOptionModeUpdate(int32_t mode)
+{
+    // cross platform is not support now;
+}
+
 void WebPattern::OnTextAutosizingUpdate(bool isTextAutosizing)
 {
-   // cross platform is not support now;
+    // cross platform is not support now;
 }
 
 void WebPattern::UpdateRelativeOffset()
@@ -1191,9 +1226,14 @@ void WebPattern::InitSlideUpdateListener()
     // cross platform is not support now;
 }
 
-void WebPattern::UpdateSlideOffset()
+void WebPattern::UpdateSlideOffset(bool isNeedReset)
 {
-   // cross platform is not support now;
+    // cross platform is not support now;
+}
+
+bool WebPattern::Backward()
+{
+    return false;
 }
 
 void WebPattern::CalculateHorizontalDrawRect()
@@ -1227,12 +1267,37 @@ void WebPattern::OnDefaultTextEncodingFormatUpdate(const std::string& value)
     // cross platform is not support now;
 }
 
+void  WebPattern::OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMenuOption)
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::OnNativeVideoPlayerConfigUpdate(const std::tuple<bool, bool>& config)
+{
+    // cross platform is not support now;
+}
+
 void WebPattern::OnOverlayScrollbarEnabledUpdate(bool value)
 {
     // cross platform is not support now;
 }
 
+void WebPattern::OnNativeEmbedRuleTagUpdate(const std::string& tag)
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::OnNativeEmbedRuleTypeUpdate(const std::string& type)
+{
+    // cross platform is not support now;
+}
+
 void WebPattern::OnMetaViewportUpdate(bool value)
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode)
 {
     // cross platform is not support now;
 }

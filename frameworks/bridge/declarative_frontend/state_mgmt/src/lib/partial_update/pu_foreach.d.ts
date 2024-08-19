@@ -53,8 +53,11 @@ declare class RepeatVirtualScrollNative {
       onUpdateNode: (fromKey: string, forIndex: number) => void;
       onGetKeys4Range: (from: number, toNumber: number) => Array<string>;
       onGetTypes4Range: (from: number, toNumber: number) => Array<string>;
+      onSetActiveRange: (from: number, to: number) => void;
     }
   ): void;
-  // invalidate C++ side map index -> key
-  static invalidateKeyCache(totalCount : number): void;
+  // invalidate caches in C++ side, trigger render if needed
+  static updateRenderState(totalCount: number, visibleItemsChanged: boolean): void;
+  // drag and drop
+  static onMove(handler: (from: number, to: number) => void);
 }

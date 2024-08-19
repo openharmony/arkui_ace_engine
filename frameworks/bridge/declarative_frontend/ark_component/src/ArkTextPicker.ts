@@ -115,7 +115,7 @@ class TextpickerDividerModifier extends ModifierWithKey<DividerOptions | null> {
   static identity: Symbol = Symbol('textpickerDivider');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().textpicker.resetDivider(node);
+      getUINativeModule().textpicker.resetDivider(node, this.value);
     } else {
       getUINativeModule().textpicker.setDivider(node, this.value?.strokeWidth, this.value?.color, this.value?.startMargin, this.value?.endMargin);
     }

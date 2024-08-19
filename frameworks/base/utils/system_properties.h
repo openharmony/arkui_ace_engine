@@ -293,6 +293,11 @@ public:
         return textTraceEnable_;
     }
 
+    static bool GetSyntaxTraceEnabled()
+    {
+        return syntaxTraceEnable_;
+    }
+
     static bool GetAccessTraceEnabled()
     {
         return accessTraceEnable_;
@@ -525,6 +530,11 @@ public:
         return acePerformanceMonitorEnable_;
     }
 
+    static bool GetAceCommercialLogEnabled()
+    {
+        return aceCommercialLogEnable_;
+    }
+
     static std::string GetAtomicServiceBundleName();
 
     static std::pair<float, float> GetDarkModeBrightnessPercent()
@@ -548,6 +558,7 @@ private:
     static bool syncDebugTraceEnable_;
     static bool pixelRoundEnable_;
     static bool textTraceEnable_;
+    static bool syntaxTraceEnable_;
     static bool accessTraceEnable_;
     static bool accessibilityEnabled_;
     static uint32_t canvasDebugMode_;
@@ -598,6 +609,7 @@ private:
     static bool sideBarContainerBlurEnable_;
     static bool stateManagerEnable_;
     static bool acePerformanceMonitorEnable_;
+    static bool aceCommercialLogEnable_;
     static bool faultInjectEnabled_;
     static bool imageFrameworkEnable_;
     static std::pair<float, float> brightUpPercent_;

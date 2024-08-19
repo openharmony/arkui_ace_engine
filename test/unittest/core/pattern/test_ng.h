@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_PATTERN_TEST_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_PATTERN_TEST_NG_H
 
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 #include <type_traits>
-
-#include "gtest/gtest.h"
 
 #define private public
 #define protected public
@@ -30,7 +30,11 @@
 #include "core/components/button/button_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern//linear_layout/column_model_ng.h"
+#include "core/components_ng/pattern//linear_layout/row_model_ng.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -46,11 +50,17 @@ class TestNG : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
-    RefPtr<PaintWrapper> FlushLayoutTask(const RefPtr<FrameNode>& frameNode);
+    RefPtr<PaintWrapper> FlushLayoutTask(const RefPtr<FrameNode>& frameNode, bool markDirty = false);
     RefPtr<PaintWrapper> CreateDone(const RefPtr<FrameNode>& frameNode = nullptr);
     uint64_t GetActions(const RefPtr<AccessibilityProperty>& accessibilityProperty);
     TouchEventInfo CreateTouchEventInfo(TouchType touchType, Offset location);
     static RefPtr<ThemeConstants> CreateThemeConstants(const std::string& patternName);
+    void FlushExpandSafeAreaTask();
+    void CreateLayoutTask(const RefPtr<FrameNode>& frameNode);
+    RefPtr<FrameNode> CreateText(const std::string& content, const std::function<void(TextModelNG)>& callback);
+    RefPtr<FrameNode> CreateRow(const std::function<void(RowModelNG)>& callback);
+    RefPtr<FrameNode> CreateColumn(const std::function<void(ColumnModelNG)>& callback);
+    void SetSize(Axis axis, const CalcLength& crossSize, const CalcLength& mainSize);
 
     AssertionResult IsEqual(const SizeF& actual, const SizeF& expected)
     {
@@ -65,10 +75,8 @@ public:
         if (NearEqual(actual.start, expected.start) && NearEqual(actual.end, expected.end)) {
             return AssertionSuccess();
         }
-        return AssertionFailure() << "Actual: "
-                                  << "{ " << actual.start << " , " << actual.end << " }"
-                                  << " Expected: "
-                                  << "{ " << expected.start << " , " << expected.end << " }";
+        return AssertionFailure() << "Actual: " << "{ " << actual.start << " , " << actual.end << " }"
+                                  << " Expected: " << "{ " << expected.start << " , " << expected.end << " }";
     }
 
     AssertionResult IsEqual(const Offset& actual, const Offset& expected)
@@ -109,12 +117,17 @@ public:
             actual.indexInGroup == expected.indexInGroup) {
             return AssertionSuccess();
         }
-        return AssertionFailure() << "Actual: "
-                                  << "{ " << actual.index << " , " << actual.area << " , " << actual.indexInGroup
-                                  << " }"
-                                  << " Expected: "
-                                  << "{ " << expected.index << " , " << expected.area << " , " << expected.indexInGroup
-                                  << " }";
+        return AssertionFailure() << "Actual: " << "{ " << actual.index << " , " << actual.area << " , "
+                                  << actual.indexInGroup << " }" << " Expected: " << "{ " << expected.index << " , "
+                                  << expected.area << " , " << expected.indexInGroup << " }";
+    }
+
+    AssertionResult IsEqual(const BorderRadiusProperty& actual, const BorderRadiusProperty& expected)
+    {
+        if (NearEqual(actual, expected)) {
+            return AssertionSuccess();
+        }
+        return AssertionFailure() << "Actual: " << actual.ToString() << " Expected: " << expected.ToString();
     }
 
     template<typename T>
@@ -128,7 +141,7 @@ public:
 
     RefPtr<FrameNode> GetChildFrameNode(const RefPtr<FrameNode>& frameNode, int32_t index)
     {
-        return AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(index));
+        return AceType::DynamicCast<FrameNode>(frameNode->GetChildByIndex(index));
     }
 
     RefPtr<FocusHub> GetChildFocusHub(const RefPtr<FrameNode>& frameNode, int32_t index)

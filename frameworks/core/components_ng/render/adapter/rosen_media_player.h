@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_ROSEN_MEDIA_PLAYER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_ROSEN_MEDIA_PLAYER_H
 
-#include "foundation/multimedia/player_framework/interfaces/inner_api/native/player.h"
+#include "player.h"
 #include "surface.h"
 #include "window.h"
 
@@ -42,6 +42,7 @@ public:
     void SetRenderSurface(const RefPtr<RenderSurface>& renderSurface) override;
     void RegisterMediaPlayerEvent(PositionUpdatedEvent&& positionUpdatedEvent, StateChangedEvent&& stateChangedEvent,
         CommonEvent&& errorEvent, CommonEvent&& resolutionChangeEvent, CommonEvent&& startRenderFrameEvent) override;
+    void RegisterMediaPlayerSeekDoneEvent(SeekDoneEvent&& seekDoneEvent) override;
     int32_t GetDuration(int32_t& duration) override;
     int32_t GetVideoWidth() override;
     int32_t GetVideoHeight() override;
@@ -54,6 +55,7 @@ public:
     int32_t Pause() override;
     int32_t Stop() override;
     int32_t Seek(int32_t mSeconds, OHOS::Ace::SeekMode mode) override;
+    int32_t SetPlayRange(int64_t startTime, int64_t endTime) override;
 
 private:
     // Interim programme

@@ -16,10 +16,12 @@
 #include "test/mock/core/render/mock_canvas_image.h"
 
 #include "core/components_ng/image_provider/image_loading_context.h"
+#include "core/components_ng/pattern/image/image_dfx.h"
 
 namespace OHOS::Ace::NG {
-ImageLoadingContext::ImageLoadingContext(const ImageSourceInfo& src, LoadNotifier&& loadNotifier, bool syncLoad)
-    : src_(src), notifiers_(loadNotifier), syncLoad_(syncLoad)
+ImageLoadingContext::ImageLoadingContext(
+    const ImageSourceInfo& src, LoadNotifier&& loadNotifier, bool syncLoad, const ImageDfxConfig& imageDfxConfig)
+    : src_(src), notifiers_(loadNotifier), syncLoad_(syncLoad), imageDfxConfig_(imageDfxConfig)
 {}
 
 ImageLoadingContext::~ImageLoadingContext() = default;
@@ -171,9 +173,4 @@ void ImageLoadingContext::PerformDownload() {}
 void ImageLoadingContext::DownloadImageSuccess(const std::string& imageData) {}
 
 void ImageLoadingContext::DownloadImageFailed(const std::string& errorMessage) {}
-
-bool ImageLoadingContext::RemoveDownloadTask(const std::string& src)
-{
-    return false;
-}
 } // namespace OHOS::Ace::NG

@@ -1168,9 +1168,9 @@ private:
     bool isAllowWindowOpenMethod_ = false;
     OnMouseCallback onMouseEvent_;
     OnKeyEventCallback onKeyEvent_;
-    float initialScale_;
+    float initialScale_ = 0;
     bool isInitialScaleSet_ = false;
-    int32_t backgroundColor_;
+    int32_t backgroundColor_ = 0;
     bool isBackgroundColor_ = false;
     bool isNeedGestureAccess_ = true;
     bool isNativeEmbedMode_ = false;

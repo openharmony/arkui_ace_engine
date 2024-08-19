@@ -19,6 +19,7 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <string>
 
 #include "base/geometry/dimension.h"
@@ -27,6 +28,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/components/box/drag_drop_event.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/hyperlink/hyperlink_theme.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/text/layout_info_interface.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
@@ -35,6 +37,36 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 
 namespace OHOS::Ace {
+struct TextDetectConfig {
+    std::string types;
+    std::function<void(const std::string&)> onResult;
+    Color entityColor;
+    TextDecoration entityDecorationType;
+    Color entityDecorationColor;
+    TextDecorationStyle entityDecorationStyle;
+
+    TextDetectConfig()
+    {
+        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        CHECK_NULL_VOID(pipeline);
+        auto hyperlinkTheme = pipeline->GetTheme<HyperlinkTheme>();
+        CHECK_NULL_VOID(hyperlinkTheme);
+        entityColor = hyperlinkTheme->GetTextColor();
+        entityDecorationType = TextDecoration::UNDERLINE;
+        entityDecorationColor = entityColor;
+        entityDecorationStyle = TextDecorationStyle::SOLID;
+    }
+    std::string ToString() const
+    {
+        auto jsonValue = JsonUtil::Create(true);
+        JSON_STRING_PUT_STRING(jsonValue, types);
+        JSON_STRING_PUT_STRINGABLE(jsonValue, entityColor);
+        JSON_STRING_PUT_INT(jsonValue, entityDecorationType);
+        JSON_STRING_PUT_STRINGABLE(jsonValue, entityDecorationColor);
+        return jsonValue->ToString();
+    }
+};
+
 class ACE_EXPORT SpanStringBase : public AceType {
     DECLARE_ACE_TYPE(SpanStringBase, AceType);
 };
@@ -60,6 +92,8 @@ public:
     virtual void SetTextShadow(const std::vector<Shadow>& value) = 0;
     virtual void SetItalicFontStyle(Ace::FontStyle value) = 0;
     virtual void SetFontWeight(FontWeight value) = 0;
+    virtual void SetMinFontScale(const float value) = 0;
+    virtual void SetMaxFontScale(const float value) = 0;
     virtual void SetFontFamily(const std::vector<std::string>& value) = 0;
     virtual void SetWordBreak(WordBreak wordBreak) = 0;
     virtual void SetLineBreakStrategy(LineBreakStrategy lineBreakStrategy) = 0;
@@ -79,7 +113,7 @@ public:
     virtual void SetAdaptMaxFontSize(const Dimension& value) = 0;
     virtual void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) = 0;
     virtual void SetTextDetectEnable(bool value) = 0;
-    virtual void SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult) = 0;
+    virtual void SetTextDetectConfig(const TextDetectConfig& textDetectConfig) = 0;
     virtual void OnSetWidth() {};
     virtual void OnSetHeight() {};
     virtual void OnSetAlign() {};
@@ -96,7 +130,6 @@ public:
     virtual void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) = 0;
     virtual void SetOnDrop(NG::OnDragDropFunc&& onDrop) = 0;
     virtual void SetDraggable(bool draggable) = 0;
-    virtual void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) = 0;
 
     virtual void SetTextSelection(int32_t startIndex, int32_t endIndex) = 0;
     virtual void SetTextSelectableMode(TextSelectableMode textSelectable) = 0;
@@ -109,9 +142,10 @@ public:
     };
     virtual void SetClipEdge(bool clip) = 0;
     virtual void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) = 0;
-    virtual void SetMarqueeOptions(const NG::TextMarqueeOptions& options) = 0;
-    virtual void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func) = 0;
-    virtual void SetSelectionMenuOptions(const std::vector<NG::MenuOptionsParam>&& menuOptionsItems) {};
+    virtual void SetSelectionMenuOptions(
+        const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick) {};
+    virtual void SetResponseRegion(bool isUserSetResponseRegion) {};
+    virtual void SetHalfLeading(bool halfLeading) = 0;
 
 private:
     static std::unique_ptr<TextModel> instance_;

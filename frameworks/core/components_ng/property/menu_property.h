@@ -52,6 +52,7 @@ struct MenuParam {
     OffsetF positionOffset;
     bool setShow = false;
     bool isShow = false;
+    MenuBindingType menuBindType = MenuBindingType::LONG_PRESS;
     ContextMenuRegisterType contextMenuRegisterType = ContextMenuRegisterType::NORMAL_TYPE;
     std::function<void(const std::string&)> onStateChange;
     std::optional<Placement> placement;

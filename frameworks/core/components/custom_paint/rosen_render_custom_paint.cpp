@@ -15,7 +15,6 @@
 
 #include "core/components/custom_paint/rosen_render_custom_paint.h"
 
-#include <cmath>
 
 #ifndef USE_GRAPHIC_TEXT_GINE
 #include "txt/paragraph_builder.h"
@@ -26,8 +25,6 @@
 #include "rosen_text/typography_create.h"
 #include "rosen_text/typography_style.h"
 #endif
-#include "render_service_client/core/ui/rs_node.h"
-#include "securec.h"
 
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkBlendMode.h"
@@ -51,14 +48,8 @@
 #include "base/i18n/localization.h"
 #include "base/image/pixel_map.h"
 #include "base/json/json_util.h"
-#include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/linear_map.h"
-#include "base/utils/measure_util.h"
-#include "base/utils/string_utils.h"
-#include "base/utils/utils.h"
-#include "bridge/common/utils/utils.h"
-#include "core/components/calendar/rosen_render_calendar.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/font/constants_converter.h"
 #include "core/components/font/rosen_font_collection.h"
@@ -68,8 +59,6 @@
 #else
 #include "core/components_ng/render/adapter/rosen/drawing_image.h"
 #endif
-#include "core/image/image_cache.h"
-#include "core/image/image_provider.h"
 #include "core/image/sk_image_cache.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
@@ -88,6 +77,7 @@ const std::string IMAGE_PNG = "image/png";
 const std::string IMAGE_JPEG = "image/jpeg";
 const std::string IMAGE_WEBP = "image/webp";
 const std::u16string ELLIPSIS = u"\u2026";
+const std::string FONTWEIGHT = "wght";
 
 // If args is empty or invalid format, use default: image/png
 std::string GetMimeType(const std::string& args)
@@ -648,6 +638,13 @@ double RosenRenderCustomPaint::MeasureTextInner(const MeasureContext& context)
     txtStyle.fontStyle = ConvertTxtFontStyle(context.fontStyle);
     FontWeight fontWeightStr = StringUtils::StringToFontWeight(context.fontWeight);
     txtStyle.fontWeight = ConvertTxtFontWeight(fontWeightStr);
+    auto fontWeightValue = (static_cast<int32_t>(
+            ConvertTxtFontWeight(fontWeightStr)) + 1) * 100;
+    auto pipelineContext = PipelineBase::GetCurrentContextSafely();
+    if (pipelineContext) {
+        fontWeightValue = fontWeightValue * pipelineContext->GetFontWeightScale();
+    }
+    txtStyle.fontVariations.SetAxisValue(FONTWEIGHT, fontWeightValue);
     StringUtils::StringSplitter(context.fontFamily, ',', fontFamilies);
     txtStyle.fontFamilies = fontFamilies;
     if (context.letterSpacing.has_value()) {
@@ -692,17 +689,14 @@ bool RosenRenderCustomPaint::IsApplyIndent(const MeasureContext& context, double
 
 void RosenRenderCustomPaint::ApplyLineHeightInNumUnit(const MeasureContext& context, Rosen::TextStyle& txtStyle)
 {
-    auto lineHeight = context.lineHeight.value().Value();
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    if (pipelineContext) {
-        lineHeight = pipelineContext->NormalizeToPx(context.lineHeight.value());
-    }
+    auto lineHeight = context.lineHeight.value().ConvertToPx();
     txtStyle.heightOnly = true;
     if (!NearEqual(lineHeight, txtStyle.fontSize) && (lineHeight > 0.0) && (!NearZero(txtStyle.fontSize))) {
         txtStyle.heightScale = lineHeight / txtStyle.fontSize;
     } else {
         txtStyle.heightScale = 1;
         static const int32_t BEGIN_VERSION = 6;
+        auto pipelineContext = PipelineBase::GetCurrentContextSafely();
         auto isBeginVersion = pipelineContext && pipelineContext->GetMinPlatformVersion() >= BEGIN_VERSION;
         if (NearZero(lineHeight) || (!isBeginVersion && NearEqual(lineHeight, txtStyle.fontSize))) {
             txtStyle.heightOnly = false;
@@ -778,6 +772,13 @@ Size RosenRenderCustomPaint::MeasureTextSizeInner(const MeasureContext& context)
     txtStyle.font_weight = ConvertTxtFontWeight(fontWeightStr);
 #else
     txtStyle.fontWeight = ConvertTxtFontWeight(fontWeightStr);
+    auto fontWeightValue = (static_cast<int32_t>(
+            ConvertTxtFontWeight(fontWeightStr)) + 1) * 100;
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    if (pipelineContext) {
+        fontWeightValue = fontWeightValue * pipelineContext->GetFontWeightScale();
+    }
+    txtStyle.fontVariations.SetAxisValue(FONTWEIGHT, fontWeightValue);
 #endif
     StringUtils::StringSplitter(context.fontFamily, ',', fontFamilies);
 #ifndef USE_GRAPHIC_TEXT_GINE
@@ -848,7 +849,7 @@ Size RosenRenderCustomPaint::MeasureTextSizeInner(const MeasureContext& context)
 #else
     auto* paragraphTxt = static_cast<Rosen::Typography*>(paragraph.get());
 #endif
-    if (paragraphTxt->GetLineCount() == 1) {
+    if (paragraphTxt->GetLineCount() == 1 && !context.isReturnActualWidth) {
 #ifndef USE_GRAPHIC_TEXT_GINE
         textWidth = std::max(paragraph->GetLongestLine(), paragraph->GetMaxIntrinsicWidth());
 #else

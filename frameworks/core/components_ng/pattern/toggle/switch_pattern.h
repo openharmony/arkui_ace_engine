@@ -64,25 +64,19 @@ public:
     {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
-        if (!switchModifier_) {
-            auto pipeline = PipelineBase::GetCurrentContext();
-            auto switchTheme = pipeline->GetTheme<SwitchTheme>();
-            auto paintProperty = host->GetPaintProperty<SwitchPaintProperty>();
-            auto isSelect = paintProperty->GetIsOnValue(false);
-            auto boardColor = isSelect ? paintProperty->GetSelectedColorValue(switchTheme->GetActiveColor())
-                                       : switchTheme->GetInactivePointColor();
-            switchModifier_ = AceType::MakeRefPtr<SwitchModifier>(isSelect, boardColor, dragOffsetX_);
+        if (!paintMethod_) {
+            paintMethod_ = MakeRefPtr<SwitchPaintMethod>();
         }
-        switchModifier_->SetUseContentModifier(UseContentModifier());
-        auto paintMethod = MakeRefPtr<SwitchPaintMethod>(switchModifier_);
-        paintMethod->SetDirection(direction_);
-        paintMethod->SetIsSelect(isOn_.value_or(false));
-        paintMethod->SetEnabled(enabled_);
-        paintMethod->SetDragOffsetX(dragOffsetX_);
-        paintMethod->SetTouchHoverAnimationType(touchHoverType_);
-        paintMethod->SetIsDragEvent(isDragEvent_);
-        paintMethod->SetShowHoverEffect(showHoverEffect_);
-        return paintMethod;
+        paintMethod_->SetUseContentModifier(UseContentModifier());
+        paintMethod_->SetDirection(direction_);
+        paintMethod_->SetIsSelect(isOn_.value_or(false));
+        paintMethod_->SetEnabled(enabled_);
+        paintMethod_->SetDragOffsetX(dragOffsetX_);
+        paintMethod_->SetTouchHoverAnimationType(touchHoverType_);
+        paintMethod_->SetIsDragEvent(isDragEvent_);
+        paintMethod_->SetShowHoverEffect(showHoverEffect_);
+        paintMethod_->SetUseContentModifier(UseContentModifier());
+        return paintMethod_;
     }
 
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
@@ -163,11 +157,6 @@ private:
     void OnTouchDown();
     void OnTouchUp();
     void HandleMouseEvent(bool isHover);
-    void HandleFocusEvent(const RefPtr<SwitchPaintProperty>& switchPaintProperty,
-        const RefPtr<SwitchTheme>& switchTheme);
-    void HandleBlurEvent(const RefPtr<SwitchPaintProperty>& switchPaintProperty,
-        const RefPtr<SwitchTheme>& switchTheme);
-    void UpdateColorWhenIsOn(bool isOn);
     float GetSwitchWidth() const;
     float GetSwitchContentOffsetX() const;
 
@@ -176,11 +165,6 @@ private:
     void InitClickEvent();
     void InitTouchEvent();
     void InitMouseEvent();
-    void InitFocusEvent();
-
-    void AddIsFocusActiveUpdateEvent();
-    void RemoveIsFocusActiveUpdateEvent();
-    void OnIsFocusActiveUpdate(bool isFocusAcitve);
 
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
@@ -213,12 +197,9 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     bool isTouch_ = false;
     bool isHover_ = false;
-    bool isFocus_ = false;
     bool isUserSetResponseRegion_ = false;
     bool showHoverEffect_ = true;
     bool enabled_ = true;
-    bool isBgColorUnselectFocus_ = false;
-    bool isPointColorUnselectFocus_ = false;
 
     float width_ = 0.0f;
     float height_ = 0.0f;
@@ -231,9 +212,8 @@ private:
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
     TextDirection direction_ = TextDirection::AUTO;
     bool isDragEvent_ = false;
-    RefPtr<SwitchModifier> switchModifier_;
+    RefPtr<SwitchPaintMethod> paintMethod_;
     ACE_DISALLOW_COPY_AND_MOVE(SwitchPattern);
-    std::function<void(bool)> isFocusActiveUpdateEvent_;
     bool isTouchPreventDefault_ = false;
 };
 } // namespace OHOS::Ace::NG

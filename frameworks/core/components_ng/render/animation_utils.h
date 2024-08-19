@@ -73,7 +73,7 @@ public:
     static void ContinueInteractiveAnimation(
         const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation);
 
-    static void StartInteractiveAnimation(
+    static int32_t StartInteractiveAnimation(
         const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation);
 
     static void ReverseInteractiveAnimation(

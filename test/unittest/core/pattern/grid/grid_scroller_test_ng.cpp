@@ -22,6 +22,7 @@ namespace {} // namespace
 class GridScrollerTestNg : public GridTestNg {
 public:
     AssertionResult ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, float expectOffset);
+    void ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset);
 };
 
 AssertionResult GridScrollerTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, float expectOffset)
@@ -39,6 +40,12 @@ AssertionResult GridScrollerTestNg::ScrollToIndex(int32_t index, bool smooth, Sc
     pattern_->ScrollTo(startOffset); // reset currentOffset_
     FlushLayoutTask(frameNode_);
     return IsEqual(currentOffset, expectOffset);
+}
+
+void GridScrollerTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset)
+{
+    pattern_->ScrollToIndex(index, smooth, align, extraOffset);
+    FlushLayoutTask(frameNode_);
 }
 
 /**
@@ -388,6 +395,78 @@ HWTEST_F(GridScrollerTestNg, ScrollToIndex014, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ScrollToIndex015
+ * @tc.desc: Test ScrollToIndex with extraOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, ScrollToIndex015, TestSize.Level1)
+{
+    /**
+     * @tc.cases: ScrollToIndex without animation
+     * @tc.expected: GetTotalOffset is right
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(20);
+    CreateDone(frameNode_);
+    std::optional<float> extraOffset = -400.f;
+    ScrollToIndex(2, false, ScrollAlign::START, extraOffset);
+    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 0.f);
+    ScrollToIndex(17, false, ScrollAlign::START, extraOffset);
+    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 1200.f); // 10 * ITEM_HEIGHT -  GRID_HEIGHT
+    ScrollToIndex(17, false, ScrollAlign::END, extraOffset);
+    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 600.f); // 1200.f - ITEM_HEIGHT - 400.f
+    ScrollToIndex(LAST_ITEM, false, ScrollAlign::END, extraOffset);
+    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 800.f); // 1200.f - 400.f
+
+    extraOffset = 400.f;
+    ScrollToIndex(2, false, ScrollAlign::START, extraOffset);
+    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 600.f); // ITEM_HEIGHT + 400.f
+    ScrollToIndex(2, false, ScrollAlign::END, extraOffset);
+    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 0.f);
+    ScrollToIndex(17, false, ScrollAlign::END, extraOffset);
+    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 1200.f);
+    ScrollToIndex(LAST_ITEM, false, ScrollAlign::END, extraOffset);
+    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 1200.f);
+}
+
+/**
+ * @tc.name: ScrollToIndex016
+ * @tc.desc: Test ScrollToIndex with extraOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, ScrollToIndex016, TestSize.Level1)
+{
+    /**
+     * @tc.cases: ScrollToIndex with animation
+     * @tc.expected: GetFinalPosition is right
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions({});
+    CreateFixedItems(20);
+    CreateDone(frameNode_);
+
+    std::optional<float> extraOffset = -400.f;
+    ScrollToIndex(2, true, ScrollAlign::START, extraOffset);
+    EXPECT_FLOAT_EQ(pattern_->GetFinalPosition(), -200.f); // ITEM_HEIGHT - 400.f
+    ScrollToIndex(17, true, ScrollAlign::START, extraOffset);
+    EXPECT_FLOAT_EQ(pattern_->GetFinalPosition(), 1200.f); // 10 * ITEM_HEIGHT - GRID_HEIGHT
+    ScrollToIndex(17, true, ScrollAlign::END, extraOffset);
+    EXPECT_FLOAT_EQ(pattern_->GetFinalPosition(), 600.f); // 1200.f - ITEM_HEIGHT - 400.f
+    ScrollToIndex(LAST_ITEM, true, ScrollAlign::END, extraOffset);
+    EXPECT_FLOAT_EQ(pattern_->GetFinalPosition(), -400.f); // extraOffset
+
+    extraOffset = 400.f;
+    ScrollToIndex(2, true, ScrollAlign::START, extraOffset);
+    EXPECT_FLOAT_EQ(pattern_->GetFinalPosition(), 600.f); // ITEM_HEIGHT + 400.f
+    ScrollToIndex(17, true, ScrollAlign::END, extraOffset);
+    EXPECT_FLOAT_EQ(pattern_->GetFinalPosition(), 1400.f); // 1200.f - ITEM_HEIGHT + 400.f
+    ScrollToIndex(LAST_ITEM, true, ScrollAlign::END, extraOffset);
+    EXPECT_FLOAT_EQ(pattern_->GetFinalPosition(), 400.f); // extraOffset
+}
+
+/**
  * @tc.name: ScrollTo001
  * @tc.desc: Test ScrollTo Function.
  * @tc.type: FUNC
@@ -732,15 +811,22 @@ HWTEST_F(GridScrollerTestNg, PositionController002, TestSize.Level1)
 
     /**
      * @tc.steps: step5. Test ScrollToEdge func.
-     * @tc.expected: Verify return value.
+     * @tc.expected: Verify return value. Animation should be stopped
      */
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_LEFT, true);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().jumpIndex_, EMPTY_JUMP_INDEX);
+
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_RIGHT, true);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().jumpIndex_, EMPTY_JUMP_INDEX);
+
+    pattern_->isSmoothScrolling_ = true;
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
+    EXPECT_FALSE(pattern_->isSmoothScrolling_);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().jumpIndex_, LAST_ITEM);
+
+    pattern_->isSmoothScrolling_ = true;
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true);
+    EXPECT_FALSE(pattern_->isSmoothScrolling_);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().jumpIndex_, 0);
 
     /**
@@ -1113,7 +1199,7 @@ HWTEST_F(GridScrollerTestNg, PositionController009, TestSize.Level1)
      */
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_RIGHT, SCROLL_FIXED_VELOCITY_009);
     EXPECT_FALSE(pattern_->fixedVelocityMotion_);
-    
+
     /**
      * @tc.steps: step4. Scroll to the bottom edge
      * expected: 1.Fixed Verify is is non-zero.
@@ -1202,7 +1288,7 @@ HWTEST_F(GridScrollerTestNg, PositionController010, TestSize.Level1)
      */
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_RIGHT, SCROLL_FIXED_VELOCITY_010);
     EXPECT_FALSE(pattern_->fixedVelocityMotion_);
-    
+
     /**
      * @tc.steps: step4. Scroll to the bottom edge
      * expected: 1.Fixed Verify is is non-zero.
@@ -1234,7 +1320,7 @@ HWTEST_F(GridScrollerTestNg, PositionController010, TestSize.Level1)
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, SCROLL_FIXED_VELOCITY_010);
     EXPECT_TRUE(pattern_->fixedVelocityMotion_);
     EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), SCROLL_FIXED_VELOCITY_010);
-        
+
     /**
      * @tc.steps: step7. 1. Set offset time
      *                   2. Set changed count
@@ -1470,7 +1556,7 @@ HWTEST_F(GridScrollerTestNg, UpdateCurrentOffset001, TestSize.Level1)
     UpdateCurrentOffset(100.f, SCROLL_FROM_UPDATE);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
     UpdateCurrentOffset(-200.f, SCROLL_FROM_UPDATE);
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, -200.f);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0.f);
 }
 
 /**
@@ -1492,7 +1578,7 @@ HWTEST_F(GridScrollerTestNg, UpdateCurrentOffset002, TestSize.Level1)
     UpdateCurrentOffset(100.f, SCROLL_FROM_BAR);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
     UpdateCurrentOffset(-200.f, SCROLL_FROM_BAR);
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, -200.f);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0.f);
 }
 
 /**
@@ -1515,7 +1601,7 @@ HWTEST_F(GridScrollerTestNg, UpdateCurrentOffset003, TestSize.Level1)
     UpdateCurrentOffset(100.f, SCROLL_FROM_UPDATE);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
     UpdateCurrentOffset(-200.f, SCROLL_FROM_UPDATE);
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, -200.f);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0.f);
 }
 
 /**
@@ -1562,7 +1648,7 @@ HWTEST_F(GridScrollerTestNg, ScrollBy001, TestSize.Level1)
     EXPECT_TRUE(pattern_->scrollStop_);
 
     pattern_->OutBoundaryCallback();
-    EXPECT_FALSE(pattern_->IsOutOfBoundary());
+    EXPECT_FALSE(pattern_->IsOutOfBoundary(true));
 
     /**
      * @tc.steps: step3. Test AnimateTo function
@@ -1570,34 +1656,6 @@ HWTEST_F(GridScrollerTestNg, ScrollBy001, TestSize.Level1)
      */
     pattern_->AnimateTo(1.5, 1.f, Curves::LINEAR, false);
     EXPECT_FALSE(pattern_->isAnimationStop_);
-}
-
-/**
- * @tc.name: DumpAdvanceInfo001
- * @tc.desc: Test ScrollBy
- * @tc.type: FUNC
- */
-HWTEST_F(GridScrollerTestNg, DumpAdvanceInfo001, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr");
-    CreateDone(frameNode_);
-    pattern_->DumpAdvanceInfo();
-    pattern_->gridLayoutInfo_.scrollAlign_ = ScrollAlign::NONE;
-    pattern_->DumpAdvanceInfo();
-    pattern_->gridLayoutInfo_.scrollAlign_ = ScrollAlign::CENTER;
-    pattern_->DumpAdvanceInfo();
-    pattern_->gridLayoutInfo_.scrollAlign_ = ScrollAlign::END;
-    pattern_->DumpAdvanceInfo();
-    pattern_->gridLayoutInfo_.scrollAlign_ = ScrollAlign::START;
-    pattern_->DumpAdvanceInfo();
-
-    ClearOldNodes();
-    model = CreateGrid();
-    model.SetColumnsTemplate("1fr");
-    CreateFixedItems(1);
-    CreateDone(frameNode_);
-    pattern_->DumpAdvanceInfo();
 }
 
 /**

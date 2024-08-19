@@ -25,7 +25,7 @@ class MockImageAnalyzerManager : public ImageAnalyzerManager {
 public:
     bool IsSupportImageAnalyzerFeature();
     void CreateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, const NG::OffsetF& offset = { 0.0f, 0.0f });
-    void UpdateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap);
+    void UpdateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, const NG::OffsetF& offset = { 0.0f, 0.0f });
     void UpdateAnalyzerOverlayLayout();
     void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode, const PixelMapInfo& info = {});
     void DestroyAnalyzerOverlay();

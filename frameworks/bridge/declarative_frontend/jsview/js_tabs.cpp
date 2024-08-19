@@ -14,10 +14,15 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_tabs.h"
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
+
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/engine/functions/js_swiper_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_tabs_function.h"
+#include "bridge/declarative_frontend/jsview/js_scrollable.h"
 #include "bridge/declarative_frontend/jsview/js_tabs_controller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/tabs_model_impl.h"
@@ -102,6 +107,7 @@ void JSTabs::SetOnChange(const JSCallbackInfo& info)
             return;
         }
         ACE_SCORING_EVENT("Tabs.onChange");
+        ACE_SCOPED_TRACE("Tabs.onChange index %d", tabsInfo->GetIndex());
         PipelineContext::SetCallBackNode(node);
         func->Execute(*tabsInfo);
     };
@@ -128,6 +134,9 @@ void JSTabs::SetOnTabBarClick(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("Tabs.onTabBarClick");
         PipelineContext::SetCallBackNode(node);
         func->Execute(*tabsInfo);
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Tabs.onTabBarClick");
+#endif
     };
     TabsModel::GetInstance()->SetOnTabBarClick(std::move(onTabBarClick));
 }
@@ -161,6 +170,9 @@ void JSTabs::SetOnAnimationEnd(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
         ACE_SCORING_EVENT("Tabs.onAnimationEnd");
         func->Execute(index, info);
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Tabs.onAnimationEnd");
+#endif
     };
     TabsModel::GetInstance()->SetOnAnimationEnd(std::move(onAnimationEnd));
 }
@@ -650,6 +662,15 @@ void JSTabs::SetAnimateMode(const JSCallbackInfo& info)
     TabsModel::GetInstance()->SetAnimateMode(static_cast<TabAnimateMode>(value));
 }
 
+void JSTabs::SetEdgeEffect(const JSCallbackInfo& info)
+{
+    auto edgeEffect = EdgeEffect::SPRING;
+    if (info.Length() > 0) {
+        edgeEffect = JSScrollable::ParseEdgeEffect(info[0], EdgeEffect::SPRING);
+    }
+    TabsModel::GetInstance()->SetEdgeEffect(edgeEffect);
+}
+
 void JSTabs::JSBind(BindingTarget globalObj)
 {
     JsTabContentTransitionProxy::JSBind(globalObj);
@@ -691,6 +712,7 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("customContentTransition", &JSTabs::SetCustomContentTransition);
     JSClass<JSTabs>::StaticMethod("onContentWillChange", &JSTabs::SetOnContentWillChange);
     JSClass<JSTabs>::StaticMethod("animationMode", &JSTabs::SetAnimateMode);
+    JSClass<JSTabs>::StaticMethod("edgeEffect", &JSTabs::SetEdgeEffect);
 
     JSClass<JSTabs>::InheritAndBind<JSContainerBase>(globalObj);
 }

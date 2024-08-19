@@ -26,10 +26,15 @@ class AccessibilityElementInfo;
 class AccessibilityEventInfo;
 } // namespace OHOS::Accessibility
 
+namespace OHOS::Ace::NG {
+class WebPattern;
+} // namespace OHOS::Ace::NG
+
 namespace OHOS::Ace {
 
 struct AccessibilityEvent {
     int64_t nodeId = 0;
+    int64_t stackNodeId = -1;
     uint32_t windowId = 0;
     WindowsContentChangeTypes windowContentChangeTypes = CONTENT_CHANGE_TYPE_INVALID;
     WindowUpdateType windowChangeTypes = WINDOW_UPDATE_INVALID;
@@ -37,6 +42,7 @@ struct AccessibilityEvent {
     std::string componentType;
     std::string beforeText;
     std::string latestContent;
+    std::string textAnnouncedForAccessibility;
     double currentItemIndex = 0.0;
     double itemCount = 0.0;
     AccessibilityEventType type = AccessibilityEventType::UNKNOWN;
@@ -47,14 +53,31 @@ enum class AccessibilityVersion {
     JS_DECLARATIVE_VERSION,
 };
 
+class AccessibilitySAObserverCallback {
+public:
+    explicit AccessibilitySAObserverCallback(int64_t accessibilityId) : accessibilityId_(accessibilityId)
+    {}
+    virtual ~AccessibilitySAObserverCallback() = default;
+    virtual bool OnState(bool state) = 0;
+
+    int64_t GetAccessibilityId() const
+    {
+        return accessibilityId_;
+    }
+private:
+    int64_t accessibilityId_ = -1;
+};
+
 class AccessibilityChildTreeCallback {
 public:
-    AccessibilityChildTreeCallback() = default;
+    explicit AccessibilityChildTreeCallback(int64_t accessibilityId) : accessibilityId_(accessibilityId)
+    {}
     virtual ~AccessibilityChildTreeCallback() = default;
     virtual bool OnRegister(uint32_t windowId, int32_t treeId) = 0;
     virtual bool OnDeregister() = 0;
     virtual bool OnSetChildTree(int32_t childWindowId, int32_t childTreeId) = 0;
     virtual bool OnDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
+    virtual void OnClearRegisterFlag() = 0;
     int32_t GetChildTreeId() const
     {
         return childTreeId_;
@@ -63,9 +86,14 @@ public:
     {
         childTreeId_ = childTreeId;
     }
+    int64_t GetAccessibilityId() const
+    {
+        return accessibilityId_;
+    }
 
 private:
     int32_t childTreeId_ = 0;
+    int64_t accessibilityId_ = -1;
 };
 
 using VisibleRatioCallback = std::function<void(bool, double)>;
@@ -77,6 +105,9 @@ public:
     ~AccessibilityManager() override = default;
 
     virtual void SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent) = 0;
+    virtual void SendWebAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent,
+        const RefPtr<NG::WebPattern>& webPattern) {}
+    virtual void UpdateVirtualNodeFocus() = 0;
     virtual int64_t GenerateNextAccessibilityId() = 0;
     virtual RefPtr<AccessibilityNode> CreateSpecializedNode(
         const std::string& tag, int32_t nodeId, int32_t parentNodeId) = 0;
@@ -129,11 +160,14 @@ public:
         const Accessibility::AccessibilityEventInfo& eventInfo, int64_t uiExtensionOffset) {}
 #endif
 #ifdef WEB_SUPPORTED
-    virtual void UpdateAccessibilityFocusId(const RefPtr<PipelineBase>& context, int64_t accessibilityId,
-        bool isFocus) {}
-    virtual int64_t GetAccessibilityFocusId() const
+    virtual bool RegisterWebInteractionOperationAsChildTree(int64_t accessibilityId,
+        const WeakPtr<NG::WebPattern>& webPattern)
     {
-        return -1;
+        return false;
+    }
+    virtual bool DeregisterWebInteractionOperationAsChildTree(int32_t treeId)
+    {
+        return false;
     }
 #endif
     void SetVersion(AccessibilityVersion version)
@@ -156,6 +190,12 @@ public:
     virtual void DeregisterInteractionOperationAsChildTree() {};
     virtual void SendEventToAccessibilityWithNode(const AccessibilityEvent& accessibilityEvent,
         const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context) {};
+
+    virtual void RegisterAccessibilitySAObserverCallback(
+        int64_t elementId, const std::shared_ptr<AccessibilitySAObserverCallback> &callback) {};
+
+    virtual void DeregisterAccessibilitySAObserverCallback(int64_t elementId) {};
+
     bool IsRegister()
     {
         return isReg_;
@@ -165,6 +205,14 @@ public:
     {
         isReg_ = state;
     }
+
+    int32_t GetTreeId() const
+    {
+        return treeId_;
+    }
+
+protected:
+    int32_t treeId_ = 0;
 
 private:
     AccessibilityVersion version_ = AccessibilityVersion::JS_VERSION;

@@ -15,9 +15,6 @@
 
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/text_style.h"
-
 namespace OHOS::Ace {
 namespace {
 constexpr uint8_t UINT32_LEFT_SHIFT_24 = 24;
@@ -222,9 +219,7 @@ RSTextStyle ToRSTextStyle(const RefPtr<PipelineBase>& context, const TextStyle& 
     rsTextStyle.decoration = ToRSTextDecoration(textStyle.GetTextDecoration());
     rsTextStyle.decorationColor = ToRSColor(textStyle.GetTextDecorationColor());
 #endif
-    // TODO: convert fontFamily and other styles.
 
-    // TODO: convert missing textBaseline
 #ifndef USE_GRAPHIC_TEXT_GINE
     rsTextStyle.fontWeight_ = ToRSFontWeight(textStyle.GetFontWeight());
     rsTextStyle.fontStyle_ = static_cast<RSFontStyle>(textStyle.GetFontStyle());

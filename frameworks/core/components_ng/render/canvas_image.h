@@ -20,10 +20,13 @@
 
 #include "base/geometry/ng/rect_t.h"
 #include "base/image/drawing_color_filter.h"
+#include "base/image/drawing_lattice.h"
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
+#include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
+#include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/image/image_source_info.h"
 
@@ -41,6 +44,7 @@ struct ImageColorFilter {
 struct ImagePaintConfig {
     RectF srcRect_;
     RectF dstRect_;
+    std::optional<Color> svgFillColor_;
     ImageColorFilter colorFilter_;
     std::shared_ptr<BorderRadiusArray> borderRadiusXY_ = nullptr;
     float scaleX_ = 1.0f;
@@ -56,6 +60,7 @@ struct ImagePaintConfig {
     int32_t frameCount_ = 1;
     std::vector<ObscuredReasons> obscuredReasons_;
     ImageResizableSlice resizableSlice_;
+    RefPtr<DrawingLattice> resizableLattice_ = nullptr;
     ImageSourceInfo sourceInfo_;
 };
 
@@ -68,6 +73,7 @@ public:
     ~CanvasImage() override = default;
     virtual void DrawToRSCanvas(
         RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY) = 0;
+    virtual void DrawRect(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect) {}
 
     static RefPtr<CanvasImage> Create(void* rawImage);
     static RefPtr<CanvasImage> Create();
@@ -112,6 +118,11 @@ public:
         return *paintConfig_;
     }
 
+    inline ImageDfxConfig& GetImageDfxConfig()
+    {
+        return imageDfxConfig_;
+    }
+
     virtual bool IsStatic()
     {
         return true;
@@ -124,11 +135,17 @@ public:
 
     virtual void SetRawCompressData(void* dataPtr, int32_t w, int32_t h) {}
 
+    inline void SetImageDfxConfig(const ImageDfxConfig& imageDfxConfig)
+    {
+        imageDfxConfig_ = imageDfxConfig;
+    }
+
 protected:
     bool isDrawAnimate_ = false;
 
 private:
     std::unique_ptr<ImagePaintConfig> paintConfig_;
+    ImageDfxConfig imageDfxConfig_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CanvasImage);
 };

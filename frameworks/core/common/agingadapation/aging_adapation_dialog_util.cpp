@@ -14,14 +14,7 @@
  */
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 
-#include <algorithm>
-
-#include "base/i18n/localization.h"
-#include "core/common/ace_application_info.h"
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
-#include "core/common/container.h"
-#include "core/components/dialog/dialog_properties.h"
-#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 namespace OHOS::Ace::NG {
 
@@ -74,8 +67,8 @@ RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
     return CreateCustomDialog(columnNode);
 }
 
-RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
-    const std::string& message, const SymbolSourceInfo& symbolSourceInfo, const std::vector<Color>& symbolColorList)
+RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(const std::string& message,
+    const SymbolSourceInfo& symbolSourceInfo, const std::vector<Color>& symbolColorList, FontWeight fontWeight)
 {
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(context, nullptr);
@@ -91,6 +84,7 @@ RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
     symbolProperty->UpdateSymbolSourceInfo(symbolSourceInfo);
     symbolColorList.empty() ? symbolProperty->UpdateSymbolColorList({ dialogTheme->GetDialogIconColor() })
                             : symbolProperty->UpdateSymbolColorList(symbolColorList);
+    symbolProperty->UpdateFontWeight(fontWeight);
     MarginProperty symbolMargin;
     Dimension dialogHeight;
     if (message.empty()) {
@@ -132,11 +126,6 @@ RefPtr<FrameNode> AgingAdapationDialogUtil::CreateCustomDialog(const RefPtr<Fram
     dialogProperties.backgroundColor = Color::TRANSPARENT;
     dialogProperties.shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultLG);
     dialogProperties.borderRadius = BorderRadiusProperty(dialogTheme->GetDialogCornerRadius());
-    BlurStyleOption styleOption;
-    styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
-    auto renderContext = columnNode->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, nullptr);
-    renderContext->UpdateBackBlurStyle(styleOption);
     CalcSize columnMinSize;
     float scale = context->GetFontScale();
     if (NearEqual(scale, dialogTheme->GetBigFontSizeScale()) ||

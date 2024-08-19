@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 #include "base/i18n/date_time_sequence.h"
-#include "unicode/datefmt.h"
 #include "unicode/dtptngen.h"
-#include "unicode/locid.h"
 #include "unicode/smpdtfmt.h"
 #include <regex>
 

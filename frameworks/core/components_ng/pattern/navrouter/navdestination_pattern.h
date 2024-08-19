@@ -222,6 +222,8 @@ public:
         overlayManager_.Reset();
     }
 
+    int32_t GetTitlebarZIndex() const;
+
     void SetNavigationId(const std::string& id)
     {
         inspectorId_ = id;
@@ -272,6 +274,7 @@ private:
     void InitBackButtonLongPressEvent(RefPtr<NavDestinationGroupNode>& hostNode);
     void HandleLongPress();
     void HandleLongPressActionEnd();
+    void OnFontScaleConfigurationUpdate() override;
 
     RefPtr<ShallowBuilder> shallowBuilder_;
     std::string name_;

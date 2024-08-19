@@ -386,10 +386,11 @@ template<typename C>
 template<typename T, typename... Args>
 panda::Local<panda::JSValueRef> JsiClass<C>::InternalMemberFunctionCallback(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
-    panda::Local<panda::JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
-    C* ptr = static_cast<C*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
-    T* instance = static_cast<T*>(ptr);
     EcmaVM* vm = runtimeCallInfo->GetVM();
+    panda::JsiFastNativeScope scope(vm);
+    panda::Local<panda::JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
+    C* ptr = static_cast<C*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(vm, 0));
+    T* instance = static_cast<T*>(ptr);
     auto binding = static_cast<FunctionBinding<T, panda::Local<panda::JSValueRef>, panda::JsiRuntimeCallInfo*>*>(
         runtimeCallInfo->GetData());
     if (binding == nullptr) {
@@ -397,7 +398,6 @@ panda::Local<panda::JSValueRef> JsiClass<C>::InternalMemberFunctionCallback(pand
     }
     STATIC_API_DURATION();
     ACE_BUILD_TRACE_BEGIN("[%s][%s]", ThisJSClass::JSName(), binding->Name());
-    panda::JsiFastNativeScope scope(vm);
     auto fnPtr = binding->Get();
     (instance->*fnPtr)(runtimeCallInfo);
     ACE_BUILD_TRACE_END()
@@ -408,12 +408,14 @@ template<typename T>
 panda::Local<panda::JSValueRef> JsiClass<C>::InternalJSMemberFunctionCallback(
     panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
-    panda::Local<panda::JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    C* ptr = static_cast<C*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
+    panda::JsiFastNativeScope scope(vm);
+    panda::Local<panda::JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
+    C* ptr = static_cast<C*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(vm, 0));
     if (thisObj->IsProxy(vm)) {
         panda::Local<panda::ProxyRef> thisProxiedObj = static_cast<panda::Local<panda::ProxyRef>>(thisObj);
-        ptr = static_cast<C*>(panda::Local<panda::ObjectRef>(thisProxiedObj->GetTarget(vm))->GetNativePointerField(0));
+        ptr = static_cast<C*>(panda::Local<panda::ObjectRef>(thisProxiedObj->GetTarget(vm))->GetNativePointerField(
+            vm, 0));
     }
 
     T* instance = static_cast<T*>(ptr);
@@ -424,7 +426,6 @@ panda::Local<panda::JSValueRef> JsiClass<C>::InternalJSMemberFunctionCallback(
     }
     STATIC_API_DURATION();
     ACE_BUILD_TRACE_BEGIN("[%s][%s]", ThisJSClass::JSName(), binding->Name());
-    panda::JsiFastNativeScope scope(vm);
     auto fnPtr = binding->Get();
     JsiCallbackInfo info(runtimeCallInfo);
     (instance->*fnPtr)(info);
@@ -442,17 +443,17 @@ template<typename C>
 template<typename Class, typename R, typename... Args>
 panda::Local<panda::JSValueRef> JsiClass<C>::MethodCallback(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
-    panda::Local<panda::JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
-    C* ptr = static_cast<C*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
-    Class* instance = static_cast<Class*>(ptr);
     EcmaVM* vm = runtimeCallInfo->GetVM();
+    panda::JsiFastNativeScope scope(vm);
+    panda::Local<panda::JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
+    C* ptr = static_cast<C*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(vm, 0));
+    Class* instance = static_cast<Class*>(ptr);
     auto binding = static_cast<FunctionBinding<Class, R, Args...>*>(runtimeCallInfo->GetData());
     if (binding == nullptr) {
         return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
     }
     STATIC_API_DURATION();
     ACE_BUILD_TRACE_BEGIN("[%s][%s]", ThisJSClass::JSName(), binding->Name());
-    panda::JsiFastNativeScope scope(vm);
     auto fnPtr = binding->Get();
     auto tuple = __detail__::ToTuple<std::decay_t<Args>...>(runtimeCallInfo);
     bool returnSelf = binding->Options() & MethodOptions::RETURN_SELF;
@@ -488,13 +489,13 @@ template<typename R, typename... Args>
 panda::Local<panda::JSValueRef> JsiClass<C>::StaticMethodCallback(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
+    panda::JsiFastNativeScope scope(vm);
     auto binding = static_cast<StaticFunctionBinding<R, Args...>*>(runtimeCallInfo->GetData());
     if (binding == nullptr) {
         return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
     }
     STATIC_API_DURATION();
     ACE_BUILD_TRACE_BEGIN("[%s][%s]", ThisJSClass::JSName(), binding->Name());
-    panda::JsiFastNativeScope scope(vm);
     auto fnPtr = binding->Get();
     auto tuple = __detail__::ToTuple<std::decay_t<Args>...>(runtimeCallInfo);
     bool returnSelf = binding->Options() & MethodOptions::RETURN_SELF;
@@ -530,13 +531,13 @@ template<typename C>
 panda::Local<panda::JSValueRef> JsiClass<C>::JSStaticMethodCallback(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
+    panda::JsiFastNativeScope scope(vm);
     auto binding = static_cast<StaticFunctionBinding<void, const JSCallbackInfo&>*>(runtimeCallInfo->GetData());
     if (binding == nullptr) {
         return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
     }
     STATIC_API_DURATION();
     ACE_BUILD_TRACE_BEGIN("[%s][%s]", ThisJSClass::JSName(), binding->Name());
-    panda::JsiFastNativeScope scope(vm);
     auto fnPtr = binding->Get();
     JsiCallbackInfo info(runtimeCallInfo);
     fnPtr(info);

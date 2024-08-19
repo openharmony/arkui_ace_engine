@@ -103,7 +103,7 @@ int32_t WindowSceneHelper::GetFocusSystemWindowId(const RefPtr<FrameNode>& focus
     }
     if (isWindowScene) {
         focusSystemWindowId = static_cast<int32_t>(window2patternSession->GetPersistentId());
-        LOGI("Get systemWindowScene id( %{public}d ) successfully.", focusSystemWindowId);
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Get systemWindowScene id:%{public}d successfully.", focusSystemWindowId);
     }
 
     return focusSystemWindowId;
@@ -130,7 +130,7 @@ bool WindowSceneHelper::IsFocusWindowSceneCloseKeyboard(const RefPtr<FrameNode>&
 {
     sptr<Rosen::Session> window2patternSession = GetCurSession(focusedFrameNode);
     if (window2patternSession == nullptr) {
-        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "The session between window and pattern is nullptr.");
+        TAG_LOGW(AceLogTag::ACE_KEYBOARD, "The session between window and pattern is nullptr.");
         return false;
     }
 
@@ -145,10 +145,10 @@ void WindowSceneHelper::IsWindowSceneCloseKeyboard(const RefPtr<FrameNode>& fram
     CHECK_NULL_VOID(curPattern);
     bool isNeedKeyBoard = curPattern->NeedSoftKeyboard();
     auto saveKeyboard = IsFocusWindowSceneCloseKeyboard(frameNode);
-    TAG_LOGD(AceLogTag::ACE_KEYBOARD, "Keep/Need(%{public}d/%{public}d)", saveKeyboard, isNeedKeyBoard);
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD,
+        "FrameNode(%{public}s/%{public}d) notNeedSoftKeyboard, Keep:%{public}d, Need:%{public}d)",
+        frameNode->GetTag().c_str(), frameNode->GetId(), !saveKeyboard, !isNeedKeyBoard);
     if (!saveKeyboard && !isNeedKeyBoard) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "scbFrameNode(%{public}s/%{public}d) notNeedSoftKeyboard.",
-            frameNode->GetTag().c_str(), frameNode->GetId());
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         if (inputMethod) {
             inputMethod->RequestHideInput();
@@ -167,10 +167,10 @@ void WindowSceneHelper::IsCloseKeyboard(const RefPtr<FrameNode>& frameNode)
     CHECK_NULL_VOID(curPattern);
     bool isNeedKeyBoard = curPattern->NeedSoftKeyboard();
     auto saveKeyboard = IsFocusWindowSceneCloseKeyboard(frameNode);
-    TAG_LOGD(AceLogTag::ACE_KEYBOARD, "Keep/Need(%{public}d/%{public}d)", !saveKeyboard, !isNeedKeyBoard);
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD,
+        "FrameNode(%{public}s/%{public}d) notNeedSoftKeyboard, Keep:%{public}d, Need:%{public}d)",
+        frameNode->GetTag().c_str(), frameNode->GetId(), !saveKeyboard, !isNeedKeyBoard);
     if (!saveKeyboard && !isNeedKeyBoard) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "FrameNode(%{public}s/%{public}d) notNeedSoftKeyboard.",
-            frameNode->GetTag().c_str(), frameNode->GetId());
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         if (inputMethod) {
             inputMethod->Close();
@@ -284,16 +284,54 @@ void WindowSceneHelper::InjectPointerEvent(
 bool WindowSceneHelper::InjectKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent, bool isPreIme)
 {
     CHECK_NULL_RETURN(keyEvent, false);
-    TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
-        "KeyEvent Process to inject, eventInfo: id:%{public}d, "
-        "keyEvent info: keyCode is %{public}d, "
-        "keyAction is %{public}d, keyActionTime is %{public}" PRId64,
-        keyEvent->GetId(), keyEvent->GetKeyCode(), keyEvent->GetKeyAction(), keyEvent->GetActionTime());
+    if (!SystemProperties::GetAceCommercialLogEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+            "KeyEvent Process to inject, eventInfo: id:%{public}d, "
+            "keyEvent info: keyCode is %{public}d, "
+            "keyAction is %{public}d, keyActionTime is %{public}" PRId64,
+            keyEvent->GetId(), keyEvent->GetKeyCode(), keyEvent->GetKeyAction(), keyEvent->GetActionTime());
+    }
 
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
     auto aceView = AceType::DynamicCast<OHOS::Ace::Platform::AceViewOhos>(container->GetAceView());
     CHECK_NULL_RETURN(aceView, false);
     return OHOS::Ace::Platform::AceViewOhos::DispatchKeyEvent(aceView, keyEvent, isPreIme);
+}
+
+bool WindowSceneHelper::IsWindowPattern(const RefPtr<FrameNode>& node)
+{
+    if (!node) {
+        return false;
+    }
+    return node->GetWindowPatternType() > static_cast<uint32_t>(WindowPatternType::SCREEN_SCENE);
+}
+
+bool WindowSceneHelper::HasWindowSession(const RefPtr<FrameNode>& node)
+{
+    if (!node) {
+        return false;
+    }
+    return node->GetWindowPatternType() > static_cast<uint32_t>(WindowPatternType::TRANSFORM_SCENE);
+}
+
+bool WindowSceneHelper::IsTransformScene(uint32_t type)
+{
+    return type == static_cast<uint32_t>(WindowPatternType::TRANSFORM_SCENE);
+}
+
+bool WindowSceneHelper::IsSystemWindowScene(uint32_t type)
+{
+    return type == static_cast<uint32_t>(WindowPatternType::SYSTEM_WINDOW_SCENE);
+}
+
+bool WindowSceneHelper::IsPanelScene(uint32_t type)
+{
+    return type == static_cast<uint32_t>(WindowPatternType::PANEL_SCENE);
+}
+
+bool WindowSceneHelper::IsScreenScene(uint32_t type)
+{
+    return type == static_cast<uint32_t>(WindowPatternType::SCREEN_SCENE);
 }
 } // namespace OHOS::Ace::NG

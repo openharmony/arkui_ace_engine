@@ -15,16 +15,6 @@
 
 #include "core/pipeline/base/render_node.h"
 
-#include <algorithm>
-#include <set>
-#include <sstream>
-#include <string>
-#include <unistd.h>
-
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_canvas_node.h"
 
@@ -33,23 +23,11 @@
 #endif
 
 #include "base/log/dump_log.h"
-#include "base/log/event_report.h"
-#include "base/log/log.h"
-#include "core/components/box/drag_drop_event.h"
-#include "core/components/box/render_box.h"
-#include "core/components/common/properties/motion_path_evaluator.h"
-#include "core/components/common/properties/motion_path_option.h"
 #include "core/components/common/rotation/rotation_node.h"
 #include "core/components/container_modal/container_modal_constants.h"
-#include "core/components/focus_animation/render_focus_animation.h"
-#include "core/components/grid_layout/render_grid_layout.h"
 #include "core/components/root/render_root.h"
 #include "core/components/scroll/render_single_child_scroll.h"
 #include "core/components/transform/render_transform.h"
-#include "core/components_v2/list/render_list.h"
-#include "core/event/ace_event_helper.h"
-#include "core/event/axis_event.h"
-#include "core/pipeline/base/component.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -1240,7 +1218,7 @@ Offset RenderNode::GetGlobalOffset() const
                             context->GetWindowManager()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
     if (isContainerModal) {
         globalOffset = globalOffset + Offset(-(CONTAINER_BORDER_WIDTH.ConvertToPx() + CONTENT_PADDING.ConvertToPx()),
-                                          -CONTAINER_TITLE_HEIGHT.ConvertToPx());
+            -CONTAINER_TITLE_HEIGHT.ConvertToPx());
     }
     return globalOffset;
 }

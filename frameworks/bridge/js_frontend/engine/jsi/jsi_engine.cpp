@@ -18,26 +18,12 @@
 #ifndef WINDOWS_PLATFORM
 #include <dlfcn.h>
 #endif
-#include <regex>
-#include <unistd.h>
-
 #include "base/i18n/localization.h"
-#include "base/log/ace_trace.h"
-#include "base/log/event_report.h"
-#include "base/thread/task_executor.h"
-#include "base/utils/time_util.h"
-#include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "bridge/js_frontend/engine/jsi/jsi_base_utils.h"
-#include "core/common/ace_application_info.h"
 #include "core/common/connect_server_manager.h"
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
 #include "core/components/common/layout/grid_system_manager.h"
-#include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_api_perf.h"
-#include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
-#include "frameworks/bridge/js_frontend/engine/common/runtime_constants.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_animation_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_animator_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_badge_bridge.h"
@@ -71,11 +57,11 @@ namespace OHOS::Ace::Framework {
 const int SYSTEM_BASE = 10;
 
 #if defined(ANDROID_PLATFORM)
-const std::string ARK_DEBUGGER_LIB_PATH = "libark_debugger.so";
+const std::string ARK_DEBUGGER_LIB_PATH = "libark_inspector.so";
 #elif defined(APP_USE_ARM)
-const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/platformsdk/libark_debugger.z.so";
+const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/platformsdk/libark_inspector.z.so";
 #else
-const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/platformsdk/libark_debugger.z.so";
+const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/platformsdk/libark_inspector.z.so";
 #endif
 const int32_t MAX_READ_TEXT_LENGTH = 4096;
 const std::regex URI_PATTERN("^\\/([a-z0-9A-Z_]+\\/)*[a-z0-9A-Z_]+\\.?[a-z0-9A-Z_]*$");
@@ -619,13 +605,11 @@ void GetPackageInfoCallback(
 void GetPackageInfo(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& arg)
 {
     if (!arg->IsObject(runtime) || !arg->IsArray(runtime)) {
-        LOGE("GetPackageInfo: arg is not Object or Array");
         return;
     }
 
     int32_t len = arg->GetArrayLength(runtime);
     if (len < static_cast<int32_t>(PAG_INFO_ARGS_LEN)) {
-        LOGE("GetPackageInfo: invalid callback value");
         return;
     }
     shared_ptr<JsValue> message = arg->GetElement(runtime, PAG_INFO_ARGS_MSG_IDX);
@@ -926,8 +910,13 @@ void ShowToast(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& 
             }
         }
     }
-
-    GetFrontendDelegate(runtime)->ShowToast(message, duration, bottom, NG::ToastShowMode::DEFAULT, -1, std::nullopt);
+    auto toastInfo = NG::ToastInfo { .message = message,
+        .duration = duration,
+        .bottom = bottom,
+        .showMode = NG::ToastShowMode::DEFAULT,
+        .alignment = -1,
+        .offset = std::nullopt };
+    GetFrontendDelegate(runtime)->ShowToast(toastInfo, nullptr);
 }
 
 std::vector<ButtonInfo> ParseDialogButtons(

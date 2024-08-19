@@ -129,14 +129,14 @@ ArkUINativeModuleValue NavDestinationBridge::SetIgnoreLayoutSafeArea(ArkUIRuntim
     std::string typeCppStr;
     std::string edgesCppStr;
     if (secondArg->IsString(vm)) {
-        typeCppStr = secondArg->ToString(vm)->ToString();
+        typeCppStr = secondArg->ToString(vm)->ToString(vm);
     } else {
         //type system
         typeCppStr = "0";
     }
 
     if (thirdArg->IsString(vm)) {
-        edgesCppStr = thirdArg->ToString(vm)->ToString();
+        edgesCppStr = thirdArg->ToString(vm)->ToString(vm);
     } else {
         //edge top and bottom
         edgesCppStr = "0|1";
@@ -188,9 +188,6 @@ ArkUINativeModuleValue NavDestinationBridge::SetTitle(ArkUIRuntimeCallInfo* runt
     }
 
     ArkUINavigationTitlebarOptions options;
-    // if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-    //     options.blurStyle = { 1, static_cast<ArkUI_Int32>(BlurStyle::NO_MATERIAL) };
-    // }
     if (optionsArg->IsObject(vm)) {
         NativeNavigationUtils::ParseTitleOptions(vm, optionsArg, options);
     }

@@ -15,7 +15,6 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_relative_container_ffi.h"
 
-#include "bridge/declarative_frontend/jsview/models/relative_container_model_impl.h"
 #include "core/components_ng/pattern/relative_container/relative_container_model_ng.h"
 
 using namespace OHOS::Ace;

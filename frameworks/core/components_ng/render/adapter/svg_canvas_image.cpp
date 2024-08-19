@@ -15,7 +15,7 @@
 
 #include "core/components_ng/render/adapter/svg_canvas_image.h"
 
-#include "utils/rect.h"
+#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
 const RefPtr<SvgDomBase>& SvgCanvasImage::GetSVGDom() const
@@ -29,6 +29,18 @@ void SvgCanvasImage::DrawToRSCanvas(
     CHECK_NULL_VOID(svgDom_);
     svgDom_->SetRadius(radiusXY);
     svgDom_->DrawImage(canvas, GetPaintConfig().imageFit_, Size(srcRect.GetWidth(), srcRect.GetHeight()));
+}
+
+void SvgCanvasImage::DrawRect(RSCanvas& canvas, const RSRect& /* srcRect */, const RSRect& dstRect)
+{
+    OffsetF offset(dstRect.GetLeft(), dstRect.GetTop());
+    SizeF contentSize(dstRect.GetWidth(), dstRect.GetHeight());
+    auto clipRect = RSRect(0, 0, dstRect.GetWidth(), dstRect.GetHeight());
+    canvas.Save();
+    canvas.Translate(dstRect.GetLeft(), dstRect.GetTop());
+    canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
+    DrawToRSCanvas(canvas, dstRect, dstRect, BorderRadiusArray());
+    canvas.Restore();
 }
 
 bool SvgCanvasImage::IsStatic()

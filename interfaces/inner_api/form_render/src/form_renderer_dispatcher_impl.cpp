@@ -14,12 +14,9 @@
  */
 #include "form_renderer_dispatcher_impl.h"
 
-#include <condition_variable>
-#include <mutex>
 
 #include "form_renderer.h"
 #include "form_renderer_hilog.h"
-#include "core/components_ng/gestures/gesture_group.h"
 
 namespace OHOS {
 namespace Ace {

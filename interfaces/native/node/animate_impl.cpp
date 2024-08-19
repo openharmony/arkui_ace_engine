@@ -76,7 +76,7 @@ int32_t KeyframeAnimateTo(ArkUI_ContextHandle context, ArkUI_KeyframeAnimateOpti
     animateOption.onFinish = option->onFinish;
     animateOption.userData = option->userData;
     ArkUIKeyframeState keyframes[option->keyframes.size()];
-    for (int32_t i = 0; i < option->keyframes.size(); i++) {
+    for (size_t i = 0; i < option->keyframes.size(); i++) {
         keyframes[i].duration = option->keyframes[i].duration;
         keyframes[i].event = option->keyframes[i].event;
         keyframes[i].userData = option->keyframes[i].userData;
@@ -94,7 +94,7 @@ int32_t KeyframeAnimateTo(ArkUI_ContextHandle context, ArkUI_KeyframeAnimateOpti
         keyframes[i].curveType = curve->type;
     }
     animateOption.keyframes = keyframes;
-    animateOption.keyframeSize = option->keyframes.size();
+    animateOption.keyframeSize = static_cast<int32_t>(option->keyframes.size());
 
     impl->getAnimation()->keyframeAnimateTo(reinterpret_cast<ArkUIContext*>(context), &animateOption);
     return ERROR_CODE_NO_ERROR;
@@ -113,6 +113,8 @@ ArkUIAnimatorOption* ConvertAnimatorOption(ArkUI_AnimatorOption* option)
     if (option->easing) {
         animatorOption->easing = option->easing->curve;
         animatorOption->curveType = option->easing->type;
+    } else {
+        animatorOption->easing = nullptr;
     }
 
     if (option->expectedFrameRateRange) {
@@ -283,9 +285,11 @@ ArkUI_CurveHandle StepsCurve(int32_t count, bool end)
 ArkUI_CurveHandle CubicBezierCurve(float x1, float y1, float x2, float y2)
 {
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || x1 < 0 || x1 > 1 || x2 < 0 || x2 > 1) {
+    if (!impl) {
         return nullptr;
     }
+    x1 = std::clamp(x1, 0.0f, 1.0f);
+    x2 = std::clamp(x2, 0.0f, 1.0f);
     auto curve = impl->getAnimation()->cubicBezierCurve(x1, y1, x2, y2);
     ArkUI_Curve* iCurve = new ArkUI_Curve({ ARKUI_CURVE_TYPE_CUBIC_BEZIER, curve });
     return iCurve;

@@ -527,7 +527,8 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleSelectWrapper101, TestSize.Leve
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     OHOS::Ace::CaretMoveIntent direction = OHOS::Ace::CaretMoveIntent::Home;
-    auto ret = richEditorPattern->HandleSelectWrapper(direction);
+    int32_t fixedPos = 0;
+    auto ret = richEditorPattern->HandleSelectWrapper(direction, fixedPos);
     EXPECT_EQ(ret, -1);
 }
 
@@ -1311,6 +1312,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleTouchMove001, TestSize.Level1)
      */
     Offset offset4(10.0f, 20.0f);
     richEditorPattern->isLongPress_ = false;
+    richEditorPattern->selectOverlay_->ProcessOverlay({ .animation = false });
     auto manager = richEditorPattern->selectOverlay_->GetManager<SelectContentOverlayManager>();
     ASSERT_NE(manager, nullptr);
     SelectOverlayInfo info;
@@ -1335,12 +1337,27 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleTouchUp001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->isLongPress_ = true;
-    richEditorPattern->isTouchCaret_ = true;
+    richEditorPattern->moveCaretState_.isTouchCaret = true;
     richEditorPattern->previewLongPress_ = true;
     richEditorPattern->isMoveCaretAnywhere_ = true;
     richEditorPattern->magnifierController_->isShowMagnifier_ = true;
     richEditorPattern->HandleTouchUp();
-    EXPECT_FALSE(richEditorPattern->isTouchCaret_);
     EXPECT_FALSE(richEditorPattern->isMoveCaretAnywhere_);
+}
+
+/**
+ * @tc.name: SetCustomKeyboard001
+ * @tc.desc: test SetCustomKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardShortcutTestNg, SetCustomKeyboard001, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto func = []() {};
+    richEditorModel.SetCustomKeyboard(func, true);
+    bool result =
+        ViewStackProcessor::GetInstance()->GetMainFrameNode()->GetPattern<RichEditorPattern>()->keyboardAvoidance_;
+    EXPECT_TRUE(result);
 }
 } // namespace OHOS::Ace::NG

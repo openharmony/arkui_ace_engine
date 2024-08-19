@@ -53,7 +53,6 @@
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
-#include "core/components_ng/pattern/overlay/modal_presentation_layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_paint_method.h"
@@ -94,7 +93,6 @@ const std::string MESSAGE = "hello world";
 const std::string BOTTOMSTRING = "test";
 constexpr int32_t DURATION = 2;
 constexpr float MINUS_HEIGHT = -5.0f;
-const std::string LONGEST_CONTENT = "新建文件夹";
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 } // namespace
 
@@ -163,6 +161,7 @@ void OverlayManagerTestNg::TearDownTestCase()
 {
     MockPipelineContext::GetCurrent()->themeManager_ = nullptr;
     MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 
 RefPtr<FrameNode> OverlayManagerTestNg::CreateTargetNode()
@@ -230,7 +229,10 @@ HWTEST_F(OverlayManagerTestNg, DeleteModal001, TestSize.Level1)
      */
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->ShowToast(MESSAGE, DURATION, BOTTOMSTRING, true);
+    auto toastInfo =
+        NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
+    toastInfo.shadow = ShadowConfig::DefaultShadowL;
+    overlayManager->ShowToast(toastInfo, nullptr);
     EXPECT_FALSE(overlayManager->toastMap_.empty());
 
     auto builderFunc = []() -> RefPtr<UINode> {
@@ -1010,7 +1012,7 @@ HWTEST_F(OverlayManagerTestNg, DestroySheet003, TestSize.Level1)
     sheetNode->tag_ = V2::SHEET_PAGE_TAG;
     sheetNode->GetPattern<SheetPresentationPattern>()->targetId_ = targetId;
     overlayManager->DestroySheet(sheetNode, SheetKey(targetId));
-    EXPECT_TRUE(overlayManager->modalStack_.empty());
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
 
     auto targetNodeSecond = CreateTargetNode();
     targetNodeSecond->MountToParent(stageNode);

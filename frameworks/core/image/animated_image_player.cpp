@@ -20,15 +20,10 @@
 #include "include/core/SkPixelRef.h"
 #endif
 
-#include "base/log/ace_trace.h"
-#include "base/log/log.h"
-#include "base/memory/ace_type.h"
-#include "core/components_ng/render/canvas_image.h"
 #ifdef USE_ROSEN_DRAWING
 #include "core/components_ng/render/drawing.h"
 #include "drawing/engine_adapter/skia_adapter/skia_image_info.h"
 #endif
-#include "core/image/image_provider.h"
 
 namespace OHOS::Ace {
 

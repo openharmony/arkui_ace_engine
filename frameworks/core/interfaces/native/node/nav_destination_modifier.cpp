@@ -98,7 +98,7 @@ void ResetIgnoreLayoutSafeArea(ArkUINodeHandle node)
 }
 
 void SetTitle(ArkUINodeHandle node, ArkUI_Bool hasSubTitle, ArkUI_Bool hasMainTitle,
-        ArkUI_CharPtr subTitle, ArkUI_CharPtr mainTitle, ArkUINavigationTitlebarOptions options)
+    ArkUI_CharPtr subTitle, ArkUI_CharPtr mainTitle, ArkUINavigationTitlebarOptions options)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -197,6 +197,20 @@ const ArkUINavDestinationModifier* GetNavDestinationModifier()
         ResetMenus,
         SetMenuItemAction,
         SetMenuItemSymbol
+    };
+
+    return &modifier;
+}
+
+const CJUINavDestinationModifier* GetCJUINavDestinationModifier()
+{
+    static const CJUINavDestinationModifier modifier = {
+        SetHideTitleBar,
+        ResetHideTitleBar,
+        SetNavDestinationMode,
+        ResetNavDestinationMode,
+        SetIgnoreLayoutSafeArea,
+        ResetIgnoreLayoutSafeArea
     };
 
     return &modifier;

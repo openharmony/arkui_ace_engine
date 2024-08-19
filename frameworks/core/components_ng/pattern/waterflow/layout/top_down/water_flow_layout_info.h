@@ -170,6 +170,10 @@ public:
      */
     void Sync(float mainSize, bool overScroll);
 
+    void NotifyDataChange(int32_t index, int32_t count) override {};
+    void InitSegmentsForKeepPositionMode(const std::vector<WaterFlowSections::Section>& sections,
+        const std::vector<WaterFlowSections::Section>& prevSections, int32_t start) override {};
+
     int32_t childrenCount_ = 0;
 
     float currentOffset_ = 0.0f;

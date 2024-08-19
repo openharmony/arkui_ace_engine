@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_NODE_CONTENT_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_NODE_CONTENT_H
 
 #include <functional>
 #include <list>
@@ -59,6 +60,11 @@ public:
         userData_ = userData;
     }
 
+    WeakPtr<UINode> GetContentSlot()
+    {
+        return nodeSlot_;
+    }
+
 private:
     WeakPtr<UINode> nodeSlot_;
     std::list<RefPtr<UINode>> children_;
@@ -70,3 +76,4 @@ private:
 };
 
 } // namespace OHOS::Ace::NG
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_NODE_CONTENT_H

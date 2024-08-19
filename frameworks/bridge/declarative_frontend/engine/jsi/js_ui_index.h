@@ -66,6 +66,7 @@ namespace OHOS::Ace::Framework {
     FUNCTION("selectedColorValue", SELECTED_COLOR_VALUE)       \
     FUNCTION("selectedItemHeightValue", SELECTED_ITEM_HEIGHT_VALUE)       \
     FUNCTION("selectedItemWidthValue", SELECTED_ITEM_WIDTH_VALUE)       \
+    FUNCTION("maxDisplayCountValue", MAX_DISPLAY_COUNT_VALUE)       \
     FUNCTION("size", SIZE)       \
     FUNCTION("slice", SLICE)       \
     FUNCTION("source", SOURCE)       \

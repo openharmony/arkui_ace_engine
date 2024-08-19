@@ -165,7 +165,7 @@ ArkUINativeModuleValue SpanBridge::SetFontWeight(ArkUIRuntimeCallInfo *runtimeCa
         if (secondArg->IsNumber()) {
             weight = std::to_string(secondArg->Int32Value(vm));
         } else if (secondArg->IsString(vm)) {
-            weight = secondArg->ToString(vm)->ToString();
+            weight = secondArg->ToString(vm)->ToString(vm);
         }
     }
 
@@ -192,7 +192,7 @@ ArkUINativeModuleValue SpanBridge::SetLineHeight(ArkUIRuntimeCallInfo *runtimeCa
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CalcDimension lineHeight(0.0, DimensionUnit::PX);
-    if (!ArkTSUtils::ParseJsDimensionFpNG(vm, secondArg, lineHeight)) {
+    if (!ArkTSUtils::ParseJsDimensionFpNG(vm, secondArg, lineHeight) || lineHeight.IsNegative()) {
         lineHeight.Reset();
     }
     GetArkUINodeModifiers()->getSpanModifier()->setSpanLineHeight(
@@ -379,7 +379,7 @@ ArkUINativeModuleValue SpanBridge::SetLetterSpacing(ArkUIRuntimeCallInfo *runtim
         letterSpacingValue.value = secondArg->ToNumber(vm)->Value();
         GetArkUINodeModifiers()->getSpanModifier()->setSpanLetterSpacing(nativeNode, &letterSpacingValue);
     } else if (secondArg->IsString(vm)) {
-        std::string tempValueStr = secondArg->ToString(vm)->ToString();
+        std::string tempValueStr = secondArg->ToString(vm)->ToString(vm);
         letterSpacingValue.valueStr = tempValueStr.c_str();
         GetArkUINodeModifiers()->getSpanModifier()->setSpanLetterSpacing(nativeNode, &letterSpacingValue);
     } else {
@@ -452,7 +452,7 @@ ArkUINativeModuleValue SpanBridge::SetFont(ArkUIRuntimeCallInfo *runtimeCallInfo
         if (weightArg->IsNumber()) {
             weight = std::to_string(weightArg->Int32Value(vm));
         } else if (weightArg->IsString(vm)) {
-            weight = weightArg->ToString(vm)->ToString();
+            weight = weightArg->ToString(vm)->ToString(vm);
         }
     }
     fontInfo.fontWeight = static_cast<uint8_t>(Framework::ConvertStrToFontWeight(weight));
@@ -542,6 +542,84 @@ ArkUINativeModuleValue SpanBridge::ResetTextShadow(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getSpanModifier()->resetTextShadow(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SpanBridge::SetAccessibilityText(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (secondArg->IsString(vm)) {
+        std::string stringValue = secondArg->ToString(vm)->ToString(vm);
+        GetArkUINodeModifiers()->getSpanModifier()->setAccessibilityText(nativeNode, stringValue.c_str());
+    } else {
+        GetArkUINodeModifiers()->getSpanModifier()->resetAccessibilityText(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SpanBridge::ResetAccessibilityText(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSpanModifier()->resetAccessibilityText(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SpanBridge::SetAccessibilityDescription(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (secondArg->IsString(vm)) {
+        std::string stringValue = secondArg->ToString(vm)->ToString(vm);
+        GetArkUINodeModifiers()->getSpanModifier()->setAccessibilityDescription(nativeNode, stringValue.c_str());
+    } else {
+        GetArkUINodeModifiers()->getSpanModifier()->resetAccessibilityDescription(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SpanBridge::ResetAccessibilityDescription(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSpanModifier()->resetAccessibilityDescription(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SpanBridge::SetAccessibilityLevel(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (secondArg->IsString(vm)) {
+        std::string stringValue = secondArg->ToString(vm)->ToString(vm);
+        GetArkUINodeModifiers()->getSpanModifier()->setAccessibilityLevel(nativeNode, stringValue.c_str());
+    } else {
+        GetArkUINodeModifiers()->getSpanModifier()->resetAccessibilityLevel(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SpanBridge::ResetAccessibilityLevel(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSpanModifier()->resetAccessibilityLevel(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

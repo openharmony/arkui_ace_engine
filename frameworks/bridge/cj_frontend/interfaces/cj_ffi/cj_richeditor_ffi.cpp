@@ -16,10 +16,6 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_richeditor_ffi.h"
 
 #include "cj_lambda.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
@@ -233,6 +229,9 @@ void FfiOHOSAceFrameworkRichEditorOnPaste(void(*callback)(int64_t))
 {
     auto onPast = [cjCallback = CJLambda::Create(callback)](NG::TextCommonEvent& info) {
         auto nativePasteEvent = FFIData::Create<NativePasteEvent>(&info);
+        if (nativePasteEvent == nullptr) {
+            return;
+        }
         cjCallback(nativePasteEvent->GetID());
     };
     RichEditorModel::GetInstance()->SetOnPaste(std::move(onPast));
@@ -242,5 +241,18 @@ void FfiOHOSAceFrameworkRichEditorPreventDefault(int64_t id)
 {
     auto nativePasteEvent = FFIData::GetData<NativePasteEvent>(id);
     nativePasteEvent->PreventDefault();
+}
+
+void FfiOHOSAceFrameworkRichEditorOnDidChange(void(*callback)(CJTextRange rangeBefore, CJTextRange rangeAfter))
+{
+    auto onDidChange = [cjCallback = CJLambda::Create(callback)](const NG::RichEditorChangeValue& changeValue) {
+        const auto& rangeBefore = changeValue.GetRangeBefore();
+        const auto& rangeAfter = changeValue.GetRangeAfter();
+        CJTextRange cjRangeBefore = { rangeBefore.start, rangeBefore.end };
+        CJTextRange cjRangeAfter = { rangeAfter.start, rangeAfter.end };
+
+        cjCallback(cjRangeBefore, cjRangeAfter);
+    };
+    RichEditorModel::GetInstance()->SetOnDidChange(std::move(onDidChange));
 }
 }

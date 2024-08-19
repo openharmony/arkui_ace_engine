@@ -125,6 +125,21 @@ public:
 
     // window title bar closed
     static constexpr char APP_EXIT_FROM_WINDOW_TITLE_BAR_CLOSED[] = "APP_EXIT_FROM_WINDOW_TITLE_BAR_CLOSED";
+
+    // PC start app from other
+    static constexpr char LAUNCHER_APP_LAUNCH_FROM_OTHER[] = "LAUNCHER_APP_LAUNCH_FROM_OTHER";
+
+    // scroller animation
+    static constexpr char SCROLLER_ANIMATION[] = "SCROLLER_ANIMATION";
+
+    // pc title bar maximized
+    static constexpr char WINDOW_TITLE_BAR_MAXIMIZED[] = "WINDOW_TITLE_BAR_MAXIMIZED";
+
+    // pc title bar recover
+    static constexpr char WINDOW_TITLE_BAR_RECOVER[] = "WINDOW_TITLE_BAR_RECOVER";
+
+    // PC start app from transition
+    static constexpr char LAUNCHER_APP_LAUNCH_FROM_TRANSITION[] = "LAUNCHER_APP_LAUNCH_FROM_TRANSITION";
 };
 } // namespace OHOS::Ace
 #endif // ARKUI_PERF_SCENE_ID_H

@@ -50,7 +50,6 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
      */
     protected finalizeConstruction(freezeState?: boolean | undefined): void {
 
-        ProviderConsumerUtilV2.setupConsumeVarsV2(this);
         ObserveV2.getObserve().constructComputed(this, this.constructor.name);
         ObserveV2.getObserve().constructMonitor(this, this.constructor.name);
 
@@ -418,6 +417,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         this.markNeedUpdate();
         this.elmtIdsDelayedUpdate.clear();
         this.monitorIdsDelayedUpdate.clear();
+        this.computedIdsDelayedUpdate.clear();
         stateMgmtProfiler.end();
     }
 
@@ -435,6 +435,17 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         return (this.getParent()) ? this.getParent().localStorage_ : new LocalStorage({ /* empty */ });
     }
 
+    /**
+     * @function observeRecycleComponentCreation
+     * @description custom node recycle creation not supported for V2. So a dummy function is implemented to report
+     * an error message
+     * @param name custom node name
+     * @param recycleUpdateFunc custom node recycle update which can be converted to a normal update function
+     * @return void
+     */
+    public observeRecycleComponentCreation(name: string, recycleUpdateFunc: RecycleUpdateFunc): void {
+        stateMgmtConsole.error(`${this.debugInfo__()}: Recycle not supported for ComponentV2 instances`);
+    }
 
     public debugInfoDirtDescendantElementIdsInternal(depth: number = 0, recursive: boolean = false, counter: ProfileRecursionCounter): string {
         let retVaL: string = `\n${'  '.repeat(depth)}|--${this.constructor.name}[${this.id__()}]: {`;
@@ -465,9 +476,9 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     public __mkRepeatAPI: <I>(arr: Array<I>) => RepeatAPI<I> = <I>(arr: Array<I>): RepeatAPI<I> => {
         // factory is for future extensions, currently always return the same
         const elmtId = ObserveV2.getCurrentRecordedId();
-        let repeat = this.elmtId2Repeat_.get(elmtId) as __RepeatV2<I>;
+        let repeat = this.elmtId2Repeat_.get(elmtId) as __Repeat<I>;
         if (!repeat) {
-            repeat = new __RepeatV2<I>(arr);
+            repeat = new __Repeat<I>(this, arr);
             this.elmtId2Repeat_.set(elmtId, repeat);
         } else {
             repeat.updateArr(arr);

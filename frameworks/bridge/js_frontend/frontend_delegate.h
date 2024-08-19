@@ -25,6 +25,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/common/router_recover_record.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/pattern/toast/toast_layout_property.h"
 #include "core/components_ng/render/snapshot_param.h"
 #include "core/event/ace_event_helper.h"
 #include "core/pipeline/pipeline_base.h"
@@ -161,14 +162,14 @@ public:
     // ----------------
     // system.measure
     // ----------------
-    virtual double MeasureText(const MeasureContext& context) = 0;
-    virtual Size MeasureTextSize(const MeasureContext& context) = 0;
+    virtual double MeasureText(MeasureContext context) = 0;
+    virtual Size MeasureTextSize(MeasureContext context) = 0;
 
     // ----------------
     // system.prompt
     // ----------------
-    virtual void ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
-        const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset) = 0;
+    virtual void ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback) = 0;
+    virtual void CloseToast(const int32_t toastId, std::function<void(int32_t)>&& callback) {};
     virtual void SetToastStopListenerCallback(std::function<void()>&& stopCallback) {};
     virtual void ShowDialog(const std::string& title, const std::string& message,
         const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
@@ -236,6 +237,12 @@ public:
         std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
         bool enableInspector, const NG::SnapshotParam& param)
     {}
+
+    virtual std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetSyncSnapshot(const std::string& componentId,
+        const NG::SnapshotOptions& options)
+    {
+        return {};
+    }
 
     virtual bool GetAssetContent(const std::string& url, std::string& content) = 0;
     virtual bool GetAssetContent(const std::string& url, std::vector<uint8_t>& content) = 0;

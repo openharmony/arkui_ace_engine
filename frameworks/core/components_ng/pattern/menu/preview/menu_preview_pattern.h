@@ -170,16 +170,6 @@ public:
         return hoverImageScaleTo_;
     }
 
-    void SetCustomPreviewScaleFrom(float scaleFrom)
-    {
-        customPreviewScaleFrom_ = scaleFrom;
-    }
-
-    float GetCustomPreviewScaleFrom() const
-    {
-        return customPreviewScaleFrom_;
-    }
-
     void SetCustomPreviewScaleTo(float scaleTo)
     {
         customPreviewScaleTo_ = scaleTo;
@@ -190,40 +180,37 @@ public:
         return customPreviewScaleTo_;
     }
 
-    void SetHoverImageDisAppearScaleTo(float scaleTo)
+    void SetIsHoverImageScaleNearEqual(bool isEqual)
     {
-        hoverImageDisAppearScale_ = scaleTo;
+        isHoverImageScaleNearEqual_ = isEqual;
     }
 
-    float GetHoverImageDisAppearScaleTo() const
+    bool IsHoverImageScaleNearEqual() const
     {
-        return hoverImageDisAppearScale_;
+        return isHoverImageScaleNearEqual_;
     }
 
-    void SetCustomPreviewPositionXDist(float xDist)
+    void SetIsHoverImageAnimationPlaying(bool isPlay)
     {
-        previewPositionXDist_ = xDist;
+        isHoverImageAnimationPlaying_ = isPlay;
     }
 
-    float GetCustomPreviewPositionXDist()
+    bool IsHoverImageAnimationPlaying() const
     {
-        return previewPositionXDist_;
+        return isHoverImageAnimationPlaying_;
     }
-
-    void SetCustomPreviewPositionYDist(float yDist)
-    {
-        previewPositionYDist_ = yDist;
-    }
-
-    float GetCustomPreviewPositionYDist()
-    {
-        return previewPositionYDist_;
-    }
-
-    void ShowHoverImagePreviewDisAppearAnimation(const RefPtr<RenderContext>& context, float scaleFrom, float scaleTo,
-        int32_t duration = 0);
 
     RefPtr<FrameNode> GetMenuWrapper() const;
+
+    void SetIsHoverImageScalePlaying(bool isPlay)
+    {
+        isHoverImageScalePlaying_ = isPlay;
+    }
+
+    bool IsHoverImageScalePlaying()
+    {
+        return isHoverImageScalePlaying_;
+    }
 
 private:
     void OnModifyDone() override;
@@ -234,7 +221,10 @@ private:
     bool hasPreviewTransitionEffect_ = false;
 
     bool isShowHoverImage_ = false;
+    bool isHoverImageScaleNearEqual_ = false;
+    bool isHoverImageAnimationPlaying_ = false;
     bool isWidthDistLarge_ = false;
+    bool isHoverImageScalePlaying_ = false;
     OffsetF stackCenterOffset_;
     OffsetF hoverImageAfterScaleOffset_;
     float hoverImageAfterScaleWidth_ = 0.0f;
@@ -245,11 +235,7 @@ private:
     float customPreviewAfterScaleHeight_ = 0.0f;
     float hoverImageScaleFrom_ = 1.0f;
     float hoverImageScaleTo_ = 1.0f;
-    float customPreviewScaleFrom_ = 1.0f;
     float customPreviewScaleTo_ = 1.0f;
-    float hoverImageDisAppearScale_ = 1.0f;
-    float previewPositionXDist_ = 0.0f;
-    float previewPositionYDist_ = 0.0f;
     ACE_DISALLOW_COPY_AND_MOVE(MenuPreviewPattern);
 };
 } // namespace OHOS::Ace::NG

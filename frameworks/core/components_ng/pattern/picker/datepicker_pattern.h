@@ -23,6 +23,7 @@
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_accessibility_property.h"
@@ -93,6 +94,13 @@ public:
     void SetLunarSwitchTextNode(WeakPtr<FrameNode> lunarSwitchTextNode)
     {
         weakLunarSwitchText_ = lunarSwitchTextNode;
+    }
+
+    void OnFontConfigurationUpdate() override
+    {
+        if (closeDialogEvent_) {
+            closeDialogEvent_();
+        }
     }
 
     void OnLanguageConfigurationUpdate() override;
@@ -623,6 +631,65 @@ public:
         return hasUserDefinedSelectedFontFamily_;
     }
 
+    void updateFontConfigurationEvent(const std::function<void()>& closeDialogEvent)
+    {
+        closeDialogEvent_ = closeDialogEvent;
+    }
+
+    const PickerTextProperties& GetTextProperties() const
+    {
+        return textProperties_;
+    }
+
+    void SetTextProperties(const PickerTextProperties& properties)
+    {
+        textProperties_ = properties;
+        if (properties.disappearTextStyle_.fontSize.has_value() && properties.disappearTextStyle_.fontSize->IsValid()) {
+            isUserSetGradientFont_ = true;
+            gradientHeight_ = properties.disappearTextStyle_.fontSize.value();
+        }
+
+        if (properties.normalTextStyle_.fontSize.has_value() && properties.normalTextStyle_.fontSize->IsValid()) {
+            isUserSetGradientFont_ = true;
+            gradientHeight_ = std::max(properties.normalTextStyle_.fontSize.value(), gradientHeight_);
+        }
+
+        if (properties.selectedTextStyle_.fontSize.has_value() && properties.selectedTextStyle_.fontSize->IsValid()) {
+            isUserSetDividerSpacingFont_ = true;
+            dividerSpacing_ = properties.selectedTextStyle_.fontSize.value();
+        }
+    }
+
+    bool GetIsUserSetDividerSpacingFont()
+    {
+        return isUserSetDividerSpacingFont_;
+    }
+
+    bool GetIsUserSetGradientFont()
+    {
+        return isUserSetGradientFont_;
+    }
+
+    Dimension GetDividerSpacing()
+    {
+        return dividerSpacing_;
+    }
+
+    Dimension GetGradientHeight()
+    {
+        return gradientHeight_;
+    }
+
+    void SetPaintDividerSpacing(float& value)
+    {
+        paintDividerSpacing_ = value;
+    }
+
+    float GetPaintDividerSpacing()
+    {
+        return paintDividerSpacing_;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -639,9 +706,14 @@ private:
     void OrderCurrentDateByYearMonthDayColumn(
         RefPtr<FrameNode>& stackYear, RefPtr<FrameNode>& stackMonth, RefPtr<FrameNode>& stackDay) const;
     void FillSolarYearOptions(const PickerDate& current, RefPtr<FrameNode>& yearColumn);
+    void UpdateTitleTextColor(const RefPtr<FrameNode>& buttonTitleNode, const RefPtr<PickerTheme>& pickerTheme);
     void FillLunarMonthDaysOptions(const LunarDate& current, RefPtr<FrameNode>& monthDaysColumn);
     void AdjustSolarStartEndDate();
     void AdjustLunarStartEndDate();
+    void UpdateConfirmButtonMargin(
+        const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme);
+    void UpdateCancelButtonMargin(
+        const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme);
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
@@ -661,7 +733,7 @@ private:
     std::optional<int32_t> titleId_;
     std::optional<int32_t> ButtonTitleId_;
     std::optional<int32_t> DividerId_;
-    double resizePickerItemHeight_;
+    double resizePickerItemHeight_ = 0.0;
     bool resizeFlag_ = false;
     bool isShowInDialog_ = false;
     EventMarker OnDialogAccept_;
@@ -700,6 +772,13 @@ private:
     bool hasUserDefinedDisappearFontFamily_ = false;
     bool hasUserDefinedNormalFontFamily_ = false;
     bool hasUserDefinedSelectedFontFamily_ = false;
+    std::function<void()> closeDialogEvent_;
+    bool isUserSetDividerSpacingFont_ = false;
+    bool isUserSetGradientFont_ = false;
+    Dimension gradientHeight_;
+    Dimension dividerSpacing_;
+    float paintDividerSpacing_ = 1.0f;
+    PickerTextProperties textProperties_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerPattern);
 };

@@ -14,17 +14,10 @@
  */
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_list_ffi.h"
-#include "core/components/scroll/scroll_controller_base.h"
-#include "core/components/scroll/scroll_controller.h"
 #include "cj_lambda.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_scroll_ffi.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/list/list_model.h"
-#include "core/components_ng/pattern/list/list_position_controller.h"
-#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;

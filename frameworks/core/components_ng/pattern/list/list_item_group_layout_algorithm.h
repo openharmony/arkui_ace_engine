@@ -26,6 +26,7 @@
 namespace OHOS::Ace::NG {
 class ListPositionMap;
 class ListChildrenMainSize;
+struct ListItemGroupLayoutInfo;
 struct LayoutedItemInfo {
     int32_t startIndex = 0;
     float startPos = 0.0f;
@@ -43,7 +44,8 @@ struct ListItemGroupInfo {
 struct ListItemGroupCacheParam {
     bool forward = true;
     int32_t cacheCount = 0;
-    int32_t currCachedIndex = -1;
+    int32_t forwardCachedIndex = -1;
+    int32_t backwardCachedIndex = INT_MAX;
     int64_t deadline = 0;
 };
 
@@ -134,6 +136,11 @@ public:
     void SetNeedAdjustRefPos(bool needAdjust)
     {
         needAdjustRefPos_ = needAdjust;
+    }
+
+    void SetNeedCheckOffset(bool needCheckOffset)
+    {
+        isNeedCheckOffset_ = needCheckOffset;
     }
 
     float GetRefPos() const
@@ -279,6 +286,8 @@ public:
         return cacheParam_;
     }
 
+    ListItemGroupLayoutInfo GetLayoutInfo() const;
+
 private:
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
     void UpdateListItemConstraint(const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
@@ -305,6 +314,8 @@ private:
         int32_t currentIndex);
     int32_t MeasureALineAuto(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
         int32_t currentIndex);
+    void CheckJumpForwardForBigOffset(int32_t& startIndex, float& startPos);
+    void CheckJumpBackwardForBigOffset(int32_t& endIndex, float& endPos);
     void MeasureForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
         int32_t startIndex, float startPos);
     void MeasureBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
@@ -370,6 +381,7 @@ private:
     bool forwardLayout_ = true;
     bool needAllLayout_ = false;
     bool needAdjustRefPos_ = false;
+    bool isNeedCheckOffset_ = false;
 
     std::optional<LayoutedItemInfo> layoutedItemInfo_;
     LayoutConstraintF childLayoutConstraint_;

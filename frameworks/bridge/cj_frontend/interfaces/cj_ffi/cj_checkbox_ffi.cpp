@@ -15,12 +15,9 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_checkbox_ffi.h"
 
-#include <optional>
-#include <string>
 
 #include "cj_lambda.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 
 using namespace OHOS::Ace;

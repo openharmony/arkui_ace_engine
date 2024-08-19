@@ -139,6 +139,9 @@ public:
     void OnLanguageConfigurationUpdate() override;
 
     void GetTimeLimitResource(std::string &content);
+
+    void UnregisterAccessibility();
+
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -165,6 +168,7 @@ private:
     void UpdateConfiguration();
     void HandleFormComponent(const RequestFormInfo& info);
     void AddFormComponent(const RequestFormInfo& info);
+    void AddFormComponentUI(bool isTransparencyEnabled, const RequestFormInfo& info);
     void UpdateFormComponent(const RequestFormInfo& info);
     void UpdateFormComponentSize(const RequestFormInfo& info);
     void UpdateTimeLimitFontCfg();
@@ -181,6 +185,7 @@ private:
     void HandleStaticFormEvent(const PointF& touchPoint);
     void ProcDeleteImageNode(const AAFwk::Want& want);
     void AttachRSNode(const std::shared_ptr<Rosen::RSSurfaceNode>& node, const AAFwk::Want& want);
+    void AttachJsRSNode(const std::shared_ptr<Rosen::RSNode> &jsNode);
     void HandleEnableForm(const bool enable);
 
     void InitClickEvent();
@@ -203,6 +208,9 @@ private:
     RefPtr<FrameNode> GetFormChildNode(FormChildNodeType formChildNodeType) const;
     double GetTimeLimitFontSize();
     bool IsMaskEnableForm(const RequestFormInfo &info);
+    void UpdateChildNodeOpacity(FormChildNodeType formChildNodeType, double opacity);
+    void SnapshotSurfaceNode();
+    bool CheckFormBundleForbidden(const std::string &bundleName);
     // used by ArkTS Card, for RSSurfaceNode from FRS,
     RefPtr<RenderContext> externalRenderContext_;
 

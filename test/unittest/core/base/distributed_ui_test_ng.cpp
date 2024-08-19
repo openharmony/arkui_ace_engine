@@ -455,4 +455,27 @@ HWTEST_F(DistributedUiTestNg, DistributedUiTestNg010, TestSize.Level1)
     distributedUI.UpdateUITree(array);
     EXPECT_NE(distributedUI.status_, DistributedUI::StateMachine::INIT);
 }
+
+/**
+ * @tc.name: DistributedUiTestNg011
+ * @tc.desc: DistributedUi UpdateUITree
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedUiTestNg, DistributedUiTestNg011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. statement distributedUI and SerializeableObjectArray
+     */
+    DistributedUI distributedUI;
+    distributedUI.ApplyOneUpdate();
+    EXPECT_EQ(distributedUI.pendingUpdates_.size() == 0, true);
+    SerializeableObjectArray array;
+    std::unique_ptr<SerializeableObject> value = std::make_unique<JsonValue>();
+    array.push_back(std::move(value));
+    distributedUI.RestoreUITree(array);
+    distributedUI.UpdateUITree(array);
+    EXPECT_EQ(distributedUI.pendingUpdates_.size() == 1, true);
+    distributedUI.ApplyOneUpdate();
+    EXPECT_EQ(distributedUI.pendingUpdates_.size() == 0, true);
+}
 } // namespace OHOS::Ace::NG

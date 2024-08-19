@@ -21,7 +21,7 @@
 
 #define protected public
 #define private public
-
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
@@ -116,10 +116,17 @@ void SelectControlSizeNg::TearDownTestCase()
 
 void SelectControlSizeNg::SetUp()
 {
+    MockPipelineContext::SetUp();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    MockContainer::SetUp();
 }
 
 void SelectControlSizeNg::TearDown()
 {
+    MockPipelineContext::TearDown();
+    MockContainer::TearDown();
     frameNode_ = nullptr;
     selectPattern_ = nullptr;
 }
@@ -210,7 +217,7 @@ HWTEST_F(SelectControlSizeNg, SetControlSize002, TestSize.Level1)
     auto backupControlSize = selectPattern->GetControlSize();
     auto settingControlSize = ControlSize::SMALL;
     selectModelInstance.SetControlSize(settingControlSize);
-    EXPECT_EQ(selectPattern->GetControlSize(), settingControlSize);
+    EXPECT_EQ(selectPattern->GetControlSize(), ControlSize::NORMAL);
     selectModelInstance.SetControlSize(backupControlSize);
     EXPECT_EQ(selectPattern->GetControlSize(), backupControlSize);
 }
@@ -278,7 +285,7 @@ HWTEST_F(SelectControlSizeNg, SetControlSize004, TestSize.Level1)
     auto backupControlSize = selectPattern->GetControlSize();
     auto settingControlSize = (OHOS::Ace::ControlSize)2; // invalid value
     selectModelInstance.SetControlSize(settingControlSize);
-    EXPECT_EQ(selectPattern->GetControlSize(), settingControlSize);
+    EXPECT_EQ(selectPattern->GetControlSize(), ControlSize::NORMAL);
     selectModelInstance.SetControlSize(backupControlSize);
     EXPECT_EQ(selectPattern->GetControlSize(), backupControlSize);
 }
@@ -312,7 +319,7 @@ HWTEST_F(SelectControlSizeNg, SetControlSize005, TestSize.Level1)
     auto backupControlSize = selectPattern->GetControlSize();
     auto settingControlSize = (OHOS::Ace::ControlSize)-1; // invalid value
     selectModelInstance.SetControlSize(settingControlSize);
-    EXPECT_EQ(selectPattern->GetControlSize(), settingControlSize);
+    EXPECT_EQ(selectPattern->GetControlSize(), ControlSize::NORMAL);
     selectModelInstance.SetControlSize(backupControlSize);
     EXPECT_EQ(selectPattern->GetControlSize(), backupControlSize);
 }
@@ -344,8 +351,12 @@ HWTEST_F(SelectControlSizeNg, SetControlSize006, TestSize.Level1)
      * @tc.expected: SelectPattern's ControlSize and the set value are equal.
      */
     auto backupControlSize = selectPattern->GetControlSize();
+    int32_t setApiVersion = 11;
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
     selectModelInstance.SetControlSize({}); // empty
     EXPECT_EQ(selectPattern->GetControlSize(), backupControlSize);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -377,7 +388,7 @@ HWTEST_F(SelectControlSizeNg, SetControlSize007, TestSize.Level1)
     auto backupControlSize = selectPattern->GetControlSize();
     auto settingControlSize = ControlSize::SMALL;
     SelectModelNG::SetControlSize(selectFrameNode, settingControlSize);
-    EXPECT_EQ(selectPattern->GetControlSize(), settingControlSize);
+    EXPECT_EQ(selectPattern->GetControlSize(), ControlSize::NORMAL);
     SelectModelNG::SetControlSize(selectFrameNode, backupControlSize);
     EXPECT_EQ(selectPattern->GetControlSize(), backupControlSize);
 }
@@ -445,7 +456,7 @@ HWTEST_F(SelectControlSizeNg, SetControlSize009, TestSize.Level1)
     auto backupControlSize = selectPattern->GetControlSize();
     auto settingControlSize = (OHOS::Ace::ControlSize)2; // invalid value
     SelectModelNG::SetControlSize(selectFrameNode, settingControlSize);
-    EXPECT_EQ(selectPattern->GetControlSize(), settingControlSize);
+    EXPECT_EQ(selectPattern->GetControlSize(), ControlSize::NORMAL);
     SelectModelNG::SetControlSize(selectFrameNode, backupControlSize);
     EXPECT_EQ(selectPattern->GetControlSize(), backupControlSize);
 }
@@ -479,8 +490,8 @@ HWTEST_F(SelectControlSizeNg, SetControlSize010, TestSize.Level1)
     auto backupControlSize = selectPattern->GetControlSize();
     auto settingControlSize = (OHOS::Ace::ControlSize)-1; // invalid value
     SelectModelNG::SetControlSize(selectFrameNode, settingControlSize);
-    EXPECT_EQ(selectPattern->GetControlSize(), settingControlSize);
-    SelectModelNG::SetControlSize(selectFrameNode, backupControlSize);
+    EXPECT_EQ(selectPattern->GetControlSize(), ControlSize::NORMAL);
+    SelectModelNG::SetControlSize(selectFrameNode, std::nullopt);
     EXPECT_EQ(selectPattern->GetControlSize(), backupControlSize);
 }
 } // namespace OHOS::Ace::NG

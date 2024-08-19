@@ -223,6 +223,40 @@ void UIDisplaySyncManager::FindAllRefreshRateFactors()
     return;
 }
 
+int32_t UIDisplaySyncManager::GetAnimatorRate()
+{
+    std::priority_queue<int32_t> emptyQue;
+    std::swap(maxAnimatorRateHap_, emptyQue);
+
+    if (uiDisplaySyncMap_.empty()) {
+        return INVALID_ANIMATOR_EXPECTED_RATE;
+    }
+
+    IdToDisplaySyncMap backupedMap(uiDisplaySyncMap_);
+    for (const auto& [Id, weakDisplaySync] : backupedMap) {
+        auto displaySync = weakDisplaySync.Upgrade();
+        if (displaySync) {
+            maxAnimatorRateHap_.push(displaySync->GetAnimatorExpectedRate());
+        } else {
+            uiDisplaySyncMap_.erase(Id);
+        }
+    }
+    
+    if (maxAnimatorRateHap_.empty()) {
+        return INVALID_ANIMATOR_EXPECTED_RATE;
+    }
+    int32_t currMaxAnimatorExpectedRate = maxAnimatorRateHap_.top();
+    return currMaxAnimatorExpectedRate;
+}
+
+bool UIDisplaySyncManager::IsAnimatorStopped()
+{
+    if (GetAnimatorRate() == INVALID_ANIMATOR_EXPECTED_RATE) {
+        return true;
+    }
+    return false;
+}
+
 UIDisplaySyncManager::UIDisplaySyncManager() {}
 
 UIDisplaySyncManager::~UIDisplaySyncManager() noexcept

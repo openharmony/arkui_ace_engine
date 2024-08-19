@@ -83,7 +83,10 @@ void SpanModelNG::SetFontSize(const Dimension& value)
 
 void SpanModelNG::SetTextColor(const Color& value)
 {
-    ACE_UPDATE_SPAN_PROPERTY(TextColor, value, PropertyInfo::FONTCOLOR);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    CHECK_NULL_VOID(spanNode);
+    spanNode->UpdateSpanTextColor(value);
+    spanNode->AddPropertyInfo(PropertyInfo::FONTCOLOR);
 }
 
 void SpanModelNG::SetItalicFontStyle(Ace::FontStyle value)
@@ -160,6 +163,41 @@ void SpanModelNG::SetOnClick(UINode* uiNode, GestureEventFunc&& click)
 void SpanModelNG::ClearOnClick()
 {
     ACE_UPDATE_SPAN_PROPERTY(OnClickEvent, nullptr, PropertyInfo::NONE);
+}
+
+void SpanModelNG::ClearOnClick(UINode* uiNode)
+{
+    ACE_UPDATE_NODE_SPAN_PROPERTY(OnClickEvent, nullptr, PropertyInfo::NONE, uiNode);
+}
+
+void SpanModelNG::SetAccessibilityText(const std::string& text)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    CHECK_NULL_VOID(spanNode);
+    auto spanItem = spanNode->GetSpanItem();
+    CHECK_NULL_VOID(spanItem);
+    CHECK_NULL_VOID(spanItem->accessibilityProperty);
+    spanItem->accessibilityProperty->SetAccessibilityText(text);
+}
+
+void SpanModelNG::SetAccessibilityDescription(const std::string& description)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    CHECK_NULL_VOID(spanNode);
+    auto spanItem = spanNode->GetSpanItem();
+    CHECK_NULL_VOID(spanItem);
+    CHECK_NULL_VOID(spanItem->accessibilityProperty);
+    spanItem->accessibilityProperty->SetAccessibilityDescription(description);
+}
+
+void SpanModelNG::SetAccessibilityImportance(const std::string& importance)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    CHECK_NULL_VOID(spanNode);
+    auto spanItem = spanNode->GetSpanItem();
+    CHECK_NULL_VOID(spanItem);
+    CHECK_NULL_VOID(spanItem->accessibilityProperty);
+    spanItem->accessibilityProperty->SetAccessibilityLevel(importance);
 }
 
 void SpanModelNG::InitSpan(UINode* uiNode, const std::string& content)
@@ -243,7 +281,7 @@ void SpanModelNG::SetTextColor(UINode* uiNode, const Color& value)
 {
     auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
     CHECK_NULL_VOID(spanNode);
-    spanNode->UpdateTextColor(value);
+    spanNode->UpdateSpanTextColor(value);
     spanNode->AddPropertyInfo(PropertyInfo::FONTCOLOR);
 }
 
@@ -423,5 +461,43 @@ std::vector<Shadow> SpanModelNG::GetTextShadow(UINode* uiNode)
     auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
     CHECK_NULL_RETURN(uiNode, defaultShadow);
     return spanNode->GetTextShadow().value_or(defaultShadow);
+}
+
+void SpanModelNG::SetAccessibilityText(UINode* uiNode, const std::string& text)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_VOID(spanNode);
+    auto spanItem = spanNode->GetSpanItem();
+    CHECK_NULL_VOID(spanItem);
+    CHECK_NULL_VOID(spanItem->accessibilityProperty);
+    spanItem->accessibilityProperty->SetAccessibilityText(text);
+}
+
+void SpanModelNG::SetAccessibilityDescription(UINode* uiNode, const std::string& description)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_VOID(spanNode);
+    auto spanItem = spanNode->GetSpanItem();
+    CHECK_NULL_VOID(spanItem);
+    CHECK_NULL_VOID(spanItem->accessibilityProperty);
+    spanItem->accessibilityProperty->SetAccessibilityDescription(description);
+}
+
+void SpanModelNG::SetAccessibilityImportance(UINode* uiNode, const std::string& importance)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_VOID(spanNode);
+    auto spanItem = spanNode->GetSpanItem();
+    CHECK_NULL_VOID(spanItem);
+    CHECK_NULL_VOID(spanItem->accessibilityProperty);
+    spanItem->accessibilityProperty->SetAccessibilityLevel(importance);
+}
+
+std::vector<std::string> SpanModelNG::GetSpanFontFamily(UINode* uiNode)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    std::vector<std::string> value;
+    CHECK_NULL_RETURN(spanNode, value);
+    return spanNode->GetFontFamily().value_or(value);
 }
 } // namespace OHOS::Ace::NG

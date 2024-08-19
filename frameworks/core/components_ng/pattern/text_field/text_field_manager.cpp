@@ -38,7 +38,19 @@ void TextFieldManagerNG::ClearOnFocusTextField(int32_t id)
 {
     if (onFocusTextFieldId == id) {
         onFocusTextField_ = nullptr;
+        focusFieldIsInline = false;
+        optionalPosition_ = std::nullopt;
+        usingCustomKeyboardAvoid_ = false;
     }
+}
+
+bool TextFieldManagerNG::OnBackPressed()
+{
+    auto pattern = onFocusTextField_.Upgrade();
+    CHECK_NULL_RETURN(pattern, false);
+    auto textBasePattern = AceType::DynamicCast<TextBase>(pattern);
+    CHECK_NULL_RETURN(textBasePattern, false);
+    return textBasePattern->OnBackPressed();
 }
 
 void TextFieldManagerNG::SetClickPosition(const Offset& position)
@@ -50,19 +62,11 @@ void TextFieldManagerNG::SetClickPosition(const Offset& position)
         return;
     }
     auto rootWidth = pipeline->GetRootWidth();
-    if (GreatOrEqual(position.GetX(), rootWidth) || LessOrEqual(position.GetX(), 0.0f)) {
+    if (GreatOrEqual(position.GetX(), rootWidth) || LessNotEqual(position.GetX(), 0.0f)) {
         return;
     }
     position_ = position;
-}
-
-bool TextFieldManagerNG::OnBackPressed()
-{
-    auto pattern = onFocusTextField_.Upgrade();
-    CHECK_NULL_RETURN(pattern, false);
-    auto textBasePattern = AceType::DynamicCast<TextBase>(pattern);
-    CHECK_NULL_RETURN(textBasePattern, false);
-    return textBasePattern->OnBackPressed();
+    optionalPosition_ = position;
 }
 
 RefPtr<FrameNode> TextFieldManagerNG::FindScrollableOfFocusedTextField(const RefPtr<FrameNode>& textField)
@@ -148,14 +152,13 @@ bool TextFieldManagerNG::ScrollTextFieldToSafeArea()
     CHECK_NULL_RETURN(pipeline, false);
     auto keyboardInset = pipeline->GetSafeAreaManager()->GetKeyboardInset();
     bool isShowKeyboard = keyboardInset.IsValid();
-    NotifyKeyboardChangedCallback(isShowKeyboard);
     if (isShowKeyboard) {
         auto bottomInset = pipeline->GetSafeArea().bottom_.Combine(keyboardInset);
         CHECK_NULL_RETURN(bottomInset.IsValid(), false);
         return ScrollToSafeAreaHelper(bottomInset, isShowKeyboard);
     } else if (pipeline->GetSafeAreaManager()->KeyboardSafeAreaEnabled()) {
         // hide keyboard only scroll when keyboard avoid mode is resize
-        return ScrollToSafeAreaHelper({ 0, 0 }, isShowKeyboard);
+        return ScrollToSafeAreaHelper({0, 0}, isShowKeyboard);
     }
     return false;
 }
@@ -200,12 +203,37 @@ void TextFieldManagerNG::AvoidKeyBoardInNavigation()
     SetNavContentAvoidKeyboardOffset(navNode, avoidKeyboardOffset);
 }
 
+void TextFieldManagerNG::AvoidKeyboardInSheet(const RefPtr<FrameNode>& textField)
+{
+    CHECK_NULL_VOID(textField);
+    auto parent = textField->GetAncestorNodeOfFrame();
+    bool findSheet = false;
+    while (parent) {
+        if (parent->GetHostTag() == V2::SHEET_PAGE_TAG) {
+            findSheet = true;
+            break;
+        }
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+    CHECK_NULL_VOID(parent);
+    auto sheetNodePattern = parent->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetNodePattern);
+    TAG_LOGI(ACE_KEYBOARD, "Force AvoidKeyboard in sheet");
+    sheetNodePattern->AvoidSafeArea(true);
+}
+
 RefPtr<FrameNode> TextFieldManagerNG::FindNavNode(const RefPtr<FrameNode>& textField)
 {
     CHECK_NULL_RETURN(textField, nullptr);
     auto parent = textField->GetAncestorNodeOfFrame();
     RefPtr<FrameNode> ret = nullptr;
     while (parent) {
+        // when the sheet showed in navdestination, sheet replaced navdestination to do avoid keyboard.
+        if (parent->GetHostTag() == V2::SHEET_WRAPPER_TAG) {
+            auto sheetNode = parent->GetChildAtIndex(0);
+            CHECK_NULL_RETURN(sheetNode, nullptr);
+            return AceType::DynamicCast<FrameNode>(sheetNode);
+        }
         if (parent->GetHostTag() == V2::NAVDESTINATION_VIEW_ETS_TAG ||
             parent->GetHostTag() == V2::NAVBAR_ETS_TAG) {
                 ret = parent;
@@ -261,21 +289,5 @@ void TextFieldManagerNG::SetNavContentAvoidKeyboardOffset(RefPtr<FrameNode> navN
         }
     }
     navNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-}
-
-void TextFieldManagerNG::NotifyKeyboardChangedCallback(bool isShowKeyboard)
-{
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto safeAreaManager = context->GetSafeAreaManager();
-    CHECK_NULL_VOID(safeAreaManager);
-    auto keyboardOffset = safeAreaManager->GetKeyboardOffset();
-    auto isChanged = !NearEqual(lastKeyboardOffset_, keyboardOffset);
-    for (const auto& pair : keyboardChangeCallbackMap_) {
-        if (pair.second) {
-            pair.second(isChanged, isShowKeyboard);
-        }
-    }
-    lastKeyboardOffset_ = keyboardOffset;
 }
 } // namespace OHOS::Ace::NG

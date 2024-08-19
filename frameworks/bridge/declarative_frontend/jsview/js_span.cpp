@@ -20,6 +20,9 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
 #include "base/geometry/dimension.h"
 #include "base/log/ace_scoring_log.h"
@@ -211,8 +214,13 @@ void JSSpan::SetDecoration(const JSCallbackInfo& info)
     if (ParseJsColor(colorValue, result)) {
         colorVal = result;
     } else {
-        // default color
-        colorVal = Color::BLACK;
+        auto theme = GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        if (SystemProperties::GetColorMode() == ColorMode::DARK) {
+            colorVal = theme->GetTextStyle().GetTextColor();
+        } else {
+            colorVal = Color::BLACK;
+        }
     }
     SpanModel::GetInstance()->SetTextDecoration(textDecoration.value());
     SpanModel::GetInstance()->SetTextDecorationColor(colorVal.value());
@@ -240,6 +248,9 @@ void JSSpan::JsOnClick(const JSCallbackInfo& info)
             ACE_SCORING_EVENT("onClick");
             PipelineContext::SetCallBackNode(node);
             func->Execute(*clickInfo);
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+            JSInteractableView::ReportClickEvent(node);
+#endif
         };
         SpanModel::GetInstance()->SetOnClick(std::move(onClick));
         return;
@@ -303,6 +314,34 @@ void JSSpan::SetTextShadow(const JSCallbackInfo& info)
     ParseTextShadowFromShadowObject(info[0], shadows);
     SpanModel::GetInstance()->SetTextShadow(shadows);
 }
+ 
+
+void JSSpan::SetAccessibilityText(const JSCallbackInfo& info)
+{
+    std::string text;
+    if ((info.Length() > 0) && info[0]->IsString()) {
+        text = info[0]->ToString();
+    }
+    SpanModel::GetInstance()->SetAccessibilityText(text);
+}
+
+void JSSpan::SetAccessibilityDescription(const JSCallbackInfo& info)
+{
+    std::string description;
+    if ((info.Length() > 0) && info[0]->IsString()) {
+        description = info[0]->ToString();
+    }
+    SpanModel::GetInstance()->SetAccessibilityDescription(description);
+}
+
+void JSSpan::SetAccessibilityLevel(const JSCallbackInfo& info)
+{
+    std::string level;
+    if ((info.Length() > 0) && info[0]->IsString()) {
+        level = info[0]->ToString();
+    }
+    SpanModel::GetInstance()->SetAccessibilityImportance(level);
+}
 
 void JSSpan::JSBind(BindingTarget globalObj)
 {
@@ -328,6 +367,9 @@ void JSSpan::JSBind(BindingTarget globalObj)
     JSClass<JSSpan>::StaticMethod("onClick", &JSSpan::JsOnClick);
     JSClass<JSSpan>::StaticMethod("lineHeight", &JSSpan::SetLineHeight, opt);
     JSClass<JSSpan>::StaticMethod("textBackgroundStyle", &JSContainerSpan::SetTextBackgroundStyle, opt);
+    JSClass<JSSpan>::StaticMethod("accessibilityText", &JSSpan::SetAccessibilityText, opt);
+    JSClass<JSSpan>::StaticMethod("accessibilityDescription", &JSSpan::SetAccessibilityDescription, opt);
+    JSClass<JSSpan>::StaticMethod("accessibilityLevel", &JSSpan::SetAccessibilityLevel, opt);
     JSClass<JSSpan>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

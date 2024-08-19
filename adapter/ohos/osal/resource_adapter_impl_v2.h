@@ -19,10 +19,11 @@
 #include <mutex>
 
 #include "resource_manager.h"
-
+#include "base/thread/task_executor.h"
 #include "base/image/pixel_map.h"
 #include "base/utils/device_config.h"
 #include "core/components/theme/resource_adapter.h"
+#include "adapter/ohos/osal/resource_theme_style.h"
 
 namespace OHOS::Ace {
 class ResourceAdapterImplV2 : public ResourceAdapter {
@@ -79,6 +80,8 @@ public:
     uint32_t GetSymbolById(uint32_t resId) const override;
     RefPtr<ThemeStyle> GetPatternByName(const std::string& patternName) override;
     void UpdateColorMode(ColorMode colorMode) override;
+    ColorMode GetResourceColorMode() const override;
+    void SetAppHasDarkRes(bool hasDarkRes);
 
 private:
     std::string GetActualResourceName(const std::string& resName) const;
@@ -89,12 +92,15 @@ private:
     {
         return sysResourceManager_;
     }
+    RefPtr<TaskExecutor> GetTaskExecutor();
 
     std::shared_ptr<Global::Resource::ResourceManager> sysResourceManager_;
     std::string packagePathStr_;
     std::shared_ptr<Global::Resource::ResConfig> resConfig_;
+    bool appHasDarkRes_ = false;
     std::mutex updateResConfigMutex_;
     ACE_DISALLOW_COPY_AND_MOVE(ResourceAdapterImplV2);
+    void PreloadTheme(int32_t themeId, RefPtr<ResourceThemeStyle> theme);
 };
 } // namespace OHOS::Ace
 

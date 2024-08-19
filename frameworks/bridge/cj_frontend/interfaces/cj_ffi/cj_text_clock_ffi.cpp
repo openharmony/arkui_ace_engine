@@ -16,10 +16,6 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_text_clock_ffi.h"
 
 #include "cj_lambda.h"
-#include "base/utils/string_utils.h"
-#include "core/common/ace_application_info.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "core/components/common/properties/text_style_parser.h"
 
@@ -200,6 +196,9 @@ void FfiOHOSAceFrameworkTextClockFontFeature(const char* fontFeature)
 int64_t FfiOHOSAceFrameworkTextClockControllerCtor()
 {
     auto controller = FFIData::Create<NativeTextClockController>();
+    if (controller == nullptr) {
+        return FFI_ERROR_CODE;
+    }
     return controller->GetID();
 }
 

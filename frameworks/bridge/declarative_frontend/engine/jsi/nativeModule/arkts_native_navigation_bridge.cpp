@@ -112,7 +112,7 @@ ArkUINativeModuleValue NavigationBridge::SetSubtitle(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> subtitleArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     if (subtitleArg->IsString(vm)) {
-        std::string subtitle = subtitleArg->ToString(vm)->ToString();
+        std::string subtitle = subtitleArg->ToString(vm)->ToString(vm);
         GetArkUINodeModifiers()->getNavigationModifier()->setSubtitle(nativeNode, subtitle.c_str());
     } else {
         GetArkUINodeModifiers()->getNavigationModifier()->resetSubtitle(nativeNode);
@@ -401,14 +401,14 @@ ArkUINativeModuleValue NavigationBridge::SetIgnoreLayoutSafeArea(ArkUIRuntimeCal
     std::string typeCppStr;
     std::string edgesCppStr;
     if (secondArg->IsString(vm)) {
-        typeCppStr = secondArg->ToString(vm)->ToString();
+        typeCppStr = secondArg->ToString(vm)->ToString(vm);
     } else {
         //type system
         typeCppStr = "0";
     }
 
     if (thirdArg->IsString(vm)) {
-        edgesCppStr = thirdArg->ToString(vm)->ToString();
+        edgesCppStr = thirdArg->ToString(vm)->ToString(vm);
     } else {
         //edge top and bottom
         edgesCppStr = "0|1";
@@ -460,9 +460,6 @@ ArkUINativeModuleValue NavigationBridge::SetTitle(ArkUIRuntimeCallInfo* runtimeC
     }
 
     ArkUINavigationTitlebarOptions options;
-    // if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-    //     options.blurStyle = { 1, static_cast<ArkUI_Int32>(BlurStyle::NO_MATERIAL) };
-    // }
     if (optionsArg->IsObject(vm)) {
         NativeNavigationUtils::ParseTitleOptions(vm, optionsArg, options);
     }

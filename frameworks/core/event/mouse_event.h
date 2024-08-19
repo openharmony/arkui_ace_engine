@@ -51,6 +51,14 @@ enum class MouseAction : int32_t {
     PULL_UP
 };
 
+enum class AccessibilityHoverAction : int32_t {
+    UNKNOWN = -1,
+    HOVER_ENTER,
+    HOVER_MOVE,
+    HOVER_EXIT,
+    HOVER_CANCEL
+};
+
 enum class MouseState : int32_t {
     NONE = 0,
     HOVER = 1,
@@ -104,6 +112,7 @@ struct MouseEvent final {
     int32_t originalId = 0;
     std::vector<KeyCode> pressedKeyCodes_;
     bool isInjected = false;
+    bool isPrivacyMode = false;
 
     Offset GetOffset() const
     {
@@ -157,7 +166,8 @@ struct MouseEvent final {
             .pointerEvent = pointerEvent,
             .originalId = originalId,
             .pressedKeyCodes_ = pressedKeyCodes_,
-            .isInjected = isInjected
+            .isInjected = isInjected,
+            .isPrivacyMode = isPrivacyMode
         };
     }
 
@@ -215,6 +225,7 @@ struct MouseEvent final {
             .SetTouchEventId(touchEventId)
             .SetOriginalId(pointOriginalId)
             .SetIsInjected(isInjected);
+        event.isPrivacyMode = isPrivacyMode;
         event.pointers.emplace_back(std::move(point));
         event.pressedKeyCodes_ = pressedKeyCodes_;
         return event;
@@ -244,7 +255,8 @@ struct MouseEvent final {
             .pointerEvent = pointerEvent,
             .originalId = originalId,
             .pressedKeyCodes_ = pressedKeyCodes_,
-            .isInjected = isInjected
+            .isInjected = isInjected,
+            .isPrivacyMode = isPrivacyMode
         };
     }
 };
@@ -350,8 +362,72 @@ public:
     ~HoverInfo() override = default;
 };
 
+class AccessibilityHoverInfo : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(AccessibilityHoverInfo, BaseEventInfo);
+
+public:
+    AccessibilityHoverInfo() : BaseEventInfo("onAccessibilityHover") {}
+    ~AccessibilityHoverInfo() override = default;
+
+    AccessibilityHoverInfo& SetGlobalLocation(const Offset& globalLocation)
+    {
+        globalLocation_ = globalLocation;
+        return *this;
+    }
+    AccessibilityHoverInfo& SetLocalLocation(const Offset& localLocation)
+    {
+        localLocation_ = localLocation;
+        return *this;
+    }
+
+    AccessibilityHoverInfo& SetScreenLocation(const Offset& screenLocation)
+    {
+        screenLocation_ = screenLocation;
+        return *this;
+    }
+
+    const Offset& GetScreenLocation() const
+    {
+        return screenLocation_;
+    }
+
+    const Offset& GetLocalLocation() const
+    {
+        return localLocation_;
+    }
+
+    const Offset& GetGlobalLocation() const
+    {
+        return globalLocation_;
+    }
+
+    AccessibilityHoverAction GetActionType() const
+    {
+        return actionType_;
+    }
+
+    void SetActionType(AccessibilityHoverAction type)
+    {
+        actionType_ = type;
+    }
+
+private:
+    // global position at which the touch point contacts the screen.
+    Offset globalLocation_;
+    // Different from global location, The local location refers to the location of the contact point relative to the
+    // current node which has the recognizer.
+    Offset localLocation_;
+
+    Offset screenLocation_;
+
+    // touch type
+    AccessibilityHoverAction actionType_ = AccessibilityHoverAction::UNKNOWN;
+};
+
 using OnHoverFunc = std::function<void(bool, HoverInfo& info)>;
 using OnHoverEventFunc = std::function<void(bool)>;
+
+using OnAccessibilityHoverFunc = std::function<void(bool, AccessibilityHoverInfo& info)>;
 
 class MouseEventTarget : public virtual TouchEventTarget {
     DECLARE_ACE_TYPE(MouseEventTarget, TouchEventTarget);
@@ -421,7 +497,19 @@ public:
         onHoverEventCallback_ = onHoverEventCallback;
     }
 
+    void SetAccessibilityHoverCallback(const OnAccessibilityHoverFunc& onAccessibilityHoverCallback)
+    {
+        onAccessibilityHoverCallback_ = onAccessibilityHoverCallback;
+    }
+
     bool HandleHoverEvent(bool isHovered, const MouseEvent& event);
+
+    void HandleAccessibilityHoverEvent(bool isHovered, const TouchEvent& event);
+
+    bool IsAccessibilityHoverTarget()
+    {
+        return onAccessibilityHoverCallback_ != nullptr;
+    }
 
     bool HandleHoverEvent(bool isHovered)
     {
@@ -441,9 +529,12 @@ public:
         return false;
     }
 
+    AccessibilityHoverAction ConvertAccessibilityHoverAction(TouchType type);
+
 private:
     OnHoverEventFunc onHoverCallback_;
     OnHoverFunc onHoverEventCallback_;
+    OnAccessibilityHoverFunc onAccessibilityHoverCallback_;
 };
 
 class HoverEffectTarget : public virtual TouchEventTarget {

@@ -18,13 +18,15 @@
 
 #include <memory>
 
+#include "base/geometry/rect.h"
 #include "testing_color_filter.h"
 #include "testing_enums.h"
+#include "testing_image_blur_type.h"
+#include "testing_rect.h"
 #include "testing_shader_effect.h"
 
-#include "base/geometry/rect.h"
-
 namespace OHOS::Ace::Testing {
+static const TestingRect noCropRect(0.0, 0.0, 0.0, 0.0);
 enum class FilterType {
     NO_TYPE,
     BLUR,
@@ -41,7 +43,8 @@ public:
     ~TestingImageFilter() = default;
 
     static std::shared_ptr<TestingImageFilter> CreateBlurImageFilter(
-        float sigmaX, float sigmaY, TileMode mode, std::shared_ptr<TestingImageFilter> input)
+        float sigmaX, float sigmaY, TileMode mode, std::shared_ptr<TestingImageFilter> input,
+        ImageBlurType imageBlurType = ImageBlurType::GAUSS, const TestingRect& filterRect = noCropRect)
     {
         return std::make_shared<TestingImageFilter>();
     }

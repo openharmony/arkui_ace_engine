@@ -58,8 +58,16 @@ template("ace_core_source_set") {
     platform = invoker.platform
     include_dirs = []
 
-    if (enable_split_mode && defined(vendor_configs.ace_advanced_split_mode)) {
-      include_dirs += vendor_configs.ace_advanced_split_mode_dirs
+    if (ace_engine_feature_enable_split_mode &&
+        defined(vendor_configs.ace_engine_advanced_split_mode_dirs)) {
+      include_dirs += vendor_configs.ace_engine_advanced_split_mode_dirs
+    }
+
+    if (ace_engine_feature_enable_nav_split_mode &&
+        defined(
+            vendor_configs.ace_engine_advanced_navigation_split_mode_dirs)) {
+      include_dirs +=
+          vendor_configs.ace_engine_advanced_navigation_split_mode_dirs
     }
 
     # add common source file needed by all product platform here
@@ -529,7 +537,11 @@ template("ace_core_source_set") {
           "$ace_root/frameworks/core/components/form:ace_core_components_form_$platform",
           "$ace_root/frameworks/core/components_ng/pattern/form:ace_core_components_form_pattern_ng_$platform",
         ]
-        external_deps += [ "form_fwk:form_manager" ]
+        external_deps += [
+          "ability_base:base",
+          "ability_base:want",
+          "form_fwk:form_manager",
+        ]
       }
     }
 
@@ -802,7 +814,6 @@ template("ace_core_ng_source_set") {
       # v1 deps
       "$root_out_dir/arkui/framework/core/components/theme/theme_constants_default.cpp",
       "$root_out_dir/arkui/framework/core/components/theme/theme_constants_tv.cpp",
-      "components/checkable/checkable_theme.cpp",
       "components/common/painter/rosen_svg_painter.cpp",
       "components/custom_paint/render_custom_paint_creator.cpp",
       "components/custom_paint/render_offscreen_canvas_creator.cpp",
@@ -957,6 +968,7 @@ template("ace_core_ng_source_set") {
 
         external_deps += [
           "ability_runtime:abilitykit_native",
+          "ability_runtime:app_context",
           "ability_runtime:app_manager",
           "c_utils:utils",
           "init:libbegetutil",

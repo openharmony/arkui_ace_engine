@@ -37,6 +37,7 @@
       OHOS_ACE_*;
       GetArkUINodeAPI;
       GetArkUIAnyFullNodeAPI;
+      GetCJUIFullNodeAPI;
 
       OHOS::Ace::AceApplicationInfo::*;
       OHOS::Ace::AceScopedTrace::*;
@@ -79,6 +80,7 @@
       OHOS::Ace::ResourceWrapper::*;
       OHOS::Ace::NG::AppBarView::*;
       OHOS::Ace::Color::*;
+      OHOS::Ace::DynamicColor::*;
       OHOS::Ace::NG::UIObserverHandler::*;
       OHOS::Ace::UIDisplaySync::*;
       OHOS::Ace::Dimension::*;
@@ -237,6 +239,7 @@
       OHOS::Ace::NG::RichEditorAbstractSpanResult::*;
       OHOS::Ace::NG::RichEditorInsertValue::*;
       OHOS::Ace::NG::RichEditorDeleteValue::*;
+      OHOS::Ace::NG::RichEditorChangeValue::*;
       OHOS::Ace::TabController::*;
       OHOS::Ace::ParseFontFeatureSettings*;
       OHOS::Ace::StorageProxy::*;
@@ -244,6 +247,11 @@
       OHOS::Ace::AceScoringLog::*;
       "OHOS::Ace::NG::CustomNode::FlushReload()";
       "OHOS::Ace::CanvasModel::GetInstance()";
+
+      OHOS::Ace::NG::InspectorFilter::*;
+      OHOS::Ace::NG::ServiceCollaborationMenuAceHelper::*;
+      OHOS::Ace::NG::ServiceCollaborationAceCallback::*;
+      OHOS::Ace::DumpLog::*;
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
       virtual?thunk?to?OHOS::Ace::Frontend::MaybeRelease*;
@@ -370,7 +378,6 @@
       vtable?for?OHOS::Ace::NG::MovingPhotoLayoutProperty;
       vtable?for?OHOS::Ace::NG::MovingPhotoNode;
       vtable?for?OHOS::Ace::NG::TouchEventActuator;
-      vtable?for?OHOS::Ace::NG::SwiperModelNG;
 
       VTT?for?OHOS::Ace::NG::AccessibilityProperty;
       VTT?for?OHOS::Ace::NG::BoxLayoutAlgorithm;
@@ -379,13 +386,6 @@
       VTT?for?OHOS::Ace::NG::LayoutProperty;
       VTT?for?OHOS::Ace::NG::LongPressRecognizer;
       VTT?for?OHOS::Ace::NG::TouchEventActuator;
-
-      OHOS::Ace::LinearColor::TRANSPARENT;
-
-      "OHOS::Ace::CardScope::CurrentId()";
-      "OHOS::Ace::NG::Gradient::AddColor(OHOS::Ace::NG::GradientColor const&)";
-      "OHOS::Ace::Framework::JsConverter::ConvertNapiValueToJsVal(napi_value__*)";
-      "OHOS::Ace::Framework::JsiObject::JsiObject(panda::CopyableGlobal<panda::ObjectRef> const&)";
     };
   local:
     *;

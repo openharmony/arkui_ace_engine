@@ -55,7 +55,7 @@ void Cross3(float out[3], const float a[3], const float b[3])
 // Returns false if the matrix cannot be normalized.
 bool Normalize(Matrix4& m)
 {
-    if (NearZero(m.Get(3, 3))) {
+    if (NearZero(m.Get(3, 3), epsilon)) {
         return false;
     }
     float scale = 1.0f / m.Get(3, 3);
@@ -84,7 +84,7 @@ Matrix4 BuildTranslationMatrix(const DecomposedTransform& decomp)
     float dx = decomp.translate[0];
     float dy = decomp.translate[1];
     float dz = decomp.translate[2];
-    if (NearZero(dx) && NearZero(dy) && NearZero(dz)) {
+    if (NearZero(dx, epsilon) && NearZero(dy, epsilon) && NearZero(dz, epsilon)) {
         return matrix;
     }
 
@@ -214,7 +214,7 @@ RotateOperation RotateOperation::Blend(const RotateOperation& to, const RotateOp
     ret.dy = to.dy;
     ret.dz = to.dz;
     // rotate vector is (0,0,0) is error
-    if (NearZero(ret.dx) && NearZero(ret.dy) && NearZero(ret.dz)) {
+    if (NearZero(ret.dx, epsilon) && NearZero(ret.dy, epsilon) && NearZero(ret.dz, epsilon)) {
         ret.dx = from.dx;
         ret.dy = from.dy;
         ret.dz = from.dz;
@@ -493,8 +493,8 @@ bool TransformUtil::DecomposeTransform(DecomposedTransform& out, const Matrix4& 
         perspectiveMatrix.Set(3, i, 0.0);
     }
     perspectiveMatrix.Set(3, 3, 1.0);
-
-    if (!NearZero(matrix.Get(3, 0)) || !NearZero(matrix.Get(3, 1)) || !NearZero(matrix.Get(3, 2))) {
+    if (!NearZero(matrix.Get(3, 0), epsilon) || !NearZero(matrix.Get(3, 1), epsilon) ||
+        !NearZero(matrix.Get(3, 2), epsilon)) {
         double rhs[4] = { matrix.Get(3, 0), matrix.Get(3, 1), matrix.Get(3, 2), matrix.Get(3, 3) };
 
         Matrix4 inversePerspectiveMatrix = Matrix4::Invert(perspectiveMatrix);
@@ -528,7 +528,7 @@ bool TransformUtil::DecomposeTransform(DecomposedTransform& out, const Matrix4& 
 
     // Compute X scale factor and normalize first column.
     out.scale[0] = Length3(column[0]);
-    if (!NearZero(out.scale[0])) {
+    if (!NearZero(out.scale[0], epsilon)) {
         column[0][0] /= out.scale[0];
         column[0][1] /= out.scale[0];
         column[0][2] /= out.scale[0];
@@ -540,7 +540,7 @@ bool TransformUtil::DecomposeTransform(DecomposedTransform& out, const Matrix4& 
 
     // Now, compute Y scale and normalize 2nd column.
     out.scale[1] = Length3(column[1]);
-    if (!NearZero(out.scale[1])) {
+    if (!NearZero(out.scale[1], epsilon)) {
         column[1][0] /= out.scale[1];
         column[1][1] /= out.scale[1];
         column[1][2] /= out.scale[1];
@@ -555,7 +555,7 @@ bool TransformUtil::DecomposeTransform(DecomposedTransform& out, const Matrix4& 
 
     // Next, get Z scale and normalize the 3rd column.
     out.scale[2] = Length3(column[2]);
-    if (!NearZero(out.scale[2])) {
+    if (!NearZero(out.scale[2], epsilon)) {
         column[2][0] /= out.scale[2];
         column[2][1] /= out.scale[2];
         column[2][2] /= out.scale[2];

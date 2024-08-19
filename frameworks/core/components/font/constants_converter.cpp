@@ -27,17 +27,13 @@
 #endif
 
 #include "base/i18n/localization.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components_ng/pattern/symbol/symbol_effect_options.h"
-#include "core/components_ng/pattern/symbol/constants.h"
 
 namespace OHOS::Ace::Constants {
 namespace {
 const std::string FONTWEIGHT = "wght";
 constexpr float DEFAULT_MULTIPLE = 100.0f;
-constexpr uint32_t SCALE_EFFECT = 2;
-constexpr uint32_t NONE_EFFECT = 0;
+constexpr int32_t SCALE_EFFECT = 2;
+constexpr int32_t NONE_EFFECT = 0;
 constexpr float ORIGINAL_LINE_HEIGHT_SCALE = 1.0f;
 } // namespace
 
@@ -80,7 +76,7 @@ txt::FontWeight ConvertTxtFontWeight(FontWeight fontWeight)
             convertValue = txt::FontWeight::w900;
             break;
         default:
-            LOGW("FontWeight setting error! Now using default FontWeight.");
+            TAG_LOGW(AceLogTag::ACE_FONT, "FontWeight set error! use default FontWeight.");
             convertValue = txt::FontWeight::w400;
             break;
     }
@@ -125,7 +121,7 @@ Rosen::FontWeight ConvertTxtFontWeight(FontWeight fontWeight)
             convertValue = Rosen::FontWeight::W900;
             break;
         default:
-            LOGW("FontWeight setting error! Now using default FontWeight.");
+            TAG_LOGW(AceLogTag::ACE_FONT, "FontWeight setting error! Now using default FontWeight.");
             convertValue = Rosen::FontWeight::W400;
             break;
     }
@@ -145,7 +141,7 @@ txt::FontStyle ConvertTxtFontStyle(FontStyle fontStyle)
             convertValue = txt::FontStyle::italic;
             break;
         default:
-            LOGW("FontStyle setting error! Now using default FontStyle");
+            TAG_LOGW(AceLogTag::ACE_FONT, "FontStyle set error! use default FontStyle");
             convertValue = txt::FontStyle::normal;
             break;
     }
@@ -163,7 +159,7 @@ Rosen::FontStyle ConvertTxtFontStyle(FontStyle fontStyle)
             convertValue = Rosen::FontStyle::ITALIC;
             break;
         default:
-            LOGW("FontStyle setting error! Now using default FontStyle");
+            TAG_LOGW(AceLogTag::ACE_FONT, "FontStyle setting error! Now using default FontStyle");
             convertValue = Rosen::FontStyle::NORMAL;
             break;
     }
@@ -231,7 +227,7 @@ txt::TextAlign ConvertTxtTextAlign(TextAlign textAlign)
             convertValue = txt::TextAlign::end;
             break;
         default:
-            LOGW("TextAlign setting error! Now using default TextAlign");
+            TAG_LOGW(AceLogTag::ACE_FONT, "TextAlign set error! use default TextAlign");
             convertValue = txt::TextAlign::start;
             break;
     }
@@ -261,7 +257,7 @@ Rosen::TextAlign ConvertTxtTextAlign(TextAlign textAlign)
             convertValue = Rosen::TextAlign::END;
             break;
         default:
-            LOGW("TextAlign setting error! Now using default TextAlign");
+            TAG_LOGW(AceLogTag::ACE_FONT, "TextAlign setting error! Now using default TextAlign");
             convertValue = Rosen::TextAlign::START;
             break;
     }
@@ -296,7 +292,7 @@ Rosen::TextDirection ConvertTxtTextDirection(TextDirection textDirection)
 #endif
             break;
         default:
-            LOGW("TextDirection setting error! Now using default TextDirection");
+            TAG_LOGW(AceLogTag::ACE_FONT, "TextDirection setting error! Now using default TextDirection");
 #ifndef USE_GRAPHIC_TEXT_GINE
             convertValue = txt::TextDirection::ltr;
 #else
@@ -330,7 +326,7 @@ txt::TextDecoration ConvertTxtTextDecoration(TextDecoration textDecoration)
             convertValue = txt::TextDecoration::kLineThrough;
             break;
         default:
-            LOGW("TextDecoration setting error! Now using default TextDecoration");
+            TAG_LOGW(AceLogTag::ACE_FONT, "TextDecoration set error! use default TextDecoration");
             break;
     }
     return convertValue;
@@ -353,7 +349,7 @@ Rosen::TextDecoration ConvertTxtTextDecoration(TextDecoration textDecoration)
             convertValue = Rosen::TextDecoration::LINE_THROUGH;
             break;
         default:
-            LOGW("TextDecoration setting error! Now using default TextDecoration");
+            TAG_LOGW(AceLogTag::ACE_FONT, "TextDecoration setting error! Now using default TextDecoration");
             break;
     }
     return convertValue;
@@ -380,7 +376,7 @@ txt::TextDecorationStyle ConvertTxtTextDecorationStyle(TextDecorationStyle textD
             convertValue = txt::TextDecorationStyle::kWavy;
             break;
         default:
-            LOGW("TextDecorationStyle setting error! Now using default TextDecorationStyle");
+            TAG_LOGW(AceLogTag::ACE_FONT, "TextDecorationStyle set error! use default TextDecorationStyle");
             break;
     }
     return convertValue;
@@ -406,7 +402,7 @@ Rosen::TextDecorationStyle ConvertTxtTextDecorationStyle(TextDecorationStyle tex
             convertValue = Rosen::TextDecorationStyle::WAVY;
             break;
         default:
-            LOGW("TextDecorationStyle setting error! Now using default TextDecorationStyle");
+            TAG_LOGW(AceLogTag::ACE_FONT, "TextDecorationStyle setting error! Now using default TextDecorationStyle");
             break;
     }
     return convertValue;
@@ -651,31 +647,25 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     }
     txtStyle.fontVariations.SetAxisValue(FONTWEIGHT, fontWeightValue);
     // Font size must be px when transferring to Rosen::TextStyle
-    if (pipelineContext) {
-        txtStyle.fontSize = pipelineContext->NormalizeToPx(textStyle.GetFontSize());
-        if (textStyle.IsAllowScale() && textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
-            float fontScale = std::clamp(
-                pipelineContext->GetFontScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
-            txtStyle.fontSize =
-                pipelineContext->NormalizeToPx(textStyle.GetFontSize() * fontScale);
-        }
-    } else {
-        txtStyle.fontSize = textStyle.GetFontSize().Value();
-    }
+    txtStyle.fontSize = textStyle.GetFontSize().ConvertToPxDistribute(
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     txtStyle.fontStyle = ConvertTxtFontStyle(textStyle.GetFontStyle());
 
     if (textStyle.GetWordSpacing().Unit() == DimensionUnit::PERCENT) {
         txtStyle.wordSpacing = textStyle.GetWordSpacing().Value() * txtStyle.fontSize;
     } else {
         if (pipelineContext) {
-            txtStyle.wordSpacing = pipelineContext->NormalizeToPx(textStyle.GetWordSpacing());
+            txtStyle.wordSpacing = textStyle.GetWordSpacing().ConvertToPxDistribute(
+                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
         } else {
             txtStyle.wordSpacing = textStyle.GetWordSpacing().Value();
         }
     }
     if (pipelineContext) {
-        txtStyle.letterSpacing = pipelineContext->NormalizeToPx(textStyle.GetLetterSpacing());
-        txtStyle.baseLineShift = -pipelineContext->NormalizeToPx(textStyle.GetBaselineOffset());
+        txtStyle.letterSpacing = textStyle.GetLetterSpacing().ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+        txtStyle.baseLineShift = -textStyle.GetBaselineOffset().ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     }
 
     txtStyle.fontFamilies = textStyle.GetFontFamilies();
@@ -707,12 +697,8 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
         double fontSize = txtStyle.fontSize;
         double lineHeight = textStyle.GetLineHeight().Value();
         if (pipelineContext) {
-            if (textStyle.GetLineHeight().Unit() == DimensionUnit::FP) {
-                lineHeight = pipelineContext->NormalizeToPx(
-                    textStyle.GetLineHeight() * pipelineContext->GetFontScale());
-            } else {
-                lineHeight = pipelineContext->NormalizeToPx(textStyle.GetLineHeight());
-            }
+            lineHeight = textStyle.GetLineHeight().ConvertToPxDistribute(
+                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
         }
         lineHeightOnly = textStyle.HasHeightOverride();
         if (!NearEqual(lineHeight, fontSize) && (lineHeight > 0.0) && (!NearZero(fontSize))) {
@@ -733,7 +719,8 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
         double fontSize = txtStyle.fontSize;
         double lineSpacing = textStyle.GetLineSpacing().Value();
         if (pipelineContext) {
-            lineSpacing = pipelineContext->NormalizeToPx(textStyle.GetLineSpacing());
+            lineSpacing = textStyle.GetLineSpacing().ConvertToPxDistribute(
+                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
         }
         lineSpacingOnly = true;
         if (!NearEqual(lineSpacing, fontSize) && (lineSpacing > 0.0) && (!NearZero(fontSize))) {
@@ -774,10 +761,11 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     }
     auto radius = textBackgroundStyle->backgroundRadius;
     CHECK_NULL_VOID(radius.has_value());
-    auto radiusConverter = [context = pipelineContext](const std::optional<Dimension>& radius) -> double {
+    auto radiusConverter = [context = pipelineContext, textStyle](const std::optional<Dimension>& radius) -> double {
         CHECK_NULL_RETURN(radius.has_value(), 0);
         CHECK_NULL_RETURN(context, radius->Value());
-        return context->NormalizeToPx(radius.value());
+        return radius.value().ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     };
     txtStyle.backgroundRect.leftTopRadius = radiusConverter(radius->radiusTopLeft);
     txtStyle.backgroundRect.rightTopRadius = radiusConverter(radius->radiusTopRight);
@@ -874,7 +862,7 @@ txt::PlaceholderAlignment ConvertPlaceholderAlignment(PlaceholderAlignment textD
             convertValue = txt::PlaceholderAlignment::kMiddle;
             break;
         default:
-            LOGW("PlaceholderAlignment setting error! Now using default PlaceholderAlignment");
+            TAG_LOGW(AceLogTag::ACE_FONT, "PlaceholderAlignment set error! use default PlaceholderAlignment");
             break;
     }
     return convertValue;
@@ -903,7 +891,7 @@ Rosen::PlaceholderVerticalAlignment ConvertPlaceholderAlignment(PlaceholderAlign
             convertValue = Rosen::PlaceholderVerticalAlignment::CENTER_OF_ROW_BOX;
             break;
         default:
-            LOGW("PlaceholderAlignment setting error! Now using default PlaceholderAlignment");
+            TAG_LOGW(AceLogTag::ACE_FONT, "PlaceholderAlignment setting error! Now using default PlaceholderAlignment");
             break;
     }
     return convertValue;

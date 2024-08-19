@@ -20,6 +20,6 @@ uicast_configs = {
 
 if (defined(global_parts_info) &&
     defined(global_parts_info.castplus_cast_engine)) {
-  uicast_configs.uicast_defines = [ "UICAST_COMPONENT_SUPPORTED" ]
-  uicast_configs.uicast_enable = true
+  uicast_configs.uicast_defines = []
+  uicast_configs.uicast_enable = false
 }

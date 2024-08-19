@@ -30,8 +30,10 @@ public:
 private:
     OffsetF GetSubMenuPosition(const RefPtr<FrameNode>& parentMenuItem, bool stacked);
     float VerticalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize);
-    float HorizontalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize);
-    OffsetF MenuLayoutAvoidAlgorithm(const RefPtr<FrameNode>& parentMenuItem, const SizeF& size, bool stacked);
+    float HorizontalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize,
+        LayoutWrapper* layoutWrapper = nullptr);
+    OffsetF MenuLayoutAvoidAlgorithm(const RefPtr<FrameNode>& parentMenuItem, const SizeF& size, bool stacked,
+        LayoutWrapper* layoutWrapper = nullptr);
     float VerticalLayoutSubMenuHalfScreen(const SizeF& size, float position, const SizeF& menuItemSize);
     OffsetF GetSubMenuLayoutOffset(LayoutWrapper* layoutWrapper, const RefPtr<FrameNode>& parentMenuItem,
         const SizeF& size, bool stacked);
@@ -44,7 +46,6 @@ private:
     float paddingEnd_ = 0.0f;
     float paddingTop_ = 0.0f;
     float paddingBottom_ = 0.0f;
-    float optionPadding_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(SubMenuLayoutAlgorithm);
 };

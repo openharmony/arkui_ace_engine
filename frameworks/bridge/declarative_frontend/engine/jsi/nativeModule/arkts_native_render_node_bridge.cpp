@@ -34,12 +34,148 @@
 namespace OHOS::Ace::NG {
 namespace {
 const uint32_t DEFAULT_COLOR = 0xFF000000;
+
+ArkUINativeModuleValue SetRectShape(ArkUIRuntimeCallInfo* runtimeCallInfo, bool isClip)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    auto leftValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 1, 0.0f);
+    auto topValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 2, 0.0f);
+    auto rightValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 3, 0.0f);
+    auto bottomValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 4, 0.0f);
+    if (isClip) {
+        GetArkUINodeModifiers()->getRenderNodeModifier()->setRectClip(
+            nativeNode, leftValue, topValue, rightValue - leftValue, bottomValue - topValue);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto fillColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 5, DEFAULT_COLOR);
+    auto strokeColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 6, DEFAULT_COLOR);
+    auto strokeWidthValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 7, 0.0f);
+
+    GetArkUINodeModifiers()->getRenderNodeModifier()->setRectMask(nativeNode, leftValue, topValue,
+        rightValue - leftValue, bottomValue - topValue, fillColorValue, strokeColorValue, strokeWidthValue);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SetCircleShape(ArkUIRuntimeCallInfo* runtimeCallInfo, bool isClip)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    auto centerXValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 1, 0.0f);
+    auto centerYValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 2, 0.0f);
+    auto radiusValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 3, 0.0f);
+    if (isClip) {
+        GetArkUINodeModifiers()->getRenderNodeModifier()->setCircleClip(
+            nativeNode, centerXValue, centerYValue, radiusValue);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto fillColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 4, DEFAULT_COLOR);
+    auto strokeColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 5, DEFAULT_COLOR);
+    auto strokeWidthValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 6, 0.0f);
+
+    GetArkUINodeModifiers()->getRenderNodeModifier()->setCircleMask(
+        nativeNode, centerXValue, centerYValue, radiusValue, fillColorValue, strokeColorValue, strokeWidthValue);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SetRoundRectShape(ArkUIRuntimeCallInfo* runtimeCallInfo, bool isClip)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    auto topLeftXValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 1, 0.0f);
+    auto topLeftYValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 2, 0.0f);
+
+    auto topRightXValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 3, 0.0f);
+    auto topRightYValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 4, 0.0f);
+
+    auto bottomLeftXValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 5, 0.0f);
+    auto bottomLeftYValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 6, 0.0f);
+
+    auto bottomRightXValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 7, 0.0f);
+    auto bottomRightYValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 8, 0.0f);
+
+    auto leftValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 9, 0.0f);
+    auto topValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 10, 0.0f);
+    auto rightValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 11, 0.0f);
+    auto bottomValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 12, 0.0f);
+
+    ArkUI_Float32 roundRect[] = { topLeftXValue, topLeftYValue, topRightXValue, topRightYValue, bottomLeftXValue,
+        bottomLeftYValue, bottomRightXValue, bottomRightYValue, leftValue, topValue, rightValue - leftValue,
+        bottomValue - topValue };
+
+    if (isClip) {
+        GetArkUINodeModifiers()->getRenderNodeModifier()->setRoundRectClip(nativeNode, roundRect, sizeof(roundRect));
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    auto fillColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 13, DEFAULT_COLOR);
+    auto strokeColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 14, DEFAULT_COLOR);
+    auto strokeWidthValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 15, 0.0f);
+
+    GetArkUINodeModifiers()->getRenderNodeModifier()->setRoundRectMask(
+        nativeNode, roundRect, sizeof(roundRect), fillColorValue, strokeColorValue, strokeWidthValue);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SetOvalShape(ArkUIRuntimeCallInfo* runtimeCallInfo, bool isClip)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    auto leftValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 1, 0.0f);
+    auto topValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 2, 0.0f);
+    auto rightValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 3, 0.0f);
+    auto bottomValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 4, 0.0f);
+    if (isClip) {
+        GetArkUINodeModifiers()->getRenderNodeModifier()->setOvalClip(
+            nativeNode, leftValue, topValue, rightValue - leftValue, bottomValue - topValue);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto fillColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 5, DEFAULT_COLOR);
+    auto strokeColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 6, DEFAULT_COLOR);
+    auto strokeWidthValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 7, 0.0f);
+
+    GetArkUINodeModifiers()->getRenderNodeModifier()->setOvalMask(nativeNode, leftValue, topValue,
+        rightValue - leftValue, bottomValue - topValue, fillColorValue, strokeColorValue, strokeWidthValue);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SetCommandPathShape(ArkUIRuntimeCallInfo* runtimeCallInfo, bool isClip)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    Local<JSValueRef> path = runtimeCallInfo->GetCallArgRef(1);
+    std::string pathValue;
+    if (path->IsString(vm)) {
+        pathValue = path->ToString(vm)->ToString(vm);
+    }
+
+    if (isClip) {
+        GetArkUINodeModifiers()->getRenderNodeModifier()->setCommandPathClip(nativeNode, pathValue.c_str());
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto fillColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 2, DEFAULT_COLOR);
+    auto strokeColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 3, DEFAULT_COLOR);
+    auto strokeWidthValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 4, 0.0f);
+
+    GetArkUINodeModifiers()->getRenderNodeModifier()->setCommandPathMask(
+        nativeNode, pathValue.c_str(), fillColorValue, strokeColorValue, strokeWidthValue);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace
 
 ArkUINativeModuleValue RenderNodeBridge::CreateRenderNode(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode = NG::FrameNode::GetOrCreateFrameNode(
         V2::RENDER_NODE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NG::RenderNodePattern>(); });
@@ -116,7 +252,6 @@ void RenderNodeBridge::SetOnDraw(const RefPtr<FrameNode>& frameNode, ArkUIRuntim
 ArkUINativeModuleValue RenderNodeBridge::AppendChild(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
@@ -128,7 +263,6 @@ ArkUINativeModuleValue RenderNodeBridge::AppendChild(ArkUIRuntimeCallInfo* runti
 ArkUINativeModuleValue RenderNodeBridge::InsertChildAfter(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
@@ -146,7 +280,6 @@ ArkUINativeModuleValue RenderNodeBridge::InsertChildAfter(ArkUIRuntimeCallInfo* 
 ArkUINativeModuleValue RenderNodeBridge::RemoveChild(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
@@ -158,7 +291,6 @@ ArkUINativeModuleValue RenderNodeBridge::RemoveChild(ArkUIRuntimeCallInfo* runti
 ArkUINativeModuleValue RenderNodeBridge::ClearChildren(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getRenderNodeModifier()->clearChildren(nativeNode);
@@ -168,7 +300,6 @@ ArkUINativeModuleValue RenderNodeBridge::ClearChildren(ArkUIRuntimeCallInfo* run
 ArkUINativeModuleValue RenderNodeBridge::SetClipToFrame(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
@@ -183,7 +314,6 @@ ArkUINativeModuleValue RenderNodeBridge::SetClipToFrame(ArkUIRuntimeCallInfo* ru
 ArkUINativeModuleValue RenderNodeBridge::SetRotation(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
@@ -213,7 +343,6 @@ ArkUINativeModuleValue RenderNodeBridge::SetRotation(ArkUIRuntimeCallInfo* runti
 ArkUINativeModuleValue RenderNodeBridge::SetShadowColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> color = runtimeCallInfo->GetCallArgRef(1);
@@ -228,7 +357,6 @@ ArkUINativeModuleValue RenderNodeBridge::SetShadowColor(ArkUIRuntimeCallInfo* ru
 ArkUINativeModuleValue RenderNodeBridge::SetShadowOffset(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
@@ -249,10 +377,26 @@ ArkUINativeModuleValue RenderNodeBridge::SetShadowOffset(ArkUIRuntimeCallInfo* r
     GetArkUINodeModifiers()->getRenderNodeModifier()->setShadowOffset(nativeNode, offsetX, offsetY, unit);
     return panda::JSValueRef::Undefined(vm);
 }
-ArkUINativeModuleValue RenderNodeBridge::SetShadowAlpha(ArkUIRuntimeCallInfo* runtimeCallInfo)
+ArkUINativeModuleValue RenderNodeBridge::SetLabel(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> label = runtimeCallInfo->GetCallArgRef(1);
+    std::string labelValue;
+    if (label->IsString(vm)) {
+        labelValue = label->ToString(vm)->ToString(vm);
+    } else {
+        labelValue = "";
+        LOGW("The label of the node should be a string!");
+    }
+    GetArkUINodeModifiers()->getRenderNodeModifier()->setLabel(nativeNode, labelValue.c_str());
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue RenderNodeBridge::SetShadowAlpha(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> alpha = runtimeCallInfo->GetCallArgRef(1);
@@ -266,7 +410,6 @@ ArkUINativeModuleValue RenderNodeBridge::SetShadowAlpha(ArkUIRuntimeCallInfo* ru
 ArkUINativeModuleValue RenderNodeBridge::SetShadowElevation(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> elevation = runtimeCallInfo->GetCallArgRef(1);
@@ -280,7 +423,6 @@ ArkUINativeModuleValue RenderNodeBridge::SetShadowElevation(ArkUIRuntimeCallInfo
 ArkUINativeModuleValue RenderNodeBridge::SetShadowRadius(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> radius = runtimeCallInfo->GetCallArgRef(1);
@@ -296,7 +438,6 @@ ArkUINativeModuleValue RenderNodeBridge::SetShadowRadius(ArkUIRuntimeCallInfo* r
 ArkUINativeModuleValue RenderNodeBridge::SetScale(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
@@ -319,7 +460,6 @@ ArkUINativeModuleValue RenderNodeBridge::SetScale(ArkUIRuntimeCallInfo* runtimeC
 ArkUINativeModuleValue RenderNodeBridge::SetBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> color = runtimeCallInfo->GetCallArgRef(1);
@@ -335,7 +475,6 @@ ArkUINativeModuleValue RenderNodeBridge::SetBackgroundColor(ArkUIRuntimeCallInfo
 ArkUINativeModuleValue RenderNodeBridge::SetPivot(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
@@ -358,7 +497,6 @@ ArkUINativeModuleValue RenderNodeBridge::SetPivot(ArkUIRuntimeCallInfo* runtimeC
 ArkUINativeModuleValue RenderNodeBridge::SetFrame(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
@@ -394,7 +532,6 @@ ArkUINativeModuleValue RenderNodeBridge::SetFrame(ArkUIRuntimeCallInfo* runtimeC
 ArkUINativeModuleValue RenderNodeBridge::SetSize(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
@@ -423,7 +560,6 @@ ArkUINativeModuleValue RenderNodeBridge::SetSize(ArkUIRuntimeCallInfo* runtimeCa
 ArkUINativeModuleValue RenderNodeBridge::SetPosition(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
@@ -452,7 +588,6 @@ ArkUINativeModuleValue RenderNodeBridge::SetPosition(ArkUIRuntimeCallInfo* runti
 ArkUINativeModuleValue RenderNodeBridge::SetOpacity(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> opacity = runtimeCallInfo->GetCallArgRef(1);
@@ -468,7 +603,6 @@ ArkUINativeModuleValue RenderNodeBridge::SetOpacity(ArkUIRuntimeCallInfo* runtim
 ArkUINativeModuleValue RenderNodeBridge::SetTranslate(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
@@ -491,7 +625,6 @@ ArkUINativeModuleValue RenderNodeBridge::SetTranslate(ArkUIRuntimeCallInfo* runt
 ArkUINativeModuleValue RenderNodeBridge::SetBorderStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
@@ -516,7 +649,6 @@ ArkUINativeModuleValue RenderNodeBridge::SetBorderStyle(ArkUIRuntimeCallInfo* ru
 ArkUINativeModuleValue RenderNodeBridge::SetBorderWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
@@ -534,7 +666,6 @@ ArkUINativeModuleValue RenderNodeBridge::SetBorderWidth(ArkUIRuntimeCallInfo* ru
 ArkUINativeModuleValue RenderNodeBridge::SetBorderColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
@@ -551,7 +682,6 @@ ArkUINativeModuleValue RenderNodeBridge::SetBorderColor(ArkUIRuntimeCallInfo* ru
 ArkUINativeModuleValue RenderNodeBridge::SetBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
@@ -568,127 +698,57 @@ ArkUINativeModuleValue RenderNodeBridge::SetBorderRadius(ArkUIRuntimeCallInfo* r
 
 ArkUINativeModuleValue RenderNodeBridge::SetRectMask(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-
-    auto leftValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 1, 0.0f);
-    auto topValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 2, 0.0f);
-    auto rightValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 3, 0.0f);
-    auto bottomValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 4, 0.0f);
-    auto fillColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 5, DEFAULT_COLOR);
-    auto strokeColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 6, DEFAULT_COLOR);
-    auto strokeWidthValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 7, 0.0f);
-
-    GetArkUINodeModifiers()->getRenderNodeModifier()->setRectMask(nativeNode, leftValue, topValue,
-        rightValue - leftValue, bottomValue - topValue, fillColorValue, strokeColorValue, strokeWidthValue);
-    return panda::JSValueRef::Undefined(vm);
+    return SetRectShape(runtimeCallInfo, false);
 }
 
 ArkUINativeModuleValue RenderNodeBridge::SetCircleMask(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-
-    auto centerXValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 1, 0.0f);
-    auto centerYValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 2, 0.0f);
-    auto radiusValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 3, 0.0f);
-    auto fillColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 4, DEFAULT_COLOR);
-    auto strokeColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 5, DEFAULT_COLOR);
-    auto strokeWidthValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 6, 0.0f);
-
-    GetArkUINodeModifiers()->getRenderNodeModifier()->setCircleMask(
-        nativeNode, centerXValue, centerYValue, radiusValue, fillColorValue, strokeColorValue, strokeWidthValue);
-    return panda::JSValueRef::Undefined(vm);
+    return SetCircleShape(runtimeCallInfo, false);
 }
 
 ArkUINativeModuleValue RenderNodeBridge::SetRoundRectMask(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-
-    auto topLeftXValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 1, 0.0f);
-    auto topLeftYValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 2, 0.0f);
-
-    auto topRightXValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 3, 0.0f);
-    auto topRightYValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 4, 0.0f);
-
-    auto bottomLeftXValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 5, 0.0f);
-    auto bottomLeftYValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 6, 0.0f);
-
-    auto bottomRightXValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 7, 0.0f);
-    auto bottomRightYValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 8, 0.0f);
-
-    auto leftValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 9, 0.0f);
-    auto topValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 10, 0.0f);
-    auto rightValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 11, 0.0f);
-    auto bottomValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 12, 0.0f);
-
-    auto fillColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 13, DEFAULT_COLOR);
-    auto strokeColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 14, DEFAULT_COLOR);
-    auto strokeWidthValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 15, 0.0f);
-
-    ArkUI_Float32 roundRect[] = { topLeftXValue, topLeftYValue, topRightXValue, topRightYValue, bottomLeftXValue,
-        bottomLeftYValue, bottomRightXValue, bottomRightYValue, leftValue, topValue, rightValue - leftValue,
-        bottomValue - topValue };
-
-    GetArkUINodeModifiers()->getRenderNodeModifier()->setRoundRectMask(
-        nativeNode, roundRect, sizeof(roundRect), fillColorValue, strokeColorValue, strokeWidthValue);
-    return panda::JSValueRef::Undefined(vm);
+    return SetRoundRectShape(runtimeCallInfo, false);
 }
 
 ArkUINativeModuleValue RenderNodeBridge::SetOvalMask(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-
-    auto leftValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 1, 0.0f);
-    auto topValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 2, 0.0f);
-    auto rightValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 3, 0.0f);
-    auto bottomValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 4, 0.0f);
-
-    auto fillColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 5, DEFAULT_COLOR);
-    auto strokeColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 6, DEFAULT_COLOR);
-    auto strokeWidthValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 7, 0.0f);
-
-    GetArkUINodeModifiers()->getRenderNodeModifier()->setOvalMask(nativeNode, leftValue, topValue,
-        rightValue - leftValue, bottomValue - topValue, fillColorValue, strokeColorValue, strokeWidthValue);
-    return panda::JSValueRef::Undefined(vm);
+    return SetOvalShape(runtimeCallInfo, false);
 }
 
 ArkUINativeModuleValue RenderNodeBridge::SetCommandPathMask(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    return SetCommandPathShape(runtimeCallInfo, false);
+}
 
-    Local<JSValueRef> path = runtimeCallInfo->GetCallArgRef(1);
-    std::string pathValue;
-    if (path->IsString(vm)) {
-        pathValue = path->ToString(vm)->ToString();
-    }
+ArkUINativeModuleValue RenderNodeBridge::SetRectClip(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    return SetRectShape(runtimeCallInfo, true);
+}
 
-    auto fillColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 2, DEFAULT_COLOR);
-    auto strokeColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 3, DEFAULT_COLOR);
-    auto strokeWidthValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 4, 0.0f);
+ArkUINativeModuleValue RenderNodeBridge::SetCircleClip(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    return SetCircleShape(runtimeCallInfo, true);
+}
 
-    GetArkUINodeModifiers()->getRenderNodeModifier()->setCommandPathMask(
-        nativeNode, pathValue.c_str(), fillColorValue, strokeColorValue, strokeWidthValue);
-    return panda::JSValueRef::Undefined(vm);
+ArkUINativeModuleValue RenderNodeBridge::SetRoundRectClip(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    return SetRoundRectShape(runtimeCallInfo, true);
+}
+
+ArkUINativeModuleValue RenderNodeBridge::SetOvalClip(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    return SetOvalShape(runtimeCallInfo, true);
+}
+
+ArkUINativeModuleValue RenderNodeBridge::SetCommandPathClip(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    return SetCommandPathShape(runtimeCallInfo, true);
 }
 
 ArkUINativeModuleValue RenderNodeBridge::Invalidate(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getRenderNodeModifier()->invalidate(nativeNode);
@@ -698,7 +758,6 @@ ArkUINativeModuleValue RenderNodeBridge::Invalidate(ArkUIRuntimeCallInfo* runtim
 ArkUINativeModuleValue RenderNodeBridge::SetMarkNodeGroup(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 

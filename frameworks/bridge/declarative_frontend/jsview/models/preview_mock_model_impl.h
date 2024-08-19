@@ -19,10 +19,10 @@
 #include <functional>
 #include <string>
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_canvas_renderer.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
-#include "frameworks/core/components_ng/pattern/preview_mock/preview_mock_model.h"
+#include "bridge/declarative_frontend/jsview/canvas/js_canvas_renderer.h"
+#include "bridge/declarative_frontend/jsview/canvas/js_rendering_context.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/pattern/preview_mock/preview_mock_model.h"
 
 namespace OHOS::Ace::Framework {
 namespace {

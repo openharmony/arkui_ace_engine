@@ -19,9 +19,11 @@
 #include <optional>
 
 #include "base/utils/utils.h"
+#include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
+#include "core/components_ng/pattern/text/text_layout_adapter.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -50,7 +52,7 @@ std::optional<SelectHandleInfo> TextSelectOverlay::GetFirstHandleInfo()
     handleInfo.paintRect = textPattern->GetTextSelector().firstHandle;
     handleInfo.isShow = CheckAndAdjustHandle(handleInfo.paintRect);
 
-    auto localPaintRect = handleInfo.paintRect;
+    auto localPaintRect = textPattern->GetTextSelector().firstHandle;
     localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
     handleInfo.localPaintRect = localPaintRect;
     SetTransformPaintInfo(handleInfo, localPaintRect);
@@ -65,7 +67,7 @@ std::optional<SelectHandleInfo> TextSelectOverlay::GetSecondHandleInfo()
     handleInfo.paintRect = textPattern->GetTextSelector().secondHandle;
     handleInfo.isShow = CheckAndAdjustHandle(handleInfo.paintRect);
 
-    auto localPaintRect = handleInfo.paintRect;
+    auto localPaintRect = textPattern->GetTextSelector().secondHandle;
     localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
     handleInfo.localPaintRect = localPaintRect;
     SetTransformPaintInfo(handleInfo, localPaintRect);
@@ -92,15 +94,6 @@ RectF TextSelectOverlay::GetSecondHandleLocalPaintRect()
 
 bool TextSelectOverlay::CheckAndAdjustHandle(RectF& paintRect)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_RETURN(pipeline, false);
-    auto theme = pipeline->GetTheme<TextOverlayTheme>();
-    auto handleRadius = theme->GetHandleDiameter().ConvertToPx();
-    // If the handle is incomplete at the top, not show.
-    if (LessNotEqual(paintRect.Top() - handleRadius, 0.0f)) {
-        return false;
-    }
-
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_RETURN(textPattern, false);
     auto host = textPattern->GetHost();
@@ -112,13 +105,31 @@ bool TextSelectOverlay::CheckAndAdjustHandle(RectF& paintRect)
         clip = true;
     }
     if (!renderContext->GetClipEdge().value_or(clip)) {
-        return true;
+        if (handleLevelMode_ == HandleLevelMode::EMBED) {
+            return true;
+        }
+        auto contentRect = textPattern->GetTextContentRect();
+        auto localPaintRect = paintRect;
+        localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
+        localPaintRect.SetOffset(OffsetF(localPaintRect.GetX() + localPaintRect.Width() / 2.0f, localPaintRect.GetY()));
+        auto visibleContentRect = contentRect.CombineRectT(localPaintRect);
+        visibleContentRect.SetOffset(visibleContentRect.GetOffset() + textPattern->GetTextPaintOffset());
+        visibleContentRect = GetVisibleRect(host, visibleContentRect);
+        return CheckAndAdjustHandleWithContent(visibleContentRect, paintRect);
     }
     auto contentRect = textPattern->GetTextContentRect();
     RectF visibleContentRect(contentRect.GetOffset() + textPattern->GetTextPaintOffset(), contentRect.GetSize());
-    visibleContentRect = GetVisibleRect(host, visibleContentRect);
-    PointF bottomPoint = { paintRect.Left(), paintRect.Bottom() - BOX_EPSILON };
-    PointF topPoint = { paintRect.Left(), paintRect.Top() + BOX_EPSILON };
+    if (handleLevelMode_ == HandleLevelMode::OVERLAY) {
+        visibleContentRect = GetVisibleRect(host, visibleContentRect);
+    }
+    return CheckAndAdjustHandleWithContent(visibleContentRect, paintRect);
+}
+
+bool TextSelectOverlay::CheckAndAdjustHandleWithContent(const RectF& visibleContentRect, RectF& paintRect)
+{
+    auto paintLeft = paintRect.GetX() + paintRect.Width() / 2.0f;
+    PointF bottomPoint = { paintLeft, paintRect.Bottom() - BOX_EPSILON };
+    PointF topPoint = { paintLeft, paintRect.Top() + BOX_EPSILON };
     bool bottomInRegion = visibleContentRect.IsInRegion(bottomPoint);
     bool topInRegion = visibleContentRect.IsInRegion(topPoint);
     if (!bottomInRegion && topInRegion) {
@@ -170,9 +181,13 @@ void TextSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     CHECK_NULL_VOID(renderContext);
     auto contentRect = textPattern->GetTextContentRect();
     auto contentOffset = contentRect.GetOffset();
+    auto localHandleOffset = handleRect.GetOffset();
     if (IsOverlayMode()) {
         contentOffset = contentOffset + GetPaintOffsetWithoutTransform();
+        localHandleOffset -= GetPaintOffsetWithoutTransform();
     }
+    localHandleOffset.SetY(localHandleOffset.GetY() + handleRect.Height() / 2.0f);
+    textPattern->GetMagnifierController()->SetLocalOffset(localHandleOffset);
     auto handleOffset = handleRect.GetOffset();
     if (!selectTextUseTopHandle) {
         bool isUseHandleTop = (isFirst != IsHandleReverse());
@@ -205,16 +220,26 @@ void TextSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOffset, 
     CHECK_NULL_VOID(textPattern);
     auto currentHandleIndex = textPattern->GetHandleIndex(Offset(handleOffset.GetX(), handleOffset.GetY()));
     if (isFirstHandle) {
+        if (textPattern->GetTextSelector().baseOffset != currentHandleIndex) {
+            VibratorUtils::StartVibraFeedback("slide");
+        }
         textPattern->HandleSelectionChange(currentHandleIndex, textPattern->GetTextSelector().destinationOffset);
     } else {
+        if (textPattern->GetTextSelector().destinationOffset != currentHandleIndex) {
+            VibratorUtils::StartVibraFeedback("slide");
+        }
         textPattern->HandleSelectionChange(textPattern->GetTextSelector().baseOffset, currentHandleIndex);
     }
 }
 
 void TextSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
 {
+    BaseTextSelectOverlay::OnHandleMoveDone(rect, isFirst);
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
+    if (textPattern->GetMagnifierController()) {
+        textPattern->GetMagnifierController()->RemoveMagnifierFrameNode();
+    }
     textPattern->SetTextResponseType(TextResponseType::LONG_PRESS);
     auto textSelector = textPattern->GetTextSelector();
     textPattern->UpdateSelectionSpanType(textSelector.GetTextStart(), textSelector.GetTextEnd());
@@ -228,6 +253,7 @@ void TextSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
         ProcessOverlay({ .animation = true });
     }
     overlayManager->ShowOptionMenu();
+    overlayManager->SetHandleCircleIsShow(isFirst, true);
     auto host = textPattern->GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -295,11 +321,11 @@ void TextSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOverlay
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     menuInfo.showCopyAll = !textPattern->IsSelectAll();
+    menuInfo.showCopy = !textPattern->GetTextSelector().SelectNothing();
     if (dirtyFlag == DIRTY_COPY_ALL_ITEM) {
         return;
     }
     menuInfo.menuIsShow = IsShowMenu();
-    menuInfo.showCopy = !textPattern->GetTextSelector().SelectNothing();
     menuInfo.showCut = false;
     menuInfo.showPaste = false;
 }
@@ -309,8 +335,8 @@ void TextSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo
     BaseTextSelectOverlay::OnUpdateSelectOverlayInfo(overlayInfo, requestCode);
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
-    overlayInfo.menuOptionItems = textPattern->GetMenuOptionItems();
     textPattern->CopySelectionMenuParams(overlayInfo);
+    OnUpdateOnCreateMenuCallback(overlayInfo);
 }
 
 void TextSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType type)
@@ -333,7 +359,8 @@ void TextSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType t
 void TextSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
 {
     BaseTextSelectOverlay::OnCloseOverlay(menuType, reason, info);
-    if (reason == CloseReason::CLOSE_REASON_HOLD_BY_OTHER || reason == CloseReason::CLOSE_REASON_TOOL_BAR) {
+    if (reason == CloseReason::CLOSE_REASON_HOLD_BY_OTHER || reason == CloseReason::CLOSE_REASON_TOOL_BAR ||
+        reason == CloseReason::CLOSE_REASON_BACK_PRESSED) {
         auto textPattern = GetPattern<TextPattern>();
         CHECK_NULL_VOID(textPattern);
         textPattern->ResetSelection();
@@ -344,11 +371,9 @@ void TextSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchTyp
 {
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
-    if (IsTouchUp(sourceType, touchType)) {
+    if (IsTouchUp(sourceType, touchType) || IsMouseClickDown(sourceType, touchType)) {
         CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
         textPattern->ResetSelection();
-    } else if (IsMouseClickDown(sourceType, touchType)) {
-        CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
     }
 }
 
@@ -374,5 +399,19 @@ void TextSelectOverlay::OnHandleLevelModeChanged(HandleLevelMode mode)
         UpdateAllHandlesOffset();
     }
     BaseTextSelectOverlay::OnHandleLevelModeChanged(mode);
+}
+
+void TextSelectOverlay::OnHandleMoveStart(bool isFirst)
+{
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    manager->SetHandleCircleIsShow(isFirst, false);
+}
+
+void TextSelectOverlay::OnOverlayClick(const GestureEvent& event, bool isFirst)
+{
+    if (!IsSingleHandle()) {
+        ToggleMenu();
+    }
 }
 } // namespace OHOS::Ace::NG

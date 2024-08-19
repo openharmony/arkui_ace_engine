@@ -16,10 +16,6 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_animator_bridge.h"
 
 #include "base/log/event_report.h"
-#include "base/log/log.h"
-#include "core/common/container.h"
-#include "frameworks/bridge/common/utils/utils.h"
-#include "frameworks/bridge/js_frontend/js_ace_page.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -303,10 +299,12 @@ void AddFrameListener(const WeakPtr<JsiAnimatorBridge>& bridgeWeak, const RefPtr
             return;
         }
         auto jsTaskExecutor = delegate->GetAnimationJsTask();
-        jsTaskExecutor.PostTask([bridgeWeak, weakRuntime, value]() mutable {
-            LOGI("call animation onframe event");
-            CallAnimationFrameJs(bridgeWeak, weakRuntime.lock(), value);
-        }, "ArkUIAnimationFrame");
+        jsTaskExecutor.PostTask(
+            [bridgeWeak, weakRuntime, value]() mutable {
+                LOGI("call animation onframe event");
+                CallAnimationFrameJs(bridgeWeak, weakRuntime.lock(), value);
+            },
+            "ArkUIAnimationFrame");
     });
 }
 
@@ -589,12 +587,14 @@ void JsiAnimatorTaskCreate::AnimatorBridgeTaskFunc(const RefPtr<JsAcePage>& page
     auto jsTaskExecutor = delegate->GetAnimationJsTask();
     if (bridgeFree) {
         auto weakBridge = AceType::WeakClaim(AceType::RawPtr(bridgeFree));
-        jsTaskExecutor.PostTask([weakBridge]() mutable {
-            auto bridgeFree = weakBridge.Upgrade();
-            if (bridgeFree != nullptr) {
-                bridgeFree.Reset();
-            }
-        }, "ArkUIAnimatorBridgeRelease");
+        jsTaskExecutor.PostTask(
+            [weakBridge]() mutable {
+                auto bridgeFree = weakBridge.Upgrade();
+                if (bridgeFree != nullptr) {
+                    bridgeFree.Reset();
+                }
+            },
+            "ArkUIAnimatorBridgeRelease");
     }
     page->RemoveAnimatorBridge(bridgeId);
     bridge_->JsCreateAnimation(param_);

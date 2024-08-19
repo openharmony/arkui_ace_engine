@@ -68,5 +68,11 @@ const ArkUIShapeModifier* GetShapeModifier()
     static const ArkUIShapeModifier modifier = { SetShapeViewPort, ResetShapeViewPort, SetShapeMesh, ResetShapeMesh };
     return &modifier;
 }
+
+const CJUIShapeModifier* GetCJUIShapeModifier()
+{
+    static const CJUIShapeModifier modifier = { SetShapeViewPort, ResetShapeViewPort, SetShapeMesh, ResetShapeMesh };
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

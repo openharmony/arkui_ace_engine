@@ -155,6 +155,8 @@ public:
     void SetSliderValue(double value, int32_t mode);
 
 private:
+    void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnModifyDone() override;
     void CalcSliderValue();
     void CancelExceptionValue(float& min, float& max, float& step);
@@ -203,6 +205,7 @@ private:
     bool MoveStep(int32_t stepCount);
 
     bool IsSliderVisible();
+    void RegisterVisibleAreaChange();
     void OnWindowHide() override;
     void OnWindowShow() override;
     void StartAnimation();
@@ -230,6 +233,23 @@ private:
     RefPtr<FrameNode> BuildContentModifierNode();
     float GetValueInValidRange(const RefPtr<SliderPaintProperty>& paintProperty, float value, float min, float max);
     void UpdateToValidValue();
+    void AccessibilityVirtualNodeRenderTask();
+    void InitAccessibilityHoverEvent();
+    void HandleAccessibilityHoverEvent(bool state, const AccessibilityHoverInfo& info);
+    bool InitAccessibilityVirtualNode();
+    void ModifyAccessibilityVirtualNode();
+    void AddStepPointsAccessibilityVirtualNode();
+    void HandleTextOnAccessibilityFocusCallback();
+    void UpdateStepAccessibilityVirtualNode();
+    std::string GetPointAccessibilityTxt(uint32_t pointIndex, float stepRatio, float min, float max);
+    uint32_t GetCurrentStepIndex();
+    SizeF GetStepPointAccessibilityVirtualNodeSize();
+    void UpdateStepPointsAccessibilityVirtualNodeSelected();
+    void SetStepPointsAccessibilityVirtualNodeEvent(
+        const RefPtr<FrameNode>& pointNode, uint32_t index, bool isClickAbled, bool reverse);
+    void SetStepPointAccessibilityVirtualNode(
+        const RefPtr<FrameNode>& pointNode, const SizeF& size, const PointF& point, const std::string& txt);
+
     std::optional<SliderMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
     void SetSkipGestureEvents()
@@ -262,6 +282,8 @@ private:
     bool axisFlag_ = false; // Wheel operation flag
     bool focusFlag_ = false;
     bool panMoveFlag_ = false;
+    bool hasVisibleChangeRegistered_ = false;
+    bool isVisibleArea_ = true;
     bool isVisible_ = true;
     bool isShow_ = true;
     SliderModelNG::SliderInteraction sliderInteractionMode_ = SliderModelNG::SliderInteraction::SLIDE_AND_CLICK;
@@ -269,7 +291,6 @@ private:
     int32_t fingerId_ = -1;
     std::optional<Offset> lastTouchLocation_ = std::nullopt;
 
-    float stepRatio_ = 1.0f / 100.0f;
     float valueRatio_ = 0.0f;
     float sliderLength_ = 0.0f;
     float borderBlank_ = 0.0f;
@@ -296,6 +317,11 @@ private:
     RefPtr<FrameNode> imageFrameNode_;
     std::function<void(bool)> isFocusActiveUpdateEvent_;
     bool isFocusActive_ = false;
+
+    RefPtr<FrameNode> parentAccessibilityNode_;
+    std::vector<RefPtr<FrameNode>> pointAccessibilityNodeVec_;
+    std::vector<GestureEventFunc> pointAccessibilityNodeEventVec_;
+    bool isInitAccessibilityVirtualNode_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SliderPattern);
 };

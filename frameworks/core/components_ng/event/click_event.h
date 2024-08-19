@@ -91,6 +91,11 @@ public:
         }
     }
 
+    bool IsUserClickable() const
+    {
+        return userCallback_ != nullptr;
+    }
+
     void AddClickEvent(const RefPtr<ClickEvent>& clickEvent)
     {
         if (clickEvents_.empty()) {
@@ -127,7 +132,7 @@ public:
 
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result,
-        TouchTestResult& responseLinkResult) override;
+        ResponseLinkResult& responseLinkResult) override;
 
     GestureEventFunc GetClickEvent();
     std::optional<GestureJudgeFunc> GetSysJudgeFunc() const;

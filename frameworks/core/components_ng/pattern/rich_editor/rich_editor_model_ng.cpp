@@ -101,6 +101,14 @@ void RichEditorModelNG::SetOnSelect(std::function<void(const BaseEventInfo*)>&& 
     eventHub->SetOnSelect(std::move(func));
 }
 
+void RichEditorModelNG::SetOnSelect(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSelect(std::move(callback));
+}
+
 void RichEditorModelNG::SetOnSelectionChange(std::function<void(const BaseEventInfo*)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
@@ -116,12 +124,46 @@ void RichEditorModelNG::SetAboutToIMEInput(std::function<bool(const RichEditorIn
     eventHub->SetAboutToIMEInput(std::move(func));
 }
 
+void RichEditorModelNG::SetAboutToIMEInput(FrameNode* frameNode,
+    std::function<bool(const RichEditorInsertValue&)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetAboutToIMEInput(std::move(callback));
+}
+
 void RichEditorModelNG::SetOnIMEInputComplete(std::function<void(const RichEditorAbstractSpanResult&)>&& func)
 {
     CHECK_NULL_VOID(!isStyledStringMode_);
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnIMEInputComplete(std::move(func));
+}
+
+void RichEditorModelNG::SetOnDidIMEInput(std::function<void(const TextRange&)>&& func)
+{
+    CHECK_NULL_VOID(!isStyledStringMode_);
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidIMEInput(std::move(func));
+}
+
+void RichEditorModelNG::SetOnIMEInputComplete(FrameNode* frameNode,
+    std::function<void(const RichEditorAbstractSpanResult&)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnIMEInputComplete(std::move(callback));
+}
+
+void RichEditorModelNG::SetOnDidIMEInput(FrameNode* frameNode, std::function<void(const TextRange&)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidIMEInput(std::move(callback));
 }
 
 void RichEditorModelNG::SetAboutToDelete(std::function<bool(const RichEditorDeleteValue&)>&& func)
@@ -233,15 +275,29 @@ void RichEditorModelNG::SetSupportPreviewText(bool value)
     pattern->SetSupportPreviewText(value);
 }
 
-void RichEditorModelNG::SetTextDetectConfig(const std::string& value,
-    std::function<void(const std::string&)>&& onResult)
+void RichEditorModelNG::SetTextDetectConfig(const TextDetectConfig& textDetectConfig)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetTextDetectTypes(value);
-    pattern->SetOnResult(std::move(onResult));
+    pattern->SetTextDetectConfig(textDetectConfig);
+}
+
+void RichEditorModelNG::SetTextDetectConfig(FrameNode* frameNode, const TextDetectConfig& textDetectConfig)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetTextDetectConfig(textDetectConfig);
+}
+
+void RichEditorModelNG::SetOnSelectionChange(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSelectionChange(std::move(callback));
 }
 
 void RichEditorModelNG::SetTextDetectEnable(FrameNode* frameNode, bool value)
@@ -251,7 +307,7 @@ void RichEditorModelNG::SetTextDetectEnable(FrameNode* frameNode, bool value)
     richEditorPattern->SetTextDetectEnable(value);
 }
 
-void RichEditorModelNG::SetSelectedBackgroundColor(const Color& selectedColor)
+void RichEditorModelNG::SetSelectedBackgroundColor(const DynamicColor& selectedColor)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -260,14 +316,14 @@ void RichEditorModelNG::SetSelectedBackgroundColor(const Color& selectedColor)
     pattern->SetSelectedBackgroundColor(selectedColor);
 }
 
-void RichEditorModelNG::SetSelectedBackgroundColor(FrameNode* frameNode, const Color& selectedColor)
+void RichEditorModelNG::SetSelectedBackgroundColor(FrameNode* frameNode, const DynamicColor& selectedColor)
 {
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSelectedBackgroundColor(selectedColor);
 }
 
-void RichEditorModelNG::SetCaretColor(const Color& color)
+void RichEditorModelNG::SetCaretColor(const DynamicColor& color)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -276,7 +332,7 @@ void RichEditorModelNG::SetCaretColor(const Color& color)
     pattern->SetCaretColor(color);
 }
 
-void RichEditorModelNG::SetCaretColor(FrameNode* frameNode, const Color& color)
+void RichEditorModelNG::SetCaretColor(FrameNode* frameNode, const DynamicColor& color)
 {
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
@@ -325,6 +381,15 @@ void RichEditorModelNG::SetOnSubmit(std::function<void(int32_t, NG::TextFieldCom
     eventHub->SetOnSubmit(std::move(func));
 }
 
+void RichEditorModelNG::SetOnSubmit(FrameNode* frameNode,
+    std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSubmit(std::move(callback));
+}
+
 void RichEditorModelNG::SetOnWillChange(std::function<bool(const RichEditorChangeValue&)>&& func)
 {
     CHECK_NULL_VOID(!isStyledStringMode_);
@@ -371,10 +436,28 @@ void RichEditorModelNG::SetOnCopy(FrameNode* frameNode, std::function<void(NG::T
     eventHub->SetOnCopy(std::move(func));
 }
 
-void RichEditorModelNG::SetSelectionMenuOptions(const std::vector<MenuOptionsParam>&& menuOptionsItems)
+void RichEditorModelNG::SetSelectionMenuOptions(
+    const OnCreateMenuCallback&& onCreateMenuCallback, const OnMenuItemClickCallback&& onMenuItemClick)
 {
     auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
     CHECK_NULL_VOID(richEditorPattern);
-    richEditorPattern->OnSelectionMenuOptionsUpdate(std::move(menuOptionsItems));
+    richEditorPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
+
+void RichEditorModelNG::SetRequestKeyboardOnFocus(bool needToRequest)
+{
+    CHECK_NULL_VOID(!isStyledStringMode_);
+    auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetRequestKeyboardOnFocus(needToRequest);
+}
+
+void RichEditorModelNG::SetRequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetRequestKeyboardOnFocus(needToRequest);
+}
+
 } // namespace OHOS::Ace::NG

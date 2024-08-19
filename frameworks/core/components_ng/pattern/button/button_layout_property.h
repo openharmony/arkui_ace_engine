@@ -19,6 +19,8 @@
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/dialog/dialog_properties.h"
+#include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/utils.h"
@@ -26,6 +28,8 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t DEFAULT_MAXLINES = 1;
+constexpr Dimension BUTTON_BOTTOM_TOP_MARGIN = 10.0_vp;
+constexpr Dimension TITLE_PADDING_HORIZONTAL = 16.0_vp;
 } // namespace
 
 class ACE_EXPORT ButtonLayoutProperty : public LayoutProperty {
@@ -94,6 +98,64 @@ public:
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ButtonLayoutProperty);
+};
+
+enum class ModuleDialogType {
+    TIMEPICKER_DIALOG = 0,
+    DATEPICKER_DIALOG,
+};
+
+class ModuleDialogTypeRtl {
+public:
+    static void MarginIsRtl(bool isRtl, MarginProperty& margin,
+        const RefPtr<DialogTheme>& dialogTheme, bool lesstwleve)
+    {
+        if (lesstwleve) {
+            if (isRtl) {
+                margin.right = CalcLength(0.0_vp);
+                margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
+            } else {
+                margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
+                margin.left = CalcLength(0.0_vp);
+            }
+        } else {
+            if (isRtl) {
+                margin.right = CalcLength(0.0_vp);
+                margin.left = CalcLength(dialogTheme->GetActionsPadding().Left());
+            } else {
+                margin.right = CalcLength(dialogTheme->GetActionsPadding().Right());
+                margin.left = CalcLength(0.0_vp);
+            }
+        }
+    }
+    
+    static void UpdateMarginIsRtl(bool isRtl, MarginProperty& margin,
+        const RefPtr<DialogTheme>& dialogTheme, bool isLessThanTwleve, ModuleDialogType type)
+    {
+        ModuleDialogTypeRtl::MarginIsRtl(isRtl, margin, dialogTheme, isLessThanTwleve);
+        switch (type) {
+            case ModuleDialogType::TIMEPICKER_DIALOG:
+                if (isLessThanTwleve) {
+                    margin.top = CalcLength(dialogTheme->GetDividerHeight());
+                    margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
+                } else {
+                    margin.top = CalcLength(dialogTheme->GetActionsPadding().Bottom());
+                    margin.bottom = CalcLength(dialogTheme->GetActionsPadding().Bottom());
+                }
+                break;
+            case ModuleDialogType::DATEPICKER_DIALOG:
+                if (isLessThanTwleve) {
+                    margin.top = CalcLength(BUTTON_BOTTOM_TOP_MARGIN);
+                    margin.bottom = CalcLength(BUTTON_BOTTOM_TOP_MARGIN);
+                } else {
+                    margin.top = CalcLength(TITLE_PADDING_HORIZONTAL);
+                    margin.bottom = CalcLength(TITLE_PADDING_HORIZONTAL);
+                }
+                break;
+            default:
+                break;
+        }
+    }
 };
 } // namespace OHOS::Ace::NG
 

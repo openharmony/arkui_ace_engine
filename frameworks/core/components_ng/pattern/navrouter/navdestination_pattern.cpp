@@ -17,22 +17,23 @@
 
 #include <atomic>
 
+#include "base/log/dump_log.h"
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/common/container.h"
-#include "base/log/dump_log.h"
 #include "core/components/theme/app_theme.h"
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
-#include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-    // titlebar ZINDEX
-    constexpr static int32_t DEFAULT_TITLEBAR_ZINDEX = 2;
-    std::atomic<uint64_t> navDestinationPatternNextAutoGenId = 0;
-}
+// titlebar ZINDEX
+constexpr static int32_t DEFAULT_TITLEBAR_ZINDEX = 2;
+std::atomic<uint64_t> navDestinationPatternNextAutoGenId = 0;
+} // namespace
 
 NavDestinationPattern::NavDestinationPattern(const RefPtr<ShallowBuilder>& shallowBuilder)
     : shallowBuilder_(shallowBuilder)
@@ -80,21 +81,25 @@ void NavDestinationPattern::OnModifyDone()
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarRenderContext = titleBarNode->GetRenderContext();
     CHECK_NULL_VOID(titleBarRenderContext);
+    titleBarNode->SetInnerParentId(hostNode->GetInspectorId().value_or(""));
     // set the titlebar to float on the top
     titleBarRenderContext->UpdateZIndex(DEFAULT_TITLEBAR_ZINDEX);
     auto&& opts = hostNode->GetLayoutProperty()->GetSafeAreaExpandOpts();
     auto navDestinationContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
     if (opts && navDestinationContentNode) {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION,
-            "Navdestination SafArea expand as %{public}s", opts->ToString().c_str());
-            navDestinationContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
-            navDestinationContentNode->MarkModifyDone();
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Navdestination SafArea expand as %{public}s", opts->ToString().c_str());
+        navDestinationContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
+        navDestinationContentNode->MarkModifyDone();
     }
 
     UpdateNameIfNeeded(hostNode);
     UpdateBackgroundColorIfNeeded(hostNode);
     UpdateTitlebarVisibility(hostNode);
-    InitBackButtonLongPressEvent(hostNode);
+    auto pipeline = hostNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (GreatOrEqual(pipeline->GetFontScale(), AgingAdapationDialogUtil::GetDialogBigFontSizeScale())) {
+        InitBackButtonLongPressEvent(hostNode);
+    }
 }
 
 void NavDestinationPattern::OnLanguageConfigurationUpdate()
@@ -233,6 +238,11 @@ bool NavDestinationPattern::GetBackButtonState()
     if (isCustomTitle) {
         return showBackButton;
     }
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_RETURN(titleBarPattern, showBackButton);
+    if (titleBarPattern->IsFontSizeSettedByDeveloper()) {
+        return showBackButton;
+    }
     auto titleNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle());
     CHECK_NULL_RETURN(titleNode, showBackButton);
     auto theme = NavigationGetTheme();
@@ -268,7 +278,7 @@ void NavDestinationPattern::DumpInfo()
 bool NavDestinationPattern::OverlayOnBackPressed()
 {
     CHECK_NULL_RETURN(overlayManager_, false);
-    CHECK_EQUAL_RETURN(overlayManager_->IsModalEmpty(), true,  false);
+    CHECK_EQUAL_RETURN(overlayManager_->IsModalEmpty(), true, false);
     return overlayManager_->RemoveOverlay(true);
 }
 
@@ -314,21 +324,14 @@ void NavDestinationPattern::InitBackButtonLongPressEvent(RefPtr<NavDestinationGr
         pattern->HandleLongPressActionEnd();
     };
     longPressRecognizer->SetOnActionEnd(longPressEndCallback);
+
+    auto accessibilityProperty = backButtonNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
 }
 
 void NavDestinationPattern::HandleLongPress()
 {
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto dialogTheme = context->GetTheme<AgingAdapationDialogTheme>();
-    CHECK_NULL_VOID(dialogTheme);
-    float scale = context->GetFontScale();
-    if (LessNotEqual(scale, dialogTheme->GetBigFontSizeScale())) {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION,
-            "The current system font scale is %{public}f; dialogTheme font scale is %{public}f", scale,
-            dialogTheme->GetBigFontSizeScale());
-        return;
-    }
     auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     auto titleBarUINode = hostNode->GetTitleBarNode();
@@ -350,15 +353,16 @@ void NavDestinationPattern::HandleLongPress()
         if (backButtonIconNode->GetTag() == V2::SYMBOL_ETS_TAG) {
             auto symbolProperty = backButtonIconNode->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(symbolProperty);
-            dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(
-                message, symbolProperty->GetSymbolSourceInfoValue(), symbolProperty->GetSymbolColorListValue({}));
-            return ;
+            dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(message,
+                symbolProperty->GetSymbolSourceInfoValue(), symbolProperty->GetSymbolColorListValue({}),
+                symbolProperty->GetFontWeightValue(FontWeight::NORMAL));
+            return;
         }
         auto imageProperty = backButtonIconNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageProperty);
         ImageSourceInfo imageSourceInfo = imageProperty->GetImageSourceInfoValue();
         dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(message, imageSourceInfo);
-        return ;
+        return;
     }
     auto backButtonImageLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(backButtonImageLayoutProperty);
@@ -375,6 +379,32 @@ void NavDestinationPattern::HandleLongPressActionEnd()
     CHECK_NULL_VOID(overlayManager);
     overlayManager->CloseDialog(dialogNode_);
     dialogNode_ = nullptr;
+}
+
+void NavDestinationPattern::OnFontScaleConfigurationUpdate()
+{
+    auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto pipeline = hostNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (LessNotEqual(pipeline->GetFontScale(), AgingAdapationDialogUtil::GetDialogBigFontSizeScale())) {
+        auto titleBarUINode = hostNode->GetTitleBarNode();
+        auto titleBarNode = AceType::DynamicCast<TitleBarNode>(titleBarUINode);
+        CHECK_NULL_VOID(titleBarNode);
+
+        auto backButtonUINode = titleBarNode->GetBackButton();
+        auto backButtonNode = AceType::DynamicCast<FrameNode>(backButtonUINode);
+        CHECK_NULL_VOID(backButtonNode);
+
+        auto gestureHub = backButtonNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->SetLongPressEvent(nullptr);
+        auto longPressRecognizer = gestureHub->GetLongPressRecognizer();
+        CHECK_NULL_VOID(longPressRecognizer);
+        longPressRecognizer->SetOnActionEnd(nullptr);
+        return;
+    }
+    InitBackButtonLongPressEvent(hostNode);
 }
 
 void NavDestinationPattern::SetSystemBarStyle(const RefPtr<SystemBarStyle>& style)
@@ -399,5 +429,10 @@ void NavDestinationPattern::SetSystemBarStyle(const RefPtr<SystemBarStyle>& styl
             navigationPattern->TryRestoreSystemBarStyle(windowManager);
         }
     }
+}
+
+int32_t NavDestinationPattern::GetTitlebarZIndex() const
+{
+    return DEFAULT_TITLEBAR_ZINDEX;
 }
 } // namespace OHOS::Ace::NG

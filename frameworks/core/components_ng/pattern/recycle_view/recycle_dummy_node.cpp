@@ -46,6 +46,9 @@ RecycleDummyNode::~RecycleDummyNode()
     }
     auto child = GetFirstChild();
     CHECK_NULL_VOID(child);
+    if (child->TotalChildCount() == 0) {
+        return;
+    }
     child->DetachFromMainTree();
     auto customNode = AceType::DynamicCast<CustomNodeBase>(child);
     CHECK_NULL_VOID(customNode);

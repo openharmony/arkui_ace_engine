@@ -55,7 +55,6 @@
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
-#include "core/components_ng/pattern/overlay/modal_presentation_layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_paint_method.h"
@@ -88,7 +87,6 @@ const std::string BOTTOMSTRING = "test";
 constexpr int32_t START_YEAR_BEFORE = 1990;
 constexpr int32_t SELECTED_YEAR = 2000;
 constexpr int32_t END_YEAR = 2090;
-const std::string LONGEST_CONTENT = "新建文件夹";
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 } // namespace
 class OverlayNewTestNg : public testing::Test {
@@ -146,6 +144,7 @@ void OverlayNewTestNg::TearDownTestCase()
 {
     MockPipelineContext::GetCurrent()->themeManager_ = nullptr;
     MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 
 RefPtr<FrameNode> OverlayNewTestNg::CreateTargetNode()
@@ -322,11 +321,11 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest002, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
     overlayManager->HideMenu(menuNode, targetId);
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
     overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
     overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
     auto layoutProperty = menuNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
@@ -397,11 +396,11 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest003, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
     overlayManager->HideMenu(menuNode, targetId);
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
     overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
     overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
     auto layoutProperty = menuNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
@@ -472,11 +471,11 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest004, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
     overlayManager->HideMenu(menuNode, targetId);
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
     overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
     overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
     auto layoutProperty = menuNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
@@ -548,11 +547,11 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest005, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
     overlayManager->HideMenu(menuNode, targetId);
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
     overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
     overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
     auto layoutProperty = menuNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
@@ -624,11 +623,11 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest006, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
     overlayManager->HideMenu(menuNode, targetId);
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
     overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
     overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
     auto layoutProperty = menuNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
@@ -917,11 +916,11 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest010, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
     overlayManager->HideMenu(menuNode, targetId);
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
     overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
     overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
     auto layoutProperty = menuNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
@@ -992,11 +991,11 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest011, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
     overlayManager->HideMenu(menuNode, targetId);
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
     overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
     overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
     auto layoutProperty = menuNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
@@ -1067,11 +1066,11 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest012, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
     overlayManager->HideMenu(menuNode, targetId);
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
     overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
     overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
     auto layoutProperty = menuNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
@@ -1143,11 +1142,11 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest013, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
     overlayManager->HideMenu(menuNode, targetId);
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
     overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
     overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
     auto layoutProperty = menuNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
@@ -1219,11 +1218,11 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest014, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
     overlayManager->HideMenu(menuNode, targetId);
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
     overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
     overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
     auto layoutProperty = menuNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
@@ -1512,11 +1511,11 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest018, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
     overlayManager->HideMenu(menuNode, targetId);
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
     overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
     overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
     auto layoutProperty = menuNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::GONE, true);

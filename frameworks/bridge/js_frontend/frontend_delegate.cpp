@@ -15,11 +15,6 @@
 
 #include "frameworks/bridge/js_frontend/frontend_delegate.h"
 
-#include <string>
-
-#include "base/utils/utils.h"
-#include "core/common/ace_application_info.h"
-#include "core/components_ng/event/focus_hub.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/core/components_ng/base/inspector.h"
@@ -125,6 +120,7 @@ void FrontendDelegate::GetRectangleById(const std::string& key, NG::Rectangle& r
 
 void FrontendDelegate::ResetFocus()
 {
+    TAG_LOGI(AceLogTag::ACE_FOCUS, "Lost focus to view root scope by user");
     NG::FocusHub::LostFocusToViewRoot();
 }
 

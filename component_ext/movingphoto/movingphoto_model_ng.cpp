@@ -24,6 +24,10 @@
 
 namespace OHOS::Ace::NG {
 
+namespace {
+    constexpr int32_t ERROR_CODE = -1;
+}
+
 void MovingPhotoModelNG::Create(const RefPtr<MovingPhotoController>& controller)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -60,21 +64,29 @@ void MovingPhotoModelNG::SetImageSrc(const std::string& value)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = AceType::DynamicCast<MovingPhotoLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    if (layoutProperty->HasMovingPhotoUri()) {
-        auto movingPhotoUri = layoutProperty->GetMovingPhotoUri().value();
-        if (movingPhotoUri == value) {
-            TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "src not changed.");
-            return;
-        }
-    }
-    ACE_UPDATE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, MovingPhotoUri, value);
-
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto dataProvider = AceType::DynamicCast<DataProviderManagerStandard>(pipeline->GetDataProviderManager());
     CHECK_NULL_VOID(dataProvider);
+    auto movingPhotoPattern = AceType::DynamicCast<MovingPhotoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(movingPhotoPattern);
+    if (layoutProperty->HasMovingPhotoUri()) {
+        auto movingPhotoUri = layoutProperty->GetMovingPhotoUri().value();
+        int64_t dateModified = dataProvider->GetMovingPhotoDateModified(value);
+        if (dateModified == ERROR_CODE) {
+            TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MovingPhotoDateModified return -1.");
+        }
+        int64_t currentDateModified = movingPhotoPattern->GetCurrentDateModified();
+        if (movingPhotoUri == value && dateModified == currentDateModified) {
+            TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "src not changed.");
+            return;
+        }
+        movingPhotoPattern->UpdateCurrentDateModified(dateModified);
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, MovingPhotoUri, value);
 
     std::string imageSrc = dataProvider->GetMovingPhotoImageUri(value);
+    imageSrc += "?date_modified=" + std::to_string(movingPhotoPattern->GetCurrentDateModified());
     ImageSourceInfo src;
     src.SetSrc(imageSrc);
     ACE_UPDATE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, ImageSourceInfo, src);
@@ -94,6 +106,15 @@ void MovingPhotoModelNG::SetMuted(bool value)
 void MovingPhotoModelNG::SetObjectFit(ImageFit objectFit)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, ObjectFit, objectFit);
+}
+
+void MovingPhotoModelNG::SetOnComplete(MovingPhotoEventFunc&& onComplete)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<MovingPhotoEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnComplete(std::move(onComplete));
 }
 
 void MovingPhotoModelNG::SetOnStart(MovingPhotoEventFunc&& onStart)
@@ -139,5 +160,32 @@ void MovingPhotoModelNG::SetOnError(MovingPhotoEventFunc&& onError)
     auto eventHub = frameNode->GetEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnError(std::move(onError));
+}
+
+void MovingPhotoModelNG::AutoPlayPeriod(int64_t startTime, int64_t endTime)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto movingPhotoPattern = AceType::DynamicCast<MovingPhotoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(movingPhotoPattern);
+    movingPhotoPattern->AutoPlayPeriod(startTime, endTime);
+}
+
+void MovingPhotoModelNG::AutoPlay(bool isAutoPlay)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto movingPhotoPattern = AceType::DynamicCast<MovingPhotoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(movingPhotoPattern);
+    movingPhotoPattern->AutoPlay(isAutoPlay);
+}
+
+void MovingPhotoModelNG::RepeatPlay(bool isRepeatPlay)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto movingPhotoPattern = AceType::DynamicCast<MovingPhotoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(movingPhotoPattern);
+    movingPhotoPattern->RepeatPlay(isRepeatPlay);
 }
 } // namespace OHOS::Ace::NG

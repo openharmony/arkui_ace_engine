@@ -90,6 +90,10 @@ void TextModelImpl::SetFontWeight(Ace::FontWeight value)
     component->SetTextStyle(textStyle);
 }
 
+void TextModelImpl::SetMinFontScale(const float value) {}
+
+void TextModelImpl::SetMaxFontScale(const float value) {}
+
 void TextModelImpl::SetFontFamily(const std::vector<std::string>& value)
 {
     auto component = GetComponent();
@@ -232,8 +236,7 @@ void TextModelImpl::SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) {}
 
 void TextModelImpl::SetTextDetectEnable(bool value) {}
 
-void TextModelImpl::SetTextDetectConfig(const std::string& value,
-    std::function<void(const std::string&)>&& onResult) {}
+void TextModelImpl::SetTextDetectConfig(const TextDetectConfig& textDetectConfig) {}
 
 void TextModelImpl::OnSetWidth()
 {
@@ -346,6 +349,5 @@ void TextModelImpl::SetOnDrop(NG::OnDragDropFunc&& onDrop)
     component->SetOnDropId(onDrop);
 }
 
-void TextModelImpl::SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) {}
-
+void TextModelImpl::SetHalfLeading(bool halfLeading) {}
 } // namespace OHOS::Ace::Framework

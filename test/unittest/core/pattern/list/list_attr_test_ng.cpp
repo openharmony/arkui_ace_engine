@@ -18,12 +18,36 @@
 namespace OHOS::Ace::NG {
 
 namespace {
-const InspectorFilter filter;
+constexpr float DEVIATION_HEIGHT = 20.f;
+constexpr float HALF_ITEM_HEIGHT = ITEM_HEIGHT / 2;
+constexpr float LESS_THAN_HALF_ITEM_HEIGHT = HALF_ITEM_HEIGHT - 1.f;
+constexpr float GREATER_THAN_HALF_ITEM_HEIGHT = HALF_ITEM_HEIGHT + 1.f;
+constexpr float SPECIAL_ITEM_HEIGHT = ITEM_HEIGHT * 1.5;
+constexpr float LESS_THAN_HALF_SPECIAL_ITEM_HEIGHT = SPECIAL_ITEM_HEIGHT / 2 - 1.f;
+constexpr float GREATER_THAN_HALF_SPECIAL_ITEM_HEIGHT = SPECIAL_ITEM_HEIGHT / 2 + 1.f;
 } // namespace
 
 class ListAttrTestNg : public ListTestNg {
 public:
+    void CreateSnapList(V2::ScrollSnapAlign scrollSnapAlign, int32_t itemNumber = TOTAL_ITEM_NUMBER);
+    void SetListItemHeight(int32_t index, float height);
 };
+
+void ListAttrTestNg::CreateSnapList(V2::ScrollSnapAlign scrollSnapAlign, int32_t itemNumber)
+{
+    ListModelNG model = CreateList();
+    // Make ListHeight not an integer multiple of ListItems
+    ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT - DEVIATION_HEIGHT));
+    model.SetScrollSnapAlign(scrollSnapAlign);
+    CreateListItems(itemNumber);
+    CreateDone(frameNode_);
+}
+
+void ListAttrTestNg::SetListItemHeight(int32_t index, float height)
+{
+    GetChildLayoutProperty<ListItemLayoutProperty>(frameNode_, index)
+        ->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(height)));
+}
 
 /**
  * @tc.name: ListLayoutProperty001
@@ -53,6 +77,7 @@ HWTEST_F(ListAttrTestNg, ListLayoutProperty001, TestSize.Level1)
      * @tc.steps: step1. Call ToJsonValue()
      * @tc.expected: The json value is correct
      */
+    InspectorFilter filter;
     auto json = JsonUtil::Create(true);
     layoutProperty_->ToJsonValue(json, filter);
     EXPECT_EQ(Dimension::FromString(json->GetString("space")), Dimension(10));
@@ -176,6 +201,23 @@ HWTEST_F(ListAttrTestNg, ListLayoutProperty002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListLayoutProperty003
+ * @tc.desc: Test List layout properties with fastFilter
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, ListLayoutProperty003, TestSize.Level1)
+{
+    CreateList();
+    CreateDone(frameNode_);
+    InspectorFilter filter;
+    std::string attr = "editable";
+    filter.AddFilterAttr(attr);
+    auto json = JsonUtil::Create(true);
+    layoutProperty_->ToJsonValue(json, filter);
+    EXPECT_EQ(json->ToString(), "{}");
+}
+
+/**
  * @tc.name: ListItemLayoutProperty001
  * @tc.desc: Test ListItem layout properties.
  * @tc.type: FUNC
@@ -191,6 +233,7 @@ HWTEST_F(ListAttrTestNg, ListItemLayoutProperty001, TestSize.Level1)
      * @tc.steps: step1. Call ToJsonValue()
      * @tc.expected: The json value is correct
      */
+    InspectorFilter filter;
     auto json = JsonUtil::Create(true);
     layoutProperty->ToJsonValue(json, filter);
     EXPECT_EQ(static_cast<V2::StickyMode>(json->GetInt("sticky")), V2::StickyMode::NONE);
@@ -252,6 +295,51 @@ HWTEST_F(ListAttrTestNg, ListItemLayoutProperty001, TestSize.Level1)
     itemModel = CreateListItem();
     itemModel.SetEditMode(V2::EditMode::DELETABLE | V2::EditMode::MOVABLE);
     CreateDone(frameNode_);
+    json = JsonUtil::Create(true);
+    layoutProperty->ToJsonValue(json, filter);
+    EXPECT_TRUE(json->GetBool("editable"));
+}
+
+/**
+ * @tc.name: ListItemLayoutProperty002
+ * @tc.desc: Test ListItem layout properties with fastFilter
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, ListItemLayoutProperty002, TestSize.Level1)
+{
+    CreateList();
+    ListItemModelNG itemModel = CreateListItem();
+    CreateDone(frameNode_);
+    auto layoutProperty = GetChildLayoutProperty<ListItemLayoutProperty>(frameNode_, 0);
+
+    /**
+     * @tc.steps: step1. IsFastFilter
+     * @tc.expected: Test editable
+     */
+    InspectorFilter filter;
+    std::string attr = "editable";
+    filter.AddFilterAttr(attr);
+    EXPECT_TRUE(filter.IsFastFilter());
+    auto json = JsonUtil::Create(true);
+    layoutProperty->ToJsonValue(json, filter);
+    EXPECT_FALSE(json->GetBool("editable"));
+
+    layoutProperty->UpdateEditMode(V2::EditMode::NONE);
+    json = JsonUtil::Create(true);
+    layoutProperty->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("editable"), "EditMode.None");
+
+    layoutProperty->UpdateEditMode(V2::EditMode::MOVABLE);
+    json = JsonUtil::Create(true);
+    layoutProperty->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("editable"), "EditMode.Movable");
+
+    layoutProperty->UpdateEditMode(V2::EditMode::DELETABLE);
+    json = JsonUtil::Create(true);
+    layoutProperty->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("editable"), "EditMode.Deletable");
+
+    layoutProperty->UpdateEditMode(V2::EditMode::DELETABLE | V2::EditMode::MOVABLE);
     json = JsonUtil::Create(true);
     layoutProperty->ToJsonValue(json, filter);
     EXPECT_TRUE(json->GetBool("editable"));
@@ -697,23 +785,53 @@ HWTEST_F(ListAttrTestNg, AttrAlignListItem001, TestSize.Level1)
      * @tc.cases: case2. Set ListItemAlign::CENTER
      * @tc.expected: the item is align to center
      */
-    model = CreateList();
-    model.SetListItemAlign(V2::ListItemAlign::CENTER);
-    CreateListItem();
-    ViewAbstract::SetWidth(CalcLength(itemWidth));
-    CreateDone(frameNode_);
+    layoutProperty_->UpdateListItemAlign(V2::ListItemAlign::CENTER);
+    FlushLayoutTask(frameNode_);
     EXPECT_EQ(GetChildX(frameNode_, 0), (LIST_WIDTH - itemWidth) / 2);
 
     /**
      * @tc.cases: case3. Set ListItemAlign::END
      * @tc.expected: the item is align to end
      */
-    model = CreateList();
-    model.SetListItemAlign(V2::ListItemAlign::END);
+    layoutProperty_->UpdateListItemAlign(V2::ListItemAlign::END);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), LIST_WIDTH - itemWidth);
+}
+
+/**
+ * @tc.name: AttrAlignListItem002
+ * @tc.desc: Test LayoutProperty about alignListItem in RTL Layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, AttrAlignListItem002, TestSize.Level1)
+{
+    /**
+     * @tc.cases: case1. Set item width smaller than LIST_WIDTH
+     * @tc.expected: the item default is align to start
+     */
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    const float itemWidth = LIST_WIDTH / 2;
+    CreateList();
     CreateListItem();
     ViewAbstract::SetWidth(CalcLength(itemWidth));
     CreateDone(frameNode_);
     EXPECT_EQ(GetChildX(frameNode_, 0), LIST_WIDTH - itemWidth);
+
+    /**
+     * @tc.cases: case2. Set ListItemAlign::CENTER
+     * @tc.expected: the item is align to center
+     */
+    layoutProperty_->UpdateListItemAlign(V2::ListItemAlign::CENTER);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), (LIST_WIDTH - itemWidth) / 2);
+
+    /**
+     * @tc.cases: case3. Set ListItemAlign::END
+     * @tc.expected: the item is align to end
+     */
+    layoutProperty_->UpdateListItemAlign(V2::ListItemAlign::END);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 0);
 }
 
 /**
@@ -723,37 +841,51 @@ HWTEST_F(ListAttrTestNg, AttrAlignListItem001, TestSize.Level1)
  */
 HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign001, TestSize.Level1)
 {
-    /**
-     * @tc.steps: stpe1. Set list height:380.f for not align the last item, Set ScrollSnapAlign::START
-     */
-    ListModelNG model = CreateList();
-    ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT - 20.f)); // 380.f
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    float scrollableDistance = pattern_->GetScrollableDistance();
-    EXPECT_EQ(scrollableDistance, 220.f);
+    CreateSnapList(V2::ScrollSnapAlign::START);
 
     /**
-     * @tc.steps: stpe2. Scroll delta less than half of ITEM_HEIGHT
-     * @tc.expected: The item(index:0) align to start
+     * @tc.steps: step1. Scroll Down, the delta less than half of ITEM_HEIGHT
+     * @tc.expected: Align item not change
      */
-    ScrollSnapForEqualHeightItem(-49.f, -1200.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+    ScrollSnap(-LESS_THAN_HALF_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.0);
 
     /**
-     * @tc.steps: stpe3. Scroll delta greater than half of ITEM_HEIGHT
+     * @tc.steps: step2. Scroll Down, the delta greater than half of ITEM_HEIGHT
      * @tc.expected: The item(index:1) align to start
      */
-    ScrollSnapForEqualHeightItem(-51.f, -1200.f);
+    ScrollSnap(-GREATER_THAN_HALF_ITEM_HEIGHT, 0.0);
     EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT);
 
     /**
-     * @tc.steps: stpe4. Scroll to over bottom
-     * @tc.expected: The last item(index:9) align to end
+     * @tc.steps: step3. Scroll Down, the delta over bottom
+     * @tc.expected: The last item align to end
      */
-    ScrollSnapForEqualHeightItem(-500.f, -1200.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), scrollableDistance); // 220.f
+    ScrollSnap(-500.0, 0.0);
+    float scrollableDistance = pattern_->GetScrollableDistance();
+    EXPECT_EQ(scrollableDistance, ITEM_HEIGHT * 2 + DEVIATION_HEIGHT); // 220.f
+    EXPECT_EQ(pattern_->GetTotalOffset(), scrollableDistance);
+
+    /**
+     * @tc.steps: step4. Scroll Up, the delta is small
+     * @tc.expected: The item(index:2) align to start
+     */
+    ScrollSnap(1.0, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT * 2);
+
+    /**
+     * @tc.steps: step5. Scroll Up, the delta less than half of ITEM_HEIGHT
+     * @tc.expected: Align item not change
+     */
+    ScrollSnap(LESS_THAN_HALF_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT * 2);
+
+    /**
+     * @tc.steps: step6. Scroll Up, the delta greater than half of ITEM_HEIGHT
+     * @tc.expected: The item(index:1) align to start
+     */
+    ScrollSnap(GREATER_THAN_HALF_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT);
 }
 
 /**
@@ -763,31 +895,47 @@ HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign001, TestSize.Level1)
  */
 HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign002, TestSize.Level1)
 {
+    CreateSnapList(V2::ScrollSnapAlign::END);
+
     /**
-     * @tc.steps: stpe1. Set list height:380.f for not align the last item, Set ScrollSnapAlign::END
-     * @tc.expected: The last item in the view will be align to end
+     * @tc.steps: step1. The first item(index:0) will be align to start in init
      */
-    ListModelNG model = CreateList();
-    ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT - 20.f)); // 380.f
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::END);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    // The first item(index:0) will be align to start in init
     EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
 
     /**
-     * @tc.steps: stpe2. Scroll delta less than half of ITEM_HEIGHT
-     * @tc.expected: The last item(index:7) in the view will be align to end
+     * @tc.steps: step2. Scroll Down, the delta is small
+     * @tc.expected: The item(index:3) align to end
      */
-    ScrollSnap(-49.f, 1200.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), 20.f);
+    ScrollSnap(-1.0, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), DEVIATION_HEIGHT);
 
     /**
-     * @tc.steps: stpe3. Scroll delta greater than half of ITEM_HEIGHT
-     * @tc.expected: The last item(index:8) will be align to end
+     * @tc.steps: step3. Scroll Down, the delta less than half of ITEM_HEIGHT
+     * @tc.expected: Align item not change
      */
-    ScrollSnap(-51.f, 1200.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT + 20.f); // 120.f
+    ScrollSnap(-LESS_THAN_HALF_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), DEVIATION_HEIGHT);
+
+    /**
+     * @tc.steps: step4. Scroll Down, the delta greater than half of ITEM_HEIGHT
+     * @tc.expected: The item(index:4) align to end
+     */
+    ScrollSnap(-GREATER_THAN_HALF_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT + DEVIATION_HEIGHT);
+
+    /**
+     * @tc.steps: step5. Scroll Up, the delta less than half of ITEM_HEIGHT
+     * @tc.expected: Align item not change
+     */
+    ScrollSnap(LESS_THAN_HALF_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT + DEVIATION_HEIGHT);
+
+    /**
+     * @tc.steps: step6. Scroll Up, the delta greater than half of ITEM_HEIGHT
+     * @tc.expected: The item(index:3) align to end
+     */
+    ScrollSnap(GREATER_THAN_HALF_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), DEVIATION_HEIGHT);
 }
 
 /**
@@ -797,135 +945,311 @@ HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign002, TestSize.Level1)
  */
 HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign003, TestSize.Level1)
 {
+    CreateSnapList(V2::ScrollSnapAlign::CENTER);
+
     /**
-     * @tc.steps: stpe1. Set ScrollSnapAlign::CENTER
-     * @tc.expected: The middle item in the view will be align to center
+     * @tc.steps: step1. The middle item in the view will be align to center
      */
-    ListModelNG model = CreateList();
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    const float defaultOffset = -(LIST_HEIGHT - ITEM_HEIGHT) / 2; // -150.f
+    const float defaultOffset = -(LIST_HEIGHT - DEVIATION_HEIGHT - ITEM_HEIGHT) / 2; // -140.f
     EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset);
+
+    /**
+     * @tc.steps: step2. Scroll Down, the delta less than half of ITEM_HEIGHT
+     * @tc.expected: Align item not change
+     */
+    ScrollSnap(-LESS_THAN_HALF_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset);
+
+    /**
+     * @tc.steps: step3. Scroll Down, the delta greater than half of ITEM_HEIGHT
+     * @tc.expected: The item(index:1) align to center
+     */
+    ScrollSnap(-GREATER_THAN_HALF_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset + ITEM_HEIGHT);
+
+    /**
+     * @tc.steps: step4. Scroll Down, the delta over bottom
+     * @tc.expected: The last item align to center
+     */
+    ScrollSnap(-1000.f, 0.0);
     float scrollableDistance = pattern_->GetScrollableDistance();
-    EXPECT_EQ(scrollableDistance, 200.f); // still is 200.f
+    EXPECT_EQ(scrollableDistance, ITEM_HEIGHT * 2 + DEVIATION_HEIGHT); // 220.f
+    EXPECT_EQ(pattern_->GetTotalOffset(), scrollableDistance - defaultOffset);
 
     /**
-     * @tc.steps: stpe2. Scroll delta less than half of ITEM_HEIGHT
-     * @tc.expected: The fitst item(index:0) align to center
+     * @tc.steps: step5. Scroll Up, the delta less than half of ITEM_HEIGHT
+     * @tc.expected: Align item not change
      */
-    ScrollSnapForEqualHeightItem(-49.f, -1200.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset); // -150.f
+    ScrollSnap(LESS_THAN_HALF_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), scrollableDistance - defaultOffset);
 
     /**
-     * @tc.steps: stpe3. Scroll delta greater than half of ITEM_HEIGHT
-     * @tc.expected: The fitst item(index:1) align to center
+     * @tc.steps: step6. Scroll Up, the delta greater than half of ITEM_HEIGHT
+     * @tc.expected: The item(index:4) align to start
      */
-    ScrollSnapForEqualHeightItem(-51.f, -1200.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset + ITEM_HEIGHT); // -50.f
-
-    /**
-     * @tc.steps: stpe4. Scroll to over bottom
-     * @tc.expected: The last item(index:9) align to center
-     */
-    ScrollSnapForEqualHeightItem(-1000.f, -1200.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), scrollableDistance - defaultOffset); // 350.f
+    ScrollSnap(GREATER_THAN_HALF_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), scrollableDistance - defaultOffset - ITEM_HEIGHT);
 }
 
 /**
  * @tc.name: AttrScrollSnapAlign004
- * @tc.desc: Test LayoutProperty about ScrollSnapAlign different itemHeight
+ * @tc.desc: Test LayoutProperty about ScrollSnapAlign with different itemHeight
  * @tc.type: FUNC
  */
 HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign004, TestSize.Level1)
 {
-    /**
-     * @tc.steps: stpe1. Set ScrollSnapAlign::START, set item(index:1) height:150.f
-     */
-    ListModelNG model = CreateList();
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    GetChildLayoutProperty<ListItemLayoutProperty>(frameNode_, 1)
-        ->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(ITEM_HEIGHT * 1.5)));
-    /**
-     * @tc.steps: stpe2. Scroll delta greater than half of item(index:0) height
-     * @tc.expected: The item(index:1) align to start
-     */
-    ScrollSnap(-51.f, 1200.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT); // 100.f
+    CreateSnapList(V2::ScrollSnapAlign::START);
+    SetListItemHeight(1, SPECIAL_ITEM_HEIGHT);
 
     /**
-     * @tc.steps: stpe3. Scroll delta greater than half of item(index:1) height(half height:75.f)
+     * @tc.steps: step1. Scroll Down, the delta greater than half of ITEM_HEIGHT
+     * @tc.expected: The item(index:1) align to start
+     */
+    ScrollSnap(-GREATER_THAN_HALF_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT);
+
+    /**
+     * @tc.steps: step2. Scroll Down, the delta less than half of SPECIAL_ITEM_HEIGHT
+     * @tc.expected: Align item not change
+     */
+    ScrollSnap(-LESS_THAN_HALF_SPECIAL_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT);
+
+    /**
+     * @tc.steps: step3. Scroll Down, the delta greater than half of SPECIAL_ITEM_HEIGHT
      * @tc.expected: The item(index:2) align to start
      */
-    ScrollSnap(-76.f, 1200.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT * 2.5); // 250.f
+    ScrollSnap(-GREATER_THAN_HALF_SPECIAL_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT * 2.5);
+
+    /**
+     * @tc.steps: step4. Scroll Up, the delta less than half of SPECIAL_ITEM_HEIGHT
+     * @tc.expected: Align item not change
+     */
+    ScrollSnap(LESS_THAN_HALF_SPECIAL_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT * 2.5);
+
+    /**
+     * @tc.steps: step5. Scroll Up, the delta greater than half of SPECIAL_ITEM_HEIGHT
+     * @tc.expected: The item(index:1) align to start
+     */
+    ScrollSnap(GREATER_THAN_HALF_SPECIAL_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT);
 }
 
 /**
  * @tc.name: AttrScrollSnapAlign005
- * @tc.desc: Test LayoutProperty about ScrollSnapAlign different itemHeight
+ * @tc.desc: Test LayoutProperty about ScrollSnapAlign with different itemHeight
  * @tc.type: FUNC
  */
 HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign005, TestSize.Level1)
 {
-    /**
-     * @tc.steps: stpe1. Set ScrollSnapAlign::END, set item(index:5) height:150.f
-     */
-    ListModelNG model = CreateList();
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::END);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    GetChildLayoutProperty<ListItemLayoutProperty>(frameNode_, TOTAL_ITEM_NUMBER - 1)
-        ->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(ITEM_HEIGHT * 1.5)));
+    CreateSnapList(V2::ScrollSnapAlign::END);
+    SetListItemHeight(TOTAL_ITEM_NUMBER - 2, SPECIAL_ITEM_HEIGHT);
 
     /**
-     * @tc.steps: stpe2. Scroll delta greater than half of item(index:8) height
-     * @tc.expected: The item(index:8) align to end
+     * @tc.steps: step1. Scroll Down, the delta is small
+     * @tc.expected: The item(index:3) align to end
      */
-    ScrollSnap(-51.f, 1200.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT); // 100.f
+    ScrollSnap(-1.0, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), DEVIATION_HEIGHT);
 
     /**
-     * @tc.steps: stpe3. Scroll delta greater than half of item(index:9) height(half height:75.f)
-     * @tc.expected: The item(index:9) align to end
+     * @tc.steps: step2. Scroll Down, the delta less than half of SPECIAL_ITEM_HEIGHT
+     * @tc.expected: Align item not change
      */
-    ScrollSnap(-76.f, 1200.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT * 2.5); // 250.f
+    ScrollSnap(-LESS_THAN_HALF_SPECIAL_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), DEVIATION_HEIGHT);
+
+    /**
+     * @tc.steps: step3. Scroll Down, the delta greater than half of SPECIAL_ITEM_HEIGHT
+     * @tc.expected: The item(index:4) align to end
+     */
+    ScrollSnap(-GREATER_THAN_HALF_SPECIAL_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), SPECIAL_ITEM_HEIGHT + DEVIATION_HEIGHT);
+
+    /**
+     * @tc.steps: step4. Scroll Up, the delta less than half of SPECIAL_ITEM_HEIGHT
+     * @tc.expected: Align item not change
+     */
+    ScrollSnap(LESS_THAN_HALF_SPECIAL_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), SPECIAL_ITEM_HEIGHT + DEVIATION_HEIGHT);
+
+    /**
+     * @tc.steps: step5. Scroll Up, the delta greater than half of SPECIAL_ITEM_HEIGHT
+     * @tc.expected: The item(index:3) align to end
+     */
+    ScrollSnap(GREATER_THAN_HALF_SPECIAL_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), DEVIATION_HEIGHT);
 }
 
 /**
  * @tc.name: AttrScrollSnapAlign006
- * @tc.desc: Test LayoutProperty about ScrollSnapAlign different itemHeight
+ * @tc.desc: Test LayoutProperty about ScrollSnapAlign with different itemHeight
  * @tc.type: FUNC
  */
 HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign006, TestSize.Level1)
 {
+    CreateSnapList(V2::ScrollSnapAlign::CENTER);
+    SetListItemHeight(1, SPECIAL_ITEM_HEIGHT);
+
     /**
-     * @tc.steps: stpe1. Set ScrollSnapAlign::CENTER, set item(index:1) height:150.f
+     * @tc.steps: step1. The middle item in the view will be align to center
      */
+    const float defaultOffset = -(LIST_HEIGHT - DEVIATION_HEIGHT - ITEM_HEIGHT) / 2; // -140.f
+    EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset);
+
+    /**
+     * @tc.steps: step2. Scroll Down, the delta less than half of ITEM_HEIGHT
+     * @tc.expected: Align item not change
+     */
+    ScrollSnap(-LESS_THAN_HALF_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset);
+
+    /**
+     * @tc.steps: step3. Scroll Down, the delta greater than half of ITEM_HEIGHT
+     * @tc.expected: The item(index:1) align to center
+     */
+    ScrollSnap(-GREATER_THAN_HALF_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset + (SPECIAL_ITEM_HEIGHT + ITEM_HEIGHT) / 2);
+
+    /**
+     * @tc.steps: step5. Scroll Up, the delta less than half of SPECIAL_ITEM_HEIGHT
+     * @tc.expected: Align item not change
+     */
+    ScrollSnap(LESS_THAN_HALF_SPECIAL_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset + (SPECIAL_ITEM_HEIGHT + ITEM_HEIGHT) / 2);
+
+    /**
+     * @tc.steps: step6. Scroll Up, the delta greater than half of SPECIAL_ITEM_HEIGHT
+     * @tc.expected: The item(index:0) align to center
+     */
+    ScrollSnap(GREATER_THAN_HALF_SPECIAL_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset);
+}
+
+/**
+ * @tc.name: AttrScrollSnapAlign007
+ * @tc.desc: Test LayoutProperty about ScrollSnapAlign invalid condition
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Empty ListItems
+     * @tc.expected: Can not scroll snap
+     */
+    CreateSnapList(V2::ScrollSnapAlign::START, 0);
+    EXPECT_EQ(pattern_->GetScrollableDistance(), 0.f);
+    ScrollSnap(-GREATER_THAN_HALF_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+
+    /**
+     * @tc.steps: step2. UnScrollable List
+     * @tc.expected: Can not scroll snap
+     */
+    ClearOldNodes();
+    CreateSnapList(V2::ScrollSnapAlign::START, 1);
+    ScrollSnap(-GREATER_THAN_HALF_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+
+    /**
+     * @tc.steps: step3. ScrollSnapAlign::NONE
+     * @tc.expected: Has no Snap effect
+     */
+    ClearOldNodes();
+    CreateSnapList(V2::ScrollSnapAlign::NONE);
+    ScrollSnap(-GREATER_THAN_HALF_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), GREATER_THAN_HALF_ITEM_HEIGHT);
+}
+
+/**
+ * @tc.name: AttrScrollSnapAlign008
+ * @tc.desc: Test FixPredictSnapOffsetAlignStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign008, TestSize.Level1)
+{
+    CreateSnapList(V2::ScrollSnapAlign::START);
+    pattern_->OnScrollSnapCallback(-1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+    pattern_->OnScrollSnapCallback(1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+
+    // EdgeEffect::FADE
     ListModelNG model = CreateList();
+    model.SetEdgeEffect(EdgeEffect::FADE, false);
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
+    pattern_->OnScrollSnapCallback(-1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+    pattern_->OnScrollSnapCallback(1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+}
+
+/**
+ * @tc.name: AttrScrollSnapAlign009
+ * @tc.desc: Test FixPredictSnapOffsetAlignEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign009, TestSize.Level1)
+{
+    CreateSnapList(V2::ScrollSnapAlign::END);
+    pattern_->OnScrollSnapCallback(-1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+    pattern_->OnScrollSnapCallback(1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+
+    // EdgeEffect::FADE
+    ListModelNG model = CreateList();
+    model.SetEdgeEffect(EdgeEffect::FADE, false);
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::END);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
+    pattern_->OnScrollSnapCallback(-1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+    pattern_->OnScrollSnapCallback(1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+}
+
+/**
+ * @tc.name: AttrScrollSnapAlign010
+ * @tc.desc: Test FixPredictSnapOffsetAlignCenter
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign010, TestSize.Level1)
+{
+    float defaultOffset = -(LIST_HEIGHT - DEVIATION_HEIGHT - ITEM_HEIGHT) / 2; // -140.f
+    CreateSnapList(V2::ScrollSnapAlign::CENTER);
+    pattern_->OnScrollSnapCallback(-1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset);
+    pattern_->OnScrollSnapCallback(1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset);
+
+    // EdgeEffect::FADE
+    defaultOffset = -(LIST_HEIGHT - ITEM_HEIGHT) / 2;
+    ListModelNG model = CreateList();
+    model.SetEdgeEffect(EdgeEffect::FADE, false);
     model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
-    GetChildLayoutProperty<ListItemLayoutProperty>(frameNode_, 1)
-        ->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(ITEM_HEIGHT * 1.5)));
-    EXPECT_EQ(pattern_->GetTotalOffset(), -(LIST_HEIGHT - ITEM_HEIGHT) / 2); // -150.f
-
-    /**
-     * @tc.steps: stpe2. Scroll delta greater than half of item(index:0) height
-     * @tc.expected: The item(index:1) align to center
-     */
-    ScrollSnap(-51.f, 1200.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), -25.f); // item(index:0) height and item(index:1) half-height
-
-    /**
-     * @tc.steps: stpe3. Scroll delta greater than half of item(index:1) height(half height:75.f)
-     * @tc.expected: The item(index:2) align to center
-     */
-    ScrollSnap(-76.f, 1200.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), 100.f); // item(index:0,1) height and item(index:2) half-height
+    pattern_->OnScrollSnapCallback(-1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset);
+    pattern_->OnScrollSnapCallback(1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset);
 }
 
 /**
@@ -1168,10 +1492,15 @@ HWTEST_F(ListAttrTestNg, SetEdgeEffectCallback002, TestSize.Level1)
     CreateDone(frameNode_);
     RefPtr<ScrollEdgeEffect> scrollEdgeEffect = pattern_->GetScrollEdgeEffect();
     EXPECT_EQ(scrollEdgeEffect->currentPositionCallback_(), 150.0);
-    EXPECT_EQ(scrollEdgeEffect->leadingCallback_(), -50.0);
     EXPECT_EQ(scrollEdgeEffect->trailingCallback_(), 150.f);
-    EXPECT_EQ(scrollEdgeEffect->initLeadingCallback_(), -50.0);
     EXPECT_EQ(scrollEdgeEffect->initTrailingCallback_(), 150.f);
+    EXPECT_TRUE(GreatNotEqual(150.0, scrollEdgeEffect->leadingCallback_()));
+
+    ScrollToIndex(TOTAL_ITEM_NUMBER - 1, false, ScrollAlign::CENTER);
+    EXPECT_EQ(scrollEdgeEffect->currentPositionCallback_(), -50.0);
+    EXPECT_EQ(scrollEdgeEffect->leadingCallback_(), -50.0);
+    EXPECT_EQ(scrollEdgeEffect->initLeadingCallback_(), -50.0);
+    EXPECT_TRUE(LessNotEqual(-50, scrollEdgeEffect->trailingCallback_()));
 }
 
 /**
@@ -1344,77 +1673,412 @@ HWTEST_F(ListAttrTestNg, ChainAnimation003, TestSize.Level1)
 }
 
 /**
- * @tc.name: FadingEdge001
- * @tc.desc: Test SetFadingEdge
+ * @tc.name: GetOrCreateController001
+ * @tc.desc: Test GetOrCreateController
  * @tc.type: FUNC
  */
-HWTEST_F(ListAttrTestNg, FadingEdge001, TestSize.Level1)
+HWTEST_F(ListAttrTestNg, GetOrCreateController001, TestSize.Level1)
 {
-    /**
-     * @tc.cases: SetFadingEdge false
-     * @tc.expected: FadingEdge false
-     */
-    ListModelNG model = CreateList();
-    model.SetFadingEdge(false);
-    CreateListItems(1);
-    CreateDone(frameNode_);
-    EXPECT_FALSE(layoutProperty_->GetFadingEdgeValue(true));
-
-    /**
-     * @tc.cases: SetFadingEdge true
-     * @tc.expected: FadingEdge true
-     */
-    model = CreateList();
-    model.SetFadingEdge(true);
-    CreateListItems(1);
-    CreateDone(frameNode_);
-    EXPECT_TRUE(layoutProperty_->GetFadingEdgeValue(false));
-    frameNode_->SetOverlayNode(nullptr);
-    FlushLayoutTask(frameNode_);
+    ListModelNG model;
+    model.Create();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    auto controller = model.GetOrCreateController(AceType::RawPtr(frameNode));
+    EXPECT_NE(controller, nullptr);
+    controller = model.GetOrCreateController(AceType::RawPtr(frameNode));
+    EXPECT_NE(controller, nullptr);
+    CreateDone(frameNode);
 }
 
 /**
- * @tc.name: FadingEdge002
- * @tc.desc: Test SetFadingEdge
+ * @tc.name: ListItemCreate001
+ * @tc.desc: Test ListItemModelNG Create
  * @tc.type: FUNC
  */
-HWTEST_F(ListAttrTestNg, FadingEdge002, TestSize.Level1)
+HWTEST_F(ListAttrTestNg, ListItemCreate001, TestSize.Level1)
 {
     /**
-     * @tc.cases: ContentStartOffset 50.f and Space 10.f
-     * @tc.expected: startMainPos_ >= 0 and endMainPos_ > contentMainSize_
+     * @tc.steps: step1. Create ListItem without or with deepRenderFunc
+     * @tc.expected: Created successful
+     */
+    CreateList();
+    ListItemModelNG itemModel;
+    itemModel.Create(nullptr, V2::ListItemStyle::NONE);
+    ViewStackProcessor::GetInstance()->Pop();
+    itemModel.Create([](int32_t) {}, V2::ListItemStyle::NONE);
+    ViewStackProcessor::GetInstance()->Pop();
+    CreateDone(frameNode_);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 2);
+}
+
+/**
+ * @tc.name: ListMaintainVisibleContentPosition001
+ * @tc.desc: Test maintain visible content position
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, ListMaintainVisibleContentPosition001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ListItem LazyForEach
+     * @tc.expected: Created successful
      */
     ListModelNG model = CreateList();
-    model.SetFadingEdge(true);
-    model.SetContentStartOffset(50.f);
-    model.SetContentEndOffset(50.f);
-    model.SetSpace(Dimension(10.f));
-    CreateListItems(TOTAL_ITEM_NUMBER);
+    model.SetMaintainVisibleContentPosition(true);
+    CreateListItems(10);
     CreateDone(frameNode_);
-    EXPECT_EQ(pattern_->GetTotalOffset(), -50);
-    EXPECT_EQ(pattern_->startMainPos_, 50.f);
-    EXPECT_EQ(pattern_->endMainPos_, 490.f);
-    EXPECT_EQ(pattern_->contentStartOffset_, 50.f);
-    EXPECT_EQ(pattern_->contentEndOffset_, 50.f);
 
     /**
-     * @tc.cases: ScrollTo 0.f
-     * @tc.expected: startMainPos_ >= 0 and endMainPos_ > contentMainSize_
+     * @tc.steps: step1. Current start index is 2, insert Item in 0.
+     * @tc.expected: Current index is 3.
      */
-    pattern_->ScrollTo(0);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->startMainPos_, 0.f);
-    EXPECT_EQ(pattern_->endMainPos_, 440.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+    ScrollToIndex(2, false, ScrollAlign::START);
+    pattern_->NotifyDataChange(0, 1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->startIndex_, 3);
+    EXPECT_EQ(pattern_->currentOffset_, 300);
 
     /**
-     * @tc.cases: ScrollTo 50.f
-     * @tc.expected: startMainPos_ < 0
+     * @tc.steps: step2. Current start index is 3, insert Item in 3.
+     * @tc.expected: Current index is 4.
      */
-    pattern_->ScrollTo(50);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->startMainPos_, -50.f);
-    EXPECT_EQ(pattern_->endMainPos_, 490.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), 50.f);
+    pattern_->NotifyDataChange(3, 1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->startIndex_, 4);
+    EXPECT_EQ(pattern_->currentOffset_, 400);
+
+    /**
+     * @tc.steps: step3. Current start index is 4, delete Item in 1.
+     * @tc.expected: Current index is 3.
+     */
+    pattern_->NotifyDataChange(1, -1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->startIndex_, 3);
+    EXPECT_EQ(pattern_->currentOffset_, 300);
+
+    /**
+     * @tc.steps: step4. Current start index is 3, delete 3 Item in 1.
+     * @tc.expected: Current index is 1.
+     */
+    pattern_->NotifyDataChange(1, -3);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->startIndex_, 1);
+    EXPECT_EQ(pattern_->currentOffset_, 100);
+
+    /**
+     * @tc.steps: step5. Current start index is 1, delete 1 Item in 2.
+     * @tc.expected: Current index is 1.
+     */
+    pattern_->NotifyDataChange(2, -1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->startIndex_, 1);
+    EXPECT_EQ(pattern_->currentOffset_, 100);
+
+    /**
+     * @tc.steps: step6. Current start index is 1, add Item in 2.
+     * @tc.expected: Current index is 1.
+     */
+    pattern_->NotifyDataChange(2, 1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->startIndex_, 1);
+    EXPECT_EQ(pattern_->currentOffset_, 100);
 }
+
+/**
+ * @tc.name: ListMaintainVisibleContentPosition002
+ * @tc.desc: Test Test maintain visible content position with lanes
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, ListMaintainVisibleContentPosition002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ListItem LazyForEach
+     * @tc.expected: Created successful
+     */
+    ListModelNG model = CreateList();
+    model.SetMaintainVisibleContentPosition(true);
+    model.SetLanes(2);
+    CreateListItems(20);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step1. Current start index is 4, insert Item in 0.
+     * @tc.expected: Current start index is 4.
+     */
+    ScrollToIndex(4, false, ScrollAlign::START);
+    pattern_->NotifyDataChange(0, 1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->startIndex_, 4);
+    EXPECT_EQ(pattern_->currentOffset_, 200);
+
+    /**
+     * @tc.steps: step2. Current start index is 4, insert 2 Item in 0.
+     * @tc.expected: Current index is 6.
+     */
+    pattern_->NotifyDataChange(0, 2);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->startIndex_, 6);
+    EXPECT_EQ(pattern_->currentOffset_, 300);
+
+    /**
+     * @tc.steps: step3. Current start index is 6, delete Item in 0.
+     * @tc.expected: Current index is 4.
+     */
+    pattern_->NotifyDataChange(0, -1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->startIndex_, 6);
+    EXPECT_EQ(pattern_->currentOffset_, 300);
+
+    /**
+     * @tc.steps: step4. Current start index is 6, delete 2 Item in 0.
+     * @tc.expected: Current index is 2.
+     */
+    pattern_->NotifyDataChange(0, -2);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->startIndex_, 4);
+    EXPECT_EQ(pattern_->currentOffset_, 200);
+
+    /**
+     * @tc.steps: step5. Current start index is 4, delete 2 Item in 4.
+     * @tc.expected: Current index is 2.
+     */
+    pattern_->NotifyDataChange(4, -1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->startIndex_, 4);
+    EXPECT_EQ(pattern_->currentOffset_, 200);
+
+    /**
+     * @tc.steps: step6. Current start index is 4, add Item in 2.
+     * @tc.expected: Current index is 6.
+     */
+    pattern_->NotifyDataChange(4, 2);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->startIndex_, 6);
+    EXPECT_EQ(pattern_->currentOffset_, 300);
+}
+
+/**
+ * @tc.name: ListMaintainVisibleContentPosition002
+ * @tc.desc: Test Test maintain visible content position with ListItemGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, ListMaintainVisibleContentPosition003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ListItem LazyForEach
+     * @tc.expected: Created successful
+     */
+    ListModelNG model = CreateList();
+    model.SetMaintainVisibleContentPosition(true);
+    CreateListItemGroup();
+    CreateListItems(10);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step1. Current start index is 2, insert Item in 0.
+     * @tc.expected: Current index is 3.
+     */
+    ScrollToItemInGroup(0, 2, false, ScrollAlign::START);
+    EXPECT_EQ(pattern_->currentOffset_, 200);
+    auto groupNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    auto groupPattern = groupNode->GetPattern<ListItemGroupPattern>();
+    groupPattern->NotifyDataChange(0, 1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 3);
+    EXPECT_EQ(pattern_->currentOffset_, 300);
+
+    /**
+     * @tc.steps: step2. Current start index is 3, insert Item in 3.
+     * @tc.expected: Current index is 4.
+     */
+    groupPattern->NotifyDataChange(3, 1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 4);
+    EXPECT_EQ(pattern_->currentOffset_, 400);
+
+    /**
+     * @tc.steps: step3. Current start index is 4, delete Item in 1.
+     * @tc.expected: Current index is 3.
+     */
+    groupPattern->NotifyDataChange(1, -1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 3);
+    EXPECT_EQ(pattern_->currentOffset_, 300);
+
+    /**
+     * @tc.steps: step4. Current start index is 3, delete 3 Item in 1.
+     * @tc.expected: Current index is 1.
+     */
+    groupPattern->NotifyDataChange(1, -3);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 1);
+    EXPECT_EQ(pattern_->currentOffset_, 100);
+
+    /**
+     * @tc.steps: step5. Current start index is 1, delete 1 Item in 2.
+     * @tc.expected: Current index is 1.
+     */
+    groupPattern->NotifyDataChange(2, -1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 1);
+    EXPECT_EQ(pattern_->currentOffset_, 100);
+
+    /**
+     * @tc.steps: step6. Current start index is 1, add Item in 2.
+     * @tc.expected: Current index is 1.
+     */
+    groupPattern->NotifyDataChange(2, 1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 1);
+    EXPECT_EQ(pattern_->currentOffset_, 100);
+}
+
+/**
+ * @tc.name: ListMaintainVisibleContentPosition004
+ * @tc.desc: Test Test maintain visible content position with ListItemGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, ListMaintainVisibleContentPosition004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ListItem LazyForEach
+     * @tc.expected: Created successful
+     */
+    ListModelNG model = CreateList();
+    model.SetLanes(2);
+    model.SetMaintainVisibleContentPosition(true);
+    CreateListItemGroup();
+    CreateListItems(20);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step1. Current start index is 2, insert Item in 0.
+     * @tc.expected: Current index is 3.
+     */
+    ScrollToItemInGroup(0, 4, false, ScrollAlign::START);
+    auto groupNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    auto groupPattern = groupNode->GetPattern<ListItemGroupPattern>();
+    groupPattern->NotifyDataChange(0, 1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 4);
+    EXPECT_EQ(pattern_->currentOffset_, 200);
+
+    /**
+     * @tc.steps: step2. Current start index is 4, insert 2 Item in 0.
+     * @tc.expected: Current index is 6.
+     */
+    groupPattern->NotifyDataChange(0, 2);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 6);
+    EXPECT_EQ(pattern_->currentOffset_, 300);
+
+    /**
+     * @tc.steps: step3. Current start index is 6, delete Item in 0.
+     * @tc.expected: Current index is 4.
+     */
+    groupPattern->NotifyDataChange(0, -1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 6);
+    EXPECT_EQ(pattern_->currentOffset_, 300);
+
+    /**
+     * @tc.steps: step4. Current start index is 6, delete 2 Item in 0.
+     * @tc.expected: Current index is 2.
+     */
+    groupPattern->NotifyDataChange(0, -2);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 4);
+    EXPECT_EQ(pattern_->currentOffset_, 200);
+
+    /**
+     * @tc.steps: step5. Current start index is 4, delete 2 Item in 4.
+     * @tc.expected: Current index is 2.
+     */
+    groupPattern->NotifyDataChange(4, -1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 4);
+    EXPECT_EQ(pattern_->currentOffset_, 200);
+
+    /**
+     * @tc.steps: step6. Current start index is 4, add Item in 4.
+     * @tc.expected: Current index is 4.
+     */
+    groupPattern->NotifyDataChange(4, 2);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 6);
+    EXPECT_EQ(pattern_->currentOffset_, 300);
+}
+
+/**
+ * @tc.name: ListMaintainVisibleContentPosition005
+ * @tc.desc: Test Test maintain visible content position with ListItemGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, ListMaintainVisibleContentPosition005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ListItem LazyForEach
+     * @tc.expected: Created successful
+     */
+    ListModelNG model = CreateList();
+    model.SetLanes(2);
+    model.SetMaintainVisibleContentPosition(true);
+    CreateListItemGroups(10);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step1. Current start index is 2, insert Item in 0.
+     * @tc.expected: Current index is 3.
+     */
+    ScrollToIndex(2, false, ScrollAlign::START);
+    pattern_->NotifyDataChange(0, 1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->startIndex_, 3);
+    EXPECT_EQ(pattern_->currentOffset_, 300);
+
+    /**
+     * @tc.steps: step2. Current start index is 3, insert Item in 3.
+     * @tc.expected: Current index is 4.
+     */
+    pattern_->NotifyDataChange(3, 1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->startIndex_, 4);
+    EXPECT_EQ(pattern_->currentOffset_, 400);
+
+    /**
+     * @tc.steps: step3. Current start index is 4, delete Item in 1.
+     * @tc.expected: Current index is 3.
+     */
+    pattern_->NotifyDataChange(1, -1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->startIndex_, 3);
+    EXPECT_EQ(pattern_->currentOffset_, 300);
+
+    /**
+     * @tc.steps: step4. Current start index is 3, delete 3 Item in 1.
+     * @tc.expected: Current index is 1.
+     */
+    pattern_->NotifyDataChange(1, -3);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->startIndex_, 1);
+    EXPECT_EQ(pattern_->currentOffset_, 100);
+
+    /**
+     * @tc.steps: step5. Current start index is 1, delete 1 Item in 2.
+     * @tc.expected: Current index is 1.
+     */
+    pattern_->NotifyDataChange(2, -1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->startIndex_, 1);
+    EXPECT_EQ(pattern_->currentOffset_, 100);
+
+    /**
+     * @tc.steps: step6. Current start index is 1, add Item in 2.
+     * @tc.expected: Current index is 1.
+     */
+    pattern_->NotifyDataChange(2, 1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->startIndex_, 1);
+    EXPECT_EQ(pattern_->currentOffset_, 100);
+}
+
 } // namespace OHOS::Ace::NG

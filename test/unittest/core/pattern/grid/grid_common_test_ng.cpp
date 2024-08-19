@@ -271,9 +271,9 @@ HWTEST_F(GridCommonTestNg, MouseSelect004, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetRowsTemplate("1fr 1fr 1fr 1fr");
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateBigItem(1, 2, 1, 2);
-        CreateBigItem(NULL_VALUE, NULL_VALUE, 1, 3);
-        CreateBigItem(1, 3, NULL_VALUE, NULL_VALUE);
+    CreateBigItem(1, 2, 1, 2);
+    CreateBigItem(NULL_VALUE, NULL_VALUE, 1, 3);
+    CreateBigItem(1, 3, NULL_VALUE, NULL_VALUE);
     CreateGridItems(7);
     CreateDone(frameNode_);
     MouseSelect(LEFT_BOTTOM, RIGHT_TOP);
@@ -1233,7 +1233,7 @@ HWTEST_F(GridCommonTestNg, EventHub002, TestSize.Level1)
 
 /**
  * @tc.name: PerformActionTest001
- * @tc.desc: GirdItem AccessibilityPerformAction test Select and ClearSelection.
+ * @tc.desc: GridItem AccessibilityPerformAction test Select and ClearSelection.
  * @tc.type: FUNC
  */
 HWTEST_F(GridCommonTestNg, PerformActionTest001, TestSize.Level1)
@@ -1268,7 +1268,7 @@ HWTEST_F(GridCommonTestNg, PerformActionTest001, TestSize.Level1)
 
 /**
  * @tc.name: PerformActionTest002
- * @tc.desc: Gird AccessibilityPerformAction test ScrollForward and ScrollBackward.
+ * @tc.desc: Grid AccessibilityPerformAction test ScrollForward and ScrollBackward.
  * @tc.type: FUNC
  */
 HWTEST_F(GridCommonTestNg, PerformActionTest002, TestSize.Level1)

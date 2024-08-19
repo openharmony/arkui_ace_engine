@@ -94,7 +94,8 @@ public:
     void OnWindowHide() override;
     void OnVisibleChange(bool visible) override;
     void OnMountToParentDone() override;
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void AfterMountToParent() override;
+    void OnSyncGeometryNode(const DirtySwapConfig& config) override;
 
     void OnConnect();
     void OnDisconnect(bool isAbnormal);
@@ -116,7 +117,7 @@ public:
     void FireOnReceiveCallback(const AAFwk::WantParams& params);
     void SetOnErrorCallback(
         const std::function<void(int32_t code, const std::string& name, const std::string& message)>&& callback);
-    virtual void FireOnErrorCallback(int32_t code, const std::string& name, const std::string& message);
+    void FireOnErrorCallback(int32_t code, const std::string& name, const std::string& message);
     void SetSyncCallbacks(const std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>>&& callbackList);
     void FireSyncCallbacks();
     void SetAsyncCallbacks(const std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>>&& callbackList);
@@ -138,6 +139,10 @@ public:
     int32_t GetSessionId();
     int32_t GetNodeId();
     int32_t GetUiExtensionId() override;
+    RefPtr<SessionWrapper> GetSessionWrapper()
+    {
+        return sessionWrapper_;
+    }
     int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId) override;
     void DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type);
     void SetWantWrap(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
@@ -147,17 +152,15 @@ public:
         return isShowPlaceholder_;
     }
 
-    virtual void SearchExtensionElementInfoByAccessibilityId(int64_t elementId, int32_t mode, int64_t baseParent,
-        std::list<Accessibility::AccessibilityElementInfo>& output) override;
-    virtual void SearchElementInfosByText(int64_t elementId, const std::string& text, int64_t baseParent,
-        std::list<Accessibility::AccessibilityElementInfo>& output) override;
-    virtual void FindFocusedElementInfo(int64_t elementId, int32_t focusType, int64_t baseParent,
-        Accessibility::AccessibilityElementInfo& output) override;
-    virtual void FocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
-        Accessibility::AccessibilityElementInfo& output) override;
-    virtual bool TransferExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
-        int32_t action, int64_t offset) override;
     void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t uiExtensionOffset);
+    void SetModalFlag(bool isModal)
+    {
+        isModal_ = isModal;
+    }
+    void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId);
+    void OnAccessibilityChildTreeDeregister();
+    void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId);
+    void OnAccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info);
 
 protected:
     virtual void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
@@ -165,7 +168,6 @@ protected:
 
     int32_t uiExtensionId_ = 0;
     int32_t instanceId_ = Container::CurrentId();
-    std::function<void(int32_t code, const std::string& name, const std::string& message)> onErrorCallback_;
 
 private:
     enum class AbilityState {
@@ -193,6 +195,7 @@ private:
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
     void InitHoverEvent(const RefPtr<InputEventHub>& inputHub);
+    void InitializeAccessibility();
     bool HandleKeyEvent(const KeyEvent& event);
     void HandleFocusEvent();
     void HandleBlurEvent();
@@ -203,6 +206,7 @@ private:
     void DispatchFocusActiveEvent(bool isFocusActive);
     void DispatchFocusState(bool focusState);
     void DispatchDisplayArea(bool isForce = false);
+    void LogoutModalUIExtension();
 
     void RegisterVisibleAreaChange();
     void MountPlaceholderNode();
@@ -213,6 +217,7 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> hoverEvent_;
     std::shared_ptr<MMI::PointerEvent> lastPointerEvent_ = nullptr;
+    std::shared_ptr<AccessibilityChildTreeCallback> accessibilityChildTreeCallback_;
 
     std::function<void()> onModalDestroy_;
     std::function<void(const std::shared_ptr<ModalUIExtensionProxy>&)> onModalRemoteReadyCallback_;
@@ -221,6 +226,7 @@ private:
     std::function<void(int32_t, const AAFwk::Want&)> onResultCallback_;
     std::function<void(int32_t, const RefPtr<WantWrap>&)> onTerminatedCallback_;
     std::function<void(const AAFwk::WantParams&)> onReceiveCallback_;
+    std::function<void(int32_t code, const std::string& name, const std::string& message)> onErrorCallback_;
     std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>> onSyncOnCallbackList_;
     std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>> onAsyncOnCallbackList_;
     std::function<void()> bindModalCallback_;
@@ -238,9 +244,16 @@ private:
     bool isAsyncModalBinding_ = false;
     bool isShowPlaceholder_ = false;
     bool densityDpi_ = false;
+    // Whether to send the focus to the UIExtension
+    // No multi-threading problem due to run js thread
+    bool canFocusSendToUIExtension_ = true;
+    bool needReSendFocusToUIExtension_ = false;
     int32_t callbackId_ = 0;
     RectF displayArea_;
     bool isKeyAsync_ = false;
+    // StartUIExtension should after mountToParent
+    bool hasMountToParent_ = false;
+    bool needReNotifyForeground_ = false;
     SessionType sessionType_ = SessionType::UI_EXTENSION_ABILITY;
 
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);

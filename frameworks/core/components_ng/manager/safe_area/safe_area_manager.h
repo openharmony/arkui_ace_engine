@@ -65,7 +65,8 @@ public:
      * @param safeArea The SafeAreaInsets representing the new cutout safe area.
      * @return true if the cutout safe area was successfully updated, false otherwise.
      */
-    bool UpdateCutoutSafeArea(const SafeAreaInsets& safeArea);
+    bool UpdateCutoutSafeArea(
+        const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize = NG::OptionalSize<uint32_t>());
 
     /**
      * @brief Retrieves the safe area insets that account for any cutout areas on the screen.
@@ -82,6 +83,13 @@ public:
     SafeAreaInsets GetSafeArea() const;
 
     /**
+     * @brief Retrieves the safe area insets only System.
+     *
+     * @return The System safe area insets.
+     */
+    SafeAreaInsets GetSafeAreaWithoutCutout() const;
+
+    /**
      * @brief Updates the safe area to accommodate the keyboard.
      *
      * This function is called to update the safe area when the keyboard is shown or hidden.
@@ -89,7 +97,7 @@ public:
      * @param keyboardHeight The height of the keyboard in pixels.
      * @return true if the safe area was modified, false otherwise.
      */
-    bool UpdateKeyboardSafeArea(float keyboardHeight);
+    bool UpdateKeyboardSafeArea(float keyboardHeight, std::optional<uint32_t> rootHeight = std::nullopt);
 
     /**
      * @brief Retrieves the inset of the safe area caused by the keyboard.
@@ -189,6 +197,7 @@ public:
     bool IsSafeAreaValid() const;
     // check if the page node needs to be avoid keyboard
     bool CheckPageNeedAvoidKeyboard(const RefPtr<FrameNode>& frameNode);
+    PaddingPropertyF SafeAreaToPadding(bool withoutProcess = false);
 private:
     bool isAtomicService_ = false;
 

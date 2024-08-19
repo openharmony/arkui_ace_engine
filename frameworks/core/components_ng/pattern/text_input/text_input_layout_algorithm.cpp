@@ -39,10 +39,12 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
 
     // Create paragraph.
     auto disableTextAlign = !pattern->IsTextArea() && !showPlaceHolder_ && !isInlineStyle;
-    auto textFieldContentConstraint = CalculateContentMaxSizeWithCalculateConstraint(contentConstraint, layoutWrapper);
-    if (IsNeedAdaptFontSize(textStyle, textFieldLayoutProperty, textFieldContentConstraint)) {
-        if (!AddAdaptFontSizeAndAnimations(textStyle, textFieldLayoutProperty,
-            BuildLayoutConstraintWithoutResponseArea(textFieldContentConstraint, layoutWrapper), layoutWrapper)) {
+    textFieldContentConstraint_ = CalculateContentMaxSizeWithCalculateConstraint(contentConstraint, layoutWrapper);
+    auto contentConstraintWithoutResponseArea =
+        BuildLayoutConstraintWithoutResponseArea(textFieldContentConstraint_, layoutWrapper);
+    if (IsNeedAdaptFontSize(textStyle, textFieldLayoutProperty, textFieldContentConstraint_)) {
+        if (!AddAdaptFontSizeAndAnimations(
+            textStyle, textFieldLayoutProperty, contentConstraintWithoutResponseArea, layoutWrapper)) {
             return std::nullopt;
         }
     } else {
@@ -59,12 +61,12 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
     // Paragraph layout.
     if (isInlineStyle) {
         CreateInlineParagraph(textStyle, textContent_, false, pattern->GetNakedCharPosition(), disableTextAlign);
-        return InlineMeasureContent(textFieldContentConstraint, layoutWrapper);
+        return InlineMeasureContent(contentConstraintWithoutResponseArea, layoutWrapper);
     }
     if (showPlaceHolder_) {
-        return PlaceHolderMeasureContent(textFieldContentConstraint, layoutWrapper, 0);
+        return PlaceHolderMeasureContent(contentConstraintWithoutResponseArea, layoutWrapper, 0);
     }
-    return TextInputMeasureContent(textFieldContentConstraint, layoutWrapper, 0);
+    return TextInputMeasureContent(contentConstraintWithoutResponseArea, layoutWrapper, 0);
 }
 
 void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -89,20 +91,21 @@ void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(textFieldTheme);
     auto defaultHeight = GetDefaultHeightByType(layoutWrapper);
 
-    if (LessOrEqual(contentWidth, 0)) {
-        frameSize.SetWidth(contentWidth);
-    } else {
-        frameSize.SetWidth(contentWidth + pattern->GetHorizontalPaddingAndBorderSum());
+    auto responseAreaWidth = 0.0f;
+    if (pattern->GetCleanNodeResponseArea()) {
+        responseAreaWidth += pattern->GetCleanNodeResponseArea()->GetFrameSize().Width();
     }
+    if (pattern->GetResponseArea()) {
+        responseAreaWidth += pattern->GetResponseArea()->GetFrameSize().Width();
+    }
+    frameSize.SetWidth(contentWidth + pattern->GetHorizontalPaddingAndBorderSum() + responseAreaWidth);
 
-    auto contentConstraint = layoutWrapper->GetLayoutProperty()->CreateContentConstraint();
-    auto textFieldContentConstraint = CalculateContentMaxSizeWithCalculateConstraint(contentConstraint, layoutWrapper);
-    if (textFieldContentConstraint.selfIdealSize.Height().has_value()) {
+    if (textFieldContentConstraint_.selfIdealSize.Height().has_value()) {
         if (LessOrEqual(contentWidth, 0)) {
-            frameSize.SetHeight(textFieldContentConstraint.maxSize.Height());
+            frameSize.SetHeight(textFieldContentConstraint_.maxSize.Height());
         } else {
             frameSize.SetHeight(
-                textFieldContentConstraint.maxSize.Height() + pattern->GetVerticalPaddingAndBorderSum());
+                textFieldContentConstraint_.maxSize.Height() + pattern->GetVerticalPaddingAndBorderSum());
         }
     } else {
         auto height = LessNotEqual(contentHeight, defaultHeight)
@@ -113,51 +116,14 @@ void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         frameSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
     } else if (!layoutWrapper->GetLayoutProperty()->GetLayoutRect()) {
+        auto frameSizeConstraint = CalculateFrameSizeConstraint(textFieldContentConstraint_, layoutWrapper);
         auto finalSize = UpdateOptionSizeByCalcLayoutConstraint(frameSize,
             layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint(),
             layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()->percentReference);
         frameSize.SetHeight(finalSize.Height());
+        frameSize.Constrain(frameSizeConstraint.minSize, frameSizeConstraint.maxSize);
     }
-    ResponseAreaMeasure(layoutWrapper, frameSize, textFieldContentConstraint, contentWidth, contentHeight);
-}
-
-void TextInputLayoutAlgorithm::ResponseAreaMeasure(LayoutWrapper* layoutWrapper, OptionalSizeF& frameSize,
-    LayoutConstraintF& textFieldContentConstraint, float contentWidth, float contentHeight)
-{
-    const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
-    auto responseArea = pattern->GetResponseArea();
-    auto cleanNodeResponseArea = pattern->GetCleanNodeResponseArea();
-    float childWidth = 0.0f;
-    bool updateFrameSize = false;
-    if (responseArea) {
-        updateFrameSize = true;
-        auto childIndex = frameNode->GetChildIndex(responseArea->GetFrameNode());
-        childWidth += responseArea->Measure(layoutWrapper, childIndex).Width();
-    }
-    if (cleanNodeResponseArea) {
-        updateFrameSize = true;
-        auto childIndex = frameNode->GetChildIndex(cleanNodeResponseArea->GetFrameNode());
-        childWidth += cleanNodeResponseArea->Measure(layoutWrapper, childIndex).Width();
-    }
-    if (updateFrameSize) {
-        if (LessOrEqual(contentWidth + childWidth, textFieldContentConstraint.maxSize.Width())) {
-            frameSize.SetWidth(contentWidth + pattern->GetHorizontalPaddingAndBorderSum() + childWidth);
-        } else {
-            if (showPlaceHolder_) {
-                PlaceHolderMeasureContent(textFieldContentConstraint, layoutWrapper, childWidth);
-            }
-            content->SetSize(SizeF(textFieldContentConstraint.maxSize.Width() - childWidth, contentHeight));
-            frameSize.SetWidth(
-                textFieldContentConstraint.maxSize.Width() + pattern->GetHorizontalPaddingAndBorderSum());
-        }
-        layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
-    }
 }
 
 void TextInputLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -219,7 +185,7 @@ void TextInputLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         .isRTL = isRTL,
         .responseArea = responseArea,
         .cleanResponseArea = cleanNodeResponseArea,
-        .offsetBase = offsetBase
+        .contentOffset = content->GetRect().GetOffset()
     };
     UpdateTextRect(updateTextRectParams);
 
@@ -234,32 +200,21 @@ void TextInputLayoutAlgorithm::UpdateContentPosition(const UpdateContentPosition
 {
     OffsetF contentOffset =
         params.offsetBase + Alignment::GetAlignPosition(params.size, params.contentSize, params.align);
+    auto offsetBaseX = params.offsetBase.GetX();
     if (params.isRTL) {
         if (params.responseArea) {
-            RectF responseAreaRect = params.responseArea->GetAreaRect();
-            content->SetOffset(OffsetF(params.offsetBase.GetX() + responseAreaRect.Width(), contentOffset.GetY()));
-        } else if (params.cleanResponseArea) {
-            RectF cleanResponseAreaRect = params.cleanResponseArea->GetAreaRect();
-            content->SetOffset(OffsetF(params.offsetBase.GetX() + cleanResponseAreaRect.Width(), contentOffset.GetY()));
-        } else {
-            content->SetOffset(OffsetF(params.offsetBase.GetX(), contentOffset.GetY()));
+            offsetBaseX += params.responseArea->GetAreaRect().Width();
         }
-    } else {
-        content->SetOffset(OffsetF(params.offsetBase.GetX(), contentOffset.GetY()));
+        if (params.cleanResponseArea) {
+            offsetBaseX += params.cleanResponseArea->GetAreaRect().Width();
+        }
     }
+    content->SetOffset(OffsetF(offsetBaseX, contentOffset.GetY()));
 }
 
 void TextInputLayoutAlgorithm::UpdateTextRect(const UpdateTextRectParams& params)
 {
-    auto buttonWidth = 0.0f;
-    if (params.cleanResponseArea) {
-        buttonWidth += params.cleanResponseArea->GetAreaRect().Width();
-    }
-    if (params.responseArea) {
-        buttonWidth += params.responseArea->GetAreaRect().Width();
-    }
-    if (LessOrEqual(textRect_.Width(), params.contentSize.Width()) ||
-        LessOrEqual(textRect_.Width() - buttonWidth, params.contentSize.Width())) {
+    if (LessOrEqual(textRect_.Width(), params.contentSize.Width())) {
         float textRectOffsetX = 0.0f;
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
             textRectOffsetX = params.pattern->GetPaddingLeft();
@@ -281,12 +236,12 @@ void TextInputLayoutAlgorithm::UpdateTextRect(const UpdateTextRectParams& params
                 RectF cleanResponseAreaRect = params.cleanResponseArea->GetAreaRect();
                 textRectOffsetX += cleanResponseAreaRect.Width();
             }
-            textRect_.SetOffset(OffsetF(textRectOffsetX, params.offsetBase.GetY()));
+            textRect_.SetOffset(OffsetF(textRectOffsetX, params.contentOffset.GetY()));
         } else {
-            textRect_.SetOffset(OffsetF(textRectOffsetX, params.offsetBase.GetY()));
+            textRect_.SetOffset(OffsetF(textRectOffsetX, params.contentOffset.GetY()));
         }
     } else {
-        textRect_.SetOffset({ params.pattern->GetTextRect().GetOffset().GetX(), params.offsetBase.GetY() });
+        textRect_.SetOffset({ params.pattern->GetTextRect().GetOffset().GetX(), params.contentOffset.GetY() });
     }
 }
 
@@ -342,7 +297,8 @@ LayoutConstraintF TextInputLayoutAlgorithm::BuildLayoutConstraintWithoutResponse
     }
 
     auto newLayoutConstraint = contentConstraint;
-    newLayoutConstraint.maxSize.MinusWidth(childWidth);
+    newLayoutConstraint.maxSize.SetWidth(std::max(newLayoutConstraint.maxSize.Width() - childWidth, 0.0f));
+    newLayoutConstraint.minSize.SetWidth(std::max(newLayoutConstraint.minSize.Width() - childWidth, 0.0f));
     if (newLayoutConstraint.selfIdealSize.Width()) {
         newLayoutConstraint.selfIdealSize.SetWidth(newLayoutConstraint.selfIdealSize.Width().value() - childWidth);
     }

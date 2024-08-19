@@ -164,16 +164,6 @@ constexpr int32_t AI_SPAN_START = 7;
 constexpr int32_t AI_SPAN_END = 18;
 constexpr int32_t AI_SPAN_START_II = 24;
 constexpr int32_t AI_SPAN_END_II = 37;
-const struct TextDataDetectResult TEXT_DATA_DETECT_RESULT = { 0,
-    "{\"phoneNum\":[{\"charOffset\":7,\"number\":\"18888888888\",\"oriText\":\"18888888888\",\"type\":1}]}", "0",
-    "{\"phoneNum\":[{\"option\":\"呼叫\"},{\"option\":\"发送信息\"},\
-        {\"option\":\"新建联系人\"},{\"option\":\"复制\"},{\"option\":\"选择文本\"}],\
-        \"url\":[{\"option\":\"打开\"},{\"option\":\"复制\"},{\"option\":\"选择文本\"}],\
-        \"email\":[{\"option\":\"新建邮箱\"},{\"option\":\"发送信息\"},\
-        {\"option\":\"新建联系人\"},{\"option\":\"复制\"},{\"option\":\"选择文本\"}],\
-        \"location\":[{\"option\":\"导航至该位置\"},{\"option\":\"在地图中打开\"},\
-        {\"option\":\"复制\"},{\"option\":\"选择文本\"}]}",
-    "{\"bundlename\":\"com.XXXXXX.hmsapp.hiai\",\"abilityname\":\"EntityMenuUIExtensionAbility\"}" };
 const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_1 = ParseFontFeatureSettings("\"ss01\" 1");
 const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_0 = ParseFontFeatureSettings("\"ss01\" 0");
 const std::string MULTIPLE_SPAN1 = "Span1";

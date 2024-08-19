@@ -320,9 +320,12 @@ void SelectPattern::RegisterOnPress()
     auto host = GetHost();
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
-        auto host = pattern->GetHost();
-        auto theme = host->GetContextRefPtr()->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContextRefPtr();
+        CHECK_NULL_VOID(context);
+        auto theme = context->GetTheme<SelectTheme>();
         auto touchType = info.GetTouches().front().GetTouchType();
         const auto& renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
@@ -624,7 +627,7 @@ void SelectPattern::SetOptionBgColor(const Color& color)
 {
     optionBgColor_ = color;
     for (size_t i = 0; i < options_.size(); ++i) {
-        if (i == selected_ && selectedBgColor_.has_value()) {
+        if (static_cast<int32_t>(i) == selected_ && selectedBgColor_.has_value()) {
             continue;
         }
         auto pattern = options_[i]->GetPattern<OptionPattern>();
@@ -637,7 +640,7 @@ void SelectPattern::SetOptionFontSize(const Dimension& value)
 {
     optionFont_.FontSize = value;
     for (size_t i = 0; i < options_.size(); ++i) {
-        if (i == selected_ && selectedFont_.FontSize.has_value()) {
+        if (static_cast<int32_t>(i) == selected_ && selectedFont_.FontSize.has_value()) {
             continue;
         }
         auto pattern = options_[i]->GetPattern<OptionPattern>();
@@ -650,7 +653,7 @@ void SelectPattern::SetOptionItalicFontStyle(const Ace::FontStyle& value)
 {
     optionFont_.FontStyle = value;
     for (size_t i = 0; i < options_.size(); ++i) {
-        if (i == selected_ && selectedFont_.FontStyle.has_value()) {
+        if (static_cast<int32_t>(i) == selected_ && selectedFont_.FontStyle.has_value()) {
             continue;
         }
         auto pattern = options_[i]->GetPattern<OptionPattern>();
@@ -663,7 +666,7 @@ void SelectPattern::SetOptionFontWeight(const FontWeight& value)
 {
     optionFont_.FontWeight = value;
     for (size_t i = 0; i < options_.size(); ++i) {
-        if (i == selected_ && selectedFont_.FontWeight.has_value()) {
+        if (static_cast<int32_t>(i) == selected_ && selectedFont_.FontWeight.has_value()) {
             continue;
         }
         auto pattern = options_[i]->GetPattern<OptionPattern>();
@@ -676,7 +679,7 @@ void SelectPattern::SetOptionFontFamily(const std::vector<std::string>& value)
 {
     optionFont_.FontFamily = value;
     for (size_t i = 0; i < options_.size(); ++i) {
-        if (i == selected_ && selectedFont_.FontFamily.has_value()) {
+        if (static_cast<int32_t>(i) == selected_ && selectedFont_.FontFamily.has_value()) {
             continue;
         }
         auto pattern = options_[i]->GetPattern<OptionPattern>();
@@ -689,7 +692,7 @@ void SelectPattern::SetOptionFontColor(const Color& color)
 {
     optionFont_.FontColor = color;
     for (size_t i = 0; i < options_.size(); ++i) {
-        if (i == selected_ && selectedFont_.FontColor.has_value()) {
+        if (static_cast<int32_t>(i) == selected_ && selectedFont_.FontColor.has_value()) {
             continue;
         }
         auto pattern = options_[i]->GetPattern<OptionPattern>();
@@ -775,6 +778,7 @@ void SelectPattern::ResetOptionProps()
     for (const auto& option : options_) {
         auto pattern = option->GetPattern<OptionPattern>();
         CHECK_NULL_VOID(pattern);
+        pattern->SetSelected(false);
         pattern->SetBgColor(optionBgColor_.value_or(selectTheme->GetBackgroundColor()));
         pattern->SetFontSize(optionFont_.FontSize.value_or(selectTheme->GetMenuFontSize()));
         pattern->SetItalicFontStyle(optionFont_.FontStyle.value_or(textTheme->GetTextStyle().GetFontStyle()));
@@ -802,6 +806,7 @@ void SelectPattern::UpdateLastSelectedProps(int32_t index)
         lastSelected->SetFontWeight(newSelected->GetFontWeight());
 
         lastSelected->SetBgColor(newSelected->GetBgColor());
+        lastSelected->SetSelected(false);
         lastSelected->UpdateNextNodeDivider(true);
         if (selected_ != 0) {
             auto lastSelectedNode = lastSelected->GetHost();
@@ -852,6 +857,7 @@ void SelectPattern::UpdateSelectedProps(int32_t index)
         auto selectedColor = theme->GetSelectedColor();
         newSelected->SetBgColor(selectedColor);
     }
+    newSelected->SetSelected(true);
     newSelected->UpdateNextNodeDivider(false);
     auto newSelectedNode = newSelected->GetHost();
     CHECK_NULL_VOID(newSelectedNode);
@@ -887,9 +893,6 @@ void SelectPattern::InitTextProps(const RefPtr<TextLayoutProperty>& textProps, c
     textProps->UpdateTextDecoration(theme->GetTextDecoration());
     textProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textProps->UpdateMaxLines(SELECT_ITSELF_TEXT_LINES);
-    MarginProperty margin;
-    margin.left = CalcLength(theme->GetContentMargin());
-    textProps->UpdateMargin(margin);
 }
 
 void SelectPattern::InitSpinner(
@@ -907,10 +910,6 @@ void SelectPattern::InitSpinner(
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = idealSize;
     spinnerLayoutProperty->UpdateCalcLayoutProperty(layoutConstraint);
-    MarginProperty margin;
-    margin.right = CalcLength(selectTheme->GetContentMargin());
-    spinnerLayoutProperty->UpdateMargin(margin);
-
     auto spinnerRenderProperty = spinner->GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_VOID(spinnerRenderProperty);
     spinnerRenderProperty->UpdateSvgFillColor(selectTheme->GetSpinnerColor());
@@ -925,9 +924,6 @@ void SelectPattern::InitSpinner(
     spinnerLayoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo{symbolId});
     spinnerLayoutProperty->UpdateSymbolColorList({selectTheme->GetSpinnerSymbolColor()});
     spinnerLayoutProperty->UpdateFontSize(selectTheme->GetFontSize());
-    MarginProperty margin;
-    margin.right = CalcLength(selectTheme->GetContentMargin());
-    spinnerLayoutProperty->UpdateMargin(margin);
 }
 
 // XTS inspector code

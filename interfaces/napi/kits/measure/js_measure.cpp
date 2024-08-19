@@ -13,24 +13,10 @@
  * limitations under the License.
  */
 
-#include <map>
-#include <optional>
-#include <string>
 
 #include "interfaces/napi/kits/utils/napi_utils.h"
-#include "js_native_api.h"
-#include "js_native_api_types.h"
-#include "napi/native_api.h"
-#include "napi/native_engine/native_value.h"
-#include "napi/native_node_api.h"
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/size.h"
 #include "bridge/common/utils/engine_helper.h"
-#include "bridge/js_frontend/engine/common/js_engine.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/text_style.h"
-#include "frameworks/base/utils/measure_util.h"
 
 extern const char _binary_measure_js_start[];
 extern const char _binary_measure_abc_start[];
@@ -43,6 +29,48 @@ extern const char* _binary_measure_abc_end;
 #endif
 
 namespace OHOS::Ace::Napi {
+namespace {
+Dimension MeasureStringToDimensionWithUnit(const std::string& value, bool& useDefaultUnit,
+    DimensionUnit defaultUnit = DimensionUnit::PX, float defaultValue = 0.0f, bool isCalc = false)
+{
+    errno = 0;
+    if (std::strcmp(value.c_str(), "auto") == 0) {
+        return Dimension(defaultValue, DimensionUnit::AUTO);
+    }
+    char* pEnd = nullptr;
+    double result = std::strtod(value.c_str(), &pEnd);
+    if (pEnd == value.c_str() || errno == ERANGE) {
+        useDefaultUnit = true;
+        return Dimension(defaultValue, defaultUnit);
+    }
+    if (pEnd != nullptr) {
+        if (std::strcmp(pEnd, "%") == 0) {
+            // Parse percent, transfer from [0, 100] to [0, 1]
+            return Dimension(result / 100.0, DimensionUnit::PERCENT);
+        }
+        if (std::strcmp(pEnd, "px") == 0) {
+            return Dimension(result, DimensionUnit::PX);
+        }
+        if (std::strcmp(pEnd, "vp") == 0) {
+            return Dimension(result, DimensionUnit::VP);
+        }
+        if (std::strcmp(pEnd, "fp") == 0) {
+            return Dimension(result, DimensionUnit::FP);
+        }
+        if (std::strcmp(pEnd, "lpx") == 0) {
+            return Dimension(result, DimensionUnit::LPX);
+        }
+        if ((std::strcmp(pEnd, "\0") == 0) && isCalc) {
+            return Dimension(result, DimensionUnit::NONE);
+        }
+        if (isCalc) {
+            return Dimension(result, DimensionUnit::INVALID);
+        }
+    }
+    useDefaultUnit = true;
+    return Dimension(result, defaultUnit);
+}
+} // namespace
 static int32_t HandleIntStyle(napi_value fontStyleNApi, napi_env env)
 {
     size_t ret = 0;
@@ -102,7 +130,8 @@ static std::string HandleStringType(napi_value ParameterNApi, napi_env env)
     return ParameterStr;
 }
 
-static std::optional<Dimension> HandleDimensionType(napi_value ParameterNApi, napi_env env)
+static std::optional<Dimension> HandleDimensionType(
+    napi_value ParameterNApi, napi_env env, DimensionUnit defaultUnit, bool& useDefaultUnit)
 {
     size_t ret = 0;
     std::string ParameterStr;
@@ -113,13 +142,14 @@ static std::optional<Dimension> HandleDimensionType(napi_value ParameterNApi, na
         double ParameterValue;
         napi_get_value_double(env, ParameterNApi, &ParameterValue);
         Parameter.SetValue(ParameterValue);
-        Parameter.SetUnit(DimensionUnit::VP);
+        Parameter.SetUnit(defaultUnit);
+        useDefaultUnit = true;
     } else if (valueType == napi_string) {
         size_t ParameterLen = GetParamLen(env, ParameterNApi) + 1;
         std::unique_ptr<char[]> ParameterTemp = std::make_unique<char[]>(ParameterLen);
         napi_get_value_string_utf8(env, ParameterNApi, ParameterTemp.get(), ParameterLen, &ret);
         ParameterStr = ParameterTemp.get();
-        Parameter = StringUtils::StringToDimensionWithUnit(ParameterStr, DimensionUnit::VP);
+        Parameter = MeasureStringToDimensionWithUnit(ParameterStr, useDefaultUnit, defaultUnit);
     } else if (valueType == napi_object) {
         ResourceInfo recv;
         if (!ParseResourceParam(env, ParameterNApi, recv)) {
@@ -131,7 +161,7 @@ static std::optional<Dimension> HandleDimensionType(napi_value ParameterNApi, na
         if (!ParseIntegerToString(recv, ParameterStr)) {
             return std::nullopt;
         }
-        Parameter = StringUtils::StringToDimensionWithUnit(ParameterStr, DimensionUnit::VP);
+        Parameter = MeasureStringToDimensionWithUnit(ParameterStr, useDefaultUnit, defaultUnit);
     } else {
         return std::nullopt;
     }
@@ -166,13 +196,17 @@ static napi_value JSMeasureText(napi_env env, napi_callback_info info)
     } else {
         return nullptr;
     }
-    std::optional<Dimension> fontSizeNum = HandleDimensionType(fontSizeNApi, env);
-    std::optional<Dimension> letterSpace = HandleDimensionType(letterSpacingNApi, env);
+    MeasureContext context;
+    auto isFontSizeUseDefaultUnit = false;
+    std::optional<Dimension> fontSizeNum =
+        HandleDimensionType(fontSizeNApi, env, DimensionUnit::FP, isFontSizeUseDefaultUnit);
+    context.isFontSizeUseDefaultUnit = isFontSizeUseDefaultUnit;
+    std::optional<Dimension> letterSpace =
+        HandleDimensionType(letterSpacingNApi, env, DimensionUnit::VP, isFontSizeUseDefaultUnit);
     int32_t fontStyle = HandleIntStyle(fontStyleNApi, env);
     std::string textContent = HandleStringType(textContentNApi, env);
     std::string fontWeight = HandleStringType(fontWeightNApi, env);
     std::string fontFamily = HandleStringType(fontFamilyNApi, env);
-    MeasureContext context;
     context.textContent = textContent;
     context.fontSize = fontSizeNum;
     context.fontStyle = static_cast<FontStyle>(fontStyle);
@@ -249,19 +283,27 @@ static void SetMeasureTextNapiProperty(
 static void SetContextProperty(
     std::map<std::string, napi_value>& contextParamMap, MeasureContext& context, napi_env& env)
 {
-    std::optional<Dimension> fontSizeNum = HandleDimensionType(contextParamMap["fontSizeNApi"], env);
-    std::optional<Dimension> letterSpace = HandleDimensionType(contextParamMap["letterSpacingNApi"], env);
-    std::optional<Dimension> constraintWidth = HandleDimensionType(contextParamMap["constraintWidthNApi"], env);
-    std::optional<Dimension> lineHeight = HandleDimensionType(contextParamMap["lineHeightNApi"], env);
-    std::optional<Dimension> baselineOffset = HandleDimensionType(contextParamMap["baselineOffsetNApi"], env);
-    std::optional<Dimension> textIndent = HandleDimensionType(contextParamMap["textIndentNApi"], env);
+    auto isFontSizeUseDefaultUnit = false;
+    std::optional<Dimension> fontSizeNum =
+        HandleDimensionType(contextParamMap["fontSizeNApi"], env, DimensionUnit::FP, isFontSizeUseDefaultUnit);
+    context.isFontSizeUseDefaultUnit = isFontSizeUseDefaultUnit;
+    std::optional<Dimension> letterSpace =
+        HandleDimensionType(contextParamMap["letterSpacingNApi"], env, DimensionUnit::VP, isFontSizeUseDefaultUnit);
+    std::optional<Dimension> constraintWidth =
+        HandleDimensionType(contextParamMap["constraintWidthNApi"], env, DimensionUnit::VP, isFontSizeUseDefaultUnit);
+    std::optional<Dimension> lineHeight =
+        HandleDimensionType(contextParamMap["lineHeightNApi"], env, DimensionUnit::VP, isFontSizeUseDefaultUnit);
+    std::optional<Dimension> baselineOffset =
+        HandleDimensionType(contextParamMap["baselineOffsetNApi"], env, DimensionUnit::VP, isFontSizeUseDefaultUnit);
+    std::optional<Dimension> textIndent =
+        HandleDimensionType(contextParamMap["textIndentNApi"], env, DimensionUnit::VP, isFontSizeUseDefaultUnit);
 
     int32_t fontStyle = HandleIntStyle(contextParamMap["fontStyleNApi"], env);
     int32_t textAlign = HandleIntStyle(contextParamMap["textAlignNApi"], env);
     int32_t textOverFlow = HandleIntStyle(contextParamMap["textOverFlowNApi"], env);
     int32_t maxlines = HandleIntStyle(contextParamMap["maxLinesNApi"], env);
     int32_t textCase = HandleIntStyle(contextParamMap["textCaseNApi"], env);
-    
+
     if (contextParamMap["wordBreakNApi"] != nullptr) {
         napi_valuetype jsValueType = napi_undefined;
         napi_typeof(env, contextParamMap["wordBreakNApi"], &jsValueType);
@@ -274,7 +316,7 @@ static void SetContextProperty(
     std::string textContent = HandleStringType(contextParamMap["textContentNApi"], env);
     std::string fontWeight = HandleStringType(contextParamMap["fontWeightNApi"], env);
     std::string fontFamily = HandleStringType(contextParamMap["fontFamilyNApi"], env);
-    
+
     context.textContent = textContent;
     context.constraintWidth = constraintWidth;
     context.fontSize = fontSizeNum;

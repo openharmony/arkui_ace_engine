@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIScrollerModifier* GetScrollerModifier();
+const CJUIScrollerModifier* GetCJUIScrollerModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_SCROLLER_MODIFIER_H

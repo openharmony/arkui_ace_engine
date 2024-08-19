@@ -428,6 +428,7 @@ void BubbleLayoutAlgorithm::BubbleAvoidanceRule(RefPtr<LayoutWrapper> child, Ref
         UpdateMarginByWidth();
         childOffset_ = GetChildPositionNew(childSize_, bubbleProp); // bubble's offset
         childOffset_ = AddOffset(childOffset_);
+        dumpInfo_.finalPlacement = PlacementUtils::ConvertPlacementToString(placement_);
     }
 }
 
@@ -440,6 +441,9 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(frameNode);
     auto bubblePattern = frameNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(bubblePattern);
+    if (bubblePattern->IsExiting()) {
+        return;
+    }
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.empty()) {
         return;
@@ -474,9 +478,10 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     targetOffsetForPaint_ = targetOffset_;
     childOffsetForPaint_ = childOffset_;
     arrowPositionForPaint_ = arrowPosition_;
-    UpdateClipOffset(frameNode);
     auto isBlock = bubbleProp->GetBlockEventValue(true);
+    dumpInfo_.mask = isBlock;
     SetHotAreas(showInSubWindow, isBlock, frameNode, bubblePattern->GetContainerId());
+    UpdateClipOffset(frameNode);
 }
 
 void BubbleLayoutAlgorithm::SetHotAreas(bool showInSubWindow, bool isBlock,
@@ -531,6 +536,18 @@ bool BubbleLayoutAlgorithm::GetIfNeedArrow(const RefPtr<BubbleLayoutProperty>& b
     return false;
 }
 
+void BubbleLayoutAlgorithm::UpdateDumpInfo()
+{
+    dumpInfo_.targetSpace = targetSpace_;
+    dumpInfo_.originPlacement = PlacementUtils::ConvertPlacementToString(placement_);
+    dumpInfo_.userOffset = positionOffset_;
+    dumpInfo_.enableArrow = enableArrow_;
+    dumpInfo_.top = top_;
+    dumpInfo_.bottom = bottom_;
+    dumpInfo_.targetNode = targetTag_;
+    dumpInfo_.targetID = targetNodeId_;
+}
+
 void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layoutProp, bool showInSubWindow)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -538,9 +555,9 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     auto popupTheme = pipeline->GetTheme<PopupTheme>();
     CHECK_NULL_VOID(popupTheme);
     padding_ = popupTheme->GetPadding();
+    userSetTargetSpace_ = layoutProp->GetTargetSpace().value_or(Dimension(0.0f));
     borderRadius_ = layoutProp->GetRadius().value_or(popupTheme->GetRadius().GetX());
     border_.SetBorderRadius(Radius(borderRadius_));
-    userSetTargetSpace_ = layoutProp->GetTargetSpace().value_or(Dimension(0.0f));
     targetSpace_ = layoutProp->GetTargetSpace().value_or(popupTheme->GetTargetSpace());
     placement_ = layoutProp->GetPlacement().value_or(Placement::BOTTOM);
     isCaretMode_ = layoutProp->GetIsCaretMode().value_or(true);
@@ -564,6 +581,7 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     CHECK_NULL_VOID(safeAreaManager);
     top_ = safeAreaManager->GetSafeAreaWithoutProcess().top_.Length();
     bottom_ = safeAreaManager->GetSafeAreaWithoutProcess().bottom_.Length();
+    UpdateDumpInfo();
     marginStart_ = MARGIN_SPACE.ConvertToPx() + DRAW_EDGES_SPACE.ConvertToPx();
     marginEnd_ = MARGIN_SPACE.ConvertToPx() + DRAW_EDGES_SPACE.ConvertToPx();
     marginTop_ = top_ + DRAW_EDGES_SPACE.ConvertToPx();
@@ -999,14 +1017,12 @@ void BubbleLayoutAlgorithm::UpdateChildPosition(OffsetF& childOffset)
 
 void BubbleLayoutAlgorithm::UpdateTouchRegion()
 {
-    OffsetF topLeft;
-    OffsetF bottomRight;
+    OffsetF topLeft = childOffset_;
+    OffsetF bottomRight = OffsetF(childSize_.Width(), childSize_.Height());
     switch (arrowPlacement_) {
         case Placement::TOP:
         case Placement::TOP_LEFT:
         case Placement::TOP_RIGHT:
-            topLeft = childOffset_;
-            bottomRight = OffsetF(childSize_.Width(), targetSpace_.ConvertToPx() + childSize_.Height());
             if (showArrow_) {
                 bottomRight += OffsetF(0.0, BUBBLE_ARROW_HEIGHT.ConvertToPx());
             }
@@ -1014,8 +1030,6 @@ void BubbleLayoutAlgorithm::UpdateTouchRegion()
         case Placement::BOTTOM:
         case Placement::BOTTOM_LEFT:
         case Placement::BOTTOM_RIGHT:
-            topLeft = childOffset_ + OffsetF(0.0, -targetSpace_.ConvertToPx());
-            bottomRight = OffsetF(childSize_.Width(), targetSpace_.ConvertToPx() + childSize_.Height());
             if (showArrow_) {
                 topLeft += OffsetF(0.0, -BUBBLE_ARROW_HEIGHT.ConvertToPx());
                 bottomRight += OffsetF(0.0, BUBBLE_ARROW_HEIGHT.ConvertToPx());
@@ -1024,8 +1038,6 @@ void BubbleLayoutAlgorithm::UpdateTouchRegion()
         case Placement::LEFT:
         case Placement::LEFT_TOP:
         case Placement::LEFT_BOTTOM:
-            topLeft = childOffset_;
-            bottomRight = OffsetF(targetSpace_.ConvertToPx() + childSize_.Width(), childSize_.Height());
             if (showArrow_) {
                 bottomRight += OffsetF(BUBBLE_ARROW_HEIGHT.ConvertToPx(), 0.0);
             }
@@ -1033,19 +1045,16 @@ void BubbleLayoutAlgorithm::UpdateTouchRegion()
         case Placement::RIGHT:
         case Placement::RIGHT_TOP:
         case Placement::RIGHT_BOTTOM:
-            topLeft = childOffset_ + OffsetF(-targetSpace_.ConvertToPx(), 0.0);
-            bottomRight = OffsetF(targetSpace_.ConvertToPx() + childSize_.Width(), childSize_.Height());
             if (showArrow_) {
                 topLeft += OffsetF(-BUBBLE_ARROW_HEIGHT.ConvertToPx(), 0.0);
                 bottomRight += OffsetF(BUBBLE_ARROW_HEIGHT.ConvertToPx(), 0.0);
             }
             break;
         default:
-            topLeft = childOffset_;
-            bottomRight = OffsetF(childSize_.Width(), targetSpace_.ConvertToPx() + childSize_.Height());
             break;
     }
     touchRegion_ = RectF(topLeft, topLeft + bottomRight);
+    dumpInfo_.touchRegion = touchRegion_;
 }
 
 void BubbleLayoutAlgorithm::InitCaretTargetSizeAndPosition()
@@ -1077,12 +1086,12 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(bool showInSubWindow)
     if (!targetNode->IsOnMainTree() && !targetNode->IsVisible()) {
         return;
     }
-    auto geometryNode = targetNode->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    targetSize_ = geometryNode->GetFrameSize();
+    auto rect = targetNode->GetPaintRectToWindowWithTransform();
+    targetSize_ = rect.GetSize();
+    targetOffset_ = rect.GetOffset();
     auto pipelineContext = GetMainPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
-    targetOffset_ = targetNode->GetPaintRectOffset();
+    
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "popup targetOffset_: %{public}s, targetSize_: %{public}s",
         targetOffset_.ToString().c_str(), targetSize_.ToString().c_str());
     // Show in SubWindow
@@ -1096,6 +1105,8 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(bool showInSubWindow)
             targetOffset_ -= subwindowRect.GetOffset();
         }
     }
+    dumpInfo_.targetOffset = targetOffset_;
+    dumpInfo_.targetSize = targetSize_;
 }
 
 bool BubbleLayoutAlgorithm::CheckPositionInPlacementRect(

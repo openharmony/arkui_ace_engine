@@ -24,10 +24,10 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/placement.h"
-#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_algorithm.h"
@@ -47,6 +47,7 @@ namespace OHOS::Ace::NG {
 namespace {
 
 // Using UX spec: Constrain max height within 4/5 of screen height.
+constexpr double DIALOG_HEIGHT_RATIO = 0.8;
 constexpr double DIALOG_HEIGHT_RATIO_FOR_LANDSCAPE = 0.9;
 constexpr double DIALOG_HEIGHT_RATIO_FOR_CAR = 0.95;
 constexpr double DIALOG_MAX_HEIGHT_RATIO = 0.9;
@@ -59,11 +60,8 @@ constexpr Dimension AVOID_LIMIT_PADDING = 8.0_vp;
 constexpr double EXPAND_DISPLAY_WINDOW_HEIGHT_RATIO = 0.67;
 constexpr double EXPAND_DISPLAY_DIALOG_HEIGHT_RATIO = 0.9;
 constexpr double HALF = 2.0;
-constexpr int32_t TEXT_ALIGN_CONTENT_CENTER = 1;
-constexpr int32_t DIALOG_DEVICE_COLUMN_TWO = 2;
-constexpr int32_t DIALOG_DEVICE_COLUMN_THREE = 3;
-constexpr int32_t DIALOG_DEVICE_COLUMN_FOUR = 4;
 constexpr double LANDSCAPE_DIALOG_WIDTH_RATIO = 0.75;
+constexpr Dimension SCROLL_MIN_HEIGHT_SUITOLD = 100.0_vp;
 } // namespace
 
 void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -86,8 +84,18 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     gridCount_ = dialogProp->GetGridCount().value_or(-1);
     isShowInSubWindow_ = dialogProp->GetShowInSubWindowValue(false);
     isModal_ = dialogProp->GetIsModal().value_or(true);
-    isSuitableForElderly_ = dialogPattern->GetIsSuitableForAging();
-    if (dialogPattern->GetNeeedUpdateOrientation()) {
+    auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+    dialogPattern->UpdateFontScale();
+    isSuitOldMeasure_ = dialogPattern->GetIsSuitOldMeasure();
+    isSuitableForElderly_ = (dialogPattern->GetIsSuitableForAging() || dialogPattern->GetCustomNode()) &&
+                            windowManager->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING &&
+                            GreatOrEqual(pipeline->GetFontScale(), 1.75f);
+    auto isPickekDiaglog = dialogPattern->GetIsPickerDiaglog();
+    if (isPickekDiaglog || customSize_) {
+        isSuitableForElderly_ = false;
+    }
+    if (isSuitableForElderly_ || GreatOrEqual(pipeline->GetFontScale(), 1.75f)) {
         dialogPattern->UpdateDeviceOrientation(SystemProperties::GetDeviceOrientation());
     }
     UpdateSafeArea();
@@ -108,6 +116,10 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // constraint child size unless developer is using customStyle
     if (!customSize_) {
         auto maxSize = layoutConstraint->maxSize;
+        if (isSuitOldMeasure_) {
+            maxSize.SetWidth(pipeline->GetRootWidth());
+            maxSize.SetHeight(pipeline->GetRootHeight());
+        }
         maxSize.MinusPadding(0, 0, safeAreaInsets_.top_.Length(), 0);
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) && LessNotEqual(gridCount_, 0)) {
             maxSize.MinusPadding(0, 0, 0, safeAreaInsets_.bottom_.Length());
@@ -122,8 +134,10 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     // childSize_ and childOffset_ is used in Layout.
     child->Measure(childLayoutConstraint);
-
     if (!layoutWrapper->GetHostNode()->GetPattern<DialogPattern>()->GetCustomNode()) {
+        if (isSuitOldMeasure_) {
+            dialogMaxHeight_ = childLayoutConstraint.maxSize.Height();
+        }
         AnalysisHeightOfChild(layoutWrapper);
     }
 }
@@ -152,8 +166,8 @@ void DialogLayoutAlgorithm::AnalysisHeightOfChild(LayoutWrapper* layoutWrapper)
     RefPtr<LayoutWrapper> scroll;
     RefPtr<LayoutWrapper> list;
     for (const auto& children : layoutWrapper->GetAllChildrenWithBuild()) {
-        restWidth = children->GetGeometryNode()->GetMarginFrameSize().Width();
-        restHeight = children->GetGeometryNode()->GetMarginFrameSize().Height();
+        restWidth = children->GetLayoutProperty()->GetContentLayoutConstraint()->maxSize.Width();
+        restHeight = children->GetLayoutProperty()->GetContentLayoutConstraint()->maxSize.Height();
         for (const auto& grandson : children->GetAllChildrenWithBuild()) {
             if (grandson->GetHostTag() == V2::SCROLL_ETS_TAG) {
                 scroll = grandson;
@@ -181,6 +195,7 @@ void DialogLayoutAlgorithm::AnalysisHeightOfChild(LayoutWrapper* layoutWrapper)
         if (scroll != nullptr) {
             auto childConstraint =
                 CreateDialogChildConstraint(layoutWrapper, std::min(restHeight, scrollHeight), restWidth);
+            UpdateIsScrollHeightNegative(layoutWrapper, std::min(restHeight, scrollHeight));
             scroll->Measure(childConstraint);
         }
         if (list != nullptr) {
@@ -206,35 +221,17 @@ void DialogLayoutAlgorithm::AnalysisLayoutOfContent(LayoutWrapper* layoutWrapper
     CHECK_NULL_VOID(layoutAlgorithmWrapper);
     auto textLayoutAlgorithm = DynamicCast<TextLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_VOID(textLayoutAlgorithm);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
-    CHECK_NULL_VOID(dialogTheme);
     auto scrollPropery = scroll->GetLayoutProperty();
     CHECK_NULL_VOID(scrollPropery);
-    if (dialogTheme->GetTextAlignContent() == TEXT_ALIGN_CONTENT_CENTER) {
+    if (dialogPattern->GetTitle().empty() && dialogPattern->GetSubtitle().empty()) {
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
             GreatNotEqual(textLayoutAlgorithm->GetLineCount(), 1)) {
-            scrollPropery->UpdateAlignment(Alignment::CENTER_LEFT);
+            scroll->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER_LEFT);
         } else {
-            scrollPropery->UpdateAlignment(Alignment::CENTER);
+            scroll->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
         }
     } else {
-        if (dialogPattern->GetTitle().empty() && dialogPattern->GetSubtitle().empty()) {
-            if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
-                GreatNotEqual(textLayoutAlgorithm->GetLineCount(), 1)) {
-                scrollPropery->UpdateAlignment(Alignment::CENTER_LEFT);
-            } else {
-                scrollPropery->UpdateAlignment(Alignment::CENTER);
-            }
-        } else {
-            bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-            if (!isRtl) {
-                scrollPropery->UpdateAlignment(Alignment::CENTER_LEFT);
-            } else {
-                scrollPropery->UpdateAlignment(Alignment::CENTER_RIGHT);
-            }
-        }
+        scrollPropery->UpdateAlignment(Alignment::CENTER_LEFT);
     }
 }
 
@@ -367,9 +364,6 @@ void DialogLayoutAlgorithm::ComputeInnerLayoutParam(LayoutConstraintF& innerLayo
     columnInfo->GetParent()->BuildColumnWidth(maxSize.Width());
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
-    CHECK_NULL_VOID(dialogTheme);
-    double ratioHeight = dialogTheme->GetDialogRatioHeight();
     auto width = GetMaxWidthBasedOnGridType(columnInfo, gridSizeType, SystemProperties::GetDeviceType());
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         width =
@@ -384,18 +378,18 @@ void DialogLayoutAlgorithm::ComputeInnerLayoutParam(LayoutConstraintF& innerLayo
             innerLayout.maxSize = SizeF(width, maxSize.Height() * DIALOG_HEIGHT_RATIO_FOR_LANDSCAPE);
         } else {
             innerLayout.minSize = SizeF(width, 0.0);
-            innerLayout.maxSize = SizeF(width, maxSize.Height() * ratioHeight);
+            innerLayout.maxSize = SizeF(width, maxSize.Height() * DIALOG_HEIGHT_RATIO);
         }
     } else if (SystemProperties::GetDeviceType() == DeviceType::CAR) {
         innerLayout.minSize = SizeF(width, 0.0);
         innerLayout.maxSize = SizeF(width, maxSize.Height() * DIALOG_HEIGHT_RATIO_FOR_CAR);
     } else {
         innerLayout.minSize = SizeF(width, 0.0);
-        innerLayout.maxSize = SizeF(width, maxSize.Height() * ratioHeight);
+        innerLayout.maxSize = SizeF(width, maxSize.Height() * DIALOG_HEIGHT_RATIO);
     }
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && expandDisplay_) {
-        auto maxHeight = SystemProperties::GetDevicePhysicalHeight() * EXPAND_DISPLAY_WINDOW_HEIGHT_RATIO *
-                         EXPAND_DISPLAY_DIALOG_HEIGHT_RATIO;
+        auto maxHeight = SystemProperties::GetDevicePhysicalHeight() *
+            EXPAND_DISPLAY_WINDOW_HEIGHT_RATIO * EXPAND_DISPLAY_DIALOG_HEIGHT_RATIO;
         innerLayout.minSize = SizeF(SUBWINDOW_DIALOG_DEFAULT_WIDTH.ConvertToPx(), 0.0);
         innerLayout.maxSize = SizeF(SUBWINDOW_DIALOG_DEFAULT_WIDTH.ConvertToPx(), maxHeight);
     }
@@ -451,30 +445,15 @@ int32_t DialogLayoutAlgorithm::GetDeviceColumns(GridSizeType type, DeviceType de
                Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         deviceColumns = 5; // 5: the number of deviceColumns
     } else {
-        deviceColumns = GetDeviceColumn(type);
-    }
-    return deviceColumns;
-}
-int32_t DialogLayoutAlgorithm::GetDeviceColumn(GridSizeType type)
-{
-    int32_t columnNum;
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, 0);
-    auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
-    CHECK_NULL_RETURN(dialogTheme, 0);
-    int32_t deviceColumn = dialogTheme->GetDeviceColumns();
-    if (deviceColumn > 0) {
-        columnNum = deviceColumn;
-    } else {
         if (type == GridSizeType::SM) {
-            columnNum = DIALOG_DEVICE_COLUMN_TWO;
+            deviceColumns = 2;
         } else if (type == GridSizeType::MD) {
-            columnNum = DIALOG_DEVICE_COLUMN_THREE;
+            deviceColumns = 3;
         } else {
-            columnNum = DIALOG_DEVICE_COLUMN_FOUR;
+            deviceColumns = 4;
         }
     }
-    return columnNum;
+    return deviceColumns;
 }
 
 void DialogLayoutAlgorithm::ProcessMaskRect(
@@ -486,11 +465,6 @@ void DialogLayoutAlgorithm::ProcessMaskRect(
     auto width = maskRect->GetWidth();
     auto height = maskRect->GetHeight();
     auto offset = maskRect->GetOffset();
-    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-    if (isRtl) {
-        Dimension offsetX = Dimension(offset.GetX().Value() * (-1));
-        offset.SetX(offsetX);
-    }
     if (width.IsNegative()) {
         width = FULLSCREEN;
     }
@@ -827,16 +801,7 @@ double DialogLayoutAlgorithm::GetPaddingBottom() const
 OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
     OffsetF& topLeftPoint, const OffsetF& dialogOffset, const SizeF& childSize, bool needAvoidKeyboard)
 {
-    auto container = Container::Current();
-    auto currentId = Container::CurrentId();
-    if (isShowInSubWindow_ && !container->IsSubContainer()) {
-        currentId = SubwindowManager::GetInstance()->GetSubContainerId(Container::CurrentId());
-        container = AceEngine::Get().GetContainer(currentId);
-    }
-    CHECK_NULL_RETURN(container, topLeftPoint + dialogOffset);
-    auto context = container->GetPipelineContext();
-    CHECK_NULL_RETURN(context, topLeftPoint + dialogOffset);
-    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(context);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, topLeftPoint + dialogOffset);
     if (!customSize_ && topLeftPoint.GetY() < safeAreaInsets_.top_.end) {
         topLeftPoint.SetY(safeAreaInsets_.top_.end);
@@ -899,6 +864,22 @@ void DialogLayoutAlgorithm::ClipUIExtensionSubWindowContent(const RefPtr<FrameNo
         dialogContext->UpdateClipShape(shapeRect);
     } else {
         dialogContext->UpdateClipShape(nullptr);
+    }
+}
+
+void DialogLayoutAlgorithm::UpdateIsScrollHeightNegative(LayoutWrapper* layoutWrapper, float height)
+{
+    if (height < SCROLL_MIN_HEIGHT_SUITOLD.ConvertToPx()) {
+        const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+        auto child = children.front();
+        auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
+        if (childSize.Height() == dialogMaxHeight_) {
+            auto hostNode = layoutWrapper->GetHostNode();
+            CHECK_NULL_VOID(hostNode);
+            auto dialogPattern = hostNode->GetPattern<DialogPattern>();
+            CHECK_NULL_VOID(dialogPattern);
+            dialogPattern->SetIsScrollHeightNegative(true);
+        }
     }
 }
 } // namespace OHOS::Ace::NG

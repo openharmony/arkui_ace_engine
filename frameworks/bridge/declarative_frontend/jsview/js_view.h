@@ -181,6 +181,11 @@ protected:
 private:
     int32_t instanceId_ = -1;
     std::vector<int32_t> restoreInstanceIdStack_;
+    static constexpr uint32_t PRIMARY_ID_STACK_SIZE = 32;
+    uint32_t primaryStackSize_ = 0;
+    // The primary id stack is protection for restoreInstanceIdStack_.
+    // This can avoid crashing when the pointer in vector is corrupted.
+    std::array<int32_t, PRIMARY_ID_STACK_SIZE> primaryIdStack_{};
     bool isStatic_ = false;
     std::function<void()> notifyRenderDone_;
 };

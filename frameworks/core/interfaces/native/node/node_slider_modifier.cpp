@@ -224,7 +224,7 @@ void SetSelectColor(ArkUINodeHandle node, uint32_t color)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    SliderModelNG::SetSelectColor(frameNode, SliderModelNG::CreateSolidGradient(Color(color)), true);
+    SliderModelNG::SetSelectColor(frameNode, Color(color));
 }
 
 void ResetSelectColor(ArkUINodeHandle node)
@@ -235,8 +235,7 @@ void ResetSelectColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(theme);
-    SliderModelNG::SetSelectColor(
-        frameNode, SliderModelNG::CreateSolidGradient(theme->GetTrackSelectedColor()), true);
+    SliderModelNG::SetSelectColor(frameNode, theme->GetTrackSelectedColor());
 }
 
 void SetShowSteps(ArkUINodeHandle node, int showSteps)
@@ -537,8 +536,7 @@ ArkUI_Uint32 GetSelectColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
-    NG::Gradient gradient = SliderModelNG::GetSelectColor(frameNode);
-    return gradient.GetColors().at(0).GetLinearColor().ToColor().GetValue();
+    return SliderModelNG::GetSelectColor(frameNode).GetValue();
 }
 
 ArkUI_Bool GetShowSteps(ArkUINodeHandle node)
@@ -668,6 +666,83 @@ namespace NodeModifier {
 const ArkUISliderModifier* GetSliderModifier()
 {
     static const ArkUISliderModifier modifier = {
+        SliderModifier::SetShowTips,
+        SliderModifier::ResetShowTips,
+        SliderModifier::SetSliderStepSize,
+        SliderModifier::ResetSliderStepSize,
+        SliderModifier::SetBlockSize,
+        SliderModifier::ResetBlockSize,
+        SliderModifier::SetTrackBorderRadius,
+        SliderModifier::ResetTrackBorderRadius,
+        SliderModifier::SetStepColor,
+        SliderModifier::ResetStepColor,
+        SliderModifier::SetBlockBorderColor,
+        SliderModifier::ResetBlockBorderColor,
+        SliderModifier::SetBlockBorderWidth,
+        SliderModifier::ResetBlockBorderWidth,
+        SliderModifier::SetBlockColor,
+        SliderModifier::ResetBlockColor,
+        SliderModifier::SetTrackBackgroundColor,
+        SliderModifier::ResetTrackBackgroundColor,
+        SliderModifier::SetSelectColor,
+        SliderModifier::ResetSelectColor,
+        SliderModifier::SetShowSteps,
+        SliderModifier::ResetShowSteps,
+        SliderModifier::SetThickness,
+        SliderModifier::ResetThickness,
+        SliderModifier::SetSliderValue,
+        SliderModifier::SetMinLabel,
+        SliderModifier::SetMaxLabel,
+        SliderModifier::SetDirection,
+        SliderModifier::SetStep,
+        SliderModifier::SetReverse,
+        SliderModifier::SetSliderStyle,
+        SliderModifier::ResetSliderValue,
+        SliderModifier::ResetMinLabel,
+        SliderModifier::ResetMaxLabel,
+        SliderModifier::ResetDirection,
+        SliderModifier::ResetStep,
+        SliderModifier::ResetReverse,
+        SliderModifier::ResetSliderStyle,
+        SliderModifier::SetSliderBlockImage,
+        SliderModifier::ResetSliderBlockImage,
+        SliderModifier::SetSliderBlockPath,
+        SliderModifier::SetSliderBlockShape,
+        SliderModifier::ResetSliderBlockShape,
+        SliderModifier::SetSliderBlockType,
+        SliderModifier::ResetSliderBlockType,
+        SliderModifier::SetSliderValidSlideRange,
+        SliderModifier::ResetSliderValidSlideRange,
+        SliderModifier::SetSelectedBorderRadius,
+        SliderModifier::ResetSelectedBorderRadius,
+        SliderModifier::SetInteractionMode,
+        SliderModifier::ResetInteractionMode,
+        SliderModifier::SetMinResponsiveDistance,
+        SliderModifier::ResetMinResponsiveDistance,
+        SliderModifier::GetBlockColor,
+        SliderModifier::GetTrackBackgroundColor,
+        SliderModifier::GetSelectColor,
+        SliderModifier::GetShowSteps,
+        SliderModifier::GetBlockType,
+        SliderModifier::GetSliderValue,
+        SliderModifier::GetMinLabel,
+        SliderModifier::GetMaxLabel,
+        SliderModifier::GetDirection,
+        SliderModifier::GetStep,
+        SliderModifier::GetReverse,
+        SliderModifier::GetSliderStyle,
+        SliderModifier::GetBlockImageValue,
+        SliderModifier::GetSliderBlockShape,
+        SliderModifier::GetThickness,
+        SliderModifier::GetSliderValidSlideRange,
+    };
+
+    return &modifier;
+}
+
+const CJUISliderModifier* GetCJUISliderModifier()
+{
+    static const CJUISliderModifier modifier = {
         SliderModifier::SetShowTips,
         SliderModifier::ResetShowTips,
         SliderModifier::SetSliderStepSize,

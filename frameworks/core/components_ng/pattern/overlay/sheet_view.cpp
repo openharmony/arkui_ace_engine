@@ -17,6 +17,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/i18n/localization.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
@@ -53,6 +54,7 @@ RefPtr<FrameNode> SheetView::CreateSheetPage(int32_t targetId, std::string targe
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::SHEET_PAGE_TAG, targetId);
     auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<SheetPresentationPattern>(targetId, targetTag, std::move(callback)));
+    sheetNode->SetDragHitTestBlock(true);
     auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(sheetLayoutProperty, nullptr);
     sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
@@ -123,7 +125,11 @@ void SheetView::CreateDragBarNode(const RefPtr<FrameNode>& titleBuilder, const R
         isSingleDetents = sheetStyle.detents[0] == sheetStyle.detents[1] &&
                           sheetStyle.detents[1] == sheetStyle.detents[SHEET_DETENTS_TWO];
     }
-    if (!isSingleDetents && showDragIndicator) {
+
+    // 1、showDragBar && not single detents
+    // 2、has SystemTitleBar
+    // need set drag bar invisible to occupy place
+    if ((!isSingleDetents && showDragIndicator) || sheetStyle.isTitleBuilder.has_value()) {
         dragBarLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
     } else {
         dragBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
@@ -173,7 +179,6 @@ void SheetView::CreateCloseIconButtonNode(RefPtr<FrameNode> sheetNode, NG::Sheet
         CHECK_NULL_VOID(sheet);
         auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
         CHECK_NULL_VOID(sheetPattern);
-        sheetPattern->SetIsDirectionUp(false);
         sheetPattern->SheetInteractiveDismiss(BindSheetDismissReason::CLOSE_BUTTON);
     };
     eventConfirmHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(clickCallback));
@@ -183,21 +188,51 @@ void SheetView::CreateCloseIconButtonNode(RefPtr<FrameNode> sheetNode, NG::Sheet
     focusHub->SetFocusDependence(FocusDependence::SELF);
     buttonNode->MarkModifyDone();
 
-    auto imageNode = FrameNode::CreateFrameNode(
-        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(imageLayoutProperty);
-    imageLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(SHEET_CLOSE_ICON_IMAGE_HEIGHT), CalcLength(SHEET_CLOSE_ICON_IMAGE_HEIGHT)));
-    imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
-    ImageSourceInfo imageSourceInfo;
-    imageSourceInfo.SetResourceId(InternalResource::ResourceId::IC_CANCEL_SVG);
-    imageSourceInfo.SetFillColor(sheetTheme->GetCloseIconImageColor());
-    imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-    imageNode->MarkModifyDone();
-
-    buttonNode->AddChild(imageNode);
+    CreateCloseIconNode(buttonNode);
     buttonNode->MountToParent(sheetNode);
+
+    // set accessibilityProperty to sheet close button
+    auto accessibilityProperty = buttonNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    std::string message  = Localization::GetInstance()->GetEntryLetters("sheet.close");
+    accessibilityProperty->SetAccessibilityText(message);
+}
+
+void SheetView::CreateCloseIconNode(RefPtr<FrameNode> buttonNode)
+{
+    auto pipeline = buttonNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    CHECK_NULL_VOID(sheetTheme);
+    RefPtr<FrameNode> iconNode;
+
+    // when api >= 12, use symbol format image, else use image format.
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        iconNode = FrameNode::CreateFrameNode(
+            V2::SYMBOL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+        CHECK_NULL_VOID(iconNode);
+        auto symbolLayoutProperty = iconNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(symbolLayoutProperty);
+        uint32_t symbolId = sheetTheme->GetCloseIconSource();
+        symbolLayoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo{symbolId});
+        symbolLayoutProperty->UpdateFontSize(SHEET_CLOSE_ICON_IMAGE_HEIGHT);
+        symbolLayoutProperty->UpdateSymbolColorList({sheetTheme->GetCloseIconSymbolColor()});
+    } else {
+        iconNode = FrameNode::CreateFrameNode(
+            V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+        CHECK_NULL_VOID(iconNode);
+        auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
+        imageLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(SHEET_CLOSE_ICON_IMAGE_HEIGHT), CalcLength(SHEET_CLOSE_ICON_IMAGE_HEIGHT)));
+        imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
+        ImageSourceInfo imageSourceInfo;
+        imageSourceInfo.SetResourceId(InternalResource::ResourceId::IC_CANCEL_SVG);
+        imageSourceInfo.SetFillColor(sheetTheme->GetCloseIconImageColor());
+        imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+    }
+    iconNode->MarkModifyDone();
+    buttonNode->AddChild(iconNode);
 }
 
 RefPtr<FrameNode> SheetView::CreateScrollNode()
@@ -335,7 +370,8 @@ RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::S
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_RETURN(sheetTheme, nullptr);
     layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
-    if (pipeline->GetFontScale() == sheetTheme->GetSheetNormalScale()) {
+    bool isTitleCustombuilder = sheetStyle.isTitleBuilder.has_value() && sheetStyle.isTitleBuilder.value();
+    if (pipeline->GetFontScale() == sheetTheme->GetSheetNormalScale() || isTitleCustombuilder) {
         layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT)));
     }
     MarginProperty margin;

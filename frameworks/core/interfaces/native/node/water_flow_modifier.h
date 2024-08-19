@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIWaterFlowModifier* GetWaterFlowModifier();
+const CJUIWaterFlowModifier* GetCJUIWaterFlowModifier();
 
 void SetOnWillScroll(ArkUINodeHandle node, void* extraParam);
 void SetOnWaterFlowReachEnd(ArkUINodeHandle node, void* extraParam);

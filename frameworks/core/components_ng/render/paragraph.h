@@ -29,12 +29,22 @@
 #include "core/components/common/properties/text_layout_info.h"
 
 namespace OHOS::Ace::NG {
+
+enum RectHeightPolicy {
+    COVER_TEXT,
+    COVER_LINE
+};
+
 class LeadingMarginSize {
 public:
     LeadingMarginSize() = default;
     ~LeadingMarginSize() = default;
 
-    LeadingMarginSize(Dimension width, Dimension height) : width_(width), height_(height) {}
+    LeadingMarginSize(Dimension width, Dimension height)
+    {
+        width_ = UnitFilter(width);
+        height_ = UnitFilter(height);
+    }
 
     std::string ToString() const
     {
@@ -62,6 +72,11 @@ public:
     }
 
 private:
+    Dimension UnitFilter(Dimension& value)
+    {
+        return value.Unit() == DimensionUnit::PERCENT ? Dimension(0.0) : value;
+    }
+
     Dimension width_;
     Dimension height_;
 };
@@ -222,6 +237,7 @@ public:
     virtual float GetMaxIntrinsicWidth() = 0;
     virtual bool DidExceedMaxLines() = 0;
     virtual float GetLongestLine() = 0;
+    virtual float GetLongestLineWithIndent() = 0;
     virtual float GetMaxWidth() = 0;
     virtual float GetAlphabeticBaseline() = 0;
     virtual float GetCharacterWidth(int32_t index) = 0;
@@ -232,6 +248,7 @@ public:
         return finalResult;
     }
     virtual void GetRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects) = 0;
+    virtual void GetTightRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects) = 0;
     virtual void GetRectsForPlaceholders(std::vector<RectF>& selectedRects) = 0;
     virtual bool ComputeOffsetForCaretDownstream(
         int32_t extent, CaretMetricsF& result, bool needLineHighest = true) = 0;
@@ -255,6 +272,7 @@ public:
     virtual LineMetrics GetLineMetricsByRectF(RectF& rect) = 0;
     virtual TextLineMetrics GetLineMetrics(size_t lineNumber) = 0;
     virtual bool GetLineMetricsByCoordinate(const Offset& offset, LineMetrics& lineMetrics) = 0;
+    virtual void UpdateColor(size_t from, size_t to, const Color& color) = 0;
 };
 } // namespace OHOS::Ace::NG
 

@@ -124,6 +124,22 @@ public:
         }
     }
 
+    uint32_t GetNodeNum() const
+    {
+        return itemMap_.size();
+    }
+
+    ElementIdType GetLastestElementId() const
+    {
+        return lastestElementId_;
+    }
+
+    RefPtr<NG::FrameNode> GetAttachedFrameNodeById(const std::string& key);
+
+    void AddFrameNodeByInspectorId(const std::string& key, const WeakPtr<NG::FrameNode>& node);
+
+    void RemoveFrameNodeByInspectorId(const std::string& key, int32_t nodeId);
+
 private:
     // private constructor
     ElementRegister() = default;
@@ -138,8 +154,13 @@ private:
     // first to Component, then synced to Element
     ElementIdType nextUniqueElementId_ = 0;
 
+    ElementIdType lastestElementId_ = 0;
+
     // Map for created elements
     std::unordered_map<ElementIdType, WeakPtr<AceType>> itemMap_;
+
+    // Map for inspectorId
+    std::unordered_map<std::string, std::list<WeakPtr<NG::FrameNode>>> inspectorIdMap_;
 
     RemovedElementsType removedItems_;
 
