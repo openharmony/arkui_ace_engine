@@ -75,6 +75,7 @@ constexpr int32_t VSYNC_PERIOD_COUNT = 5;
 constexpr int32_t MIN_IDLE_TIME = 1000;
 constexpr uint8_t SINGLECOLOR_UPDATE_ALPHA = 75;
 constexpr int8_t RENDERING_SINGLE_COLOR = 1;
+constexpr int32_t VSYNC_COLLECT_COUNT = 2;
 
 #define CHECK_THREAD_SAFE(isFormRender, taskExecutor) CheckThreadSafe(isFormRender, taskExecutor, __func__, __LINE__)
 void CheckThreadSafe(
@@ -2514,13 +2515,31 @@ void PipelineContext::DumpPipelineInfo() const
     }
 }
 
+void PipelineContext::CollectTouchEventsBeforeVsync(std::list<TouchEvent>& touchEvents)
+{
+    auto targetTimeStamp = GetVsyncTime();
+    for (auto iter = touchEvents_.begin(); iter != touchEvents_.end();) {
+        auto timeStamp = std::chrono::duration_cast<std::chrono::nanoseconds>(iter->time.time_since_epoch()).count();
+        if (targetTimeStamp < static_cast<uint64_t>(timeStamp)) {
+            iter++;
+            continue;
+        }
+        if (targetTimeStamp - static_cast<uint64_t>(timeStamp) <
+            static_cast<uint64_t>(VSYNC_COLLECT_COUNT * window_->GetVSyncPeriod())) {
+            touchEvents.emplace_back(*iter);
+        }
+        iter = touchEvents_.erase(iter);
+    }
+}
+
 void PipelineContext::FlushTouchEvents()
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(rootNode_);
     {
         std::unordered_set<int32_t> moveEventIds;
-        decltype(touchEvents_) touchEvents(std::move(touchEvents_));
+        std::list<TouchEvent> touchEvents;
+        CollectTouchEventsBeforeVsync(touchEvents);
         if (touchEvents.empty()) {
             canUseLongPredictTask_ = true;
             return;
