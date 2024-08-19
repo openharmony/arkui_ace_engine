@@ -8516,7 +8516,12 @@ class MonitorV2 {
         ObserveV2.getObserve().startRecordDependencies(this, this.watchId_);
         let ret = false;
         this.values_.forEach((item) => {
-            let dirty = item.setValue(isInit, this.analysisProp(isInit, item));
+            const [success, value] = this.analysisProp(isInit, item);
+            if (!success) {
+
+                return;
+            }
+            let dirty = item.setValue(isInit, value);
             ret = ret || dirty;
         });
         ObserveV2.getObserve().stopRecordDependencies();
@@ -8532,10 +8537,10 @@ class MonitorV2 {
             }
             else {
                 isInit && stateMgmtConsole.warn(`watch prop ${monitoredValue.path} initialize not found, make sure it exists!`);
-                return undefined;
+                return [false, undefined];
             }
         }
-        return obj;
+        return [true, obj];
     }
     static clearWatchesFromTarget(target) {
         var _a;
