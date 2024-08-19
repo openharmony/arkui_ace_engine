@@ -15,10 +15,6 @@
 
 #include "core/components/toggle/render_toggle.h"
 
-#include "base/log/log.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/event/ace_event_helper.h"
-
 namespace OHOS::Ace {
 namespace {
 

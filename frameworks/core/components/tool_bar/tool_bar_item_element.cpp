@@ -15,11 +15,7 @@
 
 #include "core/components/tool_bar/tool_bar_item_element.h"
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/size.h"
 #include "core/components/tool_bar/render_tool_bar_item.h"
-#include "core/event/ace_event_helper.h"
-#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace {
 

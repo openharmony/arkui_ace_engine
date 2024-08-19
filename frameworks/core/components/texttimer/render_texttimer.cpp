@@ -15,11 +15,7 @@
 
 #include "core/components/texttimer/render_texttimer.h"
 
-#include <string>
-
 #include "base/i18n/localization.h"
-#include "core/components/stack/stack_element.h"
-#include "core/components/text/render_text.h"
 #include "core/components/texttimer/texttimer_component.h"
 
 namespace OHOS::Ace {

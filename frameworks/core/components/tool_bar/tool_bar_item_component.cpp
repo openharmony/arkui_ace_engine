@@ -15,7 +15,6 @@
 
 #include "core/components/tool_bar/tool_bar_item_component.h"
 
-#include "base/log/log.h"
 #include "core/components/tool_bar/render_tool_bar_item.h"
 #include "core/components/tool_bar/tool_bar_item_element.h"
 
