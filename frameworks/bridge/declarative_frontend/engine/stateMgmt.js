@@ -10152,7 +10152,7 @@ class __Repeat {
             }
             catch (e) {
                 stateMgmtConsole.applicationError(`Repeat with virtual scroll. Exception in templateId():`, e === null || e === void 0 ? void 0 : e.message);
-                throw e;
+                return '';
             }
         };
         // typeGenFunc wrapper with ttype validation

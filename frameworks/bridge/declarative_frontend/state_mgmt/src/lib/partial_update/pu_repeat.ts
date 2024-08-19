@@ -206,7 +206,7 @@ class __Repeat<T> implements RepeatAPI<T> {
                 return typeGenFunc(item, index);
             } catch (e) {
                 stateMgmtConsole.applicationError(`Repeat with virtual scroll. Exception in templateId():`, e?.message);
-                throw e;
+                return '';
             }
         }
         // typeGenFunc wrapper with ttype validation
