@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 122
+#define ARKUI_FULL_API_VERSION 123
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 122
+#define ARKUI_NODE_API_VERSION 123
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 8
@@ -4069,6 +4069,12 @@ struct ArkUISpanModifier {
     void (*resetTextShadow)(ArkUINodeHandle node);
     void (*getTextShadows)(ArkUINodeHandle node, ArkUITextShadowStruct* textShadow, ArkUI_Uint32 size);
     ArkUI_CharPtr (*getSpanFontFamily)(ArkUINodeHandle node);
+    void (*setAccessibilityText)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetAccessibilityText)(ArkUINodeHandle node);
+    void (*setAccessibilityDescription)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetAccessibilityDescription)(ArkUINodeHandle node);
+    void (*setAccessibilityLevel)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetAccessibilityLevel)(ArkUINodeHandle node);
 };
 
 struct ArkUISelectModifier {

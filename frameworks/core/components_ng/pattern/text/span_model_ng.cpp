@@ -463,6 +463,36 @@ std::vector<Shadow> SpanModelNG::GetTextShadow(UINode* uiNode)
     return spanNode->GetTextShadow().value_or(defaultShadow);
 }
 
+void SpanModelNG::SetAccessibilityText(UINode* uiNode, const std::string& text)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_VOID(spanNode);
+    auto spanItem = spanNode->GetSpanItem();
+    CHECK_NULL_VOID(spanItem);
+    CHECK_NULL_VOID(spanItem->accessibilityProperty);
+    spanItem->accessibilityProperty->SetAccessibilityText(text);
+}
+
+void SpanModelNG::SetAccessibilityDescription(UINode* uiNode, const std::string& description)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_VOID(spanNode);
+    auto spanItem = spanNode->GetSpanItem();
+    CHECK_NULL_VOID(spanItem);
+    CHECK_NULL_VOID(spanItem->accessibilityProperty);
+    spanItem->accessibilityProperty->SetAccessibilityDescription(description);
+}
+
+void SpanModelNG::SetAccessibilityImportance(UINode* uiNode, const std::string& importance)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_VOID(spanNode);
+    auto spanItem = spanNode->GetSpanItem();
+    CHECK_NULL_VOID(spanItem);
+    CHECK_NULL_VOID(spanItem->accessibilityProperty);
+    spanItem->accessibilityProperty->SetAccessibilityLevel(importance);
+}
+
 std::vector<std::string> SpanModelNG::GetSpanFontFamily(UINode* uiNode)
 {
     auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
