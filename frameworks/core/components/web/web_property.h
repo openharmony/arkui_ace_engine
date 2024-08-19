@@ -28,7 +28,6 @@
 #include "core/components_v2/common/common_def.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
-#include "core/components_ng/pattern/text/text_menu_extension.h"
 
 namespace OHOS::Ace {
 
