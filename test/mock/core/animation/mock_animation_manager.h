@@ -15,7 +15,7 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ANIMATION_MANAGER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ANIMATION_MANAGER_H
-#include "test/mock/core/render/mock_animation_utils.h"
+#include "test/mock/core/animation/mock_implicit_animation.h"
 
 #include "core/components_ng/base/modifier.h"
 #include "frameworks/base/utils/singleton.h"
@@ -27,6 +27,7 @@ private:
     ~MockAnimationManager() override = default;
     friend Singleton<MockAnimationManager>;
     ACE_DISALLOW_COPY_AND_MOVE(MockAnimationManager);
+
 public:
     static void Enable(bool value)
     {
@@ -41,7 +42,7 @@ public:
     {
         inScope_ = true;
     }
-    std::shared_ptr<AnimationUtils::Animation> CloseAnimation();
+    std::vector<RefPtr<MockImplicitAnimation>> CloseAnimation();
 
     bool IsAnimationOpen() const
     {
@@ -56,9 +57,14 @@ public:
         ticks_ = tick;
     }
 
-    void SetParams(AnimationParam&& param)
+    struct AnimationParams {
+        AnimationCallbacks callbacks;
+        AnimationOperation type = AnimationOperation::PLAY;
+    };
+    void SetParams(int32_t duration, AnimationCallbacks&& param)
     {
-        params_ = std::move(param);
+        params_.callbacks = std::move(param);
+        params_.type = (duration <= 0) ? AnimationOperation::CANCEL : AnimationOperation::PLAY;
     }
 
     void AddActiveProp(const WeakPtr<PropertyBase>& prop)
@@ -72,10 +78,16 @@ public:
      */
     void Tick();
 
+    void Reset();
+
 private:
-    AnimationParam params_;
-    std::unordered_set<std::shared_ptr<AnimationUtils::Animation>> animations_;
+    void CancelAnimations();
+
+    AnimationParams params_;
+    std::list<RefPtr<MockImplicitAnimation>> animations_;
     std::set<WeakPtr<PropertyBase>> activeProps_;
+    std::map<WeakPtr<PropertyBase>, WeakPtr<MockImplicitAnimation>> propToAnimation_;
+
     int32_t ticks_ = 1;
     bool inScope_ = false;
     bool enabled_ = false;

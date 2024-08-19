@@ -14,7 +14,7 @@
  */
 
 #include "test/unittest/core/pattern/test_ng.h"
-#include "test/mock/core/render/mock_animation_manager.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
 
 #define private public
 #define protected public

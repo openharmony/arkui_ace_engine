@@ -13,8 +13,11 @@
  * limitations under the License.
  */
 
-#include "test/mock/core/render/mock_animation_manager.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
 #include "water_flow_test_ng.h"
+
+#include "core/components/common/layout/constants.h"
+#include "core/gestures/gesture_event.h"
 
 namespace OHOS::Ace::NG {
 
@@ -446,6 +449,67 @@ HWTEST_F(WaterFlowScrollerTestNg, ScrollToIndex001, TestSize.Level1)
     pattern_->ScrollToIndex(20, true);
     // Item 20 doesn't exist
     EXPECT_EQ(pattern_->targetIndex_, std::nullopt);
+}
+
+/**
+ * @tc.name: SpringAnimation001
+ * @tc.desc: Test WaterFlow spring animation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowScrollerTestNg, SpringAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Calling the ScrollToIndex interface to set values to 20 and true.
+     * @tc.expected: pattern_->targetIndex_ is 20
+     */
+    auto model = CreateWaterFlow();
+    CreateWaterFlowItems();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateDone();
+    GestureEvent gesture;
+    gesture.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    gesture.SetMainVelocity(10.0f);
+    gesture.SetMainDelta(10.0f);
+    gesture.SetGlobalLocation(Offset(1.0f, 1.0f));
+    gesture.SetGlobalPoint(Point(1.0f, 1.0f));
+    gesture.SetLocalLocation(Offset(1.0f, 1.0f));
+    auto scrollable = pattern_->GetScrollableEvent()->scrollable_;
+    ASSERT_TRUE(scrollable);
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(gesture);
+
+    // scroll up
+    scrollable->HandleDragUpdate(gesture);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 9.77164745);
+
+    MockAnimationManager::GetInstance().SetTicks(2);
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(gesture);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 19.325195);
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 9.6625977);
+
+    // interrupt animation
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(gesture);
+    scrollable->HandleDragUpdate(gesture);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 19.218552);
+
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(gesture);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 28.565876);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 14.282938);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0.0f);
 }
 
 /**

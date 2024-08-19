@@ -334,9 +334,9 @@ HWTEST_F(ScrollableCoverTestNg, InitializeTest001, TestSize.Level1)
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
     auto scrollable = AceType::MakeRefPtr<Scrollable>(scrollCallback, scrollPn->GetAxis());
     ASSERT_NE(scrollable, nullptr);
-    RefPtr<Container> conainer = Container::Current();
-    ASSERT_NE(conainer, nullptr);
-    conainer->SetUseNewPipeline();
+    RefPtr<Container> container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    container->SetUseNewPipeline();
     EXPECT_EQ(Container::IsCurrentUseNewPipeline(), true);
     scrollable->Initialize(MockPipelineContext::GetCurrent());
 

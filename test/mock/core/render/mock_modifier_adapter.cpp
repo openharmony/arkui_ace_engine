@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "test/mock/core/render/mock_animation_manager.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
 
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/render/modifier_adapter.h"
@@ -28,7 +28,7 @@ void NodeAnimatableProperty<float, AnimatablePropertyFloat>::AnimateWithVelocity
     if (!MockAnimationManager::Enabled()) {
         return;
     }
-    MockAnimationManager::GetInstance().SetParams({ finishCallback, nullptr });
+    MockAnimationManager::GetInstance().SetParams(option.GetDuration(), { finishCallback, nullptr });
     MockAnimationManager::GetInstance().OpenAnimation();
     Set(value);
     MockAnimationManager::GetInstance().CloseAnimation();

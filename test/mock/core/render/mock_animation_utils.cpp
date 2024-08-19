@@ -13,49 +13,27 @@
  * limitations under the License.
  */
 
-#include "test/mock/core/render/mock_animation_utils.h"
-
-#include "test/mock/core/render/mock_animation_manager.h"
-#include "test/mock/core/render/mock_animation_proxy.h"
+#ifdef ENHANCED_ANIMATION
+#include "test/mock/core/animation/mock_implicit_animation.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
+#endif
 
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace {
-void AnimationUtils::Animation::UpdateProp(const WeakPtr<NG::PropertyBase>& propWk) const
-{
-#ifdef ENHANCED_ANIMATION
-    if (auto prop = AceType::DynamicCast<NG::AnimatablePropertyFloat>(propWk.Upgrade()); prop) {
-        NG::MockAnimationProxy<float>::GetInstance().Next(prop, remainingTicks_);
-        auto cb = prop->GetUpdateCallback();
-        if (cb) {
-            cb(NG::MockAnimationProxy<float>::GetInstance().GetStagingValue(prop));
-        }
-    }
-    /* add update code for other types */
-#endif
-}
-
-void AnimationUtils::Animation::Next()
-{
-    if (Finished()) {
-        return;
-    }
-    for (const auto& propWk : props_) {
-        UpdateProp(propWk);
-    }
-    if (params_.repeatCb) {
-        params_.repeatCb();
-    }
-    if (--remainingTicks_ <= 0) {
-        if (params_.finishCb) {
-            params_.finishCb();
-        }
-    }
-}
 
 #ifdef ENHANCED_ANIMATION
 using AnimManager = NG::MockAnimationManager;
+
+class AnimationUtils::Animation {
+public:
+    Animation() = default;
+    explicit Animation(std::vector<RefPtr<MockImplicitAnimation>>&& anims) : impls_(anims) {}
+    std::vector<RefPtr<MockImplicitAnimation>> impls_;
+};
+#else
+class AnimationUtils::Animation {};
 #endif
 
 class AnimationUtils::InteractiveAnimation {
@@ -91,7 +69,7 @@ void AnimationUtils::Animate(const AnimationOption& option, const PropertyCallba
     const FinishCallback& finishCallback, const RepeatCallback& repeatCallback)
 {
 #ifdef ENHANCED_ANIMATION
-    AnimManager::GetInstance().SetParams({ finishCallback, repeatCallback });
+    AnimManager::GetInstance().SetParams(option.GetDuration(), { finishCallback, repeatCallback });
     AnimManager::GetInstance().OpenAnimation();
 #endif
     if (callback) {
@@ -138,26 +116,41 @@ std::shared_ptr<AnimationUtils::Animation> AnimationUtils::StartAnimation(const 
     const PropertyCallback& callback, const FinishCallback& finishCallback, const RepeatCallback& repeatCallback)
 {
 #ifdef ENHANCED_ANIMATION
-    AnimManager::GetInstance().SetParams({ finishCallback, repeatCallback });
+    AnimManager::GetInstance().SetParams(option.GetDuration(), { finishCallback, repeatCallback });
     AnimManager::GetInstance().OpenAnimation();
-#endif
     if (callback) {
         callback();
     }
-#ifdef ENHANCED_ANIMATION
-    auto animation = AnimManager::GetInstance().CloseAnimation();
+    auto animations = AnimManager::GetInstance().CloseAnimation();
     if (AnimManager::Enabled()) {
-        return animation;
+        return std::make_shared<Animation>(std::move(animations));
     }
-#endif
 
     if (finishCallback) {
         finishCallback();
     }
     return std::make_shared<AnimationUtils::Animation>();
+#else
+    if (callback) {
+        callback();
+    }
+
+    if (finishCallback) {
+        finishCallback();
+    }
+    return std::make_shared<AnimationUtils::Animation>();
+#endif
 }
 
-void AnimationUtils::StopAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation) {}
+void AnimationUtils::StopAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation)
+{
+#ifdef ENHANCED_ANIMATION
+    CHECK_NULL_VOID(animation);
+    for (auto&& anim : animation->impls_) {
+        anim->End();
+    }
+#endif
+}
 
 void AnimationUtils::BlendBgColorAnimation(
     RefPtr<NG::RenderContext>& renderContext, const Color& endColor, int32_t duration, const RefPtr<Curve>& curve)
@@ -167,7 +160,15 @@ void AnimationUtils::PauseAnimation(const std::shared_ptr<AnimationUtils::Animat
 
 void AnimationUtils::ResumeAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation) {}
 
-void AnimationUtils::ExecuteWithoutAnimation(const PropertyCallback& callback) {}
+void AnimationUtils::ExecuteWithoutAnimation(const PropertyCallback& callback)
+{
+#ifdef ENHANCED_ANIMATION
+    if (AnimManager::GetInstance().IsAnimationOpen()) {
+        AnimManager::GetInstance().CloseAnimation();
+    }
+    callback();
+#endif
+}
 
 std::shared_ptr<AnimationUtils::InteractiveAnimation> AnimationUtils::CreateInteractiveAnimation(
     const InteractiveAnimationCallback& addCallback, const FinishCallback& callback)

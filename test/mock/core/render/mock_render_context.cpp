@@ -14,8 +14,8 @@
  */
 #include "test/mock/core/render/mock_render_context.h"
 
-#include "test/mock/core/render/mock_animation_manager.h"
-#include "test/mock/core/render/mock_animation_proxy.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
+#include "test/mock/core/animation/mock_animation_proxy.h"
 
 #include "core/components_ng/base/modifier.h"
 
