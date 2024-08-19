@@ -145,6 +145,25 @@ void OnTextChangedListenerImpl::SendKeyboardStatus(const MiscServices::KeyboardS
     HandleKeyboardStatus(keyboardStatus);
 }
 
+void OnTextChangedListenerImpl::NotifyKeyboardHeight(uint32_t height)
+{
+    auto task = [textField = pattern_, height] {
+        ACE_SCOPED_TRACE("NotifyKeyboardHeight");
+        auto client = textField.Upgrade();
+        CHECK_NULL_VOID(client);
+        ContainerScope scope(client->GetInstanceId());
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto manager = pipeline->GetSafeAreaManager();
+        CHECK_NULL_VOID(manager);
+        manager->SetkeyboardHeightConsideringUIExtension(height);
+        auto overlayManager = pipeline->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->CloseAIEntityMenu();
+    };
+    PostTaskToUI(task, "ArkUITextFieldNotifyKeyboardHeight");
+}
+
 void OnTextChangedListenerImpl::SendFunctionKey(const MiscServices::FunctionKey& functionKey)
 {
     HandleFunctionKey(functionKey);
