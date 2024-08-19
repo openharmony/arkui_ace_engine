@@ -434,21 +434,6 @@ void MutableSpanString::UpdateSpanAndSpanMapAfterInsertSpanString(int32_t start,
             span->interval.second += offset;
         }
     }
-    for (auto& iter : spansMap_) {
-        if (spansMap_.find(iter.first) == spansMap_.end()) {
-            continue;
-        }
-        auto spans = spansMap_[iter.first];
-        for (auto& span : spans) {
-            if (span->GetStartIndex() >= start) {
-                span->UpdateStartIndex(span->GetStartIndex() + offset);
-            }
-            if (span->GetEndIndex() > start) {
-                span->UpdateEndIndex(span->GetEndIndex() + offset);
-            }
-        }
-        spansMap_[iter.first] = spans;
-    }
 }
 
 void MutableSpanString::ApplyInsertSpanStringToSpans(int32_t start, const RefPtr<SpanString>& spanString)
@@ -489,22 +474,26 @@ void MutableSpanString::ApplyInsertSpanStringToSpanBase(int32_t start, const Ref
 {
     auto offset = spanString->GetLength();
     auto otherSpansMap = spanString->GetSpansMap();
-    for (auto& iter : otherSpansMap) {
+    for (auto& iter : spansMap_) {
         auto spans = spansMap_[iter.first];
         for (auto it = spans.begin(); it != spans.end(); ++it) {
             auto spanItemStart = (*it)->GetStartIndex();
             auto spanItemEnd = (*it)->GetEndIndex();
-            if (spanItemEnd < start || spanItemStart > start) {
-                continue;
-            }
-            if (spanItemEnd != start) {
-                auto newSpanItem = (*it)->GetSubSpan(start + offset, spanItemEnd);
+            if (spanItemStart >= start) {
+                (*it)->UpdateStartIndex(spanItemStart + offset);
+                (*it)->UpdateEndIndex(spanItemEnd + offset);
+            } else if (spanItemStart < start && start < spanItemEnd) {
+                auto newSpanItem = (*it)->GetSubSpan(start + offset, spanItemEnd + offset);
                 (*it)->UpdateEndIndex(start);
                 ++it;
-                spans.insert(it, newSpanItem);
+                it = spans.insert(it, newSpanItem);
             }
-            break;
         }
+        spansMap_[iter.first] = spans;
+    }
+
+    for (auto& iter : otherSpansMap) {
+        auto spans = spansMap_[iter.first];
         auto otherSpans = otherSpansMap[iter.first];
         for (auto& spanBase : otherSpans) {
             auto newSpanItem = spanBase->GetSubSpan(spanBase->GetStartIndex() + start, spanBase->GetEndIndex() + start);
