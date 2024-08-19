@@ -1751,6 +1751,10 @@ void SearchPattern::InitIconColorSize()
 void SearchPattern::CreateSearchIcon(const std::string& src)
 {
     CHECK_NULL_VOID(GetSearchNode());
+    if (GetSearchNode()->HasSearchIconNodeCreated()) {
+        UpdateSearchSymboliconColor();
+        return;
+    }
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
         src.empty()) {
         CreateOrUpdateSymbol(IMAGE_INDEX, !GetSearchNode()->HasSearchIconNodeCreated());
@@ -1767,12 +1771,47 @@ void SearchPattern::CreateSearchIcon(const std::string& src)
 void SearchPattern::CreateCancelIcon()
 {
     CHECK_NULL_VOID(GetSearchNode());
+    if (GetSearchNode()->HasCancelIconNodeCreated()) {
+        UpdateCancelSymboliconColor();
+        return;
+    }
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         CreateOrUpdateSymbol(CANCEL_IMAGE_INDEX, !GetSearchNode()->HasCancelIconNodeCreated());
     } else {
         CreateOrUpdateImage(CANCEL_IMAGE_INDEX, "", !GetSearchNode()->HasCancelIconNodeCreated(), "", "");
     }
     GetSearchNode()->UpdateHasCancelIconNodeCreated(true);
+}
+
+void SearchPattern::UpdateCancelSymboliconColor()
+{
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(GetSearchNode ());
+    auto cancelButtonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(CANCEL_IMAGE_INDEX));
+    auto layoutProperty = cancelButtonFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateSymbolColorList({ GetSearchNode()->GetCancelIconColor() });
+}
+
+void SearchPattern::UpdateSearchSymboliconColor()
+{
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(GetSearchNode ());
+    auto cancelButtonFrameNode = DynamicCast<FrameNode> (host->GetChildAtIndex(IMAGE_INDEX));
+    auto layoutProperty = cancelButtonFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateSymbolColorList({ GetSearchNode()->GetSearchIconColor() });
+    if (isFocusIconColorSet_ && GetDefaultIconColor(IMAGE_INDEX) == normalIconColor_) {
+        SetSearchIconColor(focusIconColor_);
+    }
 }
 
 void SearchPattern::CreateOrUpdateSymbol(int32_t index, bool isCreateNode)

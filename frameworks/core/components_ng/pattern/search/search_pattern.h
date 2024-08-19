@@ -193,6 +193,8 @@ public:
     void InitIconColorSize();
     void CreateSearchIcon(const std::string& src);
     void CreateCancelIcon();
+    void UpdateSearchSymboliconColor();
+    void UpdateCancelSymboliconColor();
 
 private:
     void OnModifyDone() override;
