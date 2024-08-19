@@ -1298,7 +1298,7 @@ void TextFieldPattern::HandleOnUndoAction()
     }
     redoOperationRecords_.push_back(textEditingValue);
     operationRecords_.pop_back();
-    FireEventHubOnChange("");
+        FireEventHubOnChange("");
     contentController_->SetTextValue(textEditingValue.text);
     selectController_->UpdateCaretIndex(textEditingValue.caretPosition);
     auto tmpHost = GetHost();
@@ -2206,13 +2206,14 @@ bool TextFieldPattern::IsAutoFillPasswordType(const AceAutoFillType& autoFillTyp
             autoFillType == AceAutoFillType::ACE_NEW_PASSWORD);
 }
 
-AceAutoFillType TextFieldPattern::GetHintType()
+HintToTypeWrap TextFieldPattern::GetHintType()
 {
+    HintToTypeWrap hintToTypeWrap;
     auto container = Container::Current();
-    CHECK_NULL_RETURN(container, AceAutoFillType::ACE_UNSPECIFIED);
+    CHECK_NULL_RETURN(container, hintToTypeWrap);
     auto onePlaceHolder = GetPlaceHolder();
     if (onePlaceHolder.empty()) {
-        return AceAutoFillType::ACE_UNSPECIFIED;
+        return hintToTypeWrap;
     }
     return container->PlaceHolderToType(onePlaceHolder);
 }
@@ -2276,14 +2277,36 @@ AceAutoFillType TextFieldPattern::GetAutoFillType(bool isNeedToHitType)
     if (aceContentType != AceAutoFillType::ACE_UNSPECIFIED) {
         return aceContentType;
     }
-    if (aceInputType != AceAutoFillType::ACE_UNSPECIFIED) {
-        if (IsAutoFillPasswordType(aceInputType)) {
-            return aceInputType;
-        } else {
-            return isNeedToHitType ? GetHintType() : AceAutoFillType::ACE_UNSPECIFIED;
-        }
+    if (aceInputType != AceAutoFillType::ACE_UNSPECIFIED && IsAutoFillPasswordType(aceInputType)) {
+        return aceInputType;
     }
-    return isNeedToHitType ? GetHintType() : AceAutoFillType::ACE_UNSPECIFIED;
+    if (isNeedToHitType) {
+        auto hintToTypeWrap = GetHintType();
+        return hintToTypeWrap.autoFillType;
+    }
+    return AceAutoFillType::ACE_UNSPECIFIED;
+}
+
+HintToTypeWrap TextFieldPattern::GetAutoFillTypeAndMetaData(bool isNeedToHitType)
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    HintToTypeWrap hintToTypeWrap;
+    CHECK_NULL_RETURN(layoutProperty, hintToTypeWrap);
+    auto aceContentType =
+        TextContentTypeToAceAutoFillType(layoutProperty->GetTextContentTypeValue(TextContentType::UNSPECIFIED));
+    auto aceInputType = ConvertToAceAutoFillType(layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED));
+    if (aceContentType != AceAutoFillType::ACE_UNSPECIFIED) {
+        hintToTypeWrap.autoFillType = aceContentType;
+        return hintToTypeWrap;
+    }
+    if (aceInputType != AceAutoFillType::ACE_UNSPECIFIED && IsAutoFillPasswordType(aceInputType)) {
+        hintToTypeWrap.autoFillType = aceInputType;
+        return hintToTypeWrap;
+    }
+    if (isNeedToHitType) {
+        hintToTypeWrap = GetHintType();
+    }
+    return hintToTypeWrap;
 }
 
 bool TextFieldPattern::CheckAutoFill(bool isFromKeyBoard)
@@ -2971,7 +2994,7 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
 void TextFieldPattern::ShowSelectOverlayForLongPress(bool shouldProcessOverlayAfterLayout)
 {
     if (IsSelected()) {
-        StopTwinkling();
+    StopTwinkling();
     }
     SetIsSingleHandle(!IsSelected());
     if (!IsContentRectNonPositive()) {
@@ -6014,8 +6037,8 @@ void TextFieldPattern::ApplyInlineTheme()
     BorderColorProperty inlineBorderColor;
     inlineBorderColor.SetColor(theme->GetInlineBorderColor());
     renderContext->UpdateBorderColor(inlineBorderColor);
-    layoutProperty->UpdatePadding({ CalcLength(0.0f), CalcLength(theme->getInlinePaddingRight()), CalcLength(0.0f),
-        CalcLength(0.0f) });
+        layoutProperty->UpdatePadding({ CalcLength(0.0f), CalcLength(theme->getInlinePaddingRight()), CalcLength(0.0f),
+            CalcLength(0.0f) });
     ProcessInnerPadding();
     ProcessInlinePaddingAndMargin();
 }
@@ -6089,8 +6112,8 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
     json->PutExtAttr("style", GetInputStyleString().c_str(), filter);
 
     auto jsonValue = JsonUtil::Create(true);
-    jsonValue->Put("onIconSrc", GetShowResultImageSrc().c_str());
-    jsonValue->Put("offIconSrc", GetHideResultImageSrc().c_str());
+        jsonValue->Put("onIconSrc", GetShowResultImageSrc().c_str());
+        jsonValue->Put("offIconSrc", GetHideResultImageSrc().c_str());
     json->PutExtAttr("passwordIcon", jsonValue->ToString().c_str(), filter);
     json->PutExtAttr("showError", GetErrorTextState() ? GetErrorTextString().c_str() : "undefined", filter);
     json->PutExtAttr("maxLines", GreatOrEqual(GetMaxLines(),
@@ -6425,12 +6448,13 @@ void TextFieldPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, b
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto autoFillType = GetAutoFillType();
+    auto autoFillTypeAndMetaData = GetAutoFillTypeAndMetaData();
     auto info = PageNodeInfoWrap::CreatePageNodeInfoWrap();
     CHECK_NULL_VOID(info);
     info->SetId(host->GetId());
     info->SetDepth(host->GetDepth());
-    info->SetAutoFillType(autoFillType);
+    info->SetAutoFillType(autoFillTypeAndMetaData.autoFillType);
+    info->SetMetadata(autoFillTypeAndMetaData.metadata);
     info->SetTag(host->GetTag());
     if (autoFillOtherAccount_) {
         viewDataWrap->SetOtherAccount(true);
@@ -6661,8 +6685,8 @@ bool TextFieldPattern::RepeatClickCaret(const Offset& offset, int32_t lastCaretI
 {
     auto touchDownIndex = selectController_->ConvertTouchOffsetToPosition(offset);
     if (!selectController_->CaretAtLast()) {
-        return lastCaretIndex == touchDownIndex && HasFocus();
-    }
+    return lastCaretIndex == touchDownIndex && HasFocus();
+}
     // Increase the cursor area if there is no text
     auto caretRect = lastCaretRect;
     caretRect.SetLeft(caretRect.GetX() - caretRect.Height() / 2);
