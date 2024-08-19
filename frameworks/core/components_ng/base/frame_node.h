@@ -19,6 +19,7 @@
 #include <functional>
 #include <list>
 #include <utility>
+#include <mutex>
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/point_t.h"
@@ -512,13 +513,18 @@ public:
 
     void SetNDKColorModeUpdateCallback(const std::function<void(int32_t)>&& callback)
     {
+        std::unique_lock<std::shared_mutex> lock(colorModeCallbackMutex_);
         ndkColorModeUpdateCallback_ = callback;
     }
 
     void SetNDKFontUpdateCallback(const std::function<void(float, float)>&& callback)
     {
+        std::unique_lock<std::shared_mutex> lock(fontSizeCallbackMutex_);
         ndkFontUpdateCallback_ = callback;
     }
+
+    void FireColorNDKCallback();
+    void FireFontNDKCallback(const ConfigurationChange& configurationChange);
 
     bool MarkRemoving() override;
 
@@ -1281,7 +1287,8 @@ private:
     friend class RosenRenderContext;
     friend class RenderContext;
     friend class Pattern;
-
+    mutable std::shared_mutex fontSizeCallbackMutex_;
+    mutable std::shared_mutex colorModeCallbackMutex_;
     ACE_DISALLOW_COPY_AND_MOVE(FrameNode);
 };
 } // namespace OHOS::Ace::NG
