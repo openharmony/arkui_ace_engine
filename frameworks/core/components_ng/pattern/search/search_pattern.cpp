@@ -1771,30 +1771,12 @@ void SearchPattern::CreateSearchIcon(const std::string& src)
 void SearchPattern::CreateCancelIcon()
 {
     CHECK_NULL_VOID(GetSearchNode());
-    if (GetSearchNode()->HasCancelIconNodeCreated()) {
-        UpdateCancelSymboliconColor();
-        return;
-    }
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         CreateOrUpdateSymbol(CANCEL_IMAGE_INDEX, !GetSearchNode()->HasCancelIconNodeCreated());
     } else {
         CreateOrUpdateImage(CANCEL_IMAGE_INDEX, "", !GetSearchNode()->HasCancelIconNodeCreated(), "", "");
     }
     GetSearchNode()->UpdateHasCancelIconNodeCreated(true);
-}
-
-void SearchPattern::UpdateCancelSymboliconColor()
-{
-    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    CHECK_NULL_VOID(GetSearchNode());
-    auto cancelButtonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(CANCEL_IMAGE_INDEX));
-    auto layoutProperty = cancelButtonFrameNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateSymbolColorList({ GetSearchNode()->GetCancelIconColor() });
 }
 
 void SearchPattern::UpdateSearchSymboliconColor()
