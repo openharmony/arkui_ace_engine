@@ -303,7 +303,7 @@ HWTEST_F(GridLayoutRangeTest, SolveOverScroll002, TestSize.Level1)
 
 /**
  * @tc.name: ScrollItem001
- * @tc.desc: Test an error condition
+ * @tc.desc: Test ScrollToIndex
  * @tc.type: FUNC
  */
 HWTEST_F(GridLayoutRangeTest, ScrollItem001, TestSize.Level1)
@@ -331,6 +331,38 @@ HWTEST_F(GridLayoutRangeTest, ScrollItem001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info.startIndex_, 2);
     EXPECT_EQ(info.endIndex_, 2);
+}
+
+/**
+ * @tc.name: ScrollItem002
+ * @tc.desc: Test scroll to center of long item
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutRangeTest, ScrollItem002, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(GetOptionDemo14());
+    model.SetColumnsGap(Dimension { 10.0f });
+    model.SetRowsGap(Dimension { 10.0f });
+    constexpr float itemHeight = 300.0f;
+    CreateFixedHeightItems(1, itemHeight * 2 + 10.0f);
+    CreateFixedHeightItems(1, itemHeight);
+    CreateFixedHeightItems(1, itemHeight * 2 + 10.0f);
+    CreateFixedHeightItems(19, itemHeight);
+    CreateFixedHeightItems(1, itemHeight * 6 + 50.0f);
+    CreateFixedHeightItems(77, itemHeight);
+    CreateDone(frameNode_);
+    const auto& info = pattern_->gridLayoutInfo_;
+
+    pattern_->ScrollToIndex(22, false, ScrollAlign::CENTER, 0.0f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info.startIndex_, 22);
+    EXPECT_EQ(info.endIndex_, 26);
+    for (int i = info.startIndex_; i <= info.endIndex_; ++i) {
+        EXPECT_TRUE(GetChildFrameNode(frameNode_, i)->IsActive());
+    }
+    EXPECT_EQ(GetChildY(frameNode_, 22), -525.0f);
 }
 
 /**
