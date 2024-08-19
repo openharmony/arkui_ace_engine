@@ -91,9 +91,9 @@ RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(AIImageQuality imageQuality, b
     std::pair<int32_t, int32_t> sourceSize = source->GetImageSize();
     auto src = obj_->GetSourceInfo();
     auto srcStr = src.GetSrcType() == SrcType::BASE64 ? src.GetKey() : src.ToString();
-    ACE_SCOPED_TRACE("CreateImagePixelMap %s, hdr: [%d], quality: [%d], sourceSize: [ %d, %d ], targetSize: [ %d, %d ]",
-        srcStr.c_str(), static_cast<int32_t>(isHdrDecoderNeed), static_cast<int32_t>(imageQuality), sourceSize.first,
-        sourceSize.second, static_cast<int32_t>(width), static_cast<int32_t>(height));
+    ACE_SCOPED_TRACE("CreateImagePixelMap %s, sourceSize: [ %d, %d ], targetSize: [ %d, %d ], hdr: [%d], quality: [%d]",
+        srcStr.c_str(), sourceSize.first, sourceSize.second, static_cast<int32_t>(width), static_cast<int32_t>(height),
+        static_cast<int32_t>(isHdrDecoderNeed), static_cast<int32_t>(imageQuality));
 
     auto pixmap = source->CreatePixelMap({ width, height }, imageQuality, isHdrDecoderNeed);
     if (!pixmap) {
