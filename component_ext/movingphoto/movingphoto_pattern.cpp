@@ -896,7 +896,7 @@ void MovingPhotoPattern::CommonStartAnimation(const RefPtr<RenderContext>& image
     animationOption.SetCurve(Curves::FRICTION);
     animationOption.SetOnFinishEvent([movingPhotoPattern]() {
         auto movingPhoto = movingPhotoPattern.Upgrade();
-        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto StartAnimation OnFinishEvent.");
+        TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto StartAnimation OnFinishEvent.");
         CHECK_NULL_VOID(movingPhoto);
         if (movingPhoto->currentPlayStatus_ == PlaybackStatus::PAUSED
             || movingPhoto->currentPlayStatus_ == PlaybackStatus::STOPPED
@@ -1019,7 +1019,7 @@ void MovingPhotoPattern::RepeatStopAnimation(const RefPtr<RenderContext>& videoR
 void MovingPhotoPattern::StopAnimationCallback()
 {
     Seek(0);
-    TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "StopAnimation OnFinishEvent:%{public}d.", autoAndRepeatLevel_);
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "StopAnimation OnFinishEvent:%{public}d.", autoAndRepeatLevel_);
     if (autoAndRepeatLevel_ == PlaybackMode::REPEAT) {
         StartRepeatPlay();
     } else if (autoAndRepeatLevel_ == PlaybackMode::AUTO) {
@@ -1029,7 +1029,7 @@ void MovingPhotoPattern::StopAnimationCallback()
 
 void MovingPhotoPattern::AutoPlay(bool isAutoPlay)
 {
-    TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto AutoPlay: %{public}d.", isAutoPlay);
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto AutoPlay: %{public}d.", isAutoPlay);
     if (isAutoPlay && historyAutoAndRepeatLevel_ != PlaybackMode::AUTO) {
         isChangePlayMode_ = true;
     }
@@ -1041,7 +1041,7 @@ void MovingPhotoPattern::AutoPlay(bool isAutoPlay)
 
 void MovingPhotoPattern::StartAutoPlay()
 {
-    TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto StartAutoPlay in.");
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto StartAutoPlay in.");
     isFastKeyUp_ = false;
     if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
         return;
@@ -1055,7 +1055,7 @@ void MovingPhotoPattern::StartAutoPlay()
 
 void MovingPhotoPattern::StartRepeatPlay()
 {
-    TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto StartRepeatPlay in.");
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto StartRepeatPlay in.");
     isFastKeyUp_ = false;
     if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
         return;
@@ -1074,7 +1074,7 @@ void MovingPhotoPattern::StartRepeatPlay()
 
 void MovingPhotoPattern::RepeatPlay(bool isRepeatPlay)
 {
-    TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto RepeatPlay status: %{public}d.", isRepeatPlay);
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto RepeatPlay status: %{public}d.", isRepeatPlay);
     if (isRepeatPlay && historyAutoAndRepeatLevel_ != PlaybackMode::REPEAT) {
         isChangePlayMode_ = true;
         isFirstRepeatPlay_ = true;
@@ -1095,7 +1095,7 @@ void MovingPhotoPattern::AutoPlayPeriod(int64_t startTime, int64_t endTime)
 {
     if (startTime >= VIDEO_PLAYTIME_START_POSITION && startTime < endTime
             && endTime <= VIDEO_PLAYTIME_END_POSITION) {
-        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer set Period.");
+        TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer set Period.");
         autoPlayPeriodStartTime_ = startTime;
         autoPlayPeriodEndTime_ = endTime;
     }
