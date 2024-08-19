@@ -1298,7 +1298,7 @@ void TextFieldPattern::HandleOnUndoAction()
     }
     redoOperationRecords_.push_back(textEditingValue);
     operationRecords_.pop_back();
-        FireEventHubOnChange("");
+    FireEventHubOnChange("");
     contentController_->SetTextValue(textEditingValue.text);
     selectController_->UpdateCaretIndex(textEditingValue.caretPosition);
     auto tmpHost = GetHost();
@@ -2994,7 +2994,7 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
 void TextFieldPattern::ShowSelectOverlayForLongPress(bool shouldProcessOverlayAfterLayout)
 {
     if (IsSelected()) {
-    StopTwinkling();
+        StopTwinkling();
     }
     SetIsSingleHandle(!IsSelected());
     if (!IsContentRectNonPositive()) {
@@ -6037,8 +6037,8 @@ void TextFieldPattern::ApplyInlineTheme()
     BorderColorProperty inlineBorderColor;
     inlineBorderColor.SetColor(theme->GetInlineBorderColor());
     renderContext->UpdateBorderColor(inlineBorderColor);
-        layoutProperty->UpdatePadding({ CalcLength(0.0f), CalcLength(theme->getInlinePaddingRight()), CalcLength(0.0f),
-            CalcLength(0.0f) });
+    layoutProperty->UpdatePadding({ CalcLength(0.0f), CalcLength(theme->getInlinePaddingRight()), CalcLength(0.0f),
+        CalcLength(0.0f) });
     ProcessInnerPadding();
     ProcessInlinePaddingAndMargin();
 }
@@ -6112,8 +6112,8 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
     json->PutExtAttr("style", GetInputStyleString().c_str(), filter);
 
     auto jsonValue = JsonUtil::Create(true);
-        jsonValue->Put("onIconSrc", GetShowResultImageSrc().c_str());
-        jsonValue->Put("offIconSrc", GetHideResultImageSrc().c_str());
+    jsonValue->Put("onIconSrc", GetShowResultImageSrc().c_str());
+    jsonValue->Put("offIconSrc", GetHideResultImageSrc().c_str());
     json->PutExtAttr("passwordIcon", jsonValue->ToString().c_str(), filter);
     json->PutExtAttr("showError", GetErrorTextState() ? GetErrorTextString().c_str() : "undefined", filter);
     json->PutExtAttr("maxLines", GreatOrEqual(GetMaxLines(),
@@ -6685,8 +6685,8 @@ bool TextFieldPattern::RepeatClickCaret(const Offset& offset, int32_t lastCaretI
 {
     auto touchDownIndex = selectController_->ConvertTouchOffsetToPosition(offset);
     if (!selectController_->CaretAtLast()) {
-    return lastCaretIndex == touchDownIndex && HasFocus();
-}
+        return lastCaretIndex == touchDownIndex && HasFocus();
+    }
     // Increase the cursor area if there is no text
     auto caretRect = lastCaretRect;
     caretRect.SetLeft(caretRect.GetX() - caretRect.Height() / 2);

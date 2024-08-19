@@ -2382,7 +2382,7 @@ void AceContainer::CheckAndSetFontFamily()
         return;
     }
     path = path.append(familyName);
-        fontManager->SetFontFamily(familyName.c_str(), path.c_str());
+    fontManager->SetFontFamily(familyName.c_str(), path.c_str());
 }
 
 bool AceContainer::IsFontFileExistInPath(std::string path)
