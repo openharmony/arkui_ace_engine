@@ -27,6 +27,7 @@
 
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
+#include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_view.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
@@ -39,6 +40,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t SHEET_DETENTS_TWO = 2;
 constexpr int32_t SHEET_DETENTS_THREE = 3;
+constexpr Dimension WINDOW_EDGE_SPACE = 6.0_vp;
 } // namespace
 
 class SheetCoverageTestNg : public testing::Test {
@@ -1442,6 +1444,167 @@ HWTEST_F(SheetCoverageTestNg, GetOffsetWithBottomRight001, TestSize.Level1)
     EXPECT_TRUE(GreatNotEqual(arrowOffsetX + algorithm->sheetRadius_ + arrowVertical.ConvertToPx(),
         algorithm->sheetWidth_));
     algorithm->GetOffsetWithBottomRight(targetSize, OffsetF());
+    SheetCoverageTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: AvoidanceRuleOfPlacement001
+ * @tc.desc: Increase the coverage of SheetPresentationLayoutAlgorithm::AvoidanceRuleOfPlacement function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetCoverageTestNg, AvoidanceRuleOfPlacement001, TestSize.Level1)
+{
+    SheetCoverageTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 301,
+        AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto algorithm = AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
+    algorithm->directionCheckFunc_[Placement::BOTTOM] = &SheetPresentationLayoutAlgorithm::CheckPlacementBottomLeft;
+    algorithm->placementCheckFunc_[Placement::BOTTOM] = &SheetPresentationLayoutAlgorithm::CheckPlacementBottomLeft;
+    OffsetF targetOffset(WINDOW_EDGE_SPACE.ConvertToPx() - 1.0f, 1.0f);
+    EXPECT_FALSE(algorithm->CheckPlacementBottomLeft(SizeF(), targetOffset));
+    algorithm->AvoidanceRuleOfPlacement(Placement::BOTTOM, SizeF(), targetOffset);
+
+    targetOffset.x_ = WINDOW_EDGE_SPACE.ConvertToPx() + 1.0f;
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    pipelineContext->displayWindowRectInfo_.width_ = 2*WINDOW_EDGE_SPACE.ConvertToPx() + algorithm->sheetWidth_ + 1.0f;
+    EXPECT_TRUE(algorithm->CheckPlacementBottomLeft(SizeF(), targetOffset));
+    algorithm->AvoidanceRuleOfPlacement(Placement::BOTTOM, SizeF(), targetOffset);
+
+    algorithm->directionCheckFunc_[Placement::BOTTOM] = nullptr;
+    algorithm->placementCheckFunc_[Placement::BOTTOM] = nullptr;
+    algorithm->AvoidanceRuleOfPlacement(Placement::BOTTOM, SizeF(), OffsetF());
+    SheetCoverageTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: GetHeightBySheetStyle001
+ * @tc.desc: Increase the coverage of SheetPresentationLayoutAlgorithm::GetHeightBySheetStyle function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetCoverageTestNg, GetHeightBySheetStyle001, TestSize.Level1)
+{
+    SheetCoverageTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 301,
+        AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto algorithm = AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
+    EXPECT_NE(algorithm->sheetStyle_.sheetMode, SheetMode::MEDIUM);
+    EXPECT_NE(algorithm->sheetStyle_.sheetMode, SheetMode::LARGE);
+    EXPECT_FALSE(algorithm->sheetStyle_.height.has_value());
+    algorithm->GetHeightBySheetStyle();
+
+    algorithm->sheetStyle_.sheetMode = SheetMode::MEDIUM;
+    EXPECT_EQ(algorithm->sheetStyle_.sheetMode, SheetMode::MEDIUM);
+    EXPECT_FALSE(algorithm->sheetStyle_.height.has_value());
+    algorithm->GetHeightBySheetStyle();
+
+    algorithm->sheetStyle_.sheetMode = SheetMode::LARGE;
+    algorithm->sheetStyle_.height = 100.0_vp;
+    EXPECT_EQ(algorithm->sheetStyle_.sheetMode, SheetMode::LARGE);
+    EXPECT_TRUE(algorithm->sheetStyle_.height.has_value());
+    EXPECT_FALSE(algorithm->SheetInSplitWindow());
+    algorithm->GetHeightBySheetStyle();
+
+    algorithm->sheetType_ = SheetType::SHEET_CENTER;
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto windowManager = pipelineContext->windowManager_;
+    windowManager->SetWindowGetModeCallBack([]() -> WindowMode { return WindowMode::WINDOW_MODE_SPLIT_PRIMARY; });
+    EXPECT_TRUE(algorithm->SheetInSplitWindow());
+    algorithm->GetHeightBySheetStyle();
+    SheetCoverageTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: CreateSheetChildConstraint001
+ * @tc.desc: Increase the coverage of SheetPresentationLayoutAlgorithm::CreateSheetChildConstraint function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetCoverageTestNg, CreateSheetChildConstraint001, TestSize.Level1)
+{
+    SheetCoverageTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 301,
+        AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto algorithm = AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
+    EXPECT_FALSE(algorithm->sheetStyle_.isTitleBuilder.has_value());
+    algorithm->CreateSheetChildConstraint(sheetPattern->GetLayoutProperty<SheetPresentationProperty>());
+
+    algorithm->sheetStyle_.isTitleBuilder = true;
+    EXPECT_NE(algorithm->sheetType_, SheetType::SHEET_CENTER);
+    EXPECT_NE(algorithm->sheetType_, SheetType::SHEET_POPUP);
+    algorithm->CreateSheetChildConstraint(sheetPattern->GetLayoutProperty<SheetPresentationProperty>());
+
+    algorithm->sheetType_ = SheetType::SHEET_CENTER;
+    algorithm->CreateSheetChildConstraint(sheetPattern->GetLayoutProperty<SheetPresentationProperty>());
+    algorithm->sheetType_ = SheetType::SHEET_POPUP;
+    algorithm->CreateSheetChildConstraint(sheetPattern->GetLayoutProperty<SheetPresentationProperty>());
+    SheetCoverageTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: SheetInSplitWindow001
+ * @tc.desc: Increase the coverage of SheetPresentationLayoutAlgorithm::SheetInSplitWindow function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetCoverageTestNg, SheetInSplitWindow001, TestSize.Level1)
+{
+    SheetCoverageTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 301,
+        AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto algorithm = AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
+    algorithm->sheetType_ = SheetType::SHEET_BOTTOM;
+    EXPECT_FALSE(algorithm->SheetInSplitWindow());
+    algorithm->sheetType_ = SheetType::SHEET_CENTER;
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto windowManager = pipelineContext->windowManager_;
+    pipelineContext->windowManager_ = nullptr;
+    EXPECT_FALSE(algorithm->SheetInSplitWindow());
+    pipelineContext->windowManager_ = windowManager;
+    pipelineContext->displayWindowRectInfo_.height_ = SystemProperties::GetDeviceHeight();
+    EXPECT_FALSE(algorithm->SheetInSplitWindow());
+    pipelineContext->displayWindowRectInfo_.height_ = SystemProperties::GetDeviceHeight() - 10.0f;
+    EXPECT_FALSE(algorithm->SheetInSplitWindow());
+
+    windowManager->SetWindowGetModeCallBack([]() -> WindowMode { return WindowMode::WINDOW_MODE_SPLIT_PRIMARY; });
+    EXPECT_TRUE(algorithm->SheetInSplitWindow());
+    windowManager->SetWindowGetModeCallBack([]() -> WindowMode { return WindowMode::WINDOW_MODE_SPLIT_SECONDARY; });
+    EXPECT_TRUE(algorithm->SheetInSplitWindow());
+    SheetCoverageTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: GetOverlayFromPageAndGetTagFromRootNodeType001
+ * @tc.desc: Increase the coverage of SheetManager::GetOverlayFromPage and GetTagFromRootNodeType function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetCoverageTestNg, GetOverlayFromPageAndGetTagFromRootNodeType001, TestSize.Level1)
+{
+    SheetCoverageTestNg::SetUpTestCase();
+    int32_t rootNodeId = 101;
+    auto sheetNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, rootNodeId,
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    RootNodeType rootNodeType = RootNodeType::PAGE_ETS_TAG;
+    SheetManager::GetInstance().GetOverlayFromPage(-1, rootNodeType);
+    EXPECT_NE(FrameNode::GetFrameNode(sheetNode->tag_, rootNodeId), nullptr);
+    SheetManager::GetInstance().GetOverlayFromPage(rootNodeId, rootNodeType);
+
+    rootNodeType = RootNodeType::NAVDESTINATION_VIEW_ETS_TAG;
+    sheetNode->tag_ = V2::NAVDESTINATION_VIEW_ETS_TAG;
+    EXPECT_NE(FrameNode::GetFrameNode(sheetNode->tag_, rootNodeId), nullptr);
+    SheetManager::GetInstance().GetOverlayFromPage(rootNodeId, rootNodeType);
+
+    rootNodeType = RootNodeType::WINDOW_SCENE_ETS_TAG;
+    sheetNode->tag_ = V2::WINDOW_SCENE_ETS_TAG;
+    EXPECT_NE(FrameNode::GetFrameNode(sheetNode->tag_, rootNodeId), nullptr);
+    SheetManager::GetInstance().GetOverlayFromPage(rootNodeId, rootNodeType);
+
+    SheetManager::GetInstance().GetOverlayFromPage(rootNodeId, RootNodeType(100));
     SheetCoverageTestNg::TearDownTestCase();
 }
 } // namespace OHOS::Ace::NG
