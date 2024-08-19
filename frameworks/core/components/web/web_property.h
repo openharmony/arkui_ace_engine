@@ -72,6 +72,14 @@ enum class WebKeyboardAvoidMode : int32_t {
     DEFAULT
 };
 
+struct WebMenuOptionsParam {
+    std::vector<NG::MenuOptionsParam> menuOption;
+    bool operator==(const WebMenuOptionsParam& webMenuOption) const
+    {
+        return menuOption.data() == webMenuOption.menuOption.data();
+    }
+};
+
 constexpr int32_t DEFAULT_TEXT_ZOOM_RATIO = 100;
 constexpr int32_t DEFAULT_FIXED_FONT_SIZE = 13;
 constexpr int32_t DEFAULT_FONT_SIZE = 16;
