@@ -29,6 +29,7 @@
 
 namespace {
 constexpr uint64_t SCREEN_ID_INVALID = -1ULL;
+const float EPSILON = 1e-3;
 }
 namespace OHOS::Ace::NG {
 WindowSceneLayoutManager* WindowSceneLayoutManager::GetInstance()
@@ -159,16 +160,20 @@ void WindowSceneLayoutManager::FillWindowSceneInfo(const RefPtr<FrameNode>& node
     Rosen::SessionUIParam uiParam;
     auto width = localGeometry->GetWidth();
     auto height = localGeometry->GetHeight();
+    if (std::abs(width - 0.0f) < EPSILON || std::abs(height - 0.0f) < EPSILON) {
+        TAG_LOGE(AceLogTag::ACE_WINDOW_PIPELINE, "name:%{public}s w:%{public}f h:%{public}f is 0",
+            GetWindowName(node).c_str(), width, height);
+        return;
+    }
     if (isAncestorRecent) {
         uiParam.rect_ = { localGeometry->GetX(), localGeometry->GetY(), width, height };
     } else {
         auto absRect = globalGeometry->GetAbsRect();
         uiParam.rect_ = { absRect.GetLeft(), absRect.GetTop(), width, height };
+        uiParam.scaleX_ = absRect.GetWidth() / width;
+        uiParam.scaleY_ = absRect.GetHeight() / height;
     }
 
-    auto matrix = globalGeometry->GetAbsMatrix();
-    uiParam.scaleX_ = matrix.Get(Rosen::Drawing::Matrix::SCALE_X);
-    uiParam.scaleY_ = matrix.Get(Rosen::Drawing::Matrix::SCALE_Y);
     uiParam.pivotX_ = globalGeometry->GetPivotX();
     uiParam.pivotY_ = globalGeometry->GetPivotY();
     uiParam.zOrder_ = static_cast<uint32_t>(res.zOrderCnt_);
