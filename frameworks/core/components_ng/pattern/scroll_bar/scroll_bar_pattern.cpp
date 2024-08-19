@@ -250,6 +250,7 @@ void ScrollBarPattern::UpdateScrollBarRegion(float offset, float estimatedHeight
             }
         }
         Offset scrollOffset = { offset, offset };
+        scrollBar_->SetReverse(IsReverse());
         scrollBar_->UpdateScrollBarRegion(viewOffset, viewPort, scrollOffset, estimatedHeight);
         scrollBar_->MarkNeedRender();
     }
@@ -402,13 +403,9 @@ bool ScrollBarPattern::UpdateCurrentOffset(float delta, int32_t source)
     if (NearZero(delta) || axis_ == Axis::NONE) {
         return false;
     }
-    if ((IsAtBottom() && delta > 0.0f) || (IsAtTop() && delta < 0.0f)) {
-        return false;
-    }
 
     lastOffset_ = currentOffset_;
     currentOffset_ += delta;
-    ValidateOffset();
     if (scrollBarProxy_ && lastOffset_ != currentOffset_) {
         scrollBarProxy_->NotifyScrollableNode(-delta, source, AceType::WeakClaim(this));
     }
@@ -698,7 +695,7 @@ void ScrollBarPattern::HandleDragUpdate(const GestureEvent& info)
 
 void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
 {
-    auto velocity = info.GetMainVelocity();
+    auto velocity = IsReverse() ? -info.GetMainVelocity() : info.GetMainVelocity();
     TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "outer scrollBar drag end, position is %{public}f and %{public}f, "
         "velocity is %{public}f",
         info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(), velocity);
