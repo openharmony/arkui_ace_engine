@@ -185,7 +185,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetFrameNodeByUniqueId(ArkUIRuntimeCal
     if (nodePtr) {
         return panda::NativePointerRef::New(vm, nodePtr);
     }
-    
+
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -256,7 +256,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetNavigationInfoByUniqueId(ArkUIRunti
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "navigationId"),
         panda::StringRef::NewFromUtf8(vm, result->navigationId.c_str()));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "pathStack"), navPathStackObj->GetLocalHandle());
-    
+
     return obj;
 }
 
@@ -1114,6 +1114,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RowBridge::SetSpace));
     row->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSpace"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RowBridge::ResetSpace));
+    row->Set(vm, panda::StringRef::NewFromUtf8(vm, "setReverse"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RowBridge::SetReverse));
+    row->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetReverse"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RowBridge::ResetReverse));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "row"), row);
 
     auto rowSplit = panda::ObjectRef::New(vm);
@@ -1622,6 +1626,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ColumnBridge::SetSpace));
     column->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSpace"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ColumnBridge::ResetSpace));
+    column->Set(vm, panda::StringRef::NewFromUtf8(vm, "setReverse"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ColumnBridge::SetReverse));
+    column->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetReverse"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ColumnBridge::ResetReverse));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "column"), column);
 
     auto gridRow = panda::ObjectRef::New(vm);

@@ -27,6 +27,7 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void SetAlignItems(int32_t value);
     static void SetJustifyContent(int32_t value);
+    static void SetReverse(const JSCallbackInfo& info);
 };
 
 class VerticalAlignDeclaration : public AlignDeclaration {
