@@ -344,6 +344,11 @@ public:
         return preFrameSize_;
     }
 
+    void SetIsFocus(bool isFocus)
+    {
+        isFocus_ = isFocus;
+    }
+
 protected:
     bool IsNeedInitClickEventRecorder() const override
     {
@@ -426,7 +431,6 @@ private:
     void SetBlurButtonStyle(RefPtr<TextLayoutProperty>& textLayoutProperty, RefPtr<FrameNode>& textNode);
     void AddIsFocusActiveUpdateEvent();
     void RemoveIsFocusActiveUpdateEvent();
-    void SetIsFocus(bool isFoucs);
 };
 } // namespace OHOS::Ace::NG
 

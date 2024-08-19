@@ -209,11 +209,6 @@ void ButtonPattern::InitButtonLabel()
     }
 }
 
-void ButtonPattern::SetIsFocus(bool isFocus)
-{
-    isFocus_ = isFocus;
-}
-
 void ButtonPattern::AddIsFocusActiveUpdateEvent()
 {
     if (!isFocusActiveUpdateEvent_) {
@@ -265,7 +260,6 @@ void ButtonPattern::HandleBlurStyleTask()
 void ButtonPattern::SetBlurButtonStyle(RefPtr<TextLayoutProperty>& textLayoutProperty, RefPtr<FrameNode>& textNode)
 {
     CHECK_NULL_VOID(renderContext_);
-    CHECK_NULL_VOID(renderContext_);
     CHECK_NULL_VOID(buttonTheme_);
     ButtonStyleMode buttonStyle = layoutProperty_->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
     ButtonRole buttonRole = layoutProperty_->GetButtonRole().value_or(ButtonRole::NORMAL);
@@ -305,8 +299,8 @@ void ButtonPattern::SetFocusButtonStyle(RefPtr<TextLayoutProperty>& textLayoutPr
     CHECK_NULL_VOID(buttonTheme_);
     ButtonStyleMode buttonStyle = layoutProperty_->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
     ButtonRole buttonRole = layoutProperty_->GetButtonRole().value_or(ButtonRole::NORMAL);
-    auto && graphics = renderContext_->GetOrCreateGraphics();
-    auto && transform = renderContext_->GetOrCreateTransform();
+    auto&& graphics = renderContext_->GetOrCreateGraphics();
+    auto&& transform = renderContext_->GetOrCreateTransform();
     CHECK_NULL_VOID(graphics);
     CHECK_NULL_VOID(transform);
 
@@ -426,7 +420,7 @@ void ButtonPattern::HandleBackgroundAndBorder()
     ButtonStyleMode buttonStyle = layoutProperty_->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
     ButtonRole buttonRole = layoutProperty_->GetButtonRole().value_or(ButtonRole::NORMAL);
 
-    auto && graphics = renderContext_->GetOrCreateGraphics();
+    auto&& graphics = renderContext_->GetOrCreateGraphics();
     CHECK_NULL_VOID(graphics);
     if (buttonStyle != ButtonStyleMode::TEXT && !graphics->HasBackShadow() && isApplyShadow_) {
         ShadowStyle shadowStyle = static_cast<ShadowStyle>(buttonTheme_->GetShadowNormal());
