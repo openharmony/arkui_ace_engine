@@ -642,9 +642,7 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem() const
     COPY_TEXT_STYLE(textLineStyle, HalfLeading, UpdateHalfLeading);
 
     if (backgroundStyle.has_value()) {
-        sameSpan->backgroundStyle->backgroundColor = backgroundStyle->backgroundColor;
-        sameSpan->backgroundStyle->backgroundRadius = backgroundStyle->backgroundRadius;
-        sameSpan->backgroundStyle->groupId = backgroundStyle->groupId;
+        sameSpan->backgroundStyle = backgroundStyle;
     }
 
     sameSpan->onClick = onClick;
@@ -1048,6 +1046,7 @@ int32_t PlaceholderSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNo
     run.width = placeholderStyle.width;
     run.height = placeholderStyle.height;
     textStyle.SetTextDecoration(TextDecoration::NONE);
+    textStyle.SetTextBackgroundStyle(backgroundStyle);
     builder->PushStyle(textStyle);
     int32_t index = builder->AddPlaceholder(run);
     run_ = run;

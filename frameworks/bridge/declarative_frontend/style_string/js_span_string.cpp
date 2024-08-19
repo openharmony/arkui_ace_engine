@@ -111,7 +111,7 @@ void ReturnPromise(const JSCallbackInfo& info, int32_t errCode)
 
 const std::unordered_set<SpanType> types = { SpanType::Font, SpanType::Gesture, SpanType::BaselineOffset,
     SpanType::Decoration, SpanType::LetterSpacing, SpanType::TextShadow, SpanType::LineHeight, SpanType::Image,
-    SpanType::CustomSpan, SpanType::ParagraphStyle, SpanType::ExtSpan };
+    SpanType::CustomSpan, SpanType::ParagraphStyle, SpanType::ExtSpan, SpanType::BackgroundColor };
 
 const std::unordered_map<SpanType, std::function<JSRef<JSObject>(const RefPtr<SpanBase>&)>> spanCreators = {
     { SpanType::Font, JSSpanString::CreateJsFontSpan }, { SpanType::Decoration, JSSpanString::CreateJsDecorationSpan },
@@ -119,6 +119,7 @@ const std::unordered_map<SpanType, std::function<JSRef<JSObject>(const RefPtr<Sp
     { SpanType::LetterSpacing, JSSpanString::CreateJsLetterSpacingSpan },
     { SpanType::Gesture, JSSpanString::CreateJsGestureSpan },
     { SpanType::TextShadow, JSSpanString::CreateJsTextShadowSpan },
+    { SpanType::BackgroundColor, JSSpanString::CreateJSBackgroundColorSpan },
     { SpanType::LineHeight, JSSpanString::CreateJsLineHeightSpan },
     { SpanType::Image, JSSpanString::CreateJsImageSpan },
     { SpanType::ParagraphStyle, JSSpanString::CreateJsParagraphStyleSpan },
@@ -358,6 +359,16 @@ JSRef<JSObject> JSSpanString::CreateJsTextShadowSpan(const RefPtr<SpanBase>& spa
     return obj;
 }
 
+JSRef<JSObject> JSSpanString::CreateJSBackgroundColorSpan(const RefPtr<SpanBase>& spanObject)
+{
+    auto span = AceType::DynamicCast<BackgroundColorSpan>(spanObject);
+    CHECK_NULL_RETURN(span, JSRef<JSObject>::New());
+    JSRef<JSObject> obj = JSClass<JSBackgroundColorSpan>::NewInstance();
+    auto backgroundColorSpan = Referenced::Claim(obj->Unwrap<JSBackgroundColorSpan>());
+    backgroundColorSpan->SetBackgroundColorSpan(span);
+    return obj;
+}
+
 JSRef<JSObject> JSSpanString::CreateJsLineHeightSpan(const RefPtr<SpanBase>& spanObject)
 {
     auto span = AceType::DynamicCast<LineHeightSpan>(spanObject);
@@ -410,6 +421,8 @@ RefPtr<SpanBase> JSSpanString::ParseJsSpanBase(int32_t start, int32_t length, Sp
             return ParseJsParagraphStyleSpan(start, length, obj);
         case SpanType::ExtSpan:
             return ParseJsExtSpan(start, length, obj);
+        case SpanType::BackgroundColor:
+            return ParseJSBackgroundColorSpan(start, length, obj);
         default:
             break;
     }
@@ -489,6 +502,17 @@ RefPtr<SpanBase> JSSpanString::ParseJsTextShadowSpan(int32_t start, int32_t leng
     if (textShadowSpan && textShadowSpan->GetTextShadowSpan()) {
         return AceType::MakeRefPtr<TextShadowSpan>(
             textShadowSpan->GetTextShadowSpan()->GetTextShadow(), start, start + length);
+    }
+    return nullptr;
+}
+
+RefPtr<SpanBase> JSSpanString::ParseJSBackgroundColorSpan(int32_t start, int32_t length, const JSRef<JSObject>& obj)
+{
+    auto* base = obj->Unwrap<AceType>();
+    auto* backgroundColorSpan = AceType::DynamicCast<JSBackgroundColorSpan>(base);
+    if (backgroundColorSpan && backgroundColorSpan->GetBackgroundColorSpan()) {
+        return AceType::MakeRefPtr<BackgroundColorSpan>(
+            backgroundColorSpan->GetBackgroundColorSpan()->GetBackgroundColor(), start, start + length);
     }
     return nullptr;
 }
