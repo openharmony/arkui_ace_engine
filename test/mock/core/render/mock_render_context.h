@@ -77,10 +77,24 @@ public:
         return rect_;
     }
 
+    void SetPaintRectWithTransform(const RectF rect)
+    {
+        rect_ = rect;
+    }
+
     RectF GetPaintRectWithoutTransform() override
     {
         return paintRect_;
     }
+
+    void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> modifier) override
+#ifdef ENHANCED_ANIMATION
+        ;
+#else
+    {}
+#endif
+
+    void DetachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& modifier) override {}
 
     void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle)
     {

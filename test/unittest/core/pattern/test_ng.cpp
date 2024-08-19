@@ -14,6 +14,7 @@
  */
 
 #include "test/unittest/core/pattern/test_ng.h"
+#include "test/mock/core/render/mock_animation_manager.h"
 
 #define private public
 #define protected public
@@ -35,6 +36,7 @@ void TestNG::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
+    MockAnimationManager::Enable(false);
 }
 
 RefPtr<PaintWrapper> TestNG::FlushLayoutTask(const RefPtr<FrameNode>& frameNode, bool markDirty)

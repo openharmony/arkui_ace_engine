@@ -1,39 +1,44 @@
 /*
  * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
+ * distributed under the License is distributed on an 'AS IS' BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 
-if (!("finalizeConstruction" in ViewPU.prototype)) {
-  Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
+if (!('finalizeConstruction' in ViewPU.prototype)) {
+  Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
 }
 if (PUV2ViewBase.contextStack === undefined) {
-  Reflect.set(PUV2ViewBase, "contextStack", []);
+  Reflect.set(PUV2ViewBase, 'contextStack', []);
 }
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const hilog = requireNapi('ohos.hilog');
-const LOADINGPROGRESS_SIZE = 24;
 const DEFAULT_MARGIN = 16;
 const ITEM_SPACE = 4;
+const MIN_SIZE = 24;
+const MID_SIZE = 40;
+const MAX_SIZE = 48;
+const MAX_FONT_SIZE = 2;
 export class SwipeRefresher extends ViewPU {
   constructor(u11, v11, w11, x11 = -1, y11 = undefined, z11) {
     super(u11, w11, x11, z11);
-    if (typeof y11 === "function") {
+    if (typeof y11 === 'function') {
       this.paramsGenerator_ = y11;
     }
-    this.__content = new SynchedPropertySimpleOneWayPU(v11.content, this, "content");
-    this.__isLoading = new SynchedPropertySimpleOneWayPU(v11.isLoading, this, "isLoading");
+    this.__content = new SynchedPropertySimpleOneWayPU(v11.content, this, 'content');
+    this.__isLoading = new SynchedPropertySimpleOneWayPU(v11.isLoading, this, 'isLoading');
     this.maxAppFontScale = 1;
     this.isFollowingSystemFontScale = false;
+    this.minFontSize = 1.75;
+    this.maxFontSize = 2;
     this.setInitiallyProvidedValue(v11);
     this.finalizeConstruction();
   }
@@ -49,6 +54,12 @@ export class SwipeRefresher extends ViewPU {
     }
     if (t11.isFollowingSystemFontScale !== undefined) {
       this.isFollowingSystemFontScale = t11.isFollowingSystemFontScale;
+    }
+    if (t11.minFontSize !== undefined) {
+      this.minFontSize = t11.minFontSize;
+    }
+    if (t11.maxFontSize !== undefined) {
+      this.maxFontSize = t11.maxFontSize;
     }
   }
   updateStateVars(s11) {
@@ -86,12 +97,12 @@ export class SwipeRefresher extends ViewPU {
     catch (l11) {
       let m11 = l11.code;
       let n11 = l11.message;
-      hilog.error(0x3900, 'Ace', `Failed to init fontsizescale info, cause, code: ${m11}, message: ${n11}`);
+      hilog.error(0x3900, 'SwipeRefresher', `Failed to init fontsizescale info, cause, code: ${m11}, message: ${n11}`);
     }
   }
   updateFontScale() {
     let j11 = this.getUIContext();
-    let k11 = j11.getHostContext()?.config.fontSizeScale ?? 1;
+    let k11 = j11.getHostContext()?.config?.fontSizeScale ?? 1;
     if (!this.isFollowingSystemFontScale) {
       return 1;
     }
@@ -115,8 +126,10 @@ export class SwipeRefresher extends ViewPU {
           this.observeComponentCreation((f11, g11) => {
             ViewStackProcessor.StartGetAccessRecordingFor(f11);
             LoadingProgress.create();
-            LoadingProgress.height(LOADINGPROGRESS_SIZE);
-            LoadingProgress.width(LOADINGPROGRESS_SIZE);
+            LoadingProgress.height(Math.min(this.updateFontScale(), MAX_FONT_SIZE) === this.maxFontSize ? MAX_SIZE :
+              (Math.min(this.updateFontScale(), MAX_FONT_SIZE) === this.minFontSize ? MID_SIZE : MIN_SIZE));
+            LoadingProgress.width(Math.min(this.updateFontScale(), MAX_FONT_SIZE) === this.maxFontSize ? MAX_SIZE :
+              (Math.min(this.updateFontScale(), MAX_FONT_SIZE) === this.minFontSize ? MID_SIZE : MIN_SIZE));
             LoadingProgress.margin({
               end: LengthMetrics.vp(ITEM_SPACE)
             });
@@ -140,8 +153,8 @@ export class SwipeRefresher extends ViewPU {
     this.observeComponentCreation((y10, z10) => {
       ViewStackProcessor.StartGetAccessRecordingFor(y10);
       Text.create(this.content);
-      Text.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-      Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+      Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+      Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body2'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
       Text.minFontScale(1);
       Text.maxFontScale(Math.min(this.updateFontScale(), 2));
       Text.padding({

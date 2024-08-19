@@ -14,6 +14,8 @@
  */
 #include "bridge/declarative_frontend/jsview/js_mock.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_bindings.h"
+#include "bridge/declarative_frontend/engine/jsi/modules/jsi_curves_module.h"
+#include "bridge/js_frontend/engine/jsi/ark_js_value.h"
 
 namespace OHOS::Ace::Framework {
 void JSMockBaseNode::JSBind(BindingTarget globalObj)
@@ -69,5 +71,50 @@ void JSMock::JSBind(BindingTarget globalObj)
     JSMockViewPU::JSBind(globalObj, "PUV2ViewBase");
     JSMockScopeUtil::JSBind(globalObj);
     MockCustomDialogController::JSBind(globalObj);
+}
+
+bool JSMock::InitModule(
+    const shared_ptr<JsRuntime>& runtime, shared_ptr<JsValue>& thisObj, const std::string& moduleName)
+{
+    static const std::unordered_map<std::string,
+        void (*)(const shared_ptr<JsRuntime>& runtime, shared_ptr<JsValue>& thisObj)>
+        MODULE_LIST = {
+            { "ohos.curves", [](const shared_ptr<JsRuntime>& runtime,
+                                 shared_ptr<JsValue>& thisObj) { InitCurvesModule(runtime, thisObj); } },
+        };
+    auto iter = MODULE_LIST.find(moduleName);
+    if (iter != MODULE_LIST.end()) {
+        iter->second(runtime, thisObj);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+shared_ptr<JsValue> MockRequireNativeModule(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    std::string moduleName = argv[0]->ToString(runtime);
+
+    // has already init module object
+    shared_ptr<JsValue> global = runtime->GetGlobal();
+    shared_ptr<JsValue> moduleObject = global->GetProperty(runtime, moduleName);
+    if (moduleObject != nullptr && moduleObject->IsObject(runtime)) {
+        return moduleObject;
+    }
+
+    // init module object first time
+    shared_ptr<JsValue> newObject = runtime->NewObject();
+    if (JSMock::InitModule(runtime, newObject, moduleName)) {
+        global->SetProperty(runtime, moduleName, newObject);
+        return newObject;
+    }
+
+    return runtime->NewNull();
+}
+
+bool JSMock::PreloadWorkerRequireNative(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& global)
+{
+    return global->SetProperty(runtime, "requireNativeModule", runtime->NewFunction(MockRequireNativeModule));
 }
 } // namespace OHOS::Ace::Framework

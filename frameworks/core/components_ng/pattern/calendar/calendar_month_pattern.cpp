@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
+#include "core/components/slider/slider_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -48,6 +49,17 @@ bool CalendarMonthPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     }
 
     return !(config.skipMeasure || dirty->SkipMeasureContent());
+}
+
+CalendarMonthPattern::~CalendarMonthPattern()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto accessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->DeregisterAccessibilitySAObserverCallback(host->GetAccessibilityId());
 }
 
 Dimension CalendarMonthPattern::GetDaySize(const RefPtr<CalendarTheme>& theme)
@@ -123,6 +135,7 @@ void CalendarMonthPattern::OnModifyDone()
     InitTouchEvent();
     InitHoverEvent();
     InitAccessibilityHoverEvent();
+    InitializeCalendarAccessibility();
 }
 
 void CalendarMonthPattern::SetVirtualNodeUserSelected(int32_t index)
@@ -138,11 +151,12 @@ void CalendarMonthPattern::SetVirtualNodeUserSelected(int32_t index)
     auto remainderWeek = index % CALENDAR_WEEK_DAYS;
     int32_t selectedIndex = (textDirection == TextDirection::RTL ?
         CALENDAR_WEEK_DAYS - remainderWeek * 2 + index - 1 : index);
+    std::string selectMessage;
     for (int i = 0; i < static_cast<int32_t>(accessibilityPropertyVec_.size()); i++) {
         if (i == selectedIndex &&
             obtainedMonth_.days[i].month.month == obtainedMonth_.month &&
             obtainedMonth_.days[i].month.year == obtainedMonth_.year) {
-            accessibilityPropertyVec_[i]->SetUserSelected(true);
+            selectMessage += accessibilityPropertyVec_[index]->GetAccessibilityText();
             continue;
         }
         accessibilityPropertyVec_[i]->SetUserSelected(false);
@@ -163,6 +177,10 @@ void CalendarMonthPattern::SetVirtualNodeUserSelected(int32_t index)
         }
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    if (!selectMessage.empty()) {
+        host->OnAccessibilityEvent(AccessibilityEventType::ANNOUNCE_FOR_ACCESSIBILITY, selectedTxt_ + selectMessage);
+        selectedIndex_ = index;
+    }
 }
 
 void CalendarMonthPattern::InitVirtualButtonClickEvent(RefPtr<FrameNode> frameNode, int32_t index)
@@ -388,6 +406,90 @@ int32_t CalendarMonthPattern::JudgeArea(const Offset& offset)
     return (y * columnsOfData + x);
 }
 
+class CalendarAccessibilitySAObserverCallback : public AccessibilitySAObserverCallback {
+public:
+    CalendarAccessibilitySAObserverCallback(
+        const WeakPtr<CalendarMonthPattern> &weakCalendarPattern, int64_t accessibilityId)
+        : AccessibilitySAObserverCallback(accessibilityId), weakCalendarPattern_(weakCalendarPattern)
+    {}
+
+    ~CalendarAccessibilitySAObserverCallback() override = default;
+
+    bool OnState(bool state) override
+    {
+        auto calendarPattern = weakCalendarPattern_.Upgrade();
+        CHECK_NULL_RETURN(calendarPattern, false);
+        if (state) {
+            calendarPattern->InitCurrentVirtualNode();
+        } else {
+            calendarPattern->ClearCalendarVirtualNode();
+        }
+        return true;
+    }
+private:
+    WeakPtr<CalendarMonthPattern> weakCalendarPattern_;
+};
+
+void CalendarMonthPattern::InitializeCalendarAccessibility()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto accessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilitySAObserverCallback_ = std::make_shared<CalendarAccessibilitySAObserverCallback>(
+        WeakClaim(this), host->GetAccessibilityId());
+    accessibilityManager->RegisterAccessibilitySAObserverCallback(host->GetAccessibilityId(),
+        accessibilitySAObserverCallback_);
+    if (margin_ == 0) {
+        auto paintProperty = host->GetPaintProperty<CalendarPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        dayHeight_ = paintProperty->GetDayHeight().value_or(Dimension(0.0f)).ConvertToPx();
+        dayWidth_ = paintProperty->GetDayWidth().value_or(Dimension(0.0f)).ConvertToPx();
+        RefPtr<CalendarTheme> theme = pipeline->GetTheme<CalendarTheme>();
+        CHECK_NULL_VOID(theme);
+        auto sliderTheme = pipeline->GetTheme<SliderTheme>();
+        CHECK_NULL_VOID(sliderTheme);
+        margin_ = theme->GetDialogMargin().ConvertToPx();
+        selectedTxt_ = sliderTheme->GetSelectedTxt();
+        disabledDesc_ = sliderTheme->GetDisabelDesc();
+    }
+}
+
+void CalendarMonthPattern::InitCurrentVirtualNode()
+{
+    auto deviceOrientation = SystemProperties::GetDeviceOrientation();
+    if ((!isInitVirtualNode_ || buttonAccessibilityNodeVec_.size() != obtainedMonth_.days.size() ||
+        deviceOrientation_ != deviceOrientation) &&
+        monthState_ == MonthState::CUR_MONTH) {
+        isInitVirtualNode_ = InitCalendarVirtualNode();
+        deviceOrientation_ = deviceOrientation;
+    } else {
+        FireModifyAccessibilityVirtualNode(obtainedMonth_);
+    }
+}
+
+void CalendarMonthPattern::ClearCalendarVirtualNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    buttonAccessibilityNodeVec_.clear();
+    accessibilityPropertyVec_.clear();
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SaveAccessibilityVirtualNode(nullptr);
+}
+
+void CalendarMonthPattern::SetLineNodeSize(RefPtr<FrameNode> lineNode)
+{
+    CHECK_NULL_VOID(lineNode);
+    auto layoutProperty = lineNode->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(dayWidth_ * CALENDAR_WEEK_DAYS), CalcLength(dayHeight_ * DAILY_FIVE_ROWSPACE)));
+}
+
 bool CalendarMonthPattern::InitCalendarVirtualNode()
 {
     auto host = GetHost();
@@ -405,6 +507,8 @@ bool CalendarMonthPattern::InitCalendarVirtualNode()
         buttonAccessibilityNodeVec_.emplace_back(buttonNode);
         ChangeVirtualNodeContent(day);
     }
+    SetLineNodeSize(lineNode);
+    SetCalendarAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
     accessibilityProperty->SetAccessibilityText(" ");
     auto virtualFrameNode = AceType::DynamicCast<NG::FrameNode>(lineNode);
     CHECK_NULL_RETURN(virtualFrameNode, false);
@@ -414,6 +518,26 @@ bool CalendarMonthPattern::InitCalendarVirtualNode()
     FrameNode::ProcessOffscreenNode(virtualFrameNode);
     accessibilityProperty->SaveAccessibilityVirtualNode(lineNode);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    if (!isFirstEnter_) {
+        return true;
+    }
+    for (auto &day : obtainedMonth_.days) {
+        if (day.isSelected) {
+            auto layoutProperty = host->GetLayoutProperty();
+            CHECK_NULL_RETURN(layoutProperty, false);
+            auto textDirection = layoutProperty->GetNonAutoLayoutDirection();
+            auto remainderWeek = day.index % CALENDAR_WEEK_DAYS;
+            int32_t selectedIndex = (textDirection == TextDirection::RTL ?
+                CALENDAR_WEEK_DAYS - remainderWeek * 2 + day.index - 1 : day.index);
+            if (selectedIndex >= static_cast<int32_t>(buttonAccessibilityNodeVec_.size())) {
+                return false;
+            }
+            buttonAccessibilityNodeVec_[selectedIndex]->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
+            isFirstEnter_ = false;
+            selectedIndex_ = selectedIndex;
+            break;
+        }
+    }
     return true;
 }
 
@@ -426,22 +550,37 @@ std::pair<int32_t, int32_t> GetXYByIndex(const int32_t index)
     }
 }
 
+void CalendarMonthPattern::ChangeVirtualNodeState(const CalendarDay& calendarDay)
+{
+    if (selectedIndex_ >= static_cast<int32_t>(accessibilityPropertyVec_.size())) {
+        return;
+    }
+    if (calendarDay.index != selectedIndex_) {
+        accessibilityPropertyVec_[selectedIndex_]->SetUserSelected(true);
+    }
+}
+
 RefPtr<FrameNode> CalendarMonthPattern::AddButtonNodeIntoVirtual(const CalendarDay& calendarDay)
 {
     auto buttonNode = FrameNode::CreateFrameNode(
         V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
     auto buttonAccessibilityProperty = buttonNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_RETURN(buttonAccessibilityProperty, nullptr);
-    UpdateAccessibilityButtonNode(buttonNode, calendarDay.index);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto pipeline = host->GetContext();
+    if (pipeline) {
+        UpdateAccessibilityButtonNode(buttonNode, calendarDay.index);
+    } else {
+        UpdateButtonNodeWithoutTheme(buttonNode, calendarDay.index);
+    }
     accessibilityPropertyVec_.emplace_back(buttonAccessibilityProperty);
     InitVirtualButtonClickEvent(buttonNode, calendarDay.index);
-    buttonAccessibilityProperty->SetOnAccessibilityFocusCallback([weak = WeakClaim(this)](bool focus) {
+    buttonAccessibilityProperty->SetOnAccessibilityFocusCallback([weak = WeakClaim(this), calendarDay](bool focus) {
         if (focus) {
             auto calendar = weak.Upgrade();
             CHECK_NULL_VOID(calendar);
-            if (calendar->isOnHover_) {
-                calendar->SetCalendarAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
-            }
+            calendar->ChangeVirtualNodeState(calendarDay);
         }
     });
     return buttonNode;
@@ -483,14 +622,14 @@ void CalendarMonthPattern::SetCalendarAccessibilityLevel(const std::string& leve
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetAccessibilityLevel(level);
     auto parent = host->GetParent();
-    while (parent && parent->GetTag() != V2::COLUMN_ETS_TAG) {
+    while (parent) {
+        auto parentNode = AceType::DynamicCast<NG::FrameNode>(parent);
+        CHECK_NULL_VOID(parentNode);
+        auto parentAccessibilityProperty = parentNode->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_VOID(parentAccessibilityProperty);
+        parentAccessibilityProperty->SetAccessibilityLevel(level);
         parent = parent->GetParent();
     }
-    auto parentNode = AceType::DynamicCast<NG::FrameNode>(parent);
-    CHECK_NULL_VOID(parentNode);
-    auto parentAccessibilityProperty = parentNode->GetAccessibilityProperty<AccessibilityProperty>();
-    CHECK_NULL_VOID(parentAccessibilityProperty);
-    parentAccessibilityProperty->SetAccessibilityLevel(level);
 }
 
 void CalendarMonthPattern::InitAccessibilityHoverEvent()
@@ -512,8 +651,64 @@ void CalendarMonthPattern::HandleAccessibilityHoverEvent(bool isHover, Accessibi
         isOnHover_ = true;
     } else if (!isHover) {
         isOnHover_ = false;
-        SetCalendarAccessibilityLevel(AccessibilityProperty::Level::YES_STR);
     }
+}
+
+float GetRowSpaceWithoutTheme(RefPtr<CalendarPaintProperty> paintProperty, size_t daySize)
+{
+    auto dailyFourRowSpace = NonPositive(paintProperty->GetDailyFourRowSpaceValue({}).ConvertToPx())
+                                 ? 0.0f
+                                 : paintProperty->GetDailyFourRowSpaceValue({}).ConvertToPx();
+    auto dailyFiveRowSpace = paintProperty->GetDailyFiveRowSpaceValue({}).ConvertToPx() <= 0
+                                 ? 0.0f
+                                 : paintProperty->GetDailyFiveRowSpaceValue({}).ConvertToPx();
+    auto dailySixRowSpace = paintProperty->GetDailySixRowSpaceValue({}).ConvertToPx() <= 0
+                                ? 0.0f
+                                : paintProperty->GetDailySixRowSpaceValue({}).ConvertToPx();
+    auto rows = (static_cast<int32_t>(daySize) / CALENDAR_WEEK_DAYS);
+    auto rowSpace = dailySixRowSpace;
+    switch (rows) {
+        case DAILY_FOUR_ROWSPACE: {
+            rowSpace = dailyFourRowSpace;
+            break;
+        }
+        case DAILY_FIVE_ROWSPACE: {
+            rowSpace = dailyFiveRowSpace;
+            break;
+        }
+        default:
+            break;
+    }
+    return rowSpace;
+}
+
+void CalendarMonthPattern::UpdateButtonNodeWithoutTheme(RefPtr<FrameNode> frameNode, int32_t index)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<CalendarPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto dayHeight = paintProperty->GetDayHeight().value_or(Dimension(0.0f)).ConvertToPx();
+    auto dayWidth = paintProperty->GetDayWidth().value_or(Dimension(0.0f)).ConvertToPx();
+    CHECK_NULL_VOID(frameNode);
+    auto buttonLayoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    buttonLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(dayWidth), CalcLength(dayHeight)));
+    auto pos = GetXYByIndex(index);
+    auto colSpace = paintProperty->GetColSpaceValue({}).ConvertToPx() <= 0
+                    ? 0.0f
+                    : paintProperty->GetColSpaceValue({}).ConvertToPx();
+    Dimension buttonOffsetX = Dimension(margin_ / 2 + (colSpace + dayWidth) * pos.first);
+    auto weekHeight = paintProperty->GetWeekHeight().value_or(Dimension(0.0f)).ConvertToPx();
+    auto rowSpace = GetRowSpaceWithoutTheme(paintProperty, obtainedMonth_.days.size());
+    auto weekAndDayRowSpace =
+        paintProperty->GetWeekAndDayRowSpace().value_or(Dimension(0.0f)).ConvertToPx();
+    auto browHeight = weekHeight + weekAndDayRowSpace;
+    Dimension buttonOffsetY = Dimension(browHeight + (dayHeight + rowSpace) * pos.second);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdatePosition(OffsetT(buttonOffsetX, buttonOffsetY));
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void CalendarMonthPattern::UpdateAccessibilityButtonNode(RefPtr<FrameNode> frameNode, int32_t index)
@@ -522,7 +717,7 @@ void CalendarMonthPattern::UpdateAccessibilityButtonNode(RefPtr<FrameNode> frame
     CHECK_NULL_VOID(host);
     auto paintProperty = host->GetPaintProperty<CalendarPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
@@ -538,7 +733,7 @@ void CalendarMonthPattern::UpdateAccessibilityButtonNode(RefPtr<FrameNode> frame
     auto colSpace = paintProperty->GetColSpaceValue({}).ConvertToPx() <= 0
                     ? theme->GetCalendarTheme().colSpace.ConvertToPx()
                     : paintProperty->GetColSpaceValue({}).ConvertToPx();
-    Dimension buttonOffsetX = Dimension(colSpace / 2 + (colSpace + dayWidth) * pos.first - 1);
+    Dimension buttonOffsetX = Dimension(margin_ / 2 + (colSpace + dayWidth) * pos.first);
     auto topPadding = isCalendarDialog_ ? 0.0 : theme->GetCalendarTheme().topPadding.ConvertToPx();
     auto weekHeight = paintProperty->GetWeekHeight().value_or(theme->GetCalendarTheme().weekHeight).ConvertToPx();
     auto rowSpace = GetRowSpace(paintProperty, theme, obtainedMonth_.days.size());
@@ -568,16 +763,19 @@ void CalendarMonthPattern::ChangeVirtualNodeContent(const CalendarDay& calendarD
                       calendarDay.day == calendarDay_.day) {
         message += Localization::GetInstance()->GetEntryLetters("calendar.today");
     }
-    std::string month = Localization::GetInstance()->GetEntryLetters("calendar.month");
-    message += std::to_string(calendarDay.month.month) + month;
+    message += std::to_string(calendarDay.month.year) + "/";
+    message += std::to_string(calendarDay.month.month) + "/";
     std::string day = Localization::GetInstance()->GetEntryLetters("calendar.day");
-    message += std::to_string(calendarDay.day) + day;
+    message += std::to_string(calendarDay.day);
     std::string week = Localization::GetInstance()->GetEntryLetters("calendar.week");
     message += week + (remainderWeek == 0 ? day : std::to_string(remainderWeek));
     auto node = buttonAccessibilityNodeVec_[index];
     auto buttonAccessibilityProperty = node->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(buttonAccessibilityProperty);
+    buttonAccessibilityProperty->SetAccessibilityDescription(
+        calendarDay.month.month != obtainedMonth_.month ? disabledDesc_ : " ");
     buttonAccessibilityProperty->SetUserDisabled(calendarDay.month.month != obtainedMonth_.month ? true : false);
+    buttonAccessibilityProperty->SetUserSelected(false);
     buttonAccessibilityProperty->SetAccessibilityText(message);
 }
 

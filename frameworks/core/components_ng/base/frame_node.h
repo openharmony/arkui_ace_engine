@@ -485,6 +485,8 @@ public:
     void OnAccessibilityEvent(
         AccessibilityEventType eventType, int64_t stackNodeId, WindowsContentChangeTypes windowsContentChangeType);
 
+    void OnAccessibilityEvent(
+        AccessibilityEventType eventType, std::string textAnnouncedForAccessibility);
     void MarkNeedRenderOnly();
 
     void OnDetachFromMainTree(bool recursive, PipelineContext* context) override;
@@ -1158,6 +1160,8 @@ private:
 
     CacheVisibleRectResult CalculateCacheVisibleRect(CacheVisibleRectResult& parentCacheVisibleRect,
         const RefPtr<FrameNode>& parentUi, RectF& rectToParent, VectorF scale, uint64_t timestamp);
+
+    void NotifyConfigurationChangeNdk(const ConfigurationChange& configurationChange);
 
     bool AllowVisibleAreaCheck() const;
 

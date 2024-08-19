@@ -639,6 +639,14 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
         jsView->jsViewFunction_->ExecuteForceNodeRerender(nodeId);
     };
 
+    auto hasNodeUpdateFunc = [weak = AceType::WeakClaim(this)](int32_t nodeId) -> bool {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_RETURN(jsView, false);
+        CHECK_NULL_RETURN(jsView->jsViewFunction_, false);
+        ContainerScope scope(jsView->GetInstanceId());
+        return jsView->jsViewFunction_->ExecuteHasNodeUpdateFunc(nodeId);
+    };
+
     auto recycleCustomNode = [weak = AceType::WeakClaim(this)](const RefPtr<NG::CustomNodeBase>& recycleNode) -> void {
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
@@ -697,6 +705,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
         .reloadFunc = std::move(reloadFunction),
         .completeReloadFunc = std::move(completeReloadFunc),
         .nodeUpdateFunc = std::move(nodeUpdateFunc),
+        .hasNodeUpdateFunc = std::move(hasNodeUpdateFunc),
         .recycleCustomNodeFunc = recycleCustomNode,
         .setActiveFunc = std::move(setActiveFunc),
         .onDumpInfoFunc = std::move(onDumpInfoFunc),

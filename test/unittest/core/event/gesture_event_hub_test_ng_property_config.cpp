@@ -327,6 +327,12 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest032, TestSize.Level1)
     gestureEventHub->ProcessTouchTestHierarchy(
         COORDINATE_OFFSET, touchRestrict, innerTargets, finalResult, TOUCH_ID, nullptr, responseLinkResult);
     EXPECT_TRUE(finalResult.empty());
+
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGERS, 1);
+    innerTargets.emplace_back(clickRecognizer);
+
+    gestureEventHub->ProcessTouchTestHierarchy(
+        COORDINATE_OFFSET, touchRestrict, innerTargets, finalResult, TOUCH_ID, nullptr, responseLinkResult);
 }
 
 /**
@@ -527,6 +533,8 @@ HWTEST_F(GestureEventHubTestNg, GetDragDropInfo002, TestSize.Level1)
     RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     gestureEventHub->InitDragDropEvent();
     ASSERT_NE(gestureEventHub->dragEventActuator_, nullptr);
+    gestureEventHub->SetTextDraggable(true);
+    info.SetInputEventType(InputEventType::MOUSE_BUTTON);
     auto dragDropInfo = gestureEventHub->GetDragDropInfo(info, frameNode, dragPreviewInfo, dragEvent);
     EXPECT_TRUE(dragDropInfo.customNode);
     EXPECT_EQ(dragDropInfo.extraInfo, "user set extraInfo");
@@ -550,6 +558,7 @@ HWTEST_F(GestureEventHubTestNg, GetUnifiedData001, TestSize.Level1)
     auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     EXPECT_TRUE(gestureEventHub);
 
+    gestureEventHub->InitDragDropEvent();
     /**
      * @tc.steps: step2. set OnDragStart for eventHub
      *            case: user not set onDragStart callback function
@@ -624,6 +633,7 @@ HWTEST_F(GestureEventHubTestNg, GetUnifiedData002, TestSize.Level1)
      *            case: user do not set unifiedData and extraInfo
      * @tc.expected: unifiedData is not null, extraInfo is not empty.
      */
+    gestureEventHub->InitDragDropEvent();
     DragDropInfo dragDropInfo;
     gestureEventHub->GetUnifiedData("", dragDropInfo, dragEvent);
     EXPECT_TRUE(dragEvent->GetData());
@@ -1682,8 +1692,10 @@ HWTEST_F(GestureEventHubTestNg, RegisterCoordinationListener001, TestSize.Level1
     ASSERT_NE(taskExecutor, nullptr);
     auto mock = AceType::DynamicCast<MockInteractionInterface>(InteractionInterface::GetInstance());
     ASSERT_NE(mock, nullptr);
-    EXPECT_CALL(*mock, RegisterCoordinationListener(testing::_)).Times(1).WillOnce(Return(50));
     gestureEventHub->RegisterCoordinationListener(context);
+    if (mock->gDragOutCallback) {
+        mock->gDragOutCallback();
+    }
 }
 
 /**

@@ -137,6 +137,7 @@ public:
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
     Rect GetItemRect(int32_t index) const override;
+    int32_t GetItemIndex(double x, double y) const override;
 
     RefPtr<WaterFlowSections> GetSections() const;
     RefPtr<WaterFlowSections> GetOrCreateWaterFlowSections();
@@ -175,6 +176,7 @@ public:
     void AddSectionChangeStartPos(int32_t start)
     {
         sectionChangeStartPos_.emplace_back(start);
+        MarkDirtyNodeSelf();
     }
 
 private:

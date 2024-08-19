@@ -1623,7 +1623,7 @@ export class Filter extends ViewPU {
 
     updateFontScale() {
         let uiContent = this.getUIContext();
-        let systemFontScale = uiContent.getHostContext()?.config.fontSizeScale ?? 1;
+        let systemFontScale = uiContent.getHostContext()?.config?.fontSizeScale ?? 1;
         if (!this.isFollowingSystemFontScale) {
             return 1;
         }

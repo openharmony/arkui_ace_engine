@@ -66,6 +66,9 @@ void FormPatternTest::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
     MockContainer::SetUp();
+    MockContainer::Current()->pipelineContext_ = NG::MockPipelineContext::GetCurrent();
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockContainer::Current()->pipelineContext_->taskExecutor_ = MockContainer::Current()->taskExecutor_;
 }
 
 void FormPatternTest::TearDownTestSuite()
@@ -252,6 +255,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_007, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     EXPECT_NE(pipeline, nullptr);
     int32_t delayTime = 0;
+    pipeline->taskExecutor_ = nullptr;
     auto taskExecutor = pipeline->GetTaskExecutor();
     EXPECT_EQ(taskExecutor, nullptr);
     pattern->HandleSnapshot(delayTime);

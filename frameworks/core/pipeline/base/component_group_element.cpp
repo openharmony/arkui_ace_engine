@@ -15,13 +15,7 @@
 
 #include "core/pipeline/base/component_group_element.h"
 
-#include "base/log/log.h"
-#include "base/utils/macros.h"
-#include "base/utils/utils.h"
-#include "core/common/frontend.h"
 #include "core/pipeline/base/component_group.h"
-#include "core/pipeline/base/composed_element.h"
-#include "core/pipeline/base/multi_composed_component.h"
 
 namespace OHOS::Ace {
 

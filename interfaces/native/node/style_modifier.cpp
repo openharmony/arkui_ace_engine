@@ -14,33 +14,12 @@
  */
 #include "style_modifier.h"
 
-#include <cstddef>
-#include <cstdint>
-#include <map>
-#include <unordered_map>
-#include <regex>
-#include <string>
-#include "securec.h"
-#include "drawable_descriptor.h"
 #include "frame_information.h"
-#include "native_node.h"
-#include "native_type.h"
-#include "node_extened.h"
 #include "node_model.h"
 #include "node_transition.h"
-#include "styled_string.h"
 #include "waterflow_section_option.h"
-#include "list_option.h"
 
-#include "base/error/error_code.h"
-#include "base/log/log_wrapper.h"
-#include "base/utils/string_utils.h"
-#include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
-#include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NodeModel {
 namespace {
@@ -2765,6 +2744,14 @@ const ArkUI_AttributeItem* GetMask(ArkUI_NodeHandle node)
     ArkUIMaskOptions options;
     auto unit = GetDefaultUnit(node, UNIT_VP);
     GetFullImpl()->getNodeModifiers()->getCommonModifier()->getMask(node->uiNodeHandle, &options, unit);
+    CHECK_NULL_RETURN(&options, nullptr);
+    if (options.type == static_cast<ArkUI_Int32>(ArkUI_MaskType::ARKUI_MASK_TYPE_PROGRESS)) {
+        g_numberValues[NUM_0].i32 = options.type;
+        g_numberValues[NUM_1].f32 = options.value;
+        g_numberValues[NUM_2].f32 = options.maxValue;
+        g_numberValues[NUM_3].u32 = options.color;
+        return &g_attributeItem;
+    }
     switch (static_cast<BasicShapeType>(options.type)) {
         case BasicShapeType::RECT:
             g_numberValues[NUM_0].u32 = options.fill;
@@ -2806,11 +2793,7 @@ const ArkUI_AttributeItem* GetMask(ArkUI_NodeHandle node)
             g_attributeItem.string = options.commands;
             break;
         default:
-            g_numberValues[NUM_0].i32 = static_cast<ArkUI_Int32>(ArkUI_MaskType::ARKUI_MASK_TYPE_PROGRESS);
-            g_numberValues[NUM_1].f32 = options.value;
-            g_numberValues[NUM_2].f32 = options.maxValue;
-            g_numberValues[NUM_3].u32 = options.color;
-            break;
+            return nullptr;
     }
     return &g_attributeItem;
 }

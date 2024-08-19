@@ -55,7 +55,6 @@
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
-#include "core/components_ng/pattern/overlay/modal_presentation_layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_paint_method.h"
@@ -478,7 +477,7 @@ HWTEST_F(OverlayTestUpdate, ToastTest005, TestSize.Level1)
      */
     auto styleOption = toastContext->GetBackBlurStyle();
     auto testval1 = toastContext->GetBackgroundColorValue();
-    auto shadow1 = textContext->GetBackShadow().value();
+    auto shadow1 = toastContext->GetBackShadow().value();
     EXPECT_EQ(testval1, Color::BLUE);
     EXPECT_EQ(styleOption->blurStyle, BlurStyle::NO_MATERIAL);
     EXPECT_EQ(shadow1, ShadowConfig::DefaultShadowL);

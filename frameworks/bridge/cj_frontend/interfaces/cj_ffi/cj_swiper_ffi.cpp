@@ -17,6 +17,7 @@
 
 
 #include "bridge/cj_frontend/cppview/swiper_controller.h"
+#include "bridge/cj_frontend/cppview/view_abstract.h"
 #include "cj_lambda.h"
 #include "bridge/common/utils/utils.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
@@ -162,6 +163,7 @@ void FfiOHOSAceFrameworkSwiperSetCachedCount(int32_t cachedCount)
 
 void FfiOHOSAceFrameworkSwiperSetEnabled(bool value)
 {
+    ViewAbstract::CjEnabled(value);
     SwiperModel::GetInstance()->SetEnabled(value);
 }
 

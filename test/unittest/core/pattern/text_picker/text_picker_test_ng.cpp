@@ -2001,4 +2001,145 @@ HWTEST_F(TextPickerTestNg, TextPickerModelTest007, TestSize.Level1)
     EXPECT_EQ(imageLayoutProperty->GetMarginProperty()->left, CalcLength(ICON_TEXT_SPACE));
 }
 
+/**
+ * @tc.name: TextPickerDialogViewConvertFontScaleValue001
+ * @tc.desc: Test TextPickerDialogView ConvertFontScaleValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewConvertFontScaleValue001, TestSize.Level1)
+{
+    Dimension fontSizeValue = 50.0_vp;
+    Dimension fontSizeLimit = 40.0_vp;
+
+    auto result = TextPickerDialogView::ConvertFontScaleValue(fontSizeValue, fontSizeLimit, true);
+    EXPECT_EQ(fontSizeLimit.Value(), result.Value());
+}
+
+/**
+ * @tc.name: TextPickerDialogViewConvertFontScaleValue002
+ * @tc.desc: Test TextPickerDialogView ConvertFontScaleValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewConvertFontScaleValue002, TestSize.Level1)
+{
+    Dimension fontSizeValue = 20.0_vp;
+    Dimension fontSizeLimit = 40.0_vp;
+
+    auto result = TextPickerDialogView::ConvertFontScaleValue(fontSizeValue, fontSizeLimit, true);
+    EXPECT_EQ(fontSizeValue.Value(), result.Value());
+}
+
+/**
+ * @tc.name: TextPickerDialogViewConvertFontSizeLimitTest001
+ * @tc.desc: Test TextPickerDialogView ConvertFontSizeLimit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewConvertFontSizeLimitTest001, TestSize.Level1)
+{
+    Dimension fontSizeValue(20.0);
+    Dimension fontSizeLimit(30.0);
+    bool isUserSetFont = false;
+    Dimension result = TextPickerDialogView::ConvertFontSizeLimit(fontSizeValue, fontSizeLimit, isUserSetFont);
+    EXPECT_EQ(result, fontSizeValue);
+}
+
+/**
+ * @tc.name: TextPickerDialogViewConvertFontSizeLimitTest002
+ * @tc.desc: Test TextPickerDialogView ConvertFontSizeLimit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewConvertFontSizeLimitTest002, TestSize.Level1)
+{
+    Dimension fontSizeValue(20.0);
+    Dimension fontSizeLimit(30.0);
+    bool isUserSetFont = true;
+    Dimension result = TextPickerDialogView::ConvertFontSizeLimit(fontSizeValue, fontSizeLimit, isUserSetFont);
+    EXPECT_EQ(result, fontSizeValue);
+}
+
+/**
+ * @tc.name: TextPickerDialogViewConvertFontSizeLimitTest003
+ * @tc.desc: Test TextPickerDialogView ConvertFontSizeLimit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewConvertFontSizeLimitTest003, TestSize.Level1)
+{
+    Dimension fontSizeValue(40.0);
+    Dimension fontSizeLimit(30.0);
+    bool isUserSetFont = true;
+    double fontScale = 2.0f;
+    MockPipelineContext::GetCurrent()->SetFontScale(fontScale);
+    Dimension result = TextPickerDialogView::ConvertFontSizeLimit(fontSizeValue, fontSizeLimit, isUserSetFont);
+    Dimension expected = fontSizeLimit / fontScale;
+    EXPECT_EQ(result, expected);
+}
+
+/**
+ * @tc.name: TextPickerDialogViewConvertFontSizeLimitTest004
+ * @tc.desc: Test TextPickerDialogView ConvertFontSizeLimit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewConvertFontSizeLimitTest004, TestSize.Level1)
+{
+    Dimension fontSizeValue(10.0);
+    Dimension fontSizeLimit(30.0);
+    bool isUserSetFont = true;
+    double fontScale = 2.0f;
+    MockPipelineContext::GetCurrent()->SetFontScale(fontScale);
+    Dimension result = TextPickerDialogView::ConvertFontSizeLimit(fontSizeValue, fontSizeLimit, isUserSetFont);
+    EXPECT_EQ(result, fontSizeValue);
+}
+
+/**
+ * @tc.name: TextPickerDialogViewGetUserSettingLimitTest001
+ * @tc.desc: Test TextPickerDialogView AdjustFontSizeScale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewGetUserSettingLimitTest001, TestSize.Level1)
+{
+    double fontScale = 1.0f;
+    Dimension fontSizeValue(10.0);
+    Dimension result = TextPickerDialogView::AdjustFontSizeScale(fontSizeValue, fontScale);
+    EXPECT_EQ(result, fontSizeValue * fontScale);
+}
+
+/**
+ * @tc.name: TextPickerDialogViewGetUserSettingLimitTest002
+ * @tc.desc: Test TextPickerDialogView AdjustFontSizeScale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewGetUserSettingLimitTest002, TestSize.Level1)
+{
+    double fontScale = 1.75f;
+    Dimension fontSizeValue(10.0);
+    Dimension result = TextPickerDialogView::AdjustFontSizeScale(fontSizeValue, fontScale);
+    EXPECT_EQ(result, fontSizeValue * fontScale);
+}
+
+/**
+ * @tc.name: TextPickerDialogViewGetUserSettingLimitTest003
+ * @tc.desc: Test TextPickerDialogView AdjustFontSizeScale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewGetUserSettingLimitTest003, TestSize.Level1)
+{
+    double fontScale = 2.0f;
+    Dimension fontSizeValue(10.0);
+    Dimension result = TextPickerDialogView::AdjustFontSizeScale(fontSizeValue, fontScale);
+    EXPECT_EQ(result, fontSizeValue * fontScale);
+}
+
+/**
+ * @tc.name: TextPickerDialogViewGetUserSettingLimitTest004
+ * @tc.desc: Test TextPickerDialogView AdjustFontSizeScale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewGetUserSettingLimitTest004, TestSize.Level1)
+{
+    double fontScale = 3.2f;
+    Dimension fontSizeValue(10.0);
+    Dimension result = TextPickerDialogView::AdjustFontSizeScale(fontSizeValue, fontScale);
+    EXPECT_NE(result, fontSizeValue * fontScale);
+}
+
 } // namespace OHOS::Ace::NG

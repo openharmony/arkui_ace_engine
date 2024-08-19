@@ -159,6 +159,13 @@ public:
         LayoutProperty::FromJson(json);
     }
 
+    void UpdateImageSourceInfoCacheKey()
+    {
+        if (propImageSourceInfo_.has_value()) {
+            propImageSourceInfo_.value().GenerateCacheKey();
+        }
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageFit, ImageFit, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageSourceInfo, ImageSourceInfo, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Alt, ImageSourceInfo, PROPERTY_UPDATE_NORMAL);

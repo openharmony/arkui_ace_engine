@@ -89,19 +89,17 @@ RefPtr<AceType> NativeView::CreateUI()
             }
             self->pendingUpdateTasks_.clear();
         },
-        .reloadFunc =
-            [weakThis](bool deep) {
-                auto self = weakThis.promote();
-                CHECK_NULL_VOID(self);
-                ContainerScope scope(self->instanceId_);
-                self->cjView_->Reload(deep);
-            },
-        .removeFunc =
-            [weakThis]() {
-                auto self = weakThis.promote();
-                CHECK_NULL_VOID(self);
-                self->Destroy();
-            },
+        .removeFunc = [weakThis]() {
+            auto self = weakThis.promote();
+            CHECK_NULL_VOID(self);
+            self->Destroy();
+        },
+        .reloadFunc = [weakThis](bool deep) {
+            auto self = weakThis.promote();
+            CHECK_NULL_VOID(self);
+            ContainerScope scope(self->instanceId_);
+            self->cjView_->Reload(deep);
+        },
         .completeReloadFunc = [weakThis]() -> RefPtr<AceType> {
             auto view = weakThis.promote();
             CHECK_NULL_RETURN(view, nullptr);

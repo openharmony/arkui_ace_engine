@@ -389,6 +389,7 @@ void NGGestureRecognizer::HandleWillAccept()
     auto node = GetAttachedNode().Upgrade();
     if (AceType::InstanceOf<ClickRecognizer>(this)) {
         auto clickRecognizer = AceType::DynamicCast<ClickRecognizer>(this);
+        CHECK_NULL_VOID(clickRecognizer);
         GestureEvent gestureEventInfo = clickRecognizer->GetGestureEventInfo();
         ClickInfo clickInfo = clickRecognizer->GetClickInfo();
         UIObserverHandler::GetInstance().NotifyWillClick(gestureEventInfo, clickInfo, node);
@@ -400,6 +401,7 @@ void NGGestureRecognizer::HandleDidAccept()
     auto node = GetAttachedNode().Upgrade();
     if (AceType::InstanceOf<ClickRecognizer>(this)) {
         auto clickRecognizer = AceType::DynamicCast<ClickRecognizer>(this);
+        CHECK_NULL_VOID(clickRecognizer);
         GestureEvent gestureEventInfo = clickRecognizer->GetGestureEventInfo();
         ClickInfo clickInfo = clickRecognizer->GetClickInfo();
         UIObserverHandler::GetInstance().NotifyDidClick(gestureEventInfo, clickInfo, node);

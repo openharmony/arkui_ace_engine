@@ -91,7 +91,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag001, TestSize.Level1)
     float delta = SCROLL_BAR_CHILD_HEIGHT;
     info.SetMainDelta(-delta);
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_);
+    FlushLayoutTask(stackNode_, true);
     EXPECT_EQ(pattern_->GetCurrentPosition(), 0.f);
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), 0.f);
 
@@ -101,7 +101,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag001, TestSize.Level1)
      */
     info.SetMainDelta(delta);
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_);
+    FlushLayoutTask(stackNode_, true);
     EXPECT_EQ(pattern_->GetCurrentPosition(), delta);
     float expectOffset = delta * controlDistance / scrollableDistance;
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), expectOffset); // 50.f
@@ -111,7 +111,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag001, TestSize.Level1)
      * @tc.expected: Scroll down
      */
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_);
+    FlushLayoutTask(stackNode_, true);
     EXPECT_EQ(pattern_->GetCurrentPosition(), delta * 2);
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), expectOffset * 2); // 100.f
 
@@ -121,7 +121,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag001, TestSize.Level1)
      */
     info.SetMainDelta(-delta);
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_);
+    FlushLayoutTask(stackNode_, true);
     EXPECT_EQ(pattern_->GetCurrentPosition(), delta);
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), expectOffset); // 50.f
 
@@ -129,7 +129,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag001, TestSize.Level1)
      * @tc.steps: step6. HandleDragEnd, drag end
      */
     HandleDragEnd(info);
-    FlushLayoutTask(stackNode_);
+    FlushLayoutTask(stackNode_, true);
     EXPECT_EQ(pattern_->GetCurrentPosition(), delta);
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), expectOffset);
 }
@@ -164,7 +164,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag002, TestSize.Level1)
     float delta = -SCROLL_BAR_CHILD_HEIGHT;
     info.SetMainDelta(delta);
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_);
+    FlushLayoutTask(stackNode_, true);
     float expectBarPosition = -delta / controlDistance * scrollableDistance;
     EXPECT_EQ(pattern_->GetCurrentPosition(), expectBarPosition); // 512.f
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), -delta);
@@ -174,7 +174,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag002, TestSize.Level1)
      * @tc.expected: Scroll down
      */
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_);
+    FlushLayoutTask(stackNode_, true);
     EXPECT_EQ(pattern_->GetCurrentPosition(), scrollableDistance); // 640.f
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), controlDistance);
 
@@ -184,7 +184,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag002, TestSize.Level1)
      */
     info.SetMainDelta(-delta);
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_);
+    FlushLayoutTask(stackNode_, true);
     EXPECT_EQ(pattern_->GetCurrentPosition(), scrollableDistance - expectBarPosition); // 138
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), controlDistance + delta);              // 40.f
 
@@ -192,7 +192,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag002, TestSize.Level1)
      * @tc.steps: step5. HandleDragEnd, mouse wheel end
      */
     HandleDragEnd(info);
-    FlushLayoutTask(stackNode_);
+    FlushLayoutTask(stackNode_, true);
     EXPECT_EQ(pattern_->GetCurrentPosition(), scrollableDistance - expectBarPosition); // 138
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), controlDistance + delta);              // 40.f
 }
@@ -290,7 +290,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag004, TestSize.Level1)
     float delta = -SCROLL_BAR_CHILD_HEIGHT;
     info.SetMainDelta(delta);
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_);
+    FlushLayoutTask(stackNode_, true);
     EXPECT_EQ(pattern_->GetCurrentPosition(), 0.f);
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), 0.f);
 
@@ -298,7 +298,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag004, TestSize.Level1)
      * @tc.steps: step3. HandleDragEnd, mouse wheel end
      */
     HandleDragEnd(info);
-    FlushLayoutTask(stackNode_);
+    FlushLayoutTask(stackNode_, true);
     EXPECT_EQ(pattern_->GetCurrentPosition(), 0.f);
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), 0.f);
 }
@@ -796,5 +796,62 @@ HWTEST_F(ScrollBarEventTestNg, HandleLongPress003, TestSize.Level1)
     HandleMouseEvent(mouseInfo);
     EXPECT_FALSE(pattern_->scrollingUp_);
     EXPECT_FALSE(pattern_->scrollingDown_);
+}
+
+/**
+ * @tc.name: HandleOnHover001
+ * @tc.desc: Test mouse onhover show bar
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarEventTestNg, HandleOnHover001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create CreateScrollBar and MouseInfo.
+     * @tc.expected: create CreateScrollBar and MouseInfo created successfully.
+     */
+    const int32_t apiTargetVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::AUTO);
+    CreateScrollBarChild();
+    CreateDone();
+    pattern_->SetControlDistance(1.f);
+    pattern_->CreateScrollBarOverlayModifier();
+    auto context = PipelineContext::GetCurrentContext();
+    EXPECT_NE(context, nullptr);
+    if (context->taskExecutor_ == nullptr) {
+        context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    }
+    EXPECT_NE(context->taskExecutor_, nullptr);
+
+    /**
+     * @tc.steps: step2. Test not hover on bar.
+     * @tc.expect: Opacity = 0 .
+     */
+    pattern_->InitMouseEvent();
+    pattern_->SetScrollBar(DisplayMode::AUTO);
+    HoverInfo info;
+    auto inputHub = pattern_->GetInputHub();
+    auto& inputEvents = pattern_->GetEventHub<EventHub>()->GetInputEventHub()->hoverEventActuator_->inputEvents_;
+    EXPECT_TRUE(inputEvents.size() > 1);
+    for (const auto& callback : inputEvents) {
+        if (callback) {
+            (*callback)(false, info);
+        }
+    }
+    EXPECT_EQ(pattern_->opacity_, 0);
+
+    /**
+     * @tc.steps: step2. Test hover on bar.
+     * @tc.expect: Opacity = UINT8_MAX .
+     */
+    for (const auto& callback : inputEvents) {
+        if (callback) {
+            (*callback)(true, info);
+        }
+    }
+    EXPECT_EQ(pattern_->opacity_, UINT8_MAX);
+    Container::Current()->SetApiTargetVersion(apiTargetVersion);
 }
 } // namespace OHOS::Ace::NG

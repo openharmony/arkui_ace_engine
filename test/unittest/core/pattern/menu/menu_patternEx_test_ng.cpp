@@ -100,6 +100,9 @@ constexpr double MENU_OFFSET_X = 10.0;
 constexpr double MENU_OFFSET_Y = 10.0;
 constexpr float MENU_SIZE_WIDTH = 100.0f;
 constexpr float MENU_SIZE_HEIGHT = 50.0f;
+constexpr double CONST_NEAR_ZREO = 0.0001;
+constexpr double CONST_LESS_NEAR_ZREO = 0.00001;
+constexpr float PAN_GREATER_MAX_VELOCITY = 2100.0f;
 } // namespace
 class MenuPattern1TestNg : public testing::Test {
 public:
@@ -1515,6 +1518,12 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg034, TestSize.Level1)
     if (context) {
         context->dipScale_ = DIP_SCALE;
     }
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    RefPtr<MenuTheme> menuTheme = AceType::MakeRefPtr<MenuTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(menuTheme));
+
     auto menuWrapperNode = GetPreviewMenuWrapper();
     ASSERT_NE(menuWrapperNode, nullptr);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
@@ -1598,7 +1607,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg036, TestSize.Level1)
     menuPattern->HandleDragEnd(OFFSET_FIRST, OFFSET_SECOND, POSITION_OFFSET);
     EXPECT_TRUE(LessOrEqual(POSITION_OFFSET, PAN_MAX_VELOCITY));
 
-    menuPattern->HandleDragEnd(OFFSET_FIRST, CONST_DOUBLE_ZREO, POSITION_OFFSET);
+    menuPattern->HandleDragEnd(OFFSET_SECOND, OFFSET_FIRST, PAN_GREATER_MAX_VELOCITY);
     EXPECT_TRUE(LessOrEqual(CONST_DOUBLE_ZREO, 0.0f));
 }
 /**
@@ -1625,7 +1634,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg037, TestSize.Level1)
     menuPattern->HandleScrollDragEnd(OFFSET_FIRST, OFFSET_SECOND, POSITION_OFFSET);
     EXPECT_TRUE(LessOrEqual(POSITION_OFFSET, PAN_MAX_VELOCITY));
 
-    menuPattern->HandleScrollDragEnd(OFFSET_FIRST, CONST_DOUBLE_ZREO, POSITION_OFFSET);
+    menuPattern->HandleScrollDragEnd(CONST_LESS_NEAR_ZREO, CONST_NEAR_ZREO, PAN_GREATER_MAX_VELOCITY);
     EXPECT_FALSE(!NearZero(CONST_DOUBLE_ZREO));
 }
 /**

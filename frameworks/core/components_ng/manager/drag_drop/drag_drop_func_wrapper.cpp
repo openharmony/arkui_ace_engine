@@ -84,6 +84,7 @@ void GetShadowInfoArray(
 
 void PostStopDrag(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction, const RefPtr<Container>& container)
 {
+    CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     auto windowId = container->GetWindowId();
@@ -243,7 +244,10 @@ int32_t DragDropFuncWrapper::StartDragAction(std::shared_ptr<OHOS::Ace::NG::ArkU
     std::optional<DragDataCore> dragData;
     EnvelopedDragData(dragAction, dragData);
     if (!dragData) {
-        manager->GetDragAction()->dragState = DragAdapterState::INIT;
+        {
+            std::lock_guard<std::mutex> lock(dragAction->dragStateMutex);
+            manager->GetDragAction()->dragState = DragAdapterState::INIT;
+        }
         return -1;
     }
     OnDragCallback callback = [dragAction, manager](const OHOS::Ace::DragNotifyMsg& dragNotifyMsg) {

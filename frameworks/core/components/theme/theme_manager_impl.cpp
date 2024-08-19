@@ -14,7 +14,6 @@
  */
 
 #include "core/components/theme/theme_manager_impl.h"
-#include "shadow_theme.h"
 
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/components/badge/badge_theme.h"
@@ -50,17 +49,13 @@
 #include "core/components/semi_modal/semi_modal_theme.h"
 #include "core/components/slider/slider_theme.h"
 #include "core/components/stepper/stepper_theme.h"
-#include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components/tab_bar/tab_theme.h"
-#include "core/components/text/text_theme.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/theme/advanced_pattern_theme.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components/theme/blur_style_theme.h"
 #include "core/components/theme/card_theme.h"
-#include "core/components/theme/icon_theme.h"
-#include "core/components/theme/resource_adapter.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components/toggle/toggle_theme.h"
@@ -70,7 +65,6 @@
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
 #include "core/components_ng/pattern/form/form_theme.h"
 #include "core/components_ng/pattern/gauge/gauge_theme.h"
-#include "core/components_ng/pattern/overlay/sheet_theme.h"
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
 #include "core/components_ng/pattern/side_bar/side_bar_theme.h"
 #include "core/components_v2/pattern_lock/pattern_lock_theme.h"

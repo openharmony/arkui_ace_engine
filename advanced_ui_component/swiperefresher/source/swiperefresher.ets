@@ -18,9 +18,12 @@ import { common } from '@kit.AbilityKit';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 
-const LOADINGPROGRESS_SIZE = 24
 const DEFAULT_MARGIN = 16
 const ITEM_SPACE = 4
+const MIN_SIZE = 24
+const MID_SIZE = 40
+const MAX_SIZE = 48
+const MAX_FONT_SIZE = 2
 
 @Component
 export struct SwipeRefresher {
@@ -30,22 +33,24 @@ export struct SwipeRefresher {
   isLoading: boolean = false;
   maxAppFontScale: number = 1;
   isFollowingSystemFontScale: boolean = false;
+  minFontSize: number = 1.75;
+  maxFontSize: number = 2;
 
   aboutToAppear() {
     try {
       let uiContent: UIContext = this.getUIContext();
-      this.isFollowingSystemFontScale= uiContent.isFollowingSystemFontScale();
+      this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
       this.maxAppFontScale = uiContent.getMaxFontScale();
     } catch (err) {
       let code: number = (err as BusinessError).code;
       let message: string = (err as BusinessError).message;
-      hilog.error(0x3900, 'Ace', `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
+      hilog.error(0x3900, 'SwipeRefresher', `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
     }
   }
 
   updateFontScale(): number {
     let uiContent: UIContext = this.getUIContext();
-    let systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1;
+    let systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
     if (!this.isFollowingSystemFontScale) {
       return 1;
     }
@@ -56,8 +61,10 @@ export struct SwipeRefresher {
     Flex({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center }) {
       if (this.isLoading) {
         LoadingProgress()
-          .height(LOADINGPROGRESS_SIZE)
-          .width(LOADINGPROGRESS_SIZE)
+          .height(Math.min(this.updateFontScale(), MAX_FONT_SIZE) === this.maxFontSize ? MAX_SIZE :
+            (Math.min(this.updateFontScale(), MAX_FONT_SIZE) === this.minFontSize ? MID_SIZE : MIN_SIZE))
+          .width(Math.min(this.updateFontScale(), MAX_FONT_SIZE) === this.maxFontSize ? MAX_SIZE :
+            (Math.min(this.updateFontScale(), MAX_FONT_SIZE) === this.minFontSize ? MID_SIZE : MIN_SIZE))
           .margin({
             end: LengthMetrics.vp(ITEM_SPACE)
           })

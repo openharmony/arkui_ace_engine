@@ -13,25 +13,10 @@
  * limitations under the License.
  */
 
-#include <memory>
-#include <string>
 
 #include "animator_option.h"
 #include "interfaces/napi/kits/utils/napi_utils.h"
-#include "napi/native_api.h"
-#include "napi/native_engine/native_value.h"
-#include "napi/native_node_api.h"
-
-#include "base/log/ace_trace.h"
-#include "base/log/log.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
 #include "base/thread/frame_trace_adapter.h"
-#include "bridge/common/utils/utils.h"
-#include "core/animation/animator.h"
-#include "core/animation/curve.h"
-#include "core/animation/curve_animation.h"
-#include "core/animation/spring_motion.h"
 
 namespace OHOS::Ace::Napi {
 

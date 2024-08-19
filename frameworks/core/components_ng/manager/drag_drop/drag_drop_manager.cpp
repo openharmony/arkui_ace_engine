@@ -401,7 +401,7 @@ std::unordered_set<int32_t> DragDropManager::FindHitFrameNodes(const Point& poin
     std::unordered_set<int32_t> frameNodeList;
     for (auto iter = nodesForDragNotify_.begin(); iter != nodesForDragNotify_.end(); iter++) {
         auto frameNode = iter->second.Upgrade();
-        if (!frameNode || !frameNode->IsActive() || !frameNode->IsVisible()) {
+        if (!frameNode || !frameNode->IsActive() || !frameNode->IsVisible() || frameNode->GetDepth() < 0) {
             continue;
         }
         auto geometryNode = frameNode->GetGeometryNode();
@@ -1028,14 +1028,6 @@ void DragDropManager::onDragCancel()
     draggedFrameNode_ = nullptr;
 }
 
-void DragDropManager::EnsureStatusForPullIn()
-{
-    preTargetFrameNode_ = nullptr;
-    draggedFrameNode_ = nullptr;
-    hasNotifiedTransformation_ = false;
-    isDragFwkShow_ = true;
-}
-
 void DragDropManager::FireOnDragEventWithDragType(const RefPtr<EventHub>& eventHub, DragEventType type,
     RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams)
 {
@@ -1560,6 +1552,30 @@ bool DragDropManager::IsNeedScaleDragPreview()
     return info_.scale > 0 && info_.scale < 1.0f;
 }
 
+OffsetF GetTouchOffsetRelativeToSubwindow(int32_t x, int32_t y)
+{
+    auto touchOffset = OffsetF(x, y);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline) {
+        auto window = pipeline->GetWindow();
+        if (window) {
+            auto windowOffset = window->GetCurrentWindowRect().GetOffset();
+            touchOffset.SetX(touchOffset.GetX() + windowOffset.GetX());
+            touchOffset.SetY(touchOffset.GetY() + windowOffset.GetY());
+        }
+    }
+    auto containerId = Container::CurrentId();
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(
+        containerId >= MIN_SUBCONTAINER_ID ? SubwindowManager::GetInstance()->GetParentContainerId(containerId)
+                                           : containerId);
+    if (subwindow) {
+        auto subwindowOffset = subwindow->GetRect().GetOffset();
+        touchOffset.SetX(touchOffset.GetX() - subwindowOffset.GetX());
+        touchOffset.SetY(touchOffset.GetY() - subwindowOffset.GetY());
+    }
+    return touchOffset;
+}
+
 double DragDropManager::CalcDragPreviewDistanceWithPoint(
     const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info)
 {
@@ -1568,16 +1584,8 @@ double DragDropManager::CalcDragPreviewDistanceWithPoint(
     auto renderContext = info.imageNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, 0.0);
     nodeOffset -= pixelMapOffset_;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    auto windowScale = GetWindowScale();
-    if (pipeline && NearEqual(windowScale, 1.0f)) {
-        auto window = pipeline->GetWindow();
-        CHECK_NULL_RETURN(window, 0.0);
-        auto windowOffset = window->GetCurrentWindowRect().GetOffset();
-        x += windowOffset.GetX();
-        y += windowOffset.GetY();
-    }
-    return sqrt(pow(nodeOffset.GetX() - x, 2) + pow(nodeOffset.GetY() - y, 2));
+    auto touchOffset = GetTouchOffsetRelativeToSubwindow(x, y);
+    return sqrt(pow(nodeOffset.GetX() - touchOffset.GetX(), 2) + pow(nodeOffset.GetY() - touchOffset.GetY(), 2));
 }
 
 Offset DragDropManager::CalcDragMoveOffset(
@@ -1587,14 +1595,8 @@ Offset DragDropManager::CalcDragMoveOffset(
     auto originPoint = info.imageNode->GetOffsetRelativeToWindow();
     originPoint.SetX(originPoint.GetX() - pixelMapOffset_.GetX() + (1 - info.scale) * info.width / 2.0f);
     originPoint.SetY(originPoint.GetY() - pixelMapOffset_.GetY() + (1 - info.scale) * info.height / 2.0f);
-    Offset newOffset { x - originPoint.GetX(), y - originPoint.GetY() };
-    auto pipeline = PipelineContext::GetCurrentContext();
-    auto windowScale = GetWindowScale();
-    if (pipeline && NearEqual(windowScale, 1.0f)) {
-        auto windowOffset = pipeline->GetWindow()->GetCurrentWindowRect().GetOffset();
-        newOffset.SetX(newOffset.GetX() + windowOffset.GetX());
-        newOffset.SetY(newOffset.GetY() + windowOffset.GetY());
-    }
+    auto touchOffset = GetTouchOffsetRelativeToSubwindow(x, y);
+    Offset newOffset { touchOffset.GetX() - originPoint.GetX(), touchOffset.GetY() - originPoint.GetY() };
     return newOffset;
 }
 

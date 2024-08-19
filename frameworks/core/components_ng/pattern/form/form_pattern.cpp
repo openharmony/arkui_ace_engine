@@ -93,6 +93,25 @@ public:
 private:
     WeakPtr<FormPattern> weakFormPattern_ = nullptr;
 };
+
+void PostTask(const TaskExecutor::Task& task, TaskExecutor::TaskType type, const std::string& name)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(task, type, name, PriorityType::HIGH);
+}
+
+void PostUITask(const TaskExecutor::Task& task, const std::string& name)
+{
+    PostTask(task, TaskExecutor::TaskType::UI, name);
+}
+
+void PostBgTask(const TaskExecutor::Task& task, const std::string& name)
+{
+    PostTask(task, TaskExecutor::TaskType::BACKGROUND, name);
+}
 } // namespace
 
 FormPattern::FormPattern()
@@ -631,10 +650,16 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
 void FormPattern::HandleFormComponent(const RequestFormInfo& info)
 {
+    ACE_FUNCTION_TRACE();
     if (info.bundleName != cardInfo_.bundleName || info.abilityName != cardInfo_.abilityName ||
         info.moduleName != cardInfo_.moduleName || info.cardName != cardInfo_.cardName ||
         info.dimension != cardInfo_.dimension || info.renderingMode != cardInfo_.renderingMode) {
-        AddFormComponent(info);
+        PostBgTask(
+            [weak = WeakClaim(this), info] {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->AddFormComponent(info);
+            }, "ArkUIHandleFormComponent");
     } else {
         UpdateFormComponent(info);
     }
@@ -670,16 +695,7 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
     }
 #endif
 
-    CreateCardContainer();
-    if (host->IsDraggable()) {
-        EnableDrag();
-    }
-
-#if OHOS_STANDARD_SYSTEM
-    if (!isJsCard_ && ShouldLoadFormSkeleton(formInfo.transparencyEnabled, info)) {
-        LoadFormSkeleton();
-    }
-#endif
+    AddFormComponentUI(formInfo.transparencyEnabled, info);
 
     if (!formManagerBridge_) {
         TAG_LOGE(AceLogTag::ACE_FORM, "Form manager delegate is nullptr.");
@@ -692,8 +708,34 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
 #endif
 
     if (!formInfo.transparencyEnabled && CheckFormBundleForbidden(info.bundleName)) {
-        LoadDisableFormStyle(info);
+        PostUITask([weak = WeakClaim(this), info] {
+            ACE_SCOPED_TRACE("ArkUILoadDisableFormStyle");
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->LoadDisableFormStyle(info);
+            }, "ArkUILoadDisableFormStyle");
     }
+}
+
+void FormPattern::AddFormComponentUI(bool isTransparencyEnabled, const RequestFormInfo& info)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    PostUITask([weak = WeakClaim(this), host, isTransparencyEnabled, info, isJsCard = isJsCard_] {
+        ACE_SCOPED_TRACE("ArkUIAddFormComponentUI");
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->CreateCardContainer();
+        if (host->IsDraggable()) {
+            pattern->EnableDrag();
+        }
+
+#if OHOS_STANDARD_SYSTEM
+        if (!isJsCard && pattern->ShouldLoadFormSkeleton(isTransparencyEnabled, info)) {
+            pattern->LoadFormSkeleton();
+        }
+#endif
+        }, "ArkUIAddFormComponentUI");
 }
 
 void FormPattern::UpdateFormComponent(const RequestFormInfo& info)

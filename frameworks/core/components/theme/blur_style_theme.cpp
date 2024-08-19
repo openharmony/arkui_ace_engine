@@ -15,9 +15,7 @@
 
 #include "core/components/theme/blur_style_theme.h"
 
-#include "core/components/common/properties/blur_parameter.h"
 #include "core/components/common/properties/decoration.h"
-#include "core/components/theme/theme_attributes.h"
 
 namespace OHOS::Ace {
 

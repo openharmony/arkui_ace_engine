@@ -16,6 +16,7 @@
 #ifndef ARKUI_NATIVE_DIALOG_H
 #define ARKUI_NATIVE_DIALOG_H
 
+#include <stdbool.h>
 #include "native_type.h"
 
 #ifdef __cplusplus

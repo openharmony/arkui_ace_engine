@@ -473,7 +473,7 @@ void SheetPresentationPattern::HandleDragUpdate(const GestureEvent& info)
     auto height = height_ + sheetHeightUp_;
     auto maxDetentSize = sheetDetentHeight_[detentSize - 1];
     if (GreatNotEqual((height - currentOffset_), maxDetentSize)) {
-        if (LessNotEqual(mainDelta, 0)) {
+        if (LessNotEqual(mainDelta, 0) && GreatNotEqual(sheetMaxHeight_, 0.0f)) {
             auto friction = CalculateFriction((height - currentOffset_) / sheetMaxHeight_);
             mainDelta = mainDelta * friction;
         }
@@ -554,7 +554,6 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
             if (NearZero(downHeight)) {
                 SheetInteractiveDismiss(BindSheetDismissReason::SLIDE_DOWN, std::abs(dragVelocity));
             } else {
-                isDirectionUp_ = false;
                 detentsIndex_ = detentsLowerPos;
                 ChangeSheetHeight(downHeight);
                 ChangeSheetPage(height);
@@ -569,7 +568,6 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
     } else {
         // when drag velocity is over the threshold
         if (GreatOrEqual(dragVelocity, 0.0f)) {
-            isDirectionUp_ = false;
             if (NearZero(downHeight)) {
                 SheetInteractiveDismiss(BindSheetDismissReason::SLIDE_DOWN, std::abs(dragVelocity));
             } else {
@@ -901,6 +899,7 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVe
 
 void SheetPresentationPattern::SheetInteractiveDismiss(BindSheetDismissReason dismissReason, float dragVelocity)
 {
+    isDirectionUp_ = false;
     if (HasShouldDismiss() || HasOnWillDismiss()) {
         const auto& overlayManager = GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
@@ -1549,6 +1548,7 @@ bool SheetPresentationPattern::IsFold()
 void SheetPresentationPattern::ChangeSheetHeight(float height)
 {
     if (!NearEqual(height_, height)) {
+        isDirectionUp_ = GreatNotEqual(height, height_);
         height_ = height;
         SetCurrentHeightToOverlay(height_);
     }
@@ -2150,12 +2150,30 @@ ScrollResult SheetPresentationPattern::HandleScrollWithSheet(float scrollOffset)
         isSheetNeedScroll_ = false;
         return {scrollOffset, true};
     }
+
     auto currentHeightPos = height_ + sheetHeightUp_;
-    if ((NearZero(currentOffset_)) && (LessNotEqual(scrollOffset, 0.0f)) &&
-        (GreatOrEqual(currentHeightPos, sheetDetentHeight_[sheetDetentsSize - 1]))) {
+    bool isDraggingUp = LessNotEqual(scrollOffset, 0.0f);
+    bool isReachMaxSheetHeight = GreatOrEqual(currentHeightPos, sheetDetentHeight_[sheetDetentsSize - 1]);
+
+    // When dragging up the sheet, and sheet height is larger than sheet content height,
+    // the sheet height should be updated.
+    // When dragging up the sheet, and sheet height is less than or equal to sheet content height,
+    // the sheet content should scrolling.
+    if ((NearZero(currentOffset_)) && isDraggingUp && isReachMaxSheetHeight && IsScrollable()) {
         isSheetNeedScroll_ = false;
         return {scrollOffset, true};
     }
+
+    // When dragging up the sheet, and sheet height is larger than max height,
+    // should set the coefficient of friction.
+    bool isExceedMaxSheetHeight =
+        GreatNotEqual((currentHeightPos - currentOffset_), sheetDetentHeight_[sheetDetentsSize - 1]);
+    bool isNeedCalculateFriction = isExceedMaxSheetHeight && isDraggingUp;
+    if (isNeedCalculateFriction && GreatNotEqual(sheetMaxHeight_, 0.0f)) {
+        auto friction = CalculateFriction((currentHeightPos - currentOffset_) / sheetMaxHeight_);
+        scrollOffset = scrollOffset * friction;
+    }
+
     auto host = GetHost();
     CHECK_NULL_RETURN(host, result);
     currentOffset_ = currentOffset_ + scrollOffset;
@@ -2165,13 +2183,16 @@ ScrollResult SheetPresentationPattern::HandleScrollWithSheet(float scrollOffset)
         sheetOffsetInPage = pageHeight - sheetMaxHeight_;
         currentOffset_ = currentHeightPos - sheetMaxHeight_;
     }
-    bool isNeedChangeScrollHeight = scrollSizeMode_ == ScrollSizeMode::CONTINUOUS && scrollOffset < 0;
+    bool isNeedChangeScrollHeight = scrollSizeMode_ == ScrollSizeMode::CONTINUOUS && isDraggingUp;
     if (isNeedChangeScrollHeight) {
         ChangeScrollHeight(currentHeightPos - currentOffset_);
     }
     ProcessColumnRect(currentHeightPos - currentOffset_);
     auto renderContext = host->GetRenderContext();
     renderContext->UpdateTransformTranslate({ 0.0f, sheetOffsetInPage, 0.0f });
+    if (IsSheetBottomStyle()) {
+        OnHeightDidChange(height_ - currentOffset_ + sheetHeightUp_);
+    }
     isSheetPosChanged_ = true;
     return result;
 }

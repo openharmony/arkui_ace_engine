@@ -13,14 +13,9 @@
  * limitations under the License.
  */
 
-#include <string>
 
 #include "interfaces/napi/kits/utils/napi_utils.h"
-#include "napi/native_api.h"
-#include "napi/native_node_api.h"
-#include "native_engine/native_value.h"
 
-#include "frameworks/bridge/common/utils/componentInfo.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace::Napi {

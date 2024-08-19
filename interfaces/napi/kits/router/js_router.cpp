@@ -13,21 +13,11 @@
  * limitations under the License.
  */
 
-#include <cstdint>
-#include <memory>
-#include <string>
 
 #include "interfaces/napi/kits/utils/napi_utils.h"
-#include "js_native_api.h"
-#include "js_native_api_types.h"
-#include "napi/native_api.h"
-#include "napi/native_engine/native_value.h"
-#include "napi/native_node_api.h"
 
 #include "core/common/ace_engine.h"
-#include "frameworks/base/log/log.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
-#include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 
 namespace OHOS::Ace::Napi {
 const char EN_ALERT_APPROVE[] = "enableAlertBeforeBackPage:ok";

@@ -85,8 +85,9 @@ DataReadyNotifyTask ImagePattern::CreateDataReadyCallback()
         auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
         if (currentSourceInfo != sourceInfo) {
             TAG_LOGW(AceLogTag::ACE_IMAGE,
-                "sourceInfo does not match, ignore current callback. "
-                "current: %{private}s vs callback's: %{private}s",
+                "sourceInfo does not match, ignore current callback. nodeId = %{public}d, accessibilityId = "
+                "%{public}lld. current: %{private}s vs callback's: %{private}s",
+                pattern->imageDfxConfig_.nodeId_, static_cast<long long>(pattern->imageDfxConfig_.accessibilityId_),
                 currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
@@ -104,8 +105,9 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallback()
         auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
         if (currentSourceInfo != sourceInfo) {
             TAG_LOGW(AceLogTag::ACE_IMAGE,
-                "sourceInfo does not match, ignore current callback. "
-                "current: %{private}s vs callback's: %{private}s",
+                "sourceInfo does not match, ignore current callback. nodeId = %{public}d, accessibilityId = "
+                "%{public}lld. current: %{private}s vs callback's: %{private}s",
+                pattern->imageDfxConfig_.nodeId_, static_cast<long long>(pattern->imageDfxConfig_.accessibilityId_),
                 currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
@@ -123,8 +125,9 @@ LoadFailNotifyTask ImagePattern::CreateLoadFailCallback()
         auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
         if (currentSourceInfo != sourceInfo) {
             TAG_LOGW(AceLogTag::ACE_IMAGE,
-                "sourceInfo does not match, ignore current callback. "
-                "current: %{private}s vs callback's: %{private}s",
+                "sourceInfo does not match, ignore current callback. nodeId = %{public}d, accessibilityId = "
+                "%{public}lld. current: %{private}s vs callback's: %{private}s",
+                pattern->imageDfxConfig_.nodeId_, static_cast<long long>(pattern->imageDfxConfig_.accessibilityId_),
                 currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
@@ -144,8 +147,9 @@ OnCompleteInDataReadyNotifyTask ImagePattern::CreateCompleteCallBackInDataReady(
         auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
         if (currentSourceInfo != sourceInfo) {
             TAG_LOGW(AceLogTag::ACE_IMAGE,
-                "sourceInfo does not match, ignore current callback. "
-                "current: %{private}s vs callback's: %{private}s",
+                "sourceInfo does not match, ignore current callback. nodeId = %{public}d, accessibilityId = "
+                "%{public}lld. current: %{private}s vs callback's: %{private}s",
+                pattern->imageDfxConfig_.nodeId_, static_cast<long long>(pattern->imageDfxConfig_.accessibilityId_),
                 currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
@@ -642,7 +646,6 @@ void ImagePattern::LoadImage(
     LoadNotifier loadNotifier(CreateDataReadyCallback(), CreateLoadSuccessCallback(), CreateLoadFailCallback());
     loadNotifier.onDataReadyComplete_ = CreateCompleteCallBackInDataReady();
 
-    loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(loadNotifier), syncLoad_);
     auto host = GetHost();
 
     imageDfxConfig_ = {
@@ -650,12 +653,15 @@ void ImagePattern::LoadImage(
         .accessibilityId_ = host->GetAccessibilityId(),
         .imageSrc_ = src.ToString().substr(0, MAX_SRC_LENGTH),
     };
+
+    loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(loadNotifier), syncLoad_, imageDfxConfig_);
+
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGD(AceLogTag::ACE_IMAGE,
             "start loading image, id = %{public}d, accessId = %{public}lld, src = %{public}s", imageDfxConfig_.nodeId_,
             static_cast<long long>(imageDfxConfig_.accessibilityId_), imageDfxConfig_.imageSrc_.c_str());
     }
-    loadingCtx_->SetImageDfxConfig(imageDfxConfig_);
+
     if (onProgressCallback_) {
         loadingCtx_->SetOnProgressCallback(std::move(onProgressCallback_));
     }
@@ -672,7 +678,6 @@ void ImagePattern::LoadAltImage(const ImageSourceInfo& altImageSourceInfo)
     LoadNotifier altLoadNotifier(CreateDataReadyCallbackForAlt(), CreateLoadSuccessCallbackForAlt(), nullptr);
     if (!altLoadingCtx_ || altLoadingCtx_->GetSourceInfo() != altImageSourceInfo ||
         (altLoadingCtx_ && altImageSourceInfo.IsSvg())) {
-        altLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(altImageSourceInfo, std::move(altLoadNotifier));
         auto host = GetHost();
 
         altImageDfxConfig_ = {
@@ -680,7 +685,9 @@ void ImagePattern::LoadAltImage(const ImageSourceInfo& altImageSourceInfo)
             .accessibilityId_ = host->GetAccessibilityId(),
             .imageSrc_ = altImageSourceInfo.ToString().substr(0, MAX_SRC_LENGTH),
         };
-        altLoadingCtx_->SetImageDfxConfig(altImageDfxConfig_);
+
+        altLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
+            altImageSourceInfo, std::move(altLoadNotifier), false, altImageDfxConfig_);
         altLoadingCtx_->LoadImageData();
     }
 }
@@ -765,7 +772,7 @@ void ImagePattern::InitOnKeyEvent()
     if (keyEventCallback_) {
         return;
     }
-    
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<EventHub>();
@@ -923,8 +930,9 @@ DataReadyNotifyTask ImagePattern::CreateDataReadyCallbackForAlt()
         auto currentAltSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
         if (currentAltSourceInfo != sourceInfo) {
             TAG_LOGW(AceLogTag::ACE_IMAGE,
-                "alt image sourceInfo does not match, ignore current callback. "
-                "current: %{private}s vs callback's: %{private}s",
+                "alt image sourceInfo does not match, ignore current callback. nodeId = %{public}d, accessibilityId = "
+                "%{public}lld. current: %{private}s vs callback's: %{private}s",
+                pattern->imageDfxConfig_.nodeId_, static_cast<long long>(pattern->imageDfxConfig_.accessibilityId_),
                 currentAltSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
@@ -956,8 +964,9 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
         auto currentAltSrc = layoutProps->GetAlt().value_or(ImageSourceInfo(""));
         if (currentAltSrc != sourceInfo) {
             TAG_LOGW(AceLogTag::ACE_IMAGE,
-                "alt image sourceInfo does not match, ignore current callback. "
-                "current: %{private}s vs callback's: %{private}s",
+                "alt image sourceInfo does not match, ignore current callback. nodeId = %{public}d, accessibilityId = "
+                "%{public}lld. current: %{private}s vs callback's: %{private}s",
+                pattern->imageDfxConfig_.nodeId_, static_cast<long long>(pattern->imageDfxConfig_.accessibilityId_),
                 currentAltSrc.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
@@ -1042,6 +1051,9 @@ void ImagePattern::OnReuse()
     auto renderProp = GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_VOID(renderProp);
     renderProp->UpdateNeedBorderRadius(needBorderRadius_);
+    auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    imageLayoutProperty->UpdateImageSourceInfoCacheKey();
     LoadImageDataIfNeed();
 }
 
@@ -1365,6 +1377,7 @@ void ImagePattern::DumpLayoutInfo()
     CHECK_NULL_VOID(layoutProp);
     auto src = layoutProp->GetImageSourceInfo().value_or(ImageSourceInfo(""));
     DumpLog::GetInstance().AddDesc(std::string("url: ").append(src.ToString()));
+    DumpLog::GetInstance().AddDesc("SrcCacheKey: " + src.GetKey());
 
     auto altSrc = layoutProp->GetAlt().value_or(ImageSourceInfo(""));
     DumpLog::GetInstance().AddDesc(std::string("altUrl: ").append(altSrc.ToString()));
@@ -1524,8 +1537,8 @@ void ImagePattern::OnConfigurationUpdate()
 
     auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
+    imageLayoutProperty->UpdateImageSourceInfoCacheKey();
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
-    src.GenerateCacheKey();
     UpdateInternalResource(src);
 
     LoadImage(src, imageLayoutProperty->GetPropertyChangeFlag(),

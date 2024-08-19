@@ -25,13 +25,7 @@
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkTypeface.h"
 #endif
-#include "base/i18n/localization.h"
-#include "base/log/ace_trace.h"
-#include "base/log/log.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
-#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace {
 
@@ -156,7 +150,7 @@ void RosenFontCollection::LoadThemeFont(const char* fontFamily, std::unique_ptr<
 #endif
 #else
         fontCollection_->LoadThemeFont("", nullptr, 0);
-        TAG_LOGD(AceLogTag::ACE_FONT, "LoadThemeFont [%{public}s:%{public}d]", familyName.c_str(),
+        TAG_LOGI(AceLogTag::ACE_FONT, "LoadThemeFont [%{public}s:%{public}d]", familyName.c_str(),
             static_cast<int32_t>(size));
         fontCollection_->LoadThemeFont(familyName, data, size);
 #endif

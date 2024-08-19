@@ -15,20 +15,13 @@
 
 #include "prompt_action.h"
 
-#include <cstddef>
-#include <memory>
-#include <string>
 
 #include "interfaces/napi/kits/utils/napi_utils.h"
 #include "base/i18n/localization.h"
-#include "base/log/log_wrapper.h"
 #include "base/subwindow/subwindow_manager.h"
-#include "base/utils/system_properties.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/ace_engine.h"
-#include "core/components/common/properties/shadow.h"
 #include "core/components/theme/shadow_theme.h"
-#include "core/components_ng/pattern/toast/toast_layout_property.h"
 
 namespace OHOS::Ace::Napi {
 namespace {
@@ -163,10 +156,6 @@ bool GetToastShowMode(napi_env env, napi_value showModeNApi, NG::ToastShowMode& 
             showMode = static_cast<NG::ToastShowMode>(num);
         }
     }
-
-    if (showMode == NG::ToastShowMode::TOP_MOST) {
-        showMode = NG::ToastShowMode::DEFAULT;
-    }
     return true;
 }
 
@@ -252,6 +241,26 @@ bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
     return true;
 }
 
+bool ParseResource(const ResourceInfo resource, CalcDimension& result)
+{
+    auto resourceWrapper = CreateResourceWrapper(resource);
+    CHECK_NULL_RETURN(resourceWrapper, false);
+    if (resource.type == static_cast<uint32_t>(ResourceType::STRING)) {
+        auto value = resourceWrapper->GetString(resource.resId);
+        return StringUtils::StringToCalcDimensionNG(value, result, false);
+    }
+    if (resource.type == static_cast<uint32_t>(ResourceType::INTEGER)) {
+        auto value = std::to_string(resourceWrapper->GetInt(resource.resId));
+        StringUtils::StringToDimensionWithUnitNG(value, result);
+        return true;
+    }
+    if (resource.type == static_cast<uint32_t>(ResourceType::FLOAT)) {
+        result = resourceWrapper->GetDimension(resource.resId);
+        return true;
+    }
+    return false;
+}
+
 void GetToastObjectShadow(napi_env env, napi_value shadowNApi, Shadow& shadowProps)
 {
     napi_value radiusApi = nullptr;
@@ -262,12 +271,20 @@ void GetToastObjectShadow(napi_env env, napi_value shadowNApi, Shadow& shadowPro
     napi_get_named_property(env, shadowNApi, "color", &colorApi);
     napi_get_named_property(env, shadowNApi, "type", &typeApi);
     napi_get_named_property(env, shadowNApi, "fill", &fillApi);
-    double radius = 0.0;
-    napi_get_value_double(env, radiusApi, &radius);
-    if (LessNotEqual(radius, 0.0)) {
-        radius = 0.0;
+    ResourceInfo recv;
+    double radiusValue = 0.0;
+    if (ParseResourceParam(env, radiusApi, recv)) {
+        CalcDimension radius;
+        if (ParseResource(recv, radius)) {
+            radiusValue = LessNotEqual(radius.Value(), 0.0) ? 0.0 : radius.Value();
+        }
+    } else {
+        napi_get_value_double(env, radiusApi, &radiusValue);
+        if (LessNotEqual(radiusValue, 0.0)) {
+            radiusValue = 0.0;
+        }
     }
-    shadowProps.SetBlurRadius(radius);
+    shadowProps.SetBlurRadius(radiusValue);
     Color color;
     ShadowColorStrategy shadowColorStrategy;
     if (ParseShadowColorStrategy(env, colorApi, shadowColorStrategy)) {
@@ -292,26 +309,6 @@ void GetToastObjectShadow(napi_env env, napi_value shadowNApi, Shadow& shadowPro
         napi_get_value_bool(env, fillApi, &isFilled);
     }
     shadowProps.SetIsFilled(isFilled);
-}
-
-bool ParseResource(const ResourceInfo resource, CalcDimension& result)
-{
-    auto resourceWrapper = CreateResourceWrapper(resource);
-    CHECK_NULL_RETURN(resourceWrapper, false);
-    if (resource.type == static_cast<uint32_t>(ResourceType::STRING)) {
-        auto value = resourceWrapper->GetString(resource.resId);
-        return StringUtils::StringToCalcDimensionNG(value, result, false);
-    }
-    if (resource.type == static_cast<uint32_t>(ResourceType::INTEGER)) {
-        auto value = std::to_string(resourceWrapper->GetInt(resource.resId));
-        StringUtils::StringToDimensionWithUnitNG(value, result);
-        return true;
-    }
-    if (resource.type == static_cast<uint32_t>(ResourceType::FLOAT)) {
-        result = resourceWrapper->GetDimension(resource.resId);
-        return true;
-    }
-    return false;
 }
 
 void GetToastShadow(napi_env env, napi_value shadowNApi, std::optional<Shadow>& shadow)
@@ -546,7 +543,7 @@ napi_value JSPromptCloseToast(napi_env env, napi_callback_info info)
         NapiThrow(env, "The toastId is invalid.", ERROR_CODE_PARAM_INVALID);
         return nullptr;
     }
-    int32_t showModeVal = id & 0b111;
+    int32_t showModeVal = static_cast<int32_t>(static_cast<uint32_t>(id) & 0b111);
     int32_t toastId =
         static_cast<int32_t>(static_cast<uint32_t>(id) >>
                              3); // 3 : Move 3 bits to the right to get toastId, and the last 3 bits are the showMode

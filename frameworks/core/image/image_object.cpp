@@ -20,11 +20,8 @@
 #endif
 
 #include "base/thread/background_task_executor.h"
-#include "base/utils/utils.h"
 #include "core/common/container.h"
-#include "core/common/container_scope.h"
 #include "core/components/image/render_image.h"
-#include "core/components_ng/render/canvas_image.h"
 #include "core/image/sk_image_cache.h"
 #include "core/image/image_compressor.h"
 
@@ -193,7 +190,7 @@ void StaticImageObject::UploadToGpuForRender(const WeakPtr<PipelineBase>& contex
         auto key = GenerateCacheKey(imageSource, imageSize);
         // is already uploaded
         if (!ImageProvider::TryUploadingImage(key, successCallback, failedCallback)) {
-            LOGI("other thread is uploading same image to gpu : %{public}s", imageSource.ToString().c_str());
+            LOGI("other thread is uploading same image to gpu : %{private}s", imageSource.ToString().c_str());
             return;
         }
 

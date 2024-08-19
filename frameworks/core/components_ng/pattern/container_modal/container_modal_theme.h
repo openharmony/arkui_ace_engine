@@ -16,6 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CONTAINER_MODAL_THEME_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CONTAINER_MODAL_THEME_H
 
+#include <cstdint>
+#include "base/utils/device_config.h"
+#include "base/utils/system_properties.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
@@ -26,6 +29,20 @@
 
 namespace OHOS::Ace::NG {
 
+constexpr uint32_t DARK_MODE_NORMAL_CLOSE_BTN_COLOR = 0xff3d2e2d;
+constexpr uint32_t HOVER_CLOSE_BTN_COLOR_DARK = 0xff414141;
+constexpr uint32_t HOVER_CLOSE_BTN_COLOR_LIGHT = 0xffdcdcdc;
+constexpr uint32_t HOVER_FILL_CLOSE_BTN_COLOR_DARK = 0xffe5e5e5;
+constexpr uint32_t HOVER_FILL_CLOSE_BTN_COLOR_LIGHT = 0xffffffff;
+constexpr uint32_t HOVER_FILL_NORMA_BTN_COLOR_LIGHT = 0xff000000;
+constexpr uint32_t PRESS_CLOSE_BTN_COLOR_DARK = 0xffde6355;
+constexpr uint32_t PRESS_CLOSE_BTN_COLOR_LIGHT = 0xffd03922;
+constexpr uint32_t PRESS_NORMAL_BTN_COLOR_DARK = 0xff4b4b4b;
+constexpr uint32_t PRESS_NORMAL_BTN_COLOR_LIGHT = 0xffd0d0d0;
+constexpr uint32_t UNFOCUS_CLOSE_BTN_COLOR_DARK = 0xff191312;
+constexpr uint32_t UNFOCUS_CLOSE_BTN_COLOR_LIGHT = 0xfffef7f6;
+constexpr uint32_t UNFOCUS_BTN_COLOR_DARK = 0xff121212;
+constexpr uint32_t UNFOCUS_BTN_COLOR_LIGHT = 0xfff5f5f5;
 
 enum ControlBtnColorType {
     NORMAL,
@@ -71,19 +88,9 @@ public:
             theme->backgroundColor_ = pattern->GetAttr<Color>("container_modal_background", Color());
             theme->backgroundUnfocusColor_ = pattern->GetAttr<Color>("container_modal_unfocus_background", Color());
             theme->titleTextColor_ = pattern->GetAttr<Color>("ohos_id_color_primary", Color());
-            theme->normalBtnBackgroundColor_ = pattern->GetAttr<Color>("ohos_id_normalbtn_bg", Color());
-            theme->normalBtnImageFillColor_ = pattern->GetAttr<Color>("ohos_id_color_primary", Color());
-            theme->normalBtnPressedBackgroundColor_ = pattern->GetAttr<Color>("ohos_id_normalbtn_press_bg", Color());
-            theme->normalBtnHoverBackgroundColor_ = pattern->GetAttr<Color>("ohos_id_normalbtn_hover_bg", Color());
-            theme->normalBtnImageHoverFillColor_ = pattern->GetAttr<Color>("ohos_id_color_primary", Color());
-            theme->closeBtnBackgroundColor_  = pattern->GetAttr<Color>("ohos_id_closebtn_focus_bg", Color());
-            theme->closeBtnImageFillColor_ = pattern->GetAttr<Color>("ohos_id_closebtn_color_warning", Color());
-            theme->closeBtnPressBackGroundColor_ = pattern->GetAttr<Color>("ohos_id_closebtn_press_bg", Color());
-            theme->closeBtnImagePressFillColor_ = pattern->GetAttr<Color>("ohos_id_color_foreground_contrary", Color());
-            theme->closeBtnHoverBackGroundColor_  = pattern->GetAttr<Color>("ohos_id_closebtn_color_warning", Color());
-            theme->closeBtnImageHoverFillColor_ = pattern->GetAttr<Color>("ohos_id_color_foreground_contrary", Color());
-            theme->normalBtnUnfocusBackGroundColor_ = pattern->GetAttr<Color>("ohos_id_normalbtn_unfocus_bg", Color());
-            theme->closeBtnUnfocusBackGroundColor_ = pattern->GetAttr<Color>("ohos_id_closebtn_unfocus_bg", Color());
+            theme->colorPrimary_ = pattern->GetAttr<Color>("ohos_id_color_primary", Color());
+            theme->colorWarning_ = pattern->GetAttr<Color>("ohos_id_color_warning", Color());
+            theme->colorPrimaryContrary_ = pattern->GetAttr<Color>("ohos_id_color_primary_contary", Color());
         }
     };
     ContainerModalTheme() = default;
@@ -97,39 +104,48 @@ public:
 
     Color GetControlBtnColor(bool isCloseBtn, ControlBtnColorType type)
     {
+        auto isDarkMode = SystemProperties::GetColorMode() == ColorMode::DARK;
+
         Color btnColor;
         switch (type) {
             case ControlBtnColorType::NORMAL:
-                btnColor = !isCloseBtn ? normalBtnBackgroundColor_.ChangeOpacity(1.0f)
-                                       : closeBtnBackgroundColor_.ChangeOpacity(1.0f);
+                if (isDarkMode) {
+                    btnColor = isCloseBtn ? Color(DARK_MODE_NORMAL_CLOSE_BTN_COLOR) : colorPrimary_.ChangeOpacity(0.2f);
+                } else {
+                    btnColor = isCloseBtn ? colorWarning_.ChangeOpacity(0.1f) : colorPrimary_.ChangeOpacity(0.1f);
+                }
                 break;
             case ControlBtnColorType::NORMAL_FILL:
-                btnColor = !isCloseBtn ? normalBtnImageFillColor_.ChangeOpacity(1.0f)
-                                       : closeBtnImageFillColor_.ChangeOpacity(1.0f);
+                btnColor = isCloseBtn ? colorWarning_.ChangeOpacity(1.0f)
+                                      : colorPrimary_.ChangeOpacity(isDarkMode ? 1.0f : 0.9f);
                 break;
             case ControlBtnColorType::HOVER:
-                btnColor = !isCloseBtn ? normalBtnHoverBackgroundColor_.ChangeOpacity(0.05f)
-                                       : closeBtnHoverBackGroundColor_.ChangeOpacity(1.0f);
+                btnColor = isCloseBtn
+                               ? colorWarning_.ChangeOpacity(1.0f)
+                               : (isDarkMode ? Color(HOVER_CLOSE_BTN_COLOR_DARK) : Color(HOVER_CLOSE_BTN_COLOR_LIGHT));
                 break;
             case ControlBtnColorType::HOVER_FILL:
-                btnColor = !isCloseBtn ? normalBtnImageHoverFillColor_.ChangeOpacity(1.0f)
-                                       : closeBtnImageHoverFillColor_.ChangeOpacity(1.0f);
+                btnColor = isCloseBtn ? (isDarkMode ? Color(HOVER_FILL_CLOSE_BTN_COLOR_DARK)
+                                                    : Color(HOVER_FILL_CLOSE_BTN_COLOR_LIGHT))
+                                      : (isDarkMode ? Color(HOVER_FILL_CLOSE_BTN_COLOR_LIGHT).ChangeOpacity(0.86f)
+                                                    : Color(HOVER_FILL_CLOSE_BTN_COLOR_LIGHT).ChangeOpacity(0.9f));
                 break;
             case ControlBtnColorType::PRESS:
-                btnColor = !isCloseBtn ? normalBtnPressedBackgroundColor_.ChangeOpacity(1.0f)
-                                       : closeBtnPressBackGroundColor_.ChangeOpacity(1.0f);
+                btnColor =
+                    isCloseBtn
+                        ? (isDarkMode ? Color(PRESS_CLOSE_BTN_COLOR_DARK) : Color(PRESS_CLOSE_BTN_COLOR_LIGHT))
+                        : (isDarkMode ? Color(PRESS_NORMAL_BTN_COLOR_DARK) : Color(PRESS_NORMAL_BTN_COLOR_LIGHT));
                 break;
             case ControlBtnColorType::PRESS_FILL:
-                btnColor = !isCloseBtn ? normalBtnImageFillColor_.ChangeOpacity(1.0f)
-                                       : closeBtnImagePressFillColor_.ChangeOpacity(1.0f);
+                btnColor = isCloseBtn ? colorPrimaryContrary_.ChangeOpacity(1.0f) : colorPrimary_.ChangeOpacity(1.0f);
                 break;
             case ControlBtnColorType::UNFOCUS:
-                btnColor = !isCloseBtn ? normalBtnUnfocusBackGroundColor_.ChangeOpacity(0.6f)
-                                       : closeBtnUnfocusBackGroundColor_.ChangeOpacity(0.6f);
+                btnColor = isCloseBtn ? (isDarkMode ? Color(UNFOCUS_CLOSE_BTN_COLOR_DARK)
+                                                    : Color(UNFOCUS_CLOSE_BTN_COLOR_LIGHT))
+                                      : (isDarkMode ? Color(UNFOCUS_BTN_COLOR_DARK) : Color(UNFOCUS_BTN_COLOR_LIGHT));
                 break;
             case ControlBtnColorType::UNFOCUS_FILL:
-                btnColor = !isCloseBtn ? normalBtnImageFillColor_.ChangeOpacity(0.4f)
-                                       : closeBtnImageFillColor_.ChangeOpacity(0.4f);
+                btnColor = GetControlBtnColor(isCloseBtn, ControlBtnColorType::NORMAL_FILL).ChangeOpacity(0.4f);
                 break;
             default:
                 break;
@@ -141,19 +157,10 @@ private:
     Color backgroundColor_;
     Color backgroundUnfocusColor_;
     Color titleTextColor_;
-    Color normalBtnBackgroundColor_;
-    Color normalBtnImageFillColor_;
-    Color normalBtnPressedBackgroundColor_;
-    Color normalBtnHoverBackgroundColor_;
-    Color closeBtnBackgroundColor_;
-    Color closeBtnImageFillColor_;
-    Color closeBtnPressBackGroundColor_;
-    Color closeBtnImagePressFillColor_;
-    Color closeBtnHoverBackGroundColor_;
-    Color closeBtnImageHoverFillColor_;
-    Color normalBtnUnfocusBackGroundColor_;
-    Color closeBtnUnfocusBackGroundColor_;
-    Color normalBtnImageHoverFillColor_;
+
+    Color colorPrimary_;
+    Color colorWarning_;
+    Color colorPrimaryContrary_;
 };
 
 } // namespace OHOS::Ace

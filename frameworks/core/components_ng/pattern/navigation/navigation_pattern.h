@@ -410,7 +410,8 @@ private:
     void InitFoldState();
 
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
-        const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath);
+        const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath,
+        int32_t preLastStandardIndex = -1);
     void TransitionWithAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage, bool isNeedVisible = false);
     bool TriggerCustomAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
@@ -449,7 +450,7 @@ private:
     void NotifyPageShow(const std::string& pageName);
     int32_t FireNavDestinationStateChange(NavDestinationLifecycle lifecycle);
     void UpdatePreNavDesZIndex(const RefPtr<FrameNode> &preTopNavDestination,
-        const RefPtr<FrameNode> &newTopNavDestination);
+        const RefPtr<FrameNode> &newTopNavDestination, int32_t preLastStandardIndex = -1);
     void UpdateNavPathList();
     void RefreshNavDestination();
     RefPtr<NavigationPattern> GetParentNavigationPattern();

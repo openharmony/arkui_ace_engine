@@ -176,7 +176,8 @@ void RichEditorCommonTestNg::OnDrawVerify(
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-
+    auto contentRect = richEditorNode_->GetGeometryNode()->GetContentRect();
+    richEditorNode_->GetGeometryNode()->SetContentSize({100, 100});
     if (SelectSpanType::TYPESPAN == type) {
         AddSpan(text);
     } else if (SelectSpanType::TYPEIMAGE == type) {
@@ -251,5 +252,6 @@ void RichEditorCommonTestNg::OnDrawVerify(
      */
     ret = controller->GetShowMagnifier();
     EXPECT_FALSE(ret);
+    richEditorNode_->GetGeometryNode()->SetContentSize(contentRect.GetSize());
 }
 } // namespace OHOS::Ace::NG

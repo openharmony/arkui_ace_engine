@@ -70,6 +70,7 @@ public:
     {
         return true;
     }
+    float GetHandleHotZoneRadius();
 
 private:
     void RemoveAreaChangeInner();

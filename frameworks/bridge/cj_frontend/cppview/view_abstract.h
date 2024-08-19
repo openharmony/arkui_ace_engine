@@ -90,6 +90,7 @@ public:
     }
 
     static RefPtr<ThemeConstants> GetThemeConstants();
+    static void CjEnabled(bool enabled);
 
 };
 } // namespace OHOS::Ace::Framework

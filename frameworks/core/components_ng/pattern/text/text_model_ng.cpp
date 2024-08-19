@@ -357,14 +357,13 @@ void TextModelNG::SetTextDetectEnable(bool value)
     textPattern->SetTextDetectEnable(value);
 }
 
-void TextModelNG::SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult)
+void TextModelNG::SetTextDetectConfig(const TextDetectConfig& textDetectConfig)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
-    textPattern->SetTextDetectTypes(value);
-    textPattern->SetOnResult(std::move(onResult));
+    textPattern->SetTextDetectConfig(textDetectConfig);
 }
 
 void TextModelNG::SetOnClick(std::function<void(BaseEventInfo* info)>&& click)
@@ -997,14 +996,12 @@ void TextModelNG::SetTextSelection(FrameNode* frameNode, int32_t startIndex, int
     textPattern->SetTextSelection(startIndex, endIndex);
 }
 
-void TextModelNG::SetTextDetectConfig(FrameNode* frameNode, const std::string& value,
-    std::function<void(const std::string&)>&& onResult)
+void TextModelNG::SetTextDetectConfig(FrameNode* frameNode, const TextDetectConfig& textDetectConfig)
 {
     CHECK_NULL_VOID(frameNode);
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
-    textPattern->SetTextDetectTypes(value);
-    textPattern->SetOnResult(std::move(onResult));
+    textPattern->SetTextDetectConfig(textDetectConfig);
 }
 
 void TextModelNG::SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func)

@@ -62,6 +62,7 @@ config("ace_unittest_config") {
     "$hilog_root/interfaces/native/innerkits/include",
     "$root_out_dir/arkui/framework",
     "//third_party/icu/icu4c/source/common",
+    "//third_party/skia",
     "//foundation/window/window_manager/interfaces/innerkits",
   ]
   if (ace_engine_feature_enable_split_mode &&
@@ -479,6 +480,7 @@ ohos_source_set("ace_engine_unittest_flutter_deps") {
 
 ohos_source_set("ace_components_mock") {
   testonly = true
+  defines = [ "ENHANCED_ANIMATION" ]
   sources = [
     "$ace_root/test/mock/adapter/mock_file_uri_helper_ohos.cpp",
     "$ace_root/test/mock/adapter/mock_image_packer_ohos.cpp",
@@ -530,10 +532,13 @@ ohos_source_set("ace_components_mock") {
     "$ace_root/test/mock/core/image_provider/mock_image_cache.cpp",
     "$ace_root/test/mock/core/image_provider/mock_image_loading_context.cpp",
     "$ace_root/test/mock/core/image_provider/mock_image_source_info.cpp",
+    "$ace_root/test/mock/core/package/mock_package_event_proxy.cpp",
     "$ace_root/test/mock/core/pattern/mock_app_bar_view.cpp",
     "$ace_root/test/mock/core/pattern/mock_container_modal_utils.cpp",
     "$ace_root/test/mock/core/pipeline/mock_element_register.cpp",
     "$ace_root/test/mock/core/pipeline/mock_pipeline_context.cpp",
+    "$ace_root/test/mock/core/render/mock_animated_image.cpp",
+    "$ace_root/test/mock/core/render/mock_animation_manager.cpp",
     "$ace_root/test/mock/core/render/mock_animation_utils.cpp",
     "$ace_root/test/mock/core/render/mock_canvas_image.cpp",
     "$ace_root/test/mock/core/render/mock_component_snapshot.cpp",
@@ -543,6 +548,7 @@ ohos_source_set("ace_components_mock") {
     "$ace_root/test/mock/core/render/mock_paragraph.cpp",
     "$ace_root/test/mock/core/render/mock_path_painter.cpp",
     "$ace_root/test/mock/core/render/mock_pixmap_image.cpp",
+    "$ace_root/test/mock/core/render/mock_render_context.cpp",
     "$ace_root/test/mock/core/render/mock_render_context_creator.cpp",
     "$ace_root/test/mock/core/render/mock_render_surface_creator.cpp",
     "$ace_root/test/mock/core/rosen/testing_typography_style.cpp",
@@ -822,7 +828,6 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/option/option_view.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/overlay/group_manager.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/overlay/keyboard_base_pattern.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/overlay/modal_presentation_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/overlay/modal_presentation_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/overlay/overlay_container_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/overlay/overlay_manager.cpp",

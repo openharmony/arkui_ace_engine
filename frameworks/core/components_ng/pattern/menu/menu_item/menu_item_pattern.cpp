@@ -56,8 +56,10 @@ constexpr double DAMPING = 33.0f;
 constexpr double SEMI_CIRCLE_ANGEL = 180.0f;
 constexpr float OPACITY_EFFECT = 0.99;
 const std::string SYSTEM_RESOURCE_PREFIX = std::string("resource:///");
-// id of system resource start from 0x07800000
-constexpr unsigned long MIN_SYSTEM_RESOURCE_ID = 0x07800000;
+// id of system resource start from 0x07000000
+constexpr unsigned long MIN_SYSTEM_RESOURCE_ID = 0x07000000;
+// id of system resource end to 0x07FFFFFF
+constexpr unsigned long MAX_SYSTEM_RESOURCE_ID = 0x07FFFFFF;
 
 void UpdateFontSize(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayoutProperty>& menuProperty,
     const std::optional<Dimension>& fontSize, const Dimension& defaultFontSize)
@@ -334,18 +336,21 @@ void MenuItemPattern::ShowSubMenu()
         auto focusMenuBlurStyle = focusMenuRenderContext->GetBackBlurStyle();
         param.backgroundBlurStyle = static_cast<int>(focusMenuBlurStyle->blurStyle);
     }
+    if (focusMenuRenderContext->GetBackgroundColor().has_value()) {
+        param.backgroundColor = focusMenuRenderContext->GetBackgroundColor();
+    }
     param.type = isSelectOverlayMenu ? MenuType::SELECT_OVERLAY_SUB_MENU : MenuType::SUB_MENU;
     ParseMenuRadius(param);
     auto subMenu = MenuView::Create(customNode, host->GetId(), host->GetTag(), param);
     CHECK_NULL_VOID(subMenu);
     ShowSubMenuHelper(subMenu);
     menuPattern->SetShowedSubMenu(subMenu);
-    auto accessibilityProperty = menuNode->GetAccessibilityProperty<MenuAccessibilityProperty>();
+    auto accessibilityProperty = subMenu->GetAccessibilityProperty<MenuAccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetAccessibilityIsShow(true);
-    host->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+    subMenu->OnAccessibilityEvent(AccessibilityEventType::PAGE_OPEN);
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "Send event to %{public}d",
-        static_cast<int32_t>(AccessibilityEventType::PAGE_CHANGE));
+        static_cast<int32_t>(AccessibilityEventType::PAGE_OPEN));
 }
 
 void MenuItemPattern::UpdateSubmenuExpandingMode(RefPtr<UINode>& customNode)
@@ -1284,7 +1289,8 @@ bool MenuItemPattern::UseDefaultThemeIcon(const ImageSourceInfo& imageSourceInfo
             src.substr(0, src.rfind(".svg")).size() - SYSTEM_RESOURCE_PREFIX.size());
         return (srcId.find("ohos_") != std::string::npos)
             || ((std::all_of(srcId.begin(), srcId.end(), ::isdigit))
-                && (std::stoul(srcId) >= MIN_SYSTEM_RESOURCE_ID));
+                && (std::stoul(srcId) >= MIN_SYSTEM_RESOURCE_ID)
+                && (std::stoul(srcId) <= MAX_SYSTEM_RESOURCE_ID));
     }
     return false;
 }

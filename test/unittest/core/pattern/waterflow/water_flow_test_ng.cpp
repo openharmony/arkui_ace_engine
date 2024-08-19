@@ -48,6 +48,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #undef private
 #undef protected
+#include "test/mock/core/render/mock_animation_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -59,7 +60,7 @@ void WaterFlowTestNg::SetUpTestSuite()
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
     EXPECT_CALL(*MockPipelineContext::GetCurrent(), FlushUITasks).Times(AnyNumber());
-
+    MockAnimationManager::Enable(true);
 #ifndef TEST_SEGMENTED_WATER_FLOW
     g_segmentedWaterflow = false;
 #endif
@@ -219,7 +220,8 @@ AssertionResult WaterFlowTestNg::IsEqualTotalOffset(float expectOffset)
     if (NearEqual(currentOffset, expectOffset)) {
         return testing::AssertionSuccess();
     }
-    return AssertionFailure() << "currentOffset: " << currentOffset << " != " << "expectOffset: " << expectOffset;
+    return AssertionFailure() << "currentOffset: " << currentOffset << " != "
+                              << "expectOffset: " << expectOffset;
 }
 
 void WaterFlowTestNg::HandleDrag(float offset)

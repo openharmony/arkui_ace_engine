@@ -70,6 +70,7 @@ RefPtr<AceType> ViewPartialUpdateModelNG::CreateNode(NodeInfoPU&& info)
     customNode->SetDestroyFunction(std::move(info.removeFunc));
     customNode->SetPageTransitionFunction(std::move(info.pageTransitionFunc));
     customNode->SetForceUpdateNodeFunc(std::move(info.nodeUpdateFunc));
+    customNode->SetHasNodeUpdateFunc(std::move(info.hasNodeUpdateFunc));
     customNode->SetReloadFunction(std::move(info.reloadFunc));
     customNode->SetThisFunc(std::move(info.getThisFunc));
     auto completeReloadFunc = [reloadFunc = std::move(info.completeReloadFunc)]() -> RefPtr<UINode> {

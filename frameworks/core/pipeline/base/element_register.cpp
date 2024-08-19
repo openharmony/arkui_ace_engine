@@ -15,14 +15,7 @@
 
 #include "frameworks/core/pipeline/base/element_register.h"
 
-#include "base/log/log.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_v2/common/element_proxy.h"
-#include "core/pipeline/base/element.h"
 
 namespace OHOS::Ace {
 thread_local ElementRegister* ElementRegister::instance_ = nullptr;

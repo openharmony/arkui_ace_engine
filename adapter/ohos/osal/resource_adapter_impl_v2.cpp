@@ -57,7 +57,8 @@ const char* PATTERN_MAP[] = {
 // PRELOAD_LIST contain themes that should be preloaded asynchronously
 const char* PRELOAD_LIST[] = {
     THEME_BLUR_STYLE_COMMON,
-    THEME_PATTERN_ICON
+    THEME_PATTERN_ICON,
+    THEME_PATTERN_SHADOW
 };
 
 constexpr char RESOURCE_TOKEN_PATTERN[] = "\\[.+?\\]\\.(\\S+?\\.\\S+)";

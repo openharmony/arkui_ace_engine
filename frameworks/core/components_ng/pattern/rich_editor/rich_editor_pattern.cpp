@@ -481,11 +481,12 @@ void RichEditorPattern::OnModifyDone()
     InitClickEvent(gestureEventHub);
     InitLongPressEvent(gestureEventHub);
     InitTouchEvent();
+    InitPanEvent();
     HandleEnabled();
     ProcessInnerPadding();
     InitScrollablePattern();
     SetAccessibilityAction();
-    if (host->IsDraggable() && copyOption_ != CopyOptions::None) {
+    if (host->IsDraggable()) {
         InitDragDropEvent();
         AddDragFrameNodeToManager(host);
     } else {
@@ -2552,9 +2553,10 @@ bool RichEditorPattern::RepeatClickCaret(const Offset& offset, int32_t lastCaret
 bool RichEditorPattern::RepeatClickCaret(const Offset& offset, const RectF& lastCaretRect)
 {
     auto lastCaretHeight = lastCaretRect.Height();
-    auto caretRect =
-        RectF(lastCaretRect.GetX() - lastCaretHeight / 2.0f, lastCaretRect.GetY(), lastCaretHeight, lastCaretHeight);
-    return caretRect.IsInRegion(PointF(offset.GetX(), offset.GetY()));
+    auto handleHotZone = selectOverlay_->GetHandleHotZoneRadius();
+    auto caretHotZoneRect =
+        RectF(lastCaretRect.GetX() - handleHotZone, lastCaretRect.GetY(), handleHotZone * 2, lastCaretHeight);
+    return caretHotZoneRect.IsInRegion(PointF(offset.GetX(), offset.GetY()));
 }
 
 void RichEditorPattern::CreateAndShowSingleHandle()
@@ -2815,6 +2817,7 @@ void RichEditorPattern::HandleBlurEvent()
     isLongPress_ = false;
     previewLongPress_ = false;
     editingLongPress_ = false;
+    moveCaretState_.Reset();
     StopTwinkling();
     auto reason = GetBlurReason();
     // The pattern handles blurevent, Need to close the softkeyboard first.
@@ -2933,6 +2936,13 @@ void RichEditorPattern::HandleDraggableFlag(bool isTouchSelectArea)
     } else {
         gestureHub->SetIsTextDraggable(false);
     }
+}
+
+void RichEditorPattern::SetIsTextDraggable(bool isTextDraggable)
+{
+    auto gestureHub = GetGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetIsTextDraggable(isTextDraggable);
 }
 
 bool RichEditorPattern::JudgeContentDraggable()
@@ -6049,6 +6059,36 @@ void RichEditorPattern::InitTouchEvent()
     gesture->AddTouchEvent(touchListener_);
 }
 
+void RichEditorPattern::InitPanEvent()
+{
+    CHECK_NULL_VOID(!panEvent_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    auto actionStartTask = [](const GestureEvent& info) {};
+    auto actionUpdateTask = [](const GestureEvent& info) {};
+    auto actionEndTask = [](const GestureEvent& info) {};
+    GestureEventNoParameter actionCancelTask;
+    panEvent_ = MakeRefPtr<PanEvent>(std::move(actionStartTask), std::move(actionUpdateTask),
+        std::move(actionEndTask), std::move(actionCancelTask));
+    PanDirection panDirection = { .type = PanDirection::ALL };
+    gestureHub->AddPanEvent(panEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
+    gestureHub->SetPanEventType(GestureTypeName::PAN_GESTURE);
+    gestureHub->SetOnGestureJudgeNativeBegin([weak = WeakClaim(this)](const RefPtr<NG::GestureInfo>& gestureInfo,
+                                                 const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, GestureJudgeResult::CONTINUE);
+        if (gestureInfo->GetType() == GestureTypeName::PAN_GESTURE &&
+            gestureInfo->GetInputEventType() == InputEventType::TOUCH_SCREEN &&
+            pattern->moveCaretState_.isMoveCaret) {
+            return GestureJudgeResult::CONTINUE;
+        }
+        CHECK_NULL_RETURN(gestureInfo->GetType() != GestureTypeName::PAN_GESTURE, GestureJudgeResult::REJECT);
+        return GestureJudgeResult::CONTINUE;
+    });
+}
+
 void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
     CHECK_NULL_VOID(!selectOverlay_->IsTouchAtHandle(info));
@@ -6061,7 +6101,13 @@ void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
         isOnlyImageDrag_ = false;
         HandleTouchUp();
     } else if (touchType == TouchType::MOVE) {
-        HandleTouchMove(info.GetTouches().front().GetLocalLocation());
+        auto touchGlobalOffset = info.GetTouches().front().GetGlobalLocation();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto offsetInScreen = host->GetOffsetInScreen();
+        auto localOffset =
+            Offset(touchGlobalOffset.GetX() - offsetInScreen.GetX(), touchGlobalOffset.GetY() - offsetInScreen.GetY());
+        HandleTouchMove(localOffset);
     }
 }
 
@@ -6131,7 +6177,8 @@ void RichEditorPattern::HandleTouchMove(const Offset& offset)
     CHECK_NULL_VOID(moveCaretState_.isTouchCaret);
     if (!moveCaretState_.isMoveCaret) {
         auto moveDistance = (offset - moveCaretState_.touchDownOffset).GetDistance();
-        if (GreatNotEqual(moveDistance, moveCaretState_.minDinstance.ConvertToPx())) {
+        if (GreatNotEqual(moveDistance, moveCaretState_.minDistance.ConvertToPx())) {
+            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Move caret distance greater than minDistance");
             moveCaretState_.isMoveCaret = true;
             ShowCaretWithoutTwinkling();
         }
@@ -6144,13 +6191,15 @@ void RichEditorPattern::UpdateCaretByTouchMove(const Offset& offset)
     CHECK_NULL_VOID(moveCaretState_.isMoveCaret);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto caretMoveOffset =
-        offset - Offset(0, host->GetOffsetInScreen().GetY() - moveCaretState_.touchDownPaintOffset.GetY());
-    Offset textOffset = ConvertTouchOffsetToTextOffset(caretMoveOffset);
+    if (SelectOverlayIsOn()) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Close select overlay while dragging caret");
+        selectOverlay_->CloseOverlay(false, CloseReason::CLOSE_REASON_NORMAL);
+    }
+    Offset textOffset = ConvertTouchOffsetToTextOffset(offset);
     auto position = paragraphs_.GetIndex(textOffset);
     SetCaretPosition(position);
     CalcAndRecordLastClickCaretInfo(textOffset);
-    auto localOffset = OffsetF(caretMoveOffset.GetX(), caretMoveOffset.GetY());
+    auto localOffset = OffsetF(offset.GetX(), offset.GetY());
     if (magnifierController_) {
         magnifierController_->SetLocalOffset(localOffset);
     }
@@ -8040,7 +8089,7 @@ void RichEditorPattern::HandleCursorOnDragEnded(const RefPtr<NotifyDragEvent>& n
     if (!isCursorAlwaysDisplayed_) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "In OnDragEnded,"
             " the released location is not in the current richEditor, id:%{public}d", host->GetId());
-        focusHub->LostFocusToViewRoot();
+        focusHub->LostFocus();
         StopTwinkling();
         return;
     }
@@ -8437,19 +8486,17 @@ void RichEditorPattern::HandleOnDragDropTextOperation(const std::string& insertV
     CHECK_NULL_VOID(BeforeChangeText(changeValue, record, RecordType::DRAG));
     if (isDeleteSelect) {
         if (currentPosition < dragRange_.first) {
-            HandleOnDragInsertValue(insertValue);
+            InsertValueByOperationType(insertValue, OperationType::DRAG);
             dragRange_.first += strLength;
             dragRange_.second += strLength;
             HandleOnDragDeleteForward();
-            caretPosition_ += strLength;
         } else if (currentPosition > dragRange_.second) {
-            HandleOnDragInsertValue(insertValue);
+            InsertValueByOperationType(insertValue, OperationType::DRAG);
             int32_t delLength = HandleOnDragDeleteForward();
-            caretPosition_ -= (delLength - strLength);
+            caretPosition_ -= delLength;
         }
     } else {
-        HandleOnDragInsertValue(insertValue);
-        caretPosition_ += strLength;
+        InsertValueByOperationType(insertValue, OperationType::DRAG);
     }
     AfterChangeText(changeValue);
 }
@@ -8496,7 +8543,7 @@ void RichEditorPattern::HandleOnDragInsertValue(const std::string& insertValue)
     }
     record.addText = insertValue;
     ClearRedoOperationRecords();
-    HandleOnDragInsertValueOperation(insertValue);
+    InsertValueByOperationType(insertValue, OperationType::DRAG);
     int32_t length = dragRange_.second - dragRange_.first;
     record.afterCaretPosition = record.beforeCaretPosition + length;
     record.deleteCaretPostion = dragRange_.first;
