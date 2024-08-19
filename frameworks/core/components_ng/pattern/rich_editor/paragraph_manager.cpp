@@ -290,10 +290,10 @@ std::vector<RectF> ParagraphManager::GetRects(int32_t start, int32_t end, RectHe
     return res;
 }
 
-std::vector<std::vector<RectF>> ParagraphManager::GetParagraphsRects(
+std::vector<std::pair<std::vector<RectF>, TextDirection>> ParagraphManager::GetParagraphsRects(
     int32_t start, int32_t end, RectHeightPolicy rectHeightPolicy) const
 {
-    std::vector<std::vector<RectF>> paragraphsRects;
+    std::vector<std::pair<std::vector<RectF>, TextDirection>> paragraphsRects;
     float y = 0.0f;
     for (auto&& info : paragraphs_) {
         if (info.start > end) {
@@ -307,10 +307,13 @@ std::vector<std::vector<RectF>> ParagraphManager::GetParagraphsRects(
             } else {
                 info.paragraph->GetRectsForRange(relativeStart, end - info.start, rects);
             }
+            std::pair<std::vector<RectF>, TextDirection> paragraphRects;
             for (auto&& rect : rects) {
                 rect.SetTop(rect.Top() + y);
             }
-            paragraphsRects.emplace_back(rects);
+            paragraphRects.first = rects;
+            paragraphRects.second = info.paragraphStyle.direction;
+            paragraphsRects.emplace_back(paragraphRects);
         }
         y += info.paragraph->GetHeight();
     }
