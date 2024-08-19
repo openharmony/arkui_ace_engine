@@ -156,6 +156,14 @@ public:
     }
 
     /**
+     * @brief obtain true total number of FlowItems by filtering out the footer node.
+     */
+    inline int32_t ItemCnt(int32_t childrenCount) const
+    {
+        return childrenCount - footerIndex_ - 1;
+    }
+
+    /**
      * @brief Initialize margin of each section, along with segmentStartPos_, which depends on margin_.
      *
      * @param sections vector of Sections info.

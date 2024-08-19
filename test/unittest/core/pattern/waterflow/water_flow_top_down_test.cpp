@@ -609,4 +609,46 @@ HWTEST_F(WaterFlowTestNg, ScrollToIndex005, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_FLOAT_EQ(pattern_->GetFinalPosition(), 1600.f);
 }
+
+/**
+ * @tc.name: Cache002
+ * @tc.desc: Test cache item layout position
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Cache002, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    CreateItemsInRepeat(50, [](int32_t i) { return i % 2 ? 100.0f : 200.0f; });
+    model.SetCachedCount(3);
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(10));
+    model.SetColumnsGap(Dimension(10));
+    CreateDone();
+
+    pattern_->ScrollToIndex(30);
+    FlushLayoutTask(frameNode_);
+    const auto info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->startIndex_, 28);
+    EXPECT_EQ(info->endIndex_, 39);
+    const std::list<int32_t> preloadList = { 40, 41, 42 };
+    EXPECT_EQ(pattern_->preloadItems_, preloadList);
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 40));
+    EXPECT_EQ(GetChildWidth(frameNode_, 40), (WATER_FLOW_WIDTH - 10.0f) / 2.0f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 40), 850.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 26), -320.0f);
+
+    UpdateCurrentOffset(300.0f);
+    EXPECT_EQ(info->startIndex_, 24);
+    EXPECT_EQ(info->endIndex_, 35);
+    // item in cache range shouldn't be created yet
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 22));
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    ASSERT_TRUE(GetChildFrameNode(frameNode_, 22));
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 22)->IsActive());
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 22), -340.0f);
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 22)->IsActive());
+}
 } // namespace OHOS::Ace::NG

@@ -675,4 +675,19 @@ void WaterFlowLayoutInfoSW::UpdateLanesIndex(int32_t updateIdx)
         }
     }
 }
+
+void WaterFlowLayoutInfoSW::BeginCacheUpdate()
+{
+    savedLanes_ = std::make_unique<decltype(lanes_)>(lanes_);
+    synced_ = false;
+}
+
+void WaterFlowLayoutInfoSW::EndCacheUpdate()
+{
+    synced_ = true;
+    if (savedLanes_) {
+        lanes_ = std::move(*savedLanes_);
+        savedLanes_.reset();
+    }
+}
 } // namespace OHOS::Ace::NG

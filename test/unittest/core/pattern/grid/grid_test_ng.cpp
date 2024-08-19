@@ -235,22 +235,20 @@ GridModelNG GridTestNg::CreateRepeatGrid(int32_t itemNumber, std::function<float
         }
         return keys;
     };
-    std::function<void(uint32_t, uint32_t)> setActiveRange = [](uint32_t start, uint32_t end) {
-    };
+    std::function<void(uint32_t, uint32_t)> setActiveRange = [](uint32_t start, uint32_t end) {};
     repeatModel.Create(itemNumber, {}, createFunc, updateFunc, getKeys, getTypes, setActiveRange);
     return model;
 }
 
-void GridTestNg::CreateAdaptChildSizeGridItems(
-    int32_t itemNumber, GridItemStyle gridItemStyle)
+void GridTestNg::CreateAdaptChildSizeGridItems(int32_t itemNumber, GridItemStyle gridItemStyle)
 {
     for (int32_t i = 0; i < itemNumber; i++) {
         ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
         GridItemModelNG itemModel;
         itemModel.Create(gridItemStyle);
         {
-            auto columnFrameNode =
-        FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+            auto columnFrameNode = FrameNode::CreateFrameNode(
+                V2::COLUMN_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
             ViewStackProcessor::GetInstance()->Pop();
         }
         ViewStackProcessor::GetInstance()->Pop();

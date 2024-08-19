@@ -102,16 +102,16 @@ HWTEST_F(WaterFlowSegmentTest, Fill001, TestSize.Level1)
 {
     WaterFlowModelNG model = CreateWaterFlow();
     model.SetColumnsTemplate("1fr 1fr");
-    CreateWaterFlowItemWithHeight(50.0f);
-    CreateWaterFlowItemWithHeight(30.0f);
-    CreateWaterFlowItemWithHeight(40.0f);
-    CreateWaterFlowItemWithHeight(60.0f);
-    CreateWaterFlowItemWithHeight(20.0f);
-    CreateWaterFlowItemWithHeight(50.0f);
-    CreateWaterFlowItemWithHeight(30.0f);
-    CreateWaterFlowItemWithHeight(40.0f);
-    CreateWaterFlowItemWithHeight(2.0f);
-    CreateWaterFlowItemWithHeight(20.0f);
+    CreateItemWithHeight(50.0f);
+    CreateItemWithHeight(30.0f);
+    CreateItemWithHeight(40.0f);
+    CreateItemWithHeight(60.0f);
+    CreateItemWithHeight(20.0f);
+    CreateItemWithHeight(50.0f);
+    CreateItemWithHeight(30.0f);
+    CreateItemWithHeight(40.0f);
+    CreateItemWithHeight(2.0f);
+    CreateItemWithHeight(20.0f);
     CreateDone();
 
     auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(AceType::MakeRefPtr<WaterFlowLayoutInfo>());

@@ -118,6 +118,16 @@ public:
     void Sync(int32_t itemCnt, float mainSize, const std::vector<float>& mainGap);
 
     /**
+     * @brief Mark beginning of cache item layout and save current lanes_ state.
+     *
+     */
+    void BeginCacheUpdate();
+    /**
+     * @brief mark synced and restore lanes_ after cache item layout
+     */
+    void EndCacheUpdate();
+
+    /**
      * @brief Calculates distance from the item's top edge to the top of the viewport.
      *
      * @param item index
@@ -194,7 +204,11 @@ public:
         const std::vector<WaterFlowSections::Section>& prevSections, int32_t start) override;
 
     struct Lane;
-    std::vector<std::vector<Lane>> lanes_; // lanes in multiple sections
+    /**
+     * @brief lanes in multiple sections.
+     * REQUIRES: In stable state (outside update phase), only items inside viewport are in lanes_.
+     */
+    std::vector<std::vector<Lane>> lanes_;
     // mapping of all items previously or currently in lanes_.
     std::unordered_map<int32_t, size_t> idxToLane_;
 
@@ -233,6 +247,8 @@ private:
      */
     bool AdjustLanes(const std::vector<WaterFlowSections::Section>& sections,
         const WaterFlowSections::Section& prevSection, int32_t start, int32_t prevSegIdx);
+
+    std::unique_ptr<decltype(lanes_)> savedLanes_; // temporarily store current lanes_ state in Cache Item operations.
 
     /* cache */
     float startPos_ = 0.0f;
