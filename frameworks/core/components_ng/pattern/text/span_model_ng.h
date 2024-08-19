@@ -43,7 +43,9 @@ public:
     void SetLineHeight(const Dimension& value) override;
     void SetOnClick(std::function<void(BaseEventInfo* info)>&& click) override;
     void ClearOnClick() override;
-    
+    void SetAccessibilityText(const std::string& text) override;
+    void SetAccessibilityDescription(const std::string& description) override;
+    void SetAccessibilityImportance(const std::string& importance) override;
 
     static RefPtr<SpanNode> CreateSpanNode(int32_t nodeId, const std::string& content);
     static void InitSpan(UINode* uiNode, const std::string& content);
