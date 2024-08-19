@@ -16,18 +16,7 @@
 #include "core/components/stepper/render_stepper.h"
 
 #include "base/i18n/localization.h"
-#include "base/utils/string_utils.h"
-#include "core/animation/curve_animation.h"
-#include "core/animation/keyframe.h"
-#include "core/components/align/render_align.h"
-#include "core/components/flex/flex_component.h"
-#include "core/components/image/image_component.h"
-#include "core/components/padding/padding_component.h"
-#include "core/components/padding/render_padding.h"
-#include "core/components/progress/loading_progress_component.h"
 #include "core/components/stepper/render_stepper_item.h"
-#include "core/components/stepper/stepper_component.h"
-#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 namespace {

@@ -15,7 +15,6 @@
 
 #include "frameworks/core/components/svg/render_svg_filter.h"
 
-#include "frameworks/core/animation/curve_animation.h"
 #include "frameworks/core/components/svg/svg_filter_component.h"
 
 namespace OHOS::Ace {

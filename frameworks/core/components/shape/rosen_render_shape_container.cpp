@@ -19,9 +19,6 @@
 #include "include/core/SkVertices.h"
 #endif
 
-#include "render_service_client/core/ui/rs_node.h"
-#include "securec.h"
-
 #include "frameworks/core/components/transform/rosen_render_transform.h"
 
 namespace OHOS::Ace {
