@@ -15,12 +15,6 @@
 
 #include "core/components/plugin/resource/plugin_manager_delegate.h"
 
-#include <algorithm>
-#include <iomanip>
-#include <sstream>
-
-#include "frameworks/base/json/json_util.h"
-
 #ifdef OHOS_STANDARD_SYSTEM
 #include "frameworks/core/components/plugin/resource/plugin_callback_client.h"
 #endif

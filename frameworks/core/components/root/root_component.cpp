@@ -15,8 +15,6 @@
 
 #include "core/components/root/root_component.h"
 
-#include "base/log/log.h"
-#include "base/utils/utils.h"
 #include "core/components/root/render_root.h"
 #include "core/components/root/root_element.h"
 

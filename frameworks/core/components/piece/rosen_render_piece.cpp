@@ -15,7 +15,6 @@
 
 #include "core/components/piece/rosen_render_piece.h"
 
-#include "render_service_client/core/ui/rs_node.h"
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #else
@@ -23,7 +22,6 @@
 #endif
 
 #include "core/components/box/render_box.h"
-#include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {
 

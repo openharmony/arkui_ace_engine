@@ -15,16 +15,7 @@
 
 #include "core/components/option/option_element.h"
 
-#include "base/utils/system_properties.h"
-#include "core/components/list/list_component.h"
-#include "core/components/option/option_component.h"
-#include "core/components/option/render_option.h"
-#include "core/components/scroll/render_scroll.h"
-#include "core/components/select/select_component.h"
 #include "core/components/select_popup/render_select_popup.h"
-#include "core/components/stack/render_stack.h"
-#include "core/components/stack/stack_element.h"
-#include "core/gestures/click_recognizer.h"
 
 namespace OHOS::Ace {
 

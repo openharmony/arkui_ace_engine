@@ -23,9 +23,7 @@
 #include "core/components_ng/render/drawing.h"
 #endif
 
-#include "core/components/align/render_align.h"
 #include "core/components/common/painter/rosen_universal_painter.h"
-#include "core/pipeline/base/constants.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {
