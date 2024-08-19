@@ -1414,6 +1414,9 @@ void GridPattern::UpdateScrollBarOffset()
     if (!GetScrollBar() && !GetScrollBarProxy()) {
         return;
     }
+    if (!isConfigScrollable_) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
