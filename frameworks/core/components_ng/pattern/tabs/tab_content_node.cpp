@@ -169,7 +169,10 @@ void TabContentNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
     CHECK_NULL_VOID(tabTheme);
     label->Put("unselectedColor", labelStyle.unselectedColor.value_or(
         tabTheme->GetSubTabTextOffColor()).ColorToString().c_str());
-    auto selectColor = tabContentPattern->GetSelectedMode() == SelectedMode::BOARD ?
+    auto tabBarLayoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(tabBarLayoutProperty);
+    auto axis = tabBarLayoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
+    auto selectColor = tabContentPattern->GetSelectedMode() == SelectedMode::BOARD && axis == Axis::HORIZONTAL ?
         tabTheme->GetSubTabBoardTextOnColor() : tabTheme->GetSubTabTextOnColor();
     label->Put("selectedColor", labelStyle.selectedColor.value_or(selectColor).ColorToString().c_str());
     tabBar->Put("labelStyle", label);
