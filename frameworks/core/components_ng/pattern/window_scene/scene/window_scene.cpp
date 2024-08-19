@@ -543,7 +543,7 @@ bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CHECK_EQUAL_RETURN(attachToFrameNodeFlag_ || session_->GetBlankFlag(), false, false);
     ACE_SCOPED_TRACE("WindowScene::OnDirtyLayoutWrapperSwap");
     attachToFrameNodeFlag_ = false;
-    CHECK_EQUAL_RETURN(session_->GetShowRecent(), true, false);
+    CHECK_EQUAL_RETURN(session_->GetShowRecent() && !session_->GetBlankFlag(), true, false);
     auto surfaceNode = session_->GetSurfaceNode();
     CHECK_NULL_RETURN(surfaceNode, false);
     surfaceNode->SetBufferAvailableCallback(hotStartCallback_);
@@ -563,6 +563,8 @@ bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     snapshotWindow_.Reset();
     session_->SetNeedSnapshot(true);
     AddChild(host, appWindow_, appWindowName_, 0);
+    RemoveChild(host, startingWindow_, startingWindowName_);
+    startingWindow_.Reset();
     surfaceNode->SetVisible(false);
     CreateBlankWindow();
     AddChild(host, blankWindow_, blankWindowName_);
