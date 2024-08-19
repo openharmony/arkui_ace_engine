@@ -118,6 +118,7 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx);
 bool GetPixelMapByCustom(DragControllerAsyncCtx* asyncCtx);
 bool GetPixelMapArrayByCustom(DragControllerAsyncCtx* asyncCtx, napi_value customBuilder, int arrayLength);
 ParameterType getParameterType(DragControllerAsyncCtx* asyncCtx);
+void SetMouseDragMonitorState(DragControllerAsyncCtx *asyncCtx, bool state);
 
 class DragAction {
 public:
@@ -285,6 +286,7 @@ public:
             return nullptr;
         }
 
+        SetMouseDragMonitorState(dragAction->asyncCtx_, true);
         dragAction->StartDragInternal(dragAction->asyncCtx_);
         napi_escape_handle(env, scope, promiseResult, &promiseResult);
         napi_close_escapable_handle_scope(env, scope);
@@ -541,6 +543,20 @@ void GetCallBackDataForJs(DragControllerAsyncCtx* asyncCtx, const DragNotifyMsg&
     napi_close_handle_scope(asyncCtx->env, scope);
 }
 
+void SetMouseDragMonitorState(DragControllerAsyncCtx *asyncCtx, bool state)
+{
+    if (asyncCtx->sourceType != SOURCE_TYPE_MOUSE) {
+        return;
+    }
+    auto ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->SetMouseDragMonitorState(state);
+    if (ret != 0) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Set mouse drag monitor state %{public}d failed, return value is %{public}d",
+            state, ret);
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Set mouse drag monitor state %{public}d success", state);
+}
+
 void HandleSuccess(DragControllerAsyncCtx* asyncCtx, const DragNotifyMsg& dragNotifyMsg,
     const DragStatus dragStatus)
 {
@@ -782,6 +798,7 @@ void OnMultipleComplete(DragControllerAsyncCtx* asyncCtx)
                 napi_handle_scope scope = nullptr;
                 napi_open_handle_scope(asyncCtx->env, &scope);
                 HandleFail(asyncCtx, ERROR_CODE_INTERNAL_ERROR, "drag state is reject.");
+                SetMouseDragMonitorState(asyncCtx, false);
                 napi_close_handle_scope(asyncCtx->env, scope);
                 return;
             }
@@ -1539,6 +1556,7 @@ static napi_value JSExecuteDrag(napi_env env, napi_callback_info info)
         napi_close_escapable_handle_scope(env, scope);
         return result;
     }
+    SetMouseDragMonitorState(dragAsyncContext, true);
     ParameterType parameterType = getParameterType(dragAsyncContext);
     if (parameterType == ParameterType::DRAGITEMINFO) {
         OnComplete(dragAsyncContext);
