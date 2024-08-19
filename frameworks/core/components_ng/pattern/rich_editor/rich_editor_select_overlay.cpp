@@ -272,6 +272,7 @@ void RichEditorSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectO
     menuInfo.showCut = isShowItem && hasValue && !pattern->textSelector_.SelectNothing();
     menuInfo.showPaste = IsShowPaste();
     menuInfo.menuIsShow = IsShowMenu();
+    menuInfo.showAIWrite = pattern->IsShowAIWrite() && hasValue;
     pattern->UpdateSelectMenuInfo(menuInfo);
 }
 
@@ -363,6 +364,9 @@ void RichEditorSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenu
             break;
         case OptionMenuActionId::CAMERA_INPUT:
             pattern->HandleOnCameraInput();
+            break;
+        case OptionMenuActionId::AI_WRITE:
+            pattern->HandleOnAIWrite();
             break;
         case OptionMenuActionId::DISAPPEAR:
             if (pattern->GetTextDetectEnable() && !pattern->HasFocus()) {

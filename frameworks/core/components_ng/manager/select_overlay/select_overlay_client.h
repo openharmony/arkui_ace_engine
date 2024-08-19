@@ -69,7 +69,8 @@ enum class SelectOverlayMenuId {
     CUT,
     PASTE,
     SELECT_ALL,
-    CAMERA_INPUT
+    CAMERA_INPUT,
+    AI_WRITE
 };
 
 class SelectOverlayClient : public SelectionHost {
@@ -77,6 +78,7 @@ class SelectOverlayClient : public SelectionHost {
 
 public:
     void InitSelectOverlay();
+    void InitMenuCallback();
     void RequestOpenSelectOverlay(ClientOverlayInfo& overlayInfo);
     virtual void RequestCloseSelectOverlay(bool animation);
     bool SelectOverlayIsOn();
