@@ -15,16 +15,11 @@
 
 #include "core/components/checkable/rosen_render_switch.h"
 
-#include "render_service_client/core/ui/rs_node.h"
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkRRect.h"
 #endif
 
-#include "core/components/checkable/checkable_component.h"
-#include "core/components/common/painter/rosen_checkable_painter.h"
 #include "core/components/common/painter/rosen_universal_painter.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/components/text/text_component.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {
