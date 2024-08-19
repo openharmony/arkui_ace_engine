@@ -390,6 +390,9 @@ private:
     int32_t nodeId_ = -1;
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> hoverListener_;
+    RefPtr<ButtonLayoutProperty> layoutProperty_;
+    RefPtr<RenderContext> renderContext_;
+    RefPtr<ButtonTheme> buttonTheme_;
     bool isHover_ = false;
     bool isFocus_ = false;
     bool isPress_ = false;
@@ -412,17 +415,18 @@ private:
     bool bgColorModify_ = false;
     bool scaleModify_ = false;
     bool shadowModify_ = false;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
     
-    void HandleBorderStyle(RefPtr<ButtonLayoutProperty>& layoutProperty,
-        RefPtr<RenderContext>& renderContext, RefPtr<ButtonTheme>& buttonTheme);
-    void HandleBackgroundStyle(RefPtr<ButtonLayoutProperty>& layoutProperty,
-        RefPtr<RenderContext>& renderContext, RefPtr<ButtonTheme>& buttonTheme);
-    void HandleFocusStatusStyle(RefPtr<ButtonLayoutProperty>& layoutProperty,
-        RefPtr<RenderContext>& renderContext, RefPtr<ButtonTheme>& buttonTheme);
-    void HandleFocusStyleTask(RefPtr<ButtonLayoutProperty>,
-        RefPtr<RenderContext>, RefPtr<ButtonTheme>, RefPtr<TextLayoutProperty>, RefPtr<FrameNode>);
-    void HandleBlurStyleTask(RefPtr<ButtonLayoutProperty>,
-        RefPtr<RenderContext>, RefPtr<ButtonTheme>, RefPtr<TextLayoutProperty>, RefPtr<FrameNode>);
+    void HandleBackgroundAndBorder();
+    void HandleFocusStatusStyle();
+    void HandleFocusStyleTask();
+    void HandleBlurStyleTask();
+    void UpdateButtonStyle();
+    void SetFocusButtonStyle(RefPtr<TextLayoutProperty>& textLayoutProperty, RefPtr<FrameNode>& textNode);
+    void SetBlurButtonStyle(RefPtr<TextLayoutProperty>& textLayoutProperty, RefPtr<FrameNode>& textNode);
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+    void SetIsFocus(bool isFoucs);
 };
 } // namespace OHOS::Ace::NG
 
