@@ -1790,7 +1790,7 @@ void SearchPattern::UpdateCancelSymboliconColor()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    CHECK_NULL_VOID(GetSearchNode ());
+    CHECK_NULL_VOID(GetSearchNode());
     auto cancelButtonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(CANCEL_IMAGE_INDEX));
     auto layoutProperty = cancelButtonFrameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -1804,7 +1804,7 @@ void SearchPattern::UpdateSearchSymboliconColor()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    CHECK_NULL_VOID(GetSearchNode ());
+    CHECK_NULL_VOID(GetSearchNode());
     auto cancelButtonFrameNode = DynamicCast<FrameNode> (host->GetChildAtIndex(IMAGE_INDEX));
     auto layoutProperty = cancelButtonFrameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
