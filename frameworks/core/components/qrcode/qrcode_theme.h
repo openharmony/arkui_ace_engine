@@ -57,6 +57,7 @@ public:
                 return;
             }
             theme->qrcodeDefaultSize_ = pattern->GetAttr<Dimension>("default_size", 240.0_vp);
+            theme->qrcodeFocusedPadding_ = pattern->GetAttr<Dimension>("focused_padding", 0.0_vp);
             theme->backgroundColor_ = pattern->GetAttr<Color>("qrcode_background_color", Color::RED);
             if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
                 theme->qrcodeColor_ = Color(0xff000000);
@@ -110,6 +111,11 @@ public:
         return qrcodeDefaultSize_;
     }
 
+    const Dimension& GetQrcodeFocusedPadding() const
+    {
+        return qrcodeFocusedPadding_;
+    }
+
 protected:
     QrcodeTheme() = default;
 
@@ -121,6 +127,7 @@ private:
     Dimension qrcodeWidth_;
     Dimension qrcodeHeight_;
     Dimension qrcodeDefaultSize_;
+    Dimension qrcodeFocusedPadding_;
 };
 
 } // namespace OHOS::Ace
