@@ -139,6 +139,10 @@ public:
 
     void OnAccessibilityHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) override;
 
+    void OnPenHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) override;
+
+    void HandlePenHoverOut(const TouchEvent& point) override;
+
     void OnMouseEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node) override;
 
     void OnAxisEvent(const AxisEvent& event, const RefPtr<NG::FrameNode>& node) override;

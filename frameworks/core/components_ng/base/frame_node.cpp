@@ -2742,11 +2742,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
                 responseLinkResult.splice(responseLinkResult.end(), std::move(newComingResponseLinkTargets));
             }
         } else if (touchRestrict.hitTestType == SourceType::MOUSE) {
-            auto mouseHub = eventHub_->GetInputEventHub();
-            if (mouseHub) {
-                const auto coordinateOffset = globalPoint - localPoint;
-                preventBubbling = mouseHub->ProcessMouseTestHit(coordinateOffset, newComingTargets);
-            }
+            preventBubbling = ProcessMouseTestHit(globalPoint, localPoint, touchRestrict, newComingTargets);
         }
     }
 
@@ -2774,6 +2770,22 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     }
     // consume by self and children.
     return testResult;
+}
+
+bool FrameNode::ProcessMouseTestHit(const PointF& globalPoint, const PointF& localPoint,
+    TouchRestrict& touchRestrict, TouchTestResult& newComingTargets)
+{
+    auto mouseHub = eventHub_->GetInputEventHub();
+    if (!mouseHub) {
+        return false;
+    }
+
+    const auto coordinateOffset = globalPoint - localPoint;
+    if (touchRestrict.touchEvent.IsPenHoverEvent()) {
+        return mouseHub->ProcessPenHoverTestHit(coordinateOffset, newComingTargets);
+    }
+
+    return mouseHub->ProcessMouseTestHit(coordinateOffset, newComingTargets);
 }
 
 std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect, int32_t sourceType)
