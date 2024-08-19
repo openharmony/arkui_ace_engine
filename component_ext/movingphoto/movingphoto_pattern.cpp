@@ -922,7 +922,7 @@ void MovingPhotoPattern::RepeatStartAnimation(const RefPtr<RenderContext>& video
     animationOption.SetOnFinishEvent([movingPhotoPattern]() {
     });
     startAnimationFlag_ = true;
-    AnimationUtils::Animate(animationOption, [videoCtx = video]() {
+    AnimationUtils::Animate(animationOption, [videoCtx = videoRsContext]() {
             videoCtx->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
          }, animationOption.GetOnFinishEvent());
 }
