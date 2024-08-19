@@ -624,6 +624,8 @@ private:
     RefPtr<RenderContext> GetRenderContext();
     bool PostTask(const TaskExecutor::Task& task, const std::string& name);
     void CheckSheetHeightChange();
+    float GetWrapperHeight();
+    bool SheetHeightNeedChanged();
     void InitSheetDetents();
     void HandleFitContontChange(float height);
     void ChangeSheetHeight(float height);
@@ -664,6 +666,7 @@ private:
     float sheetHeightUp_ = 0.0f; // sheet offset to move up when avoiding keyboard
     float height_ = 0.0f; // sheet height, start from the bottom, before avoiding keyboard
     float sheetHeight_ = 0.0f; // sheet frameSize Height
+    float wrapperHeight_ = 0.0f; // sheetWrapper frameSize Height
     float pageHeight_ = 0.0f; // root Height, = maxSize.Height()
     float scrollHeight_ = 0.0f;
     float preWidth_ = 0.0f;
