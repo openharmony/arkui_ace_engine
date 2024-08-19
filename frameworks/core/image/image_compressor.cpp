@@ -142,7 +142,7 @@ bool ImageCompressor::CheckImageQuality(std::string key, uint32_t sumErr, uint32
         std::lock_guard<std::mutex> mLock(recordsMutex_);
         failedRecords_.insert(key);
     }
-    LOGI("compress quality %{public}s [%{public}u, %{public}.2f] size(%{public}d×%{public}d) %{public}s",
+    LOGI("compress quality %{private}s [%{public}u, %{public}.2f] size(%{public}d×%{public}d) %{public}s",
         key.c_str(), maxErr, psnr, width, height, isOk ? "ok" : "no");
     return isOk;
 }

@@ -80,7 +80,7 @@ RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(AIImageQuality imageQuality, b
     auto source = ImageSource::Create(static_cast<const uint8_t*>(data_->GetData()), data_->GetSize());
     if (!source) {
         TAG_LOGE(AceLogTag::ACE_IMAGE,
-            "ImageSouce Create Fail, id = %{public}d, accessId = %{public}lld, src = %{public}s.",
+            "ImageSouce Create Fail, id = %{public}d, accessId = %{public}lld, src = %{private}s.",
             imageDfxConfig.nodeId_, static_cast<long long>(imageDfxConfig.accessibilityId_),
             imageDfxConfig.imageSrc_.c_str());
         return nullptr;
@@ -98,7 +98,7 @@ RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(AIImageQuality imageQuality, b
     auto pixmap = source->CreatePixelMap({ width, height }, imageQuality, isHdrDecoderNeed);
     if (!pixmap) {
         TAG_LOGE(AceLogTag::ACE_IMAGE,
-            "PixelMap Create Fail, id = %{public}d, accessId = %{public}lld, src = %{public}s.", imageDfxConfig.nodeId_,
+            "PixelMap Create Fail, id = %{public}d-%{public}lld, src = %{private}s.", imageDfxConfig.nodeId_,
             static_cast<long long>(imageDfxConfig.accessibilityId_), imageDfxConfig.imageSrc_.c_str());
         return nullptr;
     }
@@ -106,7 +106,7 @@ RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(AIImageQuality imageQuality, b
 
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGD(AceLogTag::ACE_IMAGE,
-            "decode to pixmap, src=%{public}s, resolutionQuality = %{public}s, desiredSize = %{public}s, pixmap size = "
+            "decode to pixmap, src=%{private}s, resolutionQuality=%{public}s, desiredSize=%{public}s, pixmap size = "
             "%{public}d x %{public}d",
             obj_->GetSourceInfo().ToString().c_str(), GetResolutionQuality(imageQuality).c_str(),
             desiredSize_.ToString().c_str(), image->GetWidth(), image->GetHeight());
@@ -192,7 +192,7 @@ RefPtr<CanvasImage> ImageDecoder::QueryCompressedCache()
     auto rosenImageData = AceType::DynamicCast<DrawingImageData>(cachedData);
     CHECK_NULL_RETURN(rosenImageData, {});
     auto stripped = ImageCompressor::StripFileHeader(rosenImageData->GetRSData());
-    TAG_LOGI(AceLogTag::ACE_IMAGE, "use astc cache %{public}s", key.c_str());
+    TAG_LOGI(AceLogTag::ACE_IMAGE, "use astc cache %{private}s", key.c_str());
 
     // create encoded SkImage to use its uniqueId
     CHECK_NULL_RETURN(data_, {});
