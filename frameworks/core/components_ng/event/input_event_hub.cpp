@@ -53,6 +53,18 @@ bool InputEventHub::ProcessMouseTestHit(const OffsetF& coordinateOffset, TouchTe
     return false;
 }
 
+bool InputEventHub::ProcessPenHoverTestHit(const OffsetF& coordinateOffset, TouchTestResult& result)
+{
+    auto eventHub = eventHub_.Upgrade();
+    auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
+
+    if (hoverEventActuator_) {
+        hoverEventActuator_->OnCollectPenHoverEvent(coordinateOffset, getEventTargetImpl, result);
+    }
+
+    return false;
+}
+
 bool InputEventHub::ProcessAxisTestHit(const OffsetF& coordinateOffset, AxisTestResult& onAxisResult)
 {
     auto eventHub = eventHub_.Upgrade();

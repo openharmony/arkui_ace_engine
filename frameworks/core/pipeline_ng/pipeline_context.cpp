@@ -2671,6 +2671,35 @@ void PipelineContext::OnAccessibilityHoverEvent(const TouchEvent& point, const R
     RequestFrame();
 }
 
+void PipelineContext::OnPenHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node)
+{
+    CHECK_RUN_ON(UI);
+    auto scaleEvent = point.CreateScalePoint(viewScale_);
+    if (scaleEvent.type != TouchType::MOVE) {
+        eventManager_->GetEventTreeRecord().AddTouchPoint(scaleEvent);
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+            "OnPenHoverEvent event id:%{public}d, fingerId:%{public}d, x=%{public}f y=%{public}f "
+            "type=%{public}d, "
+            "inject=%{public}d",
+            scaleEvent.touchEventId, scaleEvent.id, scaleEvent.x, scaleEvent.y, (int)scaleEvent.type,
+            scaleEvent.isInjected);
+    }
+
+    auto targerNode = node ? node : rootNode_;
+    TouchRestrict touchRestrict { TouchRestrict::NONE };
+    touchRestrict.sourceType = scaleEvent.sourceType;
+    touchRestrict.touchEvent.sourceTool = scaleEvent.sourceTool;
+    touchRestrict.touchEvent.type = scaleEvent.type;
+    touchRestrict.touchEvent.force = scaleEvent.force;
+
+    // use mouse to collect pen hover target
+    touchRestrict.hitTestType = SourceType::MOUSE;
+    touchRestrict.inputEventType = InputEventType::TOUCH_SCREEN;
+    eventManager_->PenHoverTest(scaleEvent, targerNode, touchRestrict);
+    eventManager_->DispatchPenHoverEventNG(scaleEvent);
+    RequestFrame();
+}
+
 void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNode>& node)
 {
     CHECK_RUN_ON(UI);
