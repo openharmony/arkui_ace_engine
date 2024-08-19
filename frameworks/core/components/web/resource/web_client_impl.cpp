@@ -1238,4 +1238,12 @@ void WebClientImpl::ReportDynamicFrameLossEvent(const std::string& sceneId, bool
     ContainerScope scope(delegate->GetInstanceId());
     delegate->ReportDynamicFrameLossEvent(sceneId, isStart);
 }
+
+void WebClientImpl::StartVibraFeedback(const std::string& vibratorType)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->StartVibraFeedback(vibratorType);
+}
 } // namespace OHOS::Ace

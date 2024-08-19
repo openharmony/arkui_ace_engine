@@ -7145,4 +7145,10 @@ std::string WebDelegate::SpanstringConvertHtml(const std::vector<uint8_t> &conte
         " string length = %{public}u", static_cast<int32_t>(htmlStr.length()));
     return htmlStr;
 }
+
+void WebDelegate::StartVibraFeedback(const std::string& vibratorType)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::StartVibraFeedback vibratorType = %{public}s", vibratorType.c_str());
+    NG::VibratorUtils::StartVibraFeedback(vibratorType);
+}
 } // namespace OHOS::Ace
