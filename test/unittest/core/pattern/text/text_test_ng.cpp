@@ -221,13 +221,15 @@ HWTEST_F(TextTestNg, SetTextDetectEnable003, TestSize.Level1)
     textModelNG.SetTextDetectConfig(frameNode, "apple, orange, banana");
     ASSERT_NE(textModelNG.GetTextDetectConfig(frameNode), "apple, orange, banana");
 
-    auto onResult = [](const std::string&) {};
-    textModelNG.SetTextDetectConfig(frameNode, "apple, orange, banana", std::move(onResult));
+    TextDetectConfig textDetectConfig;
+    textDetectConfig.types = "apple, orange, banana";
+    textDetectConfig.onResult = [](const std::string&) {};
+    textModelNG.SetTextDetectConfig(frameNode, textDetectConfig);
     ASSERT_NE(textModelNG.GetTextDetectConfig(frameNode), "apple, orange, banana");
 
     auto textPattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
-    textModelNG.SetOnDetectResultUpdate(frameNode, std::move(onResult));
+    textModelNG.SetOnDetectResultUpdate(frameNode, std::move(textDetectConfig.onResult));
     EXPECT_NE(textPattern->dataDetectorAdapter_->onResult_, nullptr);
 
     FONT_FEATURES_LIST value;
@@ -656,37 +658,6 @@ HWTEST_F(TextTestNg, MeasureContent001, TestSize.Level1)
     rowLayoutAlgorithm->isSpanStringMode_ = false;
     ret = rowLayoutAlgorithm->MeasureContent(contentConstraint, AceType::RawPtr(frameNode));
     EXPECT_EQ(ret.has_value(), true);
-}
-
-/**
- * @tc.name: ResetAiSpanTextStyle001
- * @tc.desc: Test ResetAiSpanTextStyle.
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, ResetAiSpanTextStyle001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init
-     */
-    auto pattern = AceType::MakeRefPtr<TextPattern>();
-    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
-    ASSERT_NE(frameNode, nullptr);
-    pattern->AttachToFrameNode(frameNode);
-    pattern->selectOverlayProxy_ = nullptr;
-
-    DirtySwapConfig config;
-    config.skipMeasure = false;
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
-        frameNode, AceType::MakeRefPtr<GeometryNode>(), frameNode->GetLayoutProperty());
-    ASSERT_NE(layoutWrapper, nullptr);
-    auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
-    ASSERT_NE(rowLayoutAlgorithm, nullptr);
-    /**
-     * @tc.steps: step2. call function.
-     */
-    TextStyle textStyle;
-    rowLayoutAlgorithm->ResetAiSpanTextStyle(frameNode, textStyle);
-    EXPECT_EQ(textStyle.textDecoration_, TextDecoration::NONE);
 }
 
 /**

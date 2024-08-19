@@ -15,13 +15,6 @@
 
 #include "core/common/ace_application_info.h"
 
-#include <thread>
-
-#include "base/json/json_util.h"
-#include "base/log/log.h"
-#include "base/utils/string_utils.h"
-#include "core/common/ace_page.h"
-
 namespace OHOS::Ace {
 
 void AceApplicationInfo::SetPackageName(const std::string& packageName)

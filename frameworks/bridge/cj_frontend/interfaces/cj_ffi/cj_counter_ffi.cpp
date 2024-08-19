@@ -16,8 +16,6 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_counter_ffi.h"
 
 #include "cj_lambda.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
-#include "core/components_ng/pattern/counter/counter_model.h"
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
 
 using namespace OHOS::Ace;

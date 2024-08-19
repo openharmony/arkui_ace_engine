@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include <cmath>
-#include <fstream>
 #ifdef ENABLE_OPENCL
 #include <securec.h>
 #endif // ENABLE_OPENCL
@@ -26,9 +24,7 @@
 #endif
 
 #include "base/log/ace_trace.h"
-#include "base/log/log.h"
 #include "base/thread/background_task_executor.h"
-#include "base/utils/system_properties.h"
 #include "core/image/image_file_cache.h"
 #include "core/image/image_compressor.h"
 
@@ -146,7 +142,7 @@ bool ImageCompressor::CheckImageQuality(std::string key, uint32_t sumErr, uint32
         std::lock_guard<std::mutex> mLock(recordsMutex_);
         failedRecords_.insert(key);
     }
-    LOGI("compress quality %{public}s [%{public}u, %{public}.2f] size(%{public}d×%{public}d) %{public}s",
+    LOGI("compress quality %{private}s [%{public}u, %{public}.2f] size(%{public}d×%{public}d) %{public}s",
         key.c_str(), maxErr, psnr, width, height, isOk ? "ok" : "no");
     return isOk;
 }

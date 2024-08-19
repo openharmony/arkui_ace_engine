@@ -15,8 +15,6 @@
 
 #include "frameworks/bridge/common/dom/dom_piece.h"
 
-#include "core/components/declaration/piece/piece_declaration.h"
-
 namespace OHOS::Ace::Framework {
 
 DOMPiece::DOMPiece(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, nodeName)

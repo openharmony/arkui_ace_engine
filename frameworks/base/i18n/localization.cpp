@@ -15,43 +15,17 @@
 
 #include "base/i18n/localization.h"
 
-#include <cstddef>
-#include <cstring>
-#include <map>
-#include <type_traits>
-#include <unordered_map>
-#include <utility>
-
 #include "chnsecal.h"
-#include "unicode/calendar.h"
-#include "unicode/datefmt.h"
 #include "unicode/dtfmtsym.h"
 #include "unicode/dtptngen.h"
-#include "unicode/fieldpos.h"
-#include "unicode/fmtable.h"
-#include "unicode/locid.h"
 #include "unicode/measfmt.h"
-#include "unicode/measunit.h"
-#include "unicode/measure.h"
 #include "unicode/numberformatter.h"
-#include "unicode/plurrule.h"
 #include "unicode/reldatefmt.h"
 #include "unicode/smpdtfmt.h"
-#include "unicode/stringpiece.h"
-#include "unicode/ucal.h"
-#include "unicode/unistr.h"
-#include "unicode/upluralrules.h"
-#include "unicode/ureldatefmt.h"
-#include "unicode/utypes.h"
-#include "unicode/uversion.h"
-
 #include "date_time_sequence.h"
 #include "base/json/json_util.h"
-#include "base/log/log.h"
 #include "base/resource/internal_resource.h"
-#include "base/utils/linear_map.h"
 #include "base/utils/string_utils.h"
-#include "base/utils/utils.h"
 
 namespace OHOS::Ace {
 
@@ -621,9 +595,15 @@ LunarDate Localization::GetLunarDate(Date date)
     CHECK_RETURN(status, dateRet);
 
     // Sexagenary cycle years convert to Western years
-    dateRet.year = static_cast<uint32_t>(lunarYear) % SEXAGENARY_CYCLE_SIZE + GUIHAI_YEAR_RECENT;
+    bool repeatCalc = false;
+    if ((static_cast<uint32_t>(date.year) - GUIHAI_YEAR_RECENT) % SEXAGENARY_CYCLE_SIZE == 0 ||
+        static_cast<uint32_t>(lunarYear) == SEXAGENARY_CYCLE_SIZE) {
+        repeatCalc = true;
+    }
+    dateRet.year = static_cast<uint32_t>(lunarYear) + GUIHAI_YEAR_RECENT;
     dateRet.year +=
-        ((static_cast<uint32_t>(date.year) - GUIHAI_YEAR_RECENT) / SEXAGENARY_CYCLE_SIZE) * SEXAGENARY_CYCLE_SIZE;
+        ((static_cast<uint32_t>(date.year) - GUIHAI_YEAR_RECENT) / SEXAGENARY_CYCLE_SIZE - (repeatCalc ? 1 : 0)) *
+        SEXAGENARY_CYCLE_SIZE;
     // 0 means January,  1 means February, so month + 1
     dateRet.month = static_cast<uint32_t>(lunarMonth) + 1;
     dateRet.day = static_cast<uint32_t>(lunarDate);

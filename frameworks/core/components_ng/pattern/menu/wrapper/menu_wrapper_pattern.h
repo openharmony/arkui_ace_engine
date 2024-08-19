@@ -188,12 +188,13 @@ public:
     {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
-        auto badgeNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(2));
-        CHECK_NULL_RETURN(badgeNode, nullptr);
-        if (badgeNode->GetTag() != V2::TEXT_ETS_TAG) {
-            return nullptr;
+        for (const auto& child : host->GetChildren()) {
+            auto node = DynamicCast<FrameNode>(child);
+            if (node && node->GetTag() == V2::TEXT_ETS_TAG) {
+                return node;
+            }
         }
-        return badgeNode;
+        return nullptr;
     }
 
     OffsetT<Dimension> GetAnimationOffset();
@@ -445,6 +446,7 @@ private:
     void HideMenu(const RefPtr<FrameNode>& menu);
     void HideMenu(const RefPtr<MenuPattern>& menuPattern, const RefPtr<FrameNode>& menu, const OffsetF& position);
     void SetExitAnimation(const RefPtr<FrameNode>& host);
+    void SendToAccessibility(const RefPtr<UINode>& subMenu, bool isShow);
     std::function<void()> onAppearCallback_ = nullptr;
     std::function<void()> onDisappearCallback_ = nullptr;
     std::function<void()> aboutToAppearCallback_ = nullptr;

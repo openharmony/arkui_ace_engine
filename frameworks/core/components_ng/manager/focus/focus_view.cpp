@@ -65,7 +65,9 @@ void FocusView::FocusViewClose()
         return;
     }
     TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus view: %{public}s/%{public}d close", GetFrameName().c_str(), GetFrameId());
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto node = GetFrameNode();
+    CHECK_NULL_VOID(node);
+    auto pipeline = node->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto focusManager = pipeline->GetFocusManager();
     CHECK_NULL_VOID(focusManager);

@@ -15,8 +15,6 @@
 
 #include "cj_badge_ffi.h"
 
-#include "utils.h"
-#include "core/components_ng/pattern/badge/badge_model.h"
 #include "core/components_ng/pattern/badge/badge_model_ng.h"
 
 using namespace OHOS::Ace;

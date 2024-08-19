@@ -46,6 +46,11 @@ enum class MenuPreviewMode {
     IMAGE,
     CUSTOM,
 };
+
+enum class MenuBindingType {
+    LONG_PRESS,
+    RIGHT_CLICK,
+};
 namespace OHOS::Ace::NG {
 
 enum class HitTestMode {
@@ -83,8 +88,8 @@ enum class HitTestMode {
 
 using TouchInterceptFunc = std::function<NG::HitTestMode(TouchEventInfo&)>;
 
-using ShouldBuiltInRecognizerParallelWithFunc =
-    std::function<RefPtr<NGGestureRecognizer>(RefPtr<TouchEventTarget>, std::vector<RefPtr<TouchEventTarget>>)>;
+using ShouldBuiltInRecognizerParallelWithFunc = std::function<RefPtr<NGGestureRecognizer>(
+    const RefPtr<NGGestureRecognizer>&, const std::vector<RefPtr<NGGestureRecognizer>>&)>;
 
 enum class TouchTestStrategy {
     DEFAULT = 0,
@@ -435,7 +440,7 @@ public:
     // the return value means prevents event bubbling.
     bool ProcessTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint,
-        const RefPtr<TargetComponent>& targetComponent, TouchTestResult& responseLinkResult);
+        const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult);
 
     RefPtr<FrameNode> GetFrameNode() const;
 
@@ -572,6 +577,16 @@ public:
         return contextMenuShowStatus_;
     }
 
+    void SetMenuBindingType(MenuBindingType menuBindingType)
+    {
+        menuBindingType_ = menuBindingType;
+    }
+
+    MenuBindingType GetMenuBindingType()
+    {
+        return menuBindingType_;
+    }
+
     void SetPixelMap(RefPtr<PixelMap> pixelMap)
     {
         pixelMap_ = pixelMap;
@@ -695,7 +710,7 @@ public:
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,
-        const RefPtr<TargetComponent>& targetComponent, TouchTestResult& responseLinkResult);
+        const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult);
 
     void UpdateGestureHierarchy();
 
@@ -774,6 +789,7 @@ private:
     MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;
     // the value from show parameter of context menu, which is controlled by caller manually
     bool contextMenuShowStatus_  = false;
+    MenuBindingType menuBindingType_  = MenuBindingType::LONG_PRESS;
     bool isDragForbidden_ = false;
     bool textDraggable_ = false;
     bool isTextDraggable_ = false;

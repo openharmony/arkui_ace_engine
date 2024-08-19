@@ -17,17 +17,9 @@
 
 #include <unistd.h>
 
-#include "base/log/frame_report.h"
 #ifdef FFRT_EXISTS
 #include "base/longframe/long_frame_report.h"
 #endif
-#include "base/memory/referenced.h"
-#include "base/utils/time_util.h"
-#include "base/utils/utils.h"
-#include "core/common/thread_checker.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/custom/custom_node.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -47,6 +39,7 @@ UITaskScheduler::UITaskScheduler()
 UITaskScheduler::~UITaskScheduler()
 {
     persistAfterLayoutTasks_.clear();
+    lastestFrameLayoutFinishTasks_.clear();
 }
 
 void UITaskScheduler::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
@@ -328,6 +321,13 @@ void UITaskScheduler::AddPersistAfterLayoutTask(std::function<void()>&& task)
     LOGI("AddPersistAfterLayoutTask size: %{public}u", static_cast<uint32_t>(persistAfterLayoutTasks_.size()));
 }
 
+void UITaskScheduler::AddLastestFrameLayoutFinishTask(std::function<void()>&& task)
+{
+    lastestFrameLayoutFinishTasks_.emplace_back(std::move(task));
+    LOGI("AddLastestFrameLayoutFinishTask size: %{public}u",
+        static_cast<uint32_t>(lastestFrameLayoutFinishTasks_.size()));
+}
+
 void UITaskScheduler::FlushAfterLayoutTask()
 {
     decltype(afterLayoutTasks_) tasks(std::move(afterLayoutTasks_));
@@ -359,6 +359,20 @@ void UITaskScheduler::FlushPersistAfterLayoutTask()
     }
     ACE_SCOPED_TRACE("UITaskScheduler::FlushPersistAfterLayoutTask");
     for (const auto& task : persistAfterLayoutTasks_) {
+        if (task) {
+            task();
+        }
+    }
+}
+
+void UITaskScheduler::FlushLastestFrameLayoutFinishTask()
+{
+    // only execute after lastest layout finish
+    if (lastestFrameLayoutFinishTasks_.empty()) {
+        return;
+    }
+    ACE_SCOPED_TRACE("UITaskScheduler::FlushLastestFrameLayoutFinishTask");
+    for (const auto& task : lastestFrameLayoutFinishTasks_) {
         if (task) {
             task();
         }

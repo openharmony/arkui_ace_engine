@@ -103,7 +103,7 @@ int32_t WindowSceneHelper::GetFocusSystemWindowId(const RefPtr<FrameNode>& focus
     }
     if (isWindowScene) {
         focusSystemWindowId = static_cast<int32_t>(window2patternSession->GetPersistentId());
-        LOGI("Get systemWindowScene id( %{public}d ) successfully.", focusSystemWindowId);
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Get systemWindowScene id:%{public}d successfully.", focusSystemWindowId);
     }
 
     return focusSystemWindowId;
@@ -130,7 +130,7 @@ bool WindowSceneHelper::IsFocusWindowSceneCloseKeyboard(const RefPtr<FrameNode>&
 {
     sptr<Rosen::Session> window2patternSession = GetCurSession(focusedFrameNode);
     if (window2patternSession == nullptr) {
-        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "The session between window and pattern is nullptr.");
+        TAG_LOGW(AceLogTag::ACE_KEYBOARD, "The session between window and pattern is nullptr.");
         return false;
     }
 
@@ -145,10 +145,10 @@ void WindowSceneHelper::IsWindowSceneCloseKeyboard(const RefPtr<FrameNode>& fram
     CHECK_NULL_VOID(curPattern);
     bool isNeedKeyBoard = curPattern->NeedSoftKeyboard();
     auto saveKeyboard = IsFocusWindowSceneCloseKeyboard(frameNode);
-    TAG_LOGD(AceLogTag::ACE_KEYBOARD, "Keep/Need(%{public}d/%{public}d)", saveKeyboard, isNeedKeyBoard);
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD,
+        "FrameNode(%{public}s/%{public}d) notNeedSoftKeyboard, Keep:%{public}d, Need:%{public}d)",
+        frameNode->GetTag().c_str(), frameNode->GetId(), !saveKeyboard, !isNeedKeyBoard);
     if (!saveKeyboard && !isNeedKeyBoard) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "scbFrameNode(%{public}s/%{public}d) notNeedSoftKeyboard.",
-            frameNode->GetTag().c_str(), frameNode->GetId());
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         if (inputMethod) {
             inputMethod->RequestHideInput();
@@ -167,10 +167,10 @@ void WindowSceneHelper::IsCloseKeyboard(const RefPtr<FrameNode>& frameNode)
     CHECK_NULL_VOID(curPattern);
     bool isNeedKeyBoard = curPattern->NeedSoftKeyboard();
     auto saveKeyboard = IsFocusWindowSceneCloseKeyboard(frameNode);
-    TAG_LOGD(AceLogTag::ACE_KEYBOARD, "Keep/Need(%{public}d/%{public}d)", !saveKeyboard, !isNeedKeyBoard);
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD,
+        "FrameNode(%{public}s/%{public}d) notNeedSoftKeyboard, Keep:%{public}d, Need:%{public}d)",
+        frameNode->GetTag().c_str(), frameNode->GetId(), !saveKeyboard, !isNeedKeyBoard);
     if (!saveKeyboard && !isNeedKeyBoard) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "FrameNode(%{public}s/%{public}d) notNeedSoftKeyboard.",
-            frameNode->GetTag().c_str(), frameNode->GetId());
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         if (inputMethod) {
             inputMethod->Close();

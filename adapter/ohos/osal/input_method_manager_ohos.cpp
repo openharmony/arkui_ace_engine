@@ -44,8 +44,7 @@ InputMethodManager* InputMethodManager::GetInstance()
 void InputMethodManager::OnFocusNodeChange(const RefPtr<NG::FrameNode>& curFocusNode)
 {
     auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    if (container->IsKeyboard()) {
+    if (container && container->IsKeyboard()) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "focus in input method.");
         return;
     }
@@ -131,8 +130,7 @@ void InputMethodManager::ProcessKeyboard(const RefPtr<NG::FrameNode>& curFocusNo
     }
 
     auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto isUIExtension = container->IsUIExtensionWindow();
+    auto isUIExtension = container && container->IsUIExtensionWindow();
     auto pattern = curFocusNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     if (isUIExtension && !pattern->NeedSoftKeyboard()) {
@@ -151,6 +149,14 @@ bool InputMethodManager::NeedSoftKeyboard() const
 {
     auto currentFocusNode = curFocusNode_.Upgrade();
     CHECK_NULL_RETURN(currentFocusNode, false);
+    auto pipeline = currentFocusNode->GetContextRefPtr();
+    if (pipeline) {
+        auto manager = AceType::DynamicCast<NG::TextFieldManagerNG>(pipeline->GetTextFieldManager());
+        if (manager && manager->GetLastRequestKeyboardId() == currentFocusNode->GetId()) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Last RequestKeyboard node is current focus node, So keep");
+            return true;
+        }
+    }
     if (currentFocusNode && (currentFocusNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG ||
                              currentFocusNode->GetTag() == V2::EMBEDDED_COMPONENT_ETS_TAG)) {
         return true;

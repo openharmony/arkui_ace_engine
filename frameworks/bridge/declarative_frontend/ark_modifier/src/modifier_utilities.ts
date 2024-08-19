@@ -69,6 +69,7 @@ function mergeMaps(stageMap: Map<Symbol, AttributeModifierWithKey>,
 class ModifierUtils {
   static dirtyComponentSet: Set<ArkComponent | ArkSpanComponent> = new Set();
   static dirtyFlag = false;
+  static timeoutId = -1;
 
   static copyModifierWithKey(obj: ModifierWithKey<string | number | boolean | object>): ModifierWithKey<string | number | boolean | object> {
     let newObj: ModifierWithKey<string | number | boolean | object> = {
@@ -129,6 +130,9 @@ class ModifierUtils {
   }
 
   static applySetOnChange<T, M extends ArkComponent | ArkSpanComponent, C extends ArkComponent | ArkSpanComponent>(modifier: M): void {
+    // It is to make the stateMgmt can addRef of _changed,
+    // so that the modifier change can be observed by makeObserved when modifier._changed changed.
+    modifier._changed;
     let myMap = modifier._modifiersWithKeys as ModifierMap;
     if (modifier._classType === ModifierType.STATE) {
       myMap.setOnChange((key: Symbol, value: AttributeModifierWithKey) => {
@@ -147,6 +151,8 @@ class ModifierUtils {
     if (!arkModifier._weakPtr.invalid()) {
       attributeModifierWithKey.applyPeer(arkModifier.nativePtr,
         (attributeModifierWithKey.value === undefined || attributeModifierWithKey.value === null));
+    } else {
+      ArkLogConsole.warn("pointer is invalid when putDirtyModifier");
     }
     this.dirtyComponentSet.add(arkModifier);
     if (!this.dirtyFlag) {
@@ -157,6 +163,9 @@ class ModifierUtils {
 
   static requestFrame(): void {
     const frameCallback = () => {
+      if (this.timeoutId !== -1) {
+        clearTimeout(this.timeoutId);
+      }
       this.dirtyComponentSet.forEach(item => {
         const nativePtrValid = !item._weakPtr.invalid();
         if (item._nativePtrChanged && nativePtrValid) {
@@ -172,8 +181,12 @@ class ModifierUtils {
       });
       this.dirtyComponentSet.clear();
       this.dirtyFlag = false;
+      this.timeoutId = -1;
     };
-  
+    if (this.timeoutId !== -1) {
+      clearTimeout(this.timeoutId);
+    }
+    this.timeoutId = setTimeout(frameCallback, 100);
     getUINativeModule().frameNode.registerFrameCallback(frameCallback);
   }
 }

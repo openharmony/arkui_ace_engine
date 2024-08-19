@@ -53,6 +53,7 @@
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/event/ace_event_handler.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace {
 
@@ -874,12 +875,11 @@ void JSText::JsDataDetectorConfig(const JSCallbackInfo& info)
         return;
     }
 
-    std::string textTypes;
-    std::function<void(const std::string&)> onResult;
-    if (!ParseDataDetectorConfig(info, textTypes, onResult)) {
+    TextDetectConfig textDetectConfig;
+    if (!ParseDataDetectorConfig(info, textDetectConfig)) {
         return;
     }
-    TextModel::GetInstance()->SetTextDetectConfig(textTypes, std::move(onResult));
+    TextModel::GetInstance()->SetTextDetectConfig(textDetectConfig);
 }
 
 void JSText::BindSelectionMenu(const JSCallbackInfo& info)

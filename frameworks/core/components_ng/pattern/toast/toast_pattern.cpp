@@ -210,9 +210,10 @@ void ToastPattern::UpdateTextSizeConstraint(const RefPtr<FrameNode>& text)
     textLayoutProperty->UpdateCalcMinSize(CalcSize(NG::CalcLength(minWidth), NG::CalcLength(minHeight)));
 
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto limitWidth = Dimension(GetTextMaxWidth());
         auto limitHeight = GetTextMaxHeight();
         textLayoutProperty->UpdateCalcMaxSize(
-            CalcSize(NG::CalcLength(maxWidth), NG::CalcLength(Dimension(limitHeight))));
+            CalcSize(NG::CalcLength(limitWidth), NG::CalcLength(Dimension(limitHeight))));
 
         auto textProperty = textNode_->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textProperty);
@@ -297,6 +298,8 @@ double ToastPattern::GetTextMaxHeight()
     if (GreatNotEqual(maxHeight, limitHeight)) {
         maxHeight = limitHeight;
     }
+
+    maxHeight = GreatOrEqual(maxHeight, 0.0) ? maxHeight : 0.0;
     return maxHeight;
 }
 

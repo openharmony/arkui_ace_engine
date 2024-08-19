@@ -92,6 +92,16 @@ public:
         return { FocusType::NODE, false };
     }
 
+    void UpdateCurrentDateModified(int64_t currentDateModified)
+    {
+        currentDateModified_ = currentDateModified;
+    }
+
+    int64_t GetCurrentDateModified()
+    {
+        return currentDateModified_;
+    }
+
 protected:
     int32_t instanceId_;
 
@@ -194,6 +204,7 @@ private:
     PlaybackStatus currentPlayStatus_ = PlaybackStatus::NONE;
     PlaybackMode autoAndRepeatLevel_ = PlaybackMode::NONE;
     PlaybackMode historyAutoAndRepeatLevel_ = PlaybackMode::NONE;
+    int64_t currentDateModified_ = -2;
 
     Rect lastBoundsRect_;
 

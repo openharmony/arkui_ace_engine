@@ -15,13 +15,6 @@
 
 #include "core/components_ng/render/adapter/moon_progress_modifier.h"
 
-#include <cmath>
-
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
-#include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline_ng/pipeline_context.h"
 

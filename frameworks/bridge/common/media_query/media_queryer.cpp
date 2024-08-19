@@ -15,13 +15,7 @@
 
 #include "frameworks/bridge/common/media_query/media_queryer.h"
 
-#include <list>
-#include <regex>
-
-#include "base/log/log.h"
-#include "base/utils/utils.h"
 #include "core/common/container.h"
-#include "frameworks/bridge/common/media_query/media_query_info.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {

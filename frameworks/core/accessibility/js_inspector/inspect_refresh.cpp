@@ -15,8 +15,6 @@
 
 #include "inspect_refresh.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 InspectRefresh::InspectRefresh(NodeId nodeId, const std::string& nodeName) : InspectNode(nodeId, nodeName) {
 }

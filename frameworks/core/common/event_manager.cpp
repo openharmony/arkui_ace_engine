@@ -14,28 +14,13 @@
  */
 
 #include "core/common/event_manager.h"
-#include <set>
 
-#include "base/geometry/ng/point_t.h"
-#include "base/json/json_util.h"
-#include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
-#include "base/memory/ace_type.h"
 #include "base/thread/frame_trace_adapter.h"
-#include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/xcollie/xcollieInterface.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/event/touch_event.h"
-#include "core/components_ng/gestures/recognizers/recognizer_group.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
-#include "core/event/ace_events.h"
-#include "core/event/key_event.h"
-#include "core/event/touch_event.h"
-#include "core/gestures/gesture_referee.h"
-#include "core/pipeline/base/element.h"
-#include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
 constexpr uint8_t KEYS_MAX_VALUE = 3;
@@ -85,14 +70,14 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     ACE_FUNCTION_TRACE();
     CHECK_NULL_VOID(frameNode);
     if (!curAccessibilityHoverResults_.empty()) {
-        MockHoverCancelEventAndDispatch(touchPoint);
+        FalsifyHoverCancelEventAndDispatch(touchPoint);
     }
     // collect
     TouchTestResult hitTestResult;
     const NG::PointF point { touchPoint.x, touchPoint.y };
     if (refereeNG_->CheckEventTypeChange(touchPoint.sourceType)) {
         AxisEvent axisEvent;
-        MockCancelEventAndDispatch(axisEvent);
+        FalsifyCancelEventAndDispatch(axisEvent);
         refereeNG_->CleanAll(true);
         touchTestResults_.clear();
         axisTouchTestResults_.clear();
@@ -107,7 +92,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
         }
     }
     if (lastDownFingerNumber_ == 0 && refereeNG_->QueryAllDone()) {
-        MockCancelEventAndDispatch(touchPoint);
+        FalsifyCancelEventAndDispatch(touchPoint);
         refereeNG_->ForceCleanGestureReferee();
         refereeNG_->CleanAll();
         CleanGestureEventHub();
@@ -115,7 +100,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     if (!needAppend && touchTestResults_.empty()) {
         NG::NGGestureRecognizer::ResetGlobalTransCfg();
     }
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     // For root node, the parent local point is the same as global point.
     frameNode->TouchTest(point, point, point, touchRestrict, hitTestResult, touchPoint.id, responseLinkResult);
     TouchTestResult savePrevHitTestResult = touchTestResults_[touchPoint.id];
@@ -154,12 +139,12 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
             TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
         }
         eventTree_.eventTreeList.clear();
-        MockCancelEventAndDispatch(touchPoint);
+        FalsifyCancelEventAndDispatch(touchPoint);
         refereeNG_->ForceCleanGestureReferee();
         refereeNG_->CleanAll();
 
         TouchTestResult reHitTestResult;
-        TouchTestResult reResponseLinkResult;
+        ResponseLinkResult reResponseLinkResult;
         frameNode->TouchTest(point, point, point, touchRestrict,
             reHitTestResult, touchPoint.id, reResponseLinkResult);
         SetResponseLinkRecognizers(reHitTestResult, reResponseLinkResult);
@@ -333,7 +318,7 @@ bool EventManager::PostEventTouchTest(
             postEventRefereeNG_->CleanAll();
         }
     }
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     // For root node, the parent local point is the same as global point.
     uiNode->TouchTest(point, point, point, touchRestrict, hitTestResult, touchPoint.id, responseLinkResult);
     for (const auto& item : hitTestResult) {
@@ -361,7 +346,7 @@ void EventManager::TouchTest(
 
     if (refereeNG_->CheckSourceTypeChange(event.sourceType, true)) {
         TouchEvent touchEvent;
-        MockCancelEventAndDispatch(touchEvent);
+        FalsifyCancelEventAndDispatch(touchEvent);
         refereeNG_->CleanAll(true);
         touchTestResults_.clear();
         axisTouchTestResults_.clear();
@@ -375,7 +360,7 @@ void EventManager::TouchTest(
     const NG::PointF point { event.x, event.y };
     // For root node, the parent local point is the same as global point.
     TouchTestResult hitTestResult;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     frameNode->TouchTest(point, point, point, touchRestrict, hitTestResult, event.id, responseLinkResult);
     SetResponseLinkRecognizers(hitTestResult, responseLinkResult);
     axisTouchTestResults_[event.id] = std::move(hitTestResult);
@@ -511,7 +496,8 @@ void EventManager::HandleOutOfRectCallback(const Point& point, std::vector<RectC
             continue;
         }
         for (const auto& rect : rectList) {
-            LOGI("Point(%{public}f, %{public}f) out of Rect-[%{public}f, %{public}f, %{public}f, %{public}f]",
+            TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+                "Point(%{public}f, %{public}f) out of Rect-[%{public}f, %{public}f, %{public}f, %{public}f]",
                 point.GetX(), point.GetY(), rect.Left(), rect.Right(), rect.Top(), rect.Bottom());
         }
         if (point.GetSourceType() == SourceType::TOUCH) {
@@ -613,7 +599,7 @@ void EventManager::CheckDownEvent(const TouchEvent& touchEvent)
                 "InputTracking id:%{public}d, eventManager receive DOWN event twice,"
                 " touchEvent id is %{public}d",
                 touchEvent.touchEventId, touchEvent.id);
-            MockCancelEventAndDispatch(touchEvent);
+            FalsifyCancelEventAndDispatch(touchEvent);
             refereeNG_->ForceCleanGestureReferee();
             touchTestResults_.clear();
             downFingerIds_.clear();
@@ -624,7 +610,7 @@ void EventManager::CheckDownEvent(const TouchEvent& touchEvent)
 
 void EventManager::CheckUpEvent(const TouchEvent& touchEvent)
 {
-    if (touchEvent.isMocked) {
+    if (touchEvent.isFalsified) {
         return;
     }
     auto touchEventFindResult = downFingerIds_.find(touchEvent.id);
@@ -634,7 +620,7 @@ void EventManager::CheckUpEvent(const TouchEvent& touchEvent)
                 "InputTracking id:%{public}d, eventManager receive UP/CANCEL event "
                 "without receive DOWN event, touchEvent id is %{public}d",
                 touchEvent.touchEventId, touchEvent.id);
-            MockCancelEventAndDispatch(touchEvent);
+            FalsifyCancelEventAndDispatch(touchEvent);
             refereeNG_->ForceCleanGestureReferee();
             downFingerIds_.clear();
         } else {
@@ -664,6 +650,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
         lastDownFingerNumber_ = static_cast<int32_t>(downFingerIds_.size());
         return false;
     }
+    lastTouchEvent_ = event;
 
     if (point.type == TouchType::DOWN) {
         refereeNG_->CleanGestureRefereeState(event.id);
@@ -741,7 +728,7 @@ void EventManager::ClearTouchTestTargetForPenStylus(TouchEvent& touchEvent)
     refereeNG_->CleanGestureScope(touchEvent.id);
     referee_->CleanGestureScope(touchEvent.id);
     touchTestResults_.erase(touchEvent.id);
-    touchEvent.isMocked = true;
+    touchEvent.isFalsified = true;
     touchEvent.type = TouchType::CANCEL;
     for (const auto& iter : downFingerIds_) {
         touchEvent.id = iter.first;
@@ -850,7 +837,7 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event)
 
     const auto curResultIter = axisTouchTestResults_.find(event.id);
     if (curResultIter == axisTouchTestResults_.end()) {
-        LOGI("the %{public}d axis test result does not exist!", event.id);
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "the %{public}d axis test result does not exist!", event.id);
         return false;
     }
     // rotate event is no need to add scope.
@@ -889,7 +876,7 @@ bool EventManager::DispatchTabIndexEvent(
     CHECK_NULL_RETURN(focusNode, false);
     CHECK_NULL_RETURN(mainNode, false);
     if (focusNode->HandleFocusByTabIndex(event, mainNode)) {
-        LOGI("Tab index focus system handled this event");
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "Tab index focus system handled this event");
         return true;
     }
     return false;
@@ -899,7 +886,7 @@ bool EventManager::DispatchKeyEvent(const KeyEvent& event, const RefPtr<FocusNod
 {
     CHECK_NULL_RETURN(focusNode, false);
     if (focusNode->HandleKeyEvent(event)) {
-        LOGI("Default focus system handled this event");
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "Default focus system handled this event");
         return true;
     }
     return false;
@@ -962,8 +949,8 @@ void EventManager::MouseTest(const MouseEvent& event, const RefPtr<RenderNode>& 
     }
     mouseHoverNodePre_ = mouseHoverNode_;
     mouseHoverNode_ = hoverNode;
-    LOGI("MouseDetect hit test last/new result size = %{public}zu/%{public}zu", mouseHoverTestResultsPre_.size(),
-        mouseHoverTestResults_.size());
+    TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "MouseDetect hit test last/new result size = %{public}zu/%{public}zu",
+        mouseHoverTestResultsPre_.size(), mouseHoverTestResults_.size());
 }
 
 bool EventManager::DispatchMouseEvent(const MouseEvent& event)
@@ -974,7 +961,8 @@ bool EventManager::DispatchMouseEvent(const MouseEvent& event)
             auto hoverNode = wp.Upgrade();
             if (hoverNode) {
                 if (hoverNode->HandleMouseEvent(event)) {
-                    LOGI("Do HandleMouseEvent. Dispatch node: %{public}s", AceType::TypeName(hoverNode));
+                    TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "Do HandleMouseEvent. Dispatch node: %{public}s",
+                        AceType::TypeName(hoverNode));
                     break;
                 }
             }
@@ -1083,14 +1071,14 @@ void EventManager::AccessibilityHoverTest(
 {
     CHECK_NULL_VOID(frameNode);
     if (downFingerIds_.empty()) {
-        MockCancelEventAndDispatch(event);
+        FalsifyCancelEventAndDispatch(event);
         refereeNG_->CleanAll();
         touchTestResults_.clear();
         downFingerIds_.clear();
     }
     const NG::PointF point { event.x, event.y };
     TouchTestResult testResult;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     frameNode->TouchTest(
         point, point, point, touchRestrict, testResult, event.id, responseLinkResult);
     SetResponseLinkRecognizers(testResult, responseLinkResult);
@@ -1115,7 +1103,7 @@ void EventManager::MouseTest(
         } else if ((event.action == MouseAction::MOVE && event.button != MouseButton::NONE_BUTTON)) {
             testResult = mouseTestResults_[event.GetPointerId(event.id)];
         } else {
-            TouchTestResult responseLinkResult;
+            ResponseLinkResult responseLinkResult;
             if (event.action != MouseAction::MOVE) {
                 touchRestrict.touchEvent.isMouseTouchTest = true;
             }
@@ -1125,7 +1113,7 @@ void EventManager::MouseTest(
             mouseTestResults_[event.GetPointerId(event.id)] = testResult;
         }
     } else {
-        TouchTestResult responseLinkResult;
+        ResponseLinkResult responseLinkResult;
         if (event.action != MouseAction::MOVE) {
             touchRestrict.touchEvent.isMouseTouchTest = true;
         }
@@ -1398,7 +1386,7 @@ void EventManager::AxisTest(const AxisEvent& event, const RefPtr<RenderNode>& re
     WeakPtr<RenderNode> axisNode = nullptr;
     renderNode->AxisDetect(point, point, axisNode, event.GetDirection());
     axisNode_ = axisNode;
-    LOGI("Current axis node is %{public}s", AceType::TypeName(axisNode_.Upgrade()));
+    TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "Current axis node is %{public}s", AceType::TypeName(axisNode_.Upgrade()));
 }
 
 bool EventManager::DispatchAxisEvent(const AxisEvent& event)
@@ -1729,19 +1717,19 @@ void AddKeyboardShortcutKeys(
     // single key
     if (keys == CtrlKeysBit::CTRL || keys == CtrlKeysBit::SHIFT ||
         keys == CtrlKeysBit::ALT) {
-        LOGI("AddKeyboardShortcutKeys single key");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "AddKeyboardShortcutKeys single key");
         AddKeyboardShortcutSingleKey(keys, keyCodes, permutation);
     }
     // double keys
     if (keys == CtrlKeysBit::CTRL + CtrlKeysBit::SHIFT ||
         keys == CtrlKeysBit::CTRL + CtrlKeysBit::ALT ||
         keys == CtrlKeysBit::SHIFT + CtrlKeysBit::ALT) {
-        LOGI("AddKeyboardShortcutKeys double keys");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "AddKeyboardShortcutKeys double keys");
         AddKeyboardShortcutDoubleKeys(keys, keyCodes, permutation);
     }
     // triple keys
     if (keys == CtrlKeysBit::CTRL + CtrlKeysBit::SHIFT + CtrlKeysBit::ALT) {
-        LOGI("AddKeyboardShortcutKeys triple keys");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "AddKeyboardShortcutKeys triple keys");
         AddKeyboardShortcutTripleKeys(keys, keyCodes, permutation);
     }
 }
@@ -1780,13 +1768,13 @@ bool TriggerKeyboardShortcut(const KeyEvent& event, const std::vector<NG::Keyboa
 
                 if (keyboardShortcut.onKeyboardShortcutAction) {
                     keyboardShortcut.onKeyboardShortcutAction();
-                    LOGI("TriggerKeyboardShortcut action done.");
+                    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "TriggerKeyboardShortcut action done.");
                     return true;
                 } else {
                     auto gestureEventHub = eventHub->GetGestureEventHub();
                     if (gestureEventHub && gestureEventHub->IsClickable()) {
                         gestureEventHub->KeyBoardShortCutClick(event, node);
-                        LOGI("TriggerKeyboardShortcut click done.");
+                        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "TriggerKeyboardShortcut click done.");
                         return true;
                     }
                 }
@@ -2039,11 +2027,11 @@ void EventManager::CheckAndLogLastConsumedEventInfo(int32_t eventId, bool logImm
     if (logImmediately) {
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
             "Consumed new event id=%{public}d in ace_container, lastEventInfo: id:%{public}d", eventId,
-            lastReceivedEvent_.eventId);
+            lastConsumedEvent_.eventId);
         return;
     }
     auto currentTime = GetSysTimestamp();
-    auto lastLogTimeStamp = lastReceivedEvent_.lastLogTimeStamp;
+    auto lastLogTimeStamp = lastConsumedEvent_.lastLogTimeStamp;
     if (lastConsumedEvent_.lastLogTimeStamp != 0 &&
         (currentTime - lastConsumedEvent_.lastLogTimeStamp) > EVENT_CLEAR_DURATION * TRANSLATE_NS_TO_MS) {
         TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
@@ -2057,7 +2045,7 @@ void EventManager::CheckAndLogLastConsumedEventInfo(int32_t eventId, bool logImm
 }
 
 void EventManager::SetResponseLinkRecognizers(
-    const TouchTestResult& result, const TouchTestResult& responseLinkRecognizers)
+    const TouchTestResult& result, const ResponseLinkResult& responseLinkRecognizers)
 {
     for (const auto& item : result) {
         auto group = AceType::DynamicCast<NG::RecognizerGroup>(item);
@@ -2072,35 +2060,36 @@ void EventManager::SetResponseLinkRecognizers(
     }
 }
 
-void EventManager::MockCancelEventAndDispatch(const TouchEvent& touchPoint)
+void EventManager::FalsifyCancelEventAndDispatch(const TouchEvent& touchPoint)
 {
-    TouchEvent mockedEvent = touchPoint;
-    mockedEvent.isMocked = true;
-    mockedEvent.type = TouchType::CANCEL;
+    TouchEvent falsifyEvent = touchPoint;
+    falsifyEvent.isFalsified = true;
+    falsifyEvent.type = TouchType::CANCEL;
     for (const auto& iter : downFingerIds_) {
-        mockedEvent.id = iter.first;
-        DispatchTouchEvent(mockedEvent);
+        falsifyEvent.id = iter.first;
+        falsifyEvent.pointers = lastTouchEvent_.pointers;
+        DispatchTouchEvent(falsifyEvent);
     }
 }
 
-void EventManager::MockCancelEventAndDispatch(const AxisEvent& axisEvent)
+void EventManager::FalsifyCancelEventAndDispatch(const AxisEvent& axisEvent)
 {
     if (axisTouchTestResults_.empty()) {
         return;
     }
-    AxisEvent mockedEvent = axisEvent;
-    mockedEvent.action = AxisAction::CANCEL;
-    mockedEvent.id = static_cast<int32_t>(axisTouchTestResults_.begin()->first);
-    DispatchTouchEvent(mockedEvent);
+    AxisEvent falsifyEvent = axisEvent;
+    falsifyEvent.action = AxisAction::CANCEL;
+    falsifyEvent.id = static_cast<int32_t>(axisTouchTestResults_.begin()->first);
+    DispatchTouchEvent(falsifyEvent);
 }
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
 
 bool EventManager::TouchTargetHitTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
-    TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend, const std::string& target)
+    TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend, const std::string& target)`
 {
     CHECK_NULL_RETURN(frameNode, false);
     TouchTestResult hitTestResult;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     const NG::PointF point { touchPoint.x, touchPoint.y };
     frameNode->TouchTest(point, point, point, touchRestrict, hitTestResult, touchPoint.id, responseLinkResult);
     for (const auto& entry : hitTestResult) {
@@ -2115,13 +2104,13 @@ bool EventManager::TouchTargetHitTest(const TouchEvent& touchPoint, const RefPtr
 }
 #endif
 
-void EventManager::MockHoverCancelEventAndDispatch(const TouchEvent& touchPoint)
+void EventManager::FalsifyHoverCancelEventAndDispatch(const TouchEvent& touchPoint)
 {
     lastAccessibilityHoverResults_ = std::move(curAccessibilityHoverResults_);
     curAccessibilityHoverResults_.clear();
-    TouchEvent mockedEvent = touchPoint;
-    mockedEvent.isMocked = true;
-    mockedEvent.type = TouchType::HOVER_CANCEL;
-    DispatchAccessibilityHoverEventNG(mockedEvent);
+    TouchEvent falsifyEvent = touchPoint;
+    falsifyEvent.isFalsified = true;
+    falsifyEvent.type = TouchType::HOVER_CANCEL;
+    DispatchAccessibilityHoverEventNG(falsifyEvent);
 }
 } // namespace OHOS::Ace

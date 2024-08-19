@@ -107,6 +107,8 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
         contentRect.Width() + contentRect.GetX() + textFieldPattern->GetInlinePadding(), clipRectHeight);
     canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     if (paragraph) {
+        auto textField = textFieldPattern->IsTextArea() ? "TextArea" : "TextInput";
+        ACE_LAYOUT_SCOPED_TRACE("[%s][id:%d] [Rect:%s]", textField, frameNode->GetId(), contentRect.ToString().c_str());
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
             canvas.Save();
             RSRect clipRect;
@@ -121,7 +123,6 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
                 textFieldPattern->IsTextArea() ? textFieldPattern->GetTextRect().GetY() : contentOffset.GetY());
         }
     }
-
     canvas.Restore();
 }
 

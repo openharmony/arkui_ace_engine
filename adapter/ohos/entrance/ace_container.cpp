@@ -1347,7 +1347,7 @@ private:
     AceAutoFillType autoFillType_ = AceAutoFillType::ACE_UNSPECIFIED;
     bool isNative_ = true;
     AbilityBase::Rect rect_;
-    Rosen::Rect windowRect_;
+    Rosen::Rect windowRect_ { 0, 0, 0, 0 };
 };
 
 bool AceContainer::UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node,
@@ -1377,24 +1377,30 @@ bool AceContainer::ClosePopupUIExtension(uint32_t autoFillSessionId)
     return true;
 }
 
-AceAutoFillType AceContainer::PlaceHolderToType(const std::string& onePlaceHolder)
+HintToTypeWrap AceContainer::PlaceHolderToType(const std::string& onePlaceHolder)
 {
+    HintToTypeWrap hintToTypeWrap;
     auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
-    CHECK_NULL_RETURN(viewDataWrap, AceAutoFillType::ACE_UNSPECIFIED);
+    CHECK_NULL_RETURN(viewDataWrap, hintToTypeWrap);
     auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
-    CHECK_NULL_RETURN(viewDataWrapOhos, AceAutoFillType::ACE_UNSPECIFIED);
+    CHECK_NULL_RETURN(viewDataWrapOhos, hintToTypeWrap);
     std::vector<std::string> placeHolder;
     std::vector<int> intType;
+    std::vector<std::string> metadata;
     placeHolder.push_back(onePlaceHolder);
-    auto isSuccess = viewDataWrapOhos->LoadHint2Type(placeHolder, intType);
+    auto isSuccess = viewDataWrapOhos->LoadHint2Type(placeHolder, intType, metadata);
     if (!isSuccess) {
         TAG_LOGE(AceLogTag::ACE_AUTO_FILL, "Load Hint2Type Failed !");
-        return AceAutoFillType::ACE_UNSPECIFIED;
+        return hintToTypeWrap;
     }
     if (intType.empty()) {
-        return AceAutoFillType::ACE_UNSPECIFIED;
+        return hintToTypeWrap;
     }
-    return static_cast<AceAutoFillType>(viewDataWrapOhos->HintToAutoFillType(intType[0]));
+    hintToTypeWrap.autoFillType = static_cast<AceAutoFillType>(viewDataWrapOhos->HintToAutoFillType(intType[0]));
+    if (!metadata.empty()) {
+        hintToTypeWrap.metadata = metadata[0];
+    }
+    return hintToTypeWrap;
 }
 
 bool AceContainer::ChangeType(AbilityBase::ViewData& viewData)
@@ -1917,17 +1923,16 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     resRegister_ = aceView_->GetPlatformResRegister();
 #ifndef NG_BUILD
     if (useNewPipeline_) {
-        LOGI("New pipeline version creating...");
         pipelineContext_ = AceType::MakeRefPtr<NG::PipelineContext>(
             window, taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
         pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
     } else {
+        LOGI("Create old pipeline.");
         pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
             window, taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
         pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManager>());
     }
 #else
-    LOGI("New pipeline version creating...");
     pipelineContext_ = AceType::MakeRefPtr<NG::PipelineContext>(
         window, taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
     pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
@@ -2458,16 +2463,22 @@ void AceContainer::SetFontScaleAndWeightScale(
     }
     if (!parsedConfig.fontScale.empty()) {
         TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "parsedConfig fontScale: %{public}s", parsedConfig.fontScale.c_str());
-        auto instanceId = instanceId_;
-        SetFontScale(instanceId, StringUtils::StringToFloat(parsedConfig.fontScale));
-        configurationChange.fontScaleUpdate = true;
+        CHECK_NULL_VOID(pipelineContext_);
+        float fontSizeScale = StringUtils::StringToFloat(parsedConfig.fontScale);
+        if (fontSizeScale != pipelineContext_->GetFontScale()) {
+            SetFontScale(instanceId_, fontSizeScale);
+            configurationChange.fontScaleUpdate = true;
+        }
     }
     if (!parsedConfig.fontWeightScale.empty()) {
         TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "parsedConfig fontWeightScale: %{public}s",
             parsedConfig.fontWeightScale.c_str());
-        auto instanceId = instanceId_;
-        SetFontWeightScale(instanceId, StringUtils::StringToFloat(parsedConfig.fontWeightScale));
-        configurationChange.fontWeightScaleUpdate = true;
+        CHECK_NULL_VOID(pipelineContext_);
+        float fontWeightScale = StringUtils::StringToFloat(parsedConfig.fontWeightScale);
+        if (fontWeightScale != pipelineContext_->GetFontWeightScale()) {
+            SetFontWeightScale(instanceId_, fontWeightScale);
+            configurationChange.fontWeightScaleUpdate = true;
+        }
     }
 }
 
@@ -2507,15 +2518,16 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     CHECK_NULL_VOID(themeManager);
     auto resConfig = GetResourceConfiguration();
     if (!parsedConfig.colorMode.empty()) {
-        configurationChange.colorModeUpdate = true;
-        if (parsedConfig.colorMode == "dark") {
+        if (parsedConfig.colorMode == "dark" && SystemProperties::GetColorMode() != ColorMode::DARK) {
             SystemProperties::SetColorMode(ColorMode::DARK);
             SetColorScheme(ColorScheme::SCHEME_DARK);
             resConfig.SetColorMode(ColorMode::DARK);
-        } else {
+            configurationChange.colorModeUpdate = true;
+        } else if (parsedConfig.colorMode == "light" && SystemProperties::GetColorMode() != ColorMode::LIGHT) {
             SystemProperties::SetColorMode(ColorMode::LIGHT);
             SetColorScheme(ColorScheme::SCHEME_LIGHT);
             resConfig.SetColorMode(ColorMode::LIGHT);
+            configurationChange.colorModeUpdate = true;
         }
     }
     if (!parsedConfig.deviceAccess.empty()) {

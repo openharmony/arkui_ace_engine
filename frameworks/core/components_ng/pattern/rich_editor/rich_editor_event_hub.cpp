@@ -366,6 +366,11 @@ void RichEditorDeleteValue::SetRichEditorDeleteSpans(const RichEditorAbstractSpa
     richEditorDeleteSpans_.emplace_back(deleteSpan);
 }
 
+void RichEditorDeleteValue::ResetRichEditorDeleteSpans()
+{
+    richEditorDeleteSpans_.clear();
+}
+
 const std::list<RichEditorAbstractSpanResult>& RichEditorDeleteValue::GetRichEditorDeleteSpans() const
 {
     return richEditorDeleteSpans_;

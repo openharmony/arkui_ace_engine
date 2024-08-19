@@ -15,20 +15,10 @@
 
 
 #include "cj_view_context_ffi.h"
-#include <functional>
-#include <memory>
-#include <sstream>
-#include <utility>
 #include "cj_lambda.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/utils.h"
 #include "base/log/jank_frame_report.h"
-#include "bridge/common/utils/engine_helper.h"
-#include "bridge/common/utils/utils.h"
 #include "core/common/ace_engine.h"
-#include "core/components/common/properties/animation_option.h"
 #include "core/components_ng/base/view_stack_model.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
 
 using namespace OHOS::Ace;

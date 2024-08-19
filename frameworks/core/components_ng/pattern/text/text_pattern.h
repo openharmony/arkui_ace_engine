@@ -28,12 +28,12 @@
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
 #include "core/common/ai/data_detector_adapter.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/select_overlay/magnifier.h"
 #include "core/components_ng/pattern/text/layout_info_interface.h"
 #include "core/components_ng/pattern/text/multiple_click_recognizer.h"
 #include "core/components_ng/pattern/text/span/mutable_span_string.h"
@@ -57,6 +57,7 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 enum class Status { DRAGGING, ON_DROP, NONE };
 using CalculateHandleFunc = std::function<void()>;
 using ShowSelectOverlayFunc = std::function<void(const RectF&, const RectF&)>;
@@ -66,14 +67,20 @@ struct SpanNodeInfo {
 };
 
 // TextPattern is the base class for text render node to perform paint text.
-class TextPattern : public virtual Pattern, public TextDragBase, public TextBase, public LayoutInfoInterface {
-    DECLARE_ACE_TYPE(TextPattern, Pattern, TextDragBase, TextBase);
+class TextPattern : public virtual Pattern,
+                    public TextDragBase,
+                    public TextBase,
+                    public TextGestureSelector,
+                    public Magnifier,
+                    public LayoutInfoInterface {
+    DECLARE_ACE_TYPE(TextPattern, Pattern, TextDragBase, TextBase, TextGestureSelector, Magnifier);
 
 public:
     TextPattern()
     {
         selectOverlay_ = AceType::MakeRefPtr<TextSelectOverlay>(WeakClaim(this));
         pManager_ = AceType::MakeRefPtr<ParagraphManager>();
+        magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
     }
 
     ~TextPattern() override;
@@ -121,6 +128,13 @@ public:
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
         return host->GetTag() == V2::SYMBOL_ETS_TAG;
+    }
+
+    bool IsTextNode() const
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        return host->GetTag() == V2::TEXT_ETS_TAG;
     }
 
     bool DefaultSupportDrag() override
@@ -189,17 +203,7 @@ public:
         return contentMod_;
     }
 
-    void SetTextDetectEnable(bool enable)
-    {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        dataDetectorAdapter_->frameNode_ = host;
-        bool cache = textDetectEnable_;
-        textDetectEnable_ = enable;
-        if (cache != textDetectEnable_) {
-            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        }
-    }
+    void SetTextDetectEnable(bool enable);
     bool GetTextDetectEnable()
     {
         return textDetectEnable_;
@@ -231,6 +235,33 @@ public:
     TextDataDetectResult GetTextDetectResult()
     {
         return dataDetectorAdapter_->textDetectResult_;
+    }
+    void SetTextDetectConfig(const TextDetectConfig& textDetectConfig)
+    {
+        dataDetectorAdapter_->SetTextDetectTypes(textDetectConfig.types);
+        dataDetectorAdapter_->onResult_ = std::move(textDetectConfig.onResult);
+        dataDetectorAdapter_->entityColor_ = textDetectConfig.entityColor;
+        dataDetectorAdapter_->entityDecorationType_ = textDetectConfig.entityDecorationType;
+        dataDetectorAdapter_->entityDecorationColor_ = textDetectConfig.entityDecorationColor;
+        dataDetectorAdapter_->entityDecorationStyle_ = textDetectConfig.entityDecorationStyle;
+        auto textDetectConfigCache = dataDetectorAdapter_->textDetectConfigStr_;
+        dataDetectorAdapter_->textDetectConfigStr_ = textDetectConfig.ToString();
+        if (textDetectConfigCache != dataDetectorAdapter_->textDetectConfigStr_) {
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
+    void ModifyAISpanStyle(TextStyle& aiSpanStyle)
+    {
+        TextDetectConfig textDetectConfig;
+        aiSpanStyle.SetTextColor(dataDetectorAdapter_->entityColor_.value_or(textDetectConfig.entityColor));
+        aiSpanStyle.SetTextDecoration(
+            dataDetectorAdapter_->entityDecorationType_.value_or(textDetectConfig.entityDecorationType));
+        aiSpanStyle.SetTextDecorationColor(
+            dataDetectorAdapter_->entityDecorationColor_.value_or(textDetectConfig.entityColor));
+        aiSpanStyle.SetTextDecorationStyle(
+            dataDetectorAdapter_->entityDecorationStyle_.value_or(textDetectConfig.entityDecorationStyle));
     }
 
     void OnVisibleChange(bool isVisible) override;
@@ -631,12 +662,21 @@ public:
         isUserSetResponseRegion_ = isUserSetResponseRegion;
     }
 
+    size_t GetSubComponentInfos(std::vector<SubComponentInfo>& subComponentInfos);
+
     void UpdateFontColor(const Color& value);
     void BeforeCreatePaintWrapper() override;
 
     void OnTextOverflowChanged();
 
     void MarkDirtyNodeRender();
+
+    uint64_t GetSystemTimestamp()
+    {
+        return static_cast<uint64_t>(
+            std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
+                .count());
+    }
 
 protected:
     void OnAttachToFrameNode() override;
@@ -684,16 +724,7 @@ protected:
     bool IsSelectableAndCopy();
     void SetResponseRegion(const SizeF& frameSize, const SizeF& boundsSize);
 
-    virtual bool CanStartAITask()
-    {
-        auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
-        if (textLayoutProperty) {
-            return textDetectEnable_ && enabled_ &&
-                   textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) != TextOverflow::MARQUEE;
-        } else {
-            return textDetectEnable_ && enabled_;
-        }
-    };
+    virtual bool CanStartAITask();
 
     void OnAttachToMainTree() override
     {
@@ -704,6 +735,21 @@ protected:
     {
         isDetachFromMainTree_ = true;
     }
+
+    bool SetActionExecSubComponent();
+    void GetSubComponentInfosForAISpans(std::vector<SubComponentInfo>& subComponentInfos);
+    void GetSubComponentInfosForSpans(std::vector<SubComponentInfo>& subComponentInfos);
+    bool ExecSubComponent(int32_t spanId);
+    void AddSubComponentInfosByDataDetectorForSpan(std::vector<SubComponentInfo>& subComponentInfos,
+        const RefPtr<SpanItem>& span);
+    void AddSubComponentInfoForAISpan(std::vector<SubComponentInfo>& subComponentInfos, const std::string& content,
+        const AISpan& aiSpan);
+    void AddSubComponentInfoForSpan(std::vector<SubComponentInfo>& subComponentInfos, const std::string& content,
+        const RefPtr<SpanItem>& span);
+
+    int32_t GetTouchIndex(const OffsetF& offset) override;
+    void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) override;
+    void OnTextGenstureSelectionEnd() override;
 
     bool enabled_ = true;
     Status status_ = Status::NONE;
@@ -746,6 +792,12 @@ protected:
 
     OffsetF parentGlobalOffset_;
     std::optional<TextResponseType> textResponseType_;
+
+    struct SubComponentInfoEx {
+        std::optional<AISpan> aiSpan;
+        WeakPtr<SpanItem> span;
+    };
+    std::vector<SubComponentInfoEx> subComponentInfos_;
 
 private:
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -815,6 +867,7 @@ private:
     bool isDoubleClick_ = false;
     bool showSelected_ = false;
     bool isSensitive_ = false;
+    bool hasSpanStringLongPressEvent_ = false;
     int32_t clickedSpanPosition_ = -1;
 
     RefPtr<ParagraphManager> pManager_;
@@ -841,6 +894,7 @@ private:
     std::optional<ParagraphStyle> externalParagraphStyle_;
     bool isUserSetResponseRegion_ = false;
     RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
+    WeakPtr<PipelineContext> pipeline_;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 };
 } // namespace OHOS::Ace::NG

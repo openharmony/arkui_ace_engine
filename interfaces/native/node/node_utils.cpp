@@ -13,14 +13,10 @@
  * limitations under the License.
  */
 
-#include <cstdint>
-#include <vector>
 
-#include "native_type.h"
 #include "node_model.h"
 
 #include "base/error/error_code.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -154,12 +150,12 @@ void OH_ArkUI_UnregisterSystemFontStyleChangeEvent(ArkUI_NodeHandle node)
     impl->getNodeModifiers()->getFrameNodeModifier()->resetSystemFontStyleChangeEvent(node->uiNodeHandle);
 }
 
-int32_t OH_ArkUI_SystemFontStyleEvent_GetFontSize(const ArkUI_SystemFontStyleEvent* event)
+float OH_ArkUI_SystemFontStyleEvent_GetFontSizeScale(const ArkUI_SystemFontStyleEvent* event)
 {
     return event->fontSize;
 }
 
-int32_t OH_ArkUI_SystemFontStyleEvent_GetFontWeight(const ArkUI_SystemFontStyleEvent* event)
+float OH_ArkUI_SystemFontStyleEvent_GetFontWeightScale(const ArkUI_SystemFontStyleEvent* event)
 {
     return event->fontWeight;
 }

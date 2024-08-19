@@ -210,33 +210,35 @@ JSRef<JSObject> JSRichEditor::CreateJSTextStyleResult(const TextStyleResult& tex
 {
     JSRef<JSObject> textStyleObj = JSRef<JSObject>::New();
     textStyleObj->SetProperty<std::string>("fontColor", textStyleResult.fontColor);
-    textStyleObj->SetProperty<std::string>("fontFeature", UnParseFontFeatureSetting(textStyleResult.fontFeature));
     textStyleObj->SetProperty<double>("fontSize", textStyleResult.fontSize);
     textStyleObj->SetProperty<int32_t>("fontStyle", textStyleResult.fontStyle);
-    textStyleObj->SetProperty<double>("lineHeight", textStyleResult.lineHeight);
-    textStyleObj->SetProperty<double>("letterSpacing", textStyleResult.letterSpacing);
     textStyleObj->SetProperty<int32_t>("fontWeight", textStyleResult.fontWeight);
     textStyleObj->SetProperty<std::string>("fontFamily", textStyleResult.fontFamily);
+
     JSRef<JSObject> decorationObj = JSRef<JSObject>::New();
     decorationObj->SetProperty<int32_t>("type", textStyleResult.decorationType);
     decorationObj->SetProperty<std::string>("color", textStyleResult.decorationColor);
     decorationObj->SetProperty<int32_t>("style", textStyleResult.decorationStyle);
     textStyleObj->SetPropertyObject("decoration", decorationObj);
-    textStyleObj->SetProperty<int32_t>("textAlign", textStyleResult.textAlign);
+
+    textStyleObj->SetProperty<double>("lineHeight", textStyleResult.lineHeight);
+    textStyleObj->SetProperty<double>("letterSpacing", textStyleResult.letterSpacing);
+    textStyleObj->SetProperty<std::string>("fontFeature", UnParseFontFeatureSetting(textStyleResult.fontFeature));
     textStyleObj->SetPropertyObject("textShadow", CreateJsTextShadowObjectArray(textStyleResult));
-    JSRef<JSArray> leadingMarginArray = JSRef<JSArray>::New();
-    leadingMarginArray->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(textStyleResult.leadingMarginSize[0])));
-    leadingMarginArray->SetValueAt(1, JSRef<JSVal>::Make(ToJSValue(textStyleResult.leadingMarginSize[1])));
-    textStyleObj->SetPropertyObject("leadingMarginSize", leadingMarginArray);
 
     return textStyleObj;
 }
 
 JSRef<JSArray> JSRichEditor::CreateJsTextShadowObjectArray(const TextStyleResult& textSpanResult)
 {
+    return CreateJsTextShadowObjectArray(textSpanResult.textShadows);
+}
+
+JSRef<JSArray> JSRichEditor::CreateJsTextShadowObjectArray(const std::vector<Shadow>& textShadows)
+{
     JSRef<JSArray> textShadowArray = JSRef<JSArray>::New();
     int32_t index = 0;
-    for (const auto& it : textSpanResult.textShadows) {
+    for (const auto& it : textShadows) {
         JSRef<JSObject> textShadowObj = JSRef<JSObject>::New();
         textShadowObj->SetProperty<double>("radius", it.GetBlurRadius());
         textShadowObj->SetProperty<std::string>("color", it.GetColor().ToString());
@@ -1155,12 +1157,11 @@ void JSRichEditor::JsDataDetectorConfig(const JSCallbackInfo& info)
         return;
     }
 
-    std::string textTypes;
-    std::function<void(const std::string&)> onResult;
-    if (!ParseDataDetectorConfig(info, textTypes, onResult)) {
+    TextDetectConfig textDetectConfig;
+    if (!ParseDataDetectorConfig(info, textDetectConfig)) {
         return;
     }
-    RichEditorModel::GetInstance()->SetTextDetectConfig(textTypes, std::move(onResult));
+    RichEditorModel::GetInstance()->SetTextDetectConfig(textDetectConfig);
 }
 
 void JSRichEditor::SetCaretColor(const JSCallbackInfo& info)
@@ -2389,33 +2390,19 @@ void JSRichEditorBaseController::GetTypingStyle(const JSCallbackInfo& info)
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     auto controller = controllerWeak_.Upgrade();
     CHECK_NULL_VOID(controller);
-    auto style = CreateTypingStyleResult(typingStyle_);
+    auto typingStyle = controller->GetTypingStyle();
+    auto style = CreateTypingStyleResult(typingStyle.value_or(UpdateSpanStyle()));
     info.SetReturnValue(JSRef<JSVal>::Cast(style));
 }
 
 JSRef<JSObject> JSRichEditorBaseController::CreateTypingStyleResult(const struct UpdateSpanStyle& typingStyle)
 {
     auto tyingStyleObj = JSRef<JSObject>::New();
-    TextStyle textStyle;
-    if (typingStyle.updateFontFamily.has_value()) {
-        std::string family = V2::ConvertFontFamily(typingStyle.updateFontFamily.value());
-        tyingStyleObj->SetProperty<std::string>("fontFamily", family);
-    }
-    if (typingStyle.updateFontSize.has_value()) {
-        tyingStyleObj->SetProperty<double>("fontSize", typingStyle.updateFontSize.value().ConvertToVp());
-    }
-    if (typingStyle.updateLineHeight.has_value()) {
-        tyingStyleObj->SetProperty<double>("lineHeight", typingStyle.updateLineHeight.value().ConvertToVp());
-    }
-    if (typingStyle.updateLetterSpacing.has_value()) {
-        tyingStyleObj->SetProperty<double>("letterSpacing", typingStyle.updateLetterSpacing.value().ConvertToVp());
-    }
     if (typingStyle.updateTextColor.has_value()) {
         tyingStyleObj->SetProperty<std::string>("fontColor", typingStyle.updateTextColor.value().ColorToString());
     }
-    if (typingStyle.updateFontFeature.has_value()) {
-        tyingStyleObj->SetProperty<std::string>(
-            "fontFeature", UnParseFontFeatureSetting(typingStyle.updateFontFeature.value()));
+    if (typingStyle.updateFontSize.has_value()) {
+        tyingStyleObj->SetProperty<double>("fontSize", typingStyle.updateFontSize.value().ConvertToVp());
     }
     if (typingStyle.updateItalicFontStyle.has_value()) {
         tyingStyleObj->SetProperty<int32_t>(
@@ -2424,7 +2411,10 @@ JSRef<JSObject> JSRichEditorBaseController::CreateTypingStyleResult(const struct
     if (typingStyle.updateFontWeight.has_value()) {
         tyingStyleObj->SetProperty<int32_t>("fontWeight", static_cast<int32_t>(typingStyle.updateFontWeight.value()));
     }
-
+    if (typingStyle.updateFontFamily.has_value()) {
+        std::string family = V2::ConvertFontFamily(typingStyle.updateFontFamily.value());
+        tyingStyleObj->SetProperty<std::string>("fontFamily", family);
+    }
     JSRef<JSObject> decorationObj = JSRef<JSObject>::New();
     if (typingStyle.updateTextDecoration.has_value()) {
         decorationObj->SetProperty<int32_t>("type", static_cast<int32_t>(typingStyle.updateTextDecoration.value()));
@@ -2439,6 +2429,21 @@ JSRef<JSObject> JSRichEditorBaseController::CreateTypingStyleResult(const struct
     if (typingStyle.updateTextDecoration.has_value() || typingStyle.updateTextDecorationColor.has_value()) {
         tyingStyleObj->SetPropertyObject("decoration", decorationObj);
     }
+    if (typingStyle.updateTextShadows.has_value()) {
+        tyingStyleObj->SetPropertyObject("textShadows",
+            JSRichEditor::CreateJsTextShadowObjectArray(typingStyle.updateTextShadows.value()));
+    }
+    if (typingStyle.updateLineHeight.has_value()) {
+        tyingStyleObj->SetProperty<double>("lineHeight", typingStyle.updateLineHeight.value().ConvertToVp());
+    }
+    if (typingStyle.updateLetterSpacing.has_value()) {
+        tyingStyleObj->SetProperty<double>("letterSpacing", typingStyle.updateLetterSpacing.value().ConvertToVp());
+    }
+    if (typingStyle.updateFontFeature.has_value()) {
+        tyingStyleObj->SetProperty<std::string>(
+            "fontFeature", UnParseFontFeatureSetting(typingStyle.updateFontFeature.value()));
+    }
+
     return tyingStyleObj;
 }
 

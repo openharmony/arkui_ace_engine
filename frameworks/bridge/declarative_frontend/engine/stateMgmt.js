@@ -4245,6 +4245,20 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         this.dirtDescendantElementIds_.delete(elmtId);
         
     }
+    /**
+     * for C++ to judge whether a CustomNode has updateFunc with specified nodeId.
+     * use same judgement with UpdateElement, to make sure it can rerender if return true.
+     *
+     * @param elmtId query ID
+     *
+     * framework internal function
+     */
+    hasNodeUpdateFunc(elmtId) {
+        const entry = this.updateFuncByElmtId.get(elmtId);
+        const updateFunc = entry ? entry.getUpdateFunc() : undefined;
+        // if this component does not have updateFunc for elmtId, return false.
+        return typeof updateFunc === 'function';
+    }
     // KEEP
     static pauseRendering() {
         PUV2ViewBase.renderingPaused = true;
@@ -7453,27 +7467,29 @@ class ObserveV2 {
     // clear any previously created dependency view model object to elmtId
     // find these view model objects with the reverse map id2targets_
     clearBinding(id) {
-        const targetSet = this.id2targets_[id];
-        let target;
-        if (targetSet && targetSet instanceof Set) {
-            targetSet.forEach((weakTarget) => {
-                var _a, _b;
-                if ((target = weakTarget.deref()) && target instanceof Object) {
-                    const idRefs = target[ObserveV2.ID_REFS];
-                    const symRefs = target[ObserveV2.SYMBOL_REFS];
-                    if (idRefs) {
-                        (_a = idRefs[id]) === null || _a === void 0 ? void 0 : _a.forEach(key => { var _a; return (_a = symRefs === null || symRefs === void 0 ? void 0 : symRefs[key]) === null || _a === void 0 ? void 0 : _a.delete(id); });
-                        delete idRefs[id];
-                    }
-                    else {
-                        for (let key in symRefs) {
-                            (_b = symRefs[key]) === null || _b === void 0 ? void 0 : _b.delete(id);
-                        }
-                        ;
-                    }
+        var _a;
+        // multiple weakRefs might point to the same target - here we get Set of unique targets
+        const targetSet = new Set();
+        (_a = this.id2targets_[id]) === null || _a === void 0 ? void 0 : _a.forEach((weak) => {
+            if (weak.deref() instanceof Object) {
+                targetSet.add(weak.deref());
+            }
+        });
+        targetSet.forEach((target) => {
+            var _a, _b;
+            const idRefs = target[ObserveV2.ID_REFS];
+            const symRefs = target[ObserveV2.SYMBOL_REFS];
+            if (idRefs) {
+                (_a = idRefs[id]) === null || _a === void 0 ? void 0 : _a.forEach(key => { var _a; return (_a = symRefs === null || symRefs === void 0 ? void 0 : symRefs[key]) === null || _a === void 0 ? void 0 : _a.delete(id); });
+                delete idRefs[id];
+            }
+            else {
+                for (let key in symRefs) {
+                    (_b = symRefs[key]) === null || _b === void 0 ? void 0 : _b.delete(id);
                 }
-            });
-        }
+                ;
+            }
+        });
         delete this.id2targets_[id];
         delete this.id2cmp_[id];
         
@@ -8534,26 +8550,6 @@ class ProviderConsumerUtilV2 {
         const aliasProp = ProviderConsumerUtilV2.metaAliasKey(aliasName, deco);
         meta[aliasProp] = { 'varName': varName, 'aliasName': aliasName, 'deco': deco };
     }
-    static setupConsumeVarsV2(view) {
-        const meta = view && view[ObserveV2.V2_DECO_META];
-        if (!meta) {
-            return;
-        }
-        for (const [key, value] of Object.entries(meta)) {
-            // check all entries of this format varName: { deco: '@Provider' | '@Consumer', aliasName: ..... }
-            // do not check alias entries
-            // 'varName' is only in alias entries, see addProvideConsumeVariableDecoMeta
-            if (typeof value === 'object' && value['deco'] === '@Consumer' && !('varName' in value)) {
-                let result = ProviderConsumerUtilV2.findProvider(view, value['aliasName']);
-                if (result && result[0] && result[1]) {
-                    ProviderConsumerUtilV2.connectConsumer2Provider(view, key, result[0], result[1]);
-                }
-                else {
-                    ProviderConsumerUtilV2.defineConsumerWithoutProvider(view, key);
-                }
-            }
-        }
-    }
     /**
     * find a @Provider'ed variable from its nearest ancestor ViewV2.
     * @param searchingAliasName The key name to search for.
@@ -8582,6 +8578,18 @@ class ProviderConsumerUtilV2 {
         stateMgmtConsole.warn(`findProvider: ${view.debugInfo__()} @Consumer('${aliasName}'), no matching @Provider found amongst ancestor @ComponentV2's!`);
         return undefined;
     }
+    /**
+    * Connects a consumer property of a view (`consumeView`) to a provider property of another view (`provideView`).
+    * This function establishes a link between the consumer and provider, allowing the consumer to access and update
+    * the provider's value directly. If the provider view is garbage collected, attempts to access the provider
+    * property will throw an error.
+    *
+    * @param consumeView - The view object that consumes data from the provider.
+    * @param consumeVarName - The name of the property in the consumer view that will be linked to the provider.
+    * @param provideView - The view object that provides the data to the consumer.
+    * @param provideVarName - The name of the property in the provider view that the consumer will access.
+    *
+    */
     static connectConsumer2Provider(consumeView, consumeVarName, provideView, provideVarName) {
         var _a;
         const weakView = new WeakRef(provideView);
@@ -8618,10 +8626,10 @@ class ProviderConsumerUtilV2 {
             enumerable: true
         });
     }
-    static defineConsumerWithoutProvider(consumeView, consumeVarName) {
+    static defineConsumerWithoutProvider(consumeView, consumeVarName, consumerLocalVal) {
         
         const storeProp = ObserveV2.OB_PREFIX + consumeVarName;
-        consumeView[storeProp] = consumeView[consumeVarName]; // use local init value, also as backing store
+        consumeView[storeProp] = consumerLocalVal; // use local init value, also as backing store
         Reflect.defineProperty(consumeView, consumeVarName, {
             get() {
                 ObserveV2.getObserve().addRef(this, consumeVarName);
@@ -8805,7 +8813,12 @@ class MonitorV2 {
         ObserveV2.getObserve().startRecordDependencies(this, this.watchId_);
         let ret = false;
         this.values_.forEach((item) => {
-            let dirty = item.setValue(isInit, this.analysisProp(isInit, item));
+            const [success, value] = this.analysisProp(isInit, item);
+            if (!success) {
+                
+                return;
+            }
+            let dirty = item.setValue(isInit, value);
             ret = ret || dirty;
         });
         ObserveV2.getObserve().stopRecordDependencies();
@@ -8821,10 +8834,10 @@ class MonitorV2 {
             }
             else {
                 isInit && stateMgmtConsole.warn(`watch prop ${monitoredValue.path} initialize not found, make sure it exists!`);
-                return undefined;
+                return [false, undefined];
             }
         }
-        return obj;
+        return [true, obj];
     }
     static clearWatchesFromTarget(target) {
         var _a;
@@ -9011,7 +9024,6 @@ class ViewV2 extends PUV2ViewBase {
      * otherwise it inherits from its parent instance if its freezeState is true
      */
     finalizeConstruction(freezeState) {
-        ProviderConsumerUtilV2.setupConsumeVarsV2(this);
         ObserveV2.getObserve().constructComputed(this, this.constructor.name);
         ObserveV2.getObserve().constructMonitor(this, this.constructor.name);
         // Always use ID_REFS in ViewV2
@@ -9547,6 +9559,32 @@ const Consumer = (aliasName) => {
         // redefining the property happens when owning ViewV2 gets constructed
         // and @Consumer gets connected to @provide counterpart
         ProviderConsumerUtilV2.addProvideConsumeVariableDecoMeta(proto, varName, searchForProvideWithName, '@Consumer');
+        const providerName = (aliasName === undefined || aliasName === null ||
+            (typeof aliasName === 'string' && aliasName.trim() === '')) ? varName : aliasName;
+        let providerInfo;
+        Reflect.defineProperty(proto, varName, {
+            get() {
+                if (!providerInfo) {
+                    providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
+                    if (providerInfo && providerInfo[0] && providerInfo[1]) {
+                        ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
+                    }
+                }
+                return this[providerName !== null && providerName !== void 0 ? providerName : varName];
+            },
+            set(val) {
+                if (!providerInfo) {
+                    providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
+                    if (providerInfo && providerInfo[0] && providerInfo[1]) {
+                        ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
+                    }
+                    else {
+                        ProviderConsumerUtilV2.defineConsumerWithoutProvider(this, varName, val);
+                    }
+                }
+            },
+            enumerable: true
+        });
     };
 }; // @Consumer
 /**
@@ -10126,8 +10164,18 @@ class __Repeat {
         return this;
     }
     // function to decide which template to use, each template has an id
-    templateId(typeFunc) {
-        this.config.typeGenFunc = typeFunc;
+    templateId(typeGenFunc) {
+        // typeGenFunc wrapper with ttype validation
+        const typeGenFuncSafe = (item, index) => {
+            const itemType = typeGenFunc(item, index);
+            const itemFunc = this.config.itemGenFuncs[itemType];
+            if (typeof itemFunc !== 'function') {
+                stateMgmtConsole.applicationError(`Repeat with virtual scroll. Missing Repeat.template for id '${itemType}'`);
+                return '';
+            }
+            return itemType;
+        };
+        this.config.typeGenFunc = typeGenFuncSafe;
         return this;
     }
     // template: id + builder function to render specific type of data item 
@@ -10358,6 +10406,8 @@ class __RepeatVirtualScrollImpl {
         this.repeatItem4Key_ = new Map();
         // RepeatVirtualScrollNode elmtId
         this.repeatElmtId_ = -1;
+        // Last known active range (as sparse array)
+        this.lastActiveRangeData_ = [];
     }
     render(config, isInitialRender) {
         this.arr_ = config.arr;
@@ -10473,7 +10523,6 @@ class __RepeatVirtualScrollImpl {
             return result;
         }; // const onGetKeys4Range 
         const onGetTypes4Range = (from, to) => {
-            var _a;
             if (to > this.totalCount_ || to > this.arr_.length) {
                 stateMgmtConsole.applicationError(`Repeat with virtualScroll elmtId: ${this.repeatElmtId_}:  onGetTypes4Range from ${from} to ${to} \
                   with data array length ${this.arr_.length}, totalCount=${this.totalCount_} \
@@ -10490,13 +10539,7 @@ class __RepeatVirtualScrollImpl {
             ViewStackProcessor.StartGetAccessRecordingFor(this.repeatElmtId_);
             ObserveV2.getObserve().startRecordDependencies(owningView, this.repeatElmtId_, false);
             for (let i = from; i <= to && i < this.arr_.length; i++) {
-                let ttype = (_a = this.typeGenFunc_(this.arr_[i], i)) !== null && _a !== void 0 ? _a : '';
-                if (!this.itemGenFuncs_[ttype]) {
-                    stateMgmtConsole.applicationError(`Repeat with virtual scroll elmtId: ${this.repeatElmtId_}. Factory function .templateId  returns template id '${ttype}'.` +
-                        (ttype === '') ? 'Missing Repeat.each ' : `missing Repeat.template for id '${ttype}'` + '! Unrecoverable application error!');
-                    // fallback to use .each function and try to continue the app with it.
-                    ttype = '';
-                }
+                let ttype = this.typeGenFunc_(this.arr_[i], i);
                 result.push(ttype);
             } // for
             ObserveV2.getObserve().stopRecordDependencies();
@@ -10504,35 +10547,67 @@ class __RepeatVirtualScrollImpl {
             
             return result;
         }; // const onGetTypes4Range
+        const onSetActiveRange = (from, to) => {
+            
+            // make sparse copy of this.arr_
+            this.lastActiveRangeData_ = new Array(this.arr_.length);
+            for (let i = from; i <= to && i < this.arr_.length; i++) {
+                const item = this.arr_[i];
+                const ttype = this.typeGenFunc_(this.arr_[i], i);
+                this.lastActiveRangeData_[i] = { item, ttype };
+            }
+        };
         
         RepeatVirtualScrollNative.create(this.totalCount_, Object.entries(this.templateOptions_), {
             onCreateNode,
             onUpdateNode,
             onGetKeys4Range,
-            onGetTypes4Range
+            onGetTypes4Range,
+            onSetActiveRange
         });
         RepeatVirtualScrollNative.onMove(this.onMoveHandler_);
         
     }
     reRender() {
         
-        this.purgeKeyCache();
-        RepeatVirtualScrollNative.invalidateKeyCache(this.totalCount_);
-        
-    }
-    initialRenderItem(repeatItem) {
-        var _a, _b;
-        // execute the itemGen function
-        const itemType = (_a = this.typeGenFunc_(repeatItem.item, repeatItem.index)) !== null && _a !== void 0 ? _a : '';
-        const itemFunc = (_b = this.itemGenFuncs_[itemType]) !== null && _b !== void 0 ? _b : this.itemGenFuncs_[''];
-        if (typeof itemFunc === 'function') {
-            itemFunc(repeatItem);
+        if (this.hasVisibleItemsChanged()) {
+            this.purgeKeyCache();
+            RepeatVirtualScrollNative.updateRenderState(this.totalCount_, true);
+            
         }
         else {
-            stateMgmtConsole.applicationError(`Repeat with virtualScroll elmtId ${this.repeatElmtId_}: ` +
-                (itemType === '') ? 'Missing Repeat.each ' : `missing Repeat.template for id '${itemType}'` +
-                '! Unrecoverable application error!');
+            // avoid re-render when data pushed outside visible area
+            RepeatVirtualScrollNative.updateRenderState(this.totalCount_, false);
+            
         }
+    }
+    initialRenderItem(repeatItem) {
+        // execute the itemGen function
+        const itemType = this.typeGenFunc_(repeatItem.item, repeatItem.index);
+        const itemFunc = this.itemGenFuncs_[itemType];
+        itemFunc(repeatItem);
+    }
+    hasVisibleItemsChanged() {
+        var _a, _b;
+        let lastActiveRangeIndex = 0;
+        // has any item or ttype in the active range changed?
+        for (let i in this.lastActiveRangeData_) {
+            const oldItem = (_a = this.lastActiveRangeData_[+i]) === null || _a === void 0 ? void 0 : _a.item;
+            const oldType = (_b = this.lastActiveRangeData_[+i]) === null || _b === void 0 ? void 0 : _b.ttype;
+            const newItem = this.arr_[+i];
+            const newType = this.typeGenFunc_(this.arr_[+i], +i);
+            if (oldItem !== newItem) {
+                
+                return true;
+            }
+            if (oldType !== newType) {
+                
+                return true;
+            }
+            lastActiveRangeIndex = +i;
+        }
+        
+        return false;
     }
     /**
      * maintain: index <-> key mapping

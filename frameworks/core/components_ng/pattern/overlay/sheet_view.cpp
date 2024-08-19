@@ -17,6 +17,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/i18n/localization.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
@@ -178,7 +179,6 @@ void SheetView::CreateCloseIconButtonNode(RefPtr<FrameNode> sheetNode, NG::Sheet
         CHECK_NULL_VOID(sheet);
         auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
         CHECK_NULL_VOID(sheetPattern);
-        sheetPattern->SetIsDirectionUp(false);
         sheetPattern->SheetInteractiveDismiss(BindSheetDismissReason::CLOSE_BUTTON);
     };
     eventConfirmHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(clickCallback));
@@ -190,6 +190,12 @@ void SheetView::CreateCloseIconButtonNode(RefPtr<FrameNode> sheetNode, NG::Sheet
 
     CreateCloseIconNode(buttonNode);
     buttonNode->MountToParent(sheetNode);
+
+    // set accessibilityProperty to sheet close button
+    auto accessibilityProperty = buttonNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    std::string message  = Localization::GetInstance()->GetEntryLetters("sheet.close");
+    accessibilityProperty->SetAccessibilityText(message);
 }
 
 void SheetView::CreateCloseIconNode(RefPtr<FrameNode> buttonNode)

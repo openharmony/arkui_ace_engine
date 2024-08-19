@@ -15,13 +15,9 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_select_ffi.h"
 
-#include <vector>
 
 #include "cj_lambda.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 #include "bridge/common/utils/utils.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/chart/chart_component.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
 
 using namespace OHOS::Ace;

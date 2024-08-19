@@ -15,10 +15,7 @@
 
 #include "cj_persistent_storage_ffi.h"
 #include "cj_lambda.h"
-#include "core/common/container.h"
-#include "core/common/ace_engine.h"
 #include "core/common/storage/storage_proxy.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;

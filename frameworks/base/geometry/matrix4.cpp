@@ -15,11 +15,6 @@
 
 #include "base/geometry/matrix4.h"
 
-#include <algorithm>
-#include <cmath>
-
-#include "base/utils/utils.h"
-
 namespace OHOS::Ace {
 namespace {
 constexpr int32_t MATRIX_LENGTH = Matrix4::DIMENSION * Matrix4::DIMENSION;

@@ -53,7 +53,11 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 #ifdef WEB_SUPPORTED
+#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "core/components_ng/pattern/web/web_pattern.h"
+#else
+#include "core/components_ng/pattern/web/cross_platform/web_pattern.h"
+#endif
 #endif // WEB_SUPPORTED
 
 namespace OHOS::Ace::NG {
@@ -194,6 +198,10 @@ bool DragEventActuator::IsCurrentNodeStatusSuitableForDragging(
 
 void DragEventActuator::RestartDragTask(const GestureEvent& info)
 {
+    if (info.GetInputEventType() == InputEventType::AXIS) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger drag pan event by axis");
+        return;
+    }
     auto gestureInfo = const_cast<GestureEvent&>(info);
     if (actionStart_) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Restart drag for lifting status");
@@ -202,7 +210,7 @@ void DragEventActuator::RestartDragTask(const GestureEvent& info)
 }
 
 void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, TouchTestResult& responseLinkResult)
+    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, ResponseLinkResult& responseLinkResult)
 {
     CHECK_NULL_VOID(userCallback_);
     isDragUserReject_ = false;
@@ -350,7 +358,9 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto dragDropManager = pipelineContext->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
         dragDropManager->SetHasGatherNode(false);
-        dragDropManager->ResetDragging();
+        if (dragDropManager->IsAboutToPreview()) {
+            dragDropManager->ResetDragging();
+        }
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
         CHECK_NULL_VOID(actuator->userCallback_);
@@ -396,10 +406,12 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         actuator->ResetResponseRegion();
         actuator->SetGatherNode(nullptr);
         auto contextMenuShowStatus = gestureHub->GetContextMenuShowStatus();
+        bool isContextMenuLongPress = gestureHub->GetMenuBindingType() == MenuBindingType::LONG_PRESS;
         if (actuator->GetIsNotInPreviewState() && !gestureHub->GetTextDraggable()) {
             DragEventActuator::ExecutePreDragAction(PreDragStatus::ACTION_CANCELED_BEFORE_DRAG, frameNode);
         }
-        if (!hasContextMenuUsingGesture && !contextMenuShowStatus) {
+        if ((!hasContextMenuUsingGesture && !contextMenuShowStatus) ||
+            (hasContextMenuUsingGesture && !isContextMenuLongPress)) {
             if (gestureHub->GetTextDraggable()) {
                 if (gestureHub->GetIsTextDraggable()) {
                     actuator->HideEventColumn();
@@ -459,7 +471,14 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         CHECK_NULL_VOID(pipelineContext);
         auto manager = pipelineContext->GetOverlayManager();
         CHECK_NULL_VOID(manager);
-        manager->RemoveGatherNode();
+        auto dragDropManager = pipelineContext->GetDragDropManager();
+        CHECK_NULL_VOID(dragDropManager);
+        auto preDragStatus = dragDropManager->GetPreDragStatus();
+        if (preDragStatus <= PreDragStatus::READY_TO_TRIGGER_DRAG_ACTION) {
+            manager->RemoveGatherNode();
+        } else {
+            manager->RemoveGatherNodeWithAnimation();
+        }
     };
     panRecognizer_->SetOnReject(panOnReject);
     panRecognizer_->SetIsForDrag(true);
@@ -563,7 +582,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         CHECK_NULL_VOID(manager);
         actuator->SetIsNotInPreviewState(false);
         actuator->SetGatherNodeAboveFilter(actuator);
-        if (!hasContextMenuUsingGesture) {
+        bool isContextMenuLongPress = gestureHub->GetMenuBindingType() == MenuBindingType::LONG_PRESS;
+        if (!hasContextMenuUsingGesture || !isContextMenuLongPress) {
             actuator->SetPixelMap(actuator);
         }
         auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(SPRING_RESPONSE, SPRING_DAMPING_FRACTION, 0);
@@ -1174,7 +1194,7 @@ void DragEventActuator::UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>&
     auto opacity = imageContext->GetOpacity();
 
     OptionsAfterApplied options = frameNode->GetDragPreviewOption().options;
-    if (opacity.has_value() && (opacity.value()) <= MAX_OPACITY && (opacity.value()) > MIN_OPACITY) {
+    if (opacity.has_value() && (opacity.value()) <= MAX_OPACITY && (opacity.value()) >= MIN_OPACITY) {
         options.opacity = opacity.value();
     } else {
         options.opacity = DEFAULT_OPACITY;
@@ -1218,7 +1238,7 @@ void DragEventActuator::UpdatePreviewOptionDefaultAttr(const RefPtr<FrameNode>& 
     } else {
         dragPreviewOption.options.shadow = std::nullopt;
     }
-    if (dragPreviewOption.isDefaultRadiusEnabled) {
+    if (dragPreviewOption.isDefaultRadiusEnabled || dragPreviewOption.isMultiSelectionEnabled) {
         dragPreviewOption.options.borderRadius = GetDefaultBorderRadius();
     } else {
         dragPreviewOption.options.borderRadius = std::nullopt;

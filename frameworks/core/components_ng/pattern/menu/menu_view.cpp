@@ -398,7 +398,7 @@ void UpdatePreivewVisibleArea(const RefPtr<FrameNode>& hoverImageStackNode, cons
         previewPattern->GetHoverImageAfterScaleHeight();
     auto clipEndValue = previewPattern->GetIsWidthDistLarger() ?
         previewPattern->GetCustomPreviewAfterScaleWidth() : previewPattern->GetCustomPreviewAfterScaleHeight();
-
+    CHECK_NULL_VOID(hoverImageStackNode);
     hoverImageStackNode->CreateAnimatablePropertyFloat(HOVER_IMAGE_CLIP_PROPERTY_NAME, 0,
         [weak = AceType::WeakClaim(AceType::RawPtr(hoverImageStackNode)),
             previewWeak = AceType::WeakClaim(AceType::RawPtr(previewNode))](float value) {
@@ -439,6 +439,7 @@ void UpdatePreivewVisibleArea(const RefPtr<FrameNode>& hoverImageStackNode, cons
     if (isScaleNearEqual) { option.SetDelay(menuTheme->GetHoverImageDelayDuration()); }
     hoverImageStackNode->UpdateAnimatablePropertyFloat(HOVER_IMAGE_CLIP_PROPERTY_NAME, clipStartValue);
     auto clipAnimation_ = AnimationUtils::StartAnimation(option, [hoverImageStackNode, clipEndValue]() {
+            CHECK_NULL_VOID(hoverImageStackNode);
             hoverImageStackNode->UpdateAnimatablePropertyFloat(HOVER_IMAGE_CLIP_PROPERTY_NAME, clipEndValue);
         });
 }
@@ -746,6 +747,30 @@ void SetHoverImageCustomPreviewInfo(const RefPtr<FrameNode>& previewNode, const 
         previewPattern->GetHoverImageAfterScaleHeight() / HALF_DIVIDE));
 }
 
+void SetAccessibilityPixelMap(const RefPtr<FrameNode>& targetNode, RefPtr<FrameNode>& imageNode)
+{
+    auto targetProps = targetNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(targetProps);
+    targetProps->SetOnAccessibilityFocusCallback([targetWK = AceType::WeakClaim(AceType::RawPtr(targetNode)),
+        imageWK = AceType::WeakClaim(AceType::RawPtr(imageNode))](bool focus) {
+        if (!focus) {
+            auto targetNode = targetWK.Upgrade();
+            CHECK_NULL_VOID(targetNode);
+            auto context = targetNode->GetRenderContext();
+            CHECK_NULL_VOID(context);
+            auto pixelMap = context->GetThumbnailPixelMap();
+            CHECK_NULL_VOID(pixelMap);
+            auto imageNode = imageWK.Upgrade();
+            CHECK_NULL_VOID(imageNode);
+            auto props = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+            CHECK_NULL_VOID(props);
+            props->UpdateAutoResize(false);
+            props->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
+            imageNode->MarkModifyDone();
+        }
+    });
+}
+
 void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapperNode,
     const RefPtr<FrameNode>& hoverImageStackNode, const RefPtr<FrameNode>& previewNode, const MenuParam& menuParam)
 {
@@ -769,6 +794,7 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
     props->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
     auto imagePattern = imageNode->GetPattern<ImagePattern>();
     imagePattern->SetSyncLoad(true);
+    SetAccessibilityPixelMap(target, imageNode);
     auto hub = imageNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto imageGestureHub = hub->GetOrCreateGestureEventHub();

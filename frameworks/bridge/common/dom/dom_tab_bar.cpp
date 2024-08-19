@@ -15,9 +15,6 @@
 
 #include "frameworks/bridge/common/dom/dom_tab_bar.h"
 
-#include "core/components/tab_bar/tab_theme.h"
-#include "core/components/theme/theme_manager.h"
-#include "frameworks/bridge/common/dom/dom_type.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {

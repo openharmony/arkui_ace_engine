@@ -109,4 +109,8 @@ constexpr int32_t ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT = 160002;
 
 // FromHtml error code
 constexpr int32_t ERROR_CODE_FROM_HTML_CONVERT_ERROR = 170001;
+
+// Gesture error code
+constexpr int32_t ERROR_CODE_NON_SCROLLABLE_CONTAINER = 180001;
+constexpr int32_t ERROR_CODE_BUFFER_SIZE_NOT_ENOUGH = 180002;
 } // namespace OHOS::Ace

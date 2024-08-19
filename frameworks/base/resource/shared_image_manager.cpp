@@ -15,12 +15,6 @@
 
 #include "base/resource/shared_image_manager.h"
 
-#include <cstdint>
-#include <type_traits>
-#include <utility>
-
-#include "base/log/log.h"
-#include "base/thread/cancelable_callback.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace {

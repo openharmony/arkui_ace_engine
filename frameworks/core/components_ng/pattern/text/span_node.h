@@ -38,6 +38,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/components_ng/pattern/symbol/symbol_effect_options.h"
+#include "core/components_ng/property/accessibility_property.h"
 
 #define DEFINE_SPAN_FONT_STYLE_ITEM(name, type)                              \
 public:                                                                      \
@@ -209,22 +210,22 @@ public:
     // when paragraph ends with a \n, it causes the paragraph height to gain an extra line
     // to have normal spacing between paragraphs, remove \n from every paragraph except the last one.
     bool needRemoveNewLine = false;
-    bool useThemeFontColor = false;
-    bool useThemeDecorationColor = false;
+    bool useThemeFontColor = true;
+    bool useThemeDecorationColor = true;
     std::optional<LeadingMargin> leadingMargin;
     int32_t selectedStart = -1;
     int32_t selectedEnd = -1;
+    RefPtr<AccessibilityProperty> accessibilityProperty = MakeRefPtr<AccessibilityProperty>();
     void UpdateSymbolSpanParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder);
     virtual int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
         bool isSpanStringMode = false, PlaceholderStyle placeholderStyle = PlaceholderStyle(), bool isMarquee = false);
     virtual void UpdateSymbolSpanColor(const RefPtr<FrameNode>& frameNode, TextStyle& symbolSpanStyle);
-    virtual void UpdateTextStyleForAISpan(
-        const std::string& content, const RefPtr<Paragraph>& builder, const TextStyle& textStyle);
+    virtual void UpdateTextStyleForAISpan(const std::string& content, const RefPtr<Paragraph>& builder,
+        const TextStyle& textStyle, const TextStyle& aiSpanStyle);
     virtual void UpdateTextStyle(const std::string& content, const RefPtr<Paragraph>& builder,
         const TextStyle& textStyle, const int32_t selStart, const int32_t selEnd);
     virtual void UpdateContentTextStyle(
         const std::string& content, const RefPtr<Paragraph>& builder, const TextStyle& textStyle);
-    virtual void SetAiSpanTextStyle(std::optional<TextStyle>& textStyle);
     virtual void GetIndex(int32_t& start, int32_t& end) const;
     virtual void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;

@@ -15,11 +15,8 @@
 
 #include "cj_video_ffi.h"
 
-#include <cinttypes>
 
-#include "base/json/json_util.h"
 #include "cj_lambda.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;

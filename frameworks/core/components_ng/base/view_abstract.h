@@ -630,6 +630,10 @@ public:
     static void SetOnGestureJudgeBegin(FrameNode* frameNode, GestureJudgeFunc&& gestureJudgeFunc);
     static void SetOnSizeChanged(
         FrameNode* frameNode, std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged);
+    static void SetOnGestureRecognizerJudgeBegin(
+        FrameNode* frameNode, GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc);
+    static void SetShouldBuiltInRecognizerParallelWith(
+        FrameNode* frameNode, NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc);
     static void SetSystemColorModeChangeEvent(FrameNode* frameNode, std::function<void(int32_t)>&& onColorModeChange);
     static void SetSystemFontChangeEvent(FrameNode* frameNode, std::function<void(float, float)>&& onFontChange);
     static void SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style);

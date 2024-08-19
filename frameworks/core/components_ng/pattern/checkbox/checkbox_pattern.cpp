@@ -616,7 +616,8 @@ void CheckBoxPattern::CheckBoxGroupIsTrue()
         }
     }
     const auto& groupPaintProperty = checkBoxGroupNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
-    if (groupPaintProperty->GetIsCheckBoxCallbackDealed()) {
+    CHECK_NULL_VOID(groupPaintProperty);
+    if (!groupManager->GetCheckboxGroupIsChange(group) && groupPaintProperty->GetIsCheckBoxCallbackDealed()) {
         return;
     }
     // All checkboxes do not set select status.
@@ -628,6 +629,7 @@ void CheckBoxPattern::CheckBoxGroupIsTrue()
         UpdateCheckBoxGroupStatus(checkBoxGroupNode, list);
     }
     groupPaintProperty->SetIsCheckBoxCallbackDealed(true);
+    groupManager->SetCheckboxGroupIsChange(group, false);
 }
 
 void CheckBoxPattern::InitCheckBoxStatusByGroup(RefPtr<FrameNode> checkBoxGroupNode,

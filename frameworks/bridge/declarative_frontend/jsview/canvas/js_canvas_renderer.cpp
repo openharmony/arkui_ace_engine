@@ -114,8 +114,7 @@ JSCanvasRenderer::JSCanvasRenderer()
             auto canvasRender = self.Upgrade();
             CHECK_NULL_VOID(canvasRender);
             canvasRender->density_ = density;
-            canvasRender->canvasDensity_= canvasRender->GetDensity();
-            canvasRender->TransferCanvasDensity();
+            canvasRender->SetDensity();
         });
     }
 }
@@ -256,9 +255,10 @@ void JSCanvasRenderer::SetAntiAlias()
     renderingContext2DModel_->SetAntiAlias(anti_);
 }
 
-void JSCanvasRenderer::TransferCanvasDensity()
+void JSCanvasRenderer::SetDensity()
 {
-    renderingContext2DModel_->SetDensity(canvasDensity_);
+    double density = GetDensity();
+    renderingContext2DModel_->SetDensity(density);
 }
 
 // font: string

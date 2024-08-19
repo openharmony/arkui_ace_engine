@@ -15,23 +15,13 @@
 
 #include "core/components_ng/render/adapter/component_snapshot.h"
 
-#include <iterator>
-#include <memory>
-
 #include "transaction/rs_interfaces.h"
-
 #include "base/log/ace_trace.h"
-#include "base/log/log_wrapper.h"
-#include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -163,8 +153,10 @@ bool CheckImageSuccessfullyLoad(const RefPtr<UINode>& node, int32_t& imageCount)
 
         auto result = imageStateManger->GetCurrentState() == ImageLoadingState::LOAD_SUCCESS;
         if (!result) {
-            TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Image loading failed! ImageId=%{public}d ImageKey=%{public}s",
-                imageNode->GetId(), imageNode->GetInspectorId().value_or("").c_str());
+            TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+                "Image loading failed! ImageId=%{public}d ImageState=%{public}d ImageKey=%{public}s",
+                imageNode->GetId(), static_cast<int32_t>(imageStateManger->GetCurrentState()),
+                imageNode->GetInspectorId().value_or("").c_str());
         }
         return result;
     }
@@ -175,6 +167,23 @@ bool CheckImageSuccessfullyLoad(const RefPtr<UINode>& node, int32_t& imageCount)
             return false;
         }
     }
+    return true;
+}
+
+bool GetTaskExecutor(const RefPtr<UINode>& uiNode, RefPtr<PipelineContext>& pipeline, RefPtr<TaskExecutor>& executor)
+{
+    if (!uiNode) {
+        return false;
+    }
+    pipeline = uiNode->GetContextRefPtr();
+    if (!pipeline) {
+        return false;
+    }
+    executor = pipeline->GetTaskExecutor();
+    if (!executor) {
+        return false;
+    }
+
     return true;
 }
 
@@ -221,10 +230,13 @@ void ComponentSnapshot::Get(const std::string& componentId, JsCallback&& callbac
             componentId.c_str(), node->GetId());
         return;
     }
+    int32_t imageCount = 0;
+    bool checkImage = CheckImageSuccessfullyLoad(node, imageCount);
     TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-        "Get ComponentSnapshot key=%{public}s options=%{public}s Id=%{public}d Tag=%{public}s "
-        "RsNodeId=%{public}" PRIu64 "",
-        componentId.c_str(), options.ToString().c_str(), node->GetId(), node->GetTag().c_str(), rsNode->GetId());
+        "Get ComponentSnapshot key=%{public}s options=%{public}s Id=%{public}d Tag=%{public}s imageCount=%{public}d "
+        "checkImage=%{public}d RsNodeId=%{public}" PRIu64 "",
+        componentId.c_str(), options.ToString().c_str(), node->GetId(), node->GetTag().c_str(), imageCount, checkImage,
+        rsNode->GetId());
     auto& rsInterface = Rosen::RSInterfaces::GetInstance();
     rsInterface.TakeSurfaceCaptureForUI(rsNode, std::make_shared<CustomizedCallback>(std::move(callback), nullptr),
         options.scale, options.scale, options.waitUntilRenderFinished);
@@ -238,8 +250,11 @@ void ComponentSnapshot::Create(
     auto nodeId = stack->ClaimNodeId();
     auto stackNode = FrameNode::CreateFrameNode(V2::STACK_ETS_TAG, nodeId, AceType::MakeRefPtr<StackPattern>());
     auto uiNode = AceType::DynamicCast<UINode>(customNode);
-    if (!uiNode) {
+    RefPtr<PipelineContext> pipeline = nullptr;
+    RefPtr<TaskExecutor> executor = nullptr;
+    if (!GetTaskExecutor(uiNode, pipeline, executor)) {
         callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Internal error! Can't get TaskExecutor!");
         return;
     }
     auto node = AceType::DynamicCast<FrameNode>(customNode);
@@ -249,9 +264,10 @@ void ComponentSnapshot::Create(
     }
     FrameNode::ProcessOffscreenNode(node);
     TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-        "Process off screen Node finished, root size = %{public}s Id=%{public}d Tag=%{public}s InspectorId=%{public}s",
+        "Process off screen Node finished, root size = %{public}s Id=%{public}d Tag=%{public}s InspectorId=%{public}s "
+        "enableInspector=%{public}d",
         node->GetGeometryNode()->GetFrameSize().ToString().c_str(), node->GetId(), node->GetTag().c_str(),
-        node->GetInspectorId().value_or("").c_str());
+        node->GetInspectorId().value_or("").c_str(), enableInspector);
 
     ProcessImageNode(node);
 
@@ -259,10 +275,6 @@ void ComponentSnapshot::Create(
         Inspector::AddOffscreenNode(node);
     }
 
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto executor = pipeline->GetTaskExecutor();
-    CHECK_NULL_VOID(executor);
     if (flag) {
         executor->PostTask(
             [node]() {
@@ -302,6 +314,7 @@ void ComponentSnapshot::BuilerTask(JsCallback&& callback, const RefPtr<FrameNode
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
             "Image loading failed! rootId=%{public}d rootNode=%{public}s InspectorId=%{public}s",
             node->GetId(), node->GetTag().c_str(), node->GetInspectorId().value_or("").c_str());
+        Inspector::RemoveOffscreenNode(node);
         callback(nullptr, ERROR_CODE_COMPONENT_SNAPSHOT_IMAGE_LOAD_ERROR, nullptr);
         return;
     }

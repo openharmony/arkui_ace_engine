@@ -327,9 +327,9 @@ export class ChipComponent extends ViewPU {
         this.onClicked = noop;
         this.__suffixIconOnFocus = new ObservedPropertySimplePU(false, this, "suffixIconOnFocus");
         this.__chipBreakPoints = new ObservedPropertySimplePU(BreakPointsType.SM, this, "chipBreakPoints");
-        this.smListener = mediaquery.matchMediaSync("0vp<width<600vp");
-        this.mdListener = mediaquery.matchMediaSync("600vp<=width<840vp");
-        this.lgListener = mediaquery.matchMediaSync("840vp<=width");
+        this.smListener = mediaquery.matchMediaSync("(0vp<width) and (width<600vp)");
+        this.mdListener = mediaquery.matchMediaSync("(600vp<=width) and (width<840vp)");
+        this.lgListener = mediaquery.matchMediaSync("(840vp<=width)");
         this.__isShowPressedBackGroundColor = new ObservedPropertySimplePU(false, this, "isShowPressedBackGroundColor");
         this.__fontSizeScale = new ObservedPropertyObjectPU(0, this, "fontSizeScale");
         this.__fontWeightScale = new ObservedPropertyObjectPU(0, this, "fontWeightScale");
@@ -344,6 +344,7 @@ export class ChipComponent extends ViewPU {
         this.callbackId = undefined;
         this.__prefixSymbolWidth = new ObservedPropertyObjectPU(this.toVp(componentUtils.getRectangleById("PrefixSymbolGlyph")?.size?.width), this, "prefixSymbolWidth");
         this.__suffixSymbolWidth = new ObservedPropertyObjectPU(this.toVp(componentUtils.getRectangleById("SuffixSymbolGlyph")?.size?.width), this, "suffixSymbolWidth");
+        this.__allowCloseSymbolWidth = new ObservedPropertyObjectPU(this.toVp(componentUtils.getRectangleById("AllowCloseSymbolGlyph")?.size?.width), this, "allowCloseSymbolWidth");
         this.__symbolEffect = new ObservedPropertyObjectPU(new SymbolEffect(), this, "symbolEffect");
         this.setInitiallyProvidedValue(l5);
         this.finalizeConstruction();
@@ -452,6 +453,9 @@ export class ChipComponent extends ViewPU {
         if (j5.suffixSymbolWidth !== undefined) {
             this.suffixSymbolWidth = j5.suffixSymbolWidth;
         }
+        if (j5.allowCloseSymbolWidth !== undefined) {
+            this.allowCloseSymbolWidth = j5.allowCloseSymbolWidth;
+        }
         if (j5.symbolEffect !== undefined) {
             this.symbolEffect = j5.symbolEffect;
         }
@@ -501,6 +505,7 @@ export class ChipComponent extends ViewPU {
         this.__fontWeightScale.purgeDependencyOnElmtId(h5);
         this.__prefixSymbolWidth.purgeDependencyOnElmtId(h5);
         this.__suffixSymbolWidth.purgeDependencyOnElmtId(h5);
+        this.__allowCloseSymbolWidth.purgeDependencyOnElmtId(h5);
         this.__symbolEffect.purgeDependencyOnElmtId(h5);
     }
 
@@ -532,6 +537,7 @@ export class ChipComponent extends ViewPU {
         this.__fontWeightScale.aboutToBeDeleted();
         this.__prefixSymbolWidth.aboutToBeDeleted();
         this.__suffixSymbolWidth.aboutToBeDeleted();
+        this.__allowCloseSymbolWidth.aboutToBeDeleted();
         this.__symbolEffect.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
@@ -751,6 +757,14 @@ export class ChipComponent extends ViewPU {
 
     set suffixSymbolWidth(g4) {
         this.__suffixSymbolWidth.set(g4);
+    }
+
+    get allowCloseSymbolWidth() {
+        return this.__allowCloseSymbolWidth.get();
+    }
+
+    set allowCloseSymbolWidth(j4) {
+        this.__allowCloseSymbolWidth.set(j4);
     }
 
     get symbolEffect() {
@@ -1154,7 +1168,7 @@ export class ChipComponent extends ViewPU {
             return this.getSuffixIconSize().width;
         }
         else if (!this.suffixIcon?.src && (this.allowClose ?? true)) {
-            return this.theme.defaultSymbol.fontSize;
+            return this.allowCloseSymbolWidth;
         }
         else {
             return 0;
@@ -1554,6 +1568,10 @@ export class ChipComponent extends ViewPU {
                         });
                         SymbolGlyph.fontSize(this.theme.defaultSymbol.fontSize);
                         SymbolGlyph.fontColor(this.getDefaultSymbolColor());
+                        SymbolGlyph.onSizeChange((u, v) => {
+                            this.allowCloseSymbolWidth = v?.width;
+                        });
+                        SymbolGlyph.key("AllowCloseSymbolGlyph");
                         SymbolGlyph.onClick(() => {
                             if (!this.getChipEnable()) {
                                 return;

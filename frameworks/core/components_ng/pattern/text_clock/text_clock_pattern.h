@@ -154,6 +154,7 @@ private:
     int32_t nodeId_ = -1;
     RefPtr<TextClockController> textClockController_;
     float hourWest_ = 0.0f;
+    long timeValue_ = 0.0f;
     std::optional<int32_t> textId_;
     bool isStart_ = true;
     bool is24H_ = SystemProperties::Is24HourClock();

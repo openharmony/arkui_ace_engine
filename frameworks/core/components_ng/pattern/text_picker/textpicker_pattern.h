@@ -417,8 +417,14 @@ public:
         closeDialogEvent_ = closeDialogEvent;
     }
 
+    const PickerTextProperties& GetTextProperties() const
+    {
+        return textProperties_;
+    }
+
     void SetTextProperties(const PickerTextProperties& properties)
     {
+        textProperties_ = properties;
         if (properties.disappearTextStyle_.fontSize.has_value() && properties.disappearTextStyle_.fontSize->IsValid()) {
             isUserSetGradientFont_ = true;
             gradientHeight_ = properties.disappearTextStyle_.fontSize.value();
@@ -553,6 +559,7 @@ private:
     Dimension dividerSpacing_;
     float paintDividerSpacing_ = 1.0f;
     bool isNeedUpdateSelectedIndex_ = true;
+    PickerTextProperties textProperties_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -17,8 +17,6 @@
 
 #include "cj_lambda.h"
 
-#include <string>
-#include <vector>
 
 NavigationItem::NavigationItem(const NavigationItemFFI& source)
 {

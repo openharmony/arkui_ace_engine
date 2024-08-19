@@ -34,6 +34,21 @@
 #include "core/components_ng/property/templates_parser.h"
 #include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
+namespace {
+void AddCacheItemsInFront(int32_t startIdx, LayoutWrapper* host, int32_t cacheCnt, std::list<int32_t>& buildList)
+{
+    for (int32_t i = 1; i <= cacheCnt; ++i) {
+        int32_t item = startIdx - i;
+        if (item < 0) {
+            break;
+        }
+        if (!host->GetChildByIndex(item, true)) {
+            buildList.push_back(item);
+        }
+    }
+}
+} // namespace
+
 void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -77,7 +92,8 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     // update cache info.
-    layoutWrapper->SetCacheCount(static_cast<int32_t>(gridLayoutProperty->GetCachedCountValue(1) * crossCount_));
+    const int32_t cacheCnt = static_cast<int32_t>(gridLayoutProperty->GetCachedCountValue(1) * crossCount_);
+    layoutWrapper->SetCacheCount(cacheCnt);
 
     gridLayoutInfo_.lastMainSize_ = mainSize;
     gridLayoutInfo_.lastCrossSize_ = crossSize;
@@ -90,6 +106,7 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     if (SystemProperties::GetGridCacheEnabled()) {
         FillCacheLineAtEnd(mainSize, crossSize, layoutWrapper);
+        AddCacheItemsInFront(gridLayoutInfo_.startIndex_, layoutWrapper, cacheCnt, predictBuildList_);
         if (!predictBuildList_.empty()) {
             GridLayoutUtils::PreloadGridItems(layoutWrapper->GetHostNode()->GetPattern<GridPattern>(),
                 std::move(predictBuildList_),
@@ -333,8 +350,7 @@ void GridScrollLayoutAlgorithm::LayoutBackwardCachedLine(LayoutWrapper* layoutWr
             itemIdex = iter.second;
             auto crossIter = itemsCrossPosition_.find(itemIdex);
             if (crossIter == itemsCrossPosition_.end()) {
-                crossIter =
-                    itemsCrossPosition_.emplace(itemIdex, ComputeItemCrossPosition(iter.first)).first;
+                crossIter = itemsCrossPosition_.emplace(itemIdex, ComputeItemCrossPosition(iter.first)).first;
             }
             bool prevLineNotContains =
                 std::none_of(prevLine.begin(), prevLine.end(), [itemIdex](auto ite) { return ite.second == itemIdex; });
@@ -643,8 +659,27 @@ bool GridScrollLayoutAlgorithm::FillBlankAtStart(float mainSize, float crossSize
         gridLayoutInfo_.reachStart_ = true;
         break;
     }
-    if (gridLayoutInfo_.gridMatrix_[gridLayoutInfo_.startMainLineIndex_].size() < crossCount_ &&
-        gridLayoutInfo_.startIndex_ > 0) {
+
+    FillOneLineForwardWithoutUpdatingStartIndex(crossSize, mainSize, layoutWrapper);
+
+    gridLayoutInfo_.currentOffset_ = blankAtStart;
+    gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
+    return fillNewLine;
+}
+
+// If there is a multi-line item in the current line and its starting line is not within this line,
+// it may result in an incomplete layout.
+void GridScrollLayoutAlgorithm::FillOneLineForwardWithoutUpdatingStartIndex(
+    float crossSize, float mainSize, LayoutWrapper* layoutWrapper)
+{
+    if (gridLayoutInfo_.gridMatrix_.empty()) {
+        return;
+    }
+    auto startLine = gridLayoutInfo_.gridMatrix_.find(gridLayoutInfo_.startMainLineIndex_);
+    if (startLine == gridLayoutInfo_.gridMatrix_.end() || startLine->second.empty()) {
+        return;
+    }
+    if (startLine->second.size() < crossCount_ && gridLayoutInfo_.startIndex_ > 0) {
         auto tempStartIndex = gridLayoutInfo_.startIndex_;
         auto tempStartMainLineIndex = gridLayoutInfo_.startMainLineIndex_;
         auto tempCurrentMainLineIndex = currentMainLineIndex_;
@@ -660,10 +695,6 @@ bool GridScrollLayoutAlgorithm::FillBlankAtStart(float mainSize, float crossSize
         currentMainLineIndex_ = tempCurrentMainLineIndex;
         gridLayoutInfo_.reachStart_ = tempReachStart;
     }
-
-    gridLayoutInfo_.currentOffset_ = blankAtStart;
-    gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
-    return fillNewLine;
 }
 
 // When a moving up event comes, the [currentOffset_] may have been reduced too much than the items really need to
@@ -1126,6 +1157,13 @@ float GridScrollLayoutAlgorithm::MeasureRecordedItems(float mainSize, float cros
     return mainLength;
 }
 
+namespace {
+inline bool OneLineMovesOffViewportFromAbove(float mainLength, float lineHeight)
+{
+    return LessNotEqual(mainLength, 0.0) || (NearZero(mainLength) && GreatNotEqual(lineHeight, 0.0f));
+}
+} // namespace
+
 bool GridScrollLayoutAlgorithm::UseCurrentLines(
     float mainSize, float crossSize, LayoutWrapper* layoutWrapper, float& mainLength)
 {
@@ -1183,7 +1221,7 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
             mainLength += (cellAveLength_ + mainGap_);
         }
         // If a line moves up out of viewport, update [startIndex_], [currentOffset_] and [startMainLineIndex_]
-        if (LessNotEqual(mainLength, 0.0)) {
+        if (OneLineMovesOffViewportFromAbove(mainLength, cellAveLength_)) {
             gridLayoutInfo_.currentOffset_ = mainLength;
             gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
             gridLayoutInfo_.startMainLineIndex_ = currentMainLineIndex_ + 1;

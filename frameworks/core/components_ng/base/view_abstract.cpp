@@ -2128,6 +2128,10 @@ void ViewAbstract::SetInspectorId(const std::string& inspectorId)
 {
     auto& uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     if (uiNode) {
+        if (uiNode->GetInspectorId().has_value() && uiNode->GetInspectorIdValue() != inspectorId) {
+            ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(
+                uiNode->GetInspectorIdValue(), uiNode->GetId());
+        }
         uiNode->UpdateInspectorId(inspectorId);
     }
 }
@@ -3459,6 +3463,10 @@ void ViewAbstract::SetAllowDrop(FrameNode* frameNode, const std::set<std::string
 void ViewAbstract::SetInspectorId(FrameNode* frameNode, const std::string& inspectorId)
 {
     if (frameNode) {
+        if (frameNode->GetInspectorId().has_value() && frameNode->GetInspectorIdValue() != inspectorId) {
+            ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(
+                frameNode->GetInspectorIdValue(), frameNode->GetId());
+        }
         frameNode->UpdateInspectorId(inspectorId);
     }
 }
@@ -3992,16 +4000,22 @@ RefPtr<BasicShape> ViewAbstract::GetMask(FrameNode* frameNode)
 {
     RefPtr<BasicShape> value = AceType::MakeRefPtr<BasicShape>();
     const auto& target = frameNode->GetRenderContext();
-    CHECK_NULL_RETURN(target, value);
-    return target->GetClipMaskValue(value);
+    CHECK_NULL_RETURN(target, nullptr);
+    if (target->HasClipMask()) {
+        return target->GetClipMaskValue(value);
+    }
+    return nullptr;
 }
 
 RefPtr<ProgressMaskProperty> ViewAbstract::GetMaskProgress(FrameNode* frameNode)
 {
     RefPtr<ProgressMaskProperty> value = AceType::MakeRefPtr<ProgressMaskProperty>();
     const auto& target = frameNode->GetRenderContext();
-    CHECK_NULL_RETURN(target, value);
-    return target->GetProgressMaskValue(value);
+    CHECK_NULL_RETURN(target, nullptr);
+    if (target->HasProgressMask()) {
+        return target->GetProgressMaskValue(value);
+    }
+    return nullptr;
 }
 
 BlendMode ViewAbstract::GetBlendMode(FrameNode* frameNode)
@@ -4617,6 +4631,24 @@ void ViewAbstract::SetOnSizeChanged(
 {
     CHECK_NULL_VOID(frameNode);
     frameNode->SetOnSizeChangeCallback(std::move(onSizeChanged));
+}
+
+void ViewAbstract::SetOnGestureRecognizerJudgeBegin(
+    FrameNode* frameNode, GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc));
+}
+
+void ViewAbstract::SetShouldBuiltInRecognizerParallelWith(
+    FrameNode* frameNode, NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetShouldBuildinRecognizerParallelWithFunc(std::move(shouldBuiltInRecognizerParallelWithFunc));
 }
 
 void ViewAbstract::SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style)

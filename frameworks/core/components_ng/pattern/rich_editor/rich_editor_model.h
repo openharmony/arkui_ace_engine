@@ -122,6 +122,16 @@ struct UpdateSpanStyle {
     bool useThemeDecorationColor = true;
     bool isSymbolStyle = false;
 
+    void UpdateColorByResourceId()
+    {
+        if (updateTextColor) {
+            updateTextColor->UpdateColorByResourceId();
+        }
+        if (updateTextDecorationColor) {
+            updateTextDecorationColor->UpdateColorByResourceId();
+        }
+    }
+
     std::string ToString() const
     {
         auto jsonValue = JsonUtil::Create(true);
@@ -264,6 +274,7 @@ public:
     virtual bool SetCaretOffset(int32_t caretPosition) = 0;
     virtual void SetTypingStyle(std::optional<struct UpdateSpanStyle> typingStyle,
         std::optional<TextStyle> textStyle) = 0;
+    virtual std::optional<struct UpdateSpanStyle> GetTypingStyle() = 0;
     virtual void CloseSelectionMenu() = 0;
     virtual bool IsEditing() = 0;
     virtual void StopEditing() = 0;
@@ -326,7 +337,7 @@ public:
     virtual void SetPlaceholder(PlaceholderOptions& options) = 0;
     virtual void SetTextDetectEnable(bool value) = 0;
     virtual void SetSupportPreviewText(bool value) = 0;
-    virtual void SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult) = 0;
+    virtual void SetTextDetectConfig(const TextDetectConfig& textDetectConfig) = 0;
     virtual void SetSelectedBackgroundColor(const DynamicColor& selectedColor) = 0;
     virtual void SetCaretColor(const DynamicColor& color) = 0;
     virtual void SetOnEditingChange(std::function<void(const bool&)>&& func) = 0;

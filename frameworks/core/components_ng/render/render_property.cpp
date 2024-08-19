@@ -15,9 +15,6 @@
 
 #include "core/components_ng/render/render_property.h"
 
-#include "core/common/ace_application_info.h"
-#include "core/components/common/properties/blend_mode.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

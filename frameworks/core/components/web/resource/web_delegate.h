@@ -765,6 +765,7 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
     void OnQuickMenuDismissed();
     void HideHandleAndQuickMenuIfNecessary(bool hide);
+    void ChangeVisibilityOfQuickMenu();
     void OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
@@ -943,7 +944,7 @@ public:
     bool ShouldVirtualKeyboardOverlay();
     void ScrollBy(float deltaX, float deltaY);
     void ScrollByRefScreen(float deltaX, float deltaY, float vx = 0, float vy = 0);
-    void ExecuteAction(int64_t accessibilityId, AceAction action,
+    bool ExecuteAction(int64_t accessibilityId, AceAction action,
         const std::map<std::string, std::string>& actionArguments);
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetFocusedAccessibilityNodeInfo(
         int64_t accessibilityId, bool isAccessibilityFocus);

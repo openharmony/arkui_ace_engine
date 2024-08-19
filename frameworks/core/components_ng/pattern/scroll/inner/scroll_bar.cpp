@@ -368,13 +368,16 @@ void ScrollBar::SetGestureEvent()
                     inRegion = scrollBar->InBarHoverRegion(point);
                     scrollBar->MarkNeedRender();
                 }
-                scrollBar->SetPressed(inRegion);
+                if (!scrollBar->IsPressed()) {
+                    scrollBar->SetPressed(inRegion);
+                }
                 if (inRegion && !scrollBar->IsHover()) {
                     scrollBar->PlayScrollBarGrowAnimation();
                 }
             }
-            if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
-                info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
+            if ((info.GetTouches().front().GetTouchType() == TouchType::UP ||
+                    info.GetTouches().front().GetTouchType() == TouchType::CANCEL) &&
+                info.GetTouches().size() <= 1) {
                 if (scrollBar->IsPressed() && !scrollBar->IsHover()) {
                     scrollBar->PlayScrollBarShrinkAnimation();
                     scrollBar->ScheduleDisappearDelayTask();
@@ -587,7 +590,7 @@ void ScrollBar::HandleDragEnd(const GestureEvent& info)
     if (dragFRCSceneCallback_) {
         dragFRCSceneCallback_(0, NG::SceneStatus::END);
     }
-    auto velocity = info.GetMainVelocity();
+    auto velocity = IsReverse() ? -info.GetMainVelocity() : info.GetMainVelocity();
     TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "inner scrollBar drag end, position is %{public}f and %{public}f, "
         "velocity is %{public}f",
         info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(), velocity);
@@ -655,7 +658,7 @@ void ScrollBar::ProcessFrictionMotionStop()
 
 void ScrollBar::OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
     TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-    TouchTestResult& responseLinkResult)
+    ResponseLinkResult& responseLinkResult)
 {
     if (panRecognizer_ && isScrollable_) {
         panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
@@ -690,7 +693,7 @@ void ScrollBar::ScheduleDisappearDelayTask()
 
 void ScrollBar::OnCollectLongPressTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
     TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-    TouchTestResult& responseLinkResult)
+    ResponseLinkResult& responseLinkResult)
 {
     if (longPressRecognizer_ && isScrollable_) {
         longPressRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));

@@ -17,7 +17,6 @@
 
 #include "bridge/cj_frontend/cppview/shape_abstract.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_shape_ffi.h"
-#include "core/common/container.h"
 #include "core/components_ng/pattern/shape/path_model_ng.h"
 
 

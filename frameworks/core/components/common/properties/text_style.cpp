@@ -15,9 +15,6 @@
 
 #include "core/components/common/properties/text_style.h"
 
-#include "core/components_ng/base/inspector_filter.h"
-#include "core/pipeline/base/constants.h"
-
 namespace OHOS::Ace {
 const std::vector<WordBreak> WORD_BREAK_TYPES = { WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD };
 const std::vector<LineBreakStrategy> LINE_BREAK_STRATEGY_TYPES = { LineBreakStrategy::GREEDY,

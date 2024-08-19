@@ -284,7 +284,6 @@ build_component_ng("pattern_ng") {
     "option/option_view.cpp",
     "overlay/group_manager.cpp",
     "overlay/keyboard_base_pattern.cpp",
-    "overlay/modal_presentation_layout_algorithm.cpp",
     "overlay/modal_presentation_pattern.cpp",
     "overlay/overlay_container_pattern.cpp",
     "overlay/overlay_manager.cpp",
@@ -586,9 +585,6 @@ build_component_ng("pattern_ng") {
       external_deps += [ "window_manager:scene_session" ]
     }
   } else if (is_arkui_x) {
-    deps += [
-      "$ace_graphic/rosen/modules/render_service_client:librender_service_client_static",
-      "//plugins/libs/napi:napi_$platform",
-    ]
+    deps += [ "$ace_graphic/rosen/modules/render_service_client:librender_service_client_static" ]
   }
 }

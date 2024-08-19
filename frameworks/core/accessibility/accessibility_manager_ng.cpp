@@ -17,11 +17,7 @@
 
 #include "core/accessibility/accessibility_constants.h"
 #include "core/accessibility/accessibility_session_adapter.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/property/accessibility_property.h"
-#include "core/event/mouse_event.h"
-#include "core/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
 void AccessibilityManagerNG::HandleAccessibilityHoverEvent(const RefPtr<FrameNode>& root, const MouseEvent& event)

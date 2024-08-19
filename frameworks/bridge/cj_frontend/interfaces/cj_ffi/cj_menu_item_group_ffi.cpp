@@ -17,7 +17,6 @@
 #include "cj_lambda.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view.h"
-#include "core/common/container.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;

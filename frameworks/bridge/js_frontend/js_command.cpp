@@ -16,11 +16,8 @@
 #include "frameworks/bridge/js_frontend/js_command.h"
 
 #include "base/log/event_report.h"
-#include "base/log/log.h"
-#include "frameworks/bridge/common/dom/dom_proxy.h"
 #include "frameworks/bridge/common/dom/dom_search.h"
 #include "frameworks/bridge/common/dom/dom_textarea.h"
-#include "frameworks/bridge/common/dom/dom_type.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine_loader.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
 

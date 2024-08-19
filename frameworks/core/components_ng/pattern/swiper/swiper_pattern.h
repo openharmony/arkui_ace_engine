@@ -511,6 +511,7 @@ public:
     void FireWillHideEvent(int32_t willHideIndex) const;
     void FireWillShowEvent(int32_t willShowIndex) const;
     void SetOnHiddenChangeForParent();
+    void RemoveOnHiddenChange();
 
     void SetHasTabsAncestor(bool hasTabsAncestor)
     {
@@ -602,6 +603,7 @@ private:
     void OnAfterModifyDone() override;
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
+    void OnDetachFromMainTree() override;
     void InitSurfaceChangedCallback();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
@@ -903,6 +905,8 @@ private:
     void UpdateIgnoreBlankOffsetWithDrag(bool overSrollDirection);
 
     std::set<int32_t> CalcVisibleIndex(float offset = 0.0f) const;
+
+    bool IsItemOverlay() const;
 
     friend class SwiperHelper;
 

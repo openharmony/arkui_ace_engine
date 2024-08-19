@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
@@ -39,6 +40,7 @@ class ToolBarTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
+    static void MockPipelineContextGetTheme();
     void SetUp() override;
     void TearDown() override;
     RefPtr<NavToolbarPattern> toolBarPattern_;
@@ -65,6 +67,13 @@ void ToolBarTestNg::TearDown()
 {
     toolBarPattern_ = nullptr;
     toolBarNode_ = nullptr;
+}
+
+void ToolBarTestNg::MockPipelineContextGetTheme()
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<NavigationBarTheme>()));
 }
 
 /**
@@ -279,5 +288,130 @@ HWTEST_F(ToolBarTestNg, ToolBarPatternTest008, TestSize.Level1)
     ASSERT_NE(navToolbarPattern->dialogNode_, nullptr);
     navToolbarPattern->HandleLongPressActionEnd();
     EXPECT_EQ(navToolbarPattern->dialogNode_, nullptr);
+}
+
+/**
+ * @tc.name: NavToolbarPatternOnModifyDone001
+ * @tc.desc: Increase the coverage of NavToolbarPattern::OnModifyDone function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, NavToolbarPatternOnModifyDone001, TestSize.Level1)
+{
+    auto containerNode = FrameNode::GetOrCreateFrameNode(
+        "Container", 101, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    ASSERT_NE(containerNode, nullptr);
+    auto toolbarNode = NavToolbarNode::GetOrCreateToolbarNode(
+        "Toolbar", 201, []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+    ASSERT_NE(toolbarNode, nullptr);
+    toolbarNode->SetToolbarContainerNode(containerNode);
+    auto navToolbarPattern = toolbarNode->GetPattern<NavToolbarPattern>();
+    ASSERT_NE(navToolbarPattern, nullptr);
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->fontScale_ = AgingAdapationDialogUtil::GetDialogBigFontSizeScale() - 1.0f;
+    EXPECT_TRUE(LessNotEqual(context->fontScale_, AgingAdapationDialogUtil::GetDialogBigFontSizeScale()));
+    navToolbarPattern->OnModifyDone();
+
+    context->fontScale_ = AgingAdapationDialogUtil::GetDialogBigFontSizeScale() + 1.0f;
+    EXPECT_FALSE(LessNotEqual(context->fontScale_, AgingAdapationDialogUtil::GetDialogBigFontSizeScale()));
+    navToolbarPattern->OnModifyDone();
+}
+
+/**
+ * @tc.name: NavToolbarPatternInitDragEvent001
+ * @tc.desc: Increase the coverage of NavToolbarPattern::InitDragEvent function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, NavToolbarPatternInitDragEvent001, TestSize.Level1)
+{
+    auto containerNode = FrameNode::GetOrCreateFrameNode(
+        "Container", 101, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    auto gestureHub = containerNode->GetOrCreateGestureEventHub();
+    auto toolbarNode = NavToolbarNode::GetOrCreateToolbarNode(
+        "Toolbar", 301, []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+    toolbarNode->SetToolbarContainerNode(containerNode);
+    auto toolbarPattern = toolbarNode->GetPattern<NavToolbarPattern>();
+    ASSERT_NE(toolbarPattern, nullptr);
+    toolbarPattern->InitDragEvent(gestureHub);
+    ASSERT_NE(gestureHub->GetDragEventActuator(), nullptr);
+    ASSERT_NE(gestureHub->GetDragEventActuator()->userCallback_, nullptr);
+    auto actionUpdate = gestureHub->GetDragEventActuator()->userCallback_->GetActionUpdateEventFunc();
+    ASSERT_NE(actionUpdate, nullptr);
+    GestureEvent info;
+    auto barItem1 = BarItemNode::GetOrCreateBarItemNode(
+        "BarItem", 201, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto geometryNode = barItem1->GetGeometryNode();
+    geometryNode->SetFrameWidth(100);
+    geometryNode->SetFrameHeight(50);
+    containerNode->children_.emplace_front(barItem1);
+    EXPECT_EQ(toolbarPattern->dialogNode_, nullptr);
+    actionUpdate(info);
+    
+    auto dialogNode = FrameNode::GetOrCreateFrameNode(
+        "Dailog", 401, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    toolbarPattern->dialogNode_ = dialogNode;
+    toolbarPattern->moveIndex_ = -1;
+    EXPECT_NE(toolbarPattern->dialogNode_, nullptr);
+    EXPECT_TRUE(toolbarPattern->moveIndex_.has_value());
+    actionUpdate(info);
+
+    toolbarPattern->dialogNode_ = dialogNode;
+    toolbarPattern->moveIndex_ = std::nullopt;
+    EXPECT_NE(toolbarPattern->dialogNode_, nullptr);
+    EXPECT_FALSE(toolbarPattern->moveIndex_.has_value());
+    actionUpdate(info);
+}
+
+/**
+ * @tc.name: NavToolbarPatternShowDialogWithNode001
+ * @tc.desc: Increase the coverage of NavToolbarPattern::ShowDialogWithNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, NavToolbarPatternShowDialogWithNode001, TestSize.Level1)
+{
+    ToolBarTestNg::MockPipelineContextGetTheme();
+    auto toolbarNode = NavToolbarNode::GetOrCreateToolbarNode(
+        "Toolbar", 301, []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+    auto toolbarPattern = toolbarNode->GetPattern<NavToolbarPattern>();
+    ASSERT_NE(toolbarPattern, nullptr);
+    auto barItem1 = BarItemNode::GetOrCreateBarItemNode(
+        "BarItem", 201, []() { return AceType::MakeRefPtr<Pattern>(); });
+    EXPECT_FALSE(barItem1->IsMoreItemNode());
+    EXPECT_EQ(AceType::DynamicCast<FrameNode>(barItem1->GetTextNode()), nullptr);
+    EXPECT_EQ(AceType::DynamicCast<FrameNode>(barItem1->GetIconNode()), nullptr);
+    toolbarPattern->ShowDialogWithNode(barItem1);
+
+    auto textNode = FrameNode::CreateFrameNode("Text", 0, AceType::MakeRefPtr<TextPattern>());
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->propContent_ = "";
+    barItem1->SetTextNode(textNode);
+    auto imageNode = FrameNode::GetOrCreateFrameNode(
+        "Image", 1, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    barItem1->SetIconNode(imageNode);
+    EXPECT_NE(AceType::DynamicCast<FrameNode>(barItem1->GetTextNode()), nullptr);
+    ASSERT_TRUE(textLayoutProperty->GetContent().has_value());
+    EXPECT_TRUE(textLayoutProperty->GetContent().value().empty());
+    EXPECT_NE(AceType::DynamicCast<FrameNode>(barItem1->GetIconNode()), nullptr);
+    EXPECT_NE(imageNode->GetTag(), V2::SYMBOL_ETS_TAG);
+    toolbarPattern->ShowDialogWithNode(barItem1);
+
+    textLayoutProperty->propContent_ = "test";
+    imageNode->tag_ = V2::SYMBOL_ETS_TAG;
+    ASSERT_TRUE(textLayoutProperty->GetContent().has_value());
+    EXPECT_FALSE(textLayoutProperty->GetContent().value().empty());
+    EXPECT_EQ(imageNode->GetTag(), V2::SYMBOL_ETS_TAG);
+    toolbarPattern->ShowDialogWithNode(barItem1);
+
+    barItem1->isMoreItemNode_ = true;
+    AceApplicationInfo& applicationInfo = AceApplicationInfo::GetInstance();
+    applicationInfo.apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TEN);
+    EXPECT_TRUE(barItem1->IsMoreItemNode());
+    EXPECT_FALSE(applicationInfo.GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE));
+    toolbarPattern->ShowDialogWithNode(barItem1);
+
+    applicationInfo.apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
+    EXPECT_TRUE(applicationInfo.GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE));
+    toolbarPattern->ShowDialogWithNode(barItem1);
 }
 } // namespace OHOS::Ace::NG

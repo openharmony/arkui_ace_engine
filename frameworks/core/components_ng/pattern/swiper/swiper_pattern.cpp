@@ -135,6 +135,11 @@ void SwiperPattern::OnDetachFromFrameNode(FrameNode* node)
     pipeline->RemoveWindowStateChangedCallback(node->GetId());
 }
 
+void SwiperPattern::OnDetachFromMainTree()
+{
+    RemoveOnHiddenChange();
+}
+
 RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
 {
     auto host = GetHost();
@@ -494,10 +499,11 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
             jumpIndex_ = 0;
         }
         targetIndex_.reset();
+        nextIndex_ = jumpIndex_.value();
         StopAutoPlay();
         StopTranslateAnimation();
         StopFadeAnimation();
-        StopSpringAnimationImmediately();
+        StopSpringAnimation();
         if (usePropertyAnimation_) {
             StopPropertyTranslateAnimation(false, true);
             StopIndicatorAnimation();
@@ -1454,6 +1460,18 @@ void SwiperPattern::OnSwiperCustomAnimationFinish(
         task.Cancel();
     }
 
+    int32_t timeout = 0;
+    if (onSwiperCustomContentTransition_ && !isFinishAnimation) {
+        timeout = onSwiperCustomContentTransition_->timeout;
+    }
+
+    if (timeout == 0) {
+        needUnmountIndexs_.erase(index);
+        itemPositionInAnimation_.erase(index);
+        MarkDirtyNodeSelf();
+        return;
+    }
+
     task.Reset([weak = AceType::WeakClaim(this), index] {
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
@@ -1461,10 +1479,6 @@ void SwiperPattern::OnSwiperCustomAnimationFinish(
         swiper->itemPositionInAnimation_.erase(index);
         swiper->MarkDirtyNodeSelf();
     });
-    int32_t timeout = 0;
-    if (onSwiperCustomContentTransition_ && !isFinishAnimation) {
-        timeout = onSwiperCustomContentTransition_->timeout;
-    }
     taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI, timeout, "ArkUISwiperDelayedCustomAnimation");
 }
 
@@ -1487,9 +1501,6 @@ void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
     StopSpringAnimationImmediately();
     StopIndicatorAnimation(true);
     jumpIndex_ = index;
-    auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateIndexWithoutMeasure(jumpIndex_.value());
     AceAsyncTraceBeginCommercial(0, hasTabsAncestor_ ? APP_TABS_NO_ANIMATION_SWITCH : APP_SWIPER_NO_ANIMATION_SWITCH);
     uiCastJumpIndex_ = index;
     MarkDirtyNodeSelf();
@@ -3042,10 +3053,11 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
                 ? swiper->itemPosition_.begin()->second.node->GetRenderContext()->GetTranslateXYProperty()
                 : OffsetF();
         TAG_LOGI(AceLogTag::ACE_SWIPER,
-            "Swiper finish property translate animation with offsetX: %{public}f, offsetY: %{public}f",
-            finalOffset.GetX(), finalOffset.GetY());
-        ACE_SCOPED_TRACE_COMMERCIAL("%s finish property animation, X: %f, Y: %f",
-            swiper->hasTabsAncestor_ ? V2::TABS_ETS_TAG : V2::SWIPER_ETS_TAG, finalOffset.GetX(), finalOffset.GetY());
+            "Swiper finish property animation with offsetX: %{public}f, offsetY: %{public}f isVerifiedSuc %{public}d",
+            finalOffset.GetX(), finalOffset.GetY(), !swiper->IsItemOverlay());
+        ACE_SCOPED_TRACE_COMMERCIAL("%s finish property animation, X: %f, Y: %f isVerifiedSuc %d",
+            swiper->hasTabsAncestor_ ? V2::TABS_ETS_TAG : V2::SWIPER_ETS_TAG, finalOffset.GetX(), finalOffset.GetY(),
+            !swiper->IsItemOverlay());
         swiper->OnPropertyTranslateAnimationFinish(offset);
     };
     // initial translate info.
@@ -3073,9 +3085,8 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
         } else {
             AceAsyncTraceBeginCommercial(0, APP_TABS_FLING);
         }
-        TAG_LOGI(AceLogTag::ACE_SWIPER,
-            "Swiper start property translate animation with offsetX: %{public}f, offsetY: %{public}f", offset.GetX(),
-            offset.GetY());
+        TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper start property animation with offsetX: %{public}f, offsetY: %{public}f",
+            offset.GetX(), offset.GetY());
         ACE_SCOPED_TRACE_COMMERCIAL("%s start property animation, X: %f, Y: %f",
             swiperPattern->hasTabsAncestor_ ? V2::TABS_ETS_TAG : V2::SWIPER_ETS_TAG, offset.GetX(), offset.GetY());
         for (auto& item : swiperPattern->itemPosition_) {
@@ -3133,10 +3144,10 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
 void SwiperPattern::UpdateOffsetAfterPropertyAnimation(float offset)
 {
     UpdateCurrentOffset(offset);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    if (pipeline) {
-        pipeline->FlushUITasks();
-    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->SetLayoutDirtyMarked(true);
+    host->CreateLayoutTask();
 }
 
 void SwiperPattern::OnPropertyTranslateAnimationFinish(const OffsetF& offset)
@@ -5738,7 +5749,7 @@ void SwiperPattern::SetOnHiddenChangeForParent()
     if (parent->GetTag() == V2::PAGE_ETS_TAG) {
         auto pagePattern = parent->GetPattern<PagePattern>();
         CHECK_NULL_VOID(pagePattern);
-        pagePattern->SetOnHiddenChange(std::move(onHiddenChange));
+        pagePattern->AddOnHiddenChange(host->GetId(), std::move(onHiddenChange));
     }
 
     if (parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
@@ -5746,7 +5757,34 @@ void SwiperPattern::SetOnHiddenChangeForParent()
         CHECK_NULL_VOID(navDestinationePattern);
         auto navDestinationEventHub = navDestinationePattern->GetEventHub<NavDestinationEventHub>();
         CHECK_NULL_VOID(navDestinationEventHub);
-        navDestinationEventHub->SetOnHiddenChange(std::move(onHiddenChange));
+        navDestinationEventHub->AddOnHiddenChange(host->GetId(), std::move(onHiddenChange));
+    }
+}
+
+void SwiperPattern::RemoveOnHiddenChange()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto parent = host->GetAncestorNodeOfFrame();
+    CHECK_NULL_VOID(parent);
+    while (parent) {
+        if (parent->GetTag() == V2::PAGE_ETS_TAG || parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+            break;
+        }
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+    CHECK_NULL_VOID(parent);
+    if (parent->GetTag() == V2::PAGE_ETS_TAG) {
+        auto pagePattern = parent->GetPattern<PagePattern>();
+        CHECK_NULL_VOID(pagePattern);
+        pagePattern->RemoveOnHiddenChange(host->GetId());
+    }
+    if (parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+        auto navDestinationePattern = parent->GetPattern<NavDestinationPattern>();
+        CHECK_NULL_VOID(navDestinationePattern);
+        auto navDestinationEventHub = navDestinationePattern->GetEventHub<NavDestinationEventHub>();
+        CHECK_NULL_VOID(navDestinationEventHub);
+        navDestinationEventHub->RemoveOnHiddenChange(host->GetId());
     }
 }
 
@@ -5973,5 +6011,34 @@ void SwiperPattern::SetSwiperController(const RefPtr<SwiperController>& controll
 {
     swiperController_ = controller;
     SwiperHelper::InitSwiperController(controller, WeakClaim(this));
+}
+
+bool SwiperPattern::IsItemOverlay() const
+{
+    if (itemPosition_.empty()) {
+        return false;
+    }
+    float lastItemEndPos = 0.0f;
+    for (auto& item : itemPosition_) {
+        auto frameNode = item.second.node;
+        if (!frameNode) {
+            continue;
+        }
+        auto renderContext = frameNode->GetRenderContext();
+        if (!renderContext) {
+            continue;
+        }
+        RectF rect = renderContext->GetPaintRectWithoutTransform();
+        if (item.first == itemPosition_.begin()->first) {
+            lastItemEndPos = direction_ == Axis::HORIZONTAL ? rect.Right() : rect.Bottom();
+            continue;
+        }
+        float currentItemStartPos = direction_ == Axis::HORIZONTAL ? rect.Left() : rect.Top();
+        if (GreatNotEqual(lastItemEndPos, currentItemStartPos)) {
+            return true;
+        }
+        lastItemEndPos = direction_ == Axis::HORIZONTAL ? rect.Right() : rect.Bottom();
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

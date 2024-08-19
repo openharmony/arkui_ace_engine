@@ -244,7 +244,7 @@ void TextFieldSelectOverlay::CloseMagnifier()
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     if (pattern->GetMagnifierController()->GetShowMagnifier()) {
-        pattern->GetMagnifierController()->UpdateShowMagnifier();
+        pattern->GetMagnifierController()->RemoveMagnifierFrameNode();
     }
 }
 
@@ -389,34 +389,40 @@ int32_t TextFieldSelectOverlay::GetTextAreaCaretPosition(const OffsetF& localOff
     return pattern->ConvertTouchOffsetToCaretPosition(offset);
 }
 
-int32_t TextFieldSelectOverlay::GetTextInputCaretPosition(const OffsetF& localOffset)
+int32_t TextFieldSelectOverlay::GetTextInputCaretPosition(const OffsetF& localOffset, bool isFirst)
 {
     auto pattern = GetPattern<TextFieldPattern>();
     auto contentRect = pattern->GetContentRect();
     auto selectController = pattern->GetTextSelectController();
     auto wideText = pattern->GetWideText();
     if (LessNotEqual(localOffset.GetX(), contentRect.GetX())) {
-        auto startIndex = selectController->GetStartIndex();
-        auto len = pattern->GetGraphemeClusterLength(wideText, startIndex, true);
-        return std::max(startIndex - len, 0);
+        auto index = selectController->GetStartIndex();
+        if ((!isFirst && !IsHandleReverse()) || (isFirst && IsHandleReverse())) {
+            index = selectController->GetEndIndex();
+        }
+        auto len = pattern->GetGraphemeClusterLength(wideText, index, true);
+        return std::max(index - len, 0);
     }
     if (GreatOrEqual(localOffset.GetX(), contentRect.GetX() + contentRect.Width())) {
-        auto endIndex = selectController->GetEndIndex();
-        auto len = pattern->GetGraphemeClusterLength(wideText, endIndex);
-        return std::min(endIndex + len, pattern->GetContentWideTextLength());
+        auto index = selectController->GetEndIndex();
+        if ((isFirst && !IsHandleReverse()) || (!isFirst && IsHandleReverse())) {
+            index = selectController->GetStartIndex();
+        }
+        auto len = pattern->GetGraphemeClusterLength(wideText, index);
+        return std::min(index + len, pattern->GetContentWideTextLength());
     }
     Offset offset(localOffset.GetX() - pattern->GetTextRect().GetX(), 0.0f);
     return pattern->ConvertTouchOffsetToCaretPosition(offset);
 }
 
-int32_t TextFieldSelectOverlay::GetCaretPositionOnHandleMove(const OffsetF& localOffset)
+int32_t TextFieldSelectOverlay::GetCaretPositionOnHandleMove(const OffsetF& localOffset, bool isFirst)
 {
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, 0);
     if (pattern->IsTextArea()) {
         return GetTextAreaCaretPosition(localOffset);
     }
-    return GetTextInputCaretPosition(localOffset);
+    return GetTextInputCaretPosition(localOffset, isFirst);
 }
 
 void TextFieldSelectOverlay::StartVibratorByCaretIndexChange(const int32_t currentIndex, const int32_t preIndex)
@@ -440,12 +446,6 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     int32_t startIndex = selectController->GetFirstHandleIndex();
     int32_t endIndex = selectController->GetSecondHandleIndex();
     if (pattern->GetMagnifierController() && SelectOverlayIsOn()) {
-        auto movingCaretOffset =
-            selectController->CalcCaretOffsetByOffset(Offset(localOffset.GetX(), localOffset.GetY()));
-        if (IsOverlayMode()) {
-            GetLocalPointWithTransform(movingCaretOffset);
-        }
-        pattern->SetMovingCaretOffset(movingCaretOffset);
         auto magnifierLocalOffsetY = localOffset.GetY() + handleRect.Height() / 2.0f;
         auto magnifierLocalOffset = OffsetF(localOffset.GetX(), magnifierLocalOffsetY);
         if (IsOverlayMode()) {
@@ -456,9 +456,10 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     if (IsSingleHandle()) {
         int32_t preIndex = selectController->GetCaretIndex();
         selectController->UpdateCaretInfoByOffset(Offset(localOffset.GetX(), localOffset.GetY()));
+        pattern->ShowCaretAndStopTwinkling();
         StartVibratorByCaretIndexChange(selectController->GetCaretIndex(), preIndex);
     } else {
-        auto position = GetCaretPositionOnHandleMove(localOffset);
+        auto position = GetCaretPositionOnHandleMove(localOffset, isFirst);
         if (isFirst) {
             StartVibratorByCaretIndexChange(position, startIndex);
             selectController->MoveFirstHandleToContentRect(position, false);
@@ -502,9 +503,14 @@ void TextFieldSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
             overlayManager->MarkInfoChange(DIRTY_DOUBLE_HANDLE | DIRTY_SELECT_AREA | DIRTY_SELECT_TEXT);
         }
     } else {
+        pattern->StopTwinkling();
         overlayManager->MarkInfoChange(DIRTY_SECOND_HANDLE);
     }
     overlayManager->ShowOptionMenu();
+    overlayManager->SetHandleCircleIsShow(isFirst, true);
+    if (IsSingleHandle()) {
+        overlayManager->SetIsHandleLineShow(true);
+    }
     pattern->ScheduleDisappearDelayTask();
     pattern->UpdateCaretInfoToController();
     auto tmpHost = pattern->GetHost();
@@ -539,7 +545,7 @@ void TextFieldSelectOverlay::OnHandleLevelModeChanged(HandleLevelMode mode)
     BaseTextSelectOverlay::OnHandleLevelModeChanged(mode);
 }
 
-void TextFieldSelectOverlay::OnOverlayClick(const GestureEvent& event, bool isClickCaret)
+void TextFieldSelectOverlay::OnOverlayClick(const GestureEvent& event, bool isFirst)
 {
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
@@ -551,8 +557,31 @@ void TextFieldSelectOverlay::OnOverlayClick(const GestureEvent& event, bool isCl
         overlayEvent.SetLocalLocation(recognizer->GetBeginLocalLocation());
         overlayEvent.SetGlobalLocation(recognizer->GetBeginGlobalLocation());
         pattern->HandleClickEvent(overlayEvent);
+    } else if (!IsSingleHandle()) {
+        auto selectController = pattern->GetTextSelectController();
+        auto index = isFirst ? selectController->GetFirstHandleIndex() : selectController->GetSecondHandleIndex();
+        pattern->HandleSetSelection(index, index, false);
+        pattern->StartTwinkling();
     } else {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield overlayClick");
+    }
+}
+
+void TextFieldSelectOverlay::OnHandleIsHidden()
+{
+    auto pattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->StartTwinkling();
+}
+
+void TextFieldSelectOverlay::OnHandleMoveStart(bool isFirst)
+{
+    BaseTextSelectOverlay::OnHandleMoveStart(isFirst);
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    manager->SetHandleCircleIsShow(isFirst, false);
+    if (IsSingleHandle()) {
+        manager->SetIsHandleLineShow(false);
     }
 }
 } // namespace OHOS::Ace::NG

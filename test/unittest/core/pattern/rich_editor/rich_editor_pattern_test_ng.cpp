@@ -417,7 +417,7 @@ HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestCreateTextSpanNode001, Te
 
     richEditorPattern->typingStyle_ = updateSpanStyle;
     richEditorPattern->CreateTextSpanNode(spanNode, info, insertValue, false);
-    EXPECT_EQ(spanNode->GetSpanItem()->useThemeDecorationColor, false);
+    EXPECT_EQ(spanNode->GetSpanItem()->useThemeDecorationColor, true);
 
     richEditorPattern->typingStyle_ = typingStyle;
     richEditorPattern->typingTextStyle_ = typingTextStyle;
@@ -707,7 +707,7 @@ HWTEST_F(RichEditorPatternTestNg, HandleCursorOnDragMoved001, TestSize.Level1)
      */
     richEditorPattern->isCursorAlwaysDisplayed_ = false;
     richEditorPattern->HandleCursorOnDragMoved(notifyDragEvent);
-    EXPECT_EQ(richEditorPattern->isCursorAlwaysDisplayed_, false);
+    EXPECT_EQ(richEditorPattern->isCursorAlwaysDisplayed_, true);
 }
 
 /**

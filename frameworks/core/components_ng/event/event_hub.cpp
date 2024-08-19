@@ -478,4 +478,18 @@ void EventHub::FireOnDetach()
         onDetach();
     }
 }
+
+void EventHub::ClearStateStyle()
+{
+    if (stateStyleMgr_) {
+        stateStyleMgr_->ClearStateStyleTask();
+    }
+}
+
+void EventHub::OnDetachClear()
+{
+    FireOnDetach();
+    FireOnDisappear();
+    ClearStateStyle();
+}
 } // namespace OHOS::Ace::NG

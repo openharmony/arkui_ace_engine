@@ -1679,13 +1679,14 @@ HWTEST_F(PatternLockTestNg, PatternLockAccessibilityTest001, TestSize.Level1)
     AccessibilityHoverInfo info;
     info.SetActionType(AccessibilityHoverAction::HOVER_ENTER);
     pattern_->HandleAccessibilityHoverEvent(true, info);
-    EXPECT_TRUE(pattern_->accessibilityPropertyVec_[0]->GetAccessibilityLevel() == AccessibilityProperty::Level::YES);
+    EXPECT_TRUE(pattern_->accessibilityPropertyVec_[0]->GetAccessibilityLevel() ==
+        AccessibilityProperty::Level::YES_STR);
     /**
      * @tc.case: case3 HandleTextOnAccessibilityFocusCallback 1.
      */
     pattern_->HandleTextOnAccessibilityFocusCallback(0, 0);
     auto accessibilityProperty = frameNode_->GetAccessibilityProperty<AccessibilityProperty>();
-    EXPECT_TRUE(accessibilityProperty->GetAccessibilityLevel() == AccessibilityProperty::Level::NO);
+    EXPECT_TRUE(accessibilityProperty->GetAccessibilityLevel() == AccessibilityProperty::Level::NO_STR);
     /**
      * @tc.case: case4 HandleTextOnAccessibilityFocusCallback 2.
      */
@@ -1709,8 +1710,9 @@ HWTEST_F(PatternLockTestNg, PatternLockAccessibilityTest001, TestSize.Level1)
      */
     info.SetActionType(AccessibilityHoverAction::HOVER_MOVE);
     pattern_->HandleAccessibilityHoverEvent(false, info);
-    EXPECT_TRUE(pattern_->accessibilityPropertyVec_[0]->GetAccessibilityLevel() == AccessibilityProperty::Level::NO);
-    EXPECT_TRUE(accessibilityProperty->GetAccessibilityLevel() == AccessibilityProperty::Level::YES);
+    EXPECT_TRUE(pattern_->accessibilityPropertyVec_[0]->GetAccessibilityLevel() ==
+        AccessibilityProperty::Level::NO_STR);
+    EXPECT_TRUE(accessibilityProperty->GetAccessibilityLevel() == AccessibilityProperty::Level::YES_STR);
     /**
      * @tc.case: case6 HandleAccessibilityHoverEvent 3.
      */

@@ -16,6 +16,9 @@
 import measure from '@ohos.measure'
 import curves from '@ohos.curves'
 import { LengthMetrics } from '@ohos.arkui.node';
+import { common } from '@kit.AbilityKit';
+import { BusinessError } from '@kit.BasicServicesKit';
+import { hilog } from '@kit.PerformanceAnalysisKit';
 
 const TEXT_HOT_AREA_WIDTH: number = 8
 const LIST_ROW_HEIGHT: number = 40
@@ -124,13 +127,14 @@ struct ListFilterRow {
   filterRow: FilterParams = { name: '', options: [] };
   onItemClick: (colIndex: number) => void = () => {}
   rowIndex: number = 0
+  maxAppFontScale: number = 1;
 
   build() {
     Stack({ alignContent: Alignment.End }) {
       Stack({ alignContent: Alignment.Start }) {
         List() {
           ForEach(this.filterRow.options, (option: Array<ResourceStr>, colIndex: number) => {
-            if (colIndex == 0) {
+            if (colIndex === 0) {
               ListItem()
                 .width($r('sys.float.ohos_id_max_padding_start'))
                 .height(LIST_ROW_HEIGHT)
@@ -138,6 +142,8 @@ struct ListFilterRow {
             ListItem() {
               Text(option.toString())
                 .fontSize($r('sys.float.ohos_id_text_size_body3'))
+                .minFontScale(1)
+                .maxFontScale(Math.min(this.maxAppFontScale, 2))
                 .fontColor(this.colorRow[colIndex])
                 .fontWeight(this.fontWeightRow[colIndex])
                 .focusable(true)
@@ -200,7 +206,7 @@ struct ListFilterRow {
               }
             })
             .margin({ start: LengthMetrics.vp(colIndex === 0 ? -TEXT_HOT_AREA_WIDTH : 0) })
-            .tabIndex(colIndex == 0 ? this.rowIndex : -1)
+            .tabIndex(colIndex === 0 ? this.rowIndex : -1)
           })
         }
         .listDirection(Axis.Horizontal)
@@ -243,9 +249,10 @@ struct MultiFilterRow {
   private filterColumnWidth: number = 0
   private lastFilterColumnWidth: number = 0
   private rowIndex: number = 0
+  maxAppFontScale: number = 1;
 
   private calcMultiFilterRowItemNum() {
-    let curLineRetainWidth = this.filterColumnWidth - vp2px(MULTI_LINE_PADDING)
+    let curLineRetainWidth = this.filterColumnWidth;
     let curLineSum = 0
     let curLine = 1
     if (this.filterRow) {
@@ -253,7 +260,7 @@ struct MultiFilterRow {
         let option = this.filterRow.options[i]
         let itemWidth = measure.measureText({
           textContent: option,
-          fontSize: FILTER_FONT_SIZE,
+          fontSize: `${FILTER_FONT_SIZE * Math.min(this.maxAppFontScale, 2)}vp`,
         })
         if (i === 0) {
           continue
@@ -270,7 +277,7 @@ struct MultiFilterRow {
           }
           if (curLine === 1) {
             curLine += 1
-            curLineRetainWidth = this.filterColumnWidth - vp2px(ARROW_IMG_SIZE) - vp2px(MULTI_LINE_PADDING)
+            curLineRetainWidth = this.filterColumnWidth - vp2px(ARROW_IMG_SIZE);
             i--
           } else {
             break
@@ -388,16 +395,16 @@ struct MultiFilterRow {
   }
 
   build() {
-    Row() {
+    Flex() {
       if (this.filterRow?.options && this.filterRow?.options.length > 0) {
         Text(this.filterRow?.options[0].toString())
           .height(LIST_ROW_HEIGHT)
-          .width(px2vp(measure.measureText({
-            textContent: this.filterRow?.options[0].toString(),
-            fontSize: FILTER_FONT_SIZE
-          })) + (TEXT_HOT_AREA_WIDTH * 2))
           .margin({ start: LengthMetrics.vp(-TEXT_HOT_AREA_WIDTH) })
           .fontSize($r('sys.float.ohos_id_text_size_body3'))
+          .minFontScale(1)
+          .maxFontScale(Math.min(this.maxAppFontScale, 2))
+          .maxLines(1)
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
           .fontColor(this.colorRow[0])
           .fontWeight(this.fontWeightRow[0])
           .backgroundColor(this.isBackgroundHoverRow[0] ? this.backgroundColorRow[0] : TRANS_COLOR)
@@ -456,87 +463,93 @@ struct MultiFilterRow {
               .padding({ start: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH), end: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH) })
             }
           })
+          .constraintSize({ maxWidth: '50%' })
+          .flexShrink(0)
           .tabIndex(this.rowIndex)
       }
       Row() {
         Flex({ direction: FlexDirection.Row, wrap: FlexWrap.Wrap }) {
           ForEach(this.filterRow?.options.slice(0, this.twoLineModeItemNumRow.value + 1),
-            (option: Array<ResourceStr>, colIndex?: number) => {
-            if (colIndex > 0) {
-              Text(option.toString())
-                .transition(TransitionEffect.OPACITY)
-                .fontSize($r('sys.float.ohos_id_text_size_body3'))
-                .height(LIST_ROW_HEIGHT)
-                .fontColor(this.colorRow[colIndex])
-                .fontWeight(this.fontWeightRow[colIndex])
-                .backgroundColor(this.isBackgroundHoverRow[colIndex] ? this.backgroundColorRow[colIndex] : TRANS_COLOR)
-                .onClick(() => {
-                  this.onItemClick(colIndex)
-                })
-                .onHover((isHover: boolean) => {
-                  animateTo({
-                    curve: FRICTION_CUBIC_BEZIER,
-                    duration: ANIMATION_DURATION_250
-                  }, () => {
-                    if (isHover) {
-                      this.backgroundColorRow[colIndex] = $r('sys.color.ohos_id_color_hover')
-                      this.isBackgroundHoverRow[colIndex] = true
-                    } else {
-                      this.isBackgroundHoverRow[colIndex] = false
+            (option: Array<ResourceStr>, colIndex: number) => {
+              if (colIndex > 0) {
+                Text(option.toString())
+                  .transition(TransitionEffect.OPACITY)
+                  .fontSize($r('sys.float.ohos_id_text_size_body3'))
+                  .minFontScale(1)
+                  .maxFontScale(Math.min(this.maxAppFontScale, 2))
+                  .maxLines(1)
+                  .textOverflow({ overflow: TextOverflow.Ellipsis })
+                  .height(LIST_ROW_HEIGHT)
+                  .fontColor(this.colorRow[colIndex])
+                  .fontWeight(this.fontWeightRow[colIndex])
+                  .backgroundColor(this.isBackgroundHoverRow[colIndex] ?
+                    this.backgroundColorRow[colIndex] : TRANS_COLOR)
+                  .onClick(() => {
+                    this.onItemClick(colIndex)
+                  })
+                  .onHover((isHover: boolean) => {
+                    animateTo({
+                      curve: FRICTION_CUBIC_BEZIER,
+                      duration: ANIMATION_DURATION_250
+                    }, () => {
+                      if (isHover) {
+                        this.backgroundColorRow[colIndex] = $r('sys.color.ohos_id_color_hover')
+                        this.isBackgroundHoverRow[colIndex] = true
+                      } else {
+                        this.isBackgroundHoverRow[colIndex] = false
+                      }
+                    })
+                  })
+                  .onTouch((event) => {
+                    if (event.type === TouchType.Down) {
+                      animateTo({
+                        curve: SHARP_CUBIC_BEZIER,
+                        duration: ANIMATION_DURATION_100
+                      }, () => {
+                        this.backgroundColorRow[colIndex] = $r('sys.color.ohos_id_color_click_effect')
+                        this.isBackgroundHoverRow[colIndex] = true
+                      })
+                    } else if (event.type === TouchType.Up) {
+                      animateTo({
+                        curve: SHARP_CUBIC_BEZIER,
+                        duration: ANIMATION_DURATION_100
+                      }, () => {
+                        this.isBackgroundHoverRow[colIndex] = false
+                      })
                     }
                   })
-                })
-                .onTouch((event) => {
-                  if (event.type === TouchType.Down) {
-                    animateTo({
-                      curve: SHARP_CUBIC_BEZIER,
-                      duration: ANIMATION_DURATION_100
-                    }, () => {
-                      this.backgroundColorRow[colIndex] = $r('sys.color.ohos_id_color_click_effect')
-                      this.isBackgroundHoverRow[colIndex] = true
-                    })
-                  } else if (event.type === TouchType.Up) {
-                    animateTo({
-                      curve: SHARP_CUBIC_BEZIER,
-                      duration: ANIMATION_DURATION_100
-                    }, () => {
-                      this.isBackgroundHoverRow[colIndex] = false
-                    })
-                  }
-                })
-                .focusable(true)
-                .stateStyles({
-                  focused: {
-                    .border({
-                      radius: $r('sys.float.ohos_id_corner_radius_clicked'),
-                      width: FOCUS_BORDER_WIDTH,
-                      color: $r('sys.color.ohos_id_color_focused_outline'),
-                      style: BorderStyle.Solid
-                    })
-                    .padding({
-                      start: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH),
-                      end: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH)
-                    })
-                  },
-                  normal: {
-                    .border({
-                      radius: $r('sys.float.ohos_id_corner_radius_clicked'),
-                      width: 0 })
-                    .padding({
-                      start: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH),
-                      end: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH)
-                    })
-                  }
-                })
-                .tabIndex(-1)
-            }
-          })
+                  .focusable(true)
+                  .stateStyles({
+                    focused: {
+                      .border({
+                        radius: $r('sys.float.ohos_id_corner_radius_clicked'),
+                        width: FOCUS_BORDER_WIDTH,
+                        color: $r('sys.color.ohos_id_color_focused_outline'),
+                        style: BorderStyle.Solid
+                      })
+                      .padding({
+                        start: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH),
+                        end: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH)
+                      })
+                    },
+                    normal: {
+                      .border({
+                        radius: $r('sys.float.ohos_id_corner_radius_clicked'),
+                        width: 0 })
+                      .padding({
+                        start: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH),
+                        end: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH)
+                      })
+                    }
+                  })
+                  .tabIndex(-1)
+              }
+            })
           if (this.arrowShowStateRow.value) {
             this.DownAndUpArrow()
           }
-        }.alignSelf(ItemAlign.Stretch)
+        }
       }.width(PERCENT_100)
-      .padding({ end: LengthMetrics.resource($r('sys.float.ohos_id_max_padding_end')) })
       .onAreaChange((_oldValue: Area, newValue: Area) => {
         this.filterColumnWidth = vp2px(parseInt(newValue.width.toString(), 0))
         if (this.twoLineModeItemNumRow.value === 0) {
@@ -567,7 +580,6 @@ struct MultiFilterRow {
       })
 
     }.width(PERCENT_100)
-    .alignItems(VerticalAlign.Top)
     .padding({
       start: LengthMetrics.resource($r('sys.float.ohos_id_max_padding_start')),
       end: LengthMetrics.resource($r('sys.float.ohos_id_max_padding_end'))
@@ -608,6 +620,8 @@ export struct Filter {
   @State twoLineModeItemNumRecord: Array<ObservedNumber> | null = null
   @State downArrowShowState: Array<ObservedBoolean> | null = null
   @State floatFilterBarText: string = ''
+  maxAppFontScale: number = 1;
+  isFollowingSystemFontScale: boolean = false;
 
   textColor(rowIndex: number, colIndex: number) {
     if (this.selectedFilters && this.selectedFilters.length > rowIndex &&
@@ -618,7 +632,25 @@ export struct Filter {
   }
 
   aboutToAppear() {
-    this.initParams()
+    this.initParams();
+    try {
+      let uiContent: UIContext = this.getUIContext();
+      this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
+      this.maxAppFontScale = uiContent.getMaxFontScale();
+    } catch (err) {
+      let code: number = (err as BusinessError).code;
+      let message: string = (err as BusinessError).message;
+      hilog.error(0x3900, 'Ace', `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
+    }
+  }
+
+  updateFontScale(): number {
+    let uiContent: UIContext = this.getUIContext();
+    let systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+    if (!this.isFollowingSystemFontScale) {
+      return 1;
+    }
+    return Math.min(systemFontScale, this.maxAppFontScale);
   }
 
   private filterItemClick(rowIndex: number, colIndex: number) {
@@ -738,14 +770,15 @@ export struct Filter {
           onItemClick: (colIndex: number) => {
             this.filterItemClick(rowIndex, colIndex);
           },
-          rowIndex: rowIndex
+          rowIndex: rowIndex,
+          maxAppFontScale: this.updateFontScale(),
         })
       })
     }.width(PERCENT_100)
     .align(Alignment.Start)
     .onAreaChange((_oldValue: Area, newValue: Area) => {
       if (!this.isFloatShowAllFilterWithoutAnimation && !this.isFloatBarShowWithoutAnimation) {
-        if (this.additionFilters != null) {
+        if (this.additionFilters !== null) {
           this.filterDynamicHeight = parseInt(newValue.height.toString(), 0) + LIST_ROW_HEIGHT + FILTER_TOP_PADDING
         } else {
           this.filterDynamicHeight = parseInt(newValue.height.toString(), 0) + FILTER_TOP_PADDING
@@ -772,12 +805,13 @@ export struct Filter {
           onItemClick: (colIndex: number) => {
             this.filterItemClick(rowIndex, colIndex);
           },
-          rowIndex: rowIndex
+          rowIndex: rowIndex,
+          maxAppFontScale: this.updateFontScale(),
         })
       })
     }.width(PERCENT_100)
     .onAreaChange((_oldValue: Area, newValue: Area) => {
-      if (this.additionFilters != null) {
+      if (this.additionFilters !== null) {
         this.filterDynamicHeight = parseInt(newValue.height.toString(), 0) + LIST_ROW_HEIGHT + FILTER_TOP_PADDING
       } else {
         this.filterDynamicHeight = parseInt(newValue.height.toString(), 0) + FILTER_TOP_PADDING
@@ -821,7 +855,7 @@ export struct Filter {
 
   @Builder AdditionFilterList() {
     if (this.additionFilters && this.additionFilters.name && this.additionFilters.options &&
-      this.additionFilters.options.length != 0) {
+      this.additionFilters.options.length !== 0) {
       Stack({ alignContent: Alignment.End }) {
         Stack({ alignContent: Alignment.Start }) {
           List() {
@@ -829,6 +863,8 @@ export struct Filter {
               Row() {
                 Text(this.additionFilters.name.toString())
                   .fontSize($r('sys.float.ohos_id_text_size_body3'))
+                  .minFontScale(1)
+                  .maxFontScale(Math.min(this.updateFontScale(), 2))
                   .fontColor($r('sys.color.ohos_id_color_text_secondary'))
                   .margin({ start: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH), end: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH) })
                   .padding({ start: LengthMetrics.resource($r('sys.float.ohos_id_max_padding_start'))})
@@ -844,6 +880,8 @@ export struct Filter {
               ListItem() {
                 Text(option.toString())
                   .fontSize($r('sys.float.ohos_id_text_size_body3'))
+                  .minFontScale(1)
+                  .maxFontScale(Math.min(this.updateFontScale(), 2))
                   .fontColor(this.additionColorArr ? this.additionColorArr[index] : '')
                   .fontWeight(this.additionFontWeightArr ? this.additionFontWeightArr[index] : '')
                   .focusable(true)
@@ -908,7 +946,7 @@ export struct Filter {
               .onClick(() => {
                 this.additionItemClick(index)
               })
-              .tabIndex(index == 0 ? this.multiFilters.length : -1)
+              .tabIndex(index === 0 ? this.multiFilters.length : -1)
             })
           }
           .listDirection(Axis.Horizontal)
@@ -1007,6 +1045,8 @@ export struct Filter {
               .textOverflow({ overflow: TextOverflow.Ellipsis })
               .fontColor($r('sys.color.ohos_id_color_text_primary_activated'))
               .fontSize($r('sys.float.ohos_id_text_size_body3'))
+              .minFontScale(1)
+              .maxFontScale(Math.min(this.updateFontScale(), 2))
               .constraintSize({ maxWidth: '85%' })
               .maxLines(1)
 
@@ -1132,7 +1172,7 @@ export struct Filter {
         .height(PERCENT_100)
         .edgeEffect(EdgeEffect.Spring)
         .onScroll((_scrollOffset: number, scrollState: ScrollState) => {
-          if (this.isFloatShowAllFilterWithoutAnimation && scrollState == ScrollState.Scroll) {
+          if (this.isFloatShowAllFilterWithoutAnimation && scrollState === ScrollState.Scroll) {
             this.isFloatBarShowWithoutAnimation = true
             this.isFloatShowAllFilterWithoutAnimation = false
             animateTo({

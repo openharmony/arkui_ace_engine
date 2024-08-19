@@ -344,6 +344,10 @@ struct ImageMenuItem {
   minFontSize: number = 1.75;
   maxFontSize: number = 3.2;
   longPressTime: number = 500;
+  isFollowingSystemFontScale: boolean = false;
+  maxFontScale: number = 1;
+  systemFontScale?: number = 1;
+
   @Prop fontSize: number = 1;
   @State isOnFocus: boolean = false;
   @State isOnHover: boolean = false;
@@ -433,6 +437,27 @@ struct ImageMenuItem {
     }
   }
 
+  aboutToAppear(): void {
+    try {
+      let uiContent: UIContext = this.getUIContext();
+      this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
+      this.maxFontScale = uiContent.getMaxFontScale();
+    } catch (exception) {
+      let code: number = (exception as BusinessError).code;
+      let message: string = (exception as BusinessError).message;
+      hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
+    }
+  }
+
+  decideFontScale(): number {
+    let uiContent: UIContext = this.getUIContext();
+    this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+    if (!this.isFollowingSystemFontScale) {
+      return 1;
+    }
+    return Math.min(this.systemFontScale, this.maxFontScale);
+  }
+
   @Styles
   buttonEventStyle() {
     .onFocus(() => {
@@ -460,8 +485,7 @@ struct ImageMenuItem {
     .gesture(
       LongPressGesture({ repeat: false, duration: this.longPressTime })
         .onAction((event: GestureEvent) => {
-          let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
-          this.fontSize = context.config?.fontSizeScale ?? 1;
+          this.fontSize = this.decideFontScale();
           if (event) {
             if (this.fontSize >= this.minFontSize) {
               this.dialogController?.open()

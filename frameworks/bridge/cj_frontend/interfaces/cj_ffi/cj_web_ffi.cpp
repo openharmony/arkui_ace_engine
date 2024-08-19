@@ -14,22 +14,9 @@
  */
 
 #include "cj_web_ffi.h"
-
 #include "application_context.h"
 #include "cj_lambda.h"
-#include "webview_controller_impl.h"
-
-#include "base/log/ace_scoring_log.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "base/web/webview/ohos_nweb/include/nweb.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
-#include "core/components/web/web_event.h"
 #include "core/components_ng/pattern/web/web_model_ng.h"
-#include "core/pipeline/pipeline_base.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
@@ -460,8 +447,14 @@ void MapToCFFIArrayToFreeMemory(MapToCFFIArray& mapToCFFIArray)
 void FfiOHOSAceFrameworkWebOnLoadIntercept(bool (*callback)(FfiWebResourceRequest event))
 {
     auto instanceId = Container::CurrentId();
-    auto onLoadIntercept = [func = CJLambda::Create(callback), instanceId](const BaseEventInfo* info) {
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onLoadIntercept = [func = CJLambda::Create(callback), instanceId, node = frameNode](
+        const BaseEventInfo* info) -> bool  {
         ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        pipelineContext->UpdateCurrentActiveNode(node);
+
         FfiWebResourceRequest cjWebResourceRequest {};
         auto* eventInfo = TypeInfoHelper::DynamicCast<LoadInterceptEvent>(info);
         auto request = eventInfo->GetRequest();

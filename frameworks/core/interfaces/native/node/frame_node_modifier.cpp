@@ -398,6 +398,12 @@ ArkUINodeHandle GetFrameNodeByKey(ArkUI_CharPtr key)
     return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(node));
 }
 
+ArkUINodeHandle GetAttachedFrameNodeById(ArkUI_CharPtr key)
+{
+    auto node = ElementRegister::GetInstance()->GetAttachedFrameNodeById(key);
+    return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(node));
+}
+
 void PropertyUpdate(ArkUINodeHandle node)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
@@ -501,9 +507,9 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         GetPositionToParent, GetPositionToScreen, GetPositionToWindow, GetPositionToParentWithTransform,
         GetPositionToScreenWithTransform, GetPositionToWindowWithTransform, GetMeasuredSize, GetLayoutPosition,
         GetInspectorId, GetNodeType, IsVisible, IsAttached, GetInspectorInfo, GetFrameNodeById, GetFrameNodeByUniqueId,
-        GetFrameNodeByKey, PropertyUpdate, GetLast, GetFirstUINode, GetLayoutSize, GetLayoutPositionWithoutMargin,
-        SetSystemColorModeChangeEvent, ResetSystemColorModeChangeEvent, SetSystemFontStyleChangeEvent,
-        ResetSystemFontStyleChangeEvent };
+        GetFrameNodeByKey, GetAttachedFrameNodeById, PropertyUpdate, GetLast, GetFirstUINode, GetLayoutSize,
+        GetLayoutPositionWithoutMargin, SetSystemColorModeChangeEvent, ResetSystemColorModeChangeEvent,
+        SetSystemFontStyleChangeEvent, ResetSystemFontStyleChangeEvent };
     return &modifier;
 }
 

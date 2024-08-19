@@ -162,7 +162,7 @@ FormNode::~FormNode()
 
 HitTestResult FormNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
-    TouchTestResult& responseLinkResult, bool isDispatch)
+    ResponseLinkResult& responseLinkResult, bool isDispatch)
 {
     // The mousetest has been merged into touchtest.
     // FormComponent does not support some mouse event(eg. Hover, HoverAnimation..).

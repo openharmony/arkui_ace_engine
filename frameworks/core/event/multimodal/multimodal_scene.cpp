@@ -15,10 +15,7 @@
 
 #include "core/event/multimodal/multimodal_scene.h"
 
-#include <algorithm>
-
 #include "base/log/dump_log.h"
-#include "base/log/log.h"
 
 namespace OHOS::Ace {
 

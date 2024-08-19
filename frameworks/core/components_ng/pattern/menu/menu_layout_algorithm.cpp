@@ -684,7 +684,9 @@ void MenuLayoutAlgorithm::GetPreviewNodeTargetHoverImageChild(const RefPtr<Layou
     bool isColNode = hostNode->GetTag() == V2::FLEX_ETS_TAG;
     CHECK_NULL_VOID(isColNode);
     // flex -> stack -> image index 0 , preview index 1 when hoverScale api in use
-    auto childNode = child->GetChildByIndex(0)->GetChildByIndex(1);
+    auto stackNode = child->GetChildByIndex(0);
+    CHECK_NULL_VOID(stackNode);
+    auto childNode = stackNode->GetChildByIndex(1);
     CHECK_NULL_VOID(childNode);
 
     auto hostChild = childNode->GetHostNode();
@@ -1311,10 +1313,8 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             auto offset = ComputeMenuPositionByOffset(menuProp, geometryNode);
             position_ += offset;
         }
-        auto menuPosition =
-            !menuPattern->IsContextMenu() && lastPosition_.has_value() && CheckIsEmbeddedMode(layoutWrapper)
-                ? lastPosition_.value()
-                : MenuLayoutAvoidAlgorithm(menuProp, menuPattern, size, didNeedArrow);
+        auto menuPosition = lastPosition_.has_value() && CheckIsEmbeddedMode(layoutWrapper) ? lastPosition_.value()
+            : MenuLayoutAvoidAlgorithm(menuProp, menuPattern, size, didNeedArrow, layoutWrapper);
         menuPattern->UpdateLastPosition(menuPosition);
         auto renderContext = menuNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
@@ -1666,7 +1666,7 @@ RefPtr<PipelineContext> MenuLayoutAlgorithm::GetCurrentPipelineContext()
 }
 
 OffsetF MenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(const RefPtr<MenuLayoutProperty>& menuProp,
-    const RefPtr<MenuPattern>& menuPattern, const SizeF& size, bool didNeedArrow)
+    const RefPtr<MenuPattern>& menuPattern, const SizeF& size, bool didNeedArrow, LayoutWrapper* layoutWrapper)
 {
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, OffsetF(0, 0));
@@ -1676,6 +1676,9 @@ OffsetF MenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(const RefPtr<MenuLayoutPro
     float y = 0.0f;
     if (menuProp->GetMenuPlacement().has_value() && (targetSize_.Width() > 0.0 || targetSize_.Height() > 0.0)) {
         placement_ = menuProp->GetMenuPlacement().value();
+        if (layoutWrapper != nullptr) {
+            PlacementRTL(layoutWrapper, placement_);
+        }
         auto childOffset = GetChildPosition(size, didNeedArrow);
         x = childOffset.GetX();
         y = childOffset.GetY();
@@ -1689,6 +1692,49 @@ OffsetF MenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(const RefPtr<MenuLayoutPro
     float yMaxAvoid = wrapperRect_.Bottom() - paddingBottom_ - size.Height();
     y = std::clamp(y, yMinAvoid, yMaxAvoid);
     return { x, y };
+}
+
+void MenuLayoutAlgorithm::PlacementRTL(LayoutWrapper* layoutWrapper, Placement& placement_)
+{
+    auto menuLayoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(menuLayoutProperty);
+    auto layoutDirection = menuLayoutProperty->GetNonAutoLayoutDirection();
+    if (layoutDirection == TextDirection::RTL) {
+        switch (placement_) {
+            case Placement::LEFT:
+                placement_ = Placement::RIGHT;
+                break;
+            case Placement::RIGHT:
+                placement_ = Placement::LEFT;
+                break;
+            case Placement::TOP_LEFT:
+                placement_ = Placement::TOP_RIGHT;
+                break;
+            case Placement::TOP_RIGHT:
+                placement_ = Placement::TOP_LEFT;
+                break;
+            case Placement::BOTTOM_LEFT:
+                placement_ = Placement::BOTTOM_RIGHT;
+                break;
+            case Placement::BOTTOM_RIGHT:
+                placement_ = Placement::BOTTOM_LEFT;
+                break;
+            case Placement::LEFT_TOP:
+                placement_ = Placement::RIGHT_TOP;
+                break;
+            case Placement::RIGHT_TOP:
+                placement_ = Placement::LEFT_TOP;
+                break;
+            case Placement::LEFT_BOTTOM:
+                placement_ = Placement::RIGHT_BOTTOM;
+                break;
+            case Placement::RIGHT_BOTTOM:
+                placement_ = Placement::LEFT_BOTTOM;
+                break;
+            default:
+                break;
+        }
+    }
 }
 
 void MenuLayoutAlgorithm::LimitContainerModalMenuRect(double& rectWidth, double& rectHeight)
@@ -1736,7 +1782,7 @@ void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, L
 
     float maxAvailableHeight = wrapperRect_.Height();
     float maxSpaceHeight = maxAvailableHeight * HEIGHT_CONSTRAINT_FACTOR;
-    if (!menuPattern->IsContextMenu() && lastPosition_.has_value() && CheckIsEmbeddedMode(layoutWrapper)) {
+    if (lastPosition_.has_value() && CheckIsEmbeddedMode(layoutWrapper)) {
         auto spaceToBottom = static_cast<float>(wrapperRect_.Bottom()) - lastPosition_.value().GetY();
         maxSpaceHeight = std::min(maxSpaceHeight, spaceToBottom);
     }

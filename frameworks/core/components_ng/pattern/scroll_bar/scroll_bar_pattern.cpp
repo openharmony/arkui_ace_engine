@@ -122,7 +122,7 @@ void ScrollBarPattern::OnModifyDone()
     scrollableEvent_->SetBarCollectTouchTargetCallback(
         [weak = AceType::WeakClaim(this)](const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
             TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-            TouchTestResult& responseLinkResult) {
+            ResponseLinkResult& responseLinkResult) {
             auto scrollBarPattern = weak.Upgrade();
             CHECK_NULL_VOID(scrollBarPattern);
             if (!scrollBarPattern->HasChild()
@@ -139,7 +139,7 @@ void ScrollBarPattern::OnModifyDone()
     scrollableEvent_->SetBarCollectClickAndLongPressTargetCallback(
         [weak = AceType::WeakClaim(this)](const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
             TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-            TouchTestResult& responseLinkResult) {
+            ResponseLinkResult& responseLinkResult) {
             auto scrollBar = weak.Upgrade();
             CHECK_NULL_VOID(scrollBar);
             scrollBar->OnCollectClickTarget(
@@ -250,6 +250,7 @@ void ScrollBarPattern::UpdateScrollBarRegion(float offset, float estimatedHeight
             }
         }
         Offset scrollOffset = { offset, offset };
+        scrollBar_->SetReverse(IsReverse());
         scrollBar_->UpdateScrollBarRegion(viewOffset, viewPort, scrollOffset, estimatedHeight);
         scrollBar_->MarkNeedRender();
     }
@@ -402,13 +403,9 @@ bool ScrollBarPattern::UpdateCurrentOffset(float delta, int32_t source)
     if (NearZero(delta) || axis_ == Axis::NONE) {
         return false;
     }
-    if ((IsAtBottom() && delta > 0.0f) || (IsAtTop() && delta < 0.0f)) {
-        return false;
-    }
 
     lastOffset_ = currentOffset_;
     currentOffset_ += delta;
-    ValidateOffset();
     if (scrollBarProxy_ && lastOffset_ != currentOffset_) {
         scrollBarProxy_->NotifyScrollableNode(-delta, source, AceType::WeakClaim(this));
     }
@@ -698,7 +695,7 @@ void ScrollBarPattern::HandleDragUpdate(const GestureEvent& info)
 
 void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
 {
-    auto velocity = info.GetMainVelocity();
+    auto velocity = IsReverse() ? -info.GetMainVelocity() : info.GetMainVelocity();
     TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "outer scrollBar drag end, position is %{public}f and %{public}f, "
         "velocity is %{public}f",
         info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(), velocity);
@@ -760,7 +757,7 @@ void ScrollBarPattern::ProcessFrictionMotionStop()
 
 void ScrollBarPattern::OnCollectTouchTarget(const OffsetF& coordinateOffset,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
-    const RefPtr<TargetComponent>& targetComponent, TouchTestResult& responseLinkResult)
+    const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult)
 {
     if (panRecognizer_) {
         panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
@@ -777,7 +774,7 @@ void ScrollBarPattern::OnCollectTouchTarget(const OffsetF& coordinateOffset,
 
 void ScrollBarPattern::OnCollectClickTarget(const OffsetF& coordinateOffset,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
-    const RefPtr<TargetComponent>& targetComponent, TouchTestResult& responseLinkResult)
+    const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult)
 {
     if (clickRecognizer_) {
         clickRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
@@ -801,7 +798,7 @@ void ScrollBarPattern::OnCollectClickTarget(const OffsetF& coordinateOffset,
 
 void ScrollBarPattern::OnCollectLongPressTarget(const OffsetF& coordinateOffset,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
-    const RefPtr<TargetComponent>& targetComponent, TouchTestResult& responseLinkResult)
+    const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult)
 {
     if (longPressRecognizer_) {
         longPressRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));

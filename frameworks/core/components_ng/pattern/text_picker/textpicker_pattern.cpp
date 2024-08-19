@@ -186,9 +186,12 @@ void TextPickerPattern::SetButtonIdeaSize()
     auto children = host->GetChildren();
     for (const auto& child : children) {
         auto stackNode = DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(stackNode);
         auto width = stackNode->GetGeometryNode()->GetFrameSize().Width();
         auto buttonNode = DynamicCast<FrameNode>(child->GetFirstChild());
+        CHECK_NULL_VOID(buttonNode);
         auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+        CHECK_NULL_VOID(buttonLayoutProperty);
         buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
         buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
         buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(PRESS_RADIUS));
@@ -200,6 +203,7 @@ void TextPickerPattern::SetButtonIdeaSize()
             UpdateUserDefinedIdealSize(CalcSize(CalcLength(width - PRESS_INTERVAL.ConvertToPx() * RATE),
                 CalcLength(buttonHeight)));
         auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
+        CHECK_NULL_VOID(buttonConfirmRenderContext);
         auto blendNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
         CHECK_NULL_VOID(blendNode);
         auto columnNode = DynamicCast<FrameNode>(blendNode->GetLastChild());
@@ -1045,8 +1049,9 @@ void TextPickerPattern::OnColorConfigurationUpdate()
     auto normalStyle = pickerTheme->GetOptionStyle(false, false);
     auto pickerProperty = host->GetLayoutProperty<TextPickerLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
-    pickerProperty->UpdateColor(normalStyle.GetTextColor());
-    pickerProperty->UpdateDisappearColor(disappearStyle.GetTextColor());
+    pickerProperty->UpdateColor(GetTextProperties().normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
+    pickerProperty->UpdateDisappearColor(
+        GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
     if (isPicker_) {
         return;
     }

@@ -102,9 +102,27 @@ public:
         return isScrollable_;
     }
 
+    void SetMaintainVisibleContentPosition(bool enabled)
+    {
+        maintainVisibleContentPosition_ = enabled;
+    }
+
+    bool GetMaintainVisibleContentPosition()
+    {
+        return maintainVisibleContentPosition_;
+    }
+
+    void MarkNeedReEstimateOffset()
+    {
+        needReEstimateOffset_ = true;
+    }
+
+    void NotifyDataChange(int32_t index, int32_t count) override;
+
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
-    bool OutBoundaryCallback() override;
+    void OnTouchDown(const TouchEventInfo& info) override;
+    OverScrollOffset GetOutBoundaryOffset(bool useCurrentDelta) const;
     OverScrollOffset GetOverScrollOffset(double delta) const override;
     float GetOffsetWithLimit(float offset) const override;
     void HandleScrollBarOutBoundary();
@@ -169,7 +187,11 @@ public:
     bool AnimateToTarget(int32_t index, std::optional<int32_t> indexInGroup, ScrollAlign align);
     Offset GetCurrentOffset() const;
     Rect GetItemRect(int32_t index) const override;
+    int32_t GetItemIndex(double x, double y) const override;
     Rect GetItemRectInGroup(int32_t index, int32_t indexInGroup) const;
+    ListItemIndex GetItemIndexInGroup(double x, double y) const;
+    bool GetGroupItemIndex(double x, double y, RefPtr<FrameNode> itemFrameNode, int32_t& index,
+        ListItemIndex& itemIndex) const;
     void OnAnimateStop() override;
     float GetMainContentSize() const override
     {
@@ -331,6 +353,7 @@ private:
     void HandleScrollEffect(float offset);
     void StartDefaultOrCustomSpringMotion(float start, float end, const RefPtr<InterpolatingSpring>& curve);
     bool IsScrollSnapAlignCenter() const;
+    void SetChainAnimationCallback();
     void SetChainAnimationToPosMap();
     void SetChainAnimationLayoutAlgorithm(
         RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm, RefPtr<ListLayoutProperty> listLayoutProperty);
@@ -373,6 +396,7 @@ private:
     float contentMainSize_ = 0.0f;
     float contentStartOffset_ = 0.0f;
     float contentEndOffset_ = 0.0f;
+    bool maintainVisibleContentPosition_ = false;
 
     float currentDelta_ = 0.0f;
     bool crossMatchChild_ = false;

@@ -47,9 +47,9 @@ int32_t TextBase::GetGraphemeClusterLength(
     return StringUtils::NotInUtf16Bmp(aroundChar) ? 2 : 1;
 }
 
-void TextBase::CalculateSelectedRect(std::vector<RectF>& selectedRect, float longestLine)
+void TextBase::CalculateSelectedRect(std::vector<RectF>& selectedRect, float longestLine, TextDirection direction)
 {
-    if (selectedRect.size() <= 1) {
+    if (selectedRect.size() <= 1 || direction == TextDirection::RTL) {
         return;
     }
     std::map<float, RectF> lineGroup;
@@ -74,11 +74,37 @@ void TextBase::CalculateSelectedRect(std::vector<RectF>& selectedRect, float lon
             break;
         }
         auto rect = RectF(line.second.Left(), lastLineBottom, longestLine - line.second.Left(),
-            line.second.Bottom() - lastLineBottom);
+                line.second.Bottom() - lastLineBottom);
         selectedRect.emplace_back(rect);
         lastLineBottom = line.second.Bottom();
     }
     selectedRect.emplace_back(RectF(end.second.Left(), lastLineBottom, end.second.Width(), end.second.Height()));
 }
 
+void TextGestureSelector::DoGestureSelection(const TouchEventInfo& info)
+{
+    if (info.GetTouches().empty()) {
+        return;
+    }
+    auto touchType = info.GetTouches().front().GetTouchType();
+    if (touchType == TouchType::UP) {
+        EndGestureSelection();
+        return;
+    }
+    if (touchType == TouchType::MOVE) {
+        DoTextSelectionTouchMove(info);
+    }
+}
+
+void TextGestureSelector::DoTextSelectionTouchMove(const TouchEventInfo& info)
+{
+    if (!isStarted) {
+        return;
+    }
+    auto localOffset = info.GetTouches().front().GetLocalLocation();
+    auto index = GetTouchIndex({ localOffset.GetX(), localOffset.GetY() });
+    auto start = std::min(index, start_);
+    auto end = std::max(index, end_);
+    OnTextGestureSelectionUpdate(start, end, info);
+}
 }

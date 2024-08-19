@@ -556,6 +556,7 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     context->RequestFrame();
+    lastVsyncTime_ = context->GetVsyncTime();
 }
 
 void Scrollable::SetDelayedTask()
@@ -1272,7 +1273,7 @@ inline bool Scrollable::IsMouseWheelScroll(const GestureEvent& info)
 }
 
 void Scrollable::OnCollectTouchTarget(TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
-    const RefPtr<TargetComponent>& targetComponent, TouchTestResult& responseLinkResult)
+    const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult)
 {
     if (panRecognizerNG_) {
         panRecognizerNG_->SetNodeId(frameNode->GetId());

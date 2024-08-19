@@ -58,7 +58,7 @@ const std::vector<EllipsisMode> ELLIPSIS_MODALS = { EllipsisMode::HEAD, Ellipsis
 const std::vector<TextSelectableMode> TEXT_SELECTABLE_MODE = { TextSelectableMode::SELECTABLE_UNFOCUSABLE,
     TextSelectableMode::SELECTABLE_FOCUSABLE, TextSelectableMode::UNSELECTABLE };
 constexpr bool DEFAULT_ENABLE_TEXT_DETECTOR = false;
-const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location" };
+const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location", "datetime" };
 
 std::map<TextHeightAdaptivePolicy, int> TEXT_HEIGHT_ADAPTIVE_POLICY_MAP = {
     { TextHeightAdaptivePolicy::MAX_LINES_FIRST, 0 },
@@ -105,6 +105,24 @@ void SetFontWeight(ArkUINodeHandle node, ArkUI_Int32 weight)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetFontWeight(frameNode, static_cast<FontWeight>(weight));
+}
+
+void SetOnClick(ArkUINodeHandle node, void* callback)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    GestureEventFunc* click = nullptr;
+    if (callback) {
+        click = reinterpret_cast<GestureEventFunc*>(callback);
+    }
+    TextModelNG::SetOnClick(frameNode, std::move(*click));
+}
+
+void ResetOnClick(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::ClearOnClick(frameNode);
 }
 
 void ResetFontWeight(ArkUINodeHandle node)
@@ -982,23 +1000,30 @@ void ResetTextSelectableMode(ArkUINodeHandle node)
     TextModelNG::SetTextSelectableMode(frameNode, TEXT_SELECTABLE_MODE[0]);
 }
 
-void SetTextDataDetectorConfigWithEvent(ArkUINodeHandle node, ArkUI_CharPtr types, void* callback)
+void SetTextDataDetectorConfigWithEvent(
+    ArkUINodeHandle node, const struct ArkUITextDetectConfigStruct* arkUITextDetectConfig)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    std::string strValue = types;
-    std::function<void(const std::string&)>* onResult = nullptr;
-    if (callback) {
-        onResult = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+    TextDetectConfig textDetectConfig;
+    textDetectConfig.types = arkUITextDetectConfig->types;
+    if (arkUITextDetectConfig->onResult) {
+        textDetectConfig.onResult =
+            std::move(*(reinterpret_cast<std::function<void(const std::string&)>*>(arkUITextDetectConfig->onResult)));
     }
-    TextModelNG::SetTextDetectConfig(frameNode, strValue, std::move(*onResult));
+    textDetectConfig.entityColor = Color(arkUITextDetectConfig->entityColor);
+    textDetectConfig.entityDecorationType = TextDecoration(arkUITextDetectConfig->entityDecorationType);
+    textDetectConfig.entityDecorationColor = Color(arkUITextDetectConfig->entityDecorationColor);
+    textDetectConfig.entityDecorationStyle = TextDecorationStyle(arkUITextDetectConfig->entityDecorationStyle);
+    TextModelNG::SetTextDetectConfig(frameNode, textDetectConfig);
 }
 
 void ResetTextDataDetectorConfigWithEvent(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextModelNG::SetTextDetectConfig(frameNode, "", nullptr);
+    TextDetectConfig textDetectConfig;
+    TextModelNG::SetTextDetectConfig(frameNode, textDetectConfig);
 }
 
 void SetTextOnCopy(ArkUINodeHandle node, void* callback)
@@ -1203,7 +1228,9 @@ const ArkUITextModifier* GetTextModifier()
         ResetTextSelectionMenuOptions,
         SetTextHalfLeading,
         ResetTextHalfLeading,
-        GetTextHalfLeading
+        GetTextHalfLeading,
+        SetOnClick,
+        ResetOnClick
     };
 
     return &modifier;

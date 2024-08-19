@@ -15,8 +15,6 @@
 
 #include "core/image/image_cache.h"
 
-#include <string>
-
 #include "base/log/dump_log.h"
 #include "core/components_ng/image_provider/image_object.h"
 #include "core/image/image_object.h"

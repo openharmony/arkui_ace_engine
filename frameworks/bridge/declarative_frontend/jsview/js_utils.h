@@ -82,5 +82,6 @@ bool CheckRegexValid(const std::string& pattern);
 void ParseBackgroundOptions(const JSRef<JSVal>& obj, NG::NavigationBackgroundOptions& options);
 void ParseBarOptions(const JSRef<JSVal>& obj, NG::NavigationBarOptions& options);
 napi_env GetCurrentEnv();
+void ParseTextOptions(const JSCallbackInfo& info, const JSRef<JSVal>& obj, NG::NavigationTextOptions& options);
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_UTILS_H

@@ -87,6 +87,9 @@ class ModifierUtils {
     }
   }
   static applySetOnChange(modifier) {
+    // It is to make the stateMgmt can addRef of _changed,
+    // so that the modifier change can be observed by makeObserved when modifier._changed changed.
+    modifier._changed;
     let myMap = modifier._modifiersWithKeys;
     if (modifier._classType === ModifierType.STATE) {
       myMap.setOnChange((key, value) => {
@@ -100,12 +103,13 @@ class ModifierUtils {
   }
   static putDirtyModifier(arkModifier, attributeModifierWithKey) {
     attributeModifierWithKey.value = attributeModifierWithKey.stageValue;
-    if (!arkModifier._weakPtr.invalid()) {
-      ArkLogConsole.info("pointer is invalid when putDirtyModifier");
+    if (!arkModifier._weakPtr.invalid()) {  
       attributeModifierWithKey.applyPeer(arkModifier.nativePtr,
         (attributeModifierWithKey.value === undefined ||
           attributeModifierWithKey.value === null)
       );
+    } else {
+      ArkLogConsole.warn("pointer is invalid when putDirtyModifier");
     }
     this.dirtyComponentSet.add(arkModifier);
     if (!this.dirtyFlag) {
@@ -115,6 +119,9 @@ class ModifierUtils {
   }
   static requestFrame() {
     const frameCallback = () => {
+      if (this.timeoutId !== -1) {
+        clearTimeout(this.timeoutId);
+      }
       this.dirtyComponentSet.forEach((item) => {
         const nativePtrValid = !item._weakPtr.invalid();
         if (item._nativePtrChanged && nativePtrValid) {
@@ -130,12 +137,18 @@ class ModifierUtils {
       });
       this.dirtyComponentSet.clear();
       this.dirtyFlag = false;
+      this.timeoutId = -1;
     };
+    if (this.timeoutId !== -1) {
+      clearTimeout(this.timeoutId);
+    }
+    this.timeoutId = setTimeout(frameCallback, 100);
     getUINativeModule().frameNode.registerFrameCallback(frameCallback);
   }
 }
 ModifierUtils.dirtyComponentSet = new Set();
 ModifierUtils.dirtyFlag = false;
+ModifierUtils.timeoutId = -1;
 class ModifierMap {
   constructor() {
     this.map_ = new Map();

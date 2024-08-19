@@ -14,6 +14,7 @@
  */
 
 #include "test/unittest/core/pattern/test_ng.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
 
 #define private public
 #define protected public
@@ -35,6 +36,7 @@ void TestNG::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
+    MockAnimationManager::Enable(false);
 }
 
 RefPtr<PaintWrapper> TestNG::FlushLayoutTask(const RefPtr<FrameNode>& frameNode, bool markDirty)
@@ -154,5 +156,16 @@ RefPtr<FrameNode> TestNG::CreateColumn(const std::function<void(ColumnModelNG)>&
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
     ViewStackProcessor::GetInstance()->PopContainer();
     return AceType::DynamicCast<FrameNode>(element);
+}
+
+void TestNG::SetSize(Axis axis, const CalcLength& crossSize, const CalcLength& mainSize)
+{
+    if (axis == Axis::VERTICAL) {
+        ViewAbstract::SetWidth(crossSize);
+        ViewAbstract::SetHeight(mainSize);
+    } else {
+        ViewAbstract::SetWidth(mainSize);
+        ViewAbstract::SetHeight(crossSize);
+    }
 }
 } // namespace OHOS::Ace::NG

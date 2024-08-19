@@ -16,11 +16,8 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_scroll_ffi.h"
 
 #include "cj_lambda.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 #include "bridge/common/utils/utils.h"
-#include "core/common/container.h"
 #include "core/components/scroll/scroll_component.h"
-#include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 
 using namespace OHOS::Ace;

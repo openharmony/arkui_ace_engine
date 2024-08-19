@@ -41,6 +41,7 @@ ace_unittest("drag_event_test_ng") {
   sources = [
     "drag_event_test_ng.cpp",
     "drag_event_test_ng_property_config.cpp",
+    "drag_event_test_ng_property_config_coverage.cpp",
   ]
 }
 
@@ -65,7 +66,9 @@ ace_unittest("gesture_event_hub_test_ng") {
   module_output = "events"
   sources = [
     "gesture_event_hub_test_ng.cpp",
+    "gesture_event_hub_test_ng_coverage.cpp",
     "gesture_event_hub_test_ng_property_config.cpp",
+    "gesture_event_hub_test_two_ng.cpp",
   ]
 }
 

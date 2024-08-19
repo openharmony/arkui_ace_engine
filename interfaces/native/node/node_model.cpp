@@ -15,21 +15,14 @@
 
 #include "node_model.h"
 
-#include <cstdint>
-#include <set>
-#include <unordered_map>
 
 #include "event_converter.h"
 #include "interfaces/native/event/ui_input_event_impl.h"
-#include "native_node.h"
-#include "native_type.h"
 #include "node_extened.h"
 #include "style_modifier.h"
 
 #include "base/error/error_code.h"
-#include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
 
 namespace OHOS::Ace::NodeModel {
 namespace {
@@ -532,14 +525,28 @@ void HandleNodeEvent(ArkUI_NodeEvent* event)
     }
     if (event->node && event->node->eventListeners) {
         auto eventListenersSet = reinterpret_cast<std::set<void (*)(ArkUI_NodeEvent*)>*>(event->node->eventListeners);
-        if (eventListenersSet) {
-            for (const auto& eventListener : *eventListenersSet) {
-                (*eventListener)(event);
-            }
-        }
+        TriggerNodeEvent(event, eventListenersSet);
     }
     if (g_eventReceiver) {
         g_eventReceiver(event);
+    }
+}
+
+void TriggerNodeEvent(ArkUI_NodeEvent* event, std::set<void (*)(ArkUI_NodeEvent*)>* eventListenersSet)
+{
+    if (!eventListenersSet) {
+        return;
+    }
+    if (eventListenersSet->size() == 1) {
+        auto eventListener = eventListenersSet->begin();
+        (*eventListener)(event);
+    } else if (eventListenersSet->size() > 1) {
+        for (const auto& eventListener : *eventListenersSet) {
+            (*eventListener)(event);
+            if (!IsValidArkUINode(event->node)) {
+                break;
+            }
+        }
     }
 }
 

@@ -284,12 +284,6 @@ ParagraphStyle RichEditorLayoutAlgorithm::GetParagraphStyle(
     return style;
 }
 
-void RichEditorLayoutAlgorithm::GetSpanParagraphStyle(
-    const std::unique_ptr<TextLineStyle>& lineStyle, ParagraphStyle& pStyle)
-{
-    MultipleParagraphLayoutAlgorithm::GetSpanParagraphStyle(lineStyle, pStyle);
-}
-
 void RichEditorLayoutAlgorithm::HandleEmptyParagraph(RefPtr<Paragraph> paragraph,
     const std::list<RefPtr<SpanItem>>& spanGroup)
 {

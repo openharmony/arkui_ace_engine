@@ -15,8 +15,6 @@
 
 #include "core/animation/simple_spring_chain.h"
 
-#include "base/utils/utils.h"
-
 namespace OHOS::Ace {
 namespace {
 

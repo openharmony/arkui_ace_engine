@@ -897,6 +897,7 @@ void ListItemPattern::MarkIsSelected(bool isSelected)
 void ListItemPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     json->PutFixedAttr("selectable", selectable_, filter, FIXED_ATTR_SELECTABLE);
+    json->PutExtAttr("selected", isSelected_, filter);
 }
 
 void ListItemPattern::SetAccessibilityAction()

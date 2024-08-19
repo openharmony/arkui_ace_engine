@@ -868,7 +868,6 @@ HWTEST_F(ListLayoutTestNg, Pattern003, TestSize.Level1)
     EXPECT_NE(pattern_->chainAnimation_, nullptr);
     UpdateCurrentOffset(ITEM_HEIGHT);
     EXPECT_TRUE(pattern_->OutBoundaryCallback());
-    EXPECT_TRUE(pattern_->dragFromSpring_);
 }
 
 /**

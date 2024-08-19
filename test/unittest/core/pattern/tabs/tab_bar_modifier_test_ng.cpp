@@ -16,9 +16,6 @@
 #include "tabs_test_ng.h"
 
 namespace OHOS::Ace::NG {
-
-namespace {} // namespace
-
 class TabBarModifierTestNg : public TabsTestNg {
 public:
 };

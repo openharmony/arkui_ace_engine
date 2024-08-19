@@ -23,6 +23,7 @@
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_accessibility_property.h"
@@ -635,8 +636,14 @@ public:
         closeDialogEvent_ = closeDialogEvent;
     }
 
+    const PickerTextProperties& GetTextProperties() const
+    {
+        return textProperties_;
+    }
+
     void SetTextProperties(const PickerTextProperties& properties)
     {
+        textProperties_ = properties;
         if (properties.disappearTextStyle_.fontSize.has_value() && properties.disappearTextStyle_.fontSize->IsValid()) {
             isUserSetGradientFont_ = true;
             gradientHeight_ = properties.disappearTextStyle_.fontSize.value();
@@ -699,9 +706,14 @@ private:
     void OrderCurrentDateByYearMonthDayColumn(
         RefPtr<FrameNode>& stackYear, RefPtr<FrameNode>& stackMonth, RefPtr<FrameNode>& stackDay) const;
     void FillSolarYearOptions(const PickerDate& current, RefPtr<FrameNode>& yearColumn);
+    void UpdateTitleTextColor(const RefPtr<FrameNode>& buttonTitleNode, const RefPtr<PickerTheme>& pickerTheme);
     void FillLunarMonthDaysOptions(const LunarDate& current, RefPtr<FrameNode>& monthDaysColumn);
     void AdjustSolarStartEndDate();
     void AdjustLunarStartEndDate();
+    void UpdateConfirmButtonMargin(
+        const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme);
+    void UpdateCancelButtonMargin(
+        const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme);
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
@@ -766,6 +778,7 @@ private:
     Dimension gradientHeight_;
     Dimension dividerSpacing_;
     float paintDividerSpacing_ = 1.0f;
+    PickerTextProperties textProperties_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerPattern);
 };

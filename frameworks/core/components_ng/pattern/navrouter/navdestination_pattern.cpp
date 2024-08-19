@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
+#include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -237,6 +238,11 @@ bool NavDestinationPattern::GetBackButtonState()
     if (isCustomTitle) {
         return showBackButton;
     }
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_RETURN(titleBarPattern, showBackButton);
+    if (titleBarPattern->IsFontSizeSettedByDeveloper()) {
+        return showBackButton;
+    }
     auto titleNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle());
     CHECK_NULL_RETURN(titleNode, showBackButton);
     auto theme = NavigationGetTheme();
@@ -321,7 +327,7 @@ void NavDestinationPattern::InitBackButtonLongPressEvent(RefPtr<NavDestinationGr
 
     auto accessibilityProperty = backButtonNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO);
+    accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
 }
 
 void NavDestinationPattern::HandleLongPress()

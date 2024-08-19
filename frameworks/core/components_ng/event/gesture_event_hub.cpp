@@ -59,7 +59,11 @@
 #include "core/common/udmf/udmf_client.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #ifdef WEB_SUPPORTED
+#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "core/components_ng/pattern/web/web_pattern.h"
+#else
+#include "core/components_ng/pattern/web/cross_platform/web_pattern.h"
+#endif
 #endif
 namespace OHOS::Ace::NG {
 namespace {
@@ -89,7 +93,7 @@ RefPtr<FrameNode> GestureEventHub::GetFrameNode() const
 
 bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
     TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint,
-    const RefPtr<TargetComponent>& targetComponent, TouchTestResult& responseLinkResult)
+    const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult)
 {
     auto host = GetFrameNode();
     CHECK_NULL_RETURN(host, false);
@@ -228,7 +232,7 @@ RefPtr<NGGestureRecognizer> GestureEventHub::PackInnerRecognizer(
 
 void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
     std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,
-    const RefPtr<TargetComponent>& targetComponent, TouchTestResult& responseLinkResult)
+    const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult)
 {
     auto host = GetFrameNode();
     if (!host) {
@@ -954,6 +958,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     auto focusHub = frameNode->GetFocusHub();
     bool hasContextMenu = focusHub == nullptr
                               ? false : focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
+    bool isBindMenuPreview = GetPreviewMode() != MenuPreviewMode::NONE;
     if (IsNeedSwitchToSubWindow() || isMenuShow) {
         imageNode = overlayManager->GetPixelMapContentNode();
         DragEventActuator::CreatePreviewNode(frameNode, imageNode);
@@ -961,7 +966,8 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         if (hasContextMenu || isMenuShow) {
             auto previewDragMovePosition = dragDropManager->GetUpdateDragMovePosition();
             OffsetF previewOffset;
-            if (SubwindowManager::GetInstance()->GetMenuPreviewCenter(previewOffset)) {
+            auto ret = SubwindowManager::GetInstance()->GetMenuPreviewCenter(previewOffset);
+            if (isBindMenuPreview && ret) {
                 previewOffset -= OffsetF(pixelMap->GetWidth() / 2.0f, pixelMap->GetHeight() / 2.0f);
                 DragEventActuator::UpdatePreviewPositionAndScale(imageNode, previewDragMovePosition + previewOffset);
             } else {
@@ -1030,6 +1036,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     auto arkExtraInfoJson = JsonUtil::Create(true);
     auto dragNodeGrayscale = pipeline->GetDragNodeGrayscale();
     auto dipScale = pipeline->GetDipScale();
+    arkExtraInfoJson->Put("scale", scale);
     arkExtraInfoJson->Put("dip_scale", dipScale);
     arkExtraInfoJson->Put("drag_node_gray_scale", dragNodeGrayscale);
     UpdateExtraInfo(frameNode, arkExtraInfoJson, scale);

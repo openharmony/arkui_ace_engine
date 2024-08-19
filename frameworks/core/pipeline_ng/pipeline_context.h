@@ -273,6 +273,8 @@ public:
 
     void AddPersistAfterLayoutTask(std::function<void()>&& task);
 
+    void AddLastestFrameLayoutFinishTask(std::function<void()>&& task);
+
     void AddAfterRenderTask(std::function<void()>&& task);
 
     void AddSafeAreaPaddingProcessTask(FrameNode* node);
@@ -303,7 +305,7 @@ public:
 
     bool CheckNeedAvoidInSubWindow() override;
 
-    void CheckAndUpdateKeyboardInset(uint32_t keyboardHeight) override;
+    void CheckAndUpdateKeyboardInset(float keyboardHeight) override;
 
     void UpdateSizeChangeReason(
         WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -792,13 +794,11 @@ public:
 
     void CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, AxisAction action) override;
 
-    void AddFrameCallback(FrameCallbackFunc&& frameCallbackFunc)
-    {
-        frameCallbackFuncs_.emplace_back(std::move(frameCallbackFunc));
-        RequestFrame();
-    }
+    void AddFrameCallback(FrameCallbackFunc&& frameCallbackFunc, FrameCallbackFunc&& idleCallbackFunc,
+        int64_t delayMillis);
 
     void FlushFrameCallback(uint64_t nanoTimestamp);
+    void TriggerIdleCallback(int64_t deadline);
 
     void RegisterTouchEventListener(const std::shared_ptr<ITouchEventCallback>& listener);
     void UnregisterTouchEventListener(const WeakPtr<NG::Pattern>& pattern);
@@ -866,7 +866,7 @@ protected:
     void OnVirtualKeyboardHeightChange(float keyboardHeight,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, const float safeHeight = 0.0f,
         const bool supportAvoidance = false, bool forceChange = false) override;
-    void OnVirtualKeyboardHeightChange(uint32_t keyboardHeight, double positionY, double height,
+    void OnVirtualKeyboardHeightChange(float keyboardHeight, double positionY, double height,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool forceChange = false) override;
 
     void SetIsLayouting(bool layouting)
@@ -1092,6 +1092,7 @@ private:
     std::string homePageConfig_;
 
     std::list<FrameCallbackFunc> frameCallbackFuncs_;
+    std::list<FrameCallbackFunc> idleCallbackFuncs_;
     uint32_t transform_ = 0;
     std::list<WeakPtr<FrameNode>> changeInfoListeners_;
     std::list<WeakPtr<FrameNode>> changedNodes_;

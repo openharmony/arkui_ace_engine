@@ -290,6 +290,36 @@ std::vector<RectF> ParagraphManager::GetRects(int32_t start, int32_t end, RectHe
     return res;
 }
 
+std::vector<std::pair<std::vector<RectF>, TextDirection>> ParagraphManager::GetParagraphsRects(
+    int32_t start, int32_t end, RectHeightPolicy rectHeightPolicy) const
+{
+    std::vector<std::pair<std::vector<RectF>, TextDirection>> paragraphsRects;
+    float y = 0.0f;
+    for (auto&& info : paragraphs_) {
+        if (info.start > end) {
+            break;
+        }
+        if (info.end > start) {
+            std::vector<RectF> rects;
+            auto relativeStart = (start < info.start) ? 0 : start - info.start;
+            if (rectHeightPolicy == RectHeightPolicy::COVER_TEXT) {
+                info.paragraph->GetTightRectsForRange(relativeStart, end - info.start, rects);
+            } else {
+                info.paragraph->GetRectsForRange(relativeStart, end - info.start, rects);
+            }
+            std::pair<std::vector<RectF>, TextDirection> paragraphRects;
+            for (auto&& rect : rects) {
+                rect.SetTop(rect.Top() + y);
+            }
+            paragraphRects.first = rects;
+            paragraphRects.second = info.paragraphStyle.direction;
+            paragraphsRects.emplace_back(paragraphRects);
+        }
+        y += info.paragraph->GetHeight();
+    }
+    return paragraphsRects;
+}
+
 bool ParagraphManager::IsSelectLineHeadAndUseLeadingMargin(int32_t start) const
 {
     for (auto iter = paragraphs_.begin(); iter != paragraphs_.end(); iter++) {

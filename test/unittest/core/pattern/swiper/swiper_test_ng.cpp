@@ -655,26 +655,28 @@ HWTEST_F(SwiperTestNg, SwiperPatternGetCustomPropertyOffset001, TestSize.Level1)
  */
 HWTEST_F(SwiperTestNg, SwiperPatternComputeNextIndexByVelocity001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
-    float velocity = 0.1f;
-    pattern_->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { 2, 1 }));
-
-    /**
-     * @tc.steps: step2. call ComputeNextIndexByVelocity.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            pattern_->ComputeNextIndexByVelocity(velocity);
-            if (i == 1) {
-                continue;
-            }
-            pattern_->itemPosition_.clear();
-            pattern_->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { 2, 1 }));
-            velocity = 0;
-        }
-        velocity = 200;
-    }
+    CreateWithItem([](SwiperModelNG model) { model.SetItemSpace(100.0_px); });
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion((int32_t)PlatformVersion::VERSION_TEN);
+    float velocity = -1201.0f;
+    EXPECT_EQ(pattern_->ComputeNextIndexByVelocity(velocity, false), 1);
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion((int32_t)PlatformVersion::VERSION_ELEVEN);
+    velocity = -781.0f;
+    EXPECT_EQ(pattern_->ComputeNextIndexByVelocity(velocity, false), 1);
+    velocity = -780.0f;
+    EXPECT_EQ(pattern_->ComputeNextIndexByVelocity(velocity, false), 0);
+    pattern_->UpdateCurrentOffset(239.0f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->ComputeNextIndexByVelocity(velocity, true), 0);
+    velocity = -781.0f;
+    EXPECT_EQ(pattern_->ComputeNextIndexByVelocity(velocity, false), 1);
+    pattern_->SwipeToWithoutAnimation(0);
+    FlushLayoutTask(frameNode_);
+    pattern_->UpdateCurrentOffset(-241.0f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->ComputeNextIndexByVelocity(velocity, true), 1);
+    velocity = -780.0f;
+    EXPECT_EQ(pattern_->ComputeNextIndexByVelocity(velocity, false), 1);
 }
 
 /**
@@ -1775,72 +1777,6 @@ HWTEST_F(SwiperTestNg, SwipeCaptureLayoutInfo001, TestSize.Level1)
     pattern_->currentDelta_ = -itemWidth;
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->leftCaptureIndex_, 3);
-    leftCaptureNode = AceType::DynamicCast<FrameNode>(
-        frameNode_->GetChildAtIndex(frameNode_->GetChildIndexById(pattern_->GetLeftCaptureId())));
-    EXPECT_NE(leftCaptureNode, nullptr);
-    if (leftCaptureNode) {
-        auto size = leftCaptureNode->GetGeometryNode()->GetFrameRect();
-        auto offset = leftCaptureNode->GetGeometryNode()->GetFrameOffset();
-        EXPECT_EQ(offset.GetX(), CAPTURE_MARGIN_SIZE - size.Width());
-    }
-}
-
-/**
- * @tc.name: SwipeCaptureLayoutInfo002
- * @tc.desc: Test check itemPosition map info
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwipeCaptureLayoutInfo002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create swiper witch need the capture
-     */
-    InitCaptureTest();
-    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    FlushLayoutTask(frameNode_);
-    /**
-     * @tc.steps: step2. capture in left, target index change to equal to first item index in itemPosition
-     * current index 0, target index to 0, 3'|3' 0 1 2 3|3 to 3'|3' 0 1 2 3|3
-     */
-    pattern_->targetIndex_ = 0;
-    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->leftCaptureIndex_, 3);
-    auto leftCaptureNode = AceType::DynamicCast<FrameNode>(
-        frameNode_->GetChildAtIndex(frameNode_->GetChildIndexById(pattern_->GetLeftCaptureId())));
-    EXPECT_NE(leftCaptureNode, nullptr);
-    if (leftCaptureNode) {
-        auto size = leftCaptureNode->GetGeometryNode()->GetFrameRect();
-        auto offset = leftCaptureNode->GetGeometryNode()->GetFrameOffset();
-        EXPECT_EQ(offset.GetX(), CAPTURE_MARGIN_SIZE - size.Width());
-    }
-    /**
-     * @tc.steps: step3. capture in left, target index change to smaller than first item index in itemPosition
-     * current index 0, target index to -1, 3'|3' 0 1 2 3|3 to 3|3 0 1 2 3'|3'
-     */
-    pattern_->targetIndex_ = -1;
-    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    FlushLayoutTask(frameNode_);
-    // isCaptureReverse_ change to true
-    EXPECT_TRUE(pattern_->isCaptureReverse_);
-    EXPECT_EQ(pattern_->leftCaptureIndex_, 3);
-    auto rightCaptureNode = AceType::DynamicCast<FrameNode>(
-        frameNode_->GetChildAtIndex(frameNode_->GetChildIndexById(pattern_->GetRightCaptureId())));
-    EXPECT_NE(rightCaptureNode, nullptr);
-    if (rightCaptureNode) {
-        auto offset = leftCaptureNode->GetGeometryNode()->GetFrameOffset();
-        EXPECT_EQ(offset.GetX(), SWIPER_WIDTH - CAPTURE_MARGIN_SIZE);
-    }
-    /**
-     * @tc.steps: step4. capture in left, target index change to larger than first item index in itemPosition
-     * current index 0, target index to 1, 3|3 0 1 2 3'|3' to 3'|3' 0 1 2 3|3
-     */
-    pattern_->targetIndex_ = 1;
-    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    FlushLayoutTask(frameNode_);
-    // isCaptureReverse_ change to true
-    EXPECT_FALSE(pattern_->isCaptureReverse_);
     EXPECT_EQ(pattern_->leftCaptureIndex_, 3);
     leftCaptureNode = AceType::DynamicCast<FrameNode>(
         frameNode_->GetChildAtIndex(frameNode_->GetChildIndexById(pattern_->GetLeftCaptureId())));

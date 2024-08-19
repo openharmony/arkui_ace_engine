@@ -540,6 +540,7 @@ bool SubwindowOhos::ShowPreviewNG()
     CHECK_NULL_RETURN(window_, false);
     ShowWindow(false);
     ResizeWindow();
+    window_->SetTouchable(false);
     return true;
 }
 

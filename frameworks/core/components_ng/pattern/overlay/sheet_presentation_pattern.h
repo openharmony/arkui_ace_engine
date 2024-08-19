@@ -291,7 +291,7 @@ public:
     bool IsScrollable() const;
     void AvoidAiBar();
 
-    void AvoidSafeArea();
+    void AvoidSafeArea(bool forceChange = false);
     void CheckBuilderChange();
     float GetSheetHeightChange();
     void ScrollTo(float height);
@@ -325,11 +325,6 @@ public:
     void SetCurrentOffset(float currentOffset)
     {
         currentOffset_ = currentOffset;
-    }
-
-    void SetIsDirectionUp(bool isDirectionUp)
-    {
-        isDirectionUp_ = isDirectionUp;
     }
 
     void SetCurrentHeight(float currentHeight)

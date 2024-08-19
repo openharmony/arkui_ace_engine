@@ -321,20 +321,19 @@ void OnTextChangedListenerImpl::NotifyPanelStatusInfo(const MiscServices::PanelS
         keyboardInfo.keyBoardType = KeyBoardType::STATUS_BAR;
     }
     keyboardInfo.visible = info.visible;
-    auto textClient = pattern_.Upgrade();
-    CHECK_NULL_VOID(textClient);
-    auto pattern = AceType::DynamicCast<Pattern>(textClient);
-    CHECK_NULL_VOID(pattern);
-    auto host = pattern->GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContextRefPtr();
-    auto task = [weak = WeakPtr(pipelineContext), keyboardInfo, id = Container::CurrentId()] {
-        auto pipeline = weak.Upgrade();
+    auto task = [weak = pattern_, keyboardInfo, id = Container::CurrentId()] {
+        auto textClient = weak.Upgrade();
+        CHECK_NULL_VOID(textClient);
+        auto pattern = AceType::DynamicCast<Pattern>(textClient);
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContextRefPtr();
         CHECK_NULL_VOID(pipeline);
         ContainerScope scope(id);
         auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
         CHECK_NULL_VOID(textFieldManager);
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyPanelStatusInfo SetImeShow:%d", keyboardInfo.visible);
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyPanelStatusInfo SetImeShow:%{public}d", keyboardInfo.visible);
         textFieldManager->SetImeShow(keyboardInfo.visible);
     };
     PostTaskToUI(task, "ArkUITextFieldSetImeShow");

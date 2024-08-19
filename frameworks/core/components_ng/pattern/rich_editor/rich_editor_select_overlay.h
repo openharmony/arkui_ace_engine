@@ -59,15 +59,29 @@ public:
     void UpdateHandleOffset();
     void UpdateSelectOverlayOnAreaChanged();
     void ToggleMenu();
+    bool GetIsHandleMoving()
+    {
+        return isHandleMoving_;
+    }
+    void OnHandleIsHidden() override;
+    void OnOverlayClick(const GestureEvent& event, bool isFirst) override;
+    void OnAfterSelectOverlayShow(bool isCreate) override;
+    bool IsRegisterTouchCallback() override
+    {
+        return true;
+    }
+    float GetHandleHotZoneRadius();
 
 private:
     void RemoveAreaChangeInner();
     void CloseMagnifier();
     void UpdateSelectorOnHandleMove(const OffsetF& handleOffset, bool isFirstHandle) override;
     void CheckMenuParamChange(SelectOverlayInfo& selectInfo, TextSpanType selectType, TextResponseType responseType);
+    void SwitchCaretState();
     std::shared_ptr<SelectionMenuParams> lastMenuParams_ = nullptr;
     std::pair<TextSpanType, TextResponseType> lastSelectResponseComb_;
     bool needRefreshMenu_ = false;
+    bool handleIsHidden_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorSelectOverlay);
 };

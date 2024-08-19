@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 122
+#define ARKUI_FULL_API_VERSION 123
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 122
+#define ARKUI_NODE_API_VERSION 123
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 8
@@ -302,6 +302,15 @@ struct ArkUITextShadowStruct {
     ArkUI_Float32 offsetX;
     ArkUI_Float32 offsetY;
     ArkUI_Uint32 fill;
+};
+
+struct ArkUITextDetectConfigStruct {
+    ArkUI_CharPtr types;
+    void* onResult;
+    ArkUI_Uint32 entityColor;
+    ArkUI_Int32 entityDecorationType;
+    ArkUI_Uint32 entityDecorationColor;
+    ArkUI_Int32 entityDecorationStyle;
 };
 
 struct ArkUIImagePropertiesStruct {
@@ -1994,7 +2003,8 @@ struct ArkUITextModifier {
     void (*resetTextSelection)(ArkUINodeHandle node);
     void (*setTextSelectableMode)(ArkUINodeHandle node, ArkUI_Uint32 textSelectableMode);
     void (*resetTextSelectableMode)(ArkUINodeHandle node);
-    void (*setTextDataDetectorConfigWithEvent)(ArkUINodeHandle node, ArkUI_CharPtr types, void* callback);
+    void (*setTextDataDetectorConfigWithEvent)(
+        ArkUINodeHandle node, const struct ArkUITextDetectConfigStruct* arkUITextDetectConfig);
     void (*resetTextDataDetectorConfigWithEvent)(ArkUINodeHandle node);
     void (*setTextOnCopy)(ArkUINodeHandle node, void* callback);
     void (*resetTextOnCopy)(ArkUINodeHandle node);
@@ -2010,6 +2020,8 @@ struct ArkUITextModifier {
     void (*setTextHalfLeading)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetTextHalfLeading)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextHalfLeading)(ArkUINodeHandle node);
+    void (*setTextOnClick)(ArkUINodeHandle node, void* callback);
+    void (*resetTextOnClick)(ArkUINodeHandle node);
 };
 
 struct ArkUIButtonModifier {
@@ -2263,6 +2275,8 @@ struct ArkUIListModifier {
     void (*getlistDivider)(ArkUINodeHandle node, ArkUIdividerOptions* option, ArkUI_Int32 unit);
     void (*setInitialScroller)(ArkUINodeHandle node, ArkUINodeHandle controller, ArkUINodeHandle proxy);
     void (*resetInitialScroller)(ArkUINodeHandle node);
+    void (*setListMaintainVisibleContentPosition)(ArkUINodeHandle node, ArkUI_Bool enabled);
+    void (*resetListMaintainVisibleContentPosition)(ArkUINodeHandle node);
 };
 
 struct ArkUIListItemGroupModifier {
@@ -2689,6 +2703,20 @@ struct ArkUITabsControllerModifier {
 
 struct ArkUIGesture;
 
+struct ArkUIGestureEventTargetInfo {
+    void* uiNode = nullptr;
+};
+
+struct ArkUIGestureRecognizer {
+    ArkUI_Int32 type = -1;
+    ArkUIGesture* gesture = nullptr;
+    void* extraData = nullptr;
+    void* attachNode = nullptr;
+    bool capi = true;
+    void* recognizer = nullptr;
+    ArkUIGestureEventTargetInfo targetInfo = {};
+};
+
 struct ArkUIGestureEvent {
     ArkUIAPIEventGestureAsyncEvent eventData;
     void* attachNode;
@@ -2701,6 +2729,24 @@ struct ArkUIGestureInterruptInfo {
     void* userData = nullptr;
     void* inputEvent = nullptr;
     void* gestureEvent = nullptr;
+    ArkUIGestureRecognizer** responseLinkRecognizer = nullptr;
+    ArkUI_Int32 count = 0;
+};
+
+enum ArkUIGestureRecognizerState {
+    RECOGNIZER_STATE_READY = 0,
+    RECOGNIZER_STATE_DETECTING = 1,
+    RECOGNIZER_STATE_PENDING = 2,
+    RECOGNIZER_STATE_BLOCKED = 3,
+    RECOGNIZER_STATE_SUCCESSFUL = 4,
+    RECOGNIZER_STATE_FAILED = 5,
+};
+
+struct ArkUIParallelInnerGestureEvent {
+    ArkUIGestureRecognizer* current = nullptr;
+    ArkUIGestureRecognizer** responseLinkRecognizer = nullptr;
+    void* userData = nullptr;
+    ArkUI_Int32 count = 0;
 };
 
 struct ArkUIGestureModifier {
@@ -2727,6 +2773,22 @@ struct ArkUIGestureModifier {
     void (*clearGestures)(ArkUINodeHandle node);
     void (*setGestureInterrupterToNode)(
         ArkUINodeHandle node, ArkUI_Int32 (*interrupter)(ArkUIGestureInterruptInfo* interrupterInfo));
+    ArkUI_Int32 (*setInnerGestureParallelTo)(ArkUINodeHandle node, void* userData,
+        ArkUIGestureRecognizer* (*parallelInnerGesture)(ArkUIParallelInnerGestureEvent* event));
+    ArkUI_Int32 (*setGestureRecognizerEnabled)(ArkUIGestureRecognizer* recognizer, bool enabled);
+    ArkUI_Bool (*getGestureRecognizerEnabled)(ArkUIGestureRecognizer* recognizer);
+    ArkUI_Int32 (*getGestureRecognizerState)(ArkUIGestureRecognizer* recognizer, ArkUIGestureRecognizerState* state);
+    ArkUI_Int32 (*gestureEventTargetInfoIsScrollBegin)(ArkUIGestureEventTargetInfo* info, bool* ret);
+    ArkUI_Int32 (*gestureEventTargetInfoIsScrollEnd)(ArkUIGestureEventTargetInfo* info, bool* ret);
+    ArkUI_Int32 (*getPanGestureDirectionMask)(ArkUIGestureRecognizer* recognizer, ArkUIGestureDirection* direction);
+    ArkUI_Bool (*isBuiltInGesture)(ArkUIGestureRecognizer* recognizer);
+    ArkUI_Int32 (*getGestureTag)(
+        ArkUIGestureRecognizer* recognizer, char* buffer, ArkUI_Int32 bufferSize, ArkUI_Int32* result);
+    ArkUI_Int32 (*getGestureBindNodeId)(
+        ArkUIGestureRecognizer* recognizer, char* nodeId, ArkUI_Int32 size, ArkUI_Int32* result);
+    ArkUI_Bool (*isGestureRecognizerValid)(ArkUIGestureRecognizer* recognizer);
+    ArkUI_Int32 (*setArkUIGestureRecognizerDisposeNotify)(ArkUIGestureRecognizer* recognizer, void* userData,
+        void (*callback)(ArkUIGestureRecognizer* recognizer, void* userData));
 };
 
 struct ArkUISliderModifier {
@@ -3852,6 +3914,7 @@ struct ArkUITextPickerModifier {
     ArkUI_Int32 (*getTextPickerSelectedSize)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextPickerCanLoop)(ArkUINodeHandle node);
     ArkUI_Float32 (*getTextPickerDefaultPickerItemHeight)(ArkUINodeHandle node, ArkUI_Int32 dUnit);
+    void (*resetTextPickerDividerNull)(ArkUINodeHandle node);
 };
 
 struct ArkUITextTimerModifier {
@@ -4005,6 +4068,13 @@ struct ArkUISpanModifier {
     void (*setTextShadow)(ArkUINodeHandle node, struct ArkUITextShadowStruct* shadows, ArkUI_Uint32 length);
     void (*resetTextShadow)(ArkUINodeHandle node);
     void (*getTextShadows)(ArkUINodeHandle node, ArkUITextShadowStruct* textShadow, ArkUI_Uint32 size);
+    ArkUI_CharPtr (*getSpanFontFamily)(ArkUINodeHandle node);
+    void (*setAccessibilityText)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetAccessibilityText)(ArkUINodeHandle node);
+    void (*setAccessibilityDescription)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetAccessibilityDescription)(ArkUINodeHandle node);
+    void (*setAccessibilityLevel)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetAccessibilityLevel)(ArkUINodeHandle node);
 };
 
 struct ArkUISelectModifier {
@@ -4189,7 +4259,8 @@ struct ArkUIColumnSplitModifier {
 struct ArkUIRichEditorModifier {
     void (*setRichEditorEnableDataDetector)(ArkUINodeHandle node, ArkUI_Uint32 enableDataDetector);
     void (*resetRichEditorEnableDataDetector)(ArkUINodeHandle node);
-    void (*setRichEditorDataDetectorConfigWithEvent)(ArkUINodeHandle node, ArkUI_CharPtr types, void* callback);
+    void (*setRichEditorDataDetectorConfigWithEvent)(
+        ArkUINodeHandle node, const struct ArkUITextDetectConfigStruct* arkUITextDetectConfig);
     void (*resetRichEditorDataDetectorConfigWithEvent)(ArkUINodeHandle node);
     void (*setRichEditorOnIMEInputComplete)(ArkUINodeHandle node, void* callback);
     void (*resetRichEditorOnIMEInputComplete)(ArkUINodeHandle node);
@@ -4453,6 +4524,7 @@ struct ArkUIFrameNodeModifier {
     ArkUINodeHandle (*getFrameNodeById)(ArkUI_Int32 nodeId);
     ArkUINodeHandle (*getFrameNodeByUniqueId)(ArkUI_Int32 uniqueId);
     ArkUINodeHandle (*getFrameNodeByKey)(ArkUI_CharPtr key);
+    ArkUINodeHandle (*getAttachedFrameNodeById)(ArkUI_CharPtr key);
     void (*propertyUpdate)(ArkUINodeHandle node);
     ArkUINodeHandle (*getLast)(ArkUINodeHandle node, ArkUI_Bool isExpanded);
     ArkUINodeHandle (*getFirstUINode)(ArkUINodeHandle node);

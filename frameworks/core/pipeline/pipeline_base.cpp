@@ -15,24 +15,13 @@
 
 #include "core/pipeline/pipeline_base.h"
 
-#include <cinttypes>
-
 #include "base/log/ace_tracker.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/subwindow/subwindow_manager.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/time_util.h"
-#include "base/utils/utils.h"
-#include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
-#include "core/common/display_info.h"
 #include "core/common/font_manager.h"
-#include "core/common/frontend.h"
 #include "core/common/manager_interface.h"
-#include "core/common/thread_checker.h"
 #include "core/common/window.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/container_modal/container_modal_constants.h"
@@ -751,7 +740,7 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positio
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, bool forceChange)
 {
     auto currentContainer = Container::Current();
-    auto keyboardHeight = static_cast<uint32_t>(keyboardArea.Height());
+    float keyboardHeight = keyboardArea.Height();
     if (currentContainer && !currentContainer->IsSubContainer()) {
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentContainer->GetInstanceId());
         if (subwindow && subwindow->GetShown() && subwindow->IsFocused() && !CheckNeedAvoidInSubWindow()) {
@@ -762,7 +751,6 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positio
         }
     }
     if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight)) {
-        CheckAndUpdateKeyboardInset(keyboardHeight);
         return;
     }
     OnVirtualKeyboardHeightChange(keyboardHeight, positionY, height, rsTransaction, forceChange);

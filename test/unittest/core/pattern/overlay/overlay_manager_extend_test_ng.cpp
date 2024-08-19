@@ -57,7 +57,6 @@
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
-#include "core/components_ng/pattern/overlay/modal_presentation_layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
@@ -846,6 +845,7 @@ HWTEST_F(OverlayManagerExtendTestNg, ShowToastTest001, TestSize.Level1)
      */
     auto toastInfo =
         NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
+    toastInfo.shadow = ShadowConfig::DefaultShadowL;
     /**
      * @tc.steps: step3. run ShowToast
      * @tc.expected: toastMap_ is not empty
@@ -874,7 +874,7 @@ HWTEST_F(OverlayManagerExtendTestNg, ShowToastTest002, TestSize.Level1)
      */
     auto toastInfo =
         NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
-
+    toastInfo.shadow = ShadowConfig::DefaultShadowL;
     auto callback = [](int32_t callbackId) {
         /**
          * @tc.steps: step4. get callbackId.
@@ -911,7 +911,7 @@ HWTEST_F(OverlayManagerExtendTestNg, CloseToastTest001, TestSize.Level1)
      */
     auto toastInfo =
         NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
-
+    toastInfo.shadow = ShadowConfig::DefaultShadowL;
     auto callback = [overlayManager](int32_t callbackId) {
         /**
          * @tc.steps: step4. get callbackId.

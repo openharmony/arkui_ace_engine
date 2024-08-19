@@ -428,11 +428,13 @@ void ScrollPattern::FireOnDidScroll(float scroll)
         scrollY.SetValue(scrollVpValue);
     }
     auto scrollState = GetScrollState();
+    bool isTriggered = false;
     if (!NearZero(scroll)) {
         onScroll(scrollX, scrollY, scrollState);
+        isTriggered = true;
     }
     if (scrollStop_ && !GetScrollAbort()) {
-        if (scrollState != ScrollState::IDLE) {
+        if (scrollState != ScrollState::IDLE || !isTriggered) {
             onScroll(0.0_vp, 0.0_vp, ScrollState::IDLE);
         }
     }

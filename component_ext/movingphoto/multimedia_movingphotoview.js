@@ -85,15 +85,15 @@ class MovingPhotoView extends JSViewAbstract {
     }
 
     static autoPlayPeriod(startTime, endTime) {
-        __Common__.remoteMessage(startTime, endTime);
+        __MovingPhotoView__.autoPlayPeriod(startTime, endTime);
     }
 
     static autoPlay(value) {
-        __Common__.autoPlay(value);
+        __MovingPhotoView__.autoPlay(value);
     }
 
     static repeatPlay(value) {
-        __Common__.loop(value);
+        __MovingPhotoView__.repeatPlay(value);
     }
 }
 

@@ -15,14 +15,11 @@
 
 #include "core/components_ng/render/path_painter.h"
 
-#include "core/components_ng/pattern/shape/path_paint_property.h"
 #ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/render/adapter/sk_painter.h"
 #else
 #include "core/components_ng/render/adapter/rosen/drawing_painter.h"
 #endif
-#include "core/components_ng/render/drawing.h"
-#include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
 void PathPainter::DrawPath(RSCanvas& canvas, const PathPaintProperty& pathPaintProperty)

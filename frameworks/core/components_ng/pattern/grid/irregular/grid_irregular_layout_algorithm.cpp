@@ -286,6 +286,7 @@ void GridIrregularLayoutAlgorithm::MeasureOnJump(float mainSize)
     Jump(mainSize);
 
     if (info_.extraOffset_) {
+        info_.prevOffset_ = info_.currentOffset_;
         info_.currentOffset_ += *info_.extraOffset_;
         MeasureOnOffset(mainSize);
     }
@@ -364,15 +365,32 @@ void GridIrregularLayoutAlgorithm::UpdateLayoutInfo()
     }
 }
 
-void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset, int32_t cacheLine)
+namespace {
+Alignment GetAlignment(Axis axis, const RefPtr<GridLayoutProperty>& props)
 {
-    const auto& info = gridLayoutInfo_;
-    Alignment align = info.axis_ == Axis::VERTICAL ? Alignment::TOP_CENTER : Alignment::CENTER_LEFT;
-    const auto& props = DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
+    Alignment align = axis == Axis::VERTICAL ? Alignment::TOP_CENTER : Alignment::CENTER_LEFT;
     const auto& positionProp = props->GetPositionProperty();
     if (positionProp) {
         align = positionProp->GetAlignment().value_or(align);
     }
+    return align;
+}
+/* adjust mainOffset to the first cache line */
+void AdjustStartOffset(const std::map<int32_t, float>& lineHeights, int32_t startLine, int32_t cacheStartLine,
+    float mainGap, float& mainOffset)
+{
+    auto startLineIt = lineHeights.lower_bound(startLine);
+    for (auto it = lineHeights.lower_bound(cacheStartLine); it != startLineIt; ++it) {
+        mainOffset -= mainGap + it->second;
+    }
+}
+} // namespace
+
+void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset, int32_t cacheLine)
+{
+    const auto& info = gridLayoutInfo_;
+    const auto& props = DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
+    const Alignment align = GetAlignment(info.axis_, props);
 
     const auto& padding = *wrapper_->GetGeometryNode()->GetPadding();
     mainOffset += info.axis_ == Axis::HORIZONTAL ? 0.0f : padding.top.value_or(0.0f);
@@ -382,13 +400,7 @@ void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset, int32_t cach
     MinusPaddingToSize(padding, frameSize);
     const bool isRtl = props->GetNonAutoLayoutDirection() == TextDirection::RTL;
     const int32_t cacheStartLine = info.startMainLineIndex_ - cacheLine;
-    {
-        // adjust mainOffset to the first cache line
-        auto startLine = info.lineHeightMap_.lower_bound(info.startMainLineIndex_);
-        for (auto it = info.lineHeightMap_.lower_bound(cacheStartLine); it != startLine; ++it) {
-            mainOffset -= mainGap_ + it->second;
-        }
-    }
+    AdjustStartOffset(info.lineHeightMap_, info.startMainLineIndex_, cacheStartLine, mainGap_, mainOffset);
 
     auto endIt = info.gridMatrix_.upper_bound(std::max(info.endMainLineIndex_ + cacheLine, info.startMainLineIndex_));
     for (auto it = info.gridMatrix_.lower_bound(cacheStartLine); it != endIt; ++it) {
@@ -399,11 +411,8 @@ void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset, int32_t cach
         const bool isCache = it->first < info.startMainLineIndex_ || it->first > info.endMainLineIndex_;
         const auto& row = it->second;
         for (const auto& [c, itemIdx] : row) {
-            if (itemIdx < 0) {
+            if (itemIdx < 0 || (itemIdx == 0 && (it->first > 0 || c > 0))) {
                 // not top-left tile
-                continue;
-            }
-            if (itemIdx == 0 && (it->first > 0 || c > 0)) {
                 continue;
             }
             auto child = wrapper_->GetChildByIndex(itemIdx, isCache);
