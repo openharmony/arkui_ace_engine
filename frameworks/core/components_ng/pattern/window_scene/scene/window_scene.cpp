@@ -420,6 +420,7 @@ void WindowScene::DisposeSnapshotAndBlankWindow()
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     surfaceNode->SetBufferAvailableCallback(hotStartCallback_);
     CHECK_EQUAL_VOID(session_->GetSystemConfig().uiType_, "pc");
+    CHECK_EQUAL_VOID(session_->GetSystemConfig().freeMultiWindowEnable_, true);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto frameSize = geometryNode->GetFrameSize();
@@ -548,6 +549,7 @@ bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CHECK_NULL_RETURN(surfaceNode, false);
     surfaceNode->SetBufferAvailableCallback(hotStartCallback_);
     CHECK_EQUAL_RETURN(session_->GetSystemConfig().uiType_, "pc", false);
+    CHECK_EQUAL_RETURN(session_->GetSystemConfig().freeMultiWindowEnable_, true, false);
     CHECK_NULL_RETURN(dirty, false);
     auto geometryNode = dirty->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
