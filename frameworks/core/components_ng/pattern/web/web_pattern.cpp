@@ -1867,7 +1867,6 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
         TAG_LOGI(AceLogTag::ACE_WEB,
             "OnDirtyLayoutWrapperSwap; WebPattern is Offline Mode, WebId:%{public}d", GetWebId());
         offlineWebRendered_ = true;
-        delegate_->OnRenderToForeground();
         delegate_->ShowWebView();
     }
 
@@ -2705,6 +2704,7 @@ void WebPattern::InitInOfflineMode()
         return;
     }
     TAG_LOGI(AceLogTag::ACE_WEB, "Web offline mode type, webId:%{public}d", GetWebId());
+    delegate_->OnRenderToBackground();
     offlineWebInited_ = true;
     isActive_ = false;
     isVisible_ = false;
