@@ -161,7 +161,8 @@ private:
     static const Dimension ConvertTitleFontScaleValue(const Dimension& fontSizeValue);
     static const Dimension AdjustFontSizeScale(const Dimension& fontSizeValue, double fontScale);
     static void GetUserSettingLimit();
-
+    static void UpdateCancelButtonTextLayoutProperty(
+        const RefPtr<TextLayoutProperty>& textCancelLayoutProperty, const RefPtr<PickerTheme>& pickerTheme);
     static bool switchTimePickerFlag_;
     static bool switchDatePickerFlag_;
     static bool isShowTime_;

@@ -16,19 +16,8 @@
 #include "core/common/connect_server_manager.h"
 
 #include <dlfcn.h>
-#include <string>
 #include <unistd.h>
-
-#include "base/json/json_util.h"
-#include "base/log/log.h"
-#include "base/utils/utils.h"
-#include "core/common/ace_application_info.h"
-#include "core/common/ace_engine.h"
-#include "core/common/ace_page.h"
-#include "core/common/container.h"
 #include "core/common/layout_inspector.h"
-#include "core/event/ace_event_handler.h"
-
 #if defined(IOS_PLATFORM)
 #include "inspector/connect_inspector.h"
 #include <sys/sysctl.h>
@@ -142,9 +131,9 @@ void ConnectServerManager::InitConnectServer()
 {
 #if !defined(IOS_PLATFORM)
 #if defined(ANDROID_PLATFORM)
-    const std::string soDir = "libconnectserver_debugger.so";
+    const std::string soDir = "libark_connect_inspector.so";
 #else
-    const std::string soDir = "libconnectserver_debugger.z.so";
+    const std::string soDir = "libark_connect_inspector.z.so";
 #endif // ANDROID_PLATFORM
     handlerConnectServerSo_ = dlopen(soDir.c_str(), RTLD_LAZY);
     if (handlerConnectServerSo_ == nullptr) {
@@ -167,7 +156,7 @@ void ConnectServerManager::InitConnectServer()
 
 void ConnectServerManager::StartConnectServerWithSocketPair(int32_t socketFd)
 {
-    handlerConnectServerSo_ = dlopen("libconnectserver_debugger.z.so", RTLD_LAZY);
+    handlerConnectServerSo_ = dlopen("libark_connect_inspector.z.so", RTLD_LAZY);
     CHECK_NULL_VOID(handlerConnectServerSo_);
 
     auto startServerForSocketPair =

@@ -152,9 +152,9 @@ public:
     virtual RectF GetVisibleContentRect();
     virtual bool CheckHandleVisible(const RectF& paintRect) = 0;
 
-    virtual std::string GetPasteMimeType()
+    virtual std::vector<std::string> GetPasteMimeTypes()
     {
-        return "";
+        return std::vector<std::string>();
     }
 
     virtual void OnResetTextSelection() {}
@@ -188,7 +188,7 @@ public:
         const OffsetF& rightTop, const OffsetF& leftTop);
 
     void OnSelectionMenuOptionsUpdate(
-        const NG::OnCreateMenuCallback && onCreateMenuCallback, const NG::OnMenuItemClickCallback && onMenuItemClick);
+        const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick);
 
     float GetHandleDiameter();
     VectorF GetHostScale();
@@ -208,9 +208,21 @@ public:
     }
     virtual void OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag);
     void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info) override;
+    void OnHandleMoveStart(bool isFirst) override
+    {
+        isHandleDragging_ = true;
+    }
+    void OnHandleMoveDone(const RectF& rect, bool isFirst) override
+    {
+        isHandleDragging_ = false;
+    }
+    bool GetIsHandleDragging()
+    {
+        return isHandleDragging_;
+    }
     bool IsTouchAtHandle(const TouchEventInfo& info);
     bool IsClickAtHandle(const GestureEvent& info);
-    bool HasThreeDimensionTransform();
+    bool HasUnsupportedTransform();
     bool CheckSwitchToMode(HandleLevelMode mode) override;
 
     void OnUpdateOnCreateMenuCallback(SelectOverlayInfo& selectInfo)
@@ -256,20 +268,24 @@ protected:
     }
     void RegisterScrollingListener(const RefPtr<FrameNode> scrollableNode);
     void OnHandleScrolling(const WeakPtr<FrameNode>& scrollingNode);
+    virtual void UpdateTransformFlag();
+    bool CheckHasTransformAttr();
     std::optional<OverlayRequest> latestReqeust_;
     bool hasTransform_ = false;
     HandleLevelMode handleLevelMode_ = HandleLevelMode::OVERLAY;
     OnCreateMenuCallback onCreateMenuCallback_;
     OnMenuItemClickCallback onMenuItemClick_;
+    bool isHandleMoving_ = false;
 
 private:
-    void UpdateTransformFlag();
     void FindScrollableParentAndSetCallback(const RefPtr<FrameNode>& host);
     void RegisterParentScrollCallback(const RefPtr<FrameNode>& host, int32_t parentId);
     void ShowSelectOverlay(const OverlayRequest& request, bool hasClipboardData);
     void GetHandlePoints(const RectF& handleRect, std::vector<PointF>& points, bool handleOnTop);
     bool IsPointsInRegion(const std::vector<PointF>& points, const RectF& regionRect);
     bool CheckAndUpdateHostGlobalPaintRect();
+    bool CheckHasTransformMatrix(const RefPtr<RenderContext>& context);
+    bool isHandleDragging_ = false;
     bool isSingleHandle_ = false;
     bool isShowPaste_ = false;
     bool isShowMenu_ = true;

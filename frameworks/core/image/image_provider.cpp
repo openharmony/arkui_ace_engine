@@ -16,9 +16,6 @@
 #include "core/image/image_provider.h"
 
 #include "image_compressor.h"
-#include "include/core/SkGraphics.h"
-#include "include/core/SkStream.h"
-#include "modules/svg/include/SkSVGDOM.h"
 
 #ifdef USE_ROSEN_DRAWING
 #include "drawing/engine_adapter/skia_adapter/skia_data.h"
@@ -26,15 +23,12 @@
 #include "drawing/engine_adapter/skia_adapter/skia_graphics.h"
 #endif
 
-#include "base/log/ace_trace.h"
 #include "base/thread/background_task_executor.h"
 #include "core/common/container.h"
-#include "core/common/container_scope.h"
 #ifdef USE_ROSEN_DRAWING
 #include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
 #include "core/components_ng/render/adapter/rosen/drawing_image.h"
 #endif
-#include "core/event/ace_event_helper.h"
 #include "core/image/image_file_cache.h"
 #include "core/image/image_object.h"
 

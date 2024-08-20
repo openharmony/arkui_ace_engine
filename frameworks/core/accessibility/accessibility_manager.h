@@ -26,10 +26,15 @@ class AccessibilityElementInfo;
 class AccessibilityEventInfo;
 } // namespace OHOS::Accessibility
 
+namespace OHOS::Ace::NG {
+class WebPattern;
+} // namespace OHOS::Ace::NG
+
 namespace OHOS::Ace {
 
 struct AccessibilityEvent {
     int64_t nodeId = 0;
+    int64_t stackNodeId = -1;
     uint32_t windowId = 0;
     WindowsContentChangeTypes windowContentChangeTypes = CONTENT_CHANGE_TYPE_INVALID;
     WindowUpdateType windowChangeTypes = WINDOW_UPDATE_INVALID;
@@ -37,6 +42,7 @@ struct AccessibilityEvent {
     std::string componentType;
     std::string beforeText;
     std::string latestContent;
+    std::string textAnnouncedForAccessibility;
     double currentItemIndex = 0.0;
     double itemCount = 0.0;
     AccessibilityEventType type = AccessibilityEventType::UNKNOWN;
@@ -45,6 +51,21 @@ struct AccessibilityEvent {
 enum class AccessibilityVersion {
     JS_VERSION = 1,
     JS_DECLARATIVE_VERSION,
+};
+
+class AccessibilitySAObserverCallback {
+public:
+    explicit AccessibilitySAObserverCallback(int64_t accessibilityId) : accessibilityId_(accessibilityId)
+    {}
+    virtual ~AccessibilitySAObserverCallback() = default;
+    virtual bool OnState(bool state) = 0;
+
+    int64_t GetAccessibilityId() const
+    {
+        return accessibilityId_;
+    }
+private:
+    int64_t accessibilityId_ = -1;
 };
 
 class AccessibilityChildTreeCallback {
@@ -84,6 +105,8 @@ public:
     ~AccessibilityManager() override = default;
 
     virtual void SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent) = 0;
+    virtual void SendWebAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent,
+        const RefPtr<NG::WebPattern>& webPattern) {}
     virtual void UpdateVirtualNodeFocus() = 0;
     virtual int64_t GenerateNextAccessibilityId() = 0;
     virtual RefPtr<AccessibilityNode> CreateSpecializedNode(
@@ -137,11 +160,14 @@ public:
         const Accessibility::AccessibilityEventInfo& eventInfo, int64_t uiExtensionOffset) {}
 #endif
 #ifdef WEB_SUPPORTED
-    virtual void UpdateAccessibilityFocusId(const RefPtr<PipelineBase>& context, int64_t accessibilityId,
-        bool isFocus) {}
-    virtual int64_t GetAccessibilityFocusId() const
+    virtual bool RegisterWebInteractionOperationAsChildTree(int64_t accessibilityId,
+        const WeakPtr<NG::WebPattern>& webPattern)
     {
-        return -1;
+        return false;
+    }
+    virtual bool DeregisterWebInteractionOperationAsChildTree(int32_t treeId)
+    {
+        return false;
     }
 #endif
     void SetVersion(AccessibilityVersion version)
@@ -164,6 +190,12 @@ public:
     virtual void DeregisterInteractionOperationAsChildTree() {};
     virtual void SendEventToAccessibilityWithNode(const AccessibilityEvent& accessibilityEvent,
         const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context) {};
+
+    virtual void RegisterAccessibilitySAObserverCallback(
+        int64_t elementId, const std::shared_ptr<AccessibilitySAObserverCallback> &callback) {};
+
+    virtual void DeregisterAccessibilitySAObserverCallback(int64_t elementId) {};
+
     bool IsRegister()
     {
         return isReg_;

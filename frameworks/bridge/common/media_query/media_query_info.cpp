@@ -15,9 +15,7 @@
 
 #include "frameworks/bridge/common/media_query/media_query_info.h"
 
-#include "base/log/log.h"
 #include "core/common/container.h"
-#include "core/common/thread_checker.h"
 #include "core/components/container_modal/container_modal_constants.h"
 
 namespace OHOS::Ace::Framework {

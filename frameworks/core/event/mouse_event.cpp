@@ -15,10 +15,6 @@
 
 #include "core/event/mouse_event.h"
 
-#include "base/log/log.h"
-#include "core/accessibility/accessibility_utils.h"
-#include "core/common/ace_application_info.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {

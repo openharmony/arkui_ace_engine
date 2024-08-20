@@ -113,6 +113,11 @@ void RefreshModelNG::SetLoadingText(const std::string& loadingText)
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, LoadingText, loadingText);
 }
 
+void RefreshModelNG::ResetLoadingText()
+{
+    ACE_RESET_LAYOUT_PROPERTY(RefreshLayoutProperty, LoadingText);
+}
+
 void RefreshModelNG::SetOnStateChange(StateChangeEvent&& stateChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -183,6 +188,11 @@ void RefreshModelNG::SetCustomBuilder(const RefPtr<NG::UINode>& customBuilder)
     auto pattern = frameNode->GetPattern<RefreshPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->AddCustomBuilderNode(customBuilder);
+}
+
+void RefreshModelNG::SetIsCustomBuilderExist(bool isCustomBuilderExist)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsCustomBuilderExist, isCustomBuilderExist);
 }
 
 void RefreshModelNG::SetCustomBuilder(FrameNode* frameNode, FrameNode* customBuilder)

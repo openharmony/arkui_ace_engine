@@ -238,6 +238,12 @@ public:
         bool enableInspector, const NG::SnapshotParam& param)
     {}
 
+    virtual std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetSyncSnapshot(const std::string& componentId,
+        const NG::SnapshotOptions& options)
+    {
+        return {};
+    }
+
     virtual bool GetAssetContent(const std::string& url, std::string& content) = 0;
     virtual bool GetAssetContent(const std::string& url, std::vector<uint8_t>& content) = 0;
     virtual std::string GetAssetPath(const std::string& url) = 0;

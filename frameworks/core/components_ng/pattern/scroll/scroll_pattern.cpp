@@ -79,7 +79,6 @@ void ScrollPattern::OnModifyDone()
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     Register2DragDropManager();
-    SetEdgeRtl();
 }
 
 bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -429,11 +428,13 @@ void ScrollPattern::FireOnDidScroll(float scroll)
         scrollY.SetValue(scrollVpValue);
     }
     auto scrollState = GetScrollState();
+    bool isTriggered = false;
     if (!NearZero(scroll)) {
         onScroll(scrollX, scrollY, scrollState);
+        isTriggered = true;
     }
     if (scrollStop_ && !GetScrollAbort()) {
-        if (scrollState != ScrollState::IDLE) {
+        if (scrollState != ScrollState::IDLE || !isTriggered) {
             onScroll(0.0_vp, 0.0_vp, ScrollState::IDLE);
         }
     }
@@ -1164,12 +1165,8 @@ void ScrollPattern::DumpAdvanceInfo()
     ScrollablePattern::DumpAdvanceInfo();
     DumpLog::GetInstance().AddDesc(std::string("currentOffset: ").append(std::to_string(currentOffset_)));
     GetScrollSnapAlignDumpInfo();
-    auto snapPaginationStr = std::string("snapPagination: [");
-    auto iter = snapPaginations_.begin();
-    for (; iter != snapPaginations_.end(); ++iter) {
-        snapPaginationStr = snapPaginationStr.append((*iter).ToString()).append(" ");
-    }
-    DumpLog::GetInstance().AddDesc(snapPaginationStr.append("]"));
+    auto snapPaginationStr = std::string("snapPagination: ");
+    DumpLog::GetInstance().AddDesc(snapPaginationStr.append(GetScrollSnapPagination()));
     enableSnapToSide_.first ? DumpLog::GetInstance().AddDesc("enableSnapToStart: true")
                             : DumpLog::GetInstance().AddDesc("enableSnapToStart: false");
     enableSnapToSide_.second ? DumpLog::GetInstance().AddDesc("enableSnapToEnd: true")
@@ -1209,23 +1206,42 @@ void ScrollPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     initialOffset->Put("xOffset", GetInitialOffset().GetX().ToString().c_str());
     initialOffset->Put("yOffset", GetInitialOffset().GetY().ToString().c_str());
     json->PutExtAttr("initialOffset", initialOffset, filter);
+    json->PutExtAttr("enablePaging", IsEnablePagingValid(), filter);
+
+    auto scrollSnapOptions = JsonUtil::Create(true);
+    if (IsSnapToInterval()) {
+        scrollSnapOptions->Put("snapPagination", intervalSize_.ToString().c_str());
+    } else {
+        auto snapPaginationArr = JsonUtil::CreateArray(true);
+        auto iter = snapPaginations_.begin();
+        for (auto i = 0; iter != snapPaginations_.end(); ++iter, ++i) {
+            snapPaginationArr->Put(std::to_string(i).c_str(), (*iter).ToString().c_str());
+        }
+        scrollSnapOptions->Put("snapPagination", snapPaginationArr);
+    }
+    scrollSnapOptions->Put("enableSnapToStart", enableSnapToSide_.first);
+    scrollSnapOptions->Put("enableSnapToEnd", enableSnapToSide_.second);
+    json->PutExtAttr("scrollSnap", scrollSnapOptions, filter);
+}
+
+std::string ScrollPattern::GetScrollSnapPagination() const
+{
+    auto snapPaginationStr = std::string("");
+    if (IsSnapToInterval()) {
+        snapPaginationStr = intervalSize_.ToString();
+    } else {
+        snapPaginationStr.append("[");
+        auto iter = snapPaginations_.begin();
+        for (; iter != snapPaginations_.end(); ++iter) {
+            snapPaginationStr = snapPaginationStr.append((*iter).ToString()).append(" ");
+        }
+        snapPaginationStr.append("]");
+    }
+    return snapPaginationStr;
 }
 
 bool ScrollPattern::OnScrollSnapCallback(double targetOffset, double velocity)
 {
     return ScrollSnapTrigger();
-}
-
-void ScrollPattern::SetEdgeRtl()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto layoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto scrollEdgeEffect = GetScrollEdgeEffect();
-    CHECK_NULL_VOID(scrollEdgeEffect);
-    auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
-    auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
-    scrollEdgeEffect->SetScrollRtl(layoutDirection == TextDirection::RTL && axis == Axis::HORIZONTAL);
 }
 } // namespace OHOS::Ace::NG

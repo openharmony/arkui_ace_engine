@@ -15,11 +15,8 @@
 
 #include "cj_video_ffi.h"
 
-#include <cinttypes>
 
-#include "base/json/json_util.h"
 #include "cj_lambda.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
@@ -214,6 +211,9 @@ void FfiOHOSAceFrameworkVideoOnFullscreenChange(void (*callback)(bool value))
 int64_t FfiOHOSAceFrameworkVideoControllerCreate()
 {
     auto controller = FFIData::Create<NativeVideoController>();
+    if (controller == nullptr) {
+        return FFI_ERROR_CODE;
+    }
     return controller->GetID();
 }
 

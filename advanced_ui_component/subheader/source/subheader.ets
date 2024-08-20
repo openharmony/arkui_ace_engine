@@ -181,6 +181,8 @@ export struct SubHeader {
     end: LengthMetrics.resource($r('sys.float.margin_right')),
   };
   @Provide subHeaderTheme: SubHeaderTheme = new SubHeaderTheme();
+  isFollowingSystemFontScale: boolean = false;
+  appMaxFontScale: number = 3.2;
   constraintWidth: number = 0;
   paddingLeft: number = 2;
 
@@ -199,8 +201,10 @@ export struct SubHeader {
   private commonContentPadding() {
     .padding({
       end: LengthMetrics.resource($r('sys.float.padding_level0')),
-      top: LengthMetrics.resource($r('sys.float.padding_level4')),
-      bottom: LengthMetrics.resource($r('sys.float.padding_level4')),
+      top: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.resource($r('sys.float.padding_level0'))
+        : LengthMetrics.resource($r('sys.float.padding_level4')),
+      bottom: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.resource($r('sys.float.padding_level0'))
+        : LengthMetrics.resource($r('sys.float.padding_level4')),
     })
   }
 
@@ -208,8 +212,10 @@ export struct SubHeader {
   private commonListPadding() {
     .padding({
       end: LengthMetrics.resource($r('sys.float.padding_level6')),
-      top: LengthMetrics.resource($r('sys.float.padding_level4')),
-      bottom: LengthMetrics.resource($r('sys.float.padding_level4')),
+      top: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.resource($r('sys.float.padding_level0'))
+        : LengthMetrics.resource($r('sys.float.padding_level4')),
+      bottom: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.resource($r('sys.float.padding_level0'))
+        : LengthMetrics.resource($r('sys.float.padding_level4')),
     })
   }
 
@@ -241,9 +247,27 @@ export struct SubHeader {
     })
   }
 
+  updateFontScale(): number {
+    try {
+      let uiContext: UIContext = this.getUIContext();
+      let systemFontScale = (uiContext.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1;
+      if(!this.isFollowingSystemFontScale) {
+        return 1;
+      }
+      return Math.min(systemFontScale, this.appMaxFontScale);
+    } catch (exception) {
+      let code: number = (exception as BusinessError).code;
+      let message: string = (exception as BusinessError).message;
+      hilog.error(0x3900, 'Ace', `Faild to init fontsizescale info,cause, code: ${code}, message: ${message}`);
+      return 1;
+    }
+  }
+
   async aboutToAppear(): Promise<void> {
-    let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
-    this.fontSize = context.config?.fontSizeScale ?? 1;
+    let uiContext: UIContext = this.getUIContext();
+    this.isFollowingSystemFontScale = uiContext.isFollowingSystemFontScale();
+    this.appMaxFontScale = uiContext.getMaxFontScale();
+    this.fontSize = this.updateFontScale();
     if (this.isSuitableAging()) {
       this.ageing = true;
       this.subHeaderModifier.isAgeing = this.ageing;
@@ -302,6 +326,9 @@ export struct SubHeader {
         Row() {
           this.leftArea();
         }
+        .margin({
+          top: this.fontSize >= MIN_FONT_SIZE ? $r('sys.float.padding_level8') : ''
+        })
         .width('100%')
         .flexShrink(1)
 
@@ -327,7 +354,7 @@ export struct SubHeader {
   onMeasureSize(selfLayoutInfo: GeometryInfo, children: Measurable[], constraint: ConstraintSizeOptions): SizeResult {
     let result: SizeResult = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
     let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
-    this.fontSize = context.config?.fontSizeScale ?? 1;
+    this.fontSize = this.updateFontScale();
     if (this.isSuitableAging()) {
       this.ageing = true;
       this.subHeaderModifier.isAgeing = this.ageing;
@@ -492,6 +519,7 @@ export struct SubHeader {
           fontColor: this.subHeaderTheme.fontPrimaryColor,
         })
         .attributeModifier(this.primaryTitleModifier)
+        .accessibilityLevel('yes')
         .width('100%')
       Text($$.subContent)
         .secondaryTitleStyles({
@@ -505,6 +533,7 @@ export struct SubHeader {
           top: $r('sys.float.padding_level1'),
         })
         .attributeModifier(this.secondaryTitleModifier)
+        .accessibilityLevel('yes')
     }
     .commonContentPadding()
     .alignItems(HorizontalAlign.Start)
@@ -528,6 +557,7 @@ export struct SubHeader {
           this.changeFlexAlign(FlexAlign.SpaceBetween);
         })
         .attributeModifier(this.secondaryTitleModifier)
+        .accessibilityLevel('yes')
     }
     .alignItems(HorizontalAlign.Start)
     .commonListPadding()
@@ -576,6 +606,7 @@ export struct SubHeader {
           this.changeFlexAlign(FlexAlign.SpaceBetween);
         })
         .attributeModifier(this.primaryTitleModifier)
+        .accessibilityLevel('yes')
     }
     .alignItems(HorizontalAlign.Start)
     .commonContentPadding()
@@ -971,7 +1002,7 @@ class Util {
     } else if (typeof fontSize === 'number') {
       return fontSize;
     } else {
-      return resourceManager.getSystemResourceManager().getNumber(fontSize);
+      return getContext().resourceManager.getNumber(fontSize);
     }
   }
 

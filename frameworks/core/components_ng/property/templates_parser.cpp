@@ -215,7 +215,7 @@ std::pair<std::vector<double>, double> ParseArgsWithAutoFill(
     if (!CheckAutoFillParameter(args, size, lens, retTemplates)) {
         return std::make_pair(lens, gap);
     }
-    size_t countNonRepeat = 0;
+    int32_t countNonRepeat = 0;
     int countRepeat = 0;
     double sizeRepeat = 0.0;
     double sizeNonRepeat = 0.0;
@@ -250,8 +250,8 @@ std::pair<std::vector<double>, double> ParseArgsWithAutoFill(
         count = (sizeLeft + gap) / (sizeRepeat + countRepeat * gap);
         count = LessOrEqual(count, 1) ? 1 : floor(count);
     } else {
-        if (childrenCount >= static_cast<int32_t>(countNonRepeat) && !retTemplates.empty()) {
-            count = ceil((size - countNonRepeat) * 1.0 / (retTemplates.size() - countNonRepeat));
+        if (childrenCount >= countNonRepeat && !retTemplates.empty()) {
+            count = ceil((size - countNonRepeat) * 1.0 / (static_cast<int32_t>(retTemplates.size()) - countNonRepeat));
         }
     }
     lens.insert(lens.end(), prefixLens.begin(), prefixLens.end());

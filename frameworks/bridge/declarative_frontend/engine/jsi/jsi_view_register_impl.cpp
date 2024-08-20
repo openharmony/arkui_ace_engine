@@ -114,6 +114,7 @@
 #include "bridge/declarative_frontend/jsview/js_menu.h"
 #include "bridge/declarative_frontend/jsview/js_menu_item.h"
 #include "bridge/declarative_frontend/jsview/js_menu_item_group.h"
+#include "bridge/declarative_frontend/jsview/js_mock.h"
 #include "bridge/declarative_frontend/jsview/js_nav_path_stack.h"
 #include "bridge/declarative_frontend/jsview/js_navdestination.h"
 #include "bridge/declarative_frontend/jsview/js_navigation.h"
@@ -1154,6 +1155,7 @@ void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)
     JSRenderingContextSettings::JSBind(globalObj);
     JSRenderImage::JSBind(globalObj, nativeEngine);
     JSPath2D::JSBind(globalObj);
+    JSMock::JSBind(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

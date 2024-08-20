@@ -136,7 +136,13 @@ public:
         return false;
     }
 
-    GridLayoutInfo GetGridLayoutInfo() const
+    const GridLayoutInfo& GetGridLayoutInfo() const
+    {
+        return gridLayoutInfo_;
+    }
+
+    /* caution when using mutable reference */
+    GridLayoutInfo& GetMutableLayoutInfo()
     {
         return gridLayoutInfo_;
     }
@@ -149,6 +155,7 @@ public:
         gridLayoutInfo_.endMainLineIndex_ = 0;
         gridLayoutInfo_.ResetPositionFlags();
         gridLayoutInfo_.irregularItemsPosition_.clear();
+        gridLayoutInfo_.clearStretch_ = true;
     }
 
     void SetIrregular(bool value)
@@ -209,8 +216,8 @@ public:
 
     void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::AUTO,
         std::optional<float> extraOffset = std::nullopt) override;
-    void AnimateToTarget(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper);
-    bool AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper);
+    void AnimateToTarget(ScrollAlign align, const RefPtr<LayoutAlgorithmWrapper>& algo);
+    bool AnimateToTargetImpl(ScrollAlign align, const RefPtr<LayoutAlgorithmWrapper>& algo);
 
     int32_t GetOriginalIndex() const;
     int32_t GetCrossCount() const;
@@ -225,6 +232,7 @@ public:
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
     Rect GetItemRect(int32_t index) const override;
+    int32_t GetItemIndex(double x, double y) const override;
 
     bool IsNeedInitClickEventRecorder() const override
     {
@@ -332,8 +340,10 @@ private:
     double GetNearestDistanceFromChildToCurFocusItemInCrossAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);
     void ResetAllDirectionsStep();
 
+    std::string GetIrregularIndexesString() const;
+
     void CheckGridItemRange(const std::pair<int32_t, int32_t> &range);
-    
+
     bool supportAnimation_ = false;
     bool isConfigScrollable_ = false;
 

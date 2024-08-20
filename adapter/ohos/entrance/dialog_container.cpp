@@ -345,7 +345,13 @@ void DialogContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<Ac
         TaskExecutor::TaskType::UI, "ArkUIDialogFrameReportInit");
     ThemeConstants::InitDeviceType();
     // Load custom style at UI thread before frontend attach, to make sure style can be loaded before building dom tree.
-    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
+    RefPtr<ThemeManagerImpl> themeManager = nullptr;
+    if (SystemProperties::GetResourceDecoupling()) {
+        auto resAdapter = ResourceAdapter::CreateV2();
+        themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resAdapter);
+    } else {
+        themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
+    }
     if (themeManager) {
         pipelineContext_->SetThemeManager(themeManager);
         // Init resource
@@ -555,13 +561,7 @@ bool DialogContainer::ShowToastDialogWindow(
         window->SetTouchable(false);
     }
     window->SetNeedDefaultAnimation(false);
-    OHOS::Rosen::WMError ret = window->Show();
-    if (ret != OHOS::Rosen::WMError::WM_OK) {
-        TAG_LOGE(AceLogTag::ACE_DIALOG, "DialogContainer ShowToastDialogWindow Show window failed code: %{public}d",
-            static_cast<int32_t>(ret));
-        return false;
-    }
-    ret = window->MoveTo(posX, posY);
+    OHOS::Rosen::WMError ret = window->MoveTo(posX, posY);
     if (ret != OHOS::Rosen::WMError::WM_OK) {
         TAG_LOGW(AceLogTag::ACE_DIALOG, "DialogContainer ShowToastDialogWindow MoveTo window failed code: %{public}d",
             static_cast<int32_t>(ret));
@@ -570,6 +570,12 @@ bool DialogContainer::ShowToastDialogWindow(
     ret = window->Resize(width, height);
     if (ret != OHOS::Rosen::WMError::WM_OK) {
         TAG_LOGW(AceLogTag::ACE_DIALOG, "DialogContainer ShowToastDialogWindow Resize window failed code: %{public}d",
+            static_cast<int32_t>(ret));
+        return false;
+    }
+    ret = window->Show();
+    if (ret != OHOS::Rosen::WMError::WM_OK) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "DialogContainer ShowToastDialogWindow Show window failed code: %{public}d",
             static_cast<int32_t>(ret));
         return false;
     }
@@ -621,5 +627,31 @@ void DialogContainer::SetFontScaleAndWeightScale(int32_t instanceId)
     float fontWeightScale = SystemProperties::GetFontWeightScale();
     Container::SetFontScale(instanceId, fontScale);
     Container::SetFontWeightScale(instanceId, fontWeightScale);
+}
+
+void DialogContainer::UpdateConfiguration(const ParsedConfig& parsedConfig)
+{
+    if (!parsedConfig.IsValid()) {
+        LOGW("DialogContainer::OnConfigurationUpdated param is empty");
+        return;
+    }
+
+    CHECK_NULL_VOID(pipelineContext_);
+    auto themeManager = pipelineContext_->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto resConfig = GetResourceConfiguration();
+    if (!parsedConfig.colorMode.empty()) {
+        if (parsedConfig.colorMode == "dark") {
+            SystemProperties::SetColorMode(ColorMode::DARK);
+            resConfig.SetColorMode(ColorMode::DARK);
+        } else {
+            SystemProperties::SetColorMode(ColorMode::LIGHT);
+            resConfig.SetColorMode(ColorMode::LIGHT);
+        }
+    }
+
+    SetResourceConfiguration(resConfig);
+    themeManager->UpdateConfig(resConfig);
+    themeManager->LoadResourceThemes();
 }
 } // namespace OHOS::Ace::Platform

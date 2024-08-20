@@ -174,7 +174,7 @@ HWTEST_F(ClickEventTestNg, ClickEventActuatorTest003, TestSize.Level1)
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
     EXPECT_NE(getEventTargetImpl, nullptr);
     TouchTestResult finalResult;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     clickEventActuator.OnCollectTouchTarget(
         COORDINATE_OFFSET, CLICK_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
     EXPECT_TRUE(finalResult.empty());
@@ -266,7 +266,7 @@ HWTEST_F(ClickEventTestNg, ClickEventActuatorTest004, TestSize.Level1)
     EXPECT_NE(getEventTargetImpl, nullptr);
 
     TouchTestResult finalResult;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     std::string result;
     GestureEventFunc callback = [&result](GestureEvent& info) { result = RESULT_SUCCESS; };
 
@@ -316,7 +316,7 @@ HWTEST_F(ClickEventTestNg, ClickEventActuatorTest005, TestSize.Level1)
     clickEventActuator.AddClickEvent(clickEvent);
 
     TouchTestResult finalResult;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     clickEventActuator.OnCollectTouchTarget(
         COORDINATE_OFFSET, CLICK_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
     EXPECT_EQ(finalResult.size(), CLICK_TEST_RESULT_SIZE_1);

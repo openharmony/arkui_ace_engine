@@ -82,7 +82,7 @@ OffsetF SubMenuLayoutAlgorithm::GetSubMenuLayoutOffset(LayoutWrapper* layoutWrap
 {
     OffsetF position;
     auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
-    position = MenuLayoutAvoidAlgorithm(parentMenuItem, size, stacked);
+    position = MenuLayoutAvoidAlgorithm(parentMenuItem, size, stacked, layoutWrapper);
     if (layoutDirection == TextDirection::RTL) {
         position.SetX(wrapperSize_.Width() - position.GetX() - size.Width());
     }
@@ -90,12 +90,21 @@ OffsetF SubMenuLayoutAlgorithm::GetSubMenuLayoutOffset(LayoutWrapper* layoutWrap
 }
 
 OffsetF SubMenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(const RefPtr<FrameNode>& parentMenuItem,
-    const SizeF& size, bool stacked)
+    const SizeF& size, bool stacked, LayoutWrapper* layoutWrapper)
 {
     auto pipelineContext = PipelineContext::GetMainPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, NG::OffsetF(0.0f, 0.0f));
     auto menuItemSize = parentMenuItem->GetGeometryNode()->GetFrameSize();
     position_ = GetSubMenuPosition(parentMenuItem, stacked);
+    if (layoutWrapper != nullptr) {
+        auto menuLayoutProperty = layoutWrapper->GetLayoutProperty();
+        CHECK_NULL_RETURN(menuLayoutProperty, NG::OffsetF(0.0f, 0.0f));
+        auto layoutDirection = menuLayoutProperty->GetNonAutoLayoutDirection();
+        if (layoutDirection == TextDirection::RTL) {
+            float leftSpace = position_.GetX() - menuItemSize.Width();
+            position_ = OffsetF(wrapperSize_.Width() - leftSpace, position_.GetY());
+        }
+    }
     float x = HorizontalLayoutSubMenu(size, position_.GetX(), menuItemSize);
     x = std::clamp(x, paddingStart_, wrapperSize_.Width() - size.Width() - paddingEnd_);
     float y = 0.0f;
@@ -205,11 +214,20 @@ float SubMenuLayoutAlgorithm::VerticalLayoutSubMenu(const SizeF& size, float pos
 
 // returns submenu horizontal offset
 float SubMenuLayoutAlgorithm::HorizontalLayoutSubMenu(
-    const SizeF& size, float position, const SizeF& menuItemSize)
+    const SizeF& size, float position, const SizeF& menuItemSize, LayoutWrapper* layoutWrapper)
 {
     float wrapperWidth = wrapperSize_.Width();
-    float rightSpace = wrapperWidth - position;
+    float rightSpace = wrapperWidth - position - paddingEnd_;
     float leftSpace = position - menuItemSize.Width();
+    if (layoutWrapper != nullptr) {
+        auto menuLayoutProperty = layoutWrapper->GetLayoutProperty();
+        CHECK_NULL_RETURN(menuLayoutProperty, 0.0f);
+        auto layoutDirection = menuLayoutProperty->GetNonAutoLayoutDirection();
+        if (layoutDirection == TextDirection::RTL) {
+            rightSpace = position - menuItemSize.Width();
+            leftSpace = wrapperWidth - position;
+        }
+    }
     // can fit subMenu on the right side of menuItem
     if (rightSpace >= size.Width()) {
         return position;
@@ -266,13 +284,12 @@ void SubMenuLayoutAlgorithm::InitializePadding(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(theme);
     if (!menuPattern->IsSelectOverlayExtensionMenu()) {
         margin_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
-        optionPadding_ = margin_;
         paddingStart_ = static_cast<float>(theme->GetDefaultPaddingStart().ConvertToPx());
         paddingEnd_ = static_cast<float>(theme->GetDefaultPaddingEnd().ConvertToPx());
-        paddingTop_ = static_cast<float>(theme->GetDefaultPaddingTop().ConvertToPx());
-        paddingBottom_ = static_cast<float>(theme->GetDefaultPaddingBottomFixed().ConvertToPx());
-    } else {
-        optionPadding_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+        if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            paddingTop_ = static_cast<float>(theme->GetDefaultPaddingTop().ConvertToPx());
+            paddingBottom_ = static_cast<float>(theme->GetDefaultPaddingBottomFixed().ConvertToPx());
+        }
     }
 }
 
@@ -288,7 +305,6 @@ void SubMenuLayoutAlgorithm::InitializePaddingAPI12(LayoutWrapper* layoutWrapper
     CHECK_NULL_VOID(theme);
     if (!menuPattern->IsSelectOverlayExtensionMenu()) {
         margin_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
-        optionPadding_ = margin_;
         if (!hierarchicalParameters_) {
             paddingStart_ = static_cast<float>(theme->GetMenuLargeMargin().ConvertToPx());
             paddingEnd_ = static_cast<float>(theme->GetMenuLargeMargin().ConvertToPx());
@@ -296,8 +312,6 @@ void SubMenuLayoutAlgorithm::InitializePaddingAPI12(LayoutWrapper* layoutWrapper
             paddingStart_ = static_cast<float>(theme->GetMenuMediumMargin().ConvertToPx());
             paddingEnd_ = static_cast<float>(theme->GetMenuMediumMargin().ConvertToPx());
         }
-    } else {
-        optionPadding_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
     }
 }
 

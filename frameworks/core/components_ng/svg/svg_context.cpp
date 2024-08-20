@@ -66,11 +66,11 @@ void SvgContext::RemoveAnimator(int32_t key)
 
 void SvgContext::ControlAnimators(bool play)
 {
-    for (auto&& it : animators_) {
-        auto animator = it.second.Upgrade();
+    for (auto it = animators_.begin(); it != animators_.end();) {
+        auto animator = it->second.Upgrade();
         if (!animator) {
             LOGW("null animator in map");
-            animators_.erase(it.first);
+            it = animators_.erase(it);
             continue;
         }
         if (play) {
@@ -78,6 +78,7 @@ void SvgContext::ControlAnimators(bool play)
         } else {
             animator->Pause();
         }
+        ++it;
     }
 }
 
@@ -101,7 +102,7 @@ void SvgContext::AnimateFlush()
             it->second();
             ++it;
         } else {
-            animateCallbacks_.erase(it++);
+            it = animateCallbacks_.erase(it);
         }
     }
 }

@@ -30,8 +30,6 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void SyncInstanceId(const JSCallbackInfo& info);
     static void RestoreInstanceId(const JSCallbackInfo& info);
-private:
-    static int32_t restoreInstanceId_;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_SCOPE_UTIL_H

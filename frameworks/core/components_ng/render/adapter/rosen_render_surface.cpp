@@ -16,16 +16,9 @@
 
 #include "render_service_client/core/ui/rs_surface_node.h"
 #include "surface_utils.h"
-#include "sync_fence.h"
-
 #include "base/log/dump_log.h"
-#include "base/memory/referenced.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -38,7 +31,7 @@ const uint32_t ADJUST_WEB_DRAW_LENGTH = 3000;
 const uint32_t DEFAULT_WEB_DRAW_LENGTH = 6167;
 const std::string SURFACE_WIDTH = "surface_width";
 const std::string SURFACE_HEIGHT = "surface_height";
-const int32_t SIZE_LIMIT = 7999;
+const int32_t SIZE_LIMIT = 5999;
 const int32_t PERMITTED_DIFFERENCE = 100;
 const int32_t FAILED_LIMIT = 3;
 
@@ -269,12 +262,9 @@ void RosenRenderSurface::DrawBuffer(int32_t width, int32_t height)
         }
     }
     if (!surfaceNode) {
-        LOGE("RosenRenderSurface::surfaceNode is null");
         return;
     }
-    if (!CompareBufferSize(width, height, surfaceNode)) {
-        LOGE("RosenRenderSurface buffer is not matched.");
-    }
+    CompareBufferSize(width, height, surfaceNode);
     ACE_SCOPED_TRACE("Web DrawBuffer");
     rosenRenderContext->StartRecording();
     auto rsNode = rosenRenderContext->GetRSNode();
@@ -320,6 +310,8 @@ bool RosenRenderSurface::CompareBufferSize(int32_t width, int32_t height,
         failTimes_++;
         if (failTimes_ <= FAILED_LIMIT) {
             pipeline->SetIsFreezeFlushMessage(true);
+            ACE_SCOPED_TRACE("Web SetIsFreezeFlushMessage (width %d, height %d, bufferWidth %d, bufferHeight %d)",
+                width, height, bufferWidth, bufferHeight);
             return false;
         }
     }
@@ -361,8 +353,6 @@ void RosenRenderSurface::ConsumeWebBuffer()
             int32_t stepStear = bufferWidth - ADJUST_WEB_DRAW_LENGTH * 2;
             orgin_.SetX(stepStear * ADJUST_WEB_DRAW_LENGTH);
         }
-    } else {
-        LOGE("ConsumeWebBuffer axis is not vertical or horizontal");
     }
     LOGD("ConsumeWebBuffer x : %{public}f, y : %{public}f, width : %{public}d, height : %{public}d",
         orgin_.GetX(), orgin_.GetY(), bufferWidth, bufferHeight);

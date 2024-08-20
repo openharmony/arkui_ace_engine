@@ -83,8 +83,6 @@ const char THEME_PATTERN_LINEAR_INDICATOR[] = "linear_indicator_pattern";
 
 const char THEME_BLUR_STYLE_COMMON[] = "blur_style_common";
 const char THEME_PATTERN_SHADOW[] = "shadow_pattern";
-const char THEME_PATTERN_LINEAR_LAYOUT[] = "linear_layout_pattern";
-const char THEME_PATTERN_STACK[] = "stack_pattern";
 const char THEME_PATTERN_CONTAINER_MODAL[] = "container_modal_pattern";
 
 // pattern general attributes

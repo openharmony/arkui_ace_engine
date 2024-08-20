@@ -21,6 +21,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "core/components/search/search_theme.h"
+#include "core/components_ng/pattern/search/search_overlay_modifier.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/node_paint_method.h"
 
@@ -30,31 +31,21 @@ class SearchPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(SearchPaintMethod, NodePaintMethod)
 
 public:
-    SearchPaintMethod(const SizeF& buttonSize, const std::string& searchButton, bool isEnabled)
-        : buttonSize_(buttonSize), searchButton_(searchButton), isSearchButtonEnabled_(isEnabled) {};
+    SearchPaintMethod(const RefPtr<SearchOverlayModifier>& searchOverlayModifier, const SizeF& buttonSize,
+        const std::string& searchButton, bool isEnabled)
+        : searchOverlayModifier_(searchOverlayModifier), buttonSize_(buttonSize), searchButton_(searchButton),
+          isSearchButtonEnabled_(isEnabled) {};
     ~SearchPaintMethod() override = default;
 
-    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
+    RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper) override
+    {
+        return searchOverlayModifier_;
+    }
+
+    void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
 
 private:
-    struct DividerOffsetsParams {
-        bool isRTL;
-        OHOS::Ace::NG::SizeF searchSize;
-        OHOS::Ace::Dimension iconHeight;
-        double dividerSpace;
-        double searchSpace;
-        double searchDividerWidth;
-        float rightOffset;
-        float leftOffset;
-        float topPadding;
-        float bottomPadding;
-    };
-    void PaintSearch(RSCanvas& canvas, PaintWrapper* paintWrapper) const;
-    std::tuple<OHOS::Ace::Dimension, double, double, double, OHOS::Ace::Color> GetThemeAttributes(
-        const RefPtr<OHOS::Ace::SearchTheme>& searchTheme) const;
-    std::tuple<float, float, float, float> GetPaddingOffsets(PaintWrapper* paintWrapper) const;
-    std::tuple<float, float, float> CalculateDividerOffsets(const DividerOffsetsParams& params) const;
-
+    RefPtr<SearchOverlayModifier> searchOverlayModifier_;
     SizeF buttonSize_;
     std::string searchButton_;
     bool isSearchButtonEnabled_ = false;

@@ -15,17 +15,8 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_native_view_ffi.h"
 
-#include <securec.h>
-#include <cinttypes>
 
 #include "bridge/cj_frontend/cppview/native_view.h"
-#include "ffi_remote_data.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
-#include "core/components_ng/pattern/image/image_model_ng.h"
-#include "core/components_ng/pattern/linear_layout/column_model_ng.h"
-#include "core/components_ng/pattern/linear_layout/row_model_ng.h"
-#include "core/components_ng/pattern/linear_split/linear_split_model_ng.h"
-#include "core/components_ng/pattern/navigator/navigator_model_ng.h"
 
 using namespace OHOS::Ace::Framework;
 using namespace OHOS::FFI;
@@ -72,6 +63,9 @@ int64_t FfiOHOSAceFrameworkNativeViewCtor(int64_t remoteId)
 {
     auto remoteView = RemoteData::Create<RemoteView>(remoteId);
     auto view = FFIData::Create<NativeView>(remoteView);
+    if (view == nullptr) {
+        return FFI_ERROR_CODE;
+    }
     return view->GetID();
 }
 
@@ -103,6 +97,16 @@ bool FfiOHOSAceFrameworkNativeViewNeedsUpdate(int64_t nativeViewId)
         return false;
     }
     return nativeView->NeedsUpdate();
+}
+
+bool FfiOHOSAceFrameworkNativeViewIsFirstRender(int64_t nativeViewId)
+{
+    auto nativeView = FFIData::GetData<NativeView>(nativeViewId);
+    if (!nativeView) {
+        LOGE("FfiOHOSAceFrameworkNativeViewIsFirstRender fail, no NativeView of %{public}" PRId64 ".", nativeViewId);
+        return false;
+    }
+    return nativeView->IsFirstRender();
 }
 
 void FfiOHOSAceFrameworkNativeViewMarkStatic(int64_t nativeViewId)

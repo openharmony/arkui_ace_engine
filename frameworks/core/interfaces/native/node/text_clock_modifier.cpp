@@ -211,5 +211,29 @@ const ArkUITextClockModifier* GetTextClockModifier()
 
     return &modifier;
 }
+
+const CJUITextClockModifier* GetCJUITextClockModifier()
+{
+    static const CJUITextClockModifier modifier = {
+        TextClockModifier::SetFormat,
+        TextClockModifier::ResetFormat,
+        TextClockModifier::SetFontColor,
+        TextClockModifier::ResetFontColor,
+        TextClockModifier::SetFontSize,
+        TextClockModifier::ResetFontSize,
+        TextClockModifier::SetFontStyle,
+        TextClockModifier::ResetFontStyle,
+        TextClockModifier::SetFontWeight,
+        TextClockModifier::ResetFontWeight,
+        TextClockModifier::SetFontFamily,
+        TextClockModifier::ResetFontFamily,
+        TextClockModifier::SetTextShadow,
+        TextClockModifier::ResetTextShadow,
+        TextClockModifier::SetFontFeature,
+        TextClockModifier::ResetFontFeature
+    };
+
+    return &modifier;
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

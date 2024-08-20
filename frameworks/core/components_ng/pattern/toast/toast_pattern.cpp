@@ -103,8 +103,14 @@ Dimension ToastPattern::GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper)
     CHECK_NULL_RETURN(toastProp, Dimension(0.0));
     auto textHeight = text->GetGeometryNode()->GetMarginFrameSize().Height();
     Dimension offsetY;
-    const auto& safeArea = toastProp->GetSafeAreaInsets();
-    auto safeAreaOffset = safeArea ? safeArea->bottom_.Length() : 0.0f;
+    auto safeAreaManager = context->GetSafeAreaManager();
+    auto safeAreaOffset = safeAreaManager ? safeAreaManager->GetSafeAreaWithoutProcess().bottom_.Length() : 0;
+    auto showMode = toastProp->GetShowModeValue(ToastShowMode::DEFAULT);
+    if (showMode == ToastShowMode::DEFAULT) {
+        auto keyboardInset = safeAreaManager ? safeAreaManager->GetKeyboardInset().Length() : 0;
+        auto keyboardOffset = GreatNotEqual(keyboardInset, 0) ? keyboardInset : 0;
+        safeAreaOffset = safeAreaOffset + keyboardOffset;
+    }
     if (!toastProp->HasToastAlignment()) {
         auto toastBottom = GetBottomValue(layoutWrapper);
         toastBottom_ = toastBottom;
@@ -156,7 +162,11 @@ void ToastPattern::BeforeCreateLayoutWrapper()
 
     auto toastNode = GetHost();
     CHECK_NULL_VOID(toastNode);
-    UpdateToastSize(toastNode);
+    auto pipelineContext = IsDefaultToast() ? toastNode->GetContextRefPtr() : GetMainPipelineContext();
+    if (!pipelineContext) {
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "toast get pipelineContext failed");
+        return;
+    }
 
     auto textNode = DynamicCast<FrameNode>(toastNode->GetFirstChild());
     CHECK_NULL_VOID(textNode);
@@ -200,9 +210,10 @@ void ToastPattern::UpdateTextSizeConstraint(const RefPtr<FrameNode>& text)
     textLayoutProperty->UpdateCalcMinSize(CalcSize(NG::CalcLength(minWidth), NG::CalcLength(minHeight)));
 
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto limitWidth = Dimension(GetTextMaxWidth());
         auto limitHeight = GetTextMaxHeight();
         textLayoutProperty->UpdateCalcMaxSize(
-            CalcSize(NG::CalcLength(maxWidth), NG::CalcLength(Dimension(limitHeight))));
+            CalcSize(NG::CalcLength(limitWidth), NG::CalcLength(Dimension(limitHeight))));
 
         auto textProperty = textNode_->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textProperty);
@@ -279,16 +290,16 @@ double ToastPattern::GetTextMaxHeight()
         auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
         deviceHeight = windowGlobalRect.Height();
     }
-
     auto safeAreaManager = pipelineContext->GetSafeAreaManager();
-    CHECK_NULL_RETURN(safeAreaManager, 0.0);
-    auto bottom = safeAreaManager->GetSystemSafeArea().bottom_.Length();
-    auto top = safeAreaManager->GetSystemSafeArea().top_.Length();
+    auto bottom = safeAreaManager ? safeAreaManager->GetSafeAreaWithoutProcess().bottom_.Length() : 0;
+    auto top = safeAreaManager ? safeAreaManager->GetSafeAreaWithoutProcess().top_.Length() : 0;
     auto maxHeight = deviceHeight - bottom - top - toastBottom_;
     auto limitHeight = (deviceHeight - bottom - top) * 0.65;
     if (GreatNotEqual(maxHeight, limitHeight)) {
         maxHeight = limitHeight;
     }
+
+    maxHeight = GreatOrEqual(maxHeight, 0.0) ? maxHeight : 0.0;
     return maxHeight;
 }
 

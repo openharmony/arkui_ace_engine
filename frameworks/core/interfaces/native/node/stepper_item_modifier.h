@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIStepperItemModifier* GetStepperItemModifier();
+const CJUIStepperItemModifier* GetCJUIStepperItemModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_STEPPERITEM_MODIFIER_H

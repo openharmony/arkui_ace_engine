@@ -417,6 +417,18 @@ const ArkUIDatePickerModifier* GetDatePickerModifier()
     return &modifier;
 }
 
+const CJUIDatePickerModifier* GetCJUIDatePickerModifier()
+{
+    static const CJUIDatePickerModifier modifier = { GetSelectedTextStyle, SetSelectedTextStyle,
+        ResetSelectedTextStyle, GetDatePickerTextStyle, SetDatePickerTextStyle, ResetDatePickerTextStyle,
+        GetDisappearTextStyle, SetDisappearTextStyle, ResetDisappearTextStyle, GetLunar, SetLunar, ResetLunar,
+        GetStartDate, SetStartDate, ResetStartDate, GetEndDate, SetEndDate, ResetEndDate, GetSelectedDate,
+        SetSelectedDate, ResetSelectedDate, GetDatePickerBackgroundColor, SetDatePickerBackgroundColor,
+        ResetDatePickerBackgroundColor };
+
+    return &modifier;
+}
+
 void SetDatePickerOnDateChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);

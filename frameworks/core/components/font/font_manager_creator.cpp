@@ -14,10 +14,6 @@
  */
 
 #include "core/common/font_manager.h"
-
-#ifndef NG_BUILD
-
-#endif
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components/font/rosen_font_manager.h"
 #endif

@@ -32,11 +32,11 @@ class PrefetchRangeEvaluator implements IPrefetchRangeEvaluator {
     return this.rangeToPrefetch_;
   }
 
-  setTotal(totalItems: number) {
+  setTotal(totalItems: number): void {
     this.totalItems = totalItems;
   }
 
-  visibleRangeChanged(minVisible: number, maxVisible: number) {
+  visibleRangeChanged(minVisible: number, maxVisible: number): void {
     this.itemsOnScreen.update(minVisible, maxVisible);
 
     Logger.log(
@@ -51,7 +51,7 @@ class PrefetchRangeEvaluator implements IPrefetchRangeEvaluator {
     this.fetchedRegistry.updateRangeToPrefetch(this.rangeToPrefetch_);
   }
 
-  itemPrefetched(index: number, fetchDuration: number) {
+  itemPrefetched(index: number, fetchDuration: number): void {
     let maxRatioChanged = false;
     if (this.prefetchRangeRatio.update(fetchDuration) === 'ratio-changed') {
       this.prefetchCount.maxRatio = this.prefetchRangeRatio.maxRatio;

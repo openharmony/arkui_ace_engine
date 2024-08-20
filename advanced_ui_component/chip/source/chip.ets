@@ -296,9 +296,9 @@ export struct ChipComponent {
   private onClicked: () => void = noop
   @State suffixIconOnFocus: boolean = false
   @State chipBreakPoints: BreakPointsType = BreakPointsType.SM
-  private smListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("0vp<width<600vp")
-  private mdListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("600vp<=width<840vp")
-  private lgListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("840vp<=width")
+  private smListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("(0vp<width) and (width<600vp)")
+  private mdListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("(600vp<=width) and (width<840vp)")
+  private lgListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("(840vp<=width)")
   @State private isShowPressedBackGroundColor: boolean = false
   @State fontSizeScale: number | undefined = 0
   @State fontWeightScale: number | undefined = 0
@@ -312,6 +312,7 @@ export struct ChipComponent {
   private callbackId: number | undefined = undefined
   @State prefixSymbolWidth: Length | undefined = this.toVp(componentUtils.getRectangleById("PrefixSymbolGlyph")?.size?.width);
   @State suffixSymbolWidth: Length | undefined = this.toVp(componentUtils.getRectangleById("SuffixSymbolGlyph")?.size?.width);
+  @State allowCloseSymbolWidth: Length | undefined = this.toVp(componentUtils.getRectangleById("AllowCloseSymbolGlyph")?.size?.width);
   @State symbolEffect: SymbolEffect = new SymbolEffect();
 
   private isChipSizeEnum(): boolean {
@@ -390,58 +391,45 @@ export struct ChipComponent {
       case 'object':
         try {
           if ((value as Resource).id !== -1) {
-            return getContext(this).resourceManager.getNumber((value as Resource).id)
+            return px2vp(getContext(this).resourceManager.getNumber((value as Resource).id))
           } else {
-            return getContext(this)
+            return px2vp(getContext(this)
               .resourceManager
-              .getNumberByName(((value.params as string[])[0]).split('.')[2])
+              .getNumberByName(((value.params as string[])[0]).split('.')[2]))
           }
         } catch (error) {
-          try {
-            if ((value as Resource).id !== -1) {
-              return this.parseStringToVp(getContext(this).resourceManager.getStringSync((value as Resource).id))
-            } else {
-              return this.parseStringToVp(getContext(this).resourceManager
-                .getStringByNameSync(((value.params as string[])[0]).split('.')[2]))
-            }
-          } catch (error) {
-            return Number.NEGATIVE_INFINITY
-          }
+          return Number.NEGATIVE_INFINITY
         }
       case 'string':
-        return this.parseStringToVp(value)
+        let regex: RegExp = new RegExp("(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$", "i");
+        let matches: RegExpMatchArray | null = value.match(regex);
+        if (!matches) {
+          return Number.NEGATIVE_INFINITY
+        }
+        let length: number = Number(matches?.[1] ?? 0);
+        let unit: string = matches?.[2] ?? 'vp'
+        switch (unit.toLowerCase()) {
+          case 'px':
+            length = px2vp(length)
+            break
+          case 'fp':
+            length = px2vp(fp2px(length))
+            break
+          case 'lpx':
+            length = px2vp(lpx2px(length))
+            break
+          case '%':
+            length = Number.NEGATIVE_INFINITY
+            break
+          case 'vp':
+            break
+          default:
+            break
+        }
+        return length
       default:
         return Number.NEGATIVE_INFINITY
     }
-  }
-
-  private parseStringToVp(value: string): number {
-    let regex: RegExp = new RegExp('(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$', 'i');
-    let matches: RegExpMatchArray | null = value.match(regex);
-    if (!matches) {
-      return Number.NEGATIVE_INFINITY
-    }
-    let length: number = Number(matches?.[1] ?? 0);
-    let unit: string = matches?.[2] ?? 'vp'
-    switch (unit.toLowerCase()) {
-      case 'px':
-        length = px2vp(length)
-        break
-      case 'fp':
-        length = px2vp(fp2px(length))
-        break
-      case 'lpx':
-        length = px2vp(lpx2px(length))
-        break
-      case '%':
-        length = Number.NEGATIVE_INFINITY
-        break
-      case 'vp':
-        break
-      default:
-        break
-    }
-    return length;
   }
 
   private getLabelMargin(): Margin {
@@ -695,7 +683,7 @@ export struct ChipComponent {
     } else if (this.suffixIcon?.src) {
       return this.getSuffixIconSize().width
     } else if (!this.suffixIcon?.src && (this.allowClose ?? true)) {
-      return this.theme.defaultSymbol.fontSize
+      return this.allowCloseSymbolWidth
     } else {
       return 0
     }
@@ -1004,6 +992,10 @@ export struct ChipComponent {
           SymbolGlyph($r('sys.symbol.xmark'))
             .fontSize(this.theme.defaultSymbol.fontSize)
             .fontColor(this.getDefaultSymbolColor())
+            .onSizeChange((oldValue, newValue) => {
+              this.allowCloseSymbolWidth = newValue?.width
+            })
+            .key("AllowCloseSymbolGlyph")
             .onClick(() => {
               if (!this.getChipEnable()) {
                 return

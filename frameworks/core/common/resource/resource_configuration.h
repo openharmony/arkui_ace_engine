@@ -33,6 +33,19 @@ struct ConfigurationChange {
         return colorModeUpdate || languageUpdate || directionUpdate || dpiUpdate || fontUpdate || iconUpdate ||
                skinUpdate || fontScaleUpdate || fontWeightScaleUpdate;
     }
+
+    void MergeConfig(const ConfigurationChange& config)
+    {
+        colorModeUpdate |= config.colorModeUpdate;
+        languageUpdate |= config.languageUpdate;
+        directionUpdate |= config.directionUpdate;
+        dpiUpdate |= config.dpiUpdate;
+        fontUpdate |= config.fontUpdate;
+        iconUpdate |= config.iconUpdate;
+        skinUpdate |= config.skinUpdate;
+        fontScaleUpdate |= config.fontScaleUpdate;
+        fontWeightScaleUpdate |= config.fontWeightScaleUpdate;
+    }
 };
 } // namespace OHOS::Ace
 

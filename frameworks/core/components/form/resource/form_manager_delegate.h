@@ -177,6 +177,7 @@ private:
 
     State state_ { State::WAITINGFORSIZE };
     bool isDynamic_ = true;
+    std::mutex accessibilityChildTreeRegisterMutex_;
     std::mutex recycleMutex_;
     RecycleStatus recycleStatus_ = RecycleStatus::RECOVERED;
     std::vector<std::shared_ptr<MMI::PointerEvent>> pointerEventCache_;

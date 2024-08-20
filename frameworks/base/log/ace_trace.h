@@ -39,6 +39,8 @@
     AceScopedTraceFlag aceScopedTraceFlag(SystemProperties::GetAccessTraceEnabled(), fmt, ##__VA_ARGS__)
 #define ACE_LAYOUT_SCOPED_TRACE(fmt, ...) \
     AceScopedTraceFlag aceScopedTraceFlag(SystemProperties::GetLayoutTraceEnabled(), fmt, ##__VA_ARGS__)
+#define ACE_IMAGE_SCOPED_TRACE(fmt, ...) \
+    AceScopedTraceFlag aceScopedTraceFlag(SystemProperties::GetDebugEnabled(), fmt, ##__VA_ARGS__)
 #ifdef ACE_DEBUG
 #define ACE_DEBUG_SCOPED_TRACE(fmt, ...) AceScopedTrace aceScopedTrace(fmt, ##__VA_ARGS__)
 #else
@@ -94,6 +96,8 @@ void ACE_EXPORT AceCountTraceWidthArgs(int32_t count, const char* format, ...);
 // for commercial trace
 void ACE_EXPORT AceTraceBeginCommercial(const char* name);
 void ACE_EXPORT AceTraceEndCommercial();
+void ACE_EXPORT AceAsyncTraceBeginCommercial(int32_t taskId, const char* name, bool isAnimationTrace = false);
+void ACE_EXPORT AceAsyncTraceEndCommercial(int32_t taskId, const char* name, bool isAnimationTrace = false);
 
 class ACE_FORCE_EXPORT AceScopedTrace final {
 public:

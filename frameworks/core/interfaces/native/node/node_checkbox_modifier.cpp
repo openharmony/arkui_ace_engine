@@ -288,6 +288,16 @@ const ArkUICheckboxModifier *GetCheckboxModifier()
     return &modifier;
 }
 
+const CJUICheckboxModifier* GetCJUICheckboxModifier()
+{
+    static const CJUICheckboxModifier modifier = { SetSelect, SetSelectedColor, SetUnSelectedColor, SetCheckboxWidth,
+        SetCheckboxHeight, SetMark, SetCheckboxPadding, SetCheckboxResponseRegion, ResetSelect, ResetSelectedColor,
+        ResetUnSelectedColor, ResetCheckboxWidth, ResetCheckboxHeight, ResetMark, SetCheckboxShape, ResetCheckboxShape,
+        ResetCheckboxPadding, ResetCheckboxResponseRegion, GetSelect, GetSelectedColor, GetUnSelectedColor,
+        GetCheckMarkColor, GetCheckMarkSize, GetCheckMarkWidth, GetCheckboxShape, };
+    return &modifier;
+}
+
 void SetCheckboxChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);

@@ -27,6 +27,7 @@
 #include "core/common/stylus/stylus_detector_loader.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components_ng/pattern/search/search_text_field.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
@@ -35,9 +36,6 @@
 #include "frameworks/base/log/log_wrapper.h"
 
 namespace OHOS::Ace {
-namespace {
-const Dimension HOT_AREA_ADJUST_SIZE = 20.0_vp;
-}
 const static std::unordered_set<std::string> TEXT_FIELD_COMPONENT_TAGS = {
     V2::TEXTINPUT_ETS_TAG,
     V2::TEXTAREA_ETS_TAG,
@@ -68,7 +66,7 @@ void StylusDetectorMgr::StylusDetectorCallBack::RequestFocus(int32_t nodeId)
     CHECK_NULL_VOID(pattern);
     bool needToRequestKeyBoardOnFocus = pattern->NeedToRequestKeyboardOnFocus();
     if (!needToRequestKeyBoardOnFocus) {
-        pattern->RequestKeyboard(false, true, true);
+        pattern->RequestKeyboardNotByFocusSwitch(NG::RequestKeyboardReason::STYLUS_DETECTOR);
     }
 }
 
@@ -178,19 +176,69 @@ bool StylusDetectorMgr::Notify(const NotifyInfo& notifyInfo)
     return engine_->Notify(notifyInfo);
 }
 
-bool StylusDetectorMgr::IsNeedInterceptedTouchEvent(const TouchEvent& touchEvent)
+RefPtr<NG::FrameNode> StylusDetectorMgr::FindHitFrameNode(
+    const TouchEvent& touchEvent, const TouchTestResult& touchTestResult)
+{
+    RefPtr<NG::FrameNode> frameNode;
+    // TextField, textInput, search and richEditor has default touchEventTarget.
+    for (const auto& entry : touchTestResult) {
+        auto recognizer = AceType::DynamicCast<NG::NGGestureRecognizer>(entry);
+        if (recognizer) {
+            continue;
+        }
+        auto nodeId = entry->GetNodeId();
+        auto UiNode = ElementRegister::GetInstance()->GetUINodeById(nodeId);
+        frameNode = AceType::DynamicCast<NG::FrameNode>(UiNode);
+        if (frameNode) {
+            break;
+        }
+    }
+    CHECK_NULL_RETURN(frameNode, nullptr);
+
+    auto pipeline = frameNode->GetContextRefPtr();
+    if (!pipeline) {
+        LOGI("Can't find pipeline for find hit node.");
+        return nullptr;
+    }
+    auto nanoTimestamp = pipeline->GetVsyncTime();
+
+    // only textField, textInput, search and richEditor need to response stylus event.
+    auto tag = frameNode->GetTag();
+    auto iterEx = TEXT_FIELD_COMPONENT_TAGS.find(tag);
+    if (iterEx == TEXT_FIELD_COMPONENT_TAGS.end()) {
+        return nullptr;
+    }
+    if (!CheckTextEditable(frameNode) ||
+        IsHitCleanNodeResponseArea({ touchEvent.x, touchEvent.y }, frameNode, nanoTimestamp)) {
+        return nullptr;
+    }
+    return frameNode;
+}
+
+bool StylusDetectorMgr::IsNeedInterceptedTouchEvent(
+    const TouchEvent& touchEvent, std::unordered_map<size_t, TouchTestResult> touchTestResults)
 {
     if (!IsStylusTouchEvent(touchEvent)) {
         return false;
     }
 
-    auto frameNode = FindTextInputFrameNodeByPosition(touchEvent.x, touchEvent.y);
-    CHECK_NULL_RETURN(frameNode, false);
+    const auto iter = touchTestResults.find(touchEvent.id);
+    if (iter == touchTestResults.end() || iter->second.empty()) {
+        LOGI("TouchTestResult is empty");
+        return false;
+    }
+
+    auto frameNode = FindHitFrameNode(touchEvent, iter->second);
+    if (!frameNode) {
+        LOGI("Stylus hit position is (%{public}f, %{public}f). TargetNode is None", touchEvent.x, touchEvent.y);
+        return false;
+    }
 
     LOGI("Stylus hit position is (%{public}f, %{public}f). TargetNode is %{public}s, id is %{public}s", touchEvent.x,
         touchEvent.y, frameNode->GetTag().c_str(), frameNode->GetInspectorId()->c_str());
 
     if (!IsEnable()) {
+        LOGI("Stylus service is not enable");
         return false;
     }
 
@@ -244,103 +292,30 @@ StylusDetectorMgr::StylusDetectorMgr() : engine_(nullptr), isRegistered_(false)
     }
 }
 
-bool StylusDetectorMgr::CheckTextEditable(const RefPtr<NG::FrameNode> parentNode)
+bool StylusDetectorMgr::CheckTextEditable(const RefPtr<NG::FrameNode> frameNode)
 {
-    CHECK_NULL_RETURN(parentNode, false);
-    auto focusHub = parentNode->GetFocusHub();
-    if (!focusHub->IsFocusable() || !parentNode->IsVisible()) {
+    CHECK_NULL_RETURN(frameNode, false);
+    auto focusHub = frameNode->GetFocusHub();
+    // if frameNode is not focusable or invisible, no need to hit frameNode.
+    if (!focusHub->IsFocusable() || !frameNode->IsVisible()) {
         return false;
     }
-    if (parentNode->GetTag() == V2::RICH_EDITOR_ETS_TAG) {
-        return true;
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    auto opacity = renderContext->GetOpacity();
+    // if opacity is 0.0f, no need to hit frameNode.
+    if (NearZero(opacity.value_or(1.0f))) {
+        return false;
     }
-    auto pattern = parentNode->GetPattern<NG::TextFieldPattern>();
-    CHECK_NULL_RETURN(pattern, false);
-    return !pattern->IsInPasswordMode();
+    // if frameNode is textfield, need to check password mode.
+    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        auto pattern = frameNode->GetPattern<NG::TextFieldPattern>();
+        CHECK_NULL_RETURN(pattern, false);
+        return !pattern->IsInPasswordMode();
+    }
+    return true;
 }
 
-RefPtr<NG::FrameNode> StylusDetectorMgr::FindTargetInChildNodes(
-    const RefPtr<NG::UINode> parentNode, const FrameNodeSet& hitFrameNodes)
-{
-    CHECK_NULL_RETURN(parentNode, nullptr);
-    auto parentFrameNode = AceType::DynamicCast<NG::FrameNode>(parentNode);
-    if (parentFrameNode && (!parentFrameNode->IsActive() || !parentFrameNode->IsVisible())) {
-        return nullptr;
-    }
-    auto children = parentFrameNode->GetFrameChildren();
-
-    for (auto iter = children.rbegin(); iter != children.rend(); iter++) {
-        auto child = iter->Upgrade();
-        if (child == nullptr) {
-            continue;
-        }
-        auto childNode = AceType::DynamicCast<NG::UINode>(child);
-        auto childFindResult = FindTargetInChildNodes(childNode, hitFrameNodes);
-        if (childFindResult) {
-            return childFindResult;
-        }
-    }
-
-    CHECK_NULL_RETURN(parentFrameNode, nullptr);
-    auto iter = hitFrameNodes.find(parentFrameNode);
-    if (iter != hitFrameNodes.end() && CheckTextEditable(parentFrameNode)) {
-        return *iter;
-    }
-    return nullptr;
-}
-
-RefPtr<NG::FrameNode> StylusDetectorMgr::FindTextInputFrameNodeByPosition(float globalX, float globalY)
-{
-    if (textFieldNodes_.empty()) {
-        return nullptr;
-    }
-
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto nanoTimestamp = pipeline->GetVsyncTime();
-    NG::PointF point(globalX, globalY);
-
-    FrameNodeSet hitFrameNodes;
-    for (auto iterOfFrameNode = textFieldNodes_.begin(); iterOfFrameNode != textFieldNodes_.end(); iterOfFrameNode++) {
-        auto frameNode = iterOfFrameNode->second.Upgrade();
-        if (!frameNode || !frameNode->IsVisible()) {
-            continue;
-        }
-        auto geometryNode = frameNode->GetGeometryNode();
-        if (!geometryNode) {
-            continue;
-        }
-        auto imageContext = frameNode->GetRenderContext();
-        CHECK_NULL_RETURN(imageContext, nullptr);
-        auto opacity = imageContext->GetOpacity();
-        if (NearZero(opacity.value_or(1.0f))) {
-            continue;
-        }
-        auto globalFrameRect = geometryNode->GetFrameRect() + NG::SizeF(0, HOT_AREA_ADJUST_SIZE.ConvertToPx() * 2);
-        globalFrameRect.SetOffset(frameNode->CalculateCachedTransformRelativeOffset(nanoTimestamp) +
-                                  NG::OffsetF(0, -HOT_AREA_ADJUST_SIZE.ConvertToPx()));
-        if (globalFrameRect.IsInRegion(point) && !IsHitCleanNodeResponseArea(point, frameNode, nanoTimestamp)) {
-            hitFrameNodes.insert(frameNode);
-        }
-    }
-
-    if (hitFrameNodes.empty()) {
-        LOGD("Cannot find targetNodes.");
-        return nullptr;
-    }
-
-    auto rootNode = pipeline->GetRootElement();
-    auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
-        rootNode = pipeline->GetFocusedWindowSceneNode();
-    }
-
-    auto result = FindTargetInChildNodes(rootNode, hitFrameNodes);
-    if (result) {
-        return result;
-    }
-    return nullptr;
-}
 bool StylusDetectorMgr::IsStylusTouchEvent(const TouchEvent& touchEvent) const
 {
     return touchEvent.sourceTool == SourceTool::PEN && touchEvent.type == TouchType::DOWN;

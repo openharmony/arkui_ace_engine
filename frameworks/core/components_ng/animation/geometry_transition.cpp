@@ -208,7 +208,7 @@ void GeometryTransition::WillLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
     if (IsNodeInAndActive(hostNode)) {
         layoutPropertyIn_ = hostNode->GetLayoutProperty()->Clone();
         ModifyLayoutConstraint(layoutWrapper, true);
-    } else if (IsNodeOutAndActive(hostNode)) {
+    } else if (IsNodeOutAndActive(hostNode) && !hasInAnim_) {
         layoutPropertyOut_ = hostNode->GetLayoutProperty()->Clone();
         ModifyLayoutConstraint(layoutWrapper, false);
     }
@@ -308,7 +308,6 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
     auto geometryNode = self->GetGeometryNode();
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(renderContext && targetRenderContext && geometryNode && pipeline);
-    auto taskExecutor = pipeline->GetTaskExecutor();
     // get own parent's global position, parent's transform is not taken into account other than translate
     auto parentPos = self->IsRemoving() ? outNodeParentPos_ : self->GetPaintRectGlobalOffsetWithTranslate(true).first;
     // get target's global position, target own transform is taken into account
@@ -331,20 +330,13 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
             }
         }
     } else {
+        isSynced_ = true;
         outNodeTargetAbsRect_ = targetRect;
         if (staticNodeAbsRect_ && targetRenderContext->HasSandBox()) {
             staticNodeAbsRect_.reset();
             if (doRegisterSharedTransition_) {
                 targetRenderContext->RegisterSharedTransition(renderContext);
             }
-        }
-        if (taskExecutor) {
-            taskExecutor->PostTask(
-                [weakGT = WeakClaim(this)]() {
-                    auto geometryTransition = weakGT.Upgrade();
-                    CHECK_NULL_VOID(geometryTransition);
-                    geometryTransition->isSynced_ = true;
-                }, TaskExecutor::TaskType::UI, "ArkUIAnimationGeometryTransitionSynced");
         }
     }
     auto propertyCallback = [&]() {

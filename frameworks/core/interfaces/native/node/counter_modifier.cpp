@@ -81,5 +81,14 @@ const ArkUICounterModifier* GetCounterModifier()
 
     return &modifier;
 }
+
+const CJUICounterModifier* GetCJUICounterModifier()
+{
+    static const CJUICounterModifier modifier = { SetEnableInc, ResetEnableInc, SetEnableDec, ResetEnableDec,
+        SetCounterHeight, ResetCounterHeight, SetCounterWidth, ResetCounterWidth, SetCounterBackgroundColor,
+        ResetCounterBackgroundColor };
+
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

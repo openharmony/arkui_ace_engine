@@ -33,6 +33,8 @@ public:
     static void JSOpenBindSheet(const JSCallbackInfo& info);
     static void JSUpdateBindSheet(const JSCallbackInfo& info);
     static void JSCloseBindSheet(const JSCallbackInfo& info);
+    static void IsFollowingSystemFontScale(const JSCallbackInfo& info);
+    static void GetMaxFontScale(const JSCallbackInfo& info);
 
 private:
     static void AnimateToInner(const JSCallbackInfo& info, bool immediately);

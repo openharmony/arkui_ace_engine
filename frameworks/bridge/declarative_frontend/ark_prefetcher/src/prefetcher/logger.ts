@@ -14,5 +14,5 @@
  */
 
 class Logger {
-  static log(message: string) {}
+  static log(message: string): void {}
 }

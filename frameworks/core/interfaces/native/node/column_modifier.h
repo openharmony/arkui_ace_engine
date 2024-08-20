@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIColumnModifier* GetColumnModifier();
+const CJUIColumnModifier* GetCJUIColumnModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_COLUMN_MODIFIER_H

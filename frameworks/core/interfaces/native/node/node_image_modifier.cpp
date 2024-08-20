@@ -540,7 +540,7 @@ void SetImageOpacity(ArkUINodeHandle node, ArkUI_Float32 opacity)
     CHECK_NULL_VOID(frameNode);
     auto opacityValue = static_cast<float>(opacity);
     if ((LessNotEqual(opacityValue, 0.0)) || GreatNotEqual(opacityValue, 1.0)) {
-        opacityValue = 0.0f;
+        opacityValue = 1.0f;
     }
     ViewAbstract::SetOpacity(frameNode, opacityValue);
 }
@@ -549,7 +549,7 @@ void ResetImageOpacity(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetOpacity(frameNode, 0.0f);
+    ViewAbstract::SetOpacity(frameNode, 1.0f);
 }
 
 void SetEdgeAntialiasing(ArkUINodeHandle node, ArkUI_Float32 edgeAntialiasing)
@@ -835,6 +835,27 @@ const ArkUIImageModifier* GetImageModifier()
         AnalyzerConfig, SetDrawingColorFilter, GetDrawingColorFilter, ResetImageContent, ResetImageSrc,
         SetInitialPixelMap, SetAltSourceInfo, SetOnComplete, SetOnError, ResetOnError, SetImageOnFinish,
         ResetImageOnFinish };
+    return &modifier;
+}
+
+const CJUIImageModifier* GetCJUIImageModifier()
+{
+    static const CJUIImageModifier modifier = {
+        SetImageSrc, SetImageShowSrc, SetCopyOption, ResetCopyOption, SetAutoResize,
+        ResetAutoResize, SetObjectRepeat, ResetObjectRepeat, SetRenderMode, ResetRenderMode, SetSyncLoad, ResetSyncLoad,
+        SetObjectFit, ResetObjectFit, SetFitOriginalSize, ResetFitOriginalSize, SetSourceSize, ResetSourceSize,
+        SetMatchTextDirection, ResetMatchTextDirection, SetFillColor, ResetFillColor, SetAlt, ResetAlt,
+        SetImageInterpolation, ResetImageInterpolation, SetColorFilter, ResetColorFilter, SetImageSyncLoad,
+        ResetImageSyncLoad, SetImageObjectFit, ResetImageObjectFit, SetImageFitOriginalSize, ResetImageFitOriginalSize,
+        SetImageDraggable, ResetImageDraggable, SetImageBorderRadius, ResetImageBorderRadius, SetImageBorder,
+        ResetImageBorder, SetImageOpacity, ResetImageOpacity, SetEdgeAntialiasing, ResetEdgeAntialiasing, SetResizable,
+        ResetResizable, SetDynamicRangeMode, ResetDynamicRangeMode, SetEnhancedImageQuality,
+        ResetEnhancedImageQuality, GetImageSrc, GetAutoResize, GetObjectRepeat, GetObjectFit,
+        GetImageInterpolation, GetColorFilter, GetAlt, GetImageDraggable, GetRenderMode, SetImageResizable,
+        GetImageResizable, GetFitOriginalSize, GetFillColor, SetPixelMap, SetPixelMapArray, SetResourceSrc,
+        EnableAnalyzer, SetImagePrivacySensitve, ResetImagePrivacySensitve, AnalyzerConfig, SetDrawingColorFilter,
+        GetDrawingColorFilter, ResetImageSrc, SetInitialPixelMap, SetOnComplete, SetOnError,
+        ResetOnError, SetImageOnFinish, ResetImageOnFinish };
     return &modifier;
 }
 

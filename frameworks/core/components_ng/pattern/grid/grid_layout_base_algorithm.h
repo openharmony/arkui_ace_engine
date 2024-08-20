@@ -68,6 +68,14 @@ public:
     }
 
 protected:
+    void AdjustChildrenHeight(LayoutWrapper* layoutWrapper);
+
+    // The default value is set to true to skip the second measure in other layout algorithms.
+    virtual bool IsIrregularLine(int32_t lineIndex) const
+    {
+        return true;
+    }
+
     GridLayoutInfo gridLayoutInfo_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridLayoutBaseAlgorithm);

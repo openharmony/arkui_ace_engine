@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIButtonModifier* GetButtonModifier();
+const CJUIButtonModifier* GetCJUIButtonModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_BUTTON_MODIFIER_H

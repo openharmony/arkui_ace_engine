@@ -35,7 +35,8 @@ class SwitchModifier : public ContentModifier {
     DECLARE_ACE_TYPE(SwitchModifier, ContentModifier);
 
 public:
-    SwitchModifier(bool isSelect, const Color& boardColor, float dragOffsetX);
+    SwitchModifier(const SizeF& size, const OffsetF& offset, float pointOffset, bool isSelect, const Color& boardColor,
+        float dragOffsetX);
     ~SwitchModifier() override = default;
 
     void onDraw(DrawingContext& context) override
@@ -72,17 +73,13 @@ public:
             return;
         }
         bool isRtl = direction_ == TextDirection::AUTO ? AceApplicationInfo::GetInstance().IsRightToLeft()
-                                                   : direction_ == TextDirection::RTL;
-        // Animation is not displayed when created for the first time.
-        if (isFirstCreated_) {
-            animatableBoardColor_->Set(isSelect_->Get() ? LinearColor(userActiveColor_) : LinearColor(inactiveColor_));
-            if (isRtl) {
-                pointOffset_->Set(isSelect_->Get() ? 0.0f : actualSize_.Width() - actualSize_.Height());
-            } else {
-                pointOffset_->Set(isSelect_->Get() ? actualSize_.Width() - actualSize_.Height() : 0.0f);
-            }
-            isFirstCreated_ = false;
-        }
+                                                       : direction_ == TextDirection::RTL;
+        auto offsetNotRtl = GreatOrEqual(actualSize_.Width(), actualSize_.Height())
+                                ? (isSelect_->Get() ? actualSize_.Width() - actualSize_.Height() : 0.0f)
+                                : (isSelect_->Get() ? actualSize_.Width() - actualTrackRadius_ : actualTrackRadius_);
+        auto offsetIsRtl = GreatOrEqual(actualSize_.Width(), actualSize_.Height())
+                               ? (isSelect_->Get() ? 0.0f : actualSize_.Width() - actualSize_.Height())
+                               : (isSelect_->Get() ? actualTrackRadius_ : actualSize_.Width() - actualTrackRadius_);
         AnimationOption colorOption = AnimationOption();
         colorOption.SetDuration(colorAnimationDuration_);
         colorOption.SetCurve(Curves::FAST_OUT_SLOW_IN);
@@ -96,13 +93,18 @@ public:
         float newPointOffset = 0.0f;
         if (!isDragEvent_) {
             if (isRtl) {
-                newPointOffset = isSelect_->Get() ? 0.0f : actualSize_.Width() - actualSize_.Height();
+                newPointOffset = offsetIsRtl;
             } else {
-                newPointOffset = isSelect_->Get() ? actualSize_.Width() - actualSize_.Height() : 0.0f;
+                newPointOffset = offsetNotRtl;
             }
         } else {
-            newPointOffset = std::clamp(
-                dragOffsetX_->Get() - offset_->Get().GetX(), 0.0f, actualSize_.Width() - actualSize_.Height());
+            if (GreatOrEqual(actualSize_.Width(), actualSize_.Height())) {
+                newPointOffset = std::clamp(
+                    dragOffsetX_->Get() - offset_->Get().GetX(), 0.0f, actualSize_.Width() - actualSize_.Height());
+            } else {
+                newPointOffset = std::clamp(dragOffsetX_->Get() - offset_->Get().GetX(), actualTrackRadius_,
+                    actualSize_.Width() - actualTrackRadius_);
+            }
         }
         AnimationUtils::Animate(pointOption, [&]() { pointOffset_->Set(newPointOffset); });
     }
@@ -119,10 +121,8 @@ public:
 
     void InitializeParam();
     void PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset, const SizeF& contentSize);
-    void DrawTouchAndHoverBoard(RSCanvas& canvas, const OffsetF& offset) const;
     float GetSwitchWidth(const SizeF& contentSize) const;
-    void DrawFocusBoard(RSCanvas& canvas, const OffsetF& offset, const SizeF& size, double& actualGap);
-    void DrawRectCircle(RSCanvas& canvas, const OffsetF& contentOffset, const SizeF& contentSize, double& actualGap);
+    float CalcActualWidth(float width, float height, double actualGap, double defaultWidthGap);
 
     void SetUserActiveColor(const Color& color)
     {
@@ -153,20 +153,6 @@ public:
     {
         if (isSelect_) {
             isSelect_->Set(isSelect);
-        }
-    }
-
-    void SetIsFocused(bool isFocused)
-    {
-        if (isFocused_) {
-            isFocused_->Set(isFocused);
-        }
-    }
-
-    void SetIsOn(bool isOn)
-    {
-        if (isOn_) {
-            isOn_->Set(isOn);
         }
     }
 
@@ -246,7 +232,7 @@ public:
 
     float GetPointRadius()
     {
-        return animatePointRadius_->Get();
+        return pointRadius_;
     }
 
     void SetInactiveColor(const Color& color)
@@ -261,7 +247,12 @@ public:
 
     float GetTrackRadius()
     {
-        return animateTrackRadius_->Get();
+        return actualTrackRadius_;
+    }
+
+    void SetActualTrackRadius(float borderRadius)
+    {
+        actualTrackRadius_ = borderRadius;
     }
 
 private:
@@ -275,7 +266,6 @@ private:
     Color inactiveColor_;
     Color userActiveColor_;
     Dimension hoverRadius_ = 8.0_vp;
-    Dimension focusRadius_ = 8.0_vp;
     float hoverDuration_ = 0.0f;
     float hoverToTouchDuration_ = 0.0f;
     float touchDuration_ = 0.0f;
@@ -284,6 +274,7 @@ private:
     bool isDragEvent_ = false;
     bool isFirstCreated_ = true;
     bool showHoverEffect_ = true;
+    float actualTrackRadius_ = 0.0f;
 
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
@@ -298,8 +289,6 @@ private:
     RefPtr<PropertyFloat> dragOffsetX_;
     RefPtr<PropertyBool> isSelect_;
     RefPtr<PropertyBool> isHover_;
-    RefPtr<PropertyBool> isFocused_;
-    RefPtr<PropertyBool> isOn_;
     RefPtr<AnimatablePropertyOffsetF> offset_;
     RefPtr<AnimatablePropertySizeF> size_;
     RefPtr<PropertyBool> enabled_;

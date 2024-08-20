@@ -15,10 +15,6 @@
 
 #include "core/common/plugin_manager.h"
 
-#include "base/log/log_wrapper.h"
-#include "base/log/log.h"
-#include "base/utils/utils.h"
-
 namespace OHOS::Ace {
 PluginManager::PluginManager() {}
 

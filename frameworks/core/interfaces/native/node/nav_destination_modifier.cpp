@@ -110,5 +110,19 @@ const ArkUINavDestinationModifier* GetNavDestinationModifier()
 
     return &modifier;
 }
+
+const CJUINavDestinationModifier* GetCJUINavDestinationModifier()
+{
+    static const CJUINavDestinationModifier modifier = {
+        SetHideTitleBar,
+        ResetHideTitleBar,
+        SetNavDestinationMode,
+        ResetNavDestinationMode,
+        SetIgnoreLayoutSafeArea,
+        ResetIgnoreLayoutSafeArea
+    };
+
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

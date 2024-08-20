@@ -263,17 +263,6 @@ inline std::string ToString(const TextOverflow& textOverflow)
 }
 } // namespace StringUtils
 
-enum class TextMarqueeState {
-    START = 0,
-    BOUNCE,
-    FINISH,
-};
-
-enum class MarqueeStartPolicy {
-    DEFAULT = 0,
-    ON_FOCUS,
-};
-
 // overflow-x: visible|hidden|scroll|auto|no-display|no-content;
 enum class TextFieldOverflowX {
     VISIBLE,
@@ -354,7 +343,8 @@ enum class DynamicRangeMode {
 };
 
 enum class AIImageQuality {
-    NONE = 1,
+    NONE = 0,
+    LOW,
     NORMAL,
     HIGH,
 };

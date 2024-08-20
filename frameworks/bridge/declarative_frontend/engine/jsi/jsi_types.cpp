@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_types.h"
 
+#include "base/log/ace_performance_monitor.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
@@ -367,6 +368,7 @@ JsiFunction::JsiFunction(const EcmaVM *vm, panda::Local<panda::FunctionRef> val)
 
 JsiRef<JsiValue> JsiFunction::Call(JsiRef<JsiValue> thisVal, int argc, JsiRef<JsiValue> argv[]) const
 {
+    JS_CALLBACK_DURATION();
     auto vm = GetEcmaVM();
     LocalScope scope(vm);
     panda::TryCatch trycatch(vm);

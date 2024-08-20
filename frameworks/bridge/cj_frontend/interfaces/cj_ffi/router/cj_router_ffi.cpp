@@ -16,10 +16,6 @@
 #include "cj_router_ffi.h"
 
 #include "bridge/cj_frontend/frontend/cj_frontend_abstract.h"
-#include "bridge/cj_frontend/frontend/cj_page_router_abstract.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
-#include "core/common/container.h"
-#include "core/components/page/page_target.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;

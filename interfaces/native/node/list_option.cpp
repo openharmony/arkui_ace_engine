@@ -15,16 +15,11 @@
 
 #include "list_option.h"
 
-#include <cstdint>
-#include <vector>
 
-#include "native_node.h"
-#include "native_type.h"
 #include "node_model.h"
 
 #include "base/error/error_code.h"
 #include "base/utils/utils.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -225,7 +220,7 @@ int32_t OH_ArkUI_ListChildrenMainSizeOption_Splice(
     ArkUI_ListChildrenMainSize* option, int32_t index, int32_t deleteCount, int32_t addCount)
 {
     CHECK_NULL_RETURN(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
-    if (index < 0 || deleteCount < 0 || addCount < 0 || option->mainSize.size() - 1 < static_cast<size_t>(index)) {
+    if (index < 0 || deleteCount < 0 || addCount < 0 || static_cast<int32_t>(option->mainSize.size()) - 1 < index) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     while (deleteCount > 0) {
@@ -245,7 +240,7 @@ int32_t OH_ArkUI_ListChildrenMainSizeOption_UpdateSize(
     ArkUI_ListChildrenMainSize* option, int32_t index, float mainSize)
 {
     CHECK_NULL_RETURN(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
-    if (index < 0 || mainSize < 0 || option->mainSize.size() - 1 < static_cast<size_t>(index)) {
+    if (index < 0 || mainSize < 0 || static_cast<int32_t>(option->mainSize.size()) - 1 < index) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     option->mainSize[index] = mainSize;
@@ -255,7 +250,7 @@ int32_t OH_ArkUI_ListChildrenMainSizeOption_UpdateSize(
 float OH_ArkUI_ListChildrenMainSizeOption_GetMainSize(ArkUI_ListChildrenMainSize* option, int32_t index)
 {
     CHECK_NULL_RETURN(option, -1);
-    if (index < 0 || option->mainSize.size() - 1 < static_cast<uint32_t>(index)) {
+    if (index < 0 || static_cast<int32_t>(option->mainSize.size()) - 1 < index) {
         return -1;
     }
     return option->mainSize[index];

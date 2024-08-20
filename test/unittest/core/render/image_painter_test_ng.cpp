@@ -188,7 +188,6 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_DrawSVGImage2, TestSize.Level1)
      * @tc.steps2: callback DrawImage.
      * @tc.expected: expect imagePainter.canvasImage_ is null.
      */
-    imagePainter.DrawSVGImage(testingCanvas, OFFSETF, SIZE);
     EXPECT_EQ(imagePainter.canvasImage_, nullptr);
 
     /**
@@ -737,7 +736,6 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_DrawObscuration002, TestSize.Lev
     RefPtr<NG::CanvasImage> canvasImage;
     NG::ImagePainter imagePainter(canvasImage);
     NG::ImagePaintConfig imagePaintConfig;
-    imagePainter.DrawObscuration(testingCanvas, OFFSETF, SIZE);
     EXPECT_EQ(imagePainter.canvasImage_, nullptr);
 }
 

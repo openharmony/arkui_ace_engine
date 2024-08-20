@@ -1703,6 +1703,8 @@ HWTEST_F(TextPickerExTestNg, TextPickerOverscroller001, TestSize.Level1)
     ASSERT_NE(textPickerColumnPattern_, nullptr);
     columnNode_->GetGeometryNode()->SetFrameSize(COLUMN_SIZE);
     textPickerColumnPattern_->SetCurrentIndex(0);
+    std::vector<NG::RangeContent> range = { { "", "" } };
+    textPickerColumnPattern_->SetOptions(range);
 
     // init overscroller
     TextPickerOverscroller overscroller;

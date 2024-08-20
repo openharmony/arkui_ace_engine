@@ -122,7 +122,7 @@ void TextLayoutElement::Init(RefPtr<SecurityComponentLayoutProperty>& property,
     }
 
     auto textConstraint = property->CreateChildConstraint();
-    SizeT<float> maxSize { Infinity<float>(), Infinity<float>() };
+    SizeT<float> maxSize { textConstraint.maxSize.Width(), Infinity<float>() };
     textConstraint.maxSize = maxSize;
     textWrap_->Measure(std::optional<LayoutConstraintF>(textConstraint));
     auto textSizeF = textWrap->GetGeometryNode()->GetFrameSize();
@@ -178,6 +178,39 @@ void TextLayoutElement::UpdateSize(bool isWidth)
     auto textSizeF = textWrap_->GetGeometryNode()->GetFrameSize();
     width_ = textSizeF.Width();
     height_ = textSizeF.Height();
+}
+
+bool TextLayoutElement::GetTextLimitExceededFlag(double maxHeight)
+{
+    CHECK_NULL_RETURN(textWrap_, false);
+    std::optional<SizeF> currentTextSize;
+
+    auto textProp = AceType::DynamicCast<TextLayoutProperty>(textWrap_->GetLayoutProperty());
+    CHECK_NULL_RETURN(textProp, false);
+    currentTextSize = GetMeasureTextSize(textProp->GetContent().value_or(""),
+        textProp->GetFontSize().value_or(minFontSize_),
+        textProp->GetFontWeight().value_or(FontWeight::NORMAL));
+    if (!currentTextSize.has_value()) {
+        return false;
+    }
+
+    auto textConstraint = textProp->GetContentLayoutConstraint();
+    CHECK_NULL_RETURN(textConstraint, false);
+    if (!GreatNotEqual(textConstraint->maxSize.Width(), 0.0)) {
+        return true;
+    }
+    if (LessOrEqual(currentTextSize.value().Width(), textConstraint->maxSize.Width())) {
+        if (GreatNotEqual(currentTextSize.value().Height(), maxHeight)) {
+            return true;
+        }
+    } else {
+        auto times = std::ceil(currentTextSize.value().Width() / textConstraint->maxSize.Width());
+        auto expectedHeight = times * currentTextSize.value().Height();
+        if (expectedHeight > maxHeight) {
+            return true;
+        }
+    }
+    return false;
 }
 
 std::optional<SizeF> TextLayoutElement::GetMeasureTextSize(const std::string& data,

@@ -15,8 +15,6 @@
 
 #include "core/event/mouse_raw_recognizer.h"
 
-#include "base/log/log.h"
-
 namespace OHOS::Ace {
 namespace {
 

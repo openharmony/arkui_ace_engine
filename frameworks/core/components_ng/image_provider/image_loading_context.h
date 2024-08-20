@@ -17,12 +17,14 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_IMAGE_LOADING_CONTEXT_H
 
 #include <cstdint>
+
 #include "base/geometry/ng/size_t.h"
 #include "base/thread/task_executor.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/image_provider/image_object.h"
 #include "core/components_ng/image_provider/image_provider.h"
 #include "core/components_ng/image_provider/image_state_manager.h"
+#include "core/components_ng/pattern/image/image_dfx.h"
 
 namespace OHOS::Ace::NG {
 
@@ -35,7 +37,8 @@ class ACE_FORCE_EXPORT ImageLoadingContext : public AceType {
 
 public:
     // Create an empty ImageObject and initialize state machine when the constructor is called
-    ImageLoadingContext(const ImageSourceInfo& src, LoadNotifier&& loadNotifier, bool syncLoad = false);
+    ImageLoadingContext(const ImageSourceInfo& src, LoadNotifier&& loadNotifier, bool syncLoad = false,
+        const ImageDfxConfig& imageDfxConfig = {});
     ~ImageLoadingContext() override;
 
     // return true if calling MakeCanvasImage is necessary
@@ -132,16 +135,6 @@ public:
         measureFinish_ = true;
     }
 
-    bool GetLoadInVipChannel()
-    {
-        return loadInVipChannel_;
-    }
-
-    void SetLoadInVipChannel(bool loadInVipChannel)
-    {
-        loadInVipChannel_ = loadInVipChannel;
-    }
-
     void CallbackAfterMeasureIfNeed();
 
     void OnDataReadyOnCompleteCallBack();
@@ -151,9 +144,15 @@ public:
         return errorMsg_;
     }
 
-    void SetNodeId(int32_t nodeId)
+    void SetImageDfxConfig(const ImageDfxConfig& imageDfxConfig)
     {
-        nodeId_ = nodeId;
+        imageDfxConfig_ = imageDfxConfig;
+    }
+
+
+    ImageDfxConfig GetImageDfxConfig()
+    {
+        return imageDfxConfig_;
     }
 
 private:
@@ -192,7 +191,7 @@ private:
     RefPtr<ImageStateManager> stateManager_;
     RefPtr<ImageObject> imageObj_;
     RefPtr<CanvasImage> canvasImage_;
-    std::string imageDataCopy_;
+    std::string downloadedUrlData_;
 
     // [LoadNotifier] contains 3 tasks to notify whom uses [ImageLoadingContext] of loading results
     LoadNotifier notifiers_;
@@ -203,7 +202,6 @@ private:
     bool isHdrDecoderNeed_ = false;
     bool autoResize_ = true;
     bool syncLoad_ = false;
-    bool loadInVipChannel_ = false;
 
     DynamicRangeMode dynamicMode_ = DynamicRangeMode::STANDARD;
     AIImageQuality imageQuality_ = AIImageQuality::NONE;
@@ -216,7 +214,7 @@ private:
     std::atomic<bool> needDataReadyCallBack_ = false;
     // to determine whether the image needs to be reloaded
     int32_t sizeLevel_ = -1;
-    int32_t nodeId_ = -1;
+    ImageDfxConfig imageDfxConfig_;
 
     ImageFit imageFit_ = ImageFit::COVER;
     std::unique_ptr<SizeF> sourceSizePtr_ = nullptr;

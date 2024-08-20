@@ -883,7 +883,9 @@ HWTEST_F(SpanTestNg, UpdateTextStyleForAISpan001, TestSize.Level1)
         .textOverflow = textStyle.GetTextOverflow() };
     auto paragraph= MockParagraph::GetOrCreateMockParagraph();
 
-    spanNode->spanItem_->UpdateTextStyleForAISpan(spanContent, paragraph, textStyle);
+    auto aiSpanStyle = textStyle;
+    pattern->ModifyAISpanStyle(aiSpanStyle);
+    spanNode->spanItem_->UpdateTextStyleForAISpan(spanContent, paragraph, textStyle, aiSpanStyle);
     EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
 }
 
@@ -1324,13 +1326,15 @@ HWTEST_F(SpanTestNg, UpdateTextStyleForAISpan002, TestSize.Level1)
     std::string spanContent = TEXT_FOR_AI;
     spanNode->spanItem_->position = StringUtils::ToWstring(spanContent).length();
     TextStyle textStyle;
+    auto aiSpanStyle = textStyle;
+    pattern->ModifyAISpanStyle(aiSpanStyle);
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     EXPECT_CALL(*paragraph, PushStyle).Times(AnyNumber());
     EXPECT_CALL(*paragraph, AddText).Times(AnyNumber());
     EXPECT_CALL(*paragraph, PopStyle).Times(AnyNumber());
 
     spanNode->spanItem_->SetNeedRemoveNewLine(true);
-    spanNode->spanItem_->UpdateTextStyleForAISpan(spanContent, paragraph, textStyle);
+    spanNode->spanItem_->UpdateTextStyleForAISpan(spanContent, paragraph, textStyle, aiSpanStyle);
     EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
     MockParagraph::TearDown();
 }

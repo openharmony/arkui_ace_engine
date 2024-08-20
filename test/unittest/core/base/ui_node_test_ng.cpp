@@ -69,7 +69,7 @@ public:
     explicit TestNode(int32_t nodeId) : UINode("TestNode", nodeId) {}
 
     HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const PointF& parentRevertPoint,
-        TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId, TouchTestResult& responseLinkResult,
+        TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId, ResponseLinkResult& responseLinkResult,
         bool isDispatch = false) override
     {
         return hitTestResult_;
@@ -784,7 +784,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg023, TestSize.Level1)
      * @tc.expected: the return value is meetings expectations
      */
     TouchTestResult result;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     TouchRestrict restrict;
     const PointF GLOBAL_POINT { 20.0f, 20.0f };
     const PointF LOCAL_POINT { 15.0f, 15.0f };
@@ -2369,6 +2369,26 @@ HWTEST_F(UINodeTestNg, UINodeTestNg070, TestSize.Level1)
     AxisTestResult onAxisResult;
     HitTestResult ret2 = testNode1->UINode::AxisTest(globalPoint, parentLocalPoint, onAxisResult);
     EXPECT_EQ(ret2 == HitTestResult::OUT_OF_REGION, true);
+}
+
+/**
+ * @tc.name: UINodeTestNg071
+ * @tc.desc: Test ui node method SetAccessibilityNodeVirtual
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestNg071, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create FrameNode node and construct params
+     */
+    auto testNode1 = TestNode::CreateTestNode(21);
+    auto child = TestNode::CreateTestNode(22);
+    testNode1->SetAccessibilityNodeVirtual();
+    EXPECT_EQ(testNode1->IsAccessibilityVirtualNode(), true);
+    testNode1->SetAccessibilityVirtualNodeParent(child);
+    auto weakResult = testNode1->GetVirtualNodeParent();
+    auto result = weakResult.Upgrade();
+    ASSERT_NE(result, nullptr);
 }
 
 /**

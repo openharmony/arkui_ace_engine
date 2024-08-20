@@ -14,10 +14,7 @@
  */
 #include "form_renderer_dispatcher_stub.h"
 
-#include "appexecfwk_errors.h"
-#include "errors.h"
 #include "form_renderer_hilog.h"
-#include "ipc_skeleton.h"
 
 namespace OHOS {
 namespace Ace {

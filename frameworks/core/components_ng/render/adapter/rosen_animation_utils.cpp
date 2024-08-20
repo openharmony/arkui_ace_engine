@@ -13,13 +13,10 @@
  * limitations under the License.
  */
 
-#include "render_service_client/core/animation/rs_animation.h"
-#include "render_service_client/core/ui/rs_node.h"
 #include "render_service_client/core/animation/rs_interactive_implict_animator.h"
 
 #include "core/animation/native_curve_helper.h"
 #include "core/common/container.h"
-#include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace {
 
@@ -51,6 +48,7 @@ Rosen::RSAnimationTimingProtocol OptionToTimingProtocol(const AnimationOption& o
     if (rateRange) {
         timingProtocol.SetFrameRateRange({ rateRange->min_, rateRange->max_, rateRange->preferred_ });
     }
+    timingProtocol.SetInstanceId(Container::CurrentIdSafelyWithCheck());
     return timingProtocol;
 }
 std::function<void()> GetWrappedCallback(const std::function<void()>& callback)
@@ -58,7 +56,7 @@ std::function<void()> GetWrappedCallback(const std::function<void()>& callback)
     if (!callback) {
         return nullptr;
     }
-    auto wrappedOnFinish = [onFinish = callback, instanceId = Container::CurrentId()]() {
+    auto wrappedOnFinish = [onFinish = callback, instanceId = Container::CurrentIdSafelyWithCheck()]() {
         ContainerScope scope(instanceId);
         auto taskExecutor = Container::CurrentTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
@@ -198,11 +196,22 @@ void AnimationUtils::PauseAnimation(const std::shared_ptr<AnimationUtils::Animat
     for (auto& ani : animation->animations_) {
         ani->Pause();
     }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    if (pipeline && !pipeline->GetOnShow()) {
+        pipeline->FlushMessages();
+    }
 }
 
 void AnimationUtils::ResumeAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation)
 {
     CHECK_NULL_VOID(animation);
+    if (animation->animations_.empty()) {
+        return;
+    }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    if (pipeline) {
+        pipeline->RequestFrame();
+    }
     for (auto& ani : animation->animations_) {
         ani->Resume();
     }
@@ -231,12 +240,12 @@ std::shared_ptr<AnimationUtils::InteractiveAnimation> AnimationUtils::CreateInte
     return interactiveAnimation;
 }
 
-void AnimationUtils::StartInteractiveAnimation(
+int32_t AnimationUtils::StartInteractiveAnimation(
     const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation)
 {
-    CHECK_NULL_VOID(interactiveAnimation);
-    CHECK_NULL_VOID(interactiveAnimation->interactiveAnimation_);
-    interactiveAnimation->interactiveAnimation_->StartAnimation();
+    CHECK_NULL_RETURN(interactiveAnimation, -1);
+    CHECK_NULL_RETURN(interactiveAnimation->interactiveAnimation_, -1);
+    return interactiveAnimation->interactiveAnimation_->StartAnimation();
 }
 
 void AnimationUtils::ContinueInteractiveAnimation(

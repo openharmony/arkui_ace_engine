@@ -32,6 +32,8 @@ public:
 
     std::string GetText() const override;
 
+    bool IsSelected() const override;
+
 protected:
     void SetSpecificSupportAction() override
     {

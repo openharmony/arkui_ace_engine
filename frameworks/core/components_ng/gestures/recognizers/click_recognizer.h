@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GESTURES_RECOGNIZERS_CLICK_RECOGNIZER_H
 
 #include <functional>
+#include <limits>
 
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/point_t.h"
@@ -34,7 +35,7 @@ class ClickRecognizer : public MultiFingersRecognizer {
 
 public:
     ClickRecognizer() = default;
-    ClickRecognizer(int32_t fingers, int32_t count);
+    ClickRecognizer(int32_t fingers, int32_t count, double distanceThreshold = std::numeric_limits<double>::infinity());
 
     ~ClickRecognizer() override = default;
 
@@ -59,6 +60,14 @@ public:
     void SetOnAccessibility(OnAccessibilityEventFunc onAccessibilityEvent)
     {
         onAccessibilityEventFunc_ = std::move(onAccessibilityEvent);
+    }
+
+    void SetDistanceThreshold(double distanceThreshold)
+    {
+        distanceThreshold_ = distanceThreshold;
+        if (distanceThreshold_ < 0) {
+            distanceThreshold_ = std::numeric_limits<double>::infinity();
+        }
     }
 
     int GetCount()
@@ -118,6 +127,7 @@ private:
     bool CheckNeedReceiveEvent();
 
     int32_t count_ = 1;
+    double distanceThreshold_ = std::numeric_limits<double>::infinity();
 
     // number of tap action.
     int32_t tappedCount_ = 0;

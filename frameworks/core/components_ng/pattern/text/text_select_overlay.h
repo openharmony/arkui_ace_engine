@@ -57,6 +57,7 @@ public:
     void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info = nullptr) override;
     void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType) override;
     void OnHandleLevelModeChanged(HandleLevelMode mode) override;
+    void OnHandleMoveStart(bool isFirst) override;
 
     void UpdateHandleGlobalOffset()
     {
@@ -69,8 +70,18 @@ public:
         return handleGlobalOffset_;
     }
 
+    bool IsRegisterTouchCallback() override
+    {
+        return true;
+    }
+    void OnOverlayClick(const GestureEvent& event, bool isFirst) override;
+
 protected:
     virtual void UpdateSelectorOnHandleMove(const OffsetF& handleOffset, bool isFirstHandle);
+    void UpdateTransformFlag() override
+    {
+        hasTransform_ = CheckHasTransformAttr();
+    }
     bool selectTextUseTopHandle = false;
 
 private:

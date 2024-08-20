@@ -17,6 +17,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/i18n/localization.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
@@ -53,6 +54,7 @@ RefPtr<FrameNode> SheetView::CreateSheetPage(int32_t targetId, std::string targe
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::SHEET_PAGE_TAG, targetId);
     auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<SheetPresentationPattern>(targetId, targetTag, std::move(callback)));
+    sheetNode->SetDragHitTestBlock(true);
     auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(sheetLayoutProperty, nullptr);
     sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
@@ -123,7 +125,11 @@ void SheetView::CreateDragBarNode(const RefPtr<FrameNode>& titleBuilder, const R
         isSingleDetents = sheetStyle.detents[0] == sheetStyle.detents[1] &&
                           sheetStyle.detents[1] == sheetStyle.detents[SHEET_DETENTS_TWO];
     }
-    if (!isSingleDetents && showDragIndicator) {
+
+    // 1、showDragBar && not single detents
+    // 2、has SystemTitleBar
+    // need set drag bar invisible to occupy place
+    if ((!isSingleDetents && showDragIndicator) || sheetStyle.isTitleBuilder.has_value()) {
         dragBarLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
     } else {
         dragBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
@@ -173,7 +179,6 @@ void SheetView::CreateCloseIconButtonNode(RefPtr<FrameNode> sheetNode, NG::Sheet
         CHECK_NULL_VOID(sheet);
         auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
         CHECK_NULL_VOID(sheetPattern);
-        sheetPattern->SetIsDirectionUp(false);
         sheetPattern->SheetInteractiveDismiss(BindSheetDismissReason::CLOSE_BUTTON);
     };
     eventConfirmHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(clickCallback));
@@ -185,6 +190,12 @@ void SheetView::CreateCloseIconButtonNode(RefPtr<FrameNode> sheetNode, NG::Sheet
 
     CreateCloseIconNode(buttonNode);
     buttonNode->MountToParent(sheetNode);
+
+    // set accessibilityProperty to sheet close button
+    auto accessibilityProperty = buttonNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    std::string message  = Localization::GetInstance()->GetEntryLetters("sheet.close");
+    accessibilityProperty->SetAccessibilityText(message);
 }
 
 void SheetView::CreateCloseIconNode(RefPtr<FrameNode> buttonNode)

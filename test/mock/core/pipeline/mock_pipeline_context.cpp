@@ -321,7 +321,8 @@ bool PipelineContext::CheckNeedDisableUpdateBackgroundImage()
 }
 
 void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight,
-    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight, const bool supportAvoidance)
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight,
+    const bool supportAvoidance, bool forceChange)
 {}
 
 void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double positionY, double height,
@@ -348,11 +349,6 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
 
 void PipelineContext::OnLayoutCompleted(const std::string& componentId) {}
 
-bool PipelineContext::CheckPageFocus()
-{
-    return true;
-}
-
 bool PipelineContext::CheckOverlayFocus()
 {
     return false;
@@ -360,7 +356,7 @@ bool PipelineContext::CheckOverlayFocus()
 
 void PipelineContext::OnDrawCompleted(const std::string& componentId) {}
 
-void PipelineContext::SetNeedRenderNode(const RefPtr<FrameNode>& node) {}
+void PipelineContext::SetNeedRenderNode(const WeakPtr<FrameNode>& node) {}
 
 void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY) {}
 
@@ -559,6 +555,7 @@ bool PipelineContext::IsEnableKeyBoardAvoidMode()
 {
     return false;
 }
+void PipelineContext::RequireSummary() {};
 void PipelineContext::SetIgnoreViewSafeArea(bool value) {};
 void PipelineContext::SetIsLayoutFullScreen(bool value) {};
 void PipelineContext::SetIsNeedAvoidWindow(bool value) {};
@@ -577,6 +574,11 @@ SafeAreaInsets PipelineContext::GetSafeAreaWithoutProcess() const
 float PipelineContext::GetPageAvoidOffset()
 {
     return 0.0f;
+}
+
+bool PipelineContext::CheckNeedAvoidInSubWindow()
+{
+    return false;
 }
 
 void PipelineContext::AddFontNodeNG(const WeakPtr<UINode>& node) {}
@@ -641,7 +643,7 @@ void PipelineContext::ResetDragging() {}
 
 void PipelineContext::UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) {}
 
-void PipelineContext::CheckAndUpdateKeyboardInset() {}
+void PipelineContext::CheckAndUpdateKeyboardInset(float keyboardHeight) {}
 
 bool PipelineContext::PrintVsyncInfoIfNeed() const
 {
@@ -698,15 +700,25 @@ void PipelineContext::CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, Axis
 
 void PipelineContext::PreLayout(uint64_t nanoTimestamp, uint32_t frameCount) {}
 
-void PipelineContext::AddFrameNodeChangeListener(const RefPtr<FrameNode>& node) {}
+void PipelineContext::AddFrameNodeChangeListener(const WeakPtr<FrameNode>& node) {}
 
-void PipelineContext::RemoveFrameNodeChangeListener(const RefPtr<FrameNode>& node) {}
+void PipelineContext::RemoveFrameNodeChangeListener(int32_t nodeId) {}
 
-void PipelineContext::AddChangedFrameNode(const RefPtr<FrameNode>& node) {}
+bool PipelineContext::AddChangedFrameNode(const WeakPtr<FrameNode>& node)
+{
+    return true;
+}
+
+void PipelineContext::RemoveChangedFrameNode(int32_t nodeId) {}
 
 void PipelineContext::FlushNodeChangeFlag() {}
 
 void PipelineContext::CleanNodeChangeFlag() {}
+
+bool PipelineContext::HasOnAreaChangeNode(int32_t nodeId)
+{
+    return false;
+}
 
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
@@ -715,9 +727,6 @@ void PipelineContext::CleanNodeChangeFlag() {}
 namespace OHOS::Ace {
 class ManagerInterface : public AceType {
     DECLARE_ACE_TYPE(ManagerInterface, AceType);
-};
-class FontManager : public AceType {
-    DECLARE_ACE_TYPE(FontManager, AceType);
 };
 
 void PipelineBase::OpenImplicitAnimation(
@@ -749,7 +758,8 @@ RefPtr<ImageCache> PipelineBase::GetImageCache() const
 }
 
 void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea,
-    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight, const bool supportAvoidance)
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight,
+    const bool supportAvoidance, bool forceChange)
 {}
 void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positionY, double height,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, bool forceChange)

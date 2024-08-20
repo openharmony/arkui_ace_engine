@@ -73,6 +73,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkWebVerticalScrollBarAccessEnabled(bool isVerti
 CJ_EXPORT void FfiOHOSAceFrameworkNestedScroll(int32_t nestedScrollNum, int32_t scrollBackwardNum);
 CJ_EXPORT void FfiOHOSAceFrameworkWebUserAgent(const std::string& userAgent);
 CJ_EXPORT void FfiOHOSAceFrameworkWebBackgroundColor(uint32_t color);
+CJ_EXPORT void FfiOHOSAceFrameworkWebDarkMode(int32_t darkMode);
+CJ_EXPORT void FfiOHOSAceFrameworkWebForceDarkAccess(bool access);
 
 CJ_EXPORT void FfiOHOSAceFrameworkWebOnAlert(bool (*callback)(FfiWebEvent event));
 CJ_EXPORT void FfiOHOSAceFrameworkWebOnPageStart(void (*callback)(const char* url));

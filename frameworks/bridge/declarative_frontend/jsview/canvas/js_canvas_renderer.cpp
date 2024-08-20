@@ -36,6 +36,7 @@
 
 namespace OHOS::Ace {
 constexpr uint32_t PIXEL_SIZE = 4;
+constexpr int32_t ALPHA_INDEX = 3;
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
@@ -113,6 +114,7 @@ JSCanvasRenderer::JSCanvasRenderer()
             auto canvasRender = self.Upgrade();
             CHECK_NULL_VOID(canvasRender);
             canvasRender->density_ = density;
+            canvasRender->SetDensity();
         });
     }
 }
@@ -209,9 +211,14 @@ void JSCanvasRenderer::JsFillText(const JSCallbackInfo& info)
         textInfo.x *= density;
         textInfo.y *= density;
         if (info.Length() >= 4) {
-            double maxWidth = FLT_MAX;
-            if (info.GetDoubleArg(3, maxWidth)) {
+            double maxWidth = 0.0;
+            if (info.GetDoubleArg(3, maxWidth)) { // Parse the 3rd parameter.
                 maxWidth *= density;
+            } else if (info[3]->IsUndefined()) { // Is the 3rd parameter undefined.
+                maxWidth = FLT_MAX;
+            }
+            if (maxWidth < 0) {
+                return;
             }
             textInfo.maxWidth = maxWidth;
         }
@@ -228,9 +235,14 @@ void JSCanvasRenderer::JsStrokeText(const JSCallbackInfo& info)
         textInfo.x *= density;
         textInfo.y *= density;
         if (info.Length() >= 4) {
-            double maxWidth = FLT_MAX;
-            if (info.GetDoubleArg(3, maxWidth)) {
+            double maxWidth = 0.0;
+            if (info.GetDoubleArg(3, maxWidth)) { // Parse the 3rd parameter.
                 maxWidth *= density;
+            } else if (info[3]->IsUndefined()) { // Is the 3rd parameter undefined.
+                maxWidth = FLT_MAX;
+            }
+            if (maxWidth < 0) {
+                return;
             }
             textInfo.maxWidth = maxWidth;
         }
@@ -241,6 +253,12 @@ void JSCanvasRenderer::JsStrokeText(const JSCallbackInfo& info)
 void JSCanvasRenderer::SetAntiAlias()
 {
     renderingContext2DModel_->SetAntiAlias(anti_);
+}
+
+void JSCanvasRenderer::SetDensity()
+{
+    double density = GetDensity();
+    renderingContext2DModel_->SetDensity(density);
 }
 
 // font: string
@@ -258,16 +276,16 @@ void JSCanvasRenderer::JsSetFont(const JSCallbackInfo& info)
         if (FONT_WEIGHTS.find(fontProp) != FONT_WEIGHTS.end()) {
             updateFontweight = true;
             auto weight = ConvertStrToFontWeight(fontProp);
-            style_.SetFontWeight(weight);
+            paintState_.SetFontWeight(weight);
             renderingContext2DModel_->SetFontWeight(weight);
         } else if (FONT_STYLES.find(fontProp) != FONT_STYLES.end()) {
             updateFontStyle = true;
             auto fontStyle = ConvertStrToFontStyle(fontProp);
-            style_.SetFontStyle(fontStyle);
+            paintState_.SetFontStyle(fontStyle);
             renderingContext2DModel_->SetFontStyle(fontStyle);
         } else if (FONT_FAMILIES.find(fontProp) != FONT_FAMILIES.end()) {
             auto families = ConvertStrToFontFamilies(fontProp);
-            style_.SetFontFamilies(families);
+            paintState_.SetFontFamilies(families);
             renderingContext2DModel_->SetFontFamilies(families);
         } else if (fontProp.find("px") != std::string::npos || fontProp.find("vp") != std::string::npos) {
             Dimension size;
@@ -277,7 +295,7 @@ void JSCanvasRenderer::JsSetFont(const JSCallbackInfo& info)
                 std::string fontSize = fontProp.substr(0, fontProp.size() - 2);
                 size = Dimension(StringToDouble(fontProp));
             }
-            style_.SetFontSize(size);
+            paintState_.SetFontSize(size);
             renderingContext2DModel_->SetFontSize(size);
         }
     }
@@ -660,8 +678,8 @@ void JSCanvasRenderer::JsPutImageData(const JSCallbackInfo& info)
     imageData.data = std::vector<Color>();
     for (int32_t i = std::max(imageData.dirtyY, 0); i < imageData.dirtyY + imageData.dirtyHeight; ++i) {
         for (int32_t j = std::max(imageData.dirtyX, 0); j < imageData.dirtyX + imageData.dirtyWidth; ++j) {
-            uint32_t idx = 4 * (j + imgWidth * i);
-            if (bufferLength > static_cast<int32_t>(idx + 3)) {
+            uint32_t idx = static_cast<uint32_t>(4 * (j + imgWidth * i));
+            if (bufferLength > static_cast<int32_t>(idx + ALPHA_INDEX)) {
                 imageData.data.emplace_back(
                     Color::FromARGB(buffer[idx + 3], buffer[idx], buffer[idx + 1], buffer[idx + 2]));
             }
@@ -1233,12 +1251,17 @@ void JSCanvasRenderer::JsClosePath(const JSCallbackInfo& info)
 // restore(): void
 void JSCanvasRenderer::JsRestore(const JSCallbackInfo& info)
 {
+    if (!savePaintState_.empty()) {
+        paintState_ = savePaintState_.back();
+        savePaintState_.pop_back();
+    }
     renderingContext2DModel_->Restore();
 }
 
 // save(): void
 void JSCanvasRenderer::JsSave(const JSCallbackInfo& info)
 {
+    savePaintState_.push_back(paintState_);
     renderingContext2DModel_->CanvasRendererSave();
 }
 
@@ -1412,7 +1435,7 @@ void JSCanvasRenderer::JsSetTextBaseline(const JSCallbackInfo& info)
     if (info.GetStringArg(0, textBaseline)) {
         auto baseline =
             ConvertStrToEnum(textBaseline.c_str(), BASELINE_TABLE, ArraySize(BASELINE_TABLE), TextBaseline::ALPHABETIC);
-        style_.SetTextBaseline(baseline);
+        paintState_.SetTextBaseline(baseline);
         renderingContext2DModel_->SetTextBaseline(baseline);
     }
 }
@@ -1421,7 +1444,6 @@ void JSCanvasRenderer::JsSetTextBaseline(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsMeasureText(const JSCallbackInfo& info)
 {
     std::string text;
-    paintState_.SetTextStyle(style_);
     double density = GetDensity();
     if (Positive(density) && info.GetStringArg(0, text)) {
         TextMetrics textMetrics = renderingContext2DModel_->GetMeasureTextMetrics(paintState_, text);
@@ -1505,7 +1527,6 @@ void JSCanvasRenderer::JsRestoreLayer(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsReset(const JSCallbackInfo& info)
 {
     paintState_ = PaintState();
-    style_ = TextStyle();
     anti_ = false;
     isInitializeShadow_ = false;
     isOffscreenInitializeShadow_ = false;

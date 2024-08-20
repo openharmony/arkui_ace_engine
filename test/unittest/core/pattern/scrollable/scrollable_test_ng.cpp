@@ -57,15 +57,17 @@ void ScrollableTestNg::TearDown()
 
 void ScrollableTestNg::InitNestedScrolls()
 {
-    scroll_ = FrameNode::CreateFrameNode("scroll", -1, AceType::MakeRefPtr<PartiallyMockedScrollable>());
+    ResetElmtId();
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    scroll_ = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, nodeId, AceType::MakeRefPtr<PartiallyMockedScrollable>());
+    stack->Push(scroll_);
     mockScroll_ = FrameNode::CreateFrameNode("mockScroll", -1, AceType::MakeRefPtr<MockNestableScrollContainer>());
     scroll_->MountToParent(mockScroll_);
-
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    // to enable need parent
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::PARALLEL, .backward = NestedScrollMode::PARALLEL };
     scrollPn->SetParentScrollable();
-
     scrollPn->AddScrollEvent();
     scrollPn->SetEdgeEffect();
 }
@@ -1859,27 +1861,24 @@ HWTEST_F(ScrollableTestNg, HandleClickScroll001, TestSize.Level1)
     scrollPn->scrollBar_->touchRegion_ = Rect(0.0f, 100.0f, 30.0f, 100.0f);
     scrollPn->isMousePressed_ = true;
     scrollPn->scrollBar_->isScrollable_ = true;
-    GestureEvent info;
-    info.SetLocalLocation(Offset(1.0f, 150.0f));
+    scrollPn->locationInfo_ = Offset(1.0f, 150.0f);
     // /**
     //  * @tc.steps: step2. Test HandleClickEvent.
     //  * @tc.expect: finalPosition_ equal to expect value.
     //  */
     EXPECT_CALL(*scrollPn, GetMainContentSize).Times(2).WillRepeatedly(Return(50.0f));
     scrollPn->InitScrollBarClickEvent();
-    scrollPn->HandleClickEvent(info);
+    scrollPn->HandleClickEvent();
     EXPECT_EQ(scrollPn->finalPosition_, 0.0f);
 
-    GestureEvent info1;
-    info1.SetLocalLocation(Offset(15.0f, 1.0f));
+    scrollPn->locationInfo_ = Offset(15.0f, 1.0f);
     scrollPn->scrollBar_->touchRegion_ = Rect(0.0f, 100.0f, 30.0f, 100.0f);
-    scrollPn->HandleClickEvent(info1);
+    scrollPn->HandleClickEvent();
     EXPECT_EQ(scrollPn->finalPosition_, -50.0f);
 
-    GestureEvent info2;
-    info2.SetLocalLocation(Offset(15.0f, 350.0f));
+    scrollPn->locationInfo_ = Offset(15.0f, 350.0f);
     scrollPn->scrollBar_->touchRegion_ = Rect(0.0f, 100.0f, 30.0f, 100.0f);
-    scrollPn->HandleClickEvent(info2);
+    scrollPn->HandleClickEvent();
     EXPECT_EQ(scrollPn->finalPosition_, 50.0f);
 }
 

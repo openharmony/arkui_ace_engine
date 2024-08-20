@@ -15,9 +15,6 @@
 
 #include "core/gestures/swipe_recognizer.h"
 
-#include "base/json/json_util.h"
-#include "base/log/log.h"
-
 namespace OHOS::Ace {
 namespace {
 

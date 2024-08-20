@@ -302,7 +302,9 @@ public:
     void SetIdealSurfaceOffsetX(float offsetX);
     void SetIdealSurfaceOffsetY(float offsetY);
     void ClearIdealSurfaceOffset(bool isXAxis);
-    void UpdateSurfaceBounds(bool needForceRender, bool frameOffsetChange = false);
+    std::tuple<bool, bool, bool> UpdateSurfaceRect();
+    void HandleSurfaceChangeEvent(bool needForceRender, bool offsetChanged, bool sizeChanged, bool needFireNativeEvent,
+        bool frameOffsetChange = false);
     void EnableAnalyzer(bool enable);
     void SetImageAIOptions(void* options);
     void StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnalyzed);
@@ -362,11 +364,6 @@ private:
     void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
     void ReleaseImageAnalyzer();
     void SetRotation(uint32_t rotation);
-#ifdef OHOS_PLATFORM
-    float GetUpVelocity(OH_NativeXComponent_TouchEvent lastMoveInfo, OH_NativeXComponent_TouchEvent upEventInfo);
-    int GetFlingDuration(float velocity);
-    void ReportSlideToRss();
-#endif
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     RenderSurface::RenderSurfaceType CovertToRenderSurfaceType(const XComponentType& hostType);
@@ -409,7 +406,7 @@ private:
     bool hasXComponentInit_ = false;
 
     RefPtr<TouchEventImpl> touchEvent_;
-    OH_NativeXComponent_TouchEvent touchEventPoint_;
+    OH_NativeXComponent_TouchEvent touchEventPoint_ = {};
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> axisEvent_;
     RefPtr<InputEvent> mouseHoverEvent_;
@@ -420,7 +417,7 @@ private:
     OffsetF globalPosition_;
     SizeF drawSize_;
     SizeF surfaceSize_;
-    RefPtr<UIDisplaySync> displaySync_ = AceType::MakeRefPtr<UIDisplaySync>();
+    RefPtr<UIDisplaySync> displaySync_ = AceType::MakeRefPtr<UIDisplaySync>(UIObjectType::DISPLAYSYNC_XCOMPONENT);
 
     std::optional<float> selfIdealSurfaceWidth_;
     std::optional<float> selfIdealSurfaceHeight_;
@@ -438,12 +435,6 @@ private:
     bool isEnableAnalyzer_ = false;
     std::optional<int32_t> transformHintChangedCallbackId_;
     uint32_t rotation_ = 0;
-#ifdef OHOS_PLATFORM
-    int64_t startIncreaseTime_ = 0;
-    OH_NativeXComponent_TouchEvent lastTouchInfo_;
-    std::atomic<int32_t> slideCount_ {0};
-    double physicalCoeff_ = 0.0;
-#endif
 };
 } // namespace OHOS::Ace::NG
 

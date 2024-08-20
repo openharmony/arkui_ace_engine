@@ -99,5 +99,13 @@ const ArkUIRectModifier* GetRectModifier()
 
     return &modifier;
 }
+
+const CJUIRectModifier* GetCJUIRectModifier()
+{
+    static const CJUIRectModifier modifier = { SetRectRadiusWidth, ResetRectRadiusWidth, SetRectRadiusHeight,
+        ResetRectRadiusHeight, SetRectRadiusWithArray, SetRectRadiusWithValue, ResetRectRadius };
+
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

@@ -109,16 +109,13 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutProperty);
     auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
     auto scrollNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(scrollNode);
-    auto scrollPattern = AceType::DynamicCast<ScrollPattern>(scrollNode->GetPattern());
     auto geometryNode = layoutWrapper->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-    CHECK_NULL_VOID(childWrapper);
+    CHECK_NULL_VOID((scrollNode && geometryNode && childWrapper));
+    auto scrollPattern = AceType::DynamicCast<ScrollPattern>(scrollNode->GetPattern());
     auto childGeometryNode = childWrapper->GetGeometryNode();
     CHECK_NULL_VOID(childGeometryNode);
     auto size = geometryNode->GetFrameSize();
-
     auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
     auto padding = layoutProperty->CreatePaddingAndBorder();
     viewSize_ = size;
@@ -138,7 +135,7 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     viewPortLength_ = GetMainAxisSize(viewPort_, axis);
     auto currentOffset = axis == Axis::VERTICAL ? OffsetF(0.0f, currentOffset_) : OffsetF(currentOffset_, 0.0f);
     if (layoutDirection == TextDirection::RTL && axis == Axis::HORIZONTAL) {
-        currentOffset = OffsetF(size.Width() - childSize.Width() - currentOffset_, 0.0f);
+        currentOffset = OffsetF(std::min(size.Width() - childSize.Width(), 0.f) - currentOffset_, 0.0f);
     }
     auto scrollAlignment = Alignment::CENTER;
     if (layoutProperty->GetPositionProperty() && layoutProperty->GetPositionProperty()->HasAlignment()) {
@@ -148,6 +145,10 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         UpdateScrollAlignment(scrollAlignment);
     }
     auto alignmentPosition = Alignment::GetAlignPosition(size, viewPortExtent_, scrollAlignment);
+    if (GreatNotEqual(viewPortExtent_.Width(), size.Width()) && layoutDirection == TextDirection::RTL &&
+        axis == Axis::VERTICAL) {
+        alignmentPosition.SetX(size.Width() - viewPortExtent_.Width());
+    }
     childGeometryNode->SetMarginFrameOffset(padding.Offset() + currentOffset + alignmentPosition);
     childWrapper->Layout();
 }

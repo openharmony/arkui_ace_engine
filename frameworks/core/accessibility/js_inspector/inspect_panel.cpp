@@ -15,8 +15,6 @@
 
 #include "inspect_panel.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 InspectPanel::InspectPanel(NodeId nodeId, const std::string& nodeName) : InspectNode(nodeId, nodeName) {
 }

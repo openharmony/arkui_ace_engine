@@ -88,4 +88,18 @@ void ImageAnalyzerMgr::UpdateOverlayStatus(void** overlayData, ImageAnalyzerInne
         return engine_->UpdateOverlayStatus(overlayData, config);
     }
 }
+
+void ImageAnalyzerMgr::UpdateOverlayActiveStatus(void** overlayData, bool status)
+{
+    if (engine_) {
+        return engine_->UpdateOverlayActiveStatus(overlayData, status);
+    }
+}
+
+void ImageAnalyzerMgr::UpdateAIButtonConfig(void** overlayData, AIButtonConfig* config)
+{
+    if (engine_) {
+        return engine_->UpdateAIButtonConfig(overlayData, config);
+    }
+}
 }

@@ -13,25 +13,10 @@
  * limitations under the License.
  */
 
-#include <memory>
-#include <string>
 
 #include "animator_option.h"
 #include "interfaces/napi/kits/utils/napi_utils.h"
-#include "napi/native_api.h"
-#include "napi/native_engine/native_value.h"
-#include "napi/native_node_api.h"
-
-#include "base/log/ace_trace.h"
-#include "base/log/log.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
 #include "base/thread/frame_trace_adapter.h"
-#include "bridge/common/utils/utils.h"
-#include "core/animation/animator.h"
-#include "core/animation/curve.h"
-#include "core/animation/curve_animation.h"
-#include "core/animation/spring_motion.h"
 
 namespace OHOS::Ace::Napi {
 
@@ -639,9 +624,12 @@ static napi_value SetOnfinish(napi_env env, napi_callback_info info)
             return;
         }
         ACE_SCOPED_TRACE("ohos.animator finishCallback, id:%d", id);
+        TAG_LOGI(AceLogTag::ACE_ANIMATION, "ohos.animator call finish callback, id:%{public}d", id);
         result = napi_call_function(env, NULL, onfinish, 0, NULL, &ret);
-        TAG_LOGI(AceLogTag::ACE_ANIMATION, "ohos.animator call finish callback done, id:%{public}d, succeed:%{public}d",
-            id, result == napi_ok);
+        if (result != napi_ok) {
+            TAG_LOGW(
+                AceLogTag::ACE_ANIMATION, "ohos.animator call finish callback failed, napi error, id:%{public}d", id);
+        }
         napi_close_handle_scope(env, scope);
     });
     napi_value undefined;

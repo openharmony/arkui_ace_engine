@@ -102,6 +102,8 @@ const Dimension DEFAULT_INDENT_SIZE3 = Dimension(7, DimensionUnit::VP);
 const Dimension DEFAULT_INDENT_SIZE4 = Dimension(8, DimensionUnit::VP);
 const Dimension DEFAULT_INDENT_SIZE5 = Dimension(9, DimensionUnit::VP);
 const Dimension DEFAULT_INDENT_SIZE6 = Dimension(10, DimensionUnit::VP);
+const float PADDING_FIVE = 5.0f;
+const Color COLOR_DEFAULT = Color::RED;
 struct ExpectParagraphParams {
     float height = 50.f;
     float longestLine = 460.f;
@@ -741,5 +743,367 @@ HWTEST_F(TextInputAreaTest, testTextIndent024, TestSize.Level1)
     layoutProperty_->UpdateTextIndent(DEFAULT_INDENT_SIZE6);
     frameNode_->MarkModifyDone();
     EXPECT_EQ(layoutProperty_->GetTextIndent(), DEFAULT_INDENT_SIZE6);
+}
+
+/**
+ * @tc.name: testFieldModelNg001
+ * @tc.desc: test testInput ModelNg TextInputType
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, testFieldModelNg001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT, "");
+
+    /**
+     * @tc.step: step2. Set TextInputType
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateTextInputType(TextInputType::UNSPECIFIED);
+    textFieldModelNG.SetType(TextInputType::UNSPECIFIED);
+    layoutProperty->UpdateTextInputType(TextInputType::EMAIL_ADDRESS);
+    textFieldModelNG.SetType(TextInputType::UNSPECIFIED);
+    layoutProperty->ResetTextInputType();
+    textFieldModelNG.SetType(TextInputType::UNSPECIFIED);
+}
+
+/**
+ * @tc.name: testFieldModelNg002
+ * @tc.desc: test testInput ModelNg SetContentType
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, testFieldModelNg002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT, "");
+
+    /**
+     * @tc.step: step2. Set SetContentType
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateTextContentType(TextContentType::USER_NAME);
+    textFieldModelNG.SetContentType(TextContentType::USER_NAME);
+    layoutProperty->UpdateTextContentType(TextContentType::PERSON_FIRST_NAME);
+    textFieldModelNG.SetContentType(TextContentType::USER_NAME);
+    layoutProperty->ResetTextContentType();
+    textFieldModelNG.SetContentType(TextContentType::PERSON_FIRST_NAME);
+}
+
+/**
+ * @tc.name: testFieldModelNg003
+ * @tc.desc: test testInput ModelNg SetPasswordIcon
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, testFieldModelNg003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT, "");
+
+    /**
+     * @tc.step: step2. Set SetPasswordIcon
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    PasswordIcon passwordIcon;
+    textFieldModelNG.SetPasswordIcon(passwordIcon);
+    passwordIcon.showResult = HELLO_TEXT;
+    passwordIcon.hideResult = HELLO_TEXT;
+    textFieldModelNG.SetPasswordIcon(passwordIcon);
+    std::function<void()> buildFunc;
+    textFieldModelNG.SetCustomKeyboard(std::move(buildFunc), true);
+}
+
+/**
+ * @tc.name: testFieldModelNg004
+ * @tc.desc: test testInput ModelNg SetPlaceholderFont
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, testFieldModelNg004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT, "");
+
+    /**
+     * @tc.step: step2. Set SetPlaceholderFont
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    Font font;
+    textFieldModelNG.SetPlaceholderFont(frameNode, font);
+    font.fontSize = Dimension(2);
+    font.fontStyle = Ace::FontStyle::NORMAL;
+    font.fontWeight = FontWeight::W200;
+    std::vector<std::string> families = { "cursive" };
+    font.fontFamilies = families;
+    textFieldModelNG.SetPlaceholderFont(frameNode, font);
+    textFieldModelNG.GetOrCreateController(frameNode);
+}
+
+/**
+ * @tc.name: testFieldModelNg005
+ * @tc.desc: test testInput ModelNg SetTextFieldText
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, testFieldModelNg005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT, "");
+
+    /**
+     * @tc.step: step2. Set SetTextFieldText
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    textFieldModelNG.SetTextFieldText(frameNode, DEFAULT_TEXT);
+    RefPtr<TextFieldPattern> pattern = frameNode->GetPattern<TextFieldPattern>();
+    EXPECT_NE(pattern, nullptr);
+    pattern->contentController_->SetTextValue(TEXTCASE_TEXT);
+    textFieldModelNG.SetTextFieldText(frameNode, TEXTCASE_TEXT);
+    textFieldModelNG.StopTextFieldEditing(frameNode);
+    textFieldModelNG.ResetNumberOfLines(frameNode);
+    textFieldModelNG.GetMargin(frameNode);
+    textFieldModelNG.GetPadding(frameNode);
+    textFieldModelNG.SetDefaultPadding();
+    textFieldModelNG.GetPadding(frameNode);
+    PaddingProperty margins;
+    margins.left = CalcLength(PADDING_FIVE);
+    margins.right = CalcLength(PADDING_FIVE);
+    margins.top = CalcLength(PADDING_FIVE);
+    margins.bottom = CalcLength(PADDING_FIVE);
+    textFieldModelNG.SetMargin(frameNode, margins);
+    textFieldModelNG.GetMargin(frameNode);
+}
+
+/**
+ * @tc.name: testFieldModelNg006
+ * @tc.desc: test testInput ModelNg
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, testFieldModelNg006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT, "");
+
+    /**
+     * @tc.step: step2. Set Action
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    textFieldModelNG.SetEnterKeyType(TextInputAction::SEARCH);
+    CaretStyle caretStyle;
+    textFieldModelNG.SetCaretStyle(caretStyle);
+    PasswordIcon passwordIcon;
+    textFieldModelNG.SetPasswordIcon(frameNode, passwordIcon);
+    passwordIcon.showResult = HELLO_TEXT;
+    passwordIcon.hideResult = HELLO_TEXT;
+    textFieldModelNG.SetPasswordIcon(frameNode, passwordIcon);
+    layoutProperty->UpdateTextInputType(TextInputType::UNSPECIFIED);
+    textFieldModelNG.SetType(frameNode, TextInputType::UNSPECIFIED);
+    layoutProperty->UpdateTextInputType(TextInputType::EMAIL_ADDRESS);
+    textFieldModelNG.SetType(frameNode, TextInputType::UNSPECIFIED);
+    layoutProperty->ResetTextInputType();
+    textFieldModelNG.SetType(frameNode, TextInputType::UNSPECIFIED);
+}
+
+/**
+ * @tc.name: testFieldModelNg007
+ * @tc.desc: test testInput ModelNg
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, testFieldModelNg007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT, "");
+
+    /**
+     * @tc.step: step2. Set Action
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateTextContentType(TextContentType::USER_NAME);
+    textFieldModelNG.SetContentType(frameNode, TextContentType::USER_NAME);
+    layoutProperty->UpdateTextContentType(TextContentType::PERSON_FIRST_NAME);
+    textFieldModelNG.SetContentType(frameNode, TextContentType::USER_NAME);
+    layoutProperty->ResetTextContentType();
+    textFieldModelNG.SetContentType(frameNode, TextContentType::PERSON_FIRST_NAME);
+
+    BorderWidthProperty borderWidth;
+    borderWidth.SetBorderWidth(Dimension(ICON_SIZE, DimensionUnit::VP));
+    textFieldModelNG.SetBorderWidth(frameNode, borderWidth);
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(Dimension(ICON_SIZE, DimensionUnit::VP));
+    borderRadius.multiValued = false;
+    textFieldModelNG.SetBorderRadius(frameNode, borderRadius);
+    BorderStyleProperty borderStyle;
+    borderStyle.SetBorderStyle(BorderStyle::NONE);
+    textFieldModelNG.SetBorderStyle(frameNode, borderStyle);
+    BorderColorProperty borderColor;
+    borderColor.SetColor(COLOR_DEFAULT);
+    textFieldModelNG.SetBorderColor(frameNode, borderColor);
+    textFieldModelNG.SetBackBorder();
+}
+
+/**
+ * @tc.name: testFieldModelNg008
+ * @tc.desc: test testInput ModelNg
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, testFieldModelNg008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextInput(DEFAULT_TEXT, "");
+
+    /**
+     * @tc.step: step2. Set Action
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    textFieldModelNG.SetTextAlign(TextAlign::JUSTIFY);
+    std::function<void()> unitFunction;
+    textFieldModelNG.SetShowUnit(std::move(unitFunction));
+    std::function<void()> unitFunctionAction = [] {};
+    textFieldModelNG.SetShowUnit(std::move(unitFunctionAction));
+}
+
+/**
+ * @tc.name: testFieldModelNg009
+ * @tc.desc: test testInput ModelNg
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, testFieldModelNg009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT, "");
+
+    /**
+     * @tc.step: step2. Set Action
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    textFieldModelNG.SetTextAlign(TextAlign::RIGHT);
+}
+
+/**
+ * @tc.name: accessibilityProperty001
+ * @tc.desc: test testInput accessibilityProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, accessibilityProperty001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT, "");
+
+    /**
+     * @tc.step: step2. Set Action
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
+    EXPECT_NE(accessibilityProperty, nullptr);
+    layoutProperty->UpdateTextInputType(TextInputType::TEXT);
+    EXPECT_EQ(accessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_TEXT);
+    layoutProperty->UpdateTextInputType(TextInputType::NUMBER);
+    EXPECT_EQ(accessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_NUMBER);
+    layoutProperty->UpdateTextInputType(TextInputType::PHONE);
+    EXPECT_EQ(accessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_PHONENUMBER);
+    layoutProperty->UpdateTextInputType(TextInputType::DATETIME);
+    EXPECT_EQ(accessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_DATE);
+    accessibilityProperty->GetText();
+    layoutProperty->UpdateTextInputType(TextInputType::EMAIL_ADDRESS);
+    EXPECT_EQ(accessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_EMAIL);
+    layoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
+    EXPECT_EQ(accessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_PASSWORD);
+    layoutProperty->UpdateTextInputType(TextInputType::USER_NAME);
+    EXPECT_EQ(accessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_USER_NAME);
+    layoutProperty->UpdateTextInputType(TextInputType::NEW_PASSWORD);
+    EXPECT_EQ(accessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_NEW_PASSWORD);
+    accessibilityProperty->GetText();
+    layoutProperty->UpdateTextInputType(TextInputType::BEGIN);
+    accessibilityProperty->GetTextInputType();
+}
+
+/**
+ * @tc.name: accessibilityProperty002
+ * @tc.desc: test testInput accessibilityProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, accessibilityProperty002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT, "");
+
+    /**
+     * @tc.step: step2. Set Action
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
+    EXPECT_NE(accessibilityProperty, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    EXPECT_NE(pattern, nullptr);
+    layoutProperty->UpdateTextInputType(TextInputType::TEXT);
+    textFieldModelNG.SetCopyOption(CopyOptions::InApp);
+    accessibilityProperty->SetSpecificSupportAction();
+
+    layoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
+    textFieldModelNG.SetCopyOption(CopyOptions::None);
+    accessibilityProperty->SetSpecificSupportAction();
 }
 } // namespace OHOS::Ace::NG

@@ -15,8 +15,6 @@
 
 #include "core/components_ng/render/image_painter.h"
 
-#include "base/utils/utils.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -84,11 +82,36 @@ void ApplyNone(const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, Re
     dstRect.SetRect(Alignment::GetAlignPosition(dstSize, srcSize, Alignment::CENTER), srcSize);
     srcRect.SetRect(Alignment::GetAlignPosition(rawPicSize, srcSize, Alignment::CENTER), srcSize);
 }
+
+void ApplyAlignment(
+    const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect, const Alignment& alignMent)
+{
+    SizeF srcSize(std::min(dstSize.Width(), rawPicSize.Width()), std::min(dstSize.Height(), rawPicSize.Height()));
+    dstRect.SetRect(Alignment::GetAlignPosition(dstSize, srcSize, alignMent), srcSize);
+    srcRect.SetRect(Alignment::GetAlignPosition(rawPicSize, srcSize, alignMent), srcSize);
+}
 } // namespace
+
+const std::unordered_map<ImageFit, std::function<Alignment(bool)>> ImagePainter::ALIMENT_OPERATIONS = {
+    { ImageFit::TOP_LEFT,
+        [](bool isRightToLeft) { return isRightToLeft ? Alignment::TOP_RIGHT : Alignment::TOP_LEFT; } },
+    { ImageFit::TOP, [](bool) { return Alignment::TOP_CENTER; } },
+    { ImageFit::TOP_END,
+        [](bool isRightToLeft) { return isRightToLeft ? Alignment::TOP_LEFT : Alignment::TOP_RIGHT; } },
+    { ImageFit::START,
+        [](bool isRightToLeft) { return isRightToLeft ? Alignment::CENTER_RIGHT : Alignment::CENTER_LEFT; } },
+    { ImageFit::CENTER, [](bool) { return Alignment::CENTER; } },
+    { ImageFit::END,
+        [](bool isRightToLeft) { return isRightToLeft ? Alignment::CENTER_LEFT : Alignment::CENTER_RIGHT; } },
+    { ImageFit::BOTTOM_START,
+        [](bool isRightToLeft) { return isRightToLeft ? Alignment::BOTTOM_RIGHT : Alignment::BOTTOM_LEFT; } },
+    { ImageFit::BOTTOM, [](bool) { return Alignment::BOTTOM_CENTER; } },
+    { ImageFit::BOTTOM_END,
+        [](bool isRightToLeft) { return isRightToLeft ? Alignment::BOTTOM_LEFT : Alignment::BOTTOM_RIGHT; } }
+};
 
 void ImagePainter::DrawObscuration(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const
 {
-    CHECK_NULL_VOID(canvasImage_);
     const auto config = canvasImage_->GetPaintConfig();
     RSBrush brush;
     Color fillColor = COLOR_PRIVATE_MODE;
@@ -117,7 +140,10 @@ void ImagePainter::DrawObscuration(RSCanvas& canvas, const OffsetF& offset, cons
 
 void ImagePainter::DrawImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const
 {
-    CHECK_NULL_VOID(canvasImage_);
+    if (!canvasImage_) {
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "canvasImage is null");
+        return;
+    }
     const auto config = canvasImage_->GetPaintConfig();
     bool drawObscuration = std::any_of(config.obscuredReasons_.begin(), config.obscuredReasons_.end(),
         [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
@@ -132,7 +158,6 @@ void ImagePainter::DrawImage(RSCanvas& canvas, const OffsetF& offset, const Size
 
 void ImagePainter::DrawSVGImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& svgContainerSize) const
 {
-    CHECK_NULL_VOID(canvasImage_);
     canvas.Save();
     canvas.Translate(offset.GetX(), offset.GetY());
     const auto config = canvasImage_->GetPaintConfig();
@@ -149,7 +174,10 @@ void ImagePainter::DrawSVGImage(RSCanvas& canvas, const OffsetF& offset, const S
 
 void ImagePainter::DrawStaticImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const
 {
-    CHECK_NULL_VOID(canvasImage_);
+    if (!canvasImage_) {
+        TAG_LOGE(AceLogTag::ACE_IMAGE, "canvasImage is null");
+        return;
+    }
     const auto config = canvasImage_->GetPaintConfig();
     canvas.Save();
     canvas.Translate(offset.GetX(), offset.GetY());
@@ -227,6 +255,17 @@ void ImagePainter::DrawImageWithRepeat(RSCanvas& canvas, const RectF& contentRec
     canvas.Restore();
 }
 
+void ImagePainter::ApplyImageAlignmentFit(
+    ImageFit imageFit, const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect)
+{
+    auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    auto itImageFit = ALIMENT_OPERATIONS.find(imageFit);
+    if (itImageFit != ALIMENT_OPERATIONS.end()) {
+        Alignment alignment = itImageFit->second(isRightToLeft);
+        ApplyAlignment(rawPicSize, dstSize, srcRect, dstRect, alignment);
+    }
+}
+
 void ImagePainter::ApplyImageFit(
     ImageFit imageFit, const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect)
 {
@@ -237,6 +276,11 @@ void ImagePainter::ApplyImageFit(
     srcRect.ApplyScale(1.0 / viewScale);
     dstRect.SetOffset(OffsetF());
     dstRect.SetSize(dstSize);
+    if (imageFit >= ImageFit::TOP_LEFT && imageFit <= ImageFit::BOTTOM_END) {
+        ApplyImageAlignmentFit(imageFit, rawPicSize, dstSize, srcRect, dstRect);
+        srcRect.ApplyScale(viewScale);
+        return;
+    }
     switch (imageFit) {
         case ImageFit::FILL:
             break;

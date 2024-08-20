@@ -16,14 +16,15 @@
 #include "core/components_ng/pattern/menu/menu_view.h"
 
 #include "base/geometry/dimension.h"
+#include "base/i18n/localization.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/placement.h"
-#include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -37,8 +38,8 @@
 #include "core/components_ng/pattern/option/option_view.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -58,7 +59,7 @@ constexpr float PAN_MAX_VELOCITY = 2000.0f;
 constexpr float HALF_DIVIDE = 2.0f;
 constexpr float PREVIEW_ORIGIN_SCALE = 1.0f;
 const RefPtr<Curve> CUSTOM_PREVIEW_ANIMATION_CURVE =
-    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 380.0f, 34.0f);
+    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 328.0f, 34.0f);
 const std::string HOVER_IMAGE_CLIP_PROPERTY_NAME = "hoverImageClip";
 
 void SetSelfAndChildDraggableFalse(const RefPtr<UINode>& customNode)
@@ -215,7 +216,9 @@ RefPtr<FrameNode> CreateMenuScroll(const RefPtr<UINode>& node)
     CHECK_NULL_RETURN(renderContext, nullptr);
     BorderRadiusProperty borderRadius;
     if (theme) {
-        borderRadius.SetRadius(theme->GetMenuBorderRadius());
+        auto defaultRadius = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ?
+            theme->GetMenuDefaultRadius() : theme->GetMenuBorderRadius();
+        borderRadius.SetRadius(defaultRadius);
     }
     renderContext->UpdateBorderRadius(borderRadius);
     return scroll;
@@ -242,7 +245,7 @@ void OptionKeepMenu(RefPtr<FrameNode>& option, WeakPtr<FrameNode>& menuWeak)
 bool GetHasIcon(const std::vector<OptionParam>& params)
 {
     for (size_t i = 0; i < params.size(); ++i) {
-        if (!params[i].icon.empty()) {
+        if (!params[i].icon.empty() || params[i].isPasteOption) {
             return true;
         }
     }
@@ -395,7 +398,7 @@ void UpdatePreivewVisibleArea(const RefPtr<FrameNode>& hoverImageStackNode, cons
         previewPattern->GetHoverImageAfterScaleHeight();
     auto clipEndValue = previewPattern->GetIsWidthDistLarger() ?
         previewPattern->GetCustomPreviewAfterScaleWidth() : previewPattern->GetCustomPreviewAfterScaleHeight();
-
+    CHECK_NULL_VOID(hoverImageStackNode);
     hoverImageStackNode->CreateAnimatablePropertyFloat(HOVER_IMAGE_CLIP_PROPERTY_NAME, 0,
         [weak = AceType::WeakClaim(AceType::RawPtr(hoverImageStackNode)),
             previewWeak = AceType::WeakClaim(AceType::RawPtr(previewNode))](float value) {
@@ -436,6 +439,7 @@ void UpdatePreivewVisibleArea(const RefPtr<FrameNode>& hoverImageStackNode, cons
     if (isScaleNearEqual) { option.SetDelay(menuTheme->GetHoverImageDelayDuration()); }
     hoverImageStackNode->UpdateAnimatablePropertyFloat(HOVER_IMAGE_CLIP_PROPERTY_NAME, clipStartValue);
     auto clipAnimation_ = AnimationUtils::StartAnimation(option, [hoverImageStackNode, clipEndValue]() {
+            CHECK_NULL_VOID(hoverImageStackNode);
             hoverImageStackNode->UpdateAnimatablePropertyFloat(HOVER_IMAGE_CLIP_PROPERTY_NAME, clipEndValue);
         });
 }
@@ -462,6 +466,12 @@ void UpdateHoverImagePreviewScale(const RefPtr<FrameNode>& hoverImageStackNode,
     if (isScaleNearEqual) {
         scaleOption.SetDelay(menuTheme->GetHoverImageDelayDuration());
     }
+    previewPattern->SetIsHoverImageScalePlaying(true);
+    scaleOption.SetOnFinishEvent([weak = WeakPtr<MenuPreviewPattern>(previewPattern)] {
+        auto previewPattern = weak.Upgrade();
+        CHECK_NULL_VOID(previewPattern);
+        previewPattern->SetIsHoverImageScalePlaying(false);
+    });
     AnimationUtils::Animate(
         scaleOption, [stackContext, scaleTo]() {
             CHECK_NULL_VOID(stackContext);
@@ -737,6 +747,30 @@ void SetHoverImageCustomPreviewInfo(const RefPtr<FrameNode>& previewNode, const 
         previewPattern->GetHoverImageAfterScaleHeight() / HALF_DIVIDE));
 }
 
+void SetAccessibilityPixelMap(const RefPtr<FrameNode>& targetNode, RefPtr<FrameNode>& imageNode)
+{
+    auto targetProps = targetNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(targetProps);
+    targetProps->SetOnAccessibilityFocusCallback([targetWK = AceType::WeakClaim(AceType::RawPtr(targetNode)),
+        imageWK = AceType::WeakClaim(AceType::RawPtr(imageNode))](bool focus) {
+        if (!focus) {
+            auto targetNode = targetWK.Upgrade();
+            CHECK_NULL_VOID(targetNode);
+            auto context = targetNode->GetRenderContext();
+            CHECK_NULL_VOID(context);
+            auto pixelMap = context->GetThumbnailPixelMap();
+            CHECK_NULL_VOID(pixelMap);
+            auto imageNode = imageWK.Upgrade();
+            CHECK_NULL_VOID(imageNode);
+            auto props = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+            CHECK_NULL_VOID(props);
+            props->UpdateAutoResize(false);
+            props->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
+            imageNode->MarkModifyDone();
+        }
+    });
+}
+
 void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapperNode,
     const RefPtr<FrameNode>& hoverImageStackNode, const RefPtr<FrameNode>& previewNode, const MenuParam& menuParam)
 {
@@ -760,6 +794,7 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
     props->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
     auto imagePattern = imageNode->GetPattern<ImagePattern>();
     imagePattern->SetSyncLoad(true);
+    SetAccessibilityPixelMap(target, imageNode);
     auto hub = imageNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto imageGestureHub = hub->GetOrCreateGestureEventHub();
@@ -1205,7 +1240,8 @@ void MenuView::UpdateMenuBorderEffect(const RefPtr<FrameNode>& menuNode)
         auto theme = pipeLineContext->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(theme);
         BorderRadiusProperty outerRadiusProp;
-        outerRadiusProp.SetRadius(Dimension(theme->GetMenuBorderRadius()));
+        outerRadiusProp.SetRadius(Dimension(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ?
+            theme->GetMenuDefaultRadius() : theme->GetMenuBorderRadius()));
         BorderWidthProperty outerWidthProp;
         outerWidthProp.SetBorderWidth(Dimension(menuTheme->GetOuterBorderWidth()));
         renderContext->SetOuterBorderStyle(styleProp);
@@ -1215,7 +1251,8 @@ void MenuView::UpdateMenuBorderEffect(const RefPtr<FrameNode>& menuNode)
         BorderColorProperty innerColorProp;
         innerColorProp.SetColor(menuTheme->GetInnerBorderColor());
         BorderRadiusProperty innerRadiusProp;
-        innerRadiusProp.SetRadius(Dimension(theme->GetMenuBorderRadius()));
+        innerRadiusProp.SetRadius(Dimension(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ?
+            theme->GetMenuDefaultRadius() : theme->GetMenuBorderRadius()));
         BorderWidthProperty innerWidthProp;
         innerWidthProp.SetBorderWidth(Dimension(menuTheme->GetInnerBorderWidth()));
         renderContext->SetBorderStyle(styleProp);

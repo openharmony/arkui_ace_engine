@@ -45,17 +45,15 @@ public:
 
 void WaterFlowSegmentTest::SetUpConfig1()
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-            model.SetColumnsGap(Dimension(5.0f));
-            model.SetRowsGap(Dimension(1.0f));
-            auto footer = GetDefaultHeaderBuilder();
-            model.SetFooter(std::move(footer));
-            CreateItem(10);
-            ViewStackProcessor::GetInstance()->Pop();
-        },
-        false);
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetColumnsGap(Dimension(5.0f));
+    model.SetRowsGap(Dimension(1.0f));
+    auto footer = GetDefaultHeaderBuilder();
+    model.SetFooter(std::move(footer));
+    CreateWaterFlowItems(10);
+    ViewStackProcessor::GetInstance()->Finish();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
 
     LayoutConstraintF constraint { .maxSize = { 480.0f, 800.0f }, .percentReference = { 480.0f, 800.0f } };
     layoutProperty_->UpdateLayoutConstraint(constraint);
@@ -64,17 +62,15 @@ void WaterFlowSegmentTest::SetUpConfig1()
 
 void WaterFlowSegmentTest::SetUpConfig2()
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            model.SetColumnsTemplate("1fr 1fr 1fr 1fr 1fr");
-            model.SetColumnsGap(Dimension(5.0f));
-            model.SetRowsGap(Dimension(1.0f));
-            auto footer = GetDefaultHeaderBuilder();
-            model.SetFooter(std::move(footer));
-            CreateItem(100);
-            ViewStackProcessor::GetInstance()->Pop();
-        },
-        false);
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr 1fr");
+    model.SetColumnsGap(Dimension(5.0f));
+    model.SetRowsGap(Dimension(1.0f));
+    auto footer = GetDefaultHeaderBuilder();
+    model.SetFooter(std::move(footer));
+    CreateWaterFlowItems(100);
+    ViewStackProcessor::GetInstance()->Finish();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
 
     LayoutConstraintF constraint { .maxSize = { 480.0f, 800.0f }, .percentReference = { 480.0f, 800.0f } };
     layoutProperty_->UpdateLayoutConstraint(constraint);
@@ -83,13 +79,12 @@ void WaterFlowSegmentTest::SetUpConfig2()
 
 void WaterFlowSegmentTest::SetUpConfig5()
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(60);
-        },
-        false);
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(60);
+    ViewStackProcessor::GetInstance()->Finish();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     LayoutConstraintF constraint { .maxSize = { 400.0f, 600.0f }, .percentReference = { 400.0f, 600.0f } };
     layoutProperty_->UpdateLayoutConstraint(constraint);
     layoutProperty_->UpdateContentConstraint();
@@ -105,21 +100,19 @@ void WaterFlowSegmentTest::SetUpConfig5()
  */
 HWTEST_F(WaterFlowSegmentTest, Fill001, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            model.SetColumnsTemplate("1fr 1fr");
-            CreateItemWithHeight(50.0f);
-            CreateItemWithHeight(30.0f);
-            CreateItemWithHeight(40.0f);
-            CreateItemWithHeight(60.0f);
-            CreateItemWithHeight(20.0f);
-            CreateItemWithHeight(50.0f);
-            CreateItemWithHeight(30.0f);
-            CreateItemWithHeight(40.0f);
-            CreateItemWithHeight(2.0f);
-            CreateItemWithHeight(20.0f);
-        },
-        false);
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateWaterFlowItemWithHeight(50.0f);
+    CreateWaterFlowItemWithHeight(30.0f);
+    CreateWaterFlowItemWithHeight(40.0f);
+    CreateWaterFlowItemWithHeight(60.0f);
+    CreateWaterFlowItemWithHeight(20.0f);
+    CreateWaterFlowItemWithHeight(50.0f);
+    CreateWaterFlowItemWithHeight(30.0f);
+    CreateWaterFlowItemWithHeight(40.0f);
+    CreateWaterFlowItemWithHeight(2.0f);
+    CreateWaterFlowItemWithHeight(20.0f);
+    CreateDone();
 
     auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(AceType::MakeRefPtr<WaterFlowLayoutInfo>());
     algo->wrapper_ = AceType::RawPtr(frameNode_);
@@ -151,17 +144,15 @@ HWTEST_F(WaterFlowSegmentTest, Fill001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentTest, MeasureOnOffset001, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-            model.SetColumnsGap(Dimension(5.0f));
-            model.SetRowsGap(Dimension(1.0f));
-            auto footer = GetDefaultHeaderBuilder();
-            model.SetFooter(std::move(footer));
-            CreateItem(10);
-            ViewStackProcessor::GetInstance()->Pop();
-        },
-        false);
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetColumnsGap(Dimension(5.0f));
+    model.SetRowsGap(Dimension(1.0f));
+    auto footer = GetDefaultHeaderBuilder();
+    model.SetFooter(std::move(footer));
+    CreateWaterFlowItems(10);
+    ViewStackProcessor::GetInstance()->Finish();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
 
     LayoutConstraintF constraint { .maxSize = { 480.0f, 800.0f }, .percentReference = { 480.0f, 800.0f } };
     layoutProperty_->UpdateLayoutConstraint(constraint);
@@ -212,14 +203,13 @@ HWTEST_F(WaterFlowSegmentTest, MeasureOnOffset001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentTest, MeasureFooter001, TestSize.Level1)
 {
-    Create([](WaterFlowModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        model.SetColumnsGap(Dimension(5.0f));
-        model.SetRowsGap(Dimension(1.0f));
-        model.SetFooter(GetDefaultHeaderBuilder());
-        CreateItem(10);
-        ViewStackProcessor::GetInstance()->Pop();
-    });
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetColumnsGap(Dimension(5.0f));
+    model.SetRowsGap(Dimension(1.0f));
+    model.SetFooter(GetDefaultHeaderBuilder());
+    CreateWaterFlowItems(10);
+    CreateDone();
 
     auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
     EXPECT_EQ(info->childrenCount_, 11);
@@ -256,14 +246,13 @@ HWTEST_F(WaterFlowSegmentTest, MeasureFooter001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentTest, MeasureFooter002, TestSize.Level1)
 {
-    Create([](WaterFlowModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        model.SetColumnsGap(Dimension(5.0f));
-        model.SetRowsGap(Dimension(1.0f));
-        model.SetFooter(GetDefaultHeaderBuilder());
-        CreateItem(10);
-        ViewStackProcessor::GetInstance()->Pop();
-    });
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetColumnsGap(Dimension(5.0f));
+    model.SetRowsGap(Dimension(1.0f));
+    model.SetFooter(GetDefaultHeaderBuilder());
+    CreateWaterFlowItems(10);
+    CreateDone();
 
     auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
     EXPECT_EQ(info->childrenCount_, 11);
@@ -755,14 +744,13 @@ HWTEST_F(WaterFlowSegmentTest, Reset003, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentTest, Reset004, TestSize.Level1)
 {
-    Create([](WaterFlowModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        model.SetColumnsGap(Dimension(5.0f));
-        model.SetRowsGap(Dimension(1.0f));
-        model.SetFooter(GetDefaultHeaderBuilder());
-        CreateItem(200);
-        ViewStackProcessor::GetInstance()->Pop();
-    });
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetColumnsGap(Dimension(5.0f));
+    model.SetRowsGap(Dimension(1.0f));
+    model.SetFooter(GetDefaultHeaderBuilder());
+    CreateWaterFlowItems(200);
+    CreateDone();
 
     UpdateCurrentOffset(-2000.0f);
     auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
@@ -795,14 +783,13 @@ HWTEST_F(WaterFlowSegmentTest, Reset004, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentTest, Reset005, TestSize.Level1)
 {
-    Create([](WaterFlowModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        model.SetColumnsGap(Dimension(5.0f));
-        model.SetRowsGap(Dimension(1.0f));
-        model.SetFooter(GetDefaultHeaderBuilder());
-        CreateItem(200);
-        ViewStackProcessor::GetInstance()->Pop();
-    });
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetColumnsGap(Dimension(5.0f));
+    model.SetRowsGap(Dimension(1.0f));
+    model.SetFooter(GetDefaultHeaderBuilder());
+    CreateWaterFlowItems(200);
+    CreateDone();
     auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
     EXPECT_EQ(info->startIndex_, 0);
     EXPECT_EQ(info->endIndex_, 21);
@@ -826,13 +813,12 @@ HWTEST_F(WaterFlowSegmentTest, Reset005, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentTest, Segmented001, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(60);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(60);
+    ViewStackProcessor::GetInstance()->Finish();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_4);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
@@ -876,13 +862,12 @@ HWTEST_F(WaterFlowSegmentTest, Segmented001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentTest, Segmented005, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(60);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(60);
+    ViewStackProcessor::GetInstance()->Finish();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_4);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
@@ -904,6 +889,7 @@ HWTEST_F(WaterFlowSegmentTest, Segmented005, TestSize.Level1)
 
     secObj->ChangeData(0, 4, SECTION_5);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    pattern_->BeforeCreateLayoutWrapper();
     EXPECT_EQ(secObj->GetSectionInfo().size(), 5);
     info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
     EXPECT_EQ(info->startIndex_, 47);
@@ -1031,6 +1017,8 @@ HWTEST_F(WaterFlowSegmentTest, Segmented004, TestSize.Level1)
         AceType::MakeRefPtr<WaterFlowSegmentedLayout>(AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_));
 
     auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
+
+    pattern_->BeforeCreateLayoutWrapper();
     algo->Measure(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info->endIndex_, 10);
     EXPECT_EQ(info->itemInfos_.size(), 11);
@@ -1048,6 +1036,7 @@ HWTEST_F(WaterFlowSegmentTest, Segmented004, TestSize.Level1)
     pattern_->layoutInfo_ = info;
     auto secObj = pattern_->GetSections();
     secObj->ChangeData(5, 0, ADD_SECTION_6);
+    pattern_->BeforeCreateLayoutWrapper();
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     AddItems(10);
     info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
@@ -1079,17 +1068,14 @@ HWTEST_F(WaterFlowSegmentTest, Segmented004, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentTest, Segmented006, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(37);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(37);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_7);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
+    CreateDone();
 
     auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
     EXPECT_EQ(*info->margins_[0].top, 5.0f);
@@ -1129,17 +1115,14 @@ HWTEST_F(WaterFlowSegmentTest, Segmented006, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentTest, Segmented007, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(60);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(60);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_4);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
+    CreateDone();
     EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(0, 0, 400.0f / 3, 100)));
     EXPECT_TRUE(IsEqual(pattern_->GetItemRect(2), Rect(400.0f / 3 * 2, 0, 400.0f / 3, 100)));
 
@@ -1156,17 +1139,14 @@ HWTEST_F(WaterFlowSegmentTest, Segmented007, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentTest, CheckHeight001, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(37);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(37);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_7);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
+    CreateDone();
 
     auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
 
@@ -1222,13 +1202,12 @@ HWTEST_F(WaterFlowSegmentTest, TargetIndex001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentTest, ChildrenCount001, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(40);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(40);
+    ViewStackProcessor::GetInstance()->Finish();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_5);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
@@ -1271,13 +1250,12 @@ HWTEST_F(WaterFlowSegmentTest, ChildrenCount001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentTest, ChildrenCount002, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(80);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(80);
+    ViewStackProcessor::GetInstance()->Finish();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_5);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
@@ -1317,17 +1295,14 @@ HWTEST_F(WaterFlowSegmentTest, ChildrenCount002, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentTest, Illegal001, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(37);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(37);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, {});
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
+    CreateDone();
     auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
 
     UpdateCurrentOffset(-205.0f);
@@ -1342,17 +1317,14 @@ HWTEST_F(WaterFlowSegmentTest, Illegal001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentTest, Illegal002, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(10);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(10);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_8);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
+    CreateDone();
     auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
 
     // user-defined negative size would be treated as 0
@@ -1370,17 +1342,14 @@ HWTEST_F(WaterFlowSegmentTest, Illegal002, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentTest, Constraint001, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(60);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(60);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_5);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
+    CreateDone();
 
     auto& info = pattern_->layoutInfo_;
     EXPECT_EQ(info->startIndex_, 0);
@@ -1393,7 +1362,7 @@ HWTEST_F(WaterFlowSegmentTest, Constraint001, TestSize.Level1)
         EXPECT_EQ(GetChildWidth(frameNode_, i), 500.f / 3);
     }
     for (int i = 5; i < 10; i++) {
-        EXPECT_EQ(GetChildWidth(frameNode_, i), (500.f - 3) / 5);
+        EXPECT_EQ(GetChildWidth(frameNode_, i), (500.f - 8.0f) / 5);
     }
     EXPECT_EQ(GetChildWidth(frameNode_, 10), 500.f);
     EXPECT_EQ(info->endIndex_, 10);
@@ -1416,17 +1385,14 @@ HWTEST_F(WaterFlowSegmentTest, Constraint001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentTest, ResetSections001, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(60);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(60);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_5);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
+    CreateDone();
     auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
 
     UpdateCurrentOffset(-205.0f);
@@ -1458,17 +1424,14 @@ HWTEST_F(WaterFlowSegmentTest, ResetSections001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentTest, Jump001, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(60);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(60);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_5);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
+    CreateDone();
     auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
 
     UpdateCurrentOffset(-500.0f);
@@ -1498,17 +1461,14 @@ HWTEST_F(WaterFlowSegmentTest, Jump001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentTest, Jump002, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(60);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(60);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_5);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
+    CreateDone();
     auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
 
     UpdateCurrentOffset(-500.0f);
@@ -1533,17 +1493,14 @@ HWTEST_F(WaterFlowSegmentTest, Jump002, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentTest, EstimateContentHeight001, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(60);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(60);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_5);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
+    CreateDone();
     auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
 
     UpdateCurrentOffset(-500.0f);

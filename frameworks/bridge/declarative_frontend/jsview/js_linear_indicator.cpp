@@ -41,7 +41,7 @@ namespace OHOS::Ace::Framework {
 
 void JSLinearIndicator::Create(const JSCallbackInfo& info)
 {
-    uint32_t length = info.Length();
+    const int32_t length = info.Length();
     auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetThemeManager()->GetTheme<NG::LinearIndicatorTheme>();

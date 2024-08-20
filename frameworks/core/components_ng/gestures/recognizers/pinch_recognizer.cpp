@@ -60,8 +60,8 @@ void PinchRecognizer::OnAccepted()
     }
     
     auto node = GetAttachedNode().Upgrade();
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Pinch accepted, tag = %{public}s, id = %{public}s",
-        node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Pinch accepted, tag = %{public}s",
+        node ? node->GetTag().c_str() : "null");
     ResSchedReport::GetInstance().ResSchedDataReport("click");
     refereeState_ = RefereeState::SUCCEED;
     isLastPinchFinished_ = false;
@@ -73,6 +73,7 @@ void PinchRecognizer::OnRejected()
     if (refereeState_ == RefereeState::SUCCEED) {
         return;
     }
+    SendRejectMsg();
     refereeState_ = RefereeState::FAIL;
     firstInputTime_.reset();
 }
@@ -88,6 +89,9 @@ void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pinch %{public}d down, begin to detect pinch,"
         "state: %{public}d", event.touchEventId, event.id, refereeState_);
+    if (touchPoints_.size() == 1 && refereeState_ == RefereeState::FAIL) {
+        refereeState_ = RefereeState::READY;
+    }
     touchPoints_[event.id] = event;
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
@@ -383,7 +387,6 @@ Offset PinchRecognizer::ComputePinchCenter()
 void PinchRecognizer::OnResetStatus()
 {
     MultiFingersRecognizer::OnResetStatus();
-    distance_ = 0.0;
     initialDev_ = 0.0;
     currentDev_ = 0.0;
     scale_ = 1.0;
@@ -415,11 +418,12 @@ void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
             info.SetVerticalAxis(lastAxisEvent_.verticalAxis);
             info.SetHorizontalAxis(lastAxisEvent_.horizontalAxis);
             info.SetSourceTool(lastAxisEvent_.sourceTool);
+            info.SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
         } else {
             info.SetSourceTool(lastTouchEvent_.sourceTool);
+            info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
         }
         info.SetPointerEvent(lastPointEvent_);
-        info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);
@@ -437,6 +441,7 @@ GestureJudgeResult PinchRecognizer::TriggerGestureJudgeCallback()
     }
     auto info = std::make_shared<PinchGestureEvent>();
     info->SetTimeStamp(time_);
+    info->SetDeviceId(deviceId_);
     UpdateFingerListInfo();
     info->SetFingerList(fingerList_);
     info->SetScale(scale_);
@@ -444,6 +449,9 @@ GestureJudgeResult PinchRecognizer::TriggerGestureJudgeCallback()
     info->SetSourceDevice(deviceType_);
     info->SetTarget(GetEventTarget().value_or(EventTarget()));
     info->SetForce(lastTouchEvent_.force);
+    if (gestureInfo_) {
+        gestureInfo_->SetInputEventType(inputEventType_);
+    }
     if (lastTouchEvent_.tiltX.has_value()) {
         info->SetTiltX(lastTouchEvent_.tiltX.value());
     }

@@ -201,7 +201,7 @@ export struct IconGroupSuffix {
   }
 
   build() {
-    Row() {
+    Row({space: 8}) {
       ForEach(this.items || [], (suffixItem: IconItemOptions | SymbolGlyphModifier) => {
         Button() {
           if (suffixItem instanceof SymbolGlyphModifier) {
@@ -269,12 +269,15 @@ export struct ChipGroup {
 
   aboutToAppear() {
     this.itemStyleOnChange();
+    if (this.getSelectedIndexes().length === 0) {
+      this.selectedIndexes = [0];
+    }
   }
 
   private getChipSize(): ChipSize | SizeOptions {
     if (this.itemStyle && this.itemStyle.size) {
       if (typeof this.itemStyle.size === 'object') {
-        if ( !this.itemStyle.size.width || !this.itemStyle.size.height || !this.itemStyle.size) {
+        if (!this.itemStyle.size.width || !this.itemStyle.size.height || !this.itemStyle.size) {
           return defaultTheme.itemStyle.size;
         }
       }
@@ -377,9 +380,6 @@ export struct ChipGroup {
             array.indexOf(element) === index &&
             element < (this.items || []).length);
       });
-    if (temp.length == 0) {
-      temp = [0];
-    }
     return temp;
   }
 
@@ -437,20 +437,6 @@ export struct ChipGroup {
     }
   }
 
-  private getChipGroupHeight() {
-    if (typeof this.chipSize === 'string') {
-      if (this.chipSize === ChipSize.NORMAL) {
-        return ChipGroupHeight.NORMAL;
-      } else {
-        return ChipGroupHeight.SMALL;
-      }
-    } else if (typeof this.chipSize === 'object') {
-      return this.chipSize.height as number
-    } else {
-      return ChipGroupHeight.NORMAL
-    }
-  }
-
   private getPaddingTop() {
     if (!this.chipGroupPadding || !this.chipGroupPadding.top) {
       return defaultTheme.chipGroupPadding.top
@@ -473,6 +459,20 @@ export struct ChipGroup {
       isValidDimensionNoPercentageString,
       defaultTheme.chipGroupPadding.bottom
     );
+  }
+
+  private getChipGroupHeight() {
+    if (typeof this.chipSize === 'string') {
+      if (this.chipSize === ChipSize.NORMAL) {
+        return ChipGroupHeight.NORMAL;
+      } else {
+        return ChipGroupHeight.SMALL;
+      }
+    } else if (typeof this.chipSize === 'object') {
+      return this.chipSize.height as number
+    } else {
+      return ChipGroupHeight.NORMAL
+    }
   }
 
   build() {
@@ -533,7 +533,10 @@ export struct ChipGroup {
             });
           }
           .padding({ left: this.getChipGroupStartSpace(),
-            right: this.getChipGroupEndSpace() })
+            right: this.getChipGroupEndSpace(),
+            top: this.getPaddingTop(),
+            bottom: this.getPaddingBottom()
+          })
           .constraintSize({ minWidth: '100%' })
         }
         .scrollable(ScrollDirection.Horizontal)
@@ -548,13 +551,13 @@ export struct ChipGroup {
         if (this.suffix && !this.isReachEnd) {
           Stack()
             .width(iconGroupSuffixTheme.normalBackgroundSize)
-            .height(this.getChipGroupHeight() + (this.getPaddingTop() as number) + (this.getPaddingBottom() as number))
+            .padding({ top: this.getPaddingTop(), bottom: this.getPaddingBottom() })
             .linearGradient({ angle: 90, colors: colorStops })
             .blendMode(BlendMode.DST_IN, BlendApplyType.OFFSCREEN)
             .hitTestBehavior(HitTestMode.None)
         }
       }
-      .height(this.getChipGroupHeight() + (this.getPaddingTop() as number) + (this.getPaddingBottom() as number))
+      .height(this.getChipGroupHeight())
       .layoutWeight(1)
       .blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN)
       .alignContent(Alignment.End)
@@ -562,12 +565,15 @@ export struct ChipGroup {
       if (this.suffix) {
         Row() {
           this.suffix();
-        }.padding({ left: iconGroupSuffixTheme.marginLeft, right: iconGroupSuffixTheme.marginRight })
+        }.padding({ left: iconGroupSuffixTheme.marginLeft,
+          right: iconGroupSuffixTheme.marginRight,
+          top: this.getPaddingTop(),
+          bottom: this.getPaddingBottom()
+        })
       }
     }
     .align(Alignment.End)
     .width("100%")
-    .height(this.getChipGroupHeight() + (this.getPaddingTop() as number) + (this.getPaddingBottom() as number))
     .padding({ top: this.getPaddingTop(), bottom: this.getPaddingBottom() })
   }
 }

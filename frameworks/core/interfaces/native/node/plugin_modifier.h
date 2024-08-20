@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIPluginModifier* GetPluginModifier();
+const CJUIPluginModifier* GetCJUIPluginModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_PULGIN_MODIFIER_H

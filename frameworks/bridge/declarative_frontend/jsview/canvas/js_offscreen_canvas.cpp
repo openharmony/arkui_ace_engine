@@ -410,6 +410,7 @@ napi_value JSOffscreenCanvas::onGetContext(napi_env env, napi_callback_info info
         }
         SetAntiAlias(argv[1]);
         offscreenCanvasContext_->SetUnit(GetUnit());
+        offscreenCanvasContext_->SetDensity();
         return contextObj;
     }
     return nullptr;

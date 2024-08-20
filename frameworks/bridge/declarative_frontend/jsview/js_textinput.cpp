@@ -112,16 +112,17 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("selectAll", &JSTextField::SetSelectAllValue);
     JSClass<JSTextInput>::StaticMethod("lineBreakStrategy", &JSTextField::SetLineBreakStrategy);
     JSClass<JSTextInput>::StaticMethod("showCounter", &JSTextField::SetShowCounter);
+    JSClass<JSTextInput>::StaticMethod("fontFeature", &JSTextField::SetFontFeature);
     JSClass<JSTextInput>::StaticMethod("decoration", &JSTextField::SetDecoration);
-    JSClass<JSTextInput>::StaticMethod("showPassword", &JSTextField::ShowPasswordText);
     JSClass<JSTextInput>::StaticMethod("minFontSize", &JSTextField::SetMinFontSize);
     JSClass<JSTextInput>::StaticMethod("maxFontSize", &JSTextField::SetMaxFontSize);
     JSClass<JSTextInput>::StaticMethod("heightAdaptivePolicy", &JSTextField::SetHeightAdaptivePolicy);
     JSClass<JSTextInput>::StaticMethod("letterSpacing", &JSTextField::SetLetterSpacing);
     JSClass<JSTextInput>::StaticMethod("lineHeight", &JSTextField::SetLineHeight);
-    JSClass<JSTextInput>::StaticMethod("fontFeature", &JSTextField::SetFontFeature);
     JSClass<JSTextInput>::StaticMethod("textOverflow", &JSTextField::SetTextOverflow);
     JSClass<JSTextInput>::StaticMethod("textIndent", &JSTextField::SetTextIndent);
+    JSClass<JSTextInput>::StaticMethod("showPassword", &JSTextField::ShowPasswordText);
+
     JSClass<JSTextInput>::StaticMethod("onWillInsert", &JSTextField::OnWillInsertValue);
     JSClass<JSTextInput>::StaticMethod("onDidInsert", &JSTextField::OnDidInsertValue);
     JSClass<JSTextInput>::StaticMethod("onWillDelete", &JSTextField::OnWillDelete);

@@ -15,9 +15,7 @@
 
 #include "core/common/container.h"
 
-#include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
-#include "core/common/container_scope.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
 #endif
@@ -125,7 +123,7 @@ RefPtr<Container> Container::GetFoucsed()
 {
     RefPtr<Container> foucsContainer;
     AceEngine::Get().NotifyContainers([&foucsContainer](const RefPtr<Container>& container) {
-        auto pipeline = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+        auto pipeline = container->GetPipelineContext();
         if (pipeline && pipeline->IsWindowFocused()) {
             foucsContainer = container;
         }

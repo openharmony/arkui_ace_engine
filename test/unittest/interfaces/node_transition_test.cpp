@@ -983,3 +983,57 @@ HWTEST_F(NodeTransitionTest, NodeTransitionTest036, TestSize.Level1)
     OH_ArkUI_TransitionEffect_Dispose(disappear);
     disappear = nullptr;
 }
+
+/**
+ * @tc.name: NodeTransitionTest037
+ * @tc.desc: Test ConvertToEffectOption function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeTransitionTest, NodeTransitionTest037, TestSize.Level1)
+{
+    ArkUI_TranslationOptions translationOptions = {0.0f, 0.0f, 0.0f};
+    ArkUI_TransitionEffect* option = OH_ArkUI_CreateTranslationTransitionEffect(&translationOptions);
+    ASSERT_NE(option, nullptr);
+    option->translate = nullptr;
+    ArkUITransitionEffectOption* toEffectOption = OHOS::Ace::TransitionModel::ConvertToEffectOption(option);
+    ASSERT_EQ(toEffectOption, nullptr);
+
+    OH_ArkUI_TransitionEffect_Dispose(option);
+    option = nullptr;
+}
+
+/**
+ * @tc.name: NodeTransitionTest038
+ * @tc.desc: Test ConvertToEffectOption function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeTransitionTest, NodeTransitionTest038, TestSize.Level1)
+{
+    ArkUI_ScaleOptions scaleOptions = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    ArkUI_TransitionEffect* option = OH_ArkUI_CreateScaleTransitionEffect(&scaleOptions);
+    ASSERT_NE(option, nullptr);
+    option->scale = nullptr;
+    ArkUITransitionEffectOption* toEffectOption = OHOS::Ace::TransitionModel::ConvertToEffectOption(option);
+    ASSERT_EQ(toEffectOption, nullptr);
+
+    OH_ArkUI_TransitionEffect_Dispose(option);
+    option = nullptr;
+}
+
+/**
+ * @tc.name: NodeTransitionTest039
+ * @tc.desc: Test ConvertToEffectOption function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeTransitionTest, NodeTransitionTest039, TestSize.Level1)
+{
+    ArkUI_RotationOptions rotationOptions = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    ArkUI_TransitionEffect* option = OH_ArkUI_CreateRotationTransitionEffect(&rotationOptions);
+    ASSERT_NE(option, nullptr);
+    option->rotate = nullptr;
+    ArkUITransitionEffectOption* toEffectOption = OHOS::Ace::TransitionModel::ConvertToEffectOption(option);
+    ASSERT_EQ(toEffectOption, nullptr);
+
+    OH_ArkUI_TransitionEffect_Dispose(option);
+    option = nullptr;
+}

@@ -72,12 +72,13 @@ public:
     void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func) override {};
     void SetOnChangeEvent(std::function<void(const std::string&)>&& onChangeEvent) override {};
     void SetSelectionMenuHidden(bool selectionMenuHidden) override {};
+
     void SetCustomKeyboard(const std::function<void ()> &&buildFunc, bool supportAvoidance = false) override {};
+    void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) override {};
     void SetSearchEnterKeyType(TextInputAction value) override {};
     void SetMaxLength(uint32_t value) override {};
     void ResetMaxLength() override {};
     void SetType(TextInputType type) override {};
-    void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) override {};
     void SetEnablePreviewText(bool enablePreviewText) override {};
 
 private:

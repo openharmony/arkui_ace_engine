@@ -34,6 +34,8 @@ public:
     virtual void Release(void** overlayData) = 0;
     virtual void UpdatePressOverlay(void** overlayData, ImageAnalyzerInnerConfig* config) = 0;
     virtual void UpdateOverlayStatus(void** overlayData, ImageAnalyzerInnerConfig* config) = 0;
+    virtual void UpdateOverlayActiveStatus(void** overlayData, bool status) = 0;
+    virtual void UpdateAIButtonConfig(void** overlayData, AIButtonConfig* config) = 0;
 protected:
     virtual ~ImageAnalyzerInterface() {}
 }; // namespace OHOS::Ace

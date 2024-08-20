@@ -82,6 +82,8 @@ void RichEditorCommonTestNg::AddParagraph(TestParagraphItem testParagraphItem)
         { .paragraph = paragraph, .start = testParagraphItem.start, .end = testParagraphItem.end });
     for (const auto& [index, offset] : testParagraphItem.indexOffsetMap) {
         EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(offset, _)).WillRepeatedly(Return(index));
+        PositionWithAffinity positionWithAffinity(index, TextAffinity::UPSTREAM);
+        EXPECT_CALL(*paragraph, GetGlyphPositionAtCoordinate(offset)).WillRepeatedly(Return(positionWithAffinity));
     }
     for (auto& cursorItem : testParagraphItem.testCursorItems) {
         EXPECT_CALL(*paragraph, ComputeOffsetForCaretDownstream(cursorItem.index, _, _))
@@ -174,7 +176,8 @@ void RichEditorCommonTestNg::OnDrawVerify(
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-
+    auto contentRect = richEditorNode_->GetGeometryNode()->GetContentRect();
+    richEditorNode_->GetGeometryNode()->SetContentSize({100, 100});
     if (SelectSpanType::TYPESPAN == type) {
         AddSpan(text);
     } else if (SelectSpanType::TYPEIMAGE == type) {
@@ -249,5 +252,6 @@ void RichEditorCommonTestNg::OnDrawVerify(
      */
     ret = controller->GetShowMagnifier();
     EXPECT_FALSE(ret);
+    richEditorNode_->GetGeometryNode()->SetContentSize(contentRect.GetSize());
 }
 } // namespace OHOS::Ace::NG

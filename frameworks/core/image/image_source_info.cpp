@@ -15,10 +15,6 @@
 
 #include "core/image/image_source_info.h"
 
-#include <regex>
-
-#include "base/utils/string_utils.h"
-#include "core/common/container.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
@@ -142,6 +138,7 @@ ImageSourceInfo::ImageSourceInfo(std::string imageSrc, std::string bundleName, s
         ++count;
     }
     if (pixmap != nullptr) {
+        pixmapBuffer_ = pixmap->GetPixels();
         ++count;
     }
     if (count > 1) {
@@ -171,6 +168,7 @@ ImageSourceInfo::ImageSourceInfo(const std::shared_ptr<std::string>& imageSrc, s
         ++count;
     }
     if (pixmap != nullptr) {
+        pixmapBuffer_ = pixmap->GetPixels();
         ++count;
     }
     if (count > 1) {
@@ -237,7 +235,7 @@ bool ImageSourceInfo::operator==(const ImageSourceInfo& info) const
         return false;
     }
     return ((!pixmap_ && !info.pixmap_) ||
-               (pixmap_ && info.pixmap_ && pixmap_->GetRawPixelMapPtr() == info.pixmap_->GetRawPixelMapPtr())) &&
+               (pixmap_ && info.pixmap_ && pixmapBuffer_ == info.pixmap_->GetPixels())) &&
            GetSrc() == info.GetSrc() && resourceId_ == info.resourceId_;
 }
 

@@ -29,7 +29,7 @@ public:
     ~ScreenNode() override = default;
 
     HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const PointF& parentRevertPoint,
-        TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId, TouchTestResult& responseLinkResult,
+        TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId, ResponseLinkResult& responseLinkResult,
         bool isDispatch = false) override;
 
     static RefPtr<ScreenNode> GetOrCreateScreenNode(

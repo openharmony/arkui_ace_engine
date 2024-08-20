@@ -95,10 +95,14 @@ const std::vector<SelectParam> CREATE_VALUE = { { "content1", "icon1" }, { "cont
     { "", "icon3" }, { "", "" } };
 const std::vector<SelectParam> CREATE_VALUE_NEW = { { "content1_new", "" }, { "", "icon4_new" },
     { "", "" }, { "", "icon4_new" } };
+const V2::ItemDivider ITEM_DIVIDER = { Dimension(5.f), Dimension(10), Dimension(20), Color(0x000000) };
 constexpr double MENU_OFFSET_X = 10.0;
 constexpr double MENU_OFFSET_Y = 10.0;
 constexpr float MENU_SIZE_WIDTH = 100.0f;
 constexpr float MENU_SIZE_HEIGHT = 50.0f;
+constexpr double CONST_NEAR_ZREO = 0.0001;
+constexpr double CONST_LESS_NEAR_ZREO = 0.00001;
+constexpr float PAN_GREATER_MAX_VELOCITY = 2100.0f;
 } // namespace
 class MenuPattern1TestNg : public testing::Test {
 public:
@@ -1514,6 +1518,12 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg034, TestSize.Level1)
     if (context) {
         context->dipScale_ = DIP_SCALE;
     }
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    RefPtr<MenuTheme> menuTheme = AceType::MakeRefPtr<MenuTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(menuTheme));
+
     auto menuWrapperNode = GetPreviewMenuWrapper();
     ASSERT_NE(menuWrapperNode, nullptr);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
@@ -1597,7 +1607,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg036, TestSize.Level1)
     menuPattern->HandleDragEnd(OFFSET_FIRST, OFFSET_SECOND, POSITION_OFFSET);
     EXPECT_TRUE(LessOrEqual(POSITION_OFFSET, PAN_MAX_VELOCITY));
 
-    menuPattern->HandleDragEnd(OFFSET_FIRST, CONST_DOUBLE_ZREO, POSITION_OFFSET);
+    menuPattern->HandleDragEnd(OFFSET_SECOND, OFFSET_FIRST, PAN_GREATER_MAX_VELOCITY);
     EXPECT_TRUE(LessOrEqual(CONST_DOUBLE_ZREO, 0.0f));
 }
 /**
@@ -1624,7 +1634,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg037, TestSize.Level1)
     menuPattern->HandleScrollDragEnd(OFFSET_FIRST, OFFSET_SECOND, POSITION_OFFSET);
     EXPECT_TRUE(LessOrEqual(POSITION_OFFSET, PAN_MAX_VELOCITY));
 
-    menuPattern->HandleScrollDragEnd(OFFSET_FIRST, CONST_DOUBLE_ZREO, POSITION_OFFSET);
+    menuPattern->HandleScrollDragEnd(CONST_LESS_NEAR_ZREO, CONST_NEAR_ZREO, PAN_GREATER_MAX_VELOCITY);
     EXPECT_FALSE(!NearZero(CONST_DOUBLE_ZREO));
 }
 /**
@@ -1868,12 +1878,20 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg042, TestSize.Level1)
     RefPtr<FrameNode> menuNode =
         FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
             []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
-    auto child = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto child = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
     child->MountToParent(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     menuPattern->type_ = MenuType::CONTEXT_MENU;
     auto menuItemPattern = child->GetPattern<MenuItemPattern>();
     auto testInfo = menuPattern->GetMenuItemInfo(child, false);
+    EXPECT_FALSE(testInfo.isFindTargetId);
+    menuItemPattern->SetClickMenuItemId(child->GetId());
+    testInfo = menuPattern->GetMenuItemInfo(child, false);
+    EXPECT_TRUE(testInfo.isFindTargetId);
+    testInfo = menuPattern->GetMenuItemInfo(child, true);
+    EXPECT_TRUE(testInfo.isFindTargetId);
+
+    testInfo = menuPattern->GetMenuItemInfo(menuNode, false);
     EXPECT_FALSE(testInfo.isFindTargetId);
 }
 /**
@@ -1921,5 +1939,100 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg043, TestSize.Level1)
     testInfo = menuPattern->GetInnerMenuOffset(menuitemgroupNode, true);
     EXPECT_EQ(testInfo.originOffset, OffsetF(0.0, 0.0));
     EXPECT_FALSE(testInfo.isFindTargetId);
+}
+
+/**
+ * @tc.name: MenuPatternTestNg044
+ * @tc.desc: Verify MneuModelInstance methods.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg044, TestSize.Level1)
+{
+    MenuModelNG MneuModelInstance;
+    MneuModelInstance.Create();
+    MneuModelInstance.SetFontSize(Dimension(25.0));
+    MneuModelInstance.SetFontColor(Color::RED);
+    MneuModelInstance.SetFontWeight(FontWeight::BOLD);
+    MneuModelInstance.SetFontStyle(Ace::FontStyle::ITALIC);
+    MneuModelInstance.SetBorderRadius(Dimension(2));
+    MneuModelInstance.SetWidth(Dimension(10));
+    std::vector<std::string> myFamilies = {"Smith"};
+    MneuModelInstance.SetFontFamily(myFamilies);
+    MneuModelInstance.SetBorderRadius(Dimension(1), Dimension(2), Dimension(3), Dimension(4));
+    MneuModelInstance.SetItemDivider(ITEM_DIVIDER);
+    MneuModelInstance.SetItemGroupDivider(ITEM_DIVIDER);
+    MneuModelInstance.SetExpandingMode(SubMenuExpandingMode::STACK);
+
+    auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto layoutProperty = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    // call UpdateMenuItemChildren
+    menuPattern->OnModifyDone();
+
+    MneuModelInstance.ResetFontFamily();
+    MneuModelInstance.ResetBorderRadius();
+
+    ASSERT_TRUE(layoutProperty->GetFontSize().has_value());
+    EXPECT_EQ(layoutProperty->GetFontSize().value(), Dimension(25.0));
+    ASSERT_TRUE(layoutProperty->GetFontWeight().has_value());
+    EXPECT_EQ(layoutProperty->GetFontWeight().value(), FontWeight::BOLD);
+    ASSERT_TRUE(layoutProperty->GetFontColor().has_value());
+    EXPECT_EQ(layoutProperty->GetFontColor().value(), Color::RED);
+    ASSERT_TRUE(layoutProperty->GetItalicFontStyle().has_value());
+    EXPECT_EQ(layoutProperty->GetItalicFontStyle().value(), Ace::FontStyle::ITALIC);
+}
+
+/**
+ * @tc.name: MenuPatternTestNg045
+ * @tc.desc: Verify MneuModelInstance methods with frameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg045, TestSize.Level1)
+{
+    MenuModelNG MneuModelInstance;
+    MneuModelInstance.Create();
+
+    auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(menuNode, nullptr);
+    FrameNode *frameNode = menuNode.GetRawPtr();
+    CHECK_NULL_VOID(frameNode);
+    MneuModelInstance.SetFontSize(frameNode, Dimension(25.0));
+    MneuModelInstance.SetFontWeight(frameNode, FontWeight::BOLD);
+    MneuModelInstance.SetFontColor(frameNode, Color::RED);
+    MneuModelInstance.SetFontStyle(frameNode, Ace::FontStyle::ITALIC);
+    MneuModelInstance.SetBorderRadius(frameNode, Dimension(2));
+    MneuModelInstance.SetWidth(frameNode, Dimension(10));
+    std::vector<std::string> myFamilies = {"Smith"};
+    MneuModelInstance.SetFontFamily(frameNode, myFamilies);
+    MneuModelInstance.SetBorderRadius(frameNode, Dimension(1), Dimension(2), Dimension(3), Dimension(4));
+    MneuModelInstance.SetItemDivider(frameNode, ITEM_DIVIDER);
+    MneuModelInstance.SetItemGroupDivider(frameNode, ITEM_DIVIDER);
+    MneuModelInstance.ResetBorderRadius(frameNode);
+
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto layoutProperty = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    // call UpdateMenuItemChildren
+    menuPattern->OnModifyDone();
+
+    ASSERT_TRUE(layoutProperty->GetFontSize().has_value());
+    EXPECT_EQ(layoutProperty->GetFontSize().value(), Dimension(25.0));
+    ASSERT_TRUE(layoutProperty->GetFontWeight().has_value());
+    EXPECT_EQ(layoutProperty->GetFontWeight().value(), FontWeight::BOLD);
+    ASSERT_TRUE(layoutProperty->GetFontColor().has_value());
+    EXPECT_EQ(layoutProperty->GetFontColor().value(), Color::RED);
+    ASSERT_TRUE(layoutProperty->GetItalicFontStyle().has_value());
+    EXPECT_EQ(layoutProperty->GetItalicFontStyle().value(), Ace::FontStyle::ITALIC);
+
+    MneuModelInstance.SetFontColor(frameNode, std::nullopt);
+    ASSERT_FALSE(layoutProperty->GetFontColor().has_value());
+    MneuModelInstance.SetFontSize(frameNode, Dimension(0.0));
+    ASSERT_FALSE(layoutProperty->GetFontSize().has_value());
 }
 } // namespace OHOS::Ace::NG

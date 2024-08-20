@@ -1604,6 +1604,30 @@ void GetTextAreaPadding(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_
     (*values)[NUM_3] = padding.left->GetDimensionContainsNegative().GetNativeValue(static_cast<DimensionUnit>(unit));
     length = NUM_4;
 }
+
+void SetTextAreaSelectionMenuOptions(ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::OnCreateMenuCallback* onCreateMenu = nullptr;
+    NG::OnMenuItemClickCallback* onMenuItemClick = nullptr;
+    if (onCreateMenuCallback) {
+        onCreateMenu = reinterpret_cast<NG::OnCreateMenuCallback*>(onCreateMenuCallback);
+    }
+    if (onMenuItemClickCallback) {
+        onMenuItemClick = reinterpret_cast<NG::OnMenuItemClickCallback*>(onMenuItemClickCallback);
+    }
+    TextFieldModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu), std::move(*onMenuItemClick));
+}
+
+void ResetTextAreaSelectionMenuOptions(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::OnCreateMenuCallback onCreateMenuCallback;
+    NG::OnMenuItemClickCallback onMenuItemClick;
+    TextFieldModelNG::SetSelectionMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1623,16 +1647,57 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         GetTextAreaText, GetTextAreaCaretColor, GetTextAreaMaxLength, GetTextAreaPlaceholderColor,
         GetTextAreaPlaceholderFont, GetTextAreaEditing, SetTextAreaBackgroundColor, ResetTextAreaBackgroundColor,
         SetTextAreaType, ResetTextAreaType, GetTextAreaType, GetTextAreaTextAlign, SetTextAreaShowCounterOptions,
-        ResetTextAreaShowCounterOptions, GetTextAreaShowCounterOptions, SetTextAreaDecoration,
-        ResetTextAreaDecoration, SetTextAreaLetterSpacing, ResetTextAreaLetterSpacing, SetTextAreaLineHeight,
-        ResetTextAreaLineHeight, SetTextAreaFontFeature, ResetTextAreaFontFeature, SetTextAreaWordBreak,
-        ResetTextAreaWordBreak, SetTextAreaAdaptMinFontSize, ResetTextAreaAdaptMinFontSize,
-        SetTextAreaAdaptMaxFontSize, ResetTextAreaAdaptMaxFontSize, SetTextAreaHeightAdaptivePolicy,
-        ResetTextAreaHeightAdaptivePolicy, SetTextAreaSelectedBackgroundColor, ResetTextAreaSelectedBackgroundColor,
-        SetTextAreaCaretStyle, ResetTextAreaCaretStyle, SetTextAreaTextOverflow, ResetTextAreaTextOverflow,
-        SetTextAreaTextIndent, ResetTextAreaTextIndent, SetTextAreaLineSpacing, ResetTextAreaLineSpacing,
-        GetTextAreaSelectionMenuHidden, GetTextAreaAdaptMinFontSize, GetTextAreaAdaptMaxFontSize,
-        GetTextAreaLineHeight, GetgetTextAreaMaxLines,
+        ResetTextAreaShowCounterOptions, GetTextAreaShowCounterOptions, SetTextAreaDecoration, ResetTextAreaDecoration,
+        SetTextAreaLetterSpacing, ResetTextAreaLetterSpacing, SetTextAreaLineHeight, ResetTextAreaLineHeight,
+        SetTextAreaFontFeature, ResetTextAreaFontFeature, SetTextAreaWordBreak, ResetTextAreaWordBreak,
+        SetTextAreaAdaptMinFontSize, ResetTextAreaAdaptMinFontSize, SetTextAreaAdaptMaxFontSize,
+        ResetTextAreaAdaptMaxFontSize, SetTextAreaHeightAdaptivePolicy, ResetTextAreaHeightAdaptivePolicy,
+        SetTextAreaSelectedBackgroundColor, ResetTextAreaSelectedBackgroundColor, SetTextAreaCaretStyle,
+        ResetTextAreaCaretStyle, SetTextAreaTextOverflow, ResetTextAreaTextOverflow, SetTextAreaTextIndent,
+        ResetTextAreaTextIndent, SetTextAreaLineSpacing, ResetTextAreaLineSpacing, GetTextAreaSelectionMenuHidden,
+        GetTextAreaAdaptMinFontSize, GetTextAreaAdaptMaxFontSize, GetTextAreaLineHeight, GetgetTextAreaMaxLines,
+        SetTextAreaPadding, ResetTextAreaPadding, GetTextAreaFontFeature, SetTextAreaOnChange, ResetTextAreaOnChange,
+        SetTextAreaEnterKeyType, ResetTextAreaEnterKeyType, SetTextAreaInputFilter, ResetTextAreaInputFilter,
+        SetTextAreaOnTextSelectionChange, ResetTextAreaOnTextSelectionChange, SetTextAreaOnContentScroll,
+        ResetTextAreaOnContentScroll, SetTextAreaOnEditChange, ResetTextAreaOnEditChange, SetTextAreaOnCopy,
+        ResetTextAreaOnCopy, SetTextAreaOnCut, ResetTextAreaOnCut, SetTextAreaOnPaste, ResetTextAreaOnPaste,
+        SetTextAreaLineBreakStrategy, ResetTextAreaLineBreakStrategy, SetTextAreaOnSubmitWithEvent,
+        ResetTextAreaOnSubmitWithEvent, SetTextAreaContentType, ResetTextAreaContentType, SetTextAreaEnableAutoFill,
+        ResetTextAreaEnableAutoFill, SetTextAreaBorder, ResetTextAreaBorder, SetTextAreaBorderWidth,
+        ResetTextAreaBorderWidth, SetTextAreaBorderColor, ResetTextAreaBorderColor, SetTextAreaBorderStyle,
+        ResetTextAreaBorderStyle, SetTextAreaBorderRadius, ResetTextAreaBorderRadius, SetTextAreaMargin,
+        ResetTextAreaMargin, SetTextAreaCaret, GetTextAreaMargin, SetTextAreaOnWillInsert, ResetTextAreaOnWillInsert,
+        SetTextAreaOnDidInsert, ResetTextAreaOnDidInsert, SetTextAreaOnWillDelete, ResetTextAreaOnWillDelete,
+        SetTextAreaOnDidDelete, ResetTextAreaOnDidDelete, SetTextAreaEnablePreviewText, ResetTextAreaEnablePreviewText,
+        GetTextAreaPadding, SetTextAreaSelectionMenuOptions, ResetTextAreaSelectionMenuOptions };
+    return &modifier;
+}
+
+const CJUITextAreaModifier* GetCJUITextAreaModifier()
+{
+    static const CJUITextAreaModifier modifier = { SetTextAreaStyle, ResetTextAreaStyle,
+        SetTextAreaSelectionMenuHidden, ResetTextAreaSelectionMenuHidden, SetTextAreaMaxLines, ResetTextAreaMaxLines,
+        SetTextAreaCopyOption, ResetTextAreaCopyOption, SetTextAreaPlaceholderColor, ResetTextAreaPlaceholderColor,
+        SetTextAreaTextAlign, ResetTextAreaTextAlign, SetTextAreaPlaceholderFont, ResetTextAreaPlaceholderFont,
+        SetTextAreaBarState, ResetTextAreaBarState, SetTextAreaEnableKeyboardOnFocus,
+        ResetTextAreaEnableKeyboardOnFocus, SetTextAreaFontFamily, ResetTextAreaFontFamily, SetTextAreaShowCounter,
+        ResetTextAreaShowCounter, SetTextAreaCaretColor, ResetTextAreaCaretColor, SetTextAreaMaxLength,
+        ResetTextAreaMaxLength, SetTextAreaFontColor, ResetTextAreaFontColor, SetTextAreaFontStyle,
+        ResetTextAreaFontStyle, SetTextAreaFontWeight, ResetTextAreaFontWeight, SetTextAreaFontSize,
+        ResetTextAreaFontSize, SetCounterType, SetTextAreaPlaceholderString, SetTextAreaTextString,
+        StopTextAreaTextEditing, SetTextAreaFontWeightStr, SetTextAreaPlaceholderFontEnum, GetTextAreaPlaceholder,
+        GetTextAreaText, GetTextAreaCaretColor, GetTextAreaMaxLength, GetTextAreaPlaceholderColor,
+        GetTextAreaPlaceholderFont, GetTextAreaEditing, SetTextAreaBackgroundColor, ResetTextAreaBackgroundColor,
+        SetTextAreaType, ResetTextAreaType, GetTextAreaType, GetTextAreaTextAlign, SetTextAreaShowCounterOptions,
+        ResetTextAreaShowCounterOptions, GetTextAreaShowCounterOptions, SetTextAreaDecoration, ResetTextAreaDecoration,
+        SetTextAreaLetterSpacing, ResetTextAreaLetterSpacing, SetTextAreaLineHeight, ResetTextAreaLineHeight,
+        SetTextAreaFontFeature, ResetTextAreaFontFeature, SetTextAreaWordBreak, ResetTextAreaWordBreak,
+        SetTextAreaAdaptMinFontSize, ResetTextAreaAdaptMinFontSize, SetTextAreaAdaptMaxFontSize,
+        ResetTextAreaAdaptMaxFontSize, SetTextAreaHeightAdaptivePolicy, ResetTextAreaHeightAdaptivePolicy,
+        SetTextAreaSelectedBackgroundColor, ResetTextAreaSelectedBackgroundColor, SetTextAreaCaretStyle,
+        ResetTextAreaCaretStyle, SetTextAreaTextOverflow, ResetTextAreaTextOverflow, SetTextAreaTextIndent,
+        ResetTextAreaTextIndent, SetTextAreaLineSpacing, ResetTextAreaLineSpacing, GetTextAreaSelectionMenuHidden,
+        GetTextAreaAdaptMinFontSize, GetTextAreaAdaptMaxFontSize, GetTextAreaLineHeight, GetgetTextAreaMaxLines,
         SetTextAreaPadding, ResetTextAreaPadding, GetTextAreaFontFeature,
         SetTextAreaOnChange, ResetTextAreaOnChange,
         SetTextAreaEnterKeyType, ResetTextAreaEnterKeyType, SetTextAreaInputFilter, ResetTextAreaInputFilter,
@@ -1645,8 +1710,8 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         SetTextAreaContentType, ResetTextAreaContentType, SetTextAreaEnableAutoFill, ResetTextAreaEnableAutoFill,
         SetTextAreaBorder, ResetTextAreaBorder, SetTextAreaBorderWidth, ResetTextAreaBorderWidth,
         SetTextAreaBorderColor, ResetTextAreaBorderColor, SetTextAreaBorderStyle, ResetTextAreaBorderStyle,
-        SetTextAreaBorderRadius, ResetTextAreaBorderRadius, SetTextAreaMargin, ResetTextAreaMargin, SetTextAreaCaret,
-        GetTextAreaMargin,
+        SetTextAreaBorderRadius, ResetTextAreaBorderRadius, SetTextAreaMargin, ResetTextAreaMargin,
+        GetTextAreaMargin, SetTextAreaCaret,
         SetTextAreaOnWillInsert, ResetTextAreaOnWillInsert,
         SetTextAreaOnDidInsert, ResetTextAreaOnDidInsert,
         SetTextAreaOnWillDelete, ResetTextAreaOnWillDelete,

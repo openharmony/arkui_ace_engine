@@ -356,7 +356,7 @@ public:
 
     virtual void GetBoundingRectData(int32_t nodeId, Rect& rect) {}
 
-    virtual void CheckAndUpdateKeyboardInset() {}
+    virtual void CheckAndUpdateKeyboardInset(float keyboardHeight) {}
 
     virtual RefPtr<AccessibilityManager> GetAccessibilityManager() const;
 
@@ -368,6 +368,26 @@ public:
     void SetRootSize(double density, float width, float height);
 
     void UpdateFontWeightScale();
+
+    void SetFollowSystem(bool followSystem)
+    {
+        followSystem_ = followSystem;
+    }
+
+    void SetMaxAppFontScale(float maxAppFontScale)
+    {
+        maxAppFontScale_ = maxAppFontScale;
+    }
+
+    float GetMaxAppFontScale()
+    {
+        return maxAppFontScale_;
+    }
+
+    bool IsFollowSystem()
+    {
+        return followSystem_;
+    }
 
     double NormalizeToPx(const Dimension& dimension) const;
 
@@ -734,6 +754,21 @@ public:
         return focusWindowId_.has_value();
     }
 
+    void SetRealHostWindowId(uint32_t realHostWindowId)
+    {
+        realHostWindowId_ = realHostWindowId;
+    }
+
+    uint32_t GetRealHostWindowId() const
+    {
+        return realHostWindowId_.value_or(GetFocusWindowId());
+    }
+
+    bool IsRealHostWindowIdSetted() const
+    {
+        return realHostWindowId_.has_value();
+    }
+
     float GetViewScale() const
     {
         return viewScale_;
@@ -846,7 +881,7 @@ public:
 
     void OnVirtualKeyboardAreaChange(Rect keyboardArea,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, const float safeHeight = 0.0f,
-        bool supportAvoidance = false);
+        bool supportAvoidance = false, bool forceChange = false);
     void OnVirtualKeyboardAreaChange(Rect keyboardArea, double positionY, double height,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool forceChange = false);
 
@@ -936,6 +971,8 @@ public:
     virtual bool IsEnableKeyBoardAvoidMode() {
         return false;
     }
+
+    virtual void RequireSummary() {}
 
     void SetPluginOffset(const Offset& offset)
     {
@@ -1270,6 +1307,11 @@ public:
         return 0.0f;
     }
 
+    virtual bool CheckNeedAvoidInSubWindow()
+    {
+        return false;
+    }
+
     virtual bool IsDensityChanged() const = 0;
 
     void SetUiDvsyncSwitch(bool on);
@@ -1278,8 +1320,6 @@ public:
 
     void SetDestroyed();
 
-    virtual void UpdateLastVsyncEndTimestamp(uint64_t lastVsyncEndTimestamp) {}
-
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
     // Called by hittest to find touch node is equal target.
     virtual bool OnTouchTargetHitTest(const TouchEvent& point, bool isSubPipe = false,
@@ -1287,9 +1327,18 @@ public:
 #endif
     virtual bool IsWindowFocused() const
     {
-        return false;
+        return GetOnFoucs();
     }
 
+    void SetDragNodeGrayscale(float dragNodeGrayscale)
+    {
+        dragNodeGrayscale_ = dragNodeGrayscale;
+    }
+
+    float GetDragNodeGrayscale() const
+    {
+        return dragNodeGrayscale_;
+    }
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1311,7 +1360,7 @@ protected:
 
     virtual void OnVirtualKeyboardHeightChange(float keyboardHeight,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, const float safeHeight = 0.0f,
-        const bool supportAvoidance = false)
+        const bool supportAvoidance = false, bool forceChange = false)
     {}
     virtual void OnVirtualKeyboardHeightChange(float keyboardHeight, double positionY, double height,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool forceChange = false)
@@ -1348,6 +1397,7 @@ protected:
     uint32_t windowId_ = 0;
     // UIExtensionAbility need component windowID
     std::optional<uint32_t> focusWindowId_;
+    std::optional<uint32_t> realHostWindowId_;
 
     int32_t appLabelId_ = 0;
     float fontScale_ = 1.0f;
@@ -1422,6 +1472,8 @@ protected:
     std::function<std::string()> onFormRecycle_;
     std::function<void(std::string)> onFormRecover_;
 
+    uint64_t compensationValue_ = 0;
+    int64_t recvTime_ = 0;
     std::once_flag displaySyncFlag_;
     RefPtr<UIDisplaySyncManager> uiDisplaySyncManager_;
 
@@ -1460,7 +1512,10 @@ private:
     WindowSizeChangeReason type_ = WindowSizeChangeReason::UNDEFINED;
     std::shared_ptr<Rosen::RSTransaction> rsTransaction_;
     uint32_t frameCount_ = 0;
-
+    bool followSystem_ = false;
+    float maxAppFontScale_ = static_cast<float>(INT32_MAX);
+    float dragNodeGrayscale_ = 0.0f;
+    
     // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker thread.
     std::mutex densityChangeMutex_;
     int32_t densityChangeCallbackId_ = 0;

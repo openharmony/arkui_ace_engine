@@ -15,9 +15,6 @@
 
 #include "core/components/common/painter/rosen_decoration_painter.h"
 
-#include <cmath>
-#include <functional>
-
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkBitmap.h"
 #include "include/core/SkCanvas.h"
@@ -31,13 +28,9 @@
 #include "include/effects/SkImageFilters.h"
 #include "include/utils/SkShadowUtils.h"
 #endif
-#include "render_service_client/core/ui/rs_node.h"
 
 #include "core/components/common/painter/border_image_painter.h"
-#include "core/components/common/properties/color.h"
-#include "core/pipeline/base/render_node.h"
 #include "core/pipeline/base/rosen_render_context.h"
-#include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
 namespace {

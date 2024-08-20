@@ -153,12 +153,27 @@ void UIExtensionManager::RemoveDestroyedUIExtension(int32_t nodeId)
 
 bool UIExtensionManager::NotifyOccupiedAreaChangeInfo(const sptr<Rosen::OccupiedAreaChangeInfo>& info)
 {
-    auto sessionWrapper = sessionWrapper_.Upgrade();
-    return sessionWrapper && sessionWrapper->NotifyOccupiedAreaChangeInfo(info);
+    int32_t keyboardHeight = static_cast<int32_t>(info->rect_.height_);
+    if (keyboardHeight != 0) {
+        auto sessionWrapper = sessionWrapper_.Upgrade();
+        return sessionWrapper && sessionWrapper->NotifyOccupiedAreaChangeInfo(info);
+    }
+    // keyboardHeight is 0, broadcast it.
+    bool ret = false;
+    for (const auto& it : aliveUIExtensions_) {
+        auto uiExtension = it.second.Upgrade();
+        if (uiExtension) {
+            auto session = uiExtension->GetSessionWrapper();
+            if (session && session->IsSessionValid()) {
+                ret |= session->NotifyOccupiedAreaChangeInfo(info);
+            }
+        }
+    }
+    return ret;
 }
 
-void UIExtensionManager::NotifySizeChangeReason(WindowSizeChangeReason type,
-    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+void UIExtensionManager::NotifySizeChangeReason(
+    WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     for (const auto& it : aliveUIExtensions_) {
         auto uiExtension = it.second.Upgrade();

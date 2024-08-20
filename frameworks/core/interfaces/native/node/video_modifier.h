@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIVideoModifier* GetVideoModifier();
+const CJUIVideoModifier* GetCJUIVideoModifier();
 } // namespace OHOS::Ace::NG::NodeModifier
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_VIDEO_MODIFIER_H

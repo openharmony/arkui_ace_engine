@@ -29,6 +29,8 @@
 #include "core/event/touch_event.h"
 
 namespace OHOS::Ace {
+constexpr int32_t HOT_AREA_EXPAND_TIME = 2;
+constexpr Dimension HOT_AREA_ADJUST_SIZE = 20.0_vp;
 struct Hash {
     size_t operator()(const RefPtr<NG::FrameNode>& node) const
     {
@@ -47,7 +49,9 @@ public:
     void UnRegisterStylusInteractionListener(const std::string& bundleName) override;
     bool Notify(const NotifyInfo& notifyInfo) override;
 
-    bool IsNeedInterceptedTouchEvent(const TouchEvent& touchEvent);
+    RefPtr<NG::FrameNode> FindHitFrameNode(const TouchEvent& touchEvent, const TouchTestResult& touchTestResult);
+    bool IsNeedInterceptedTouchEvent(
+        const TouchEvent& touchEvent, std::unordered_map<size_t, TouchTestResult> touchTestResults);
 
     void AddTextFieldFrameNode(const RefPtr<NG::FrameNode>& textFieldNode);
     void RemoveTextFieldFrameNode(const int32_t id);
@@ -78,12 +82,7 @@ private:
     bool IsHitCleanNodeResponseArea(
         const NG::PointF& point, const RefPtr<NG::FrameNode>& frameNode, uint64_t nanoTimestamp);
 
-    RefPtr<NG::FrameNode> FindTextInputFrameNodeByPosition(float globalX, float globalY);
-
-    RefPtr<NG::FrameNode> FindTargetInChildNodes(
-        const RefPtr<NG::UINode> parentNode, const FrameNodeSet& hitFrameNodes);
-
-    bool CheckTextEditable(const RefPtr<NG::FrameNode> parentNode);
+    bool CheckTextEditable(const RefPtr<NG::FrameNode> frameNode);
 
     std::unordered_map<int32_t, WeakPtr<NG::FrameNode>> textFieldNodes_;
 

@@ -15,14 +15,6 @@
 
 #include "frameworks/bridge/common/dom/dom_label.h"
 
-#include "core/components/checkable/checkable_component.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components/gesture_listener/gesture_listener_component.h"
-#include "core/components/text_span/text_span_component.h"
-#include "frameworks/bridge/common/dom/input/dom_radio_util.h"
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 
 DOMLabel::DOMLabel(NodeId nodeId, const std::string& nodeName) : DOMText(nodeId, nodeName) {}

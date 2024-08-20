@@ -1088,9 +1088,10 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest001, TestSize.Level1)
     /**
      * @tc.case: case. CheckBoxPaintMethod's PaintCheckBox will be called.
      */
-    auto checkBoxModifier =
-        AceType::MakeRefPtr<CheckBoxModifier>(false, BOARD_COLOR, CHECK_COLOR, BORDER_COLOR, SHADOW_COLOR);
-    CheckBoxPaintMethod checkBoxPaintMethod(checkBoxModifier);
+    auto checkBoxModifier = AceType::MakeRefPtr<CheckBoxModifier>(
+        false, BOARD_COLOR, CHECK_COLOR, BORDER_COLOR, SHADOW_COLOR, SizeF(), OffsetF(), 0.0, 0.0);
+    CheckBoxPaintMethod checkBoxPaintMethod;
+    checkBoxPaintMethod.checkboxModifier_ = checkBoxModifier;
     checkBoxPaintMethod.checkboxModifier_->SetCheckboxStyle(CheckBoxStyle::SQUARE_STYLE);
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
@@ -1134,10 +1135,11 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest002, TestSize.Level1)
     }
 
     PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
-    auto checkboxModifier =
-        AceType::MakeRefPtr<CheckBoxModifier>(false, Color::BLUE, Color::BLACK, Color::BLACK, Color::GRAY);
-    ASSERT_NE(checkboxModifier, nullptr);
-    CheckBoxPaintMethod checkBoxPaintMethod(checkboxModifier);
+    auto checkBoxModifier = AceType::MakeRefPtr<CheckBoxModifier>(
+        false, BOARD_COLOR, CHECK_COLOR, BORDER_COLOR, SHADOW_COLOR, SizeF(), OffsetF(), 0.0, 0.0);
+    ASSERT_NE(checkBoxModifier, nullptr);
+    CheckBoxPaintMethod checkBoxPaintMethod;
+    checkBoxPaintMethod.checkboxModifier_ = checkBoxModifier;;
     checkBoxPaintMethod.UpdateContentModifier(&paintWrapper);
     EXPECT_EQ(checkBoxPaintMethod.checkboxModifier_->isSelect_->Get(), SELECT_STATE);
     EXPECT_EQ(checkBoxPaintMethod.checkboxModifier_->userActiveColor_, SELECTED_COLOR);
@@ -1171,10 +1173,11 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest003, TestSize.Level1)
     }
 
     PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
-    auto checkboxModifier =
-        AceType::MakeRefPtr<CheckBoxModifier>(false, Color::BLUE, Color::BLACK, Color::BLACK, Color::GRAY);
-    ASSERT_NE(checkboxModifier, nullptr);
-    CheckBoxPaintMethod checkBoxPaintMethod(checkboxModifier);
+    auto checkBoxModifier = AceType::MakeRefPtr<CheckBoxModifier>(
+        false, BOARD_COLOR, CHECK_COLOR, BORDER_COLOR, SHADOW_COLOR, SizeF(), OffsetF(), 0.0, 0.0);
+    ASSERT_NE(checkBoxModifier, nullptr);
+    CheckBoxPaintMethod checkBoxPaintMethod;
+    checkBoxPaintMethod.checkboxModifier_ = checkBoxModifier;;
     checkBoxPaintMethod.UpdateContentModifier(&paintWrapper);
     EXPECT_EQ(checkBoxPaintMethod.checkboxModifier_->strokeSize_->Get(), static_cast<float>(CONTENT_SIZE.Width()));
 }
@@ -1196,10 +1199,11 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest004, TestSize.Level1)
     /**
      * @tc.case: case. CheckBoxPaintMethod's PaintCheckBox will be called.
      */
-    auto checkBoxModifier =
-        AceType::MakeRefPtr<CheckBoxModifier>(false, BOARD_COLOR, CHECK_COLOR, BORDER_COLOR, SHADOW_COLOR);
+    auto checkBoxModifier = AceType::MakeRefPtr<CheckBoxModifier>(
+        false, BOARD_COLOR, CHECK_COLOR, BORDER_COLOR, SHADOW_COLOR, SizeF(), OffsetF(), 0.0, 0.0);
     checkBoxModifier->SetStrokeSize(10);
-    CheckBoxPaintMethod checkBoxPaintMethod(checkBoxModifier);
+    CheckBoxPaintMethod checkBoxPaintMethod;
+    checkBoxPaintMethod.checkboxModifier_ = checkBoxModifier;;
     checkBoxPaintMethod.checkboxModifier_->SetCheckboxStyle(CheckBoxStyle::SQUARE_STYLE);
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
@@ -1217,26 +1221,26 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest004, TestSize.Level1)
  */
 HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest005, TestSize.Level1)
 {
-    auto checkboxModifier =
-        AceType::MakeRefPtr<CheckBoxModifier>(false, BOARD_COLOR, CHECK_COLOR, BORDER_COLOR, SHADOW_COLOR);
-    checkboxModifier->hoverColor_ = Color::RED;
-    checkboxModifier->clickEffectColor_ = Color::BLUE;
-    checkboxModifier->touchHoverType_ = TouchHoverAnimationType::HOVER;
-    checkboxModifier->UpdateAnimatableProperty();
-    checkboxModifier->animateTouchHoverColor_ =
+    auto checkBoxModifier = AceType::MakeRefPtr<CheckBoxModifier>(
+        false, BOARD_COLOR, CHECK_COLOR, BORDER_COLOR, SHADOW_COLOR, SizeF(), OffsetF(), 0.0, 0.0);
+    checkBoxModifier->hoverColor_ = Color::RED;
+    checkBoxModifier->clickEffectColor_ = Color::BLUE;
+    checkBoxModifier->touchHoverType_ = TouchHoverAnimationType::HOVER;
+    checkBoxModifier->UpdateAnimatableProperty();
+    checkBoxModifier->animateTouchHoverColor_ =
         AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT));
-    checkboxModifier->touchHoverType_ = TouchHoverAnimationType::PRESS_TO_HOVER;
-    checkboxModifier->UpdateAnimatableProperty();
-    EXPECT_EQ(checkboxModifier->animateTouchHoverColor_->Get(), LinearColor(Color::RED));
-    checkboxModifier->touchHoverType_ = TouchHoverAnimationType::NONE;
-    checkboxModifier->UpdateAnimatableProperty();
-    EXPECT_EQ(checkboxModifier->animateTouchHoverColor_->Get(), LinearColor(Color::RED.BlendOpacity(0)));
-    checkboxModifier->touchHoverType_ = TouchHoverAnimationType::HOVER_TO_PRESS;
-    checkboxModifier->UpdateAnimatableProperty();
-    EXPECT_EQ(checkboxModifier->animateTouchHoverColor_->Get(), LinearColor(Color::BLUE));
-    checkboxModifier->touchHoverType_ = TouchHoverAnimationType::PRESS;
-    checkboxModifier->UpdateAnimatableProperty();
-    EXPECT_EQ(checkboxModifier->animateTouchHoverColor_->Get(), LinearColor(Color::BLUE));
+    checkBoxModifier->touchHoverType_ = TouchHoverAnimationType::PRESS_TO_HOVER;
+    checkBoxModifier->UpdateAnimatableProperty();
+    EXPECT_EQ(checkBoxModifier->animateTouchHoverColor_->Get(), LinearColor(Color::RED));
+    checkBoxModifier->touchHoverType_ = TouchHoverAnimationType::NONE;
+    checkBoxModifier->UpdateAnimatableProperty();
+    EXPECT_EQ(checkBoxModifier->animateTouchHoverColor_->Get(), LinearColor(Color::RED.BlendOpacity(0)));
+    checkBoxModifier->touchHoverType_ = TouchHoverAnimationType::HOVER_TO_PRESS;
+    checkBoxModifier->UpdateAnimatableProperty();
+    EXPECT_EQ(checkBoxModifier->animateTouchHoverColor_->Get(), LinearColor(Color::BLUE));
+    checkBoxModifier->touchHoverType_ = TouchHoverAnimationType::PRESS;
+    checkBoxModifier->UpdateAnimatableProperty();
+    EXPECT_EQ(checkBoxModifier->animateTouchHoverColor_->Get(), LinearColor(Color::BLUE));
 }
 
 /**
@@ -1434,9 +1438,10 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest006, TestSize.Level1)
      * @tc.steps: step2. use DrawCheck to draw checkbox.
      * @tc.expected: DrawCheck successfully.
      */
-    auto checkBoxModifier =
-        AceType::MakeRefPtr<CheckBoxModifier>(false, BOARD_COLOR, CHECK_COLOR, BORDER_COLOR, SHADOW_COLOR);
-    CheckBoxPaintMethod checkBoxPaintMethod(checkBoxModifier);
+    auto checkBoxModifier = AceType::MakeRefPtr<CheckBoxModifier>(
+        false, BOARD_COLOR, CHECK_COLOR, BORDER_COLOR, SHADOW_COLOR, SizeF(), OffsetF(), 0.0, 0.0);
+    CheckBoxPaintMethod checkBoxPaintMethod;
+    checkBoxPaintMethod.checkboxModifier_ = checkBoxModifier;;
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
@@ -1638,9 +1643,10 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest007, TestSize.Level1)
     /**
      *  @tc.steps: create CheckBoxModifier
      */
-    auto checkBoxModifier =
-        AceType::MakeRefPtr<CheckBoxModifier>(false, BOARD_COLOR, CHECK_COLOR, BORDER_COLOR, SHADOW_COLOR);
-    CheckBoxPaintMethod checkBoxPaintMethod(checkBoxModifier);
+    auto checkBoxModifier = AceType::MakeRefPtr<CheckBoxModifier>(
+        false, BOARD_COLOR, CHECK_COLOR, BORDER_COLOR, SHADOW_COLOR, SizeF(), OffsetF(), 0.0, 0.0);
+    CheckBoxPaintMethod checkBoxPaintMethod;
+    checkBoxPaintMethod.checkboxModifier_ = checkBoxModifier;;
     /**
      * @tc.steps: Set parameters to CheckBox property
      */
@@ -1699,13 +1705,14 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest008, TestSize.Level1)
      * @tc.steps: create PaintWrapper of CheckBoxPaintProperty
      */
     PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
-    auto checkboxModifier =
-        AceType::MakeRefPtr<CheckBoxModifier>(false, Color::BLUE, Color::BLACK, Color::BLACK, Color::GRAY);
-    ASSERT_NE(checkboxModifier, nullptr);
+    auto checkBoxModifier = AceType::MakeRefPtr<CheckBoxModifier>(
+        false, BOARD_COLOR, CHECK_COLOR, BORDER_COLOR, SHADOW_COLOR, SizeF(), OffsetF(), 0.0, 0.0);
+    ASSERT_NE(checkBoxModifier, nullptr);
     /**
      * @tc.case: case. CheckBoxPaintMethod's UpdateContentModifier will be called.
      */
-    CheckBoxPaintMethod checkBoxPaintMethod(checkboxModifier);
+    CheckBoxPaintMethod checkBoxPaintMethod;
+    checkBoxPaintMethod.checkboxModifier_ = checkBoxModifier;;
     checkBoxPaintMethod.UpdateContentModifier(&paintWrapper);
     EXPECT_EQ(checkBoxPaintMethod.checkboxModifier_->strokeSize_->Get(), static_cast<float>(CONTENT_SIZE.Width()));
     EXPECT_EQ(checkBoxPaintMethod.checkboxModifier_->hoverEffectType_, HoverEffectType::AUTO);
@@ -1765,12 +1772,13 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest010, TestSize.Level1)
     /**
      * @tc.steps: create CheckBoxModifier
      */
-    auto checkBoxModifier =
-        AceType::MakeRefPtr<CheckBoxModifier>(false, BOARD_COLOR, CHECK_COLOR, BORDER_COLOR, SHADOW_COLOR);
+    auto checkBoxModifier = AceType::MakeRefPtr<CheckBoxModifier>(
+        false, BOARD_COLOR, CHECK_COLOR, BORDER_COLOR, SHADOW_COLOR, SizeF(), OffsetF(), 0.0, 0.0);
     /**
      * @tc.steps: create CheckBoxPaintMethod
      */
-    CheckBoxPaintMethod checkBoxPaintMethod(checkBoxModifier);
+    CheckBoxPaintMethod checkBoxPaintMethod;
+    checkBoxPaintMethod.checkboxModifier_ = checkBoxModifier;;
     /**
      * @tc.steps: Set parameters to CheckBox property
      */
@@ -1813,12 +1821,13 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest011, TestSize.Level1)
     /**
      * @tc.steps: create CheckBoxModifier
      */
-    auto checkBoxModifier =
-        AceType::MakeRefPtr<CheckBoxModifier>(false, BOARD_COLOR, CHECK_COLOR, BORDER_COLOR, SHADOW_COLOR);
+    auto checkBoxModifier = AceType::MakeRefPtr<CheckBoxModifier>(
+        false, BOARD_COLOR, CHECK_COLOR, BORDER_COLOR, SHADOW_COLOR, SizeF(), OffsetF(), 0.0, 0.0);
     /**
      * @tc.steps: create CheckBoxPaintMethod
      */
-    CheckBoxPaintMethod checkBoxPaintMethod(checkBoxModifier);
+    CheckBoxPaintMethod checkBoxPaintMethod;
+    checkBoxPaintMethod.checkboxModifier_ = checkBoxModifier;;
     /**
      * @tc.steps: Set parameters to CheckBox property
      */
@@ -2632,4 +2641,3 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0130, TestSize.Level1)
     EXPECT_EQ(childNode->GetRenderContext()->GetOpacityValue(), 0);
 }
 } // namespace OHOS::Ace::NG
-

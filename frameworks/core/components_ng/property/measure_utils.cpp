@@ -50,8 +50,6 @@ std::optional<float> ConvertToPx(const CalcLength& value, const ScaleProperty& s
     double result = -1.0;
     if (!value.NormalizeToPx(
             scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference, result)) {
-        LOGE("fail to Convert CalcDimension To Px: %{public}f, %{public}f, %{public}f, %{public}f",
-            scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference);
         return std::nullopt;
     }
     return static_cast<float>(result);
@@ -66,8 +64,6 @@ std::optional<float> ConvertToPx(
     double result = -1.0;
     if (!value.value().NormalizeToPx(
             scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference, result)) {
-        LOGE("optional: fail to Convert CalcDimension To Px: %{public}f, %{public}f, %{public}f, %{public}f",
-            scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference);
         return std::nullopt;
     }
     return static_cast<float>(result);
@@ -78,8 +74,6 @@ std::optional<float> ConvertToPx(const Dimension& dimension, const ScaleProperty
     double result = -1.0;
     if (!dimension.NormalizeToPx(
             scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference, result)) {
-        LOGE("fail to Convert dimension To Px: %{public}f, %{public}f, %{public}f, %{public}f", scaleProperty.vpScale,
-            scaleProperty.fpScale, scaleProperty.lpxScale, percentReference);
         return std::nullopt;
     }
     return static_cast<float>(result);
@@ -94,8 +88,6 @@ std::optional<float> ConvertToPx(
     double result = -1.0;
     if (!dimension.value().NormalizeToPx(
             scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference, result)) {
-        LOGE("fail to Convert dimension To Px: %{public}f, %{public}f, %{public}f, %{public}f", scaleProperty.vpScale,
-            scaleProperty.fpScale, scaleProperty.lpxScale, percentReference);
         return std::nullopt;
     }
     return static_cast<float>(result);

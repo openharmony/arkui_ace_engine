@@ -15,13 +15,9 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_refresh_ffi.h"
 
-#include <cstdint>
-#include "base/log/ace_scoring_log.h"
 #include "cj_lambda.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 #include "core/components/refresh/refresh_theme.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 
 using namespace OHOS::Ace;

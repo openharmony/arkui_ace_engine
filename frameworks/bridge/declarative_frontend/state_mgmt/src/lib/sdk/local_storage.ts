@@ -158,13 +158,13 @@ class LocalStorage extends NativeLocalStorage {
   public set<T>(propName: string, newValue: T): boolean {
     stateMgmtProfiler.begin('LocalStorage.set');
     if (newValue === undefined && !Utils.isApiVersionEQAbove(12)) {
-      stateMgmtConsole.warn(`${this.constructor.name}: set('${propName}') with newValue == undefined not allowed.`);
+      stateMgmtConsole.debug(`${this.constructor.name}: set('${propName}') with newValue == undefined not allowed.`);
       stateMgmtProfiler.end();
       return false;
     }
     var p: ObservedPropertyAbstract<T> | undefined = this.storage_.get(propName);
     if (p === undefined) {
-      stateMgmtConsole.warn(`${this.constructor.name}: set: no property ${propName} error.`);
+      stateMgmtConsole.debug(`${this.constructor.name}: set: no property ${propName} error.`);
       stateMgmtProfiler.end();
       return false;
     }
@@ -188,7 +188,7 @@ class LocalStorage extends NativeLocalStorage {
   public setOrCreate<T>(propName: string, newValue: T): boolean {
     stateMgmtProfiler.begin('LocalStorage.setOrCreate');
     if (newValue == undefined && !Utils.isApiVersionEQAbove(12)) {
-      stateMgmtConsole.warn(`${this.constructor.name}: setOrCreate('${propName}') with newValue == undefined not allowed.`);
+      stateMgmtConsole.debug(`${this.constructor.name}: setOrCreate('${propName}') with newValue == undefined not allowed.`);
       stateMgmtProfiler.end();
       return false;
     }
@@ -275,7 +275,7 @@ class LocalStorage extends NativeLocalStorage {
     stateMgmtProfiler.begin('LocalStorage.link');
     var p: ObservedPropertyAbstract<T> | undefined = this.storage_.get(propName);
     if (p == undefined) {
-      stateMgmtConsole.warn(`${this.constructor.name}: link: no property ${propName} error.`);
+      stateMgmtConsole.debug(`${this.constructor.name}: link: no property ${propName} error.`);
       stateMgmtProfiler.end();
       return undefined;
     }
@@ -333,7 +333,7 @@ class LocalStorage extends NativeLocalStorage {
     stateMgmtProfiler.begin('LocalStorage.prop');
     var p: ObservedPropertyAbstract<T> | undefined = this.storage_.get(propName);
     if (p == undefined) {
-      stateMgmtConsole.warn(`${this.constructor.name}: prop: no property ${propName} error.`);
+      stateMgmtConsole.debug(`${this.constructor.name}: prop: no property ${propName} error.`);
       stateMgmtProfiler.end();
       return undefined;
     }
@@ -407,7 +407,7 @@ class LocalStorage extends NativeLocalStorage {
       stateMgmtProfiler.end();
       return true;
     } else {
-      stateMgmtConsole.warn(`${this.constructor.name}: Attempt to delete unknown property ${propName}.`);
+      stateMgmtConsole.debug(`${this.constructor.name}: Attempt to delete unknown property ${propName}.`);
       stateMgmtProfiler.end();
       return false;
     }

@@ -14,18 +14,10 @@
  */
 
 #include "core/pipeline/base/render_element.h"
-#include <string>
 
-#include "base/log/log.h"
-#include "base/utils/string_utils.h"
-#include "base/utils/utils.h"
-#include "core/accessibility/accessibility_manager.h"
 #include "core/components/focus_animation/render_focus_animation.h"
 #include "core/components/shadow/render_shadow.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
-#include "core/event/ace_event_helper.h"
-#include "core/pipeline/base/composed_element.h"
-#include "core/pipeline/base/render_component.h"
 
 namespace OHOS::Ace {
 

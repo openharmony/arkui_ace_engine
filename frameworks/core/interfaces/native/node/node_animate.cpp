@@ -94,6 +94,7 @@ void AnimateToInner(ArkUIContext* context, AnimationOption& option, const std::f
         context->PrepareOpenImplicitAnimation();
     });
     pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), onFinishFunc);
+    auto previousOption = pipelineContext->GetSyncAnimationOption();
     pipelineContext->SetSyncAnimationOption(option);
     // Execute the function.
     animateToFunc();
@@ -118,7 +119,7 @@ void AnimateToInner(ArkUIContext* context, AnimationOption& option, const std::f
         context->PrepareCloseImplicitAnimation();
     });
     pipelineContext->CloseImplicitAnimation();
-    pipelineContext->SetSyncAnimationOption(AnimationOption());
+    pipelineContext->SetSyncAnimationOption(previousOption);
     if (immediately) {
         pipelineContext->FlushMessages();
     } else {
@@ -135,12 +136,13 @@ void AnimateTo(ArkUIContext* context, ArkUIAnimateOption option, void (*event)(v
         auto curve = reinterpret_cast<Curve*>(option.iCurve);
         animationOption.SetCurve(AceType::Claim(curve));
     } else {
-        animationOption.SetCurve(CURVES_LIST[option.curve > CURVES_LIST.size() ? 0 : option.curve]);
+        animationOption.SetCurve(
+            CURVES_LIST[option.curve > static_cast<ArkUI_Int32>(CURVES_LIST.size()) ? 0 : option.curve]);
     }
     animationOption.SetDelay(option.delay);
     animationOption.SetIteration(option.iterations);
     animationOption.SetAnimationDirection(
-        DIRECTION_LIST[option.playMode > DIRECTION_LIST.size() ? 0 : option.playMode]);
+        DIRECTION_LIST[option.playMode > static_cast<ArkUI_Int32>(DIRECTION_LIST.size()) ? 0 : option.playMode]);
     animationOption.SetFinishCallbackType(static_cast<FinishCallbackType>(option.finishCallbackType));
 
     if (option.expectedFrameRateRange) {
@@ -251,7 +253,8 @@ void ParseAnimatorOption(const RefPtr<Animator>& animator, ArkUIAnimatorOption* 
 {
     animator->SetDuration(option->duration);
     animator->SetIteration(option->iterations);
-    animator->SetAnimationDirection(DIRECTION_LIST[option->direction > DIRECTION_LIST.size() ? 0 : option->direction]);
+    animator->SetAnimationDirection(
+        DIRECTION_LIST[option->direction > static_cast<ArkUI_Int32>(DIRECTION_LIST.size()) ? 0 : option->direction]);
     animator->SetStartDelay(option->delay);
     animator->SetFillMode(static_cast<FillMode>(option->fill));
 
@@ -409,7 +412,7 @@ int32_t AnimatorReverse(ArkUIAnimatorHandle animatorHandle)
 
 ArkUICurveHandle CreateCurve(ArkUI_Int32 curve)
 {
-    auto iCurve = AceType::RawPtr(CURVES_LIST[curve > CURVES_LIST.size() ? 0 : curve]);
+    auto iCurve = AceType::RawPtr(CURVES_LIST[curve > static_cast<ArkUI_Int32>(CURVES_LIST.size()) ? 0 : curve]);
     iCurve->IncRefCount();
     return reinterpret_cast<ArkUICurveHandle>(iCurve);
 }

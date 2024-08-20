@@ -36,6 +36,18 @@ public:
     {
         return position_;
     }
+
+    const std::optional<Offset>& GetOptionalClickPosition()
+    {
+        return optionalPosition_;
+    }
+
+    void ResetOptionalClickPosition() {
+        optionalPosition_ = std::nullopt;
+    }
+
+    void AvoidKeyboardInSheet(const RefPtr<FrameNode>& textField);
+
     void MovePage(int32_t pageId, const Offset& rootRect, double offsetHeight) override {}
     void RemovePageId(int32_t pageId) override {}
 
@@ -49,6 +61,9 @@ public:
         const auto& pattern = onFocusTextField.Upgrade();
         if (pattern && pattern->GetHost()) {
             onFocusTextFieldId = pattern->GetHost()->GetId();
+        }
+        if (onFocusTextField_ != onFocusTextField) {
+            SetImeAttached(false);
         }
         onFocusTextField_ = onFocusTextField;
     }
@@ -75,12 +90,29 @@ public:
 
     bool GetImeShow() const override
     {
-        return imeShow_;
+        if (!imeShow_ && imeAttachCalled_) {
+            TAG_LOGI(ACE_KEYBOARD, "imeNotShown but attach called, still consider that as shown");
+        }
+        return imeShow_ || imeAttachCalled_;
     }
 
     void SetImeShow(bool imeShow)
     {
         imeShow_ = imeShow;
+        imeAttachCalled_ = false;
+    }
+
+    void SetImeAttached(bool imeAttached)
+    {
+        imeAttachCalled_ = imeAttached;
+    }
+
+    bool UsingCustomKeyboardAvoid() {
+        return usingCustomKeyboardAvoid_;
+    }
+
+    void SetUsingCustomKeyboardAvoid(bool usingCustomKeyboardAvoid) {
+        usingCustomKeyboardAvoid_ = usingCustomKeyboardAvoid;
     }
 
     void SetUIExtensionImeShow(bool imeShow) override
@@ -117,20 +149,66 @@ public:
         return needToRequestKeyboard_;
     }
 
+    bool GetIfFocusTextFieldIsInline() {
+        return focusFieldIsInline;
+    }
+
+    void SetIfFocusTextFieldIsInline(bool isinline) {
+        focusFieldIsInline = isinline;
+    }
+
+    void GetInlineTextFieldAvoidPositionYAndHeight(double& positionY, double& height) {
+        positionY = inlinePositionY_;
+        height = inlineHeight_;
+    }
+
+    void SetInlineTextFieldAvoidPositionYAndHeight(double positionY, double height) {
+        inlinePositionY_ = positionY;
+        inlineHeight_ = height;
+    }
+
+    void SetLastAvoidFieldId(int32_t lastAvoidFieldId) {
+        lastAvoidFieldId_ = lastAvoidFieldId;
+    }
+
+    int32_t GetLastAvoidFieldId() {
+        return lastAvoidFieldId_;
+    }
+
+    int32_t GetOnFocusTextFieldId() {
+        return onFocusTextFieldId;
+    }
+
+    void SetLastRequestKeyboardId(int32_t lastRequestKeyboardId) {
+        lastRequestKeyboardId_ = lastRequestKeyboardId;
+    }
+
+    int32_t GetLastRequestKeyboardId() {
+        return lastRequestKeyboardId_;
+    }
+
 private:
     bool ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bottomInset, bool isShowKeyboard);
     RefPtr<FrameNode> FindScrollableOfFocusedTextField(const RefPtr<FrameNode>& textField);
     RefPtr<FrameNode> FindNavNode(const RefPtr<FrameNode>& textField);
 
+    bool focusFieldIsInline = false;
+    double inlinePositionY_ = 0.0f;
+    double inlineHeight_ = 0.0f;
     bool hasMove_ = false;
     bool imeShow_ = false;
+    bool usingCustomKeyboardAvoid_ = false;
     bool uiExtensionImeShow_ = false;
     bool prevHasTextFieldPattern_ = true;
     Offset position_;
+    std::optional<Offset> optionalPosition_;
     float height_ = 0.0f;
     WeakPtr<Pattern> onFocusTextField_;
     WeakPtr<FrameNode> weakNavNode_;
     int32_t onFocusTextFieldId = -1;
+    int32_t lastAvoidFieldId_ = -1;
+    int32_t lastRequestKeyboardId_ = -1;
+    bool imeAttachCalled_ = false;
     bool needToRequestKeyboard_ = true;
 };
 

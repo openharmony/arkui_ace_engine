@@ -61,6 +61,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_syscap_module.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_timer_module.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_local_storage.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_mock.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
@@ -103,11 +104,11 @@ namespace {
 const std::string OHMURL_START_TAG = "@bundle:";
 
 #if defined(ANDROID_PLATFORM)
-const std::string ARK_DEBUGGER_LIB_PATH = "libark_debugger.so";
+const std::string ARK_DEBUGGER_LIB_PATH = "libark_inspector.so";
 #elif defined(APP_USE_ARM)
-const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/platformsdk/libark_debugger.z.so";
+const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/platformsdk/libark_inspector.z.so";
 #else
-const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/platformsdk/libark_debugger.z.so";
+const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/platformsdk/libark_inspector.z.so";
 #endif
 const std::string FORM_ES_MODULE_CARD_PATH = "ets/widgets.abc";
 const std::string FORM_ES_MODULE_PATH = "ets/modules.abc";
@@ -185,6 +186,8 @@ inline bool PreloadJsEnums(const shared_ptr<JsRuntime>& runtime)
 
 inline bool PreloadStateManagement(const shared_ptr<JsRuntime>& runtime)
 {
+    // set __hasUIFramework__
+    runtime->GetGlobal()->SetProperty(runtime, "__hasUIFramework__", runtime->NewBoolean(true));
 #ifdef STATE_MGMT_USE_AOT
     return runtime->ExecuteJsBinForAOT("/etc/abc/framework/stateMgmt.abc");
 #else
@@ -587,6 +590,10 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleWorker(void* runtime)
 
     // preload js enums
     PreloadJsEnums(arkRuntime);
+
+    // preload requireNative
+    shared_ptr<JsValue> global = arkRuntime->GetGlobal();
+    JSMock::PreloadWorkerRequireNative(arkRuntime, global);
 }
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceModule(void* runtime)
@@ -1675,7 +1682,7 @@ bool JsiDeclarativeEngine::LoadPageSource(
     const std::function<void(const std::string&, int32_t)>& errorCallback)
 {
     ACE_SCOPED_TRACE("JsiDeclarativeEngine::LoadPageSource");
-    LOGI("JsiDeclarativeEngine LoadJs by buffer");
+    LOGI("LoadJs by buffer");
     ACE_DCHECK(engineInstance_);
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
@@ -1708,9 +1715,11 @@ void JsiDeclarativeEngine::AddToNamedRouterMap(const EcmaVM* vm, panda::Global<p
         return;
     }
 
-    LOGI("add named router record, name: %{public}s, bundleName: %{public}s, moduleName: %{public}s, "
-        "pagePath: %{public}s, pageFullPath: %{public}s, ohmUrl: %{public}s", namedRoute.c_str(), bundleName.c_str(),
-        moduleName.c_str(), pagePath.c_str(), pageFullPath.c_str(), ohmUrl.c_str());
+    TAG_LOGI(AceLogTag::ACE_ROUTER,
+        "add named router record, name: %{public}s, bundleName: %{public}s, moduleName: %{public}s, "
+        "pagePath: %{public}s, pageFullPath: %{public}s, ohmUrl: %{public}s",
+        namedRoute.c_str(), bundleName.c_str(), moduleName.c_str(), pagePath.c_str(), pageFullPath.c_str(),
+        ohmUrl.c_str());
     NamedRouterProperty namedRouterProperty({ pageGenerator, bundleName, moduleName, pagePath, ohmUrl });
     auto ret = namedRouterRegisterMap_.insert(std::make_pair(namedRoute, namedRouterProperty));
     if (!ret.second) {
@@ -1953,26 +1962,27 @@ void JsiDeclarativeEngine::PreloadNamedRouter(const std::string& name, std::func
     const auto& moduleName = it->second.moduleName;
     const auto& pagePath = it->second.pagePath;
     std::string ohmUrl = it->second.ohmUrl + ".js";
-    LOGI("preload named rotuer, bundleName: %{public}s, moduleName: %{public}s, pagePath: %{public}s, "
-        "ohmUrl: %{public}s", bundleName.c_str(), moduleName.c_str(), pagePath.c_str(), ohmUrl.c_str());
+    TAG_LOGI(AceLogTag::ACE_ROUTER, "preload named rotuer, bundleName:"
+        "%{public}s, moduleName: %{public}s, pagePath: %{public}s, ohmUrl: %{public}s",
+        bundleName.c_str(), moduleName.c_str(), pagePath.c_str(), ohmUrl.c_str());
 
     auto callback = [weak = AceType::WeakClaim(this), ohmUrl, finishCallback = loadFinishCallback]() {
         auto jsEngine = weak.Upgrade();
         CHECK_NULL_VOID(jsEngine);
         bool loadSuccess = true;
-        jsEngine->LoadPageSource(ohmUrl,
-            [ohmUrl, &loadSuccess](const std::string& errorMsg, int32_t errorCode) {
-                LOGW("Failed to load page source: %{public}s, errorCode: %{public}d, errorMsg: %{public}s",
-                    ohmUrl.c_str(), errorCode, errorMsg.c_str());
-                loadSuccess = false;
-            });
+        jsEngine->LoadPageSource(ohmUrl, [ohmUrl, &loadSuccess](const std::string& errorMsg, int32_t errorCode) {
+            TAG_LOGW(AceLogTag::ACE_ROUTER,
+                "Failed to load page source: %{public}s, errorCode: %{public}d, errorMsg: %{public}s", ohmUrl.c_str(),
+                errorCode, errorMsg.c_str());
+            loadSuccess = false;
+        });
         if (finishCallback) {
             finishCallback(loadSuccess);
         }
     };
     auto silentInstallErrorCallBack = [finishCallback = loadFinishCallback](
-        int32_t errorCode, const std::string& errorMsg) {
-        LOGW("Failed to preload named router, error = %{public}d, errorMsg = %{public}s",
+                                          int32_t errorCode, const std::string& errorMsg) {
+        TAG_LOGW(AceLogTag::ACE_ROUTER, "Failed to preload named router, error = %{public}d, errorMsg = %{public}s",
             errorCode, errorMsg.c_str());
         if (finishCallback) {
             finishCallback(false);
@@ -2789,7 +2799,7 @@ void JsiDeclarativeEngineInstance::ReloadAceModuleCard(
     RegisterStringCacheTable(vm, MAX_STRING_CACHE_SIZE);
     // reload js views
     JsRegisterFormViews(JSNApi::GetGlobalObject(vm), formModuleList, true);
-    JSNApi::TriggerGC(vm, JSNApi::TRIGGER_GC_TYPE::FULL_GC);
+    JSNApi::TriggerGC(vm, panda::ecmascript::GCReason::TRIGGER_BY_ARKUI, JSNApi::TRIGGER_GC_TYPE::FULL_GC);
     TAG_LOGI(AceLogTag::ACE_FORM, "Card model was reloaded successfully.");
 }
 #endif
@@ -2813,13 +2823,11 @@ bool JsiDeclarativeEngineInstance::RegisterStringCacheTable(const EcmaVM* vm, in
         return false;
     }
     if (static_cast<uint32_t>(size) > MAX_STRING_CACHE_SIZE) {
-        TAG_LOGE(AceLogTag::ACE_DEFAULT_DOMAIN, "string cache table is oversize");
         return false;
     }
 
     bool res = panda::ExternalStringCache::RegisterStringCacheTable(vm, size);
     if (!res) {
-        TAG_LOGI(AceLogTag::ACE_DEFAULT_DOMAIN, "string cache table has been registered");
         return false;
     }
     SetCachedString(vm);

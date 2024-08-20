@@ -255,7 +255,7 @@ HWTEST_F(GridLayoutTestNg, GridScrollTest001, TestSize.Level1)
 HWTEST_F(GridLayoutTestNg, GridScrollTest002, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create girdItem and initialize related properties.
+     * @tc.steps: step1. Create gridItem and initialize related properties.
      */
     GridModelNG model;
     model.Create(nullptr, nullptr);
@@ -279,7 +279,7 @@ HWTEST_F(GridLayoutTestNg, GridScrollTest002, TestSize.Level1)
 HWTEST_F(GridLayoutTestNg, GridScrollTest003, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create girdItem and initialize related properties.
+     * @tc.steps: step1. Create gridItem and initialize related properties.
      */
     GridModelNG model;
     model.Create(nullptr, nullptr);
@@ -304,7 +304,7 @@ HWTEST_F(GridLayoutTestNg, GridScrollTest003, TestSize.Level1)
 HWTEST_F(GridLayoutTestNg, GridScrollTest004, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create girdItem and initialize related properties.
+     * @tc.steps: step1. Create gridItem and initialize related properties.
      */
     GridModelNG model;
     model.Create(nullptr, nullptr);
@@ -397,37 +397,8 @@ HWTEST_F(GridLayoutTestNg, GetAverageHeight001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GridItemDisableEventTest001
- * @tc.desc: GirdItem disable event test.
- * @tc.type: FUNC
- */
-HWTEST_F(GridLayoutTestNg, GridItemDisableEventTest001, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    CreateFixedItems(10, GridItemStyle::PLAIN);
-    CreateDone(frameNode_);
-
-    /**
-     * @tc.steps: step2. Get girdItem frameNode and pattern, set callback function.
-     * @tc.expected: Related function is called.
-     */
-    auto gridItemPattern = GetChildPattern<GridItemPattern>(frameNode_, 0);
-    auto gridItemEventHub = GetChildEventHub<GridItemEventHub>(frameNode_, 0);
-    auto gridItemFrameNode = GetChildFrameNode(frameNode_, 0);
-    auto renderContext = gridItemFrameNode->renderContext_;
-    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
-    EXPECT_EQ(mockRenderContext->opacityMultiplier_, 1.0f);
-    gridItemEventHub->SetEnabled(false);
-    gridItemPattern->InitDisableStyle();
-    EXPECT_EQ(mockRenderContext->opacityMultiplier_, 0.4f);
-    gridItemEventHub->SetEnabled(true);
-    gridItemPattern->InitDisableStyle();
-    EXPECT_EQ(mockRenderContext->opacityMultiplier_, 1.0f);
-}
-
-/**
  * @tc.name: GridItemGetInnerFocusPaintRectTest001
- * @tc.desc: GirdItem GetInnerFocusPaintRect test.
+ * @tc.desc: GridItem GetInnerFocusPaintRect test.
  * @tc.type: FUNC
  */
 HWTEST_F(GridLayoutTestNg, GridItemGetInnerFocusPaintRectTest001, TestSize.Level1)
@@ -1677,41 +1648,13 @@ HWTEST_F(GridLayoutTestNg, LayoutWithAutoStretch003, TestSize.Level1)
 }
 
 /**
- * @tc.name: GridItemDisableEventTest002
- * @tc.desc: GirdItem disable event test.
- * @tc.type: FUNC
- */
-HWTEST_F(GridLayoutTestNg, GridItemDisableEventTest002, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    CreateFixedItems(10, GridItemStyle::PLAIN);
-    CreateDone(frameNode_);
-
-    /**
-     * @tc.steps: step2. Get girdItem frameNode and pattern, set callback function.
-     * @tc.expected: Related function is called.
-     */
-    auto gridItemPattern = GetChildPattern<GridItemPattern>(frameNode_, 0);
-    auto gridItemEventHub = GetChildEventHub<GridItemEventHub>(frameNode_, 0);
-    auto gridItemFrameNode = GetChildFrameNode(frameNode_, 0);
-    auto renderContext = gridItemFrameNode->renderContext_;
-    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
-    EXPECT_EQ(mockRenderContext->opacityMultiplier_, 1.0f);
-    gridItemEventHub->SetEnabled(false);
-    gridItemPattern->InitDisableStyle();
-    EXPECT_EQ(mockRenderContext->opacityMultiplier_, 0.4f);
-    gridItemPattern->InitDisableStyle();
-    EXPECT_EQ(mockRenderContext->opacityMultiplier_, 0.4f);
-}
-
-/**
  * @tc.name: Cache001
  * @tc.desc: Test Grid preload items
  * @tc.type: FUNC
  */
 HWTEST_F(GridLayoutTestNg, Cache001, TestSize.Level1)
 {
-    GridModelNG model = CreateRepeatGrid(50, 200.0f);
+    GridModelNG model = CreateRepeatGrid(50, [](uint32_t idx) { return 200.0f; });
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetRowsGap(Dimension(10));
     model.SetColumnsGap(Dimension(10));
@@ -1750,5 +1693,244 @@ HWTEST_F(GridLayoutTestNg, Cache001, TestSize.Level1)
     EXPECT_EQ(info.startIndex_, 39);
     // GridScroll algo currently not capable of preloading backward
     EXPECT_TRUE(pattern_->preloadItemList_.empty());
+}
+
+/**
+ * @tc.name: Stretch001
+ * @tc.desc: Test Grid AlignItems STRETCH
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, Stretch001, TestSize.Level1)
+{
+    /**
+     * 0: [0], [1]
+     *
+     * 1 will stretch
+     */
+    GridModelNG model = CreateGrid();
+    model.SetAlignItems(GridItemAlignment::STRETCH);
+    model.SetColumnsTemplate("1fr 1fr");
+
+    CreateFixedHeightItems(1, 150);
+    CreateAdaptChildSizeGridItems(1);
+
+    CreateDone(frameNode_);
+    FlushLayoutTask(frameNode_);
+
+    auto childRect0 = pattern_->GetItemRect(0);
+    auto childRect1 = pattern_->GetItemRect(1);
+    EXPECT_EQ(childRect0.Height(), childRect1.Height());
+}
+
+/**
+ * @tc.name: Stretch002
+ * @tc.desc: Test Grid AlignItems STRETCH
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, Stretch002, TestSize.Level1)
+{
+    /**
+     * 0: [0], [1]
+     * 1: [0]
+     *
+     * 1 will not stretch
+     */
+    GridModelNG model = CreateGrid();
+    model.SetAlignItems(GridItemAlignment::STRETCH);
+    model.SetColumnsTemplate("1fr 1fr");
+
+    CreateBigItem(0, 1, 0, 0, ITEM_WIDTH, 200);
+    CreateAdaptChildSizeGridItems(1);
+
+    CreateDone(frameNode_);
+    FlushLayoutTask(frameNode_);
+
+    auto childRect1 = pattern_->GetItemRect(1);
+    EXPECT_EQ(childRect1.Height(), 0);
+}
+
+/**
+ * @tc.name: Stretch003
+ * @tc.desc: Test Grid AlignItems STRETCH
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, Stretch003, TestSize.Level1)
+{
+    /**
+     * 0: [0], [1]
+     * 1: [0], [2]
+     * 2: [3], [4]
+     *
+     * 1 and 2 will not stretch
+     * 3 will stretch
+     */
+    GridModelNG model = CreateGrid();
+    model.SetAlignItems(GridItemAlignment::STRETCH);
+    model.SetColumnsTemplate("1fr 1fr");
+
+    CreateBigItem(0, 1, 0, 0, ITEM_WIDTH, 200);
+    CreateAdaptChildSizeGridItems(3);
+    CreateFixedHeightItems(1, 150);
+
+    CreateDone(frameNode_);
+    FlushLayoutTask(frameNode_);
+
+    auto childRect1 = pattern_->GetItemRect(1);
+    EXPECT_EQ(childRect1.Height(), 0);
+
+    auto childRect3 = pattern_->GetItemRect(3);
+    auto childRect4 = pattern_->GetItemRect(4);
+    EXPECT_EQ(childRect4.Height(), childRect3.Height());
+}
+
+/**
+ * @tc.name: Stretch004
+ * @tc.desc: Test Grid AlignItems STRETCH
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, Stretch004, TestSize.Level1)
+{
+    /**
+     * 0: [0], [0], [1]
+     *
+     * 1 will not stretch
+     */
+    GridModelNG model = CreateGrid();
+    model.SetAlignItems(GridItemAlignment::STRETCH);
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+
+    CreateBigItem(0, 1, 0, 1, ITEM_WIDTH, 200);
+    CreateAdaptChildSizeGridItems(1);
+
+    CreateDone(frameNode_);
+    FlushLayoutTask(frameNode_);
+
+    auto childRect1 = pattern_->GetItemRect(1);
+    EXPECT_EQ(childRect1.Height(), 0);
+    auto childRect2 = pattern_->GetItemRect(2);
+    EXPECT_EQ(childRect2.Height(), 0);
+}
+
+/**
+ * @tc.name: Stretch005
+ * @tc.desc: Test Grid AlignItems STRETCH
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, Stretch005, TestSize.Level1)
+{
+    /**
+     *  0
+     * [0]
+     * [1]
+     *
+     * 1 will stretch
+     */
+    GridModelNG model = CreateGrid();
+    model.SetAlignItems(GridItemAlignment::STRETCH);
+    model.SetRowsTemplate("1fr 1fr");
+
+    CreateFixedHeightItems(1, 150);
+    CreateAdaptChildSizeGridItems(1);
+
+    CreateDone(frameNode_);
+    FlushLayoutTask(frameNode_);
+
+    auto childRect0 = pattern_->GetItemRect(0);
+    auto childRect1 = pattern_->GetItemRect(1);
+    EXPECT_EQ(childRect0.Width(), childRect1.Width());
+}
+
+/**
+ * @tc.name: Stretch006
+ * @tc.desc: Test Grid AlignItems STRETCH
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, Stretch006, TestSize.Level1)
+{
+    /**
+     *  0
+     * [0]
+     * [0]
+     * [1]
+     *
+     * 1 will not stretch
+     */
+    GridModelNG model = CreateGrid();
+    model.SetAlignItems(GridItemAlignment::STRETCH);
+    model.SetRowsTemplate("1fr 1fr 1fr");
+
+    CreateBigItem(0, 1, 0, 0, ITEM_WIDTH, ITEM_HEIGHT);
+    CreateAdaptChildSizeGridItems(1);
+
+    CreateDone(frameNode_);
+    FlushLayoutTask(frameNode_);
+
+    auto childRect1 = pattern_->GetItemRect(1);
+    EXPECT_EQ(childRect1.Width(), 0);
+}
+
+/**
+ * @tc.name: Stretch007
+ * @tc.desc: Test Grid AlignItems STRETCH
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, Stretch007, TestSize.Level1)
+{
+    /**
+     *  0    1    2
+     * [0], [0], [3]
+     * [1], [2], [4]
+     *
+     * 1 and 2 will not stretch
+     * 3 will stretch
+     */
+    GridModelNG model = CreateGrid();
+    model.SetAlignItems(GridItemAlignment::STRETCH);
+    model.SetRowsTemplate("1fr 1fr");
+
+    CreateBigItem(0, 0, 0, 1, ITEM_WIDTH, ITEM_HEIGHT);
+    CreateAdaptChildSizeGridItems(3);
+    CreateFixedHeightItems(1, 150);
+
+    CreateDone(frameNode_);
+    FlushLayoutTask(frameNode_);
+
+    auto childRect1 = pattern_->GetItemRect(1);
+    EXPECT_EQ(childRect1.Width(), 0);
+
+    auto childRect3 = pattern_->GetItemRect(3);
+    auto childRect4 = pattern_->GetItemRect(4);
+    EXPECT_EQ(childRect4.Width(), childRect3.Width());
+}
+
+/**
+ * @tc.name: Stretch008
+ * @tc.desc: Test Grid AlignItems STRETCH
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, Stretch008, TestSize.Level1)
+{
+    /**
+     *  0    1
+     * [0], [0]
+     * [0], [0]
+     * [1], [2]
+     *
+     * 1 and 2 will not stretch
+     */
+    GridModelNG model = CreateGrid();
+    model.SetAlignItems(GridItemAlignment::STRETCH);
+    model.SetRowsTemplate("1fr 1fr 1fr");
+
+    CreateBigItem(0, 1, 0, 1, ITEM_WIDTH, ITEM_HEIGHT);
+    CreateAdaptChildSizeGridItems(2);
+
+    CreateDone(frameNode_);
+    FlushLayoutTask(frameNode_);
+
+    auto childRect1 = pattern_->GetItemRect(1);
+    EXPECT_EQ(childRect1.Width(), 0);
+    auto childRect2 = pattern_->GetItemRect(2);
+    EXPECT_EQ(childRect2.Width(), 0);
 }
 } // namespace OHOS::Ace::NG

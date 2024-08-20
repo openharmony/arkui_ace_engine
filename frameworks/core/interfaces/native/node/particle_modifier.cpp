@@ -89,5 +89,13 @@ const ArkUIParticleModifier* GetParticleModifier()
         resetEmitter };
     return &modifier;
 }
+
+const CJUIParticleModifier* GetCJUIParticleModifier()
+{
+    static const CJUIParticleModifier modifier = {
+        SetDisturbanceField, ResetDisturbanceField, setEmitter, resetEmitter
+    };
+    return &modifier;
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

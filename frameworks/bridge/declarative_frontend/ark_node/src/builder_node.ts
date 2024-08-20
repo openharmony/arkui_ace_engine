@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,8 +31,8 @@ class BuilderNode {
   public update(params: Object) {
     this._JSBuilderNode.update(params);
   }
-  public build(builder: WrappedBuilder<Object[]>, params: Object): void {
-    this._JSBuilderNode.build(builder, params);
+  public build(builder: WrappedBuilder<Object[]>, params?: Object, options?: BuildOptions,): void {
+    this._JSBuilderNode.build(builder, params, options);
     this.nodePtr_ = this._JSBuilderNode.getNodePtr();
   }
   public getNodePtr(): NodePtr {
@@ -59,6 +59,9 @@ class BuilderNode {
   public recycle(): void {
     this._JSBuilderNode.recycle();
   }
+  public updateConfiguration(): void {
+    this._JSBuilderNode.updateConfiguration();
+  }
 }
 
 class JSBuilderNode extends BaseNode {
@@ -68,11 +71,14 @@ class JSBuilderNode extends BaseNode {
   private frameNode_: FrameNode;
   private childrenWeakrefMap_ = new Map<number, WeakRef<ViewPU>>();
   private _nativeRef: NativeStrongRef;
+  private _supportNestingBuilder: boolean;
+  private _proxyObjectParam: Object;
 
   constructor(uiContext: UIContext, options?: RenderOptions) {
     super(uiContext, options);
     this.uiContext_ = uiContext;
     this.updateFuncByElmtId = new Map();
+    this._supportNestingBuilder = false;
   }
   public reuse(param: Object): void {
     this.updateStart();
@@ -146,11 +152,34 @@ class JSBuilderNode extends BaseNode {
     }
     return nodeInfo;
   }
-  public build(builder: WrappedBuilder<Object[]>, params: Object) {
+  private isObject(param: Object): boolean {
+    const typeName = Object.prototype.toString.call(param);
+    const objectName = `[object Object]`;
+    if (typeName === objectName) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  private buildWithNestingBuilder(builder: WrappedBuilder<Object[]>): void {
+    if (this._supportNestingBuilder && this.isObject(this.params_)) {
+      this._proxyObjectParam = new Proxy(this.params_, {
+        set(target, property, val): boolean {
+          throw Error(`@Builder : Invalid attempt to set(write to) parameter '${property.toString()}' error!`);
+        },
+        get: (target, property, receiver): Object => { return this.params_?.[property] }
+      });
+      this.nodePtr_ = super.create(builder.builder, this._proxyObjectParam, this.updateNodeFromNative, this.updateConfiguration);
+    } else {
+      this.nodePtr_ = super.create(builder.builder, this.params_, this.updateNodeFromNative, this.updateConfiguration);
+    }
+  }
+  public build(builder: WrappedBuilder<Object[]>, params?: Object, options?: BuildOptions): void {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    this._supportNestingBuilder = options?.nestingBuilderSupported ? options.nestingBuilderSupported : false;
     this.params_ = params;
     this.updateFuncByElmtId.clear();
-    this.nodePtr_ = super.create(builder.builder, this.params_, this.updateNodeFromNative, this.updateConfiguration);
+    this.buildWithNestingBuilder(builder);
     this._nativeRef = getUINativeModule().nativeUtils.createNativeStrongRef(this.nodePtr_);
     if (this.frameNode_ === undefined || this.frameNode_ === null) {
       this.frameNode_ = new BuilderRootFrameNode(this.uiContext_);
@@ -171,13 +200,19 @@ class JSBuilderNode extends BaseNode {
     this.updateEnd();
     __JSScopeUtil__.restoreInstanceId();
   }
-  private updateConfiguration() {
+  public updateConfiguration(): void {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     this.updateStart();
     this.purgeDeletedElmtIds();
     Array.from(this.updateFuncByElmtId.keys()).sort((a: number, b: number): number => {
       return (a < b) ? -1 : (a > b) ? 1 : 0;
     }).forEach(elmtId => this.UpdateElement(elmtId));
+    for (const child of this.childrenWeakrefMap_.values()) {
+      const childView = child.deref();
+      if (childView) {
+        childView.forceCompleteRerender(true);
+      }
+    }
     this.updateEnd();
     __JSScopeUtil__.restoreInstanceId();
   }
@@ -237,9 +272,24 @@ class JSBuilderNode extends BaseNode {
     const updateFunc = (elmtId: number, isFirstRender: boolean): void => {
       __JSScopeUtil__.syncInstanceId(this.instanceId_);
       ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
-      compilerAssignedUpdateFunc(elmtId, isFirstRender, this.params_);
+      // if V2 @Observed/@Track used anywhere in the app (there is no more fine grained criteria),
+      // enable V2 object deep observation
+      // FIXME: A @Component should only use PU or V2 state, but ReactNative dynamic viewer uses both.
+      if (ConfigureStateMgmt.instance.needsV2Observe()) {
+        // FIXME: like in V2 setting bindId_ in ObserveV2 does not work with 'stacked'
+        // update + initial render calls, like in if and ForEach case, convert to stack as well
+        ObserveV2.getObserve().startRecordDependencies(this, elmtId, true);
+      }
+      if (this._supportNestingBuilder) {
+        compilerAssignedUpdateFunc(elmtId, isFirstRender);
+      } else {
+        compilerAssignedUpdateFunc(elmtId, isFirstRender, this.params_);
+      }
       if (!isFirstRender) {
         _popFunc();
+      }
+      if (ConfigureStateMgmt.instance.needsV2Observe()) {
+        ObserveV2.getObserve().stopRecordDependencies();
       }
       ViewStackProcessor.StopGetAccessRecording();
       __JSScopeUtil__.restoreInstanceId();

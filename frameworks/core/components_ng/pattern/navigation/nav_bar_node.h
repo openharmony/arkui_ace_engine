@@ -150,8 +150,6 @@ public:
         return isNewToolbar_;
     }
 
-    std::string GetTitleString() const;
-    std::string GetSubtitleString() const;
     std::string GetBarItemsString(bool isMenu) const;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 

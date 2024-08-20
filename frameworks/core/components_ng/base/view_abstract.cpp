@@ -30,7 +30,6 @@
 #include "base/subwindow/subwindow.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
-#include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components/common/layout/constants.h"
@@ -301,16 +300,7 @@ void ViewAbstract::SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle)
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto target = frameNode->GetRenderContext();
-    if (target) {
-        if (target->GetBackgroundEffect().has_value()) {
-            target->UpdateBackgroundEffect(std::nullopt);
-        }
-        target->UpdateBackBlurStyle(bgBlurStyle);
-        if (target->GetBackBlurRadius().has_value()) {
-            target->UpdateBackBlurRadius(Dimension());
-        }
-    }
+    SetBackgroundBlurStyle(frameNode, bgBlurStyle);
 }
 
 void ViewAbstract::SetForegroundEffect(float radius)
@@ -339,18 +329,7 @@ void ViewAbstract::SetBackgroundEffect(const EffectOption& effectOption)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto target = frameNode->GetRenderContext();
-    if (target) {
-        if (target->GetBackBlurRadius().has_value()) {
-            target->UpdateBackBlurRadius(Dimension());
-        }
-        if (target->GetBackBlurStyle().has_value()) {
-            target->UpdateBackBlurStyle(std::nullopt);
-        }
-        target->UpdateBackgroundEffect(effectOption);
-    }
+    SetBackgroundEffect(ViewStackProcessor::GetInstance()->GetMainFrameNode(), effectOption);
 }
 
 void ViewAbstract::SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle)
@@ -1041,13 +1020,13 @@ void ViewAbstract::DisableOnAreaChange(FrameNode* frameNode)
     frameNode->ClearUserOnAreaChange();
 }
 
-void ViewAbstract::SetOnClick(GestureEventFunc&& clickEventFunc)
+void ViewAbstract::SetOnClick(GestureEventFunc&& clickEventFunc, double distanceThreshold)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    gestureHub->SetUserOnClick(std::move(clickEventFunc));
+    gestureHub->SetUserOnClick(std::move(clickEventFunc), distanceThreshold);
 
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -1317,6 +1296,17 @@ void ViewAbstract::AddDragFrameNodeToManager()
     dragDropManager->AddDragFrameNode(frameNode->GetId(), AceType::WeakClaim(frameNode));
 }
 
+void ViewAbstract::AddDragFrameNodeToManager(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+
+    dragDropManager->AddDragFrameNode(frameNode->GetId(), AceType::WeakClaim(frameNode));
+}
+
 void ViewAbstract::SetDraggable(bool draggable)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1352,9 +1342,63 @@ void ViewAbstract::SetOnDragStart(
     eventHub->SetOnDragStart(std::move(onDragStart));
 }
 
+void ViewAbstract::SetOnDragStart(FrameNode* frameNode,
+    std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragStart)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->InitDragDropEvent();
+
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDragStart(std::move(onDragStart));
+}
+
+void ViewAbstract::SetOnDragEnter(FrameNode* frameNode,
+    std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragEnter)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_ENTER, std::move(onDragEnter));
+
+    AddDragFrameNodeToManager(frameNode);
+}
+
+void ViewAbstract::SetOnDragMove(FrameNode* frameNode,
+    std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragMove)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_MOVE, std::move(onDragMove));
+
+    AddDragFrameNodeToManager(frameNode);
+}
+
+void ViewAbstract::SetOnDragLeave(FrameNode* frameNode,
+    std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragLeave)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_LEAVE, std::move(onDragLeave));
+
+    AddDragFrameNodeToManager(frameNode);
+}
+
 void ViewAbstract::SetOnPreDrag(std::function<void(const PreDragStatus)>&& onPreDragFunc)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnPreDrag(std::move(onPreDragFunc));
+}
+
+void ViewAbstract::SetOnPreDrag(FrameNode* frameNode, std::function<void(const PreDragStatus)>&& onPreDragFunc)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnPreDrag(std::move(onPreDragFunc));
 }
@@ -1405,6 +1449,29 @@ void ViewAbstract::SetOnDragEnd(std::function<void(const RefPtr<OHOS::Ace::DragE
     eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_END, std::move(onDragEnd));
 
     AddDragFrameNodeToManager();
+}
+
+void ViewAbstract::SetOnDragEnd(
+    FrameNode* frameNode, std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>&& onDragEnd)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_END, std::move(onDragEnd));
+
+    AddDragFrameNodeToManager(frameNode);
+}
+
+void ViewAbstract::SetOnDrop(
+    FrameNode* frameNode, std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDrop)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_DROP, std::move(onDrop));
+
+    AddDragFrameNodeToManager(frameNode);
 }
 
 void ViewAbstract::SetAlign(Alignment alignment)
@@ -1832,7 +1899,7 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params, const Re
     auto overlayManager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
 
-    if (expandDisplay && menuParam.isShowInSubWindow) {
+    if (expandDisplay && menuParam.isShowInSubWindow && targetNode->GetTag() != V2::SELECT_ETS_TAG) {
         bool isShown = SubwindowManager::GetInstance()->GetShown();
         if (!isShown) {
             SubwindowManager::GetInstance()->ShowMenuNG(menuNode, menuParam, targetNode, offset);
@@ -1866,18 +1933,13 @@ void ViewAbstract::BindMenuWithCustomNode(std::function<void()>&& buildFunc, con
     CHECK_NULL_VOID(pipelineContext);
     auto overlayManager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-
-    auto containerId = pipelineContext->GetInstanceId();
-    RefPtr<Container> container = AceEngine::Get().GetContainer(containerId);
-    CHECK_NULL_VOID(container);
-
-    // contextMenu not use subWindow in such cases: not expandDisplay and not in UIExtendsion.
-    if (menuParam.type == MenuType::CONTEXT_MENU && (expandDisplay || container->IsUIExtensionWindow())) {
+    if (menuParam.type == MenuType::CONTEXT_MENU) {
         SubwindowManager::GetInstance()->ShowMenuNG(
             std::move(buildFunc), std::move(previewBuildFunc), menuParam, targetNode, offset);
         return;
     }
-    if (menuParam.type == MenuType::MENU && expandDisplay && menuParam.isShowInSubWindow) {
+    if (menuParam.type == MenuType::MENU && expandDisplay && menuParam.isShowInSubWindow &&
+        targetNode->GetTag() != V2::SELECT_ETS_TAG) {
         bool isShown = SubwindowManager::GetInstance()->GetShown();
         if (!isShown) {
             SubwindowManager::GetInstance()->ShowMenuNG(
@@ -2066,6 +2128,10 @@ void ViewAbstract::SetInspectorId(const std::string& inspectorId)
 {
     auto& uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     if (uiNode) {
+        if (uiNode->GetInspectorId().has_value() && uiNode->GetInspectorIdValue() != inspectorId) {
+            ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(
+                uiNode->GetInspectorIdValue(), uiNode->GetId());
+        }
         uiNode->UpdateInspectorId(inspectorId);
     }
 }
@@ -2803,15 +2869,18 @@ void ViewAbstract::ClearWidthOrHeight(FrameNode *frameNode, bool isWidth)
     layoutProperty->ClearUserDefinedIdealSize(isWidth, !isWidth);
 }
 
-void ViewAbstract::SetPosition(FrameNode *frameNode, const OffsetT<Dimension>& value)
+void ViewAbstract::SetPosition(FrameNode* frameNode, const OffsetT<Dimension>& value)
 {
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, PositionEdges, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(Position, value, frameNode);
 }
 
 void ViewAbstract::SetPositionEdges(FrameNode* frameNode, const EdgesParam& value)
 {
-    ACE_RESET_RENDER_CONTEXT(RenderContext, Position);
-    ACE_UPDATE_RENDER_CONTEXT(PositionEdges, value);
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, Position, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(PositionEdges, value, frameNode);
 }
 
 void ViewAbstract::ResetPosition(FrameNode* frameNode)
@@ -2930,8 +2999,25 @@ void ViewAbstract::SetLinearGradientBlur(FrameNode *frameNode, const NG::LinearG
     ACE_UPDATE_NODE_RENDER_CONTEXT(LinearGradientBlur, blurPara, frameNode);
 }
 
+void ViewAbstract::SetMagnifier(FrameNode* frameNode, const MagnifierParams& magnifierOffset)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(Magnifier, magnifierOffset, frameNode);
+}
+
+void ViewAbstract::ReSetMagnifier(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, Magnifier, frameNode);
+}
+
 void ViewAbstract::SetBackgroundBlurStyle(FrameNode *frameNode, const BlurStyleOption& bgBlurStyle)
 {
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (bgBlurStyle.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+        pipeline->AddWindowFocusChangedCallback(frameNode->GetId());
+    } else {
+        pipeline->RemoveWindowFocusChangedCallback(frameNode->GetId());
+    }
     auto target = frameNode->GetRenderContext();
     if (target) {
         if (target->GetBackgroundEffect().has_value()) {
@@ -3134,13 +3220,15 @@ void ViewAbstract::SetDisplayIndex(FrameNode* frameNode, int32_t value)
 void ViewAbstract::SetOffset(FrameNode* frameNode, const OffsetT<Dimension>& value)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, OffsetEdges, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(Offset, value, frameNode);
 }
 
 void ViewAbstract::SetOffsetEdges(FrameNode* frameNode, const EdgesParam& value)
 {
-    ACE_RESET_RENDER_CONTEXT(RenderContext, Offset);
-    ACE_UPDATE_RENDER_CONTEXT(OffsetEdges, value);
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, Offset, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(OffsetEdges, value, frameNode);
 }
 
 void ViewAbstract::MarkAnchor(FrameNode* frameNode, const OffsetT<Dimension>& value)
@@ -3375,6 +3463,10 @@ void ViewAbstract::SetAllowDrop(FrameNode* frameNode, const std::set<std::string
 void ViewAbstract::SetInspectorId(FrameNode* frameNode, const std::string& inspectorId)
 {
     if (frameNode) {
+        if (frameNode->GetInspectorId().has_value() && frameNode->GetInspectorIdValue() != inspectorId) {
+            ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(
+                frameNode->GetInspectorIdValue(), frameNode->GetId());
+        }
         frameNode->UpdateInspectorId(inspectorId);
     }
 }
@@ -3418,6 +3510,13 @@ void ViewAbstract::SetForegroundEffect(FrameNode* frameNode, float radius)
 void ViewAbstract::SetBackgroundEffect(FrameNode* frameNode, const EffectOption& effectOption)
 {
     CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (effectOption.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+        pipeline->AddWindowFocusChangedCallback(frameNode->GetId());
+    } else {
+        pipeline->RemoveWindowFocusChangedCallback(frameNode->GetId());
+    }
     auto target = frameNode->GetRenderContext();
     if (target) {
         if (target->GetBackBlurRadius().has_value()) {
@@ -3660,11 +3759,11 @@ void ViewAbstract::SetOnBlur(FrameNode* frameNode, OnBlurFunc&& onBlurCallback)
     focusHub->SetOnBlurCallback(std::move(onBlurCallback));
 }
 
-void ViewAbstract::SetOnClick(FrameNode* frameNode, GestureEventFunc&& clickEventFunc)
+void ViewAbstract::SetOnClick(FrameNode* frameNode, GestureEventFunc&& clickEventFunc, double distanceThreshold)
 {
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    gestureHub->SetUserOnClick(std::move(clickEventFunc));
+    gestureHub->SetUserOnClick(std::move(clickEventFunc), distanceThreshold);
 
     auto focusHub = frameNode->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -3901,16 +4000,22 @@ RefPtr<BasicShape> ViewAbstract::GetMask(FrameNode* frameNode)
 {
     RefPtr<BasicShape> value = AceType::MakeRefPtr<BasicShape>();
     const auto& target = frameNode->GetRenderContext();
-    CHECK_NULL_RETURN(target, value);
-    return target->GetClipMaskValue(value);
+    CHECK_NULL_RETURN(target, nullptr);
+    if (target->HasClipMask()) {
+        return target->GetClipMaskValue(value);
+    }
+    return nullptr;
 }
 
 RefPtr<ProgressMaskProperty> ViewAbstract::GetMaskProgress(FrameNode* frameNode)
 {
     RefPtr<ProgressMaskProperty> value = AceType::MakeRefPtr<ProgressMaskProperty>();
     const auto& target = frameNode->GetRenderContext();
-    CHECK_NULL_RETURN(target, value);
-    return target->GetProgressMaskValue(value);
+    CHECK_NULL_RETURN(target, nullptr);
+    if (target->HasProgressMask()) {
+        return target->GetProgressMaskValue(value);
+    }
+    return nullptr;
 }
 
 BlendMode ViewAbstract::GetBlendMode(FrameNode* frameNode)
@@ -4528,9 +4633,44 @@ void ViewAbstract::SetOnSizeChanged(
     frameNode->SetOnSizeChangeCallback(std::move(onSizeChanged));
 }
 
+void ViewAbstract::SetOnGestureRecognizerJudgeBegin(
+    FrameNode* frameNode, GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc));
+}
+
+void ViewAbstract::SetShouldBuiltInRecognizerParallelWith(
+    FrameNode* frameNode, NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetShouldBuildinRecognizerParallelWithFunc(std::move(shouldBuiltInRecognizerParallelWithFunc));
+}
+
+void ViewAbstract::SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->GetFocusBox().SetStyle(style);
+}
+
 void ViewAbstract::SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->SetEventStrictReportingEnabled(dragEventStrictReportingEnabled);
+}
+
+void ViewAbstract::SetDragEventStrictReportingEnabled(int32_t instanceId, bool dragEventStrictReportingEnabled)
+{
+    auto pipeline = PipelineContext::GetContextByContainerId(instanceId);
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
@@ -4827,5 +4967,18 @@ void ViewAbstract::SetOffsetLocalizedEdges(FrameNode* frameNode, bool needLocali
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateNeedOffsetLocalizedEdges(needLocalized);
+}
+
+void ViewAbstract::SetSystemColorModeChangeEvent(
+    FrameNode* frameNode, std::function<void(int32_t)>&& onColorModeChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetNDKColorModeUpdateCallback(std::move(onColorModeChange));
+}
+
+void ViewAbstract::SetSystemFontChangeEvent(FrameNode* frameNode, std::function<void(float, float)>&& onFontChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetNDKFontUpdateCallback(std::move(onFontChange));
 }
 } // namespace OHOS::Ace::NG

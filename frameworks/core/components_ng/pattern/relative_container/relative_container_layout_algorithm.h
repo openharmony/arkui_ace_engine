@@ -85,6 +85,9 @@ private:
     void CalcBarrier(LayoutWrapper* layoutWrapper);
     bool IsGuideline(const std::string& id);
     bool IsBarrier(const std::string& id);
+    bool IsGuidelineOrBarrier(const std::string& id);
+    std::optional<float> GetOriginMarginLeft(
+        TextDirection textDirection, const std::unique_ptr<MarginPropertyF>& marginProp);
     BarrierRect GetBarrierRectByReferencedIds(const std::vector<std::string>& referencedIds);
     void MeasureBarrier(const std::string& barrierName);
     void CheckNodeInHorizontalChain(std::string& currentNode, std::string& nextNode,
@@ -118,6 +121,7 @@ private:
     float CalcHorizontalOffsetAlignRight(const HorizontalAlign& alignRule, float& anchorWidth, float& flexItemWidth);
     float CalcHorizontalOffset(
         AlignDirection alignDirection, const AlignRule& alignRule, float containerWidth, const std::string& nodeName);
+    float CalcAnchorWidth(bool anchorIsContainer, float& containerWidth, const std::string& anchor);
     float CalcVerticalOffsetAlignTop(const VerticalAlign& alignRule, float& anchorHeight);
     float CalcVerticalOffsetAlignCenter(const VerticalAlign& alignRule, float& anchorHeight, float& flexItemHeight);
     float CalcVerticalOffsetAlignBottom(const VerticalAlign& alignRule, float& anchorHeight, float& flexItemHeight);
@@ -135,14 +139,14 @@ private:
     void MeasureChild(LayoutWrapper* layoutWrapper);
     BarrierDirection BarrierDirectionRtl(BarrierDirection barrierDirection);
     void AdjustOffsetRtl(LayoutWrapper* layoutWrapper);
-
+    bool versionGreatorOrEqualToEleven_ = false;
     bool isHorizontalRelyOnContainer_ = false;
     bool isVerticalRelyOnContainer_ = false;
     std::list<std::string> renderList_;
-    std::map<std::string, ChildMeasureWrapper> idNodeMap_;
-    std::map<std::string, uint32_t> incomingDegreeMap_;
-    std::map<std::string, std::set<std::string>> reliedOnMap_;
-    std::map<std::string, OffsetF> recordOffsetMap_;
+    std::unordered_map<std::string, ChildMeasureWrapper> idNodeMap_;
+    std::unordered_map<std::string, uint32_t> incomingDegreeMap_;
+    std::unordered_map<std::string, std::set<std::string>> reliedOnMap_;
+    std::unordered_map<std::string, OffsetF> recordOffsetMap_;
     std::unordered_map<std::string, BarrierParams> barriers_;
     std::unordered_map<std::string, GuidelineParams> guidelines_;
     std::unordered_map<std::string, ChainParam> horizontalChains_;

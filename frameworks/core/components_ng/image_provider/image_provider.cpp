@@ -19,14 +19,11 @@
 #include <mutex>
 
 #include "base/log/ace_trace.h"
+#include "base/log/log_wrapper.h"
 #include "base/memory/referenced.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/image_provider/adapter/image_decoder.h"
-#ifndef USE_ROSEN_DRAWING
-#include "core/components_ng/image_provider/adapter/skia_image_data.h"
-#else
 #include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
-#endif
 #include "core/components_ng/image_provider/animated_image_object.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/image_provider/image_object.h"
@@ -34,11 +31,8 @@
 #include "core/components_ng/image_provider/pixel_map_image_object.h"
 #include "core/components_ng/image_provider/static_image_object.h"
 #include "core/components_ng/image_provider/svg_image_object.h"
-#ifndef USE_ROSEN_DRAWING
-#include "core/components_ng/render/adapter/skia_image.h"
-#else
+#include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/render/adapter/rosen/drawing_image.h"
-#endif
 #include "core/image/image_loader.h"
 #include "core/image/sk_image_cache.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -67,13 +61,12 @@ bool ImageProvider::PrepareImageData(const RefPtr<ImageObject>& imageObj)
     if (imageObj->GetData()) {
         return true;
     }
-    // if image object has no skData, reload data.
-    auto imageLoader = ImageLoader::CreateImageLoader(imageObj->GetSourceInfo());
-    CHECK_NULL_RETURN(imageLoader, false);
+
+    auto&& dfxConfig = imageObj->GetImageDfxConfig();
 
     auto container = Container::Current();
     if (container && container->IsSubContainer()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "subContainer's pipeline's dataProviderManager is null, cannot load image "
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "subContainer's pipeline's dataProviderManager is null, cannot load image "
                                        "source, need to switch pipeline in parentContainer.");
         auto currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
         container = Container::GetContainer(currentId);
@@ -81,6 +74,15 @@ bool ImageProvider::PrepareImageData(const RefPtr<ImageObject>& imageObj)
     CHECK_NULL_RETURN(container, false);
     auto pipeline = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipeline, false);
+    // if image object has no skData, reload data.
+    auto imageLoader = ImageLoader::CreateImageLoader(imageObj->GetSourceInfo());
+    if (!imageLoader) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE,
+            "Failed to create loader in prepareImageData. src = %{private}s, nodeId = %{public}d, accessibilityId = "
+            "%{public}lld.",
+            dfxConfig.imageSrc_.c_str(), dfxConfig.nodeId_, static_cast<long long>(dfxConfig.accessibilityId_));
+        return false;
+    }
     auto newLoadedData = imageLoader->GetImageData(imageObj->GetSourceInfo(), WeakClaim(RawPtr(pipeline)));
     CHECK_NULL_RETURN(newLoadedData, false);
     // load data success
@@ -131,17 +133,13 @@ void ImageProvider::FailCallback(const std::string& key, const std::string& erro
             ctx->FailCallback(errorMsg);
         } else {
             // NOTE: contexts may belong to different arkui pipelines
-            auto notifyLoadFailTask = [ctx, errorMsg] {
-                ctx->FailCallback(errorMsg);
-            };
-
+            auto notifyLoadFailTask = [ctx, errorMsg] { ctx->FailCallback(errorMsg); };
             ImageUtils::PostToUI(std::move(notifyLoadFailTask), "ArkUIImageProviderFail", ctx->GetContainerId());
         }
     }
 }
 
-void ImageProvider::SuccessCallback(
-    const RefPtr<CanvasImage>& canvasImage, const std::string& key, bool sync, bool loadInVipChannel)
+void ImageProvider::SuccessCallback(const RefPtr<CanvasImage>& canvasImage, const std::string& key, bool sync)
 {
     canvasImage->Cache(key);
     auto ctxs = EndTask(key);
@@ -156,18 +154,24 @@ void ImageProvider::SuccessCallback(
         } else {
             // NOTE: contexts may belong to different arkui pipelines
             auto notifyLoadSuccess = [ctx, canvasImage] { ctx->SuccessCallback(canvasImage->Clone()); };
-            ImageUtils::PostToUI(std::move(notifyLoadSuccess), "ArkUIImageProviderSuccess", ctx->GetContainerId(),
-                loadInVipChannel ? PriorityType::VIP : PriorityType::LOW);
+            ImageUtils::PostToUI(std::move(notifyLoadSuccess), "ArkUIImageProviderSuccess", ctx->GetContainerId());
         }
     }
 }
 
 void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
 {
-    ACE_SCOPED_TRACE("CreateImageObj %s", src.ToString().c_str());
+    const ImageDfxConfig& imageDfxConfig = src.GetImageDfxConfig();
+    ACE_SCOPED_TRACE("CreateImageObj [%s]-[%d]-[%lld]", src.ToString().c_str(), imageDfxConfig.nodeId_,
+        static_cast<long long>(imageDfxConfig.accessibilityId_));
     // load image data
     auto imageLoader = ImageLoader::CreateImageLoader(src);
     if (!imageLoader) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE,
+            "Failed to create image loader, Image source type not supported. src = %{private}s, nodeId = "
+            "%{public}d-%{public}lld.",
+            imageDfxConfig.imageSrc_.c_str(), imageDfxConfig.nodeId_,
+            static_cast<long long>(imageDfxConfig.accessibilityId_));
         std::string errorMessage("Failed to create image loader, Image source type not supported");
         FailCallback(src.GetKey(), src.ToString() + errorMessage, sync);
         return;
@@ -175,6 +179,9 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
     auto pipeline = PipelineContext::GetCurrentContext();
     RefPtr<ImageData> data = imageLoader->GetImageData(src, WeakClaim(RawPtr(pipeline)));
     if (!data) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Fail load imageData. src = %{private}s, nodeId = %{public}d-%{public}lld.",
+            imageDfxConfig.imageSrc_.c_str(), imageDfxConfig.nodeId_,
+            static_cast<long long>(imageDfxConfig.accessibilityId_));
         FailCallback(src.GetKey(), "Failed to load image data", sync);
         return;
     }
@@ -182,6 +189,10 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
     // build ImageObject
     RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(src, data);
     if (!imageObj) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE,
+            "Failed to build image object. src = %{private}s, nodeId = %{public}d-%{public}lld.",
+            imageDfxConfig.imageSrc_.c_str(), imageDfxConfig.nodeId_,
+            static_cast<long long>(imageDfxConfig.accessibilityId_));
         FailCallback(src.GetKey(), "Failed to build image object", sync);
         return;
     }
@@ -204,9 +215,7 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
             ctx->DataReadyCallback(imageObj);
         } else {
             // NOTE: contexts may belong to different arkui pipelines
-            auto notifyDataReadyTask = [ctx, imageObj, src] {
-                ctx->DataReadyCallback(imageObj);
-            };
+            auto notifyDataReadyTask = [ctx, imageObj, src] { ctx->DataReadyCallback(imageObj); };
             ImageUtils::PostToUI(std::move(notifyDataReadyTask), "ArkUIImageProviderDataReady", ctx->GetContainerId());
         }
     }
@@ -249,11 +258,10 @@ void ImageProvider::CancelTask(const std::string& key, const WeakPtr<ImageLoadin
     CHECK_NULL_VOID(it->second.ctxs_.find(ctx) != it->second.ctxs_.end());
     // only one LoadingContext waiting for this task, can just cancel
     if (it->second.ctxs_.size() == 1) {
-        bool canceled = it->second.bgTask_.Cancel();
-        if (canceled) {
-            tasks_.erase(it);
-            return;
-        }
+        // task should be deleted regardless of whether the cancellation is successful or not
+        it->second.bgTask_.Cancel();
+        tasks_.erase(it);
+        return;
     }
     // other LoadingContext still waiting for this task, remove ctx from set
     it->second.ctxs_.erase(ctx);
@@ -281,9 +289,12 @@ void ImageProvider::CreateImageObject(const ImageSourceInfo& src, const WeakPtr<
 
 RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& src, const RefPtr<ImageData>& data)
 {
+    auto imageDfxConfig = src.GetImageDfxConfig();
     if (!data) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "data is null when try ParseImageObjectType, src: %{public}s",
-            src.ToString().c_str());
+        TAG_LOGW(AceLogTag::ACE_IMAGE,
+            "data is null when try ParseImageObjectType, src: %{public}s, nodeID = %{public}d-%{public}lld.",
+            imageDfxConfig.imageSrc_.c_str(), imageDfxConfig.nodeId_,
+            static_cast<long long>(imageDfxConfig.accessibilityId_));
         return nullptr;
     }
     if (src.IsSvg()) {
@@ -294,21 +305,21 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& src, 
         return PixelMapImageObject::Create(src, data);
     }
 
-#ifndef USE_ROSEN_DRAWING
-    auto skiaImageData = DynamicCast<SkiaImageData>(data);
-    CHECK_NULL_RETURN(skiaImageData, nullptr);
-    auto [size, frameCount] = skiaImageData->Parse();
-#else
     auto rosenImageData = DynamicCast<DrawingImageData>(data);
-    CHECK_NULL_RETURN(rosenImageData, nullptr);
+    if (!rosenImageData) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "rosenImageData null, src: %{private}s, nodeID = %{public}d-%{public}lld.",
+            imageDfxConfig.imageSrc_.c_str(), imageDfxConfig.nodeId_,
+            static_cast<long long>(imageDfxConfig.accessibilityId_));
+        return nullptr;
+    }
+    rosenImageData->SetDfxConfig(imageDfxConfig.nodeId_, imageDfxConfig.accessibilityId_);
     auto [size, frameCount] = rosenImageData->Parse();
-#endif
     if (!size.IsPositive()) {
         TAG_LOGW(AceLogTag::ACE_IMAGE,
             "Image of src: %{private}s, imageData's size = %{public}d is invalid, and the parsed size is invalid "
-            "%{public}s, "
-            "frameCount is %{public}d",
-            src.ToString().c_str(), static_cast<int32_t>(data->GetSize()), size.ToString().c_str(), frameCount);
+            "%{public}s, frameCount is %{public}d, nodeId = %{public}d-%{public}lld.",
+            src.ToString().c_str(), static_cast<int32_t>(data->GetSize()), size.ToString().c_str(), frameCount,
+            imageDfxConfig.nodeId_, static_cast<long long>(imageDfxConfig.accessibilityId_));
         return nullptr;
     }
     if (frameCount > 1) {
@@ -323,8 +334,12 @@ void ImageProvider::MakeCanvasImage(const RefPtr<ImageObject>& obj, const WeakPt
     const SizeF& size, const ImageDecoderOptions& imageDecoderOptions)
 {
     auto key = ImageUtils::GenerateImageKey(obj->GetSourceInfo(), size);
+    auto&& dfxConfig = obj->GetImageDfxConfig();
     // check if same task is already executing
     if (!RegisterTask(key, ctxWp)) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE,
+            "Register decoderTask fail. src = %{private}s, nodeId = %{public}d, accessibilityId = %{public}lld.",
+            dfxConfig.imageSrc_.c_str(), dfxConfig.nodeId_, static_cast<long long>(dfxConfig.accessibilityId_));
         return;
     }
     if (imageDecoderOptions.sync) {
@@ -333,9 +348,8 @@ void ImageProvider::MakeCanvasImage(const RefPtr<ImageObject>& obj, const WeakPt
         std::scoped_lock<std::mutex> lock(taskMtx_);
         // wrap with [CancelableCallback] and record in [tasks_] map
         CancelableCallback<void()> task;
-        task.Reset([key, obj, size, imageDecoderOptions] {
-            MakeCanvasImageHelper(obj, size, key, imageDecoderOptions);
-        });
+        task.Reset(
+            [key, obj, size, imageDecoderOptions] { MakeCanvasImageHelper(obj, size, key, imageDecoderOptions); });
         tasks_[key].bgTask_ = task;
         auto ctx = ctxWp.Upgrade();
         CHECK_NULL_VOID(ctx);
@@ -348,18 +362,15 @@ void ImageProvider::MakeCanvasImageHelper(const RefPtr<ImageObject>& obj, const 
 {
     ImageDecoder decoder(obj, size, imageDecoderOptions.forceResize);
     RefPtr<CanvasImage> image;
+    // preview and ohos platform
     if (SystemProperties::GetImageFrameworkEnabled()) {
         image = decoder.MakePixmapImage(imageDecoderOptions.imageQuality, imageDecoderOptions.isHdrDecoderNeed);
     } else {
-#ifndef USE_ROSEN_DRAWING
-        image = decoder.MakeSkiaImage();
-#else
         image = decoder.MakeDrawingImage();
-#endif
     }
 
     if (image) {
-        SuccessCallback(image, key, imageDecoderOptions.sync, imageDecoderOptions.loadInVipChannel);
+        SuccessCallback(image, key, imageDecoderOptions.sync);
     } else {
         FailCallback(key, "Failed to decode image");
     }

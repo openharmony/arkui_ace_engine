@@ -13,19 +13,8 @@
  * limitations under the License.
  */
 
-#include <condition_variable>
-#include <cstdint>
-#include <functional>
-#include <memory>
-#include <mutex>
-#include <optional>
-#include <string>
-#include <vector>
-
-#include "curl/curl.h"
 #include "hilog/log.h"
 #include "http_client.h"
-#include "http_proxy.h"
 #include "net_conn_client.h"
 
 #include "base/network/download_manager.h"
@@ -45,8 +34,7 @@ namespace {
 constexpr int32_t MAXIMUM_WAITING_PERIOD = 2800;
 
 #define PRINT_LOG(level, fmt, ...)                                                                               \
-    HILOG_IMPL(LOG_CORE, LOG_##level, 0xD00393A, "DownloadManager", "[%{public}s:%{public}d]" fmt, __FUNCTION__, \
-        __LINE__, ##__VA_ARGS__)
+    HILOG_IMPL(LOG_CORE, LOG_##level, 0xD00393A, "DownloadManager", "[%{public}d]" fmt, __LINE__, ##__VA_ARGS__) \
 
 #define LOGE(fmt, ...) PRINT_LOG(ERROR, fmt, ##__VA_ARGS__)
 #define LOGW(fmt, ...) PRINT_LOG(WARN, fmt, ##__VA_ARGS__)
@@ -258,11 +246,11 @@ public:
             downloadCondition->cv.notify_all();
         });
         task->OnFail([downloadCondition](const NetStackRequest& request, const NetStackResponse& response,
-                         const NetStackError& error) { OnFail(downloadCondition, request, response, error); });
+                        const NetStackError& error) { OnFail(downloadCondition, request, response, error); });
         if (downloadCallback.onProgressCallback) {
             task->OnProgress([onProgressCallback = downloadCallback.onProgressCallback, instanceId](
-                                 const NetStackRequest& request, u_long dlTotal, u_long dlNow, u_long ulTotal,
-                                 u_long ulNow) { onProgressCallback(dlTotal, dlNow, false, instanceId); });
+                                const NetStackRequest& request, u_long dlTotal, u_long dlNow, u_long ulTotal,
+                                u_long ulNow) { onProgressCallback(dlTotal, dlNow, false, instanceId); });
         }
         AddDownloadTask(url, task, nodeId);
         auto result = task->Start();

@@ -19,12 +19,13 @@
 #include "test/mock/core/pattern/mock_nestable_scroll_container.h"
 
 namespace OHOS::Ace::NG {
-
+namespace {
 constexpr float WIDTH = 480.f;
 constexpr float SWIPER_HEIGHT = 400.f;
 constexpr float SCROLL_HEIGHT = 400.f;
 constexpr float TEXT_HEIGHT = 200.f;
 constexpr int32_t TEXT_NUMBER = 5;
+} // namespace
 
 void RefreshTestNg::SetUpTestSuite()
 {
@@ -34,6 +35,7 @@ void RefreshTestNg::SetUpTestSuite()
     auto themeConstants = CreateThemeConstants(THEME_PATTERN_REFRESH);
     auto refreshTheme = RefreshTheme::Builder().Build(themeConstants);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(refreshTheme));
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
 }
 
 void RefreshTestNg::TearDownTestSuite()
@@ -45,51 +47,33 @@ void RefreshTestNg::SetUp() {}
 
 void RefreshTestNg::TearDown()
 {
-    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
     frameNode_ = nullptr;
     pattern_ = nullptr;
     eventHub_ = nullptr;
     layoutProperty_ = nullptr;
     accessibilityProperty_ = nullptr;
-    swiper_ = nullptr;
+    swiperNode_ = nullptr;
     swiperPattern_ = nullptr;
-    scroll_ = nullptr;
+    scrollNode_ = nullptr;
     scrollPattern_ = nullptr;
 }
 
-void RefreshTestNg::GetInstance()
+void RefreshTestNg::GetRefresh()
 {
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
-    frameNode_ = AceType::DynamicCast<FrameNode>(element);
+    frameNode_ = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     pattern_ = frameNode_->GetPattern<RefreshPattern>();
     eventHub_ = frameNode_->GetEventHub<RefreshEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<RefreshLayoutProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<RefreshAccessibilityProperty>();
 }
 
-void RefreshTestNg::Create(const std::function<void(RefreshModelNG)>& callback)
+RefreshModelNG RefreshTestNg::CreateRefresh()
 {
     RefreshModelNG model;
     model.Create();
     ViewAbstract::SetHeight(CalcLength(REFRESH_HEIGHT));
-    if (callback) {
-        callback(model);
-    }
-    GetInstance();
-    ViewStackProcessor::GetInstance()->Finish();
-    FlushLayoutTask(frameNode_);
-}
-
-void RefreshTestNg::CreateRefresh(const std::function<void(RefreshModelNG)>& callback)
-{
-    RefreshModelNG model;
-    model.Create();
-    ViewAbstract::SetHeight(CalcLength(REFRESH_HEIGHT));
-    if (callback) {
-        callback(model);
-    }
-    GetInstance();
-    ViewStackProcessor::GetInstance()->Pop();
+    GetRefresh();
+    return model;
 }
 
 void RefreshTestNg::CreateScroll()
@@ -98,20 +82,23 @@ void RefreshTestNg::CreateScroll()
     scrollModel.Create();
     ViewAbstract::SetWidth(CalcLength(WIDTH));
     ViewAbstract::SetHeight(CalcLength(SCROLL_HEIGHT));
+    scrollNode_ = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    scrollPattern_ = scrollNode_->GetPattern<ScrollPattern>();
+}
+
+void RefreshTestNg::CreateColumn()
+{
     ColumnModelNG colModel;
     colModel.Create(Dimension(0), nullptr, "");
+}
+
+void RefreshTestNg::CreateText()
+{
     TextModelNG model;
     model.Create("text");
     ViewAbstract::SetWidth(CalcLength(WIDTH));
     ViewAbstract::SetHeight(CalcLength(TEXT_HEIGHT));
     ViewStackProcessor::GetInstance()->Pop();
-    CreateRefresh([this](RefreshModelNG model) { CreateNestedSwiper(); });
-    ViewStackProcessor::GetInstance()->Pop();
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
-    scroll_ = AceType::DynamicCast<FrameNode>(element);
-    scrollPattern_ = scroll_->GetPattern<ScrollPattern>();
-    ViewStackProcessor::GetInstance()->Finish();
-    FlushLayoutTask(scroll_);
 }
 
 void RefreshTestNg::CreateNestedSwiper()
@@ -122,17 +109,12 @@ void RefreshTestNg::CreateNestedSwiper()
     model.SetLoop(false);
     ViewAbstract::SetWidth(CalcLength(WIDTH));
     ViewAbstract::SetHeight(CalcLength(SWIPER_HEIGHT));
+    swiperNode_ = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    swiperPattern_ = swiperNode_->GetPattern<SwiperPattern>();
     for (int32_t index = 0; index < TEXT_NUMBER; index++) {
-        TextModelNG model;
-        model.Create("text");
-        ViewStackProcessor::GetInstance()->Pop();
+        CreateText();
     }
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
-    swiper_ = AceType::DynamicCast<FrameNode>(element);
-    swiperPattern_ = swiper_->GetPattern<SwiperPattern>();
     ViewStackProcessor::GetInstance()->Pop();
-    FlushLayoutTask(swiper_);
-    auto children = swiper_->GetChildren();
 }
 
 RefPtr<FrameNode> RefreshTestNg::CreateCustomNode()
@@ -155,13 +137,15 @@ HWTEST_F(RefreshTestNg, RefreshNestedSwiper001, TestSize.Level1)
      */
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    Create([this](RefreshModelNG model) { CreateNestedSwiper(); });
+    CreateRefresh();
+    CreateNestedSwiper();
+    CreateDone();
     ASSERT_NE(swiperPattern_, nullptr);
-    ASSERT_NE(pattern_, nullptr);
 
     /**
      * @tc.steps: step2. Test OnScrollStartRecursive.
-     * @tc.expected: isSourceFromAnimation_ of refresh  is false, the nestedOption of swiper is PARENT_FIRST and SELF_FIRST.
+     * @tc.expected: isSourceFromAnimation_ of refresh  is false,
+     *               the nestedOption of swiper is PARENT_FIRST and SELF_FIRST.
      */
     swiperPattern_->OnScrollStartRecursive(0.f, 0.f);
     EXPECT_FALSE(pattern_->isSourceFromAnimation_);
@@ -212,6 +196,7 @@ HWTEST_F(RefreshTestNg, RefreshNestedSwiper001, TestSize.Level1)
     swiperPattern_->HandleScroll(static_cast<float>(-20.f), SCROLL_FROM_UPDATE, NestedState::GESTURE, 0.f);
     EXPECT_EQ(pattern_->scrollOffset_, 0.f);
     EXPECT_EQ(swiperPattern_->currentDelta_, 20.f);
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
 }
 
 /**
@@ -227,9 +212,19 @@ HWTEST_F(RefreshTestNg, RefreshNestedSwiper002, TestSize.Level1)
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     CreateScroll();
-    ASSERT_NE(swiperPattern_, nullptr);
-    ASSERT_NE(pattern_, nullptr);
-    ASSERT_NE(scrollPattern_, nullptr);
+    {
+        CreateColumn();
+        {
+            CreateText();
+            CreateRefresh();
+            {
+                CreateNestedSwiper();
+            }
+            ViewStackProcessor::GetInstance()->Pop();
+        }
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    CreateDone();
     swiperPattern_->SetNestedScroll(NestedScrollOptions({
         .forward = NestedScrollMode::SELF_FIRST,
         .backward = NestedScrollMode::SELF_FIRST,
@@ -274,6 +269,7 @@ HWTEST_F(RefreshTestNg, RefreshNestedSwiper002, TestSize.Level1)
     auto pullDownRatio = pattern_->CalculatePullDownRatio();
     swiperPattern_->HandleScroll(static_cast<float>(40.f), SCROLL_FROM_UPDATE, NestedState::GESTURE, 0.f);
     EXPECT_EQ(pattern_->scrollOffset_, lastScrollOffset + 20.f * pullDownRatio);
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
 }
 
 /**
@@ -285,8 +281,9 @@ HWTEST_F(RefreshTestNg, RefreshPatternHandleScroll001, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    CreateRefresh([this](RefreshModelNG model) {});
-    ASSERT_NE(pattern_, nullptr);
+    CreateRefresh();
+    CreateDone();
+
     auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
     pattern_->scrollOffset_ = 5.f;
     pattern_->parent_ = mockScroll;
@@ -305,6 +302,7 @@ HWTEST_F(RefreshTestNg, RefreshPatternHandleScroll001, TestSize.Level1)
     pattern_->scrollOffset_ = 0.f;
     res = pattern_->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL, 0.f);
     EXPECT_EQ(res.remain, 5.f);
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
 }
 
 /**
@@ -316,8 +314,9 @@ HWTEST_F(RefreshTestNg, RefreshPatternHandleScroll002, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    CreateRefresh([this](RefreshModelNG model) {});
-    ASSERT_NE(pattern_, nullptr);
+    CreateRefresh();
+    CreateDone();
+
     auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
     pattern_->scrollOffset_ = 5.f;
     pattern_->parent_ = mockScroll;
@@ -344,6 +343,7 @@ HWTEST_F(RefreshTestNg, RefreshPatternHandleScroll002, TestSize.Level1)
         .WillOnce(Return(ScrollResult { .remain = 0.f, .reachEdge = true }));
     res = pattern_->HandleScroll(-5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL, 0.f);
     EXPECT_EQ(res.remain, 0.f);
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
 }
 
 /**
@@ -355,8 +355,12 @@ HWTEST_F(RefreshTestNg, RefreshPatternHandleScroll003, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    CreateRefresh([this](RefreshModelNG model) {});
-    ASSERT_NE(pattern_, nullptr);
+    RefreshModelNG model;
+    model.Create();
+    ViewAbstract::SetHeight(CalcLength(REFRESH_HEIGHT));
+    GetRefresh();
+    ViewStackProcessor::GetInstance()->Pop();
+
     auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
     pattern_->scrollOffset_ = 5.f;
     pattern_->parent_ = mockScroll;
@@ -388,6 +392,7 @@ HWTEST_F(RefreshTestNg, RefreshPatternHandleScroll003, TestSize.Level1)
     res = pattern_->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL, 0.f);
     EXPECT_EQ(res.remain, 0.f);
     EXPECT_EQ(pattern_->scrollOffset_, lastScrollOffset + 5.f * pullDownRatio);
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
 }
 
 /**
@@ -401,8 +406,8 @@ HWTEST_F(RefreshTestNg, PullDownRatio001, TestSize.Level1)
      * @tc.steps: step1. Create Refresh
      * @tc.expected: layoutProperty_ is not nullptr
      */
-    Create([](RefreshModelNG model) {});
-    ASSERT_NE(layoutProperty_, nullptr);
+    CreateRefresh();
+    CreateDone();
 
     /**
      * @tc.steps: step2. Set PullDownRatio to 1.0f
@@ -444,10 +449,10 @@ HWTEST_F(RefreshTestNg, Drag001, TestSize.Level1)
     RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
     auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
     auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
-    Create([onRefreshing, onStateChange](RefreshModelNG model) {
-        model.SetOnRefreshing(std::move(onRefreshing));
-        model.SetOnStateChange(std::move(onStateChange));
-    });
+    RefreshModelNG model = CreateRefresh();
+    model.SetOnRefreshing(std::move(onRefreshing));
+    model.SetOnStateChange(std::move(onStateChange));
+    CreateDone();
 
     /**
      * @tc.steps: step1. HandleDragStart
@@ -513,7 +518,8 @@ HWTEST_F(RefreshTestNg, Drag002, TestSize.Level1)
      * @tc.cases: HandleDrag delta less than TRIGGER_REFRESH_DISTANCE
      * @tc.expected: Would not trigger refresh
      */
-    Create([](RefreshModelNG model) {});
+    CreateRefresh();
+    CreateDone();
     pattern_->HandleDragStart();
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
     pattern_->HandleDragUpdate(TRIGGER_REFRESH_DISTANCE.ConvertToPx() - 1.f);
@@ -533,7 +539,8 @@ HWTEST_F(RefreshTestNg, Drag003, TestSize.Level1)
      * @tc.cases: HandleDrag delta less than TRIGGER_REFRESH_DISTANCE
      * @tc.expected: Would not trigger refresh
      */
-    Create([](RefreshModelNG model) {});
+    CreateRefresh();
+    CreateDone();
     pattern_->HandleDragStart();
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
     pattern_->HandleDragUpdate(TRIGGER_REFRESH_DISTANCE.ConvertToPx() - 1.f);
@@ -553,11 +560,11 @@ HWTEST_F(RefreshTestNg, CustomDrag001, TestSize.Level1)
     RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
     auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
     auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
-    Create([onRefreshing, onStateChange](RefreshModelNG model) {
-        model.SetOnRefreshing(std::move(onRefreshing));
-        model.SetOnStateChange(std::move(onStateChange));
-        model.SetCustomBuilder(CreateCustomNode());
-    });
+    RefreshModelNG model = CreateRefresh();
+    model.SetOnRefreshing(std::move(onRefreshing));
+    model.SetOnStateChange(std::move(onStateChange));
+    model.SetCustomBuilder(CreateCustomNode());
+    CreateDone();
 
     /**
      * @tc.steps: step1. HandleDragStart
@@ -623,9 +630,9 @@ HWTEST_F(RefreshTestNg, CustomDrag002, TestSize.Level1)
      * @tc.cases: HandleDrag delta less than TRIGGER_REFRESH_DISTANCE
      * @tc.expected: Would not trigger refresh
      */
-    Create([](RefreshModelNG model) {
-        model.SetCustomBuilder(CreateCustomNode());
-    });
+    RefreshModelNG model = CreateRefresh();
+    model.SetCustomBuilder(CreateCustomNode());
+    CreateDone();
     pattern_->HandleDragStart();
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
     pattern_->HandleDragUpdate(TRIGGER_REFRESH_DISTANCE.ConvertToPx() - 1.f);
@@ -642,7 +649,9 @@ HWTEST_F(RefreshTestNg, CustomDrag002, TestSize.Level1)
 HWTEST_F(RefreshTestNg, AddCustomBuilderNode001, TestSize.Level1)
 {
     auto builder = CreateCustomNode();
-    Create([&builder](RefreshModelNG model) { model.SetCustomBuilder(builder); });
+    RefreshModelNG model = CreateRefresh();
+    model.SetCustomBuilder(builder);
+    CreateDone();
 
     /**
      * @tc.steps: step1. Add same custom node
@@ -671,21 +680,22 @@ HWTEST_F(RefreshTestNg, AddCustomBuilderNode002, TestSize.Level1)
      * @tc.steps: step1. create refresh
      * @tc.expected: init progress node.
      */
-    Create([](RefreshModelNG model) { model.SetProgressColor(Color::BLUE); });
+    RefreshModelNG model = CreateRefresh();
+    model.SetProgressColor(Color::BLUE);
+    CreateDone();
     EXPECT_EQ(layoutProperty_->GetProgressColor(), Color::BLUE);
-    auto builder = CreateCustomNode();
-    pattern_->AddCustomBuilderNode(builder);
-    EXPECT_EQ(GetChildFrameNode(frameNode_, 0), builder);
     EXPECT_NE(pattern_->progressChild_, nullptr);
 
     /**
-     * @tc.steps: step2. init child node
+     * @tc.steps: step2. init custom node
      * @tc.expected: remove progress child.
      */
     int32_t childrenSize = frameNode_->GetChildren().size();
-    pattern_->InitChildNode();
+    auto builder = CreateCustomNode();
+    pattern_->AddCustomBuilderNode(builder);
+    EXPECT_EQ(GetChildFrameNode(frameNode_, 0), builder);
     EXPECT_EQ(pattern_->progressChild_, nullptr);
-    EXPECT_EQ(frameNode_->GetChildren().size(), childrenSize - 1);
+    EXPECT_EQ(frameNode_->GetChildren().size(), childrenSize);
 
     /**
      * @tc.steps: step3. set null custom node
@@ -706,17 +716,10 @@ HWTEST_F(RefreshTestNg, AddCustomBuilderNode003, TestSize.Level1)
     /**
      * @tc.steps: step1. create refresh with child node
      */
-    auto builder = CreateCustomNode();
-    RefreshModelNG model;
-    model.Create();
-    model.SetCustomBuilder(builder);
-    {
-        TextModelNG model;
-        model.Create("text");
-        ViewStackProcessor::GetInstance()->Pop();
-    }
-    GetInstance();
-    FlushLayoutTask(frameNode_);
+    RefreshModelNG model = CreateRefresh();
+    model.SetCustomBuilder(CreateCustomNode());
+    CreateText();
+    CreateDone();
     EXPECT_EQ(frameNode_->TotalChildCount(), 2);
 
     /**
@@ -725,8 +728,9 @@ HWTEST_F(RefreshTestNg, AddCustomBuilderNode003, TestSize.Level1)
      */
     pattern_->AddCustomBuilderNode(nullptr);
     EXPECT_FALSE(pattern_->isCustomBuilderExist_);
+    EXPECT_EQ(frameNode_->TotalChildCount(), 1);
     pattern_->InitChildNode();
-    EXPECT_EQ(frameNode_->TotalChildCount(), 3);
+    EXPECT_EQ(frameNode_->TotalChildCount(), 2);
 }
 
 /**
@@ -736,7 +740,9 @@ HWTEST_F(RefreshTestNg, AddCustomBuilderNode003, TestSize.Level1)
  */
 HWTEST_F(RefreshTestNg, AttrRefreshing001, TestSize.Level1)
 {
-    Create([](RefreshModelNG model) { model.SetCustomBuilder(CreateCustomNode()); });
+    RefreshModelNG model = CreateRefresh();
+    model.SetCustomBuilder(CreateCustomNode());
+    CreateDone();
 
     /**
      * @tc.steps: step1. IsRefreshing: true -> false
@@ -764,7 +770,8 @@ HWTEST_F(RefreshTestNg, AttrRefreshing001, TestSize.Level1)
  */
 HWTEST_F(RefreshTestNg, AttrRefreshing002, TestSize.Level1)
 {
-    Create();
+    CreateRefresh();
+    CreateDone();
 
     /**
      * @tc.steps: step1. IsRefreshing: true -> false
@@ -792,7 +799,8 @@ HWTEST_F(RefreshTestNg, AttrRefreshing002, TestSize.Level1)
  */
 HWTEST_F(RefreshTestNg, AccessibilityProperty001, TestSize.Level1)
 {
-    Create();
+    CreateRefresh();
+    CreateDone();
 
     /**
      * @tc.steps: step1. When IsScrollable() == true
@@ -821,7 +829,8 @@ HWTEST_F(RefreshTestNg, AccessibilityProperty001, TestSize.Level1)
  */
 HWTEST_F(RefreshTestNg, PerformActionTest001, TestSize.Level1)
 {
-    Create(); // trigger SetAccessibilityAction()
+    CreateRefresh();
+    CreateDone(); // trigger SetAccessibilityAction()
 
     /**
      * @tc.steps: step1. pattern->IsRefreshing() == false
@@ -845,7 +854,8 @@ HWTEST_F(RefreshTestNg, PerformActionTest001, TestSize.Level1)
  */
 HWTEST_F(RefreshTestNg, OnKeyEvent001, TestSize.Level1)
 {
-    Create();
+    CreateRefresh();
+    CreateDone();
 
     /**
      * @tc.steps: step1. KeyCode::KEY_UNKNOWN
@@ -869,7 +879,9 @@ HWTEST_F(RefreshTestNg, OnKeyEvent002, TestSize.Level1)
 {
     bool isTrigger = false;
     auto onRefreshing = [&isTrigger]() { isTrigger = true; };
-    Create([onRefreshing](RefreshModelNG model) { model.SetOnRefreshing(std::move(onRefreshing)); });
+    RefreshModelNG model = CreateRefresh();
+    model.SetOnRefreshing(std::move(onRefreshing));
+    CreateDone();
 
     /**
      * @tc.steps: step1. KeyCode::KEY_F5
@@ -890,29 +902,14 @@ HWTEST_F(RefreshTestNg, OnKeyEvent002, TestSize.Level1)
 }
 
 /**
- * @tc.name: Frame Scene TEST
- * @tc.desc: Test frame ratio
- * @tc.type: FUNC
- */
-HWTEST_F(RefreshTestNg, RefreshDragFrameRatio001, TestSize.Level1)
-{
-    Create();
-    auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
-    frameNode_->renderContext_ = renderContext;
-    // CalcExpectedFrameRate will be called
-    pattern_->HandleDragStart();
-    pattern_->HandleDragUpdate(0.0f);
-    pattern_->HandleDragEnd(0.0f);
-}
-
-/**
  * @tc.name: GetTargetOffset001
  * @tc.desc: Test frame ratio
  * @tc.type: FUNC
  */
 HWTEST_F(RefreshTestNg, GetTargetOffset001, TestSize.Level1)
 {
-    Create([](RefreshModelNG model) {});
+    CreateRefresh();
+    CreateDone();
     pattern_->HandleDragStart();
     EXPECT_FLOAT_EQ(pattern_->GetTargetOffset(), 0.f);
     pattern_->HandleDragUpdate(TRIGGER_REFRESH_DISTANCE.ConvertToPx() / RADIO);

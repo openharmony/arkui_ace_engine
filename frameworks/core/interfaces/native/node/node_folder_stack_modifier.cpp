@@ -62,5 +62,16 @@ const ArkUIFolderStackModifier* GetFolderStackModifier()
     };
     return &modifier;
 }
+
+const CJUIFolderStackModifier* GetCJUIFolderStackModifier()
+{
+    static const CJUIFolderStackModifier modifier = {
+        SetEnableAnimation,
+        ResetEnableAnimation,
+        SetAutoHalfFold,
+        ResetAutoHalfFold
+    };
+    return &modifier;
+}
 }
 }

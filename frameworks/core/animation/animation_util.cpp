@@ -15,7 +15,6 @@
 
 #include "core/animation/animation_util.h"
 
-#include "bridge/common/dom/dom_node.h"
 #include "bridge/common/utils/utils.h"
 
 namespace OHOS::Ace {

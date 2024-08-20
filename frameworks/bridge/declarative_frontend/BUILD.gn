@@ -58,6 +58,12 @@ template("declarative_frontend") {
     }
 
     deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+    if (is_arkui_x) {
+      deps += [
+        "//arkcompiler/ets_runtime:libark_jsruntime_static",
+        "//foundation/arkui/napi:ace_napi",
+      ]
+    }
     external_deps = [
       "ets_runtime:libark_jsruntime",
       "napi:ace_napi",
@@ -176,6 +182,7 @@ template("declarative_js_engine") {
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
       ":gen_obj_src_js_uicontext",
+      ":mock",
       ":prefetcher",
       ":shape",
       ":statemanagement",
@@ -297,6 +304,7 @@ template("declarative_js_engine") {
       "jsview/js_menu.cpp",
       "jsview/js_menu_item.cpp",
       "jsview/js_menu_item_group.cpp",
+      "jsview/js_mock.cpp",
       "jsview/js_nav_path_stack.cpp",
       "jsview/js_navdestination.cpp",
       "jsview/js_navdestination_context.cpp",
@@ -701,6 +709,7 @@ template("declarative_js_engine_ng") {
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
       ":gen_obj_src_js_uicontext",
+      ":mock",
       ":prefetcher",
       ":shape",
       ":statemanagement",
@@ -825,6 +834,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_menu.cpp",
       "jsview/js_menu_item.cpp",
       "jsview/js_menu_item_group.cpp",
+      "jsview/js_mock.cpp",
       "jsview/js_nav_path_stack.cpp",
       "jsview/js_navdestination.cpp",
       "jsview/js_navdestination_context.cpp",
@@ -1039,7 +1049,10 @@ template("declarative_js_engine_ng") {
         "jsview/menu/js_context_menu.cpp",
       ]
       configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
-      deps += [ "$ark_ets_path:libark_jsruntime_static" ]
+      deps += [
+        "$ark_ets_path:libark_jsruntime_static",
+        "//foundation/graphic/graphic_2d/interfaces/kits/napi/graphic/drawing:drawing_napi_impl",
+      ]
       if (defined(config.pixel_map_support) && config.pixel_map_support) {
         configs += [ "//foundation/multimedia/image_framework/interfaces/innerkits:image_external_config" ]
       }
@@ -1115,6 +1128,15 @@ foreach(item, ace_platforms) {
 ohos_abc("statemanagement") {
   sources = [ "engine/jsStateManagement.js" ]
   output_name = "statemanagement"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("mock") {
+  sources = [ "engine/jsMock.js" ]
+  output_name = "mock"
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui"
   subsystem_name = ace_engine_subsystem

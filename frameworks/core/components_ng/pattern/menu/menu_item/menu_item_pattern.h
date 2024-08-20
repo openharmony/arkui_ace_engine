@@ -194,6 +194,11 @@ public:
         return clickMenuItemId_;
     }
 
+    void SetOnClickAIMenuItem(std::function<void()> onClickAIMenuItem)
+    {
+        onClickAIMenuItem_ = onClickAIMenuItem;
+    }
+
     void OnVisibleChange(bool isVisible) override;
     void InitLongPressEvent();
     void UpdateNeedDivider(bool need);
@@ -227,6 +232,7 @@ protected:
     RefPtr<FrameNode> GetMenuWrapper();
 
 private:
+    friend class ServiceCollaborationMenuAceHelper;
     // register menu item's callback
     void RegisterOnClick();
     void RegisterOnHover();
@@ -241,7 +247,7 @@ private:
     void AddExpandIcon(RefPtr<FrameNode>& row);
     void AddClickableArea();
     void UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProperty>& menuProperty, bool isLabel);
-    void UpdateTexOverflow(RefPtr<TextLayoutProperty>& textProperty);
+    void UpdateTextOverflow(RefPtr<TextLayoutProperty>& textProperty);
     void AddStackSubMenuHeader(RefPtr<FrameNode>& menuNode);
     RefPtr<FrameNode> GetClickableArea();
     void UpdateDisabledStyle();
@@ -269,6 +275,7 @@ private:
         std::function<void(WeakPtr<NG::FrameNode>)>& symbol, bool isStart);
     void UpdateImageIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>& iconNode, ImageSourceInfo& iconSrc,
         std::function<void(WeakPtr<NG::FrameNode>)>& symbol, bool isStart);
+    bool UseDefaultThemeIcon(const ImageSourceInfo& imageSourceInfo);
 
     std::list<TouchRegion> hoverRegions_;
 
@@ -282,6 +289,7 @@ private:
     bool isHovered_ = false;
     bool isExpanded_ = false;
     int32_t clickMenuItemId_ = -1;
+    std::function<void()> onClickAIMenuItem_ = nullptr;
     int32_t index_ = 0;
 
     std::function<void()> subBuilderFunc_ = nullptr;

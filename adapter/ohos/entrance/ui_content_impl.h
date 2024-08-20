@@ -37,6 +37,7 @@
 #include "core/common/asset_manager_impl.h"
 #include "core/common/render_boundary_manager.h"
 #include "core/common/update_config_manager.h"
+#include "core/components/common/properties/animation_option.h"
 #include "core/components/common/properties/popup_param.h"
 
 namespace OHOS::Accessibility {
@@ -78,6 +79,7 @@ public:
     std::string GetContentInfo(ContentInfoType type) const override;
     void DestroyUIDirector() override;
     void SetUIContentType(UIContentType uIContentType) override;
+    void UpdateFontScale(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
 
     // UI content event process
     bool ProcessBackPressed() override;
@@ -91,6 +93,8 @@ public:
     void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) override;
     void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr) override;
+    void UpdateViewportConfigWithAnimation(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
+        AnimationOption animationOpt, const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr);
     void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) override;
     void UpdateDecorVisible(bool visible, bool hasDeco) override;
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
@@ -119,6 +123,9 @@ public:
 
     // Set UIContent callback after layout finish
     void SetFrameLayoutFinishCallback(std::function<void()>&& callback) override;
+
+    // Set UIContent callback after lastest layout finish
+    void SetLastestFrameLayoutFinishCallback(std::function<void()>&& callback) override;
 
     // Receive memory level notification
     void NotifyMemoryLevel(int32_t level) override;
@@ -227,7 +234,7 @@ public:
     bool DumpViewData(AbilityBase::ViewData& viewData, AbilityBase::AutoFillType& type) override;
     bool CheckNeedAutoSave() override;
     bool DumpViewData(const RefPtr<NG::FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap,
-        bool skipSubAutoFillContainer = false);
+        bool skipSubAutoFillContainer = false, bool needsRecordData = false);
 
     void SearchElementInfoByAccessibilityId(
         int64_t elementId, int32_t mode,
@@ -326,7 +333,9 @@ public:
 
     void SetFontScaleAndWeightScale(const RefPtr<Platform::AceContainer>& container, int32_t instanceId);
 
-    void SetForceSplitEnable(bool isForceSplit) override;
+    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) override;
+
+    void UpdateDialogContainerConfig(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
 
 private:
     UIContentErrorCode InitializeInner(
@@ -341,6 +350,8 @@ private:
 
     void InitializeSafeArea(const RefPtr<Platform::AceContainer>& container);
     void InitializeDisplayAvailableRect(const RefPtr<Platform::AceContainer>& container);
+
+    void InitDragSummaryMap(const RefPtr<Platform::AceContainer>& container);
 
     RefPtr<PopupParam> CreateCustomPopupParam(bool isShow, const CustomPopupUIExtensionConfig& config);
     void OnPopupStateChange(const std::string& event, const CustomPopupUIExtensionConfig& config, int32_t nodeId);

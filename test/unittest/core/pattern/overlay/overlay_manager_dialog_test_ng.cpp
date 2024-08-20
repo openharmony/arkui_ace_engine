@@ -55,7 +55,6 @@
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
-#include "core/components_ng/pattern/overlay/modal_presentation_layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_paint_method.h"
@@ -88,7 +87,6 @@ const std::string BOTTOMSTRING = "test";
 constexpr int32_t START_YEAR_BEFORE = 1990;
 constexpr int32_t SELECTED_YEAR = 2000;
 constexpr int32_t END_YEAR = 2090;
-const std::string LONGEST_CONTENT = "新建文件夹";
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 } // namespace
 class OverlayManagerDialogTestNg : public testing::Test {
@@ -146,6 +144,7 @@ void OverlayManagerDialogTestNg::TearDownTestCase()
 {
     MockPipelineContext::GetCurrent()->themeManager_ = nullptr;
     MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 
 RefPtr<FrameNode> OverlayManagerDialogTestNg::CreateTargetNode()

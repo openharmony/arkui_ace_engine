@@ -19,6 +19,7 @@
 #include "base/utils/utils.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/toast/toast_theme.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/toast/toast_layout_property.h"
@@ -29,6 +30,7 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
+constexpr float MAX_TOAST_SCALE = 2.0f;
 RefPtr<FrameNode> ToastView::CreateToastNode(const ToastInfo& toastInfo)
 {
     auto context = PipelineBase::GetCurrentContext();
@@ -58,8 +60,8 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const ToastInfo& toastInfo)
     CHECK_NULL_RETURN(pattern, nullptr);
     pattern->SetToastInfo(toastInfo);
     pattern->SetTextNode(textNode);
-    UpdateTextLayoutProperty(textNode, toastInfo.message, toastInfo.isRightToLeft);
-    UpdateTextContext(textNode);
+    UpdateTextLayoutProperty(textNode, toastInfo.message, toastInfo.isRightToLeft, toastInfo.textColor);
+    UpdateToastContext(toastNode);
     textNode->MountToParent(toastNode);
     auto align = Alignment::ParseAlignment(toastInfo.alignment);
     if (align.has_value()) {
@@ -81,7 +83,8 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const ToastInfo& toastInfo)
 }
 
 void ToastView::UpdateTextLayoutProperty(
-    const RefPtr<FrameNode>& textNode, const std::string& message, bool isRightToLeft)
+    const RefPtr<FrameNode>& textNode, const std::string& message,
+    bool isRightToLeft, const std::optional<Color>& textColor)
 {
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
@@ -92,7 +95,8 @@ void ToastView::UpdateTextLayoutProperty(
     auto fontSize = toastTheme->GetTextStyle().GetFontSize();
     auto padding = toastTheme->GetPadding();
     auto fontWeight = toastTheme->GetTextStyle().GetFontWeight();
-    auto textColor = toastTheme->GetTextStyle().GetTextColor();
+    auto defaultColor = toastTheme->GetTextStyle().GetTextColor();
+    textLayoutProperty->UpdateMaxFontScale(MAX_TOAST_SCALE);
     PaddingProperty paddings;
     paddings.top = NG::CalcLength(padding.Top());
     paddings.bottom = NG::CalcLength(padding.Bottom());
@@ -104,18 +108,24 @@ void ToastView::UpdateTextLayoutProperty(
     textLayoutProperty->UpdateFontSize(fontSize);
     textLayoutProperty->UpdateLayoutDirection((isRightToLeft ? TextDirection::RTL : TextDirection::LTR));
     textLayoutProperty->UpdatePadding(paddings);
-    textLayoutProperty->UpdateTextColor(textColor);
+    textLayoutProperty->UpdateTextColor(textColor.value_or(defaultColor));
     textLayoutProperty->UpdateFontWeight(fontWeight);
+    auto textContext = textNode->GetRenderContext();
+    CHECK_NULL_VOID(textContext);
+    textContext->UpdateClipEdge(false);
 
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
         textLayoutProperty->UpdateEllipsisMode(EllipsisMode::TAIL);
     }
 }
-void ToastView::UpdateTextContext(const RefPtr<FrameNode>& textNode)
+
+void ToastView::UpdateToastContext(const RefPtr<FrameNode>& toastNode)
 {
-    auto textContext = textNode->GetRenderContext();
-    CHECK_NULL_VOID(textContext);
+    auto toastContext = toastNode->GetRenderContext();
+    CHECK_NULL_VOID(toastContext);
+    auto pattern = toastNode->GetPattern<ToastPattern>();
+    CHECK_NULL_VOID(pattern);
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
@@ -123,35 +133,36 @@ void ToastView::UpdateTextContext(const RefPtr<FrameNode>& textNode)
     auto radius = toastTheme->GetRadius();
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(Dimension(radius.GetX().ConvertToPx()));
-    textContext->UpdateBorderRadius(borderRadius);
+    toastContext->UpdateBorderRadius(borderRadius);
     if (toastTheme->GetToastDoubleBorderEnable()) {
-        textContext->UpdateOuterBorderRadius(borderRadius);
+        toastContext->UpdateOuterBorderRadius(borderRadius);
 
         BorderWidthProperty innerWidthProp;
         innerWidthProp.SetBorderWidth(Dimension(toastTheme->GetToastInnerBorderWidth()));
-        textContext->UpdateBorderWidth(innerWidthProp);
+        toastContext->UpdateBorderWidth(innerWidthProp);
         BorderColorProperty innerColorProp;
         innerColorProp.SetColor(toastTheme->GetToastInnerBorderColor());
-        textContext->UpdateBorderColor(innerColorProp);
+        toastContext->UpdateBorderColor(innerColorProp);
 
         BorderWidthProperty outerWidthProp;
         outerWidthProp.SetBorderWidth(Dimension(toastTheme->GetToastOuterBorderWidth()));
-        textContext->UpdateOuterBorderWidth(outerWidthProp);
+        toastContext->UpdateOuterBorderWidth(outerWidthProp);
         BorderColorProperty outerColorProp;
         outerColorProp.SetColor(toastTheme->GetToastOuterBorderColor());
-        textContext->UpdateOuterBorderColor(outerColorProp);
+        toastContext->UpdateOuterBorderColor(outerColorProp);
     }
-    textContext->UpdateBackShadow(ShadowConfig::DefaultShadowL);
-    textContext->UpdateClipEdge(false);
-
+    auto toastInfo = pattern->GetToastInfo();
+    toastContext->UpdateBackShadow(toastInfo.shadow.value_or(Shadow::CreateShadow(ShadowStyle::OuterDefaultMD)));
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        textContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        toastContext->UpdateBackgroundColor(toastInfo.backgroundColor.value_or(Color::TRANSPARENT));
         BlurStyleOption styleOption;
-        styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
-        textContext->UpdateBackBlurStyle(styleOption);
+        styleOption.blurStyle = static_cast<BlurStyle>(
+            toastInfo.backgroundBlurStyle.value_or(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)));
+        styleOption.policy = BlurStyleActivePolicy::ALWAYS_ACTIVE;
+        toastContext->UpdateBackBlurStyle(styleOption);
     } else {
         auto toastBackgroundColor = toastTheme->GetBackgroundColor();
-        textContext->UpdateBackgroundColor(toastBackgroundColor);
+        toastContext->UpdateBackgroundColor(toastBackgroundColor);
     }
 }
 } // namespace OHOS::Ace::NG

@@ -17,9 +17,11 @@
 #define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_NODE_TIME_PICKER_MODIFIER_H
 
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/interfaces/cjui/cjui_api.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUITimepickerModifier* GetTimepickerModifier();
+const CJUITimepickerModifier* GetCJUITimepickerModifier();
 void SetTimePickerOnChange(ArkUINodeHandle node, void* extraParam);
 }
 

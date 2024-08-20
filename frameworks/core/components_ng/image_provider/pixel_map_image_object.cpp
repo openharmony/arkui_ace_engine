@@ -22,8 +22,8 @@
 
 namespace OHOS::Ace::NG {
 
-void PixelMapImageObject::MakeCanvasImage(const RefPtr<ImageLoadingContext>& ctx, const SizeF& /*resizeTarget*/,
-    bool /*forceResize*/, bool syncLoad, bool loadInVipChannel)
+void PixelMapImageObject::MakeCanvasImage(
+    const RefPtr<ImageLoadingContext>& ctx, const SizeF& /*resizeTarget*/, bool /*forceResize*/, bool syncLoad)
 {
     if (!pixmap_) {
         ctx->FailCallback("pixmap is null when PixelMapImageObject try MakeCanvasImage");
@@ -41,8 +41,7 @@ void PixelMapImageObject::MakeCanvasImage(const RefPtr<ImageLoadingContext>& ctx
             CHECK_NULL_VOID(pixelmapObject);
             ctx->SuccessCallback(CanvasImage::Create(pixelmapObject->pixmap_));
         };
-        NG::ImageUtils::PostToUI(task, "ArkUIImageCreateCanvasSuccess", ctx->GetContainerId(),
-            loadInVipChannel ? PriorityType::VIP : PriorityType::LOW);
+        NG::ImageUtils::PostToUI(task, "ArkUIImageCreateCanvasSuccess", ctx->GetContainerId());
     }
 }
 

@@ -398,9 +398,6 @@ struct SelectItem {
         .position(this.selectedItemPosition)
         .scale({ x: this.zoomScaleArray[this.selectedIndexes[0]], y: this.zoomScaleArray[this.selectedIndexes[0]] })
         .shadow(ShadowStyle.OUTER_DEFAULT_XS)
-        .pixelRound({
-          top: PixelRoundCalcPolicy.FORCE_FLOOR
-        })
     }
   }
 }
@@ -556,6 +553,7 @@ class HoverColorProperty {
 struct PressAndHoverEffect {
   @Consume buttonItemsSize: SizeOptions[]
   @Prop press: boolean
+  @Prop hover: boolean
   @ObjectLink colorProperty: HoverColorProperty
   @Consume buttonBorderRadius: LocalizedBorderRadiuses[]
   @ObjectLink options: SegmentButtonOptions;
@@ -566,7 +564,7 @@ struct PressAndHoverEffect {
     Stack()
       .direction(this.options.direction)
       .size(this.buttonItemsSize[this.pressIndex])
-      .backgroundColor(this.press ? this.pressColor : this.colorProperty.hoverColor)
+      .backgroundColor(this.press && this.hover ? this.pressColor : this.colorProperty.hoverColor)
       .borderRadius(this.buttonBorderRadius[this.pressIndex])
   }
 }
@@ -585,6 +583,7 @@ struct SegmentButtonItemArrayComponent {
   @Consume buttonItemProperty: ItemProperty[]
   @Consume buttonItemsSelected: boolean[]
   @Link pressArray: boolean[]
+  @Link hoverArray: boolean[]
   @Link hoverColorArray: HoverColorProperty[]
   @State buttonWidth: number[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => 0)
   @State buttonHeight: number[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => 0)
@@ -799,7 +798,8 @@ struct SegmentButtonItemArrayComponent {
                 this.buttonItemsPosition[index] = {
                   start: LengthMetrics.vp(Number.parseFloat(this.options.componentPadding.toString()) +
                     (Number.parseFloat(newValue.width.toString()) + 1) * index),
-                  top: LengthMetrics.vp(Number.parseFloat(this.options.componentPadding.toString()))
+                  top: LengthMetrics.px(Math.floor(this.getUIContext()
+                    .vp2px(Number.parseFloat(this.options.componentPadding.toString()))))
                 }
               }
             })
@@ -831,6 +831,7 @@ struct SegmentButtonItemArrayComponent {
               }
             })
             .onHover((isHover: boolean) => {
+              this.hoverArray[index] = isHover
               if (isHover) {
                 animateTo({ duration: 250, curve: Curve.Friction }, () => {
                   this.hoverColorArray[index].hoverColor = (segmentButtonTheme.HOVER_COLOR)
@@ -913,6 +914,7 @@ export struct SegmentButton {
   @Provide selectedItemPosition: LocalizedEdges = {}
   @Provide zoomScaleArray: number[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => 1.0)
   @State pressArray: boolean[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => false)
+  @State hoverArray: boolean[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => false)
   @State hoverColorArray: HoverColorProperty[] = Array.from({
     length: MAX_ITEM_COUNT
   }, (_: Object, index) => new HoverColorProperty())
@@ -1054,16 +1056,18 @@ export struct SegmentButton {
                         pressIndex: index,
                         colorProperty: this.hoverColorArray[index],
                         press: this.pressArray[index],
+                        hover: this.hoverArray[index],
                         options: this.options,
                       })
                     }
+                    .direction(this.options.direction)
                     .scale({
                       x: this.options.type === 'capsule' && (this.options.multiply ?? false) ? 1 : this.zoomScaleArray[index],
                       y: this.options.type === 'capsule' && (this.options.multiply ?? false) ? 1 : this.zoomScaleArray[index]
                     })
                   }
                 })
-              }
+              }.direction(this.options.direction)
             }
           }
           .direction(this.options.direction)
@@ -1089,6 +1093,7 @@ export struct SegmentButton {
         }
         .direction(this.options.direction)
         .size(this.componentSize)
+        .animation({ duration: 0 })
         .borderRadius((this.options.type === 'capsule' && (this.options.multiply ?? false) ?
         this.options.iconTextRadius : this.options.iconTextBackgroundRadius) ??
           this.componentSize.height as number / 2)
@@ -1096,6 +1101,7 @@ export struct SegmentButton {
 
         SegmentButtonItemArrayComponent({
           pressArray: this.pressArray,
+          hoverArray: this.hoverArray,
           hoverColorArray: this.hoverColorArray,
           optionsArray: this.options.buttons,
           options: this.options,

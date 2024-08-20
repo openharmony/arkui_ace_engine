@@ -67,6 +67,8 @@ public:
     void SetImageAnalyzerConfig(void* config) override;
     void SetImageAIOptions(void* options) override;
     void SetResizableSlice(const ImageResizableSlice& slice) override;
+    void SetResizableLattice(const RefPtr<DrawingLattice>& lattice) override;
+    void ResetResizableLattice() override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& src, RefPtr<PixelMap>& pixMap,
         const std::string& bundleName, const std::string& moduleName, bool isUriPureNumber = false);
     static void InitImage(FrameNode *frameNode, std::string& src);
@@ -108,12 +110,14 @@ public:
     static ImageSourceInfo GetAlt(FrameNode* frameNode);
     static bool GetDraggable(FrameNode* frameNode);
     static ImageRenderMode GetImageRenderMode(FrameNode* frameNode);
-    static void SetResizableSlice(FrameNode *frameNode, const ImageResizableSlice& slice);
-    static ImageResizableSlice GetResizableSlice(FrameNode *frameNode);
-    static void SetDynamicRangeMode(FrameNode *frameNode, DynamicRangeMode dynamicRangeMode);
-    static void SetEnhancedImageQuality(FrameNode *frameNode, AIImageQuality imageQuality);
-    static bool GetFitOriginalSize(FrameNode *frameNode);
-    static uint32_t GetFillColor(FrameNode *frameNode);
+    static void SetResizableSlice(FrameNode* frameNode, const ImageResizableSlice& slice);
+    static void SetResizableLattice(FrameNode* frameNode, const RefPtr<DrawingLattice>& lattice);
+    static void ResetResizableLattice(FrameNode *frameNode);
+    static ImageResizableSlice GetResizableSlice(FrameNode* frameNode);
+    static void SetDynamicRangeMode(FrameNode* frameNode, DynamicRangeMode dynamicRangeMode);
+    static void SetEnhancedImageQuality(FrameNode* frameNode, AIImageQuality imageQuality);
+    static bool GetFitOriginalSize(FrameNode* frameNode);
+    static uint32_t GetFillColor(FrameNode* frameNode);
     static void SetPixelMap(FrameNode* frameNode, void* drawableDescriptor);
     static void SetPixelMapArray(FrameNode* frameNode, void* animatedDrawableDescriptor);
     static void SetResource(FrameNode* frameNode, void* resource);

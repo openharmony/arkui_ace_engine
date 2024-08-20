@@ -15,9 +15,6 @@
 
 #include "core/components/common/layout/grid_container_info.h"
 
-#include "base/log/log.h"
-#include "base/utils/utils.h"
-#include "core/components/common/layout/grid_layout_info.h"
 #include "core/components/common/layout/grid_system_manager.h"
 
 namespace OHOS::Ace {
@@ -33,7 +30,8 @@ const T& GetValue(const T& current, const T& system, const T& defaultValue)
 
 void GridContainerInfo::BuildColumnWidth()
 {
-    BuildColumnWidth(GridSystemManager::GetInstance().GetScreenWidth());
+    auto pipeline = PipelineBase::GetCurrentContext();
+    BuildColumnWidth(GridSystemManager::GetInstance().GetScreenWidth(pipeline));
 }
 
 void GridContainerInfo::BuildColumnWidth(double width)

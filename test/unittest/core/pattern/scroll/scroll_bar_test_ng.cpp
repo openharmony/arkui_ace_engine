@@ -40,9 +40,8 @@ void ScrollBarTestNg::CreateWithBar()
 
 void ScrollBarTestNg::ClickBar(Offset point)
 {
-    GestureEvent info;
-    info.SetLocalLocation(point);
-    pattern_->HandleClickEvent(info); // will trigger CheckBarDirection
+    pattern_->locationInfo_ = Offset(point);
+    pattern_->HandleClickEvent(); // will trigger CheckBarDirection
 }
 
 void ScrollBarTestNg::UpdateOverlayModifier(RefPtr<PaintWrapper> paintWrapper)
@@ -213,7 +212,7 @@ HWTEST_F(ScrollBarTestNg, OnCollectTouchTarget001, TestSize.Level1)
     OffsetF coordinateOffset;
     GetEventTargetImpl getEventTargetImpl;
     TouchTestResult result;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     pattern_->scrollableEvent_->BarCollectTouchTarget(
         coordinateOffset, getEventTargetImpl, result, frameNode_, nullptr, responseLinkResult);
     EXPECT_EQ(result.size(), 1);
@@ -1040,7 +1039,7 @@ HWTEST_F(ScrollBarTestNg, RegisterEventByClick001, TestSize.Level1)
     PointF localPoint;
     RefPtr<FrameNode> frameNode = frameNode_;
     RefPtr<TargetComponent> targetComponent;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     auto scrollableActuator = frameNode_->GetOrCreateGestureEventHub()->scrollableActuator_;
     int32_t nodeId = 123456;
     frameNode_->UpdateRecycleElmtId(nodeId);

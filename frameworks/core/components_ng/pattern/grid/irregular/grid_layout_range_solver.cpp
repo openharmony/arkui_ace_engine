@@ -59,8 +59,8 @@ RangeInfo GridLayoutRangeSolver::FindRangeOnJump(int32_t jumpIdx, int32_t jumpLi
         case ScrollAlign::CENTER: {
             // align by item center
             auto size = GridLayoutUtils::GetItemSize(info_, wrapper_, jumpIdx);
-            auto [centerLine, offset] = info_->FindItemCenter(jumpLineIdx, size.rows, mainGap);
-            float halfMainSize = mainSize / 2.0f;
+            const auto [centerLine, offset] = info_->FindItemCenter(jumpLineIdx, size.rows, mainGap);
+            const float halfMainSize = mainSize / 2.0f;
             auto [endLineIdx, endIdx] = SolveForwardForEndIdx(mainGap, halfMainSize + offset, centerLine);
             auto res = SolveBackward(mainGap, halfMainSize - offset, centerLine);
             return { res.row, res.idx, res.pos, endLineIdx, endIdx };

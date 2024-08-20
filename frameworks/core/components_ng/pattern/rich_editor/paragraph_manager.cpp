@@ -235,7 +235,7 @@ LineMetrics ParagraphManager::GetLineMetricsByRectF(RectF rect, int32_t paragrap
 
 TextLineMetrics ParagraphManager::GetLineMetrics(size_t lineNumber)
 {
-    if (lineNumber > GetLineCount() - 1) {
+    if (GetLineCount() == 0 || lineNumber > GetLineCount() - 1) {
         TAG_LOGE(AceLogTag::ACE_TEXT,
             "GetLineMetrics failed, lineNumber is greater than max lines:%{public}zu", lineNumber);
         return TextLineMetrics();
@@ -245,7 +245,7 @@ TextLineMetrics ParagraphManager::GetLineMetrics(size_t lineNumber)
     size_t lineNumberParam = lineNumber;
     for (auto &&info : paragraphs_) {
         auto lineCount = info.paragraph->GetLineCount();
-        if (lineNumber > lineCount - 1) {
+        if (lineCount > 0 && lineNumber > lineCount - 1) {
             lineNumber -= lineCount;
             paragraphsHeight += info.paragraph->GetHeight();
             auto lastLineMetrics = info.paragraph->GetLineMetrics(lineCount - 1);
@@ -288,6 +288,33 @@ std::vector<RectF> ParagraphManager::GetRects(int32_t start, int32_t end, RectHe
         y += info.paragraph->GetHeight();
     }
     return res;
+}
+
+std::vector<std::vector<RectF>> ParagraphManager::GetParagraphsRects(
+    int32_t start, int32_t end, RectHeightPolicy rectHeightPolicy) const
+{
+    std::vector<std::vector<RectF>> paragraphsRects;
+    float y = 0.0f;
+    for (auto&& info : paragraphs_) {
+        if (info.start > end) {
+            break;
+        }
+        if (info.end > start) {
+            std::vector<RectF> rects;
+            auto relativeStart = (start < info.start) ? 0 : start - info.start;
+            if (rectHeightPolicy == RectHeightPolicy::COVER_TEXT) {
+                info.paragraph->GetTightRectsForRange(relativeStart, end - info.start, rects);
+            } else {
+                info.paragraph->GetRectsForRange(relativeStart, end - info.start, rects);
+            }
+            for (auto&& rect : rects) {
+                rect.SetTop(rect.Top() + y);
+            }
+            paragraphsRects.emplace_back(rects);
+        }
+        y += info.paragraph->GetHeight();
+    }
+    return paragraphsRects;
 }
 
 bool ParagraphManager::IsSelectLineHeadAndUseLeadingMargin(int32_t start) const

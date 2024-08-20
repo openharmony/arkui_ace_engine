@@ -57,7 +57,7 @@ void CanvasRenderingContext2DModelNG::SetFontWeight(const FontWeight& weight)
     pattern_->UpdateFontWeight(weight);
 }
 
-void CanvasRenderingContext2DModelNG::SetFontStyle(const FontStyle& fontStyle)
+void CanvasRenderingContext2DModelNG::SetFontStyle(const Ace::FontStyle& fontStyle)
 {
     CHECK_NULL_VOID(pattern_);
     pattern_->UpdateFontStyle(fontStyle);
@@ -172,7 +172,7 @@ std::string CanvasRenderingContext2DModelNG::GetJsonData(const std::string& path
 
 std::string CanvasRenderingContext2DModelNG::ToDataURL(const std::string& dataUrl, double quality)
 {
-    return pattern_ ? pattern_->ToDataURL(dataUrl + "," + std::to_string(quality)) : "";
+    return pattern_ ? pattern_->ToDataURL(dataUrl, quality) : "";
 }
 
 void CanvasRenderingContext2DModelNG::SetLineCap(const LineCapStyle& lineCap)
@@ -455,8 +455,8 @@ RefPtr<Ace::PixelMap> CanvasRenderingContext2DModelNG::GetPixelMap(const ImageSi
     options.alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL;
     options.pixelFormat = OHOS::Media::PixelFormat::RGBA_8888;
     options.scaleMode = OHOS::Media::ScaleMode::CENTER_CROP;
-    options.size.width = static_cast<int32_t>(std::abs(imageSize.height));
-    options.size.height = static_cast<int32_t>(std::abs(imageSize.width));
+    options.size.width = static_cast<int32_t>(std::abs(imageSize.width));
+    options.size.height = static_cast<int32_t>(std::abs(imageSize.height));
     options.editable = true;
     auto pixelMap = Ace::PixelMap::Create(OHOS::Media::PixelMap::Create(options));
     CHECK_NULL_RETURN(pixelMap, nullptr);
@@ -548,6 +548,12 @@ void CanvasRenderingContext2DModelNG::GetHeight(RefPtr<AceType>& canvasPattern, 
 {
     CHECK_NULL_VOID(pattern_);
     height = pattern_->GetHeight();
+}
+
+void CanvasRenderingContext2DModelNG::SetDensity(double density)
+{
+    CHECK_NULL_VOID(pattern_);
+    pattern_->SetDensity(density);
 }
 
 #ifdef PIXEL_MAP_SUPPORTED

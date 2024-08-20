@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIRatingModifier* GetRatingModifier();
+const CJUIRatingModifier* GetCJUIRatingModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_RATING_MODIFIER_H

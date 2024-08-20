@@ -155,6 +155,10 @@ public:
 
     void TransitionWithPop(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
     void TransitionWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
+    virtual void CreateAnimationWithPop(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
+        const AnimationFinishCallback finishCallback, bool isNavBar = false);
+    virtual void CreateAnimationWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
+        const AnimationFinishCallback finishCallback, bool isNavBar = false);
 
     std::shared_ptr<AnimationUtils::Animation> BackButtonAnimation(
         const RefPtr<FrameNode>& backButtonNode, bool isTransitionIn);
@@ -178,7 +182,7 @@ public:
         isOnAnimation_ = isOnAnimation;
     }
     RefPtr<FrameNode> GetTopDestination();
-    void OnDetachFromMainTree(bool recursive) override;
+    void OnDetachFromMainTree(bool recursive, PipelineContext* context = nullptr) override;
     void OnAttachToMainTree(bool recursive) override;
 
     void FireHideNodeChange(NavDestinationLifecycle lifecycle);
@@ -218,6 +222,15 @@ public:
         hideNodes_.clear();
     }
 
+    std::vector<std::pair<RefPtr<NavDestinationGroupNode>, bool>> GetHideNodes() const
+    {
+        return hideNodes_;
+    }
+
+protected:
+    std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
+    std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;
+
 private:
     bool UpdateNavDestinationVisibility(const RefPtr<NavDestinationGroupNode>& navDestination,
         const RefPtr<UINode>& remainChild, int32_t index, size_t destinationSize,
@@ -226,7 +239,8 @@ private:
         const std::vector<std::pair<std::string, RefPtr<UINode>>>& navDestinationNodes,
         RefPtr<FrameNode>& navigationContentNode, int32_t& slot, bool& hasChanged);
     void RemoveRedundantNavDestination(RefPtr<FrameNode>& navigationContentNode,
-        const RefPtr<UINode>& remainChild, int32_t slot, bool& hasChanged, int32_t beforeLastStandardIndex);
+        const RefPtr<UINode>& remainChild, int32_t slot, bool& hasChanged,
+        const RefPtr<NavDestinationGroupNode>& preLastStandardNode);
     void ReorderAnimatingDestination(RefPtr<FrameNode>& navigationContentNode, RefPtr<UINode>& maxAnimatingDestination,
         RefPtr<UINode>& remainDestination, RefPtr<UINode>& curTopDestination);
     bool FindNavigationParent(const std::string& parentName);
@@ -248,8 +262,6 @@ private:
     bool needSetInvisible_ { false };
     bool isOnModeSwitchAnimation_ { false };
     std::string curId_;
-    std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
-    std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;
     std::string navigationPathInfo_;
     std::string navigationModuleName_;
 };

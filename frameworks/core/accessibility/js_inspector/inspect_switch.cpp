@@ -15,8 +15,6 @@
 
 #include "inspect_switch.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 InspectSwitch::InspectSwitch(NodeId nodeId, const std::string& nodeName) : InspectNode(nodeId, nodeName) {
 }

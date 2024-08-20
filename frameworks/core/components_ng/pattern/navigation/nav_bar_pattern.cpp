@@ -136,12 +136,13 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
     CHECK_NULL_RETURN(hub, nullptr);
     auto isButtonEnabled = hub->IsEnabled();
 
-    uint32_t count = 0;
+    std::string parentId = navigationGroupNode->GetInspectorId().value_or("");
+    int32_t count = 0;
     std::vector<OptionParam> params;
     OptionParam param;
     for (const auto& menuItem : menuItems) {
         ++count;
-        if (needMoreButton && (count > mostMenuItemCount - 1)) {
+        if (needMoreButton && (count > static_cast<int32_t>(mostMenuItemCount) - 1)) {
             param = { menuItem.text.value_or(""), menuItem.icon.value_or(""), menuItem.isEnabled.value_or(true),
                 menuItem.action, menuItem.iconSymbol.value_or(nullptr) };
             param.SetSymbolUserDefinedIdealFontSize(theme->GetMenuIconSize());
@@ -149,8 +150,8 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
         } else {
             auto menuItemNode = NavigationTitleUtil::CreateMenuItemButton(theme);
             int32_t barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-            auto barItemNode = AceType::MakeRefPtr<BarItemNode>(V2::BAR_ITEM_ETS_TAG, barItemNodeId);
-            barItemNode->InitializePatternAndContext();
+            auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+                V2::BAR_ITEM_ETS_TAG, barItemNodeId, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
             NavigationTitleUtil::UpdateBarItemNodeWithItem(barItemNode, menuItem, isButtonEnabled);
             auto barItemLayoutProperty = barItemNode->GetLayoutProperty();
             CHECK_NULL_RETURN(barItemLayoutProperty, nullptr);
@@ -163,6 +164,12 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
             // read navigation menu button
             NavigationTitleUtil::SetAccessibility(menuItemNode, menuItem.text.value_or(""));
 
+            // set navigation titleBar menu inspectorId
+            std::string menuItemValue = menuItemNode->GetTag() + std::to_string(count);
+            // Field field;
+            NavigationTitleUtil::SetInnerChildId(menuItemNode, NG::NAV_FIELD,
+                menuNode->GetTag(), menuItemValue, parentId);
+
             barItemNode->MountToParent(menuItemNode);
             barItemNode->MarkModifyDone();
             menuItemNode->MarkModifyDone();
@@ -173,8 +180,8 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
     // build more button
     if (needMoreButton) {
         int32_t barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        auto barItemNode = AceType::MakeRefPtr<BarItemNode>(V2::BAR_ITEM_ETS_TAG, barItemNodeId);
-        barItemNode->InitializePatternAndContext();
+        auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+            V2::BAR_ITEM_ETS_TAG, barItemNodeId, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
         auto barItemLayoutProperty = barItemNode->GetLayoutProperty();
         CHECK_NULL_RETURN(barItemLayoutProperty, nullptr);
         barItemLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
@@ -198,6 +205,9 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
         // read navigation "more" button
         std::string message  = Localization::GetInstance()->GetEntryLetters("navigation.more");
         NavigationTitleUtil::SetAccessibility(menuItemNode, message);
+
+        // set navigation titleBar "more" button inspectorId
+        NavigationTitleUtil::SetInnerChildId(menuItemNode, NG::NAV_FIELD, menuNode->GetTag(), "More", parentId);
 
         barItemNode->MountToParent(menuItemNode);
         barItemNode->MarkModifyDone();
@@ -489,6 +499,10 @@ void NavBarPattern::OnModifyDone()
     isHideToolbar_ = navBarLayoutProperty->GetHideToolBarValue(false);
     isHideTitlebar_ = navBarLayoutProperty->GetHideTitleBarValue(false);
     titleMode_ = navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
+
+    auto parent = hostNode->GetParent();
+    CHECK_NULL_VOID(parent);
+    titleBarNode->SetInnerParentId(parent->GetInspectorId().value_or(""));
 }
 
 void NavBarPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)

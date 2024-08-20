@@ -62,7 +62,7 @@ RefPtr<Asset> AssetManagerImpl::GetAsset(const std::string& assetName)
         }
     }
 
-    LOGW("GetAsset failed, assetName = %{public}s", assetName.c_str());
+    LOGW("GetAsset failed: %{public}s", assetName.c_str());
     return nullptr;
 }
 

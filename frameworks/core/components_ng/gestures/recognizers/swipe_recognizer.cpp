@@ -75,8 +75,8 @@ void SwipeRecognizer::OnAccepted()
     firstInputTime_.reset();
 
     auto node = GetAttachedNode().Upgrade();
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Swipe accepted, tag = %{public}s, id = %{public}s",
-        node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Swipe accepted, tag = %{public}s",
+        node ? node->GetTag().c_str() : "null");
     refereeState_ = RefereeState::SUCCEED;
     SendCallbackMsg(onAction_);
     int64_t overTime = GetSysTimestamp();
@@ -89,6 +89,7 @@ void SwipeRecognizer::OnAccepted()
 
 void SwipeRecognizer::OnRejected()
 {
+    SendRejectMsg();
     refereeState_ = RefereeState::FAIL;
     firstInputTime_.reset();
 }
@@ -402,14 +403,15 @@ void SwipeRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
             info.SetVerticalAxis(lastAxisEvent_.verticalAxis);
             info.SetHorizontalAxis(lastAxisEvent_.horizontalAxis);
             info.SetSourceTool(lastAxisEvent_.sourceTool);
+            info.SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
         } else {
             info.SetSourceTool(lastTouchEvent_.sourceTool);
+            info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
         }
         info.SetPointerEvent(lastPointEvent_);
         if (prevAngle_) {
             info.SetAngle(prevAngle_.value());
         }
-        info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);
@@ -427,6 +429,7 @@ GestureJudgeResult SwipeRecognizer::TriggerGestureJudgeCallback()
     }
     auto info = std::make_shared<SwipeGestureEvent>();
     info->SetTimeStamp(time_);
+    info->SetDeviceId(deviceId_);
     UpdateFingerListInfo();
     info->SetFingerList(fingerList_);
     if (deviceType_ == SourceType::MOUSE) {
@@ -437,6 +440,9 @@ GestureJudgeResult SwipeRecognizer::TriggerGestureJudgeCallback()
     info->SetSourceDevice(deviceType_);
     info->SetTarget(GetEventTarget().value_or(EventTarget()));
     info->SetForce(lastTouchEvent_.force);
+    if (gestureInfo_) {
+        gestureInfo_->SetInputEventType(inputEventType_);
+    }
     if (lastTouchEvent_.tiltX.has_value()) {
         info->SetTiltX(lastTouchEvent_.tiltX.value());
     }

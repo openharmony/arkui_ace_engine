@@ -34,7 +34,7 @@ public:
     void SetStrokeText(const PaintState& state, const FillTextInfo& fillTextInfo) override;
     void SetAntiAlias(bool anti) override;
     void SetFontWeight(const FontWeight& weight) override;
-    void SetFontStyle(const FontStyle& fontStyle) override;
+    void SetFontStyle(const Ace::FontStyle& fontStyle) override;
     void SetFontFamilies(const std::vector<std::string>& families) override;
     void SetFontSize(const Dimension& size) override;
     std::vector<double> GetLineDash() override;
@@ -104,6 +104,7 @@ public:
     void RestoreLayer() override;
     void Reset() override;
     TextMetrics GetMeasureTextMetrics(const PaintState& state, const std::string& text) override;
+    void SetDensity(double density) override;
 
     // All interfaces that only the 'OffscreenCanvasRenderingContext2D' has.
     RefPtr<AceType> CreateOffscreenPattern(int width, int height) override;

@@ -14,6 +14,7 @@
  */
 
 #include "text_base.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -514,6 +515,12 @@ HWTEST_F(TextTestThreeNg, HandleDoubleClickEvent001, TestSize.Level1)
     RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
     ASSERT_NE(paragraph, nullptr);
     pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+    auto makeEvent = [](GestureEvent& info, bool first) {
+        info.localLocation_ = Offset(0, first ? 0 : 10);
+        info.globalLocation_ = info.localLocation_;
+        TimeStamp timeStamp(std::chrono::nanoseconds(first ? 0 : 3000));
+        info.SetTimeStamp(timeStamp);
+    };
 
     /**
      * @tc.steps: step4. create GestureEvent and call HandleClickEvent function quickly to trigger doubleClick.
@@ -521,30 +528,41 @@ HWTEST_F(TextTestThreeNg, HandleDoubleClickEvent001, TestSize.Level1)
      */
     pattern->textSelector_.Update(-2, -2);
     GestureEvent info;
-    info.localLocation_ = Offset(0, 0);
-
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>(true);
     // test CopyOptions is None
     pattern->copyOption_ = CopyOptions::None;
+    pattern->isDoubleClick_ = false;
+    makeEvent(info, true);
     pattern->HandleClickEvent(info);
-    EXPECT_TRUE(pattern->hasClicked_);
+    EXPECT_TRUE(pattern->multipleClickRecognizer_->IsRunning());
+    makeEvent(info, false);
     pattern->HandleClickEvent(info);
-    EXPECT_FALSE(pattern->hasClicked_);
+    EXPECT_FALSE(pattern->isDoubleClick_);
 
     // test mouse doubleClick
     pattern->isMousePressed_ = true;
     pattern->copyOption_ = CopyOptions::Local;
+    pattern->isDoubleClick_ = false;
+    makeEvent(info, true);
     pattern->HandleClickEvent(info);
-    EXPECT_TRUE(pattern->hasClicked_);
+    EXPECT_TRUE(pattern->multipleClickRecognizer_->IsRunning());
+    makeEvent(info, false);
+    pattern->textForDisplay_ = "ABC";
     pattern->HandleClickEvent(info);
-    EXPECT_FALSE(pattern->hasClicked_);
+    EXPECT_TRUE(pattern->isDoubleClick_);
 
     // test gesture doubleClick
     pattern->isMousePressed_ = false;
     pattern->copyOption_ = CopyOptions::Local;
+    pattern->isDoubleClick_ = false;
+    makeEvent(info, true);
     pattern->HandleClickEvent(info);
-    EXPECT_TRUE(pattern->hasClicked_);
+    EXPECT_TRUE(pattern->multipleClickRecognizer_->IsRunning());
+    makeEvent(info, false);
     pattern->HandleClickEvent(info);
-    EXPECT_FALSE(pattern->hasClicked_);
+    EXPECT_TRUE(pattern->isDoubleClick_);
     pattern->pManager_->Reset();
 }
 
@@ -587,8 +605,14 @@ HWTEST_F(TextTestThreeNg, HandleDoubleClickEvent002, TestSize.Level1)
     pattern->isMousePressed_ = false;
     GestureEvent info;
     info.localLocation_ = Offset(0, 0);
+    info.globalLocation_ = Offset(0, 0);
+    TimeStamp timeStamp(std::chrono::nanoseconds(0));
+    info.SetTimeStamp(timeStamp);
     pattern->HandleClickEvent(info);
     info.localLocation_ = Offset(0, 10);
+    info.globalLocation_ = Offset(0, 10);
+    TimeStamp timeStamp0(std::chrono::nanoseconds(3000));
+    info.SetTimeStamp(timeStamp0);
     pattern->HandleClickEvent(info);
     EXPECT_TRUE(pattern->isDoubleClick_);
     EXPECT_EQ(pattern->textResponseType_, TextResponseType::NONE);
@@ -913,6 +937,180 @@ HWTEST_F(TextTestThreeNg, OnTextSelectionChange002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnTextSelectionChange003
+ * @tc.desc: Test onTextSelectionChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, OnTextSelectionChange003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    /**
+     * @tc.steps: step2. call SetTextSelection with CopyOptions::InApp
+     * @tc.expected: longPress/gesture/input will be regist when CopyOptions not none.
+     */
+    textModelNG.SetCopyOption(CopyOptions::InApp);
+    textModelNG.SetTextDetectEnable(true);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    frameNode->draggable_ = true;
+    auto pattern = frameNode->GetPattern<TextPattern>();
+
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    /**
+     * @tc.steps: step3. create paragraph
+     */
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_, _)).WillRepeatedly(Return(2));
+    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(10.f));
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+
+    /**
+     * @tc.steps: step4. select range is 0-5
+     */
+    pattern->textSelector_.Update(0, 5);
+    int32_t secondIndex = pattern->GetTextSelector().destinationOffset;
+
+    /**
+     * @tc.steps: step5. move secondHandle to index 2
+     */
+    OffsetF secondOffset(ADAPT_OFFSETY_VALUE, ADAPT_OFFSETX_VALUE);
+    int32_t currentHaandleIndex = pattern->GetHandleIndex(Offset(ADAPT_OFFSETY_VALUE, ADAPT_OFFSETY_VALUE));
+    textSelectOverlay->UpdateSelectorOnHandleMove(secondOffset, false);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 2);
+    EXPECT_NE(currentHaandleIndex, secondIndex);
+
+    secondIndex = pattern->GetTextSelector().destinationOffset;
+    currentHaandleIndex = pattern->GetHandleIndex(Offset(ADAPT_OFFSETY_VALUE, ADAPT_OFFSETY_VALUE));
+    textSelectOverlay->UpdateSelectorOnHandleMove(secondOffset, false);
+    EXPECT_EQ(currentHaandleIndex, secondIndex);
+
+    pattern->pManager_->Reset();
+}
+
+/**
+ * @tc.name: OnTextSelectionChange004
+ * @tc.desc: Test onTextSelectionChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, OnTextSelectionChange004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    /**
+     * @tc.steps: step2. call SetTextSelection with CopyOptions::InApp
+     * @tc.expected: longPress/gesture/input will be regist when CopyOptions not none.
+     */
+    textModelNG.SetCopyOption(CopyOptions::InApp);
+    textModelNG.SetTextDetectEnable(true);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    frameNode->draggable_ = true;
+    auto pattern = frameNode->GetPattern<TextPattern>();
+
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    /**
+     * @tc.steps: step3. create paragraph
+     */
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_, _)).WillRepeatedly(Return(2));
+    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(10.f));
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+
+    /**
+     * @tc.steps: step4. select range is 0-5
+     */
+    pattern->textSelector_.Update(0, 5);
+    int32_t firstIndex = pattern->GetTextSelector().baseOffset;
+
+    /**
+     * @tc.steps: step5. move firstHandle to index 2
+     */
+    OffsetF secondOffset(ADAPT_OFFSETY_VALUE, ADAPT_OFFSETX_VALUE);
+    int32_t currentHaandleIndex = pattern->GetHandleIndex(Offset(ADAPT_OFFSETY_VALUE, ADAPT_OFFSETY_VALUE));
+    textSelectOverlay->UpdateSelectorOnHandleMove(secondOffset, true);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 2);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 5);
+    EXPECT_NE(currentHaandleIndex, firstIndex);
+
+    firstIndex = pattern->GetTextSelector().baseOffset;
+    currentHaandleIndex = pattern->GetHandleIndex(Offset(ADAPT_OFFSETY_VALUE, ADAPT_OFFSETY_VALUE));
+    textSelectOverlay->UpdateSelectorOnHandleMove(secondOffset, true);
+    EXPECT_EQ(currentHaandleIndex, firstIndex);
+
+    pattern->pManager_->Reset();
+}
+
+/**
+ * @tc.name: OnTextSelectionChange005
+ * @tc.desc: Test onTextSelectionChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, OnTextSelectionChange005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    /**
+     * @tc.steps: step2. call SetTextSelection with CopyOptions::InApp
+     * @tc.expected: longPress/gesture/input will be regist when CopyOptions not none.
+     */
+    textModelNG.SetCopyOption(CopyOptions::InApp);
+    textModelNG.SetTextDetectEnable(true);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    frameNode->draggable_ = true;
+    auto pattern = frameNode->GetPattern<TextPattern>();
+
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    /**
+     * @tc.steps: step3. create paragraph
+     */
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_, _)).WillRepeatedly(Return(10));
+    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(10.f));
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+
+    /**
+     * @tc.steps: step4. select range is 0-5
+     */
+    pattern->textSelector_.Update(0, 5);
+    int32_t firstIndex = pattern->GetTextSelector().baseOffset;
+
+    /**
+     * @tc.steps: step5. move firstHandle to index 10
+     */
+    OffsetF secondOffset(ADAPT_OFFSETY_VALUE, ADAPT_OFFSETX_VALUE);
+    int32_t currentHaandleIndex = pattern->GetHandleIndex(Offset(ADAPT_OFFSETY_VALUE, ADAPT_OFFSETY_VALUE));
+    textSelectOverlay->UpdateSelectorOnHandleMove(secondOffset, true);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 5);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 10);
+    EXPECT_NE(currentHaandleIndex, firstIndex);
+
+    firstIndex = pattern->GetTextSelector().baseOffset;
+    currentHaandleIndex = pattern->GetHandleIndex(Offset(ADAPT_OFFSETY_VALUE, ADAPT_OFFSETY_VALUE));
+    textSelectOverlay->UpdateSelectorOnHandleMove(secondOffset, true);
+    EXPECT_EQ(currentHaandleIndex, firstIndex);
+
+    pattern->pManager_->Reset();
+}
+
+/**
  * @tc.name: TextLayoutAlgorithmTest009
  * @tc.desc: test text_layout_algorithm.cpp: new method UpdateParagraphForAISpan001
  * @tc.type: FUNC
@@ -1034,11 +1232,11 @@ HWTEST_F(TextTestThreeNg, HandleClickAISpanEvent, TestSize.Level1)
 }
 
 /**
- * @tc.name: ShowUIExtensionMenu
- * @tc.desc: test test_pattern.h ShowUIExtensionMenu function with valid textSelector
+ * @tc.name: ShowAIEntityMenu
+ * @tc.desc: test test_pattern.h ShowAIEntityMenu function with valid textSelector
  * @tc.type: FUNC
  */
-HWTEST_F(TextTestThreeNg, ShowUIExtensionMenu, TestSize.Level1)
+HWTEST_F(TextTestThreeNg, ShowAIEntityMenu, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode and pattern
@@ -1057,10 +1255,10 @@ HWTEST_F(TextTestThreeNg, ShowUIExtensionMenu, TestSize.Level1)
     aiSpan.type = TextDataDetectType::PHONE_NUMBER;
 
     /**
-     * @tc.steps: step2. call ShowUIExtensionMenu function
-     * @tc.expected: ShowUIExtensionMenu result is true.
+     * @tc.steps: step2. call ShowAIEntityMenu function
+     * @tc.expected: ShowAIEntityMenu result is true.
      */
-    EXPECT_TRUE(pattern->ShowUIExtensionMenu(aiSpan, nullptr, nullptr));
+    EXPECT_TRUE(pattern->ShowAIEntityMenu(aiSpan, nullptr, nullptr));
 }
 
 /**
@@ -1107,6 +1305,12 @@ HWTEST_F(TextTestThreeNg, InitSpanItem001, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<PlaceholderSpanPattern>(); });
     host->AddChild(placeholderSpanNode);
     placeholderSpanNode->SetParent(host);
+
+    auto customSpanNode = CustomSpanNode::GetOrCreateSpanNode(V2::CUSTOM_SPAN_NODE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId());
+    host->AddChild(customSpanNode);
+    customSpanNode->SetParent(host);
+
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     /**
      * @tc.steps: step3. textFrameNode Measure will call InitSpanItem/CollectSpanNodes.
@@ -1115,7 +1319,7 @@ HWTEST_F(TextTestThreeNg, InitSpanItem001, TestSize.Level1)
     LayoutConstraintF layoutConstraintF;
     frameNode->Measure(layoutConstraintF);
     auto textPattern = frameNode->GetPattern<TextPattern>();
-    EXPECT_EQ(textPattern->spans_.size(), 5);
+    EXPECT_EQ(textPattern->spans_.size(), 6);
     auto gesture = childFrameNode->GetOrCreateGestureEventHub();
     EXPECT_EQ(gesture->GetHitTestMode(), HitTestMode::HTMNONE);
 }
@@ -1454,9 +1658,8 @@ HWTEST_F(TextTestThreeNg, SetTextDetectTypes001, TestSize.Level1)
      */
     TextModelNG textModelNG;
     textModelNG.Create("");
-    textModelNG.SetCopyOption(CopyOptions::InApp);
-    auto onResult = [](const std::string&) {};
-    textModelNG.SetTextDetectConfig("apple, orange, banana", std::move(onResult));
+    TextDetectConfig textDetectConfig;
+    textModelNG.SetTextDetectConfig(textDetectConfig);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     auto pattern = frameNode->GetPattern<TextPattern>();
     EXPECT_EQ(pattern->dataDetectorAdapter_->aiDetectInitialized_, false);

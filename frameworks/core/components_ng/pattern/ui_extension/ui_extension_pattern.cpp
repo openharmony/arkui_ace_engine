@@ -137,7 +137,6 @@ private:
     WeakPtr<UIExtensionPattern> weakPattern_;
 };
 }
-
 UIExtensionPattern::UIExtensionPattern(
     bool isTransferringCaller, bool isModal, bool isAsyncModalBinding, SessionType sessionType)
     : isTransferringCaller_(isTransferringCaller), isModal_(isModal),
@@ -149,7 +148,7 @@ UIExtensionPattern::UIExtensionPattern(
     CHECK_NULL_VOID(uiExtensionManager);
     uiExtensionId_ = uiExtensionManager->ApplyExtensionId();
     sessionWrapper_ = SessionWrapperFactory::CreateSessionWrapper(
-        sessionType, WeakClaim(this), instanceId_, isTransferringCaller_);
+        sessionType, AceType::WeakClaim(this), instanceId_, isTransferringCaller_);
     accessibilitySessionAdapter_ =
         AceType::MakeRefPtr<AccessibilitySessionAdapterUIExtension>(sessionWrapper_);
     UIEXT_LOGI("The %{public}smodal UIExtension is created.", isModal_ ? "" : "non");
@@ -298,6 +297,13 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
         UIEXT_LOGW("Unable to StartUiextensionAbility while in the background.");
         return;
     }
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    if (container->IsScenceBoardWindow() && !isModal_ && !hasMountToParent_) {
+        needReNotifyForeground_ = true;
+        UIEXT_LOGI("Should NotifyForeground after MountToParent.");
+        return;
+    }
     NotifyForeground();
 }
 
@@ -395,24 +401,9 @@ void UIExtensionPattern::OnDisconnect(bool isAbnormal)
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void UIExtensionPattern::OnAreaChangedInner()
+void UIExtensionPattern::OnSyncGeometryNode(const DirtySwapConfig& config)
 {
-    DispatchDisplayArea();
-}
-
-bool UIExtensionPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
-{
-    CHECK_NULL_RETURN(sessionWrapper_, false);
-    CHECK_NULL_RETURN(dirty, false);
-    auto host = dirty->GetHostNode();
-    CHECK_NULL_RETURN(host, false);
-    auto [displayOffset, err] = host->GetPaintRectGlobalOffsetWithTranslate();
-    auto geometryNode = dirty->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, false);
-    auto displaySize = geometryNode->GetFrameSize();
-    displayArea_ = RectF(displayOffset, displaySize);
-    sessionWrapper_->NotifyDisplayArea(displayArea_);
-    return false;
+    DispatchDisplayArea(true);
 }
 
 void UIExtensionPattern::OnWindowShow()
@@ -474,7 +465,18 @@ void UIExtensionPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(pipeline);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    OnAreaChangedFunc onAreaChangedFunc = [weak = WeakClaim(this)](
+        const RectF& oldRect,
+        const OffsetF& oldOrigin,
+        const RectF& rect,
+        const OffsetF& origin) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->DispatchDisplayArea();
+    };
+    eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
     pipeline->AddOnAreaChangeNode(host->GetId());
     callbackId_ = pipeline->RegisterSurfacePositionChangedCallback([weak = WeakClaim(this)](int32_t, int32_t) {
         auto pattern = weak.Upgrade();
@@ -482,6 +484,7 @@ void UIExtensionPattern::OnAttachToFrameNode()
             pattern->DispatchDisplayArea(true);
         }
     });
+    UIEXT_LOGI("OnAttachToFrameNode");
 }
 
 void UIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -616,10 +619,19 @@ bool UIExtensionPattern::HandleKeyEvent(const KeyEvent& event)
 void UIExtensionPattern::HandleFocusEvent()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
-    if (pipeline->GetIsFocusActive()) {
-        DispatchFocusActiveEvent(true);
+    CHECK_NULL_VOID(pipeline);
+    if (canFocusSendToUIExtension_) {
+        if (pipeline->GetIsFocusActive()) {
+            DispatchFocusActiveEvent(true);
+        }
+
+        DispatchFocusState(true);
+        needReSendFocusToUIExtension_ = false;
+    } else {
+        needReSendFocusToUIExtension_ = true;
     }
-    DispatchFocusState(true);
+
+    canFocusSendToUIExtension_ = true;
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
     uiExtensionManager->RegisterUIExtensionInFocus(WeakClaim(this), sessionWrapper_);
 }
@@ -665,8 +677,21 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
     AceExtraInputData::InsertInterpolatePoints(info);
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->RequestFocusImmediately();
+    bool ret = true;
+    if (pipeline->IsWindowFocused() && !focusHub->IsCurrentFocus()) {
+        canFocusSendToUIExtension_ = false;
+        ret = focusHub->RequestFocusImmediately();
+        if (!ret) {
+            canFocusSendToUIExtension_ = true;
+            UIEXT_LOGW("RequestFocusImmediately failed when HandleTouchEvent.");
+        }
+    }
     DispatchPointerEvent(pointerEvent);
+    if (pipeline->IsWindowFocused() && needReSendFocusToUIExtension_ &&
+        pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_UP) {
+        HandleFocusEvent();
+        needReSendFocusToUIExtension_ = false;
+    }
 }
 
 void UIExtensionPattern::HandleMouseEvent(const MouseInfo& info)
@@ -874,7 +899,7 @@ void UIExtensionPattern::SetOnResultCallback(const std::function<void(int32_t, c
 
 void UIExtensionPattern::FireOnResultCallback(int32_t code, const AAFwk::Want& want)
 {
-    UIEXT_LOGI("OnResult tThe state is changing from '%{public}s' to 'DESTRUCTION'.", ToString(state_));
+    UIEXT_LOGI("OnResult the state is changing from '%{public}s' to 'DESTRUCTION'.", ToString(state_));
     if (onResultCallback_ && (state_ != AbilityState::DESTRUCTION)) {
         ContainerScope scope(instanceId_);
         onResultCallback_(code, want);
@@ -1018,10 +1043,13 @@ void UIExtensionPattern::InitializeAccessibility()
     accessibilityChildTreeCallback_ = std::make_shared<UIExtensionAccessibilityChildTreeCallback>(
         WeakClaim(this), accessibilityId);
     CHECK_NULL_VOID(accessibilityChildTreeCallback_);
+    auto realHostWindowId = ngPipeline->GetRealHostWindowId();
     if (accessibilityManager->IsRegister()) {
-        accessibilityChildTreeCallback_->OnRegister(ngPipeline->GetWindowId(), accessibilityManager->GetTreeId());
+        accessibilityChildTreeCallback_->OnRegister(
+            realHostWindowId, accessibilityManager->GetTreeId());
     }
-    UIEXT_LOGD("UIExtension: %{public}" PRId64 " register child tree", accessibilityId);
+    UIEXT_LOGI("UIExtension: %{public}" PRId64 " register child tree, realHostWindowId: %{public}u",
+        accessibilityId, realHostWindowId);
     accessibilityManager->RegisterAccessibilityChildTreeCallback(accessibilityId, accessibilityChildTreeCallback_);
 }
 
@@ -1069,6 +1097,13 @@ void UIExtensionPattern::OnAccessibilityDumpChildInfo(
 
 void UIExtensionPattern::OnMountToParentDone()
 {
+    UIEXT_LOGI("OnMountToParentDone.");
+    hasMountToParent_ = true;
+    if (needReNotifyForeground_) {
+        needReNotifyForeground_ = false;
+        UIEXT_LOGI("NotifyForeground OnMountToParentDone.");
+        NotifyForeground();
+    }
     auto frameNode = frameNode_.Upgrade();
     CHECK_NULL_VOID(frameNode);
     if (frameNode->GetNodeStatus() == NodeStatus::NORMAL_NODE) {
@@ -1079,6 +1114,17 @@ void UIExtensionPattern::OnMountToParentDone()
     CHECK_NULL_VOID(wantWrap);
     UpdateWant(wantWrap);
     SetWantWrap(nullptr);
+}
+
+void UIExtensionPattern::AfterMountToParent()
+{
+    UIEXT_LOGI("AfterMountToParent.");
+    hasMountToParent_ = true;
+    if (needReNotifyForeground_) {
+        needReNotifyForeground_ = false;
+        UIEXT_LOGI("NotifyForeground AfterMountToParent.");
+        NotifyForeground();
+    }
 }
 
 void UIExtensionPattern::RegisterVisibleAreaChange()

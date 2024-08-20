@@ -28,6 +28,7 @@ void ScrollSpringEffect::RegisterSpringCallback()
         CHECK_NULL_VOID(effect);
         effect->ProcessScrollOver(velocity);
     });
+    scrollable_->SetCurrentPositionCallback(currentPositionCallback_);
 }
 
 void ScrollSpringEffect::InitialEdgeEffect()
@@ -40,6 +41,9 @@ void ScrollSpringEffect::ProcessScrollOver(double velocity)
     if (!currentPositionCallback_ || !leadingCallback_ || !trailingCallback_ || !initLeadingCallback_ ||
         !initTrailingCallback_ || !scrollable_) {
         return;
+    }
+    if (onWillStartSpringCallback_) {
+        onWillStartSpringCallback_();
     }
     double position = currentPositionCallback_();
     double minExtent = leadingCallback_();
@@ -58,6 +62,9 @@ void ScrollSpringEffect::ProcessSpringUpdate()
     if (!currentPositionCallback_ || !leadingCallback_ || !trailingCallback_ || !initLeadingCallback_ ||
         !initTrailingCallback_ || !scrollable_) {
         return;
+    }
+    if (onWillStartSpringCallback_) {
+        onWillStartSpringCallback_();
     }
     double position = currentPositionCallback_();
     double minExtent = leadingCallback_();

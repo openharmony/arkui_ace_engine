@@ -31,6 +31,18 @@ Rect ListPositionController::GetItemRectInGroup(int32_t index, int32_t indexInGr
                 Dimension(pxRect.Height(), DimensionUnit::PX).ConvertToVp());
 }
 
+ListItemGroupIndex ListPositionController::GetItemIndexInGroup(double x, double y) const
+{
+    auto listPattern = AceType::DynamicCast<ListPattern>(scroll_.Upgrade());
+    CHECK_NULL_RETURN(listPattern, ListItemGroupIndex());
+    auto itemIndex = listPattern->GetItemIndexInGroup(x, y);
+    ListItemGroupIndex itemGroupIndex = { -1, -1, -1 };
+    itemGroupIndex.index = itemIndex.index;
+    itemGroupIndex.area = itemIndex.area;
+    itemGroupIndex.indexInGroup = itemIndex.indexInGroup;
+    return itemGroupIndex;
+}
+
 void ListPositionController::JumpToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth,
     ScrollAlign align, int32_t source)
 {

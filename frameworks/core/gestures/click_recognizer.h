@@ -30,10 +30,12 @@ class ClickRecognizer : public MultiFingersRecognizer {
 
 public:
     ClickRecognizer() = default;
-    ClickRecognizer(const WeakPtr<PipelineBase>& context, int32_t fingers, int32_t count)
+    ClickRecognizer(const WeakPtr<PipelineBase>& context, int32_t fingers,
+        int32_t count, double distanceThreshold = std::numeric_limits<double>::infinity())
         : count_(count), context_(context)
     {
         fingers_ = fingers;
+        distanceThreshold_ = distanceThreshold;
     }
     explicit ClickRecognizer(const WeakPtr<PipelineBase>& context) : context_(context) {}
     ~ClickRecognizer() override = default;
@@ -71,6 +73,7 @@ private:
     void InitGlobalValue(SourceType deviceId);
 
     int32_t count_ = 1;
+    double distanceThreshold_ = std::numeric_limits<double>::infinity();
     // number of fingers which put on the screen
     int32_t pointsCount_ = 0;
     int32_t tappedCount_ = 0;

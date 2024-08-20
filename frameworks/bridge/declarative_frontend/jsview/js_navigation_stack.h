@@ -93,6 +93,7 @@ public:
     std::vector<std::string> GetAllPathName() override;
     std::vector<int32_t> GetAllPathIndex() override;
     void InitNavPathIndex(const std::vector<std::string>& pathNames) override;
+    void SetDestinationIdToJsStack(int32_t index, const std::string& navDestinationId) override;
     RefPtr<NG::UINode> CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>& node) override;
     RefPtr<NG::UINode> CreateNodeByRouteInfo(const RefPtr<NG::RouteInfo>& routeInfo,
         const WeakPtr<NG::UINode>& node) override;
@@ -125,14 +126,16 @@ private:
     JSRef<JSObject> GetJsPathInfo(int32_t index);
     std::string GetNameByIndex(int32_t index);
     JSRef<JSVal> GetOnPopByIndex(int32_t index) const;
+    JSRef<JSObject> CreatePathInfoWithNecessaryProperty(const RefPtr<NG::NavDestinationContext>& context);
     bool GetNavDestinationNodeInUINode(RefPtr<NG::UINode> node, RefPtr<NG::NavDestinationGroupNode>& desNode);
     int32_t GetSize() const;
     void SetJSParentStack(JSRef<JSVal> parent);
-    static std::string ConvertParamToString(const JSRef<JSVal>& param);
-    static void ParseJsObject(std::unique_ptr<JsonValue>& json, const JSRef<JSObject>& obj, int32_t depthLimit);
-    static void UpdateOnStateChangedCallback(JSRef<JSObject> obj, std::function<void()> callback);
-    static void UpdateCheckNavDestinationExistsFunc(JSRef<JSObject> obj,
-        std::function<int32_t(JSRef<JSObject>)> checkFunc);
+    std::string ConvertParamToString(const JSRef<JSVal>& param) const;
+    void ParseJsObject(std::unique_ptr<JsonValue>& json, const JSRef<JSObject>& obj, int32_t depthLimit) const;
+    static void UpdateOnStateChangedCallback(
+        JSRef<JSObject> obj, std::function<void()> callback);
+    static void UpdateCheckNavDestinationExistsFunc(
+        JSRef<JSObject> obj, std::function<int32_t(JSRef<JSObject>)> checkFunc);
 
     int LoadDestination(const std::string& name, const JSRef<JSVal>& param, const WeakPtr<NG::UINode>& customNode,
         RefPtr<NG::UINode>& node, RefPtr<NG::NavDestinationGroupNode>& desNode);

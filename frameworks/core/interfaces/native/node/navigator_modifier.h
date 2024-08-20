@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUINavigatorModifier* GetNavigatorModifier();
+const CJUINavigatorModifier* GetCJUINavigatorModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_NAVIGATOR_MODIFIER_H

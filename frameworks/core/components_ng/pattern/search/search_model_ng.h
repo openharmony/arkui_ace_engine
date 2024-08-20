@@ -153,6 +153,8 @@ public:
     static void SetOnWillDeleteEvent(FrameNode* frameNode, std::function<bool(const DeleteValueInfo&)>&& func);
     static void SetOnDidDeleteEvent(FrameNode* frameNode, std::function<void(const DeleteValueInfo&)>&& func);
     static void SetEnablePreviewText(FrameNode* frameNode, bool enablePreviewText);
+    static void SetSelectionMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+        const NG::OnMenuItemClickCallback&& onMenuItemClick);
 
 private:
     static RefPtr<SearchNode> CreateSearchNode(int32_t nodeId, const std::optional<std::string>& value,
@@ -165,7 +167,6 @@ private:
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
     RefPtr<FrameNode> GetSearchTextFieldFrameNode() const;
     static const Dimension ConvertTextFontScaleValue(const Dimension& fontSizeValue);
-    static void UpdateTextFieldFontValue(const RefPtr<FrameNode>& frameNode);
     static void TextFieldUpdateContext(const RefPtr<FrameNode>& frameNode);
 };
 

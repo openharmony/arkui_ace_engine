@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIPathModifier* GetPathModifier();
+const CJUIPathModifier* GetCJUIPathModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_PATH_MODIFIER_H

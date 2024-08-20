@@ -86,6 +86,8 @@ public:
         return cacheKey_;
     }
 
+    Animator::Status GetAnimatorStatus() const;
+
 protected:
     // ensure frames decode serially
     std::mutex decodeMtx_;
@@ -134,6 +136,16 @@ public:
     ~AnimatedRSImage() override = default;
 
     std::shared_ptr<RSImage> GetImage() const override;
+
+    int32_t GetWidth() const override
+    {
+        return currentFrame_ ? currentFrame_->GetWidth() : 0;
+    }
+
+    int32_t GetHeight() const override
+    {
+        return currentFrame_ ? currentFrame_->GetHeight() : 0;
+    }
 #endif
 
     RefPtr<CanvasImage> Clone() override

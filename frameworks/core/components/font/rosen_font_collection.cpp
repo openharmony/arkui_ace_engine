@@ -25,13 +25,7 @@
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkTypeface.h"
 #endif
-#include "base/i18n/localization.h"
-#include "base/log/ace_trace.h"
-#include "base/log/log.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
-#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace {
 
@@ -48,7 +42,7 @@ std::shared_ptr<txt::FontCollection> RosenFontCollection::GetFontCollection()
             fontCollection_ = collectionTxt->GetFontCollection();
             dynamicFontManager_ = collectionTxt->GetDynamicFontManager();
         } else {
-            LOGE("Fail to get FontFollectionTxt!");
+            TAG_LOGW(AceLogTag::ACE_FONT, "Fail to get font Follection!");
         }
     });
     return fontCollection_;
@@ -109,7 +103,7 @@ void RosenFontCollection::LoadFontFromList(const uint8_t* fontData, size_t lengt
         }
         fontCollection_->ClearFontFamilyCache();
 #else
-        LOGE("Drawing is not supported dynamic font");
+        TAG_LOGW(AceLogTag::ACE_FONT, "Drawing is not supported dynamic font");
 #endif
 #else
         fontCollection_->LoadFont(familyName, fontData, length);
@@ -152,10 +146,12 @@ void RosenFontCollection::LoadThemeFont(const char* fontFamily, std::unique_ptr<
         }
         fontCollection_->ClearFontFamilyCache();
 #else
-        LOGE("Drawing is not supported");
+        TAG_LOGW(AceLogTag::ACE_FONT, "Drawing is not supported");
 #endif
 #else
         fontCollection_->LoadThemeFont("", nullptr, 0);
+        TAG_LOGI(AceLogTag::ACE_FONT, "LoadThemeFont [%{public}s:%{public}d]", familyName.c_str(),
+            static_cast<int32_t>(size));
         fontCollection_->LoadThemeFont(familyName, data, size);
 #endif
     }
@@ -165,44 +161,44 @@ void RosenFontCollection::LoadFontFamily(const char* fontFamily, const char* fam
 {
     const std::string path = familySrc;
     if (currentFamily_ == path) {
-        LOGI("This font has already been registered.");
+        TAG_LOGI(AceLogTag::ACE_FONT, "This font has already been registered.");
         return;
     }
     InitializeFontCollection();
     auto ret = StdFilesystemExists(path);
     if (!ret) {
-        LOGE("font is not exist");
+        TAG_LOGW(AceLogTag::ACE_FONT, "FontFamily %{public}s not exist", path.c_str());
         return;
     }
 
     std::ifstream ifs(path, std::ios_base::in);
     if (!ifs.is_open()) {
-        LOGE("path file open fail");
+        TAG_LOGW(AceLogTag::ACE_FONT, "FontFamily file open fail, %{public}s", path.c_str());
         return;
     }
     ifs.seekg(0, ifs.end);
     if (!ifs.good()) {
         ifs.close();
-        LOGE("font file is bad");
+        TAG_LOGW(AceLogTag::ACE_FONT, "font file is bad");
         return;
     }
     auto size = ifs.tellg();
     if (ifs.fail()) {
         ifs.close();
-        LOGE("get size failed");
+        TAG_LOGW(AceLogTag::ACE_FONT, "get size failed");
         return;
     }
     ifs.seekg(ifs.beg);
     if (!ifs.good()) {
         ifs.close();
-        LOGE("file seek failed");
+        TAG_LOGW(AceLogTag::ACE_FONT, "file seek failed");
         return;
     }
     std::unique_ptr<char[]> buffer = std::make_unique<char[]>(size);
     ifs.read(buffer.get(), size);
     if (!ifs.good()) {
         ifs.close();
-        LOGE("read file failed");
+        TAG_LOGW(AceLogTag::ACE_FONT, "read file failed");
         return;
     }
     ifs.close();

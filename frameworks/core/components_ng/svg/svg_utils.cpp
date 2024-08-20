@@ -16,16 +16,13 @@
 #include "core/components_ng/svg/svg_ulils.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-constexpr float DEFAULT_SVG_WIDTH = 300.0f;
-constexpr float DEFAULT_SVG_HEIGHT = 150.0f;
-}
+
 void SvgUtils::CalculateSvgConentSize(Size& svgContentSize, const Size& svgContainerSize,
     const Size& svgSize, const Rect& viewBox)
 {
     if (LessOrEqual(viewBox.Width(), 0.0) || LessOrEqual(viewBox.Height(), 0.0)) {
-        svgContentSize.SetWidth(LessNotEqual(svgSize.Width(), 0.0) ? DEFAULT_SVG_WIDTH : svgSize.Width());
-        svgContentSize.SetHeight(LessNotEqual(svgSize.Height(), 0.0) ? DEFAULT_SVG_HEIGHT : svgSize.Height());
+        svgContentSize.SetWidth(LessNotEqual(svgSize.Width(), 0.0) ? svgContainerSize.Width() : svgSize.Width());
+        svgContentSize.SetHeight(LessNotEqual(svgSize.Height(), 0.0) ? svgContainerSize.Height() : svgSize.Height());
         return;
     }
     if (LessNotEqual(svgSize.Width(), 0.0) && LessNotEqual(svgSize.Height(), 0.0)) {

@@ -281,6 +281,7 @@ void GridItemPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
         static_cast<float>(radius.radiusBottomRight->ConvertToPx() + focusPaintPadding),
         static_cast<float>(radius.radiusBottomRight->ConvertToPx() + focusPaintPadding));
 }
+
 void GridItemPattern::DumpAdvanceInfo()
 {
     auto property = GetLayoutProperty<GridItemLayoutProperty>();
@@ -303,6 +304,8 @@ void GridItemPattern::DumpAdvanceInfo()
     property->GetColumnEnd().has_value()
         ? DumpLog::GetInstance().AddDesc("ColumnEnd:" + std::to_string(property->GetColumnEnd().value()))
         : DumpLog::GetInstance().AddDesc("ColumnEnd:null");
+    property->GetNeedStretch() ? DumpLog::GetInstance().AddDesc("needStretch:true")
+                               : DumpLog::GetInstance().AddDesc("needStretch:false");
     selectable_ ? DumpLog::GetInstance().AddDesc("selectable:true")
                 : DumpLog::GetInstance().AddDesc("selectable:false");
     isSelected_ ? DumpLog::GetInstance().AddDesc("isSelected:true")

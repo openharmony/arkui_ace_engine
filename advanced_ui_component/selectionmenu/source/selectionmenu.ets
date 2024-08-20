@@ -400,7 +400,8 @@ struct SelectionMenuComponent {
                 })
             }
           }
-          if (this.controller && !this.showExpandedMenuOptions && this.expandedMenuOptions && this.expandedMenuOptions.length > 0) {
+          if (this.controller && !this.showExpandedMenuOptions &&
+            this.expandedMenuOptions && this.expandedMenuOptions.length > 0) {
             MenuItem({ content: "更多", endIcon: this.theme.arrowDownIcon })
               .onClick(() => {
                 this.showExpandedMenuOptions = true

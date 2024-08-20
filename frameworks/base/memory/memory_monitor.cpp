@@ -17,14 +17,12 @@
 
 #include <map>
 #include <mutex>
+#include <memory>
 
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM) and !defined(LINUX_PLATFORM)
 #include <malloc.h>
 #endif
-
 #include "base/log/dump_log.h"
-#include "base/log/log.h"
-#include "base/utils/system_properties.h"
 
 namespace OHOS::Ace {
 

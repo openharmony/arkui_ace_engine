@@ -15,18 +15,8 @@
 
 #include "core/components/common/painter/rosen_svg_painter.h"
 
-#include "include/core/SkColor.h"
-#include "include/core/SkPathMeasure.h"
-#include "include/core/SkRSXform.h"
-#include "include/core/SkTextBlob.h"
-#include "include/effects/SkDashPathEffect.h"
-#include "include/effects/SkGradientShader.h"
-#include "include/effects/SkLumaColorFilter.h"
 #include "include/utils/SkParsePath.h"
-#include "render_service_client/core/ui/rs_node.h"
-
 #include "frameworks/core/components/svg/rosen_render_svg_pattern.h"
-#include "frameworks/core/components/transform/rosen_render_transform.h"
 
 namespace OHOS::Ace {
 
