@@ -220,7 +220,7 @@ void ButtonPattern::HandleFocusStyleTask(RefPtr<ButtonLayoutProperty> layoutProp
     CHECK_NULL_VOID(graphics);
     CHECK_NULL_VOID(transform);
 
-    if (buttonStyle != ButtonStyleMode::TEXT) {
+    if (buttonStyle != ButtonStyleMode::TEXT && isApplyShadow_) {
         Shadow shadow = Shadow::CreateShadow(static_cast<ShadowStyle>(buttonTheme->GetShadowNormal()));
         if (!graphics->HasBackShadow() || graphics->GetBackShadowValue() == shadow) {
             shadowModify_ = true;
@@ -366,7 +366,7 @@ void ButtonPattern::HandleBackgroundStyle(RefPtr<ButtonLayoutProperty>& layoutPr
 
     auto && graphics = renderContext->GetOrCreateGraphics();
     CHECK_NULL_VOID(graphics);
-    if (buttonStyle != ButtonStyleMode::TEXT && !graphics->HasBackShadow()) {
+    if (buttonStyle != ButtonStyleMode::TEXT && !graphics->HasBackShadow() && isApplyShadow_) {
         ShadowStyle shadowStyle = static_cast<ShadowStyle>(buttonTheme->GetShadowNormal());
         Shadow shadow = Shadow::CreateShadow(shadowStyle);
         renderContext->UpdateBackShadow(shadow);

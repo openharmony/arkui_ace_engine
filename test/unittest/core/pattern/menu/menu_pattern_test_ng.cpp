@@ -1263,7 +1263,7 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTest077, TestSize.Level1)
 HWTEST_F(MenuPatternTestNg, MenuPatternTest078, TestSize.Level1)
 {
     MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
-	ScreenSystemManager::GetInstance().dipScale_ = DIP_SCALE;
+    ScreenSystemManager::GetInstance().dipScale_ = DIP_SCALE;
     SystemProperties::orientation_ = DeviceOrientation::LANDSCAPE;
     auto menuWrapperNode = GetPreviewMenuWrapper();
     ASSERT_NE(menuWrapperNode, nullptr);

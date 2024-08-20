@@ -13,19 +13,23 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_VIBRATOR_VIBRATOR_IMPL_H
-#define FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_VIBRATOR_VIBRATOR_IMPL_H
-#include <stdint.h>
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_VIBRATOR_VIBRATOR_UTILS_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_VIBRATOR_VIBRATOR_UTILS_H
+
+#include <string>
+
 namespace OHOS::Ace::NG {
-class VibratorImpl {
+class VibratorUtils {
 public:
-    VibratorImpl() = delete;
-    ~VibratorImpl() = delete;
+    VibratorUtils() = delete;
+    ~VibratorUtils() = delete;
 
     static void StartVibraFeedback();
-    static bool StartVibraFeedback(const char* effectId);
-    static bool StartVibraFeedback(const char* effectId, int32_t usage);
+    static void StartVibraFeedback(const std::string& vibratorType);
+private:
+    static const char* GetFirstSupportedId();
+    static const char* supportedEffectId;
 };
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_VIBRATOR_VIBRATOR_IMPL_H
 
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_VIBRATOR_VIBRATOR_UTILS_H

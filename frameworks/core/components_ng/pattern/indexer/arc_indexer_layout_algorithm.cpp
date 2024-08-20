@@ -143,7 +143,9 @@ void ArcIndexerLayoutAlgorithm::MeasureArc(LayoutWrapper* layoutWrapper)
         startAngle_ = -stepAngle_ * fullCount_ * HALF + stepAngle_* HALF;
     }
 
-    sweepAngle_ = stepAngle_ * (itemCount_ - 1);
+    if (itemCount_ > 0) {
+        sweepAngle_ = stepAngle_ * (itemCount_ - 1);
+    }
 }
 
 } // namespace OHOS::Ace::NG

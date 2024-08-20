@@ -42,6 +42,11 @@ public:
 
     ~ButtonPattern() override = default;
 
+    void SetApplyShadow(bool shadow)
+    {
+        isApplyShadow_ = shadow;
+    }
+
     bool IsAtomicNode() const override
     {
         return false;
@@ -388,6 +393,7 @@ private:
     bool isHover_ = false;
     bool isFocus_ = false;
     bool isPress_ = false;
+    bool isApplyShadow_ = true;
 
     bool isInHover_ = false;
     Offset localLocation_;

@@ -1558,7 +1558,7 @@ HWTEST_F(OverlayTestUpdate, ToastTest028, TestSize.Level1)
     ASSERT_NE(textNode, nullptr);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-	auto renderContext = textNode->GetRenderContext();
+    auto renderContext = textNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
     /**
      * @tc.steps: step4. change version.
@@ -1574,7 +1574,7 @@ HWTEST_F(OverlayTestUpdate, ToastTest028, TestSize.Level1)
      */
     ToastView::UpdateTextLayoutBorderShadowProperty(textNode);
     EXPECT_EQ(renderContext->HasBorderWidth(), true);
-	EXPECT_EQ(renderContext->HasBorderColor(), true);
+    EXPECT_EQ(renderContext->HasBorderColor(), true);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 
@@ -1604,9 +1604,9 @@ HWTEST_F(OverlayTestUpdate, ToastTest029, TestSize.Level1)
     ASSERT_NE(textNode, nullptr);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-	auto renderContext = textNode->GetRenderContext();
+    auto renderContext = textNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
-	auto && graphics = renderContext->GetOrCreateGraphics();
+    auto && graphics = renderContext->GetOrCreateGraphics();
     CHECK_NULL_VOID(graphics);
     /**
      * @tc.steps: step4. change version.

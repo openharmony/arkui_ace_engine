@@ -170,7 +170,7 @@ void SwitchModifier::DrawRectCircle(RSCanvas& canvas, const OffsetF& contentOffs
     canvas.AttachBrush(brush);
     canvas.DrawRoundRect(roundRect);
     canvas.DetachBrush();
-    if (isDiffPointColor_) {
+    if (isDiffPointColor_ && !hasPointColor_) {
         if (isFocused_->Get()) {
             brush.SetColor(ToRSColor(isSelect_->Get() ? animatePointColor_->Get() : LinearColor(pointColor_)));
         } else {

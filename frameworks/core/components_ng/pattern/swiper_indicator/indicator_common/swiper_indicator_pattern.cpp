@@ -166,7 +166,11 @@ void SwiperIndicatorPattern::HandleFocusEvent()
 {
     CHECK_NULL_VOID(dotIndicatorModifier_);
     AddIsFocusActiveUpdateEvent();
-    OnIsFocusActiveUpdate(true);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetIsFocusActive()) {
+        OnIsFocusActiveUpdate(true);
+    }
 }
 
 void SwiperIndicatorPattern::HandleBlurEvent()

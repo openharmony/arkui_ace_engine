@@ -48,7 +48,6 @@ constexpr uint32_t PICKER_SELECT_AVERAGE = 2;
 constexpr int32_t INVALID_CROWNSENSITIVITY = -1;
 constexpr int32_t DEFAULT_CROWNSENSITIVITY = 1;
 constexpr int32_t INVALID_SELECTED_COLUMN_INDEX = -1;
-constexpr int32_t VIBRATOR_TYPE_ONE = 0;
 constexpr char WATCHHAPTIC_CROWN_STRENGTH1[] = "watchhaptic.crown.strength1";
 constexpr char WATCHHAPTIC_CROWN_STRENGTH5[] = "watchhaptic.crown.strength5";
 

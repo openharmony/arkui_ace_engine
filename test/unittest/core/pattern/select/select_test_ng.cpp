@@ -44,6 +44,7 @@
 #include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/syntax/lazy_for_each_model.h"
@@ -2055,6 +2056,37 @@ HWTEST_F(SelectTestNg, SetFocusStyle001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetFocusStyle002
+ * @tc.desc: Test SelectPattern SetFocusStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetFocusStyle002, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
+        { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call SetFocusStyle.
+     * @tc.expected: the function runs normally
+     */
+    for (int turn = 0; turn < 2; turn++) {
+        selectPattern->SetFocusStyle();
+        EXPECT_EQ(selectPattern->bgColorModify_, true);
+    }
+}
+
+/**
  * @tc.name: ClearFocusStyle001
  * @tc.desc: Test SelectPattern ClearFocusStyle
  * @tc.type: FUNC
@@ -2082,8 +2114,39 @@ HWTEST_F(SelectTestNg, ClearFocusStyle001, TestSize.Level1)
     for (int turn = 0; turn < 2; turn++) {
         selectPattern->ClearFocusStyle();
         EXPECT_EQ(selectPattern->shadowModify_, false);
-		EXPECT_EQ(selectPattern->scaleModify_, false);
-		EXPECT_EQ(selectPattern->bgColorModify_, false);
+        EXPECT_EQ(selectPattern->scaleModify_, false);
+        EXPECT_EQ(selectPattern->bgColorModify_, false);
+    }
+}
+
+/**
+ * @tc.name: ClearFocusStyle002
+ * @tc.desc: Test SelectPattern ClearFocusStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, ClearFocusStyle002, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
+        { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call ClearFocusStyle.
+     * @tc.expected: the function runs normally
+     */
+    for (int turn = 0; turn < 2; turn++) {
+        selectPattern->ClearFocusStyle();
+        EXPECT_EQ(selectPattern->focusTextColorModify_, false);
     }
 }
 
@@ -2120,20 +2183,119 @@ HWTEST_F(SelectTestNg, ModFocusIconStyle001, TestSize.Level1)
     /**
      * @tc.steps: step3. Call ModFocusIconStyle.
      * @tc.expected: the function runs normally
-     */	
+     */
     bool isSetUnSet[2] = { false, true };
     for (int turn = 0; turn < 2; turn++) {
-        if(isSetUnSet[turn])
-        {
+        if (isSetUnSet[turn]) {
             spinnerLayoutProperty->UpdateSymbolColorList({selectTheme->GetSpinnerFocusedSymbolColor()});
-        }
-        else
-        {
+        } else {
             spinnerLayoutProperty->UpdateSymbolColorList({selectTheme->GetSpinnerSymbolColor()});
         }
         EXPECT_NE(selectPattern->spinner_, nullptr);
     }
+}
 
+/**
+ * @tc.name: ModFocusIconStyle002
+ * @tc.desc: Test SelectPattern ModFocusIconStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, ModFocusIconStyle002, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
+        { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto spinnerId = selectPattern->GetSpinnerId();
+    RefPtr<FrameNode> spinner_ = FrameNode::GetOrCreateFrameNode(
+            V2::IMAGE_ETS_TAG, spinnerId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    auto spinnerRenderProperty = spinner_->GetPaintProperty<ImageRenderProperty>();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    
+    /**
+     * @tc.steps: step3. Call ModFocusIconStyle.
+     * @tc.expected: the function runs normally
+     */
+    bool isSetUnSet[2] = { false, true };
+    for (int turn = 0; turn < 2; turn++) {
+        if (isSetUnSet[turn]) {
+            spinnerRenderProperty->UpdateSvgFillColor(selectTheme->GetSpinnerFocusedColor());
+        } else {
+            spinnerRenderProperty->UpdateSvgFillColor(selectTheme->GetSpinnerColor());
+        }
+        EXPECT_NE(selectPattern->spinner_, nullptr);
+    }
+}
+
+/**
+ * @tc.name: GetSelectLeftRightMargin001
+ * @tc.desc: Test SelectPattern GetSelectLeftRightMargin
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, GetSelectLeftRightMargin001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
+        { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call GetSelectLeftRightMargin.
+     * @tc.expected: the function runs normally
+     */
+    Dimension value = selectPattern->GetSelectLeftRightMargin();
+    EXPECT_EQ(value,  8.0_vp);
+}
+
+/**
+ * @tc.name: GetFocusPattern001
+ * @tc.desc: Test SelectPattern GetFocusPattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, GetFocusPattern001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
+        { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call GetFocusPattern.
+     * @tc.expected: the function runs normally
+     */
+    FocusPattern value = selectPattern->GetFocusPattern();
+    ASSERT_NE(selectPattern, nullptr);
 }
 
 /**
@@ -2157,7 +2319,7 @@ HWTEST_F(SelectTestNg, BuildChild001, TestSize.Level1)
     ASSERT_NE(select, nullptr);
     auto selectPattern = select->GetPattern<SelectPattern>();
     auto host = selectPattern->GetHost();
-	ASSERT_NE(host, nullptr);
+    ASSERT_NE(host, nullptr);
     auto pipeline = PipelineBase::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
@@ -2167,16 +2329,16 @@ HWTEST_F(SelectTestNg, BuildChild001, TestSize.Level1)
      * @tc.steps: step3. Call UpdateBorderWidth.
      * @tc.expected: the function runs normally
      */
-	// set bgColor and border
+    // set bgColor and border
     auto renderContext = host->GetRenderContext();
-	EXPECT_NE(renderContext, 0);
+    EXPECT_NE(renderContext, 0);
 
     BorderColorProperty borderColor;
     borderColor.SetColor(selectTheme->GetSelectNormalBorderColor());
     renderContext->UpdateBorderColor(borderColor);
 
     auto layoutProperty = select->GetLayoutProperty();
-	EXPECT_NE(layoutProperty, 0);
+    EXPECT_NE(layoutProperty, 0);
     BorderWidthProperty borderWidth;
     borderWidth.SetBorderWidth(selectTheme->GetSelectNormalBorderWidth());
     layoutProperty->UpdateBorderWidth(borderWidth);
@@ -2185,7 +2347,7 @@ HWTEST_F(SelectTestNg, BuildChild001, TestSize.Level1)
     ShadowStyle shadowStyle = static_cast<ShadowStyle>(selectTheme->GetSelectNormalShadow());
     renderContext->UpdateBackShadow(Shadow::CreateShadow(shadowStyle));
     EXPECT_NE(selectTheme, nullptr);
-	int iShadowStyle = static_cast<int>(shadowStyle);
+    int iShadowStyle = static_cast<int>(shadowStyle);
     EXPECT_EQ(iShadowStyle, 0);
 }
 
@@ -2211,10 +2373,10 @@ HWTEST_F(SelectTestNg, UpdateLastSelectedProps003, TestSize.Level1)
         []() { return AceType::MakeRefPtr<OptionPattern>(0); });
     ASSERT_NE(option1, nullptr);
     pattern->options_.push_back(option1);
-	pattern->UpdateLastSelectedProps(0);
+    pattern->UpdateLastSelectedProps(0);
     EXPECT_NE(pattern->options_[0]->GetPattern<OptionPattern>(), nullptr);
 
-	auto option2 = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    auto option2 = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<OptionPattern>(0); });
     ASSERT_NE(option2, nullptr);
     pattern->options_.push_back(option2);

@@ -38,7 +38,7 @@
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #ifdef SUPPORT_DIGITAL_CROWN
-#include "adapter/ohos/entrance/vibrator/vibrator_impl.h"
+#include "core/common/vibrator/vibrator_utils.h"
 #endif
 
 namespace OHOS::Ace::NG {
@@ -51,8 +51,6 @@ constexpr float ARC_LIST_DRAG_OVER_FRICTION = 0.5f;
 constexpr float ARC_LIST_ITEM_MOVE_THRESHOLD_RATIO = 0.4f;
 constexpr float FLOAT_TWO = 2.0f;
 #ifdef SUPPORT_DIGITAL_CROWN
-constexpr int32_t VIBRATOR_TYPE_ONE = 0;
-constexpr int32_t VIBRATOR_TYPE_THREE = 2;
 constexpr const char* HAPTIC_STRENGTH1 = "watchhaptic.crown.strength1";
 constexpr const char* HAPTIC_STRENGTH5 = "watchhaptic.crown.strength5";
 #endif
@@ -579,10 +577,8 @@ void ArcListPattern::StartVibrator(bool bEdge)
     if (!GetCrownEventDragging()) {
         return;
     }
-
     const char* effectId = bEdge ? HAPTIC_STRENGTH5 : HAPTIC_STRENGTH1;
-    int32_t usage = bEdge ? VIBRATOR_TYPE_THREE : VIBRATOR_TYPE_ONE;
-    VibratorImpl::StartVibraFeedback(effectId, usage);
+    VibratorUtils::StartVibraFeedback(effectId);
 }
 #endif
 

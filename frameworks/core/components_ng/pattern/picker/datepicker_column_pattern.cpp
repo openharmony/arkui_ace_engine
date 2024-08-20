@@ -269,11 +269,7 @@ void DatePickerColumnPattern::OnTouchUp()
     CHECK_NULL_VOID(pickerTheme);
     SetSelectedMark(pickerTheme, true);
 
-    if (hoverd_) {
-        PlayPressAnimation(GetButtonHoverColor());
-    } else {
-        PlayPressAnimation(buttonBgColor_);
-    }
+    PlayPressAnimation(hoverd_ ? GetButtonHoverColor() : buttonBgColor_);
 }
 
 void DatePickerColumnPattern::SetButtonBackgroundColor(const Color& pressColor)
@@ -329,8 +325,8 @@ void DatePickerColumnPattern::InitSelectorButtonProperties(const RefPtr<PickerTh
         pressColor_ = buttonDefaultBgColor_.BlendColor(pickerTheme->GetPressColor());
         hoverColor_ = buttonDefaultBgColor_.BlendColor(pickerTheme->GetHoverColor());
 
-        buttonDefaultBorderWidth_ = pickerTheme->GetSelectorItemFocusBorderWidth();
-        buttonFocusBorderWidth_ = pickerTheme->GetSelectorItemBorderWidth();
+        buttonFocusBorderWidth_ = pickerTheme->GetSelectorItemFocusBorderWidth();
+        buttonDefaultBorderWidth_ = pickerTheme->GetSelectorItemBorderWidth();
     }
 }
 
@@ -341,7 +337,7 @@ const Color& DatePickerColumnPattern::GetButtonHoverColor() const
 
 void DatePickerColumnPattern::UpdateColumnButtonFocusState(bool haveFocus, bool needMarkDirty)
 {
-    auto isInitUpdate = isFirstTimeUpdateButtonProps_ && (!haveFocus);
+    auto isInitUpdate = isFirstTimeUpdateButtonProps_ && !haveFocus;
     auto isFocusChanged = isFocusColumn_ != haveFocus;
 
     if (isFocusChanged || isInitUpdate) {
@@ -1213,7 +1209,9 @@ void DatePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
         InnerHandleScroll(LessNotEqual(dragDelta, 0.0), true, false);
         dragDelta = dragDelta % static_cast<int>(std::abs(shiftDistance));
 #ifdef SUPPORT_DIGITAL_CROWN
-        VibratorImpl::StartVibraFeedback(OHOS::Ace::NG::WATCHHAPTIC_CROWN_STRENGTH1, OHOS::Ace::NG::VIBRATOR_TYPE_ONE);
+#if !defined(PREVIEW)
+        VibratorUtils::StartVibraFeedback(OHOS::Ace::NG::WATCHHAPTIC_CROWN_STRENGTH1);
+#endif
 #endif
     }
     // update selected option
@@ -1461,7 +1459,7 @@ void DatePickerColumnPattern::HandleCrownEndEvent(const CrownEvent& event)
         InnerHandleScroll(LessNotEqual(scrollDelta_, 0.0), true, false);
         scrollDelta_ = scrollDelta_ - std::abs(shiftDistance) * (dir == DatePickerScrollDirection::UP ? -1 : 1);
 #ifdef SUPPORT_DIGITAL_CROWN
-        VibratorImpl::StartVibraFeedback(OHOS::Ace::NG::WATCHHAPTIC_CROWN_STRENGTH1, OHOS::Ace::NG::VIBRATOR_TYPE_ONE);
+        VibratorUtils::StartVibraFeedback(OHOS::Ace::NG::WATCHHAPTIC_CROWN_STRENGTH1);
 #endif
     }
     CreateAnimation(scrollDelta_, 0.0);
