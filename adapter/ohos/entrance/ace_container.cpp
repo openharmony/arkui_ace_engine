@@ -1941,6 +1941,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
 #ifdef FORM_SUPPORTED
     if (isFormRender_) {
         pipelineContext_->SetIsFormRender(isFormRender_);
+        pipelineContext_->SetIsDynamicRender(isDynamicRender_);
         auto cardFrontend = AceType::DynamicCast<FormFrontendDeclarative>(frontend_);
         if (cardFrontend) {
             cardFrontend->SetTaskExecutor(taskExecutor_);
