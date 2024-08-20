@@ -4097,6 +4097,9 @@ float TextFieldPattern::PreferredTextHeight(bool isPlaceholder, bool isAlgorithm
         TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(tmpHost, layoutProperty, textFieldTheme, textStyle, false);
         textContent = "b";
     }
+    if (adaptFontSize_.has_value()) {
+        textStyle.SetFontSize(adaptFontSize_.value());
+    }
     if (textStyle.GetFontSize().IsNonPositive()) {
         textStyle.SetFontSize(DEFAULT_FONT);
     }
