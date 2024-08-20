@@ -919,6 +919,8 @@ private:
 
     bool IsItemOverlay() const;
 
+    void CheckSpecialItemCount() const;
+
     friend class SwiperHelper;
 
     RefPtr<PanEvent> panEvent_;

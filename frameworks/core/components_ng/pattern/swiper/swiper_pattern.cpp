@@ -43,6 +43,7 @@
 #include "core/components_ng/pattern/swiper/swiper_layout_algorithm.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
+#include "core/components_ng/pattern/swiper/swiper_node.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_method.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
 #include "core/components_ng/pattern/swiper/swiper_utils.h"
@@ -365,6 +366,7 @@ void SwiperPattern::OnModifyDone()
     InitIndicator();
     InitArrow();
     InitCapture();
+    CheckSpecialItemCount();
     SetLazyLoadIsLoop();
     RegisterVisibleAreaChange();
     InitTouchEvent(gestureHub);
@@ -5872,5 +5874,13 @@ bool SwiperPattern::IsItemOverlay() const
         lastItemEndPos = direction_ == Axis::HORIZONTAL ? rect.Right() : rect.Bottom();
     }
     return false;
+}
+
+void SwiperPattern::CheckSpecialItemCount() const
+{
+    auto swiperNode = AceType::DynamicCast<SwiperNode>(GetHost());
+    CHECK_NULL_VOID(swiperNode);
+    swiperNode->SetSpecialItemCount(indicatorId_.has_value() + leftButtonId_.has_value() + rightButtonId_.has_value() +
+                                    leftCaptureId_.has_value() + rightCaptureId_.has_value());
 }
 } // namespace OHOS::Ace::NG
