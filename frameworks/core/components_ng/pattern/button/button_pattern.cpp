@@ -267,7 +267,7 @@ void ButtonPattern::InitHoverEvent()
         return;
     }
     auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
-        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "button handle hover %{public}d", isHover);
+        TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "button hover %{public}d", isHover);
         auto pattern = weak.Upgrade();
         if (pattern) {
             pattern->HandleHoverEvent(isHover);
