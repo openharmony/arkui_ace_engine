@@ -122,6 +122,7 @@ public:
     void FocusSwitchingEnd(SwitchingEndReason reason = SwitchingEndReason::FOCUS_GUARD_DESTROY);
     void WindowFocusMoveStart();
     void WindowFocusMoveEnd();
+    void WindowFocus(bool isFocus);
 
     static RefPtr<FocusManager> GetFocusManager(RefPtr<FrameNode>& node);
 

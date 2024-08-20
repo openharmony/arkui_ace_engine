@@ -404,4 +404,39 @@ FocusManager::FocusGuard::~FocusGuard()
         focusMng_->FocusSwitchingEnd();
     }
 }
+
+void FocusManager::WindowFocus(bool isFocus)
+{
+    if (!isFocus) {
+        return;
+    }
+    WindowFocusMoveStart();
+    FocusSwitchingStart(GetCurrentFocus(), SwitchingStartReason::WINDOW_FOCUS);
+    auto curFocusView = GetLastFocusView().Upgrade();
+    auto curFocusViewHub = curFocusView ? curFocusView->GetFocusHub() : nullptr;
+    if (!curFocusViewHub) {
+        TAG_LOGW(AceLogTag::ACE_FOCUS, "Current focus view can not found!");
+    } else if (curFocusView->GetIsViewHasFocused() && !curFocusViewHub->IsCurrentFocus()) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on current focus view: %{public}s/%{public}d",
+            curFocusView->GetFrameName().c_str(), curFocusView->GetFrameId());
+        curFocusViewHub->RequestFocusImmediately();
+    } else {
+        auto container = Container::Current();
+        if (container && (container->IsUIExtensionWindow() || container->IsDynamicRender())) {
+            curFocusView->SetIsViewRootScopeFocused(false);
+            curFocusView->RequestDefaultFocus();
+        }
+    }
+
+    auto pipeline = pipeline_.Upgrade();
+    CHECK_NULL_VOID(pipeline);
+    auto root = pipeline->GetRootElement();
+    CHECK_NULL_VOID(root);
+    auto rootFocusHub = root->GetFocusHub();
+    CHECK_NULL_VOID(rootFocusHub);
+    if (!rootFocusHub->IsCurrentFocus()) {
+        rootFocusHub->RequestFocusImmediately();
+    }
+    pipeline->RequestFrame();
+}
 } // namespace OHOS::Ace::NG

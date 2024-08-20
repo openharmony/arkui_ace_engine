@@ -3091,31 +3091,11 @@ void PipelineContext::WindowFocus(bool isFocus)
         NotifyPopupDismiss();
     } else {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Window id: %{public}d get focus.", windowId_);
-        GetOrCreateFocusManager()->WindowFocusMoveStart();
-        GetOrCreateFocusManager()->FocusSwitchingStart(focusManager_->GetCurrentFocus(),
-            SwitchingStartReason::WINDOW_FOCUS);
+        
         isWindowHasFocused_ = true;
         InputMethodManager::GetInstance()->SetWindowFocus(true);
-        auto curFocusView = focusManager_ ? focusManager_->GetLastFocusView().Upgrade() : nullptr;
-        auto curFocusViewHub = curFocusView ? curFocusView->GetFocusHub() : nullptr;
-        if (!curFocusViewHub) {
-            TAG_LOGW(AceLogTag::ACE_FOCUS, "Current focus view can not found!");
-        } else if (curFocusView->GetIsViewHasFocused() && !curFocusViewHub->IsCurrentFocus()) {
-            TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on current focus view: %{public}s/%{public}d",
-                curFocusView->GetFrameName().c_str(), curFocusView->GetFrameId());
-            curFocusViewHub->RequestFocusImmediately();
-        } else {
-            auto container = Container::Current();
-            if (container && container->IsUIExtensionWindow()) {
-                curFocusView->RequestDefaultFocus();
-            }
-            if (container && container->IsDynamicRender()) {
-                curFocusView->SetIsViewRootScopeFocused(false);
-                curFocusView->RequestDefaultFocus();
-            }
-        }
-        RequestFrame();
     }
+    GetOrCreateFocusManager()->WindowFocus(isFocus);
     FlushWindowFocusChangedCallback(isFocus);
 }
 
