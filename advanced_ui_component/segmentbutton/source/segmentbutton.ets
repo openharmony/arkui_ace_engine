@@ -517,7 +517,7 @@ struct SegmentButtonItem {
     }
   }
 
-  onFocusIndex(){
+  onFocusIndex() {
     this.isMarquee = this.marquee && this.focusIndex === this.index;
   }
 
@@ -534,12 +534,11 @@ struct SegmentButtonItem {
   }
 
   private getFontColor() {
-    let isMarquce = this.marquee && this.focusIndex === this.index;
     let isResource = (typeof this.options.selectedFontColor) === 'object';
     let isUseDefaultColor = false;
-    let defaultCapSelectFontColorId = (segmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR as Resource).id;
-    let defaultTabSelectFontColorId = (segmentButtonTheme.TAB_SELECTED_FONT_COLOR as Resource).id;
     if (isResource) {
+      let defaultCapSelectFontColorId = (segmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR as Resource).id;
+      let defaultTabSelectFontColorId = (segmentButtonTheme.TAB_SELECTED_FONT_COLOR as Resource).id;
       let selectFontColorId = (this.options.selectedFontColor as Resource).id;
       isUseDefaultColor = this.options.type === 'tab' ? selectFontColorId === defaultTabSelectFontColorId :
         selectFontColorId === defaultCapSelectFontColorId;
@@ -547,7 +546,7 @@ struct SegmentButtonItem {
     if (this.property.isSelected && !isUseDefaultColor) {
       return this.options.selectedFontColor;
     } else {
-      return isMarquce ? segmentButtonTheme.SEGMENT_BUTTON_FOCUS_TEXT_COLOR : this.setFontColor();
+      return this.isMarquee ? segmentButtonTheme.SEGMENT_BUTTON_FOCUS_TEXT_COLOR : this.setFontColor();
     }
   }
 
@@ -820,7 +819,7 @@ struct SegmentButtonItemArrayComponent {
   }
 
   @Builder
-  SegmentButtonFocus (index: number, item: SegmentButtonItemOptions) {
+  SegmentButtonFocus(index: number, item: SegmentButtonItemOptions) {
     Stack() {
       PressAndHoverEffect({
         pressIndex: index,
@@ -860,7 +859,7 @@ struct SegmentButtonItemArrayComponent {
             Stack() {
               if (this.segmentFocusControl) {
                 Stack() {
-                  this.SegmentButtonFocus (index, item);
+                  this.SegmentButtonFocus(index, item);
                 }
                 .stateStyles({
                   normal: {
@@ -873,9 +872,18 @@ struct SegmentButtonItemArrayComponent {
                   }
                 })
                 .onClick(() => {
+                  if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
+                    if (this.selectedIndexes.indexOf(index) > -1) {
+                      this.selectedIndexes.splice(this.selectedIndexes.indexOf(index), 1);
+                    } else {
+                      this.selectedIndexes.push(index);
+                    }
+                  } else {
+                    this.selectedIndexes[0] = index;
+                  }
                 })
               } else {
-                this.SegmentButtonFocus (index, item);
+                this.SegmentButtonFocus(index, item);
               }
             }
             .direction(this.options.direction)
@@ -922,6 +930,9 @@ struct SegmentButtonItemArrayComponent {
               this.hoverColorArray[index].hoverColor = Color.Transparent;
             })
             .onTouch((event: TouchEvent) => {
+              if (this.marquee) {
+                this.getUIContext().getFocusController().clearFocus();
+              }
               if (event.source !== SourceType.TouchScreen) {
                 return
               }
@@ -929,9 +940,6 @@ struct SegmentButtonItemArrayComponent {
                 animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
                   this.zoomScaleArray[index] = 0.95
                 })
-                if (this.marquee) {
-                  this.getUIContext().getFocusController().clearFocus();
-                }
               } else if (event.type === TouchType.Up) {
                 animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
                   this.zoomScaleArray[index] = 1
@@ -939,17 +947,15 @@ struct SegmentButtonItemArrayComponent {
               }
             })
             .onHover((isHover: boolean) => {
-              if (isHover) {
-                animateTo({ duration: 250, curve: Curve.Friction }, () => {
+              animateTo({ duration: 250, curve: Curve.Friction }, () => {
+                if (isHover) {
                   this.hoverColorArray[index].hoverColor = this.marquee && this.focusIndex === index ?
                   $r('sys.color.segment_button_focus_backboard_primary') : (segmentButtonTheme.HOVER_COLOR);
-                })
-              } else {
-                animateTo({ duration: 250, curve: Curve.Friction }, () => {
+                } else {
                   this.hoverColorArray[index].hoverColor = this.marquee && this.focusIndex === index ?
                   $r('sys.color.segment_button_focus_backboard_primary') : Color.Transparent;
-                })
-              }
+                }
+              })
             })
             .onMouse((event: MouseEvent) => {
               switch (event.action) {
