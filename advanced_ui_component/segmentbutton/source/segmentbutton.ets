@@ -473,7 +473,7 @@ struct MultiSelectItemArray {
 @Component
 struct SegmentButtonItem {
   @Link selectedIndexes: number[]
-  @Link @Watch('onFocusIndex') focusIndex: number
+  @Link @Watch('onFocusIndex') focusIndex: number;
   @ObjectLink itemOptions: SegmentButtonItemOptions
   @ObjectLink options: SegmentButtonOptions;
   @ObjectLink property: ItemProperty
@@ -518,11 +518,11 @@ struct SegmentButtonItem {
   }
 
   onFocusIndex(){
-    this.isMarquee = this.marquee && this.focusIndex === this.index
+    this.isMarquee = this.marquee && this.focusIndex === this.index;
   }
 
   aboutToAppear(): void {
-    this.isFadeout = this.marquee
+    this.isFadeout = this.marquee;
   }
 
   setFontColor() {
@@ -533,14 +533,22 @@ struct SegmentButtonItem {
     }
   }
 
-  private getFillColor(): ResourceColor {
-    return this.marquee && this.focusIndex === this.index ?
-    segmentButtonTheme.SEGMENT_BUTTON_FOCUS_TEXT_COLOR : this.setFontColor();
-  }
-
   private getFontColor() {
-    return this.options.selectedFontColor ? this.marquee && this.focusIndex === this.index ?
-    segmentButtonTheme.SEGMENT_BUTTON_FOCUS_TEXT_COLOR : this.setFontColor() : this.setFontColor();
+    let isMarquce = this.marquee && this.focusIndex === this.index;
+    let isResource = (typeof this.options.selectedFontColor) === 'object';
+    let isUseDefaultColor = false;
+    let defaultCapSelectFontColorId = (segmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR as Resource).id;
+    let defaultTabSelectFontColorId = (segmentButtonTheme.TAB_SELECTED_FONT_COLOR as Resource).id;
+    if (isResource) {
+      let selectFontColorId = (this.options.selectedFontColor as Resource).id;
+      isUseDefaultColor = this.options.type === 'tab' ? selectFontColorId === defaultTabSelectFontColorId :
+        selectFontColorId === defaultCapSelectFontColorId;
+    }
+    if (this.property.isSelected && !isUseDefaultColor) {
+      return this.options.selectedFontColor;
+    } else {
+      return isMarquce ? segmentButtonTheme.SEGMENT_BUTTON_FOCUS_TEXT_COLOR : this.setFontColor();
+    }
   }
 
   build() {
@@ -552,7 +560,7 @@ struct SegmentButtonItem {
           .size(this.options.imageSize ?? { width: 24, height: 24 })
           .focusable(!this.options.showText)
           .draggable(false)
-          .fillColor(this.getFillColor())
+          .fillColor(this.getFontColor())
       }
       if (this.options.showText) {
         Text(this.itemOptions.text)
@@ -623,7 +631,7 @@ struct SegmentButtonItemArrayComponent {
   @Consume buttonBorderRadius: LocalizedBorderRadiuses[]
   @Consume @Watch('onButtonItemsSizeChange') buttonItemsSize: SizeOptions[]
   @Consume buttonItemsPosition: Position[]
-  @Consume @Watch('onFocusIndex') focusIndex: number
+  @Consume @Watch('onFocusIndex') focusIndex: number;
   @Consume zoomScaleArray: number[]
   @Consume buttonItemProperty: ItemProperty[]
   @Consume buttonItemsSelected: boolean[]
@@ -732,7 +740,7 @@ struct SegmentButtonItemArrayComponent {
   }
 
   onFocusIndex() {
-    this.isMarqueeAndFadeout = this.marquee ? !this.isMarqueeAndFadeout : false;
+    this.isMarqueeAndFadeout = this.marquee && !this.isMarqueeAndFadeout;
   }
 
   aboutToAppear() {
@@ -833,13 +841,13 @@ struct SegmentButtonItemArrayComponent {
       })
         .onSizeChange((_, newValue) => {
           // Calculate height of items
-          this.buttonItemsRealHeight[index] = newValue.height as number
+          this.buttonItemsRealHeight[index] = newValue.height as number;
           let maxHeight = Math.max(...this.buttonItemsRealHeight.slice(0, this.options.buttons ?
-          this.options.buttons.length : 0))
+          this.options.buttons.length : 0));
           for (let index = 0; index < this.buttonItemsSize.length; index++) {
-            this.buttonItemsSize[index] = { width: this.buttonItemsSize[index].width, height: maxHeight }
+            this.buttonItemsSize[index] = { width: this.buttonItemsSize[index].width, height: maxHeight };
           }
-          this.calculateBorderRadius()
+          this.calculateBorderRadius();
         })
     }
   }
@@ -934,12 +942,12 @@ struct SegmentButtonItemArrayComponent {
               if (isHover) {
                 animateTo({ duration: 250, curve: Curve.Friction }, () => {
                   this.hoverColorArray[index].hoverColor = this.marquee && this.focusIndex === index ?
-                  $r('sys.color.segment_button_focus_backboard_primary') : (segmentButtonTheme.HOVER_COLOR)
+                  $r('sys.color.segment_button_focus_backboard_primary') : (segmentButtonTheme.HOVER_COLOR);
                 })
               } else {
                 animateTo({ duration: 250, curve: Curve.Friction }, () => {
                   this.hoverColorArray[index].hoverColor = this.marquee && this.focusIndex === index ?
-                  $r('sys.color.segment_button_focus_backboard_primary') : Color.Transparent
+                  $r('sys.color.segment_button_focus_backboard_primary') : Color.Transparent;
                 })
               }
             })
