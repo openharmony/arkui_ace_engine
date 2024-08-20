@@ -729,7 +729,7 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     placeholderCount_++;
     if (updateCaret) {
         SetCaretPosition(insertIndex + spanItem->content.length());
-        needMoveCaretToContentRect_ = true;
+        SetNeedMoveCaretToContentRect();
     }
     ResetSelectionAfterAddSpan(isPaste);
     AfterAddImage(changeValue);
@@ -808,6 +808,7 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
     if (placeholderPipelineContext) {
         placeholderPipelineContext->SetDoKeyboardAvoidAnimate(false);
     }
+    SetNeedMoveCaretToContentRect();
     placeholderSpanNode->MarkModifyDone();
     placeholderSpanNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     host->MarkModifyDone();
@@ -850,6 +851,7 @@ int32_t RichEditorPattern::AddTextSpan(TextSpanOptions options, bool isPaste, in
         record.beforeCaretPosition + static_cast<int32_t>(StringUtils::ToWstring(options.value).length());
     AddOperationRecord(record);
     auto ret = AddTextSpanOperation(options, isPaste, index, false);
+    SetNeedMoveCaretToContentRect();
     if (!previewTextRecord_.IsValid()) {
         AfterChangeText(changeValue);
     }
@@ -950,6 +952,7 @@ int32_t RichEditorPattern::AddSymbolSpan(const SymbolSpanOptions& options, bool 
     record.afterCaretPosition = record.beforeCaretPosition + 1;
     AddOperationRecord(record);
     auto ret = AddSymbolSpanOperation(options, isPaste, index);
+    SetNeedMoveCaretToContentRect();
     AfterAddSymbol(changeValue);
     return ret;
 }
@@ -7504,6 +7507,12 @@ void RichEditorPattern::MoveSecondHandle(float offset)
         textSelector_.secondHandle.SetOffset(secondHandleOffset);
         selectOverlay_->UpdateSecondHandleOffset();
     }
+}
+
+void RichEditorPattern::SetNeedMoveCaretToContentRect()
+{
+    CHECK_NULL_VOID(isRichEditorInit_);
+    needMoveCaretToContentRect_ = true;
 }
 
 void RichEditorPattern::MoveCaretToContentRect()
