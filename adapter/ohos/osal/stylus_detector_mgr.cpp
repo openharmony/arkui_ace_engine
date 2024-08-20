@@ -30,6 +30,7 @@
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components_ng/pattern/search/search_text_field.h"
+#include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -201,14 +202,9 @@ RefPtr<NG::FrameNode> StylusDetectorMgr::FindHitFrameNode(
         return nullptr;
     }
     auto nanoTimestamp = pipeline->GetVsyncTime();
-
-    // only textField, textInput, search and richEditor need to response stylus event.
-    auto tag = frameNode->GetTag();
-    auto iterEx = TEXT_FIELD_COMPONENT_TAGS.find(tag);
-    if (iterEx == TEXT_FIELD_COMPONENT_TAGS.end()) {
-        return nullptr;
-    }
-    if (!CheckTextEditable(frameNode) ||
+    auto textBasePattern = frameNode->GetPattern<NG::TextBase>();
+    CHECK_NULL_RETURN(textBasePattern, nullptr);
+    if (!textBasePattern->IsTextEditableForStylus() ||
         IsHitCleanNodeResponseArea({ touchEvent.x, touchEvent.y }, frameNode, nanoTimestamp)) {
         return nullptr;
     }
@@ -290,30 +286,6 @@ StylusDetectorMgr::StylusDetectorMgr() : engine_(nullptr), isRegistered_(false)
     if (!lib || !(engine_ = lib->CreateStylusDetector())) {
         engine_ = StylusDetectorInstance(StylusDetectorDefault::GetInstance(), [](StylusDetectorInterface* e) {});
     }
-}
-
-bool StylusDetectorMgr::CheckTextEditable(const RefPtr<NG::FrameNode> frameNode)
-{
-    CHECK_NULL_RETURN(frameNode, false);
-    auto focusHub = frameNode->GetFocusHub();
-    // if frameNode is not focusable or invisible, no need to hit frameNode.
-    if (!focusHub->IsFocusable() || !frameNode->IsVisible()) {
-        return false;
-    }
-    auto renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, false);
-    auto opacity = renderContext->GetOpacity();
-    // if opacity is 0.0f, no need to hit frameNode.
-    if (NearZero(opacity.value_or(1.0f))) {
-        return false;
-    }
-    // if frameNode is textfield, need to check password mode.
-    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
-        auto pattern = frameNode->GetPattern<NG::TextFieldPattern>();
-        CHECK_NULL_RETURN(pattern, false);
-        return !pattern->IsInPasswordMode();
-    }
-    return true;
 }
 
 bool StylusDetectorMgr::IsStylusTouchEvent(const TouchEvent& touchEvent) const

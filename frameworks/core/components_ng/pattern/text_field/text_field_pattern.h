@@ -1421,6 +1421,8 @@ public:
 
     void ShowCaretAndStopTwinkling();
 
+    bool IsTextEditableForStylus() override;
+
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override
