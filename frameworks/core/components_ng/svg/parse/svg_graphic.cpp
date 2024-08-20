@@ -86,15 +86,18 @@ void SvgGraphic::SetRadialGradient(const Size& viewPort, Gradient& gradient)
     const auto& radialGradient = gradient.GetRadialGradient();
     auto gradientInfo = RadialGradientInfo();
 
-    gradientInfo.r = ConvertDimensionToPx(radialGradient.radialHorizontalSize ?
-        Dimension(radialGradient.radialHorizontalSize.value().Value(),
-        radialGradient.radialHorizontalSize.value().Unit()) : 0.5_pct, sqrt(width * height));
-    gradientInfo.cx = ConvertDimensionToPx(radialGradient.radialCenterX ?
-        Dimension(radialGradient.radialCenterX.value().Value(),
-        radialGradient.radialCenterX.value().Unit()) : 0.5_pct, width) + bounds.Left();
-    gradientInfo.cy = ConvertDimensionToPx(radialGradient.radialCenterY ?
-        Dimension(radialGradient.radialCenterY.value().Value(),
-        radialGradient.radialCenterY.value().Unit()) : 0.5_pct, height) + bounds.Top();
+    Dimension radialHorizontalSize = Dimension(
+        radialGradient.radialHorizontalSize.value().Value(), radialGradient.radialHorizontalSize.value().Unit());
+    gradientInfo.r = ConvertDimensionToPx(
+        radialGradient.radialHorizontalSize ? radialHorizontalSize : 0.5_pct, sqrt(width * height));
+    Dimension radialCenterX =
+        Dimension(radialGradient.radialCenterX.value().Value(), radialGradient.radialCenterX.value().Unit());
+    gradientInfo.cx =
+        ConvertDimensionToPx(radialGradient.radialCenterX ? radialCenterX : 0.5_pct, width) + bounds.Left();
+    Dimension radialCenterY =
+        Dimension(radialGradient.radialCenterY.value().Value(), radialGradient.radialCenterY.value().Unit());
+    gradientInfo.cy =
+        ConvertDimensionToPx(radialGradient.radialCenterY ? radialCenterY : 0.5_pct, height) + bounds.Top();
     if (radialGradient.fRadialCenterX && radialGradient.fRadialCenterX->IsValid()) {
         gradientInfo.fx = ConvertDimensionToPx(radialGradient.fRadialCenterX.value(), width) + bounds.Left();
     } else {
@@ -144,7 +147,7 @@ bool SvgGraphic::UpdateFillStyle(const std::optional<Color>& color, bool antiAli
     fillBrush_.SetAntiAlias(antiAlias);
 #endif
     if (fillState_.GetGradient()) {
-        return SetGradientStyle(curOpacity);
+        SetGradientStyle(curOpacity);
     } else {
         auto fillColor = (color) ? *color : fillState_.GetColor();
 #ifndef USE_ROSEN_DRAWING
@@ -156,13 +159,13 @@ bool SvgGraphic::UpdateFillStyle(const std::optional<Color>& color, bool antiAli
     return true;
 }
 
-bool SvgGraphic::SetGradientStyle(double opacity)
+void SvgGraphic::SetGradientStyle(double opacity)
 {
     auto gradient = fillState_.GetGradient();
-    CHECK_NULL_RETURN(gradient, false);
+    CHECK_NULL_VOID(gradient);
     auto gradientColors = gradient->GetColors();
     if (gradientColors.empty()) {
-        return false;
+        return;
     }
 #ifdef USE_ROSEN_DRAWING
     std::vector<RSScalar> pos;
@@ -194,7 +197,6 @@ bool SvgGraphic::SetGradientStyle(double opacity)
         }
     }
 #endif
-    return true;
 }
 
 void SvgGraphic::SetStrokeGradientStyle(double opacity)
