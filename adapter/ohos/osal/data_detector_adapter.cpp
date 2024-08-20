@@ -323,7 +323,7 @@ void DataDetectorAdapter::ParseAIJson(
         item->Put("costTime", costTime.count());
         item->Put("resultCode", textDetectResult_.code);
         entityJson_[start] = item->ToString();
-        TAG_LOGI(AceLogTag::ACE_TEXT, "The json of the entity is: %{public}s", entityJson_[start].c_str());
+        TAG_LOGI(AceLogTag::ACE_TEXT, "The json of the entity is: %{private}s", entityJson_[start].c_str());
 
         AISpan aiSpan;
         aiSpan.start = start;
