@@ -430,7 +430,7 @@ bool WebPattern::NeedSoftKeyboard() const
 
 void WebPattern::OnAttachToMainTree()
 {
-    TAG_LOGD(AceLogTag::ACE_WEB, "OnAttachToMainTree");
+    TAG_LOGI(AceLogTag::ACE_WEB, "OnAttachToMainTree");
     InitSlideUpdateListener();
     // report component is in foreground.
     delegate_->OnRenderToForeground();
@@ -438,7 +438,7 @@ void WebPattern::OnAttachToMainTree()
 
 void WebPattern::OnDetachFromMainTree()
 {
-    TAG_LOGD(AceLogTag::ACE_WEB, "OnDetachFromMainTree");
+    TAG_LOGI(AceLogTag::ACE_WEB, "OnDetachFromMainTree");
     // report component is in background.
     delegate_->OnRenderToBackground();
 }
@@ -4715,7 +4715,7 @@ void WebPattern::UpdateLocale()
 
 void WebPattern::OnWindowShow()
 {
-    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::OnWindowShow");
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnWindowShow");
     CHECK_NULL_VOID(delegate_);
     delegate_->OnRenderToForeground();
     delegate_->OnOnlineRenderToForeground();
@@ -4730,7 +4730,7 @@ void WebPattern::OnWindowShow()
 
 void WebPattern::OnWindowHide()
 {
-    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::OnWindowHide");
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnWindowHide");
     CHECK_NULL_VOID(delegate_);
     delegate_->OnRenderToBackground();
 
@@ -4862,7 +4862,7 @@ void WebPattern::SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterE
 
 void WebPattern::OnInActive()
 {
-    TAG_LOGD(AceLogTag::ACE_WEB,
+    TAG_LOGI(AceLogTag::ACE_WEB,
         "WebPattern::OnInActive webId:%{public}d, isActive:%{public}d", GetWebId(), isActive_);
     if (!isActive_) {
         return;
@@ -4875,7 +4875,7 @@ void WebPattern::OnInActive()
 
 void WebPattern::OnActive()
 {
-    TAG_LOGD(AceLogTag::ACE_WEB,
+    TAG_LOGI(AceLogTag::ACE_WEB,
         "WebPattern::OnActive webId:%{public}d, isActive:%{public}d", GetWebId(), isActive_);
     if (isActive_) {
         return;
@@ -4889,6 +4889,7 @@ void WebPattern::OnActive()
 void WebPattern::OnVisibleAreaChange(bool isVisible)
 {
     bool isDialogNested = IsDialogNested();
+    ACE_SCOPED_TRACE("WebPattern::OnVisibleAreaChange, webId: %d, isVisible: %d", GetWebId(), isVisible);
     TAG_LOGI(AceLogTag::ACE_WEB,
         "WebPattern::OnVisibleAreaChange webId:%{public}d, isVisible:%{public}d, old_isVisible:%{public}d, "
         "isVisibleActiveEnable:%{public}d, isDialogNested:%{public}d, isFocus:%{public}d",
