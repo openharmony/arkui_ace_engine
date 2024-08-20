@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/components/common/properties/color.h"
+#include "core/components_ng/pattern/divider/divider_model_ng.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -21,23 +24,40 @@ void SetDividerOptionsImpl(Ark_NativePointer node)
 {
 }
 } // DividerInterfaceModifier
+
 namespace DividerAttributeModifier {
 void VerticalImpl(Ark_NativePointer node,
                   Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    DividerModelNG::SetVertical(frameNode, Converter::Convert<bool>(value));
 }
+
 void ColorImpl(Ark_NativePointer node,
                const ResourceColor* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    DividerModelNG::SetDividerColor(frameNode, Converter::OptConvert<Color>(*value));
 }
+
 void StrokeWidthImpl(Ark_NativePointer node,
                      const Type_DividerAttribute_strokeWidth_Arg0* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    DividerModelNG::StrokeWidth(frameNode, Converter::OptConvert<Dimension>(*value));
 }
+
 void LineCapImpl(Ark_NativePointer node,
                  Ark_Int32 value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    DividerModelNG::LineCap(frameNode, Converter::OptConvert<LineCap>(value));
 }
+
 } // DividerAttributeModifier
 const GENERATED_ArkUIDividerModifier* GetDividerModifier()
 {

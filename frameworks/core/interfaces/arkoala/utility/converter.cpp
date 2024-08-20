@@ -24,32 +24,11 @@ constexpr int32_t OFFSET_2 = 2;
 
 void ParseDimension(const Ark_String &string, Ark_Length *result)
 {
-    char *suffixPtr = nullptr;
-    float value = std::strtof(string.chars, &suffixPtr);
-
-    if (!suffixPtr || suffixPtr == string.chars) {
-        // not a numeric value
-        result->unit = static_cast<Ark_Int32>(DimensionUnit::NONE);
-        return;
-    }
-    result->value = value;
-
-    DimensionUnit unit;
-    if (suffixPtr[OFFSET_0] == '\0' || (suffixPtr[OFFSET_0] == 'v' && suffixPtr[OFFSET_1] == 'p')) {
-        unit = DimensionUnit::VP;
-    } else if (suffixPtr[OFFSET_0] == '%') {
-        unit = DimensionUnit::PERCENT;
-    } else if (suffixPtr[OFFSET_0] == 'p' && suffixPtr[OFFSET_1] == 'x') {
-        unit = DimensionUnit::PX;
-    } else if (suffixPtr[OFFSET_0] == 'l' && suffixPtr[OFFSET_1] == 'p' && suffixPtr[OFFSET_2] == 'x') {
-        unit = DimensionUnit::LPX;
-    } else if (suffixPtr[OFFSET_0] == 'f' && suffixPtr[OFFSET_1] == 'p') {
-        unit = DimensionUnit::FP;
-    } else {
-        unit = DimensionUnit::NONE;
-    }
-    result->unit = static_cast<Ark_Int32>(unit);
+    auto dimension = Dimension::FromString(string.chars);
+    result->value = dimension.Value();
+    result->unit =  static_cast<Ark_Int32>(dimension.Unit());
 }
+
 Ark_TouchObject ConvertTouchInfo(OHOS::Ace::TouchLocationInfo& info)
 {
     Ark_TouchObject touch;
@@ -92,6 +71,7 @@ Ark_TouchObject ConvertTouchInfo(OHOS::Ace::TouchLocationInfo& info)
 
     return touch;
 }
+
 uint32_t ColorAlphaAdapt(uint32_t origin)
 {
     constexpr uint32_t COLOR_ALPHA_OFFSET = 24;

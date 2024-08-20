@@ -36,7 +36,6 @@
 #include "core/interfaces/arkoala/utility/generated/converter_generated.h"
 #include "ace_engine_types.h"
 
-
 namespace OHOS::Ace::NG::Converter {
     template<typename To, typename From>
     To Convert(const From& src) = delete;
@@ -133,17 +132,9 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<>
-    inline Dimension Convert(const Ark_Number& src)
-    {
-        return src.tag == Ark_Tag::ARK_TAG_INT32 ?
-            CalcDimension(src.i32, DimensionUnit::VP) : CalcDimension(src.i32, DimensionUnit::VP);
-    }
-
-    template<>
     inline Dimension Convert(const Ark_String& src)
     {
-        char* result;
-        return CalcDimension(std::strtod(src.chars, &result), DimensionUnit::VP);
+        return Dimension::FromString(src.chars);
     }
 
     template<>
@@ -169,6 +160,12 @@ namespace OHOS::Ace::NG::Converter {
     inline float Convert(const Ark_Number& src)
     {
         return src.tag == ARK_TAG_FLOAT32 ? src.f32 : static_cast<float>(src.i32);
+    }
+
+    template<>
+    inline Dimension Convert(const Ark_Number& src)
+    {
+        return Dimension(Converter::Convert<float>(src), DimensionUnit::VP);
     }
 
     template<>
@@ -398,6 +395,17 @@ namespace OHOS::Ace::NG::Converter {
             return "";
         }
         return src.chars;
+    }
+
+    template<>
+    inline void AssignCast(std::optional<LineCap>& dst, const Ark_LineCapStyle& src)
+    {
+        switch (src) {
+            case static_cast<Ark_LineCapStyle>(LineCap::SQUARE): dst = LineCap::SQUARE; break;
+            case static_cast<Ark_LineCapStyle>(LineCap::ROUND): dst = LineCap::ROUND; break;
+            case static_cast<Ark_LineCapStyle>(LineCap::BUTT): dst = LineCap::BUTT; break;
+            default: LOGE("Unexpected enum value in Ark_LineCapStyle: %{public}d", src);
+        }
     }
 } // namespace OHOS::Ace::NG::Converter
 
