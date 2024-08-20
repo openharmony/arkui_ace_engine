@@ -630,7 +630,7 @@ void HandleOnDragStart(DragControllerAsyncCtx* asyncCtx)
             NG::DragDropFuncWrapper::DecideWhetherToStopDragging(
                 { ctx->globalX, ctx->globalY }, ctx->extraParams, ctx->pointerId, ctx->instanceId);
         },
-        TaskExecutor::TaskType::UI, "ArkUIDragHandleDragEventStart");
+        TaskExecutor::TaskType::UI, "ArkUIDragHandleDragEventStart", PriorityType::VIP);
 }
 
 void GetShadowInfoArray(DragControllerAsyncCtx* asyncCtx,
@@ -747,6 +747,7 @@ void StartDragService(DragControllerAsyncCtx* asyncCtx)
         HandleSuccess(asyncCtx, dragNotifyMsg, DragStatus::ENDED);
     };
     NG::DragDropFuncWrapper::SetDraggingPointerAndPressedState(asyncCtx->pointerId, asyncCtx->instanceId);
+    NG::DragDropFuncWrapper::SetExtraInfo(asyncCtx->instanceId, asyncCtx->extraParams);
     int32_t ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<OHOS::Ace::StartDragListenerImpl>(callback));
     if (ret != 0) {
@@ -804,7 +805,7 @@ void OnMultipleComplete(DragControllerAsyncCtx* asyncCtx)
             }
             StartDragService(asyncCtx);
         },
-        TaskExecutor::TaskType::JS, "ArkUIDragMultipleComplete");
+        TaskExecutor::TaskType::JS, "ArkUIDragMultipleComplete", PriorityType::VIP);
 }
 
 void OnComplete(DragControllerAsyncCtx* asyncCtx)
