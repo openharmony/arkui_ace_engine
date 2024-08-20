@@ -839,7 +839,7 @@ enum ArkUIEventSubKind {
     ON_REFRESH_REFRESHING,
     ON_REFRESH_ON_OFFSET_CHANGE,
     ON_REFRESH_CHANGE_EVENT,
-    
+
     ON_DATE_PICKER_DATE_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_DATE_PICKER,
     ON_TIME_PICKER_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TIME_PICKER,
     ON_TEXT_PICKER_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TEXT_PICKER,
@@ -2170,6 +2170,8 @@ struct ArkUIColumnModifier {
     ArkUI_Int32 (*getColumnAlignItems)(ArkUINodeHandle node);
     void (*setColumnSpace)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetColumnSpace)(ArkUINodeHandle node);
+    void (*setColumnReverse)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetColumnReverse)(ArkUINodeHandle node);
 };
 
 struct ArkUIRowModifier {
@@ -2181,6 +2183,8 @@ struct ArkUIRowModifier {
     ArkUI_Int32 (*getRowAlignItems)(ArkUINodeHandle node);
     void (*setRowSpace)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetRowSpace)(ArkUINodeHandle node);
+    void (*setRowReverse)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetRowReverse)(ArkUINodeHandle node);
 };
 
 struct ArkUIDividerModifier {
