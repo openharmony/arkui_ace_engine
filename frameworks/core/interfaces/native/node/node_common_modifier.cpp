@@ -3416,11 +3416,13 @@ void SetBackgroundEffect(ArkUINodeHandle node, ArkUI_Float32 radiusArg, ArkUI_Fl
     ArkUI_Int32 blurValuesSize)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-
     CalcDimension radius;
-    radius.SetValue(radiusArg);
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        radius = CalcDimension(radiusArg, DimensionUnit::VP);
+    } else {
+        radius = CalcDimension(radiusArg, DimensionUnit::PX);
+    }
     Color color(colorArg);
-
     BlurOption blurOption;
     blurOption.grayscale.assign(blurValues, blurValues + blurValuesSize);
 
