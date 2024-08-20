@@ -38,6 +38,9 @@ public:
         remainingTicks_ = ticks;
     }
 
+    /**
+     * @brief move to next frame
+     */
     void Next();
 
     bool Finished() const
@@ -45,10 +48,10 @@ public:
         return remainingTicks_ <= 0;
     }
 
-    void End()
-    {
-        remainingTicks_ = 0;
-    }
+    /**
+     * @brief immediately terminate the animation
+     */
+    void End();
 
 private:
     void UpdateProp(const WeakPtr<NG::PropertyBase>& propWk) const;

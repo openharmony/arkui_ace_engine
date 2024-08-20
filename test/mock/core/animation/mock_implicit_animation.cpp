@@ -49,4 +49,12 @@ void MockImplicitAnimation::Next()
         }
     }
 }
+
+void MockImplicitAnimation::End()
+{
+    remainingTicks_ = 0;
+    if (cbs_.finishCb) {
+        cbs_.finishCb();
+    }
+}
 } // namespace OHOS::Ace
