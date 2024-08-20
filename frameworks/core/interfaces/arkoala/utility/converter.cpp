@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/view_abstract.h"
+#include "core/interfaces/native/node/node_api.h"
 #include "converter.h"
 #include "reverse_converter.h"
 #include "core/interfaces/arkoala/utility/validators.h"
@@ -33,6 +35,62 @@ void AssignArkValue(Ark_Resource& dst, const Ark_Length& src)
 }
 
 void AssignArkValue(Ark_TouchObject& touch, const OHOS::Ace::TouchLocationInfo& info)
+
+void AssignGradientColors(Gradient *gradient, const Array_Tuple_Ark_ResourceColor_Number *colors)
+{
+    for (int32_t i = 0; i < colors->length; i++) {
+        auto color = OptConvert<Color>(colors->array[i].value0);
+        auto position = Convert<float>(colors->array[i].value1);
+        if (color.has_value()) {
+            NG::GradientColor gradientColor;
+            gradientColor.SetColor(color.value());
+            gradientColor.SetHasValue(true);
+            gradientColor.SetDimension(CalcDimension(position * Converter::PERCENT_100, DimensionUnit::PERCENT));
+            gradient->AddColor(gradientColor);
+        }
+    }
+}
+
+void AssignLinearGradientDirection(std::shared_ptr<OHOS::Ace::NG::LinearGradient> linear, const GradientDirection &direction)
+{
+    switch (direction) {
+        case GradientDirection::LEFT:
+            linear->linearX = NG::GradientDirection::LEFT;
+            break;
+        case GradientDirection::RIGHT:
+            linear->linearX = NG::GradientDirection::RIGHT;
+            break;
+        case GradientDirection::TOP:
+            linear->linearY = NG::GradientDirection::TOP;
+            break;
+        case GradientDirection::BOTTOM:
+            linear->linearY = NG::GradientDirection::BOTTOM;
+            break;
+        case GradientDirection::LEFT_TOP:
+            linear->linearX = NG::GradientDirection::LEFT;
+            linear->linearY = NG::GradientDirection::TOP;
+            break;
+        case GradientDirection::LEFT_BOTTOM:
+            linear->linearX = NG::GradientDirection::LEFT;
+            linear->linearY = NG::GradientDirection::BOTTOM;
+            break;
+        case GradientDirection::RIGHT_TOP:
+            linear->linearX = NG::GradientDirection::RIGHT;
+            linear->linearY = NG::GradientDirection::TOP;
+            break;
+        case GradientDirection::RIGHT_BOTTOM:
+            linear->linearX = NG::GradientDirection::RIGHT;
+            linear->linearY = NG::GradientDirection::BOTTOM;
+            break;
+        case GradientDirection::NONE:
+        case GradientDirection::START_TO_END:
+        case GradientDirection::END_TO_START:
+        default:
+            break;
+    }
+}
+
+Ark_TouchObject ConvertTouchInfo(OHOS::Ace::TouchLocationInfo& info)
 {
     Offset globalOffset = info.GetGlobalLocation();
     Offset localOffset = info.GetLocalLocation();
@@ -332,6 +390,22 @@ template<>
 std::vector<Shadow> Convert(const Ark_ShadowOptions& src)
 {
     return { Convert<Shadow>(src) };
+}
+
+Shadow Convert(const Ark_ShadowStyle& src)
+{
+    ShadowStyle style;
+
+    switch(src) {
+        case ARK_SHADOW_STYLE_OUTER_DEFAULT_XS: style = ShadowStyle::OuterDefaultXS; break;
+        case ARK_SHADOW_STYLE_OUTER_DEFAULT_SM: style = ShadowStyle::OuterDefaultSM; break;
+        case ARK_SHADOW_STYLE_OUTER_DEFAULT_MD: style = ShadowStyle::OuterDefaultMD; break;
+        case ARK_SHADOW_STYLE_OUTER_DEFAULT_LG: style = ShadowStyle::OuterDefaultLG; break;
+        case ARK_SHADOW_STYLE_OUTER_FLOATING_SM: style = ShadowStyle::OuterFloatingSM; break;
+        case ARK_SHADOW_STYLE_OUTER_FLOATING_MD: style = ShadowStyle::OuterFloatingMD; break;
+    }
+
+    return Shadow::CreateShadow(style);
 }
 
 template<>

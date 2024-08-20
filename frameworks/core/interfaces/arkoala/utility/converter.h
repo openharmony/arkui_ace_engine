@@ -44,8 +44,10 @@
 #include "core/components_ng/pattern/tabs/tabs_model.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/list/list_properties.h"
+#include "core/components_ng/property/gradient_property.h"
 #include "core/image/image_source_info.h"
 
 #include "ace_engine_types.h"
@@ -64,6 +66,27 @@ std::optional<int32_t> EnumToInt(const std::optional<T>& src)
 using StringArray = std::vector<std::string>;
 
 namespace Converter {
+    constexpr int32_t OFFSET_0 = 0;
+    constexpr int32_t OFFSET_1 = 1;
+    constexpr int32_t OFFSET_2 = 2;
+    constexpr int32_t OFFSET_3 = 3;
+    constexpr int32_t OFFSET_4 = 4;
+    constexpr int32_t OFFSET_5 = 5;
+    constexpr int32_t OFFSET_6 = 6;
+    constexpr int32_t OFFSET_7 = 7;
+    constexpr int32_t OFFSET_8 = 8;
+    constexpr int32_t OFFSET_9 = 9;
+    constexpr int32_t OFFSET_10 = 10;
+    constexpr int32_t OFFSET_11 = 11;
+    constexpr int32_t OFFSET_12 = 12;
+    constexpr int32_t OFFSET_13 = 13;
+    constexpr int32_t OFFSET_14 = 14;
+    constexpr int32_t OFFSET_15 = 15;
+    constexpr int32_t OFFSET_16 = 16;
+    constexpr int32_t OFFSET_24 = 24;
+    constexpr double PERCENT_100 = 100.0;
+    constexpr int32_t MAX_ALIGN_VALUE = 8;
+
     template<typename To, typename From>
     To Convert(const From& src);
     template<typename To, typename From>
@@ -220,6 +243,13 @@ namespace Converter {
         return src.tag == ARK_TAG_FLOAT32 ? src.f32 : static_cast<float>(src.i32);
     }
 
+    // Implementation is in cpp
+    Ark_TouchObject ConvertTouchInfo(OHOS::Ace::TouchLocationInfo &info);
+    Ark_ClickEvent ConvertClickEventInfo(OHOS::Ace::GestureEvent& info);
+    void AssignGradientColors(Gradient *gradient, const Array_Tuple_Ark_ResourceColor_Number *colors);
+    void AssignLinearGradientDirection(std::shared_ptr<OHOS::Ace::NG::LinearGradient> linear,
+        const GradientDirection &direction);
+
     template<>
     inline uint32_t Convert(const Ark_Number& src)
     {
@@ -248,6 +278,13 @@ namespace Converter {
     inline ImageSourceInfo Convert(const Ark_CustomObject& value)
     {
         LOGE("Convert [Ark_CustomObject] to [ImageSourceInfo] is not supported");
+        return ImageSourceInfo();
+    }
+
+    template<>
+    inline ImageSourceInfo Convert(const Ark_LinearGradient& value)
+    {
+        LOGE("Convert [Ark_LinearGradient] to [ImageSourceInfo] is not supported");
         return ImageSourceInfo();
     }
 
@@ -411,6 +448,70 @@ namespace Converter {
     }
 
     template<>
+    inline Color Convert(const Ark_String& src)
+    {
+        return Color::FromString(src.chars);
+    }
+
+    template<> CalcLength Convert(const Ark_Length& src);
+
+    template<>
+    inline std::tuple<Ark_Float32, Ark_Int32> Convert(const Ark_String& src)
+    {
+        auto dimension = Dimension::FromString(src.chars);
+        return std::make_tuple(dimension.Value(), static_cast<Ark_Int32>(dimension.Unit()));
+    }
+
+    template<>
+    inline Ark_CharPtr Convert(const Ark_Undefined& src)
+    {
+        return "";
+    }
+
+    template<>
+    inline Ark_CharPtr Convert(const Ark_Function& src)
+    {
+        LOGE("Convert [Ark_Function/CustomBuilder] to [Ark_CharPtr] is not valid.");
+        return "";
+    }
+
+    template<>
+    inline Ark_CharPtr Convert(const Ark_CustomObject& src)
+    {
+        LOGE("Convert [Ark_CustomObject] to [Ark_CharPtr] is not valid.");
+        return "";
+    }
+
+    template<>
+    inline int Convert(const Ark_String& src)
+    {
+        float value = std::atoi(src.chars);
+        return value;
+    }
+
+    template<>
+    inline float Convert(const Ark_String& src)
+    {
+        char *end = nullptr;
+        float value = std::strtof(src.chars, &end);
+        return value;
+    }
+
+    template<>
+    inline float Convert(const Ark_Float32& src)
+    {
+        return src;
+    }
+
+    template<>
+    inline Shadow Convert(const Ark_Int32& src)
+    {
+        Shadow shadow;
+        shadow.SetBlurRadius(src);
+        return shadow;
+    }
+
+    template<>
     inline EdgesParam Convert(const Ark_Edges& src)
     {
         EdgesParam edges;
@@ -443,6 +544,71 @@ namespace Converter {
             .uncheckedBorderColor = Converter::OptConvert<Color>(src.uncheckedBorderColor),
             .indicatorColor = Converter::OptConvert<Color>(src.indicatorColor)
         };
+    }
+
+    template<>
+    inline BlurOption Convert(const Ark_BlurOptions& src)
+    {
+        BlurOption blurOption;
+        auto values = Convert<int>(src.grayscale.value0);
+        auto valuesSize = Convert<int>(src.grayscale.value1);
+        blurOption.grayscale.assign(values, values * valuesSize);
+        return blurOption;
+    }
+
+    template<>
+    inline BorderRadiusProperty Convert(const Ark_Length& src)
+    {
+        BorderRadiusProperty property;
+        auto value = OptConvert<Dimension>(src);
+        if (value.has_value()) {
+            property.SetRadius(value.value());
+        }
+        return property;
+    }
+
+    template<>
+    inline BorderRadiusProperty Convert(const Ark_BorderRadiuses& src)
+    {
+        BorderRadiusProperty property;
+        property.radiusTopLeft = OptConvert<Dimension>(src.topLeft);
+        property.radiusTopRight = OptConvert<Dimension>(src.topRight);
+        property.radiusBottomRight = OptConvert<Dimension>(src.bottomRight);
+        property.radiusBottomLeft = OptConvert<Dimension>(src.bottomLeft);
+        return property;
+    }
+
+    template<>
+    inline BorderRadiusProperty Convert(const Ark_LocalizedBorderRadiuses& src)
+    {
+        LOGE("Convert [Ark_LocalizedPadding] to [PaddingProperty] is not supported.");
+        BorderRadiusProperty property;
+        return property;
+    }
+
+    template<>
+    inline BorderStyle Convert(const Ark_BorderStyle& src)
+    {
+        return static_cast<BorderStyle>(src);
+    }
+
+    template<>
+    inline BorderStyleProperty Convert(const Ark_BorderStyle& src)
+    {
+        BorderStyleProperty property;
+        property.SetBorderStyle(static_cast<BorderStyle>(src));
+        return property;
+    }
+
+    template<>
+    inline BorderStyleProperty Convert(const Ark_EdgeStyles& src)
+    {
+        BorderStyleProperty property;
+        property.styleLeft = OptConvert<BorderStyle>(src.left);
+        property.styleTop = OptConvert<BorderStyle>(src.top);
+        property.styleRight = OptConvert<BorderStyle>(src.right);
+        property.styleBottom = OptConvert<BorderStyle>(src.bottom);
+        return property;
     }
 
     template<>
@@ -552,6 +718,10 @@ namespace Converter {
     template<> void AssignCast(std::optional<SliderModel::SliderInteraction>& dst, const Ark_SliderInteraction& src);
     template<> void AssignCast(std::optional<SliderModel::BlockStyleType>& dst, const Ark_SliderBlockType& src);
     template<> void AssignCast(std::optional<SliderModel::SliderChangeMode>& dst, const Ark_SliderChangeMode& src);
+    template<> void AssignCast(std::optional<AdaptiveColor>& dst, const Ark_AdaptiveColor& src);
+    template<> void AssignCast(std::optional<BorderImageRepeat>& dst, const Ark_RepeatMode& src);
+    template<> void AssignCast(std::optional<ThemeColorMode>& dst, const Ark_ThemeColorMode& src);
+    template<> void AssignCast(std::optional<GradientDirection>& dst, const Ark_GradientDirection& src);
 } // namespace OHOS::Ace::NG::Converter
 } // namespace OHOS::Ace::NG
 
