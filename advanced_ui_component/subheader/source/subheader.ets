@@ -515,7 +515,7 @@ export struct SubHeader {
       Text($$.content)
         .primaryTitleStyles({
           fontWeight: FontWeight.Bold,
-          maxLines: SINGLE_LINE_NUM,
+          maxLines: DOUBLE_LINE_NUM,
           alignment: Alignment.Start,
           fontColor: this.subHeaderTheme.fontPrimaryColor,
         })
@@ -524,7 +524,7 @@ export struct SubHeader {
         .width('100%')
       Text($$.subContent)
         .secondaryTitleStyles({
-          maxLines: SINGLE_LINE_NUM,
+          maxLines: DOUBLE_LINE_NUM,
           fontWeight: FontWeight.Regular,
           alignment: Alignment.Start,
           fontColor: this.subHeaderTheme.fontSecondaryColor,
