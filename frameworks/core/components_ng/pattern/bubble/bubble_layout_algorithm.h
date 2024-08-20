@@ -144,6 +144,8 @@ public:
 protected:
     OffsetF positionOffset_;
     SizeF wrapperSize_;
+    // rect is relative to popupWrapper
+    Rect wrapperRect_;
 
 private:
     enum class ErrorPositionType {
@@ -172,7 +174,7 @@ private:
         const OffsetF& topPosition, const OffsetF& bottomPosition, OffsetF& arrowPosition);
     void InitTargetSizeAndPosition(bool showInSubWindow);
     void InitCaretTargetSizeAndPosition();
-    void InitProps(const RefPtr<BubbleLayoutProperty>& layoutProp, bool showInSubWindow);
+    void InitProps(const RefPtr<BubbleLayoutProperty>& layoutProp, bool showInSubWindow, LayoutWrapper* layoutWrapper);
     void InitArrowState(const RefPtr<BubbleLayoutProperty>& layoutProp);
     OffsetF GetPositionWithPlacementNew(
         const SizeF& childSize, const OffsetF& topPosition, const OffsetF& bottomPosition, OffsetF& arrowPosition);
@@ -182,7 +184,8 @@ private:
     bool GetIfNeedArrow(const RefPtr<BubbleLayoutProperty>& bubbleProp, const SizeF& childSize);
     void UpdateChildPosition(OffsetF& childOffset);
     void UpdateTouchRegion();
-
+    void InitWrapperRect(LayoutWrapper* layoutWrapper);
+    void UpdateScrollHeight(LayoutWrapper* layoutWrapper, bool showInSubWindow);
     std::string MoveTo(double x, double y);
     std::string LineTo(double x, double y);
     std::string ArcTo(double rx, double ry, double rotation, int32_t arc_flag, double x, double y);
@@ -258,6 +261,7 @@ private:
     bool showArrow_ = false;
     bool enableArrow_ = false;
     bool isCaretMode_ = true;
+    bool enableFoldedArea_ = false;
     float scaledBubbleSpacing_ = 0.0f;
     float arrowHeight_ = 0.0f;
     float realArrowWidth_ = 20.0f;
@@ -286,6 +290,9 @@ private:
     std::vector<std::vector<float>> arrowOffsetsFromClip_
         = { {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f} };
     bool isGreatWrapperWidth_ = false;
+    float foldCreaseTop_ = 0.0f;
+    float foldCreaseBottom_ = 0.0f;
+    bool isHalfFoldHover_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_BUBBLE_BUBBLE_LAYOUT_ALGORITHM_H

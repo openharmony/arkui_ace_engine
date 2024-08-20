@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -256,7 +257,7 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto bubbleLayoutProperty = AceType::DynamicCast<BubbleLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(bubbleLayoutProperty);
     bool showInSubWindow = bubbleLayoutProperty->GetShowInSubWindowValue(false);
-    InitProps(bubbleProp, showInSubWindow);
+    InitProps(bubbleProp, showInSubWindow, layoutWrapper);
     auto bubbleNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(bubbleNode);
     const auto& layoutConstraint = bubbleLayoutProperty->GetLayoutConstraint();
@@ -277,6 +278,10 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto child = children.front();
     CHECK_NULL_VOID(child);
     measureChildSizeBefore_ = child->GetGeometryNode()->GetFrameSize();
+    if (isHalfFoldHover_) {
+        SizeF size = SizeF(childLayoutConstraint.maxSize.Width(), static_cast<float>(wrapperRect_.Height()));
+        childLayoutConstraint.UpdateMaxSizeWithCheck(size);
+    }
     // childSize_ and childOffset_ is used in Layout.
     child->Measure(childLayoutConstraint);
     measureChildSizeAfter_ = child->GetGeometryNode()->GetFrameSize();
@@ -548,7 +553,8 @@ void BubbleLayoutAlgorithm::UpdateDumpInfo()
     dumpInfo_.targetID = targetNodeId_;
 }
 
-void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layoutProp, bool showInSubWindow)
+void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layoutProp, bool showInSubWindow,
+    LayoutWrapper* layoutWrapper)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -587,6 +593,100 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     marginTop_ = top_ + DRAW_EDGES_SPACE.ConvertToPx();
     marginBottom_ = bottom_ + DRAW_EDGES_SPACE.ConvertToPx();
     showArrow_ = false;
+    isHalfFoldHover_ = pipelineContext->IsHalfFoldHoverStatus();
+    InitWrapperRect(layoutWrapper);
+    UpdateScrollHeight(layoutWrapper, showInSubWindow);
+}
+
+void BubbleLayoutAlgorithm::InitWrapperRect(LayoutWrapper* layoutWrapper)
+{
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto displayInfo = container->GetDisplayInfo();
+    auto foldCreaseRects = displayInfo->GetCurrentFoldCreaseRegion();
+    if (!foldCreaseRects.empty()) {
+        auto foldCrease = foldCreaseRects.front();
+        foldCreaseTop_ = foldCrease.Top();
+        foldCreaseBottom_ = foldCrease.Bottom();
+    }
+    auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
+    CHECK_NULL_VOID(targetNode);
+    auto targetOffset = targetNode->GetPaintRectOffset();
+    float getY = 0;
+    getY = targetOffset.GetY();
+    auto bubbleNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(bubbleNode);
+    auto bubblePattern = bubbleNode->GetPattern<BubblePattern>();
+    CHECK_NULL_VOID(bubblePattern);
+    auto enableHoverMode = bubblePattern->GetEnableHoverMode();
+    if (!enableHoverMode) {
+        isHalfFoldHover_ = false;
+    }
+    if (isHalfFoldHover_ && enableHoverMode) {
+        if (getY < foldCreaseTop_) {
+            wrapperRect_.SetRect(marginStart_, marginTop_,
+                wrapperSize_.Width() - marginEnd_ - marginStart_, foldCreaseTop_ - marginTop_);
+        } else if (getY > foldCreaseBottom_) {
+            wrapperRect_.SetRect(marginStart_, foldCreaseBottom_,
+                wrapperSize_.Width() - marginEnd_ - marginStart_,
+                    wrapperSize_.Height() - foldCreaseBottom_ - marginBottom_);
+        } else {
+            isHalfFoldHover_ = false;
+        }
+    }
+}
+
+void BubbleLayoutAlgorithm::UpdateScrollHeight(LayoutWrapper* layoutWrapper, bool showInSubWindow)
+{
+    auto bubbleNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(bubbleNode);
+    auto bubblePattern = bubbleNode->GetPattern<BubblePattern>();
+    CHECK_NULL_VOID(bubblePattern);
+    auto enableHoverMode = bubblePattern->GetEnableHoverMode();
+    if (!enableHoverMode) {
+        return;
+    }
+
+    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    if (children.empty()) {
+        return;
+    }
+    auto childWrapper = children.front();
+    auto childMaxSize =
+        GetPopupMaxWidthAndHeight(showInSubWindow, childWrapper->GetGeometryNode()->GetMarginFrameSize().Width());
+
+    auto columnNode = AceType::DynamicCast<FrameNode>(bubbleNode->GetLastChild());
+    CHECK_NULL_VOID(columnNode);
+    auto lastColumnNode = AceType::DynamicCast<FrameNode>(columnNode->GetLastChild());
+    CHECK_NULL_VOID(lastColumnNode);
+    auto buttonRowNode = AceType::DynamicCast<FrameNode>(lastColumnNode->GetLastChild());
+    CHECK_NULL_VOID(buttonRowNode);
+
+    if (buttonRowNode->GetChildren().empty()) {
+        return;
+    }
+    const auto& lastChildren = lastColumnNode->GetChildren();
+    buttonRowSize_ = buttonRowNode->GetGeometryNode()->GetFrameSize();
+    
+    for (const auto& uinode : lastChildren) {
+        if (uinode->GetTag() == V2::SCROLL_ETS_TAG) {
+            auto scrollNode = AceType::DynamicCast<FrameNode>(uinode);
+            CHECK_NULL_VOID(scrollNode);
+            
+            auto scrollProps = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
+            CHECK_NULL_VOID(scrollProps);
+            if (isHalfFoldHover_) {
+                scrollProps->UpdateCalcMaxSize(CalcSize(
+                    std::nullopt,
+                    CalcLength(Dimension(wrapperRect_.Height() - buttonRowSize_.Height()))));
+            } else {
+                scrollProps->UpdateCalcMaxSize(CalcSize(
+                    std::nullopt,
+                    CalcLength(Dimension(childMaxSize.Height() - buttonRowSize_.Height()))));
+            }
+            scrollNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
 }
 
 OffsetF BubbleLayoutAlgorithm::GetChildPositionNew(
@@ -831,6 +931,10 @@ OffsetF BubbleLayoutAlgorithm::AdjustPosition(const OffsetF& position, float wid
             xMax = std::min(targetOffset_.GetX() - width - space, wrapperSize_.Width() - marginEnd_ - width);
             yMin = marginTop_;
             yMax = wrapperSize_.Height() - height - marginBottom_;
+            if (isHalfFoldHover_) {
+                yMin = wrapperRect_.Top();
+                yMax = wrapperRect_.Bottom() - height;
+            }
             break;
         }
         case Placement::RIGHT_TOP:
@@ -843,6 +947,10 @@ OffsetF BubbleLayoutAlgorithm::AdjustPosition(const OffsetF& position, float wid
             xMax = wrapperSize_.Width() - width - marginEnd_;
             yMin = marginTop_;
             yMax = wrapperSize_.Height() - height - marginBottom_;
+            if (isHalfFoldHover_) {
+                yMin = wrapperRect_.Top();
+                yMax = wrapperRect_.Bottom() - height;
+            }
             break;
         }
         case Placement::TOP_LEFT:
@@ -852,6 +960,11 @@ OffsetF BubbleLayoutAlgorithm::AdjustPosition(const OffsetF& position, float wid
             xMax = wrapperSize_.Width() - width - marginEnd_;
             yMin = marginTop_;
             yMax = std::min(targetOffset_.GetY() - height - space, wrapperSize_.Height() - marginBottom_ - height);
+            if (isHalfFoldHover_) {
+                yMin = wrapperRect_.Top();
+                yMax = std::min(targetOffset_.GetY() - height - space,
+                    static_cast<float>(wrapperRect_.Bottom()) - height);
+            }
             yTargetOffset = targetSecurity_;
             break;
         }
@@ -865,6 +978,11 @@ OffsetF BubbleLayoutAlgorithm::AdjustPosition(const OffsetF& position, float wid
             xMax = wrapperSize_.Width() - width - marginEnd_;
             yMin = std::max(targetOffset_.GetY() + targetSize_.Height() + space, marginTop_);
             yMax = wrapperSize_.Height() - height - marginBottom_;
+            if (isHalfFoldHover_) {
+                yMin = std::max(targetOffset_.GetY() + targetSize_.Height() + space,
+                    static_cast<float>(wrapperRect_.Top()));
+                yMax = wrapperRect_.Bottom() - height;
+            }
             yTargetOffset = -targetSecurity_;
             break;
         }
@@ -873,6 +991,10 @@ OffsetF BubbleLayoutAlgorithm::AdjustPosition(const OffsetF& position, float wid
             xMax = wrapperSize_.Width() - width - marginEnd_;
             yMin = marginTop_;
             yMax = wrapperSize_.Height() - height - marginBottom_;
+            if (isHalfFoldHover_) {
+                yMin = wrapperRect_.Top();
+                yMax = wrapperRect_.Bottom() - height;
+            }
             break;
         }
         default:
@@ -1135,6 +1257,12 @@ bool BubbleLayoutAlgorithm::CheckPosition(const OffsetF& position, const SizeF& 
             auto height = std::min(wrapperSize_.Height() - marginBottom_ - targetOffsetY - targetSize_.Height(),
                 wrapperSize_.Height() - marginBottom_ - marginTop_);
             rect.SetRect(marginStart_, y, wrapperSize_.Width() - marginEnd_ - marginStart_, height);
+            if (isHalfFoldHover_) {
+                y = std::max(targetOffsetY + targetSize_.Height(), static_cast<float>(wrapperRect_.Top()));
+                height = std::min(static_cast<float>(wrapperRect_.Bottom()) - targetOffsetY - targetSize_.Height(),
+                    wrapperSize_.Height() - marginBottom_ - marginTop_);
+                rect.SetRect(marginStart_, y, wrapperSize_.Width() - marginEnd_ - marginStart_, height);
+            }
             if (childSize.Height() > height) {
                 i += step;
                 return false;
@@ -1149,6 +1277,12 @@ bool BubbleLayoutAlgorithm::CheckPosition(const OffsetF& position, const SizeF& 
             targetOffsetY += (-userSetTargetSpace_.ConvertToPx());
             auto height = std::min(targetOffsetY - marginTop_, wrapperSize_.Height() - marginTop_ - marginBottom_);
             rect.SetRect(marginStart_, marginTop_, wrapperSize_.Width() - marginEnd_ - marginStart_, height);
+            if (isHalfFoldHover_) {
+                height = std::min(targetOffsetY - static_cast<float>(wrapperRect_.Top()),
+                    wrapperSize_.Height() - marginTop_ - marginBottom_);
+                rect.SetRect(marginStart_, wrapperRect_.Top(),
+                    wrapperSize_.Width() - marginEnd_ - marginStart_, height);
+            }
             if (childSize.Height() > height) {
                 i += step;
                 return false;
@@ -1165,6 +1299,9 @@ bool BubbleLayoutAlgorithm::CheckPosition(const OffsetF& position, const SizeF& 
             auto width = std::min(wrapperSize_.Width() - targetOffsetX - targetSize_.Width() - marginEnd_,
                 wrapperSize_.Width() - marginStart_ - marginEnd_);
             rect.SetRect(x, marginTop_, width, wrapperSize_.Height() - marginBottom_ - marginTop_);
+            if (isHalfFoldHover_) {
+                rect.SetRect(x, wrapperRect_.Top(), width, wrapperRect_.Height());
+            }
             if (childSize.Width() > width) {
                 i += step;
                 return false;
@@ -1179,6 +1316,9 @@ bool BubbleLayoutAlgorithm::CheckPosition(const OffsetF& position, const SizeF& 
             targetOffsetX += (-userSetTargetSpace_.ConvertToPx());
             auto width = std::min(targetOffsetX - marginStart_, wrapperSize_.Width() - marginEnd_ - marginStart_);
             rect.SetRect(marginStart_, marginTop_, width, wrapperSize_.Height() - marginBottom_ - marginTop_);
+            if (isHalfFoldHover_) {
+                rect.SetRect(marginStart_, wrapperRect_.Top(), width, wrapperRect_.Height());
+            }
             if (childSize.Width() > width) {
                 i += step;
                 return false;

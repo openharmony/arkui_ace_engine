@@ -163,6 +163,8 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     popupProp->UpdatePositionOffset(OffsetF(param->GetTargetOffset().GetX(), param->GetTargetOffset().GetY()));
     popupProp->UpdateBlockEvent(param->IsBlockEvent());
     popupProp->UpdateIsCaretMode(param->IsCaretMode());
+    popupProp->UpdateEnableHoverMode(param->EnableHoverMode());
+    
     if (param->GetArrowHeight().has_value()) {
         popupProp->UpdateArrowHeight(param->GetArrowHeight().value());
     }
@@ -201,6 +203,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     auto textColor = param->GetTextColor();
     bubblePattern->SetMessageColor(textColor.has_value());
     bubblePattern->SetHasTransition(param->GetHasTransition());
+    bubblePattern->SetEnableHoverMode(param->EnableHoverMode());
     // Create child
     RefPtr<FrameNode> child;
     if (primaryButton.showButton || secondaryButton.showButton) {
@@ -296,6 +299,7 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
         bubbleHub->SetOnStateChange(param->GetOnStateChange());
     }
     auto popupPattern = popupNode->GetPattern<BubblePattern>();
+    popupPattern->SetEnableHoverMode(param->EnableHoverMode());
     popupPattern->SetCustomPopupTag(true);
     // update bubble props
     auto layoutProps = popupNode->GetLayoutProperty<BubbleLayoutProperty>();

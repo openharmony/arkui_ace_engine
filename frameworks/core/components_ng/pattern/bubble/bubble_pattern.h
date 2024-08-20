@@ -202,6 +202,16 @@ public:
             onWillDismiss_(reason);
         }
     }
+
+    void SetEnableHoverMode(bool enableHoverMode)
+    {
+        enableHoverMode_ = enableHoverMode;
+    }
+
+    bool GetEnableHoverMode() const
+    {
+        return enableHoverMode_;
+    }
     
     void SetHasTransition(bool hasTransition)
     {
@@ -304,6 +314,8 @@ private:
 
     bool hasTransition_ = false;
     bool hasOnAreaChange_ = false;
+    bool enableHoverMode_ = false;
+    int32_t halfFoldHoverCallbackId_ = -1;
 };
 } // namespace OHOS::Ace::NG
 

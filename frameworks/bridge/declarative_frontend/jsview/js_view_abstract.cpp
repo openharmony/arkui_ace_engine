@@ -989,6 +989,11 @@ void ParsePopupCommonParam(
         popupParam->SetEnableArrow(enableArrowValue->ToBoolean());
     }
 
+    auto enableHoverModeValue = popupObj->GetProperty("enableHoverMode");
+    if (enableHoverModeValue->IsBoolean()) {
+        popupParam->SetEnableHoverMode(enableHoverModeValue->ToBoolean());
+    }
+
     JSRef<JSVal> maskValue = popupObj->GetProperty("mask");
     if (maskValue->IsBoolean()) {
         if (popupParam) {
