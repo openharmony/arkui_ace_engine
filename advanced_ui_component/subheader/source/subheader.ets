@@ -314,7 +314,8 @@ export struct SubHeader {
           start: LengthMetrics.vp((this.contentMargin ? (this.contentMargin.start? this.contentMargin.start.value: 0) :
           Util.getNumberByResource(125830936, LEFT_ICON_SIZE_NUMBER)) - this.paddingLeft),
           // 'sys.float.margin_right' id,value: 16vp
-          end: this.contentMargin ? this.contentMargin.end : LengthMetrics.vp(Util.getNumberByResource(125830937, LEFT_ICON_SIZE_NUMBER)),
+          end: this.contentMargin ? this.contentMargin.end : LengthMetrics.vp(Util.getNumberByResource(125830937,
+            LEFT_ICON_SIZE_NUMBER)),
         })
         .justifyContent(FlexAlign.Start)
         .width('100%')
