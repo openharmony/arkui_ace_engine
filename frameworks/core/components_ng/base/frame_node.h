@@ -513,6 +513,7 @@ public:
     void SetNDKColorModeUpdateCallback(const std::function<void(int32_t)>&& callback)
     {
         ndkColorModeUpdateCallback_ = callback;
+        colorMode_ = SystemProperties::GetColorMode();
     }
 
     void SetNDKFontUpdateCallback(const std::function<void(float, float)>&& callback)
@@ -1230,6 +1231,8 @@ private:
     bool isInternal_ = false;
 
     std::string nodeName_;
+
+    ColorMode colorMode_;
 
     bool draggable_ = false;
     bool userSet_ = false;
