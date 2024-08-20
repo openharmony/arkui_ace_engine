@@ -361,6 +361,14 @@ void WebPattern::OnAttachToFrameNode()
         CHECK_NULL_VOID(renderContextForSurface_);
         renderContextForSurface_->InitContext(false, param);
     }
+
+    if (!renderContextForPopupSurface_) {
+        renderContextForPopupSurface_ = RenderContext::Create();
+        CHECK_NULL_VOID(renderContextForPopupSurface_);
+        static RenderContext::ContextParam popupParam  = { RenderContext::ContextType::HARDWARE_SURFACE,
+            "RosenWebPopup" };
+        renderContextForPopupSurface_->InitContext(false, popupParam);
+    }
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
 
@@ -2389,8 +2397,11 @@ void WebPattern::OnModifyDone()
             delegate_->SetDrawSize(drawSize);
             int32_t instanceId = Container::CurrentId();
             CHECK_NULL_VOID(renderSurface_);
+            CHECK_NULL_VOID(popupRenderSurface_);
             CHECK_NULL_VOID(renderContextForSurface_);
+            CHECK_NULL_VOID(renderContextForPopupSurface_);
             renderSurface_->SetInstanceId(instanceId);
+            popupRenderSurface_->SetInstanceId(instanceId);
             renderSurface_->SetRenderContext(host->GetRenderContext());
             if (renderMode_ == RenderMode::SYNC_RENDER) {
                 renderSurface_->SetIsTexture(true);
@@ -2401,12 +2412,20 @@ void WebPattern::OnModifyDone()
                 renderSurface_->SetSurfaceQueueSize(ASYNC_SURFACE_QUEUE_SIZE);
                 renderSurface_->SetRenderContext(renderContextForSurface_);
             }
+            popupRenderSurface_->SetIsTexture(false);
+            popupRenderSurface_->SetSurfaceQueueSize(ASYNC_SURFACE_QUEUE_SIZE);
+            popupRenderSurface_->SetRenderContext(renderContextForPopupSurface_);
             renderContext->AddChild(renderContextForSurface_, 0);
+            renderContext->AddChild(renderContextForPopupSurface_, 1);
+            popupRenderSurface_->InitSurface();
+            popupRenderSurface_->SetTransformHint(rotation_);
+            popupRenderSurface_->UpdateSurfaceConfig();
             renderSurface_->InitSurface();
             renderSurface_->SetTransformHint(rotation_);
             TAG_LOGD(AceLogTag::ACE_WEB, "OnModify done, set rotation %{public}u", rotation_);
             renderSurface_->UpdateSurfaceConfig();
             delegate_->InitOHOSWeb(PipelineContext::GetCurrentContext(), renderSurface_);
+            delegate_->SetPopupSurface(popupRenderSurface_);
             if (renderMode_ == RenderMode::ASYNC_RENDER) {
                 std::string surfaceId = renderSurface_->GetUniqueId();
                 delegate_->SetSurfaceId(surfaceId);
@@ -3827,6 +3846,24 @@ void WebPattern::OnTooltip(const std::string& tooltip)
         return;
     }
     ShowTooltip(tooltip, tooltipTimestamp);
+}
+
+void WebPattern::OnPopupSize(int32_t x, int32_t y, int32_t width, int32_t height)
+{
+    CHECK_NULL_VOID(renderContextForPopupSurface_);
+    renderContextForPopupSurface_->SetBounds(x, y, width, height);
+}
+
+void WebPattern::OnPopupShow(bool show)
+{
+    if (!show) {
+        CHECK_NULL_VOID(renderContextForPopupSurface_);
+        renderContextForPopupSurface_->SetBounds(0, 0, 0, 0);
+    }
+
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RequestFrame();
 }
 
 void WebPattern::AttachCustomKeyboard()
@@ -5642,6 +5679,8 @@ void WebPattern::OnRebuildFrame()
     CHECK_NULL_VOID(renderContext);
     CHECK_NULL_VOID(renderContextForSurface_);
     renderContext->AddChild(renderContextForSurface_, 0);
+    CHECK_NULL_VOID(renderContextForPopupSurface_);
+    renderContext->AddChild(renderContextForPopupSurface_, 1);
 }
 
 void WebPattern::CreateOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, int offsetX, int offsetY, int rectWidth,

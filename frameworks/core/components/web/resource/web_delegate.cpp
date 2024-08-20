@@ -5027,6 +5027,36 @@ void WebDelegate::OnTooltip(const std::string& tooltip)
         TaskExecutor::TaskType::UI, "ArkUIWebTooltip");
 }
 
+void WebDelegate::OnPopupSize(int32_t x, int32_t y, int32_t width, int32_t height)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), x, y, width, height]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            webPattern->OnPopupSize(x, y, width, height);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIWebPopupSize");
+}
+
+void WebDelegate::OnPopupShow(bool show)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), show]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            webPattern->OnPopupShow(show);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIWebPopupShow");
+}
+
 void WebDelegate::OnRequestFocus()
 {
     if (onRequestFocusV2_) {
@@ -6071,6 +6101,27 @@ void WebDelegate::SetSurface(const sptr<Surface>& surface)
     surfaceRsNode_ = webPattern->GetSurfaceRSNode();
     CHECK_NULL_VOID(surfaceRsNode_);
     surfaceNodeId_ = webPattern->GetWebSurfaceNodeId();
+}
+void WebDelegate::SetPopupSurface(const RefPtr<NG::RenderSurface>& popupSurface)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), popupSurface]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                auto rosenRenderSurface = AceType::DynamicCast<NG::RosenRenderSurface>(popupSurface);
+                delegate->popupRenderSurface_ = rosenRenderSurface;
+                delegate->popupSurface_ = rosenRenderSurface->GetSurface();
+
+                CHECK_NULL_VOID(delegate->popupSurface_);
+                delegate->nweb_->SetPopupSurface(reinterpret_cast<void *>(&delegate->popupSurface_));
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUISetPopupSurface");
 }
 #endif
 

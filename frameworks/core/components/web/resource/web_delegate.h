@@ -852,6 +852,8 @@ public:
     bool OnDragAndDropData(const void* data, size_t len, int width, int height);
     bool OnDragAndDropDataUdmf(std::shared_ptr<OHOS::NWeb::NWebDragData> dragData);
     void OnTooltip(const std::string& tooltip);
+    void OnPopupSize(int32_t x, int32_t y, int32_t width, int32_t height);
+    void OnPopupShow(bool show);
     void OnShowAutofillPopup(const float offsetX, const float offsetY, const std::vector<std::string>& menu_items);
     void SuggestionSelected(int32_t index);
     void OnHideAutofillPopup();
@@ -914,8 +916,11 @@ public:
     std::string SpanstringConvertHtml(const std::vector<uint8_t> &content);
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
+    void SetPopupSurface(const RefPtr<NG::RenderSurface>& popupSurface);
     sptr<Surface> surface_ = nullptr;
+    sptr<Surface> popupSurface_ = nullptr;
     RefPtr<NG::RosenRenderSurface> renderSurface_ = nullptr;
+    RefPtr<NG::RosenRenderSurface> popupRenderSurface_ = nullptr;
 #endif
 #ifdef OHOS_STANDARD_SYSTEM
     void SetWebRendeGlobalPos(const Offset& pos)
