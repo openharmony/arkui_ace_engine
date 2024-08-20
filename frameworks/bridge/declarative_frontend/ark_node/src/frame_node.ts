@@ -794,6 +794,11 @@ const __creatorMap__ = new Map<string, (context: UIContext) => FrameNode>(
         return new ArkFlowItemComponent(node, type);
       })
     }],
+    ["QRCode", (context: UIContext) => {
+      return new TypedFrameNode(context, "QRCode", (node: NodePtr, type: ModifierType): ArkQRCodeComponent => {
+        return new ArkQRCodeComponent(node, type);
+      })
+    }],
   ]
 )
 

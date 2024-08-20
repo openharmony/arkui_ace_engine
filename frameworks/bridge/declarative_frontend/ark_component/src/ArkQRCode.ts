@@ -18,6 +18,13 @@ class ArkQRCodeComponent extends ArkComponent implements QRCodeAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
+  allowChildCount(): number {
+    return 0;
+  }
+  initialize(value: Object[]): this {
+    modifierWithKey(this._modifiersWithKeys, QRValueModifier.identity, QRValueModifier, value[0]);
+    return this;
+  }
   color(value: ResourceColor): this {
     modifierWithKey(this._modifiersWithKeys, QRColorModifier.identity, QRColorModifier, value);
     return this;
@@ -29,6 +36,20 @@ class ArkQRCodeComponent extends ArkComponent implements QRCodeAttribute {
   contentOpacity(value: number | Resource): this {
     modifierWithKey(this._modifiersWithKeys, QRContentOpacityModifier.identity, QRContentOpacityModifier, value);
     return this;
+  }
+}
+
+class QRValueModifier extends ModifierWithKey<string> {
+  constructor(value: string) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('QRCodeValue');
+  applyPeer(node: KNode, reset: boolean): void {
+    getUINativeModule().qrcode.setQRValue(node, this.value);
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 

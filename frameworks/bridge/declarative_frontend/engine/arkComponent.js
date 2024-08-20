@@ -22900,6 +22900,13 @@ class ArkQRCodeComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
+  allowChildCount() {
+    return 0;
+  }
+  initialize(value) {
+    modifierWithKey(this._modifiersWithKeys, QRValueModifier.identity, QRValueModifier, value[0]);
+    return this;
+  }
   color(value) {
     modifierWithKey(this._modifiersWithKeys, QRColorModifier.identity, QRColorModifier, value);
     return this;
@@ -22913,6 +22920,18 @@ class ArkQRCodeComponent extends ArkComponent {
     return this;
   }
 }
+class QRValueModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    getUINativeModule().qrcode.setQRValue(node, this.value);
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+QRValueModifier.identity = Symbol('QRCodeValue');
 class QRColorModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
