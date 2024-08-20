@@ -887,6 +887,11 @@ public:
     }
 
     TextStyle GetDefaultTextStyle();
+    void SetEnableHapticFeedback(bool isEnabled)
+    {
+        isEnableHapticFeedback_ = isEnabled;
+    }
+
     void SetRequestKeyboardOnFocus(bool needToRequest)
     {
         needToRequestKeyboardOnFocus_ = needToRequest;
@@ -954,6 +959,7 @@ private:
     void HandleLongPress(GestureEvent& info);
     void HandleDoubleClickOrLongPress(GestureEvent& info);
     void HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<FrameNode> host);
+    void StartVibratorByLongPress();
     std::string GetPositionSpansText(int32_t position, int32_t& startSpan);
     void FireOnSelect(int32_t selectStart, int32_t selectEnd);
     void FireOnSelectionChange(const int32_t caretPosition);
@@ -973,6 +979,7 @@ private:
     void HandleTouchUpAfterLongPress();
     void HandleTouchMove(const Offset& offset);
     void UpdateCaretByTouchMove(const Offset& offset);
+    void StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex);
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void UseHostToUpdateTextFieldManager();
     void UpdateTextFieldManager(const Offset& offset, float height);
@@ -1297,6 +1304,7 @@ private:
     std::queue<std::function<void()>> tasks_;
     bool isModifyingContent_ = false;
     bool needToRequestKeyboardOnFocus_ = true;
+    bool isEnableHapticFeedback_ = true;
 };
 } // namespace OHOS::Ace::NG
 
