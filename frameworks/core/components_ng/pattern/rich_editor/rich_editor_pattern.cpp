@@ -3959,6 +3959,11 @@ bool RichEditorPattern::EnableStandardInput(bool needShowSoftKeyboard)
         miscTextConfig->windowId = systemWindowId;
     }
 #endif
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
+    auto host = GetHost();
+    if (host && textFieldManager) {
+        textFieldManager->SetLastRequestKeyboardId(host->GetId());
+    }
     inputMethod->Attach(richEditTextChangeListener_, needShowSoftKeyboard, textconfig);
     UpdateCaretInfoToController();
     if (context) {

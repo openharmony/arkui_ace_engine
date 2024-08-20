@@ -156,6 +156,26 @@ public:
         inlineHeight_ = height;
     }
 
+    void SetLastAvoidFieldId(int32_t lastAvoidFieldId) {
+        lastAvoidFieldId_ = lastAvoidFieldId;
+    }
+
+    int32_t GetLastAvoidFieldId() {
+        return lastAvoidFieldId_;
+    }
+
+    int32_t GetOnFocusTextFieldId() {
+        return onFocusTextFieldId;
+    }
+
+    void SetLastRequestKeyboardId(int32_t lastRequestKeyboardId) {
+        lastRequestKeyboardId_ = lastRequestKeyboardId;
+    }
+
+    int32_t GetLastRequestKeyboardId() {
+        return lastRequestKeyboardId_;
+    }
+
 private:
     bool ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bottomInset, bool isShowKeyboard);
     RefPtr<FrameNode> FindScrollableOfFocusedTextField(const RefPtr<FrameNode>& textField);
@@ -174,6 +194,8 @@ private:
     WeakPtr<Pattern> onFocusTextField_;
     WeakPtr<FrameNode> weakNavNode_;
     int32_t onFocusTextFieldId = -1;
+    int32_t lastAvoidFieldId_ = -1;
+    int32_t lastRequestKeyboardId_ = -1;
     bool imeAttachCalled_ = false;
     bool needToRequestKeyboard_ = true;
 };
