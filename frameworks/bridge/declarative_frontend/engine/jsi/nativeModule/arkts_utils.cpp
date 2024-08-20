@@ -1878,6 +1878,12 @@ RefPtr<PixelMap> ArkTSUtils::GetDrawablePixmap(const EcmaVM* vm, Local<JSValueRe
     return PixelMap::GetFromDrawable(UnwrapNapiValue(vm, obj));
 }
 
+Rosen::BrightnessBlender* ArkTSUtils::CreateRSBrightnessBlenderFromNapiValue(const EcmaVM* vm, Local<JSValueRef> obj)
+{
+    auto blenderPtr = static_cast<Rosen::BrightnessBlender*>(UnwrapNapiValue(vm, obj));
+    return blenderPtr;
+}
+
 void* ArkTSUtils::UnwrapNapiValue(const EcmaVM* vm, const Local<JSValueRef>& obj)
 {
     if (!obj->IsObject(vm)) {

@@ -937,7 +937,7 @@ class ArkCustomProperty {
 }
 
 class ArkBlendMode {
-  blendMode: number;
+  blendMode: number | Blender;
   blendApplyType: number;
   constructor() {
     this.blendMode = undefined;

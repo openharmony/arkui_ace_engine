@@ -5353,6 +5353,13 @@ ArkUINativeModuleValue CommonBridge::SetBlendMode(ArkUIRuntimeCallInfo *runtimeC
     auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
     int32_t blendModeValue = static_cast<int32_t>(OHOS::Ace::BlendMode::NONE);
     int32_t blendApplyTypeValue = static_cast<int32_t>(OHOS::Ace::BlendApplyType::FAST);
+    if (blendApplyTypeArg->IsNumber()) {
+        int32_t blendApplyTypeNum = blendApplyTypeArg->Int32Value(vm);
+        if (blendApplyTypeNum >= static_cast<int>(OHOS::Ace::BlendApplyType::FAST) &&
+            blendApplyTypeNum <= static_cast<int>(OHOS::Ace::BlendApplyType::OFFSCREEN)) {
+            blendApplyTypeValue = blendApplyTypeNum;
+        }
+    }
     if (blendModeArg->IsNumber()) {
         int32_t blendModeNum = blendModeArg->Int32Value(vm);
         if (blendModeNum >= static_cast<int32_t>(OHOS::Ace::BlendMode::NONE) &&
@@ -5362,14 +5369,11 @@ ArkUINativeModuleValue CommonBridge::SetBlendMode(ArkUIRuntimeCallInfo *runtimeC
             blendModeValue = static_cast<int32_t>(OHOS::Ace::BlendMode::SRC_OVER);
             blendApplyTypeValue = static_cast<int32_t>(OHOS::Ace::BlendApplyType::OFFSCREEN);
         }
-        if (blendApplyTypeArg->IsNumber()) {
-            int32_t blendApplyTypeNum = blendApplyTypeArg->Int32Value(vm);
-            if (blendApplyTypeNum >= static_cast<int>(OHOS::Ace::BlendApplyType::FAST) &&
-                blendApplyTypeNum <= static_cast<int>(OHOS::Ace::BlendApplyType::OFFSCREEN)) {
-                blendApplyTypeValue = blendApplyTypeNum;
-            }
-        }
         GetArkUINodeModifiers()->getCommonModifier()->setBlendMode(nativeNode, blendModeValue, blendApplyTypeValue);
+    } else if (blendModeArg->IsObject(vm)) {
+        auto arkBlender = ArkTSUtils::CreateRSBrightnessBlenderFromNapiValue(vm, blendModeArg);
+        auto blender = reinterpret_cast<ArkUINodeHandle>(arkBlender);
+        GetArkUINodeModifiers()->getCommonModifier()->setBlendModeByBlender(nativeNode, blender, blendApplyTypeValue);
     } else {
         GetArkUINodeModifiers()->getCommonModifier()->resetBlendMode(nativeNode);
     }
