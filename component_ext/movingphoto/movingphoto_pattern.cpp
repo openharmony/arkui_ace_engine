@@ -868,13 +868,10 @@ void MovingPhotoPattern::StartAnimation()
     CHECK_NULL_VOID(image);
     auto imageRsContext = image->GetRenderContext();
     CHECK_NULL_VOID(imageRsContext);
-    imageRsContext->UpdateOpacity(1.0);
-    imageRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
     auto video = AceType::DynamicCast<FrameNode>(movingPhoto->GetVideo());
     CHECK_NULL_VOID(video);
     auto videoRsContext = video->GetRenderContext();
     CHECK_NULL_VOID(videoRsContext);
-    videoRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
 
     if (historyAutoAndRepeatLevel_ == PlaybackMode::REPEAT) {
         if (isFirstRepeatPlay_) {
@@ -884,12 +881,15 @@ void MovingPhotoPattern::StartAnimation()
             RepeatStartAnimation(videoRsContext);
         }
     } else {
+        videoRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
         CommonStartAnimation(imageRsContext, videoRsContext);
     }
 }
 
 void MovingPhotoPattern::CommonStartAnimation(const RefPtr<RenderContext>& image, const RefPtr<RenderContext>& video)
 {
+    imageRsContext->UpdateOpacity(1.0);
+    imageRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
     auto movingPhotoPattern = WeakClaim(this);
     AnimationOption animationOption;
     animationOption.SetDuration(ANIMATION_DURATION_400);
