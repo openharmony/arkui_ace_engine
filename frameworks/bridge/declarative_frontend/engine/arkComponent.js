@@ -9209,7 +9209,8 @@ class SpanFontModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    if (this.stageValue.weight !== this.value.weight || this.stageValue.style !== this.value.style) {
+    if (this.stageValue.weight !== this.value.weight || this.stageValue.style !== this.value.style ||
+      this.stageValue.enableVariableFontWeight !== this.value.enableVariableFontWeight) {
       return true;
     }
     if (((isResource(this.stageValue.size) && isResource(this.value.size) &&
@@ -10299,7 +10300,7 @@ class FontWeightModifier extends ModifierWithKey {
       getUINativeModule().text.resetFontWeight(node);
     }
     else {
-      getUINativeModule().text.setFontWeight(node, this.value);
+      getUINativeModule().text.setFontWeight(node, this.value.value, this.value.enableVariableFontWeight);
     }
   }
 }
@@ -10805,11 +10806,13 @@ class TextFontModifier extends ModifierWithKey {
       getUINativeModule().text.resetFont(node);
     }
     else {
-      getUINativeModule().text.setFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+      getUINativeModule().text.setFont(node, this.value.value.size, this.value.value.weight, this.value.value.family,
+        this.value.value.style, this.value.enableVariableFontWeight);
     }
   }
   checkObjectDiff() {
-    if (this.stageValue.weight !== this.value.weight || this.stageValue.style !== this.value.style) {
+    if (this.stageValue.weight !== this.value.weight || this.stageValue.style !== this.value.style ||
+      this.stageValue.enableVariableFontWeight !== this.value.enableVariableFontWeight) {
       return true;
     }
     if (((isResource(this.stageValue.size) && isResource(this.value.size) &&
@@ -11006,8 +11009,11 @@ class ArkTextComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextDataDetectorConfigModifier.identity, TextDataDetectorConfigModifier, detectorConfig);
     return this;
   }
-  font(value) {
-    modifierWithKey(this._modifiersWithKeys, TextFontModifier.identity, TextFontModifier, value);
+  font(value, options) {
+    let arkTextFont = new ArkTextFont();
+    arkTextFont.value = value;
+    arkTextFont.enableVariableFontWeight = options?.enableVariableFontWeight;
+    modifierWithKey(this._modifiersWithKeys, TextFontModifier.identity, TextFontModifier, arkTextFont);
     return this;
   }
   fontColor(value) {
@@ -11038,15 +11044,11 @@ class ArkTextComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, FontStyleModifier.identity, FontStyleModifier, value);
     return this;
   }
-  fontWeight(value) {
-    let fontWeightStr = '400';
-    if (isNumber(value)) {
-      fontWeightStr = value.toString();
-    }
-    else if (isString(value)) {
-      fontWeightStr = String(value);
-    }
-    modifierWithKey(this._modifiersWithKeys, FontWeightModifier.identity, FontWeightModifier, fontWeightStr);
+  fontWeight(value, options) {
+    let arkFontWeight = new ArkFontWeight();
+    arkFontWeight.value = value;
+    arkFontWeight.enableVariableFontWeight = options?.enableVariableFontWeight;
+    modifierWithKey(this._modifiersWithKeys, FontWeightModifier.identity, FontWeightModifier, arkFontWeight);
     return this;
   }
   textAlign(value) {
@@ -15354,6 +15356,42 @@ class ArkDragPreview {
 
   isEqual(another) {
     return this.inspectorId === another.inspectorId;
+  }
+}
+
+class ArkTextFont {
+  constructor() {
+    this.value = undefined;
+    this.enableVariableFontWeight = undefined;
+  }
+
+  isEqual(another) {
+    return (
+      this.value === another.value &&
+      this.enableVariableFontWeight === another.enableVariableFontWeight
+    );
+  }
+
+  checkObjectDiff(another) {
+    return !this.isEqual(another);
+  }
+}
+
+class ArkFontWeight {
+  constructor() {
+    this.value = undefined;
+    this.enableVariableFontWeight = undefined;
+  }
+
+  isEqual(another) {
+    return (
+      this.value === another.value &&
+      this.enableVariableFontWeight === another.enableVariableFontWeight
+    );
+  }
+
+  checkObjectDiff(another) {
+    return !this.isEqual(another);
   }
 }
 

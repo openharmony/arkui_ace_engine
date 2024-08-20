@@ -6445,7 +6445,7 @@ int32_t SetTextFont(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         StringUtils::StringSplitter(value, ',', familyArray);
     }
 
-    ArkUIFontStruct fontStruct;
+    ArkUIFontWithOptionsStruct fontStruct;
     fontStruct.fontSizeNumber = size;
     fontStruct.fontSizeUnit = GetDefaultUnit(node, UNIT_FP);
     fontStruct.fontWeight = weight;
@@ -6457,7 +6457,7 @@ int32_t SetTextFont(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         fontStruct.fontFamilies = fontFamilies.data();
     }
     fontStruct.fontStyle = style;
-    ArkUIFontStruct* fontInfo = &fontStruct;
+    ArkUIFontWithOptionsStruct* fontInfo = &fontStruct;
     fullImpl->getNodeModifiers()->getTextModifier()->setTextFont(node->uiNodeHandle, fontInfo);
     return ERROR_CODE_NO_ERROR;
 }

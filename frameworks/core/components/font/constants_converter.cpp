@@ -37,6 +37,9 @@ namespace OHOS::Ace::Constants {
 namespace {
 const std::string FONTWEIGHT = "wght";
 constexpr float DEFAULT_MULTIPLE = 100.0f;
+constexpr float MIN_FONT_WEIGHT = 100.0f;
+constexpr float DEFAULT_FONT_WEIGHT = 400.0f;
+constexpr float MAX_FONT_WEIGHT = 900.0f;
 constexpr int32_t SCALE_EFFECT = 2;
 constexpr int32_t NONE_EFFECT = 0;
 constexpr float ORIGINAL_LINE_HEIGHT_SCALE = 1.0f;
@@ -425,6 +428,12 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     if (pipelineContext) {
         fontWeightValue = fontWeightValue * pipelineContext->GetFontWeightScale();
     }
+    if (textStyle.GetEnableVariableFontWeight()) {
+        fontWeightValue = textStyle.GetVariableFontWeight();
+        if (LessNotEqual(fontWeightValue, MIN_FONT_WEIGHT) || GreatNotEqual(fontWeightValue, MAX_FONT_WEIGHT)) {
+            fontWeightValue = DEFAULT_FONT_WEIGHT;
+        }
+    }
     txtStyle.fontVariations.SetAxisValue(FONTWEIGHT, fontWeightValue);
     // Font size must be px when transferring to txt::TextStyle
     if (pipelineContext) {
@@ -649,6 +658,12 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     auto pipelineContext = context.Upgrade();
     if (pipelineContext) {
         fontWeightValue = fontWeightValue * pipelineContext->GetFontWeightScale();
+    }
+    if (textStyle.GetEnableVariableFontWeight()) {
+        fontWeightValue = textStyle.GetVariableFontWeight();
+        if (LessNotEqual(fontWeightValue, MIN_FONT_WEIGHT) || GreatNotEqual(fontWeightValue, MAX_FONT_WEIGHT)) {
+            fontWeightValue = DEFAULT_FONT_WEIGHT;
+        }
     }
     txtStyle.fontVariations.SetAxisValue(FONTWEIGHT, fontWeightValue);
     // Font size must be px when transferring to Rosen::TextStyle

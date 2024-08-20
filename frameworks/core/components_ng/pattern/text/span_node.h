@@ -273,6 +273,14 @@ public:
     {
         return isParentText;
     }
+    bool GetHasUserFontWeight()
+    {
+        return hasUserFontWeight_;
+    }
+    void SetHasUserFontWeight(bool hasUserFontWeight)
+    {
+        hasUserFontWeight_ = hasUserFontWeight;
+    }
     std::string GetSpanContent(const std::string& rawContent, bool isMarquee = false);
     std::string GetSpanContent();
     uint32_t GetSymbolUnicode();
@@ -284,6 +292,7 @@ public:
 private:
     std::optional<TextStyle> textStyle_;
     bool isParentText = false;
+    bool hasUserFontWeight_ = false;
     RefPtr<ResourceObject> resourceObject_;
 };
 
@@ -311,6 +320,8 @@ enum class PropertyInfo {
     LINESPACING,
     SYMBOL_EFFECT_OPTIONS,
     HALFLEADING,
+    VARIABLE_FONT_WEIGHT,
+    ENABLE_VARIABLE_FONT_WEIGHT,
     MIN_FONT_SCALE,
     MAX_FONT_SCALE,
 };
@@ -411,6 +422,17 @@ public:
         spanItem_->fontStyle->UpdateColorByResourceId();
     }
 
+    bool GetHasUserFontWeight()
+    {
+        return hasUserFontWeight_;
+    }
+
+    void UpdateUserFontWeight(bool hasUserFontWeight)
+    {
+        hasUserFontWeight_ = hasUserFontWeight;
+        spanItem_->SetHasUserFontWeight(hasUserFontWeight);
+    }
+
     DEFINE_SPAN_FONT_STYLE_ITEM(FontSize, Dimension);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextColor, DynamicColor);
     DEFINE_SPAN_FONT_STYLE_ITEM(ItalicFontStyle, Ace::FontStyle);
@@ -429,6 +451,8 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(SymbolEffectOptions, SymbolEffectOptions);
     DEFINE_SPAN_FONT_STYLE_ITEM(MinFontScale, float);
     DEFINE_SPAN_FONT_STYLE_ITEM(MaxFontScale, float);
+    DEFINE_SPAN_FONT_STYLE_ITEM(VariableFontWeight, int32_t);
+    DEFINE_SPAN_FONT_STYLE_ITEM(EnableVariableFontWeight, bool);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(BaselineOffset, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextAlign, TextAlign);
@@ -487,7 +511,7 @@ protected:
 private:
     std::list<RefPtr<SpanNode>> spanChildren_;
     std::set<PropertyInfo> propertyInfo_;
-
+    bool hasUserFontWeight_ = false;
     RefPtr<SpanItem> spanItem_ = MakeRefPtr<SpanItem>();
 
     ACE_DISALLOW_COPY_AND_MOVE(SpanNode);

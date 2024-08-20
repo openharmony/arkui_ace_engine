@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 121
+#define ARKUI_FULL_API_VERSION 122
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 121
+#define ARKUI_NODE_API_VERSION 122
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 8
@@ -278,6 +278,23 @@ struct ArkUIFontStruct {
     ArkUI_Int32 fontStyle;
     ArkUI_CharPtr* fontFamilies;
     ArkUI_Uint32 familyLength;
+};
+
+struct ArkUIFontWithOptionsStruct {
+    ArkUI_Float32 fontSizeNumber;
+    ArkUI_Int32 fontSizeUnit;
+    ArkUI_Int32 fontWeight;
+    ArkUI_Int32 fontStyle;
+    ArkUI_CharPtr* fontFamilies;
+    ArkUI_Uint32 familyLength;
+    ArkUI_Int32 variableFontWeight;
+    ArkUI_Bool enableVariableFontWeight;
+};
+
+struct ArkUIFontWeightWithOptionsStruct {
+    ArkUI_CharPtr weight;
+    ArkUI_Int32 variableFontWeight;
+    ArkUI_Bool enableVariableFontWeight;
 };
 
 struct ArkUISearchButtonOptionsStruct {
@@ -1932,9 +1949,10 @@ struct ArkUITextModifier {
     void (*resetTextBaselineOffset)(ArkUINodeHandle node);
     void (*setTextLetterSpacing)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetTextLetterSpacing)(ArkUINodeHandle node);
-    void (*setTextFont)(ArkUINodeHandle node, const struct ArkUIFontStruct* fontInfo);
+    void (*setTextFont)(ArkUINodeHandle node, const struct ArkUIFontWithOptionsStruct* fontInfo);
     void (*resetTextFont)(ArkUINodeHandle node);
     void (*setFontWeightStr)(ArkUINodeHandle node, ArkUI_CharPtr weight);
+    void (*setFontWeightWithOption)(ArkUINodeHandle node, const struct ArkUIFontWeightWithOptionsStruct* weightInfo);
     void (*setWordBreak)(ArkUINodeHandle node, ArkUI_Uint32 wordBreak);
     void (*resetWordBreak)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getFontFamily)(ArkUINodeHandle node);
