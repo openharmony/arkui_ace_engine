@@ -96,7 +96,6 @@ bool SubwindowOhos::InitContainer()
         OHOS::sptr<OHOS::Rosen::WindowOption> windowOption = new OHOS::Rosen::WindowOption();
         auto parentWindowName = parentContainer->GetWindowName();
         auto parentWindowId = parentContainer->GetWindowId();
-        auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
         sptr<OHOS::Rosen::Window> parentWindow = parentContainer->GetUIWindow(parentContainerId_);
         CHECK_NULL_RETURN(parentWindow, false);
         parentWindow_ = parentWindow;
@@ -126,6 +125,11 @@ bool SubwindowOhos::InitContainer()
         } else {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
             windowOption->SetParentId(parentWindowId);
+        }
+        auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+        if (!defaultDisplay) {
+            TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "DisplayManager GetDefaultDisplay failed");
+            return false;
         }
         windowOption->SetWindowRect({ 0, 0, defaultDisplay->GetWidth(), defaultDisplay->GetHeight() });
         windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
