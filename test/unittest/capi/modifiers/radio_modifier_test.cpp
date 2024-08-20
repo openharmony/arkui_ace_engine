@@ -32,27 +32,47 @@ using namespace testing::ext;
 namespace {
 inline Ark_String ArkStr(const char* s)
 {
-    return { .chars = s, .length = strlen(s) };
+    return {
+        .chars = s,
+        .length = strlen(s)
+    };
 }
 inline Ark_Number ArkNum(float src)
 {
-    return { .tag = ARK_TAG_FLOAT32, .f32 = static_cast<Ark_Float32>(src) };
+    return {
+        .tag = ARK_TAG_FLOAT32,
+        .f32 = static_cast<Ark_Float32>(src)
+    };
 }
 inline Ark_Number ArkNum(int src)
 {
-    return { .tag = ARK_TAG_INT32, .i32 = static_cast<Ark_Int32>(src) };
+    return {
+        .tag = ARK_TAG_INT32,
+        .i32 = static_cast<Ark_Int32>(src)
+    };
+}
+inline Opt_Array_String ArkResParams(Ark_String* name)
+{
+    return {
+        .tag = ARK_TAG_OBJECT,
+        .value = {
+            .array = name,
+            .length = name ? 1 : 0
+        }
+    };
 }
 inline Ark_Resource ArkRes(Ark_String* name, int id = -1,
     NodeModifier::ResourceType type = NodeModifier::ResourceType::COLOR, const char* module = "",
     const char* bundle = "")
 {
-    return { .id = ArkNum(id),
+    return {
+        .id = ArkNum(id),
         .type = ArkNum(static_cast<int>(type)),
         .moduleName = ArkStr(module),
         .bundleName = ArkStr(bundle),
-        .params = { .tag = ARK_TAG_OBJECT, .value = { .array = name, .length = name ? 1 : 0 } } };
+        .params = ArkResParams(name)
+    };
 }
-} // namespace
 
 // custom colors
 const auto CUSTOM_COLOR_STRING = "#FF123456";
@@ -63,18 +83,31 @@ const auto CHECK_FLOAT_COLOR = "#00000000";
 const auto CHECKED_COLOR_DEFAULT = "#FF000000";
 const auto UNCHECKED_COLOR_DEFAULT = "#FF000000";
 const auto INDICATOR_COLOR_DEFAULT = "#FF000000";
-// 
-
 // attributes
 const std::string CHECKED_ATTR = "checked";
 const std::string RADIO_STYLE_ATTR = "radioStyle";
 const std::string CHECKED_BACKGROUND_COLOR_ATTR = "checkedBackgroundColor";
 const std::string UNCHECKED_BORDER_COLOR_ATTR = "uncheckedBorderColor";
 const std::string INDICATOR_COLOR_ATTR = "indicatorColor";
+// indicatorType
+const std::string INDICATOR_TYPE_ATTR = "indicatorType";
+const std::string INDICATOR_TYPE_TICK = "TICK";
+const std::string INDICATOR_TYPE_DOT = "DOT";
+const std::string INDICATOR_TYPE_CUSTOM = "CUSTOM";
+// options
+const std::string RADIO_GROUP_ATTR = "group";
+const std::string RADIO_VALUE_ATTR = "value";
+const auto RADIO_GROUP_VALUE = "test_value";
+const auto RADIO_VALUE_VALUE = "test_group";
 
-static bool isCheckedTest = true;
-static auto callback = [](Ark_Int32 nodeId, const Ark_Boolean isChecked) { isCheckedTest = !isCheckedTest; };
-static GENERATED_ArkUIRadioEventsReceiver recv { .onChange = callback };
+static bool g_isCheckedTest = true;
+static auto radioOnChange(Ark_Int32 nodeId, const Ark_Boolean isChecked)
+{
+    g_isCheckedTest = !g_isCheckedTest;
+};
+static GENERATED_ArkUIRadioEventsReceiver recv {
+    .onChange = radioOnChange
+};
 static const GENERATED_ArkUIRadioEventsReceiver* getRadioEventsReceiverTest()
 {
     return &recv;
@@ -84,7 +117,7 @@ static const GENERATED_ArkUIEventsAPI* GetArkUiEventsAPITest()
     static const GENERATED_ArkUIEventsAPI eventsImpl = { .getRadioEventsReceiver = getRadioEventsReceiverTest };
     return &eventsImpl;
 };
-
+} // namespace
 class RadioModifierTest : public ModifierTestBase<GENERATED_ArkUIRadioModifier,
                               &GENERATED_ArkUINodeModifiers::getRadioModifier, GENERATED_ARKUI_RADIO> {
 public:
@@ -98,6 +131,7 @@ public:
         });
         MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
         MockContainer::SetUp();
+        MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
         NG::GeneratedModifier::GetFullAPI()->setArkUIEventsAPI(GetArkUiEventsAPITest());
     }
 
@@ -109,6 +143,57 @@ public:
     }
 };
 
+/**
+ * @tc.name: RadioOptionsTest001
+ * @tc.desc: Test Radio setRadioOptions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioModifierTest, RadioOptionsTest001, TestSize.Level1)
+{
+    auto groupDefault = GetStringAttribute(node_, RADIO_GROUP_ATTR);
+    auto valueDefault = GetStringAttribute(node_, RADIO_VALUE_ATTR);
+    EXPECT_EQ(groupDefault, "");
+    EXPECT_EQ(groupDefault, "");
+    Ark_RadioOptions radioOptions = {
+        .group = { .chars = RADIO_GROUP_VALUE },
+        .value = { .chars = RADIO_VALUE_VALUE }
+    };
+    modifier_->setRadioOptions(node_, &radioOptions);
+    auto group = GetStringAttribute(node_, RADIO_GROUP_ATTR);
+    auto value = GetStringAttribute(node_, RADIO_VALUE_ATTR);
+    EXPECT_EQ(group, RADIO_GROUP_VALUE);
+    EXPECT_EQ(value, RADIO_VALUE_VALUE);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        Ark_RadioOptions radioOptionsTick = {
+            .indicatorType = { .value = static_cast<int32_t>(RadioPattern::RadioIndicatorType::TICK) },
+        };
+        modifier_->setRadioOptions(node_, &radioOptionsTick);
+        auto groupEmpty = GetStringAttribute(node_, RADIO_GROUP_ATTR);
+        auto valueEmpty = GetStringAttribute(node_, RADIO_VALUE_ATTR);
+        auto indicatorTypeTick = GetStringAttribute(node_, INDICATOR_TYPE_ATTR);
+        EXPECT_EQ(groupEmpty, RADIO_GROUP_VALUE);
+        EXPECT_EQ(valueEmpty, RADIO_VALUE_VALUE);
+        EXPECT_EQ(indicatorTypeTick, INDICATOR_TYPE_TICK);
+        Ark_RadioOptions radioOptionsDot = {
+            .indicatorType = { .value = static_cast<int32_t>(RadioPattern::RadioIndicatorType::DOT) },
+        };
+        modifier_->setRadioOptions(node_, &radioOptionsDot);
+        auto indicatorTypeDot = GetStringAttribute(node_, INDICATOR_TYPE_ATTR);
+        EXPECT_EQ(indicatorTypeDot, INDICATOR_TYPE_DOT);
+        Ark_RadioOptions radioOptionsCustom = {
+            .indicatorType = { .value = static_cast<int32_t>(RadioPattern::RadioIndicatorType::CUSTOM)},
+        };
+        modifier_->setRadioOptions(node_, &radioOptionsCustom);
+        auto indicatorTypeCustom = GetStringAttribute(node_, INDICATOR_TYPE_ATTR);
+        EXPECT_EQ(indicatorTypeCustom, INDICATOR_TYPE_CUSTOM);
+        Ark_RadioOptions radioOptionsInvalid = {
+            .indicatorType = { .value = 3},
+        };
+        modifier_->setRadioOptions(node_, &radioOptionsInvalid);
+        auto indicatorTypeInvalid = GetStringAttribute(node_, INDICATOR_TYPE_ATTR);
+        EXPECT_EQ(indicatorTypeInvalid, INDICATOR_TYPE_TICK);
+    }
+}
 /**
  * @tc.name: RadioModifierTest001
  * @tc.desc: Test Radio setChecked.
@@ -141,8 +226,8 @@ HWTEST_F(RadioModifierTest, RadioModifierTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: RadioModifierTest002
- * @tc.desc: Test Radio setRadioStyle custom color with param Color.
+ * @tc.name: RadioModifierTest003
+ * @tc.desc: Test Radio setRadioStyle custom color.
  * @tc.type: FUNC
  */
 HWTEST_F(RadioModifierTest, RadioModifierTest003, TestSize.Level1)
@@ -164,7 +249,7 @@ HWTEST_F(RadioModifierTest, RadioModifierTest003, TestSize.Level1)
 }
 
 /**
- * @tc.name: RadioModifierTest002
+ * @tc.name: RadioModifierTest004
  * @tc.desc: Test Radio setRadioStyle custom int color.
  * @tc.type: FUNC
  */
@@ -187,8 +272,8 @@ HWTEST_F(RadioModifierTest, RadioModifierTest004, TestSize.Level1)
 }
 
 /**
- * @tc.name: RadioModifierTest002
- * @tc.desc: Test Radio setRadioStyle custom int color.
+ * @tc.name: RadioModifierTest005
+ * @tc.desc: Test Radio setRadioStyle custom float color.
  * @tc.type: FUNC
  */
 HWTEST_F(RadioModifierTest, RadioModifierTest005, TestSize.Level1)
@@ -210,8 +295,8 @@ HWTEST_F(RadioModifierTest, RadioModifierTest005, TestSize.Level1)
 }
 
 /**
- * @tc.name: RadioModifierTest002
- * @tc.desc: Test Radio setRadioStyle custom int color.
+ * @tc.name: RadioModifierTest006
+ * @tc.desc: Test Radio setRadioStyle custom string color.
  * @tc.type: FUNC
  */
 HWTEST_F(RadioModifierTest, RadioModifierTest006, TestSize.Level1)
@@ -233,8 +318,8 @@ HWTEST_F(RadioModifierTest, RadioModifierTest006, TestSize.Level1)
 }
 
 /**
- * @tc.name: RadioModifierTest002
- * @tc.desc: Test Radio setRadioStyle custom int color.
+ * @tc.name: RadioModifierTest007
+ * @tc.desc: Test Radio setRadioStyle custom resource color.
  * @tc.type: FUNC
  */
 HWTEST_F(RadioModifierTest, RadioModifierTest007, TestSize.Level1)
@@ -257,6 +342,18 @@ HWTEST_F(RadioModifierTest, RadioModifierTest007, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RadioModifierTest008
+ * @tc.desc: Test Radio ContentModifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioModifierTest, RadioModifierTest008, TestSize.Level1)
+{
+    LOGE("ARKOALA RadioAttributeModifier::ContentModifierImpl -> Method is not "
+                "implemented.");
+    EXPECT_EQ("true", "true");
+}
+
+/**
  * @tc.name: RadioEventTest001
  * @tc.desc: Test Radio onChange event.
  * @tc.type: FUNC
@@ -268,9 +365,9 @@ HWTEST_F(RadioModifierTest, RadioEventTest001, TestSize.Level1)
     modifier_->setOnChange(node_, func);
     auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     eventHub->UpdateChangeEvent(true);
-    EXPECT_EQ(isCheckedTest, false);
+    EXPECT_EQ(g_isCheckedTest, false);
     ASSERT_NE(eventHub, nullptr);
     eventHub->UpdateChangeEvent(true);
-    EXPECT_EQ(isCheckedTest, true);
+    EXPECT_EQ(g_isCheckedTest, true);
 }
 } // namespace OHOS::Ace::NG

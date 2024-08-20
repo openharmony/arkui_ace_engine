@@ -13,24 +13,50 @@
  * limitations under the License.
  */
 
-#include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
-#include "core/interfaces/arkoala/generated/interface/node_api.h"
 #include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/utility/ace_engine_types.h"
+#include "core/interfaces/arkoala/generated/interface/node_api.h"
+#include "core/common/container.h"
+#include "core/components_ng/pattern/radio/radio_pattern.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
     namespace RadioInterfaceModifier {
-        void _setRadioOptionsImpl(Ark_NativePointer node, const Ark_RadioOptions* options) {
+        void _setRadioOptionsImpl(Ark_NativePointer node, const Ark_RadioOptions* options)
+        {
+            CHECK_NULL_VOID(options);
+            auto frameNode = reinterpret_cast<FrameNode*>(node);
+            CHECK_NULL_VOID(frameNode);
+            auto group = Converter::Convert<std::string>(options->group);
+            RadioModelNG::SetRadioGroup(frameNode, group);
+            auto radioValue = Converter::Convert<std::string>(options->value);
+            RadioModelNG::SetRadioValue(frameNode, radioValue);
+            auto indicatorType = Converter::Convert<int32_t> (options->indicatorType.value);
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+                switch (indicatorType) {
+                    case static_cast<int32_t>(RadioPattern::RadioIndicatorType::TICK):
+                    case static_cast<int32_t>(RadioPattern::RadioIndicatorType::DOT):
+                    case static_cast<int32_t>(RadioPattern::RadioIndicatorType::CUSTOM):
+                        RadioModelNG::SetRadioIndicatorType(frameNode, indicatorType);
+                        break;
+                    default:
+                        RadioModelNG::SetRadioIndicatorType(frameNode, {});
+                        break;
+                }
+            }
+            LOGE("ARKOALA Opt_CustomBuilder -> Method is not implemented.");
         }
     } // RadioInterfaceModifier
     namespace RadioAttributeModifier {
-        void CheckedImpl(Ark_NativePointer node, Ark_Boolean value) {
+        void CheckedImpl(Ark_NativePointer node, Ark_Boolean value)
+        {
             auto frameNode = reinterpret_cast<FrameNode*>(node);
             CHECK_NULL_VOID(frameNode);
-            RadioModelNG::SetChecked(frameNode, value);
+            auto isChecked = Converter::Convert<bool>(value);
+            RadioModelNG::SetChecked(frameNode, isChecked);
         }
-
-        void OnChangeImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnChangeImpl(Ark_NativePointer node, Ark_Function callback)
+        {
             auto frameNode = reinterpret_cast<FrameNode*>(node);
             CHECK_NULL_VOID(frameNode);
             auto onEvent = [frameNode](const bool value) {
@@ -38,31 +64,32 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             };
             RadioModelNG::SetOnChange(frameNode, onEvent);
         }
-
-        void RadioStyleImpl(Ark_NativePointer node, const Opt_RadioStyle* value) {
+        void RadioStyleImpl(Ark_NativePointer node, const Opt_RadioStyle* value)
+        {
             auto frameNode = reinterpret_cast<FrameNode*>(node);
             CHECK_NULL_VOID(frameNode);
             CHECK_NULL_VOID(value);
-            if (auto checkedBackgroundColor = Converter::OptConvert<Color>(value->value.checkedBackgroundColor); 
-                checkedBackgroundColor) {
-                RadioModelNG::SetCheckedBackgroundColor(frameNode, checkedBackgroundColor.value());
-            }
-            if (auto uncheckedBorderColor = Converter::OptConvert<Color>(value->value.uncheckedBorderColor); 
-                uncheckedBorderColor) {
-                RadioModelNG::SetUncheckedBorderColor(frameNode, uncheckedBorderColor.value());
-            }
-            if (auto indicatorColor = Converter::OptConvert<Color>(value->value.indicatorColor); 
-                indicatorColor) {
-                RadioModelNG::SetIndicatorColor(frameNode, indicatorColor.value());
+            auto style = Converter::OptConvert<Converter::RadioStyle>(*value);
+            if (style) {
+                if (style->checkedBackgroundColor) {
+                    RadioModelNG::SetCheckedBackgroundColor(frameNode, style->checkedBackgroundColor.value());
+                }
+                if (style->uncheckedBorderColor) {
+                    RadioModelNG::SetUncheckedBorderColor(frameNode, style->uncheckedBorderColor.value());
+                }
+                if (style->indicatorColor) {
+                    RadioModelNG::SetIndicatorColor(frameNode, style->indicatorColor.value());
+                }
             }
         }
-        
-        void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* modifier) {
+        void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* modifier)
+        {
             LOGE("ARKOALA RadioAttributeModifier::ContentModifierImpl -> Method is not "
                 "implemented.");
         }
     } // RadioAttributeModifier
-    const GENERATED_ArkUIRadioModifier* GetRadioModifier() {
+    const GENERATED_ArkUIRadioModifier* GetRadioModifier()
+    {
         static const GENERATED_ArkUIRadioModifier ArkUIRadioModifierImpl {
             RadioInterfaceModifier::_setRadioOptionsImpl,
             RadioAttributeModifier::CheckedImpl,
@@ -72,5 +99,4 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         };
         return &ArkUIRadioModifierImpl;
     }
-
 }

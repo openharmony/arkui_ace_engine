@@ -69,6 +69,15 @@ void RadioModelNG::SetRadioIndicator(int32_t indicator)
     ACE_UPDATE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicator, indicator);
 }
 
+void RadioModelNG::SetRadioIndicatorType(FrameNode* frameNode, std::optional<int32_t> indicator)
+{
+    if (indicator) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicator, indicator.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicator, frameNode);
+    }
+}
+
 void RadioModelNG::SetChecked(bool isChecked)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
