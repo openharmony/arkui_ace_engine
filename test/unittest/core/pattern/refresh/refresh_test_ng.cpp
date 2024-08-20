@@ -15,8 +15,16 @@
 
 #include "refresh_test_ng.h"
 
-#include "core/components_ng/pattern/linear_layout/column_model_ng.h"
+#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pattern/mock_nestable_scroll_container.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_render_context.h"
+
+#include "core/components/refresh/refresh_theme.h"
+#include "core/components_ng/pattern/linear_layout/column_model_ng.h"
+#include "core/components_ng/pattern/scroll/scroll_model_ng.h"
+#include "core/components_ng/pattern/swiper/swiper_model_ng.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
 
 namespace OHOS::Ace::NG {
 namespace {

@@ -15,7 +15,15 @@
 
 #include "swiper_test_ng.h"
 
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
+
+#include "core/components/button/button_theme.h"
+#include "core/components/swiper/swiper_indicator_theme.h"
+#include "core/components_ng/pattern/button/button_model_ng.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_pattern.h"
 
 namespace OHOS::Ace::NG {
 void SwiperTestNg::SetUpTestSuite()

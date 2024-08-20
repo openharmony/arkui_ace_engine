@@ -14,20 +14,11 @@
  */
 
 #include "grid_test_ng.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
 
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/grid/grid_item_accessibility_property.h"
-#include "core/components_ng/pattern/grid/grid_item_model_ng.h"
-#include "core/components_ng/pattern/grid/grid_item_pattern.h"
-#include "core/components_ng/pattern/grid/grid_item_theme.h"
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
 
 namespace OHOS::Ace::NG {
 
