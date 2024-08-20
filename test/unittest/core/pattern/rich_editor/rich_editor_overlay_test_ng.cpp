@@ -936,6 +936,11 @@ HWTEST_F(RichEditorOverlayTestNg, SingleHandle003, TestSize.Level1)
     auto touchOffset = Offset(0, 0);
     AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_)
         ->SetCaretOffsetAndHeight(OffsetF(0, 0), 50.0f);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    textOverlayTheme->handleDiameter_ = 14.0_vp;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textOverlayTheme));
     richEditorPattern->HandleTouchDown(touchOffset);
     EXPECT_TRUE(richEditorPattern->moveCaretState_.isTouchCaret);
     /**
