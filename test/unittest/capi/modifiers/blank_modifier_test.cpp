@@ -16,7 +16,6 @@
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 #include "node_api.h"
-#define private public
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -59,9 +58,8 @@ inline Ark_Resource ArkRes(Ark_String *name, int id = -1,
 }
 } // namespace
 
-class BlankModifierTest: public ModifierTestBase<GENERATED_ArkUIBlankModifier,
-    &GENERATED_ArkUINodeModifiers::getBlankModifier, GENERATED_ARKUI_BLANK>
-{
+class BlankModifierTest : public ModifierTestBase<GENERATED_ArkUIBlankModifier,
+    &GENERATED_ArkUINodeModifiers::getBlankModifier, GENERATED_ARKUI_BLANK> {
 public:
     static void SetUpTestCase()
     {
