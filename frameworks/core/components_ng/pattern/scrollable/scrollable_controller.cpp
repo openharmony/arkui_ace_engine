@@ -98,10 +98,6 @@ void ScrollableController::ScrollToEdge(ScrollEdgeType scrollEdgeType, float vel
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID(pattern);
-    auto host = pattern->GetHost();
-    CHECK_NULL_VOID(host);
-    ACE_SCOPED_TRACE("ScrollToEdge, edgeType:%zu, velocity:%f, id:%d, tag:%s", scrollEdgeType, velocity,
-        static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
     if (scrollEdgeType == ScrollEdgeType::SCROLL_TOP) {
         pattern->ScrollAtFixedVelocity(velocity);
     } else if (scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) {
@@ -113,10 +109,6 @@ void ScrollableController::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smoo
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID(pattern);
-    auto host = pattern->GetHost();
-    CHECK_NULL_VOID(host);
-    ACE_SCOPED_TRACE("ScrollToEdge, edgeType:%zu, smooth:%d, id:%d, tag:%s", scrollEdgeType, smooth,
-        static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
     if (pattern->GetAxis() != Axis::NONE) {
         pattern->ScrollToEdge(scrollEdgeType, smooth);
     }
