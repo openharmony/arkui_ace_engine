@@ -888,8 +888,8 @@ void MovingPhotoPattern::StartAnimation()
 
 void MovingPhotoPattern::CommonStartAnimation(const RefPtr<RenderContext>& image, const RefPtr<RenderContext>& video)
 {
-    imageRsContext->UpdateOpacity(1.0);
-    imageRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
+    image->UpdateOpacity(1.0);
+    image->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
     auto movingPhotoPattern = WeakClaim(this);
     AnimationOption animationOption;
     animationOption.SetDuration(ANIMATION_DURATION_400);
