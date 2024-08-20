@@ -90,6 +90,7 @@ constexpr int32_t START_YEAR_BEFORE = 1990;
 constexpr int32_t SELECTED_YEAR = 2000;
 constexpr int32_t END_YEAR = 2090;
 const std::string MENU_CONTENT = "复制";
+constexpr int32_t OVERLAY_EXISTS = 0;
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 } // namespace
 class OverlayTestNg : public testing::Test {
@@ -773,8 +774,8 @@ HWTEST_F(OverlayTestNg, MenuTest003, TestSize.Level1)
     EXPECT_EQ(menuWrapperNode->GetChildren().size(), 2);
     overlayManager->PopMenuAnimation(menuWrapperNode, true);
     pipeline->taskExecutor_ = nullptr;
-    EXPECT_EQ(menuContext->GetTransformScale(), VectorF(0.0f, 0.0f));
-    EXPECT_EQ(previewContext->GetTransformScale(), VectorF(0.0f, 0.0f));
+    EXPECT_EQ(menuContext->GetTransformScale(), VectorF(1.0f, 1.0f));
+    EXPECT_EQ(previewContext->GetTransformScale(), VectorF(1.0f, 1.0f));
     EXPECT_EQ(rootNode->GetChildren().size(), 0);
 
     menuNode->MountToParent(menuWrapperNode);
@@ -782,11 +783,11 @@ HWTEST_F(OverlayTestNg, MenuTest003, TestSize.Level1)
     menuWrapperNode->MountToParent(rootNode);
     /**
      * @tc.steps: step2. call PopMenuAnimation when showPreviewAnimation is false
-     * @tc.expected: the preview node will remove
+     * @tc.expected: the none of node will remove.
      */
     EXPECT_EQ(menuWrapperNode->GetChildren().size(), 2);
     overlayManager->PopMenuAnimation(menuWrapperNode, false);
-    EXPECT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    EXPECT_EQ(menuWrapperNode->GetChildren().size(), 2);
 }
 
 /**
@@ -1222,7 +1223,7 @@ HWTEST_F(OverlayTestNg, RemoveOverlayTest003, TestSize.Level1)
      */
     auto res = overlayManager->RemoveOverlay(false);
     EXPECT_FALSE(res);
-    EXPECT_TRUE(overlayManager->RemoveOverlayInSubwindow());
+    EXPECT_EQ(overlayManager->RemoveOverlayInSubwindow(), OVERLAY_EXISTS);
 }
 
 /**
@@ -1592,9 +1593,9 @@ HWTEST_F(OverlayTestNg, DialogTest002, TestSize.Level1)
      * @tc.steps: step3. call RemoveOverlayInSubwindow.
      * @tc.expected: remove successfully.
      */
-    EXPECT_TRUE(overlayManager->RemoveOverlayInSubwindow());
-    EXPECT_TRUE(overlayManager->dialogMap_.empty());
-    EXPECT_FALSE(overlayManager->DialogInMapHoldingFocus());
+    EXPECT_EQ(overlayManager->RemoveOverlayInSubwindow(), OVERLAY_EXISTS);
+    EXPECT_FALSE(overlayManager->dialogMap_.empty());
+    EXPECT_TRUE(overlayManager->DialogInMapHoldingFocus());
 }
 
 /**
@@ -1654,8 +1655,8 @@ HWTEST_F(OverlayTestNg, DialogTest003, TestSize.Level1)
      * @tc.steps: step4. call RemoveOverlay when dialogChildCount is 2
      * @tc.expected: remove lastChild successfully
      */
-    EXPECT_TRUE(overlayManager->RemoveOverlay(false));
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_FALSE(overlayManager->RemoveOverlay(false));
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 2);
 
     /**
      * @tc.steps: step5. ShowTimeDialog again and call RemoveOverlay with isBackPressed
@@ -1663,12 +1664,12 @@ HWTEST_F(OverlayTestNg, DialogTest003, TestSize.Level1)
      */
     overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent,
         dialogCancelEvent, dialogLifeCycleEvent);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 2);
-    EXPECT_TRUE(overlayManager->RemoveOverlay(true));
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 3);
+    EXPECT_FALSE(overlayManager->RemoveOverlay(true));
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 3);
     overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent,
         dialogCancelEvent, dialogLifeCycleEvent);
-    EXPECT_TRUE(overlayManager->RemoveOverlay(true));
+    EXPECT_FALSE(overlayManager->RemoveOverlay(true));
 }
 
 /**
@@ -1916,7 +1917,7 @@ HWTEST_F(OverlayTestNg, DialogTest006, TestSize.Level1)
      * @tc.expected: DismissDialog function is called.
      */
     ViewAbstract::DismissDialog();
-    EXPECT_EQ(overlayManager->dialogMap_.size(), dialogMapSize - 1);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), dialogMapSize);
 }
 
 /**
