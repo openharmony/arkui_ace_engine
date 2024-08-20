@@ -630,9 +630,11 @@ class DynamicSyncScene {
      * @since 12
      */
     constructor(nodeRef, frameRateRange) {
-        this.frameRateRange = { ...frameRateRange }; // 确保每个实例有独立的frameRateRange
-        this.nodeRef = nodeRef;
-        this.nodePtr = this.nodeRef.getNativeHandle();
+        this.frameRateRange = { ...frameRateRange };
+        if (!nodeRef.invalid()){
+            this.nodeRef = nodeRef;
+            this.nodePtr = this.nodeRef.getNativeHandle();
+        }
     }
 
     /**
@@ -669,7 +671,7 @@ class SwiperDynamicSyncScene extends DynamicSyncScene {
      * @param {Object} frameRateRange - The new frame rate range.
      */
     setFrameRateRange(frameRateRange) {
-        this.frameRateRange = { ...frameRateRange }; // 确保每个实例有独立的frameRateRange
+        this.frameRateRange = { ...frameRateRange };
         getUINativeModule().setFrameRateRange(this.nodePtr, frameRateRange, this.type);
     }
 }
