@@ -34,6 +34,7 @@ group("linux_unittest") {
   testonly = true
   deps = [
     "base:linux_base_unittest(${host_toolchain})",
+    "capi:linux_capi_unittest(${host_toolchain})",
     "core:linux_core_unittest(${host_toolchain})",
   ]
 }

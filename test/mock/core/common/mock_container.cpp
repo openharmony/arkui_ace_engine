@@ -86,6 +86,11 @@ RefPtr<Container> Container::CurrentSafelyWithCheck()
     return MockContainer::Current();
 }
 
+int32_t Container::CurrentIdSafelyWithCheck()
+{
+    return g_id;
+}
+
 bool Container::Dump(const std::vector<std::string>& /* params */, std::vector<std::string>& /* info */)
 {
     return true;
