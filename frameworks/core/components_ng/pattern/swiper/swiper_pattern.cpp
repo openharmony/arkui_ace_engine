@@ -437,6 +437,27 @@ int32_t SwiperPattern::CheckUserSetIndex(int32_t index)
     return CheckTargetIndex(index + 1);
 }
 
+void SwiperPattern::UpdateIndicatorOnChildChange()
+{
+    if (GetIndicatorType() == SwiperIndicatorType::DOT && RealTotalCount() == 0) {
+        RemoveIndicatorNode();
+        return;
+    }
+
+    if (HasIndicatorNode()) {
+        StopIndicatorAnimation();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto indicatorNode = DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(GetIndicatorId())));
+        if (indicatorNode && indicatorNode->GetTag() == V2::SWIPER_INDICATOR_ETS_TAG) {
+            indicatorNode->MarkModifyDone();
+            indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        }
+    } else {
+        InitIndicator();
+    }
+}
+
 void SwiperPattern::BeforeCreateLayoutWrapper()
 {
     auto host = GetHost();
@@ -457,17 +478,7 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
     auto oldIndex = GetLoopIndex(oldIndex_);
     if (oldChildrenSize_.has_value() && oldChildrenSize_.value() != RealTotalCount()) {
         oldIndex = GetLoopIndex(oldIndex_, oldChildrenSize_.value());
-        if (HasIndicatorNode()) {
-            StopIndicatorAnimation();
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
-            auto indicatorNode =
-                DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(GetIndicatorId())));
-            if (indicatorNode && indicatorNode->GetTag() == V2::SWIPER_INDICATOR_ETS_TAG) {
-                indicatorNode->MarkModifyDone();
-                indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-            }
-        }
+        UpdateIndicatorOnChildChange();
         StartAutoPlay();
         InitArrow();
     }
@@ -1982,6 +1993,11 @@ void SwiperPattern::StopFadeAnimation()
 
 void SwiperPattern::InitIndicator()
 {
+    if (GetIndicatorType() == SwiperIndicatorType::DOT && RealTotalCount() == 0) {
+        RemoveIndicatorNode();
+        return;
+    }
+
     auto swiperNode = GetHost();
     CHECK_NULL_VOID(swiperNode);
     RefPtr<FrameNode> indicatorNode;

@@ -920,6 +920,7 @@ private:
     std::set<int32_t> CalcVisibleIndex(float offset = 0.0f) const;
 
     bool IsItemOverlay() const;
+    void UpdateIndicatorOnChildChange();
 
     friend class SwiperHelper;
 
