@@ -19,6 +19,7 @@
 #include <map>
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/event/package/package_change_listener.h"
 
 namespace OHOS::Ace::NG {
 using NavigationLoadPageCallback = std::function<int32_t(
@@ -33,8 +34,8 @@ struct RouteItem {
     std::map<std::string, std::string> data;
 };
 
-class ACE_EXPORT NavigationRoute : public AceType {
-    DECLARE_ACE_TYPE(NavigationRoute, AceType)
+class ACE_EXPORT NavigationRoute : public PackageChangeListener {
+    DECLARE_ACE_TYPE(NavigationRoute, PackageChangeListener)
 public:
     NavigationRoute() = default;
     ~NavigationRoute() = default;
@@ -58,6 +59,13 @@ public:
     {
         callback_ = std::move(callback);
     }
+
+    virtual bool IsNavigationItemExits(const std::string& name)
+    {
+        return false;
+    }
+
+    void OnPackageChange() override {}
 
 protected:
     NavigationLoadPageCallback callback_;
