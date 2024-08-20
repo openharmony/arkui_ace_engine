@@ -2204,7 +2204,7 @@ namespace GeneratedModifier {
 } // namespace OHOS::Ace::NG
 
 extern "C" {
-
+#ifndef ARKUI_CAPI_UNITTEST
 ACE_FORCE_EXPORT ArkUIAnyAPI* GetArkUIAnyFullNodeAPI(int version)
 {
     switch (version) {
@@ -2223,6 +2223,7 @@ const ArkUIFullNodeAPI* GetArkUIFullNodeAPI()
 {
     return &OHOS::Ace::NG::ApiImpl::impl_full;
 }
+#endif // ARKUI_CAPI_UNITTEST
 
 void SendArkUIAsyncEvent(ArkUINodeEvent* event)
 {
@@ -2236,6 +2237,7 @@ void SendArkUIAsyncCustomEvent(ArkUICustomNodeEvent* event)
 
 ACE_FORCE_EXPORT const ArkUIAnyAPI* GetArkUIAPI(ArkUIAPIVariantKind kind, ArkUI_Int32 version)
 {
+#ifndef ARKUI_CAPI_UNITTEST
     switch (kind) {
         case ArkUIAPIVariantKind::BASIC: {
             switch (version) {
@@ -2296,7 +2298,7 @@ ACE_FORCE_EXPORT const ArkUIAnyAPI* GetArkUIAPI(ArkUIAPIVariantKind kind, ArkUI_
             return nullptr;
         }
     }
-
+#endif // ARKUI_CAPI_UNITTEST
 #ifdef INCLUDE_GENERATED_SOURCES
 // GENERATED API
     switch (static_cast<GENERATED_Ark_APIVariantKind>(kind)) {
@@ -2343,6 +2345,7 @@ ACE_FORCE_EXPORT const ArkUIAnyAPI* GetArkUIAPI(ArkUIAPIVariantKind kind, ArkUI_
         }
     }
 #endif
+    return nullptr;
 }
 
 __attribute__((constructor)) static void provideEntryPoint(void)

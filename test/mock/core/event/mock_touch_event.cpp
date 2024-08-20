@@ -20,3 +20,11 @@ Offset GetTouchEventOriginOffset(const TouchEvent& event)
     return Offset();
 }
 } // namespace OHOS::Ace
+
+
+namespace OHOS::Ace::NG {
+TouchEvent ConvertToTouchEvent(const std::shared_ptr<MMI::PointerEvent>& srcPointerEvent)
+{
+    return TouchEvent();
+}
+}
