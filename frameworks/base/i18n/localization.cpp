@@ -196,7 +196,9 @@ void Localization::SetLocaleImpl(const std::string& language, const std::string&
     if (!script.empty()) {
         languageTag_.append("-").append(script);
     }
-    languageTag_.append("-").append(countryOrRegion);
+    if (!countryOrRegion.empty()) {
+        languageTag_.append("-").append(countryOrRegion);
+    }
     fontLocale_ = languageTag_;
     // Simple chinese
     if (languageTag_ == "zh-Hans-CN") {
