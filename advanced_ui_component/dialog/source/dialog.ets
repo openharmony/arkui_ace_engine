@@ -210,7 +210,7 @@ export struct TipsDialog {
   textPart(): void {
     Scroll(this.contentScroller) {
       Column() {
-        if (this.title != null) {
+        if (this.title !== null) {
           Row() {
             Text(this.title)
               .fontSize($r('sys.float.Title_S'))
@@ -223,7 +223,7 @@ export struct TipsDialog {
           }
           .padding({ bottom: $r('sys.float.padding_level8') })
         }
-        if (this.content != null) {
+        if (this.content !== null) {
           Row() {
             Text(this.content)
               .focusable(true)
@@ -435,9 +435,9 @@ export struct SelectDialog {
                       .onFocus(() => {
                         this.isFocus = true;
                         this.currentFocusIndex = index;
-                        if (index == FIRST_ITEM_INDEX) {
+                        if (index === FIRST_ITEM_INDEX) {
                           this.contentScroller.scrollEdge(Edge.Top);
-                        } else if (index == this.radioContent.length - 1) {
+                        } else if (index === this.radioContent.length - 1) {
                           this.contentScroller.scrollEdge(Edge.Bottom);
                         }
                       })
@@ -476,7 +476,7 @@ export struct SelectDialog {
             focusControl.requestFocus(String(FIRST_ITEM_INDEX));
           }
         })
-        .defaultFocus(this.buttons?.length == 0 ? true : false)
+        .defaultFocus(this.buttons?.length === 0 ? true : false)
       }
     }.scrollBar(BarState.Auto)
     .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
@@ -1547,14 +1547,14 @@ function getTextHeight(textSize: SizeOptions): number {
  * @returns undefined
  */
 function resolveKeyEvent(event: KeyEvent, controller: Scroller) {
-  if (event.type == IGNORE_KEY_EVENT_TYPE) {
+  if (event.type === IGNORE_KEY_EVENT_TYPE) {
     return;
   }
 
-  if (event.keyCode == KEYCODE_UP) {
+  if (event.keyCode === KEYCODE_UP) {
     controller.scrollPage({ next: false });
     event.stopPropagation();
-  } else if (event.keyCode == KEYCODE_DOWN) {
+  } else if (event.keyCode === KEYCODE_DOWN) {
     if (controller.isAtEnd()) {
       return;
     } else {

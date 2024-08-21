@@ -173,7 +173,7 @@ export class TabTitleBar extends ViewPU {
       Stack.create({
         alignContent: Alignment.End
       });
-      Stack.blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN)
+      Stack.blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN);
       t || Stack.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
@@ -935,7 +935,7 @@ class TabContentItem extends ViewPU {
               this.imageWidth = px2vp(e === null || e === void 0 ? void 0 : e.width);
               this.imageHeight = px2vp(e === null || e === void 0 ? void 0 : e.height);
               this.onImageComplete(px2vp(e === null || e === void 0 ? void 0 : e.componentWidth) +
-                TabContentItem.paddingLeft + TabContentItem.paddingRight)
+                TabContentItem.paddingLeft + TabContentItem.paddingRight);
             }
           }));
           Image.onError((e => {
