@@ -25,7 +25,8 @@ export enum ArcButtonStyleMode {
   EMPHASIZED_LIGHT = 0,
   EMPHASIZED_DEEP = 1,
   NORMAL_LIGHT = 2,
-  NORMAL_DEEP = 3
+  NORMAL_DEEP = 3,
+  CUSTOM_MODE = 4
 }
 
 export enum ArcButtonStatus {
@@ -58,7 +59,7 @@ interface CommonArcButtonOptions {
   height?: LengthMetrics;
 
   /**
-   *强调、普通01、普通02、警告  默认是强调状态
+   *强调、普通01、普通02、警告、自定义  默认是强调状态
    */
   styleMode?: ArcButtonStyleMode;
 
@@ -121,6 +122,16 @@ interface CommonArcButtonOptions {
    *文字到边框的距离
    */
   textMargin?: LocalizedMargin;
+
+  /**
+   * TouchEvent
+   */
+  onTouch?: Callback<TouchEvent>;
+
+  /**
+   * ClickEvent
+   */
+  onClick?: Callback<ClickEvent>;
 }
 
 @ObservedV2
@@ -141,8 +152,8 @@ export class ArcButtonOptions {
   @Trace public textStyle: FontStyle;
   @Trace public textFamily: string | Resource;
   @Trace public textMargin: LocalizedMargin;
-  public touchCallback?: Callback<TouchEvent>
-  public onClickEvent?: Callback<ClickEvent>
+  @Trace public onTouch?: Callback<TouchEvent>
+  @Trace public onClick?: Callback<ClickEvent>
 
   constructor(options: CommonArcButtonOptions) {
     this.type = options.type ?? ArcButtonTypeMode.BOTTOM_EDGE
@@ -167,6 +178,10 @@ export class ArcButtonOptions {
       end: new LengthMetrics(Constants.TEXT_HORIZONTAL_MARGIN, LengthUnit.VP),
       bottom: new LengthMetrics(Constants.TEXT_MARGIN_BOTTOM, LengthUnit.VP)
     }
+    this.onTouch = options.onTouch ?? (() => {
+    })
+    this.onClick = options.onClick ?? (() => {
+    })
   }
 }
 
@@ -198,13 +213,12 @@ export struct ArcButton {
   private circularCrossPointUtil: CircularCrossPointUtil = new CircularCrossPointUtil()
   private upperArcCircleR: number = 0
   private upperArcCircleY: number = 0
+  private textPressColor: ColorMetrics = ColorMetrics.resourceColor(Color.White)
 
-  @Monitor('options.resourceText','options.textSize','options.styleMode','options.status',
-  'options.backgroundColor','options.textColor')
+  @Monitor('options.resourceText', 'options.type', 'options.textSize', 'options.styleMode', 'options.status',
+  'options.backgroundColor', 'options.textColor')
   optionsChange() {
     this.judgeTextWidth()
-    this.btnColor = this.options.backgroundColor
-    this.textColor = this.options.textColor
     this.changeStatus()
   }
 
@@ -216,6 +230,7 @@ export struct ArcButton {
         this.btnPressColor = ColorMetrics.resourceColor(Constants.EMPHASIZED_PRESSED_BTN_COLOR)
         this.btnDisableColor = ColorMetrics.resourceColor(Constants.EMPHASIZED_DISABLE_BTN_COLOR)
         this.textDisableColor = ColorMetrics.resourceColor(Constants.EMPHASIZED_DISABLE_TEXT_COLOR)
+        this.textPressColor = ColorMetrics.resourceColor(Constants.EMPHASIZED_TEXT_COLOR)
         break
 
       case ArcButtonStyleMode.NORMAL_LIGHT:
@@ -224,6 +239,7 @@ export struct ArcButton {
         this.btnPressColor = ColorMetrics.resourceColor(Constants.NORMAL01_PRESSED_BTN_COLOR)
         this.btnDisableColor = ColorMetrics.resourceColor(Constants.NORMAL01_DISABLE_BTN_COLOR)
         this.textDisableColor = ColorMetrics.resourceColor(Constants.NORMAL01_DISABLE_TEXT_COLOR)
+        this.textPressColor = ColorMetrics.resourceColor(Constants.NORMAL01_TEXT_COLOR)
         break
 
       case ArcButtonStyleMode.NORMAL_DEEP:
@@ -232,6 +248,7 @@ export struct ArcButton {
         this.btnPressColor = ColorMetrics.resourceColor(Constants.NORMAL02_PRESSED_BTN_COLOR)
         this.btnDisableColor = ColorMetrics.resourceColor(Constants.NORMAL02_DISABLE_BTN_COLOR)
         this.textDisableColor = ColorMetrics.resourceColor(Constants.NORMAL02_DISABLE_TEXT_COLOR)
+        this.textPressColor = ColorMetrics.resourceColor(Constants.NORMAL02_TEXT_COLOR)
         break
 
       case ArcButtonStyleMode.EMPHASIZED_DEEP:
@@ -240,9 +257,14 @@ export struct ArcButton {
         this.btnPressColor = ColorMetrics.resourceColor(Constants.EMPHASIZEWARN_PRESSED_BTN_COLOR)
         this.btnDisableColor = ColorMetrics.resourceColor(Constants.EMPHASIZEWARN_DISABLE_BTN_COLOR)
         this.textDisableColor = ColorMetrics.resourceColor(Constants.EMPHASIZEWARN_DISABLE_TEXT_COLOR)
+        this.textPressColor = ColorMetrics.resourceColor(Constants.EMPHASIZEWARN_TEXT_COLOR)
         break
 
       default:
+        this.btnNormalColor = this.options.backgroundColor
+        this.textNormalColor = this.options.textColor
+        this.btnPressColor = this.options.backgroundColor
+        this.textPressColor = this.options.pressedTextColor
         break
     }
     if (this.options.status === ArcButtonStatus.DISABLED) {
@@ -301,54 +323,66 @@ export struct ArcButton {
     this.options.height.value
     this.circularCrossPointUtil.initData(this.upperArcCircleR, this.upperArcCircleY)
     this.circularCrossPointUtil.calculate().then((data: AllPoints | null) => {
-      if (data == null) {
-        return
-      }
-      this.btnWidth = data.width + Constants.SHADOW_BLUR * 2
-      if (this.isUp) {
-        this.btnHeight = data.height + Constants.SHADOW_BLUR + Constants.SHADOW_OFFSET_Y
-      } else {
-        this.btnHeight = data.height + Constants.DISTANCE_FROM_BORDER * 2
-      }
-      let margin = this.options.textMargin
-      let start = margin?.start?.value ?? 0
-      let end = margin?.end?.value ?? 0
-      let top = margin?.top?.value ?? 0
-      let bottom = margin?.bottom?.value ?? 0
-      this.textWidth = data.width - start - end
-      this.textHeight = data.height - top - bottom
-      this.judgeTextWidth()
-      let leftTopPoint = data.leftTopPoint
-      let rightTopPoint = data.rightTopPoint
-      let leftBottomPoint = data.leftBottomPoint
-      let rightBottomPoint = data.rightBottomPoint
-      let canvasLeftTopPoint = data.canvasLeftTop
-      canvasLeftTopPoint.x -= Constants.SHADOW_BLUR
-      canvasLeftTopPoint.y -= Constants.DISTANCE_FROM_BORDER
-      let pathStr = `M ${vp2px(leftTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftTopPoint.y - canvasLeftTopPoint.y)}
-        A ${vp2px(Constants.UPPER_ARC_CIRCLE_R)} ${vp2px(Constants.UPPER_ARC_CIRCLE_R)},
-        0, 0, 0, ${vp2px(rightTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightTopPoint.y - canvasLeftTopPoint.y)} ` +
-
-        `M ${vp2px(rightTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightTopPoint.y - canvasLeftTopPoint.y)}
-          A ${vp2px(Constants.CHAMFER_CIRCLE_R)} ${vp2px(Constants.CHAMFER_CIRCLE_R)}, 0, 0, 0,
-          ${vp2px(rightBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightBottomPoint.y - canvasLeftTopPoint.y)} ` +
-
-        `M ${vp2px(rightBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightBottomPoint.y - canvasLeftTopPoint.y)}
-          A ${vp2px(Constants.LOWER_ARC_CIRCLE_R)} ${vp2px(Constants.LOWER_ARC_CIRCLE_R)},
-          0, 0, 0, ${vp2px(leftBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftBottomPoint.y - canvasLeftTopPoint.y)} ` +
-
-        `M ${vp2px(leftBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftBottomPoint.y - canvasLeftTopPoint.y)}
-          A ${vp2px(Constants.CHAMFER_CIRCLE_R)} ${vp2px(Constants.CHAMFER_CIRCLE_R)}, 0, 0, 0,
-          ${vp2px(leftTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftTopPoint.y - canvasLeftTopPoint.y)} ` +
-
-        `M ${vp2px(leftTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftTopPoint.y - canvasLeftTopPoint.y)}
-          L ${vp2px(rightTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightTopPoint.y - canvasLeftTopPoint.y)}
-          L ${vp2px(rightBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightBottomPoint.y - canvasLeftTopPoint.y)}
-          L ${vp2px(leftBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftBottomPoint.y - canvasLeftTopPoint.y)}
-          L ${vp2px(leftTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftTopPoint.y - canvasLeftTopPoint.y)}`
-      this.path2D = new Path2D(pathStr)
-      this.doDraw()
+      this.generatePath(data)
     })
+  }
+
+  private generatePath(data: AllPoints | null) {
+    if (data == null) {
+      return
+    }
+    this.btnWidth = data.width + Constants.SHADOW_BLUR * 2
+    if (this.isUp) {
+      this.btnHeight = data.height + Constants.SHADOW_BLUR + Constants.SHADOW_OFFSET_Y
+    } else {
+      this.btnHeight = data.height + Constants.DISTANCE_FROM_BORDER * 2
+    }
+    let margin = this.options.textMargin
+    let start = margin?.start?.value ?? 0
+    let end = margin?.end?.value ?? 0
+    let top = margin?.top?.value ?? 0
+    let bottom = margin?.bottom?.value ?? 0
+    this.textWidth = data.width - start - end
+    this.textHeight = data.height - top - bottom
+    this.judgeTextWidth()
+    let leftTopPoint = data.leftTopPoint
+    let rightTopPoint = data.rightTopPoint
+    let leftBottomPoint = data.leftBottomPoint
+    let rightBottomPoint = data.rightBottomPoint
+    let canvasLeftTopPoint = data.canvasLeftTop
+    canvasLeftTopPoint.x -= Constants.SHADOW_BLUR
+    canvasLeftTopPoint.y -= Constants.DISTANCE_FROM_BORDER
+
+    let mLeftTopPointX: number = this.buttonVp2px(leftTopPoint.x, canvasLeftTopPoint.x)
+    let mLeftTopPointY: number = this.buttonVp2px(leftTopPoint.y, canvasLeftTopPoint.y)
+    let upperArcCircleR: number = this.getUIContext().vp2px(Constants.UPPER_ARC_CIRCLE_R)
+    let rightTopPointX: number = this.buttonVp2px(rightTopPoint.x, canvasLeftTopPoint.x)
+    let rightTopPointY: number = this.buttonVp2px(rightTopPoint.y, canvasLeftTopPoint.y)
+    let chamferCircleR: number = this.getUIContext().vp2px(Constants.CHAMFER_CIRCLE_R)
+    let rightBottomPointX: number = this.buttonVp2px(rightBottomPoint.x, canvasLeftTopPoint.x)
+    let rightBottomPointY: number = this.buttonVp2px(rightBottomPoint.y, canvasLeftTopPoint.y)
+    let lowerArcCircleR: number = this.getUIContext().vp2px(Constants.LOWER_ARC_CIRCLE_R)
+    let leftBottomPointX: number = this.buttonVp2px(leftBottomPoint.x, canvasLeftTopPoint.x)
+    let leftBottomPointY: number = this.buttonVp2px(leftBottomPoint.y, canvasLeftTopPoint.y)
+
+    let pathStr = `M ${mLeftTopPointX} ${mLeftTopPointY} A ${upperArcCircleR} ${upperArcCircleR}, 0, 0, 0,
+       ${rightTopPointX} ${rightTopPointY}` +
+      `M ${rightTopPointX} ${rightTopPointY} A ${chamferCircleR} ${chamferCircleR}, 0, 0, 0, ${rightBottomPointX}
+       ${rightBottomPointY}` +
+      `M ${rightBottomPointX} ${rightBottomPointY} A ${lowerArcCircleR} ${lowerArcCircleR}, 0, 0, 0, ${leftBottomPointX}
+       ${leftBottomPointY}` +
+      `M ${leftBottomPointX} ${leftBottomPointY} A ${chamferCircleR} ${chamferCircleR}, 0, 0, 0, ${mLeftTopPointX}
+       ${mLeftTopPointY}` +
+      `M ${mLeftTopPointX} ${mLeftTopPointY} L ${rightTopPointX} ${rightTopPointY} L ${rightBottomPointX}
+       ${rightBottomPointY} L ${leftBottomPointX} ${leftBottomPointY} L ${mLeftTopPointX} ${mLeftTopPointY}`
+
+    this.path2D = new Path2D(pathStr)
+    this.doDraw()
+  }
+
+  buttonVp2px(valueX:number ,valueY:number) {
+    let num = valueX - valueY
+    return this.getUIContext().vp2px(num)
   }
 
   @Monitor('btnColor')
@@ -361,6 +395,7 @@ export struct ArcButton {
       this.context.shadowOffsetY = -Constants.SHADOW_OFFSET_Y
       this.context.shadowColor = this.options.shadowColor.color
     }
+    this.context.clearRect(0, 0, this.btnWidth, this.btnHeight)
     this.context.beginPath()
     this.context.fillStyle = this.btnColor.color
     this.context.fill(this.path2D)
@@ -437,35 +472,41 @@ export struct ArcButton {
     .scale({ x: this.scaleX, y: this.scaleY, centerY: this.isUp ? 0 : this.btnHeight })
     .translate({ y: this.translateY })
     .onTouch((event: TouchEvent) => {
-      if (this.options.touchCallback) {
-        this.options.touchCallback(event)
-      }
-      let x = event.touches[0].windowX
-      let y = event.touches[0].windowY
-      switch (event.type) {
-        case TouchType.Down:
-          let isInPath = this.circularCrossPointUtil.isPointInPath(x, y, this.isUp)
-          if (!isInPath) {
-            return
-          }
-          this.scaleX = this.scaleValue
-          this.scaleY = this.scaleValue
-          this.btnColor = this.btnPressColor
-          break
-        case TouchType.Up:
-          this.scaleX = 1
-          this.scaleY = 1
-          this.btnColor = this.btnNormalColor
-          break
-        default:
-          break
-      }
+      this.dealTouchEvent(event)
     })
     .onClick((event: ClickEvent) => {
-      if (this.options.onClickEvent) {
-        this.options.onClickEvent(event)
+      if (this.options.onClick) {
+        this.options.onClick(event)
       }
     })
+  }
+
+  private dealTouchEvent(event: TouchEvent) {
+    if (this.options.onTouch) {
+      this.options.onTouch(event)
+    }
+    let x = event.touches[0].windowX
+    let y = event.touches[0].windowY
+    switch (event.type) {
+      case TouchType.Down:
+        let isInPath = this.circularCrossPointUtil.isPointInPath(x, y, this.isUp)
+        if (!isInPath) {
+          return
+        }
+        this.scaleX = this.scaleValue
+        this.scaleY = this.scaleValue
+        this.btnColor = this.btnPressColor
+        this.textColor = this.textPressColor
+        break
+      case TouchType.Up:
+        this.scaleX = 1
+        this.scaleY = 1
+        this.btnColor = this.btnNormalColor
+        this.textColor = this.textNormalColor
+        break
+      default:
+        break
+    }
   }
 }
 
@@ -758,14 +799,14 @@ class Constants {
   public static readonly EMPHASIZED_PRESSED_BTN_COLOR = '#2B6EC2'
   public static readonly EMPHASIZED_DISABLE_BTN_COLOR = '#991F71FF'
   public static readonly EMPHASIZED_DISABLE_TEXT_COLOR = '#99FFFFFF'
-  public static readonly NORMAL01_NORMAL_BTN_COLOR = '#132230'
+  public static readonly NORMAL01_NORMAL_BTN_COLOR = '#182840'
   public static readonly NORMAL01_TEXT_COLOR = '#5EA1FF'
-  public static readonly NORMAL01_PRESSED_BTN_COLOR = '#25353E'
+  public static readonly NORMAL01_PRESSED_BTN_COLOR = '#2F3D53'
   public static readonly NORMAL01_DISABLE_BTN_COLOR = '#132230'
   public static readonly NORMAL01_DISABLE_TEXT_COLOR = '#995ea1ff'
   public static readonly NORMAL02_NORMAL_BTN_COLOR = '#1D201C'
   public static readonly NORMAL02_TEXT_COLOR = '#5EA1FF'
-  public static readonly NORMAL02_PRESSED_BTN_COLOR = '#30342D'
+  public static readonly NORMAL02_PRESSED_BTN_COLOR = '#3C3C3C'
   public static readonly NORMAL02_DISABLE_BTN_COLOR = '#1E211D'
   public static readonly NORMAL02_DISABLE_TEXT_COLOR = '#995ea1ff'
   public static readonly EMPHASIZEWARN_NORMAL_BTN_COLOR = '#BF2629'
