@@ -317,8 +317,8 @@ void SecuritySessionWrapperImpl::CreateSession(const AAFwk::Want& want, const Se
         .callerToken_ = callerToken,
         .rootToken_ = (isTransferringCaller_ && parentToken) ? parentToken : callerToken,
         .want = wantPtr,
-        .isAsyncModalBinding_ = config.isAsyncModalBinding,
         .uiExtensionUsage_ = static_cast<uint32_t>(config.uiExtensionUsage),
+        .isAsyncModalBinding_ = config.isAsyncModalBinding,
     };
     session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
     CHECK_NULL_VOID(session_);
