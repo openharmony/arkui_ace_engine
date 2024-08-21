@@ -8029,9 +8029,9 @@ ObserveV2.normalObjectHandlerDeepObserved = {
         ObserveV2.getObserve().addRef(RefInfo.get(target), prop);
         let ret = target[prop];
         let type = typeof (ret);
-        return type === "function"
+        return type === 'function'
             ? ret.bind(receiver)
-            : (type === "object"
+            : (type === 'object'
                 ? RefInfo.get(ret).proxy
                 : ret);
     },
@@ -8068,7 +8068,7 @@ ObserveV2.arrayHandlerDeepObserved = {
         }
         let ret = target[key];
         if (typeof (ret) !== 'function') {
-            if (typeof (ret) === "object") {
+            if (typeof (ret) === 'object') {
                 let wrapper = RefInfo.get(ret);
                 ObserveV2.getObserve().addRef(refInfo, key);
                 return wrapper.proxy;
@@ -8099,7 +8099,12 @@ ObserveV2.arrayHandlerDeepObserved = {
             ObserveV2.getObserve().addRef(refInfo, ObserveV2.OB_LENGTH);
             return function (callbackFn) {
                 const result = ret.call(target, (value, index, array) => {
-                    callbackFn(typeof value == "object" ? RefInfo.get(value).proxy : value, index, receiver);
+                    // Collections.Array will report BusinessError: The foreach cannot be bound if call "receiver".
+                    // because the passed parameter is not the instance of the container class.
+                    // so we must call "target" here to deal with the collections situations.
+                    // But we also need to addref for each index.
+                    receiver[index];
+                    callbackFn(typeof value == 'object' ? RefInfo.get(value).proxy : value, index, receiver);
                 });
                 return result;
             };
@@ -8136,7 +8141,7 @@ ObserveV2.setMapHandlerDeepObserved = {
         }
         let ret = target[key];
         if (typeof (ret) !== 'function') {
-            if (typeof (ret) === "object") {
+            if (typeof (ret) === 'object') {
                 let wrapper = RefInfo.get(ret);
                 ObserveV2.getObserve().addRef(refInfo, key);
                 return wrapper.proxy;
@@ -9996,12 +10001,12 @@ class JSONCoder {
  */
 class RefInfo {
     static get(target) {
-        if (typeof (target) !== "object") {
-            throw new Error("target must be a object");
+        if (typeof (target) !== 'object') {
+            throw new Error('target must be a object');
         }
-        // makeObserved does not support @Observed and @ObservedV2/@Trace class, will return target directly
-        if (ObservedObject.IsObservedObject(target) || ObserveV2.IsObservedObjectV2(target)) {
-            stateMgmtConsole.warn(`${target.constructor.name} is Observed ${ObservedObject.IsObservedObject(target)}, IsObservedV2 ${ObserveV2.IsObservedObjectV2(target)}. makeObserved will stop work`);
+        // makeObserved does not support @Observed, @ObservedV2/@Trace class or makeObserved proxy, will return target directly
+        if (ObservedObject.IsObservedObject(target) || ObserveV2.IsObservedObjectV2(target) || ObserveV2.IsMakeObserved(target)) {
+            stateMgmtConsole.warn(`${target.constructor.name} is Observed ${ObservedObject.IsObservedObject(target)}, IsObservedV2 ${ObserveV2.IsObservedObjectV2(target)} or makeObserved proxy value ${ObserveV2.IsMakeObserved(target)}. makeObserved will stop work`);
             return { proxy: target };
         }
         let ret = RefInfo.obj2ref.get(target);
