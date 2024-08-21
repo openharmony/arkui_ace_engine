@@ -2302,6 +2302,22 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     } else {
         viewportConfigMgr_->UpdateConfig(aceViewportConfig, std::move(task), container, "ArkUIUpdateViewportConfig");
     }
+    UIExtensionUpdateViewportConfig(config, context, taskExecutor);
+}
+
+void UIContentImpl::UIExtensionUpdateViewportConfig(
+    const ViewportConfig& config, Refptr<NG::PipelineContext> context, RefPtr<TaskExecutor> taskExecutor)
+{
+    auto updateSessionViewportConfigTask = [context, config]() {
+        CHECK_NULL_VOID(context);
+        auto uiExtMgr = context->GetUIExtensionManager();
+        if (uiExtMgr) {
+            uiExtMgr->UpdateSessionViewportConfig(config);
+        }
+    };
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        std::move(updateSessionViewportConfigTask), TaskExecutor::TaskType::UI, "ArkUIUpdateSessionViewportConfig");
 }
 
 void UIContentImpl::SetIgnoreViewSafeArea(bool ignoreViewSafeArea)
