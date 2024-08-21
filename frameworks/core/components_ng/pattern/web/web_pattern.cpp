@@ -3705,7 +3705,7 @@ void WebPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
     delegate_->NotifyAutoFillViewData(jsonNode->ToString());
 
     // shift focus after autofill
-    if (focusType != AceAutoFillType::ACE_UNSPECIFIED) {
+    if (focusType != AceAutoFillType::ACE_UNSPECIFIED && !isPasswordFill_) {
         for (const auto& nodeInfo : pageNodeInfo_) {
             if (nodeInfo && nodeInfo->GetAutoFillType() == focusType) {
                 TouchEventInfo info("autofill");
