@@ -2093,4 +2093,61 @@ const RefPtr<NG::OverlayManager> DragDropManager::GetDragAnimationOverlayManager
     CHECK_NULL_RETURN(subwindow, nullptr);
     return subwindow->GetOverlayManager();
 }
+
+void DragDropManager::RemoveDragFrameNode(int32_t id)
+{
+    dragFrameNodes_.erase(id);
+    gridDragFrameNodes_.erase(id);
+    listDragFrameNodes_.erase(id);
+    textFieldDragFrameNodes_.erase(id);
+}
+
+void DragDropManager::SetIsDragged(bool isDragged)
+{
+    if (isDragged && isDragged_ != isDragged && notifyInDraggedCallback_) {
+        notifyInDraggedCallback_();
+    }
+    isDragged_ = isDragged;
+}
+
+void DragDropManager::RegisterDragStatusListener(int32_t nodeId, const WeakPtr<FrameNode>& node)
+{
+    auto ret = nodesForDragNotify_.try_emplace(nodeId, node);
+    if (!ret.second) {
+        nodesForDragNotify_[nodeId] = node;
+    }
+}
+
+bool DragDropManager::IsDraggingPressed(int32_t currentPointerId) const
+{
+    if (currentPointerId_ == currentPointerId) {
+        return draggingPressedState_;
+    }
+    return false;
+}
+
+void DragDropManager::ResetContextMenuDragPosition()
+{
+    dragMovePosition_ = OffsetF(0.0f, 0.0f);
+    lastDragMovePosition_ = OffsetF(0.0f, 0.0f);
+    dragTotalMovePosition_ = OffsetF(0.0f, 0.0f);
+}
+
+void DragDropManager::ResetContextMenuRedragPosition()
+{
+    dragMovePosition_ = OffsetF(0.0f, 0.0f);
+    lastDragMovePosition_ = OffsetF(0.0f, 0.0f);
+}
+
+void DragDropManager::AddNewDragAnimation()
+{
+    currentAnimationCnt_++;
+    allAnimationCnt_++;
+}
+
+bool DragDropManager::IsAllAnimationFinished()
+{
+    currentAnimationCnt_--;
+    return currentAnimationCnt_ == 0;
+}
 } // namespace OHOS::Ace::NG
