@@ -139,11 +139,15 @@ class MonitorV2 {
     if (this.bindRun(/* is init / first run */ false)) {
       stateMgmtConsole.debug(`@Monitor function '${this.monitorFunction.name}' exec ...`);
 
-      // exec @Monitor function
-      this.monitorFunction.call(this.target_, this);
-
-      // now -> before value
-      this.reset();
+      try {
+        // exec @Monitor function
+        this.monitorFunction.call(this.target_, this);
+      } catch(e) {
+        stateMgmtConsole.applicationError(`@Monitor exception caught for ${this.monitorFunction.name}`, e.toString());
+        throw e;
+      } finally {
+        this.reset();
+      }
     }
   }
 
@@ -204,7 +208,12 @@ class AsyncAddMonitorV2 {
   
   static addMonitor(target: any, name: string): void {
     if (AsyncAddMonitorV2.watches.length === 0) {
-      Promise.resolve(true).then(AsyncAddMonitorV2.run);
+      Promise.resolve(true)
+      .then(AsyncAddMonitorV2.run)
+      .catch(error => {
+        stateMgmtConsole.applicationError(`Exception caught in @Monitor function ${name}`, error);
+        throw error;
+      });
     }
     AsyncAddMonitorV2.watches.push([target, name]);
   }

@@ -414,7 +414,12 @@ class ObserveV2 {
       // exec a re-render or exec a monitor function changes some state -> calls fireChange -> ...
       if ((this.elmtIdsChanged_.size + this.monitorIdsChanged_.size + this.computedPropIdsChanged_.size === 0) &&
         /* update not already in progress */ !this.startDirty_) {
-        Promise.resolve().then(this.updateDirty.bind(this));
+        Promise.resolve()
+        .then(this.updateDirty.bind(this))
+        .catch(error => {
+          stateMgmtConsole.applicationError(`Exception occurred during the update process involving @Computed properties, @Monitor functions or UINode re-rendering`, error);
+          throw error;
+        });
       }
 
       // add bindId to the correct Set of pending changes.
