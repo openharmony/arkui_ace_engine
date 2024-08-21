@@ -231,6 +231,11 @@ public:
         return isSurfaceLock_;
     }
 
+    void SetIsTypeNode(bool isTypeNode)
+    {
+        isTypeNode_ = isTypeNode;
+    }
+
     std::shared_ptr<InnerXComponentController> GetXComponentController()
     {
         return xcomponentController_;
@@ -451,6 +456,7 @@ private:
     std::atomic<int32_t> slideCount_ {0};
     double physicalCoeff_ = 0.0;
 #endif
+    bool isTypeNode_ = false;
 };
 } // namespace OHOS::Ace::NG
 

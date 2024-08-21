@@ -613,6 +613,8 @@ public:
     void SetOnDestroy(std::function<void()>&& onDestroy);
     void ClearOnDestroy();
     void FireOnDestroy();
+    void ClearStateStyle();
+    void OnDetachClear();
 
 protected:
     virtual void OnModifyDone() {}
