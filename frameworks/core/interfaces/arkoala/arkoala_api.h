@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 123
+#define ARKUI_FULL_API_VERSION 124
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 123
+#define ARKUI_NODE_API_VERSION 124
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 8
@@ -2023,6 +2023,9 @@ struct ArkUITextModifier {
     ArkUI_Int32 (*getTextHalfLeading)(ArkUINodeHandle node);
     void (*setTextOnClick)(ArkUINodeHandle node, void* callback);
     void (*resetTextOnClick)(ArkUINodeHandle node);
+    void (*setTextResponseRegion)(
+        ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 lengthk);
+    void (*resetTextResponseRegion)(ArkUINodeHandle node);
 };
 
 struct ArkUIButtonModifier {
