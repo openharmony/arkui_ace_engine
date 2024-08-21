@@ -44,6 +44,7 @@
 #include "core/common/container_scope.h"
 #include "core/common/ime/text_input_client.h"
 #include "core/common/stylus/stylus_detector_mgr.h"
+#include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/base/inspector_filter.h"
@@ -3080,6 +3081,9 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
     bool isLongPressSelectArea = BetweenSelection(info.GetGlobalLocation()) && !isDoubleClick;
     HandleDraggableFlag(isLongPressSelectArea);
     bool isLongPressByMouse = isMousePressed_ && caretUpdateType_== CaretUpdateType::LONG_PRESSED;
+    if (isLongPressSelectArea && !isLongPressByMouse) {
+        StartVibratorByLongPress();
+    }
     bool isInterceptEvent = isLongPressSelectArea || isLongPressByMouse;
     if (isInterceptEvent) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "intercept when longPressSelectArea=%{public}d longPressByMouse=%{public}d",
@@ -3131,6 +3135,7 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<
             CloseSelectOverlay();
             ResetSelection();
         }
+        StartVibratorByLongPress();
         editingLongPress_ = isEditing_;
         previewLongPress_ = !isEditing_;
     }
@@ -3156,6 +3161,12 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<
     } else {
         StopTwinkling();
     }
+}
+
+void RichEditorPattern::StartVibratorByLongPress()
+{
+    CHECK_NULL_VOID(isEnableHapticFeedback_);
+    VibratorUtils::StartVibraFeedback("longPress.light");
 }
 
 bool RichEditorPattern::HandleUserLongPressEvent(GestureEvent& info)
@@ -6137,13 +6148,21 @@ void RichEditorPattern::UpdateCaretByTouchMove(const Offset& offset)
     }
     Offset textOffset = ConvertTouchOffsetToTextOffset(offset);
     auto position = paragraphs_.GetIndex(textOffset);
+    auto preCaretPosition = caretPosition_;
     SetCaretPosition(position);
+    StartVibratorByIndexChange(caretPosition_, preCaretPosition);
     CalcAndRecordLastClickCaretInfo(textOffset);
     auto localOffset = OffsetF(offset.GetX(), offset.GetY());
     if (magnifierController_) {
         magnifierController_->SetLocalOffset(localOffset);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void RichEditorPattern::StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex)
+{
+    CHECK_NULL_VOID(isEnableHapticFeedback_ && (currentIndex != preIndex));
+    VibratorUtils::StartVibraFeedback("slide");
 }
 
 bool RichEditorPattern::IsScrollBarPressed(const MouseInfo& info)

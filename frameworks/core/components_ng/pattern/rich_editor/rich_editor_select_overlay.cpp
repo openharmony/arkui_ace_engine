@@ -187,6 +187,8 @@ void RichEditorSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOf
     auto pattern = GetPattern<RichEditorPattern>();
     auto& textSelector = pattern->textSelector_;
     auto currentHandleIndex = pattern->GetHandleIndex(Offset(handleOffset.GetX(), handleOffset.GetY()));
+    auto preHandleIndex = isFirst ? textSelector.baseOffset : textSelector.destinationOffset;
+    pattern->StartVibratorByIndexChange(currentHandleIndex, preHandleIndex);
     pattern->SetCaretPosition(currentHandleIndex);
     if (isFirst) {
         pattern->HandleSelectionChange(currentHandleIndex, textSelector.destinationOffset);
