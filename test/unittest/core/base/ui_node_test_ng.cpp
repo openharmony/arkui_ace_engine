@@ -894,7 +894,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg029, TestSize.Level1)
      * @tc.expected: the TryVisibleChangeOnDescendant function is run ok
      */
     ZERO->AddChild(ONE, 1, false);
-    ZERO->UINode::TryVisibleChangeOnDescendant(true);
+    ZERO->UINode::TryVisibleChangeOnDescendant(VisibleType::INVISIBLE, VisibleType::VISIBLE);
     EXPECT_EQ(ZERO->children_.size(), 1);
     ZERO->Clean();
 }

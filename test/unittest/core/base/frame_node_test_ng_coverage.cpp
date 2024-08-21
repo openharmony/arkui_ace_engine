@@ -819,7 +819,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAdjustGridOffset01, TestSize.Level1)
 
     layoutProperty->gridProperty_ = std::make_unique<GridProperty>();
     frameNode->SetParent(FRAME_NODE);
-    frameNode->NotifyVisibleChange(true);
+    frameNode->NotifyVisibleChange(VisibleType::INVISIBLE, VisibleType::VISIBLE);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     geometryNode->SetFrameOffset(OffsetF(1.0f, 0.0f));
     frameNode->geometryNode_ = geometryNode;

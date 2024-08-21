@@ -755,7 +755,7 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransitio
 
     // update visibility value.
     propVisibility_ = visible;
-    host->NotifyVisibleChange(visible == VisibleType::VISIBLE);
+    host->NotifyVisibleChange(preVisibility.value_or(VisibleType::VISIBLE), visible);
     if (allowTransition && preVisibility) {
         if (preVisibility.value() == VisibleType::VISIBLE && visible != VisibleType::VISIBLE) {
             host->GetRenderContext()->OnNodeDisappear(false);
