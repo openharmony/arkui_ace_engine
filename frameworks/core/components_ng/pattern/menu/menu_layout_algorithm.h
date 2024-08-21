@@ -215,6 +215,9 @@ private:
     void CalculateIdealSize(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint,
         PaddingPropertyF padding, SizeF& idealSize, RefPtr<FrameNode> parentItem);
     void TranslateOptions(LayoutWrapper* layoutWrapper);
+    bool CheckChildConstraintCondition(const RefPtr<MenuPattern>& menuPattern);
+    void UpdateChildConstraintByDevice(const RefPtr<MenuPattern>& menuPattern,
+        LayoutConstraintF& childConstraint, const LayoutConstraintF& layoutConstraint);
 
     std::optional<OffsetF> lastPosition_;
     OffsetF targetOffset_;

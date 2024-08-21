@@ -173,7 +173,7 @@ void MenuItemLayoutAlgorithm::MeasureItemViews(LayoutConstraintF& childConstrain
         rightRowHeight = rightRow->GetGeometryNode()->GetMarginFrameSize().Height();
     }
     // measure left row
-    auto maxWidth = maxRowWidth_ - rightRowWidth + middleSpace_;
+    auto maxWidth = maxRowWidth_ - rightRowWidth - middleSpace_;
     childConstraint.maxSize.SetWidth(maxWidth);
     MeasureRow(leftRow, childConstraint);
     float leftRowWidth = leftRow->GetGeometryNode()->GetMarginFrameSize().Width();
@@ -269,6 +269,7 @@ void MenuItemLayoutAlgorithm::CheckNeedExpandContent(LayoutWrapper* layoutWrappe
         auto oldTextSize = contentNode->GetGeometryNode()->GetFrameSize();
         float newTextWidth = emptyWidth_ + oldTextSize.Width();
         childConstraint.minSize.SetWidth(newTextWidth);
+        childConstraint.maxSize.SetWidth(newTextWidth);
         contentNode->Measure(childConstraint);
     }
 }
