@@ -73,6 +73,7 @@
 #include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
 #include "core/interfaces/native/node/node_api.h"
@@ -273,6 +274,16 @@ void* createComponentRootNode(ArkUI_Int32 nodeId)
 void* createXComponentNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = XComponentModelNG::CreateFrameNode(nodeId, "", XComponentType::SURFACE, "");
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createXComponentNodeWithParams(ArkUI_Int32 nodeId, const ArkUI_Params& params)
+{
+    ArkUI_XComponent_Params* xcParams = (ArkUI_XComponent_Params*)(&params);
+    CHECK_NULL_RETURN(xcParams, nullptr);
+    auto frameNode = XComponentModelNG::CreateFrameNode(
+        nodeId, xcParams->id, xcParams->type, xcParams->libraryName, xcParams->controller);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -506,7 +517,7 @@ void* createBadgeNode(ArkUI_Int32 nodeId)
 }
 
 using createArkUIFrameNode = void*(ArkUI_Int32 nodeId);
-void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
+void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId, const ArkUI_Params& params)
 {
     static createArkUIFrameNode* createArkUIFrameNodes[] = {
         nullptr,
@@ -577,6 +588,9 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
     CHECK_NULL_RETURN(createArkUIFrameNodes[tag], nullptr);
     if (nodeId == ARKUI_AUTO_GENERATE_NODE_ID) {
         nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    }
+    if (tag == ArkUINodeType::ARKUI_XCOMPONENT) {
+        return createXComponentNodeWithParams(nodeId, params);
     }
     return createArkUIFrameNodes[tag](nodeId);
 }

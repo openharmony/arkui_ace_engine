@@ -231,6 +231,11 @@ public:
         return isSurfaceLock_;
     }
 
+    std::shared_ptr<InnerXComponentController> GetXComponentController()
+    {
+        return xcomponentController_;
+    }
+
     void SetHandlingRenderContextForSurface(const RefPtr<RenderContext>& otherRenderContext);
 
     void RestoreHandlingRenderContextForSurface();

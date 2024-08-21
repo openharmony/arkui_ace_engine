@@ -1401,6 +1401,10 @@ struct ArkUI_SystemFontStyleEvent {
 };
 typedef ArkUI_SystemFontStyleEvent* ArkUISystemFontStyleEvent;
 
+typedef struct ArkUI_Params {
+    ArkUINodeType nodeType;
+} ArkUI_Params;
+
 struct ArkUICommonModifier {
     void (*setBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetBackgroundColor)(ArkUINodeHandle node);
@@ -4848,6 +4852,8 @@ typedef void (*EventReceiver)(ArkUINodeEvent* event);
 struct ArkUIBasicAPI {
     /// Tree operations.
     ArkUINodeHandle (*createNode)(ArkUINodeType type, ArkUI_Int32 id, ArkUI_Int32 flags);
+    ArkUINodeHandle (*createNodeWithParams)(
+        ArkUINodeType type, ArkUI_Int32 id, ArkUI_Int32 flags, const ArkUI_Params& params);
     ArkUINodeHandle (*getNodeByViewStack)();
     void (*disposeNode)(ArkUINodeHandle node);
     // Returned pointer is valid only till node is alive.

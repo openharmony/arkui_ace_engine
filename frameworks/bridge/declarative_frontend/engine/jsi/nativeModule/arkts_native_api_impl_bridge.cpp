@@ -869,6 +869,14 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnDetach));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnDetach"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnDetach));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnLoad"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnLoad));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnLoad"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnLoad));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnDestroy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnDestroy));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnDestroy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnDestroy));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnKeyEvent"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnKeyEvent));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnKeyEvent"),
@@ -5060,6 +5068,14 @@ void ArkUINativeModule::RegisterXComponentAttributes(Local<panda::ObjectRef> obj
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::SetSepia));
     xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLinearGradientBlur"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::ResetSepia));
+    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnLoad"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::SetOnLoad));
+    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnLoad"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::ResetOnLoad));
+    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnDestroy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::SetOnDestroy));
+    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnDestroy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::ResetOnDestroy));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "xComponent"), xComponent);
 }
 

@@ -24844,6 +24844,34 @@ class XComponentLinearGradientBlurModifier extends ModifierWithKey {
   }
 }
 XComponentLinearGradientBlurModifier.identity = Symbol('xComponentlinearGradientBlur');
+class XComponentOnLoadModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().xComponent.resetOnLoad(node);
+    }
+    else {
+      getUINativeModule().xComponent.setOnLoad(node, this.value);
+    }
+  }
+}
+XComponentOnLoadModifier.identity = Symbol('xComponentOnLoad');
+class XComponentOnDestroyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().xComponent.resetOnDestroy(node);
+    }
+    else {
+      getUINativeModule().xComponent.setOnDestroy(node, this.value);
+    }
+  }
+}
+XComponentOnDestroyModifier.identity = Symbol('xComponentOnDestroy');
 /// <reference path='./import.ts' />
 class ArkBadgeComponent extends ArkComponent {
   constructor(nativePtr, classType) {

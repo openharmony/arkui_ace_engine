@@ -497,10 +497,12 @@ class ArkXComponentComponent extends ArkComponent implements XComponentAttribute
     throw new Error('Method not implemented.');
   }
   onLoad(callback: (event?: object) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, XComponentOnLoadModifier.identity, XComponentOnLoadModifier, callback);
+    return this;
   }
   onDestroy(event: () => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, XComponentOnDestroyModifier.identity, XComponentOnDestroyModifier, event);
+    return this;
   }
 
 }
@@ -839,5 +841,33 @@ class XComponentLinearGradientBlurModifier extends ModifierWithKey<ArkLinearGrad
   }
   checkObjectDiff(): boolean {
     return !this.value.isEqual(this.stageValue);
+  }
+}
+
+class XComponentOnLoadModifier extends ModifierWithKey<(event?: object) => void> {
+  constructor(value: (event?: object) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('xComponentOnLoad');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().xComponent.resetOnLoad(node);
+    } else {
+      getUINativeModule().xComponent.setOnLoad(node, this.value);
+    }
+  }
+}
+
+class XComponentOnDestroyModifier extends ModifierWithKey<() => void> {
+  constructor(value: () => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('xComponentOnDestroy');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().xComponent.resetOnDestroy(node);
+    } else {
+      getUINativeModule().xComponent.setOnDestroy(node, this.value);
+    }
   }
 }

@@ -23,6 +23,7 @@
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_render_node_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_xcomponent_bridge.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node_pattern.h"
@@ -170,11 +171,18 @@ ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNode(ArkUIRuntimeCallInf
 
     ArkUINodeType nodeType = ARKUI_CUSTOM;
     RefPtr<FrameNode> node;
+    ArkUINodeHandle nodePtr = nullptr;
     auto iter = typeMap.find(type);
     if (iter != typeMap.end()) {
         nodeType = iter->second;
         if (nodeType != ARKUI_CUSTOM) {
-            auto nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNode(nodeType, nodeId, 0);
+            if (nodeType == ARKUI_XCOMPONENT) {
+                auto& params = XComponentBridge::ParseParams(runtimeCallInfo);
+                params.nodeType = ARKUI_XCOMPONENT;
+                nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNodeWithParams(nodeType, nodeId, 0, params);
+            } else {
+                nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNode(nodeType, nodeId, 0);
+            }
             // let 'node' take the reference, so decrease ref of C node
             node = AceType::Claim(reinterpret_cast<FrameNode*>(nodePtr));
             if (node && node->RefCount() > 1) {

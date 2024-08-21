@@ -21,8 +21,11 @@
 #include "bridge/declarative_frontend/jsview/js_xcomponent.h"
 #include "bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 
 namespace OHOS::Ace::NG {
+
+thread_local ArkUI_XComponent_Params XComponentBridge::params_;
 
 enum ArgIndices {
     ARG_FIRST = 0,
@@ -50,6 +53,46 @@ XComponentType XComponentBridge::ConvertToXComponentType(const std::string& type
     }
 #endif
     return XComponentType::SURFACE;
+}
+
+ArkUI_Params& XComponentBridge::ParseParams(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    auto& params = XComponentBridge::params_;
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, params);
+    Local<JSValueRef> paramsArg = runtimeCallInfo->GetCallArgRef(2);
+
+    CHECK_NULL_RETURN(paramsArg->IsObject(vm), params);
+    auto obj = Local<panda::ObjectRef>(paramsArg);
+    auto idStr = panda::StringRef::NewFromUtf8(vm, "id");
+    auto typeStr = panda::StringRef::NewFromUtf8(vm, "type");
+    auto librarynameStr = panda::StringRef::NewFromUtf8(vm, "libraryname");
+    auto controllerStr = panda::StringRef::NewFromUtf8(vm, "controller");
+
+    auto idArg = obj->Get(vm, idStr);
+    auto typeArg = obj->Get(vm, typeStr);
+    auto libraryNameArg = obj->Get(vm, librarynameStr);
+    auto controllerArg = obj->Get(vm, controllerStr);
+
+    params.id = idArg->IsString(vm) ? idArg->ToString(vm)->ToString(vm) : "";
+    if (typeArg->IsString(vm)) {
+        params.type = ConvertToXComponentType(typeArg->ToString(vm)->ToString(vm));
+    } else if (typeArg->IsNumber()) {
+        params.type = static_cast<XComponentType>(typeArg->Int32Value(vm));
+    }
+    params.libraryName = libraryNameArg->IsString(vm) ? libraryNameArg->ToString(vm)->ToString(vm) : "";
+    params.controller = nullptr;
+    if (controllerArg->IsObject(vm)) {
+        Framework::JSXComponentController* jsXComponentController = static_cast<Framework::JSXComponentController*>(
+            Local<panda::ObjectRef>(controllerArg)->GetNativePointerField(vm, 0));
+        if (jsXComponentController && idArg->IsString(vm)) {
+            jsXComponentController->SetInstanceId(Container::CurrentId());
+            Framework::XComponentClient::GetInstance().AddControllerToJSXComponentControllersMap(
+                idArg->ToString(vm)->ToString(vm), jsXComponentController);
+            params.controller = jsXComponentController->GetController();
+        }
+    }
+    return params;
 }
 
 void XComponentBridge::SetControllerCallback(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -439,6 +482,65 @@ ArkUINativeModuleValue XComponentBridge::SetBackgroundImage(ArkUIRuntimeCallInfo
 }
 
 ArkUINativeModuleValue XComponentBridge::ResetBackgroundImage(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue XComponentBridge::SetOnLoad(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(ARG_ID);
+    CHECK_NULL_RETURN(secondArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
+    auto* frameNode = reinterpret_cast<FrameNode*>(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    auto obj = secondArg->ToObject(vm);
+    panda::Local<panda::FunctionRef> func = obj;
+    auto onLoad = [vm, func = panda::CopyableGlobal(vm, func), frameNode](const std::string& xcomponentId){
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        std::vector<Local<JSValueRef>> argv;
+        Framework::JSRef<Framework::JSVal> jsVal;
+        if (Framework::XComponentClient::GetInstance().GetJSVal(xcomponentId, jsVal)) {
+            argv.emplace_back(jsVal->GetLocalHandle());
+        }
+        func->Call(vm, func.ToLocal(), argv.data(), argv.size());
+    }
+    XComponentModelNG::SetOnLoad(frameNode, std::move(onLoad));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue XComponentBridge::ResetOnLoad(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue XComponentBridge::SetOnDestroy(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(ARG_ID);
+    CHECK_NULL_RETURN(secondArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
+    auto* frameNode = reinterpret_cast<FrameNode*>(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    auto obj = secondArg->ToObject(vm);
+    panda::Local<panda::FunctionRef> func = obj;
+    auto onDestroy = [vm, func = panda::CopyableGlobal(vm, func), frameNode](){
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        func->Call(vm, func.ToLocal(), nullptr, 0);
+    }
+    XComponentModelNG::SetOnDestroy(frameNode, std::move(onDestroy));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue XComponentBridge::ResetOnDestroy(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     return panda::JSValueRef::Undefined(vm);
