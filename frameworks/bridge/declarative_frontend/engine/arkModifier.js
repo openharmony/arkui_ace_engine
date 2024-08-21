@@ -100,12 +100,13 @@ class ModifierUtils {
   }
   static putDirtyModifier(arkModifier, attributeModifierWithKey) {
     attributeModifierWithKey.value = attributeModifierWithKey.stageValue;
-    if (!arkModifier._weakPtr.invalid()) {
-      ArkLogConsole.info("pointer is invalid when putDirtyModifier");
+    if (!arkModifier._weakPtr.invalid()) {  
       attributeModifierWithKey.applyPeer(arkModifier.nativePtr,
         (attributeModifierWithKey.value === undefined ||
           attributeModifierWithKey.value === null)
       );
+    } else {
+      ArkLogConsole.warn("pointer is invalid when putDirtyModifier");
     }
     this.dirtyComponentSet.add(arkModifier);
     if (!this.dirtyFlag) {
