@@ -881,7 +881,7 @@ void FfiOHOSAceFrameworkViewAbstractSetGeometryTransition(char* id, CJGeometryTr
 
 void FfiOHOSAceFrameworkViewAbstractSetBlur(double value)
 {
-    Dimension radius(value, DimensionUnit::VP);
+    Dimension radius(value, DimensionUnit::PX);
     BlurOption options;
     ViewAbstractModel::GetInstance()->SetFrontBlur(radius, options);
 }
@@ -893,7 +893,7 @@ void FfiOHOSAceFrameworkViewAbstractSetColorBlend(uint32_t color)
 
 void FfiOHOSAceFrameworkViewAbstractSetBackdropBlur(double value)
 {
-    Dimension radius(value, DimensionUnit::VP);
+    Dimension radius(value, DimensionUnit::PX);
     BlurOption options;
     ViewAbstractModel::GetInstance()->SetBackdropBlur(radius, options);
 }
