@@ -228,7 +228,7 @@ void FocusHub::DumpFocusScopeTree(int32_t depth)
     }
 
     for (const auto& item : focusNodes) {
-        item->DumpFocusTree(depth + 1, true);
+        item->DumpFocusTree(depth + 1);
     }
 }
 
