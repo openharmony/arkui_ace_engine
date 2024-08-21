@@ -450,6 +450,28 @@ void SwiperIndicatorPattern::UpdateTextContent(const RefPtr<SwiperIndicatorLayou
     UpdateTextContentSub(layoutProperty, firstTextNode, lastTextNode);
 }
 
+int32_t SwiperIndicatorPattern::GetDisplayCurrentIndex() const
+{
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_RETURN(swiperNode, 0);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(swiperPattern, 0);
+    CHECK_NULL_RETURN(swiperPattern->RealTotalCount(), 0);
+    auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(swiperLayoutProperty, 0);
+    auto currentIndex = swiperPattern->GetCurrentFirstIndex() + 1;
+    if (currentIndex > swiperPattern->RealTotalCount()) {
+        currentIndex = 1;
+    } else if (swiperLayoutProperty->HasIndex()) {
+        currentIndex = GetCurrentIndex() + 1;
+        if (currentIndex > swiperPattern->RealTotalCount()) {
+            currentIndex = 1;
+        }
+    }
+
+    return currentIndex;
+}
+
 int32_t SwiperIndicatorPattern::GetCurrentIndex() const
 {
     auto swiperNode = GetSwiperNode();
@@ -480,15 +502,7 @@ void SwiperIndicatorPattern::UpdateTextContentSub(const RefPtr<SwiperIndicatorLa
     CHECK_NULL_VOID(swiperPattern);
     auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(swiperLayoutProperty);
-    auto currentIndex = swiperPattern->GetCurrentFirstIndex() + 1;
-    if (currentIndex > swiperPattern->RealTotalCount()) {
-        currentIndex = 1;
-    } else if (swiperLayoutProperty->HasIndex()) {
-        currentIndex = GetCurrentIndex() + 1;
-        if (currentIndex > swiperPattern->RealTotalCount()) {
-            currentIndex = 1;
-        }
-    }
+    auto currentIndex = GetDisplayCurrentIndex();
     auto lastTextLayoutProperty = lastTextNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(lastTextLayoutProperty);
     lastTextLayoutProperty->UpdateLayoutDirection(swiperPattern->GetNonAutoLayoutDirection());
