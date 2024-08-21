@@ -189,4 +189,9 @@ float SystemProperties::GetDragStartPanDistanceThreshold()
 {
     return dragStartPanDisThreshold_;
 }
+
+bool SystemProperties::GetAllowWindowOpenMethodEnabled()
+{
+    return false;
+}
 } // namespace OHOS::Ace

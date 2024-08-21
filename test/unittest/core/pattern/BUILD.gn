@@ -109,6 +109,7 @@ group("core_pattern_unittest") {
     "waterflow:water_flow_test_original",
     "waterflow:water_flow_test_segmented",
     "waterflow:water_flow_test_sw",
+    "web:web_pattern_unit_test",
     "xcomponent:xcomponent_test_ng",
   ]
 

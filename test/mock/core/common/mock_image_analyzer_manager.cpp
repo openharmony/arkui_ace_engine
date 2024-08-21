@@ -89,4 +89,8 @@ void ImageAnalyzerManager::SetImageAnalyzerCallback(OnAnalyzedCallback& callback
 void ImageAnalyzerManager::ReleaseImageAnalyzer()
 {
 }
+
+void ImageAnalyzerManager::UpdateOverlayTouchInfo(int touchPointX, int touchPointY, TouchType touchType)
+{
+}
 } // namespace OHOS::Ace
