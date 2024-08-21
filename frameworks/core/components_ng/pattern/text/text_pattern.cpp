@@ -2068,13 +2068,6 @@ void TextPattern::OnModifyDone()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
 
-    if (CheckNeedMeasure(textLayoutProperty->GetPropertyChangeFlag()) && pManager_) {
-        // measure flag changed, reset paragraph.
-        auto nowTime = static_cast<unsigned long long>(GetSystemTimestamp());
-        ACE_SCOPED_TRACE("OnModifyDone[Text][id:%d][time:%llu]", host->GetId(), nowTime);
-        pManager_->Reset();
-    }
-
     if (!(PipelineContext::GetCurrentContextSafely() &&
             PipelineContext::GetCurrentContextSafely()->GetMinPlatformVersion() > API_PROTEXTION_GREATER_NINE)) {
         bool shouldClipToContent =
