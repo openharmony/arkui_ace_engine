@@ -1124,6 +1124,7 @@ public:
     void DumpAdvanceInfo() override;
     void DumpPlaceHolderInfo();
     void DumpScaleInfo();
+    std::string GetDumpTextValue() const;
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) override;
     void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) override;
