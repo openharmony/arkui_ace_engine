@@ -67,6 +67,8 @@ namespace OHOS::Ace::NG {
 namespace {
 const InspectorFilter filter;
 constexpr int32_t TARGET_ID = 3;
+constexpr int32_t START_INDEX = 3;
+constexpr int32_t FOOT_INDEX = 3;
 constexpr MenuType TYPE = MenuType::MENU;
 const std::string EMPTY_TEXT = "";
 const std::string TEXT_TAG = "text";
@@ -843,5 +845,94 @@ HWTEST_F(MenuItemGroupTestNg, MenuItemGroupPattern004, TestSize.Level1)
     EXPECT_EQ(layoutProps2->GetFontWeight(), FontWeight::BOLD);
 
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: AddHeaderNull
+ * @tc.desc: Test MenuItemGroup pattern AddHeader with null ptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, AddHeaderNull, TestSize.Level1)
+{
+    auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
+    MenuItemGroupView menuItemGroupView;
+    menuItemGroupView.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto menuItemPattern = frameNode->GetPattern<MenuItemGroupPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+
+    RefPtr<NG::UINode> headerNode;
+    headerNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    menuItemPattern->headerContent_ = nullptr;
+    menuItemPattern->headerIndex_ = -1;
+    menuItemPattern->itemStartIndex_ = START_INDEX;
+    menuItemPattern->AddHeader(headerNode);
+    EXPECT_EQ(menuItemPattern->headerIndex_, START_INDEX);
+    EXPECT_EQ(menuItemPattern->itemStartIndex_, START_INDEX + 1);
+}
+
+/**
+ * @tc.name: AddFooterNormal
+ * @tc.desc: Test MenuItemGroup pattern AddFooter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, AddFooterNormal, TestSize.Level1)
+{
+    auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
+    MenuItemGroupView menuItemGroupView;
+    menuItemGroupView.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto menuItemPattern = frameNode->GetPattern<MenuItemGroupPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+
+    std::string footerStr = "foot";
+    menuItemGroupView.SetFooter(footerStr);
+    ASSERT_NE(menuItemPattern->footerContent_, nullptr);
+
+    RefPtr<NG::UINode> footerNode;
+    footerNode = NG::ViewStackProcessor::GetInstance()->Finish();
+
+    frameNode->isRestoreInfoUsed_ = false;
+    menuItemPattern->footerIndex_ = FOOT_INDEX;
+    menuItemPattern->itemStartIndex_ = START_INDEX;
+    menuItemPattern->AddFooter(footerNode);
+    EXPECT_NE(menuItemPattern->footerContent_, nullptr);
+    EXPECT_EQ(menuItemPattern->footerIndex_, START_INDEX);
+    EXPECT_EQ(frameNode->isRestoreInfoUsed_, false);
+}
+
+/**
+ * @tc.name: AddFooterNull
+ * @tc.desc: Test MenuItemGroup pattern AddFooter with null ptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, AddFooterNull, TestSize.Level1)
+{
+    auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
+    MenuItemGroupView menuItemGroupView;
+    menuItemGroupView.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto menuItemPattern = frameNode->GetPattern<MenuItemGroupPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+
+    std::string footerStr = "foot";
+    menuItemGroupView.SetFooter(footerStr);
+    ASSERT_NE(menuItemPattern->footerContent_, nullptr);
+    
+    RefPtr<NG::UINode> footerNode;
+    footerNode = NG::ViewStackProcessor::GetInstance()->Finish();
+
+    menuItemPattern->footerContent_ = nullptr;
+    frameNode->isRestoreInfoUsed_ = false;
+    menuItemPattern->footerIndex_ = FOOT_INDEX;
+    menuItemPattern->itemStartIndex_ = START_INDEX;
+    menuItemPattern->AddFooter(footerNode);
+
+    EXPECT_EQ(menuItemPattern->footerContent_, nullptr);
+    EXPECT_EQ(menuItemPattern->footerIndex_, START_INDEX);
+    EXPECT_EQ(frameNode->isRestoreInfoUsed_, false);
 }
 } // namespace OHOS::Ace::NG

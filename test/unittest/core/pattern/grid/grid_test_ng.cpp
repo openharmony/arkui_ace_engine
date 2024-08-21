@@ -20,12 +20,9 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components/button/button_theme.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/grid/grid_item_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_model_ng.h"
-#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/pattern/button/button_model_ng.h"
 
 #ifndef TEST_IRREGULAR_GRID
 #include "test/mock/base/mock_system_properties.h"

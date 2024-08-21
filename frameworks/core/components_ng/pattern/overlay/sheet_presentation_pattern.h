@@ -422,6 +422,7 @@ public:
 
     SheetType GetSheetType();
     bool IsPhoneInLandScape();
+    bool IsShowCloseIcon();
     ScrollSizeMode GetScrollSizeMode();
     void GetSheetTypeWithAuto(SheetType& sheetType);
     void GetSheetTypeWithPopup(SheetType& sheetType);
@@ -618,6 +619,7 @@ private:
     void SetColumnMinSize(bool reset = false);
     void UpdateDragBarStatus();
     void UpdateCloseIconStatus();
+    void UpdateTitlePadding();
     float GetCloseIconPosX(const SizeF& sheetSize, const RefPtr<SheetTheme>& sheetTheme);
     void UpdateSheetTitle();
     void UpdateFontScaleStatus();

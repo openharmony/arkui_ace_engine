@@ -1403,4 +1403,5 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNg019, TestSize.Level1)
     menuItemEventHub->SetOnChange(changeEvent);
     menuItemPattern->OnClick();
 }
+
 } // namespace OHOS::Ace::NG

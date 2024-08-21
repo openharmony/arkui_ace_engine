@@ -702,6 +702,9 @@ void Scrollable::StartScrollSnapMotion(float predictSnapOffset, float scrollSnap
             }
     });
     isSnapScrollAnimationStop_ = false;
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    lastVsyncTime_ = context->GetVsyncTime();
 }
 
 void Scrollable::ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scrollSnapVelocity)
@@ -731,6 +734,9 @@ void Scrollable::ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scro
             scroll->ProcessScrollMotionStop(false);
     });
     isSnapAnimationStop_ = false;
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    lastVsyncTime_ = context->GetVsyncTime();
 }
 
 void Scrollable::UpdateScrollSnapStartOffset(double offset)

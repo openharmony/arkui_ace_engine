@@ -51,6 +51,7 @@ public:
     void SetSelectionMenuOptions(const OnCreateMenuCallback&& onCreateMenuCallback,
         const OnMenuItemClickCallback&& onMenuItemClick) override;
     void SetRequestKeyboardOnFocus(bool needToRequest) override;
+    void SetEnableHapticFeedback(bool isEnabled) override;
 
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
     static void SetTextDetectConfig(FrameNode* frameNode, const TextDetectConfig& textDetectConfig);

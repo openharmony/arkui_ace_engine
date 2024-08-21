@@ -420,6 +420,9 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     if (pipelineContext) {
         fontWeightValue = fontWeightValue * pipelineContext->GetFontWeightScale();
     }
+    if (textStyle.GetEnableVariableFontWeight()) {
+        fontWeightValue = textStyle.GetVariableFontWeight();
+    }
     txtStyle.fontVariations.SetAxisValue(FONTWEIGHT, fontWeightValue);
     // Font size must be px when transferring to txt::TextStyle
     if (pipelineContext) {
@@ -644,6 +647,9 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     auto pipelineContext = context.Upgrade();
     if (pipelineContext) {
         fontWeightValue = fontWeightValue * pipelineContext->GetFontWeightScale();
+    }
+    if (textStyle.GetEnableVariableFontWeight()) {
+        fontWeightValue = textStyle.GetVariableFontWeight();
     }
     txtStyle.fontVariations.SetAxisValue(FONTWEIGHT, fontWeightValue);
     // Font size must be px when transferring to Rosen::TextStyle

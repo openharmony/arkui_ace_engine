@@ -189,9 +189,12 @@ void MenuPreviewPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     CHECK_NULL_VOID(mainPipeline);
     auto dragDropManager = mainPipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
-    auto preDragFrameNode = dragDropManager->GetPrepareDragFrameNode().Upgrade();
-    CHECK_NULL_VOID(preDragFrameNode);
-    auto eventHub = preDragFrameNode->GetEventHub<EventHub>();
+    auto menuWrapper = GetMenuWrapper();
+    auto menuPattern = GetMenuPattern(menuWrapper);
+    CHECK_NULL_VOID(menuPattern);
+    auto dragTargetNode = FrameNode::GetFrameNode(menuPattern->GetTargetTag(), menuPattern->GetTargetId());
+    CHECK_NULL_VOID(dragTargetNode);
+    auto eventHub = dragTargetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto targetGestureHub = eventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(targetGestureHub);

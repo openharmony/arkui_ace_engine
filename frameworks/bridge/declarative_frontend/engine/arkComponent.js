@@ -1386,7 +1386,7 @@ class GeometryTransitionModifier extends ModifierWithKey {
       getUINativeModule().common.resetGeometryTransition(node);
     }
     else {
-      getUINativeModule().common.setGeometryTransition(node, this.value.id, 
+      getUINativeModule().common.setGeometryTransition(node, this.value.id,
         (_a = this.value.options) === null || _a === void 0 ? void 0 : _a.follow,
         (_b = this.value.options) === null || _b === void 0 ? void 0 : _b.hierarchyStrategy);
     }
@@ -4461,7 +4461,7 @@ class UICommonEvent {
     this._nodePtr = nodePtr;
   }
   // the first param is used to indicate frameNode
-  // the second param is used to indicate the callback 
+  // the second param is used to indicate the callback
   // the third param is used to indicate the instanceid
   // other options will be indicated after them
   setOnClick(callback) {
@@ -4720,11 +4720,27 @@ function applyGesture(modifier, component) {
   }
 }
 
+globalThis.__mapOfModifier__ = new Map();
 function __gestureModifier__(modifier) {
+  if (globalThis.__mapOfModifier__.size === 0) {
+    __modifierElmtDeleteCallback__();
+  }
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = new ArkComponent(nativeNode);
-  applyGesture(modifier, component);
+  if (globalThis.__mapOfModifier__.get(elmtId)) {
+    let component = globalThis.__mapOfModifier__.get(elmtId);
+    applyGesture(modifier, component);
+  } else {
+    let component = new ArkComponent(nativeNode);
+    globalThis.__mapOfModifier__.set(elmtId, component);
+    applyGesture(modifier, component);
+  }
+}
+
+function __modifierElmtDeleteCallback__() {
+  UINodeRegisterProxy.registerModifierElmtDeleteCallback((elmtId) => {
+    globalThis.__mapOfModifier__.delete(elmtId);
+  });
 }
 
 const __elementIdToCustomProperties__ = new Map();
@@ -5040,6 +5056,24 @@ class ColumnPointLightModifier extends ModifierWithKey {
   }
 }
 ColumnPointLightModifier.identity = Symbol('columnPointLight');
+
+class ColumnReverseModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().column.resetReverse(node);
+    } else {
+      getUINativeModule().column.setReverse(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+ColumnReverseModifier.identity = Symbol('columnReverse');
+
 class ArkColumnComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -5060,6 +5094,10 @@ class ArkColumnComponent extends ArkComponent {
   }
   pointLight(value) {
     modifierWithKey(this._modifiersWithKeys, ColumnPointLightModifier.identity, ColumnPointLightModifier, value);
+    return this;
+  }
+  reverse(value) {
+    modifierWithKey(this._modifiersWithKeys, ColumnReverseModifier.identity, ColumnReverseModifier, value);
     return this;
   }
 }
@@ -8151,6 +8189,24 @@ class RowPointLightModifier extends ModifierWithKey {
   }
 }
 RowPointLightModifier.identity = Symbol('rowPointLight');
+
+class RowReverseModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().row.resetReverse(node);
+    } else {
+      getUINativeModule().row.setReverse(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+RowReverseModifier.identity = Symbol('rowReverse');
+
 class ArkRowComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -8171,6 +8227,10 @@ class ArkRowComponent extends ArkComponent {
   }
   pointLight(value) {
     modifierWithKey(this._modifiersWithKeys, RowPointLightModifier.identity, RowPointLightModifier, value);
+    return this;
+  }
+  reverse(value) {
+    modifierWithKey(this._modifiersWithKeys, RowReverseModifier.identity, RowReverseModifier, value);
     return this;
   }
 }
@@ -18081,7 +18141,7 @@ class RadioContentModifier extends ModifierWithKey {
   }
   applyPeer(node, reset, component) {
     let radioComponent = component;
-    radioComponent.setContentModifier(this.value); 
+    radioComponent.setContentModifier(this.value);
   }
 }
 RadioContentModifier.identity = Symbol('radioContentModifier');
@@ -22900,6 +22960,13 @@ class ArkQRCodeComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
+  allowChildCount() {
+    return 0;
+  }
+  initialize(value) {
+    modifierWithKey(this._modifiersWithKeys, QRValueModifier.identity, QRValueModifier, value[0]);
+    return this;
+  }
   color(value) {
     modifierWithKey(this._modifiersWithKeys, QRColorModifier.identity, QRColorModifier, value);
     return this;
@@ -22913,6 +22980,18 @@ class ArkQRCodeComponent extends ArkComponent {
     return this;
   }
 }
+class QRValueModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    getUINativeModule().qrcode.setQRValue(node, this.value);
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+QRValueModifier.identity = Symbol('QRCodeValue');
 class QRColorModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -24411,7 +24490,7 @@ class XComponentInitializeModifier extends ModifierWithKey {
     else {
       getUINativeModule().xComponent.setXComponentInitialize(node, this.value?.id,
         this.value?.type, this.value?.imageAIOptions, this.value?.libraryname, this.value?.controller);
-      
+
     }
   }
 }

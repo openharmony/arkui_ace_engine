@@ -1414,6 +1414,11 @@ const __creatorMap__ = new Map([
                 return new ArkFlowItemComponent(node, type);
             });
         }],
+    ["QRCode", (context) => {
+            return new TypedFrameNode(context, "QRCode", (node, type) => {
+                return new ArkQRCodeComponent(node, type);
+            });
+        }],
 ]);
 class typeNode {
     static createNode(context, type) {
