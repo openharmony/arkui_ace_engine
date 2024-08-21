@@ -1146,9 +1146,11 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
 
 void FrameNode::NotifyConfigurationChangeNdk(const ConfigurationChange& configurationChange)
 {
-    if (ndkColorModeUpdateCallback_ && configurationChange.colorModeUpdate) {
+    if (ndkColorModeUpdateCallback_ && configurationChange.colorModeUpdate &&
+        colorMode_ != SystemProperties::GetColorMode()) {
         auto colorModeChange = ndkColorModeUpdateCallback_;
         colorModeChange(SystemProperties::GetColorMode() == ColorMode::DARK);
+        colorMode_ = SystemProperties::GetColorMode();
     }
 
     if (ndkFontUpdateCallback_ && (configurationChange.fontScaleUpdate || configurationChange.fontWeightScaleUpdate)) {
