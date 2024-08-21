@@ -1532,13 +1532,15 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
     if (pos != std::string::npos && pos == url.length() - (sizeof(js_ext) - 1)) {
         std::string urlName = url.substr(0, pos) + bin_ext;
 #if !defined(PREVIEW)
-        if (IsModule() && !pluginModuleName_.empty()) {
-            if (engineInstance_->IsPlugin()) {
+        if (IsModule()) {
+            if (!engineInstance_->IsPlugin()) {
+                LoadJsWithModule(urlName);
+                return;
+            }
+            if (!pluginModuleName_.empty()) {
                 LoadPluginJsWithModule(urlName);
                 return;
             }
-            LoadJsWithModule(urlName);
-            return;
         }
 #endif
         if (isMainPage) {
