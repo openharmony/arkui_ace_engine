@@ -20,7 +20,7 @@
 namespace OHOS::Ace::Framework {
 
 RefPtr<NG::NGGestureRecognizer> JsShouldBuiltInRecognizerParallelWithFunction::Execute(
-    const RefPtr<TouchEventTarget>& current, const std::vector<RefPtr<TouchEventTarget>>& others)
+    const RefPtr<NG::NGGestureRecognizer>& current, const std::vector<RefPtr<NG::NGGestureRecognizer>>& others)
 {
     CHECK_NULL_RETURN(current, nullptr);
     auto currentObj = CreateRecognizerObject(current);
@@ -45,7 +45,7 @@ RefPtr<NG::NGGestureRecognizer> JsShouldBuiltInRecognizerParallelWithFunction::E
 }
 
 JSRef<JSObject> JsShouldBuiltInRecognizerParallelWithFunction::CreateRecognizerObject(
-    const RefPtr<TouchEventTarget>& target)
+    const RefPtr<NG::NGGestureRecognizer>& target)
 {
     auto panRecognizer = AceType::DynamicCast<NG::PanRecognizer>(target);
     if (panRecognizer) {
@@ -58,7 +58,7 @@ JSRef<JSObject> JsShouldBuiltInRecognizerParallelWithFunction::CreateRecognizerO
     }
     JSRef<JSObject> recognizerObj = JSClass<JSGestureRecognizer>::NewInstance();
     auto currentRecognizer = Referenced::Claim(recognizerObj->Unwrap<JSGestureRecognizer>());
-    currentRecognizer->SetRecognizer(AceType::DynamicCast<NG::NGGestureRecognizer>(target));
+    currentRecognizer->SetRecognizer(target);
     return recognizerObj;
 }
 

@@ -21,6 +21,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
@@ -5880,6 +5881,23 @@ Local<panda::ObjectRef> CommonBridge::SetUniqueAttributes(
     }
 }
 
+Local<panda::ObjectRef> CommonBridge::CreateRecognizerObject(EcmaVM* vm, const RefPtr<NG::NGGestureRecognizer>& target)
+{
+    auto panRecognizer = AceType::DynamicCast<NG::PanRecognizer>(target);
+    if (panRecognizer) {
+        JSRef<JSObject> recognizerObj = JSClass<JSPanRecognizer>::NewInstance();
+        auto currentRecognizer = Referenced::Claim(recognizerObj->Unwrap<JSPanRecognizer>());
+        currentRecognizer->SetRecognizer(panRecognizer);
+        currentRecognizer->SetPanGestureOptions(
+            panRecognizer->GetFingers(), panRecognizer->GetDistance(), panRecognizer->GetDirection());
+        return recognizerObj->GetLocalHandle();
+    }
+    JSRef<JSObject> recognizerObj = JSClass<JSGestureRecognizer>::NewInstance();
+    auto currentRecognizer = Referenced::Claim(recognizerObj->Unwrap<JSGestureRecognizer>());
+    currentRecognizer->SetRecognizer(target);
+    return recognizerObj->GetLocalHandle();
+}
+
 Local<panda::ObjectRef> CommonBridge::CreateFingerInfo(EcmaVM* vm, const FingerInfo& fingerInfo)
 {
     const OHOS::Ace::Offset& globalLocation = fingerInfo.globalLocation_;
@@ -6822,6 +6840,110 @@ ArkUINativeModuleValue CommonBridge::ResetOnGestureJudgeBegin(ArkUIRuntimeCallIn
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     ViewAbstract::SetOnGestureJudgeBegin(frameNode, nullptr);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetOnGestureRecognizerJudgeBegin(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
+    auto obj = secondeArg->ToObject(vm);
+    auto containerId = Container::CurrentId();
+    panda::Local<panda::FunctionRef> func = obj;
+    auto onGestureRecognizerJudgeBegin =
+        [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode), containerId](
+            const std::shared_ptr<BaseGestureEvent>& info, const RefPtr<NGGestureRecognizer>& current,
+            const std::list<RefPtr<NGGestureRecognizer>>& others) -> GestureJudgeResult {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        ContainerScope scope(containerId);
+        PipelineContext::SetCallBackNode(node);
+        auto gestureInfo = current->GetGestureInfo();
+        CHECK_NULL_RETURN(gestureInfo, GestureJudgeResult::CONTINUE);
+        auto gestureEventObj = CreateGestureEventInfo(vm, gestureInfo->GetType(), info);
+        auto currentObj = CreateRecognizerObject(vm, current);
+        auto othersArr = panda::ArrayRef::New(vm);
+        uint32_t othersIdx = 0;
+        for (const auto& item : others) {
+            auto othersObj = CreateRecognizerObject(vm, item);
+            othersArr->SetValueAt(vm, othersArr, othersIdx++, othersObj);
+        }
+        panda::Local<panda::JSValueRef> params[3] = { gestureEventObj, currentObj, othersArr };
+        auto returnValue = GestureJudgeResult::CONTINUE;
+        auto value = func->Call(vm, func.ToLocal(), params, 3);
+        if (value->IsNumber()) {
+            returnValue = static_cast<GestureJudgeResult>(value->ToNumber(vm)->Value());
+        }
+        return returnValue;
+    };
+    NG::ViewAbstract::SetOnGestureRecognizerJudgeBegin(frameNode, std::move(onGestureRecognizerJudgeBegin));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetOnGestureRecognizerJudgeBegin(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    ViewAbstract::SetOnGestureRecognizerJudgeBegin(frameNode, nullptr);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetShouldBuiltInRecognizerParallelWith(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
+    auto obj = secondeArg->ToObject(vm);
+    auto containerId = Container::CurrentId();
+    panda::Local<panda::FunctionRef> func = obj;
+    auto shouldBuiltInRecognizerParallelWithFunc =
+        [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode), containerId](
+            const RefPtr<NG::NGGestureRecognizer>& current,
+            const std::vector<RefPtr<NG::NGGestureRecognizer>>& others) -> RefPtr<NG::NGGestureRecognizer> {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        ContainerScope scope(containerId);
+        PipelineContext::SetCallBackNode(node);
+        auto currentObj = CreateRecognizerObject(vm, current);
+        auto othersArr = panda::ArrayRef::New(vm);
+        uint32_t othersIdx = 0;
+        for (const auto& item : others) {
+            auto othersObj = CreateRecognizerObject(vm, item);
+            othersArr->SetValueAt(vm, othersArr, othersIdx++, othersObj);
+        }
+        panda::Local<panda::JSValueRef> params[2] = { currentObj, othersArr };
+        auto value = func->Call(vm, func.ToLocal(), params, 2);
+        if (!value->IsObject(vm)) {
+            return nullptr;
+        }
+        RefPtr<NG::NGGestureRecognizer> returnValue = nullptr;
+        auto valueObj = value->ToObject(vm);
+        valueObj->Freeze(vm);
+        auto jsObj = JSRef<JSObject>(JSObject(valueObj));
+        returnValue = Referenced::Claim(jsObj->Unwrap<JSGestureRecognizer>())->GetRecognizer().Upgrade();
+        return returnValue;
+    };
+    NG::ViewAbstract::SetShouldBuiltInRecognizerParallelWith(
+        frameNode, std::move(shouldBuiltInRecognizerParallelWithFunc));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetShouldBuiltInRecognizerParallelWith(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    ViewAbstract::SetShouldBuiltInRecognizerParallelWith(frameNode, nullptr);
     return panda::JSValueRef::Undefined(vm);
 }
 

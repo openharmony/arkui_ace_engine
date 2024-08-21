@@ -192,7 +192,7 @@ HWTEST_F(ScrollableEventTestNg, ScrollableEventOnCollectTouchTargetTest003, Test
      * @tc.expected: Invoke InitializeScrollable. when scrollableEvents_ is empty return directly.
      */
     TouchTestResult result;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     scrollableActuator->CollectTouchTarget(COORDINATE_OFFSET, SCROLL_RESTRICT, eventHub->CreateGetEventTargetImpl(),
         result, LOCAL_POINT, frameNode, nullptr, responseLinkResult);
@@ -291,11 +291,11 @@ HWTEST_F(ScrollableEventTestNg, ScrollableEventOnCollectTouchTargetTest004, Test
     scrollableEvent->SetBarCollectTouchTargetCallback(
         [](const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result,
             const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-            TouchTestResult& responseLinkResult) { return true; });
+            ResponseLinkResult& responseLinkResult) { return true; });
     scrollableActuator->AddScrollableEvent(scrollableEvent);
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     TouchTestResult result;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     scrollableActuator->CollectTouchTarget(COORDINATE_OFFSET, SCROLL_RESTRICT, eventHub->CreateGetEventTargetImpl(),
         result, LOCAL_POINT, frameNode, nullptr, responseLinkResult);
     EXPECT_FALSE(results);
@@ -323,11 +323,11 @@ HWTEST_F(ScrollableEventTestNg, ScrollableEventOnCollectTouchTargetTest005, Test
     scrollableEvent->SetBarCollectClickAndLongPressTargetCallback(
         [](const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result,
             const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-            TouchTestResult& responseLinkResult) { return true; });
+            ResponseLinkResult& responseLinkResult) { return true; });
     scrollableActuator->AddScrollableEvent(scrollableEvent);
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     TouchTestResult result;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     scrollableActuator->CollectTouchTarget(COORDINATE_OFFSET, SCROLL_RESTRICT, eventHub->CreateGetEventTargetImpl(),
         result, LOCAL_POINT, frameNode, nullptr, responseLinkResult);
     EXPECT_FALSE(results);
@@ -356,7 +356,7 @@ HWTEST_F(ScrollableEventTestNg, ScrollableEventOnCollectTouchTargetTest006, Test
     scrollableActuator->AddScrollableEvent(scrollableEvent);
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     TouchTestResult result;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     scrollableActuator->CollectTouchTarget(COORDINATE_OFFSET, SCROLL_RESTRICT, eventHub->CreateGetEventTargetImpl(),
         result, LOCAL_POINT, frameNode, nullptr, responseLinkResult);
     scrollableEvent->SetEnabled(true);

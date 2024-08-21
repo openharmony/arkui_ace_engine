@@ -166,7 +166,7 @@ public:
 
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-        TouchTestResult& responseLinkResult);
+        ResponseLinkResult& responseLinkResult);
 
     float GetMainOffset(const Offset& offset) const
     {
@@ -198,10 +198,10 @@ public:
     void StartLongPressEventTimer();
     void OnCollectClickTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-        TouchTestResult& responseLinkResult);
+        ResponseLinkResult& responseLinkResult);
     void OnCollectLongPressTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-        TouchTestResult& responseLinkResult);
+        ResponseLinkResult& responseLinkResult);
     void SetScrollBar(DisplayMode displayMode);
     void UpdateScrollBarOffset();
     void HandleScrollBarOutBoundary(float scrollBarOutBoundaryExtent);
