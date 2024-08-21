@@ -718,7 +718,7 @@ class NodeController {
  * limitations under the License.
  */
 class FrameNode {
-    constructor(uiContext, type) {
+    constructor(uiContext, type, options) {
         if (uiContext === undefined) {
             throw Error('Node constructor error, param uiContext error');
         }
@@ -746,7 +746,7 @@ class FrameNode {
             result = getUINativeModule().frameNode.createFrameNode(this);
         }
         else {
-            result = getUINativeModule().frameNode.createTypedFrameNode(this, type);
+            result = getUINativeModule().frameNode.createTypedFrameNode(this, type, options);
         }
         __JSScopeUtil__.restoreInstanceId();
         this._nativeRef = result?.nativeStrongRef;
@@ -1250,8 +1250,8 @@ class FrameNodeUtils {
     }
 }
 class TypedFrameNode extends FrameNode {
-    constructor(uiContext, type, attrCreator) {
-        super(uiContext, type);
+    constructor(uiContext, type, attrCreator, options) {
+        super(uiContext, type, options);
         this.attrCreator_ = attrCreator;
     }
     initialize(...args) {
@@ -1394,10 +1394,10 @@ const __creatorMap__ = new Map([
                 return new ArkButtonComponent(node, type);
             });
         }],
-    ['XComponent', (context) => {
+    ['XComponent', (context, options) => {
             return new TypedFrameNode(context, 'XComponent', (node, type) => {
                 return new ArkXComponentComponent(node, type);
-            });
+            }, options);
         }],
     ['ListItemGroup', (context) => {
             return new TypedFrameNode(context, 'ListItemGroup', (node, type) => {
@@ -1416,12 +1416,12 @@ const __creatorMap__ = new Map([
         }],
 ]);
 class typeNode {
-    static createNode(context, type) {
+    static createNode(context, type, options) {
         let creator = __creatorMap__.get(type);
         if (creator === undefined) {
             return undefined;
         }
-        return creator(context);
+        return creator(context, options);
     }
 }
 /*

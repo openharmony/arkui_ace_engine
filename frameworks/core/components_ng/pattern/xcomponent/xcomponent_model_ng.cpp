@@ -114,11 +114,37 @@ void XComponentModelNG::SetOnLoad(LoadEvent&& onLoad)
     eventHub->SetOnLoad(std::move(onLoad));
 }
 
+void XComponentModelNG::SetOnLoad(FrameNode* frameNode, LoadEvent&& onLoad)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::Claim(frameNode);
+    auto type = GetTypeImpl(node);
+    if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
+        return;
+    }
+    auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnLoad(std::move(onLoad));
+}
+
 void XComponentModelNG::SetOnDestroy(DestroyEvent&& onDestroy)
 {
     auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(frameNode);
     auto type = GetTypeImpl(frameNode);
+    if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
+        return;
+    }
+    auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDestroy(std::move(onDestroy));
+}
+
+void XComponentModelNG::SetOnDestroy(FrameNode* frameNode, LoadEvent&& onDestroy)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::Claim(frameNode);
+    auto type = GetTypeImpl(node);
     if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
         return;
     }
@@ -230,6 +256,18 @@ RefPtr<FrameNode> XComponentModelNG::CreateFrameNode(int32_t nodeId, const std::
     const std::string& libraryname)
 {
     std::shared_ptr<InnerXComponentController> controller = nullptr;
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::XCOMPONENT_ETS_TAG, nodeId, AceType::MakeRefPtr<XComponentPattern>(id, type, libraryname, controller));
+    auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
+    if (layoutProperty) {
+        layoutProperty->UpdateXComponentType(type);
+    }
+    return frameNode;
+}
+
+RefPtr<FrameNode> XComponentModelNG::CreateFrameNode(int32_t nodeId, const std::string& id, XComponentType type,
+    const std::string& libraryname, const std::shared_ptr<InnerXComponentController> controller)
+{
     auto frameNode = FrameNode::CreateFrameNode(
         V2::XCOMPONENT_ETS_TAG, nodeId, AceType::MakeRefPtr<XComponentPattern>(id, type, libraryname, controller));
     auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();

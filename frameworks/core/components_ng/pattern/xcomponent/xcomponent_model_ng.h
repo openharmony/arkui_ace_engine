@@ -20,9 +20,18 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 
 namespace OHOS::Ace::NG {
 class FrameNode;
+
+class ArkUI_XComponent_Params final : public ArkUI_Params {
+public:
+    std::string id;
+    XComponentType type;
+    std::string libraryName;
+    std::shared_ptr<InnerXComponentController> controller;
+};
 
 class ACE_EXPORT XComponentModelNG : public OHOS::Ace::XComponentModel {
 public:
@@ -51,6 +60,8 @@ public:
     static XComponentType GetType(FrameNode* frameNode);
     static RefPtr<FrameNode> CreateFrameNode(
         int32_t nodeId, const std::string& id, XComponentType type, const std::string& libraryname);
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& id, XComponentType type,
+        const std::string& libraryname, const std::shared_ptr<InnerXComponentController> controller);
     static void SetXComponentId(FrameNode* frameNode, const std::string& id);
     static void SetXComponentType(FrameNode* frameNode, XComponentType type);
     static void SetXComponentSurfaceSize(FrameNode* frameNode, uint32_t width, uint32_t height);
@@ -64,6 +75,8 @@ public:
     static void SetControllerOnDestroyed(FrameNode* frameNode, SurfaceDestroyedEvent&& onDestroyed);
     static void SetDetachCallback(FrameNode* frameNode, DetachCallback&& onDetach);
     static void SetImageAIOptions(FrameNode* frameNode, void* options);
+    static void SetOnLoad(FrameNode* frameNode, LoadEvent&& onLoad);
+    static void SetOnDestroy(FrameNode* frameNode, DestroyEvent&& onDestroy);
 
 private:
     static XComponentType GetTypeImpl(const RefPtr<FrameNode>& frameNode);
