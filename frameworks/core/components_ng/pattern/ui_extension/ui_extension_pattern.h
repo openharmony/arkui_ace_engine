@@ -255,6 +255,7 @@ private:
     bool hasMountToParent_ = false;
     bool needReNotifyForeground_ = false;
     SessionType sessionType_ = SessionType::UI_EXTENSION_ABILITY;
+    UIExtensionUsage usage_ = UIExtensionUsage::EMBEDDED;
 
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 };
