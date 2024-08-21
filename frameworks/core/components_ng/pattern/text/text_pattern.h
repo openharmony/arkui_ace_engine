@@ -163,6 +163,7 @@ public:
     void DumpAdvanceInfo() override;
     void DumpInfo() override;
     void DumpScaleInfo();
+    void DumpTextEngineInfo();
 
     TextSelector GetTextSelector() const
     {
@@ -659,6 +660,11 @@ public:
         paintInfo_ = area + paintOffset.ToString();
     }
 
+    void DumpRecord(const std::string& record)
+    {
+        frameRecord_.append(record);
+    }
+
     void SetIsUserSetResponseRegion(bool isUserSetResponseRegion)
     {
         isUserSetResponseRegion_ = isUserSetResponseRegion;
@@ -777,6 +783,7 @@ protected:
 
     std::string textForDisplay_;
     std::string paintInfo_ = "NA";
+    std::string frameRecord_ = "NA";
     std::optional<TextStyle> textStyle_;
     std::list<RefPtr<SpanItem>> spans_;
     mutable std::list<RefPtr<UINode>> childNodes_;
