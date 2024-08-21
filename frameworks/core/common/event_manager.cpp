@@ -124,10 +124,9 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
         }
     }
     SetHittedFrameNode(hitTestRecognizers);
+    refereeNG_->AddGestureToScope(touchPoint.id, hitTestResult);
     touchTestResults_[touchPoint.id] = std::move(hitTestResult);
 
-    const auto& touchTestResult = touchTestResults_.find(touchPoint.id);
-    refereeNG_->AddGestureToScope(touchPoint.id, touchTestResult->second);
     int64_t currentEventTime = static_cast<int64_t>(touchPoint.time.time_since_epoch().count());
     int64_t lastEventTime = static_cast<int64_t>(lastEventTime_.time_since_epoch().count());
     int64_t duration = static_cast<int64_t>((currentEventTime - lastEventTime) / TRANSLATE_NS_TO_MS);
