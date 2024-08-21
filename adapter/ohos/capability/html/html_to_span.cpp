@@ -897,7 +897,8 @@ void HtmlToSpan::ToImageOptions(const std::map<std::string, std::string>& styles
     }
 }
 
-void HtmlToSpan::ToImage(xmlNodePtr node, size_t len, size_t& pos, std::vector<SpanInfo>& spanInfos)
+void HtmlToSpan::ToImage(xmlNodePtr node, size_t len, size_t& pos, std::vector<SpanInfo>& spanInfos,
+    bool isProcessImageOptions)
 {
     std::map<std::string, std::string> styleMap;
     xmlAttrPtr curNode = node->properties;
@@ -909,7 +910,9 @@ void HtmlToSpan::ToImage(xmlNodePtr node, size_t len, size_t& pos, std::vector<S
     }
 
     ImageSpanOptions option;
-    ToImageOptions(styleMap, option);
+    if (isProcessImageOptions) {
+        ToImageOptions(styleMap, option);
+    }
 
     SpanInfo info;
     info.type = HtmlType::IMAGE;
@@ -920,7 +923,8 @@ void HtmlToSpan::ToImage(xmlNodePtr node, size_t len, size_t& pos, std::vector<S
 }
 
 void HtmlToSpan::ToSpan(
-    xmlNodePtr curNode, size_t& pos, std::string& allContent, std::vector<SpanInfo>& spanInfos)
+    xmlNodePtr curNode, size_t& pos, std::string& allContent, std::vector<SpanInfo>& spanInfos,
+    bool isNeedLoadPixelMap)
 {
     size_t curNodeLen = 0;
     if (curNode->content) {
@@ -939,7 +943,7 @@ void HtmlToSpan::ToSpan(
             ToParagraphSpan(curNode, childPos - pos, pos, spanInfos);
         } else if (htmlTag == "img") {
             childPos++;
-            ToImage(curNode, childPos - pos, pos, spanInfos);
+            ToImage(curNode, childPos - pos, pos, spanInfos, isNeedLoadPixelMap);
         } else {
             ToTextSpan(htmlTag, curNode, childPos - pos, pos, spanInfos);
         }
@@ -948,12 +952,12 @@ void HtmlToSpan::ToSpan(
 }
 
 void HtmlToSpan::ParaseHtmlToSpanInfo(
-    xmlNodePtr node, size_t& pos, std::string& allContent, std::vector<SpanInfo>& spanInfos)
+    xmlNodePtr node, size_t& pos, std::string& allContent, std::vector<SpanInfo>& spanInfos, bool isNeedLoadPixelMap)
 {
     xmlNodePtr curNode = nullptr;
     for (curNode = node; curNode; curNode = curNode->next) {
         if (curNode->type == XML_ELEMENT_NODE || curNode->type == XML_TEXT_NODE) {
-            ToSpan(curNode, pos, allContent, spanInfos);
+            ToSpan(curNode, pos, allContent, spanInfos, isNeedLoadPixelMap);
         }
     }
 }
@@ -1095,7 +1099,7 @@ RefPtr<MutableSpanString> HtmlToSpan::GenerateSpans(
     return mutableSpan;
 }
 
-RefPtr<MutableSpanString> HtmlToSpan::ToSpanString(const std::string& html)
+RefPtr<MutableSpanString> HtmlToSpan::ToSpanString(const std::string& html, const bool isNeedLoadPixelMap)
 {
     htmlDocPtr doc = htmlReadMemory(html.c_str(), html.length(), nullptr, "UTF-8", 0);
     if (doc == nullptr) {
@@ -1115,7 +1119,7 @@ RefPtr<MutableSpanString> HtmlToSpan::ToSpanString(const std::string& html)
     size_t pos = 0;
     std::string content;
     std::vector<SpanInfo> spanInfos;
-    ParaseHtmlToSpanInfo(root, pos, content, spanInfos);
+    ParaseHtmlToSpanInfo(root, pos, content, spanInfos, isNeedLoadPixelMap);
     AfterProcSpanInfos(spanInfos);
     PrintSpanInfos(spanInfos);
     return GenerateSpans(content, spanInfos);
