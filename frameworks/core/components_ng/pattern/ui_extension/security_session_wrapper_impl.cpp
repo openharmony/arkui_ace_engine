@@ -640,10 +640,12 @@ bool SecuritySessionWrapperImpl::NotifyOccupiedAreaChangeInfo(
         int32_t spaceWindow = std::max(curWindow.Bottom() - displayArea_.Bottom(), .0);
         keyboardHeight = static_cast<int32_t>(std::max(keyboardHeight - spaceWindow, 0));
     }
-    info->rect_.height_ = static_cast<uint32_t>(keyboardHeight);
+    sptr<Rosen::OccupiedAreaChangeInfo> newInfo = new Rosen::OccupiedAreaChangeInfo(
+        info->type_, info->rect_, info->safeHeight_, info->textFieldPositionY_, info->textFieldHeight_);
+    newInfo->rect_.height_ = static_cast<uint32_t>(keyboardHeight);
     PLATFORM_LOGD("The occcupied area with 'keyboardHeight = %{public}d' is notified to the provider.",
         keyboardHeight);
-    session_->NotifyOccupiedAreaChangeInfo(info);
+    session_->NotifyOccupiedAreaChangeInfo(newInfo);
     return true;
 }
 
