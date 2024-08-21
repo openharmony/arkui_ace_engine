@@ -8899,7 +8899,7 @@ void RichEditorPattern::GetDeletedSpan(RichEditorChangeValue& changeValue, int32
             changeValue.SetRichEditorOriginalSpans(it);
         } else if (it.GetType() == SpanResultType::SYMBOL && textSelector_.SelectNothing() &&
             previewTextRecord_.previewContent.empty()) {
-            int32_t symbolStart = innerPosition - 1;
+            int32_t symbolStart = it.GetSpanRangeStart();
             changeValue.SetRichEditorOriginalSpans(it);
             changeValue.SetRangeBefore({ symbolStart, symbolStart + SYMBOL_SPAN_LENGTH });
             changeValue.SetRangeAfter({ symbolStart, symbolStart });
@@ -9935,6 +9935,9 @@ void RichEditorPattern::TripleClickSection(GestureEvent& info, int32_t start, in
         showSelect_ = true;
         RequestKeyboard(false, true, true);
         HandleOnEditChanged(true);
+        SetCaretPosition(end);
+        caretAffinityPolicy_ = CaretAffinityPolicy::UPSTREAM_FIRST;
+        MoveCaretToContentRect();
         CalculateHandleOffsetAndShowOverlay();
         selectOverlay_->ProcessOverlay({ .menuIsShow = !selectOverlay_->GetIsHandleMoving(), .animation = true });
     }
