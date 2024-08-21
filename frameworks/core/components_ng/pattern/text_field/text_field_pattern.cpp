@@ -1101,6 +1101,9 @@ void TextFieldPattern::InitDisableColor()
         underlineWidth_ = HasFocus() ? TYPING_UNDERLINE_WIDTH : UNDERLINE_WIDTH;
         Color underlineColor = HasFocus() ? userUnderlineColor_.typing.value_or(theme->GetUnderlineTypingColor())
                                           : userUnderlineColor_.normal.value_or(theme->GetUnderlineColor());
+        if (IsShowError()) {
+            underlineColor = userUnderlineColor_.error.value_or(theme->GetErrorUnderlineColor());
+        }
         if (userUnderlineColor_.disable) {
             underlineColor_ = IsDisabled() ? userUnderlineColor_.disable.value() : underlineColor;
         } else {
@@ -2634,6 +2637,9 @@ void TextFieldPattern::HandleCountStyle()
 
 void TextFieldPattern::ProcessUnderlineColorOnModifierDone()
 {
+    if (IsShowError()) {
+        return;
+    }
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     auto inputValue = layoutProperty->GetSetCounterValue(DEFAULT_MODE);
     if (inputValue == ILLEGAL_VALUE) {
@@ -5874,8 +5880,12 @@ void TextFieldPattern::ApplyUnderlineTheme()
     SetThemeAttr();
     auto theme = GetTheme();
     CHECK_NULL_VOID(theme);
-    underlineColor_ = HasFocus() ? userUnderlineColor_.typing.value_or(theme->GetUnderlineTypingColor())
-                                 : userUnderlineColor_.normal.value_or(theme->GetUnderlineColor());
+    if (IsShowError()) {
+        underlineColor_ = userUnderlineColor_.error.value_or(theme->GetErrorUnderlineColor());
+    } else {
+        underlineColor_ = HasFocus() ? userUnderlineColor_.typing.value_or(theme->GetUnderlineTypingColor())
+            : userUnderlineColor_.normal.value_or(theme->GetUnderlineColor());
+    }
     underlineWidth_ = HasFocus() ? TYPING_UNDERLINE_WIDTH : UNDERLINE_WIDTH;
 }
 
