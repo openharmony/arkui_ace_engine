@@ -628,7 +628,7 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, SwiperOverLengthIndicatorGetCo
      * @tc.steps: step1. Set OverlengthDotIndicatorPaintMethod and parameters
      * @tc.expected: parameters set successfully
      */
-    Create([](SwiperModelNG model) {});
+    CreateWithItem([](SwiperModelNG model) {});
     ASSERT_NE(indicatorNode_, nullptr);
     auto modifier = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
     auto paintMethod = AceType::MakeRefPtr<OverlengthDotIndicatorPaintMethod>(modifier);

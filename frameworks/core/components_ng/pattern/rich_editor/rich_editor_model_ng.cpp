@@ -460,4 +460,10 @@ void RichEditorModelNG::SetRequestKeyboardOnFocus(FrameNode* frameNode, bool nee
     richEditorPattern->SetRequestKeyboardOnFocus(needToRequest);
 }
 
+void RichEditorModelNG::SetEnableHapticFeedback(bool isEnabled)
+{
+    auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetEnableHapticFeedback(isEnabled);
+}
 } // namespace OHOS::Ace::NG

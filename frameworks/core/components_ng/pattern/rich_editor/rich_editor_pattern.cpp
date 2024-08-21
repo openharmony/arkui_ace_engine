@@ -44,6 +44,7 @@
 #include "core/common/container_scope.h"
 #include "core/common/ime/text_input_client.h"
 #include "core/common/stylus/stylus_detector_mgr.h"
+#include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/base/inspector_filter.h"
@@ -3080,6 +3081,9 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
     bool isLongPressSelectArea = BetweenSelection(info.GetGlobalLocation()) && !isDoubleClick;
     HandleDraggableFlag(isLongPressSelectArea);
     bool isLongPressByMouse = isMousePressed_ && caretUpdateType_== CaretUpdateType::LONG_PRESSED;
+    if (isLongPressSelectArea && !isLongPressByMouse) {
+        StartVibratorByLongPress();
+    }
     bool isInterceptEvent = isLongPressSelectArea || isLongPressByMouse;
     if (isInterceptEvent) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "intercept when longPressSelectArea=%{public}d longPressByMouse=%{public}d",
@@ -3131,6 +3135,7 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<
             CloseSelectOverlay();
             ResetSelection();
         }
+        StartVibratorByLongPress();
         editingLongPress_ = isEditing_;
         previewLongPress_ = !isEditing_;
     }
@@ -3156,6 +3161,12 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<
     } else {
         StopTwinkling();
     }
+}
+
+void RichEditorPattern::StartVibratorByLongPress()
+{
+    CHECK_NULL_VOID(isEnableHapticFeedback_);
+    VibratorUtils::StartVibraFeedback("longPress.light");
 }
 
 bool RichEditorPattern::HandleUserLongPressEvent(GestureEvent& info)
@@ -6041,13 +6052,7 @@ void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
         isOnlyImageDrag_ = false;
         HandleTouchUp();
     } else if (touchType == TouchType::MOVE) {
-        auto touchGlobalOffset = info.GetTouches().front().GetGlobalLocation();
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto offsetInScreen = host->GetOffsetInScreen();
-        auto localOffset =
-            Offset(touchGlobalOffset.GetX() - offsetInScreen.GetX(), touchGlobalOffset.GetY() - offsetInScreen.GetY());
-        HandleTouchMove(localOffset);
+        HandleTouchMove(info.GetTouches().front().GetLocalLocation());
     }
 }
 
@@ -6135,15 +6140,25 @@ void RichEditorPattern::UpdateCaretByTouchMove(const Offset& offset)
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Close select overlay while dragging caret");
         selectOverlay_->CloseOverlay(false, CloseReason::CLOSE_REASON_NORMAL);
     }
-    Offset textOffset = ConvertTouchOffsetToTextOffset(offset);
+    auto caretMoveOffset =
+        offset - Offset(0, host->GetOffsetInScreen().GetY() - moveCaretState_.touchDownPaintOffset.GetY());
+    Offset textOffset = ConvertTouchOffsetToTextOffset(caretMoveOffset);
     auto position = paragraphs_.GetIndex(textOffset);
+    auto preCaretPosition = caretPosition_;
     SetCaretPosition(position);
+    StartVibratorByIndexChange(caretPosition_, preCaretPosition);
     CalcAndRecordLastClickCaretInfo(textOffset);
-    auto localOffset = OffsetF(offset.GetX(), offset.GetY());
+    auto localOffset = OffsetF(caretMoveOffset.GetX(), caretMoveOffset.GetY());
     if (magnifierController_) {
         magnifierController_->SetLocalOffset(localOffset);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void RichEditorPattern::StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex)
+{
+    CHECK_NULL_VOID(isEnableHapticFeedback_ && (currentIndex != preIndex));
+    VibratorUtils::StartVibraFeedback("slide");
 }
 
 bool RichEditorPattern::IsScrollBarPressed(const MouseInfo& info)
@@ -6904,7 +6919,9 @@ void RichEditorPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight
         UpdateOriginIsMenuShow(false);
     }
     UpdateCaretInfoToController();
-    if (magnifierController_->GetShowMagnifier()) {
+    previewLongPress_ = false;
+    editingLongPress_ = false;
+    if (magnifierController_) {
         magnifierController_->RemoveMagnifierFrameNode();
     }
 }
@@ -7279,6 +7296,25 @@ TextLineMetrics RichEditorPattern::GetLineMetrics(int32_t lineNumber)
     lineMetrics.y += textRect.GetY();
     lineMetrics.baseline += textRect.GetY();
     return lineMetrics;
+}
+
+std::vector<ParagraphManager::TextBox> RichEditorPattern::GetRectsForRange(
+    int32_t start, int32_t end, RectHeightStyle heightStyle, RectWidthStyle widthStyle)
+{
+    if (start < 0 || end < 0 || start > end) {
+        return {};
+    }
+    std::vector<ParagraphManager::TextBox> textBoxes =
+        paragraphs_.GetRectsForRange(start, end, heightStyle, widthStyle);
+    const auto& textRect = richTextRect_;
+    std::vector<ParagraphManager::TextBox> adjustedTextBoxes;
+    for (auto& textBox : textBoxes) {
+        ParagraphManager::TextBox adjustedTextBox = textBox;
+        adjustedTextBox.rect_.SetLeft(textBox.rect_.Left() + textRect.Left());
+        adjustedTextBox.rect_.SetTop(textBox.rect_.Top() + textRect.Top());
+        adjustedTextBoxes.push_back(adjustedTextBox);
+    }
+    return adjustedTextBoxes;
 }
 
 float RichEditorPattern::GetLetterSpacing() const

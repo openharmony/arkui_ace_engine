@@ -798,7 +798,7 @@ public:
         return rectFromOrigin_;
     }
 
-    void DumpFocusTree(int32_t depth);
+    void DumpFocusTree(int32_t depth, bool hasJson = false);
     void DumpFocusNodeTree(int32_t depth);
     void DumpFocusScopeTree(int32_t depth);
 
@@ -1092,6 +1092,8 @@ private:
 
     bool RequestFocusImmediatelyInner(bool isJudgeRootTree = false);
 
+    void DumpFocusNodeTreeInJson(int32_t depth);
+    void DumpFocusScopeTreeInJson(int32_t depth);
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;
     OnBlurReasonFunc onBlurReasonInternal_;

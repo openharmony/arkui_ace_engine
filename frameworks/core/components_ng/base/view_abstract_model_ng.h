@@ -1248,6 +1248,9 @@ public:
     void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, const MenuParam& menuParam,
         std::function<void()>& previewBuildFunc) override;
 
+    void BindContextMenu(const RefPtr<FrameNode>& targetNode, ResponseType type, std::function<void()>& buildFunc,
+        const NG::MenuParam& menuParam, std::function<void()>& previewBuildFunc) override;
+
     void BindDragWithContextMenuParams(const NG::MenuParam& menuParam) override;
 
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,

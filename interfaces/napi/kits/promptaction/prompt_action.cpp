@@ -316,7 +316,6 @@ void GetToastShadow(napi_env env, napi_value shadowNApi, std::optional<Shadow>& 
     Shadow shadowProps;
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, shadowNApi, &valueType);
-    GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadowProps);
     if (valueType == napi_number) {
         int32_t num = 0;
         napi_get_value_int32(env, shadowNApi, &num);
@@ -354,6 +353,8 @@ void GetToastShadow(napi_env env, napi_value shadowNApi, std::optional<Shadow>& 
             }
         }
         GetToastObjectShadow(env, shadowNApi, shadowProps);
+    } else {
+        GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadowProps);
     }
     shadow = shadowProps;
 }

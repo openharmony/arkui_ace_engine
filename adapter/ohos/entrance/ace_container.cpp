@@ -2518,16 +2518,15 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     CHECK_NULL_VOID(themeManager);
     auto resConfig = GetResourceConfiguration();
     if (!parsedConfig.colorMode.empty()) {
-        if (parsedConfig.colorMode == "dark" && SystemProperties::GetColorMode() != ColorMode::DARK) {
+        configurationChange.colorModeUpdate = true;
+        if (parsedConfig.colorMode == "dark") {
             SystemProperties::SetColorMode(ColorMode::DARK);
             SetColorScheme(ColorScheme::SCHEME_DARK);
             resConfig.SetColorMode(ColorMode::DARK);
-            configurationChange.colorModeUpdate = true;
-        } else if (parsedConfig.colorMode == "light" && SystemProperties::GetColorMode() != ColorMode::LIGHT) {
+        } else {
             SystemProperties::SetColorMode(ColorMode::LIGHT);
             SetColorScheme(ColorScheme::SCHEME_LIGHT);
             resConfig.SetColorMode(ColorMode::LIGHT);
-            configurationChange.colorModeUpdate = true;
         }
     }
     if (!parsedConfig.deviceAccess.empty()) {

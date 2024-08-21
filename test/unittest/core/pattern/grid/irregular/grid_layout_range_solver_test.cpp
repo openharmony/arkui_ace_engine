@@ -681,4 +681,34 @@ HWTEST_F(GridLayoutRangeTest, Cache002, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 23), 1020.0f);
     EXPECT_EQ(GetChildY(frameNode_, 24), 1230.0f);
 }
+
+/**
+ * @tc.name: Drag001
+ * @tc.desc: Test grid dragged item
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutRangeTest, Drag001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(GetOptionDemo14());
+    model.SetColumnsGap(Dimension { 10.0f });
+    model.SetRowsGap(Dimension { 20.0f });
+    model.SetEditable(true);
+    constexpr float itemHeight = 300.0f;
+    CreateFixedHeightItems(22, itemHeight);
+    CreateFixedHeightItems(1, itemHeight * 5 + 100.0f);
+    CreateFixedHeightItems(77, itemHeight);
+    CreateDone(frameNode_);
+
+    pattern_->ScrollToIndex(21, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 2)->IsActive());
+    EXPECT_EQ(GetChildY(frameNode_, 2), 640.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 24), 640.0f);
+    GestureEvent event;
+    event.SetGlobalPoint(Point(5.0f, 650.0f));
+    eventHub_->HandleOnItemDragStart(event);
+    EXPECT_EQ(eventHub_->draggedIndex_, 24);
+}
 } // namespace OHOS::Ace::NG

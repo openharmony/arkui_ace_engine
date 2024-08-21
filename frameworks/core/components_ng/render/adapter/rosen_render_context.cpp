@@ -2602,6 +2602,33 @@ void RosenRenderContext::PaintAccessibilityFocus()
     PaintFocusState(frameRect, focusPaddingVp, paintColor, paintWidth, true);
 }
 
+void RosenRenderContext::UpdateAccessibilityRoundRect()
+{
+    CHECK_NULL_VOID(accessibilityFocusStateModifier_);
+    CHECK_NULL_VOID(rsNode_);
+    constexpr double ACCESSIBILITY_FOCUS_WIDTH = 4.0;
+    double lineWidth = ACCESSIBILITY_FOCUS_WIDTH * PipelineBase::GetCurrentDensity();
+    Dimension paintWidth(lineWidth, DimensionUnit::PX);
+    Dimension focusPaddingVp = Dimension(0.0, DimensionUnit::VP);
+
+    auto paintWidthPx = static_cast<float>(paintWidth.ConvertToPx());
+    auto borderPaddingPx = static_cast<float>(focusPaddingVp.ConvertToPx());
+
+    auto node = GetHost();
+    auto nodeWidth = node->GetGeometryNode()->GetFrameSize().Width();
+    auto nodeHeight = node->GetGeometryNode()->GetFrameSize().Height();
+
+
+    double noGreenBorderWidth = (nodeWidth - (2 * lineWidth)) > 0 ? (nodeWidth - (2 * lineWidth)) : 0;
+    double noGreenBorderHeight = (nodeHeight - (2 * lineWidth)) > 0 ? (nodeHeight - (2 * lineWidth)) : 0;
+
+    RoundRect frameRect;
+    std::shared_ptr<FocusStateModifier> modifier;
+    modifier = accessibilityFocusStateModifier_;
+    frameRect.SetRect(RectF(paintWidthPx / 2, paintWidthPx / 2, noGreenBorderWidth + 2 * borderPaddingPx + paintWidthPx,
+        noGreenBorderHeight + 2 * borderPaddingPx + paintWidthPx));
+    modifier->SetRoundRect(frameRect, paintWidthPx);
+}
 void RosenRenderContext::ClearAccessibilityFocus()
 {
     CHECK_NULL_VOID(rsNode_);

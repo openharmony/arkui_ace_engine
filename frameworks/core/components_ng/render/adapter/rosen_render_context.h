@@ -307,6 +307,8 @@ public:
 
     void PaintAccessibilityFocus() override;
 
+    void UpdateAccessibilityRoundRect() override;
+
     void ClearAccessibilityFocus() override;
 
     void OnAccessibilityFocusUpdate(

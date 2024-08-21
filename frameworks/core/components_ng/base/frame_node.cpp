@@ -1146,9 +1146,11 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
 
 void FrameNode::NotifyConfigurationChangeNdk(const ConfigurationChange& configurationChange)
 {
-    if (ndkColorModeUpdateCallback_ && configurationChange.colorModeUpdate) {
+    if (ndkColorModeUpdateCallback_ && configurationChange.colorModeUpdate &&
+        colorMode_ != SystemProperties::GetColorMode()) {
         auto colorModeChange = ndkColorModeUpdateCallback_;
         colorModeChange(SystemProperties::GetColorMode() == ColorMode::DARK);
+        colorMode_ = SystemProperties::GetColorMode();
     }
 
     if (ndkFontUpdateCallback_ && (configurationChange.fontScaleUpdate || configurationChange.fontWeightScaleUpdate)) {
@@ -3131,7 +3133,7 @@ void FrameNode::OnAccessibilityEvent(
         event.type = eventType;
         event.windowContentChangeTypes = windowsContentChangeType;
         event.nodeId = GetAccessibilityId();
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->SendEventToAccessibility(event);
     }
@@ -3271,6 +3273,9 @@ RefPtr<FrameNode> FrameNode::FindChildByPosition(float x, float y)
     std::list<RefPtr<FrameNode>> children;
     GenerateOneDepthAllFrame(children);
     for (const auto& child : children) {
+        if (!child->IsActive()) {
+            continue;
+        }
         auto geometryNode = child->GetGeometryNode();
         if (!geometryNode) {
             continue;
@@ -3873,6 +3878,7 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
         MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
     }
     layoutAlgorithm_.Reset();
+    renderContext_->UpdateAccessibilityRoundRect();
     ProcessAccessibilityVirtualNode();
     auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, false);

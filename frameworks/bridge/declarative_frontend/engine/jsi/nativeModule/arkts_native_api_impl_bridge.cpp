@@ -321,7 +321,7 @@ ArkUINativeModuleValue ArkUINativeModule::RequireDynamicSyncScene(ArkUIRuntimeCa
     }
 
     auto sceneTag = sceneNode->GetTag();
-    auto nativeRef = NativeUtilsBridge::CreateStrongRef(vm, sceneNode);
+    auto nativeRef = NativeUtilsBridge::CreateWeakRef(vm, sceneNode);
     const char* keys[] = { "nativeRef", "tag" };
     Local<JSValueRef> values[] = { nativeRef, panda::StringRef::NewFromUtf8(vm, sceneTag.c_str()) };
     return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
@@ -1288,6 +1288,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetOnClick));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnClick"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetOnClick));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setResponseRegion"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetResponseRegion));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetResponseRegion"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetResponseRegion));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "text"), text);
 
     auto search = panda::ObjectRef::New(vm);
