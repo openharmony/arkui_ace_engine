@@ -55,13 +55,7 @@ public:
         dragFrameNodes_.try_emplace(id, dragFrameNode);
     }
 
-    void RemoveDragFrameNode(int32_t id)
-    {
-        dragFrameNodes_.erase(id);
-        gridDragFrameNodes_.erase(id);
-        listDragFrameNodes_.erase(id);
-        textFieldDragFrameNodes_.erase(id);
-    }
+    void RemoveDragFrameNode(int32_t id);
 
     void AddGridDragFrameNode(int32_t id, const WeakPtr<FrameNode>& dragFrameNode)
     {
@@ -169,13 +163,7 @@ public:
         return isDragged_;
     }
 
-    void SetIsDragged(bool isDragged)
-    {
-        if (isDragged && isDragged_ != isDragged && notifyInDraggedCallback_) {
-            notifyInDraggedCallback_();
-        }
-        isDragged_ = isDragged;
-    }
+    void SetIsDragged(bool isDragged);
 
     void SetDragDampStartPoint(const Point& point)
     {
@@ -241,13 +229,7 @@ public:
     void NotifyDragRegisterFrameNode(std::unordered_map<int32_t, WeakPtr<FrameNode>> nodes, DragEventType dragEventType,
         RefPtr<NotifyDragEvent>& notifyEvent);
 
-    void RegisterDragStatusListener(int32_t nodeId, const WeakPtr<FrameNode>& node)
-    {
-        auto ret = nodesForDragNotify_.try_emplace(nodeId, node);
-        if (!ret.second) {
-            nodesForDragNotify_[nodeId] = node;
-        }
-    }
+    void RegisterDragStatusListener(int32_t nodeId, const WeakPtr<FrameNode>& node);
 
     void UnRegisterDragStatusListener(int32_t nodeId)
     {
@@ -286,13 +268,7 @@ public:
         draggingPressedState_ = pointerPressed;
     }
 
-    bool IsDraggingPressed(int32_t currentPointerId) const
-    {
-        if (currentPointerId_ == currentPointerId) {
-            return draggingPressedState_;
-        }
-        return false;
-    }
+    bool IsDraggingPressed(int32_t currentPointerId) const;
 
     bool IsSameDraggingPointer(int32_t currentPointerId) const
     {
@@ -377,6 +353,7 @@ public:
     {
         pixelMapOffset_ = pixelMapOffset;
     }
+
     bool IsNeedDisplayInSubwindow();
     void ClearGatherPixelMap()
     {
@@ -442,18 +419,9 @@ public:
 
     void UpdateDragMovePosition(const NG::OffsetF& offset, bool isRedragStart = false);
 
-    void ResetContextMenuDragPosition()
-    {
-        dragMovePosition_ = OffsetF(0.0f, 0.0f);
-        lastDragMovePosition_ = OffsetF(0.0f, 0.0f);
-        dragTotalMovePosition_ = OffsetF(0.0f, 0.0f);
-    }
+    void ResetContextMenuDragPosition();
 
-    void ResetContextMenuRedragPosition()
-    {
-        dragMovePosition_ = OffsetF(0.0f, 0.0f);
-        lastDragMovePosition_ = OffsetF(0.0f, 0.0f);
-    }
+    void ResetContextMenuRedragPosition();
 
     OffsetF GetUpdateDragMovePosition() const
     {
@@ -467,17 +435,9 @@ public:
         dragAction_ = dragAction;
     }
 
-    void AddNewDragAnimation()
-    {
-        currentAnimationCnt_++;
-        allAnimationCnt_++;
-    }
+    void AddNewDragAnimation();
 
-    bool IsAllAnimationFinished()
-    {
-        currentAnimationCnt_--;
-        return currentAnimationCnt_ == 0;
-    }
+    bool IsAllAnimationFinished();
 
     float GetCurrentDistance(float x, float y);
 
