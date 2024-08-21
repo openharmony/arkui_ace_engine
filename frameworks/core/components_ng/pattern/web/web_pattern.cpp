@@ -3909,6 +3909,11 @@ bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType)
     TAG_LOGI(AceLogTag::ACE_WEB, "RequestAutoFill");
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto instanceId = context->GetInstanceId();
+    CHECK_NULL_RETURN(instanceId, false);
+    ContainerScope scope(instanceId);
     auto container = Container::Current();
     if (container == nullptr) {
         container = Container::GetActive();
@@ -3924,6 +3929,11 @@ bool WebPattern::RequestAutoSave()
     TAG_LOGI(AceLogTag::ACE_WEB, "RequestAutoSave");
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto instanceId = context->GetInstanceId();
+    CHECK_NULL_RETURN(instanceId, false);
+    ContainerScope scope(instanceId);
     auto container = Container::Current();
     if (container == nullptr) {
         container = Container::GetActive();
@@ -3940,6 +3950,11 @@ bool WebPattern::UpdateAutoFillPopup()
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto instanceId = context->GetInstanceId();
+    CHECK_NULL_RETURN(instanceId, false);
+    ContainerScope scope(instanceId);
     auto container = Container::Current();
     if (container == nullptr) {
         container = Container::GetActive();
@@ -3951,6 +3966,13 @@ bool WebPattern::UpdateAutoFillPopup()
 bool WebPattern::CloseAutoFillPopup()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "CloseAutoFillPopup");
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto instanceId = context->GetInstanceId();
+    CHECK_NULL_RETURN(instanceId, false);
+    ContainerScope scope(instanceId);
     auto container = Container::Current();
     if (container == nullptr) {
         container = Container::GetActive();
