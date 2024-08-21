@@ -607,14 +607,14 @@ public:
     void SetOnDetach(std::function<void()>&& onDetach);
     void ClearOnDetach();
     void FireOnDetach();
-    void ClearStateStyle();
-    void OnDetachClear();
     void SetOnLoad(std::function<void(const std::string& xcomponentId)>&& onLoad);
     void ClearOnLoad();
     void FireOnLoad(const std::string& xcomponentId);
     void SetOnDestroy(std::function<void()>&& onDestroy);
     void ClearOnDestroy();
     void FireOnDestroy();
+    void ClearStateStyle();
+    void OnDetachClear();
 
 protected:
     virtual void OnModifyDone() {}

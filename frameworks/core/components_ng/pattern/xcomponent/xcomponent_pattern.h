@@ -231,6 +231,11 @@ public:
         return isSurfaceLock_;
     }
 
+    void SetIsTypeNode(bool isTypeNode)
+    {
+        isTypeNode_ = isTypeNode;
+    }
+
     std::shared_ptr<InnerXComponentController> GetXComponentController()
     {
         return xcomponentController_;
@@ -440,6 +445,7 @@ private:
     bool isEnableAnalyzer_ = false;
     std::optional<int32_t> transformHintChangedCallbackId_;
     uint32_t rotation_ = 0;
+    bool isTypeNode_ = false;
 };
 } // namespace OHOS::Ace::NG
 

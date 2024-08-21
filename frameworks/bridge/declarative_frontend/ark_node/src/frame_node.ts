@@ -624,7 +624,7 @@ class TypedFrameNode<T extends ArkComponent> extends FrameNode {
   attrCreator_: (node: NodePtr, type: ModifierType) => T
 
   constructor(uiContext: UIContext, type: string, attrCreator: (node: NodePtr, type: ModifierType) => T, options?: object) {
-    super(uiContext, type, options)
+    super(uiContext, type, options);
     this.attrCreator_ = attrCreator;
   }
 
@@ -777,7 +777,7 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     ['XComponent', (context: UIContext, options?: object): FrameNode=> {
       return new TypedFrameNode(context, 'XComponent', (node: NodePtr, type: ModifierType): ArkXComponentComponent => {
         return new ArkXComponentComponent(node, type);
-      }, options)
+      }, options);
     }],
     ['ListItemGroup', (context: UIContext): FrameNode=> {
       return new TypedFrameNode(context, 'ListItemGroup', (node: NodePtr, type: ModifierType): ArkListItemGroupComponent => {

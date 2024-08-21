@@ -3771,12 +3771,12 @@ void ViewAbstract::SetOnLoad(FrameNode* frameNode, std::function<void(const std:
     eventHub->SetOnLoad(std::move(onLoad));
 }
 
-void ViewAbstract::SetOnDetach(FrameNode* frameNode, std::function<void()>&& onDestroy)
+void ViewAbstract::SetOnDestroy(FrameNode* frameNode, std::function<void()>&& onDestroy)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnDetach(std::move(onDestroy));
+    eventHub->SetOnDestroy(std::move(onDestroy));
 }
 
 void ViewAbstract::SetOnAreaChanged(FrameNode* frameNode, std::function<void(const RectF &oldRect,

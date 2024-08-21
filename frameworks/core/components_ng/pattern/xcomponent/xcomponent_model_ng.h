@@ -31,6 +31,7 @@ public:
     XComponentType type;
     std::string libraryName;
     std::shared_ptr<InnerXComponentController> controller;
+    void* aiOptions;
 };
 
 class ACE_EXPORT XComponentModelNG : public OHOS::Ace::XComponentModel {
@@ -60,8 +61,7 @@ public:
     static XComponentType GetType(FrameNode* frameNode);
     static RefPtr<FrameNode> CreateFrameNode(
         int32_t nodeId, const std::string& id, XComponentType type, const std::string& libraryname);
-    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& id, XComponentType type,
-        const std::string& libraryname, const std::shared_ptr<InnerXComponentController> controller);
+    static RefPtr<FrameNode> CreateTypeNode(int32_t nodeId, ArkUI_XComponent_Params* params);
     static void SetXComponentId(FrameNode* frameNode, const std::string& id);
     static void SetXComponentType(FrameNode* frameNode, XComponentType type);
     static void SetXComponentSurfaceSize(FrameNode* frameNode, uint32_t width, uint32_t height);
@@ -77,6 +77,7 @@ public:
     static void SetImageAIOptions(FrameNode* frameNode, void* options);
     static void SetOnLoad(FrameNode* frameNode, LoadEvent&& onLoad);
     static void SetOnDestroy(FrameNode* frameNode, DestroyEvent&& onDestroy);
+    static void EnableAnalyzer(FrameNode* frameNode, bool enable);
 
 private:
     static XComponentType GetTypeImpl(const RefPtr<FrameNode>& frameNode);

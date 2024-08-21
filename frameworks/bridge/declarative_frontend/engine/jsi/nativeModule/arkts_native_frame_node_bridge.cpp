@@ -177,9 +177,15 @@ ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNode(ArkUIRuntimeCallInf
         nodeType = iter->second;
         if (nodeType != ARKUI_CUSTOM) {
             if (nodeType == ARKUI_XCOMPONENT) {
-                auto& params = XComponentBridge::ParseParams(runtimeCallInfo);
+#ifdef XCOMPONENT_SUPPORTED
+                ArkUI_Params params;
+                XComponentBridge::ParseParams(runtimeCallInfo, params);
                 params.nodeType = ARKUI_XCOMPONENT;
                 nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNodeWithParams(nodeType, nodeId, 0, params);
+                XComponentBridge::SetControllerCallback(runtimeCallInfo, reinterpret_cast<FrameNode*>(nodePtr));
+#else
+                nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNode(nodeType, nodeId, 0);
+#endif
             } else {
                 nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNode(nodeType, nodeId, 0);
             }
