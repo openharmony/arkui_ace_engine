@@ -7701,7 +7701,12 @@ class ObserveV2 {
             // exec a re-render or exec a monitor function changes some state -> calls fireChange -> ...
             if ((this.elmtIdsChanged_.size + this.monitorIdsChanged_.size + this.computedPropIdsChanged_.size === 0) &&
                 /* update not already in progress */ !this.startDirty_) {
-                Promise.resolve().then(this.updateDirty.bind(this));
+                Promise.resolve()
+                    .then(this.updateDirty.bind(this))
+                    .catch(error => {
+                    stateMgmtConsole.applicationError(`Exception occurred during the update process involving @Computed properties, @Monitor functions or UINode re-rendering`, error);
+                    throw error;
+                });
             }
             // add bindId to the correct Set of pending changes.
             if (id < ComputedV2.MIN_COMPUTED_ID) {
@@ -8798,10 +8803,17 @@ class MonitorV2 {
     notifyChange() {
         if (this.bindRun(/* is init / first run */ false)) {
             
-            // exec @Monitor function
-            this.monitorFunction.call(this.target_, this);
-            // now -> before value
-            this.reset();
+            try {
+                // exec @Monitor function
+                this.monitorFunction.call(this.target_, this);
+            }
+            catch (e) {
+                stateMgmtConsole.applicationError(`@Monitor exception caught for ${this.monitorFunction.name}`, e.toString());
+                throw e;
+            }
+            finally {
+                this.reset();
+            }
         }
     }
     // called after @Monitor function call
@@ -8859,7 +8871,12 @@ MonitorV2.nextWatchId_ = MonitorV2.MIN_WATCH_ID;
 class AsyncAddMonitorV2 {
     static addMonitor(target, name) {
         if (AsyncAddMonitorV2.watches.length === 0) {
-            Promise.resolve(true).then(AsyncAddMonitorV2.run);
+            Promise.resolve(true)
+                .then(AsyncAddMonitorV2.run)
+                .catch(error => {
+                stateMgmtConsole.applicationError(`Exception caught in @Monitor function ${name}`, error);
+                throw error;
+            });
         }
         AsyncAddMonitorV2.watches.push([target, name]);
     }
@@ -8936,8 +8953,18 @@ class ComputedV2 {
     // register current watchId while executing compute function
     observeObjectAccess() {
         ObserveV2.getObserve().startRecordDependencies(this, this.computedId_);
-        let ret = this.propertyComputeFunc_.call(this.target_);
-        ObserveV2.getObserve().stopRecordDependencies();
+        let ret;
+        try {
+            ret = this.propertyComputeFunc_.call(this.target_);
+        }
+        catch (e) {
+            stateMgmtConsole.applicationError(`@Computed Exception caught for ${this.propertyComputeFunc_.name}`, e.toString());
+            ret = undefined;
+            throw e;
+        }
+        finally {
+            ObserveV2.getObserve().stopRecordDependencies();
+        }
         return ret;
     }
 }
@@ -8949,7 +8976,12 @@ ComputedV2.COMPUTED_CACHED_PREFIX = '___comp_cached_';
 class AsyncAddComputedV2 {
     static addComputed(target, name) {
         if (AsyncAddComputedV2.computedVars.length === 0) {
-            Promise.resolve(true).then(AsyncAddComputedV2.run);
+            Promise.resolve(true)
+                .then(AsyncAddComputedV2.run)
+                .catch(error => {
+                stateMgmtConsole.applicationError(`Exception caught in @Computed ${name}`, error);
+                throw error;
+            });
         }
         AsyncAddComputedV2.computedVars.push({ target: target, name: name });
     }
@@ -9223,8 +9255,16 @@ class ViewV2 extends PUV2ViewBase {
             const componentName = entry.getComponentName();
             
             
-            updateFunc(elmtId, /* isFirstRender */ false);
-            
+            try {
+                updateFunc(elmtId, /* isFirstRender */ false);
+            }
+            catch (e) {
+                stateMgmtConsole.applicationError(`Exception caught in update function of ${componentName} for elmtId ${elmtId}`, e.toString());
+                throw e;
+            }
+            finally {
+                
+            }
             
             this.finishUpdateFunc(elmtId);
             
