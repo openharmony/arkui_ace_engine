@@ -269,6 +269,74 @@ Rosen::TextAlign ConvertTxtTextAlign(TextAlign textAlign)
 #endif
 
 #ifndef USE_GRAPHIC_TEXT_GINE
+txt::Paragraph::RectHeightStyle ConvertTxtRectHeightStyle(RectHeightStyle heightStyle)
+{
+    switch (heightStyle) {
+        case RectHeightStyle::TIGHT:
+            return txt::Paragraph::RectHeightStyle::kTight;
+        case RectHeightStyle::MAX:
+            return txt::Paragraph::RectHeightStyle::kMax;
+        case RectHeightStyle::INCLUDE_LINE_SPACE_MIDDLE:
+            return txt::Paragraph::RectHeightStyle::kIncludeLineSpacingMiddle;
+        case RectHeightStyle::INCLUDE_LINE_SPACE_TOP:
+            return txt::Paragraph::RectHeightStyle::kIncludeLineSpacingTop;
+        case RectHeightStyle::INCLUDE_LINE_SPACE_BOTTOM:
+            return txt::Paragraph::RectHeightStyle::kIncludeLineSpacingBottom;
+        case RectHeightStyle::STRUT:
+            return txt::Paragraph::RectHeightStyle::kStrut;
+        default:
+            return txt::Paragraph::RectHeightStyle::kTight;
+    }
+}
+#else
+Rosen::TextRectHeightStyle ConvertTxtRectHeightStyle(RectHeightStyle heightStyle)
+{
+    switch (heightStyle) {
+        case RectHeightStyle::TIGHT:
+            return Rosen::TextRectHeightStyle::TIGHT;
+        case RectHeightStyle::MAX:
+            return Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM;
+        case RectHeightStyle::INCLUDE_LINE_SPACE_MIDDLE:
+            return Rosen::TextRectHeightStyle::COVER_HALF_TOP_AND_BOTTOM;
+        case RectHeightStyle::INCLUDE_LINE_SPACE_TOP:
+            return Rosen::TextRectHeightStyle::COVER_TOP;
+        case RectHeightStyle::INCLUDE_LINE_SPACE_BOTTOM:
+            return Rosen::TextRectHeightStyle::COVER_BOTTOM;
+        case RectHeightStyle::STRUT:
+            return Rosen::TextRectHeightStyle::FOLLOW_BY_STRUT;
+        default:
+            return Rosen::TextRectHeightStyle::TIGHT;
+    }
+}
+#endif
+
+#ifndef USE_GRAPHIC_TEXT_GINE
+txt::Paragraph::RectWidthStyle ConvertTxtRectWidthStyle(RectWidthStyle widthStyle)
+{
+    switch (widthStyle) {
+        case RectWidthStyle::TIGHT:
+            return txt::Paragraph::RectWidthStyle::kTight;
+        case RectWidthStyle::MAX:
+            return txt::Paragraph::RectWidthStyle::kMax;
+        default:
+            return txt::Paragraph::RectWidthStyle::kTight;
+    }
+}
+#else
+Rosen::TextRectWidthStyle ConvertTxtRectWidthStyle(RectWidthStyle widthStyle)
+{
+    switch (widthStyle) {
+        case RectWidthStyle::TIGHT:
+            return Rosen::TextRectWidthStyle::TIGHT;
+        case RectWidthStyle::MAX:
+            return Rosen::TextRectWidthStyle::MAX;
+        default:
+            return Rosen::TextRectWidthStyle::TIGHT;
+    }
+}
+#endif
+
+#ifndef USE_GRAPHIC_TEXT_GINE
 txt::TextDirection ConvertTxtTextDirection(TextDirection textDirection)
 #else
 Rosen::TextDirection ConvertTxtTextDirection(TextDirection textDirection)

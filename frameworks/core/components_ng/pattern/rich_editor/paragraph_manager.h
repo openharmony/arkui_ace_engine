@@ -35,6 +35,13 @@ public:
 
         std::string ToString() const;
     };
+    struct TextBox {
+        TextDirection direction_;
+        RectF rect_;
+        TextBox() = default;
+        TextBox(RectF rect, TextDirection direction) : direction_(direction), rect_(rect) {}
+    };
+
     ParagraphManager() = default;
     std::optional<double> minParagraphFontSize = std::nullopt;
 
@@ -81,6 +88,8 @@ public:
     float GetLongestLineWithIndent() const;
     size_t GetLineCount() const;
     LineMetrics GetLineMetricsByRectF(RectF rect, int32_t paragraphIndex) const;
+    std::vector<TextBox> GetRectsForRange(int32_t start, int32_t end,
+        RectHeightStyle heightStyle, RectWidthStyle widthStyle);
     TextLineMetrics GetLineMetrics(size_t lineNumber);
 
 private:
