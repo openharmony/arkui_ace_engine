@@ -217,7 +217,7 @@ export const defaultTheme = {
             "bundleName": "__harDefaultBundleName__",
             "moduleName": "__harDefaultModuleName__"
         },
-        opacity: { normal: 1, hover: 0.95, pressed: 0.9, disabled: 0.4 },
+        opacity: { normal: 1, hover: 0.95, pressed: 0.9 },
         breakPointConstraintWidth: {
             breakPointMinWidth: 128,
             breakPointSmMaxWidth: 156,
@@ -1188,7 +1188,7 @@ export class ChipComponent extends ViewPU {
     }
 
     getChipNodeOpacity() {
-        return this.getChipEnable() ? this.chipOpacity : this.theme.chipNode.opacity.disabled;
+        return this.chipOpacity;
     }
 
     handleTouch(i3) {

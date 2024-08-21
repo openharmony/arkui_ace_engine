@@ -109,7 +109,6 @@ interface ChipNodeOpacity {
   normal: number;
   hover: number;
   pressed: number;
-  disabled: number;
 }
 
 interface ChipNodeConstraintWidth {
@@ -216,7 +215,7 @@ export const defaultTheme: ChipTheme = {
     },
     hoverBlendColor: $r('sys.color.ohos_id_color_hover'),
     pressedBlendColor: $r('sys.color.ohos_id_color_click_effect'),
-    opacity: { normal: 1, hover: 0.95, pressed: 0.9, disabled: 0.4 },
+    opacity: { normal: 1, hover: 0.95, pressed: 0.9 },
     breakPointConstraintWidth: {
       breakPointMinWidth: 128,
       breakPointSmMaxWidth: 156,
@@ -702,7 +701,7 @@ export struct ChipComponent {
   }
 
   private getChipNodeOpacity(): number {
-    return this.getChipEnable() ? this.chipOpacity : this.theme.chipNode.opacity.disabled
+    return this.chipOpacity
   }
 
   private handleTouch(event: TouchEvent) {
