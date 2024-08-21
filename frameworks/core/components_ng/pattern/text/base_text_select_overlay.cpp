@@ -632,7 +632,7 @@ std::optional<RectF> BaseTextSelectOverlay::GetAncestorNodeViewPort()
     CHECK_NULL_RETURN(host, std::nullopt);
     auto parent = host->GetAncestorNodeOfFrame(true);
     while (parent) {
-        auto scrollableContainer = host->GetPattern<NestableScrollContainer>();
+        auto scrollableContainer = parent->GetPattern<NestableScrollContainer>();
         if (scrollableContainer) {
             return parent->GetTransformRectRelativeToWindow();
         }
