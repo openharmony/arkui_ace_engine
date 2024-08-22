@@ -385,10 +385,6 @@ void ImagePattern::OnImageLoadSuccess()
     LoadImageSuccessEvent event(loadingCtx_->GetImageSize().Width(), loadingCtx_->GetImageSize().Height(),
         geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), 1, paintRect.Width(),
         paintRect.Height(), paintRect.GetX(), paintRect.GetY());
-    auto eventHub = GetEventHub<ImageEventHub>();
-    if (eventHub) {
-        eventHub->FireCompleteEvent(event);
-    }
 
     SetImagePaintConfig(image_, srcRect_, dstRect_, srcInfo, frameCount);
     UpdateSvgSmoothEdgeValue();
@@ -397,6 +393,10 @@ void ImagePattern::OnImageLoadSuccess()
         EnableDrag();
     }
     ClearAltData();
+    auto eventHub = GetEventHub<ImageEventHub>();
+    if (eventHub) {
+        eventHub->FireCompleteEvent(event);
+    }
 
     if (IsSupportImageAnalyzerFeature()) {
         if (isPixelMapChanged_) {
