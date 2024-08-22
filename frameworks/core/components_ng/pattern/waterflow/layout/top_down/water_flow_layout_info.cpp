@@ -551,7 +551,6 @@ void WaterFlowLayoutInfo::JumpTo(const std::pair<float, float>& item)
 
 void WaterFlowLayoutInfo::UpdateOffset(float delta)
 {
-    prevOffset_ = currentOffset_;
     currentOffset_ += delta;
 }
 

@@ -177,6 +177,11 @@ public:
         sectionChangeStartPos_.emplace_back(start);
     }
 
+    float GetPrevOffset() const
+    {
+        return prevOffset_;
+    }
+
 private:
     DisplayMode GetDefaultScrollBarDisplayMode() const override
     {

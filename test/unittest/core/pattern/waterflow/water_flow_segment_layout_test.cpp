@@ -183,7 +183,6 @@ HWTEST_F(WaterFlowSegmentTest, MeasureOnOffset001, TestSize.Level1)
         EXPECT_EQ(info->segmentStartPos_, SEGMENT_START_POS_2);
     }
 
-    info->prevOffset_ = 0.0f;
     info->currentOffset_ = -100.0f;
     algo->Measure(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info->currentOffset_, 0.0f);
@@ -191,7 +190,6 @@ HWTEST_F(WaterFlowSegmentTest, MeasureOnOffset001, TestSize.Level1)
     EXPECT_EQ(info->endIndex_, 10);
 
     algo->overScroll_ = true;
-    info->prevOffset_ = 0.0f;
     info->currentOffset_ = -200.0f;
     algo->Measure(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info->currentOffset_, -200.0f);
@@ -342,7 +340,6 @@ HWTEST_F(WaterFlowSegmentTest, Layout002, TestSize.Level1)
 
     info->footerIndex_ = 0;
 
-    info->prevOffset_ = 0.0f;
     info->currentOffset_ = -100.0f;
     algo->overScroll_ = true;
     algo->Measure(AceType::RawPtr(frameNode_));
@@ -385,14 +382,12 @@ HWTEST_F(WaterFlowSegmentTest, MeasureOnOffset002, TestSize.Level1)
         EXPECT_EQ(info->segmentTails_, SEGMENT_TAILS_3);
     }
 
-    info->prevOffset_ = 0.0f;
     info->currentOffset_ = -100.0f;
     algo->Measure(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info->currentOffset_, -100.0f);
     EXPECT_EQ(info->startIndex_, 1);
     EXPECT_EQ(info->endIndex_, 30);
 
-    info->prevOffset_ = -100.0f;
     info->currentOffset_ = -500.0f;
     algo->Measure(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info->currentOffset_, -500.0f);
@@ -403,7 +398,6 @@ HWTEST_F(WaterFlowSegmentTest, MeasureOnOffset002, TestSize.Level1)
     const auto itemInfo = info->itemInfos_;
     const auto endPosArr = info->endPosArray_;
 
-    info->prevOffset_ = -500.0f;
     info->currentOffset_ = -300.0f;
     algo->Measure(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info->items_, itemMap);
@@ -413,7 +407,6 @@ HWTEST_F(WaterFlowSegmentTest, MeasureOnOffset002, TestSize.Level1)
     EXPECT_EQ(info->endIndex_, 37);
     EXPECT_EQ(info->segmentStartPos_, std::vector<float> { 0.0f });
 
-    info->prevOffset_ = -300.0f;
     info->currentOffset_ = -700.0f;
     algo->Measure(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info->startIndex_, 19);
@@ -860,7 +853,6 @@ HWTEST_F(WaterFlowSegmentTest, Segmented001, TestSize.Level1)
     EXPECT_EQ(info->currentOffset_, -200.0f);
     EXPECT_EQ(info->segmentStartPos_.size(), 1);
 
-    info->prevOffset_ = -200.0f;
     info->currentOffset_ = -4050.0f;
     algo->Measure(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info->startIndex_, 47);
@@ -997,7 +989,6 @@ HWTEST_F(WaterFlowSegmentTest, Segmented003, TestSize.Level1)
     EXPECT_EQ(info->endIndex_, 25);
     EXPECT_EQ(info->segmentStartPos_.size(), 4);
 
-    info->prevOffset_ = -2300.0f;
     info->currentOffset_ = -1800.0f;
     algo->Measure(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info->startIndex_, 18);
@@ -1064,7 +1055,6 @@ HWTEST_F(WaterFlowSegmentTest, Segmented004, TestSize.Level1)
     EXPECT_EQ(info->childrenCount_, 70);
     algo->Layout(AceType::RawPtr(frameNode_));
 
-    info->prevOffset_ = -800.0f;
     info->currentOffset_ = -10000.0f;
     algo->Measure(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info->startIndex_, 63);
@@ -1260,7 +1250,6 @@ HWTEST_F(WaterFlowSegmentTest, ChildrenCount001, TestSize.Level1)
     EXPECT_EQ(info->endIndex_, -1);
     EXPECT_EQ(info->segmentStartPos_.size(), 1);
 
-    info->prevOffset_ = -1050.0f;
     info->currentOffset_ = -10000.0f;
     algo->Measure(AceType::RawPtr(frameNode_));
     // as long as no crash happens
