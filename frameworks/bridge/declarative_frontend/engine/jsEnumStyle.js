@@ -2206,9 +2206,9 @@ class NavPathStack {
         reject({ message: 'Internal error.', code: 100001 });
       })
     }
-    promise.then(() => {
+    promise.then((navDestinationId) => {
       return new Promise((resolve, reject) => {
-        [info.index, info.navDestinationId] = this.findInPopArray(name);
+        info.navDestinationId = navDestinationId;
         this.pathArray.push(info);
         this.nativeStack?.onStateChanged();
         resolve({code: 0});
@@ -2287,12 +2287,12 @@ class NavPathStack {
         reject({ message: 'Internal error.', code: 100001 });
       })
     }
-    promise.then(() => {
+    promise.then((navDestinationId) => {
       return new Promise((resolve, reject) => {
-        [info.index, info.navDestinationId] = this.findInPopArray(info.name);
         if (launchMode === LaunchMode.NEW_INSTANCE) {
           info.needBuildNewInstance = true;
         }
+        info.navDestinationId = navDestinationId;
         this.pathArray.push(info);
         this.nativeStack?.onStateChanged();
         resolve({code: 0});
