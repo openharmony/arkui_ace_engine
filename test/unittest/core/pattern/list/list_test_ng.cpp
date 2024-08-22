@@ -532,7 +532,9 @@ void ListTestNg::CreateRepeatVirtualScrollNode(int32_t itemNumber, const std::fu
         }
         return keys;
     };
-    repeatModel.Create(itemNumber, {}, createFunc, updateFunc, getKeys, getTypes);
+    std::function<void(uint32_t, uint32_t)> setActiveRange = [](uint32_t start, uint32_t end) {
+    };
+    repeatModel.Create(itemNumber, {}, createFunc, updateFunc, getKeys, getTypes, setActiveRange);
 }
 
 void ListTestNg::FlushIdleTask(const RefPtr<ListPattern>& listPattern)
