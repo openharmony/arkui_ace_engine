@@ -209,7 +209,8 @@ bool WaterFlowLayoutInfoSW::ReachStart(float prevPos, bool firstLayout) const
     if (!itemStart_ || lanes_.empty()) {
         return false;
     }
-    return firstLayout || Negative(prevPos);
+    const float prevStart = StartPos() - (totalOffset_ - prevPos);
+    return firstLayout || Negative(prevStart);
 }
 
 bool WaterFlowLayoutInfoSW::ReachEnd(float prevPos) const
