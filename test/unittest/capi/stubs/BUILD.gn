@@ -11,10 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-group("linux_capi_unittest") {
-  testonly = true
-  deps = [
-    "modifiers:capi_modifiers_unittest",
-    "utils:capi_utils_unittest",
-  ]
+import("//build/ohos.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
+
+ohos_source_set("capi-ut-stubs") {
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+  sources = [ "capi-ut-stubs.cpp" ]
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }
