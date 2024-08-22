@@ -14,6 +14,7 @@
  */
 
 #include "swiper_test_ng.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
 
 #include "core/animation/spring_curve.h"
 
@@ -23,7 +24,28 @@ namespace {} // namespace
 
 class SwiperAnimationTestNg : public SwiperTestNg {
 public:
+    static void SetUpTestSuite()
+    {
+        SwiperTestNg::SetUpTestSuite();
+        MockAnimationManager::Enable(true);
+        MockAnimationManager::GetInstance().SetTicks(2);
+    }
     void CreateWithCustomAnimation();
+
+    void SimulateSwipe(float offset, float velocity)
+    {
+        GestureEvent event;
+        event.SetMainVelocity(velocity);
+        event.SetMainDelta(offset);
+        TouchLocationInfo touch(0);
+        pattern_->HandleTouchDown({ touch });
+        pattern_->panEvent_->actionStart_(event);
+        pattern_->panEvent_->actionUpdate_(event);
+        FlushLayoutTask(frameNode_);
+
+        pattern_->HandleTouchUp();
+        pattern_->panEvent_->actionEnd_(event);
+    }
 };
 
 void SwiperAnimationTestNg::CreateWithCustomAnimation()
@@ -67,18 +89,24 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation001, TestSize.Level1
  */
 HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
-    double dragVelocity = 2000.0;
-    pattern_->springAnimation_ = nullptr;
-    pattern_->currentOffset_ = 1;
-    pattern_->contentMainSize_ = 1.0f;
-    struct SwiperItemInfo swiperItemInfo;
-    swiperItemInfo.startPos = -1.0f;
-    swiperItemInfo.endPos = -1.0f;
-    pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo));
-    pattern_->PlaySpringAnimation(dragVelocity);
-    pattern_->StopAndResetSpringAnimation();
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetLoop(false);
+        model.SetEdgeEffect(EdgeEffect::SPRING);
+    });
+    SimulateSwipe(200.0f, 2000.0f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 200.0f);
     EXPECT_TRUE(pattern_->springAnimationIsRunning_);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 100.0f);
+
+    // change attribute during animation
+    layoutProperty_->UpdateLoop(true);
+    pattern_->OnModifyDone();
+    EXPECT_FALSE(pattern_->springAnimationIsRunning_);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 0.0f);
 }
 
 /**
@@ -112,19 +140,22 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation003, TestSize.Level1
  */
 HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation004, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
-    double dragVelocity = 2000.0;
-    pattern_->springAnimation_ = nullptr;
-    pattern_->currentOffset_ = 1;
-    pattern_->contentMainSize_ = 1.0f;
-    struct SwiperItemInfo swiperItemInfo;
-    swiperItemInfo.startPos = -1.0f;
-    swiperItemInfo.endPos = -1.0f;
-    pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo));
-    pattern_->PlaySpringAnimation(dragVelocity);
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetEdgeEffect(EdgeEffect::SPRING);
+        model.SetLoop(false);
+    });
+    SimulateSwipe(100.0f, 1000.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 100.0f);
+    EXPECT_TRUE(pattern_->springAnimationIsRunning_);
     pattern_->StopSpringAnimation();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 0.0f);
+
+    SimulateSwipe(100.0f, 1000.0f);
     EXPECT_TRUE(pattern_->springAnimationIsRunning_);
     pattern_->StopSpringAnimationImmediately();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 100.0f);
     EXPECT_FALSE(pattern_->springAnimationIsRunning_);
 }
 
@@ -190,14 +221,19 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternPlayFadeAnimation001, TestSize.Leve
  */
 HWTEST_F(SwiperAnimationTestNg, SwiperPatternPlayFadeAnimation002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
-    pattern_->fadeOffset_ = 100.0f;
-    pattern_->fadeAnimationIsRunning_ = true;
-    pattern_->PlayFadeAnimation();
-    EXPECT_FALSE(pattern_->fadeAnimationIsRunning_);
-    pattern_->fadeOffset_ = -100.0f;
-    pattern_->fadeAnimationIsRunning_ = true;
-    pattern_->PlayFadeAnimation();
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetEdgeEffect(EdgeEffect::FADE);
+        model.SetLoop(false);
+    });
+    SimulateSwipe(100.0f, 500.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 0.0f);
+    EXPECT_EQ(pattern_->fadeOffset_, 100.0f);
+
+    EXPECT_TRUE(pattern_->fadeAnimationIsRunning_);
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_EQ(pattern_->fadeOffset_, 50.0f);
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_EQ(pattern_->fadeOffset_, 0.0f);
     EXPECT_FALSE(pattern_->fadeAnimationIsRunning_);
 }
 
@@ -1058,29 +1094,50 @@ HWTEST_F(SwiperAnimationTestNg, StopTranslateAnimation001, TestSize.Level1)
         model.SetDisplayCount(2);
         model.SetSwipeByGroup(true);
     });
+    pattern_->isVisibleArea_ = true;
 
     /**
      * @tc.steps: step1. ShowPrevious with animate, than forceStop animation
      */
-    pattern_->isFinishAnimation_ = false;
-    pattern_->isVisibleArea_ = true;
     pattern_->ShowPrevious();
     FlushLayoutTask(frameNode_);
-    pattern_->translateAnimationIsRunning_ = true;
-    pattern_->pauseTargetIndex_ = -2;
-    pattern_->StopTranslateAnimation();
+    EXPECT_TRUE(pattern_->usePropertyAnimation_);
+    EXPECT_EQ(GetChildX(frameNode_, 2), -480.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 3), -240.0f);
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_TRUE(pattern_->usePropertyAnimation_);
+    for (int i = 0; i < 4; ++i) {
+        EXPECT_EQ(
+            GetChildFrameNode(frameNode_, i)->GetRenderContext()->GetTranslateXYProperty(), OffsetF(240.0f, 0.0f));
+    }
+    pattern_->FinishAnimation();
+    EXPECT_FALSE(pattern_->usePropertyAnimation_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 240.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 3), 0.0f);
+    // jumped to final position
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), -2);
+    EXPECT_EQ(pattern_->currentIndex_, -2);
+    EXPECT_EQ(GetChildX(frameNode_, 2), 0.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 3), 240.0f);
 
     /**
-     * @tc.steps: step2. ShowNext with animate, than forceStop animation
+     * @tc.steps: step2. ShowNext with animate
      */
     pattern_->ShowNext();
     FlushLayoutTask(frameNode_);
-    pattern_->translateAnimationIsRunning_ = true;
-    pattern_->pauseTargetIndex_ = 0;
-    pattern_->StopTranslateAnimation();
+    EXPECT_TRUE(pattern_->usePropertyAnimation_);
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_TRUE(pattern_->usePropertyAnimation_);
+    for (int i = 0; i < 4; ++i) {
+        EXPECT_EQ(
+            GetChildFrameNode(frameNode_, i)->GetRenderContext()->GetTranslateXYProperty(), OffsetF(-240.0f, 0.0f));
+    }
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_FALSE(pattern_->usePropertyAnimation_);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 3)->IsActive());
+    EXPECT_EQ(GetChildX(frameNode_, 0), 0.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 240.0f);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
 }
 } // namespace OHOS::Ace::NG
