@@ -26,21 +26,19 @@
 namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
-constexpr float SCROLL_WIDTH = 480.f;
-constexpr float SCROLL_HEIGHT = 800.f;
-constexpr int32_t TOTAL_ITEM_NUMBER = 10;
-constexpr int32_t VIEW_ITEM_NUMBER = 8;
-constexpr int32_t SNAP_ITEM_NUMBER = 30;
+constexpr float SCROLL_WIDTH = 240.f;
+constexpr float SCROLL_HEIGHT = 400.f;
+constexpr float CONTENT_MAIN_SIZE = 1000.f;
+constexpr float ITEM_MAIN_SIZE = 100.f;
+constexpr float VERTICAL_SCROLLABLE_DISTANCE = CONTENT_MAIN_SIZE - SCROLL_HEIGHT;
 constexpr float DEFAULT_ACTIVE_WIDTH = 8.0f;
 constexpr float DEFAULT_INACTIVE_WIDTH = 4.0f;
 constexpr float DEFAULT_NORMAL_WIDTH = 4.0f;
 constexpr float DEFAULT_TOUCH_WIDTH = 32.0f;
-constexpr float ITEM_WIDTH = 60.f;
-constexpr float ITEM_HEIGHT = 100.f;
-constexpr float VERTICAL_SCROLLABLE_DISTANCE = (TOTAL_ITEM_NUMBER - VIEW_ITEM_NUMBER) * ITEM_HEIGHT;
-constexpr float SNAP_SCROLLABLE_DISTANCE = (SNAP_ITEM_NUMBER - VIEW_ITEM_NUMBER) * ITEM_HEIGHT;
 constexpr float NORMAL_WIDTH = 4.f;
 constexpr float SCROLL_PAGING_SPEED_THRESHOLD = 1200.0f;
+constexpr int32_t TICK = 2;
+constexpr float DRAG_VELOCITY = 1200.f;
 
 class ScrollTestNg : public TestNG {
 public:
@@ -54,8 +52,8 @@ public:
     void CreateSnapScroll(ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
         const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide);
 
-    void CreateContent(int32_t childNumber = TOTAL_ITEM_NUMBER);
-    RefPtr<FrameNode> GetContentChild(int32_t index);
+    void CreateContent(float mainSize = CONTENT_MAIN_SIZE);
+    void CreateContentChild(int32_t childNumber = 10);
     void Touch(TouchType touchType, Offset offset, SourceType sourceType);
     void Mouse(Offset location, MouseButton mouseButton = MouseButton::NONE_BUTTON,
         MouseAction mouseAction = MouseAction::NONE);
@@ -64,10 +62,13 @@ public:
     void ScrollToEdge(ScrollEdgeType scrollEdgeType);
     void ScrollTo(float offset);
     Axis GetAxis();
-    float GetOffset(float childNumber);
     AssertionResult UpdateAndVerifyPosition(float delta, int32_t source, float expectOffset);
-    AssertionResult ScrollToNode(int32_t childIndex, float expectOffset);
+    AssertionResult ScrollToNode(const RefPtr<FrameNode>& focusFrameNode, float expectOffset);
     AssertionResult IsEqualCurrentPosition(float expectOffset);
+    AssertionResult VerifyTickPosition(float expectOffset);
+    void DragStart(GestureEvent& gesture);
+    void DragUpdate(GestureEvent& gesture);
+    void DragEnd(GestureEvent& gesture);
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<ScrollPattern> pattern_;
@@ -76,6 +77,8 @@ public:
     RefPtr<ScrollablePaintProperty> paintProperty_;
     RefPtr<ScrollAccessibilityProperty> accessibilityProperty_;
     RefPtr<ScrollBar> scrollBar_;
+
+    std::vector<RefPtr<FrameNode>> contentChildren_;
 };
 } // namespace OHOS::Ace::NG
 
