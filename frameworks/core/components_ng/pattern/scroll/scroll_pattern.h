@@ -345,10 +345,12 @@ public:
     void AddScrollLayoutInfo();
 
     void GetScrollSnapAlignDumpInfo();
+    void GetScrollSnapAlignDumpInfo(std::unique_ptr<JsonValue>& json);
 
     void GetScrollPagingStatusDumpInfo();
-
+    void GetScrollPagingStatusDumpInfo(std::unique_ptr<JsonValue>& json);
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
 
     SizeF GetViewSize() const
     {

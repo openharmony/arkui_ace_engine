@@ -203,7 +203,7 @@ void ScrollBar::SetRectTrickRegion(
         return;
     }
     double activeSize = barRegionSize_ * mainSize / estimatedHeight - outBoundary_;
-    
+
     if (!NearZero(outBoundary_)) {
         activeSize = std::max(
             std::max(activeSize, NormalizeToPx(minHeight_) - outBoundary_), NormalizeToPx(minDynamicHeight_));
@@ -1023,5 +1023,127 @@ Axis ScrollBar::GetPanDirection() const
 {
     CHECK_NULL_RETURN(panRecognizer_, Axis::NONE);
     return panRecognizer_->GetAxisDirection();
+}
+
+void ScrollBar::GetShapeModeDumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    switch (shapeMode_) {
+        case ShapeMode::RECT: {
+            json->Put("shapeMode", "RECT");
+            break;
+        }
+        case ShapeMode::ROUND: {
+            json->Put("shapeMode", "ROUND");
+            break;
+        }
+        case ShapeMode::DEFAULT: {
+            json->Put("shapeMode", "DEFAULT");
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+void ScrollBar::GetPositionModeDumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    switch (positionMode_) {
+        case PositionMode::RIGHT: {
+            json->Put("padding.right", padding_.Right().ToString().c_str());
+            break;
+        }
+        case PositionMode::LEFT: {
+            json->Put("padding.left", padding_.Left().ToString().c_str());
+            break;
+        }
+        case PositionMode::BOTTOM: {
+            json->Put("padding.bottom", padding_.Bottom().ToString().c_str());
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+void ScrollBar::GetAxisDumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    switch (axis_) {
+        case Axis::NONE: {
+            json->Put("axis", "NONE");
+            break;
+        }
+        case Axis::VERTICAL: {
+            json->Put("axis", "VERTICAL");
+            break;
+        }
+        case Axis::HORIZONTAL: {
+            json->Put("axis", "HORIZONTAL");
+            break;
+        }
+        case Axis::FREE: {
+            json->Put("axis", "FREE");
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+void ScrollBar::GetPanDirectionDumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    if (panRecognizer_) {
+        switch (panRecognizer_->GetAxisDirection()) {
+            case Axis::NONE: {
+                json->Put("panDirection", "NONE");
+                break;
+            }
+            case Axis::VERTICAL: {
+                json->Put("panDirection", "VERTICAL");
+                break;
+            }
+            case Axis::HORIZONTAL: {
+                json->Put("panDirection", "HORIZONTAL");
+                break;
+            }
+            case Axis::FREE: {
+                json->Put("panDirection", "FREE");
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    }
+}
+
+void ScrollBar::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("activeRect", activeRect_.ToString().c_str());
+    json->Put("touchRegion", touchRegion_.ToString().c_str());
+    json->Put("hoverRegion", hoverRegion_.ToString().c_str());
+    json->Put("normalWidth", normalWidth_.ToString().c_str());
+    json->Put("activeWidth", activeWidth_.ToString().c_str());
+    json->Put("touchWidth", touchWidth_.ToString().c_str());
+    json->Put("hoverWidth", hoverWidth_.ToString().c_str());
+    GetShapeModeDumpInfo(json);
+    GetPositionModeDumpInfo(json);
+    GetAxisDumpInfo(json);
+    GetPanDirectionDumpInfo(json);
+    json->Put("hostBorderRadius", hostBorderRadius_.ToString().c_str());
+    json->Put("startReservedHeight", startReservedHeight_.ToString().c_str());
+    json->Put("endReservedHeight", endReservedHeight_.ToString().c_str());
+    json->Put("isScrollable", std::to_string(isScrollable_).c_str());
+    json->Put("isReverse", std::to_string(isReverse_).c_str());
+
+    std::unique_ptr<JsonValue> children = JsonUtil::CreateArray(true);
+    for (const auto& info : innerScrollBarLayoutInfos_) {
+        std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
+        info.ToJson(child);
+        children->Put(child);
+    }
+    json->Put("innerScrollBarLayoutInfos", children);
 }
 } // namespace OHOS::Ace::NG
