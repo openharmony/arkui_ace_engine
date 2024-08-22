@@ -1483,18 +1483,18 @@ void WebPattern::HandleOnDragDropFile(RefPtr<UnifiedData> aceData)
     delegate_->dragData_->ClearImageFileNames();
     for (std::string url : urlVec) {
         TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop event WebEventHub onDragDropId,"
-            "url get from udmf:%{public}s", url.c_str());
+            "url get from udmf:%{public}zu", url.length());
         AppFileService::ModuleFileUri::FileUri fileUri(url);
         TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop event WebEventHub onDragDropId,"
-            "fileUri ToString:%{public}s", fileUri.ToString().c_str());
+            "fileUri ToString:%{public}zu", fileUri.ToString().length());
         std::string uriRealPath = FileUriHelper::GetRealPath(url);
         if (!uriRealPath.empty() && access(uriRealPath.c_str(), F_OK) == 0) { // file exist
             TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop event WebEventHub onDragDropId,"
-            "url real path:%{public}s", uriRealPath.c_str());
+            "url real path:%{public}zu", uriRealPath.length());
             delegate_->dragData_->SetFileUri(uriRealPath);
         } else {
             TAG_LOGW(AceLogTag::ACE_WEB, "DragDrop event WebEventHub onDragDropId,"
-                "url is empty or not exist, uriRealPath:%{public}s", uriRealPath.c_str());
+                "url is empty or not exist, uriRealPath:%{public}zu", uriRealPath.length());
         }
     }
 }
