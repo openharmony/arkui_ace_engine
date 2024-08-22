@@ -1722,10 +1722,11 @@ HWTEST_F(ScrollTestNg, EnablePaging002, TestSize.Level1)
     CreateContent(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
     EXPECT_EQ(pattern_->GetEnablePaging(), ScrollPagingStatus::VALID);
+    EXPECT_EQ(pattern_->IsEnablePagingValid(), true);
 
     /**
      * @tc.steps: step2. Create scroll, first set enablePaging and than set snap.
-     * @tc.expected: the value of GetEnablePaging() is INVALID
+     * @tc.expected: the value of IsEnablePagingValid() is false
      */
     Dimension intervalSize = Dimension(10.f);
     std::vector<Dimension> snapPaginations = {
@@ -1745,7 +1746,7 @@ HWTEST_F(ScrollTestNg, EnablePaging002, TestSize.Level1)
 
     /**
      * @tc.steps: step3. Create scroll, first set snap and than set enablePaging.
-     * @tc.expected: the value of GetEnablePaging() is INVALID
+     * @tc.expected: the value of IsEnablePagingValid() is false
      */
     ClearOldNodes();
     model = CreateScroll();
@@ -1757,7 +1758,7 @@ HWTEST_F(ScrollTestNg, EnablePaging002, TestSize.Level1)
 
     /**
      * @tc.steps: step4. Create scroll, set enablePaging true and than set enablePaging false.
-     * @tc.expected: the value of GetEnablePaging() is NONE
+     * @tc.expected: the value of GetEnablePaging() is INVALID
      */
     ClearOldNodes();
     model = CreateScroll();
@@ -1765,7 +1766,8 @@ HWTEST_F(ScrollTestNg, EnablePaging002, TestSize.Level1)
     model.SetEnablePaging(false);
     CreateContent(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
-    EXPECT_EQ(pattern_->GetEnablePaging(), ScrollPagingStatus::NONE);
+    EXPECT_EQ(pattern_->GetEnablePaging(), ScrollPagingStatus::INVALID);
+    EXPECT_EQ(pattern_->IsEnablePagingValid(), false);
 
     /**
      * @tc.steps: step5. Create scroll, set enablePaging false and than set enablePaging true.
@@ -1778,6 +1780,7 @@ HWTEST_F(ScrollTestNg, EnablePaging002, TestSize.Level1)
     CreateContent(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
     EXPECT_EQ(pattern_->GetEnablePaging(), ScrollPagingStatus::VALID);
+    EXPECT_EQ(pattern_->IsEnablePagingValid(), true);
 }
 
 /**
@@ -1918,8 +1921,10 @@ HWTEST_F(ScrollTestNg, Model001, TestSize.Level1)
     EXPECT_EQ(model.GetScrollEnabled(AceType::RawPtr(frameNode_)), 0);
     model.SetEnablePaging(AceType::RawPtr(frameNode_), true);
     EXPECT_EQ(pattern_->GetEnablePaging(), ScrollPagingStatus::VALID);
+    EXPECT_EQ(pattern_->IsEnablePagingValid(), true);
     model.SetEnablePaging(AceType::RawPtr(frameNode_), false);
-    EXPECT_EQ(pattern_->GetEnablePaging(), ScrollPagingStatus::NONE);
+    EXPECT_EQ(pattern_->GetEnablePaging(), ScrollPagingStatus::INVALID);
+    EXPECT_EQ(pattern_->IsEnablePagingValid(), false);
     CreateContent(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
 

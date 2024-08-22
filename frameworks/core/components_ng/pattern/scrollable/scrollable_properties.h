@@ -53,11 +53,11 @@ enum class ScrollSnapAlign {
 };
 
 enum class ScrollPagingStatus {
-    // no enablePaging and scrollSnap setting
+    // no enablePaging set
     NONE = 0,
-    // scrollSnap has set, enablePaging is not effective
+    // enablePaging is false
     INVALID,
-    // enablePaging is effective
+    // enablePaging is true
     VALID,
 };
 
