@@ -441,21 +441,23 @@ void UpdateTitleBarMenuNode(const RefPtr<NavBarNode>& navBarNode, const SizeF& n
     CHECK_NULL_VOID(toolBarLayoutProperty);
     auto navBarPattern = AceType::DynamicCast<NavBarPattern>(navBarNode->GetPattern());
     auto isHideToolbar = navBarPattern->GetToolbarHideStatus();
+    auto preMenuNode = titleBarNode->GetMenu();
 
-    if (titleBarNode->GetMenu()) {
-        titleBarNode->RemoveChild(titleBarNode->GetMenu());
+    bool isNeedLandscapeMenu = CheckWhetherNeedToHideToolbar(navBarNode, navigationSize) && !isHideToolbar;
+    RefPtr<UINode> newMenuNode = isNeedLandscapeMenu ? navBarNode->GetLandscapeMenu() : navBarNode->GetMenu();
+    if (preMenuNode == newMenuNode) {
+        return;
     }
-
-    if (CheckWhetherNeedToHideToolbar(navBarNode, navigationSize) && !isHideToolbar) {
+    if (isNeedLandscapeMenu) {
         toolBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
-        titleBarNode->SetMenu(navBarNode->GetLandscapeMenu());
     } else {
         if (!isHideToolbar) {
             toolBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         }
-        titleBarNode->SetMenu(navBarNode->GetMenu());
     }
-    titleBarNode->AddChild(titleBarNode->GetMenu());
+    titleBarNode->RemoveChild(preMenuNode);
+    titleBarNode->SetMenu(newMenuNode);
+    titleBarNode->AddChild(newMenuNode);
 }
 
 float TransferTitleBarHeight(const RefPtr<NavBarNode>& hostNode, float titleBarHeight)
