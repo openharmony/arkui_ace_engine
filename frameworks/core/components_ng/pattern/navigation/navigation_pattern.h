@@ -101,9 +101,7 @@ public:
         navigationMode_ = navigationMode;
     }
 
-    bool IsFoldStateChange();
-
-    void UpdateFoldState();
+    bool JudgeFoldStateChangeAndUpdateState();
 
     void SetNavigationStack(const RefPtr<NavigationStack>& navigationStack);
 
@@ -409,9 +407,11 @@ private:
     bool ApplyTopNavPathSystemBarStyleOrRestore(const RefPtr<WindowManager>& windowManager,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& topNavPath);
     void InitPageNode(const RefPtr<FrameNode>& host);
+    void InitFoldState();
 
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
-        const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath);
+        const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath,
+        int32_t preLastStandardIndex = -1);
     void TransitionWithAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage, bool isNeedVisible = false);
     bool TriggerCustomAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
@@ -450,7 +450,7 @@ private:
     void NotifyPageShow(const std::string& pageName);
     int32_t FireNavDestinationStateChange(NavDestinationLifecycle lifecycle);
     void UpdatePreNavDesZIndex(const RefPtr<FrameNode> &preTopNavDestination,
-        const RefPtr<FrameNode> &newTopNavDestination);
+        const RefPtr<FrameNode> &newTopNavDestination, int32_t preLastStandardIndex = -1);
     void UpdateNavPathList();
     void RefreshNavDestination();
     RefPtr<NavigationPattern> GetParentNavigationPattern();
@@ -476,6 +476,7 @@ private:
         const RefPtr<NavDestinationGroupNode>& topDestination,
         bool isPopPage, const RefPtr<NavigationTransitionProxy>& proxy,
         NavigationTransition navigationTransition);
+    bool GetIsFocusable(const RefPtr<FrameNode>& frameNode);
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;
@@ -509,7 +510,10 @@ private:
     bool isInDividerDrag_ = false;
     bool isDividerDraggable_ = true;
     bool isAnimated_ = false;
-    FoldStatus currentfoldStatus_ = FoldStatus::UNKNOWN;  // only used for mode-switch animation
+#if defined(ENABLE_NAV_SPLIT_MODE)
+    bool isBackPage_ = false;
+#endif
+    FoldStatus currentFoldStatus_ = FoldStatus::UNKNOWN;  // only used for mode-switch animation
     bool isReplace_ = false;
     bool isFinishInteractiveAnimation_ = true;
     int32_t lastPreIndex_ = false;

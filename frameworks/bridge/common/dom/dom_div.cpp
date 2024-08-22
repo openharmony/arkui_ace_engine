@@ -16,12 +16,7 @@
 #include "frameworks/bridge/common/dom/dom_div.h"
 
 #include "base/log/event_report.h"
-#include "core/common/ace_application_info.h"
 #include "core/components/focus_collaboration/focus_collaboration_component.h"
-#include "core/components/scroll/scroll_bar_theme.h"
-#include "core/components/scroll/scroll_fade_effect.h"
-#include "core/components/scroll/scroll_spring_effect.h"
-#include "core/components/theme/theme_manager.h"
 #include "frameworks/bridge/common/dom/dom_reflect_map.h"
 #include "frameworks/bridge/common/utils/utils.h"
 

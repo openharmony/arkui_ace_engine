@@ -82,6 +82,7 @@ public:
     {
         sideBarStatus_ = sideBarStatus;
         showSideBar_ = sideBarStatus_ == SideBarStatus::SHOW;
+        SetAccessibilityEvent();
     }
 
     void SetHasControlButton(bool hasControlButton)
@@ -150,6 +151,11 @@ public:
         WindowFocus(false);
     }
 
+    bool GetShowSideBar() const
+    {
+        return showSideBar_;
+    }
+
 private:
     void WindowFocus(bool isFocus);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -197,6 +203,8 @@ private:
     void OnLanguageConfigurationUpdate() override;
     void SetSideBarMask(bool isWindowFocus) const;
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
+    void RegisterElementInfoCallBack(const RefPtr<FrameNode>& buttonNode);
+    void SetAccessibilityEvent();
 
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<InputEvent> dividerMouseEvent_;
@@ -223,9 +231,9 @@ private:
     bool isRightToLeft_ = false;
     bool isInDividerDrag_ = false;
     bool isDividerDraggable_ = true;
-    bool isWindowFocus_ = true;
     bool isMousePressing_ = false;
     bool isResizeMouseStyle_ = false;
+    bool isWindowFocus_ = true;
 
     Dimension realSideBarWidth_ = -1.0_vp;
     Dimension preSidebarWidth_;

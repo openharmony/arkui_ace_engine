@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NODE_UTILS_H
 
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/interfaces/cjui/cjui_api.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/pipeline/pipeline_base.h"
 
@@ -32,6 +33,7 @@ namespace OHOS::Ace::NG {
 
 namespace NodeModifier {
     const ArkUIStateModifier* GetUIStateModifier();
+    const CJUIStateModifier* GetCJUIStateModifier();
 }
 
 template<typename T> OHOS::Ace::RefPtr<T> GetTheme()

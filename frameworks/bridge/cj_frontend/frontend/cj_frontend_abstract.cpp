@@ -234,8 +234,8 @@ void CJFrontendAbstract::ShowToast(
         auto toastInfo = NG::ToastInfo { .message = message,
             .duration = durationTime,
             .bottom = bottom,
-            .showMode = showMode,
             .isRightToLeft = isRightToLeft,
+            .showMode = showMode,
             .alignment = -1,
             .offset = std::nullopt };
         overlayManager->ShowToast(toastInfo, nullptr);
@@ -407,8 +407,8 @@ VectorStringHandle CJFrontendAbstract::GetSystemFontList()
 
 NativeOptionFontInfo CJFrontendAbstract::GetSystemFont(const std::string& fontName)
 {
-    auto fontInfo = new FontInfo;
-    if (!pipelineContextHolder_.Get()->GetSystemFont(fontName, *fontInfo)) {
+    FontInfo fontInfo;
+    if (!pipelineContextHolder_.Get()->GetSystemFont(fontName, fontInfo)) {
         return NativeOptionFontInfo {
             .hasValue = false,
             .info = nullptr
@@ -417,16 +417,16 @@ NativeOptionFontInfo CJFrontendAbstract::GetSystemFont(const std::string& fontNa
     return NativeOptionFontInfo {
         .hasValue = true,
         .info = new NativeFontInfo {
-            .path = fontInfo->path.c_str(),
-            .postScriptName = fontInfo->postScriptName.c_str(),
-            .fullName = fontInfo->fullName.c_str(),
-            .family = fontInfo->family.c_str(),
-            .subfamily = fontInfo->subfamily.c_str(),
-            .weight = fontInfo->weight,
-            .width = fontInfo->width,
-            .italic = fontInfo->italic,
-            .monoSpace = fontInfo->monoSpace,
-            .symbolic =  fontInfo->symbolic
+            .path = fontInfo.path.c_str(),
+            .postScriptName = fontInfo.postScriptName.c_str(),
+            .fullName = fontInfo.fullName.c_str(),
+            .family = fontInfo.family.c_str(),
+            .subfamily = fontInfo.subfamily.c_str(),
+            .weight = fontInfo.weight,
+            .width = fontInfo.width,
+            .italic = fontInfo.italic,
+            .monoSpace = fontInfo.monoSpace,
+            .symbolic =  fontInfo.symbolic
         }
     };
 }

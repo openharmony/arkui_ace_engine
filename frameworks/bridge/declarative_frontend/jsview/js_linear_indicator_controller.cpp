@@ -54,7 +54,7 @@ void JSLinearIndicatorController::SetProgress(const JSCallbackInfo& args)
     }
     auto arg0 = args[0];
     auto arg1 = args[1];
-    if (arg0->IsUndefined() || arg1->IsUndefined()) {
+    if (arg0->IsUndefined() || arg1->IsUndefined() || arg0->IsNull() || arg1->IsNull()) {
         JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "invalid param index or progress");
         return;
     }

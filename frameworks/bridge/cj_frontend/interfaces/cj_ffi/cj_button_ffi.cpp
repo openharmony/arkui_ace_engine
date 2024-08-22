@@ -15,11 +15,8 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_button_ffi.h"
 
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 #include "bridge/common/utils/utils.h"
-#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/button/button_model.h"
-#include "core/gestures/click_recognizer.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
@@ -90,18 +87,6 @@ void FfiOHOSAceFrameworkButtonSetAllBorderRadius(CJBorderRadius value)
     CalcDimension topRight(value.topRight, static_cast<DimensionUnit>(value.topRightUnit));
     CalcDimension bottomLeft(value.bottomLeft, static_cast<DimensionUnit>(value.bottomLeftUnit));
     CalcDimension bottomRight(value.bottomRight, static_cast<DimensionUnit>(value.bottomRightUnit));
-    if (topLeft.Unit() == DimensionUnit::PERCENT) {
-        topLeft.Reset();
-    }
-    if (topRight.Unit() == DimensionUnit::PERCENT) {
-        topRight.Reset();
-    }
-    if (bottomLeft.Unit() == DimensionUnit::PERCENT) {
-        bottomLeft.Reset();
-    }
-    if (bottomRight.Unit() == DimensionUnit::PERCENT) {
-        bottomRight.Reset();
-    }
     ButtonModel::GetInstance()->SetBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
 }
 

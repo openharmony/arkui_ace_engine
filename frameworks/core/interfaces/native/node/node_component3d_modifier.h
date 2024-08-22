@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIComponent3DModifier* GetComponent3DModifier();
+const CJUIComponent3DModifier* GetCJUIComponent3DModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_COMPONENT3D_MODIFIER_H

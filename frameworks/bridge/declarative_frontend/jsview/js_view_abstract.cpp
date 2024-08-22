@@ -171,7 +171,7 @@ constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
 constexpr float MAX_ANGLE = 360.0f;
 constexpr float DEFAULT_BIAS = 0.5f;
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
-const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location" };
+const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location", "datetime" };
 const std::vector<std::string> RESOURCE_HEADS = { "app", "sys" };
 const std::string SHEET_HEIGHT_MEDIUM = "medium";
 const std::string SHEET_HEIGHT_LARGE = "large";
@@ -2833,6 +2833,56 @@ void JSViewAbstract::ParseBlurOption(const JSRef<JSObject>& jsBlurOption, BlurOp
     }
 }
 
+void JSViewAbstract::ParseBlurStyleOption(const JSRef<JSObject>& jsOption, BlurStyleOption& styleOption)
+{
+    auto colorMode = static_cast<int32_t>(ThemeColorMode::SYSTEM);
+    ParseJsInt32(jsOption->GetProperty("colorMode"), colorMode);
+    if (colorMode >= static_cast<int32_t>(ThemeColorMode::SYSTEM) &&
+        colorMode <= static_cast<int32_t>(ThemeColorMode::DARK)) {
+        styleOption.colorMode = static_cast<ThemeColorMode>(colorMode);
+    }
+    auto adaptiveColor = static_cast<int32_t>(AdaptiveColor::DEFAULT);
+    ParseJsInt32(jsOption->GetProperty("adaptiveColor"), adaptiveColor);
+    if (adaptiveColor >= static_cast<int32_t>(AdaptiveColor::DEFAULT) &&
+        adaptiveColor <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
+        styleOption.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColor);
+    }
+
+    // policy
+    auto policy = static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_ACTIVE);
+    ParseJsInt32(jsOption->GetProperty("policy"), policy);
+    if (policy >= static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) &&
+        policy <= static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_INACTIVE)) {
+        styleOption.policy = static_cast<BlurStyleActivePolicy>(policy);
+    }
+
+    // blurType
+    auto blurType = static_cast<int32_t>(BlurType::WITHIN_WINDOW);
+    ParseJsInt32(jsOption->GetProperty("type"), blurType);
+    if (blurType >= static_cast<int32_t>(BlurType::WITHIN_WINDOW) &&
+        blurType <= static_cast<int32_t>(BlurType::BEHIND_WINDOW)) {
+        styleOption.blurType = static_cast<BlurType>(blurType);
+    }
+
+    // inactiveColor
+    if (ParseJsColor(jsOption->GetProperty("inactiveColor"), styleOption.inactiveColor)) {
+        styleOption.isValidColor = true;
+    }
+
+    // scale
+    if (jsOption->GetProperty("scale")->IsNumber()) {
+        double scale = jsOption->GetProperty("scale")->ToNumber<double>();
+        styleOption.scale = std::clamp(scale, 0.0, 1.0);
+    }
+
+    if (jsOption->GetProperty("blurOptions")->IsObject()) {
+        JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(jsOption->GetProperty("blurOptions"));
+        BlurOption blurOption;
+        ParseBlurOption(jsBlurOption, blurOption);
+        styleOption.blurOption = blurOption;
+    }
+}
+
 void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
 {
     if (info.Length() == 0) {
@@ -2848,29 +2898,7 @@ void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
     }
     if (info.Length() > 1 && info[1]->IsObject()) {
         JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[1]);
-        auto colorMode = static_cast<int32_t>(ThemeColorMode::SYSTEM);
-        ParseJsInt32(jsOption->GetProperty("colorMode"), colorMode);
-        if (colorMode >= static_cast<int32_t>(ThemeColorMode::SYSTEM) &&
-            colorMode <= static_cast<int32_t>(ThemeColorMode::DARK)) {
-            styleOption.colorMode = static_cast<ThemeColorMode>(colorMode);
-        }
-        auto adaptiveColor = static_cast<int32_t>(AdaptiveColor::DEFAULT);
-        ParseJsInt32(jsOption->GetProperty("adaptiveColor"), adaptiveColor);
-        if (adaptiveColor >= static_cast<int32_t>(AdaptiveColor::DEFAULT) &&
-            adaptiveColor <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
-            styleOption.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColor);
-        }
-        if (jsOption->GetProperty("scale")->IsNumber()) {
-            double scale = jsOption->GetProperty("scale")->ToNumber<double>();
-            styleOption.scale = std::clamp(scale, 0.0, 1.0);
-        }
-
-        if (jsOption->GetProperty("blurOptions")->IsObject()) {
-            JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(jsOption->GetProperty("blurOptions"));
-            BlurOption blurOption;
-            ParseBlurOption(jsBlurOption, blurOption);
-            styleOption.blurOption = blurOption;
-        }
+        ParseBlurStyleOption(jsOption, styleOption);
     }
     ViewAbstractModel::GetInstance()->SetBackgroundBlurStyle(styleOption);
 }
@@ -2931,20 +2959,24 @@ void JSViewAbstract::ParseEffectOption(const JSRef<JSObject>& jsOption, EffectOp
     if (!ParseJsDimensionVp(jsOption->GetProperty("radius"), radius) || LessNotEqual(radius.Value(), 0.0f)) {
         radius.SetValue(0.0f);
     }
+    effectOption.radius = radius;
+
     double saturation = 1.0f;
     if (jsOption->GetProperty("saturation")->IsNumber()) {
         saturation = jsOption->GetProperty("saturation")->ToNumber<double>();
         saturation = (saturation > 0.0f || NearZero(saturation)) ? saturation : 1.0f;
     }
+    effectOption.saturation = saturation;
+
     double brightness = 1.0f;
     if (jsOption->GetProperty("brightness")->IsNumber()) {
         brightness = jsOption->GetProperty("brightness")->ToNumber<double>();
         brightness = (brightness > 0.0f || NearZero(brightness)) ? brightness : 1.0f;
     }
-    Color color = Color::TRANSPARENT;
-    if (!ParseJsColor(jsOption->GetProperty("color"), color)) {
-        color.SetValue(Color::TRANSPARENT.GetValue());
-    }
+    effectOption.brightness = brightness;
+
+    ParseJsColor(jsOption->GetProperty("color"), effectOption.color);
+
     auto adaptiveColorValue = static_cast<int32_t>(AdaptiveColor::DEFAULT);
     auto adaptiveColor = AdaptiveColor::DEFAULT;
     ParseJsInt32(jsOption->GetProperty("adaptiveColor"), adaptiveColorValue);
@@ -2952,13 +2984,35 @@ void JSViewAbstract::ParseEffectOption(const JSRef<JSObject>& jsOption, EffectOp
         adaptiveColorValue <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
         adaptiveColor = static_cast<AdaptiveColor>(adaptiveColorValue);
     }
+    effectOption.adaptiveColor = adaptiveColor;
+
+    // policy
+    auto policy = static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_ACTIVE);
+    ParseJsInt32(jsOption->GetProperty("policy"), policy);
+    if (policy >= static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) &&
+        policy <= static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_INACTIVE)) {
+        effectOption.policy = static_cast<BlurStyleActivePolicy>(policy);
+    }
+
+    // blurType
+    auto blurType = static_cast<int32_t>(BlurType::WITHIN_WINDOW);
+    ParseJsInt32(jsOption->GetProperty("type"), blurType);
+    if (blurType >= static_cast<int32_t>(BlurType::WITHIN_WINDOW) &&
+        blurType <= static_cast<int32_t>(BlurType::BEHIND_WINDOW)) {
+        effectOption.blurType = static_cast<BlurType>(blurType);
+    }
+
+    // inactiveColor
+    if (ParseJsColor(jsOption->GetProperty("inactiveColor"), effectOption.inactiveColor)) {
+        effectOption.isValidColor = true;
+    }
 
     BlurOption blurOption;
     if (jsOption->GetProperty("blurOptions")->IsObject()) {
         JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(jsOption->GetProperty("blurOptions"));
         ParseBlurOption(jsBlurOption, blurOption);
+        effectOption.blurOption = blurOption;
     }
-    effectOption = { radius, saturation, brightness, color, adaptiveColor, blurOption };
 }
 
 void JSViewAbstract::JsForegroundEffect(const JSCallbackInfo& info)
@@ -3288,7 +3342,8 @@ void ParseMenuBorderRadius(const JSRef<JSObject>& menuOptions, NG::MenuParam& me
         CalcDimension topRight;
         CalcDimension bottomLeft;
         CalcDimension bottomRight;
-        JSViewAbstract::ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight);
+        bool hasSetBorderRadius =
+            JSViewAbstract::ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight);
         if (LessNotEqual(topLeft.Value(), 0.0f)) {
             topLeft.Reset();
         }
@@ -3301,10 +3356,11 @@ void ParseMenuBorderRadius(const JSRef<JSObject>& menuOptions, NG::MenuParam& me
         if (LessNotEqual(bottomRight.Value(), 0.0f)) {
             bottomRight.Reset();
         }
-        menuBorderRadius.radiusTopLeft = topLeft;
-        menuBorderRadius.radiusTopRight = topRight;
-        menuBorderRadius.radiusBottomLeft = bottomLeft;
-        menuBorderRadius.radiusBottomRight = bottomRight;
+        auto isRtl = hasSetBorderRadius && AceApplicationInfo::GetInstance().IsRightToLeft();
+        menuBorderRadius.radiusTopLeft = isRtl ? topRight : topLeft;
+        menuBorderRadius.radiusTopRight = isRtl ? topLeft : topRight;
+        menuBorderRadius.radiusBottomLeft = isRtl ? bottomRight : bottomLeft;
+        menuBorderRadius.radiusBottomRight = isRtl ? bottomLeft : bottomRight;
         menuBorderRadius.multiValued = true;
         menuParam.borderRadius = menuBorderRadius;
     }
@@ -3371,7 +3427,6 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
     }
 
     auto backgroundBlurStyle = menuOptions->GetProperty(static_cast<int32_t>(ArkUIIndex::BACKGROUND_BLUR_STYLE));
-    BlurStyleOption styleOption;
     if (backgroundBlurStyle->IsNumber()) {
         auto blurStyle = backgroundBlurStyle->ToNumber<int32_t>();
         if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
@@ -3632,7 +3687,7 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
         auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc), node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("BuildMenu");
-            PipelineContext::SetCallBackNode(node);
+            auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
             func->Execute();
         };
         ViewAbstractModel::GetInstance()->BindMenu({}, std::move(buildFunc), menuParam);
@@ -5469,7 +5524,7 @@ bool JSViewAbstract::ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, C
 
 bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result)
 {
-    if (jsValue->IsNumber() && jsValue->ToNumber<int64_t>() >= 0) {
+    if (jsValue->IsNumber()) {
         result = Color(ColorAlphaAdapt(jsValue->ToNumber<uint32_t>()));
         return true;
     }
@@ -5485,8 +5540,7 @@ bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result)
 bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result, const Color& defaultColor)
 {
     if (jsValue->IsNumber()) {
-        result = jsValue->ToNumber<int64_t>() >= 0 ? Color(ColorAlphaAdapt(jsValue->ToNumber<uint32_t>())) :
-            defaultColor;
+        result = Color(ColorAlphaAdapt(jsValue->ToNumber<uint32_t>()));
         return true;
     }
     if (jsValue->IsString()) {
@@ -6862,7 +6916,7 @@ void JSViewAbstract::JsMotionPath(const JSCallbackInfo& info)
     if (ParseMotionPath(jsVal, motionPathOption)) {
         ViewAbstractModel::GetInstance()->SetMotionPath(motionPathOption);
     } else {
-        LOGI("Parse animation motionPath failed. %{public}s", jsVal->ToString().c_str());
+        TAG_LOGI(AceLogTag::ACE_ANIMATION, "Parse animation motionPath failed. %{public}s", jsVal->ToString().c_str());
         ViewAbstractModel::GetInstance()->SetMotionPath(MotionPathOption());
     }
 }
@@ -6895,21 +6949,32 @@ void JSViewAbstract::JsBlendMode(const JSCallbackInfo& info)
     BlendApplyType blendApplyType = BlendApplyType::FAST;
     // for backward compatible, we temporary add a magic number to trigger offscreen, will remove soon
     constexpr int BACKWARD_COMPAT_MAGIC_NUMBER_OFFSCREEN = 1000;
+    constexpr int BACKWARD_COMPAT_SOURCE_IN_NUMBER_OFFSCREEN = 2000;
+    constexpr int BACKWARD_COMPAT_DESTINATION_IN_NUMBER_OFFSCREEN = 3000;
+    constexpr int BACKWARD_COMPAT_MAGIC_NUMBER_SRC_IN = 5000;
     if (info[0]->IsNumber()) {
         auto blendModeNum = info[0]->ToNumber<int32_t>();
-        if (blendModeNum >= static_cast<int>(BlendMode::NONE) &&
-            blendModeNum <= static_cast<int>(BlendMode::LUMINOSITY)) {
+        if (blendModeNum >= 0 && blendModeNum < static_cast<int>(BlendMode::MAX)) {
             blendMode = static_cast<BlendMode>(blendModeNum);
         } else if (blendModeNum == BACKWARD_COMPAT_MAGIC_NUMBER_OFFSCREEN) {
             // backward compatibility code, will remove soon
             blendMode = BlendMode::SRC_OVER;
             blendApplyType = BlendApplyType::OFFSCREEN;
+        } else if (blendModeNum == BACKWARD_COMPAT_SOURCE_IN_NUMBER_OFFSCREEN) {
+            // backward compatibility code, will remove soon
+            blendMode = BlendMode::SRC_IN;
+            blendApplyType = BlendApplyType::OFFSCREEN;
+        } else if (blendModeNum == BACKWARD_COMPAT_DESTINATION_IN_NUMBER_OFFSCREEN) {
+            // backward compatibility code, will remove soon
+            blendMode = BlendMode::DST_IN;
+            blendApplyType = BlendApplyType::OFFSCREEN;
+        } else if (blendModeNum == BACKWARD_COMPAT_MAGIC_NUMBER_SRC_IN) {
+            blendMode = BlendMode::BACK_COMPAT_SOURCE_IN;
         }
     }
     if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsNumber()) {
         auto blendApplyTypeNum = info[1]->ToNumber<int32_t>();
-        if (blendApplyTypeNum >= static_cast<int>(BlendApplyType::FAST) &&
-            blendApplyTypeNum <= static_cast<int>(BlendApplyType::OFFSCREEN)) {
+        if (blendApplyTypeNum >= 0 && blendApplyTypeNum < static_cast<int>(BlendApplyType::MAX)) {
             blendApplyType = static_cast<BlendApplyType>(blendApplyTypeNum);
         }
     }
@@ -7582,7 +7647,7 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     if (responseType != ResponseType::LONG_PRESS) {
         menuParam.previewMode = MenuPreviewMode::NONE;
         menuParam.isShowHoverImage = false;
-        menuParam.menuBindType = NG::MenuBindingType::RIGHT_CLICK;
+        menuParam.menuBindType = MenuBindingType::RIGHT_CLICK;
     }
     menuParam.type = NG::MenuType::CONTEXT_MENU;
     ViewAbstractModel::GetInstance()->BindContextMenu(responseType, buildFunc, menuParam, previewBuildFunc);
@@ -9196,8 +9261,7 @@ bool JSViewAbstract::ParseJsResource(const JSRef<JSVal>& jsValue, CalcDimension&
     return false;
 }
 
-bool JSViewAbstract::ParseDataDetectorConfig(
-    const JSCallbackInfo& info, std::string& types, std::function<void(const std::string&)>& onResult)
+bool JSViewAbstract::ParseDataDetectorConfig(const JSCallbackInfo& info, TextDetectConfig& textDetectConfig)
 {
     JSRef<JSVal> arg = info[0];
     if (!arg->IsObject()) {
@@ -9216,21 +9280,54 @@ bool JSViewAbstract::ParseDataDetectorConfig(
             return false;
         }
         if (i != 0) {
-            types.append(",");
+            textDetectConfig.types.append(",");
         }
-        types.append(TEXT_DETECT_TYPES[index]);
+        textDetectConfig.types.append(TEXT_DETECT_TYPES[index]);
     }
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     JSRef<JSVal> resultCallback = obj->GetProperty("onDetectResultUpdate");
     if (resultCallback->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsClipboardFunction>(JSRef<JSFunc>::Cast(resultCallback));
-        onResult = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
+        textDetectConfig.onResult = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
                        const std::string& result) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             PipelineContext::SetCallBackNode(node);
             func->Execute(result);
         };
     }
+
+    return ParseAIEntityColor(obj, textDetectConfig);
+}
+
+bool JSViewAbstract::ParseAIEntityColor(const JSRef<JSObject>& obj, TextDetectConfig& textDetectConfig)
+{
+    JSRef<JSVal> entityColorValue = obj->GetProperty("color");
+    ParseJsColor(entityColorValue, textDetectConfig.entityColor);
+
+    JSRef<JSVal> decorationValue = obj->GetProperty("decoration");
+    if (decorationValue->IsUndefined() || !decorationValue->IsObject()) {
+        textDetectConfig.entityDecorationColor = textDetectConfig.entityColor;
+        return true;
+    }
+    JSRef<JSObject> decorationObj = JSRef<JSObject>::Cast(decorationValue);
+    JSRef<JSVal> typeValue = decorationObj->GetProperty("type");
+    JSRef<JSVal> colorValue = decorationObj->GetProperty("color");
+    JSRef<JSVal> styleValue = decorationObj->GetProperty("style");
+
+    if (typeValue->IsNumber()) {
+        textDetectConfig.entityDecorationType = static_cast<TextDecoration>(typeValue->ToNumber<int32_t>());
+    } else {
+        textDetectConfig.entityDecorationType = TextDecoration::UNDERLINE;
+    }
+    if (!ParseJsColor(colorValue, textDetectConfig.entityDecorationColor)) {
+        textDetectConfig.entityDecorationColor = textDetectConfig.entityColor;
+    }
+    if (styleValue->IsNumber()) {
+         textDetectConfig.entityDecorationStyle = static_cast<TextDecorationStyle>(styleValue->ToNumber<int32_t>());
+    } else {
+        textDetectConfig.entityDecorationStyle = TextDecorationStyle::SOLID;
+    }
+
     return true;
 }
 
@@ -9584,7 +9681,16 @@ void JSViewAbstract::JsOnClick(const JSCallbackInfo& info)
         JSInteractableView::ReportClickEvent(node);
 #endif
     };
-    ViewAbstractModel::GetInstance()->SetOnClick(std::move(tmpOnTap), std::move(onClick));
+
+    double distanceThreshold = std::numeric_limits<double>::infinity();
+    if (info.Length() > 1 && info[1]->IsNumber()) {
+        distanceThreshold = info[1]->ToNumber<double>();
+        if (distanceThreshold < 0) {
+            distanceThreshold = std::numeric_limits<double>::infinity();
+        }
+    }
+    distanceThreshold = Dimension(distanceThreshold, DimensionUnit::VP).ConvertToPx();
+    ViewAbstractModel::GetInstance()->SetOnClick(std::move(tmpOnTap), std::move(onClick), distanceThreshold);
 }
 
 void JSViewAbstract::JsOnGestureJudgeBegin(const JSCallbackInfo& info)
@@ -9638,8 +9744,8 @@ void JSViewAbstract::JsShouldBuiltInRecognizerParallelWith(const JSCallbackInfo&
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto shouldBuiltInRecognizerParallelWithFunc =
         [execCtx = info.GetExecutionContext(), func = jsParallelInnerGestureToFunc, node = frameNode](
-            const RefPtr<TouchEventTarget>& current,
-            const std::vector<RefPtr<TouchEventTarget>>& others) -> RefPtr<NG::NGGestureRecognizer> {
+            const RefPtr<NG::NGGestureRecognizer>& current,
+            const std::vector<RefPtr<NG::NGGestureRecognizer>>& others) -> RefPtr<NG::NGGestureRecognizer> {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, nullptr);
         ACE_SCORING_EVENT("shouldBuiltInRecognizerParallelWith");
         PipelineContext::SetCallBackNode(node);
@@ -10436,11 +10542,11 @@ void JSViewAbstract::JsFocusScopeId(const JSCallbackInfo& info)
     if (info.Length() == 0) {
         return;
     }
-    if (!info[0]->IsString() || info[0]->IsNull() || info[0]->IsUndefined()) {
-        return;
-    }
 
-    std::string focusScopeId = info[0]->ToString();
+    std::string focusScopeId;
+    if (info[0]->IsString()) {
+        focusScopeId = info[0]->ToString();
+    }
 
     bool isGroup = false;
     if (info.Length() == PARAMETER_LENGTH_SECOND && !info[0]->IsNull() && !info[0]->IsUndefined() &&
@@ -10734,5 +10840,36 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_ParseJsMedia(void* value, void* resour
     res->src = src;
     res->bundleName = bundleName;
     res->moduleName = moduleName;
+}
+
+void JSViewAbstract::SetTextStyleApply(const JSCallbackInfo& info,
+    std::function<void(WeakPtr<NG::FrameNode>)>& textStyleApply, const JSRef<JSVal>& modifierObj)
+{
+    if (!modifierObj->IsObject()) {
+        textStyleApply = nullptr;
+        return;
+    }
+    auto vm = info.GetVm();
+    auto globalObj = JSNApi::GetGlobalObject(vm);
+    auto globalFunc = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "applyTextModifierToNode"));
+    JsiValue jsiValue(globalFunc);
+    JsiRef<JsiValue> globalFuncRef = JsiRef<JsiValue>::Make(jsiValue);
+    if (!globalFuncRef->IsFunction()) {
+        textStyleApply = nullptr;
+        return;
+    }
+    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(globalFuncRef));
+    auto onApply = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                    modifierParam = std::move(modifierObj)](WeakPtr<NG::FrameNode> frameNode) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto node = frameNode.Upgrade();
+        CHECK_NULL_VOID(node);
+        JSRef<JSVal> params[2];
+        params[0] = modifierParam;
+        params[1] = JSRef<JSVal>::Make(panda::NativePointerRef::New(execCtx.vm_, AceType::RawPtr(node)));
+        PipelineContext::SetCallBackNode(node);
+        func->ExecuteJS(2, params);
+    };
+    textStyleApply = onApply;
 }
 } // namespace OHOS::Ace::Framework

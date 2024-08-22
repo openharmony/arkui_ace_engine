@@ -15,12 +15,9 @@
 
 #include "waterflow_section_option.h"
 
-#include <cstdint>
-#include <vector>
 
 #include "native_type.h"
 
-#include "base/utils/utils.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,7 +34,7 @@ ArkUI_WaterFlowSectionOption* OH_ArkUI_WaterFlowSectionOption_Create()
 }
 
 // 释放函数
-void OH_ArkUI_WaterFlowSectionOption_Destroy(ArkUI_WaterFlowSectionOption* option)
+void OH_ArkUI_WaterFlowSectionOption_Dispose(ArkUI_WaterFlowSectionOption* option)
 {
     if (option != nullptr) {
         delete option;
@@ -48,6 +45,9 @@ void OH_ArkUI_WaterFlowSectionOption_Destroy(ArkUI_WaterFlowSectionOption* optio
 void OH_ArkUI_WaterFlowSectionOption_SetSize(ArkUI_WaterFlowSectionOption* option, int32_t size)
 {
     CHECK_NULL_VOID(option);
+    if (size < 0) {
+        return;
+    }
     option->sections.resize(size);
 }
 
@@ -73,6 +73,9 @@ void OH_ArkUI_WaterFlowSectionOption_SetCrossCount(
     CHECK_NULL_VOID(option);
     if (index < 0) {
         return;
+    }
+    if (crossCount <= 0) {
+        crossCount = 1;
     }
     auto size = static_cast<int32_t>(option->sections.size());
     if (size == 0 || size <= index + 1) {

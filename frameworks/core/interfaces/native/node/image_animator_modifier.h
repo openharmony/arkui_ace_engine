@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIImageAnimatorModifier* GetImageAnimatorModifier();
+const CJUIImageAnimatorModifier* GetCJUIImageAnimatorModifier();
 void SetImageAnimatorOnStart(ArkUINodeHandle node, void* extraParam);
 void SetImageAnimatorOnPause(ArkUINodeHandle node, void* extraParam);
 void SetImageAnimatorOnRepeat(ArkUINodeHandle node, void* extraParam);

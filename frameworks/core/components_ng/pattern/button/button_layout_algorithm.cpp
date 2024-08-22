@@ -311,6 +311,7 @@ void ButtonLayoutAlgorithm::MarkNeedFlushMouseEvent(LayoutWrapper* layoutWrapper
     if (frameSize != pattern->GetPreFrameSize()) {
         pattern->SetPreFrameSize(frameSize);
         auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
         context->MarkNeedFlushMouseEvent();
     }
 }
@@ -329,20 +330,26 @@ bool ButtonLayoutAlgorithm::NeedAgingMeasure(LayoutWrapper* layoutWrapper)
     if (buttonLayoutProperty->HasControlSize() && buttonLayoutProperty->GetControlSize() == ControlSize::SMALL) {
         agingPadding = buttonTheme->GetAgingSmallPadding().ConvertToPx() * 2.0f;
     }
-    auto geometryNode = layoutWrapper->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, false);
-    auto frameSize = geometryNode->GetFrameSize();
-    if (buttonLayoutProperty->HasLabel()) {
-        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-        CHECK_NULL_RETURN(childWrapper, false);
-        auto childGeometryNode = childWrapper->GetGeometryNode();
-        CHECK_NULL_RETURN(childGeometryNode, false);
-        auto childFrameSize = childGeometryNode->GetContentSize();
-        frameSize.SetHeight(childFrameSize.Height() + agingPadding);
-    } else {
-        frameSize.SetHeight(frameSize.Height() + agingPadding);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, false);
+    auto pattern = host->GetPattern<ButtonPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    if (!pattern->GetHasCustomPadding()) {
+        auto geometryNode = layoutWrapper->GetGeometryNode();
+        CHECK_NULL_RETURN(geometryNode, false);
+        auto frameSize = geometryNode->GetFrameSize();
+        if (buttonLayoutProperty->HasLabel()) {
+            auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+            CHECK_NULL_RETURN(childWrapper, false);
+            auto childGeometryNode = childWrapper->GetGeometryNode();
+            CHECK_NULL_RETURN(childGeometryNode, false);
+            auto childFrameSize = childGeometryNode->GetContentSize();
+            frameSize.SetHeight(childFrameSize.Height() + agingPadding);
+        } else {
+            frameSize.SetHeight(frameSize.Height() + agingPadding);
+        }
+        geometryNode->SetFrameSize(frameSize);
     }
-    geometryNode->SetFrameSize(frameSize);
     HandleBorderRadius(layoutWrapper);
     return true;
 }
@@ -364,7 +371,8 @@ bool ButtonLayoutAlgorithm::IsAging(LayoutWrapper* layoutWrapper)
         return false;
     }
     const auto& calcConstraint = buttonLayoutProperty->GetCalcLayoutConstraint();
-    if (calcConstraint && calcConstraint->selfIdealSize.has_value()) {
+    if (calcConstraint && calcConstraint->selfIdealSize->Height().has_value() &&
+        calcConstraint->selfIdealSize->Width().has_value()) {
         return false;
     }
     auto pipeline = NG::PipelineContext::GetCurrentContextSafely();

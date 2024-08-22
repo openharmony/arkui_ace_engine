@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_segmented_layout.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_paint_method.h"
+#include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
 
 namespace OHOS::Ace::NG {
 SizeF WaterFlowPattern::GetContentSize() const
@@ -399,6 +400,17 @@ Rect WaterFlowPattern::GetItemRect(int32_t index) const
         itemGeometry->GetFrameRect().Width(), itemGeometry->GetFrameRect().Height());
 }
 
+int32_t WaterFlowPattern::GetItemIndex(double x, double y) const
+{
+    for (int32_t index = layoutInfo_->FirstIdx(); index <= layoutInfo_->endIndex_; ++index) {
+        Rect rect = GetItemRect(index);
+        if (rect.IsInRegion({x, y})) {
+            return index;
+        }
+    }
+    return -1;
+}
+
 RefPtr<WaterFlowSections> WaterFlowPattern::GetSections() const
 {
     return sections_;
@@ -410,27 +422,29 @@ RefPtr<WaterFlowSections> WaterFlowPattern::GetOrCreateWaterFlowSections()
         return sections_;
     }
     sections_ = AceType::MakeRefPtr<WaterFlowSections>();
+    auto sectionChangeCallback = [weakPattern = WeakClaim(this)](int32_t start, int32_t count) {
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->NotifyDataChange(start, count);
+    };
     auto callback = [weakPattern = WeakClaim(this)](int32_t start) {
         auto pattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto context = PipelineContext::GetCurrentContextSafely();
-        CHECK_NULL_VOID(context);
-        context->AddBuildFinishCallBack([weakPattern, start]() {
-            auto pattern = weakPattern.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->OnSectionChanged(start);
-        });
-        context->RequestFrame();
+        pattern->AddSectionChangeStartPos(start);
     };
     sections_->SetOnDataChange(callback);
+    sections_->SetNotifyDataChange(sectionChangeCallback);
     return sections_;
 }
 
 void WaterFlowPattern::OnSectionChanged(int32_t start)
 {
-    layoutInfo_->InitSegments(sections_->GetSectionInfo(), start);
-
-    MarkDirtyNodeSelf();
+    if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW && keepContentPosition_) {
+        layoutInfo_->InitSegmentsForKeepPositionMode(
+            sections_->GetSectionInfo(), sections_->GetPrevSectionInfo(), start);
+    } else {
+        layoutInfo_->InitSegments(sections_->GetSectionInfo(), start);
+    }
 }
 
 void WaterFlowPattern::ResetSections()
@@ -605,60 +619,14 @@ int32_t WaterFlowPattern::GetChildrenCount() const
     return 0;
 }
 
-void WaterFlowPattern::DumpAdvanceInfo()
+void WaterFlowPattern::NotifyDataChange(int32_t index, int32_t count)
 {
-    auto property = GetLayoutProperty<WaterFlowLayoutProperty>();
-    CHECK_NULL_VOID(property);
-    ScrollablePattern::DumpAdvanceInfo();
-    auto info = DynamicCast<WaterFlowLayoutInfo>(layoutInfo_);
-    std::vector<std::string> scrollAlign = { "START", "CENTER", "END", "AUTO", "NONE" };
-
-    DumpLog::GetInstance().AddDesc("currentOffset:" + std::to_string(info->currentOffset_));
-    DumpLog::GetInstance().AddDesc("prevOffset:" + std::to_string(info->prevOffset_));
-    DumpLog::GetInstance().AddDesc("lastMainSize:" + std::to_string(info->lastMainSize_));
-    DumpLog::GetInstance().AddDesc("maxHeight:" + std::to_string(info->maxHeight_));
-    DumpLog::GetInstance().AddDesc("startIndex:" + std::to_string(info->startIndex_));
-    DumpLog::GetInstance().AddDesc("endIndex:" + std::to_string(info->endIndex_));
-    DumpLog::GetInstance().AddDesc("jumpIndex:" + std::to_string(info->jumpIndex_));
-    DumpLog::GetInstance().AddDesc("childrenCount:" + std::to_string(info->childrenCount_));
-
-    DumpLog::GetInstance().AddDesc("RowsTemplate:", property->GetRowsTemplate()->c_str());
-    DumpLog::GetInstance().AddDesc("ColumnsTemplate:", property->GetColumnsTemplate()->c_str());
-    DumpLog::GetInstance().AddDesc("CachedCount:" + std::to_string(property->GetCachedCount().value_or(1)));
-    DumpLog::GetInstance().AddDesc("ScrollAlign:" + scrollAlign[static_cast<int32_t>(layoutInfo_->align_)]);
-
-    property->IsReverse() ? DumpLog::GetInstance().AddDesc("isReverse:true")
-                          : DumpLog::GetInstance().AddDesc("isReverse:false");
-    info->itemStart_ ? DumpLog::GetInstance().AddDesc("itemStart:true")
-                     : DumpLog::GetInstance().AddDesc("itemStart:false");
-    info->itemEnd_ ? DumpLog::GetInstance().AddDesc("itemEnd:true") : DumpLog::GetInstance().AddDesc("itemEnd:false");
-    info->offsetEnd_ ? DumpLog::GetInstance().AddDesc("offsetEnd:true")
-                     : DumpLog::GetInstance().AddDesc("offsetEnd:false");
-    footer_.Upgrade() ? DumpLog::GetInstance().AddDesc("footer:true") : DumpLog::GetInstance().AddDesc("footer:false");
-
-    property->GetItemMinSize().has_value()
-        ? DumpLog::GetInstance().AddDesc("ItemMinSize:" + property->GetItemMinSize().value().ToString())
-        : DumpLog::GetInstance().AddDesc("ItemMinSize:null");
-    property->GetItemMaxSize().has_value()
-        ? DumpLog::GetInstance().AddDesc("ItemMaxSize:" + property->GetItemMaxSize().value().ToString())
-        : DumpLog::GetInstance().AddDesc("ItemMaxSize:null");
-
-    if (sections_) {
-        DumpLog::GetInstance().AddDesc("-----------start print sections_------------");
-        std::string res = std::string("");
-        int32_t index = 0;
-        for (const auto& section : sections_->GetSectionInfo()) {
-            res.append("[section:" + std::to_string(index) + "]");
-            res.append("{ itemCount:" + std::to_string(section.itemsCount) + " },")
-                .append("{ crossCount:" + std::to_string(section.crossCount.value_or(1)) + " },")
-                .append("{ columnsGap:" + section.columnsGap.value_or(Dimension(0.0)).ToString() + " },")
-                .append("{ rowsGap:" + section.rowsGap.value_or(Dimension(0.0)).ToString() + " },")
-                .append("{ margin:[" + section.margin.value_or(MarginProperty()).ToString() + " ]}");
-            DumpLog::GetInstance().AddDesc(res);
-            res.clear();
-            index++;
+    if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW && keepContentPosition_) {
+        if (footer_.Upgrade()) {
+            layoutInfo_->NotifyDataChange(index - 1, count);
+        } else {
+            layoutInfo_->NotifyDataChange(index, count);
         }
-        DumpLog::GetInstance().AddDesc("-----------end print sections_------------");
     }
 }
 
@@ -734,5 +702,70 @@ std::function<bool(int32_t)> WaterFlowPattern::GetScrollIndexAbility()
         }
         return true;
     };
+}
+
+void WaterFlowPattern::DumpAdvanceInfo()
+{
+    auto property = GetLayoutProperty<WaterFlowLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    ScrollablePattern::DumpAdvanceInfo();
+    auto info = DynamicCast<WaterFlowLayoutInfo>(layoutInfo_);
+    std::vector<std::string> scrollAlign = { "START", "CENTER", "END", "AUTO", "NONE" };
+
+    DumpLog::GetInstance().AddDesc("currentOffset:" + std::to_string(info->currentOffset_));
+    DumpLog::GetInstance().AddDesc("prevOffset:" + std::to_string(info->prevOffset_));
+    DumpLog::GetInstance().AddDesc("lastMainSize:" + std::to_string(info->lastMainSize_));
+    DumpLog::GetInstance().AddDesc("maxHeight:" + std::to_string(info->maxHeight_));
+    DumpLog::GetInstance().AddDesc("startIndex:" + std::to_string(info->startIndex_));
+    DumpLog::GetInstance().AddDesc("endIndex:" + std::to_string(info->endIndex_));
+    DumpLog::GetInstance().AddDesc("jumpIndex:" + std::to_string(info->jumpIndex_));
+    DumpLog::GetInstance().AddDesc("childrenCount:" + std::to_string(info->childrenCount_));
+
+    DumpLog::GetInstance().AddDesc("RowsTemplate:", property->GetRowsTemplate()->c_str());
+    DumpLog::GetInstance().AddDesc("ColumnsTemplate:", property->GetColumnsTemplate()->c_str());
+    DumpLog::GetInstance().AddDesc("CachedCount:" + std::to_string(property->GetCachedCount().value_or(1)));
+    DumpLog::GetInstance().AddDesc("ScrollAlign:" + scrollAlign[static_cast<int32_t>(layoutInfo_->align_)]);
+
+    property->IsReverse() ? DumpLog::GetInstance().AddDesc("isReverse:true")
+                          : DumpLog::GetInstance().AddDesc("isReverse:false");
+    info->itemStart_ ? DumpLog::GetInstance().AddDesc("itemStart:true")
+                     : DumpLog::GetInstance().AddDesc("itemStart:false");
+    info->itemEnd_ ? DumpLog::GetInstance().AddDesc("itemEnd:true") : DumpLog::GetInstance().AddDesc("itemEnd:false");
+    info->offsetEnd_ ? DumpLog::GetInstance().AddDesc("offsetEnd:true")
+                     : DumpLog::GetInstance().AddDesc("offsetEnd:false");
+    footer_.Upgrade() ? DumpLog::GetInstance().AddDesc("footer:true") : DumpLog::GetInstance().AddDesc("footer:false");
+
+    property->GetItemMinSize().has_value()
+        ? DumpLog::GetInstance().AddDesc("ItemMinSize:" + property->GetItemMinSize().value().ToString())
+        : DumpLog::GetInstance().AddDesc("ItemMinSize:null");
+    property->GetItemMaxSize().has_value()
+        ? DumpLog::GetInstance().AddDesc("ItemMaxSize:" + property->GetItemMaxSize().value().ToString())
+        : DumpLog::GetInstance().AddDesc("ItemMaxSize:null");
+
+    if (sections_) {
+        DumpLog::GetInstance().AddDesc("-----------start print sections_------------");
+        std::string res = std::string("");
+        int32_t index = 0;
+        for (const auto& section : sections_->GetSectionInfo()) {
+            res.append("[section:" + std::to_string(index) + "]");
+            res.append("{ itemCount:" + std::to_string(section.itemsCount) + " },")
+                .append("{ crossCount:" + std::to_string(section.crossCount.value_or(1)) + " },")
+                .append("{ columnsGap:" + section.columnsGap.value_or(Dimension(0.0)).ToString() + " },")
+                .append("{ rowsGap:" + section.rowsGap.value_or(Dimension(0.0)).ToString() + " },")
+                .append("{ margin:[" + section.margin.value_or(MarginProperty()).ToString() + " ]}");
+            DumpLog::GetInstance().AddDesc(res);
+            res.clear();
+            index++;
+        }
+        DumpLog::GetInstance().AddDesc("-----------end print sections_------------");
+    }
+}
+
+void WaterFlowPattern::BeforeCreateLayoutWrapper()
+{
+    for (const auto& start : sectionChangeStartPos_) {
+        OnSectionChanged(start);
+    }
+    sectionChangeStartPos_.clear();
 }
 } // namespace OHOS::Ace::NG

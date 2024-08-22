@@ -15,9 +15,6 @@
 
 #include "base/utils/date_util.h"
 
-#include <chrono>
-#include <ctime>
-
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace {

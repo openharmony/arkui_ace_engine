@@ -50,6 +50,7 @@ constexpr char FORM_ADAPTOR_RESOURCE_NAME[] = "formAdaptor";
 constexpr char NTC_PARAM_RICH_TEXT[] = "formAdaptor";
 constexpr char FORM_RENDERER_PROCESS_ON_ADD_SURFACE[] = "ohos.extra.param.key.process_on_add_surface";
 constexpr char FORM_RENDERER_DISPATCHER[] = "ohos.extra.param.key.process_on_form_renderer_dispatcher";
+constexpr char PARAM_FORM_MIGRATE_FORM_KEY[] = "ohos.extra.param.key.migrate_form";
 constexpr int32_t RENDER_DEAD_CODE = 16501006;
 constexpr int32_t FORM_NOT_TRUST_CODE = 16501007;
 constexpr char ALLOW_UPDATE[] = "allowUpdate";
@@ -207,16 +208,25 @@ void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo
 
     bool needHandleCachedClick =
         want.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT, false);
-    bool isRecover = recycleStatus_ == RecycleStatus::RECYCLED || needHandleCachedClick;
+    bool isRecover = recycleStatus_ != RecycleStatus::RECOVERED || needHandleCachedClick;
     AAFwk::Want newWant;
     newWant.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_DYNAMIC, formInfo.isDynamic);
     newWant.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM, isRecover);
     newWant.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT, needHandleCachedClick);
 
+    std::lock_guard<std::mutex> lock(accessibilityChildTreeRegisterMutex_);
     onFormSurfaceNodeCallback_(rsSurfaceNode, newWant);
-    if (!formRendererDispatcher_) {
-        sptr<IRemoteObject> proxy = want.GetRemoteObject(FORM_RENDERER_DISPATCHER);
+
+    sptr<IRemoteObject> proxy = want.GetRemoteObject(FORM_RENDERER_DISPATCHER);
+    if (proxy != nullptr) {
         formRendererDispatcher_ = iface_cast<IFormRendererDispatcher>(proxy);
+    } else {
+        TAG_LOGE(AceLogTag::ACE_FORM, "want renderer dispatcher null");
+    }
+
+    {
+        std::lock_guard<std::mutex> lock(recycleMutex_);
+        recycleStatus_ = RecycleStatus::RECOVERED;
     }
 
     isDynamic_ = formInfo.isDynamic;
@@ -239,7 +249,6 @@ void FormManagerDelegate::HandleCachedClickEvents()
         std::lock_guard<std::mutex> lock(recycleMutex_);
         TAG_LOGI(AceLogTag::ACE_FORM, "process click event after recover form, pointerEventCache_.size: %{public}s",
             std::to_string(pointerEventCache_.size()).c_str());
-        recycleStatus_ = RecycleStatus::RECOVERED;
         for (const auto& pointerEvent : pointerEventCache_) {
             SerializedGesture serializedGesture;
             formRendererDispatcher_->DispatchPointerEvent(pointerEvent, serializedGesture);
@@ -822,11 +831,11 @@ void FormManagerDelegate::HandleEnableFormCallback(const bool enable)
 
 void FormManagerDelegate::ReAddForm()
 {
-    {
-        std::lock_guard<std::mutex> lock(recycleMutex_);
-        recycleStatus_ = RecycleStatus::RECOVERED;
-    }
     formRendererDispatcher_ = nullptr; // formRendererDispatcher_ need reset, otherwise PointerEvent will disable
+    if (wantCache_.HasParameter(PARAM_FORM_MIGRATE_FORM_KEY)) {
+        TAG_LOGW(AceLogTag::ACE_FORM, "Remove migrate form key.");
+        wantCache_.RemoveParam(PARAM_FORM_MIGRATE_FORM_KEY);
+    }
     auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
     auto ret =
         OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(formJsInfo_.formId, wantCache_, clientInstance, formJsInfo_);
@@ -846,6 +855,7 @@ void FormManagerDelegate::SetObscured(bool isObscured)
 
 void FormManagerDelegate::OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId)
 {
+    std::lock_guard<std::mutex> lock(accessibilityChildTreeRegisterMutex_);
     CHECK_NULL_VOID(formRendererDispatcher_);
     formRendererDispatcher_->OnAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
 }

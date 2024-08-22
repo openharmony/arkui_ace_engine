@@ -46,7 +46,8 @@ std::string GetDeclaration(const std::optional<Color>& color, const std::optiona
         "type", V2::ConvertWrapTextDecorationToStirng(textDecoration.value_or(TextDecoration::NONE)).c_str());
     jsonSpanDeclaration->Put("color", (color.value_or(Color::BLACK).ColorToString()).c_str());
     jsonSpanDeclaration->Put("style",
-        V2::ConvertWrapTextDecorationStyleToString(textDecorationStyle.value_or(TextDecorationStyle::SOLID)).c_str());
+        V2::ConvertWrapTextDecorationStyleToString(textDecorationStyle.value_or(TextDecorationStyle::SOLID))
+            .c_str());
     return jsonSpanDeclaration->ToString();
 }
 inline std::unique_ptr<JsonValue> ConvertShadowToJson(const Shadow& shadow)
@@ -262,14 +263,21 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
     if (NearZero(textStyle.GetFontSize().Value())) {
         return -1;
     }
-    textStyle.SetHalfLeading(pipelineContext->GetHalfLeading());
+    auto textLayoutProp = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    if (textLayoutProp && textLayoutProp->HasHalfLeading()) {
+        textStyle.SetHalfLeading(textLayoutProp->GetHalfLeadingValue(false));
+    } else {
+        textStyle.SetHalfLeading(pipelineContext->GetHalfLeading());
+    }
 
     auto spanContent = GetSpanContent(content, isMarquee);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, -1);
     textStyle.SetTextBackgroundStyle(backgroundStyle);
     if (pattern->NeedShowAIDetect() && !aiSpanMap.empty()) {
-        UpdateTextStyleForAISpan(spanContent, builder, textStyle);
+        TextStyle aiSpanStyle = textStyle;
+        pattern->ModifyAISpanStyle(aiSpanStyle);
+        UpdateTextStyleForAISpan(spanContent, builder, textStyle, aiSpanStyle);
     } else {
         UpdateTextStyle(spanContent, builder, textStyle, selectedStart, selectedEnd);
     }
@@ -293,8 +301,13 @@ void SpanItem::UpdateSymbolSpanParagraph(const RefPtr<FrameNode>& frameNode, con
         if (NearZero(themeTextStyle.GetFontSize().Value())) {
             return;
         }
+        auto textLayoutProp = frameNode->GetLayoutProperty<TextLayoutProperty>();
+        if (textLayoutProp && textLayoutProp->HasHalfLeading()) {
+            themeTextStyle.SetHalfLeading(textLayoutProp->GetHalfLeadingValue(false));
+        } else {
+            themeTextStyle.SetHalfLeading(pipelineContext->GetHalfLeading());
+        }
         textStyle = themeTextStyle;
-        textStyle->SetHalfLeading(pipelineContext->GetHalfLeading());
         if (symbolUnicode != 0) {
             UpdateSymbolSpanColor(frameNode, themeTextStyle);
         }
@@ -330,8 +343,8 @@ void SpanItem::UpdateSymbolSpanColor(const RefPtr<FrameNode>& frameNode, TextSty
     }
 }
 
-void SpanItem::UpdateTextStyleForAISpan(
-    const std::string& spanContent, const RefPtr<Paragraph>& builder, const TextStyle& textStyle)
+void SpanItem::UpdateTextStyleForAISpan(const std::string& spanContent, const RefPtr<Paragraph>& builder,
+    const TextStyle& textStyle, const TextStyle& aiSpanStyle)
 {
     auto wSpanContent = StringUtils::ToWstring(spanContent);
     int32_t wSpanContentLength = static_cast<int32_t>(wSpanContent.length());
@@ -340,8 +353,6 @@ void SpanItem::UpdateTextStyleForAISpan(
         spanStart -= 1;
     }
     int32_t preEnd = spanStart;
-    std::optional<TextStyle> aiSpanTextStyle = textStyle;
-    SetAiSpanTextStyle(aiSpanTextStyle);
     while (!aiSpanMap.empty()) {
         auto aiSpan = aiSpanMap.begin()->second;
         if (aiSpan.start >= position || preEnd >= position) {
@@ -364,7 +375,7 @@ void SpanItem::UpdateTextStyleForAISpan(
         }
         auto displayContent = StringUtils::ToWstring(aiSpan.content)
             .substr(aiSpanStartInSpan - aiSpan.start, aiSpanEndInSpan - aiSpanStartInSpan);
-        UpdateTextStyle(StringUtils::ToString(displayContent), builder, aiSpanTextStyle.value(),
+        UpdateTextStyle(StringUtils::ToString(displayContent), builder, aiSpanStyle,
             selectedStart - contentStart, selectedEnd - contentStart);
         preEnd = aiSpanEndInSpan;
         if (aiSpan.end > position) {
@@ -377,28 +388,6 @@ void SpanItem::UpdateTextStyleForAISpan(
         int32_t contentStart = preEnd - spanStart;
         auto afterContent = StringUtils::ToString(wSpanContent.substr(preEnd - spanStart, position - preEnd));
         UpdateTextStyle(afterContent, builder, textStyle, selectedStart - contentStart, selectedEnd - contentStart);
-    }
-}
-
-void SpanItem::SetAiSpanTextStyle(std::optional<TextStyle>& aiSpanTextStyle)
-{
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    if (!aiSpanTextStyle.has_value()) {
-        TextStyle themeTextStyle =
-            CreateTextStyleUsingTheme(fontStyle, textLineStyle, pipelineContext->GetTheme<TextTheme>());
-        if (NearZero(themeTextStyle.GetFontSize().Value())) {
-            return;
-        }
-        aiSpanTextStyle = themeTextStyle;
-    } else {
-        auto hyerlinkTheme = pipelineContext->GetTheme<HyperlinkTheme>();
-        CHECK_NULL_VOID(hyerlinkTheme);
-        auto hyerlinkColor = hyerlinkTheme->GetTextColor();
-        aiSpanTextStyle.value().SetTextColor(hyerlinkColor);
-        aiSpanTextStyle.value().SetTextDecoration(TextDecoration::UNDERLINE);
-        aiSpanTextStyle.value().SetTextDecorationColor(hyerlinkColor);
-        aiSpanTextStyle.value().SetTextDecorationStyle(TextDecorationStyle::SOLID);
     }
 }
 
@@ -498,8 +487,8 @@ void SpanItem::UpdateContentTextStyle(
 std::string SpanItem::GetSpanContent(const std::string& rawContent, bool isMarquee)
 {
     std::string data;
-    if (needRemoveNewLine) {
-        data = rawContent.substr(0, rawContent.length() - 1);
+    if (needRemoveNewLine && !rawContent.empty()) {
+        data = rawContent.substr(0, static_cast<int32_t>(rawContent.length()) - 1);
     } else {
         data = rawContent;
     }
@@ -564,8 +553,8 @@ ResultObject SpanItem::GetSpanResultObject(int32_t start, int32_t end)
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] = startPosition;
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGEEND] = endPosition;
         resultObject.type = SelectSpanType::TYPESPAN;
-        resultObject.span = WeakClaim(this);
         resultObject.valueString = content;
+        resultObject.span = WeakClaim(this);
         resultObject.isInit = true;
     }
     return resultObject;
@@ -594,16 +583,18 @@ TextStyle SpanItem::InheritParentProperties(const RefPtr<FrameNode>& frameNode, 
     INHERIT_TEXT_STYLE(fontStyle, ItalicFontStyle, SetFontStyle);
     INHERIT_TEXT_STYLE(fontStyle, FontWeight, SetFontWeight);
     INHERIT_TEXT_STYLE(fontStyle, FontFamily, SetFontFamilies);
-    INHERIT_TEXT_STYLE(fontStyle, FontFeature, SetFontFeatures);
     INHERIT_TEXT_STYLE(fontStyle, TextShadow, SetTextShadows);
     INHERIT_TEXT_STYLE(fontStyle, TextCase, SetTextCase);
     INHERIT_TEXT_STYLE(fontStyle, TextDecoration, SetTextDecoration);
     INHERIT_TEXT_STYLE(fontStyle, TextDecorationColor, SetTextDecorationColor);
     INHERIT_TEXT_STYLE(fontStyle, TextDecorationStyle, SetTextDecorationStyle);
     INHERIT_TEXT_STYLE(fontStyle, LetterSpacing, SetLetterSpacing);
-
+    INHERIT_TEXT_STYLE(fontStyle, FontFeature, SetFontFeatures);
+    INHERIT_TEXT_STYLE(fontStyle, MinFontScale, SetMinFontScale);
+    INHERIT_TEXT_STYLE(fontStyle, MaxFontScale, SetMaxFontScale);
     INHERIT_TEXT_STYLE(textLineStyle, LineHeight, SetLineHeight);
     INHERIT_TEXT_STYLE(textLineStyle, LineSpacing, SetLineSpacing);
+    INHERIT_TEXT_STYLE(textLineStyle, HalfLeading, SetHalfLeading);
     return textStyle;
 }
 
@@ -631,6 +622,8 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem() const
     COPY_TEXT_STYLE(fontStyle, AdaptMinFontSize, UpdateAdaptMinFontSize);
     COPY_TEXT_STYLE(fontStyle, AdaptMaxFontSize, UpdateAdaptMaxFontSize);
     COPY_TEXT_STYLE(fontStyle, LetterSpacing, UpdateLetterSpacing);
+    COPY_TEXT_STYLE(fontStyle, MinFontScale, UpdateMinFontScale);
+    COPY_TEXT_STYLE(fontStyle, MaxFontScale, UpdateMaxFontScale);
 
     COPY_TEXT_STYLE(textLineStyle, LineHeight, UpdateLineHeight);
     COPY_TEXT_STYLE(textLineStyle, LineSpacing, UpdateLineSpacing);
@@ -646,6 +639,7 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem() const
     COPY_TEXT_STYLE(textLineStyle, WordBreak, UpdateWordBreak);
     COPY_TEXT_STYLE(textLineStyle, LineBreakStrategy, UpdateLineBreakStrategy);
     COPY_TEXT_STYLE(textLineStyle, EllipsisMode, UpdateEllipsisMode);
+    COPY_TEXT_STYLE(textLineStyle, HalfLeading, UpdateHalfLeading);
 
     if (backgroundStyle.has_value()) {
         sameSpan->backgroundStyle->backgroundColor = backgroundStyle->backgroundColor;
@@ -998,6 +992,46 @@ ResultObject ImageSpanItem::GetSpanResultObject(int32_t start, int32_t end)
     return resultObject;
 }
 
+ResultObject CustomSpanItem::GetSpanResultObject(int32_t start, int32_t end)
+{
+    int32_t itemLength = 1;
+    ResultObject resultObject;
+
+    int32_t endPosition = interval.second;
+    int32_t startPosition = interval.first;
+    resultObject.type = SelectSpanType::TYPEBUILDERSPAN;
+    if ((start <= startPosition) && (end >= endPosition)) {
+        resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] = startPosition;
+        resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGEEND] = endPosition;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGESTART] = 0;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = itemLength;
+        resultObject.valueString = " ";
+        resultObject.isInit = true;
+    }
+    return resultObject;
+}
+
+bool SpanItem::UpdateSpanTextColor(Color color)
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, false);
+    auto textPattern = DynamicCast<TextPattern>(pattern);
+    CHECK_NULL_RETURN(textPattern, false);
+    auto paragraphManager = textPattern->GetParagraphManager();
+    CHECK_NULL_RETURN(paragraphManager, false);
+    auto paragraphInfos = paragraphManager->GetParagraphs();
+    if (paragraphIndex != 0 || paragraphInfos.size() != 1) {
+        return false;
+    }
+    auto iter = paragraphInfos.begin();
+    auto paragraphInfo = *iter;
+    auto paragraph = paragraphInfo.paragraph;
+    CHECK_NULL_RETURN(paragraph, false);
+    paragraph->UpdateColor(position - length, position, color);
+    textPattern->MarkDirtyNodeRender();
+    return true;
+}
+
 void SpanItem::GetIndex(int32_t& start, int32_t& end) const
 {
     auto contentLen = StringUtils::ToWstring(content).length();
@@ -1053,8 +1087,8 @@ std::set<PropertyInfo> SpanNode::CalculateInheritPropertyInfo()
         PropertyInfo::TEXT_ALIGN, PropertyInfo::LEADING_MARGIN, PropertyInfo::TEXTSHADOW, PropertyInfo::SYMBOL_COLOR,
         PropertyInfo::SYMBOL_RENDERING_STRATEGY, PropertyInfo::SYMBOL_EFFECT_STRATEGY, PropertyInfo::WORD_BREAK,
         PropertyInfo::LINE_BREAK_STRATEGY, PropertyInfo::FONTFEATURE, PropertyInfo::LINESPACING,
-        PropertyInfo::SYMBOL_EFFECT_OPTIONS };
-
+        PropertyInfo::SYMBOL_EFFECT_OPTIONS, PropertyInfo::HALFLEADING, PropertyInfo::MIN_FONT_SCALE,
+        PropertyInfo::MAX_FONT_SCALE };
     set_difference(propertyInfoContainer.begin(), propertyInfoContainer.end(), propertyInfo_.begin(),
         propertyInfo_.end(), inserter(inheritPropertyInfo, inheritPropertyInfo.begin()));
     return inheritPropertyInfo;

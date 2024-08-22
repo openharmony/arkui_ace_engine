@@ -26,6 +26,7 @@
 #include "core/components/declaration/image/image_animator_declaration.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/manager/select_overlay/selection_host.h"
+#include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/pattern/image/image_event_hub.h"
 #include "core/components_ng/pattern/image/image_layout_algorithm.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -89,7 +90,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, false };
+        return { FocusType::NODE, false, FocusStyleType::OUTER_BORDER };
     }
 
     const RefPtr<CanvasImage>& GetCanvasImage()
@@ -295,6 +296,8 @@ public:
         return true;
     }
 
+    bool AllowVisibleAreaCheck() const override;
+
     void OnInActive() override
     {
         if (status_ == Animator::Status::RUNNING) {
@@ -332,11 +335,6 @@ public:
         isImageAnimator_ = isImageAnimator;
     }
 
-    bool GetLoadInVipChannel()
-    {
-        return loadInVipChannel_;
-    }
-
     bool GetNeedLoadAlt()
     {
         return needLoadAlt_;
@@ -345,11 +343,6 @@ public:
     void SetNeedLoadAlt(bool needLoadAlt)
     {
         needLoadAlt_ = needLoadAlt;
-    }
-
-    void SetLoadInVipChannel(bool loadInVipChannel)
-    {
-        loadInVipChannel_ = loadInVipChannel;
     }
 
     void SetOnProgressCallback(std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& onProgress);
@@ -362,17 +355,22 @@ public:
         return loadingCtx_->GetImageSize();
     }
 
-    void OnVisibleAreaChange(bool visible);
+    void OnVisibleAreaChange(bool visible = true, double ratio = 0.0);
 
     bool GetDefaultAutoResize()
     {
-        InitDefaultValue();
         return autoResizeDefault_;
     }
+
     ImageInterpolation GetDefaultInterpolation()
     {
-        InitDefaultValue();
         return interpolationDefault_;
+    }
+    void InitOnKeyEvent();
+
+    void SetIsComponentSnapshotNode(bool isComponentSnapshotNode = true)
+    {
+        isComponentSnapshotNode_ = isComponentSnapshotNode;
     }
 protected:
     void RegisterWindowStateChangedCallback();
@@ -429,7 +427,8 @@ private:
     void PrepareAnimation(const RefPtr<CanvasImage>& image);
     void SetRedrawCallback(const RefPtr<CanvasImage>& image);
     void SetOnFinishCallback(const RefPtr<CanvasImage>& image);
-    void RegisterVisibleAreaChange();
+    void RegisterVisibleAreaChange(bool isCalcClip = true);
+    void TriggerVisibleAreaChangeForChild(const RefPtr<UINode>& node, bool visible, double ratio);
 
     void InitCopy();
     void HandleCopy();
@@ -469,6 +468,8 @@ private:
     void ReleaseImageAnalyzer();
     bool IsSupportImageAnalyzerFeature();
     void InitDefaultValue();
+    void ClearAltData();
+    void UpdateSvgSmoothEdgeValue();
 
     //animation
     RefPtr<PictureAnimation<int32_t>> CreatePictureAnimation(int32_t size);
@@ -491,6 +492,7 @@ private:
     void SetImageFit(const RefPtr<FrameNode>& imageFrameNode);
     void ControlAnimation(int32_t index);
     void SetObscured();
+    void OnKeyEvent();
 
     CopyOptions copyOption_ = CopyOptions::None;
     ImageInterpolation interpolation_ = ImageInterpolation::LOW;
@@ -515,16 +517,19 @@ private:
     RefPtr<Clipboard> clipboard_;
     RefPtr<SelectOverlayProxy> selectOverlay_;
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
+    ImageDfxConfig imageDfxConfig_;
+    ImageDfxConfig altImageDfxConfig_;
 
+    std::function<bool(const KeyEvent& event)> keyEventCallback_ = nullptr;
     bool syncLoad_ = false;
     bool needBorderRadius_ = false;
-    bool loadInVipChannel_ = false;
     AIImageQuality imageQuality_ = AIImageQuality::NONE;
     bool isImageQualityChange_ = false;
     bool isEnableAnalyzer_ = false;
     bool autoResizeDefault_ = true;
     bool isSensitive_ = false;
     ImageInterpolation interpolationDefault_ = ImageInterpolation::NONE;
+    Color selectedColor_;
     OffsetF parentGlobalOffset_;
     bool isSelected_ = false;
 
@@ -548,8 +553,9 @@ private:
     bool isFormAnimationEnd_ = false;
     bool isImageAnimator_ = false;
     bool hasSizeChanged = false;
-    bool isPixelMapChanged_ = true;
+    bool isPixelMapChanged_ = false;
     bool isSrcUndefined_ = false;
+    bool isComponentSnapshotNode_ = false;
 
     std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)> onProgressCallback_ = nullptr;
 };

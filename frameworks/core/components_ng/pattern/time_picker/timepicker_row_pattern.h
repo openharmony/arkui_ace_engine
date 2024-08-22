@@ -23,6 +23,7 @@
 #include "base/i18n/time_format.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/inspector_filter.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"
@@ -380,6 +381,9 @@ public:
 
     void SetIsEnableHaptic(bool value)
     {
+        if (isEnableHaptic_ != value) {
+            isHapticChanged_ = true;
+        }
         isEnableHaptic_ = value;
     }
 
@@ -488,9 +492,15 @@ public:
     {
         return hasUserDefinedSelectedFontFamily_;
     }
+ 
+    const PickerTextProperties& GetTextProperties() const
+    {
+        return textProperties_;
+    }
 
     void SetTextProperties(const PickerTextProperties& properties)
     {
+        textProperties_ = properties;
         if (properties.disappearTextStyle_.fontSize.has_value() && properties.disappearTextStyle_.fontSize->IsValid()) {
             isUserSetGradientFont_ = true;
             gradientHeight_ = properties.disappearTextStyle_.fontSize.value();
@@ -560,6 +570,11 @@ private:
     void UpdateNodePositionForUg();
     void MountSecondNode(const RefPtr<FrameNode>& stackSecondNode);
     void RemoveSecondNode();
+    void ColumnPatternInitHapticController();
+    void UpdateConfirmButtonMargin(
+        const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme);
+    void UpdateCancelButtonMargin(
+        const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme);
 
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
@@ -604,6 +619,7 @@ private:
     bool isForceUpdate_ = false;
     bool isDateTimeOptionUpdate_ = false;
     bool isEnableHaptic_ = true;
+    bool isHapticChanged_ = false;
     std::optional<std::string> firedTimeStr_;
     std::string language_;
     std::string amPmTimeOrder_;
@@ -615,6 +631,7 @@ private:
     Dimension gradientHeight_;
     Dimension dividerSpacing_;
     float paintDividerSpacing_ = 1.0f;
+    PickerTextProperties textProperties_;
 };
 } // namespace OHOS::Ace::NG
 

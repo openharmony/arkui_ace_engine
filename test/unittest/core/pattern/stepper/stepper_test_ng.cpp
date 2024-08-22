@@ -46,6 +46,9 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t STEPPER_ERROR = -1;
 constexpr int32_t INDEX_NUM = 10;
+constexpr float SUIT_AGE_LEVEL_ONE = 1.75f;
+constexpr float SUIT_AGE_LEVEL_TWO = 2.0f;
+constexpr float SUIT_AGE_LEVEL_THRER = 3.2f;
 const std::string FINISH_EVENT_NAME = "FINISH_EVENT";
 const std::string SKIP_EVENT_NAME = "SKIP_EVENT";
 const std::string CHANGE_EVENT_NAME = "CHANGE_EVENT";
@@ -1409,5 +1412,59 @@ HWTEST_F(StepperTestNg, StepperAlgorithmTest006, TestSize.Level1)
         layoutWrapper->GetOrCreateChildByIndex(Rightindex)->GetGeometryNode()->GetMarginFrameOffset());
     ASSERT_NE(leftButtonOffsetOld,
         layoutWrapper->GetOrCreateChildByIndex(leftindex)->GetGeometryNode()->GetMarginFrameOffset());
+}
+
+/**
+ * @tc.name: StepperLayoutAlgorithmMeasure001
+ * @tc.desc: Increase the coverage of StepperLayoutAlgorithm::Measure function..
+ * @tc.type: FUNC
+ */
+HWTEST_F(StepperTestNg, StepperLayoutAlgorithmMeasure001, TestSize.Level1)
+{
+    auto stepperFrameNode = StepperNode::GetOrCreateStepperNode(STEPPER_ITEM_TAG,
+        ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<StepperPattern>(); });
+    ASSERT_NE(stepperFrameNode, nullptr);
+    auto stepperPattern = stepperFrameNode->GetPattern<StepperPattern>();
+    ASSERT_NE(stepperPattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(stepperFrameNode, geometryNode, stepperFrameNode->GetLayoutProperty());
+    auto stepperLayoutAlgorithm = stepperPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(stepperLayoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(stepperLayoutAlgorithm));
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = SizeF(RK356_HEIGHT, RK356_HEIGHT);
+    layoutConstraint.percentReference = layoutConstraint.maxSize;
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+    stepperLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), layoutConstraint.maxSize);
+
+    PipelineBase::GetCurrentContext()->fontScale_ = SUIT_AGE_LEVEL_THRER;
+    stepperLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), layoutConstraint.maxSize);
+
+    PipelineBase::GetCurrentContext()->fontScale_ = SUIT_AGE_LEVEL_TWO;
+    stepperLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), layoutConstraint.maxSize);
+
+    PipelineBase::GetCurrentContext()->fontScale_ = SUIT_AGE_LEVEL_ONE;
+    stepperLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), layoutConstraint.maxSize);
+
+    layoutConstraint.maxSize = SizeF(RK356_HEIGHT, Infinity<float>());
+    layoutConstraint.percentReference = layoutConstraint.maxSize;
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
+    stepperLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF());
+
+    layoutConstraint.maxSize = SizeF(Infinity<float>(), RK356_HEIGHT);
+    layoutConstraint.percentReference = layoutConstraint.maxSize;
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
+    stepperLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF());
 }
 } // namespace OHOS::Ace::NG

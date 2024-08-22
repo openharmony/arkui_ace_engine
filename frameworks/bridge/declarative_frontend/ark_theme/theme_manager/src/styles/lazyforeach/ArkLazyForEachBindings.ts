@@ -45,7 +45,7 @@ if (globalThis.LazyForEach !== undefined) {
         }
     
         // create wrapper under original itemGenerator to add enter/exit callbacks for ThemeScopeManager
-        const itemGeneratorWrapper = (...params: any[]) => {
+        const itemGeneratorWrapper = (...params: any[]): void => {
             const result = ArkThemeScopeManager.getInstance().onDeepRenderScopeEnter(themeScope);
             paramItemGenerator(...params);
             if (result === true) {

@@ -51,14 +51,7 @@ void ExclusiveRecognizer::OnAccepted()
             continue;
         }
         recognizer->OnRejected();
-        auto bridgeObjList = recognizer->GetBridgeObj();
-        for (const auto& item : bridgeObjList) {
-            auto bridgeObj = item.Upgrade();
-            if (bridgeObj) {
-                bridgeObj->OnRejected();
-                bridgeObj->OnRejectBridgeObj();
-            }
-        }
+        recognizer->OnRejectBridgeObj();
     }
 }
 
@@ -76,7 +69,11 @@ void ExclusiveRecognizer::OnRejected()
             auto group = AceType::DynamicCast<RecognizerGroup>(recognizer);
             group->ForceReject();
         } else {
+            if (recognizer->IsBridgeMode()) {
+                continue;
+            }
             recognizer->OnRejected();
+            recognizer->OnRejectBridgeObj();
         }
     }
 }

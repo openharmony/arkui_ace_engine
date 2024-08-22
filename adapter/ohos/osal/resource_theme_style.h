@@ -36,7 +36,7 @@ public:
     ~ResourceThemeStyle() override = default;
 
     void ParseContent() override;
-    void CheckThemeStyleLoaded() override;
+    void CheckThemeStyleLoaded(const std::string& patternName) override;
     void SetPromiseValue()
     {
         promise_.set_value();
@@ -44,12 +44,14 @@ public:
 protected:
     void OnParseStyle();
     void OnParseResourceMedia(const std::string& attrName, const std::string& attrValue);
-    std::promise<void> promise_;
-    std::shared_future<void> future_ = promise_.get_future();
+
 private:
     RawAttrMap rawAttrs_; // key and value read from global resource api.
     RawPatternMap patternAttrs_;
     RefPtr<ResourceAdapter> resAdapter_;
+    std::promise<void> promise_;
+    std::shared_future<void> future_ = promise_.get_future();
+    std::vector<std::string> checkThemeStyleVector; // theme pattern name list for checking the preloaded theme style
 };
 } // namespace OHOS::Ace
 

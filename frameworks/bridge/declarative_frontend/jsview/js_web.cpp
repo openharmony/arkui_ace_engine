@@ -25,7 +25,11 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "base/web/webview/ohos_nweb/include/nweb.h"
+#else
+#include "base/web/webview/ohos_interface/include/ohos_nweb/nweb.h"
+#endif
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
@@ -4617,31 +4621,57 @@ void JSWeb::SetLayoutMode(int32_t layoutMode)
 
 void JSWeb::SetNestedScroll(const JSCallbackInfo& args)
 {
-    NestedScrollOptions nestedOpt = {
-        .forward = NestedScrollMode::SELF_ONLY,
-        .backward = NestedScrollMode::SELF_ONLY,
+    NestedScrollOptionsExt nestedOpt = {
+        .scrollUp = NestedScrollMode::SELF_ONLY,
+        .scrollDown = NestedScrollMode::SELF_ONLY,
+        .scrollLeft = NestedScrollMode::SELF_ONLY,
+        .scrollRight = NestedScrollMode::SELF_ONLY,
     };
     if (args.Length() < 1 || !args[0]->IsObject()) {
-        WebModel::GetInstance()->SetNestedScroll(nestedOpt);
+        WebModel::GetInstance()->SetNestedScrollExt(nestedOpt);
         return;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
     int32_t froward = 0;
     JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollForward"), froward);
-    if (froward < static_cast<int32_t>(NestedScrollMode::SELF_ONLY) ||
-        froward > static_cast<int32_t>(NestedScrollMode::PARALLEL)) {
-        froward = 0;
+    if (CheckNestedScrollMode(froward)) {
+        nestedOpt.scrollDown = static_cast<NestedScrollMode>(froward);
+        nestedOpt.scrollRight = static_cast<NestedScrollMode>(froward);
     }
     int32_t backward = 0;
     JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollBackward"), backward);
-    if (backward < static_cast<int32_t>(NestedScrollMode::SELF_ONLY) ||
-        backward > static_cast<int32_t>(NestedScrollMode::PARALLEL)) {
-        backward = 0;
+    if (CheckNestedScrollMode(backward)) {
+        nestedOpt.scrollUp = static_cast<NestedScrollMode>(backward);
+        nestedOpt.scrollLeft = static_cast<NestedScrollMode>(backward);
     }
-    nestedOpt.forward = static_cast<NestedScrollMode>(froward);
-    nestedOpt.backward = static_cast<NestedScrollMode>(backward);
-    WebModel::GetInstance()->SetNestedScroll(nestedOpt);
+    int32_t scrollUp = 0;
+    JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollUp"), scrollUp);
+    if (CheckNestedScrollMode(scrollUp)) {
+        nestedOpt.scrollUp = static_cast<NestedScrollMode>(scrollUp);
+    }
+    int32_t scrollDown = 0;
+    JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollDown"), scrollDown);
+    if (CheckNestedScrollMode(scrollDown)) {
+        nestedOpt.scrollDown = static_cast<NestedScrollMode>(scrollDown);
+    }
+    int32_t scrollLeft = 0;
+    JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollLeft"), scrollLeft);
+    if (CheckNestedScrollMode(scrollLeft)) {
+        nestedOpt.scrollLeft = static_cast<NestedScrollMode>(scrollLeft);
+    }
+    int32_t scrollRight = 0;
+    JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollRight"), scrollRight);
+    if (CheckNestedScrollMode(scrollRight)) {
+        nestedOpt.scrollRight = static_cast<NestedScrollMode>(scrollRight);
+    }
+    WebModel::GetInstance()->SetNestedScrollExt(nestedOpt);
     args.ReturnSelf();
+}
+
+bool JSWeb::CheckNestedScrollMode(const int32_t& modeValue)
+{
+    return modeValue > static_cast<int32_t>(NestedScrollMode::SELF_ONLY) &&
+           modeValue <= static_cast<int32_t>(NestedScrollMode::PARALLEL);
 }
 
 void JSWeb::SetMetaViewport(const JSCallbackInfo& args)

@@ -45,6 +45,7 @@
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/event/axis_event.h"
 #include "core/image/image_source_info.h"
@@ -1017,7 +1018,7 @@ bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
  * shadows[4] : ShadowType, shadows[5] : Color, shadows[6] : IsFilled
  * @param length shadows length
  */
-void SetBackShadow(ArkUINodeHandle node, const ArkUIInt32orFloat32* shadows, ArkUI_Int32 length, ArkUI_Int32 unit)
+void SetBackShadow(ArkUINodeHandle node, const ArkUIInt32orFloat32* shadows, ArkUI_Int32 length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1034,11 +1035,8 @@ void SetBackShadow(ArkUINodeHandle node, const ArkUIInt32orFloat32* shadows, Ark
     }
     auto blurRadius = shadows[NUM_0].f32;                          // BlurRadius
     auto hasColorValue = static_cast<int32_t>(shadows[NUM_1].i32); // 1: has ColorStrategy; 2: has Color
-    
-    // OffsetX
-    auto offsetX = Dimension(shadows[NUM_2].f32, static_cast<OHOS::Ace::DimensionUnit>(unit)).ConvertToPx();
-    // OffsetY
-    auto offsetY = Dimension(shadows[NUM_3].f32, static_cast<OHOS::Ace::DimensionUnit>(unit)).ConvertToPx();
+    auto offsetX = shadows[NUM_2].f32;                             // OffsetX
+    auto offsetY = shadows[NUM_3].f32;                             // OffsetY
     auto shadowType = shadows[NUM_4].i32;                          // ShadowType
     auto color = static_cast<uint32_t>(shadows[NUM_5].u32);        // Color
     auto isFilled = static_cast<uint32_t>(shadows[NUM_6].i32);     // IsFilled
@@ -2817,6 +2815,7 @@ void SetAllowDrop(ArkUINodeHandle node, ArkUI_CharPtr* allowDropCharArray, ArkUI
         allowDropStr = allowDropCharArray[i];
         allowDropSet.insert(allowDropStr);
     }
+    frameNode->SetDisallowDropForcedly(false);
     ViewAbstract::SetAllowDrop(frameNode, allowDropSet);
 }
 
@@ -2825,7 +2824,15 @@ void ResetAllowDrop(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::set<std::string> allowDrop;
+    frameNode->SetDisallowDropForcedly(false);
     ViewAbstract::SetAllowDrop(frameNode, allowDrop);
+}
+
+void SetDisAllowDrop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetDisallowDropForcedly(true);
 }
 
 void SetAccessibilityLevel(ArkUINodeHandle node, ArkUI_CharPtr value)
@@ -5211,6 +5218,15 @@ void GetMask(ArkUINodeHandle node, ArkUIMaskOptions* options, ArkUI_Int32 unit)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto basicShape = ViewAbstract::GetMask(frameNode);
+    if (basicShape == nullptr) {
+        auto process = ViewAbstract::GetMaskProgress(frameNode);
+        CHECK_NULL_VOID(process);
+        options->type = static_cast<ArkUI_Int32>(ArkUI_MaskType::ARKUI_MASK_TYPE_PROGRESS);
+        options->value = process->GetValue();
+        options->color = process->GetColor().GetValue();
+        options->maxValue = process->GetMaxValue();
+        return;
+    }
     options->type = static_cast<ArkUI_Int32>(basicShape->GetBasicShapeType());
     options->fill = basicShape->GetColor().GetValue();
     options->strokeColor = basicShape->GetStrokeColor();
@@ -5234,11 +5250,6 @@ void GetMask(ArkUINodeHandle node, ArkUIMaskOptions* options, ArkUI_Int32 unit)
             shapeRect->GetTopRightRadius().GetX().GetNativeValue(static_cast<DimensionUnit>(unit));
         options->bottomRightRadius =
             shapeRect->GetBottomRightRadius().GetX().GetNativeValue(static_cast<DimensionUnit>(unit));
-    } else {
-        auto process = ViewAbstract::GetMaskProgress(frameNode);
-        options->value = process->GetValue();
-        options->color = process->GetColor().GetValue();
-        options->maxValue = process->GetMaxValue();
     }
 }
 
@@ -5962,15 +5973,15 @@ RefPtr<NG::ChainedTransitionEffect> ParseTransition(ArkUITransitionEffectOption*
         animationOption.SetDelay(animation.delay);
         animationOption.SetIteration(animation.iterations);
         animationOption.SetTempo(animation.tempo);
-        animationOption.SetAnimationDirection(
-            DIRECTION_LIST[animation.playMode > DIRECTION_LIST.size() ? 0 : animation.playMode]);
+        animationOption.SetAnimationDirection(DIRECTION_LIST[
+            static_cast<ArkUI_Uint32>(animation.playMode) > DIRECTION_LIST.size() ? 0 : animation.playMode]);
 
         // curve
         if (animation.iCurve) {
             auto curve = reinterpret_cast<Curve*>(animation.iCurve);
             animationOption.SetCurve(AceType::Claim(curve));
         } else {
-            if (animation.curve < 0 || animation.curve >= CURVES.size()) {
+            if (animation.curve < 0 || static_cast<ArkUI_Uint32>(animation.curve) >= CURVES.size()) {
                 animationOption.SetCurve(OHOS::Ace::Curves::EASE_IN_OUT);
             } else {
                 animationOption.SetCurve(CURVES[animation.curve]);
@@ -6060,6 +6071,52 @@ void SetBorderDashParams(ArkUINodeHandle node, const ArkUI_Float32* values, ArkU
         ViewAbstract::SetDashWidth(frameNode, borderDashWidth);
     }
 }
+
+ArkUI_Int32 GetNodeUniqueId(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, -1);
+    return frameNode->GetId();
+}
+
+void SetFocusBoxStyle(ArkUINodeHandle node, ArkUI_Float32 valueMargin, ArkUI_Int32 marginUnit,
+    ArkUI_Float32 valueStrokeWidth, ArkUI_Int32 widthUnit, ArkUI_Uint32 valueColor, ArkUI_Uint32 hasValue)
+{
+    CHECK_NULL_VOID(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto marginUnitEnum = static_cast<OHOS::Ace::DimensionUnit>(marginUnit);
+    auto widthUnitEnum = static_cast<OHOS::Ace::DimensionUnit>(widthUnit);
+    NG::FocusBoxStyle style;
+    if ((hasValue >> 2) & 1) { // 2: margin
+        CalcDimension margin = CalcDimension(valueMargin, DimensionUnit::FP);
+        if (marginUnitEnum >= OHOS::Ace::DimensionUnit::PX && marginUnitEnum <= OHOS::Ace::DimensionUnit::CALC &&
+            marginUnitEnum != OHOS::Ace::DimensionUnit::PERCENT) {
+            margin.SetUnit(marginUnitEnum);
+        }
+        style.margin = margin;
+    }
+    if ((hasValue >> 1) & 1) { // 1: strokeWidth
+        CalcDimension strokeWidth = CalcDimension(valueStrokeWidth, DimensionUnit::FP);
+        if (widthUnitEnum >= OHOS::Ace::DimensionUnit::PX && widthUnitEnum <= OHOS::Ace::DimensionUnit::CALC &&
+            widthUnitEnum != OHOS::Ace::DimensionUnit::PERCENT) {
+            strokeWidth.SetUnit(widthUnitEnum);
+        }
+        style.strokeWidth = strokeWidth;
+    }
+    if ((hasValue >> 0) & 1) { // 0: strokeColor
+        Color strokeColor(valueColor);
+        style.strokeColor = strokeColor;
+    }
+    ViewAbstract::SetFocusBoxStyle(frameNode, style);
+}
+
+void ResetFocusBoxStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::FocusBoxStyle style;
+    ViewAbstract::SetFocusBoxStyle(frameNode, style);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -6070,6 +6127,79 @@ OHOS::Ace::TouchEventInfo globalEventInfo("global");
 const ArkUICommonModifier* GetCommonModifier()
 {
     static const ArkUICommonModifier modifier = { SetBackgroundColor, ResetBackgroundColor, SetWidth, ResetWidth,
+        SetHeight, ResetHeight, SetBorderRadius, ResetBorderRadius, SetBorderWidth, ResetBorderWidth, SetTransform,
+        ResetTransform, SetBorderColor, ResetBorderColor, SetPosition, ResetPosition, SetPositionEdges,
+        ResetPositionEdges, SetBorderStyle, ResetBorderStyle, SetBackShadow, ResetBackShadow, SetHitTestBehavior,
+        ResetHitTestBehavior, SetZIndex, ResetZIndex, SetOpacity, ResetOpacity, SetAlign, ResetAlign, SetBackdropBlur,
+        ResetBackdropBlur, SetHueRotate, ResetHueRotate, SetInvert, ResetInvert, SetSepia, ResetSepia, SetSaturate,
+        ResetSaturate, SetColorBlend, ResetColorBlend, SetGrayscale, ResetGrayscale, SetContrast, ResetContrast,
+        SetBrightness, ResetBrightness, SetBlur, ResetBlur, SetLinearGradient, ResetLinearGradient, SetSweepGradient,
+        ResetSweepGradient, SetRadialGradient, ResetRadialGradient, SetOverlay, ResetOverlay, SetBorderImage,
+        ResetBorderImage, SetBorderImageGradient, SetForegroundBlurStyle, ResetForegroundBlurStyle,
+        SetLinearGradientBlur, ResetLinearGradientBlur, SetBackgroundBlurStyle, ResetBackgroundBlurStyle, SetBorder,
+        ResetBorder, SetBackgroundImagePosition, ResetBackgroundImagePosition, SetBackgroundImageSize,
+        ResetBackgroundImageSize, SetBackgroundImage, ResetBackgroundImage, SetTranslate, ResetTranslate, SetScale,
+        SetScaleWithoutTransformCenter, ResetScale, SetRotate, SetRotateWithoutTransformCenter, ResetRotate,
+        SetGeometryTransition, ResetGeometryTransition, SetPixelStretchEffect, ResetPixelStretchEffect,
+        SetLightUpEffect, ResetLightUpEffect, SetSphericalEffect, ResetSphericalEffect, SetRenderGroup,
+        ResetRenderGroup, SetRenderFit, ResetRenderFit, SetUseEffect, ResetUseEffect, SetForegroundColor,
+        ResetForegroundColor, SetMotionPath, ResetMotionPath, SetMotionBlur, ResetMotionBlur, SetGroupDefaultFocus,
+        ResetGroupDefaultFocus, SetFocusOnTouch, ResetFocusOnTouch, SetFocusable, ResetFocusable, SetTouchable,
+        ResetTouchable, SetDefaultFocus, ResetDefaultFocus, SetDisplayPriority, ResetDisplayPriority, SetOffset,
+        SetOffsetEdges, ResetOffset, SetPadding, ResetPadding, SetMargin, ResetMargin, SetMarkAnchor, ResetMarkAnchor,
+        SetVisibility, ResetVisibility, SetAccessibilityText, ResetAccessibilityText, SetAllowDrop, ResetAllowDrop,
+        SetAccessibilityLevel, ResetAccessibilityLevel, SetDirection, ResetDirection, SetLayoutWeight,
+        ResetLayoutWeight, SetMinWidth, ResetMinWidth, SetMaxWidth, ResetMaxWidth, SetMinHeight, ResetMinHeight,
+        SetMaxHeight, ResetMaxHeight, SetSize, ResetSize, ClearWidthOrHeight, SetAlignSelf, ResetAlignSelf,
+        SetAspectRatio, ResetAspectRatio, SetFlexGrow, ResetFlexGrow, SetFlexShrink, ResetFlexShrink, SetGridOffset,
+        ResetGridOffset, SetGridSpan, ResetGridSpan, SetExpandSafeArea, ResetExpandSafeArea, SetFlexBasis,
+        ResetFlexBasis, SetAlignRules, ResetAlignRules, SetAccessibilityDescription, ResetAccessibilityDescription,
+        SetId, ResetId, SetKey, ResetKey, SetRestoreId, ResetRestoreId, SetTabIndex, ResetTabIndex, SetObscured,
+        ResetObscured, SetResponseRegion, ResetResponseRegion, SetForegroundEffect, ResetForegroundEffect,
+        SetBackgroundEffect, ResetBackgroundEffect, SetBackgroundBrightness, ResetBackgroundBrightness,
+        SetBackgroundBrightnessInternal, ResetBackgroundBrightnessInternal, SetForegroundBrightness,
+        ResetForegroundBrightness, SetDragPreviewOptions, ResetDragPreviewOptions, SetMouseResponseRegion,
+        ResetMouseResponseRegion, SetEnabled, ResetEnabled, SetUseShadowBatching, ResetUseShadowBatching, SetDraggable,
+        ResetDraggable, SetAccessibilityGroup, ResetAccessibilityGroup, SetHoverEffect, ResetHoverEffect,
+        SetClickEffect, ResetClickEffect, SetKeyBoardShortCut, ResetKeyBoardShortCut, SetPointLightPosition,
+        ResetPointLightPosition, SetPointLightIntensity, ResetPointLightIntensity, SetPointLightColor,
+        ResetPointLightColor, SetPointLightIlluminated, ResetPointLightIlluminated, SetPointLightBloom,
+        ResetPointLightBloom, SetClip, SetClipShape, SetClipPath, ResetClip, SetTransitionCenter, SetOpacityTransition,
+        SetRotateTransition, SetScaleTransition, SetTranslateTransition, SetMaskShape, SetMaskPath, SetProgressMask,
+        SetBlendMode, ResetBlendMode, SetMonopolizeEvents, ResetMonopolizeEvents, SetConstraintSize,
+        ResetConstraintSize, SetOutlineColor, ResetOutlineColor, SetOutlineRadius, ResetOutlineRadius, SetOutlineWidth,
+        ResetOutlineWidth, SetOutlineStyle, ResetOutlineStyle, SetOutline, ResetOutline, SetBindPopup, ResetBindPopup,
+        GetFocusable, GetDefaultFocus, GetResponseRegion, GetOverlay, GetAccessibilityGroup, GetAccessibilityText,
+        GetAccessibilityDescription, GetAccessibilityLevel, SetNeedFocus, GetNeedFocus, GetOpacity, GetBorderWidth,
+        GetBorderWidthDimension, GetBorderRadius, GetBorderColor, GetBorderStyle, GetZIndex, GetVisibility, GetClip,
+        GetClipShape, GetTransform, GetHitTestBehavior, GetPosition, GetShadow, GetCustomShadow, GetSweepGradient,
+        GetRadialGradient, GetMask, GetBlendMode, GetDirection, GetAlignSelf, GetTransformCenter, GetOpacityTransition,
+        GetRotateTransition, GetScaleTransition, GetTranslateTransition, GetOffset, GetMarkAnchor, GetAlignRules,
+        GetBackgroundBlurStyle, GetBackgroundImageSize, GetBackgroundImageSizeWidthStyle, SetOutlineWidthFloat,
+        GetOutlineWidthFloat, GetDisplayPriority, SetAlignRulesWidthType, GetLayoutWeight, GetScale, GetRotate,
+        GetBrightness, GetSaturate, GetBackgroundImagePosition, GetFlexGrow, GetFlexShrink, GetFlexBasis,
+        GetConstraintSize, GetGrayScale, GetInvert, GetSepia, GetContrast, GetForegroundColor, GetBlur,
+        GetLinearGradient, GetAlign, GetWidth, GetHeight, GetBackgroundColor, GetBackgroundImage, GetPadding,
+        GetPaddingDimension, GetConfigSize, GetKey, GetEnabled, GetMargin, GetMarginDimension, GetTranslate,
+        SetMoveTransition, GetMoveTransition, ResetMask, GetAspectRatio, SetBackgroundImageResizable,
+        ResetBackgroundImageResizable, SetBackgroundImageSizeWithUnit, GetRenderFit, GetOutlineColor, GetSize,
+        GetRenderGroup, SetOnVisibleAreaChange, GetGeometryTransition, SetChainStyle, GetChainStyle, ResetChainStyle,
+        SetBias, GetBias, ResetBias, GetColorBlend, GetForegroundBlurStyle,
+        SetBackgroundImagePixelMap, SetBackgroundImagePixelMapByPixelMapPtr,
+        SetLayoutRect, GetLayoutRect, ResetLayoutRect, GetFocusOnTouch, SetSystemBarEffect,
+        GetAccessibilityID, SetAccessibilityState, GetAccessibilityState, ResetAccessibilityState,
+        SetAccessibilityValue, GetAccessibilityValue, ResetAccessibilityValue, SetAccessibilityActions,
+        ResetAccessibilityActions, GetAccessibilityActions, SetAccessibilityRole, ResetAccessibilityRole,
+        GetAccessibilityRole, SetFocusScopeId, ResetFocusScopeId, SetFocusScopePriority, ResetFocusScopePriority,
+        SetPixelRound, ResetPixelRound, SetBorderDashParams, GetExpandSafeArea, SetTransition, SetDragPreview,
+        ResetDragPreview, GetNodeUniqueId, SetFocusBoxStyle, ResetFocusBoxStyle, SetDisAllowDrop };
+
+    return &modifier;
+}
+
+const CJUICommonModifier* GetCJUICommonModifier()
+{
+    static const CJUICommonModifier modifier = { SetBackgroundColor, ResetBackgroundColor, SetWidth, ResetWidth,
         SetHeight, ResetHeight, SetBorderRadius, ResetBorderRadius, SetBorderWidth, ResetBorderWidth, SetTransform,
         ResetTransform, SetBorderColor, ResetBorderColor, SetPosition, ResetPosition, SetPositionEdges,
         ResetPositionEdges, SetBorderStyle, ResetBorderStyle, SetBackShadow, ResetBackShadow, SetHitTestBehavior,
@@ -6294,21 +6424,14 @@ void SetOnClick(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.nodeId = nodeId;
         event.componentAsyncEvent.subKind = ON_CLICK;
-
         auto target = info.GetTarget();
-        event.touchEvent.target.id = target.id.c_str();
-        event.touchEvent.target.type = target.type.c_str();
-        event.touchEvent.target.area = {
-            static_cast<ArkUI_Int32>(target.area.GetOffset().GetX().Value()),
-            static_cast<ArkUI_Int32>(target.area.GetOffset().GetY().Value()),
-            static_cast<ArkUI_Int32>(target.area.GetWidth().Value()),
-            static_cast<ArkUI_Int32>(target.area.GetHeight().Value())
-        };
-        event.touchEvent.target.origin = {
-            static_cast<ArkUI_Int32>(target.origin.GetX().Value()),
-            static_cast<ArkUI_Int32>(target.origin.GetY().Value())
-        };
-
+        event.touchEvent.target = { target.id.c_str(), target.type.c_str(),
+            { static_cast<ArkUI_Int32>(target.area.GetOffset().GetX().Value()),
+                static_cast<ArkUI_Int32>(target.area.GetOffset().GetY().Value()),
+                static_cast<ArkUI_Int32>(target.area.GetWidth().Value()),
+                static_cast<ArkUI_Int32>(target.area.GetHeight().Value()) },
+            { static_cast<ArkUI_Int32>(target.origin.GetX().Value()),
+                static_cast<ArkUI_Int32>(target.origin.GetY().Value()) } };
         Offset globalOffset = info.GetGlobalLocation();
         Offset localOffset = info.GetLocalLocation();
         Offset screenOffset = info.GetScreenLocation();
@@ -6337,11 +6460,12 @@ void SetOnClick(ArkUINodeHandle node, void* extraParam)
             usePx ? PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()) : screenOffset.GetY();
         SendArkUIAsyncEvent(&event);
     };
-    if (uiNode->GetTag() == "Span") {
+    if (uiNode->GetTag() == V2::SPAN_ETS_TAG) {
         SpanModelNG::SetOnClick(uiNode, std::move(onEvent));
-    } else {
-        auto* frameNode = reinterpret_cast<FrameNode*>(node);
-        ViewAbstract::SetOnClick(frameNode, std::move(onEvent));
+    } else if (uiNode->GetTag() == V2::TEXT_ETS_TAG) {
+        TextModelNG::SetOnClick(reinterpret_cast<FrameNode*>(node), std::move(onEvent));
+    }  else {
+        ViewAbstract::SetOnClick(reinterpret_cast<FrameNode*>(node), std::move(onEvent));
     }
 }
 
@@ -6674,8 +6798,11 @@ void ResetOnClick(ArkUINodeHandle node)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
-    if (uiNode->GetTag() == "Span") {
+    if (uiNode->GetTag() == V2::SPAN_ETS_TAG) {
         SpanModelNG::ClearOnClick(uiNode);
+    } else if (uiNode->GetTag() == V2::TEXT_ETS_TAG) {
+        auto* frameNode = reinterpret_cast<FrameNode*>(node);
+        TextModelNG::ClearOnClick(frameNode);
     } else {
         auto* frameNode = reinterpret_cast<FrameNode*>(node);
         ViewAbstract::DisableOnClick(frameNode);

@@ -59,7 +59,7 @@ void NavDestinationEventHub::FireAutoSave()
 
 void NavDestinationEventHub::FireOnShownEvent(const std::string& name, const std::string& param)
 {
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle chang to shown state.", name_.c_str());
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to onShown state.", name_.c_str());
     state_= NavDestinationState::ON_SHOWN;
     UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
         NavDestinationState::ON_SHOWN);
@@ -67,8 +67,8 @@ void NavDestinationEventHub::FireOnShownEvent(const std::string& name, const std
         auto onShownEvent = onShownEvent_;
         onShownEvent();
     }
-    if (onHiddenChange_) {
-        onHiddenChange_(true);
+    if (!onHiddenChange_.empty()) {
+        FireOnHiddenChange(true);
     }
     if (Recorder::EventRecorder::Get().IsPageRecordEnable()) {
         auto host = GetFrameNode();
@@ -85,17 +85,16 @@ void NavDestinationEventHub::FireOnShownEvent(const std::string& name, const std
 
 void NavDestinationEventHub::FireOnHiddenEvent(const std::string& name)
 {
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle chang to hidden state.", name_.c_str());
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle chang to onHidden state.", name_.c_str());
     state_ = NavDestinationState::ON_HIDDEN;
     UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
         NavDestinationState::ON_HIDDEN);
     if (onHiddenEvent_) {
         onHiddenEvent_();
     }
-    if (onHiddenChange_) {
-        onHiddenChange_(false);
+    if (!onHiddenChange_.empty()) {
+        FireOnHiddenChange(false);
     }
-
     if (Recorder::EventRecorder::Get().IsPageRecordEnable()) {
         auto host = GetFrameNode();
         CHECK_NULL_VOID(host);
@@ -108,7 +107,7 @@ void NavDestinationEventHub::FireOnHiddenEvent(const std::string& name)
 
 void NavDestinationEventHub::FireOnAppear()
 {
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to appear state", name_.c_str());
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to onAppear state.", name_.c_str());
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto navigationManager = pipeline->GetNavigationManager();
@@ -139,7 +138,7 @@ void NavDestinationEventHub::FireOnAppear()
 
 void NavDestinationEventHub::FireOnWillAppear()
 {
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to will appear state", name_.c_str());
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to onWillAppear state.", name_.c_str());
     state_ = NavDestinationState::ON_WILL_APPEAR;
     UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
         NavDestinationState::ON_WILL_APPEAR);
@@ -150,7 +149,7 @@ void NavDestinationEventHub::FireOnWillAppear()
 
 void NavDestinationEventHub::FireOnWillShow()
 {
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to will show state", name_.c_str());
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to onWillShow state.", name_.c_str());
     state_ = NavDestinationState::ON_WILL_SHOW;
     UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
         NavDestinationState::ON_WILL_SHOW);
@@ -161,7 +160,7 @@ void NavDestinationEventHub::FireOnWillShow()
 
 void NavDestinationEventHub::FireOnWillHide()
 {
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to will hide state", name_.c_str());
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to onWillHide state.", name_.c_str());
     state_ = NavDestinationState::ON_WILL_HIDE;
     UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
         NavDestinationState::ON_WILL_HIDE);
@@ -174,7 +173,7 @@ void NavDestinationEventHub::FireOnWillHide()
 
 void NavDestinationEventHub::FireOnWillDisAppear()
 {
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to will disappear state", name_.c_str());
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to onWillDisappear state.", name_.c_str());
     state_ = NavDestinationState::ON_WILL_DISAPPEAR;
     UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
         NavDestinationState::ON_WILL_DISAPPEAR);
@@ -185,9 +184,6 @@ void NavDestinationEventHub::FireOnWillDisAppear()
 
 bool NavDestinationEventHub::FireOnBackPressedEvent()
 {
-    state_ = NavDestinationState::ON_BACKPRESS;
-    UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
-        NavDestinationState::ON_BACKPRESS);
     if (onBackPressedEvent_) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navDestination backButton press is happening.");
         return onBackPressedEvent_();

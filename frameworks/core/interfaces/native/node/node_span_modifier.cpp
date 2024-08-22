@@ -25,6 +25,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/pipeline/base/element_register.h"
+#include "draw/canvas.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -44,6 +45,7 @@ constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
+constexpr int NUM_32 = 32;
 constexpr int DEFAULT_LENGTH = 4;
 void SetSpanContent(ArkUINodeHandle node, const char* value)
 {
@@ -443,6 +445,25 @@ void ResetTextTextShadow(ArkUINodeHandle node)
     shadow.SetOffsetY(0.0);
     SpanModelNG::SetTextShadow(frameNode, std::vector<Shadow> { shadow });
 }
+
+ArkUI_CharPtr GetSpanFontFamily(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    std::vector<std::string> fontFamilies = SpanModelNG::GetSpanFontFamily(frameNode);
+    std::string families;
+    //set index start
+    uint32_t index = 0;
+    for (auto& family : fontFamilies) {
+        families += family;
+        if (index != fontFamilies.size() - 1) {
+            families += ",";
+        }
+        index++;
+    }
+    g_strValue = families;
+    return g_strValue.c_str();
+}
 } // namespace
 namespace NodeModifier {
 const ArkUISpanModifier* GetSpanModifier()
@@ -455,8 +476,72 @@ const ArkUISpanModifier* GetSpanModifier()
         SetSpanFontWeightStr, GetSpanContent, GetSpanDecoration, GetSpanFontColor, GetSpanFontSize, GetSpanFontStyle,
         GetSpanFontWeight, GetSpanLineHeight, GetSpanTextCase, GetSpanLetterSpacing, GetSpanBaselineOffset,
         SetSpanTextBackgroundStyle, ResetSpanTextBackgroundStyle, GetSpanTextBackgroundStyle, SetTextTextShadow,
+        ResetTextTextShadow, GetTextShadow, GetSpanFontFamily };
+    return &modifier;
+}
+
+const CJUISpanModifier* GetCJUISpanModifier()
+{
+    static const CJUISpanModifier modifier = { SetSpanSrc, SetSpanContent, SetSpanTextCase, ResetSpanTextCase,
+        SetSpanFontWeight, ResetSpanFontWeight, SetSpanLineHeight, ResetSpanLineHeight, SetSpanFontStyle,
+        ResetSpanFontStyle, SetSpanFontSize, ResetSpanFontSize, SetSpanFontFamily, ResetSpanFontFamily,
+        SetSpanDecoration, ResetSpanDecoration, SetSpanFontColor, ResetSpanFontColor, SetSpanLetterSpacing,
+        ResetSpanLetterSpacing, SetSpanBaselineOffset, ResetSpanBaselineOffset, SetSpanFont, ResetSpanFont,
+        SetSpanFontWeightStr, GetSpanContent, GetSpanDecoration, GetSpanFontColor, GetSpanFontSize, GetSpanFontStyle,
+        GetSpanFontWeight, GetSpanLineHeight, GetSpanTextCase, GetSpanLetterSpacing, GetSpanBaselineOffset,
+        SetSpanTextBackgroundStyle, ResetSpanTextBackgroundStyle, GetSpanTextBackgroundStyle, SetTextTextShadow,
         ResetTextTextShadow, GetTextShadow };
     return &modifier;
+}
+
+void SetCustomSpanOnMeasure(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<CustomSpanNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::function<CustomSpanMetrics(CustomSpanMeasureInfo)> onMeasureFunc =
+        [node, extraParam](CustomSpanMeasureInfo customSpanMeasureInfo) -> CustomSpanMetrics {
+        ArkUICustomNodeEvent event;
+        event.kind = ArkUIAPINodeFlags::CUSTOM_MEASURE;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.numberData[0].f32 = customSpanMeasureInfo.fontSize;
+        event.numberReturnData[0].f32 = 0.0f;
+        event.numberReturnData[1].f32 = 0.0f;
+        SendArkUIAsyncCustomEvent(&event);
+        float width = std::max(event.numberReturnData[0].f32, 0.0f);
+        float height = std::max(event.numberReturnData[1].f32, 0.0f);
+        return { width, height };
+    };
+    frameNode->GetSpanItem()->onMeasure = onMeasureFunc;
+}
+
+void SetCustomSpanOnDraw(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<CustomSpanNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::function<void(NG::DrawingContext&, CustomSpanOptions)> onDrawFunc =
+        [node, extraParam](NG::DrawingContext& context, CustomSpanOptions customSpanOptions) {
+        auto canvas = reinterpret_cast<uintptr_t>(&context.canvas);
+        ArkUICustomNodeEvent event;
+        event.kind = ArkUIAPINodeFlags::CUSTOM_DRAW;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.data[NUM_0] = (ArkUI_Int32)(canvas & 0xffffffff);
+        event.data[NUM_1] =
+            (ArkUI_Int32)((static_cast<uint64_t>(canvas) >> NUM_32) & 0xffffffff);
+        event.data[NUM_2] = context.width;
+        event.data[NUM_3] = context.height;
+        event.canvas = reinterpret_cast<intptr_t>(&context.canvas);
+        event.numberData[0].f32 = customSpanOptions.x;
+        event.numberData[1].f32 = customSpanOptions.lineTop;
+        event.numberData[2].f32 = customSpanOptions.lineBottom;
+        event.numberData[3].f32 = customSpanOptions.baseline;
+        // clip
+        context.canvas.Save();
+        auto clipInnerRect = RSRect(0, 0, context.width, context.height);
+        context.canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
+        SendArkUIAsyncCustomEvent(&event);
+        context.canvas.Restore();
+    };
+    frameNode->GetSpanItem()->onDraw = onDrawFunc;
 }
 } // namespace NodeModifier
 

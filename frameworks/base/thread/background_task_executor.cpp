@@ -16,8 +16,6 @@
 #include "base/thread/background_task_executor.h"
 
 #include <pthread.h>
-#include <string>
-#include <functional>
 
 #include "base/log/log.h"
 #include "base/memory/memory_monitor.h"

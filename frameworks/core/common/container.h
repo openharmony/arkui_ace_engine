@@ -26,6 +26,7 @@
 #include "interfaces/inner_api/ace/navigation_controller.h"
 
 #include "base/memory/ace_type.h"
+#include "base/view_data/hint_to_type_wrap.h"
 #include "base/resource/asset_manager.h"
 #include "base/resource/shared_image_manager.h"
 #include "base/thread/task_executor.h"
@@ -89,9 +90,15 @@ public:
         return false;
     }
 
-    virtual AceAutoFillType PlaceHolderToType(const std::string& onePlaceHolder)
+    virtual bool ClosePopupUIExtension(uint32_t autoFillSessionId)
     {
-        return AceAutoFillType::ACE_UNSPECIFIED;
+        return false;
+    }
+
+    virtual HintToTypeWrap PlaceHolderToType(const std::string& onePlaceHolder)
+    {
+        HintToTypeWrap hintToTypeWrap;
+        return hintToTypeWrap;
     }
 
     // Get the instance id of this container
@@ -184,7 +191,24 @@ public:
         return MakeRefPtr<DisplayInfo>();
     }
 
+    virtual void InitIsFoldable() {}
+
+    virtual bool IsFoldable() const
+    {
+        return false;
+    }
+
+    virtual FoldStatus GetCurrentFoldStatus()
+    {
+        return FoldStatus::UNKNOWN;
+    }
+
     virtual NG::SafeAreaInsets GetKeyboardSafeArea()
+    {
+        return {};
+    }
+
+    virtual Rect GetSessionAvoidAreaByType(uint32_t safeAreaType)
     {
         return {};
     }
@@ -501,10 +525,12 @@ public:
     }
 
     virtual bool RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std::function<void()>& onFinish = nullptr,
-        const std::function<void()>& onUIExtNodeBindingCompleted = nullptr, bool isNative = true)
+        const std::function<void()>& onUIExtNodeBindingCompleted = nullptr, bool isNative = true,
+        int32_t instanceId = -1)
     {
         return false;
     }
+
 
     virtual std::shared_ptr<NavigationController> GetNavigationController(const std::string& navigationId)
     {

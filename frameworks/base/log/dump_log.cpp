@@ -16,12 +16,6 @@
 #include "base/log/dump_log.h"
 
 #include <fstream>
-#include <new>
-#include <ostream>
-#include <string>
-
-#include "base/log/log_wrapper.h"
-#include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 
 namespace OHOS::Ace {

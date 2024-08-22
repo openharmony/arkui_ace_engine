@@ -15,16 +15,11 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_canvas_ffi.h"
 
-#include <cinttypes>
 
 #include "cj_lambda.h"
-#include "ffi_remote_data.h"
-#include "pixel_map_impl.h"
 
-#include "bridge/cj_frontend/cppview/canvas_path.h"
 #include "bridge/cj_frontend/cppview/canvas_renderer.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
-#include "core/common/container.h"
 #include "core/components_ng/pattern/canvas/canvas_model.h"
 
 using namespace OHOS;
@@ -160,6 +155,9 @@ void FfiOHOSAceFrameworkCanvasOnReady(void (*callback)())
 int64_t FfiOHOSAceFrameworkRenderingContextCtor(bool antialias)
 {
     auto context = FFIData::Create<NativeCanvasRenderer>(antialias);
+    if (context == nullptr) {
+        return FFI_ERROR_CODE;
+    }
     return context->GetID();
 }
 

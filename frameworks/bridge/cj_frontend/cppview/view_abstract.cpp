@@ -35,6 +35,7 @@
 #include "core/components/text/text_component.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_v2/extensions/events/on_area_change_extension.h"
 #include "core/gestures/long_press_gesture.h"
@@ -58,6 +59,11 @@ RefPtr<ThemeConstants> ViewAbstract::GetThemeConstants()
         return nullptr;
     }
     return themeManager->GetThemeConstants();
+}
+
+void ViewAbstract::CjEnabled(bool enabled)
+{
+    ViewAbstractModel::GetInstance()->SetEnabled(enabled);
 }
 
 } // namespace OHOS::Ace::Framework

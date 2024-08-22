@@ -15,11 +15,8 @@
 
 #include "cj_environment.h"
 
-#include "core/common/ace_application_info.h"
-#include "core/common/container.h"
 #include "core/common/environment/environment_proxy.h"
 #include "frameworks/base/i18n/localization.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;

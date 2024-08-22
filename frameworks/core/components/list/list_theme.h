@@ -62,8 +62,6 @@ public:
             theme->chainIntensity_ = pattern->GetAttr<double>("chain_intensity", 0.3f);
             theme->chainStiffness_ = pattern->GetAttr<double>("chain_stiffness", 228.0f);
             theme->chainDamping_ = pattern->GetAttr<double>("chain_damping", 30.0f);
-            std::string fadingEdge = pattern->GetAttr<std::string>("list_fadeout_enable", "");
-            theme->fadingEdge_ = (fadingEdge == "true");
         }
     };
 
@@ -113,10 +111,6 @@ public:
     {
         return chainDamping_;
     }
-    bool GetFadingEdge() const
-    {
-        return fadingEdge_;
-    }
 
 protected:
     ListTheme() = default;
@@ -132,7 +126,6 @@ private:
     double chainIntensity_ = 0.0;
     double chainStiffness_ = 0.0;
     double chainDamping_ = 0.0;
-    bool fadingEdge_ = false;
 };
 
 } // namespace OHOS::Ace

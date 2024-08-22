@@ -19,6 +19,7 @@
 #include <chrono>
 #include <fstream>
 #include <string>
+#include <vector>
 
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
@@ -154,6 +155,7 @@ public:
         const uint32_t* colors, uint32_t colorLength, int32_t width, int32_t height);
     virtual int32_t GetWidth() const = 0;
     virtual int32_t GetHeight() const = 0;
+    virtual bool GetPixelsVec(std::vector<uint8_t>& data) const = 0;
     virtual const uint8_t* GetPixels() const = 0;
     virtual PixelFormat GetPixelFormat() const = 0;
     virtual AlphaType GetAlphaType() const = 0;

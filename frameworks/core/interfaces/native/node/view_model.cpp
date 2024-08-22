@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
+#include "core/components_ng/pattern/text/span/span_object.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
@@ -478,6 +479,14 @@ void* createTabContentNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createCustomSpanNode(ArkUI_Int32 nodeId)
+{
+    auto customSpanNode = CustomSpanNode::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(customSpanNode, nullptr);
+    customSpanNode->IncRefCount();
+    return AceType::RawPtr(customSpanNode);
+}
+
 using createArkUIFrameNode = void*(ArkUI_Int32 nodeId);
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
 {
@@ -539,6 +548,7 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
         createCircleNode,
         createTabContentNode,
         createNavigationNode,
+        createCustomSpanNode,
     };
     if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to create %{public}d type of node", tag);

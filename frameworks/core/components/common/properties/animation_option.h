@@ -157,6 +157,22 @@ public:
         return rateRange_;
     }
 
+    std::string ToString() const
+    {
+        std::string result = std::string("duration:").append(std::to_string(duration_))
+            .append(", curve:").append(curve_ ? curve_->ToString() : "");
+        if (iteration_ != 1) {
+            result.append(", iteration:").append(std::to_string(iteration_));
+        }
+        if (delay_) {
+            result.append(", delay:").append(std::to_string(delay_));
+        }
+        if (!NearEqual(tempo_, 1.0f)) {
+            result.append(", tempo:").append(std::to_string(tempo_));
+        }
+        return result;
+    }
+
 private:
     int32_t duration_ = 0;
     int32_t delay_ = 0;

@@ -372,7 +372,7 @@ private:
     bool IsScrollOutOnEdge(float delta) const;
     void HandleCrashTop();
     void HandleCrashBottom();
-    bool IsEnablePagingValid()
+    bool IsEnablePagingValid() const
     {
         return enablePagingStatus_ == ScrollPagingStatus::VALID && GetScrollSnapAlign() == ScrollSnapAlign::NONE;
     }
@@ -387,11 +387,11 @@ private:
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void UpdateScrollBarOffset() override;
     void SetAccessibilityAction() override;
-    bool SetScrollProperties(const RefPtr<LayoutWrapper>& dirty);
     bool ScrollSnapTrigger();
     void CheckScrollable();
-    void SetEdgeRtl();
     OffsetF GetOffsetToScroll(const RefPtr<FrameNode>& childFrame) const;
+    bool SetScrollProperties(const RefPtr<LayoutWrapper>& dirty);
+    std::string GetScrollSnapPagination() const;
 
     float currentOffset_ = 0.0f;
     float lastOffset_ = 0.0f;

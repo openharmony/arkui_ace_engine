@@ -1441,8 +1441,8 @@ var BlurStyle;
 var BlurStyleActivePolicy;
 (function (BlurStyleActivePolicy) {
   BlurStyleActivePolicy[BlurStyleActivePolicy["FOLLOWS_WINDOW_ACTIVE_STATE"] = 0] = "FOLLOWS_WINDOW_ACTIVE_STATE";
-  BlurStyleActivePolicy[BlurStyleActivePolicy["ALAWYS_ACTIVE"] = 1] = "ALAWYS_ACTIVE";
-  BlurStyleActivePolicy[BlurStyleActivePolicy["ALAWYS_INACTIVE"] = 2] = "ALAWYS_INACTIVE";
+  BlurStyleActivePolicy[BlurStyleActivePolicy["ALWAYS_ACTIVE"] = 1] = "ALWAYS_ACTIVE";
+  BlurStyleActivePolicy[BlurStyleActivePolicy["ALWAYS_INACTIVE"] = 2] = "ALWAYS_INACTIVE";
 })(BlurStyleActivePolicy || (BlurStyleActivePolicy = {}));
 
 var BlurType;
@@ -1982,7 +1982,7 @@ class TextMenuItemId {
   }
 
   equals(id) {
-    return id.id_ == this.id_;
+    return id.id_ === this.id_;
   }
 
   static get CUT() {
@@ -2086,6 +2086,7 @@ class NavPathInfo {
     this.index = -1;
     this.needUpdate = false;
     this.needBuildNewInstance = false;
+    this.navDestinationId = undefined;
   }
 }
 
@@ -2132,10 +2133,10 @@ class NavPathStack {
     for (let i = this.popArray.length - 1; i >= 0; i--) {
       if (name === this.popArray[i].name) {
         let info = this.popArray.splice(i, 1);
-        return info[0].index;
+        return [info[0].index, info[0].navDestinationId];
       }
     }
-    return -1; // add new navdestination
+    return [-1, undefined]; // add new navdestination
   }
   setNativeStack(stack) {
     this.nativeStack = stack;
@@ -2151,7 +2152,7 @@ class NavPathStack {
   }
   pushName(name, param) {
     let info = new NavPathInfo(name, param);
-    info.index = this.findInPopArray(name);
+    [info.index, info.navDestinationId] = this.findInPopArray(name);
     this.pathArray.push(info);
     this.isReplace = 0;
     this.nativeStack?.onStateChanged();
@@ -2166,7 +2167,7 @@ class NavPathStack {
     } else {
       info = new NavPathInfo(name, param, onPop);
     }
-    info.index = this.findInPopArray(name);
+    [info.index, info.navDestinationId] = this.findInPopArray(name);
     this.pathArray.push(info);
     this.isReplace = 0;
     if (typeof onPop === 'boolean') {
@@ -2200,9 +2201,18 @@ class NavPathStack {
         reject({ message: 'Internal error.', code: 100001 });
       })
     }
-    info.index = this.findInPopArray(name);
-    this.pathArray.push(info);
-    this.nativeStack?.onStateChanged();
+    promise.then(() => {
+      return new Promise((resolve, reject) => {
+        [info.index, info.navDestinationId] = this.findInPopArray(name);
+        this.pathArray.push(info);
+        this.nativeStack?.onStateChanged();
+        resolve({code: 0});
+      }).catch((err) => {
+        return new Promise((resolve, reject) => {
+          reject(err);
+        })
+      })
+    })
     return promise;
   }
   parseNavigationOptions(param) {
@@ -2249,7 +2259,7 @@ class NavPathStack {
     if (ret) {
       return;
     }
-    info.index = this.findInPopArray(info.name);
+    [info.index, info.navDestinationId] = this.findInPopArray(info.name);
     if (launchMode === LaunchMode.NEW_INSTANCE) {
       info.needBuildNewInstance = true;
     }
@@ -2272,12 +2282,21 @@ class NavPathStack {
         reject({ message: 'Internal error.', code: 100001 });
       })
     }
-    info.index = this.findInPopArray(info.name);
-    if (launchMode === LaunchMode.NEW_INSTANCE) {
-      info.needBuildNewInstance = true;
-    }
-    this.pathArray.push(info);
-    this.nativeStack?.onStateChanged();
+    promise.then(() => {
+      return new Promise((resolve, reject) => {
+        [info.index, info.navDestinationId] = this.findInPopArray(info.name);
+        if (launchMode === LaunchMode.NEW_INSTANCE) {
+          info.needBuildNewInstance = true;
+        }
+        this.pathArray.push(info);
+        this.nativeStack?.onStateChanged();
+        resolve({code: 0});
+      }).catch((err) => {
+        return new Promise((resolve, reject) => {
+          reject(err);
+        })
+      })
+    })
     return promise;
   }
   replacePath(info, optionParam) {
@@ -2475,6 +2494,16 @@ class NavPathStack {
     }
     return cnt;
   }
+  removeByNavDestinationId(navDestinationId) {
+    let index = this.pathArray.findIndex(element => element.navDestinationId === navDestinationId);
+    if (index === -1) {
+      return false;
+    }
+    this.pathArray.splice(index, 1);
+    this.isReplace = 0;
+    this.nativeStack?.onStateChanged();
+    return true;
+  }
   removeIndex(index) {
     if (index >= this.pathArray.length) {
       return;
@@ -2557,7 +2586,7 @@ class WaterFlowSections {
   }
 
   isNonNegativeInt32(input) {
-    return Number.isSafeInteger(input) && input > 0 && input <= 2147483647;
+    return Number.isSafeInteger(input) && input >= 0 && input <= 2147483647;
   }
 
   toArrayIndex(origin, limit) {
@@ -3175,19 +3204,6 @@ let TextResponseType;
   TextResponseType[TextResponseType['SELECT'] = 2] = 'SELECT';
 })(TextResponseType || (TextResponseType = {}));
 
-let MarqueeState;
-(function (MarqueeState) {
-  MarqueeState[MarqueeState['START'] = 0] = 'START';
-  MarqueeState[MarqueeState['BOUNCE'] = 1] = 'BOUNCE';
-  MarqueeState[MarqueeState['FINISH'] = 2] = 'FINISH';
-})(MarqueeState || (MarqueeState = {}));
-
-let MarqueeStartPolicy;
-(function (MarqueeStartPolicy) {
-  MarqueeStartPolicy[MarqueeStartPolicy['DEFAULT'] = 0] = 'DEFAULT';
-  MarqueeStartPolicy[MarqueeStartPolicy['ON_FOCUS'] = 1] = 'ON_FOCUS';
-})(MarqueeStartPolicy || (MarqueeStartPolicy = {}));
-
 let NativeEmbedStatus;
 (function (NativeEmbedStatus) {
   NativeEmbedStatus['CREATE'] = 0;
@@ -3195,6 +3211,8 @@ let NativeEmbedStatus;
   NativeEmbedStatus['DESTROY'] = 2;
   NativeEmbedStatus['ENTER_BFCACHE'] = 3;
   NativeEmbedStatus['LEAVE_BFCACHE'] = 4;
+  NativeEmbedStatus['VISIBLE'] = 5;
+  NativeEmbedStatus['HIDDEN'] = 6;
 })(NativeEmbedStatus || (NativeEmbedStatus = {}));
 
 let RenderMode;
@@ -3296,6 +3314,12 @@ var GestureRecognizerState;
   GestureRecognizerState[GestureRecognizerState["SUCCESSFUL"] = 4] = "SUCCESSFUL";
   GestureRecognizerState[GestureRecognizerState["FAILED"] = 5] = "FAILED";
 })(GestureRecognizerState || (GestureRecognizerState = {}));
+
+let GridItemAlignment;
+(function (GridItemAlignment) {
+  GridItemAlignment[GridItemAlignment['DEFAULT'] = 0] = 'DEFAULT';
+  GridItemAlignment[GridItemAlignment['STRETCH'] = 1] = 'STRETCH';
+})(GridItemAlignment || (GridItemAlignment = {}));
 
 class ImageAnalyzerController {
   constructor() {

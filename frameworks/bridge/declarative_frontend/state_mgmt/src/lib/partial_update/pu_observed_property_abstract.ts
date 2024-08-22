@@ -177,8 +177,8 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
       : false;
   }
 
-  public getOwningView() :ViewPUInfo {
-    return { componentName: this.owningView_?.constructor.name, id: this.owningView_?.id__() }
+  public getOwningView(): ViewPUInfo {
+    return { componentName: this.owningView_?.constructor.name, id: this.owningView_?.id__() };
   }
 
   public dumpSyncPeers(isProfiler: boolean, changedTrackPropertyName?: string): ObservedPropertyInfo<T>[] {
@@ -357,17 +357,17 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
    */
 
   protected checkIsSupportedValue(value: T): boolean {
-    let res = ((typeof value === 'object' && typeof value !== 'function' && !ObserveV2.IsObservedObjectV2(value)) ||
-    typeof value === 'number' || typeof value === 'string' || typeof value === 'boolean' ||
-    value === undefined || value === null);
+    let res = ((typeof value === 'object' && typeof value !== 'function' && !ObserveV2.IsObservedObjectV2(value) &&
+      !ObserveV2.IsMakeObserved(value)) || typeof value === 'number' || typeof value === 'string' ||
+      typeof value === 'boolean' || value === undefined || value === null);
     if (!res) {
       errorReport.varValueCheckFailed({
-          customComponent: this.debugInfoOwningView(),
-          variableDeco: this.debugInfoDecorator(),
-          variableName: this.info(),
-          expectedType: `undefined, null, number, boolean, string, or Object but not function, not V3 @observed / @track class`,
-          value: value
-        });
+        customComponent: this.debugInfoOwningView(),
+        variableDeco: this.debugInfoDecorator(),
+        variableName: this.info(),
+        expectedType: `undefined, null, number, boolean, string, or Object but not function, not V2 @ObservedV2 / @Trace class, and makeObserved return value either`,
+        value: value
+      });
     }
     return res;
   }

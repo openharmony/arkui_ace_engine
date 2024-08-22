@@ -17,9 +17,6 @@
 
 #include "base/i18n/localization.h"
 #include "core/components/padding/padding_component.h"
-#include "core/components/select/select_theme.h"
-#include "frameworks/bridge/common/dom/dom_type.h"
-#include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {
 namespace {

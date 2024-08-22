@@ -900,4 +900,203 @@ HWTEST_F(TextClockTestNG, TextClockTest013, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetFontWeight(), FONT_WEIGHT_VALUE);
     EXPECT_EQ(layoutProperty->GetFontFamily(), FONT_FAMILY_VALUE);
 }
+
+/**
+ * @tc.name: GetDateTimeIndex
+ * @tc.desc: Test UpdateTextLayoutProperty of TextClockPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockTestNG, GetDateTimeIndex, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textClock frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.format = std::make_optional(CLOCK_FORMAT);
+    testProperty.hoursWest = std::make_optional(HOURS_WEST);
+    RefPtr<FrameNode> frameNode = CreateTextClockParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get pattern and layoutProperty.
+     * @tc.expected: step2.
+     */
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textClockProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    ASSERT_NE(textClockProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. ParseDateTimeValue function is called..
+     * @tc.expected: step3. check whether the properties is correct.
+     */
+    TextClockFormatElement tempFormatElement;
+    tempFormatElement.formatElementNum = 5;
+    pattern->GetDateTimeIndex('M', tempFormatElement);
+    tempFormatElement.formatElementNum = 5;
+    pattern->GetDateTimeIndex('d', tempFormatElement);
+}
+
+/**
+ * @tc.name: GetAmPm
+ * @tc.desc: Test UpdateTextLayoutProperty of TextClockPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockTestNG, GetAmPm, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textClock frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.format = std::make_optional(CLOCK_FORMAT);
+    testProperty.hoursWest = std::make_optional(HOURS_WEST);
+    RefPtr<FrameNode> frameNode = CreateTextClockParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get pattern and layoutProperty.
+     * @tc.expected: step2.
+     */
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textClockProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    ASSERT_NE(textClockProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. ParseDateTimeValue function is called..
+     * @tc.expected: step3. check whether the properties is correct.
+     */
+    pattern->GetAmPm(0);
+    pattern->GetAmPm(12);
+}
+
+/**
+ * @tc.name: AddZeroPrefix
+ * @tc.desc: Test UpdateTextLayoutProperty of TextClockPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockTestNG, AddZeroPrefix, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textClock frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.format = std::make_optional(CLOCK_FORMAT);
+    testProperty.hoursWest = std::make_optional(HOURS_WEST);
+    RefPtr<FrameNode> frameNode = CreateTextClockParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get pattern and layoutProperty.
+     * @tc.expected: step2.
+     */
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textClockProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    ASSERT_NE(textClockProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. ParseDateTimeValue function is called..
+     * @tc.expected: step3. check whether the properties is correct.
+     */
+    pattern->AddZeroPrefix("10");
+    pattern->AddZeroPrefix("a");
+    pattern->AddZeroPrefix("%");
+}
+
+/**
+ * @tc.name: RemoveZeroPrefix
+ * @tc.desc: Test UpdateTextLayoutProperty of TextClockPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockTestNG, RemoveZeroPrefix, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textClock frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.format = std::make_optional(CLOCK_FORMAT);
+    testProperty.hoursWest = std::make_optional(HOURS_WEST);
+    RefPtr<FrameNode> frameNode = CreateTextClockParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get pattern and layoutProperty.
+     * @tc.expected: step2.
+     */
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textClockProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    ASSERT_NE(textClockProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. ParseDateTimeValue function is called..
+     * @tc.expected: step3. check whether the properties is correct.
+     */
+    pattern->RemoveZeroPrefix("1");
+    pattern->RemoveZeroPrefix("10");
+}
+
+/**
+ * @tc.name: FireBuilder
+ * @tc.desc: Test UpdateTextLayoutProperty of TextClockPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockTestNG, FireBuilder, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textClock frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.format = std::make_optional(CLOCK_FORMAT);
+    testProperty.hoursWest = std::make_optional(HOURS_WEST);
+    RefPtr<FrameNode> frameNode = CreateTextClockParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get pattern and layoutProperty.
+     * @tc.expected: step2.
+     */
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textClockProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    ASSERT_NE(textClockProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. ParseDateTimeValue function is called..
+     * @tc.expected: step3. check whether the properties is correct.
+     */
+    pattern->contentModifierNode_ = frameNode;
+    pattern->FireBuilder();
+}
+
+/**
+ * @tc.name: BuildContentModifierNode
+ * @tc.desc: Test UpdateTextLayoutProperty of TextClockPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockTestNG, BuildContentModifierNode, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textClock frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.format = std::make_optional(CLOCK_FORMAT);
+    testProperty.hoursWest = std::make_optional(HOURS_WEST);
+    RefPtr<FrameNode> frameNode = CreateTextClockParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get pattern and layoutProperty.
+     * @tc.expected: step2.
+     */
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step3. ParseDateTimeValue function is called..
+     * @tc.expected: step3. check whether the properties is correct.
+     */
+    pattern->BuildContentModifierNode();
+}
 } // namespace OHOS::Ace::NG

@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIRowSplitModifier* GetRowSplitModifier();
+const CJUIRowSplitModifier* GetCJUIRowSplitModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_ROW_SPLIT_MODIFIER_H

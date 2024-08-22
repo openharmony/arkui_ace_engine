@@ -159,7 +159,7 @@ public:
 protected:
     virtual void DumpHandleEvent(const std::vector<std::string>& params);
     virtual void DumpProperty(const std::vector<std::string>& params);
-    virtual void DumpTree(int32_t depth, int64_t nodeID);
+    virtual void DumpTree(int32_t depth, int64_t nodeID, bool isDumpSimplify = false);
 
     static bool GetDefaultAttrsByType(const std::string& type, std::unique_ptr<JsonValue>& jsonDefaultAttrs);
     mutable std::mutex mutex_;

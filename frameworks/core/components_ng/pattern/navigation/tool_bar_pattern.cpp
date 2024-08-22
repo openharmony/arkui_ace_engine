@@ -67,12 +67,13 @@ void NavToolbarPattern::OnModifyDone()
     CHECK_NULL_VOID(context);
     float scale = context->GetFontScale();
     if (LessNotEqual(scale, AgingAdapationDialogUtil::GetDialogBigFontSizeScale())) {
-        gestureHub->RemoveDragEvent();
-        gestureHub->SetLongPressEvent(nullptr);
         return;
     }
     InitLongPressEvent(gestureHub);
     InitDragEvent(gestureHub);
+    auto accessibilityProperty = containerNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
 }
 
 void NavToolbarPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)

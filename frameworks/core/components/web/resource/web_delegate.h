@@ -19,6 +19,7 @@
 #include <list>
 #include <map>
 
+#include "ability_runtime/context/environment_callback.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/render/render_surface.h"
 #include "core/pipeline/pipeline_base.h"
@@ -48,6 +49,7 @@
 #include "app_mgr_client.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "surface.h"
+#include "core/components_ng/render/adapter/rosen_render_surface.h"
 #endif
 #include "wm/window.h"
 #endif
@@ -762,6 +764,8 @@ public:
     bool RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
     void OnQuickMenuDismissed();
+    void HideHandleAndQuickMenuIfNecessary(bool hide);
+    void ChangeVisibilityOfQuickMenu();
     void OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
@@ -793,7 +797,8 @@ public:
     }
     void HandleAccessibilityHoverEvent(int32_t x, int32_t y);
     void NotifyAutoFillViewData(const std::string& jsonStr);
-    void HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
+    void AutofillCancel(const std::string& fillContent);
+    bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
@@ -912,6 +917,7 @@ public:
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     sptr<Surface> surface_ = nullptr;
+    RefPtr<NG::RosenRenderSurface> renderSurface_ = nullptr;
 #endif
 #ifdef OHOS_STANDARD_SYSTEM
     void SetWebRendeGlobalPos(const Offset& pos)
@@ -938,7 +944,7 @@ public:
     bool ShouldVirtualKeyboardOverlay();
     void ScrollBy(float deltaX, float deltaY);
     void ScrollByRefScreen(float deltaX, float deltaY, float vx = 0, float vy = 0);
-    void ExecuteAction(int64_t accessibilityId, AceAction action,
+    bool ExecuteAction(int64_t accessibilityId, AceAction action,
         const std::map<std::string, std::string>& actionArguments);
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetFocusedAccessibilityNodeInfo(
         int64_t accessibilityId, bool isAccessibilityFocus);
@@ -1178,7 +1184,7 @@ private:
     WindowsSurfaceInfo surfaceInfo_ = { nullptr, EGL_NO_DISPLAY, nullptr, EGL_NO_CONTEXT };
     bool forceDarkMode_ = false;
     WebDarkMode current_dark_mode_ = WebDarkMode::Auto;
-    sptr<AppExecFwk::IConfigurationObserver> configChangeObserver_ = nullptr;
+    std::shared_ptr<OHOS::AbilityRuntime::EnvironmentCallback> configChangeObserver_ = nullptr;
     OHOS::NWeb::BlurReason blurReason_ = OHOS::NWeb::BlurReason::FOCUS_SWITCH;
     bool isPopup_ = false;
     int32_t parentNWebId_ = -1;

@@ -77,7 +77,7 @@ void WindowNode::SetParent(const WeakPtr<UINode>& parent)
     UINode::SetParent(parent);
 }
 
-bool WindowNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint, int32_t sourceType)
+bool WindowNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint, const TouchEvent& touchEvent)
 {
     auto pattern = GetPattern<WindowPattern>();
     if (pattern != nullptr) {
@@ -93,7 +93,7 @@ bool WindowNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint, int32_t 
         }
     }
     const auto& rect = GetPaintRectWithTransform();
-    const auto& hotRect = ConvertHotRect(rect, sourceType);
+    const auto& hotRect = ConvertHotRect(rect, static_cast<int32_t>(touchEvent.sourceType));
     if (!hotRect.IsInRegion(parentLocalPoint)) {
         return true;
     }

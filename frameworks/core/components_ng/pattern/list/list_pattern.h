@@ -59,8 +59,6 @@ public:
     ListPattern() : ScrollablePattern(EdgeEffect::SPRING, false) {}
     ~ListPattern() override = default;
 
-    void CreateAnalyzerOverlay(const RefPtr<FrameNode> listNode);
-
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -113,9 +111,27 @@ public:
         return isScrollable_;
     }
 
+    void SetMaintainVisibleContentPosition(bool enabled)
+    {
+        maintainVisibleContentPosition_ = enabled;
+    }
+
+    bool GetMaintainVisibleContentPosition()
+    {
+        return maintainVisibleContentPosition_;
+    }
+
+    void MarkNeedReEstimateOffset()
+    {
+        needReEstimateOffset_ = true;
+    }
+
+    void NotifyDataChange(int32_t index, int32_t count) override;
+
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
-    bool OutBoundaryCallback() override;
+    void OnTouchDown(const TouchEventInfo& info) override;
+    OverScrollOffset GetOutBoundaryOffset(bool useCurrentDelta) const;
     OverScrollOffset GetOverScrollOffset(double delta) const override;
     float GetOffsetWithLimit(float offset) const override;
     void HandleScrollBarOutBoundary();
@@ -180,7 +196,11 @@ public:
     bool AnimateToTarget(int32_t index, std::optional<int32_t> indexInGroup, ScrollAlign align);
     Offset GetCurrentOffset() const;
     Rect GetItemRect(int32_t index) const override;
+    int32_t GetItemIndex(double x, double y) const override;
     Rect GetItemRectInGroup(int32_t index, int32_t indexInGroup) const;
+    ListItemIndex GetItemIndexInGroup(double x, double y) const;
+    bool GetGroupItemIndex(double x, double y, RefPtr<FrameNode> itemFrameNode, int32_t& index,
+        ListItemIndex& itemIndex) const;
     void OnAnimateStop() override;
     float GetMainContentSize() const override
     {
@@ -232,8 +252,15 @@ public:
     }
     bool CanReplaceSwiperItem()
     {
-        if (!swiperItem_.Upgrade()) {
+        auto listItemPattern = swiperItem_.Upgrade();
+        if (!listItemPattern) {
             canReplaceSwiperItem_ = true;
+            return canReplaceSwiperItem_;
+        }
+        auto host = listItemPattern->GetHost();
+        if (!host || !host->IsOnMainTree()) {
+            canReplaceSwiperItem_ = true;
+            return canReplaceSwiperItem_;
         }
         return canReplaceSwiperItem_;
     }
@@ -349,8 +376,8 @@ private:
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void HandleScrollEffect(float offset);
     void StartDefaultOrCustomSpringMotion(float start, float end, const RefPtr<InterpolatingSpring>& curve);
-    void UpdateScrollSnap();
     bool IsScrollSnapAlignCenter() const;
+    void SetChainAnimationCallback();
     void SetChainAnimationToPosMap();
     void SetChainAnimationLayoutAlgorithm(
         RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm, RefPtr<ListLayoutProperty> listLayoutProperty);
@@ -377,17 +404,10 @@ private:
     void UpdateListDirectionInCardStyle();
     bool UpdateStartListItemIndex();
     bool UpdateEndListItemIndex();
-    float GetStartOverScrollOffset(float offset) const;
-    float GetEndOverScrollOffset(float offset) const;
+    float GetStartOverScrollOffset(float offset, float startMainPos) const;
+    float GetEndOverScrollOffset(float offset, float endMainPos, float startMainPos) const;
+    float UpdateTotalOffset(const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm, bool isJump);
     RefPtr<ListContentModifier> listContentModifier_;
-
-    void ReadThemeToFadingEdge();
-    void UpdateFadingEdge(const RefPtr<ListPaintMethod> paint);
-    void UpdateFadeInfo(bool isFadingTop, bool isFadingBottom, const RefPtr<ListPaintMethod> paint);
-    bool isFadingEdge_ = false;
-    bool isTopEdgeFading_ = false;
-    bool isLowerEdgeFading_ = false;
-    Axis fadingAxis_ = Axis::VERTICAL;
 
     int32_t maxListItemIndex_ = 0;
     int32_t startIndex_ = -1;
@@ -400,6 +420,7 @@ private:
     float contentMainSize_ = 0.0f;
     float contentStartOffset_ = 0.0f;
     float contentEndOffset_ = 0.0f;
+    bool maintainVisibleContentPosition_ = false;
 
     float currentDelta_ = 0.0f;
     bool crossMatchChild_ = false;

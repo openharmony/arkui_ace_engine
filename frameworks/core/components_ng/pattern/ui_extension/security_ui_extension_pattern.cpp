@@ -273,28 +273,12 @@ void SecurityUIExtensionPattern::OnDisconnect(bool isAbnormal)
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void SecurityUIExtensionPattern::OnAreaChangedInner()
-{
-    DispatchDisplayArea();
-}
-
 void SecurityUIExtensionPattern::FireBindModalCallback()
 {}
 
-bool SecurityUIExtensionPattern::OnDirtyLayoutWrapperSwap(
-    const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+void SecurityUIExtensionPattern::OnSyncGeometryNode(const DirtySwapConfig& config)
 {
-    CHECK_NULL_RETURN(sessionWrapper_, false);
-    CHECK_NULL_RETURN(dirty, false);
-    auto host = dirty->GetHostNode();
-    CHECK_NULL_RETURN(host, false);
-    auto [displayOffset, err] = host->GetPaintRectGlobalOffsetWithTranslate();
-    auto geometryNode = dirty->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, false);
-    auto displaySize = geometryNode->GetFrameSize();
-    displayArea_ = RectF(displayOffset, displaySize);
-    sessionWrapper_->NotifyDisplayArea(displayArea_);
-    return false;
+    DispatchDisplayArea(true);
 }
 
 void SecurityUIExtensionPattern::OnWindowShow()
@@ -358,7 +342,18 @@ void SecurityUIExtensionPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(pipeline);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    OnAreaChangedFunc onAreaChangedFunc = [weak = WeakClaim(this)](
+        const RectF& oldRect,
+        const OffsetF& oldOrigin,
+        const RectF& rect,
+        const OffsetF& origin) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->DispatchDisplayArea();
+    };
+    eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
     pipeline->AddOnAreaChangeNode(host->GetId());
     callbackId_ = pipeline->RegisterSurfacePositionChangedCallback(
         [weak = WeakClaim(this)](int32_t, int32_t) {
@@ -367,6 +362,7 @@ void SecurityUIExtensionPattern::OnAttachToFrameNode()
                 pattern->DispatchDisplayArea(true);
             }
         });
+    PLATFORM_LOGI("OnAttachToFrameNode");
 }
 
 void SecurityUIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -484,21 +480,24 @@ void SecurityUIExtensionPattern::FireOnTerminatedCallback(
         return;
     }
 
+    state_ = AbilityState::DESTRUCTION;
+    if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
+        PLATFORM_LOGI("DestroySession.");
+        sessionWrapper_->DestroySession();
+    }
+
     ContainerScope scope(instanceId_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<UIExtensionHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnTerminatedCallback(code, wantWrap);
-    state_ = AbilityState::DESTRUCTION;
-    if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
-        sessionWrapper_->DestroySession();
-    }
 }
 
 void SecurityUIExtensionPattern::FireOnErrorCallback(
     int32_t code, const std::string& name, const std::string& message)
 {
+    state_ = AbilityState::NONE;
     PlatformPattern::FireOnErrorCallback(code, name, message);
     if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
         sessionWrapper_->DestroySession();
@@ -524,7 +523,7 @@ void SecurityUIExtensionPattern::SetSyncCallbacks(
 
 void SecurityUIExtensionPattern::FireSyncCallbacks()
 {
-    PLATFORM_LOGD("The size of sync callbacks = %{public}zu.", onSyncOnCallbackList_.size());
+    PLATFORM_LOGI("The size of sync callbacks = %{public}zu.", onSyncOnCallbackList_.size());
     ContainerScope scope(instanceId_);
     for (const auto& callback : onSyncOnCallbackList_) {
         if (callback) {
@@ -541,7 +540,7 @@ void SecurityUIExtensionPattern::SetAsyncCallbacks(
 
 void SecurityUIExtensionPattern::FireAsyncCallbacks()
 {
-    PLATFORM_LOGD("The size of async callbacks = %{public}zu.", onSyncOnCallbackList_.size());
+    PLATFORM_LOGI("The size of async callbacks = %{public}zu.", onSyncOnCallbackList_.size());
     ContainerScope scope(instanceId_);
     for (const auto& callback : onAsyncOnCallbackList_) {
         if (callback) {
@@ -595,7 +594,7 @@ void SecurityUIExtensionPattern::OnMountToParentDone()
         return;
     }
 
-    PLATFORM_LOGI("OnMountToParentDone");
+    PLATFORM_LOGI("OnMountToParentDone.");
     auto wantWrap = GetWantWrap();
     CHECK_NULL_VOID(wantWrap);
     UpdateWant(wantWrap);
@@ -615,6 +614,15 @@ void SecurityUIExtensionPattern::RegisterVisibleAreaChange()
     CHECK_NULL_VOID(host);
     std::vector<double> ratioList = { 0.0 };
     pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
+}
+
+void SecurityUIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->RequestFocusImmediately();
 }
 
 void SecurityUIExtensionPattern::OnLanguageConfigurationUpdate()

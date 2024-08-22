@@ -57,7 +57,7 @@ public:
     void SetAdaptMaxFontSize(const Dimension& value) override;
     void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) override;
     void SetTextDetectEnable(bool value) override;
-    void SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult) override;
+    void SetTextDetectConfig(const TextDetectConfig& textDetectConfig) override;
     void OnSetHeight() override;
     void OnSetWidth() override;
     void OnSetAlign() override;
@@ -69,14 +69,13 @@ public:
     void SetEllipsisMode(EllipsisMode modal) override {};
     void SetClipEdge(bool clip) override {};
     void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) override {};
-    void SetMarqueeOptions(const NG::TextMarqueeOptions& options) override {};
-    void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func) override {};
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
     void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override;
     void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) override;
     void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override;
     void SetOnDrop(NG::OnDragDropFunc&& onDrop) override;
     void SetDraggable(bool draggable) override;
+    void SetHalfLeading(bool halfLeading) override;
 
 private:
     static RefPtr<TextComponentV2> GetComponent();

@@ -15,8 +15,6 @@
 
 #include "inspect_video.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 InspectVideo::InspectVideo(NodeId nodeId, const std::string& nodeName) : InspectNode(nodeId, nodeName) {
 }

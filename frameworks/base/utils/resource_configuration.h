@@ -137,6 +137,36 @@ public:
         return appHasDarkRes_;
     }
 
+    void SetPreferredLanguage(const std::string& preferredLanguage)
+    {
+        preferredLanguage_ = preferredLanguage;
+    }
+
+    const std::string& GetPreferredLanguage() const
+    {
+        return preferredLanguage_;
+    }
+
+    void SetPreferredCountry(const std::string& preferredCountry)
+    {
+        preferredCountry_ = preferredCountry;
+    }
+
+    const std::string& GetPreferredCountry() const
+    {
+        return preferredCountry_;
+    }
+
+    void SetPreferredScript(const std::string& preferredScript)
+    {
+        preferredScript_ = preferredScript;
+    }
+
+    const std::string& GetPreferredScript() const
+    {
+        return preferredScript_;
+    }
+
 private:
     bool ParseJsonColorMode(const std::unique_ptr<JsonValue>& jsonConfig, uint32_t& updateFlags);
     bool ParseJsonFontRatio(const std::unique_ptr<JsonValue>& jsonConfig, uint32_t& updateFlags);
@@ -152,6 +182,9 @@ private:
     bool appHasDarkRes_ = false;
     uint32_t mcc_ = 0;
     uint32_t mnc_ = 0;
+    std::string preferredLanguage_;
+    std::string preferredCountry_;
+    std::string preferredScript_;
 };
 
 class ResourceInfo {
@@ -206,6 +239,16 @@ public:
     {
         return systemPackagePath_;
     }
+
+    void SetHmsPackagePath(const std::string& hmsPackagePath)
+    {
+        hmsPackagePath_ = hmsPackagePath;
+    }
+
+    const std::string& GetHmsPackagePath() const
+    {
+        return hmsPackagePath_;
+    }
 #endif
 
     void SetThemeId(uint32_t themeId)
@@ -225,6 +268,7 @@ private:
     std::string packagePath_;
 #if defined(PREVIEW)
     std::string systemPackagePath_;
+    std::string hmsPackagePath_;
 #endif
     int32_t themeId_ = -1;
 };

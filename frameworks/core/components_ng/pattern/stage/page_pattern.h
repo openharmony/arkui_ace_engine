@@ -153,6 +153,11 @@ public:
         isPageInTransition_ = pageTransition;
     }
 
+    bool GetPageInTransition() const
+    {
+        return isPageInTransition_;
+    }
+
     // Mark current page node invisible in render tree.
     void ProcessHideState();
     // Mark current page node visible in render tree.
@@ -173,9 +178,27 @@ public:
         dynamicPageSizeCallback_ = std::move(dynamicPageSizeCallback);
     }
 
-    void SetOnHiddenChange(std::function<void(bool)>&& onHiddenChange)
+    void AddOnHiddenChange(int32_t id, PageVisibilityChangeCallback&& onHiddenChange)
     {
-        onHiddenChange_ = std::move(onHiddenChange);
+        onHiddenChange_[id] = std::move(onHiddenChange);
+    }
+
+    void FireOnHiddenChange(bool flag)
+    {
+        for (auto& onHiddenChangeInfo : onHiddenChange_) {
+            if (onHiddenChangeInfo.second) {
+                auto onHiddenChange = onHiddenChangeInfo.second;
+                onHiddenChange(flag);
+            }
+        }
+    }
+
+    void RemoveOnHiddenChange(int32_t id)
+    {
+        auto iter = onHiddenChange_.find(id);
+        if (iter != onHiddenChange_.end()) {
+            onHiddenChange_.erase(iter);
+        }
     }
 
     void CreateOverlayManager(bool isShow)
@@ -238,6 +261,11 @@ protected:
         return true;
     }
 
+    bool AvoidCutout() const override
+    {
+        return true;
+    }
+
     void NotifyPerfMonitorPageMsg(const std::string& pageUrl, const std::string& bundleName);
 
     RefPtr<PageInfo> pageInfo_;
@@ -248,7 +276,7 @@ protected:
     std::function<bool()> onBackPressed_;
     std::function<void()> pageTransitionFunc_;
     std::function<void()> firstBuildCallback_;
-    std::function<void(bool)> onHiddenChange_;
+    std::unordered_map<int32_t, PageVisibilityChangeCallback> onHiddenChange_;
     DynamicPageSizeCallback dynamicPageSizeCallback_;
     PageVisibilityChangeCallback visibilityChangeCallback_;
     std::shared_ptr<std::function<void()>> pageTransitionFinish_;
@@ -259,6 +287,10 @@ protected:
     bool isPageInTransition_ = false;
     bool isRenderDone_ = false;
     bool isModalCovered_ = false;
+
+#if defined(ENABLE_SPLIT_MODE)
+    bool needFireObserver_ = true;
+#endif
 
     SharedTransitionMap sharedTransitionMap_;
     JSAnimatorMap jsAnimatorMap_;

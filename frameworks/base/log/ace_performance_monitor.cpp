@@ -15,11 +15,8 @@
 
 #include "base/log/ace_performance_monitor.h"
 
-#include <cinttypes>
-
 #include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
-#include "base/utils/system_properties.h"
 
 namespace OHOS::Ace {
 using namespace std;
@@ -73,12 +70,16 @@ void ArkUIPerfMonitor::RecordTimeSlice(MonitorTag tag, int64_t duration)
 {
     SetRecordingStatus(tag, MonitorStatus::IDLE);
     if (tag == MonitorTag::STATIC_API) {
+        propertyNum_++;
         if (!monitorStatus_) {
             return;
         }
-        propertyNum_++;
+        timeSlice_[tag] += duration;
+        return;
     }
-    timeSlice_[tag] += duration;
+    if (monitorStatus_ == 0) {
+        timeSlice_[tag] += duration;
+    }
 }
 
 void ArkUIPerfMonitor::RecordStateMgmtNode(int64_t num)
@@ -129,6 +130,7 @@ void ArkUIPerfMonitor::ClearPerfMonitor()
     timeSlice_[MonitorTag::COMPONENT_UPDATE] = 0;
     timeSlice_[MonitorTag::JS_CALLBACK] = 0;
     timeSlice_[MonitorTag::STATIC_API] = 0;
+    timeSlice_[MonitorTag::OTHER] = 0;
     propertyNum_ = 0;
     stateMgmtNodeNum_ = 0;
     layoutNodeNum_ = 0;
@@ -141,7 +143,7 @@ void ArkUIPerfMonitor::FlushPerfMonitor()
     auto total = static_cast<int64_t>(duration_cast<nanoseconds>(end_ - begin_).count());
     auto frameWork = total - timeSlice_[MonitorTag::COMPONENT_CREATION] - timeSlice_[MonitorTag::COMPONENT_LIFECYCLE] -
                      timeSlice_[MonitorTag::COMPONENT_UPDATE] - timeSlice_[MonitorTag::JS_CALLBACK] +
-                     timeSlice_[MonitorTag::STATIC_API];
+                     timeSlice_[MonitorTag::STATIC_API] - timeSlice_[MonitorTag::OTHER];
     auto json = JsonUtil::Create(true);
     json->Put("state_mgmt", stateMgmtNodeNum_);
     json->Put("layout", layoutNodeNum_);

@@ -40,13 +40,13 @@ void OffscreenCanvasRenderingContext2DModelNG::SetPattern(RefPtr<AceType> patter
 void OffscreenCanvasRenderingContext2DModelNG::SetFillText(const PaintState& state, const FillTextInfo& fillTextInfo)
 {
     CHECK_NULL_VOID(pattern_);
-    pattern_->FillText(fillTextInfo.text, fillTextInfo.x, fillTextInfo.y, fillTextInfo.maxWidth, state);
+    pattern_->FillText(fillTextInfo.text, fillTextInfo.x, fillTextInfo.y, fillTextInfo.maxWidth);
 }
 
 void OffscreenCanvasRenderingContext2DModelNG::SetStrokeText(const PaintState& state, const FillTextInfo& fillTextInfo)
 {
     CHECK_NULL_VOID(pattern_);
-    pattern_->StrokeText(fillTextInfo.text, fillTextInfo.x, fillTextInfo.y, fillTextInfo.maxWidth, state);
+    pattern_->StrokeText(fillTextInfo.text, fillTextInfo.x, fillTextInfo.y, fillTextInfo.maxWidth);
 }
 
 void OffscreenCanvasRenderingContext2DModelNG::SetAntiAlias(bool anti)
@@ -61,7 +61,7 @@ void OffscreenCanvasRenderingContext2DModelNG::SetFontWeight(const FontWeight& w
     pattern_->SetFontWeight(weight);
 }
 
-void OffscreenCanvasRenderingContext2DModelNG::SetFontStyle(const FontStyle& fontStyle)
+void OffscreenCanvasRenderingContext2DModelNG::SetFontStyle(const Ace::FontStyle& fontStyle)
 {
     CHECK_NULL_VOID(pattern_);
     pattern_->SetFontStyle(fontStyle);
@@ -456,8 +456,8 @@ RefPtr<Ace::PixelMap> OffscreenCanvasRenderingContext2DModelNG::GetPixelMap(cons
     options.alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL;
     options.pixelFormat = OHOS::Media::PixelFormat::RGBA_8888;
     options.scaleMode = OHOS::Media::ScaleMode::CENTER_CROP;
-    options.size.width = static_cast<int32_t>(std::abs(imageSize.height));
-    options.size.height = static_cast<int32_t>(std::abs(imageSize.width));
+    options.size.width = static_cast<int32_t>(std::abs(imageSize.width));
+    options.size.height = static_cast<int32_t>(std::abs(imageSize.height));
     options.editable = true;
     auto pixelMap = Ace::PixelMap::Create(OHOS::Media::PixelMap::Create(options));
     CHECK_NULL_RETURN(pixelMap, nullptr);
@@ -537,6 +537,12 @@ void OffscreenCanvasRenderingContext2DModelNG::Reset()
 {
     CHECK_NULL_VOID(pattern_);
     pattern_->Reset();
+}
+
+void OffscreenCanvasRenderingContext2DModelNG::SetDensity(double density)
+{
+    CHECK_NULL_VOID(pattern_);
+    pattern_->SetDensity(density);
 }
 
 // All interfaces that only the 'OffscreenCanvasRenderingContext2D' has.

@@ -1742,6 +1742,30 @@ void ResetTextInputEnablePreviewText(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetEnablePreviewText(frameNode, DEFAULT_ENABLE_PREVIEW_TEXT_VALUE);
 }
+
+void SetTextInputSelectionMenuOptions(ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::OnCreateMenuCallback* onCreateMenu = nullptr;
+    NG::OnMenuItemClickCallback* onMenuItemClick = nullptr;
+    if (onCreateMenuCallback) {
+        onCreateMenu = reinterpret_cast<NG::OnCreateMenuCallback*>(onCreateMenuCallback);
+    }
+    if (onMenuItemClickCallback) {
+        onMenuItemClick = reinterpret_cast<NG::OnMenuItemClickCallback*>(onMenuItemClickCallback);
+    }
+    TextFieldModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu), std::move(*onMenuItemClick));
+}
+
+void ResetTextInputSelectionMenuOptions(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::OnCreateMenuCallback onCreateMenuCallback;
+    NG::OnMenuItemClickCallback onMenuItemClick;
+    TextFieldModelNG::SetSelectionMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+}
 } // namespace
 namespace NodeModifier {
 const ArkUITextInputModifier* GetTextInputModifier()
@@ -1773,30 +1797,88 @@ const ArkUITextInputModifier* GetTextInputModifier()
         SetTextInputDecoration, ResetTextInputDecoration, SetTextInputLetterSpacing, ResetTextInputLetterSpacing,
         SetTextInputLineHeight, ResetTextInputLineHeight, SetTextInputFontFeature, ResetTextInputFontFeature,
         SetTextInputWordBreak, ResetTextInputWordBreak, SetTextInputPasswordRules, ResetTextInputPasswordRules,
-        SetTextInputEnableAutoFill, ResetTextInputEnableAutoFill,
-        SetTextInputPadding, ResetTextInputPadding, SetTextInputAdaptMinFontSize,
-        ResetTextInputAdaptMinFontSize, SetTextInputAdaptMaxFontSize, ResetTextInputAdaptMaxFontSize,
-        SetTextInputHeightAdaptivePolicy, ResetTextInputHeightAdaptivePolicy, SetTextInputPlaceholderFontEnum,
-        SetTextInputTextOverflow, ResetTextInputTextOverflow, SetTextInputTextIndent, ResetTextInputTextIndent,
-        SetTextInputSelectAll, ResetTextInputSelectAll, SetTextInputShowCounter, ResetTextInputShowCounter,
-        SetTextInputOnEditChange, ResetTextInputOnEditChange, SetTextInputFilter, ResetTextInputFilter,
-        SetTextInputOnSubmitWithEvent, ResetTextInputOnSubmitWithEvent, SetTextInputOnChange, ResetTextInputOnChange,
-        SetTextInputOnTextSelectionChange, ResetTextInputOnTextSelectionChange, SetTextInputOnContentScroll,
-        ResetTextInputOnContentScroll, SetTextInputOnCopy, ResetTextInputOnCopy,
+        SetTextInputEnableAutoFill, ResetTextInputEnableAutoFill, SetTextInputPadding, ResetTextInputPadding,
+        SetTextInputAdaptMinFontSize, ResetTextInputAdaptMinFontSize, SetTextInputAdaptMaxFontSize,
+        ResetTextInputAdaptMaxFontSize, SetTextInputHeightAdaptivePolicy, ResetTextInputHeightAdaptivePolicy,
+        SetTextInputPlaceholderFontEnum, SetTextInputTextOverflow, ResetTextInputTextOverflow, SetTextInputTextIndent,
+        ResetTextInputTextIndent, SetTextInputSelectAll, ResetTextInputSelectAll, SetTextInputShowCounter,
+        ResetTextInputShowCounter, SetTextInputOnEditChange, ResetTextInputOnEditChange, SetTextInputFilter,
+        ResetTextInputFilter, SetTextInputOnSubmitWithEvent, ResetTextInputOnSubmitWithEvent, SetTextInputOnChange,
+        ResetTextInputOnChange, SetTextInputOnTextSelectionChange, ResetTextInputOnTextSelectionChange,
+        SetTextInputOnContentScroll, ResetTextInputOnContentScroll, SetTextInputOnCopy, ResetTextInputOnCopy,
         SetTextInputOnCut, ResetTextInputOnCut, SetTextInputOnPaste, ResetTextInputOnPaste,
-        GetTextInputSelectionMenuHidden, SetTextInputShowPassword, ResetTextInputShowPassword,
-        GetTextInputShowPassword, GetTextInputWordBreak, GetTextInputEnableAutoFill, SetTextInputContentType,
-        ResetTextInputContentType, GetTextInputContentType, GetTextInputUserUnderlineColor, GetTextInputPasswordRules,
-        GetTextInputSelectAll, SetTextInputInputFilter, GetTextInputInputFilter, ResetTextInputInputFilter,
-        GetTextInputCaretIndex, GetTextInputCaretOffset, GetTextInputStyle, GetTextInputContentRect,
-        GetTextInputContentLinesNum, SetBlurOnSubmit, GetBlurOnSubmit,
-        GetTextInputAdaptMinFontSize, GetTextInputAdaptMaxFontSize, GetTextInputLineHeight, GetTextInputMaxLines,
-        GetTextInputFontFeature, SetTextInputCustomKeyboard, GetTextInputCustomKeyboard,
-        GetTextInputCustomKeyboardOption, ResetTextInputCustomKeyboard, SetTextInputLineBreakStrategy,
-        ResetTextInputLineBreakStrategy,  SetTextInputShowKeyBoardOnFocus, GetTextInputShowKeyBoardOnFocus,
-        ResetTextInputShowKeyBoardOnFocus, SetTextInputNumberOfLines, GetTextInputNumberOfLines,
-        ResetTextInputNumberOfLines, SetTextInputMargin, ResetTextInputMargin, SetTextInputCaret,
-        GetTextInputController, GetTextInputMargin, SetTextInputEnablePreviewText, ResetTextInputEnablePreviewText };
+        GetTextInputSelectionMenuHidden, SetTextInputShowPassword, ResetTextInputShowPassword, GetTextInputShowPassword,
+        GetTextInputWordBreak, GetTextInputEnableAutoFill, SetTextInputContentType, ResetTextInputContentType,
+        GetTextInputContentType, GetTextInputUserUnderlineColor, GetTextInputPasswordRules, GetTextInputSelectAll,
+        SetTextInputInputFilter, GetTextInputInputFilter, ResetTextInputInputFilter, GetTextInputCaretIndex,
+        GetTextInputCaretOffset, GetTextInputStyle, GetTextInputContentRect, GetTextInputContentLinesNum,
+        SetBlurOnSubmit, GetBlurOnSubmit, GetTextInputAdaptMinFontSize, GetTextInputAdaptMaxFontSize,
+        GetTextInputLineHeight, GetTextInputMaxLines, GetTextInputFontFeature, SetTextInputCustomKeyboard,
+        GetTextInputCustomKeyboard, GetTextInputCustomKeyboardOption, ResetTextInputCustomKeyboard,
+        SetTextInputLineBreakStrategy, ResetTextInputLineBreakStrategy, SetTextInputShowKeyBoardOnFocus,
+        GetTextInputShowKeyBoardOnFocus, ResetTextInputShowKeyBoardOnFocus, SetTextInputNumberOfLines,
+        GetTextInputNumberOfLines, ResetTextInputNumberOfLines, SetTextInputMargin, ResetTextInputMargin,
+        SetTextInputCaret, GetTextInputController, GetTextInputMargin, SetTextInputEnablePreviewText,
+        ResetTextInputEnablePreviewText, SetTextInputSelectionMenuOptions, ResetTextInputSelectionMenuOptions };
+    return &modifier;
+}
+
+const CJUITextInputModifier* GetCJUITextInputModifier()
+{
+    static const CJUITextInputModifier modifier = { SetTextInputCaretColor, ResetTextInputCaretColor, SetTextInputType,
+        ResetTextInputType, SetTextInputMaxLines, ResetTextInputMaxLines, SetTextInputPlaceholderColor,
+        ResetTextInputPlaceholderColor, SetTextInputCaretPosition, ResetTextInputCaretPosition, SetTextInputCopyOption,
+        ResetTextInputCopyOption, SetTextInputShowPasswordIcon, ResetTextInputShowPasswordIcon,
+        SetTextInputPasswordIcon, ResetTextInputPasswordIcon, SetTextInputTextAlign, ResetTextInputTextAlign,
+        SetTextInputStyle, ResetTextInputStyle, SetTextInputSelectionMenuHidden, ResetTextInputSelectionMenuHidden,
+        SetTextInputShowUnderline, ResetTextInputShowUnderline, SetTextInputCaretStyle, ResetTextInputCaretStyle,
+        SetTextInputEnableKeyboardOnFocus, ResetTextInputEnableKeyboardOnFocus, SetTextInputBarState,
+        ResetTextInputBarState, SetTextInputEnterKeyType, ResetTextInputEnterKeyType, SetTextInputFontWeight,
+        ResetTextInputFontWeight, SetTextInputFontSize, ResetTextInputFontSize, SetTextInputMaxLength,
+        ResetTextInputMaxLength, SetTextInputSelectedBackgroundColor, ResetTextInputSelectedBackgroundColor,
+        SetTextInputShowError, ResetTextInputShowError, SetTextInputPlaceholderFont, ResetTextInputPlaceholderFont,
+        SetTextInputFontColor, ResetTextInputFontColor, SetTextInputFontStyle, ResetTextInputFontStyle,
+        SetTextInputFontFamily, ResetTextInputFontFamily, SetTextInputPlaceholderString, SetTextInputTextString,
+        SetTextInputFontWeightStr, StopTextInputTextEditing, SetTextInputCancelButton, resetTextInputCancelButton,
+        GetTextInputPlaceholder, GetTextInputText, GetTextInputCaretColor, GetTextInputCaretStyle,
+        GetTextInputShowUnderline, GetTextInputMaxLength, GetTextInputEnterKeyType, GetTextInputPlaceholderColor,
+        GetTextInputPlaceholderFont, GetTextInputRequestKeyboardOnFocus, GetTextInputType,
+        GetTextInputSelectedBackgroundColor, GetTextInputShowPasswordIcon, GetTextInputEditing,
+        GetTextInputShowCancelButton, GetTextInputCancelIconSize, getTextInputTextCancelIconSrc,
+        getTextInputTextCancelIconColor, GetTextInputTextAlign, GetTextInputFontColor, GetTextInputFontStyle,
+        GetTextInputFontWeight, GetTextInputFontSize, GetTextInputCancelButtonStyle, SetTextInputBackgroundColor,
+        ResetTextInputBackgroundColor, SetTextInputTextSelection, GetTextInputTextSelectionIndex,
+        SetTextInputPasswordRules, ResetTextInputPasswordRules, SetTextInputEnableAutoFill,
+        ResetTextInputEnableAutoFill, SetTextInputPadding, ResetTextInputPadding,
+        SetTextInputFontFeature, ResetTextInputFontFeature,
+        SetTextInputDecoration, ResetTextInputDecoration, SetTextInputLetterSpacing, ResetTextInputLetterSpacing,
+        SetTextInputLineHeight, ResetTextInputLineHeight,
+        SetTextInputNormalUnderlineColor, SetTextInputUserUnderlineColor, ResetTextInputUserUnderlineColor,
+        SetTextInputWordBreak, ResetTextInputWordBreak, SetTextInputPlaceholderFontEnum,
+        SetTextInputAdaptMinFontSize, ResetTextInputAdaptMinFontSize, SetTextInputAdaptMaxFontSize,
+        ResetTextInputAdaptMaxFontSize, SetTextInputHeightAdaptivePolicy, ResetTextInputHeightAdaptivePolicy,
+        SetTextInputTextOverflow, ResetTextInputTextOverflow, SetTextInputTextIndent, ResetTextInputTextIndent,
+        GetTextInputSelectionMenuHidden, GetTextInputWordBreak, GetTextInputEnableAutoFill,
+        SetTextInputContentType, ResetTextInputContentType, GetTextInputContentType,
+        GetTextInputUserUnderlineColor, GetTextInputPasswordRules, GetTextInputSelectAll,
+        SetTextInputInputFilter, GetTextInputInputFilter, ResetTextInputInputFilter, GetTextInputCaretIndex,
+        GetTextInputCaretOffset, GetTextInputStyle, GetTextInputContentRect, GetTextInputContentLinesNum,
+        SetBlurOnSubmit, GetBlurOnSubmit, GetTextInputAdaptMinFontSize, GetTextInputAdaptMaxFontSize,
+        GetTextInputLineHeight, GetTextInputMaxLines, GetTextInputFontFeature,
+        SetTextInputCustomKeyboard, GetTextInputCustomKeyboard, GetTextInputCustomKeyboardOption,
+        ResetTextInputCustomKeyboard, SetTextInputSelectAll, ResetTextInputSelectAll, SetTextInputShowCounter,
+        ResetTextInputShowCounter, SetTextInputOnEditChange, ResetTextInputOnEditChange, SetTextInputFilter,
+        ResetTextInputFilter, SetTextInputOnSubmitWithEvent, ResetTextInputOnSubmitWithEvent, SetTextInputOnChange,
+        ResetTextInputOnChange, SetTextInputOnTextSelectionChange, ResetTextInputOnTextSelectionChange,
+        SetTextInputOnContentScroll, ResetTextInputOnContentScroll, SetTextInputOnCopy, ResetTextInputOnCopy,
+        SetTextInputOnCut, ResetTextInputOnCut, SetTextInputOnPaste, ResetTextInputOnPaste,
+        SetTextInputShowKeyBoardOnFocus, GetTextInputShowKeyBoardOnFocus, ResetTextInputShowKeyBoardOnFocus,
+        SetTextInputNumberOfLines, GetTextInputNumberOfLines, ResetTextInputNumberOfLines,
+        SetTextInputShowPassword, ResetTextInputShowPassword, GetTextInputShowPassword, SetTextInputLineBreakStrategy,
+        ResetTextInputLineBreakStrategy, SetTextInputMargin, ResetTextInputMargin,
+        GetTextInputMargin, SetTextInputCaret, GetTextInputController,
+        SetTextInputEnablePreviewText, ResetTextInputEnablePreviewText };
+
     return &modifier;
 }
 

@@ -81,7 +81,7 @@ RefPtr<PixelMap> PixelMap::CreatePixelMap(void* rawPtr)
 {
     auto* pixmapPtr = reinterpret_cast<std::shared_ptr<Media::PixelMap>*>(rawPtr);
     if (pixmapPtr == nullptr || *pixmapPtr == nullptr) {
-        LOGW("pixmap pointer is nullptr when CreatePixelMap.");
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "pixmap pointer is nullptr when CreatePixelMap.");
         return nullptr;
     }
     return AceType::MakeRefPtr<PixelMapOhos>(*pixmapPtr);
@@ -262,6 +262,19 @@ void* PixelMapOhos::GetWritablePixels() const
 {
     CHECK_NULL_RETURN(pixmap_, nullptr);
     return pixmap_->GetWritablePixels();
+}
+
+bool PixelMapOhos::GetPixelsVec(std::vector<uint8_t>& data) const
+{
+    CHECK_NULL_RETURN(pixmap_, false);
+    data.resize(pixmap_->GetByteCount());
+    uint8_t* dst = data.data();
+    uint32_t errCode = pixmap_->ReadPixels(pixmap_->GetByteCount(), dst);
+    if (errCode) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "GetPixelsVec error, errCode=%{public}d", errCode);
+        return false;
+    }
+    return true;
 }
 
 RefPtr<PixelMap> PixelMap::ConvertSkImageToPixmap(

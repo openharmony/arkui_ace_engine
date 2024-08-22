@@ -567,6 +567,24 @@ const ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
     return &modifier;
 }
 
+const CJUIAlphabetIndexerModifier* GetCJUIAlphabetIndexerModifier()
+{
+    static const CJUIAlphabetIndexerModifier modifier = { SetPopupItemFont, ResetPopupItemFont, SetSelectedFont,
+        ResetSelectedFont, SetPopupFont, ResetPopupFont, SetAlphabetIndexerFont, ResetAlphabetIndexerFont,
+        SetPopupItemBackgroundColor, ResetPopupItemBackgroundColor, SetAlphabetIndexerColor, ResetAlphabetIndexerColor,
+        SetPopupColor, ResetPopupColor, SetAlphabetIndexerSelectedColor, ResetAlphabetIndexerSelectedColor,
+        SetPopupBackground, ResetPopupBackground, SetSelectedBackgroundColor, ResetSelectedBackgroundColor,
+        SetPopupUnselectedColor, ResetPopupUnselectedColor, SetAlignStyle, ResetAlignStyle, SetUsingPopup,
+        ResetUsingPopup, SetAlphabetIndexerSelected, ResetAlphabetIndexerSelected, SetPopupHorizontalSpace,
+        ResetPopupHorizontalSpace, SetPopupSelectedColor, ResetPopupSelectedColor, SetItemSize, ResetItemSize,
+        SetPopupPosition, ResetPopupPosition, SetPopupItemBorderRadius, ResetPopupItemBorderRadius, SetItemBorderRadius,
+        ResetItemBorderRadius, SetPopupBackgroundBlurStyle, ResetPopupBackgroundBlurStyle, SetPopupTitleBackground,
+        ResetPopupTitleBackground, SetAdaptiveWidth, ResetAdaptiveWidth, SetAutoCollapse, ResetAutoCollapse,
+        SetEnableHapticFeedback, ResetEnableHapticFeedback, SetArrayValue, ResetArrayValue };
+
+    return &modifier;
+}
+
 void SetOnIndexerSelected(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);

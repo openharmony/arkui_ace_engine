@@ -44,6 +44,10 @@ std::string ContentController::PreprocessString(int32_t startIndex, int32_t endI
     CHECK_NULL_RETURN(pattern, value);
     auto textField = DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_RETURN(textField, value);
+    if (textField->GetIsPreviewText()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "no PreprocessString at previewing text");
+        return tmp;
+    }
     auto property = textField->GetLayoutProperty<TextFieldLayoutProperty>();
     auto selectValue = GetSelectedValue(startIndex, endIndex);
     bool hasInputFilter =
@@ -166,6 +170,11 @@ void ContentController::FilterValue()
     CHECK_NULL_VOID(pattern);
     auto textField = DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_VOID(textField);
+    if (textField->GetIsPreviewText()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "no filter at previewing text");
+        return;
+    }
+
     auto property = textField->GetLayoutProperty<TextFieldLayoutProperty>();
 
     bool hasInputFilter =
@@ -185,7 +194,9 @@ void ContentController::FilterValue()
         property->HasMaxLength() ? property->GetMaxLengthValue(Infinity<uint32_t>()) : Infinity<uint32_t>();
     auto textWidth = static_cast<int32_t>(GetWideText().length());
     if (GreatNotEqual(textWidth, maxLength)) {
-        content_ = StringUtils::ToString(GetWideText().substr(0, maxLength));
+        // clamp emoji
+        auto subWstring = TextEmojiProcessor::SubWstring(0, maxLength, GetWideText());
+        content_ = StringUtils::ToString(subWstring);
     }
 }
 
@@ -239,8 +250,12 @@ std::string ContentController::RemoveErrorTextFromValue(const std::string& value
 
 std::string ContentController::FilterWithRegex(const std::string& filter, std::string& result)
 {
-    std::regex filterRegex(filter);
-    auto errorText = std::regex_replace(result, filterRegex, "");
+    // convert wstring for processing unicode characters
+    std::wstring wFilter = StringUtils::ToWstring(filter);
+    std::wstring wResult = StringUtils::ToWstring(result);
+    std::wregex wFilterRegex(wFilter);
+    std::wstring wErrorText = std::regex_replace(wResult, wFilterRegex, L"");
+    std::string errorText = StringUtils::ToString(wErrorText);
     result = RemoveErrorTextFromValue(result, errorText);
     return errorText;
 }
@@ -346,7 +361,7 @@ int32_t ContentController::GetDeleteLength(int32_t startIndex, int32_t length, b
     auto content = content_;
     return TextEmojiProcessor::Delete(startIndex, length, content, isBackward);
 }
-
+ 
 bool ContentController::IsIndexBeforeOrInEmoji(int32_t index)
 {
     int32_t startIndex = index - EMOJI_RANGE_LEFT;

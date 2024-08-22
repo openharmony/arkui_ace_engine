@@ -12,11 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const pasteboard = requireNapi("pasteboard");
-const hilog = requireNapi("hilog");
+const pasteboard = requireNapi('pasteboard');
+const hilog = requireNapi('hilog');
 
-if (!("finalizeConstruction" in ViewPU.prototype)) {
-    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => {
+if (!('finalizeConstruction' in ViewPU.prototype)) {
+    Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {
     });
 }
 
@@ -29,88 +29,88 @@ const defaultTheme = {
     expandedOptionPadding: 3,
     defaultMenuWidth: 256,
     imageFillColor: {
-        "id": -1,
-        "type": 10001,
+        'id': -1,
+        'type': 10001,
         params: ['sys.color.ohos_id_color_primary'],
-        "bundleName": "__harDefaultBundleName__",
-        "moduleName": "__harDefaultModuleName__"
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
     },
     backGroundColor: {
-        "id": -1,
-        "type": 10001,
+        'id': -1,
+        'type': 10001,
         params: ['sys.color.ohos_id_color_dialog_bg'],
-        "bundleName": "__harDefaultBundleName__",
-        "moduleName": "__harDefaultModuleName__"
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
     },
     iconBorderRadius: {
-        "id": -1,
-        "type": 10002,
+        'id': -1,
+        'type': 10002,
         params: ['sys.float.ohos_id_corner_radius_default_m'],
-        "bundleName": "__harDefaultBundleName__",
-        "moduleName": "__harDefaultModuleName__"
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
     },
     containerBorderRadius: {
-        "id": -1,
-        "type": 10002,
+        'id': -1,
+        'type': 10002,
         params: ['sys.float.ohos_id_corner_radius_card'],
-        "bundleName": "__harDefaultBundleName__",
-        "moduleName": "__harDefaultModuleName__"
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
     },
     cutIcon: {
-        "id": -1,
-        "type": 20000,
-        params: ["sys.media.ohos_ic_public_cut"],
-        "bundleName": "__harDefaultBundleName__",
-        "moduleName": "__harDefaultModuleName__"
+        'id': -1,
+        'type': 20000,
+        params: ['sys.media.ohos_ic_public_cut'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
     },
     copyIcon: {
-        "id": -1,
-        "type": 20000,
-        params: ["sys.media.ohos_ic_public_copy"],
-        "bundleName": "__harDefaultBundleName__",
-        "moduleName": "__harDefaultModuleName__"
+        'id': -1,
+        'type': 20000,
+        params: ['sys.media.ohos_ic_public_copy'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
     },
     pasteIcon: {
-        "id": -1,
-        "type": 20000,
-        params: ["sys.media.ohos_ic_public_paste"],
-        "bundleName": "__harDefaultBundleName__",
-        "moduleName": "__harDefaultModuleName__"
+        'id': -1,
+        'type': 20000,
+        params: ['sys.media.ohos_ic_public_paste'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
     },
     selectAllIcon: {
-        "id": -1,
-        "type": 20000,
-        params: ["sys.media.ohos_ic_public_select_all"],
-        "bundleName": "__harDefaultBundleName__",
-        "moduleName": "__harDefaultModuleName__"
+        'id': -1,
+        'type': 20000,
+        params: ['sys.media.ohos_ic_public_select_all'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
     },
     shareIcon: {
-        "id": -1,
-        "type": 20000,
-        params: ["sys.media.ohos_ic_public_share"],
-        "bundleName": "__harDefaultBundleName__",
-        "moduleName": "__harDefaultModuleName__"
+        'id': -1,
+        'type': 20000,
+        params: ['sys.media.ohos_ic_public_share'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
     },
     translateIcon: {
-        "id": -1,
-        "type": 20000,
-        params: ["sys.media.ohos_ic_public_translate_c2e"],
-        "bundleName": "__harDefaultBundleName__",
-        "moduleName": "__harDefaultModuleName__"
+        'id': -1,
+        'type': 20000,
+        params: ['sys.media.ohos_ic_public_translate_c2e'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
     },
     searchIcon: {
-        "id": -1,
-        "type": 20000,
-        params: ["sys.media.ohos_ic_public_search_filled"],
-        "bundleName": "__harDefaultBundleName__",
-        "moduleName": "__harDefaultModuleName__"
+        'id': -1,
+        'type': 20000,
+        params: ['sys.media.ohos_ic_public_search_filled'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
     },
     arrowDownIcon: {
-        "id": -1,
-        "type": 20000,
-        params: ["sys.media.ohos_ic_public_arrow_down"],
-        "bundleName": "__harDefaultBundleName__",
-        "moduleName": "__harDefaultModuleName__"
+        'id': -1,
+        'type': 20000,
+        params: ['sys.media.ohos_ic_public_arrow_down'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
     },
     iconPanelShadowStyle: ShadowStyle.OUTER_DEFAULT_MD,
 };
@@ -118,7 +118,7 @@ const defaultTheme = {
 class SelectionMenuComponent extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
-        if (typeof paramsLambda === "function") {
+        if (typeof paramsLambda === 'function') {
             this.paramsGenerator_ = paramsLambda;
         }
         this.editorMenuOptions = undefined;
@@ -130,15 +130,15 @@ class SelectionMenuComponent extends ViewPU {
         this.onSelectAll = undefined;
         this.theme = defaultTheme;
         this.builder = this.CloserFun;
-        this.__showExpandedMenuOptions = new ObservedPropertySimplePU(false, this, "showExpandedMenuOptions");
-        this.__showCustomerIndex = new ObservedPropertySimplePU(-1, this, "showCustomerIndex");
-        this.__customerChange = new ObservedPropertySimplePU(false, this, "customerChange");
-        this.__cutAndCopyEnable = new ObservedPropertySimplePU(false, this, "cutAndCopyEnable");
-        this.__pasteEnable = new ObservedPropertySimplePU(false, this, "pasteEnable");
-        this.__visibilityValue = new ObservedPropertySimplePU(Visibility.Visible, this, "visibilityValue");
-        this.__customMenuSize = new ObservedPropertySimplePU('100%', this, "customMenuSize");
+        this.__showExpandedMenuOptions = new ObservedPropertySimplePU(false, this, 'showExpandedMenuOptions');
+        this.__showCustomerIndex = new ObservedPropertySimplePU(-1, this, 'showCustomerIndex');
+        this.__customerChange = new ObservedPropertySimplePU(false, this, 'customerChange');
+        this.__cutAndCopyEnable = new ObservedPropertySimplePU(false, this, 'cutAndCopyEnable');
+        this.__pasteEnable = new ObservedPropertySimplePU(false, this, 'pasteEnable');
+        this.__visibilityValue = new ObservedPropertySimplePU(Visibility.Visible, this, 'visibilityValue');
+        this.__customMenuSize = new ObservedPropertySimplePU('100%', this, 'customMenuSize');
         this.customMenuHeight = this.theme.menuSpacing;
-        this.fontWeightTable = ["100", "200", "300", "400", "500", "600", "700", "800", "900", "bold", "normal", "bolder", "lighter", "medium", "regular"];
+        this.fontWeightTable = ['100', '200', '300', '400', '500', '600', '700', '800', '900', 'bold', 'normal', 'bolder', 'lighter', 'medium', 'regular'];
         this.setInitiallyProvidedValue(params);
         this.finalizeConstruction();
     }
@@ -378,9 +378,9 @@ class SelectionMenuComponent extends ViewPU {
         }
         sysBoard.clearData();
         sysBoard.setData(pasteData).then(() => {
-            hilog.info(0x3900, "Ace", 'SelectionMenu copy option, Succeeded in setting PasteData.');
+            hilog.info(0x3900, 'Ace', 'SelectionMenu copy option, Succeeded in setting PasteData.');
         }).catch((err) => {
-            hilog.info(0x3900, "Ace", 'SelectionMenu copy option, Failed to set PasteData. Cause:' + err.message);
+            hilog.info(0x3900, 'Ace', 'SelectionMenu copy option, Failed to set PasteData. Cause:' + err.message);
         });
     }
 
@@ -404,9 +404,9 @@ class SelectionMenuComponent extends ViewPU {
                     fontSize: 16,
                     fontColor: Color.Black,
                     fontWeight: FontWeight.Normal,
-                    fontFamily: "HarmonyOS Sans",
+                    fontFamily: 'HarmonyOS Sans',
                     fontStyle: FontStyle.Normal,
-                    decoration: { type: TextDecorationType.None, color: "#FF000000" }
+                    decoration: { type: TextDecorationType.None, color: '#FF000000' }
                 };
                 if (data.getProperty() && data.getProperty().additions[i]) {
                     const tmp = data.getProperty().additions[i];
@@ -582,8 +582,8 @@ class SelectionMenuComponent extends ViewPU {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     MenuItem.create({
                                         startIcon: this.theme.cutIcon,
-                                        content: "剪切",
-                                        labelInfo: "Ctrl+X"
+                                        content: '剪切',
+                                        labelInfo: 'Ctrl+X'
                                     });
                                     MenuItem.enabled(this.cutAndCopyEnable);
                                     MenuItem.onClick(() => {
@@ -607,8 +607,8 @@ class SelectionMenuComponent extends ViewPU {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     MenuItem.create({
                                         startIcon: this.theme.copyIcon,
-                                        content: "复制",
-                                        labelInfo: "Ctrl+C"
+                                        content: '复制',
+                                        labelInfo: 'Ctrl+C'
                                     });
                                     MenuItem.enabled(this.cutAndCopyEnable);
                                     MenuItem.onClick(() => {
@@ -629,8 +629,8 @@ class SelectionMenuComponent extends ViewPU {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     MenuItem.create({
                                         startIcon: this.theme.pasteIcon,
-                                        content: "粘贴",
-                                        labelInfo: "Ctrl+V"
+                                        content: '粘贴',
+                                        labelInfo: 'Ctrl+V'
                                     });
                                     MenuItem.enabled(this.pasteEnable);
                                     MenuItem.onClick(() => {
@@ -651,8 +651,8 @@ class SelectionMenuComponent extends ViewPU {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     MenuItem.create({
                                         startIcon: this.theme.selectAllIcon,
-                                        content: "全选",
-                                        labelInfo: "Ctrl+A"
+                                        content: '全选',
+                                        labelInfo: 'Ctrl+A'
                                     });
                                     MenuItem.visibility(this.visibilityValue);
                                     MenuItem.onClick(() => {
@@ -685,7 +685,7 @@ class SelectionMenuComponent extends ViewPU {
                         if (this.controller && !this.showExpandedMenuOptions && this.expandedMenuOptions && this.expandedMenuOptions.length > 0) {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    MenuItem.create({ content: "更多", endIcon: this.theme.arrowDownIcon });
+                                    MenuItem.create({ content: '更多', endIcon: this.theme.arrowDownIcon });
                                     MenuItem.onClick(() => {
                                         this.showExpandedMenuOptions = true;
                                         this.customMenuSize = '100%';
@@ -767,7 +767,7 @@ export function SelectionMenu(options, parent = null) {
     {
         (parent ? parent : this).observeComponentCreation2((elmtId, isInitialRender, options = __options__) => {
             if (isInitialRender) {
-                let componentCall = new SelectionMenuComponent(typeof PUV2ViewBase !== "undefined" && parent instanceof PUV2ViewBase ? parent : this, {
+                let componentCall = new SelectionMenuComponent(typeof PUV2ViewBase !== 'undefined' && parent instanceof PUV2ViewBase ? parent : this, {
                     editorMenuOptions: options.editorMenuOptions,
                     expandedMenuOptions: options.expandedMenuOptions,
                     controller: options.controller,
@@ -776,7 +776,7 @@ export function SelectionMenu(options, parent = null) {
                     onCut: options.onCut,
                     onSelectAll: options.onSelectAll
                 }, undefined, elmtId, () => {
-                }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 459, col: 3 });
+                }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 459, col: 3 });
                 ViewPU.create(componentCall);
                 let paramsLambda = () => {
                     return {
@@ -794,7 +794,7 @@ export function SelectionMenu(options, parent = null) {
             else {
                 (parent ? parent : this).updateStateVarsOfChildByElmtId(elmtId, {});
             }
-        }, { name: "SelectionMenuComponent" });
+        }, { name: 'SelectionMenuComponent' });
     }
 }
 export default { SelectionMenu };

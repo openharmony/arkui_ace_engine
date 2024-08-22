@@ -312,6 +312,9 @@ void JSScroll::OnScrollStopCallback(const JSCallbackInfo& args)
         auto scrollStop = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             func->Call(JSRef<JSObject>(), 0, nullptr);
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+            UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onScrollStop");
+#endif
         };
         ScrollModel::GetInstance()->SetOnScrollStop(std::move(scrollStop));
     }
@@ -379,8 +382,8 @@ void JSScroll::JSBind(BindingTarget globalObj)
     JSClass<JSScroll>::StaticMethod("enableScrollInteraction", &JSScroll::SetScrollEnabled);
     JSClass<JSScroll>::StaticMethod("friction", &JSScroll::SetFriction);
     JSClass<JSScroll>::StaticMethod("scrollSnap", &JSScroll::SetScrollSnap);
-    JSClass<JSScroll>::StaticMethod("clip", &JSScrollable::JsClip);
     JSClass<JSScroll>::StaticMethod("enablePaging", &JSScroll::SetEnablePaging);
+    JSClass<JSScroll>::StaticMethod("clip", &JSScrollable::JsClip);
     JSClass<JSScroll>::StaticMethod("initialOffset", &JSScroll::SetInitialOffset);
     JSClass<JSScroll>::InheritAndBind<JSScrollableBase>(globalObj);
 }

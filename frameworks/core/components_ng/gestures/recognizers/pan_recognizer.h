@@ -90,6 +90,10 @@ private:
         void Reset(int32_t id);
         void ResetAll();
         void SetDirection(int32_t directionType);
+        const std::map<int32_t, VelocityTracker>& GetVelocityMap() const
+        {
+            return trackerMap_;
+        }
 
     private:
         int32_t GetFastestTracker(std::function<double(VelocityTracker&)>&& func);
@@ -116,7 +120,7 @@ private:
     bool CalculateTruthFingers(bool isDirectionUp) const;
     void UpdateTouchPointInVelocityTracker(const TouchEvent& event, bool end = false);
     void UpdateAxisPointInVelocityTracker(const AxisEvent& event, bool end = false);
-    void UpdateTouchEventInfo(const TouchEvent& event, bool updateVelocity);
+    void UpdateTouchEventInfo(const TouchEvent& event);
     Offset GetRawGlobalLocation(int32_t postEventNodeId);
 
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);

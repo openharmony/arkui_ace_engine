@@ -163,12 +163,29 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     return listLayoutProperty && listLayoutProperty->GetDivider().has_value() && !itemPosition_.empty();
 }
 
+float ListItemGroupPattern::GetPaddingAndMargin() const
+{
+    auto layoutProperty = GetLayoutProperty<ListItemGroupLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0.0f);
+    const auto& padding = layoutProperty->CreatePaddingAndBorder();
+    const auto& margin = layoutProperty->CreateMargin();
+    auto offsetBeforeContent = axis_ == Axis::HORIZONTAL ? padding.left.value_or(0) : padding.top.value_or(0);
+    auto offsetAfterContent = axis_ == Axis::HORIZONTAL ? padding.right.value_or(0) : padding.bottom.value_or(0);
+    offsetBeforeContent += axis_ == Axis::HORIZONTAL ? margin.left.value_or(0) : margin.top.value_or(0);
+    offsetAfterContent += axis_ == Axis::HORIZONTAL ? margin.right.value_or(0) : margin.bottom.value_or(0);
+    return offsetBeforeContent + offsetAfterContent;
+}
+
 float ListItemGroupPattern::GetEstimateOffset(float height, const std::pair<float, float>& targetPos) const
 {
     if (layoutedItemInfo_.has_value() && layoutedItemInfo_.value().startIndex > 0) {
         float averageHeight = 0.0f;
         float estimateHeight = GetEstimateHeight(averageHeight);
-        return height + estimateHeight - targetPos.second;
+        if (layoutedItemInfo_.value().endIndex >= itemTotalCount_ - 1) {
+            return height + estimateHeight - targetPos.second;
+        } else {
+            return height - targetPos.first + layoutedItemInfo_.value().startIndex * averageHeight - spaceWidth_;
+        }
     }
     return height - targetPos.first;
 }
@@ -181,6 +198,7 @@ float ListItemGroupPattern::GetEstimateHeight(float& averageHeight) const
     if (visible == VisibleType::GONE) {
         return 0.0f;
     }
+    float paddingAndMargin = GetPaddingAndMargin();
     if (layoutedItemInfo_.has_value()) {
         auto totalHeight = (layoutedItemInfo_.value().endPos - layoutedItemInfo_.value().startPos + spaceWidth_);
         auto itemCount = layoutedItemInfo_.value().endIndex - layoutedItemInfo_.value().startIndex + 1;
@@ -188,14 +206,14 @@ float ListItemGroupPattern::GetEstimateHeight(float& averageHeight) const
     }
     if (layouted_) {
         if (itemTotalCount_ > 0) {
-            return itemTotalCount_ * averageHeight + headerMainSize_ + footerMainSize_ - spaceWidth_;
+            return itemTotalCount_ * averageHeight + headerMainSize_ + footerMainSize_ + paddingAndMargin - spaceWidth_;
         } else {
-            return headerMainSize_ + footerMainSize_;
+            return headerMainSize_ + footerMainSize_ + paddingAndMargin;
         }
     }
     auto host = GetHost();
     auto totalItem = host->GetTotalChildCount();
-    return averageHeight * totalItem;
+    return averageHeight * totalItem + paddingAndMargin;
 }
 
 void ListItemGroupPattern::CheckListDirectionInCardStyle()
@@ -436,5 +454,50 @@ void ListItemGroupPattern::SetListItemGroupStyle(V2::ListItemGroupStyle style)
         listItemGroupStyle_ = style;
         SetListItemGroupDefaultAttributes(host);
     }
+}
+
+void ListItemGroupPattern::NotifyDataChange(int32_t index, int32_t count)
+{
+    if (itemPosition_.empty()) {
+        return;
+    }
+    if (count == 0 || (count > 0 && index > itemDisplayStartIndex_) ||
+        (count < 0 && index >= itemDisplayStartIndex_)) {
+        return;
+    }
+
+    RefPtr<FrameNode> listNode = GetListFrameNode();
+    CHECK_NULL_VOID(listNode);
+    auto listPattern = listNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(listPattern);
+    if (!listPattern->GetMaintainVisibleContentPosition()) {
+        return;
+    }
+
+    count = std::max(count, index - itemDisplayStartIndex_);
+    int32_t mod = 0;
+    if (count < 0 && lanes_ > 1) {
+        mod = -count % lanes_;
+    }
+    auto prevPosMap = std::move(itemPosition_);
+    for (auto &pos : prevPosMap) {
+        if (mod > 0) {
+            mod--;
+        } else {
+            itemPosition_[pos.first + count] = pos.second;
+        }
+    }
+    if (layoutedItemInfo_ && layoutedItemInfo_.value().startIndex >= index) {
+        layoutedItemInfo_.value().startIndex += count;
+        layoutedItemInfo_.value().endIndex += count;
+        if (lanes_ > 1) {
+            if (count < 0) {
+                layoutedItemInfo_.value().startIndex += -count % lanes_;
+            } else {
+                layoutedItemInfo_.value().endIndex -= count % lanes_;
+            }
+        }
+    }
+    listPattern->MarkNeedReEstimateOffset();
 }
 } // namespace OHOS::Ace::NG

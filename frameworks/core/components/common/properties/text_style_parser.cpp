@@ -14,7 +14,6 @@
  */
 
 #include <regex>
-#include <unordered_map>
 
 #include "core/components/common/properties/text_style.h"
 
@@ -95,6 +94,14 @@ bool ParseFontVariantNumeric(const std::string& fontVariant, FONT_FEATURES_LIST&
         return true;
     }
     return false;
+}
+
+int32_t ParseFontFeatureParameters(std::string& value)
+{
+    if ((value == FONT_FEATURE_ON) || (StringUtils::StringToInt(value) == 1)) {
+        return 1;
+    }
+    return 0;
 }
 
 bool ParseFontVariantAlternates(const std::string& fontVariant, FONT_FEATURES_LIST& fontFeatures)
@@ -239,14 +246,6 @@ bool ParseFontVariantEastAsian(const std::string& fontVariant, FONT_FEATURES_LIS
     return false;
 }
 
-int32_t ParseFontFeatureParameters(std::string& value)
-{
-    if ((value == FONT_FEATURE_ON) || (StringUtils::StringToInt(value) == 1)) {
-        return 1;
-    }
-    return 0;
-}
-
 void ParseFontVariant(const std::string& fontVariant, FONT_FEATURES_LIST& fontFeatures)
 {
     if (fontVariant.empty()) {
@@ -304,21 +303,18 @@ void ParseFontFeatureSetting(
     const std::string& fontFeatureSetting, FONT_FEATURES_LIST& fontFeatures)
 {
     if (fontFeatureSetting.empty()) {
-        LOGW("ParseFontFeatureSetting fontFeatureSetting is empty");
         return;
     }
 
     auto temp = fontFeatureSetting;
     StringUtils::TrimStrLeadingAndTrailing(temp);
     if (temp.empty()) {
-        LOGW("ParseFontFeatureSetting fontFeatureSetting is empty");
         return;
     }
 
     std::vector<std::string> value;
     StringUtils::StringSplitter(temp, ' ', value);
     if (value.empty() || value.size() > FONT_FEATURE_MAX_SIZE || value[0].size() != FONT_FEATURE_KEY_LENGTH) {
-        LOGW("ParseFontFeatureSetting param is invalid");
         return;
     }
 
@@ -330,7 +326,6 @@ void ParseFontFeatureSetting(
             fontFeatures.emplace_back(std::make_pair(value[0], ParseFontFeatureParameters(value[1])));
             break;
         default:
-            LOGW("ParseFontFeatureSetting format of font-feature-settings is invalid");
             break;
     }
 }

@@ -19,6 +19,7 @@
 
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
+#include "unicode/unistr.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -116,7 +117,7 @@ int32_t TextEmojiProcessor::GetCharacterNum(const std::string& content)
     int32_t charNum = 0;
     std::u16string u16Content = StringUtils::Str8ToStr16(content);
     int32_t pos = 0;
-    while (pos < u16Content.length()) {
+    while (pos < static_cast<int32_t>(u16Content.length())) {
         std::u32string u32Content;
         int32_t forwardLenU16 = GetEmojiLengthU16Forward(u32Content, pos, u16Content);
         if (forwardLenU16 > 1) {
@@ -287,6 +288,15 @@ TextEmojiSubStringRange TextEmojiProcessor::CalSubWstringRange(
         }
     }
     TextEmojiSubStringRange result = { startIndex, endIndex };
+    return result;
+}
+
+std::string TextEmojiProcessor::ConvertU8stringUnpairedSurrogates(const std::string& value)
+{
+    // Unpaired surrogates are replaced with U+FFFD
+    icu::UnicodeString ustring = icu::UnicodeString::fromUTF8(value);
+    std::string result;
+    ustring.toUTF8String(result);
     return result;
 }
 
@@ -794,6 +804,7 @@ bool TextEmojiProcessor::HandleDeleteAction(std::u32string& u32Content, int32_t 
     if (isBackward) {
         if (deleteCount > 0) {
             int32_t start = static_cast<int32_t>(u32Content.length()) - deleteCount;
+            start = std::max(start, 0);
             u32Content.erase(start, deleteCount);
             return true;
         }

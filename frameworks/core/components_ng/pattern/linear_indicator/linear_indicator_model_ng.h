@@ -31,6 +31,14 @@ public:
     void Loop(bool value) override;
     void OnChange(std::function<void(int index, float progress)>&& event) override;
 
+    static void SetIndicatorStyleSpace(FrameNode* frameNode, const Dimension& space);
+    static void SetIndicatorStyleStrokeWidth(FrameNode* frameNode, const Dimension& strokeWidth);
+    static void SetIndicatorStyleStrokeRadius(FrameNode* frameNode, const Dimension& strokeRadius);
+    static void SetIndicatorStyleTrackBackgroundColor(FrameNode* frameNode, const Color& trackBackgroundColor);
+    static void SetIndicatorStyleTrackColor(FrameNode* frameNode, const Color& trackColor);
+    static void SetLoop(FrameNode* frameNode, bool value);
+    static void SetOnChange(FrameNode* frameNode, std::function<void(int index, float progress)>&& event);
+
 private:
     void SetProgressCount(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> frameNode, std::size_t progressCount);
 };

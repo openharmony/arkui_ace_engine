@@ -49,7 +49,11 @@ void ParallelRecognizer::OnRejected()
             auto group = AceType::DynamicCast<RecognizerGroup>(recognizer);
             group->ForceReject();
         } else {
+            if (recognizer->IsBridgeMode()) {
+                continue;
+            }
             recognizer->OnRejected();
+            recognizer->OnRejectBridgeObj();
         }
     }
 }

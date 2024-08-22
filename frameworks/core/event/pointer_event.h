@@ -81,6 +81,9 @@ struct PointerEvent final {
     PointerEvent(int32_t windowX, int32_t windowY, int32_t displayX, int32_t displayY)
         : windowX(windowX), windowY(windowY), displayX(displayX), displayY(displayY)
     {}
+    PointerEvent(int32_t pointerEventId, int32_t windowX, int32_t windowY, int32_t displayX, int32_t displayY)
+        : pointerEventId(pointerEventId), windowX(windowX), windowY(windowY), displayX(displayX), displayY(displayY)
+    {}
 
     Point GetPoint() const
     {

@@ -25,11 +25,12 @@ namespace OHOS::Ace::NG {
 
 void RepeatVirtualScrollModelNG::Create(
     uint32_t totalCount,
-    const std::map<std::string, uint32_t>& templateCachedCountMap,
+    const std::map<std::string, std::pair<bool, uint32_t>>& templateCachedCountMap,
     const std::function<void(uint32_t forIndex)>& onCreateNode,
     const std::function<void(const std::string& fromKey, uint32_t forIndex)>& onUpdateNode,
     const std::function<std::list<std::string>(uint32_t from, uint32_t to)>& onGetKeys4Range,
-    const std::function<std::list<std::string>(uint32_t from, uint32_t to)>& onGetTypes4Range)
+    const std::function<std::list<std::string>(uint32_t from, uint32_t to)>& onGetTypes4Range,
+    const std::function<void(uint32_t from, uint32_t to)>& onSetActiveRange)
 {
     ACE_SCOPED_TRACE("RepeatVirtualScrollModelNG::Create");
     auto* stack = ViewStackProcessor::GetInstance();
@@ -41,20 +42,20 @@ void RepeatVirtualScrollModelNG::Create(
         onCreateNode,
         onUpdateNode,
         onGetKeys4Range,
-        onGetTypes4Range
-    );
+        onGetTypes4Range,
+        onSetActiveRange);
     stack->Push(repeatNode);
     stack->PopContainer();
 }
 
-void RepeatVirtualScrollModelNG::InvalidateKeyCache(uint32_t totalCount)
+void RepeatVirtualScrollModelNG::UpdateRenderState(uint32_t totalCount, bool visibleItemsChanged)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto repeatNode = ElementRegister::GetInstance()->GetSpecificItemById<RepeatVirtualScrollNode>(nodeId);
     CHECK_NULL_VOID(repeatNode);
     repeatNode->UpdateTotalCount(totalCount);
-    repeatNode->InvalidateKeyCache();
+    repeatNode->UpdateRenderState(visibleItemsChanged);
 }
 
 void RepeatVirtualScrollModelNG::OnMove(std::function<void(int32_t, int32_t)>&& onMove)

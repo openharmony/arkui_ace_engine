@@ -15,13 +15,10 @@
 
 #include "base/log/ace_scoring_log.h"
 
-#include <cinttypes>
 #ifdef LINUX_PLATFORM
 #include <mutex>
 #endif
 
-#include "base/log/log.h"
-#include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
 #include "core/common/ace_application_info.h"
 
@@ -61,7 +58,7 @@ void AceScoringLog::Init()
                                        : AceApplicationInfo::GetInstance().GetProcessName();
         AceScoringLog::isDebuggingEnabled_ = SystemProperties::IsScoringEnabled(AceScoringLog::procName_);
     });
-    startTime_ = GetSysTimestamp();
+    startTime_ = static_cast<uint64_t>(GetSysTimestamp());
 }
 
 AceScoringLog::~AceScoringLog()
@@ -69,7 +66,7 @@ AceScoringLog::~AceScoringLog()
     if (!AceScoringLog::isDebuggingEnabled_) {
         return;
     }
-    endTime_ = GetSysTimestamp();
+    endTime_ = static_cast<uint64_t>(GetSysTimestamp());
 }
 
 } // namespace OHOS::Ace

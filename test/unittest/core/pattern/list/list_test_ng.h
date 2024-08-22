@@ -127,8 +127,7 @@ public:
     void HandleDragStart(int32_t index);
     void HandleDragUpdate(int32_t index, float mainDelta);
     void HandleDragEnd(int32_t index, float mainVelocity = SWIPER_SPEED_TH);
-    void ScrollSnap(float offset, float velocity);
-    void ScrollSnapForEqualHeightItem(float offset, float velocity);
+    void ScrollSnap(double offset, double velocity);
     void FlushIdleTask(const RefPtr<ListPattern>& listPattern);
 
     AssertionResult ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, float expectOffset);

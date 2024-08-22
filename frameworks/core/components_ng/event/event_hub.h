@@ -607,6 +607,8 @@ public:
     void SetOnDetach(std::function<void()>&& onDetach);
     void ClearOnDetach();
     void FireOnDetach();
+    void ClearStateStyle();
+    void OnDetachClear();
 
 protected:
     virtual void OnModifyDone() {}

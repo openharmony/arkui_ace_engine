@@ -18,11 +18,7 @@
 #include "core/components_ng/pattern/canvas/custom_paint_util.h"
 
 #ifndef ACE_UNITTEST
-#include "include/encode/SkJpegEncoder.h"
-#include "include/encode/SkPngEncoder.h"
-#include "include/encode/SkWebpEncoder.h"
 #include "include/utils/SkBase64.h"
-
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/font/constants_converter.h"
 #include "core/components/font/rosen_font_collection.h"
@@ -39,7 +35,7 @@
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
-
+constexpr Dimension DEFAULT_FONT_SIZE = 14.0_px;
 CanvasPaintMethod::CanvasPaintMethod(RefPtr<CanvasModifier> contentModifier, const RefPtr<FrameNode>& frameNode)
     : frameNode_(frameNode)
 {
@@ -48,6 +44,8 @@ CanvasPaintMethod::CanvasPaintMethod(RefPtr<CanvasModifier> contentModifier, con
     imageShadow_ = std::make_unique<Shadow>();
     contentModifier_ = contentModifier;
     InitImageCallbacks();
+    // The initial value of the font size in canvas is 14px.
+    SetFontSize(DEFAULT_FONT_SIZE);
 }
 
 #ifndef USE_FAST_TASKPOOL
@@ -159,8 +157,7 @@ void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canva
     InitImagePaint(nullptr, &imageBrush_, sampleOptions_);
     RSBrush compositeOperationpBrush;
     InitPaintBlend(compositeOperationpBrush);
-    RSRect rec = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
-    RSSaveLayerOps layerOps(&rec, &compositeOperationpBrush);
+    RSSaveLayerOps layerOps(nullptr, &compositeOperationpBrush);
     if (state_.globalState.GetType() != CompositeOperation::SOURCE_OVER) {
         rsCanvas_->SaveLayer(layerOps);
     }
@@ -231,8 +228,11 @@ void CanvasPaintMethod::CloseImageBitmap(const std::string& src)
 }
 
 std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(
-    RefPtr<RenderContext> renderContext, double left, double top, double width, double height)
+    double left, double top, double width, double height)
 {
+    auto host = frameNode_.Upgrade();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     double dirtyWidth = std::abs(width);
     double dirtyHeight = std::abs(height);
@@ -274,9 +274,12 @@ std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(
 }
 
 void CanvasPaintMethod::GetImageData(
-    const RefPtr<RenderContext>& renderContext, const std::shared_ptr<Ace::ImageData>& imageData)
+    const std::shared_ptr<Ace::ImageData>& imageData)
 {
 #ifndef ACE_UNITTEST
+    auto host = frameNode_.Upgrade();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
     auto rosenRenderContext = AceType::DynamicCast<RosenRenderContext>(renderContext);
     CHECK_NULL_VOID(rosenRenderContext);
     CHECK_NULL_VOID(imageData);
@@ -326,32 +329,16 @@ void CanvasPaintMethod::TransferFromImageBitmap(const RefPtr<PixelMap>& pixelMap
 }
 #endif
 
-void CanvasPaintMethod::FillText(const std::string& text, double x, double y, std::optional<double> maxWidth)
-{
-    auto success = UpdateParagraph(text, false, HasShadow());
-    CHECK_NULL_VOID(success);
-    PaintText(lastLayoutSize_.Width(), x, y, maxWidth, false, HasShadow());
-}
-
-void CanvasPaintMethod::StrokeText(const std::string& text, double x, double y, std::optional<double> maxWidth)
-{
-    if (HasShadow()) {
-        auto success = UpdateParagraph(text, true, true);
-        CHECK_NULL_VOID(success);
-        PaintText(lastLayoutSize_.Width(), x, y, maxWidth, true, true);
-    }
-    // need to process again for non-shadow case
-    auto success = UpdateParagraph(text, true);
-    CHECK_NULL_VOID(success);
-    PaintText(lastLayoutSize_.Width(), x, y, maxWidth, true);
-}
-
-std::string CanvasPaintMethod::ToDataURL(RefPtr<RenderContext> renderContext, const std::string& args)
+std::string CanvasPaintMethod::ToDataURL(const std::string& type, const double quality)
 {
 #ifndef ACE_UNITTEST
+    auto host = frameNode_.Upgrade();
+    CHECK_NULL_RETURN(host, UNSUPPORTED);
+    auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, UNSUPPORTED);
-    std::string mimeType = GetMimeType(args);
-    double quality = GetQuality(args);
+    std::string mimeType = GetMimeType(type);
+    // Quality needs to be between 0.0 and 1.0 for MimeType jpeg and webp
+    double qua = GetQuality(mimeType, quality);
     double width = lastLayoutSize_.Width();
     double height = lastLayoutSize_.Height();
     auto imageInfo = SkImageInfo::Make(width, height, SkColorType::kBGRA_8888_SkColorType,
@@ -370,19 +357,7 @@ std::string CanvasPaintMethod::ToDataURL(RefPtr<RenderContext> renderContext, co
     RSPixmap rsSrc = tempCache.GetPixmap();
     SkPixmap src { imageInfo, rsSrc.GetAddr(), rsSrc.GetRowBytes() };
     SkDynamicMemoryWStream dst;
-    if (mimeType == IMAGE_JPEG) {
-        SkJpegEncoder::Options options;
-        options.fQuality = quality * 100;
-        success = SkJpegEncoder::Encode(&dst, src, options);
-    } else if (mimeType == IMAGE_WEBP) {
-        SkWebpEncoder::Options options;
-        options.fQuality = quality * 100.0;
-        success = SkWebpEncoder::Encode(&dst, src, options);
-    } else {
-        mimeType = IMAGE_PNG;
-        SkPngEncoder::Options options;
-        success = SkPngEncoder::Encode(&dst, src, options);
-    }
+    success = EncodeImage(mimeType, qua, src, dst);
     CHECK_NULL_RETURN(success, UNSUPPORTED);
     auto result = dst.detachAsData();
     CHECK_NULL_RETURN(result, UNSUPPORTED);
@@ -454,4 +429,19 @@ void CanvasPaintMethod::ConvertTxtStyle(const TextStyle& textStyle, Rosen::TextS
     Constants::ConvertTxtStyle(textStyle, context_, txtStyle);
 }
 #endif
+
+std::string CanvasPaintMethod::GetDumpInfo()
+{
+    CHECK_NULL_RETURN(rsCanvas_, "Canvas is nullptr");
+    // translate
+    std::string trans = "TRANS: " + std::to_string(rsCanvas_->GetTotalMatrix().Get(RSMatrix::TRANS_X)) + ", " +
+                        std::to_string(rsCanvas_->GetTotalMatrix().Get(RSMatrix::TRANS_Y)) + "; ";
+    // scale
+    std::string scale = "SCALE: " + std::to_string(rsCanvas_->GetTotalMatrix().Get(RSMatrix::SCALE_X)) + ", " +
+                        std::to_string(rsCanvas_->GetTotalMatrix().Get(RSMatrix::SCALE_Y)) + "; ";
+    // rotate
+    std::string skew = "SKEW: " + std::to_string(rsCanvas_->GetTotalMatrix().Get(RSMatrix::SKEW_X)) + ", " +
+                       std::to_string(rsCanvas_->GetTotalMatrix().Get(RSMatrix::SKEW_Y)) + "; ";
+    return trans.append(scale).append(skew);
+}
 } // namespace OHOS::Ace::NG

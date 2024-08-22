@@ -165,6 +165,10 @@ public:
     void InitMargins(
         const std::vector<WaterFlowSections::Section>& sections, const ScaleProperty& scale, float percentWidth);
 
+    virtual void NotifyDataChange(int32_t index, int32_t count) = 0;
+    virtual void InitSegmentsForKeepPositionMode(const std::vector<WaterFlowSections::Section>& sections,
+        const std::vector<WaterFlowSections::Section>& prevSections, int32_t start) = 0;
+
     bool itemStart_ = false;
     /**
      * @brief last item is partially in viewport.

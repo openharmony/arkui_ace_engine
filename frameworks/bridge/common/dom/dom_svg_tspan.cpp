@@ -15,7 +15,6 @@
 
 #include "frameworks/bridge/common/dom/dom_svg_tspan.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/core/components/svg/svg_tspan_component.h"
 
 namespace OHOS::Ace::Framework {

@@ -394,5 +394,51 @@ const ArkUITabsModifier* GetTabsModifier()
 
     return &modifier;
 }
+
+const CJUITabsModifier* GetCJUITabsModifier()
+{
+    static const CJUITabsModifier modifier = {
+        SetTabBarMode,
+        SetScrollableBarModeOptions,
+        SetBarGridAlign,
+        SetDivider,
+        SetFadingEdge,
+        SetBarBackgroundColor,
+        SetBarBackgroundBlurStyle,
+        SetBarOverlap,
+        SetIsVertical,
+        SetTabBarPosition,
+        SetScrollable,
+        SetTabBarWidth,
+        SetTabBarHeight,
+        SetBarAdaptiveHeight,
+        SetAnimationDuration,
+        ResetTabBarMode,
+        ResetScrollableBarModeOptions,
+        ResetBarGridAlign,
+        ResetDivider,
+        ResetFadingEdge,
+        ResetBarBackgroundColor,
+        ResetBarBackgroundBlurStyle,
+        ResetBarOverlap,
+        ResetIsVertical,
+        ResetTabBarPosition,
+        ResetScrollable,
+        ResetTabBarWidth,
+        ResetTabBarHeight,
+        ResetBarAdaptiveHeight,
+        ResetAnimationDuration,
+        SetTabClip,
+        ResetTabClip,
+        SetTabWidthAuto,
+        ResetTabWidthAuto,
+        SetTabHeightAuto,
+        ResetTabHeightAuto,
+        SetAnimateMode,
+        ResetAnimateMode,
+    };
+
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

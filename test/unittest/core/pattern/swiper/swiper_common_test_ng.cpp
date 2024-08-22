@@ -113,6 +113,7 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent003, TestSize.Level1)
     ShowNext();
     EXPECT_EQ(pattern_->GetCurrentIndex(), 1);
     pattern_->springAnimationIsRunning_ = true;
+    pattern_->isTouchDownSpringAnimation_ = false;
     pattern_->childScrolling_ = true;
 
     /**
@@ -121,7 +122,8 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent003, TestSize.Level1)
      */
     pattern_->HandleTouchEvent(CreateTouchEventInfo(TouchType::DOWN, Offset()));
     EXPECT_TRUE(pattern_->isTouchDown_);
-    EXPECT_FALSE(pattern_->springAnimationIsRunning_);
+    EXPECT_TRUE(pattern_->springAnimationIsRunning_);
+    EXPECT_TRUE(pattern_->isTouchDownSpringAnimation_);
     EXPECT_FALSE(pattern_->childScrolling_);
 
     /**
@@ -131,6 +133,7 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent003, TestSize.Level1)
     pattern_->HandleTouchEvent(CreateTouchEventInfo(TouchType::UP, Offset()));
     EXPECT_FALSE(pattern_->isTouchDown_);
     EXPECT_TRUE(pattern_->springAnimationIsRunning_);
+    EXPECT_FALSE(pattern_->isTouchDownSpringAnimation_);
     EXPECT_TRUE(pattern_->moveDirection_);
 }
 
@@ -819,8 +822,62 @@ HWTEST_F(SwiperCommonTestNg, OnKeyEvent004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnKeyEvent005
+ * @tc.desc: OnKeyEvent return false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, OnKeyEvent005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set axis default
+     */
+    CreateWithItem([](SwiperModelNG model) {});
+
+    /**
+     * @tc.steps: step2. Call OnKeyEvent KEY_DPAD_LEFT
+     * @tc.expected: false
+     */
+    EXPECT_FALSE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_LEFT, KeyAction::LONG_PRESS)));
+
+    /**
+     * @tc.steps: step3. Call OnKeyEvent KEY_DPAD_RIGHT
+     * @tc.expected: false
+     */
+    EXPECT_FALSE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_RIGHT, KeyAction::LONG_PRESS)));
+
+     /**
+     * @tc.steps: step4. Call OnKeyEvent KEY_DPAD_UP
+     * @tc.expected: false
+     */
+    EXPECT_FALSE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_UP, KeyAction::DOWN)));
+
+    /**
+     * @tc.steps: step5. Call OnKeyEvent KEY_DPAD_DOWN
+     * @tc.expected: false
+     */
+    EXPECT_FALSE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_DOWN, KeyAction::DOWN)));
+
+    /**
+     * @tc.steps: step6. set axis vertical
+     */
+    CreateWithItem([](SwiperModelNG model) { model.SetDirection(Axis::VERTICAL); });
+
+    /**
+     * @tc.steps: step7. Call OnKeyEvent KEY_DPAD_LEFT
+     * @tc.expected: false
+     */
+    EXPECT_FALSE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_LEFT, KeyAction::DOWN)));
+
+    /**
+     * @tc.steps: step8. Call OnKeyEvent KEY_DPAD_RIGHT
+     * @tc.expected: false
+     */
+    EXPECT_FALSE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN)));
+}
+
+/**
  * @tc.name: MarginIgnoreBlankTest001
- * @tc.desc: Test Swiper PrevMargin IgnoreBlank
+ * @tc.desc: Test Swiper IgnoreBlank in jumpIndex case
  * @tc.type: FUNC
  */
 HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest001, TestSize.Level1)
@@ -845,11 +902,10 @@ HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest001, TestSize.Level1)
      */
     ChangeIndex(0);
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
-    EXPECT_EQ(GetChildX(frameNode_, 0), itemWidth * 0);
-    EXPECT_EQ(GetChildX(frameNode_, 1), itemWidth * 1);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 0.f);
+    EXPECT_EQ(GetChildX(frameNode_, 1), itemWidth);
     EXPECT_EQ(GetChildX(frameNode_, 2), itemWidth * 2);
     EXPECT_EQ(GetChildX(frameNode_, 3), itemWidth * 3);
-    EXPECT_EQ(GetChildX(frameNode_, 4), 0.f); // out of view
 
     /**
      * @tc.steps: step3. ChangeIndex to 1
@@ -859,20 +915,19 @@ HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest001, TestSize.Level1)
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 1);
     EXPECT_EQ(GetChildX(frameNode_, 0), PRE_MARGIN - itemWidth);
     EXPECT_EQ(GetChildX(frameNode_, 1), PRE_MARGIN);
-    EXPECT_EQ(GetChildX(frameNode_, 2), PRE_MARGIN + itemWidth * 1);
+    EXPECT_EQ(GetChildX(frameNode_, 2), PRE_MARGIN + itemWidth);
     EXPECT_EQ(GetChildX(frameNode_, 3), PRE_MARGIN + itemWidth * 2);
     EXPECT_EQ(GetChildX(frameNode_, 4), PRE_MARGIN + itemWidth * 3);
 
     /**
      * @tc.steps: step4. ChangeIndex to 2
-     * @tc.expected: Verify ignoreBlank is not effective
+     * @tc.expected: Verify ignoreBlank on the endpage is effective
      */
     ChangeIndex(2);
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 2);
-    EXPECT_EQ(GetChildX(frameNode_, 0), PRE_MARGIN - itemWidth); // out of view
     EXPECT_EQ(GetChildX(frameNode_, 1), PRE_MARGIN + NEXT_MARGIN - itemWidth);
     EXPECT_EQ(GetChildX(frameNode_, 2), PRE_MARGIN + NEXT_MARGIN);
-    EXPECT_EQ(GetChildX(frameNode_, 3), PRE_MARGIN + NEXT_MARGIN + itemWidth * 1);
+    EXPECT_EQ(GetChildX(frameNode_, 3), PRE_MARGIN + NEXT_MARGIN + itemWidth);
     EXPECT_EQ(GetChildX(frameNode_, 4), PRE_MARGIN + NEXT_MARGIN + itemWidth * 2);
 }
 

@@ -15,11 +15,6 @@
 
 #include "core/event/back_end_event_manager.h"
 
-#include <atomic>
-#include <string>
-
-#include "base/utils/macros.h"
-
 namespace OHOS::Ace {
 namespace {
 

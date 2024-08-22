@@ -136,6 +136,37 @@ struct NestedScrollOptions {
         return "NestedScrollOptions forward: " + std::to_string(static_cast<int32_t>(forward)) +
                ", backward: " + std::to_string(static_cast<int32_t>(backward));
     }
+
+    std::string GetNestedScrollModeStr(NestedScrollMode mode) const
+    {
+        switch (mode) {
+            case NestedScrollMode::SELF_ONLY:
+                return "NestedScrollMode.SELF_ONLY";
+            case NestedScrollMode::SELF_FIRST:
+                return "NestedScrollMode.SELF_FIRST";
+            case NestedScrollMode::PARENT_FIRST:
+                return "NestedScrollMode.PARENT_FIRST";
+            case NestedScrollMode::PARALLEL:
+                return "NestedScrollMode.PARALLEL";
+            default:
+                return "";
+        }
+    }
+};
+
+struct NestedScrollOptionsExt {
+    NestedScrollMode scrollUp;
+    NestedScrollMode scrollDown;
+    NestedScrollMode scrollLeft;
+    NestedScrollMode scrollRight;
+
+    std::string ToString() const
+    {
+        return "NestedScrollOptionsExt scrollUp: " + std::to_string(static_cast<int32_t>(scrollUp)) +
+               ", scrollDown: " + std::to_string(static_cast<int32_t>(scrollDown)) +
+               ", scrollLeft: " + std::to_string(static_cast<int32_t>(scrollLeft)) +
+               ", scrollRight: " + std::to_string(static_cast<int32_t>(scrollRight));
+    }
 };
 
 struct ListItemIndex {

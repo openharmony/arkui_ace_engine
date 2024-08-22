@@ -25,6 +25,7 @@
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/common/container_scope.h"
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
@@ -33,6 +34,8 @@
 namespace OHOS::Ace::Framework {
 namespace {
     constexpr int ARGC_TWO = 2;
+    const CalcDimension SECURITY_UEC_MIN_WIDTH(10.0f, DimensionUnit::VP);
+    const CalcDimension SECURITY_UEC_MIN_HEIGHT(10.0f, DimensionUnit::VP);
 }
 void JSSecurityUIExtensionProxy::JSBind(BindingTarget globalObj)
 {
@@ -386,6 +389,8 @@ void JSSecurityUIExtension::Create(const JSCallbackInfo& info)
         } while (false);
     }
     UIExtensionModel::GetInstance()->Create(config);
+    ViewAbstractModel::GetInstance()->SetMinWidth(SECURITY_UEC_MIN_WIDTH);
+    ViewAbstractModel::GetInstance()->SetMinHeight(SECURITY_UEC_MIN_HEIGHT);
 }
 
 void JSSecurityUIExtension::OnRemoteReady(const JSCallbackInfo& info)

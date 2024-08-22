@@ -169,13 +169,14 @@ void JSRenderingContext::Constructor(const JSCallbackInfo& args)
     args.SetReturnValue(Referenced::RawPtr(jsRenderContext));
 
     auto* jsContextSetting = args.UnwrapArg<JSRenderingContextSettings>(0);
-    CHECK_NULL_VOID(jsContextSetting);
-    bool anti = jsContextSetting->GetAntialias();
-    jsRenderContext->SetAnti(anti);
+    if (jsContextSetting) {
+        bool anti = jsContextSetting->GetAntialias();
+        jsRenderContext->SetAnti(anti);
 
-    int32_t unit = 0;
-    if (args.GetInt32Arg(1, unit) && (static_cast<CanvasUnit>(unit) == CanvasUnit::PX)) {
-        jsRenderContext->SetUnit(CanvasUnit::PX);
+        int32_t unit = 0;
+        if (args.GetInt32Arg(1, unit) && (static_cast<CanvasUnit>(unit) == CanvasUnit::PX)) {
+            jsRenderContext->SetUnit(CanvasUnit::PX);
+        }
     }
 }
 

@@ -15,9 +15,6 @@
 
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
 
-#include <cstddef>
-
-#include "base/geometry/dimension_offset.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "core/accessibility/js_inspector/inspect_badge.h"
@@ -769,7 +766,7 @@ bool AccessibilityNodeManager::GetDefaultAttrsByType(
 #endif
 }
 
-void AccessibilityNodeManager::DumpTree(int32_t depth, int64_t nodeID)
+void AccessibilityNodeManager::DumpTree(int32_t depth, int64_t nodeID, bool isDumpSimplify)
 {
     if (!DumpLog::GetInstance().GetDumpFile()) {
         return;
@@ -782,10 +779,19 @@ void AccessibilityNodeManager::DumpTree(int32_t depth, int64_t nodeID)
     }
 
     DumpLog::GetInstance().AddDesc("ID: " + std::to_string(node->GetNodeId()));
-    DumpLog::GetInstance().AddDesc("compid: " + node->GetJsComponentId());
-    DumpLog::GetInstance().AddDesc("text: " + node->GetText());
-    DumpLog::GetInstance().AddDesc("top: " + std::to_string(node->GetTop() + GetWindowTop(node->GetWindowId())));
-    DumpLog::GetInstance().AddDesc("left: " + std::to_string(node->GetLeft() + GetWindowLeft(node->GetWindowId())));
+    if (!isDumpSimplify) {
+        DumpLog::GetInstance().AddDesc("compid: " + node->GetJsComponentId());
+        DumpLog::GetInstance().AddDesc("text: " + node->GetText());
+        DumpLog::GetInstance().AddDesc("visible: " + std::to_string(node->GetShown() && node->GetVisible()));
+        DumpLog::GetInstance().AddDesc("clickable: " + std::to_string(node->GetClickableState()));
+        DumpLog::GetInstance().AddDesc("checkable: " + std::to_string(node->GetCheckableState()));
+    }
+    auto top = node->GetTop() + GetWindowTop(node->GetWindowId());
+    auto left = node->GetLeft() + GetWindowLeft(node->GetWindowId());
+    if (!isDumpSimplify || (!NearZero(top, 0.0) && !NearZero(left, 0.0))) {
+        DumpLog::GetInstance().AddDesc("top: " + std::to_string(top));
+        DumpLog::GetInstance().AddDesc("left: " + std::to_string(left));
+    }
     if (node->GetTag() == "SideBarContainer") {
         Rect sideBarRect = node->GetRect();
         for (const auto& childNode : node->GetChildList()) {
@@ -797,12 +803,9 @@ void AccessibilityNodeManager::DumpTree(int32_t depth, int64_t nodeID)
         DumpLog::GetInstance().AddDesc("width: " + std::to_string(node->GetWidth()));
         DumpLog::GetInstance().AddDesc("height: " + std::to_string(node->GetHeight()));
     }
-    DumpLog::GetInstance().AddDesc("visible: " + std::to_string(node->GetShown() && node->GetVisible()));
-    DumpLog::GetInstance().AddDesc("clickable: " + std::to_string(node->GetClickableState()));
-    DumpLog::GetInstance().AddDesc("checkable: " + std::to_string(node->GetCheckableState()));
     DumpLog::GetInstance().Print(depth, node->GetTag(), node->GetChildList().size());
     for (const auto& item : node->GetChildList()) {
-        AccessibilityNodeManager::DumpTree(depth + 1, item->GetNodeId());
+        AccessibilityNodeManager::DumpTree(depth + 1, item->GetNodeId(), isDumpSimplify);
     }
 }
 

@@ -14,11 +14,8 @@
  */
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_if_else_ffi.h"
 
-#include <cstdint>
 
 #include "core/common/container.h"
-#include "core/components_ng/syntax/if_else_model.h"
-#include "core/components_ng/syntax/if_else_model_ng.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;

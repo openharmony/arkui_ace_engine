@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
     const ArkUITextInputModifier* GetTextInputModifier();
+    const CJUITextInputModifier* GetCJUITextInputModifier();
     void SetOnTextInputChange(ArkUINodeHandle node, void* extraParam);
     void SetTextInputOnSubmit(ArkUINodeHandle node, void* extraParam);
     void SetOnTextInputCut(ArkUINodeHandle node, void* extraParam);
@@ -29,10 +30,6 @@ namespace OHOS::Ace::NG::NodeModifier {
     void SetOnTextInputContentSizeChange(ArkUINodeHandle node, void* extraParam);
     void SetOnTextInputInputFilterError(ArkUINodeHandle node, void* extraParam);
     void SetTextInputOnTextContentScroll(ArkUINodeHandle node, void* extraParam);
-    void SetTextInputOnWillInsert(ArkUINodeHandle node, void* extraParam);
-    void SetTextInputOnDidInsert(ArkUINodeHandle node, void* extraParam);
-    void SetTextInputOnWillDelete(ArkUINodeHandle node, void* extraParam);
-    void SetTextInputOnDidDelete(ArkUINodeHandle node, void* extraParam);
 
     void ResetOnTextInputChange(ArkUINodeHandle node);
     void ResetTextInputOnSubmit(ArkUINodeHandle node);
@@ -44,5 +41,9 @@ namespace OHOS::Ace::NG::NodeModifier {
     void ResetOnTextInputInputFilterError(ArkUINodeHandle node);
     void ResetTextInputOnTextContentScroll(ArkUINodeHandle node);
 
+    void SetTextInputOnWillInsert(ArkUINodeHandle node, void* extraParam);
+    void SetTextInputOnDidInsert(ArkUINodeHandle node, void* extraParam);
+    void SetTextInputOnWillDelete(ArkUINodeHandle node, void* extraParam);
+    void SetTextInputOnDidDelete(ArkUINodeHandle node, void* extraParam);
 } // namespace OHOS::Ace::NG::NodeModifier
 #endif // FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_TEXT_INPUT_MODIFIER_H

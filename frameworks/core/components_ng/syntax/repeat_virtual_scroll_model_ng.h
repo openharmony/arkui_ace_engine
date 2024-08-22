@@ -31,13 +31,14 @@ class ACE_EXPORT RepeatVirtualScrollModelNG : public RepeatVirtualScrollModel {
 public:
     void Create(
         uint32_t totalCount,
-        const std::map<std::string, uint32_t>& templateCachedCountMap,
+        const std::map<std::string, std::pair<bool, uint32_t>>& templateCachedCountMap,
         const std::function<void(uint32_t forIndex)>& onCreateNode,
         const std::function<void(const std::string& fromKey, uint32_t forIndex)>& onUpdateNode,
         const std::function<std::list<std::string>(uint32_t from, uint32_t to)>& onGetKeys4Range,
-        const std::function<std::list<std::string>(uint32_t from, uint32_t to)>& onGetTypes4Range) override;
+        const std::function<std::list<std::string>(uint32_t from, uint32_t to)>& onGetTypes4Range,
+        const std::function<void(uint32_t from, uint32_t to)>& onSetActiveRange) override;
 
-    void InvalidateKeyCache(uint32_t totalCount) override;
+    void UpdateRenderState(uint32_t totalCount, bool visibleItemsChanged) override;
 
     void OnMove(std::function<void(int32_t, int32_t)>&& onMove) override;
 };

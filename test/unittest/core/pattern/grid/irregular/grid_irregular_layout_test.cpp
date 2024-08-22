@@ -54,7 +54,7 @@ HWTEST_F(GridIrregularLayoutTest, LayoutChildren001, TestSize.Level1)
     algorithm->crossLens_ = { 50.0f, 50.0f, 100.0f };
     algorithm->crossGap_ = 5.0f;
     algorithm->mainGap_ = 1.0f;
-    algorithm->LayoutChildren(0.0f);
+    algorithm->LayoutChildren(0.0f, 0);
 
     EXPECT_EQ(frameNode_->GetChildByIndex(0)->GetGeometryNode()->GetFrameOffset().GetX(), 5.0f);
     EXPECT_EQ(frameNode_->GetChildByIndex(0)->GetGeometryNode()->GetFrameOffset().GetY(), 3.0f);
@@ -837,6 +837,27 @@ HWTEST_F(GridIrregularLayoutTest, TargetPos002, TestSize.Level1)
     pattern_->ScrollToIndex(0, true, ScrollAlign::CENTER);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->finalPosition_, 0.0f);
+
+    EXPECT_EQ(
+        GetChildAccessibilityProperty<GridItemAccessibilityProperty>(frameNode_, 0)->GetCollectionItemInfo().row, 0);
+    EXPECT_EQ(
+        GetChildAccessibilityProperty<GridItemAccessibilityProperty>(frameNode_, 0)->GetCollectionItemInfo().column, 0);
+    EXPECT_EQ(
+        GetChildAccessibilityProperty<GridItemAccessibilityProperty>(frameNode_, 1)->GetCollectionItemInfo().row, 0);
+    EXPECT_EQ(
+        GetChildAccessibilityProperty<GridItemAccessibilityProperty>(frameNode_, 1)->GetCollectionItemInfo().column, 1);
+    EXPECT_EQ(
+        GetChildAccessibilityProperty<GridItemAccessibilityProperty>(frameNode_, 2)->GetCollectionItemInfo().row, 1);
+    EXPECT_EQ(
+        GetChildAccessibilityProperty<GridItemAccessibilityProperty>(frameNode_, 2)->GetCollectionItemInfo().column, 0);
+    EXPECT_EQ(
+        GetChildAccessibilityProperty<GridItemAccessibilityProperty>(frameNode_, 3)->GetCollectionItemInfo().row, 1);
+    EXPECT_EQ(
+        GetChildAccessibilityProperty<GridItemAccessibilityProperty>(frameNode_, 3)->GetCollectionItemInfo().column, 1);
+    EXPECT_EQ(
+        GetChildAccessibilityProperty<GridItemAccessibilityProperty>(frameNode_, 4)->GetCollectionItemInfo().row, 2);
+    EXPECT_EQ(
+        GetChildAccessibilityProperty<GridItemAccessibilityProperty>(frameNode_, 4)->GetCollectionItemInfo().column, 0);
 }
 
 /**
@@ -1610,7 +1631,7 @@ HWTEST_F(GridIrregularLayoutTest, Horizontal001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     // print all content of gridMatrix_
     auto& info = pattern_->gridLayoutInfo_;
-    EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_14);
+    EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_14_HORIZONTAL);
     for (int i = 0; i < 200; ++i) {
         UpdateCurrentOffset(50.0f);
     }
@@ -1908,5 +1929,91 @@ HWTEST_F(GridIrregularLayoutTest, Add001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info.startIndex_, 3);
     EXPECT_EQ(info.endIndex_, 21);
+}
+
+/**
+ * @tc.name: Stretch001
+ * @tc.desc: Test Grid AlignItems STRETCH
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, Stretch001, TestSize.Level1)
+{
+    GridLayoutOptions option;
+    option.irregularIndexes = {
+        1, // [1 x 2]
+    };
+    auto onGetIrregularSizeByIndex = [](int32_t index) -> GridItemSize {
+        if (index == 1) {
+            return { .rows = 2, .columns = 1 };
+        }
+        return { .rows = 1, .columns = 1 };
+    };
+    option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
+
+    GridModelNG model = CreateGrid();
+    model.SetAlignItems(GridItemAlignment::STRETCH);
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions(option);
+
+    CreateAdaptChildSizeGridItems(1);
+    CreateFixedHeightItems(1, 150);
+    CreateAdaptChildSizeGridItems(2);
+    CreateFixedHeightItems(1, 150);
+
+    CreateDone(frameNode_);
+    FlushLayoutTask(frameNode_);
+
+    auto childRect0 = pattern_->GetItemRect(0);
+    EXPECT_EQ(childRect0.Height(), 0);
+
+    auto childRect2 = pattern_->GetItemRect(2);
+    EXPECT_EQ(childRect2.Height(), 0);
+
+    auto childRect3 = pattern_->GetItemRect(3);
+    auto childRect4 = pattern_->GetItemRect(4);
+    EXPECT_EQ(childRect3.Height(), childRect4.Height());
+}
+
+/**
+ * @tc.name: Stretch002
+ * @tc.desc: Test Grid AlignItems STRETCH
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, Stretch002, TestSize.Level1)
+{
+    GridLayoutOptions option;
+    option.irregularIndexes = {
+        0, // [2 x 2]
+        3, // [2 x 1]
+    };
+    auto onGetIrregularSizeByIndex = [](int32_t index) -> GridItemSize {
+        if (index == 0) {
+            return { .rows = 2, .columns = 2 };
+        }
+        return { .rows = 1, .columns = 2 };
+    };
+    option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
+
+    GridModelNG model = CreateGrid();
+    model.SetAlignItems(GridItemAlignment::STRETCH);
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(option);
+
+    CreateFixedHeightItems(1, 150);
+    CreateAdaptChildSizeGridItems(2);
+    CreateFixedHeightItems(1, 150);
+    CreateAdaptChildSizeGridItems(1);
+
+    CreateDone(frameNode_);
+    FlushLayoutTask(frameNode_);
+
+    auto childRect1 = pattern_->GetItemRect(1);
+    EXPECT_EQ(childRect1.Height(), 0);
+
+    auto childRect2 = pattern_->GetItemRect(2);
+    EXPECT_EQ(childRect2.Height(), 0);
+
+    auto childRect4 = pattern_->GetItemRect(4);
+    EXPECT_EQ(childRect4.Height(), 0);
 }
 } // namespace OHOS::Ace::NG

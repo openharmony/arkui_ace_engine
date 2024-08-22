@@ -387,6 +387,7 @@ void JSGrid::JSBind(BindingTarget globalObj)
     JSClass<JSGrid>::StaticMethod("nestedScroll", &JSGrid::SetNestedScroll);
     JSClass<JSGrid>::StaticMethod("enableScrollInteraction", &JSGrid::SetScrollEnabled);
     JSClass<JSGrid>::StaticMethod("friction", &JSGrid::SetFriction);
+    JSClass<JSGrid>::StaticMethod("alignItems", &JSGrid::SetAlignItems);
 
     JSClass<JSGrid>::StaticMethod("onScroll", &JSGrid::JsOnScroll);
     JSClass<JSGrid>::StaticMethod("onReachStart", &JSGrid::JsOnReachStart);
@@ -657,6 +658,24 @@ void JSGrid::SetFriction(const JSCallbackInfo& info)
         friction = -1.0;
     }
     GridModel::GetInstance()->SetFriction(friction);
+}
+
+void JSGrid::SetAlignItems(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        GridModel::GetInstance()->SetAlignItems(GridItemAlignment::DEFAULT);
+        return;
+    }
+
+    if (info[0]->IsNumber()) {
+        auto itemAlign = static_cast<GridItemAlignment>(info[0]->ToNumber<int32_t>());
+        if (itemAlign < GridItemAlignment::DEFAULT || itemAlign > GridItemAlignment::STRETCH) {
+            itemAlign = GridItemAlignment::DEFAULT;
+        }
+        GridModel::GetInstance()->SetAlignItems(itemAlign);
+    } else {
+        GridModel::GetInstance()->SetAlignItems(GridItemAlignment::DEFAULT);
+    }
 }
 
 void JSGrid::JsOnScroll(const JSCallbackInfo& args)

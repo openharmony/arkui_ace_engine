@@ -664,24 +664,6 @@ HWTEST_F(SearchTestNg, PatternOnColorConfigurationUpdate009, TestSize.Level1)
      */
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    auto renderContext = frameNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    auto geometryNode = frameNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    auto paintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(paintProperty, nullptr);
-    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    Testing::MockCanvas rsCanvas;
-    auto searchPaintMethod = AceType::MakeRefPtr<SearchPaintMethod>(SizeF(80, 20), std::string("search"), true);
-    auto canvasDrawFunction = searchPaintMethod->GetContentDrawFunction(paintWrapper);
-
-    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
-    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(1);
-    EXPECT_CALL(rsCanvas, Restore()).Times(1);
-    canvasDrawFunction(rsCanvas);
-
     auto pattern = frameNode->GetPattern<SearchPattern>();
     ASSERT_NE(pattern, nullptr);
 
@@ -691,7 +673,7 @@ HWTEST_F(SearchTestNg, PatternOnColorConfigurationUpdate009, TestSize.Level1)
      * OnColorConfigurationUpdate.
      */
     pattern->OnColorConfigurationUpdate();
-    EXPECT_TRUE(pattern->cancelButtonNode_);
+    EXPECT_TRUE(pattern->cancelButtonNode_.Upgrade());
 }
 
 /**
@@ -706,24 +688,6 @@ HWTEST_F(SearchTestNg, PatternOnColorConfigurationUpdate010, TestSize.Level1)
      */
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    auto renderContext = frameNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    auto geometryNode = frameNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    auto paintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(paintProperty, nullptr);
-    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    Testing::MockCanvas rsCanvas;
-    auto searchPaintMethod = AceType::MakeRefPtr<SearchPaintMethod>(SizeF(80, 20), std::string("search"), true);
-    auto canvasDrawFunction = searchPaintMethod->GetContentDrawFunction(paintWrapper);
-
-    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
-    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(1);
-    EXPECT_CALL(rsCanvas, Restore()).Times(1);
-    canvasDrawFunction(rsCanvas);
-
     auto pattern = frameNode->GetPattern<SearchPattern>();
     ASSERT_NE(pattern, nullptr);
 
@@ -736,7 +700,7 @@ HWTEST_F(SearchTestNg, PatternOnColorConfigurationUpdate010, TestSize.Level1)
     pattern->SetTextFieldNode(nullptr);
     pattern->SetCancelButtonNode(nullptr);
     pattern->OnColorConfigurationUpdate();
-    EXPECT_EQ(pattern->cancelButtonNode_, nullptr);
+    EXPECT_EQ(pattern->cancelButtonNode_.Upgrade(), nullptr);
 }
 
 /**
@@ -796,6 +760,8 @@ HWTEST_F(SearchTestNg, SetCaretWidth001, TestSize.Level1)
     auto textFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
     auto textPaintProperty = textFrameNode->GetPaintProperty<TextFieldPaintProperty>();
     ASSERT_NE(textPaintProperty, nullptr);
+    NG::DragPreviewOption option { false };
+    searchModelInstance.SetDragPreviewOptions(option);
     searchModelInstance.SetCaretWidth(14.0_vp);
     searchModelInstance.SetCaretColor(Color::RED);
     EXPECT_EQ(textPaintProperty->GetCursorWidth()->Value(), 14);
@@ -1246,6 +1212,7 @@ HWTEST_F(SearchTestNg, SetTextAlign001, TestSize.Level1)
     ASSERT_NE(textFieldChild, nullptr);
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     ASSERT_NE(textFieldLayoutProperty, nullptr);
+    searchModelInstance.SetTextAlign(OHOS::Ace::TextAlign::START);
     searchModelInstance.SetTextAlign(OHOS::Ace::TextAlign::CENTER);
     EXPECT_EQ(textFieldLayoutProperty->GetTextAlign(), OHOS::Ace::TextAlign::CENTER);
     searchModelInstance.SetTextAlign(OHOS::Ace::TextAlign::CENTER);
@@ -1375,122 +1342,6 @@ HWTEST_F(SearchTestNg, AddChildToGroup001, TestSize.Level1)
     auto tempFrameNode = AceType::MakeRefPtr<FrameNode>("TEMP", -1, AceType::MakeRefPtr<Pattern>());
     searchNode->AddChildToGroup(tempFrameNode, 1);
     searchNode->AddChildToGroup(tempFrameNode, 1);
-}
-
-/**
- * @tc.name: PaintMethodTest001
- * @tc.desc: GetContentDrawFunction, PaintSearch
- * @tc.type: FUNC
- */
-HWTEST_F(SearchTestNg, PaintMethodTest001, TestSize.Level1)
-{
-    SearchModelNG searchModelInstance;
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto renderContext = frameNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    auto geometryNode = frameNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    auto paintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(paintProperty, nullptr);
-    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    Testing::MockCanvas rsCanvas;
-    auto searchPaintMethod = AceType::MakeRefPtr<SearchPaintMethod>(SizeF(80, 20), std::string("search"), true);
-    auto canvasDrawFunction = searchPaintMethod->GetContentDrawFunction(paintWrapper);
-
-    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
-    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(1);
-    EXPECT_CALL(rsCanvas, Restore()).Times(1);
-    canvasDrawFunction(rsCanvas);
-}
-
-/**
- * @tc.name: PaintMethodTest002
- * @tc.desc: GetContentDrawFunction, PaintSearch
- * @tc.type: FUNC
- */
-HWTEST_F(SearchTestNg, PaintMethodTest002, TestSize.Level1)
-{
-    SearchModelNG searchModelInstance;
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto renderContext = frameNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    auto geometryNode = frameNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    auto paintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(paintProperty, nullptr);
-    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    Testing::MockCanvas rsCanvas;
-    auto searchPaintMethod = AceType::MakeRefPtr<SearchPaintMethod>(SizeF(80, 20), std::string("search"), false);
-    auto canvasDrawFunction = searchPaintMethod->GetContentDrawFunction(paintWrapper);
-    canvasDrawFunction(rsCanvas);
-}
-
-/**
- * @tc.name: PaintMethodTest003
- * @tc.desc: GetContentDrawFunction, PaintSearch
- * @tc.type: FUNC
- */
-HWTEST_F(SearchTestNg, PaintMethodTest003, TestSize.Level1)
-{
-    SearchModelNG searchModelInstance;
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto renderContext = frameNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    auto geometryNode = frameNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    geometryNode->UpdatePaddingWithBorder(PaddingPropertyF({ 0.0f, 0.0f, 10.0f, 0.0f }));
-    auto paintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(paintProperty, nullptr);
-    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    Testing::MockCanvas rsCanvas;
-    auto searchPaintMethod = AceType::MakeRefPtr<SearchPaintMethod>(SizeF(80, 20), std::string("search"), true);
-    auto canvasDrawFunction = searchPaintMethod->GetContentDrawFunction(paintWrapper);
-
-    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
-    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(1);
-    EXPECT_CALL(rsCanvas, Restore()).Times(1);
-    canvasDrawFunction(rsCanvas);
-}
-
-/**
- * @tc.name: PaintMethodTest004
- * @tc.desc: GetContentDrawFunction, PaintSearch
- * @tc.type: FUNC
- */
-HWTEST_F(SearchTestNg, PaintMethodTest004, TestSize.Level1)
-{
-    SearchModelNG searchModelInstance;
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto renderContext = frameNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    auto geometryNode = frameNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    geometryNode->UpdatePaddingWithBorder(PaddingPropertyF({ 0.0f, 0.0f, 0.0f, 20.0f }));
-    geometryNode->SetFrameSize(SizeF(200.0f, 60.0f));
-    auto paintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(paintProperty, nullptr);
-    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    Testing::MockCanvas rsCanvas;
-    auto searchPaintMethod = AceType::MakeRefPtr<SearchPaintMethod>(SizeF(80, 20), std::string("search"), true);
-    auto canvasDrawFunction = searchPaintMethod->GetContentDrawFunction(paintWrapper);
-    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
-    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(2);
-    EXPECT_CALL(rsCanvas, Restore()).Times(2);
-    canvasDrawFunction(rsCanvas);
-
-    paintWrapper->GetGeometryNode()->UpdatePaddingWithBorder(PaddingPropertyF({ 0.0f, 0.0f, 20.0f, 0.0f }));
-    auto canvasDrawFunction2 = searchPaintMethod->GetContentDrawFunction(paintWrapper);
-    canvasDrawFunction2(rsCanvas);
 }
 
 /**
@@ -1671,10 +1522,15 @@ HWTEST_F(SearchTestNg, Pattern014, TestSize.Level1)
     auto pipeline = PipelineBase::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     pattern->OnColorConfigurationUpdate();
-    ASSERT_NE(pattern->cancelButtonNode_, nullptr);
-    auto textFieldLayoutProperty = pattern->textField_->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto cancelButtonNode = pattern->cancelButtonNode_.Upgrade();
+    ASSERT_NE(cancelButtonNode, nullptr);
+    auto textField = pattern->textField_.Upgrade();
+    ASSERT_NE(textField, nullptr);
+    auto textFieldLayoutProperty =
+        textField->GetLayoutProperty<TextFieldLayoutProperty>();
     EXPECT_EQ(textFieldLayoutProperty->GetPlaceholderTextColor(), Color::RED);
-    auto cancelButtonTextNode = AceType::DynamicCast<FrameNode>(pattern->cancelButtonNode_->GetChildren().front());
+    auto cancelButtonTextNode = AceType::DynamicCast<FrameNode>(
+        cancelButtonNode->GetChildren().front());
     ASSERT_NE(cancelButtonTextNode, nullptr);
     auto cancelButtonTextLayout = cancelButtonTextNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(cancelButtonTextLayout, nullptr);
@@ -2116,5 +1972,89 @@ HWTEST_F(SearchTestNg, SetTextAlign002, TestSize.Level1)
             EXPECT_EQ(textFieldLayoutProperty->GetTextAlign(), textAlign);
         }
     }
+}
+/**
+ * @tc.name: SetSearchEnterKeyType001
+ * @tc.desc: SetSearchEnterKeyType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetSearchEnterKeyType001, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    searchModelInstance.SetSearchEnterKeyType(TextInputAction::UNSPECIFIED);
+}
+/**
+ * @tc.name: SetSearchEnterKeyType002
+ * @tc.desc: SetSearchEnterKeyType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetSearchEnterKeyType002, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    searchModelInstance.SetTextIndent(DEFAULT_INDENT_SIZE);
+    searchModelInstance.SetSearchEnterKeyType(TextInputAction::GO);
+}
+/**
+ * @tc.name: SetEnablePreviewText
+ * @tc.desc: Test SetEnablePreviewText
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetEnablePreviewText, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    searchModelInstance.SetEnablePreviewText(true);
+    EXPECT_TRUE(textFieldPattern->GetSupportPreviewText());
+}
+/**
+ * @tc.name: ConvertTextFontScaleValue001
+ * @tc.desc: Test ConvertTextFontScaleValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, ConvertTextFontScaleValue001, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetFontScale(0.0f);
+    const Dimension fontsizevalue = Dimension(20.1, DimensionUnit::PX);
+    EXPECT_EQ(searchModelInstance.ConvertTextFontScaleValue(fontsizevalue), fontsizevalue);
+}
+/**
+ * @tc.name: ConvertTextFontScaleValue002
+ * @tc.desc: Test ConvertTextFontScaleValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, ConvertTextFontScaleValue002, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetFontScale(3.0f);
+    const Dimension fontsizevalue = Dimension(6.0, DimensionUnit::PX);
+    EXPECT_EQ(searchModelInstance.ConvertTextFontScaleValue(fontsizevalue), Dimension(4.0, DimensionUnit::PX));
 }
 } // namespace OHOS::Ace::NG

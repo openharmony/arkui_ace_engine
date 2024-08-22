@@ -56,9 +56,10 @@ private:
     void CalcChildrenHotZone(LayoutWrapper* layoutWrapper);
     double CalcSearchWidth(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     double CalcSearchHeight(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+    void UpdateFontFeature(LayoutWrapper* layoutWrapper);
     void SetTextFieldLayoutConstraintHeight(LayoutConstraintF& contentConstraint, double textFieldHeight,
         LayoutWrapper* layoutWrapper);
-    void UpdateFontFeature(LayoutWrapper* layoutWrapper);
+
     // children frame size
     SizeF searchIconSizeMeasure_;
     SizeF cancelIconSizeMeasure_;
@@ -71,6 +72,7 @@ private:
     void LayoutCancelImage(const LayoutSearchParams& params);
     void LayoutTextField(const LayoutSearchParams& params);
     void UpdateClipBounds(LayoutWrapper* layoutWrapper, float height);
+    double CalcSymbolIconHeight(LayoutWrapper* layoutWrapper, int32_t index, double defaultImageHeight);
 
     ACE_DISALLOW_COPY_AND_MOVE(SearchLayoutAlgorithm);
 };

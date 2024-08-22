@@ -53,6 +53,7 @@ public:
 
     void TriggerGarbageCollection();
     void NotifyContainers(const std::function<void(const RefPtr<Container>&)>& callback);
+    void NotifyContainersOrderly(const std::function<void(const RefPtr<Container>&)>& callback);
     bool HasContainer(int32_t containerId) const;
 
 private:

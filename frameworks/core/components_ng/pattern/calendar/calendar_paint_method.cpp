@@ -686,9 +686,9 @@ void CalendarPaintMethod::SetCalendarTheme(const RefPtr<CalendarPaintProperty>& 
     }
     showHoliday_ = paintProperty->GetShowHolidayValue(true);
     if (paintProperty->HasStartOfWeek()) {
-        startOfWeek_ = static_cast<uint32_t>(paintProperty->GetStartOfWeekValue());
+        startOfWeek_ = static_cast<int32_t>(paintProperty->GetStartOfWeekValue());
     }
-    startOfWeek_ = static_cast<uint32_t>(log2(startOfWeek_));
+    startOfWeek_ = static_cast<int32_t>(log2(startOfWeek_));
     if (paintProperty->HasOffDays()) {
         offDays_ = paintProperty->GetOffDaysValue();
     }
@@ -707,7 +707,7 @@ bool CalendarPaintMethod::IsOffDay(const CalendarDay& dayInfo) const
     StringUtils::StringSplitter(offDays_, ',', days);
     int32_t daysOfWeek = 7;
     for (const auto& day : days) {
-        auto num = (StringUtils::StringToInt(day) + (daysOfWeek - startOfWeek_)) % daysOfWeek;
+        auto num = (StringUtils::StringToInt(day) + (daysOfWeek - static_cast<int32_t>(startOfWeek_))) % daysOfWeek;
         if ((dayInfo.index % daysOfWeek) == num) {
             return true;
         }

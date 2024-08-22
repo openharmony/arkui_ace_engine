@@ -303,6 +303,8 @@ public:
         clickBreak_ = value;
     }
 
+    void InitHapticController(const RefPtr<FrameNode>& host);
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -366,7 +368,6 @@ private:
     DimensionRect CalculateHotZone(int32_t index, int32_t midSize, float middleChildHeight, float otherChildHeight);
     void AddHotZoneRectToText();
     void InitTextFontFamily();
-    void InitHapticController(const RefPtr<FrameNode>& host);
     void RegisterWindowStateChangedCallback();
     void UnregisterWindowStateChangedCallback();
     void OnWindowHide() override;
@@ -387,7 +388,7 @@ private:
     uint32_t currentIndex_ = 0;
     double yLast_ = 0.0;
     double yOffset_ = 0.0;
-    double jumpInterval_;
+    double jumpInterval_ = 0.0;
     uint32_t showCount_ = 0;
     bool isVertical_ = true;
     float gradientHeight_ = 0.0f;

@@ -143,10 +143,15 @@ void ExtensionHandler::InvalidateRender()
 {
     if (invalidateRender_) {
         invalidateRender_();
-    } else {
-        if (node_) {
-            node_->MarkNeedRenderOnly();
-        }
+    }
+    if (overlayRender_) {
+        overlayRender_();
+    }
+    if (foreGroundRender_) {
+        foreGroundRender_();
+    }
+    if (node_ && !invalidateRender_ && !overlayRender_ && !foreGroundRender_) {
+        node_->MarkNeedRenderOnly();
     }
     needRender_ = true;
 }

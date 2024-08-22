@@ -1028,12 +1028,13 @@ void ViewAbstractModelImpl::SetHueRotate(float value)
     frontDecoration->SetHueRotate(value);
 }
 
-void ViewAbstractModelImpl::SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc)
+void ViewAbstractModelImpl::SetOnClick(
+    GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc, double distanceThreshold)
 {
     auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
     CHECK_NULL_VOID(inspector);
     auto impl = inspector->GetInspectorFunctionImpl();
-    RefPtr<Gesture> tapGesture = AceType::MakeRefPtr<TapGesture>(1, 1);
+    RefPtr<Gesture> tapGesture = AceType::MakeRefPtr<TapGesture>(1, 1, distanceThreshold);
     tapGesture->SetOnActionId([func = std::move(tapEventFunc), impl](GestureEvent& info) {
         if (impl) {
             impl->UpdateEventInfo(info);

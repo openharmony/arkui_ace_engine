@@ -16,9 +16,6 @@
 #include "native_interface_xcomponent.h"
 
 #include "node/node_model.h"
-#include "ui_input_event.h"
-#include "native_node.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
 
 #include "base/error/error_code.h"
 #include "frameworks/core/components/xcomponent/native_interface_xcomponent_impl.h"

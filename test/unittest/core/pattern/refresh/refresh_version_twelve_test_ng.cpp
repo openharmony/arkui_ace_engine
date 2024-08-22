@@ -16,8 +16,7 @@
 #include "refresh_test_ng.h"
 
 namespace OHOS::Ace::NG {
-
-namespace {} // namespace
+namespace {
 constexpr Dimension TEN_OFFSET = 10.0_vp;
 constexpr Dimension ZERO_OFFSET = 0.0_vp;
 constexpr Dimension MINUS_OFFSET = -1.0_vp;
@@ -25,10 +24,12 @@ constexpr Dimension DRAG_OFFSET = 640.0_vp;
 constexpr Dimension OVERDRAG_OFFSET = 32.0_vp;
 constexpr Dimension DRAG_NE_OFFSET = -640.0_vp;
 constexpr Dimension ONE_OFFSET = 1.0_vp;
+} // namespace
 
 class RefreshVersionTwelveTestNg : public RefreshTestNg {
 public:
 };
+
 /**
  * @tc.name: AttrRefreshOffset01
  * @tc.desc: Test attr RefreshOffset
@@ -37,7 +38,8 @@ public:
 HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset01, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    Create();
+    CreateRefresh();
+    CreateDone();
 
     /**
      * @tc.steps: step1. UpdateRefreshOffset: 64vp -> 10vp
@@ -57,7 +59,8 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset01, TestSize.Level1)
 HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset02, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    Create();
+    CreateRefresh();
+    CreateDone();
 
     /**
      * @tc.steps: step1. UpdateRefreshOffset: 64vp -> 0vp
@@ -77,7 +80,8 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset02, TestSize.Level1)
 HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset03, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    Create();
+    CreateRefresh();
+    CreateDone();
 
     /**
      * @tc.steps: step1. UpdateRefreshOffset: 64vp -> -1vp
@@ -89,7 +93,6 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset03, TestSize.Level1)
     EXPECT_EQ(pattern_->refreshOffset_, TRIGGER_REFRESH_DISTANCE);
 }
 
-
 /**
  * @tc.name: AttrRefreshOffset04
  * @tc.desc: Test attr RefreshOffset
@@ -98,13 +101,11 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset03, TestSize.Level1)
 HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset04, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    bool isRefreshTrigger = false;
     RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
-    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
     auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
-    Create([onRefreshing, onStateChange](RefreshModelNG model) {
-        model.SetOnStateChange(std::move(onStateChange));
-    });
+    RefreshModelNG model = CreateRefresh();
+    model.SetOnStateChange(std::move(onStateChange));
+    CreateDone();
 
     /**
      * @tc.steps: step1. refreshOffset_: -> 640vp
@@ -127,8 +128,7 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset04, TestSize.Level1)
      * @tc.expected: scrollOffset_ is 64.f(Plus previous delta),but refreshOffset_ = 640vp,
      *               onStateChange event triggered and refreshStatus is DRAG
      */
-    pattern_->HandleDragUpdate((TRIGGER_REFRESH_DISTANCE).ConvertToPx()
-                               / pattern_->CalculatePullDownRatio());
+    pattern_->HandleDragUpdate((TRIGGER_REFRESH_DISTANCE).ConvertToPx() / pattern_->CalculatePullDownRatio());
     EXPECT_EQ(refreshStatus, RefreshStatus::DRAG);
 }
 
@@ -140,15 +140,13 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset04, TestSize.Level1)
 HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset05, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    bool isRefreshTrigger = false;
     RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
-    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
     auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
-    Create([onRefreshing, onStateChange](RefreshModelNG model) {
-        model.SetOnStateChange(std::move(onStateChange));
-    });
+    RefreshModelNG model = CreateRefresh();
+    model.SetOnStateChange(std::move(onStateChange));
+    CreateDone();
 
-        /**
+    /**
      * @tc.steps: step1. refreshOffset_: -> 32vp
      * @tc.expected: refreshOffset_: -> 32vp
      */
@@ -169,8 +167,7 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset05, TestSize.Level1)
      * @tc.expected: scrollOffset_ is 32.f(Plus previous delta),
      *               onStateChange event triggered and refreshStatus is OVER_DRAG
      */
-    pattern_->HandleDragUpdate((OVERDRAG_OFFSET).ConvertToPx()
-                               / pattern_->CalculatePullDownRatio());
+    pattern_->HandleDragUpdate((OVERDRAG_OFFSET).ConvertToPx() / pattern_->CalculatePullDownRatio());
     EXPECT_EQ(refreshStatus, RefreshStatus::OVER_DRAG);
 }
 
@@ -182,9 +179,9 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset05, TestSize.Level1)
 HWTEST_F(RefreshVersionTwelveTestNg, AttrPullToRefresh01, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    Create([](RefreshModelNG model) {
-        model.SetCustomBuilder(CreateCustomNode());
-    });
+    RefreshModelNG model = CreateRefresh();
+    model.SetCustomBuilder(CreateCustomNode());
+    CreateDone();
 
     /**
      * @tc.steps: step1. PullToRefresh: false -> true
@@ -205,9 +202,9 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrPullToRefresh01, TestSize.Level1)
 HWTEST_F(RefreshVersionTwelveTestNg, AttrPullToRefresh02, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    Create([](RefreshModelNG model) {
-        model.SetCustomBuilder(CreateCustomNode());
-    });
+    RefreshModelNG model = CreateRefresh();
+    model.SetCustomBuilder(CreateCustomNode());
+    CreateDone();
 
     /**
      * @tc.steps: step1. PullToRefresh: -> false
@@ -228,13 +225,11 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrPullToRefresh02, TestSize.Level1)
 HWTEST_F(RefreshVersionTwelveTestNg, AttrPullToRefresh03, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    bool isRefreshTrigger = false;
     RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
-    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
     auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
-    Create([onRefreshing, onStateChange](RefreshModelNG model) {
-        model.SetOnStateChange(std::move(onStateChange));
-    });
+    RefreshModelNG model = CreateRefresh();
+    model.SetOnStateChange(std::move(onStateChange));
+    CreateDone();
 
     /**
      * @tc.steps: step1. PullToRefresh: -> false
@@ -257,8 +252,7 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrPullToRefresh03, TestSize.Level1)
      * @tc.expected: scrollOffset_ is 64.f(Plus previous delta),but pullToRefresh_ == false,
      *               onStateChange event triggered and refreshStatus is DRAG
      */
-    pattern_->HandleDragUpdate((TRIGGER_REFRESH_DISTANCE).ConvertToPx()
-                               / pattern_->CalculatePullDownRatio());
+    pattern_->HandleDragUpdate((TRIGGER_REFRESH_DISTANCE).ConvertToPx() / pattern_->CalculatePullDownRatio());
     EXPECT_EQ(refreshStatus, RefreshStatus::DRAG);
 }
 
@@ -270,13 +264,11 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrPullToRefresh03, TestSize.Level1)
 HWTEST_F(RefreshVersionTwelveTestNg, AttrPullToRefresh04, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    bool isRefreshTrigger = false;
     RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
-    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
     auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
-    Create([onRefreshing, onStateChange](RefreshModelNG model) {
-        model.SetOnStateChange(std::move(onStateChange));
-    });
+    RefreshModelNG model = CreateRefresh();
+    model.SetOnStateChange(std::move(onStateChange));
+    CreateDone();
 
     /**
      * @tc.steps: step1. PullToRefresh: -> true
@@ -299,8 +291,7 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrPullToRefresh04, TestSize.Level1)
      * @tc.expected: scrollOffset_ is 64.f(Plus previous delta), pullToRefresh_ == true,
      *               onStateChange event triggered and refreshStatus is OVER_DRAG
      */
-    pattern_->HandleDragUpdate((TRIGGER_REFRESH_DISTANCE).ConvertToPx()
-                               / pattern_->CalculatePullDownRatio());
+    pattern_->HandleDragUpdate((TRIGGER_REFRESH_DISTANCE).ConvertToPx() / pattern_->CalculatePullDownRatio());
     EXPECT_EQ(refreshStatus, RefreshStatus::OVER_DRAG);
 }
 
@@ -312,12 +303,11 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrPullToRefresh04, TestSize.Level1)
 HWTEST_F(RefreshVersionTwelveTestNg, AttrPullToRefresh05, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    bool isRefreshTrigger = false;
     float offset;
-    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
     auto onOffsetChange = [&offset](const float param) { offset = param; };
-    Create(
-        [onRefreshing, onOffsetChange](RefreshModelNG model) { model.SetOnOffsetChange(std::move(onOffsetChange)); });
+    RefreshModelNG model = CreateRefresh();
+    model.SetOnOffsetChange(std::move(onOffsetChange));
+    CreateDone();
 
     /**
      * @tc.steps: step1. PullToRefresh: -> false
@@ -358,13 +348,11 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrPullToRefresh05, TestSize.Level1)
 HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset06, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    bool isRefreshTrigger = false;
     RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
-    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
     auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
-    Create([onRefreshing, onStateChange](RefreshModelNG model) {
-        model.SetOnStateChange(std::move(onStateChange));
-    });
+    RefreshModelNG model = CreateRefresh();
+    model.SetOnStateChange(std::move(onStateChange));
+    CreateDone();
 
     /**
      * @tc.steps: step1. refreshOffset_: -> 32vp
@@ -389,8 +377,7 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset06, TestSize.Level1)
      * @tc.expected: scrollOffset_ is 32.f(Plus previous delta),
      *               onStateChange event triggered and refreshStatus is OVER_DRAG
      */
-    pattern_->HandleDragUpdate((OVERDRAG_OFFSET).ConvertToPx()
-                               / pattern_->CalculatePullDownRatio());
+    pattern_->HandleDragUpdate((OVERDRAG_OFFSET).ConvertToPx() / pattern_->CalculatePullDownRatio());
     EXPECT_EQ(refreshStatus, RefreshStatus::OVER_DRAG);
     layoutProperty_->UpdatePullToRefresh(false);
     frameNode_->MarkModifyDone();
@@ -406,13 +393,11 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset06, TestSize.Level1)
 HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset07, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    bool isRefreshTrigger = false;
     RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
-    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
     auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
-    Create([onRefreshing, onStateChange](RefreshModelNG model) {
-        model.SetOnStateChange(std::move(onStateChange));
-    });
+    RefreshModelNG model = CreateRefresh();
+    model.SetOnStateChange(std::move(onStateChange));
+    CreateDone();
 
     /**
      * @tc.steps: step1. refreshOffset_: -> -640vp
@@ -450,13 +435,11 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset07, TestSize.Level1)
 HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset08, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    bool isRefreshTrigger = false;
     RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
-    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
     auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
-    Create([onRefreshing, onStateChange](RefreshModelNG model) {
-        model.SetOnStateChange(std::move(onStateChange));
-    });
+    RefreshModelNG model = CreateRefresh();
+    model.SetOnStateChange(std::move(onStateChange));
+    CreateDone();
 
     /**
      * @tc.steps: step1. refreshOffset_: -> 640vp
@@ -493,13 +476,11 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset08, TestSize.Level1)
 HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset09, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    bool isRefreshTrigger = false;
     RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
-    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
     auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
-    Create([onRefreshing, onStateChange](RefreshModelNG model) {
-        model.SetOnStateChange(std::move(onStateChange));
-    });
+    RefreshModelNG model = CreateRefresh();
+    model.SetOnStateChange(std::move(onStateChange));
+    CreateDone();
 
     /**
      * @tc.steps: step1. refreshOffset_: -> 64vp
@@ -538,13 +519,11 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset09, TestSize.Level1)
 HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset10, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    bool isRefreshTrigger = false;
     RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
-    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
     auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
-    Create([onRefreshing, onStateChange](RefreshModelNG model) {
-        model.SetOnStateChange(std::move(onStateChange));
-    });
+    RefreshModelNG model = CreateRefresh();
+    model.SetOnStateChange(std::move(onStateChange));
+    CreateDone();
 
     /**
      * @tc.steps: step1. refreshOffset_: -> 32vp
@@ -582,13 +561,11 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset10, TestSize.Level1)
 HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset11, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    bool isRefreshTrigger = false;
     RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
-    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
     auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
-    Create([onRefreshing, onStateChange](RefreshModelNG model) {
-        model.SetOnStateChange(std::move(onStateChange));
-    });
+    RefreshModelNG model = CreateRefresh();
+    model.SetOnStateChange(std::move(onStateChange));
+    CreateDone();
 
     /**
      * @tc.steps: step1. refreshOffset_: -> 0vp
@@ -626,13 +603,11 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset11, TestSize.Level1)
 HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset12, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    bool isRefreshTrigger = false;
     RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
-    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
     auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
-    Create([onRefreshing, onStateChange](RefreshModelNG model) {
-        model.SetOnStateChange(std::move(onStateChange));
-    });
+    RefreshModelNG model = CreateRefresh();
+    model.SetOnStateChange(std::move(onStateChange));
+    CreateDone();
 
     /**
      * @tc.steps: step1. refreshOffset_: -> -1vp
@@ -670,13 +645,11 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset12, TestSize.Level1)
 HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset13, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    bool isRefreshTrigger = false;
     RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
-    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
     auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
-    Create([onRefreshing, onStateChange](RefreshModelNG model) {
-        model.SetOnStateChange(std::move(onStateChange));
-    });
+    RefreshModelNG model = CreateRefresh();
+    model.SetOnStateChange(std::move(onStateChange));
+    CreateDone();
 
     /**
      * @tc.steps: step1. refreshOffset_: -> 1vp
@@ -714,13 +687,11 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset13, TestSize.Level1)
 HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset14, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    bool isRefreshTrigger = false;
     RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
-    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
     auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
-    Create([onRefreshing, onStateChange](RefreshModelNG model) {
-        model.SetOnStateChange(std::move(onStateChange));
-    });
+    RefreshModelNG model = CreateRefresh();
+    model.SetOnStateChange(std::move(onStateChange));
+    CreateDone();
 
     /**
      * @tc.steps: step1. refreshOffset_: -> 10vp
@@ -757,13 +728,11 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset14, TestSize.Level1)
 HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset15, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    bool isRefreshTrigger = false;
     RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
-    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
     auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
-    Create([onRefreshing, onStateChange](RefreshModelNG model) {
-        model.SetOnStateChange(std::move(onStateChange));
-    });
+    RefreshModelNG model = CreateRefresh();
+    model.SetOnStateChange(std::move(onStateChange));
+    CreateDone();
 
     /**
      * @tc.steps: step1. refreshOffset_: -> -640vp
@@ -801,13 +770,11 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset15, TestSize.Level1)
 HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset16, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    bool isRefreshTrigger = false;
     RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
-    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
     auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
-    Create([onRefreshing, onStateChange](RefreshModelNG model) {
-        model.SetOnStateChange(std::move(onStateChange));
-    });
+    RefreshModelNG model = CreateRefresh();
+    model.SetOnStateChange(std::move(onStateChange));
+    CreateDone();
 
     /**
      * @tc.steps: step1. refreshOffset_: -> 640vp
@@ -845,13 +812,11 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset16, TestSize.Level1)
 HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset17, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    bool isRefreshTrigger = false;
     RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
-    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
     auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
-    Create([onRefreshing, onStateChange](RefreshModelNG model) {
-        model.SetOnStateChange(std::move(onStateChange));
-    });
+    RefreshModelNG model = CreateRefresh();
+    model.SetOnStateChange(std::move(onStateChange));
+    CreateDone();
 
     /**
      * @tc.steps: step1. refreshOffset_: -> 64vp
@@ -889,13 +854,11 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset17, TestSize.Level1)
 HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset18, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    bool isRefreshTrigger = false;
     RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
-    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
     auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
-    Create([onRefreshing, onStateChange](RefreshModelNG model) {
-        model.SetOnStateChange(std::move(onStateChange));
-    });
+    RefreshModelNG model = CreateRefresh();
+    model.SetOnStateChange(std::move(onStateChange));
+    CreateDone();
 
     /**
      * @tc.steps: step1. refreshOffset_: -> 32vp
@@ -933,13 +896,11 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset18, TestSize.Level1)
 HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset19, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    bool isRefreshTrigger = false;
     RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
-    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
     auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
-    Create([onRefreshing, onStateChange](RefreshModelNG model) {
-        model.SetOnStateChange(std::move(onStateChange));
-    });
+    RefreshModelNG model = CreateRefresh();
+    model.SetOnStateChange(std::move(onStateChange));
+    CreateDone();
 
     /**
      * @tc.steps: step1. refreshOffset_: -> 0vp
@@ -977,13 +938,11 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset19, TestSize.Level1)
 HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset20, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    bool isRefreshTrigger = false;
     RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
-    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
     auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
-    Create([onRefreshing, onStateChange](RefreshModelNG model) {
-        model.SetOnStateChange(std::move(onStateChange));
-    });
+    RefreshModelNG model = CreateRefresh();
+    model.SetOnStateChange(std::move(onStateChange));
+    CreateDone();
 
     /**
      * @tc.steps: step1. refreshOffset_: -> -1vp
@@ -1021,13 +980,11 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset20, TestSize.Level1)
 HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset21, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    bool isRefreshTrigger = false;
     RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
-    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
     auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
-    Create([onRefreshing, onStateChange](RefreshModelNG model) {
-        model.SetOnStateChange(std::move(onStateChange));
-    });
+    RefreshModelNG model = CreateRefresh();
+    model.SetOnStateChange(std::move(onStateChange));
+    CreateDone();
 
     /**
      * @tc.steps: step1. refreshOffset_: -> 1vp
@@ -1065,13 +1022,11 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset21, TestSize.Level1)
 HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset22, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    bool isRefreshTrigger = false;
     RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
-    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
     auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
-    Create([onRefreshing, onStateChange](RefreshModelNG model) {
-        model.SetOnStateChange(std::move(onStateChange));
-    });
+    RefreshModelNG model = CreateRefresh();
+    model.SetOnStateChange(std::move(onStateChange));
+    CreateDone();
 
     /**
      * @tc.steps: step1. refreshOffset_: -> 10vp
@@ -1109,13 +1064,11 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset22, TestSize.Level1)
 HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset23, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    bool isRefreshTrigger = false;
     RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
-    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
     auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
-    Create([onRefreshing, onStateChange](RefreshModelNG model) {
-        model.SetOnStateChange(std::move(onStateChange));
-    });
+    RefreshModelNG model = CreateRefresh();
+    model.SetOnStateChange(std::move(onStateChange));
+    CreateDone();
 
     /**
      * @tc.steps: step1. refreshOffset_: -> -640vp
@@ -1153,13 +1106,11 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset23, TestSize.Level1)
 HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset24, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    bool isRefreshTrigger = false;
     RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
-    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
     auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
-    Create([onRefreshing, onStateChange](RefreshModelNG model) {
-        model.SetOnStateChange(std::move(onStateChange));
-    });
+    RefreshModelNG model = CreateRefresh();
+    model.SetOnStateChange(std::move(onStateChange));
+    CreateDone();
 
     /**
      * @tc.steps: step1. refreshOffset_: -> 640vp
@@ -1197,13 +1148,11 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset24, TestSize.Level1)
 HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset25, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    bool isRefreshTrigger = false;
     RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
-    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
     auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
-    Create([onRefreshing, onStateChange](RefreshModelNG model) {
-        model.SetOnStateChange(std::move(onStateChange));
-    });
+    RefreshModelNG model = CreateRefresh();
+    model.SetOnStateChange(std::move(onStateChange));
+    CreateDone();
 
     /**
      * @tc.steps: step1. refreshOffset_: -> 64vp
@@ -1241,13 +1190,11 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset25, TestSize.Level1)
 HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset26, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    bool isRefreshTrigger = false;
     RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
-    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
     auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
-    Create([onRefreshing, onStateChange](RefreshModelNG model) {
-        model.SetOnStateChange(std::move(onStateChange));
-    });
+    RefreshModelNG model = CreateRefresh();
+    model.SetOnStateChange(std::move(onStateChange));
+    CreateDone();
 
     /**
      * @tc.steps: step1. refreshOffset_: -> 32vp
@@ -1285,13 +1232,11 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset26, TestSize.Level1)
 HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset27, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    bool isRefreshTrigger = false;
     RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
-    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
     auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
-    Create([onRefreshing, onStateChange](RefreshModelNG model) {
-        model.SetOnStateChange(std::move(onStateChange));
-    });
+    RefreshModelNG model = CreateRefresh();
+    model.SetOnStateChange(std::move(onStateChange));
+    CreateDone();
 
     /**
      * @tc.steps: step1. refreshOffset_: -> 0vp
@@ -1329,13 +1274,11 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset27, TestSize.Level1)
 HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset28, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    bool isRefreshTrigger = false;
     RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
-    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
     auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
-    Create([onRefreshing, onStateChange](RefreshModelNG model) {
-        model.SetOnStateChange(std::move(onStateChange));
-    });
+    RefreshModelNG model = CreateRefresh();
+    model.SetOnStateChange(std::move(onStateChange));
+    CreateDone();
 
     /**
      * @tc.steps: step1. refreshOffset_: -> -1vp
@@ -1373,13 +1316,11 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset28, TestSize.Level1)
 HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset29, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    bool isRefreshTrigger = false;
     RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
-    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
     auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
-    Create([onRefreshing, onStateChange](RefreshModelNG model) {
-        model.SetOnStateChange(std::move(onStateChange));
-    });
+    RefreshModelNG model = CreateRefresh();
+    model.SetOnStateChange(std::move(onStateChange));
+    CreateDone();
 
     /**
      * @tc.steps: step1. refreshOffset_: -> 1vp
@@ -1421,7 +1362,9 @@ HWTEST_F(RefreshVersionTwelveTestNg, RefreshWithText001, TestSize.Level1)
      * @tc.expected: Would trigger refresh
      */
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    Create([](RefreshModelNG model) {model.SetLoadingText("promptText"); });
+    RefreshModelNG model = CreateRefresh();
+    model.SetLoadingText("promptText");
+    CreateDone();
     pattern_->HandleDragStart();
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
     pattern_->HandleDragUpdate(TRIGGER_REFRESH_DISTANCE.ConvertToPx() - 1.f);
@@ -1442,7 +1385,9 @@ HWTEST_F(RefreshVersionTwelveTestNg, RefreshWithText002, TestSize.Level1)
      * @tc.expected: Would trigger refresh
      */
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    Create([](RefreshModelNG model) {model.SetLoadingText(""); });
+    RefreshModelNG model = CreateRefresh();
+    model.SetLoadingText("");
+    CreateDone();
     pattern_->HandleDragStart();
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
     pattern_->HandleDragUpdate(TRIGGER_REFRESH_DISTANCE.ConvertToPx() - 1.f);

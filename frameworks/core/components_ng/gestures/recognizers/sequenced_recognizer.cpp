@@ -59,7 +59,11 @@ void SequencedRecognizer::OnRejected()
     while (iter != recognizers_.end()) {
         auto recognizer = *iter;
         if (recognizer) {
+            if (recognizer->IsBridgeMode()) {
+                continue;
+            }
             recognizer->OnRejected();
+            recognizer->OnRejectBridgeObj();
         }
         ++iter;
     }
@@ -259,7 +263,7 @@ void SequencedRecognizer::UpdateCurrentIndex()
 
 bool SequencedRecognizer::CheckBetweenTwoLongPressRecognizer(int32_t currentIndex)
 {
-    if (currentIndex <= 0 || currentIndex_ > static_cast<int32_t>((recognizers_.size() - 1))) {
+    if (currentIndex <= 0 || currentIndex_ > static_cast<int32_t>(recognizers_.size()) - 1) {
         return false;
     }
     auto iterBefore = recognizers_.begin();

@@ -15,13 +15,6 @@
 
 #include "core/common/resource/resource_manager.h"
 
-#include <memory>
-#include <string>
-
-#include "base/log/log_wrapper.h"
-#include "base/memory/referenced.h"
-#include "core/components/theme/resource_adapter.h"
-
 namespace OHOS::Ace {
 namespace {
 const std::string DEFAULT_BUNDLE_NAME = "";

@@ -12,8 +12,5 @@
 # limitations under the License.
 
 group("component_ext") {
-  deps = [
-    "arc_swiper:arcswiper",
-    "movingphoto:movingphotoview",
-  ]
+  deps = [ "movingphoto:movingphotoview" ]
 }

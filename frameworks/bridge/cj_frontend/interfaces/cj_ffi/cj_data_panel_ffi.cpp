@@ -15,10 +15,8 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_data_panel_ffi.h"
 
-#include <vector>
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/chart/chart_component.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
 

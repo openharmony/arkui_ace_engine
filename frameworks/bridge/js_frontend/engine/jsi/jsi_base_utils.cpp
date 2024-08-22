@@ -15,17 +15,8 @@
 
 #include "bridge/js_frontend/engine/jsi/jsi_base_utils.h"
 
-#include <utility>
-
-#include "base/log/event_report.h"
-#include "base/log/exception_handler.h"
-#include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
-#include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_value.h"
-#include "core/common/ace_application_info.h"
-#include "core/common/ace_engine.h"
-#include "core/common/container.h"
 
 namespace OHOS::Ace::Framework {
 constexpr char JS_CRASH_CODE[] = "100001";
@@ -49,7 +40,7 @@ int32_t GetLineOffset(const AceType* data)
 
 std::string GetMsgStr(const std::string& msg)
 {
-    int pos = msg.find('\n');
+    auto pos = msg.find('\n');
     if (pos == std::string::npos) {
         return msg;
     }

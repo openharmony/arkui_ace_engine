@@ -267,6 +267,16 @@ class ButtonTypeModifier extends ModifierWithKey<number> {
     super(value);
   }
   static identity: Symbol = Symbol('buttonType');
+  applyStage(node: KNode, component?: ArkComponent): boolean {
+    if (this.stageValue === undefined || this.stageValue === null) {
+      this.value = this.stageValue;
+      this.applyPeer(node, true, component);
+      return true;
+    }
+    this.value = this.stageValue;
+    this.applyPeer(node, false, component);
+    return false;
+  }
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().button.resetType(node);
@@ -616,7 +626,7 @@ globalThis.Button.attributeModifier = function (modifier: ArkComponent): void {
 };
 
 // @ts-ignore
-globalThis.Button.contentModifier = function (modifier) {
+globalThis.Button.contentModifier = function (modifier: ContentModifier<ButtonConfiguration>): void {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {

@@ -161,19 +161,16 @@ int32_t FrontendDelegateDeclarative::GetMinPlatformVersion()
 UIContentErrorCode FrontendDelegateDeclarative::RunPage(
     const std::string& url, const std::string& params, const std::string& profile, bool isNamedRouter)
 {
-    LOGI("FrontendDelegateDeclarative RunPage url=%{public}s", url.c_str());
+    LOGI("RunPage:%{public}s", url.c_str());
     std::string jsonContent;
     if (GetAssetContent(MANIFEST_JSON, jsonContent)) {
         manifestParser_->Parse(jsonContent);
         manifestParser_->Printer();
     } else if (!profile.empty() && GetAssetContent(profile, jsonContent)) {
-        LOGI("Parse profile %{public}s", profile.c_str());
         manifestParser_->Parse(jsonContent);
     } else if (GetAssetContent(PAGES_JSON, jsonContent)) {
-        LOGI("Parse main_pages.json");
         manifestParser_->Parse(jsonContent);
     } else {
-        LOGE("RunPage parse manifest.json failed");
         EventReport::SendPageRouterException(PageRouterExcepType::RUN_PAGE_ERR, url);
         return UIContentErrorCode::PARSE_MANIFEST_FAILED;
     }
@@ -1697,6 +1694,7 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter");
     DialogProperties dialogProperties = {
+        .type = DialogType::ALERT_DIALOG,
         .title = title,
         .content = message,
         .autoCancel = autoCancel,
@@ -1711,6 +1709,7 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter with status changed");
     DialogProperties dialogProperties = {
+        .type = DialogType::ALERT_DIALOG,
         .title = title,
         .content = message,
         .autoCancel = autoCancel,
@@ -1725,6 +1724,7 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter with attr");
     DialogProperties dialogProperties = {
+        .type = DialogType::ALERT_DIALOG,
         .title = dialogAttr.title,
         .content = dialogAttr.message,
         .autoCancel = dialogAttr.autoCancel,
@@ -1765,6 +1765,7 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter with attr for status changed");
     DialogProperties dialogProperties = {
+        .type = DialogType::ALERT_DIALOG,
         .title = dialogAttr.title,
         .content = dialogAttr.message,
         .autoCancel = dialogAttr.autoCancel,
@@ -1887,7 +1888,6 @@ void FrontendDelegateDeclarative::CloseCustomDialog(const WeakPtr<NG::UINode>& n
         CHECK_NULL_VOID(overlayManager);
         TAG_LOGI(AceLogTag::ACE_OVERLAY, "begin to close custom dialog.");
         overlayManager->CloseCustomDialog(node, std::move(callback));
-        SubwindowManager::GetInstance()->CloseCustomDialogNG(node, std::move(callback));
     };
     MainWindowOverlay(std::move(task), "ArkUIOverlayCloseCustomDialog");
     return;
@@ -1897,9 +1897,9 @@ void FrontendDelegateDeclarative::UpdateCustomDialog(
     const WeakPtr<NG::UINode>& node, const PromptDialogAttr &dialogAttr, std::function<void(int32_t)> &&callback)
 {
     DialogProperties dialogProperties = {
-        .isSysBlurStyle = false,
         .autoCancel = dialogAttr.autoCancel,
-        .maskColor = dialogAttr.maskColor
+        .maskColor = dialogAttr.maskColor,
+        .isSysBlurStyle = false
     };
     if (dialogAttr.alignment.has_value()) {
         dialogProperties.alignment = dialogAttr.alignment.value();
@@ -1907,12 +1907,11 @@ void FrontendDelegateDeclarative::UpdateCustomDialog(
     if (dialogAttr.offset.has_value()) {
         dialogProperties.offset = dialogAttr.offset.value();
     }
-    auto task = [dialogAttr, dialogProperties, node, callback]
+    auto task = [dialogProperties, node, callback]
         (const RefPtr<NG::OverlayManager>& overlayManager) mutable {
         CHECK_NULL_VOID(overlayManager);
         LOGI("begin to update custom dialog.");
         overlayManager->UpdateCustomDialog(node, dialogProperties, std::move(callback));
-        SubwindowManager::GetInstance()->UpdateCustomDialogNG(node, dialogAttr, std::move(callback));
     };
     MainWindowOverlay(std::move(task), "ArkUIOverlayUpdateCustomDialog");
     return;
@@ -3365,6 +3364,15 @@ void FrontendDelegateDeclarative::GetSnapshot(
 #ifdef ENABLE_ROSEN_BACKEND
     NG::ComponentSnapshot::Get(componentId, std::move(callback), options);
 #endif
+}
+
+std::pair<int32_t, std::shared_ptr<Media::PixelMap>> FrontendDelegateDeclarative::GetSyncSnapshot(
+    const std::string& componentId, const NG::SnapshotOptions& options)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    return NG::ComponentSnapshot::GetSync(componentId, options);
+#endif
+    return {ERROR_CODE_INTERNAL_ERROR, nullptr};
 }
 
 void FrontendDelegateDeclarative::CreateSnapshot(

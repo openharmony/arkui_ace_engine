@@ -16,8 +16,6 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_line_ffi.h"
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_shape_ffi.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
-#include "core/components_ng/pattern/shape/line_model.h"
 #include "core/components_ng/pattern/shape/line_model_ng.h"
 
 using namespace OHOS::Ace;
@@ -27,7 +25,12 @@ extern "C" {
 void FfiOHOSAceFrameworkLineCreate(double width, int32_t widthUnit, double height, int32_t heightUnit)
 {
     LineModel::GetInstance()->Create();
-    FfiOHOSAceFrameworkShapeSetSize(width, widthUnit, height, heightUnit);
+    if (width > 0.0) {
+        FfiOHOSAceFrameworkShapeSetWidth(width, widthUnit);
+    }
+    if (height > 0.0) {
+        FfiOHOSAceFrameworkShapeSetHeight(height, heightUnit);
+    }
 }
 
 void FfiOHOSAceFrameworkLineSetStart(double x, double y)

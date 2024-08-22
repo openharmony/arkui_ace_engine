@@ -15,10 +15,6 @@
 
 #include "core/components/common/properties/edge.h"
 
-#include <vector>
-
-#include "base/utils/string_utils.h"
-
 namespace OHOS::Ace {
 namespace {
 

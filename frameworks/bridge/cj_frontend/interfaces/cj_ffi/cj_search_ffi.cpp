@@ -19,12 +19,8 @@
 
 #include "bridge/cj_frontend/cppview/search_controller.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 #include "bridge/common/utils/utils.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/search/search_model.h"
-#include "frameworks/core/components/text_field/text_field_controller.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
@@ -210,6 +206,9 @@ void FfiOHOSAceFrameworkSearchOnPaste(void (*callback)(const char* value))
 int64_t FfiOHOSAceFrameworkSearchController()
 {
     auto ret_ = FFIData::Create<SearchController>();
+    if (ret_ == nullptr) {
+        return FFI_ERROR_CODE;
+    }
     return ret_->GetID();
 }
 

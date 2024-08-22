@@ -29,15 +29,15 @@ class SelectOverlayModifier : public OverlayModifier {
     DECLARE_ACE_TYPE(SelectOverlayModifier, OverlayModifier)
 
 public:
-    SelectOverlayModifier(const OffsetF& menuOptionOffset);
+    SelectOverlayModifier(const OffsetF& menuOptionOffset, bool isReverse);
 
     ~SelectOverlayModifier() override = default;
 
     void onDraw(DrawingContext& drawingContext) override;
 
-    void SetOtherPointRadius(const Dimension& radius);
+    void SetOtherPointRadius(const Dimension& radius, bool noAnimation = false);
 
-    void SetHeadPointRadius(const Dimension& radius);
+    void SetHeadPointRadius(const Dimension& radius, bool noAnimation = false);
 
     void SetMenuOptionOffset(const OffsetF& offset)
     {
@@ -46,11 +46,12 @@ public:
         }
     }
 
-    void SetLineEndOffset(bool isMore);
+    void SetLineEndOffset(bool isMore, bool noAnimation = false);
 
     void SetHasExtensionMenu(bool hasExtensionMenu)
     {
-        hasExtensionMenu_ = hasExtensionMenu;
+        CHECK_NULL_VOID(hasExtensionMenu_);
+        hasExtensionMenu_->Set(hasExtensionMenu);
     }
 
     bool GetHasExtensionMenu()
@@ -91,11 +92,14 @@ private:
 
     void DrawbBackArrow(DrawingContext& context);
     void DrawbCircles(DrawingContext& context);
-    void LineEndOffsetWithAnimation(bool isMore);
-    void BackArrowTransitionAnimation();
+    void LineEndOffsetWithAnimation(bool isMore, bool noAnimation);
+    void BackArrowTransitionAnimation(bool noAnimation);
+    void ChangeCircle();
+    void BackArrowTransitionChange(const OffsetF& coordinate, int32_t i);
 
     RefPtr<PropertyBool> firstHandleIsShow_;
     RefPtr<PropertyBool> secondHandleIsShow_;
+    RefPtr<PropertyBool> hasExtensionMenu_;
     RefPtr<PropertyOffsetF> menuOptionOffset_;
     RefPtr<AnimatablePropertyFloat> pointRadius_;
     RefPtr<AnimatablePropertyFloat> headPointRadius_;
@@ -105,7 +109,6 @@ private:
     std::vector<RefPtr<AnimatablePropertyOffsetF>> lineEndOffset_;
 
     Color iconColor_ = Color::BLACK;
-    bool hasExtensionMenu_ = false;
     bool isNewAvoid_ = false;
     bool isReverse_ = false;
 

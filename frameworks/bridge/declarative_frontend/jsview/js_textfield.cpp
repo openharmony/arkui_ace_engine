@@ -1415,6 +1415,7 @@ void JSTextField::SetCancelButton(const JSCallbackInfo& info)
     }
     auto param = JSRef<JSObject>::Cast(info[0]);
     auto theme = GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
     std::string styleStr;
     CleanNodeStyle cleanNodeStyle;
     auto styleProp = param->GetProperty("style");
@@ -1427,7 +1428,11 @@ void JSTextField::SetCancelButton(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetIsShowCancelButton(true);
     auto iconJsVal = param->GetProperty("icon");
     if (iconJsVal->IsUndefined() || iconJsVal->IsNull() || !iconJsVal->IsObject()) {
-        TextFieldModel::GetInstance()->SetCancelIconColor(Color());
+        if (SystemProperties::GetColorMode() == ColorMode::DARK) {
+            TextFieldModel::GetInstance()->SetCancelIconColor(theme->GetCancelButtonIconColor());
+        } else {
+            TextFieldModel::GetInstance()->SetCancelIconColor(Color());
+        }
         TextFieldModel::GetInstance()->SetCancelIconSize(theme->GetIconSize());
         TextFieldModel::GetInstance()->SetCanacelIconSrc(std::string(), std::string(), std::string());
         return;
@@ -1444,6 +1449,13 @@ void JSTextField::SetCancelButton(const JSCallbackInfo& info)
         iconSize = theme->GetIconSize();
     }
     TextFieldModel::GetInstance()->SetCancelIconSize(iconSize);
+    SetCancelIconColorAndIconSrc(iconParam);
+}
+
+void JSTextField::SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam)
+{
+    auto theme = GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
     // set icon src
     std::string iconSrc;
     std::string bundleName;
@@ -1457,10 +1469,15 @@ void JSTextField::SetCancelButton(const JSCallbackInfo& info)
     // set icon color
     Color iconColor;
     auto iconColorProp = iconParam->GetProperty("color");
-    if (!iconColorProp->IsUndefined() && !iconColorProp->IsNull()) {
-        ParseJsColor(iconColorProp, iconColor);
+    if (!iconColorProp->IsUndefined() && !iconColorProp->IsNull() && ParseJsColor(iconColorProp, iconColor)) {
+        TextFieldModel::GetInstance()->SetCancelIconColor(iconColor);
+        return;
     }
-    TextFieldModel::GetInstance()->SetCancelIconColor(iconColor);
+    if (SystemProperties::GetColorMode() == ColorMode::DARK) {
+        TextFieldModel::GetInstance()->SetCancelIconColor(theme->GetCancelButtonIconColor());
+    } else {
+        TextFieldModel::GetInstance()->SetCancelIconColor(iconColor);
+    }
 }
 
 void JSTextField::SetSelectAllValue(const JSCallbackInfo& info)

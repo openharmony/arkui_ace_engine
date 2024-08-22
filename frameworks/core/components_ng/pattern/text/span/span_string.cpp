@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/text/span/span_string.h"
 
+#include <cstdint>
 #include <iterator>
 #include <utility>
 
@@ -616,9 +617,14 @@ bool SpanString::operator==(const SpanString& other) const
     if (text_ != other.text_) {
         return false;
     }
-    auto size = spansMap_.size() - (spansMap_.find(SpanType::Gesture) == spansMap_.end() ? 0 : 1);
-    auto sizeOther =
-        other.spansMap_.size() - (other.spansMap_.find(SpanType::Gesture) == other.spansMap_.end() ? 0 : 1);
+    auto size =
+        !spansMap_.empty()
+            ? (static_cast<int32_t>(spansMap_.size()) - (spansMap_.find(SpanType::Gesture) == spansMap_.end() ? 0 : 1))
+            : 0;
+    auto sizeOther = !other.spansMap_.empty()
+                         ? (static_cast<int32_t>(other.spansMap_.size()) -
+                               (other.spansMap_.find(SpanType::Gesture) == other.spansMap_.end() ? 0 : 1))
+                         : 0;
     if (size != sizeOther) {
         return false;
     }

@@ -71,5 +71,12 @@ const ArkUIBlankModifier* GetBlankModifier()
         SetBlankMin, ResetBlankMin };
     return &modifier;
 }
+
+const CJUIBlankModifier* GetCJUIBlankModifier()
+{
+    static const CJUIBlankModifier modifier = { SetColor, ResetColor, SetBlankHeight, ResetBlankHeight,
+        SetBlankMin, ResetBlankMin };
+    return &modifier;
+}
 }
 }

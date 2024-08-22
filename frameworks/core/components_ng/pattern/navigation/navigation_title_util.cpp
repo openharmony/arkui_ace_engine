@@ -60,6 +60,10 @@ bool NavigationTitleUtil::BuildMoreButton(bool isButtonEnabled, RefPtr<Navigatio
     std::string message = Localization::GetInstance()->GetEntryLetters("navigation.more");
     SetAccessibility(menuItemNode, message);
 
+    // set navdestination titleBar "more" button inspectorId
+    SetInnerChildId(menuItemNode, NG::DES_FIELD, menuNode->GetTag(),
+        "More", titleBarNode->GetInnerParentId());
+
     barItemNode->MountToParent(menuItemNode);
     barItemNode->MarkModifyDone();
     menuItemNode->MarkModifyDone();
@@ -85,12 +89,12 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItems(const int32_t menuNodeId,
     auto mostMenuItemCount = GetOrInitMaxMenuNums(theme, titleBarNode);
     bool needMoreButton = menuItems.size() > mostMenuItemCount ? true : false;
 
-    uint32_t count = 0;
+    int32_t count = 0;
     std::vector<OptionParam> params;
     OptionParam param;
     for (const auto& menuItem : menuItems) {
         ++count;
-        if (needMoreButton && (count > mostMenuItemCount - 1)) {
+        if (needMoreButton && (count > static_cast<int32_t>(mostMenuItemCount) - 1)) {
             param = { menuItem.text.value_or(""), menuItem.icon.value_or(""), menuItem.isEnabled.value_or(true),
                 menuItem.action, menuItem.iconSymbol.value_or(nullptr) };
             param.SetSymbolUserDefinedIdealFontSize(theme->GetMenuIconSize());
@@ -98,6 +102,11 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItems(const int32_t menuNodeId,
         } else {
             auto menuItemNode = CreateMenuItemNode(theme, menuItem, isButtonEnabled);
             CHECK_NULL_RETURN(menuItemNode, nullptr);
+
+            // set navdestination titleBar menuitem inspectorId
+            std::string menuItemId = menuItemNode->GetTag() + std::to_string(count);
+            NavigationTitleUtil::SetInnerChildId(menuItemNode, NG::DES_FIELD, menuNode->GetTag(),
+                menuItemId, titleBarNode->GetInnerParentId());
 
             // read navdestination menu button
             SetAccessibility(menuItemNode, menuItem.text.value_or(""));
@@ -171,8 +180,8 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItemNode(
     CHECK_NULL_RETURN(menuItemNode, nullptr);
 
     int32_t barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto barItemNode = AceType::MakeRefPtr<BarItemNode>(V2::BAR_ITEM_ETS_TAG, barItemNodeId);
-    barItemNode->InitializePatternAndContext();
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, barItemNodeId, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
     UpdateBarItemNodeWithItem(barItemNode, menuItem, isButtonEnabled);
     auto iconNode = AceType::DynamicCast<FrameNode>(barItemNode->GetChildren().front());
     InitTitleBarButtonEvent(menuItemNode, iconNode, false, menuItem, menuItem.isEnabled.value_or(true));
@@ -366,8 +375,7 @@ void NavigationTitleUtil::UpdateBarItemNodeWithItem(
         barItemNode->SetTextNode(textNode);
         barItemNode->AddChild(textNode);
     }
-    if ((barItem.icon.has_value())
-        || (barItem.iconSymbol.has_value() && barItem.iconSymbol.value() != nullptr)) {
+    if ((barItem.icon.has_value()) || (barItem.iconSymbol.has_value() && barItem.iconSymbol.value() != nullptr)) {
         auto iconNode = CreateBarItemIconNode(barItem, isButtonEnabled);
         barItemNode->SetIconNode(iconNode);
         barItemNode->AddChild(iconNode);
@@ -445,8 +453,8 @@ void NavigationTitleUtil::BuildMoreIemNode(const RefPtr<BarItemNode>& barItemNod
 RefPtr<BarItemNode> NavigationTitleUtil::CreateBarItemNode(const bool isButtonEnabled)
 {
     int32_t barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto barItemNode = AceType::MakeRefPtr<BarItemNode>(V2::BAR_ITEM_ETS_TAG, barItemNodeId);
-    barItemNode->InitializePatternAndContext();
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, barItemNodeId, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
     auto barItemLayoutProperty = barItemNode->GetLayoutProperty();
     CHECK_NULL_RETURN(barItemLayoutProperty, nullptr);
     barItemLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
@@ -504,53 +512,20 @@ void NavigationTitleUtil::HandleLongPressActionEnd(const RefPtr<FrameNode>& targ
 void NavigationTitleUtil::InitDragAndLongPressEvent(
     const RefPtr<FrameNode>& menuNode, const std::vector<NG::BarItem>& menuItems)
 {
-    auto actionUpdateTask = [weakMenuNode = WeakPtr<FrameNode>(menuNode), menuItems](const GestureEvent& info) {
-        auto menuNode = weakMenuNode.Upgrade();
-        CHECK_NULL_VOID(menuNode);
-        auto menuItemNode =
-            menuNode->FindChildByPosition(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
-        CHECK_NULL_VOID(menuItemNode);
-        auto index = menuNode->GetChildIndex(menuItemNode);
-        auto totalCount = menuNode->TotalChildCount();
-        auto titleBarNode = menuNode->GetParentFrameNode();
-        CHECK_NULL_VOID(titleBarNode);
-        auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
-        CHECK_NULL_VOID(titleBarPattern);
-        auto dialogNode = titleBarPattern->GetLargeFontPopUpDialogNode();
-        if (dialogNode && index >= 0 && index < totalCount) {
-            if (!titleBarPattern->GetMoveIndex().has_value()) {
-                titleBarPattern->SetMoveIndex(index);
-            }
+    CHECK_NULL_VOID(menuNode);
+    auto pipeline = menuNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (LessNotEqual(pipeline->GetFontScale(), AgingAdapationDialogUtil::GetDialogBigFontSizeScale())) {
+        return;
+    }
 
-            if (titleBarPattern->GetMoveIndex().value() != index) {
-                HandleLongPressActionEnd(menuNode);
-                titleBarPattern->SetMoveIndex(index);
-                titleBarPattern->SetLargeFontPopUpDialogNode(CreatePopupDialogNode(menuItemNode, menuItems, index));
-            }
-        }
-    };
     auto gestureHub = menuNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-
-    auto dragEvent = AceType::MakeRefPtr<DragEvent>(nullptr, std::move(actionUpdateTask), nullptr, nullptr);
-    PanDirection panDirection = { .type = PanDirection::ALL };
-    gestureHub->SetDragEvent(dragEvent, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
-
-    auto longPressCallback = [weakTargetNode = WeakPtr<FrameNode>(menuNode), menuItems](GestureEvent& info) {
-        auto menuNode = weakTargetNode.Upgrade();
-        NavigationTitleUtil::HandleLongPress(info, menuNode, menuItems);
-    };
-    auto longPressEvent = AceType::MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
-    gestureHub->SetLongPressEvent(longPressEvent);
-
-    auto longPressRecognizer = gestureHub->GetLongPressRecognizer();
-    CHECK_NULL_VOID(longPressRecognizer);
-
-    auto longPressEndCallback = [weakTargetNode = WeakPtr<FrameNode>(menuNode)](GestureEvent& info) {
-        auto menuNode = weakTargetNode.Upgrade();
-        NavigationTitleUtil::HandleLongPressActionEnd(menuNode);
-    };
-    longPressRecognizer->SetOnActionEnd(longPressEndCallback);
+    InitDragEvent(gestureHub, menuNode, menuItems);
+    InitLongPressEvent(gestureHub, menuNode, menuItems);
+    auto accessibilityProperty = menuNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
 }
 
 RefPtr<FrameNode> NavigationTitleUtil::CreatePopupDialogNode(
@@ -572,8 +547,8 @@ RefPtr<FrameNode> NavigationTitleUtil::CreatePopupDialogNode(
             message = accessibilityProperty->GetAccessibilityText();
         }
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            dialogNode = AgingAdapationDialogUtil::ShowLongPressDialog(
-                message, SymbolSourceInfo(theme->GetMoreSymbolId()));
+            dialogNode =
+                AgingAdapationDialogUtil::ShowLongPressDialog(message, SymbolSourceInfo(theme->GetMoreSymbolId()));
             return dialogNode;
         }
         imageSourceInfo.SetResourceId(theme->GetMoreResourceId());
@@ -619,5 +594,88 @@ void NavigationTitleUtil::SetAccessibility(const RefPtr<FrameNode>& node, const 
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetAccessibilityText(message);
     accessibilityProperty->SetAccessibilityGroup(true);
+}
+
+std::string NavigationTitleUtil::GetTitleString(const RefPtr<TitleBarNode>& titleBarNode, bool isCustom)
+{
+    if (isCustom) {
+        return "";
+    }
+    CHECK_NULL_RETURN(titleBarNode, "");
+    auto title = AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle());
+    CHECK_NULL_RETURN(title, "");
+    if (title->GetTag() != V2::TEXT_ETS_TAG) {
+        return "";
+    }
+    auto textLayoutProperty = title->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, "");
+    return textLayoutProperty->GetContentValue("");
+}
+
+std::string NavigationTitleUtil::GetSubtitleString(const RefPtr<TitleBarNode>& titleBarNode)
+{
+    CHECK_NULL_RETURN(titleBarNode, "");
+    auto subtitle = AceType::DynamicCast<FrameNode>(titleBarNode->GetSubtitle());
+    CHECK_NULL_RETURN(subtitle, "");
+    if (subtitle->GetTag() != V2::TEXT_ETS_TAG) {
+        return "";
+    }
+    auto textLayoutProperty = subtitle->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, "");
+    return textLayoutProperty->GetContentValue("");
+}
+
+void NavigationTitleUtil::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub, const RefPtr<FrameNode>& menuNode,
+    const std::vector<NG::BarItem>& menuItems)
+{
+    auto actionUpdateTask = [weakMenuNode = WeakPtr<FrameNode>(menuNode), menuItems](const GestureEvent& info) {
+        auto menuNode = weakMenuNode.Upgrade();
+        CHECK_NULL_VOID(menuNode);
+        auto menuItemNode =
+            menuNode->FindChildByPosition(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
+        CHECK_NULL_VOID(menuItemNode);
+        auto index = menuNode->GetChildIndex(menuItemNode);
+        auto totalCount = menuNode->TotalChildCount();
+        auto titleBarNode = menuNode->GetParentFrameNode();
+        CHECK_NULL_VOID(titleBarNode);
+        auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+        CHECK_NULL_VOID(titleBarPattern);
+        auto dialogNode = titleBarPattern->GetLargeFontPopUpDialogNode();
+        if (dialogNode && index >= 0 && index < totalCount) {
+            if (!titleBarPattern->GetMoveIndex().has_value()) {
+                titleBarPattern->SetMoveIndex(index);
+            }
+
+            if (titleBarPattern->GetMoveIndex().value() != index) {
+                HandleLongPressActionEnd(menuNode);
+                titleBarPattern->SetMoveIndex(index);
+                titleBarPattern->SetLargeFontPopUpDialogNode(CreatePopupDialogNode(menuItemNode, menuItems, index));
+            }
+        }
+    };
+
+    auto dragEvent = AceType::MakeRefPtr<DragEvent>(nullptr, std::move(actionUpdateTask), nullptr, nullptr);
+    PanDirection panDirection = { .type = PanDirection::ALL };
+    gestureHub->SetDragEvent(dragEvent, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+}
+
+void NavigationTitleUtil::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub,
+    const RefPtr<FrameNode>& menuNode, const std::vector<NG::BarItem>& menuItems)
+{
+    auto longPressCallback = [weakTargetNode = WeakPtr<FrameNode>(menuNode), menuItems](GestureEvent& info) {
+        auto menuNode = weakTargetNode.Upgrade();
+        NavigationTitleUtil::HandleLongPress(info, menuNode, menuItems);
+    };
+    auto longPressEvent = AceType::MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
+    gestureHub->SetLongPressEvent(longPressEvent);
+
+    auto longPressRecognizer = gestureHub->GetLongPressRecognizer();
+    CHECK_NULL_VOID(longPressRecognizer);
+
+    auto longPressEndCallback = [weakTargetNode = WeakPtr<FrameNode>(menuNode)](GestureEvent& info) {
+        auto menuNode = weakTargetNode.Upgrade();
+        NavigationTitleUtil::HandleLongPressActionEnd(menuNode);
+    };
+    longPressRecognizer->SetOnActionEnd(longPressEndCallback);
 }
 } // namespace OHOS::Ace::NG

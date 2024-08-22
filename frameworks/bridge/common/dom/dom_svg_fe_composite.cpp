@@ -15,8 +15,6 @@
 
 #include "frameworks/bridge/common/dom/dom_svg_fe_composite.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 
 DOMSvgFeComposite::DOMSvgFeComposite(NodeId nodeId, const std::string& nodeName) : DOMSvgBase(nodeId, nodeName) {}

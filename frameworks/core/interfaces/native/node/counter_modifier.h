@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUICounterModifier* GetCounterModifier();
+const CJUICounterModifier* GetCJUICounterModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_COUNTER_MODIFIER_H

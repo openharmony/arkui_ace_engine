@@ -19,6 +19,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUICommonShapeModifier* GetCommonShapeModifier();
+const CJUICommonShapeModifier* GetCJUICommonShapeModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_COMMON_SHAPE_MODIFIER_H

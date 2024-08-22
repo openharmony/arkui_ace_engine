@@ -28,8 +28,4 @@ bool TextLayoutadapter::IsRightTOLeftArabic(int32_t charOfShowingText)
 {
     return false;
 }
-double TextLayoutadapter::TextConvertToPx(const Dimension& value, FontScaleParameter parameter)
-{
-    return value.ConvertToPx();
-}
 } // namespace OHOS::Ace::NG

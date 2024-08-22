@@ -15,7 +15,6 @@
 
 #include "frameworks/core/components_ng/render/adapter/matrix2d.h"
 #include "include/core/SkMatrix.h"
-#include "include/core/SkScalar.h"
 #include "2d_graphics/include/utils/matrix.h"
 
 namespace OHOS::Ace::NG {

@@ -374,6 +374,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSweepGradient(SweepGradientParam s
 struct RadialGradientParam {
     CTupleLength center;
     double radius;
+    int32_t radiusUnit;
     CArrCColors colors;
     bool repeating;
 };

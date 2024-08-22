@@ -33,6 +33,7 @@ void ResetHyperlinkColor(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
     auto themeManager = context->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
     auto hyperlinkTheme = themeManager->GetTheme<HyperlinkTheme>();
@@ -59,6 +60,14 @@ namespace NodeModifier {
 const ArkUIHyperlinkModifier* GetHyperlinkModifier()
 {
     static const ArkUIHyperlinkModifier modifier = { SetHyperlinkColor, ResetHyperlinkColor, SetHyperlinkDraggable,
+        ResetHyperlinkDraggable };
+
+    return &modifier;
+}
+
+const CJUIHyperlinkModifier* GetCJUIHyperlinkModifier()
+{
+    static const CJUIHyperlinkModifier modifier = { SetHyperlinkColor, ResetHyperlinkColor, SetHyperlinkDraggable,
         ResetHyperlinkDraggable };
 
     return &modifier;

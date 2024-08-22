@@ -17,9 +17,7 @@
 
 #include "cj_lambda.h"
 
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
-#include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;

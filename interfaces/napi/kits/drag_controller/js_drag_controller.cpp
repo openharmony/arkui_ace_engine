@@ -24,7 +24,6 @@
 #include "napi/native_common.h"
 #include "native_engine/impl/ark/ark_native_engine.h"
 #include "native_value.h"
-#include "node_api.h"
 
 #if defined(ENABLE_DRAG_FRAMEWORK) && defined(PIXEL_MAP_SUPPORTED)
 #include "jsnapi.h"
@@ -118,6 +117,7 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx);
 bool GetPixelMapByCustom(DragControllerAsyncCtx* asyncCtx);
 bool GetPixelMapArrayByCustom(DragControllerAsyncCtx* asyncCtx, napi_value customBuilder, int arrayLength);
 ParameterType getParameterType(DragControllerAsyncCtx* asyncCtx);
+void SetMouseDragMonitorState(DragControllerAsyncCtx *asyncCtx, bool state);
 
 class DragAction {
 public:
@@ -285,6 +285,7 @@ public:
             return nullptr;
         }
 
+        SetMouseDragMonitorState(dragAction->asyncCtx_, true);
         dragAction->StartDragInternal(dragAction->asyncCtx_);
         napi_escape_handle(env, scope, promiseResult, &promiseResult);
         napi_close_escapable_handle_scope(env, scope);
@@ -541,6 +542,20 @@ void GetCallBackDataForJs(DragControllerAsyncCtx* asyncCtx, const DragNotifyMsg&
     napi_close_handle_scope(asyncCtx->env, scope);
 }
 
+void SetMouseDragMonitorState(DragControllerAsyncCtx *asyncCtx, bool state)
+{
+    if (asyncCtx->sourceType != SOURCE_TYPE_MOUSE) {
+        return;
+    }
+    auto ret = InteractionInterface::GetInstance()->SetMouseDragMonitorState(state);
+    if (ret != 0) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Set mouse drag monitor state %{public}d failed, return value is %{public}d",
+            state, ret);
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Set mouse drag monitor state %{public}d success", state);
+}
+
 void HandleSuccess(DragControllerAsyncCtx* asyncCtx, const DragNotifyMsg& dragNotifyMsg,
     const DragStatus dragStatus)
 {
@@ -614,14 +629,14 @@ void HandleOnDragStart(DragControllerAsyncCtx* asyncCtx)
             NG::DragDropFuncWrapper::DecideWhetherToStopDragging(
                 { ctx->globalX, ctx->globalY }, ctx->extraParams, ctx->pointerId, ctx->instanceId);
         },
-        TaskExecutor::TaskType::UI, "ArkUIDragHandleDragEventStart");
+        TaskExecutor::TaskType::UI, "ArkUIDragHandleDragEventStart", PriorityType::VIP);
 }
 
 void GetShadowInfoArray(DragControllerAsyncCtx* asyncCtx,
     std::vector<Msdp::DeviceStatus::ShadowInfo>& shadowInfos)
 {
     std::set<Media::PixelMap*> scaledPixelMaps;
-    auto minScaleWidth = GridSystemManager::GetInstance().GetMaxWidthWithColumnType(GridColumnType::DRAG_PANEL);
+    auto minScaleWidth = NG::DragDropFuncWrapper::GetScaleWidth(asyncCtx->instanceId);
     for (const auto& pixelMap: asyncCtx->pixelMapList) {
         double scale = 1.0;
         if (!scaledPixelMaps.count(pixelMap.get())) {
@@ -731,12 +746,9 @@ void StartDragService(DragControllerAsyncCtx* asyncCtx)
         HandleSuccess(asyncCtx, dragNotifyMsg, DragStatus::ENDED);
     };
     NG::DragDropFuncWrapper::SetDraggingPointerAndPressedState(asyncCtx->pointerId, asyncCtx->instanceId);
+    NG::DragDropFuncWrapper::SetExtraInfo(asyncCtx->instanceId, asyncCtx->extraParams);
     int32_t ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<OHOS::Ace::StartDragListenerImpl>(callback));
-    napi_handle_scope scope = nullptr;
-    napi_open_handle_scope(asyncCtx->env, &scope);
-    HandleSuccess(asyncCtx, DragNotifyMsg {}, DragStatus::STARTED);
-    napi_close_handle_scope(asyncCtx->env, scope);
     if (ret != 0) {
         napi_handle_scope scope = nullptr;
         napi_open_handle_scope(asyncCtx->env, &scope);
@@ -744,6 +756,10 @@ void StartDragService(DragControllerAsyncCtx* asyncCtx)
         napi_close_handle_scope(asyncCtx->env, scope);
         return;
     }
+    napi_handle_scope scope = nullptr;
+    napi_open_handle_scope(asyncCtx->env, &scope);
+    HandleSuccess(asyncCtx, DragNotifyMsg {}, DragStatus::STARTED);
+    napi_close_handle_scope(asyncCtx->env, scope);
     auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
     SetIsDragging(container, true);
     TAG_LOGI(AceLogTag::ACE_DRAG, "msdp start drag successfully");
@@ -782,12 +798,13 @@ void OnMultipleComplete(DragControllerAsyncCtx* asyncCtx)
                 napi_handle_scope scope = nullptr;
                 napi_open_handle_scope(asyncCtx->env, &scope);
                 HandleFail(asyncCtx, ERROR_CODE_INTERNAL_ERROR, "drag state is reject.");
+                SetMouseDragMonitorState(asyncCtx, false);
                 napi_close_handle_scope(asyncCtx->env, scope);
                 return;
             }
             StartDragService(asyncCtx);
         },
-        TaskExecutor::TaskType::JS, "ArkUIDragMultipleComplete");
+        TaskExecutor::TaskType::JS, "ArkUIDragMultipleComplete", PriorityType::VIP);
 }
 
 void OnComplete(DragControllerAsyncCtx* asyncCtx)
@@ -842,7 +859,7 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
                 dataSize = badgeNumber.value();
             }
             double scale = 1.0;
-            auto minScaleWidth = GridSystemManager::GetInstance().GetMaxWidthWithColumnType(GridColumnType::DRAG_PANEL);
+            auto minScaleWidth = NG::DragDropFuncWrapper::GetScaleWidth(asyncCtx->instanceId);
             if (asyncCtx->pixelMap->GetWidth() > minScaleWidth && asyncCtx->dragPreviewOption.isScaleEnabled) {
                 scale = minScaleWidth / asyncCtx->pixelMap->GetWidth();
             }
@@ -899,7 +916,7 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
                 }
             }
         },
-        TaskExecutor::TaskType::JS, "ArkUIDragComplete");
+        TaskExecutor::TaskType::JS, "ArkUIDragComplete", PriorityType::VIP);
 }
 
 bool ParseTouchPoint(DragControllerAsyncCtx* asyncCtx, napi_valuetype& valueType)
@@ -1539,6 +1556,7 @@ static napi_value JSExecuteDrag(napi_env env, napi_callback_info info)
         napi_close_escapable_handle_scope(env, scope);
         return result;
     }
+    SetMouseDragMonitorState(dragAsyncContext, true);
     ParameterType parameterType = getParameterType(dragAsyncContext);
     if (parameterType == ParameterType::DRAGITEMINFO) {
         OnComplete(dragAsyncContext);

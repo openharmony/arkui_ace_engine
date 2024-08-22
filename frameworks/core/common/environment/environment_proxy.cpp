@@ -15,9 +15,6 @@
 
 #include "core/common/environment/environment_proxy.h"
 
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-
 namespace OHOS::Ace {
 
 EnvironmentProxy* EnvironmentProxy::inst_ = nullptr;

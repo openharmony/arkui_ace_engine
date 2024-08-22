@@ -145,7 +145,7 @@ void SliderTestNg::SetSliderContentModifier(SliderContentModifier& sliderContent
     sliderContentModifier.SetStepColor(TEST_COLOR);
     sliderContentModifier.SetStepRatio(SLIDER_CONTENT_MODIFIER_STEP_RATIO);
     sliderContentModifier.SetBackgroundSize(POINTF_START, POINTF_END);
-    sliderContentModifier.SetSelectColor(SliderModelNG::CreateSolidGradient(TEST_COLOR));
+    sliderContentModifier.SetSelectColor(TEST_COLOR);
     sliderContentModifier.SetBlockColor(TEST_COLOR);
     SizeF blockSize;
     sliderContentModifier.SetBlockSize(blockSize);
@@ -388,7 +388,6 @@ HWTEST_F(SliderTestNg, SliderTestNg004, TestSize.Level1)
     sliderPattern->OnModifyDone();
     EXPECT_EQ(sliderPattern->value_, VALUE);
     EXPECT_EQ(sliderPattern->valueRatio_, .5f);
-    EXPECT_EQ(sliderPattern->stepRatio_, .01f);
     EXPECT_EQ(sliderPattern->showTips_, false);
     EXPECT_EQ(sliderPaintProperty->GetPadding(), std::nullopt);
     EXPECT_EQ(sliderPaintProperty->GetTipColor(), std::nullopt);
@@ -551,7 +550,6 @@ HWTEST_F(SliderTestNg, SliderTestNg007, TestSize.Level1)
     sliderPattern->HandlingGestureEvent(info);
     EXPECT_EQ(sliderPattern->valueRatio_, 0);
     EXPECT_EQ(sliderPattern->value_, 1.0f);
-    sliderPaintProperty->UpdateStep(.0);
     sliderPattern->HandlingGestureEvent(info);
     EXPECT_EQ(sliderPattern->valueRatio_, 0);
     /**
@@ -1575,7 +1573,6 @@ HWTEST_F(SliderTestNg, SliderTestNgInteractionMode010, TestSize.Level1)
     sliderPattern->HandlingGestureEvent(info);
     EXPECT_EQ(sliderPattern->valueRatio_, 0);
     EXPECT_EQ(sliderPattern->value_, 1.0f);
-    sliderPaintProperty->UpdateStep(.0);
     sliderPattern->HandlingGestureEvent(info);
     EXPECT_EQ(sliderPattern->valueRatio_, 0);
     /**

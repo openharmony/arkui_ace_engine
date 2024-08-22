@@ -15,7 +15,12 @@
 # limitations under the License.
 #
 
-import os.path
+
+# convert the dump result into graphical representation
+
+import os
+import shutil
+
 from typing import List
 from graphviz import Digraph
 from src.beans.event_node import EventNode
@@ -32,9 +37,7 @@ edge_colors = ['black', 'blue', 'brown', 'purple', 'yellow', 'pink', 'gray']
 
 
 def reset_output_dir():
-    import os
     if os.path.exists(output_folder):
-        import shutil
         shutil.rmtree(output_folder)
     os.mkdir(output_folder)
 

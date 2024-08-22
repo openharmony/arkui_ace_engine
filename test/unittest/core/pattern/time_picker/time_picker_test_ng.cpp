@@ -1557,12 +1557,15 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern001, TestSize.Level1)
     EXPECT_GT(width, defaultWidth);
 
     for (const auto& child : children) {
+        auto childNode = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(childNode);
+        auto newWidth = childNode->GetGeometryNode()->GetFrameSize().Width();
         auto buttonNode = AceType::DynamicCast<FrameNode>(child->GetFirstChild());
         auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
         EXPECT_EQ(buttonLayoutProperty->GetMeasureType(), MeasureType::MATCH_PARENT_MAIN_AXIS);
         EXPECT_EQ(buttonLayoutProperty->GetTypeValue(), ButtonType::NORMAL);
         auto calcSize = buttonLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize.value();
-        EXPECT_EQ(calcSize.Width().value(), CalcLength(defaultWidth - PRESS_INTERVAL.ConvertToPx()));
+        EXPECT_EQ(calcSize.Width().value(), CalcLength(newWidth - PRESS_INTERVAL.ConvertToPx()));
         EXPECT_EQ(calcSize.Height().value(), CalcLength(height - PRESS_INTERVAL));
         auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
         EXPECT_EQ(buttonConfirmRenderContext->GetBackgroundColorValue(), Color::TRANSPARENT);
@@ -1903,8 +1906,6 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern011, TestSize.Level1)
     EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEvent));
     EXPECT_EQ(timePickerRowPattern->focusKeyID_, 0);
 
-    auto frameWidth = frameNode->GetGeometryNode()->GetFrameSize().Width();
-    auto childSize = frameNode->GetChildren().size();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto pickerTheme = AceType::MakeRefPtr<PickerTheme>();
@@ -1945,7 +1946,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern011, TestSize.Level1)
     RoundRect paintRect2;
     timePickerRowPattern->GetInnerFocusPaintRect(paintRect2);
     auto rect2 = paintRect2.GetRect();
-    auto centerX = (frameWidth / childSize - pickerThemeWidth) / 2 +
+    auto centerX = (pickerChild->GetGeometryNode()->GetFrameSize().Width() - pickerThemeWidth) / 2 +
                    pickerChild->GetGeometryNode()->GetFrameRect().Width() * timePickerRowPattern->focusKeyID_ +
                    PRESS_INTERVAL.ConvertToPx() * 2;
     EXPECT_EQ(rect2.GetX(), centerX);
@@ -4721,4 +4722,208 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow043, TestSize.Level1)
         AM + std::to_string(CURRENT_VALUE5) + COLON + std::to_string(CURRENT_VALUE5));
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
+
+/**
+ * @tc.name: TimePickerEnableHapticFeedback001
+ * @tc.desc: Test property enableHapticFeedback by default.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerEnableHapticFeedback001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_TRUE(TimePickerModelNG::getEnableHapticFeedback(frameNode));
+}
+
+/**
+ * @tc.name: TimePickerEnableHapticFeedback002
+ * @tc.desc: Test property enableHapticFeedback by Setter API
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerEnableHapticFeedback002, TestSize.Level1)
+{
+    std::vector<bool> testValues = { false, true, true, false, false };
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    for (auto testValue : testValues) {
+        TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        ASSERT_NE(frameNode, nullptr);
+        TimePickerModelNG::GetInstance()->SetIsEnableHapticFeedback(testValue);
+        EXPECT_EQ(TimePickerModelNG::getEnableHapticFeedback(frameNode), static_cast<uint32_t>(testValue));
+    }
+}
+
+/**
+ * @tc.name: TimePickerEnableHapticFeedback003
+ * @tc.desc: Test property enableHapticFeedback by Setter/Getter API
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerEnableHapticFeedback003, TestSize.Level1)
+{
+    std::vector<bool> testValues = { false, true, true, false, false };
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    for (auto testValue : testValues) {
+        TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        ASSERT_NE(frameNode, nullptr);
+        TimePickerModelNG::GetInstance()->SetIsEnableHapticFeedback(testValue);
+        auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+        ASSERT_NE(timePickerRowPattern, nullptr);
+        EXPECT_EQ(timePickerRowPattern->GetIsEnableHaptic(), testValue);
+    }
+}
+
+/**
+ * @tc.name: TimePickerDialogViewConvertFontScaleValue001
+ * @tc.desc: Test TimePickerDialogView ConvertFontScaleValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewConvertFontScaleValue001, TestSize.Level1)
+{
+    Dimension fontSizeValue = 50.0_vp;
+    Dimension fontSizeLimit = 40.0_vp;
+
+    auto result = TimePickerDialogView::ConvertFontScaleValue(fontSizeValue,
+        fontSizeLimit, true);
+    EXPECT_EQ(fontSizeLimit.Value(), result.Value());
+}
+
+/**
+ * @tc.name: TimePickerDialogViewConvertFontScaleValue002
+ * @tc.desc: Test TimePickerDialogView ConvertFontScaleValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewConvertFontScaleValue002, TestSize.Level1)
+{
+    Dimension fontSizeValue = 20.0_vp;
+    Dimension fontSizeLimit = 40.0_vp;
+
+    auto result = TimePickerDialogView::ConvertFontScaleValue(fontSizeValue,
+        fontSizeLimit, true);
+    EXPECT_EQ(fontSizeValue.Value(), result.Value());
+}
+
+/**
+ * @tc.name: TimePickerDialogViewConvertFontSizeLimitTest001
+ * @tc.desc: Test TimePickerDialogView ConvertFontSizeLimit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewConvertFontSizeLimitTest001, TestSize.Level1)
+{
+    Dimension fontSizeValue(20.0);
+    Dimension fontSizeLimit(30.0);
+    bool isUserSetFont = false;
+    Dimension result = TimePickerDialogView::ConvertFontSizeLimit(fontSizeValue,
+        fontSizeLimit, isUserSetFont);
+    EXPECT_EQ(result, fontSizeValue);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewConvertFontSizeLimitTest002
+ * @tc.desc: Test TimePickerDialogView ConvertFontSizeLimit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewConvertFontSizeLimitTest002, TestSize.Level1)
+{
+    Dimension fontSizeValue(20.0);
+    Dimension fontSizeLimit(30.0);
+    bool isUserSetFont = true;
+    Dimension result = TimePickerDialogView::ConvertFontSizeLimit(fontSizeValue,
+        fontSizeLimit, isUserSetFont);
+    EXPECT_EQ(result, fontSizeValue);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewConvertFontSizeLimitTest003
+ * @tc.desc: Test TimePickerDialogView ConvertFontSizeLimit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewConvertFontSizeLimitTest003, TestSize.Level1)
+{
+    Dimension fontSizeValue(40.0);
+    Dimension fontSizeLimit(30.0);
+    bool isUserSetFont = true;
+    double fontScale = 2.0f;
+    MockPipelineContext::GetCurrent()->SetFontScale(fontScale);
+    Dimension result = TimePickerDialogView::ConvertFontSizeLimit(fontSizeValue,
+        fontSizeLimit, isUserSetFont);
+    Dimension expected = fontSizeLimit / fontScale;
+    EXPECT_EQ(result, expected);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewConvertFontSizeLimitTest004
+ * @tc.desc: Test TimePickerDialogView ConvertFontSizeLimit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewConvertFontSizeLimitTest004, TestSize.Level1)
+{
+    Dimension fontSizeValue(10.0);
+    Dimension fontSizeLimit(30.0);
+    bool isUserSetFont = true;
+    double fontScale = 2.0f;
+    MockPipelineContext::GetCurrent()->SetFontScale(fontScale);
+    Dimension result = TimePickerDialogView::ConvertFontSizeLimit(fontSizeValue,
+        fontSizeLimit, isUserSetFont);
+    EXPECT_EQ(result, fontSizeValue);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewGetUserSettingLimitTest001
+ * @tc.desc: Test TimePickerDialogView AdjustFontSizeScale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewGetUserSettingLimitTest001, TestSize.Level1)
+{
+    double fontScale = 1.0f;
+    Dimension fontSizeValue(10.0);
+    Dimension result = TimePickerDialogView::AdjustFontSizeScale(fontSizeValue, fontScale);
+    EXPECT_EQ(result, fontSizeValue * fontScale);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewGetUserSettingLimitTest002
+ * @tc.desc: Test TimePickerDialogView AdjustFontSizeScale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewGetUserSettingLimitTest002, TestSize.Level1)
+{
+    double fontScale = 1.75f;
+    Dimension fontSizeValue(10.0);
+    Dimension result = TimePickerDialogView::AdjustFontSizeScale(fontSizeValue, fontScale);
+    EXPECT_EQ(result, fontSizeValue * fontScale);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewGetUserSettingLimitTest003
+ * @tc.desc: Test TimePickerDialogView AdjustFontSizeScale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewGetUserSettingLimitTest003, TestSize.Level1)
+{
+    double fontScale = 2.0f;
+    Dimension fontSizeValue(10.0);
+    Dimension result = TimePickerDialogView::AdjustFontSizeScale(fontSizeValue, fontScale);
+    EXPECT_EQ(result, fontSizeValue * fontScale);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewGetUserSettingLimitTest004
+ * @tc.desc: Test TimePickerDialogView AdjustFontSizeScale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewGetUserSettingLimitTest004, TestSize.Level1)
+{
+    double fontScale = 3.2f;
+    Dimension fontSizeValue(10.0);
+    Dimension result = TimePickerDialogView::AdjustFontSizeScale(fontSizeValue, fontScale);
+    EXPECT_NE(result, fontSizeValue * fontScale);
+}
+
 } // namespace OHOS::Ace::NG

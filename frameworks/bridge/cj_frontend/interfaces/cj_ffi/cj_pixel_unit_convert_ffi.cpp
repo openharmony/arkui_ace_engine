@@ -14,8 +14,6 @@
  */
 
 #include "cj_pixel_unit_convert_ffi.h"
-#include "core/pipeline/pipeline_base.h"
-#include "core/common/container.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
@@ -24,12 +22,20 @@ namespace OHOS::Ace::Framework {
 extern "C" {
 double FfiOHOSAceFrameworkVp2Px(double value)
 {
+    auto container = Container::Current();
+    if (!container) {
+        return NAN;
+    }
     double density = PipelineBase::GetCurrentDensity();
     return value * density;
 }
 
 double FfiOHOSAceFrameworkPx2Vp(double value)
 {
+    auto container = Container::Current();
+    if (!container) {
+        return NAN;
+    }
     double density = PipelineBase::GetCurrentDensity();
     if (NearZero(density)) {
         return 1.0f;

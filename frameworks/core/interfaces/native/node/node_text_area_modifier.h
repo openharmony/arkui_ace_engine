@@ -21,6 +21,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
     const ArkUITextAreaModifier* GetTextAreaModifier();
+    const CJUITextAreaModifier* GetCJUITextAreaModifier();
     void SetOnTextAreaChange(ArkUINodeHandle node, void* extraParam);
     void SetOnTextAreaPaste(ArkUINodeHandle node, void* extraParam);
     void SetOnTextAreaSelectionChange(ArkUINodeHandle node, void* extraParam);
@@ -29,10 +30,6 @@ namespace OHOS::Ace::NG::NodeModifier {
     void SetOnTextAreaInputFilterError(ArkUINodeHandle node, void* extraParam);
     void SetTextAreaOnTextContentScroll(ArkUINodeHandle node, void* extraParam);
     void SetTextAreaOnSubmit(ArkUINodeHandle node, void* extraParam);
-    void SetTextAreaOnWillInsertValue(ArkUINodeHandle node, void* extraParam);
-    void SetTextAreaOnDidInsertValue(ArkUINodeHandle node, void* extraParam);
-    void SetTextAreaOnWillDeleteValue(ArkUINodeHandle node, void* extraParam);
-    void SetTextAreaOnDidDeleteValue(ArkUINodeHandle node, void* extraParam);
 
     void ResetOnTextAreaChange(ArkUINodeHandle node);
     void ResetOnTextAreaPaste(ArkUINodeHandle node);
@@ -42,5 +39,9 @@ namespace OHOS::Ace::NG::NodeModifier {
     void ResetOnTextAreaInputFilterError(ArkUINodeHandle node);
     void ResetTextAreaOnTextContentScroll(ArkUINodeHandle node);
     void ResetTextAreaOnSubmit(ArkUINodeHandle node);
+    void SetTextAreaOnWillInsertValue(ArkUINodeHandle node, void* extraParam);
+    void SetTextAreaOnDidInsertValue(ArkUINodeHandle node, void* extraParam);
+    void SetTextAreaOnWillDeleteValue(ArkUINodeHandle node, void* extraParam);
+    void SetTextAreaOnDidDeleteValue(ArkUINodeHandle node, void* extraParam);
 } // namespace OHOS::Ace::NG::NodeModifier
 #endif

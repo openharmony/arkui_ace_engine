@@ -55,7 +55,8 @@ constexpr Dimension BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_2_WIDTH = 96.0_vp;
 constexpr Dimension BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_2_HEIGHT = 56.0_vp;
 constexpr Dimension BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_2_WIDTH = 48.0_vp;
 constexpr Dimension BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_2_HEIGHT = 64.0_vp;
-constexpr Dimension TEXT_MAX = 72.0_vp;
+constexpr Dimension TEXT_MAX = 36.0_vp;
+constexpr Dimension TEXT_AGING_MAX = 72.0_vp;
 constexpr int32_t MAX_LENGTH = 1;
 constexpr float SUITABLEAGING_LEVEL_1_SCALE = 1.75f;
 constexpr float SUITABLEAGING_LEVEL_2_SCALE = 2.0f;
@@ -98,10 +99,17 @@ void SliderTipModifier::PaintText(DrawingContext& context)
     auto arrowSizeWidth = static_cast<float>(ARROW_WIDTH.ConvertToPx());
     auto arrowSizeHeight = static_cast<float>(ARROW_HEIGHT.ConvertToPx());
     auto circularOffset = static_cast<float>(CIRCULAR_HORIZON_OFFSET.ConvertToPx());
+    auto pipeLine = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeLine);
+    auto fontScale = pipeLine->GetFontScale();
     SizeF textSize = { 0, 0 };
     if (paragraph_) {
-        textSize = SizeF(std::min(paragraph_->GetLongestLine(), static_cast<float>(TEXT_MAX.ConvertToPx())),
-            paragraph_->GetHeight());
+        auto width = static_cast<float>(TEXT_MAX.ConvertToPx());
+        if (GreatOrEqual(fontScale, SUITABLEAGING_LEVEL_1_SCALE) ||
+            (GreatOrEqual(fontScale, SUITABLEAGING_LEVEL_2_SCALE))) {
+            width = static_cast<float>(TEXT_AGING_MAX.ConvertToPx());
+        }
+        textSize = SizeF(std::min(paragraph_->GetLongestLine(), width), paragraph_->GetHeight());
     }
     if (axis_ == Axis::HORIZONTAL) {
         textOffset_.SetX(vertex_.GetX() - textSize.Width() * HALF);
@@ -171,7 +179,8 @@ void SliderTipModifier::PaintVerticalBubble(float vertexOffsetFromBlock, RSPath&
     auto arrowVerticalOffset = static_cast<float>(ARROW_VERTICAL_OFFSET.ConvertToPx());
     float arrowRadius = static_cast<float>(ARROW_RADIUS.ConvertToPx());
     float circularRadius = bubbleSize_.Height() * HALF;
-    if (sliderGlobalOffset_->Get().GetX() + vertex_.GetX() < bubbleSize_.Width()) {
+    if (sliderGlobalOffset_->Get().GetX() + vertex_.GetX() < bubbleSize_.Width() ||
+        AceApplicationInfo::GetInstance().IsRightToLeft()) {
         vertex_.AddX(vertexOffsetFromBlock / HALF);
         isMask_ = true;
         path.MoveTo(vertex_.GetX(), vertex_.GetY());
@@ -279,7 +288,8 @@ void SliderTipModifier::PaintVerticalBubbleSuitableAging(float vertexOffsetFromB
     auto arrowVerticalOffset = static_cast<float>(ARROW_VERTICAL_OFFSET.ConvertToPx());
     float arrowRadius = static_cast<float>(ARROW_RADIUS.ConvertToPx());
     float circularRadius = bubbleSize_.Height() * (1.0f / 3.0f);
-    if (sliderGlobalOffset_->Get().GetX() + vertex_.GetX() < bubbleSize_.Width()) {
+    if (sliderGlobalOffset_->Get().GetX() + vertex_.GetX() < bubbleSize_.Width() ||
+        AceApplicationInfo::GetInstance().IsRightToLeft()) {
         vertex_.AddX(vertexOffsetFromBlock / HALF);
         isMask_ = true;
         path.MoveTo(vertex_.GetX(), vertex_.GetY());
@@ -485,7 +495,16 @@ void SliderTipModifier::CreateParagraphAndLayout(const TextStyle& textStyle, con
     if (parent) {
         parent->BuildColumnWidth();
     }
-    paragraph_->Layout(static_cast<float>(TEXT_MAX.ConvertToPx()));
+
+    auto pipeLine = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeLine);
+    auto fontScale = pipeLine->GetFontScale();
+    auto width = static_cast<float>(TEXT_MAX.ConvertToPx());
+    if (GreatOrEqual(fontScale, SUITABLEAGING_LEVEL_1_SCALE) ||
+        (GreatOrEqual(fontScale, SUITABLEAGING_LEVEL_2_SCALE))) {
+        width = static_cast<float>(TEXT_AGING_MAX.ConvertToPx());
+    }
+    paragraph_->Layout(width);
 }
 
 bool SliderTipModifier::CreateParagraph(const TextStyle& textStyle, std::string content)
@@ -573,11 +592,17 @@ bool SliderTipModifier::UpdateOverlayRect(const SizeF& frameSize)
         rect.SetSize(
             SizeF(contentSize.Width() + bubbleSize_.Width() / HALF, maxWidth + bubbleSize_.Height() + distance));
     } else {
+        float bubbleCenterX = rect.GetOffset().GetX() + bubbleSize_.Width() * HALF;
+        float sliderOffsetX = sliderGlobalOffset_->Get().GetX() - bubbleCenterX;
         auto maxWidth = std::max(circleSize.Width(), frameSize.Width());
         if (sliderGlobalOffset_->Get().GetX() + vertex.GetX() < bubbleSize_.Width()) {
-            rect.SetOffset(OffsetF(bubbleSize_.Width() + distance, -bubbleSize_.Height()));
+            rect.SetOffset(OffsetF(AceApplicationInfo::GetInstance().IsRightToLeft()
+                ? (sliderOffsetX + bubbleSize_.Width() + distance)
+                : (bubbleSize_.Width() + distance), -bubbleSize_.Height()));
         } else {
-            rect.SetOffset(OffsetF(-bubbleSize_.Width() - distance, -bubbleSize_.Height()));
+            rect.SetOffset(OffsetF(AceApplicationInfo::GetInstance().IsRightToLeft()
+                ? (sliderOffsetX - bubbleSize_.Width() - distance)
+                : (-bubbleSize_.Width() - distance), -bubbleSize_.Height()));
         }
         rect.SetSize(
             SizeF(maxWidth + bubbleSize_.Width() + distance, contentSize.Height() + bubbleSize_.Height() / HALF));

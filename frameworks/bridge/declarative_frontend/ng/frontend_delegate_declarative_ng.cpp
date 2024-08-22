@@ -650,6 +650,7 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const std::string& title, const s
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter");
     DialogProperties dialogProperties = {
+        .type = DialogType::ALERT_DIALOG,
         .title = title,
         .content = message,
         .autoCancel = autoCancel,
@@ -664,6 +665,7 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const std::string& title, const s
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter");
     DialogProperties dialogProperties = {
+        .type = DialogType::ALERT_DIALOG,
         .title = title,
         .content = message,
         .autoCancel = autoCancel,
@@ -679,6 +681,7 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter");
     DialogProperties dialogProperties = {
+        .type = DialogType::ALERT_DIALOG,
         .title = dialogAttr.title,
         .content = dialogAttr.message,
         .autoCancel = dialogAttr.autoCancel,
@@ -711,6 +714,7 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter");
     DialogProperties dialogProperties = {
+        .type = DialogType::ALERT_DIALOG,
         .title = dialogAttr.title,
         .content = dialogAttr.message,
         .autoCancel = dialogAttr.autoCancel,
@@ -829,9 +833,9 @@ void FrontendDelegateDeclarativeNG::UpdateCustomDialog(
     const WeakPtr<NG::UINode>& node, const PromptDialogAttr &dialogAttr, std::function<void(int32_t)> &&callback)
 {
     DialogProperties dialogProperties = {
-        .isSysBlurStyle = false,
         .autoCancel = dialogAttr.autoCancel,
-        .maskColor = dialogAttr.maskColor
+        .maskColor = dialogAttr.maskColor,
+        .isSysBlurStyle = false
     };
     if (dialogAttr.alignment.has_value()) {
         dialogProperties.alignment = dialogAttr.alignment.value();
@@ -1169,6 +1173,15 @@ void FrontendDelegateDeclarativeNG::GetSnapshot(
 #ifdef ENABLE_ROSEN_BACKEND
     NG::ComponentSnapshot::Get(componentId, std::move(callback), options);
 #endif
+}
+
+std::pair<int32_t, std::shared_ptr<Media::PixelMap>> FrontendDelegateDeclarativeNG::GetSyncSnapshot(
+    const std::string& componentId, const NG::SnapshotOptions& options)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    return NG::ComponentSnapshot::GetSync(componentId, options);
+#endif
+    return {ERROR_CODE_INTERNAL_ERROR, nullptr};
 }
 
 std::string FrontendDelegateDeclarativeNG::GetContentInfo(ContentInfoType type)

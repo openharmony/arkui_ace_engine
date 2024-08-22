@@ -22,6 +22,7 @@
 #endif
 
 #include "base/log/ace_scoring_log.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_search_theme.h"
 #include "bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_text_editable_controller.h"
@@ -31,12 +32,11 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/search_model_impl.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/text_style_parser.h"
 #include "core/components/search/search_theme.h"
 #include "core/components_ng/gestures/gesture_info.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
-#include "core/components/common/properties/text_style_parser.h"
-#include "bridge/declarative_frontend/ark_theme/theme_apply/js_search_theme.h"
 
 namespace OHOS::Ace {
 
@@ -305,7 +305,7 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
                 SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
             }
         } else {
-                SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
+            SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
         }
     } else {
         SearchModel::GetInstance()->SetSearchButtonFontSize(theme->GetFontSize());
@@ -323,7 +323,7 @@ void JSSearch::SetSearchIcon(const JSCallbackInfo& info)
     }
     if (info[0]->IsObject()) {
         auto param = JSRef<JSObject>::Cast(info[0]);
-        bool isSymbolIcon = param->HasProperty("fontColor");  // only SymbolGlyph has fontColor property
+        bool isSymbolIcon = param->HasProperty("fontColor"); // only SymbolGlyph has fontColor property
         if (isSymbolIcon) {
             SetSearchSymbolIcon(info);
         } else {
@@ -339,15 +339,20 @@ void JSSearch::SetCancelDefaultIcon()
 
 void JSSearch::SetCancelSymbolIcon(const JSCallbackInfo& info)
 {
-    std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
-    auto param = JSRef<JSObject>::Cast(info[0]);
-    auto iconProp = param->GetProperty("icon");
-    SetSymbolOptionApply(info, iconSymbol, iconProp);
-    SearchModel::GetInstance()->SetCancelSymbolIcon(iconSymbol);
+    if (info[0]->IsObject()) {
+        std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
+        auto param = JSRef<JSObject>::Cast(info[0]);
+        auto iconProp = param->GetProperty("icon");
+        SetSymbolOptionApply(info, iconSymbol, iconProp);
+        SearchModel::GetInstance()->SetCancelSymbolIcon(iconSymbol);
+    }
 }
 
 void JSSearch::SetCancelImageIcon(const JSCallbackInfo& info)
 {
+    if (!info[0]->IsObject()) {
+        return;
+    }
     auto param = JSRef<JSObject>::Cast(info[0]);
     auto theme = GetTheme<SearchTheme>();
     CHECK_NULL_VOID(theme);
@@ -394,6 +399,10 @@ void JSSearch::SetSearchDefaultIcon()
 
 void JSSearch::SetSearchSymbolIcon(const JSCallbackInfo& info)
 {
+    if (!info[0]->IsObject()) {
+        return;
+    }
+
     std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
     SetSymbolOptionApply(info, iconSymbol, info[0]);
     SearchModel::GetInstance()->SetSearchSymbolIcon(iconSymbol);
@@ -401,6 +410,9 @@ void JSSearch::SetSearchSymbolIcon(const JSCallbackInfo& info)
 
 void JSSearch::SetSearchImageIcon(const JSCallbackInfo& info)
 {
+    if (!info[0]->IsObject()) {
+        return;
+    }
     auto param = JSRef<JSObject>::Cast(info[0]);
     auto theme = GetTheme<SearchTheme>();
     CHECK_NULL_VOID(theme);
@@ -422,18 +434,21 @@ void JSSearch::SetSearchImageIcon(const JSCallbackInfo& info)
     if (srcPathProp->IsUndefined() || srcPathProp->IsNull() || !ParseJsMedia(srcPathProp, src)) {
         src = "";
     }
-    // set icon color
-    Color colorVal = theme->GetSearchIconColor();
-    auto colorProp = param->GetProperty("color");
-    if (!colorProp->IsUndefined() && !colorProp->IsNull() && ParseJsColor(colorProp, colorVal)) {
-        ParseJsColor(colorProp, colorVal);
-    }
-
     std::string bundleName;
     std::string moduleName;
     GetJsMediaBundleInfo(srcPathProp, bundleName, moduleName);
-    NG::IconOptions searchIconOptions = NG::IconOptions(colorVal, size, src, bundleName, moduleName);
-    SearchModel::GetInstance()->SetSearchImageIcon(searchIconOptions);
+
+    // set icon color
+    Color colorVal = theme->GetSearchIconColor();
+    auto colorProp = param->GetProperty("color");
+    if (!colorProp->IsUndefined() && !colorProp->IsNull()) {
+        ParseJsColor(colorProp, colorVal);
+        NG::IconOptions searchIconOptions = NG::IconOptions(colorVal, size, src, bundleName, moduleName);
+        SearchModel::GetInstance()->SetSearchImageIcon(searchIconOptions);
+    } else {
+        NG::IconOptions searchIconOptions = NG::IconOptions(size, src, bundleName, moduleName);
+        SearchModel::GetInstance()->SetSearchImageIcon(searchIconOptions);
+    }
 }
 
 static CancelButtonStyle ConvertStrToCancelButtonStyle(const std::string& value)
@@ -488,7 +503,7 @@ void JSSearch::SetIconStyle(const JSCallbackInfo& info)
     }
 
     auto iconParam = JSRef<JSObject>::Cast(iconJsVal);
-    bool isSymbolIcon = iconParam->HasProperty("fontColor");  // only SymbolGlyph has fontColor property
+    bool isSymbolIcon = iconParam->HasProperty("fontColor"); // only SymbolGlyph has fontColor property
     if (isSymbolIcon) {
         SetCancelSymbolIcon(info);
     } else {
@@ -652,7 +667,7 @@ void JSSearch::SetTextFont(const JSCallbackInfo& info)
     CHECK_NULL_VOID(theme);
     auto themeFontSize = theme->GetFontSize();
     auto themeFontWeight = theme->GetFontWeight();
-    Font font {.fontWeight = themeFontWeight, .fontSize = themeFontSize, .fontStyle = Ace::FontStyle::NORMAL};
+    Font font { .fontWeight = themeFontWeight, .fontSize = themeFontSize, .fontStyle = Ace::FontStyle::NORMAL };
     if (info.Length() < 1 || !info[0]->IsObject()) {
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             SearchModel::GetInstance()->SetTextFont(font);
@@ -763,10 +778,10 @@ void JSSearch::OnChange(const JSCallbackInfo& info)
 {
     auto jsValue = info[0];
     CHECK_NULL_VOID(jsValue->IsFunction());
-    auto jsChangeFunc = AceType::MakeRefPtr<JsCitedEventFunction<PreviewText, 2>>(
-        JSRef<JSFunc>::Cast(jsValue), CreateJsOnChangeObj);
+    auto jsChangeFunc =
+        AceType::MakeRefPtr<JsCitedEventFunction<PreviewText, 2>>(JSRef<JSFunc>::Cast(jsValue), CreateJsOnChangeObj);
     auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsChangeFunc)](
-        const std::string& val, PreviewText& previewText) {
+                        const std::string& val, PreviewText& previewText) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onChange");
         func->Execute(val, previewText);
@@ -961,7 +976,7 @@ void JSSearch::SetCustomKeyboard(const JSCallbackInfo& info)
         return;
     }
     bool supportAvoidance = false;
-    if (info.Length() == 2 && info[1]->IsObject()) {  //  2 here refers to the number of parameters
+    if (info.Length() == 2 && info[1]->IsObject()) { //  2 here refers to the number of parameters
         auto paramObject = JSRef<JSObject>::Cast(info[1]);
         auto isSupportAvoidance = paramObject->GetProperty("supportAvoidance");
         if (!isSupportAvoidance->IsNull() && isSupportAvoidance->IsBoolean()) {

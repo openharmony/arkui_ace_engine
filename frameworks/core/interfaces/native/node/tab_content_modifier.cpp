@@ -105,5 +105,14 @@ const ArkUITabContentModifier* GetTabContentModifier()
     };
     return &modifier;
 }
+
+const CJUITabContentModifier* GetCJUITabContentModifier()
+{
+    static const CJUITabContentModifier modifier = {
+        SetTabContentBuilder,
+        SetTabContentLabel
+    };
+    return &modifier;
+}
 }
 }

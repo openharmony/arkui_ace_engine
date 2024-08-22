@@ -1557,8 +1557,10 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest043, TestSize.Level1)
     child->MountToParent(parent);
 
     auto safeAreaManager = PipelineContext::GetCurrentContext()->safeAreaManager_;
+    // ExpandIntoKeyboard(): use page offset judge if expandIntoKeyboard
+    // no page node, return OffsetF(0, 0)
     safeAreaManager->UpdateKeyboardOffset(50.0f);
-    EXPECT_EQ(parent->ExpandIntoKeyboard(), OffsetF(0, -50.0f));
+    EXPECT_EQ(parent->ExpandIntoKeyboard(), OffsetF(0, 0));
 
     // parent already expanded
     child->ExpandIntoKeyboard();
@@ -1566,7 +1568,8 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest043, TestSize.Level1)
 
     layoutWrapper->layoutProperty_->UpdateSafeAreaExpandOpts({ SAFE_AREA_TYPE_NONE, SAFE_AREA_EDGE_ALL });
     child->ExpandIntoKeyboard();
-    EXPECT_EQ(child->ExpandIntoKeyboard(), OffsetF(0, -50.0f));
+    // no page node, return OffsetF(0, 0)
+    EXPECT_EQ(child->ExpandIntoKeyboard(), OffsetF(0, 0));
 }
 
 /**

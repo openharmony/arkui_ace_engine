@@ -15,12 +15,6 @@
 
 #include "base/resource/shared_image_manager.h"
 
-#include <cstdint>
-#include <type_traits>
-#include <utility>
-
-#include "base/log/log.h"
-#include "base/thread/cancelable_callback.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace {
@@ -98,9 +92,9 @@ void SharedImageManager::AddSharedImage(const std::string& name, SharedImage&& s
                 auto sharedImageManager = wp.Upgrade();
                 CHECK_NULL_VOID(sharedImageManager);
                 size_t dataSize = 0;
-                auto sharedImageMap = sharedImageManager->GetSharedImageMap();
                 {
                     std::lock_guard<std::mutex> lockImageMap(sharedImageManager->sharedImageMapMutex_);
+                    auto sharedImageMap = sharedImageManager->GetSharedImageMap();
                     auto imageDataIter = sharedImageMap.find(name);
                     if (imageDataIter == sharedImageMap.end()) {
                         LOGW("fail to find data of %{public}s in sharedImageMap, stop UpdateData", name.c_str());

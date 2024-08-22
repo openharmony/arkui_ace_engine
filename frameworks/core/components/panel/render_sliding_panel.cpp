@@ -15,21 +15,11 @@
 
 #include "core/components/panel/render_sliding_panel.h"
 
-#include "base/json/json_util.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
-#include "core/animation/curve.h"
-#include "core/animation/curves.h"
-#include "core/animation/keyframe.h"
-#include "core/animation/keyframe_animation.h"
 #include "core/animation/spring_animation.h"
 #include "core/components/common/layout/grid_system_manager.h"
-#include "core/components/drag_bar/render_drag_bar.h"
 #include "core/components/panel/sliding_events.h"
-#include "core/components/panel/sliding_panel_component.h"
-#include "core/components/root/render_root.h"
-#include "core/components/stack/stack_element.h"
-#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 namespace {

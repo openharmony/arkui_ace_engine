@@ -46,6 +46,8 @@ public:
         const std::string& abcPath, const std::string& entryPoint, void* runtime) override;
     void InitializeIsolatedComponent(const RefPtr<NG::FrameNode>& frameNode,
         const RefPtr<OHOS::Ace::WantWrap>& wantWrap, void* runtime) override;
+    void SetPlatformOnError(std::function<void(
+        int32_t code, const std::string& name, const std::string& message)>&& onError) override;
     void SetAdaptiveWidth(bool state) override;
     void SetAdaptiveHeight(bool state) override;
 
@@ -61,8 +63,6 @@ public:
     void SetOnError(
         std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError,
         NG::SessionType sessionType = NG::SessionType::UI_EXTENSION_ABILITY) override;
-    void SetPlatformOnError(std::function<void(
-        int32_t code, const std::string& name, const std::string& message)>&& onError) override;
 
 private:
     void CreateSecurityUIExtension(const UIExtensionConfig& config);

@@ -708,7 +708,10 @@ void CJPageRouterNG::FlushReload()
 {
     for (const auto& viewId : viewStack_) {
         auto view = FFI::FFIData::GetData<NativeView>(viewId);
-        view->FlushReload();
+        if (view == nullptr) {
+            continue;
+        }
+        view->MarkNeedUpdate();
     }
 }
 } // namespace OHOS::Ace::Framework

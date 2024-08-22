@@ -199,5 +199,16 @@ const ArkUIMarqueeModifier* GetMarqueeModifier()
         SetMarqueeOnBounce, ResetMarqueeOnBounce, SetMarqueeOnFinish, ResetMarqueeOnFinish };
     return &modifier;
 }
+
+const CJUIMarqueeModifier* GetCJUIMarqueeModifier()
+{
+    static const CJUIMarqueeModifier modifier = {
+        SetMarqueeFontSize, ResetMarqueeFontSize, SetMarqueeFontColor,
+        ResetMarqueeFontColor, SetMarqueeAllowScale, ResetMarqueeAllowScale, SetMarqueeFontWeight,
+        ResetMarqueeFontWeight, SetMarqueeFontFamily, ResetMarqueeFontFamily, SetMarqueeUpdateStrategy,
+        ResetMarqueeUpdateStrategy, SetMarqueeOnStart, ResetMarqueeOnStart,
+        SetMarqueeOnBounce, ResetMarqueeOnBounce, SetMarqueeOnFinish, ResetMarqueeOnFinish };
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

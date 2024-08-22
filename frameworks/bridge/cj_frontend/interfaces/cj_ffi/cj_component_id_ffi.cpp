@@ -16,10 +16,7 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_component_id_ffi.h"
 
-#include "core/common/container_scope.h"
-#include "core/common/container.h"
 #include "core/components_ng/base/inspector.h"
-#include "core/components_v2/inspector/inspector.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
