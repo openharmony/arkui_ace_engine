@@ -71,6 +71,8 @@ public:
     RefPtr<FrameNode> GetFrameNode(int32_t index) override;
     void InitDragManager(const RefPtr<UINode>& childNode);
     void InitAllChildrenDragManager(bool init);
+    void MappingChildWithId(std::unordered_set<std::string>& oldIdsSet, std::list<RefPtr<UINode>>& additionalChildComps,
+        std::map<std::string, RefPtr<UINode>>& oldNodeByIdMap);
 private:
     std::list<std::string> ids_;
 
