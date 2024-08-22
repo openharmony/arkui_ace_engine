@@ -705,6 +705,7 @@ private:
     void OrderCurrentDateByYearMonthDayColumn(
         RefPtr<FrameNode>& stackYear, RefPtr<FrameNode>& stackMonth, RefPtr<FrameNode>& stackDay) const;
     void FillSolarYearOptions(const PickerDate& current, RefPtr<FrameNode>& yearColumn);
+    void UpdateTitleTextColor(const RefPtr<FrameNode>& buttonTitleNode, const RefPtr<PickerTheme>& pickerTheme);
     void FillLunarMonthDaysOptions(const LunarDate& current, RefPtr<FrameNode>& monthDaysColumn);
     void AdjustSolarStartEndDate();
     void AdjustLunarStartEndDate();
