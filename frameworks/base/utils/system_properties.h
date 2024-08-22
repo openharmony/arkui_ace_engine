@@ -38,6 +38,13 @@ enum class ResolutionType : int32_t {
     RESOLUTION_XXXHDPI = 640,
 };
 
+enum class FoldScreenType: int32_t {
+    UNKNOWN = 0,
+    BIG_FOLDER = 1,
+    SMALL_FOLDER = 2,
+    OUTER_FOLDER = 3,
+};
+
 constexpr int32_t MCC_UNDEFINED = 0;
 constexpr int32_t MNC_UNDEFINED = 0;
 
@@ -70,6 +77,11 @@ public:
      * Init device type according to system property.
      */
     static void InitDeviceTypeBySystemProperty();
+
+    /**
+     * Init fold screen type according to system property.
+     */
+    static void InitFoldScreenTypeBySystemProperty();
 
     /*
      * Get type of current device.
@@ -548,6 +560,8 @@ public:
 
     static float GetDragStartPanDistanceThreshold();
 
+    static bool IsSmallFoldProduct();
+
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;
@@ -615,6 +629,7 @@ private:
     static std::pair<float, float> brightUpPercent_;
     static float dragStartDampingRatio_;
     static float dragStartPanDisThreshold_;
+    static FoldScreenType foldScreenType_;
 };
 
 } // namespace OHOS::Ace

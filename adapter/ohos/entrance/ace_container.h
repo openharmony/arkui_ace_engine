@@ -285,14 +285,6 @@ public:
         return static_cast<Orientation>(static_cast<uint32_t>(dmOrientation));
     }
 
-    RefPtr<DisplayInfo> GetDisplayInfo() override;
-
-    void InitIsFoldable() override;
-
-    bool IsFoldable() const override;
-
-    FoldStatus GetCurrentFoldStatus() override;
-
     void SetHapPath(const std::string& hapPath);
 
     void Dispatch(
@@ -704,7 +696,6 @@ private:
     RefPtr<PlatformResRegister> resRegister_;
     RefPtr<PipelineBase> pipelineContext_;
     RefPtr<Frontend> frontend_;
-    RefPtr<DisplayInfo> displayInfo_ = MakeRefPtr<DisplayInfo>();
     std::unordered_map<int64_t, WeakPtr<Frontend>> cardFrontendMap_;
     std::unordered_map<int64_t, WeakPtr<PipelineBase>> cardPipelineMap_;
 

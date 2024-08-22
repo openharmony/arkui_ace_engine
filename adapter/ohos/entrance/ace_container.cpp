@@ -2798,51 +2798,6 @@ void AceContainer::GetNamesOfSharedImage(std::vector<std::string>& picNameArray)
     }
 }
 
-RefPtr<DisplayInfo> AceContainer::GetDisplayInfo()
-{
-    auto displayManager = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
-    CHECK_NULL_RETURN(displayManager, nullptr);
-    auto dmRotation = displayManager->GetRotation();
-    auto isFoldable = Rosen::DisplayManager::GetInstance().IsFoldable();
-    auto dmFoldStatus = Rosen::DisplayManager::GetInstance().GetFoldStatus();
-    std::vector<Rect> rects;
-    auto foldCreaseRegion = Rosen::DisplayManager::GetInstance().GetCurrentFoldCreaseRegion();
-    if (foldCreaseRegion) {
-        auto creaseRects = foldCreaseRegion->GetCreaseRects();
-        if (!creaseRects.empty()) {
-            for (const auto& item : creaseRects) {
-                Rect rect;
-                rect.SetRect(item.posX_, item.posY_, item.width_, item.height_);
-                rects.insert(rects.end(), rect);
-            }
-        }
-    }
-    displayInfo_->SetDisplayId(displayManager->GetId());
-    displayInfo_->SetIsFoldable(isFoldable);
-    displayInfo_->SetFoldStatus(static_cast<FoldStatus>(static_cast<uint32_t>(dmFoldStatus)));
-    displayInfo_->SetRotation(static_cast<Rotation>(static_cast<uint32_t>(dmRotation)));
-    displayInfo_->SetCurrentFoldCreaseRegion(rects);
-    return displayInfo_;
-}
-
-void AceContainer::InitIsFoldable()
-{
-    auto isFoldable = Rosen::DisplayManager::GetInstance().IsFoldable();
-    displayInfo_->SetIsFoldable(isFoldable);
-}
-
-bool AceContainer::IsFoldable() const
-{
-    return displayInfo_->GetIsFoldable();
-}
-
-FoldStatus AceContainer::GetCurrentFoldStatus()
-{
-    auto dmFoldStatus = Rosen::DisplayManager::GetInstance().GetFoldStatus();
-    displayInfo_->SetFoldStatus(static_cast<FoldStatus>(static_cast<uint32_t>(dmFoldStatus)));
-    return displayInfo_->GetFoldStatus();
-}
-
 void AceContainer::UpdateSharedImage(
     std::vector<std::string>& picNameArray, std::vector<int32_t>& byteLenArray, std::vector<int>& fileDescriptorArray)
 {

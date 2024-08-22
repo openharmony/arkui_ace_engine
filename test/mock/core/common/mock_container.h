@@ -38,10 +38,16 @@ public:
         return taskExecutor_;
     }
 
+    RefPtr<DisplayInfo> GetMockDisplayInfo()
+    {
+        return displayInfo_;
+    }
+
     static void SetUp();
     static void TearDown();
     static RefPtr<MockContainer> Current();
     static RefPtr<MockContainer> GetContainer(int32_t containerId);
+    void SetDisplayInfo(RefPtr<DisplayInfo> displayInfo);
 
     void SetIsFormRender(bool isFormRender) override
     {
@@ -92,7 +98,6 @@ public:
     MOCK_METHOD(void, DumpHeapSnapshot, (bool isPrivate), (override));
     MOCK_METHOD(void, TriggerGarbageCollection, (), (override));
     MOCK_METHOD(bool, WindowIsShow, (), (const, override));
-    MOCK_METHOD(RefPtr<DisplayInfo>, GetDisplayInfo, (), (override));
     static RefPtr<MockContainer> container_;
 
 private:
@@ -101,6 +106,7 @@ private:
     bool isFormRender_ = false;
     bool isUIExtensionWindow_ = false;
     bool isScenceBoardWindow_ = false;
+    RefPtr<DisplayInfo> displayInfo_ = MakeRefPtr<DisplayInfo>();
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_TEST_MOCK_CORE_COMMON_MOCK_CONTAINER_H
