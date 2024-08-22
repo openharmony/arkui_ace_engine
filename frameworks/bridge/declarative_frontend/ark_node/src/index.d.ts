@@ -103,6 +103,7 @@ declare class UINodeRegisterProxy {
   private obtainDeletedElmtIds(): void;
   public static unregisterElmtIdsFromIViews(): void;
   public static obtainDeletedElmtIds(): void;
+  public static unregisterRemovedElmtsFromViewPUs(removedElements: Array<number>): void;
 }
 
 declare interface RegisterParams {
