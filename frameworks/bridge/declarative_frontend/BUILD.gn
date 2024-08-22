@@ -58,6 +58,12 @@ template("declarative_frontend") {
     }
 
     deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+    if (is_arkui_x) {
+      deps += [
+        "//arkcompiler/ets_runtime:libark_jsruntime_static",
+        "//foundation/arkui/napi:ace_napi",
+      ]
+    }
     external_deps = [
       "ets_runtime:libark_jsruntime",
       "napi:ace_napi",
@@ -1031,6 +1037,7 @@ template("declarative_js_engine_ng") {
         deps += [ "$ace_root/frameworks/core:ace_container_scope" ]
       }
     }
+    include_dirs = []
 
     # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
     if (is_arkui_x) {
@@ -1042,8 +1049,12 @@ template("declarative_js_engine_ng") {
         "jsview/js_sec_button_base.cpp",
         "jsview/menu/js_context_menu.cpp",
       ]
+      include_dirs += [ "//commonlibrary/c_utils/base/include" ]
       configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
-      deps += [ "$ark_ets_path:libark_jsruntime_static" ]
+      deps += [
+        "$ark_ets_path:libark_jsruntime_static",
+        "//foundation/graphic/graphic_2d/interfaces/kits/napi/graphic/drawing:drawing_napi_impl",
+      ]
       if (defined(config.pixel_map_support) && config.pixel_map_support) {
         configs += [ "//foundation/multimedia/image_framework/interfaces/innerkits:image_external_config" ]
       }
