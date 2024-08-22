@@ -1408,7 +1408,7 @@ HWTEST_F(ToggleTestNg, TogglePatternTest0025, TestSize.Level1)
 
 /**
  * @tc.name: TogglePatternTest0026
- * @tc.desc: Test HandleBorderStyle() and HandleShadowStyle().
+ * @tc.desc: Test HandleBorderAndShadow.
  * @tc.type: FUNC
  */
 HWTEST_F(ToggleTestNg, TogglePatternTest0026, TestSize.Level1)
@@ -1448,8 +1448,7 @@ HWTEST_F(ToggleTestNg, TogglePatternTest0026, TestSize.Level1)
     /**
      * @tc.steps: step5. visit method HandleBorderStyle() and HandleShadowStyle().
      */
-    togglePattern->HandleBorderStyle(togglePaintProperty, renderContext, toggleButtonTheme);
-    togglePattern->HandleShadowStyle(togglePaintProperty, renderContext, toggleButtonTheme);
+    togglePattern->HandleBorderAndShadow();
     /**
      * @tc.steps: step6. Obtain borderWidth and borderColor from theme and assign them to Property(Unchecked).
      */
@@ -1472,8 +1471,7 @@ HWTEST_F(ToggleTestNg, TogglePatternTest0026, TestSize.Level1)
     ShadowStyle normalShadowStyle = static_cast<ShadowStyle>(toggleButtonTheme->GetShadowNormal());
     Shadow normalShadow = Shadow::CreateShadow(normalShadowStyle);
 
-    togglePattern->HandleShadowStyle(togglePaintProperty, renderContext, toggleButtonTheme);
-    togglePattern->HandleBorderStyle(togglePaintProperty, renderContext, toggleButtonTheme);
+    togglePattern->HandleBorderAndShadow();
     /**
      * @tc.steps: step9. expect toggle and shadow border style is consistent with toggleTheme(Checked).
      */
@@ -1525,8 +1523,7 @@ HWTEST_F(ToggleTestNg, TogglePatternTest0027, TestSize.Level1)
     /**
      * @tc.steps: step5. visit HandleFocusEvent();
      */
-    togglePattern->HandleFocusEvent(renderContext, toggleButtonTheme, textNode,
-		textLayoutProperty, togglePaintProperty);
+    togglePattern->SetFocusButtonStyle(textNode, textLayoutProperty);
     Shadow focusShadow = Shadow::CreateShadow(static_cast<ShadowStyle>(toggleButtonTheme->GetShadowFocus()));
     EXPECT_EQ(focusShadow, graphics->GetBackShadowValue());
     EXPECT_EQ(toggleButtonTheme->GetBackgroundColorFocusChecked(), renderContext->GetBackgroundColor());
@@ -1537,8 +1534,7 @@ HWTEST_F(ToggleTestNg, TogglePatternTest0027, TestSize.Level1)
     EXPECT_TRUE(!graphics->HasBackShadow() ||
 		graphics->GetBackShadowValue() == Shadow::CreateShadow(ShadowStyle::None));
     EXPECT_TRUE(renderContext->GetBackgroundColor() == toggleButtonTheme->GetBackgroundColor());
-    togglePattern->HandleFocusEvent(renderContext, toggleButtonTheme, textNode,
-		textLayoutProperty, togglePaintProperty);
+    togglePattern->SetFocusButtonStyle(textNode, textLayoutProperty);
     EXPECT_EQ(focusShadow, graphics->GetBackShadowValue());
     EXPECT_EQ(renderContext->GetBackgroundColor(), toggleButtonTheme->GetBackgroundColorFocusUnchecked());
 }

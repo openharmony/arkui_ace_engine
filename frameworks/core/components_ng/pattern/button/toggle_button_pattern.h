@@ -72,6 +72,11 @@ public:
     {
         return nodeId_;
     }
+    
+    void SetIsFocus(bool focus)
+    {
+        isFocus_ = focus;
+    }
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
     void OnClick();
@@ -88,12 +93,8 @@ private:
     void InitClickEvent();
     void InitButtonAndText();
     void InitOnKeyEvent();
-    void HandleBlurEvent(RefPtr<RenderContext> renderContext, RefPtr<ToggleTheme> toggleTheme,
-        RefPtr<FrameNode> textNode, RefPtr<TextLayoutProperty> textLayoutProperty,
-        RefPtr<ToggleButtonPaintProperty> paintProperty);
-    void HandleFocusEvent(RefPtr<RenderContext> renderContext, RefPtr<ToggleTheme> toggleTheme,
-        RefPtr<FrameNode> textNode, RefPtr<TextLayoutProperty> textLayoutProperty,
-        RefPtr<ToggleButtonPaintProperty> paintProperty);
+    void HandleBlurEvent();
+    void HandleFocusEvent();
     bool OnKeyEvent(const KeyEvent& event);
     void SetAccessibilityAction();
     void UpdateSelectStatus(bool isSelected);
@@ -103,21 +104,25 @@ private:
     void FireBuilder();
     void HandleOnOffStyle(bool isOnToOff, bool isFocus);
     void HandleOverlayStyle();
-    void HandleShadowStyle(RefPtr<ToggleButtonPaintProperty>& paintProperty,
-        RefPtr<RenderContext>& renderContext, RefPtr<ToggleTheme>& toggleTheme);
-    void HandleBorderStyle(RefPtr<ToggleButtonPaintProperty>& paintProperty,
-        RefPtr<RenderContext>& renderContext, RefPtr<ToggleTheme>& toggleTheme);
-    void HandleFocusStyle(RefPtr<ToggleButtonPaintProperty>& paintProperty,
-        RefPtr<RenderContext>& renderContext, RefPtr<ToggleTheme>& toggleTheme);
+    void HandleBorderAndShadow();
+    void HandleFocusStyle();
+    void UpdateButtonStyle();
+    void SetBlurButtonStyle(RefPtr<FrameNode>& textNode, RefPtr<TextLayoutProperty>& textLayoutProperty);
+    void SetFocusButtonStyle(RefPtr<FrameNode>& textNode, RefPtr<TextLayoutProperty>& textLayoutProperty);
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
     
     RefPtr<FrameNode> BuildContentModifierNode();
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
     std::optional<SwitchMakeCallback> toggleMakeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
-    void SetIsFocus(bool isFocus);
     RefPtr<TouchEventImpl> touchListener_;
     int32_t nodeId_ = -1;
 
     RefPtr<ClickEvent> clickListener_;
+    RefPtr<ToggleButtonPaintProperty> paintProperty_;
+    RefPtr<RenderContext> renderContext_;
+    RefPtr<ToggleTheme> toggleTheme_;
     std::optional<bool> isOn_;
     Color checkedColor_;
     Color unCheckedColor_;
