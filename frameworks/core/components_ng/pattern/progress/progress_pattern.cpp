@@ -25,6 +25,9 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr float PROGRESS_DEFAULT_VALUE = 0.0f;
+}
 bool ProgressPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
@@ -75,6 +78,11 @@ void ProgressPattern::InitAnimatableProperty(ProgressAnimatableProperty& progres
     auto strokeRadius = static_cast<float>(
         paintProperty->GetStrokeRadiusValue(Dimension(strokeWidth_ / 2, DimensionUnit::VP)).ConvertToPx());
     strokeRadius = std::min(strokeWidth_ / 2, strokeRadius);
+    auto smoothEffect = paintProperty->GetEnableSmoothEffectValue(true);
+    if (!smoothEffect) {
+        auto value = paintProperty->GetValueValue(PROGRESS_DEFAULT_VALUE);
+        progressAnimatableProperty.value = value;
+    }
     progressAnimatableProperty.color = color;
     progressAnimatableProperty.bgColor = bgColor;
     progressAnimatableProperty.borderColor = borderColor;
