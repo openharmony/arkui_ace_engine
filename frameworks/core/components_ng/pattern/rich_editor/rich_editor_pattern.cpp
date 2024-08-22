@@ -75,8 +75,8 @@
 #include "core/pipeline/base/element_register.h"
 #include "core/text/text_emoji_processor.h"
 
-#if not defined(ACE_UNITTEST)
-#if defined(ENABLE_STANDARD_INPUT)
+#ifndef ACE_UNITTEST
+#ifdef ENABLE_STANDARD_INPUT
 #include "commonlibrary/c_utils/base/include/refbase.h"
 
 #include "core/components_ng/pattern/text_field/on_text_changed_listener_impl.h"
