@@ -671,9 +671,7 @@ void ScrollBarPattern::HandleDragStart(const GestureEvent& info)
 {
     StopMotion();
     SetDragStartPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
-    TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "outer scrollBar drag start, localLocation: %{public}s, "
-        "globalLocation: %{public}s",
-        info.GetLocalLocation().ToString().c_str(), info.GetGlobalLocation().ToString().c_str());
+    TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "outer scrollBar drag start");
     ACE_SCOPED_TRACE("outer scrollBar HandleDragStart");
     if (scrollPositionCallback_) {
         if (scrollBarProxy_) {
@@ -703,9 +701,7 @@ void ScrollBarPattern::HandleDragUpdate(const GestureEvent& info)
 void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
 {
     auto velocity = IsReverse() ? -info.GetMainVelocity() : info.GetMainVelocity();
-    TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "outer scrollBar drag end, position is %{public}f and %{public}f, "
-        "velocity is %{public}f",
-        info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(), velocity);
+    TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "outer scrollBar drag end, velocity is %{public}f", velocity);
     ACE_SCOPED_TRACE("outer scrollBar HandleDragEnd velocity:%f", velocity);
     SetDragEndPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
     if (NearZero(velocity) || info.GetInputEventType() == InputEventType::AXIS) {
