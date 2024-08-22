@@ -87,18 +87,15 @@ public:
         return paintRect_;
     }
 
-    void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> modifier) override
 #ifdef ENHANCED_ANIMATION
-        ;
-#else
-    {}
-#endif
+    void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> modifier) override;
+    void DetachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& modifier) override {}
 
     void CancelTranslateXYAnimation() override;
     OffsetF GetTranslateXYProperty() override;
     void UpdateTranslateInXY(const OffsetF& offset) override;
+#endif
 
-    void DetachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& modifier) override {}
 
     void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle)
     {
