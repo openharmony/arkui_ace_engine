@@ -1603,6 +1603,11 @@ void RichEditorPattern::SetTypingStyle(std::optional<struct UpdateSpanStyle> typ
     typingStyle_ = typingStyle;
     typingTextStyle_ = textStyle;
     presetParagraph_ = nullptr;
+    if (spans_.empty() || !previewTextRecord_.previewContent.empty()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 std::optional<struct UpdateSpanStyle> RichEditorPattern::GetTypingStyle()
