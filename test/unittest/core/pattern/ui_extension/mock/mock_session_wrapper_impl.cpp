@@ -248,4 +248,8 @@ int32_t SessionWrapperImpl::SendDataSync(const AAFwk::WantParams& wantParams, AA
 {
     return 1;
 }
+
+void SessionWrapperImpl::UpdateSessionViewportConfig()
+{
+}
 } // namespace OHOS::Ace::NG

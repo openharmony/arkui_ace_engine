@@ -170,23 +170,23 @@ public:
     void OnAccessibilityChildTreeDeregister();
     void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId);
     void OnAccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info);
-    void SetViewportCOnfigCHanged(bool ViewportConfigChanged)
+    void SetViewportConfigChanged(bool ViewportConfigChanged)
     {
         viewportConfigChanged_ = ViewportConfigChanged;
     }
-    bool IsViewportCOnfigCHanged()
+    bool IsViewportConfigChanged() const
     {
         return viewportConfigChanged_;
     }
-    bool IsForeground()
+    bool IsForeground() const
     {
         return state_ = AbilityState::FOREGROUND;
     }
-    void SetSessionViewportConofig(const SessionViewportConfig& config)
+    void SetSessionViewportConfig(const SessionViewportConfig& config)
     {
         sessionViewportConfig_ = config;
     }
-    const SessionViewoprtConfig& GetSessionViewportConfig()
+    const SessionViewoprtConfig& GetSessionViewportConfig() const
     {
         return sessionViewportConfig_;
     }
