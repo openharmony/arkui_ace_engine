@@ -33,6 +33,8 @@ ace_unittest("capi_all_modifiers_test") {
     "navigation_modifier_test.cpp",
     "navigator_modifier_test.cpp",
     "radio_modifier_test.cpp",
+    "search_modifier_resources_test.cpp",
+    "search_modifier_test.cpp",
     "select_modifier_test.cpp",
     "swiper_modifier_test.cpp",
     "swiper_modifier_test2.cpp",

@@ -139,7 +139,7 @@ void CaretStyleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto caretStyle = Converter::Convert<Converter::ArkCaretStyle>(*value);
+    auto caretStyle = Converter::Convert<Converter::CaretStyle>(*value);
     TextFieldModelNG::SetCaretColor(frameNode, caretStyle.color);
     resetNegative(caretStyle.width);
     resetPercent(caretStyle.width);

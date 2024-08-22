@@ -22,7 +22,7 @@
 #include <optional>
 #include <vector>
 #include <string>
-
+#include <sstream>
 #include "bridge/common/utils/utils.h"
 #include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension.h"
@@ -49,6 +49,10 @@ std::optional<int32_t> EnumToInt(const std::optional<T>& src)
 
 using StringArray = std::vector<std::string>;
 namespace Converter {
+    constexpr int32_t OFFSET_0 = 0;
+    constexpr int32_t OFFSET_1 = 1;
+    constexpr int32_t OFFSET_2 = 2;
+
      //Allow conversion for Ark_Xxx type to same Ark_Xxx type
     template<typename T>
     void AssignTo(T& dst, const T& src)
@@ -268,12 +272,6 @@ namespace Converter {
     }
 
     template<>
-    inline Ace::FontStyle Convert(const Ark_FontStyle& src)
-    {
-        return static_cast<Ace::FontStyle>(src);
-    }
-
-    template<>
     inline Dimension Convert(const Ark_String& src)
     {
         return Dimension::FromString(src.chars);
@@ -488,11 +486,11 @@ namespace Converter {
     }
 
     template<>
-    inline ArkCaretStyle Convert(const Ark_CaretStyle& src)
+    inline CaretStyle Convert(const Ark_CaretStyle& src)
     {
-        ArkCaretStyle caretStyle;
-        caretStyle.color = OptConvert<Color>(src.color);
-        caretStyle.width = OptConvert<Dimension>(src.width);
+        CaretStyle caretStyle;
+        caretStyle.color = OptConvert<Color> (src.color);
+        caretStyle.width = OptConvert<Dimension> (src.width);
         return caretStyle;
     }
 
@@ -534,10 +532,13 @@ namespace Converter {
     template<> void AssignCast(std::optional<TextAlign>& dst, const Ark_TextAlign& src);
     template<> void AssignCast(std::optional<TextInputAction>& dst, const Ark_EnterKeyType& src);
     template<> void AssignCast(std::optional<TextInputType>& dst, const Ark_TextAreaType& src);
+    template<> void AssignCast(std::optional<TextInputType>& dst, const Ark_SearchType& src);
     template<> void AssignCast(std::optional<TextDeleteDirection>& dst, const Ark_TextDeleteDirection& src);
     template<> void AssignCast(std::optional<CopyOptions>& dst, const Ark_CopyOptions& src);
     template<> void AssignCast(std::optional<TextContentType>& dst, const Ark_ContentType& src);
     template<> void AssignCast(std::optional<TextCase>& dst, const Ark_TextCase& src);
+    template<> void AssignCast(std::optional<OHOS::Ace::FontStyle>& dst, const Ark_FontStyle& src);
+    template<> void AssignCast(std::optional<CancelButtonStyle>& dst, const Ark_CancelButtonStyle& src);
 
     template<>
     inline ItemDragInfo Convert(const Ark_ItemDragInfo& src)

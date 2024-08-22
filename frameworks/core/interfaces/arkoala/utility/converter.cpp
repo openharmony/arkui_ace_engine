@@ -229,14 +229,11 @@ Font Convert(const Ark_Font& src)
         auto familiesResStr = OptConvert<UnionStringResource>(src.family);
         std::string familiesStr;
         if (familiesResStr) {
-            auto srcArkStr = std::get_if<Ark_String>(&familiesResStr.value());
-            if (srcArkStr != nullptr) {
-                auto srcStr = Converter::Convert<std::string>(*srcArkStr);
-                if (!srcStr.empty()) {
-                    familiesStr = srcStr;
-                } else {
-                    LOGE("ARKOALA SearchAttributeModifier.FonFamilyResource not implemented.");
-                }
+            if (auto srcArkStr = std::get_if<Ark_String>(&familiesResStr.value());
+                srcArkStr != nullptr) {
+                familiesStr = Converter::Convert<std::string>(*srcArkStr);
+            } else {
+                LOGE("ARKOALA SearchAttributeModifier.FonFamilyResource not implemented.");
             }
         }
         std::istringstream families(familiesStr);

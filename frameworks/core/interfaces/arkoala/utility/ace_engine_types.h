@@ -33,11 +33,10 @@ typedef std::tuple<
     // here it can be expanded by Family and Style data
 > FontMetaData;
 
-struct ArkCaretStyle {
+struct CaretStyle {
     std::optional<Dimension> width;
     std::optional<Color> color;
 };
-
 struct TextDecorationOptions {
     std::optional<TextDecoration> textDecoration;
     std::optional<Color> color;
