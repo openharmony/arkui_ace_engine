@@ -13,23 +13,32 @@
  * limitations under the License.
  */
 
-#include "arkoala_api_generated.h"
+#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/stack/stack_model_ng.h"
+#include "core/components/common/properties/alignment.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace StackInterfaceModifier {
+
 void SetStackOptionsImpl(Ark_NativePointer node,
                          const Opt_Type_StackInterface_setStackOptions_Arg0* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    StackModelNG::SetAlignment(frameNode, Converter::ConvertOrDefault(*value, Alignment::CENTER));
 }
 } // StackInterfaceModifier
 namespace StackAttributeModifier {
 void AlignContentImpl(Ark_NativePointer node,
                       Ark_Int32 value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    StackModelNG::SetAlignment(frameNode, Converter::ConvertOrDefault(value, Alignment::CENTER));
 }
 void PointLightImpl(Ark_NativePointer node,
                     const Ark_PointLightStyle* value)
 {
+    LOGE("Arkoala: Stack.PointLightImpl - method not implemented");
 }
 } // StackAttributeModifier
 const GENERATED_ArkUIStackModifier* GetStackModifier()

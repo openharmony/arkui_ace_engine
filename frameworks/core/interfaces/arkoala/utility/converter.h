@@ -46,6 +46,12 @@ namespace OHOS::Ace::NG::Converter {
         dst = Convert<T, P>(src);
     }
 
+    template<>
+    inline void AssignCast(std::optional<Alignment>& dst, const int32_t& value)
+    {
+        dst = Alignment::ParseAlignment(value);
+    }
+
     template<typename T, typename P>
     void AssignLiteralTo(std::optional<T>& dst, const P& src)
     {
@@ -368,6 +374,7 @@ namespace OHOS::Ace::NG::Converter {
         PaddingProperty padding;
         return padding;
     }
+    
     struct ImageResource {
         uint32_t type;
         std::string bundleName;
