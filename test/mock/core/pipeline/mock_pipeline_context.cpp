@@ -217,6 +217,8 @@ void PipelineContext::OnAccessibilityHoverEvent(const TouchEvent& point, const R
 
 void PipelineContext::OnPenHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) {}
 
+void PipelineContext::HandlePenHoverOut(const TouchEvent& point) {}
+
 void PipelineContext::OnMouseEvent(const MouseEvent& event) {}
 
 void PipelineContext::FlushTouchEvents() {}

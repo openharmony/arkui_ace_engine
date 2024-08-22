@@ -172,6 +172,8 @@ public:
 
     virtual void OnPenHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) {}
 
+    virtual void HandlePenHoverOut(const TouchEvent& point) {}
+
     // Called by container when key event received.
     // if return false, then this event needs platform to handle it.
     virtual bool OnKeyEvent(const KeyEvent& event) = 0;

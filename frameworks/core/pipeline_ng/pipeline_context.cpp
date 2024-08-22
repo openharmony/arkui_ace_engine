@@ -2031,6 +2031,8 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
 {
     CHECK_RUN_ON(UI);
 
+    HandlePenHoverOut(point);
+
 #ifdef UICAST_COMPONENT_SUPPORTED
     do {
         auto container = Container::Current();
@@ -2698,6 +2700,21 @@ void PipelineContext::OnPenHoverEvent(const TouchEvent& point, const RefPtr<NG::
     eventManager_->PenHoverTest(scaleEvent, targerNode, touchRestrict);
     eventManager_->DispatchPenHoverEventNG(scaleEvent);
     RequestFrame();
+}
+
+void PipelineContext::HandlePenHoverOut(const TouchEvent& point)
+{
+    if (point.sourceTool != SourceTool::PEN || point.type != TouchType::DOWN || point.force <= 0.0f) {
+        return;
+    }
+
+    CHECK_RUN_ON(UI);
+    auto scaleEvent = point.CreateScalePoint(viewScale_);
+    scaleEvent.type = TouchType::PROXIMITY_OUT;
+
+    TouchTestResult testResult;
+    eventManager_->UpdatePenHoverNode(scaleEvent, testResult);
+    eventManager_->DispatchPenHoverEventNG(scaleEvent);
 }
 
 void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNode>& node)
