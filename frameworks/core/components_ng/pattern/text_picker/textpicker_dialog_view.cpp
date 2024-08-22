@@ -496,7 +496,11 @@ void TextPickerDialogView::UpdateButtonConfirmLayoutProperty(const RefPtr<FrameN
     CHECK_NULL_VOID(buttonConfirmLayoutProperty);
     buttonConfirmLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.ok"));
     buttonConfirmLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    buttonConfirmLayoutProperty->UpdateType(ButtonType::CAPSULE);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        buttonConfirmLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
+    } else {
+        buttonConfirmLayoutProperty->UpdateType(ButtonType::CAPSULE);
+    }
     buttonConfirmLayoutProperty->UpdateFlexShrink(1.0);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -844,7 +848,11 @@ void TextPickerDialogView::UpdateButtonCancelLayoutProperty(
     auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
     buttonCancelLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.cancel"));
     buttonCancelLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    buttonCancelLayoutProperty->UpdateType(ButtonType::CAPSULE);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        buttonCancelLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
+    } else {
+        buttonCancelLayoutProperty->UpdateType(ButtonType::CAPSULE);
+    }
     buttonCancelLayoutProperty->UpdateFlexShrink(1.0);
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         buttonCancelLayoutProperty->UpdateUserDefinedIdealSize(
@@ -867,7 +875,11 @@ void TextPickerDialogView::UpdateButtonForwardLayoutProperty(
     auto buttonForwardLayoutProperty = buttonForwardNode->GetLayoutProperty<ButtonLayoutProperty>();
     buttonForwardLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.next"));
     buttonForwardLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    buttonForwardLayoutProperty->UpdateType(ButtonType::CAPSULE);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        buttonForwardLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
+    } else {
+        buttonForwardLayoutProperty->UpdateType(ButtonType::CAPSULE);
+    }
     buttonForwardLayoutProperty->UpdateFlexShrink(1.0);
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         buttonForwardLayoutProperty->UpdateUserDefinedIdealSize(
@@ -891,7 +903,11 @@ void TextPickerDialogView::UpdateButtonBackwardLayoutProperty(
     auto buttonBackwardLayoutProperty = buttonBackwardNode->GetLayoutProperty<ButtonLayoutProperty>();
     buttonBackwardLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.prev"));
     buttonBackwardLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    buttonBackwardLayoutProperty->UpdateType(ButtonType::CAPSULE);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        buttonBackwardLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
+    } else {
+        buttonBackwardLayoutProperty->UpdateType(ButtonType::CAPSULE);
+    }
     buttonBackwardLayoutProperty->UpdateFlexShrink(1.0);
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         buttonBackwardLayoutProperty->UpdateUserDefinedIdealSize(

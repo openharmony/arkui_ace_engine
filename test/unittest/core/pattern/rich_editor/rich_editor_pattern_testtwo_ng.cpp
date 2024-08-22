@@ -756,4 +756,351 @@ HWTEST_F(RichEditorPatternTestTwoNg, RefreshSelectOverlay002, TestSize.Level1)
     richEditorPattern->RefreshSelectOverlay(true, true);
     EXPECT_NE(proxy, nullptr);
 }
+
+/**
+ * @tc.name: HideMenu001
+ * @tc.desc: test HideMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, HideMenu001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->HideMenu();
+    EXPECT_NE(richEditorPattern->selectOverlay_, nullptr);
+}
+
+/**
+ * @tc.name: ResetKeyboardIfNeed001
+ * @tc.desc: test ResetKeyboardIfNeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, ResetKeyboardIfNeed001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto focusHub = richEditorPattern->GetFocusHub();
+    EXPECT_NE(focusHub, nullptr);
+
+    focusHub->currentFocus_ = true;
+    richEditorPattern->action_ = TextInputAction::UNSPECIFIED;
+    richEditorPattern->ResetKeyboardIfNeed();
+    EXPECT_NE(richEditorPattern->action_, TextInputAction::UNSPECIFIED);
+}
+
+/**
+ * @tc.name: ResetKeyboardIfNeed002
+ * @tc.desc: test ResetKeyboardIfNeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, ResetKeyboardIfNeed002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto focusHub = richEditorPattern->GetFocusHub();
+    EXPECT_NE(focusHub, nullptr);
+
+    richEditorPattern->imeShown_ = false;
+    richEditorPattern->isCustomKeyboardAttached_ = true;
+    focusHub->currentFocus_ = false;
+    richEditorPattern->action_ = TextInputAction::SEARCH;
+    richEditorPattern->ResetKeyboardIfNeed();
+    EXPECT_NE(richEditorPattern->action_, TextInputAction::SEARCH);
+}
+
+/**
+ * @tc.name: ResetKeyboardIfNeed003
+ * @tc.desc: test ResetKeyboardIfNeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, ResetKeyboardIfNeed003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto focusHub = richEditorPattern->GetFocusHub();
+    EXPECT_NE(focusHub, nullptr);
+
+    richEditorPattern->imeShown_ = false;
+    richEditorPattern->isCustomKeyboardAttached_ = false;
+    focusHub->currentFocus_ = true;
+    richEditorPattern->action_ = TextInputAction::SEARCH;
+    richEditorPattern->ResetKeyboardIfNeed();
+    EXPECT_NE(richEditorPattern->action_, TextInputAction::SEARCH);
+}
+
+/**
+ * @tc.name: ScheduleCaretTwinkling001
+ * @tc.desc: test ScheduleCaretTwinkling
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, ScheduleCaretTwinkling001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    richEditorPattern->isCursorAlwaysDisplayed_ = true;
+    richEditorPattern->ScheduleCaretTwinkling();
+    EXPECT_NE(context->GetCurrentContext(), nullptr);
+}
+
+/**
+ * @tc.name: ScheduleCaretTwinkling002
+ * @tc.desc: test ScheduleCaretTwinkling
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, ScheduleCaretTwinkling002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = nullptr;
+    richEditorPattern->ScheduleCaretTwinkling();
+    EXPECT_EQ(context->GetTaskExecutor(), nullptr);
+}
+
+/**
+ * @tc.name: DumpInfo001
+ * @tc.desc: test DumpInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, DumpInfo001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto richEditorOverlay = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
+    richEditorOverlay->caretHeight_->Set(0.0f);
+    richEditorPattern->DumpInfo();
+    richEditorOverlay->caretHeight_->Set(1.0f);
+    richEditorPattern->DumpInfo();
+    EXPECT_NE(richEditorPattern->selectOverlay_->HasRenderTransform(), true);
+}
+
+/**
+ * @tc.name: SetSelection001
+ * @tc.desc: test SetSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, SetSelection001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto focusHub = richEditorPattern->GetFocusHub();
+    EXPECT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = true;
+
+    richEditorPattern->previewTextRecord_.previewContent = "test";
+    richEditorPattern->previewTextRecord_.isPreviewTextInputting = true;
+    richEditorPattern->previewTextRecord_.startOffset = 1;
+    richEditorPattern->previewTextRecord_.endOffset = 10;
+
+    int32_t start = 1;
+    int32_t end = 3;
+    SelectionOptions options;
+    options.menuPolicy = MenuPolicy::DEFAULT;
+    richEditorPattern->SetSelection(start, end, options, true);
+    EXPECT_NE(richEditorPattern->HasFocus(), false);
+}
+
+/**
+ * @tc.name: SetSelection002
+ * @tc.desc: test SetSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, SetSelection002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto focusHub = richEditorPattern->GetFocusHub();
+    EXPECT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = true;
+
+    richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AccessibilityManager::MakeRefPtr<MutableSpanString>("test123456");
+    int32_t start = -1;
+    int32_t end = -1;
+    SelectionOptions options;
+    options.menuPolicy = MenuPolicy::DEFAULT;
+    richEditorPattern->SetSelection(start, end, options, true);
+    EXPECT_NE(richEditorPattern->HasFocus(), false);
+}
+
+/**
+ * @tc.name: SetSelection003
+ * @tc.desc: test SetSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, SetSelection003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto focusHub = richEditorPattern->GetFocusHub();
+    EXPECT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = true;
+
+    richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AccessibilityManager::MakeRefPtr<MutableSpanString>("test123456");
+    richEditorPattern->textSelector_ = TextSelector(0, 6);
+
+    int32_t start = 1;
+    int32_t end = 5;
+    SelectionOptions options;
+    options.menuPolicy = MenuPolicy::DEFAULT;
+    richEditorPattern->SetSelection(start, end, options, true);
+    EXPECT_NE(richEditorPattern->HasFocus(), false);
+}
+
+/**
+ * @tc.name: SetSelection004
+ * @tc.desc: test SetSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, SetSelection004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto focusHub = richEditorPattern->GetFocusHub();
+    EXPECT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = true;
+
+    richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AccessibilityManager::MakeRefPtr<MutableSpanString>("test123456");
+    richEditorPattern->textSelector_ = TextSelector(2, 4);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    pipeline->themeManager_ = theme;
+
+    richEditorPattern->customKeyboardBuilder_ = []() {};
+    richEditorPattern->DumpInfo();
+    richEditorPattern->isTextChange_ = false;
+    EXPECT_EQ(richEditorPattern->IsShowHandle(), true);
+
+    int32_t start = 2;
+    int32_t end = 5;
+    SelectionOptions options;
+    options.menuPolicy = MenuPolicy::DEFAULT;
+    richEditorPattern->SetSelection(start, end, options, true);
+    EXPECT_NE(richEditorPattern->HasFocus(), false);
+}
+
+/**
+ * @tc.name: SetSelection005
+ * @tc.desc: test SetSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, SetSelection005, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto focusHub = richEditorPattern->GetFocusHub();
+    EXPECT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = true;
+
+    richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AccessibilityManager::MakeRefPtr<MutableSpanString>("test123456");
+
+    richEditorPattern->textSelector_ = TextSelector(2, 4);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    pipeline->themeManager_ = theme;
+
+    richEditorPattern->customKeyboardBuilder_ = []() {};
+    richEditorPattern->DumpInfo();
+    richEditorPattern->isTextChange_ = false;
+    EXPECT_EQ(richEditorPattern->IsShowHandle(), true);
+
+    int32_t start = 2;
+    int32_t end = 5;
+    SelectionOptions options;
+    options.menuPolicy = MenuPolicy::HIDE;
+    richEditorPattern->SetSelection(start, end, options, true);
+    EXPECT_NE(richEditorPattern->HasFocus(), false);
+}
+
+/**
+ * @tc.name: SetSelection006
+ * @tc.desc: test SetSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, SetSelection006, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto focusHub = richEditorPattern->GetFocusHub();
+    EXPECT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = true;
+
+    richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AccessibilityManager::MakeRefPtr<MutableSpanString>("test123456");
+    richEditorPattern->textSelector_ = TextSelector(2, 4);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    pipeline->themeManager_ = theme;
+
+    richEditorPattern->customKeyboardBuilder_ = []() {};
+    richEditorPattern->DumpInfo();
+    richEditorPattern->isTextChange_ = false;
+    EXPECT_EQ(richEditorPattern->IsShowHandle(), true);
+
+    int32_t start = 2;
+    int32_t end = 5;
+    SelectionOptions options;
+    options.menuPolicy = MenuPolicy::SHOW;
+    richEditorPattern->SetSelection(start, end, options, false);
+    EXPECT_NE(richEditorPattern->HasFocus(), false);
+}
 } // namespace OHOS::Ace::NG

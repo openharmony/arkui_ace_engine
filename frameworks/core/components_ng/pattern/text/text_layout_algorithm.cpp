@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/render/font_collection.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace::NG {
 
@@ -71,7 +72,7 @@ void TextLayoutAlgorithm::ConstructParagraphSpanGroup(std::list<RefPtr<SpanItem>
     // split spans into groups by mew paragraph style
     auto it = spans.begin();
     ParagraphStyle pStyle;
-    GetSpanParagraphStyle((*it)->textLineStyle, pStyle);
+    GetSpanParagraphStyle(nullptr, (*it), pStyle);
     while (it != spans.end()) {
         auto spanItem = *it;
         if (!spanItem) {
@@ -87,7 +88,7 @@ void TextLayoutAlgorithm::ConstructParagraphSpanGroup(std::list<RefPtr<SpanItem>
             auto next = *(std::next(it));
             ParagraphStyle nextSpanParagraphStyle;
             if (next) {
-                GetSpanParagraphStyle(next->textLineStyle, nextSpanParagraphStyle);
+                GetSpanParagraphStyle(nullptr, next, nextSpanParagraphStyle);
             } else {
                 break;
             }
@@ -204,8 +205,8 @@ void TextLayoutAlgorithm::UpdateParagraphForAISpan(
     dragSpanPosition.dragStart = pattern->GetRecoverStart();
     dragSpanPosition.dragEnd = pattern->GetRecoverEnd();
     bool isDragging = pattern->IsDragging();
-    TextStyle aiSpanTextStyle = textStyle;
-    ResetAiSpanTextStyle(frameNode, aiSpanTextStyle);
+    TextStyle aiSpanStyle = textStyle;
+    pattern->ModifyAISpanStyle(aiSpanStyle);
     for (auto kv : pattern->GetAISpanMap()) {
         if (preEnd >= wTextForAILength) {
             break;
@@ -223,26 +224,13 @@ void TextLayoutAlgorithm::UpdateParagraphForAISpan(
         preEnd = aiSpan.end;
         dragSpanPosition.spanStart = aiSpan.start;
         dragSpanPosition.spanEnd = aiSpan.end;
-        GrayDisplayAISpan(dragSpanPosition, wTextForAI, aiSpanTextStyle, isDragging, paragraph);
+        GrayDisplayAISpan(dragSpanPosition, wTextForAI, aiSpanStyle, isDragging, paragraph);
     }
     if (preEnd < wTextForAILength) {
         dragSpanPosition.spanStart = preEnd;
         dragSpanPosition.spanEnd = wTextForAILength;
         GrayDisplayAISpan(dragSpanPosition, wTextForAI, textStyle, isDragging, paragraph);
     }
-}
-
-void TextLayoutAlgorithm::ResetAiSpanTextStyle(const RefPtr<FrameNode>& frameNode, TextStyle& aiSpanTextStyle)
-{
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto hyerlinkTheme = pipeline->GetTheme<HyperlinkTheme>();
-    CHECK_NULL_VOID(hyerlinkTheme);
-    auto hyerlinkColor = hyerlinkTheme->GetTextColor();
-    aiSpanTextStyle.SetTextColor(hyerlinkColor);
-    aiSpanTextStyle.SetTextDecoration(TextDecoration::UNDERLINE);
-    aiSpanTextStyle.SetTextDecorationColor(hyerlinkColor);
-    aiSpanTextStyle.SetTextDecorationStyle(TextDecorationStyle::SOLID);
 }
 
 void TextLayoutAlgorithm::GrayDisplayAISpan(const DragSpanPosition& dragSpanPosition, const std::wstring wTextForAI,
@@ -487,7 +475,12 @@ bool TextLayoutAlgorithm::UpdateSingleParagraph(LayoutWrapper* layoutWrapper, Pa
         } else {
             auto value = content;
             StringUtils::TransformStrCase(value, static_cast<int32_t>(textStyle.GetTextCase()));
-            paragraph->AddText(StringUtils::Str8ToStr16(value));
+            std::u16string result = StringUtils::Str8ToStr16(value);
+            if (result.length() == 0 && value.length() != 0) {
+                value = TextEmojiProcessor::ConvertU8stringUnpairedSurrogates(value);
+                result = StringUtils::Str8ToStr16(value);
+            }
+            paragraph->AddText(result);
         }
     }
     paragraph->Build();
@@ -502,6 +495,11 @@ bool TextLayoutAlgorithm::UpdateSingleParagraph(LayoutWrapper* layoutWrapper, Pa
 bool TextLayoutAlgorithm::BuildParagraph(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& layoutProperty,
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, false);
+    auto pattern = host->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    pattern->DumpRecord(",BuildParagraph id:" + std::to_string(host->GetId()));
     if (!textStyle.GetAdaptTextSize() || !spans_.empty()) {
         if (!CreateParagraphAndLayout(
                 textStyle, layoutProperty->GetContent().value_or(""), contentConstraint, layoutWrapper)) {
@@ -548,36 +546,15 @@ bool TextLayoutAlgorithm::BuildParagraphAdaptUseLayoutConstraint(TextStyle& text
     if (!BuildParagraph(textStyle, layoutProperty, contentConstraint, layoutWrapper)) {
         return false;
     }
-    CHECK_NULL_RETURN(GetSingleParagraph(), false);
-    auto height = static_cast<float>(GetSingleParagraph()->GetHeight());
-    double minTextSizeHeight = textStyle.GetAdaptMinFontSize().ConvertToPxDistribute(
-        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
-    if (LessOrEqual(minTextSizeHeight, 0.0)) {
-        minTextSizeHeight = textStyle.GetFontSize().ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
-    }
-    if (textStyle.GetMaxLines() == UINT32_MAX) {
-        double baselineOffset =
-            textStyle.GetBaselineOffset().Unit() == DimensionUnit::PERCENT
-                ? textStyle.GetBaselineOffset().ConvertToPxWithSize(contentConstraint.maxSize.Height())
-                : textStyle.GetBaselineOffset().ConvertToPxDistribute(
-                    textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
-        double lineHeight = minTextSizeHeight;
-        if (textStyle.HasHeightOverride()) {
-            lineHeight = textStyle.GetLineHeight().Unit() == DimensionUnit::PERCENT
-                             ? textStyle.GetLineHeight().ConvertToPxWithSize(contentConstraint.maxSize.Height())
-                             : textStyle.GetLineHeight().ConvertToPxDistribute(
-                                 textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
-        }
-        uint32_t maxLines = (contentConstraint.maxSize.Height() - baselineOffset - minTextSizeHeight) / (lineHeight);
-        textStyle.SetMaxLines(maxLines);
-        textStyle.DisableAdaptTextSize();
-        if (!BuildParagraph(textStyle, layoutProperty, contentConstraint, layoutWrapper)) {
-            return false;
-        }
-    }
+    
     auto paragraph = GetSingleParagraph();
-    height = static_cast<float>(paragraph->GetHeight());
+    CHECK_NULL_RETURN(paragraph, false);
+    auto lineCount = static_cast<uint32_t>(paragraph->GetLineCount());
+    lineCount = std::max(std::min(textStyle.GetMaxLines(), lineCount), static_cast<uint32_t>(0));
+    textStyle.SetMaxLines(lineCount);
+    textStyle.DisableAdaptTextSize();
+
+    auto height = static_cast<float>(paragraph->GetHeight());
     while (GreatNotEqual(height, contentConstraint.maxSize.Height())) {
         auto maxLines = textStyle.GetMaxLines();
         if (maxLines == 0) {

@@ -1444,14 +1444,14 @@ HWTEST_F(TextTestFiveNg, GetSpanParagraphStyle001, TestSize.Level1)
     auto textLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
     ASSERT_NE(textLayoutAlgorithm, nullptr);
 
-    std::unique_ptr<TextLineStyle> lineStyle = std::make_unique<TextLineStyle>();
     ParagraphStyle pStyle;
 
-    lineStyle->UpdateMaxLines(1024);
-    lineStyle->UpdateEllipsisMode(EllipsisMode::HEAD);
-    lineStyle->UpdateLineBreakStrategy(LineBreakStrategy::GREEDY);
-    lineStyle->UpdateLeadingMargin(LeadingMargin());
-    textLayoutAlgorithm->GetSpanParagraphStyle(lineStyle, pStyle);
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->textLineStyle->UpdateMaxLines(1024);
+    spanItem->textLineStyle->UpdateEllipsisMode(EllipsisMode::HEAD);
+    spanItem->textLineStyle->UpdateLineBreakStrategy(LineBreakStrategy::GREEDY);
+    spanItem->textLineStyle->UpdateLeadingMargin(LeadingMargin());
+    textLayoutAlgorithm->GetSpanParagraphStyle(nullptr, spanItem, pStyle);
     EXPECT_EQ(pStyle.maxLines, 1024);
     EXPECT_EQ(pStyle.ellipsisMode, EllipsisMode::HEAD);
     EXPECT_EQ(pStyle.lineBreakStrategy, LineBreakStrategy::GREEDY);
@@ -1785,33 +1785,6 @@ HWTEST_F(TextTestFiveNg, UpdateSymbolSpanColor001, TestSize.Level1)
     spanItem->SetIsParentText(false);
     spanItem->UpdateSymbolSpanColor(frameNode, symbolSpanStyle);
     EXPECT_EQ(symbolSpanStyle.GetSymbolColorList().size(), 1);
-}
-
-/**
- * @tc.name: SetAiSpanTextStyle001
- * @tc.desc: test span_node.cpp SetAiSpanTextStyle function
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestFiveNg, SetAiSpanTextStyle001, TestSize.Level1)
-{
-    auto pattern = AceType::MakeRefPtr<TextPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
-    ASSERT_NE(frameNode, nullptr);
-    pattern->AttachToFrameNode(frameNode);
-
-    auto spanItem = AceType::MakeRefPtr<SpanItem>();
-    ASSERT_NE(spanItem, nullptr);
-
-    std::optional<TextStyle> aiSpanTextStyle = std::nullopt;
-
-    spanItem->fontStyle->UpdateFontSize(Dimension(0));
-    spanItem->SetAiSpanTextStyle(aiSpanTextStyle);
-    EXPECT_EQ(aiSpanTextStyle, std::nullopt);
-
-    spanItem->fontStyle->UpdateFontSize(Dimension(10));
-    spanItem->SetAiSpanTextStyle(aiSpanTextStyle);
-    EXPECT_NE(aiSpanTextStyle, std::nullopt);
 }
 
 /**

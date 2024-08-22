@@ -37,6 +37,8 @@ public:
     void SetTextShadow(const std::vector<Shadow>& value) override;
     void SetItalicFontStyle(Ace::FontStyle value) override;
     void SetFontWeight(FontWeight value) override;
+    void SetVariableFontWeight(int32_t value) override;
+    void SetEnableVariableFontWeight(bool value) override;
     void SetMinFontScale(const float value) override;
     void SetMaxFontScale(const float value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
@@ -60,7 +62,7 @@ public:
     void SetAdaptMaxFontSize(const Dimension& value) override;
     void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) override;
     void SetTextDetectEnable(bool value) override;
-    void SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult) override;
+    void SetTextDetectConfig(const TextDetectConfig& textDetectConfig) override;
     void SetOnClick(std::function<void(BaseEventInfo* info)>&& click) override;
     void ClearOnClick() override;
     void SetRemoteMessage(std::function<void()>&& event) override;
@@ -88,6 +90,8 @@ public:
     static void InitSpanStringController(FrameNode* frameNode, const RefPtr<SpanStringBase>& spanBase);
     static RefPtr<TextControllerBase> InitTextController(FrameNode* frameNode);
     static void SetFontWeight(FrameNode* frameNode, Ace::FontWeight value);
+    static void SetVariableFontWeight(FrameNode* frameNode, int32_t value);
+    static void SetEnableVariableFontWeight(FrameNode* frameNode, bool value);
     static void SetMinFontScale(FrameNode* frameNode, const float value);
     static void SetMaxFontScale(FrameNode* frameNode, const float value);
     static void SetItalicFontStyle(FrameNode* frameNode, Ace::FontStyle value);
@@ -121,6 +125,8 @@ public:
     static void SetTextDetectConfig(FrameNode* frameNode, const std::string& value);
     static void SetOnClick(FrameNode* frameNode, GestureEventFunc&& click);
     static void ClearOnClick(FrameNode* frameNode);
+    static void SetResponseRegion(FrameNode* frameNode, std::vector<DimensionRect> regions);
+    static void ClearResponseRegion(FrameNode* frameNode);
     static void SetOnDetectResultUpdate(FrameNode* frameNode, std::function<void(const std::string&)>&& onResult);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
     static void SetTextContentWithStyledString(FrameNode* frameNode, ArkUI_StyledString* value);
@@ -161,8 +167,7 @@ public:
     static LineBreakStrategy GetLineBreakStrategy(FrameNode* frameNode);
     static void SetTextSelection(FrameNode* frameNode, int32_t startIndex, int32_t endIndex);
     static void SetTextSelectableMode(FrameNode* frameNode, TextSelectableMode value);
-    static void SetTextDetectConfig(FrameNode* frameNode, const std::string& value,
-        std::function<void(const std::string&)>&& onResult);
+    static void SetTextDetectConfig(FrameNode* frameNode, const TextDetectConfig& textDetectConfig);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
     static void SetOnTextSelectionChange(FrameNode* frameNode, std::function<void(int32_t, int32_t)>&& func);
     static void SetSelectionMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,

@@ -193,7 +193,7 @@ class ListFilterRow extends ViewPU {
         this.onItemClick = () => {
         };
         this.rowIndex = 0;
-        this.maxAppFontScale = 1;
+        this.__maxAppFontScale = new ObservedPropertySimplePU(1, this, 'maxAppFontScale');
         this.setInitiallyProvidedValue(params);
         this.finalizeConstruction();
     }
@@ -254,6 +254,14 @@ class ListFilterRow extends ViewPU {
 
     get isBackgroundHoverRow() {
         return this.__isBackgroundHoverRow.get();
+    }
+
+    get maxAppFontScale() {
+        return this.__maxAppFontScale.get();
+    }
+
+    set maxAppFontScale(newValue) {
+        this.__maxAppFontScale.set(newValue);
     }
 
     initialRender() {
@@ -541,7 +549,7 @@ class MultiFilterRow extends ViewPU {
         this.filterColumnWidth = 0;
         this.lastFilterColumnWidth = 0;
         this.rowIndex = 0;
-        this.maxAppFontScale = 1;
+        this.__maxAppFontScale = new ObservedPropertySimplePU(1, this, 'maxAppFontScale');
         this.setInitiallyProvidedValue(params);
         this.finalizeConstruction();
     }
@@ -666,6 +674,14 @@ class MultiFilterRow extends ViewPU {
 
     set isArrowBgHoverRow(newValue) {
         this.__isArrowBgHoverRow.set(newValue);
+    }
+
+    get maxAppFontScale() {
+        return this.__maxAppFontScale.get();
+    }
+
+    set maxAppFontScale(newValue) {
+        this.__maxAppFontScale.set(newValue);
     }
 
     calcMultiFilterRowItemNum() {
@@ -1229,7 +1245,7 @@ export class Filter extends ViewPU {
         this.__twoLineModeItemNumRecord = new ObservedPropertyObjectPU(null, this, 'twoLineModeItemNumRecord');
         this.__downArrowShowState = new ObservedPropertyObjectPU(null, this, 'downArrowShowState');
         this.__floatFilterBarText = new ObservedPropertySimplePU('', this, 'floatFilterBarText');
-        this.maxAppFontScale = 1;
+        this.__maxAppFontScale = new ObservedPropertySimplePU(1, this, 'maxAppFontScale');
         this.isFollowingSystemFontScale = false;
         this.setInitiallyProvidedValue(params);
         this.finalizeConstruction();
@@ -1588,6 +1604,14 @@ export class Filter extends ViewPU {
         this.__floatFilterBarText.set(newValue);
     }
 
+    get maxAppFontScale() {
+        return this.__maxAppFontScale.get();
+    }
+
+    set maxAppFontScale(newValue) {
+        this.__maxAppFontScale.set(newValue);
+    }
+
     textColor(rowIndex, colIndex) {
         if (this.selectedFilters && this.selectedFilters.length > rowIndex &&
             this.selectedFilters[rowIndex].index === colIndex) {
@@ -1623,7 +1647,7 @@ export class Filter extends ViewPU {
 
     updateFontScale() {
         let uiContent = this.getUIContext();
-        let systemFontScale = uiContent.getHostContext()?.config.fontSizeScale ?? 1;
+        let systemFontScale = uiContent.getHostContext()?.config?.fontSizeScale ?? 1;
         if (!this.isFollowingSystemFontScale) {
             return 1;
         }

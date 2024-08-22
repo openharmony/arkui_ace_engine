@@ -37,7 +37,7 @@ sptr<AppExecFwk::IBundleMgr> NavigationRouteOhos::GetBundleManager()
     return iface_cast<AppExecFwk::IBundleMgr>(bundleObj);
 }
 
-void NavigationRouteOhos::InitRouteMap(const std::string& bundleName)
+void NavigationRouteOhos::InitRouteMap()
 {
     auto bundleManager = GetBundleManager();
     if (!bundleManager) {
@@ -53,6 +53,11 @@ void NavigationRouteOhos::InitRouteMap(const std::string& bundleName)
         return;
     }
     allRouteItems_ = bundleInfo.routerArray;
+}
+
+void NavigationRouteOhos::OnPackageChange()
+{
+    InitRouteMap();
 }
 
 bool NavigationRouteOhos::GetRouteItem(const std::string& name, NG::RouteItem& info)
@@ -89,10 +94,25 @@ int32_t NavigationRouteOhos::LoadPage(const std::string& name)
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "get route name failed");
         return ERROR_CODE_BUILDER_FUNCTION_NOT_REGISTERED;
     }
+    if (callback_ == nullptr) {
+        return -1;
+    }
     int32_t res = callback_(item.bundleName, item.moduleName, item.ohmurl, false);
     if (res == 0) {
         names_.emplace_back(name);
     }
     return res;
+}
+
+bool NavigationRouteOhos::IsNavigationItemExits(const std::string& name)
+{
+    if (HasLoaded(name)) {
+        return true;
+    }
+    AppExecFwk::RouterItem item;
+    if (GetRouteItemFromBundle(name, item)) {
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace

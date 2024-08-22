@@ -17,6 +17,7 @@ import curves from '@ohos.curves';
 import { Route, RouteGroup } from '../common/route';
 import { OperatesDestination, operatesRoute } from './operates';
 import { DisplaysDestination, displaysRoute } from './displays';
+import { PickersDestination, pickersRoute } from './pickers';
 
 @Styles
 function CardPressedStyle() {
@@ -46,6 +47,8 @@ function Destination(name: string, route: Route) {
     DisplaysDestination(name, route)
   } else if (name.startsWith('operates/')) {
     OperatesDestination(name, route)
+  } else if (name.startsWith('pickers/')) {
+    PickersDestination(name, route)
   }
 }
 
@@ -56,6 +59,7 @@ struct Index {
   @State routes: RouteGroup[] = [
     operatesRoute,
     displaysRoute,
+    pickersRoute,
   ];
   @State selection: string | null = null;
 

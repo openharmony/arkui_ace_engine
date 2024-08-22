@@ -15,8 +15,6 @@
 
 #include "core/components/form/form_window.h"
 
-#include "base/log/log.h"
-
 namespace OHOS::Ace {
 void FormWindow::RequestFrame()
 {

@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_segmented_layout.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_paint_method.h"
+#include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
 
 namespace OHOS::Ace::NG {
 SizeF WaterFlowPattern::GetContentSize() const
@@ -152,7 +153,7 @@ RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
 
 RefPtr<NodePaintMethod> WaterFlowPattern::CreateNodePaintMethod()
 {
-    auto paint = MakeRefPtr<WaterFlowPaintMethod>();
+    auto paint = MakeRefPtr<WaterFlowPaintMethod>(GetAxis() == Axis::HORIZONTAL);
     if (!contentModifier_) {
         contentModifier_ = AceType::MakeRefPtr<WaterFlowContentModifier>();
     }
@@ -166,6 +167,7 @@ RefPtr<NodePaintMethod> WaterFlowPattern::CreateNodePaintMethod()
     if (scrollEffect && scrollEffect->IsFadeEffect()) {
         paint->SetEdgeEffect(scrollEffect);
     }
+    UpdateFadingEdge(paint);
     return paint;
 }
 
@@ -189,6 +191,12 @@ void WaterFlowPattern::OnModifyDone()
     }
     SetAccessibilityAction();
     Register2DragDropManager();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto overlayNode = host->GetOverlayNode();
+    if (!overlayNode && paintProperty->GetFadingEdge().value_or(false)) {
+        CreateAnalyzerOverlay(host);
+    }
 }
 
 void WaterFlowPattern::TriggerModifyDone()
@@ -399,6 +407,17 @@ Rect WaterFlowPattern::GetItemRect(int32_t index) const
         itemGeometry->GetFrameRect().Width(), itemGeometry->GetFrameRect().Height());
 }
 
+int32_t WaterFlowPattern::GetItemIndex(double x, double y) const
+{
+    for (int32_t index = layoutInfo_->FirstIdx(); index <= layoutInfo_->endIndex_; ++index) {
+        Rect rect = GetItemRect(index);
+        if (rect.IsInRegion({x, y})) {
+            return index;
+        }
+    }
+    return -1;
+}
+
 RefPtr<WaterFlowSections> WaterFlowPattern::GetSections() const
 {
     return sections_;
@@ -433,8 +452,6 @@ void WaterFlowPattern::OnSectionChanged(int32_t start)
     } else {
         layoutInfo_->InitSegments(sections_->GetSectionInfo(), start);
     }
-
-    MarkDirtyNodeSelf();
 }
 
 void WaterFlowPattern::ResetSections()
@@ -561,6 +578,9 @@ bool WaterFlowPattern::NeedRender()
     auto property = host->GetLayoutProperty();
     CHECK_NULL_RETURN(host, false);
     needRender = property->GetPaddingProperty() != nullptr || needRender;
+    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, needRender);
+    needRender = needRender || paintProperty->GetFadingEdge().value_or(false);
     return needRender;
 }
 

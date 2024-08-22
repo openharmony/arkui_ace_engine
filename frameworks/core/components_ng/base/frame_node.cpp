@@ -489,7 +489,6 @@ FrameNode::~FrameNode()
     pattern_->DetachFromFrameNode(this);
     if (IsOnMainTree()) {
         OnDetachFromMainTree(false, GetContext());
-        LOGW("%{public}s %{public}d should do detach before destroy function", GetTag().c_str(), GetId());
     }
     TriggerVisibleAreaChangeCallback(0, true);
     CleanVisibleAreaUserCallback();
@@ -1112,10 +1111,6 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
         }
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        if (ndkColorModeUpdateCallback_) {
-            auto colorModeChange = ndkColorModeUpdateCallback_;
-            colorModeChange(SystemProperties::GetColorMode() == ColorMode::DARK);
-        }
     }
     if (configurationChange.directionUpdate) {
         pattern_->OnDirectionConfigurationUpdate();
@@ -1146,13 +1141,23 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
-    if (configurationChange.fontScaleUpdate || configurationChange.fontWeightScaleUpdate) {
-        if (ndkFontUpdateCallback_) {
-            auto fontChangeCallback = ndkFontUpdateCallback_;
-            auto pipeline = GetContextWithCheck();
-            CHECK_NULL_VOID(pipeline);
-            fontChangeCallback(pipeline->GetFontScale(), pipeline->GetFontWeightScale());
-        }
+    NotifyConfigurationChangeNdk(configurationChange);
+}
+
+void FrameNode::NotifyConfigurationChangeNdk(const ConfigurationChange& configurationChange)
+{
+    if (ndkColorModeUpdateCallback_ && configurationChange.colorModeUpdate &&
+        colorMode_ != SystemProperties::GetColorMode()) {
+        auto colorModeChange = ndkColorModeUpdateCallback_;
+        colorModeChange(SystemProperties::GetColorMode() == ColorMode::DARK);
+        colorMode_ = SystemProperties::GetColorMode();
+    }
+
+    if (ndkFontUpdateCallback_ && (configurationChange.fontScaleUpdate || configurationChange.fontWeightScaleUpdate)) {
+        auto fontChangeCallback = ndkFontUpdateCallback_;
+        auto pipeline = GetContextWithCheck();
+        CHECK_NULL_VOID(pipeline);
+        fontChangeCallback(pipeline->GetFontScale(), pipeline->GetFontWeightScale());
     }
 }
 
@@ -3268,6 +3273,9 @@ RefPtr<FrameNode> FrameNode::FindChildByPosition(float x, float y)
     std::list<RefPtr<FrameNode>> children;
     GenerateOneDepthAllFrame(children);
     for (const auto& child : children) {
+        if (!child->IsActive()) {
+            continue;
+        }
         auto geometryNode = child->GetGeometryNode();
         if (!geometryNode) {
             continue;

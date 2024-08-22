@@ -19,6 +19,7 @@
 #include "base/geometry/axis.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/scroll/scroll_accessibility_property.h"
+#include "core/components_ng/pattern/scroll/scroll_content_modifier.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_algorithm.h"
@@ -62,7 +63,7 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        auto paint = MakeRefPtr<ScrollPaintMethod>();
+        auto paint = MakeRefPtr<ScrollPaintMethod>(GetAxis() == Axis::HORIZONTAL);
         paint->SetScrollBar(GetScrollBar());
         CreateScrollBarOverlayModifier();
         paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
@@ -70,6 +71,11 @@ public:
         if (scrollEffect && scrollEffect->IsFadeEffect()) {
             paint->SetEdgeEffect(scrollEffect);
         }
+        if (!scrollContentModifier_) {
+            scrollContentModifier_ = AceType::MakeRefPtr<ScrollContentModifier>();
+        }
+        paint->SetContentModifier(scrollContentModifier_);
+        UpdateFadingEdge(paint);
         return paint;
     }
 
@@ -420,6 +426,8 @@ private:
     float lastPageLength_ = 0.0f;
     float GetPagingOffset(float delta, float dragDistance, float velocity)  const;
     float GetPagingDelta(float dragDistance, float velocity, float pageLength) const;
+
+    RefPtr<ScrollContentModifier> scrollContentModifier_;
 
     //initialOffset
     std::optional<OffsetT<CalcDimension>> initialOffset_;

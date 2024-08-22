@@ -29,6 +29,7 @@ if (!('finalizeConstruction' in ViewPU.prototype)) {
     });
 }
 
+const hilog = requireNapi('hilog');
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const resourceManager = requireNapi('resourceManager');
 
@@ -969,7 +970,7 @@ export class TreeView extends ViewPU {
 
     decideFontScale() {
         let i25 = this.getUIContext();
-        let j25 = i25.getHostContext()?.config.fontSizeScale ?? 1;
+        let j25 = i25.getHostContext()?.config?.fontSizeScale ?? 1;
         if (!this.followingSystemFontScale) {
             return 1;
         }
@@ -1227,7 +1228,7 @@ export class TreeView extends ViewPU {
             List.create({});
             List.onDragMove((k23, l23) => {
                 if (this.isMultiPress) {
-                    console.error('drag error, a item has been dragged');
+                    hilog.error(0x3900, 'TreeView', 'drag error, a item has been dragged');
                     return;
                 }
                 let m23 = LIST_ITEM_HEIGHT;
@@ -1287,12 +1288,12 @@ export class TreeView extends ViewPU {
                 let q22 = JSON.parse(o22).insertIndex;
                 let r22 = this.dropSelectedIndex;
                 if (r22 - 1 > this.listNodeDataSource.totalCount() || r22 === undefined) {
-                    console.error('drag error, currentNodeIndex is not found');
+                    hilog.error(0x3900, 'TreeView', 'drag error, currentNodeIndex is not found');
                     this.listNodeDataSource.setIsDrag(false);
                     return;
                 }
                 if (q22 === this.listNodeDataSource.totalCount()) {
-                    console.log('need to insert into the position of the last line, now insertNodeIndex = insertNodeIndex - 1');
+                    hilog.info(0x3900, 'TreeView', 'need to insert into the position of the last line');
                     q22 -= 1;
                 }
                 let s22 = this.listNodeDataSource.getData(q22);
@@ -1419,7 +1420,7 @@ export class TreeView extends ViewPU {
                         ListItem.align(Alignment.Start);
                         ListItem.onDragStart((z21, a22) => {
                             if (this.listNodeDataSource.getIsDrag() || this.listNodeDataSource.getIsInnerDrag() || this.isMultiPress) {
-                                console.error('drag error, a item has been dragged');
+                                hilog.error(0x3900, 'TreeView', 'drag error, a item has been dragged');
                                 return;
                             }
                             this.dropSelectedIndex = JSON.parse(a22).selectedIndex;
@@ -1427,7 +1428,7 @@ export class TreeView extends ViewPU {
                             let c22 = this.listNodeDataSource.getData(b22);
                             let d22 = b21.getNodeCurrentNodeId();
                             if (b22 >= this.listNodeDataSource.totalCount() || b22 === undefined) {
-                                console.error('drag error, currentNodeIndex is not found in onDragStart');
+                                hilog.error(0x3900, 'TreeView', 'drag error, currentNodeIndex is not found in onDragStart');
                                 return;
                             }
                             this.listNodeDataSource.setIsInnerDrag(true);
@@ -1439,7 +1440,7 @@ export class TreeView extends ViewPU {
                             this.listNodeDataSource.setListItemOpacity(e22);
                             this.listNodeDataSource.notifyDataChange(b22);
                             if (d22 !== c22?.getNodeCurrentNodeId()) {
-                                console.error('drag is too fast,it attribute a fault to OH');
+                                hilog.error(0x3900, 'TreeView', 'drag is too fast, it attribute a fault to OH');
                                 this.listNodeDataSource.setIsDrag(false);
                                 return;
                             }
@@ -1587,7 +1588,7 @@ export class TreeController {
         let l20 = this.listNodeDataSource.getNewNodeParam(k20);
         this.nodeIdList.push(this.nodeIdList[this.nodeIdList.length - 1] + 1);
         let m20 = this.nodeIdList[this.nodeIdList.length - 1];
-        this.listNodeDataSource.addNode(k20, m20, {
+        let t27 = this.listNodeDataSource.addNode(k20, m20, {
             isFolder: l20.isFolder,
             icon: l20.icon,
             selectedIcon: l20.selectedIcon,
@@ -1596,6 +1597,9 @@ export class TreeController {
             container: l20.container,
             secondaryTitle: l20.secondaryTitle,
         }, j20);
+        if (!t27) {
+            return;
+        }
         this.listNodeDataSource.refreshData(MenuOperation.ADD_NODE, k20, [m20]);
         this.listNodeDataSource.setPopUpInfo(PopUpType.WARNINGS, InputError.NONE, false, this.listNodeDataSource.getLastIndex());
         this.listNodeDataSource.setItemVisibilityOnEdit(this.listNodeDataSource.getLastIndex(), MenuOperation.COMMIT_NODE);
@@ -1612,6 +1616,7 @@ export class TreeController {
             return this;
         }
         else {
+            let r27 = false;
             if (h20.primaryTitle !== undefined &&
                 !this.listNodeDataSource.checkMainTitleIsValid(h20.primaryTitle.toString())) {
                 throw new Error('ListTreeNode[addNode]: ' +
@@ -1632,8 +1637,11 @@ export class TreeController {
             }
             if (h20.parentNodeId !== undefined) {
                 if (h20.currentNodeId !== undefined) {
-                    this.listNodeDataSource.addNode(h20.parentNodeId, h20.currentNodeId, h20, this.initBuild);
+                    r27 = this.listNodeDataSource.addNode(h20.parentNodeId, h20.currentNodeId, h20, this.initBuild);
                 }
+            }
+            if (!r27) {
+                return this;
             }
             if (!this.initBuild && h20.parentNodeId !== undefined) {
                 let i20 = this.nodeIdList[this.nodeIdList.length - 1];
@@ -1716,24 +1724,29 @@ class BasicDataSource {
     }
 }
 
-function delayUpdateParentChildNum(b19, c19, d19, e19) {
-    let f19 = setTimeout(() => {
-        e19.forEach((i19) => {
-            let j19 = i19;
-            while (j19 >= 0) {
-                if (d19.has(j19)) {
-                    let k19 = d19.get(j19);
-                    k19.getChildNodeInfo().allChildNum =
-                        b19 ? k19.getChildNodeInfo().allChildNum + c19 : k19.getChildNodeInfo().allChildNum - c19;
-                    j19 = k19.parentNodeId;
-                }
-                else {
-                    throw new Error('delayUpdateParentChildNum: Parent node not found.');
-                }
-            }
+function delayUpdateParentChildNum(b24, b25, f25, w25) {
+    let j27 = setTimeout(() => {
+        w25.forEach((m27) => {
+            updateParentChildNumHandler(m27, f25, b24, b25);
         });
-        clearTimeout(f19);
+        clearTimeout(j27);
     }, DELAY_TIME);
+}
+
+function updateParentChildNumHandler(m8, u8, v8, y16) {
+    let z16 = m8;
+    while (z16 >= 0) {
+        if (u8.has(z16)) {
+            let a18 = u8.get(z16);
+            a18.getChildNodeInfo().allChildNum =
+                v8 ? a18.getChildNodeInfo().allChildNum + y16 : a18.getChildNodeInfo().allChildNum - y16;
+            z16 = a18.parentNodeId;
+        }
+        else {
+            hilog.error(0x3900, 'TreeView', 'updateParentChildNumHandler: parent node not found');
+            break;
+        }
+    }
 }
 
 function delaySortNodeIdList(v18) {
@@ -1908,7 +1921,18 @@ class ListNodeDataSource extends BasicDataSource {
         this.nodeIdNodeParamMap.set(-1, emptyNodeInfo);
     }
 
+    checkIndex(j11) {
+        if (j11 < 0 || j11 >= this.listNode.length) {
+            hilog.error(0x3900, 'TreeView', 'check index fail');
+            return false;
+        }
+        return true;
+    }
+
     changeNodeColor(t18, u18) {
+        if (!this.checkIndex(t18)) {
+            return;
+        }
         this.listNode[t18].setNodeColor(u18);
         this.listNode[t18].setNodeBorder(false);
     }
@@ -1924,6 +1948,9 @@ class ListNodeDataSource extends BasicDataSource {
     }
 
     setImageSource(n18, o18) {
+        if (!this.checkIndex(n18)) {
+            return;
+        }
         let p18 = this.listNode[n18];
         p18.setIsSelected(o18 === InteractionStatus.SELECTED ||
             o18 === InteractionStatus.EDIT || o18 === InteractionStatus.FINISH_EDIT);
@@ -1937,15 +1964,15 @@ class ListNodeDataSource extends BasicDataSource {
         }
     }
 
-    setImageCollapseSource(k18, l18) {
-        let m18 = this.listNode[k18];
-        if (m18.getNodeItem().imageCollapse !== undefined) {
-            m18.getNodeItem().imageCollapse = CollapseImageNodeFlyweightFactory.getCollapseImageNode(l18, this.expandAndCollapseInfo.get(m18.getNodeCurrentNodeId()), m18.getNodeItem().imageCollapse.type);
+    setImageCollapseSource(p17, q17) {
+        let r17 = this.listNode[p17];
+        if (r17.getNodeItem().imageCollapse !== undefined) {
+            r17.getNodeItem().imageCollapse = CollapseImageNodeFlyweightFactory.getCollapseImageNode(q17, this.expandAndCollapseInfo.get(r17.getNodeCurrentNodeId()), r17.getNodeItem().imageCollapse?.type);
         }
     }
 
     clearLastIndexStatus() {
-        if (this.lastIndex === -1 || this.lastIndex >= this.listNode.length) {
+        if (!this.checkIndex(this.lastIndex)) {
             return;
         }
         this.setImageSource(this.lastIndex, InteractionStatus.NORMAL);
@@ -1968,27 +1995,29 @@ class ListNodeDataSource extends BasicDataSource {
         }
     }
 
-    changeNodeStatus(f18) {
-        if (f18 >= this.listNode.length) {
-            throw new Error('changeNodeStatus clickIndex error.');
+    changeNodeStatus(k17) {
+        if (k17 >= this.listNode.length) {
+            hilog.error(0x3900, 'TreeView', 'changeNodeStatus clickIndex error.');
+            return;
         }
-        let g18 = f18;
-        let h18 = this.listNode[f18].getNodeCurrentNodeId();
-        if (this.expandAndCollapseInfo.get(h18) === NodeStatus.EXPAND) {
-            this.expandAndCollapseInfo.set(h18, NodeStatus.COLLAPSE);
-            this.listNode[g18].getNodeItem().imageCollapse = this.listNode[g18].getNodeItem().imageCollapse ?
-            CollapseImageNodeFlyweightFactory.changeImageCollapseSource(NodeStatus.COLLAPSE, this.listNode[g18].getNodeItem().imageCollapse.isCollapse) : undefined;
+        let l17 = k17;
+        let m17 = this.listNode[k17].getNodeCurrentNodeId();
+        if (this.expandAndCollapseInfo.get(m17) === NodeStatus.EXPAND) {
+            this.expandAndCollapseInfo.set(m17, NodeStatus.COLLAPSE);
+            this.listNode[l17].getNodeItem()
+                .imageCollapse = CollapseImageNodeFlyweightFactory.changeImageCollapseSource(NodeStatus.COLLAPSE, this.listNode[l17].getNodeItem().imageCollapse?.isCollapse);
         }
-        else if (this.expandAndCollapseInfo.get(h18) === NodeStatus.COLLAPSE) {
-            this.expandAndCollapseInfo.set(h18, NodeStatus.EXPAND);
-            this.listNode[g18].getNodeItem().imageCollapse = this.listNode[g18].getNodeItem().imageCollapse ?
-            CollapseImageNodeFlyweightFactory.changeImageCollapseSource(NodeStatus.EXPAND, this.listNode[g18].getNodeItem().imageCollapse.isCollapse) : undefined;
+        else if (this.expandAndCollapseInfo.get(m17) === NodeStatus.COLLAPSE) {
+            this.expandAndCollapseInfo.set(m17, NodeStatus.EXPAND);
+            this.listNode[l17].getNodeItem()
+                .imageCollapse = CollapseImageNodeFlyweightFactory.changeImageCollapseSource(NodeStatus.EXPAND, this.listNode[l17].getNodeItem().imageCollapse?.isCollapse);
         }
     }
 
     handleExpandAndCollapse(v17, w17) {
         if (v17 >= this.listNode.length) {
-            throw new Error('handleExpandAndCollapse clickIndex error.');
+            hilog.error(0x3900, 'TreeView', 'handleExpandAndCollapse clickIndex error.');
+            return;
         }
         let x17 = v17;
         let y17 = this.listNode[x17].getNodeCurrentNodeId();
@@ -2033,38 +2062,53 @@ class ListNodeDataSource extends BasicDataSource {
         delayUpdateParentChildNum(true, 1, this.nodeIdNodeItemMap, this.updateNodeIdList);
     }
 
-    initHandler(n17, o17, p17) {
-        let q17 = 0;
-        let r17 = 0;
-        n17.splice(0, n17.length);
+    resetData(q27) {
+        q27.splice(0, q27.length);
         this.loadedNodeIdAndIndexMap.clear();
         this.loadedListNode.splice(0, this.loadedListNode.length);
         this.nodeIdAndNodeIndexMap.clear();
         this.nodeIdAndSubtitleMap.clear();
-        this.traverseSectionNodeDF((t17) => {
-            if (t17.getCurrentNodeId() >= 0 && this.nodeIdNodeParamMap.has(t17.getCurrentNodeId())) {
-                let u17 = new NodeInfo(t17, this.nodeIdNodeParamMap.get(t17.getCurrentNodeId()));
-                u17.addImageCollapse(t17.getChildNodeInfo().isHasChildNode);
-                n17.push(u17);
-                this.nodeIdAndNodeIndexMap.set(u17.getNodeCurrentNodeId(), r17++);
-                if (u17.getChildNodeInfo().isHasChildNode) {
-                    this.expandAndCollapseInfo.set(u17.getNodeCurrentNodeId(), NodeStatus.COLLAPSE);
+    }
+
+    initHandler(q16, r16, s16) {
+        let t16 = 0;
+        let u16 = 0;
+        this.resetData(q16);
+        try {
+            this.traverseSectionNodeDF((o27) => {
+                if (o27.getCurrentNodeId() >= 0 && this.nodeIdNodeParamMap.has(o27.getCurrentNodeId())) {
+                    let p27 = new NodeInfo(o27, this.nodeIdNodeParamMap.get(o27.getCurrentNodeId()));
+                    p27.addImageCollapse(o27.getChildNodeInfo().isHasChildNode);
+                    q16.push(p27);
+                    this.nodeIdAndNodeIndexMap.set(p27.getNodeCurrentNodeId(), u16++);
+                    t16 = this.nodeDFHandler(p27, t16);
                 }
-                if (u17.getNodeIsShow()) {
-                    this.loadedNodeIdAndIndexMap.set(u17.getNodeCurrentNodeId(), q17++);
-                    this.loadedListNode.push(u17);
-                }
-                if (u17.getIsFolder()) {
-                    if (u17.getNodeInfoData().secondaryTitle !== undefined) {
-                        this.nodeIdAndSubtitleMap.set(u17.getNodeCurrentNodeId(), u17.getNodeInfoData().secondaryTitle);
-                    }
-                    else {
-                        this.nodeIdAndSubtitleMap.set(u17.getNodeCurrentNodeId(), '');
-                    }
-                }
+                return false;
+            }, this._root, r16, s16);
+        }
+        catch (g19) {
+            hilog.error(0x3900, 'TreeView', 'traverseSectionNodeDF function callbacks error.');
+            this.resetData(q16);
+        }
+    }
+
+    nodeDFHandler(k11, l11) {
+        if (k11.getChildNodeInfo().isHasChildNode) {
+            this.expandAndCollapseInfo.set(k11.getNodeCurrentNodeId(), NodeStatus.COLLAPSE);
+        }
+        if (k11.getNodeIsShow()) {
+            this.loadedNodeIdAndIndexMap.set(k11.getNodeCurrentNodeId(), l11++);
+            this.loadedListNode.push(k11);
+        }
+        if (k11.getIsFolder()) {
+            if (k11.getNodeInfoData().secondaryTitle !== undefined) {
+                this.nodeIdAndSubtitleMap.set(k11.getNodeCurrentNodeId(), k11.getNodeInfoData().secondaryTitle);
             }
-            return false;
-        }, this._root, o17, p17);
+            else {
+                this.nodeIdAndSubtitleMap.set(k11.getNodeCurrentNodeId(), '');
+            }
+        }
+        return l11;
     }
 
     delayInit() {
@@ -2190,7 +2234,7 @@ class ListNodeDataSource extends BasicDataSource {
     }
 
     getClickNodeId() {
-        if (this.thisIndex < 0 || this.thisIndex >= this.listNode.length) {
+        if (!this.checkIndex(this.thisIndex)) {
             return -1;
         }
         return this.listNode[this.thisIndex].getNodeCurrentNodeId();
@@ -2218,6 +2262,9 @@ class ListNodeDataSource extends BasicDataSource {
     }
 
     handleEventDrag(h16) {
+        if (!this.checkIndex(h16)) {
+            return;
+        }
         this.setImageSource(h16, InteractionStatus.NORMAL);
         this.changeNodeColor(h16, this.listNode[h16].getNodeStatus().normal);
         this.handleFocusEffect(h16, false);
@@ -2226,6 +2273,9 @@ class ListNodeDataSource extends BasicDataSource {
 
     handleEvent(f16, g16) {
         if (this.isDrag) {
+            return;
+        }
+        if (!this.checkIndex(g16)) {
             return;
         }
         if (f16 === Event.TOUCH_DOWN || f16 === Event.TOUCH_UP || f16 === Event.MOUSE_BUTTON_RIGHT) {
@@ -2400,6 +2450,9 @@ class ListNodeDataSource extends BasicDataSource {
     }
 
     setPopUpInfo(d15, e15, f15, g15) {
+        if (!this.checkIndex(g15)) {
+            return;
+        }
         let h15 = this.listNode[g15];
         if (h15 === undefined) {
             return;
@@ -2457,6 +2510,9 @@ class ListNodeDataSource extends BasicDataSource {
     }
 
     setShowPopUpTimeout(a15, b15) {
+        if (!this.checkIndex(b15)) {
+            return;
+        }
         if (this.listNode[b15].getNodeItem().mainTitleNode !== null) {
             this.listNode[b15].getNodeItem().mainTitleNode.popUpTimeout = a15;
         }
@@ -2483,6 +2539,9 @@ class ListNodeDataSource extends BasicDataSource {
     }
 
     addData(v14, w14) {
+        if (!this.checkIndex(v14)) {
+            return;
+        }
         this.listNode.splice(v14, 0, w14);
         this.nodeIdAndNodeIndexMap.set(w14.getNodeCurrentNodeId(), v14);
         this.loadedListNodeFunction();
@@ -2625,6 +2684,9 @@ class ListNodeDataSource extends BasicDataSource {
     }
 
     clearHighLight(b14) {
+        if (!this.checkIndex(b14)) {
+            return;
+        }
         this.changeNodeColor(b14, this.listNode[b14].getNodeStatus().normal);
         this.changeNodeHighLightColor(b14, false);
         this.setImageSource(b14, InteractionStatus.FINISH_DRAG_INSERT);
@@ -2947,7 +3009,10 @@ class ListNodeDataSource extends BasicDataSource {
             return false;
         };
         this.dragTraverseNodeDF(t11, n11, this.listNode);
-        this.removeNode(g11, f11);
+        let b18 = this.removeNode(g11, f11);
+        if (b18.length === 0) {
+            return;
+        }
         let u11 = e11;
         let v11 = r11;
         if (this.expandAndCollapseInfo.get(e11) === NodeStatus.EXPAND) {
@@ -2966,9 +3031,15 @@ class ListNodeDataSource extends BasicDataSource {
         else if (!this.expandAndCollapseInfo.get(e11) && o11) {
             this.expandAndCollapseInfo.set(e11, NodeStatus.EXPAND);
         }
-        this.addDragNode(i11[0].parentId, i11[0].currentId, u11, v11, i11[0].data);
+        let c18 = this.addDragNode(i11[0].parentId, i11[0].currentId, u11, v11, i11[0].data);
+        if (!c18) {
+            return;
+        }
         for (let z11 = 1; z11 < i11.length; z11++) {
-            this.addNode(i11[z11].parentId, i11[z11].currentId, i11[z11].data, false);
+            let f18 = this.addNode(i11[z11].parentId, i11[z11].currentId, i11[z11].data, false);
+            if (!f18) {
+                return;
+            }
         }
         for (let y11 = 0; y11 < this.listNode.length; y11++) {
             if (this.listNode[y11].getNodeCurrentNodeId() === f11) {
@@ -2983,41 +3054,41 @@ class ListNodeDataSource extends BasicDataSource {
         this.reloadListNode(w11);
     }
 
-    reloadListNode(v10) {
-        let w10 = 0;
-        let x10 = 0;
+    reloadListNode(g10) {
+        let h10 = 0;
+        let i10 = 0;
         this.listNode.splice(0, this.listNode.length);
         this.loadedNodeIdAndIndexMap.clear();
         this.loadedListNode.splice(0, this.loadedListNode.length);
-        this.traverseNodeDF((z10) => {
-            let a11 = z10.currentNodeId;
-            if (a11 >= 0) {
-                if (this.nodeIdNodeParamMap.has(a11)) {
-                    let b11 = new NodeInfo(z10, this.nodeIdNodeParamMap.get(a11));
-                    b11.addImageCollapse(z10.getChildNodeInfo().isHasChildNode);
-                    this.listNode.push(b11);
-                    this.nodeIdAndNodeIndexMap.set(b11.getNodeCurrentNodeId(), x10++);
-                    if (this.expandAndCollapseInfo.get(a11) === NodeStatus.EXPAND) {
-                        b11.getNodeItem().imageCollapse = b11.getNodeItem().imageCollapse ?
-                        CollapseImageNodeFlyweightFactory.changeImageCollapseSource(NodeStatus.EXPAND, b11.getNodeItem().imageCollapse.isCollapse) : undefined;
+        this.traverseNodeDF((k10) => {
+            let l10 = k10.currentNodeId;
+            if (l10 >= 0) {
+                if (this.nodeIdNodeParamMap.has(l10)) {
+                    let m10 = new NodeInfo(k10, this.nodeIdNodeParamMap.get(l10));
+                    m10.addImageCollapse(k10.getChildNodeInfo().isHasChildNode);
+                    this.listNode.push(m10);
+                    this.nodeIdAndNodeIndexMap.set(m10.getNodeCurrentNodeId(), i10++);
+                    if (this.expandAndCollapseInfo.get(l10) === NodeStatus.EXPAND) {
+                        m10.getNodeItem()
+                            .imageCollapse = CollapseImageNodeFlyweightFactory.changeImageCollapseSource(NodeStatus.EXPAND, m10.getNodeItem().imageCollapse?.isCollapse);
                     }
-                    else if (this.expandAndCollapseInfo.get(a11) === NodeStatus.COLLAPSE) {
-                        b11.getNodeItem().imageCollapse = b11.getNodeItem().imageCollapse ?
-                        CollapseImageNodeFlyweightFactory.changeImageCollapseSource(NodeStatus.COLLAPSE, b11.getNodeItem().imageCollapse.isCollapse) : undefined;
+                    else if (this.expandAndCollapseInfo.get(l10) === NodeStatus.COLLAPSE) {
+                        m10.getNodeItem()
+                            .imageCollapse = CollapseImageNodeFlyweightFactory.changeImageCollapseSource(NodeStatus.COLLAPSE, m10.getNodeItem().imageCollapse?.isCollapse);
                     }
-                    for (let c11 = 0; c11 < v10.length; c11++) {
-                        if (v10[c11].getNodeCurrentNodeId() === b11.getNodeCurrentNodeId()) {
-                            b11.setNodeIsShow(v10[c11].getNodeIsShow());
-                            b11.setListItemHeight(v10[c11].getListItemHeight());
-                            if (b11.getNodeItem().mainTitleNode && b11.getIsShowTitle()) {
-                                b11.getNodeItem().mainTitleNode.title = v10[c11].getNodeItem().mainTitleNode?.title;
+                    for (let n10 = 0; n10 < g10.length; n10++) {
+                        if (g10[n10].getNodeCurrentNodeId() === m10.getNodeCurrentNodeId()) {
+                            m10.setNodeIsShow(g10[n10].getNodeIsShow());
+                            m10.setListItemHeight(g10[n10].getListItemHeight());
+                            if (m10.getNodeItem().mainTitleNode && m10.getIsShowTitle()) {
+                                m10.getNodeItem().mainTitleNode.title = g10[n10].getNodeItem().mainTitleNode?.title;
                             }
                             break;
                         }
                     }
-                    if (b11.getNodeIsShow()) {
-                        this.loadedNodeIdAndIndexMap.set(b11.getNodeCurrentNodeId(), w10++);
-                        this.loadedListNode.push(b11);
+                    if (m10.getNodeIsShow()) {
+                        this.loadedNodeIdAndIndexMap.set(m10.getNodeCurrentNodeId(), h10++);
+                        this.loadedListNode.push(m10);
                     }
                 }
             }
@@ -3150,7 +3221,8 @@ class ListNodeDataSource extends BasicDataSource {
                 q9 = r9.parentNodeId;
             }
             else {
-                throw new Error('updateParentChildNum: Parent node not found');
+                hilog.error(0x3900, 'TreeView', 'updateParentChildNum: parent node not found.');
+                break;
             }
         }
     }
@@ -3174,7 +3246,8 @@ class ListNodeDataSource extends BasicDataSource {
             let i9 = this.nodeIdNodeItemMap.get(e9);
             let j9 = new NodeItem(g9);
             if (i9.nodeLevel > this.maxNodeLevel) {
-                throw new Error('ListNodeUtils[addNode]: The level of the tree view cannot exceed 50.');
+                hilog.error(0x3900, 'TreeView', 'ListDataSource[addNode]: The level of the tree view cannot exceed 50.');
+                return false;
             }
             j9.nodeLevel = i9.nodeLevel + 1;
             j9.parentNodeId = e9;
@@ -3196,10 +3269,11 @@ class ListNodeDataSource extends BasicDataSource {
             }
             this.nodeIdNodeParamMap.set(f9, g9);
             this.nodeIdNodeItemMap.set(f9, j9);
-            return;
+            return true;
         }
         else {
-            throw new Error('ListDataSource[addNode]: Parent node not found.');
+            hilog.error(0x3900, 'TreeView', 'ListDataSource[addNode]: Parent node not found.');
+            return false;
         }
     }
 
@@ -3226,7 +3300,8 @@ class ListNodeDataSource extends BasicDataSource {
             let q8 = o8.indexOfParent;
             let r8 = 0;
             if (q8 < 0) {
-                throw new Error('Node does not exist.');
+                hilog.error(0x3900, 'TreeView', 'node does not exist.');
+                return [];
             }
             else {
                 r8 = n8.children[q8].getChildNodeInfo().allChildNum + 1;
@@ -3251,16 +3326,19 @@ class ListNodeDataSource extends BasicDataSource {
             return p8;
         }
         else {
-            throw new Error('Parent does not exist.');
+            hilog.error(0x3900, 'TreeView', 'parent does not exist.');
+            return [];
         }
     }
 
     getNodeInfoByNodeItem(j8) {
         if (j8?.currentNodeId === undefined) {
-            throw new Error('getNodeInfoByNodeItem: currentId is undefined');
+            hilog.error(0x3900, 'TreeView', 'getNodeInfoByNodeItem: currentId is undefined');
+            return new NodeInfo(new NodeItem(emptyNodeInfo), emptyNodeInfo);
         }
         if (!this.nodeIdAndNodeIndexMap.has(j8.currentNodeId)) {
-            throw new Error('getNodeInfoByNodeItem: not has nodeItem');
+            hilog.error(0x3900, 'TreeView', 'getNodeInfoByNodeItem: not has nodeItem.');
+            return new NodeInfo(new NodeItem(emptyNodeInfo), emptyNodeInfo);
         }
         let k8 = this.nodeIdAndNodeIndexMap.get(j8.currentNodeId);
         return this.listNode[k8];
@@ -3406,7 +3484,8 @@ class ListNodeDataSource extends BasicDataSource {
             let f7 = this.nodeIdNodeItemMap.get(a7);
             let g7 = new NodeItem(e7);
             if (f7.nodeLevel > this.maxNodeLevel) {
-                throw new Error('ListNodeUtils[addNode]: The level of the tree view cannot exceed 50.');
+                hilog.error(0x3900, 'TreeView', 'addDragNode: The level of the tree view cannot exceed 50.');
+                return false;
             }
             g7.nodeLevel = f7.nodeLevel + 1;
             g7.parentNodeId = a7;
@@ -3442,9 +3521,11 @@ class ListNodeDataSource extends BasicDataSource {
             this.updateParentChildNum(f7, true, 1);
             this.nodeIdNodeItemMap.set(b7, g7);
             this.nodeIdNodeParamMap.set(b7, e7);
+            return true;
         }
         else {
-            throw new Error('addDragNode: Parent node not found.');
+            hilog.error(0x3900, 'TreeView', 'addDragNode: parent node not found.');
+            return false;
         }
     }
 }
@@ -3708,7 +3789,7 @@ export class TreeViewInner extends ViewPU {
 
     decideFontScale() {
         let g6 = this.getUIContext();
-        let h6 = g6.getHostContext()?.config.fontSizeScale ?? 1;
+        let h6 = g6.getHostContext()?.config?.fontSizeScale ?? 1;
         if (!this.followingSystemFontScale) {
             return 1;
         }
@@ -4487,48 +4568,54 @@ class CollapseImageNodeFlyweightFactory {
         return y;
     }
 
-    static getCollapseImageNode(t, u, v) {
-        let w = v;
-        if (t == InteractionStatus.EDIT ||
-            t === InteractionStatus.DRAG_INSERT) {
-            if (u === NodeStatus.COLLAPSE) {
-                w = CollapseImageType.ARROW_RIGHT_WHITE;
+    static getCollapseImageNode(c1, d1, e1) {
+        if (e1 === undefined) {
+            return undefined;
+        }
+        let f1 = e1;
+        if (c1 == InteractionStatus.EDIT ||
+            c1 === InteractionStatus.DRAG_INSERT) {
+            if (d1 === NodeStatus.COLLAPSE) {
+                f1 = CollapseImageType.ARROW_RIGHT_WHITE;
             }
             else {
-                w = CollapseImageType.ARROW_DOWN_WHITE;
+                f1 = CollapseImageType.ARROW_DOWN_WHITE;
             }
         }
-        else if (t === InteractionStatus.FINISH_EDIT ||
-            t === InteractionStatus.FINISH_DRAG_INSERT) {
-            if (u === NodeStatus.COLLAPSE) {
-                w = CollapseImageType.ARROW_RIGHT;
+        else if (c1 === InteractionStatus.FINISH_EDIT ||
+            c1 === InteractionStatus.FINISH_DRAG_INSERT) {
+            if (d1 === NodeStatus.COLLAPSE) {
+                f1 = CollapseImageType.ARROW_RIGHT;
             }
             else {
-                w = CollapseImageType.ARROW_DOWN;
+                f1 = CollapseImageType.ARROW_DOWN;
             }
         }
-        return CollapseImageNodeFlyweightFactory.getCollapseImageNodeByType(w);
+        return CollapseImageNodeFlyweightFactory.getCollapseImageNodeByType(f1);
     }
-
-    static changeImageCollapseSource(q, r) {
-        let s;
-        if (!r) {
-            if (q === NodeStatus.COLLAPSE) {
-                s = CollapseImageType.ARROW_RIGHT_WHITE;
+    
+    static changeImageCollapseSource(z, a1) {
+        if (a1 === undefined) {
+            return undefined;
+        }
+        let b1;
+        if (!a1) {
+            if (z === NodeStatus.COLLAPSE) {
+                b1 = CollapseImageType.ARROW_RIGHT_WHITE;
             }
             else {
-                s = CollapseImageType.ARROW_DOWN_WHITE;
+                b1 = CollapseImageType.ARROW_DOWN_WHITE;
             }
         }
         else {
-            if (q === NodeStatus.COLLAPSE) {
-                s = CollapseImageType.ARROW_RIGHT;
+            if (z === NodeStatus.COLLAPSE) {
+                b1 = CollapseImageType.ARROW_RIGHT;
             }
             else {
-                s = CollapseImageType.ARROW_DOWN;
+                b1 = CollapseImageType.ARROW_DOWN;
             }
         }
-        return CollapseImageNodeFlyweightFactory.getCollapseImageNodeByType(s);
+        return CollapseImageNodeFlyweightFactory.getCollapseImageNodeByType(b1);
     }
 }
 

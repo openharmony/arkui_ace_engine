@@ -15,8 +15,6 @@
 
 #include "core/components/plugin/resource/plugin_manager_resource.h"
 
-#include "base/log/log.h"
-
 namespace OHOS::Ace {
 const char PLUGIN_MANAGER_PARAM_NONE[] = "";
 const char PLUGIN_MANAGER_PARAM_AND[] = "#HWJS-&-#";

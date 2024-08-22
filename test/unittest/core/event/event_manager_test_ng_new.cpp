@@ -1554,7 +1554,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest080, TestSize.Level1)
 
 /**
  * @tc.name: EventManagerTest081
- * @tc.desc: Test MockCancelEventAndDispatch
+ * @tc.desc: Test FalsifyCancelEventAndDispatch
  * @tc.type: FUNC
  */
 HWTEST_F(EventManagerTestNg, EventManagerTest081, TestSize.Level1)
@@ -1573,7 +1573,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest081, TestSize.Level1)
     eventManager->axisTouchTestResults_.clear();
     eventManager->axisTouchTestResults_[0] = resultList;
     AxisEvent event;
-    eventManager->MockCancelEventAndDispatch(event);
+    eventManager->FalsifyCancelEventAndDispatch(event);
     EXPECT_TRUE(eventManager->axisTouchTestResults_.empty());
 }
 

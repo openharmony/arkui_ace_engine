@@ -14,6 +14,11 @@
  */
 
 #include "scroll_test_ng.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+
+#include "core/components/scroll/scroll_bar_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {

@@ -52,7 +52,7 @@ template("uiservice_static") {
     part_name = ace_engine_part
     defines += invoker.defines
     cflags_cc += invoker.cflags_cc
-
+    branch_protector_ret = "pac_ret"
     sources = uiservice_files
     configs = [
       ":uiservicems_config",

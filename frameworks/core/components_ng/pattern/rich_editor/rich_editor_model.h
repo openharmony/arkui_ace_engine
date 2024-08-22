@@ -337,7 +337,7 @@ public:
     virtual void SetPlaceholder(PlaceholderOptions& options) = 0;
     virtual void SetTextDetectEnable(bool value) = 0;
     virtual void SetSupportPreviewText(bool value) = 0;
-    virtual void SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult) = 0;
+    virtual void SetTextDetectConfig(const TextDetectConfig& textDetectConfig) = 0;
     virtual void SetSelectedBackgroundColor(const DynamicColor& selectedColor) = 0;
     virtual void SetCaretColor(const DynamicColor& color) = 0;
     virtual void SetOnEditingChange(std::function<void(const bool&)>&& func) = 0;
@@ -350,6 +350,7 @@ public:
     virtual void SetSelectionMenuOptions(
         const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick) {}
     virtual void SetRequestKeyboardOnFocus(bool needToRequest) {}
+    virtual void SetEnableHapticFeedback(bool isEnabled) {}
 private:
     static std::unique_ptr<RichEditorModel> instance_;
     static std::mutex mutex_;

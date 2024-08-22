@@ -149,6 +149,12 @@ void AddResConfigInfo(
     aceResCfg.SetMcc(resConfig->GetMcc());
     aceResCfg.SetMnc(resConfig->GetMnc());
     aceResCfg.SetAppHasDarkRes(resConfig->GetAppDarkRes());
+    auto preferredLocaleInfo = resConfig->GetPreferredLocaleInfo();
+    if (preferredLocaleInfo != nullptr) {
+        aceResCfg.SetPreferredLanguage(preferredLocaleInfo->getLanguage());
+        aceResCfg.SetPreferredCountry(preferredLocaleInfo->getCountry());
+        aceResCfg.SetPreferredScript(preferredLocaleInfo->getScript());
+    }
 }
 
 void AddSetAppColorModeToResConfig(
@@ -1702,6 +1708,13 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         container->SetFocusWindowId(focusWindowId);
     }
 
+    auto realHostWindowId = window_->GetRealParentId();
+    if (realHostWindowId != 0) {
+        container->SetRealHostWindowId(static_cast<uint32_t>(realHostWindowId));
+    }
+    LOGI("focusWindowId: %{public}u, realHostWindowId: %{public}d",
+        focusWindowId, realHostWindowId);
+
     // after frontend initialize
     if (window_->IsFocused()) {
         Focus();
@@ -2230,7 +2243,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         if (pipelineContext) {
             if (safeAreaManager) {
                 uint32_t keyboardHeight = safeAreaManager->GetKeyboardInset().Length();
-                safeAreaManager->UpdateKeyboardSafeArea(keyboardHeight, config.Width());
+                safeAreaManager->UpdateKeyboardSafeArea(keyboardHeight, config.Height());
                 safeAreaManager->UpdateCutoutSafeArea(
                     container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT),
                     NG::OptionalSize<uint32_t>(config.Width(), config.Height()));
@@ -2552,6 +2565,18 @@ void UIContentImpl::SetFrameLayoutFinishCallback(std::function<void()>&& callbac
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddPersistAfterLayoutTask(std::move(callback));
     LOGI("[%{public}s][%{public}s][%{public}d]: SetFrameLayoutFinishCallback", bundleName_.c_str(),
+        moduleName_.c_str(), instanceId_);
+}
+
+void UIContentImpl::SetLastestFrameLayoutFinishCallback(std::function<void()>&& callback)
+{
+    CHECK_NULL_VOID(callback);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddLastestFrameLayoutFinishTask(std::move(callback));
+    LOGI("[%{public}s][%{public}s][%{public}d]: SetLastestFrameLayoutFinishCallback", bundleName_.c_str(),
         moduleName_.c_str(), instanceId_);
 }
 

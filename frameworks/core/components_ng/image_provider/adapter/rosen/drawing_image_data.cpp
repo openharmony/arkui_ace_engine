@@ -79,10 +79,21 @@ std::shared_ptr<RSData> DrawingImageData::GetRSData() const
 RefPtr<SvgDomBase> DrawingImageData::MakeSvgDom(const ImageSourceInfo& src)
 {
     CHECK_NULL_RETURN(rsData_, nullptr);
-    RSDataWrapper* wrapper = new RSDataWrapper{rsData_};
+    RSDataWrapper* wrapper = new RSDataWrapper { rsData_ };
     auto skData = SkData::MakeWithProc(rsData_->GetData(), rsData_->GetSize(), RSDataWrapperReleaseProc, wrapper);
+    if (!skData) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE,
+            "skData in MakeSvgDom is null, rsDataSize = %{public}d, nodeID = %{public}d-%{public}lld.",
+            static_cast<int32_t>(rsData_->GetSize()), nodeId_, static_cast<long long>(accessibilityId_));
+        return nullptr;
+    }
     const auto svgStream = std::make_unique<SkMemoryStream>(skData);
-    CHECK_NULL_RETURN(svgStream, nullptr);
+    if (!svgStream) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE,
+            "svgStream in MakeSvgDom is null, rsDataSize = %{public}d, nodeID = %{public}d-%{public}lld.",
+            static_cast<int32_t>(rsData_->GetSize()), nodeId_, static_cast<long long>(accessibilityId_));
+        return nullptr;
+    }
     if (SystemProperties::GetSvgMode() <= 0) {
         return SkiaSvgDom::CreateSkiaSvgDom(*svgStream, src.GetFillColor());
     }
@@ -92,6 +103,9 @@ RefPtr<SvgDomBase> DrawingImageData::MakeSvgDom(const ImageSourceInfo& src)
 #else
     auto svgDom_ = SvgDom::CreateSvgDom(*svgStream, src);
     if (!svgDom_) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE,
+            "svgDom in MakeSvgDom is null, rsDataSize = %{public}d, nodeID = %{public}d-%{public}lld.",
+            static_cast<int32_t>(rsData_->GetSize()), nodeId_, static_cast<long long>(accessibilityId_));
         return nullptr;
     }
     svgDom_->SetFuncNormalizeToPx(
@@ -118,8 +132,19 @@ std::pair<SizeF, int32_t> DrawingImageData::Parse() const
 
     RSDataWrapper* wrapper = new RSDataWrapper{rsData};
     auto skData = SkData::MakeWithProc(rsData->GetData(), rsData->GetSize(), RSDataWrapperReleaseProc, wrapper);
+    if (!skData) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE,
+            "skData in Parse is null, rsDataSize = %{public}d, nodeID = %{public}d-%{public}lld.",
+            static_cast<int32_t>(rsData->GetSize()), nodeId_, static_cast<long long>(accessibilityId_));
+        return {};
+    }
     auto codec = SkCodec::MakeFromData(skData);
-    CHECK_NULL_RETURN(codec, {});
+    if (!codec) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE,
+            "codec in Parse is null, rsDataSize = %{public}d, nodeID = %{public}d-%{public}lld.",
+            static_cast<int32_t>(rsData->GetSize()), nodeId_, static_cast<long long>(accessibilityId_));
+        return {};
+    }
     switch (codec->getOrigin()) {
         case SkEncodedOrigin::kLeftTop_SkEncodedOrigin:
         case SkEncodedOrigin::kRightTop_SkEncodedOrigin:

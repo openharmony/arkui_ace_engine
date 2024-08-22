@@ -184,9 +184,6 @@ void NavDestinationEventHub::FireOnWillDisAppear()
 
 bool NavDestinationEventHub::FireOnBackPressedEvent()
 {
-    state_ = NavDestinationState::ON_BACKPRESS;
-    UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
-        NavDestinationState::ON_BACKPRESS);
     if (onBackPressedEvent_) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navDestination backButton press is happening.");
         return onBackPressedEvent_();

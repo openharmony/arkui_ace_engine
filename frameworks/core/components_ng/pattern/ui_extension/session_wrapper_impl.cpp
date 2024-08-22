@@ -250,6 +250,9 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionCon
     UIEXT_LOGI("The session is created with want = %{private}s", want.ToString().c_str());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    auto realHostWindowId = pipeline->GetRealHostWindowId();
     auto wantPtr = std::make_shared<Want>(want);
     if (sessionType_ == SessionType::UI_EXTENSION_ABILITY) {
         if (wantPtr->GetStringParam(UI_EXTENSION_TYPE_KEY) == EMBEDDED_UI) {
@@ -277,7 +280,8 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionCon
         wantPtr->SetParam(UI_EXTENSION_TYPE_KEY, EMBEDDED_UI);
     }
     isNotifyOccupiedAreaChange_ = want.GetBoolParam(OCCUPIED_AREA_CHANGE_KEY, true);
-    UIEXT_LOGD("Want param isNotifyOccupiedAreaChange is %{public}d.", isNotifyOccupiedAreaChange_);
+    UIEXT_LOGI("Want param isNotifyOccupiedAreaChange is %{public}d, realHostWindowId: %{public}u.",
+        isNotifyOccupiedAreaChange_, realHostWindowId);
     auto callerToken = container->GetToken();
     auto parentToken = container->GetParentToken();
     Rosen::SessionInfo extensionSessionInfo = {
@@ -286,8 +290,9 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionCon
         .callerToken_ = callerToken,
         .rootToken_ = (isTransferringCaller_ && parentToken) ? parentToken : callerToken,
         .want = wantPtr,
-        .isAsyncModalBinding_ = config.isAsyncModalBinding,
+        .realParentId_ = static_cast<int32_t>(realHostWindowId),
         .uiExtensionUsage_ = static_cast<uint32_t>(config.uiExtensionUsage),
+        .isAsyncModalBinding_ = config.isAsyncModalBinding,
     };
     session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
     CHECK_NULL_VOID(session_);
@@ -465,6 +470,9 @@ void SessionWrapperImpl::NotifyForeground()
     UIEXT_LOGI("NotifyForeground, persistentid = %{public}d, hostWindowId = %{public}u,"
         " windowSceneId = %{public}d, IsScenceBoardWindow: %{public}d.",
         session_->GetPersistentId(), hostWindowId, windowSceneId, container->IsScenceBoardWindow());
+    if (container->IsScenceBoardWindow() && windowSceneId != INVALID_WINDOW_ID) {
+        hostWindowId = static_cast<uint32_t>(windowSceneId);
+    }
     Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionActivation(
         session_, hostWindowId, std::move(foregroundCallback_));
 }
@@ -645,7 +653,8 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
         "reason = %{public}d, duration = %{public}d, persistentId = %{public}d.",
         displayArea_.ToString().c_str(), curWindow.ToString().c_str(), reason, duration, persistentId);
     session_->UpdateRect({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),
-        std::round(displayArea_.Width()), std::round(displayArea_.Height()) }, reason, transaction);
+        std::round(displayArea_.Width()), std::round(displayArea_.Height()) }, reason, "NotifyDisplayArea",
+        transaction);
 }
 
 void SessionWrapperImpl::NotifySizeChangeReason(

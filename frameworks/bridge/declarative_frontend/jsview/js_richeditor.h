@@ -80,6 +80,9 @@ public:
     static void EditMenuOptions(const JSCallbackInfo& info);
     static std::optional<uint32_t> ParseColorResourceId(JSRef<JSVal> colorVal);
     static void SetEnableKeyboardOnFocus(const JSCallbackInfo& info);
+    static void SetEnableHapticFeedback(const JSCallbackInfo& info);
+    static JSRef<JSArray> CreateJsTextShadowObjectArray(const TextStyleResult& textStyleResult);
+    static JSRef<JSArray> CreateJsTextShadowObjectArray(const std::vector<Shadow>& textShadows);
 private:
     static void CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult);
     static void CreateImageStyleObj(JSRef<JSObject>& imageStyleObj, JSRef<JSObject>& spanResultObj,
@@ -96,7 +99,6 @@ private:
         const NG::RichEditorAbstractSpanResult& spanResult);
     static void SetJSSpanResultObject(JSRef<JSObject>& resultObj, const ResultObject& resultObject);
     static void SetJSDeleteSpan(JSRef<JSObject>& spanResultObj, const NG::RichEditorAbstractSpanResult& it);
-    static JSRef<JSArray> CreateJsTextShadowObjectArray(const TextStyleResult& textStyleResult);
 };
 
 class JSRichEditorBaseController : public Referenced {

@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "test/unittest/core/pattern/waterflow/water_flow_item_maps.h"
-#include "test/unittest/core/pattern/waterflow/water_flow_test_ng.h"
+
+#include "water_flow_item_maps.h"
+#include "water_flow_test_ng.h"
 
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
@@ -102,16 +103,16 @@ HWTEST_F(WaterFlowSegmentTest, Fill001, TestSize.Level1)
 {
     WaterFlowModelNG model = CreateWaterFlow();
     model.SetColumnsTemplate("1fr 1fr");
-    CreateWaterFlowItemWithHeight(50.0f);
-    CreateWaterFlowItemWithHeight(30.0f);
-    CreateWaterFlowItemWithHeight(40.0f);
-    CreateWaterFlowItemWithHeight(60.0f);
-    CreateWaterFlowItemWithHeight(20.0f);
-    CreateWaterFlowItemWithHeight(50.0f);
-    CreateWaterFlowItemWithHeight(30.0f);
-    CreateWaterFlowItemWithHeight(40.0f);
-    CreateWaterFlowItemWithHeight(2.0f);
-    CreateWaterFlowItemWithHeight(20.0f);
+    CreateItemWithHeight(50.0f);
+    CreateItemWithHeight(30.0f);
+    CreateItemWithHeight(40.0f);
+    CreateItemWithHeight(60.0f);
+    CreateItemWithHeight(20.0f);
+    CreateItemWithHeight(50.0f);
+    CreateItemWithHeight(30.0f);
+    CreateItemWithHeight(40.0f);
+    CreateItemWithHeight(2.0f);
+    CreateItemWithHeight(20.0f);
     CreateDone();
 
     auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(AceType::MakeRefPtr<WaterFlowLayoutInfo>());

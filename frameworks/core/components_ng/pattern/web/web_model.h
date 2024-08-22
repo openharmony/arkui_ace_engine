@@ -160,6 +160,7 @@ public:
 
     virtual void SetScreenCaptureRequestEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) {};
     virtual void SetNestedScroll(const NestedScrollOptions& nestedOpt) {}
+    virtual void SetNestedScrollExt(const NestedScrollOptionsExt& nestedOpt) {}
     virtual void SetMetaViewport(bool enabled) {}
     virtual void SetLayoutMode(WebLayoutMode mode) {}
     virtual void SetOverScrollMode(OverScrollMode mode) {}
@@ -188,6 +189,8 @@ public:
     virtual void SetAdsBlockedEventId(std::function<void(const BaseEventInfo* info)> && jsCallback) = 0;
     virtual void SetOverlayScrollbarEnabled(bool isEnabled) {};
     virtual void SetKeyboardAvoidMode(const WebKeyboardAvoidMode& mode) {}
+    virtual void SetEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+        const NG::OnMenuItemClickCallback&& onMenuItemClick) {};
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

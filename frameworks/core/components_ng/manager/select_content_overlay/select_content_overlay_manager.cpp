@@ -147,6 +147,7 @@ SelectOverlayInfo SelectContentOverlayManager::BuildSelectOverlayInfo(int32_t re
     overlayInfo.menuCallback.onCut = MakeMenuCallback(OptionMenuActionId::CUT, overlayInfo);
     overlayInfo.menuCallback.onSelectAll = MakeMenuCallback(OptionMenuActionId::SELECT_ALL, overlayInfo);
     overlayInfo.menuCallback.onCameraInput = MakeMenuCallback(OptionMenuActionId::CAMERA_INPUT, overlayInfo);
+    overlayInfo.menuCallback.onAIWrite = MakeMenuCallback(OptionMenuActionId::AI_WRITE, overlayInfo);
     overlayInfo.menuCallback.onAppear = MakeMenuCallback(OptionMenuActionId::APPEAR, overlayInfo);
     overlayInfo.menuCallback.onDisappear = MakeMenuCallback(OptionMenuActionId::DISAPPEAR, overlayInfo);
     overlayInfo.isUseOverlayNG = true;
@@ -494,6 +495,8 @@ void SelectContentOverlayManager::MountNodeToRoot(const RefPtr<FrameNode>& overl
         index++;
     }
 
+    TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "MountNodeToRoot:%{public}s, id:%{public}d", rootNode->GetTag().c_str(),
+        rootNode->GetId());
     overlayNode->MountToParent(rootNode, slot);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     if (!shareOverlayInfo_->isUsingMouse) {

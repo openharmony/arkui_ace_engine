@@ -156,10 +156,6 @@ bool GetToastShowMode(napi_env env, napi_value showModeNApi, NG::ToastShowMode& 
             showMode = static_cast<NG::ToastShowMode>(num);
         }
     }
-
-    if (showMode == NG::ToastShowMode::TOP_MOST) {
-        showMode = NG::ToastShowMode::DEFAULT;
-    }
     return true;
 }
 
@@ -320,7 +316,6 @@ void GetToastShadow(napi_env env, napi_value shadowNApi, std::optional<Shadow>& 
     Shadow shadowProps;
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, shadowNApi, &valueType);
-    GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadowProps);
     if (valueType == napi_number) {
         int32_t num = 0;
         napi_get_value_int32(env, shadowNApi, &num);
@@ -358,6 +353,8 @@ void GetToastShadow(napi_env env, napi_value shadowNApi, std::optional<Shadow>& 
             }
         }
         GetToastObjectShadow(env, shadowNApi, shadowProps);
+    } else {
+        GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadowProps);
     }
     shadow = shadowProps;
 }
@@ -547,7 +544,7 @@ napi_value JSPromptCloseToast(napi_env env, napi_callback_info info)
         NapiThrow(env, "The toastId is invalid.", ERROR_CODE_PARAM_INVALID);
         return nullptr;
     }
-    int32_t showModeVal = id & 0b111;
+    int32_t showModeVal = static_cast<int32_t>(static_cast<uint32_t>(id) & 0b111);
     int32_t toastId =
         static_cast<int32_t>(static_cast<uint32_t>(id) >>
                              3); // 3 : Move 3 bits to the right to get toastId, and the last 3 bits are the showMode

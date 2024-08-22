@@ -5750,4 +5750,145 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest111, TestSize.Level1)
     datePickerPattern->OnModifyDone();
 }
 
+/**
+ * @tc.name: DatePickerDialogViewConvertFontScaleValue001
+ * @tc.desc: Test DatePickerDialogView ConvertFontScaleValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewConvertFontScaleValue001, TestSize.Level1)
+{
+    Dimension fontSizeValue = 50.0_vp;
+    Dimension fontSizeLimit = 40.0_vp;
+
+    auto result = DatePickerDialogView::ConvertFontScaleValue(fontSizeValue, fontSizeLimit, true);
+    EXPECT_EQ(fontSizeLimit.Value(), result.Value());
+}
+
+/**
+ * @tc.name: DatePickerDialogViewConvertFontScaleValue002
+ * @tc.desc: Test DatePickerDialogView ConvertFontScaleValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewConvertFontScaleValue002, TestSize.Level1)
+{
+    Dimension fontSizeValue = 20.0_vp;
+    Dimension fontSizeLimit = 40.0_vp;
+
+    auto result = DatePickerDialogView::ConvertFontScaleValue(fontSizeValue, fontSizeLimit, true);
+    EXPECT_EQ(fontSizeValue.Value(), result.Value());
+}
+
+/**
+ * @tc.name: DatePickerDialogViewConvertFontSizeLimitTest001
+ * @tc.desc: Test DatePickerDialogView ConvertFontSizeLimit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewConvertFontSizeLimitTest001, TestSize.Level1)
+{
+    Dimension fontSizeValue(20.0);
+    Dimension fontSizeLimit(30.0);
+    bool isUserSetFont = false;
+    Dimension result = DatePickerDialogView::ConvertFontSizeLimit(fontSizeValue, fontSizeLimit, isUserSetFont);
+    EXPECT_EQ(result, fontSizeValue);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewConvertFontSizeLimitTest002
+ * @tc.desc: Test DatePickerDialogView ConvertFontSizeLimit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewConvertFontSizeLimitTest002, TestSize.Level1)
+{
+    Dimension fontSizeValue(20.0);
+    Dimension fontSizeLimit(30.0);
+    bool isUserSetFont = true;
+    Dimension result = DatePickerDialogView::ConvertFontSizeLimit(fontSizeValue, fontSizeLimit, isUserSetFont);
+    EXPECT_EQ(result, fontSizeValue);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewConvertFontSizeLimitTest003
+ * @tc.desc: Test DatePickerDialogView ConvertFontSizeLimit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewConvertFontSizeLimitTest003, TestSize.Level1)
+{
+    Dimension fontSizeValue(40.0);
+    Dimension fontSizeLimit(30.0);
+    bool isUserSetFont = true;
+    double fontScale = 2.0f;
+    MockPipelineContext::GetCurrent()->SetFontScale(fontScale);
+    Dimension result = DatePickerDialogView::ConvertFontSizeLimit(fontSizeValue, fontSizeLimit, isUserSetFont);
+    Dimension expected = fontSizeLimit / fontScale;
+    EXPECT_EQ(result, expected);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewConvertFontSizeLimitTest004
+ * @tc.desc: Test DatePickerDialogView ConvertFontSizeLimit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewConvertFontSizeLimitTest004, TestSize.Level1)
+{
+    Dimension fontSizeValue(10.0);
+    Dimension fontSizeLimit(30.0);
+    bool isUserSetFont = true;
+    double fontScale = 2.0f;
+    MockPipelineContext::GetCurrent()->SetFontScale(fontScale);
+    Dimension result = DatePickerDialogView::ConvertFontSizeLimit(fontSizeValue, fontSizeLimit, isUserSetFont);
+    EXPECT_EQ(result, fontSizeValue);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewGetUserSettingLimitTest001
+ * @tc.desc: Test DatePickerDialogView AdjustFontSizeScale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewGetUserSettingLimitTest001, TestSize.Level1)
+{
+    double fontScale = 1.0f;
+    Dimension fontSizeValue(10.0);
+    Dimension result = DatePickerDialogView::AdjustFontSizeScale(fontSizeValue, fontScale);
+    EXPECT_EQ(result, fontSizeValue * fontScale);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewGetUserSettingLimitTest002
+ * @tc.desc: Test DatePickerDialogView AdjustFontSizeScale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewGetUserSettingLimitTest002, TestSize.Level1)
+{
+    double fontScale = 1.75f;
+    Dimension fontSizeValue(10.0);
+    Dimension result = DatePickerDialogView::AdjustFontSizeScale(fontSizeValue, fontScale);
+    EXPECT_EQ(result, fontSizeValue * fontScale);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewGetUserSettingLimitTest003
+ * @tc.desc: Test DatePickerDialogView AdjustFontSizeScale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewGetUserSettingLimitTest003, TestSize.Level1)
+{
+    double fontScale = 2.0f;
+    Dimension fontSizeValue(10.0);
+    Dimension result = DatePickerDialogView::AdjustFontSizeScale(fontSizeValue, fontScale);
+    EXPECT_EQ(result, fontSizeValue * fontScale);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewGetUserSettingLimitTest004
+ * @tc.desc: Test DatePickerDialogView AdjustFontSizeScale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewGetUserSettingLimitTest004, TestSize.Level1)
+{
+    double fontScale = 3.2f;
+    Dimension fontSizeValue(10.0);
+    Dimension result = DatePickerDialogView::AdjustFontSizeScale(fontSizeValue, fontScale);
+    EXPECT_NE(result, fontSizeValue * fontScale);
+}
+
 } // namespace OHOS::Ace::NG

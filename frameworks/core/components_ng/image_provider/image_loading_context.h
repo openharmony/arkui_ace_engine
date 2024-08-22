@@ -37,7 +37,8 @@ class ACE_FORCE_EXPORT ImageLoadingContext : public AceType {
 
 public:
     // Create an empty ImageObject and initialize state machine when the constructor is called
-    ImageLoadingContext(const ImageSourceInfo& src, LoadNotifier&& loadNotifier, bool syncLoad = false);
+    ImageLoadingContext(const ImageSourceInfo& src, LoadNotifier&& loadNotifier, bool syncLoad = false,
+        const ImageDfxConfig& imageDfxConfig = {});
     ~ImageLoadingContext() override;
 
     // return true if calling MakeCanvasImage is necessary
@@ -146,6 +147,12 @@ public:
     void SetImageDfxConfig(const ImageDfxConfig& imageDfxConfig)
     {
         imageDfxConfig_ = imageDfxConfig;
+    }
+
+
+    ImageDfxConfig GetImageDfxConfig()
+    {
+        return imageDfxConfig_;
     }
 
 private:

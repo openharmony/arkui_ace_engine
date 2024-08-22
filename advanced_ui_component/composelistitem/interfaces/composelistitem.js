@@ -296,7 +296,7 @@ class ContentItemStruct extends ViewPU {
                                     Image.width(ICON_SIZE_MAP.get(this.iconStyle));
                                     Image.height(ICON_SIZE_MAP.get(this.iconStyle));
                                     Image.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                                    Image.focusable(true);
+                                    Image.focusable(false);
                                     Image.draggable(false);
                                     Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
                                     Image.flexShrink(0);
@@ -315,7 +315,7 @@ class ContentItemStruct extends ViewPU {
                                         maxHeight: ICON_SIZE_MAP.get(this.iconStyle)
                                     });
                                     Image.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                                    Image.focusable(true);
+                                    Image.focusable(false);
                                     Image.draggable(false);
                                     Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
                                     Image.flexShrink(0);
@@ -773,6 +773,7 @@ class OperateItemStruct extends ViewPU {
     createButton(z6 = null) {
         this.observeComponentCreation2((h7, i7) => {
             Button.createWithChild();
+            Button.padding({ top: 0, bottom: 0 });
             Button.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
             Button.hitTestBehavior(HitTestMode.Block);
             Button.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_button3'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
@@ -787,20 +788,20 @@ class OperateItemStruct extends ViewPU {
             Button.onFocus(() => {
                 this.parentCanFocus = false;
             });
-            Button.onTouch((s11) => {
-                if (s11.type === TouchType.Down) {
+            Button.onTouch((d1) => {
+                if (d1.type === TouchType.Down) {
                     this.parentCanTouch = false;
                 }
-                if (s11.type === TouchType.Up || s11.type === TouchType.Cancel) {
+                if (d1.type === TouchType.Up || d1.type === TouchType.Cancel) {
                     this.parentCanTouch = true;
                 }
             });
-            Button.onHover((r11) => {
+            Button.onHover((c1) => {
                 this.parentCanHover = false;
-                if (r11 && this.parentFrontColor === this.hoveringColor) {
+                if (c1 && this.parentFrontColor === this.hoveringColor) {
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 }
-                if (!r11) {
+                if (!c1) {
                     this.parentCanHover = true;
                     if (this.parentIsHover) {
                         this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
@@ -1065,7 +1066,7 @@ class OperateItemStruct extends ViewPU {
                 maxLines: TEXT_MAX_LINE
             });
             Button.backgroundColor(Color.Transparent);
-            Button.height(this.parentDirection === FlexDirection.Column ? undefined : TEXT_ARROW_HEIGHT);
+            Button.constraintSize({ minHeight: TEXT_ARROW_HEIGHT });
             Button.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
             Button.onFocus(() => {
                 this.parentCanFocus = false;
@@ -1077,27 +1078,27 @@ class OperateItemStruct extends ViewPU {
                 right: 0
             });
             Button.stateEffect(this.arrow?.action !== undefined);
-            Button.onTouch((q11) => {
+            Button.onTouch((b1) => {
                 if (this.arrow?.action === undefined) {
                     return;
                 }
-                if (q11.type === TouchType.Down) {
+                if (b1.type === TouchType.Down) {
                     this.parentCanTouch = false;
                 }
-                if (q11.type === TouchType.Up || q11.type === TouchType.Cancel) {
+                if (b1.type === TouchType.Up || b1.type === TouchType.Cancel) {
                     this.parentCanTouch = true;
                 }
             });
             Button.hoverEffect(this.arrow?.action !== undefined ? HoverEffect.Auto : HoverEffect.None);
-            Button.onHover((p11) => {
+            Button.onHover((a1) => {
                 if (this.arrow?.action === undefined) {
                     return;
                 }
                 this.parentCanHover = false;
-                if (p11) {
+                if (a1) {
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 }
-                if (!p11) {
+                if (!a1) {
                     this.parentCanHover = true;
                     if (this.parentIsHover) {
                         this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
@@ -1134,7 +1135,7 @@ class OperateItemStruct extends ViewPU {
                         Image.height(OPERATEITEM_ICONLIKE_SIZE);
                         Image.width(OPERATEITEM_ARROW_WIDTH);
                         Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_fourth'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                        Image.focusable(true);
+                        Image.focusable(false);
                         Image.draggable(false);
                     }, Image);
                     Flex.pop();
@@ -1165,7 +1166,7 @@ class OperateItemStruct extends ViewPU {
                         Image.height(OPERATEITEM_ICONLIKE_SIZE);
                         Image.width(OPERATEITEM_ARROW_WIDTH);
                         Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_fourth'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                        Image.focusable(true);
+                        Image.focusable(false);
                         Image.draggable(false);
                     }, Image);
                     Row.pop();
@@ -1763,12 +1764,13 @@ export class ComposeListItem extends ViewPU {
                     {
                         this.observeComponentCreation2((l1, m1) => {
                             if (m1) {
-                                let n1 = new ContentItemStruct(this, {}, undefined, l1, () => { }, { page: "library/src/main/ets/components/composelistitem.ets", line: 938, col: 11 });
+                                let n1 = new ContentItemStruct(this, {}, undefined, l1, () => { },
+                                    { page: 'library/src/main/ets/components/composelistitem.ets', line: 939, col: 11 });
                                 ViewPU.create(n1);
-                                let t1 = () => {
+                                let z = () => {
                                     return {};
                                 };
-                                n1.paramsGenerator_ = t1;
+                                n1.paramsGenerator_ = z;
                             }
                             else {
                                 this.updateStateVarsOfChildByElmtId(l1, {});
@@ -1787,14 +1789,10 @@ export class ComposeListItem extends ViewPU {
             If.create();
             if (this.contentItem !== null) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((o1, p1) => {
-                        __Common__.create();
-                        __Common__.flexShrink(0);
-                    }, __Common__);
                     {
-                        this.observeComponentCreation2((d, o) => {
-                            if (o) {
-                                let p = new ContentItemStruct(this, {
+                        this.observeComponentCreation2((z, f1) => {
+                            if (f1) {
+                                let t1 = new ContentItemStruct(this, {
                                     icon: this.contentItem?.icon,
                                     iconStyle: this.contentItem?.iconStyle,
                                     primaryText: this.contentItem?.primaryText,
@@ -1804,9 +1802,9 @@ export class ComposeListItem extends ViewPU {
                                     fontSizeScale: this.fontSizeScale,
                                     parentDirection: this.containerDirection,
                                     itemDirection: this.contentItemDirection,
-                                }, undefined, d, () => { }, { page: "library/src/main/ets/components/composelistitem.ets", line: 941, col: 11 });
-                                ViewPU.create(p);
-                                let t = () => {
+                                }, undefined, z, () => { }, { page: "library/src/main/ets/components/composelistitem.ets", line: 942, col: 11 });
+                                ViewPU.create(t1);
+                                let a4 = () => {
                                     return {
                                         icon: this.contentItem?.icon,
                                         iconStyle: this.contentItem?.iconStyle,
@@ -1819,10 +1817,10 @@ export class ComposeListItem extends ViewPU {
                                         itemDirection: this.contentItemDirection
                                     };
                                 };
-                                p.paramsGenerator_ = t;
+                                t1.paramsGenerator_ = a4;
                             }
                             else {
-                                this.updateStateVarsOfChildByElmtId(d, {
+                                this.updateStateVarsOfChildByElmtId(z, {
                                     icon: this.contentItem?.icon,
                                     iconStyle: this.contentItem?.iconStyle,
                                     primaryText: this.contentItem?.primaryText,
@@ -1836,7 +1834,6 @@ export class ComposeListItem extends ViewPU {
                             }
                         }, { name: "ContentItemStruct" });
                     }
-                    __Common__.pop();
                 });
             }
             else {
@@ -1881,7 +1878,8 @@ export class ComposeListItem extends ViewPU {
                                     parentCanHover: this.__canHover,
                                     rightWidth: this.calculatedRightWidth(),
                                     parentDirection: this.__containerDirection,
-                                }, undefined, l, () => { }, { page: "library/src/main/ets/components/composelistitem.ets", line: 955, col: 11 });
+                                }, undefined, l, () => { },
+                                    { page: 'library/src/main/ets/components/composelistitem.ets', line: 956, col: 11 });
                                 ViewPU.create(n);
                                 let a = () => {
                                     return {

@@ -17,7 +17,6 @@
 
 #include "core/components/flex/flex_component.h"
 #include "core/components/padding/padding_component.h"
-#include "core/components/tab_bar/render_tab_bar_item.h"
 #include "core/components/tab_bar/tab_bar_item_element.h"
 
 namespace OHOS::Ace {

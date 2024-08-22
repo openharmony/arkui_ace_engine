@@ -47,9 +47,11 @@ void WebModelNG::Create(const std::string& src, const RefPtr<WebController>& web
 
     auto webPattern = frameNode->GetPattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
-    webPattern->SetNestedScroll(NestedScrollOptions({
-            .forward = NestedScrollMode::SELF_FIRST,
-            .backward = NestedScrollMode::SELF_FIRST,
+    webPattern->SetNestedScrollExt(NestedScrollOptionsExt({
+            .scrollUp = NestedScrollMode::SELF_FIRST,
+            .scrollDown = NestedScrollMode::SELF_FIRST,
+            .scrollLeft = NestedScrollMode::SELF_FIRST,
+            .scrollRight = NestedScrollMode::SELF_FIRST,
         }));
     webPattern->SetWebSrc(src);
     webPattern->SetWebController(webController);
@@ -73,9 +75,11 @@ void WebModelNG::Create(const std::string& src, std::function<void(int32_t)>&& s
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
-    webPattern->SetNestedScroll(NestedScrollOptions({
-            .forward = NestedScrollMode::SELF_FIRST,
-            .backward = NestedScrollMode::SELF_FIRST,
+    webPattern->SetNestedScrollExt(NestedScrollOptionsExt({
+            .scrollUp = NestedScrollMode::SELF_FIRST,
+            .scrollDown = NestedScrollMode::SELF_FIRST,
+            .scrollLeft = NestedScrollMode::SELF_FIRST,
+            .scrollRight = NestedScrollMode::SELF_FIRST,
         }));
     webPattern->SetWebSrc(src);
     webPattern->SetPopup(popup);
@@ -1014,6 +1018,13 @@ void WebModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
     webPattern->SetNestedScroll(nestedOpt);
 }
 
+void WebModelNG::SetNestedScrollExt(const NestedScrollOptionsExt& nestedOpt)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->SetNestedScrollExt(nestedOpt);
+}
+
 void WebModelNG::SetMetaViewport(bool enabled)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
@@ -1103,6 +1114,14 @@ void WebModelNG::SetSelectionMenuOptions(const WebMenuOptionsParam& webMenuOptio
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateSelectionMenuOptions(std::move(webMenuOption));
+}
+
+void WebModelNG::SetEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+                                    const NG::OnMenuItemClickCallback&& onMenuItemClick)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateEditMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
 
 void WebModelNG::SetViewportFitChangedId(std::function<void(const BaseEventInfo* info)>&& jsCallback)

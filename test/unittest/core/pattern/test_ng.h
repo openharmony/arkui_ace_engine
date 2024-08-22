@@ -22,16 +22,8 @@
 
 #define private public
 #define protected public
-#include "base/geometry/axis.h"
-#include "base/geometry/dimension.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/components/button/button_theme.h"
+#include "core/components/theme/theme_constants.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_abstract_model_ng.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern//linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern//linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"

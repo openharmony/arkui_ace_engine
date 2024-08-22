@@ -19,6 +19,7 @@
 #include <iomanip>
 #include <memory>
 #include <sstream>
+
 #include "form_info_base.h"
 
 #include "base/log/log.h"
@@ -27,7 +28,6 @@
 #include "core/components_ng/gestures/pan_gesture.h"
 #include "core/gestures/gesture_info.h"
 #include "frameworks/base/json/json_util.h"
-#include "frameworks/core/common/frontend.h"
 
 #ifdef OHOS_STANDARD_SYSTEM
 #include "form_callback_client.h"
@@ -112,6 +112,7 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
 #endif
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    std::lock_guard<std::mutex> lock(recycleMutex_);
     // dynamic add new form should release the running form first.
     if (runningCardId_ > 0) {
         TAG_LOGI(AceLogTag::ACE_FORM, "Add new form, release platform resource about old form:%{public}s.",
@@ -208,7 +209,7 @@ void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo
 
     bool needHandleCachedClick =
         want.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT, false);
-    bool isRecover = recycleStatus_ == RecycleStatus::RECYCLED || needHandleCachedClick;
+    bool isRecover = recycleStatus_ != RecycleStatus::RECOVERED || needHandleCachedClick;
     AAFwk::Want newWant;
     newWant.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_DYNAMIC, formInfo.isDynamic);
     newWant.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM, isRecover);
@@ -222,6 +223,11 @@ void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo
         formRendererDispatcher_ = iface_cast<IFormRendererDispatcher>(proxy);
     } else {
         TAG_LOGE(AceLogTag::ACE_FORM, "want renderer dispatcher null");
+    }
+
+    {
+        std::lock_guard<std::mutex> lock(recycleMutex_);
+        recycleStatus_ = RecycleStatus::RECOVERED;
     }
 
     isDynamic_ = formInfo.isDynamic;
@@ -244,7 +250,6 @@ void FormManagerDelegate::HandleCachedClickEvents()
         std::lock_guard<std::mutex> lock(recycleMutex_);
         TAG_LOGI(AceLogTag::ACE_FORM, "process click event after recover form, pointerEventCache_.size: %{public}s",
             std::to_string(pointerEventCache_.size()).c_str());
-        recycleStatus_ = RecycleStatus::RECOVERED;
         for (const auto& pointerEvent : pointerEventCache_) {
             SerializedGesture serializedGesture;
             formRendererDispatcher_->DispatchPointerEvent(pointerEvent, serializedGesture);
@@ -827,10 +832,6 @@ void FormManagerDelegate::HandleEnableFormCallback(const bool enable)
 
 void FormManagerDelegate::ReAddForm()
 {
-    {
-        std::lock_guard<std::mutex> lock(recycleMutex_);
-        recycleStatus_ = RecycleStatus::RECOVERED;
-    }
     formRendererDispatcher_ = nullptr; // formRendererDispatcher_ need reset, otherwise PointerEvent will disable
     if (wantCache_.HasParameter(PARAM_FORM_MIGRATE_FORM_KEY)) {
         TAG_LOGW(AceLogTag::ACE_FORM, "Remove migrate form key.");

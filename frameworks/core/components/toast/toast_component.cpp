@@ -15,11 +15,6 @@
 
 #include "core/components/toast/toast_component.h"
 
-#include <atomic>
-
-#include "base/utils/string_utils.h"
-#include "base/utils/system_properties.h"
-#include "core/common/ace_application_info.h"
 #include "core/components/align/align_component.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"

@@ -510,6 +510,10 @@ void MenuPattern::UpdateMenuItemChildren(RefPtr<UINode>& host)
             isNeedDivider_ = false;
             UpdateMenuItemChildren(itemGroupNode);
             isNeedDivider_ = false;
+            auto accessibilityProperty =
+                DynamicCast<FrameNode>(child)->GetAccessibilityProperty<AccessibilityProperty>();
+            CHECK_NULL_VOID(accessibilityProperty);
+            accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
         } else if (child->GetTag() == V2::JS_FOR_EACH_ETS_TAG || child->GetTag() == V2::JS_SYNTAX_ITEM_ETS_TAG) {
             auto nodesSet = AceType::DynamicCast<UINode>(child);
             CHECK_NULL_VOID(nodesSet);

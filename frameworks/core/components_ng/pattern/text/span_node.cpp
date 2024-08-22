@@ -275,7 +275,9 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
     CHECK_NULL_RETURN(pattern, -1);
     textStyle.SetTextBackgroundStyle(backgroundStyle);
     if (pattern->NeedShowAIDetect() && !aiSpanMap.empty()) {
-        UpdateTextStyleForAISpan(spanContent, builder, textStyle);
+        TextStyle aiSpanStyle = textStyle;
+        pattern->ModifyAISpanStyle(aiSpanStyle);
+        UpdateTextStyleForAISpan(spanContent, builder, textStyle, aiSpanStyle);
     } else {
         UpdateTextStyle(spanContent, builder, textStyle, selectedStart, selectedEnd);
     }
@@ -341,8 +343,8 @@ void SpanItem::UpdateSymbolSpanColor(const RefPtr<FrameNode>& frameNode, TextSty
     }
 }
 
-void SpanItem::UpdateTextStyleForAISpan(
-    const std::string& spanContent, const RefPtr<Paragraph>& builder, const TextStyle& textStyle)
+void SpanItem::UpdateTextStyleForAISpan(const std::string& spanContent, const RefPtr<Paragraph>& builder,
+    const TextStyle& textStyle, const TextStyle& aiSpanStyle)
 {
     auto wSpanContent = StringUtils::ToWstring(spanContent);
     int32_t wSpanContentLength = static_cast<int32_t>(wSpanContent.length());
@@ -351,8 +353,6 @@ void SpanItem::UpdateTextStyleForAISpan(
         spanStart -= 1;
     }
     int32_t preEnd = spanStart;
-    std::optional<TextStyle> aiSpanTextStyle = textStyle;
-    SetAiSpanTextStyle(aiSpanTextStyle);
     while (!aiSpanMap.empty()) {
         auto aiSpan = aiSpanMap.begin()->second;
         if (aiSpan.start >= position || preEnd >= position) {
@@ -375,7 +375,7 @@ void SpanItem::UpdateTextStyleForAISpan(
         }
         auto displayContent = StringUtils::ToWstring(aiSpan.content)
             .substr(aiSpanStartInSpan - aiSpan.start, aiSpanEndInSpan - aiSpanStartInSpan);
-        UpdateTextStyle(StringUtils::ToString(displayContent), builder, aiSpanTextStyle.value(),
+        UpdateTextStyle(StringUtils::ToString(displayContent), builder, aiSpanStyle,
             selectedStart - contentStart, selectedEnd - contentStart);
         preEnd = aiSpanEndInSpan;
         if (aiSpan.end > position) {
@@ -388,28 +388,6 @@ void SpanItem::UpdateTextStyleForAISpan(
         int32_t contentStart = preEnd - spanStart;
         auto afterContent = StringUtils::ToString(wSpanContent.substr(preEnd - spanStart, position - preEnd));
         UpdateTextStyle(afterContent, builder, textStyle, selectedStart - contentStart, selectedEnd - contentStart);
-    }
-}
-
-void SpanItem::SetAiSpanTextStyle(std::optional<TextStyle>& aiSpanTextStyle)
-{
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    if (!aiSpanTextStyle.has_value()) {
-        TextStyle themeTextStyle =
-            CreateTextStyleUsingTheme(fontStyle, textLineStyle, pipelineContext->GetTheme<TextTheme>());
-        if (NearZero(themeTextStyle.GetFontSize().Value())) {
-            return;
-        }
-        aiSpanTextStyle = themeTextStyle;
-    } else {
-        auto hyerlinkTheme = pipelineContext->GetTheme<HyperlinkTheme>();
-        CHECK_NULL_VOID(hyerlinkTheme);
-        auto hyerlinkColor = hyerlinkTheme->GetTextColor();
-        aiSpanTextStyle.value().SetTextColor(hyerlinkColor);
-        aiSpanTextStyle.value().SetTextDecoration(TextDecoration::UNDERLINE);
-        aiSpanTextStyle.value().SetTextDecorationColor(hyerlinkColor);
-        aiSpanTextStyle.value().SetTextDecorationStyle(TextDecorationStyle::SOLID);
     }
 }
 
@@ -614,6 +592,8 @@ TextStyle SpanItem::InheritParentProperties(const RefPtr<FrameNode>& frameNode, 
     INHERIT_TEXT_STYLE(fontStyle, FontFeature, SetFontFeatures);
     INHERIT_TEXT_STYLE(fontStyle, MinFontScale, SetMinFontScale);
     INHERIT_TEXT_STYLE(fontStyle, MaxFontScale, SetMaxFontScale);
+    INHERIT_TEXT_STYLE(fontStyle, VariableFontWeight, SetVariableFontWeight);
+    INHERIT_TEXT_STYLE(fontStyle, EnableVariableFontWeight, SetEnableVariableFontWeight);
     INHERIT_TEXT_STYLE(textLineStyle, LineHeight, SetLineHeight);
     INHERIT_TEXT_STYLE(textLineStyle, LineSpacing, SetLineSpacing);
     INHERIT_TEXT_STYLE(textLineStyle, HalfLeading, SetHalfLeading);
@@ -664,9 +644,7 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem() const
     COPY_TEXT_STYLE(textLineStyle, HalfLeading, UpdateHalfLeading);
 
     if (backgroundStyle.has_value()) {
-        sameSpan->backgroundStyle->backgroundColor = backgroundStyle->backgroundColor;
-        sameSpan->backgroundStyle->backgroundRadius = backgroundStyle->backgroundRadius;
-        sameSpan->backgroundStyle->groupId = backgroundStyle->groupId;
+        sameSpan->backgroundStyle = backgroundStyle;
     }
 
     sameSpan->onClick = onClick;
@@ -1070,6 +1048,7 @@ int32_t PlaceholderSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNo
     run.width = placeholderStyle.width;
     run.height = placeholderStyle.height;
     textStyle.SetTextDecoration(TextDecoration::NONE);
+    textStyle.SetTextBackgroundStyle(backgroundStyle);
     builder->PushStyle(textStyle);
     int32_t index = builder->AddPlaceholder(run);
     run_ = run;
@@ -1110,7 +1089,7 @@ std::set<PropertyInfo> SpanNode::CalculateInheritPropertyInfo()
         PropertyInfo::SYMBOL_RENDERING_STRATEGY, PropertyInfo::SYMBOL_EFFECT_STRATEGY, PropertyInfo::WORD_BREAK,
         PropertyInfo::LINE_BREAK_STRATEGY, PropertyInfo::FONTFEATURE, PropertyInfo::LINESPACING,
         PropertyInfo::SYMBOL_EFFECT_OPTIONS, PropertyInfo::HALFLEADING, PropertyInfo::MIN_FONT_SCALE,
-        PropertyInfo::MAX_FONT_SCALE };
+        PropertyInfo::MAX_FONT_SCALE, PropertyInfo::VARIABLE_FONT_WEIGHT, PropertyInfo::ENABLE_VARIABLE_FONT_WEIGHT };
     set_difference(propertyInfoContainer.begin(), propertyInfoContainer.end(), propertyInfo_.begin(),
         propertyInfo_.end(), inserter(inheritPropertyInfo, inheritPropertyInfo.begin()));
     return inheritPropertyInfo;

@@ -956,12 +956,6 @@ PipelineContext* UINode::GetContext() const
             context = PipelineContext::GetCurrentContextPtrSafely();
         }
     }
-
-    if (context && context->IsDestroyed()) {
-        LOGW("Get context from node when the context is destroyed. The context_ of node is%{public}s nullptr",
-            context_? " not" : "");
-    }
-
     return context;
 }
 
@@ -1228,7 +1222,7 @@ bool UINode::MarkRemoving()
 {
     bool pendingRemove = false;
     isRemoving_ = true;
-    const auto& children = GetChildren();
+    const auto children = GetChildren();
     for (const auto& child : children) {
         pendingRemove = child->MarkRemoving() || pendingRemove;
     }

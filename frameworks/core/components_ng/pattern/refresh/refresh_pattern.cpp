@@ -92,6 +92,14 @@ bool RefreshPattern::OnDirtyLayoutWrapperSwap(
         }
         isRemoveCustomBuilder_ = false;
         isTextNodeChanged_ = false;
+    } else if (progressChild_) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_RETURN(geometryNode, false);
+        auto refreshHeight = geometryNode->GetFrameSize().Height();
+        auto scrollOffset = std::clamp(scrollOffset_, 0.0f, refreshHeight);
+        UpdateScrollTransition(scrollOffset);
     }
     return false;
 }
@@ -353,8 +361,6 @@ void RefreshPattern::InitChildNode()
         CHECK_NULL_VOID(textAccessibilityProperty);
         textAccessibilityProperty->SetAccessibilityLevel(accessibilityLevel);
     }
-
-    OnColorConfigurationUpdate();
 }
 
 void RefreshPattern::RefreshStatusChangeEffect()

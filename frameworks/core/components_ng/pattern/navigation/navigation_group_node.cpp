@@ -56,6 +56,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/event/package/package_event_proxy.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -363,6 +364,10 @@ void NavigationGroupNode::SetBackButtonEvent(const RefPtr<NavDestinationGroupNod
         CHECK_NULL_RETURN(navDestination, false);
         auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
         CHECK_NULL_RETURN(eventHub, false);
+        eventHub->SetState(NavDestinationState::ON_BACKPRESS);
+        auto navdestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
+        UIObserverHandler::GetInstance().NotifyNavigationStateChange(
+            navdestinationPattern, NavDestinationState::ON_BACKPRESS);
         auto isOverride = eventHub->GetOnBackPressedEvent();
         auto result = false;
         if (isOverride) {
@@ -1175,6 +1180,14 @@ void NavigationGroupNode::OnAttachToMainTree(bool recursive)
     int32_t pageId = pagePattern->GetPageInfo()->GetPageId();
     if (!findNavdestination) {
         pipelineContext->AddNavigationNode(pageId, WeakClaim(this));
+    }
+    auto* eventProxy = PackageEventProxy::GetInstance();
+    if (eventProxy) {
+        auto container = OHOS::Ace::Container::CurrentSafely();
+        CHECK_NULL_VOID(container);
+        auto navigationRoute = container->GetNavigationRoute();
+        CHECK_NULL_VOID(navigationRoute);
+        eventProxy->Register(WeakClaim(AceType::RawPtr(navigationRoute)));
     }
 }
 

@@ -279,13 +279,14 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
         UIEXT_LOGI("The old want is %{private}s.", sessionWrapper_->GetWant()->ToString().c_str());
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        host->RemoveChild(contentNode_);
+        host->RemoveChildAtIndex(0);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         NotifyDestroy();
     }
 
     isKeyAsync_ = want.GetBoolParam(ABILITY_KEY_ASYNC, false);
     UIExtensionUsage uIExtensionUsage = GetUIExtensionUsage(want);
+    usage_ = uIExtensionUsage;
     UIEXT_LOGI("The ability KeyAsync %{public}d, uIExtensionUsage: %{public}u.",
         isKeyAsync_, uIExtensionUsage);
     MountPlaceholderNode();
@@ -356,10 +357,10 @@ void UIExtensionPattern::OnConnect()
     host->AddChild(contentNode_, 0);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     surfaceNode->CreateNodeInRenderThread();
-    surfaceNode->SetForeground(isModal_);
+    surfaceNode->SetForeground(usage_ == UIExtensionUsage::MODAL);
     FireOnRemoteReadyCallback();
     auto focusHub = host->GetFocusHub();
-    if (isModal_ && focusHub) {
+    if ((usage_ == UIExtensionUsage::MODAL) && focusHub) {
         focusHub->RequestFocusImmediately();
     }
     bool isFocused = focusHub && focusHub->IsCurrentFocus();
@@ -370,7 +371,7 @@ void UIExtensionPattern::OnConnect()
     CHECK_NULL_VOID(pipeline);
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
     uiExtensionManager->AddAliveUIExtension(host->GetId(), WeakClaim(this));
-    if (isFocused || isModal_) {
+    if (isFocused || (usage_ == UIExtensionUsage::MODAL)) {
         uiExtensionManager->RegisterUIExtensionInFocus(WeakClaim(this), sessionWrapper_);
     }
     InitializeAccessibility();
@@ -397,7 +398,7 @@ void UIExtensionPattern::OnDisconnect(bool isAbnormal)
     UIEXT_LOGI("The session is disconnected and the current state is '%{public}s'.", ToString(state_));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->RemoveChild(contentNode_);
+    host->RemoveChildAtIndex(0);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -882,6 +883,13 @@ void UIExtensionPattern::FireOnErrorCallback(int32_t code, const std::string& na
     state_ = AbilityState::NONE;
     // Release the session.
     if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
+        if (!isShowPlaceholder_) {
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            host->RemoveChildAtIndex(0);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+        sessionWrapper_->NotifyDestroy();
         sessionWrapper_->DestroySession();
     }
     if (onErrorCallback_) {
@@ -1043,10 +1051,13 @@ void UIExtensionPattern::InitializeAccessibility()
     accessibilityChildTreeCallback_ = std::make_shared<UIExtensionAccessibilityChildTreeCallback>(
         WeakClaim(this), accessibilityId);
     CHECK_NULL_VOID(accessibilityChildTreeCallback_);
+    auto realHostWindowId = ngPipeline->GetRealHostWindowId();
     if (accessibilityManager->IsRegister()) {
-        accessibilityChildTreeCallback_->OnRegister(ngPipeline->GetFocusWindowId(), accessibilityManager->GetTreeId());
+        accessibilityChildTreeCallback_->OnRegister(
+            realHostWindowId, accessibilityManager->GetTreeId());
     }
-    UIEXT_LOGD("UIExtension: %{public}" PRId64 " register child tree", accessibilityId);
+    UIEXT_LOGI("UIExtension: %{public}" PRId64 " register child tree, realHostWindowId: %{public}u",
+        accessibilityId, realHostWindowId);
     accessibilityManager->RegisterAccessibilityChildTreeCallback(accessibilityId, accessibilityChildTreeCallback_);
 }
 

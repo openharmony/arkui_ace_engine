@@ -244,4 +244,9 @@ void JankFrameReport::ReportJSAnimation()
         hasJsAnimation_ = true;
     }
 }
+
+void JankFrameReport::RecordAnimateEnd()
+{
+    prevEndTimeStamp_ = GetSteadyTimestamp<std::chrono::nanoseconds>();
+}
 } // namespace OHOS::Ace

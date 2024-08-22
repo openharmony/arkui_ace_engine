@@ -15,21 +15,11 @@
 
 #include "core/components/bubble/render_bubble.h"
 
-#include "base/geometry/offset.h"
 #include "base/log/event_report.h"
-#include "base/utils/string_utils.h"
-#include "base/utils/system_properties.h"
-#include "core/accessibility/accessibility_utils.h"
-#include "core/components/box/box_component.h"
-#include "core/components/box/render_box.h"
-#include "core/components/bubble/bubble_element.h"
-#include "core/components/slider/render_slider.h"
 #include "core/components/stack/stack_element.h"
 #ifdef USE_ROSEN_DRAWING
 #include "core/components_ng/render/drawing.h"
 #endif
-#include "core/event/ace_event_helper.h"
-#include "core/pipeline/base/component.h"
 #include "core/pipeline/base/composed_element.h"
 
 namespace OHOS::Ace {

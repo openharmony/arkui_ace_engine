@@ -77,6 +77,74 @@ RefPtr<PaintProperty> ScrollablePattern::CreatePaintProperty()
     return property;
 }
 
+void ScrollablePattern::CreateAnalyzerOverlay(const RefPtr<FrameNode> node)
+{
+    auto builderFunc = []() -> RefPtr<UINode> {
+        auto uiNode = FrameNode::GetOrCreateFrameNode(V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        return uiNode;
+    };
+    auto overlayNode = AceType::DynamicCast<FrameNode>(builderFunc());
+    CHECK_NULL_VOID(overlayNode);
+    node->SetOverlayNode(overlayNode);
+    overlayNode->SetParent(AceType::WeakClaim(AceType::RawPtr(node)));
+    overlayNode->SetActive(true);
+    overlayNode->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
+    auto overlayProperty = AceType::DynamicCast<LayoutProperty>(overlayNode->GetLayoutProperty());
+    CHECK_NULL_VOID(overlayProperty);
+    overlayProperty->SetIsOverlayNode(true);
+    overlayProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    overlayProperty->UpdateAlignment(Alignment::CENTER);
+    auto overlayOffsetX = std::make_optional<Dimension>(Dimension::FromString("0px"));
+    auto overlayOffsetY = std::make_optional<Dimension>(Dimension::FromString("0px"));
+    overlayProperty->SetOverlayOffset(overlayOffsetX, overlayOffsetY);
+    auto focusHub = overlayNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusable(false);
+    overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void ScrollablePattern::UpdateFadingEdge(const RefPtr<ScrollablePaintMethod>& paint)
+{
+    if (NearZero(GetMainContentSize())) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto overlayNode = host->GetOverlayNode();
+    CHECK_NULL_VOID(overlayNode);
+    auto overlayRenderContext = overlayNode->GetRenderContext();
+    CHECK_NULL_VOID(overlayRenderContext);
+    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (!paintProperty->GetFadingEdge().value_or(false)) {
+        paint->SetOverlayRenderContext(overlayRenderContext);
+        paint->SetFadingInfo(false, false);
+        return;
+    }
+    auto isFadingTop = !IsAtTop();
+    auto isFadingBottom = !IsAtBottom();
+    if (isFadingTop || isFadingBottom) {
+        paint->SetOverlayRenderContext(overlayRenderContext);
+        UpdateFadeInfo(isFadingTop, isFadingBottom, paint);
+    }
+}
+
+void ScrollablePattern::UpdateFadeInfo(
+    bool isFadingTop, bool isFadingBottom, const RefPtr<ScrollablePaintMethod>& paint)
+{
+    float percentFading = 0.0f;
+    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto fadingEdgeLength = paintProperty->GetFadingEdgeLength().value();
+    if (fadingEdgeLength.Unit() == DimensionUnit::PERCENT) {
+        percentFading = fadingEdgeLength.Value() / 100.0f; // One hundred percent
+    } else {
+        percentFading = fadingEdgeLength.ConvertToPx() / std::abs(GetMainContentSize());
+    }
+    paint->SetFadingInfo(isFadingTop, isFadingBottom, (percentFading > 0.5f ? 0.5f : percentFading)); // 0.5: Half
+}
+
 void ScrollablePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     /* no fixed attr below, just return */

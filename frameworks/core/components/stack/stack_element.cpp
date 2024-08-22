@@ -15,23 +15,16 @@
 
 #include "core/components/stack/stack_element.h"
 
-#include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/bubble/bubble_element.h"
 #include "core/components/bubble/render_bubble.h"
-#include "core/components/common/properties/animation_option.h"
 #include "core/components/dialog/dialog_component.h"
 #include "core/components/dialog/dialog_element.h"
 #include "core/components/dialog_tween/render_dialog_tween.h"
 #include "core/components/drop_filter/drop_filter_element.h"
-#include "core/components/page/page_element.h"
 #include "core/components/picker/picker_base_element.h"
-#include "core/components/popup/popup_component.h"
-#include "core/components/popup/popup_theme.h"
 #include "core/components/select_popup/select_popup_element.h"
 #include "core/components/text_overlay/text_overlay_element.h"
 #include "core/components_v2/inspector/inspector_composed_component.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
-#include "core/pipeline/base/composed_element.h"
 
 namespace OHOS::Ace {
 

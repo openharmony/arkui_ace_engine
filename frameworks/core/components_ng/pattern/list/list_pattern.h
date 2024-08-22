@@ -122,6 +122,7 @@ public:
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
     void OnTouchDown(const TouchEventInfo& info) override;
+    OverScrollOffset GetOutBoundaryOffset(bool useCurrentDelta) const;
     OverScrollOffset GetOverScrollOffset(double delta) const override;
     float GetOffsetWithLimit(float offset) const override;
     void HandleScrollBarOutBoundary();
@@ -186,7 +187,11 @@ public:
     bool AnimateToTarget(int32_t index, std::optional<int32_t> indexInGroup, ScrollAlign align);
     Offset GetCurrentOffset() const;
     Rect GetItemRect(int32_t index) const override;
+    int32_t GetItemIndex(double x, double y) const override;
     Rect GetItemRectInGroup(int32_t index, int32_t indexInGroup) const;
+    ListItemIndex GetItemIndexInGroup(double x, double y) const;
+    bool GetGroupItemIndex(double x, double y, RefPtr<FrameNode> itemFrameNode, int32_t& index,
+        ListItemIndex& itemIndex) const;
     void OnAnimateStop() override;
     float GetMainContentSize() const override
     {

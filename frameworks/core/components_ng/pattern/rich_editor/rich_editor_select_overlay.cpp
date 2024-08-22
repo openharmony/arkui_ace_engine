@@ -24,6 +24,7 @@
 #include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
+#include "core/components/text_overlay/text_overlay_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -186,6 +187,8 @@ void RichEditorSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOf
     auto pattern = GetPattern<RichEditorPattern>();
     auto& textSelector = pattern->textSelector_;
     auto currentHandleIndex = pattern->GetHandleIndex(Offset(handleOffset.GetX(), handleOffset.GetY()));
+    auto preHandleIndex = isFirst ? textSelector.baseOffset : textSelector.destinationOffset;
+    pattern->StartVibratorByIndexChange(currentHandleIndex, preHandleIndex);
     pattern->SetCaretPosition(currentHandleIndex);
     if (isFirst) {
         pattern->HandleSelectionChange(currentHandleIndex, textSelector.destinationOffset);
@@ -271,6 +274,7 @@ void RichEditorSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectO
     menuInfo.showCut = isShowItem && hasValue && !pattern->textSelector_.SelectNothing();
     menuInfo.showPaste = IsShowPaste();
     menuInfo.menuIsShow = IsShowMenu();
+    menuInfo.showAIWrite = pattern->IsShowAIWrite() && hasValue;
     pattern->UpdateSelectMenuInfo(menuInfo);
 }
 
@@ -363,6 +367,9 @@ void RichEditorSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenu
         case OptionMenuActionId::CAMERA_INPUT:
             pattern->HandleOnCameraInput();
             break;
+        case OptionMenuActionId::AI_WRITE:
+            pattern->HandleOnAIWrite();
+            break;
         case OptionMenuActionId::DISAPPEAR:
             if (pattern->GetTextDetectEnable() && !pattern->HasFocus()) {
                 pattern->ResetSelection();
@@ -397,17 +404,19 @@ void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReaso
     }
     if (reason == CloseReason::CLOSE_REASON_BACK_PRESSED) {
         pattern->ResetSelection();
-        if (pattern->IsEditing()) {
-            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "only show caret for edit state");
-            pattern->isCursorAlwaysDisplayed_ = false;
-            pattern->StartTwinkling();
-        }
+        ResumeTwinkling();
     }
 }
 
 void RichEditorSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType)
 {
-    BaseTextSelectOverlay::OnHandleGlobalTouchEvent(sourceType, touchType);
+    CHECK_NULL_VOID(IsMouseClickDown(sourceType, touchType) || IsTouchUp(sourceType, touchType));
+    if (IsSingleHandle()) {
+        CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
+        ResumeTwinkling();
+    } else {
+        HideMenu();
+    }
 }
 
 void RichEditorSelectOverlay::OnHandleLevelModeChanged(HandleLevelMode mode)
@@ -499,7 +508,7 @@ void RichEditorSelectOverlay::UpdateSelectOverlayOnAreaChanged()
 
 void RichEditorSelectOverlay::SwitchCaretState()
 {
-    CHECK_NULL_VOID(IsSingleHandle());
+    CHECK_NULL_VOID(IsSingleHandle() && !isHandleMoving_);
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     auto singleHandlePaintRect = pattern->textSelector_.secondHandle;
@@ -510,9 +519,17 @@ void RichEditorSelectOverlay::SwitchCaretState()
     if (isSingleHandleShow) {
         pattern->StopTwinkling();
     } else {
-        pattern->isCursorAlwaysDisplayed_ = false;
-        pattern->StartTwinkling();
+        ResumeTwinkling();
     }
+}
+
+void RichEditorSelectOverlay::ResumeTwinkling()
+{
+    auto pattern = GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern && pattern->IsEditing());
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "only show caret for edit state");
+    pattern->isCursorAlwaysDisplayed_ = false;
+    pattern->StartTwinkling();
 }
 
 void RichEditorSelectOverlay::OnHandleIsHidden()
@@ -545,6 +562,17 @@ void RichEditorSelectOverlay::OnAfterSelectOverlayShow(bool isCreate)
         CHECK_NULL_VOID(pattern);
         pattern->StopTwinkling();
     }
+}
+
+float RichEditorSelectOverlay::GetHandleHotZoneRadius()
+{
+    auto hotZoneRadius = 0.0f;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, hotZoneRadius);
+    auto theme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_RETURN(theme, hotZoneRadius);
+    hotZoneRadius = theme->GetHandleHotZoneRadius().ConvertToPx();
+    return hotZoneRadius;
 }
 
 } // namespace OHOS::Ace::NG

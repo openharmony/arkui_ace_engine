@@ -13,14 +13,10 @@
  * limitations under the License.
  */
 
-#include <cstdlib>
-#include <cmath>
 #include "core/components/checkable/render_switch.h"
 
 #include "base/log/event_report.h"
 #include "core/common/font_manager.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/components/text/text_component.h"
 
 namespace OHOS::Ace {
 namespace {

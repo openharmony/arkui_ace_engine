@@ -15,17 +15,10 @@
 
 #include "core/components/list/list_element.h"
 
-#include "base/log/log.h"
-#include "base/utils/utils.h"
 #include "core/common/frontend.h"
-#include "core/components/list/list_component.h"
-#include "core/components/list/list_item_component.h"
 #include "core/components/list/list_item_element.h"
-#include "core/components/list/render_list.h"
-#include "core/components/list/render_list_item.h"
 #include "core/components/proxy/render_item_proxy.h"
 #include "core/components/scroll/render_multi_child_scroll.h"
-#include "core/event/ace_event_helper.h"
 #include "core/pipeline/base/composed_element.h"
 
 namespace OHOS::Ace {

@@ -94,6 +94,14 @@ void OptionPaintMethod::PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrappe
                        static_cast<float>(selectTheme->GetOutPadding().ConvertToPx());
     auto hasIcon = props->GetHasIcon().value_or(false);
     float iconHorInterval = 0.0f;
+    auto renderContext = paintWrapper->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto optionNode = renderContext->GetHost();
+    CHECK_NULL_VOID(optionNode);
+    auto layoutProperty = optionNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto textDirection = layoutProperty->GetNonAutoLayoutDirection();
+    auto isRtl = (textDirection == TextDirection::RTL) ? true : false;
     if (hasIcon) {
         iconHorInterval = static_cast<float>(selectTheme->GetIconSideLength().ConvertToPx()) +
                           static_cast<float>(selectTheme->GetIconContentPadding().ConvertToPx());
@@ -103,8 +111,9 @@ void OptionPaintMethod::PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrappe
     if (props->HasDivider()) {
         PaintCustomDivider(optionSize, horInterval, iconHorInterval, paintWrapper, path);
     } else {
-        path.AddRect(horInterval + iconHorInterval, 0, optionSize.Width() - horInterval,
-            static_cast<float>(selectTheme->GetDefaultDividerWidth().ConvertToPx()));
+        auto startX = isRtl ? optionSize.Width() - (horInterval + iconHorInterval) : horInterval + iconHorInterval;
+        auto rectWidth = isRtl ? horInterval : optionSize.Width() - horInterval;
+        path.AddRect(startX, 0, rectWidth, static_cast<float>(selectTheme->GetDefaultDividerWidth().ConvertToPx()));
     }
     RSBrush brush;
     auto dividerColor = props->HasDivider() ? props->GetDividerValue().color : selectTheme->GetLineColor();

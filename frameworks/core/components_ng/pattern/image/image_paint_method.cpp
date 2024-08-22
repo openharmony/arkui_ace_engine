@@ -98,10 +98,10 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
     config.imageRepeat_ = renderProps->GetImageRepeat().value_or(ImageRepeat::NO_REPEAT);
     config.smoothEdge_ = renderProps->GetSmoothEdge().value_or(0.0f);
     config.dynamicMode = renderProps->GetDynamicModeValue(DynamicRangeMode::STANDARD);
-    if (renderProps) {
-        config.resizableSlice_ = renderProps->GetImageResizableSliceValue({});
-        config.resizableLattice_ = renderProps->GetImageResizableLatticeValue(nullptr);
-    }
+    config.svgFillColor_ = renderProps->GetSvgFillColor();
+    config.resizableSlice_ = renderProps->GetImageResizableSliceValue({});
+    config.resizableLattice_ = renderProps->GetImageResizableLatticeValue(nullptr);
+
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     config.flipHorizontally_ = isRightToLeft && renderProps->GetMatchTextDirection().value_or(false);
     config.colorFilter_.Reset();
@@ -114,8 +114,9 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
         config.colorFilter_.colorFilterDrawing_ = drawingColorFilter.value();
     }
     auto renderCtx = paintWrapper->GetRenderContext();
-    CHECK_NULL_VOID(renderCtx);
-    config.obscuredReasons_ = renderCtx->GetObscured().value_or(std::vector<ObscuredReasons>());
+    if (renderCtx) {
+        config.obscuredReasons_ = renderCtx->GetObscured().value_or(std::vector<ObscuredReasons>());
+    }
 
     if (renderProps->GetNeedBorderRadiusValue(false)) {
         UpdateBorderRadius(paintWrapper);
@@ -139,8 +140,8 @@ CanvasDrawFunction ImagePaintMethod::GetContentDrawFunction(PaintWrapper* paintW
     UpdatePaintConfig(props, paintWrapper);
     auto svgCanvas = DynamicCast<SvgCanvasImage>(canvasImage_);
     if (svgCanvas && InstanceOf<SvgCanvasImage>(canvasImage_)) {
-        svgCanvas->SetFillColor(props->GetSvgFillColor());
-        svgCanvas->SetSmoothEdge(props->GetSmoothEdgeValue(0.0f));
+        svgCanvas->SetFillColor(paintConfig.svgFillColor_);
+        svgCanvas->SetSmoothEdge(paintConfig.smoothEdge_);
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             std::optional<ImageColorFilter> imageColorFilter = std::nullopt;
             if (paintConfig.colorFilter_.colorFilterMatrix_ || paintConfig.colorFilter_.colorFilterDrawing_) {

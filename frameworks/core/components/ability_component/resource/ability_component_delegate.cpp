@@ -15,11 +15,6 @@
 
 #include "core/components/ability_component/resource/ability_component_delegate.h"
 
-#include "base/log/log.h"
-#include "core/event/ace_event_helper.h"
-#include "core/event/back_end_event_manager.h"
-#include "frameworks/bridge/js_frontend/frontend_delegate_impl.h"
-
 namespace OHOS::Ace {
 namespace {
 

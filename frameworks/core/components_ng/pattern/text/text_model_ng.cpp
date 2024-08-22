@@ -115,6 +115,7 @@ void TextModelNG::SetFont(const Font& value)
     if (value.fontStyle.has_value()) {
         SetItalicFontStyle(value.fontStyle.value());
     }
+    SetEnableVariableFontWeight(value.enableVariableFontWeight.value_or(false));
 }
 
 void TextModelNG::SetFontSize(const Dimension& value)
@@ -184,6 +185,16 @@ void TextModelNG::SetFontWeight(FrameNode* frameNode, Ace::FontWeight value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontWeight, value, frameNode);
 }
 
+void TextModelNG::SetVariableFontWeight(FrameNode* frameNode, int32_t value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, VariableFontWeight, value, frameNode);
+}
+
+void TextModelNG::SetEnableVariableFontWeight(FrameNode* frameNode, bool value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, EnableVariableFontWeight, value, frameNode);
+}
+
 void TextModelNG::SetMinFontScale(const float value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, MinFontScale, value);
@@ -197,6 +208,16 @@ void TextModelNG::SetMaxFontScale(const float value)
 void TextModelNG::SetFontWeight(Ace::FontWeight value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontWeight, value);
+}
+
+void TextModelNG::SetVariableFontWeight(int32_t value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, VariableFontWeight, value);
+}
+
+void TextModelNG::SetEnableVariableFontWeight(bool value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, EnableVariableFontWeight, value);
 }
 
 void TextModelNG::SetFontFamily(const std::vector<std::string>& value)
@@ -357,14 +378,13 @@ void TextModelNG::SetTextDetectEnable(bool value)
     textPattern->SetTextDetectEnable(value);
 }
 
-void TextModelNG::SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult)
+void TextModelNG::SetTextDetectConfig(const TextDetectConfig& textDetectConfig)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
-    textPattern->SetTextDetectTypes(value);
-    textPattern->SetOnResult(std::move(onResult));
+    textPattern->SetTextDetectConfig(textDetectConfig);
 }
 
 void TextModelNG::SetOnClick(std::function<void(BaseEventInfo* info)>&& click)
@@ -554,6 +574,7 @@ void TextModelNG::SetFont(FrameNode* frameNode, const Font& value)
     if (value.fontStyle.has_value()) {
         SetItalicFontStyle(frameNode, value.fontStyle.value());
     }
+    SetEnableVariableFontWeight(frameNode, value.enableVariableFontWeight.value_or(false));
 }
 
 void TextModelNG::SetLetterSpacing(FrameNode* frameNode, const Dimension& value)
@@ -997,14 +1018,12 @@ void TextModelNG::SetTextSelection(FrameNode* frameNode, int32_t startIndex, int
     textPattern->SetTextSelection(startIndex, endIndex);
 }
 
-void TextModelNG::SetTextDetectConfig(FrameNode* frameNode, const std::string& value,
-    std::function<void(const std::string&)>&& onResult)
+void TextModelNG::SetTextDetectConfig(FrameNode* frameNode, const TextDetectConfig& textDetectConfig)
 {
     CHECK_NULL_VOID(frameNode);
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
-    textPattern->SetTextDetectTypes(value);
-    textPattern->SetOnResult(std::move(onResult));
+    textPattern->SetTextDetectConfig(textDetectConfig);
 }
 
 void TextModelNG::SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func)
@@ -1045,6 +1064,36 @@ void TextModelNG::SetResponseRegion(bool isUserSetResponseRegion)
     auto textPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->SetIsUserSetResponseRegion(isUserSetResponseRegion);
+}
+
+void TextModelNG::SetResponseRegion(FrameNode* frameNode, std::vector<DimensionRect> regions)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    auto gesture = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    gesture->SetResponseRegion(regions);
+    textPattern->SetIsUserSetResponseRegion(true);
+}
+
+void TextModelNG::ClearResponseRegion(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    auto gesture = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    std::vector<DimensionRect> region;
+    CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension widthDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    CalcDimension heightDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    DimensionOffset offsetDimen(xDimen, yDimen);
+    DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen);
+    region.emplace_back(dimenRect);
+    gesture->SetResponseRegion(region);
+    textPattern->SetIsUserSetResponseRegion(false);
 }
 
 void TextModelNG::SetHalfLeading(bool halfLeading)

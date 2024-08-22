@@ -106,6 +106,23 @@ void SliderPattern::InitAccessibilityHoverEvent()
         CHECK_NULL_VOID(slider);
         slider->HandleAccessibilityHoverEvent(isHover, info);
     });
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetOnAccessibilityFocusCallback([weak = WeakClaim(this)](bool focus) {
+        if (focus) {
+            auto slider = weak.Upgrade();
+            CHECK_NULL_VOID(slider);
+            slider->HandleSliderOnAccessibilityFocusCallback();
+        }
+    });
+}
+
+void SliderPattern::HandleSliderOnAccessibilityFocusCallback()
+{
+    for (const auto& pointNode : pointAccessibilityNodeVec_) {
+        pointNode->GetAccessibilityProperty<AccessibilityProperty>()->SetAccessibilityLevel(
+            AccessibilityProperty::Level::NO_STR);
+    }
 }
 
 void SliderPattern::HandleAccessibilityHoverEvent(bool isHover, const AccessibilityHoverInfo& info)
@@ -118,10 +135,6 @@ void SliderPattern::HandleAccessibilityHoverEvent(bool isHover, const Accessibil
                 AccessibilityProperty::Level::YES_STR);
         }
     } else if (!isHover) {
-        for (const auto& pointNode : pointAccessibilityNodeVec_) {
-            pointNode->GetAccessibilityProperty<AccessibilityProperty>()->SetAccessibilityLevel(
-                AccessibilityProperty::Level::NO_STR);
-        }
         auto host = GetHost();
         auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
         accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::YES_STR);
@@ -372,8 +385,12 @@ SizeF SliderPattern::GetStepPointAccessibilityVirtualNodeSize()
 {
     auto host = GetHost();
     auto& hostContent = host->GetGeometryNode()->GetContent();
-    float pointNodeHeight = blockHotSize_.Height();
-    float pointNodeWidth = blockHotSize_.Width();
+    auto pointCount = pointAccessibilityNodeEventVec_.size();
+    if (pointCount <= 1) {
+        return SizeF(0, 0);
+    }
+    float pointNodeHeight = sliderLength_ / (pointCount - 1);
+    float pointNodeWidth = pointNodeHeight;
     if (direction_ == Axis::HORIZONTAL) {
         pointNodeHeight = hostContent->GetRect().Height();
     } else {
@@ -707,6 +724,11 @@ void SliderPattern::HandlingGestureStart(const GestureEvent& info)
         }
     }
     panMoveFlag_ = allowDragEvents_;
+    if (panMoveFlag_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
+    }
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 

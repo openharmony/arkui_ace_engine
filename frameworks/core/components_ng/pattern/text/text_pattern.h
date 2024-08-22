@@ -130,6 +130,13 @@ public:
         return host->GetTag() == V2::SYMBOL_ETS_TAG;
     }
 
+    bool IsTextNode() const
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        return host->GetTag() == V2::TEXT_ETS_TAG;
+    }
+
     bool DefaultSupportDrag() override
     {
         return true;
@@ -156,6 +163,7 @@ public:
     void DumpAdvanceInfo() override;
     void DumpInfo() override;
     void DumpScaleInfo();
+    void DumpTextEngineInfo();
 
     TextSelector GetTextSelector() const
     {
@@ -196,17 +204,7 @@ public:
         return contentMod_;
     }
 
-    void SetTextDetectEnable(bool enable)
-    {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        dataDetectorAdapter_->frameNode_ = host;
-        bool cache = textDetectEnable_;
-        textDetectEnable_ = enable;
-        if (cache != textDetectEnable_) {
-            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        }
-    }
+    void SetTextDetectEnable(bool enable);
     bool GetTextDetectEnable()
     {
         return textDetectEnable_;
@@ -238,6 +236,33 @@ public:
     TextDataDetectResult GetTextDetectResult()
     {
         return dataDetectorAdapter_->textDetectResult_;
+    }
+    void SetTextDetectConfig(const TextDetectConfig& textDetectConfig)
+    {
+        dataDetectorAdapter_->SetTextDetectTypes(textDetectConfig.types);
+        dataDetectorAdapter_->onResult_ = std::move(textDetectConfig.onResult);
+        dataDetectorAdapter_->entityColor_ = textDetectConfig.entityColor;
+        dataDetectorAdapter_->entityDecorationType_ = textDetectConfig.entityDecorationType;
+        dataDetectorAdapter_->entityDecorationColor_ = textDetectConfig.entityDecorationColor;
+        dataDetectorAdapter_->entityDecorationStyle_ = textDetectConfig.entityDecorationStyle;
+        auto textDetectConfigCache = dataDetectorAdapter_->textDetectConfigStr_;
+        dataDetectorAdapter_->textDetectConfigStr_ = textDetectConfig.ToString();
+        if (textDetectConfigCache != dataDetectorAdapter_->textDetectConfigStr_) {
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
+    void ModifyAISpanStyle(TextStyle& aiSpanStyle)
+    {
+        TextDetectConfig textDetectConfig;
+        aiSpanStyle.SetTextColor(dataDetectorAdapter_->entityColor_.value_or(textDetectConfig.entityColor));
+        aiSpanStyle.SetTextDecoration(
+            dataDetectorAdapter_->entityDecorationType_.value_or(textDetectConfig.entityDecorationType));
+        aiSpanStyle.SetTextDecorationColor(
+            dataDetectorAdapter_->entityDecorationColor_.value_or(textDetectConfig.entityColor));
+        aiSpanStyle.SetTextDecorationStyle(
+            dataDetectorAdapter_->entityDecorationStyle_.value_or(textDetectConfig.entityDecorationStyle));
     }
 
     void OnVisibleChange(bool isVisible) override;
@@ -617,6 +642,8 @@ public:
 
     size_t GetLineCount() const override;
     TextLineMetrics GetLineMetrics(int32_t lineNumber) override;
+    std::vector<ParagraphManager::TextBox> GetRectsForRange(int32_t start, int32_t end,
+        RectHeightStyle heightStyle, RectWidthStyle widthStyle) override;
     PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y) override;
 
     void OnSelectionMenuOptionsUpdate(
@@ -633,10 +660,17 @@ public:
         paintInfo_ = area + paintOffset.ToString();
     }
 
+    void DumpRecord(const std::string& record)
+    {
+        frameRecord_.append(record);
+    }
+
     void SetIsUserSetResponseRegion(bool isUserSetResponseRegion)
     {
         isUserSetResponseRegion_ = isUserSetResponseRegion;
     }
+
+    size_t GetSubComponentInfos(std::vector<SubComponentInfo>& subComponentInfos);
 
     void UpdateFontColor(const Color& value);
     void BeforeCreatePaintWrapper() override;
@@ -698,16 +732,7 @@ protected:
     bool IsSelectableAndCopy();
     void SetResponseRegion(const SizeF& frameSize, const SizeF& boundsSize);
 
-    virtual bool CanStartAITask()
-    {
-        auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
-        if (textLayoutProperty) {
-            return textDetectEnable_ && enabled_ &&
-                   textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) != TextOverflow::MARQUEE;
-        } else {
-            return textDetectEnable_ && enabled_;
-        }
-    };
+    virtual bool CanStartAITask();
 
     void OnAttachToMainTree() override
     {
@@ -718,6 +743,17 @@ protected:
     {
         isDetachFromMainTree_ = true;
     }
+
+    bool SetActionExecSubComponent();
+    void GetSubComponentInfosForAISpans(std::vector<SubComponentInfo>& subComponentInfos);
+    void GetSubComponentInfosForSpans(std::vector<SubComponentInfo>& subComponentInfos);
+    bool ExecSubComponent(int32_t spanId);
+    void AddSubComponentInfosByDataDetectorForSpan(std::vector<SubComponentInfo>& subComponentInfos,
+        const RefPtr<SpanItem>& span);
+    void AddSubComponentInfoForAISpan(std::vector<SubComponentInfo>& subComponentInfos, const std::string& content,
+        const AISpan& aiSpan);
+    void AddSubComponentInfoForSpan(std::vector<SubComponentInfo>& subComponentInfos, const std::string& content,
+        const RefPtr<SpanItem>& span);
 
     int32_t GetTouchIndex(const OffsetF& offset) override;
     void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) override;
@@ -747,6 +783,7 @@ protected:
 
     std::string textForDisplay_;
     std::string paintInfo_ = "NA";
+    std::string frameRecord_ = "NA";
     std::optional<TextStyle> textStyle_;
     std::list<RefPtr<SpanItem>> spans_;
     mutable std::list<RefPtr<UINode>> childNodes_;
@@ -764,6 +801,12 @@ protected:
 
     OffsetF parentGlobalOffset_;
     std::optional<TextResponseType> textResponseType_;
+
+    struct SubComponentInfoEx {
+        std::optional<AISpan> aiSpan;
+        WeakPtr<SpanItem> span;
+    };
+    std::vector<SubComponentInfoEx> subComponentInfos_;
 
 private:
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);

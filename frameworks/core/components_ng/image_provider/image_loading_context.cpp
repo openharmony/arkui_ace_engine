@@ -26,6 +26,7 @@
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/image_provider/pixel_map_image_object.h"
 #include "core/components_ng/image_provider/static_image_object.h"
+#include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/render/image_painter.h"
 #include "core/image/image_file_cache.h"
 #include "core/image/image_loader.h"
@@ -73,10 +74,13 @@ RefPtr<ImageData> QueryDataFromCache(const ImageSourceInfo& src, bool& dataHit)
 }
 } // namespace
 
-ImageLoadingContext::ImageLoadingContext(const ImageSourceInfo& src, LoadNotifier&& loadNotifier, bool syncLoad)
-    : src_(src), notifiers_(std::move(loadNotifier)), containerId_(Container::CurrentId()), syncLoad_(syncLoad)
+ImageLoadingContext::ImageLoadingContext(
+    const ImageSourceInfo& src, LoadNotifier&& loadNotifier, bool syncLoad, const ImageDfxConfig& imageDfxConfig)
+    : src_(src), notifiers_(std::move(loadNotifier)), containerId_(Container::CurrentId()), syncLoad_(syncLoad),
+      imageDfxConfig_(imageDfxConfig)
 {
     stateManager_ = MakeRefPtr<ImageStateManager>(WeakClaim(this));
+    src_.SetImageDfxConfig(imageDfxConfig_);
 
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
         src_.GetSrcType() == SrcType::PIXMAP) {

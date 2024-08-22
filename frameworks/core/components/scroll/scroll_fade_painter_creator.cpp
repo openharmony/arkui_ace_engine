@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 
-#include "base/utils/system_properties.h"
 #include "core/components/common/painter/rosen_scroll_fade_painter.h"
-#include "core/components/scroll/scroll_fade_painter.h"
 
 namespace OHOS::Ace {
 

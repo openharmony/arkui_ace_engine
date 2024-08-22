@@ -419,4 +419,192 @@ HWTEST_F(TextFieldPatternTestThree, IsResponseRegionExpandingNeededForStylus001,
     ret = pattern_->IsResponseRegionExpandingNeededForStylus(touchEvent);
     EXPECT_FALSE(ret);
 }
+
+/**
+ * @tc.name: SearchRequestKeyboard001
+ * @tc.desc: test SearchRequestKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, SearchRequestKeyboard001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+    ASSERT_NE(pattern_, nullptr);
+
+    auto focusHub = pattern_->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    pattern_->isLongPress_ = true;
+    focusHub->currentFocus_ = true;
+    pattern_->showKeyBoardOnFocus_ = true;
+    pattern_->customKeyboardBuilder_ = CustomKeyboardBuilder;
+    pattern_->isCustomKeyboardAttached_ = true;
+
+    pattern_->SearchRequestKeyboard();
+    EXPECT_EQ(pattern_->isEdit_, true);
+}
+
+/**
+ * @tc.name: ResultImageSrc001
+ * @tc.desc: test GetHideResultImageSrc and GetShowResultImageSrc
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, ResultImageSrc001, TestSize.Level0)
+{
+    struct PasswordIcon passwordIcon;
+    passwordIcon.hideModuleName = "hideModuleName";
+    passwordIcon.hideResult = "hideResult";
+    passwordIcon.hideBundleName = "hideBundleName";
+    passwordIcon.showModuleName = "showModuleName";
+    passwordIcon.showResult = "showResult";
+    passwordIcon.showBundleName = "showBundleName";
+    CreateTextField(DEFAULT_TEXT, "", [passwordIcon](TextFieldModelNG model) {
+        model.SetPasswordIcon(passwordIcon);
+    });
+    GetFocus();
+    ASSERT_NE(pattern_, nullptr);
+    auto ret = pattern_->GetHideResultImageSrc();
+    ASSERT_EQ(ret, passwordIcon.hideResult);
+    ret = pattern_->GetShowResultImageSrc();
+    ASSERT_EQ(ret, passwordIcon.showResult);
+}
+
+/**
+ * @tc.name: ResultImageSrc002
+ * @tc.desc: test GetHideResultImageSrc and GetShowResultImageSrc
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, ResultImageSrc002, TestSize.Level0)
+{
+    const std::string SHOW_PASSWORD_SVG = "SYS_SHOW_PASSWORD_SVG";
+    const std::string HIDE_PASSWORD_SVG = "SYS_HIDE_PASSWORD_SVG";
+    struct PasswordIcon passwordIcon;
+    CreateTextField(DEFAULT_TEXT, "", [passwordIcon](TextFieldModelNG model) {
+        model.SetPasswordIcon(passwordIcon);
+    });
+    GetFocus();
+    ASSERT_NE(pattern_, nullptr);
+    auto ret = pattern_->GetHideResultImageSrc();
+    ASSERT_EQ(ret, HIDE_PASSWORD_SVG);
+    ret = pattern_->GetShowResultImageSrc();
+    ASSERT_EQ(ret, SHOW_PASSWORD_SVG);
+}
+
+/**
+ * @tc.name: OnBackPressed001
+ * @tc.desc: test OnBackPressed
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, OnBackPressed001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+    ASSERT_NE(pattern_, nullptr);
+
+    pattern_->isLongPress_ = true;
+    pattern_->showKeyBoardOnFocus_ = true;
+    pattern_->customKeyboardBuilder_ = CustomKeyboardBuilder;
+    pattern_->isCustomKeyboardAttached_ = true;
+
+    int32_t start = 0;
+    int32_t end = 4;
+    SelectionOptions options;
+    pattern_->SetSelectionFlag(start, end, options);
+    EXPECT_EQ(pattern_->isEdit_, true);
+
+    bool ret = pattern_->OnBackPressed();
+    pattern_->imeShown_ = true;
+    ret = pattern_->OnBackPressed();
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: UnitResponseKeyEvent001
+ * @tc.desc: test UnitResponseKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, UnitResponseKeyEvent001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto unitResponseArea = AceType::MakeRefPtr<UnitResponseArea>(
+        AceType::WeakClaim(AceType::RawPtr(pattern)), textFieldNode);
+    ASSERT_NE(unitResponseArea, nullptr);
+    pattern->responseArea_ = std::move(unitResponseArea);
+    ASSERT_NE(pattern->responseArea_, nullptr);
+
+    pattern->UnitResponseKeyEvent();
+    EXPECT_NE(pattern->responseArea_->GetFrameNode()->GetTag(), V2::SELECT_ETS_TAG);
+}
+
+/**
+ * @tc.name: UnitResponseKeyEvent002
+ * @tc.desc: test UnitResponseKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, UnitResponseKeyEvent002, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto selectNode = FrameNode::GetOrCreateFrameNode(V2::SELECT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SelectPattern>(); });
+    ASSERT_NE(selectNode, nullptr);
+    auto selectPattern = selectNode->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+
+    auto unitResponseArea = AceType::MakeRefPtr<UnitResponseArea>(
+        AceType::WeakClaim(AceType::RawPtr(selectPattern)), selectNode);
+    ASSERT_NE(unitResponseArea, nullptr);
+    pattern->responseArea_ = std::move(unitResponseArea);
+    ASSERT_NE(pattern->responseArea_, nullptr);
+
+    pattern->UnitResponseKeyEvent();
+    EXPECT_EQ(pattern->responseArea_->GetFrameNode()->GetTag(), V2::SELECT_ETS_TAG);
+}
+
+/**
+ * @tc.name: OnTextGenstureSelectionEnd001
+ * @tc.desc: test testInput text OnTextGenstureSelectionEnd001
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, OnTextGenstureSelectionEnd001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    pattern_->OnTextGenstureSelectionEnd();
+    EXPECT_FALSE(pattern_->IsContentRectNonPositive());
+    pattern_->contentRect_.SetRect(10, 10, 0, 0);
+    pattern_->OnTextGenstureSelectionEnd();
+    EXPECT_TRUE(pattern_->IsContentRectNonPositive());
+}
+
+/**
+ * @tc.name: OnTextGestureSelectionUpdate001
+ * @tc.desc: test testInput text OnTextGestureSelectionUpdate001
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, OnTextGestureSelectionUpdate001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    int32_t start = 0;
+    int32_t end = 0;
+    TouchEventInfo info("onTouch");
+    TouchLocationInfo infoSub(1);
+    infoSub.SetLocalLocation(Offset(10, 20));
+    info.AddTouchLocationInfo(std::move(infoSub));
+    pattern_->OnTextGestureSelectionUpdate(start, end, info);
+    EXPECT_TRUE(pattern_->magnifierController_);
+    pattern_->magnifierController_ = nullptr;
+    pattern_->OnTextGestureSelectionUpdate(start, end, info);
+    EXPECT_FALSE(pattern_->magnifierController_);
+}
 } // namespace OHOS::Ace::NG

@@ -16,7 +16,6 @@
 #include "core/components/qrcode/qrcode_component.h"
 
 #include "core/components/qrcode/qrcode_element.h"
-#include "core/components/qrcode/render_qrcode.h"
 
 namespace OHOS::Ace {
 

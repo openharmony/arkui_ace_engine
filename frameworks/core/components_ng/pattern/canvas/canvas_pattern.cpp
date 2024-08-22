@@ -1174,6 +1174,7 @@ void CanvasPattern::OnLanguageConfigurationUpdate()
 
 void CanvasPattern::OnModifyDone()
 {
+    Pattern::CheckLocalized();
     UpdateTextDefaultDirection();
 }
 
