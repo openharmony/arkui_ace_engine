@@ -480,8 +480,27 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     arrowPositionForPaint_ = arrowPosition_;
     auto isBlock = bubbleProp->GetBlockEventValue(true);
     dumpInfo_.mask = isBlock;
+    UpdateHostWindowRect();
     SetHotAreas(showInSubWindow, isBlock, frameNode, bubblePattern->GetContainerId());
     UpdateClipOffset(frameNode);
+}
+
+void BubbleLayoutAlgorithm::UpdateHostWindowRect()
+{
+    hostWindowRect_ = SubwindowManager::GetInstance()->GetParentWindowRect();
+    auto currentId = Container::CurrentId();
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    if (container->IsSubContainer()) {
+        currentId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
+        container = AceEngine::Get().GetContainer(currentId);
+        CHECK_NULL_VOID(container);
+    }
+    if (container->IsUIExtensionWindow()) {
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentId);
+        CHECK_NULL_VOID(subwindow);
+        hostWindowRect_ = subwindow->GetUIExtensionHostWindowRect();
+    }
 }
 
 void BubbleLayoutAlgorithm::SetHotAreas(bool showInSubWindow, bool isBlock,
@@ -494,10 +513,9 @@ void BubbleLayoutAlgorithm::SetHotAreas(bool showInSubWindow, bool isBlock,
                 childSize_.Width(), childSize_.Height());
             rects.emplace_back(rect);
         } else {
-            auto parentWindowRect = SubwindowManager::GetInstance()->GetParentWindowRect();
             auto rect = Rect(childOffsetForPaint_.GetX(), childOffsetForPaint_.GetY(),
                 childSize_.Width(), childSize_.Height());
-            rects.emplace_back(parentWindowRect);
+            rects.emplace_back(hostWindowRect_);
             rects.emplace_back(rect);
         }
         auto context = PipelineContext::GetCurrentContext();
