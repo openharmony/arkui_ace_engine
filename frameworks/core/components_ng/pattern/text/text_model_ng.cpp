@@ -984,6 +984,7 @@ void TextModelNG::SetTextContentWithStyledString(FrameNode* frameNode, ArkUI_Sty
                 position += static_cast<int32_t>(wSpanContent.length());
                 auto intervalEnd = position;
                 spanItem->interval = { intervalStart, intervalEnd };
+                spanItem->position = position;
                 spanItems.emplace_back(spanItem);
             }
         }
