@@ -19,6 +19,7 @@
 #include <memory>
 
 #include "accessibility_event_info.h"
+#include "interfaces/include/ws_common.h"
 #include "refbase.h"
 #include "session_manager/include/extension_session_manager.h"
 #include "transaction/rs_sync_transaction_controller.h"
@@ -26,7 +27,6 @@
 #include "ui/rs_surface_node.h"
 #include "want_params.h"
 #include "wm/wm_common.h"
-#include "interfaces/include/ws_common.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/osal/want_wrap_ohos.h"
