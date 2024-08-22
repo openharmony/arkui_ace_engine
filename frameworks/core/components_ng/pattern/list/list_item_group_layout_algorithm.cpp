@@ -1220,9 +1220,6 @@ void ListItemGroupLayoutAlgorithm::MeasureCacheItem(LayoutWrapper* layoutWrapper
             if (!frameNode->CheckNeedForceMeasureAndLayout()) {
                 continue;
             }
-            if (frameNode->GetTag() == V2::LIST_ITEM_ETS_TAG) {
-                frameNode->GetPattern<ListItemPattern>()->BeforeCreateLayoutWrapper();
-            }
             if (!frameNode->GetHostNode()->RenderCustomChild(cacheParam.deadline)) {
                 break;
             }
@@ -1242,9 +1239,6 @@ void ListItemGroupLayoutAlgorithm::MeasureCacheItem(LayoutWrapper* layoutWrapper
             }
             if (!frameNode->CheckNeedForceMeasureAndLayout()) {
                 continue;
-            }
-            if (frameNode->GetTag() == V2::LIST_ITEM_ETS_TAG) {
-                frameNode->GetPattern<ListItemPattern>()->BeforeCreateLayoutWrapper();
             }
             if (!frameNode->GetHostNode()->RenderCustomChild(cacheParam.deadline)) {
                 break;
