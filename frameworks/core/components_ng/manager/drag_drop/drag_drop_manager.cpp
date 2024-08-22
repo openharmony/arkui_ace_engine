@@ -1503,7 +1503,7 @@ void DragDropManager::UpdateVelocityTrackerPoint(const Point& point, bool isEnd)
 }
 
 bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayManager,
-    DragPreviewInfo& dragPreviewInfo)
+    DragPreviewInfo& dragPreviewInfo, const RefPtr<GestureEventHub>& gestureHub)
 {
     if (!overlayManager->GetHasPixelMap()) {
         return false;
@@ -1514,9 +1514,17 @@ bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayMa
     if (badgeNode) {
         dragPreviewInfo.textNode = badgeNode;
     }
-    double maxWidth = DragDropManager::GetMaxWidthBaseOnGridSystem(imageNode->GetContextRefPtr());
+    CHECK_NULL_RETURN(gestureHub, false);
+    auto frameNode = gestureHub->GetFrameNode();
+    double maxWidth = DragDropManager::GetMaxWidthBaseOnGridSystem(frameNode->GetContextRefPtr());
     auto width = imageNode->GetGeometryNode()->GetFrameRect().Width();
-    dragPreviewInfo.scale = static_cast<float>(imageNode->GetPreviewScaleVal());
+    auto previewOption = imageNode->GetDragPreviewOption();
+    if (imageNode->GetTag() != V2::WEB_ETS_TAG && width != 0 && width > maxWidth && previewOption.isScaleEnabled) {
+        dragPreviewInfo.scale = maxWidth / width;
+    } else {
+        dragPreviewInfo.scale = 1.0f;
+    }
+
     if (!isMouseDragged_ && dragPreviewInfo.scale == 1.0f) {
         dragPreviewInfo.scale = TOUCH_DRAG_PIXELMAP_SCALE;
     }
@@ -1708,8 +1716,8 @@ void DragDropManager::UpdateDragPreviewScale()
     renderContext->UpdateTransformScale({ info_.scale, info_.scale });
 }
 
-void DragDropManager::DoDragStartAnimation(
-    const RefPtr<OverlayManager>& overlayManager, const GestureEvent& event, bool isSubwindowOverlay)
+void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlayManager,
+    const GestureEvent& event, const RefPtr<GestureEventHub>& gestureHub, bool isSubwindowOverlay)
 {
     auto containerId = Container::CurrentId();
     auto deviceId = static_cast<int32_t>(event.GetDeviceId());
@@ -1720,7 +1728,8 @@ void DragDropManager::DoDragStartAnimation(
         return;
     }
     CHECK_NULL_VOID(overlayManager);
-    if (!(GetDragPreviewInfo(overlayManager, info_))
+    CHECK_NULL_VOID(gestureHub);
+    if (!(GetDragPreviewInfo(overlayManager, info_, gestureHub))
         || (!IsNeedDisplayInSubwindow() && !isSubwindowOverlay && !isDragWithContextMenu_)) {
         if (isDragWithContextMenu_) {
             UpdateDragPreviewScale();
