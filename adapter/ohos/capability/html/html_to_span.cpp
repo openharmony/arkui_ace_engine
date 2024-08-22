@@ -665,34 +665,20 @@ void HtmlToSpan::HandleImagePixelMap(const std::string& src, ImageSpanOptions& o
     if (src.empty()) {
         return;
     }
-    auto iter = src.find_first_of(':');
-    if (iter == std::string::npos) {
-        return;
+    NG::LoadNotifier loadNotifier(nullptr, nullptr, nullptr);
+    RefPtr<NG::ImageLoadingContext> ctx =
+        AceType::MakeRefPtr<NG::ImageLoadingContext>(ImageSourceInfo(src), std::move(loadNotifier), true);
+    CHECK_NULL_VOID(ctx);
+    ctx->LoadImageData();
+    ctx->MakeCanvasImageIfNeed(ctx->GetImageSize(), true, ImageFit::NONE);
+    auto image = ctx->MoveCanvasImage();
+    if (image != nullptr) {
+        option.imagePixelMap = image->GetPixelMap();
     }
-    std::string head = src.substr(0, iter);
-    std::transform(head.begin(), head.end(), head.begin(), [](unsigned char c) { return std::tolower(c); });
-    if (head == "http" || head == "https") {
-        NG::LoadNotifier loadNotifier(nullptr, nullptr, nullptr);
-        RefPtr<NG::ImageLoadingContext> ctx =
-            AceType::MakeRefPtr<NG::ImageLoadingContext>(ImageSourceInfo(src), std::move(loadNotifier), true);
-        CHECK_NULL_VOID(ctx);
-        ctx->LoadImageData();
-        ctx->MakeCanvasImageIfNeed(ctx->GetImageSize(), true, ImageFit::NONE);
-        auto image = ctx->MoveCanvasImage();
-        if (image != nullptr) {
-            option.imagePixelMap = image->GetPixelMap();
-        }
-    } else if (head == "file") {
-        std::string filePath = FileUriHelper::GetRealPath(src);
-        auto imageSource = ImageSource::Create(filePath);
-        CHECK_NULL_VOID(imageSource);
-        option.imagePixelMap = imageSource->CreatePixelMap();
-    }
-
     if (option.imagePixelMap.has_value() && option.imagePixelMap.value() != nullptr) {
         auto pixel = option.imagePixelMap.value();
-        LOGI("img head:%{public}s height: %{public}d, width: %{public}d, size:%{public}d", head.c_str(),
-            pixel->GetHeight(), pixel->GetWidth(), pixel->GetByteCount());
+        LOGI("img height: %{public}d, width: %{public}d, size:%{public}d", pixel->GetHeight(),
+            pixel->GetWidth(), pixel->GetByteCount());
     }
 }
 
