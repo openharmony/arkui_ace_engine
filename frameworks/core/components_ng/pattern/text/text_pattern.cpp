@@ -3062,12 +3062,12 @@ void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
                 }
                 break;
             case PropertyInfo::VARIABLE_FONT_WEIGHT:
-                if (textLayoutProp->HasVariableFontWeight()) {
+                if (textLayoutProp->HasVariableFontWeight() && !child->GetHasUserFontWeight()) {
                     child->UpdateVariableFontWeightWithoutFlushDirty(textLayoutProp->GetVariableFontWeight().value());
                 }
                 break;
             case PropertyInfo::ENABLE_VARIABLE_FONT_WEIGHT:
-                if (textLayoutProp->HasEnableVariableFontWeight()) {
+                if (textLayoutProp->HasEnableVariableFontWeight() && !child->GetHasUserFontWeight()) {
                     child->UpdateEnableVariableFontWeightWithoutFlushDirty(
                         textLayoutProp->GetEnableVariableFontWeight().value());
                 }
