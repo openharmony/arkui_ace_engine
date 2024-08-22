@@ -43,7 +43,9 @@ void StageCardParser::Parse(const std::string& contents, const std::string& sele
             selectUrl.c_str());
         return;
     }
-
+    if (!formConfig) {
+        return;
+    }
     auto supportDimensions = formConfig->GetValue("supportDimensions");
     if (supportDimensions && supportDimensions->IsArray()) {
         for (index = 0; index < supportDimensions->GetArraySize(); ++index) {
