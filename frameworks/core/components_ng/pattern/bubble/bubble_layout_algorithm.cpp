@@ -441,9 +441,6 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(frameNode);
     auto bubblePattern = frameNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(bubblePattern);
-    if (bubblePattern->IsExiting()) {
-        return;
-    }
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.empty()) {
         return;
@@ -460,6 +457,9 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto childShowHeight =
             childWrapper->GetGeometryNode()->GetFrameSize().Height() + BUBBLE_ARROW_HEIGHT.ConvertToPx() * 2;
         childWrapper->GetGeometryNode()->SetFrameSize(SizeF { childShowWidth, childShowHeight });
+    }
+    if (bubblePattern->IsExiting()) {
+        return;
     }
     BubbleAvoidanceRule(childWrapper, bubbleProp, frameNode, showInSubWindow);
     UpdateTouchRegion();
