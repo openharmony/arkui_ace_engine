@@ -124,7 +124,7 @@ void SideBarContainerPattern::OnUpdateShowSideBar(const RefPtr<SideBarContainerL
     }
 
     auto newShowSideBar = layoutProperty->GetShowSideBar().value_or(true);
-    if (newShowSideBar == oldShowSideBar_) {
+    if (newShowSideBar == userSetShowSideBar_) {
         return;
     }
 
@@ -133,7 +133,7 @@ void SideBarContainerPattern::OnUpdateShowSideBar(const RefPtr<SideBarContainerL
         FireChangeEvent(newShowSideBar);
     }
     
-    oldShowSideBar_ = newShowSideBar;
+    userSetShowSideBar_ = newShowSideBar;
     SetSideBarStatus(newShowSideBar ? SideBarStatus::SHOW : SideBarStatus::HIDDEN);
     UpdateControlButtonIcon();
     auto host = GetHost();
