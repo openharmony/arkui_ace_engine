@@ -43,7 +43,7 @@ void MockImplicitAnimation::UpdateProp(const WeakPtr<NG::PropertyBase>& propWk) 
 
 void MockImplicitAnimation::Next()
 {
-    if (Finished()) {
+    if (paused_ || Finished()) {
         return;
     }
     UpdateProp(prop_);
@@ -63,5 +63,15 @@ void MockImplicitAnimation::End()
     if (cbs_.finishCb) {
         cbs_.finishCb();
     }
+}
+
+void MockImplicitAnimation::JumpToEnd()
+{
+    remainingTicks_ = 1;
+    UpdateProp(prop_);
+    if (cbs_.repeatCb) {
+        cbs_.repeatCb();
+    }
+    End();
 }
 } // namespace OHOS::Ace
