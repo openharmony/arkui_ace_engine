@@ -180,13 +180,13 @@ public:
     }
     bool IsForeground() const
     {
-        return state_ = AbilityState::FOREGROUND;
+        return state_ == AbilityState::FOREGROUND;
     }
     void SetSessionViewportConfig(const SessionViewportConfig& config)
     {
         sessionViewportConfig_ = config;
     }
-    const SessionViewoprtConfig& GetSessionViewportConfig() const
+    const SessionViewportConfig& GetSessionViewportConfig() const
     {
         return sessionViewportConfig_;
     }

@@ -2306,7 +2306,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
 }
 
 void UIContentImpl::UIExtensionUpdateViewportConfig(
-    const ViewportConfig& config, Refptr<NG::PipelineContext> context, RefPtr<TaskExecutor> taskExecutor)
+    const ViewportConfig& config, RefPtr<NG::PipelineContext> context, RefPtr<TaskExecutor> taskExecutor)
 {
     auto updateSessionViewportConfigTask = [context, config]() {
         CHECK_NULL_VOID(context);

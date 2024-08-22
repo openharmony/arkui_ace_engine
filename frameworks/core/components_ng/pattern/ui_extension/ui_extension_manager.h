@@ -108,7 +108,7 @@ public:
 
     void AddAliveUIExtension(int32_t nodeId, const WeakPtr<SecurityUIExtensionPattern>& uiExtension);
 
-    void UIExtensionManger::UpdateSessionViewportConfig(const ViewportConfig& config);
+    void UpdateSessionViewportConfig(const ViewportConfig& config);
 
 private:
     class UIExtensionIdUtility {
