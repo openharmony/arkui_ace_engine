@@ -128,6 +128,7 @@ public:
 
 private:
     void GetFocusViewMap(FocusViewMap& focusViewMap);
+    void ReportFocusSwitching();
 
     std::list<WeakPtr<FocusView>> focusViewStack_;
     WeakPtr<FocusView> lastFocusView_;
@@ -146,9 +147,9 @@ private:
     bool isSwitchingWindow_ = false;
     RefPtr<FocusHub> switchingFocus_;
 
-    std::optional<SwitchingStartReason> startReason;
-    std::optional<SwitchingEndReason> endReason;
-    std::optional<SwitchingUpdateReason> updateReason;
+    std::optional<SwitchingStartReason> startReason_;
+    std::optional<SwitchingEndReason> endReason_;
+    std::optional<SwitchingUpdateReason> updateReason_;
 
     ACE_DISALLOW_COPY_AND_MOVE(FocusManager);
 };
