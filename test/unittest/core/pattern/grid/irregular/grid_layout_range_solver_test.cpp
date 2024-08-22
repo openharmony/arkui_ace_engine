@@ -599,7 +599,7 @@ HWTEST_F(GridLayoutRangeTest, Cache001, TestSize.Level1)
     for (const int32_t i : preloadList) {
         EXPECT_FALSE(frameNode_->GetChildByIndex(i));
     }
-    EXPECT_EQ(pattern_->preloadItemList_, preloadList);
+    CheckPreloadListEqual(preloadList);
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     EXPECT_TRUE(pattern_->preloadItemList_.empty());
     constexpr float itemWidth = (GRID_WIDTH - 20.0f) / 3.0f;
@@ -628,11 +628,11 @@ HWTEST_F(GridLayoutRangeTest, Cache001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info.startIndex_, 39);
     const std::list<int32_t> preloadList2 = { 38, 37, 36, 35, 34, 33 };
-    EXPECT_EQ(pattern_->preloadItemList_, preloadList2);
+    CheckPreloadListEqual(preloadList2);
     const int64_t time = GetSysTimestamp();
     PipelineContext::GetCurrentContext()->OnIdle(time - 1);
     // no time to execute
-    EXPECT_EQ(pattern_->preloadItemList_, preloadList2);
+    CheckPreloadListEqual(preloadList2);
 }
 
 /**
@@ -667,7 +667,7 @@ HWTEST_F(GridLayoutRangeTest, Cache002, TestSize.Level1)
     for (const int32_t i : preloadList) {
         EXPECT_FALSE(frameNode_->GetChildByIndex(i));
     }
-    EXPECT_EQ(pattern_->preloadItemList_, preloadList);
+    CheckPreloadListEqual(preloadList);
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     EXPECT_EQ(GetChildHeight(frameNode_, 22), 1250.0f);
 

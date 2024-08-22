@@ -49,6 +49,15 @@ void GridTestNg::SetUpTestSuite()
 #endif
 }
 
+void GridTestNg::CheckPreloadListEqual(const std::list<int32_t>& expectedList) const {
+    ASSERT_EQ(expectedList.size(), pattern_->preloadItemList_.size());
+    auto it = expectedList.begin();
+    for (auto&& item : pattern_->preloadItemList_) {
+        EXPECT_EQ(*it, item.idx);
+        ++it;
+    }
+}
+
 void GridTestNg::TearDownTestSuite()
 {
     TestNG::TearDownTestSuite();
