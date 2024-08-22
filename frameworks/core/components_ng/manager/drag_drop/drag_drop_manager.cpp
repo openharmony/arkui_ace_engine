@@ -1581,6 +1581,7 @@ double DragDropManager::CalcDragPreviewDistanceWithPoint(
     CHECK_NULL_RETURN(renderContext, 0.0);
     nodeOffset -= pixelMapOffset_;
     auto touchOffset = GetTouchOffsetRelativeToSubwindow(x, y);
+    // calculate distance, so need to pow 2.
     return sqrt(pow(nodeOffset.GetX() - touchOffset.GetX(), 2) + pow(nodeOffset.GetY() - touchOffset.GetY(), 2));
 }
 
