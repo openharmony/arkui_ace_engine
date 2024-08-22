@@ -114,11 +114,37 @@ void XComponentModelNG::SetOnLoad(LoadEvent&& onLoad)
     eventHub->SetOnLoad(std::move(onLoad));
 }
 
+void XComponentModelNG::SetOnLoad(FrameNode* frameNode, LoadEvent&& onLoad)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::Claim(frameNode);
+    auto type = GetTypeImpl(node);
+    if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
+        return;
+    }
+    auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnLoad(std::move(onLoad));
+}
+
 void XComponentModelNG::SetOnDestroy(DestroyEvent&& onDestroy)
 {
     auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(frameNode);
     auto type = GetTypeImpl(frameNode);
+    if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
+        return;
+    }
+    auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDestroy(std::move(onDestroy));
+}
+
+void XComponentModelNG::SetOnDestroy(FrameNode* frameNode, DestroyEvent&& onDestroy)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::Claim(frameNode);
+    auto type = GetTypeImpl(node);
     if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
         return;
     }
@@ -239,6 +265,25 @@ RefPtr<FrameNode> XComponentModelNG::CreateFrameNode(int32_t nodeId, const std::
     return frameNode;
 }
 
+RefPtr<FrameNode> XComponentModelNG::CreateTypeNode(int32_t nodeId, ArkUI_XComponent_Params* params)
+{
+    auto id = params->id;
+    auto type = params->type;
+    auto libraryName = params->libraryName;
+    auto controller = params->controller;
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::XCOMPONENT_ETS_TAG, nodeId, AceType::MakeRefPtr<XComponentPattern>(id, type, libraryName, controller));
+    auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
+    if (layoutProperty) {
+        layoutProperty->UpdateXComponentType(type);
+    }
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_RETURN(xcPattern, nullptr);
+    xcPattern->SetIsTypeNode(true);
+    xcPattern->SetImageAIOptions(params->aiOptions);
+    return frameNode;
+}
+
 void XComponentModelNG::SetXComponentId(FrameNode* frameNode, const std::string& id)
 {
     auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
@@ -296,6 +341,19 @@ void XComponentModelNG::EnableAnalyzer(bool enable)
     auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(frameNode);
     auto type = GetTypeImpl(frameNode);
+    if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
+        return;
+    }
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(xcPattern);
+    xcPattern->EnableAnalyzer(enable);
+}
+
+void XComponentModelNG::EnableAnalyzer(FrameNode* frameNode, bool enable)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::Claim(frameNode);
+    auto type = GetTypeImpl(node);
     if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
         return;
     }
