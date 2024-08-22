@@ -36,7 +36,7 @@ struct BubbleDumpInfo {
     bool enableArrow = false;
     bool mask = true;
     std::string targetNode;
-    int32_t targetID;
+    int32_t targetID = -1;
     OffsetF targetOffset;
     SizeF targetSize;
     RectF touchRegion;
