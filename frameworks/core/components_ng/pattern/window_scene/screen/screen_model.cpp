@@ -15,7 +15,7 @@
 
 #include "core/components_ng/pattern/window_scene/screen/screen_model.h"
 
-#include "screen_session_manager/include/screen_session_manager_client.h"
+#include "screen_session_manager_client.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/window_scene/screen/screen_node.h"

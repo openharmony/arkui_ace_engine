@@ -653,7 +653,7 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
     if (GetResourceId(uri, rawFile)) {
         // must fit raw file firstly, as file name may contains number
         if (!resourceWrapper->GetRawFileData(rawFile, dataLen, data, bundleName, moudleName)) {
-            TAG_LOGW(AceLogTag::ACE_IMAGE, "get image data by name failed, uri:%{private}s, rawFile:%{public}s",
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "get image data by name failed, uri:%{private}s, rawFile:%{private}s",
                 uri.c_str(), rawFile.c_str());
             return nullptr;
         }
@@ -683,7 +683,7 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
     std::string resName;
     if (GetResourceName(uri, resName)) {
         if (!resourceWrapper->GetMediaData(resName, dataLen, data, bundleName, moudleName)) {
-            TAG_LOGW(AceLogTag::ACE_IMAGE, "get image data by name failed, uri:%{private}s, resName:%{public}s",
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "get image data by name failed, uri:%{private}s, resName:%{private}s",
                 uri.c_str(), resName.c_str());
             return nullptr;
         }
@@ -865,7 +865,7 @@ std::shared_ptr<RSData> SharedMemoryImageLoader::LoadImageData(
 
 void SharedMemoryImageLoader::UpdateData(const std::string& uri, const std::vector<uint8_t>& memData)
 {
-    TAG_LOGI(AceLogTag::ACE_IMAGE, "SharedMemory image data is ready %{public}s", uri.c_str());
+    TAG_LOGI(AceLogTag::ACE_IMAGE, "SharedMemory image data is ready %{private}s", uri.c_str());
     {
         std::scoped_lock<std::mutex> lock(mtx_);
         data_ = memData;

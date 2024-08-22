@@ -15,8 +15,6 @@
 
 #include "core/components/arc/render_arc.h"
 
-#include "core/components/arc/arc_component.h"
-
 namespace OHOS::Ace {
 namespace {
 

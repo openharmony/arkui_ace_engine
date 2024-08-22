@@ -595,6 +595,9 @@ bool ArkTSUtils::ParseStringArray(const EcmaVM* vm, const Local<JSValueRef>& arg
         return false;
     }
     auto handle = panda::CopyableGlobal<panda::ArrayRef>(vm, arg);
+    if (handle->IsUndefined() || handle->IsNull()) {
+        return false;
+    }
     int32_t length = static_cast<int32_t>(handle->Length(vm));
     if (length != defaultLength) {
         return false;
@@ -1876,6 +1879,12 @@ bool ArkTSUtils::IsDrawable(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
 RefPtr<PixelMap> ArkTSUtils::GetDrawablePixmap(const EcmaVM* vm, Local<JSValueRef> obj)
 {
     return PixelMap::GetFromDrawable(UnwrapNapiValue(vm, obj));
+}
+
+Rosen::BrightnessBlender* ArkTSUtils::CreateRSBrightnessBlenderFromNapiValue(const EcmaVM* vm, Local<JSValueRef> obj)
+{
+    auto blenderPtr = static_cast<Rosen::BrightnessBlender*>(UnwrapNapiValue(vm, obj));
+    return blenderPtr;
 }
 
 void* ArkTSUtils::UnwrapNapiValue(const EcmaVM* vm, const Local<JSValueRef>& obj)

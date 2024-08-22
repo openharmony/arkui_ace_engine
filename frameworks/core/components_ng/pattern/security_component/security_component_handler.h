@@ -54,6 +54,7 @@ private:
     static bool CheckBrightness(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
     static bool CheckVisibility(const RefPtr<FrameNode>& node, RefPtr<LayoutProperty>& layoutProperty);
     static bool CheckBlur(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
+    static bool CheckForegroundBlurStyle(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
     static bool CheckGrayScale(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
     static bool CheckSaturate(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
     static bool CheckContrast(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);

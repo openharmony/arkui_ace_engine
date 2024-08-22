@@ -15,15 +15,10 @@
 
 #include "core/components/plugin/plugin_component_manager.h"
 
-#include <map>
-#include <vector>
-
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 #include "ui_service_mgr_client.h"
 
-#include "base/json/json_util.h"
-#include "base/log/log.h"
 #include "core/common/ace_engine.h"
 
 namespace OHOS::Ace {

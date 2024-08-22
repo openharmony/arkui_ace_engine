@@ -168,9 +168,7 @@ void TextLayoutElement::UpdateSize(bool isWidth)
     ChooseExactFontSize(textProp, isWidth);
     auto textConstraint = textProp->GetContentLayoutConstraint();
     CHECK_NULL_VOID(textConstraint);
-    if (isWidth) {
-        textConstraint->selfIdealSize.SetWidth(width_);
-    } else {
+    if (!isWidth) {
         textConstraint->selfIdealSize.SetHeight(height_);
     }
 

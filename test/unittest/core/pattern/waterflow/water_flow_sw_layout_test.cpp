@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "test/unittest/core/pattern/waterflow/water_flow_test_ng.h"
+
 #include "water_flow_item_maps.h"
+#include "water_flow_test_ng.h"
 
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
 
@@ -249,7 +250,7 @@ HWTEST_F(WaterFlowSWTest, ModifyItem002, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 46), -100.0f);
     EXPECT_EQ(GetChildY(frameNode_, 51), 350.0f);
     auto child = GetChildFrameNode(frameNode_, 49);
-    child->layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(300.0)));
+    child->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(300.0)));
     child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info_->startIndex_, 45);
@@ -257,11 +258,11 @@ HWTEST_F(WaterFlowSWTest, ModifyItem002, TestSize.Level1)
     EXPECT_EQ(GetChildHeight(frameNode_, 49), 300.0f);
 
     child = GetChildFrameNode(frameNode_, 40);
-    child->layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(10.0)));
+    child->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(10.0)));
     child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info_->startIndex_, 45);
-    EXPECT_EQ(GetChildY(frameNode_, 45), -50.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 46), -50.0f);
     EXPECT_FALSE(child->IsActive());
     EXPECT_FALSE(info_->idxToLane_.count(40));
 
@@ -275,7 +276,7 @@ HWTEST_F(WaterFlowSWTest, ModifyItem002, TestSize.Level1)
     EXPECT_EQ(info_->lanes_[0][1].ToString(), "{StartPos: -50.000000 EndPos: 750.000000 Items [71 72 75 76 79 ] }");
 
     child = GetChildFrameNode(frameNode_, 0);
-    child->layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(1.0)));
+    child->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(1.0)));
     child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info_->lanes_[0][0].ToString(), "{StartPos: -150.000000 EndPos: 850.000000 Items [69 71 74 75 78 79 ] }");
@@ -299,7 +300,7 @@ HWTEST_F(WaterFlowSWTest, Order001, TestSize.Level1)
     model.SetRowsGap(Dimension(5.0f));
     model.SetColumnsGap(Dimension(5.0f));
     for (int i = 0; i < 30; ++i) {
-        CreateWaterFlowItemWithHeight(100.0f);
+        CreateItemWithHeight(100.0f);
     }
     CreateDone();
     AddItemsAtSlot(5, 100.0f, 3);
@@ -321,7 +322,7 @@ HWTEST_F(WaterFlowSWTest, Update001, TestSize.Level1)
     ViewAbstract::SetWidth(CalcLength(400.0f));
     ViewAbstract::SetHeight(CalcLength(600.f));
     for (int i = 0; i < 35; ++i) {
-        CreateWaterFlowItemWithHeight(100.0f);
+        CreateItemWithHeight(100.0f);
     }
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_11);
@@ -587,7 +588,7 @@ HWTEST_F(WaterFlowSWTest, Misaligned002, TestSize.Level1)
         106, 156, 213, 102, 93, 73, 184, 89, 156, 178, 163, 176, 187, 191, 118, 218, 212, 196, 52, 103, 57, 189, 55,
         127, 230, 51, 167, 166, 118, 107 };
     for (const float& f : randomHeights) {
-        CreateWaterFlowItemWithHeight(f);
+        CreateItemWithHeight(f);
     }
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_10);
@@ -963,5 +964,54 @@ HWTEST_F(WaterFlowSWTest, NotifyDataChange002, TestSize.Level1)
     newSections = { WaterFlowSections::Section { .itemsCount = 30, .crossCount = 5 } };
     secObj->ChangeData(6, 1, newSections);
     EXPECT_EQ(info_->newStartIndex_, -2);
+}
+
+/**
+ * @tc.name: Cache002
+ * @tc.desc: Test cache item layout position
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, Cache002, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    CreateItemsInRepeat(50, [](int32_t i) { return i % 2 ? 100.0f : 200.0f; });
+
+    model.SetCachedCount(3);
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(10));
+    model.SetColumnsGap(Dimension(10));
+    CreateDone();
+    pattern_->ScrollToIndex(30);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 30);
+    EXPECT_EQ(info_->endIndex_, 40);
+    const std::list<int32_t> preloadList = { 41, 42, 43, 29, 28, 27 };
+    EXPECT_EQ(pattern_->preloadItems_, preloadList);
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 40));
+    EXPECT_EQ(GetChildWidth(frameNode_, 40), (WATER_FLOW_WIDTH - 10.0f) / 2.0f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 41), 850.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 42), 960.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 43), 960.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 27), -220.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 28), -210.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 29), -110.0f);
+    // test lanes_'s constraint
+    info_->BeginUpdate();
+    EXPECT_EQ(info_->StartIndex(), 30);
+    EXPECT_EQ(info_->EndIndex(), 40);
+
+    UpdateCurrentOffset(300.0f);
+    EXPECT_EQ(info_->startIndex_, 25);
+    EXPECT_EQ(info_->endIndex_, 36);
+    // item in cache range shouldn't be created yet
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 22));
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    ASSERT_TRUE(GetChildFrameNode(frameNode_, 22));
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 22)->IsActive());
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 22), -440.0f);
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 22)->IsActive());
 }
 } // namespace OHOS::Ace::NG

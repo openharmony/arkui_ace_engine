@@ -71,6 +71,22 @@ bool IsStartTopLeft(FlexDirection direction, TextDirection textDirection)
     }
 }
 
+FlexDirection ReverseFlexDirection(FlexDirection direction)
+{
+    switch (direction) {
+        case FlexDirection::ROW:
+            return FlexDirection::ROW_REVERSE;
+        case FlexDirection::ROW_REVERSE:
+            return FlexDirection::ROW;
+        case FlexDirection::COLUMN:
+            return FlexDirection::COLUMN_REVERSE;
+        case FlexDirection::COLUMN_REVERSE:
+            return FlexDirection::COLUMN;
+        default:
+            return FlexDirection::ROW;
+    }
+}
+
 float GetCrossAxisSizeHelper(const SizeF& size, FlexDirection direction)
 {
     if (direction == FlexDirection::ROW || direction == FlexDirection::ROW_REVERSE) {
@@ -997,6 +1013,10 @@ void FlexLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutProperty);
     space_ = static_cast<float>(layoutProperty->GetSpaceValue({}).ConvertToPx());
     direction_ = layoutProperty->GetFlexDirection().value_or(FlexDirection::ROW);
+    bool isReverse = layoutProperty->GetFlexLayoutAttribute()->GetIsReverse().value_or(false);
+    if (isReverse) {
+        direction_ = ReverseFlexDirection(direction_);
+    }
     mainAxisAlign_ = layoutProperty->GetMainAxisAlignValue(FlexAlign::FLEX_START);
     crossAxisAlign_ =
         layoutProperty->GetCrossAxisAlignValue(isLinearLayoutFeature_ ? FlexAlign::CENTER : FlexAlign::FLEX_START);

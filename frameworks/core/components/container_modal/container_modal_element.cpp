@@ -15,17 +15,10 @@
 
 #include "core/components/container_modal/container_modal_element.h"
 
-#include "base/memory/ace_type.h"
-#include "core/components/box/box_element.h"
-#include "core/components/box/render_box.h"
 #include "core/components/clip/clip_element.h"
 #include "core/components/clip/render_clip.h"
 #include "core/components/container_modal/container_modal_constants.h"
-#include "core/components/container_modal/render_container_modal.h"
-#include "core/components/flex/flex_element.h"
 #include "core/components/padding/render_padding.h"
-#include "core/gestures/tap_gesture.h"
-#include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
 namespace {

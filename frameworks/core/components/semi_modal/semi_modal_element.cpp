@@ -15,7 +15,6 @@
 
 #include "core/components/semi_modal/semi_modal_element.h"
 
-#include "core/components/box/box_element.h"
 #include "core/components/flex/flex_element.h"
 #include "core/components/flex/flex_item_element.h"
 #include "core/components/semi_modal/render_semi_modal.h"

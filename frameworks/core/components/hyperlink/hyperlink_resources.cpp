@@ -15,10 +15,6 @@
 
 #include "core/components/hyperlink/hyperlink_resources.h"
 
-#include <sstream>
-
-#include "base/log/log.h"
-
 namespace OHOS::Ace {
 
 const char HYPERLINK_COMPONENT_PARAM_EQUALS[] = "#HWJS-=-#";

@@ -66,7 +66,7 @@ bool ImageProvider::TrySetLoadingImage(const ImageSourceInfo& imageInfo, const I
         loadingImage_.emplace(key, callbacks);
         return true;
     } else {
-        LOGI("other thread is loading same image: %{public}s", imageInfo.ToString().c_str());
+        LOGI("other thread is loading same image: %{private}s", imageInfo.ToString().c_str());
         iter->second.emplace_back(successCallback, uploadCallback, failedCallback);
         return false;
     }
@@ -108,7 +108,7 @@ void ImageProvider::ProccessLoadingResult(const RefPtr<TaskExecutor>& taskExecut
             }
         }
     } else {
-        LOGW("no loading image: %{public}s", imageInfo.ToString().c_str());
+        LOGW("no loading image: %{private}s", imageInfo.ToString().c_str());
     }
     loadingImage_.erase(key);
 }
@@ -149,7 +149,7 @@ void ImageProvider::ProccessUploadResult(const RefPtr<TaskExecutor>& taskExecuto
             },
             TaskExecutor::TaskType::UI, "ArkUIImageProviderUploadResult");
     } else {
-        LOGW("no uploading image: %{public}s", imageInfo.ToString().c_str());
+        LOGW("no uploading image: %{private}s", imageInfo.ToString().c_str());
     }
     uploadingImage_.erase(key);
 }
@@ -400,7 +400,7 @@ void ImageProvider::UploadImageToGPUForRender(const WeakPtr<PipelineBase> contex
     callback(image, nullptr);
 #else
     if (data && ImageCompressor::GetInstance()->CanCompress()) {
-        LOGI("use astc cache %{public}s %{public}d * %{public}d", src.c_str(), image->width(), image->height());
+        LOGI("use astc cache %{private}s %{public}d * %{public}d", src.c_str(), image->width(), image->height());
         callback(image, data);
         return;
     }
@@ -458,7 +458,7 @@ void ImageProvider::UploadImageToGPUForRender(const WeakPtr<PipelineBase> contex
     callback(image, nullptr);
 #else
     if (data && ImageCompressor::GetInstance()->CanCompress()) {
-        LOGI("use astc cache %{public}s %{public}d * %{public}d", src.c_str(), image->GetWidth(), image->GetHeight());
+        LOGI("use astc cache %{private}s %{public}d * %{public}d", src.c_str(), image->GetWidth(), image->GetHeight());
         callback(image, data);
         return;
     }
@@ -696,7 +696,7 @@ sk_sp<SkImage> ImageProvider::GetSkImage(const std::string& src, const WeakPtr<P
     ImageSourceInfo info(src);
     auto imageLoader = ImageLoader::CreateImageLoader(info);
     if (!imageLoader) {
-        LOGE("Invalid src, src is %{public}s", src.c_str());
+        LOGE("Invalid src, src is %{private}s", src.c_str());
         return nullptr;
     }
     auto imageSkData = imageLoader->LoadImageData(info, context);
@@ -719,7 +719,7 @@ std::shared_ptr<RSImage> ImageProvider::GetDrawingImage(
     ImageSourceInfo info(src);
     auto imageLoader = ImageLoader::CreateImageLoader(info);
     if (!imageLoader) {
-        LOGE("Invalid src, src is %{public}s", src.c_str());
+        LOGE("Invalid src, src is %{private}s", src.c_str());
         return nullptr;
     }
     auto imageData = imageLoader->LoadImageData(info, context);

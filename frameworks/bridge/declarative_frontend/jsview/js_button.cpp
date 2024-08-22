@@ -126,7 +126,8 @@ void JSButton::SetType(const JSCallbackInfo& info)
         value = info[0]->ToNumber<int32_t>();
     }
     if ((ButtonType)value == ButtonType::CAPSULE || (ButtonType)value == ButtonType::CIRCLE ||
-        (ButtonType)value == ButtonType::ARC || (ButtonType)value == ButtonType::NORMAL) {
+        (ButtonType)value == ButtonType::ARC || (ButtonType)value == ButtonType::NORMAL ||
+        (ButtonType)value == ButtonType::ROUNDED_RECTANGLE) {
         ButtonModel::GetInstance()->SetType(value);
     }
 }

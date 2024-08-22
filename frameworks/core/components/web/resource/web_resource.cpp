@@ -15,12 +15,6 @@
 
 #include "core/components/web/resource/web_resource.h"
 
-#include <sstream>
-
-#include "base/log/log.h"
-#include "core/components/box/drag_drop_event.h"
-#include "core/pipeline/pipeline_context.h"
-
 namespace OHOS::Ace {
 
 const char WEB_PARAM_NONE[] = "";

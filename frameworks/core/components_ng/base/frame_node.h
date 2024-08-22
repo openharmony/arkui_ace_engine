@@ -515,6 +515,7 @@ public:
     {
         std::unique_lock<std::shared_mutex> lock(colorModeCallbackMutex_);
         ndkColorModeUpdateCallback_ = callback;
+        colorMode_ = SystemProperties::GetColorMode();
     }
 
     void SetNDKFontUpdateCallback(const std::function<void(float, float)>&& callback)
@@ -1167,6 +1168,8 @@ private:
     CacheVisibleRectResult CalculateCacheVisibleRect(CacheVisibleRectResult& parentCacheVisibleRect,
         const RefPtr<FrameNode>& parentUi, RectF& rectToParent, VectorF scale, uint64_t timestamp);
 
+    void NotifyConfigurationChangeNdk(const ConfigurationChange& configurationChange);
+
     bool AllowVisibleAreaCheck() const;
 
     // sort in ZIndex.
@@ -1234,6 +1237,8 @@ private:
     bool isInternal_ = false;
 
     std::string nodeName_;
+
+    ColorMode colorMode_;
 
     bool draggable_ = false;
     bool userSet_ = false;

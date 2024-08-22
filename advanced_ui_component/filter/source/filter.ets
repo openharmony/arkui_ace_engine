@@ -127,7 +127,7 @@ struct ListFilterRow {
   filterRow: FilterParams = { name: '', options: [] };
   onItemClick: (colIndex: number) => void = () => {}
   rowIndex: number = 0
-  maxAppFontScale: number = 1;
+  @State maxAppFontScale: number = 1;
 
   build() {
     Stack({ alignContent: Alignment.End }) {
@@ -249,7 +249,7 @@ struct MultiFilterRow {
   private filterColumnWidth: number = 0
   private lastFilterColumnWidth: number = 0
   private rowIndex: number = 0
-  maxAppFontScale: number = 1;
+  @State maxAppFontScale: number = 1;
 
   private calcMultiFilterRowItemNum() {
     let curLineRetainWidth = this.filterColumnWidth;
@@ -620,7 +620,7 @@ export struct Filter {
   @State twoLineModeItemNumRecord: Array<ObservedNumber> | null = null
   @State downArrowShowState: Array<ObservedBoolean> | null = null
   @State floatFilterBarText: string = ''
-  maxAppFontScale: number = 1;
+  @State maxAppFontScale: number = 1;
   isFollowingSystemFontScale: boolean = false;
 
   textColor(rowIndex: number, colIndex: number) {

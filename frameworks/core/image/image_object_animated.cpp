@@ -126,7 +126,7 @@ void AnimatedImageObject::UploadToGpuForRender(
             dstHeight);
         ClearData();
     } else if (animatedPlayer_ && forceResize && imageSize.IsValid()) {
-        LOGI("animated player has been constructed, forceResize: %{public}s", imageSize.ToString().c_str());
+        LOGI("animated player has been constructed, forceResize: %{private}s", imageSize.ToString().c_str());
         int32_t dstWidth = static_cast<int32_t>(imageSize.Width() + SizeOffset);
         int32_t dstHeight = static_cast<int32_t>(imageSize.Height() + SizeOffset);
         animatedPlayer_->SetTargetSize(dstWidth, dstHeight);

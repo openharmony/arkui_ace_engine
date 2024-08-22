@@ -62,7 +62,7 @@ void SystemWindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
     session_->SetBounds(originBounds);
     windowRect.posX_ = std::round(bounds.x_ + session_->GetOffsetX());
     windowRect.posY_ = std::round(bounds.y_ + session_->GetOffsetY());
-    session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED);
+    session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED, "OnBoundsChanged");
 }
 
 void SystemWindowScene::OnVisibleChange(bool visible)

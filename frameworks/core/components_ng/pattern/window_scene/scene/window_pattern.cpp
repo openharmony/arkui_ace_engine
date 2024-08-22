@@ -56,6 +56,7 @@ const Rosen::RSAnimationTimingCurve NODE_ANIMATION_TIMING_CURVE =
 #endif
 
 constexpr uint32_t COLOR_TRANSLUCENT_WHITE = 0x66ffffff;
+constexpr uint32_t COLOR_TRANSLUCENT_BLACK = 0x66000000;
 constexpr Dimension SNAPSHOT_RADIUS = 16.0_vp;
 } // namespace
 
@@ -415,7 +416,9 @@ void WindowPattern::UpdateSnapshotWindowProperty()
         borderRadius.SetRadius(SNAPSHOT_RADIUS);
         borderRadius.multiValued = false;
         renderContext->UpdateBorderRadius(borderRadius);
-        renderContext->UpdateBackgroundColor(Color(COLOR_TRANSLUCENT_WHITE));
+        auto backgroundColor =
+            SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_TRANSLUCENT_BLACK : COLOR_TRANSLUCENT_WHITE;
+        renderContext->UpdateBackgroundColor(Color(backgroundColor));
         imagePattern->SetNeedBorderRadius(true);
         imageRenderProperty->UpdateNeedBorderRadius(true);
     }

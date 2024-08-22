@@ -15,18 +15,9 @@
 
 #include "core/components/hyperlink/render_hyperlink.h"
 
-#include "base/log/event_report.h"
-#include "base/log/log_wrapper.h"
-#include "core/common/event_manager.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/components/hyperlink/hyperlink_component.h"
 #include "core/components/image/image_component.h"
-#include "core/components/page/page_target.h"
 #include "core/components/text/text_component.h"
-#include "core/event/ace_event_helper.h"
-#include "core/pipeline/base/component_group.h"
 #include "core/pipeline/base/multi_composed_component.h"
-#include "core/pipeline/base/sole_child_component.h"
 
 namespace OHOS::Ace {
 

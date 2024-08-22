@@ -185,6 +185,7 @@ var ButtonType;
   ButtonType[ButtonType["Capsule"] = 1] = "Capsule";
   ButtonType[ButtonType["Circle"] = 2] = "Circle";
   ButtonType[ButtonType["Arc"] = 4] = "Arc";
+  ButtonType[ButtonType["ROUNDED_RECTANGLE"] = 8] = "ROUNDED_RECTANGLE";
 })(ButtonType || (ButtonType = {}));
 
 var DevicePosition;
@@ -2008,6 +2009,10 @@ class TextMenuItemId {
   static get CAMERA_INPUT() {
     return new TextMenuItemId('OH_DEFAULT_CAMERA_INPUT');
   }
+
+  static get AI_WRITER() {
+    return new TextMenuItemId('OH_DEFAULT_AI_WRITE');
+  }
 }
 
 globalThis.TextMenuItemId = TextMenuItemId;
@@ -2201,9 +2206,18 @@ class NavPathStack {
         reject({ message: 'Internal error.', code: 100001 });
       })
     }
-    [info.index, info.navDestinationId] = this.findInPopArray(name);
-    this.pathArray.push(info);
-    this.nativeStack?.onStateChanged();
+    promise.then(() => {
+      return new Promise((resolve, reject) => {
+        [info.index, info.navDestinationId] = this.findInPopArray(name);
+        this.pathArray.push(info);
+        this.nativeStack?.onStateChanged();
+        resolve({code: 0});
+      }).catch((err) => {
+        return new Promise((resolve, reject) => {
+          reject(err);
+        })
+      })
+    })
     return promise;
   }
   parseNavigationOptions(param) {
@@ -2273,12 +2287,21 @@ class NavPathStack {
         reject({ message: 'Internal error.', code: 100001 });
       })
     }
-    [info.index, info.navDestinationId] = this.findInPopArray(info.name);
-    if (launchMode === LaunchMode.NEW_INSTANCE) {
-      info.needBuildNewInstance = true;
-    }
-    this.pathArray.push(info);
-    this.nativeStack?.onStateChanged();
+    promise.then(() => {
+      return new Promise((resolve, reject) => {
+        [info.index, info.navDestinationId] = this.findInPopArray(info.name);
+        if (launchMode === LaunchMode.NEW_INSTANCE) {
+          info.needBuildNewInstance = true;
+        }
+        this.pathArray.push(info);
+        this.nativeStack?.onStateChanged();
+        resolve({code: 0});
+      }).catch((err) => {
+        return new Promise((resolve, reject) => {
+          reject(err);
+        })
+      })
+    })
     return promise;
   }
   replacePath(info, optionParam) {

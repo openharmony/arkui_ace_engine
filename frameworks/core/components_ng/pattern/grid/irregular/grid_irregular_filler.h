@@ -133,7 +133,7 @@ public:
      * @param col The column index where the item is being added.
      * @param row The row index where the item is being added.
      */
-    LayoutConstraintF MeasureItem(
+    std::pair<float, LayoutConstraintF> MeasureItem(
         const FillParameters& params, int32_t itemIdx, int32_t col, int32_t row, bool isCache);
 
 private:

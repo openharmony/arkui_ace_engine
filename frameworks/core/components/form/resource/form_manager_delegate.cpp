@@ -19,6 +19,7 @@
 #include <iomanip>
 #include <memory>
 #include <sstream>
+
 #include "form_info_base.h"
 
 #include "base/log/log.h"
@@ -27,7 +28,6 @@
 #include "core/components_ng/gestures/pan_gesture.h"
 #include "core/gestures/gesture_info.h"
 #include "frameworks/base/json/json_util.h"
-#include "frameworks/core/common/frontend.h"
 
 #ifdef OHOS_STANDARD_SYSTEM
 #include "form_callback_client.h"
@@ -112,6 +112,7 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
 #endif
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    std::lock_guard<std::mutex> lock(recycleMutex_);
     // dynamic add new form should release the running form first.
     if (runningCardId_ > 0) {
         TAG_LOGI(AceLogTag::ACE_FORM, "Add new form, release platform resource about old form:%{public}s.",

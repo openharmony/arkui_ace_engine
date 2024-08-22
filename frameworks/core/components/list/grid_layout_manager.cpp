@@ -15,12 +15,6 @@
 
 #include "core/components/list/grid_layout_manager.h"
 
-#include <algorithm>
-
-#include "base/log/log.h"
-#include "base/utils/utils.h"
-#include "core/components/list/list_component.h"
-#include "core/components/list/render_list_item.h"
 #include "core/components/scroll/render_multi_child_scroll.h"
 
 namespace {

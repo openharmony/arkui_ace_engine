@@ -298,6 +298,8 @@ double ToastPattern::GetTextMaxHeight()
     if (GreatNotEqual(maxHeight, limitHeight)) {
         maxHeight = limitHeight;
     }
+
+    maxHeight = GreatOrEqual(maxHeight, 0.0) ? maxHeight : 0.0;
     return maxHeight;
 }
 

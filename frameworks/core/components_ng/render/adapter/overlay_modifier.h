@@ -131,6 +131,7 @@ public:
     SizeF GetParagraphSize(double contextWidth) const
     {
         auto paragraph = GetParagraph(contextWidth);
+        CHECK_NULL_RETURN(paragraph, SizeF());
         return SizeF(static_cast<float>(paragraph->GetActualWidth()), static_cast<float>(paragraph->GetHeight()));
     }
 

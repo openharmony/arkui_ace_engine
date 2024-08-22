@@ -16,7 +16,6 @@
 #include "core/components/scroll/render_single_child_scroll.h"
 
 #include "core/common/text_field_manager.h"
-#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 namespace {

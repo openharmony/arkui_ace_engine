@@ -15,7 +15,6 @@
 
 #include "core/components/declaration/span/span_declaration.h"
 
-#include "base/utils/string_utils.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components/declaration/common/declaration_constants.h"
 #include "frameworks/bridge/common/utils/utils.h"

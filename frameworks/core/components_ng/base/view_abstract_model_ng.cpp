@@ -215,6 +215,12 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
     const MenuParam& menuParam, std::function<void()>& previewBuildFunc)
 {
     auto targetNode = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    BindContextMenu(targetNode, type, buildFunc, menuParam, previewBuildFunc);
+}
+
+void ViewAbstractModelNG::BindContextMenu(const RefPtr<FrameNode>& targetNode, ResponseType type,
+    std::function<void()>& buildFunc, const NG::MenuParam& menuParam, std::function<void()>& previewBuildFunc)
+{
     CHECK_NULL_VOID(targetNode);
     auto targetId = targetNode->GetId();
     auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());

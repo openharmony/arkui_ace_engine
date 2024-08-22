@@ -1101,6 +1101,9 @@ void TextFieldPattern::InitDisableColor()
         underlineWidth_ = HasFocus() ? TYPING_UNDERLINE_WIDTH : UNDERLINE_WIDTH;
         Color underlineColor = HasFocus() ? userUnderlineColor_.typing.value_or(theme->GetUnderlineTypingColor())
                                           : userUnderlineColor_.normal.value_or(theme->GetUnderlineColor());
+        if (IsShowError()) {
+            underlineColor = userUnderlineColor_.error.value_or(theme->GetErrorUnderlineColor());
+        }
         if (userUnderlineColor_.disable) {
             underlineColor_ = IsDisabled() ? userUnderlineColor_.disable.value() : underlineColor;
         } else {
@@ -1330,6 +1333,16 @@ void TextFieldPattern::HandleOnRedoAction()
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+}
+
+bool TextFieldPattern::CanUndo()
+{
+    return operationRecords_.size() > 1;
+}
+
+bool TextFieldPattern::CanRedo()
+{
+    return !redoOperationRecords_.empty();
 }
 
 void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle, bool showMenu)
@@ -1647,6 +1660,7 @@ void TextFieldPattern::FireEventHubOnChange(const std::string& text)
 void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
     CHECK_NULL_VOID(!IsDragging());
+    CHECK_NULL_VOID(!info.GetTouches().empty());
     if (selectOverlay_->IsTouchAtHandle(info)) {
         return;
     }
@@ -2634,6 +2648,9 @@ void TextFieldPattern::HandleCountStyle()
 
 void TextFieldPattern::ProcessUnderlineColorOnModifierDone()
 {
+    if (IsShowError()) {
+        return;
+    }
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     auto inputValue = layoutProperty->GetSetCounterValue(DEFAULT_MODE);
     if (inputValue == ILLEGAL_VALUE) {
@@ -4096,6 +4113,9 @@ float TextFieldPattern::PreferredTextHeight(bool isPlaceholder, bool isAlgorithm
     } else {
         TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(tmpHost, layoutProperty, textFieldTheme, textStyle, false);
         textContent = "b";
+    }
+    if (adaptFontSize_.has_value()) {
+        textStyle.SetFontSize(adaptFontSize_.value());
     }
     if (textStyle.GetFontSize().IsNonPositive()) {
         textStyle.SetFontSize(DEFAULT_FONT);
@@ -5874,8 +5894,12 @@ void TextFieldPattern::ApplyUnderlineTheme()
     SetThemeAttr();
     auto theme = GetTheme();
     CHECK_NULL_VOID(theme);
-    underlineColor_ = HasFocus() ? userUnderlineColor_.typing.value_or(theme->GetUnderlineTypingColor())
-                                 : userUnderlineColor_.normal.value_or(theme->GetUnderlineColor());
+    if (IsShowError()) {
+        underlineColor_ = userUnderlineColor_.error.value_or(theme->GetErrorUnderlineColor());
+    } else {
+        underlineColor_ = HasFocus() ? userUnderlineColor_.typing.value_or(theme->GetUnderlineTypingColor())
+            : userUnderlineColor_.normal.value_or(theme->GetUnderlineColor());
+    }
     underlineWidth_ = HasFocus() ? TYPING_UNDERLINE_WIDTH : UNDERLINE_WIDTH;
 }
 
@@ -6479,7 +6503,7 @@ void TextFieldPattern::DumpInfo()
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto& dumpLog = DumpLog::GetInstance();
-    dumpLog.AddDesc(std::string("Content:").append(GetTextValue()));
+    dumpLog.AddDesc(std::string("Content:").append(GetDumpTextValue()));
     dumpLog.AddDesc(std::string("autoWidth: ").append(std::to_string(layoutProperty->GetWidthAutoValue(false))));
     dumpLog.AddDesc(std::string("MaxLength:").append(std::to_string(GetMaxLength())));
     dumpLog.AddDesc(std::string("fontSize:").append(GetFontSize()));
@@ -6514,6 +6538,7 @@ void TextFieldPattern::DumpInfo()
         std::string("HeightAdaptivePolicy: ")
             .append(V2::ConvertWrapTextHeightAdaptivePolicyToString(
                 layoutProperty->GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST))));
+    dumpLog.AddDesc(std::string("IsAIWrite: ").append(std::to_string(IsShowAIWrite())));
     DumpPlaceHolderInfo();
     DumpScaleInfo();
     if (SystemProperties::GetDebugEnabled()) {
@@ -6588,6 +6613,17 @@ void TextFieldPattern::DumpScaleInfo()
     dumpLog.AddDesc(std::string("IsFollowSystem: ").append(std::to_string(followSystem)));
     dumpLog.AddDesc(std::string("maxFontScale: ").append(std::to_string(maxFontScale)));
     dumpLog.AddDesc(std::string("halfLeading: ").append(std::to_string(halfLeading)));
+}
+
+std::string TextFieldPattern::GetDumpTextValue() const
+{
+    if (IsInPasswordMode()) {
+        auto len = GetTextValue().length();
+        auto passwordLen = "passwordLen:" + std::to_string(len);
+        return passwordLen;
+    } else {
+        return GetTextValue();
+    }
 }
 
 void TextFieldPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData)
@@ -8051,5 +8087,114 @@ void TextFieldPattern::OnTextGenstureSelectionEnd()
     if (!IsContentRectNonPositive()) {
         ProcessOverlay({ .animation = true });
     }
+}
+
+bool TextFieldPattern::IsShowAIWrite()
+{
+    auto textFieldTheme = GetTheme();
+    CHECK_NULL_RETURN(textFieldTheme, false);
+    auto bundleName = textFieldTheme->GetAIWriteBundleName();
+    auto abilityName = textFieldTheme->GetAIWriteAbilityName();
+    aiWriteAdapter_->SetBundleName(bundleName);
+    aiWriteAdapter_->SetAbilityName(abilityName);
+    return IsUnspecifiedOrTextType() && !bundleName.empty() && !abilityName.empty();
+}
+
+void TextFieldPattern::GetAIWriteInfo(AIWriteInfo& info)
+{
+    // serialize the selected text
+    info.selectStart = selectController_->GetStartIndex();
+    info.selectEnd = selectController_->GetEndIndex();
+    auto selectContent = contentController_->GetSelectedValue(info.selectStart, info.selectEnd);
+    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(selectContent);
+    spanString->EncodeTlv(info.selectBuffer);
+    TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "Selected range=[%{public}d--%{public}d], content = %{public}s",
+        info.selectStart, info.selectEnd, spanString->GetString().c_str());
+
+    // serialize the sentenced-level text
+    auto textSize = static_cast<int32_t>(contentController_->GetWideText().length());
+    auto contentAll = contentController_->GetWideText();
+    auto sentenceStart = 0;
+    auto sentenceEnd = textSize;
+    for (int32_t i = info.selectStart; i >= 0; --i) {
+        if (aiWriteAdapter_->IsSentenceBoundary(contentAll[i])) {
+            sentenceStart = i + 1;
+            break;
+        }
+    }
+    for (int32_t i = info.selectEnd; i < textSize; i++) {
+        if (aiWriteAdapter_->IsSentenceBoundary(contentAll[i])) {
+            sentenceEnd = i;
+            break;
+        }
+    }
+    auto sentenceContent = contentController_->GetSelectedValue(sentenceStart, sentenceEnd);
+    spanString = AceType::MakeRefPtr<SpanString>(sentenceContent);
+    spanString->EncodeTlv(info.selectBuffer);
+    TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "Sentence range=[%{public}d--%{public}d], content = %{public}s",
+        sentenceStart, sentenceEnd, spanString->GetString().c_str());
+}
+
+void TextFieldPattern::HandleOnAIWrite()
+{
+    AIWriteInfo info;
+    GetAIWriteInfo(info);
+    CloseSelectOverlay();
+    CloseKeyboard(true);
+
+    auto callback = [weak = WeakClaim(this), info](std::vector<uint8_t>& buffer) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleAIWriteResult(info.selectStart, info.selectEnd, buffer);
+        auto aiWriteAdapter = pattern->aiWriteAdapter_;
+        CHECK_NULL_VOID(aiWriteAdapter);
+        aiWriteAdapter->CloseModalUIExtension();
+    };
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    aiWriteAdapter_->SetPipelineContext(pipeline);
+    aiWriteAdapter_->ShowModalUIExtension(info, callback);
+}
+
+void TextFieldPattern::HandleAIWriteResult(int32_t start, int32_t end, std::vector<uint8_t>& buffer)
+{
+    RefPtr<SpanString> spanString = SpanString::DecodeTlv(buffer);
+    auto resultText = spanString->GetString();
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "Backfilling results range=[%{public}d--%{public}d], content = %{public}s",
+        start, end, spanString->GetString().c_str());
+    if (spanString->GetSpanItems().empty()) {
+        return;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto value = contentController_->GetSelectedValue(start, end);
+    BeforeIMEDeleteValue(value, TextDeleteDirection::FORWARD, start);
+    BeforeIMEInsertValue(resultText, start);
+    contentController_->ReplaceSelectedValue(start, end, resultText);
+    AfterIMEDeleteValue(value, TextDeleteDirection::FORWARD);
+    AfterIMEInsertValue(resultText);
+    CloseSelectOverlay(true);
+    SetCaretPosition(start + spanString->GetLength());
+    StartTwinkling();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+}
+
+bool TextFieldPattern::IsTextEditableForStylus()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto focusHub = host->GetFocusHub();
+    if (!focusHub->IsFocusable() || !host->IsVisible()) {
+        return false;
+    }
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    auto opacity = renderContext->GetOpacity();
+    // if opacity is 0.0f, no need to hit frameNode.
+    if (NearZero(opacity.value_or(1.0f))) {
+        return false;
+    }
+    return !IsInPasswordMode();
 }
 } // namespace OHOS::Ace::NG

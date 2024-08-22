@@ -1446,7 +1446,7 @@ void JsAccessibilityManager::UpdateWebAccessibilityElementInfo(
     nodeInfo.SetFocused(node->GetIsFocused());
     nodeInfo.SetAccessibilityFocus(node->GetIsAccessibilityFocus());
     nodeInfo.SetVisible(node->GetIsVisible());
-    
+
     if (node->GetIsVisible()) {
         CHECK_NULL_VOID(webPattern);
         auto webNode = webPattern->GetHost();
@@ -2401,7 +2401,7 @@ void JsAccessibilityManager::SendWebAccessibilityAsyncEvent(
     if (windowId == 0) {
         return;
     }
-    
+
     AccessibilityEventInfo eventInfo;
     RefPtr<NG::PipelineContext> ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context_.Upgrade());
     CHECK_NULL_VOID(ngPipeline);
@@ -2410,7 +2410,7 @@ void JsAccessibilityManager::SendWebAccessibilityAsyncEvent(
                 accessibilityEvent.nodeId, accessibilityEvent.stackNodeId, ngPipeline->GetRealHostWindowId() },
         webPattern);
     eventInfo.SetWindowId(ngPipeline->GetRealHostWindowId());
-    
+
     if (accessibilityEvent.type == AccessibilityEventType::PAGE_CHANGE && accessibilityEvent.windowId != 0) {
         eventInfo.SetWindowId(accessibilityEvent.windowId);
     }
@@ -2612,7 +2612,7 @@ bool JsAccessibilityManager::CheckDumpInfoParams(const std::vector<std::string> 
     return true;
 }
 
-void JsAccessibilityManager::OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId)
+void JsAccessibilityManager::OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId, bool hasJson)
 {
     if (!CheckDumpInfoParams(params)) {
         DumpLog::GetInstance().Print("Error: invalid arguments!");
@@ -2658,6 +2658,8 @@ void JsAccessibilityManager::OnDumpInfoNG(const std::vector<std::string>& params
             pointY = StringUtils::StringToInt(*arg);
         } else if (*arg == "-v") {
             verbose = true;
+        } else if (*arg == "-json") {
+            mode = DumpMode::TREE;
         } else {
             if (mode == DumpMode::NODE) {
                 mode = DumpMode::HANDLE_EVENT;
@@ -2677,6 +2679,7 @@ void JsAccessibilityManager::OnDumpInfoNG(const std::vector<std::string>& params
     }
     switch (mode) {
         case DumpMode::TREE:
+            isUseJson_ = hasJson;
             DumpTreeNG(useWindowId, windowId, rootId, isDumpSimplify);
             break;
         case DumpMode::NODE:
@@ -3139,8 +3142,10 @@ void JsAccessibilityManager::DumpTreeNG(const RefPtr<NG::FrameNode>& parent, int
     }
     if (isDumpSimplify) {
         DumpTreeNodeSimplifyInfoNG(node, depth, commonProperty, children.size());
-    } else {
+    } else if (!isUseJson_) {
         DumpTreeNodeInfoNG(node, depth, commonProperty, children.size());
+    } else {
+        DumpTreeNodeInfoInJson(node, depth, commonProperty, children.size());
     }
     auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
     auto uiVirtualNode = accessibilityProperty->GetAccessibilityVirtualNode();
@@ -5540,4 +5545,52 @@ void JsAccessibilityManager::FindTextByTextHint(const RefPtr<NG::UINode>& node,
     }
 }
 
+void JsAccessibilityManager::CreateNodeInfoJson(
+    const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty, std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_VOID(node);
+    auto child = JsonUtil::Create(true);
+    child->Put("ID", node->GetAccessibilityId());
+    child->Put("compid", node->GetInspectorId().value_or("").c_str());
+    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    if (accessibilityProperty) {
+        child->Put("text", accessibilityProperty->GetGroupText().c_str());
+        child->Put("accessibilityText", accessibilityProperty->GetAccessibilityText().c_str());
+        child->Put("accessibilityGroup", accessibilityProperty->IsAccessibilityGroup());
+        child->Put("accessibilityLevel", accessibilityProperty->GetAccessibilityLevel().c_str());
+    }
+    NG::RectF rect = node->GetTransformRectRelativeToWindow();
+    child->Put("top", rect.Top() + commonProperty.windowTop);
+    child->Put("left", rect.Left() + commonProperty.windowLeft);
+    child->Put("width", rect.Width());
+    child->Put("height", rect.Height());
+    child->Put("visible", node->IsVisible());
+    auto eventHub = node->GetEventHub<NG::EventHub>();
+    if (eventHub) {
+        auto gestureEventHub = eventHub->GetGestureEventHub();
+        child->Put("clickable", gestureEventHub ? gestureEventHub->IsAccessibilityClickable() : false);
+        child->Put("longclickable", gestureEventHub ? gestureEventHub->IsAccessibilityLongClickable() : false);
+    }
+    if (accessibilityProperty) {
+        child->Put("checkable", accessibilityProperty->IsCheckable());
+        child->Put("scrollable", accessibilityProperty->IsScrollable());
+        child->Put("checked", accessibilityProperty->IsChecked());
+        child->Put("hint", accessibilityProperty->GetHintText().c_str());
+        child->Put("childTree", accessibilityProperty->GetChildTreeId());
+    }
+    std::string tag =
+        node->GetTag() == "root" ? "root" : node->GetTag() + "_" + std::to_string(node->GetAccessibilityId());
+    json->Put(tag.c_str(), child);
+}
+
+void JsAccessibilityManager::DumpTreeNodeInfoInJson(
+    const RefPtr<NG::FrameNode>& node, int32_t depth, const CommonProperty& commonProperty, int32_t childSize)
+{
+    auto json = JsonUtil::Create(true);
+    CreateNodeInfoJson(node, commonProperty, json);
+    std::string content = DumpLog::GetInstance().FormatDumpInfo(json->ToString(), depth);
+    std::string prefix = DumpLog::GetInstance().GetPrefix(depth);
+    std::string fulljson = prefix.append(content);
+    DumpLog::GetInstance().PrintJson(fulljson);
+}
 } // namespace OHOS::Ace::Framework

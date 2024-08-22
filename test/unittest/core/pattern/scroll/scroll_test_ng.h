@@ -16,42 +16,12 @@
 #ifndef FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_SCROLL_SCROLL_TEST_NG_H
 #define FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_SCROLL_SCROLL_TEST_NG_H
 
-#include <cstdint>
-#include <memory>
-#include <utility>
-
-#include "gtest/gtest.h"
-
-#include "base/geometry/ng/size_t.h"
-#include "base/geometry/offset.h"
-#include "base/memory/ace_type.h"
-#define private public
-#define protected public
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
-#include "core/animation/animator.h"
-#include "core/components/common/layout/grid_system_manager.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/scroll/scroll_bar_theme.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_abstract_model_ng.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/linear_layout/column_model_ng.h"
-#include "core/components_ng/pattern/linear_layout/row_model_ng.h"
-#include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
+#define private public
+#define protected public
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
-#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;

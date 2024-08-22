@@ -262,4 +262,10 @@ void RosenWindow::OnVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         }
 #endif
 }
+
+void RosenWindow::NotifyExtensionTimeout(int32_t errorCode)
+{
+    CHECK_NULL_VOID(rsWindow_);
+    rsWindow_->NotifyExtensionTimeout(errorCode);
+}
 } // namespace OHOS::Ace::NG

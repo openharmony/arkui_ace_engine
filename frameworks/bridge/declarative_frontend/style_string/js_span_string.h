@@ -65,6 +65,9 @@ public:
     static JSRef<JSObject> CreateJsGestureSpan(const RefPtr<SpanBase>& spanObject);
     static RefPtr<SpanBase> ParseJsGestureSpan(int32_t start, int32_t length, const JSRef<JSObject>& obj);
 
+    static JSRef<JSObject> CreateJSBackgroundColorSpan(const RefPtr<SpanBase>& spanObject);
+    static RefPtr<SpanBase> ParseJSBackgroundColorSpan(int32_t start, int32_t length, const JSRef<JSObject>& obj);
+
     static JSRef<JSObject> CreateJsTextShadowSpan(const RefPtr<SpanBase>& spanObject);
     static RefPtr<SpanBase> ParseJsTextShadowSpan(int32_t start, int32_t length, const JSRef<JSObject>& obj);
 
@@ -89,8 +92,11 @@ public:
     void SetController(const RefPtr<SpanString>& spanString);
 
     static void FromHtml(const JSCallbackInfo& info);
-
+    static void Marshalling(const JSCallbackInfo& info);
+    static void Unmarshalling(const JSCallbackInfo& info);
 private:
+    static void UnmarshallingExec(napi_env env, void *data);
+    static void UnmarshallingComplete(napi_env env, napi_status status, void *data);
     ACE_DISALLOW_COPY_AND_MOVE(JSSpanString);
     RefPtr<SpanString> spanString_;
 };

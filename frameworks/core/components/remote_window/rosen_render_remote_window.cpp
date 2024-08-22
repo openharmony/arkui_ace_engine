@@ -15,8 +15,6 @@
 
 #include "core/components/remote_window/rosen_render_remote_window.h"
 
-#include "render_service_client/core/ui/rs_proxy_node.h"
-
 namespace OHOS::Ace {
 void RosenRenderRemoteWindow::Update(const RefPtr<Component>& component)
 {

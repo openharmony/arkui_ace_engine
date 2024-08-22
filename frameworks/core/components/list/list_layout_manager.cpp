@@ -15,15 +15,7 @@
 
 #include "core/components/list/list_layout_manager.h"
 
-#include <algorithm>
-
-#include "base/log/log.h"
-#include "base/utils/utils.h"
 #include "core/animation/bilateral_spring_node.h"
-#include "core/animation/curve.h"
-#include "core/animation/curve_animation.h"
-#include "core/components/list/list_component.h"
-#include "core/components/list/render_list_item.h"
 #include "core/components/list/render_list_item_group.h"
 #include "core/components/scroll/render_multi_child_scroll.h"
 

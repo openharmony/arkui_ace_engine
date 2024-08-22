@@ -211,4 +211,22 @@ HWTEST_F(ObserverTestNg, ObserverTestNg008, TestSize.Level1)
     UIObserverHandler::GetInstance().NotifyDidClick(gestureEventInfo, clickInfo, frameNode);
     ASSERT_EQ(UIObserverHandler::GetInstance().didClickHandleFunc_, nullptr);
 }
+
+/**
+ * @tc.name: ObserverTestNg009
+ * @tc.desc: Test the func of GetHandleNavDestinationSwitchFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(ObserverTestNg, ObserverTestNg009, TestSize.Level1)
+{
+    std::optional<NavDestinationInfo> from;
+    std::optional<NavDestinationInfo> to;
+    UIObserverHandler::NavDestinationSwitchHandleFunc handleFunc = [](const AbilityContextInfo&,
+                                                                       NavDestinationSwitchInfo&) -> void {};
+    UIObserverHandler::GetInstance().navDestinationSwitchHandleFunc_ = handleFunc;
+    UIObserverHandler::NavDestinationSwitchHandleFunc func =
+        UIObserverHandler::GetInstance().GetHandleNavDestinationSwitchFunc();
+    ASSERT_NE(handleFunc, nullptr);
+    ASSERT_NE(func, nullptr);
+}
 }

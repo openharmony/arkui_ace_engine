@@ -15,7 +15,6 @@
 
 #include "core/components/slider/slider_component.h"
 
-#include "core/components/box/box_component.h"
 #include "core/components/slider/slider_element.h"
 
 namespace OHOS::Ace {

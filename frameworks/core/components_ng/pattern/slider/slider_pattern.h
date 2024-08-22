@@ -240,6 +240,7 @@ private:
     void ModifyAccessibilityVirtualNode();
     void AddStepPointsAccessibilityVirtualNode();
     void HandleTextOnAccessibilityFocusCallback();
+    void HandleSliderOnAccessibilityFocusCallback();
     void UpdateStepAccessibilityVirtualNode();
     std::string GetPointAccessibilityTxt(uint32_t pointIndex, float stepRatio, float min, float max);
     uint32_t GetCurrentStepIndex();

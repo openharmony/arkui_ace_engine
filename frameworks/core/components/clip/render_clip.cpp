@@ -17,7 +17,6 @@
 
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
-#include "base/utils/utils.h"
 #include "core/components/box/render_box.h"
 #include "core/components/clip/clip_component.h"
 #include "core/components/display/render_display.h"

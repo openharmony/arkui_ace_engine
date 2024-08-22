@@ -423,6 +423,11 @@ public:
      *  End of NestableScrollContainer implementations
      */
 
+    void SetNestedScrollExt(const NestedScrollOptionsExt &nestedScroll);
+    NestedScrollOptionsExt GetNestedScrollExt() const
+    {
+        return nestedScroll_;
+    }
     ACE_DEFINE_PROPERTY_GROUP(WebProperty, WebPatternProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, JsEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MediaPlayGestureAccess, bool);
@@ -612,11 +617,15 @@ public:
     void SetAccessibilityState(bool state);
     void UpdateFocusedAccessibilityId(int64_t accessibilityId = -1);
     void OnTooltip(const std::string& tooltip);
+    void OnPopupSize(int32_t x, int32_t y, int32_t width, int32_t height);
+    void OnPopupShow(bool show);
     bool IsDefaultFocusNodeExist();
     bool IsRootNeedExportTexture();
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
     bool Backward();
     void OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMenuOption);
+    void UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+        const NG::OnMenuItemClickCallback&& onMenuItemClick);
     void NotifyForNextTouchEvent() override;
     void CloseKeyboard();
     void CreateOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, int offsetX, int offsetY, int rectWidth,
@@ -893,6 +902,8 @@ private:
     void InitInOfflineMode();
     void OnOverScrollFlingVelocityHandler(float velocity, bool isFling);
     bool FilterScrollEventHandleOffset(const float offset);
+    bool CheckParentScroll(const float &directValue, const NestedScrollMode &scrollMode);
+    bool CheckOverParentScroll(const float &directValue, const NestedScrollMode &scrollMode);
     bool FilterScrollEventHandlevVlocity(const float velocity);
     void UpdateFlingReachEdgeState(const float value, bool status);
     void CalculateTooltipOffset(RefPtr<FrameNode>& tooltipNode, OffsetF& tooltipOfffset);
@@ -958,7 +969,9 @@ private:
     JsProxyCallback jsProxyCallback_ = nullptr;
     OnControllerAttachedCallback onControllerAttachedCallback_ = nullptr;
     RefPtr<RenderSurface> renderSurface_ = RenderSurface::Create();
+    RefPtr<RenderSurface> popupRenderSurface_ = RenderSurface::Create();
     RefPtr<RenderContext> renderContextForSurface_;
+    RefPtr<RenderContext> renderContextForPopupSurface_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> hoverEvent_;
@@ -1084,6 +1097,16 @@ private:
     bool isAutoFillClosing_ = true;
     ViewDataCommon viewDataCommon_;
     bool isPasswordFill_ = false;
+    NestedScrollOptionsExt nestedScroll_ = {
+        .scrollUp = NestedScrollMode::SELF_ONLY,
+        .scrollDown = NestedScrollMode::SELF_ONLY,
+        .scrollLeft = NestedScrollMode::SELF_ONLY,
+        .scrollRight = NestedScrollMode::SELF_ONLY,
+    };
+
+protected:
+    OnCreateMenuCallback onCreateMenuCallback_;
+    OnMenuItemClickCallback onMenuItemClick_;
 };
 } // namespace OHOS::Ace::NG
 

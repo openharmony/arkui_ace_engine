@@ -12,26 +12,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "gtest/gtest.h"
-#include "gtest/hwext/gtest-ext.h"
 
-#include "core/components/common/layout/constants.h"
-
-#define protected public
-#define private public
+#include "scrollable_test_ng.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#define protected public
+#define private public
+#include "test/unittest/core/pattern/scrollable/mock_scrollable.h"
 
+#include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item_pool.h"
-#include "test/unittest/core/pattern/scrollable/scrollable_test_ng.h"
-#include "test/unittest/core/pattern/scrollable/mock_scrollable.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
-#include "core/components/scroll/scroll_bar_theme.h"
 
 namespace OHOS::Ace::NG {
 class ScrollableCoverTestNg : public ScrollableTestNg {
@@ -334,9 +330,9 @@ HWTEST_F(ScrollableCoverTestNg, InitializeTest001, TestSize.Level1)
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
     auto scrollable = AceType::MakeRefPtr<Scrollable>(scrollCallback, scrollPn->GetAxis());
     ASSERT_NE(scrollable, nullptr);
-    RefPtr<Container> conainer = Container::Current();
-    ASSERT_NE(conainer, nullptr);
-    conainer->SetUseNewPipeline();
+    RefPtr<Container> container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    container->SetUseNewPipeline();
     EXPECT_EQ(Container::IsCurrentUseNewPipeline(), true);
     scrollable->Initialize(MockPipelineContext::GetCurrent());
 

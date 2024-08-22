@@ -67,6 +67,8 @@ public:
         overScroll_ = value;
     }
 
+    bool AppendCacheItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline) override;
+
 private:
     /**
      * @brief Initialize member variables from LayoutProperty.
@@ -108,8 +110,10 @@ private:
      * If user has defined a size for any FlowItem, use that size instead of calling child->Measure.
      *
      * @param targetIdx index of the last FlowItem to measure.
+     * @param cacheDeadline when called during a cache layout, always measure the items and return early if deadline is
+     * reached.
      */
-    void MeasureToTarget(int32_t targetIdx);
+    void MeasureToTarget(int32_t targetIdx, std::optional<int64_t> cacheDeadline);
 
     /**
      * @brief Helper to measure a single FlowItems.
@@ -120,8 +124,8 @@ private:
      * @param userDefMainSize user-defined main-axis size of the FlowItem.
      * @return LayoutWrapper of the FlowItem.
      */
-    RefPtr<LayoutWrapper> MeasureItem(
-        const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, int32_t crossIdx, float userDefMainSize) const;
+    RefPtr<LayoutWrapper> MeasureItem(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, int32_t crossIdx,
+        float userDefMainSize, bool isCache) const;
 
     /**
      * @brief Layout a FlowItem at [idx].

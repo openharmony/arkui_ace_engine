@@ -1941,6 +1941,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onAdsBlocked", &JSWeb::OnAdsBlocked);
     JSClass<JSWeb>::StaticMethod("forceDisplayScrollBar", &JSWeb::ForceDisplayScrollBar);
     JSClass<JSWeb>::StaticMethod("keyboardAvoidMode", &JSWeb::KeyboardAvoidMode);
+    JSClass<JSWeb>::StaticMethod("editMenuOptions", &JSWeb::EditMenuOptions);
 
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -4621,31 +4622,57 @@ void JSWeb::SetLayoutMode(int32_t layoutMode)
 
 void JSWeb::SetNestedScroll(const JSCallbackInfo& args)
 {
-    NestedScrollOptions nestedOpt = {
-        .forward = NestedScrollMode::SELF_ONLY,
-        .backward = NestedScrollMode::SELF_ONLY,
+    NestedScrollOptionsExt nestedOpt = {
+        .scrollUp = NestedScrollMode::SELF_ONLY,
+        .scrollDown = NestedScrollMode::SELF_ONLY,
+        .scrollLeft = NestedScrollMode::SELF_ONLY,
+        .scrollRight = NestedScrollMode::SELF_ONLY,
     };
     if (args.Length() < 1 || !args[0]->IsObject()) {
-        WebModel::GetInstance()->SetNestedScroll(nestedOpt);
+        WebModel::GetInstance()->SetNestedScrollExt(nestedOpt);
         return;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
     int32_t froward = 0;
     JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollForward"), froward);
-    if (froward < static_cast<int32_t>(NestedScrollMode::SELF_ONLY) ||
-        froward > static_cast<int32_t>(NestedScrollMode::PARALLEL)) {
-        froward = 0;
+    if (CheckNestedScrollMode(froward)) {
+        nestedOpt.scrollDown = static_cast<NestedScrollMode>(froward);
+        nestedOpt.scrollRight = static_cast<NestedScrollMode>(froward);
     }
     int32_t backward = 0;
     JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollBackward"), backward);
-    if (backward < static_cast<int32_t>(NestedScrollMode::SELF_ONLY) ||
-        backward > static_cast<int32_t>(NestedScrollMode::PARALLEL)) {
-        backward = 0;
+    if (CheckNestedScrollMode(backward)) {
+        nestedOpt.scrollUp = static_cast<NestedScrollMode>(backward);
+        nestedOpt.scrollLeft = static_cast<NestedScrollMode>(backward);
     }
-    nestedOpt.forward = static_cast<NestedScrollMode>(froward);
-    nestedOpt.backward = static_cast<NestedScrollMode>(backward);
-    WebModel::GetInstance()->SetNestedScroll(nestedOpt);
+    int32_t scrollUp = 0;
+    JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollUp"), scrollUp);
+    if (CheckNestedScrollMode(scrollUp)) {
+        nestedOpt.scrollUp = static_cast<NestedScrollMode>(scrollUp);
+    }
+    int32_t scrollDown = 0;
+    JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollDown"), scrollDown);
+    if (CheckNestedScrollMode(scrollDown)) {
+        nestedOpt.scrollDown = static_cast<NestedScrollMode>(scrollDown);
+    }
+    int32_t scrollLeft = 0;
+    JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollLeft"), scrollLeft);
+    if (CheckNestedScrollMode(scrollLeft)) {
+        nestedOpt.scrollLeft = static_cast<NestedScrollMode>(scrollLeft);
+    }
+    int32_t scrollRight = 0;
+    JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollRight"), scrollRight);
+    if (CheckNestedScrollMode(scrollRight)) {
+        nestedOpt.scrollRight = static_cast<NestedScrollMode>(scrollRight);
+    }
+    WebModel::GetInstance()->SetNestedScrollExt(nestedOpt);
     args.ReturnSelf();
+}
+
+bool JSWeb::CheckNestedScrollMode(const int32_t& modeValue)
+{
+    return modeValue > static_cast<int32_t>(NestedScrollMode::SELF_ONLY) &&
+           modeValue <= static_cast<int32_t>(NestedScrollMode::PARALLEL);
 }
 
 void JSWeb::SetMetaViewport(const JSCallbackInfo& args)
@@ -5071,4 +5098,13 @@ void JSWeb::KeyboardAvoidMode(int32_t mode)
     WebKeyboardAvoidMode avoidMode = static_cast<WebKeyboardAvoidMode>(mode);
     WebModel::GetInstance()->SetKeyboardAvoidMode(avoidMode);
 }
+
+void JSWeb::EditMenuOptions(const JSCallbackInfo& info)
+{
+    NG::OnCreateMenuCallback onCreateMenuCallback;
+    NG::OnMenuItemClickCallback onMenuItemClick;
+    JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick);
+    WebModel::GetInstance()->SetEditMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+}
+
 } // namespace OHOS::Ace::Framework

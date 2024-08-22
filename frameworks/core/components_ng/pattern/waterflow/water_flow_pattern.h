@@ -137,6 +137,7 @@ public:
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
     Rect GetItemRect(int32_t index) const override;
+    int32_t GetItemIndex(double x, double y) const override;
 
     RefPtr<WaterFlowSections> GetSections() const;
     RefPtr<WaterFlowSections> GetOrCreateWaterFlowSections();
@@ -151,13 +152,25 @@ public:
 
     void DumpAdvanceInfo() override;
 
-    void SetPredictLayoutParam(std::optional<WaterFlowLayoutBase::PredictLayoutParam> param)
+    void SetPreloadList(std::list<int32_t>&& preload)
     {
-        predictLayoutParam_ = param;
+        preloadItems_ = std::move(preload);
     }
-    std::optional<WaterFlowLayoutBase::PredictLayoutParam> GetPredictLayoutParam() const
+    bool PreloadListEmpty() const
     {
-        return predictLayoutParam_;
+        return preloadItems_.empty();
+    }
+    std::list<int32_t>&& MovePreloadList()
+    {
+        return std::move(preloadItems_);
+    }
+    void SetCacheLayoutAlgo(const RefPtr<WaterFlowLayoutBase>& algo)
+    {
+        cacheLayout_ = algo;
+    }
+    const RefPtr<WaterFlowLayoutBase>& GetCacheLayoutAlgo() const
+    {
+        return cacheLayout_;
     }
 
     void NotifyDataChange(int32_t index, int32_t count) override;
@@ -212,13 +225,14 @@ private:
     SizeF lastSize_;
     std::pair<int32_t, int32_t> itemRange_ = { -1, -1 };
     WeakPtr<UINode> footer_;
-    //for keepVisiableContentPosition mode temporarily.
+    // for keepVisiableContentPosition mode temporarily.
     bool keepContentPosition_ = true;
 
     // clip padding of WaterFlow
     RefPtr<WaterFlowContentModifier> contentModifier_;
 
-    std::optional<WaterFlowLayoutBase::PredictLayoutParam> predictLayoutParam_;
+    std::list<int32_t> preloadItems_;
+    RefPtr<WaterFlowLayoutBase> cacheLayout_;
 
     std::vector<int32_t> sectionChangeStartPos_;
 };

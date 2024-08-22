@@ -654,6 +654,15 @@ void BuildToolbarMoreMenuNodeAction(
     eventHub->SetItemAction(clickCallback);
     RegisterToolbarHotZoneEvent(buttonNode, barItemNode);
 }
+
+void SetNeedResetTitleProperty(const RefPtr<FrameNode>& titleBarNode)
+{
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    titleBarPattern->SetNeedResetMainTitleProperty(true);
+    titleBarPattern->SetNeedResetSubTitleProperty(true);
+}
 } // namespace
 
 void NavigationModelNG::Create()
@@ -1011,6 +1020,9 @@ void NavigationModelNG::SetTitleMode(NG::NavigationTitleMode mode)
     if (titleHeightProperty.has_value()) {
         mode = NavigationTitleMode::MINI;
     }
+    if (!navBarLayoutProperty->HasTitleMode() || navBarLayoutProperty->GetTitleModeValue() != mode) {
+        SetNeedResetTitleProperty(titleBarNode);
+    }
     navBarLayoutProperty->UpdateTitleMode(static_cast<NG::NavigationTitleMode>(mode));
     auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
     if (mode != NavigationTitleMode::MINI) {
@@ -1158,6 +1170,10 @@ void NavigationModelNG::SetHideBackButton(bool hideBackButton)
     CHECK_NULL_VOID(navBarNode);
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
+    if (!navBarLayoutProperty->HasHideBackButton() ||
+        (hideBackButton != navBarLayoutProperty->GetHideBackButtonValue())) {
+        SetNeedResetTitleProperty(AceType::DynamicCast<FrameNode>(navBarNode->GetTitleBarNode()));
+    }
     navBarLayoutProperty->UpdateHideBackButton(hideBackButton);
 }
 
@@ -1769,6 +1785,10 @@ void NavigationModelNG::SetHideBackButton(FrameNode* frameNode, bool hideBackBut
     CHECK_NULL_VOID(navBarNode);
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
+    if (!navBarLayoutProperty->HasHideBackButton() ||
+        (hideBackButton != navBarLayoutProperty->GetHideBackButtonValue())) {
+        SetNeedResetTitleProperty(AceType::DynamicCast<FrameNode>(navBarNode->GetTitleBarNode()));
+    }
     navBarLayoutProperty->UpdateHideBackButton(hideBackButton);
 }
 
@@ -1787,6 +1807,9 @@ void NavigationModelNG::SetTitleMode(FrameNode* frameNode, NG::NavigationTitleMo
     const auto& titleHeightProperty = titleBarLayoutProperty->GetTitleHeight();
     if (titleHeightProperty.has_value()) {
         mode = NavigationTitleMode::MINI;
+    }
+    if (!navBarLayoutProperty->HasTitleMode() || navBarLayoutProperty->GetTitleModeValue() != mode) {
+        SetNeedResetTitleProperty(titleBarNode);
     }
     navBarLayoutProperty->UpdateTitleMode(static_cast<NG::NavigationTitleMode>(mode));
     auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());

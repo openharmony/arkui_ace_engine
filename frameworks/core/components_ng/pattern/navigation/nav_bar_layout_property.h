@@ -78,7 +78,7 @@ public:
         json->PutExtAttr("hideBackButton", GetHideBackButtonValue(false), filter);
         json->PutExtAttr("hideTitleBar", GetHideTitleBarValue(false), filter);
         json->PutExtAttr("hideToolBar", GetHideToolBarValue(false), filter);
-        json->PutExtAttr("visibility",
+        json->PutExtAttr("navBarVisibility",
             VisibleTypeToString(propVisibility_.value_or(VisibleType::VISIBLE)).c_str(), filter);
     }
 

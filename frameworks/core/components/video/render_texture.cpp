@@ -15,7 +15,6 @@
 
 #include "core/components/video/render_texture.h"
 
-#include "core/components/theme/theme_manager.h"
 #include "core/components/video/video_component.h"
 #include "core/components/video/video_theme.h"
 

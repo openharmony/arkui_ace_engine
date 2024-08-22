@@ -851,4 +851,81 @@ bool ExtSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
 {
     return false;
 }
+
+BackgroundColorSpan::BackgroundColorSpan(
+    std::optional<TextBackgroundStyle> textBackgroundStyle, int32_t start, int32_t end)
+    : SpanBase(start, end), textBackgroundStyle_(std::move(textBackgroundStyle))
+{}
+
+void BackgroundColorSpan::ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const
+{
+    switch (operation) {
+        case SpanOperation::ADD:
+            AddSpanStyle(spanItem);
+            break;
+        case SpanOperation::REMOVE:
+            RemoveSpanStyle(spanItem);
+            break;
+    }
+}
+
+BackgroundColorSpan::BackgroundColorSpan(std::optional<TextBackgroundStyle> textBackgroundStyle)
+    : textBackgroundStyle_(textBackgroundStyle) {}
+
+RefPtr<SpanBase> BackgroundColorSpan::GetSubSpan(int32_t start, int32_t end)
+{
+    RefPtr<SpanBase> spanBase = MakeRefPtr<BackgroundColorSpan>(GetBackgroundColor(), start, end);
+    return spanBase;
+}
+void BackgroundColorSpan::AddSpanStyle(const RefPtr<NG::SpanItem>& spanItem) const
+{
+    if (textBackgroundStyle_.has_value()) {
+        TextBackgroundStyle tempVal = GetBackgroundColor();
+        spanItem->backgroundStyle = tempVal;
+    }
+}
+
+void BackgroundColorSpan::RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem)
+{
+    if (spanItem->backgroundStyle.has_value()) {
+        spanItem->backgroundStyle.reset();
+    }
+}
+
+TextBackgroundStyle BackgroundColorSpan::GetBackgroundColor() const
+{
+    return textBackgroundStyle_.value();
+}
+
+void BackgroundColorSpan::SetBackgroundColorGroupId(int32_t groupId)
+{
+    textBackgroundStyle_->groupId = groupId;
+}
+
+SpanType BackgroundColorSpan::GetSpanType() const
+{
+    return SpanType::BackgroundColor;
+}
+
+std::string BackgroundColorSpan::ToString() const
+{
+    std::stringstream str;
+    str << "BackgroundColorSpan ( start:";
+    str << GetStartIndex();
+    str << " end:";
+    str << GetEndIndex();
+    str << "]";
+    std::string output = str.str();
+    return output;
+}
+
+bool BackgroundColorSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
+{
+    auto backgroundColorSpan = DynamicCast<BackgroundColorSpan>(other);
+        if (!backgroundColorSpan) {
+            return false;
+        }
+    auto backgroundColor = backgroundColorSpan->GetBackgroundColor();
+    return backgroundColor == textBackgroundStyle_;
+}
 } // namespace OHOS::Ace

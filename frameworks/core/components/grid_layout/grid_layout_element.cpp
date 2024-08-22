@@ -15,12 +15,8 @@
 
 #include "core/components/grid_layout/grid_layout_element.h"
 
-#include "base/log/log.h"
-#include "base/utils/utils.h"
-#include "core/components/grid_layout/grid_layout_component.h"
 #include "core/components/grid_layout/render_grid_layout.h"
 #include "core/components/proxy/render_item_proxy.h"
-#include "core/pipeline/base/composed_element.h"
 
 namespace OHOS::Ace {
 

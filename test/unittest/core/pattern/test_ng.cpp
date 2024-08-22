@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +13,16 @@
  * limitations under the License.
  */
 
-#include "test/unittest/core/pattern/test_ng.h"
+#include "test_ng.h"
 
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #define private public
 #define protected public
-#include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
+#include "core/components_ng/base/view_stack_processor.h"
 #undef private
 #undef protected
 
@@ -35,6 +38,7 @@ void TestNG::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
+    MockAnimationManager::Enable(false);
 }
 
 RefPtr<PaintWrapper> TestNG::FlushLayoutTask(const RefPtr<FrameNode>& frameNode, bool markDirty)

@@ -950,7 +950,6 @@ export struct ComposeListItem {
             parentDirection: this.containerDirection,
             itemDirection: this.contentItemDirection,
           })
-            .flexShrink(0)
         }
         if (this.operateItem !== null) {
           OperateItemStruct({

@@ -37,6 +37,19 @@ public:
     void Execute(MouseInfo& info);
 };
 
+class JsWeakClickFunction : public JsWeakFunction {
+    DECLARE_ACE_TYPE(JsWeakClickFunction, JsWeakFunction)
+
+public:
+    explicit JsWeakClickFunction(const JSRef<JSFunc>& jsFunction) : JsWeakFunction(JSRef<JSObject>(), jsFunction) {}
+
+    ~JsWeakClickFunction() override {};
+    void Execute() override;
+    void Execute(const ClickInfo& info);
+    void Execute(GestureEvent& info);
+    void Execute(MouseInfo& info);
+};
+
 } // namespace OHOS::Ace::Framework
 
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_FUNCTION_JS_CLICK_FUNCTION_H

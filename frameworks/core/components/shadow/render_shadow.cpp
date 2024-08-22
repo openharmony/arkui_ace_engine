@@ -15,8 +15,6 @@
 
 #include "core/components/shadow/render_shadow.h"
 
-#include "base/utils/system_properties.h"
-
 namespace OHOS::Ace {
 
 void RenderShadow::PerformLayout()

@@ -16,12 +16,10 @@
 #include "core/components/select_popup/select_popup_component.h"
 
 #include "base/subwindow/subwindow_manager.h"
-#include "base/utils/string_utils.h"
 #include "core/components/clip/clip_component.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/focus_collaboration/focus_collaboration_component.h"
 #include "core/components/gesture_listener/gesture_listener_component.h"
-#include "core/components/menu/menu_component.h"
 #include "core/components/positioned/positioned_component.h"
 #include "core/components/select_popup/render_select_popup.h"
 #include "core/components/select_popup/select_popup_element.h"
