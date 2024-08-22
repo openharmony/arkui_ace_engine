@@ -4566,7 +4566,7 @@ void TextFieldPattern::HandleCounterBorder()
             renderContext->UpdateBorderColor(overCountBorderColor);
         }
     } else {
-        if (IsUnderlineMode()) {
+        if (IsUnderlineMode() && !IsShowError()) {
             ApplyUnderlineTheme();
             UpdateCounterMargin();
         } else {
