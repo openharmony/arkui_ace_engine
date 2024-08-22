@@ -92,8 +92,8 @@
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/text/text_emoji_processor.h"
-#if not defined(ACE_UNITTEST)
-#if defined(ENABLE_STANDARD_INPUT)
+#ifndef ACE_UNITTEST
+#ifdef ENABLE_STANDARD_INPUT
 #include "parameters.h"
 
 #include "core/components_ng/pattern/text_field/on_text_changed_listener_impl.h"

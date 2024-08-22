@@ -36,8 +36,8 @@
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #endif
 
-#if not defined(ACE_UNITTEST)
-#if defined(ENABLE_STANDARD_INPUT)
+#ifndef ACE_UNITTEST
+#ifdef ENABLE_STANDARD_INPUT
 #include "core/components_ng/pattern/text_field/on_text_changed_listener_impl.h"
 #endif
 #endif
