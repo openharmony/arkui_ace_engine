@@ -2173,7 +2173,6 @@ void TextPattern::OnModifyDone()
         enabled_ = enabledCache;
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
-    SetActionExecSubComponent();
 }
 
 bool TextPattern::SetActionExecSubComponent()
@@ -2199,6 +2198,7 @@ size_t TextPattern::GetSubComponentInfos(std::vector<SubComponentInfo>& subCompo
     } else {
         GetSubComponentInfosForSpans(subComponentInfos);
     }
+    SetActionExecSubComponent();
     return subComponentInfos.size();
 }
 
