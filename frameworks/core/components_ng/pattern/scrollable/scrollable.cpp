@@ -1224,10 +1224,11 @@ void Scrollable::StopFrictionAnimation()
     }
 }
 
-void Scrollable::StopSpringAnimation()
+void Scrollable::StopSpringAnimation(bool reachFinalPosition)
 {
     if (!isSpringAnimationStop_) {
-        ACE_SCOPED_TRACE("StopSpringAnimation, id:%d, tag:%s", nodeId_, nodeTag_.c_str());
+        ACE_SCOPED_TRACE(
+            "StopSpringAnimation, reachFinalPosition:%u, id:%d, tag:%s", reachFinalPosition, nodeId_, nodeTag_.c_str());
         isSpringAnimationStop_ = true;
         isFadingAway_ = false;
         AnimationOption option;
@@ -1235,11 +1236,18 @@ void Scrollable::StopSpringAnimation()
         option.SetDuration(0);
         AnimationUtils::StartAnimation(
             option,
-            [weak = AceType::WeakClaim(this)]() {
+            [weak = AceType::WeakClaim(this), reachFinalPosition]() {
                 auto scroll = weak.Upgrade();
                 CHECK_NULL_VOID(scroll);
-                //avoid top edge spring can not stop
-                scroll->springOffsetProperty_->Set(scroll->currentPos_);
+                if (reachFinalPosition) {
+                    // ensure that the spring animation is restored to its final position.
+                    scroll->ProcessSpringMotion(scroll->finalPosition_);
+                    // use non final position to stop animation, otherwise the animation cannot be stoped.
+                    scroll->springOffsetProperty_->Set(scroll->finalPosition_ - 1.f);
+                } else {
+                    // avoid top edge spring can not stop
+                    scroll->springOffsetProperty_->Set(scroll->currentPos_);
+                }
             },
             nullptr);
     }

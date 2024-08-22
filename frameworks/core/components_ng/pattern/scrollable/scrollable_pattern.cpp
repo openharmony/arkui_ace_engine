@@ -713,7 +713,7 @@ void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)
     CHECK_NULL_VOID(scrollable);
     scrollable->SetEdgeEffect(edgeEffect);
     if (edgeEffect != EdgeEffect::SPRING) {
-        scrollable->StopSpringAnimation();
+        scrollable->StopSpringAnimation(true);
     }
 }
 
