@@ -23,6 +23,7 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "bridge/declarative_frontend/jsview/js_button.h"
 #include "bridge/declarative_frontend/jsview/models/toggle_model_impl.h"
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_toggle_theme.h"
 #include "core/common/container.h"
@@ -85,6 +86,7 @@ void JSToggle::JSBind(BindingTarget globalObj)
     JSClass<JSToggle>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSToggle>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSToggle>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSToggle>::StaticMethod("borderRadius", &JSToggle::JsRadius);
     JSClass<JSToggle>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -476,6 +478,17 @@ void JSToggle::SwitchStyle(const JSCallbackInfo& info)
         ToggleModel::GetInstance()->SetTrackBorderRadius(trackRadius);
     } else {
         ToggleModel::GetInstance()->ResetTrackBorderRadius();
+    }
+}
+
+void JSToggle::JsRadius(const JSCallbackInfo& info)
+{
+    CalcDimension radius;
+    // when toggle equels button should follow button model.
+    if (static_cast<NG::ToggleType>(toggleType_) == NG::ToggleType::BUTTON) {
+        JSButton::JsRadius(info);
+    } else {
+        JSViewAbstract::JsBorderRadius(info);
     }
 }
 } // namespace OHOS::Ace::Framework
