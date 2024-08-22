@@ -738,7 +738,7 @@ void SessionWrapperImpl::UpdateSessionViewportConfig()
     CHECK_NULL_VOID(pattern);
     auto config = pattern->GetSessionViewportConfig();
     UIEXT_LOGI("SessionViewportConfig: isDensityFollowHost_ = %{public}d, density_ = %{public}f, "
-               "displayId_ = %{public}lu, orientation_ = %{public}d, transform_ = %{public}d",
+               "displayId_ = %{public}" PRIu64", orientation_ = %{public}d, transform_ = %{public}d",
         config.isDensityFollowHost_, config.density_, config.displayId_, config.orientation_, config.transform_);
     session_->UpdateSessionViewportConfig(*reinterpret_cast<Rosen::SessionViewportConfig*>(&config));
 }
