@@ -1213,7 +1213,9 @@ void ScrollPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     initialOffset->Put("xOffset", GetInitialOffset().GetX().ToString().c_str());
     initialOffset->Put("yOffset", GetInitialOffset().GetY().ToString().c_str());
     json->PutExtAttr("initialOffset", initialOffset, filter);
-    json->PutExtAttr("enablePaging", IsEnablePagingValid(), filter);
+    if (enablePagingStatus_ != ScrollPagingStatus::NONE) {
+        json->PutExtAttr("enablePaging", enablePagingStatus_ == ScrollPagingStatus::VALID, filter);
+    }
 
     auto scrollSnapOptions = JsonUtil::Create(true);
     if (IsSnapToInterval()) {
