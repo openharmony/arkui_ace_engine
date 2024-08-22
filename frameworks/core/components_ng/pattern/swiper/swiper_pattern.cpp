@@ -2964,9 +2964,12 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
 #ifdef OHOS_PLATFORM
-        if (swiper->isInAutoPlay_) {
+        if (!swiper->isInAutoPlay_) {
+            ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+        } else {
             ResSchedReport::GetInstance().ResSchedDataReport("auto_play_off");
         }
+
 #endif
         if (!swiper->hasTabsAncestor_) {
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_SWIPER_FLING, true);
@@ -3001,9 +3004,12 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
         auto swiperPattern = swiper.Upgrade();
         CHECK_NULL_VOID(swiperPattern);
 #ifdef OHOS_PLATFORM
-        if (swiperPattern->isInAutoPlay_) {
+        if (!swiperPattern->isInAutoPlay_) {
+            ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+        } else {
             ResSchedReport::GetInstance().ResSchedDataReport("auto_play_on");
         }
+
 #endif
         if (!swiperPattern->hasTabsAncestor_) {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_SWIPER_FLING, PerfActionType::LAST_UP, "");
