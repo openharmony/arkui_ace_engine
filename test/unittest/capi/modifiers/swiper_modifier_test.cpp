@@ -44,12 +44,12 @@ inline Ark_Boolean ArkBool(bool val)
     return static_cast<Ark_Boolean>(val);
 }
 
-/*
 inline Ark_String ArkStr(const char *s)
 {
     return {.chars = s, .length = strlen(s)
     };
 }
+/*
 
 inline Ark_Resource ArkRes(Ark_String *name, int id = -1,
     NodeModifier::ResourceType type = NodeModifier::ResourceType::COLOR,
@@ -296,6 +296,52 @@ HWTEST_F(SwiperModifierTest, SwiperModifierTest9, TestSize.Level1)
  */
 HWTEST_F(SwiperModifierTest, SwiperModifierTest10, TestSize.Level1)
 {
+    static const std::string PROP_NAME("itemSpace");
+    static const std::string DEFAULT_VALUE("0.00vp");
+    ASSERT_NE(modifier_->setItemSpace, nullptr);
+
+    auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal1, DEFAULT_VALUE);
+
+    Type_SwiperAttribute_itemSpace_Arg0 intVal = { .selector = 0, .value0 = ArkNum(123) };
+    modifier_->setItemSpace(node_, &intVal);
+    auto checkVal3 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal3, "123.00vp");
+
+    Type_SwiperAttribute_itemSpace_Arg0 floatVal = { .selector = 0, .value0 = ArkNum(1.23f) };
+    modifier_->setItemSpace(node_, &floatVal);
+    auto checkVal4 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal4, "1.23vp");
+
+    Type_SwiperAttribute_itemSpace_Arg0 pxVal = { .selector = 1, .value1 = ArkStr("45px") };
+    modifier_->setItemSpace(node_, &pxVal);
+    auto checkVal5 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal5, "45.00px");
+
+    Type_SwiperAttribute_itemSpace_Arg0 vpVal = { .selector = 1, .value1 = ArkStr("5.6vp") };
+    modifier_->setItemSpace(node_, &vpVal);
+    auto checkVal6 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal6, "5.60vp");
+
+    Type_SwiperAttribute_itemSpace_Arg0 intNegVal = { .selector = 0, .value0 = ArkNum(-123) };
+    modifier_->setItemSpace(node_, &intNegVal);
+    auto checkVal7 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal7, DEFAULT_VALUE);
+
+    Type_SwiperAttribute_itemSpace_Arg0 floatNegVal = { .selector = 0, .value0 = ArkNum(-1.23f) };
+    modifier_->setItemSpace(node_, &floatNegVal);
+    auto checkVal8 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal8, DEFAULT_VALUE);
+
+    Type_SwiperAttribute_itemSpace_Arg0 pxNegVal = { .selector = 1, .value1 = ArkStr("-4.5px") };
+    modifier_->setItemSpace(node_, &pxNegVal);
+    auto checkVal9 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal9, DEFAULT_VALUE);
+
+    Type_SwiperAttribute_itemSpace_Arg0 vpNegVal = { .selector = 1, .value1 = ArkStr("-56vp") };
+    modifier_->setItemSpace(node_, &vpNegVal);
+    auto checkVal10 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal10, DEFAULT_VALUE);
 }
 /**
  * @tc.name: SwiperModifierTest11
@@ -368,13 +414,145 @@ HWTEST_F(SwiperModifierTest, SwiperModifierTest12, TestSize.Level1)
     EXPECT_EQ(checkVal5, DEFAULT_VALUE);
 }
 /**
- * @tc.name: SwiperModifierTest13
- * @tc.desc: Check the functionality of SwiperModifier.DisplayCountImpl
+ * @tc.name: SwiperModifierTest13_Num
+ * @tc.desc: Check the functionality of SwiperModifier.DisplayCountImpl with Ark_Number arg
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, SwiperModifierTest13, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, SwiperModifierTest13_Num, TestSize.Level1)
 {
+    static const std::string PROP_NAME("displayCount");
+    static const std::string DEFAULT_VALUE("1"); // corrrsponds to 
+    // DEFAULT_SWIPER_DISPLAY_COUNT in frameworks/core/components/declaration/swiper/swiper_declaration.h
+    ASSERT_NE(modifier_->setDisplayCount, nullptr);
+
+    auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal1, DEFAULT_VALUE);
+
+    Type_SwiperAttribute_displayCount_Arg0 numberInt = {.selector = 0, .value0 = ArkNum(123456)};
+    modifier_->setDisplayCount(node_, &numberInt, nullptr);
+    auto checkVal2 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal2, "123456");
+
+    Type_SwiperAttribute_displayCount_Arg0 numberFlt = {.selector = 0, .value0 = ArkNum(1.23456f)};
+    modifier_->setDisplayCount(node_, &numberFlt, nullptr);
+    auto checkVal3 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal3, "1");
+
+    Type_SwiperAttribute_displayCount_Arg0 numberIntNeg = {.selector = 0, .value0 = ArkNum(-111)};
+    modifier_->setDisplayCount(node_, &numberIntNeg, nullptr);
+    auto checkVal4 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal4, DEFAULT_VALUE);
+
+    Type_SwiperAttribute_displayCount_Arg0 numberFltNeg = {.selector = 0, .value0 = ArkNum(-1.111f)};
+    modifier_->setDisplayCount(node_, &numberFltNeg, nullptr);
+    auto checkVal5 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal5, DEFAULT_VALUE);
 }
+/**
+ * @tc.name: SwiperModifierTest13_Str
+ * @tc.desc: Check the functionality of SwiperModifier.DisplayCountImpl with Ark_String arg
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModifierTest, SwiperModifierTest13_Str, TestSize.Level1)
+{
+    static const std::string PROP_NAME("displayCount");
+    static const std::string DEFAULT_VALUE("1"); // corrrsponds to 
+    // DEFAULT_SWIPER_DISPLAY_COUNT in frameworks/core/components/declaration/swiper/swiper_declaration.h
+    ASSERT_NE(modifier_->setDisplayCount, nullptr);
+
+    auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal1, DEFAULT_VALUE);
+
+    Type_SwiperAttribute_displayCount_Arg0 regularVal = {.selector = 1, .value1 = ArkStr("1234")};
+    modifier_->setDisplayCount(node_, &regularVal, nullptr);
+    auto checkVal2 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal2, "1234");
+
+    auto arkValue0 = static_cast<Ark_Int32>(OHOS::Ace::SwiperDisplayMode::STRETCH);
+    modifier_->setDisplayMode(node_, arkValue0);
+    Type_SwiperAttribute_displayCount_Arg0 autoVal = {.selector = 1, .value1 = ArkStr("auto")};
+    modifier_->setDisplayCount(node_, &autoVal, nullptr);
+    auto checkVal3 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal3, "");
+    auto checkValDispMode= GetStringAttribute(node_, "displayMode");
+    EXPECT_EQ(checkValDispMode, "SwiperDisplayMode.AutoLinear");
+
+    Type_SwiperAttribute_displayCount_Arg0 negVal = {.selector = 1, .value1 = ArkStr("-1234")};
+    modifier_->setDisplayCount(node_, &negVal, nullptr);
+    auto checkVal4 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal4, DEFAULT_VALUE);
+}
+
+static Type_SwiperAttribute_displayCount_Arg0 ArkSwiperAutoFill(Ark_VP val) {
+    return {.selector = 2, .value2 = { .minSize = {val}}};
+}
+
+/**
+ * @tc.name: SwiperModifierTest13_Obj
+ * @tc.desc: Check the functionality of SwiperModifier.DisplayCountImpl with Ark_VP arg
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModifierTest, SwiperModifierTest13_Obj, TestSize.Level1)
+{
+    static const std::string PROP_NAME("minSize");
+    static const std::string DEFAULT_VALUE("0.00vp");
+    ASSERT_NE(modifier_->setDisplayCount, nullptr);
+
+    auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal1, DEFAULT_VALUE);
+
+    auto intVal = ArkSwiperAutoFill( { .selector = 1, .value1 = ArkNum(123) } );
+    modifier_->setDisplayCount(node_, &intVal, nullptr);
+    auto checkVal3 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal3, "123.00vp");
+
+    auto floatVal = ArkSwiperAutoFill( { .selector = 1, .value1 = ArkNum(1.23f) });
+    modifier_->setDisplayCount(node_, &floatVal, nullptr);
+    auto checkVal4 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal4, "1.23vp");
+
+    auto pxVal = ArkSwiperAutoFill({ .selector = 0, .value0 = ArkStr("45px") });
+    modifier_->setDisplayCount(node_, &pxVal, nullptr);
+    auto checkVal5 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal5, "45.00px");
+
+    auto vpVal = ArkSwiperAutoFill({ .selector = 0, .value0 = ArkStr("5.6vp") });
+    modifier_->setDisplayCount(node_, &vpVal, nullptr);
+    auto checkVal6 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal6, "5.60vp");
+
+    auto intNegVal = ArkSwiperAutoFill({ .selector = 1, .value1 = ArkNum(-123) });
+    modifier_->setDisplayCount(node_, &intNegVal, nullptr);
+    auto checkVal7 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal7, DEFAULT_VALUE);
+
+    auto floatNegVal = ArkSwiperAutoFill({ .selector = 1, .value1 = ArkNum(-1.23f) });
+    modifier_->setDisplayCount(node_, &floatNegVal, nullptr);
+    auto checkVal8 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal8, DEFAULT_VALUE);
+
+    auto pxNegVal = ArkSwiperAutoFill({ .selector = 0, .value0 = ArkStr("-4.5px") });
+    modifier_->setDisplayCount(node_, &pxNegVal, nullptr);
+    auto checkVal9 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal9, DEFAULT_VALUE);
+
+    auto vpNegVal = ArkSwiperAutoFill({ .selector = 0, .value0 = ArkStr("-56vp") });
+    modifier_->setDisplayCount(node_, &vpNegVal, nullptr);
+    auto checkVal10 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal10, DEFAULT_VALUE);
+}
+
+/**
+ * @tc.name: SwiperModifierTest13_ByGroup
+ * @tc.desc: Check the functionality of SwiperModifier.DisplayCountImpl with ByGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModifierTest, SwiperModifierTest13_ByGroup, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setDisplayCount, nullptr);
+    /*no support of the SwipeByGroup property in OHOS::Ace::NG::SwiperLayoutProperty::toJsonValue() method */
+}
+
 /**
  * @tc.name: SwiperModifierTest14
  * @tc.desc: Check the functionality of SwiperModifier.EffectModeImpl

@@ -144,6 +144,27 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<>
+    inline void AssignTo(std::optional<FontWeight>& dst, const Ark_Number& src)
+    {
+        auto str = std::to_string(src.tag == Ark_Tag::ARK_TAG_INT32 ? src.i32 : static_cast<int32_t>(src.f32));
+        if (auto [parseOk, val] = StringUtils::ParseFontWeight(str); parseOk) {
+            dst = val;
+        } else {
+            dst.reset();
+        }
+    }
+
+    template<>
+    inline void AssignTo(std::optional<FontWeight>& dst, const Ark_String& src)
+    {
+        if (auto [parseOk, val] = StringUtils::ParseFontWeight(src.chars); parseOk) {
+            dst = val;
+        } else {
+            dst.reset();
+        }
+    }
+
+    template<>
     inline Dimension Convert(const Ark_Resource& src)
     {
         return CalcDimension();

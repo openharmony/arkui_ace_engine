@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/utils/string_utils.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/components/common/properties/color.h"
@@ -50,7 +51,7 @@ Ark_Int32 trimToAceRange(Ark_Int32 val, T min, T max)
 constexpr int32_t DEFAULT_INTERVAL = static_cast<int32_t>(OHOS::Ace::DEFAULT_SWIPER_AUTOPLAY_INTERVAL);
 constexpr int32_t DEFAULT_DURATION = static_cast<int32_t>(OHOS::Ace::DEFAULT_SWIPER_ANIMATION_DURATION);
 constexpr int32_t DEFAULT_CACHED_COUNT = OHOS::Ace::DEFAULT_SWIPER_CACHED_SIZE;
-// constexpr int32_t DEFAULT_DISPLAY_COUNT = OHOS::Ace::DEFAULT_SWIPER_DISPLAY_COUNT;
+constexpr int32_t DEFAULT_DISPLAY_COUNT = OHOS::Ace::DEFAULT_SWIPER_DISPLAY_COUNT;
 } // namespace
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -128,7 +129,16 @@ void VerticalImpl(Ark_NativePointer node,
 void ItemSpaceImpl(Ark_NativePointer node,
                    const Type_SwiperAttribute_itemSpace_Arg0* value)
 {
-    // TODO
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto aceOptVal = Converter::OptConvert<Dimension>(*value);
+    CHECK_NULL_VOID(aceOptVal);
+    if (!aceOptVal->IsValid()) {
+        aceOptVal->Reset();
+        aceOptVal->SetUnit(DimensionUnit::VP);
+    }
+    SwiperModelNG::SetItemSpace(frameNode, *aceOptVal);
 }
 void DisplayModeImpl(Ark_NativePointer node,
                      Ark_Int32 value)
@@ -152,7 +162,42 @@ void DisplayCountImpl(Ark_NativePointer node,
                       const Type_SwiperAttribute_displayCount_Arg0* value,
                       const Opt_Boolean* swipeByGroup)
 {
-    // TODO
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    switch (value->selector) {
+        case 0: { // Ark_Number
+            int32_t val = Converter::Convert<int32_t>(value->value0);
+            SwiperModelNG::SetDisplayCount(frameNode, val < DEFAULT_DISPLAY_COUNT ? DEFAULT_DISPLAY_COUNT : val);
+            break;
+        }
+        case 1: { // Ark_String
+            std::string aceVal(value->value1.chars);
+            if (aceVal == "auto") {
+                SwiperModelNG::SetDisplayMode(frameNode, OHOS::Ace::SwiperDisplayMode::AUTO_LINEAR);
+                SwiperModelNG::ResetDisplayCount(frameNode);
+                break;
+            }
+            int32_t val = StringUtils::StringToInt(aceVal);
+            SwiperModelNG::SetDisplayCount(frameNode, val < DEFAULT_DISPLAY_COUNT ? DEFAULT_DISPLAY_COUNT : val);
+            break;
+        }
+        case 2: { // struct Ark_SwiperAutoFill
+            if (auto aceOptVal = Converter::OptConvert<Dimension>(value->value2.minSize); aceOptVal) {
+                if (!aceOptVal->IsValid()) {
+                    aceOptVal->Reset();
+                    aceOptVal->SetUnit(DimensionUnit::VP);
+                }
+                SwiperModelNG::SetMinSize(frameNode, *aceOptVal);
+            }
+            break;
+        }
+    }
+
+    if (swipeByGroup) {
+        auto aceOptVal = Converter::OptConvert<bool>(*swipeByGroup);
+        SwiperModelNG::SetSwipeByGroup(frameNode, aceOptVal && *aceOptVal);
+    }
 }
 void EffectModeImpl(Ark_NativePointer node,
                     Ark_Int32 value)
