@@ -705,6 +705,16 @@ public:
         return isFormRender_;
     }
 
+    void SetIsDynamicRender(bool isDynamicRender)
+    {
+        isDynamicRender_ = isDynamicRender;
+    }
+
+    bool IsDynamicRender() const
+    {
+        return isDynamicRender_;
+    }
+
     // Get the dp scale which used to covert dp to logic px.
     double GetDipScale() const
     {
@@ -1382,6 +1392,7 @@ protected:
     bool isRebuildFinished_ = false;
     bool isJsCard_ = false;
     bool isFormRender_ = false;
+    bool isDynamicRender_ = false;
     bool isRightToLeft_ = false;
     bool isFullWindow_ = false;
     bool isAppWindow_ = true;
