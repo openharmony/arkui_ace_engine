@@ -4962,7 +4962,7 @@ std::wstring RichEditorPattern::DeleteBackwardOperation(int32_t length)
         DoDeleteActions(0, 0, info);
         return deleteText;
     }
-    info.SetOffset(caretPosition_ - 1);
+    info.SetOffset(caretPosition_ - length);
     info.SetLength(length);
     int32_t currentPosition = std::clamp((caretPosition_ - length), 0, static_cast<int32_t>(GetTextContentLength()));
     if (!spans_.empty()) {
