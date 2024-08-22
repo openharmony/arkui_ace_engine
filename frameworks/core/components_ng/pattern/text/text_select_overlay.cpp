@@ -403,6 +403,7 @@ void TextSelectOverlay::OnHandleLevelModeChanged(HandleLevelMode mode)
 
 void TextSelectOverlay::OnHandleMoveStart(bool isFirst)
 {
+    BaseTextSelectOverlay::OnHandleMoveStart(isFirst);
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     manager->SetHandleCircleIsShow(isFirst, false);

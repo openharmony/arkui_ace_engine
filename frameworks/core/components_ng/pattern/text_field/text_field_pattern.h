@@ -1430,6 +1430,7 @@ public:
     void ShowCaretAndStopTwinkling();
 
     bool IsTextEditableForStylus() override;
+    bool IsHandleDragging();
 
 protected:
     virtual void InitDragEvent();
@@ -1671,7 +1672,6 @@ private:
     bool GetTouchInnerPreviewText(const Offset& offset) const;
     bool IsShowMenu(const std::optional<SelectionOptions>& options);
     bool IsContentRectNonPositive();
-    bool IsHandleDragging();
     void ReportEvent();
     void ResetPreviewTextState();
 
