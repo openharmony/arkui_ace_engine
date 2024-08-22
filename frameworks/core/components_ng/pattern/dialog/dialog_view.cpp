@@ -60,7 +60,7 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     auto dialogLayoutProp = AceType::DynamicCast<DialogLayoutProperty>(dialog->GetLayoutProperty());
     CHECK_NULL_RETURN(dialogLayoutProp, dialog);
     DialogAlignment align = static_cast<DialogAlignment>(dialogTheme->GetAlignDialog());
-    if (param.alignment != DialogAlignment::DEFAULT && align == DialogAlignment::CENTER) {
+    if (param.alignment == DialogAlignment::DEFAULT && align == DialogAlignment::CENTER) {
         dialogLayoutProp->UpdateDialogAlignment(align);
     } else {
         dialogLayoutProp->UpdateDialogAlignment(param.alignment);
