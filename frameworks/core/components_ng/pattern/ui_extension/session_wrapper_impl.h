@@ -88,7 +88,6 @@ public:
     void NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) const override;
     bool NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaChangeInfo> info) const override;
 
-
     // The interface to send the data for ArkTS
     void SendDataAsync(const AAFwk::WantParams& params) const override;
     int32_t SendDataSync(const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams) const override;
