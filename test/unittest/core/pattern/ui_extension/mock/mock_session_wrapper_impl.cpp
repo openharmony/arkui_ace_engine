@@ -236,10 +236,6 @@ bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaCh
     return true;
 }
 
-void SessionWrapperImpl::SetDensityDpiImpl(bool isDensityDpi)
-{
-}
-
 void SessionWrapperImpl::SendDataAsync(const AAFwk::WantParams& params) const
 {
 }

@@ -133,8 +133,6 @@ public:
     void FireAsyncCallbacks();
     void SetBindModalCallback(const std::function<void()>&& callback);
     void FireBindModalCallback();
-    void DispatchFollowHostDensity(bool densityDpi);
-    void OnDpiConfigurationUpdate() override;
     void SetDensityDpi(bool densityDpi);
     bool GetDensityDpi();
     bool IsCompatibleOldVersion();
