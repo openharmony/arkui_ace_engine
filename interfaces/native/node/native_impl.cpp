@@ -132,6 +132,7 @@ ArkUI_NativeGestureAPI_1 gestureImpl_1 = {
     OHOS::Ace::GestureModel::SetGestureInterrupterToNode,
     OHOS::Ace::GestureModel::GetGestureType,
     OHOS::Ace::GestureModel::SetInnerGestureParallelTo,
+    OHOS::Ace::GestureModel::CreateTapGestureWithDistanceThreshold,
 };
 
 ArkUI_NativeAnimateAPI_1 animateImpl_1 = {

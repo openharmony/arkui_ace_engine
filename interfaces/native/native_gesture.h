@@ -875,6 +875,32 @@ typedef struct {
     int32_t (*setInnerGestureParallelTo)(
         ArkUI_NodeHandle node, void* userData, ArkUI_GestureRecognizer* (*parallelInnerGesture)(
             ArkUI_ParallelInnerGestureEvent* event));
+
+    /**
+    * @brief Creates a tap gesture that is subject to distance restrictions.
+    *
+    *        1. This API is used to trigger a tap gesture with one, two, or more taps. \n
+    *        2. If multi-tap is configured, the timeout interval between a lift and the next tap is 300 ms. \n
+    *        3. If the distance between the last tapped position and the current tapped position exceeds 60 vp,
+    *           gesture recognition fails. \n
+    *        4. If the value is greater than 1, the tap gesture will fail to be recognized when the number of fingers
+    *           touching the screen within 300 ms of the first finger touch is less than the required number,
+    *           or when the number of fingers lifted from the screen within 300 ms of the first finger's being lifted
+    *           is less than the required number. \n
+    *        5. When the number of fingers touching the screen exceeds the set value, the gesture can be recognized. \n
+    *        6. If the finger moves beyond the preset distance limit, gesture recognition fails. \n
+    *
+    * @param countNum Indicates the number of consecutive taps. If the value is less than 1 or is not set, the default
+    *        value <b>1</b> is used.
+    * @param fingersNum Indicates the number of fingers required to trigger a tap. The value ranges from 1 to 10.
+    *        If the value is less than 1 or is not set, the default value <b>1</b> is used.
+    * @param distanceThreshold Indicates the allowed moving distance of a finger.
+    *        The unit of this parameter is px.
+    *        If the value is less than 0, it will be converted to the default value of infinity.
+    * @return Returns the pointer to the created gesture.
+    */
+    ArkUI_GestureRecognizer* (*createTapGestureWithDistanceThreshold)(
+        int32_t countNum, int32_t fingersNum, double distanceThreshold);
 } ArkUI_NativeGestureAPI_1;
 
 #ifdef __cplusplus
