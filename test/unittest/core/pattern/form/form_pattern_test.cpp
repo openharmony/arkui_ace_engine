@@ -52,6 +52,7 @@ DirtySwapConfig config;
 RequestFormInfo formInfo;
 const std::string INIT_VALUE_1 = "hello1";
 constexpr double ARC_RADIUS_TO_DIAMETER = 2.0;
+constexpr double TRANSPARENT_VAL = 0;
 }
 class FormPatternTest : public testing::Test {
 public:
@@ -1928,5 +1929,22 @@ HWTEST_F(FormPatternTest, FormPatternTest_051, TestSize.Level1)
 
     auto drawRSFrame = pattern->GetDrawDelegate();
     EXPECT_NE(drawRSFrame, nullptr);
+}
+
+/**
+ * @tc.name: FormPatternTest_052
+ * @tc.desc: SetNonTransparentAfterRecover
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTest, FormPatternTest_052, TestSize.Level1)
+{
+    RefPtr<FormNode> formNode = CreateFromNode();
+    auto pattern = formNode->GetPattern<FormPattern>();
+    EXPECT_NE(pattern, nullptr);
+    pattern->frameNode_ = formNode;
+    RefPtr<RenderContext> externalRenderContext = pattern->GetExternalRenderContext();
+    externalRenderContext->SetOpacity(TRANSPARENT_VAL);
+    pattern->SetNonTransparentAfterRecover();
+    EXPECT_EQ(formNode->GetTotalChildCount(), 0);
 }
 } // namespace OHOS::Ace::NG

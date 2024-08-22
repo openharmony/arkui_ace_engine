@@ -57,7 +57,7 @@ bool StylusDetectorDefault::Notify(const NotifyInfo& notifyInfo)
 
 void StylusDetectorDefault::ExecuteCommand(const std::vector<std::string>& params)
 {
-    if (params.size() > MAX_PARAMS_SIZE) {
+    if (params.size() > MAX_PARAMS_SIZE || params.size() < PARAMS_ENABLE_INDEX) {
         return;
     }
     bool isEnable = true;

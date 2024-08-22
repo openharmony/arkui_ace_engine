@@ -2067,21 +2067,15 @@ void TextPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-
-    if (CheckNeedMeasure(textLayoutProperty->GetPropertyChangeFlag()) && pManager_) {
-        // measure flag changed, reset paragraph.
-        auto nowTime = static_cast<unsigned long long>(GetSystemTimestamp());
-        ACE_SCOPED_TRACE("OnModifyDone[Text][id:%d][time:%llu]", host->GetId(), nowTime);
-        pManager_->Reset();
-    }
-
+    auto nowTime = static_cast<unsigned long long>(GetSystemTimestamp());
+    ACE_LAYOUT_SCOPED_TRACE("OnModifyDone[Text][id:%d][time:%llu]", host->GetId(), nowTime);
+    DumpRecord(std::to_string(nowTime));
     if (!(PipelineContext::GetCurrentContextSafely() &&
             PipelineContext::GetCurrentContextSafely()->GetMinPlatformVersion() > API_PROTEXTION_GREATER_NINE)) {
         bool shouldClipToContent =
             textLayoutProperty->GetTextOverflow().value_or(TextOverflow::CLIP) == TextOverflow::CLIP;
         host->GetRenderContext()->SetClipToFrame(shouldClipToContent);
     }
-
     if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE) {
         if (!renderContext->GetClipEdge().has_value()) {
             renderContext->UpdateClipEdge(true);
@@ -2125,7 +2119,6 @@ void TextPattern::OnModifyDone()
         dataDetectorAdapter_->StartAITask();
     }
     ProcessMarqueeVisibleAreaCallback();
-
     auto gestureEventHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
     auto eventHub = host->GetEventHub<EventHub>();
@@ -2864,26 +2857,6 @@ void TextPattern::AddImageToSpanItem(const RefPtr<UINode>& child)
 void TextPattern::DumpAdvanceInfo()
 {
     DumpLog::GetInstance().AddDesc(std::string("-----DumpAdvanceInfo-----"));
-    DumpLog::GetInstance().AddDesc(std::string("contentRect :").append(contentRect_.ToString()));
-    if (SystemProperties::GetDebugEnabled() && pManager_) {
-        DumpLog::GetInstance().AddDesc(std::string("from TextEngine paragraphs_ info :"));
-        DumpLog::GetInstance().AddDesc(
-            std::string("DidExceedMaxLines:").append(std::to_string(pManager_->DidExceedMaxLines())));
-
-        DumpLog::GetInstance().AddDesc(std::string("GetTextWidth:")
-                                           .append(std::to_string(pManager_->GetTextWidth()))
-                                           .append(" GetHeight:")
-                                           .append(std::to_string(pManager_->GetHeight()))
-                                           .append(" GetMaxWidth:")
-                                           .append(std::to_string(pManager_->GetMaxWidth()))
-                                           .append(" GetMaxIntrinsicWidth:")
-                                           .append(std::to_string(pManager_->GetMaxIntrinsicWidth())));
-        DumpLog::GetInstance().AddDesc(std::string("GetLineCount:")
-                                           .append(std::to_string(pManager_->GetLineCount()))
-                                           .append(" GetLongestLine:")
-                                           .append(std::to_string(pManager_->GetLongestLine())));
-    }
-
     DumpLog::GetInstance().AddDesc(
         std::string("BindSelectionMenu: ").append(std::to_string(selectionMenuMap_.empty())));
     auto host = GetHost();
@@ -2898,6 +2871,7 @@ void TextPattern::DumpAdvanceInfo()
         auto strategy = static_cast<int32_t>(renderContext->GetForegroundColorStrategyValue());
         DumpLog::GetInstance().AddDesc(std::string("ForegroundColorStrategy: ").append(std::to_string(strategy)));
     }
+    DumpLog::GetInstance().AddDesc(std::string("Selection: ").append("(").append(textSelector_.ToString()).append(")"));
 }
 
 void TextPattern::DumpInfo()
@@ -2906,6 +2880,7 @@ void TextPattern::DumpInfo()
     CHECK_NULL_VOID(textLayoutProp);
     auto& dumpLog = DumpLog::GetInstance();
     auto nowTime = GetSystemTimestamp();
+    dumpLog.AddDesc(std::string("frameRecord: ").append(frameRecord_));
     dumpLog.AddDesc(std::string("time: ").append(std::to_string(nowTime)));
     if (!IsSetObscured()) {
         dumpLog.AddDesc(std::string("Content: ").append(textLayoutProp->GetContent().value_or(" ")));
@@ -2938,13 +2913,13 @@ void TextPattern::DumpInfo()
         std::string("HeightAdaptivePolicy: ")
             .append(V2::ConvertWrapTextHeightAdaptivePolicyToString(
                 textLayoutProp->GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST))));
-    dumpLog.AddDesc(std::string("Selection: ").append("(").append(textSelector_.ToString()).append(")"));
-    if (pManager_ && !pManager_->GetParagraphs().empty()) {
+    if (pManager_) {
         auto num = static_cast<int32_t>(pManager_->GetParagraphs().size());
         dumpLog.AddDesc(std::string("Paragraphs num: ").append(std::to_string(num)));
         dumpLog.AddDesc(std::string("PaintInfo: ").append(paintInfo_));
     }
     DumpScaleInfo();
+    DumpTextEngineInfo();
     if (SystemProperties::GetDebugEnabled()) {
         DumpAdvanceInfo();
     }
@@ -2966,6 +2941,30 @@ void TextPattern::DumpScaleInfo()
     dumpLog.AddDesc(std::string("IsFollowSystem: ").append(std::to_string(followSystem)));
     dumpLog.AddDesc(std::string("maxFontScale: ").append(std::to_string(maxFontScale)));
     dumpLog.AddDesc(std::string("halfLeading: ").append(std::to_string(halfLeading)));
+}
+
+void TextPattern::DumpTextEngineInfo()
+{
+    auto& dumpLog = DumpLog::GetInstance();
+    dumpLog.AddDesc(std::string("-----TextEngine paragraphs_ info-----"));
+    dumpLog.AddDesc(std::string("contentRect :").append(contentRect_.ToString()));
+    if (pManager_) {
+        dumpLog.AddDesc(std::string("from TextEngine paragraphs_ info :"));
+        dumpLog.AddDesc(std::string("DidExceedMaxLines:").append(std::to_string(pManager_->DidExceedMaxLines())));
+        dumpLog.AddDesc(std::string("GetTextWidth:")
+                            .append(std::to_string(pManager_->GetTextWidth()))
+                            .append(" GetHeight:")
+                            .append(std::to_string(pManager_->GetHeight()))
+                            .append(" GetMaxWidth:")
+                            .append(std::to_string(pManager_->GetMaxWidth()))
+                            .append(" GetMaxIntrinsicWidth:")
+                            .append(std::to_string(pManager_->GetMaxIntrinsicWidth())));
+        dumpLog.AddDesc(std::string("GetLineCount:")
+                            .append(std::to_string(pManager_->GetLineCount()))
+                            .append(" GetLongestLine:")
+                            .append(std::to_string(pManager_->GetLongestLine())));
+    }
+    dumpLog.AddDesc(std::string("spans size :").append(std::to_string(spans_.size())));
 }
 
 void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
@@ -3062,6 +3061,17 @@ void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
                     child->UpdateMaxFontScaleWithoutFlushDirty(textLayoutProp->GetMaxFontScale().value());
                 }
                 break;
+            case PropertyInfo::VARIABLE_FONT_WEIGHT:
+                if (textLayoutProp->HasVariableFontWeight()) {
+                    child->UpdateVariableFontWeightWithoutFlushDirty(textLayoutProp->GetVariableFontWeight().value());
+                }
+                break;
+            case PropertyInfo::ENABLE_VARIABLE_FONT_WEIGHT:
+                if (textLayoutProp->HasEnableVariableFontWeight()) {
+                    child->UpdateEnableVariableFontWeightWithoutFlushDirty(
+                        textLayoutProp->GetEnableVariableFontWeight().value());
+                }
+                break;
             default:
                 break;
         }
@@ -3127,6 +3137,9 @@ void TextPattern::OnColorConfigurationUpdate()
     if (magnifierController_) {
         magnifierController_->SetColorModeChange(true);
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    ACE_TEXT_SCOPED_TRACE("OnColorConfigurationUpdate[Text][self:%d]", host->GetId());
 }
 
 OffsetF TextPattern::GetDragUpperLeftCoordinates()
@@ -3774,6 +3787,25 @@ TextLineMetrics TextPattern::GetLineMetrics(int32_t lineNumber)
     lineMetrics.y += textContentRect.GetY();
     lineMetrics.baseline += textContentRect.GetY();
     return lineMetrics;
+}
+
+std::vector<ParagraphManager::TextBox> TextPattern::GetRectsForRange(
+    int32_t start, int32_t end, RectHeightStyle heightStyle, RectWidthStyle widthStyle)
+{
+    if (start < 0 || end < 0 || start > end) {
+        return {};
+    }
+    std::vector<ParagraphManager::TextBox> textBoxes = pManager_->GetRectsForRange(start, end, heightStyle, widthStyle);
+    RectF textContentRect = contentRect_;
+    textContentRect.SetTop(contentRect_.GetY() - std::min(baselineOffset_, 0.0f));
+    std::vector<ParagraphManager::TextBox> adjustedTextBoxes;
+    for (auto& textBox : textBoxes) {
+        ParagraphManager::TextBox adjustedTextBox = textBox;
+        adjustedTextBox.rect_.SetLeft(textBox.rect_.Left() + textContentRect.Left());
+        adjustedTextBox.rect_.SetTop(textBox.rect_.Top() + textContentRect.Top());
+        adjustedTextBoxes.push_back(adjustedTextBox);
+    }
+    return adjustedTextBoxes;
 }
 
 Offset TextPattern::ConvertLocalOffsetToParagraphOffset(const Offset& offset)

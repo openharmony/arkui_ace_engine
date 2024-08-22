@@ -335,8 +335,7 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
     SetDragStartPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
     const double dragPositionInMainAxis =
         axis_ == Axis::VERTICAL ? info.GetGlobalLocation().GetY() : info.GetGlobalLocation().GetX();
-    TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Scroll drag start, localLocation: %{public}s, globalLocation: %{public}s",
-        info.GetLocalLocation().ToString().c_str(), info.GetGlobalLocation().ToString().c_str());
+    TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Scroll drag start, id:%{public}d, tag:%{public}s", nodeId_, nodeTag_.c_str());
     
     skipRestartSpring_ = false; // reset flags. Extract method if more flags need to be reset
 
@@ -427,9 +426,8 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     // avoid no render frame when drag end
     HandleDragUpdate(info);
 
-    TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Scroll drag end, position is %{public}f and %{public}f, "
-        "velocity is %{public}f",
-        info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(), info.GetMainVelocity());
+    TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Scroll drag end, velocity is %{public}f id:%{public}d, tag:%{public}s",
+        info.GetMainVelocity(), nodeId_, nodeTag_.c_str());
     if (dragFRCSceneCallback_) {
         dragFRCSceneCallback_(info.GetMainVelocity(), NG::SceneStatus::END);
     }
@@ -702,6 +700,9 @@ void Scrollable::StartScrollSnapMotion(float predictSnapOffset, float scrollSnap
             }
     });
     isSnapScrollAnimationStop_ = false;
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    lastVsyncTime_ = context->GetVsyncTime();
 }
 
 void Scrollable::ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scrollSnapVelocity)
@@ -731,6 +732,9 @@ void Scrollable::ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scro
             scroll->ProcessScrollMotionStop(false);
     });
     isSnapAnimationStop_ = false;
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    lastVsyncTime_ = context->GetVsyncTime();
 }
 
 void Scrollable::UpdateScrollSnapStartOffset(double offset)

@@ -186,6 +186,10 @@ declare class ArkWaterFlowComponent extends ArkComponent {}
 
 declare class ArkFlowItemComponent extends ArkComponent {}
 
+declare class ArkQRCodeComponent extends ArkComponent {}
+
+declare class ArkBadgeComponent extends ArkComponent {}
+
 declare class UICommonEvent {
   private _nodePtr: NodePtr;
   private _instanceId: number;

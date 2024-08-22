@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 123
+#define ARKUI_FULL_API_VERSION 124
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 123
+#define ARKUI_NODE_API_VERSION 124
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 8
@@ -646,6 +646,22 @@ struct ArkUIdividerOptions {
     ArkUI_Float32 endMargin;
 };
 
+struct ArkUIBadgeParam {
+    ArkUI_Bool isPositionXy;
+    ArkUI_Bool isDefaultFontSize;
+    ArkUI_Bool isDefaultBadgeSize;
+    ArkUI_Int32 position;
+    ArkUI_Int32 fontWeight;
+    ArkUI_Uint32 badgeColor;
+    ArkUI_Uint32 borderColor;
+    ArkUI_Uint32 textColor;
+    struct ArkUIDimensionType positionX;
+    struct ArkUIDimensionType positionY;
+    struct ArkUIDimensionType badgeSize;
+    struct ArkUIDimensionType borderWidth;
+    struct ArkUIDimensionType fontSize;
+};
+
 enum ArkUINodeType {
     ARKUI_TEXT = 1,
     ARKUI_SPAN,
@@ -700,6 +716,8 @@ enum ArkUINodeType {
     ARKUI_TAB_CONTENT,
     ARKUI_NAVIGATION,
     ARKUI_CUSTOM_SPAN,
+    ARKUI_QRCODE,
+    ARKUI_BADGE,
 };
 
 enum ArkUIEventCategory {
@@ -838,7 +856,7 @@ enum ArkUIEventSubKind {
     ON_REFRESH_REFRESHING,
     ON_REFRESH_ON_OFFSET_CHANGE,
     ON_REFRESH_CHANGE_EVENT,
-    
+
     ON_DATE_PICKER_DATE_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_DATE_PICKER,
     ON_TIME_PICKER_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TIME_PICKER,
     ON_TEXT_PICKER_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TEXT_PICKER,
@@ -1823,6 +1841,7 @@ struct ArkUICommonModifier {
         ArkUI_Float32 valueStrokeWidth, ArkUI_Int32 widthUnit, ArkUI_Uint32 valueColor, ArkUI_Uint32 hasValue);
     void (*resetFocusBoxStyle)(ArkUINodeHandle node);
     void (*setDisAllowDrop)(ArkUINodeHandle node);
+    void (*setBlendModeByBlender)(ArkUINodeHandle node, ArkUINodeHandle blender, ArkUI_Int32 blendApplyTypeValue);
 };
 
 struct ArkUICommonShapeModifier {
@@ -2022,6 +2041,9 @@ struct ArkUITextModifier {
     ArkUI_Int32 (*getTextHalfLeading)(ArkUINodeHandle node);
     void (*setTextOnClick)(ArkUINodeHandle node, void* callback);
     void (*resetTextOnClick)(ArkUINodeHandle node);
+    void (*setTextResponseRegion)(
+        ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 lengthk);
+    void (*resetTextResponseRegion)(ArkUINodeHandle node);
 };
 
 struct ArkUIButtonModifier {
@@ -2169,6 +2191,8 @@ struct ArkUIColumnModifier {
     ArkUI_Int32 (*getColumnAlignItems)(ArkUINodeHandle node);
     void (*setColumnSpace)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetColumnSpace)(ArkUINodeHandle node);
+    void (*setColumnReverse)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetColumnReverse)(ArkUINodeHandle node);
 };
 
 struct ArkUIRowModifier {
@@ -2180,6 +2204,8 @@ struct ArkUIRowModifier {
     ArkUI_Int32 (*getRowAlignItems)(ArkUINodeHandle node);
     void (*setRowSpace)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetRowSpace)(ArkUINodeHandle node);
+    void (*setRowReverse)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetRowReverse)(ArkUINodeHandle node);
 };
 
 struct ArkUIDividerModifier {
@@ -3581,6 +3607,9 @@ struct ArkUIBadgeModifier {
     void (*setBadgeCount)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*setBadgeMaxCount)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*setBadgeFontWeight)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*setBadgeParamWithNumber)(ArkUINodeHandle node, const struct ArkUIBadgeParam* style, ArkUI_Int32 count,
+        ArkUI_Bool countHasValue, ArkUI_Int32 maxCount);
+    void (*setBadgeParamWithString)(ArkUINodeHandle node, const struct ArkUIBadgeParam* style, ArkUI_CharPtr value);
 };
 
 struct ArkUIRefreshModifier {
@@ -4350,6 +4379,7 @@ struct ArkUIQRCodeModifier {
     void (*resetQRBackgroundColor)(ArkUINodeHandle node);
     void (*setContentOpacity)(ArkUINodeHandle node, ArkUI_Float32 opacity);
     void (*resetContentOpacity)(ArkUINodeHandle node);
+    void (*setQRValue)(ArkUINodeHandle node, ArkUI_CharPtr value);
 };
 
 struct ArkUIFormComponentModifier {

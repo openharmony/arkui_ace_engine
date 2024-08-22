@@ -13,39 +13,23 @@
  * limitations under the License.
  */
 
-#include <cstdint>
-#include <cstdlib>
-#include <map>
-#include <memory>
-
 #ifndef TEST_SEGMENTED_WATER_FLOW
 #include "test/mock/base/mock_system_properties.h"
 #endif
+
+#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #define protected public
 #define private public
-#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/unittest/core/pattern/waterflow/water_flow_test_ng.h"
+#include "water_flow_test_ng.h"
 
-#include "core/components/button/button_theme.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scroll_controller_base.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
-#include "core/components_ng/pattern/scrollable/scrollable.h"
-#include "core/components_ng/pattern/waterflow/water_flow_accessibility_property.h"
-#include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_node.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
-#include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
-#include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/property.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_model_ng.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #undef private
 #undef protected
 #include "test/mock/core/animation/mock_animation_manager.h"
@@ -1762,6 +1746,33 @@ HWTEST_F(WaterFlowTestNg, WaterFlowGetItemRectTest001, TestSize.Level1)
     EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(0, 0, itemWidth, ITEM_MAIN_SIZE)));
     EXPECT_TRUE(IsEqual(pattern_->GetItemRect(5), Rect(itemWidth * 2, ITEM_MAIN_SIZE, itemWidth, BIG_ITEM_MAIN_SIZE)));
     EXPECT_TRUE(IsEqual(pattern_->GetItemRect(10), Rect(itemWidth * 2, ITEM_MAIN_SIZE * 3, itemWidth, ITEM_MAIN_SIZE)));
+}
+
+/**
+ * @tc.name: WaterFlowGetItemIndexTest001
+ * @tc.desc: Test WaterFlow GetItemIndex function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowGetItemIndexTest001, TestSize.Level1)
+{
+    float colNumber = 4;
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateWaterFlowItems(TOTAL_LINE_NUMBER * colNumber);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Get invalid WaterFlowItem index.
+     * @tc.expected: Return -1 when input invalid x and y coordinate.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetItemIndex(1000000, -1000000), -1));
+
+    /**
+     * @tc.steps: step2. Get valid WaterFlowItem index.
+     * @tc.expected: Return actual index when input valid x and y coordinate.
+     */
+    float itemWidth = WATER_FLOW_WIDTH / colNumber;
+    EXPECT_TRUE(IsEqual(pattern_->GetItemIndex(itemWidth / 2, ITEM_MAIN_SIZE / 2), 0));
 }
 
 /**

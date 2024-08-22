@@ -1386,7 +1386,7 @@ class GeometryTransitionModifier extends ModifierWithKey {
       getUINativeModule().common.resetGeometryTransition(node);
     }
     else {
-      getUINativeModule().common.setGeometryTransition(node, this.value.id, 
+      getUINativeModule().common.setGeometryTransition(node, this.value.id,
         (_a = this.value.options) === null || _a === void 0 ? void 0 : _a.follow,
         (_b = this.value.options) === null || _b === void 0 ? void 0 : _b.hierarchyStrategy);
     }
@@ -4461,7 +4461,7 @@ class UICommonEvent {
     this._nodePtr = nodePtr;
   }
   // the first param is used to indicate frameNode
-  // the second param is used to indicate the callback 
+  // the second param is used to indicate the callback
   // the third param is used to indicate the instanceid
   // other options will be indicated after them
   setOnClick(callback) {
@@ -4720,11 +4720,27 @@ function applyGesture(modifier, component) {
   }
 }
 
+globalThis.__mapOfModifier__ = new Map();
 function __gestureModifier__(modifier) {
+  if (globalThis.__mapOfModifier__.size === 0) {
+    __modifierElmtDeleteCallback__();
+  }
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = new ArkComponent(nativeNode);
-  applyGesture(modifier, component);
+  if (globalThis.__mapOfModifier__.get(elmtId)) {
+    let component = globalThis.__mapOfModifier__.get(elmtId);
+    applyGesture(modifier, component);
+  } else {
+    let component = new ArkComponent(nativeNode);
+    globalThis.__mapOfModifier__.set(elmtId, component);
+    applyGesture(modifier, component);
+  }
+}
+
+function __modifierElmtDeleteCallback__() {
+  UINodeRegisterProxy.registerModifierElmtDeleteCallback((elmtId) => {
+    globalThis.__mapOfModifier__.delete(elmtId);
+  });
 }
 
 const __elementIdToCustomProperties__ = new Map();
@@ -5040,6 +5056,24 @@ class ColumnPointLightModifier extends ModifierWithKey {
   }
 }
 ColumnPointLightModifier.identity = Symbol('columnPointLight');
+
+class ColumnReverseModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().column.resetReverse(node);
+    } else {
+      getUINativeModule().column.setReverse(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+ColumnReverseModifier.identity = Symbol('columnReverse');
+
 class ArkColumnComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -5060,6 +5094,10 @@ class ArkColumnComponent extends ArkComponent {
   }
   pointLight(value) {
     modifierWithKey(this._modifiersWithKeys, ColumnPointLightModifier.identity, ColumnPointLightModifier, value);
+    return this;
+  }
+  reverse(value) {
+    modifierWithKey(this._modifiersWithKeys, ColumnReverseModifier.identity, ColumnReverseModifier, value);
     return this;
   }
 }
@@ -8151,6 +8189,24 @@ class RowPointLightModifier extends ModifierWithKey {
   }
 }
 RowPointLightModifier.identity = Symbol('rowPointLight');
+
+class RowReverseModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().row.resetReverse(node);
+    } else {
+      getUINativeModule().row.setReverse(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+RowReverseModifier.identity = Symbol('rowReverse');
+
 class ArkRowComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -8171,6 +8227,10 @@ class ArkRowComponent extends ArkComponent {
   }
   pointLight(value) {
     modifierWithKey(this._modifiersWithKeys, RowPointLightModifier.identity, RowPointLightModifier, value);
+    return this;
+  }
+  reverse(value) {
+    modifierWithKey(this._modifiersWithKeys, RowReverseModifier.identity, RowReverseModifier, value);
     return this;
   }
 }
@@ -11215,6 +11275,40 @@ class TextOnClickModifier extends ModifierWithKey {
 }
 TextOnClickModifier.identity = Symbol('textOnClick');
 
+class TextResponseRegionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    let _a, _b, _c, _d, _e, _f, _g, _h;
+    if (reset) {
+      getUINativeModule().text.resetResponseRegion(node);
+    }
+    else {
+      let responseRegion = [];
+      if (Array.isArray(this.value)) {
+        for (let i = 0; i < this.value.length; i++) {
+          responseRegion.push((_a = this.value[i].x) !== null && _a !== void 0 ? _a : 'PLACEHOLDER');
+          responseRegion.push((_b = this.value[i].y) !== null && _b !== void 0 ? _b : 'PLACEHOLDER');
+          responseRegion.push((_c = this.value[i].width) !== null && _c !== void 0 ? _c : 'PLACEHOLDER');
+          responseRegion.push((_d = this.value[i].height) !== null && _d !== void 0 ? _d : 'PLACEHOLDER');
+        }
+      }
+      else {
+        responseRegion.push((_e = this.value.x) !== null && _e !== void 0 ? _e : 'PLACEHOLDER');
+        responseRegion.push((_f = this.value.y) !== null && _f !== void 0 ? _f : 'PLACEHOLDER');
+        responseRegion.push((_g = this.value.width) !== null && _g !== void 0 ? _g : 'PLACEHOLDER');
+        responseRegion.push((_h = this.value.height) !== null && _h !== void 0 ? _h : 'PLACEHOLDER');
+      }
+      getUINativeModule().text.setResponseRegion(node, responseRegion, responseRegion.length);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextResponseRegionModifier.identity = Symbol('textResponseRegion');
+
 class ArkTextComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -11409,6 +11503,10 @@ class ArkTextComponent extends ArkComponent {
   }
   onClick(value) {
     modifierWithKey(this._modifiersWithKeys, TextOnClickModifier.identity, TextOnClickModifier, value);
+    return this;
+  }
+  responseRegion(value) {
+    modifierWithKey(this._modifiersWithKeys, TextResponseRegionModifier.identity, TextResponseRegionModifier, value);
     return this;
   }
 }
@@ -18081,7 +18179,7 @@ class RadioContentModifier extends ModifierWithKey {
   }
   applyPeer(node, reset, component) {
     let radioComponent = component;
-    radioComponent.setContentModifier(this.value); 
+    radioComponent.setContentModifier(this.value);
   }
 }
 RadioContentModifier.identity = Symbol('radioContentModifier');
@@ -22900,6 +22998,13 @@ class ArkQRCodeComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
+  allowChildCount() {
+    return 0;
+  }
+  initialize(value) {
+    modifierWithKey(this._modifiersWithKeys, QRValueModifier.identity, QRValueModifier, value[0]);
+    return this;
+  }
   color(value) {
     modifierWithKey(this._modifiersWithKeys, QRColorModifier.identity, QRColorModifier, value);
     return this;
@@ -22913,6 +23018,18 @@ class ArkQRCodeComponent extends ArkComponent {
     return this;
   }
 }
+class QRValueModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    getUINativeModule().qrcode.setQRValue(node, this.value);
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+QRValueModifier.identity = Symbol('QRCodeValue');
 class QRColorModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -24411,7 +24528,7 @@ class XComponentInitializeModifier extends ModifierWithKey {
     else {
       getUINativeModule().xComponent.setXComponentInitialize(node, this.value?.id,
         this.value?.type, this.value?.imageAIOptions, this.value?.libraryname, this.value?.controller);
-      
+
     }
   }
 }
@@ -24732,7 +24849,237 @@ class ArkBadgeComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
+  allowChildCount() {
+    return 1;
+  }
+  initialize(value) {
+    var _a, _b;
+    if (value.length === 1 && isObject(value[0])) {
+      if (((_a = value[0]) === null || _a === void 0 ? void 0 : _a.count) !== undefined) {
+        modifierWithKey(
+          this._modifiersWithKeys, BadgeParamWithNumberModifier.identity, BadgeParamWithNumberModifier, value[0]);
+      }
+      else if (((_b = value[0]) === null || _b === void 0 ? void 0 : _b.value) !== undefined) {
+        modifierWithKey(
+          this._modifiersWithKeys, BadgeParamWithStringModifier.identity, BadgeParamWithStringModifier, value[0]);
+      }
+      else {
+        modifierWithKey(
+          this._modifiersWithKeys, BadgeParamWithNumberModifier.identity, BadgeParamWithNumberModifier, undefined);
+      }
+      return this;
+    }
+    modifierWithKey(
+      this._modifiersWithKeys, BadgeParamWithNumberModifier.identity, BadgeParamWithNumberModifier, undefined);
+    return this;
+  }
 }
+class BadgeParamWithNumberModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1;
+    if (reset) {
+      getUINativeModule().badge.setBadgeParamWithNumber(node, undefined, undefined, undefined, undefined, undefined,
+        undefined, undefined, undefined, undefined, undefined, undefined, 0, undefined);
+    }
+    else {
+      if (((_a = this.value) === null || _a === void 0 ? void 0 : _a.style) === undefined) {
+        getUINativeModule().badge.setBadgeParamWithNumber(node,
+          isNumber((_b = this.value) === null || _b === void 0 ? void 0 : _b.position) ? this.value.position : undefined,
+          isObject((_c = this.value) === null || _c === void 0 ? void 0 : _c.position) ?
+          (_d = this.value.position) === null || _d === void 0 ? void 0 : _d.x : undefined,
+          isObject((_e = this.value) === null || _e === void 0 ? void 0 : _e.position) ?
+          (_f = this.value.position) === null || _f === void 0 ? void 0 : _f.y : undefined,
+          undefined, undefined, undefined, undefined, undefined, undefined, undefined,
+          isObject((_g = this.value) === null || _g === void 0 ? void 0 : _g.position) &&
+          !isNull((_h = this.value) === null || _h === void 0 ? void 0 : _h.position),
+          (_j = this.value) === null || _j === void 0 ? void 0 : _j.count,
+          (_k = this.value) === null || _k === void 0 ? void 0 : _k.maxCount);
+      }
+      else {
+        getUINativeModule().badge.setBadgeParamWithNumber(node,
+          isNumber((_l = this.value) === null || _l === void 0 ? void 0 : _l.position) ? this.value.position : undefined,
+          isObject((_m = this.value) === null || _m === void 0 ? void 0 : _m.position) ?
+          (_o = this.value.position) === null || _o === void 0 ? void 0 : _o.x : undefined,
+          isObject((_p = this.value) === null || _p === void 0 ? void 0 : _p.position) ?
+          (_q = this.value.position) === null || _q === void 0 ? void 0 : _q.y : undefined,
+          (_r = this.value.style) === null || _r === void 0 ? void 0 : _r.badgeColor,
+          (_s = this.value.style) === null || _s === void 0 ? void 0 : _s.badgeSize,
+          (_t = this.value.style) === null || _t === void 0 ? void 0 : _t.borderColor,
+          (_u = this.value.style) === null || _u === void 0 ? void 0 : _u.borderWidth,
+          (_v = this.value.style) === null || _v === void 0 ? void 0 : _v.color,
+          (_w = this.value.style) === null || _w === void 0 ? void 0 : _w.fontSize,
+          (_x = this.value.style) === null || _x === void 0 ? void 0 : _x.fontWeight,
+          isObject((_y = this.value) === null || _y === void 0 ? void 0 : _y.position) &&
+          !isNull((_z = this.value) === null || _z === void 0 ? void 0 : _z.position),
+          (_0 = this.value) === null || _0 === void 0 ? void 0 : _0.count,
+          (_1 = this.value) === null || _1 === void 0 ? void 0 : _1.maxCount);
+      }
+    }
+  }
+  checkObjectDiff() {
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7;
+    var positionResult = false;
+    var badgeSizeResult = false;
+    var borderWidthResult = false;
+    var badgeColorResult = false;
+    var borderColorResult = false;
+    var colorResult = false;
+    var fontSizeResult = false;
+    var fontWeightResult = false;
+    if (isNumber((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.position) &&
+      isNumber((_b = this.value) === null || _b === void 0 ? void 0 : _b.position)) {
+      positionResult = !isBaseOrResourceEqual(this.stageValue.position, this.value.position);
+    }
+    else if (isObject((_c = this.stageValue) === null || _c === void 0 ? void 0 : _c.position) &&
+      isObject((_d = this.value) === null || _d === void 0 ? void 0 : _d.position)) {
+      positionResult = !isBaseOrResourceEqual((_e = this.stageValue.position) === null || _e === void 0 ? void 0 : _e.x,
+        (_f = this.value.position) === null || _f === void 0 ? void 0 : _f.x) ||
+        !isBaseOrResourceEqual((_g = this.stageValue.position) === null || _g === void 0 ? void 0 : _g.y,
+        (_h = this.value.position) === null || _h === void 0 ? void 0 : _h.y);
+    }
+    else if (((_j = this.stageValue) === null || _j === void 0 ? void 0 : _j.position) !== undefined ||
+      ((_k = this.value) === null || _k === void 0 ? void 0 : _k.position) !== undefined) {
+      positionResult = true;
+    }
+    if (isObject((_l = this.stageValue) === null || _l === void 0 ? void 0 : _l.style) &&
+      isObject((_m = this.value) === null || _m === void 0 ? void 0 : _m.style)) {
+      badgeSizeResult = !isBaseOrResourceEqual((_o = this.stageValue.style) === null || _o === void 0 ? void 0 : _o.badgeSize,
+        (_p = this.value.style) === null || _p === void 0 ? void 0 : _p.badgeSize);
+      borderWidthResult = !isBaseOrResourceEqual((_q = this.stageValue.style) === null || _q === void 0 ? void 0 : _q.borderWidth,
+        (_r = this.value.style) === null || _r === void 0 ? void 0 : _r.borderWidth);
+      badgeColorResult = !isBaseOrResourceEqual((_s = this.stageValue.style) === null || _s === void 0 ? void 0 : _s.badgeColor,
+        (_t = this.value.style) === null || _t === void 0 ? void 0 : _t.badgeColor);
+      borderColorResult = !isBaseOrResourceEqual((_u = this.stageValue.style) === null || _u === void 0 ? void 0 : _u.borderColor,
+        (_v = this.value.style) === null || _v === void 0 ? void 0 : _v.borderColor);
+      colorResult = !isBaseOrResourceEqual((_w = this.stageValue.style) === null || _w === void 0 ? void 0 : _w.color,
+        (_x = this.value.style) === null || _x === void 0 ? void 0 : _x.color);
+      fontSizeResult = !isBaseOrResourceEqual((_y = this.stageValue.style) === null || _y === void 0 ? void 0 : _y.fontSize,
+        (_z = this.value.style) === null || _z === void 0 ? void 0 : _z.fontSize);
+      fontWeightResult = !isBaseOrResourceEqual((_0 = this.stageValue.style) === null || _0 === void 0 ? void 0 : _0.fontWeight,
+        (_1 = this.value.style) === null || _1 === void 0 ? void 0 : _1.fontWeight);
+    }
+    else if (((_2 = this.stageValue) === null || _2 === void 0 ? void 0 : _2.style) !== undefined ||
+      ((_3 = this.value) === null || _3 === void 0 ? void 0 : _3.style) !== undefined) {
+      badgeSizeResult = true;
+      borderWidthResult = true;
+      badgeColorResult = true;
+      borderColorResult = true;
+      colorResult = true;
+      fontSizeResult = true;
+      fontWeightResult = true;
+    }
+    return positionResult || badgeSizeResult || borderWidthResult || badgeColorResult || borderColorResult || colorResult ||
+      fontSizeResult || fontWeightResult || !isBaseOrResourceEqual((_4 = this.stageValue) === null || _4 === void 0 ? void 0 : _4.count,
+      (_5 = this.value) === null || _5 === void 0 ? void 0 : _5.count) ||
+      !isBaseOrResourceEqual((_6 = this.stageValue) === null || _6 === void 0 ? void 0 : _6.maxCount,
+      (_7 = this.value) === null || _7 === void 0 ? void 0 : _7.maxCount);
+  }
+}
+BadgeParamWithNumberModifier.identity = Symbol('BadgeParamWithNumber');
+class BadgeParamWithStringModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z;
+    if (reset) {
+      getUINativeModule().badge.setBadgeParamWithString(node, undefined, undefined, undefined, undefined, undefined,
+        undefined, undefined, undefined, undefined, undefined, undefined, undefined);
+    }
+    else {
+      if (((_a = this.value) === null || _a === void 0 ? void 0 : _a.style) === undefined) {
+        getUINativeModule().badge.setBadgeParamWithString(node,
+          isNumber((_b = this.value) === null || _b === void 0 ? void 0 : _b.position) ? this.value.position : undefined,
+          isObject((_c = this.value) === null || _c === void 0 ? void 0 : _c.position) ?
+          (_d = this.value.position) === null || _d === void 0 ? void 0 : _d.x : undefined,
+          isObject((_e = this.value) === null || _e === void 0 ? void 0 : _e.position) ?
+          (_f = this.value.position) === null || _f === void 0 ? void 0 : _f.y : undefined,
+          undefined, undefined, undefined, undefined, undefined, undefined, undefined,
+          isObject((_g = this.value) === null || _g === void 0 ? void 0 : _g.position) &&
+          !isNull((_h = this.value) === null || _h === void 0 ? void 0 : _h.position),
+          (_j = this.value) === null || _j === void 0 ? void 0 : _j.value);
+      }
+      else {
+        getUINativeModule().badge.setBadgeParamWithString(node,
+          isNumber((_k = this.value) === null || _k === void 0 ? void 0 : _k.position) ? this.value.position : undefined,
+          isObject((_l = this.value) === null || _l === void 0 ? void 0 : _l.position) ?
+          (_m = this.value.position) === null || _m === void 0 ? void 0 : _m.x : undefined,
+          isObject((_o = this.value) === null || _o === void 0 ? void 0 : _o.position) ?
+          (_p = this.value.position) === null || _p === void 0 ? void 0 : _p.y : undefined,
+          (_q = this.value.style) === null || _q === void 0 ? void 0 : _q.badgeColor,
+          (_r = this.value.style) === null || _r === void 0 ? void 0 : _r.badgeSize,
+          (_s = this.value.style) === null || _s === void 0 ? void 0 : _s.borderColor,
+          (_t = this.value.style) === null || _t === void 0 ? void 0 : _t.borderWidth,
+          (_u = this.value.style) === null || _u === void 0 ? void 0 : _u.color,
+          (_v = this.value.style) === null || _v === void 0 ? void 0 : _v.fontSize,
+          (_w = this.value.style) === null || _w === void 0 ? void 0 : _w.fontWeight,
+          isObject((_x = this.value) === null || _x === void 0 ? void 0 : _x.position) &&
+          !isNull((_y = this.value) === null || _y === void 0 ? void 0 : _y.position),
+          (_z = this.value) === null || _z === void 0 ? void 0 : _z.value);
+      }
+    }
+  }
+  checkObjectDiff() {
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5;
+    var positionResult = false;
+    var badgeSizeResult = false;
+    var borderWidthResult = false;
+    var badgeColorResult = false;
+    var borderColorResult = false;
+    var colorResult = false;
+    var fontSizeResult = false;
+    var fontWeightResult = false;
+    if (isNumber((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.position) &&
+      isNumber((_b = this.value) === null || _b === void 0 ? void 0 : _b.position)) {
+      positionResult = !isBaseOrResourceEqual(this.stageValue.position, this.value.position);
+    }
+    else if (isObject((_c = this.stageValue) === null || _c === void 0 ? void 0 : _c.position) &&
+      isObject((_d = this.value) === null || _d === void 0 ? void 0 : _d.position)) {
+      positionResult = !isBaseOrResourceEqual((_e = this.stageValue.position) === null || _e === void 0 ? void 0 : _e.x,
+        (_f = this.value.position) === null || _f === void 0 ? void 0 : _f.x) ||
+        !isBaseOrResourceEqual((_g = this.stageValue.position) === null || _g === void 0 ? void 0 : _g.y,
+        (_h = this.value.position) === null || _h === void 0 ? void 0 : _h.y);
+    }
+    else if (((_j = this.stageValue) === null || _j === void 0 ? void 0 : _j.position) !== undefined ||
+      ((_k = this.value) === null || _k === void 0 ? void 0 : _k.position) !== undefined) {
+      positionResult = true;
+    }
+    if (isObject((_l = this.stageValue) === null || _l === void 0 ? void 0 : _l.style) &&
+      isObject((_m = this.value) === null || _m === void 0 ? void 0 : _m.style)) {
+      badgeSizeResult = !isBaseOrResourceEqual((_o = this.stageValue.style) === null || _o === void 0 ? void 0 : _o.badgeSize,
+        (_p = this.value.style) === null || _p === void 0 ? void 0 : _p.badgeSize);
+      borderWidthResult = !isBaseOrResourceEqual((_q = this.stageValue.style) === null || _q === void 0 ? void 0 : _q.borderWidth,
+        (_r = this.value.style) === null || _r === void 0 ? void 0 : _r.borderWidth);
+      badgeColorResult = !isBaseOrResourceEqual((_s = this.stageValue.style) === null || _s === void 0 ? void 0 : _s.badgeColor,
+        (_t = this.value.style) === null || _t === void 0 ? void 0 : _t.badgeColor);
+      borderColorResult = !isBaseOrResourceEqual((_u = this.stageValue.style) === null || _u === void 0 ? void 0 : _u.borderColor,
+        (_v = this.value.style) === null || _v === void 0 ? void 0 : _v.borderColor);
+      colorResult = !isBaseOrResourceEqual((_w = this.stageValue.style) === null || _w === void 0 ? void 0 : _w.color,
+        (_x = this.value.style) === null || _x === void 0 ? void 0 : _x.color);
+      fontSizeResult = !isBaseOrResourceEqual((_y = this.stageValue.style) === null || _y === void 0 ? void 0 : _y.fontSize,
+        (_z = this.value.style) === null || _z === void 0 ? void 0 : _z.fontSize);
+      fontWeightResult = !isBaseOrResourceEqual((_0 = this.stageValue.style) === null || _0 === void 0 ? void 0 : _0.fontWeight,
+        (_1 = this.value.style) === null || _1 === void 0 ? void 0 : _1.fontWeight);
+    }
+    else if (((_2 = this.stageValue) === null || _2 === void 0 ? void 0 : _2.style) !== undefined ||
+      ((_3 = this.value) === null || _3 === void 0 ? void 0 : _3.style) !== undefined) {
+      badgeSizeResult = true;
+      borderWidthResult = true;
+      badgeColorResult = true;
+      borderColorResult = true;
+      colorResult = true;
+      fontSizeResult = true;
+      fontWeightResult = true;
+    }
+    return positionResult || badgeSizeResult || borderWidthResult || badgeColorResult || borderColorResult || colorResult ||
+      fontSizeResult || fontWeightResult || !isBaseOrResourceEqual((_4 = this.stageValue) === null || _4 === void 0 ? void 0 : _4.value,
+      (_5 = this.value) === null || _5 === void 0 ? void 0 : _5.value);
+  }
+}
+BadgeParamWithStringModifier.identity = Symbol('BadgeParamWithString');
 // @ts-ignore
 if (globalThis.Badge !== undefined) {
   globalThis.Badge.attributeModifier = function (modifier) {

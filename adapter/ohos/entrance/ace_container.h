@@ -565,6 +565,7 @@ public:
     bool IsScenceBoardWindow() override;
     bool IsUIExtensionWindow() override;
     bool IsSceneBoardEnabled() override;
+    bool IsMainWindow() const override;
 
     void SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent);
     bool GetCurPointerEventInfo(int32_t& pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,

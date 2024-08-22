@@ -3935,7 +3935,7 @@ void WebDelegate::LoadUrl()
 
 void WebDelegate::OnInactive()
 {
-    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::OnInactive, webId:%{public}d", GetWebId());
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnInactive, webId:%{public}d", GetWebId());
     auto context = context_.Upgrade();
     if (!context) {
         return;
@@ -3955,7 +3955,7 @@ void WebDelegate::OnInactive()
 
 void WebDelegate::OnActive()
 {
-    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::OnActive, webId:%{public}d", GetWebId());
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnActive, webId:%{public}d", GetWebId());
     auto context = context_.Upgrade();
     if (!context) {
         return;
@@ -4013,7 +4013,7 @@ void WebDelegate::OnWebviewShow()
 
 void WebDelegate::OnRenderToForeground()
 {
-    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::OnRenderToForeground");
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnRenderToForeground");
     auto context = context_.Upgrade();
     if (!context) {
         return;
@@ -4034,7 +4034,7 @@ void WebDelegate::OnRenderToForeground()
 
 void WebDelegate::OnRenderToBackground()
 {
-    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::OnRenderToBackground");
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnRenderToBackground");
     auto context = context_.Upgrade();
     if (!context) {
         return;
@@ -5022,6 +5022,36 @@ void WebDelegate::OnTooltip(const std::string& tooltip)
             webPattern->OnTooltip(tooltip);
         },
         TaskExecutor::TaskType::UI, "ArkUIWebTooltip");
+}
+
+void WebDelegate::OnPopupSize(int32_t x, int32_t y, int32_t width, int32_t height)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), x, y, width, height]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            webPattern->OnPopupSize(x, y, width, height);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIWebPopupSize");
+}
+
+void WebDelegate::OnPopupShow(bool show)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), show]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            webPattern->OnPopupShow(show);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIWebPopupShow");
 }
 
 void WebDelegate::OnRequestFocus()
@@ -6092,6 +6122,27 @@ void WebDelegate::SetSurface(const sptr<Surface>& surface)
     CHECK_NULL_VOID(surfaceRsNode_);
     surfaceNodeId_ = webPattern->GetWebSurfaceNodeId();
 }
+void WebDelegate::SetPopupSurface(const RefPtr<NG::RenderSurface>& popupSurface)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), popupSurface]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                auto rosenRenderSurface = AceType::DynamicCast<NG::RosenRenderSurface>(popupSurface);
+                delegate->popupRenderSurface_ = rosenRenderSurface;
+                delegate->popupSurface_ = rosenRenderSurface->GetSurface();
+
+                CHECK_NULL_VOID(delegate->popupSurface_);
+                delegate->nweb_->SetPopupSurface(reinterpret_cast<void *>(&delegate->popupSurface_));
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUISetPopupSurface");
+}
 #endif
 
 void WebDelegate::UpdateScreenOffSet(double& offsetX, double& offsetY)
@@ -7144,5 +7195,11 @@ std::string WebDelegate::SpanstringConvertHtml(const std::vector<uint8_t> &conte
     TAG_LOGD(AceLogTag::ACE_WEB, "pasteboard spasntring convert html success,"
         " string length = %{public}u", static_cast<int32_t>(htmlStr.length()));
     return htmlStr;
+}
+
+void WebDelegate::StartVibraFeedback(const std::string& vibratorType)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::StartVibraFeedback vibratorType = %{public}s", vibratorType.c_str());
+    NG::VibratorUtils::StartVibraFeedback(vibratorType);
 }
 } // namespace OHOS::Ace

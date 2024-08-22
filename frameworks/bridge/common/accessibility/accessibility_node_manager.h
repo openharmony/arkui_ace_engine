@@ -126,7 +126,7 @@ public:
         const std::string& id, const std::string& target, const RefPtr<AccessibilityNode>& node) override;
     void HandleComponentPostBinding() override {}
     void OnDumpInfo(const std::vector<std::string>& params) override;
-    void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId) override {}
+    void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId, bool hasJson = false) override {}
     std::unique_ptr<JsonValue> DumpComposedElementsToJson() const;
     std::unique_ptr<JsonValue> DumpComposedElementToJson(NodeId nodeId);
     void SetCardViewParams(const std::string& key, bool focus) override;

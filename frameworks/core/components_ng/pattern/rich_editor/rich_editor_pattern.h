@@ -22,6 +22,7 @@
 #include <set>
 #include <string>
 
+#include "core/common/ai/ai_write_adapter.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_action.h"
 #include "core/common/ime/text_input_client.h"
@@ -53,8 +54,8 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 
-#if not defined(ACE_UNITTEST)
-#if defined(ENABLE_STANDARD_INPUT)
+#ifndef ACE_UNITTEST
+#ifdef ENABLE_STANDARD_INPUT
 #include "commonlibrary/c_utils/base/include/refbase.h"
 
 namespace OHOS::MiscServices {
@@ -377,17 +378,12 @@ public:
         OperationType operationType = OperationType::IME);
     void DeleteSelectOperation(OperationRecord* const record);
     void DeleteByRange(OperationRecord* const record, int32_t start, int32_t end);
-    void InsertValueAfterBeforeSpan(RefPtr<SpanNode>& spanNodeBefore, RefPtr<SpanNode>& spanNode,
-        const TextInsertValueInfo& info, const std::string& insertValue, bool isIME = true);
     void InsertDiffStyleValueInSpan(
-        RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue, bool isIME = true);
-    void InsertValueWithoutSpan(
         RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue, bool isIME = true);
     void InsertValueByPaste(const std::string& insertValue);
     bool IsLineSeparatorInLast(RefPtr<SpanNode>& spanNode);
     void InsertValueToSpanNode(
         RefPtr<SpanNode>& spanNode, const std::string& insertValue, const TextInsertValueInfo& info);
-    void SpanNodeFission(RefPtr<SpanNode>& spanNode, const std::string& insertValue, const TextInsertValueInfo& info);
     void SpanNodeFission(RefPtr<SpanNode>& spanNode);
     void CreateTextSpanNode(
         RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue, bool isIME = true);
@@ -674,6 +670,8 @@ public:
     bool IsDisabled() const;
     float GetLineHeight() const override;
     size_t GetLineCount() const override;
+    std::vector<ParagraphManager::TextBox> GetRectsForRange(int32_t start, int32_t end,
+        RectHeightStyle heightStyle, RectWidthStyle widthStyle) override;
     TextLineMetrics GetLineMetrics(int32_t lineNumber) override;
     float GetLetterSpacing() const;
     std::vector<RectF> GetTextBoxes() override;
@@ -743,7 +741,10 @@ public:
     bool SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList);
 
     void HandleOnCameraInput() override;
-
+    void HandleOnAIWrite();
+    void GetAIWriteInfo(AIWriteInfo& info);
+    void HandleAIWriteResult(int32_t start, int32_t end, std::vector<uint8_t>& buffer);
+    bool IsShowAIWrite();
     RefPtr<FocusHub> GetFocusHub() const;
     void ResetDragOption() override;
     bool NeedShowAIDetect() override;
@@ -888,10 +889,17 @@ public:
     }
 
     TextStyle GetDefaultTextStyle();
+    void SetEnableHapticFeedback(bool isEnabled)
+    {
+        isEnableHapticFeedback_ = isEnabled;
+    }
+
     void SetRequestKeyboardOnFocus(bool needToRequest)
     {
         needToRequestKeyboardOnFocus_ = needToRequest;
     }
+
+    bool IsTextEditableForStylus() override;
 
 protected:
     bool CanStartAITask() override;
@@ -953,6 +961,7 @@ private:
     void HandleLongPress(GestureEvent& info);
     void HandleDoubleClickOrLongPress(GestureEvent& info);
     void HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<FrameNode> host);
+    void StartVibratorByLongPress();
     std::string GetPositionSpansText(int32_t position, int32_t& startSpan);
     void FireOnSelect(int32_t selectStart, int32_t selectEnd);
     void FireOnSelectionChange(const int32_t caretPosition);
@@ -972,6 +981,7 @@ private:
     void HandleTouchUpAfterLongPress();
     void HandleTouchMove(const Offset& offset);
     void UpdateCaretByTouchMove(const Offset& offset);
+    void StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex);
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void UseHostToUpdateTextFieldManager();
     void UpdateTextFieldManager(const Offset& offset, float height);
@@ -1089,6 +1099,7 @@ private:
     void AutoScrollByEdgeDetection(AutoScrollParam param, OffsetF offset, EdgeDetectionStrategy strategy);
     float CalcDragSpeed(float hotAreaStart, float hotAreaEnd, float point);
     float MoveTextRect(float offset);
+    void SetNeedMoveCaretToContentRect();
     void MoveCaretToContentRect();
     void MoveCaretToContentRect(const OffsetF& caretOffset, float caretHeight);
     void MoveCaretToContentRect(float offset, int32_t source);
@@ -1245,6 +1256,7 @@ private:
     std::function<void()> customKeyboardBuilder_;
     std::function<void(int32_t)> caretChangeListener_;
     RefPtr<OverlayManager> keyboardOverlay_;
+    RefPtr<AIWriteAdapter> aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
     Offset selectionMenuOffset_;
     // add for scroll
     RectF richTextRect_;
@@ -1294,6 +1306,7 @@ private:
     std::queue<std::function<void()>> tasks_;
     bool isModifyingContent_ = false;
     bool needToRequestKeyboardOnFocus_ = true;
+    bool isEnableHapticFeedback_ = true;
 };
 } // namespace OHOS::Ace::NG
 

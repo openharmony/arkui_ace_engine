@@ -1941,6 +1941,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
 #ifdef FORM_SUPPORTED
     if (isFormRender_) {
         pipelineContext_->SetIsFormRender(isFormRender_);
+        pipelineContext_->SetIsDynamicRender(isDynamicRender_);
         auto cardFrontend = AceType::DynamicCast<FormFrontendDeclarative>(frontend_);
         if (cardFrontend) {
             cardFrontend->SetTaskExecutor(taskExecutor_);
@@ -2518,16 +2519,15 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     CHECK_NULL_VOID(themeManager);
     auto resConfig = GetResourceConfiguration();
     if (!parsedConfig.colorMode.empty()) {
-        if (parsedConfig.colorMode == "dark" && SystemProperties::GetColorMode() != ColorMode::DARK) {
+        configurationChange.colorModeUpdate = true;
+        if (parsedConfig.colorMode == "dark") {
             SystemProperties::SetColorMode(ColorMode::DARK);
             SetColorScheme(ColorScheme::SCHEME_DARK);
             resConfig.SetColorMode(ColorMode::DARK);
-            configurationChange.colorModeUpdate = true;
-        } else if (parsedConfig.colorMode == "light" && SystemProperties::GetColorMode() != ColorMode::LIGHT) {
+        } else {
             SystemProperties::SetColorMode(ColorMode::LIGHT);
             SetColorScheme(ColorScheme::SCHEME_LIGHT);
             resConfig.SetColorMode(ColorMode::LIGHT);
-            configurationChange.colorModeUpdate = true;
         }
     }
     if (!parsedConfig.deviceAccess.empty()) {
@@ -2886,6 +2886,12 @@ bool AceContainer::IsSceneBoardEnabled()
     return Rosen::SceneBoardJudgement::IsSceneBoardEnabled();
 }
 // ArkTsCard end
+
+bool AceContainer::IsMainWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+}
 
 void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent)
 {

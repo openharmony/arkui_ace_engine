@@ -3712,32 +3712,29 @@ void OverlayManager::OnBindContentCover(bool isShow, std::function<void(const st
         if (!modalTransition.has_value()) {
             modalTransition = ModalTransition::DEFAULT;
         }
-        if (!modalStack_.empty()) {
-            auto topModalNode = modalStack_.top().Upgrade();
-            CHECK_NULL_VOID(topModalNode);
-            if (topModalNode->GetTag() == V2::MODAL_PAGE_TAG) {
-                const auto& topModalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
-                if (topModalPattern->GetTargetId() == targetId) {
-                    if (modalStyle.backgroundColor.has_value()) {
-                        topModalNode->GetRenderContext()->UpdateBackgroundColor(modalStyle.backgroundColor.value());
-                    }
-                    topModalPattern->UpdateOnDisappear(std::move(onDisappear));
-                    topModalPattern->UpdateOnWillDisappear(std::move(onWillDisappear));
-                    topModalPattern->UpdateOnAppear(std::move(onAppear));
-                    topModalPattern->UpdateOnWillDismiss(std::move(contentCoverParam.onWillDismiss));
-                    topModalPattern->SetType(modalTransition.value());
-                    topModalPattern->SetHasTransitionEffect(contentCoverParam.transitionEffect != nullptr);
-                    topModalNode->GetRenderContext()->UpdateChainedTransition(contentCoverParam.transitionEffect);
-                    return;
-                }
+        auto targetModalNode = GetModal(targetId);
+        if (targetModalNode) {
+            const auto& targetModalPattern = targetModalNode->GetPattern<ModalPresentationPattern>();
+            CHECK_NULL_VOID(targetModalPattern);
+            auto modalRenderContext = targetModalNode->GetRenderContext();
+            CHECK_NULL_VOID(modalRenderContext);
+            if (modalStyle.backgroundColor.has_value()) {
+                modalRenderContext->UpdateBackgroundColor(modalStyle.backgroundColor.value());
             }
+            targetModalPattern->UpdateOnDisappear(std::move(onDisappear));
+            targetModalPattern->UpdateOnWillDisappear(std::move(onWillDisappear));
+            targetModalPattern->UpdateOnAppear(std::move(onAppear));
+            targetModalPattern->UpdateOnWillDismiss(std::move(contentCoverParam.onWillDismiss));
+            targetModalPattern->SetType(modalTransition.value());
+            targetModalPattern->SetHasTransitionEffect(contentCoverParam.transitionEffect != nullptr);
+            modalRenderContext->UpdateChainedTransition(contentCoverParam.transitionEffect);
+            return;
         }
         if (onWillAppear) {
             onWillAppear();
         }
         HandleModalShow(std::move(callback), std::move(buildNodeFunc), modalStyle, std::move(onAppear),
-            std::move(onDisappear), std::move(onWillDisappear), rootNode, contentCoverParam,
-            targetId, modalTransition);
+            std::move(onDisappear), std::move(onWillDisappear), rootNode, contentCoverParam, targetId, modalTransition);
         return;
     }
 
@@ -3855,10 +3852,7 @@ void OverlayManager::HandleModalPop(
         RemoveChildWithService(rootNode, topModalNode);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    modalStack_.pop();
-    if (!modalList_.empty()) {
-        modalList_.pop_back();
-    }
+    RemoveModal(targetId);
     if (modalTransition == ModalTransition::NONE || builder->GetRenderContext()->HasDisappearTransition()) {
         // Fire shown event of navdestination under the disappeared modal
         FireNavigationStateChange(true);
@@ -4260,8 +4254,6 @@ RefPtr<FrameNode> OverlayManager::GetModal(int32_t targetId)
         int32_t modalTargetId = -1;
         if (modalNode->GetTag() == V2::MODAL_PAGE_TAG) {
             modalTargetId = modalNode->GetPattern<ModalPresentationPattern>()->GetTargetId();
-        } else if (modalNode->GetTag() == V2::SHEET_PAGE_TAG) {
-            modalTargetId = modalNode->GetPattern<SheetPresentationPattern>()->GetTargetId();
         } else {
             continue;
         }
@@ -4283,8 +4275,6 @@ void OverlayManager::RemoveModal(int32_t targetId)
         int32_t modalTargetId = -1;
         if (modalNode->GetTag() == V2::MODAL_PAGE_TAG) {
             modalTargetId = modalNode->GetPattern<ModalPresentationPattern>()->GetTargetId();
-        } else if (modalNode->GetTag() == V2::SHEET_PAGE_TAG) {
-            modalTargetId = modalNode->GetPattern<SheetPresentationPattern>()->GetTargetId();
         } else {
             continue;
         }
@@ -4292,8 +4282,6 @@ void OverlayManager::RemoveModal(int32_t targetId)
             isDelete = true;
             modalList_.erase(modal);
             break;
-        } else {
-            ++modal;
         }
     }
     if (isDelete) {

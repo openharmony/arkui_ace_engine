@@ -4752,11 +4752,31 @@ function applyGesture(modifier: GestureModifier, component: ArkComponent): void 
   }
 }
 
+globalThis.__mapOfModifier__ = new Map();
 function __gestureModifier__(modifier) {
+  if (globalThis.__mapOfModifier__.size === 0) {
+    __modifierElmtDeleteCallback__();
+  }
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = new ArkComponent(nativeNode);
-  applyGesture(modifier, component);
+  if (globalThis.__mapOfModifier__.get(elmtId)) {
+    let component = globalThis.__mapOfModifier__.get(elmtId);
+    applyGesture(modifier, component);
+  } else {
+    let component = new ArkComponent(nativeNode);
+    globalThis.__mapOfModifier__.set(elmtId, component);
+    applyGesture(modifier, component);
+  }
+}
+
+declare class UINodeRegisterProxy {
+  public static registerModifierElmtDeleteCallback(): void;
+}
+
+function __modifierElmtDeleteCallback__() {
+  UINodeRegisterProxy.registerModifierElmtDeleteCallback((elmtId) => {
+    globalThis.__mapOfModifier__.delete(elmtId);
+  });
 }
 
 const __elementIdToCustomProperties__ = new Map();

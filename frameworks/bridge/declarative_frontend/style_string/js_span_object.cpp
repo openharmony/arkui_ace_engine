@@ -37,6 +37,7 @@
 #include "core/components_ng/render/paragraph.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_container_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
@@ -532,7 +533,7 @@ RefPtr<GestureSpan> JSGestureSpan::ParseJSGestureSpan(const JSCallbackInfo& args
     if (!clickFunc->IsFunction() || clickFunc->IsUndefined()) {
         gestureInfo.onClick = std::nullopt;
     } else {
-        auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(clickFunc));
+        auto jsOnClickFunc = AceType::MakeRefPtr<JsWeakClickFunction>(JSRef<JSFunc>::Cast(clickFunc));
         auto onClick = [execCtx = args.GetExecutionContext(), func = jsOnClickFunc](BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
@@ -547,7 +548,7 @@ RefPtr<GestureSpan> JSGestureSpan::ParseJSGestureSpan(const JSCallbackInfo& args
     if (!longPressFunc->IsFunction() || longPressFunc->IsUndefined()) {
         gestureInfo.onLongPress = std::nullopt;
     } else {
-        auto jsOnLongPressFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(longPressFunc));
+        auto jsOnLongPressFunc = AceType::MakeRefPtr<JsWeakClickFunction>(JSRef<JSFunc>::Cast(longPressFunc));
         auto onLongPress = [execCtx = args.GetExecutionContext(), func = jsOnLongPressFunc](BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* longPressInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
@@ -1474,5 +1475,68 @@ void JSExtSpan::SetJsExtSpanObject(const JSRef<JSObject>& extSpanObj)
 JSRef<JSObject>& JSExtSpan::GetJsExtSpanObject()
 {
     return extSpanObj_;
+}
+
+void JSBackgroundColorSpan::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSBackgroundColorSpan>::Declare("BackgroundColorStyle");
+    JSClass<JSBackgroundColorSpan>::CustomProperty(
+        "textBackgroundStyle", &JSBackgroundColorSpan::GetBackgroundColor, &JSBackgroundColorSpan::SetBackgroundColor);
+    JSClass<JSBackgroundColorSpan>::Bind(
+        globalObj, JSBackgroundColorSpan::Constructor, JSBackgroundColorSpan::Destructor);
+}
+
+void JSBackgroundColorSpan::Constructor(const JSCallbackInfo& args)
+{
+    auto backgroundColor = Referenced::MakeRefPtr<JSBackgroundColorSpan>();
+    CHECK_NULL_VOID(backgroundColor);
+    backgroundColor->IncRefCount();
+    RefPtr<BackgroundColorSpan> span;
+    if (args.Length() <= 0 || !args[0]->IsObject()) {
+        span = AceType::MakeRefPtr<BackgroundColorSpan>();
+    } else {
+        span = JSBackgroundColorSpan::ParseJSBackgroundColorSpan(args);
+    }
+    CHECK_NULL_VOID(span);
+    backgroundColor->backgroundColorSpan_ = span;
+    args.SetReturnValue(Referenced::RawPtr(backgroundColor));
+}
+
+void JSBackgroundColorSpan::Destructor(JSBackgroundColorSpan* backgroundColor)
+{
+    if (backgroundColor != nullptr) {
+        backgroundColor->DecRefCount();
+    }
+}
+
+RefPtr<BackgroundColorSpan> JSBackgroundColorSpan::ParseJSBackgroundColorSpan(const JSCallbackInfo& info)
+{
+    auto textBackgroundValue = JSContainerSpan::ParseTextBackgroundStyle(info);
+    return AceType::MakeRefPtr<BackgroundColorSpan>(textBackgroundValue);
+}
+
+void JSBackgroundColorSpan::GetBackgroundColor(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(backgroundColorSpan_);
+    auto backgroundColorStyle = backgroundColorSpan_->GetBackgroundColor();
+    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+    objectTemplate->SetInternalFieldCount(1);
+    JSRef<JSObject> backgroundColorObj = objectTemplate->NewInstance();
+    backgroundColorObj->SetProperty<std::string>("color", backgroundColorStyle.backgroundColor->ColorToString());
+    backgroundColorObj->SetProperty<std::string>(
+        "BorderRadiusProperty", backgroundColorStyle.backgroundRadius->ToString());
+    info.SetReturnValue(backgroundColorObj);
+}
+
+void JSBackgroundColorSpan::SetBackgroundColor(const JSCallbackInfo& info) {};
+
+RefPtr<BackgroundColorSpan>& JSBackgroundColorSpan::GetBackgroundColorSpan()
+{
+    return backgroundColorSpan_;
+}
+
+void JSBackgroundColorSpan::SetBackgroundColorSpan(const RefPtr<BackgroundColorSpan>& backgroundColorSpan)
+{
+    backgroundColorSpan_ = backgroundColorSpan;
 }
 } // namespace OHOS::Ace::Framework

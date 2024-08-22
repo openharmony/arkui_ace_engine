@@ -185,6 +185,7 @@ var ButtonType;
   ButtonType[ButtonType["Capsule"] = 1] = "Capsule";
   ButtonType[ButtonType["Circle"] = 2] = "Circle";
   ButtonType[ButtonType["Arc"] = 4] = "Arc";
+  ButtonType[ButtonType["ROUNDED_RECTANGLE"] = 8] = "ROUNDED_RECTANGLE";
 })(ButtonType || (ButtonType = {}));
 
 var DevicePosition;
@@ -2014,6 +2015,10 @@ class TextMenuItemId {
   static get CAMERA_INPUT() {
     return new TextMenuItemId('OH_DEFAULT_CAMERA_INPUT');
   }
+
+  static get AI_WRITER() {
+    return new TextMenuItemId('OH_DEFAULT_AI_WRITE');
+  }
 }
 
 globalThis.TextMenuItemId = TextMenuItemId;
@@ -2085,7 +2090,7 @@ var LaunchMode;
 })(LaunchMode || (LaunchMode = {}));
 
 class NavPathInfo {
-  constructor(name, param, onPop) {
+  constructor(name, param, onPop, isEntry) {
     this.name = name;
     this.param = param;
     this.onPop = onPop;
@@ -2093,6 +2098,7 @@ class NavPathInfo {
     this.needUpdate = false;
     this.needBuildNewInstance = false;
     this.navDestinationId = undefined;
+    this.isEntry = isEntry;
   }
 }
 
@@ -2243,6 +2249,7 @@ class NavPathStack {
         this.pathArray[index].param = info.param;
         this.pathArray[index].onPop = info.onPop;
         this.pathArray[index].needUpdate = true;
+        this.pathArray[index].isEntry = info.isEntry;
         if (launchMode === LaunchMode.MOVE_TO_TOP_SINGLETON) {
           this.moveIndexToTop(index, animated);
         } else {
@@ -2578,6 +2585,20 @@ class NavPathStack {
   }
   setInterception(interception) {
     this.interception = interception;
+  }
+  getIsEntryByIndex(index) {
+    let item = this.pathArray[index];
+    if (item === undefined) {
+      return false;
+    }
+    return item.isEntry;
+  }
+  setIsEntryByIndex(index, isEntry) {
+    let item = this.pathArray[index];
+    if (item === undefined) {
+      return;
+    }
+    item.isEntry = isEntry;
   }
 }
 

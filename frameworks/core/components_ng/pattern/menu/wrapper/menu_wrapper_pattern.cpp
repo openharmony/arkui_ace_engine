@@ -86,8 +86,7 @@ RectF MenuWrapperPattern::GetMenuZone(RefPtr<UINode>& innerMenuNode)
         CHECK_NULL_RETURN(scrollNode, RectF());
         innerMenuNode = DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
         CHECK_NULL_RETURN(innerMenuNode, RectF());
-        auto offset = DynamicCast<FrameNode>(innerMenuNode)->GetOffsetRelativeToWindow();
-        menuZone.SetOffset(offset);
+        menuZone = subMenuNode->GetGeometryNode()->GetFrameRect();
     }
     return menuZone;
 }

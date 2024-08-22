@@ -19,6 +19,7 @@
 #include "core/components_ng/base/observer_handler.h"
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_badge_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_blank_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_button_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_checkbox_bridge.h"
@@ -185,7 +186,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetFrameNodeByUniqueId(ArkUIRuntimeCal
     if (nodePtr) {
         return panda::NativePointerRef::New(vm, nodePtr);
     }
-    
+
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -256,7 +257,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetNavigationInfoByUniqueId(ArkUIRunti
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "navigationId"),
         panda::StringRef::NewFromUtf8(vm, result->navigationId.c_str()));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "pathStack"), navPathStackObj->GetLocalHandle());
-    
+
     return obj;
 }
 
@@ -321,7 +322,7 @@ ArkUINativeModuleValue ArkUINativeModule::RequireDynamicSyncScene(ArkUIRuntimeCa
     }
 
     auto sceneTag = sceneNode->GetTag();
-    auto nativeRef = NativeUtilsBridge::CreateStrongRef(vm, sceneNode);
+    auto nativeRef = NativeUtilsBridge::CreateWeakRef(vm, sceneNode);
     const char* keys[] = { "nativeRef", "tag" };
     Local<JSValueRef> values[] = { nativeRef, panda::StringRef::NewFromUtf8(vm, sceneTag.c_str()) };
     return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
@@ -1114,6 +1115,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RowBridge::SetSpace));
     row->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSpace"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RowBridge::ResetSpace));
+    row->Set(vm, panda::StringRef::NewFromUtf8(vm, "setReverse"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RowBridge::SetReverse));
+    row->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetReverse"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RowBridge::ResetReverse));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "row"), row);
 
     auto rowSplit = panda::ObjectRef::New(vm);
@@ -1284,6 +1289,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetOnClick));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnClick"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetOnClick));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setResponseRegion"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetResponseRegion));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetResponseRegion"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetResponseRegion));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "text"), text);
 
     auto search = panda::ObjectRef::New(vm);
@@ -1622,6 +1631,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ColumnBridge::SetSpace));
     column->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSpace"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ColumnBridge::ResetSpace));
+    column->Set(vm, panda::StringRef::NewFromUtf8(vm, "setReverse"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ColumnBridge::SetReverse));
+    column->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetReverse"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ColumnBridge::ResetReverse));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "column"), column);
 
     auto gridRow = panda::ObjectRef::New(vm);
@@ -2573,6 +2586,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
 #endif
     RegisterResourceAttributes(object, vm);
     RegisterFlexAttributes(object, vm);
+    RegisterBadgeAttributes(object, vm);
     return object;
 }
 
@@ -4858,6 +4872,8 @@ void ArkUINativeModule::RegisterQRCodeAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), QRCodeBridge::SetContentOpacity));
     qrcode->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetContentOpacity"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), QRCodeBridge::ResetContentOpacity));
+    qrcode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setQRValue"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), QRCodeBridge::SetQRValue));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "qrcode"), qrcode);
 }
 
@@ -5086,5 +5102,15 @@ void ArkUINativeModule::RegisterFlexAttributes(Local<panda::ObjectRef> object, E
     flex->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFlexInitialize"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FlexBridge::ResetFlexInitialize));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "flex"), flex);
+}
+
+void ArkUINativeModule::RegisterBadgeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto badge = panda::ObjectRef::New(vm);
+    badge->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBadgeParamWithNumber"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), BadgeBridge::SetBadgeParamWithNumber));
+    badge->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBadgeParamWithString"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), BadgeBridge::SetBadgeParamWithString));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "badge"), badge);
 }
 } // namespace OHOS::Ace::NG
