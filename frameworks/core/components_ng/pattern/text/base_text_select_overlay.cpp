@@ -203,8 +203,10 @@ RefPtr<FrameNode> BaseTextSelectOverlay::GetOwner()
 
 void BaseTextSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType)
 {
-    if (IsMouseClickDown(sourceType, touchType) || IsTouchUp(sourceType, touchType)) {
+    if (IsMouseClickDown(sourceType, touchType)) {
         CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
+    } else if (IsTouchUp(sourceType, touchType)) {
+        HideMenu(true);
     }
 }
 
