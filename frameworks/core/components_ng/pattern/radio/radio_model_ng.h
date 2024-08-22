@@ -50,6 +50,7 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     void SetBuilder(std::function<void()>&& buildFunc) override;
     static void SetRadioIndicator(int32_t indicator);
+    static void SetRadioIndicatorType(FrameNode* frameNode, std::optional<int32_t> indicator);
     static void SetChecked(FrameNode* frameNode, bool isChecked);
     static void SetCheckedBackgroundColor(FrameNode* frameNode, const Color& color);
     static void SetUncheckedBorderColor(FrameNode* frameNode, const Color& color);

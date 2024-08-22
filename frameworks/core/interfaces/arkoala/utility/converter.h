@@ -34,6 +34,7 @@
 #include "core/interfaces/native/node/node_api.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/arkoala/utility/generated/converter_generated.h"
+#include "ace_engine_types.h"
 
 
 namespace OHOS::Ace::NG::Converter {
@@ -380,6 +381,24 @@ namespace OHOS::Ace::NG::Converter {
     ImageSourceInfo Convert(Ark_NativePointer node, const Type_ImageAttribute_alt_Arg0& value);
     ImageResource Convert(const Ark_Resource& value);
 
+    template<>
+    inline RadioStyle Convert(const Ark_RadioStyle& src)
+    {
+        RadioStyle style;
+        style.checkedBackgroundColor = Converter::OptConvert<Color>(src.checkedBackgroundColor);
+        style.uncheckedBorderColor = Converter::OptConvert<Color>(src.uncheckedBorderColor);
+        style.indicatorColor = Converter::OptConvert<Color>(src.indicatorColor);
+        return style;
+    }
+
+    template<>
+    inline std::string Convert(const Ark_String& src)
+    {
+        if (src.chars == nullptr) {
+            return "";
+        }
+        return src.chars;
+    }
 } // namespace OHOS::Ace::NG::Converter
 
 #endif  // GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_UTILITY_CONVERTER_H
