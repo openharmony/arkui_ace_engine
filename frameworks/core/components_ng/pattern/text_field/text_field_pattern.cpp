@@ -163,6 +163,8 @@ constexpr int32_t CLICK_DOUBLE = 2;
 constexpr int32_t CLICK_TRIPLE = 3;
 constexpr int32_t CLICK_FINGER_ONE = 1;
 
+constexpr int32_t HOVER_ANIMATION_DURATION = 250;
+
 static std::unordered_map<TextContentType, std::pair<AceAutoFillType, std::string>> contentTypeMap_ = {
     {TextContentType::VISIBLE_PASSWORD,
         std::make_pair(AceAutoFillType::ACE_PASSWORD, "TextContentType.VISIBLE_PASSWORD")},
@@ -907,9 +909,9 @@ void TextFieldPattern::SetFocusStyle()
         underlineWidth_ = TYPING_UNDERLINE_WIDTH;
     }
 
-    if (!paintProperty->HasBackgroundColor()) {
+    if (!paintProperty->HasBackgroundColor() && !IsUnderlineMode()) {
         auto defaultBGColor = textFieldTheme->GetBgColor();
-        if (renderContext->GetBackgroundColorValue(defaultBGColor) == defaultBGColor) {
+        if (paintProperty->GetBackgroundColorValue(defaultBGColor) == defaultBGColor) {
             renderContext->UpdateBackgroundColor(textFieldTheme->GetFocusBgColor());
             isFocusBGColorSet_ = true;
         }
@@ -1673,6 +1675,7 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 void TextFieldPattern::HandleTouchDown(const Offset& offset)
 {
+    UpdatePressStyle(true);
     auto focusHub = GetFocusHub();
     if (!focusHub->IsFocusable()) {
         return;
@@ -1698,6 +1701,7 @@ void TextFieldPattern::HandleTouchDown(const Offset& offset)
 
 void TextFieldPattern::HandleTouchUp()
 {
+    UpdatePressStyle(false);
     if (isTouchCaret_) {
         isTouchCaret_ = false;
         CloseSelectOverlay(true);
@@ -2640,6 +2644,7 @@ void TextFieldPattern::OnModifyDone()
     CHECK_NULL_VOID(layoutProperty);
     auto textFieldTheme = GetTheme();
     CHECK_NULL_VOID(textFieldTheme);
+    InitTextFieldThemeColors(textFieldTheme);
     directionKeysMoveFocusOut_ = textFieldTheme->GetDirectionKeysMoveFocusOut();
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
@@ -3185,7 +3190,81 @@ void TextFieldPattern::OnHover(bool isHover)
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT, windowId);
         pipeline->FreeMouseStyleHoldNode(frameId);
     }
+    UpdateHoverStyle(isHover);
     isOnHover_ = isHover;
+}
+
+void TextFieldPattern::InitTextFieldThemeColors(const RefPtr<TextFieldTheme>& theme)
+{
+    CHECK_NULL_VOID(theme);
+
+    defaultThemeBgColor_ = theme->GetBgColor();
+    focusThemeBgColor_ = theme->GetFocusBgColor();
+    hoverThemeBgColor_ = theme->GetPressColor();
+    pressThemeBgColor_ = theme->GetHoverColor();
+}
+
+void TextFieldPattern::UpdateHoverStyle(bool isHover)
+{
+    if (hoverAndPressBgColorEnabled_) {
+        auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        auto textFieldBgColor = paintProperty->GetBackgroundColorValue(defaultThemeBgColor_);
+        auto bgColor = (textFieldBgColor == defaultThemeBgColor_)
+                           ? (IsUnderlineMode() ? Color::TRANSPARENT : defaultThemeBgColor_)
+                           : textFieldBgColor;
+
+        auto hoverColor = bgColor.BlendColor(hoverThemeBgColor_);
+        if (!HasFocus()) {
+            if (isHover) {
+                PlayAnimationHoverAndPress(hoverColor);
+            } else {
+                PlayAnimationHoverAndPress(bgColor);
+            }
+        }
+    }
+}
+
+void TextFieldPattern::UpdatePressStyle(bool isPressed)
+{
+    if (hoverAndPressBgColorEnabled_) {
+        auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        auto textFieldBgColor = paintProperty->GetBackgroundColorValue(defaultThemeBgColor_);
+        auto bgColor =
+            (textFieldBgColor == defaultThemeBgColor_)
+                ? (IsUnderlineMode() ? Color::TRANSPARENT : (HasFocus() ? focusThemeBgColor_ : defaultThemeBgColor_))
+                : textFieldBgColor;
+        auto pressColor = bgColor.BlendColor(pressThemeBgColor_);
+
+        if (isPressed) {
+            PlayAnimationHoverAndPress(pressColor);
+        } else {
+            PlayAnimationHoverAndPress(bgColor);
+        }
+    }
+}
+
+void TextFieldPattern::PlayAnimationHoverAndPress(const Color& color)
+{
+    AnimationOption option = AnimationOption();
+    option.SetDuration(HOVER_ANIMATION_DURATION);
+    option.SetCurve(Curves::FRICTION);
+    AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), color]() {
+        auto textFieldPattern = weak.Upgrade();
+        CHECK_NULL_VOID(textFieldPattern);
+        textFieldPattern->UpdateTextFieldBgColor(color);
+    });
+}
+
+void TextFieldPattern::UpdateTextFieldBgColor(const Color& color)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(color);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void TextFieldPattern::RestoreDefaultMouseState()
