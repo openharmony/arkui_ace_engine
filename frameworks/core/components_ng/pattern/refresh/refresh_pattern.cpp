@@ -716,12 +716,14 @@ void RefreshPattern::UpdateScrollTransition(float scrollOffset)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    // If the refresh has no children without loadingProgress, it does not need to be offset.
-    if (host->TotalChildCount() <= 1) {
+    int32_t childCount = host->TotalChildCount();
+    // If the refresh has no children without loadingProgress and text, it does not need to update offset.
+    if (childCount < 2 || (childCount == 2 && hasLoadingText_)) { // 2 means loadingProgress and text child components.
         return;
     }
     // Need to search for frameNode and skip ComponentNode
     auto childNode = host->GetLastChild();
+    CHECK_NULL_VOID(childNode);
     while (!AceType::InstanceOf<FrameNode>(childNode) && !childNode->GetChildren().empty()) {
         childNode = childNode->GetFirstChild();
     }
