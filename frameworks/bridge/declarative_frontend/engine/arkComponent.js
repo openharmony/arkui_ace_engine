@@ -17424,6 +17424,21 @@ class ArkToggleComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
+  allowChildCount() {
+    if (this.toggleType === ToggleType.Button) {
+      return 1;
+    }
+    return 0;
+  }
+  initialize(value) {
+    if (isObject(value[0])) {
+      this.toggleType = value[0].type;
+      modifierWithKey(this._modifiersWithKeys, ToggleOptionsModifier.identity, ToggleOptionsModifier, value[0]);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, ToggleOptionsModifier.identity, ToggleOptionsModifier, undefined);
+    }
+    return this;
+  }
   onChange(callback) {
     throw new Error('Method not implemented.');
   }
@@ -17717,6 +17732,23 @@ class ToggleContentModifier extends ModifierWithKey {
   }
 }
 ToggleContentModifier.identity = Symbol('toggleContentModifier');
+class ToggleOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().toggle.setToggleOptions(node, undefined);
+    } else {
+      getUINativeModule().toggle.setToggleOptions(node, this.value?.isOn);
+    }
+  }
+
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.isOn, this.value.isOn);
+  }
+}
+ToggleOptionsModifier.identity = Symbol('toggleOptions');
 // @ts-ignore
 if (globalThis.Toggle !== undefined) {
   globalThis.Toggle.attributeModifier = function (modifier) {
