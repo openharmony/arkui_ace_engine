@@ -364,6 +364,7 @@ public:
     void OnModifyDone() override;
     void BeforeCreateLayoutWrapper() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void HandleSelectOverlayOnLayoutSwap();
     void FireOnReady();
     void SupplementIdealSizeWidth(const RefPtr<FrameNode>& frameNode);
     void MoveCaretOnLayoutSwap(bool isReduceSize);
@@ -966,7 +967,7 @@ private:
     void FireOnSelect(int32_t selectStart, int32_t selectEnd);
     void FireOnSelectionChange(const int32_t caretPosition);
     void FireOnSelectionChange(const TextSelector& selector);
-    void FireOnSelectionChange(int32_t selectStart, int32_t selectEnd);
+    void FireOnSelectionChange(int32_t selectStart, int32_t selectEnd, bool isForced = false);
     void MouseRightFocus(const MouseInfo& info);
     bool IsScrollBarPressed(const MouseInfo& info);
     void HandleMouseLeftButtonMove(const MouseInfo& info);

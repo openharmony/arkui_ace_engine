@@ -559,11 +559,7 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     }
     MoveCaretOnLayoutSwap(LessNotEqual(originHeight, frameRect_.Height()));
     HandleTasksOnLayoutSwap();
-    if (textSelector_.IsValid() && SelectOverlayIsOn() && isShowMenu_) {
-        CalculateHandleOffsetAndShowOverlay();
-        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
-    }
-    isShowMenu_ = true;
+    HandleSelectOverlayOnLayoutSwap();
     if (!isModifyingContent_) {
         UpdateCaretInfoToController();
     }
@@ -585,6 +581,15 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     }
     caretUpdateType_ = CaretUpdateType::NONE;
     return ret;
+}
+
+void RichEditorPattern::HandleSelectOverlayOnLayoutSwap()
+{
+    CHECK_NULL_VOID(textSelector_.IsValid());
+    CHECK_NULL_VOID(SelectOverlayIsOn());
+    CHECK_NULL_VOID(!IsPreviewTextInputting());
+    CalculateHandleOffsetAndShowOverlay();
+    selectOverlay_->ProcessOverlay({ .menuIsShow = selectOverlay_->IsCurrentMenuVisibile(), .animation = true });
 }
 
 void RichEditorPattern::FireOnReady()
@@ -1549,13 +1554,13 @@ void RichEditorPattern::FireOnSelectionChange(const TextSelector& selector)
     FireOnSelectionChange(selector.GetStart(), selector.GetEnd());
 }
 
-void RichEditorPattern::FireOnSelectionChange(int32_t start, int32_t end)
+void RichEditorPattern::FireOnSelectionChange(int32_t start, int32_t end, bool isForced)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
-    CHECK_NULL_VOID(HasFocus());
+    CHECK_NULL_VOID(isForced || HasFocus());
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "range=[%{public}d,%{public}d], caretTwinkling_=%{public}d",
         start, end, caretTwinkling_);
     if (start < 0 || end < 0) {
@@ -3461,12 +3466,16 @@ void RichEditorPattern::OnDragEnd(const RefPtr<Ace::DragEvent>& event)
     }
     UpdateSpanItemDragStatus(recoverDragResultObjects_, false);
     recoverDragResultObjects_.clear();
-    if (event && event->GetResult() != DragRet::DRAG_SUCCESS) {
+    auto focusHub = GetFocusHub();
+    if (event && focusHub && event->GetResult() != DragRet::DRAG_SUCCESS && focusHub->IsFocusable()) {
         HandleSelectionChange(recoverStart_, recoverEnd_);
+        FireOnSelectionChange(recoverStart_, recoverEnd_, true);
         showSelect_ = true;
-        isShowMenu_ = false;
         CalculateHandleOffsetAndShowOverlay();
-        ResetSelection();
+        if (!IsUsingMouse()) {
+            selectOverlay_->ProcessOverlay({ .menuIsShow = false});
+        }
+        focusHub->RequestFocusImmediately();
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
