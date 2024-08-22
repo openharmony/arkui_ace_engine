@@ -926,9 +926,26 @@ export class ChipComponent extends ViewPU {
             this.toVp(this.label.labelMargin.left) >= 0) {
             labelMargin.left = this.label?.labelMargin?.left;
         }
+        else if ((this.prefixSymbol?.normal || this.prefixSymbol?.activated) || this.prefixIcon?.src) {
+            if (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) {
+                labelMargin.left = this.theme.label.smallMargin.left;
+            }
+            else {
+                labelMargin.left = this.theme.label.normalMargin.left;
+            }
+        }
         if (this.label?.labelMargin?.right !== void (0) &&
             this.toVp(this.label.labelMargin.right) >= 0) {
             labelMargin.right = this.label?.labelMargin?.right;
+        }
+        else if ((this.suffixSymbol?.normal || this.suffixSymbol?.activated) ||
+            this.suffixIcon?.src || this.useDefaultSuffixIcon) {
+            if (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) {
+                labelMargin.right = this.theme.label.smallMargin.right;
+            }
+            else {
+                labelMargin.right = this.theme.label.normalMargin.right;
+            }
         }
         return labelMargin;
     }
