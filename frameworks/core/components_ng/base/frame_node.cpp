@@ -1095,6 +1095,14 @@ void FrameNode::OnAttachToBuilderNode(NodeStatus nodeStatus)
     pattern_->OnAttachToBuilderNode(nodeStatus);
 }
 
+bool FrameNode::RenderCustomChild(int64_t deadline)
+{
+    if (!pattern_->RenderCustomChild(deadline)) {
+        return false;
+    }
+    return UINode::RenderCustomChild(deadline);
+}
+
 void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationChange)
 {
     if (configurationChange.languageUpdate) {
