@@ -634,6 +634,11 @@ public:
 
     virtual void NotifyDataChange(int32_t index, int32_t count) {};
 
+    virtual bool TriggerAutoSaveWhenInvisible()
+    {
+        return false;
+    }
+
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}

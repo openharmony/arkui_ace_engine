@@ -788,7 +788,10 @@ void UINode::DumpViewDataPageNodes(
 {
     auto frameNode = AceType::DynamicCast<FrameNode>(this);
     if (frameNode && !frameNode->IsVisible()) {
-        return;
+        auto pattern = frameNode->GetPattern();
+        if (pattern && !pattern->TriggerAutoSaveWhenInvisible()) {
+            return;
+        }
     }
     DumpViewDataPageNode(viewDataWrap, needsRecordData);
     for (const auto& item : GetChildren()) {
@@ -806,7 +809,10 @@ bool UINode::NeedRequestAutoSave()
 {
     auto frameNode = AceType::DynamicCast<FrameNode>(this);
     if (frameNode && !frameNode->IsVisible()) {
-        return false;
+        auto pattern = frameNode->GetPattern();
+        if (pattern && !pattern->TriggerAutoSaveWhenInvisible()) {
+            return false;
+        }
     }
     if (CheckAutoSave()) {
         return true;
