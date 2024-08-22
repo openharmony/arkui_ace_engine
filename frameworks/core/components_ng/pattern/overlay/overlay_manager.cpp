@@ -2305,7 +2305,7 @@ void OverlayManager::CleanPopupInSubWindow()
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "clean popup insubwindow enter");
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
-    std::vector<RefPtr<FrameNode>> removeNodes;
+    std::vector<int32_t> targetList;
     for (const auto& child : rootNode->GetChildren()) {
         if (!child || child->GetTag() != V2::POPUP_ETS_TAG) {
             continue;
@@ -2320,16 +2320,25 @@ void OverlayManager::CleanPopupInSubWindow()
             popupInfo.markNeedUpdate = true;
             auto removeNode = HidePopupWithoutAnimation(target, popupInfo);
             if (removeNode) {
-                removeNodes.emplace_back(removeNode);
-                auto subwindowMgr = SubwindowManager::GetInstance();
-                subwindowMgr->DeleteHotAreas(Container::CurrentId(), removeNode->GetId());
-                ErasePopupInfo(target);
+                targetList.emplace_back(target);
             }
             break;
         }
     }
-    for (const auto& removeNode : removeNodes) {
-        rootNode->RemoveChild(removeNode);
+    for (const auto& target : targetList) {
+        auto removeNode = GetPopupInfo(target).popupNode;
+        CHECK_NULL_VOID(removeNode);
+        auto bubblePattern = removeNode->GetPattern<BubblePattern>();
+        CHECK_NULL_VOID(bubblePattern);
+        if (bubblePattern->HasOnWillDismiss()) {
+            SetDismissPopupId(target);
+            bubblePattern->CallOnWillDismiss(static_cast<int32_t>(DismissReason::TOUCH_OUTSIDE));
+        } else {
+            rootNode->RemoveChild(removeNode);
+            auto subwindowMgr = SubwindowManager::GetInstance();
+            subwindowMgr->DeleteHotAreas(Container::CurrentId(), removeNode->GetId());
+            ErasePopupInfo(target);
+        }
     }
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
