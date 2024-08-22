@@ -3172,6 +3172,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     if (this._gestureEvent !== null) {
       this._gestureEvent = new UIGestureEvent();
       this._gestureEvent.setNodePtr(this.nativePtr);
+      this._gestureEvent.setWeakNodePtr(this._weakPtr);
     }
     return this._gestureEvent;
   }
@@ -4615,10 +4616,17 @@ function attributeModifierFuncWithoutStateStyles<T>(modifier: AttributeModifier<
 
 class UIGestureEvent {
   private _nodePtr: Object | null;
+  private _weakNodePtr: JsPointerClass;
   setNodePtr(nodePtr: Object | null): void {
     this._nodePtr = nodePtr;
   }
+  setWeakNodePtr(weakNodePtr: JsPointerClass): void {
+    this._weakNodePtr = weakNodePtr;
+  }
   addGesture(gesture: GestureHandler, priority?: GesturePriority, mask?: GestureMask): void {
+    if (this._weakNodePtr.invalid()) {
+      return;
+    }
     switch (gesture.gestureType) {
       case CommonGestureType.TAP_GESTURE: {
         let tapGesture: TapGestureHandler = gesture as TapGestureHandler;
@@ -4679,9 +4687,15 @@ class UIGestureEvent {
     this.addGesture(gesture, GesturePriority.PARALLEL, mask);
   }
   removeGestureByTag(tag: string): void {
+    if (this._weakNodePtr.invalid()) {
+      return;
+    }
     getUINativeModule().common.removeGestureByTag(this._nodePtr, tag);
   }
   clearGestures(): void {
+    if (this._weakNodePtr.invalid()) {
+      return;
+    }
     getUINativeModule().common.clearGestures(this._nodePtr);
   }
 }

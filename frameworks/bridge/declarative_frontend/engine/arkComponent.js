@@ -3066,6 +3066,7 @@ class ArkComponent {
     if (this._gestureEvent !== null) {
       this._gestureEvent = new UIGestureEvent();
       this._gestureEvent.setNodePtr(this.nativePtr);
+      this._gestureEvent.setWeakNodePtr(this._weakPtr);
     }
     return this._gestureEvent;
   }
@@ -4587,7 +4588,13 @@ class UIGestureEvent {
   setNodePtr(nodePtr) {
     this._nodePtr = nodePtr;
   }
+  setWeakNodePtr(weakNodePtr) {
+    this._weakNodePtr = weakNodePtr;
+  }
   addGesture(gesture, priority, mask) {
+    if (this._weakNodePtr.invalid()) {
+      return;
+    }
     switch (gesture.gestureType) {
       case CommonGestureType.TAP_GESTURE: {
         let tapGesture = gesture;
@@ -4648,9 +4655,15 @@ class UIGestureEvent {
     this.addGesture(gesture, GesturePriority.PARALLEL, mask);
   }
   removeGestureByTag(tag) {
+    if (this._weakNodePtr.invalid()) {
+      return;
+    }
     getUINativeModule().common.removeGestureByTag(this._nodePtr, tag);
   }
   clearGestures() {
+    if (this._weakNodePtr.invalid()) {
+      return;
+    }
     getUINativeModule().common.clearGestures(this._nodePtr);
   }
 }
