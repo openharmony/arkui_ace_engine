@@ -2338,6 +2338,19 @@ void GetRealEventWindowId(
     windowId = ngPipeline->GetRealHostWindowId();
 }
 
+int64_t GetRealStackNodeId(const AccessibilityEvent& accessibilityEvent)
+{
+    int64_t stackNodeId = accessibilityEvent.stackNodeId;
+    if (stackNodeId != -1) {
+        int64_t splitElementId = AccessibilityElementInfo::UNDEFINED_ACCESSIBILITY_ID;
+        int32_t splitTreeId = AccessibilityElementInfo::UNDEFINED_TREE_ID;
+        AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(
+            accessibilityEvent.nodeId, splitElementId, splitTreeId);
+        AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(splitTreeId, stackNodeId);
+    }
+    return stackNodeId;
+}
+
 void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent)
 {
     ACE_ACCESS_SCOPED_TRACE("SendAccessibilityAsyncEvent");
@@ -2351,14 +2364,7 @@ void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEven
     AccessibilityEventInfo eventInfo;
     uint32_t realWindowId = GetWindowId();
     if (AceType::InstanceOf<NG::PipelineContext>(context)) {
-        int64_t stackNodeId = accessibilityEvent.stackNodeId;
-        if (stackNodeId != -1) {
-            int64_t splitElementId = AccessibilityElementInfo::UNDEFINED_ACCESSIBILITY_ID;
-            int32_t splitTreeId = AccessibilityElementInfo::UNDEFINED_TREE_ID;
-            AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(
-                accessibilityEvent.nodeId, splitElementId, splitTreeId);
-            AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(splitTreeId, stackNodeId);
-        }
+        int64_t stackNodeId = GetRealStackNodeId(accessibilityEvent);
         RefPtr<NG::FrameNode> node;
         ngPipeline = FindPipelineByElementId(accessibilityEvent.nodeId, node);
         CHECK_NULL_VOID(ngPipeline);
@@ -2397,6 +2403,7 @@ void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEven
             TaskExecutor::TaskType::BACKGROUND, "ArkUIAccessibilitySendSyncEvent");
     }
 }
+
 #ifdef WEB_SUPPORTED
 
 void JsAccessibilityManager::SendWebAccessibilityAsyncEvent(
@@ -4831,14 +4838,6 @@ void JsAccessibilityManager::JsInteractionOperation::SetChildTreeIdAndWinId(
     auto jsAccessibilityManager = GetHandler().Upgrade();
     CHECK_NULL_VOID(jsAccessibilityManager);
     jsAccessibilityManager->NotifySetChildTreeIdAndWinId(splitElementId, treeId, childWindowId);
-
-    auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
-    CHECK_NULL_VOID(context);
-    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
-    CHECK_NULL_VOID(ngPipeline);
-    auto rootNode = ngPipeline->GetRootElement();
-    CHECK_NULL_VOID(rootNode);
-    rootNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
 }
 
 void JsAccessibilityManager::JsInteractionOperation::SetBelongTreeId(const int32_t treeId)

@@ -646,6 +646,22 @@ struct ArkUIdividerOptions {
     ArkUI_Float32 endMargin;
 };
 
+struct ArkUIBadgeParam {
+    ArkUI_Bool isPositionXy;
+    ArkUI_Bool isDefaultFontSize;
+    ArkUI_Bool isDefaultBadgeSize;
+    ArkUI_Int32 position;
+    ArkUI_Int32 fontWeight;
+    ArkUI_Uint32 badgeColor;
+    ArkUI_Uint32 borderColor;
+    ArkUI_Uint32 textColor;
+    struct ArkUIDimensionType positionX;
+    struct ArkUIDimensionType positionY;
+    struct ArkUIDimensionType badgeSize;
+    struct ArkUIDimensionType borderWidth;
+    struct ArkUIDimensionType fontSize;
+};
+
 enum ArkUINodeType {
     ARKUI_TEXT = 1,
     ARKUI_SPAN,
@@ -701,6 +717,7 @@ enum ArkUINodeType {
     ARKUI_NAVIGATION,
     ARKUI_CUSTOM_SPAN,
     ARKUI_QRCODE,
+    ARKUI_BADGE,
 };
 
 enum ArkUIEventCategory {
@@ -3589,6 +3606,9 @@ struct ArkUIBadgeModifier {
     void (*setBadgeCount)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*setBadgeMaxCount)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*setBadgeFontWeight)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*setBadgeParamWithNumber)(ArkUINodeHandle node, const struct ArkUIBadgeParam* style, ArkUI_Int32 count,
+        ArkUI_Bool countHasValue, ArkUI_Int32 maxCount);
+    void (*setBadgeParamWithString)(ArkUINodeHandle node, const struct ArkUIBadgeParam* style, ArkUI_CharPtr value);
 };
 
 struct ArkUIRefreshModifier {

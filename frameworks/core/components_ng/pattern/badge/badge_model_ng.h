@@ -28,6 +28,10 @@ public:
         isDefaultBadgeSize_ = isDefaultBadgeSize;
     };
 
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void SetBadgeParam(
+        FrameNode* frameNode, BadgeParameters& badgeParameters, bool isDefaultFontSize, bool isDefaultBadgeSize);
+
 private:
     static void UpdateBadgeStyle(BadgeParameters& badgeParameters, const RefPtr<FrameNode>& frameNode);
     bool isDefaultFontSize_ = true;
