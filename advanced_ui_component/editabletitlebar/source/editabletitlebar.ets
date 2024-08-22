@@ -88,11 +88,11 @@ class EditableTitleBarTheme {
   public subTitleColor: ResourceColor = $r('sys.color.titlebar_subheader_color');
 }
 
-class buttonGestureModifier implements GestureModifier {
-  longPressTime: number = 500;
-  fontSize: number = 1;
-  minFontSize: number = 1.75;
-  controller: CustomDialogController | null = null;
+class ButtonGestureModifier implements GestureModifier {
+   private longPressTime: number = 500;
+   private fontSize: number = 1;
+   private minFontSize: number = 1.75;
+   private controller: CustomDialogController | null = null;
 
   constructor(controller: CustomDialogController | null) {
     this.controller = controller;
@@ -417,7 +417,7 @@ struct ImageMenuItem {
     isModal: true,
     customStyle: true,
   });
-  @State buttonGestureModifier: buttonGestureModifier = new buttonGestureModifier(this.dialogController);
+  @State buttonGestureModifier: ButtonGestureModifier = new ButtonGestureModifier(this.dialogController);
 
   private textDialog(): ResourceStr {
     if (this.item.value === PUBLIC_OK) {
