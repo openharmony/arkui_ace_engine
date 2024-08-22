@@ -646,9 +646,11 @@ class DynamicSyncScene {
      * @since 12
      */
     constructor(nodeRef, frameRateRange) {
-        this.frameRateRange = frameRateRange;
-        this.nodeRef = nodeRef;
-        this.nodePtr = this.nodeRef.getNativeHandle();
+        this.frameRateRange = { ...frameRateRange };
+        if (!nodeRef.invalid()){
+            this.nodeRef = nodeRef;
+            this.nodePtr = this.nodeRef.getNativeHandle();
+        }
     }
 
     getFrameRateRange() {
@@ -668,7 +670,7 @@ class SwiperDynamicSyncScene extends DynamicSyncScene {
     }
 
     setFrameRateRange(frameRateRange) {
-        this.frameRateRange = frameRateRange;
+        this.frameRateRange = { ...frameRateRange };
         getUINativeModule().setFrameRateRange(this.nodePtr, frameRateRange, this.type); // -> this.nodeRef -> SetFrameRate.
     }
 }
