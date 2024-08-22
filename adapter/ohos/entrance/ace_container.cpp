@@ -2931,6 +2931,12 @@ bool AceContainer::IsSceneBoardEnabled()
 }
 // ArkTsCard end
 
+bool AceContainer::IsMainWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+}
+
 void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent)
 {
     std::lock_guard<std::mutex> lock(pointerEventMutex_);
