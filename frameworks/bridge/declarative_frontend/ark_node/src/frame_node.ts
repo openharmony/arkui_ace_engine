@@ -804,6 +804,16 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
         return new ArkBadgeComponent(node, type);
       })
     }],
+    ['Grid', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Grid', (node: NodePtr, type: ModifierType): ArkGridComponent => {
+        return new ArkGridComponent(node, type);
+      })
+    }],
+    ['GridItem', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'GridItem', (node: NodePtr, type: ModifierType): ArkGridItemComponent => {
+        return new ArkGridItemComponent(node, type);
+      })
+    }],
   ]
 )
 

@@ -5567,6 +5567,24 @@ class ArkGridComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
+  allowChildTypes() {
+    return ["GridItem"];
+  }
+  initialize(value) {
+    if (value.length === 1 && isObject(value[0])) {
+      modifierWithKey(this._modifiersWithKeys, GridScrollerModifier.identity, GridScrollerModifier, value[0]);
+      modifierWithKey(this._modifiersWithKeys, GridLayoutOptionsModifier.identity, GridLayoutOptionsModifier, undefined);
+    }
+    else if (value.length === 2 && isObject(value[0]) && isObject(value[1])) {
+      modifierWithKey(this._modifiersWithKeys, GridScrollerModifier.identity, GridScrollerModifier, value[0]);
+      modifierWithKey(this._modifiersWithKeys, GridLayoutOptionsModifier.identity, GridLayoutOptionsModifier, value[1]);
+    }
+    else {
+      modifierWithKey(this._modifiersWithKeys, GridScrollerModifier.identity, GridScrollerModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, GridLayoutOptionsModifier.identity, GridLayoutOptionsModifier, undefined);
+    }
+    return this;
+  }
   columnsTemplate(value) {
     modifierWithKey(this._modifiersWithKeys, GridColumnsTemplateModifier.identity, GridColumnsTemplateModifier, value);
     return this;
@@ -5706,6 +5724,53 @@ class ArkGridComponent extends ArkComponent {
   }
 
 }
+class GridScrollerModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.setGridScroller(node, undefined);
+    }
+    else {
+      getUINativeModule().grid.setGridScroller(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+GridScrollerModifier.identity = Symbol('gridScroller');
+class GridLayoutOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    var _a, _b, _c, _d;
+    if (reset) {
+      getUINativeModule().grid.setGridLayoutOptions(node, undefined, undefined, undefined, undefined, undefined);
+    }
+    else {
+      getUINativeModule().grid.setGridLayoutOptions(node, isArray(this.value.regularSize) ? this.value.regularSize : undefined,
+      isArray((_a = this.value) === null || _a === void 0 ? void 0 : _a.irregularIndexes) ? this.value.irregularIndexes : undefined,
+      isArray((_b = this.value) === null || _b === void 0 ? void 0 : _b.irregularIndexes) ? this.value.irregularIndexes.length : undefined,
+      isFunction((_c = this.value) === null || _c === void 0 ? void 0 : _c.onGetIrregularSizeByIndex) ? this.value.onGetIrregularSizeByIndex : undefined,
+      isFunction((_d = this.value) === null || _d === void 0 ? void 0 : _d.onGetRectByIndex) ? this.value.onGetRectByIndex : undefined);
+    }
+  }
+  checkObjectDiff() {
+    var _a, _b, _c, _d, _e, _f, _g, _h;
+    return !isBaseOrResourceEqual((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.regularSize,
+      (_b = this.value) === null || _b === void 0 ? void 0 : _b.regularSize) ||
+      !isBaseOrResourceEqual((_c = this.stageValue) === null || _c === void 0 ? void 0 : _c.irregularIndexes,
+        (_d = this.value) === null || _d === void 0 ? void 0 : _d.irregularIndexes) ||
+      !isBaseOrResourceEqual((_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.onGetIrregularSizeByIndex,
+        (_f = this.value) === null || _f === void 0 ? void 0 : _f.onGetIrregularSizeByIndex) ||
+      !isBaseOrResourceEqual((_g = this.stageValue) === null || _g === void 0 ? void 0 : _g.onGetRectByIndex,
+        (_h = this.value) === null || _h === void 0 ? void 0 : _h.onGetRectByIndex);
+  }
+}
+GridLayoutOptionsModifier.identity = Symbol('gridLayoutOptions');
 class GridColumnsTemplateModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -25285,9 +25350,40 @@ class GridItemColumnEndModifier extends ModifierWithKey {
   }
 }
 GridItemColumnEndModifier.identity = Symbol('gridItemColumnEnd');
+class GridItemOptionsModifier extends ModifierWithKey {
+  applyPeer(node, reset) {
+    var _a;
+    if (reset) {
+      getUINativeModule().gridItem.setGridItemOptions(node, undefined);
+    }
+    else {
+      if (((_a = this.value) === null || _a === void 0 ? void 0 : _a.style) === undefined) {
+        getUINativeModule().gridItem.setGridItemOptions(node, undefined);
+      }
+      else {
+        getUINativeModule().gridItem.setGridItemOptions(node, this.value.style);
+      }
+    }
+  }
+  checkObjectDiff() {
+    var _a, _b;
+    return !isBaseOrResourceEqual((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.style,
+      (_b = this.value) === null || _b === void 0 ? void 0 : _b.style);
+  }
+}
+GridItemOptionsModifier.identity = Symbol('gridItemOptions');
 class ArkGridItemComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
+  }
+  allowChildCount() {
+    return 1;
+  }
+  initialize(value) {
+    if (value.length === 1 && isObject(value[0])) {
+      modifierWithKey(this._modifiersWithKeys, GridItemOptionsModifier.identity, GridItemOptionsModifier, value[0]);
+    }
+    return this;
   }
   rowStart(value) {
     modifierWithKey(this._modifiersWithKeys, GridItemRowStartModifier.identity, GridItemRowStartModifier, value);

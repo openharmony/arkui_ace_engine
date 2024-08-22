@@ -1426,6 +1426,16 @@ const __creatorMap__ = new Map([
                 return new ArkBadgeComponent(node, type);
             });
         }],
+    ['Grid', (context) => {
+            return new TypedFrameNode(context, 'Grid', (node, type) => {
+                return new ArkGridComponent(node, type);
+            });
+        }],
+    ['GridItem', (context) => {
+            return new TypedFrameNode(context, 'GridItem', (node, type) => {
+                return new ArkGridItemComponent(node, type);
+            });
+        }],
 ]);
 class typeNode {
     static createNode(context, type, options) {
