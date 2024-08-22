@@ -154,8 +154,11 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         lanes_ = listLayoutAlgorithm->GetLanes();
     }
     float relativeOffset = UpdateTotalOffset(listLayoutAlgorithm, isJump);
+    auto isNeedUpdateIndex = true;
     if (targetIndex_) {
         AnimateToTarget(targetIndex_.value(), targetIndexInGroup_, scrollAlign_);
+        // AniamteToTarget does not need to update endIndex and startIndex in the first frame.
+        isNeedUpdateIndex = false;
         targetIndex_.reset();
         targetIndexInGroup_.reset();
     }
@@ -211,9 +214,11 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
     bool indexChanged = false;
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-        indexChanged = (startIndex_ != listLayoutAlgorithm->GetStartIndex()) ||
-                       (endIndex_ != listLayoutAlgorithm->GetEndIndex()) ||
-                       (centerIndex_ != listLayoutAlgorithm->GetMidIndex(AceType::RawPtr(dirty)));
+        if (isNeedUpdateIndex) {
+            indexChanged = (startIndex_ != listLayoutAlgorithm->GetStartIndex()) ||
+                           (endIndex_ != listLayoutAlgorithm->GetEndIndex()) ||
+                           (centerIndex_ != listLayoutAlgorithm->GetMidIndex(AceType::RawPtr(dirty)));
+        }
     } else {
         indexChanged =
             (startIndex_ != listLayoutAlgorithm->GetStartIndex()) || (endIndex_ != listLayoutAlgorithm->GetEndIndex());
