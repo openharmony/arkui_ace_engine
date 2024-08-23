@@ -17,6 +17,7 @@
 
 #include <securec.h>
 #include <algorithm>
+#include <vector>
 
 #include "display_manager.h"
 #include "file_uri.h"
@@ -1521,8 +1522,9 @@ void WebPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
             "DragDrop event WebEventHub onDragDropId, size:%{public}" PRId64 "", aceData->GetSize());
         CHECK_NULL_VOID(delegate_->dragData_);
         // plain text
-        std::string plain = UdmfClient::GetInstance()->GetSinglePlainTextRecord(aceData);
-        if (!plain.empty()) {
+        std::vector<std::string> plains = UdmfClient::GetInstance()->GetPlainTextRecords(aceData);
+        if (!plains.empty() && !plains[0].empty()) {
+            std::string plain = plains[0];
             delegate_->dragData_->SetFragmentText(plain);
             TAG_LOGI(AceLogTag::ACE_WEB,
                 "DragDrop event WebEventHub onDragDropId, plain size:%{public}zu", plain.size());
