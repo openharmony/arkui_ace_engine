@@ -42,6 +42,7 @@ constexpr int8_t MASK_COUNT = 2;
 constexpr int8_t SM_COLUMN_NUM = 4;
 constexpr int8_t MD_COLUMN_NUM = 8;
 constexpr int8_t LG_COLUMN_NUM = 12;
+constexpr int8_t FOCUS_BOARD = 2;
 } // namespace
 void TabBarLayoutAlgorithm::UpdateChildConstraint(LayoutConstraintF& childConstraint,
     const RefPtr<TabBarLayoutProperty>& layoutProperty, const SizeF& ideaSize, int32_t childCount, Axis axis)
@@ -165,6 +166,12 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     geometryNode->SetFrameSize(idealSize.ConvertToSizeT());
 
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
+    auto focusBoardPadding = tabTheme->GetBoardFocusPadding().ConvertToPx();
+    if (axis_ == Axis::HORIZONTAL) {
+        idealSize.MinusHeight(focusBoardPadding * FOCUS_BOARD);
+    } else if (axis_ == Axis::VERTICAL) {
+        idealSize.MinusWidth(focusBoardPadding * FOCUS_BOARD);
+    }
     UpdateChildConstraint(childLayoutConstraint, layoutProperty, idealSize.ConvertToSizeT(), childCount, axis_);
 
     // Measure children.
