@@ -89,10 +89,10 @@ class EditableTitleBarTheme {
 }
 
 class ButtonGestureModifier implements GestureModifier {
-   private longPressTime: number = 500;
-   private fontSize: number = 1;
-   private minFontSize: number = 1.75;
-   private controller: CustomDialogController | null = null;
+   public longPressTime: number = 500;
+   public fontSize: number = 1;
+   public minFontSize: number = 1.75;
+   public controller: CustomDialogController | null = null;
 
   constructor(controller: CustomDialogController | null) {
     this.controller = controller;
