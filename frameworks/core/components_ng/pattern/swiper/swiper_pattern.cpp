@@ -5545,9 +5545,10 @@ std::pair<float, float> SwiperPattern::CalcCurrentPageStatusOnRTL(float addition
 {
     float currentTurnPageRate = FLT_MAX;
     auto firstIndex = currentFirstIndex_;
+    auto itemMainSize = CalculateVisibleSize();
     for (auto iter = itemPosition_.rbegin(); iter != itemPosition_.rend(); iter++) {
-        auto startPos = contentMainSize_ - iter->second.endPos;
-        auto endPos = contentMainSize_ - iter->second.startPos;
+        auto startPos = itemMainSize - iter->second.endPos;
+        auto endPos = itemMainSize - iter->second.startPos;
         if (LessNotEqual((startPos + additionalOffset), 0) && LessNotEqual((endPos + additionalOffset), 0)) {
             continue;
         }
