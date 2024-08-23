@@ -127,7 +127,29 @@ struct ListFilterRow {
   filterRow: FilterParams = { name: '', options: [] };
   onItemClick: (colIndex: number) => void = () => {}
   rowIndex: number = 0
-  @State maxAppFontScale: number = 1;
+  maxAppFontScale: number = 1;
+  isFollowingSystemFontScale: boolean = false;
+
+  aboutToAppear() {
+    try {
+      let uiContent: UIContext = this.getUIContext();
+      this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
+      this.maxAppFontScale = uiContent.getMaxFontScale();
+    } catch (err) {
+      let code: number = (err as BusinessError).code;
+      let message: string = (err as BusinessError).message;
+      hilog.error(0x3900, 'Ace', `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
+    }
+  }
+
+  updateFontScale(): number {
+    let uiContent: UIContext = this.getUIContext();
+    let systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+    if (!this.isFollowingSystemFontScale) {
+      return 1;
+    }
+    return Math.min(systemFontScale, this.maxAppFontScale);
+  }
 
   build() {
     Stack({ alignContent: Alignment.End }) {
@@ -143,7 +165,7 @@ struct ListFilterRow {
               Text(option.toString())
                 .fontSize($r('sys.float.ohos_id_text_size_body3'))
                 .minFontScale(1)
-                .maxFontScale(Math.min(this.maxAppFontScale, 2))
+                .maxFontScale(Math.min(this.updateFontScale(), 2))
                 .fontColor(this.colorRow[colIndex])
                 .fontWeight(this.fontWeightRow[colIndex])
                 .focusable(true)
@@ -249,7 +271,29 @@ struct MultiFilterRow {
   private filterColumnWidth: number = 0
   private lastFilterColumnWidth: number = 0
   private rowIndex: number = 0
-  @State maxAppFontScale: number = 1;
+  maxAppFontScale: number = 1;
+  isFollowingSystemFontScale: boolean = false;
+
+  aboutToAppear() {
+    try {
+      let uiContent: UIContext = this.getUIContext();
+      this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
+      this.maxAppFontScale = uiContent.getMaxFontScale();
+    } catch (err) {
+      let code: number = (err as BusinessError).code;
+      let message: string = (err as BusinessError).message;
+      hilog.error(0x3900, 'Ace', `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
+    }
+  }
+
+  updateFontScale(): number {
+    let uiContent: UIContext = this.getUIContext();
+    let systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+    if (!this.isFollowingSystemFontScale) {
+      return 1;
+    }
+    return Math.min(systemFontScale, this.maxAppFontScale);
+  }
 
   private calcMultiFilterRowItemNum() {
     let curLineRetainWidth = this.filterColumnWidth;
@@ -260,7 +304,7 @@ struct MultiFilterRow {
         let option = this.filterRow.options[i]
         let itemWidth = measure.measureText({
           textContent: option,
-          fontSize: `${FILTER_FONT_SIZE * Math.min(this.maxAppFontScale, 2)}vp`,
+          fontSize: `${FILTER_FONT_SIZE * Math.min(this.updateFontScale(), 2)}vp`,
         })
         if (i === 0) {
           continue
@@ -402,7 +446,7 @@ struct MultiFilterRow {
           .margin({ start: LengthMetrics.vp(-TEXT_HOT_AREA_WIDTH) })
           .fontSize($r('sys.float.ohos_id_text_size_body3'))
           .minFontScale(1)
-          .maxFontScale(Math.min(this.maxAppFontScale, 2))
+          .maxFontScale(Math.min(this.updateFontScale(), 2))
           .maxLines(1)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .fontColor(this.colorRow[0])
@@ -476,14 +520,14 @@ struct MultiFilterRow {
                   .transition(TransitionEffect.OPACITY)
                   .fontSize($r('sys.float.ohos_id_text_size_body3'))
                   .minFontScale(1)
-                  .maxFontScale(Math.min(this.maxAppFontScale, 2))
+                  .maxFontScale(Math.min(this.updateFontScale(), 2))
                   .maxLines(1)
                   .textOverflow({ overflow: TextOverflow.Ellipsis })
                   .height(LIST_ROW_HEIGHT)
                   .fontColor(this.colorRow[colIndex])
                   .fontWeight(this.fontWeightRow[colIndex])
                   .backgroundColor(this.isBackgroundHoverRow[colIndex] ?
-                    this.backgroundColorRow[colIndex] : TRANS_COLOR)
+                  this.backgroundColorRow[colIndex] : TRANS_COLOR)
                   .onClick(() => {
                     this.onItemClick(colIndex)
                   })
@@ -620,7 +664,7 @@ export struct Filter {
   @State twoLineModeItemNumRecord: Array<ObservedNumber> | null = null
   @State downArrowShowState: Array<ObservedBoolean> | null = null
   @State floatFilterBarText: string = ''
-  @State maxAppFontScale: number = 1;
+  maxAppFontScale: number = 1;
   isFollowingSystemFontScale: boolean = false;
 
   textColor(rowIndex: number, colIndex: number) {
@@ -771,7 +815,6 @@ export struct Filter {
             this.filterItemClick(rowIndex, colIndex);
           },
           rowIndex: rowIndex,
-          maxAppFontScale: this.updateFontScale(),
         })
       })
     }.width(PERCENT_100)
@@ -806,7 +849,6 @@ export struct Filter {
             this.filterItemClick(rowIndex, colIndex);
           },
           rowIndex: rowIndex,
-          maxAppFontScale: this.updateFontScale(),
         })
       })
     }.width(PERCENT_100)
