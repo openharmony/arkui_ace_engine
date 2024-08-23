@@ -527,7 +527,7 @@ struct MultiFilterRow {
                   .fontColor(this.colorRow[colIndex])
                   .fontWeight(this.fontWeightRow[colIndex])
                   .backgroundColor(this.isBackgroundHoverRow[colIndex] ?
-                  this.backgroundColorRow[colIndex] : TRANS_COLOR)
+                    this.backgroundColorRow[colIndex] : TRANS_COLOR)
                   .onClick(() => {
                     this.onItemClick(colIndex)
                   })
