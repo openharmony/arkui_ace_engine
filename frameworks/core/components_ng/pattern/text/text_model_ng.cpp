@@ -1000,6 +1000,7 @@ void TextModelNG::SetTextContentWithStyledString(FrameNode* frameNode, ArkUI_Sty
                 position += static_cast<int32_t>(wSpanContent.length());
                 auto intervalEnd = position;
                 spanItem->interval = { intervalStart, intervalEnd };
+                spanItem->position = position;
                 spanItems.emplace_back(spanItem);
             }
         }
@@ -1064,6 +1065,36 @@ void TextModelNG::SetResponseRegion(bool isUserSetResponseRegion)
     auto textPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->SetIsUserSetResponseRegion(isUserSetResponseRegion);
+}
+
+void TextModelNG::SetResponseRegion(FrameNode* frameNode, std::vector<DimensionRect> regions)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    auto gesture = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    gesture->SetResponseRegion(regions);
+    textPattern->SetIsUserSetResponseRegion(true);
+}
+
+void TextModelNG::ClearResponseRegion(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    auto gesture = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    std::vector<DimensionRect> region;
+    CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension widthDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    CalcDimension heightDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    DimensionOffset offsetDimen(xDimen, yDimen);
+    DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen);
+    region.emplace_back(dimenRect);
+    gesture->SetResponseRegion(region);
+    textPattern->SetIsUserSetResponseRegion(false);
 }
 
 void TextModelNG::SetHalfLeading(bool halfLeading)

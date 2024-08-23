@@ -607,6 +607,12 @@ public:
     void SetOnDetach(std::function<void()>&& onDetach);
     void ClearOnDetach();
     void FireOnDetach();
+    void SetOnLoad(std::function<void(const std::string& xcomponentId)>&& onLoad);
+    void ClearOnLoad();
+    void FireOnLoad(const std::string& xcomponentId);
+    void SetOnDestroy(std::function<void()>&& onDestroy);
+    void ClearOnDestroy();
+    void FireOnDestroy();
     void ClearStateStyle();
     void OnDetachClear();
 
@@ -632,6 +638,9 @@ private:
 
     std::function<void()> onAttach_;
     std::function<void()> onDetach_;
+
+    std::function<void(const std::string& xcomponentId)> onLoad_;
+    std::function<void()> onDestroy_;
 
     OnPreDragFunc onPreDragFunc_;
     OnDragStartFunc onDragStart_;

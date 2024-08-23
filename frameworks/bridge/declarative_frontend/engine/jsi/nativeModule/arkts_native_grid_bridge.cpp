@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,12 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_bridge.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_grid.h"
+#include "bridge/declarative_frontend/jsview/js_scroller.h"
+#include "core/components_ng/pattern/grid/grid_model_ng.h"
+#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
+#include "core/components_ng/pattern/scrollable/scrollable_controller.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -23,6 +28,95 @@ constexpr int32_t CALL_ARG_0 = 0;
 constexpr int32_t CALL_ARG_1 = 1;
 constexpr int32_t CALL_ARG_2 = 2;
 constexpr int32_t DEFAULT_CACHED_COUNT = 1;
+constexpr size_t GRID_ITEM_SIZE_RESULT_LENGTH = 2;
+constexpr size_t GRID_ITEM_RECT_RESULT_LENGTH = 4;
+namespace {
+void ParseGridItemSize(const Framework::JSRef<Framework::JSVal>& value, GridItemSize& gridItemSize)
+{
+    if (value->IsArray()) {
+        auto array = Framework::JSRef<Framework::JSArray>::Cast(value);
+        auto length = array->Length();
+        if (length != GRID_ITEM_SIZE_RESULT_LENGTH) {
+            return;
+        }
+        Framework::JSRef<Framework::JSVal> rows = array->GetValueAt(0);
+        if (rows->IsNumber()) {
+            gridItemSize.rows = rows->ToNumber<int32_t>();
+        }
+        Framework::JSRef<Framework::JSVal> columns = array->GetValueAt(1);
+        if (columns->IsNumber()) {
+            gridItemSize.columns = columns->ToNumber<int32_t>();
+        }
+    }
+}
+
+void ParseGridItemRect(const Framework::JSRef<Framework::JSVal>& value, GridItemRect& gridItemRect)
+{
+    if (value->IsArray()) {
+        Framework::JSRef<Framework::JSArray> array = Framework::JSRef<Framework::JSArray>::Cast(value);
+        auto length = array->Length();
+        if (length != GRID_ITEM_RECT_RESULT_LENGTH) {
+            return;
+        }
+        auto rowStart = array->GetValueAt(GridItemRect::ROW_START);
+        if (rowStart->IsNumber()) {
+            gridItemRect.rowStart = rowStart->ToNumber<int32_t>();
+        }
+        auto rowSpan = array->GetValueAt(GridItemRect::ROW_SPAN);
+        if (rowSpan->IsNumber()) {
+            gridItemRect.rowSpan = rowSpan->ToNumber<int32_t>();
+        }
+        auto columnStart = array->GetValueAt(GridItemRect::COLUMN_START);
+        if (columnStart->IsNumber()) {
+            gridItemRect.columnStart = columnStart->ToNumber<int32_t>();
+        }
+        auto columnSpan = array->GetValueAt(GridItemRect::COLUMN_SPAN);
+        if (columnSpan->IsNumber()) {
+            gridItemRect.columnSpan = columnSpan->ToNumber<int32_t>();
+        }
+    }
+}
+
+void ParseGetGridItemSize(const EcmaVM* vm, const Local<JSValueRef>& getSizeByIndex, GridLayoutOptions& option)
+{
+    if (getSizeByIndex->IsFunction(vm)) {
+        Local<panda::FunctionRef> functionRef = getSizeByIndex->ToObject(vm);
+        auto onGetIrregularSizeByIndex =
+            [func = AceType::MakeRefPtr<Framework::JsFunction>(Framework::JSRef<Framework::JSObject>(),
+                 Framework::JSRef<Framework::JSFunc>(Framework::JSFunc(functionRef)))](int32_t index) {
+                GridItemSize gridItemSize;
+                auto itemIndex = Framework::JSRef<Framework::JSVal>::Make(Framework::ToJSValue(index));
+                auto result = func->ExecuteJS(1, &itemIndex);
+                if (!result->IsArray()) {
+                    return gridItemSize;
+                }
+                ParseGridItemSize(result, gridItemSize);
+                return gridItemSize;
+            };
+        option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
+    }
+}
+
+void ParseGetGridItemRect(const EcmaVM* vm, const Local<JSValueRef>& getRectByIndex, GridLayoutOptions& option)
+{
+    if (getRectByIndex->IsFunction(vm)) {
+        Local<panda::FunctionRef> functionRef = getRectByIndex->ToObject(vm);
+        auto onGetRectByIndex =
+            [func = AceType::MakeRefPtr<Framework::JsFunction>(Framework::JSRef<Framework::JSObject>(),
+                 Framework::JSRef<Framework::JSFunc>(Framework::JSFunc(functionRef)))](int32_t index) {
+                GridItemRect gridItemRect;
+                auto itemIndex = Framework::JSRef<Framework::JSVal>::Make(Framework::ToJSValue(index));
+                auto result = func->ExecuteJS(1, &itemIndex);
+                if (!result->IsArray()) {
+                    return gridItemRect;
+                }
+                ParseGridItemRect(result, gridItemRect);
+                return gridItemRect;
+            };
+        option.getRectByIndex = std::move(onGetRectByIndex);
+    }
+}
+} // namespace
 
 ArkUINativeModuleValue GridBridge::SetColumnsTemplate(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -672,4 +766,65 @@ ArkUINativeModuleValue GridBridge::ResetAlignItems(ArkUIRuntimeCallInfo* runtime
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue GridBridge::SetGridScroller(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeVal = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> scrollerVal = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    RefPtr<ScrollControllerBase> positionController;
+    RefPtr<ScrollProxy> scrollBarProxy;
+    auto nativeNode = nodePtr(nodeVal->ToNativePointer(vm)->Value());
+    if (scrollerVal->IsObject(vm)) {
+        auto* jsScroller = Framework::JSRef<Framework::JSObject>(Framework::JSObject(scrollerVal->ToObject(vm)))
+                               ->Unwrap<Framework::JSScroller>();
+        if (jsScroller) {
+            jsScroller->SetInstanceId(Container::CurrentIdSafely());
+            positionController = AceType::MakeRefPtr<ScrollableController>();
+            jsScroller->SetController(positionController);
+            scrollBarProxy = jsScroller->GetScrollBarProxy();
+            if (!scrollBarProxy) {
+                scrollBarProxy = AceType::MakeRefPtr<NG::ScrollBarProxy>();
+                jsScroller->SetScrollBarProxy(scrollBarProxy);
+            }
+        }
+    }
+    GridModelNG::InitScroller(reinterpret_cast<FrameNode*>(nativeNode), positionController, scrollBarProxy);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue GridBridge::SetGridLayoutOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeVal = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> irregularIndexesVal = runtimeCallInfo->GetCallArgRef(2);
+    Local<JSValueRef> indexesLengthVal = runtimeCallInfo->GetCallArgRef(3);
+    auto nativeNode = nodePtr(nodeVal->ToNativePointer(vm)->Value());
+    int32_t length = 0;
+    if (indexesLengthVal->IsNumber()) {
+        length = indexesLengthVal->Int32Value(vm);
+    }
+    auto irregularIndexes = std::make_unique<int32_t[]>(length);
+    bool irregularResult = ArkTSUtils::ParseArray<int32_t>(vm, irregularIndexesVal, irregularIndexes.get(), length,
+        [](const EcmaVM* vm, const Local<JSValueRef>& jsValue) {
+            bool isNumber = false;
+            return jsValue->GetValueInt32(isNumber);
+        });
+
+    GridLayoutOptions options;
+    // only support regularSize(1, 1)
+    options.regularSize.rows = 1;
+    options.regularSize.columns = 1;
+    if (irregularResult) {
+        for (int32_t i = 0; i < length; i++) {
+            options.irregularIndexes.emplace(irregularIndexes[i]);
+        }
+    }
+    irregularIndexes.reset();
+    ParseGetGridItemSize(vm, runtimeCallInfo->GetCallArgRef(4), options);
+    ParseGetGridItemRect(vm, runtimeCallInfo->GetCallArgRef(5), options);
+    GridModelNG::SetLayoutOptions(reinterpret_cast<FrameNode*>(nativeNode), options);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

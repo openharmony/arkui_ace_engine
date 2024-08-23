@@ -344,7 +344,7 @@ struct CollapsibleMenuSection {
           this.menuItems.length),
           (item:ComposeTitleBarMenuItem, index:number) => {
             ImageMenuItem({ item: item, index: this.index * 1000 +
-            CollapsibleMenuSection.maxCountOfVisibleItems + index })
+            CollapsibleMenuSection.maxCountOfVisibleItems + index, isPopup: true })
           })
       }
     }
@@ -367,6 +367,7 @@ struct ImageMenuItem {
   isFollowingSystemFontScale: boolean = false;
   maxFontScale: number = 1;
   systemFontScale?: number = 1;
+  isPopup: boolean = false;
 
   static readonly imageSize = 24
   static readonly imageHotZoneWidth = 48
@@ -522,7 +523,7 @@ struct ImageMenuItem {
       }
       if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
         this.isOnClick = false
-        if (this.fontSize >= this.minFontSize) {
+        if (this.fontSize >= this.minFontSize && this.isPopup === false) {
           this.dialogController?.close()
         }
       }
@@ -537,7 +538,7 @@ struct ImageMenuItem {
         .onAction((event: GestureEvent) => {
           this.fontSize = this.decideFontScale();
           if (event) {
-            if (this.fontSize >= this.minFontSize) {
+            if (this.fontSize >= this.minFontSize && this.isPopup === false) {
               this.dialogController?.open()
             }
           }

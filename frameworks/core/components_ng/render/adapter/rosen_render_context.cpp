@@ -4085,6 +4085,14 @@ void RosenRenderContext::OnBackBlendApplyTypeUpdate(BlendApplyType blendApplyTyp
     RequestNextFrame();
 }
 
+void RosenRenderContext::UpdateBrightnessBlender(const OHOS::Rosen::BrightnessBlender* brightnessBlender)
+{
+    CHECK_NULL_VOID(rsNode_);
+    CHECK_NULL_VOID(brightnessBlender);
+    rsNode_->SetBlender(brightnessBlender);
+    RequestNextFrame();
+}
+
 // called when frameNode size changes
 void RosenRenderContext::PaintGraphics()
 {

@@ -3381,13 +3381,21 @@ void SetResponseRegion(ArkUINodeHandle node, const ArkUI_Float32* values, const 
         DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen);
         region.emplace_back(dimenRect);
     }
-    ViewAbstract::SetResponseRegion(frameNode, region);
+    if (frameNode->GetTag() == V2::TEXT_ETS_TAG) {
+        TextModelNG::SetResponseRegion(frameNode, region);
+    } else {
+        ViewAbstract::SetResponseRegion(frameNode, region);
+    }
 }
 
 void ResetResponseRegion(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == V2::TEXT_ETS_TAG) {
+        TextModelNG::ClearResponseRegion(frameNode);
+        return;
+    }
     std::vector<DimensionRect> region;
     CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
     CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
@@ -6120,6 +6128,15 @@ void ResetFocusBoxStyle(ArkUINodeHandle node)
     NG::FocusBoxStyle style;
     ViewAbstract::SetFocusBoxStyle(frameNode, style);
 }
+
+void SetBlendModeByBlender(ArkUINodeHandle node, ArkUINodeHandle blender, ArkUI_Int32 blendApplyTypeValue)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    OHOS::Rosen::BrightnessBlender* brightnessBlender = reinterpret_cast<OHOS::Rosen::BrightnessBlender*>(blender);
+    ViewAbstractModelNG::SetBrightnessBlender(frameNode, brightnessBlender);
+    ViewAbstractModelNG::SetBlendApplyType(frameNode, static_cast<OHOS::Ace::BlendApplyType>(blendApplyTypeValue));
+}
 } // namespace
 
 namespace NodeModifier {
@@ -6195,7 +6212,8 @@ const ArkUICommonModifier* GetCommonModifier()
         ResetAccessibilityActions, GetAccessibilityActions, SetAccessibilityRole, ResetAccessibilityRole,
         GetAccessibilityRole, SetFocusScopeId, ResetFocusScopeId, SetFocusScopePriority, ResetFocusScopePriority,
         SetPixelRound, ResetPixelRound, SetBorderDashParams, GetExpandSafeArea, SetTransition, SetDragPreview,
-        ResetDragPreview, GetNodeUniqueId, SetFocusBoxStyle, ResetFocusBoxStyle, SetDisAllowDrop };
+        ResetDragPreview, GetNodeUniqueId, SetFocusBoxStyle, ResetFocusBoxStyle, SetDisAllowDrop,
+        SetBlendModeByBlender };
 
     return &modifier;
 }

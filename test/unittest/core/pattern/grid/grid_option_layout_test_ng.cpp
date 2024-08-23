@@ -417,6 +417,46 @@ HWTEST_F(GridOptionLayoutTestNg, GridPattern_GetItemRect001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GridPattern_GetItemIndex001
+ * @tc.desc: Test the GetItemIndex function of Grid.
+ * @tc.type: FUNCgetitemre
+ */
+HWTEST_F(GridOptionLayoutTestNg, GridPattern_GetItemIndex001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Grid then slide Grid by Scroller.
+     */
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    option.irregularIndexes = { 1, 3 };
+    auto onGetIrregularSizeByIndex = [](int32_t index) {
+        GridItemSize gridItemSize { 1, 2 };
+        return gridItemSize;
+    };
+    option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions(option);
+    CreateGridItems(10, -2, ITEM_HEIGHT);
+    CreateDone(frameNode_);
+    pattern_->UpdateStartIndex(3, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.steps: step2. Get invalid GridItem index.
+     * @tc.expected: Return -1 when input invalid index.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetItemIndex(100000, -100000), -1));
+
+    /**
+     * @tc.steps: step3. Get valid GridItem index.
+     * @tc.expected: Return actual Rect when input valid index.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetItemIndex(GRID_WIDTH / 2, ITEM_HEIGHT / 2), 3));
+}
+
+/**
  * @tc.name: LayoutUtils::GetItemSize001
  * @tc.desc: Test LayoutUtils::GetItemSize
  * @tc.type: FUNC

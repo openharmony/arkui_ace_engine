@@ -59,6 +59,7 @@ public:
 
 private:
     void ProcessTabBarItem();
+    Axis GetTabBarAxis() const;
     std::string ConvertFlexAlignToString(FlexAlign verticalAlign) const;
     std::string ConvertLayoutModeToString(LayoutMode layoutMode) const;
 

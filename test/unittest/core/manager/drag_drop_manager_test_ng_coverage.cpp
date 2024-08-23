@@ -30,7 +30,7 @@ void DragDropManagerTestNgCoverage::SetUpTestCase()
 {
     MockPipelineContext::SetUp();
     MockContainer::SetUp();
-    MOCK_DRAG_WINDOW = DragWindow::CreateDragWindow("", 0, 0, 0, 0);
+    MOCK_DRAG_WINDOW = DragWindow::CreateDragWindow({"", 0, 0, 0, 0, 0});
 }
 
 void DragDropManagerTestNgCoverage::TearDownTestCase()
@@ -1178,10 +1178,6 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage047, TestSi
     GestureEvent event;
     event.SetDeviceId(0xFFFFFFFF);
     dragDropManager->SetIsDragWithContextMenu(true);
-    auto containerId = Container::CurrentId();
-    auto subwindow = AceType::MakeRefPtr<MockSubwindow>();
-    SubwindowManager::GetInstance()->AddSubwindow(containerId, subwindow);
-    EXPECT_CALL(*subwindow, GetOverlayManager()).WillRepeatedly(testing::Return(overlayManager));
     dragDropManager->DoDragStartAnimation(overlayManager, event);
     dragDropManager->TransDragWindowToDragFwk(111);
     dragDropManager->SetIsDragWithContextMenu(false);

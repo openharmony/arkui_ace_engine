@@ -1670,7 +1670,6 @@ void TabBarPattern::OnTabBarIndexChange(int32_t index)
         CHECK_NULL_VOID(tabBarPattern);
         auto tabBarNode = tabBarPattern->GetHost();
         CHECK_NULL_VOID(tabBarNode);
-        tabBarPattern->ResetIndicatorAnimationState();
         auto tabBarLayoutProperty = tabBarPattern->GetLayoutProperty<TabBarLayoutProperty>();
         CHECK_NULL_VOID(tabBarLayoutProperty);
         if (!tabBarPattern->IsMaskAnimationByCreate()) {
@@ -1678,9 +1677,12 @@ void TabBarPattern::OnTabBarIndexChange(int32_t index)
         }
         tabBarPattern->SetMaskAnimationByCreate(false);
         tabBarPattern->SetIndicator(index);
-        tabBarPattern->UpdateIndicator(index);
         tabBarPattern->UpdateSubTabBoard(index);
         tabBarPattern->UpdateTextColorAndFontWeight(index);
+        if (!tabBarPattern->GetChangeByClick() || tabBarLayoutProperty->GetIndicator().value_or(0) == index) {
+            tabBarPattern->ResetIndicatorAnimationState();
+        }
+        tabBarPattern->UpdateIndicator(index);
         if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
             tabBarPattern->UpdateAnimationDuration();
             auto duration = tabBarPattern->GetAnimationDuration().value_or(0);
@@ -2675,7 +2677,7 @@ void TabBarPattern::ApplyTurnPageRateToIndicator(float turnPageRate)
     if ((index >= totalCount || index >= static_cast<int32_t>(tabBarStyles_.size())) && !isRtl) {
         swiperStartIndex_--;
         index--;
-        turnPageRate += 1.0f;
+        turnPageRate = 1.0f;
     }
     if (isRtl && (index == static_cast<int32_t>(tabBarStyles_.size()) || NearEqual(turnPageRate, 1.0f))) {
         return;

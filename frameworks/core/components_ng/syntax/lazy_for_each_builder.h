@@ -32,7 +32,6 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_v2/foreach/lazy_foreach_component.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -318,9 +317,6 @@ public:
         }
         ProcessOffscreenNode(itemInfo.second, false);
         itemInfo.second->Build(nullptr);
-        if (frameNode && frameNode->GetTag() == V2::LIST_ITEM_ETS_TAG) {
-            frameNode->GetPattern<ListItemPattern>()->BeforeCreateLayoutWrapper();
-        }
         context->ResetPredictNode();
         itemInfo.second->SetJSViewActive(false, true);
         cachedItems_[index] = LazyForEachChild(itemInfo.first, nullptr);

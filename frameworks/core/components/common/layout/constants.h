@@ -40,6 +40,20 @@ enum class ButtonType {
     ROUNDED_RECTANGLE,
 };
 
+enum class RectWidthStyle {
+    TIGHT,
+    MAX,
+};
+
+enum class RectHeightStyle {
+    TIGHT,
+    MAX,
+    INCLUDE_LINE_SPACE_MIDDLE,
+    INCLUDE_LINE_SPACE_TOP,
+    INCLUDE_LINE_SPACE_BOTTOM,
+    STRUT,
+};
+
 enum class ButtonStyleMode { NORMAL, EMPHASIZE, TEXT };
 
 enum class ControlSize { SMALL, NORMAL };

@@ -71,7 +71,7 @@ std::string AlignDirectionToString(AlignDirection direction)
         case AlignDirection::LEFT:
             return "AlignDirection::Left";
         case AlignDirection::RIGHT:
-            return "AlignDirection::Middle";
+            return "AlignDirection::RIGHT";
         case AlignDirection::TOP:
             return "AlignDirection::Top";
         case AlignDirection::CENTER:

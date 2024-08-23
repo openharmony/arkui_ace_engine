@@ -114,6 +114,7 @@ public:
     void RecoveryNavigationStack() override;
     bool NeedBuildNewInstance(int32_t index) override;
     void SetNeedBuildNewInstance(int32_t index, bool need) override;
+    void SetIsEntryByIndex(int32_t index, bool isEntry) override;
 
 protected:
     JSRef<JSObject> dataSourceObj_;
@@ -126,6 +127,7 @@ private:
     JSRef<JSObject> GetJsPathInfo(int32_t index);
     std::string GetNameByIndex(int32_t index);
     JSRef<JSVal> GetOnPopByIndex(int32_t index) const;
+    bool GetIsEntryByIndex(int32_t index);
     JSRef<JSObject> CreatePathInfoWithNecessaryProperty(const RefPtr<NG::NavDestinationContext>& context);
     bool GetNavDestinationNodeInUINode(RefPtr<NG::UINode> node, RefPtr<NG::NavDestinationGroupNode>& desNode);
     int32_t GetSize() const;

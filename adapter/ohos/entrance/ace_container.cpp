@@ -1941,6 +1941,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
 #ifdef FORM_SUPPORTED
     if (isFormRender_) {
         pipelineContext_->SetIsFormRender(isFormRender_);
+        pipelineContext_->SetIsDynamicRender(isDynamicRender_);
         auto cardFrontend = AceType::DynamicCast<FormFrontendDeclarative>(frontend_);
         if (cardFrontend) {
             cardFrontend->SetTaskExecutor(taskExecutor_);
@@ -2930,6 +2931,12 @@ bool AceContainer::IsSceneBoardEnabled()
     return Rosen::SceneBoardJudgement::IsSceneBoardEnabled();
 }
 // ArkTsCard end
+
+bool AceContainer::IsMainWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+}
 
 void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent)
 {

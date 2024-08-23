@@ -29,8 +29,8 @@
 #include "core/event/ace_events.h"
 #include "core/event/touch_event.h"
 
-#if not defined(ACE_UNITTEST)
-#if defined(ENABLE_STANDARD_INPUT)
+#ifndef ACE_UNITTEST
+#ifdef ENABLE_STANDARD_INPUT
 #include "input_method_controller.h"
 #endif
 #endif
