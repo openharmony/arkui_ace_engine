@@ -75,7 +75,7 @@ ImagePattern::ImagePattern()
 
 ImagePattern::~ImagePattern()
 {
-    if (IsSupportImageAnalyzerFeature()) {
+    if (isEnableAnalyzer_) {
         ReleaseImageAnalyzer();
     }
 }
@@ -2247,6 +2247,97 @@ void ImagePattern::TriggerVisibleAreaChangeForChild(const RefPtr<UINode>& node, 
             }
         }
         TriggerVisibleAreaChangeForChild(childNode, visible, ratio);
+    }
+}
+
+void ImagePattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    DumpLayoutInfo(json);
+    DumpRenderInfo(json);
+    json->Put("syncLoad", syncLoad_);
+    json->Put("autoResize", autoResizeDefault_);
+    json->Put("imageInterpolation", GetImageInterpolation().c_str());
+    if (loadingCtx_) {
+        auto currentLoadImageState = loadingCtx_->GetCurrentLoadingState();
+        json->Put("currentLoadImageState", currentLoadImageState.c_str());
+        json->Put("rawImageSize", loadingCtx_->GetImageSize().ToString().c_str());
+        json->Put("LoadErrorMsg", loadingCtx_->GetErrorMsg().c_str());
+    } else {
+        json->Put("imageLoadingContext", "null");
+    }
+
+    auto host = GetHost();
+    if (host) {
+        auto enDrage = host->IsDraggable();
+        json->Put("draggable", enDrage);
+    }
+    json->Put("enableAnalyzer", isEnableAnalyzer_);
+}
+
+void ImagePattern::DumpLayoutInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto layoutProp = GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(layoutProp);
+    auto src = layoutProp->GetImageSourceInfo().value_or(ImageSourceInfo(""));
+    json->Put("url", src.ToString().c_str());
+    auto altSrc = layoutProp->GetAlt().value_or(ImageSourceInfo(""));
+    json->Put("altUrl", altSrc.ToString().c_str());
+    auto imageFit = layoutProp->GetImageFit().value_or(ImageFit::COVER);
+    json->Put("objectFit", GetImageFitStr(imageFit).c_str());
+    auto fitOriginalSize = layoutProp->GetFitOriginalSize().value_or(false);
+    json->Put("fitOriginalSize", fitOriginalSize);
+    const std::optional<SizeF>& sourceSize = layoutProp->GetSourceSize();
+    if (sourceSize.has_value()) {
+        json->Put("sourceSize", sourceSize.value().ToString().c_str());
+    }
+}
+
+void ImagePattern::DumpRenderInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto renderProp = GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(renderProp);
+    auto imageRenderMode = renderProp->GetImageRenderMode().value_or(ImageRenderMode::ORIGINAL);
+    json->Put("renderMode", (imageRenderMode == ImageRenderMode::ORIGINAL) ? "Original" : "Template");
+    auto imageRepeat = renderProp->GetImageRepeat().value_or(ImageRepeat::NO_REPEAT);
+    json->Put("objectRepeat", GetImageRepeatStr(imageRepeat).c_str());
+    auto imageColorFilter = renderProp->GetColorFilter();
+    if (imageColorFilter.has_value()) {
+        auto colorFilter = imageColorFilter.value();
+        json->Put("colorFilter", GetImageColorFilterStr(colorFilter).c_str());
+    }
+    auto fillColor = renderProp->GetSvgFillColor();
+    if (fillColor.has_value()) {
+        auto color = fillColor.value();
+        json->Put("fillColor", color.ColorToString().c_str());
+    }
+    DynamicRangeMode dynamicMode = DynamicRangeMode::STANDARD;
+    if (renderProp->HasDynamicMode()) {
+        dynamicMode = renderProp->GetDynamicMode().value_or(DynamicRangeMode::STANDARD);
+        json->Put("dynamicRangeMode", GetDynamicModeString(dynamicMode).c_str());
+    }
+    auto matchTextDirection = renderProp->GetMatchTextDirection().value_or(false);
+    json->Put("matchTextDirection", matchTextDirection);
+    auto smoothEdge = renderProp->GetSmoothEdge();
+    if (smoothEdge.has_value()) {
+        json->Put("edgeAntialiasing", smoothEdge.value());
+    }
+    auto needBorderRadius = renderProp->GetNeedBorderRadius().value_or(false);
+    json->Put("needBorderRadius", needBorderRadius);
+    if (renderProp && renderProp->HasImageResizableSlice() && renderProp->GetImageResizableSliceValue({}).Valid()) {
+        json->Put("resizable slice", renderProp->GetImageResizableSliceValue({}).ToString().c_str());
+    }
+}
+
+void ImagePattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto layoutProp = GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(layoutProp);
+    auto src = layoutProp->GetImageSourceInfo().value_or(ImageSourceInfo(""));
+    json->Put("url", src.ToString().c_str());
+    json->Put("syncLoad", syncLoad_);
+    if (loadingCtx_) {
+        auto currentLoadImageState = loadingCtx_->GetCurrentLoadingState();
+        json->Put("currentLoadImageState", currentLoadImageState.c_str());
     }
 }
 } // namespace OHOS::Ace::NG

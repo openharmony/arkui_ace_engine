@@ -37,6 +37,7 @@ using OHOS::Ace::ContainerScope;
 namespace OHOS::Ace {
 namespace {
 std::atomic<uint32_t> g_callbackId(1);
+constexpr size_t ARGC_MIN = 2;
 
 class TraceIdScope final {
 public:
@@ -138,8 +139,10 @@ napi_value StartTimeoutOrInterval(napi_env env, napi_callback_info info, bool is
     napi_value thisVar = nullptr;
     void* data = nullptr;
     napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr);
-    if (argc > 0) {
+    if (argc >= ARGC_MIN) {
         argv = new napi_value[argc];
+    } else {
+        return result;
     }
     napi_get_cb_info(env, info, &argc, argv, &thisVar, &data);
 

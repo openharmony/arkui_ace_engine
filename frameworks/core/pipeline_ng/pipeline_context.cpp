@@ -76,7 +76,6 @@ constexpr int32_t MIN_IDLE_TIME = 1000;
 constexpr uint8_t SINGLECOLOR_UPDATE_ALPHA = 75;
 constexpr int8_t RENDERING_SINGLE_COLOR = 1;
 constexpr int32_t DELAY_TIME = 500;
-constexpr int32_t VSYNC_COLLECT_COUNT = 2;
 
 #define CHECK_THREAD_SAFE(isFormRender, taskExecutor) CheckThreadSafe(isFormRender, taskExecutor, __func__, __LINE__)
 void CheckThreadSafe(
@@ -2537,17 +2536,14 @@ void PipelineContext::DumpPipelineInfo() const
 
 void PipelineContext::CollectTouchEventsBeforeVsync(std::list<TouchEvent>& touchEvents)
 {
-    auto targetTimeStamp = GetVsyncTime();
+    auto targetTimeStamp = compensationValue_ > 0 ? GetVsyncTime() - compensationValue_ : GetVsyncTime();
     for (auto iter = touchEvents_.begin(); iter != touchEvents_.end();) {
         auto timeStamp = std::chrono::duration_cast<std::chrono::nanoseconds>(iter->time.time_since_epoch()).count();
         if (targetTimeStamp < static_cast<uint64_t>(timeStamp)) {
             iter++;
             continue;
         }
-        if (targetTimeStamp - static_cast<uint64_t>(timeStamp) <
-            static_cast<uint64_t>(VSYNC_COLLECT_COUNT * window_->GetVSyncPeriod())) {
-            touchEvents.emplace_back(*iter);
-        }
+        touchEvents.emplace_back(*iter);
         iter = touchEvents_.erase(iter);
     }
 }
@@ -3438,7 +3434,7 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
     }
 
     if (action == DragEventAction::DRAG_EVENT_START) {
-        manager->ResetPreTargetFrameNode();
+        manager->ResetPreTargetFrameNode(GetInstanceId());
         manager->RequireSummary();
         manager->SetDragCursorStyleCore(DragCursorStyleCore::DEFAULT);
         TAG_LOGI(AceLogTag::ACE_DRAG, "start drag, current windowId is %{public}d", container->GetWindowId());

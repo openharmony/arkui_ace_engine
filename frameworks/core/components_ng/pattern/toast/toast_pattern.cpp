@@ -373,4 +373,28 @@ void ToastPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc(
         "Offset: { dx: " + offset.GetX().ToString() + " dy: " + offset.GetY().ToString() + " }");
 }
+
+void ToastPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("Message", toastInfo_.message.c_str());
+    json->Put("Duration", toastInfo_.duration);
+    json->Put("Bottom", toastInfo_.bottom.c_str());
+    json->Put("IsRightToLeft", toastInfo_.isRightToLeft ? "true" : "false");
+    json->Put("ShowMode", toastInfo_.showMode == ToastShowMode::DEFAULT ? "DEFAULT" : "TOP_MOST");
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto toastProp = DynamicCast<ToastLayoutProperty>(host->GetLayoutProperty());
+    CHECK_NULL_VOID(toastProp);
+    if (!toastProp->HasToastAlignment()) {
+        json->Put("Alignment", "NONE");
+    } else {
+        json->Put(
+            "Alignment", toastProp->GetToastAlignmentValue().GetAlignmentStr(toastProp->GetLayoutDirection()).c_str());
+    }
+    auto offset = toastProp->GetToastOffsetValue(DimensionOffset());
+    std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
+    children->Put("dx", offset.GetX().ToString().c_str());
+    children->Put("dy", offset.GetY().ToString().c_str());
+    json->Put("Offset", children);
+}
 } // namespace OHOS::Ace::NG

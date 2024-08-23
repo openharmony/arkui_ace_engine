@@ -160,14 +160,14 @@ RefPtr<FrameNode> TestNG::CreateColumn(const std::function<void(ColumnModelNG)>&
     return AceType::DynamicCast<FrameNode>(element);
 }
 
-void TestNG::SetSize(Axis axis, const CalcLength& crossSize, const CalcLength& mainSize)
+void TestNG::SetSize(std::optional<Axis> axis, const CalcLength& crossSize, const CalcLength& mainSize)
 {
-    if (axis == Axis::VERTICAL) {
-        ViewAbstract::SetWidth(crossSize);
-        ViewAbstract::SetHeight(mainSize);
-    } else {
+    if (axis.has_value() && axis.value() == Axis::HORIZONTAL) {
         ViewAbstract::SetWidth(mainSize);
         ViewAbstract::SetHeight(crossSize);
+    } else {
+        ViewAbstract::SetWidth(crossSize);
+        ViewAbstract::SetHeight(mainSize);
     }
 }
 } // namespace OHOS::Ace::NG

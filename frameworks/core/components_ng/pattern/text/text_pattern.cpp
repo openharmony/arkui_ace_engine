@@ -3241,7 +3241,7 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
             contentRect_.GetY() + static_cast<float>(pManager_->GetHeight() + std::fabs(baselineOffset_));
         boundsRect.SetWidth(boundsWidth);
         boundsRect.SetHeight(boundsHeight);
-        
+
         SetResponseRegion(frameSize, boundsRect.GetSize());
         ProcessBoundRectByTextShadow(boundsRect);
         ProcessBoundRectByTextMarquee(boundsRect);
@@ -3939,5 +3939,93 @@ void TextPattern::OnTextGenstureSelectionEnd()
     }
     CalculateHandleOffsetAndShowOverlay();
     ShowSelectOverlay({ .animation = true });
+}
+
+void TextPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("contentRect", contentRect_.ToString().c_str());
+    if (SystemProperties::GetDebugEnabled() && pManager_) {
+        std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
+        children->Put("DidExceedMaxLines", std::to_string(pManager_->DidExceedMaxLines()).c_str());
+        children->Put("GetTextWidth", std::to_string(pManager_->GetTextWidth()).c_str());
+        children->Put("GetHeight", std::to_string(pManager_->GetHeight()).c_str());
+        children->Put("GetMaxWidth", std::to_string(pManager_->GetMaxWidth()).c_str());
+        children->Put("GetMaxIntrinsicWidth", std::to_string(pManager_->GetMaxIntrinsicWidth()).c_str());
+        children->Put("GetLineCount", std::to_string(pManager_->GetLineCount()).c_str());
+        children->Put("GetLongestLine", std::to_string(pManager_->GetLongestLine()).c_str());
+        json->Put("from TextEngine paragraphs_ info", children);
+    }
+    json->Put("BindSelectionMenu", std::to_string(selectionMenuMap_.empty()).c_str());
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto fontScale = pipeline->GetFontScale();
+    auto fontWeightScale = pipeline->GetFontWeightScale();
+    json->Put("fontScale", std::to_string(fontScale).c_str());
+    json->Put("fontWeightScale", std::to_string(fontWeightScale).c_str());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (renderContext->HasForegroundColor()) {
+        json->Put("ForegroundColor", renderContext->GetForegroundColorValue().ColorToString().c_str());
+    }
+    if (renderContext->GetForegroundColorStrategy().has_value()) {
+        auto strategy = static_cast<int32_t>(renderContext->GetForegroundColorStrategyValue());
+        json->Put("ForegroundColorStrategy", strategy);
+    }
+}
+
+void TextPattern::SetTextStyleDumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    if (textStyle_.has_value()) {
+        json->Put("MaxFontSize", textStyle_->GetAdaptMaxFontSize().ToString().c_str());
+        json->Put("MinFontSize", textStyle_->GetAdaptMinFontSize().ToString().c_str());
+        json->Put("FontWeight", StringUtils::ToString(textStyle_->GetFontWeight()).c_str());
+        json->Put("FontStyle", StringUtils::ToString(textStyle_->GetFontStyle()).c_str());
+        json->Put("LineHeight", textStyle_->GetLineHeight().ToString().c_str());
+        json->Put("LineSpacing", textStyle_->GetLineSpacing().ToString().c_str());
+        json->Put("BaselineOffset", textStyle_->GetBaselineOffset().ToString().c_str());
+        json->Put("TextIndent", textStyle_->GetTextIndent().ToString().c_str());
+        json->Put("LetterSpacing", textStyle_->GetLetterSpacing().ToString().c_str());
+        json->Put("TextOverflow", StringUtils::ToString(textStyle_->GetTextOverflow()).c_str());
+        json->Put("TextAlign", StringUtils::ToString(textStyle_->GetTextAlign()).c_str());
+        json->Put("WordBreak", StringUtils::ToString(textStyle_->GetWordBreak()).c_str());
+        json->Put("TextCase", StringUtils::ToString(textStyle_->GetTextCase()).c_str());
+        json->Put("EllipsisMode", StringUtils::ToString(textStyle_->GetEllipsisMode()).c_str());
+        json->Put("LineBreakStrategy", GetLineBreakStrategyInJson(textStyle_->GetLineBreakStrategy()).c_str());
+    }
+}
+
+void TextPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProp);
+    auto nowTime = GetSystemTimestamp();
+    json->Put("time", std::to_string(nowTime).c_str());
+    if (!IsSetObscured()) {
+        json->Put("Content", textLayoutProp->GetContent().value_or(" ").c_str());
+    }
+    json->Put("ConteFontColornt",
+        (textStyle_.has_value() ? textStyle_->GetTextColor() : Color::BLACK).ColorToString().c_str());
+    json->Put(
+        "FontSize", (textStyle_.has_value() ? textStyle_->GetFontSize() : Dimension(DIMENSION_VALUE, DimensionUnit::FP))
+                        .ToString()
+                        .c_str());
+    SetTextStyleDumpInfo(json);
+    json->Put("HeightAdaptivePolicy",
+        V2::ConvertWrapTextHeightAdaptivePolicyToString(
+            textLayoutProp->GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST))
+            .c_str());
+
+    json->Put("Selection", textSelector_.ToString().c_str());
+
+    if (pManager_ && !pManager_->GetParagraphs().empty()) {
+        auto num = static_cast<int32_t>(pManager_->GetParagraphs().size());
+        json->Put("Paragraphs num", std::to_string(num).c_str());
+        json->Put("PaintInfo", paintInfo_.c_str());
+    }
+    if (SystemProperties::GetDebugEnabled()) {
+        DumpAdvanceInfo(json);
+    }
 }
 } // namespace OHOS::Ace::NG

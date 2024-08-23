@@ -295,7 +295,7 @@ void IndexerPattern::ApplySevenPlusOneMode(int32_t fullArraySize)
     }
 
     auto lastPushedIndex = sharpItemCount_;
-    
+
     for (int32_t groupIndex = 0; groupIndex < gmin; groupIndex++) { // push groups of minimum items count
         int32_t firstIndex = lastPushedIndex + 1;
         int32_t lastIndex = firstIndex + cmin - 1;
@@ -2066,5 +2066,21 @@ void IndexerPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("AutoCollapse: ", autoCollapse_ ? "true" : "false");
     DumpLog::GetInstance().AddDesc("IsPopup: ", isPopup_ ? "true" : "false");
     DumpLog::GetInstance().AddDesc(std::string("EnableHapticFeedback: ").append(std::to_string(enableHapticFeedback_)));
+}
+
+void IndexerPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto layoutProperty = GetLayoutProperty<IndexerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    json->Put("AlignStyle", static_cast<int32_t>(layoutProperty->GetAlignStyleValue(AlignStyle::END)));
+
+    auto offset = layoutProperty->GetPopupHorizontalSpace();
+    json->Put("Offset", offset.has_value() ? offset.value().ToString().c_str() : "undefined");
+    json->Put("PopupPositionX",
+        layoutProperty->GetPopupPositionXValue(Dimension(NG::BUBBLE_POSITION_X, DimensionUnit::VP)).ToString().c_str());
+    json->Put("PopupPositionY",
+        layoutProperty->GetPopupPositionYValue(Dimension(NG::BUBBLE_POSITION_Y, DimensionUnit::VP)).ToString().c_str());
+    json->Put("AutoCollapse", autoCollapse_ ? "true" : "false");
+    json->Put("EnableHapticFeedback", std::to_string(enableHapticFeedback_).c_str());
 }
 } // namespace OHOS::Ace::NG

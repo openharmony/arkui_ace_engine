@@ -395,7 +395,7 @@ void SwiperIndicatorPattern::GetMouseClickIndex()
     float space = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx());
     int32_t currentIndex = swiperPattern->GetCurrentShownIndex();
     auto [itemCount, step] = swiperPattern->CalculateStepAndItemCount();
-    int32_t loopCount = itemCount == 0 ? 0 : std::abs(currentIndex / itemCount);
+    int32_t loopCount = SwiperIndicatorUtils::CalcLoopCount(currentIndex, itemCount);
     auto frameSize = host->GetGeometryNode()->GetFrameSize();
     auto axis = swiperPattern->GetDirection();
     float centerX = static_cast<float>(INDICATOR_PADDING_DOT.ConvertToPx());
