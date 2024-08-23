@@ -1234,7 +1234,7 @@ private:
 
     std::string nodeName_;
 
-    ColorMode colorMode_;
+    ColorMode colorMode_ = ColorMode::LIGHT;
 
     bool draggable_ = false;
     bool userSet_ = false;
