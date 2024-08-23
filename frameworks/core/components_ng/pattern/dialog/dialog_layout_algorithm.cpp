@@ -154,7 +154,9 @@ void DialogLayoutAlgorithm::UpdateChildLayoutConstraint(const RefPtr<DialogLayou
     if (NonNegative(dialogWidth.Value())) {
         childLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(dialogWidth), std::nullopt));
     }
-    childLayoutConstraint.UpdateMaxSizeWithCheck(SizeF(dialogWidth.Value(), dialogHeight.Value()));
+    childLayoutConstraint.UpdateMaxSizeWithCheck(SizeF(
+        dialogWidth.ConvertToPxWithSize(childLayoutConstraint.maxSize.Width()),
+        dialogHeight.ConvertToPxWithSize(childLayoutConstraint.maxSize.Height())));
 }
 
 void DialogLayoutAlgorithm::AnalysisHeightOfChild(LayoutWrapper* layoutWrapper)
