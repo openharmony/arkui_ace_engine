@@ -18,6 +18,7 @@
 #include <dirent.h>
 
 #include "drawable_descriptor.h"
+#include "resource_adapter_impl_v2.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/osal/resource_convertor.h"
@@ -849,5 +850,23 @@ ColorMode ResourceAdapterImplV2::GetResourceColorMode() const
 void ResourceAdapterImplV2::SetAppHasDarkRes(bool hasDarkRes)
 {
     appHasDarkRes_ = hasDarkRes;
+}
+
+RefPtr<ResourceAdapter> ResourceAdapterImplV2::GetOverrideResourceAdapter(
+    const ResourceConfiguration& config, const ConfigurationChange& configurationChange)
+{
+    std::shared_ptr<Global::Resource::ResConfig> overrideResConfig(Global::Resource::CreateResConfig());
+    sysResourceManager_->GetOverrideResConfig(*overrideResConfig);
+    if (configurationChange.colorModeUpdate) {
+        overrideResConfig->SetColorMode(ConvertColorModeToGlobal(config.GetColorMode()));
+    }
+    if (configurationChange.directionUpdate) {
+        overrideResConfig->SetDirection(ConvertDirectionToGlobal(config.GetOrientation()));
+    }
+    if (configurationChange.dpiUpdate) {
+        overrideResConfig->SetScreenDensity(config.GetDensity());
+    }
+    auto overrideResMgr = sysResourceManager_->GetOverrideResourceManager(overrideResConfig);
+    return AceType::MakeRefPtr<ResourceAdapterImplV2>(overrideResMgr);
 }
 } // namespace OHOS::Ace

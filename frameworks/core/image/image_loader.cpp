@@ -17,6 +17,8 @@
 
 #include "include/utils/SkBase64.h"
 
+#include "base/utils/resource_configuration.h"
+#include "core/common/resource/resource_configuration.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_wrapper.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
@@ -636,16 +638,22 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     RefPtr<ThemeConstants> themeConstants = nullptr;
     if (SystemProperties::GetResourceDecoupling()) {
-        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-        CHECK_NULL_RETURN(resourceAdapter, nullptr);
+        auto adapterInCache = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+        CHECK_NULL_RETURN(adapterInCache, nullptr);
+        resourceAdapter = adapterInCache;
+        if (imageSourceInfo.GetLocalColorMode() != ColorMode::COLOR_MODE_UNDEFINED) {
+            ResourceConfiguration resConfig;
+            resConfig.SetColorMode(imageSourceInfo.GetLocalColorMode());
+            ConfigurationChange configChange { .colorModeUpdate = true };
+            resourceAdapter = adapterInCache->GetOverrideResourceAdapter(resConfig, configChange);
+        }
     } else {
         auto themeManager = PipelineBase::CurrentThemeManager();
         CHECK_NULL_RETURN(themeManager, nullptr);
         themeConstants = themeManager->GetThemeConstants();
         CHECK_NULL_RETURN(themeConstants, nullptr);
     }
-    auto resourceWrapper =
-        AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter, imageSourceInfo.GetLocalColorMode());
+    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
 
     std::unique_ptr<uint8_t[]> data;
     size_t dataLen = 0;
