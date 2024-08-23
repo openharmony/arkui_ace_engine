@@ -497,7 +497,6 @@ void RichEditorSelectOverlay::UpdateHandleOffset()
 
 void RichEditorSelectOverlay::UpdateSelectOverlayOnAreaChanged()
 {
-    HideMenu(true);
     CHECK_NULL_VOID(SelectOverlayIsOn() || SelectOverlayIsCreating());
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
