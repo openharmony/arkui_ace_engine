@@ -1642,4 +1642,94 @@ void DialogPattern::InitHostWindowRect()
         hostWindowRect_ = RectF(rect.Left(), rect.Top(), rect.Width(), rect.Height());
     }
 }
+
+void DialogPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("Type", DialogTypeUtils::ConvertDialogTypeToString(dialogProperties_.type).c_str());
+    if (!dialogProperties_.title.empty()) {
+        json->Put("Title", dialogProperties_.title.c_str());
+    }
+    if (!dialogProperties_.subtitle.empty()) {
+        json->Put("Subtitle", dialogProperties_.subtitle.c_str());
+    }
+    if (!dialogProperties_.content.empty()) {
+        json->Put("Content", dialogProperties_.content.c_str());
+    }
+    json->Put("DialogButtonDirection",
+        DialogButtonDirectionUtils::ConvertDialogButtonDirectionToString(dialogProperties_.buttonDirection).c_str());
+    if (dialogProperties_.width.has_value()) {
+        json->Put("Width", dialogProperties_.width.value().ToString().c_str());
+    }
+    if (dialogProperties_.height.has_value()) {
+        json->Put("Height", dialogProperties_.height.value().ToString().c_str());
+    }
+    if (dialogProperties_.backgroundBlurStyle.has_value()) {
+        json->Put("BackgroundBlurStyle", std::to_string(dialogProperties_.backgroundBlurStyle.value()).c_str());
+    }
+    if (dialogProperties_.borderWidth.has_value()) {
+        json->Put("BorderWidth", dialogProperties_.borderWidth.value().ToString().c_str());
+    }
+    if (dialogProperties_.borderColor.has_value()) {
+        json->Put("BorderColor", dialogProperties_.borderColor.value().ToString().c_str());
+    }
+    if (dialogProperties_.backgroundColor.has_value()) {
+        json->Put("BackgroundColor", dialogProperties_.backgroundColor.value().ToString().c_str());
+    }
+    if (dialogProperties_.borderRadius.has_value()) {
+        json->Put("BorderRadius", dialogProperties_.borderRadius.value().ToString().c_str());
+    }
+    DumpBoolProperty(json);
+    DumpObjectProperty(json);
+}
+
+void DialogPattern::DumpBoolProperty(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("AutoCancel", GetBoolStr(dialogProperties_.autoCancel).c_str());
+    json->Put("CustomStyle", GetBoolStr(dialogProperties_.customStyle).c_str());
+    json->Put("IsMenu", GetBoolStr(dialogProperties_.isMenu).c_str());
+    json->Put("IsMask", GetBoolStr(dialogProperties_.isMask).c_str());
+    json->Put("IsModal", GetBoolStr(dialogProperties_.isModal).c_str());
+    json->Put("IsScenceBoardDialog", GetBoolStr(dialogProperties_.isScenceBoardDialog).c_str());
+    json->Put("IsSysBlurStyle", GetBoolStr(dialogProperties_.isSysBlurStyle).c_str());
+    json->Put("IsShowInSubWindow", GetBoolStr(dialogProperties_.isShowInSubWindow).c_str());
+}
+
+void DialogPattern::DumpObjectProperty(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("Alignment", DialogAlignmentUtils::ConvertDialogAlignmentToString(dialogProperties_.alignment).c_str());
+    std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
+    children->Put("dx", dialogProperties_.offset.GetX().ToString().c_str());
+    children->Put("dy", dialogProperties_.offset.GetY().ToString().c_str());
+    json->Put("Offset", children);
+    if (dialogProperties_.buttons.size() > 0) {
+        std::unique_ptr<JsonValue> buttons = JsonUtil::Create(true);
+        int32_t inx = -1;
+        for (auto buttonInfo : dialogProperties_.buttons) {
+            std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
+            child->Put("text", buttonInfo.text.c_str());
+            child->Put("color", buttonInfo.textColor.c_str());
+            inx++;
+            std::string key = "button_" + std::to_string(inx);
+            buttons->Put(key.c_str(), child);
+        }
+        json->Put("buttons", buttons);
+    }
+    if (dialogProperties_.shadow.has_value()) {
+        auto shadow = dialogProperties_.shadow.value();
+        std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
+
+        child->Put("radius", shadow.GetBlurRadius());
+        child->Put("style", static_cast<int32_t>(shadow.GetStyle()));
+        child->Put("type", static_cast<int32_t>(shadow.GetShadowType()));
+        child->Put("fill", GetBoolStr(shadow.GetIsFilled()).c_str());
+        child->Put("offset", shadow.GetOffset().ToString().c_str());
+        json->Put("shadow", child);
+    }
+    if (dialogProperties_.maskColor.has_value()) {
+        json->Put("MaskColor", dialogProperties_.maskColor.value().ToString().c_str());
+    }
+    if (dialogProperties_.maskRect.has_value()) {
+        json->Put("MaskRect", dialogProperties_.maskRect.value().ToString().c_str());
+    }
+}
 } // namespace OHOS::Ace::NG

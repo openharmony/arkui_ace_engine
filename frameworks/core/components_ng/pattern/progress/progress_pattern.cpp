@@ -433,4 +433,11 @@ RefPtr<FrameNode> ProgressPattern::BuildContentModifierNode()
     auto enabled = eventHub->IsEnabled();
     return (makeFunc_.value())(ProgressConfiguration{value, total, enabled});
 }
+
+void ProgressPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto paintProperty = GetPaintProperty<ProgressPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    json->Put("EnableSmoothEffect", paintProperty->GetEnableSmoothEffectValue(true) ? "true" : "false");
+}
 } // namespace OHOS::Ace::NG
