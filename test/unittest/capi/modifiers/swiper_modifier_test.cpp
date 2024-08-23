@@ -21,6 +21,9 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components/swiper/swiper_indicator_theme.h"
+
 namespace OHOS::Ace::NG {
 
 using namespace testing;
@@ -49,8 +52,8 @@ inline Ark_String ArkStr(const char *s)
     return {.chars = s, .length = strlen(s)
     };
 }
-/*
 
+/*
 inline Ark_Resource ArkRes(Ark_String *name, int id = -1,
     NodeModifier::ResourceType type = NodeModifier::ResourceType::COLOR,
     const char *module = "", const char *bundle = "")
@@ -72,13 +75,18 @@ public:
     static void SetUpTestCase()
     {
         MockPipelineContext::SetUp();
+
         auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-        MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
         // assume using of test/mock/core/common/mock_theme_constants.cpp in build
         auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
         EXPECT_CALL(*themeManager, GetThemeConstants(testing::_, testing::_)).WillRepeatedly(Return(themeConstants));
+        EXPECT_CALL(*themeManager, GetTheme(testing::_)).WillRepeatedly(
+            Return(std::make_unique<SwiperIndicatorTheme::Builder>()->Build(nullptr))
+        );
         MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+
         MockContainer::SetUp(MockPipelineContext::GetCurrent());
+        MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     }
 
     static void TearDownTestCase()
@@ -386,7 +394,7 @@ HWTEST_F(SwiperModifierTest, SwiperModifierTest11, TestSize.Level1)
 HWTEST_F(SwiperModifierTest, SwiperModifierTest12, TestSize.Level1)
 {
     static const std::string PROP_NAME("cachedCount");
-    static const std::string DEFAULT_VALUE("-1"); // corrrsponds to 
+    static const std::string DEFAULT_VALUE("1"); // corrrsponds to
     // DEFAULT_SWIPER_CACHED_SIZE in frameworks/core/components/declaration/swiper/swiper_declaration.h
     ASSERT_NE(modifier_->setCachedCount, nullptr);
 
@@ -473,7 +481,7 @@ HWTEST_F(SwiperModifierTest, SwiperModifierTest13_Str, TestSize.Level1)
     Type_SwiperAttribute_displayCount_Arg0 autoVal = {.selector = 1, .value1 = ArkStr("auto")};
     modifier_->setDisplayCount(node_, &autoVal, nullptr);
     auto checkVal3 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal3, "");
+    EXPECT_EQ(checkVal3, DEFAULT_VALUE);
     auto checkValDispMode= GetStringAttribute(node_, "displayMode");
     EXPECT_EQ(checkValDispMode, "SwiperDisplayMode.AutoLinear");
 
@@ -549,8 +557,32 @@ HWTEST_F(SwiperModifierTest, SwiperModifierTest13_Obj, TestSize.Level1)
  */
 HWTEST_F(SwiperModifierTest, SwiperModifierTest13_ByGroup, TestSize.Level1)
 {
+    static const std::string PROP_NAME("swipeByGroup");
+    static const std::string DEFAULT_VALUE("false");
     ASSERT_NE(modifier_->setDisplayCount, nullptr);
-    /*no support of the SwipeByGroup property in OHOS::Ace::NG::SwiperLayoutProperty::toJsonValue() method */
+
+    Type_SwiperAttribute_displayCount_Arg0 aceFakeArg0;
+
+    auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal1, DEFAULT_VALUE);
+
+    Opt_Boolean optBoolTrue = {.tag = ARK_TAG_OBJECT, .value = ArkBool(true)};
+    modifier_->setDisplayCount(node_, &aceFakeArg0, &optBoolTrue);
+    auto checkVal2 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal2, "true");
+
+    modifier_->setDisplayCount(node_, &aceFakeArg0, nullptr);
+    auto checkVal2opt = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal2opt, "true"); // nothing change if no optional arg
+
+    Opt_Boolean optBoolFalse = {.tag = ARK_TAG_OBJECT, .value = Ark_Boolean(false)};
+    modifier_->setDisplayCount(node_, &aceFakeArg0, &optBoolFalse);
+    auto checkVal3 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal3, "false");
+
+    modifier_->setDisplayCount(node_, &aceFakeArg0, nullptr);
+    auto checkVal3opt = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal3opt, "false"); // nothing change if no optional arg
 }
 
 /**
@@ -560,23 +592,20 @@ HWTEST_F(SwiperModifierTest, SwiperModifierTest13_ByGroup, TestSize.Level1)
  */
 HWTEST_F(SwiperModifierTest, SwiperModifierTest14, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setEffectMode, nullptr);
-
-/* this will work after implementation of this propery support in ace_engine, toJsomValue 
-    static const std::string PROP_NAME("????");
-    static const std::string DEFAULT_VALUE("????");
+    static const std::string PROP_NAME("effectMode");
+    static const std::string DEFAULT_VALUE("EdgeEffect.Spring");
     auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal1, DEFAULT_VALUE);
 
     auto arkValue0 = static_cast<Ark_Int32>(OHOS::Ace::EdgeEffect::SPRING);
     modifier_->setEffectMode(node_, arkValue0);
     auto checkVal2 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal2, "SwiperEffectMode.Spring");
+    EXPECT_EQ(checkVal2, "EdgeEffect.Spring");
 
     auto arkValue1 = static_cast<Ark_Int32>(OHOS::Ace::EdgeEffect::FADE);
     modifier_->setEffectMode(node_, arkValue1);
     auto checkVal3 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal3, "SwiperEffectMode.Fade");
+    EXPECT_EQ(checkVal3, "EdgeEffect.Fade");
 
     auto arkValue2 = static_cast<Ark_Int32>(INT_MAX);
     modifier_->setEffectMode(node_, arkValue2);
@@ -587,7 +616,6 @@ HWTEST_F(SwiperModifierTest, SwiperModifierTest14, TestSize.Level1)
     modifier_->setEffectMode(node_, arkValue3);
     auto checkVal5 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal5, DEFAULT_VALUE);
-*/
 }
 /**
  * @tc.name: SwiperModifierTest15
