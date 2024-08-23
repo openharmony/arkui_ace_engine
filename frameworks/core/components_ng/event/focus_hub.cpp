@@ -354,6 +354,7 @@ void FocusHub::RemoveChild(const RefPtr<FocusHub>& focusNode, BlurReason reason)
     }
 
     if (focusNode->IsCurrentFocus()) {
+        FocusManager::FocusGuard guard(Claim(this), SwitchingStartReason::REMOVE_CHILD);
         // Try to goto next focus, otherwise goto previous focus.
         if (!GoToNextFocusLinear(FocusStep::TAB) && !GoToNextFocusLinear(FocusStep::SHIFT_TAB)) {
             lastWeakFocusNode_ = nullptr;
@@ -365,7 +366,6 @@ void FocusHub::RemoveChild(const RefPtr<FocusHub>& focusNode, BlurReason reason)
                 RemoveSelf(reason);
             }
         }
-        FocusManager::FocusGuard guard(Claim(this), SwitchingStartReason::REMOVE_CHILD);
         focusNode->LostFocus(reason);
     }
     if (lastWeakFocusNode_ == focusNode) {
