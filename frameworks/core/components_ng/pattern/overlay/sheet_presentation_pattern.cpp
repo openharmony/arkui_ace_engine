@@ -845,6 +845,18 @@ void SheetPresentationPattern::ModifyFireSheetTransition(float dragVelocity)
         finishCallback);
 }
 
+float SheetPresentationPattern::UpdateSheetTransitionOffset()
+{
+    // dentets greater than 1 and no rebound
+    if (!WillSpringBack() && sheetDetentHeight_.size() > 1) {
+        // When avoiding keyboards
+        // don't consider the height difference introduced by avoidance after switching detents
+        sheetHeightUp_ = 0.0f;
+    }
+    auto offset = GetPageHeightWithoutOffset() - (height_ + sheetHeightUp_);
+    return offset;
+}
+
 void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVelocity)
 {
     bool isNeedChangeScrollHeight = scrollSizeMode_ == ScrollSizeMode::CONTINUOUS && isDirectionUp_;
@@ -855,14 +867,12 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVe
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetRenderContext();
-    CHECK_NULL_VOID(context);
     AnimationOption option;
     const RefPtr<InterpolatingSpring> curve = AceType::MakeRefPtr<InterpolatingSpring>(
         dragVelocity / SHEET_VELOCITY_THRESHOLD, CURVE_MASS, CURVE_STIFFNESS, CURVE_DAMPING);
     option.SetCurve(curve);
     option.SetFillMode(FillMode::FORWARDS);
-    auto offset = GetPageHeightWithoutOffset() - (height_ + sheetHeightUp_);
+    auto offset = UpdateSheetTransitionOffset();
     if (!isTransitionIn) {
         const auto& overlayManager = GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
@@ -883,6 +893,7 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVe
             }
             pattern->AvoidAiBar();
             pattern->FireOnDetentsDidChange(pattern->height_);
+            pattern->isSpringBack_ = false;
         } else {
             pattern->SetAnimationProcess(false);
             const auto& overlayManager = pattern->GetOverlayManager();
@@ -905,6 +916,7 @@ void SheetPresentationPattern::SheetInteractiveDismiss(BindSheetDismissReason di
         overlayManager->SetDismissTarget(DismissTarget(sheetKey_));
         if (dismissReason == BindSheetDismissReason::SLIDE_DOWN) {
             ProcessColumnRect(height_);
+            isSpringBack_ = true;
             if (HasSheetSpringBack()) {
                 CallSheetSpringBack();
             } else {
