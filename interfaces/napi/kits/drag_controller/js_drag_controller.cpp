@@ -1555,6 +1555,8 @@ static napi_value JSExecuteDrag(napi_env env, napi_callback_info info)
     if (!container) {
         NapiThrow(env, "get container failed.", ERROR_CODE_INTERNAL_ERROR);
         napi_close_escapable_handle_scope(env, scope);
+        delete dragAsyncContext;
+        dragAsyncContext = nullptr;
         return nullptr;
     }
     if (CheckDragging(container)) {
@@ -1568,8 +1570,6 @@ static napi_value JSExecuteDrag(napi_env env, napi_callback_info info)
     if (!getPointSuccess) {
         NapiThrow(env, "confirm current point info failed.", ERROR_CODE_INTERNAL_ERROR);
         napi_escape_handle(env, scope, result, &result);
-        delete dragAsyncContext;
-        dragAsyncContext = nullptr;
         napi_close_escapable_handle_scope(env, scope);
         return result;
     }
