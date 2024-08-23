@@ -265,8 +265,7 @@ class ListFilterRow extends ViewPU {
             let uiContent = this.getUIContext();
             this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
             this.maxAppFontScale = uiContent.getMaxFontScale();
-        }
-        catch (err) {
+        } catch (err) {
             let code = err.code;
             let message = err.message;
             hilog.error(0x3900, 'Ace', `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
@@ -703,8 +702,7 @@ class MultiFilterRow extends ViewPU {
             let uiContent = this.getUIContext();
             this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
             this.maxAppFontScale = uiContent.getMaxFontScale();
-        }
-        catch (err) {
+        } catch (err) {
             let code = err.code;
             let message = err.message;
             hilog.error(0x3900, 'Ace', `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
