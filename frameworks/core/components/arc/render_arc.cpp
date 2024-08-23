@@ -16,7 +16,6 @@
 #include "core/components/arc/render_arc.h"
 
 namespace OHOS::Ace {
-namespace {} // namespace
 
 void RenderArc::PerformLayout()
 {
