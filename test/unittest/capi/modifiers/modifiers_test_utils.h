@@ -29,11 +29,7 @@ inline std::string GetStringAttribute(ArkUINodeHandle node, const std::string &n
     if (auto fnode = reinterpret_cast<FrameNode *>(node); fnode) {
         if (auto jsonVal = JsonUtil::Create(true); jsonVal) {
             fnode->ToJsonValue(jsonVal, inspector);
-            auto val = jsonVal->GetValue(name);
-            if (val) {
-                if (val->IsString()) return jsonVal->GetString(name);
-                if (val->IsNumber()) return std::to_string(jsonVal->GetInt(name));
-            }
+            return jsonVal->GetString(name);
         }
     }
     return {};

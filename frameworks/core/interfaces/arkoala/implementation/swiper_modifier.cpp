@@ -48,6 +48,14 @@ Ark_Int32 trimToAceRange(Ark_Int32 val, T min, T max)
     return (val >= limitMin && val <= limitMax) ? val : limitMin;
 }
 
+std::optional<OHOS::Ace::Dimension> &checkDimValid(std::optional<OHOS::Ace::Dimension> &dim) {
+    if (dim && dim->IsNegative()) {
+        dim->SetValue(0);
+        dim->SetUnit(OHOS::Ace::DimensionUnit::VP);
+    }
+    return dim;
+}
+
 constexpr int32_t DEFAULT_INTERVAL = static_cast<int32_t>(OHOS::Ace::DEFAULT_SWIPER_AUTOPLAY_INTERVAL);
 constexpr int32_t DEFAULT_DURATION = static_cast<int32_t>(OHOS::Ace::DEFAULT_SWIPER_ANIMATION_DURATION);
 constexpr int32_t DEFAULT_CACHED_COUNT = OHOS::Ace::DEFAULT_SWIPER_CACHED_SIZE;
@@ -90,10 +98,97 @@ void IntervalImpl(Ark_NativePointer node,
     auto aceVal = Converter::Convert<int32_t>(*value);
     SwiperModelNG::SetAutoPlayInterval(frameNode, aceVal < 0 ? ::DEFAULT_INTERVAL: aceVal);
 }
+
+namespace {
+bool checkDimCustom(std::optional<Dimension> &dim, const Dimension &defultVal) {
+    bool isCustom = dim && dim->Unit() != DimensionUnit::PERCENT;
+    if (isCustom && dim->IsNegative()) {
+        *dim = defultVal;
+    }
+    return isCustom;
+}
+std::tuple<SwiperParameters, bool> ParseDotIndicator(const Ark_DotIndicator& src) {
+    SwiperParameters p;
+    bool isCustom;
+    p.dimLeft = Converter::OptConvert<Dimension>(src._left);
+    p.dimTop = Converter::OptConvert<Dimension>(src._top);
+    p.dimRight = Converter::OptConvert<Dimension>(src._right);
+    p.dimBottom = Converter::OptConvert<Dimension>(src._bottom);
+
+    p.dimStart = Converter::OptConvert<Dimension>(src._start);
+    p.dimEnd = Converter::OptConvert<Dimension>(src._end);
+
+    p.itemWidth = Converter::OptConvert<Dimension>(src._itemWidth);
+    p.itemHeight = Converter::OptConvert<Dimension>(src._itemHeight);
+    p.selectedItemWidth = Converter::OptConvert<Dimension>(src._selectedItemWidth);
+    p.selectedItemHeight = Converter::OptConvert<Dimension>(src._selectedItemHeight);
+
+    p.maskValue = Converter::OptConvert<bool>(src._mask);
+    p.colorVal = Converter::OptConvert<Color>(src._color);
+    p.selectedColorVal = Converter::OptConvert<Color>(src._selectedColor);
+    p.maxDisplayCountVal = Converter::OptConvert<int32_t>(src._maxDisplayCount);
+
+    if (!p.dimStart) {
+        p.dimStart = Dimension(0, DimensionUnit::VP);
+    }
+    if (!p.dimEnd) {
+        p.dimEnd = Dimension(0, DimensionUnit::VP);
+    }
+
+    checkDimValid(p.dimLeft);
+    checkDimValid(p.dimTop);
+    checkDimValid(p.dimRight);
+    checkDimValid(p.dimBottom);
+    checkDimValid(p.dimStart);
+    checkDimValid(p.dimEnd);
+
+    Dimension defaultSize(0, DimensionUnit::VP);     // TODO
+    isCustom = checkDimCustom(p.itemWidth, defaultSize);
+    isCustom = checkDimCustom(p.itemHeight, defaultSize) || isCustom;
+    isCustom = checkDimCustom(p.selectedItemWidth, defaultSize) || isCustom;
+    isCustom = checkDimCustom(p.selectedItemHeight, defaultSize) || isCustom;
+
+    if (p.maxDisplayCountVal && *p.maxDisplayCountVal < 0) {
+        *p.maxDisplayCountVal = 0;
+    }
+    return {p, isCustom};
+}
+
+SwiperDigitalParameters ParseDigitIndicator(const Ark_DigitIndicator& src) {
+    SwiperDigitalParameters p;
+    // TODO
+    return p;
+}
+} // namespace
+
 void IndicatorImpl(Ark_NativePointer node,
                    const Type_SwiperAttribute_indicator_Arg0* value)
 {
-    // TODO
+    constexpr int SELECTOR_DOT =  SELECTOR_ID_0;
+    constexpr int SELECTOR_DIGIT = SELECTOR_ID_1;
+    constexpr int SELECTOR_BOOL = SELECTOR_ID_2;
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    if (value->selector == SELECTOR_DIGIT) {
+        SwiperModelNG::SetIndicatorIsBoolean(frameNode, false);
+        SwiperModelNG::SetDigitIndicatorStyle(frameNode, ParseDigitIndicator(value->value1));
+        SwiperModelNG::SetIndicatorType(frameNode, SwiperIndicatorType::DIGIT);
+    } else {
+        static Ark_DotIndicator defaultArkDot;
+        const Ark_DotIndicator *arkDot = &defaultArkDot;
+        if (value->selector == SELECTOR_DOT ) {
+            arkDot = &(value->value0);
+            SwiperModelNG::SetIndicatorIsBoolean(frameNode, false);
+        }
+        auto [params, isCustomSize] = ParseDotIndicator(*arkDot);
+        SwiperModelNG::SetDotIndicatorStyle(frameNode, params);
+        SwiperModelNG::SetIsIndicatorCustomSize(frameNode, isCustomSize);
+        SwiperModelNG::SetIndicatorType(frameNode, SwiperIndicatorType::DOT);
+    }
+
+    auto showIndicator = value->selector != SELECTOR_BOOL || Converter::Convert<bool>(value->value2);
+    SwiperModelNG::SetShowIndicator(frameNode, showIndicator);
 }
 void DisplayArrowImpl(Ark_NativePointer node,
                       const Type_SwiperAttribute_displayArrow_Arg0* value,
@@ -134,11 +229,7 @@ void ItemSpaceImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto aceOptVal = Converter::OptConvert<Dimension>(*value);
     CHECK_NULL_VOID(aceOptVal);
-    if (!aceOptVal->IsValid()) {
-        aceOptVal->Reset();
-        aceOptVal->SetUnit(DimensionUnit::VP);
-    }
-    SwiperModelNG::SetItemSpace(frameNode, *aceOptVal);
+    SwiperModelNG::SetItemSpace(frameNode, *checkDimValid(aceOptVal));
 }
 void DisplayModeImpl(Ark_NativePointer node,
                      Ark_Int32 value)
@@ -166,12 +257,12 @@ void DisplayCountImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     switch (value->selector) {
-        case 0: { // Ark_Number
+        case SELECTOR_ID_0: { // Ark_Number
             int32_t val = Converter::Convert<int32_t>(value->value0);
             SwiperModelNG::SetDisplayCount(frameNode, val < DEFAULT_DISPLAY_COUNT ? DEFAULT_DISPLAY_COUNT : val);
             break;
         }
-        case 1: { // Ark_String
+        case SELECTOR_ID_1: { // Ark_String
             std::string aceVal(value->value1.chars);
             if (aceVal == "auto") {
                 SwiperModelNG::SetDisplayMode(frameNode, OHOS::Ace::SwiperDisplayMode::AUTO_LINEAR);
@@ -182,13 +273,9 @@ void DisplayCountImpl(Ark_NativePointer node,
             SwiperModelNG::SetDisplayCount(frameNode, val < DEFAULT_DISPLAY_COUNT ? DEFAULT_DISPLAY_COUNT : val);
             break;
         }
-        case 2: { // struct Ark_SwiperAutoFill
+        case SELECTOR_ID_2: { // struct Ark_SwiperAutoFill
             if (auto aceOptVal = Converter::OptConvert<Dimension>(value->value2.minSize); aceOptVal) {
-                if (!aceOptVal->IsValid()) {
-                    aceOptVal->Reset();
-                    aceOptVal->SetUnit(DimensionUnit::VP);
-                }
-                SwiperModelNG::SetMinSize(frameNode, *aceOptVal);
+                SwiperModelNG::SetMinSize(frameNode, *checkDimValid(aceOptVal));
             }
             break;
         }

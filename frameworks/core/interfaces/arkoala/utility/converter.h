@@ -435,6 +435,12 @@ namespace OHOS::Ace::NG::Converter {
             default: LOGE("Unexpected enum value in Ark_LineCapStyle: %{public}d", src);
         }
     }
+
+    template<>
+    inline Dimension Convert(const Ark_CustomObject& src)
+    {
+        return Dimension();
+    }
 } // namespace OHOS::Ace::NG::Converter
 
 #endif  // GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_UTILITY_CONVERTER_H

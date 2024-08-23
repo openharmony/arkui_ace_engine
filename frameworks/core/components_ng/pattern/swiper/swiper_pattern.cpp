@@ -5886,8 +5886,10 @@ void SwiperPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
 
     auto indicatorType = GetIndicatorType();
     if (indicatorType == SwiperIndicatorType::DOT) {
+        json->Delete("indicator");
         json->PutExtAttr("indicator", SwiperHelper::GetDotIndicatorStyle(GetSwiperParameters()).c_str(), filter);
     } else {
+        json->Delete("indicator");
         json->PutExtAttr(
             "indicator", SwiperHelper::GetDigitIndicatorStyle(GetSwiperDigitalParameters()).c_str(), filter);
     }
