@@ -733,6 +733,7 @@ enum ArkUINodeType {
     ARKUI_TAB_CONTENT,
     ARKUI_NAVIGATION,
     ARKUI_CUSTOM_SPAN,
+    ARKUI_SYMBOL_GLYPH,
     ARKUI_QRCODE,
     ARKUI_BADGE,
 };
@@ -4012,7 +4013,8 @@ struct ArkUISymbolGlyphModifier {
     void (*resetRenderingStrategy)(ArkUINodeHandle node);
     void (*setEffectStrategy)(ArkUINodeHandle node, ArkUI_Uint32 effectStrategy);
     void (*resetEffectStrategy)(ArkUINodeHandle node);
-    void (*setSymbolId)(ArkUINodeHandle node, ArkUI_Uint32 copyOption);
+    void (*setSymbolGlyphInitialize)(ArkUINodeHandle node, ArkUI_Uint32 symbolId);
+    void (*resetSymbolGlyphInitialize)(ArkUINodeHandle node);
 };
 
 struct ArkUISymbolSpanModifier {
