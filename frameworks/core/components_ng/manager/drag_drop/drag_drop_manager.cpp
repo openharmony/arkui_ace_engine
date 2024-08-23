@@ -720,6 +720,16 @@ void DragDropManager::ResetDragDropStatus(const Point& point, const DragDropRet&
     parentHitNodes_.clear();
     dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
 }
+
+void DragDropManager::ResetPreTargetFrameNode(int32_t instanceId)
+{
+    auto container = Container::GetContainer(instanceId);
+    if (container && (container->IsScenceBoardWindow() || container->IsUIExtensionWindow())) {
+        return;
+    }
+    preTargetFrameNode_ = nullptr;
+}
+
 void DragDropManager::DoDragReset()
 {
     dragDropState_ = DragDropMgrState::IDLE;
