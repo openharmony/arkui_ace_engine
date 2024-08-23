@@ -2382,12 +2382,11 @@ bool SwiperPattern::CheckOverScroll(float offset)
 
 bool SwiperPattern::SpringOverScroll(float offset)
 {
-    bool outOfBounds = isTouchPad_ ? IsOutOfBoundary(offset) : IsOutOfBoundary();
+    bool outOfBounds = IsOutOfBoundary(offset);
     if (!outOfBounds) {
         return false;
     }
     offset = IsHorizontalAndRightToLeft() ? -offset : offset;
-    targetIndex_.reset();
 
     auto visibleSize = CalculateVisibleSize();
     if (LessOrEqual(visibleSize, 0.0)) {
@@ -2746,6 +2745,10 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
     mainDeltaSum_ += mainDelta;
 
     if (IsAutoLinear() && AutoLinearIsOutOfBoundary(static_cast<float>(mainDelta))) {
+        return;
+    }
+
+    if (usePropertyAnimation_) {
         return;
     }
 
@@ -3584,7 +3587,7 @@ void SwiperPattern::CreateSpringProperty()
 void SwiperPattern::PlaySpringAnimation(double dragVelocity)
 {
     UpdateIgnoreBlankOffsetWithDrag(IsOutOfStart());
-    if (springAnimationIsRunning_) {
+    if (springAnimationIsRunning_ || usePropertyAnimation_) {
         return;
     }
     auto host = GetHost();
