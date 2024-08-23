@@ -189,6 +189,9 @@ void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     gestureHub->AddPanEvent(panEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        gestureHub->SetIsAllowMouse(false);
+    }
 }
 
 void RefreshPattern::InitOnKeyEvent()
