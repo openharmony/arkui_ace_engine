@@ -1082,7 +1082,8 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         DragEventActuator::MountPixelMap(subWindowOverlayManager, eventHub->GetGestureEventHub(), imageNode, textNode);
         pipeline->FlushSyncGeometryNodeTasks();
         DragAnimationHelper::ShowBadgeAnimation(textNode);
-        dragDropManager->DoDragStartAnimation(subWindowOverlayManager, info, isMenuShow);
+        dragDropManager->DoDragStartAnimation(
+            subWindowOverlayManager, info, eventHub->GetGestureEventHub(), isMenuShow);
         if (hasContextMenu) {
             //response: 0.347, dampingRatio: 0.99, blendDuration: 0.0
             const RefPtr<Curve> curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.347f, 0.99f, 0.0f);
