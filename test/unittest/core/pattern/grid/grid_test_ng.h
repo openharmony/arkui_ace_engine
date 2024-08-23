@@ -73,6 +73,8 @@ public:
     void UpdateCurrentOffset(float offset, int32_t source = SCROLL_FROM_UPDATE);
     void CreateAdaptChildSizeGridItems(int32_t itemNumber, GridItemStyle gridItemStyle = GridItemStyle::NONE);
 
+    void CheckPreloadListEqual(const std::list<int32_t>& expectedList) const;
+
     RefPtr<FrameNode> frameNode_;
     RefPtr<GridPattern> pattern_;
     RefPtr<GridEventHub> eventHub_;
