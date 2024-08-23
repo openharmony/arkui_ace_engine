@@ -54,6 +54,13 @@ struct CalendarThemeStructure {
     std::string dayFontWeight = "500";
     std::string lunarDayFontWeight = "500";
     std::string workStateFontWeight = "500";
+    std::string monday;
+    std::string tuesday;
+    std::string wednesday;
+    std::string thursday;
+    std::string friday;
+    std::string saturday;
+    std::string sunday;
     Color weekColor;
     Color dayColor;
     Color lunarColor;
@@ -218,6 +225,13 @@ public:
                 CALENDAR_FOCUS_AREA_BACKGROUND_COLOR, DEFAULT_CALENDAR_FOCUS_AREA_BACKGROUND_COLOR);
             theme->calendarTheme_.blurAreaBackgroundColor = pattern->GetAttr<Color>(
                 CALENDAR_BLUR_AREA_BACKGROUND_COLOR, DEFAULT_CALENDAR_BLUR_AREA_BACKGROUND_COLOR);
+            theme->calendarTheme_.monday = pattern->GetAttr<std::string>("calendar_picker_mon", "");
+            theme->calendarTheme_.tuesday = pattern->GetAttr<std::string>("calendar_picker_tue", "");
+            theme->calendarTheme_.wednesday = pattern->GetAttr<std::string>("calendar_picker_wed", "");
+            theme->calendarTheme_.thursday = pattern->GetAttr<std::string>("calendar_picker_thu", "");
+            theme->calendarTheme_.friday = pattern->GetAttr<std::string>("calendar_picker_fri", "");
+            theme->calendarTheme_.saturday = pattern->GetAttr<std::string>("calendar_picker_sat", "");
+            theme->calendarTheme_.sunday = pattern->GetAttr<std::string>("calendar_picker_sun", "");
         }
 
         void ParseCalenderPickerFirstPart(const RefPtr<ThemeConstants>& themeConstants,
