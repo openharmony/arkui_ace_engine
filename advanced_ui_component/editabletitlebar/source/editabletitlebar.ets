@@ -99,9 +99,9 @@ class ButtonGestureModifier implements GestureModifier {
   }
 
   applyGesture(event: UIGestureEvent): void {
-    if (this.fontSize >= this.minFontSize) {
+    if (this.fontSize >= ButtonGestureModifier.minFontSize) {
       event.addGesture(
-        new LongPressGestureHandler({ repeat: false, duration: this.longPressTime })
+        new LongPressGestureHandler({ repeat: false, duration: ButtonGestureModifier.longPressTime })
           .onAction(() => {
             if (event) {
               this.controller?.open();
