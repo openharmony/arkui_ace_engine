@@ -2471,13 +2471,10 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     CHECK_NULL_VOID(!HandleClickSelection(info) && !isClickSingleHandle);
 
     Offset textOffset = ConvertTouchOffsetToTextOffset(info.GetLocalLocation());
-    if (!isMousePressed_) {
-        HandleClickAISpanEvent(PointF(textOffset.GetX(), textOffset.GetY()));
-    }
+    IF_TRUE(!isMousePressed_, HandleClickAISpanEvent(PointF(textOffset.GetX(), textOffset.GetY())));
+
     if (dataDetectorAdapter_->hasClickedAISpan_ || dataDetectorAdapter_->pressedByLeftMouse_) {
-        if (selectOverlay_->SelectOverlayIsOn()) {
-            selectOverlay_->DisableMenu();
-        }
+        IF_TRUE(SelectOverlayIsOn(), selectOverlay_->DisableMenu());
         return;
     }
 
@@ -2496,8 +2493,7 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     bool isCaretTwinkling = caretTwinkling_;
     auto position = paragraphs_.GetIndex(textOffset);
     AdjustCursorPosition(position);
-    auto focusHub = GetFocusHub();
-    if (focusHub) {
+    if (auto focusHub = GetFocusHub(); focusHub) {
         SetCaretPosition(position);
         if (focusHub->RequestFocusImmediately()) {
             StartTwinkling();
@@ -3926,7 +3922,7 @@ void RichEditorPattern::ResetDragSpanItems()
 
 bool RichEditorPattern::SelectOverlayIsOn()
 {
-    return  selectOverlay_->SelectOverlayIsOn();
+    return selectOverlay_->SelectOverlayIsOn();
 }
 
 void RichEditorPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent)
