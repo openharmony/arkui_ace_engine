@@ -482,8 +482,8 @@ export class ToolBar extends ViewPU {
       ViewStackProcessor.visualState('normal');
       Button.backgroundColor(this.toolBarItemBackground[p5]);
       ViewStackProcessor.visualState();
-      Button.onTouch((f6) => {
-        this.touchEventAction(f6, p5);
+      Button.onClick(() => {
+        this.clickEventAction(p5);
       });
       Button.gestureModifier(this.toolBarItemGestureModifier[p5]);
     }, Button);
@@ -596,8 +596,8 @@ export class ToolBar extends ViewPU {
       ViewStackProcessor.visualState('normal');
       Button.backgroundColor(this.toolBarItemBackground[o4]);
       ViewStackProcessor.visualState();
-      Button.onTouch((n5) => {
-        this.touchEventAction(n5, o4);
+      Button.onClick(() => {
+        this.clickEventAction(o4);
       });
       Button.onClick(() => {
       });
@@ -764,20 +764,18 @@ export class ToolBar extends ViewPU {
     return v3;
   }
 
-  touchEventAction(q3, r3) {
-    if (q3.type === TouchType.Up || q3.type === TouchType.Cancel) {
-      let s3 = this.toolBarList[r3];
-      if (s3.state === ItemState.ACTIVATE) {
-        if (this.activateIndex === r3) {
-          this.activateIndex = -1;
-        }
-        else {
-          this.activateIndex = r3;
-        }
+  clickEventAction(d4) {
+    let e4 = this.toolBarList[d4];
+    if (e4.state === ItemState.ACTIVATE) {
+      if (this.activateIndex === d4) {
+        this.activateIndex = -1;
       }
-      if (!(s3.state === ItemState.DISABLE)) {
-        s3.action && s3.action();
+      else {
+        this.activateIndex = d4;
       }
+    }
+    if (!(e4.state === ItemState.DISABLE)) {
+      e4.action && e4.action();
     }
   }
 

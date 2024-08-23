@@ -207,8 +207,8 @@ export struct ToolBar {
         .backgroundColor(this.toolBarItemBackground[index])
       }
     })
-    .onTouch((event) => {
-      this.touchEventAction(event, index);
+    .onClick(() => {
+      this.clickEventAction(index);
     })
     .gestureModifier(this.toolBarItemGestureModifier[index])
   }
@@ -277,10 +277,8 @@ export struct ToolBar {
         .backgroundColor(this.toolBarItemBackground[index])
       }
     })
-    .onTouch((event) => {
-      this.touchEventAction(event, index);
-    })
     .onClick(() => {
+      this.clickEventAction(index);
     })
     .gestureModifier(this.toolBarItemGestureModifier[index])
   }
@@ -349,19 +347,17 @@ export struct ToolBar {
     return lengthString;
   }
 
-  private touchEventAction(event: TouchEvent, index: number): void {
-    if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-      let toolbar = this.toolBarList[index];
-      if (toolbar.state === ItemState.ACTIVATE) {
-        if (this.activateIndex === index) {
-          this.activateIndex = -1;
-        } else {
-          this.activateIndex = index;
-        }
+  private clickEventAction(index: number): void {
+    let toolbar = this.toolBarList[index];
+    if (toolbar.state === ItemState.ACTIVATE) {
+      if (this.activateIndex === index) {
+        this.activateIndex = -1;
+      } else {
+        this.activateIndex = index;
       }
-      if (!(toolbar.state === ItemState.DISABLE)) {
-        toolbar.action && toolbar.action();
-      }
+    }
+    if (!(toolbar.state === ItemState.DISABLE)) {
+      toolbar.action && toolbar.action();
     }
   }
 
