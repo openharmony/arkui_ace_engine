@@ -119,7 +119,7 @@ HWTEST_F(LongPressEventTestNg, LongPressEventActuatorTest002, TestSize.Level1)
      * @tc. OnCollectTouchTarget return directly
      */
     TouchTestResult result;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     longPressEventActuator->OnCollectTouchTarget(
         COORDINATE_OFFSET, LONG_PRESS_TOUCH_RESTRICT, eventHub->CreateGetEventTargetImpl(), result, responseLinkResult);
     EXPECT_EQ(result.size(), LONG_PRESS_TEST_RESULT_SIZE);

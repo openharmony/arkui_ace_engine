@@ -53,7 +53,7 @@ bool ScrollableActuator::RemoveScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& 
 void ScrollableActuator::CollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const PointF& localPoint,
     const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-    TouchTestResult& responseLinkResult)
+    ResponseLinkResult& responseLinkResult)
 {
     for (const auto& [axis, event] : scrollableEvents_) {
         if (!event) {
@@ -118,7 +118,7 @@ void ScrollableActuator::InitClickRecognizer(const OffsetF& coordinateOffset,
 
 void ScrollableEvent::CollectScrollableTouchTarget(const OffsetF& coordinateOffset,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
-    const RefPtr<TargetComponent>& targetComponent, TouchTestResult& responseLinkResult)
+    const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult)
     {
         if (scrollable_) {
             scrollable_->SetGetEventTargetImpl(getEventTargetImpl);
