@@ -187,6 +187,7 @@ public:
     static void ReportEventJankFrame(DataBase& data);
     static void ReportJankFrameApp(JankInfo& info);
     static void ReportJankFrameFiltered(JankInfo& info);
+    static void ReportJankFrameUnFiltered(JankInfo& info);
     static void ReportDoubleClickTitle(int32_t stateChange);
     static void ReportClickTitleMaximizeMenu(int32_t maxMenuItem, int32_t stateChange);
     static void ReportPageNodeOverflow(const std::string& pageUrl, int32_t nodeCount, int32_t threshold);
