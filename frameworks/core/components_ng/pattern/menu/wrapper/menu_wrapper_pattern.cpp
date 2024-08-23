@@ -30,6 +30,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+constexpr int32_t FOCUS_MENU_NUM = 2;
 void MenuWrapperPattern::HideMenu(const RefPtr<FrameNode>& menu)
 {
     if (GetHost()->GetTag() == V2::SELECT_OVERLAY_ETS_TAG) {
@@ -307,11 +308,12 @@ RefPtr<FrameNode> MenuWrapperPattern::MenuFocusViewShow()
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     auto iter = host->GetChildren().begin();
-    int32_t focusNodeId = 2;
-    std::advance(iter, host->GetChildren().size() - focusNodeId);
+    int32_t focusNodeId = static_cast<int32_t>(host->GetChildren().size()) - FOCUS_MENU_NUM;
+    CHECK_NULL_RETURN(focusNodeId >= 0, nullptr);
+    std::advance(iter, focusNodeId);
     auto focusMenu = DynamicCast<FrameNode>(*iter);
     CHECK_NULL_RETURN(focusMenu, nullptr);
-    if (focusMenu->GetPattern<MenuPreviewPattern>()) {
+    if (GetPreviewMode() != MenuPreviewMode::NONE && focusNodeId == 1) {
         focusMenu = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
         CHECK_NULL_RETURN(focusMenu, nullptr);
     }
@@ -690,6 +692,23 @@ RefPtr<FrameNode> MenuWrapperPattern::GetMenuChild(const RefPtr<UINode>& node)
         child = child->GetChildAtIndex(0);
     }
     return menuChild;
+}
+
+void MenuWrapperPattern::ClearAllSubMenu()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto children = host->GetChildren();
+    for (auto child = children.rbegin(); child != children.rend(); ++child) {
+        auto frameNode = DynamicCast<FrameNode>(*child);
+        if (!frameNode) {
+            continue;
+        }
+        auto pattern = frameNode->GetPattern<MenuPattern>();
+        if (pattern && pattern->IsSubMenu()) {
+            host->RemoveChild(frameNode);
+        }
+    }
 }
 
 void MenuWrapperPattern::DumpInfo()
