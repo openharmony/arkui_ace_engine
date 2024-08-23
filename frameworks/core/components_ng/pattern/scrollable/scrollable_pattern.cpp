@@ -124,10 +124,8 @@ void ScrollablePattern::UpdateFadingEdge(const RefPtr<ScrollablePaintMethod>& pa
     }
     auto isFadingTop = !IsAtTop();
     auto isFadingBottom = !IsAtBottom();
-    if (isFadingTop || isFadingBottom) {
-        paint->SetOverlayRenderContext(overlayRenderContext);
-        UpdateFadeInfo(isFadingTop, isFadingBottom, paint);
-    }
+    paint->SetOverlayRenderContext(overlayRenderContext);
+    UpdateFadeInfo(isFadingTop, isFadingBottom, paint);
 }
 
 void ScrollablePattern::UpdateFadeInfo(

@@ -43,9 +43,8 @@ class ACE_EXPORT ListPaintMethod : public ScrollablePaintMethod {
     DECLARE_ACE_TYPE(ListPaintMethod, ScrollablePaintMethod)
 public:
     using PositionMap = ListLayoutAlgorithm::PositionMap;
-    ListPaintMethod(
-        const V2::ItemDivider& divider, bool vertical, int32_t lanes, float space)
-        : ScrollablePaintMethod(vertical), divider_(divider), lanes_(lanes), space_(space)
+    ListPaintMethod(const V2::ItemDivider& divider, bool vertical, bool isReverse, int32_t lanes, float space)
+        : ScrollablePaintMethod(vertical, isReverse), divider_(divider), lanes_(lanes), space_(space)
     {}
     ~ListPaintMethod() override = default;
 
