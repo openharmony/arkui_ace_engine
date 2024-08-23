@@ -9500,7 +9500,7 @@ class SpanFontModifier extends ModifierWithKey {
   }
   checkObjectDiff() {
     if (this.stageValue.weight !== this.value.weight || this.stageValue.style !== this.value.style ||
-      this.stageValue.enableVariableFontWeight != this.value.enableVariableFontWeight) {
+      this.stageValue.enableVariableFontWeight !== this.value.enableVariableFontWeight) {
       return true;
     }
     if (((isResource(this.stageValue.size) && isResource(this.value.size) &&
@@ -11159,7 +11159,7 @@ class TextFontModifier extends ModifierWithKey {
   }
   checkObjectDiff() {
     if (this.stageValue.weight !== this.value.weight || this.stageValue.style !== this.value.style ||
-      this.stageValue.enableVariableFontWeight != this.value.enableVariableFontWeight) {
+      this.stageValue.enableVariableFontWeight !== this.value.enableVariableFontWeight) {
       return true;
     }
     if (((isResource(this.stageValue.size) && isResource(this.value.size) &&
