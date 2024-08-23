@@ -1176,7 +1176,6 @@ void FocusHub::OnFocusNode()
 
     auto focusManager = pipeline->GetOrCreateFocusManager();
     CHECK_NULL_VOID(focusManager);
-    focusManager->PaintFocusState();
     focusManager->UpdateCurrentFocus(Claim(this), SwitchingUpdateReason::ON_FOCUS_NODE);
     if (focusType_ == FocusType::NODE) {
         focusManager->FocusSwitchingEnd(SwitchingEndReason::NODE_FOCUS);
@@ -1217,9 +1216,6 @@ void FocusHub::OnBlurNode()
     if (blurReason_ != BlurReason::FRAME_DESTROY) {
         ClearFocusState();
     }
-    auto focusManager = pipeline->GetOrCreateFocusManager();
-    CHECK_NULL_VOID(focusManager);
-    focusManager->PaintFocusState();
 
     pipeline->RequestFrame();
 }

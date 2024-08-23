@@ -1499,7 +1499,7 @@ void UINode::CollectRemovedChildren(const std::list<RefPtr<UINode>>& children,
     std::list<int32_t>& removedElmtId, bool isEntry)
 {
     for (auto const& child : children) {
-        if (!child->IsDisappearing() && child->GetTag() != V2::RECYCLE_VIEW_ETS_TAG) {
+        if (!child->IsDisappearing() && child->GetTag() != V2::RECYCLE_VIEW_ETS_TAG && !child->GetIsRootBuilderNode()) {
             CollectRemovedChild(child, removedElmtId);
         }
     }
@@ -1510,9 +1510,6 @@ void UINode::CollectRemovedChildren(const std::list<RefPtr<UINode>>& children,
 
 void UINode::CollectRemovedChild(const RefPtr<UINode>& child, std::list<int32_t>& removedElmtId)
 {
-    if (child->GetNodeStatus() != NodeStatus::NORMAL_NODE) {
-        return;
-    }
     removedElmtId.emplace_back(child->GetId());
     // Fetch all the child elementIDs recursively
     if (child->GetTag() != V2::JS_VIEW_ETS_TAG) {

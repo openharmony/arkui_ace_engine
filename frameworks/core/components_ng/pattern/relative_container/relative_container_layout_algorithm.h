@@ -121,7 +121,7 @@ private:
     float CalcHorizontalOffsetAlignRight(const HorizontalAlign& alignRule, float& anchorWidth, float& flexItemWidth);
     float CalcHorizontalOffset(
         AlignDirection alignDirection, const AlignRule& alignRule, float containerWidth, const std::string& nodeName);
-    float CalcAnchorWidth(bool anchorIsContainer, float& containerWidth, const std::string& anchor);
+    float CalcAnchorWidth(bool anchorIsContainer, float containerWidth, const std::string& anchor);
     float CalcVerticalOffsetAlignTop(const VerticalAlign& alignRule, float& anchorHeight);
     float CalcVerticalOffsetAlignCenter(const VerticalAlign& alignRule, float& anchorHeight, float& flexItemHeight);
     float CalcVerticalOffsetAlignBottom(const VerticalAlign& alignRule, float& anchorHeight, float& flexItemHeight);

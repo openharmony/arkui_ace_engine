@@ -103,6 +103,7 @@ declare class UINodeRegisterProxy {
   private obtainDeletedElmtIds(): void;
   public static unregisterElmtIdsFromIViews(): void;
   public static obtainDeletedElmtIds(): void;
+  public static unregisterRemovedElmtsFromViewPUs(removedElements: Array<number>): void;
 }
 
 declare interface RegisterParams {
@@ -189,6 +190,10 @@ declare class ArkFlowItemComponent extends ArkComponent {}
 declare class ArkQRCodeComponent extends ArkComponent {}
 
 declare class ArkBadgeComponent extends ArkComponent {}
+
+declare class ArkGridComponent extends ArkComponent {}
+
+declare class ArkGridItemComponent extends ArkComponent {}
 
 declare class UICommonEvent {
   private _nodePtr: NodePtr;

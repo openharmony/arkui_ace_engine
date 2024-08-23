@@ -363,11 +363,13 @@ int32_t WaterFlowLayoutInfo::FastSolveEndIndex(float mainSize) const
         return -1;
     }
 
-    auto it = std::lower_bound(itemInfos_.begin(), itemInfos_.end(), mainSize - currentOffset_,
+    const float endBound = mainSize - currentOffset_;
+    auto it = std::lower_bound(itemInfos_.begin(), itemInfos_.end(), endBound,
         [](const ItemInfo& info, float value) { return LessNotEqual(info.mainOffset, value); });
 
-    if (it == itemInfos_.end()) {
-        return static_cast<int32_t>(itemInfos_.size()) - 1;
+    // The last flowItem with the height of 0 should be regarded as endIndex_ when reach end.
+    while (it != itemInfos_.end() && NearZero(it->mainSize) && NearEqual(it->mainOffset, endBound)) {
+        ++it;
     }
     int32_t res = std::distance(itemInfos_.begin(), it) - 1;
     return std::max(res, 0);

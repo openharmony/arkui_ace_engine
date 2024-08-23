@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 124
+#define ARKUI_FULL_API_VERSION 126
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 124
+#define ARKUI_NODE_API_VERSION 126
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 8
@@ -280,6 +280,23 @@ struct ArkUIFontStruct {
     ArkUI_Int32 fontStyle;
     ArkUI_CharPtr* fontFamilies;
     ArkUI_Uint32 familyLength;
+};
+
+struct ArkUIFontWithOptionsStruct {
+    ArkUI_Float32 fontSizeNumber;
+    ArkUI_Int32 fontSizeUnit;
+    ArkUI_Int32 fontWeight;
+    ArkUI_Int32 fontStyle;
+    ArkUI_CharPtr* fontFamilies;
+    ArkUI_Uint32 familyLength;
+    ArkUI_Int32 variableFontWeight;
+    ArkUI_Bool enableVariableFontWeight;
+};
+
+struct ArkUIFontWeightWithOptionsStruct {
+    ArkUI_CharPtr weight;
+    ArkUI_Int32 variableFontWeight;
+    ArkUI_Bool enableVariableFontWeight;
 };
 
 struct ArkUISearchButtonOptionsStruct {
@@ -1401,6 +1418,10 @@ struct ArkUI_SystemFontStyleEvent {
 };
 typedef ArkUI_SystemFontStyleEvent* ArkUISystemFontStyleEvent;
 
+typedef struct ArkUI_Params {
+    ArkUINodeType nodeType;
+} ArkUI_Params;
+
 struct ArkUICommonModifier {
     void (*setBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetBackgroundColor)(ArkUINodeHandle node);
@@ -1842,6 +1863,8 @@ struct ArkUICommonModifier {
     void (*resetFocusBoxStyle)(ArkUINodeHandle node);
     void (*setDisAllowDrop)(ArkUINodeHandle node);
     void (*setBlendModeByBlender)(ArkUINodeHandle node, ArkUINodeHandle blender, ArkUI_Int32 blendApplyTypeValue);
+    void (*resetEnableAnalyzer)(ArkUINodeHandle node);
+    void (*setEnableAnalyzer)(ArkUINodeHandle node, ArkUI_Bool enable);
 };
 
 struct ArkUICommonShapeModifier {
@@ -1967,9 +1990,10 @@ struct ArkUITextModifier {
     void (*resetTextBaselineOffset)(ArkUINodeHandle node);
     void (*setTextLetterSpacing)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetTextLetterSpacing)(ArkUINodeHandle node);
-    void (*setTextFont)(ArkUINodeHandle node, const struct ArkUIFontStruct* fontInfo);
+    void (*setTextFont)(ArkUINodeHandle node, const struct ArkUIFontWithOptionsStruct* fontInfo);
     void (*resetTextFont)(ArkUINodeHandle node);
     void (*setFontWeightStr)(ArkUINodeHandle node, ArkUI_CharPtr weight);
+    void (*setFontWeightWithOption)(ArkUINodeHandle node, const struct ArkUIFontWeightWithOptionsStruct* weightInfo);
     void (*setWordBreak)(ArkUINodeHandle node, ArkUI_Uint32 wordBreak);
     void (*resetWordBreak)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getFontFamily)(ArkUINodeHandle node);
@@ -2570,6 +2594,7 @@ struct ArkUIGridItemModifier {
     void (*resetGridItemColumnStart)(ArkUINodeHandle node);
     void (*setGridItemColumnEnd)(ArkUINodeHandle node, ArkUI_Int32 columnEnd);
     void (*resetGridItemColumnEnd)(ArkUINodeHandle node);
+    void (*setGridItemOptions)(ArkUINodeHandle node, ArkUI_Int32 style);
 };
 
 struct ArkUIScrollModifier {
@@ -4457,6 +4482,12 @@ struct ArkUIXComponentModifier {
     ArkUI_CharPtr (*getXComponentSurfaceId)(ArkUIXComponentControllerHandle controller);
     ArkUIXComponentControllerHandle (*getXComponentController)(ArkUINodeHandle node);
 
+    void (*setXComponentWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue);
+    void (*resetXComponentWidth)(ArkUINodeHandle node);
+    void (*setXComponentHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue);
+    void (*resetXComponentHeight)(ArkUINodeHandle node);
+    void (*setXComponentEnableAnalyzer)(ArkUINodeHandle node, ArkUI_Bool enable);
+    void (*resetXComponentEnableAnalyzer)(ArkUINodeHandle node);
     void (*setXComponentBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetXComponentBackgroundColor)(ArkUINodeHandle node);
     void (*setXComponentOpacity)(ArkUINodeHandle node, ArkUI_Float32 opacity);
@@ -4848,6 +4879,8 @@ typedef void (*EventReceiver)(ArkUINodeEvent* event);
 struct ArkUIBasicAPI {
     /// Tree operations.
     ArkUINodeHandle (*createNode)(ArkUINodeType type, ArkUI_Int32 id, ArkUI_Int32 flags);
+    ArkUINodeHandle (*createNodeWithParams)(
+        ArkUINodeType type, ArkUI_Int32 id, ArkUI_Int32 flags, const ArkUI_Params& params);
     ArkUINodeHandle (*getNodeByViewStack)();
     void (*disposeNode)(ArkUINodeHandle node);
     // Returned pointer is valid only till node is alive.

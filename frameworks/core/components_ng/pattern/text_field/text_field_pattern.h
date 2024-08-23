@@ -155,10 +155,21 @@ enum class RequestKeyboardReason {
     MOUSE_RELEASE,
     SET_SELECTION,
     SEARCH_REQUEST,
-    AUTO_FILL_REQUEST_FILL,
+    AUTO_FILL_REQUEST_FAIL,
     SHOW_KEYBOARD_ON_FOCUS,
     STYLUS_DETECTOR,
     CUSTOM_KEYBOARD
+};
+
+enum class RequestFocusReason {
+    UNKNOWN = 0,
+    DRAG_END,
+    DRAG_MOVE,
+    CLICK,
+    LONG_PRESS,
+    AUTO_FILL,
+    CLEAN_NODE,
+    MOUSE,
 };
 
 struct PreviewTextInfo {
@@ -656,6 +667,12 @@ public:
     void SearchRequestKeyboard();
 
     bool RequestKeyboardNotByFocusSwitch(RequestKeyboardReason reason = RequestKeyboardReason::UNKNOWN);
+
+    bool TextFieldRequestFocus(RequestFocusReason reason = RequestFocusReason::UNKNOWN);
+
+    static std::string RequestFocusReasonToString(RequestFocusReason reason);
+
+    static std::string RequestKeyboardReasonToString(RequestKeyboardReason reason);
 
     bool GetTextObscured() const
     {

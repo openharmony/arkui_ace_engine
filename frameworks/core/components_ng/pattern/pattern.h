@@ -636,6 +636,11 @@ public:
 
     virtual void NotifyDataChange(int32_t index, int32_t count) {};
 
+    virtual bool RenderCustomChild(int64_t deadline)
+    {
+        return true;
+    }
+
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}
