@@ -16,8 +16,6 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_line_ffi.h"
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_shape_ffi.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
-#include "core/components_ng/pattern/shape/line_model.h"
 #include "core/components_ng/pattern/shape/line_model_ng.h"
 
 using namespace OHOS::Ace;

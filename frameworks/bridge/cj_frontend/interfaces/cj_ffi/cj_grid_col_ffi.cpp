@@ -15,7 +15,6 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_grid_col_ffi.h"
 
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/grid_col/grid_col_model_ng.h"
 
 using namespace OHOS::Ace;

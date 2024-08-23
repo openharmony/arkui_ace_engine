@@ -14,9 +14,6 @@
  */
 
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
-#include "frameworks/base/log/log_wrapper.h"
-
-#include <iostream>
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 namespace OHOS::Ace::Framework {

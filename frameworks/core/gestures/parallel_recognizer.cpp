@@ -15,12 +15,6 @@
 
 #include "core/gestures/parallel_recognizer.h"
 
-#include <vector>
-
-#include "base/geometry/offset.h"
-#include "base/log/log.h"
-#include "core/gestures/gesture_referee.h"
-
 namespace OHOS::Ace {
 
 void ParallelRecognizer::OnAccepted(size_t touchId)

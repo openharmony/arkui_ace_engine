@@ -5344,7 +5344,7 @@ typedef enum {
      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
      * {@link ArkUI_NodeComponentEvent}. \n
      * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
-     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: corresponds to {@link ArkUI_PreViewDragStatus}. \n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: corresponds to {@link ArkUI_PreDragStatus}. \n
      */
     NODE_ON_PRE_DRAG = 14,
     /**
@@ -6064,7 +6064,8 @@ typedef enum {
      * settings, such as keyboard and mouse operations. \n
      * 2. Scrolling can be initiated by calling the controller API. \n
      * 3. The out-of-bounds bounce effect is supported. \n
-     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is {@link ArkUI_NodeComponentEvent}. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
      * {@link ArkUI_NodeComponentEvent} contains two parameters: \n
      * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: scroll offset of each frame. The offset is positive when the list
      * is scrolled up and negative when the list is scrolled down. \n
@@ -7393,6 +7394,74 @@ int32_t OH_ArkUI_List_CloseAllSwipeActions(ArkUI_NodeHandle node, void* userData
 * @since 12
 */
 ArkUI_ContextHandle OH_ArkUI_GetContextByNode(ArkUI_NodeHandle node);
+
+/**
+ * @brief The event called when the system color mode changes.
+ *        Only one system color change callback can be registered for the same component.
+ *
+ * @param node Indicates the target node.
+ * @param userData Indicates the custom data to be saved.
+ * @param onColorModeChange Callback Events.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ *         {@link ARKUI_ERROR_CODE_ATTRIBUTE_OR_EVENT_NOT_SUPPORTED} The component does not support this event.
+ * @since 12
+ */
+int32_t OH_ArkUI_RegisterSystemColorModeChangeEvent(
+    ArkUI_NodeHandle node, void* userData, void (*onColorModeChange)(ArkUI_SystemColorMode colorMode, void* userData));
+
+/**
+ * @brief Unregister the event callback when the system color mode changes.
+ *
+ * @param node Indicates the target node.
+ * @since 12
+ */
+void OH_ArkUI_UnregisterSystemColorModeChangeEvent(ArkUI_NodeHandle node);
+
+/**
+ * @brief The event called when the system font style changes.
+ *        Only one system font change callback can be registered for the same component.
+ *
+ * @param node Indicates the target node.
+ * @param userData Indicates the custom data to be saved.
+ * @param onFontStyleChange Callback Events.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ *         {@link ARKUI_ERROR_CODE_ATTRIBUTE_OR_EVENT_NOT_SUPPORTED} The component does not support this event.
+ * @since 12
+ */
+int32_t OH_ArkUI_RegisterSystemFontStyleChangeEvent(ArkUI_NodeHandle node, void* userData,
+    void (*onFontStyleChange)(ArkUI_SystemFontStyleEvent* event, void* userData));
+
+/**
+ * @brief Unregister the event callback when the system font style changes.
+ *
+ * @param node Indicates the target node.
+ * @since 12
+ */
+void OH_ArkUI_UnregisterSystemFontStyleChangeEvent(ArkUI_NodeHandle node);
+
+/**
+ * @brief Retrieve the font size value for system font change events.
+ *
+ * @param event Indicates a pointer to the current system font change event.
+ * @return Updated system font size scaling factor. Default value: 1.0.
+ *         -1 indicates a retrieval error.
+ * @since 12
+ */
+float OH_ArkUI_SystemFontStyleEvent_GetFontSizeScale(const ArkUI_SystemFontStyleEvent* event);
+
+/**
+ * @brief Retrieve the font thickness values for system font change events.
+ *
+ * @param event Indicates a pointer to the current system font change event.
+ * @return The updated system font thickness scaling factor. Default value: 1.0.
+ *         -1 indicates a retrieval error.
+ * @since 12
+ */
+float OH_ArkUI_SystemFontStyleEvent_GetFontWeightScale(const ArkUI_SystemFontStyleEvent* event);
 
 #ifdef __cplusplus
 };

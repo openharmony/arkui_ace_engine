@@ -14,7 +14,6 @@
  */
 
 #include "base/utils/measure_util.h"
-#include "base/geometry/size.h"
 #include "core/components/custom_paint/render_custom_paint.h"
 
 namespace OHOS::Ace {

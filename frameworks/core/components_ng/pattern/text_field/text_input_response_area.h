@@ -110,9 +110,13 @@ public:
 
 private:
     void LoadImageSourceInfo();
+    void AddImageEventOnError();
     void ChangeObscuredState();
     ImageSourceInfo GetDefaultSourceInfo(bool isObscured);
     void UpdateImageSource();
+    void UpdateSymbolSource();
+    void InitSymbolEffectOptions();
+    bool IsShowSymbol();
     bool IsShowPasswordIcon();
     float GetIconRightOffset();
     float GetIconSize();

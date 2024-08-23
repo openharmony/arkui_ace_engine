@@ -114,6 +114,7 @@ public:
     void RecoveryNavigationStack() override;
     bool NeedBuildNewInstance(int32_t index) override;
     void SetNeedBuildNewInstance(int32_t index, bool need) override;
+    void SetIsEntryByIndex(int32_t index, bool isEntry) override;
 
 protected:
     JSRef<JSObject> dataSourceObj_;
@@ -126,6 +127,7 @@ private:
     JSRef<JSObject> GetJsPathInfo(int32_t index);
     std::string GetNameByIndex(int32_t index);
     JSRef<JSVal> GetOnPopByIndex(int32_t index) const;
+    bool GetIsEntryByIndex(int32_t index);
     JSRef<JSObject> CreatePathInfoWithNecessaryProperty(const RefPtr<NG::NavDestinationContext>& context);
     bool GetNavDestinationNodeInUINode(RefPtr<NG::UINode> node, RefPtr<NG::NavDestinationGroupNode>& desNode);
     int32_t GetSize() const;
@@ -133,9 +135,9 @@ private:
     std::string ConvertParamToString(const JSRef<JSVal>& param) const;
     void ParseJsObject(std::unique_ptr<JsonValue>& json, const JSRef<JSObject>& obj, int32_t depthLimit) const;
     static void UpdateOnStateChangedCallback(
-        JSRef<JSObject> obj, std::function<void()> callback, const RefPtr<JSNavigationStack>& stack);
+        JSRef<JSObject> obj, std::function<void()> callback);
     static void UpdateCheckNavDestinationExistsFunc(
-        JSRef<JSObject> obj, std::function<int32_t(JSRef<JSObject>)> checkFunc, const RefPtr<JSNavigationStack>& stack);
+        JSRef<JSObject> obj, std::function<int32_t(JSRef<JSObject>)> checkFunc);
 
     int LoadDestination(const std::string& name, const JSRef<JSVal>& param, const WeakPtr<NG::UINode>& customNode,
         RefPtr<NG::UINode>& node, RefPtr<NG::NavDestinationGroupNode>& desNode);

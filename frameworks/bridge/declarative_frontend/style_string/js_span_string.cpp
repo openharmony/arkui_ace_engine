@@ -16,9 +16,12 @@
 #include "frameworks/bridge/declarative_frontend/style_string/js_span_string.h"
 
 #include <unordered_set>
+#include "securec.h"
 
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
+#include "core/common/container.h"
+#include "core/common/container_scope.h"
 #include "core/components_ng/pattern/text/span/mutable_span_string.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
 #include "core/text/html_utils.h"
@@ -38,9 +41,18 @@ struct HtmlConverterAsyncCtx {
     int32_t errCode = -1;
     int32_t instanceId = -1;
 };
+struct AsyncContext {
+    napi_env env = nullptr;
+    napi_deferred deferred = nullptr;
+    napi_async_work asyncWork;
+    std::vector<uint8_t> buffer;
+    RefPtr<SpanString> spanString;
+    int32_t status = -1;
+};
 
-std::unordered_map<int32_t, std::string> FROM_HTML_ERROR_MAP = {
+std::unordered_map<int32_t, std::string> ASYNC_ERROR_MAP = {
     { ERROR_CODE_FROM_HTML_CONVERT_ERROR, "Convert error." },
+    { ERROR_CODE_STYLED_STRING_CONVERT_ERROR, "Styled string decode error."},
     { ERROR_CODE_PARAM_INVALID, "Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;"
         "2. Incorrect parameter types; 3. Parameter verification failed." }
 };
@@ -72,7 +84,7 @@ void ProcessPromiseCallback(std::shared_ptr<HtmlConverterAsyncCtx> asyncContext,
     if (callbackCode == ERROR_CODE_NO_ERROR) {
         napi_resolve_deferred(asyncContext->env, asyncContext->deferred, spanStr);
     } else {
-        napi_value error = CreateErrorValue(asyncContext->env, callbackCode, FROM_HTML_ERROR_MAP[callbackCode]);
+        napi_value error = CreateErrorValue(asyncContext->env, callbackCode, ASYNC_ERROR_MAP[callbackCode]);
         napi_reject_deferred(asyncContext->env, asyncContext->deferred, error);
     }
     napi_close_handle_scope(asyncContext->env, scope);
@@ -89,7 +101,7 @@ void ReturnPromise(const JSCallbackInfo& info, int32_t errCode)
     napi_create_promise(env, &deferred, &promise);
 
     if (errCode != ERROR_CODE_NO_ERROR) {
-        napi_value result = CreateErrorValue(env, errCode, FROM_HTML_ERROR_MAP[errCode]);
+        napi_value result = CreateErrorValue(env, errCode, ASYNC_ERROR_MAP[errCode]);
         napi_reject_deferred(env, deferred, result);
     } else {
         napi_value result = nullptr;
@@ -109,7 +121,7 @@ void ReturnPromise(const JSCallbackInfo& info, int32_t errCode)
 
 const std::unordered_set<SpanType> types = { SpanType::Font, SpanType::Gesture, SpanType::BaselineOffset,
     SpanType::Decoration, SpanType::LetterSpacing, SpanType::TextShadow, SpanType::LineHeight, SpanType::Image,
-    SpanType::CustomSpan, SpanType::ParagraphStyle, SpanType::ExtSpan };
+    SpanType::CustomSpan, SpanType::ParagraphStyle, SpanType::ExtSpan, SpanType::BackgroundColor };
 
 const std::unordered_map<SpanType, std::function<JSRef<JSObject>(const RefPtr<SpanBase>&)>> spanCreators = {
     { SpanType::Font, JSSpanString::CreateJsFontSpan }, { SpanType::Decoration, JSSpanString::CreateJsDecorationSpan },
@@ -117,6 +129,7 @@ const std::unordered_map<SpanType, std::function<JSRef<JSObject>(const RefPtr<Sp
     { SpanType::LetterSpacing, JSSpanString::CreateJsLetterSpacingSpan },
     { SpanType::Gesture, JSSpanString::CreateJsGestureSpan },
     { SpanType::TextShadow, JSSpanString::CreateJsTextShadowSpan },
+    { SpanType::BackgroundColor, JSSpanString::CreateJSBackgroundColorSpan },
     { SpanType::LineHeight, JSSpanString::CreateJsLineHeightSpan },
     { SpanType::Image, JSSpanString::CreateJsImageSpan },
     { SpanType::ParagraphStyle, JSSpanString::CreateJsParagraphStyleSpan },
@@ -173,6 +186,8 @@ void JSSpanString::JSBind(BindingTarget globalObj)
     JSClass<JSSpanString>::CustomMethod("subStyledString", &JSSpanString::GetSubSpanString);
     JSClass<JSSpanString>::CustomMethod("getStyles", &JSSpanString::GetSpans);
     JSClass<JSSpanString>::StaticMethod("fromHtml", &JSSpanString::FromHtml);
+    JSClass<JSSpanString>::StaticMethod("marshalling", &JSSpanString::Marshalling);
+    JSClass<JSSpanString>::StaticMethod("unmarshalling", &JSSpanString::Unmarshalling);
     JSClass<JSSpanString>::Bind(globalObj, JSSpanString::Constructor, JSSpanString::Destructor);
 }
 
@@ -356,6 +371,16 @@ JSRef<JSObject> JSSpanString::CreateJsTextShadowSpan(const RefPtr<SpanBase>& spa
     return obj;
 }
 
+JSRef<JSObject> JSSpanString::CreateJSBackgroundColorSpan(const RefPtr<SpanBase>& spanObject)
+{
+    auto span = AceType::DynamicCast<BackgroundColorSpan>(spanObject);
+    CHECK_NULL_RETURN(span, JSRef<JSObject>::New());
+    JSRef<JSObject> obj = JSClass<JSBackgroundColorSpan>::NewInstance();
+    auto backgroundColorSpan = Referenced::Claim(obj->Unwrap<JSBackgroundColorSpan>());
+    backgroundColorSpan->SetBackgroundColorSpan(span);
+    return obj;
+}
+
 JSRef<JSObject> JSSpanString::CreateJsLineHeightSpan(const RefPtr<SpanBase>& spanObject)
 {
     auto span = AceType::DynamicCast<LineHeightSpan>(spanObject);
@@ -408,6 +433,8 @@ RefPtr<SpanBase> JSSpanString::ParseJsSpanBase(int32_t start, int32_t length, Sp
             return ParseJsParagraphStyleSpan(start, length, obj);
         case SpanType::ExtSpan:
             return ParseJsExtSpan(start, length, obj);
+        case SpanType::BackgroundColor:
+            return ParseJSBackgroundColorSpan(start, length, obj);
         default:
             break;
     }
@@ -487,6 +514,17 @@ RefPtr<SpanBase> JSSpanString::ParseJsTextShadowSpan(int32_t start, int32_t leng
     if (textShadowSpan && textShadowSpan->GetTextShadowSpan()) {
         return AceType::MakeRefPtr<TextShadowSpan>(
             textShadowSpan->GetTextShadowSpan()->GetTextShadow(), start, start + length);
+    }
+    return nullptr;
+}
+
+RefPtr<SpanBase> JSSpanString::ParseJSBackgroundColorSpan(int32_t start, int32_t length, const JSRef<JSObject>& obj)
+{
+    auto* base = obj->Unwrap<AceType>();
+    auto* backgroundColorSpan = AceType::DynamicCast<JSBackgroundColorSpan>(base);
+    if (backgroundColorSpan && backgroundColorSpan->GetBackgroundColorSpan()) {
+        return AceType::MakeRefPtr<BackgroundColorSpan>(
+            backgroundColorSpan->GetBackgroundColorSpan()->GetBackgroundColor(), start, start + length);
     }
     return nullptr;
 }
@@ -643,9 +681,9 @@ RefPtr<CustomSpan> JSSpanString::ParseJsCustomSpan(const JSCallbackInfo& args)
     return AceType::MakeRefPtr<JSCustomSpan>(args[0], args);
 }
 
-
 void JSSpanString::FromHtml(const JSCallbackInfo& info)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     if (info.Length() != 1 || !info[0]->IsString()) {
         ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
         return;
@@ -657,10 +695,7 @@ void JSSpanString::FromHtml(const JSCallbackInfo& info)
         return;
     }
     auto taskExecutor = container->GetTaskExecutor();
-    if (!taskExecutor) {
-        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
-        return;
-    }
+    CHECK_NULL_VOID(taskExecutor);
     auto engine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_VOID(engine);
     NativeEngine* nativeEngine = engine->GetNativeEngine();
@@ -691,10 +726,96 @@ void JSSpanString::FromHtml(const JSCallbackInfo& info)
                     jsSpanString->SetController(styledString);
                     auto spanStrNapi = JsConverter::ConvertJsValToNapiValue(obj);
                     ProcessPromiseCallback(asyncContext, ERROR_CODE_NO_ERROR, spanStrNapi);
-            }, TaskExecutor::TaskType::UI, "FromHtmlReturnPromise", PriorityType::IMMEDIATE);
-        }, TaskExecutor::TaskType::BACKGROUND, "FromHtml", PriorityType::IMMEDIATE);
-
+                },
+                TaskExecutor::TaskType::UI, "FromHtmlReturnPromise", PriorityType::IMMEDIATE);
+        },
+        TaskExecutor::TaskType::BACKGROUND, "FromHtml", PriorityType::IMMEDIATE);
     auto jsPromise = JsConverter::ConvertNapiValueToJsVal(result);
+    CHECK_NULL_VOID(jsPromise->IsObject());
+    info.SetReturnValue(JSRef<JSObject>::Cast(jsPromise));
+}
+
+void JSSpanString::Marshalling(const JSCallbackInfo& info)
+{
+    auto arg = info[0];
+    if (info.Length() != 1 || !arg->IsObject()) {
+        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+
+    auto* spanString = JSRef<JSObject>::Cast(arg)->Unwrap<JSSpanString>();
+    CHECK_NULL_VOID(spanString);
+    auto spanStringController = spanString->GetController();
+    CHECK_NULL_VOID(spanStringController);
+    std::vector<uint8_t> buff;
+    spanStringController->EncodeTlv(buff);
+
+    size_t bufferSize = buff.size();
+    JSRef<JSArrayBuffer> arrayBuffer = JSRef<JSArrayBuffer>::New(bufferSize);
+    auto* buffer = static_cast<uint8_t*>(arrayBuffer->GetBuffer());
+    if (memcpy_s(buffer, bufferSize, buff.data(), bufferSize) != 0) {
+        return;
+    }
+    info.SetReturnValue(arrayBuffer);
+}
+    
+void JSSpanString::UnmarshallingExec(napi_env env, void *data)
+{
+    CHECK_NULL_VOID(data);
+    auto asyncContext = static_cast<AsyncContext*>(data);
+    asyncContext->spanString = SpanString::DecodeTlv(asyncContext->buffer);
+    CHECK_NULL_VOID(asyncContext->spanString);
+    asyncContext->status = napi_ok; 
+}
+
+void JSSpanString::UnmarshallingComplete(napi_env env, napi_status status, void *data)
+{
+    CHECK_NULL_VOID(data);
+    auto asyncContext = static_cast<AsyncContext*>(data);
+    JSRef<JSObject> obj = JSClass<JSSpanString>::NewInstance();
+    auto jsSpanString = Referenced::Claim(obj->Unwrap<JSSpanString>());
+    CHECK_NULL_VOID(jsSpanString);
+    jsSpanString->SetController(asyncContext->spanString);
+    auto spanStrNapi = JsConverter::ConvertJsValToNapiValue(obj);
+
+    if (status == napi_ok && asyncContext->status == napi_ok) {
+        napi_resolve_deferred(env, asyncContext->deferred, spanStrNapi);
+    } else {
+        napi_value error = CreateErrorValue(asyncContext->env, ERROR_CODE_STYLED_STRING_CONVERT_ERROR,
+            ASYNC_ERROR_MAP[ERROR_CODE_STYLED_STRING_CONVERT_ERROR]);
+        napi_reject_deferred(env, asyncContext->deferred, error);
+    }
+    delete asyncContext;
+}
+
+void JSSpanString::Unmarshalling(const JSCallbackInfo& info)
+{
+    auto arg = info[0];
+    if (info.Length() != 1 || !arg->IsArrayBuffer()) {
+        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+    JSRef<JSArrayBuffer> arrayBuffer = JSRef<JSArrayBuffer>::Cast(arg);
+    size_t bufferSize = static_cast<size_t>(arrayBuffer->ByteLength());
+    void* buffer = arrayBuffer->GetBuffer();
+    std::vector<uint8_t> buff(static_cast<uint8_t*>(buffer), static_cast<uint8_t*>(buffer) + bufferSize);
+    auto asyncContext = new AsyncContext();
+    asyncContext->buffer = buff;
+
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_VOID(nativeEngine);
+    asyncContext->env = reinterpret_cast<napi_env>(nativeEngine);
+    napi_value promise = nullptr;
+    napi_create_promise(asyncContext->env, &asyncContext->deferred, &promise);
+    napi_value resourceName = nullptr;
+    napi_create_string_utf8(asyncContext->env, "ArkUISpanStringUnmarshalling", NAPI_AUTO_LENGTH, &resourceName);
+    napi_create_async_work(asyncContext->env, nullptr, resourceName, UnmarshallingExec, UnmarshallingComplete,
+        asyncContext, &asyncContext->asyncWork);
+    napi_queue_async_work(asyncContext->env, asyncContext->asyncWork);
+
+    auto jsPromise = JsConverter::ConvertNapiValueToJsVal(promise);
     CHECK_NULL_VOID(jsPromise->IsObject());
     info.SetReturnValue(JSRef<JSObject>::Cast(jsPromise));
 }

@@ -39,8 +39,9 @@ public:
         const std::function<void(uint32_t forIndex)>& onCreateNode,
         const std::function<void(const std::string& fromKey, uint32_t forIndex)>& onUpdateNode,
         const std::function<std::list<std::string>(uint32_t from, uint32_t to)>& onGetKeys4Range,
-        const std::function<std::list<std::string>(uint32_t from, uint32_t to)>& onGetTypes4Range) = 0;
-    virtual void InvalidateKeyCache(uint32_t totalCount) = 0;
+        const std::function<std::list<std::string>(uint32_t from, uint32_t to)>& onGetTypes4Range,
+        const std::function<void(uint32_t from, uint32_t to)>& onSetActiveRange) = 0;
+    virtual void UpdateRenderState(uint32_t totalCount, bool visibleItemsChanged) = 0;
     virtual void OnMove(std::function<void(int32_t, int32_t)>&& onMove) = 0;
 
 private:

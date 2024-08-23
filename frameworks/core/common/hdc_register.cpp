@@ -16,11 +16,7 @@
 #include "core/common/hdc_register.h"
 
 #include <dlfcn.h>
-#include <unistd.h>
 
-#include "base/json/json_util.h"
-#include "base/log/log.h"
-#include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container_consts.h"
 

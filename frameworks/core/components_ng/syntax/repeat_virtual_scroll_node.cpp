@@ -33,7 +33,8 @@ RefPtr<RepeatVirtualScrollNode> RepeatVirtualScrollNode::GetOrCreateRepeatNode(i
     const std::function<void(uint32_t)>& onCreateNode,
     const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
     const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
-    const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range)
+    const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range,
+    const std::function<void(uint32_t, uint32_t)>& onSetActiveRange)
 {
     auto node = ElementRegister::GetInstance()->GetSpecificItemById<RepeatVirtualScrollNode>(nodeId);
     if (node) {
@@ -42,7 +43,8 @@ RefPtr<RepeatVirtualScrollNode> RepeatVirtualScrollNode::GetOrCreateRepeatNode(i
         return node;
     }
     node = MakeRefPtr<RepeatVirtualScrollNode>(
-        nodeId, totalCount, templateCachedCountMap, onCreateNode, onUpdateNode, onGetKeys4Range, onGetTypes4Range);
+        nodeId, totalCount, templateCachedCountMap, onCreateNode, onUpdateNode, onGetKeys4Range, onGetTypes4Range,
+        onSetActiveRange);
 
     ElementRegister::GetInstance()->AddUINode(node);
     return node;
@@ -53,12 +55,21 @@ RepeatVirtualScrollNode::RepeatVirtualScrollNode(int32_t nodeId, int32_t totalCo
     const std::function<void(uint32_t)>& onCreateNode,
     const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
     const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
-    const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range)
+    const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range,
+    const std::function<void(uint32_t, uint32_t)>& onSetActiveRange)
     : ForEachBaseNode(V2::JS_REPEAT_ETS_TAG, nodeId), totalCount_(totalCount),
       caches_(templateCachedCountMap, onCreateNode, onUpdateNode, onGetKeys4Range, onGetTypes4Range),
+      onSetActiveRange_(onSetActiveRange),
       postUpdateTaskHasBeenScheduled_(false)
 {
 }
+
+void RepeatVirtualScrollNode::UpdateTotalCount(uint32_t totalCount)
+{
+    TAG_LOGD(AceLogTag::ACE_REPEAT, "UpdateTotalCount: %{public}d", totalCount);
+    totalCount_ = totalCount;
+}
+
 
 void RepeatVirtualScrollNode::DoSetActiveChildRange(
     int32_t start, int32_t end,
@@ -74,6 +85,8 @@ void RepeatVirtualScrollNode::DoSetActiveChildRange(
 
     // memorize active range
     caches_.SetLastActiveRange(start - cacheStart, end + cacheEnd);
+    // notify TS side
+    onSetActiveRange_(start, end);
 
     bool needSync = caches_.RebuildL1([start, end, cacheStart, cacheEnd, this](
         int32_t index, const RefPtr<UINode>& node) -> bool {
@@ -105,8 +118,7 @@ void RepeatVirtualScrollNode::DoSetActiveChildRange(
             ((end < start) && (index <= end + cacheEnd || start - cacheStart <= index))) {
             // keep in Repeat L1
             TAG_LOGD(AceLogTag::ACE_REPEAT,
-                "  ... in visible + pre-render range: index %{public}d -> nodeId  %{public}d: "
-                "keep in Repeat L1",
+                "  ... in visible + pre-render range: index %{public}d -> nodeId  %{public}d: keep in Repeat L1",
                 static_cast<int32_t>(index), frameNode->GetId());
             return true;
         }
@@ -116,8 +128,7 @@ void RepeatVirtualScrollNode::DoSetActiveChildRange(
             "detach, move to spare items L2",
             index, frameNode->GetId());
 
-        // move active node into L2 cached.
-        // check transition flag.
+        // move active node into L2 cached. check transition flag.
         if (node->OnRemoveFromParent(true)) {
             // OnRemoveFromParent returns true means the child can be removed from tree immediately.
             RemoveDisappearingChild(node);
@@ -165,6 +176,9 @@ void RepeatVirtualScrollNode::DropFromL1(const std::string& key)
 void RepeatVirtualScrollNode::DoSetActiveChildRange(
     const std::set<int32_t>& activeItems, const std::set<int32_t>& cachedItems, int32_t baseIndex)
 {
+    // Notify TS side. Verify line below when DoSetActiveChildRange() will start to be used.
+    // Call onSetActiveRange_ here;
+
     bool needSync =
         caches_.RebuildL1([&activeItems, &cachedItems, baseIndex, this](int32_t index, RefPtr<UINode> node) -> bool {
             if (node == nullptr) {
@@ -197,19 +211,28 @@ void RepeatVirtualScrollNode::DoSetActiveChildRange(
     }
 }
 
-void RepeatVirtualScrollNode::InvalidateKeyCache()
+void RepeatVirtualScrollNode::UpdateRenderState(bool visibleItemsChanged)
 {
     TAG_LOGD(AceLogTag::ACE_REPEAT,
-        "InvalidateKeyCache triggered by Repeat rerender: nodeId: %{public}d .",
-        static_cast<int32_t>(GetId()));
-    // empty the cache index -> key
-    // C++ will need to ask all new keys from JS side
-    caches_.InvalidateKeyAndTTypeCaches();
-    children_.clear();
+        "UpdateRenderState triggered by Repeat rerender: nodeId: %{public}d, visibleItemsChanged: %{public}d",
+        static_cast<int32_t>(GetId()), visibleItemsChanged);
 
-    auto frameNode = GetParentFrameNode();
-    if (frameNode) {
-        frameNode->ChildrenUpdatedFrom(0);
+    if (visibleItemsChanged) {
+        // empty the cache index -> key
+        // C++ will need to ask all new keys from JS side
+        caches_.InvalidateKeyAndTTypeCaches();
+        children_.clear();
+
+        if (auto frameNode = GetParentFrameNode()) {
+            frameNode->ChildrenUpdatedFrom(0);
+        }
+    } else {
+        auto lastIndexInActiveRange = caches_.GetLastActiveRange().second;
+        TAG_LOGD(AceLogTag::ACE_REPEAT, "lastIndexInActiveRange:%{public}d", lastIndexInActiveRange);
+
+        if (auto frameNode = GetParentFrameNode()) {
+            frameNode->ChildrenUpdatedFrom(lastIndexInActiveRange + 1);
+        }
     }
 
     MarkNeedSyncRenderTree(true);

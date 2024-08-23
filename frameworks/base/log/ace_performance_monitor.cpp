@@ -15,11 +15,8 @@
 
 #include "base/log/ace_performance_monitor.h"
 
-#include <cinttypes>
-
 #include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
-#include "base/utils/system_properties.h"
 
 namespace OHOS::Ace {
 using namespace std;
@@ -73,12 +70,16 @@ void ArkUIPerfMonitor::RecordTimeSlice(MonitorTag tag, int64_t duration)
 {
     SetRecordingStatus(tag, MonitorStatus::IDLE);
     if (tag == MonitorTag::STATIC_API) {
+        propertyNum_++;
         if (!monitorStatus_) {
             return;
         }
-        propertyNum_++;
+        timeSlice_[tag] += duration;
+        return;
     }
-    timeSlice_[tag] += duration;
+    if (monitorStatus_ == 0) {
+        timeSlice_[tag] += duration;
+    }
 }
 
 void ArkUIPerfMonitor::RecordStateMgmtNode(int64_t num)

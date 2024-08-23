@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIGaugeModifier* GetGaugeModifier();
+const CJUIGaugeModifier* GetCJUIGaugeModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_GAUGE_MODIFIER_H

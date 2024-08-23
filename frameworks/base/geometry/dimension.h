@@ -151,11 +151,14 @@ public:
 
     DimensionUnit GetAdaptDimensionUnit(const Dimension& dimension);
 
-    double ConvertToPxDistribute(std::optional<float> minOptional, std::optional<float> maxOptional) const;
+    double ConvertToPxDistribute(
+        std::optional<float> minOptional, std::optional<float> maxOptional, bool allowScale = true) const;
 
     double ConvertToPxByCustomFontScale(float minFontScale, float maxFontScale) const;
 
     double ConvertToPxByAppFontScale(float minFontScale) const;
+
+    double ConvertToVpByAppFontScale() const;
 
     double GetNativeValue(DimensionUnit unit) const
     {

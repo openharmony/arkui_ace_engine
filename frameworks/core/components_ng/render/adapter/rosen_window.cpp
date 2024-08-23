@@ -15,21 +15,11 @@
 
 #include "core/components_ng/render/adapter/rosen_window.h"
 
-#include "transaction/rs_interfaces.h"
-
 #include "base/log/ace_performance_monitor.h"
 #include "base/log/event_report.h"
-#include "base/log/ace_trace.h"
 #include "base/log/frame_report.h"
 #include "base/log/jank_frame_report.h"
-#include "base/thread/task_executor.h"
-#include "base/utils/time_util.h"
-#include "base/utils/utils.h"
 #include "core/common/container.h"
-#include "core/common/container_scope.h"
-#include "core/common/thread_checker.h"
-#include "core/common/window.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
 namespace {
@@ -127,7 +117,7 @@ void RosenWindow::SetUiDvsyncSwitch(bool dvsyncSwitch)
         return;
     }
     if (dvsyncSwitch) {
-        ACE_SCOPED_TRACE("enale dvsync");
+        ACE_SCOPED_TRACE("enable dvsync");
     } else {
         ACE_SCOPED_TRACE("disable dvsync");
     }
@@ -272,4 +262,24 @@ void RosenWindow::OnVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         }
 #endif
 }
+
+void RosenWindow::NotifyExtensionTimeout(int32_t errorCode)
+{
+    CHECK_NULL_VOID(rsWindow_);
+    rsWindow_->NotifyExtensionTimeout(errorCode);
+}
+
+uint32_t RosenWindow::GetStatusBarHeight() const
+{
+#ifndef PREVIEW
+    if (rsWindow_) {
+        return rsWindow_->GetStatusBarHeight();
+    } else {
+        return 0;
+    }
+#else
+    return 0;
+#endif
+}
+
 } // namespace OHOS::Ace::NG

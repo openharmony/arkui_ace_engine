@@ -15,8 +15,6 @@
 
 #include "inspect_rating.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 InspectRating::InspectRating(NodeId nodeId, const std::string& nodeName) : InspectNode(nodeId, nodeName) {
 }

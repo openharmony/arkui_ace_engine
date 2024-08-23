@@ -15,10 +15,7 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_rating_ffi.h"
 
-#include "base/log/ace_scoring_log.h"
 #include "cj_lambda.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
 
 namespace {

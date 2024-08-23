@@ -15,8 +15,6 @@
 
 #include "rosen_render_text_field.h"
 
-#include <cmath>
-
 #ifndef USE_GRAPHIC_TEXT_GINE
 #include "txt/paragraph_builder.h"
 #include "txt/paragraph_txt.h"
@@ -24,8 +22,6 @@
 #include "rosen_text/typography.h"
 #include "rosen_text/typography_create.h"
 #endif
-#include "include/effects/SkGradientShader.h"
-#include "render_service_client/core/ui/rs_node.h"
 #include "unicode/uchar.h"
 
 #include "base/i18n/localization.h"
@@ -38,7 +34,6 @@
 #include "core/components/common/painter/rosen_scroll_bar_painter.h"
 #include "core/components/font/constants_converter.h"
 #include "core/components/font/rosen_font_collection.h"
-#include "core/pipeline/base/rosen_render_context.h"
 
 #if defined(ENABLE_STANDARD_INPUT)
 #include "core/components/text_field/on_text_changed_listener_impl.h"

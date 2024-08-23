@@ -14,27 +14,10 @@
  */
 
 #include "base/log/ace_performance_check.h"
-
-#include <chrono>
-#include <cstdint>
-#include <ctime>
-#include <fstream>
-#include <memory>
-#include <numeric>
-#include <ostream>
-#include <string>
-#include <unordered_map>
-#include <utility>
-#include <vector>
-
 #include "base/i18n/localization.h"
-#include "base/json/json_util.h"
 #include "base/log/ace_checker.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
-#include "base/utils/time_util.h"
-#include "base/utils/utils.h"
-#include "bridge/common/utils/engine_helper.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/container.h"
 

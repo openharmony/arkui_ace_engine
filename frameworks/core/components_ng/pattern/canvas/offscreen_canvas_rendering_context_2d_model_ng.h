@@ -34,7 +34,7 @@ public:
     void SetStrokeText(const PaintState& state, const FillTextInfo& fillTextInfo) override;
     void SetAntiAlias(bool anti) override;
     void SetFontWeight(const FontWeight& weight) override;
-    void SetFontStyle(const FontStyle& fontStyle) override;
+    void SetFontStyle(const Ace::FontStyle& fontStyle) override;
     void SetFontFamilies(const std::vector<std::string>& families) override;
     void SetFontSize(const Dimension& size) override;
     std::vector<double> GetLineDash() override;

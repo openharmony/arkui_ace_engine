@@ -16,16 +16,14 @@
 #include "grid_test_ng.h"
 
 #include "test/mock/base/mock_drag_window.h"
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components/button/button_theme.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/grid/grid_item_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_model_ng.h"
-#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/pattern/button/button_model_ng.h"
 
 #ifndef TEST_IRREGULAR_GRID
 #include "test/mock/base/mock_system_properties.h"
@@ -41,11 +39,13 @@ void GridTestNg::SetUpTestSuite()
     auto themeConstants = CreateThemeConstants(THEME_PATTERN_GRID);
     auto gridItemTheme = GridItemTheme::Builder().Build(themeConstants);
     EXPECT_CALL(*themeManager, GetTheme(GridItemTheme::TypeId())).WillRepeatedly(Return(gridItemTheme));
-    RefPtr<DragWindow> dragWindow = DragWindow::CreateDragWindow("", 0, 0, 0, 0);
+    RefPtr<DragWindow> dragWindow = DragWindow::CreateDragWindow({"", 0, 0, 0, 0, 0});
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(dragWindow)), DrawFrameNode(_)).Times(AnyNumber());
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(dragWindow)), MoveTo(_, _)).Times(AnyNumber());
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(dragWindow)), Destroy()).Times(AnyNumber());
     EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(AnyNumber());
+    auto container = Container::GetContainer(CONTAINER_ID_DIVIDE_SIZE);
+    EXPECT_CALL(*(AceType::DynamicCast<MockContainer>(container)), GetWindowId()).Times(AnyNumber());
 
 #ifndef TEST_IRREGULAR_GRID
     g_irregularGrid = false;
@@ -212,15 +212,15 @@ void GridTestNg::UpdateCurrentOffset(float offset, int32_t source)
     FlushLayoutTask(frameNode_);
 }
 
-GridModelNG GridTestNg::CreateRepeatGrid(int32_t itemNumber, float itemHeight)
+GridModelNG GridTestNg::CreateRepeatGrid(int32_t itemNumber, std::function<float(uint32_t)>&& getSize)
 {
     auto model = CreateGrid();
 
     RepeatVirtualScrollModelNG repeatModel;
-    std::function<void(uint32_t)> createFunc = [this, itemHeight](
-                                                   uint32_t idx) { CreateGridItem(FILL_VALUE, itemHeight); };
+    std::function<void(uint32_t)> createFunc = [this, getSize](
+                                                   uint32_t idx) { CreateGridItem(FILL_VALUE, getSize(idx)); };
     std::function<void(const std::string&, uint32_t)> updateFunc =
-        [this, itemHeight](const std::string& value, uint32_t idx) { CreateGridItem(FILL_VALUE, itemHeight); };
+        [this, getSize](const std::string& value, uint32_t idx) { CreateGridItem(FILL_VALUE, getSize(idx)); };
     std::function<std::list<std::string>(uint32_t, uint32_t)> getKeys = [](uint32_t start, uint32_t end) {
         std::list<std::string> keys;
         for (uint32_t i = start; i <= end; ++i) {
@@ -235,20 +235,20 @@ GridModelNG GridTestNg::CreateRepeatGrid(int32_t itemNumber, float itemHeight)
         }
         return keys;
     };
-    repeatModel.Create(itemNumber, {}, createFunc, updateFunc, getKeys, getTypes);
+    std::function<void(uint32_t, uint32_t)> setActiveRange = [](uint32_t start, uint32_t end) {};
+    repeatModel.Create(itemNumber, {}, createFunc, updateFunc, getKeys, getTypes, setActiveRange);
     return model;
 }
 
-void GridTestNg::CreateAdaptChildSizeGridItems(
-    int32_t itemNumber, GridItemStyle gridItemStyle)
+void GridTestNg::CreateAdaptChildSizeGridItems(int32_t itemNumber, GridItemStyle gridItemStyle)
 {
     for (int32_t i = 0; i < itemNumber; i++) {
         ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
         GridItemModelNG itemModel;
         itemModel.Create(gridItemStyle);
         {
-            auto columnFrameNode =
-        FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+            auto columnFrameNode = FrameNode::CreateFrameNode(
+                V2::COLUMN_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
             ViewStackProcessor::GetInstance()->Pop();
         }
         ViewStackProcessor::GetInstance()->Pop();

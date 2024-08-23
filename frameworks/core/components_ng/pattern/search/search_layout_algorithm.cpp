@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/search/search_layout_algorithm.h"
+#include "core/components_ng/pattern/search/search_pattern.h"
 
 #include <algorithm>
 
@@ -41,6 +42,7 @@ constexpr int32_t BUTTON_INDEX = 4;
 constexpr int32_t MULTIPLE_2 = 2;
 constexpr float MAX_SEARCH_BUTTON_RATE = 0.4f;
 constexpr float AGING_MIN_SCALE = 1.75f;
+constexpr float MAX_FONT_SCALE = 2.0f;
 constexpr int TWO = 2;
 } // namespace
 
@@ -73,6 +75,9 @@ void SearchLayoutAlgorithm::CancelImageMeasure(LayoutWrapper* layoutWrapper)
     auto imageHeight = static_cast<float>(std::min(layoutProperty->HasCancelButtonUDSize() ?
         layoutProperty->GetCancelButtonUDSizeValue().ConvertToPx() : defaultImageHeight,
         searchHeight));
+    if (cancelImageWrapper->GetHostTag() == V2::SYMBOL_ETS_TAG) {
+        imageHeight = CalcSymbolIconHeight(layoutWrapper, CANCEL_IMAGE_INDEX, defaultImageHeight);
+    }
     CalcSize imageCalcSize;
     imageCalcSize.SetWidth(CalcLength(imageHeight));
     imageCalcSize.SetHeight(CalcLength(imageHeight));
@@ -215,6 +220,9 @@ void SearchLayoutAlgorithm::ImageMeasure(LayoutWrapper* layoutWrapper)
     auto imageHeight = static_cast<float>(std::min(layoutProperty->HasSearchIconUDSize() ?
         layoutProperty->GetSearchIconUDSizeValue().ConvertToPx() : defaultImageHeight,
         searchHeight));
+    if (imageWrapper->GetHostTag() == V2::SYMBOL_ETS_TAG) {
+        imageHeight = CalcSymbolIconHeight(layoutWrapper, IMAGE_INDEX, defaultImageHeight);
+    }
     CalcSize imageCalcSize;
     imageCalcSize.SetWidth(CalcLength(imageHeight));
     imageCalcSize.SetHeight(CalcLength(imageHeight));
@@ -764,5 +772,32 @@ void SearchLayoutAlgorithm::UpdateClipBounds(LayoutWrapper* layoutWrapper, float
         isClip = isClip || LessNotEqual(height, layoutProperty->GetCancelButtonUDSizeValue().ConvertToPx());
     }
     renderContext->SetClipToBounds(isClip);
+}
+double SearchLayoutAlgorithm::CalcSymbolIconHeight(
+    LayoutWrapper* layoutWrapper, int32_t index, double defaultImageHeight)
+{
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(hostNode, defaultImageHeight);
+    auto pipeline = hostNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, defaultImageHeight);
+    auto searchPattern = hostNode->GetPattern<SearchPattern>();
+    CHECK_NULL_RETURN(searchPattern, defaultImageHeight);
+    auto searchNode = searchPattern->GetSearchNode();
+    CHECK_NULL_RETURN(searchNode, defaultImageHeight);
+
+    auto iconNode = AceType::DynamicCast<FrameNode>(hostNode->GetChildAtIndex(index));
+    CHECK_NULL_RETURN(iconNode, defaultImageHeight);
+    auto symbolLayoutProperty = iconNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(symbolLayoutProperty, defaultImageHeight);
+
+    auto defaultSymbolIconSize =
+        (index == IMAGE_INDEX ? searchNode->GetSearchSymbolIconSize() : searchNode->GetCancelSymbolIconSize());
+    auto iconSize = symbolLayoutProperty->GetFontSize().value_or(defaultSymbolIconSize);
+    if (iconSize.Unit() == DimensionUnit::FP) {
+        if (GreatOrEqualCustomPrecision(pipeline->GetFontScale(), MAX_FONT_SCALE)) {
+            return iconSize.ConvertToPx() / pipeline->GetFontScale() * MAX_FONT_SCALE;
+        }
+    }
+    return iconSize.ConvertToPx();
 }
 } // namespace OHOS::Ace::NG

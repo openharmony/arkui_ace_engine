@@ -15,10 +15,6 @@
 
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_offscreen_canvas_bridge.h"
 
-#include "base/utils/linear_map.h"
-#include "base/utils/string_utils.h"
-#include "frameworks/bridge/js_frontend/engine/jsi/jsi_engine.h"
-
 namespace OHOS::Ace::Framework {
 namespace {
 

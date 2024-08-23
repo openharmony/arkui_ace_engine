@@ -34,6 +34,21 @@
 #include "core/components_ng/property/templates_parser.h"
 #include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
+namespace {
+void AddCacheItemsInFront(int32_t startIdx, LayoutWrapper* host, int32_t cacheCnt, std::list<int32_t>& buildList)
+{
+    for (int32_t i = 1; i <= cacheCnt; ++i) {
+        int32_t item = startIdx - i;
+        if (item < 0) {
+            break;
+        }
+        if (!host->GetChildByIndex(item, true)) {
+            buildList.push_back(item);
+        }
+    }
+}
+} // namespace
+
 void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -77,7 +92,8 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     // update cache info.
-    layoutWrapper->SetCacheCount(static_cast<int32_t>(gridLayoutProperty->GetCachedCountValue(1) * crossCount_));
+    const int32_t cacheCnt = static_cast<int32_t>(gridLayoutProperty->GetCachedCountValue(1) * crossCount_);
+    layoutWrapper->SetCacheCount(cacheCnt);
 
     gridLayoutInfo_.lastMainSize_ = mainSize;
     gridLayoutInfo_.lastCrossSize_ = crossSize;
@@ -90,6 +106,7 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     if (SystemProperties::GetGridCacheEnabled()) {
         FillCacheLineAtEnd(mainSize, crossSize, layoutWrapper);
+        AddCacheItemsInFront(gridLayoutInfo_.startIndex_, layoutWrapper, cacheCnt, predictBuildList_);
         if (!predictBuildList_.empty()) {
             GridLayoutUtils::PreloadGridItems(layoutWrapper->GetHostNode()->GetPattern<GridPattern>(),
                 std::move(predictBuildList_),
@@ -258,17 +275,17 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             } else {
                 SyncGeometry(wrapper);
             }
-            auto layoutProperty = wrapper->GetLayoutProperty();
-            CHECK_NULL_VOID(layoutProperty);
-            auto gridItemLayoutProperty = AceType::DynamicCast<GridItemLayoutProperty>(layoutProperty);
-            CHECK_NULL_VOID(gridItemLayoutProperty);
-            gridItemLayoutProperty->UpdateMainIndex(line->first);
-            gridItemLayoutProperty->UpdateCrossIndex(iter->first);
-            UpdateRealGridItemPositionInfo(wrapper, line->first, iter->first);
             auto frameNode = AceType::DynamicCast<FrameNode>(wrapper);
             if (frameNode) {
                 frameNode->MarkAndCheckNewOpIncNode();
             }
+            auto layoutProperty = wrapper->GetLayoutProperty();
+            CHECK_NULL_CONTINUE(layoutProperty);
+            auto gridItemLayoutProperty = AceType::DynamicCast<GridItemLayoutProperty>(layoutProperty);
+            CHECK_NULL_CONTINUE(gridItemLayoutProperty);
+            gridItemLayoutProperty->UpdateMainIndex(line->first);
+            gridItemLayoutProperty->UpdateCrossIndex(iter->first);
+            UpdateRealGridItemPositionInfo(wrapper, line->first, iter->first);
         }
         prevLineHeight += gridLayoutInfo_.lineHeightMap_[line->first] + mainGap_;
     }
@@ -333,8 +350,7 @@ void GridScrollLayoutAlgorithm::LayoutBackwardCachedLine(LayoutWrapper* layoutWr
             itemIdex = iter.second;
             auto crossIter = itemsCrossPosition_.find(itemIdex);
             if (crossIter == itemsCrossPosition_.end()) {
-                crossIter =
-                    itemsCrossPosition_.emplace(itemIdex, ComputeItemCrossPosition(iter.first)).first;
+                crossIter = itemsCrossPosition_.emplace(itemIdex, ComputeItemCrossPosition(iter.first)).first;
             }
             bool prevLineNotContains =
                 std::none_of(prevLine.begin(), prevLine.end(), [itemIdex](auto ite) { return ite.second == itemIdex; });
@@ -374,22 +390,24 @@ void GridScrollLayoutAlgorithm::LayoutForwardCachedLine(LayoutWrapper* layoutWra
     // startMainLineIndex will greater than endMainLineIndex
     auto currentLine = std::min(gridLayoutInfo_.startMainLineIndex_, gridLayoutInfo_.endMainLineIndex_);
     auto nextLineHeight = gridLayoutInfo_.lineHeightMap_[currentLine] + mainGap_;
-    auto nextLineIter = gridLayoutInfo_.gridMatrix_.find(gridLayoutInfo_.startMainLineIndex_);
     std::map<int32_t, int32_t> nextLine;
-    if (nextLineIter != gridLayoutInfo_.gridMatrix_.end()) {
-        nextLine = nextLineIter->second;
-    }
     for (int32_t i = 1; i <= cacheCount && currentLine - i >= 0; i++) {
         int32_t currLine = currentLine - i;
         const auto& line = gridLayoutInfo_.gridMatrix_.find(currLine);
         if (line == gridLayoutInfo_.gridMatrix_.end() || line->second.empty()) {
-            break;
+            continue;
         }
         auto nextLineOffset = axis_ == Axis::VERTICAL ? OffsetF(0.0, nextLineHeight) : OffsetF(nextLineHeight, 0.0);
         int32_t itemIdex = -1;
         auto lineHeightIter = gridLayoutInfo_.lineHeightMap_.find(line->first);
         if (lineHeightIter == gridLayoutInfo_.lineHeightMap_.end()) {
-            return;
+            continue;
+        }
+        auto nextLineIter = gridLayoutInfo_.gridMatrix_.find(currLine + 1);
+        if (nextLineIter != gridLayoutInfo_.gridMatrix_.end()) {
+            nextLine = nextLineIter->second;
+        } else {
+            nextLine.clear();
         }
         float lineHeight = lineHeightIter->second;
         Alignment align = axis_ == Axis::VERTICAL ? Alignment::TOP_CENTER : Alignment::CENTER_LEFT;
@@ -404,8 +422,7 @@ void GridScrollLayoutAlgorithm::LayoutForwardCachedLine(LayoutWrapper* layoutWra
             itemIdex = iter.second;
             auto crossIter = itemsCrossPosition_.find(itemIdex);
             if (crossIter == itemsCrossPosition_.end()) {
-                crossIter =
-                    itemsCrossPosition_.emplace(itemIdex, ComputeItemCrossPosition(iter.first)).first;
+                crossIter = itemsCrossPosition_.emplace(itemIdex, ComputeItemCrossPosition(iter.first)).first;
             }
             bool nextLineNotContains =
                 std::none_of(nextLine.begin(), nextLine.end(), [itemIdex](auto ite) { return ite.second == itemIdex; });
@@ -429,7 +446,7 @@ void GridScrollLayoutAlgorithm::LayoutForwardCachedLine(LayoutWrapper* layoutWra
             auto translate = OffsetF(0.0f, 0.0f);
             translate = Alignment::GetAlignPosition(blockSize, wrapper->GetGeometryNode()->GetMarginFrameSize(), align);
 
-            wrapper->GetGeometryNode()->SetMarginFrameOffset(offset + translate);
+            wrapper->GetGeometryNode()->SetMarginFrameOffset(offset - translate);
             SyncGeometry(wrapper);
             wrapper->SetActive(false);
         }
@@ -642,8 +659,27 @@ bool GridScrollLayoutAlgorithm::FillBlankAtStart(float mainSize, float crossSize
         gridLayoutInfo_.reachStart_ = true;
         break;
     }
-    if (gridLayoutInfo_.gridMatrix_[gridLayoutInfo_.startMainLineIndex_].size() < crossCount_ &&
-        gridLayoutInfo_.startIndex_ > 0) {
+
+    FillOneLineForwardWithoutUpdatingStartIndex(crossSize, mainSize, layoutWrapper);
+
+    gridLayoutInfo_.currentOffset_ = blankAtStart;
+    gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
+    return fillNewLine;
+}
+
+// If there is a multi-line item in the current line and its starting line is not within this line,
+// it may result in an incomplete layout.
+void GridScrollLayoutAlgorithm::FillOneLineForwardWithoutUpdatingStartIndex(
+    float crossSize, float mainSize, LayoutWrapper* layoutWrapper)
+{
+    if (gridLayoutInfo_.gridMatrix_.empty()) {
+        return;
+    }
+    auto startLine = gridLayoutInfo_.gridMatrix_.find(gridLayoutInfo_.startMainLineIndex_);
+    if (startLine == gridLayoutInfo_.gridMatrix_.end() || startLine->second.empty()) {
+        return;
+    }
+    if (startLine->second.size() < crossCount_ && gridLayoutInfo_.startIndex_ > 0) {
         auto tempStartIndex = gridLayoutInfo_.startIndex_;
         auto tempStartMainLineIndex = gridLayoutInfo_.startMainLineIndex_;
         auto tempCurrentMainLineIndex = currentMainLineIndex_;
@@ -659,10 +695,6 @@ bool GridScrollLayoutAlgorithm::FillBlankAtStart(float mainSize, float crossSize
         currentMainLineIndex_ = tempCurrentMainLineIndex;
         gridLayoutInfo_.reachStart_ = tempReachStart;
     }
-
-    gridLayoutInfo_.currentOffset_ = blankAtStart;
-    gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
-    return fillNewLine;
 }
 
 // When a moving up event comes, the [currentOffset_] may have been reduced too much than the items really need to
@@ -1125,6 +1157,13 @@ float GridScrollLayoutAlgorithm::MeasureRecordedItems(float mainSize, float cros
     return mainLength;
 }
 
+namespace {
+inline bool OneLineMovesOffViewportFromAbove(float mainLength, float lineHeight)
+{
+    return LessNotEqual(mainLength, 0.0) || (NearZero(mainLength) && GreatNotEqual(lineHeight, 0.0f));
+}
+} // namespace
+
 bool GridScrollLayoutAlgorithm::UseCurrentLines(
     float mainSize, float crossSize, LayoutWrapper* layoutWrapper, float& mainLength)
 {
@@ -1182,7 +1221,7 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
             mainLength += (cellAveLength_ + mainGap_);
         }
         // If a line moves up out of viewport, update [startIndex_], [currentOffset_] and [startMainLineIndex_]
-        if (LessNotEqual(mainLength, 0.0)) {
+        if (OneLineMovesOffViewportFromAbove(mainLength, cellAveLength_)) {
             gridLayoutInfo_.currentOffset_ = mainLength;
             gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
             gridLayoutInfo_.startMainLineIndex_ = currentMainLineIndex_ + 1;
@@ -1263,17 +1302,8 @@ void GridScrollLayoutAlgorithm::SkipBackwardLines(float mainSize, LayoutWrapper*
         return;
     }
 
-    auto totalViewHeight = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap_, true);
-    auto needSkipHeight = totalViewHeight + gridLayoutInfo_.prevOffset_ + mainGap_;
-    if (GreatOrEqual(needSkipHeight, -gridLayoutInfo_.currentOffset_)) {
+    if (!SkipLargeLineHeightLines(mainSize)) {
         return;
-    }
-
-    auto endLine = gridLayoutInfo_.gridMatrix_.find(gridLayoutInfo_.endMainLineIndex_ + 1);
-    if (endLine != gridLayoutInfo_.gridMatrix_.end() && !endLine->second.empty()) {
-        gridLayoutInfo_.currentOffset_ += needSkipHeight;
-        gridLayoutInfo_.endMainLineIndex_++;
-        gridLayoutInfo_.startMainLineIndex_ = gridLayoutInfo_.endMainLineIndex_;
     }
 
     // grid size change from big to small
@@ -1529,7 +1559,7 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
             --currentIndex;
             break;
         }
-        i = static_cast<uint32_t>(lastCross_) - 1;
+        i = static_cast<uint32_t>(lastCross_ - 1);
         // Step3. Measure [GridItem]
         LargeItemLineHeight(itemWrapper, hasNormalItem);
 
@@ -2356,5 +2386,32 @@ void GridScrollLayoutAlgorithm::MergeRemainingLines(
             gridLayoutInfo_.gridMatrix_[line.first - forwardLines][crossIndex] = index;
         }
     }
+}
+
+bool GridScrollLayoutAlgorithm::SkipLargeLineHeightLines(float mainSize)
+{
+    bool needSkip = false;
+    for (int32_t line = gridLayoutInfo_.startMainLineIndex_; line <= gridLayoutInfo_.endMainLineIndex_; line++) {
+        auto iter = gridLayoutInfo_.lineHeightMap_.find(line);
+        if (iter != gridLayoutInfo_.lineHeightMap_.end() && iter->second >= mainSize) {
+            needSkip = true;
+            break;
+        }
+    }
+    if (needSkip) {
+        auto totalViewHeight = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap_, true);
+        auto needSkipHeight = totalViewHeight + gridLayoutInfo_.prevOffset_ + mainGap_;
+        if (GreatOrEqual(needSkipHeight, -gridLayoutInfo_.currentOffset_)) {
+            return false;
+        }
+
+        auto endLine = gridLayoutInfo_.gridMatrix_.find(gridLayoutInfo_.endMainLineIndex_ + 1);
+        if (endLine != gridLayoutInfo_.gridMatrix_.end() && !endLine->second.empty()) {
+            gridLayoutInfo_.currentOffset_ += needSkipHeight;
+            gridLayoutInfo_.endMainLineIndex_++;
+            gridLayoutInfo_.startMainLineIndex_ = gridLayoutInfo_.endMainLineIndex_;
+        }
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG

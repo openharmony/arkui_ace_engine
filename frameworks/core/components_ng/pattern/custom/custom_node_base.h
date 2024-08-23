@@ -120,6 +120,16 @@ public:
         }
     }
 
+    void SetHasNodeUpdateFunc(std::function<bool(int32_t)>&& hasNodeUpdateFunc)
+    {
+        hasNodeUpdateFunc_ = std::move(hasNodeUpdateFunc);
+    }
+
+    bool FireHasNodeUpdateFunc(ElementIdType id)
+    {
+        return hasNodeUpdateFunc_ && hasNodeUpdateFunc_(id);
+    }
+
     void FireRecycleSelf();
 
     void SetRecycleFunction(std::function<void(RefPtr<CustomNodeBase>)>&& recycleCustomNode)
@@ -253,6 +263,7 @@ private:
     std::function<void(bool)> reloadFunc_;
     std::function<void()> completeReloadFunc_;
     std::function<void(int32_t)> forceNodeUpdateFunc_;
+    std::function<bool(int32_t)> hasNodeUpdateFunc_;
     std::function<void(RefPtr<CustomNodeBase>)> recycleCustomNodeFunc_;
     std::function<void()> recycleRenderFunc_;
     std::function<void(bool)> setActiveFunc_;

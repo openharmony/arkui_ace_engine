@@ -43,7 +43,6 @@ public:
     }
 
 protected:
-    void GetSpanParagraphStyle(const std::unique_ptr<TextLineStyle>& lineStyle, ParagraphStyle& pStyle) override;
     void HandleEmptyParagraph(RefPtr<Paragraph> paragraph, const std::list<RefPtr<SpanItem>>& spanGroup) override;
     RefPtr<SpanItem> GetParagraphStyleSpanItem(const std::list<RefPtr<SpanItem>>& spanGroup) override;
 
@@ -58,10 +57,11 @@ private:
     float GetShadowOffset(const std::list<RefPtr<SpanItem>>& group) override;
     void UpdateRichTextRect(const SizeF& res, const float& textHeight, LayoutWrapper* layoutWrapper);
 
-    void SetPlaceholder(LayoutWrapper* layoutWrapper);
+    bool SetPlaceholder(LayoutWrapper* layoutWrapper);
 
     void CopySpanStyle(RefPtr<SpanItem> source, RefPtr<SpanItem> target);
     void AppendNewLineSpan();
+    std::optional<SizeF> MeasureEmptyContent(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
 
     const std::list<RefPtr<SpanItem>>& GetSpans() const
     {

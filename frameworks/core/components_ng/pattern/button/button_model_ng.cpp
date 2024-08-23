@@ -308,6 +308,11 @@ RefPtr<FrameNode> ButtonModelNG::CreateFrameNode(int32_t nodeId)
 void ButtonModelNG::Padding(const PaddingProperty& paddingNew, const Edge& paddingOld)
 {
     NG::ViewAbstract::SetPadding(paddingNew);
+    auto button = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(button);
+    auto pattern = button->GetPattern<ButtonPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetHasCustomPadding(true);
 }
 
 void ButtonModelNG::OnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc)
@@ -389,8 +394,13 @@ void ButtonModelNG::SetTypeAndStateEffect(const std::optional<ButtonType>& type,
     if (type.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, type.value());
     } else {
-        // undefined use capsule type.
-        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, ButtonType::CAPSULE);
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+            // undefined use ROUNDED_RECTANGLE type.
+            ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, ButtonType::ROUNDED_RECTANGLE);
+        } else {
+            // undefined use capsule type.
+            ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, ButtonType::CAPSULE);
+        }
     }
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -552,6 +562,7 @@ Color ButtonModelNG::GetFontColor(FrameNode* frameNode)
 }
 void ButtonModelNG::SetBuilderFunc(FrameNode* frameNode, NG::ButtonMakeCallback&& makeFunc)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ButtonPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetBuilderFunc(std::move(makeFunc));
@@ -578,7 +589,15 @@ void ButtonModelNG::ResetBorderRadius()
 ButtonType ButtonModelNG::GetType(FrameNode* frameNode)
 {
     ButtonType value = ButtonType::CAPSULE;
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ButtonLayoutProperty, Type, value, frameNode, ButtonType::CAPSULE);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        value = ButtonType::ROUNDED_RECTANGLE;
+        ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ButtonLayoutProperty, Type, value,
+                                                        frameNode, ButtonType::ROUNDED_RECTANGLE);
+    } else {
+        ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ButtonLayoutProperty, Type, value,
+                                                        frameNode, ButtonType::CAPSULE);
+    }
+
     return value;
 }
 

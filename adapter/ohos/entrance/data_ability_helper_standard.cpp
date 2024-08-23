@@ -53,7 +53,6 @@ void* DataAbilityHelperStandard::QueryThumbnailResFromDataAbility(const std::str
 #ifdef MEDIA_LIBRARY_EXISTS
     ACE_FUNCTION_TRACE();
     Uri fileUri(uri);
-    LOGI("QueryThumbnailResFromDataAbility GetThumbnail uri=%{public}s", uri.c_str());
     return mgr_.GetThumbnail(fileUri).release();
 #else
     return nullptr;
@@ -67,6 +66,15 @@ std::string DataAbilityHelperStandard::GetMovingPhotoImageUri(const std::string&
     return mgr_.GetMovingPhotoImageUri(uri);
 #else
     return "";
+#endif
+}
+
+int64_t DataAbilityHelperStandard::GetMovingPhotoDateModified(const std::string& uri)
+{
+#ifdef MEDIA_LIBRARY_EXISTS
+    return mgr_.GetMovingPhotoDateModified(uri);
+#else
+    return -1;
 #endif
 }
 

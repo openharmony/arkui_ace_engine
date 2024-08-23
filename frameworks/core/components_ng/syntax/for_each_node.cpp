@@ -96,7 +96,6 @@ void ForEachNode::CompareAndUpdateChildren()
     std::map<std::string, RefPtr<UINode>> oldNodeByIdMap;
     MakeNodeMapById(tempChildren_, tempIds_, oldNodeByIdMap);
     // swap new children to tempChildren, old children back to children
-    TraversingCheck();
     std::swap(children, tempChildren_);
 
     for (const auto& newId : ids_) {

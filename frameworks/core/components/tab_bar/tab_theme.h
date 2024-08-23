@@ -60,6 +60,7 @@ public:
                 theme->subTabIndicatorHeight_ = pattern->GetAttr<Dimension>("subtab_indicator_height", 0.0_vp);
                 theme->subTabTextOnColor_ = pattern->GetAttr<Color>("subtab_text_on_color", Color::WHITE);
                 theme->subTabTextOffColor_ = pattern->GetAttr<Color>("subtab_text_off_color", Color::WHITE);
+                theme->subTabBoardTextOnColor_ = pattern->GetAttr<Color>("subtab_board_text_on_color", Color::WHITE);
                 theme->subTabIndicatorGap_ = pattern->GetAttr<Dimension>("subtab_indicator_gap", 0.0_vp);
                 theme->subTabHorizontalPadding_ = pattern->GetAttr<Dimension>("subtab_horizontal_padding", 0.0_vp);
                 theme->subTabTopPadding_ = pattern->GetAttr<Dimension>("subtab_top_padding", 0.0_vp);
@@ -237,6 +238,11 @@ public:
     const Color& GetSubTabTextOffColor() const
     {
         return subTabTextOffColor_;
+    }
+
+    const Color& GetSubTabBoardTextOnColor() const
+    {
+        return subTabBoardTextOnColor_;
     }
 
     const Dimension& GetSubTabIndicatorHeight() const
@@ -494,6 +500,7 @@ private:
     Dimension focusIndicatorVerticalPadding_;
     Color subTabTextOnColor_;
     Color subTabTextOffColor_;
+    Color subTabBoardTextOnColor_;
     Dimension subTabIndicatorHeight_;
     Dimension subTabIndicatorGap_;
     Dimension subTabHorizontalPadding_;

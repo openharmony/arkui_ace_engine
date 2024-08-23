@@ -19,7 +19,6 @@
 #include "include/core/SkRRect.h"
 #endif
 
-#include "core/pipeline/base/rosen_render_context.h"
 #ifdef OHOS_PLATFORM
 #include "core/components/common/painter/rosen_svg_painter.h"
 #else
@@ -27,7 +26,6 @@
 #include "core/components_ng/render/drawing.h"
 #endif
 #endif
-#include "render_service_client/core/ui/rs_node.h"
 
 namespace OHOS::Ace {
 

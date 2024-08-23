@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
     const ArkUILoadingProgressModifier* GetLoadingProgressModifier();
+    const CJUILoadingProgressModifier* GetCJUILoadingProgressModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_NODE_LOADING_PROGRESS_MODIFIER_H

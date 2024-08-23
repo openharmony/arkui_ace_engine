@@ -130,7 +130,7 @@ struct BlurStyleOption {
     AdaptiveColor adaptiveColor = AdaptiveColor::DEFAULT;
     double scale = 1.0;
     BlurOption blurOption;
-    BlurStyleActivePolicy policy = BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE;
+    BlurStyleActivePolicy policy = BlurStyleActivePolicy::ALWAYS_ACTIVE;
     BlurType blurType = BlurType::WITHIN_WINDOW;
     Color inactiveColor { Color::TRANSPARENT };
     bool isValidColor = false;

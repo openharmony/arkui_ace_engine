@@ -98,8 +98,6 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
-    std::string GetDotIndicatorStyle() const;
-    std::string GetDigitIndicatorStyle() const;
 
     int32_t GetCurrentShownIndex() const
     {
@@ -128,6 +126,11 @@ public:
         return turnPageRate_;
     }
 
+    float GetGroupTurnPageRate() const
+    {
+        return groupTurnPageRate_;
+    }
+
     GestureState GetGestureState();
 
     TouchBottomTypeLoop GetTouchBottomTypeLoop() const
@@ -143,6 +146,11 @@ public:
     void SetTurnPageRate(float turnPageRate)
     {
         turnPageRate_ = turnPageRate;
+    }
+
+    void SetGroupTurnPageRate(float groupTurnPageRate)
+    {
+        groupTurnPageRate_ = groupTurnPageRate;
     }
 
     float GetTouchBottomRate() const
@@ -430,7 +438,7 @@ public:
     void AdjustCurrentIndexOnSwipePage(int32_t index);
     void OnCustomContentTransition(int32_t toIndex);
     void OnCustomAnimationFinish(int32_t fromIndex, int32_t toIndex, bool hasOnChanged);
-    void OnSwiperCustomAnimationFinish(std::pair<int32_t, SwiperItemInfo> item);
+    void OnSwiperCustomAnimationFinish(CancelableCallback<void()>& task, int32_t index, bool isFinishAnimation);
 
     void SetCustomAnimationToIndex(int32_t toIndex)
     {
@@ -490,6 +498,8 @@ public:
 
     int32_t RealTotalCount() const;
     bool IsSwipeByGroup() const;
+    int32_t DisplayIndicatorTotalCount() const;
+    std::pair<int32_t, int32_t> CalculateStepAndItemCount() const;
     int32_t GetDisplayCount() const;
     int32_t GetCachedCount() const;
     bool ContentWillChange(int32_t comingIndex);
@@ -511,6 +521,7 @@ public:
     void FireWillHideEvent(int32_t willHideIndex) const;
     void FireWillShowEvent(int32_t willShowIndex) const;
     void SetOnHiddenChangeForParent();
+    void RemoveOnHiddenChange();
 
     void SetHasTabsAncestor(bool hasTabsAncestor)
     {
@@ -602,6 +613,7 @@ private:
     void OnAfterModifyDone() override;
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
+    void OnDetachFromMainTree() override;
     void InitSurfaceChangedCallback();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
@@ -676,6 +688,7 @@ private:
     float GetPrevMargin() const;
     float GetNextMargin() const;
     float CalculateVisibleSize() const;
+    float CalculateGroupTurnPageRate(float additionalOffset);
     int32_t CurrentIndex() const;
     int32_t CalculateDisplayCount() const;
     int32_t CalculateCount(
@@ -902,6 +915,13 @@ private:
     // overSrollDirection is true means over start boundary, false means over end boundary.
     void UpdateIgnoreBlankOffsetWithDrag(bool overSrollDirection);
 
+    std::set<int32_t> CalcVisibleIndex(float offset = 0.0f) const;
+
+    bool IsItemOverlay() const;
+    void UpdateIndicatorOnChildChange();
+
+    void CheckSpecialItemCount() const;
+
     friend class SwiperHelper;
 
     RefPtr<PanEvent> panEvent_;
@@ -943,6 +963,7 @@ private:
     float currentOffset_ = 0.0f;
     float fadeOffset_ = 0.0f;
     float turnPageRate_ = 0.0f;
+    float groupTurnPageRate_ = 0.0f;
     float translateAnimationEndPos_ = 0.0f;
     GestureState gestureState_ = GestureState::GESTURE_STATE_INIT;
     TouchBottomTypeLoop touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
@@ -958,7 +979,7 @@ private:
     bool isInit_ = true;
     bool hasVisibleChangeRegistered_ = false;
     bool isVisible_ = true;
-    bool isVisibleArea_ = true;
+    bool isVisibleArea_ = false;
     bool isWindowShow_ = true;
     bool isCustomSize_ = false;
     bool indicatorIsBoolean_ = true;

@@ -126,7 +126,7 @@ public:
         const std::string& id, const std::string& target, const RefPtr<AccessibilityNode>& node) override;
     void HandleComponentPostBinding() override {}
     void OnDumpInfo(const std::vector<std::string>& params) override;
-    void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId) override {}
+    void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId, bool hasJson = false) override {}
     std::unique_ptr<JsonValue> DumpComposedElementsToJson() const;
     std::unique_ptr<JsonValue> DumpComposedElementToJson(NodeId nodeId);
     void SetCardViewParams(const std::string& key, bool focus) override;
@@ -159,7 +159,7 @@ public:
 protected:
     virtual void DumpHandleEvent(const std::vector<std::string>& params);
     virtual void DumpProperty(const std::vector<std::string>& params);
-    virtual void DumpTree(int32_t depth, int64_t nodeID);
+    virtual void DumpTree(int32_t depth, int64_t nodeID, bool isDumpSimplify = false);
 
     static bool GetDefaultAttrsByType(const std::string& type, std::unique_ptr<JsonValue>& jsonDefaultAttrs);
     mutable std::mutex mutex_;

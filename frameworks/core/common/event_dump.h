@@ -30,6 +30,7 @@
 namespace OHOS::Ace::NG {
 struct FrameNodeSnapshot {
     void Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth) const;
+    void Dump(std::unique_ptr<JsonValue>& json) const;
 
     int32_t nodeId = -1;
     int32_t parentNodeId = -1;
@@ -46,7 +47,7 @@ struct TouchPointSnapshot {
     TouchPointSnapshot(const TouchEvent& event);
 
     void Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth) const;
-
+    void Dump(std::unique_ptr<JsonValue>& json) const;
     int32_t id = -1;
     OffsetF point;
     OffsetF screenPoint;
@@ -81,6 +82,8 @@ struct EventTreeRecord {
 
     void Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth, int32_t startNumber = 0) const;
 
+    void Dump(std::unique_ptr<JsonValue>& json, int32_t depth, int32_t startNumber = 0) const;
+    void BuildTouchPoints(std::list<TouchPointSnapshot> touchPoints, std::unique_ptr<JsonValue>& json) const;
     std::list<EventTree> eventTreeList;
 };
 }

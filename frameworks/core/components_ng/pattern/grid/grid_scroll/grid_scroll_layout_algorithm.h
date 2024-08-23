@@ -93,6 +93,8 @@ private:
     float FillNewLineForward(float crossSize, float mainSize, LayoutWrapper* layoutWrapper);
     void AddForwardLines(int32_t currentIndex, float crossSize, float mainSize, LayoutWrapper* layoutWrapper);
     void UpdateMatrixForAddedItems();
+    // Fill forward one line, but do not update startMainLineIndex_ and startIndex_
+    void FillOneLineForwardWithoutUpdatingStartIndex(float crossSize, float mainSize, LayoutWrapper* layoutWrapper);
 
     // fill end of viewport
     void FillBlankAtEnd(float mainSize, float crossSize, LayoutWrapper* layoutWrapper, float& mainLength);
@@ -184,6 +186,8 @@ private:
     void ResetOffsetWhenHeightChanged();
 
     void MergeRemainingLines(std::map<int32_t, std::map<int32_t, int32_t>> matrix, int32_t forwardLines);
+
+    bool SkipLargeLineHeightLines(float mainSize);
 
 protected:
     uint32_t crossCount_ = 0;

@@ -38,7 +38,15 @@ ArkUINativeModuleValue NativeUtilsBridge::CreateNativeWeakRef(ArkUIRuntimeCallIn
     if (firstArg.IsEmpty() || !firstArg->IsNativePointer(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
-    auto* weak = new NativeWeakRef(reinterpret_cast<AceType*>(firstArg->ToNativePointer(vm)->Value()));
+    auto refPtr = AceType::Claim(reinterpret_cast<AceType*>(firstArg->ToNativePointer(vm)->Value()));
+    return NativeUtilsBridge::CreateWeakRef(vm, refPtr);
+}
+
+ArkUINativeModuleValue NativeUtilsBridge::CreateWeakRef(EcmaVM* vm, const RefPtr<AceType>& ref)
+{
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    CHECK_NULL_RETURN(ref, panda::JSValueRef::Undefined(vm));
+    auto* weak = new NativeWeakRef(AceType::RawPtr(ref));
     auto nativeWeakRef = panda::ObjectRef::New(vm);
     nativeWeakRef->SetNativePointerFieldCount(vm, 1);
     nativeWeakRef->SetNativePointerField(vm, 0, weak, &DestructorInterceptor<NativeWeakRef>);

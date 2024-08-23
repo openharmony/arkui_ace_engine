@@ -35,6 +35,7 @@
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
 #include "base/view_data/view_data_wrap.h"
+#include "base/view_data/hint_to_type_wrap.h"
 #include "core/common/ace_view.h"
 #include "core/common/container.h"
 #include "core/common/display_info.h"
@@ -399,6 +400,13 @@ public:
         }
     }
 
+    void SetRealHostWindowId(uint32_t realHostWindowId)
+    {
+        if (pipelineContext_) {
+            pipelineContext_->SetRealHostWindowId(realHostWindowId);
+        }
+    }
+
     bool IsUseCustomBg() const
     {
         return isUseCustomBg_;
@@ -565,6 +573,7 @@ public:
     bool IsScenceBoardWindow() override;
     bool IsUIExtensionWindow() override;
     bool IsSceneBoardEnabled() override;
+    bool IsMainWindow() const override;
 
     void SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent);
     bool GetCurPointerEventInfo(int32_t& pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
@@ -581,7 +590,7 @@ public:
     std::shared_ptr<NavigationController> GetNavigationController(const std::string& navigationId) override;
     void OverwritePageNodeInfo(const RefPtr<NG::FrameNode>& frameNode, AbilityBase::ViewData& viewData);
     bool ChangeType(AbilityBase::ViewData& viewData);
-    AceAutoFillType PlaceHolderToType(const std::string& onePlaceHolder) override;
+    HintToTypeWrap PlaceHolderToType(const std::string& onePlaceHolder) override;
 
     void SearchElementInfoByAccessibilityIdNG(
         int64_t elementId, int32_t mode, int64_t baseParent,

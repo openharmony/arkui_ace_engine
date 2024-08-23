@@ -356,7 +356,7 @@ public:
 
     virtual void GetBoundingRectData(int32_t nodeId, Rect& rect) {}
 
-    virtual void CheckAndUpdateKeyboardInset() {}
+    virtual void CheckAndUpdateKeyboardInset(float keyboardHeight) {}
 
     virtual RefPtr<AccessibilityManager> GetAccessibilityManager() const;
 
@@ -705,6 +705,16 @@ public:
         return isFormRender_;
     }
 
+    void SetIsDynamicRender(bool isDynamicRender)
+    {
+        isDynamicRender_ = isDynamicRender;
+    }
+
+    bool IsDynamicRender() const
+    {
+        return isDynamicRender_;
+    }
+
     // Get the dp scale which used to covert dp to logic px.
     double GetDipScale() const
     {
@@ -752,6 +762,21 @@ public:
     bool IsFocusWindowIdSetted() const
     {
         return focusWindowId_.has_value();
+    }
+
+    void SetRealHostWindowId(uint32_t realHostWindowId)
+    {
+        realHostWindowId_ = realHostWindowId;
+    }
+
+    uint32_t GetRealHostWindowId() const
+    {
+        return realHostWindowId_.value_or(GetFocusWindowId());
+    }
+
+    bool IsRealHostWindowIdSetted() const
+    {
+        return realHostWindowId_.has_value();
     }
 
     float GetViewScale() const
@@ -1367,6 +1392,7 @@ protected:
     bool isRebuildFinished_ = false;
     bool isJsCard_ = false;
     bool isFormRender_ = false;
+    bool isDynamicRender_ = false;
     bool isRightToLeft_ = false;
     bool isFullWindow_ = false;
     bool isAppWindow_ = true;
@@ -1382,6 +1408,7 @@ protected:
     uint32_t windowId_ = 0;
     // UIExtensionAbility need component windowID
     std::optional<uint32_t> focusWindowId_;
+    std::optional<uint32_t> realHostWindowId_;
 
     int32_t appLabelId_ = 0;
     float fontScale_ = 1.0f;

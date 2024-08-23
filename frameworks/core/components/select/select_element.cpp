@@ -16,16 +16,8 @@
 #include "core/components/select/select_element.h"
 
 #include "core/components/box/render_box.h"
-#include "core/components/positioned/positioned_component.h"
-#include "core/components/root/render_root.h"
 #include "core/components/select/render_select.h"
-#include "core/components/select/select_component.h"
-#include "core/components/select/select_theme.h"
-#include "core/components/select_popup/select_popup_component.h"
-#include "core/components/stack/stack_element.h"
 #include "core/components/text/render_text.h"
-#include "core/event/ace_event_helper.h"
-#include "core/gestures/click_recognizer.h"
 
 namespace OHOS::Ace {
 

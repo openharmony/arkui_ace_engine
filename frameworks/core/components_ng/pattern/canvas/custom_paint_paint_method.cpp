@@ -135,7 +135,7 @@ bool CustomPaintPaintMethod::CheckFilterProperty(FilterType filterType, const st
             return std::regex_match(filterParam, contrastRegexExpression);
         }
         case FilterType::BLUR: {
-            std::regex blurRegexExpression(R"((\d+(\.\d+)?(px|rem))|(^$))");
+            std::regex blurRegexExpression(R"((\d+(\.\d+)?(px|vp|rem)?)|(^$))");
             return std::regex_match(filterParam, blurRegexExpression);
         }
         case FilterType::HUE_ROTATE: {
@@ -496,8 +496,7 @@ void CustomPaintPaintMethod::DrawImageInternal(
 {
     RSBrush compositeOperationpBrush;
     InitPaintBlend(compositeOperationpBrush);
-    auto rect = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
-    RSSaveLayerOps slo(&rect, &compositeOperationpBrush);
+    RSSaveLayerOps slo(nullptr, &compositeOperationpBrush);
     if (state_.globalState.GetType() != CompositeOperation::SOURCE_OVER) {
         rsCanvas_->SaveLayer(slo);
     }
@@ -618,8 +617,7 @@ void CustomPaintPaintMethod::FillRect(const Rect& rect)
     } else {
         RSBrush compositeOperationpBrush;
         InitPaintBlend(compositeOperationpBrush);
-        auto rect = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
-        RSSaveLayerOps slo(&rect, &compositeOperationpBrush);
+        RSSaveLayerOps slo(nullptr, &compositeOperationpBrush);
         if (HasShadow()) {
             RSRecordingPath path;
             path.AddRect(rsRect);
@@ -660,8 +658,7 @@ void CustomPaintPaintMethod::StrokeRect(const Rect& rect)
     } else {
         RSBrush compositeOperationpBrush;
         InitPaintBlend(compositeOperationpBrush);
-        auto rect = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
-        RSSaveLayerOps slo(&rect, &compositeOperationpBrush);
+        RSSaveLayerOps slo(nullptr, &compositeOperationpBrush);
         if (HasShadow()) {
             RSRecordingPath path;
             path.AddRect(rsRect);
@@ -739,8 +736,7 @@ void CustomPaintPaintMethod::Fill()
     } else {
         RSBrush compositeOperationpBrush;
         InitPaintBlend(compositeOperationpBrush);
-        auto rect = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
-        RSSaveLayerOps slo(&rect, &compositeOperationpBrush);
+        RSSaveLayerOps slo(nullptr, &compositeOperationpBrush);
         if (HasShadow()) {
             PaintShadow(rsPath_, state_.shadow, &brush, nullptr, &slo);
         }
@@ -793,8 +789,7 @@ void CustomPaintPaintMethod::Path2DFill()
     } else {
         RSBrush compositeOperationpBrush;
         InitPaintBlend(compositeOperationpBrush);
-        auto rect = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
-        RSSaveLayerOps slo(&rect, &compositeOperationpBrush);
+        RSSaveLayerOps slo(nullptr, &compositeOperationpBrush);
         if (HasShadow()) {
             PaintShadow(rsPath2d_, state_.shadow, &brush, nullptr, &slo);
         }
@@ -829,8 +824,7 @@ void CustomPaintPaintMethod::Stroke()
     } else {
         RSBrush compositeOperationpBrush;
         InitPaintBlend(compositeOperationpBrush);
-        auto rect = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
-        RSSaveLayerOps slo(&rect, &compositeOperationpBrush);
+        RSSaveLayerOps slo(nullptr, &compositeOperationpBrush);
         if (HasShadow()) {
             PaintShadow(rsPath_, state_.shadow, nullptr, &pen, &slo);
         }
@@ -873,8 +867,7 @@ void CustomPaintPaintMethod::Path2DStroke()
     } else {
         RSBrush compositeOperationpBrush;
         InitPaintBlend(compositeOperationpBrush);
-        auto rect = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
-        RSSaveLayerOps slo(&rect, &compositeOperationpBrush);
+        RSSaveLayerOps slo(nullptr, &compositeOperationpBrush);
         if (HasShadow()) {
             PaintShadow(rsPath2d_, state_.shadow, nullptr, &pen, &slo);
         }
@@ -1470,8 +1463,8 @@ void CustomPaintPaintMethod::SetFilterParam(const std::string& filterStr)
         return;
     }
     colorMatrix_ = RSColorMatrix();
-    colorFilter_ = nullptr;
-    blurFilter_ = nullptr;
+    colorFilter_ = RSColorFilter::CreateMatrixColorFilter(colorMatrix_);
+    blurFilter_ = RSImageFilter::CreateBlurImageFilter(0, 0, RSTileMode::DECAL, nullptr);
     for (FilterProperty filter : filters) {
         switch (filter.filterType_) {
             case FilterType::NONE:
@@ -1733,7 +1726,7 @@ void CustomPaintPaintMethod::SetBlurFilter(const std::string& percent)
         return;
     }
     blurFilter_ =
-        RSImageFilter::CreateBlurImageFilter(blurNum * density_, blurNum * density_, RSTileMode::DECAL, nullptr);
+        RSImageFilter::CreateBlurImageFilter(blurNum, blurNum, RSTileMode::DECAL, nullptr);
 }
 
 bool CustomPaintPaintMethod::GetFilterType(const std::string& filterStr, std::vector<FilterProperty>& filters)
@@ -1798,6 +1791,15 @@ double CustomPaintPaintMethod::BlurStrToDouble(const std::string& str)
         ret = StringUtils::StringToDouble(result);
         return ret;
     }
+
+    // check vp case
+    index = str.find("vp");
+    if (index != std::string::npos) {
+        std::string result = str.substr(0, index);
+        ret = StringUtils::StringToDouble(result);
+        ret = ret * density_;
+        return ret;
+    }
     
     // check rem case
     index = str.find("rem");
@@ -1808,7 +1810,8 @@ double CustomPaintPaintMethod::BlurStrToDouble(const std::string& str)
         return ret;
     }
 
-    return ret;
+    ret = StringUtils::StringToDouble(str);
+    return ret * density_;
 }
 
 float CustomPaintPaintMethod::PercentStrToFloat(const std::string& percentStr)
@@ -1981,8 +1984,8 @@ void CustomPaintPaintMethod::ResetStates()
     std::vector<std::shared_ptr<RSColorFilter>>().swap(saveColorFilter_);
     std::vector<std::shared_ptr<RSImageFilter>>().swap(saveBlurFilter_);
     colorMatrix_ = RSColorMatrix();
-    colorFilter_ = nullptr;
-    blurFilter_ = nullptr;
+    colorFilter_ = RSColorFilter::CreateMatrixColorFilter(colorMatrix_);
+    blurFilter_ = RSImageFilter::CreateBlurImageFilter(0, 0, RSTileMode::DECAL, nullptr);
 }
 
 void CustomPaintPaintMethod::PaintShadow(

@@ -23,10 +23,7 @@
 #include "core/components_ng/render/drawing.h"
 #endif
 
-#include "base/log/log.h"
-#include "base/utils/utils.h"
 #include "core/components/common/painter/rosen_universal_painter.h"
-#include "core/components/common/properties/alignment.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
 #include "core/pipeline/base/rosen_render_context.h"
 

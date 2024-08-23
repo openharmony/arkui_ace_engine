@@ -14,19 +14,8 @@
  */
 #include "core/common/recorder/event_controller.h"
 
-#include <algorithm>
-#include <queue>
-
-#include "base/json/json_util.h"
-#include "base/log/log_wrapper.h"
-#include "base/memory/referenced.h"
 #include "base/thread/background_task_executor.h"
-#include "base/thread/task_executor.h"
-#include "core/common/container.h"
 #include "core/common/recorder/node_data_cache.h"
-#include "core/common/recorder/event_recorder.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/ui_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::Recorder {
@@ -50,6 +39,7 @@ EventController& EventController::Get()
 
 void EventController::Register(const std::string& config, const std::shared_ptr<UIEventObserver>& observer)
 {
+    TAG_LOGI(AceLogTag::ACE_UIEVENT, "Register config");
     UIEventClient client;
     client.config.Init(config);
     if (!client.config.IsEnable()) {

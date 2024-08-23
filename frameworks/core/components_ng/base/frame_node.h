@@ -73,6 +73,7 @@ struct CacheVisibleRectResult {
     RectF innerVisibleRect = RectF();
     VectorF cumulativeScale = {1.0f, 1.0f};
     RectF frameRect = RectF();
+    RectF innerBoundaryRect = RectF();
 };
 
 // FrameNode will display rendering region in the screen.
@@ -188,7 +189,9 @@ public:
         MarkDirtyNode(extraFlag);
     }
 
-    void OnMountToParentDone();
+    [[deprecated]] void OnMountToParentDone();
+
+    void AfterMountToParent() override;
 
     bool GetIsLayoutNode();
 
@@ -332,9 +335,12 @@ public:
         return eventHub_->GetFocusHub();
     }
 
-    RefPtr<AccessibilityProperty> GetVirtualAccessibilityProperty() override
+    bool HasVirtualNodeAccessibilityProperty() override
     {
-        return accessibilityProperty_;
+        if (accessibilityProperty_ && accessibilityProperty_->GetAccessibilityVirtualNodePtr()) {
+            return true;
+        }
+        return false;
     }
 
     FocusType GetFocusType() const
@@ -353,7 +359,7 @@ public:
 
     // If return true, will prevent TouchTest Bubbling to parent and brother nodes.
     HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const PointF& parentRevertPoint,
-        TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId, TouchTestResult& responseLinkResult,
+        TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId, ResponseLinkResult& responseLinkResult,
         bool isDispatch = false) override;
 
     HitTestResult MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint, MouseTestResult& onMouseResult,
@@ -439,6 +445,10 @@ public:
 
     OffsetF GetPaintRectOffsetNG(bool excludeSelf = false) const;
 
+    bool GetRectPointToParentWithTransform(std::vector<Point>& pointList, const RefPtr<FrameNode>& parent) const;
+
+    RectF GetPaintRectToWindowWithTransform();
+
     OffsetF GetPaintRectCenter(bool checkWindowBoundary = true) const;
 
     std::pair<OffsetF, bool> GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf = false) const;
@@ -475,11 +485,15 @@ public:
     void OnAccessibilityEvent(
         AccessibilityEventType eventType, int64_t stackNodeId, WindowsContentChangeTypes windowsContentChangeType);
 
+    void OnAccessibilityEvent(
+        AccessibilityEventType eventType, std::string textAnnouncedForAccessibility);
     void MarkNeedRenderOnly();
 
     void OnDetachFromMainTree(bool recursive, PipelineContext* context) override;
     void OnAttachToMainTree(bool recursive) override;
     void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
+
+    bool RenderCustomChild(int64_t deadline) override;
 
     void TryVisibleChangeOnDescendant(bool isVisible) override;
     void NotifyVisibleChange(bool isVisible);
@@ -496,6 +510,17 @@ public:
     void SetColorModeUpdateCallback(const std::function<void()>&& callback)
     {
         colorModeUpdateCallback_ = callback;
+    }
+
+    void SetNDKColorModeUpdateCallback(const std::function<void(int32_t)>&& callback)
+    {
+        ndkColorModeUpdateCallback_ = callback;
+        colorMode_ = SystemProperties::GetColorMode();
+    }
+
+    void SetNDKFontUpdateCallback(const std::function<void(float, float)>&& callback)
+    {
+        ndkFontUpdateCallback_ = callback;
     }
 
     bool MarkRemoving() override;
@@ -895,7 +920,7 @@ public:
     }
 
     void GetVisibleRect(RectF& visibleRect, RectF& frameRect) const;
-    void GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect) const;
+    void GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect);
 
     void AttachContext(PipelineContext* context, bool recursive = false) override;
     void DetachContext(bool recursive = false) override;
@@ -935,6 +960,13 @@ public:
     bool CheckAccessibilityLevelNo() const {
         return false;
     }
+
+    void HasAccessibilityVirtualNode(bool hasAccessibilityVirtualNode)
+    {
+        hasAccessibilityVirtualNode_ = hasAccessibilityVirtualNode;
+    }
+
+    void ProcessAccessibilityVirtualNode();
 
     RectF GetVirtualNodeTransformRectRelativeToWindow()
     {
@@ -1017,6 +1049,8 @@ public:
     {
         dragHitTestBlock_ = dragHitTestBlock;
     }
+
+    void NotifyDataChange(int32_t index, int32_t count, int64_t id) const override;
 
 protected:
     void DumpInfo() override;
@@ -1117,7 +1151,7 @@ private:
     HitTestMode TriggerOnTouchIntercept(const TouchEvent& touchEvent);
 
     void TriggerShouldParallelInnerWith(
-        const TouchTestResult& currentRecognizers, const TouchTestResult& responseLinkRecognizers);
+        const ResponseLinkResult& currentRecognizers, const ResponseLinkResult& responseLinkRecognizers);
 
     void TriggerRsProfilerNodeMountCallbackIfExist();
 
@@ -1130,14 +1164,20 @@ private:
     CacheVisibleRectResult CalculateCacheVisibleRect(CacheVisibleRectResult& parentCacheVisibleRect,
         const RefPtr<FrameNode>& parentUi, RectF& rectToParent, VectorF scale, uint64_t timestamp);
 
+    void NotifyConfigurationChangeNdk(const ConfigurationChange& configurationChange);
+
+    bool AllowVisibleAreaCheck() const;
+
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
 
     std::list<std::function<void()>> destroyCallbacks_;
     std::function<void()> colorModeUpdateCallback_;
-
+    std::function<void(int32_t)> ndkColorModeUpdateCallback_;
+    std::function<void(float, float)> ndkFontUpdateCallback_;
     RefPtr<AccessibilityProperty> accessibilityProperty_;
+    bool hasAccessibilityVirtualNode_ = false;
     RefPtr<LayoutProperty> layoutProperty_;
     RefPtr<PaintProperty> paintProperty_;
     RefPtr<RenderContext> renderContext_ = RenderContext::Create();
@@ -1193,6 +1233,8 @@ private:
     bool isInternal_ = false;
 
     std::string nodeName_;
+
+    ColorMode colorMode_;
 
     bool draggable_ = false;
     bool userSet_ = false;

@@ -132,7 +132,7 @@ public:
 
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result,
-        TouchTestResult& responseLinkResult) override;
+        ResponseLinkResult& responseLinkResult) override;
 
     GestureEventFunc GetClickEvent();
     std::optional<GestureJudgeFunc> GetSysJudgeFunc() const;

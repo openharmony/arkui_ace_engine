@@ -451,6 +451,27 @@ void ResetTextPickerDivider(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto themeManager = context->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto pickerTheme = themeManager->GetTheme<PickerTheme>();
+    NG::ItemDivider divider;
+    Dimension defaultStrokeWidth = 0.0_vp;
+    Color defaultColor = Color::TRANSPARENT;
+    if (pickerTheme) {
+        defaultStrokeWidth = pickerTheme->GetDividerThickness();
+        defaultColor = pickerTheme->GetDividerColor();
+        divider.strokeWidth = defaultStrokeWidth;
+        divider.color = defaultColor;
+    }
+    TextPickerModelNG::SetDivider(frameNode, divider);
+}
+
+void ResetTextPickerDividerNull(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
     NG::ItemDivider divider;
     TextPickerModelNG::SetDivider(frameNode, divider);
 }
@@ -500,6 +521,22 @@ namespace NodeModifier {
 const ArkUITextPickerModifier* GetTextPickerModifier()
 {
     static const ArkUITextPickerModifier modifier = { SetTextPickerBackgroundColor, SetTextPickerCanLoop,
+        GetTextPickerSelectedIndex, SetTextPickerSelectedIndex, GetTextPickerTextStyle, SetTextPickerTextStyle,
+        GetTextPickerSelectedTextStyle, SetTextPickerSelectedTextStyle, GetTextPickerDisappearTextStyle,
+        SetTextPickerDisappearTextStyle, SetTextPickerDefaultPickerItemHeight, ResetTextPickerCanLoop,
+        ResetTextPickerSelectedIndex, ResetTextPickerTextStyle, ResetTextPickerSelectedTextStyle,
+        ResetTextPickerDisappearTextStyle, ResetTextPickerDefaultPickerItemHeight, ResetTextPickerBackgroundColor,
+        GetTextPickerRangeStr, GetTextPickerSingleRange, SetTextPickerRangeStr, GetTextPickerValue, SetTextPickerValue,
+        SetTextPickerDivider, ResetTextPickerDivider, SetTextPickerGradientHeight, ResetTextPickerGradientHeight,
+        GetTextPickerSelectedSize, GetTextPickerCanLoop, GetTextPickerDefaultPickerItemHeight,
+        ResetTextPickerDividerNull };
+
+    return &modifier;
+}
+
+const CJUITextPickerModifier* GetCJUITextPickerModifier()
+{
+    static const CJUITextPickerModifier modifier = { SetTextPickerBackgroundColor, SetTextPickerCanLoop,
         GetTextPickerSelectedIndex, SetTextPickerSelectedIndex, GetTextPickerTextStyle, SetTextPickerTextStyle,
         GetTextPickerSelectedTextStyle, SetTextPickerSelectedTextStyle, GetTextPickerDisappearTextStyle,
         SetTextPickerDisappearTextStyle, SetTextPickerDefaultPickerItemHeight, ResetTextPickerCanLoop,
@@ -623,11 +660,12 @@ void SetSelectedIndexMulti(FrameNode* frameNode, uint32_t* inputs, const int32_t
 void ProcessCascadeSelected(
     const std::vector<NG::TextCascadePickerOptions>& options, uint32_t index, std::vector<uint32_t>& selectedValues)
 {
-    if (options.size() == 0) {
+    const size_t size = options.size();
+    if (size == 0) {
         return;
     }
     std::vector<std::string> rangeResultValue;
-    for (size_t i = 0; i < options.size(); i++) {
+    for (size_t i = 0; i < size; i++) {
         rangeResultValue.emplace_back(options[i].rangeResult[0]);
     }
     uint32_t val = selectedValues.size() > 0 ? selectedValues.size() - 1 : 0;
@@ -637,7 +675,7 @@ void ProcessCascadeSelected(
     if (selectedValues[index] >= rangeResultValue.size()) {
         selectedValues[index] = 0;
     }
-    if ((selectedValues[index] <= options.size() - 1) && (options[selectedValues[index]].children.size() > 0)) {
+    if ((selectedValues[index] <= size - 1) && (options[selectedValues[index]].children.size() > 0)) {
         ProcessCascadeSelected(options[selectedValues[index]].children, index + 1, selectedValues);
     }
 }

@@ -14,7 +14,6 @@
  */
 
 #include "core/components/stepper/stepper_item_component_v2.h"
-#include "core/components/scroll/scroll_component.h"
 
 namespace OHOS::Ace {
 StepperItemComponentV2::StepperItemComponentV2(FlexDirection direction, FlexAlign mainAxisAlign,

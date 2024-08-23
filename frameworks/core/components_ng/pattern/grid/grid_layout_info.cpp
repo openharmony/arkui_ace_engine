@@ -56,6 +56,9 @@ void GridLayoutInfo::ClearDragState()
 void GridLayoutInfo::MoveItemsBack(int32_t from, int32_t to, int32_t itemIndex)
 {
     auto lastItemIndex = itemIndex;
+    if (crossCount_ == 0) {
+        return;
+    }
     for (int32_t i = from; i <= to; ++i) {
         int32_t mainIndex = (i - startIndex_) / crossCount_ + startMainLineIndex_;
         int32_t crossIndex = (i - startIndex_) % crossCount_;
@@ -75,6 +78,9 @@ void GridLayoutInfo::MoveItemsBack(int32_t from, int32_t to, int32_t itemIndex)
 
 void GridLayoutInfo::MoveItemsForward(int32_t from, int32_t to, int32_t itemIndex)
 {
+    if (crossCount_ == 0) {
+        return;
+    }
     for (int32_t i = from; i <= to; ++i) {
         int32_t mainIndex = (i - startIndex_) / crossCount_ + startMainLineIndex_;
         int32_t crossIndex = (i - startIndex_) % crossCount_;
@@ -162,6 +168,9 @@ bool GridLayoutInfo::IsOutOfEnd(float mainGap, bool irregular) const
 float GridLayoutInfo::GetCurrentOffsetOfRegularGrid(float mainGap) const
 {
     float defaultHeight = GetCurrentLineHeight();
+    if (crossCount_ == 0) {
+        return 0.0f;
+    }
     auto lines = startIndex_ / crossCount_;
     float res = 0.0f;
     for (int i = 0; i < lines; ++i) {
@@ -240,6 +249,9 @@ float GridLayoutInfo::GetContentHeightOfRegularGrid(float mainGap) const
 {
     float lineHeight = GetCurrentLineHeight();
     float res = 0.0f;
+    if (crossCount_ == 0) {
+        return res;
+    }
     auto lines = (childrenCount_) / crossCount_;
     for (int i = 0; i < lines; ++i) {
         auto it = lineHeightMap_.find(i);
@@ -665,6 +677,9 @@ MatIter SearchInReverse(const decltype(GridLayoutInfo::gridMatrix_)& mat, int32_
 
 MatIter GridLayoutInfo::FindInMatrix(int32_t index) const
 {
+    if (crossCount_ == 0) {
+        return gridMatrix_.end();
+    }
     if (index == 0) {
         return gridMatrix_.begin();
     }
@@ -700,6 +715,20 @@ MatIter GridLayoutInfo::FindInMatrix(int32_t index) const
     When iterator points to Line 1 ~ 3, Item 3 can never be found.
     */
     return SearchInReverse(gridMatrix_, index, crossCount_);
+}
+
+std::pair<int32_t, int32_t> GridLayoutInfo::GetItemPos(int32_t itemIdx) const
+{
+    auto it = FindInMatrix(itemIdx);
+    if (it == gridMatrix_.end()) {
+        return { -1, -1 };
+    }
+    for (auto col : it->second) {
+        if (col.second == itemIdx) {
+            return { col.first, it->first };
+        }
+    }
+    return { -1, -1 };
 }
 
 GridLayoutInfo::EndIndexInfo GridLayoutInfo::FindEndIdx(int32_t endLine) const
@@ -953,7 +982,7 @@ float GridLayoutInfo::GetHeightInRange(int32_t startLine, int32_t endLine, float
     if (endLine <= startLine) {
         return 0.0f;
     }
-    auto endIt = lineHeightMap_.find(endLine);
+    auto endIt = lineHeightMap_.lower_bound(endLine);
     auto it = lineHeightMap_.find(startLine);
     if (it == lineHeightMap_.end()) {
         return 0.0f;

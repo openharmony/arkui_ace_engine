@@ -17,6 +17,7 @@
 
 #include <memory>
 
+#include "input_manager.h"
 #include "pointer_event.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
@@ -124,6 +125,22 @@ TimeStamp GetTouchEventOriginTimeStamp(const TouchEvent& event)
     std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
     TimeStamp time(microseconds);
     return time;
+}
+
+void UpdatePressedKeyCodes(std::vector<KeyCode>& pressedKeyCodes)
+{
+    auto inputManager = MMI::InputManager::GetInstance();
+    CHECK_NULL_VOID(inputManager);
+
+    std::vector<int32_t> pressedKeys;
+    std::map<int32_t, int32_t> specialKeysState;
+    pressedKeyCodes.clear();
+    auto ret = inputManager->GetKeyState(pressedKeys, specialKeysState);
+    if (ret == 0) {
+        for (const auto& curCode : pressedKeys) {
+            pressedKeyCodes.emplace_back(static_cast<KeyCode>(curCode));
+        }
+    }
 }
 
 void UpdateMouseEventForPen(const MMI::PointerEvent::PointerItem& pointerItem, MouseEvent& mouseEvent)
@@ -534,12 +551,12 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_
             auto pipelineContext = container->GetPipelineContext();
             if (pipelineContext) {
                 uint32_t windowId = pipelineContext->GetWindowId();
-                LOGI("pointdown windowId: %{public}u", windowId);
+                TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "pointdown windowId: %{public}u", windowId);
             }
         }
     }
     if (SystemProperties::GetDebugEnabled()) {
-        LOGD("point source: %{public}d", pointerEvent->GetSourceType());
+        TAG_LOGD(AceLogTag::ACE_DRAG, "point source: %{public}d", pointerEvent->GetSourceType());
         auto actionId = pointerEvent->GetPointerId();
         MMI::PointerEvent::PointerItem item;
         if (pointerEvent->GetPointerItem(actionId, item)) {

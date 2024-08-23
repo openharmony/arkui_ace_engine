@@ -27,7 +27,6 @@
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
-#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t HANDLE_RING_DEGREE = 360;
@@ -323,6 +322,7 @@ void RichEditorDragOverlayModifier::StartFloatingAnimate()
 {
     type_ = DragAnimType::FLOATING;
     isAnimating_ = true;
+
     SetHandleOpacity(IsHandlesShow() ? 1.0 : 0.0);
     AnimationOption handleOption;
     handleOption.SetDuration(FLOATING_ANIMATE_HANDLE_OPACITY_DURATION);

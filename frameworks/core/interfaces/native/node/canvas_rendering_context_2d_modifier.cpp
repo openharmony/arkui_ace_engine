@@ -262,5 +262,31 @@ const ArkUICanvasRenderingContext2DModifier* GetCanvasRenderingContext2DModifier
     };
     return &modifier;
 }
+
+const CJUICanvasRenderingContext2DModifier* GetCJUICanvasRenderingContext2DModifier()
+{
+    static const CJUICanvasRenderingContext2DModifier modifier = {
+        nullptr,
+        SetCanvasBeginPath,
+        SetCanvasClosePath,
+        SetCanvasFill,
+        SetCanvasMoveTo,
+        SetCanvasArc,
+        SetCanvasLineTo,
+        SetCanvasStrokeStyle,
+        GetCanvasStrokeStyle,
+        SetCanvasLineWidth,
+        GetCanvasLineWidth,
+        SetCanvasStroke,
+        SetCanvasAntiAlias,
+        SetCanvasFillColor,
+        GetCanvasFillColor,
+        SetCanvasGlobalAlpha,
+        GetCanvasGlobalAlpha,
+        SetCanvasFillRect,
+        SetCanvasFillText,
+    };
+    return &modifier;
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

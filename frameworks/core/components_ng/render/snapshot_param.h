@@ -29,6 +29,10 @@ struct SnapshotOptions {
     bool waitUntilRenderFinished;
     explicit SnapshotOptions(float scale = DEFAULT_SNAPSHOT_SCALE, bool waitUntilRenderFinished = false)
         : scale(scale), waitUntilRenderFinished(waitUntilRenderFinished) {}
+    std::string ToString() const
+    {
+        return "{" + std::to_string(scale) + ", " + (waitUntilRenderFinished ? "true}" : "false}");
+    }
 };
 struct SnapshotParam {
     int32_t delay;

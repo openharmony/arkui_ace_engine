@@ -13,17 +13,11 @@
  * limitations under the License.
  */
 
-#include <cstdint>
 
-#include "native_gesture.h"
-#include "native_node.h"
-#include "native_type.h"
 #include "node_model.h"
 #include "gesture_impl.h"
 
-#include "base/utils/utils.h"
 #include "core/gestures/gesture_event.h"
-#include "frameworks/core/interfaces/arkoala/arkoala_api.h"
 #include "interfaces/native/event/ui_input_event_impl.h"
 
 #ifdef __cplusplus
@@ -35,7 +29,15 @@ struct ArkUI_GestureRecognizer {
     ArkUIGesture* gesture = nullptr;
     void* extraData = nullptr;
     void* attachNode = nullptr;
+    bool capi = true;
+    void* recognizer = nullptr;
+    ArkUIGestureEventTargetInfo targetInfo = {};
 };
+
+struct ArkUI_GestureEventTargetInfo {
+    void* uiNode = nullptr;
+};
+
 #ifdef __cplusplus
 };
 
@@ -47,6 +49,13 @@ struct ArkUI_GestureEvent {
 
 struct ArkUI_GestureInterruptInfo {
     ArkUIGestureInterruptInfo interruptData;
+};
+
+struct ArkUI_ParallelInnerGestureEvent {
+    ArkUIGestureRecognizer* current = nullptr;
+    ArkUIGestureRecognizer** responseLinkRecognizer = nullptr;
+    void* userData = nullptr;
+    int32_t count;
 };
 
 #endif
@@ -185,12 +194,187 @@ int32_t OH_ArkUI_GestureInterruptInfo_GetSystemRecognizerType(const ArkUI_Gestur
     return -1;
 }
 
+int32_t OH_ArkUI_GetResponseRecognizersFromInterruptInfo(
+    const ArkUI_GestureInterruptInfo* event, ArkUI_GestureRecognizerHandleArray* responseChain, int32_t* count)
+{
+    CHECK_NULL_RETURN(responseChain, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(count, ARKUI_ERROR_CODE_PARAM_INVALID);
+    *responseChain = reinterpret_cast<ArkUI_GestureRecognizer**>(event->interruptData.responseLinkRecognizer);
+    *count = event->interruptData.count;
+    return 0;
+}
+
+int32_t OH_ArkUI_SetGestureRecognizerEnabled(ArkUI_GestureRecognizer* recognizer, bool enabled)
+{
+    auto* gestureRecognizer = reinterpret_cast<ArkUIGestureRecognizer*>(recognizer);
+    if (!gestureRecognizer) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    return OHOS::Ace::NodeModel::GetFullImpl()
+        ->getNodeModifiers()
+        ->getGestureModifier()
+        ->setGestureRecognizerEnabled(gestureRecognizer, enabled);
+}
+
+bool OH_ArkUI_GetGestureRecognizerEnabled(ArkUI_GestureRecognizer* recognizer)
+{
+    auto* gestureRecognizer = reinterpret_cast<ArkUIGestureRecognizer*>(recognizer);
+    if (!gestureRecognizer) {
+        return false;
+    }
+    return OHOS::Ace::NodeModel::GetFullImpl()
+        ->getNodeModifiers()
+        ->getGestureModifier()
+        ->getGestureRecognizerEnabled(gestureRecognizer);
+}
+
+int32_t OH_ArkUI_GetGestureRecognizerState(ArkUI_GestureRecognizer* recognizer, ArkUI_GestureRecognizerState* state)
+{
+    auto* gestureRecognizer = reinterpret_cast<ArkUIGestureRecognizer*>(recognizer);
+    if (!gestureRecognizer) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    ArkUIGestureRecognizerState recognizerState;
+    auto result =
+        OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->getGestureRecognizerState(
+            gestureRecognizer, &recognizerState);
+    *state = static_cast<ArkUI_GestureRecognizerState>(recognizerState);
+    return result;
+}
+
+int32_t OH_ArkUI_GetGestureEventTargetInfo(ArkUI_GestureRecognizer* recognizer, ArkUI_GestureEventTargetInfo** info)
+{
+    auto* gestureRecognizer = reinterpret_cast<ArkUIGestureRecognizer*>(recognizer);
+    if (!gestureRecognizer) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    *info = reinterpret_cast<ArkUI_GestureEventTargetInfo*>(&gestureRecognizer->targetInfo);
+    return 0;
+}
+
+int32_t OH_ArkUI_GestureEventTargetInfo_IsScrollBegin(ArkUI_GestureEventTargetInfo* info, bool* ret)
+{
+    auto* targetInfo = reinterpret_cast<ArkUIGestureEventTargetInfo*>(info);
+    if (!targetInfo) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    return OHOS::Ace::NodeModel::GetFullImpl()
+        ->getNodeModifiers()
+        ->getGestureModifier()
+        ->gestureEventTargetInfoIsScrollBegin(targetInfo, ret);
+}
+
+int32_t OH_ArkUI_GestureEventTargetInfo_IsScrollEnd(ArkUI_GestureEventTargetInfo* info, bool* ret)
+{
+    auto* targetInfo = reinterpret_cast<ArkUIGestureEventTargetInfo*>(info);
+    if (!targetInfo) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    return OHOS::Ace::NodeModel::GetFullImpl()
+        ->getNodeModifiers()
+        ->getGestureModifier()
+        ->gestureEventTargetInfoIsScrollEnd(targetInfo, ret);
+}
+
+int32_t OH_ArkUI_GetPanGestureDirectionMask(
+    ArkUI_GestureRecognizer* recognizer, ArkUI_GestureDirectionMask* directionMask)
+{
+    auto* gestureRecognizer = reinterpret_cast<ArkUIGestureRecognizer*>(recognizer);
+    if (!gestureRecognizer) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    ArkUIGestureDirection direction = ArkUIGestureDirection::ArkUI_GESTURE_DIRECTION_ALL;
+    auto result =
+        OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->getPanGestureDirectionMask(
+            gestureRecognizer, &direction);
+    *directionMask = static_cast<ArkUI_GestureDirectionMask>(direction);
+    return result;
+}
+
+bool OH_ArkUI_IsBuiltInGesture(ArkUI_GestureRecognizer* recognizer)
+{
+    auto* gestureRecognizer = reinterpret_cast<ArkUIGestureRecognizer*>(recognizer);
+    if (!gestureRecognizer) {
+        return false;
+    }
+    return OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->isBuiltInGesture(
+        gestureRecognizer);
+}
+
+int32_t OH_ArkUI_GetGestureTag(ArkUI_GestureRecognizer* recognizer, char* buffer, int32_t bufferSize, int32_t* result)
+{
+    auto* gestureRecognizer = reinterpret_cast<ArkUIGestureRecognizer*>(recognizer);
+    if (!gestureRecognizer) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    return OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->getGestureTag(
+        gestureRecognizer, buffer, bufferSize, result);
+}
+
+int32_t OH_ArkUI_GetGestureBindNodeId(ArkUI_GestureRecognizer* recognizer, char* nodeId, int32_t size, int32_t* result)
+{
+    auto* gestureRecognizer = reinterpret_cast<ArkUIGestureRecognizer*>(recognizer);
+    if (!gestureRecognizer) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    return OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->getGestureBindNodeId(
+        gestureRecognizer, nodeId, size, result);
+}
+
+bool OH_ArkUI_IsGestureRecognizerValid(ArkUI_GestureRecognizer* recognizer)
+{
+    auto* gestureRecognizer = reinterpret_cast<ArkUIGestureRecognizer*>(recognizer);
+    if (!gestureRecognizer) {
+        return false;
+    }
+    return OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->isGestureRecognizerValid(
+        gestureRecognizer);
+}
+
+void* OH_ArkUI_ParallelInnerGestureEvent_GetUserData(ArkUI_ParallelInnerGestureEvent* event)
+{
+    return event->userData;
+}
+
+ArkUI_GestureRecognizer* OH_ArkUI_ParallelInnerGestureEvent_GetCurrentRecognizer(ArkUI_ParallelInnerGestureEvent* event)
+{
+    return reinterpret_cast<ArkUI_GestureRecognizer*>(event->current);
+}
+
+int32_t OH_ArkUI_ParallelInnerGestureEvent_GetConflictRecognizers(
+    ArkUI_ParallelInnerGestureEvent* event, ArkUI_GestureRecognizerHandleArray* array, int32_t* size)
+{
+    CHECK_NULL_RETURN(array, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(size, ARKUI_ERROR_CODE_PARAM_INVALID);
+    *array = reinterpret_cast<ArkUI_GestureRecognizer**>(event->responseLinkRecognizer);
+    *size = event->count;
+    return 0;
+}
+
+int32_t OH_ArkUI_SetArkUIGestureRecognizerDisposeNotify(
+    ArkUI_GestureRecognizer* recognizer, ArkUI_GestureRecognizerDisposeNotifyCallback callback, void* userData)
+{
+    auto* gestureRecognizer = reinterpret_cast<ArkUIGestureRecognizer*>(recognizer);
+    if (!gestureRecognizer || gestureRecognizer->capi) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto disposeCallback = reinterpret_cast<void (*)(ArkUIGestureRecognizer * recognizer, void* userData)>(callback);
+    OHOS::Ace::NodeModel::GetFullImpl()
+        ->getNodeModifiers()
+        ->getGestureModifier()
+        ->setArkUIGestureRecognizerDisposeNotify(gestureRecognizer, userData, disposeCallback);
+    return 0;
+}
+
 namespace OHOS::Ace::GestureModel {
 
 constexpr int32_t DEFAULT_PAN_FINGERS = 1;
 constexpr int32_t MAX_PAN_FINGERS = 10;
 constexpr double DEFAULT_PINCH_DISTANCE = 5.0f;
 constexpr double DEFAULT_SWIPE_SPEED = 100.0f;
+constexpr int32_t DEFAULT_TAP_COUNT = 1;
+constexpr int32_t DEFAULT_TAP_FINGERS = 1;
+constexpr int32_t MAX_TAP_FINGERS = 10;
 
 struct GestureInnerData {
     void (*targetReceiver)(ArkUI_GestureEvent* event, void* extraParam);
@@ -200,9 +384,22 @@ struct GestureInnerData {
 
 ArkUI_GestureRecognizer* CreateTapGesture(int32_t count, int32_t fingers)
 {
+    count = std::max(count, DEFAULT_TAP_COUNT);
+    fingers = std::clamp(fingers, DEFAULT_TAP_FINGERS, MAX_TAP_FINGERS);
     auto* ndkGesture = new ArkUI_GestureRecognizer{ TAP_GESTURE, nullptr, nullptr, nullptr };
     auto* gesture = OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createTapGesture(
         count, fingers, ndkGesture);
+    ndkGesture->gesture = gesture;
+    return ndkGesture;
+}
+
+ArkUI_GestureRecognizer* CreateTapGestureWithDistanceThreshold(int32_t count, int32_t fingers, double distanceThreshold)
+{
+    count = std::max(count, DEFAULT_TAP_COUNT);
+    fingers = std::clamp(fingers, DEFAULT_TAP_FINGERS, MAX_TAP_FINGERS);
+    auto* ndkGesture = new ArkUI_GestureRecognizer{ TAP_GESTURE, nullptr, nullptr, nullptr };
+    auto* gesture = OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->
+        createTapGestureWithDistanceThreshold(count, fingers, distanceThreshold, ndkGesture);
     ndkGesture->gesture = gesture;
     return ndkGesture;
 }
@@ -302,6 +499,7 @@ int32_t AddGestureToNode(ArkUI_NodeHandle node, ArkUI_GestureRecognizer* recogni
     recognizer->attachNode = node;
     OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->addGestureToNode(
         node->uiNodeHandle, recognizer->gesture, priorityNum, mask);
+    recognizer->targetInfo.uiNode = reinterpret_cast<void*>(node->uiNodeHandle);
     return 0;
 }
 
@@ -309,6 +507,7 @@ int32_t RemoveGestureFromNode(ArkUI_NodeHandle node, ArkUI_GestureRecognizer* re
 {
     OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->removeGestureFromNode(
         node->uiNodeHandle, recognizer->gesture);
+    recognizer->targetInfo.uiNode = nullptr;
     return 0;
 }
 
@@ -374,6 +573,16 @@ int32_t SetGestureInterrupterToNode(
     auto callback = reinterpret_cast<int32_t (*)(ArkUIGestureInterruptInfo*)>(interrupter);
     OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->setGestureInterrupterToNode(
         node->uiNodeHandle, callback);
+    return 0;
+}
+
+int32_t SetInnerGestureParallelTo(ArkUI_NodeHandle node, void* userData,
+    ArkUI_GestureRecognizer* (*parallelInnerGesture)(ArkUI_ParallelInnerGestureEvent* event))
+{
+    auto callback =
+        reinterpret_cast<ArkUIGestureRecognizer* (*)(ArkUIParallelInnerGestureEvent * current)>(parallelInnerGesture);
+    OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->setInnerGestureParallelTo(
+        node->uiNodeHandle, userData, callback);
     return 0;
 }
 

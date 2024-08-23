@@ -70,16 +70,17 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     } else {
         textContentModifier_->StopTextRace();
     }
+
+    // Privacy masking.
     auto reasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
-    textContentModifier_->SetObscured(reasons);
-    auto spanItemChildren = pattern->GetSpanItemChildren();
-    textContentModifier_->SetIfHaveSpanItemChildren(!spanItemChildren.empty());
-    auto wideTextLength = pattern->GetDisplayWideTextLength();
-    std::vector<RectF> drawObscuredRects;
-    if (wideTextLength != 0) {
-        drawObscuredRects = pManager->GetRects(0, wideTextLength);
+    bool ifPaintObscuration = std::any_of(reasons.begin(), reasons.end(),
+        [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
+    if (ifPaintObscuration) {
+        UpdateObscuredRects();
+    } else {
+        textContentModifier_->SetIfPaintObscuration(false);
     }
-    textContentModifier_->SetDrawObscuredRects(drawObscuredRects);
+
     if (renderContext->GetClipEdge().has_value()) {
         textContentModifier_->SetClip(renderContext->GetClipEdge().value());
     }
@@ -87,6 +88,26 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     if (textContentModifier_->NeedMeasureUpdate(flag)) {
         frameNode->MarkDirtyNode(flag);
     }
+}
+
+void TextPaintMethod::UpdateObscuredRects()
+{
+    auto pattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(pattern);
+    auto pManager = pattern->GetParagraphManager();
+    CHECK_NULL_VOID(pManager);
+
+    auto spanItemChildren = pattern->GetSpanItemChildren();
+    auto ifPaintObscuration = spanItemChildren.empty();
+    textContentModifier_->SetIfPaintObscuration(ifPaintObscuration);
+    CHECK_NULL_VOID(ifPaintObscuration);
+
+    auto wideTextLength = pattern->GetDisplayWideTextLength();
+    std::vector<RectF> drawObscuredRects;
+    if (wideTextLength != 0 && ifPaintObscuration) {
+        drawObscuredRects = pManager->GetRects(0, wideTextLength);
+    }
+    textContentModifier_->SetDrawObscuredRects(drawObscuredRects);
 }
 
 RefPtr<Modifier> TextPaintMethod::GetOverlayModifier(PaintWrapper* paintWrapper)
@@ -115,8 +136,8 @@ void TextPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     auto contentRect = textPattern->GetTextContentRect();
     std::vector<RectF> selectedRects;
     if (selection.GetTextStart() != selection.GetTextEnd()) {
-        selectedRects = pManager->GetRects(selection.GetTextStart(), selection.GetTextEnd());
-        TextBase::CalculateSelectedRect(selectedRects, contentRect.Width());
+        auto rects = pManager->GetParagraphsRects(selection.GetTextStart(), selection.GetTextEnd());
+        selectedRects = CalculateSelectedRect(rects, contentRect.Width());
     }
     textOverlayModifier_->SetContentRect(contentRect);
     textOverlayModifier_->SetShowSelect(textPattern->GetShowSelect());
@@ -134,5 +155,17 @@ void TextPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     if (context->GetClipEdge().has_value()) {
         textOverlayModifier_->SetIsClip(context->GetClipEdge().value());
     }
+}
+
+std::vector<RectF> TextPaintMethod::CalculateSelectedRect(
+    const std::vector<std::pair<std::vector<RectF>, TextDirection>>& selectedRects, float contentWidth)
+{
+    std::vector<RectF> result;
+    for (const auto& info : selectedRects) {
+        auto rects = info.first;
+        TextBase::CalculateSelectedRect(rects, contentWidth, info.second);
+        result.insert(result.end(), rects.begin(), rects.end());
+    }
+    return result;
 }
 } // namespace OHOS::Ace::NG

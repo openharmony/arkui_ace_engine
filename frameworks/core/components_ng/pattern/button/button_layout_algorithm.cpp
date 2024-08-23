@@ -76,7 +76,11 @@ void ButtonLayoutAlgorithm::HandleChildLayoutConstraint(
     if (!buttonLayoutProperty->HasLabel()) {
         return;
     }
-    if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CIRCLE) {
+    auto buttonType = buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        buttonType = buttonLayoutProperty->GetType().value_or(ButtonType::ROUNDED_RECTANGLE);
+    }
+    if (buttonType == ButtonType::CIRCLE) {
         layoutConstraint.maxSize = HandleLabelCircleButtonConstraint(layoutWrapper).value_or(SizeF());
         return;
     }
@@ -170,7 +174,12 @@ void ButtonLayoutAlgorithm::HandleBorderRadius(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(buttonLayoutProperty);
     auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto renderContext = host->GetRenderContext();
-    if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CIRCLE) {
+    CHECK_NULL_VOID(renderContext);
+    auto buttonType = buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        buttonType = buttonLayoutProperty->GetType().value_or(ButtonType::ROUNDED_RECTANGLE);
+    }
+    if (buttonType == ButtonType::CIRCLE) {
         auto minSize = std::min(frameSize.Height(), frameSize.Width());
         auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
         if (buttonLayoutProperty->HasBorderRadius() && layoutConstraint.parentIdealSize.IsNull()) {
@@ -179,12 +188,18 @@ void ButtonLayoutAlgorithm::HandleBorderRadius(LayoutWrapper* layoutWrapper)
         }
         renderContext->UpdateBorderRadius(BorderRadiusProperty(Dimension(minSize / 2)));
         MeasureCircleButton(layoutWrapper);
-    } else if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::NORMAL) {
-        auto normalRadius =
-            buttonLayoutProperty->GetBorderRadiusValue(BorderRadiusProperty({ 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp }));
-        renderContext->UpdateBorderRadius(normalRadius);
-    } else {
+    }  else if (buttonType == ButtonType::CAPSULE) {
         renderContext->UpdateBorderRadius(BorderRadiusProperty(Dimension(frameSize.Height() / 2)));
+    } else if (buttonLayoutProperty->HasBorderRadius() &&
+               (buttonType == ButtonType::NORMAL || buttonType == ButtonType::ROUNDED_RECTANGLE)) {
+        renderContext->UpdateBorderRadius(buttonLayoutProperty->GetBorderRadius().value());
+    } else if (buttonType == ButtonType::ROUNDED_RECTANGLE) {
+        auto defaultHeight = GetDefaultHeight(layoutWrapper);
+        auto roundedRectRadius =
+            buttonLayoutProperty->GetBorderRadiusValue(BorderRadiusProperty(Dimension(defaultHeight / 2)));
+        renderContext->UpdateBorderRadius(roundedRectRadius);
+    } else if (buttonType == ButtonType::NORMAL) {
+        renderContext->UpdateBorderRadius(BorderRadiusProperty(Dimension()));
     }
 }
 
@@ -208,7 +223,11 @@ void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
         CHECK_NULL_VOID(buttonTheme);
 
         auto defaultHeight = GetDefaultHeight(layoutWrapper);
-        if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CIRCLE) {
+        auto buttonType = buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE);
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+            buttonType = buttonLayoutProperty->GetType().value_or(ButtonType::ROUNDED_RECTANGLE);
+        }
+        if (buttonType == ButtonType::CIRCLE) {
             HandleLabelCircleButtonFrameSize(layoutConstraint, frameSize, defaultHeight);
         } else {
             if (selfLayoutConstraint && !selfLayoutConstraint->selfIdealSize.Height().has_value()) {
@@ -330,20 +349,26 @@ bool ButtonLayoutAlgorithm::NeedAgingMeasure(LayoutWrapper* layoutWrapper)
     if (buttonLayoutProperty->HasControlSize() && buttonLayoutProperty->GetControlSize() == ControlSize::SMALL) {
         agingPadding = buttonTheme->GetAgingSmallPadding().ConvertToPx() * 2.0f;
     }
-    auto geometryNode = layoutWrapper->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, false);
-    auto frameSize = geometryNode->GetFrameSize();
-    if (buttonLayoutProperty->HasLabel()) {
-        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-        CHECK_NULL_RETURN(childWrapper, false);
-        auto childGeometryNode = childWrapper->GetGeometryNode();
-        CHECK_NULL_RETURN(childGeometryNode, false);
-        auto childFrameSize = childGeometryNode->GetContentSize();
-        frameSize.SetHeight(childFrameSize.Height() + agingPadding);
-    } else {
-        frameSize.SetHeight(frameSize.Height() + agingPadding);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, false);
+    auto pattern = host->GetPattern<ButtonPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    if (!pattern->GetHasCustomPadding()) {
+        auto geometryNode = layoutWrapper->GetGeometryNode();
+        CHECK_NULL_RETURN(geometryNode, false);
+        auto frameSize = geometryNode->GetFrameSize();
+        if (buttonLayoutProperty->HasLabel()) {
+            auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+            CHECK_NULL_RETURN(childWrapper, false);
+            auto childGeometryNode = childWrapper->GetGeometryNode();
+            CHECK_NULL_RETURN(childGeometryNode, false);
+            auto childFrameSize = childGeometryNode->GetContentSize();
+            frameSize.SetHeight(childFrameSize.Height() + agingPadding);
+        } else {
+            frameSize.SetHeight(frameSize.Height() + agingPadding);
+        }
+        geometryNode->SetFrameSize(frameSize);
     }
-    geometryNode->SetFrameSize(frameSize);
     HandleBorderRadius(layoutWrapper);
     return true;
 }

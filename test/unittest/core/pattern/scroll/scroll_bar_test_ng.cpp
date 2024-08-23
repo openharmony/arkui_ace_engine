@@ -14,6 +14,11 @@
  */
 
 #include "scroll_test_ng.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+
+#include "core/components/scroll/scroll_bar_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -212,7 +217,7 @@ HWTEST_F(ScrollBarTestNg, OnCollectTouchTarget001, TestSize.Level1)
     OffsetF coordinateOffset;
     GetEventTargetImpl getEventTargetImpl;
     TouchTestResult result;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     pattern_->scrollableEvent_->BarCollectTouchTarget(
         coordinateOffset, getEventTargetImpl, result, frameNode_, nullptr, responseLinkResult);
     EXPECT_EQ(result.size(), 1);
@@ -1039,7 +1044,7 @@ HWTEST_F(ScrollBarTestNg, RegisterEventByClick001, TestSize.Level1)
     PointF localPoint;
     RefPtr<FrameNode> frameNode = frameNode_;
     RefPtr<TargetComponent> targetComponent;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     auto scrollableActuator = frameNode_->GetOrCreateGestureEventHub()->scrollableActuator_;
     int32_t nodeId = 123456;
     frameNode_->UpdateRecycleElmtId(nodeId);

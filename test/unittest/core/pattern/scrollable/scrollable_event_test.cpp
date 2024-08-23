@@ -13,16 +13,12 @@
  * limitations under the License.
  */
 
-#include "gtest/gtest.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/test_ng.h"
-
 #define protected public
 #define private public
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-
 #include "test/unittest/core/pattern/scrollable/mock_scrollable.h"
 
-#include "frameworks/core/components_ng/base/frame_node.h"
 #include "frameworks/core/components_ng/pattern/scrollable/scrollable_event_hub.h"
 #include "frameworks/core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 
@@ -397,5 +393,33 @@ HWTEST_F(ScrollableEventTest, SetOnScrollFrameBegin001, TestSize.Level1)
     onScrollFrameBeginEvent = eventHub->GetOnScrollFrameBegin();
     onScrollFrameBeginEvent(scrollOffset, scrollState);
     EXPECT_TRUE(isOnScrollFrameBeginCalled);
+}
+
+/**
+ * @tc.name: SetOnReachEnd001
+ * @tc.desc: Test ScrollableModelNG::SetOnReachEnd and FireOnReachEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableEventTest, SetOnReachEnd001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize variables and callback
+     * @tc.expected: Variables initialized successfully.
+     */
+    bool isCalled = false;
+    auto onReachEnd = [&isCalled]() {
+        isCalled = true;
+    };
+    
+    /**
+     * @tc.steps: step2. Set SetOnReachEnd callback using ScrollableModelNG::SetOnReachEnd
+     * @tc.expected: Callback set successfully.
+     */
+    ScrollableModelNG::SetOnReachEnd(AceType::RawPtr(node_), std::move(onReachEnd));
+    auto eventHub = node_->GetEventHub<ScrollableEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto onReachEndEvent = eventHub->GetOnReachEnd();
+    onReachEndEvent();
+    EXPECT_TRUE(isCalled);
 }
 } // namespace OHOS::Ace::NG

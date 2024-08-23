@@ -948,9 +948,6 @@ void LayoutProperty::UpdateMargin(const MarginProperty& value)
     if (margin_->UpdateWithCheck(value)) {
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
     }
-    if (margin_->UpdateStartAndEnd(value)) {
-        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
-    }
 }
 
 void LayoutProperty::UpdatePadding(const PaddingProperty& value)
@@ -959,9 +956,6 @@ void LayoutProperty::UpdatePadding(const PaddingProperty& value)
         padding_ = std::make_unique<PaddingProperty>();
     }
     if (padding_->UpdateWithCheck(value)) {
-        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
-    }
-    if (padding_->UpdateStartAndEnd(value)) {
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
     }
 }
@@ -1568,7 +1562,7 @@ void LayoutProperty::CheckLocalizedPadding(const RefPtr<LayoutProperty>& layoutP
     if (!padding.left.has_value() && padding.right.has_value()) {
         padding.left = std::optional<CalcLength>(CalcLength(0));
     }
-    layoutProperty->UpdatePadding(padding);
+    LocalizedPaddingOrMarginChange(padding, padding_);
 }
 
 void LayoutProperty::CheckLocalizedMargin(const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction)
@@ -1608,7 +1602,21 @@ void LayoutProperty::CheckLocalizedMargin(const RefPtr<LayoutProperty>& layoutPr
     if (!margin.left.has_value() && margin.right.has_value()) {
         margin.left = std::optional<CalcLength>(CalcLength(0));
     }
-    layoutProperty->UpdateMargin(margin);
+    LocalizedPaddingOrMarginChange(margin, margin_);
+}
+
+void LayoutProperty::LocalizedPaddingOrMarginChange(
+    const PaddingProperty& value, std::unique_ptr<PaddingProperty>& padding)
+{
+    if (value != *padding || padding->start != value.start || padding->end != value.end) {
+        padding->start = value.start;
+        padding->end = value.end;
+        padding->left = value.left;
+        padding->right = value.right;
+        padding->top = value.top;
+        padding->bottom = value.bottom;
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
+    }
 }
 
 void LayoutProperty::CheckLocalizedEdgeWidths(
@@ -1653,6 +1661,7 @@ void LayoutProperty::CheckLocalizedEdgeWidths(
     if (!borderWidth.leftDimen.has_value() && borderWidth.rightDimen.has_value()) {
         borderWidth.leftDimen = std::optional<Dimension>(Dimension(0));
     }
+    borderWidth.multiValued = true;
     layoutProperty->UpdateBorderWidth(borderWidth);
     target->UpdateBorderWidth(borderWidth);
 }

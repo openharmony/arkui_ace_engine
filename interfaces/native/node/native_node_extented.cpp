@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "drawing_text_typography.h"
 #include "native_styled_string.h"
 #include "node_extened.h"
 #include "styled_string.h"
@@ -148,7 +147,7 @@ int32_t OH_ArkUI_NodeCustomEvent_GetCustomSpanDrawInfo(
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_CustomSpanMeasureInfo* OH_ArkUI_CustomSpanMeasureInfo_Create()
+ArkUI_CustomSpanMeasureInfo* OH_ArkUI_CustomSpanMeasureInfo_Create(void)
 {
     ArkUI_CustomSpanMeasureInfo* info = new ArkUI_CustomSpanMeasureInfo { 0 };
     return info;
@@ -171,7 +170,7 @@ float OH_ArkUI_CustomSpanMeasureInfo_GetFontSize(ArkUI_CustomSpanMeasureInfo* in
     return info->fontSize;
 }
 
-ArkUI_CustomSpanMetrics* OH_ArkUI_CustomSpanMetrics_Create()
+ArkUI_CustomSpanMetrics* OH_ArkUI_CustomSpanMetrics_Create(void)
 {
     ArkUI_CustomSpanMetrics* metrics = new ArkUI_CustomSpanMetrics { 0, 0 };
     return metrics;
@@ -204,7 +203,7 @@ int32_t OH_ArkUI_CustomSpanMetrics_SetHeight(ArkUI_CustomSpanMetrics* metrics, f
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_CustomSpanDrawInfo* OH_ArkUI_CustomSpanDrawInfo_Create()
+ArkUI_CustomSpanDrawInfo* OH_ArkUI_CustomSpanDrawInfo_Create(void)
 {
     ArkUI_CustomSpanDrawInfo* info = new ArkUI_CustomSpanDrawInfo { 0, 0, 0, 0 };
     return info;
@@ -243,7 +242,7 @@ float OH_ArkUI_CustomSpanDrawInfo_GetLineBottom(ArkUI_CustomSpanDrawInfo* info)
     return info->optionsLineBottom;
 }
 
-float OH_ArkUI_CustomSpanDrawInfo_GetBaseLine(ArkUI_CustomSpanDrawInfo* info)
+float OH_ArkUI_CustomSpanDrawInfo_GetBaseline(ArkUI_CustomSpanDrawInfo* info)
 {
     if (!info) {
         return 0.0f;
@@ -535,6 +534,10 @@ void OH_ArkUI_StyledString_Destroy(ArkUI_StyledString* storage)
 {
     OH_Drawing_DestroyTypographyHandler(reinterpret_cast<OH_Drawing_TypographyCreate*>(storage->builder));
     for (auto item : storage->items) {
+        if (item->placeholder) {
+            delete reinterpret_cast<OH_Drawing_PlaceholderSpan*>(item->placeholder);
+            item->placeholder = nullptr;
+        }
         delete item;
     }
     while (!storage->styles.empty()) {
@@ -554,6 +557,15 @@ void OH_ArkUI_StyledString_PushTextStyle(ArkUI_StyledString* storage, OH_Drawing
 {
     OH_Drawing_TypographyHandlerPushTextStyle(reinterpret_cast<OH_Drawing_TypographyCreate*>(storage->builder), style);
     OH_Drawing_TextStyle* textStyle = OH_Drawing_CreateTextStyle();
+    // copy text style
+    if (style) {
+        OH_Drawing_SetTextStyleColor(textStyle, OH_Drawing_TextStyleGetColor(style));
+        OH_Drawing_SetTextStyleFontSize(textStyle, OH_Drawing_TextStyleGetFontSize(style));
+        OH_Drawing_SetTextStyleFontWeight(textStyle, OH_Drawing_TextStyleGetFontWeight(style));
+        OH_Drawing_SetTextStyleBaseLine(textStyle, OH_Drawing_TextStyleGetBaseline(style));
+        OH_Drawing_SetTextStyleFontHeight(textStyle, OH_Drawing_TextStyleGetFontHeight(style));
+        OH_Drawing_SetTextStyleFontStyle(textStyle, OH_Drawing_TextStyleGetFontStyle(style));
+    }
     storage->styles.push(textStyle);
 }
 
@@ -593,7 +605,14 @@ void OH_ArkUI_StyledString_AddPlaceholder(ArkUI_StyledString* storage, OH_Drawin
     OH_Drawing_TypographyHandlerAddPlaceholder(
         reinterpret_cast<OH_Drawing_TypographyCreate*>(storage->builder), placeholder);
     ArkUI_SpanItem* spanItem = new ArkUI_SpanItem;
-    spanItem->placeholder = placeholder;
+    if (placeholder) {
+        spanItem->placeholder = new OH_Drawing_PlaceholderSpan {
+            placeholder->width, placeholder->height,
+            placeholder->alignment, placeholder->baseline,
+            placeholder->baselineOffset };
+    } else {
+        spanItem->placeholder = new OH_Drawing_PlaceholderSpan();
+    }
     storage->items.emplace_back(spanItem);
 }
 

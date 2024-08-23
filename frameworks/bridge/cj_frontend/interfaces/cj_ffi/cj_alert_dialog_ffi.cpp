@@ -17,7 +17,6 @@
 
 #include "cj_lambda.h"
 #include "core/components_ng/pattern/dialog/alert_dialog_model_ng.h"
-#include "bridge/common/utils/engine_helper.h"
 
 using namespace OHOS::Ace;
 

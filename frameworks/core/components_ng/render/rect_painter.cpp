@@ -15,10 +15,6 @@
 
 #include "core/components_ng/render/rect_painter.h"
 
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/pattern/shape/rect_paint_property.h"
-#include "core/components_ng/render/drawing.h"
-#include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/shape_painter.h"
 
 namespace OHOS::Ace::NG {

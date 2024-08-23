@@ -169,7 +169,7 @@ HWTEST_F(TouchEventTestNg, TouchEventActuatorOnCollectTouchTargetTest003, TestSi
      * @tc.expected: TouchTestResult size has been increased one.
      */
     TouchTestResult result;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     touchEventActuator->OnCollectTouchTarget(
         COORDINATE_OFFSET, Touch_TOUCH_RESTRICT, eventHub->CreateGetEventTargetImpl(), result, responseLinkResult);

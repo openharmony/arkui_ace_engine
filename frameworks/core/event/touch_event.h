@@ -98,7 +98,7 @@ struct TouchEvent final : public UIInputEvent {
     int32_t touchEventId = 0;
     bool isInterpolated = false;
     bool isMouseTouchTest = false;
-    bool isMocked = false;
+    bool isFalsified = false;
 
     // all points on the touch screen.
     std::vector<TouchPoint> pointers;
@@ -456,6 +456,7 @@ struct TouchEvent final : public UIInputEvent {
 namespace Platform {
 ACE_FORCE_EXPORT Offset GetTouchEventOriginOffset(const TouchEvent& event);
 ACE_FORCE_EXPORT TimeStamp GetTouchEventOriginTimeStamp(const TouchEvent& event);
+ACE_FORCE_EXPORT void UpdatePressedKeyCodes(std::vector<KeyCode>& pressedKeyCodes);
 } // namespace Platform
 
 struct TouchRestrict final {
@@ -677,6 +678,16 @@ struct StateRecord {
         oss << ", " << "timestamp: " << ConvertTimestampToStr(timestamp);
         dumpList.emplace_back(std::make_pair(depth, oss.str()));
     }
+
+    void Dump(std::unique_ptr<JsonValue>& json) const
+    {
+        json->Put("procedure", procedure.c_str());
+        if (!state.empty()) {
+            json->Put("state", state.c_str());
+            json->Put("disposal", disposal.c_str());
+        }
+        json->Put("timestamp",  ConvertTimestampToStr(timestamp).c_str());
+    }
 };
 
 struct GestureSnapshot : public virtual AceType {
@@ -731,6 +742,35 @@ public:
             default:
                 return std::string("Type:").append(std::to_string(static_cast<int32_t>(type)));
         }
+    }
+
+    int32_t Dump(std::unique_ptr<JsonValue>& json) const
+    {
+        json->Put("frameNodeId", nodeId);
+        json->Put("type", type.c_str());
+        json->Put("depth", this->depth);
+
+        std::stringstream oss;
+        oss << "0x" << std::hex << id;
+        std::string idStr = oss.str();
+        oss.str("");
+        oss << "0x" << std::hex << parentId;
+        std::string parentIdStr = oss.str();
+        json->Put("id", idStr.c_str());
+        json->Put("parentId", parentIdStr.c_str());
+        if (!customInfo.empty()) {
+            json->Put("customInfo", customInfo.c_str());
+        }
+        std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
+        int32_t stateIndex = 0;
+        for (const auto& state : stateHistory) {
+            std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
+            state.Dump(child);
+            stateIndex++;
+            children->Put(("stateHistory_" + std::to_string(stateIndex)).c_str(), child);
+        }
+        json->Put("stateHistory", children);
+        return this->depth;
     }
 
     int32_t nodeId = -1;
@@ -905,6 +945,7 @@ protected:
 };
 
 using TouchTestResult = std::list<RefPtr<TouchEventTarget>>;
+using ResponseLinkResult = std::list<RefPtr<NG::NGGestureRecognizer>>;
 
 class TouchEventInfo : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(TouchEventInfo, BaseEventInfo);

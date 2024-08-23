@@ -17,7 +17,6 @@
 
 #include "frameworks/bridge/common/dom/dom_svg.h"
 #include "frameworks/bridge/common/dom/dom_svg_g.h"
-#include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {
 

@@ -15,6 +15,10 @@
 
 #include "list_test_ng.h"
 
+#include "bridge/common/utils/utils.h"
+#include "core/components_ng/pattern/list/list_item_group_paint_method.h"
+#include "core/components_ng/pattern/list/list_position_controller.h"
+
 namespace OHOS::Ace::NG {
 
 namespace {
@@ -510,20 +514,23 @@ HWTEST_F(ListScrollerTestNg, ScrollToIndex014, TestSize.Level1)
     /**
      * @tc.steps: step2. scroll to the group(index:0).
      * @tc.cases: jumpIndex < StartIndex
-     * @tc.expected: pattern_->GetTotalOffset() == 190.f.
+     * @tc.expected: pattern_->GetTotalOffset() == 620.
+     *     GroupHight = Header(50) + footer(50) + (item(100) + space(10))*count(8) - space(10) = 970
+     *     Offset = GroupHight(970) - (ListHeight(400) - ContentEndOffset(50)) = 620
      */
     ScrollToIndex(0, false, ScrollAlign::AUTO);
-    EXPECT_EQ(pattern_->GetTotalOffset(), 190.f);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 620.f);
     auto itemHeight = GetChildFrameNode(frameNode_, 0)->GetGeometryNode()->GetMarginFrameSize().Height();
     EXPECT_GT(itemHeight, pattern_->contentMainSize_);
 
     /**
      * @tc.steps: step2. scroll to group(index:1).
      * @tc.cases: jumpIndex < StartIndex
-     * @tc.expected: pattern_->GetTotalOffset() == 490.f.
+     * @tc.expected: pattern_->GetTotalOffset() == 920.f.
+     *     Offset = GroupHight(970) - ContentStartOffset(50) = 920
      */
     ScrollToIndex(1, false, ScrollAlign::AUTO);
-    EXPECT_EQ(pattern_->GetTotalOffset(), 490.f);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 920.f);
     itemHeight = GetChildFrameNode(frameNode_, 1)->GetGeometryNode()->GetMarginFrameSize().Height();
     EXPECT_GT(itemHeight, pattern_->contentMainSize_);
 }
@@ -1930,25 +1937,6 @@ HWTEST_F(ListScrollerTestNg, Pattern017, TestSize.Level1)
     pattern_->ScrollPage(true, true);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->finalPosition_, -400);
-}
-
-/**
- * @tc.name: ListPattern_UpdateScrollSnap001
- * @tc.desc: Test UpdateScrollSnap.
- * @tc.type: FUNC
- */
-HWTEST_F(ListScrollerTestNg, ListPattern_UpdateScrollSnap001, TestSize.Level1)
-{
-    CreateList();
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    pattern_->AnimateTo(1, 0, nullptr, true);
-    pattern_->UpdateScrollSnap();
-    EXPECT_FALSE(pattern_->predictSnapOffset_.has_value());
-
-    pattern_->StopAnimate();
-    pattern_->UpdateScrollSnap();
-    EXPECT_EQ(pattern_->predictSnapOffset_.value(), 0.0);
 }
 
 /**

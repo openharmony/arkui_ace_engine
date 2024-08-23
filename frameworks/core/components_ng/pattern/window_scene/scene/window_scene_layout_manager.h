@@ -49,6 +49,7 @@ private:
     bool IsNodeVisible(const RefPtr<FrameNode>& node);
     bool IsNodeDirty(const RefPtr<FrameNode>& node);
     bool IsRecentContainerState(const RefPtr<FrameNode>& node);
+    std::shared_ptr<Rosen::RSNode> GetRSNode(const RefPtr<FrameNode>& node);
     std::shared_ptr<Rosen::RSObjAbsGeometry> GetGlobalGeometry(const RefPtr<FrameNode>& node);
     std::shared_ptr<Rosen::RSObjAbsGeometry> GetLocalGeometry(const RefPtr<FrameNode>& node);
     void UpdateGeometry(const RefPtr<FrameNode>& node, const RefPtr<FrameNode>& parentNode,
@@ -63,7 +64,7 @@ private:
     template<typename T>
     uint32_t GetWindowIdInner(const RefPtr<T>& windowPattern);
     void DumpFlushInfo(uint64_t screenId, TraverseResult& res);
-    void DumpNodeInfo(const RefPtr<FrameNode>& node, const RefPtr<FrameNode>& parentNode);
+    void DumpNodeInfo(const RefPtr<FrameNode>& node, const RefPtr<FrameNode>& parentNode, const std::string& reason);
     void GetUINodeInfo(const RefPtr<FrameNode>& node, int32_t parentId, std::ostringstream& oss);
     void GetUITreeInfo(const RefPtr<FrameNode>& node, int32_t depth, int32_t parentId, std::ostringstream& oss);
     void GetTotalUITreeInfo(uint64_t screenId, std::string& info);

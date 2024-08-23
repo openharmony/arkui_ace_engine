@@ -139,11 +139,15 @@ class MonitorV2 {
     if (this.bindRun(/* is init / first run */ false)) {
       stateMgmtConsole.debug(`@Monitor function '${this.monitorFunction.name}' exec ...`);
 
-      // exec @Monitor function
-      this.monitorFunction.call(this.target_, this);
-
-      // now -> before value
-      this.reset();
+      try {
+        // exec @Monitor function
+        this.monitorFunction.call(this.target_, this);
+      } catch(e) {
+        stateMgmtConsole.applicationError(`@Monitor exception caught for ${this.monitorFunction.name}`, e.toString());
+        throw e;
+      } finally {
+        this.reset();
+      }
     }
   }
 
@@ -157,7 +161,12 @@ class MonitorV2 {
     ObserveV2.getObserve().startRecordDependencies(this, this.watchId_);
     let ret = false;
     this.values_.forEach((item) => {
-      let dirty = item.setValue(isInit, this.analysisProp(isInit, item));
+      const [ success, value ] = this.analysisProp(isInit, item)
+      if (!success ) {
+        stateMgmtConsole.debug(`@Monitor path no longer valid.`);
+        return;
+      }
+      let dirty = item.setValue(isInit, value);
       ret = ret || dirty;
     });
 
@@ -167,17 +176,17 @@ class MonitorV2 {
 
   // record / update object dependencies by reading each object along the path
   // return the value, i.e. the value of the last path item
-  private analysisProp<T>(isInit: boolean, monitoredValue: MonitorValueV2<T>): T | undefined {
+  private analysisProp<T>(isInit: boolean, monitoredValue: MonitorValueV2<T>): [ success: boolean, value : T ]  {
     let obj = this.target_;
     for (let prop of monitoredValue.props) {
       if (typeof obj === 'object' && Reflect.has(obj, prop)) {
         obj = obj[prop];
       } else {
         isInit && stateMgmtConsole.warn(`watch prop ${monitoredValue.path} initialize not found, make sure it exists!`);
-        return undefined;
+        return [ false, undefined ];
       }
     }
-    return obj as unknown as T;
+    return [true, obj as unknown as T ];
   }
 
   public static clearWatchesFromTarget(target: Object): void {
@@ -199,7 +208,12 @@ class AsyncAddMonitorV2 {
   
   static addMonitor(target: any, name: string): void {
     if (AsyncAddMonitorV2.watches.length === 0) {
-      Promise.resolve(true).then(AsyncAddMonitorV2.run);
+      Promise.resolve(true)
+      .then(AsyncAddMonitorV2.run)
+      .catch(error => {
+        stateMgmtConsole.applicationError(`Exception caught in @Monitor function ${name}`, error);
+        throw error;
+      });
     }
     AsyncAddMonitorV2.watches.push([target, name]);
   }

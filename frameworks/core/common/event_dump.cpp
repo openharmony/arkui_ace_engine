@@ -221,4 +221,84 @@ void EventTreeRecord::Dump(std::list<std::pair<int32_t, std::string>>& dumpList,
         ++index;
     }
 }
-} // end of namespace
+
+void FrameNodeSnapshot::Dump(std::unique_ptr<JsonValue>& json) const
+{
+    json->Put("nodeId", nodeId);
+    json->Put("parentId", parentNodeId);
+    json->Put("tag", tag.c_str());
+    if (!comId.empty()) {
+        json->Put("comId", comId.c_str());
+    }
+    json->Put("monopolizeEvents", monopolizeEvents);
+    json->Put("isHit", isHit);
+    json->Put("hitTestMode", hitTestMode);
+    std::string region = "";
+    for (const auto& rect : responseRegionList) {
+        region.append(rect.ToString());
+    }
+    json->Put("responseRegion", region.c_str());
+}
+
+void TouchPointSnapshot::Dump(std::unique_ptr<JsonValue>& json) const
+{
+    json->Put("point", point.ToString().c_str());
+    json->Put("screenPoint", screenPoint.ToString().c_str());
+    json->Put("type", GestureSnapshot::TransTouchType(type).c_str());
+    json->Put("timestamp", ConvertTimestampToStr(timestamp).c_str());
+    json->Put("isInjected", isInjected);
+}
+
+void EventTreeRecord::BuildTouchPoints(
+    std::list<TouchPointSnapshot> touchPoints, std::unique_ptr<JsonValue>& json) const
+{
+    std::unique_ptr<JsonValue> touch = JsonUtil::Create(true);
+    int32_t inx = -1;
+    for (auto& item : touchPoints) {
+        std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
+        inx++;
+        item.Dump(child);
+        touch->Put(("touch point_" + std::to_string(inx)).c_str(), child);
+    }
+    json->Put("touch points", touch);
+}
+
+void EventTreeRecord::Dump(std::unique_ptr<JsonValue>& json, int32_t depth, int32_t startNumber) const
+{
+    int32_t index = 0;
+    for (auto& tree : eventTreeList) {
+        if (index < startNumber) {
+            index++;
+            continue;
+        }
+        std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
+        BuildTouchPoints(tree.touchPoints, children);
+        std::unique_ptr<JsonValue> hittest = JsonUtil::Create(true);
+        int32_t hitTestTreeInx = -1;
+        for (auto& item : tree.hitTestTree) {
+            std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
+            hitTestTreeInx++;
+            item.Dump(child);
+            hittest->Put(("hittest_" + std::to_string(hitTestTreeInx)).c_str(), child);
+        }
+        children->Put("hittest", hittest);
+        // dump gesture event and procedure:
+        std::unique_ptr<JsonValue> procedures = JsonUtil::Create(true);
+        int32_t fingerIndex = -1;
+        for (auto iter = tree.gestureTree.begin(); iter != tree.gestureTree.end(); ++iter) {
+            fingerIndex++;
+            std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
+            for (const auto& item : iter->second) {
+                std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
+                auto dumpdepth = item->Dump(child);
+                children->Put(("detail_" + std::to_string(dumpdepth)).c_str(), child);
+            }
+            procedures->Put(("finger_" + std::to_string(fingerIndex)).c_str(), children);
+        }
+        children->Put("event procedures", procedures);
+        std::string header = "event tree_" + std::to_string(index);
+        json->Put(header.c_str(), children);
+        ++index;
+    }
+}
+} // namespace OHOS::Ace::NG

@@ -15,12 +15,7 @@
 
 #include "core/components/checkable/checkable_element.h"
 
-#include <string>
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-#include "core/components/checkable/checkable_component.h"
 #include "core/components/checkable/render_checkable.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace {
 

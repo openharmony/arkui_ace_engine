@@ -53,7 +53,9 @@ public:
 
     bool NeedToRequestKeyboardOnFocus() const override
     {
-        auto pattern = textField_->GetPattern();
+        auto textField = textField_.Upgrade();
+        CHECK_NULL_RETURN(textField, false);
+        auto pattern = textField->GetPattern();
         CHECK_NULL_RETURN(pattern, false);
         auto curPattern = DynamicCast<TextFieldPattern>(pattern);
         return curPattern->NeedToRequestKeyboardOnFocus();
@@ -72,7 +74,7 @@ public:
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
         if (!searchOverlayModifier_) {
-            searchOverlayModifier_ = AceType::MakeRefPtr<SearchOverlayModifier>(WeakClaim(this), buttonSize_);
+            searchOverlayModifier_ = AceType::MakeRefPtr<SearchOverlayModifier>(WeakClaim(this));
         }
         auto paintMethod =
             MakeRefPtr<SearchPaintMethod>(searchOverlayModifier_, buttonSize_, searchButton_, isSearchButtonEnabled_);
@@ -135,52 +137,57 @@ public:
 
     void SetCancelButtonNode(const RefPtr<FrameNode>& cancelButtonNode)
     {
-        cancelButtonNode_ = cancelButtonNode;
+        cancelButtonNode_ = AceType::WeakClaim(AceType::RawPtr(cancelButtonNode));
     }
 
     void SetButtonNode(const RefPtr<FrameNode>& buttonNode)
     {
-        buttonNode_ = buttonNode;
+        buttonNode_ = AceType::WeakClaim(AceType::RawPtr(buttonNode));
     }
 
     void SetTextFieldNode(const RefPtr<FrameNode>& textField)
     {
-        textField_ = textField;
+        textField_ = AceType::WeakClaim(AceType::RawPtr(textField));
     }
 
     void SetSearchIconNode(const RefPtr<FrameNode>& searchIcon)
     {
-        searchIcon_ = searchIcon;
+        searchIcon_ = AceType::WeakClaim(AceType::RawPtr(searchIcon));
     }
 
     void SetCancelIconNode(const RefPtr<FrameNode>& cancelIcon)
     {
-        cancelIcon_ = cancelIcon;
+        cancelIcon_ = AceType::WeakClaim(AceType::RawPtr(cancelIcon));
     }
 
     void SetSearchNode(const RefPtr<SearchNode>& searchNode)
     {
-        searchNode_ = searchNode;
+        searchNode_ = AceType::WeakClaim(AceType::RawPtr(searchNode));
     }
 
     RefPtr<FrameNode> GetSearchIconNode() const
     {
-        return searchIcon_;
+        return searchIcon_.Upgrade();
     }
 
     RefPtr<FrameNode> GetCancelIconNode() const
     {
-        return cancelIcon_;
+        return cancelIcon_.Upgrade();
     }
 
     RefPtr<SearchNode> GetSearchNode() const
     {
-        return searchNode_;
+        return searchNode_.Upgrade();
     }
 
     bool GetIsSearchButtonEnabled() const
     {
         return isSearchButtonEnabled_;
+    }
+
+    const SizeF GetButtonSize() const
+    {
+        return buttonSize_;
     }
 
     void ResetDragOption() override;
@@ -202,6 +209,7 @@ public:
     void InitCancelIconColorSize();
     void CreateSearchIcon(const std::string& src);
     void CreateCancelIcon();
+    const Dimension ConvertImageIconSizeValue(const Dimension& fontSizeValue);
 
 private:
     void OnModifyDone() override;
@@ -263,6 +271,9 @@ private:
     void UpdateIconChangeEvent();
     bool IsEventEnabled(const std::string& textValue, int16_t style);
 
+    void UpdateSearchSymbolIconColor();
+    void UpdateCancelSymbolIconColor();
+
     void CreateOrUpdateSymbol(int32_t index, bool isCreateNode, bool isFromModifier);
     void CreateOrUpdateImage(int32_t index, bool isCreateNode);
     void UpdateImageIconProperties(RefPtr<FrameNode>& frameNode, int32_t index);
@@ -281,6 +292,7 @@ private:
     void UpdateIconSrc(int32_t index, const std::string& src);
     void UpdateIconColor(int32_t index, const Color& color);
     void UpdateIconSize(int32_t index, const Dimension& value);
+    const Dimension ConvertImageIconScaleLimit(const Dimension& fontSizeValue);
 
     uint32_t GetMaxLength() const;
     std::string SearchTypeToString() const;
@@ -311,13 +323,12 @@ private:
     bool isSearchButtonHover_ = false;
     bool isSearchButtonEnabled_ = false;
 
-    RefPtr<FrameNode> cancelButtonNode_;
-    RefPtr<FrameNode> buttonNode_;
-    RefPtr<FrameNode> textField_;
-    RefPtr<FrameNode> searchIcon_;
-    RefPtr<FrameNode> cancelIcon_;
-    RefPtr<SearchNode> searchNode_;
-
+    WeakPtr<FrameNode> cancelButtonNode_;
+    WeakPtr<FrameNode> buttonNode_;
+    WeakPtr<FrameNode> textField_;
+    WeakPtr<FrameNode> searchIcon_;
+    WeakPtr<FrameNode> cancelIcon_;
+    WeakPtr<SearchNode> searchNode_;
     RefPtr<SearchOverlayModifier> searchOverlayModifier_;
 };
 

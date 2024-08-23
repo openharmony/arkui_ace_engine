@@ -77,6 +77,7 @@ void LinearIndicatorModelNG::SetTrackBackgroundColor(const Color& value)
 void LinearIndicatorModelNG::SetTrackColor(const Color& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearIndicatorLayoutProperty, TrackColor, value, frameNode);
 }
 
@@ -91,6 +92,45 @@ void LinearIndicatorModelNG::OnChange(std::function<void(int index, float progre
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<LinearIndicatorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->GetController()->OnChange(std::move(event));
+}
+
+void LinearIndicatorModelNG::SetIndicatorStyleSpace(FrameNode* frameNode, const Dimension& space)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearIndicatorLayoutProperty, Space, space, frameNode);
+}
+
+void LinearIndicatorModelNG::SetIndicatorStyleStrokeWidth(FrameNode* frameNode, const Dimension& strokeWidth)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearIndicatorLayoutProperty, StrokeWidth, strokeWidth, frameNode);
+}
+
+void LinearIndicatorModelNG::SetIndicatorStyleStrokeRadius(FrameNode* frameNode, const Dimension& strokeRadius)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearIndicatorLayoutProperty, StrokeRadius, strokeRadius, frameNode);
+}
+
+void LinearIndicatorModelNG::SetIndicatorStyleTrackBackgroundColor(
+    FrameNode* frameNode, const Color& trackBackgroundColor)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        LinearIndicatorLayoutProperty, TrackBackgroundColor, trackBackgroundColor, frameNode);
+}
+
+void LinearIndicatorModelNG::SetIndicatorStyleTrackColor(FrameNode* frameNode, const Color& trackColor)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearIndicatorLayoutProperty, TrackColor, trackColor, frameNode);
+}
+
+void LinearIndicatorModelNG::SetLoop(FrameNode* frameNode, bool value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearIndicatorLayoutProperty, Loop, value, frameNode);
+}
+
+void LinearIndicatorModelNG::SetOnChange(FrameNode* frameNode, std::function<void(int index, float progress)>&& event)
+{
     auto pattern = frameNode->GetPattern<LinearIndicatorPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->GetController()->OnChange(std::move(event));

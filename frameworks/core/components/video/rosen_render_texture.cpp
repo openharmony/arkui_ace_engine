@@ -19,16 +19,11 @@
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
 #endif
-#include "core/components/common/layout/constants.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_surface_node.h"
 #endif
 
-#include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
-#include "base/log/log.h"
-#include "base/utils/system_properties.h"
-#include "core/components/display/render_display.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {

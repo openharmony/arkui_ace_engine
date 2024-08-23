@@ -15,10 +15,8 @@
 
 #include "core/components/custom_dialog/custom_dialog_element.h"
 
-#include "base/utils/string_utils.h"
 #include "core/components/dialog/dialog_component.h"
 #include "core/components/stack/stack_element.h"
-#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 

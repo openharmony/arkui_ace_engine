@@ -20,9 +20,9 @@
 
 #include "base/log/ace_trace.h"
 #include "bridge/cj_frontend/runtime/cj_runtime_delegate.h"
-#include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
-#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_partial_update_model.h"
+#include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -84,11 +84,21 @@ RefPtr<AceType> NativeView::CreateUI()
             }
             self->needsUpdate_ = false;
             self->cjView_->Rerender();
+            for (const UpdateTask& updateTask : self->pendingUpdateTasks_) {
+                ViewPartialUpdateModel::GetInstance()->FlushUpdateTask(updateTask);
+            }
+            self->pendingUpdateTasks_.clear();
         },
         .removeFunc = [weakThis]() {
             auto self = weakThis.promote();
             CHECK_NULL_VOID(self);
             self->Destroy();
+        },
+        .reloadFunc = [weakThis](bool deep) {
+            auto self = weakThis.promote();
+            CHECK_NULL_VOID(self);
+            ContainerScope scope(self->instanceId_);
+            self->cjView_->Reload(deep);
         },
         .completeReloadFunc = [weakThis]() -> RefPtr<AceType> {
             auto view = weakThis.promote();
@@ -138,20 +148,7 @@ void NativeView::RestoreInstanceId()
  */
 void NativeView::MarkNeedUpdate()
 {
-    auto node = node_.Upgrade();
-    if (!node) {
-        LOGE("fail to update due to custom Node is null");
-        return;
-    }
-    if (AceType::InstanceOf<NG::CustomNode>(node)) {
-        auto customNode = AceType::DynamicCast<NG::CustomNode>(node);
-        needsUpdate_ = true;
-        customNode->MarkNeedUpdate();
-    } else if (AceType::InstanceOf<NG::CustomMeasureLayoutNode>(node)) {
-        auto customNode = AceType::DynamicCast<NG::CustomMeasureLayoutNode>(node);
-        needsUpdate_ = true;
-        customNode->MarkNeedUpdate();
-    }
+    needsUpdate_ = ViewPartialUpdateModel::GetInstance()->MarkNeedUpdate(node_);
 }
 
 void NativeView::FlushReload()
@@ -169,12 +166,14 @@ void NativeView::FlushReload()
 
 void NativeView::FinishUpdateFunc(int32_t elmtId)
 {
-    LOGI("FinishUpdateFunc start");
-    NG::ViewStackProcessor::GetInstance()->FlushRerenderTask();
-    LOGI("FinishUpdateFunc finish");
-    return;
+    wptr<NativeView> weakThis = this;
+    ViewPartialUpdateModel::GetInstance()->FinishUpdate(node_, elmtId, [weakThis](const UpdateTask& task) {
+        auto cjView = weakThis.promote();
+        if (cjView) {
+            cjView->pendingUpdateTasks_.push_back(task);
+        }
+    });
 }
-
 
 void NativeView::Destroy()
 {
@@ -189,6 +188,7 @@ void NativeView::Destroy()
     {
         cjView_->OnAboutToBeDeleted();
     }
+    pendingUpdateTasks_.clear();
     LOGD("NativeView::Destroy end");
 }
 
@@ -251,6 +251,17 @@ void NativeView::ExecuteUpdateWithValueParams(const std::string& jsonData)
         return;
     }
     cjView_->UpdateWithJson(jsonData);
+}
+
+void RemoteView::Reload(bool deep)
+{
+    auto forceCompleteRerenderFunc =
+        CJRuntimeDelegate::GetInstance()->GetCJFuncs().atCOHOSAceFrameworkRemoteViewForceCompleteRerender;
+    if (!forceCompleteRerenderFunc) {
+        LOGE("CJFunc: RemoteView::ForceCompleteRerender is empty.");
+        return;
+    }
+    forceCompleteRerenderFunc(GetID(), deep);
 }
 
 void RemoteView::VoidCallback(void (*cjFunc)(int64_t), const char* funcName)

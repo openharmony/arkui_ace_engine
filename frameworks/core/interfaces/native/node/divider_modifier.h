@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIDividerModifier* GetDividerModifier();
+const CJUIDividerModifier* GetCJUIDividerModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_DIVIDER_MODIFIER_H

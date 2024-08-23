@@ -14,7 +14,6 @@
  */
 #include "form_renderer_delegate_proxy.h"
 
-#include "form_renderer_delegate_interface.h"
 #include "form_renderer_hilog.h"
 
 namespace OHOS {

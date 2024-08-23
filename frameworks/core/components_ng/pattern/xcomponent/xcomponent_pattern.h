@@ -231,6 +231,16 @@ public:
         return isSurfaceLock_;
     }
 
+    void SetIsTypeNode(bool isTypeNode)
+    {
+        isTypeNode_ = isTypeNode;
+    }
+
+    std::shared_ptr<InnerXComponentController> GetXComponentController()
+    {
+        return xcomponentController_;
+    }
+
     void SetHandlingRenderContextForSurface(const RefPtr<RenderContext>& otherRenderContext);
 
     void RestoreHandlingRenderContextForSurface();
@@ -302,7 +312,9 @@ public:
     void SetIdealSurfaceOffsetX(float offsetX);
     void SetIdealSurfaceOffsetY(float offsetY);
     void ClearIdealSurfaceOffset(bool isXAxis);
-    void UpdateSurfaceBounds(bool needForceRender, bool frameOffsetChange = false);
+    std::tuple<bool, bool, bool> UpdateSurfaceRect();
+    void HandleSurfaceChangeEvent(bool needForceRender, bool offsetChanged, bool sizeChanged, bool needFireNativeEvent,
+        bool frameOffsetChange = false);
     void EnableAnalyzer(bool enable);
     void SetImageAIOptions(void* options);
     void StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnalyzed);
@@ -433,6 +445,7 @@ private:
     bool isEnableAnalyzer_ = false;
     std::optional<int32_t> transformHintChangedCallbackId_;
     uint32_t rotation_ = 0;
+    bool isTypeNode_ = false;
 };
 } // namespace OHOS::Ace::NG
 

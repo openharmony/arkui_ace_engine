@@ -656,7 +656,7 @@ std::optional<std::string> RepeatVirtualScrollCaches::GetTType4Index(uint32_t in
 {
     const auto it = ttype4index_.find(index);
     if (it == ttype4index_.end()) {
-        return nullptr;
+        return std::nullopt;
     }
     return it->second;
 }

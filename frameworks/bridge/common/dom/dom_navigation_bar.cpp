@@ -16,9 +16,6 @@
 #include "frameworks/bridge/common/dom/dom_navigation_bar.h"
 
 #include "base/log/event_report.h"
-#include "base/utils/linear_map.h"
-#include "base/utils/utils.h"
-#include "frameworks/bridge/common/dom/dom_type.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {

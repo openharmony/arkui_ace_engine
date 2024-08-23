@@ -21,6 +21,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/common/autofill/auto_fill_trigger_state_holder.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_algorithm.h"
@@ -42,9 +43,10 @@ enum class BindSheetDismissReason {
     SLIDE_DOWN,
 };
 class ACE_EXPORT SheetPresentationPattern :
-    public LinearLayoutPattern, public PopupBasePattern, public FocusView, public NestableScrollContainer{
+    public LinearLayoutPattern, public PopupBasePattern, public FocusView,
+        public NestableScrollContainer, public AutoFillTriggerStateHolder{
     DECLARE_ACE_TYPE(SheetPresentationPattern,
-        LinearLayoutPattern, PopupBasePattern, FocusView, NestableScrollContainer);
+        LinearLayoutPattern, PopupBasePattern, FocusView, NestableScrollContainer, AutoFillTriggerStateHolder);
 
 public:
     SheetPresentationPattern(
@@ -91,6 +93,11 @@ public:
     int32_t GetTargetId() const override
     {
         return targetId_;
+    }
+
+    const std::string& GetTargetTag() const
+    {
+        return targetTag_;
     }
 
     void FireCallback(const std::string& value)
@@ -266,6 +273,7 @@ public:
         }
     }
 
+    void OverlaySheetSpringBack();
     void OverlayDismissSheet();
     void DismissSheet()
     {
@@ -283,7 +291,7 @@ public:
     bool IsScrollable() const;
     void AvoidAiBar();
 
-    void AvoidSafeArea();
+    void AvoidSafeArea(bool forceChange = false);
     void CheckBuilderChange();
     float GetSheetHeightChange();
     void ScrollTo(float height);
@@ -317,11 +325,6 @@ public:
     void SetCurrentOffset(float currentOffset)
     {
         currentOffset_ = currentOffset;
-    }
-
-    void SetIsDirectionUp(bool isDirectionUp)
-    {
-        isDirectionUp_ = isDirectionUp;
     }
 
     void SetCurrentHeight(float currentHeight)
@@ -419,6 +422,7 @@ public:
 
     SheetType GetSheetType();
     bool IsPhoneInLandScape();
+    bool IsShowCloseIcon();
     ScrollSizeMode GetScrollSizeMode();
     void GetSheetTypeWithAuto(SheetType& sheetType);
     void GetSheetTypeWithPopup(SheetType& sheetType);
@@ -527,14 +531,24 @@ public:
         return isDrag_;
     }
 
-    void SetIsFoldable(bool isFoldable)
+    void SetFoldStatusChanged(bool isFoldStatusChanged)
     {
-        isFoldable_ = isFoldable;
+        isFoldStatusChanged_ = isFoldStatusChanged;
     }
 
-    bool IsFoldable() const
+    bool IsFoldStatusChanged() const
     {
-        return isFoldable_;
+        return isFoldStatusChanged_;
+    }
+
+    void UpdateFoldDisplayModeChangedCallbackId(std::optional<int32_t> id)
+    {
+        foldDisplayModeChangedCallbackId_ = id;
+    }
+
+    bool HasFoldDisplayModeChangedCallbackId()
+    {
+        return foldDisplayModeChangedCallbackId_.has_value();
     }
 
     // Get ScrollHeight before avoid keyboard
@@ -546,7 +560,7 @@ public:
         }
         return height_ - titleHeight;
     }
-    
+
     float GetFirstChildHeight() const;
 
     RefPtr<OverlayManager> GetOverlayManager();
@@ -607,12 +621,15 @@ private:
     void SetColumnMinSize(bool reset = false);
     void UpdateDragBarStatus();
     void UpdateCloseIconStatus();
+    void UpdateTitlePadding();
     float GetCloseIconPosX(const SizeF& sheetSize, const RefPtr<SheetTheme>& sheetTheme);
     void UpdateSheetTitle();
     void UpdateFontScaleStatus();
     RefPtr<RenderContext> GetRenderContext();
     bool PostTask(const TaskExecutor::Task& task, const std::string& name);
     void CheckSheetHeightChange();
+    float GetWrapperHeight();
+    bool SheetHeightNeedChanged();
     void InitSheetDetents();
     void HandleFitContontChange(float height);
     void ChangeSheetHeight(float height);
@@ -628,6 +645,9 @@ private:
     std::string LineTo(double x, double y);
     std::string ArcTo(double rx, double ry, double rotation, int32_t arc_flag, double x, double y);
     void DismissTransition(bool isTransitionIn, float dragVelocity = 0.0f);
+    bool IsNoStatusBarAndLandscape() const;
+    bool IsBottomLarge();
+    float GetTopAreaInWindow() const;
     uint32_t keyboardHeight_ = 0;
     int32_t targetId_ = -1;
     SheetKey sheetKey_;
@@ -653,6 +673,7 @@ private:
     float sheetHeightUp_ = 0.0f; // sheet offset to move up when avoiding keyboard
     float height_ = 0.0f; // sheet height, start from the bottom, before avoiding keyboard
     float sheetHeight_ = 0.0f; // sheet frameSize Height
+    float wrapperHeight_ = 0.0f; // sheetWrapper frameSize Height
     float pageHeight_ = 0.0f; // root Height, = maxSize.Height()
     float scrollHeight_ = 0.0f;
     float preWidth_ = 0.0f;
@@ -660,7 +681,6 @@ private:
     float sheetTopSafeArea_ = .0f;
     bool isExecuteOnDisappear_ = false;
     bool windowRotate_ = false;
-    bool firstMeasure_ = true;
     bool isScrolling_ = false;
     float builderHeight_ = 0.0f;
     float sheetMaxHeight_ = 0.0f; // start from the bottom, pageHeight - sheetTopSafeArea
@@ -693,10 +713,11 @@ private:
     std::vector<float> unSortedSheetDentents_;
 
     std::shared_ptr<AnimationUtils::Animation> animation_;
+    std::optional<int32_t> foldDisplayModeChangedCallbackId_;
 
     bool show_ = true;
     bool isDrag_ = false;
-    bool isFoldable_ = false;
+    bool isFoldStatusChanged_ = false;
     bool isNeedProcessHeight_ = false;
     bool isSheetNeedScroll_ = false; // true if Sheet is ready to receive scroll offset.
     bool isSheetPosChanged_ = false; // UpdateTransformTranslate end

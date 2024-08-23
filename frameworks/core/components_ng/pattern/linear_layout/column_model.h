@@ -38,6 +38,7 @@ public:
     virtual void CreateWithWrap() = 0;
     virtual void SetAlignItems(FlexAlign flexAlign) = 0;
     virtual void SetJustifyContent(FlexAlign flexAlign) = 0;
+    virtual void SetIsReverse(bool isReverse) = 0;
 
 private:
     static std::unique_ptr<ColumnModel> instance_;

@@ -14,8 +14,12 @@
  */
 
 #include "swiper_test_ng.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+
 #include "core/components_ng/pattern/swiper/swiper_paint_method.h"
+#include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_method.h"
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/overlength_dot_indicator_paint_method.h"
+
 namespace OHOS::Ace::NG {
 
 class SwiperOverLengthIndicatorModifierTestNg : public SwiperTestNg {
@@ -325,4 +329,425 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier
     EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 8);
 }
 
+/**
+ * @tc.name: OverlengthDotIndicatorModifier010
+ * @tc.desc: Test the GetTouchBottomCenterX method
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set OverlengthDotIndicatorModifier attributes and ContentProperty attributes
+     * @tc.expected: attributes set successfully
+     */
+    DotIndicatorModifier::ContentProperty contentProperty;
+    contentProperty.longPointLeftCenterX = 50.0f;
+    contentProperty.longPointRightCenterX = 150.0f;
+    contentProperty.vectorBlackPointCenterX = { 100.0f, 200.0f, 300.0f };
+    auto indicatorModifier = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
+    indicatorModifier->SetIsHorizontalAndRTL(false);
+    indicatorModifier->SetRealItemCount(3);
+    indicatorModifier->SetMaxDisplayCount(3);
+    float radius = (contentProperty.longPointRightCenterX - contentProperty.longPointLeftCenterX) * 0.5f;
+
+    /**
+     * @tc.steps: step2. Set AnimationState STAGE_SHRINKT_TO_BLACK_POINT and isLeftTouchBottom
+     * @tc.expected: Verify the result and result should be as expected
+     */
+    indicatorModifier->SetCurrentIndex(2);
+    indicatorModifier->isCustomSize_ = false;
+    indicatorModifier->animationState_ = TouchBottomAnimationStage::STAGE_SHRINKT_TO_BLACK_POINT;
+    auto result = indicatorModifier->GetTouchBottomCenterX(contentProperty);
+    EXPECT_NEAR(result.first, contentProperty.vectorBlackPointCenterX[0] - radius, 0.001f);
+    EXPECT_NEAR(result.second, contentProperty.vectorBlackPointCenterX[0] + radius, 0.001f);
+
+    /**
+     * @tc.steps: step3. Set IsCustomSize true and Call GetTouchBottomCenterX method
+     * @tc.expected: Verify the result
+     */
+    indicatorModifier->SetCurrentIndex(0);
+    indicatorModifier->isCustomSize_ = true;
+    indicatorModifier->animationState_ = TouchBottomAnimationStage::STAGE_EXPAND_TO_LONG_POINT;
+    result = indicatorModifier->GetTouchBottomCenterX(contentProperty);
+    EXPECT_NEAR(result.first, contentProperty.longPointLeftCenterX, 0.001f);
+    EXPECT_NEAR(result.second, contentProperty.longPointRightCenterX, 0.001f);
+
+    /**
+     * @tc.steps: step4. Set AnimationState STAGE_EXPAND_TO_LONG_POINT and isLeftTouchBottom
+     * @tc.expected: Verify the result and result should be as expected
+     */
+    indicatorModifier->SetCurrentIndex(2);
+    indicatorModifier->isCustomSize_ = false;
+    indicatorModifier->animationState_ = TouchBottomAnimationStage::STAGE_EXPAND_TO_LONG_POINT;
+    result = indicatorModifier->GetTouchBottomCenterX(contentProperty);
+    auto first = contentProperty.vectorBlackPointCenterX[indicatorModifier->maxDisplayCount_ - 1] - radius;
+    auto second = contentProperty.vectorBlackPointCenterX[indicatorModifier->maxDisplayCount_ - 1] + radius;
+    EXPECT_NEAR(result.first, first, 0.001f);
+    EXPECT_NEAR(result.second, second, 0.001f);
+}
+
+/**
+ * @tc.name: OverlengthDotIndicatorModifier011
+ * @tc.desc: Test the PaintBlackPoint method
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set OverlengthDotIndicatorModifier attributes and ContentProperty attributes
+     * @tc.expected: attributes set successfully
+     */
+    DotIndicatorModifier::ContentProperty contentProperty;
+    contentProperty.vectorBlackPointCenterX = { 100.0f, 200.0f, 300.0f };
+    auto vXSize = contentProperty.vectorBlackPointCenterX.size();
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).Times(vXSize * 2).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).Times(vXSize * 2).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(vXSize);
+    DrawingContext context { canvas, 100.f, 100.f };
+    auto indicatorModifier = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
+    /**
+     * @tc.steps: step2. Set NearEqual(width, height) and isCustomSize_ true
+     * @tc.expected: Verify the result and result should be as expected
+     */
+    contentProperty.unselectedIndicatorWidth = { 100.0f, 200.0f, 300.0f};
+    contentProperty.unselectedIndicatorHeight = { 100.0f, 200.0f, 300.0f};
+    indicatorModifier->isCustomSize_ = true;
+    indicatorModifier->PaintBlackPoint(context, contentProperty);
+
+    /**
+     * @tc.steps: step3. Set NearEqual(width, height) and isCustomSize_ false
+     * @tc.expected: Verify the result and result should be as expected
+     */
+    contentProperty.unselectedIndicatorWidth = { 100.0f, 200.0f, 300.0f};
+    contentProperty.unselectedIndicatorHeight = { 100.0f, 200.0f, 300.0f};
+    indicatorModifier->isCustomSize_ = false;
+    indicatorModifier->PaintBlackPoint(context, contentProperty);
+}
+
+
+/**
+ * @tc.name: OverlengthDotIndicatorModifier012
+ * @tc.desc: Test the UpdateUnselectedCenterXOnDrag method
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set OverlengthDotIndicatorModifier and ContentProperty parmameters
+     * @tc.expected: attributes set successfully
+     */
+    auto indicatorModifier = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
+    indicatorModifier->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
+    indicatorModifier->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+    indicatorModifier->turnPageRate_ = -1.0f;
+    indicatorModifier->animationStartIndicatorWidth_ = { 1.0f };
+    indicatorModifier->animationEndIndicatorWidth_ = { 2.0f };
+    indicatorModifier->animationStartIndicatorHeight_ = { 3.0f };
+    indicatorModifier->animationEndIndicatorHeight_ = { 4.0f };
+    indicatorModifier->animationStartCenterX_ = { 5.0f };
+    indicatorModifier->animationEndCenterX_ = { 6.0f };
+    /**
+     * @tc.steps: step2. Call UpdateUnselectedCenterXOnDrag
+     * @tc.expected: Verify the result and result should be as expected
+     */
+    auto widthStart = indicatorModifier->animationStartIndicatorWidth_[0];
+    auto widthEnd = indicatorModifier->animationEndIndicatorWidth_[0];
+    auto heightStart = indicatorModifier->animationStartIndicatorHeight_[0];
+    auto heightEnd = indicatorModifier->animationEndIndicatorHeight_[0];
+    auto CenterXStart = indicatorModifier->animationStartCenterX_[0];
+    auto CenterXEnd = indicatorModifier->animationEndCenterX_[0];
+    float expectMoveRate = 1.0f;
+    auto expectWidth = widthStart + (widthEnd - widthStart) * expectMoveRate;
+    auto expectHeight = heightStart + (heightEnd - heightStart) * expectMoveRate;
+    auto expectCenterX = CenterXStart + (CenterXEnd - CenterXStart) * expectMoveRate;
+    indicatorModifier->UpdateUnselectedCenterXOnDrag();
+    EXPECT_NEAR(expectWidth, indicatorModifier->animationEndIndicatorWidth_[0], 0.001f);
+    EXPECT_NEAR(expectHeight, indicatorModifier->animationEndIndicatorHeight_[0], 0.001f);
+    EXPECT_NEAR(expectCenterX, indicatorModifier->animationEndCenterX_[0], 0.001f);
+}
+
+/**
+ * @tc.name: OverlengthDotIndicatorModifier013
+ * @tc.desc: Test CalcTargetStatusOnAllPointMoveBackward method
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set OverlengthDotIndicatorModifier and parameters
+     * @tc.expected: parameters set successfully
+     */
+    auto indicatorModifier = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
+    indicatorModifier->isSwiperTouchDown_ = true;
+    indicatorModifier->maxDisplayCount_ = 2;
+    indicatorModifier->targetSelectedIndex_ = 1;
+    const LinearVector<float> itemHalfSizes = {5.0f, 7.0f};
+    indicatorModifier->targetOverlongType_ = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+    indicatorModifier->animationStartCenterX_ = {50.0f, 80.0f, 110.0f, 140.0f, 170.0f};
+    indicatorModifier->animationStartIndicatorWidth_ = {20.0f, 20.0f, 20.0f, 20.0f, 20.0f};
+    indicatorModifier->animationStartIndicatorHeight_ = {20.0f, 20.0f, 20.0f, 20.0f, 20.0f};
+    indicatorModifier->animationEndCenterX_ = {60.0f, 90.0f, 110.0f, 140.0f, 170.0f};
+    indicatorModifier->animationEndIndicatorWidth_ = {60.0f, 90.0f, 110.0f, 140.0f, 170.0f};
+    indicatorModifier->animationEndIndicatorHeight_ = {60.0f, 90.0f, 110.0f, 140.0f, 170.0f};
+
+     /**
+     * @tc.steps: step2. Call UpdateUnselectedCenterXOnDrag
+     * @tc.expected: Verify the result and result should be as expected
+     */
+    indicatorModifier->turnPageRate_ = -1.0f;
+    indicatorModifier->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
+    indicatorModifier->CalcTargetStatusOnAllPointMoveBackward(itemHalfSizes);
+    float expectMoveRate = 1.0f;
+    auto firstPointOpacity = static_cast<uint8_t>(UINT8_MAX * (1.0f - expectMoveRate));
+    EXPECT_EQ(indicatorModifier->firstPointOpacity_->Get(), firstPointOpacity);
+}
+
+/**
+ * @tc.name: OverlengthDotIndicatorModifier014
+ * @tc.desc: Test InitOverlongSelectedIndex method
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set OverlengthDotIndicatorModifier and parameters
+     * @tc.expected: parameters set successfully
+     */
+    auto indicatorModifier = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
+    int32_t thirdPointIndex = 2;
+    int32_t secondPointIndex = 1;
+    int32_t maxDisplayCount = 5;
+    int32_t realItemCount = 10;
+    indicatorModifier->maxDisplayCount_ = maxDisplayCount;
+    indicatorModifier->realItemCount_ = realItemCount;
+    
+     /**
+     * @tc.steps: step2. Call InitOverlongSelectedIndex
+     * @tc.expected: Verify the result and result should be as expected
+     */
+    int32_t pageIndex = 1;
+    indicatorModifier->InitOverlongSelectedIndex(pageIndex);
+    EXPECT_EQ(indicatorModifier->targetSelectedIndex_, pageIndex);
+
+    /**
+     * @tc.steps: step3. Call InitOverlongSelectedIndex
+     * @tc.expected: Verify the result and result should be as expected
+     */
+    pageIndex = 7;
+    indicatorModifier->InitOverlongSelectedIndex(pageIndex);
+    EXPECT_EQ(indicatorModifier->targetSelectedIndex_, maxDisplayCount - 1 - thirdPointIndex);
+
+    /**
+     * @tc.steps: step4. Call InitOverlongSelectedIndex
+     * @tc.expected: Verify the result and result should be as expected
+     */
+    pageIndex = 8;
+    indicatorModifier->InitOverlongSelectedIndex(pageIndex);
+    EXPECT_EQ(indicatorModifier->targetSelectedIndex_, maxDisplayCount - 1 - secondPointIndex);
+
+    /**
+     * @tc.steps: step5. Call InitOverlongSelectedIndex
+     * @tc.expected: Verify the result and result should be as expected
+     */
+    pageIndex = 9;
+    indicatorModifier->InitOverlongSelectedIndex(pageIndex);
+    EXPECT_EQ(indicatorModifier->targetSelectedIndex_, maxDisplayCount - 1);
+}
+
+/**
+ * @tc.name: OverlengthDotIndicatorModifier015
+ * @tc.desc: Test CalcTargetOverlongStatus method with various cases
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set OverlengthDotIndicatorModifier and parameters
+     * @tc.expected: parameters set successfully
+     */
+    auto indicatorModifier = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
+    int32_t maxDisplayCount = 5;
+    int32_t realItemCount = 10;
+    indicatorModifier->maxDisplayCount_ = maxDisplayCount;
+    indicatorModifier->realItemCount_ = realItemCount;
+    indicatorModifier->currentSelectedIndex_ = 2;
+    /**
+     * @tc.steps: step2. Call CalcTargetOverlongStatus with currentPageIndex == targetPageIndex
+     * @tc.expected: Verify the result and result should be as expected
+     */
+    int32_t currentPageIndex = 9;
+    int32_t targetPageIndex = 0;
+    indicatorModifier->currentOverlongType_ = OverlongType::NONE;
+    indicatorModifier->CalcTargetOverlongStatus(currentPageIndex, targetPageIndex);
+    EXPECT_EQ(indicatorModifier->targetSelectedIndex_, 0);
+    EXPECT_EQ(indicatorModifier->targetOverlongType_, OverlongType::LEFT_NORMAL_RIGHT_FADEOUT);
+
+    /**
+     * @tc.steps: step3. Call CalcTargetOverlongStatus with currentPageIndex < targetPageIndex
+     * @tc.expected: Verify the result and result should be as expected
+     */
+    currentPageIndex = 0;
+    targetPageIndex = 9;
+    indicatorModifier->currentOverlongType_ = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+    indicatorModifier->CalcTargetOverlongStatus(currentPageIndex, targetPageIndex);
+    EXPECT_EQ(indicatorModifier->targetSelectedIndex_, maxDisplayCount - 1);
+    EXPECT_EQ(indicatorModifier->targetOverlongType_, OverlongType::LEFT_FADEOUT_RIGHT_NORMAL);
+
+    /**
+     * @tc.steps: step4. Call CalcTargetOverlongStatus with currentPageIndex > targetPageIndex
+     * @tc.expected: Verify the result and result should be as expected
+     */
+    indicatorModifier->currentSelectedIndex_ = 2;
+    currentPageIndex = 3;
+    targetPageIndex = 4;
+    indicatorModifier->currentOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+    indicatorModifier->CalcTargetOverlongStatus(currentPageIndex, targetPageIndex);
+    EXPECT_EQ(indicatorModifier->targetSelectedIndex_, 2);
+
+    /**
+     * @tc.steps: step4. Call CalcTargetOverlongStatus with currentPageIndex < targetPageIndex
+     * @tc.expected: Verify the result and result should be as expected
+     */
+    indicatorModifier->currentSelectedIndex_ = 2;
+    currentPageIndex = 4;
+    targetPageIndex = 3;
+    indicatorModifier->currentOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+    indicatorModifier->CalcTargetOverlongStatus(currentPageIndex, targetPageIndex);
+    EXPECT_EQ(indicatorModifier->targetSelectedIndex_, 2);
+}
+
+/**
+ * @tc.name: SwiperOverLengthIndicatorGetContentModifier016
+ * @tc.desc: Test PaintNormalIndicator method
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, SwiperOverLengthIndicatorGetContentModifier016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set OverlengthDotIndicatorPaintMethod and parameters
+     * @tc.expected: parameters set successfully
+     */
+    CreateWithItem([](SwiperModelNG model) {});
+    ASSERT_NE(indicatorNode_, nullptr);
+    auto modifier = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
+    auto paintMethod = AceType::MakeRefPtr<OverlengthDotIndicatorPaintMethod>(modifier);
+    auto geometryNode = frameNode_->GetGeometryNode();
+    auto paintProperty = indicatorNode_->GetPaintProperty<DotIndicatorPaintProperty>();
+    paintProperty->UpdateColor(Color::RED);
+    auto renderContext = frameNode_->GetRenderContext();
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    /**
+     * @tc.steps: step2. call PaintNormalIndicator and modifier isHover_ = true.
+     */
+    modifier->isHover_ = true;
+    modifier->longPointLeftAnimEnd_ = false;
+    paintMethod->PaintNormalIndicator(&paintWrapper);
+    EXPECT_NEAR(0.0f, paintMethod->longPointCenterX_.first, 0.001f);
+    EXPECT_NEAR(0.0f, paintMethod->longPointCenterX_.second, 0.001f);
+    EXPECT_TRUE(modifier->longPointLeftAnimEnd_);
+    /**
+     *
+     * @tc.steps: step3. call PaintNormalIndicator and modifier isHover_ = false.
+     */
+    modifier->isHover_ = false;
+    modifier->isPressed_ = true;
+    paintMethod->PaintNormalIndicator(&paintWrapper);
+    EXPECT_NEAR(0.0f, paintMethod->longPointCenterX_.first, 0.001f);
+    EXPECT_NEAR(0.0f, paintMethod->longPointCenterX_.second, 0.001f);
+}
+
+/**
+ * @tc.name: SwiperOverLengthIndicatorGetContentModifier017
+ * @tc.desc: Test CalculatePointCenterX method
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, SwiperOverLengthIndicatorGetContentModifier017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set OverlengthDotIndicatorPaintMethod and parameters
+     * @tc.expected: parameters set successfully
+     */
+    auto modifier = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
+    auto paintMethod = AceType::MakeRefPtr<OverlengthDotIndicatorPaintMethod>(modifier);
+    paintMethod->SetMaxDisplayCount(3);
+    int32_t itemCount = 5;
+    paintMethod->itemCount_ = itemCount;
+    paintMethod->IsCustomSizeValue_ = false;
+    float space = 0;
+    float margin = 0;
+    float padding = 0;
+    int32_t index = 0;
+    LinearVector<float> itemHalfSizes = { 20.f, 20.f, 20.f, 20.f };
+    /**
+     * @tc.steps: step2. call PaintNormalIndicator and turnPageRate_ is positive.
+     */
+    paintMethod->turnPageRate_ = -1;
+    auto value = paintMethod->CalculatePointCenterX(itemHalfSizes, margin, padding, space, index);
+    EXPECT_NEAR(20.0f, value.first, 0.001f);
+    EXPECT_NEAR(60.0f, value.second, 0.001f);
+    /**
+     * @tc.steps: step3. call PaintNormalIndicator and turnPageRate_ is unpositive.
+     */
+    paintMethod->turnPageRate_ = 1;
+    value = paintMethod->CalculatePointCenterX(itemHalfSizes, margin, padding, space, index);
+    EXPECT_NEAR(52.0f, value.first, 0.001f);
+    EXPECT_NEAR(92.0f, value.second, 0.001f);
+}
+
+/**
+ * @tc.name: SwiperOverLengthIndicatorGetContentModifier018
+ * @tc.desc: Test CalculatePointCenterX method
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, SwiperOverLengthIndicatorGetContentModifier018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set OverlengthDotIndicatorPaintMethod and parameters
+     */
+    auto modifier = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
+    auto paintMethod = AceType::MakeRefPtr<OverlengthDotIndicatorPaintMethod>(modifier);
+    paintMethod->SetMaxDisplayCount(5);
+    paintMethod->itemCount_ = 6;
+    paintMethod->realItemCount_ = 10;
+    DotIndicatorPaintMethod::StarAndEndPointCenter starAndEndPointCenter { 10.0f, 20.0f, 30.0f, 40.0f };
+    LinearVector<float> startVectorBlackPointCenterX = { 1.0f, 2.0f, 3.0f };
+    LinearVector<float> endVectorBlackPointCenterX = { 4.0f, 5.0f, 6.0f };
+    Dimension indicatorOffsetUnit = 18.0_vp;
+    /**
+     * @tc.steps: step2. Call CalculatePointCenterX with currentIndex_ > (maxDisplayCount_ - NUM_3) and currentIndex_ <
+     * realItemCount_ - NUM_2
+     * @tc.expected: Validate the results of CalculatePointCenterX
+     */
+    paintMethod->currentIndex_ = 5;
+    paintMethod->isPressed_ = false;
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    auto [blackPointCenterMoveRate, longPointLeftCenterMoveRate, longPointRightCenterMoveRate] =
+        paintMethod->GetMoveRate();
+    auto result = paintMethod->CalculatePointCenterX(
+        starAndEndPointCenter, startVectorBlackPointCenterX, endVectorBlackPointCenterX);
+    EXPECT_FALSE(paintMethod->vectorBlackPointBegCenterX_.empty());
+    EXPECT_NEAR(paintMethod->vectorBlackPointBegCenterX_[2],
+        startVectorBlackPointCenterX[2] -
+            (paintMethod->currentIndex_ - (paintMethod->maxDisplayCount_ - 3)) * (indicatorOffsetUnit.ConvertToPx()) +
+            (endVectorBlackPointCenterX[2] - startVectorBlackPointCenterX[2]) * blackPointCenterMoveRate,
+        0.001f);
+    /**
+     * @tc.steps: step3. Call CalculatePointCenterX with currentIndex_ > (maxDisplayCount_ - NUM_3)
+     * @tc.expected: Validate the results of CalculatePointCenterX
+     */
+    paintMethod->currentIndex_ = 9;
+    paintMethod->isPressed_ = false;
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    auto [blackPointCenterMoveRateSecond, longPointLeftCenterMoveRateSecond, longPointRightCenterMoveRateSecond] =
+        paintMethod->GetMoveRate();
+    result = paintMethod->CalculatePointCenterX(
+        starAndEndPointCenter, startVectorBlackPointCenterX, endVectorBlackPointCenterX);
+    EXPECT_FALSE(paintMethod->vectorBlackPointBegCenterX_.empty());
+    EXPECT_NEAR(paintMethod->vectorBlackPointBegCenterX_[2],
+        startVectorBlackPointCenterX[2] -
+            (paintMethod->realItemCount_ - paintMethod->maxDisplayCount_) * (indicatorOffsetUnit.ConvertToPx()) +
+            (endVectorBlackPointCenterX[2] - startVectorBlackPointCenterX[2]) * blackPointCenterMoveRateSecond,
+        0.001f);
+}
 }

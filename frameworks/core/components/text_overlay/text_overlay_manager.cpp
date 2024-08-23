@@ -15,9 +15,6 @@
 
 #include "core/components/text_overlay/text_overlay_manager.h"
 
-#include <cmath>
-#include <string>
-
 #include "core/components/font/constants_converter.h"
 #include "core/components/stack/stack_element.h"
 #include "core/components/text_overlay/text_overlay_component.h"
@@ -384,7 +381,7 @@ int32_t TextOverlayBase::GetGraphemeClusterLength(int32_t extend, bool isPrefix)
         }
     } else {
         if (static_cast<size_t>(extend) < (text.length())) {
-            aroundChar = text[std::min(static_cast<int32_t>(text.length() - 1), extend)];
+            aroundChar = text[std::min(text.length() ? static_cast<int32_t>(text.length()) - 1 : 0, extend)];
         }
     }
     return StringUtils::NotInUtf16Bmp(aroundChar) ? 2 : 1;

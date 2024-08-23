@@ -98,7 +98,7 @@ public:
                 theme->selectedOptionStyle_.SetTextColor(
                     pattern->GetAttr<Color>("selected_text_color", Color(0x007DFF)));
                 theme->selectedOptionStyle_.SetFontSize(
-                    pattern->GetAttr<Dimension>("selected_text_size", 20.0_vp));
+                    pattern->GetAttr<Dimension>("selected_text_size", 20.0_fp));
                 theme->selectedOptionStyle_.SetFontWeight(FontWeight::MEDIUM);
                 theme->selectedOptionStyle_.SetAdaptTextSize(theme->selectedOptionStyle_.GetFontSize(),
                     pattern->GetAttr<Dimension>("picker_select_option_min_font_size", 0.0_fp));
@@ -124,14 +124,15 @@ public:
                     pattern->GetAttr<Dimension>("picker_normal_option_min_font_size", 0.0_fp));
                 theme->disappearOptionStyle_.SetMaxLines(1);
                 theme->disappearOptionStyle_.SetTextOverflow(TextOverflow::ELLIPSIS);
+                theme->focusOptionStyle_.SetFontSize(
+                    pattern->GetAttr<Dimension>("picker_focus_option_font_size", 0.0_fp));
+                theme->focusOptionStyle_.SetTextColor(
+                    pattern->GetAttr<Color>("picker_focus_option_text_color", Color()));
+                theme->focusOptionStyle_.SetFontWeight(
+                    FontWeight(static_cast<int32_t>(pattern->GetAttr<double>("picker_focus_option_weight", 0.0))));
+                theme->focusOptionStyle_.SetAdaptTextSize(theme->focusOptionStyle_.GetFontSize(),
+                    pattern->GetAttr<Dimension>("picker_select_option_min_font_size", 0.0_fp));
             }
-
-            theme->focusOptionStyle_.SetFontSize(pattern->GetAttr<Dimension>("picker_focus_option_font_size", 0.0_fp));
-            theme->focusOptionStyle_.SetTextColor(pattern->GetAttr<Color>("picker_focus_option_text_color", Color()));
-            theme->focusOptionStyle_.SetFontWeight(
-                FontWeight(static_cast<int32_t>(pattern->GetAttr<double>("picker_focus_option_weight", 0.0))));
-            theme->focusOptionStyle_.SetAdaptTextSize(theme->focusOptionStyle_.GetFontSize(),
-                pattern->GetAttr<Dimension>("picker_select_option_min_font_size", 0.0_fp));
             theme->focusOptionStyle_.SetMaxLines(1);
             theme->focusOptionStyle_.SetTextOverflow(TextOverflow::ELLIPSIS);
 

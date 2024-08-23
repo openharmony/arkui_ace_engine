@@ -50,6 +50,7 @@
 #include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/components_ng/pattern/option/option_view.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "frameworks/core/pipeline/base/element_register.h"
@@ -96,6 +97,8 @@ void ServiceCollaborationMenuAceHelper::CreateHeaderText(const std::string& valu
     CHECK_NULL_VOID(textPipeline);
     auto textTheme = textPipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(textTheme);
+    auto richTheme = textPipeline->GetTheme<RichEditorTheme>();
+    CHECK_NULL_VOID(richTheme);
     auto textNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_VOID(textNode);
@@ -104,12 +107,12 @@ void ServiceCollaborationMenuAceHelper::CreateHeaderText(const std::string& valu
     textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textProperty->UpdateFontSize(textTheme->GetMenuFontSize());
     textProperty->UpdateFontWeight(FontWeight::REGULAR);
-    textProperty->UpdateTextColor(Color::GRAY);
+    textProperty->UpdateTextColor(richTheme->GetMenuTitleColor());
     textProperty->UpdateCalcMinSize(
         CalcSize(CalcLength(static_cast<float>(HEADER_MIN_WIDTH)), CalcLength(static_cast<float>(HEADER_MIN_HEIGHT))));
     auto textRenderContext = textNode->GetRenderContext();
     CHECK_NULL_VOID(textRenderContext);
-    textRenderContext->UpdateForegroundColor(Color(HEADER_COLOR));
+    textRenderContext->UpdateForegroundColor(richTheme->GetMenuTitleColor());
     textProperty->UpdateContent(value);
     MarginProperty margin;
     margin.right = CalcLength(static_cast<float>(HEADER_MARGIN_LEFT));
@@ -127,13 +130,15 @@ void ServiceCollaborationMenuAceHelper::CreateEndIcon(const std::string& icon, c
     CHECK_NULL_VOID(iconPipeline);
     auto iconTheme = iconPipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(iconTheme);
+    auto richTheme = iconPipeline->GetTheme<RichEditorTheme>();
+    CHECK_NULL_VOID(richTheme);
     auto iconNode = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_VOID(iconNode);
     auto iconProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(iconProperty);
     ImageSourceInfo info(icon);
-    info.SetFillColor(Color(ENDICON_COLOR));
+    info.SetFillColor(richTheme->GetMenuIconColor());
     iconProperty->UpdateImageSourceInfo(info);
     iconProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(iconTheme->GetIconSideLength()), CalcLength(iconTheme->GetIconSideLength())));
@@ -151,12 +156,15 @@ void ServiceCollaborationMenuAceHelper::CreateStartIcon(const std::string& icon,
     CHECK_NULL_VOID(iconPipeline);
     auto iconTheme = iconPipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(iconTheme);
+    auto richTheme = iconPipeline->GetTheme<RichEditorTheme>();
+    CHECK_NULL_VOID(richTheme);
     auto iconNode = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_VOID(iconNode);
     auto iconProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(iconProperty);
     ImageSourceInfo info(icon);
+    info.SetFillColor(richTheme->GetMenuIconColor());
     iconProperty->UpdateImageSourceInfo(info);
     iconProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(iconTheme->GetIconSideLength()), CalcLength(iconTheme->GetIconSideLength())));
@@ -174,8 +182,11 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMainMenuItem(
     CHECK_NULL_RETURN(iconPipeline, nullptr);
     auto iconTheme = iconPipeline->GetTheme<IconTheme>();
     CHECK_NULL_RETURN(iconTheme, nullptr);
+    auto richTheme = iconPipeline->GetTheme<RichEditorTheme>();
+    CHECK_NULL_RETURN(richTheme, nullptr);
     auto iconPath = iconTheme ? iconTheme->GetIconPath(resId) : "";
-    return CreateMainMenuItem(value, iconPath, color);
+    return CreateMainMenuItem(
+        value, iconPath, color == Color::BLACK ? richTheme->GetMenuTextColor() : color);
 }
 RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMainMenuItem(
     const std::string& value, const std::string& icon, const Color& color)
@@ -192,7 +203,7 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMainMenuItem(
     CHECK_NULL_RETURN(menuItemNode, nullptr);
     auto menuItemProperty = menuItemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     CHECK_NULL_RETURN(menuItemProperty, nullptr);
-    menuItemProperty->UpdatePadding({ .right = CalcLength(0.0f), .top = CalcLength(0.0f) });
+    menuItemProperty->UpdatePadding({ .right = CalcLength(2.0f), .top = CalcLength(0.0f) });
     auto renderContext = menuItemNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     BorderRadiusProperty border;
@@ -214,7 +225,7 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMainMenuItem(
     BorderColorProperty borderColorProperty;
     borderColorProperty.SetColor(Color::GRAY);
     rowContext->UpdateBorderColor(borderColorProperty);
-    rowProperty->UpdateUserDefinedIdealSize(
+    rowProperty->UpdateCalcMinSize(
         CalcSize(CalcLength(static_cast<float>(MENUITEM_WIDTH)), CalcLength(static_cast<float>(MENUITEM_HEIGHT))));
     rowProperty->UpdatePadding({.right = CalcLength(0.0f)});
     MarginProperty margin;
@@ -253,6 +264,8 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateDeviceMenuItem(
     CHECK_NULL_RETURN(menuPipeline, nullptr);
     auto menuTheme = menuPipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(menuTheme, nullptr);
+    auto richTheme = menuPipeline->GetTheme<RichEditorTheme>();
+    CHECK_NULL_RETURN(richTheme, nullptr);
     auto menuItemNode = FrameNode::CreateFrameNode(
         V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<MenuItemPattern>());
@@ -275,7 +288,7 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateDeviceMenuItem(
     rowProperty->UpdateMargin(margin);
     rowProperty->UpdateUserDefinedIdealSize(size);
     CreateStartIcon(icon, row);
-    CreateText(value, row, Color::BLACK, false);
+    CreateText(value, row, richTheme->GetMenuTextColor(), false);
     row->MountToParent(menuItemNode);
     row->MarkModifyDone();
     return menuItemNode;
@@ -490,7 +503,7 @@ void ServiceCollaborationAceCallback::CreateEndIcon(const std::string& icon, con
     TAG_LOGI(AceLogTag::ACE_MENU, "enter, icon is %{public}s", icon.c_str());
     auto iconPipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(iconPipeline);
-    auto iconTheme = iconPipeline->GetTheme<SelectTheme>();
+    auto iconTheme = iconPipeline->GetTheme<RichEditorTheme>();
     CHECK_NULL_VOID(iconTheme);
     auto iconNode = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
@@ -498,7 +511,7 @@ void ServiceCollaborationAceCallback::CreateEndIcon(const std::string& icon, con
     auto iconProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(iconProperty);
     ImageSourceInfo info(icon);
-    info.SetFillColor(Color(ICON_COLOR));
+    info.SetFillColor(iconTheme->GetPopIconColor());
     iconProperty->UpdateImageSourceInfo(info);
     iconProperty->UpdateUserDefinedIdealSize(
         CalcSize(
@@ -529,7 +542,7 @@ void ServiceCollaborationAceCallback::CreateStartIcon(
     TAG_LOGI(AceLogTag::ACE_MENU, "enter, icon is %{public}s", icon.c_str());
     auto iconPipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(iconPipeline);
-    auto iconTheme = iconPipeline->GetTheme<SelectTheme>();
+    auto iconTheme = iconPipeline->GetTheme<RichEditorTheme>();
     CHECK_NULL_VOID(iconTheme);
     auto iconNode = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
@@ -537,7 +550,7 @@ void ServiceCollaborationAceCallback::CreateStartIcon(
     auto iconProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(iconProperty);
     ImageSourceInfo info(icon);
-    info.SetFillColor(Color(ICON_COLOR));
+    info.SetFillColor(iconTheme->GetPopIconColor());
     iconProperty->UpdateImageSourceInfo(info);
     iconProperty->UpdateUserDefinedIdealSize(
         CalcSize(
@@ -743,17 +756,14 @@ int32_t ServiceCollaborationAceCallback::OnDataCallback(uint32_t code, uint32_t 
         richEditorPattern->AddImageSpan(options, false, 0, false);
         if (code == SEND_PHOTO_SUCCESS) {
             richEditorPattern->SetCaretPosition(richEditorPattern->GetCaretPosition() + photoCount);
+            RemovePopupNode();
+            isTransmit_ = false;
             info_ = nullptr;
-            photoCount = 0;
         }
     });
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, -1);
     taskExecutor->PostTask(caretTwinklingTask, TaskExecutor::TaskType::UI, "ArkUIRichEditorAddImageSpan");
-    if (code == SEND_PHOTO_SUCCESS) {
-        RemovePopupNode();
-        isTransmit_ = false;
-    }
     return 0;
 }
 } // namespace OHOS::Ace::NG

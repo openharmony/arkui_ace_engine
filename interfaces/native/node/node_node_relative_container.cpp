@@ -13,10 +13,8 @@
  * limitations under the License.
  */
 
-#include "native_type.h"
 #include "node/node_model.h"
 
-#include "base/utils/utils.h"
 
 #ifdef __cplusplus
 extern "C" {

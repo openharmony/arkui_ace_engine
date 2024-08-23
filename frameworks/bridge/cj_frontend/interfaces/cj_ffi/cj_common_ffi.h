@@ -272,6 +272,7 @@ struct AtCPackage {
     void (*atCOHOSAceFrameworkRemoteViewOnAfterRender)(int64_t self) = nullptr;
     void (*atCOHOSAceFrameworkRemoteViewOnDisappear)(int64_t self) = nullptr;
     void (*atCOHOSAceFrameworkRemoteViewOnAboutToBeDeleted)(int64_t self) = nullptr;
+    void (*atCOHOSAceFrameworkRemoteViewForceCompleteRerender)(int64_t self, bool deep) = nullptr;
     ExternalString (*atCOHOSAceFrameworkLazyForEachFuncsGenerateKey)(int64_t self, int64_t idx) = nullptr;
     void (*atCOHOSAceFrameworkLazyForEachFuncsGenerateItem)(int64_t self, int64_t idx) = nullptr;
     int64_t (*atCOHOSAceFrameworkLazyForEachFuncsGetTotalCount)(int64_t self) = nullptr;

@@ -15,9 +15,6 @@
 
 #include "core/animation/cubic_curve.h"
 
-#include "base/log/log_wrapper.h"
-#include "base/utils/macros.h"
-
 namespace OHOS::Ace {
 namespace {
 

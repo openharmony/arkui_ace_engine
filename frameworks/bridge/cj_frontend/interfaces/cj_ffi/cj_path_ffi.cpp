@@ -17,7 +17,6 @@
 
 #include "bridge/cj_frontend/cppview/shape_abstract.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_shape_ffi.h"
-#include "core/common/container.h"
 #include "core/components_ng/pattern/shape/path_model_ng.h"
 
 
@@ -46,6 +45,9 @@ void FfiOHOSAceFrameworkPathCreateWithSize(
 int64_t FfiOHOSAceFrameworkPathInsCreate(const char* commands)
 {
     auto nativePath = OHOS::FFI::FFIData::Create<OHOS::Ace::Framework::NativePath>(commands);
+    if (nativePath == nullptr) {
+        return FFI_ERROR_CODE;
+    }
     return nativePath->GetID();
 }
 
@@ -55,6 +57,9 @@ int64_t FfiOHOSAceFrameworkPathInsCreateWithSize(
     OHOS::Ace::Dimension dWidth(width, static_cast<OHOS::Ace::DimensionUnit>(widthUnit));
     OHOS::Ace::Dimension dHeight(height, static_cast<OHOS::Ace::DimensionUnit>(heightUnit));
     auto nativePath = OHOS::FFI::FFIData::Create<OHOS::Ace::Framework::NativePath>(commands);
+    if (nativePath == nullptr) {
+        return FFI_ERROR_CODE;
+    }
     nativePath->SetWidth(dWidth);
     nativePath->SetHeight(dHeight);
     return nativePath->GetID();

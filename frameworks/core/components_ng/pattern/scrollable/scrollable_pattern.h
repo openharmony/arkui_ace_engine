@@ -36,6 +36,7 @@
 #include "core/components_ng/pattern/scrollable/refresh_coordination.h"
 #include "core/components_ng/pattern/scrollable/scrollable_controller.h"
 #include "core/components_ng/pattern/scrollable/scrollable_coordination_event.h"
+#include "core/components_ng/pattern/scrollable/scrollable_paint_method.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/render/animation_utils.h"
@@ -47,7 +48,7 @@ class InspectorFilter;
 constexpr double FRICTION = 0.6;
 constexpr double API11_FRICTION = 0.7;
 constexpr double API12_FRICTION = 0.75;
-constexpr double MAX_VELOCITY = 4200.0;
+constexpr double MAX_VELOCITY = 12000.0;
 #else
 constexpr double FRICTION = 0.9;
 constexpr double MAX_VELOCITY = 5000.0;
@@ -78,6 +79,12 @@ public:
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override;
+
+    void CreateAnalyzerOverlay(const RefPtr<FrameNode> node);
+
+    void UpdateFadingEdge(const RefPtr<ScrollablePaintMethod>& paint);
+    
+    void UpdateFadeInfo(bool isFadingTop, bool isFadingBottom, const RefPtr<ScrollablePaintMethod>& paint);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void OnWindowHide() override;
@@ -127,6 +134,8 @@ public:
     {
         return false;
     }
+
+    virtual void OnTouchDown(const TouchEventInfo& info) {}
 
     void AddScrollEvent();
     RefPtr<ScrollableEvent> GetScrollableEvent()
@@ -484,6 +493,11 @@ public:
         return Rect();
     };
 
+    virtual int32_t GetItemIndex(double x, double y) const
+    {
+        return -1;
+    }
+
     void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
     {
         edgeEffect_ = edgeEffect;
@@ -543,48 +557,24 @@ public:
         needLinked_ = needLinked;
     }
 
-    virtual std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems()
-    {
-        std::vector<RefPtr<FrameNode>> children;
-        return children;
-    }
-
     void SetAnimateCanOverScroll(bool animateCanOverScroll)
     {
         bool isScrollable = !(IsAtBottom() && IsAtTop() && !GetAlwaysEnabled());
         animateCanOverScroll_ = isScrollable && animateCanOverScroll;
     }
+
+    virtual std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems()
+    {
+        std::vector<RefPtr<FrameNode>> children;
+        return children;
+    }
+    void InitScrollBarGestureEvent();
     virtual void InitScrollBarClickEvent();
     void HandleClickEvent();
-    void InitScrollBarGestureEvent();
     void InitScrollBarMouseEvent();
     virtual void ScrollPage(
         bool reverse, bool smooth = false, AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL);
     void PrintOffsetLog(AceLogTag tag, int32_t id, double finalOffset);
-
-    void SetScrollToSafeAreaHelper(bool isScrollToSafeAreaHelper)
-    {
-        isScrollToSafeAreaHelper_ = isScrollToSafeAreaHelper;
-    }
-
-    bool IsScrollToSafeAreaHelper() const
-    {
-        return isScrollToSafeAreaHelper_;
-    }
-
-    void ScrollAtFixedVelocity(float velocity);
-
-    PositionMode GetPositionMode();
-
-    virtual std::pair<std::function<bool(float)>, Axis> GetScrollOffsetAbility()
-    {
-        return { nullptr, Axis::NONE };
-    }
-
-    virtual std::function<bool(int32_t)> GetScrollIndexAbility()
-    {
-        return nullptr;
-    }
 
     void CheckRestartSpring(bool sizeDiminished, bool needNestedScrolling = true);
 
@@ -612,6 +602,30 @@ public:
 
     void DumpAdvanceInfo() override;
 
+    void SetScrollToSafeAreaHelper(bool isScrollToSafeAreaHelper)
+    {
+        isScrollToSafeAreaHelper_ = isScrollToSafeAreaHelper;
+    }
+
+    bool IsScrollToSafeAreaHelper() const
+    {
+        return isScrollToSafeAreaHelper_;
+    }
+
+    virtual std::pair<std::function<bool(float)>, Axis> GetScrollOffsetAbility()
+    {
+        return { nullptr, Axis::NONE };
+    }
+
+    virtual std::function<bool(int32_t)> GetScrollIndexAbility()
+    {
+        return nullptr;
+    }
+
+    void ScrollAtFixedVelocity(float velocity);
+
+    PositionMode GetPositionMode();
+
     void HandleMoveEventInComp(const PointF& point);
     void HandleLeaveHotzoneEvent();
     void SetHotZoneScrollCallback(std::function<void(void)>&& func)
@@ -621,18 +635,9 @@ public:
 
     void OnCollectClickTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-        TouchTestResult& responseLinkResult);
+        ResponseLinkResult& responseLinkResult);
 
     virtual void SetAccessibilityAction();
-
-    /**
-     * @brief Notify component the position and count when data has changed.
-     *        This function should not be implemented here.
-     *
-     * @param index the position of change.
-     * @param count the count of change. nagative/0/positive implies delete/change/add respectively.
-     */
-    virtual void NotifyDataChange(int32_t index, int32_t count) {};
 
 protected:
     void SuggestOpIncGroup(bool flag);
@@ -711,6 +716,16 @@ protected:
     bool isInitialized_ = false;
 
     void Register2DragDropManager();
+
+    void SetScrollOriginChild(const WeakPtr<NestableScrollContainer>& scrollOriginChild)
+    {
+        scrollOriginChild_ = scrollOriginChild;
+    }
+
+    RefPtr<NestableScrollContainer> GetScrollOriginChild()
+    {
+        return scrollOriginChild_.Upgrade();
+    }
 
 private:
     virtual void OnScrollEndCallback() {};
@@ -896,6 +911,7 @@ private:
     bool lastCanOverScroll_ = false;
     RefPtr<ClickRecognizer> clickRecognizer_;
     Offset locationInfo_;
+    WeakPtr<NestableScrollContainer> scrollOriginChild_;
 
     // dump info
     std::list<ScrollableEventsFiredInfo> eventsFiredInfos_;

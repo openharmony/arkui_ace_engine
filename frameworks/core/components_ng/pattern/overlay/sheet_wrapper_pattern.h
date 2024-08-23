@@ -18,6 +18,7 @@
 
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
+#include "core/components_ng/pattern/overlay/sheet_wrapper_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
 class SheetWrapperPattern : virtual public PopupBasePattern {
@@ -30,6 +31,11 @@ public:
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::SCOPE, true };
+    }
+
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
+    {
+        return MakeRefPtr<SheetWrapperLayoutAlgorithm>();
     }
 
     void OnAttachToMainTree() override

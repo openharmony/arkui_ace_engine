@@ -23,7 +23,11 @@
             "ace_engine_feature_pgo_path",
             "ace_engine_feature_enable_atomic",
             "ace_engine_feature_enable_coverage",
-            "ace_engine_feature_enable_point_light"
+            "ace_engine_feature_enable_point_light",
+            "ace_engine_feature_enable_split_mode",
+            "ace_engine_feature_enable_nav_split_mode",
+            "ace_engine_feature_asbng_path",
+            "ace_engine_feature_sched_model"
         ],
         "adapted_system_type": [
             "standard"
@@ -100,7 +104,6 @@
                 "skia",
                 "libuv",
                 "background_task_mgr",
-                "atomicservice_basic_engine",
                 "egl"
             ],
             "third_party": []

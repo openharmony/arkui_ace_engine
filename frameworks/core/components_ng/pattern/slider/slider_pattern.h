@@ -240,12 +240,14 @@ private:
     void ModifyAccessibilityVirtualNode();
     void AddStepPointsAccessibilityVirtualNode();
     void HandleTextOnAccessibilityFocusCallback();
+    void HandleSliderOnAccessibilityFocusCallback();
     void UpdateStepAccessibilityVirtualNode();
-    std::string GetPointAccessibilityTxt(
-        const RefPtr<SliderPaintProperty>& paintProperty, uint32_t pointIndex, float stepRatio, float min, float max);
-    int32_t GetCurrentStepIndex();
+    std::string GetPointAccessibilityTxt(uint32_t pointIndex, float stepRatio, float min, float max);
+    uint32_t GetCurrentStepIndex();
     SizeF GetStepPointAccessibilityVirtualNodeSize();
     void UpdateStepPointsAccessibilityVirtualNodeSelected();
+    void SetStepPointsAccessibilityVirtualNodeEvent(
+        const RefPtr<FrameNode>& pointNode, uint32_t index, bool isClickAbled, bool reverse);
     void SetStepPointAccessibilityVirtualNode(
         const RefPtr<FrameNode>& pointNode, const SizeF& size, const PointF& point, const std::string& txt);
 
@@ -290,7 +292,6 @@ private:
     int32_t fingerId_ = -1;
     std::optional<Offset> lastTouchLocation_ = std::nullopt;
 
-    float stepRatio_ = 1.0f / 100.0f;
     float valueRatio_ = 0.0f;
     float sliderLength_ = 0.0f;
     float borderBlank_ = 0.0f;
@@ -320,6 +321,7 @@ private:
 
     RefPtr<FrameNode> parentAccessibilityNode_;
     std::vector<RefPtr<FrameNode>> pointAccessibilityNodeVec_;
+    std::vector<GestureEventFunc> pointAccessibilityNodeEventVec_;
     bool isInitAccessibilityVirtualNode_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SliderPattern);

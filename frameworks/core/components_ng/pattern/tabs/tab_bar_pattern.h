@@ -204,7 +204,7 @@ public:
 
     void UpdateSymbolEffect(int32_t index);
 
-    void UpdateSubTabBoard();
+    void UpdateSubTabBoard(int32_t index);
 
     SelectedMode GetSelectedMode() const;
 
@@ -579,6 +579,7 @@ private:
 
     std::shared_ptr<AnimationUtils::Animation> tabbarIndicatorAnimation_;
     std::shared_ptr<AnimationUtils::Animation> translateAnimation_;
+    std::shared_ptr<AnimationUtils::Animation> maskAnimation_;
 
     bool indicatorAnimationIsRunning_ = false;
     bool translateAnimationIsRunning_ = false;

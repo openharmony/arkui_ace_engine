@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
     const ArkUIToggleModifier* GetToggleModifier();
+    const CJUIToggleModifier* GetCJUIToggleModifier();
     void SetOnToggleChange(ArkUINodeHandle node, void* extraParam);
 
     void ResetOnToggleChange(ArkUINodeHandle node);

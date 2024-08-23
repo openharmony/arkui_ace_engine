@@ -44,6 +44,7 @@ std::unordered_set<AceAction> AccessibilityProperty::GetSupportAction() const
         AceAction::ACTION_SET_SELECTION,
         AceAction::ACTION_CLEAR_SELECTION,
         AceAction::ACTION_SET_CURSOR_POSITION,
+        AceAction::ACTION_EXEC_SUB_COMPONENT,
     };
 
     std::unordered_set<AceAction> supportActions;
@@ -80,7 +81,7 @@ void AccessibilityProperty::GetGroupTextRecursive(bool forceGetChildren, std::st
         return;
     }
     auto level = GetAccessibilityLevel();
-    if (level == Level::AUTO || level == Level::YES) {
+    if (level == Level::AUTO || level == Level::YES_STR) {
         auto nodeText = GetText();
         if (!text.empty() && !nodeText.empty()) {
             text += ", ";
@@ -153,7 +154,11 @@ std::unique_ptr<JsonValue> AccessibilityProperty::CreateNodeSearchInfo(const Ref
     nodeInfo->Put("id", node->GetAccessibilityId());
     nodeInfo->Put("tag", node->GetTag().c_str());
     if (!node->IsRootNode()) {
-        nodeInfo->Put("parent", node->GetParent()->GetAccessibilityId());
+        if (node->GetParent()) {
+            nodeInfo->Put("parent", node->GetParent()->GetAccessibilityId());
+        } else {
+            nodeInfo->Put("parent", -1);
+        }
     }
     nodeInfo->Put("visible", node->IsVisible());
     auto [shouldSearchSelf, shouldSearchChildren, groupFlag]
@@ -297,14 +302,14 @@ std::tuple<bool, bool, bool> AccessibilityProperty::GetSearchStrategy(const RefP
             level = accessibilityProperty->GetAccessibilityLevel();
             currentGroupFlag = accessibilityProperty->IsAccessibilityGroup();
             bool hasAccessibilityText = accessibilityProperty->HasAccessibilityTextOrDescription();
-            if (level == AccessibilityProperty::Level::YES) {
+            if (level == AccessibilityProperty::Level::YES_STR) {
                 break;
             } else if (level == AccessibilityProperty::Level::NO_HIDE_DESCENDANTS) {
                 shouldSearchSelf = false;
                 shouldSearchChildren = false;
                 break;
             } else {
-                if (level == AccessibilityProperty::Level::NO) {
+                if (level == AccessibilityProperty::Level::NO_STR) {
                     shouldSearchSelf = false;
                 } else {
                     // shouldSearchSelf is true here
@@ -328,7 +333,7 @@ std::tuple<bool, bool, bool> AccessibilityProperty::GetSearchStrategy(const RefP
     } while (0);
 
     if (ancestorGroupFlag == true) {
-        if (level != AccessibilityProperty::Level::YES) {
+        if (level != AccessibilityProperty::Level::YES_STR) {
             shouldSearchSelf = false;
         }
         currentGroupFlag = true;
@@ -410,11 +415,11 @@ bool AccessibilityProperty::IsAccessibilityFocusable(const RefPtr<FrameNode>& no
         auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
         if (accessibilityProperty != nullptr) {
             auto level = accessibilityProperty->GetAccessibilityLevel();
-            if (level == AccessibilityProperty::Level::YES) {
+            if (level == AccessibilityProperty::Level::YES_STR) {
                 focusable = true;
                 break;
             }
-            if (level == AccessibilityProperty::Level::NO) {
+            if (level == AccessibilityProperty::Level::NO_STR) {
                 break;
             }
             if (accessibilityProperty->IsAccessibilityGroup() ||

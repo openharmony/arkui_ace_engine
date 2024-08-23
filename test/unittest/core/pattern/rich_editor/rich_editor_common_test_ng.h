@@ -43,6 +43,7 @@
 #include "base/window/drag_window.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/view_abstract_model.h"
@@ -174,6 +175,8 @@ const SymbolSpanOptions SYMBOL_SPAN_OPTIONS_1 = {
     .style = TEXT_STYLE_1,
     .resourceObject = nullptr
 };
+auto BUILDER_NODE_1 = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
 } // namespace
 
 struct TestCursorItem {

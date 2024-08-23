@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_GRID_PATTERN_H
 
 #include "core/components_ng/pattern/grid/grid_accessibility_property.h"
+#include "core/components_ng/pattern/grid/grid_content_modifier.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
@@ -127,7 +128,13 @@ public:
         return false;
     }
 
-    GridLayoutInfo GetGridLayoutInfo() const
+    const GridLayoutInfo& GetGridLayoutInfo() const
+    {
+        return gridLayoutInfo_;
+    }
+
+    /* caution when using mutable reference */
+    GridLayoutInfo& GetMutableLayoutInfo()
     {
         return gridLayoutInfo_;
     }
@@ -217,6 +224,7 @@ public:
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
     Rect GetItemRect(int32_t index) const override;
+    int32_t GetItemIndex(double x, double y) const override;
 
     bool IsNeedInitClickEventRecorder() const override
     {
@@ -309,6 +317,8 @@ private:
 
     bool scrollable_ = true;
     bool forceOverScroll_ = false;
+
+    RefPtr<GridContentModifier> gridContentModifier_;
 
     float endHeight_ = 0.0f;
     bool isLeftStep_ = false;

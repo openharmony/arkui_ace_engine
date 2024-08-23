@@ -209,7 +209,8 @@ bool WaterFlowLayoutInfoSW::ReachStart(float prevPos, bool firstLayout) const
     if (!itemStart_ || lanes_.empty()) {
         return false;
     }
-    return firstLayout || Negative(prevPos);
+    const float prevStart = StartPos() - (totalOffset_ - prevPos);
+    return firstLayout || Negative(prevStart);
 }
 
 bool WaterFlowLayoutInfoSW::ReachEnd(float prevPos) const
@@ -464,7 +465,7 @@ bool WaterFlowLayoutInfoSW::IsMisaligned() const
         }
         const float startPos = SectionStartPos(lanes_[i]);
         if (std::any_of(lanes_[i].begin(), lanes_[i].end(),
-                [&startPos](const auto& lane) { return !NearEqual(lane.startPos, startPos); })) {
+                        [&startPos](const auto& lane) { return !NearEqual(lane.startPos, startPos); })) {
             return true;
         }
         const int32_t sectionStart = (i == 0) ? 0 : segmentTails_[i - 1] + 1;
@@ -673,6 +674,21 @@ void WaterFlowLayoutInfoSW::UpdateLanesIndex(int32_t updateIdx)
                 idxToLane_[item.idx] = i;
             }
         }
+    }
+}
+
+void WaterFlowLayoutInfoSW::BeginCacheUpdate()
+{
+    savedLanes_ = std::make_unique<decltype(lanes_)>(lanes_);
+    synced_ = false;
+}
+
+void WaterFlowLayoutInfoSW::EndCacheUpdate()
+{
+    synced_ = true;
+    if (savedLanes_) {
+        lanes_ = std::move(*savedLanes_);
+        savedLanes_.reset();
     }
 }
 } // namespace OHOS::Ace::NG

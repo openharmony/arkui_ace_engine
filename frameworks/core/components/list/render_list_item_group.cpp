@@ -15,11 +15,8 @@
 
 #include "core/components/list/render_list_item_group.h"
 
-#include "core/animation/curve.h"
-#include "core/animation/curve_animation.h"
 #include "core/components/flex/render_flex.h"
 #include "core/components/list/list_item_group_component.h"
-#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 namespace {

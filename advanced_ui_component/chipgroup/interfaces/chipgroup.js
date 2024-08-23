@@ -172,7 +172,7 @@ export class IconGroupSuffix extends ViewPU {
     initialRender() {
         PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Row.create();
+            Row.create({ space: 8 });
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             ForEach.create();
@@ -398,6 +398,9 @@ export class ChipGroup extends ViewPU {
     }
     aboutToAppear() {
         this.itemStyleOnChange();
+        if (this.getSelectedIndexes().length === 0) {
+            this.selectedIndexes = [0];
+        }
     }
     getChipSize() {
         if (this.itemStyle && this.itemStyle.size) {
@@ -496,9 +499,6 @@ export class ChipGroup extends ViewPU {
                 array.indexOf(element) === index &&
                 element < (this.items || []).length);
         });
-        if (temp.length == 0) {
-            temp = [0];
-        }
         return temp;
     }
     isMultiple() {
@@ -535,6 +535,18 @@ export class ChipGroup extends ViewPU {
             });
         }
     }
+    getPaddingTop() {
+        if (!this.chipGroupPadding || !this.chipGroupPadding.top) {
+            return defaultTheme.chipGroupPadding.top;
+        }
+        return parseDimension(this.getUIContext(), this.chipGroupPadding.top, isValidDimensionNoPercentageString, defaultTheme.chipGroupPadding.top);
+    }
+    getPaddingBottom() {
+        if (!this.chipGroupPadding || !this.chipGroupPadding.bottom) {
+            return defaultTheme.chipGroupPadding.bottom;
+        }
+        return parseDimension(this.getUIContext(), this.chipGroupPadding.bottom, isValidDimensionNoPercentageString, defaultTheme.chipGroupPadding.bottom);
+    }
     getChipGroupHeight() {
         if (typeof this.chipSize === 'string') {
             if (this.chipSize === ChipSize.NORMAL) {
@@ -551,30 +563,17 @@ export class ChipGroup extends ViewPU {
             return ChipGroupHeight.NORMAL;
         }
     }
-    getPaddingTop() {
-        if (!this.chipGroupPadding || !this.chipGroupPadding.top) {
-            return defaultTheme.chipGroupPadding.top;
-        }
-        return parseDimension(this.getUIContext(), this.chipGroupPadding.top, isValidDimensionNoPercentageString, defaultTheme.chipGroupPadding.top);
-    }
-    getPaddingBottom() {
-        if (!this.chipGroupPadding || !this.chipGroupPadding.bottom) {
-            return defaultTheme.chipGroupPadding.bottom;
-        }
-        return parseDimension(this.getUIContext(), this.chipGroupPadding.bottom, isValidDimensionNoPercentageString, defaultTheme.chipGroupPadding.bottom);
-    }
     initialRender() {
         PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
             Row.align(Alignment.End);
             Row.width("100%");
-            Row.height(this.getChipGroupHeight() + this.getPaddingTop() + this.getPaddingBottom());
             Row.padding({ top: this.getPaddingTop(), bottom: this.getPaddingBottom() });
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create();
-            Stack.height(this.getChipGroupHeight() + this.getPaddingTop() + this.getPaddingBottom());
+            Stack.height(this.getChipGroupHeight());
             Stack.layoutWeight(1);
             Stack.blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN);
             Stack.alignContent(Alignment.End);
@@ -593,7 +592,10 @@ export class ChipGroup extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create({ space: this.getChipGroupItemSpace() });
             Row.padding({ left: this.getChipGroupStartSpace(),
-                right: this.getChipGroupEndSpace() });
+                right: this.getChipGroupEndSpace(),
+                top: this.getPaddingTop(),
+                bottom: this.getPaddingBottom()
+            });
             Row.constraintSize({ minWidth: '100%' });
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -660,7 +662,7 @@ export class ChipGroup extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Stack.create();
                         Stack.width(iconGroupSuffixTheme.normalBackgroundSize);
-                        Stack.height(this.getChipGroupHeight() + this.getPaddingTop() + this.getPaddingBottom());
+                        Stack.padding({ top: this.getPaddingTop(), bottom: this.getPaddingBottom() });
                         Stack.linearGradient({ angle: 90, colors: colorStops });
                         Stack.blendMode(BlendMode.DST_IN, BlendApplyType.OFFSCREEN);
                         Stack.hitTestBehavior(HitTestMode.None);
@@ -681,7 +683,11 @@ export class ChipGroup extends ViewPU {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Row.create();
-                        Row.padding({ left: iconGroupSuffixTheme.marginLeft, right: iconGroupSuffixTheme.marginRight });
+                        Row.padding({ left: iconGroupSuffixTheme.marginLeft,
+                            right: iconGroupSuffixTheme.marginRight,
+                            top: this.getPaddingTop(),
+                            bottom: this.getPaddingBottom()
+                        });
                     }, Row);
                     this.suffix.bind(this)();
                     Row.pop();

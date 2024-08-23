@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <list>
 #include <string>
+#include <functional>
 
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
@@ -41,28 +42,27 @@ public:
         const std::function<void(uint32_t)>& onCreateNode,
         const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
-        const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range);
+        const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range,
+        const std::function<void(uint32_t, uint32_t)>& onSetActiveRange);
 
     RepeatVirtualScrollNode(int32_t nodeId, int32_t totalCount,
         const std::map<std::string, std::pair<bool, uint32_t>>& templateCacheCountMap,
         const std::function<void(uint32_t)>& onCreateNode,
         const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
-        const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range);
+        const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range,
+        const std::function<void(uint32_t, uint32_t)>& onSetActiveRange);
 
     ~RepeatVirtualScrollNode() override = default;
 
-    void UpdateTotalCount(uint32_t totalCount)
-    {
-        totalCount_ = totalCount;
-    }
+    void UpdateTotalCount(uint32_t totalCount);
 
     // Number of children that Repeat can product
     // returns TotalCount
     int32_t FrameCount() const override;
 
     // called from TS upon Repeat rerender
-    void InvalidateKeyCache();
+    void UpdateRenderState(bool visibleItemsChanged);
 
     /**
      * GetChildren re-assembles children_ and cleanup the L1 cache
@@ -71,7 +71,7 @@ public:
      * function returns children_
      * function runs as part of idle task
      */
-    const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = true) const override;
+    const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = false) const override;
 
     /**
      * scenario: called by layout informs:
@@ -184,6 +184,9 @@ private:
 
     // caches:
     mutable RepeatVirtualScrollCaches caches_;
+
+    // get active child range
+    std::function<void(uint32_t, uint32_t)> onSetActiveRange_;
 
     // used by one of the unknown functions
     std::list<std::string> ids_;

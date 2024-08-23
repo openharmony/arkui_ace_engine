@@ -389,7 +389,7 @@ protected:
     Ace::CanvasImage canvasImage_;
     std::unique_ptr<Shadow> imageShadow_;
     RSColorMatrix colorMatrix_;
-    double density_;
+    double density_ = 1.0;
 
 #ifndef ACE_UNITTEST
     sk_sp<SkSVGDOM> skiaDom_ = nullptr;
@@ -413,8 +413,8 @@ protected:
     static const LinearMapNode<void (*)(std::shared_ptr<RSImage>&, std::shared_ptr<RSShaderEffect>&, RSMatrix&)>
         staticPattern[];
     const float defaultOpacity = 1.0f;
-    std::shared_ptr<RSColorFilter> colorFilter_;
-    std::shared_ptr<RSImageFilter> blurFilter_;
+    std::shared_ptr<RSColorFilter> colorFilter_ = RSColorFilter::CreateMatrixColorFilter(colorMatrix_);
+    std::shared_ptr<RSImageFilter> blurFilter_ = RSImageFilter::CreateBlurImageFilter(0, 0, RSTileMode::DECAL, nullptr);
     std::vector<std::shared_ptr<RSColorFilter>> saveColorFilter_;
     std::vector<std::shared_ptr<RSImageFilter>> saveBlurFilter_;
 };

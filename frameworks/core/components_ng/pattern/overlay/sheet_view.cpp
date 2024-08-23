@@ -17,6 +17,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/i18n/localization.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
@@ -178,7 +179,6 @@ void SheetView::CreateCloseIconButtonNode(RefPtr<FrameNode> sheetNode, NG::Sheet
         CHECK_NULL_VOID(sheet);
         auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
         CHECK_NULL_VOID(sheetPattern);
-        sheetPattern->SetIsDirectionUp(false);
         sheetPattern->SheetInteractiveDismiss(BindSheetDismissReason::CLOSE_BUTTON);
     };
     eventConfirmHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(clickCallback));
@@ -190,6 +190,12 @@ void SheetView::CreateCloseIconButtonNode(RefPtr<FrameNode> sheetNode, NG::Sheet
 
     CreateCloseIconNode(buttonNode);
     buttonNode->MountToParent(sheetNode);
+
+    // set accessibilityProperty to sheet close button
+    auto accessibilityProperty = buttonNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    std::string message  = Localization::GetInstance()->GetEntryLetters("sheet.close");
+    accessibilityProperty->SetAccessibilityText(message);
 }
 
 void SheetView::CreateCloseIconNode(RefPtr<FrameNode> buttonNode)
@@ -338,14 +344,24 @@ RefPtr<FrameNode> SheetView::BuildSubTitle(RefPtr<FrameNode> sheetNode, NG::Shee
     return subtitleRow;
 }
 
-void SheetView::GetTitlePaddingPos(PaddingProperty& padding)
+void SheetView::GetTitlePaddingPos(PaddingProperty& padding, const RefPtr<FrameNode>& sheetNode)
 {
+    bool isShowCloseIcon = true;
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        CHECK_NULL_VOID(sheetNode);
+        auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+        CHECK_NULL_VOID(sheetPattern);
+        isShowCloseIcon = sheetPattern->IsShowCloseIcon();
+    }
+
     // The title bar area is reserved for the close button area size by default.
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-            padding.left = CalcLength(SHEET_CLOSE_ICON_TITLE_SPACE_NEW + SHEET_CLOSE_ICON_WIDTH);
+            padding.left = CalcLength(isShowCloseIcon ?
+                SHEET_CLOSE_ICON_TITLE_SPACE_NEW + SHEET_CLOSE_ICON_WIDTH : 0.0_vp);
         } else {
-            padding.right = CalcLength(SHEET_CLOSE_ICON_TITLE_SPACE_NEW + SHEET_CLOSE_ICON_WIDTH);
+            padding.right = CalcLength(isShowCloseIcon ?
+                SHEET_CLOSE_ICON_TITLE_SPACE_NEW + SHEET_CLOSE_ICON_WIDTH : 0.0_vp);
         }
     } else {
         padding.right = CalcLength(SHEET_CLOSE_ICON_TITLE_SPACE + SHEET_CLOSE_ICON_WIDTH);
@@ -373,7 +389,7 @@ RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::S
     margin.bottom = CalcLength(SHEET_DOUBLE_TITLE_BOTTON_PADDING);
     layoutProperty->UpdateMargin(margin);
     PaddingProperty padding;
-    GetTitlePaddingPos(padding);
+    GetTitlePaddingPos(padding, sheetNode);
     layoutProperty->UpdatePadding(padding);
     auto columnProps = titleColumn->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(columnProps, nullptr);

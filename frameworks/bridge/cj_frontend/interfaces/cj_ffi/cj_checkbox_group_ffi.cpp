@@ -15,13 +15,9 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_checkbox_group_ffi.h"
 
-#include <optional>
-#include <string>
 
 #include "cj_lambda.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
 
 using namespace OHOS::Ace;
@@ -116,5 +112,19 @@ void FfiOHOSAceFrameworkCheckBoxGroupSetPaddings(CJEdge params)
 void FfiOHOSAceFrameworkCheckBoxGroupSetOnChange(void (*callback)(FFiCheckboxGroupResult info))
 {
     CheckBoxGroupModel::GetInstance()->SetOnChange(FormatOnChangeFunction(callback));
+}
+
+void FfiCheckBoxGroupSetResponseRegion(CJResponseRegion value)
+{
+    std::vector<DimensionRect> result;
+    ParseCJResponseRegion(value, result);
+    CheckBoxGroupModel::GetInstance()->SetResponseRegion(result);
+}
+
+void FfiCheckBoxGroupSetResponseRegionArray(VectorStringPtr vecContent)
+{
+    std::vector<DimensionRect> result;
+    ParseVectorStringPtr(vecContent, result);
+    CheckBoxGroupModel::GetInstance()->SetResponseRegion(result);
 }
 }

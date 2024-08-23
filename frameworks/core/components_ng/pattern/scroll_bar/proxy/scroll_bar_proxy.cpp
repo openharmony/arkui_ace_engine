@@ -37,18 +37,18 @@ float GetScrollableNodeDistance(RefPtr<Pattern> pattern)
     return scrollablePattern->GetScrollableDistance();
 }
 
-double GetScrollBarOutBoundaryExtent(RefPtr<Pattern> pattern)
-{
-    auto scrollablePattern = AceType::DynamicCast<ScrollablePattern>(pattern);
-    CHECK_NULL_RETURN(scrollablePattern, 0.0f);
-    return scrollablePattern->GetScrollBarOutBoundaryExtent();
-}
-
 float GetScrollableNodeOffset(RefPtr<Pattern> pattern)
 {
     auto scrollablePattern = AceType::DynamicCast<ScrollablePattern>(pattern);
     CHECK_NULL_RETURN(scrollablePattern, 0.0f);
     return scrollablePattern->GetBarOffset();
+}
+
+double GetScrollBarOutBoundaryExtent(RefPtr<Pattern> pattern)
+{
+    auto scrollablePattern = AceType::DynamicCast<ScrollablePattern>(pattern);
+    CHECK_NULL_RETURN(scrollablePattern, 0.0f);
+    return scrollablePattern->GetScrollBarOutBoundaryExtent();
 }
 } // namespace
 
@@ -169,17 +169,18 @@ void ScrollBarProxy::NotifyScrollBar(const WeakPtr<ScrollablePattern>& weakScrol
 
         scrollBar->SetControlDistance(controlDistance);
         scrollBar->SetReverse(scrollable->IsReverse());
-        scrollBar->SetScrollableNodeOffset(
-            !scrollable->IsReverse() ? scrollableNodeOffset : controlDistance - scrollableNodeOffset);
         scrollBar->HandleScrollBarOutBoundary(scrollBarOutBoundaryDistance);
         auto host = scrollBar->GetHost();
         if (!host) {
             continue;
         }
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && !scrollBar->HasChild()) {
+            scrollBar->SetScrollableNodeOffset(scrollableNodeOffset);
             scrollBar->UpdateScrollBarOffset();
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         } else {
+            scrollBar->SetScrollableNodeOffset(
+                !scrollable->IsReverse() ? scrollableNodeOffset : controlDistance - scrollableNodeOffset);
             host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
         }
     }

@@ -231,20 +231,20 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0049, TestSize.Level1)
     focusHub->focusStyleType_ = FocusStyleType::CUSTOM_REGION;
     RoundRect paintRect;
     focusHub->getInnerFocusRectFunc_ = [](RoundRect) {};
-    EXPECT_FALSE(focusHub->PaintFocusState());
+    EXPECT_FALSE(focusHub->PaintFocusState(false));
     focusHub->focusStyleType_ = FocusStyleType::CUSTOM_BORDER;
-    EXPECT_FALSE(focusHub->PaintFocusState());
+    EXPECT_FALSE(focusHub->PaintFocusState(false));
     focusHub->focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
     focusHub->focusPaintParamsPtr_->paintColor = Color::RED;
     focusHub->focusPaintParamsPtr_->paintWidth = Dimension(10);
     focusHub->focusPaintParamsPtr_->paintRect = RoundRect(RectF(), 0.0f, 0.0f);
-    EXPECT_TRUE(focusHub->PaintFocusState());
+    EXPECT_TRUE(focusHub->PaintFocusState(false));
     focusHub->focusStyleType_ = FocusStyleType::OUTER_BORDER;
-    EXPECT_TRUE(focusHub->PaintFocusState());
+    EXPECT_TRUE(focusHub->PaintFocusState(false));
     focusHub->focusStyleType_ = FocusStyleType::INNER_BORDER;
-    EXPECT_TRUE(focusHub->PaintFocusState());
+    EXPECT_TRUE(focusHub->PaintFocusState(false));
     focusHub->focusPaintParamsPtr_->focusPadding = Dimension(10);
-    EXPECT_TRUE(focusHub->PaintFocusState());
+    EXPECT_TRUE(focusHub->PaintFocusState(false));
 }
 
 /**
@@ -1797,7 +1797,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0107, TestSize.Level1)
     parentFocusHub->isFocusScope_ = true;
     EXPECT_TRUE(parentFocusHub->RequestFocusByPriorityInScope());
     parentFocusHub->isFocusScope_ = false;
-    EXPECT_TRUE(parentFocusHub->RequestFocusByPriorityInScope());
+    EXPECT_FALSE(parentFocusHub->RequestFocusByPriorityInScope());
     EXPECT_TRUE(child2FocusHub->IsCurrentFocus());
 
     auto pipeline = PipelineContext::GetCurrentContext();

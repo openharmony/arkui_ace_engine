@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIFolderStackModifier* GetFolderStackModifier();
+const CJUIFolderStackModifier* GetCJUIFolderStackModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_NODE_FOLDER_STACK_MODIFIER_H

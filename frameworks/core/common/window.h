@@ -198,6 +198,13 @@ public:
 
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch);
 
+    virtual void NotifyExtensionTimeout(int32_t errorCode) {}
+    
+    virtual uint32_t GetStatusBarHeight() const
+    {
+        return 0;
+    }
+
 protected:
     bool isRequestVsync_ = false;
     bool onShow_ = true;

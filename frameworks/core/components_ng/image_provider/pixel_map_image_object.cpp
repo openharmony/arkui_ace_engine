@@ -22,8 +22,8 @@
 
 namespace OHOS::Ace::NG {
 
-void PixelMapImageObject::MakeCanvasImage(const RefPtr<ImageLoadingContext>& ctx, const SizeF& /*resizeTarget*/,
-    bool /*forceResize*/, bool syncLoad, bool loadInVipChannel)
+void PixelMapImageObject::MakeCanvasImage(
+    const RefPtr<ImageLoadingContext>& ctx, const SizeF& /*resizeTarget*/, bool /*forceResize*/, bool syncLoad)
 {
     if (!pixmap_) {
         ctx->FailCallback("pixmap is null when PixelMapImageObject try MakeCanvasImage");
@@ -52,7 +52,7 @@ RefPtr<PixelMapImageObject> PixelMapImageObject::Create(const ImageSourceInfo& s
     auto&& pixelMap = pixmapData->GetPixmap();
     if (!pixelMap) {
         TAG_LOGW(AceLogTag::ACE_IMAGE,
-            "ImageData has no pixel map data when try CreateImageEncodedInfoForDecodedPixelMap, src: %{public}s",
+            "ImageData has no pixel map data when try CreateImageEncodedInfoForDecodedPixelMap, src: %{private}s",
             src.ToString().c_str());
         return nullptr;
     }

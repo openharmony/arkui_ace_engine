@@ -16,16 +16,10 @@
 #include "core/components_ng/render/adapter/txt_paragraph.h"
 
 #include "base/log/ace_performance_monitor.h"
-#include "base/log/ace_trace.h"
-#include "base/utils/utils.h"
-#include "base/geometry/dimension.h"
 #include "core/components/font/constants_converter.h"
-#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/components_ng/render/adapter/txt_font_collection.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/components/common/properties/text_layout_info.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -333,24 +327,38 @@ void TxtParagraph::Paint(RSCanvas& canvas, float x, float y)
     paragrah->Paint(&canvas, x, y);
 #endif
     if (paraStyle_.leadingMargin && paraStyle_.leadingMargin->pixmap) {
-        auto size = paraStyle_.leadingMargin->size;
-        CaretMetricsF metrics;
-        auto flag = ComputeOffsetForCaretUpstream(0, metrics) || ComputeOffsetForCaretDownstream(0, metrics);
-        if (flag) {
-            x += metrics.offset.GetX() - size.Width().ConvertToPx();
-            auto sizeRect = SizeF(size.Width().ConvertToPx(), size.Height().ConvertToPx());
-            y += Alignment::GetAlignPosition(
-                SizeF(sizeRect.Width(), metrics.height), sizeRect, paraStyle_.leadingMarginAlign)
-                    .GetY();
-        }
+        CalculateLeadingMarginOffest(x, y);
         auto canvasImage = PixelMapImage::Create(paraStyle_.leadingMargin->pixmap);
         auto pixelMapImage = DynamicCast<PixelMapImage>(canvasImage);
         CHECK_NULL_VOID(pixelMapImage);
         auto& rsCanvas = const_cast<RSCanvas&>(canvas);
-        auto width = size.Width().ConvertToPx();
-        auto height = size.Height().ConvertToPx();
+        auto size = paraStyle_.leadingMargin->size;
+        auto width = static_cast<float>(size.Width().ConvertToPx());
+        auto height = static_cast<float>(size.Height().ConvertToPx());
         pixelMapImage->DrawRect(rsCanvas, ToRSRect(RectF(x, y, width, height)));
     }
+}
+
+void TxtParagraph::CalculateLeadingMarginOffest(float& x, float& y)
+{
+    auto paragrah = GetParagraph();
+    CHECK_NULL_VOID(paragrah);
+    auto lineCount = static_cast<int32_t>(GetLineCount());
+    CHECK_NULL_VOID(lineCount);
+    auto firstLineMetrics = GetLineMetrics(0);
+    auto size = paraStyle_.leadingMargin->size;
+    auto start = x;
+    if (paraStyle_.direction == TextDirection::RTL) {
+        x += static_cast<float>(firstLineMetrics.x + firstLineMetrics.width);
+    } else {
+        x += static_cast<float>(firstLineMetrics.x - size.Width().ConvertToPx());
+    }
+    x = std::max(start, x);
+    auto sizeRect =
+        SizeF(static_cast<float>(size.Width().ConvertToPx()), static_cast<float>(size.Height().ConvertToPx()));
+    y += Alignment::GetAlignPosition(
+        SizeF(sizeRect.Width(), static_cast<float>(firstLineMetrics.height)), sizeRect, paraStyle_.leadingMarginAlign)
+             .GetY();
 }
 
 #ifndef USE_ROSEN_DRAWING
@@ -525,15 +533,19 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
     prevChar = text_[std::max(0, extent - 1)];
     if (prevChar == NEWLINE_CODE && !text_[static_cast<size_t>(extent)] && !preIsPlaceholder) {
         // Return the start of next line.
-        result.offset.SetX(MakeEmptyOffsetX());
+        float y = 0.0f;
 #ifndef USE_GRAPHIC_TEXT_GINE
-        result.offset.SetY(textBox.rect.fBottom);
+        y = textBox.rect.fBottom;
         result.height = textBox.rect.fBottom - textBox.rect.fTop;
 #else
-        result.offset.SetY(textBox.rect.GetBottom());
+        y = textBox.rect.GetBottom();
         result.height = textBox.rect.GetBottom() - textBox.rect.GetTop();
 #endif
-        return true;
+        if (LessNotEqual(y, paragrah->GetHeight())) {
+            result.offset.SetX(MakeEmptyOffsetX());
+            result.offset.SetY(y);
+            return true;
+        }
     }
 
 #ifndef USE_GRAPHIC_TEXT_GINE
@@ -675,6 +687,32 @@ void TxtParagraph::GetRectsForRangeInner(int32_t start, int32_t end, std::vector
         RectF selectionRect(static_cast<float>(rect.Left()), static_cast<float>(rect.Top()),
             static_cast<float>(rect.Width()), static_cast<float>(rect.Height()));
         selectedRects.emplace_back(selectionRect);
+    }
+}
+
+void TxtParagraph::TxtGetRectsForRange(int32_t start, int32_t end,
+    RectHeightStyle heightStyle, RectWidthStyle widthStyle,
+    std::vector<RectF>& selectedRects, std::vector<TextDirection>& textDirections)
+{
+    auto paragrah = GetParagraph();
+    CHECK_NULL_VOID(paragrah);
+#ifndef USE_GRAPHIC_TEXT_GINE
+    const auto& boxes = paragrah->GetRectsForRange(
+        start, end, Constants::ConvertTxtRectHeightStyle(heightStyle), Constants::ConvertTxtRectWidthStyle(widthStyle));
+#else
+    const auto& boxes = paragrah->GetTextRectsByBoundary(
+        start, end, Constants::ConvertTxtRectHeightStyle(heightStyle), Constants::ConvertTxtRectWidthStyle(widthStyle));
+#endif
+    if (boxes.empty()) {
+        return;
+    }
+    for (const auto& box : boxes) {
+        auto rect = Constants::ConvertSkRect(box.rect);
+        auto textDirection = box.direction;
+        RectF selectionRect(static_cast<float>(rect.Left()), static_cast<float>(rect.Top()),
+            static_cast<float>(rect.Width()), static_cast<float>(rect.Height()));
+        selectedRects.emplace_back(selectionRect);
+        textDirections.emplace_back(static_cast<OHOS::Ace::TextDirection>(textDirection));
     }
 }
 
@@ -1049,7 +1087,10 @@ void TxtParagraph::UpdateColor(size_t from, size_t to, const Color& color)
 {
 #ifndef USE_GRAPHIC_TEXT_GINE
 #else
-    auto* paragraphTxt = static_cast<OHOS::Rosen::Typography*>(GetParagraph());
+    auto paragrah = GetParagraph();
+    CHECK_NULL_VOID(paragrah);
+    auto* paragraphTxt = static_cast<OHOS::Rosen::Typography*>(paragrah);
+    CHECK_NULL_VOID(paragraphTxt);
     paragraphTxt->UpdateColor(from, to, ToRSColor(color));
 #endif
 }

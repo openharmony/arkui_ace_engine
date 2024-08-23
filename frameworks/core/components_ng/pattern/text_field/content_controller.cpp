@@ -44,6 +44,10 @@ std::string ContentController::PreprocessString(int32_t startIndex, int32_t endI
     CHECK_NULL_RETURN(pattern, value);
     auto textField = DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_RETURN(textField, value);
+    if (textField->GetIsPreviewText()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "no PreprocessString at previewing text");
+        return tmp;
+    }
     auto property = textField->GetLayoutProperty<TextFieldLayoutProperty>();
     auto selectValue = GetSelectedValue(startIndex, endIndex);
     bool hasInputFilter =
@@ -166,6 +170,11 @@ void ContentController::FilterValue()
     CHECK_NULL_VOID(pattern);
     auto textField = DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_VOID(textField);
+    if (textField->GetIsPreviewText()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "no filter at previewing text");
+        return;
+    }
+
     auto property = textField->GetLayoutProperty<TextFieldLayoutProperty>();
 
     bool hasInputFilter =
@@ -185,7 +194,9 @@ void ContentController::FilterValue()
         property->HasMaxLength() ? property->GetMaxLengthValue(Infinity<uint32_t>()) : Infinity<uint32_t>();
     auto textWidth = static_cast<int32_t>(GetWideText().length());
     if (GreatNotEqual(textWidth, maxLength)) {
-        content_ = StringUtils::ToString(GetWideText().substr(0, maxLength));
+        // clamp emoji
+        auto subWstring = TextEmojiProcessor::SubWstring(0, maxLength, GetWideText());
+        content_ = StringUtils::ToString(subWstring);
     }
 }
 
@@ -342,7 +353,22 @@ void ContentController::erase(int32_t startIndex, int32_t length)
 
 int32_t ContentController::Delete(int32_t startIndex, int32_t length, bool isBackward)
 {
-    return TextEmojiProcessor::Delete(startIndex, length, content_, isBackward);
+    int32_t result = TextEmojiProcessor::Delete(startIndex, length, content_, isBackward);
+    if (length > 0 && result == 0) {
+        // try delete whole emoji
+        if (isBackward) {
+            TextEmojiSubStringRange range = TextEmojiProcessor::CalSubWstringRange(
+                startIndex - length, length, GetWideText(), true);
+            result = TextEmojiProcessor::Delete(range.endIndex,
+                length, content_, true);
+        } else {
+            TextEmojiSubStringRange range = TextEmojiProcessor::CalSubWstringRange(
+                startIndex, length, GetWideText(), true);
+            result = TextEmojiProcessor::Delete(range.startIndex,
+                length, content_, true);
+        }
+    }
+    return result;
 }
 
 int32_t ContentController::GetDeleteLength(int32_t startIndex, int32_t length, bool isBackward)
@@ -350,7 +376,7 @@ int32_t ContentController::GetDeleteLength(int32_t startIndex, int32_t length, b
     auto content = content_;
     return TextEmojiProcessor::Delete(startIndex, length, content, isBackward);
 }
-
+ 
 bool ContentController::IsIndexBeforeOrInEmoji(int32_t index)
 {
     int32_t startIndex = index - EMOJI_RANGE_LEFT;

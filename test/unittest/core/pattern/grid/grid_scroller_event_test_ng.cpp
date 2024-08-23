@@ -15,7 +15,6 @@
 
 #include "grid_test_ng.h"
 
-#include "core/components_ng/pattern/grid/grid_layout_info.h"
 namespace OHOS::Ace::NG {
 
 namespace {} // namespace
@@ -187,11 +186,11 @@ HWTEST_F(GridScrollerEventTestNg, GridEventTestNg002, TestSize.Level1)
     CreateDone(frameNode_);
 
     ScrollTo(ITEM_HEIGHT);
-    EXPECT_EQ(startIndex, 0);
+    EXPECT_EQ(startIndex, 2);
     EXPECT_EQ(endIndex, 9);
 
     ScrollTo(ITEM_HEIGHT * 2);
-    EXPECT_EQ(startIndex, 2);
+    EXPECT_EQ(startIndex, 4);
     EXPECT_EQ(endIndex, 11);
 }
 

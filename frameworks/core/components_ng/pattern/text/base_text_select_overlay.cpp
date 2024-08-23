@@ -127,7 +127,7 @@ void BaseTextSelectOverlay::CloseOverlay(bool animation, CloseReason reason)
 {
     auto overlayManager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(overlayManager);
-    overlayManager->Close(GetOwnerId(), animation, reason);
+    overlayManager->Close(GetOwnerId(), false, reason);
     AfterCloseOverlay();
 }
 
@@ -203,8 +203,10 @@ RefPtr<FrameNode> BaseTextSelectOverlay::GetOwner()
 
 void BaseTextSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType)
 {
-    if (IsMouseClickDown(sourceType, touchType) || IsTouchUp(sourceType, touchType)) {
+    if (IsMouseClickDown(sourceType, touchType)) {
         CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
+    } else if (IsTouchUp(sourceType, touchType)) {
+        HideMenu(true);
     }
 }
 
@@ -221,7 +223,7 @@ bool BaseTextSelectOverlay::CheckTouchInHostNode(const PointF& touchPoint)
 void BaseTextSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode)
 {
     overlayInfo.isSingleHandle = isSingleHandle_;
-    overlayInfo.isHandleLineShow = isShowHandleLine_ && !isSingleHandle_;
+    overlayInfo.isHandleLineShow = isShowHandleLine_;
     overlayInfo.recreateOverlay = isUsingMouse_;
     overlayInfo.rightClickOffset = mouseMenuOffset_;
     overlayInfo.isUsingMouse = isUsingMouse_;
@@ -363,6 +365,7 @@ bool BaseTextSelectOverlay::CheckHandleIsVisibleWithTransform(
     auto pattern = GetPattern<Pattern>();
     CHECK_NULL_RETURN(pattern, true);
     auto host = pattern->GetHost();
+    CHECK_NULL_RETURN(host, true);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, true);
     auto contentRect = geometryNode->GetContentRect();
@@ -631,7 +634,7 @@ std::optional<RectF> BaseTextSelectOverlay::GetAncestorNodeViewPort()
     CHECK_NULL_RETURN(host, std::nullopt);
     auto parent = host->GetAncestorNodeOfFrame(true);
     while (parent) {
-        auto scrollableContainer = host->GetPattern<NestableScrollContainer>();
+        auto scrollableContainer = parent->GetPattern<NestableScrollContainer>();
         if (scrollableContainer) {
             return parent->GetTransformRectRelativeToWindow();
         }

@@ -936,8 +936,13 @@ HWTEST_F(RichEditorOverlayTestNg, SingleHandle003, TestSize.Level1)
     auto touchOffset = Offset(0, 0);
     AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_)
         ->SetCaretOffsetAndHeight(OffsetF(0, 0), 50.0f);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    textOverlayTheme->handleDiameter_ = 14.0_vp;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textOverlayTheme));
     richEditorPattern->HandleTouchDown(touchOffset);
-    EXPECT_TRUE(richEditorPattern->isTouchCaret_);
+    EXPECT_TRUE(richEditorPattern->moveCaretState_.isTouchCaret);
     /**
      * @tc.steps: step4. move caret position by touch move
      */
@@ -1595,8 +1600,8 @@ HWTEST_F(RichEditorOverlayTestNg, RichEditorOverlayTestNg001, TestSize.Level1)
     ASSERT_NE(richEditorOverlayModifier, nullptr);
 
     Testing::MockCanvas rsCanvas;
-    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
     DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
 
     richEditorOverlayModifier->previewTextStyle_ = PreviewTextStyle::NORMAL;
@@ -1720,25 +1725,6 @@ HWTEST_F(RichEditorOverlayTestNg, RichEditorOverlayTestNg005, TestSize.Level1)
     richEditorPattern->selectOverlay_->isSingleHandle_ = false;
     richEditorPattern->selectOverlay_->UpdateSelectorOnHandleMove(OffsetF(50.0f, 50.0f), false);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
-}
-
-/**
- * @tc.name: RichEditorOverlayTestNg006
- * @tc.desc: test CheckEditorTypeChange
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorOverlayTestNg, RichEditorOverlayTestNg006, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    richEditorPattern->ShowSelectOverlay(
-    richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
-
-    SelectOverlayInfo selectInfo;
-    richEditorPattern->selectOverlay_->CheckEditorTypeChange(selectInfo, TextSpanType::TEXT);
-    EXPECT_EQ(selectInfo.recreateOverlay, true);
 }
 
 /**

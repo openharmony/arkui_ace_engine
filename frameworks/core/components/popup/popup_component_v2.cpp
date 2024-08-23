@@ -15,11 +15,7 @@
 
 #include "core/components/popup/popup_component_v2.h"
 
-#include "base/geometry/dimension.h"
-#include "core/components/align/align_component.h"
-#include "core/components/box/box_component.h"
 #include "core/components/button/button_component.h"
-#include "core/components/button/button_theme.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/flex/flex_component.h"
 #include "core/components/padding/padding_component.h"

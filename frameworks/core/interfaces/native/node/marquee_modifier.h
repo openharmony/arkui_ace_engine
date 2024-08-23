@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIMarqueeModifier* GetMarqueeModifier();
+const CJUIMarqueeModifier* GetCJUIMarqueeModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_MARQUEE_MODIFIER_H

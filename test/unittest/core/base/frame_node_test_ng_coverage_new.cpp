@@ -14,6 +14,8 @@
  */
 #include "test/unittest/core/base/frame_node_test_ng.h"
 
+#include "core/event/touch_event.h"
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -199,5 +201,240 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAddJudgeToTargetComponent02, TestSize.Level1)
     frameNode->eventHub_->gestureEventHub_ = nullptr;
     RefPtr<TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
     frameNode->AddJudgeToTargetComponent(targetComponent);
+}
+
+/**
+ * @tc.name: TriggerShouldParallelInnerWithTest01
+ * @tc.desc: Test the function TriggerShouldParallelInnerWith
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, TriggerShouldParallelInnerWithTest01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto gestureHub = frameNode->eventHub_->GetOrCreateGestureEventHub();
+    ShouldBuiltInRecognizerParallelWithFunc shouldBuiltInRecognizerParallelWithFunc =
+        [](RefPtr<NGGestureRecognizer> target, std::vector<RefPtr<NGGestureRecognizer>> targets) {
+            return RefPtr<NGGestureRecognizer>();
+        };
+    gestureHub->SetShouldBuildinRecognizerParallelWithFunc(std::move(shouldBuiltInRecognizerParallelWithFunc));
+    ResponseLinkResult currentRecognizers;
+    ResponseLinkResult responseLinkRecognizers;
+    auto recognizer = AceType::MakeRefPtr<ClickRecognizer>();
+    recognizer->SetRecognizerType(GestureTypeName::PAN_GESTURE);
+    recognizer->GetGestureInfo()->SetIsSystemGesture(true);
+    currentRecognizers.emplace_back(recognizer);
+    responseLinkRecognizers.emplace_back(recognizer);
+    currentRecognizers.emplace_back(AceType::MakeRefPtr<ClickRecognizer>());
+
+    auto recognizer1 = AceType::MakeRefPtr<ClickRecognizer>();
+    recognizer1->SetRecognizerType(GestureTypeName::UNKNOWN);
+    recognizer1->GetGestureInfo()->SetIsSystemGesture(true);
+    currentRecognizers.emplace_back(recognizer1);
+
+    auto recognizer2 = AceType::MakeRefPtr<ClickRecognizer>();
+    recognizer2->SetRecognizerType(GestureTypeName::PAN_GESTURE);
+    recognizer2->GetGestureInfo()->SetIsSystemGesture(true);
+    TouchEvent touchEvent;
+    TouchEvent touchEvent1;
+    recognizer2->touchPoints_[touchEvent.id] = touchEvent;
+    recognizer2->touchPoints_[touchEvent1.id] = touchEvent1;
+    currentRecognizers.emplace_back(recognizer2);
+    /**
+     * @tc.steps: step2. call the function TriggerShouldParallelInnerWith.
+     */
+    frameNode->TriggerShouldParallelInnerWith(currentRecognizers, responseLinkRecognizers);
+    EXPECT_FALSE(recognizer->IsBridgeMode());
+}
+
+/**
+ * @tc.name: OnSyncGeometryFrameFinishTest
+ * @tc.desc: Test the function OnSyncGeometryFrameFinish
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, OnSyncGeometryFrameFinishTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    RectF paintRect = { 10.0f, 10.0f, 10.0f, 10.0f };
+    /**
+     * @tc.steps: step2. call the function TriggerShouldParallelInnerWith.
+     */
+    frameNode->OnSyncGeometryFrameFinish(paintRect);
+    EXPECT_TRUE(frameNode->syncedFramePaintRect_.has_value());
+    frameNode->OnSyncGeometryFrameFinish(paintRect);
+    RectF paintRect1 = { 20.0f, 20.0f, 20.0f, 20.0f };
+    frameNode->OnSyncGeometryFrameFinish(paintRect1);
+    EXPECT_EQ(frameNode->syncedFramePaintRect_, paintRect1);
+}
+
+/**
+ * @tc.name: IsContextTransparentTest001
+ * @tc.desc: Test the function IsContextTransparent
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, IsContextTransparentTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step2. call the function IsContextTransparent.
+     */
+    EXPECT_TRUE(frameNode->IsContextTransparent());
+    frameNode->GetRenderContext()->UpdateOpacity(0.0);
+    EXPECT_TRUE(frameNode->IsContextTransparent());
+    frameNode->GetRenderContext()->UpdateOpacity(10.0);
+    EXPECT_TRUE(frameNode->IsContextTransparent());
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(frameNode->GetRenderContext());
+    mockRenderContext->SetPaintRectWithTransform(RectF(10.0f, 10.0f, 10.0f, 0.0f));
+    EXPECT_TRUE(frameNode->IsContextTransparent());
+    mockRenderContext->SetPaintRectWithTransform(RectF(10.0f, 10.0f, 10.0f, 10.0f));
+    EXPECT_FALSE(frameNode->IsContextTransparent());
+    frameNode->layoutProperty_->propVisibility_ = VisibleType::INVISIBLE;
+    EXPECT_TRUE(frameNode->IsContextTransparent());
+}
+
+/**
+ * @tc.name: IsContextTransparentTest002
+ * @tc.desc: Test the function IsContextTransparent
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, IsContextTransparentTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("Flex", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto frameNode1 = FrameNode::CreateFrameNode("framenode", 2, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->AddChild(frameNode1);
+    /**
+     * @tc.steps: step2. call the function IsContextTransparent.
+     */
+    EXPECT_TRUE(frameNode->IsContextTransparent());
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(frameNode->GetRenderContext());
+    mockRenderContext->SetPaintRectWithTransform(RectF(10.0f, 10.0f, 10.0f, 0.0f));
+    auto mockRenderContext1 = AceType::DynamicCast<MockRenderContext>(frameNode1->GetRenderContext());
+    mockRenderContext1->SetPaintRectWithTransform(RectF(10.0f, 10.0f, 10.0f, 10.0f));
+    EXPECT_FALSE(frameNode->IsContextTransparent());
+    mockRenderContext->SetPaintRectWithTransform(RectF(10.0f, 10.0f, 10.0f, 10.0f));
+    EXPECT_FALSE(frameNode->IsContextTransparent());
+    frameNode->layoutProperty_->propVisibility_ = VisibleType::INVISIBLE;
+    EXPECT_FALSE(frameNode->IsContextTransparent());
+    frameNode->layoutProperty_->propVisibility_ = VisibleType::VISIBLE;
+    frameNode->GetRenderContext()->UpdateBackgroundColor(Color::BLUE);
+    EXPECT_FALSE(frameNode->IsContextTransparent());
+}
+
+/**
+ * @tc.name: AddTouchEventAllFingersInfoTest
+ * @tc.desc: Test the function AddTouchEventAllFingersInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, AddTouchEventAllFingersInfoTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    /**
+     * @tc.steps: step2. call the function AddTouchEventAllFingersInfoTest.
+     */
+    TouchEventInfo touchEventInfo("touch");
+    TouchEvent touchEvent;
+    TouchPoint touchPoint;
+    touchEvent.pointers.emplace_back(touchPoint);
+    TouchPoint touchPoint1;
+    touchPoint1.tiltX = 10.0;
+    touchPoint1.tiltY = 10.0;
+    touchEvent.pointers.emplace_back(touchPoint1);
+    frameNode->AddTouchEventAllFingersInfo(touchEventInfo, touchEvent);
+    EXPECT_EQ(touchEventInfo.touches_.size(), 2);
+}
+
+/**
+ * @tc.name: TriggerOnTouchInterceptTest
+ * @tc.desc: Test the function TriggerOnTouchIntercept
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, TriggerOnTouchInterceptTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    /**
+     * @tc.steps: step2. call the function AddTouchEventAllFingersInfoTest.
+     */
+    auto gestureHub = frameNode->eventHub_->GetOrCreateGestureEventHub();
+    TouchInterceptFunc touchInterceptFunc = [](TouchEventInfo& touchEventInfo) { return HitTestMode::HTMBLOCK; };
+    gestureHub->SetOnTouchIntercept(std::move(touchInterceptFunc));
+    TouchEventInfo touchEventInfo("touch");
+    TouchEvent touchEvent;
+    EXPECT_EQ(frameNode->TriggerOnTouchIntercept(touchEvent), HitTestMode::HTMBLOCK);
+    touchEvent.tiltX = 10.0;
+    touchEvent.tiltY = 10.0;
+    EXPECT_EQ(frameNode->TriggerOnTouchIntercept(touchEvent), HitTestMode::HTMBLOCK);
+}
+
+/**
+ * @tc.name: CalculateCachedTransformRelativeOffsetTest
+ * @tc.desc: Test the function CalculateCachedTransformRelativeOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, CalculateCachedTransformRelativeOffsetTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    /**
+     * @tc.steps: step2. call the function CalculateCachedTransformRelativeOffset.
+     */
+    frameNode->CalculateCachedTransformRelativeOffset(0);
+    auto child = FrameNode::CreateFrameNode("child", 2, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->AddChild(child);
+    child->CalculateCachedTransformRelativeOffset(0);
+    frameNode->exposureProcessor_ = AceType::MakeRefPtr<Recorder::ExposureProcessor>("test", "0");
+    frameNode->RecordExposureInner();
+    EXPECT_EQ(child->CalculateCachedTransformRelativeOffset(0), OffsetF(0, 0));
+    EXPECT_EQ(child->CalculateCachedTransformRelativeOffset(10), OffsetF(0, 0));
+}
+
+/**
+ * @tc.name: ProcessVisibleAreaChangeEventTest
+ * @tc.desc: Test the function ProcessVisibleAreaChangeEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, ProcessVisibleAreaChangeEventTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    RectF visibleRect = { 10.0, 10.0, 10.0, 10.0 };
+    RectF frameRect = { 10.0, 10.0, 10.0, 10.0 };
+    std::vector<double> visibleAreaRatios = { 0.0, 0.0 };
+    VisibleCallbackInfo visibleAreaCallback;
+
+    /**
+     * @tc.steps: step2. call the function ProcessVisibleAreaChangeEvent.
+     */
+    // !NearEqual
+    frameNode->ProcessVisibleAreaChangeEvent(visibleRect, frameRect, visibleAreaRatios, visibleAreaCallback, true);
+    // NearEqual
+    frameNode->ProcessVisibleAreaChangeEvent(visibleRect, frameRect, visibleAreaRatios, visibleAreaCallback, true);
+    EXPECT_EQ(frameNode->lastVisibleRatio_, 1.0);
+    // !NearEqual
+    frameNode->ProcessVisibleAreaChangeEvent(visibleRect, frameRect, visibleAreaRatios, visibleAreaCallback, false);
+    // NearEqual
+    frameNode->ProcessVisibleAreaChangeEvent(visibleRect, frameRect, visibleAreaRatios, visibleAreaCallback, false);
+    EXPECT_EQ(frameNode->lastInnerVisibleRatio_, 1.0);
 }
 } // namespace OHOS::Ace::NG

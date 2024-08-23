@@ -15,8 +15,6 @@
 
 #include "rosen_render_custom_paint.h"
 
-#include "base/utils/measure_util.h"
-
 namespace OHOS::Ace {
 RefPtr<RenderNode> RenderCustomPaint::Create()
 {

@@ -15,20 +15,13 @@
 
 #include "prompt_action.h"
 
-#include <cstddef>
-#include <memory>
-#include <string>
 
 #include "interfaces/napi/kits/utils/napi_utils.h"
 #include "base/i18n/localization.h"
-#include "base/log/log_wrapper.h"
 #include "base/subwindow/subwindow_manager.h"
-#include "base/utils/system_properties.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/ace_engine.h"
-#include "core/components/common/properties/shadow.h"
 #include "core/components/theme/shadow_theme.h"
-#include "core/components_ng/pattern/toast/toast_layout_property.h"
 
 namespace OHOS::Ace::Napi {
 namespace {
@@ -194,6 +187,178 @@ bool GetToastOffset(napi_env env, napi_value offsetApi, std::optional<DimensionO
     return true;
 }
 
+void GetToastBackgroundColor(napi_env env, napi_value backgroundColorNApi, std::optional<Color>& backgroundColor)
+{
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, backgroundColorNApi, &valueType);
+    Color color;
+    backgroundColor = std::nullopt;
+    if (ParseNapiColor(env, backgroundColorNApi, color)) {
+        backgroundColor = color;
+    }
+}
+
+void GetToastTextColor(napi_env env, napi_value textColorNApi, std::optional<Color>& textColor)
+{
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, textColorNApi, &valueType);
+    Color color;
+    textColor = std::nullopt;
+    if (ParseNapiColor(env, textColorNApi, color)) {
+        textColor = color;
+    }
+}
+
+void GetToastBackgroundBlurStyle(napi_env env,
+    napi_value backgroundBlurStyleNApi, std::optional<int32_t>& backgroundBlurStyle)
+{
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, backgroundBlurStyleNApi, &valueType);
+    if (valueType == napi_number) {
+        int32_t num;
+        napi_get_value_int32(env, backgroundBlurStyleNApi, &num);
+        if (num >= 0 && num < BG_BLUR_STYLE_MAX_INDEX) {
+            backgroundBlurStyle = num;
+        }
+    }
+}
+
+bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
+{
+    auto colorMode = SystemProperties::GetColorMode();
+    if (shadowStyle == ShadowStyle::None) {
+        return true;
+    }
+    auto container = Container::CurrentSafelyWithCheck();
+    CHECK_NULL_RETURN(container, false);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+    if (!shadowTheme) {
+        return false;
+    }
+    shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
+    return true;
+}
+
+bool ParseResource(const ResourceInfo resource, CalcDimension& result)
+{
+    auto resourceWrapper = CreateResourceWrapper(resource);
+    CHECK_NULL_RETURN(resourceWrapper, false);
+    if (resource.type == static_cast<uint32_t>(ResourceType::STRING)) {
+        auto value = resourceWrapper->GetString(resource.resId);
+        return StringUtils::StringToCalcDimensionNG(value, result, false);
+    }
+    if (resource.type == static_cast<uint32_t>(ResourceType::INTEGER)) {
+        auto value = std::to_string(resourceWrapper->GetInt(resource.resId));
+        StringUtils::StringToDimensionWithUnitNG(value, result);
+        return true;
+    }
+    if (resource.type == static_cast<uint32_t>(ResourceType::FLOAT)) {
+        result = resourceWrapper->GetDimension(resource.resId);
+        return true;
+    }
+    return false;
+}
+
+void GetToastObjectShadow(napi_env env, napi_value shadowNApi, Shadow& shadowProps)
+{
+    napi_value radiusApi = nullptr;
+    napi_value colorApi = nullptr;
+    napi_value typeApi = nullptr;
+    napi_value fillApi = nullptr;
+    napi_get_named_property(env, shadowNApi, "radius", &radiusApi);
+    napi_get_named_property(env, shadowNApi, "color", &colorApi);
+    napi_get_named_property(env, shadowNApi, "type", &typeApi);
+    napi_get_named_property(env, shadowNApi, "fill", &fillApi);
+    ResourceInfo recv;
+    double radiusValue = 0.0;
+    if (ParseResourceParam(env, radiusApi, recv)) {
+        CalcDimension radius;
+        if (ParseResource(recv, radius)) {
+            radiusValue = LessNotEqual(radius.Value(), 0.0) ? 0.0 : radius.Value();
+        }
+    } else {
+        napi_get_value_double(env, radiusApi, &radiusValue);
+        if (LessNotEqual(radiusValue, 0.0)) {
+            radiusValue = 0.0;
+        }
+    }
+    shadowProps.SetBlurRadius(radiusValue);
+    Color color;
+    ShadowColorStrategy shadowColorStrategy;
+    if (ParseShadowColorStrategy(env, colorApi, shadowColorStrategy)) {
+        shadowProps.SetShadowColorStrategy(shadowColorStrategy);
+    } else if (ParseNapiColor(env, colorApi, color)) {
+        shadowProps.SetColor(color);
+    }
+    napi_valuetype valueType = GetValueType(env, typeApi);
+    int32_t shadowType = static_cast<int32_t>(ShadowType::COLOR);
+    if (valueType == napi_number) {
+        napi_get_value_int32(env, typeApi, &shadowType);
+    }
+    if (shadowType != static_cast<int32_t>(ShadowType::BLUR)) {
+        shadowType = static_cast<int32_t>(ShadowType::COLOR);
+    }
+    shadowType =
+        std::clamp(shadowType, static_cast<int32_t>(ShadowType::COLOR), static_cast<int32_t>(ShadowType::BLUR));
+    shadowProps.SetShadowType(static_cast<ShadowType>(shadowType));
+    valueType = GetValueType(env, fillApi);
+    bool isFilled = false;
+    if (valueType == napi_boolean) {
+        napi_get_value_bool(env, fillApi, &isFilled);
+    }
+    shadowProps.SetIsFilled(isFilled);
+}
+
+void GetToastShadow(napi_env env, napi_value shadowNApi, std::optional<Shadow>& shadow)
+{
+    Shadow shadowProps;
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, shadowNApi, &valueType);
+    if (valueType == napi_number) {
+        int32_t num = 0;
+        napi_get_value_int32(env, shadowNApi, &num);
+        auto style = static_cast<ShadowStyle>(num);
+        GetShadowFromTheme(style, shadowProps);
+    } else if (valueType == napi_object) {
+        napi_value offsetXApi = nullptr;
+        napi_value offsetYApi = nullptr;
+        napi_get_named_property(env, shadowNApi, "offsetX", &offsetXApi);
+        napi_get_named_property(env, shadowNApi, "offsetY", &offsetYApi);
+        ResourceInfo recv;
+        bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+        if (ParseResourceParam(env, offsetXApi, recv)) {
+            CalcDimension offsetX;
+            if (ParseResource(recv, offsetX)) {
+                double xValue = isRtl ? offsetX.Value() * (-1) : offsetX.Value();
+                shadowProps.SetOffsetX(xValue);
+            }
+        } else {
+            CalcDimension offsetX;
+            if (ParseNapiDimension(env, offsetX, offsetXApi, DimensionUnit::VP)) {
+                double xValue = isRtl ? offsetX.Value() * (-1) : offsetX.Value();
+                shadowProps.SetOffsetX(xValue);
+            }
+        }
+        if (ParseResourceParam(env, offsetYApi, recv)) {
+            CalcDimension offsetY;
+            if (ParseResource(recv, offsetY)) {
+                shadowProps.SetOffsetY(offsetY.Value());
+            }
+        } else {
+            CalcDimension offsetY;
+            if (ParseNapiDimension(env, offsetY, offsetYApi, DimensionUnit::VP)) {
+                shadowProps.SetOffsetY(offsetY.Value());
+            }
+        }
+        GetToastObjectShadow(env, shadowNApi, shadowProps);
+    } else {
+        GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadowProps);
+    }
+    shadow = shadowProps;
+}
+
 bool GetToastParams(napi_env env, napi_value argv, NG::ToastInfo& toastInfo)
 {
     napi_value messageNApi = nullptr;
@@ -202,6 +367,10 @@ bool GetToastParams(napi_env env, napi_value argv, NG::ToastInfo& toastInfo)
     napi_value showModeNApi = nullptr;
     napi_value alignmentApi = nullptr;
     napi_value offsetApi = nullptr;
+    napi_value backgroundColorNApi = nullptr;
+    napi_value textColorNApi = nullptr;
+    napi_value backgroundBlurStyleNApi = nullptr;
+    napi_value shadowNApi = nullptr;
 
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, argv, &valueType);
@@ -217,6 +386,10 @@ bool GetToastParams(napi_env env, napi_value argv, NG::ToastInfo& toastInfo)
         napi_get_named_property(env, argv, "showMode", &showModeNApi);
         napi_get_named_property(env, argv, "alignment", &alignmentApi);
         napi_get_named_property(env, argv, "offset", &offsetApi);
+        napi_get_named_property(env, argv, "backgroundColor", &backgroundColorNApi);
+        napi_get_named_property(env, argv, "textColor", &textColorNApi);
+        napi_get_named_property(env, argv, "backgroundBlurStyle", &backgroundBlurStyleNApi);
+        napi_get_named_property(env, argv, "shadow", &shadowNApi);
     } else {
         NapiThrow(env, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
         return false;
@@ -229,6 +402,10 @@ bool GetToastParams(napi_env env, napi_value argv, NG::ToastInfo& toastInfo)
         !GetToastOffset(env, offsetApi, toastInfo.offset)) {
         return false;
     }
+    GetToastBackgroundColor(env, backgroundColorNApi, toastInfo.backgroundColor);
+    GetToastTextColor(env, textColorNApi, toastInfo.textColor);
+    GetToastBackgroundBlurStyle(env, backgroundBlurStyleNApi, toastInfo.backgroundBlurStyle);
+    GetToastShadow(env, shadowNApi, toastInfo.shadow);
     return true;
 }
 
@@ -319,24 +496,8 @@ napi_value JSPromptOpenToast(napi_env env, napi_callback_info info)
     return nullptr;
 }
 
-napi_value JSPromptCloseToast(napi_env env, napi_callback_info info)
+void CloseToast(napi_env env, int32_t toastId, NG::ToastShowMode showMode)
 {
-    size_t argc = 1;
-    napi_value args[1];
-    napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
-    if (argc != 1) {
-        NapiThrow(env, "The number of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
-        return nullptr;
-    }
-    int32_t id = -1;
-    napi_get_value_int32(env, args[0], &id);
-    int32_t showModeVal = id & 0b111;
-    int32_t toastId = id >> 3; // 3 : Move 3 bits to the right to get toastId, and the last 3 bits are the showMode
-    if (toastId < 0 || showModeVal < 0 || showModeVal > static_cast<int32_t>(NG::ToastShowMode::SYSTEM_TOP_MOST)) {
-        NapiThrow(env, "", ERROR_CODE_TOAST_NOT_FOUND);
-        return nullptr;
-    }
-    auto showMode = static_cast<NG::ToastShowMode>(showModeVal);
     std::function<void(int32_t)> toastCloseCallback = nullptr;
     toastCloseCallback = [env](int32_t errorCode) mutable {
         if (errorCode != ERROR_CODE_NO_ERROR) {
@@ -353,8 +514,7 @@ napi_value JSPromptCloseToast(napi_env env, napi_callback_info info)
             NapiThrow(env, "Can not get delegate.", ERROR_CODE_INTERNAL_ERROR);
         }
     } else if (SubwindowManager::GetInstance() != nullptr) {
-        SubwindowManager::GetInstance()->CloseToast(
-            toastId, static_cast<NG::ToastShowMode>(showMode), std::move(toastCloseCallback));
+        SubwindowManager::GetInstance()->CloseToast(toastId, showMode, std::move(toastCloseCallback));
     }
 #else
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
@@ -367,6 +527,33 @@ napi_value JSPromptCloseToast(napi_env env, napi_callback_info info)
         SubwindowManager::GetInstance()->CloseToast(toastId, showMode, std::move(toastCloseCallback));
     }
 #endif
+}
+
+napi_value JSPromptCloseToast(napi_env env, napi_callback_info info)
+{
+    size_t argc = 1;
+    napi_value args[1];
+    napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+    if (argc != 1) {
+        NapiThrow(env, "The number of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
+        return nullptr;
+    }
+    int32_t id = -1;
+    napi_get_value_int32(env, args[0], &id);
+    if (id < 0 || id > INT32_MAX) {
+        NapiThrow(env, "The toastId is invalid.", ERROR_CODE_PARAM_INVALID);
+        return nullptr;
+    }
+    int32_t showModeVal = static_cast<int32_t>(static_cast<uint32_t>(id) & 0b111);
+    int32_t toastId =
+        static_cast<int32_t>(static_cast<uint32_t>(id) >>
+                             3); // 3 : Move 3 bits to the right to get toastId, and the last 3 bits are the showMode
+    if (toastId < 0 || showModeVal < 0 || showModeVal > static_cast<int32_t>(NG::ToastShowMode::SYSTEM_TOP_MOST)) {
+        NapiThrow(env, "", ERROR_CODE_TOAST_NOT_FOUND);
+        return nullptr;
+    }
+    auto showMode = static_cast<NG::ToastShowMode>(showModeVal);
+    CloseToast(env, toastId, showMode);
     return nullptr;
 }
 
@@ -811,24 +998,6 @@ std::optional<NG::BorderStyleProperty> GetBorderStyleProps(
         return styleProps;
     }
     return std::nullopt;
-}
-
-bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
-{
-    auto colorMode = SystemProperties::GetColorMode();
-    if (shadowStyle == ShadowStyle::None) {
-        return true;
-    }
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, false);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_RETURN(pipelineContext, false);
-    auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
-    if (!shadowTheme) {
-        return false;
-    }
-    shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
-    return true;
 }
 
 void GetNapiObjectShadow(napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext, Shadow& shadow)

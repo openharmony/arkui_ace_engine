@@ -15,9 +15,7 @@
 
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_component_api_bridge.h"
 
-#include "core/animation/curves.h"
 #include "frameworks/bridge/common/dom/dom_list.h"
-#include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {
 

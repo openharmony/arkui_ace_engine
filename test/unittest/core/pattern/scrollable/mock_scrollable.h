@@ -51,5 +51,12 @@ private:
     MOCK_METHOD(void, OnScrollEndCallback, (), (override));
     MOCK_METHOD(bool, OutBoundaryCallback, (), (override));
 };
+
+class MockScrollEdgeEffect : public ScrollEdgeEffect {
+    DECLARE_ACE_TYPE(MockScrollEdgeEffect, ScrollEdgeEffect);
+
+public:
+    MOCK_METHOD(void, HandleOverScroll, (Axis, float, const SizeF&, bool, bool), (override));
+};
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_TEST_CORE_PATTERN_SCROLLABLE_MOCK_SCROLLABLE_H

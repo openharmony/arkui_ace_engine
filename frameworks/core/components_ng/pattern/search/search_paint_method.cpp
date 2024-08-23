@@ -40,6 +40,10 @@ void SearchPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     auto searchTheme = pipeline->GetTheme<SearchTheme>();
     CHECK_NULL_VOID(searchTheme);
     CHECK_NULL_VOID(searchOverlayModifier_);
+    auto searchPattern = host->GetPattern<SearchPattern>();
+    CHECK_NULL_VOID(searchPattern);
+    auto btnSize = searchPattern->GetButtonSize();
+    searchOverlayModifier_->SetButtonSize(btnSize);
 
     // GetThemeAttributes logic inlined here
     auto [iconHeight, dividerSpace, searchSpace, searchDividerWidth, searchDividerColor] =
@@ -57,8 +61,6 @@ void SearchPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     searchOverlayModifier_->SetDividerHeight(dividerHeight);
     searchOverlayModifier_->SetSearchDividerWidth(searchDividerWidth);
     searchOverlayModifier_->SetSearchDividerColor(searchDividerColor);
-    auto searchPattern = host->GetPattern<SearchPattern>();
-    CHECK_NULL_VOID(searchPattern);
     isSearchButtonEnabled_ = searchPattern->GetIsSearchButtonEnabled();
     searchOverlayModifier_->SetIsSearchButtonEnabled(isSearchButtonEnabled_);
 }

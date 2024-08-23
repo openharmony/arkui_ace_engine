@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/text/span/span_string.h"
 
+#include <cstdint>
 #include <iterator>
 #include <utility>
 
@@ -109,6 +110,7 @@ std::list<RefPtr<NG::SpanItem>>::iterator SpanString::SplitSpansAndForward(
 void SpanString::ApplyToSpans(
     const RefPtr<SpanBase>& span, std::pair<int32_t, int32_t> interval, SpanOperation operation)
 {
+    SetGroupId(span);
     for (auto it = spans_.begin(); it != spans_.end(); ++it) {
         auto intersection = (*it)->GetIntersectionInterval(interval);
         if (!intersection) {
@@ -406,6 +408,8 @@ RefPtr<SpanBase> SpanString::GetDefaultSpan(SpanType type)
             return MakeRefPtr<LineHeightSpan>();
         case SpanType::ExtSpan:
             return MakeRefPtr<ExtSpan>();
+        case SpanType::BackgroundColor:
+            return MakeRefPtr<BackgroundColorSpan>();
         default:
             return nullptr;
     }
@@ -466,6 +470,14 @@ void SpanString::SetString(const std::string& text)
     text_ = text;
 }
 
+void SpanString::SetGroupId(const RefPtr<SpanBase>& span)
+{
+    if (span->GetSpanType() == SpanType::BackgroundColor) {
+        auto backgroundColorSpan = DynamicCast<BackgroundColorSpan>(span);
+        CHECK_NULL_VOID(backgroundColorSpan);
+        backgroundColorSpan->SetBackgroundColorGroupId(groupId_++);
+    }
+}
 void SpanString::SetSpanItems(const std::list<RefPtr<NG::SpanItem>>&& spanItems)
 {
     spans_ = spanItems;
@@ -616,9 +628,14 @@ bool SpanString::operator==(const SpanString& other) const
     if (text_ != other.text_) {
         return false;
     }
-    auto size = spansMap_.size() - (spansMap_.find(SpanType::Gesture) == spansMap_.end() ? 0 : 1);
-    auto sizeOther =
-        other.spansMap_.size() - (other.spansMap_.find(SpanType::Gesture) == other.spansMap_.end() ? 0 : 1);
+    auto size =
+        !spansMap_.empty()
+            ? (static_cast<int32_t>(spansMap_.size()) - (spansMap_.find(SpanType::Gesture) == spansMap_.end() ? 0 : 1))
+            : 0;
+    auto sizeOther = !other.spansMap_.empty()
+                         ? (static_cast<int32_t>(other.spansMap_.size()) -
+                               (other.spansMap_.find(SpanType::Gesture) == other.spansMap_.end() ? 0 : 1))
+                         : 0;
     if (size != sizeOther) {
         return false;
     }

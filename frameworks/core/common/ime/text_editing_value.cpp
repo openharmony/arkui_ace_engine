@@ -16,8 +16,6 @@
 #include "core/common/ime/text_editing_value.h"
 
 #include "base/json/json_util.h"
-#include "base/log/log.h"
-#include "base/utils/macros.h"
 #include "base/utils/string_utils.h"
 
 namespace OHOS::Ace {

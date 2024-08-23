@@ -46,11 +46,12 @@ struct Font {
     std::vector<std::string> fontFamilies;
     std::optional<Color> fontColor;
     std::optional<std::vector<std::string>> fontFamiliesNG;
+    std::optional<bool> enableVariableFontWeight;
 
     bool IsEqual(const Font& other) const
     {
         bool flag = fontWeight == other.fontWeight && fontSize == other.fontSize && fontStyle == other.fontStyle &&
-                    fontColor == other.fontColor;
+                    fontColor == other.fontColor && enableVariableFontWeight == other.enableVariableFontWeight;
         if (!flag) {
             return false;
         }
@@ -337,8 +338,8 @@ public:
     virtual void SetIsShowCancelButton(bool isShowCancelButton) = 0;
 
     virtual void SetSelectAllValue(bool isSetSelectAllValue) = 0;
-    virtual void SetLetterSpacing(const Dimension& value) {};
     virtual void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) = 0;
+    virtual void SetLetterSpacing(const Dimension& value) {};
     virtual void SetLineHeight(const Dimension& value) {};
     virtual void SetLineSpacing(const Dimension& value) {};
     virtual void SetAdaptMinFontSize(const Dimension& value) {};

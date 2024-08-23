@@ -33,6 +33,11 @@ int32_t InteractionImpl::SetDragWindowVisible(bool visible)
     return -1;
 }
 
+int32_t InteractionImpl::SetMouseDragMonitorState(bool state)
+{
+    return -1;
+}
+
 int32_t InteractionImpl::StartDrag(const DragDataCore& dragData,
     std::function<void(const OHOS::Ace::DragNotifyMsg&)> callback)
 {

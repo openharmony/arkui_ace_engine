@@ -18,18 +18,13 @@
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "bridge/common/utils/engine_helper.h"
-#include "bridge/js_frontend/engine/common/js_engine_loader.h"
 #include "core/common/ace_engine.h"
-#include "core/common/asset_manager_impl.h"
 #include "core/common/container_scope.h"
 #include "core/common/plugin_manager.h"
 #include "core/components/plugin/hap_asset_provider_impl.h"
 #include "core/components/plugin/plugin_element.h"
 #include "core/components/plugin/plugin_window.h"
 #include "core/components/plugin/render_plugin.h"
-#include "core/components/theme/theme_manager_impl.h"
-#include "core/components/transform/transform_element.h"
-#include "core/components_ng/pattern/plugin/plugin_layout_property.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -317,8 +312,14 @@ void PluginSubContainer::SetPluginComponentTheme(const std::string& path, const 
         pluginResourceInfo.SetPackagePath(path.substr(0, position + 1));
     }
     pluginResourceInfo.SetResourceConfiguration(resConfig);
-    pipelineContext_->SetThemeManager(AceType::MakeRefPtr<ThemeManagerImpl>());
-    auto pluginThemeManager = pipelineContext_->GetThemeManager();
+    RefPtr<ThemeManagerImpl> pluginThemeManager;
+    if (SystemProperties::GetResourceDecoupling()) {
+        auto resourceAdapter = ResourceAdapter::CreateV2();
+        pluginThemeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
+    } else {
+        pluginThemeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
+    }
+    pipelineContext_->SetThemeManager(pluginThemeManager);
     if (pluginThemeManager) {
         // Init resource, load theme map, do not parse yet.
         pluginThemeManager->InitResource(pluginResourceInfo);

@@ -27,6 +27,58 @@ namespace {
 const uint32_t ERROR_UINT_CODE = -1;
 std::string g_strValue;
 
+void SetXComponentWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
+    if (unitEnum == DimensionUnit::CALC) {
+        ViewAbstract::SetWidth(frameNode, CalcLength(CalcLength(std::string(calcValue))));
+    } else {
+        ViewAbstract::SetWidth(frameNode, CalcLength(value, unitEnum));
+    }
+}
+
+void ResetXComponentWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ClearWidthOrHeight(frameNode, true);
+}
+
+void SetXComponentHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
+    if (unitEnum == DimensionUnit::CALC) {
+        ViewAbstract::SetHeight(frameNode, CalcLength(CalcLength(std::string(calcValue))));
+    } else {
+        ViewAbstract::SetHeight(frameNode, CalcLength(value, unitEnum));
+    }
+}
+
+void ResetXComponentHeight(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ClearWidthOrHeight(frameNode, false);
+}
+
+void SetXComponentEnableAnalyzer(ArkUINodeHandle node, ArkUI_Bool enable)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    XComponentModelNG::EnableAnalyzer(frameNode, enable);
+}
+
+void ResetXComponentEnableAnalyzer(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    XComponentModelNG::EnableAnalyzer(frameNode, false);
+}
+
 void SetXComponentBackgroundColor(ArkUINodeHandle node, uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -151,6 +203,38 @@ namespace NodeModifier {
 const ArkUIXComponentModifier* GetXComponentModifier()
 {
     static const ArkUIXComponentModifier modifier = {
+        nullptr, // loadXComponent
+        nullptr, // setXComponentOptions
+        nullptr, // getXComponentSurfaceId
+        nullptr, // getXComponentController
+        SetXComponentWidth,
+        ResetXComponentWidth,
+        SetXComponentHeight,
+        ResetXComponentHeight,
+        SetXComponentEnableAnalyzer,
+        ResetXComponentEnableAnalyzer,
+        SetXComponentBackgroundColor,
+        ResetXComponentBackgroundColor,
+        SetXComponentOpacity,
+        ResetXComponentOpacity,
+        SetXComponentId,
+        SetXComponentType,
+        SetXComponentSurfaceSize,
+        GetXComponentId,
+        GetXComponentType,
+        GetXComponentSurfaceWidth,
+        GetXComponentSurfaceHeight,
+        GetNativeXComponent,
+        SetXComponentLibraryname,
+        SetImageAIOptions,
+    };
+
+    return &modifier;
+}
+
+const CJUIXComponentModifier* GetCJUIXComponentModifier()
+{
+    static const CJUIXComponentModifier modifier = {
         nullptr, // loadXComponent
         nullptr, // setXComponentOptions
         nullptr, // getXComponentSurfaceId

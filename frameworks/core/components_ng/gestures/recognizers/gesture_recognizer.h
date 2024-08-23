@@ -359,6 +359,13 @@ public:
         }
     }
 
+    void SetDisposeNotifyCallback(std::function<void(void*)>&& callback)
+    {
+        if (gestureInfo_) {
+            gestureInfo_->SetDisposeNotifyFunc(std::move(callback));
+        }
+    }
+
     void SetBridgeMode(bool bridgeMode)
     {
         bridgeMode_ = bridgeMode;
@@ -399,7 +406,9 @@ public:
         return refereeState_;
     }
 
-    void SetResponseLinkRecognizers(const std::list<RefPtr<TouchEventTarget>>& responseLinkResult);
+    void SetResponseLinkRecognizers(const ResponseLinkResult& responseLinkResult);
+
+    bool IsInResponseLinkRecognizers();
 
     virtual bool IsReady()
     {
@@ -465,7 +474,7 @@ protected:
     bool bridgeMode_ = false;
     std::list<WeakPtr<NGGestureRecognizer>> bridgeObjList_;
     bool enabled_ = true;
-    std::list<RefPtr<NGGestureRecognizer>> responseLinkRecognizer_;
+    ResponseLinkResult responseLinkRecognizer_;
 private:
     WeakPtr<NGGestureRecognizer> gestureGroup_;
     WeakPtr<NGGestureRecognizer> eventImportGestureGroup_;

@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIFlexModifier* GetFlexModifier();
+const CJUIFlexModifier* GetCJUIFlexModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_FLEX_MODIFIER_H

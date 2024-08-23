@@ -56,8 +56,10 @@ constexpr double DAMPING = 33.0f;
 constexpr double SEMI_CIRCLE_ANGEL = 180.0f;
 constexpr float OPACITY_EFFECT = 0.99;
 const std::string SYSTEM_RESOURCE_PREFIX = std::string("resource:///");
-// id of system resource start from 0x07800000
-constexpr unsigned long MIN_SYSTEM_RESOURCE_ID = 0x07800000;
+// id of system resource start from 0x07000000
+constexpr unsigned long MIN_SYSTEM_RESOURCE_ID = 0x07000000;
+// id of system resource end to 0x07FFFFFF
+constexpr unsigned long MAX_SYSTEM_RESOURCE_ID = 0x07FFFFFF;
 
 void UpdateFontSize(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayoutProperty>& menuProperty,
     const std::optional<Dimension>& fontSize, const Dimension& defaultFontSize)
@@ -334,18 +336,21 @@ void MenuItemPattern::ShowSubMenu()
         auto focusMenuBlurStyle = focusMenuRenderContext->GetBackBlurStyle();
         param.backgroundBlurStyle = static_cast<int>(focusMenuBlurStyle->blurStyle);
     }
+    if (focusMenuRenderContext->GetBackgroundColor().has_value()) {
+        param.backgroundColor = focusMenuRenderContext->GetBackgroundColor();
+    }
     param.type = isSelectOverlayMenu ? MenuType::SELECT_OVERLAY_SUB_MENU : MenuType::SUB_MENU;
     ParseMenuRadius(param);
     auto subMenu = MenuView::Create(customNode, host->GetId(), host->GetTag(), param);
     CHECK_NULL_VOID(subMenu);
     ShowSubMenuHelper(subMenu);
     menuPattern->SetShowedSubMenu(subMenu);
-    auto accessibilityProperty = menuNode->GetAccessibilityProperty<MenuAccessibilityProperty>();
+    auto accessibilityProperty = subMenu->GetAccessibilityProperty<MenuAccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetAccessibilityIsShow(true);
-    host->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+    subMenu->OnAccessibilityEvent(AccessibilityEventType::PAGE_OPEN);
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "Send event to %{public}d",
-        static_cast<int32_t>(AccessibilityEventType::PAGE_CHANGE));
+        static_cast<int32_t>(AccessibilityEventType::PAGE_OPEN));
 }
 
 void MenuItemPattern::UpdateSubmenuExpandingMode(RefPtr<UINode>& customNode)
@@ -1176,8 +1181,8 @@ void MenuItemPattern::AddStackSubMenuHeader(RefPtr<FrameNode>& menuNode)
     MenuItemProperties menuItemProps;
     menuItemProps.content = content;
     menuItemProps.endIcon = imageSourceInfo;
-    auto model = new NG::MenuItemModelNG();
-    model->Create(menuItemProps);
+    MenuItemModelNG menuItemModel;
+    menuItemModel.Create(menuItemProps);
     auto stack = ViewStackProcessor::GetInstance();
 
     auto titleItem = AceType::DynamicCast<FrameNode>(stack->Finish());
@@ -1271,19 +1276,23 @@ void MenuItemPattern::UpdateImageIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>&
         auto props = iconNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(props);
         props->UpdateImageSourceInfo(imageSourceInfo);
-        bool useDefaultThemeIcon = false;
-        if (imageSourceInfo.IsSvg()) {
-            auto src = imageSourceInfo.GetSrc();
-            auto srcId = src.substr(SYSTEM_RESOURCE_PREFIX.size(),
-                src.substr(0, src.rfind(".svg")).size() - SYSTEM_RESOURCE_PREFIX.size());
-            auto isSystemIcon = (srcId.find("ohos_") != std::string::npos)
-                || (std::stoul(srcId) >= MIN_SYSTEM_RESOURCE_ID);
-            if (isSystemIcon) {
-                useDefaultThemeIcon = true;
-            }
-        }
+        bool useDefaultThemeIcon = UseDefaultThemeIcon(imageSourceInfo);
         UpdateIconSrc(iconNode, iconWidth, iconHeight, selectTheme->GetMenuIconColor(), useDefaultThemeIcon);
     }
+}
+
+bool MenuItemPattern::UseDefaultThemeIcon(const ImageSourceInfo& imageSourceInfo)
+{
+    if (imageSourceInfo.IsSvg()) {
+        auto src = imageSourceInfo.GetSrc();
+        auto srcId = src.substr(SYSTEM_RESOURCE_PREFIX.size(),
+            src.substr(0, src.rfind(".svg")).size() - SYSTEM_RESOURCE_PREFIX.size());
+        return (srcId.find("ohos_") != std::string::npos)
+            || ((std::all_of(srcId.begin(), srcId.end(), ::isdigit))
+                && (std::stoul(srcId) >= MIN_SYSTEM_RESOURCE_ID)
+                && (std::stoul(srcId) <= MAX_SYSTEM_RESOURCE_ID));
+    }
+    return false;
 }
 
 void MenuItemPattern::UpdateSymbolIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>& iconNode, ImageSourceInfo& iconSrc,
@@ -1343,7 +1352,7 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     auto context = PipelineBase::GetCurrentContext();
     auto theme = context ? context->GetTheme<SelectTheme>() : nullptr;
     CHECK_NULL_VOID(theme);
-    UpdateTexOverflow(textProperty);
+    UpdateTextOverflow(textProperty);
     auto layoutDirection = itemProperty->GetNonAutoLayoutDirection();
     TextAlign textAlign = static_cast<TextAlign>(theme->GetMenuItemContentAlign());
     if (layoutDirection == TextDirection::RTL) {
@@ -1387,27 +1396,20 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void MenuItemPattern::UpdateTexOverflow(RefPtr<TextLayoutProperty>& textProperty)
+void MenuItemPattern::UpdateTextOverflow(RefPtr<TextLayoutProperty>& textProperty)
 {
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        auto deviceType = SystemProperties::GetDeviceType();
-        if (deviceType == DeviceType::TV || deviceType == DeviceType::TWO_IN_ONE) {
-            textProperty->UpdateMaxLines(1);
-        }
-    } else {
-        textProperty->UpdateMaxLines(1);
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto pipeline = host->GetContext();
-        CHECK_NULL_VOID(pipeline);
-        auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
-        CHECK_NULL_VOID(menuTheme);
-        auto fontScale = pipeline->GetFontScale();
-        if (NearEqual(fontScale, menuTheme->GetBigFontSizeScale()) ||
-            NearEqual(fontScale, menuTheme->GetLargeFontSizeScale()) ||
-            NearEqual(fontScale, menuTheme->GetMaxFontSizeScale())) {
-            textProperty->UpdateMaxLines(menuTheme->GetTextMaxLines());
-        }
+    textProperty->UpdateMaxLines(1);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    auto fontScale = pipeline->GetFontScale();
+    if (NearEqual(fontScale, menuTheme->GetBigFontSizeScale()) ||
+        NearEqual(fontScale, menuTheme->GetLargeFontSizeScale()) ||
+        NearEqual(fontScale, menuTheme->GetMaxFontSizeScale())) {
+        textProperty->UpdateMaxLines(menuTheme->GetTextMaxLines());
     }
 }
 

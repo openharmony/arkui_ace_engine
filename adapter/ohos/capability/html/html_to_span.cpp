@@ -217,10 +217,14 @@ Dimension HtmlToSpan::FromString(const std::string& str)
         return Dimension(NG::TEXT_DEFAULT_FONT_SIZE);
     }
 
-    for (int32_t i = static_cast<int32_t>(str.length() - 1); i >= 0; --i) {
+    for (int32_t i = static_cast<int32_t>(str.length()) - 1; i >= 0; --i) {
         if (str[i] >= '0' && str[i] <= '9') {
             value = StringUtils::StringToDouble(str.substr(0, i + 1));
             auto subStr = str.substr(i + 1);
+            if (subStr == "pt") {
+                value = static_cast<int>(value * PT_TO_PX + ROUND_TO_INT);
+                break;
+            }
             auto iter = uMap.find(subStr);
             if (iter != uMap.end()) {
                 unit = iter->second;
@@ -368,6 +372,9 @@ template<class T>
 void HtmlToSpan::InitDimension(
     const std::string& key, const std::string& value, const std::string& index, StyleValues& values)
 {
+    if (value.compare(0, strlen("normal"), "normal") == 0) {
+        return;
+    }
     auto [ret, styleValue] = GetStyleValue<T>(index, values);
     if (!ret) {
         return;
@@ -377,6 +384,25 @@ void HtmlToSpan::InitDimension(
         return;
     }
     obj->dimension = FromString(value);
+}
+
+void HtmlToSpan::InitLineHeight(const std::string& key, const std::string& value, StyleValues& values)
+{
+    auto [unit, size] = GetUnitAndSize(value);
+    if (!unit.empty()) {
+        InitDimension<LineHeightSpanSparam>(key, value, "line-height", values);
+        return;
+    }
+
+    auto it = values.find("font");
+    if (it == values.end()) {
+        return;
+    }
+    Font* font = Get<Font>(&it->second);
+    if (font == nullptr) {
+        size = size * font->fontSize->Value();
+        InitDimension<LineHeightSpanSparam>(key, std::to_string(size) + unit, "line-height", values);
+    }
 }
 
 bool HtmlToSpan::IsLetterSpacingAttr(const std::string& key)
@@ -449,7 +475,7 @@ bool HtmlToSpan::IsTextIndentAttr(const std::string& key)
 
 bool HtmlToSpan::IsLineHeightAttr(const std::string& key)
 {
-    return key.compare(0, strlen("line-height"), "line-height");
+    return key.compare(0, strlen("line-height"), "line-height") == 0;
 }
 
 bool HtmlToSpan::IsPaddingAttr(const std::string& key)
@@ -495,34 +521,34 @@ void HtmlToSpan::SetPaddingOption(const std::string& key, const std::string& val
 
         size_t size = words.size();
         if (size == ONE_PARAM) {
-            paddings->top = NG::CalcLength(words[TOP_PARAM]);
-            paddings->right = NG::CalcLength(words[TOP_PARAM]);
-            paddings->bottom = NG::CalcLength(words[TOP_PARAM]);
-            paddings->left = NG::CalcLength(words[TOP_PARAM]);
+            paddings->top = NG::CalcLength::FromString(words[TOP_PARAM]);
+            paddings->right = NG::CalcLength::FromString(words[TOP_PARAM]);
+            paddings->bottom = NG::CalcLength::FromString(words[TOP_PARAM]);
+            paddings->left = NG::CalcLength::FromString(words[TOP_PARAM]);
         } else if (size == TWO_PARAM) {
-            paddings->top = NG::CalcLength(words[TOP_PARAM]);
-            paddings->right = NG::CalcLength(words[RIGHT_PARAM]);
-            paddings->bottom = NG::CalcLength(words[TOP_PARAM]);
-            paddings->left = NG::CalcLength(words[RIGHT_PARAM]);
+            paddings->top = NG::CalcLength::FromString(words[TOP_PARAM]);
+            paddings->right = NG::CalcLength::FromString(words[RIGHT_PARAM]);
+            paddings->bottom = NG::CalcLength::FromString(words[TOP_PARAM]);
+            paddings->left = NG::CalcLength::FromString(words[RIGHT_PARAM]);
         } else if (size == THREE_PARAM) {
-            paddings->top = NG::CalcLength(words[TOP_PARAM]);
-            paddings->right = NG::CalcLength(words[RIGHT_PARAM]);
-            paddings->bottom = NG::CalcLength(words[BOTTOM_PARAM]);
-            paddings->left = NG::CalcLength(words[RIGHT_PARAM]);
+            paddings->top = NG::CalcLength::FromString(words[TOP_PARAM]);
+            paddings->right = NG::CalcLength::FromString(words[RIGHT_PARAM]);
+            paddings->bottom = NG::CalcLength::FromString(words[BOTTOM_PARAM]);
+            paddings->left = NG::CalcLength::FromString(words[RIGHT_PARAM]);
         } else if (size == FOUR_PARAM) {
-            paddings->top = NG::CalcLength(words[TOP_PARAM]);
-            paddings->right = NG::CalcLength(words[RIGHT_PARAM]);
-            paddings->bottom = NG::CalcLength(words[BOTTOM_PARAM]);
-            paddings->left = NG::CalcLength(words[LEFT_PARAM]);
+            paddings->top = NG::CalcLength::FromString(words[TOP_PARAM]);
+            paddings->right = NG::CalcLength::FromString(words[RIGHT_PARAM]);
+            paddings->bottom = NG::CalcLength::FromString(words[BOTTOM_PARAM]);
+            paddings->left = NG::CalcLength::FromString(words[LEFT_PARAM]);
         }
     } else if (key == "padding-top") {
-        paddings->top = NG::CalcLength(value);
+        paddings->top = NG::CalcLength::FromString(value);
     } else if (key == "padding-right") {
-        paddings->right = NG::CalcLength(value);
+        paddings->right = NG::CalcLength::FromString(value);
     } else if (key == "padding-bottom") {
-        paddings->bottom = NG::CalcLength(value);
+        paddings->bottom = NG::CalcLength::FromString(value);
     } else if (key == "padding-left") {
-        paddings->left = NG::CalcLength(value);
+        paddings->left = NG::CalcLength::FromString(value);
     }
 }
 void HtmlToSpan::SetMarginOption(const std::string& key, const std::string& value, ImageSpanOptions& options)
@@ -541,34 +567,34 @@ void HtmlToSpan::SetMarginOption(const std::string& key, const std::string& valu
 
         size_t size = words.size();
         if (size == ONE_PARAM) {
-            marginProp->top = NG::CalcLength(words[TOP_PARAM]);
-            marginProp->right = NG::CalcLength(words[TOP_PARAM]);
-            marginProp->bottom = NG::CalcLength(words[TOP_PARAM]);
-            marginProp->left = NG::CalcLength(words[TOP_PARAM]);
+            marginProp->top = NG::CalcLength::FromString(words[TOP_PARAM]);
+            marginProp->right = NG::CalcLength::FromString(words[TOP_PARAM]);
+            marginProp->bottom = NG::CalcLength::FromString(words[TOP_PARAM]);
+            marginProp->left = NG::CalcLength::FromString(words[TOP_PARAM]);
         } else if (size == TWO_PARAM) {
-            marginProp->top = NG::CalcLength(words[TOP_PARAM]);
-            marginProp->right = NG::CalcLength(words[RIGHT_PARAM]);
-            marginProp->bottom = NG::CalcLength(words[TOP_PARAM]);
-            marginProp->left = NG::CalcLength(words[RIGHT_PARAM]);
+            marginProp->top = NG::CalcLength::FromString(words[TOP_PARAM]);
+            marginProp->right = NG::CalcLength::FromString(words[RIGHT_PARAM]);
+            marginProp->bottom = NG::CalcLength::FromString(words[TOP_PARAM]);
+            marginProp->left = NG::CalcLength::FromString(words[RIGHT_PARAM]);
         } else if (size == THREE_PARAM) {
-            marginProp->top = NG::CalcLength(words[TOP_PARAM]);
-            marginProp->right = NG::CalcLength(words[RIGHT_PARAM]);
-            marginProp->bottom = NG::CalcLength(words[BOTTOM_PARAM]);
-            marginProp->left = NG::CalcLength(words[RIGHT_PARAM]);
+            marginProp->top = NG::CalcLength::FromString(words[TOP_PARAM]);
+            marginProp->right = NG::CalcLength::FromString(words[RIGHT_PARAM]);
+            marginProp->bottom = NG::CalcLength::FromString(words[BOTTOM_PARAM]);
+            marginProp->left = NG::CalcLength::FromString(words[RIGHT_PARAM]);
         } else if (size == FOUR_PARAM) {
-            marginProp->top = NG::CalcLength(words[TOP_PARAM]);
-            marginProp->right = NG::CalcLength(words[RIGHT_PARAM]);
-            marginProp->bottom = NG::CalcLength(words[BOTTOM_PARAM]);
-            marginProp->left = NG::CalcLength(words[LEFT_PARAM]);
+            marginProp->top = NG::CalcLength::FromString(words[TOP_PARAM]);
+            marginProp->right = NG::CalcLength::FromString(words[RIGHT_PARAM]);
+            marginProp->bottom = NG::CalcLength::FromString(words[BOTTOM_PARAM]);
+            marginProp->left = NG::CalcLength::FromString(words[LEFT_PARAM]);
         }
     } else if (key == "margin-top") {
-        marginProp->top = NG::CalcLength(value);
+        marginProp->top = NG::CalcLength::FromString(value);
     } else if (key == "margin-right") {
-        marginProp->right = NG::CalcLength(value);
+        marginProp->right = NG::CalcLength::FromString(value);
     } else if (key == "margin-bottom") {
-        marginProp->bottom = NG::CalcLength(value);
+        marginProp->bottom = NG::CalcLength::FromString(value);
     } else if (key == "margin-left") {
-        marginProp->left = NG::CalcLength(value);
+        marginProp->left = NG::CalcLength::FromString(value);
     }
 }
 void HtmlToSpan::SetBorderOption(const std::string& key, const std::string& value, ImageSpanOptions& options)
@@ -639,34 +665,20 @@ void HtmlToSpan::HandleImagePixelMap(const std::string& src, ImageSpanOptions& o
     if (src.empty()) {
         return;
     }
-    auto iter = src.find_first_of(':');
-    if (iter == std::string::npos) {
-        return;
+    NG::LoadNotifier loadNotifier(nullptr, nullptr, nullptr);
+    RefPtr<NG::ImageLoadingContext> ctx =
+        AceType::MakeRefPtr<NG::ImageLoadingContext>(ImageSourceInfo(src), std::move(loadNotifier), true);
+    CHECK_NULL_VOID(ctx);
+    ctx->LoadImageData();
+    ctx->MakeCanvasImageIfNeed(ctx->GetImageSize(), true, ImageFit::NONE);
+    auto image = ctx->MoveCanvasImage();
+    if (image != nullptr) {
+        option.imagePixelMap = image->GetPixelMap();
     }
-    std::string head = src.substr(0, iter);
-    std::transform(head.begin(), head.end(), head.begin(), [](unsigned char c) { return std::tolower(c); });
-    if (head == "http" || head == "https") {
-        NG::LoadNotifier loadNotifier(nullptr, nullptr, nullptr);
-        RefPtr<NG::ImageLoadingContext> ctx =
-            AceType::MakeRefPtr<NG::ImageLoadingContext>(ImageSourceInfo(src), std::move(loadNotifier), true);
-        CHECK_NULL_VOID(ctx);
-        ctx->LoadImageData();
-        ctx->MakeCanvasImageIfNeed(ctx->GetImageSize(), true, ImageFit::NONE);
-        auto image = ctx->MoveCanvasImage();
-        if (image != nullptr) {
-            option.imagePixelMap = image->GetPixelMap();
-        }
-    } else if (head == "file") {
-        std::string filePath = FileUriHelper::GetRealPath(src);
-        auto imageSource = ImageSource::Create(filePath);
-        CHECK_NULL_VOID(imageSource);
-        option.imagePixelMap = imageSource->CreatePixelMap();
-    }
-
     if (option.imagePixelMap.has_value() && option.imagePixelMap.value() != nullptr) {
         auto pixel = option.imagePixelMap.value();
-        LOGI("img head:%{public}s height: %{public}d, width: %{public}d, size:%{public}d", head.c_str(),
-            pixel->GetHeight(), pixel->GetWidth(), pixel->GetByteCount());
+        LOGI("img height: %{public}d, width: %{public}d, size:%{public}d", pixel->GetHeight(),
+            pixel->GetWidth(), pixel->GetByteCount());
     }
 }
 
@@ -787,6 +799,19 @@ void HtmlToSpan::ToParagraphSpan(xmlNodePtr node, size_t len, size_t& pos, std::
     spanInfos.emplace_back(std::move(info));
 }
 
+std::pair<std::string, double> HtmlToSpan::GetUnitAndSize(const std::string& str)
+{
+    double value = 0.0;
+    for (int32_t i = static_cast<int32_t>(str.length() - 1); i >= 0; --i) {
+        if (str[i] >= '0' && str[i] <= '9') {
+            value = StringUtils::StringToDouble(str.substr(0, i + 1));
+            auto subStr = str.substr(i + 1);
+            return { subStr, value };
+        }
+    }
+    return { "", value };
+}
+
 std::map<std::string, HtmlToSpan::StyleValue> HtmlToSpan::ToTextSpanStyle(xmlAttrPtr curNode)
 {
     auto attrContent = xmlGetProp(curNode->parent, curNode->name);
@@ -806,7 +831,7 @@ std::map<std::string, HtmlToSpan::StyleValue> HtmlToSpan::ToTextSpanStyle(xmlAtt
         } else if (IsTextShadowAttr(key)) {
             InitTextShadow(key, value, "shadow", styleValues);
         } else if (IsLineHeightAttr(key)) {
-            InitDimension<LineHeightSpanSparam>(key, value, "line-height", styleValues);
+            InitLineHeight(key, value, styleValues);
         } else if (IsParagraphAttr(key)) {
             InitParagrap(key, value, "paragrap", styleValues);
         }
@@ -844,6 +869,9 @@ void HtmlToSpan::ToTextSpan(
     if (!element.empty()) {
         AddStyleSpan(element, info);
     }
+    if (info.values.empty()) {
+        return;
+    }
     spanInfos.emplace_back(std::move(info));
 }
 
@@ -855,7 +883,8 @@ void HtmlToSpan::ToImageOptions(const std::map<std::string, std::string>& styles
     }
 }
 
-void HtmlToSpan::ToImage(xmlNodePtr node, size_t len, size_t& pos, std::vector<SpanInfo>& spanInfos)
+void HtmlToSpan::ToImage(xmlNodePtr node, size_t len, size_t& pos, std::vector<SpanInfo>& spanInfos,
+    bool isProcessImageOptions)
 {
     std::map<std::string, std::string> styleMap;
     xmlAttrPtr curNode = node->properties;
@@ -867,7 +896,9 @@ void HtmlToSpan::ToImage(xmlNodePtr node, size_t len, size_t& pos, std::vector<S
     }
 
     ImageSpanOptions option;
-    ToImageOptions(styleMap, option);
+    if (isProcessImageOptions) {
+        ToImageOptions(styleMap, option);
+    }
 
     SpanInfo info;
     info.type = HtmlType::IMAGE;
@@ -877,87 +908,42 @@ void HtmlToSpan::ToImage(xmlNodePtr node, size_t len, size_t& pos, std::vector<S
     spanInfos.emplace_back(std::move(info));
 }
 
-bool HasElementNode(xmlNodePtr node)
-{
-    xmlNodePtr curNode = nullptr;
-    bool result = false;
-    for (curNode = node; curNode; curNode = curNode->next) {
-        if (curNode->type == XML_ELEMENT_NODE) {
-            return true;
-        }
-
-        result = HasElementNode(curNode->children);
-    }
-
-    return result;
-}
-bool HtmlToSpan::IsValidNode(const std::string& name)
-{
-    if (name != "html" && name != "body" && name != "div") {
-        return true;
-    }
-    return false;
-}
-
 void HtmlToSpan::ToSpan(
-    xmlNodePtr curNode, size_t& pos, std::string& allContent, size_t paragraphEndPos, std::vector<SpanInfo>& spanInfos)
+    xmlNodePtr curNode, size_t& pos, std::string& allContent, std::vector<SpanInfo>& spanInfos,
+    bool isNeedLoadPixelMap)
 {
-    std::string contentStr;
-    size_t contentLen = 0;
-    auto content = xmlNodeGetContent(curNode);
-    if (content != nullptr) {
-        contentLen = StringUtils::ToWstring(reinterpret_cast<const char*>(content)).length();
-        contentStr = reinterpret_cast<const char*>(content);
-    }
-
-    std::string nameStr = reinterpret_cast<const char*>(curNode->name);
     size_t curNodeLen = 0;
-    if (IsValidNode(nameStr)) {
-        if (curNode->children && curNode->children->content) {
-            std::string curNodeContent = reinterpret_cast<const char*>(curNode->children->content);
-            allContent += curNodeContent;
-            curNodeLen = StringUtils::ToWstring(curNodeContent).length();
-        }
+    if (curNode->content) {
+        std::string curNodeContent = reinterpret_cast<const char*>(curNode->content);
+        allContent += curNodeContent;
+        curNodeLen = StringUtils::ToWstring(curNodeContent).length();
     }
 
-    size_t curPos = 0;
-    if ((pos + curNodeLen + 1) == paragraphEndPos && paragraphEndPos > 0) {
-        allContent += "\n";
-        contentLen++;
-        curNodeLen++;
-    }
-    if (nameStr == "p") {
-        if (!HasElementNode(curNode->children)) {
+    std::string htmlTag = reinterpret_cast<const char*>(curNode->name);
+    size_t childPos = pos + curNodeLen;
+    ParaseHtmlToSpanInfo(curNode->children, childPos, allContent, spanInfos);
+    if (curNode->type == XML_ELEMENT_NODE) {
+        if (htmlTag == "p") {
             allContent += "\n";
-            curNodeLen++;
+            childPos++;
+            ToParagraphSpan(curNode, childPos - pos, pos, spanInfos);
+        } else if (htmlTag == "img") {
+            childPos++;
+            ToImage(curNode, childPos - pos, pos, spanInfos, isNeedLoadPixelMap);
         } else {
-            curPos = pos + contentLen + 1;
+            ToTextSpan(htmlTag, curNode, childPos - pos, pos, spanInfos);
         }
-        ToParagraphSpan(curNode, contentLen + 1, pos, spanInfos);
-    } else if (nameStr == "img") {
-        contentLen++;
-        ToImage(curNode, contentLen, pos, spanInfos);
-        curNodeLen++;
-    } else if (nameStr == "span" || nameStr == "strong" || nameStr == "figure") {
-        ToTextSpan(nameStr, curNode, contentLen, pos, spanInfos);
-    } else if (IsValidNode(nameStr)) {
-        ToDefalutSpan(curNode, contentLen, pos, spanInfos);
     }
-
-    if (IsValidNode(nameStr)) {
-        pos += curNodeLen;
-    }
-
-    ParaseHtmlToSpanInfo(curNode->children, pos, allContent, curPos, spanInfos);
+    pos = childPos;
 }
 
 void HtmlToSpan::ParaseHtmlToSpanInfo(
-    xmlNodePtr node, size_t& pos, std::string& allContent, size_t paragraphPos, std::vector<SpanInfo>& spanInfos)
+    xmlNodePtr node, size_t& pos, std::string& allContent, std::vector<SpanInfo>& spanInfos, bool isNeedLoadPixelMap)
 {
     xmlNodePtr curNode = nullptr;
     for (curNode = node; curNode; curNode = curNode->next) {
-        if (curNode->type == XML_ELEMENT_NODE) {
-            ToSpan(curNode, pos, allContent, paragraphPos, spanInfos);
+        if (curNode->type == XML_ELEMENT_NODE || curNode->type == XML_TEXT_NODE) {
+            ToSpan(curNode, pos, allContent, spanInfos, isNeedLoadPixelMap);
         }
     }
 }
@@ -967,6 +953,25 @@ void HtmlToSpan::PrintSpanInfos(const std::vector<SpanInfo>& spanInfos)
     for (auto& info : spanInfos) {
         LOGI("span type %{public}d start:%{public}zu end:%{public}zu, style size:%{public}zu",
             static_cast<int>(info.type), info.start, info.end, info.values.size());
+    }
+}
+
+void HtmlToSpan::AfterProcSpanInfos(std::vector<SpanInfo>& spanInfos)
+{
+    std::vector<std::pair<size_t, size_t>> paragraphPos;
+    for (auto& info : spanInfos) {
+        if (info.type == HtmlType::PARAGRAPH) {
+            paragraphPos.push_back({ info.start, info.end });
+        }
+    }
+
+    for (auto& pos : paragraphPos) {
+        for (auto& info : spanInfos) {
+            if (info.type != HtmlType::PARAGRAPH && info.type != HtmlType::IMAGE && pos.second == info.end + 1) {
+                info.end += 1;
+                break;
+            }
+        }
     }
 }
 
@@ -1080,7 +1085,7 @@ RefPtr<MutableSpanString> HtmlToSpan::GenerateSpans(
     return mutableSpan;
 }
 
-RefPtr<MutableSpanString> HtmlToSpan::ToSpanString(const std::string& html)
+RefPtr<MutableSpanString> HtmlToSpan::ToSpanString(const std::string& html, const bool isNeedLoadPixelMap)
 {
     htmlDocPtr doc = htmlReadMemory(html.c_str(), html.length(), nullptr, "UTF-8", 0);
     if (doc == nullptr) {
@@ -1100,7 +1105,8 @@ RefPtr<MutableSpanString> HtmlToSpan::ToSpanString(const std::string& html)
     size_t pos = 0;
     std::string content;
     std::vector<SpanInfo> spanInfos;
-    ParaseHtmlToSpanInfo(root, pos, content, 0, spanInfos);
+    ParaseHtmlToSpanInfo(root, pos, content, spanInfos, isNeedLoadPixelMap);
+    AfterProcSpanInfos(spanInfos);
     PrintSpanInfos(spanInfos);
     return GenerateSpans(content, spanInfos);
 }

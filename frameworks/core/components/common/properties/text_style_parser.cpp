@@ -14,7 +14,6 @@
  */
 
 #include <regex>
-#include <unordered_map>
 
 #include "core/components/common/properties/text_style.h"
 
@@ -95,6 +94,14 @@ bool ParseFontVariantNumeric(const std::string& fontVariant, FONT_FEATURES_LIST&
         return true;
     }
     return false;
+}
+
+int32_t ParseFontFeatureParameters(std::string& value)
+{
+    if ((value == FONT_FEATURE_ON) || (StringUtils::StringToInt(value) == 1)) {
+        return 1;
+    }
+    return 0;
 }
 
 bool ParseFontVariantAlternates(const std::string& fontVariant, FONT_FEATURES_LIST& fontFeatures)
@@ -237,14 +244,6 @@ bool ParseFontVariantEastAsian(const std::string& fontVariant, FONT_FEATURES_LIS
         return true;
     }
     return false;
-}
-
-int32_t ParseFontFeatureParameters(std::string& value)
-{
-    if ((value == FONT_FEATURE_ON) || (StringUtils::StringToInt(value) == 1)) {
-        return 1;
-    }
-    return 0;
 }
 
 void ParseFontVariant(const std::string& fontVariant, FONT_FEATURES_LIST& fontFeatures)

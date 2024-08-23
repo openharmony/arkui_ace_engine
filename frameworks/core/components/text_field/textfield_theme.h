@@ -48,7 +48,10 @@ public:
             if (!themeConstants) {
                 return theme;
             }
+            theme->height_ = themeConstants->GetDimension(THEME_TEXTFIELD_HEIGHT);
             ParsePattern(themeConstants->GetThemeStyle(), theme);
+            theme->showSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.eye");
+            theme->hideSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.eye_slash");
             return theme;
         }
 
@@ -88,6 +91,8 @@ public:
             theme->needFade_ = static_cast<bool>(pattern->GetAttr<double>("textfield_need_fade", 0.0));
             theme->iconSize_ = pattern->GetAttr<Dimension>("textfield_icon_size", 0.0_vp);
             theme->iconHotZoneSize_ = pattern->GetAttr<Dimension>("textfield_icon_hot_zone_size", 0.0_vp);
+            theme->symbolSize_ = pattern->GetAttr<Dimension>("textfield_icon_size", 0.0_vp);
+            theme->symbolColor_ = pattern->GetAttr<Color>("textfield_symbol_color", Color());
             theme->showEllipsis_ = static_cast<bool>(pattern->GetAttr<double>("textfield_show_ellipsis", 0.0));
             theme->errorSpacing_ = pattern->GetAttr<Dimension>("textfield_error_spacing", 0.0_vp);
             theme->errorIsInner_ = static_cast<bool>(pattern->GetAttr<double>("textfield_error_is_inner", 0.0));
@@ -109,6 +114,13 @@ public:
             theme->focusPlaceholderColor_ = pattern->GetAttr<Color>("tips_text_color_focused", Color());
             theme->bgColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, Color());
             theme->focusBgColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_FOCUSED, Color());
+            theme->glassOutlinePrimaryColor_ =
+                pattern->GetAttr<Color>("glass_material_outline_primary", Color(0xffffff));
+            theme->glassOutlineSecondaryColor_ =
+                pattern->GetAttr<Color>("glass_material_outline_secondary", Color(0xf0f0f0));
+            theme->glassMaskPrimaryColor_ = pattern->GetAttr<Color>("glass_material_mask_primary", Color(0x00808080));
+            theme->glassMaskSecondaryColor_ =
+                pattern->GetAttr<Color>("glass_material_mask_secondary", Color(0x26808080));
         }
 
         void ParsePatternSubSecondPart(const RefPtr<ThemeStyle>& pattern, const RefPtr<TextFieldTheme>& theme) const
@@ -189,7 +201,7 @@ public:
             auto textfieldShowHandle = pattern->GetAttr<std::string>("textfield_show_handle", "0");
             theme->textfieldShowHandle_ = StringUtils::StringToInt(textfieldShowHandle);
 
-            theme->cancelButtonIconColor_ = pattern->GetAttr<Color>("cancel_button_icon_color", Color());
+            theme->cancelButtonIconColor_ = pattern->GetAttr<Color>("textfield_symbol_color", Color());
             theme->previewUnderlineColor_ = pattern->GetAttr<Color>(PREVIEW_UNDERLINE_COLOR, Color());
             theme->previewBoardColor_ = pattern->GetAttr<Color>(PREVIEW_BOARD_COLOR, Color());
 
@@ -200,6 +212,9 @@ public:
                 pattern->GetAttr<std::string>("textfield_accessibility_show_password", "");
             theme->hiddenPasswordPromptInformation_ =
                 pattern->GetAttr<std::string>("textfield_accessibility_hide_password", "");
+            theme->aiWriteBundleName_ = pattern->GetAttr<std::string>("textfield_writting_bundle_name", "");
+            theme->aiWriteAbilityName_ = pattern->GetAttr<std::string>("textfield_writting_ability_name", "");
+            
         }
     };
 
@@ -360,6 +375,26 @@ public:
         return iconHotZoneSize_;
     }
 
+    const Dimension& GetSymbolSize() const
+    {
+        return symbolSize_;
+    }
+
+    const Color& GetSymbolColor() const
+    {
+        return symbolColor_;
+    }
+
+    uint32_t GetShowSymbolId() const
+    {
+        return showSymbolId_;
+    }
+
+    uint32_t GetHideSymbolId() const
+    {
+        return hideSymbolId_;
+    }
+
     bool ShowEllipsis() const
     {
         return showEllipsis_;
@@ -505,6 +540,26 @@ public:
         return overCounterColor_;
     }
 
+    const Color& GetGlassOutlinePrimaryColor() const
+    {
+        return glassOutlinePrimaryColor_;
+    }
+
+    const Color& GetGlassOutlineSecondaryColor() const
+    {
+        return glassOutlineSecondaryColor_;
+    }
+
+    const Color& GetGlassMaskPrimaryColor() const
+    {
+        return glassMaskPrimaryColor_;
+    }
+
+    const Color& GetGlassMaskSecondaryColor() const
+    {
+        return glassMaskSecondaryColor_;
+    }
+
     const Dimension& GetInsertCursorOffset() const
     {
         return insertCursorOffset_;
@@ -574,7 +629,14 @@ public:
     {
         return hiddenPasswordPromptInformation_;
     }
-
+    const std::string& GetAIWriteBundleName() const
+    {
+        return aiWriteBundleName_;
+    }
+    const std::string& GetAIWriteAbilityName() const
+    {
+        return aiWriteAbilityName_;
+    }
 protected:
     TextFieldTheme() = default;
 
@@ -629,6 +691,10 @@ private:
     Color inlineBorderColor_;
     Color defaultCounterColor_;
     Color overCounterColor_;
+    Color glassOutlinePrimaryColor_;
+    Color glassOutlineSecondaryColor_;
+    Color glassMaskPrimaryColor_;
+    Color glassMaskSecondaryColor_;
 
     // UX::disable state: opacity is set to 38% of the default
     double disableOpacityRatio_ = 1.0;
@@ -646,6 +712,12 @@ private:
     Dimension iconSize_;
     Dimension iconHotZoneSize_;
     Dimension inlineBorderWidth_ = 2.0_vp;
+
+    // Replace image(icon) with symbol
+    Dimension symbolSize_;
+    Color symbolColor_;
+    uint32_t showSymbolId_ = 0;
+    uint32_t hideSymbolId_ = 0;
 
     // UX::insert cursor offset up by 8vp
     Dimension insertCursorOffset_ = 8.0_vp;
@@ -671,6 +743,8 @@ private:
 
     std::string showPasswordPromptInformation_;
     std::string hiddenPasswordPromptInformation_;
+    std::string aiWriteBundleName_;
+    std::string aiWriteAbilityName_;
 };
 
 } // namespace OHOS::Ace

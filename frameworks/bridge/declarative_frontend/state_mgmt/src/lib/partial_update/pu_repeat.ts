@@ -200,8 +200,28 @@ class __Repeat<T> implements RepeatAPI<T> {
     }
 
     // function to decide which template to use, each template has an id
-    public templateId(typeFunc: RepeatTypeGenFunc<T>): RepeatAPI<T> {
-        this.config.typeGenFunc = typeFunc;
+    public templateId(typeGenFunc: RepeatTypeGenFunc<T>): RepeatAPI<T> {
+        const typeGenFuncImpl = (item: T, index: number): string => {
+            try {
+                return typeGenFunc(item, index);
+            } catch (e) {
+                stateMgmtConsole.applicationError(`Repeat with virtual scroll. Exception in templateId():`, e?.message);
+                return '';
+            }
+        }
+        // typeGenFunc wrapper with ttype validation
+        const typeGenFuncSafe = (item: T, index: number): string => {
+            const itemType = typeGenFuncImpl(item, index);
+            const itemFunc = this.config.itemGenFuncs[itemType];
+            if (typeof itemFunc !== 'function') {
+                stateMgmtConsole.applicationError(`Repeat with virtual scroll. Missing Repeat.template for id '${itemType}'`);
+                return '';
+            }
+            return itemType;
+        };
+
+        this.config.typeGenFunc = typeGenFuncSafe;
+
         return this;
     }
 

@@ -21,6 +21,21 @@
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr Dimension MAGNIFIER_WIDTH = 112.0_vp;
+constexpr Dimension MAGNIFIER_HEIGHT = 72.0_vp;
+constexpr Dimension MAGNIFIER_OFFSETX = 0.0_vp;
+constexpr Dimension MAGNIFIER_OFFSETY = 80.0_vp;
+constexpr Dimension MAGNIFIER_BORDERWIDTH = 2.0_vp;
+constexpr Dimension MAGNIFIER_CORNERRADIUS = 36.0_vp;
+
+constexpr Dimension MAGNIFIER_SHADOWOFFSETX = 0.0_vp;
+constexpr Dimension MAGNIFIER_SHADOWOFFSETY = 8.0_vp;
+constexpr Dimension MAGNIFIER_SHADOWSIZE = 10.0_vp;
+constexpr float MAGNIFIER_FACTOR = 1.4f;
+constexpr float MAGNIFIER_SHADOWSTRENGTH = 0.08f;
+constexpr int32_t ANIMATION_DURATION_150 = 150;
+} // namespace
 class Magnifier : public virtual AceType {
     DECLARE_ACE_TYPE(Magnifier, AceType);
 

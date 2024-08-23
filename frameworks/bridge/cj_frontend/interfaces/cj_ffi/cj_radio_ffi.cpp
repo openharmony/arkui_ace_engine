@@ -15,12 +15,8 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_radio_ffi.h"
 
-#include <optional>
-#include <string>
 
 #include "cj_lambda.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 
 using namespace OHOS::Ace;
@@ -38,5 +34,19 @@ void FfiOHOSAceFrameworkRadioChecked(bool value)
 void FfiOHOSAceFrameworkRadioOnChange(void (*callback)(bool isChecked))
 {
     RadioModel::GetInstance()->SetOnChange(CJLambda::Create(callback));
+}
+
+void FfiRadioSetResponseRegion(CJResponseRegion value)
+{
+    std::vector<DimensionRect> result;
+    ParseCJResponseRegion(value, result);
+    RadioModel::GetInstance()->SetResponseRegion(result);
+}
+
+void FfiRadioSetResponseRegionArray(VectorStringPtr vecContent)
+{
+    std::vector<DimensionRect> result;
+    ParseVectorStringPtr(vecContent, result);
+    RadioModel::GetInstance()->SetResponseRegion(result);
 }
 }

@@ -17,8 +17,6 @@
 
 #include "bridge/cj_frontend/cppview/shape_abstract.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_shape_ffi.h"
-#include "core/common/container.h"
-#include "core/components_ng/pattern/shape/circle_model.h"
 #include "core/components_ng/pattern/shape/circle_model_ng.h"
 
 extern "C" {
@@ -38,6 +36,9 @@ int64_t FfiOHOSAceFrameworkCircleInsCreate(double width, int32_t widthUnit, doub
     OHOS::Ace::Dimension dWidth(width, static_cast<OHOS::Ace::DimensionUnit>(widthUnit));
     OHOS::Ace::Dimension dHeight(height, static_cast<OHOS::Ace::DimensionUnit>(heightUnit));
     auto ret_ = OHOS::FFI::FFIData::Create<OHOS::Ace::Framework::NativeCircle>(dWidth, dHeight);
+    if (ret_ == nullptr) {
+        return FFI_ERROR_CODE;
+    }
     return ret_->GetID();
 }
 }

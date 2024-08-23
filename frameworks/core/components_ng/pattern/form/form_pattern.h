@@ -168,6 +168,7 @@ private:
     void UpdateConfiguration();
     void HandleFormComponent(const RequestFormInfo& info);
     void AddFormComponent(const RequestFormInfo& info);
+    void AddFormComponentUI(bool isTransparencyEnabled, const RequestFormInfo& info);
     void UpdateFormComponent(const RequestFormInfo& info);
     void UpdateFormComponentSize(const RequestFormInfo& info);
     void UpdateTimeLimitFontCfg();
@@ -180,10 +181,12 @@ private:
     void RemoveFrsNode();
     void ReleaseRenderer();
     void DelayDeleteImageNode(bool needHandleCachedClick);
+    void SetNonTransparentAfterRecover();
     void DeleteImageNodeAfterRecover(bool needHandleCachedClick);
     void HandleStaticFormEvent(const PointF& touchPoint);
     void ProcDeleteImageNode(const AAFwk::Want& want);
     void AttachRSNode(const std::shared_ptr<Rosen::RSSurfaceNode>& node, const AAFwk::Want& want);
+    void AttachJsRSNode(const std::shared_ptr<Rosen::RSNode> &jsNode);
     void HandleEnableForm(const bool enable);
 
     void InitClickEvent();

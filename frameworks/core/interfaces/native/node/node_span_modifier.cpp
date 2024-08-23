@@ -25,6 +25,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/pipeline/base/element_register.h"
+#include "draw/canvas.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -444,11 +445,93 @@ void ResetTextTextShadow(ArkUINodeHandle node)
     shadow.SetOffsetY(0.0);
     SpanModelNG::SetTextShadow(frameNode, std::vector<Shadow> { shadow });
 }
+
+void SetAccessibilityText(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string valueStr = value;
+    SpanModelNG::SetAccessibilityText(frameNode, valueStr);
+}
+
+void ResetAccessibilityText(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SpanModelNG::SetAccessibilityText(frameNode, "");
+}
+
+void SetAccessibilityDescription(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    std::string valueStr = value;
+    SpanModelNG::SetAccessibilityDescription(frameNode, valueStr);
+}
+
+void ResetAccessibilityDescription(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SpanModelNG::SetAccessibilityDescription(frameNode, "");
+}
+
+void SetAccessibilityLevel(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    std::string valueStr = value;
+    SpanModelNG::SetAccessibilityImportance(frameNode, valueStr);
+}
+
+void ResetAccessibilityLevel(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SpanModelNG::SetAccessibilityImportance(frameNode, "");
+}
+
+ArkUI_CharPtr GetSpanFontFamily(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    std::vector<std::string> fontFamilies = SpanModelNG::GetSpanFontFamily(frameNode);
+    std::string families;
+    //set index start
+    uint32_t index = 0;
+    for (auto& family : fontFamilies) {
+        families += family;
+        if (index != fontFamilies.size() - 1) {
+            families += ",";
+        }
+        index++;
+    }
+    g_strValue = families;
+    return g_strValue.c_str();
+}
 } // namespace
 namespace NodeModifier {
 const ArkUISpanModifier* GetSpanModifier()
 {
     static const ArkUISpanModifier modifier = { SetSpanSrc, SetSpanContent, SetSpanTextCase, ResetSpanTextCase,
+        SetSpanFontWeight, ResetSpanFontWeight, SetSpanLineHeight, ResetSpanLineHeight, SetSpanFontStyle,
+        ResetSpanFontStyle, SetSpanFontSize, ResetSpanFontSize, SetSpanFontFamily, ResetSpanFontFamily,
+        SetSpanDecoration, ResetSpanDecoration, SetSpanFontColor, ResetSpanFontColor, SetSpanLetterSpacing,
+        ResetSpanLetterSpacing, SetSpanBaselineOffset, ResetSpanBaselineOffset, SetSpanFont, ResetSpanFont,
+        SetSpanFontWeightStr, GetSpanContent, GetSpanDecoration, GetSpanFontColor, GetSpanFontSize, GetSpanFontStyle,
+        GetSpanFontWeight, GetSpanLineHeight, GetSpanTextCase, GetSpanLetterSpacing, GetSpanBaselineOffset,
+        SetSpanTextBackgroundStyle, ResetSpanTextBackgroundStyle, GetSpanTextBackgroundStyle, SetTextTextShadow,
+        ResetTextTextShadow, GetTextShadow, GetSpanFontFamily,
+        SetAccessibilityText, ResetAccessibilityText, SetAccessibilityDescription, ResetAccessibilityDescription,
+        SetAccessibilityLevel, ResetAccessibilityLevel };
+    return &modifier;
+}
+
+const CJUISpanModifier* GetCJUISpanModifier()
+{
+    static const CJUISpanModifier modifier = { SetSpanSrc, SetSpanContent, SetSpanTextCase, ResetSpanTextCase,
         SetSpanFontWeight, ResetSpanFontWeight, SetSpanLineHeight, ResetSpanLineHeight, SetSpanFontStyle,
         ResetSpanFontStyle, SetSpanFontSize, ResetSpanFontSize, SetSpanFontFamily, ResetSpanFontFamily,
         SetSpanDecoration, ResetSpanDecoration, SetSpanFontColor, ResetSpanFontColor, SetSpanLetterSpacing,
@@ -470,9 +553,11 @@ void SetCustomSpanOnMeasure(ArkUINodeHandle node, void* extraParam)
         event.kind = ArkUIAPINodeFlags::CUSTOM_MEASURE;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.numberData[0].f32 = customSpanMeasureInfo.fontSize;
+        event.numberReturnData[0].f32 = 0.0f;
+        event.numberReturnData[1].f32 = 0.0f;
         SendArkUIAsyncCustomEvent(&event);
-        float width = event.numberReturnData[0].f32;
-        float height = event.numberReturnData[1].f32;
+        float width = std::max(event.numberReturnData[0].f32, 0.0f);
+        float height = std::max(event.numberReturnData[1].f32, 0.0f);
         return { width, height };
     };
     frameNode->GetSpanItem()->onMeasure = onMeasureFunc;
@@ -498,7 +583,12 @@ void SetCustomSpanOnDraw(ArkUINodeHandle node, void* extraParam)
         event.numberData[1].f32 = customSpanOptions.lineTop;
         event.numberData[2].f32 = customSpanOptions.lineBottom;
         event.numberData[3].f32 = customSpanOptions.baseline;
+        // clip
+        context.canvas.Save();
+        auto clipInnerRect = RSRect(0, 0, context.width, context.height);
+        context.canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
         SendArkUIAsyncCustomEvent(&event);
+        context.canvas.Restore();
     };
     frameNode->GetSpanItem()->onDraw = onDrawFunc;
 }

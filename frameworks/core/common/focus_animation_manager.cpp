@@ -15,11 +15,9 @@
 
 #include "core/common/focus_animation_manager.h"
 
-#include "base/utils/utils.h"
 #include "core/components/focus_animation/render_focus_animation.h"
 #include "core/components/shadow/render_shadow.h"
 #include "core/components/shadow/shadow_element.h"
-#include "core/components/stack/stack_element.h"
 
 namespace OHOS::Ace {
 

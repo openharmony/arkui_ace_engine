@@ -12,25 +12,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "gtest/gtest.h"
-#include "gtest/hwext/gtest-ext.h"
 
-#include "core/components/common/layout/constants.h"
-
-#define protected public
-#define private public
+#include "scrollable_test_ng.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#define protected public
+#define private public
+#include "test/unittest/core/pattern/scrollable/mock_scrollable.h"
 
+#include "core/components/scroll/scroll_bar_theme.h"
+#include "core/components_ng/pattern/refresh/refresh_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item_pool.h"
-#include "test/unittest/core/pattern/scrollable/scrollable_test_ng.h"
-#include "test/unittest/core/pattern/scrollable/mock_scrollable.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
-#include "core/components/scroll/scroll_bar_theme.h"
 
 namespace OHOS::Ace::NG {
 class ScrollableCoverTestNg : public ScrollableTestNg {
@@ -152,6 +149,24 @@ HWTEST_F(ScrollableCoverTestNg, SetScrollBarWidthTest001, TestSize.Level1)
     ScrollableModelNG::SetScrollBarWidth(SCROLLBAR_WIDTH_PERCENT);
     EXPECT_EQ(scrollablePn->GetBarWidth().Value(), SCROLLBAR_WIDTH_VALUE_PERCENT);
     EXPECT_EQ(scrollablePn->GetBarWidth().Unit(), DimensionUnit::PERCENT);
+    
+    /**
+     * @tc.steps: step4. Set ScrollBarWidth to vp width with frameNode
+     * @tc.expected: ScrollablePaintProperty ScrollBarWidth is updated to vp width
+     */
+    ScrollableModelNG::SetScrollBarWidth(&(*scroll_), SCROLLBAR_WIDTH_VP);
+    scrollablePn = scroll_->GetPaintProperty<ScrollablePaintProperty>();
+    EXPECT_EQ(scrollablePn->GetBarWidth().Value(), SCROLLBAR_WIDTH_VALUE_VP);
+    EXPECT_EQ(scrollablePn->GetBarWidth().Unit(), DimensionUnit::VP);
+    /**
+     * @tc.steps: step5. Set propScrollBarProperty_ nullptr in ScrollablePaintProperty and use defaultScrollBarWidth
+     */
+    scrollablePn = scroll_->GetPaintProperty<ScrollablePaintProperty>();
+    auto themeManager = MockPipelineContext::GetCurrent()->GetThemeManager();
+    auto scrollBarTheme = themeManager->GetTheme<ScrollBarTheme>();
+    scrollablePn->propScrollBarProperty_ = nullptr;
+    EXPECT_EQ(scrollablePn->GetBarWidth().Value(), scrollBarTheme->GetNormalWidth().Value());
+    EXPECT_EQ(scrollablePn->GetBarWidth().Unit(), scrollBarTheme->GetNormalWidth().Unit());
 }
 
 /**
@@ -175,6 +190,22 @@ HWTEST_F(ScrollableCoverTestNg, SetScrollBarColorTest001, TestSize.Level1)
      */
     ScrollableModelNG::SetScrollBarColor(SCROLLBAR_COLOR_RED);
     EXPECT_EQ(scrollablePn->GetBarColor(), Color::FromString(SCROLLBAR_COLOR_RED));
+
+    /**
+     * @tc.steps: step3. Set ScrollBarColor to blue with frameNode
+     * @tc.expected: ScrollablePaintProperty ScrollBarColor is updated to blue
+     */
+    ScrollableModelNG::SetScrollBarColor(&(*scroll_), SCROLLBAR_COLOR_BLUE);
+    scrollablePn = scroll_->GetPaintProperty<ScrollablePaintProperty>();
+    EXPECT_EQ(scrollablePn->GetBarColor(), Color::FromString(SCROLLBAR_COLOR_BLUE));
+    /**
+     * @tc.steps: step4. Set propScrollBarProperty_ nullptr in ScrollablePaintProperty and use defaultScrollBarColor
+     */
+    scrollablePn = scroll_->GetPaintProperty<ScrollablePaintProperty>();
+    auto themeManager = MockPipelineContext::GetCurrent()->GetThemeManager();
+    auto scrollBarTheme = themeManager->GetTheme<ScrollBarTheme>();
+    scrollablePn->propScrollBarProperty_ = nullptr;
+    EXPECT_EQ(scrollablePn->GetBarColor(), scrollBarTheme->GetForegroundColor());
 }
 
 /**
@@ -208,6 +239,12 @@ HWTEST_F(ScrollableCoverTestNg, ToJsonValueTest001, TestSize.Level1)
     EXPECT_EQ(json->GetString("scrollBar"), BAR_STATE_AUTO);
     EXPECT_EQ(json->GetString("scrollBarColor"), SCROLLBAR_COLOR_BLUE);
     EXPECT_EQ(json->GetString("scrollBarWidth"), SCROLLBAR_WIDTH_PX);
+    /**
+     * @tc.steps: step5. call tojson when filter.IsFastFilter() true
+     */
+    filter.AddFilterAttr("id");
+    scrollablePn->ToJsonValue(json, filter);
+    EXPECT_TRUE(filter.IsFastFilter());
 }
 
 /**
@@ -293,9 +330,9 @@ HWTEST_F(ScrollableCoverTestNg, InitializeTest001, TestSize.Level1)
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
     auto scrollable = AceType::MakeRefPtr<Scrollable>(scrollCallback, scrollPn->GetAxis());
     ASSERT_NE(scrollable, nullptr);
-    RefPtr<Container> conainer = Container::Current();
-    ASSERT_NE(conainer, nullptr);
-    conainer->SetUseNewPipeline();
+    RefPtr<Container> container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    container->SetUseNewPipeline();
     EXPECT_EQ(Container::IsCurrentUseNewPipeline(), true);
     scrollable->Initialize(MockPipelineContext::GetCurrent());
 
@@ -452,29 +489,38 @@ HWTEST_F(ScrollableCoverTestNg, ExecuteScrollBeginTest001, TestSize.Level1)
      * @tc.steps: step1. Create a Scrollable object and initalizes the parameters
      */
     auto scrollable = AceType::MakeRefPtr<Scrollable>();
-    scrollable->scrollBeginCallback_ = [](Dimension x, Dimension y) {
+    bool isCalled = false;
+    scrollable->scrollBeginCallback_ = nullptr;
+    scrollable->axis_ = Axis::VERTICAL;
+    double mainDelta = 5.0;
+    /**
+     * @tc.steps: step2. Test ExecuteScrollBegin with scrollable->context_.Upgrade() nullptr
+     */
+    scrollable->ExecuteScrollBegin(mainDelta);
+    ASSERT_EQ(scrollable->context_.Upgrade(), nullptr);
+    scrollable->scrollBeginCallback_ = [&isCalled](Dimension x, Dimension y) {
         ScrollInfo info;
+        isCalled = true;
         info.dx = x;
         info.dy = y;
         return info;
     };
+    EXPECT_FALSE(isCalled);
+    /**
+     * @tc.steps: step3. Test ExecuteScrollBegin with scrollBeginCallback_ and context_ in axis_ = Axis::VERTICAL
+     */
     scrollable->axis_ = Axis::VERTICAL;
-    /**
-     * @tc.steps: step2. Test ExecuteScrollBegin in Axis::VERTICAL model
-     * @tc.expected: The result should be the expected mainDelta value
-     */
-    double mainDelta = 5.0;
-    double expect = 5.0;
+    scrollable->context_ = PipelineContext::GetCurrentContext();
     scrollable->ExecuteScrollBegin(mainDelta);
-    EXPECT_EQ(expect, mainDelta);
-
+    EXPECT_TRUE(isCalled);
     /**
-     * @tc.steps: step3. Test ExecuteScrollBegin in Axis::HORIZONTAL model
+     * @tc.steps: step4. Test ExecuteScrollBegin with scrollBeginCallback_ and context_ in axis_ = Axis::HORIZONTAL
      * @tc.expected: The result should be the expected mainDelta value
      */
+    isCalled = false;
     scrollable->axis_ = Axis::HORIZONTAL;
     scrollable->ExecuteScrollBegin(mainDelta);
-    EXPECT_EQ(expect, mainDelta);
+    EXPECT_TRUE(isCalled);
 }
 
 /**
@@ -630,13 +676,35 @@ HWTEST_F(ScrollableCoverTestNg, ProcessSpringMotionTest001, TestSize.Level1)
     auto scrollable = AceType::MakeRefPtr<Scrollable>();
     scrollable->currentPos_ = 0.0;
     scrollable->isFadingAway_ = true;
+    auto propertyCallback = [](float offset) {};
+    scrollable->springOffsetProperty_ =
+        AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
+    scrollable->finalPosition_ = 100.0f;
+    bool isVelocityCallbackCalled = false;
+    scrollable->remainVelocityCallback_ = [&isVelocityCallbackCalled](float velocity) {
+        isVelocityCallbackCalled = true;
+        return true;
+    };
     /**
-     * @tc.steps: step2. Call ProcessSpringMotion with a nearEqual new position
+     * @tc.steps: step2. Call method with a nearEqual new position and moved is false.
      * @tc.expected: Verify that the scroll motion is processed correctly
      */
-    double newPosition = 0.0;
-    scrollable->ProcessSpringMotion(newPosition);
-    EXPECT_EQ(scrollable->currentPos_, newPosition);
+    scrollable->isSpringAnimationStop_ = false;
+    scrollable->callback_ = [](const double offset, int32_t source) { return false; };
+    scrollable->ProcessSpringMotion(0.0);
+    EXPECT_EQ(scrollable->currentPos_, 0.0);
+    EXPECT_TRUE(scrollable->isSpringAnimationStop_);
+    EXPECT_FALSE(isVelocityCallbackCalled);
+    /**
+     * @tc.steps: step2. Call method with distance * nextDistance < 0 and has remainVelocityCallback_.
+     * @tc.expected: Verify that the scroll motion is processed correctly
+     */
+    scrollable->isSpringAnimationStop_ = false;
+    scrollable->currentPos_ = 0.0;
+    scrollable->ProcessSpringMotion(110.0);
+    EXPECT_TRUE(isVelocityCallbackCalled);
+    EXPECT_TRUE(scrollable->scrollPause_);
+    EXPECT_TRUE(scrollable->isSpringAnimationStop_);
 }
 
 /**
@@ -720,5 +788,1035 @@ HWTEST_F(ScrollableCoverTestNg, GetSnapPropertyCallbackTest001, TestSize.Level1)
      */
     callback(0.0f);
     EXPECT_TRUE(scrollable->isSnapScrollAnimationStop_);
+}
+
+/**
+ * @tc.name: OnScrollStartEndTest001
+ * @tc.desc: Test both methods of OnScrollStart and OnScrollEnd to ensure callback is correctly set and callable
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, OnScrollStartEndTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a refreshCoordination object and set callback
+     */
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    auto refreshNode = FrameNode::CreateFrameNode("Refresh", -1, AceType::MakeRefPtr<RefreshPattern>());
+    scroll_->MountToParent(refreshNode);
+    refreshNode->MarkModifyDone();
+    scrollPn->refreshCoordination_= AceType::MakeRefPtr<RefreshCoordination>(scrollPn->GetHost());
+    bool isDragTest = false;
+    float mainVelocityTest = 0.0f;
+    auto startCallBack = [&isDragTest, &mainVelocityTest](bool isDrag, float mainVelocity) {
+        isDragTest = isDrag;
+        mainVelocityTest = mainVelocity;
+        return;
+    };
+    auto endCallBack = [&mainVelocityTest](float mainVelocity) {
+        mainVelocityTest = mainVelocity;
+        return;
+    };
+    ASSERT_NE(scrollPn->refreshCoordination_, nullptr);
+    auto eventHub = scrollPn->refreshCoordination_->coordinationEvent_;
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->onScrollStartEvent_ = startCallBack;
+    eventHub->onScrollEndEvent_ = endCallBack;
+    /**
+     * @tc.steps: step2. Call the OnScrollStart and verify the expected behavior
+     */
+    scrollPn->refreshCoordination_->OnScrollStart(true, 50.0f);
+    EXPECT_TRUE(isDragTest);
+    EXPECT_EQ(50.0f, mainVelocityTest);
+
+    /**
+     * @tc.steps: step3. Call the OnScrollEnd and verify the expected behavior
+     */
+    scrollPn->refreshCoordination_->OnScrollEnd(70.0f);
+    EXPECT_EQ(70.0f, mainVelocityTest);
+}
+
+/**
+ * @tc.name: IsRefreshInScroll001
+ * @tc.desc: Test IsRefreshInScroll method to ensure scrollOffsetValue greatNotEqual 0.0
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, IsRefreshInScroll001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a refreshCoordination object and set scrollOffset_
+     */
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    auto refreshNode = FrameNode::CreateFrameNode("Refresh", -1, AceType::MakeRefPtr<RefreshPattern>());
+    scroll_->MountToParent(refreshNode);
+    refreshNode->MarkModifyDone();
+    scrollPn->refreshCoordination_= AceType::MakeRefPtr<RefreshCoordination>(scrollPn->GetHost());
+    auto refreshPn = refreshNode->GetPattern<RefreshPattern>();
+    refreshPn->scrollOffset_ = 50.0;
+    /**
+     * @tc.steps: step2. Call the IsRefreshInScroll and verify the expected behavior
+     */
+    auto isRefresh = scrollPn->refreshCoordination_->IsRefreshInScroll();
+    EXPECT_TRUE(isRefresh);
+}
+
+/**
+ * @tc.name: ProcessNavBarReactOnStart001
+ * @tc.desc: Test ProcessNavBarReactOnStart method and cover coordinateWithNavigation method in SCROLL_FROM_START
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, ProcessNavBarReactOnStart001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get a scrollPn object and set navBarPattern_
+     */
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    scrollPn->navBarPattern_ = AceType::MakeRefPtr<NavBarPattern>();
+    double offset = 50.0;
+    int32_t source = SCROLL_FROM_START;
+    bool isAtTop = true;
+    /**
+     * @tc.steps: step2. Call the coordinateWithNavigation in SCROLL_FROM_START
+     * @tc.expected: isReactInParentMovement_ is true
+     */
+    scrollPn->CoordinateWithNavigation(offset, source, isAtTop);
+    EXPECT_TRUE(scrollPn->isReactInParentMovement_);
+}
+
+/**
+ * @tc.name: CoordinateWithNavigationt001
+ * @tc.desc:  Test the behavior of the CoordinateWithNavigation method Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, CoordinateWithNavigationt001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get a scrollPn object and set navBarPattern_
+     */
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    scrollPn->navBarPattern_ = AceType::MakeRefPtr<NavBarPattern>();
+    double offset = 50.0;
+    int32_t source = SCROLL_FROM_BAR;
+    bool isAtTop = true;
+    scrollPn->isReactInParentMovement_ = true;
+
+    /**
+     * @tc.steps: step2. Call the coordinateWithNavigation  if isReactInParentMovement_ is true
+     * @tc.expected: isReactInParentMovement_ is true and ProcessNavBarReactOnUpdate is called
+     */
+    scrollPn->CoordinateWithNavigation(offset, source, isAtTop);
+    EXPECT_TRUE(scrollPn->isReactInParentMovement_);
+
+    /**
+     * @tc.steps: step3. Call the method if isReactInParentMovement_ is true and isAtTop is false and offset is neg
+     * @tc.expected: isReactInParentMovement_ is false and ProcessNavBarReactOnEnd is called
+     */
+    isAtTop = false;
+    offset = -50.0;
+    scrollPn->CoordinateWithNavigation(offset, source, isAtTop);
+    EXPECT_FALSE(scrollPn->isReactInParentMovement_);
+}
+
+/**
+ * @tc.name: OnWindowHide001
+ * @tc.desc:  Test the behavior of the OnWindowHide method Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, OnWindowHide001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get a scrollPn object and init parameters
+     */
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    auto propertyCallback = [](float offset) {};
+    const std::function<bool(double, int32_t)> scrollCallback = [](double offset, int32_t source) {
+        return true;
+    };
+    auto scrollable = AceType::MakeRefPtr<Scrollable>(scrollCallback, scrollPn->GetAxis());
+    scrollable->frictionOffsetProperty_  =
+        AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
+    scrollable->isFrictionAnimationStop_ = false;
+    ASSERT_NE(scrollPn->scrollableEvent_, nullptr);
+    scrollPn->scrollableEvent_->scrollable_ = scrollable;
+    scrollPn->OnWindowHide();
+    /**
+     * @tc.steps: step2. Get a scrollPn object and call OnWindowHide
+     * @tc.expected: the OnWindowHide method run match expectation
+     */
+    EXPECT_TRUE(scrollable->isFrictionAnimationStop_);
+}
+
+/**
+ * @tc.name: HandleFadeEffect001
+ * @tc.desc:  Test the behavior of the HandleFadeEffect method Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, HandleFadeEffect001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get a scrollPn object and init parameters
+     */
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    auto mockEffect = AceType::MakeRefPtr<MockScrollEdgeEffect>();
+    scrollPn->scrollEffect_ = mockEffect;
+    float offset = 10.0f;
+    int32_t source = SCROLL_FROM_UPDATE;
+    const SizeF& size = SizeF(10.0f, 100.0f);
+    bool flag = false;
+    EXPECT_CALL(*mockEffect, HandleOverScroll(_, _, _, _, _))
+        .WillOnce(DoAll([&flag](Axis, float, const SizeF&, bool, bool) { flag = true; }));
+
+    /**
+     * @tc.steps: step2. Get a scrollPn object and call HandleFadeEffect
+     * @tc.expected: the HandleFadeEffect method run match expectation
+     */
+    scrollPn->HandleFadeEffect(offset, source, size, false);
+    EXPECT_TRUE(flag);
+}
+
+/**
+ * @tc.name: GetScrollDeltaTest001
+ * @tc.desc: Test GetScrollDelta method to ensure it calculates the delta correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, GetScrollDeltaTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a scrollable and init parameters
+     */
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    float offset = 100.0f;
+    bool stopAnimation = false;
+    auto lastPosition = 200.0f;
+    scrollPn->lastPosition_ = 200.0f;
+    scrollPn->finalPosition_ = 50.0f;
+    scrollPn->useTotalOffset_ = false;
+
+    /**
+     * @tc.steps: step2. Test GetScrollDelta
+     * @tc.expected: Verify the delta calculation
+     */
+    float delta = scrollPn->GetScrollDelta(offset, stopAnimation);
+    EXPECT_NEAR(delta, lastPosition - offset, 0.001f);
+}
+
+/**
+ * @tc.name: PauseAnimation001
+ * @tc.desc: Test the behaviour of the PauseAnimation method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, PauseAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a scrollable and init parameters
+     */
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    std::shared_ptr<AnimationUtils::Animation> animation;
+    scrollPn->isAnimationStop_ = false;
+    scrollPn->currentVelocity_ = 100.0;
+
+    /**
+     * @tc.steps: step2. Test PauseAnimation
+     * @tc.expected: Verify the PauseAnimation status
+     */
+    scrollPn->PauseAnimation(animation);
+    EXPECT_EQ(scrollPn->currentVelocity_, 0.0);
+    EXPECT_TRUE(scrollPn->isAnimationStop_);
+}
+
+/**
+ * @tc.name: RemainVelocityToChild001
+ * @tc.desc: Test the behaviour of the RemainVelocityToChild method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, RemainVelocityToChild001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a scrollable and init parameters
+     */
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    auto scrollable = AceType::MakeRefPtr<Scrollable>();
+    auto propertyCallback = [](float offset) {};
+    scrollable->springOffsetProperty_ =
+        AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
+    scrollable->isSpringAnimationStop_ = false;
+    scrollPn->scrollAbort_ = false;
+    ASSERT_NE(scrollPn->scrollableEvent_, nullptr);
+    scrollPn->scrollableEvent_->scrollable_ = scrollable;
+    float remainVelocity = 0.0f;
+    /**
+     * @tc.steps: step2. Test RemainVelocityToChild
+     * @tc.expected: Verify the scrollAbort_ status
+     */
+    scrollPn->RemainVelocityToChild(remainVelocity);
+    EXPECT_TRUE(scrollPn->scrollAbort_);
+}
+
+/**
+ * @tc.name: UnRegister2DragDropManager001
+ * @tc.desc: Test the behaviour of the UnRegister2DragDropManager method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, UnRegister2DragDropManager001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a scrollable and Register2DragDropManager
+     */
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    scrollPn->Register2DragDropManager();
+    auto dragDropManager = MockPipelineContext::GetCurrent()->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+    /**
+     * @tc.expected: step2. Verify that nodesForDragNotify_ contains the nodeId.
+     */
+    auto it = dragDropManager->nodesForDragNotify_.find(scroll_->GetId());
+    EXPECT_TRUE(it != dragDropManager->nodesForDragNotify_.end());
+    EXPECT_EQ(it->first, scroll_->GetId());
+    EXPECT_EQ(it->second.Upgrade(), scroll_);
+
+    scrollPn->UnRegister2DragDropManager();
+    /**
+     * @tc.expected: step3. Verify that nodesForDragNotify_ dont contains the nodeId.
+     */
+    it = dragDropManager->nodesForDragNotify_.find(scroll_->GetId());
+    EXPECT_TRUE(it == dragDropManager->nodesForDragNotify_.end());
+}
+
+/**
+ * @tc.name: ScrollPage001
+ * @tc.desc: Test the behaviour of the ScrollPage method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, ScrollPage001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a scrollable and init parameters
+     */
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    auto scrollable = AceType::MakeRefPtr<Scrollable>();
+    auto propertyCallback = [](float offset) {};
+    scrollable->springOffsetProperty_ =
+        AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
+    scrollable->isSpringAnimationStop_ = false;
+    scrollPn->scrollAbort_ = false;
+    ASSERT_NE(scrollPn->scrollableEvent_, nullptr);
+    scrollPn->scrollableEvent_->scrollable_ = scrollable;
+    /**
+     * @tc.steps: step2. Test ScrollPage
+     * @tc.expected: Verify the scrollAbort_ status
+     */
+    scrollPn->ScrollPage(false, false, AccessibilityScrollType::SCROLL_HALF);
+    EXPECT_TRUE(scrollPn->scrollAbort_);
+}
+
+/**
+ * @tc.name: Fling001
+ * @tc.desc: Test the behaviour of the Fling method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, Fling001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get a scrollPn and initializes the parameters of controller and scrollable
+     */
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    auto controller = AceType::MakeRefPtr<ScrollableController>();
+    scrollPn->SetPositionController(controller);
+    auto scrollable = AceType::MakeRefPtr<Scrollable>();
+    auto propertyCallback = [](float offset) {};
+    scrollable->springOffsetProperty_ =
+        AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
+    scrollable->isSpringAnimationStop_ = false;
+    scrollPn->scrollAbort_ = false;
+    ASSERT_NE(scrollPn->scrollableEvent_, nullptr);
+    scrollPn->scrollableEvent_->scrollable_ = scrollable;
+
+    /**
+     * @tc.steps: step2. Test Fling
+     * @tc.expected: Verify the scrollAbort_ status
+     */
+    double flingVelocity = 10.0;
+    controller->Fling(flingVelocity);
+    EXPECT_TRUE(scrollPn->scrollAbort_);
+}
+
+/**
+ * @tc.name: SetMaxFlingSpeed001
+ * @tc.desc: Test the behavior of the SetMaxFlingSpeed method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, SetMaxFlingSpeed001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get scrollablePn and set SetMaxFlingSpeed max to 100.0
+     * @tc.expected: maxFlingVelocity_ is updated to max * density
+     */
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    ScrollableModelNG::SetMaxFlingSpeed(&(*scroll_), 100.0);
+    EXPECT_EQ(scrollPn->maxFlingVelocity_, 100.0);
+}
+
+/**
+ * @tc.name: GetOrCreateScrollableItemWithParent
+ * @tc.desc: Test GetOrCreateScrollableItem method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, GetOrCreateScrollableItemWithParent001, TestSize.Level1)
+{
+    // Create a pattern creator
+    auto patternCreator = []() -> RefPtr<Pattern> { return AceType::MakeRefPtr<Pattern>(); };
+    auto tag = "testTag";
+    auto nodeId = 1;
+    auto parentNode = AceType::MakeRefPtr<ScrollableItem>("parentTag", 0, patternCreator(), false);
+    auto childPattern = patternCreator();
+    auto childNode = AceType::MakeRefPtr<ScrollableItem>(tag, nodeId, patternCreator(), false);
+    parentNode->AddChild(childNode);
+    ElementRegister::GetInstance()->AddUINode(childNode);
+    ASSERT_EQ(childNode->GetParent(), parentNode);
+    /**
+     * @tc.steps: step1. Call GetOrCreateScrollableItem when node exists and tag not exists
+     * @tc.expected: The existing ScrollableItem is removed from parent node and create a new node
+     */
+    auto result = ScrollableItem::GetOrCreateScrollableItem("notExistsTag", nodeId, patternCreator);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->GetTag(), "notExistsTag");
+    EXPECT_EQ(result->GetId(), nodeId);
+    EXPECT_EQ(childNode->GetParent(), nullptr);
+}
+
+/**
+ * @tc.name: GetOrCreateScrollableItemWithoutParent
+ * @tc.desc: Test GetOrCreateScrollableItem method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, GetOrCreateScrollableItemWithParent002, TestSize.Level1)
+{
+    auto patternCreator = []() -> RefPtr<Pattern> { return AceType::MakeRefPtr<Pattern>(); };
+    auto tag = "testTag";
+    auto nodeId = 1;
+    auto childNode = AceType::MakeRefPtr<ScrollableItem>(tag, nodeId, patternCreator(), false);
+    ElementRegister::GetInstance()->AddUINode(childNode);
+    ASSERT_EQ(childNode->GetParent(), nullptr);
+    /**
+     * @tc.steps: step1. Call GetOrCreateScrollableItem when the ScrollableItem does not have a parent
+     * @tc.expected: A new ScrollableItem is created and registered
+     */
+    auto result = ScrollableItem::GetOrCreateScrollableItem("notExistsTag", nodeId, patternCreator);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->GetTag(), "notExistsTag");
+    EXPECT_EQ(result->GetId(), nodeId);
+}
+
+/**
+ * @tc.name: SetFriction001
+ * @tc.desc: Test SetFriction method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, SetFriction001, TestSize.Level1)
+{
+    double sFriction = -1.0;
+    /**
+     * @tc.steps: step1. Call SetFriction with sFriction LessOrEqual 0.0
+     * @tc.expected: sFriction_ dont change
+     */
+    Scrollable::SetFriction(sFriction);
+    EXPECT_FALSE(Scrollable::sFriction_.has_value());
+}
+
+/**
+ * @tc.name: InitializeTest002
+ * @tc.desc: Test Initialize method and covering actionUpdate, actionEnd, actionCancel
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, InitializeTest002, TestSize.Level1)
+{
+    const std::function<bool(double, int32_t)> scrollCallback = [](double offset, int32_t source) { return true; };
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    auto scrollable = AceType::MakeRefPtr<Scrollable>(scrollCallback, scrollPn->GetAxis());
+    ASSERT_NE(scrollable, nullptr);
+    auto propertyCallback = [](float offset) {};
+    scrollable->frictionOffsetProperty_ =
+        AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
+    RefPtr<Container> conainer = Container::Current();
+    ASSERT_NE(conainer, nullptr);
+    conainer->SetUseNewPipeline();
+    auto context = MockPipelineContext::GetCurrent();
+    scrollable->Initialize(AceType::RawPtr(context));
+    ASSERT_NE(scrollable->panRecognizerNG_, nullptr);
+    auto panRecognizerNG = scrollable->panRecognizerNG_;
+    GestureEvent gestureEvent;
+    scrollable->isDragging_ = true;
+    bool isDragCancelCalled = false;
+    bool isActionEndCalled = false;
+    /**
+     * @tc.steps: step1. Trigger onActionUpdate event.
+     * @tc.expected: Verify that onActionUpdate executed.
+     */
+    scrollable->isFrictionAnimationStop_ = false;
+    (*panRecognizerNG->onActionUpdate_)(gestureEvent);
+    EXPECT_TRUE(scrollable->isFrictionAnimationStop_);
+    /**
+     * @tc.steps: step2. Trigger actionCancel and onActionEnd without dragCancelCallback_ and actionEnd_.
+     * @tc.expected: Verify that actionCancel and onActionEnd is executed.
+     */
+    scrollable->actionEnd_ = nullptr;
+    scrollable->dragCancelCallback_ = nullptr;
+    (*panRecognizerNG->onActionEnd_)(gestureEvent);
+    (*panRecognizerNG->onActionCancel_)();
+    EXPECT_FALSE(scrollable->isDragging_);
+
+    /**
+     * @tc.steps: step3. Trigger actionCancel and onActionEnd with dragCancelCallback_ and actionEnd_.
+     * @tc.expected: Verify that actionCancel and onActionEnd is executed.
+     */
+    scrollable->dragCancelCallback_ = [&isDragCancelCalled]() { isDragCancelCalled = true; };
+    scrollable->actionEnd_ = [&isActionEndCalled](GestureEvent gestureEvent) { isActionEndCalled = true; };
+    (*panRecognizerNG->onActionCancel_)();
+    (*panRecognizerNG->onActionEnd_)(gestureEvent);
+    EXPECT_TRUE(isDragCancelCalled);
+    EXPECT_TRUE(isActionEndCalled);
+}
+
+/**
+ * @tc.name: HandleTouchDownTest001
+ * @tc.desc: Test HandleTouchDown method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, HandleTouchDownTest001, TestSize.Level1)
+{
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    auto scrollable = AceType::MakeRefPtr<Scrollable>([](double, int32_t) { return true; }, scrollPn->GetAxis());
+    ASSERT_NE(scrollable, nullptr);
+    auto frictionPropertyCallback = [](float offset) {};
+    auto snapPropertyCallback = [](float offset) {};
+    scrollable->frictionOffsetProperty_ =
+        AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(frictionPropertyCallback));
+    scrollable->snapOffsetProperty_ =
+        AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(snapPropertyCallback));
+    /**
+     * @tc.steps: step1. Set isFrictionAnimationStop_ to false
+     * @tc.expected: StopFrictionAnimation is executed.
+     */
+    scrollable->isFrictionAnimationStop_ = false;
+    scrollable->isSpringAnimationStop_ = true;
+    scrollable->HandleTouchDown();
+    EXPECT_TRUE(scrollable->isFrictionAnimationStop_);
+    /**
+     * @tc.steps: step2. Set isSnapAnimationStop_ to false
+     * @tc.expected: StopSnapAnimation is executed.
+     */
+    scrollable->isSnapAnimationStop_ = false;
+    scrollable->HandleTouchDown();
+    EXPECT_TRUE(scrollable->isSnapAnimationStop_);
+}
+
+/**
+ * @tc.name: HandleTouchUpTest001
+ * @tc.desc: Test HandleTouchUp method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, HandleTouchUpTest001, TestSize.Level1)
+{
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    auto scrollable = AceType::MakeRefPtr<Scrollable>([](double, int32_t) { return true; }, scrollPn->GetAxis());
+    ASSERT_NE(scrollable, nullptr);
+    /**
+     * @tc.steps: step1. Set nestedScrolling_ to true and isTouching_ to true
+     */
+    scrollable->isTouching_ = true;
+    scrollable->nestedScrolling_ = true;
+    scrollable->HandleTouchUp();
+    EXPECT_FALSE(scrollable->isTouching_);
+    /**
+     * @tc.steps: step2. Set nestedScrolling_ to false and outBoundary nullptr and isSnapScrollAnimationStop_ false
+     */
+    scrollable->isTouching_ = true;
+    scrollable->nestedScrolling_ = false;
+    scrollable->outBoundaryCallback_ = nullptr;
+    scrollable->isSnapScrollAnimationStop_ = false;
+    scrollable->nestedScrolling_ = false;
+    scrollable->HandleTouchUp();
+    EXPECT_FALSE(scrollable->isTouching_);
+    /**
+     * @tc.steps: step3. Set nestedScrolling_ to false and scrollSnapCallback_ is executed
+     */
+    bool isScrollSnapCallbackCalled = false;
+    scrollable->isSnapScrollAnimationStop_ = true;
+    scrollable->scrollSnapCallback_ = [&isScrollSnapCallbackCalled](double targetOffset, double velocity) {
+        isScrollSnapCallbackCalled = true;
+        return true;
+    };
+    scrollable->HandleTouchUp();
+    EXPECT_TRUE(isScrollSnapCallbackCalled);
+}
+
+/**
+ * @tc.name: HandleTouchUpTest002
+ * @tc.desc: Test HandleTouchUp method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, HandleTouchUpTest002, TestSize.Level1)
+{
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    auto scrollable = AceType::MakeRefPtr<Scrollable>([](double, int32_t) { return true; }, scrollPn->GetAxis());
+    ASSERT_NE(scrollable, nullptr);
+    scrollable->nestedScrolling_ = false;
+    /**
+     * @tc.steps: step1. Set outBoundary has callback and isSpringAnimationStop_ to false
+     */
+    bool outBoundaryIsCalled = false;
+    scrollable->outBoundaryCallback_ = [&outBoundaryIsCalled]() {
+        outBoundaryIsCalled = true;
+        return true;
+    };
+    scrollable->isSpringAnimationStop_ = false;
+    scrollable->HandleTouchUp();
+    EXPECT_TRUE(outBoundaryIsCalled);
+    /**
+     * @tc.steps: step2. Set scrollOverCallback_ and onScrollStartRec_ nullptr and executed successfully
+     */
+    double expectVelocity = 0.0;
+    scrollable->isSpringAnimationStop_ = true;
+    scrollable->onScrollStartRec_ = nullptr;
+    scrollable->scrollOverCallback_ = [&expectVelocity](double velocity) { expectVelocity = 1.0; };
+    scrollable->HandleTouchUp();
+    EXPECT_EQ(expectVelocity, 1.0);
+    /**
+     * @tc.steps: step3. Set scrollable has onScrollStartRec_ and executed successfully
+     */
+    bool isOnScrollStartRec = false;
+    scrollable->isSpringAnimationStop_ = true;
+    scrollable->onScrollStartRec_ = [&isOnScrollStartRec](float value) { isOnScrollStartRec = true; };
+    scrollable->scrollOverCallback_ = [&expectVelocity](double velocity) {};
+    scrollable->HandleTouchUp();
+    EXPECT_TRUE(isOnScrollStartRec);
+}
+
+/**
+ * @tc.name: IsAnimationNotRunningTest001
+ * @tc.desc: Test IsAnimationNotRunning method of Scrollable class.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, IsAnimationNotRunningTest001, TestSize.Level1)
+{
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    auto scrollable = AceType::MakeRefPtr<Scrollable>([](double, int32_t) { return true; }, scrollPn->GetAxis());
+    ASSERT_NE(scrollable, nullptr);
+    /**
+     * @tc.steps: step1. Set isTouching_ false and others true.
+     */
+    scrollable->isTouching_ = false;
+    EXPECT_TRUE(scrollable->IsAnimationNotRunning());
+}
+
+/**
+ * @tc.name: StopScrollable001
+ * @tc.desc: Test StopScrollable method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, StopScrollable001, TestSize.Level1)
+{
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    auto scrollable = AceType::MakeRefPtr<Scrollable>([](double, int32_t) { return true; }, scrollPn->GetAxis());
+    ASSERT_NE(scrollable, nullptr);
+    auto propertyCallback = [](float offset) {};
+    scrollable->frictionOffsetProperty_ =
+        AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
+    /**
+     * @tc.steps: step1.Set isFrictionAnimationStop_ false and call StopScrollable.
+     */
+    scrollable->isFrictionAnimationStop_ = false;
+    scrollable->StopScrollable();
+    EXPECT_TRUE(scrollable->isFrictionAnimationStop_);
+}
+
+/**
+ * @tc.name: HandleScrollEnd001
+ * @tc.desc: Test HandleScrollEnd method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, HandleScrollEnd001, TestSize.Level1)
+{
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    auto scrollable = AceType::MakeRefPtr<Scrollable>([](double, int32_t) { return true; }, scrollPn->GetAxis());
+    ASSERT_NE(scrollable, nullptr);
+    bool isCalled = false;
+    scrollable->scrollEndCallback_ = [&isCalled]() { isCalled = true; };
+    /**
+     * @tc.steps: step1.Set scrollEndCallback_ and call HandleScrollEnd.
+     */
+    scrollable->HandleScrollEnd(1.0f);
+    EXPECT_TRUE(isCalled);
+}
+
+/**
+ * @tc.name: HandleDragUpdate001
+ * @tc.desc: Test HandleDragUpdate method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, HandleDragUpdate001, TestSize.Level1)
+{
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    auto scrollable = AceType::MakeRefPtr<Scrollable>([](double, int32_t) { return true; }, scrollPn->GetAxis());
+    ASSERT_NE(scrollable, nullptr);
+    GestureEvent info;
+    info.SetMainVelocity(10.0);
+    scrollable->dragCount_ = 5;
+    scrollable->lastVelocity_ = -1;
+    /**
+     * @tc.steps: step1.Set (Negative(lastVelocity_ / info.GetMainVelocity())).
+     */
+    scrollable->HandleDragUpdate(info);
+    EXPECT_EQ(scrollable->dragCount_, 1);
+    /**
+     * @tc.steps: step2.Set positive(lastVelocity_ / info.GetMainVelocity()) and isFrictionAnimationStop_ false.
+     */
+    auto propertyCallback = [](float offset) {};
+    scrollable->frictionOffsetProperty_ =
+        AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
+    scrollable->dragCount_ = 5;
+    info.SetMainVelocity(10.0);
+    scrollable->lastVelocity_ = 10;
+    scrollable->isDragUpdateStop_ = false;
+    scrollable->isFrictionAnimationStop_ = false;
+    scrollable->HandleDragUpdate(info);
+    EXPECT_TRUE(scrollable->isDragUpdateStop_);
+    EXPECT_TRUE(scrollable->isFrictionAnimationStop_);
+}
+
+/**
+ * @tc.name: HandleDragEnd001
+ * @tc.desc: Test HandleDragEnd method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, HandleDragEnd001, TestSize.Level1)
+{
+    double touchPosX = 150.0;
+    double touchPosY = 500.0;
+    float velocity = 1200.0f;
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    auto scrollable = AceType::MakeRefPtr<Scrollable>([](double, int32_t) { return true; }, scrollPn->GetAxis());
+    ASSERT_NE(scrollable, nullptr);
+    GestureEvent info;
+    info.SetMainVelocity(velocity);
+    info.SetGlobalPoint(Point(touchPosX, touchPosY));
+    info.SetGlobalLocation(Offset(touchPosX, touchPosY));
+    scrollable->moved_ = false;
+    bool isCalePredictCalled = false;
+    scrollable->calePredictSnapOffsetCallback_ = [&isCalePredictCalled](
+                                                     float position, float dragOffset, float correctVelocity) {
+        isCalePredictCalled = true;
+        return 1.0f;
+    };
+    /**
+     * @tc.steps: step1.Set moved_ false and calePredictSnapOffsetCallback_ is called.
+     */
+    scrollable->currentVelocity_ = 1.0;
+    scrollable->HandleDragEnd(info);
+    EXPECT_TRUE(isCalePredictCalled);
+    /**
+     * @tc.steps: step1.Set IsMouseWheelScroll(info) true and calePredictSnapOffsetCallback_ is called.
+     */
+    info.SetSourceTool(SourceTool::FINGER);
+    info.SetInputEventType(InputEventType::AXIS);
+    scrollable->moved_ = true;
+    isCalePredictCalled = false;
+    scrollable->HandleDragEnd(info);
+    EXPECT_TRUE(isCalePredictCalled);
+    /**
+     * @tc.steps: step2.Set NearZero(predictSnapOffset.value() true and calePredictSnapOffsetCallback_ is called.
+     */
+    isCalePredictCalled = false;
+    scrollable->calePredictSnapOffsetCallback_ = [&isCalePredictCalled](
+                                                     float position, float dragOffset, float correctVelocity) {
+        isCalePredictCalled = true;
+        return 0.0f;
+    };
+    scrollable->HandleDragEnd(info);
+    EXPECT_TRUE(isCalePredictCalled);
+    EXPECT_EQ(scrollable->currentVelocity_, 0.0);
+}
+
+/**
+ * @tc.name: HandleDragEnd002
+ * @tc.desc: Test HandleDragEnd method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, HandleDragEnd002, TestSize.Level1)
+{
+    double touchPosX = 150.0;
+    double touchPosY = 500.0;
+    float velocity = 1200.0f;
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    auto scrollable = AceType::MakeRefPtr<Scrollable>([](double, int32_t) { return true; }, scrollPn->GetAxis());
+    ASSERT_NE(scrollable, nullptr);
+    GestureEvent info;
+    info.SetMainVelocity(velocity);
+    info.SetGlobalPoint(Point(touchPosX, touchPosY));
+    info.SetGlobalLocation(Offset(touchPosX, touchPosY));
+    /**
+     * @tc.steps: step1.Set calePredictSnapOffsetCallback_ nullptr.
+     */
+    scrollable->moved_ = false;
+    scrollable->calePredictSnapOffsetCallback_ = nullptr;
+    scrollable->currentVelocity_ = 1.0;
+    scrollable->HandleDragEnd(info);
+    EXPECT_EQ(scrollable->currentVelocity_, 0.0);
+}
+
+/**
+ * @tc.name: StartScrollAnimationTest001
+ * @tc.desc: Test StartScrollAnimation method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, StartScrollAnimationTest001, TestSize.Level1)
+{
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    auto scrollable = AceType::MakeRefPtr<Scrollable>([](double, int32_t) { return true; }, scrollPn->GetAxis());
+    ASSERT_NE(scrollable, nullptr);
+    auto propertyCallback = [](float offset) {};
+    scrollable->springOffsetProperty_ =
+        AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
+    /**
+     * @tc.steps: step1. Call StartScrollAnimation and verify StopSpringAnimation is called.
+     */
+    scrollable->isSpringAnimationStop_ = false;
+    scrollable->StartScrollAnimation(100.0f, 200.0f);
+    EXPECT_TRUE(scrollable->isSpringAnimationStop_);
+}
+
+/**
+ * @tc.name: StartScrollAnimationTest002
+ * @tc.desc: Test StartScrollAnimation method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, StartScrollAnimationTest002, TestSize.Level1)
+{
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    auto scrollable = AceType::MakeRefPtr<Scrollable>([](double, int32_t) { return true; }, scrollPn->GetAxis());
+    ASSERT_NE(scrollable, nullptr);
+    /**
+     * @tc.steps: step1. Call StartScrollAnimation and verify ProcessScrollSnapSpringMotion is called.
+     */
+    scrollable->calePredictSnapOffsetCallback_ = [](float delta, float dragDistance, float velocity) { return 100.0f; };
+    scrollable->StartScrollAnimation(100.0f, 200.0f);
+    EXPECT_EQ(scrollable->currentPos_, 100.0f);
+}
+
+/**
+ * @tc.name: GetGainTest003
+ * @tc.desc: Test GetGain method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, GetGainTest003, TestSize.Level1)
+{
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    auto scrollable = AceType::MakeRefPtr<Scrollable>([](double, int32_t) { return true; }, scrollPn->GetAxis());
+    ASSERT_NE(scrollable, nullptr);
+    /**
+     * @tc.steps: step1. Call GetGain with continuousSlidingCallback nullptr.
+     */
+    scrollable->GetGain(100.0);
+    EXPECT_EQ(scrollable->preGain_, 1.0);
+    /**
+     * @tc.steps: step2. Call GetGain with continuousSlidingCallback has callback.
+     */
+    scrollable->continuousSlidingCallback_ = []() { return 0.0; };
+    scrollable->GetGain(100.0);
+    EXPECT_EQ(scrollable->preGain_, 1.0);
+    /**
+     * @tc.steps: step3. Call GetGain with Negative lastPos_ / delta.
+     */
+    scrollable->continuousSlidingCallback_ = []() { return 1.0; };
+    scrollable->dragCount_ = 6;
+    scrollable->lastPos_ = -10;
+    scrollable->GetGain(100.0);
+    EXPECT_EQ(scrollable->preGain_, 1.0);
+    /**
+     * @tc.steps: step4. Call GetGain with dragCount_ >= SECOND_THRESHOLD and Negative lastPos_ / delta.
+     */
+    scrollable->dragCount_ = 10;
+    scrollable->lastPos_ = -10;
+    scrollable->GetGain(100.0);
+    EXPECT_EQ(scrollable->preGain_, 1.0);
+    /**
+     * @tc.steps: step5 Call GetGain with dragCount_ >= SECOND_THRESHOLD and positive lastPos_ / delta.
+     */
+    scrollable->continuousSlidingCallback_ = []() { return 1; };
+    scrollable->dragCount_ = 10;
+    scrollable->lastPos_ = 10;
+    scrollable->GetGain(100.0);
+    EXPECT_EQ(scrollable->preGain_, 16);
+}
+
+/**
+ * @tc.name: ProcessScrollSnapMotion001
+ * @tc.desc: Test ProcessScrollSnapMotion method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, ProcessScrollSnapMotion001, TestSize.Level1)
+{
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    auto scrollable = AceType::MakeRefPtr<Scrollable>([](double, int32_t) { return true; }, scrollPn->GetAxis());
+    ASSERT_NE(scrollable, nullptr);
+    auto snapPropertyCallback = [](float offset) {};
+    scrollable->snapOffsetProperty_ =
+        AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(snapPropertyCallback));
+    /**
+     * @tc.steps: step1. currentPos eq pos and Callback and SnapScrollAnimationStop noraml conditions.
+     */
+    scrollable->currentPos_ = 0.0;
+    scrollable->skipRestartSpring_ = false;
+    scrollable->isSnapScrollAnimationStop_ = false;
+    bool outBoundaryIsCalled = false;
+    scrollable->outBoundaryCallback_ = [&outBoundaryIsCalled]() {
+        outBoundaryIsCalled = true;
+        return true;
+    };
+    scrollable->ProcessScrollSnapMotion(0.0);
+    EXPECT_TRUE(outBoundaryIsCalled);
+    EXPECT_TRUE(scrollable->isSnapScrollAnimationStop_);
+    EXPECT_TRUE(scrollable->skipRestartSpring_);
+    /**
+     * @tc.steps: step2. pos gt currentPos and without callback and moved false and SnapScrollAnimationStop false.
+     */
+    scrollable->moved_ = false;
+    scrollable->outBoundaryCallback_ = nullptr;
+    scrollable->isSnapScrollAnimationStop_ = false;
+    scrollable->ProcessScrollSnapMotion(100.0);
+    EXPECT_FALSE(scrollable->isSnapScrollAnimationStop_);
+    /**
+     * @tc.steps: step3. pos gt currentPos and without callback and moved true and touchUp false.
+     */
+    scrollable->currentPos_ = 0.0;
+    scrollable->moved_ = true;
+    scrollable->touchUp_ = false;
+    scrollable->scrollTouchUpCallback_ = []() {};
+    scrollable->ProcessScrollSnapMotion(100.0);
+    EXPECT_TRUE(scrollable->touchUp_);
+}
+
+/**
+ * @tc.name: ProcessScrollSnapStop001
+ * @tc.desc: Test ProcessScrollSnapStop method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, ProcessScrollSnapStop001, TestSize.Level1)
+{
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    auto scrollable = AceType::MakeRefPtr<Scrollable>([](double, int32_t) { return true; }, scrollPn->GetAxis());
+    ASSERT_NE(scrollable, nullptr);
+    bool isCalled = false;
+    /**
+     * @tc.steps: step1. Call scrollPause_ eq true and verify executed successfully.
+     */
+    scrollable->scrollPause_ = true;
+    scrollable->overScrollCallback_ = nullptr;
+    scrollable->edgeEffect_ = EdgeEffect::FADE;
+    scrollable->scrollEndCallback_ = [&isCalled]() { isCalled = true; };
+    scrollable->ProcessScrollSnapStop();
+    EXPECT_TRUE(isCalled);
+    EXPECT_FALSE(scrollable->scrollPause_);
+    /**
+     * @tc.steps: step2. Call scrollPause_ eq false and scrollEnd has callback and isTouching_ eq false.
+     */
+    bool isScrollEndCalled = false;
+    scrollable->scrollEnd_ = [&isScrollEndCalled]() { isScrollEndCalled = true; };
+    scrollable->ProcessScrollSnapStop();
+    EXPECT_TRUE(isScrollEndCalled);
+    /**
+     * @tc.steps: step3. Call scrollPause_ eq false and isTouching_ eq true.
+     */
+    isScrollEndCalled = false;
+    scrollable->scrollPause_ = false;
+    scrollable->isTouching_ = true;
+    scrollable->scrollEnd_ = [&isScrollEndCalled]() { isScrollEndCalled = true; };
+    scrollable->ProcessScrollSnapStop();
+    EXPECT_FALSE(isScrollEndCalled);
+}
+
+/**
+ * @tc.name: UpdateScrollSnapEndWithOffsetTest001
+ * @tc.desc: Test the UpdateScrollSnapEndWithOffset method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, UpdateScrollSnapEndWithOffsetTest001, TestSize.Level1)
+{
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    auto scrollable = AceType::MakeRefPtr<Scrollable>([](double, int32_t) { return true; }, scrollPn->GetAxis());
+    ASSERT_NE(scrollable, nullptr);
+    scrollable->GetSnapProperty();
+    /**
+     * @tc.steps: step1. Set isSnapScrollAnimationStop_ to false and snapOffsetProperty_ nullptr.
+     */
+    scrollable->snapOffsetProperty_ = nullptr;
+    scrollable->isSnapScrollAnimationStop_ = false;
+    scrollable->updateSnapAnimationCount_ = 0;
+    scrollable->endPos_ = 200.0;
+    scrollable->UpdateScrollSnapEndWithOffset(100.0);
+    ASSERT_NE(scrollable->snapOffsetProperty_, nullptr);
+    EXPECT_EQ(scrollable->endPos_, 100.0);
+    /**
+     * @tc.steps: step2. Set isSnapScrollAnimationStop_ to false and snapOffsetProperty_ has value.
+     */
+    scrollable->updateSnapAnimationCount_ = 3;
+    auto snapPropertyCallback = [](float offset) {};
+    scrollable->snapOffsetProperty_ =
+        AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(snapPropertyCallback));
+    scrollable->UpdateScrollSnapEndWithOffset(50.0);
+    EXPECT_EQ(scrollable->endPos_, 50.0);
+}
+
+/**
+ * @tc.name: GetFrictionPropertyTest001
+ * @tc.desc: Test the GetFrictionProperty method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, GetFrictionPropertyTest001, TestSize.Level1)
+{
+    auto scrollable = AceType::MakeRefPtr<Scrollable>();
+    auto frictionProperty = scrollable->GetFrictionProperty();
+    ASSERT_NE(frictionProperty, nullptr);
+    auto propertyCallback = [](float offset) {};
+    scrollable->frictionOffsetProperty_ =
+        AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
+    /**
+     * @tc.steps: step1. call callback with isFrictionAnimationStop_ true.
+     */
+    scrollable->isFrictionAnimationStop_ = true;
+    scrollable->isSnapAnimation_ = true;
+    auto property = AceType::DynamicCast<AnimatablePropertyFloat>(frictionProperty->GetProperty());
+    auto updateCallback = property->GetUpdateCallback();
+    ASSERT_NE(updateCallback, nullptr);
+    updateCallback(100.0f);
+    EXPECT_TRUE(scrollable->isSnapAnimation_);
+    /**
+     * @tc.steps: step2. call callback with isFrictionAnimationStop_ false and isTouching_ true.
+     */
+    scrollable->isFrictionAnimationStop_ = false;
+    scrollable->isTouching_ = true;
+    scrollable->isSnapAnimation_ = true;
+    updateCallback(100.0f);
+    EXPECT_TRUE(scrollable->isSnapAnimation_);
+    /**
+     * @tc.steps: step3. call callback with isFrictionAnimationStop_ false and isTouching_ false.
+     */
+    scrollable->isFrictionAnimationStop_ = false;
+    scrollable->isTouching_ = false;
+    scrollable->isSnapAnimation_ = true;
+    scrollable->finalPosition_ = 0.0f;
+    updateCallback(100.0f);
+    EXPECT_FALSE(scrollable->isSnapAnimation_);
+    EXPECT_EQ(scrollable->lastPosition_, 100.0f);
+    /**
+     * @tc.steps: step4. call callback with NearEqual(scroll->finalPosition_, position, 1.0).
+     */
+    scrollable->isFrictionAnimationStop_ = false;
+    scrollable->isTouching_ = false;
+    scrollable->isSnapAnimation_ = true;
+    scrollable->finalPosition_ = 100.0f;
+    updateCallback(100.0f);
+    EXPECT_FALSE(scrollable->isSnapAnimation_);
+    EXPECT_EQ(scrollable->lastPosition_, 100.0f);
+    EXPECT_TRUE(scrollable->isFrictionAnimationStop_);
 }
 } // namespace OHOS::Ace::NG

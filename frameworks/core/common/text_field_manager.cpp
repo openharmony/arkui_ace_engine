@@ -15,11 +15,6 @@
 
 #include "core/common/text_field_manager.h"
 
-#include "base/utils/utils.h"
-#include "core/components/scroll/render_scroll.h"
-#include "core/components/scroll/scroll_element.h"
-#include "core/pipeline/base/composed_element.h"
-
 namespace OHOS::Ace {
 
 void TextFieldManager::SetClickPosition(const Offset& position)

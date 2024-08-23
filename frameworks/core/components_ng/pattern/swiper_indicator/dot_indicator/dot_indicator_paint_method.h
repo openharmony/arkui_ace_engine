@@ -71,6 +71,11 @@ public:
         displayCount_ = displayCount;
     }
 
+    void SetSwipeByGroup(bool isSwipeByGroup)
+    {
+        isSwipeByGroup_ = isSwipeByGroup;
+    }
+
     void SetAxis(Axis axis)
     {
         axis_ = axis;
@@ -104,6 +109,11 @@ public:
     void SetTurnPageRate(float turnPageRate)
     {
         turnPageRate_ = turnPageRate;
+    }
+
+    void SetGroupTurnPageRate(float groupTurnPageRate)
+    {
+        groupTurnPageRate_ = groupTurnPageRate;
     }
 
     void SetGestureState(GestureState gestureState)
@@ -195,6 +205,7 @@ protected:
     int32_t itemCount_ = 0;
     int32_t displayCount_ = 1;
     float turnPageRate_ = 0.0f;
+    float groupTurnPageRate_ = 0.0f;
     GestureState gestureState_ = GestureState::GESTURE_STATE_INIT;
     TouchBottomTypeLoop touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
     PointAnimationStage pointAnimationStage_ = PointAnimationStage::STATE_SHRINKT_TO_BLACK_POINT;
@@ -205,6 +216,7 @@ protected:
     bool isPressed_ = false;
     bool longPointIsHover_ = false;
     bool IsCustomSizeValue_ = false;
+    bool isSwipeByGroup_ = false;
     // Animatable properties for updating Modifier
     LinearVector<float> vectorBlackPointCenterX_ = {};
     std::pair<float, float> longPointCenterX_ = { 0, 0 };

@@ -16,13 +16,7 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_textfield_ffi.h"
 
 #include "cj_lambda.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 #include "bridge/common/utils/utils.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_abstract_model_ng.h"
-#include "core/components_ng/pattern/text_field/text_field_model.h"
-#include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
@@ -83,6 +77,12 @@ void FfiOHOSAceFrameworkTextFieldSetBorderColor(uint32_t color)
     TextFieldModel::GetInstance()->SetBackBorder();
 }
 
+void FfiOHOSAceFrameworkTextFieldSetBorderWidthWithCJEdge(CJEdge params)
+{
+    FfiOHOSAceFrameworkViewAbstractSetBorderWidthWithCJEdge(params);
+    TextFieldModel::GetInstance()->SetBackBorder();
+}
+
 void FfiOHOSAceFrameworkTextFieldSetBorderStyle(int32_t style)
 {
     if (!Utils::CheckParamsValid(style, BORDER_STYLES.size())) {
@@ -97,6 +97,12 @@ void FfiOHOSAceFrameworkTextFieldSetBorderStyle(int32_t style)
 void FfiOHOSAceFrameworkTextFieldSetBorderRadius(double value, uint32_t unit)
 {
     FfiOHOSAceFrameworkViewAbstractSetBorderRadius(value, unit);
+    TextFieldModel::GetInstance()->SetBackBorder();
+}
+
+void FfiOHOSAceFrameworkTextFieldSetAllBorderRadius(CJBorderRadius value)
+{
+    FfiOHOSAceFrameworkViewAbstractSetAllBorderRadius(value);
     TextFieldModel::GetInstance()->SetBackBorder();
 }
 
@@ -123,9 +129,9 @@ void FfiOHOSAceFrameworkTextFieldSetPaddings(CJEdge params)
 {
     NG::PaddingProperty paddings;
     paddings.top = NG::CalcLength(Dimension(params.top, static_cast<DimensionUnit>(params.topUnit)));
-    paddings.bottom = NG::CalcLength(Dimension(params.right, static_cast<DimensionUnit>(params.rightUnit)));
-    paddings.left = NG::CalcLength(Dimension(params.bottom, static_cast<DimensionUnit>(params.bottomUnit)));
-    paddings.right = NG::CalcLength(Dimension(params.left, static_cast<DimensionUnit>(params.leftUnit)));
+    paddings.right = NG::CalcLength(Dimension(params.right, static_cast<DimensionUnit>(params.rightUnit)));
+    paddings.bottom = NG::CalcLength(Dimension(params.bottom, static_cast<DimensionUnit>(params.bottomUnit)));
+    paddings.left = NG::CalcLength(Dimension(params.left, static_cast<DimensionUnit>(params.leftUnit)));
     TextFieldModel::GetInstance()->SetPadding(paddings, Edge(), false);
 }
 
