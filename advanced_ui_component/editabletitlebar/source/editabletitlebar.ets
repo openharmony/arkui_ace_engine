@@ -89,9 +89,9 @@ class EditableTitleBarTheme {
 }
 
 class ButtonGestureModifier implements GestureModifier {
-   public longPressTime: number = 500;
+   public static readonly longPressTime: number = 500;
    public fontSize: number = 1;
-   public minFontSize: number = 1.75;
+   public static readonly minFontSize: number = 1.75;
    public controller: CustomDialogController | null = null;
 
   constructor(controller: CustomDialogController | null) {
@@ -132,9 +132,9 @@ export struct EditableTitleBar {
   onSave?: () => void;
   onCancel?: () => void;
   constraintWidth: number = 0;
-  isFollowingSystemFontScale: boolean = false;
-  maxFontScale: number = 1;
-  systemFontScale?: number = 1;
+  private isFollowingSystemFontScale: boolean = false;
+  private maxFontScale: number = 1;
+  private systemFontScale?: number = 1;
   public static readonly maxCountOfExtraItems = 3;
   public static readonly maxOtherCountOfExtraItems = 2;
   public static readonly commonZero = 0;
@@ -179,7 +179,7 @@ export struct EditableTitleBar {
     } catch (exception) {
       let code: number = (exception as BusinessError).code;
       let message: string = (exception as BusinessError).message;
-      hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
+      hilog.error(0x3900, 'Ace', `Faild to init fontsizescale info,cause, code: ${code}, message: ${message}`);
     }
   }
 
