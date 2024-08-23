@@ -44,6 +44,7 @@ constexpr float SLIDER_MIN = .0f;
 constexpr float SLIDER_MAX = 100.0f;
 constexpr Dimension BUBBLE_TO_SLIDER_DISTANCE = 10.0_vp;
 constexpr double STEP_OFFSET = 50.0;
+constexpr int32_t ACCESSIBILITY_SENDEVENT_TIMESTAMP = 400;
 
 bool GetReverseValue(RefPtr<SliderLayoutProperty> layoutProperty)
 {
@@ -1338,10 +1339,34 @@ void SliderPattern::FireChangeEvent(int32_t mode)
     }
     sliderEventHub->FireChangeEvent(static_cast<float>(value_), mode);
     valueChangeFlag_ = false;
+    SendAccessibilityValueEvent(mode);
+}
 
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->OnAccessibilityEvent(AccessibilityEventType::COMPONENT_CHANGE);
+void SliderPattern::SendAccessibilityValueEvent(int32_t mode)
+{
+    if (accessibilityValue_ == value_) {
+        return;
+    }
+    accessibilityValue_ = value_;
+    auto currentTime = GetMilliseconds();
+    if (currentTime - lastAccessibilityValueTime_ < ACCESSIBILITY_SENDEVENT_TIMESTAMP) {
+        return;
+    }
+    lastAccessibilityValueTime_ = currentTime;
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostDelayedTask(
+        [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            host->OnAccessibilityEvent(AccessibilityEventType::COMPONENT_CHANGE);
+        },
+        TaskExecutor::TaskType::UI, ACCESSIBILITY_SENDEVENT_TIMESTAMP, "ArkUISliderSendAccessibilityValueEvent"
+    );
 }
 
 void SliderPattern::UpdateMarkDirtyNode(const PropertyChangeFlag& Flag)
