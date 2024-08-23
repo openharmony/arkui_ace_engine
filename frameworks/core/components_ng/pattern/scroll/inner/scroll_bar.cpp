@@ -377,7 +377,7 @@ void ScrollBar::SetGestureEvent()
             }
             if ((info.GetTouches().front().GetTouchType() == TouchType::UP ||
                     info.GetTouches().front().GetTouchType() == TouchType::CANCEL) &&
-                info.GetTouches().size() <= 1) {
+                    (info.GetTouches().size() <= 1)) {
                 if (scrollBar->IsPressed() && !scrollBar->IsHover()) {
                     scrollBar->PlayScrollBarShrinkAnimation();
                     scrollBar->ScheduleDisappearDelayTask();
