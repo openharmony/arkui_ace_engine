@@ -5049,7 +5049,6 @@ void OverlayManager::ComputeSingleGearSheetOffset(NG::SheetStyle& sheetStyle, Re
     auto sheetMaxHeight = sheetPattern->GetPageHeightWithoutOffset();
     auto sheetTopSafeArea = sheetPattern->GetSheetTopSafeArea();
 
-    CheckDeviceInLandscape(sheetStyle, sheetNode, sheetTopSafeArea);
     auto largeHeight = sheetMaxHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx() - sheetTopSafeArea;
     if (sheetStyle.sheetMode.has_value()) {
         if (sheetStyle.sheetMode == SheetMode::MEDIUM) {
@@ -5088,7 +5087,6 @@ void OverlayManager::ComputeDetentsSheetOffset(NG::SheetStyle& sheetStyle, RefPt
     CHECK_NULL_VOID(sheetPattern);
     auto sheetMaxHeight = sheetPattern->GetPageHeightWithoutOffset();
     auto sheetTopSafeArea = sheetPattern->GetSheetTopSafeArea();
-    CheckDeviceInLandscape(sheetStyle, sheetNode, sheetTopSafeArea);
     auto largeHeight = sheetMaxHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx() - sheetTopSafeArea;
     auto selection = sheetStyle.detents[sheetPattern->GetDetentsIndex()];
     if (selection.sheetMode.has_value()) {
