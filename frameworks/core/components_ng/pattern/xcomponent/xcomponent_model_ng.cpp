@@ -63,7 +63,6 @@ RefPtr<AceType> XComponentModelNG::Create(int32_t nodeId, float width, float hei
 
 void XComponentModelNG::InitXComponent(FrameNode* frameNode)
 {
-    LOGI("Kee XComponentModelNG::InitXComponent");
     CHECK_NULL_VOID(frameNode);
     auto node = AceType::Claim(frameNode);
     auto type = GetTypeImpl(node);
@@ -134,6 +133,14 @@ void XComponentModelNG::SetOnLoad(FrameNode* frameNode, LoadEvent&& onLoad)
     auto node = AceType::Claim(frameNode);
     auto type = GetTypeImpl(node);
     if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
+        return;
+    }
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(xcPattern);
+    if (xcPattern->NeedTriggerLoadEventImmediately()) {
+        if (onLoad) {
+            onLoad(xcPattern->GetId());
+        }
         return;
     }
     auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
@@ -281,14 +288,13 @@ RefPtr<FrameNode> XComponentModelNG::CreateFrameNode(int32_t nodeId, const std::
 
 RefPtr<FrameNode> XComponentModelNG::CreateTypeNode(int32_t nodeId, ArkUI_XComponent_Params* params)
 {
-    LOGE("Kee XComponentModelNG::CreateTypeNode");
     auto id = params->id;
     auto type = params->type;
     auto libraryName = params->libraryName;
     auto controller = params->controller;
 
-    auto frameNode = FrameNode::CreateFrameNode(
-        V2::XCOMPONENT_ETS_TAG, nodeId, AceType::MakeRefPtr<XComponentPattern>(id, type, libraryName, controller, 0.0, 0.0, true));
+    auto frameNode = FrameNode::CreateFrameNode(V2::XCOMPONENT_ETS_TAG, nodeId,
+        AceType::MakeRefPtr<XComponentPattern>(id, type, libraryName, controller, 0.0, 0.0, true));
     auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
     if (layoutProperty) {
         layoutProperty->UpdateXComponentType(type);

@@ -118,8 +118,8 @@ public:
 
     std::pair<RefPtr<OHOS::Ace::NativeXComponentImpl>, std::weak_ptr<OH_NativeXComponent>> GetNativeXComponent()
     {
-        LOGE("Kee xcomponent pattern GetNativeXComponent");
         if (!nativeXComponent_ || !nativeXComponentImpl_) {
+            // for XComponentType::NODE
             nativeXComponentImpl_ = AceType::MakeRefPtr<NativeXComponentImpl>();
             nativeXComponent_ = std::make_shared<OH_NativeXComponent>(AceType::RawPtr(nativeXComponentImpl_));
         }
@@ -138,13 +138,7 @@ public:
     void XComponentSizeChange(const RectF& surfaceRect, bool needFireNativeEvent);
     void NativeXComponentInit()
     {
-        onSurfaceCreated();
-    }
-
-    void* GetNativeWindow()
-    {
-        CHECK_NULL_RETURN(renderSurface_, nullptr);
-        return renderSurface_->GetNativeWindow();
+        OnSurfaceCreated();
     }
 
     std::string GetId() const
@@ -289,6 +283,11 @@ public:
         return transformHintChangedCallbackId_.has_value();
     }
 
+    bool NeedTriggerLoadEventImmediately() const
+    {
+        return isTypedNode_ && isNativeXComponent_ && hasLoadNativeDone_;
+    }
+
     void SetExportTextureSurfaceId(const std::string& surfaceId);
     void FireExternalEvent(RefPtr<NG::PipelineContext> context,
         const std::string& componentId, const uint32_t nodeId, const bool isDestroy);
@@ -308,6 +307,7 @@ public:
     void StopImageAnalyzer();
     RectF AdjustPaintRect(float positionX, float positionY, float width, float height, bool isRound);
     float RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor);
+    void OnSurfaceDestroyed();
 
 private:
     void OnAttachToFrameNode() override;
@@ -326,12 +326,11 @@ private:
     void NativeXComponentOffset(double x, double y);
 
     void LoadNative();
-    void onNativeLoad(FrameNode* frameNode);
-    void onNativeUnload(FrameNode* frameNode);
+    void OnNativeLoad(FrameNode* frameNode);
+    void OnNativeUnload(FrameNode* frameNode);
 
-    void onSurfaceCreated();
-    void onSurfaceChanged(const RectF& surfaceRect);
-    void onSurfaceDestroyed();
+    void OnSurfaceCreated();
+    void OnSurfaceChanged(const RectF& surfaceRect);
 
     void NativeSurfaceShow();
     void NativeSurfaceHide();
@@ -448,6 +447,7 @@ private:
     uint32_t rotation_ = 0;
     bool isTypedNode_ = false;
     bool isNativeXComponent_ = false;
+    bool hasLoadNativeDone_ = false;
 };
 } // namespace OHOS::Ace::NG
 

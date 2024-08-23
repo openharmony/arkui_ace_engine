@@ -24171,14 +24171,6 @@ class ArkXComponentComponent extends ArkComponent {
   outlineWidth(value) {
     throw new Error('Method not implemented.');
   }
-  width(value) {
-    modifierWithKey(this._modifiersWithKeys, XComponentWidthModifier.identity, XComponentWidthModifier, value);
-    return this;
-  }
-  height(value) {
-    modifierWithKey(this._modifiersWithKeys, XComponentHeightModifier.identity, XComponentHeightModifier, value);
-    return this;
-  }
   expandSafeArea(types, edges) {
     throw new Error('Method not implemented.');
   }
@@ -24661,40 +24653,6 @@ class XComponentOpacityModifier extends ModifierWithKey {
   }
 }
 XComponentOpacityModifier.identity = Symbol('xComponentOpacity');
-class XComponentWidthModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().xComponent.resetWidth(node);
-    }
-    else {
-      getUINativeModule().xComponent.setWidth(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-XComponentWidthModifier.identity = Symbol('xComponentWidth');
-class XComponentHeightModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().xComponent.resetHeight(node);
-    }
-    else {
-      getUINativeModule().xComponent.setHeight(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-XComponentHeightModifier.identity = Symbol('xComponentHeight');
 class XComponentBackgroundColorModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

@@ -160,10 +160,11 @@ OH_NativeXComponent_KeyEvent ConvertNativeXComponentKeyEvent(const KeyEvent& eve
 
 XComponentPattern::XComponentPattern(const std::optional<std::string>& id, XComponentType type,
     const std::optional<std::string>& libraryname,
-    const std::shared_ptr<InnerXComponentController>& xcomponentController, float initWidth, float initHeight, bool isTypedNode)
-    : id_(id), type_(type), xcomponentController_(xcomponentController), initSize_(initWidth, initHeight)
+    const std::shared_ptr<InnerXComponentController>& xcomponentController, float initWidth, float initHeight,
+    bool isTypedNode)
+    : id_(id), type_(type), xcomponentController_(xcomponentController), initSize_(initWidth, initHeight),
+      isTypedNode_(isTypedNode)
 {
-    isTypedNode_ = isTypedNode;
     SetLibraryName(libraryname);
     if (!isTypedNode_) {
         InitNativeXComponent();
@@ -172,8 +173,7 @@ XComponentPattern::XComponentPattern(const std::optional<std::string>& id, XComp
 
 void XComponentPattern::InitNativeXComponent()
 {
-    if ((type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE) &&
-        libraryname_.has_value() && !libraryname_.value().empty()) {
+    if ((type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE) && libraryname_.has_value()) {
         isNativeXComponent_ = true;
         nativeXComponentImpl_ = AceType::MakeRefPtr<NativeXComponentImpl>();
         nativeXComponent_ = std::make_shared<OH_NativeXComponent>(AceType::RawPtr(nativeXComponentImpl_));
@@ -182,12 +182,9 @@ void XComponentPattern::InitNativeXComponent()
 
 void XComponentPattern::InitXComponent()
 {
-    LOGE("Kee InitXComponent");
     // used for TypedNode, not for declareative
     if (isTypedNode_) {
-        LOGE("Kee isTypedNode_");
         InitNativeXComponent();
-        InitNativeWindow(surfaceSize_.Width(), surfaceSize_.Height());
         if (isNativeXComponent_) {
             LoadNative();
         }
@@ -196,7 +193,6 @@ void XComponentPattern::InitXComponent()
 
 void XComponentPattern::InitSurface()
 {
-    LOGE("Kee XComponentPattern::InitSurface");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
@@ -233,18 +229,18 @@ void XComponentPattern::InitSurface()
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddWindowStateChangedCallback(host->GetId());
     SetRotation(pipelineContext->GetTransformHint());
-    auto callbackId = pipelineContext->RegisterTransformHintChangeCallback([weak = WeakClaim(this)](uint32_t transform) {
-        auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->SetRotation(transform);
-        }
-    });
+    auto callbackId =
+        pipelineContext->RegisterTransformHintChangeCallback([weak = WeakClaim(this)](uint32_t transform) {
+            auto pattern = weak.Upgrade();
+            if (pattern) {
+                pattern->SetRotation(transform);
+            }
+        });
     UpdateTransformHintChangedCallbackId(callbackId);
 }
 
 void XComponentPattern::Initialize()
 {
-    LOGE("Kee XComponentPattern::Initialize");
     if (type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE) {
         InitSurface();
         InitEvent();
@@ -262,7 +258,6 @@ void XComponentPattern::Initialize()
 
 void XComponentPattern::OnAttachToMainTree()
 {
-    LOGE("Kee XComponentPattern::OnAttachToMainTree");
     if (isTypedNode_) {
         CHECK_NULL_VOID(renderSurface_);
         renderSurface_->RegisterSurface();
@@ -270,21 +265,19 @@ void XComponentPattern::OnAttachToMainTree()
         surfaceId_ = renderSurface_->GetUniqueId();
         CHECK_NULL_VOID(xcomponentController_);
         xcomponentController_->SetSurfaceId(surfaceId_);
-        nativeWindow_ = renderSurface_->GetNativeWindow();
-        onSurfaceCreated();
+        OnSurfaceCreated();
     }
 }
 
 void XComponentPattern::OnDetachFromMainTree()
 {
-    LOGE("Kee XComponentPattern::OnDetachFromMainTree");
     if (isTypedNode_) {
         CHECK_NULL_VOID(renderSurface_);
         renderSurface_->ReleaseSurfaceBuffers();
         renderSurface_->Disconnect();
         renderSurface_->UnregisterSurface();
         CHECK_NULL_VOID(xcomponentController_);
-        onSurfaceDestroyed();
+        OnSurfaceDestroyed();
         xcomponentController_->SetSurfaceId("");
     }
 }
@@ -587,13 +580,13 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     if (isTypedNode_) {
-        onNativeUnload(frameNode);
+        OnNativeUnload(frameNode);
     } else {
         if (!hasXComponentInit_) {
             return;
         }
         if (type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE) {
-            onSurfaceDestroyed();
+            OnSurfaceDestroyed();
             auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
             CHECK_NULL_VOID(eventHub);
             {
@@ -688,7 +681,6 @@ void XComponentPattern::SetRotation(uint32_t rotation)
 
 void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
 {
-    LOGE("Kee XComponentPattern::BeforeSyncGeometryProperties");
     if (type_ == XComponentType::COMPONENT || type_ == XComponentType::NODE || config.skipMeasure) {
         return;
     }
@@ -711,10 +703,8 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
     const auto& [offsetChanged, sizeChanged, needFireNativeEvent] = UpdateSurfaceRect();
     if (!hasXComponentInit_) {
         initSize_ = drawSize_;
-        if (!SystemProperties::GetExtSurfaceEnabled()) {
-            if (!isTypedNode_) {
-                XComponentSizeInit();
-            }
+        if (!SystemProperties::GetExtSurfaceEnabled() && !isTypedNode_) {
+            XComponentSizeInit();
         }
         auto offset = globalPosition_ + localPosition_;
         NativeXComponentOffset(offset.GetX(), offset.GetY());
@@ -821,6 +811,7 @@ void XComponentPattern::InitNativeWindow(float textureWidth, float textureHeight
         renderSurface_->CreateNativeWindow();
         renderSurface_->AdjustNativeWindowSize(
             static_cast<uint32_t>(textureWidth * viewScale), static_cast<uint32_t>(textureHeight * viewScale));
+        nativeWindow_ = renderSurface_->GetNativeWindow();
     }
 }
 
@@ -864,7 +855,7 @@ void XComponentPattern::XComponentSizeChange(const RectF& surfaceRect, bool need
     if (!isTypedNode_ && isNativeXComponent_ && !needFireNativeEvent) {
         return;
     }
-    onSurfaceChanged(surfaceRect);
+    OnSurfaceChanged(surfaceRect);
 }
 
 void XComponentPattern::InitNativeNodeCallbacks()
@@ -1297,7 +1288,6 @@ std::vector<OH_NativeXComponent_HistoricalPoint> XComponentPattern::SetHistoryPo
 void XComponentPattern::FireExternalEvent(RefPtr<NG::PipelineContext> context,
     const std::string& componentId, const uint32_t nodeId, const bool isDestroy)
 {
-    LOGE("Kee XComponentPattern::FireExternalEvent");
     CHECK_NULL_VOID(context);
 #ifdef NG_BUILD
     auto frontEnd = AceType::DynamicCast<DeclarativeFrontendNG>(context->GetFrontend());
@@ -1313,7 +1303,6 @@ ExternalEvent XComponentPattern::CreateExternalEvent()
 {
     return
         [weak = AceType::WeakClaim(this)](const std::string& componentId, const uint32_t nodeId, const bool isDestroy) {
-            LOGE("Kee XComponentPattern::CreateExternalEvent");
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             auto host = pattern->GetHost();
@@ -1606,31 +1595,29 @@ std::tuple<bool, bool, bool> XComponentPattern::UpdateSurfaceRect()
 
 void XComponentPattern::LoadNative()
 {
-    LOGE("Kee LoadNative");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->FireSurfaceInitEvent(id_.value(), host->GetId());
-    LOGE("Kee call LoadNative");
-    onNativeLoad(reinterpret_cast<FrameNode*>(AceType::RawPtr(host)));
+    eventHub->FireSurfaceInitEvent(id_.value_or(""), host->GetId());
+    OnNativeLoad(reinterpret_cast<FrameNode*>(AceType::RawPtr(host)));
 }
 
-void XComponentPattern::onNativeLoad(FrameNode* frameNode)
+void XComponentPattern::OnNativeLoad(FrameNode* frameNode)
 {
-    LOGE("Kee LoadNative");
+    hasLoadNativeDone_ = true;
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     {
-        LOGE("Kee LoadNative");
         ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] FireLoadEvent", GetId().c_str());
         eventHub->FireLoadEvent(GetId());
     }
 }
 
-void XComponentPattern::onNativeUnload(FrameNode* frameNode)
+void XComponentPattern::OnNativeUnload(FrameNode* frameNode)
 {
+    hasLoadNativeDone_ = false;
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -1640,7 +1627,7 @@ void XComponentPattern::onNativeUnload(FrameNode* frameNode)
     }
 }
 
-void XComponentPattern::onSurfaceCreated()
+void XComponentPattern::OnSurfaceCreated()
 {
     CHECK_RUN_ON(UI);
     auto width = initSize_.Width();
@@ -1651,8 +1638,8 @@ void XComponentPattern::onSurfaceCreated()
         TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] native OnSurfaceCreated", GetId().c_str());
         ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] NativeSurfaceCreated", GetId().c_str());
         InitNativeWindow(width, height);
-        nativeXComponentImpl_->SetXComponentWidth(static_cast<uint32_t>(width));
-        nativeXComponentImpl_->SetXComponentHeight(static_cast<uint32_t>(height));
+        nativeXComponentImpl_->SetXComponentWidth(static_cast<int32_t>(width));
+        nativeXComponentImpl_->SetXComponentHeight(static_cast<int32_t>(height));
         nativeXComponentImpl_->SetSurface(nativeWindow_);
         const auto* callback = nativeXComponentImpl_->GetCallback();
         CHECK_NULL_VOID(callback);
@@ -1670,7 +1657,7 @@ void XComponentPattern::onSurfaceCreated()
     }
 }
 
-void XComponentPattern::onSurfaceChanged(const RectF& surfaceRect)
+void XComponentPattern::OnSurfaceChanged(const RectF& surfaceRect)
 {
     CHECK_RUN_ON(UI);
     auto host = GetHost();
@@ -1706,7 +1693,7 @@ void XComponentPattern::onSurfaceChanged(const RectF& surfaceRect)
     }
 }
 
-void XComponentPattern::onSurfaceDestroyed()
+void XComponentPattern::OnSurfaceDestroyed()
 {
     if (isNativeXComponent_) {
         ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] native OnSurfaceDestroyed", GetId().c_str());

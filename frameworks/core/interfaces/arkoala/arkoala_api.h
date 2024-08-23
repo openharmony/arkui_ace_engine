@@ -4471,7 +4471,6 @@ struct ArkUISideBarModifier {
 };
 
 struct ArkUIXComponentModifier {
-    void (*initXComponent)(ArkUINodeHandle node);
     // loadXComponent() returns VM-specific handle produced by
     // ArkNativeEngine::LoadModuleByName(). vmKind parameters allows to
     // differentiate which VM shall be used to load. Embedder code must use kind
@@ -4482,11 +4481,6 @@ struct ArkUIXComponentModifier {
     void (*setXComponentOptions)(ArkUINodeHandle node, ArkUI_CharPtr id, ArkUI_CharPtr type, ArkUI_CharPtr libraryName);
     ArkUI_CharPtr (*getXComponentSurfaceId)(ArkUIXComponentControllerHandle controller);
     ArkUIXComponentControllerHandle (*getXComponentController)(ArkUINodeHandle node);
-
-    void (*setXComponentWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue);
-    void (*resetXComponentWidth)(ArkUINodeHandle node);
-    void (*setXComponentHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue);
-    void (*resetXComponentHeight)(ArkUINodeHandle node);
     void (*setXComponentEnableAnalyzer)(ArkUINodeHandle node, ArkUI_Bool enable);
     void (*resetXComponentEnableAnalyzer)(ArkUINodeHandle node);
     void (*setXComponentBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
@@ -4503,6 +4497,7 @@ struct ArkUIXComponentModifier {
     void* (*getNativeXComponent)(ArkUINodeHandle node);
     void (*setXComponentLibraryname)(ArkUINodeHandle node, ArkUI_CharPtr libraryname);
     void (*setImageAIOptions)(ArkUINodeHandle node, void* options);
+    void (*initXComponent)(ArkUINodeHandle node);
 };
 
 struct ArkUIStateModifier {
