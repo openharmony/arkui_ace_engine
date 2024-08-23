@@ -80,7 +80,7 @@ class EditableTitleBarTheme {
             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
     }
 }
-class buttonGestureModifier {
+class ButtonGestureModifier {
     constructor(controller) {
         this.longPressTime = 500;
         this.fontSize = 1;
@@ -775,7 +775,7 @@ class ImageMenuItem extends ViewPU {
             isModal: true,
             customStyle: true
         }, this);
-        this.__buttonGestureModifier = new ObservedPropertyObjectPU(new buttonGestureModifier(this.dialogController), this, "buttonGestureModifier");
+        this.__buttonGestureModifier = new ObservedPropertyObjectPU(new ButtonGestureModifier(this.dialogController), this, "buttonGestureModifier");
         this.setInitiallyProvidedValue(params);
         this.declareWatch('fontSize', this.onFontSizeUpdated);
         this.finalizeConstruction();
