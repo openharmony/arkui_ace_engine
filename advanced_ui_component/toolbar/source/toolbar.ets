@@ -151,6 +151,7 @@ export struct ToolBar {
   @State toolBarItemGestureModifier: ButtonGestureModifier[] = [];
   isFollowSystem: boolean = false;
   maxFontSizeScale: number = 3.2;
+  moreIndex: number = 4;
 
   onWillApplyTheme(theme: Theme) {
     this.iconPrimaryColor = theme.colors.iconPrimary;
@@ -363,13 +364,13 @@ export struct ToolBar {
     this.toolBarItemGestureModifier = [];
     this.fontSize = this.getFontSizeScale();
     for (let i = 0; i < this.toolBarList.length; i++) {
-      if (i >= 4 && this.toolBarList.length > TOOLBAR_MAX_LENGTH) {
-        this.menuContent[i - 4] = {
+      if (i >= moreIndex && this.toolBarList.length > TOOLBAR_MAX_LENGTH) {
+        this.menuContent[i - moreIndex] = {
           value: this.toolBarList[i].content,
           action: this.toolBarList[i].action as () => void,
           enabled: this.toolBarList[i].state !== ItemState.DISABLE,
         }
-        this.toolBarItemGestureModifier[4] = new ButtonGestureModifier(new CustomDialogController({
+        this.toolBarItemGestureModifier[moreIndex] = new ButtonGestureModifier(new CustomDialogController({
           builder: ToolBarDialog({
             itemDialog: {
               content: this.moreText,
@@ -381,7 +382,7 @@ export struct ToolBar {
           isModal: true,
           customStyle: true,
         }))
-        this.toolBarItemGestureModifier[4].fontSize = this.fontSize;
+        this.toolBarItemGestureModifier[moreIndex].fontSize = this.fontSize;
       } else if (this.toolBarList[i]?.icon || this.toolBarList[i]?.toolBarSymbolOptions?.activated ||
         this.toolBarList[i]?.toolBarSymbolOptions?.normal) {
         this.menuContent = [];
@@ -426,7 +427,7 @@ export struct ToolBar {
         .attributeModifier(this.dividerModifier)
       Row() {
         ForEach(this.toolBarList, (item: ToolBarOption, index: number) => {
-          if (this.toolBarList.length <= TOOLBAR_MAX_LENGTH || index < 4) {
+          if (this.toolBarList.length <= TOOLBAR_MAX_LENGTH || index < moreIndex) {
             Row() {
               this.TabBuilder(index);
             }
@@ -436,7 +437,7 @@ export struct ToolBar {
         })
         if (this.refreshData() && this.toolBarList.length > TOOLBAR_MAX_LENGTH) {
           Row() {
-            this.MoreTabBuilder(4);
+            this.MoreTabBuilder(moreIndex);
           }
           .height('100%')
           .flexShrink(1)

@@ -214,6 +214,7 @@ export class ToolBar extends ViewPU {
     this.__toolBarItemGestureModifier = new ObservedPropertyObjectPU([], this, 'toolBarItemGestureModifier');
     this.isFollowSystem = false;
     this.maxFontSizeScale = 3.2;
+    this.moreIndex = 4;
     this.setInitiallyProvidedValue(x6);
     this.finalizeConstruction();
   }
@@ -278,6 +279,9 @@ export class ToolBar extends ViewPU {
     }
     if (v6.maxFontSizeScale !== undefined) {
       this.maxFontSizeScale = v6.maxFontSizeScale;
+    }
+    if (v6.moreIndex !== undefined) {
+      this.moreIndex = v6.moreIndex;
     }
   }
 
@@ -779,13 +783,13 @@ export class ToolBar extends ViewPU {
     this.toolBarItemGestureModifier = [];
     this.fontSize = this.getFontSizeScale();
     for (let u3 = 0; u3 < this.toolBarList.length; u3++) {
-      if (u3 >= 4 && this.toolBarList.length > TOOLBAR_MAX_LENGTH) {
-        this.menuContent[u3 - 4] = {
+      if (u3 >= this.moreIndex && this.toolBarList.length > TOOLBAR_MAX_LENGTH) {
+        this.menuContent[u3 - this.moreIndex] = {
           value: this.toolBarList[u3].content,
           action: this.toolBarList[u3].action,
           enabled: this.toolBarList[u3].state !== ItemState.DISABLE,
         };
-        this.toolBarItemGestureModifier[4] = new ButtonGestureModifier(new CustomDialogController({
+        this.toolBarItemGestureModifier[this.moreIndex] = new ButtonGestureModifier(new CustomDialogController({
           builder: () => {
             let z3 = new ToolBarDialog(this, {
               itemDialog: {
@@ -812,7 +816,7 @@ export class ToolBar extends ViewPU {
           isModal: true,
           customStyle: true
         }, this));
-        this.toolBarItemGestureModifier[4].fontSize = this.fontSize;
+        this.toolBarItemGestureModifier[this.moreIndex].fontSize = this.fontSize;
       }
       else if (this.toolBarList[u3]?.icon || this.toolBarList[u3]?.toolBarSymbolOptions?.activated ||
         this.toolBarList[u3]?.toolBarSymbolOptions?.normal) {
@@ -910,7 +914,7 @@ export class ToolBar extends ViewPU {
         const a3 = y2;
         this.observeComponentCreation2((c3, d3) => {
           If.create();
-          if (this.toolBarList.length <= TOOLBAR_MAX_LENGTH || z2 < 4) {
+          if (this.toolBarList.length <= TOOLBAR_MAX_LENGTH || z2 < this.moreIndex) {
             this.ifElseBranchUpdateFunction(0, () => {
               this.observeComponentCreation2((h3, i3) => {
                 Row.create();
@@ -940,7 +944,7 @@ export class ToolBar extends ViewPU {
             Row.height('100%');
             Row.flexShrink(1);
           }, Row);
-          this.MoreTabBuilder.bind(this)(4);
+          this.MoreTabBuilder.bind(this)(this.moreIndex);
           Row.pop();
         });
       }
