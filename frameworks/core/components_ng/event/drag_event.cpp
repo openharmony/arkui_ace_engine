@@ -1351,7 +1351,11 @@ void DragEventActuator::HideFilter()
 
 void DragEventActuator::HidePixelMap(bool startDrag, double x, double y, bool showAnimation)
 {
-    auto pipelineContext = PipelineContext::GetMainPipelineContext();
+    auto gestureEventHub = gestureEventHub_.Upgrade();
+    CHECK_NULL_VOID(gestureEventHub);
+    auto frameNode = gestureEventHub->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
