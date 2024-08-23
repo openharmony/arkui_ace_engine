@@ -2997,6 +2997,18 @@ bool OverlayManager::RemoveMenu(const RefPtr<FrameNode>& overlay)
     return true;
 }
 
+bool OverlayManager::RemoveDragPreview(const RefPtr<FrameNode>& overlay)
+{
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "remove dragPreview enter");
+    auto columnNode = pixmapColumnNodeWeak_.Upgrade();
+    if (columnNode != overlay) {
+        return false;
+    }
+    RemovePixelMap();
+    RemoveGatherNode();
+    return true;
+}
+
 int32_t OverlayManager::GetPopupIdByNode(const RefPtr<FrameNode>& overlay)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "GetPopupIdByNode IN");
@@ -3055,6 +3067,9 @@ int32_t OverlayManager::RemoveOverlayCommon(const RefPtr<NG::UINode>& rootNode, 
     }
     if (InstanceOf<MenuWrapperPattern>(pattern)) {
         return RemoveMenu(overlay) ? OVERLAY_REMOVE : OVERLAY_EXISTS;
+    }
+    if (InstanceOf<LinearLayoutPattern>(pattern)) {
+        return RemoveDragPreview(overlay) ? OVERLAY_REMOVE : OVERLAY_NOTHING;
     }
     return OVERLAY_NOTHING;
 }
