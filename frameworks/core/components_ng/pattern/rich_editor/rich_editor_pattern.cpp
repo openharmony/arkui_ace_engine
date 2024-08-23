@@ -1800,6 +1800,7 @@ void RichEditorPattern::UpdateSpanStyle(
         textStyle.ToString().c_str(), imageStyle.ToString().c_str());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    AdjustSelector(start, end);
     int32_t spanStart = 0;
     int32_t spanEnd = 0;
     for (auto it = host->GetChildren().begin(); it != host->GetChildren().end(); ++it) {
@@ -2836,8 +2837,6 @@ void RichEditorPattern::HandleBlurEvent()
         magnifierController_->RemoveMagnifierFrameNode();
     }
     CloseSelectOverlay();
-    ResetSelection();
-
     isCaretInContentArea_ = reason == BlurReason::WINDOW_BLUR && IsCaretInContentArea();
     if (reason != BlurReason::WINDOW_BLUR) {
         lastSelectionRange_.reset();
