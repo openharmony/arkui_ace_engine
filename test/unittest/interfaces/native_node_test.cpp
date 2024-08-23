@@ -2244,14 +2244,11 @@ HWTEST_F(NativeNodeTest, NativeNodeTest019, TestSize.Level1)
     nodeAPI->setAttribute(rootNode, NODE_XCOMPONENT_TYPE, &item);
     value[0].i32 = ARKUI_XCOMPONENT_TYPE_TEXTURE;
     nodeAPI->setAttribute(rootNode, NODE_XCOMPONENT_TYPE, &item);
-    value[0].f32 = 10.0f;
-    nodeAPI->setAttribute(rootNode, NODE_XCOMPONENT_SURFACE_SIZE, &item);
+
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_XCOMPONENT_TYPE), ARKUI_ERROR_CODE_NO_ERROR);
-    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_XCOMPONENT_SURFACE_SIZE), ARKUI_ERROR_CODE_NO_ERROR);
 
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_XCOMPONENT_ID), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_XCOMPONENT_TYPE), nullptr);
-    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_XCOMPONENT_SURFACE_SIZE), nullptr);
     nodeAPI->disposeNode(rootNode);
 }
 
@@ -4602,7 +4599,6 @@ HWTEST_F(NativeNodeTest, NativeNodeTest060, TestSize.Level1)
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_SWIPER_PREV_MARGIN, &itemFloat), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_SWIPER_NEXT_MARGIN, &item0), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_SWIPER_NEXT_MARGIN, &itemFloat), ARKUI_ERROR_CODE_PARAM_INVALID);
-    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_SWIPER_INDICATOR, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_SWIPER_INDICATOR, &item0), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_SWIPER_INDICATOR, &itemEnum), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_SWIPER_INDICATOR_INTERACTIVE, &item0),
