@@ -9842,6 +9842,11 @@ void RichEditorPattern::UpdateSelectionByTouchMove(const Offset& touchOffset)
     auto [initSelectStart, initSelectEnd] = initSelector_;
     int32_t start = std::min(initSelectStart, currentPosition);
     int32_t end = std::max(initSelectEnd, currentPosition);
+    if (start == textSelector_.GetTextStart()) {
+        StartVibratorByIndexChange(end, textSelector_.GetTextEnd());
+    } else {
+        StartVibratorByIndexChange(start, textSelector_.GetTextStart());
+    }
     bool needResumeTwinkling = isEditing_ && !caretTwinkling_ && (start == end);
     if (needResumeTwinkling) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Resume twinking when select nothing");
