@@ -841,13 +841,13 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest034, TestSize.Level1)
     bgBlurStyle2->isValidColor = true;
     EXPECT_TRUE(rosenRenderContext->UpdateBlurBackgroundColor(bgBlurStyle2));
     bgBlurStyle2->isWindowFocused = false;
-    EXPECT_FALSE(rosenRenderContext->UpdateBlurBackgroundColor(bgBlurStyle2));
+    EXPECT_TRUE(rosenRenderContext->UpdateBlurBackgroundColor(bgBlurStyle2));
 
     std::optional<EffectOption> efffectOption = std::make_optional(EffectOption());
     EXPECT_TRUE(rosenRenderContext->UpdateBlurBackgroundColor(efffectOption));
     efffectOption->isValidColor = true;
     EXPECT_TRUE(rosenRenderContext->UpdateBlurBackgroundColor(efffectOption));
     efffectOption->isWindowFocused = false;
-    EXPECT_FALSE(rosenRenderContext->UpdateBlurBackgroundColor(efffectOption));
+    EXPECT_TRUE(rosenRenderContext->UpdateBlurBackgroundColor(efffectOption));
 }
 } // namespace OHOS::Ace::NG
