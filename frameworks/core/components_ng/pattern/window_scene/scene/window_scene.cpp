@@ -457,12 +457,18 @@ void WindowScene::OnConnect()
 
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto frameSize = geometryNode->GetFrameSize();
+        RectF windowRect(0, 0, frameSize.Width(), frameSize.Height());
+        context->SyncGeometryProperties(windowRect);
+
         self->AddChild(host, self->appWindow_, self->appWindowName_, 0);
-        self->appWindow_->ForceSyncGeometryNode();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
-            "[WMSMain] Add app window finished, id: %{public}d, node id: %{public}d, name: %{public}s",
-            self->session_->GetPersistentId(), host->GetId(), self->session_->GetSessionInfo().bundleName_.c_str());
+            "[WMSMain] Add app window finished, id: %{public}d, node id: %{public}d, "
+            "name: %{public}s, rect: %{public}s", self->session_->GetPersistentId(), host->GetId(),
+            self->session_->GetSessionInfo().bundleName_.c_str(), windowRect.ToString().c_str());
 
         surfaceNode->SetBufferAvailableCallback(self->coldStartCallback_);
     };
