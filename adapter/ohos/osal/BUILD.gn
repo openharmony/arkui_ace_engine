@@ -56,6 +56,7 @@ template("ace_osal_ohos_source_set") {
       "data_detector_adapter.cpp",
       "data_detector_loader.cpp",
       "data_detector_mgr.cpp",
+      "display_info_utils.cpp",
       "download_manager_ohos.cpp",
       "event_report.cpp",
       "exception_handler.cpp",

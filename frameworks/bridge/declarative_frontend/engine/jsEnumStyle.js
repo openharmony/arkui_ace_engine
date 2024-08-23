@@ -900,6 +900,12 @@ var DialogAlignment;
   DialogAlignment[DialogAlignment["BottomEnd"] = 9] = "BottomEnd";
 })(DialogAlignment || (DialogAlignment = {}));
 
+let HoverModeAreaType;
+(function (HoverModeAreaType) {
+  HoverModeAreaType[HoverModeAreaType["TOP_SCREEN"] = 0] = "TOP_SCREEN";
+  HoverModeAreaType[HoverModeAreaType["BOTTOM_SCREEN"] = 1] = "BOTTOM_SCREEN";
+})(HoverModeAreaType || (HoverModeAreaType = {}));
+
 var DialogButtonStyle;
 (function (DialogButtonStyle) {
   DialogButtonStyle[DialogButtonStyle["DEFAULT"] = 0] = "DEFAULT";

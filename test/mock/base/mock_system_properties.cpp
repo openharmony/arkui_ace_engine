@@ -189,4 +189,9 @@ float SystemProperties::GetDragStartPanDistanceThreshold()
 {
     return dragStartPanDisThreshold_;
 }
+
+bool SystemProperties::IsSmallFoldProduct()
+{
+    return false;
+}
 } // namespace OHOS::Ace
