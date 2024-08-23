@@ -104,7 +104,7 @@ public:
     int32_t CheckNavDestinationExists(const JSRef<JSObject>& navPathInfo);
     void ClearPreBuildNodeList() override;
     std::vector<std::string> DumpStackInfo() const override;
-        void FireNavigationInterception(bool isBefore, const RefPtr<NG::NavDestinationContext>& from,
+    void FireNavigationInterception(bool isBefore, const RefPtr<NG::NavDestinationContext>& from,
         const RefPtr<NG::NavDestinationContext>& to, NG::NavigationOperation operation, bool isAnimated) override;
     void FireNavigationModeChange(NG::NavigationMode mode) override;
     JSRef<JSVal> GetParamByIndex(int32_t index) const;
@@ -134,10 +134,9 @@ private:
     void SetJSParentStack(JSRef<JSVal> parent);
     std::string ConvertParamToString(const JSRef<JSVal>& param) const;
     void ParseJsObject(std::unique_ptr<JsonValue>& json, const JSRef<JSObject>& obj, int32_t depthLimit) const;
-    static void UpdateOnStateChangedCallback(
-        JSRef<JSObject> obj, std::function<void()> callback);
-    static void UpdateCheckNavDestinationExistsFunc(
-        JSRef<JSObject> obj, std::function<int32_t(JSRef<JSObject>)> checkFunc);
+    static void UpdateOnStateChangedCallback(JSRef<JSObject> obj, std::function<void()> callback);
+    static void UpdateCheckNavDestinationExistsFunc(JSRef<JSObject> obj,
+        std::function<int32_t(JSRef<JSObject>)> checkFunc);
 
     int LoadDestination(const std::string& name, const JSRef<JSVal>& param, const WeakPtr<NG::UINode>& customNode,
         RefPtr<NG::UINode>& node, RefPtr<NG::NavDestinationGroupNode>& desNode);
