@@ -82,15 +82,13 @@ class EditableTitleBarTheme {
 }
 class ButtonGestureModifier {
     constructor(controller) {
-        this.longPressTime = 500;
         this.fontSize = 1;
-        this.minFontSize = 1.75;
         this.controller = null;
         this.controller = controller;
     }
     applyGesture(event) {
-        if (this.fontSize >= this.minFontSize) {
-            event.addGesture(new LongPressGestureHandler({ repeat: false, duration: this.longPressTime })
+        if (this.fontSize >= ButtonGestureModifier.minFontSize) {
+            event.addGesture(new LongPressGestureHandler({ repeat: false, duration: ButtonGestureModifier.longPressTime })
                 .onAction(() => {
                     if (event) {
                         this.controller?.open();
@@ -105,6 +103,8 @@ class ButtonGestureModifier {
         }
     }
 }
+ButtonGestureModifier.longPressTime = 500;
+ButtonGestureModifier.minFontSize = 1.75;
 export class EditableTitleBar extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
