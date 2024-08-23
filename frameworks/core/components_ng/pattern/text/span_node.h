@@ -30,6 +30,7 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text/span/tlv_util.h"
@@ -37,6 +38,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/components_ng/pattern/symbol/symbol_effect_options.h"
+#include "core/components_ng/property/accessibility_property.h"
 
 #define DEFINE_SPAN_FONT_STYLE_ITEM(name, type)                              \
 public:                                                                      \
@@ -188,6 +190,8 @@ public:
     int32_t rangeStart = -1;
     int32_t position = -1;
     int32_t imageNodeId = -1;
+    int32_t paragraphIndex = -1;
+    uint32_t length = 0;
     std::string inspectId;
     std::string description;
     std::string content;
@@ -206,22 +210,22 @@ public:
     // when paragraph ends with a \n, it causes the paragraph height to gain an extra line
     // to have normal spacing between paragraphs, remove \n from every paragraph except the last one.
     bool needRemoveNewLine = false;
-    bool hasResourceFontColor = false;
-    bool hasResourceDecorationColor = false;
+    bool useThemeFontColor = true;
+    bool useThemeDecorationColor = true;
     std::optional<LeadingMargin> leadingMargin;
     int32_t selectedStart = -1;
     int32_t selectedEnd = -1;
+    RefPtr<AccessibilityProperty> accessibilityProperty = MakeRefPtr<AccessibilityProperty>();
     void UpdateSymbolSpanParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder);
     virtual int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
         bool isSpanStringMode = false, PlaceholderStyle placeholderStyle = PlaceholderStyle(), bool isMarquee = false);
     virtual void UpdateSymbolSpanColor(const RefPtr<FrameNode>& frameNode, TextStyle& symbolSpanStyle);
-    virtual void UpdateTextStyleForAISpan(
-        const std::string& content, const RefPtr<Paragraph>& builder, const TextStyle& textStyle);
+    virtual void UpdateTextStyleForAISpan(const std::string& content, const RefPtr<Paragraph>& builder,
+        const TextStyle& textStyle, const TextStyle& aiSpanStyle);
     virtual void UpdateTextStyle(const std::string& content, const RefPtr<Paragraph>& builder,
         const TextStyle& textStyle, const int32_t selStart, const int32_t selEnd);
     virtual void UpdateContentTextStyle(
         const std::string& content, const RefPtr<Paragraph>& builder, const TextStyle& textStyle);
-    virtual void SetAiSpanTextStyle(std::optional<TextStyle>& textStyle);
     virtual void GetIndex(int32_t& start, int32_t& end) const;
     virtual void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
@@ -281,10 +285,18 @@ public:
     virtual bool EncodeTlv(std::vector<uint8_t>& buff);
     static RefPtr<SpanItem> DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor);
 
+    void SetTextPattern(const RefPtr<Pattern>& pattern)
+    {
+        pattern_ = pattern;
+    }
+
+    bool UpdateSpanTextColor(Color color);
+
 private:
     std::optional<TextStyle> textStyle_;
     bool isParentText = false;
     RefPtr<ResourceObject> resourceObject_;
+    WeakPtr<Pattern> pattern_;
 };
 
 enum class PropertyInfo {
@@ -311,8 +323,11 @@ enum class PropertyInfo {
     LINESPACING,
     SYMBOL_EFFECT_OPTIONS,
     HALFLEADING,
+    VARIABLE_FONT_WEIGHT,
+    ENABLE_VARIABLE_FONT_WEIGHT,
     MIN_FONT_SCALE,
     MAX_FONT_SCALE,
+    BACKGROUNDCOLOR,
 };
 
 class ACE_EXPORT BaseSpan : public virtual AceType {
@@ -429,6 +444,8 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(SymbolEffectOptions, SymbolEffectOptions);
     DEFINE_SPAN_FONT_STYLE_ITEM(MinFontScale, float);
     DEFINE_SPAN_FONT_STYLE_ITEM(MaxFontScale, float);
+    DEFINE_SPAN_FONT_STYLE_ITEM(VariableFontWeight, int32_t);
+    DEFINE_SPAN_FONT_STYLE_ITEM(EnableVariableFontWeight, bool);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(BaselineOffset, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextAlign, TextAlign);
@@ -480,6 +497,21 @@ public:
     }
 
     std::set<PropertyInfo> CalculateInheritPropertyInfo();
+
+
+    void UpdateSpanTextColor(Color color)
+    {
+        if (!spanItem_->fontStyle) {
+            spanItem_->fontStyle = std::make_unique<FontStyle>();
+        }
+        if (spanItem_->fontStyle->CheckTextColor(color)) {
+            return;
+        }
+        spanItem_->fontStyle->UpdateTextColor(color);
+        if (!spanItem_->UpdateSpanTextColor(color)) {
+            RequestTextFlushDirty();
+        }
+    }
 
 protected:
     void DumpInfo() override;

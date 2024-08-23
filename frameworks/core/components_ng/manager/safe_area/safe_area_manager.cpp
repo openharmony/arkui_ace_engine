@@ -24,6 +24,9 @@
 namespace OHOS::Ace::NG {
 bool SafeAreaManager::UpdateCutoutSafeArea(const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize)
 {
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    CHECK_NULL_RETURN(pipeline->GetUseCutout(), false);
     // cutout regions adjacent to edges.
     auto cutoutArea = safeArea;
 

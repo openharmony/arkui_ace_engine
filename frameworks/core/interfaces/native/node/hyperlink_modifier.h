@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIHyperlinkModifier* GetHyperlinkModifier();
+const CJUIHyperlinkModifier* GetCJUIHyperlinkModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_HYPERLINK_MODIFIER_H

@@ -14,6 +14,7 @@
  */
 
 #include "tabs_test_ng.h"
+
 #include "core/components_ng/pattern/dialog/dialog_layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -697,8 +698,9 @@ HWTEST_F(TabBarEventTestNg, Drag001, TestSize.Level1)
      * @tc.steps: step1. Long press on barItem(index:0)
      * @tc.expected: Show dialog
      */
-    MouseTo(MouseAction::MOVE, firstItemPoint, true);
-    TouchTo(TouchType::DOWN, firstItemPoint);
+    HandleMouseEvent(MouseAction::MOVE, firstItemPoint);
+    HandleHoverEvent(true);
+    HandleTouchEvent(TouchType::DOWN, firstItemPoint);
     LongPress(firstItemPoint);
     EXPECT_NE(tabBarPattern_->dialogNode_, nullptr);
 
@@ -730,7 +732,7 @@ HWTEST_F(TabBarEventTestNg, Drag001, TestSize.Level1)
      * @tc.steps: step5. Release press
      * @tc.expected: Hide dialog
      */
-    TouchTo(TouchType::UP, outOfTabBarPoint);
+    HandleTouchEvent(TouchType::UP, outOfTabBarPoint);
     EXPECT_EQ(tabBarPattern_->dialogNode_, nullptr);
     pipeline->fontScale_ = 1.f;
 }
@@ -791,7 +793,7 @@ HWTEST_F(TabBarEventTestNg, ScrollableEvent001, TestSize.Level1)
     TabsModelNG model = CreateTabs();
     model.SetTabBarMode(TabBarMode::SCROLLABLE);
     // Set tabs width less than total barItems width, make tabBar scrollable
-    const float tabsWidth  = BARITEM_SIZE * (TABCONTENT_NUMBER - 1);
+    const float tabsWidth = BARITEM_SIZE * (TABCONTENT_NUMBER - 1);
     ViewAbstract::SetWidth(CalcLength(tabsWidth));
     CreateTabContentsWithBuilder(TABCONTENT_NUMBER);
     CreateTabsDone(model);
@@ -816,8 +818,8 @@ HWTEST_F(TabBarEventTestNg, ScrollableEvent001, TestSize.Level1)
      */
     tabBarPattern_->visibleItemPosition_.clear();
     tabBarPattern_->visibleItemPosition_[1] = { -outOffset, -outOffset + BARITEM_SIZE };
-    tabBarPattern_->visibleItemPosition_[TABCONTENT_NUMBER - 1] =
-        { -outOffset + BARITEM_SIZE * 2, -outOffset + tabsWidth };
+    tabBarPattern_->visibleItemPosition_[TABCONTENT_NUMBER - 1] = { -outOffset + BARITEM_SIZE * 2,
+        -outOffset + tabsWidth };
     dragOffset = -100.f;
     scrollable->UpdateScrollPosition(dragOffset, SCROLL_FROM_UPDATE);
     EXPECT_LT(tabBarPattern_->currentDelta_, 0.0f);

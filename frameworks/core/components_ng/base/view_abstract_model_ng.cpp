@@ -215,6 +215,12 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
     const MenuParam& menuParam, std::function<void()>& previewBuildFunc)
 {
     auto targetNode = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    BindContextMenu(targetNode, type, buildFunc, menuParam, previewBuildFunc);
+}
+
+void ViewAbstractModelNG::BindContextMenu(const RefPtr<FrameNode>& targetNode, ResponseType type,
+    std::function<void()>& buildFunc, const NG::MenuParam& menuParam, std::function<void()>& previewBuildFunc)
+{
     CHECK_NULL_VOID(targetNode);
     auto targetId = targetNode->GetId();
     auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
@@ -345,6 +351,7 @@ void ViewAbstractModelNG::BindDragWithContextMenuParams(const NG::MenuParam& men
     if (gestureHub) {
         gestureHub->SetPreviewMode(menuParam.previewMode);
         gestureHub->SetContextMenuShowStatus(menuParam.isShow);
+        gestureHub->SetMenuBindingType(menuParam.menuBindType);
     } else {
         TAG_LOGW(AceLogTag::ACE_DRAG, "Can not get gestureEventHub!");
     }
@@ -510,11 +517,8 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
 
 void ViewAbstractModelNG::DismissSheet()
 {
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto overlayManager = context->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    auto sheet = FrameNode::GetFrameNode(V2::SHEET_PAGE_TAG, overlayManager->GetDismissSheet());
+    auto sheetId = SheetManager::GetInstance().GetDismissSheet();
+    auto sheet = FrameNode::GetFrameNode(V2::SHEET_PAGE_TAG, sheetId);
     CHECK_NULL_VOID(sheet);
     auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
@@ -532,11 +536,12 @@ void ViewAbstractModelNG::DismissContentCover()
 
 void ViewAbstractModelNG::SheetSpringBack()
 {
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto overlayManager = context->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    overlayManager->SheetSpringBack();
+    auto sheetId = SheetManager::GetInstance().GetDismissSheet();
+    auto sheet = FrameNode::GetFrameNode(V2::SHEET_PAGE_TAG, sheetId);
+    CHECK_NULL_VOID(sheet);
+    auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    sheetPattern->OverlaySheetSpringBack();
 }
 
 void ViewAbstractModelNG::SetAccessibilityGroup(bool accessible)

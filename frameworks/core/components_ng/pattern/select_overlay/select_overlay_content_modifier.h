@@ -37,6 +37,7 @@ struct HandleDrawInfo {
     OffsetF centerOffset;
     float handleWidth = 0.0f;
     bool isHandleLineShow = true;
+    bool isCircleShow = true;
 };
 
 class SelectOverlayContentModifier : public ContentModifier {
@@ -73,10 +74,22 @@ public:
         firstHandleIsShow_->Set(isShow);
     }
 
+    void SetFirstCircleIsShow(bool isShow)
+    {
+        CHECK_NULL_VOID(firstCircleIsShow_);
+        firstCircleIsShow_->Set(isShow);
+    }
+
     void SetSecondHandleIsShow(bool isShow)
     {
         CHECK_NULL_VOID(secondHandleIsShow_);
         secondHandleIsShow_->Set(isShow);
+    }
+
+    void SetSecondCircleIsShow(bool isShow)
+    {
+        CHECK_NULL_VOID(secondCircleIsShow_);
+        secondCircleIsShow_->Set(isShow);
     }
 
     void SetIsHiddenHandle(bool isHidden)
@@ -178,7 +191,8 @@ public:
     }
 
 private:
-    void PaintHandle(RSCanvas& canvas, const RectF& handleRect, bool handleOnTop, bool isHandleLineShow = true);
+    void PaintHandle(RSCanvas& canvas, const RectF& handleRect, bool handleOnTop, bool isHandleLineShow = true,
+        bool isCircleShow = true);
     void PaintHandle(RSCanvas& canvas, const HandleDrawInfo& handleInfo);
 
     void PaintSingleHandle(RSCanvas& canvas);
@@ -203,7 +217,9 @@ private:
     RefPtr<PropertyBool> handleReverse_;
     RefPtr<PropertyBool> isSingleHandle_;
     RefPtr<PropertyBool> firstHandleIsShow_;
+    RefPtr<PropertyBool> firstCircleIsShow_;
     RefPtr<PropertyBool> secondHandleIsShow_;
+    RefPtr<PropertyBool> secondCircleIsShow_;
     RefPtr<PropertyBool> isHiddenHandle_;
     RefPtr<PropertyBool> isHandleLineShow_;
     RefPtr<PropertyRectF> viewPort_;

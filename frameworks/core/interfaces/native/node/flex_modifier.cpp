@@ -166,5 +166,13 @@ const ArkUIFlexModifier* GetFlexModifier()
         SetMainSpace };
     return &modifier;
 }
+
+const CJUIFlexModifier* GetCJUIFlexModifier()
+{
+    static const CJUIFlexModifier modifier = {
+        SetFlexOptions, ResetFlexOptions, GetFlexOptions, setFlexCrossSpace, SetMainSpace
+    };
+    return &modifier;
+}
 }
 }

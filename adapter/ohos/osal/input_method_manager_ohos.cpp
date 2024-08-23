@@ -20,8 +20,8 @@
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
-#if not defined(ACE_UNITTEST)
-#if defined(ENABLE_STANDARD_INPUT)
+#ifndef ACE_UNITTEST
+#ifdef ENABLE_STANDARD_INPUT
 #include "input_method_controller.h"
 #endif
 #endif
@@ -44,8 +44,7 @@ InputMethodManager* InputMethodManager::GetInstance()
 void InputMethodManager::OnFocusNodeChange(const RefPtr<NG::FrameNode>& curFocusNode)
 {
     auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    if (container->IsKeyboard()) {
+    if (container && container->IsKeyboard()) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "focus in input method.");
         return;
     }
@@ -78,6 +77,11 @@ void InputMethodManager::OnFocusNodeChange(const RefPtr<NG::FrameNode>& curFocus
 
 void InputMethodManager::ProcessKeyboardInWindowScene(const RefPtr<NG::FrameNode>& curFocusNode)
 {
+    if (curFocusNode && NG::WindowSceneHelper::IsFocusWindowSceneCloseKeyboard(curFocusNode)) {
+        lastKeep_ = true;
+    } else {
+        lastKeep_ = false;
+    }
     // Frame other window to SCB window Or inSCB window changes,hide keyboard.
     if ((windowFocus_.has_value() && windowFocus_.value())) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SCB Window focus first, ready to hide keyboard.");
@@ -95,6 +99,11 @@ void InputMethodManager::ProcessKeyboardInWindowScene(const RefPtr<NG::FrameNode
 
 void InputMethodManager::ProcessKeyboard(const RefPtr<NG::FrameNode>& curFocusNode)
 {
+    if (curFocusNode && curFocusNode->GetTag() == V2::SCREEN_ETS_TAG && lastKeep_) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "node is screen and last node want to save keyboard Ignore");
+        lastKeep_ = false;
+        return;
+    }
     auto pipeline = curFocusNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     if (windowFocus_.has_value() && windowFocus_.value()) {
@@ -121,8 +130,7 @@ void InputMethodManager::ProcessKeyboard(const RefPtr<NG::FrameNode>& curFocusNo
     }
 
     auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto isUIExtension = container->IsUIExtensionWindow();
+    auto isUIExtension = container && container->IsUIExtensionWindow();
     auto pattern = curFocusNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     if (isUIExtension && !pattern->NeedSoftKeyboard()) {
@@ -141,6 +149,14 @@ bool InputMethodManager::NeedSoftKeyboard() const
 {
     auto currentFocusNode = curFocusNode_.Upgrade();
     CHECK_NULL_RETURN(currentFocusNode, false);
+    auto pipeline = currentFocusNode->GetContextRefPtr();
+    if (pipeline) {
+        auto manager = AceType::DynamicCast<NG::TextFieldManagerNG>(pipeline->GetTextFieldManager());
+        if (manager && manager->GetLastRequestKeyboardId() == currentFocusNode->GetId()) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Last RequestKeyboard node is current focus node, So keep");
+            return true;
+        }
+    }
     if (currentFocusNode && (currentFocusNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG ||
                              currentFocusNode->GetTag() == V2::EMBEDDED_COMPONENT_ETS_TAG)) {
         return true;

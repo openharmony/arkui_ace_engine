@@ -399,9 +399,9 @@ HWTEST_F(ImageTestNg, ImagePatternCreateNodePaintMethod001, TestSize.Level1)
     ASSERT_NE(imagePattern->loadingCtx_, nullptr);
     ASSERT_NE(imagePattern->altLoadingCtx_, nullptr);
     /**
-     * @tc.cases: case1. When SrcImage and AltImage load failed, it will not Create Image NodePaintMethod.
+     * @tc.cases: case1. When SrcImage and AltImage load failed, it will still Create Image NodePaintMethod.
      */
-    EXPECT_TRUE(imagePattern->CreateNodePaintMethod() == nullptr);
+    EXPECT_TRUE(imagePattern->CreateNodePaintMethod() != nullptr);
     /**
      * @tc.cases: case2. When SrcImage load successfully, it will Create SrcImage's NodePaintMethod.
      */
@@ -413,12 +413,12 @@ HWTEST_F(ImageTestNg, ImagePatternCreateNodePaintMethod001, TestSize.Level1)
      */
     imagePattern->image_ = nullptr;
     imagePattern->altImage_ = imagePattern->altLoadingCtx_->MoveCanvasImage();
-    EXPECT_EQ(imagePattern->CreateNodePaintMethod(), nullptr);
+    EXPECT_NE(imagePattern->CreateNodePaintMethod(), nullptr);
     imagePattern->altDstRect_ = std::make_unique<RectF>(RectF());
-    EXPECT_EQ(imagePattern->CreateNodePaintMethod(), nullptr);
+    EXPECT_NE(imagePattern->CreateNodePaintMethod(), nullptr);
     imagePattern->altSrcRect_ = std::make_unique<RectF>(RectF());
     imagePattern->altDstRect_.reset();
-    EXPECT_EQ(imagePattern->CreateNodePaintMethod(), nullptr);
+    EXPECT_NE(imagePattern->CreateNodePaintMethod(), nullptr);
     imagePattern->altDstRect_ = std::make_unique<RectF>(RectF());
     EXPECT_NE(imagePattern->CreateNodePaintMethod(), nullptr);
 }
@@ -449,9 +449,9 @@ HWTEST_F(ImageTestNg, ImagePatternCreateNodePaintMethod002, TestSize.Level1)
     imagePattern->altImage_ = nullptr;
     /**
      * @tc.steps: step4. call CreateNodePaintMethod.
-     * @tc.expected: step4. return nullptr
+     * @tc.expected: step4. return not nullptr
      */
-    EXPECT_EQ(imagePattern->CreateNodePaintMethod(), nullptr);
+    EXPECT_NE(imagePattern->CreateNodePaintMethod(), nullptr);
     /**
      * @tc.steps: step5. set obscuredImage_ is not nullptr;
      */
@@ -555,7 +555,7 @@ HWTEST_F(ImageTestNg, ImagePaintMethod002, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     pattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     pattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(pattern->image_, true);
+    ImagePaintMethod imagePaintMethod(pattern->image_, { .selected = true });
     /**
      * @tc.steps: step3. ImagePaintMethod GetContentDrawFunction.
      */
@@ -610,7 +610,8 @@ HWTEST_F(ImageTestNg, ImagePaintMethod001, TestSize.Level1)
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(imagePattern->image_, true, nullptr, true);
+    ImagePaintMethod imagePaintMethod(
+        imagePattern->image_, { .selected = true, .imageOverlayModifier = nullptr, .sensitive = true });
     /**
      * @tc.steps: step3. ImagePaintMethod GetContentDrawFunction.
      */
@@ -937,7 +938,7 @@ HWTEST_F(ImageTestNg, ImageColorFilterTest001, TestSize.Level1)
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(imagePattern->image_, true);
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, { .selected = true });
 
     ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
 

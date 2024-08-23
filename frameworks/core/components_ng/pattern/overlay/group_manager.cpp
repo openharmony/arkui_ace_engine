@@ -67,6 +67,7 @@ void GroupManager::UpdateRadioGroupValue(const std::string& group, int32_t radio
 void GroupManager::AddCheckBoxToGroup(const std::string& group, const WeakPtr<FrameNode>& checkBoxNode)
 {
     checkBoxListMap_[group].push_back(checkBoxNode);
+    checkboxChangedMap_[group] = true;
 }
 
 void GroupManager::AddCheckBoxGroup(const std::string& group, const WeakPtr<FrameNode>& checkBoxGroupNode)
@@ -90,6 +91,7 @@ void GroupManager::RemoveCheckBoxFromGroup(const std::string& group, int32_t che
         auto frameNode = item.Upgrade();
         if (frameNode && frameNode->GetId() == checkBoxId) {
             checkboxList.remove(item);
+            checkboxChangedMap_[group] = true;
             return;
         }
     }

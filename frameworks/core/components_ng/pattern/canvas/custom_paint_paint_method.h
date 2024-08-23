@@ -389,7 +389,7 @@ protected:
     Ace::CanvasImage canvasImage_;
     std::unique_ptr<Shadow> imageShadow_;
     RSColorMatrix colorMatrix_;
-    double density_;
+    double density_ = 1.0;
 
 #ifndef ACE_UNITTEST
     sk_sp<SkSVGDOM> skiaDom_ = nullptr;

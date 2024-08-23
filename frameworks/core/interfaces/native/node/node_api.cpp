@@ -140,6 +140,15 @@ const ArkUIStateModifier* GetUIStateModifier()
     static const ArkUIStateModifier modifier = { GetUIState, SetSupportedUIState };
     return &modifier;
 }
+
+const CJUIStateModifier* GetCJUIStateModifier()
+{
+    static const CJUIStateModifier modifier = {
+        GetUIState,
+        SetSupportedUIState
+    };
+    return &modifier;
+}
 } // namespace NodeModifier
 
 namespace NodeEvent {
@@ -199,12 +208,19 @@ void SetCustomCallback(ArkUIVMContext context, ArkUINodeHandle node, ArkUI_Int32
 ArkUINodeHandle CreateNode(ArkUINodeType type, int peerId, ArkUI_Int32 flags)
 {
     ArkUINodeHandle node = nullptr;
+    ArkUI_Params params = { .nodeType = type };
     if (flags == ARKUI_NODE_FLAG_C) {
         ContainerScope Scope(Container::CurrentIdSafelyWithCheck());
-        node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId));
+        node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId, params));
     } else {
-        node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId));
+        node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId, params));
     }
+    return node;
+}
+
+ArkUINodeHandle CreateNodeWithParams(ArkUINodeType type, int peerId, ArkUI_Int32 flags, const ArkUI_Params& params)
+{
+    auto* node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId, params));
     return node;
 }
 
@@ -1609,7 +1625,45 @@ const ArkUIBasicAPI* GetBasicAPI()
     /* clang-format off */
     static const ArkUIBasicAPI basicImpl = {
         CreateNode,
+        CreateNodeWithParams,
         GetNodeByViewStack,
+        DisposeNode,
+        GetName,
+        DumpTreeNode,
+
+        AddChild,
+        RemoveChild,
+        InsertChildAfter,
+        InsertChildBefore,
+        InsertChildAt,
+        GetAttribute,
+        SetAttribute,
+        ResetAttribute,
+
+        NotifyComponentAsyncEvent,
+        NotifyResetComponentAsyncEvent,
+        RegisterNodeAsyncEventReceiver,
+        UnregisterNodeAsyncEventReceiver,
+
+        nullptr,
+
+        ApplyModifierFinish,
+        MarkDirty,
+        IsBuilderNode,
+        ConvertLengthMetricsUnit,
+
+        GetContextByNode,
+    };
+    /* clang-format on */
+
+    return &basicImpl;
+}
+
+const CJUIBasicAPI* GetCJUIBasicAPI()
+{
+    /* clang-format off */
+    static const CJUIBasicAPI basicImpl = {
+        CreateNode,
         DisposeNode,
         GetName,
         DumpTreeNode,
@@ -2034,11 +2088,158 @@ ArkUIFullNodeAPI impl_full = {
     DragAdapter::GetDragAdapterAPI,        // drag adapter.
 };
 /* clang-format on */
+
+const CJUIAnimation* GetCJUIAnimationAPI()
+{
+    static const CJUIAnimation modifier = {
+        nullptr,
+        nullptr,
+        nullptr,
+        AnimateTo,
+        KeyframeAnimateTo,
+        CreateAnimator,
+        DisposeAnimator,
+        AnimatorReset,
+        AnimatorPlay,
+        AnimatorFinish,
+        AnimatorPause,
+        AnimatorCancel,
+        AnimatorReverse,
+        CreateCurve,
+        CreateStepsCurve,
+        CreateCubicBezierCurve,
+        CreateSpringCurve,
+        CreateSpringMotion,
+        CreateResponsiveSpringMotion,
+        CreateInterpolatingSpring,
+        CreateCustomCurve,
+        DisposeCurve,
+    };
+    return &modifier;
+}
+
+const CJUINavigation* GetCJUINavigationAPI()
+{
+    static const CJUINavigation modifier = {
+        nullptr,
+        nullptr,
+        GetNavigationId,
+        GetNavDestinationName,
+        GetStackLength,
+        GetNavDesNameByIndex,
+        GetNavDestinationId,
+        GetNavDestinationState,
+        GetNavDestinationIndex,
+        GetNavDestinationParam,
+        GetRouterPageIndex,
+        GetRouterPageName,
+        GetRouterPagePath,
+        GetRouterPageState,
+        GetRouterPageId,
+    };
+    return &modifier;
+}
+
+const CJUIGraphicsAPI* GetCJUIGraphicsAPI()
+{
+    static const CJUIGraphicsAPI api = {
+        ARKUI_NODE_GRAPHICS_API_VERSION, SetCallbackMethod, GetCanvasAPI, GetPaintAPI, GetFontAPI
+    };
+    return &api;
+}
+
+const CJUIDialogAPI* GetCJUIDialogAPI()
+{
+    static const CJUIDialogAPI dialogImpl = {
+        CreateDialog,
+        DisposeDialog,
+        SetDialogContent,
+        RemoveDialogContent,
+        SetDialogContentAlignment,
+        ResetDialogContentAlignment,
+        SetDialogModalMode,
+        SetDialogAutoCancel,
+        SetDialogMask,
+        SetDialogBackgroundColor,
+        SetDialogCornerRadius,
+        SetDialogGridColumnCount,
+        EnableDialogCustomStyle,
+        EnableDialogCustomAnimation,
+        ShowDialog,
+        CloseDialog,
+        RegisterOnWillDialogDismiss,
+    };
+    return &dialogImpl;
+}
+
+const CJUIExtendedNodeAPI* GetCJUIExtendedAPI()
+{
+    static CJUIExtendedNodeAPI impl_extended = {
+        ARKUI_EXTENDED_API_VERSION,
+
+        NodeModifier::GetUtilsModifier,
+        NodeModifier::GetCanvasRenderingContext2DModifier,
+
+        SetCallbackMethod,
+        SetCustomMethodFlag,
+        GetCustomMethodFlag,
+        RegisterCustomNodeAsyncEvent,
+        UnregisterCustomNodeEvent,
+        RegisterCustomNodeEventReceiver,
+        SetCustomCallback, // setCustomCallback
+        MeasureLayoutAndDraw,
+        MeasureNode,
+        LayoutNode,
+        DrawNode,
+        SetAttachNodePtr,
+        GetAttachNodePtr,
+        SetMeasureWidth, // setMeasureWidth
+        GetMeasureWidth, // getMeasureWidth
+        SetMeasureHeight, // setMeasureHeight
+        GetMeasureHeight, // getMeasureHeight
+        SetX, // setX
+        SetY, // setY
+        GetX, // getX
+        GetY, // getY
+        GetLayoutConstraint,
+        SetAlignment,
+        GetAlignment,
+        nullptr, // indexerChecker
+        nullptr, // setRangeUpdater
+        nullptr, // setLazyItemIndexer
+        GetPipelineContext,
+        SetVsyncCallback,
+        UnblockVsyncWait,
+        NodeEvent::CheckEvent,
+        NodeEvent::SendArkUIAsyncEvent,
+        nullptr, // callContinuation
+        nullptr, // setChildTotalCount
+        ShowCrash,
+    };
+    return &impl_extended;
+}
+
+CJUIFullNodeAPI fullCJUIApi {
+    SetCallbackMethod,
+    GetCJUIBasicAPI,            // BasicAPI
+    GetCJUINodeModifiers,       // NodeModifiers
+    GetCJUIAnimationAPI,        // Animation
+    GetCJUINavigationAPI,       // Navigation
+    GetCJUIGraphicsAPI,         // Graphics
+    GetCJUIDialogAPI,
+    GetCJUIExtendedAPI,         // Extended
+    NodeAdapter::GetCJUINodeAdapterAPI,         // adapter.
+};
 } // namespace
 
 } // namespace OHOS::Ace::NG
 
 extern "C" {
+
+ACE_FORCE_EXPORT CJUIFullNodeAPI* GetCJUIFullNodeAPI()
+{
+    return &OHOS::Ace::NG::fullCJUIApi;
+}
 
 ACE_FORCE_EXPORT ArkUIAnyAPI* GetArkUIAnyFullNodeAPI(int version)
 {

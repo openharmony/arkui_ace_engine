@@ -18,8 +18,10 @@
 #pragma once
 
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/interfaces/cjui/cjui_api.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUINodeContentModifier* GetNodeContentModifier();
+const CJUINodeContentModifier* GetCJUINodeContentModifier();
 } // namespace OHOS::Ace::NG::NodeModifier
 #endif

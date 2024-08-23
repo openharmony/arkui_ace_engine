@@ -16,11 +16,7 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_marquee_ffi.h"
 
 #include "cj_lambda.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 #include "bridge/common/utils/utils.h"
-#include "core/components_ng/base/view_abstract_model_ng.h"
-#include "core/components_ng/pattern/marquee/marquee_model.h"
 #include "core/components_ng/pattern/marquee/marquee_model_ng.h"
 
 using namespace OHOS::Ace;

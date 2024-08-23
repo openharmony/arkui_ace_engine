@@ -145,7 +145,6 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
 
     auto tabsNode = FindTabsNode(tabContent);
     CHECK_NULL_VOID(tabsNode);
-
     auto tabBarNode = tabsNode->GetTabBar();
     CHECK_NULL_VOID(tabBarNode);
     auto tabContentPattern = tabContentNode->GetPattern<TabContentPattern>();
@@ -249,7 +248,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
             tabBarNode->ReplaceChild(oldColumnNode, columnNode);
         }
         tabBarPattern->AddTabBarItemType(columnNode->GetId(), true);
-        tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
         return;
     }
 
@@ -327,13 +326,16 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     // Update property of text.
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
+    auto tabBarLayoutProperty = tabBarPattern->GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(tabBarLayoutProperty);
+    auto axis = tabBarLayoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
     if ((!swiperPattern->IsUseCustomAnimation() || !swiperPattern->GetCustomAnimationToIndex().has_value()) &&
         !isFrameNode) {
         if (myIndex == indicator) {
             if (labelStyle.selectedColor.has_value()) {
                 textLayoutProperty->UpdateTextColor(labelStyle.selectedColor.value());
             } else {
-                selectedMode == SelectedMode::BOARD ?
+                selectedMode == SelectedMode::BOARD && axis == Axis::HORIZONTAL ?
                     textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabBoardTextOnColor()) :
                     textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabTextOnColor());
             }
@@ -441,7 +443,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     textNode->MarkDirtyNode();
     iconNode->MarkModifyDone();
     tabBarPattern->AddTabBarItemType(columnNode->GetId(), false);
-    tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 void TabContentModelNG::RemoveTabBarItem(const RefPtr<TabContentNode>& tabContentNode)
@@ -467,7 +469,7 @@ void TabContentModelNG::RemoveTabBarItem(const RefPtr<TabContentNode>& tabConten
     auto tabsNode = FindTabsNode(tabContentNode);
     CHECK_NULL_VOID(tabsNode);
     tabsNode->RemoveBuilderByContentId(tabContentNode->GetId());
-    tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 void TabContentModelNG::SetTabBar(const std::optional<std::string>& text, const std::optional<std::string>& icon,

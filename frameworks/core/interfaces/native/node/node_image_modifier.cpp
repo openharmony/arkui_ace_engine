@@ -889,6 +889,27 @@ const ArkUIImageModifier* GetImageModifier()
     return &modifier;
 }
 
+const CJUIImageModifier* GetCJUIImageModifier()
+{
+    static const CJUIImageModifier modifier = {
+        SetImageSrc, SetImageShowSrc, SetCopyOption, ResetCopyOption, SetAutoResize,
+        ResetAutoResize, SetObjectRepeat, ResetObjectRepeat, SetRenderMode, ResetRenderMode, SetSyncLoad, ResetSyncLoad,
+        SetObjectFit, ResetObjectFit, SetFitOriginalSize, ResetFitOriginalSize, SetSourceSize, ResetSourceSize,
+        SetMatchTextDirection, ResetMatchTextDirection, SetFillColor, ResetFillColor, SetAlt, ResetAlt,
+        SetImageInterpolation, ResetImageInterpolation, SetColorFilter, ResetColorFilter, SetImageSyncLoad,
+        ResetImageSyncLoad, SetImageObjectFit, ResetImageObjectFit, SetImageFitOriginalSize, ResetImageFitOriginalSize,
+        SetImageDraggable, ResetImageDraggable, SetImageBorderRadius, ResetImageBorderRadius, SetImageBorder,
+        ResetImageBorder, SetImageOpacity, ResetImageOpacity, SetEdgeAntialiasing, ResetEdgeAntialiasing, SetResizable,
+        ResetResizable, SetDynamicRangeMode, ResetDynamicRangeMode, SetEnhancedImageQuality,
+        ResetEnhancedImageQuality, GetImageSrc, GetAutoResize, GetObjectRepeat, GetObjectFit,
+        GetImageInterpolation, GetColorFilter, GetAlt, GetImageDraggable, GetRenderMode, SetImageResizable,
+        GetImageResizable, GetFitOriginalSize, GetFillColor, SetPixelMap, SetPixelMapArray, SetResourceSrc,
+        EnableAnalyzer, SetImagePrivacySensitve, ResetImagePrivacySensitve, AnalyzerConfig, SetDrawingColorFilter,
+        GetDrawingColorFilter, ResetImageSrc, SetInitialPixelMap, SetOnComplete, SetOnError,
+        ResetOnError, SetImageOnFinish, ResetImageOnFinish };
+    return &modifier;
+}
+
 void SetImageOnComplete(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);

@@ -274,7 +274,14 @@ public:
 
     virtual void OnMountToParentDone() {}
 
+    virtual void AfterMountToParent() {}
+
     virtual void OnSensitiveStyleChange(bool isSensitive) {}
+
+    virtual bool AllowVisibleAreaCheck() const
+    {
+        return false;
+    }
 
     virtual bool IsRootPattern() const
     {
@@ -378,7 +385,9 @@ public:
     }
 
     virtual void DumpInfo() {}
+    virtual void DumpInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpAdvanceInfo() {}
+    virtual void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) {}
     virtual void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) {}
@@ -614,7 +623,7 @@ public:
     {
         return 0;
     }
-    
+
     virtual bool IsResponseRegionExpandingNeededForStylus(const TouchEvent& touchEvent) const
     {
         return false;
@@ -623,6 +632,13 @@ public:
     virtual RectF ExpandDefaultResponseRegion(RectF& rect)
     {
         return RectF();
+    }
+
+    virtual void NotifyDataChange(int32_t index, int32_t count) {};
+
+    virtual bool RenderCustomChild(int64_t deadline)
+    {
+        return true;
     }
 
 protected:

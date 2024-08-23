@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUICommonModifier* GetCommonModifier();
+const CJUICommonModifier* GetCJUICommonModifier();
 
 void SetOnAppear(ArkUINodeHandle node,  void* extraParam);
 void SetOnDisappear(ArkUINodeHandle node,  void* extraParam);

@@ -1000,6 +1000,20 @@ void ViewAbstract::DisableOnDetach(FrameNode* frameNode)
     eventHub->ClearOnDetach();
 }
 
+void ViewAbstract::DisableOnLoad(FrameNode* frameNode)
+{
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearOnLoad();
+}
+
+void ViewAbstract::DisableOnDestroy(FrameNode* frameNode)
+{
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearOnDestroy();
+}
+
 void ViewAbstract::DisableOnFocus(FrameNode* frameNode)
 {
     auto focusHub = frameNode->GetOrCreateFocusHub();
@@ -1020,13 +1034,13 @@ void ViewAbstract::DisableOnAreaChange(FrameNode* frameNode)
     frameNode->ClearUserOnAreaChange();
 }
 
-void ViewAbstract::SetOnClick(GestureEventFunc&& clickEventFunc)
+void ViewAbstract::SetOnClick(GestureEventFunc&& clickEventFunc, double distanceThreshold)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    gestureHub->SetUserOnClick(std::move(clickEventFunc));
+    gestureHub->SetUserOnClick(std::move(clickEventFunc), distanceThreshold);
 
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -2035,6 +2049,14 @@ void ViewAbstract::SetFgDynamicBrightness(const BrightnessOption& brightnessOpti
     ACE_UPDATE_RENDER_CONTEXT(FgDynamicBrightnessOption, brightnessOption);
 }
 
+void ViewAbstract::SetBrightnessBlender(const OHOS::Rosen::BrightnessBlender* brightnessBlender)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(BrightnessBlender, brightnessBlender);
+}
+
 void ViewAbstract::SetFrontBlur(const Dimension& radius, const BlurOption& blurOption)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -2128,6 +2150,10 @@ void ViewAbstract::SetInspectorId(const std::string& inspectorId)
 {
     auto& uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     if (uiNode) {
+        if (uiNode->GetInspectorId().has_value() && uiNode->GetInspectorIdValue() != inspectorId) {
+            ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(
+                uiNode->GetInspectorIdValue(), uiNode->GetId());
+        }
         uiNode->UpdateInspectorId(inspectorId);
     }
 }
@@ -3459,6 +3485,10 @@ void ViewAbstract::SetAllowDrop(FrameNode* frameNode, const std::set<std::string
 void ViewAbstract::SetInspectorId(FrameNode* frameNode, const std::string& inspectorId)
 {
     if (frameNode) {
+        if (frameNode->GetInspectorId().has_value() && frameNode->GetInspectorIdValue() != inspectorId) {
+            ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(
+                frameNode->GetInspectorIdValue(), frameNode->GetId());
+        }
         frameNode->UpdateInspectorId(inspectorId);
     }
 }
@@ -3539,6 +3569,12 @@ void ViewAbstract::SetFgDynamicBrightness(FrameNode* frameNode, const Brightness
     ACE_UPDATE_NODE_RENDER_CONTEXT(FgDynamicBrightnessOption, brightnessOption, frameNode);
 }
 
+void ViewAbstract::SetBrightnessBlender(FrameNode* frameNode, const OHOS::Rosen::BrightnessBlender* brightnessBlender)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BrightnessBlender, brightnessBlender, frameNode);
+}
+
 void ViewAbstract::SetDragPreviewOptions(FrameNode* frameNode, const DragPreviewOption& previewOption)
 {
     CHECK_NULL_VOID(frameNode);
@@ -3570,6 +3606,7 @@ void ViewAbstract::SetMouseResponseRegion(FrameNode* frameNode, const std::vecto
 void ViewAbstract::SetSharedTransition(
     FrameNode* frameNode, const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option)
 {
+    CHECK_NULL_VOID(frameNode);
     const auto& target = frameNode->GetRenderContext();
     if (target) {
         target->SetSharedTransitionOptions(option);
@@ -3727,6 +3764,22 @@ void ViewAbstract::SetOnDetach(FrameNode* frameNode, std::function<void()>&& onD
     eventHub->SetOnDetach(std::move(onDetach));
 }
 
+void ViewAbstract::SetOnLoad(FrameNode* frameNode, std::function<void(const std::string& xcomponentId)>&& onLoad)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnLoad(std::move(onLoad));
+}
+
+void ViewAbstract::SetOnDestroy(FrameNode* frameNode, std::function<void()>&& onDestroy)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDestroy(std::move(onDestroy));
+}
+
 void ViewAbstract::SetOnAreaChanged(FrameNode* frameNode, std::function<void(const RectF &oldRect,
     const OffsetF& oldOrigin, const RectF &rect, const OffsetF& origin)>&& onAreaChanged)
 {
@@ -3751,11 +3804,11 @@ void ViewAbstract::SetOnBlur(FrameNode* frameNode, OnBlurFunc&& onBlurCallback)
     focusHub->SetOnBlurCallback(std::move(onBlurCallback));
 }
 
-void ViewAbstract::SetOnClick(FrameNode* frameNode, GestureEventFunc&& clickEventFunc)
+void ViewAbstract::SetOnClick(FrameNode* frameNode, GestureEventFunc&& clickEventFunc, double distanceThreshold)
 {
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    gestureHub->SetUserOnClick(std::move(clickEventFunc));
+    gestureHub->SetUserOnClick(std::move(clickEventFunc), distanceThreshold);
 
     auto focusHub = frameNode->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -3827,7 +3880,9 @@ void ViewAbstract::SetNeedFocus(FrameNode* frameNode, bool value)
     CHECK_NULL_VOID(frameNode);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    auto instanceId = frameNode->GetContext()->GetInstanceId();
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto instanceId = context->GetInstanceId();
     ContainerScope scope(instanceId);
     if (value) {
         focusHub->RequestFocus();
@@ -3992,16 +4047,22 @@ RefPtr<BasicShape> ViewAbstract::GetMask(FrameNode* frameNode)
 {
     RefPtr<BasicShape> value = AceType::MakeRefPtr<BasicShape>();
     const auto& target = frameNode->GetRenderContext();
-    CHECK_NULL_RETURN(target, value);
-    return target->GetClipMaskValue(value);
+    CHECK_NULL_RETURN(target, nullptr);
+    if (target->HasClipMask()) {
+        return target->GetClipMaskValue(value);
+    }
+    return nullptr;
 }
 
 RefPtr<ProgressMaskProperty> ViewAbstract::GetMaskProgress(FrameNode* frameNode)
 {
     RefPtr<ProgressMaskProperty> value = AceType::MakeRefPtr<ProgressMaskProperty>();
     const auto& target = frameNode->GetRenderContext();
-    CHECK_NULL_RETURN(target, value);
-    return target->GetProgressMaskValue(value);
+    CHECK_NULL_RETURN(target, nullptr);
+    if (target->HasProgressMask()) {
+        return target->GetProgressMaskValue(value);
+    }
+    return nullptr;
 }
 
 BlendMode ViewAbstract::GetBlendMode(FrameNode* frameNode)
@@ -4617,6 +4678,24 @@ void ViewAbstract::SetOnSizeChanged(
 {
     CHECK_NULL_VOID(frameNode);
     frameNode->SetOnSizeChangeCallback(std::move(onSizeChanged));
+}
+
+void ViewAbstract::SetOnGestureRecognizerJudgeBegin(
+    FrameNode* frameNode, GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc));
+}
+
+void ViewAbstract::SetShouldBuiltInRecognizerParallelWith(
+    FrameNode* frameNode, NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetShouldBuildinRecognizerParallelWithFunc(std::move(shouldBuiltInRecognizerParallelWithFunc));
 }
 
 void ViewAbstract::SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style)

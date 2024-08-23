@@ -48,7 +48,10 @@ public:
             if (!themeConstants) {
                 return theme;
             }
+            theme->height_ = themeConstants->GetDimension(THEME_TEXTFIELD_HEIGHT);
             ParsePattern(themeConstants->GetThemeStyle(), theme);
+            theme->showSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.eye");
+            theme->hideSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.eye_slash");
             return theme;
         }
 
@@ -88,6 +91,8 @@ public:
             theme->needFade_ = static_cast<bool>(pattern->GetAttr<double>("textfield_need_fade", 0.0));
             theme->iconSize_ = pattern->GetAttr<Dimension>("textfield_icon_size", 0.0_vp);
             theme->iconHotZoneSize_ = pattern->GetAttr<Dimension>("textfield_icon_hot_zone_size", 0.0_vp);
+            theme->symbolSize_ = pattern->GetAttr<Dimension>("textfield_icon_size", 0.0_vp);
+            theme->symbolColor_ = pattern->GetAttr<Color>("textfield_symbol_color", Color());
             theme->showEllipsis_ = static_cast<bool>(pattern->GetAttr<double>("textfield_show_ellipsis", 0.0));
             theme->errorSpacing_ = pattern->GetAttr<Dimension>("textfield_error_spacing", 0.0_vp);
             theme->errorIsInner_ = static_cast<bool>(pattern->GetAttr<double>("textfield_error_is_inner", 0.0));
@@ -207,6 +212,9 @@ public:
                 pattern->GetAttr<std::string>("textfield_accessibility_show_password", "");
             theme->hiddenPasswordPromptInformation_ =
                 pattern->GetAttr<std::string>("textfield_accessibility_hide_password", "");
+            theme->aiWriteBundleName_ = pattern->GetAttr<std::string>("textfield_writting_bundle_name", "");
+            theme->aiWriteAbilityName_ = pattern->GetAttr<std::string>("textfield_writting_ability_name", "");
+            
         }
     };
 
@@ -365,6 +373,26 @@ public:
     const Dimension& GetIconHotZoneSize() const
     {
         return iconHotZoneSize_;
+    }
+
+    const Dimension& GetSymbolSize() const
+    {
+        return symbolSize_;
+    }
+
+    const Color& GetSymbolColor() const
+    {
+        return symbolColor_;
+    }
+
+    uint32_t GetShowSymbolId() const
+    {
+        return showSymbolId_;
+    }
+
+    uint32_t GetHideSymbolId() const
+    {
+        return hideSymbolId_;
     }
 
     bool ShowEllipsis() const
@@ -601,7 +629,14 @@ public:
     {
         return hiddenPasswordPromptInformation_;
     }
-
+    const std::string& GetAIWriteBundleName() const
+    {
+        return aiWriteBundleName_;
+    }
+    const std::string& GetAIWriteAbilityName() const
+    {
+        return aiWriteAbilityName_;
+    }
 protected:
     TextFieldTheme() = default;
 
@@ -678,6 +713,12 @@ private:
     Dimension iconHotZoneSize_;
     Dimension inlineBorderWidth_ = 2.0_vp;
 
+    // Replace image(icon) with symbol
+    Dimension symbolSize_;
+    Color symbolColor_;
+    uint32_t showSymbolId_ = 0;
+    uint32_t hideSymbolId_ = 0;
+
     // UX::insert cursor offset up by 8vp
     Dimension insertCursorOffset_ = 8.0_vp;
 
@@ -702,6 +743,8 @@ private:
 
     std::string showPasswordPromptInformation_;
     std::string hiddenPasswordPromptInformation_;
+    std::string aiWriteBundleName_;
+    std::string aiWriteAbilityName_;
 };
 
 } // namespace OHOS::Ace

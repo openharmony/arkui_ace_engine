@@ -101,7 +101,7 @@ void GridCacheLayoutTestNg::CreateItems2()
  */
 HWTEST_F(GridCacheLayoutTestNg, LayoutForwardCachedLines001, TestSize.Level1)
 {
-    GridModelNG model = CreateRepeatGrid(30, ITEM_HEIGHT);
+    GridModelNG model = CreateRepeatGrid(30, [](uint32_t idx) { return ITEM_HEIGHT; });
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetCachedCount(10); // 10 lines
     CreateDone(frameNode_);

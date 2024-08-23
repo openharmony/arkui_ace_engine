@@ -209,6 +209,7 @@ public:
     static void SetBackShadow(const Shadow &shadow);
     static void SetBlendMode(BlendMode blendMode);
     static void SetBlendApplyType(BlendApplyType blendApplyType);
+    static void SetBrightnessBlender(const OHOS::Rosen::BrightnessBlender* brightnessBlender);
 
     // graphics
     static void SetBrightness(const Dimension &value);
@@ -260,7 +261,8 @@ public:
     static void SetTransformMatrix(const Matrix4 &matrix);
 
     // event
-    static void SetOnClick(GestureEventFunc &&clickEventFunc);
+    static void SetOnClick(GestureEventFunc &&clickEventFunc,
+        double distanceThreshold = std::numeric_limits<double>::infinity());
     static void SetOnGestureJudgeBegin(GestureJudgeFunc &&gestureJudgeFunc);
     static void SetOnTouchIntercept(TouchInterceptFunc &&touchInterceptFunc);
     static void SetShouldBuiltInRecognizerParallelWith(
@@ -402,6 +404,8 @@ public:
     static void DisableOnDisappear(FrameNode* frameNode);
     static void DisableOnAttach(FrameNode* frameNode);
     static void DisableOnDetach(FrameNode* frameNode);
+    static void DisableOnLoad(FrameNode* frameNode);
+    static void DisableOnDestroy(FrameNode* frameNode);
     static void DisableOnFocus(FrameNode* frameNode);
     static void DisableOnBlur(FrameNode* frameNode);
     static void DisableOnAreaChange(FrameNode* frameNode);
@@ -597,6 +601,7 @@ public:
     static void SetUseShadowBatching(FrameNode* frameNode, bool useShadowBatching);
     static void SetBlendMode(FrameNode* frameNode, BlendMode blendMode);
     static void SetBlendApplyType(FrameNode* frameNode, BlendApplyType blendApplyType);
+    static void SetBrightnessBlender(FrameNode* frameNode, const OHOS::Rosen::BrightnessBlender* brightnessBlender);
     static void SetMonopolizeEvents(FrameNode* frameNode, bool monopolizeEvents);
     static void SetDraggable(FrameNode* frameNode, bool draggable);
     static void SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect);
@@ -608,11 +613,14 @@ public:
     static void SetOnDisappear(FrameNode* frameNode, std::function<void()> &&onDisappear);
     static void SetOnAttach(FrameNode* frameNode, std::function<void()> &&onAttach);
     static void SetOnDetach(FrameNode* frameNode, std::function<void()> &&onDetach);
+    static void SetOnLoad(FrameNode* frameNode, std::function<void(const std::string& xcomponentId)> &&onLoad);
+    static void SetOnDestroy(FrameNode* frameNode, std::function<void()> &&onDestroy);
     static void SetOnAreaChanged(FrameNode* frameNode, std::function<void(const RectF &oldRect,
         const OffsetF &oldOrigin, const RectF &rect, const OffsetF &origin)> &&onAreaChanged);
     static void SetOnFocus(FrameNode* frameNode, OnFocusFunc &&onFocusCallback);
     static void SetOnBlur(FrameNode* frameNode, OnBlurFunc &&onBlurCallback);
-    static void SetOnClick(FrameNode* frameNode, GestureEventFunc &&clickEventFunc);
+    static void SetOnClick(FrameNode* frameNode, GestureEventFunc &&clickEventFunc,
+        double distanceThreshold = std::numeric_limits<double>::infinity());
     static void SetOnTouch(FrameNode* frameNode, TouchEventFunc &&touchEventFunc);
     static void SetOnDragStart(FrameNode* frameNode,
         std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragStart);
@@ -628,6 +636,10 @@ public:
     static void SetOnGestureJudgeBegin(FrameNode* frameNode, GestureJudgeFunc&& gestureJudgeFunc);
     static void SetOnSizeChanged(
         FrameNode* frameNode, std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged);
+    static void SetOnGestureRecognizerJudgeBegin(
+        FrameNode* frameNode, GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc);
+    static void SetShouldBuiltInRecognizerParallelWith(
+        FrameNode* frameNode, NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc);
     static void SetSystemColorModeChangeEvent(FrameNode* frameNode, std::function<void(int32_t)>&& onColorModeChange);
     static void SetSystemFontChangeEvent(FrameNode* frameNode, std::function<void(float, float)>&& onFontChange);
     static void SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style);

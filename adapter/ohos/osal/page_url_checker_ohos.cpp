@@ -74,12 +74,13 @@ public:
 
     int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override
     {
-        LOGI("AtomicServiceStatusCallbackStub::OnReceived, code = %{public}u, flags= %{public}d.",
-            code, option.GetFlags());
+        TAG_LOGI(AceLogTag::ACE_ROUTER,
+            "AtomicServiceStatusCallbackStub::OnReceived,code = %{public}u, flags= %{public}d.", code,
+            option.GetFlags());
         std::u16string descriptor = AtomicServiceStatusCallbackStub::GetDescriptor();
         std::u16string remoteDescriptor = data.ReadInterfaceToken();
         if (descriptor != remoteDescriptor) {
-            LOGE("%{public}s failed, local descriptor is not equal to remote", __func__);
+            TAG_LOGE(AceLogTag::ACE_ROUTER, "%{public}s failed, local descriptor is not equal to remote", __func__);
             return ERR_INVALID_VALUE;
         }
 
@@ -135,7 +136,7 @@ public:
     int32_t OnActionEvent() override
     {
         if (!actionEventHandler_) {
-            LOGE("actionEventHandler_ is null.");
+            TAG_LOGE(AceLogTag::ACE_ROUTER, "actionEventHandler_ is null.");
             return ERR_INVALID_VALUE;
         }
         actionEventHandler_();
@@ -148,9 +149,9 @@ public:
      */
     int32_t OnError(int32_t code, const std::string& msg) override
     {
-        LOGE("OnError code: %{public}d, msg: %{public}s", code, msg.c_str());
+        TAG_LOGW(AceLogTag::ACE_ROUTER, "silent install Error, code: %{public}d, msg: %{public}s", code, msg.c_str());
         if (!errorEventHandler_) {
-            LOGE("errorEventHandler_ is null");
+            TAG_LOGW(AceLogTag::ACE_ROUTER, "errorEventHandler_ is null");
             return ERR_INVALID_VALUE;
         }
 
@@ -176,13 +177,13 @@ sptr<AppExecFwk::IBundleMgr> PageUrlCheckerOhos::GetBundleManager()
 {
     auto systemAbilityMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (systemAbilityMgr == nullptr) {
-        LOGE("Failed to get SystemAbilityManager.");
+        TAG_LOGE(AceLogTag::ACE_ROUTER, "Failed to get SystemAbilityManager.");
         return nullptr;
     }
 
     auto bundleObj = systemAbilityMgr->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
     if (bundleObj == nullptr) {
-        LOGE("Failed to get bundle manager service");
+        TAG_LOGE(AceLogTag::ACE_ROUTER, "Failed to get bundle manager service");
         return nullptr;
     }
 
@@ -241,7 +242,7 @@ void PageUrlCheckerOhos::LoadPageUrl(const std::string& url, const std::function
         routerCallback->SetActionEventHandler(callback);
         routerCallback->SetErrorEventHandler(silentInstallErrorCallBack);
         if (bms->SilentInstall(want, appInfo->uid / AppExecFwk::Constants::BASE_USER_RANGE, routerCallback)) {
-            LOGI("Begin to silent install");
+            TAG_LOGI(AceLogTag::ACE_ROUTER, "Begin to silent install");
         }
     }
 }

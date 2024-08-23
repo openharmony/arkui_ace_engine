@@ -105,6 +105,7 @@ constexpr uint32_t POPUPSIZE_WIDTH = 0;
 constexpr int32_t SEARCH_ELEMENT_TIMEOUT_TIME = 1500;
 constexpr int32_t POPUP_CALCULATE_RATIO = 2;
 constexpr int32_t POPUP_EDGE_INTERVAL = 48;
+std::mutex g_mutexFormRenderFontFamily;
 
 #ifdef _ARM64_
 const std::string ASSET_LIBARCH_PATH = "/lib/arm64";
@@ -1346,7 +1347,7 @@ private:
     AceAutoFillType autoFillType_ = AceAutoFillType::ACE_UNSPECIFIED;
     bool isNative_ = true;
     AbilityBase::Rect rect_;
-    Rosen::Rect windowRect_;
+    Rosen::Rect windowRect_ { 0, 0, 0, 0 };
 };
 
 bool AceContainer::UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node,
@@ -1376,24 +1377,30 @@ bool AceContainer::ClosePopupUIExtension(uint32_t autoFillSessionId)
     return true;
 }
 
-AceAutoFillType AceContainer::PlaceHolderToType(const std::string& onePlaceHolder)
+HintToTypeWrap AceContainer::PlaceHolderToType(const std::string& onePlaceHolder)
 {
+    HintToTypeWrap hintToTypeWrap;
     auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
-    CHECK_NULL_RETURN(viewDataWrap, AceAutoFillType::ACE_UNSPECIFIED);
+    CHECK_NULL_RETURN(viewDataWrap, hintToTypeWrap);
     auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
-    CHECK_NULL_RETURN(viewDataWrapOhos, AceAutoFillType::ACE_UNSPECIFIED);
+    CHECK_NULL_RETURN(viewDataWrapOhos, hintToTypeWrap);
     std::vector<std::string> placeHolder;
     std::vector<int> intType;
+    std::vector<std::string> metadata;
     placeHolder.push_back(onePlaceHolder);
-    auto isSuccess = viewDataWrapOhos->LoadHint2Type(placeHolder, intType);
+    auto isSuccess = viewDataWrapOhos->LoadHint2Type(placeHolder, intType, metadata);
     if (!isSuccess) {
         TAG_LOGE(AceLogTag::ACE_AUTO_FILL, "Load Hint2Type Failed !");
-        return AceAutoFillType::ACE_UNSPECIFIED;
+        return hintToTypeWrap;
     }
     if (intType.empty()) {
-        return AceAutoFillType::ACE_UNSPECIFIED;
+        return hintToTypeWrap;
     }
-    return static_cast<AceAutoFillType>(viewDataWrapOhos->HintToAutoFillType(intType[0]));
+    hintToTypeWrap.autoFillType = static_cast<AceAutoFillType>(viewDataWrapOhos->HintToAutoFillType(intType[0]));
+    if (!metadata.empty()) {
+        hintToTypeWrap.metadata = metadata[0];
+    }
+    return hintToTypeWrap;
 }
 
 bool AceContainer::ChangeType(AbilityBase::ViewData& viewData)
@@ -1916,17 +1923,16 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     resRegister_ = aceView_->GetPlatformResRegister();
 #ifndef NG_BUILD
     if (useNewPipeline_) {
-        LOGI("New pipeline version creating...");
         pipelineContext_ = AceType::MakeRefPtr<NG::PipelineContext>(
             window, taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
         pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
     } else {
+        LOGI("Create old pipeline.");
         pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
             window, taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
         pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManager>());
     }
 #else
-    LOGI("New pipeline version creating...");
     pipelineContext_ = AceType::MakeRefPtr<NG::PipelineContext>(
         window, taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
     pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
@@ -1935,6 +1941,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
 #ifdef FORM_SUPPORTED
     if (isFormRender_) {
         pipelineContext_->SetIsFormRender(isFormRender_);
+        pipelineContext_->SetIsDynamicRender(isDynamicRender_);
         auto cardFrontend = AceType::DynamicCast<FormFrontendDeclarative>(frontend_);
         if (cardFrontend) {
             cardFrontend->SetTaskExecutor(taskExecutor_);
@@ -2376,7 +2383,13 @@ void AceContainer::CheckAndSetFontFamily()
         return;
     }
     path = path.append(familyName);
-    fontManager->SetFontFamily(familyName.c_str(), path.c_str());
+    if (isFormRender_) {
+        // Resolve garbled characters caused by FRS multi-thread async
+        std::lock_guard<std::mutex> lock(g_mutexFormRenderFontFamily);
+        fontManager->SetFontFamily(familyName.c_str(), path.c_str());
+    } else {
+        fontManager->SetFontFamily(familyName.c_str(), path.c_str());
+    }
 }
 
 bool AceContainer::IsFontFileExistInPath(std::string path)
@@ -2451,16 +2464,22 @@ void AceContainer::SetFontScaleAndWeightScale(
     }
     if (!parsedConfig.fontScale.empty()) {
         TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "parsedConfig fontScale: %{public}s", parsedConfig.fontScale.c_str());
-        auto instanceId = instanceId_;
-        SetFontScale(instanceId, StringUtils::StringToFloat(parsedConfig.fontScale));
-        configurationChange.fontScaleUpdate = true;
+        CHECK_NULL_VOID(pipelineContext_);
+        float fontSizeScale = StringUtils::StringToFloat(parsedConfig.fontScale);
+        if (fontSizeScale != pipelineContext_->GetFontScale()) {
+            SetFontScale(instanceId_, fontSizeScale);
+            configurationChange.fontScaleUpdate = true;
+        }
     }
     if (!parsedConfig.fontWeightScale.empty()) {
         TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "parsedConfig fontWeightScale: %{public}s",
             parsedConfig.fontWeightScale.c_str());
-        auto instanceId = instanceId_;
-        SetFontWeightScale(instanceId, StringUtils::StringToFloat(parsedConfig.fontWeightScale));
-        configurationChange.fontWeightScaleUpdate = true;
+        CHECK_NULL_VOID(pipelineContext_);
+        float fontWeightScale = StringUtils::StringToFloat(parsedConfig.fontWeightScale);
+        if (fontWeightScale != pipelineContext_->GetFontWeightScale()) {
+            SetFontWeightScale(instanceId_, fontWeightScale);
+            configurationChange.fontWeightScaleUpdate = true;
+        }
     }
 }
 
@@ -2912,6 +2931,12 @@ bool AceContainer::IsSceneBoardEnabled()
     return Rosen::SceneBoardJudgement::IsSceneBoardEnabled();
 }
 // ArkTsCard end
+
+bool AceContainer::IsMainWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+}
 
 void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent)
 {

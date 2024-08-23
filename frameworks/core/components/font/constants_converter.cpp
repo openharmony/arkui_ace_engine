@@ -27,16 +27,14 @@
 #endif
 
 #include "base/i18n/localization.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components_ng/pattern/symbol/symbol_effect_options.h"
-#include "core/components_ng/pattern/symbol/constants.h"
-#include "core/components_ng/pattern/text/text_layout_adapter.h"
 
 namespace OHOS::Ace::Constants {
 namespace {
 const std::string FONTWEIGHT = "wght";
 constexpr float DEFAULT_MULTIPLE = 100.0f;
+constexpr float MIN_FONT_WEIGHT = 100.0f;
+constexpr float DEFAULT_FONT_WEIGHT = 400.0f;
+constexpr float MAX_FONT_WEIGHT = 900.0f;
 constexpr int32_t SCALE_EFFECT = 2;
 constexpr int32_t NONE_EFFECT = 0;
 constexpr float ORIGINAL_LINE_HEIGHT_SCALE = 1.0f;
@@ -81,7 +79,7 @@ txt::FontWeight ConvertTxtFontWeight(FontWeight fontWeight)
             convertValue = txt::FontWeight::w900;
             break;
         default:
-            LOGW("FontWeight setting error! Now using default FontWeight.");
+            TAG_LOGW(AceLogTag::ACE_FONT, "FontWeight set error! use default FontWeight.");
             convertValue = txt::FontWeight::w400;
             break;
     }
@@ -126,7 +124,7 @@ Rosen::FontWeight ConvertTxtFontWeight(FontWeight fontWeight)
             convertValue = Rosen::FontWeight::W900;
             break;
         default:
-            LOGW("FontWeight setting error! Now using default FontWeight.");
+            TAG_LOGW(AceLogTag::ACE_FONT, "FontWeight setting error! Now using default FontWeight.");
             convertValue = Rosen::FontWeight::W400;
             break;
     }
@@ -146,7 +144,7 @@ txt::FontStyle ConvertTxtFontStyle(FontStyle fontStyle)
             convertValue = txt::FontStyle::italic;
             break;
         default:
-            LOGW("FontStyle setting error! Now using default FontStyle");
+            TAG_LOGW(AceLogTag::ACE_FONT, "FontStyle set error! use default FontStyle");
             convertValue = txt::FontStyle::normal;
             break;
     }
@@ -164,7 +162,7 @@ Rosen::FontStyle ConvertTxtFontStyle(FontStyle fontStyle)
             convertValue = Rosen::FontStyle::ITALIC;
             break;
         default:
-            LOGW("FontStyle setting error! Now using default FontStyle");
+            TAG_LOGW(AceLogTag::ACE_FONT, "FontStyle setting error! Now using default FontStyle");
             convertValue = Rosen::FontStyle::NORMAL;
             break;
     }
@@ -232,7 +230,7 @@ txt::TextAlign ConvertTxtTextAlign(TextAlign textAlign)
             convertValue = txt::TextAlign::end;
             break;
         default:
-            LOGW("TextAlign setting error! Now using default TextAlign");
+            TAG_LOGW(AceLogTag::ACE_FONT, "TextAlign set error! use default TextAlign");
             convertValue = txt::TextAlign::start;
             break;
     }
@@ -262,11 +260,79 @@ Rosen::TextAlign ConvertTxtTextAlign(TextAlign textAlign)
             convertValue = Rosen::TextAlign::END;
             break;
         default:
-            LOGW("TextAlign setting error! Now using default TextAlign");
+            TAG_LOGW(AceLogTag::ACE_FONT, "TextAlign setting error! Now using default TextAlign");
             convertValue = Rosen::TextAlign::START;
             break;
     }
     return convertValue;
+}
+#endif
+
+#ifndef USE_GRAPHIC_TEXT_GINE
+txt::Paragraph::RectHeightStyle ConvertTxtRectHeightStyle(RectHeightStyle heightStyle)
+{
+    switch (heightStyle) {
+        case RectHeightStyle::TIGHT:
+            return txt::Paragraph::RectHeightStyle::kTight;
+        case RectHeightStyle::MAX:
+            return txt::Paragraph::RectHeightStyle::kMax;
+        case RectHeightStyle::INCLUDE_LINE_SPACE_MIDDLE:
+            return txt::Paragraph::RectHeightStyle::kIncludeLineSpacingMiddle;
+        case RectHeightStyle::INCLUDE_LINE_SPACE_TOP:
+            return txt::Paragraph::RectHeightStyle::kIncludeLineSpacingTop;
+        case RectHeightStyle::INCLUDE_LINE_SPACE_BOTTOM:
+            return txt::Paragraph::RectHeightStyle::kIncludeLineSpacingBottom;
+        case RectHeightStyle::STRUT:
+            return txt::Paragraph::RectHeightStyle::kStrut;
+        default:
+            return txt::Paragraph::RectHeightStyle::kTight;
+    }
+}
+#else
+Rosen::TextRectHeightStyle ConvertTxtRectHeightStyle(RectHeightStyle heightStyle)
+{
+    switch (heightStyle) {
+        case RectHeightStyle::TIGHT:
+            return Rosen::TextRectHeightStyle::TIGHT;
+        case RectHeightStyle::MAX:
+            return Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM;
+        case RectHeightStyle::INCLUDE_LINE_SPACE_MIDDLE:
+            return Rosen::TextRectHeightStyle::COVER_HALF_TOP_AND_BOTTOM;
+        case RectHeightStyle::INCLUDE_LINE_SPACE_TOP:
+            return Rosen::TextRectHeightStyle::COVER_TOP;
+        case RectHeightStyle::INCLUDE_LINE_SPACE_BOTTOM:
+            return Rosen::TextRectHeightStyle::COVER_BOTTOM;
+        case RectHeightStyle::STRUT:
+            return Rosen::TextRectHeightStyle::FOLLOW_BY_STRUT;
+        default:
+            return Rosen::TextRectHeightStyle::TIGHT;
+    }
+}
+#endif
+
+#ifndef USE_GRAPHIC_TEXT_GINE
+txt::Paragraph::RectWidthStyle ConvertTxtRectWidthStyle(RectWidthStyle widthStyle)
+{
+    switch (widthStyle) {
+        case RectWidthStyle::TIGHT:
+            return txt::Paragraph::RectWidthStyle::kTight;
+        case RectWidthStyle::MAX:
+            return txt::Paragraph::RectWidthStyle::kMax;
+        default:
+            return txt::Paragraph::RectWidthStyle::kTight;
+    }
+}
+#else
+Rosen::TextRectWidthStyle ConvertTxtRectWidthStyle(RectWidthStyle widthStyle)
+{
+    switch (widthStyle) {
+        case RectWidthStyle::TIGHT:
+            return Rosen::TextRectWidthStyle::TIGHT;
+        case RectWidthStyle::MAX:
+            return Rosen::TextRectWidthStyle::MAX;
+        default:
+            return Rosen::TextRectWidthStyle::TIGHT;
+    }
 }
 #endif
 
@@ -297,7 +363,7 @@ Rosen::TextDirection ConvertTxtTextDirection(TextDirection textDirection)
 #endif
             break;
         default:
-            LOGW("TextDirection setting error! Now using default TextDirection");
+            TAG_LOGW(AceLogTag::ACE_FONT, "TextDirection setting error! Now using default TextDirection");
 #ifndef USE_GRAPHIC_TEXT_GINE
             convertValue = txt::TextDirection::ltr;
 #else
@@ -331,7 +397,7 @@ txt::TextDecoration ConvertTxtTextDecoration(TextDecoration textDecoration)
             convertValue = txt::TextDecoration::kLineThrough;
             break;
         default:
-            LOGW("TextDecoration setting error! Now using default TextDecoration");
+            TAG_LOGW(AceLogTag::ACE_FONT, "TextDecoration set error! use default TextDecoration");
             break;
     }
     return convertValue;
@@ -354,7 +420,7 @@ Rosen::TextDecoration ConvertTxtTextDecoration(TextDecoration textDecoration)
             convertValue = Rosen::TextDecoration::LINE_THROUGH;
             break;
         default:
-            LOGW("TextDecoration setting error! Now using default TextDecoration");
+            TAG_LOGW(AceLogTag::ACE_FONT, "TextDecoration setting error! Now using default TextDecoration");
             break;
     }
     return convertValue;
@@ -381,7 +447,7 @@ txt::TextDecorationStyle ConvertTxtTextDecorationStyle(TextDecorationStyle textD
             convertValue = txt::TextDecorationStyle::kWavy;
             break;
         default:
-            LOGW("TextDecorationStyle setting error! Now using default TextDecorationStyle");
+            TAG_LOGW(AceLogTag::ACE_FONT, "TextDecorationStyle set error! use default TextDecorationStyle");
             break;
     }
     return convertValue;
@@ -407,7 +473,7 @@ Rosen::TextDecorationStyle ConvertTxtTextDecorationStyle(TextDecorationStyle tex
             convertValue = Rosen::TextDecorationStyle::WAVY;
             break;
         default:
-            LOGW("TextDecorationStyle setting error! Now using default TextDecorationStyle");
+            TAG_LOGW(AceLogTag::ACE_FONT, "TextDecorationStyle setting error! Now using default TextDecorationStyle");
             break;
     }
     return convertValue;
@@ -424,6 +490,12 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     auto pipelineContext = context.Upgrade();
     if (pipelineContext) {
         fontWeightValue = fontWeightValue * pipelineContext->GetFontWeightScale();
+    }
+    if (textStyle.GetEnableVariableFontWeight()) {
+        fontWeightValue = textStyle.GetVariableFontWeight();
+        if (LessNotEqual(fontWeightValue, MIN_FONT_WEIGHT) || GreatNotEqual(fontWeightValue, MAX_FONT_WEIGHT)) {
+            fontWeightValue = DEFAULT_FONT_WEIGHT;
+        }
     }
     txtStyle.fontVariations.SetAxisValue(FONTWEIGHT, fontWeightValue);
     // Font size must be px when transferring to txt::TextStyle
@@ -650,6 +722,12 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     if (pipelineContext) {
         fontWeightValue = fontWeightValue * pipelineContext->GetFontWeightScale();
     }
+    if (textStyle.GetEnableVariableFontWeight()) {
+        fontWeightValue = textStyle.GetVariableFontWeight();
+        if (LessNotEqual(fontWeightValue, MIN_FONT_WEIGHT) || GreatNotEqual(fontWeightValue, MAX_FONT_WEIGHT)) {
+            fontWeightValue = DEFAULT_FONT_WEIGHT;
+        }
+    }
     txtStyle.fontVariations.SetAxisValue(FONTWEIGHT, fontWeightValue);
     // Font size must be px when transferring to Rosen::TextStyle
     txtStyle.fontSize = textStyle.GetFontSize().ConvertToPxDistribute(
@@ -867,7 +945,7 @@ txt::PlaceholderAlignment ConvertPlaceholderAlignment(PlaceholderAlignment textD
             convertValue = txt::PlaceholderAlignment::kMiddle;
             break;
         default:
-            LOGW("PlaceholderAlignment setting error! Now using default PlaceholderAlignment");
+            TAG_LOGW(AceLogTag::ACE_FONT, "PlaceholderAlignment set error! use default PlaceholderAlignment");
             break;
     }
     return convertValue;
@@ -896,7 +974,7 @@ Rosen::PlaceholderVerticalAlignment ConvertPlaceholderAlignment(PlaceholderAlign
             convertValue = Rosen::PlaceholderVerticalAlignment::CENTER_OF_ROW_BOX;
             break;
         default:
-            LOGW("PlaceholderAlignment setting error! Now using default PlaceholderAlignment");
+            TAG_LOGW(AceLogTag::ACE_FONT, "PlaceholderAlignment setting error! Now using default PlaceholderAlignment");
             break;
     }
     return convertValue;

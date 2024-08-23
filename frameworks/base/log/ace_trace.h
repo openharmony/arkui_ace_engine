@@ -39,6 +39,8 @@
     AceScopedTraceFlag aceScopedTraceFlag(SystemProperties::GetAccessTraceEnabled(), fmt, ##__VA_ARGS__)
 #define ACE_LAYOUT_SCOPED_TRACE(fmt, ...) \
     AceScopedTraceFlag aceScopedTraceFlag(SystemProperties::GetLayoutTraceEnabled(), fmt, ##__VA_ARGS__)
+#define ACE_IMAGE_SCOPED_TRACE(fmt, ...) \
+    AceScopedTraceFlag aceScopedTraceFlag(SystemProperties::GetDebugEnabled(), fmt, ##__VA_ARGS__)
 #ifdef ACE_DEBUG
 #define ACE_DEBUG_SCOPED_TRACE(fmt, ...) AceScopedTrace aceScopedTrace(fmt, ##__VA_ARGS__)
 #else

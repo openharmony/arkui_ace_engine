@@ -649,11 +649,13 @@ void NavigationPattern::UpdateNavPathList()
 
 void NavigationPattern::RefreshNavDestination()
 {
+    isChanged_ = false;
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto preTopNavPath = std::move(preTopNavPath_);
+    auto preLastStandardIndex = hostNode->GetLastStandardIndex();
     auto& navPathList = navigationStack_->GetAllNavDestinationNodes();
     hostNode->UpdateNavDestinationNodeWithoutMarkDirty(
         preTopNavPath.has_value() ? preTopNavPath->second : nullptr, navigationModeChange_);
@@ -663,7 +665,7 @@ void NavigationPattern::RefreshNavDestination()
         navigationStack_->isLastListContains(newTopNavPath->first, newTopNavPath->second) : false;
 #endif
     std::string navDestinationName = "";
-    CheckTopNavPathChange(preTopNavPath, newTopNavPath);
+    CheckTopNavPathChange(preTopNavPath, newTopNavPath, preLastStandardIndex);
 
     // close keyboard
 #if defined(ENABLE_STANDARD_INPUT)
@@ -703,7 +705,8 @@ void NavigationPattern::RefreshNavDestination()
 
 void NavigationPattern::CheckTopNavPathChange(
     const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
-    const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath)
+    const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath,
+    int32_t preLastStandardIndex)
 {
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
@@ -773,7 +776,7 @@ void NavigationPattern::CheckTopNavPathChange(
                 break;
             }
             auto focusHub = newTopNavDestination->GetFocusHub();
-            if (!focusHub || !focusHub->IsFocusableWholePath()) {
+            if (!GetIsFocusable(newTopNavDestination)) {
                 break;
             }
             auto navDestinationPattern = newTopNavDestination->GetPattern<NavDestinationPattern>();
@@ -804,7 +807,7 @@ void NavigationPattern::CheckTopNavPathChange(
         }
         navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
         auto focusHub = navBarNode->GetFocusHub();
-        if (focusHub && focusHub->IsFocusableWholePath()) {
+        if (GetIsFocusable(navBarNode)) {
             auto navBarFocusView = navBarNode->GetPattern<FocusView>();
             CHECK_NULL_VOID(navBarFocusView);
             if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -845,7 +848,7 @@ void NavigationPattern::CheckTopNavPathChange(
         navigationStack_->UpdateAnimatedValue(true);
     } else {
         // before the animation of navDes replacing, update the zIndex of the previous navDes node
-        UpdatePreNavDesZIndex(preTopNavDestination, newTopNavDestination);
+        UpdatePreNavDesZIndex(preTopNavDestination, newTopNavDestination, preLastStandardIndex);
         // transition with animation need to run after layout task
         StartTransition(preTopNavDestination, newTopNavDestination, true, isPopPage, isShow);
     }
@@ -887,7 +890,13 @@ void NavigationPattern::FireNavigationInner(const RefPtr<UINode>& node, bool isO
     int32_t standardIndex = lastStandardIndex >= 0 ? lastStandardIndex : 0;
     int32_t start = standardIndex;
     int32_t end = navigationPattern->navigationStack_->Size();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
     if (isOnShow) {
+        if (overlayManager && overlayManager->HasModalPage()) {
+            return;
+        }
         for (int32_t index = start; index < end; index++) {
             const auto& curPath = navDestinationNodes[index];
             auto curDestination = AceType::DynamicCast<NavDestinationGroupNode>(
@@ -1043,6 +1052,7 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
             parent->RemoveChild(preTopNavDestination, true);
             parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         } else {
+            preTopNavDestination->GetRenderContext()->RemoveClipWithRRect();
             preTopNavDestination->SetTransitionType(PageTransitionType::EXIT_PUSH);
             newTopNavDestination->SetTransitionType(PageTransitionType::ENTER_PUSH);
             DealTransitionVisibility(preTopNavDestination, needVisible, false);
@@ -1722,6 +1732,7 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
         return false;
     }
     ExecuteAddAnimation(preTopNavDestination, newTopNavDestination, isPopPage, proxy, navigationTransition);
+    ACE_SCOPED_TRACE_COMMERCIAL("Navigation page custom transition start");
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
     if (navigationTransition.interactive) {
         auto finishCallback = [weakNavigation = WeakClaim(this),
@@ -1785,6 +1796,7 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "preDestination and topDestination is invalid");
         return;
     }
+    ACE_SCOPED_TRACE_COMMERCIAL("Navigation page custom transition end");
     PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
     auto replaceValue = navigationStack_->GetReplaceValue();
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
@@ -1933,7 +1945,7 @@ void NavigationPattern::OnColorConfigurationUpdate()
 }
 
 void NavigationPattern::UpdatePreNavDesZIndex(const RefPtr<FrameNode> &preTopNavDestination,
-    const RefPtr<FrameNode> &newTopNavDestination)
+    const RefPtr<FrameNode> &newTopNavDestination, int32_t preLastStandardIndex)
 {
     auto replaceVal = navigationStack_->GetReplaceValue();
     if (replaceVal != 0 && preTopNavDestination && newTopNavDestination) {
@@ -1944,9 +1956,28 @@ void NavigationPattern::UpdatePreNavDesZIndex(const RefPtr<FrameNode> &preTopNav
         auto newDesNodeContext = newTopNavDestination->GetRenderContext();
         CHECK_NULL_VOID(newDesNodeContext);
         std::optional<int32_t> newNodeZIndex = newDesNodeContext->GetZIndex();
+        int32_t standardIndex = newNodeZIndex.value_or(0) - 1;
+        auto hideNodes = hostNode->GetHideNodes();
+        for (auto iter = hideNodes.begin(); iter != hideNodes.end(); ++iter) {
+            // if navdestination nodes is not need removed, default zIndex is satisfied, don't need change
+            if (!iter->second) {
+                continue;
+            }
+            auto navDestination = iter->first;
+            if (!navDestination) {
+                continue;
+            }
+            auto navDestinationContext = navDestination->GetRenderContext();
+            if (!navDestinationContext) {
+                continue;
+            }
+            // get navDestination index in hideNodes, use navdestination index in pre navigation stack
+            int32_t hideNodesIndex = hideNodes.size() - (navDestination->GetIndex() - preLastStandardIndex);
+            navDestinationContext->UpdateZIndex(standardIndex - hideNodesIndex);
+        }
         auto preDesNodeContext = preTopNavDestination->GetRenderContext();
         CHECK_NULL_VOID(preDesNodeContext);
-        preDesNodeContext->UpdateZIndex(newNodeZIndex.value_or(0) - 1);
+        preDesNodeContext->UpdateZIndex(standardIndex);
         navigationContentNode->RebuildRenderContextTree();
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
@@ -2162,7 +2193,9 @@ void NavigationPattern::NotifyNavDestinationSwitch(const RefPtr<NavDestinationCo
     const RefPtr<NavDestinationContext>& to, NavigationOperation operation)
 {
     auto host = GetHost();
-    if (!host) {
+    auto NavdestinationSwitchFunc =
+        UIObserverHandler::GetInstance().GetHandleNavDestinationSwitchFunc();
+    if (!host || !NavdestinationSwitchFunc) {
         return;
     }
 
@@ -2378,12 +2411,19 @@ void NavigationPattern::RefreshFocusToDestination()
     if (!newTopNavPath.has_value()) {
         return;
     }
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto navBarNode = AceType::DynamicCast<FrameNode>(hostNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto navBarFocus = navBarNode->GetFocusHub();
+    CHECK_NULL_VOID(navBarFocus);
+    if (!navBarFocus->IsCurrentFocus()) {
+        return;
+    }
     auto newTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
         NavigationGroupNode::GetNavDestinationNode(newTopNavPath->second));
     CHECK_NULL_VOID(newTopNavDestination);
-    auto focusHub = newTopNavDestination->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    if (!focusHub->IsFocusableWholePath()) {
+    if (!GetIsFocusable(newTopNavDestination)) {
         return;
     }
     auto navDestinationFocusView = newTopNavDestination->GetPattern<FocusView>();
@@ -2439,6 +2479,7 @@ void NavigationPattern::RecoveryToLastStack(
 
     // update name index
     navigationStack_->RecoveryNavigationStack();
+    ACE_SCOPED_TRACE_COMMERCIAL("Navigation page transition end");
     PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
     hostNode->SetIsOnAnimation(false);
     auto id = hostNode->GetTopDestination() ? hostNode->GetTopDestination()->GetAccessibilityId() : -1;
@@ -2503,5 +2544,19 @@ bool NavigationPattern::ExecuteAddAnimation(const RefPtr<NavDestinationGroupNode
         },
         TaskExecutor::TaskType::UI, timeout, "ArkUINavigationTransitionProxyFinish");
     return true;
+}
+
+bool NavigationPattern::GetIsFocusable(const RefPtr<FrameNode>& frameNode)
+{
+    auto hostNode = AceType::DynamicCast<FrameNode>(GetHost());
+    CHECK_NULL_RETURN(hostNode, false);
+    auto focusHub = hostNode->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    if (!focusHub->IsFocusableWholePath()) {
+        return false;
+    }
+    auto currentFocusHub = frameNode->GetFocusHub();
+    CHECK_NULL_RETURN(currentFocusHub, false);
+    return currentFocusHub->IsFocusableNode();
 }
 } // namespace OHOS::Ace::NG

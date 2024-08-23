@@ -19,8 +19,6 @@
 #include "foundation/multimedia/image_framework/frameworks/kits/cj/include/pixel_map_impl.h"
 #endif
 #include "cj_lambda.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
-#include "core/common/container.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 
 using namespace OHOS::Ace::Framework;

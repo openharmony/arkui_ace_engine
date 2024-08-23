@@ -16,11 +16,6 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_alphabet_indexer_ffi.h"
 
 #include "cj_lambda.h"
-#include "bridge/common/utils/utils.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/indexer/indexer_event_hub.h"
-#include "core/components_ng/pattern/indexer/indexer_theme.h"
 #include "core/components_ng/pattern/indexer/indexer_model.h"
 
 using namespace OHOS::Ace;

@@ -87,15 +87,19 @@ public:
         WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) override;
     void NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) const override;
     bool NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaChangeInfo> info) const override;
-    void SetDensityDpiImpl(bool isDensityDpi) override;
 
     // The interface to send the data for ArkTS
     void SendDataAsync(const AAFwk::WantParams& params) const override;
     int32_t SendDataSync(const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams) const override;
 
+    // The interface to update viewport config
+    void UpdateSessionViewportConfig() override;
+
 private:
     void InitAllCallback();
     void UpdateSessionConfig();
+    int32_t GetWindowSceneId();
+
     WeakPtr<UIExtensionPattern> hostPattern_;
     RefPtr<TaskExecutor> taskExecutor_;
     int32_t instanceId_;

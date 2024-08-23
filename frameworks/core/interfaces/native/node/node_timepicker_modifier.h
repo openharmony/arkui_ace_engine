@@ -18,9 +18,11 @@
 
 #include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/interfaces/cjui/cjui_api.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUITimepickerModifier* GetTimepickerModifier();
+const CJUITimepickerModifier* GetCJUITimepickerModifier();
 void SetTimePickerOnChange(ArkUINodeHandle node, void* extraParam);
 }
 

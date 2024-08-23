@@ -567,6 +567,7 @@ void ResetSelectDivider(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
     auto themeManager = context->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
     auto selectTheme = themeManager->GetTheme<SelectTheme>();
@@ -620,6 +621,22 @@ const ArkUISelectModifier* GetSelectModifier()
         ResetSelectSize, SetSelectOptionWidthFitTrigger, SetSelectOptionWidth, ResetSelectOptionWidth,
         SetSelectOptionHeight, ResetSelectOptionHeight, SetControlSize, ResetControlSize, SetSelectValue,
         ResetSelectValue, SetMenuBgColor, ResetMenuBgColor, SetMenuBgBlurStyle, ResetMenuBgBlurStyle, SetSelectDivider,
+        ResetSelectDivider, ResetSelectDividerNull };
+
+    return &modifier;
+}
+
+const CJUISelectModifier* GetCJUISelectModifier()
+{
+    static const CJUISelectModifier modifier = { SetSpace, SetValue, SetSelected, SetSelectFontColor,
+        SetSelectedOptionBgColor, SetOptionBgColor, SetOptionFontColor, SetSelectedOptionFontColor, SetArrowPosition,
+        SetMenuAlign, SetFont, SetOptionFont, SetSelectedOptionFont, ResetSpace, ResetValue, ResetSelected,
+        ResetSelectFontColor, ResetSelectedOptionBgColor, ResetOptionBgColor, ResetOptionFontColor,
+        ResetSelectedOptionFontColor, ResetArrowPosition, ResetMenuAlign, ResetFont, ResetOptionFont,
+        ResetSelectedOptionFont, SetSelectWidth, ResetSelectWidth, SetSelectHeight, ResetSelectHeight, SetSelectSize,
+        ResetSelectSize, SetSelectOptionWidthFitTrigger, SetSelectOptionWidth, ResetSelectOptionWidth,
+        SetSelectOptionHeight, ResetSelectOptionHeight, SetControlSize, ResetControlSize, SetMenuBgColor,
+        ResetMenuBgColor, SetMenuBgBlurStyle, ResetMenuBgBlurStyle, SetSelectValue, ResetSelectValue, SetSelectDivider,
         ResetSelectDivider, ResetSelectDividerNull };
 
     return &modifier;

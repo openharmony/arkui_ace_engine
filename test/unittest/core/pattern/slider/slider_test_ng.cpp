@@ -388,7 +388,6 @@ HWTEST_F(SliderTestNg, SliderTestNg004, TestSize.Level1)
     sliderPattern->OnModifyDone();
     EXPECT_EQ(sliderPattern->value_, VALUE);
     EXPECT_EQ(sliderPattern->valueRatio_, .5f);
-    EXPECT_EQ(sliderPattern->stepRatio_, .01f);
     EXPECT_EQ(sliderPattern->showTips_, false);
     EXPECT_EQ(sliderPaintProperty->GetPadding(), std::nullopt);
     EXPECT_EQ(sliderPaintProperty->GetTipColor(), std::nullopt);

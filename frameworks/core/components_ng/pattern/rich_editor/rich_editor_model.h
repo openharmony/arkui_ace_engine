@@ -118,9 +118,19 @@ struct UpdateSpanStyle {
     std::optional<ImageFit> updateImageFit = std::nullopt;
     std::optional<OHOS::Ace::NG::MarginProperty> marginProp = std::nullopt;
     std::optional<OHOS::Ace::NG::BorderRadiusProperty> borderRadius = std::nullopt;
-    bool hasResourceFontColor = false;
-    bool hasResourceDecorationColor = false;
+    bool useThemeFontColor = true;
+    bool useThemeDecorationColor = true;
     bool isSymbolStyle = false;
+
+    void UpdateColorByResourceId()
+    {
+        if (updateTextColor) {
+            updateTextColor->UpdateColorByResourceId();
+        }
+        if (updateTextDecorationColor) {
+            updateTextDecorationColor->UpdateColorByResourceId();
+        }
+    }
 
     std::string ToString() const
     {
@@ -140,8 +150,8 @@ struct UpdateSpanStyle {
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, updateImageFit);
         JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, marginProp);
         JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, borderRadius);
-        JSON_STRING_PUT_BOOL(jsonValue, hasResourceFontColor);
-        JSON_STRING_PUT_BOOL(jsonValue, hasResourceDecorationColor);
+        JSON_STRING_PUT_BOOL(jsonValue, useThemeFontColor);
+        JSON_STRING_PUT_BOOL(jsonValue, useThemeDecorationColor);
         JSON_STRING_PUT_BOOL(jsonValue, isSymbolStyle);
         return jsonValue->ToString();
     }
@@ -191,8 +201,8 @@ struct TextSpanOptions : SpanOptionBase {
     std::optional<TextStyle> style;
     std::optional<UpdateParagraphStyle> paraStyle;
     UserGestureOptions userGestureOption;
-    bool hasResourceFontColor = false;
-    bool hasResourceDecorationColor = false;
+    bool useThemeFontColor = true;
+    bool useThemeDecorationColor = true;
 
     std::string ToString() const
     {
@@ -201,8 +211,8 @@ struct TextSpanOptions : SpanOptionBase {
         JSON_STRING_PUT_STRING(jsonValue, value);
         JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, style);
         JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, paraStyle);
-        JSON_STRING_PUT_BOOL(jsonValue, hasResourceFontColor);
-        JSON_STRING_PUT_BOOL(jsonValue, hasResourceDecorationColor);
+        JSON_STRING_PUT_BOOL(jsonValue, useThemeFontColor);
+        JSON_STRING_PUT_BOOL(jsonValue, useThemeDecorationColor);
         return jsonValue->ToString();
     }
 };
@@ -264,6 +274,7 @@ public:
     virtual bool SetCaretOffset(int32_t caretPosition) = 0;
     virtual void SetTypingStyle(std::optional<struct UpdateSpanStyle> typingStyle,
         std::optional<TextStyle> textStyle) = 0;
+    virtual std::optional<struct UpdateSpanStyle> GetTypingStyle() = 0;
     virtual void CloseSelectionMenu() = 0;
     virtual bool IsEditing() = 0;
     virtual void StopEditing() = 0;
@@ -326,7 +337,7 @@ public:
     virtual void SetPlaceholder(PlaceholderOptions& options) = 0;
     virtual void SetTextDetectEnable(bool value) = 0;
     virtual void SetSupportPreviewText(bool value) = 0;
-    virtual void SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult) = 0;
+    virtual void SetTextDetectConfig(const TextDetectConfig& textDetectConfig) = 0;
     virtual void SetSelectedBackgroundColor(const DynamicColor& selectedColor) = 0;
     virtual void SetCaretColor(const DynamicColor& color) = 0;
     virtual void SetOnEditingChange(std::function<void(const bool&)>&& func) = 0;
@@ -339,6 +350,7 @@ public:
     virtual void SetSelectionMenuOptions(
         const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick) {}
     virtual void SetRequestKeyboardOnFocus(bool needToRequest) {}
+    virtual void SetEnableHapticFeedback(bool isEnabled) {}
 private:
     static std::unique_ptr<RichEditorModel> instance_;
     static std::mutex mutex_;

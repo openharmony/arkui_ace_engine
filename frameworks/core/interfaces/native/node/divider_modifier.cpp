@@ -103,5 +103,12 @@ const ArkUIDividerModifier* GetDividerModifier()
         ResetDividerLineCap, SetDividerColor, ResetDividerColor, SetDividerVertical, ResetDividerVertical };
     return &modifier;
 }
+
+const CJUIDividerModifier* GetCJUIDividerModifier()
+{
+    static const CJUIDividerModifier modifier = { SetDividerStrokeWidth, ResetDividerStrokeWidth, SetDividerLineCap,
+        ResetDividerLineCap, SetDividerColor, ResetDividerColor, SetDividerVertical, ResetDividerVertical };
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

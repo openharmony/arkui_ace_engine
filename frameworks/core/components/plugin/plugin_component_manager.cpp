@@ -15,15 +15,10 @@
 
 #include "core/components/plugin/plugin_component_manager.h"
 
-#include <map>
-#include <vector>
-
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 #include "ui_service_mgr_client.h"
 
-#include "base/json/json_util.h"
-#include "base/log/log.h"
 #include "core/common/ace_engine.h"
 
 namespace OHOS::Ace {
@@ -194,7 +189,7 @@ void PluginComponentManager::UIServiceListener::OnReturnRequest(
                     },
                     TaskExecutor::TaskType::JS, "ArkUIPluginReturnRequestCallback");
                 callbacks_.emplace(iter->first);
-                callbackVec_.erase(iter++);
+                iter = callbackVec_.erase(iter);
             } else {
                 iter++;
             }
@@ -209,7 +204,7 @@ void PluginComponentManager::UIServiceListener::RequestByJsonPath(
     for (auto iter = callbackVec_.begin(); iter != callbackVec_.end();) {
         if (iter->second == CallBackType::RequestCallBack && iter->first != nullptr) {
             iter->first->OnRequestCallBack(pluginTemplate, data, "{}");
-            callbackVec_.erase(iter++);
+            iter = callbackVec_.erase(iter);
         } else {
             iter++;
         }

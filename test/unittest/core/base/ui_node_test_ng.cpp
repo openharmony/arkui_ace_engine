@@ -69,7 +69,7 @@ public:
     explicit TestNode(int32_t nodeId) : UINode("TestNode", nodeId) {}
 
     HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const PointF& parentRevertPoint,
-        TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId, TouchTestResult& responseLinkResult,
+        TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId, ResponseLinkResult& responseLinkResult,
         bool isDispatch = false) override
     {
         return hitTestResult_;
@@ -784,7 +784,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg023, TestSize.Level1)
      * @tc.expected: the return value is meetings expectations
      */
     TouchTestResult result;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     TouchRestrict restrict;
     const PointF GLOBAL_POINT { 20.0f, 20.0f };
     const PointF LOCAL_POINT { 15.0f, 15.0f };
@@ -2226,7 +2226,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg065, TestSize.Level1)
 
 /**
  * @tc.name: UINodeTestNg066
- * @tc.desc: Test ui node method CollectRemovedChild/UpdateNodeStatus
+ * @tc.desc: Test ui node method CollectRemovedChildren/UpdateNodeStatus
  * @tc.type: FUNC
  */
 HWTEST_F(UINodeTestNg, UINodeTestNg066, TestSize.Level1)
@@ -2242,15 +2242,18 @@ HWTEST_F(UINodeTestNg, UINodeTestNg066, TestSize.Level1)
         FrameNode::CreateFrameNode("testNode3", 3, AceType::MakeRefPtr<Pattern>(), true);
     const RefPtr<FrameNode> testNode4 =
         FrameNode::CreateFrameNode("testNode4", 4, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> testNode5 =
+        FrameNode::CreateFrameNode("testNode5", 5, AceType::MakeRefPtr<Pattern>(), true);
     testNode1->AddChild(testNode2, 1, false);
     testNode1->AddChild(testNode3, 1, false);
     testNode1->AddChild(testNode4, 1, false);
-    testNode2->UpdateNodeStatus(NodeStatus::BUILDER_NODE_ON_MAINTREE);
+    testNode2->AddChild(testNode5, 1, false);
+    testNode2->SetIsRootBuilderNode(true);
     std::list<int32_t> removedElmtId;
-    testNode2->CollectRemovedChild(testNode2, removedElmtId);
-    EXPECT_EQ(removedElmtId.size(), 0);
-    testNode1->UpdateNodeStatus(NodeStatus::BUILDER_NODE_ON_MAINTREE);
-    EXPECT_EQ(testNode1->GetNodeStatus(), NodeStatus::BUILDER_NODE_ON_MAINTREE);
+    testNode1->CollectRemovedChildren(testNode1->GetChildren(), removedElmtId, true);
+    EXPECT_EQ(removedElmtId.size(), 2);
+    testNode2->CollectRemovedChildren(testNode2->GetChildren(), removedElmtId, true);
+    EXPECT_EQ(removedElmtId.size(), 3);
 }
 
 /**

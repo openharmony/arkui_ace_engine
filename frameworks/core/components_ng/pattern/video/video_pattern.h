@@ -228,7 +228,7 @@ public:
 
     void OnResolutionChange() const;
 
-    void OnStartRenderFrameCb() const;
+    void OnStartRenderFrameCb();
 
     void ResetLastBoundsRect()
     {

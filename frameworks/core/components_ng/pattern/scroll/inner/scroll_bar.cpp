@@ -368,13 +368,16 @@ void ScrollBar::SetGestureEvent()
                     inRegion = scrollBar->InBarHoverRegion(point);
                     scrollBar->MarkNeedRender();
                 }
-                scrollBar->SetPressed(inRegion);
+                if (!scrollBar->IsPressed()) {
+                    scrollBar->SetPressed(inRegion);
+                }
                 if (inRegion && !scrollBar->IsHover()) {
                     scrollBar->PlayScrollBarGrowAnimation();
                 }
             }
-            if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
-                info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
+            if ((info.GetTouches().front().GetTouchType() == TouchType::UP ||
+                    info.GetTouches().front().GetTouchType() == TouchType::CANCEL) &&
+                info.GetTouches().size() <= 1) {
                 if (scrollBar->IsPressed() && !scrollBar->IsHover()) {
                     scrollBar->PlayScrollBarShrinkAnimation();
                     scrollBar->ScheduleDisappearDelayTask();
@@ -532,6 +535,13 @@ void ScrollBar::InitPanRecognizer()
             scrollBar->HandleDragStart(info);
         }
     });
+    panRecognizer_->SetOnActionCancel([weakBar = AceType::WeakClaim(this)]() {
+        auto scrollBar = weakBar.Upgrade();
+        if (scrollBar) {
+            GestureEvent info;
+            scrollBar->HandleDragEnd(info);
+        }
+    });
 }
 
 void ScrollBar::HandleDragStart(const GestureEvent& info)
@@ -539,9 +549,7 @@ void ScrollBar::HandleDragStart(const GestureEvent& info)
     if (frictionController_ && frictionController_->IsRunning()) {
         frictionController_->Stop();
     }
-    TAG_LOGI(AceLogTag::ACE_SCROLL_BAR,"inner scrollBar drag start, localLocation: %{public}s, "
-        "globalLocation: %{public}s",
-        info.GetLocalLocation().ToString().c_str(), info.GetGlobalLocation().ToString().c_str());
+    TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "inner scrollBar drag start");
     ACE_SCOPED_TRACE("inner scrollBar HandleDragStart");
     if (scrollPositionCallback_) {
         scrollPositionCallback_(0, SCROLL_FROM_START);
@@ -587,10 +595,8 @@ void ScrollBar::HandleDragEnd(const GestureEvent& info)
     if (dragFRCSceneCallback_) {
         dragFRCSceneCallback_(0, NG::SceneStatus::END);
     }
-    auto velocity = info.GetMainVelocity();
-    TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "inner scrollBar drag end, position is %{public}f and %{public}f, "
-        "velocity is %{public}f",
-        info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(), velocity);
+    auto velocity = IsReverse() ? -info.GetMainVelocity() : info.GetMainVelocity();
+    TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "inner scrollBar drag end, velocity is %{public}f", velocity);
     ACE_SCOPED_TRACE("inner scrollBar HandleDragEnd velocity:%f", velocity);
     if (NearZero(velocity) || info.GetInputEventType() == InputEventType::AXIS) {
         if (scrollEndCallback_) {
@@ -655,7 +661,7 @@ void ScrollBar::ProcessFrictionMotionStop()
 
 void ScrollBar::OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
     TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-    TouchTestResult& responseLinkResult)
+    ResponseLinkResult& responseLinkResult)
 {
     if (panRecognizer_ && isScrollable_) {
         panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
@@ -690,7 +696,7 @@ void ScrollBar::ScheduleDisappearDelayTask()
 
 void ScrollBar::OnCollectLongPressTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
     TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-    TouchTestResult& responseLinkResult)
+    ResponseLinkResult& responseLinkResult)
 {
     if (longPressRecognizer_ && isScrollable_) {
         longPressRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));

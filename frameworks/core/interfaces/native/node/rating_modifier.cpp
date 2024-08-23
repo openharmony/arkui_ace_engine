@@ -94,5 +94,12 @@ const ArkUIRatingModifier* GetRatingModifier()
         ResetStars, ResetRatingStepSize, ResetStarStyle};
     return &modifier;
 }
+
+const CJUIRatingModifier* GetCJUIRatingModifier()
+{
+    static const CJUIRatingModifier modifier = {SetStars, SetRatingStepSize, SetStarStyle,
+        ResetStars, ResetRatingStepSize, ResetStarStyle};
+    return &modifier;
+}
 }
 }

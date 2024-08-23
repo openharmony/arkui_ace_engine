@@ -186,9 +186,12 @@ void TextPickerPattern::SetButtonIdeaSize()
     auto children = host->GetChildren();
     for (const auto& child : children) {
         auto stackNode = DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(stackNode);
         auto width = stackNode->GetGeometryNode()->GetFrameSize().Width();
         auto buttonNode = DynamicCast<FrameNode>(child->GetFirstChild());
+        CHECK_NULL_VOID(buttonNode);
         auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+        CHECK_NULL_VOID(buttonLayoutProperty);
         buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
         buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
         buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(PRESS_RADIUS));
@@ -200,6 +203,7 @@ void TextPickerPattern::SetButtonIdeaSize()
             UpdateUserDefinedIdealSize(CalcSize(CalcLength(width - PRESS_INTERVAL.ConvertToPx() * RATE),
                 CalcLength(buttonHeight)));
         auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
+        CHECK_NULL_VOID(buttonConfirmRenderContext);
         auto blendNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
         CHECK_NULL_VOID(blendNode);
         auto columnNode = DynamicCast<FrameNode>(blendNode->GetLastChild());
@@ -873,18 +877,20 @@ std::string TextPickerPattern::GetSelectedObjectMulti(const std::vector<std::str
 {
     std::string result = "";
     result = std::string("{\"value\":") + "[";
-    for (uint32_t i = 0; i < values.size(); i++) {
+    const size_t valueSize = values.size();
+    for (uint32_t i = 0; i < valueSize; i++) {
         result += "\"" + values[i];
-        if (values.size() > 0 && i != values.size() - 1) {
+        if (valueSize > 0 && i != valueSize - 1) {
             result += "\",";
         } else {
             result += "\"]";
         }
     }
     result += std::string(",\"index\":") + "[";
-    for (uint32_t i = 0; i < indexs.size(); i++) {
+    const size_t indexSize = indexs.size();
+    for (uint32_t i = 0; i < indexSize; i++) {
         result += std::to_string(indexs[i]);
-        if (indexs.size() > 0 && indexs.size() != i + 1) {
+        if (indexSize > 0 && indexSize != i + 1) {
             result += ",";
         } else {
             result += "]";
@@ -1001,7 +1007,8 @@ std::string TextPickerPattern::GetOptionsCascadeStr(
 std::string TextPickerPattern::GetOptionsMultiStrInternal() const
 {
     std::string result = "[";
-    for (uint32_t i = 0; i < cascadeOptions_.size(); i++) {
+    const size_t size = cascadeOptions_.size();
+    for (uint32_t i = 0; i < size; i++) {
         result += "[";
         for (uint32_t j = 0; j < cascadeOptions_[i].rangeResult.size(); j++) {
             result += "\"" + cascadeOptions_[i].rangeResult[j];
@@ -1011,7 +1018,7 @@ std::string TextPickerPattern::GetOptionsMultiStrInternal() const
                 result += "\"]";
             }
         }
-        if (cascadeOptions_.size() > 0 && i != cascadeOptions_.size() - 1) {
+        if (size > 0 && i != size - 1) {
             result += ",";
         } else {
             result += "]";
@@ -1042,8 +1049,9 @@ void TextPickerPattern::OnColorConfigurationUpdate()
     auto normalStyle = pickerTheme->GetOptionStyle(false, false);
     auto pickerProperty = host->GetLayoutProperty<TextPickerLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
-    pickerProperty->UpdateColor(normalStyle.GetTextColor());
-    pickerProperty->UpdateDisappearColor(disappearStyle.GetTextColor());
+    pickerProperty->UpdateColor(GetTextProperties().normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
+    pickerProperty->UpdateDisappearColor(
+        GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
     if (isPicker_) {
         return;
     }

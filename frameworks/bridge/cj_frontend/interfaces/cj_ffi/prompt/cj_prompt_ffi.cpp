@@ -15,10 +15,8 @@
 
 #include "cj_prompt_ffi.h"
 
-#include <malloc.h>
 
 #include "cj_lambda.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 #include "bridge/cj_frontend/frontend/cj_frontend_abstract.h"
 
 using namespace OHOS::Ace;

@@ -17,8 +17,6 @@
 
 #include "bridge/cj_frontend/cppview/shape_abstract.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_shape_ffi.h"
-#include "core/common/container.h"
-#include "core/components_ng/pattern/shape/circle_model.h"
 #include "core/components_ng/pattern/shape/circle_model_ng.h"
 
 extern "C" {

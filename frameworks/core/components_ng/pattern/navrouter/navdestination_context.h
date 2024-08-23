@@ -28,6 +28,7 @@ class NavPathInfo : public virtual AceType {
 public:
     NavPathInfo() = default;
     explicit NavPathInfo(const std::string& name) : name_(name) {}
+    NavPathInfo(const std::string& name, bool isEntry) : name_(name), isEntry_(isEntry) {}
     virtual ~NavPathInfo() = default;
 
     void SetName(const std::string& name)
@@ -45,8 +46,19 @@ public:
         return nullptr;
     }
 
+    bool GetIsEntry() const
+    {
+        return isEntry_;
+    }
+
+    void SetIsEntry(bool isEntry)
+    {
+        isEntry_ = isEntry;
+    }
+
 protected:
     std::string name_;
+    bool isEntry_ = false;
 };
 
 class NavDestinationContext : public virtual AceType {
@@ -129,9 +141,9 @@ protected:
     int32_t index_ = -1;
     int32_t preIndex_ = -1;
     uint64_t navDestinationId_ = 0;
-    bool isEmpty_ = false;
     NavDestinationMode mode_;
     RefPtr<NavPathInfo> pathInfo_;
+    bool isEmpty_ = false;
     WeakPtr<NavigationStack> navigationStack_;
 };
 } // namespace OHOS::Ace::NG

@@ -22,6 +22,7 @@
 #include "base/utils/macros.h"
 #include "bridge/cj_frontend/cppview/view_abstract.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
+#include "core/components_ng/base/view_partial_update_model.h"
 #include "ffi_remote_data.h"
 
 namespace OHOS::Ace::Framework {
@@ -51,6 +52,7 @@ public:
     void OnAfterRender();
     void OnDisappear();
     void OnAboutToBeDeleted();
+    void Reload(bool deep);
 
 private:
     void VoidCallback(void (*cjFunc)(int64_t), const char* funcName);
@@ -200,6 +202,13 @@ private:
     bool useNewPipeline_ = false;
     bool isFirstRender_ = true;
     WeakPtr<AceType> node_ = nullptr;
+
+    /* list of update function result is a triple (tuple with three entries)
+    <0> elmtId
+    <1> outmost wrapping Component
+    <2> main Component
+    */
+    std::list<UpdateTask> pendingUpdateTasks_;
 };
 
 } // namespace OHOS::Ace::Framework

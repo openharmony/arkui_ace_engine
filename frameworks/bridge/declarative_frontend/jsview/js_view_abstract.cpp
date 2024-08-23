@@ -171,7 +171,7 @@ constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
 constexpr float MAX_ANGLE = 360.0f;
 constexpr float DEFAULT_BIAS = 0.5f;
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
-const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location" };
+const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location", "datetime" };
 const std::vector<std::string> RESOURCE_HEADS = { "app", "sys" };
 const std::string SHEET_HEIGHT_MEDIUM = "medium";
 const std::string SHEET_HEIGHT_LARGE = "large";
@@ -2849,7 +2849,7 @@ void JSViewAbstract::ParseBlurStyleOption(const JSRef<JSObject>& jsOption, BlurS
     }
 
     // policy
-    auto policy = static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE);
+    auto policy = static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_ACTIVE);
     ParseJsInt32(jsOption->GetProperty("policy"), policy);
     if (policy >= static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) &&
         policy <= static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_INACTIVE)) {
@@ -2987,7 +2987,7 @@ void JSViewAbstract::ParseEffectOption(const JSRef<JSObject>& jsOption, EffectOp
     effectOption.adaptiveColor = adaptiveColor;
 
     // policy
-    auto policy = static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE);
+    auto policy = static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_ACTIVE);
     ParseJsInt32(jsOption->GetProperty("policy"), policy);
     if (policy >= static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) &&
         policy <= static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_INACTIVE)) {
@@ -3342,7 +3342,8 @@ void ParseMenuBorderRadius(const JSRef<JSObject>& menuOptions, NG::MenuParam& me
         CalcDimension topRight;
         CalcDimension bottomLeft;
         CalcDimension bottomRight;
-        JSViewAbstract::ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight);
+        bool hasSetBorderRadius =
+            JSViewAbstract::ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight);
         if (LessNotEqual(topLeft.Value(), 0.0f)) {
             topLeft.Reset();
         }
@@ -3355,10 +3356,11 @@ void ParseMenuBorderRadius(const JSRef<JSObject>& menuOptions, NG::MenuParam& me
         if (LessNotEqual(bottomRight.Value(), 0.0f)) {
             bottomRight.Reset();
         }
-        menuBorderRadius.radiusTopLeft = topLeft;
-        menuBorderRadius.radiusTopRight = topRight;
-        menuBorderRadius.radiusBottomLeft = bottomLeft;
-        menuBorderRadius.radiusBottomRight = bottomRight;
+        auto isRtl = hasSetBorderRadius && AceApplicationInfo::GetInstance().IsRightToLeft();
+        menuBorderRadius.radiusTopLeft = isRtl ? topRight : topLeft;
+        menuBorderRadius.radiusTopRight = isRtl ? topLeft : topRight;
+        menuBorderRadius.radiusBottomLeft = isRtl ? bottomRight : bottomLeft;
+        menuBorderRadius.radiusBottomRight = isRtl ? bottomLeft : bottomRight;
         menuBorderRadius.multiValued = true;
         menuParam.borderRadius = menuBorderRadius;
     }
@@ -6914,7 +6916,7 @@ void JSViewAbstract::JsMotionPath(const JSCallbackInfo& info)
     if (ParseMotionPath(jsVal, motionPathOption)) {
         ViewAbstractModel::GetInstance()->SetMotionPath(motionPathOption);
     } else {
-        LOGI("Parse animation motionPath failed. %{public}s", jsVal->ToString().c_str());
+        TAG_LOGI(AceLogTag::ACE_ANIMATION, "Parse animation motionPath failed. %{public}s", jsVal->ToString().c_str());
         ViewAbstractModel::GetInstance()->SetMotionPath(MotionPathOption());
     }
 }
@@ -6947,25 +6949,41 @@ void JSViewAbstract::JsBlendMode(const JSCallbackInfo& info)
     BlendApplyType blendApplyType = BlendApplyType::FAST;
     // for backward compatible, we temporary add a magic number to trigger offscreen, will remove soon
     constexpr int BACKWARD_COMPAT_MAGIC_NUMBER_OFFSCREEN = 1000;
+    constexpr int BACKWARD_COMPAT_SOURCE_IN_NUMBER_OFFSCREEN = 2000;
+    constexpr int BACKWARD_COMPAT_DESTINATION_IN_NUMBER_OFFSCREEN = 3000;
+    constexpr int BACKWARD_COMPAT_MAGIC_NUMBER_SRC_IN = 5000;
     if (info[0]->IsNumber()) {
         auto blendModeNum = info[0]->ToNumber<int32_t>();
-        if (blendModeNum >= static_cast<int>(BlendMode::NONE) &&
-            blendModeNum <= static_cast<int>(BlendMode::LUMINOSITY)) {
+        if (blendModeNum >= 0 && blendModeNum < static_cast<int>(BlendMode::MAX)) {
             blendMode = static_cast<BlendMode>(blendModeNum);
         } else if (blendModeNum == BACKWARD_COMPAT_MAGIC_NUMBER_OFFSCREEN) {
             // backward compatibility code, will remove soon
             blendMode = BlendMode::SRC_OVER;
             blendApplyType = BlendApplyType::OFFSCREEN;
+        } else if (blendModeNum == BACKWARD_COMPAT_SOURCE_IN_NUMBER_OFFSCREEN) {
+            // backward compatibility code, will remove soon
+            blendMode = BlendMode::SRC_IN;
+            blendApplyType = BlendApplyType::OFFSCREEN;
+        } else if (blendModeNum == BACKWARD_COMPAT_DESTINATION_IN_NUMBER_OFFSCREEN) {
+            // backward compatibility code, will remove soon
+            blendMode = BlendMode::DST_IN;
+            blendApplyType = BlendApplyType::OFFSCREEN;
+        } else if (blendModeNum == BACKWARD_COMPAT_MAGIC_NUMBER_SRC_IN) {
+            blendMode = BlendMode::BACK_COMPAT_SOURCE_IN;
         }
+    } else if (info[0]->IsObject()) {
+        auto blender = CreateRSBrightnessBlenderFromNapiValue(info[0]);
+        ViewAbstractModel::GetInstance()->SetBrightnessBlender(blender);
     }
     if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsNumber()) {
         auto blendApplyTypeNum = info[1]->ToNumber<int32_t>();
-        if (blendApplyTypeNum >= static_cast<int>(BlendApplyType::FAST) &&
-            blendApplyTypeNum <= static_cast<int>(BlendApplyType::OFFSCREEN)) {
+        if (blendApplyTypeNum >= 0 && blendApplyTypeNum < static_cast<int>(BlendApplyType::MAX)) {
             blendApplyType = static_cast<BlendApplyType>(blendApplyTypeNum);
         }
     }
-    ViewAbstractModel::GetInstance()->SetBlendMode(blendMode);
+    if (!info[0]->IsObject()) {
+        ViewAbstractModel::GetInstance()->SetBlendMode(blendMode);
+    }
     ViewAbstractModel::GetInstance()->SetBlendApplyType(blendApplyType);
 }
 
@@ -7634,7 +7652,7 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     if (responseType != ResponseType::LONG_PRESS) {
         menuParam.previewMode = MenuPreviewMode::NONE;
         menuParam.isShowHoverImage = false;
-        menuParam.menuBindType = NG::MenuBindingType::RIGHT_CLICK;
+        menuParam.menuBindType = MenuBindingType::RIGHT_CLICK;
     }
     menuParam.type = NG::MenuType::CONTEXT_MENU;
     ViewAbstractModel::GetInstance()->BindContextMenu(responseType, buildFunc, menuParam, previewBuildFunc);
@@ -9248,8 +9266,7 @@ bool JSViewAbstract::ParseJsResource(const JSRef<JSVal>& jsValue, CalcDimension&
     return false;
 }
 
-bool JSViewAbstract::ParseDataDetectorConfig(
-    const JSCallbackInfo& info, std::string& types, std::function<void(const std::string&)>& onResult)
+bool JSViewAbstract::ParseDataDetectorConfig(const JSCallbackInfo& info, TextDetectConfig& textDetectConfig)
 {
     JSRef<JSVal> arg = info[0];
     if (!arg->IsObject()) {
@@ -9268,21 +9285,54 @@ bool JSViewAbstract::ParseDataDetectorConfig(
             return false;
         }
         if (i != 0) {
-            types.append(",");
+            textDetectConfig.types.append(",");
         }
-        types.append(TEXT_DETECT_TYPES[index]);
+        textDetectConfig.types.append(TEXT_DETECT_TYPES[index]);
     }
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     JSRef<JSVal> resultCallback = obj->GetProperty("onDetectResultUpdate");
     if (resultCallback->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsClipboardFunction>(JSRef<JSFunc>::Cast(resultCallback));
-        onResult = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
+        textDetectConfig.onResult = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
                        const std::string& result) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             PipelineContext::SetCallBackNode(node);
             func->Execute(result);
         };
     }
+
+    return ParseAIEntityColor(obj, textDetectConfig);
+}
+
+bool JSViewAbstract::ParseAIEntityColor(const JSRef<JSObject>& obj, TextDetectConfig& textDetectConfig)
+{
+    JSRef<JSVal> entityColorValue = obj->GetProperty("color");
+    ParseJsColor(entityColorValue, textDetectConfig.entityColor);
+
+    JSRef<JSVal> decorationValue = obj->GetProperty("decoration");
+    if (decorationValue->IsUndefined() || !decorationValue->IsObject()) {
+        textDetectConfig.entityDecorationColor = textDetectConfig.entityColor;
+        return true;
+    }
+    JSRef<JSObject> decorationObj = JSRef<JSObject>::Cast(decorationValue);
+    JSRef<JSVal> typeValue = decorationObj->GetProperty("type");
+    JSRef<JSVal> colorValue = decorationObj->GetProperty("color");
+    JSRef<JSVal> styleValue = decorationObj->GetProperty("style");
+
+    if (typeValue->IsNumber()) {
+        textDetectConfig.entityDecorationType = static_cast<TextDecoration>(typeValue->ToNumber<int32_t>());
+    } else {
+        textDetectConfig.entityDecorationType = TextDecoration::UNDERLINE;
+    }
+    if (!ParseJsColor(colorValue, textDetectConfig.entityDecorationColor)) {
+        textDetectConfig.entityDecorationColor = textDetectConfig.entityColor;
+    }
+    if (styleValue->IsNumber()) {
+         textDetectConfig.entityDecorationStyle = static_cast<TextDecorationStyle>(styleValue->ToNumber<int32_t>());
+    } else {
+        textDetectConfig.entityDecorationStyle = TextDecorationStyle::SOLID;
+    }
+
     return true;
 }
 
@@ -9636,7 +9686,16 @@ void JSViewAbstract::JsOnClick(const JSCallbackInfo& info)
         JSInteractableView::ReportClickEvent(node);
 #endif
     };
-    ViewAbstractModel::GetInstance()->SetOnClick(std::move(tmpOnTap), std::move(onClick));
+
+    double distanceThreshold = std::numeric_limits<double>::infinity();
+    if (info.Length() > 1 && info[1]->IsNumber()) {
+        distanceThreshold = info[1]->ToNumber<double>();
+        if (distanceThreshold < 0) {
+            distanceThreshold = std::numeric_limits<double>::infinity();
+        }
+    }
+    distanceThreshold = Dimension(distanceThreshold, DimensionUnit::VP).ConvertToPx();
+    ViewAbstractModel::GetInstance()->SetOnClick(std::move(tmpOnTap), std::move(onClick), distanceThreshold);
 }
 
 void JSViewAbstract::JsOnGestureJudgeBegin(const JSCallbackInfo& info)
@@ -9690,8 +9749,8 @@ void JSViewAbstract::JsShouldBuiltInRecognizerParallelWith(const JSCallbackInfo&
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto shouldBuiltInRecognizerParallelWithFunc =
         [execCtx = info.GetExecutionContext(), func = jsParallelInnerGestureToFunc, node = frameNode](
-            const RefPtr<TouchEventTarget>& current,
-            const std::vector<RefPtr<TouchEventTarget>>& others) -> RefPtr<NG::NGGestureRecognizer> {
+            const RefPtr<NG::NGGestureRecognizer>& current,
+            const std::vector<RefPtr<NG::NGGestureRecognizer>>& others) -> RefPtr<NG::NGGestureRecognizer> {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, nullptr);
         ACE_SCORING_EVENT("shouldBuiltInRecognizerParallelWith");
         PipelineContext::SetCallBackNode(node);
@@ -10786,5 +10845,36 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_ParseJsMedia(void* value, void* resour
     res->src = src;
     res->bundleName = bundleName;
     res->moduleName = moduleName;
+}
+
+void JSViewAbstract::SetTextStyleApply(const JSCallbackInfo& info,
+    std::function<void(WeakPtr<NG::FrameNode>)>& textStyleApply, const JSRef<JSVal>& modifierObj)
+{
+    if (!modifierObj->IsObject()) {
+        textStyleApply = nullptr;
+        return;
+    }
+    auto vm = info.GetVm();
+    auto globalObj = JSNApi::GetGlobalObject(vm);
+    auto globalFunc = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "applyTextModifierToNode"));
+    JsiValue jsiValue(globalFunc);
+    JsiRef<JsiValue> globalFuncRef = JsiRef<JsiValue>::Make(jsiValue);
+    if (!globalFuncRef->IsFunction()) {
+        textStyleApply = nullptr;
+        return;
+    }
+    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(globalFuncRef));
+    auto onApply = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                    modifierParam = std::move(modifierObj)](WeakPtr<NG::FrameNode> frameNode) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto node = frameNode.Upgrade();
+        CHECK_NULL_VOID(node);
+        JSRef<JSVal> params[2];
+        params[0] = modifierParam;
+        params[1] = JSRef<JSVal>::Make(panda::NativePointerRef::New(execCtx.vm_, AceType::RawPtr(node)));
+        PipelineContext::SetCallBackNode(node);
+        func->ExecuteJS(2, params);
+    };
+    textStyleApply = onApply;
 }
 } // namespace OHOS::Ace::Framework

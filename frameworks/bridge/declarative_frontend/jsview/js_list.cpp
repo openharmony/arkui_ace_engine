@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,6 +72,7 @@ constexpr ScrollAlign ALIGN_TABLE[] = {
     ScrollAlign::END,
     ScrollAlign::AUTO,
 };
+static constexpr int ARGS_LENGTH = 2;
 }
 
 namespace {
@@ -131,6 +132,9 @@ void SyncChildrenSize(const JSRef<JSObject>& childrenSizeObj, RefPtr<NG::ListChi
 
 void JSList::SetDirection(int32_t direction)
 {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && direction != 0 && direction != 1) {
+        direction = 0;
+    }
     ListModel::GetInstance()->SetListDirection(static_cast<Axis>(direction));
 }
 
@@ -242,7 +246,7 @@ void JSList::SetChildrenMainSize(const JSCallbackInfo& args)
 void JSList::SetChildrenMainSize(const JSRef<JSObject>& childrenSizeObj)
 {
     double defaultSize = 0.0f;
-    if (!ParseJsDouble(childrenSizeObj->GetProperty("defaultMainSize"), defaultSize) || !NonNegative(defaultSize)) {
+    if (!ParseJsDouble(childrenSizeObj->GetProperty("childDefaultSize"), defaultSize) || !NonNegative(defaultSize)) {
         LOGW("JSList input parameter defaultSize check failed.");
         return;
     }
@@ -498,6 +502,16 @@ void JSList::SetFriction(const JSCallbackInfo& info)
         friction = -1.0;
     }
     ListModel::GetInstance()->SetFriction(friction);
+}
+
+void JSList::MaintainVisibleContentPosition(const JSCallbackInfo& args)
+{
+    bool enabled = false;
+    JSRef<JSVal> arg0 = args[0];
+    if (arg0->IsBoolean()) {
+        enabled = arg0->ToBoolean();
+    }
+    ListModel::GetInstance()->SetMaintainVisibleContentPosition(enabled);
 }
 
 void JSList::ReachStartCallback(const JSCallbackInfo& args)
@@ -837,6 +851,7 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("enableScrollInteraction", &JSList::SetScrollEnabled);
     JSClass<JSList>::StaticMethod("scrollSnapAlign", &JSList::SetScrollSnapAlign);
     JSClass<JSList>::StaticMethod("friction", &JSList::SetFriction);
+    JSClass<JSList>::StaticMethod("maintainVisibleContentPosition", &JSList::MaintainVisibleContentPosition);
     JSClass<JSList>::StaticMethod("onScroll", &JSList::ScrollCallback);
     JSClass<JSList>::StaticMethod("onReachStart", &JSList::ReachStartCallback);
     JSClass<JSList>::StaticMethod("onReachEnd", &JSList::ReachEndCallback);
@@ -874,6 +889,7 @@ void JSListScroller::JSBind(BindingTarget globalObj)
     JSClass<JSListScroller>::CustomMethod("getItemRectInGroup", &JSListScroller::GetItemRectInGroup);
     JSClass<JSListScroller>::CustomMethod("scrollToItemInGroup", &JSListScroller::ScrollToItemInGroup);
     JSClass<JSListScroller>::CustomMethod("closeAllSwipeActions", &JSListScroller::CloseAllSwipeActions);
+    JSClass<JSListScroller>::CustomMethod("getVisibleListContentInfo", &JSListScroller::GetVisibleListContentInfo);
     JSClass<JSListScroller>::InheritAndBind<JSScroller>(globalObj, JSListScroller::Constructor,
         JSListScroller::Destructor);
 }
@@ -910,6 +926,57 @@ void JSListScroller::GetItemRectInGroup(const JSCallbackInfo& args)
     } else {
         JSException::Throw(ERROR_CODE_NAMED_ROUTE_ERROR, "%s", "Controller not bound to component.");
     }
+}
+
+void JSListScroller::GetVisibleListContentInfo(const JSCallbackInfo& args)
+{
+    if (args.Length() != ARGS_LENGTH) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter length failed.");
+        return;
+    }
+
+    Dimension xOffset;
+    Dimension yOffset;
+    if (!ConvertFromJSValue(args[0], xOffset) ||
+        !ConvertFromJSValue(args[1], yOffset)) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
+        return;
+    }
+    auto scrollController =  GetController().Upgrade();
+    if (!scrollController) {
+        JSException::Throw(ERROR_CODE_NAMED_ROUTE_ERROR, "%s", "Controller not bound to component.");
+        return;
+    }
+
+    ContainerScope scope(GetInstanceId());
+    auto deltaX = xOffset.Value();
+    auto deltaY = yOffset.Value();
+    auto container = Container::Current();
+    if (container) {
+        auto context = container->GetPipelineContext();
+        if (context) {
+            deltaX = context->NormalizeToPx(xOffset);
+            deltaY = context->NormalizeToPx(yOffset);
+            JSRef<JSObject> retObj = JSRef<JSObject>::New();
+            auto itemGroup = scrollController->GetItemIndexInGroup(deltaX, deltaY);
+            retObj->SetProperty<int32_t>("index", itemGroup.index);
+            if (itemGroup.area == -1) {
+                retObj->SetProperty("itemGroupArea", JSVal::Undefined());
+            } else {
+                retObj->SetProperty<int32_t>("itemGroupArea", itemGroup.area);
+            }
+
+            if (itemGroup.indexInGroup == -1) {
+                retObj->SetProperty("itemIndexInGroup", JSVal::Undefined());
+            } else {
+                retObj->SetProperty<int32_t>("itemIndexInGroup", itemGroup.indexInGroup);
+            }
+
+            JSRef<JSVal> ret = JSRef<JSObject>::Cast(retObj);
+            args.SetReturnValue(ret);
+        }
+    }
+    return;
 }
 
 void JSListScroller::ScrollToItemInGroup(const JSCallbackInfo& args)

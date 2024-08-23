@@ -12,18 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <cstring>
-#include <memory>
 
 #include "interfaces/napi/kits/utils/napi_utils.h"
-#include "napi/native_api.h"
-#include "napi/native_node_api.h"
 #include "interfaces/napi/kits/display_sync/js_display_sync.h"
 
-#include "base/log/log.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Napi {
 constexpr size_t STR_MAX_BUFFER_SIZE = 1024;

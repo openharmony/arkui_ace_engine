@@ -53,7 +53,6 @@
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
-#include "core/components_ng/pattern/overlay/modal_presentation_layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_paint_method.h"
@@ -232,6 +231,7 @@ HWTEST_F(OverlayManagerTestNg, DeleteModal001, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     auto toastInfo =
         NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
+    toastInfo.shadow = ShadowConfig::DefaultShadowL;
     overlayManager->ShowToast(toastInfo, nullptr);
     EXPECT_FALSE(overlayManager->toastMap_.empty());
 
@@ -3047,6 +3047,82 @@ HWTEST_F(OverlayManagerTestNg, GetSheetType001, TestSize.Level1)
     style = sheetNodeLayoutProperty->GetSheetStyle();
     EXPECT_TRUE(style->sheetType.has_value());
     EXPECT_EQ(style->sheetType.value(), SheetType::SHEET_BOTTOM);
+}
+
+/**
+ * @tc.name: GetSheetType002
+ * @tc.desc: Test SheetPresentationPattern::GetSheetType.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, GetSheetType002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page, get sheet pattern.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetThemeType_ = "auto";
+
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetDisplayWindowRectInfo({0, 0, 800, 800});
+
+    /**
+     * @tc.steps: step2. Change the sheetType.
+     * @tc.expected: the sheetType is updated successfully
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_POPUP;
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateSheetStyle(sheetStyle);
+    sheetPattern->GetSheetType();
+    auto style = layoutProperty->GetSheetStyle();
+    EXPECT_TRUE(style->sheetType.has_value());
+    EXPECT_EQ(style->sheetType.value(), SheetType::SHEET_POPUP);
+}
+
+/**
+ * @tc.name: IsShowCloseIcon
+ * @tc.desc: Test SheetPresentationPattern::IsShowCloseIcon.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, IsShowCloseIcon001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page, get sheet pattern.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Change the showCloseIcon.
+     * @tc.expected: the showCloseIcon is updated successfully
+     */
+    SheetStyle sheetStyle;
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateSheetStyle(sheetStyle);
+    auto showCloseIcon = sheetPattern->IsShowCloseIcon();
+    EXPECT_EQ(showCloseIcon, true);
+
+    sheetStyle.showCloseIcon = true;
+    layoutProperty->UpdateSheetStyle(sheetStyle);
+    showCloseIcon = sheetPattern->IsShowCloseIcon();
+    EXPECT_EQ(showCloseIcon, true);
+
+    sheetStyle.showCloseIcon = false;
+    layoutProperty->UpdateSheetStyle(sheetStyle);
+    showCloseIcon = sheetPattern->IsShowCloseIcon();
+    EXPECT_EQ(showCloseIcon, false);
 }
 
 /**

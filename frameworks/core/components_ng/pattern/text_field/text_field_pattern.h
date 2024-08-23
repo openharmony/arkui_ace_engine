@@ -29,6 +29,8 @@
 #include "base/memory/referenced.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/view_data/view_data_wrap.h"
+#include "core/common/ai/ai_write_adapter.h"
+#include "base/view_data/hint_to_type_wrap.h"
 #include "core/common/autofill/auto_fill_trigger_state_holder.h"
 #include "core/common/clipboard/clipboard.h"
 #include "core/common/ime/text_edit_controller.h"
@@ -70,8 +72,8 @@
 #include "core/components_ng/pattern/text_input/text_input_layout_algorithm.h"
 #include "core/components_ng/property/property.h"
 
-#if not defined(ACE_UNITTEST)
-#if defined(ENABLE_STANDARD_INPUT)
+#ifndef ACE_UNITTEST
+#ifdef ENABLE_STANDARD_INPUT
 #include "commonlibrary/c_utils/base/include/refbase.h"
 
 namespace OHOS::MiscServices {
@@ -143,6 +145,33 @@ struct PreState {
     bool hasBorderColor = false;
 };
 
+enum class RequestKeyboardReason {
+    UNKNOWN = 0,
+    ON_KEY_EVENT,
+    SINGLE_CLICK,
+    DOUBLE_CLICK,
+    LONG_PRESS,
+    RESET_KEYBOARD,
+    MOUSE_RELEASE,
+    SET_SELECTION,
+    SEARCH_REQUEST,
+    AUTO_FILL_REQUEST_FAIL,
+    SHOW_KEYBOARD_ON_FOCUS,
+    STYLUS_DETECTOR,
+    CUSTOM_KEYBOARD
+};
+
+enum class RequestFocusReason {
+    UNKNOWN = 0,
+    DRAG_END,
+    DRAG_MOVE,
+    CLICK,
+    LONG_PRESS,
+    AUTO_FILL,
+    CLEAN_NODE,
+    MOUSE,
+};
+
 struct PreviewTextInfo {
     std::string text;
     PreviewRange range;
@@ -153,14 +182,22 @@ struct SourceAndValueInfo {
     bool isIME = false;
 };
 
+struct TouchAndMoveCaretState {
+    bool isTouchCaret = false;
+    bool isMoveCaret = false;
+    Offset touchDownOffset;
+    Dimension minDinstance = 5.0_vp;
+};
+
 class TextFieldPattern : public ScrollablePattern,
                          public TextDragBase,
                          public ValueChangeObserver,
                          public TextInputClient,
                          public TextBase,
-                         public Magnifier {
-    DECLARE_ACE_TYPE(
-        TextFieldPattern, ScrollablePattern, TextDragBase, ValueChangeObserver, TextInputClient, TextBase, Magnifier);
+                         public Magnifier,
+                         public TextGestureSelector {
+    DECLARE_ACE_TYPE(TextFieldPattern, ScrollablePattern, TextDragBase, ValueChangeObserver, TextInputClient, TextBase,
+        Magnifier, TextGestureSelector);
 
 public:
     TextFieldPattern();
@@ -584,6 +621,7 @@ public:
     }
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void ToJsonValueForOption(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void ToJsonValueSelectOverlay(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
     void InitEditingValueText(std::string content);
     bool InitValueText(std::string content);
@@ -603,8 +641,6 @@ public:
         FocusHub::LostFocusToViewRoot();
         isKeyboardClosedByUser_ = false;
     }
-
-    void OnDirectionConfigurationUpdate() override;
 
     void NotifyKeyboardClosed() override
     {
@@ -629,6 +665,14 @@ public:
     float PreferredLineHeight(bool isAlgorithmMeasure = false);
 
     void SearchRequestKeyboard();
+
+    bool RequestKeyboardNotByFocusSwitch(RequestKeyboardReason reason = RequestKeyboardReason::UNKNOWN);
+
+    bool TextFieldRequestFocus(RequestFocusReason reason = RequestFocusReason::UNKNOWN);
+
+    static std::string RequestFocusReasonToString(RequestFocusReason reason);
+
+    static std::string RequestKeyboardReasonToString(RequestKeyboardReason reason);
 
     bool GetTextObscured() const
     {
@@ -882,6 +926,8 @@ public:
     }
     void HandleOnUndoAction() override;
     void HandleOnRedoAction() override;
+    bool CanUndo();
+    bool CanRedo();
     void HandleOnSelectAll(bool isKeyEvent, bool inlineStyle = false, bool showMenu = false);
     void HandleOnSelectAll() override
     {
@@ -891,6 +937,10 @@ public:
     void HandleOnPaste() override;
     void HandleOnCut() override;
     void HandleOnCameraInput();
+    void HandleOnAIWrite();
+    void GetAIWriteInfo(AIWriteInfo& info);
+    bool IsShowAIWrite();
+    void HandleAIWriteResult(int32_t start, int32_t end, std::vector<uint8_t>& buffer);
     void UpdateShowCountBorderStyle();
     void StripNextLine(std::wstring& data);
     bool IsShowHandle();
@@ -1040,7 +1090,7 @@ public:
             // close customKeyboard and request system keyboard
             CloseCustomKeyboard();
             customKeyboardBuilder_ = keyboardBuilder; // refresh current keyboard
-            RequestKeyboard(false, true, true);
+            RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::CUSTOM_KEYBOARD);
             StartTwinkling();
             return;
         }
@@ -1050,7 +1100,7 @@ public:
             if (imeShown_) {
                 CloseKeyboard(true);
                 customKeyboardBuilder_ = keyboardBuilder; // refresh current keyboard
-                RequestKeyboard(false, true, true);
+                RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::CUSTOM_KEYBOARD);
                 StartTwinkling();
                 return;
             }
@@ -1065,7 +1115,7 @@ public:
             // close customKeyboard and request system keyboard
             CloseCustomKeyboard();
             customKeyboard_ = keyboardBuilder; // refresh current keyboard
-            RequestKeyboard(false, true, true);
+            RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::CUSTOM_KEYBOARD);
             StartTwinkling();
             return;
         }
@@ -1075,7 +1125,7 @@ public:
             if (imeShown_) {
                 CloseKeyboard(true);
                 customKeyboard_ = keyboardBuilder; // refresh current keyboard
-                RequestKeyboard(false, true, true);
+                RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::CUSTOM_KEYBOARD);
                 StartTwinkling();
                 return;
             }
@@ -1092,6 +1142,8 @@ public:
     void DumpInfo() override;
     void DumpAdvanceInfo() override;
     void DumpPlaceHolderInfo();
+    void DumpScaleInfo();
+    std::string GetDumpTextValue() const;
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) override;
     void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) override;
@@ -1151,6 +1203,7 @@ public:
         showSelect_ = true;
     }
 
+    void FocusForwardStopTwinkling();
     bool UpdateFocusForward();
 
     bool UpdateFocusBackward();
@@ -1361,6 +1414,17 @@ public:
         isTextChangedAtCreation_ = changed;
     }
 
+    void SetIsPasswordSymbol(bool isPasswordSymbol)
+    {
+        isPasswordSymbol_ = isPasswordSymbol;
+    }
+
+    bool IsShowPasswordSymbol() const
+    {
+        return isPasswordSymbol_ &&
+            AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN);
+    }
+
     bool IsResponseRegionExpandingNeededForStylus(const TouchEvent& touchEvent) const override;
 
     RectF ExpandDefaultResponseRegion(RectF& rect) override;
@@ -1374,6 +1438,15 @@ public:
     {
         return multipleClickRecognizer_;
     }
+
+    void SetAdaptFontSize(const std::optional<Dimension>& adaptFontSize)
+    {
+        adaptFontSize_ = adaptFontSize;
+    }
+
+    void ShowCaretAndStopTwinkling();
+
+    bool IsTextEditableForStylus() override;
 
 protected:
     virtual void InitDragEvent();
@@ -1390,7 +1463,11 @@ protected:
     bool IsReverse() const override
     {
         return false;
-    };
+    }
+
+    int32_t GetTouchIndex(const OffsetF& offset) override;
+    void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) override;
+    void OnTextGenstureSelectionEnd() override;
 
 private:
     void GetTextSelectRectsInRangeAndWillChange();
@@ -1441,7 +1518,6 @@ private:
     void HandleLeftMouseMoveEvent(MouseInfo& info);
     void HandleLeftMouseReleaseEvent(MouseInfo& info);
     void HandleLongPress(GestureEvent& info);
-    void ShowSelectOverlayForLongPress(bool shouldProcessOverlayAfterLayout);
     bool CanChangeSelectState();
     void UpdateCaretPositionWithClamp(const int32_t& pos);
     void CursorMoveOnClick(const Offset& offset);
@@ -1499,13 +1575,15 @@ private:
     void SetDisabledStyle();
 
     void CalculateDefaultCursor();
-    void RequestKeyboardOnFocus();
+    void RequestKeyboardByFocusSwitch();
     bool IsModalCovered();
     void SetNeedToRequestKeyboardOnFocus();
     void SetAccessibilityAction() override;
     void SetAccessibilityActionGetAndSetCaretPosition();
+    void SetAccessibilityActionOverlayAndSelection();
     void SetAccessibilityMoveTextAction();
     void SetAccessibilityScrollAction();
+    void SetAccessibilityErrotText();
     void SetAccessibilityClearAction();
     void SetAccessibilityPasswordIconAction();
 
@@ -1524,7 +1602,8 @@ private:
     void UpdateSelectController();
     void UpdateHandlesOffsetOnScroll(float offset);
     void CloseHandleAndSelect() override;
-    bool RepeatClickCaret(const Offset& offset, int32_t lastCaretIndex, const RectF& lastCaretRect);
+    bool RepeatClickCaret(const Offset& offset, int32_t lastCaretIndex);
+    bool RepeatClickCaret(const Offset& offset, const RectF& lastCaretRect);
     void PaintTextRect();
     void GetIconPaintRect(const RefPtr<TextInputResponseArea>& responseArea, RoundRect& paintRect);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
@@ -1579,7 +1658,8 @@ private:
     void ProcessScroll();
     void ProcessCounter();
     void HandleParentGlobalOffsetChange();
-    AceAutoFillType GetHintType();
+    HintToTypeWrap GetHintType();
+    HintToTypeWrap GetAutoFillTypeAndMetaData(bool isNeedToHitType = true);
     void SetThemeAttr();
     void SetThemeBorderAttr();
     void ProcessInlinePaddingAndMargin();
@@ -1597,7 +1677,6 @@ private:
 
     void CalculatePreviewingTextMovingLimit(const Offset& touchOffset, double& limitL, double& limitR);
     void UpdateParam(GestureEvent& info, bool shouldProcessOverlayAfterLayout);
-    void ShowCaretAndStopTwinkling();
     void OnCaretMoveDone(const TouchEventInfo& info);
     void HandleCrossPlatformInBlurEvent();
     void ModifyInnerStateInBlurEvent();
@@ -1611,6 +1690,8 @@ private:
     bool IsContentRectNonPositive();
     bool IsHandleDragging();
     void ReportEvent();
+    void ResetPreviewTextState();
+
     RectF frameRect_;
     RectF textRect_;
     RefPtr<Paragraph> paragraph_;
@@ -1757,13 +1838,13 @@ private:
     bool isSupportCameraInput_ = false;
     std::function<void()> processOverlayDelayTask_;
     FocuseIndex focusIndex_ = FocuseIndex::TEXT;
-    bool isTouchCaret_ = false;
+    TouchAndMoveCaretState moveCaretState_;
     bool needSelectAll_ = false;
     bool isModifyDone_ = false;
     bool initTextRect_ = false;
     bool colorModeChange_ = false;
     bool isKeyboardClosedByUser_ = false;
-    bool isFillRequestFinish_ = false;
+    bool isFillRequestFinish_ = true;
     bool keyboardAvoidance_ = false;
     bool hasMousePressed_ = false;
     bool showCountBorderStyle_ = false;
@@ -1791,8 +1872,12 @@ private:
     bool isTextSelectionMenuShow_ = true;
     bool isMoveCaretAnywhere_ = false;
     bool isTouchPreviewText_ = false;
+    bool isCaretTwinkling_ = false;
     bool isTextChangedAtCreation_ = false;
+    bool isPasswordSymbol_ = true;
     RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
+    RefPtr<AIWriteAdapter> aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
+    std::optional<Dimension> adaptFontSize_;
 };
 } // namespace OHOS::Ace::NG
 

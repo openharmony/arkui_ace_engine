@@ -214,6 +214,7 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
     if (immediately) {
         pipelineContext->FlushModifier();
         pipelineContext->FlushMessages();
+        JankFrameReport::GetInstance().RecordAnimateEnd();
     } else {
         pipelineContext->RequestFrame();
     }
@@ -244,6 +245,7 @@ void AnimateToForFaMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOp
     if (immediately) {
         pipelineContext->FlushModifier();
         pipelineContext->FlushMessages();
+        JankFrameReport::GetInstance().RecordAnimateEnd();
     } else {
         pipelineContext->RequestFrame();
     }
@@ -882,6 +884,29 @@ void JSViewContext::JSCloseBindSheet(const JSCallbackInfo& info)
     ReturnPromise(info, ret);
     return;
 }
+void JSViewContext::IsFollowingSystemFontScale(const JSCallbackInfo& info)
+{
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto follow = pipelineContext->IsFollowSystem();
+    auto followRef = JSRef<JSVal>::Make(JSVal(ToJSValue(follow)));
+    info.SetReturnValue(followRef);
+    return;
+}
+
+void JSViewContext::GetMaxFontScale(const JSCallbackInfo& info)
+{
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto maxFontScale = pipelineContext->GetMaxAppFontScale();
+    auto maxFontScaleRef = JSRef<JSVal>::Make(JSVal(ToJSValue(maxFontScale)));
+    info.SetReturnValue(maxFontScaleRef);
+    return;
+}
 
 void JSViewContext::JSBind(BindingTarget globalObj)
 {
@@ -894,6 +919,8 @@ void JSViewContext::JSBind(BindingTarget globalObj)
     JSClass<JSViewContext>::StaticMethod("openBindSheet", JSOpenBindSheet);
     JSClass<JSViewContext>::StaticMethod("updateBindSheet", JSUpdateBindSheet);
     JSClass<JSViewContext>::StaticMethod("closeBindSheet", JSCloseBindSheet);
+    JSClass<JSViewContext>::StaticMethod("isFollowingSystemFontScale", IsFollowingSystemFontScale);
+    JSClass<JSViewContext>::StaticMethod("getMaxFontScale", GetMaxFontScale);
     JSClass<JSViewContext>::Bind<>(globalObj);
 }
 

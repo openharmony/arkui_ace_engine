@@ -1014,7 +1014,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest062, TestSize.Level1)
     auto panHorizontal1 = AceType::MakeRefPtr<PanRecognizer>(
         DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
     std::list<RefPtr<TouchEventTarget>> result;
-    std::list<RefPtr<TouchEventTarget>> responseLinkRecognizers;
+    ResponseLinkResult responseLinkRecognizers;
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
     panHorizontal1->node_ = frameNode;
     result.emplace_back(panHorizontal1);
@@ -1544,7 +1544,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest080, TestSize.Level1)
         DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
 
     TouchTestResult resultList;
-    TouchTestResult responseLinkRecognizers;
+    ResponseLinkResult responseLinkRecognizers;
     resultList.emplace_back(recognizerGroup);
     resultList.emplace_back(panHorizontal);
     responseLinkRecognizers.emplace_back(targetLinkHorizontal);
@@ -1554,7 +1554,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest080, TestSize.Level1)
 
 /**
  * @tc.name: EventManagerTest081
- * @tc.desc: Test MockCancelEventAndDispatch
+ * @tc.desc: Test FalsifyCancelEventAndDispatch
  * @tc.type: FUNC
  */
 HWTEST_F(EventManagerTestNg, EventManagerTest081, TestSize.Level1)
@@ -1573,7 +1573,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest081, TestSize.Level1)
     eventManager->axisTouchTestResults_.clear();
     eventManager->axisTouchTestResults_[0] = resultList;
     AxisEvent event;
-    eventManager->MockCancelEventAndDispatch(event);
+    eventManager->FalsifyCancelEventAndDispatch(event);
     EXPECT_TRUE(eventManager->axisTouchTestResults_.empty());
 }
 
@@ -1642,9 +1642,9 @@ HWTEST_F(EventManagerTestNg, EventManagerTest082, TestSize.Level1)
     touchPoint.id = 1;
     touchPoint.type = TouchType::DOWN;
     eventManager->CheckDownEvent(touchPoint);
-    eventManager->downFingerIds_.insert(1);
-    eventManager->downFingerIds_.insert(2);
-    eventManager->downFingerIds_.insert(3);
+    eventManager->downFingerIds_[1] = 1;
+    eventManager->downFingerIds_[2] = 2;
+    eventManager->downFingerIds_[3] = 3;
     eventManager->CheckDownEvent(touchPoint);
     touchPoint.type = TouchType::UP;
     eventManager->CheckDownEvent(touchPoint);

@@ -107,6 +107,8 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
         contentRect.Width() + contentRect.GetX() + textFieldPattern->GetInlinePadding(), clipRectHeight);
     canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     if (paragraph) {
+        auto textField = textFieldPattern->IsTextArea() ? "TextArea" : "TextInput";
+        ACE_LAYOUT_SCOPED_TRACE("[%s][id:%d] [Rect:%s]", textField, frameNode->GetId(), contentRect.ToString().c_str());
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
             canvas.Save();
             RSRect clipRect;
@@ -121,7 +123,6 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
                 textFieldPattern->IsTextArea() ? textFieldPattern->GetTextRect().GetY() : contentOffset.GetY());
         }
     }
-
     canvas.Restore();
 }
 
@@ -543,15 +544,20 @@ void TextFieldContentModifier::ProcessErrorParagraph(DrawingContext& context, fl
             return; // no enough space
         }
         errorParagraph->Layout(layoutWidth);
-        auto isRTL = property->GetNonAutoLayoutDirection() == TextDirection::RTL;
-        if (isRTL) {
-            auto responseArea = textFieldPattern->GetResponseArea();
-            auto responseAreaWidth = responseArea ? responseArea->GetAreaRect().Width() : 0.0f;
-            errorParagraph->Paint(canvas, offset.GetX() - responseAreaWidth,
-                textFrameRect.Bottom() - textFrameRect.Top() + errorMargin);
-        } else {
-            errorParagraph->Paint(canvas, offset.GetX(), textFrameRect.Bottom() - textFrameRect.Top() + errorMargin);
+        if (errorParagraph->GetLongestLine() > layoutWidth) {
+            return; // no enough space
         }
+        auto isRTL = property->GetNonAutoLayoutDirection() == TextDirection::RTL;
+        auto offSetX = offset.GetX();
+        if (isRTL) {
+            if (textFieldPattern->GetResponseArea()) {
+                offSetX -= textFieldPattern->GetResponseArea()->GetAreaRect().Width();
+            }
+            if (textFieldPattern->GetCleanNodeResponseArea()) {
+                offSetX -= textFieldPattern->GetCleanNodeResponseArea()->GetAreaRect().Width();
+            }
+        }
+        errorParagraph->Paint(canvas, offSetX, textFrameRect.Bottom() - textFrameRect.Top() + errorMargin);
     }
 }
 

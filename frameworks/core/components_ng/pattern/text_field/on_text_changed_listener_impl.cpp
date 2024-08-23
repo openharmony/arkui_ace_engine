@@ -321,44 +321,47 @@ void OnTextChangedListenerImpl::NotifyPanelStatusInfo(const MiscServices::PanelS
         keyboardInfo.keyBoardType = KeyBoardType::STATUS_BAR;
     }
     keyboardInfo.visible = info.visible;
-    auto textClient = pattern_.Upgrade();
-    CHECK_NULL_VOID(textClient);
-    auto pattern = AceType::DynamicCast<Pattern>(textClient);
-    CHECK_NULL_VOID(pattern);
-    auto host = pattern->GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContextRefPtr();
-    auto task = [weak = WeakPtr(pipelineContext), keyboardInfo, id = Container::CurrentId()] {
-        auto pipeline = weak.Upgrade();
+    auto task = [weak = pattern_, keyboardInfo, id = Container::CurrentId()] {
+        auto textClient = weak.Upgrade();
+        CHECK_NULL_VOID(textClient);
+        auto pattern = AceType::DynamicCast<Pattern>(textClient);
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContextRefPtr();
         CHECK_NULL_VOID(pipeline);
         ContainerScope scope(id);
         auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
         CHECK_NULL_VOID(textFieldManager);
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyPanelStatusInfo SetImeShow:%d", keyboardInfo.visible);
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyPanelStatusInfo SetImeShow:%{public}d", keyboardInfo.visible);
         textFieldManager->SetImeShow(keyboardInfo.visible);
     };
     PostTaskToUI(task, "ArkUITextFieldSetImeShow");
 }
 
 void OnTextChangedListenerImpl::AutoFillReceivePrivateCommand(
-    const std::unordered_map<std::string, MiscServices::PrivateDataValue>& privateCommand)
+    const std::unordered_map<std::string, MiscServices::PrivateDataValue>& privateCommand,
+    const WeakPtr<TextInputClient>& pattern)
 {
-    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    auto patternPtr = pattern.Upgrade();
+    CHECK_NULL_VOID(patternPtr);
+    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(patternPtr);
     CHECK_NULL_VOID(textFieldPattern);
     bool isPopup = false;
     if (privateCommand.find(AUTO_FILL_PARAMS_USERNAME) != privateCommand.end()) {
         auto userName = privateCommand.find(AUTO_FILL_PARAMS_USERNAME);
         textFieldPattern->SetAutoFillUserName(std::get<std::string>(userName->second));
         textFieldPattern->ProcessAutoFill(isPopup, true);
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL,
-            "com.autofill.params.userName : %{private}s", std::get<std::string>(userName->second).c_str());
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "com.autofill.params.userName : %{private}s",
+            std::get<std::string>(userName->second).c_str());
     } else if (privateCommand.find(AUTO_FILL_PARAMS_NEWPASSWORD) != privateCommand.end()) {
         auto newPassword = privateCommand.find(AUTO_FILL_PARAMS_NEWPASSWORD);
         textFieldPattern->SetAutoFillNewPassword(std::get<std::string>(newPassword->second));
         textFieldPattern->ProcessAutoFill(isPopup, true, true);
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL,
-            "com.autofill.params.newPassword : %{private}s", std::get<std::string>(newPassword->second).c_str());
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "com.autofill.params.newPassword : %{private}s",
+            std::get<std::string>(newPassword->second).c_str());
     } else if (privateCommand.find(AUTO_FILL_PARAMS_OTHERACCOUNT) != privateCommand.end()) {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "com.autofill.params.otherAccount");
         textFieldPattern->SetAutoFillOtherAccount(true);
         textFieldPattern->ProcessAutoFill(isPopup, true);
     } else {
@@ -400,9 +403,16 @@ void OnTextChangedListenerImpl::FinishTextPreview()
 }
 
 int32_t OnTextChangedListenerImpl::ReceivePrivateCommand(
-    const std::unordered_map<std::string, MiscServices::PrivateDataValue> &privateCommand)
+    const std::unordered_map<std::string, MiscServices::PrivateDataValue>& privateCommand)
 {
-    AutoFillReceivePrivateCommand(privateCommand);
+    auto uiTask = [textFieldPattern = pattern_, privateCommand] {
+        auto textInputClient = textFieldPattern.Upgrade();
+        CHECK_NULL_VOID(textInputClient);
+        ContainerScope scope(textInputClient->GetInstanceId());
+        OnTextChangedListenerImpl::AutoFillReceivePrivateCommand(privateCommand, textFieldPattern);
+    };
+    PostTaskToUI(uiTask, "ArkUITextFieldAutoFillReceivePrivateCommand");
+
     int32_t ret = MiscServices::ErrorCode::NO_ERROR;
     if (privateCommand.empty()) {
         return ret;

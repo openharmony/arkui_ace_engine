@@ -147,6 +147,7 @@ SelectOverlayInfo SelectContentOverlayManager::BuildSelectOverlayInfo(int32_t re
     overlayInfo.menuCallback.onCut = MakeMenuCallback(OptionMenuActionId::CUT, overlayInfo);
     overlayInfo.menuCallback.onSelectAll = MakeMenuCallback(OptionMenuActionId::SELECT_ALL, overlayInfo);
     overlayInfo.menuCallback.onCameraInput = MakeMenuCallback(OptionMenuActionId::CAMERA_INPUT, overlayInfo);
+    overlayInfo.menuCallback.onAIWrite = MakeMenuCallback(OptionMenuActionId::AI_WRITE, overlayInfo);
     overlayInfo.menuCallback.onAppear = MakeMenuCallback(OptionMenuActionId::APPEAR, overlayInfo);
     overlayInfo.menuCallback.onDisappear = MakeMenuCallback(OptionMenuActionId::DISAPPEAR, overlayInfo);
     overlayInfo.isUseOverlayNG = true;
@@ -205,6 +206,11 @@ void SelectContentOverlayManager::RegisterHandleCallback(SelectOverlayInfo& info
         auto overlayCallback = weakCallback.Upgrade();
         CHECK_NULL_VOID(overlayCallback);
         overlayCallback->OnHandleReverse(isReverse);
+    };
+    info.onHandleIsHidden = [weakCallback = WeakClaim(AceType::RawPtr(callback))]() {
+        auto overlayCallback = weakCallback.Upgrade();
+        CHECK_NULL_VOID(overlayCallback);
+        overlayCallback->OnHandleIsHidden();
     };
 }
 
@@ -489,6 +495,8 @@ void SelectContentOverlayManager::MountNodeToRoot(const RefPtr<FrameNode>& overl
         index++;
     }
 
+    TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "MountNodeToRoot:%{public}s, id:%{public}d", rootNode->GetTag().c_str(),
+        rootNode->GetId());
     overlayNode->MountToParent(rootNode, slot);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     if (!shareOverlayInfo_->isUsingMouse) {
@@ -1008,5 +1016,19 @@ bool SelectContentOverlayManager::IsTouchAtHandle(const PointF& localPoint, cons
         return selectOverlayNode->IsInSelectedOrSelectOverlayArea(localPoint);
     }
     return selectOverlayNode->IsInSelectedOrSelectOverlayArea(globalPoint);
+}
+
+void SelectContentOverlayManager::SetHandleCircleIsShow(bool isFirst, bool isShow)
+{
+    auto pattern = GetSelectHandlePattern(WeakClaim(this));
+    CHECK_NULL_VOID(pattern);
+    pattern->SetHandleCircleIsShow(isFirst, isShow);
+}
+
+void SelectContentOverlayManager::SetIsHandleLineShow(bool isShow)
+{
+    auto pattern = GetSelectHandlePattern(WeakClaim(this));
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsHandleLineShow(isShow);
 }
 } // namespace OHOS::Ace::NG

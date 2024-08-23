@@ -15,7 +15,6 @@
 
 #include "core/components/camera/camera_component.h"
 
-#include "base/log/log.h"
 #include "core/components/camera/camera_element.h"
 #include "core/components/video/render_texture.h"
 

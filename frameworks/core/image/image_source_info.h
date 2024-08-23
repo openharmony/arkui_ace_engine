@@ -26,6 +26,7 @@
 #include "base/utils/device_config.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/pattern/image/image_dfx.h"
 
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT ImageSourceInfo {
@@ -122,6 +123,16 @@ public:
     }
     const std::string GetColorModeToString();
 
+    void SetImageDfxConfig(const NG::ImageDfxConfig& imageDfxConfig)
+    {
+        imageDfxConfig_ = imageDfxConfig;
+    }
+
+    NG::ImageDfxConfig GetImageDfxConfig() const
+    {
+        return imageDfxConfig_;
+    }
+
 private:
     SrcType ResolveSrcType() const;
 
@@ -142,7 +153,8 @@ private:
     bool isFromReset_ = false;
     [[deprecated("in NG")]]
     std::optional<Color> fillColor_;
-    const uint8_t* pixmapBuffer_;
+    const uint8_t* pixmapBuffer_ = nullptr;
+    NG::ImageDfxConfig imageDfxConfig_;
 
     // image source type for example:FILE, ASSET, NETWORK, MEMORY, BASE64, INTERNAL, RESOURCE or DATA_ABILITY,
     SrcType srcType_ = SrcType::UNSUPPORTED;

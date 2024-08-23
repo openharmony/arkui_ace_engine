@@ -225,11 +225,12 @@ Metrics NativeCanvasRenderer::MeasureText(const std::string& text)
     double width = 0.0;
     double height = 0.0;
 
-    width = renderingContext2DModel_->GetMeasureTextWidth(paintState_, text);
-    height = renderingContext2DModel_->GetMeasureTextHeight(paintState_, text);
+    TextMetrics textMetrics = renderingContext2DModel_->GetMeasureTextMetrics(paintState_, text);
+    width = textMetrics.width;
+    height = textMetrics.height;
 
-    Metrics textMetrics = { width, height };
-    return textMetrics;
+    Metrics metrics = { width, height };
+    return metrics;
 }
 
 void NativeCanvasRenderer::Stroke()
@@ -395,7 +396,7 @@ void NativeCanvasRenderer::DrawImage(const RefPtr<OHOS::Ace::PixelMap>& pixelMap
     imageInfo.image = image;
     imageInfo.isImage = false;
     imageInfo.pixelMap = pixelMap;
-    renderingContext2DModel_->DrawImage(imageInfo);
+    renderingContext2DModel_->DrawPixelMap(imageInfo);
 }
 
 std::unique_ptr<ImageData> NativeCanvasRenderer::GetImageData(

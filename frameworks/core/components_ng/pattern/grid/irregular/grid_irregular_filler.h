@@ -125,6 +125,17 @@ public:
      */
     void MeasureLineWithIrregulars(const FillParameters& params, int32_t line);
 
+    /**
+     * @brief Measures a GridItem and updates the grid layout information.
+     *
+     * @param params The FillParameters object containing the fill parameters.
+     * @param itemIdx The index of the GridItem.
+     * @param col The column index where the item is being added.
+     * @param row The row index where the item is being added.
+     */
+    std::pair<float, LayoutConstraintF> MeasureItem(
+        const FillParameters& params, int32_t itemIdx, int32_t col, int32_t row, bool isCache);
+
 private:
     /**
      * @brief Fills one GridItem into the Grid.
@@ -143,16 +154,6 @@ private:
      * @return true if len >= targetLen after adding height of [row]. At this point, row = last
      */
     bool UpdateLength(float& len, float targetLen, int32_t& row, int32_t rowBound, float mainGap) const;
-
-    /**
-     * @brief Measures a GridItem at endIndex_ and updates the grid layout information.
-     *
-     * @param params The FillParameters object containing the fill parameters.
-     * @param itemIdx The index of the GridItem.
-     * @param col The column index where the item is being added.
-     * @param row The row index where the item is being added.
-     */
-    void MeasureItem(const FillParameters& params, int32_t itemIdx, int32_t col, int32_t row);
 
     /**
      * @brief Initializes the position of the filler in the grid to GridLayoutInfo::startIndex_.

@@ -2247,6 +2247,7 @@ void PageRouterManager::LoadOhmUrlPage(const std::string& url, std::function<voi
     auto silentInstallErrorCallBack = [errorCb = errorCallback, taskExecutor, instanceId, errorCallbackTaskName](
         int32_t errorCode, const std::string& errorMsg) {
         if (!errorCb) {
+            TAG_LOGW(AceLogTag::ACE_ROUTER, "errorCallback is null");
             return;
         }
         ContainerScope scope(instanceId);

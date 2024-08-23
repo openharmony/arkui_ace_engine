@@ -113,6 +113,18 @@ bool SecurityComponentHandler::CheckBlur(const RefPtr<FrameNode>& node, const Re
 {
     if (renderContext->GetFrontBlurRadius().has_value() &&
         GreatNotEqual(renderContext->GetFrontBlurRadius().value().ConvertToPx(), 0.0f)) {
+        LOGW("SecurityComponentCheckFail: Parent %{public}s blur is set, security component is invalid",
+            node->GetTag().c_str());
+        return true;
+    }
+    return false;
+}
+
+bool SecurityComponentHandler::CheckForegroundBlurStyle(const RefPtr<FrameNode>& node,
+    const RefPtr<RenderContext>& renderContext)
+{
+    auto blurStyleOption = renderContext->GetFrontBlurStyle();
+    if (blurStyleOption.has_value() && (blurStyleOption->blurStyle != BlurStyle::NO_MATERIAL)) {
         LOGW("SecurityComponentCheckFail: Parent %{public}s foregroundBlurStyle is set, security component is invalid",
             node->GetTag().c_str());
         return true;
@@ -212,8 +224,7 @@ bool SecurityComponentHandler::CheckClipMask(const RefPtr<FrameNode>& node, cons
 bool SecurityComponentHandler::CheckForegroundColor(const RefPtr<FrameNode>& node,
     const RefPtr<RenderContext>& renderContext)
 {
-    if (renderContext->GetForegroundColor().has_value() &&
-        (renderContext->GetForegroundColor().value() != Color::TRANSPARENT)) {
+    if (renderContext->GetForegroundColor().has_value()) {
         LOGW("SecurityComponentCheckFail: Parent %{public}s foregroundColor is set, security component is invalid",
             node->GetTag().c_str());
         return true;
@@ -268,8 +279,9 @@ bool SecurityComponentHandler::CheckRenderEffect(RefPtr<FrameNode>& node)
         CheckContrast(node, renderContext) || CheckInvert(node, renderContext) ||
         CheckSepia(node, renderContext) || CheckHueRotate(node, renderContext) ||
         CheckColorBlend(node, renderContext) || CheckClipMask(node, renderContext) ||
-        CheckForegroundColor(node, renderContext) || CheckSphericalEffect(node, renderContext)||
-        CheckLightUpEffect(node, renderContext) || CheckPixelStretchEffect(node, renderContext)) {
+        CheckForegroundColor(node, renderContext) || CheckSphericalEffect(node, renderContext) ||
+        CheckLightUpEffect(node, renderContext) || CheckPixelStretchEffect(node, renderContext) ||
+        CheckForegroundBlurStyle(node, renderContext)) {
         return true;
     }
     return false;
@@ -366,12 +378,12 @@ bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::S
         layoutProperty->GetTextIconSpace().value_or(theme->GetTextIconSpace()).ConvertToVp();
 
     if (!GetDisplayOffset(node, buttonInfo.rect_.x_, buttonInfo.rect_.y_)) {
-        LOGW("Get display offset failed");
+        LOGW("InitBaseInfoWarning: Get display offset failed");
         return false;
     }
 
     if (!GetWindowRect(node, buttonInfo.windowRect_)) {
-        LOGW("Get window rect failed");
+        LOGW("InitBaseInfoWarning: Get window rect failed");
         return false;
     }
     auto render = node->GetRenderContext();
@@ -612,7 +624,7 @@ bool SecurityComponentHandler::CheckRectIntersect(const RectF& dest, int32_t sec
     std::unordered_map<int32_t, int32_t>& nodeId2Zindex)
 {
     for (const auto& originRect : nodeId2Rect) {
-        if (originRect.second.IsInnerIntersectWith(dest) &&
+        if (originRect.second.IsInnerIntersectWithRound(dest) &&
             (nodeId2Zindex[secNodeId] <= nodeId2Zindex[originRect.first])) {
             return true;
         }
@@ -705,7 +717,7 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scI
     uint8_t defaultData = 0;
     std::vector<uint8_t> dataBuffer;
     if (pointerEvent == nullptr) {
-        LOGW("Receive a NULL pointerEvent, set default data.");
+        LOGW("SecurityComponentClickEventWarning: Receive a NULL pointerEvent, set default data.");
         secEvent.extraInfo.data = &defaultData;
         secEvent.extraInfo.dataSize = 1;
         secEvent.point.timestamp = 0;
@@ -728,7 +740,7 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scI
         return -1;
     }
     if (CheckComponentCoveredStatus(node->GetId())) {
-        LOGW("Security component is covered by another component.");
+        LOGW("SecurityComponentCheckFail: Security component is covered by another component.");
         return -1;
     }
 
@@ -757,7 +769,7 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scI
         return -1;
     }
     if (CheckComponentCoveredStatus(node->GetId())) {
-        LOGW("Security component is covered by another component.");
+        LOGW("SecurityComponentCheckFail: Security component is covered by another component.");
         return -1;
     }
     return ReportSecurityComponentClickEventInner(scId, node, secEvent, std::move(callback));

@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
+#include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -237,6 +238,11 @@ bool NavDestinationPattern::GetBackButtonState()
     if (isCustomTitle) {
         return showBackButton;
     }
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_RETURN(titleBarPattern, showBackButton);
+    if (titleBarPattern->IsFontSizeSettedByDeveloper()) {
+        return showBackButton;
+    }
     auto titleNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle());
     CHECK_NULL_RETURN(titleNode, showBackButton);
     auto theme = NavigationGetTheme();
@@ -262,6 +268,19 @@ void NavDestinationPattern::OnAttachToFrameNode()
         host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
     }
     isRightToLeft_ = AceApplicationInfo::GetInstance().IsRightToLeft();
+    auto id = host->GetId();
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddWindowStateChangedCallback(id);
+}
+
+void NavDestinationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto id = frameNode->GetId();
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveWindowStateChangedCallback(id);
 }
 
 void NavDestinationPattern::DumpInfo()
@@ -321,7 +340,7 @@ void NavDestinationPattern::InitBackButtonLongPressEvent(RefPtr<NavDestinationGr
 
     auto accessibilityProperty = backButtonNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO);
+    accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
 }
 
 void NavDestinationPattern::HandleLongPress()
@@ -428,5 +447,21 @@ void NavDestinationPattern::SetSystemBarStyle(const RefPtr<SystemBarStyle>& styl
 int32_t NavDestinationPattern::GetTitlebarZIndex() const
 {
     return DEFAULT_TITLEBAR_ZINDEX;
+}
+
+void NavDestinationPattern::OnWindowHide()
+{
+    CHECK_NULL_VOID(navDestinationContext_);
+    auto navPathInfo = navDestinationContext_->GetNavPathInfo();
+    CHECK_NULL_VOID(navPathInfo);
+    if (!navPathInfo->GetIsEntry()) {
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "window lifecycle change to hide, clear navDestination entry tag");
+    navPathInfo->SetIsEntry(false);
+    auto stack = GetNavigationStack().Upgrade();
+    CHECK_NULL_VOID(stack);
+    auto index = navDestinationContext_->GetIndex();
+    stack->SetIsEntryByIndex(index, false);
 }
 } // namespace OHOS::Ace::NG

@@ -272,6 +272,14 @@ class JSBuilderNode extends BaseNode {
     const updateFunc = (elmtId: number, isFirstRender: boolean): void => {
       __JSScopeUtil__.syncInstanceId(this.instanceId_);
       ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
+      // if V2 @Observed/@Track used anywhere in the app (there is no more fine grained criteria),
+      // enable V2 object deep observation
+      // FIXME: A @Component should only use PU or V2 state, but ReactNative dynamic viewer uses both.
+      if (ConfigureStateMgmt.instance.needsV2Observe()) {
+        // FIXME: like in V2 setting bindId_ in ObserveV2 does not work with 'stacked'
+        // update + initial render calls, like in if and ForEach case, convert to stack as well
+        ObserveV2.getObserve().startRecordDependencies(this, elmtId, true);
+      }
       if (this._supportNestingBuilder) {
         compilerAssignedUpdateFunc(elmtId, isFirstRender);
       } else {
@@ -279,6 +287,9 @@ class JSBuilderNode extends BaseNode {
       }
       if (!isFirstRender) {
         _popFunc();
+      }
+      if (ConfigureStateMgmt.instance.needsV2Observe()) {
+        ObserveV2.getObserve().stopRecordDependencies();
       }
       ViewStackProcessor.StopGetAccessRecording();
       __JSScopeUtil__.restoreInstanceId();
@@ -389,6 +400,8 @@ class JSBuilderNode extends BaseNode {
     // removedChildElmtIds will be filled with the elmtIds of all children and their children will be deleted in response to if .. else change
     let removedChildElmtIds = new Array();
     If.branchId(branchId, removedChildElmtIds);
+    //un-registers the removed child elementIDs using proxy
+    UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);
     this.purgeDeletedElmtIds();
 
     branchfunc();

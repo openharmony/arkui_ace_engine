@@ -16,10 +16,6 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_text_clock_ffi.h"
 
 #include "cj_lambda.h"
-#include "base/utils/string_utils.h"
-#include "core/common/ace_application_info.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "core/components/common/properties/text_style_parser.h"
 
@@ -95,6 +91,19 @@ void FFICJVectorNativeTextShadowDelete(VectorNativeTextShadow vec)
 {
     auto actualVec = reinterpret_cast<std::vector<NativeTextShadow>*>(vec);
     delete actualVec;
+}
+
+void FfiOHOSAceFrameworkTextClockCreateDefault(int64_t controllerId)
+{
+    auto textClock = TextClockModel::GetInstance()->Create();
+    TextClockModel::GetInstance()->SetHoursWest(NAN);
+
+    auto controller = FFIData::GetData<NativeTextClockController>(controllerId);
+    if (controller != nullptr) {
+        controller->SetController(textClock);
+    } else {
+        LOGE("textClockControllerId is invalid ");
+    }
 }
 
 void FfiOHOSAceFrameworkTextClockCreate(int32_t timeZoneOffset, int64_t controllerId)

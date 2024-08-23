@@ -96,7 +96,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest002, TestSize.Level1)
     TouchRestrict touchRestrict;
     TouchTestResult innerTargets;
     TouchTestResult finalResult;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     auto flag = gestureEventHub->ProcessTouchTestHit(
         COORDINATE_OFFSET, touchRestrict, innerTargets, finalResult, TOUCH_ID, PointF(), nullptr, responseLinkResult);
     EXPECT_FALSE(flag);
@@ -651,7 +651,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest010, TestSize.Level1)
     TouchRestrict touchRestrict;
     std::list<RefPtr<NGGestureRecognizer>> innerTargets;
     TouchTestResult finalResult;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
 
     std::vector<RefPtr<NGGestureRecognizer>> vc;
     vc.push_back(AceType::MakeRefPtr<ClickRecognizer>());
@@ -869,7 +869,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest013, TestSize.Level1)
     TouchRestrict touchRestrict;
     TouchTestResult innerTargets;
     TouchTestResult finalResult;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     PointF localPoint;
 
     PanDirection panDirection;
@@ -1035,7 +1035,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest017, TestSize.Level1)
     TouchRestrict touchRestrict;
     TouchTestResult innerTargets;
     TouchTestResult finalResult;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     PointF localPoint;
 
     PanDirection panDirection;
@@ -1854,6 +1854,8 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart001, TestSize.Level1)
     auto frameNodeOfEvent = EventHub->GetFrameNode();
     EXPECT_TRUE(frameNodeOfEvent);
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    auto unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
+    event->SetData(unifiedData);
     RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     DragDropInfo dragDropInfo;
     dragDropInfo.customNode = customNode;

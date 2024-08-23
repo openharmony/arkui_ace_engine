@@ -29,7 +29,6 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -429,15 +428,24 @@ void LazyForEachNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t 
 const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildren(bool notDetach) const
 {
     if (children_.empty()) {
+        LoadChildren(notDetach);
+
         // if measure not done, return previous children
-        if (notDetach) {
+        if (notDetach && children_.empty()) {
             return tempChildren_;
         }
+
         tempChildren_.clear();
+    }
+    return children_;
+}
 
-        std::list<std::pair<std::string, RefPtr<UINode>>> childList;
-        const auto& items = builder_->GetItems(childList);
+void LazyForEachNode::LoadChildren(bool notDetach) const
+{
+    std::list<std::pair<std::string, RefPtr<UINode>>> childList;
+    const auto& items = builder_->GetItems(childList);
 
+    if (!notDetach) {
         for (auto& node : childList) {
             if (!node.second->OnRemoveFromParent(true)) {
                 const_cast<LazyForEachNode*>(this)->AddDisappearingChild(node.second);
@@ -445,14 +453,14 @@ const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildren(bool notDetach) co
                 node.second->DetachFromMainTree();
             }
         }
-        for (const auto& [index, item] : items) {
-            if (item.second) {
-                const_cast<LazyForEachNode*>(this)->RemoveDisappearingChild(item.second);
-                children_.push_back(item.second);
-            }
+    }
+
+    for (const auto& [index, item] : items) {
+        if (item.second) {
+            const_cast<LazyForEachNode*>(this)->RemoveDisappearingChild(item.second);
+            children_.push_back(item.second);
         }
     }
-    return children_;
 }
 
 void LazyForEachNode::OnConfigurationUpdate(const ConfigurationChange& configurationChange)
@@ -560,11 +568,11 @@ void LazyForEachNode::InitAllChilrenDragManager(bool init)
 
 void LazyForEachNode::NotifyCountChange(int32_t index, int32_t count)
 {
-    auto parentNode = GetParentFrameNode();
-    CHECK_NULL_VOID(parentNode);
-    auto pattern = parentNode->GetPattern<ScrollablePattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->NotifyDataChange(index, count);
+    auto parent = GetParent();
+    int64_t accessibilityId = GetAccessibilityId();
+    if (parent) {
+        parent->NotifyDataChange(index, count, accessibilityId);
+    }
 }
 
 void LazyForEachNode::ParseOperations(const std::list<V2::Operation>& dataOperations)

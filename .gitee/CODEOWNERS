@@ -507,6 +507,7 @@ frameworks/bridge/declarative_frontend/ark_component/src/ArkImageAnimator.ts @ar
 frameworks/bridge/declarative_frontend/ark_component/src/ArkImageSpan.ts @arkui_image
 frameworks/bridge/declarative_frontend/ark_component/src/ArkImage.ts @arkui_image
 frameworks/bridge/declarative_frontend/ark_component/src/ArkLine.ts @arkuilayout
+frameworks/bridge/declarative_frontend/ark_component/src/ArkLinearIndicator.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/src/ArkListItemGroup.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/src/ArkListItem.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/src/ArkList.ts @arkuiscroll
@@ -599,6 +600,7 @@ frameworks/bridge/declarative_frontend/ark_modifier/src/image_modifier.ts @arkui
 frameworks/bridge/declarative_frontend/ark_modifier/src/image_span_modifier.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_modifier/src/import.ts @arkuievent
 frameworks/bridge/declarative_frontend/ark_modifier/src/line_modifier.ts @arkuilayout
+frameworks/bridge/declarative_frontend/ark_modifier/src/linear_indicator_modifier.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_modifier/src/list_item_group_modifier.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_modifier/src/list_item_modifier.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_modifier/src/list_modifier.ts @arkuiscroll
@@ -828,6 +830,8 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_imag
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_span_bridge.h @huawei_g_five
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_line_bridge.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_line_bridge.h @arkuilayout
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_linear_indicator.cpp @arkuiscroll
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_linear_indicator.h @arkuiscroll
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_bridge.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_bridge.h @arkuilayout
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_item_bridge.cpp @arkuilayout
@@ -2361,8 +2365,6 @@ frameworks/core/components_ng/pattern/overlay/group_manager.h @arkuipopupwindow
 frameworks/core/components_ng/pattern/overlay/keyboard_base_pattern.cpp @huawei_g_five
 frameworks/core/components_ng/pattern/overlay/keyboard_base_pattern.h @huawei_g_five
 frameworks/core/components_ng/pattern/overlay/keyboard_view.h @huawei_g_five
-frameworks/core/components_ng/pattern/overlay/modal_presentation_layout_algorithm.cpp @arkui_superman
-frameworks/core/components_ng/pattern/overlay/modal_presentation_layout_algorithm.h @arkui_superman
 frameworks/core/components_ng/pattern/overlay/modal_presentation_pattern.cpp @arkui_superman
 frameworks/core/components_ng/pattern/overlay/modal_presentation_pattern.h @arkui_superman
 frameworks/core/components_ng/pattern/overlay/modal_style.h @arkui_superman
@@ -2669,6 +2671,8 @@ frameworks/core/interfaces/native/node/image_animator_modifier.cpp @arkui_image
 frameworks/core/interfaces/native/node/image_animator_modifier.h @arkui_image
 frameworks/core/interfaces/native/node/line_modifier.cpp @arkuilayout
 frameworks/core/interfaces/native/node/line_modifier.h @arkuilayout
+frameworks/core/interfaces/native/node/linear_indicator_modifier.cpp @arkuiscroll
+frameworks/core/interfaces/native/node/linear_indicator_modifier.h @arkuiscroll
 frameworks/core/interfaces/native/node/marquee_modifier.cpp @huawei_g_five
 frameworks/core/interfaces/native/node/marquee_modifier.h @huawei_g_five
 frameworks/core/interfaces/native/node/menu_item_modifier.cpp @arkuipopupwindow
@@ -2870,8 +2874,8 @@ interfaces/native/node/node_transition_imp.cpp @arkuiframework
 interfaces/native/node/node_utils.cpp @arkuiframework
 interfaces/native/node/resource.h @arkuiframework
 interfaces/native/node/styled_string.h @huawei_g_five
-interfaces/native/node/style_modifier.cpp @huawei_g_five
-interfaces/native/node/style_modifier.h @huawei_g_five
+interfaces/native/node/style_modifier.cpp @arkuiframework
+interfaces/native/node/style_modifier.h @arkuiframework
 interfaces/native/node/waterflow_section_option.cpp @arkuiscroll
 interfaces/native/node/waterflow_section_option.h @arkuiscroll
 interfaces/native/ui_input_event.h @arkuievent
@@ -2953,6 +2957,12 @@ test/mock/core/animation/ @arkuiframework
 test/mock/core/image_provider/ @arkui_image
 test/mock/core/svg/ @arkui_image
 test/mock/interfaces/ @arkui_architecture
+
+test/mock/core/animation/mock_animation_manager.h @zhoutianer
+test/mock/core/animation/mock_animation_manager.cpp @zhoutianer
+test/mock/core/animation/mock_animation_proxy.h @zhoutianer
+test/mock/core/animation/mock_implicit_animation.h @zhoutianer
+test/mock/core/animation/mock_implicit_animation.cpp @zhoutianer
 
 test/unittest/ @chenjiafeng-openharmony
 test/unittest/core/accessibility/ @arkuiabilitygroup

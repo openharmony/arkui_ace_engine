@@ -15,7 +15,6 @@
 
 #include "core/components/picker/picker_base_element.h"
 
-#include "core/components/picker/picker_base_component.h"
 #include "core/components/picker/render_picker_base.h"
 
 namespace OHOS::Ace {

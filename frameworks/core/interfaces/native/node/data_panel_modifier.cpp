@@ -197,5 +197,15 @@ const ArkUIDataPanelModifier* GetDataPanelModifier()
 
     return &modifier;
 }
+
+const CJUIDataPanelModifier* GetCJUIDataPanelModifier()
+{
+    static const CJUIDataPanelModifier modifier = { SetCloseEffect, ResetCloseEffect,
+        SetDataPanelTrackBackgroundColor, ResetDataPanelTrackBackgroundColor, SetDataPanelStrokeWidth,
+        ResetDataPanelStrokeWidth, SetValueColors, ResetValueColors, SetTrackShadow, SetNullTrackShadow,
+        ResetTrackShadow };
+
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

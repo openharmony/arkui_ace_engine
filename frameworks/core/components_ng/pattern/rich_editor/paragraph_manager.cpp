@@ -263,6 +263,34 @@ TextLineMetrics ParagraphManager::GetLineMetrics(size_t lineNumber)
     return TextLineMetrics();
 }
 
+std::vector<ParagraphManager::TextBox> ParagraphManager::GetRectsForRange(
+    int32_t start, int32_t end, RectHeightStyle heightStyle, RectWidthStyle widthStyle)
+{
+    std::vector<TextBox> resultTextBoxes;
+    float y = 0.0f;
+    for (const auto& info : paragraphs_) {
+        if (info.start >= end) {
+            break;
+        }
+        int32_t relativeStart = std::max(static_cast<int32_t>(0), start - info.start);
+        int32_t relativeEnd = std::min(info.end - info.start, end - info.start);
+        if (relativeStart >= relativeEnd) {
+            y += info.paragraph->GetHeight();
+            continue;
+        }
+        std::vector<RectF> tempRects;
+        std::vector<TextDirection> tempTextDirections;
+        info.paragraph->TxtGetRectsForRange(
+            relativeStart, relativeEnd, heightStyle, widthStyle, tempRects, tempTextDirections);
+        for (size_t i = 0; i < tempRects.size(); ++i) {
+            tempRects[i].SetTop(tempRects[i].Top() + y);
+            resultTextBoxes.emplace_back(TextBox(tempRects[i], tempTextDirections[i]));
+        }
+        y += info.paragraph->GetHeight();
+    }
+    return resultTextBoxes;
+}
+
 std::vector<RectF> ParagraphManager::GetRects(int32_t start, int32_t end, RectHeightPolicy rectHeightPolicy) const
 {
     std::vector<RectF> res;
@@ -288,6 +316,36 @@ std::vector<RectF> ParagraphManager::GetRects(int32_t start, int32_t end, RectHe
         y += info.paragraph->GetHeight();
     }
     return res;
+}
+
+std::vector<std::pair<std::vector<RectF>, TextDirection>> ParagraphManager::GetParagraphsRects(
+    int32_t start, int32_t end, RectHeightPolicy rectHeightPolicy) const
+{
+    std::vector<std::pair<std::vector<RectF>, TextDirection>> paragraphsRects;
+    float y = 0.0f;
+    for (auto&& info : paragraphs_) {
+        if (info.start > end) {
+            break;
+        }
+        if (info.end > start) {
+            std::vector<RectF> rects;
+            auto relativeStart = (start < info.start) ? 0 : start - info.start;
+            if (rectHeightPolicy == RectHeightPolicy::COVER_TEXT) {
+                info.paragraph->GetTightRectsForRange(relativeStart, end - info.start, rects);
+            } else {
+                info.paragraph->GetRectsForRange(relativeStart, end - info.start, rects);
+            }
+            std::pair<std::vector<RectF>, TextDirection> paragraphRects;
+            for (auto&& rect : rects) {
+                rect.SetTop(rect.Top() + y);
+            }
+            paragraphRects.first = rects;
+            paragraphRects.second = info.paragraphStyle.direction;
+            paragraphsRects.emplace_back(paragraphRects);
+        }
+        y += info.paragraph->GetHeight();
+    }
+    return paragraphsRects;
 }
 
 bool ParagraphManager::IsSelectLineHeadAndUseLeadingMargin(int32_t start) const

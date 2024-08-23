@@ -16,16 +16,9 @@
 
 #include "render_service_client/core/ui/rs_surface_node.h"
 #include "surface_utils.h"
-#include "sync_fence.h"
-
 #include "base/log/dump_log.h"
-#include "base/memory/referenced.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -38,7 +31,7 @@ const uint32_t ADJUST_WEB_DRAW_LENGTH = 3000;
 const uint32_t DEFAULT_WEB_DRAW_LENGTH = 6167;
 const std::string SURFACE_WIDTH = "surface_width";
 const std::string SURFACE_HEIGHT = "surface_height";
-const int32_t SIZE_LIMIT = 7999;
+const int32_t SIZE_LIMIT = 5999;
 const int32_t PERMITTED_DIFFERENCE = 100;
 const int32_t FAILED_LIMIT = 3;
 
@@ -317,6 +310,8 @@ bool RosenRenderSurface::CompareBufferSize(int32_t width, int32_t height,
         failTimes_++;
         if (failTimes_ <= FAILED_LIMIT) {
             pipeline->SetIsFreezeFlushMessage(true);
+            ACE_SCOPED_TRACE("Web SetIsFreezeFlushMessage (width %d, height %d, bufferWidth %d, bufferHeight %d)",
+                width, height, bufferWidth, bufferHeight);
             return false;
         }
     }

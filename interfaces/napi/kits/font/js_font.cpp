@@ -13,15 +13,10 @@
  * limitations under the License.
  */
 
-#include <string>
 
 #include "interfaces/napi/kits/utils/napi_utils.h"
-#include "napi/native_api.h"
-#include "napi/native_engine/native_value.h"
-#include "napi/native_node_api.h"
 
 #include "bridge/common/utils/engine_helper.h"
-#include "bridge/js_frontend/engine/common/js_engine.h"
 #include "core/common/font_manager.h"
 
 namespace OHOS::Ace::Napi {

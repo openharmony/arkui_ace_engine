@@ -110,6 +110,12 @@ class ComponentSnapshot {
             __JSScopeUtil__.restoreInstanceId();
         }
     }
+    getSync(id, options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let pixelmap = this.ohos_componentSnapshot.getSync(id, options);
+        __JSScopeUtil__.restoreInstanceId();
+        return pixelmap;
+    }
 }
 
 class DragController {
@@ -503,6 +509,22 @@ class UIContext {
         return node;
     }
 
+    getAttachedFrameNodeById(id) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let nodePtr = getUINativeModule().getAttachedFrameNodeById(id);
+        if (!nodePtr) {
+            __JSScopeUtil__.restoreInstanceId();
+            return null;
+        }
+        let xNode = globalThis.__getArkUINode__();
+        let node = xNode.FrameNodeUtils.searchNodeInRegisterProxy(nodePtr);
+        if (!node) {
+            node = xNode.FrameNodeUtils.createFrameNode(this, nodePtr);
+        }
+        __JSScopeUtil__.restoreInstanceId();
+        return node;
+    }
+
     getFrameNodeByNodeId(id) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let nodePtr = getUINativeModule().getFrameNodeById(id);
@@ -608,10 +630,24 @@ class UIContext {
         if (dynamicSceneInfo.tag == 'Swiper') {
             __JSScopeUtil__.restoreInstanceId();
             let nodeRef = dynamicSceneInfo.nativeRef;
-            return SwiperDynamicSyncScene.Create(nodeRef);
+            return SwiperDynamicSyncScene.createInstances(nodeRef);
         }
         __JSScopeUtil__.restoreInstanceId();
         return [];
+    }
+
+    isFollowingSystemFontScale() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let isFollowing = Context.isFollowingSystemFontScale();
+        __JSScopeUtil__.restoreInstanceId();
+        return isFollowing;
+    }
+
+    getMaxFontScale() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let maxFontScale = Context.getMaxFontScale();
+        __JSScopeUtil__.restoreInstanceId();
+        return maxFontScale;
     }
 }
 
@@ -619,35 +655,54 @@ class DynamicSyncScene {
     /**
      * Construct new instance of DynamicSyncScene.
      * initialize with instanceId.
-     * @param nodeRef obtained on the c++ side.
-     * @param frameRateRange frameRateRange
+     * @param {Object} nodeRef - obtained on the c++ side.
+     * @param {Object} frameRateRange - frameRateRange
      * @since 12
      */
     constructor(nodeRef, frameRateRange) {
-        this.frameRateRange = frameRateRange;
-        this.nodeRef = nodeRef;
-        this.nodePtr = this.nodeRef.getNativeHandle();
+        this.frameRateRange = { ...frameRateRange };
+        if (!nodeRef.invalid()){
+            this.nodeRef = nodeRef;
+            this.nodePtr = this.nodeRef.getNativeHandle();
+        }
     }
 
+    /**
+     * Get the frame rate range.
+     * @returns {Object} The frame rate range.
+     */
     getFrameRateRange() {
         return this.frameRateRange;
     }
 }
 
 class SwiperDynamicSyncScene extends DynamicSyncScene {
-    static Create(nodeRef) {
-        let swiperDynamicSyncScene = [new SwiperDynamicSyncScene(nodeRef, 0), new SwiperDynamicSyncScene(nodeRef, 1)];
-        return swiperDynamicSyncScene;
+    /**
+     * Create instances of SwiperDynamicSyncScene.
+     * @param {Object} nodeRef - obtained on the c++ side.
+     * @returns {SwiperDynamicSyncScene[]} Array of SwiperDynamicSyncScene instances.
+     */
+    static createInstances(nodeRef) {
+        return [new SwiperDynamicSyncScene(nodeRef, 0), new SwiperDynamicSyncScene(nodeRef, 1)];
     }
 
+    /**
+     * Construct new instance of SwiperDynamicSyncScene.
+     * @param {Object} nodeRef - obtained on the c++ side.
+     * @param {number} type - type of the scenes.
+     */
     constructor(nodeRef, type) {
         super(nodeRef, { min: 0, max: 120, expected: 120 });
         this.type = type;
     }
 
+    /**
+     * Set the frame rate range.
+     * @param {Object} frameRateRange - The new frame rate range.
+     */
     setFrameRateRange(frameRateRange) {
-        this.frameRateRange = frameRateRange;
-        getUINativeModule().setFrameRateRange(this.nodePtr, frameRateRange, this.type); // -> this.nodeRef -> SetFrameRate.
+        this.frameRateRange = { ...frameRateRange };
+        getUINativeModule().setFrameRateRange(this.nodePtr, frameRateRange, this.type);
     }
 }
 

@@ -55,6 +55,7 @@ ohos_source_set("rosen_render_context_test_mock") {
   part_name = ace_engine_part
   sources = [
     "$ace_root/frameworks/core/components_ng/render/image_painter.cpp",
+    "$ace_root/test/unittest/core/rosen/mock_animated_image.cpp",
     "$ace_root/test/unittest/core/rosen/mock_pixmap_image.cpp",
   ]
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]

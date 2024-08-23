@@ -15,24 +15,13 @@
 
 #include "core/pipeline/pipeline_base.h"
 
-#include <cinttypes>
-
 #include "base/log/ace_tracker.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/subwindow/subwindow_manager.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/time_util.h"
-#include "base/utils/utils.h"
-#include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
-#include "core/common/display_info.h"
 #include "core/common/font_manager.h"
-#include "core/common/frontend.h"
 #include "core/common/manager_interface.h"
-#include "core/common/thread_checker.h"
 #include "core/common/window.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/container_modal/container_modal_constants.h"
@@ -246,7 +235,7 @@ void PipelineBase::SetFontScale(float fontScale)
     const static float CARD_MAX_FONT_SCALE = 1.3f;
     if (!NearEqual(fontScale_, fontScale)) {
         fontScale_ = fontScale;
-        if ((isJsCard_ || isFormRender_) && GreatOrEqual(fontScale_, CARD_MAX_FONT_SCALE)) {
+        if ((isJsCard_ || (isFormRender_ && !isDynamicRender_)) && GreatOrEqual(fontScale_, CARD_MAX_FONT_SCALE)) {
             fontScale_ = CARD_MAX_FONT_SCALE;
         }
         auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -751,15 +740,16 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positio
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, bool forceChange)
 {
     auto currentContainer = Container::Current();
+    float keyboardHeight = keyboardArea.Height();
     if (currentContainer && !currentContainer->IsSubContainer()) {
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentContainer->GetInstanceId());
         if (subwindow && subwindow->GetShown() && subwindow->IsFocused() && !CheckNeedAvoidInSubWindow()) {
             // subwindow is shown, main window doesn't lift,  no need to handle the keyboard event
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "subwindow is shown and pageOffset is zero, main window doesn't lift");
+            CheckAndUpdateKeyboardInset(keyboardHeight);
             return;
         }
     }
-    double keyboardHeight = keyboardArea.Height();
     if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight)) {
         return;
     }

@@ -15,12 +15,9 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_rect_ffi.h"
 
-#include <cinttypes>
 
 #include "bridge/cj_frontend/cppview/shape_abstract.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_shape_ffi.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components_ng/pattern/shape/rect_model.h"
 #include "core/components_ng/pattern/shape/rect_model_ng.h"
 
 using namespace OHOS::Ace;

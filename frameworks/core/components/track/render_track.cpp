@@ -16,8 +16,6 @@
 #include "core/components/track/render_track.h"
 
 #include "base/log/dump_log.h"
-#include "core/components/theme/theme_constants.h"
-#include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace {
 namespace {

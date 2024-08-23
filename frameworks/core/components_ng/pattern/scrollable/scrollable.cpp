@@ -335,8 +335,7 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
     SetDragStartPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
     const double dragPositionInMainAxis =
         axis_ == Axis::VERTICAL ? info.GetGlobalLocation().GetY() : info.GetGlobalLocation().GetX();
-    TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Scroll drag start, localLocation: %{public}s, globalLocation: %{public}s",
-        info.GetLocalLocation().ToString().c_str(), info.GetGlobalLocation().ToString().c_str());
+    TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Scroll drag start, id:%{public}d, tag:%{public}s", nodeId_, nodeTag_.c_str());
     
     skipRestartSpring_ = false; // reset flags. Extract method if more flags need to be reset
 
@@ -427,9 +426,8 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     // avoid no render frame when drag end
     HandleDragUpdate(info);
 
-    TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Scroll drag end, position is %{public}f and %{public}f, "
-        "velocity is %{public}f",
-        info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(), info.GetMainVelocity());
+    TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Scroll drag end, velocity is %{public}f id:%{public}d, tag:%{public}s",
+        info.GetMainVelocity(), nodeId_, nodeTag_.c_str());
     if (dragFRCSceneCallback_) {
         dragFRCSceneCallback_(info.GetMainVelocity(), NG::SceneStatus::END);
     }
@@ -556,6 +554,7 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     context->RequestFrame();
+    lastVsyncTime_ = context->GetVsyncTime();
 }
 
 void Scrollable::SetDelayedTask()
@@ -701,6 +700,9 @@ void Scrollable::StartScrollSnapMotion(float predictSnapOffset, float scrollSnap
             }
     });
     isSnapScrollAnimationStop_ = false;
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    lastVsyncTime_ = context->GetVsyncTime();
 }
 
 void Scrollable::ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scrollSnapVelocity)
@@ -730,6 +732,9 @@ void Scrollable::ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scro
             scroll->ProcessScrollMotionStop(false);
     });
     isSnapAnimationStop_ = false;
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    lastVsyncTime_ = context->GetVsyncTime();
 }
 
 void Scrollable::UpdateScrollSnapStartOffset(double offset)
@@ -1223,10 +1228,11 @@ void Scrollable::StopFrictionAnimation()
     }
 }
 
-void Scrollable::StopSpringAnimation()
+void Scrollable::StopSpringAnimation(bool reachFinalPosition)
 {
     if (!isSpringAnimationStop_) {
-        ACE_SCOPED_TRACE("StopSpringAnimation, id:%d, tag:%s", nodeId_, nodeTag_.c_str());
+        ACE_SCOPED_TRACE(
+            "StopSpringAnimation, reachFinalPosition:%u, id:%d, tag:%s", reachFinalPosition, nodeId_, nodeTag_.c_str());
         isSpringAnimationStop_ = true;
         isFadingAway_ = false;
         AnimationOption option;
@@ -1234,11 +1240,18 @@ void Scrollable::StopSpringAnimation()
         option.SetDuration(0);
         AnimationUtils::StartAnimation(
             option,
-            [weak = AceType::WeakClaim(this)]() {
+            [weak = AceType::WeakClaim(this), reachFinalPosition]() {
                 auto scroll = weak.Upgrade();
                 CHECK_NULL_VOID(scroll);
-                //avoid top edge spring can not stop
-                scroll->springOffsetProperty_->Set(scroll->currentPos_);
+                if (reachFinalPosition) {
+                    // ensure that the spring animation is restored to its final position.
+                    scroll->ProcessSpringMotion(scroll->finalPosition_);
+                    // use non final position to stop animation, otherwise the animation cannot be stoped.
+                    scroll->springOffsetProperty_->Set(scroll->finalPosition_ - 1.f);
+                } else {
+                    // avoid top edge spring can not stop
+                    scroll->springOffsetProperty_->Set(scroll->currentPos_);
+                }
             },
             nullptr);
     }
@@ -1272,7 +1285,7 @@ inline bool Scrollable::IsMouseWheelScroll(const GestureEvent& info)
 }
 
 void Scrollable::OnCollectTouchTarget(TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
-    const RefPtr<TargetComponent>& targetComponent, TouchTestResult& responseLinkResult)
+    const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult)
 {
     if (panRecognizerNG_) {
         panRecognizerNG_->SetNodeId(frameNode->GetId());

@@ -13,16 +13,10 @@
  * limitations under the License.
  */
 
-#include <memory>
-
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_xcomponent_bridge.h"
 
-#include "base/utils/string_utils.h"
-#include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
-#include "frameworks/bridge/js_frontend/js_command.h"
 #include "frameworks/core/common/ace_view.h"
-#include "frameworks/core/common/container.h"
 
 namespace OHOS::Ace::Framework {
 JsiXComponentBridge::JsiXComponentBridge()

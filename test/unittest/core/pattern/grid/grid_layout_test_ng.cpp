@@ -18,15 +18,10 @@
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/grid/grid_item_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
-#include "core/components_ng/pattern/grid/grid_item_theme.h"
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
-#include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.h"
-#include "core/components_ng/pattern/grid/irregular/grid_irregular_layout_algorithm.h"
-#include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1654,7 +1649,7 @@ HWTEST_F(GridLayoutTestNg, LayoutWithAutoStretch003, TestSize.Level1)
  */
 HWTEST_F(GridLayoutTestNg, Cache001, TestSize.Level1)
 {
-    GridModelNG model = CreateRepeatGrid(50, 200.0f);
+    GridModelNG model = CreateRepeatGrid(50, [](uint32_t idx) { return 200.0f; });
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetRowsGap(Dimension(10));
     model.SetColumnsGap(Dimension(10));

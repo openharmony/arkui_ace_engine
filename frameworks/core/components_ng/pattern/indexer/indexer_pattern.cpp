@@ -34,6 +34,7 @@
 #include "core/components/common/properties/popup_param.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/indexer/indexer_theme.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/indexer/indexer_theme.h"
@@ -250,7 +251,8 @@ void IndexerPattern::CollapseArrayValue()
         maxItemsCount = static_cast<int32_t>(height / itemSize);
     }
     int32_t fullArraySize = static_cast<int32_t>(fullArrayValue_.size());
-    if (maxItemsCount >= fullArraySize || fullArraySize - sharpItemCount_ <= INDEXER_NINE_CHARACTERS_CHECK) {
+    if (NearZero(height) || maxItemsCount >= fullArraySize ||
+        fullArraySize - sharpItemCount_ <= INDEXER_NINE_CHARACTERS_CHECK) {
         if (lastCollapsingMode_ != IndexerCollapsingMode::NONE) {
             lastCollapsingMode_ = IndexerCollapsingMode::NONE;
             BuildFullArrayValue();
@@ -746,6 +748,12 @@ void IndexerPattern::ApplyIndexChanged(
         childRenderContext->SetClipToBounds(true);
         auto nodeStr = autoCollapse_ && arrayValue_[index].second ?
             StringUtils::Str16ToStr8(INDEXER_STR_DOT) : arrayValue_[index].first;
+        nodeLayoutProperty->UpdateContent(nodeStr);
+        nodeLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+        nodeLayoutProperty->UpdateAlignment(Alignment::CENTER);
+        nodeLayoutProperty->UpdateMinFontScale(1.0f);
+        nodeLayoutProperty->UpdateMaxFontScale(1.0f);
+        nodeLayoutProperty->UpdateMaxLines(1);
         if (index == childHoverIndex_ || index == childPressIndex_) {
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
                 auto radiusSize = paintProperty->GetItemBorderRadius().has_value()
@@ -761,11 +769,6 @@ void IndexerPattern::ApplyIndexChanged(
                 childRenderContext->UpdateBackgroundColor(indexerTheme->GetHoverBgAreaColor());
             }
         } else if (index == childFocusIndex_ || index == selected_) {
-            nodeLayoutProperty->UpdateContent(nodeStr);
-            nodeLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
-            nodeLayoutProperty->UpdateAlignment(Alignment::CENTER);
-            nodeLayoutProperty->UpdateMinFontScale(1.0f);
-            nodeLayoutProperty->UpdateMaxFontScale(1.0f);
             if (index == childFocusIndex_) {
                 auto borderWidth = indexerTheme->GetFocusBgOutlineSize();
                 nodeLayoutProperty->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth });
@@ -829,11 +832,6 @@ void IndexerPattern::ApplyIndexChanged(
             }
         }
         Dimension borderWidth;
-        nodeLayoutProperty->UpdateContent(nodeStr);
-        nodeLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
-        nodeLayoutProperty->UpdateAlignment(Alignment::CENTER);
-        nodeLayoutProperty->UpdateMinFontScale(1.0f);
-        nodeLayoutProperty->UpdateMaxFontScale(1.0f);
         nodeLayoutProperty->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth });
         childRenderContext->ResetBlendBorderColor();
         auto defaultFont = layoutProperty->GetFont().value_or(indexerTheme->GetDefaultTextStyle());
@@ -954,7 +952,8 @@ void IndexerPattern::UpdateBubbleView()
             auto radius = Dimension(BUBBLE_RADIUS, DimensionUnit::VP);
             columnRenderContext->UpdateBorderRadius({ radius, radius, radius, radius });
         }
-        columnRenderContext->UpdateBackShadow(Shadow::CreateShadow(ShadowStyle::OuterDefaultLG));
+        Shadow shadow = GetPopupShadow();
+        columnRenderContext->UpdateBackShadow(shadow);
     } else {
         auto radius = Dimension(BUBBLE_BOX_RADIUS, DimensionUnit::VP);
         columnRenderContext->UpdateBorderRadius({ radius, radius, radius, radius });
@@ -964,6 +963,18 @@ void IndexerPattern::UpdateBubbleView()
     columnRenderContext->SetClipToBounds(true);
     popupNode_->MarkModifyDone();
     popupNode_->MarkDirtyNode();
+}
+
+Shadow IndexerPattern::GetPopupShadow()
+{
+    Shadow shadow;
+    auto colorMode = SystemProperties::GetColorMode();
+    auto pipelineContext = GetContext();
+    CHECK_NULL_RETURN(pipelineContext, shadow);
+    auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+    CHECK_NULL_RETURN(shadowTheme, shadow);
+    shadow = shadowTheme->GetShadow(ShadowStyle::OuterDefaultLG, colorMode);
+    return shadow;
 }
 
 void IndexerPattern::UpdateBubbleBackgroundView()
@@ -1831,10 +1842,12 @@ void IndexerPattern::StartCollapseDelayTask(RefPtr<FrameNode>& hostNode, uint32_
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     CHECK_NULL_VOID(context->GetTaskExecutor());
-    delayCollapseTask_.Reset([hostNode] {
+    delayCollapseTask_.Reset([node = WeakClaim(RawPtr(hostNode))]() {
+        auto hostNode = node.Upgrade();
+        CHECK_NULL_VOID(hostNode);
         hostNode->MarkModifyDone();
         hostNode->MarkDirtyNode();
-        });
+    });
     context->GetTaskExecutor()->PostDelayedTask(
         delayCollapseTask_, TaskExecutor::TaskType::UI, duration, "ArkUIAlphabetIndexerCollapse");
 }
@@ -2051,6 +2064,7 @@ void IndexerPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("PopupPositionY: ",
         layoutProperty->GetPopupPositionYValue(Dimension(NG::BUBBLE_POSITION_Y, DimensionUnit::VP)).ToString());
     DumpLog::GetInstance().AddDesc("AutoCollapse: ", autoCollapse_ ? "true" : "false");
+    DumpLog::GetInstance().AddDesc("IsPopup: ", isPopup_ ? "true" : "false");
     DumpLog::GetInstance().AddDesc(std::string("EnableHapticFeedback: ").append(std::to_string(enableHapticFeedback_)));
 }
 } // namespace OHOS::Ace::NG

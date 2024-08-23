@@ -15,24 +15,10 @@
 
 #include "frameworks/bridge/js_frontend/frontend_delegate_impl.h"
 
-#include <atomic>
-#include <regex>
-#include <string>
-
 #include "base/i18n/localization.h"
-#include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
 #include "base/resource/ace_res_config.h"
-#include "base/thread/background_task_executor.h"
-#include "base/utils/utils.h"
-#include "base/utils/measure_util.h"
-#include "core/common/ace_application_info.h"
-#include "core/common/platform_bridge.h"
-#include "core/common/thread_checker.h"
 #include "core/components/toast/toast_component.h"
-#include "frameworks/bridge/common/manifest/manifest_parser.h"
-#include "frameworks/bridge/common/utils/utils.h"
-#include "frameworks/bridge/js_frontend/js_ace_page.h"
 
 namespace OHOS::Ace::Framework {
 namespace {

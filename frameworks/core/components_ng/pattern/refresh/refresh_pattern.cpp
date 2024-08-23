@@ -92,6 +92,14 @@ bool RefreshPattern::OnDirtyLayoutWrapperSwap(
         }
         isRemoveCustomBuilder_ = false;
         isTextNodeChanged_ = false;
+    } else if (progressChild_) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_RETURN(geometryNode, false);
+        auto refreshHeight = geometryNode->GetFrameSize().Height();
+        auto scrollOffset = std::clamp(scrollOffset_, 0.0f, refreshHeight);
+        UpdateScrollTransition(scrollOffset);
     }
     return false;
 }
@@ -181,6 +189,9 @@ void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     gestureHub->AddPanEvent(panEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        gestureHub->SetIsAllowMouse(false);
+    }
 }
 
 void RefreshPattern::InitOnKeyEvent()
@@ -258,6 +269,7 @@ void RefreshPattern::InitProgressColumn()
     CHECK_NULL_VOID(layoutProperty);
     loadingTextLayoutProperty->UpdateContent(layoutProperty->GetLoadingTextValue());
     loadingTextLayoutProperty->UpdateMaxLines(1);
+    loadingTextLayoutProperty->UpdateMaxFontScale(2.0f);
     loadingTextLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
@@ -352,8 +364,6 @@ void RefreshPattern::InitChildNode()
         CHECK_NULL_VOID(textAccessibilityProperty);
         textAccessibilityProperty->SetAccessibilityLevel(accessibilityLevel);
     }
-
-    OnColorConfigurationUpdate();
 }
 
 void RefreshPattern::RefreshStatusChangeEffect()
@@ -715,12 +725,14 @@ void RefreshPattern::UpdateScrollTransition(float scrollOffset)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    // If the refresh has no children without loadingProgress, it does not need to be offset.
-    if (host->TotalChildCount() <= 1) {
+    int32_t childCount = host->TotalChildCount();
+    // If the refresh has no children without loadingProgress and text, it does not need to update offset.
+    if (childCount < 2 || (childCount == 2 && hasLoadingText_)) { // 2 means loadingProgress and text child components.
         return;
     }
     // Need to search for frameNode and skip ComponentNode
     auto childNode = host->GetLastChild();
+    CHECK_NULL_VOID(childNode);
     while (!AceType::InstanceOf<FrameNode>(childNode) && !childNode->GetChildren().empty()) {
         childNode = childNode->GetFirstChild();
     }

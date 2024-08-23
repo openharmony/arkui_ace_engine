@@ -397,6 +397,11 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarNode(const RefPtr<FrameNode>
             calendarNodeId, settingData, changeEvent == dialogEvent.end() ? nullptr : changeEvent->second);
         auto monthLayoutProperty = monthFrameNode->GetLayoutProperty();
         CHECK_NULL_RETURN(monthLayoutProperty, nullptr);
+        if (i == CURRENT_MONTH_INDEX) {
+            auto currentPattern = monthFrameNode->GetPattern<CalendarMonthPattern>();
+            CHECK_NULL_RETURN(currentPattern, nullptr);
+            currentPattern->SetIsFirstEnter(true);
+        }
         monthLayoutProperty->UpdateLayoutDirection(textDirection);
         monthFrameNode->MountToParent(swiperNode);
         monthFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -576,7 +581,12 @@ void CalendarDialogView::UpdateButtonLayoutProperty(const RefPtr<FrameNode>& but
             Localization::GetInstance()->GetEntryLetters(isConfirm ? "common.ok" : "common.cancel"));
     }
     buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    buttonLayoutProperty->UpdateType(ButtonType::CAPSULE);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        buttonLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
+    } else {
+        buttonLayoutProperty->UpdateType(ButtonType::CAPSULE);
+    }
+
     buttonLayoutProperty->UpdateFlexShrink(1.0);
     CalcLength width;
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {

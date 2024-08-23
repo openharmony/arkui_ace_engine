@@ -319,8 +319,9 @@ void SetBorderWidth(ArkUINodeHandle node, ArkUI_Float32 left, ArkUI_Float32 top,
         .bottomDimen = Dimension(bottom, unit),
         .multiValued = true
     };
-    renderContext->UpdateBorderWidth(borderWidthProperty);
     layoutProperty->UpdateBorderWidth(borderWidthProperty);
+    frameNode->MarkDirtyNode();
+    renderContext->SetBorderWidth(borderWidthProperty);
 }
 
 void SetBorderColor(ArkUINodeHandle node, uint32_t left, uint32_t top, uint32_t right, uint32_t bottom)
@@ -548,6 +549,17 @@ const ArkUIRenderNodeModifier* GetRenderNodeModifier()
         SetTranslate, SetBorderStyle, SetBorderWidth, SetBorderColor, SetBorderRadius, SetRectMask, SetCircleMask,
         SetRoundRectMask, SetOvalMask, SetCommandPathMask, SetRectClip, SetCircleClip, SetRoundRectClip, SetOvalClip,
         SetCommandPathClip, SetPosition, SetMarkNodeGroup };
+
+    return &modifier;
+}
+
+const CJUIRenderNodeModifier* GetCJUIRenderNodeModifier()
+{
+    static const CJUIRenderNodeModifier modifier = { AppendChild, InsertChildAfter, RemoveChild, ClearChildren,
+        SetClipToFrame, SetRotation, SetShadowColor, SetShadowOffset, SetShadowAlpha, SetShadowElevation,
+        SetShadowRadius, Invalidate, SetScale, SetRenderNodeBackgroundColor, SetPivot, SetFrame, SetSize, SetOpacity,
+        SetTranslate, SetBorderStyle, SetBorderWidth, SetBorderColor, SetBorderRadius, SetRectMask, SetCircleMask,
+        SetRoundRectMask, SetOvalMask, SetCommandPathMask, SetPosition, SetMarkNodeGroup };
 
     return &modifier;
 }

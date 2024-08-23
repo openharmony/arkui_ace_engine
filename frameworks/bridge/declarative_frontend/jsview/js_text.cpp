@@ -53,6 +53,7 @@
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/event/ace_event_handler.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace {
 
@@ -97,6 +98,7 @@ const std::vector<EllipsisMode> ELLIPSIS_MODALS = { EllipsisMode::HEAD, Ellipsis
 const std::vector<TextSelectableMode> TEXT_SELECTABLE_MODE = { TextSelectableMode::SELECTABLE_UNFOCUSABLE,
     TextSelectableMode::SELECTABLE_FOCUSABLE, TextSelectableMode::UNSELECTABLE };
 constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyle::SOLID;
+const int32_t DEFAULT_VARIABLE_FONT_WEIGHT = 400;
 }; // namespace
 
 void JSText::SetWidth(const JSCallbackInfo& info)
@@ -116,6 +118,20 @@ void JSText::SetFont(const JSCallbackInfo& info)
     Font font;
     GetFontInfo(info, font);
     TextModel::GetInstance()->SetFont(font);
+    if (info.Length() < 2) { // 2 : two args
+        return;
+    }
+    auto tmpInfo = info[1];
+    if (!tmpInfo->IsObject()) {
+        return;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(tmpInfo);
+    auto enableVariableFontWeight = paramObject->GetProperty("enableVariableFontWeight");
+    if (enableVariableFontWeight->IsBoolean()) {
+        TextModel::GetInstance()->SetEnableVariableFontWeight(enableVariableFontWeight->ToBoolean());
+    } else {
+        TextModel::GetInstance()->SetEnableVariableFontWeight(false);
+    }
 }
 
 void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
@@ -142,6 +158,9 @@ void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
     std::string weight;
     auto fontWeight = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::WEIGHT));
     if (!fontWeight->IsNull()) {
+        int32_t variableFontWeight = DEFAULT_VARIABLE_FONT_WEIGHT;
+        ParseJsInt32(fontWeight, variableFontWeight);
+        TextModel::GetInstance()->SetVariableFontWeight(variableFontWeight);
         if (fontWeight->IsNumber()) {
             weight = std::to_string(fontWeight->ToNumber<int32_t>());
         } else {
@@ -181,9 +200,38 @@ void JSText::SetFontSize(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetFontSize(fontSize);
 }
 
-void JSText::SetFontWeight(const std::string& value)
+void JSText::SetFontWeight(const JSCallbackInfo& info)
 {
-    TextModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(value));
+    if (info.Length() < 1) {
+        return;
+    }
+    JSRef<JSVal> args = info[0];
+    std::string fontWeight;
+    int32_t variableFontWeight = DEFAULT_VARIABLE_FONT_WEIGHT;
+    ParseJsInt32(args, variableFontWeight);
+    TextModel::GetInstance()->SetVariableFontWeight(variableFontWeight);
+
+    if (args->IsNumber()) {
+        fontWeight = args->ToString();
+    } else {
+        ParseJsString(args, fontWeight);
+    }
+    TextModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(fontWeight));
+
+    if (info.Length() < 2) { // 2 : two args
+        return;
+    }
+    auto tmpInfo = info[1];
+    if (!tmpInfo->IsObject()) {
+        return;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(tmpInfo);
+    auto enableVariableFontWeight = paramObject->GetProperty("enableVariableFontWeight");
+    if (enableVariableFontWeight->IsBoolean()) {
+        TextModel::GetInstance()->SetEnableVariableFontWeight(enableVariableFontWeight->ToBoolean());
+    } else {
+        TextModel::GetInstance()->SetEnableVariableFontWeight(false);
+    }
 }
 
 void JSText::SetMinFontScale(const JSCallbackInfo& info)
@@ -874,12 +922,11 @@ void JSText::JsDataDetectorConfig(const JSCallbackInfo& info)
         return;
     }
 
-    std::string textTypes;
-    std::function<void(const std::string&)> onResult;
-    if (!ParseDataDetectorConfig(info, textTypes, onResult)) {
+    TextDetectConfig textDetectConfig;
+    if (!ParseDataDetectorConfig(info, textDetectConfig)) {
         return;
     }
-    TextModel::GetInstance()->SetTextDetectConfig(textTypes, std::move(onResult));
+    TextModel::GetInstance()->SetTextDetectConfig(textDetectConfig);
 }
 
 void JSText::BindSelectionMenu(const JSCallbackInfo& info)

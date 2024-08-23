@@ -23,8 +23,8 @@
 #include "frameworks/core/components_ng/render/adapter/animated_image.h"
 
 namespace OHOS::Ace::NG {
-void AnimatedImageObject::MakeCanvasImage(const RefPtr<ImageLoadingContext>& ctx, const SizeF& size, bool forceResize,
-    bool /*syncLoad*/, bool /*loadInVipChannel*/)
+void AnimatedImageObject::MakeCanvasImage(
+    const RefPtr<ImageLoadingContext>& ctx, const SizeF& size, bool forceResize, bool /*syncLoad*/)
 {
     AnimatedImage::ResizeParam params { .width = size.Width(),
         .height = size.Height(),

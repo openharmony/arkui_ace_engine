@@ -273,6 +273,8 @@ public:
 
     void AddPersistAfterLayoutTask(std::function<void()>&& task);
 
+    void AddLastestFrameLayoutFinishTask(std::function<void()>&& task);
+
     void AddAfterRenderTask(std::function<void()>&& task);
 
     void AddSafeAreaPaddingProcessTask(FrameNode* node);
@@ -303,7 +305,7 @@ public:
 
     bool CheckNeedAvoidInSubWindow() override;
 
-    void CheckAndUpdateKeyboardInset() override;
+    void CheckAndUpdateKeyboardInset(float keyboardHeight) override;
 
     void UpdateSizeChangeReason(
         WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -792,13 +794,11 @@ public:
 
     void CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, AxisAction action) override;
 
-    void AddFrameCallback(FrameCallbackFunc&& frameCallbackFunc)
-    {
-        frameCallbackFuncs_.emplace_back(std::move(frameCallbackFunc));
-        RequestFrame();
-    }
+    void AddFrameCallback(FrameCallbackFunc&& frameCallbackFunc, FrameCallbackFunc&& idleCallbackFunc,
+        int64_t delayMillis);
 
     void FlushFrameCallback(uint64_t nanoTimestamp);
+    void TriggerIdleCallback(int64_t deadline);
 
     void RegisterTouchEventListener(const std::shared_ptr<ITouchEventCallback>& listener);
     void UnregisterTouchEventListener(const WeakPtr<NG::Pattern>& pattern);
@@ -847,6 +847,8 @@ public:
     {
         return isWindowHasFocused_ && GetOnFoucs();
     }
+
+    void CollectTouchEventsBeforeVsync(std::list<TouchEvent>& touchEvents);
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -929,6 +931,8 @@ private:
     void FlushFrameRate();
 
     void RegisterFocusCallback();
+    void DumpFocus(bool hasJson) const;
+    void DumpInspector(const std::vector<std::string>& params, bool hasJson) const;
 
     template<typename T>
     struct NodeCompare {
@@ -1092,6 +1096,7 @@ private:
     std::string homePageConfig_;
 
     std::list<FrameCallbackFunc> frameCallbackFuncs_;
+    std::list<FrameCallbackFunc> idleCallbackFuncs_;
     uint32_t transform_ = 0;
     std::list<WeakPtr<FrameNode>> changeInfoListeners_;
     std::list<WeakPtr<FrameNode>> changedNodes_;

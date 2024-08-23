@@ -134,6 +134,10 @@ public:
     {
         return -1;
     }
+    virtual int32_t SetPlayRange(int64_t /*startTime*/, int64_t /*endTime*/)
+    {
+        return -1;
+    }
 
 protected:
 

@@ -474,6 +474,7 @@ public:
         if (!focusPaintParamsPtr_) {
             focusPaintParamsPtr_ = std::unique_ptr<FocusPaintParam>();
         }
+        CHECK_NULL_VOID(focusPaintParamsPtr_);
         focusPaintParamsPtr_->SetPaintRect(rect);
     }
     void SetPaintColor(const Color& color)
@@ -481,6 +482,7 @@ public:
         if (!focusPaintParamsPtr_) {
             focusPaintParamsPtr_ = std::unique_ptr<FocusPaintParam>();
         }
+        CHECK_NULL_VOID(focusPaintParamsPtr_);
         focusPaintParamsPtr_->SetPaintColor(color);
     }
     void SetPaintWidth(const Dimension& width)
@@ -488,6 +490,7 @@ public:
         if (!focusPaintParamsPtr_) {
             focusPaintParamsPtr_ = std::unique_ptr<FocusPaintParam>();
         }
+        CHECK_NULL_VOID(focusPaintParamsPtr_);
         focusPaintParamsPtr_->SetPaintWidth(width);
     }
     void SetFocusPadding(const Dimension& padding)
@@ -495,6 +498,7 @@ public:
         if (!focusPaintParamsPtr_) {
             focusPaintParamsPtr_ = std::unique_ptr<FocusPaintParam>();
         }
+        CHECK_NULL_VOID(focusPaintParamsPtr_);
         focusPaintParamsPtr_->SetFocusPadding(padding);
     }
 
@@ -794,7 +798,7 @@ public:
         return rectFromOrigin_;
     }
 
-    void DumpFocusTree(int32_t depth);
+    void DumpFocusTree(int32_t depth, bool hasJson = false);
     void DumpFocusNodeTree(int32_t depth);
     void DumpFocusScopeTree(int32_t depth);
 
@@ -907,10 +911,10 @@ public:
 
     std::optional<std::string> GetInspectorKey() const;
 
-    bool PaintFocusState();
+    bool PaintFocusState(bool isNeedStateStyles = true);
     bool PaintAllFocusState();
     bool PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate = false);
-    void ClearFocusState();
+    void ClearFocusState(bool isNeedStateStyles = true);
     void ClearAllFocusState();
 
     void SetInnerFocusPaintRectCallback(const std::function<void(RoundRect&)>& callback)
@@ -1088,6 +1092,8 @@ private:
 
     bool RequestFocusImmediatelyInner(bool isJudgeRootTree = false);
 
+    void DumpFocusNodeTreeInJson(int32_t depth);
+    void DumpFocusScopeTreeInJson(int32_t depth);
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;
     OnBlurReasonFunc onBlurReasonInternal_;

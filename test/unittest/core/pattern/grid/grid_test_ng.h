@@ -16,16 +16,9 @@
 #ifndef FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_GRID_GRID_TEST_NG_H
 #define FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_GRID_GRID_TEST_NG_H
 
-#include <cstdint>
-#include <map>
-#include <memory>
-
 #include "test/unittest/core/pattern/test_ng.h"
 
-#include "core/components_ng/pattern/button/button_model_ng.h"
-#include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
-#include "core/components_ng/pattern/grid/grid_item_theme.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
 #define protected public
 #define private public
@@ -57,7 +50,7 @@ public:
     void TearDown() override;
     void GetGrid();
     GridModelNG CreateGrid();
-    GridModelNG CreateRepeatGrid(int32_t itemNumber, float itemHeight);
+    GridModelNG CreateRepeatGrid(int32_t itemNumber, std::function<float(uint32_t)>&& getSize);
 
     /**
      * @param height -2 corresponds to 100% height

@@ -507,9 +507,9 @@ HWTEST_F(GestureRecognizerTestNg, PanPressRecognizerHandleTouchMoveEventTest007,
 HWTEST_F(GestureRecognizerTestNg, PanPressRecognizerHandleTouchMoveEventTest008, TestSize.Level1)
 {
     LongPressRecognizer recognizerTest(DURATION, FINGER_NUMBER);
-    RefPtr<TouchEventTarget> targetPtr1 = nullptr;
-    RefPtr<TouchEventTarget> targetPtr2 = nullptr;
-    std::list<RefPtr<TouchEventTarget>> responseLinkResult;
+    RefPtr<NGGestureRecognizer> targetPtr1 = nullptr;
+    RefPtr<NGGestureRecognizer> targetPtr2 = nullptr;
+    std::list<RefPtr<NGGestureRecognizer>> responseLinkResult;
     responseLinkResult.push_back(targetPtr1);
     responseLinkResult.push_back(targetPtr2);
     recognizerTest.SetResponseLinkRecognizers(responseLinkResult);

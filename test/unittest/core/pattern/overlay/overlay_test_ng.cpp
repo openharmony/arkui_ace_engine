@@ -55,7 +55,6 @@
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
-#include "core/components_ng/pattern/overlay/modal_presentation_layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_paint_method.h"
@@ -90,6 +89,7 @@ constexpr int32_t START_YEAR_BEFORE = 1990;
 constexpr int32_t SELECTED_YEAR = 2000;
 constexpr int32_t END_YEAR = 2090;
 const std::string MENU_CONTENT = "复制";
+constexpr int32_t OVERLAY_EXISTS = 0;
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 } // namespace
 class OverlayTestNg : public testing::Test {
@@ -773,8 +773,8 @@ HWTEST_F(OverlayTestNg, MenuTest003, TestSize.Level1)
     EXPECT_EQ(menuWrapperNode->GetChildren().size(), 2);
     overlayManager->PopMenuAnimation(menuWrapperNode, true);
     pipeline->taskExecutor_ = nullptr;
-    EXPECT_EQ(menuContext->GetTransformScale(), VectorF(0.0f, 0.0f));
-    EXPECT_EQ(previewContext->GetTransformScale(), VectorF(0.0f, 0.0f));
+    EXPECT_EQ(menuContext->GetTransformScale(), VectorF(1.0f, 1.0f));
+    EXPECT_EQ(previewContext->GetTransformScale(), VectorF(1.0f, 1.0f));
     EXPECT_EQ(rootNode->GetChildren().size(), 0);
 
     menuNode->MountToParent(menuWrapperNode);
@@ -782,11 +782,11 @@ HWTEST_F(OverlayTestNg, MenuTest003, TestSize.Level1)
     menuWrapperNode->MountToParent(rootNode);
     /**
      * @tc.steps: step2. call PopMenuAnimation when showPreviewAnimation is false
-     * @tc.expected: the preview node will remove
+     * @tc.expected: the none of node will remove.
      */
     EXPECT_EQ(menuWrapperNode->GetChildren().size(), 2);
     overlayManager->PopMenuAnimation(menuWrapperNode, false);
-    EXPECT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    EXPECT_EQ(menuWrapperNode->GetChildren().size(), 2);
 }
 
 /**
@@ -1222,7 +1222,7 @@ HWTEST_F(OverlayTestNg, RemoveOverlayTest003, TestSize.Level1)
      */
     auto res = overlayManager->RemoveOverlay(false);
     EXPECT_FALSE(res);
-    EXPECT_TRUE(overlayManager->RemoveOverlayInSubwindow());
+    EXPECT_EQ(overlayManager->RemoveOverlayInSubwindow(), OVERLAY_EXISTS);
 }
 
 /**
@@ -1243,6 +1243,7 @@ HWTEST_F(OverlayTestNg, ToastShowModeTest001, TestSize.Level1)
         .bottom = BOTTOMSTRING,
         .showMode = NG::ToastShowMode::TOP_MOST,
         .isRightToLeft = true };
+    toastInfo.shadow = ShadowConfig::DefaultShadowL;
     overlayManager->ShowToast(toastInfo, nullptr);
     EXPECT_FALSE(overlayManager->toastMap_.empty());
     /**
@@ -1292,6 +1293,7 @@ HWTEST_F(OverlayTestNg, ToastTest001, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     auto toastInfo =
         NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
+    toastInfo.shadow = ShadowConfig::DefaultShadowL;
     overlayManager->ShowToast(toastInfo, nullptr);
     EXPECT_TRUE(overlayManager->toastMap_.empty());
     /**
@@ -1331,6 +1333,7 @@ HWTEST_F(OverlayTestNg, ToastTest002, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     auto toastInfo =
         NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
+    toastInfo.shadow = ShadowConfig::DefaultShadowL;
     overlayManager->ShowToast(toastInfo, nullptr);
     EXPECT_TRUE(overlayManager->toastMap_.empty());
     /**
@@ -1354,6 +1357,7 @@ HWTEST_F(OverlayTestNg, ToastTest004, TestSize.Level1)
      */
     auto offset = DimensionOffset(MENU_OFFSET);
     ToastInfo toastInfo = { MESSAGE, 0, BOTTOMSTRING, true, ToastShowMode::DEFAULT, 0, offset };
+    toastInfo.shadow = ShadowConfig::DefaultShadowL;
     auto toastNode = ToastView::CreateToastNode(toastInfo);
     ASSERT_NE(toastNode, nullptr);
     auto toastProperty = toastNode->GetLayoutProperty<ToastLayoutProperty>();
@@ -1390,6 +1394,7 @@ HWTEST_F(OverlayTestNg, ToastTest005, TestSize.Level1)
 
     auto offset = DimensionOffset(MENU_OFFSET);
     ToastInfo toastInfo = { MESSAGE, 0, BOTTOMSTRING, true, ToastShowMode::DEFAULT, 0, offset };
+    toastInfo.shadow = ShadowConfig::DefaultShadowL;
     auto toastNode = ToastView::CreateToastNode(toastInfo);
     ASSERT_NE(toastNode, nullptr);
     auto toastPattern = toastNode->GetPattern<ToastPattern>();
@@ -1410,7 +1415,14 @@ HWTEST_F(OverlayTestNg, ToastTest005, TestSize.Level1)
 
     auto fontSize = Dimension(10.0);
     theme->textStyle_.fontSize_ = fontSize;
+    /**
+     * @tc.steps: step1. update TextProperty in Toast alignment to property.
+     * @tc.expected: call the UpdateTextSizeConstraint function expected true and don't set MaxLine.
+     */
     toastPattern->UpdateTextSizeConstraint(textNode);
+    auto toastProperty = toastNode->GetLayoutProperty<ToastLayoutProperty>();
+    EXPECT_TRUE(toastProperty->HasToastAlignment());
+    EXPECT_EQ(textLayoutProperty->GetMaxLines(), std::nullopt);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 
     // restore mock theme manager
@@ -1426,6 +1438,7 @@ HWTEST_F(OverlayTestNg, ToastTest006, TestSize.Level1)
 {
     auto offset = DimensionOffset(MENU_OFFSET);
     ToastInfo toastInfo = { MESSAGE, 0, BOTTOMSTRING, true, ToastShowMode::DEFAULT, 0, offset };
+    toastInfo.shadow = ShadowConfig::DefaultShadowL;
     const std::optional<Color> textColor = Color::RED;
     auto toastNode = ToastView::CreateToastNode(toastInfo);
     ASSERT_NE(toastNode, nullptr);
@@ -1440,7 +1453,14 @@ HWTEST_F(OverlayTestNg, ToastTest006, TestSize.Level1)
     int32_t settingApiVersion = 12;
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    /**
+     * @tc.steps: step1. update TextProperty in Toast alignment to property.
+     * @tc.expected: call the UpdateTextLayoutProperty function expected true and Set TextColor RED.
+     */
     ToastView::UpdateTextLayoutProperty(textNode, MESSAGE, false, textColor);
+    auto toastProperty = toastNode->GetLayoutProperty<ToastLayoutProperty>();
+    EXPECT_TRUE(toastProperty->HasToastAlignment());
+    EXPECT_EQ(textLayoutProperty->GetTextColor(), Color::RED);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
@@ -2560,6 +2580,7 @@ HWTEST_F(OverlayTestNg, ToastDumpInfoTest001, TestSize.Level1)
     DumpLog::GetInstance().description_.clear();
     auto pattern = AceType::MakeRefPtr<ToastPattern>();
     ToastInfo info;
+    info.shadow = ShadowConfig::DefaultShadowL;
     /**
      * @tc.steps: step3. set info and dump info.
      * @tc.expected: dump success, the description not empty

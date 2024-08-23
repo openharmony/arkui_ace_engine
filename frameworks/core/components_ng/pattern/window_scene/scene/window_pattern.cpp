@@ -56,6 +56,7 @@ const Rosen::RSAnimationTimingCurve NODE_ANIMATION_TIMING_CURVE =
 #endif
 
 constexpr uint32_t COLOR_TRANSLUCENT_WHITE = 0x66ffffff;
+constexpr uint32_t COLOR_TRANSLUCENT_BLACK = 0x66000000;
 constexpr Dimension SNAPSHOT_RADIUS = 16.0_vp;
 } // namespace
 
@@ -185,8 +186,6 @@ void WindowPattern::OnAttachToFrameNode()
         surfaceNode->SetBufferAvailableCallback(coldStartCallback_);
         return;
     }
-    CreateSnapshotWindow();
-    AddChild(host, snapshotWindow_, snapshotWindowName_);
     attachToFrameNodeFlag_ = true;
 }
 
@@ -218,7 +217,7 @@ void WindowPattern::CreateAppWindow()
         auto context = AceType::DynamicCast<NG::RosenRenderContext>(appWindow_->GetRenderContext());
         CHECK_NULL_VOID(context);
         context->SetRSNode(surfaceNode);
-        context->SetOpacity(1);
+        surfaceNode->SetVisible(true);
     }
 }
 
@@ -417,7 +416,9 @@ void WindowPattern::UpdateSnapshotWindowProperty()
         borderRadius.SetRadius(SNAPSHOT_RADIUS);
         borderRadius.multiValued = false;
         renderContext->UpdateBorderRadius(borderRadius);
-        renderContext->UpdateBackgroundColor(Color(COLOR_TRANSLUCENT_WHITE));
+        auto backgroundColor =
+            SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_TRANSLUCENT_BLACK : COLOR_TRANSLUCENT_WHITE;
+        renderContext->UpdateBackgroundColor(Color(backgroundColor));
         imagePattern->SetNeedBorderRadius(true);
         imageRenderProperty->UpdateNeedBorderRadius(true);
     }
@@ -435,7 +436,6 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
     session_->SetNeedSnapshot(false);
     snapshotWindow_ = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-    snapshotWindow_->GetPattern<ImagePattern>()->SetLoadInVipChannel(true);
     auto imageLayoutProperty = snapshotWindow_->GetLayoutProperty<ImageLayoutProperty>();
     imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto imagePaintProperty = snapshotWindow_->GetPaintProperty<ImageRenderProperty>();

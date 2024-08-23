@@ -91,10 +91,41 @@ void ResetColumnSpace(ArkUINodeHandle node)
     ColumnModelNG::SetSpace(frameNode, space);
 }
 
+void SetColumnReverse(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ColumnModelNG::SetIsReverse(frameNode, value);
+}
+
+void ResetColumnReverse(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ColumnModelNG::SetIsReverse(frameNode, false);
+}
+
 namespace NodeModifier {
 const ArkUIColumnModifier* GetColumnModifier()
 {
     static const ArkUIColumnModifier modifier = {
+        SetColumnJustifyContent,
+        ResetColumnJustifyContent,
+        SetColumnAlignItems,
+        ResetColumnAlignItems,
+        GetColumnJustifyContent,
+        GetColumnAlignItems,
+        SetColumnSpace,
+        ResetColumnSpace,
+        SetColumnReverse,
+        ResetColumnReverse,
+    };
+    return &modifier;
+}
+
+const CJUIColumnModifier* GetCJUIColumnModifier()
+{
+    static const CJUIColumnModifier modifier = {
         SetColumnJustifyContent,
         ResetColumnJustifyContent,
         SetColumnAlignItems,

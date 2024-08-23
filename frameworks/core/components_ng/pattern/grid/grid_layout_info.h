@@ -189,6 +189,12 @@ struct GridLayoutInfo {
     std::map<int32_t, std::map<int32_t, int32_t>>::const_iterator FindInMatrix(int32_t index) const;
 
     /**
+     * @param itemIdx
+     * @return position [col, row] of the item. [-1, -1] if item is not in matrix.
+     */
+    std::pair<int32_t, int32_t> GetItemPos(int32_t itemIdx) const;
+
+    /**
      * @brief Tries to find the item between startMainLine and endMainLine.
      *
      * @param target The target item to find.

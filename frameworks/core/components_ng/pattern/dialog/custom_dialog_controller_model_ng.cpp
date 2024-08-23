@@ -61,6 +61,7 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
         CHECK_NULL_VOID(container);
         if (dialogProperties.isShowInSubWindow) {
             dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties, std::move(func));
+            CHECK_NULL_VOID(dialog);
             if (dialogProperties.isModal && !dialogProperties.isScenceBoardDialog &&
                 !container->IsUIExtensionWindow()) {
                 auto mask = overlayManager->SetDialogMask(dialogProperties);
@@ -157,7 +158,6 @@ void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogPrope
             dialogs.pop_back();
         } else {
             overlayManager->CloseDialog(dialog);
-            dialogs.pop_back();
         }
     };
     executor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIDialogCloseCustomDialog");

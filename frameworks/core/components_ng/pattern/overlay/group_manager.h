@@ -42,6 +42,15 @@ public:
     void RemoveCheckBoxGroup(const std::string& group, int32_t checkBoxGroupId);
     std::list<RefPtr<FrameNode>> GetCheckboxList(const std::string& group);
     RefPtr<FrameNode> GetCheckboxGroup(const std::string& group);
+    bool GetCheckboxGroupIsChange(const std::string& group)
+    {
+        return checkboxChangedMap_[group];
+    };
+
+    void SetCheckboxGroupIsChange(const std::string& group, bool flag)
+    {
+        checkboxChangedMap_[group] = flag;
+    };
 
     std::string GetLastNavId()
     {
@@ -60,6 +69,7 @@ private:
     std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> checkBoxListMap_;
     std::unordered_map<std::string, WeakPtr<FrameNode>> checkBoxGroupMap_;
     std::optional<std::string> lastNavId_;
+    std::unordered_map<std::string, bool> checkboxChangedMap_;
 };
 
 } // namespace OHOS::Ace::NG

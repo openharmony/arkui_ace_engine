@@ -13,22 +13,9 @@
  * limitations under the License.
  */
 
-#include <cstddef>
-#include <cstdint>
-#include <memory>
-#include <optional>
-#include <string>
-#include <vector>
 
 #include "interfaces/napi/kits/utils/napi_utils.h"
-#include "js_native_api.h"
-#include "js_native_api_types.h"
-#include "napi/native_api.h"
-#include "napi/native_node_api.h"
 
-#include "core/common/ace_engine.h"
-#include "core/common/container.h"
-#include "core/components_ng/pattern/app_bar/app_bar_view.h"
 
 namespace OHOS::Ace::Napi {
 static RefPtr<NG::AppBarView> ObtainAppBar()

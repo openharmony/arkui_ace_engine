@@ -17,7 +17,6 @@
 
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
-#include "core/common/thread_checker.h"
 
 namespace OHOS::Ace {
 namespace {

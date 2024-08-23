@@ -36,6 +36,7 @@
 #include "core/components_ng/pattern/scrollable/refresh_coordination.h"
 #include "core/components_ng/pattern/scrollable/scrollable_controller.h"
 #include "core/components_ng/pattern/scrollable/scrollable_coordination_event.h"
+#include "core/components_ng/pattern/scrollable/scrollable_paint_method.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/render/animation_utils.h"
@@ -78,6 +79,12 @@ public:
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override;
+
+    void CreateAnalyzerOverlay(const RefPtr<FrameNode> node);
+
+    void UpdateFadingEdge(const RefPtr<ScrollablePaintMethod>& paint);
+    
+    void UpdateFadeInfo(bool isFadingTop, bool isFadingBottom, const RefPtr<ScrollablePaintMethod>& paint);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void OnWindowHide() override;
@@ -127,6 +134,8 @@ public:
     {
         return false;
     }
+
+    virtual void OnTouchDown(const TouchEventInfo& info) {}
 
     void AddScrollEvent();
     RefPtr<ScrollableEvent> GetScrollableEvent()
@@ -484,6 +493,11 @@ public:
         return Rect();
     };
 
+    virtual int32_t GetItemIndex(double x, double y) const
+    {
+        return -1;
+    }
+
     void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
     {
         edgeEffect_ = edgeEffect;
@@ -621,18 +635,9 @@ public:
 
     void OnCollectClickTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-        TouchTestResult& responseLinkResult);
+        ResponseLinkResult& responseLinkResult);
 
     virtual void SetAccessibilityAction();
-
-    /**
-     * @brief Notify component the position and count when data has changed.
-     *        This function should not be implemented here.
-     *
-     * @param index the position of change.
-     * @param count the count of change. nagative/0/positive implies delete/change/add respectively.
-     */
-    virtual void NotifyDataChange(int32_t index, int32_t count) {};
 
 protected:
     void SuggestOpIncGroup(bool flag);
@@ -711,6 +716,16 @@ protected:
     bool isInitialized_ = false;
 
     void Register2DragDropManager();
+
+    void SetScrollOriginChild(const WeakPtr<NestableScrollContainer>& scrollOriginChild)
+    {
+        scrollOriginChild_ = scrollOriginChild;
+    }
+
+    RefPtr<NestableScrollContainer> GetScrollOriginChild()
+    {
+        return scrollOriginChild_.Upgrade();
+    }
 
 private:
     virtual void OnScrollEndCallback() {};
@@ -896,6 +911,7 @@ private:
     bool lastCanOverScroll_ = false;
     RefPtr<ClickRecognizer> clickRecognizer_;
     Offset locationInfo_;
+    WeakPtr<NestableScrollContainer> scrollOriginChild_;
 
     // dump info
     std::list<ScrollableEventsFiredInfo> eventsFiredInfos_;

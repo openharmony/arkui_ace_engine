@@ -16,7 +16,6 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_divider_ffi.h"
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
-#include "core/common/container.h"
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
 
 using namespace OHOS::Ace;

@@ -135,6 +135,14 @@ const ArkUIRefreshModifier* GetRefreshModifier()
     return &modifier;
 }
 
+const CJUIRefreshModifier* GetCJUIRefreshModifier()
+{
+    static const CJUIRefreshModifier modifier = { SetRefreshing, GetRefreshing, SetRefreshContent, SetRefreshOffset,
+        ResetRefreshOffset, SetPullToRefresh, ResetPullToRefresh, SetPullDownRatio, ResetPullDownRatio,
+        GetPullDownRatio, GetRefreshOffset, GetPullToRefresh };
+    return &modifier;
+}
+
 void SetRefreshOnStateChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);

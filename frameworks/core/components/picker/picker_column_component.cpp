@@ -15,14 +15,11 @@
 
 #include "core/components/picker/picker_column_component.h"
 
-#include "base/utils/system_properties.h"
 #include "core/components/clip/clip_component.h"
-#include "core/components/display/display_component.h"
 #include "core/components/flex/flex_component.h"
 #include "core/components/picker/picker_column_element.h"
 #include "core/components/picker/picker_option_component.h"
 #include "core/components/picker/render_picker_column.h"
-#include "core/components/scroll/scroll_component.h"
 
 namespace OHOS::Ace {
 namespace {

@@ -49,8 +49,10 @@ constexpr int32_t ERROR = -1;
 constexpr Dimension FOCUS_OFFSET = 1.0_vp;
 constexpr Dimension UP_AND_DOWN_PADDING = 8.0_vp;
 constexpr Dimension SYMBOL_ICON_HEIGHT = 16.0_fp;
+constexpr Dimension ICON_MAX_SIZE = 32.0_vp;
 constexpr float HOVER_OPACITY = 0.05f;
 constexpr float TOUCH_OPACITY = 0.1f;
+constexpr float MAX_FONT_SCALE = 2.0f;
 constexpr int32_t HOVER_TO_TOUCH_DURATION = 100;
 constexpr int32_t HOVER_DURATION = 250;
 constexpr int32_t TOUCH_DURATION = 250;
@@ -723,15 +725,6 @@ void SearchPattern::OnClickTextField()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->PaintInnerFocusState(focusRect);
-
-    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
-    CHECK_NULL_VOID(textFieldFrameNode);
-    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(textFieldPattern);
-    auto textFiledFocusHub = textFieldPattern->GetFocusHub();
-    if (!textFiledFocusHub->IsCurrentFocus() && focusHub->IsFocusOnTouch().value_or(true)) {
-        textFiledFocusHub->RequestFocusImmediately();
-    }
     host->MarkModifyDone();
 }
 
@@ -1313,6 +1306,7 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
     json->PutExtAttr(
         "textIndent", textFieldLayoutProperty->GetTextIndent().value_or(0.0_vp).ToString().c_str(), filter);
     json->PutExtAttr("enablePreviewText", textFieldPattern->GetSupportPreviewText(), filter);
+    textFieldPattern->ToJsonValueSelectOverlay(json, filter);
 }
 
 std::string SearchPattern::SearchTypeToString() const
@@ -1703,6 +1697,7 @@ void SearchPattern::CreateOrUpdateSymbol(int32_t index, bool isCreateNode, bool 
         index == IMAGE_INDEX ? GetSearchNode()->GetSearchSymbolIconSize() : GetSearchNode()->GetCancelSymbolIconSize());
     layoutProperty->UpdateSymbolColorList({index == IMAGE_INDEX ? GetSearchNode()->GetSearchSymbolIconColor()
                                                                 : GetSearchNode()->GetCancelSymbolIconColor()});
+    layoutProperty->UpdateMaxFontScale(MAX_FONT_SCALE);
     auto parentInspector = GetSearchNode()->GetInspectorIdValue("");
     iconFrameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[index] + parentInspector);
 
@@ -1793,9 +1788,11 @@ void SearchPattern::SetSearchImageIcon(IconOptions& iconOptions)
     auto& imageIconOptions = GetSearchNode()->GetSearchImageIconOptions();
     if (iconOptions.GetColor().has_value()) {
         imageIconOptions.UpdateColor(iconOptions.GetColor().value());
+    } else {
+        imageIconOptions.ResetColor();
     }
     if (iconOptions.GetSize().has_value()) {
-        imageIconOptions.UpdateSize(iconOptions.GetSize().value());
+        imageIconOptions.UpdateSize(ConvertImageIconSizeValue(iconOptions.GetSize().value()));
     }
     if (iconOptions.GetSrc().has_value()) {
         imageIconOptions.UpdateSrc(iconOptions.GetSrc().value_or(""),
@@ -1844,12 +1841,14 @@ void SearchPattern::SetCancelButtonStyle(const CancelButtonStyle& style)
 void SearchPattern::SetCancelImageIcon(IconOptions& iconOptions)
 {
     CHECK_NULL_VOID(GetSearchNode());
-    auto &imageIconOptions = GetSearchNode()->GetCancelImageIconOptions();
+    auto& imageIconOptions = GetSearchNode()->GetCancelImageIconOptions();
     if (iconOptions.GetColor().has_value()) {
         imageIconOptions.UpdateColor(iconOptions.GetColor().value());
+    } else {
+        imageIconOptions.ResetColor();
     }
     if (iconOptions.GetSize().has_value()) {
-        imageIconOptions.UpdateSize(iconOptions.GetSize().value());
+        imageIconOptions.UpdateSize(ConvertImageIconSizeValue(iconOptions.GetSize().value()));
     }
     if (iconOptions.GetSrc().has_value()) {
         imageIconOptions.UpdateSrc(iconOptions.GetSrc().value(),
@@ -1913,6 +1912,8 @@ void SearchPattern::UpdateImageIconProperties(RefPtr<FrameNode>& iconFrameNode, 
         CHECK_NULL_VOID(searchTheme);
         auto iconTheme = pipeline->GetTheme<IconTheme>();
         CHECK_NULL_VOID(iconTheme);
+        auto imageRenderProperty = iconFrameNode->GetPaintProperty<ImageRenderProperty>();
+        CHECK_NULL_VOID(imageRenderProperty);
         if (iconOptions.GetSrc().value_or("").empty()) {
             imageSourceInfo.SetResourceId(index == IMAGE_INDEX ? InternalResource::ResourceId::SEARCH_SVG
                                                                : InternalResource::ResourceId::CLOSE_SVG);
@@ -1924,7 +1925,10 @@ void SearchPattern::UpdateImageIconProperties(RefPtr<FrameNode>& iconFrameNode, 
         }
         imageSourceInfo.SetBundleName(iconOptions.GetBundleName().value_or(""));
         imageSourceInfo.SetModuleName(iconOptions.GetModuleName().value_or(""));
-        imageSourceInfo.SetFillColor(iconOptions.GetColor().value_or(searchTheme->GetSearchIconColor()));
+        if (iconOptions.GetColor().has_value()) {
+            imageSourceInfo.SetFillColor(iconOptions.GetColor().value());
+            imageRenderProperty->UpdateSvgFillColor(iconOptions.GetColor().value_or(searchTheme->GetSearchIconColor()));
+        }
         imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
         CalcSize imageCalcSize(CalcLength(iconOptions.GetSize().value_or(searchTheme->GetIconHeight())),
             CalcLength(iconOptions.GetSize().value_or(searchTheme->GetIconHeight())));
@@ -1932,11 +1936,6 @@ void SearchPattern::UpdateImageIconProperties(RefPtr<FrameNode>& iconFrameNode, 
         imageLayoutProperty->UpdateUserDefinedIdealSize(imageCalcSize);
         auto parentInspector = GetSearchNode()->GetInspectorIdValue("");
         iconFrameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[index] + parentInspector);
-        auto imageRenderProperty = iconFrameNode->GetPaintProperty<ImageRenderProperty>();
-        CHECK_NULL_VOID(imageRenderProperty);
-        imageSourceInfo.SetFillColor(iconOptions.GetColor().value_or(searchTheme->GetSearchIconColor()));
-        imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-        imageRenderProperty->UpdateSvgFillColor(iconOptions.GetColor().value_or(searchTheme->GetSearchIconColor()));
     }
 }
 
@@ -1955,8 +1954,9 @@ void SearchPattern::UpdateSymbolIconProperties(RefPtr<FrameNode>& iconFrameNode,
     symbolLayoutProperty->UpdateSymbolSourceInfo(index == IMAGE_INDEX
                                                      ? SymbolSourceInfo(searchTheme->GetSearchSymbolId())
                                                      : SymbolSourceInfo(searchTheme->GetCancelSymbolId()));
-    symbolLayoutProperty->UpdateFontSize(
-        index == IMAGE_INDEX ? GetSearchNode()->GetSearchSymbolIconSize() : GetSearchNode()->GetCancelSymbolIconSize());
+    auto defaultSymbolIconSize = (index == IMAGE_INDEX ? GetSearchNode()->GetSearchSymbolIconSize()
+                                                       : GetSearchNode()->GetCancelSymbolIconSize());
+    symbolLayoutProperty->UpdateFontSize(defaultSymbolIconSize);
     symbolLayoutProperty->UpdateSymbolColorList({ index == IMAGE_INDEX ? GetSearchNode()->GetSearchSymbolIconColor()
                                                                        : GetSearchNode()->GetCancelSymbolIconColor() });
     auto parentInspector = GetSearchNode()->GetInspectorIdValue("");
@@ -1976,6 +1976,10 @@ void SearchPattern::UpdateSymbolIconProperties(RefPtr<FrameNode>& iconFrameNode,
     auto symbolEffectOptions = symbolLayoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
     symbolEffectOptions.SetIsTxtActive(false);
     symbolLayoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
+    auto fontSize = symbolLayoutProperty->GetFontSize().value_or(defaultSymbolIconSize);
+    if (GreatOrEqualCustomPrecision(fontSize.ConvertToPx(), ICON_MAX_SIZE.ConvertToPx())) {
+        symbolLayoutProperty->UpdateFontSize(ICON_MAX_SIZE);
+    }
 }
 
 bool SearchPattern::IsSymbolIcon(int32_t index)
@@ -1993,6 +1997,34 @@ void SearchPattern::UpdateIconChangeEvent()
     auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(GetSearchNode()->GetChildAtIndex(TEXTFIELD_INDEX));
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     UpdateChangeEvent(textFieldPattern->GetTextValue());
+}
+
+const Dimension SearchPattern::ConvertImageIconSizeValue(const Dimension& iconSizeValue)
+{
+    if (GreatOrEqualCustomPrecision(iconSizeValue.ConvertToPx(), ICON_MAX_SIZE.ConvertToPx())) {
+        return ConvertImageIconScaleLimit(ICON_MAX_SIZE);
+    }
+    return ConvertImageIconScaleLimit(iconSizeValue);
+}
+
+const Dimension SearchPattern::ConvertImageIconScaleLimit(const Dimension& iconSizeValue)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, iconSizeValue);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, iconSizeValue);
+
+    float fontScale = pipeline->GetFontScale();
+    if (fontScale == 0) {
+        return iconSizeValue;
+    }
+
+    if (GreatOrEqualCustomPrecision(fontScale, MAX_FONT_SCALE)) {
+        if (iconSizeValue.Unit() != DimensionUnit::VP) {
+            return Dimension(iconSizeValue / fontScale * MAX_FONT_SCALE);
+        }
+    }
+    return iconSizeValue;
 }
 
 } // namespace OHOS::Ace::NG

@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUILineModifier* GetLineModifier();
+const CJUILineModifier* GetCJUILineModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_LINE_MODIFIER_H

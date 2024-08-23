@@ -263,6 +263,15 @@ void ListModelNG::SetFriction(double friction)
     pattern->SetFriction(friction);
 }
 
+void ListModelNG::SetMaintainVisibleContentPosition(bool enabled)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMaintainVisibleContentPosition(enabled);
+}
+
 void ListModelNG::SetOnScroll(OnScrollEvent&& onScroll)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -457,14 +466,6 @@ void ListModelNG::AddDragFrameNodeToManager() const
     dragDropManager->AddListDragFrameNode(frameNode->GetId(), AceType::WeakClaim(frameNode));
 }
 
-DisplayMode ListModelNG::GetDisplayMode() const
-{
-    auto list = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ListPattern>();
-    CHECK_NULL_RETURN(list, DisplayMode::AUTO);
-    return list->GetDefaultScrollBarDisplayMode();
-}
-
-
 void ListModelNG::SetInitialIndex(FrameNode* frameNode, int32_t initialIndex)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, InitialIndex, initialIndex, frameNode);
@@ -541,6 +542,14 @@ void ListModelNG::SetListFriction(FrameNode* frameNode, double friction)
         pattern->SetFriction(FRICTION);
     }
     pattern->SetFriction(friction);
+}
+
+void ListModelNG::SetListMaintainVisibleContentPosition(FrameNode* frameNode, bool enabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMaintainVisibleContentPosition(enabled);
 }
 
 void ListModelNG::SetListNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt)
@@ -704,6 +713,13 @@ void ListModelNG::SetChainAnimationOptions(FrameNode* frameNode, const ChainAnim
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetChainAnimationOptions(options);
+}
+
+DisplayMode ListModelNG::GetDisplayMode() const
+{
+    auto list = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ListPattern>();
+    CHECK_NULL_RETURN(list, DisplayMode::AUTO);
+    return list->GetDefaultScrollBarDisplayMode();
 }
 
 void ListModelNG::SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll)

@@ -25,6 +25,9 @@ namespace OHOS::Ace::GestureModel {
 
 ArkUI_GestureRecognizer* CreateTapGesture(int32_t count, int32_t fingers);
 
+ArkUI_GestureRecognizer* CreateTapGestureWithDistanceThreshold(
+    int32_t count, int32_t fingers, double distanceThreshold);
+
 ArkUI_GestureRecognizer* CreateLongPressGesture(int32_t fingers, bool repeatResult, int32_t duration);
 
 ArkUI_GestureRecognizer* CreatePanGesture(int32_t fingersNum, ArkUI_GestureDirectionMask mask, double distanceNum);
@@ -57,6 +60,9 @@ void HandleGestureEvent(ArkUINodeEvent* event);
 
 int32_t SetGestureInterrupterToNode(
     ArkUI_NodeHandle node,  ArkUI_GestureInterruptResult (*interrupter)(ArkUI_GestureInterruptInfo* info));
+
+int32_t SetInnerGestureParallelTo(ArkUI_NodeHandle node, void* userData,
+    ArkUI_GestureRecognizer* (*parallelInnerGesture)(ArkUI_ParallelInnerGestureEvent* event));
 
 }; // namespace OHOS::Ace::GestureModel
 #endif

@@ -232,8 +232,7 @@ private:
     bool isInDividerDrag_ = false;
     bool isDividerDraggable_ = true;
     bool isWindowFocus_ = true;
-    bool isMousePressing_ = false;
-    bool isResizeMouseStyle_ = false;
+    bool userSetShowSideBar_ = true;
 
     Dimension realSideBarWidth_ = -1.0_vp;
     Dimension preSidebarWidth_;

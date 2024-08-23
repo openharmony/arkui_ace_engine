@@ -199,6 +199,7 @@ template("declarative_js_engine_ark") {
       "modules/jsi_timer_module.cpp",
       "nativeModule/arkts_native_alphabet_indexer_bridge.cpp",
       "nativeModule/arkts_native_api_impl_bridge.cpp",
+      "nativeModule/arkts_native_badge_bridge.cpp",
       "nativeModule/arkts_native_blank_bridge.cpp",
       "nativeModule/arkts_native_button_bridge.cpp",
       "nativeModule/arkts_native_calendar_picker_bridge.cpp",
@@ -226,6 +227,7 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_image_bridge.cpp",
       "nativeModule/arkts_native_image_span_bridge.cpp",
       "nativeModule/arkts_native_line_bridge.cpp",
+      "nativeModule/arkts_native_linear_indicator.cpp",
       "nativeModule/arkts_native_list_bridge.cpp",
       "nativeModule/arkts_native_list_item_bridge.cpp",
       "nativeModule/arkts_native_list_item_group_bridge.cpp",
@@ -287,6 +289,9 @@ template("declarative_js_engine_ark") {
     ]
 
     deps = [ "${ace_root}/frameworks/core/interfaces/native:ace_core_interfaces_native_node_$platform" ]
+    if (is_arkui_x) {
+      deps += [ "//foundation/graphic/graphic_2d/interfaces/kits/napi/graphic/drawing:drawing_napi_impl" ]
+    }
     external_deps = [ "graphic_2d:drawing_napi_impl" ]
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]

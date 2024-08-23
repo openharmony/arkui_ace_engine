@@ -15,16 +15,7 @@
 
 #include "core/components_ng/render/adapter/rosen/drawing_decoration_painter.h"
 
-#include <cmath>
-#include <functional>
-#include <memory>
-
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_utils.h"
-#include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -638,6 +629,9 @@ public:
         if (sweepGradient->endAngle.has_value()) {
             endAngle = sweepGradient->endAngle.value().Value();
         }
+        if (startAngle > endAngle) {
+            return nullptr;
+        }
         return std::make_unique<NG::SweepGradientShader>(gradient, center, startAngle, endAngle, rotationAngle);
     }
 
@@ -692,6 +686,9 @@ std::shared_ptr<RSShaderEffect> DrawingDecorationPainter::CreateGradientShader(
         default:
             LOGE("unsupported gradient type.");
             break;
+    }
+    if (!ptr) {
+        return nullptr;
     }
     return ptr->CreateGradientShader();
 }

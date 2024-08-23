@@ -54,6 +54,9 @@ void SliderModelNG::SetSliderValue(float value)
     auto pattern = frameNode->GetPattern<SliderPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->UpdateValue(value);
+    auto sliderEventHub = frameNode->GetEventHub<SliderEventHub>();
+    CHECK_NULL_VOID(sliderEventHub);
+    sliderEventHub->SetValue(value);
 }
 void SliderModelNG::SetSliderMode(const SliderMode& value)
 {
@@ -716,6 +719,7 @@ Gradient SliderModelNG::CreateSolidGradient(Color value)
 
 void SliderModelNG::SetBuilderFunc(FrameNode* frameNode, SliderMakeCallback&& makeFunc)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<SliderPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetBuilderFunc(std::move(makeFunc));

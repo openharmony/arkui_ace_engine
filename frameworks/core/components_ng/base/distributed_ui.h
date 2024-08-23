@@ -31,6 +31,11 @@
         break;                                                      \
     }
 
+#define CHECK_NULL_CONTINUE(ptr)                                    \
+    if (!(ptr)) {                                                   \
+        continue;                                                   \
+    }
+
 namespace OHOS::Ace::NG {
 class DistributedUI {
 public:

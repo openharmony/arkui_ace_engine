@@ -431,4 +431,12 @@ const ArkUINodeAdapterAPI* GetNodeAdapterAPI()
     return &impl;
 }
 
+const CJUINodeAdapterAPI* GetCJUINodeAdapterAPI()
+{
+    static const CJUINodeAdapterAPI impl { Create, Dispose, SetTotalNodeCount, GetTotalNodeCount,
+        RegisterEventReceiver, UnregisterEventReceiver, NotifyItemReloaded, NotifyItemChanged, NotifyItemRemoved,
+        NotifyItemInserted, NotifyItemMoved, GetAllItem, AttachHostNode, DetachHostNode, GetNodeAdapter };
+    return &impl;
+}
+
 } // namespace OHOS::Ace::NodeAdapter

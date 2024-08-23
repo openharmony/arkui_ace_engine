@@ -215,11 +215,7 @@ void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectTex
     int32_t instanceID = context->GetInstanceId();
     auto textFunc = [weak = WeakClaim(this), instanceID, startPos, info](const TextDataDetectResult result) {
         ContainerScope scope(instanceID);
-        auto dataDetectorAdapter = weak.Upgrade();
-        CHECK_NULL_VOID(dataDetectorAdapter);
-        auto host = dataDetectorAdapter->GetHost();
-        CHECK_NULL_VOID(host);
-        auto context = host->GetContext();
+        auto context = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_VOID(context);
         auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask(
@@ -323,7 +319,7 @@ void DataDetectorAdapter::ParseAIJson(
         item->Put("costTime", costTime.count());
         item->Put("resultCode", textDetectResult_.code);
         entityJson_[start] = item->ToString();
-        TAG_LOGI(AceLogTag::ACE_TEXT, "The json of the entity is: %{public}s", entityJson_[start].c_str());
+        TAG_LOGI(AceLogTag::ACE_TEXT, "The json of the entity is: %{private}s", entityJson_[start].c_str());
 
         AISpan aiSpan;
         aiSpan.start = start;

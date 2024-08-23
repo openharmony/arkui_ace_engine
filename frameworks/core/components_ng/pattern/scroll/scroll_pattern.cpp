@@ -58,6 +58,7 @@ float CalculateOffsetByFriction(float extentOffset, float delta, float friction)
 
 void ScrollPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
@@ -79,6 +80,10 @@ void ScrollPattern::OnModifyDone()
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     Register2DragDropManager();
+    auto overlayNode = host->GetOverlayNode();
+    if (!overlayNode && paintProperty->GetFadingEdge().value_or(false)) {
+        CreateAnalyzerOverlay(host);
+    }
 }
 
 bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -126,7 +131,9 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     host->SetViewPort(globalViewPort);
     isInitialized_ = true;
     SetScrollSource(SCROLL_FROM_NONE);
-    return false;
+    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    return paintProperty->GetFadingEdge().value_or(false);
 }
 
 bool ScrollPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty)
@@ -428,11 +435,13 @@ void ScrollPattern::FireOnDidScroll(float scroll)
         scrollY.SetValue(scrollVpValue);
     }
     auto scrollState = GetScrollState();
+    bool isTriggered = false;
     if (!NearZero(scroll)) {
         onScroll(scrollX, scrollY, scrollState);
+        isTriggered = true;
     }
     if (scrollStop_ && !GetScrollAbort()) {
-        if (scrollState != ScrollState::IDLE) {
+        if (scrollState != ScrollState::IDLE || !isTriggered) {
             onScroll(0.0_vp, 0.0_vp, ScrollState::IDLE);
         }
     }
@@ -1163,12 +1172,8 @@ void ScrollPattern::DumpAdvanceInfo()
     ScrollablePattern::DumpAdvanceInfo();
     DumpLog::GetInstance().AddDesc(std::string("currentOffset: ").append(std::to_string(currentOffset_)));
     GetScrollSnapAlignDumpInfo();
-    auto snapPaginationStr = std::string("snapPagination: [");
-    auto iter = snapPaginations_.begin();
-    for (; iter != snapPaginations_.end(); ++iter) {
-        snapPaginationStr = snapPaginationStr.append((*iter).ToString()).append(" ");
-    }
-    DumpLog::GetInstance().AddDesc(snapPaginationStr.append("]"));
+    auto snapPaginationStr = std::string("snapPagination: ");
+    DumpLog::GetInstance().AddDesc(snapPaginationStr.append(GetScrollSnapPagination()));
     enableSnapToSide_.first ? DumpLog::GetInstance().AddDesc("enableSnapToStart: true")
                             : DumpLog::GetInstance().AddDesc("enableSnapToStart: false");
     enableSnapToSide_.second ? DumpLog::GetInstance().AddDesc("enableSnapToEnd: true")
@@ -1208,6 +1213,40 @@ void ScrollPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     initialOffset->Put("xOffset", GetInitialOffset().GetX().ToString().c_str());
     initialOffset->Put("yOffset", GetInitialOffset().GetY().ToString().c_str());
     json->PutExtAttr("initialOffset", initialOffset, filter);
+    if (enablePagingStatus_ != ScrollPagingStatus::NONE) {
+        json->PutExtAttr("enablePaging", enablePagingStatus_ == ScrollPagingStatus::VALID, filter);
+    }
+
+    auto scrollSnapOptions = JsonUtil::Create(true);
+    if (IsSnapToInterval()) {
+        scrollSnapOptions->Put("snapPagination", intervalSize_.ToString().c_str());
+    } else {
+        auto snapPaginationArr = JsonUtil::CreateArray(true);
+        auto iter = snapPaginations_.begin();
+        for (auto i = 0; iter != snapPaginations_.end(); ++iter, ++i) {
+            snapPaginationArr->Put(std::to_string(i).c_str(), (*iter).ToString().c_str());
+        }
+        scrollSnapOptions->Put("snapPagination", snapPaginationArr);
+    }
+    scrollSnapOptions->Put("enableSnapToStart", enableSnapToSide_.first);
+    scrollSnapOptions->Put("enableSnapToEnd", enableSnapToSide_.second);
+    json->PutExtAttr("scrollSnap", scrollSnapOptions, filter);
+}
+
+std::string ScrollPattern::GetScrollSnapPagination() const
+{
+    auto snapPaginationStr = std::string("");
+    if (IsSnapToInterval()) {
+        snapPaginationStr = intervalSize_.ToString();
+    } else {
+        snapPaginationStr.append("[");
+        auto iter = snapPaginations_.begin();
+        for (; iter != snapPaginations_.end(); ++iter) {
+            snapPaginationStr = snapPaginationStr.append((*iter).ToString()).append(" ");
+        }
+        snapPaginationStr.append("]");
+    }
+    return snapPaginationStr;
 }
 
 bool ScrollPattern::OnScrollSnapCallback(double targetOffset, double velocity)

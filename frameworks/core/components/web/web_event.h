@@ -35,7 +35,9 @@ enum class NativeEmbedStatus {
     UPDATE = 1,
     DESTROY = 2,
     ENTER_BFCACHE = 3,
-    LEAVE_BFCACHE = 4
+    LEAVE_BFCACHE = 4,
+    VISIBLE = 5,
+    HIDDEN = 6
 };
 
 enum class NavigationType {

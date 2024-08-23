@@ -15,17 +15,8 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_native_view_ffi.h"
 
-#include <securec.h>
-#include <cinttypes>
 
 #include "bridge/cj_frontend/cppview/native_view.h"
-#include "ffi_remote_data.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
-#include "core/components_ng/pattern/image/image_model_ng.h"
-#include "core/components_ng/pattern/linear_layout/column_model_ng.h"
-#include "core/components_ng/pattern/linear_layout/row_model_ng.h"
-#include "core/components_ng/pattern/linear_split/linear_split_model_ng.h"
-#include "core/components_ng/pattern/navigator/navigator_model_ng.h"
 
 using namespace OHOS::Ace::Framework;
 using namespace OHOS::FFI;

@@ -15,12 +15,8 @@
 
 #include "core/components/common/properties/color.h"
 
-#include <cmath>
 #include <regex>
 
-#include "base/utils/linear_map.h"
-#include "base/utils/string_utils.h"
-#include "base/utils/utils.h"
 #include "core/common/resource/resource_manager.h"
 
 namespace OHOS::Ace {

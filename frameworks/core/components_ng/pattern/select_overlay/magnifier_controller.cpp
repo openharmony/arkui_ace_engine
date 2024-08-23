@@ -15,9 +15,10 @@
 
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
 
-#include "core/components_ng/pattern/select_overlay/magnifier.h"
 #include "core/components/common/properties/color.h"
-#include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components/text_field/textfield_theme.h"
+#include "core/components_ng/pattern/select_overlay/magnifier.h"
+#include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -42,12 +43,13 @@ bool MagnifierController::UpdateMagnifierOffsetX(OffsetF& magnifierPaintOffset, 
         return false;
     }
     float left = basePaintOffset.GetX() + localOffset_.GetX() - magnifierNodeWidth_.ConvertToPx() / 2;
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, false);
-    auto window = pipelineContext->GetWindow();
-    CHECK_NULL_RETURN(window, false);
-    float windowRight = window->GetCurrentWindowRect().Right();
-    auto magnifierX = std::clamp(left, 0.f, static_cast<float>(windowRight - magnifierNodeWidth_.ConvertToPx()));
+    auto rootUINode = GetRootNode();
+    CHECK_NULL_RETURN(rootUINode, false);
+    auto rootGeometryNode = rootUINode->GetGeometryNode();
+    CHECK_NULL_RETURN(rootGeometryNode, false);
+    auto rootFrameSize = rootGeometryNode->GetFrameSize();
+    auto magnifierX =
+        std::clamp(left, 0.f, static_cast<float>(rootFrameSize.Width() - magnifierNodeWidth_.ConvertToPx()));
     magnifierPaintOffset.SetX(magnifierX);
     magnifierOffset.x = MAGNIFIER_OFFSETX.ConvertToPx();
     return true;
@@ -61,7 +63,7 @@ bool MagnifierController::UpdateMagnifierOffsetY(OffsetF& magnifierPaintOffset, 
     float menuHeight = magnifierNodeHeight_.ConvertToPx();
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     auto keyboardInsert = safeAreaManager->GetKeyboardInset();
-    auto hasKeyboard = GreatNotEqual(safeAreaManager->IsNeedAvoidWindow() ? 0.0f : keyboardInsert.Length(), 0.0f);
+    auto hasKeyboard = GreatNotEqual(keyboardInsert.Length(), 0.0f);
     auto magnifierY = basePaintOffset.GetY() + localOffset_.GetY() - menuHeight / 2;
     float offsetY_ = 0.f;
 
@@ -75,12 +77,12 @@ bool MagnifierController::UpdateMagnifierOffsetY(OffsetF& magnifierPaintOffset, 
         UpdateShowMagnifier();
         return false;
     }
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, false);
-    auto window = pipelineContext->GetWindow();
-    CHECK_NULL_RETURN(window, false);
-    float windowBottom = window->GetCurrentWindowRect().Bottom();
-    magnifierY = std::clamp(magnifierY, 0.f, static_cast<float>(windowBottom - menuHeight));
+    auto rootUINode = GetRootNode();
+    CHECK_NULL_RETURN(rootUINode, false);
+    auto rootGeometryNode = rootUINode->GetGeometryNode();
+    CHECK_NULL_RETURN(rootGeometryNode, false);
+    auto rootFrameSize = rootGeometryNode->GetFrameSize();
+    magnifierY = std::clamp(magnifierY, 0.f, static_cast<float>(rootFrameSize.Height() - menuHeight));
     offsetY_ = std::clamp(magnifierY, 0.f, static_cast<float>(MAGNIFIER_OFFSETY.ConvertToPx()));
     magnifierPaintOffset.SetY(magnifierY - offsetY_);
     magnifierOffset.y = offsetY_;
@@ -121,9 +123,7 @@ bool MagnifierController::UpdateMagnifierOffset()
 
 void MagnifierController::OpenMagnifier()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto rootUINode = pipeline->GetRootElement();
+    auto rootUINode = GetRootNode();
     CHECK_NULL_VOID(rootUINode);
     if ((!magnifierFrameNode_) || (rootUINode->GetChildIndexById(magnifierFrameNode_->GetId()) == -1) ||
         (colorModeChange_)) {
@@ -136,6 +136,40 @@ void MagnifierController::OpenMagnifier()
     }
     CHECK_NULL_VOID(UpdateMagnifierOffset());
     ChangeMagnifierVisibility(true);
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto textBase = DynamicCast<TextBase>(pattern);
+    CHECK_NULL_VOID(textBase);
+    textBase->SetIsTextDraggable(false);
+}
+
+RefPtr<FrameNode> MagnifierController::GetRootNode()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto rootNode = pipeline->GetRootElement();
+    CHECK_NULL_RETURN(rootNode, nullptr);
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, rootNode);
+    auto host = pattern->GetHost();
+    CHECK_NULL_RETURN(host, rootNode);
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
+        auto root = FindWindowScene(host);
+        rootNode = DynamicCast<FrameNode>(root);
+    }
+    return rootNode;
+}
+
+RefPtr<UINode> MagnifierController::FindWindowScene(const RefPtr<FrameNode>& targetNode)
+{
+    CHECK_NULL_RETURN(targetNode, nullptr);
+    auto parent = targetNode->GetParent();
+    while (parent && parent->GetTag() != V2::WINDOW_SCENE_ETS_TAG) {
+        parent = parent->GetParent();
+    }
+    CHECK_NULL_RETURN(parent, nullptr);
+    return parent;
 }
 
 void MagnifierController::ChangeMagnifierVisibility(const bool& visible)
@@ -259,13 +293,13 @@ void MagnifierController::CreateMagnifierChildNode()
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::TEXTINPUT_ETS_TAG, nodeId);
     auto childNode = FrameNode::GetOrCreateFrameNode(
-        V2::TEXTINPUT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+        V2::TEXTINPUT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
     CHECK_NULL_VOID(childNode);
     InitMagnifierParams();
     ViewAbstract::SetWidth(AceType::RawPtr(childNode), CalcLength(magnifierNodeWidth_));
     ViewAbstract::SetHeight(AceType::RawPtr(childNode), CalcLength(magnifierNodeHeight_));
     ViewAbstract::SetOpacity(AceType::RawPtr(childNode), 0.0);
-    auto layoutProperty = AceType::DynamicCast<TextFieldLayoutProperty>(childNode->GetLayoutProperty());
+    auto layoutProperty = AceType::DynamicCast<LayoutProperty>(childNode->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     childNode->ForceSyncGeometryNode();

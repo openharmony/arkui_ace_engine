@@ -63,6 +63,21 @@ public:
                                           height_->GetDimension().Unit() != DimensionUnit::AUTO);
     }
 
+    bool IsDimensionUnitAuto() const
+    {
+        return IsWidthDimensionUnitAuto() || IsHeightDimensionUnitAuto();
+    }
+
+    bool IsWidthDimensionUnitAuto() const
+    {
+        return width_ && width_->GetDimension().Unit() == DimensionUnit::AUTO;
+    }
+
+    bool IsHeightDimensionUnitAuto() const
+    {
+        return height_ && height_->GetDimension().Unit() == DimensionUnit::AUTO;
+    }
+
     const std::optional<CalcLength>& Width() const
     {
         return width_;
@@ -388,6 +403,9 @@ struct PaddingPropertyT {
 
     bool UpdateWithCheck(const PaddingPropertyT& value)
     {
+        if (value.start.has_value() || value.end.has_value()) {
+            return UpdateLocalizedPadding(value);
+        }
         if (*this != value) {
             left = value.left;
             right = value.right;
@@ -398,18 +416,26 @@ struct PaddingPropertyT {
         return false;
     }
 
-    bool UpdateStartAndEnd(const PaddingPropertyT& value)
+    bool UpdateLocalizedPadding(const PaddingPropertyT& value)
     {
-        bool hasStartOrEnd = false;
-        if (value.start.has_value()) {
+        bool needUpdate = false;
+        if (value.start.has_value() && start != value.start) {
             start = value.start;
-            hasStartOrEnd = true;
+            needUpdate = true;
         }
-        if (value.end.has_value()) {
+        if (value.end.has_value() && end != value.end) {
             end = value.end;
-            hasStartOrEnd = true;
+            needUpdate = true;
         }
-        return hasStartOrEnd;
+        if (value.top.has_value() && top != value.top) {
+            top = value.top;
+            needUpdate = true;
+        }
+        if (value.bottom.has_value() && bottom != value.bottom) {
+            bottom = value.bottom;
+            needUpdate = true;
+        }
+        return needUpdate;
     }
 
     std::string ToString() const

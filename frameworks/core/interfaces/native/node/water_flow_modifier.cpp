@@ -32,6 +32,7 @@ constexpr ArkUI_Float64 FRICTION_DEFAULT = -1.0;
 constexpr ArkUI_Float64 DIMENSION_DEFAULT = 0.0;
 const int32_t ERROR_INT_CODE = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
+constexpr Dimension DEFAULT_FADING_EDGE_LENGTH = Dimension(32.0f, DimensionUnit::VP); // default value
 constexpr int32_t INDEX_0 = 0;
 constexpr int32_t INDEX_1 = 1;
 constexpr int32_t INDEX_2 = 2;
@@ -615,6 +616,23 @@ void ResetWaterFlowSections(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     WaterFlowModelNG::ResetSections(frameNode);
 }
+
+void SetWaterFlowFadingEdge(
+    ArkUINodeHandle node, ArkUI_Bool fadingEdge, ArkUI_Float32 fadingEdgeLengthValue, ArkUI_Int32 fadingEdgeLengthUnit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Dimension fadingEdgeLengthDimension =
+        Dimension(fadingEdgeLengthValue, static_cast<OHOS::Ace::DimensionUnit>(fadingEdgeLengthUnit));
+    NG::ScrollableModelNG::SetFadingEdge(frameNode, fadingEdge, fadingEdgeLengthDimension);
+}
+
+void ResetWaterFlowFadingEdge(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::ScrollableModelNG::SetFadingEdge(frameNode, false, DEFAULT_FADING_EDGE_LENGTH);
+}
 } // namespace
 namespace NodeModifier {
 const ArkUIWaterFlowModifier* GetWaterFlowModifier()
@@ -633,7 +651,26 @@ const ArkUIWaterFlowModifier* GetWaterFlowModifier()
         GetItemMinWidth, GetItemMaxWidth, GetItemMinHeight, GetItemMaxHeight, GetWaterFlowEnableScrollInteraction,
         GetWaterFlowFriction, SetScrollToIndex, SetWaterflowFooter, ResetWaterflowFooter, SetWaterFlowFlingSpeedLimit,
         ResetWaterFlowFlingSpeedLimit, GetScrollController, SetWaterFlowScroller, SetWaterFlowLayoutMode,
-        ResetWaterFlowLayoutMode, ResetWaterFlowSections };
+        ResetWaterFlowLayoutMode, ResetWaterFlowSections, SetWaterFlowFadingEdge, ResetWaterFlowFadingEdge };
+    return &modifier;
+}
+
+const CJUIWaterFlowModifier* GetCJUIWaterFlowModifier()
+{
+    static const CJUIWaterFlowModifier modifier = { ResetColumnsTemplate, SetColumnsTemplate, ResetRowsTemplate,
+        SetRowsTemplate, ResetWaterFlowEnableScrollInteraction, SetWaterFlowEnableScrollInteraction, SetColumnsGap,
+        ResetColumnsGap, SetRowsGap, ResetRowsGap, SetItemMinWidth, ResetItemMinWidth, SetItemMaxWidth,
+        ResetItemMaxWidth, SetItemMinHeight, ResetItemMinHeight, SetItemMaxHeight, ResetItemMaxHeight,
+        SetLayoutDirection, ResetLayoutDirection, SetWaterFlowNestedScroll, ResetWaterFlowNestedScroll,
+        SetWaterFlowFriction, ResetWaterFlowFriction, GetLayoutDirection, GetColumnsTemplate, GetRowsTemplate,
+        GetColumnsGap, GetRowsGap, GetWaterFlowNestedScroll, SetNodeAdapter, ResetNodeAdapter, GetNodeAdapter,
+        SetCachedCount, ResetCachedCount, GetCachedCount, SetEdgeEffect, ResetEdgeEffect, SetWaterFlowScrollBar,
+        ResetWaterFlowScrollBar, GetWaterFlowScrollBar, SetWaterFlowBarWidth, ResetWaterFlowBarWidth,
+        GetWaterFlowBarWidth, SetWaterFlowScrollBarColor, ResetWaterFlowScrollBarColor, GetWaterFlowScrollBarColor,
+        GetEdgeEffect, SetWaterFlowSectionOptions, ResetWaterFlowSectionOptions, GetWaterFlowSectionOptions,
+        GetItemMinWidth, GetItemMaxWidth, GetItemMinHeight, GetItemMaxHeight, GetWaterFlowEnableScrollInteraction,
+        GetWaterFlowFriction, SetWaterflowFooter, ResetWaterflowFooter, SetScrollToIndex, SetWaterFlowFlingSpeedLimit,
+        ResetWaterFlowFlingSpeedLimit, };
     return &modifier;
 }
 

@@ -156,6 +156,7 @@ public:
         JSClass<JSGestureRecognizer>::CustomMethod("isEnabled", &JSGestureRecognizer::IsEnabled);
         JSClass<JSGestureRecognizer>::CustomMethod("getEventTargetInfo", &JSGestureRecognizer::GetEventTargetInfo);
         JSClass<JSGestureRecognizer>::CustomMethod("getState", &JSGestureRecognizer::GetRefereeState);
+        JSClass<JSGestureRecognizer>::CustomMethod("isValid", &JSGestureRecognizer::IsValid);
         JSClass<JSGestureRecognizer>::Bind(
             globalObj, &JSGestureRecognizer::Constructor, &JSGestureRecognizer::Destructor);
     }
@@ -271,6 +272,16 @@ public:
         args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(state))));
     }
 
+    void IsValid(const JSCallbackInfo& args)
+    {
+        bool isValid = false;
+        auto recognizer = recognizer_.Upgrade();
+        if (recognizer && recognizer->IsInResponseLinkRecognizers()) {
+            isValid = true;
+        }
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(isValid)));
+    }
+
     static GestureRecognizerState ConvertRefereeState(NG::RefereeState state)
     {
         switch (state) {
@@ -323,6 +334,7 @@ public:
         JSClass<JSPanRecognizer>::CustomMethod("getEventTargetInfo", &JSGestureRecognizer::GetEventTargetInfo);
         JSClass<JSPanRecognizer>::CustomMethod("getState", &JSGestureRecognizer::GetRefereeState);
         JSClass<JSPanRecognizer>::CustomMethod("getPanGestureOptions", &JSPanRecognizer::GetPanGestureOptions);
+        JSClass<JSPanRecognizer>::CustomMethod("isValid", &JSGestureRecognizer::IsValid);
         JSClass<JSPanRecognizer>::Inherit<JSGestureRecognizer>();
         JSClass<JSPanRecognizer>::Bind(globalObj, &JSPanRecognizer::Constructor, &JSPanRecognizer::Destructor);
     }
@@ -377,8 +389,8 @@ public:
     }
 
     RefPtr<NG::NGGestureRecognizer> Execute(
-        const RefPtr<TouchEventTarget>& current, const std::vector<RefPtr<TouchEventTarget>>& others);
-    static JSRef<JSObject> CreateRecognizerObject(const RefPtr<TouchEventTarget>& target);
+        const RefPtr<NG::NGGestureRecognizer>& current, const std::vector<RefPtr<NG::NGGestureRecognizer>>& others);
+    static JSRef<JSObject> CreateRecognizerObject(const RefPtr<NG::NGGestureRecognizer>& target);
 };
 } // namespace OHOS::Ace::Framework
 

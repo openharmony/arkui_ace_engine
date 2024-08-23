@@ -15,11 +15,9 @@
 
 #include "core/components/indexer/indexer_component.h"
 
-#include "core/components/arc/arc_component.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/indexer/indexer_element.h"
 #include "core/components/indexer/render_indexer_circle.h"
-#include "core/components/text/text_component.h"
 
 namespace OHOS::Ace {
 

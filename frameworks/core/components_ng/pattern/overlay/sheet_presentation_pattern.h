@@ -273,6 +273,7 @@ public:
         }
     }
 
+    void OverlaySheetSpringBack();
     void OverlayDismissSheet();
     void DismissSheet()
     {
@@ -290,7 +291,7 @@ public:
     bool IsScrollable() const;
     void AvoidAiBar();
 
-    void AvoidSafeArea();
+    void AvoidSafeArea(bool forceChange = false);
     void CheckBuilderChange();
     float GetSheetHeightChange();
     void ScrollTo(float height);
@@ -324,11 +325,6 @@ public:
     void SetCurrentOffset(float currentOffset)
     {
         currentOffset_ = currentOffset;
-    }
-
-    void SetIsDirectionUp(bool isDirectionUp)
-    {
-        isDirectionUp_ = isDirectionUp;
     }
 
     void SetCurrentHeight(float currentHeight)
@@ -426,6 +422,7 @@ public:
 
     SheetType GetSheetType();
     bool IsPhoneInLandScape();
+    bool IsShowCloseIcon();
     ScrollSizeMode GetScrollSizeMode();
     void GetSheetTypeWithAuto(SheetType& sheetType);
     void GetSheetTypeWithPopup(SheetType& sheetType);
@@ -622,12 +619,15 @@ private:
     void SetColumnMinSize(bool reset = false);
     void UpdateDragBarStatus();
     void UpdateCloseIconStatus();
+    void UpdateTitlePadding();
     float GetCloseIconPosX(const SizeF& sheetSize, const RefPtr<SheetTheme>& sheetTheme);
     void UpdateSheetTitle();
     void UpdateFontScaleStatus();
     RefPtr<RenderContext> GetRenderContext();
     bool PostTask(const TaskExecutor::Task& task, const std::string& name);
     void CheckSheetHeightChange();
+    float GetWrapperHeight();
+    bool SheetHeightNeedChanged();
     void InitSheetDetents();
     void HandleFitContontChange(float height);
     void ChangeSheetHeight(float height);
@@ -643,6 +643,9 @@ private:
     std::string LineTo(double x, double y);
     std::string ArcTo(double rx, double ry, double rotation, int32_t arc_flag, double x, double y);
     void DismissTransition(bool isTransitionIn, float dragVelocity = 0.0f);
+    bool IsNoStatusBarAndLandscape() const;
+    bool IsBottomLarge();
+    float GetTopAreaInWindow() const;
     uint32_t keyboardHeight_ = 0;
     int32_t targetId_ = -1;
     SheetKey sheetKey_;
@@ -668,6 +671,7 @@ private:
     float sheetHeightUp_ = 0.0f; // sheet offset to move up when avoiding keyboard
     float height_ = 0.0f; // sheet height, start from the bottom, before avoiding keyboard
     float sheetHeight_ = 0.0f; // sheet frameSize Height
+    float wrapperHeight_ = 0.0f; // sheetWrapper frameSize Height
     float pageHeight_ = 0.0f; // root Height, = maxSize.Height()
     float scrollHeight_ = 0.0f;
     float preWidth_ = 0.0f;
@@ -675,7 +679,6 @@ private:
     float sheetTopSafeArea_ = .0f;
     bool isExecuteOnDisappear_ = false;
     bool windowRotate_ = false;
-    bool firstMeasure_ = true;
     bool isScrolling_ = false;
     float builderHeight_ = 0.0f;
     float sheetMaxHeight_ = 0.0f; // start from the bottom, pageHeight - sheetTopSafeArea

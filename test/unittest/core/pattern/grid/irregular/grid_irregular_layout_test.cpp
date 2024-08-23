@@ -54,7 +54,7 @@ HWTEST_F(GridIrregularLayoutTest, LayoutChildren001, TestSize.Level1)
     algorithm->crossLens_ = { 50.0f, 50.0f, 100.0f };
     algorithm->crossGap_ = 5.0f;
     algorithm->mainGap_ = 1.0f;
-    algorithm->LayoutChildren(0.0f);
+    algorithm->LayoutChildren(0.0f, 0);
 
     EXPECT_EQ(frameNode_->GetChildByIndex(0)->GetGeometryNode()->GetFrameOffset().GetX(), 5.0f);
     EXPECT_EQ(frameNode_->GetChildByIndex(0)->GetGeometryNode()->GetFrameOffset().GetY(), 3.0f);

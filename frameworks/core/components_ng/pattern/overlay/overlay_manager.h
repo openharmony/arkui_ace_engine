@@ -234,6 +234,7 @@ public:
     bool RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackPressed, bool isPageRouter = false);
     bool RemoveBubble(const RefPtr<FrameNode>& overlay);
     bool RemoveMenu(const RefPtr<FrameNode>& overlay);
+    bool RemoveDragPreview(const RefPtr<FrameNode>& overlay);
     bool RemoveModalInOverlay();
     bool RemoveAllModalInOverlay();
     bool RemoveAllModalInOverlayByStack();
@@ -426,6 +427,7 @@ public:
     {
         return modalStack_.empty();
     }
+    bool HasModalPage();
     void DismissSheet();
     void DismissContentCover();
     void SheetSpringBack();
@@ -603,6 +605,7 @@ public:
     void OnUIExtensionWindowSizeChange();
 
     RefPtr<FrameNode> GetDialogNodeWithExistContent(const RefPtr<UINode>& node);
+    OffsetF CalculateMenuPosition(const RefPtr<FrameNode>& menuWrapperNode, const OffsetF& offset);
 
 private:
     void OnBindSheetInner(std::function<void(const std::string&)>&& callback,
@@ -653,6 +656,7 @@ private:
             cleanViewContextMapCallback_(instanceId, sheetContentId);
         }
     }
+    void CleanInvalidModalNode(const WeakPtr<FrameNode>& invalidNode);
     void PopToast(int32_t targetId);
 
     // toast should contain id to avoid multiple delete.
@@ -844,6 +848,8 @@ private:
     bool isAllowedBeCovered_ = true;
     // Only hasValue when isAllowedBeCovered is false
     std::set<int32_t> curSessionIds_;
+
+    std::optional<Color> sheetMaskColor_;
 };
 } // namespace OHOS::Ace::NG
 

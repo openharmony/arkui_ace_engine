@@ -157,7 +157,7 @@ bool EventManager::HasDifferentDirectionGesture()
 
 EventManager::EventManager() {}
 
-void EventManager::DumpEvent() const {}
+void EventManager::DumpEvent(bool hasJson = false) const {}
 
 void AddGestureSnapshot(int32_t finger, int32_t depth,  const RefPtr<TouchEventTarget>& target) {}
 } // namespace OHOS::Ace

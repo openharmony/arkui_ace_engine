@@ -340,10 +340,10 @@ public:
 
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-        TouchTestResult& responseLinkResult);
+        ResponseLinkResult& responseLinkResult);
     void OnCollectLongPressTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-        TouchTestResult& responseLinkResult);
+        ResponseLinkResult& responseLinkResult);
     bool InBarTouchRegion(const Point& point) const;
     bool InBarHoverRegion(const Point& point) const;
     bool InBarRectRegion(const Point& point) const;

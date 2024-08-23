@@ -15,8 +15,6 @@
 
 #include "inspect_toolbar.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 InspectToolbar::InspectToolbar(NodeId nodeId, const std::string& nodeName) : InspectNode(nodeId, nodeName) {}
 } // namespace OHOS::Ace::Framework

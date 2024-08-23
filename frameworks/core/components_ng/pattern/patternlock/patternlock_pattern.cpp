@@ -126,7 +126,7 @@ void PatternLockPattern::HandleAccessibilityHoverEvent(bool isHover, Accessibili
     if (isHover && (accessibilityHoverAction == AccessibilityHoverAction::HOVER_ENTER ||
                      accessibilityHoverAction == AccessibilityHoverAction::HOVER_MOVE)) {
         for (const auto& accessibilityProperty : accessibilityPropertyVec_) {
-            accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::YES);
+            accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::YES_STR);
         }
         if (!CheckAutoReset()) {
             return;
@@ -134,12 +134,12 @@ void PatternLockPattern::HandleAccessibilityHoverEvent(bool isHover, Accessibili
         HandleReset();
     } else if (!isHover) {
         for (const auto& accessibilityProperty : accessibilityPropertyVec_) {
-            accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO);
+            accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
         }
         AddPointEnd();
         auto host = GetHost();
         auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
-        accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::YES);
+        accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::YES_STR);
     }
 }
 
@@ -203,7 +203,7 @@ void PatternLockPattern::HandleTextOnAccessibilityFocusCallback(int32_t x, int32
         StartModifierConnectedAnimate(x, y);
         auto host = GetHost();
         auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
-        accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO);
+        accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
@@ -666,7 +666,7 @@ void PatternLockPattern::PaintFocusState()
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->PaintFocusState();
+    focusHub->PaintFocusState(true);
 
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }

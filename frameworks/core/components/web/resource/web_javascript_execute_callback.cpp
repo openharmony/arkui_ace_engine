@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "core/common/container_scope.h"
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components/web/resource/web_javascript_execute_callback.h"
 

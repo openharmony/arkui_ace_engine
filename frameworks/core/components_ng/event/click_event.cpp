@@ -30,7 +30,7 @@ ClickEventActuator::ClickEventActuator(const WeakPtr<GestureEventHub>& gestureEv
 {}
 
 void ClickEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, TouchTestResult& responseLinkResult)
+    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, ResponseLinkResult& responseLinkResult)
 {
     if (clickEvents_.empty() && !clickAfterEvents_ && !userCallback_ && !jsFrameNodeCallback_) {
         return;

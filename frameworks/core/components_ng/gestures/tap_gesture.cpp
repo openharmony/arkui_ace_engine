@@ -21,7 +21,7 @@ namespace OHOS::Ace::NG {
 
 RefPtr<NGGestureRecognizer> TapGesture::CreateRecognizer()
 {
-    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(fingers_, count_);
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(fingers_, count_, distanceThreshold_);
     if (onActionId_) {
         clickRecognizer->SetOnAction(*onActionId_);
     }

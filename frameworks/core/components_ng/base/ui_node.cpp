@@ -79,6 +79,9 @@ UINode::~UINode()
     } else {
         ElementRegister::GetInstance()->RemoveItemSilently(nodeId_);
     }
+    if (propInspectorId_.has_value()) {
+        ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(propInspectorId_.value_or(""), nodeId_);
+    }
     if (!onMainTree_) {
         return;
     }
@@ -227,6 +230,12 @@ std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& ch
         AddDisappearingChild(child, std::distance(children_.begin(), iter));
     }
     MarkNeedSyncRenderTree(true);
+    // Iter maybe lost in OnRemoveFromParent, needs reacquire.
+    iter = std::find(children_.begin(), children_.end(), child);
+    if (iter == children_.end()) {
+        LOGW("Iter is qeual to children end");
+        return children_.end();
+    }
     TraversingCheck(*iter);
     auto result = children_.erase(iter);
     return result;
@@ -331,6 +340,7 @@ void UINode::MountToParent(const RefPtr<UINode>& parent,
     if (parent->GetPageId() != 0) {
         SetHostPageId(parent->GetPageId());
     }
+    AfterMountToParent();
 }
 
 void UINode::UpdateConfigurationUpdate(const ConfigurationChange& configurationChange)
@@ -946,12 +956,6 @@ PipelineContext* UINode::GetContext() const
             context = PipelineContext::GetCurrentContextPtrSafely();
         }
     }
-
-    if (context && context->IsDestroyed()) {
-        LOGW("Get context from node when the context is destroyed. The context_ of node is%{public}s nullptr",
-            context_? " not" : "");
-    }
-
     return context;
 }
 
@@ -971,7 +975,7 @@ RefPtr<PipelineContext> UINode::GetContextRefPtr() const
 
 HitTestResult UINode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
-    TouchTestResult& responseLinkResult, bool isDispatch)
+    ResponseLinkResult& responseLinkResult, bool isDispatch)
 {
     auto children = GetChildren();
     HitTestResult hitTestResult = HitTestResult::OUT_OF_REGION;
@@ -1218,7 +1222,7 @@ bool UINode::MarkRemoving()
 {
     bool pendingRemove = false;
     isRemoving_ = true;
-    const auto& children = GetChildren();
+    const auto children = GetChildren();
     for (const auto& child : children) {
         pendingRemove = child->MarkRemoving() || pendingRemove;
     }
@@ -1495,7 +1499,7 @@ void UINode::CollectRemovedChildren(const std::list<RefPtr<UINode>>& children,
     std::list<int32_t>& removedElmtId, bool isEntry)
 {
     for (auto const& child : children) {
-        if (!child->IsDisappearing() && child->GetTag() != V2::RECYCLE_VIEW_ETS_TAG) {
+        if (!child->IsDisappearing() && child->GetTag() != V2::RECYCLE_VIEW_ETS_TAG && !child->GetIsRootBuilderNode()) {
             CollectRemovedChild(child, removedElmtId);
         }
     }
@@ -1506,9 +1510,6 @@ void UINode::CollectRemovedChildren(const std::list<RefPtr<UINode>>& children,
 
 void UINode::CollectRemovedChild(const RefPtr<UINode>& child, std::list<int32_t>& removedElmtId)
 {
-    if (child->GetNodeStatus() != NodeStatus::NORMAL_NODE) {
-        return;
-    }
     removedElmtId.emplace_back(child->GetId());
     // Fetch all the child elementIDs recursively
     if (child->GetTag() != V2::JS_VIEW_ETS_TAG) {
@@ -1589,6 +1590,24 @@ void UINode::GetContainerComponentText(std::string& text)
             break;
         }
         child->GetContainerComponentText(text);
+    }
+}
+
+void UINode::NotifyDataChange(int32_t index, int32_t count, int64_t id) const
+{
+    int32_t updateFrom = 0;
+    for (const auto& child : GetChildren()) {
+        if (child->GetAccessibilityId() == id) {
+            updateFrom += index;
+            break;
+        }
+        int32_t count = child->FrameCount();
+        updateFrom += count;
+    }
+    auto accessibilityId = GetAccessibilityId();
+    auto parent = GetParent();
+    if (parent) {
+        parent->NotifyDataChange(updateFrom, count, accessibilityId);
     }
 }
 } // namespace OHOS::Ace::NG

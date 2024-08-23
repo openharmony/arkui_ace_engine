@@ -15,11 +15,6 @@
 
 #include "base/geometry/dimension.h"
 
-#include <array>
-#include <functional>
-
-#include "base/utils/string_utils.h"
-#include "base/utils/utils.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
@@ -104,7 +99,7 @@ double Dimension::ConvertToVp() const
         return value_ / pipeline->GetDipScale();
     }
     if (unit_ == DimensionUnit::FP) {
-        return value_ * pipeline->GetFontScale();
+        return ConvertToVpByAppFontScale();
     }
     if (unit_ == DimensionUnit::LPX) {
         return value_ * pipeline->GetLogicScale() / pipeline->GetDipScale();
@@ -127,7 +122,7 @@ double Dimension::ConvertToPx() const
         return value_ * pipeline->GetDipScale();
     }
     if (unit_ == DimensionUnit::FP) {
-        return value_ * pipeline->GetDipScale() * pipeline->GetFontScale();
+        return ConvertToPxByAppFontScale(0.0f);
     }
     if (unit_ == DimensionUnit::LPX) {
         return value_ * pipeline->GetLogicScale();
@@ -140,20 +135,23 @@ double Dimension::ConvertToFp() const
     if (unit_ == DimensionUnit::FP) {
         return value_;
     }
-
     auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, 0.0);
+    auto fontScale = std::clamp(pipeline->GetFontScale(), 0.0f, pipeline->GetMaxAppFontScale());
+    if (LessOrEqual(fontScale, 0.0)) {
+        return 0.0;
+    }
     if (unit_ == DimensionUnit::NONE) {
-        return value_ / pipeline->GetDipScale() / pipeline->GetFontScale();
+        return value_ / pipeline->GetDipScale() / fontScale;
     }
     if (unit_ == DimensionUnit::PX) {
-        return value_ / pipeline->GetDipScale() / pipeline->GetFontScale();
+        return value_ / pipeline->GetDipScale() / fontScale;
     }
     if (unit_ == DimensionUnit::VP) {
-        return value_ / pipeline->GetFontScale();
+        return value_ / fontScale;
     }
     if (unit_ == DimensionUnit::LPX) {
-        return value_ * pipeline->GetLogicScale() / pipeline->GetDipScale() / pipeline->GetFontScale();
+        return value_ * pipeline->GetLogicScale() / pipeline->GetDipScale() / fontScale;
     }
     return 0.0;
 }
@@ -202,9 +200,20 @@ double Dimension::ConvertToPxByAppFontScale(float minFontScale) const
 {
     auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, value_);
+    CHECK_NULL_RETURN(pipeline->IsFollowSystem(), value_ * pipeline->GetDipScale());
     float maxFontScale = pipeline->GetMaxAppFontScale();
     float fontScale = std::clamp(pipeline->GetFontScale(), minFontScale, maxFontScale);
     return value_ * pipeline->GetDipScale() * fontScale;
+}
+
+double Dimension::ConvertToVpByAppFontScale() const
+{
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(pipeline, value_);
+    CHECK_NULL_RETURN(pipeline->IsFollowSystem(), value_);
+    float maxFontScale = pipeline->GetMaxAppFontScale();
+    float fontScale = std::clamp(pipeline->GetFontScale(), 0.0f, maxFontScale);
+    return value_ * fontScale;
 }
 
 std::string Dimension::ToString() const

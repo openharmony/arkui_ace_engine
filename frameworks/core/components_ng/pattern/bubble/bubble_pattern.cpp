@@ -19,6 +19,7 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "base/log/dump_log.h"
 #include "core/common/container_scope.h"
 #include "core/common/window_animation_config.h"
 #include "core/components/common/properties/shadow_config.h"
@@ -63,6 +64,7 @@ bool BubblePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     childOffset_ = bubbleLayoutAlgorithm->GetChildOffset();
     childSize_ = bubbleLayoutAlgorithm->GetChildSize();
     touchRegion_ = bubbleLayoutAlgorithm->GetTouchRegion();
+    hostWindowRect_ = bubbleLayoutAlgorithm->GetHostWindowRect();
     targetOffset_ = bubbleLayoutAlgorithm->GetTargetOffset();
     targetSize_ = bubbleLayoutAlgorithm->GetTargetSize();
     arrowPlacement_ = bubbleLayoutAlgorithm->GetArrowPlacement();
@@ -72,6 +74,7 @@ bool BubblePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     arrowWidth_ = bubbleLayoutAlgorithm->GetArrowWidth();
     arrowHeight_ = bubbleLayoutAlgorithm->GetArrowHeight();
     border_ = bubbleLayoutAlgorithm->GetBorder();
+    dumpInfo_ = bubbleLayoutAlgorithm->GetDumpInfo();
     paintProperty->UpdatePlacement(bubbleLayoutAlgorithm->GetArrowPlacement());
     if (delayShow_) {
         delayShow_ = false;
@@ -88,6 +91,7 @@ void BubblePattern::OnModifyDone()
         colorMode_ = SystemProperties::GetColorMode();
         UpdateBubbleText();
     }
+    UpdateAgingTextSize();
     Pattern::OnModifyDone();
     InitTouchEvent();
     RegisterButtonOnHover();
@@ -448,7 +452,7 @@ void BubblePattern::StartEnteringTransitionEffects(
                         pattern->GetChildSize().Width(), pattern->GetChildSize().Height());
                     rects.emplace_back(rect);
                 } else {
-                    auto parentWindowRect = SubwindowManager::GetInstance()->GetParentWindowRect();
+                    auto parentWindowRect = pattern->GetHostWindowRect();
                     auto rect = Rect(pattern->GetChildOffset().GetX(), pattern->GetChildOffset().GetY(),
                         pattern->GetChildSize().Width(), pattern->GetChildSize().Height());
                     rects.emplace_back(parentWindowRect);
@@ -562,7 +566,7 @@ void BubblePattern::StartAlphaEnteringAnimation(std::function<void()> finish)
                         pattern->GetChildSize().Width(), pattern->GetChildSize().Height());
                     rects.emplace_back(rect);
                 } else {
-                    auto parentWindowRect = SubwindowManager::GetInstance()->GetParentWindowRect();
+                    auto parentWindowRect = pattern->GetHostWindowRect();
                     auto rect = Rect(pattern->GetChildOffset().GetX(), pattern->GetChildOffset().GetY(),
                         pattern->GetChildSize().Width(), pattern->GetChildSize().Height());
                     rects.emplace_back(parentWindowRect);
@@ -767,6 +771,23 @@ void BubblePattern::UpdateText(const RefPtr<UINode>& node, const RefPtr<PopupThe
     }
 }
 
+void BubblePattern::DumpInfo()
+{
+    DumpLog::GetInstance().AddDesc("enableArrow: " + std::to_string(dumpInfo_.enableArrow));
+    DumpLog::GetInstance().AddDesc("mask: " + std::to_string(dumpInfo_.mask));
+    DumpLog::GetInstance().AddDesc("targetTag: " + dumpInfo_.targetNode + ", targetID: "
+        + std::to_string(dumpInfo_.targetID));
+    DumpLog::GetInstance().AddDesc("targetOffset: " + dumpInfo_.targetOffset.ToString());
+    DumpLog::GetInstance().AddDesc("targetSize: " + dumpInfo_.targetOffset.ToString());
+    DumpLog::GetInstance().AddDesc("touchRegion: " + dumpInfo_.touchRegion.ToString());
+    DumpLog::GetInstance().AddDesc("avoid top: " + std::to_string(dumpInfo_.top)
+        + ", bottom: " + std::to_string(dumpInfo_.bottom));
+    DumpLog::GetInstance().AddDesc("userOffset: " + dumpInfo_.userOffset.ToString());
+    DumpLog::GetInstance().AddDesc("targetSpace: " + dumpInfo_.targetSpace.ToString());
+    DumpLog::GetInstance().AddDesc("originPlacement: " + dumpInfo_.originPlacement);
+    DumpLog::GetInstance().AddDesc("finalPlacement: " + dumpInfo_.finalPlacement);
+}
+
 void BubblePattern::UpdateBubbleText()
 {
     auto host = GetHost();
@@ -789,4 +810,12 @@ void BubblePattern::OnColorConfigurationUpdate()
     UpdateBubbleText();
 }
 
+void BubblePattern::UpdateAgingTextSize()
+{
+    if (isCustomPopup_) {
+        return;
+    }
+    CHECK_NULL_VOID(messageNode_);
+    messageNode_->MarkDirtyNode();
+}
 } // namespace OHOS::Ace::NG

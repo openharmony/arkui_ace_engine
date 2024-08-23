@@ -291,6 +291,14 @@ class JSBuilderNode extends BaseNode {
         const updateFunc = (elmtId, isFirstRender) => {
             __JSScopeUtil__.syncInstanceId(this.instanceId_);
             ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
+            // if V2 @Observed/@Track used anywhere in the app (there is no more fine grained criteria),
+            // enable V2 object deep observation
+            // FIXME: A @Component should only use PU or V2 state, but ReactNative dynamic viewer uses both.
+            if (ConfigureStateMgmt.instance.needsV2Observe()) {
+                // FIXME: like in V2 setting bindId_ in ObserveV2 does not work with 'stacked'
+                // update + initial render calls, like in if and ForEach case, convert to stack as well
+                ObserveV2.getObserve().startRecordDependencies(this, elmtId, true);
+            }
             if (this._supportNestingBuilder) {
                 compilerAssignedUpdateFunc(elmtId, isFirstRender);
             }
@@ -299,6 +307,9 @@ class JSBuilderNode extends BaseNode {
             }
             if (!isFirstRender) {
                 _popFunc();
+            }
+            if (ConfigureStateMgmt.instance.needsV2Observe()) {
+                ObserveV2.getObserve().stopRecordDependencies();
             }
             ViewStackProcessor.StopGetAccessRecording();
             __JSScopeUtil__.restoreInstanceId();
@@ -394,6 +405,8 @@ class JSBuilderNode extends BaseNode {
         // removedChildElmtIds will be filled with the elmtIds of all children and their children will be deleted in response to if .. else change
         let removedChildElmtIds = new Array();
         If.branchId(branchId, removedChildElmtIds);
+        //un-registers the removed child elementIDs using proxy
+        UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);
         this.purgeDeletedElmtIds();
         branchfunc();
     }
@@ -585,7 +598,8 @@ class NodeAdapter {
         if (!node.isModifiable()) {
             return false;
         }
-        if (node.hasOwnProperty('attribute_')) {
+        const hasAttributeProperty = Object.prototype.hasOwnProperty.call(node, 'attribute_');
+        if (hasAttributeProperty) {
             let frameeNode = node;
             if (frameeNode.attribute_.allowChildCount !== undefined) {
                 const allowCount = frameeNode.attribute_.allowChildCount();
@@ -706,7 +720,7 @@ class NodeController {
  * limitations under the License.
  */
 class FrameNode {
-    constructor(uiContext, type) {
+    constructor(uiContext, type, options) {
         if (uiContext === undefined) {
             throw Error('Node constructor error, param uiContext error');
         }
@@ -734,7 +748,7 @@ class FrameNode {
             result = getUINativeModule().frameNode.createFrameNode(this);
         }
         else {
-            result = getUINativeModule().frameNode.createTypedFrameNode(this, type);
+            result = getUINativeModule().frameNode.createTypedFrameNode(this, type, options);
         }
         __JSScopeUtil__.restoreInstanceId();
         this._nativeRef = result?.nativeStrongRef;
@@ -868,7 +882,7 @@ class FrameNode {
         if (content === undefined || content === null || content.getNodePtr() === null || content.getNodePtr() == undefined) {
             return;
         }
-        if (!this.checkValid()) {
+        if (!this.checkValid() || !this.isModifiable()) {
             throw { message: 'The FrameNode is not modifiable.', code: 100021 };
         }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
@@ -1238,8 +1252,8 @@ class FrameNodeUtils {
     }
 }
 class TypedFrameNode extends FrameNode {
-    constructor(uiContext, type, attrCreator) {
-        super(uiContext, type);
+    constructor(uiContext, type, attrCreator, options) {
+        super(uiContext, type, options);
         this.attrCreator_ = attrCreator;
     }
     initialize(...args) {
@@ -1382,10 +1396,10 @@ const __creatorMap__ = new Map([
                 return new ArkButtonComponent(node, type);
             });
         }],
-    ['XComponent', (context) => {
+    ['XComponent', (context, options) => {
             return new TypedFrameNode(context, 'XComponent', (node, type) => {
                 return new ArkXComponentComponent(node, type);
-            });
+            }, options);
         }],
     ['ListItemGroup', (context) => {
             return new TypedFrameNode(context, 'ListItemGroup', (node, type) => {
@@ -1402,14 +1416,34 @@ const __creatorMap__ = new Map([
                 return new ArkFlowItemComponent(node, type);
             });
         }],
+    ['QRCode', (context) => {
+            return new TypedFrameNode(context, 'QRCode', (node, type) => {
+                return new ArkQRCodeComponent(node, type);
+            });
+        }],
+    ['Badge', (context) => {
+            return new TypedFrameNode(context, 'Badge', (node, type) => {
+                return new ArkBadgeComponent(node, type);
+            });
+        }],
+    ['Grid', (context) => {
+            return new TypedFrameNode(context, 'Grid', (node, type) => {
+                return new ArkGridComponent(node, type);
+            });
+        }],
+    ['GridItem', (context) => {
+            return new TypedFrameNode(context, 'GridItem', (node, type) => {
+                return new ArkGridItemComponent(node, type);
+            });
+        }],
 ]);
 class typeNode {
-    static createNode(context, type) {
+    static createNode(context, type, options) {
         let creator = __creatorMap__.get(type);
         if (creator === undefined) {
             return undefined;
         }
-        return creator(context);
+        return creator(context, options);
     }
 }
 /*

@@ -142,6 +142,8 @@ public:
     void UpdateBubbleText();
     void UpdateText(const RefPtr<UINode>& node, const RefPtr<PopupTheme>& popupTheme);
     void AddPipelineCallBack();
+    void UpdateAgingTextSize();
+    void DumpInfo() override;
 
     void SetMessageColor(bool isSetMessageColor)
     {
@@ -213,9 +215,14 @@ public:
 
     void ResetFocusState()
     {
-        SetIsDefaultHasBeFocused(false);
+        FocusViewDidShow(nullptr);
         SetIsViewRootScopeFocused(true);
         SetIsViewHasFocused(false);
+    }
+
+    Rect GetHostWindowRect() const
+    {
+        return hostWindowRect_;
     }
 
 protected:
@@ -271,6 +278,8 @@ private:
     OffsetF arrowPosition_;
     SizeF childSize_;
     RectF touchRegion_;
+    Rect hostWindowRect_;
+    BubbleDumpInfo dumpInfo_;
     // top right bottom left
     std::vector<float> arrowOffsetByClips_ = { 0.0f, 0.0f, 0.0f, 0.0f };
     std::optional<Placement> arrowPlacement_;

@@ -209,5 +209,15 @@ const ArkUIImageSpanModifier* GetImageSpanModifier()
         SetImageSpanOnError, ResetImageSpanOnError, SetImageSpanColorFilter, ResetImageSpanColorFilter};
     return &modifier;
 }
+
+const CJUIImageSpanModifier* GetCJUIImageSpanModifier()
+{
+    static const CJUIImageSpanModifier modifier = { SetImageSpanVerticalAlign, ResetImageSpanVerticalAlign,
+        SetImageSpanObjectFit, ResetImageSpanObjectFit, GetImageSpanVerticalAlign, GetImageSpanObjectFit,
+        SetImageSpanTextBackgroundStyle, ResetImageSpanTextBackgroundStyle, GetImageSpanTextBackgroundStyle,
+        SetImageSpanBaselineOffset, ResetImageSpanBaselineOffset, SetImageSpanOnComplete, ResetImageSpanOnComplete,
+        SetImageSpanOnError, ResetImageSpanOnError};
+    return &modifier;
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG
