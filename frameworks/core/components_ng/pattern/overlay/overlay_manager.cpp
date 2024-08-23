@@ -4885,7 +4885,8 @@ void OverlayManager::PlayBubbleStyleSheetTransition(RefPtr<FrameNode> sheetNode,
                         CHECK_NULL_VOID(root);
                         auto sheetParent = DynamicCast<FrameNode>(sheet->GetParent());
                         CHECK_NULL_VOID(sheetParent);
-                         overlayManager->RemoveChildWithService(root, sheetParent);
+                        overlayManager->FireAutoSave(sheet);
+                        overlayManager->RemoveChildWithService(root, sheetParent);
                         root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
                     },
                     TaskExecutor::TaskType::UI, "ArkUIOverlaySheetExitingAnimation");
