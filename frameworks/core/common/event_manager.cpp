@@ -1096,7 +1096,7 @@ void EventManager::PenHoverTest(
     frameNode->TouchTest(
         point, point, point, touchRestrict, testResult, event.id, responseLinkResult);
     SetResponseLinkRecognizers(testResult, responseLinkResult);
-    UpdateAccessibilityHoverNode(event, testResult);
+    UpdatePenHoverNode(event, testResult);
 }
 
 void EventManager::MouseTest(
@@ -1278,11 +1278,6 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
         }
     }
     return false;
-}
-
-void EventManager::DoMouseActionRelease()
-{
-    pressMouseTestResults_.clear();
 }
 
 void EventManager::DispatchMouseHoverAnimationNG(const MouseEvent& event)
