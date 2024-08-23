@@ -75,7 +75,7 @@ ImagePattern::ImagePattern()
 
 ImagePattern::~ImagePattern()
 {
-    if (IsSupportImageAnalyzerFeature()) {
+    if (isEnableAnalyzer_) {
         ReleaseImageAnalyzer();
     }
 }
