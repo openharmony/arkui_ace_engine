@@ -132,12 +132,15 @@ void TextLayoutElement::Init(RefPtr<SecurityComponentLayoutProperty>& property,
 
 void TextLayoutElement::DoMeasure(bool isVertical, float comWidth, float maxWidth, float idealWidth, float iconWidth)
 {
+    if (!isExist_) {
+        return;
+    }
     auto textProp = AceType::DynamicCast<TextLayoutProperty>(textWrap_->GetLayoutProperty());
     CHECK_NULL_VOID(textProp);
     auto textConstraint = textProp->GetContentLayoutConstraint();
     CHECK_NULL_VOID(textConstraint);
     auto minWidth = std::min(maxWidth, comWidth);
-    if (idealWidth != 0.0) {
+    if (!NearEqual(idealWidth, 0.0)) {
         minWidth = std::min(minWidth, idealWidth);
     }
 
