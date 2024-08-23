@@ -99,8 +99,10 @@ public:
         if (!prevHeader) {
             host->AddChild(header);
         } else {
-            host->ReplaceChild(prevHeader, header);
-            host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            if (header != prevHeader) {
+                host->ReplaceChild(prevHeader, header);
+                host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            }
         }
         header_ = header;
     }
@@ -113,10 +115,34 @@ public:
         if (!prevFooter) {
             host->AddChild(footer);
         } else {
-            host->ReplaceChild(prevFooter, footer);
-            host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            if (footer != prevFooter) {
+                host->ReplaceChild(prevFooter, footer);
+                host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            }
         }
         footer_ = footer;
+    }
+
+    void RemoveHeader()
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto prevHeader = header_.Upgrade();
+        if (prevHeader) {
+            host->RemoveChild(prevHeader);
+            header_ = nullptr;
+        }
+    }
+
+    void RemoveFooter()
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto prevFooter = header_.Upgrade();
+        if (prevFooter) {
+            host->RemoveChild(prevFooter);
+            header_ = nullptr;
+        }
     }
 
     const ListItemGroupLayoutAlgorithm::PositionMap& GetItemPosition()
