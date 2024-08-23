@@ -617,8 +617,8 @@ void ScrollBar::HandleDragEnd(const GestureEvent& info)
             scrollBar->ProcessFrictionMotion(value);
         });
     }
-    if (calePredictSnapOffsetCallback_ && startScrollSnapMotionCallback_) {
-        auto predictSnapOffset = calePredictSnapOffsetCallback_(CalcPatternOffset(frictionMotion_->GetFinalPosition()),
+    if (calcPredictSnapOffsetCallback_ && startScrollSnapMotionCallback_) {
+        auto predictSnapOffset = calcPredictSnapOffsetCallback_(CalcPatternOffset(frictionMotion_->GetFinalPosition()),
                                                                 CalcPatternOffset(GetDragOffset()), -velocity);
         // If snap scrolling, predictSnapOffset will has a value.
         if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {

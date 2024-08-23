@@ -183,7 +183,7 @@ bool ScrollPattern::ScrollSnapTrigger()
         return false;
     }
     if (ScrollableIdle() && !AnimateRunning()) {
-        auto predictSnapOffset = CalePredictSnapOffset(0.0);
+        auto predictSnapOffset = CalcPredictSnapOffset(0.0);
         if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
             StartScrollSnapMotion(predictSnapOffset.value(), 0.0f);
             FireOnScrollStart();
@@ -796,7 +796,7 @@ std::pair<std::function<bool(float)>, Axis> ScrollPattern::GetScrollOffsetAbilit
         GetAxis() };
 }
 
-std::optional<float> ScrollPattern::CalePredictSnapOffset(float delta, float dragDistance, float velocity)
+std::optional<float> ScrollPattern::CalcPredictSnapOffset(float delta, float dragDistance, float velocity)
 {
     std::optional<float> predictSnapOffset;
     CHECK_NULL_RETURN(IsScrollSnap(), predictSnapOffset);

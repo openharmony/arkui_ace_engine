@@ -59,7 +59,7 @@ using DragCancelRefreshCallback = std::function<void()>;
 using MouseLeftButtonScroll = std::function<bool()>;
 using ScrollSnapCallback = std::function<bool(double targetOffset, double velocity)>;
 using ContinuousSlidingCallback = std::function<double()>;
-using CalePredictSnapOffsetCallback =
+using CalcPredictSnapOffsetCallback =
     std::function<std::optional<float>(float delta, float dragDistance, float velocity)>;
 using NeedScrollSnapToSideCallback = std::function<bool(float delta)>;
 using NestableScrollCallback = std::function<ScrollResult(float, int32_t, NestedState)>;
@@ -381,9 +381,9 @@ public:
         return dragEndPosition_ - dragStartPosition_;
     }
 
-    void SetCalePredictSnapOffsetCallback(CalePredictSnapOffsetCallback&& calePredictSnapOffsetCallback)
+    void SetCalcPredictSnapOffsetCallback(CalcPredictSnapOffsetCallback&& calcPredictSnapOffsetCallback)
     {
-        calePredictSnapOffsetCallback_ = std::move(calePredictSnapOffsetCallback);
+        calcPredictSnapOffsetCallback_ = std::move(calcPredictSnapOffsetCallback);
     }
 
     void SetNeedScrollSnapToSideCallback(NeedScrollSnapToSideCallback&& needScrollSnapToSideCallback)
@@ -557,7 +557,7 @@ private:
 
     // scrollSnap
     bool needScrollSnapChange_ = false;
-    CalePredictSnapOffsetCallback calePredictSnapOffsetCallback_;
+    CalcPredictSnapOffsetCallback calcPredictSnapOffsetCallback_;
     NeedScrollSnapToSideCallback needScrollSnapToSideCallback_;
     GestureEventFunc actionEnd_;
 

@@ -195,7 +195,7 @@ public:
     Rect GetItemRect(int32_t index) const override;
 
     // scrollSnap
-    std::optional<float> CalePredictSnapOffset(float delta, float dragDistance = 0.f, float velocity = 0.f) override;
+    std::optional<float> CalcPredictSnapOffset(float delta, float dragDistance = 0.f, float velocity = 0.f) override;
     bool NeedScrollSnapToSide(float delta) override;
     void CaleSnapOffsets();
     void CaleSnapOffsetsByInterval(ScrollSnapAlign scrollSnapAlign);
