@@ -90,8 +90,8 @@ class EditableTitleBarTheme {
 
 class ButtonGestureModifier implements GestureModifier {
    public static readonly longPressTime: number = 500;
-   public fontSize: number = 1;
    public static readonly minFontSize: number = 1.75;
+   public fontSize: number = 1;
    public controller: CustomDialogController | null = null;
 
   constructor(controller: CustomDialogController | null) {
@@ -132,9 +132,6 @@ export struct EditableTitleBar {
   onSave?: () => void;
   onCancel?: () => void;
   constraintWidth: number = 0;
-  private isFollowingSystemFontScale: boolean = false;
-  private maxFontScale: number = 1;
-  private systemFontScale?: number = 1;
   public static readonly maxCountOfExtraItems = 3;
   public static readonly maxOtherCountOfExtraItems = 2;
   public static readonly commonZero = 0;
@@ -153,6 +150,9 @@ export struct EditableTitleBar {
     (EditableTitleBar.totalHeight - EditableTitleBar.titlePadding) * MAX_MAIN_TITLE_PERCENT;
   private static readonly maxSubTitleHeight =
     (EditableTitleBar.totalHeight - EditableTitleBar.titlePadding) * MAX_SUB_TITLE_PERCENT;
+  private isFollowingSystemFontScale: boolean = false;
+  private maxFontScale: number = 1;
+  private systemFontScale?: number = 1;
   @Provide editableTitleBarTheme: EditableTitleBarTheme = new EditableTitleBarTheme();
   @Prop contentMargin?: LocalizedMargin;
   @State titleBarMargin: LocalizedMargin = {
