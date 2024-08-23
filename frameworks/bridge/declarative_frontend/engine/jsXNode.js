@@ -186,7 +186,7 @@ class JSBuilderNode extends BaseNode {
             return false;
         }
     }
-    buildWithNestingBuilder(builder) {
+    buildWithNestingBuilder(builder, supportLazyBuild) {
         if (this._supportNestingBuilder && this.isObject(this.params_)) {
             this._proxyObjectParam = new Proxy(this.params_, {
                 set(target, property, val) {
@@ -194,18 +194,19 @@ class JSBuilderNode extends BaseNode {
                 },
                 get: (target, property, receiver) => { return this.params_?.[property]; }
             });
-            this.nodePtr_ = super.create(builder.builder, this._proxyObjectParam, this.updateNodeFromNative, this.updateConfiguration);
+            this.nodePtr_ = super.create(builder.builder, this._proxyObjectParam, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
         }
         else {
-            this.nodePtr_ = super.create(builder.builder, this.params_, this.updateNodeFromNative, this.updateConfiguration);
+            this.nodePtr_ = super.create(builder.builder, this.params_, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
         }
     }
     build(builder, params, options) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this._supportNestingBuilder = options?.nestingBuilderSupported ? options.nestingBuilderSupported : false;
+        const supportLazyBuild = options?.lazyBuildSupported ? options.lazyBuildSupported : false;
         this.params_ = params;
         this.updateFuncByElmtId.clear();
-        this.buildWithNestingBuilder(builder);
+        this.buildWithNestingBuilder(builder, supportLazyBuild);
         this._nativeRef = getUINativeModule().nativeUtils.createNativeStrongRef(this.nodePtr_);
         if (this.frameNode_ === undefined || this.frameNode_ === null) {
             this.frameNode_ = new BuilderRootFrameNode(this.uiContext_);
