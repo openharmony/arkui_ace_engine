@@ -7075,6 +7075,12 @@ void WebDelegate::OnTextSelected()
     }
 }
 
+void WebDelegate::OnDestroyImageAnalyzerOverlay()
+{
+    CHECK_NULL_VOID(nweb_);
+    nweb_->OnDestroyImageAnalyzerOverlay();
+}
+
 NG::WebInfoType WebDelegate::GetWebInfoType()
 {
     std::string factoryLevel = NWebAdapterHelper::Instance()
