@@ -7449,6 +7449,37 @@ class ImageSpanColorFilterModifier extends ModifierWithKey {
   }
 }
 
+class ImageSpanBorderRadiusModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().imageSpan.resetBorderRadius(node);
+    } else {
+      if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
+        getUINativeModule().imageSpan.setBorderRadius(node, this.value, this.value, this.value, this.value);
+      } else {
+        getUINativeModule().imageSpan.setBorderRadius(node, this.value.topLeft, this.value.topRight,
+          this.value.bottomLeft, this.value.bottomRight);
+      }
+    }
+  }
+  checkObjectDiff() {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !(this.stageValue.topLeft === this.value.topLeft &&
+        this.stageValue.topRight === this.value.topRight &&
+        this.stageValue.bottomLeft === this.value.bottomLeft &&
+        this.stageValue.bottomRight === this.value.bottomRight);
+    } else {
+      return true;
+    }
+  }
+}
+ImageSpanBorderRadiusModifier.identity = Symbol('imageSpanBorderRadius');
+
 ImageSpanColorFilterModifier.identity = Symbol('ImageSpanColorFilter');
 class ArkImageSpanComponent extends ArkComponent {
   constructor(nativePtr, classType) {
@@ -7484,6 +7515,11 @@ class ArkImageSpanComponent extends ArkComponent {
   }
   colorFilter(value) {
     modifierWithKey(this._modifiersWithKeys, ImageSpanColorFilterModifier.identity, ImageSpanColorFilterModifier, value);
+    return this;
+  }
+  borderRadius(value) {
+    modifierWithKey(
+      this._modifiersWithKeys, ImageSpanBorderRadiusModifier.identity, ImageSpanBorderRadiusModifier, value);
     return this;
   }
 }
