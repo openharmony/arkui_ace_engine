@@ -2704,17 +2704,17 @@ void PipelineContext::OnPenHoverEvent(const TouchEvent& point, const RefPtr<NG::
 
 void PipelineContext::HandlePenHoverOut(const TouchEvent& point)
 {
-    if (point.sourceTool != SourceTool::PEN || point.type != TouchType::DOWN || point.force <= 0.0f) {
+    if (point.sourceTool != SourceTool::PEN || point.type != TouchType::DOWN || NearZero(point.force)) {
         return;
     }
 
     CHECK_RUN_ON(UI);
-    auto scaleEvent = point.CreateScalePoint(viewScale_);
-    scaleEvent.type = TouchType::PROXIMITY_OUT;
+    auto oriPoint = point;
+    oriPoint.type = TouchType::PROXIMITY_OUT;
 
     TouchTestResult testResult;
-    eventManager_->UpdatePenHoverNode(scaleEvent, testResult);
-    eventManager_->DispatchPenHoverEventNG(scaleEvent);
+    eventManager_->UpdatePenHoverNode(oriPoint, testResult);
+    eventManager_->DispatchPenHoverEventNG(oriPoint);
 }
 
 void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNode>& node)

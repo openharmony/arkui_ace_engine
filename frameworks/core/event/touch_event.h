@@ -457,7 +457,7 @@ struct TouchEvent final : public UIInputEvent {
     bool IsPenHoverEvent() const
     {
         return sourceTool == SourceTool::PEN && (type == TouchType::PROXIMITY_IN ||
-        type == TouchType::PROXIMITY_OUT || (type == TouchType::MOVE && force == 0.0f));
+        type == TouchType::PROXIMITY_OUT || (type == TouchType::MOVE && NearZero(force)));
     }
 };
 
