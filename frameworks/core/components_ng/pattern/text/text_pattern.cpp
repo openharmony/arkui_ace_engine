@@ -361,7 +361,7 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     if (magnifierController_) {
         magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() });
     }
-    StartGestureSelection(textSelector_.GetStart(), textSelector_.GetEnd());
+    StartGestureSelection(textSelector_.GetStart(), textSelector_.GetEnd(), localOffset);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
