@@ -599,8 +599,6 @@ export class ToolBar extends ViewPU {
       Button.onClick(() => {
         this.clickEventAction(o4);
       });
-      Button.onClick(() => {
-      });
       Button.gestureModifier(this.toolBarItemGestureModifier[o4]);
     }, Button);
     this.observeComponentCreation2((g5, h5) => {
