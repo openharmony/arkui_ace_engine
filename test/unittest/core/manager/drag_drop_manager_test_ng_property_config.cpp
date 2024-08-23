@@ -1367,7 +1367,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest047, TestSize.Level1)
     dragDropManager->OnDragStart(Point(1.0f, 1.0f), frameNode);
     dragDropManager->info_.scale = 0.5f;
     dragDropManager->OnDragMoveOut(pointerEvent);
-    EXPECT_FALSE(dragDropManager->IsNeedScaleDragPreview());
+    EXPECT_TRUE(dragDropManager->IsNeedScaleDragPreview());
 }
 
 /**

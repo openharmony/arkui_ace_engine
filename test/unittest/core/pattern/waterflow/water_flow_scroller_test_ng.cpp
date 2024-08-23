@@ -741,4 +741,38 @@ HWTEST_F(WaterFlowScrollerTestNg, Focus002, TestSize.Level1)
     EXPECT_EQ(pattern_->layoutInfo_->offsetEnd_, false);
     EXPECT_EQ(pattern_->layoutInfo_->storedOffset_, 0);
 }
+
+/**
+ * @tc.name: ReachStart001
+ * @tc.desc: Test ReachStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowScrollerTestNg, ReachStart001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::NONE, false);
+    bool reached = false;
+    model.SetOnReachStart([&reached]() { reached = true; });
+    CreateWaterFlowItems(30);
+    CreateDone();
+
+    pattern_->ScrollToIndex(29);
+    FlushLayoutTask(frameNode_);
+
+    reached = false;
+    UpdateCurrentOffset(Infinity<float>());
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_TRUE(reached);
+    FlushLayoutTask(frameNode_);
+
+    reached = false;
+    UpdateCurrentOffset(-5.0f);
+    EXPECT_FALSE(reached);
+    EXPECT_EQ(GetChildY(frameNode_, 0), -5.0f);
+    reached = false;
+    UpdateCurrentOffset(6.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_TRUE(reached);
+}
 } // namespace OHOS::Ace::NG

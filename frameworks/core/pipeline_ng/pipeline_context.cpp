@@ -2368,9 +2368,30 @@ void PipelineContext::NotifyFillRequestFailed(RefPtr<FrameNode> node, int32_t er
     node->NotifyFillRequestFailed(errCode, fillContent, isPopup);
 }
 
+void PipelineContext::DumpFocus(bool hasJson) const
+{
+    auto rootFocusHub = rootNode_->GetFocusHub();
+    CHECK_NULL_VOID(rootFocusHub);
+    rootFocusHub->DumpFocusTree(0, hasJson);
+    if (hasJson) {
+        DumpLog::GetInstance().PrintEndDumpInfoNG();
+    }
+}
+
+void PipelineContext::DumpInspector(const std::vector<std::string>& params, bool hasJson) const
+{
+    auto accessibilityManager = GetAccessibilityManager();
+    if (accessibilityManager) {
+        accessibilityManager->OnDumpInfoNG(params, windowId_, hasJson);
+        if (hasJson) {
+            DumpLog::GetInstance().PrintEndDumpInfoNG();
+        }
+    }
+}
+
 bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
 {
-    ACE_DCHECK(!params.empty());
+    bool hasJson = params.back() == "-json";
     if (window_) {
         DumpLog::GetInstance().Print(1, "LastRequestVsyncTime: " + std::to_string(window_->GetLastRequestVsyncTime()));
 #ifdef ENABLE_ROSEN_BACKEND
@@ -2403,9 +2424,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
             navigationDumpMgr->OnDumpInfo();
         }
     } else if (params[0] == "-focus") {
-        if (rootNode_->GetFocusHub()) {
-            rootNode_->GetFocusHub()->DumpFocusTree(0);
-        }
+        DumpFocus(hasJson);
     } else if (params[0] == "-focuswindowscene") {
         auto windowSceneNode = GetFocusedWindowSceneNode();
         auto windowSceneFocusHub = windowSceneNode ? windowSceneNode->GetFocusHub() : nullptr;
@@ -2416,11 +2435,13 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         if (focusManager_) {
             focusManager_->DumpFocusManager();
         }
-    } else if (params[0] == "-accessibility" || params[0] == "-inspector") {
+    } else if (params[0] == "-accessibility") {
         auto accessibilityManager = GetAccessibilityManager();
         if (accessibilityManager) {
             accessibilityManager->OnDumpInfoNG(params, windowId_);
         }
+    } else if (params[0] == "-inspector") {
+        DumpInspector(params, hasJson);
     } else if (params[0] == "-rotation" && params.size() >= 2) {
     } else if (params[0] == "-animationscale" && params.size() >= 2) {
     } else if (params[0] == "-velocityscale" && params.size() >= 2) {
@@ -2439,7 +2460,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         }
     } else if (params[0] == "-event") {
         if (eventManager_) {
-            eventManager_->DumpEvent();
+            eventManager_->DumpEvent(hasJson);
         }
     } else if (params[0] == "-imagecache") {
         if (imageCache_) {
@@ -3081,31 +3102,11 @@ void PipelineContext::WindowFocus(bool isFocus)
         NotifyPopupDismiss();
     } else {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Window id: %{public}d get focus.", windowId_);
-        GetOrCreateFocusManager()->WindowFocusMoveStart();
-        GetOrCreateFocusManager()->FocusSwitchingStart(focusManager_->GetCurrentFocus(),
-            SwitchingStartReason::WINDOW_FOCUS);
+        
         isWindowHasFocused_ = true;
         InputMethodManager::GetInstance()->SetWindowFocus(true);
-        auto curFocusView = focusManager_ ? focusManager_->GetLastFocusView().Upgrade() : nullptr;
-        auto curFocusViewHub = curFocusView ? curFocusView->GetFocusHub() : nullptr;
-        if (!curFocusViewHub) {
-            TAG_LOGW(AceLogTag::ACE_FOCUS, "Current focus view can not found!");
-        } else if (curFocusView->GetIsViewHasFocused() && !curFocusViewHub->IsCurrentFocus()) {
-            TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on current focus view: %{public}s/%{public}d",
-                curFocusView->GetFrameName().c_str(), curFocusView->GetFrameId());
-            curFocusViewHub->RequestFocusImmediately();
-        } else {
-            auto container = Container::Current();
-            if (container && container->IsUIExtensionWindow()) {
-                curFocusView->RequestDefaultFocus();
-            }
-            if (container && container->IsDynamicRender()) {
-                curFocusView->SetIsViewRootScopeFocused(false);
-                curFocusView->RequestDefaultFocus();
-            }
-        }
-        RequestFrame();
     }
+    GetOrCreateFocusManager()->WindowFocus(isFocus);
     FlushWindowFocusChangedCallback(isFocus);
 }
 

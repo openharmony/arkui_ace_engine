@@ -1749,6 +1749,33 @@ HWTEST_F(WaterFlowTestNg, WaterFlowGetItemRectTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: WaterFlowGetItemIndexTest001
+ * @tc.desc: Test WaterFlow GetItemIndex function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowGetItemIndexTest001, TestSize.Level1)
+{
+    float colNumber = 4;
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateWaterFlowItems(TOTAL_LINE_NUMBER * colNumber);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Get invalid WaterFlowItem index.
+     * @tc.expected: Return -1 when input invalid x and y coordinate.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetItemIndex(1000000, -1000000), -1));
+
+    /**
+     * @tc.steps: step2. Get valid WaterFlowItem index.
+     * @tc.expected: Return actual index when input valid x and y coordinate.
+     */
+    float itemWidth = WATER_FLOW_WIDTH / colNumber;
+    EXPECT_TRUE(IsEqual(pattern_->GetItemIndex(itemWidth / 2, ITEM_MAIN_SIZE / 2), 0));
+}
+
+/**
  * @tc.name: MeasureForAnimation001
  * @tc.desc: Test WaterFlow MeasureForAnimation function.
  * @tc.type: FUNC

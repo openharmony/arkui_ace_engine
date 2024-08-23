@@ -3935,7 +3935,7 @@ void WebDelegate::LoadUrl()
 
 void WebDelegate::OnInactive()
 {
-    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::OnInactive, webId:%{public}d", GetWebId());
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnInactive, webId:%{public}d", GetWebId());
     auto context = context_.Upgrade();
     if (!context) {
         return;
@@ -3955,7 +3955,7 @@ void WebDelegate::OnInactive()
 
 void WebDelegate::OnActive()
 {
-    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::OnActive, webId:%{public}d", GetWebId());
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnActive, webId:%{public}d", GetWebId());
     auto context = context_.Upgrade();
     if (!context) {
         return;
@@ -4013,7 +4013,7 @@ void WebDelegate::OnWebviewShow()
 
 void WebDelegate::OnRenderToForeground()
 {
-    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::OnRenderToForeground");
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnRenderToForeground");
     auto context = context_.Upgrade();
     if (!context) {
         return;
@@ -4034,7 +4034,7 @@ void WebDelegate::OnRenderToForeground()
 
 void WebDelegate::OnRenderToBackground()
 {
-    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::OnRenderToBackground");
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnRenderToBackground");
     auto context = context_.Upgrade();
     if (!context) {
         return;

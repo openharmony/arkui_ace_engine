@@ -1703,7 +1703,7 @@ void OverlayManager::SetPopupHotAreas(RefPtr<FrameNode> popupNode)
                 popupPattern->GetChildSize().Width(), popupPattern->GetChildSize().Height());
             rects.emplace_back(rect);
         } else {
-            auto parentWindowRect = SubwindowManager::GetInstance()->GetParentWindowRect();
+            auto parentWindowRect = popupPattern->GetHostWindowRect();
             auto rect = Rect(popupPattern->GetChildOffset().GetX(), popupPattern->GetChildOffset().GetY(),
                 popupPattern->GetChildSize().Width(), popupPattern->GetChildSize().Height());
             rects.emplace_back(parentWindowRect);
@@ -3715,8 +3715,11 @@ void OverlayManager::OnBindContentCover(bool isShow, std::function<void(const st
         auto targetModalNode = GetModal(targetId);
         if (targetModalNode) {
             const auto& targetModalPattern = targetModalNode->GetPattern<ModalPresentationPattern>();
+            CHECK_NULL_VOID(targetModalPattern);
+            auto modalRenderContext = targetModalNode->GetRenderContext();
+            CHECK_NULL_VOID(modalRenderContext);
             if (modalStyle.backgroundColor.has_value()) {
-                targetModalNode->GetRenderContext()->UpdateBackgroundColor(modalStyle.backgroundColor.value());
+                modalRenderContext->UpdateBackgroundColor(modalStyle.backgroundColor.value());
             }
             targetModalPattern->UpdateOnDisappear(std::move(onDisappear));
             targetModalPattern->UpdateOnWillDisappear(std::move(onWillDisappear));
@@ -3724,7 +3727,7 @@ void OverlayManager::OnBindContentCover(bool isShow, std::function<void(const st
             targetModalPattern->UpdateOnWillDismiss(std::move(contentCoverParam.onWillDismiss));
             targetModalPattern->SetType(modalTransition.value());
             targetModalPattern->SetHasTransitionEffect(contentCoverParam.transitionEffect != nullptr);
-            targetModalNode->GetRenderContext()->UpdateChainedTransition(contentCoverParam.transitionEffect);
+            modalRenderContext->UpdateChainedTransition(contentCoverParam.transitionEffect);
             return;
         }
         if (onWillAppear) {

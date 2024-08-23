@@ -430,7 +430,7 @@ bool WebPattern::NeedSoftKeyboard() const
 
 void WebPattern::OnAttachToMainTree()
 {
-    TAG_LOGD(AceLogTag::ACE_WEB, "OnAttachToMainTree");
+    TAG_LOGI(AceLogTag::ACE_WEB, "OnAttachToMainTree");
     InitSlideUpdateListener();
     // report component is in foreground.
     delegate_->OnRenderToForeground();
@@ -438,7 +438,7 @@ void WebPattern::OnAttachToMainTree()
 
 void WebPattern::OnDetachFromMainTree()
 {
-    TAG_LOGD(AceLogTag::ACE_WEB, "OnDetachFromMainTree");
+    TAG_LOGI(AceLogTag::ACE_WEB, "OnDetachFromMainTree");
     // report component is in background.
     delegate_->OnRenderToBackground();
 }
@@ -1483,18 +1483,18 @@ void WebPattern::HandleOnDragDropFile(RefPtr<UnifiedData> aceData)
     delegate_->dragData_->ClearImageFileNames();
     for (std::string url : urlVec) {
         TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop event WebEventHub onDragDropId,"
-            "url get from udmf:%{public}s", url.c_str());
+            "url get from udmf:%{public}zu", url.length());
         AppFileService::ModuleFileUri::FileUri fileUri(url);
         TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop event WebEventHub onDragDropId,"
-            "fileUri ToString:%{public}s", fileUri.ToString().c_str());
+            "fileUri ToString:%{public}zu", fileUri.ToString().length());
         std::string uriRealPath = FileUriHelper::GetRealPath(url);
         if (!uriRealPath.empty() && access(uriRealPath.c_str(), F_OK) == 0) { // file exist
             TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop event WebEventHub onDragDropId,"
-            "url real path:%{public}s", uriRealPath.c_str());
+            "url real path:%{public}zu", uriRealPath.length());
             delegate_->dragData_->SetFileUri(uriRealPath);
         } else {
             TAG_LOGW(AceLogTag::ACE_WEB, "DragDrop event WebEventHub onDragDropId,"
-                "url is empty or not exist, uriRealPath:%{public}s", uriRealPath.c_str());
+                "url is empty or not exist, uriRealPath:%{public}zu", uriRealPath.length());
         }
     }
 }
@@ -1867,7 +1867,6 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
         TAG_LOGI(AceLogTag::ACE_WEB,
             "OnDirtyLayoutWrapperSwap; WebPattern is Offline Mode, WebId:%{public}d", GetWebId());
         offlineWebRendered_ = true;
-        delegate_->OnRenderToForeground();
         delegate_->ShowWebView();
     }
 
@@ -2705,6 +2704,7 @@ void WebPattern::InitInOfflineMode()
         return;
     }
     TAG_LOGI(AceLogTag::ACE_WEB, "Web offline mode type, webId:%{public}d", GetWebId());
+    delegate_->OnRenderToBackground();
     offlineWebInited_ = true;
     isActive_ = false;
     isVisible_ = false;
@@ -4737,7 +4737,7 @@ void WebPattern::UpdateLocale()
 
 void WebPattern::OnWindowShow()
 {
-    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::OnWindowShow");
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnWindowShow");
     CHECK_NULL_VOID(delegate_);
     delegate_->OnRenderToForeground();
     delegate_->OnOnlineRenderToForeground();
@@ -4752,7 +4752,7 @@ void WebPattern::OnWindowShow()
 
 void WebPattern::OnWindowHide()
 {
-    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::OnWindowHide");
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnWindowHide");
     CHECK_NULL_VOID(delegate_);
     delegate_->OnRenderToBackground();
 
@@ -4884,7 +4884,7 @@ void WebPattern::SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterE
 
 void WebPattern::OnInActive()
 {
-    TAG_LOGD(AceLogTag::ACE_WEB,
+    TAG_LOGI(AceLogTag::ACE_WEB,
         "WebPattern::OnInActive webId:%{public}d, isActive:%{public}d", GetWebId(), isActive_);
     if (!isActive_) {
         return;
@@ -4897,7 +4897,7 @@ void WebPattern::OnInActive()
 
 void WebPattern::OnActive()
 {
-    TAG_LOGD(AceLogTag::ACE_WEB,
+    TAG_LOGI(AceLogTag::ACE_WEB,
         "WebPattern::OnActive webId:%{public}d, isActive:%{public}d", GetWebId(), isActive_);
     if (isActive_) {
         return;
@@ -4911,6 +4911,7 @@ void WebPattern::OnActive()
 void WebPattern::OnVisibleAreaChange(bool isVisible)
 {
     bool isDialogNested = IsDialogNested();
+    ACE_SCOPED_TRACE("WebPattern::OnVisibleAreaChange, webId: %d, isVisible: %d", GetWebId(), isVisible);
     TAG_LOGI(AceLogTag::ACE_WEB,
         "WebPattern::OnVisibleAreaChange webId:%{public}d, isVisible:%{public}d, old_isVisible:%{public}d, "
         "isVisibleActiveEnable:%{public}d, isDialogNested:%{public}d, isFocus:%{public}d",

@@ -254,6 +254,7 @@ void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
     pen.SetColor(ToRSColor(cursorColor_->Get()));
     canvas.AttachPen(pen);
     auto paintOffset = contentOffset_->Get();
+    ACE_LAYOUT_SCOPED_TRACE("PaintCursor[offset:%f, %f]", paintOffset.GetX(), paintOffset.GetY());
     float clipRectHeight = 0.0f;
     clipRectHeight = paintOffset.GetY() + contentSize_->Get().Height();
     RSRect clipInnerRect(paintOffset.GetX(), paintOffset.GetY(),

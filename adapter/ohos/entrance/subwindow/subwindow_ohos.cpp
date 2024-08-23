@@ -542,8 +542,8 @@ void SubwindowOhos::ClearMenu()
 bool SubwindowOhos::ShowPreviewNG()
 {
     CHECK_NULL_RETURN(window_, false);
-    ShowWindow(false);
     ResizeWindow();
+    ShowWindow(false);
     window_->SetTouchable(false);
     return true;
 }
@@ -585,8 +585,8 @@ void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> customNode, const NG:
         menuWrapperPattern->RegisterMenuCallback(menuNode, menuParam);
         menuWrapperPattern->SetMenuTransitionEffect(menuNode, menuParam);
     }
-    ShowWindow();
     ResizeWindow();
+    ShowWindow();
     CHECK_NULL_VOID(window_);
     window_->SetTouchable(true);
     overlay->ShowMenuInSubWindow(targetNode->GetId(), offset, menuNode);
@@ -603,8 +603,8 @@ void SubwindowOhos::ShowMenuNG(std::function<void()>&& buildFunc, std::function<
     CHECK_NULL_VOID(context);
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
-    ShowWindow();
     ResizeWindow();
+    ShowWindow();
     CHECK_NULL_VOID(window_);
     window_->SetTouchable(true);
     NG::ScopedViewStackProcessor builderViewStackProcessor;
@@ -868,11 +868,11 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
     }
     SubwindowManager::GetInstance()->SetDialogSubWindowId(
         SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
+    ResizeWindow();
     ShowWindow();
     CHECK_NULL_RETURN(window_, nullptr);
     window_->SetFullScreen(true);
     window_->SetTouchable(true);
-    ResizeWindow();
     ContainerScope scope(childContainerId_);
     auto dialog = overlay->ShowDialog(dialogProps, std::move(buildFunc));
     CHECK_NULL_RETURN(dialog, nullptr);
@@ -903,11 +903,11 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNGWithNode(
     }
     SubwindowManager::GetInstance()->SetDialogSubWindowId(
         SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
+    ResizeWindow();
     ShowWindow();
     CHECK_NULL_RETURN(window_, nullptr);
     window_->SetFullScreen(true);
     window_->SetTouchable(true);
-    ResizeWindow();
     ContainerScope scope(childContainerId_);
     auto dialog = overlay->ShowDialogWithNode(dialogProps, customNode);
     CHECK_NULL_RETURN(dialog, nullptr);
@@ -952,11 +952,11 @@ void SubwindowOhos::OpenCustomDialogNG(const DialogProperties& dialogProps, std:
     }
     SubwindowManager::GetInstance()->SetDialogSubWindowId(
         SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
+    ResizeWindow();
     ShowWindow();
     CHECK_NULL_VOID(window_);
     window_->SetFullScreen(true);
     window_->SetTouchable(true);
-    ResizeWindow();
     ContainerScope scope(childContainerId_);
     overlay->OpenCustomDialog(dialogProps, std::move(callback));
     haveDialog_ = true;

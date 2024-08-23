@@ -286,8 +286,14 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             const componentName = entry.getComponentName();
             stateMgmtConsole.debug(`${this.debugInfo__()}: UpdateElement: re-render of ${componentName} elmtId ${elmtId} start ...`);
             stateMgmtProfiler.begin('ViewV2.updateFunc');
-            updateFunc(elmtId, /* isFirstRender */ false);
-            stateMgmtProfiler.end();
+            try {
+                updateFunc(elmtId, /* isFirstRender */ false);
+            } catch (e) {
+                stateMgmtConsole.applicationError(`Exception caught in update function of ${componentName} for elmtId ${elmtId}`, e.toString());
+                throw e;
+            } finally {
+                stateMgmtProfiler.end();
+            }
             stateMgmtProfiler.begin('ViewV2.finishUpdateFunc (native)');
             this.finishUpdateFunc(elmtId);
             stateMgmtProfiler.end();

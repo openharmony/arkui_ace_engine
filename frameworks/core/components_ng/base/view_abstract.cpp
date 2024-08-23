@@ -1000,6 +1000,20 @@ void ViewAbstract::DisableOnDetach(FrameNode* frameNode)
     eventHub->ClearOnDetach();
 }
 
+void ViewAbstract::DisableOnLoad(FrameNode* frameNode)
+{
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearOnLoad();
+}
+
+void ViewAbstract::DisableOnDestroy(FrameNode* frameNode)
+{
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearOnDestroy();
+}
+
 void ViewAbstract::DisableOnFocus(FrameNode* frameNode)
 {
     auto focusHub = frameNode->GetOrCreateFocusHub();
@@ -2033,6 +2047,14 @@ void ViewAbstract::SetFgDynamicBrightness(const BrightnessOption& brightnessOpti
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(FgDynamicBrightnessOption, brightnessOption);
+}
+
+void ViewAbstract::SetBrightnessBlender(const OHOS::Rosen::BrightnessBlender* brightnessBlender)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(BrightnessBlender, brightnessBlender);
 }
 
 void ViewAbstract::SetFrontBlur(const Dimension& radius, const BlurOption& blurOption)
@@ -3547,6 +3569,12 @@ void ViewAbstract::SetFgDynamicBrightness(FrameNode* frameNode, const Brightness
     ACE_UPDATE_NODE_RENDER_CONTEXT(FgDynamicBrightnessOption, brightnessOption, frameNode);
 }
 
+void ViewAbstract::SetBrightnessBlender(FrameNode* frameNode, const OHOS::Rosen::BrightnessBlender* brightnessBlender)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BrightnessBlender, brightnessBlender, frameNode);
+}
+
 void ViewAbstract::SetDragPreviewOptions(FrameNode* frameNode, const DragPreviewOption& previewOption)
 {
     CHECK_NULL_VOID(frameNode);
@@ -3578,6 +3606,7 @@ void ViewAbstract::SetMouseResponseRegion(FrameNode* frameNode, const std::vecto
 void ViewAbstract::SetSharedTransition(
     FrameNode* frameNode, const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option)
 {
+    CHECK_NULL_VOID(frameNode);
     const auto& target = frameNode->GetRenderContext();
     if (target) {
         target->SetSharedTransitionOptions(option);
@@ -3733,6 +3762,22 @@ void ViewAbstract::SetOnDetach(FrameNode* frameNode, std::function<void()>&& onD
     auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDetach(std::move(onDetach));
+}
+
+void ViewAbstract::SetOnLoad(FrameNode* frameNode, std::function<void(const std::string& xcomponentId)>&& onLoad)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnLoad(std::move(onLoad));
+}
+
+void ViewAbstract::SetOnDestroy(FrameNode* frameNode, std::function<void()>&& onDestroy)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDestroy(std::move(onDestroy));
 }
 
 void ViewAbstract::SetOnAreaChanged(FrameNode* frameNode, std::function<void(const RectF &oldRect,

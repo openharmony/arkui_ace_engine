@@ -344,7 +344,8 @@ RefPtr<NG::UINode> JSNavigationStack::CreateNodeByIndex(int32_t index, const Wea
         pattern->SetName(name);
         pattern->SetIndex(index);
         auto onPop = GetOnPopByIndex(index);
-        auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, param, onPop);
+        auto isEntry = GetIsEntryByIndex(index);
+        auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, param, onPop, isEntry);
         pattern->SetNavPathInfo(pathInfo);
         pattern->SetNavigationStack(WeakClaim(this));
     }
@@ -420,6 +421,42 @@ JSRef<JSVal> JSNavigationStack::GetOnPopByIndex(int32_t index) const
     JSRef<JSVal> params[1];
     params[0] = JSRef<JSVal>::Make(ToJSValue(index));
     return func->Call(dataSourceObj_, 1, params);
+}
+
+bool JSNavigationStack::GetIsEntryByIndex(int32_t index)
+{
+    if (dataSourceObj_->IsEmpty()) {
+        return false;
+    }
+    auto getIsEntryFunc = dataSourceObj_->GetProperty("getIsEntryByIndex");
+    if (!getIsEntryFunc->IsFunction()) {
+        return false;
+    }
+    auto func = JSRef<JSFunc>::Cast(getIsEntryFunc);
+    JSRef<JSVal> params[1];
+    params[0] = JSRef<JSVal>::Make(ToJSValue(index));
+    auto result = func->Call(dataSourceObj_, 1, params);
+    if (!result->IsBoolean()) {
+        return false;
+    }
+    return result->ToBoolean();
+}
+
+void JSNavigationStack::SetIsEntryByIndex(int32_t index, bool isEntry)
+{
+    CHECK_NULL_VOID(dataSourceObj_->IsEmpty());
+    if (dataSourceObj_->IsEmpty()) {
+        return;
+    }
+    auto setIsEntryFunc = dataSourceObj_->GetProperty("setIsEntryByIndex");
+    if (!setIsEntryFunc->IsFunction()) {
+        return;
+    }
+    auto func = JSRef<JSFunc>::Cast(setIsEntryFunc);
+    JSRef<JSVal> params[ARGC_COUNT_TWO];
+    params[0] = JSRef<JSVal>::Make(ToJSValue(index));
+    params[1] = JSRef<JSVal>::Make(ToJSValue(isEntry));
+    func->Call(dataSourceObj_, ARGC_COUNT_TWO, params);
 }
 
 bool JSNavigationStack::GetNavDestinationNodeInUINode(
@@ -723,7 +760,9 @@ int32_t JSNavigationStack::CheckNavDestinationExists(const JSRef<JSObject>& navP
     auto pattern = AceType::DynamicCast<NG::NavDestinationPattern>(desNode->GetPattern());
     if (pattern) {
         auto onPop = navPathInfo->GetProperty("onPop");
-        auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, param, onPop);
+        auto isEntryVal = navPathInfo->GetProperty("isEntry");
+        bool isEntry = isEntryVal->IsBoolean() ? isEntryVal->ToBoolean() : false;
+        auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, param, onPop, isEntry);
         pattern->SetNavPathInfo(pathInfo);
         pattern->SetNavigationStack(WeakClaim(this));
     }
@@ -1064,6 +1103,7 @@ JSRef<JSObject> JSNavigationStack::CreatePathInfoWithNecessaryProperty(
     pathInfo->SetProperty<std::string>("navDestinationId", std::to_string(context->GetNavDestinationId()));
     pathInfo->SetProperty("param", jsPathInfo->GetParam());
     pathInfo->SetProperty("onPop", jsPathInfo->GetOnPop());
+    pathInfo->SetProperty("isEntry", jsPathInfo->GetIsEntry());
     return pathInfo;
 }
 

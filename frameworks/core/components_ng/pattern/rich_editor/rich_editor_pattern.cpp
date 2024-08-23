@@ -75,8 +75,8 @@
 #include "core/pipeline/base/element_register.h"
 #include "core/text/text_emoji_processor.h"
 
-#if not defined(ACE_UNITTEST)
-#if defined(ENABLE_STANDARD_INPUT)
+#ifndef ACE_UNITTEST
+#ifdef ENABLE_STANDARD_INPUT
 #include "commonlibrary/c_utils/base/include/refbase.h"
 
 #include "core/components_ng/pattern/text_field/on_text_changed_listener_impl.h"
@@ -1041,16 +1041,14 @@ void RichEditorPattern::AfterAddSymbol(RichEditorChangeValue& changeValue)
 void RichEditorPattern::SpanNodeFission(RefPtr<SpanNode>& spanNode)
 {
     auto spanItem = spanNode->GetSpanItem();
-    auto content = StringUtils::ToWstring(spanItem->content);
-    auto contentLen = content.length();
-    auto spanStart = spanItem->position - contentLen;
-    for (size_t i = 0; i < content.length(); i++) {
-        auto character = content[i];
-        if (character == '\n') {
-            auto charPosition = spanStart + i;
-            TextSpanSplit(static_cast<int32_t>(charPosition + 1));
+    auto wContent = StringUtils::ToWstring(spanItem->content);
+    auto spanStart = spanItem->position - wContent.length();
+    for (size_t i = 0; i < wContent.length(); i++) {
+        if (wContent[i] == '\n') {
+            TextSpanSplit(static_cast<int32_t>(spanStart + i + 1));
         }
     }
+    UpdateSpanPosition();
 }
 
 void RichEditorPattern::DeleteSpans(const RangeOptions& options)
@@ -1603,6 +1601,11 @@ void RichEditorPattern::SetTypingStyle(std::optional<struct UpdateSpanStyle> typ
     typingStyle_ = typingStyle;
     typingTextStyle_ = textStyle;
     presetParagraph_ = nullptr;
+    if (spans_.empty() || !previewTextRecord_.previewContent.empty()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 std::optional<struct UpdateSpanStyle> RichEditorPattern::GetTypingStyle()
@@ -4964,7 +4967,7 @@ std::wstring RichEditorPattern::DeleteBackwardOperation(int32_t length)
         DoDeleteActions(0, 0, info);
         return deleteText;
     }
-    info.SetOffset(caretPosition_ - 1);
+    info.SetOffset(caretPosition_ - length);
     info.SetLength(length);
     int32_t currentPosition = std::clamp((caretPosition_ - length), 0, static_cast<int32_t>(GetTextContentLength()));
     if (!spans_.empty()) {
@@ -8557,8 +8560,6 @@ void RichEditorPattern::HandleOnEditChanged(bool isEditing)
             TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "enter edit state, reset previewLongPress_");
             previewLongPress_ = false;
         }
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "cancel AI task");
-        dataDetectorAdapter_->CancelAITask();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
@@ -8899,7 +8900,7 @@ void RichEditorPattern::GetDeletedSpan(RichEditorChangeValue& changeValue, int32
             changeValue.SetRichEditorOriginalSpans(it);
         } else if (it.GetType() == SpanResultType::SYMBOL && textSelector_.SelectNothing() &&
             previewTextRecord_.previewContent.empty()) {
-            int32_t symbolStart = innerPosition - 1;
+            int32_t symbolStart = it.GetSpanRangeStart();
             changeValue.SetRichEditorOriginalSpans(it);
             changeValue.SetRangeBefore({ symbolStart, symbolStart + SYMBOL_SPAN_LENGTH });
             changeValue.SetRangeAfter({ symbolStart, symbolStart });
@@ -9935,6 +9936,9 @@ void RichEditorPattern::TripleClickSection(GestureEvent& info, int32_t start, in
         showSelect_ = true;
         RequestKeyboard(false, true, true);
         HandleOnEditChanged(true);
+        SetCaretPosition(end);
+        caretAffinityPolicy_ = CaretAffinityPolicy::UPSTREAM_FIRST;
+        MoveCaretToContentRect();
         CalculateHandleOffsetAndShowOverlay();
         selectOverlay_->ProcessOverlay({ .menuIsShow = !selectOverlay_->GetIsHandleMoving(), .animation = true });
     }

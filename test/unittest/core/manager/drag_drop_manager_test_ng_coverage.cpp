@@ -30,7 +30,7 @@ void DragDropManagerTestNgCoverage::SetUpTestCase()
 {
     MockPipelineContext::SetUp();
     MockContainer::SetUp();
-    MOCK_DRAG_WINDOW = DragWindow::CreateDragWindow("", 0, 0, 0, 0);
+    MOCK_DRAG_WINDOW = DragWindow::CreateDragWindow({"", 0, 0, 0, 0, 0});
 }
 
 void DragDropManagerTestNgCoverage::TearDownTestCase()

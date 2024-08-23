@@ -34,6 +34,7 @@ constexpr int32_t MOUSE_HOVER_DURATION = 250;
 constexpr int32_t TYPE_TOUCH = 0;
 constexpr int32_t TYPE_HOVER = 1;
 constexpr int32_t TYPE_CANCEL = 2;
+constexpr float NORMAL_SCALE = 1.0f;
 } // namespace
 
 Color ButtonPattern::GetColorFromType(const RefPtr<ButtonTheme>& theme, const int32_t& type)
@@ -194,6 +195,15 @@ void ButtonPattern::InitButtonLabel()
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
+    if (layoutProperty->HasType() && layoutProperty->GetType() == ButtonType::CIRCLE) {
+        textLayoutProperty->UpdateMaxFontScale(NORMAL_SCALE);
+    } else {
+        auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+        CHECK_NULL_VOID(pipeline);
+        auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+        CHECK_NULL_VOID(buttonTheme);
+        textLayoutProperty->UpdateMaxFontScale(buttonTheme->GetMaxFontSizeScale());
+    }
     UpdateTextLayoutProperty(layoutProperty, textLayoutProperty);
     auto buttonRenderContext = host->GetRenderContext();
     CHECK_NULL_VOID(buttonRenderContext);

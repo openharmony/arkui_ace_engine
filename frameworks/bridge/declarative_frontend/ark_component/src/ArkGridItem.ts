@@ -80,9 +80,36 @@ class GridItemColumnEndModifier extends ModifierWithKey<number> {
   }
 }
 
+class GridItemOptionsModifier extends ModifierWithKey<GridItemOptions> {
+  static identity: Symbol = Symbol('gridItemOptions');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().gridItem.setGridItemOptions(node, undefined);
+    } else {
+      if (this.value?.style === undefined) {
+        getUINativeModule().gridItem.setGridItemOptions(node, undefined);
+      } else {
+        getUINativeModule().gridItem.setGridItemOptions(node, this.value.style);
+      }
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue?.style, this.value?.style);
+  }
+}
+
 class ArkGridItemComponent extends ArkComponent implements GridItemAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
+  }
+  allowChildCount(): number {
+    return 1;
+  }
+  initialize(value: Object[]): this {
+    if (value.length === 1 && isObject(value[0])) {
+      modifierWithKey(this._modifiersWithKeys, GridItemOptionsModifier.identity, GridItemOptionsModifier, value[0]);
+    }
+    return this;
   }
   rowStart(value: number): this {
     modifierWithKey(this._modifiersWithKeys, GridItemRowStartModifier.identity, GridItemRowStartModifier, value);

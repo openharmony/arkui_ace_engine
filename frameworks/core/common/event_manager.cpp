@@ -1896,12 +1896,20 @@ EventManager::EventManager()
     refereeNG_->SetQueryStateFunc(std::move(cleanReferee));
 }
 
-void EventManager::DumpEvent() const
+void EventManager::DumpEvent(bool hasJson) const
 {
-    std::list<std::pair<int32_t, std::string>> dumpList;
-    eventTree_.Dump(dumpList, 0);
-    for (auto& item : dumpList) {
-        DumpLog::GetInstance().Print(item.first, item.second);
+    if (hasJson) {
+        std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+        std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
+        eventTree_.Dump(children, 0);
+        json->Put("DumpEvent", children);
+        DumpLog::GetInstance().PrintJson(json->ToString());
+    } else {
+        std::list<std::pair<int32_t, std::string>> dumpList;
+        eventTree_.Dump(dumpList, 0);
+        for (auto& item : dumpList) {
+            DumpLog::GetInstance().Print(item.first, item.second);
+        }
     }
 }
 
