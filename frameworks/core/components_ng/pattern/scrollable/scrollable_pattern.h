@@ -591,16 +591,22 @@ public:
     void AddScrollableFrameInfo(int32_t scrollSource);
 
     void GetEdgeEffectDumpInfo();
+    void GetEdgeEffectDumpInfo(std::unique_ptr<JsonValue>& json);
 
     void GetAxisDumpInfo();
+    void GetAxisDumpInfo(std::unique_ptr<JsonValue>& json);
 
     void GetPanDirectionDumpInfo();
-    
+    void GetPanDirectionDumpInfo(std::unique_ptr<JsonValue>& json);
+
     void GetPaintPropertyDumpInfo();
+    void GetPaintPropertyDumpInfo(std::unique_ptr<JsonValue>& json);
 
     void GetEventDumpInfo();
+    void GetEventDumpInfo(std::unique_ptr<JsonValue>& json);
 
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
 
     void SetScrollToSafeAreaHelper(bool isScrollToSafeAreaHelper)
     {

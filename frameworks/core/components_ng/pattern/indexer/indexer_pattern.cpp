@@ -2081,6 +2081,7 @@ void IndexerPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("PopupPositionY",
         layoutProperty->GetPopupPositionYValue(Dimension(NG::BUBBLE_POSITION_Y, DimensionUnit::VP)).ToString().c_str());
     json->Put("AutoCollapse", autoCollapse_ ? "true" : "false");
+    json->Put("IsPopup", isPopup_ ? "true" : "false");
     json->Put("EnableHapticFeedback", std::to_string(enableHapticFeedback_).c_str());
 }
 } // namespace OHOS::Ace::NG
