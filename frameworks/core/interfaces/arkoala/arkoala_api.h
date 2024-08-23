@@ -4471,6 +4471,7 @@ struct ArkUISideBarModifier {
 };
 
 struct ArkUIXComponentModifier {
+    void (*initXComponent)(ArkUINodeHandle node);
     // loadXComponent() returns VM-specific handle produced by
     // ArkNativeEngine::LoadModuleByName(). vmKind parameters allows to
     // differentiate which VM shall be used to load. Embedder code must use kind

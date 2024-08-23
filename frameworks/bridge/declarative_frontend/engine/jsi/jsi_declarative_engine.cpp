@@ -2146,7 +2146,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
         CHECK_EQUAL_VOID(xcPattern->GetLibraryName().has_value(), false);
         std::weak_ptr<OH_NativeXComponent> weakNativeXComponent;
         RefPtr<OHOS::Ace::NativeXComponentImpl> nativeXComponentImpl = nullptr;
-
+        LOGE("Kee JsiDeclarativeEngine::FireExternalEvent");
         std::tie(nativeXComponentImpl, weakNativeXComponent) = xcPattern->GetNativeXComponent();
         auto nativeXComponent = weakNativeXComponent.lock();
         CHECK_NULL_VOID(nativeXComponent);

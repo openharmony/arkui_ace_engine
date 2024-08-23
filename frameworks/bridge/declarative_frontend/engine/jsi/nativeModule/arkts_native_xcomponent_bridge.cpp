@@ -289,6 +289,7 @@ ArkUINativeModuleValue XComponentBridge::SetXComponentInitialize(ArkUIRuntimeCal
     }
     HandlerDetachCallback(runtimeCallInfo);
     HandlerImageAIOptions(runtimeCallInfo);
+    GetArkUINodeModifiers()->getXComponentModifier()->initXComponent(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

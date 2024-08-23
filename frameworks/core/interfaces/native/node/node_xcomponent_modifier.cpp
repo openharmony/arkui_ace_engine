@@ -176,6 +176,7 @@ ArkUI_Uint32 GetXComponentSurfaceHeight(ArkUINodeHandle node)
 
 void* GetNativeXComponent(ArkUINodeHandle node)
 {
+    LOGE("Kee GetNativeXComponent ArkUINodeHandle");
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto xcPattern = frameNode->GetPattern<XComponentPattern>();
@@ -197,12 +198,20 @@ void SetImageAIOptions(ArkUINodeHandle node, void* options)
     CHECK_NULL_VOID(frameNode);
     XComponentModelNG::SetImageAIOptions(frameNode, options);
 }
+
+void InitXComponent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    XComponentModelNG::InitXComponent(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
 const ArkUIXComponentModifier* GetXComponentModifier()
 {
     static const ArkUIXComponentModifier modifier = {
+        InitXComponent,
         nullptr, // loadXComponent
         nullptr, // setXComponentOptions
         nullptr, // getXComponentSurfaceId

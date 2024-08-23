@@ -331,10 +331,13 @@ int32_t OH_NativeXComponent_GetTouchEventSourceType(
 
 OH_NativeXComponent* OH_NativeXComponent_GetNativeXComponent(ArkUI_NodeHandle node)
 {
-    if (node == nullptr || node->type != ARKUI_NODE_XCOMPONENT) {
+    LOGE("Kee OH_NativeXComponent_GetNativeXComponent 1 %{public}p", node);
+    if (node == nullptr) {
         return nullptr;
     }
+    LOGE("Kee OH_NativeXComponent_GetNativeXComponent 2 %{public}p", node);
     auto nodeModifiers = OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers();
+    LOGE("Kee OH_NativeXComponent_GetNativeXComponent 3 %{public}p", node);
     return reinterpret_cast<OH_NativeXComponent*>(
         nodeModifiers->getXComponentModifier()->getNativeXComponent(node->uiNodeHandle));
 }
