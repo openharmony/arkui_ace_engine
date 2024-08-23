@@ -468,6 +468,7 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         if (NeedAutoPlay() && !translateTask_) {
             StartAutoPlay();
         }
+        UpdateCurrentFocus();
         host->ChildrenUpdatedFrom(-1);
     }
 
