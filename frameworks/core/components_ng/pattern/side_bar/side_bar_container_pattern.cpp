@@ -62,7 +62,6 @@ constexpr Dimension DEFAULT_DRAG_REGION = 20.0_vp;
 constexpr int32_t SIDEBAR_DURATION = 500;
 const RefPtr<CubicCurve> SIDEBAR_CURVE = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.2f, 0.1f, 1.0f);
 constexpr Dimension DEFAULT_DIVIDER_STROKE_WIDTH = 1.0_vp;
-constexpr Dimension DEFAULT_DIVIDER_START_MARGIN_VP = 0.0_vp;
 constexpr Dimension DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_VP = 2.0_vp;
 constexpr Color DEFAULT_DIVIDER_COLOR = Color(0x08000000);
 constexpr static int32_t PLATFORM_VERSION_TEN = 10;
@@ -975,11 +974,9 @@ void SideBarContainerPattern::AddDividerHotZoneRect(const RefPtr<SideBarContaine
     auto dividerHeight = geometryNode->GetFrameSize().Height();
     auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto dividerStartMagin = layoutProperty->GetDividerStartMargin().value_or(DEFAULT_DIVIDER_START_MARGIN_VP);
 
     OffsetF hotZoneOffset;
     hotZoneOffset.SetX(-DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_VP.ConvertToPx());
-    hotZoneOffset.SetY(-dividerStartMagin.ConvertToPx());
     SizeF hotZoneSize;
     auto baseWidth = NearZero(realDividerWidth_, 0.0f) ?
         DEFAULT_DIVIDER_STROKE_WIDTH.ConvertToPx() : realDividerWidth_;
