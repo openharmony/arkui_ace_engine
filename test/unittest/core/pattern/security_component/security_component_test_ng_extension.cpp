@@ -102,7 +102,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     auto renderContext = parentFrameNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdateForegroundColor(Color::TRANSPARENT);
-    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
     ASSERT_EQ(renderContext->GetForegroundColor().value(), Color::TRANSPARENT);
     renderContext->UpdateForegroundColor(Color::GRAY);
     ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
@@ -440,6 +440,32 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     RefPtr<TestNode> unFrameNode = AceType::MakeRefPtr<TestNode>(0);
     unFrameNode->AddChild(childFrameNode);
     EXPECT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+}
+
+/**
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest018
+ * @tc.desc: Test security component CheckParentNodesEffect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest018, TestSize.Level1)
+{
+    RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(parentFrameNode, nullptr);
+    RefPtr<FrameNode> childFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(childFrameNode, nullptr);
+    parentFrameNode->AddChild(childFrameNode);
+
+    auto renderContext = parentFrameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    BlurStyleOption blur;
+    blur.blurStyle = BlurStyle::NO_MATERIAL;
+    renderContext->UpdateFrontBlurStyle(blur);
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    auto blurStyleOption = renderContext->GetFrontBlurStyle();
+    ASSERT_EQ(blurStyleOption->blurStyle, BlurStyle::NO_MATERIAL);
 }
 
 /**

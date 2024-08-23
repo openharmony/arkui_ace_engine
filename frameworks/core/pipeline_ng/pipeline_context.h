@@ -847,6 +847,8 @@ public:
     {
         return isWindowHasFocused_ && GetOnFoucs();
     }
+
+    void CollectTouchEventsBeforeVsync(std::list<TouchEvent>& touchEvents);
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -929,6 +931,8 @@ private:
     void FlushFrameRate();
 
     void RegisterFocusCallback();
+    void DumpFocus(bool hasJson) const;
+    void DumpInspector(const std::vector<std::string>& params, bool hasJson) const;
 
     template<typename T>
     struct NodeCompare {

@@ -15,7 +15,6 @@
 
 #include "grid_test_ng.h"
 
-#include "core/components_ng/pattern/grid/grid_layout_info.h"
 namespace OHOS::Ace::NG {
 
 namespace {} // namespace

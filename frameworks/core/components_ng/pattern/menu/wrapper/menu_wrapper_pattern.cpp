@@ -86,8 +86,7 @@ RectF MenuWrapperPattern::GetMenuZone(RefPtr<UINode>& innerMenuNode)
         CHECK_NULL_RETURN(scrollNode, RectF());
         innerMenuNode = DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
         CHECK_NULL_RETURN(innerMenuNode, RectF());
-        auto offset = DynamicCast<FrameNode>(innerMenuNode)->GetOffsetRelativeToWindow();
-        menuZone.SetOffset(offset);
+        menuZone = subMenuNode->GetGeometryNode()->GetFrameRect();
     }
     return menuZone;
 }
@@ -720,5 +719,26 @@ void MenuWrapperPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("OriginPlacement: " + dumpInfo_.originPlacement);
     DumpLog::GetInstance().AddDesc("FinalPosition: " + dumpInfo_.finalPosition.ToString());
     DumpLog::GetInstance().AddDesc("FinalPlacement: " + dumpInfo_.finalPlacement);
+}
+
+void MenuWrapperPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("MenuPreviewMode", std::to_string(dumpInfo_.menuPreviewMode).c_str());
+    json->Put("MenuType", std::to_string(dumpInfo_.menuType).c_str());
+    json->Put("EnableArrow", std::to_string(dumpInfo_.enableArrow).c_str());
+    json->Put("TargetNode", dumpInfo_.targetNode.c_str());
+    json->Put("TargetOffset", dumpInfo_.targetOffset.ToString().c_str());
+
+    json->Put("TargetSize", dumpInfo_.targetSize.ToString().c_str());
+    json->Put("WrapperRect", dumpInfo_.wrapperRect.ToString().c_str());
+    json->Put("PreviewBeginScale", std::to_string(dumpInfo_.previewBeginScale).c_str());
+    json->Put("PreviewEndScale", std::to_string(dumpInfo_.previewEndScale).c_str());
+    json->Put("Top", std::to_string(dumpInfo_.top).c_str());
+
+    json->Put("Bottom", std::to_string(dumpInfo_.bottom).c_str());
+    json->Put("GlobalLocation", dumpInfo_.globalLocation.ToString().c_str());
+    json->Put("OriginPlacement", dumpInfo_.originPlacement.c_str());
+    json->Put("FinalPosition", dumpInfo_.finalPosition.ToString().c_str());
+    json->Put("FinalPlacement", dumpInfo_.finalPlacement.c_str());
 }
 } // namespace OHOS::Ace::NG

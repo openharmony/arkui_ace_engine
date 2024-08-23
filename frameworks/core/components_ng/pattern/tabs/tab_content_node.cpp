@@ -151,8 +151,8 @@ void TabContentNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
     CHECK_NULL_VOID(tabTheme);
     label->Put("unselectedColor", labelStyle.unselectedColor.value_or(
         tabTheme->GetSubTabTextOffColor()).ColorToString().c_str());
-    auto selectColor = tabContentPattern->GetSelectedMode() == SelectedMode::BOARD ?
-        tabTheme->GetSubTabBoardTextOnColor() : tabTheme->GetSubTabTextOnColor();
+    auto selectColor = tabContentPattern->GetSelectedMode() == SelectedMode::BOARD &&
+        GetTabBarAxis() == Axis::HORIZONTAL ? tabTheme->GetSubTabBoardTextOnColor() : tabTheme->GetSubTabTextOnColor();
     label->Put("selectedColor", labelStyle.selectedColor.value_or(selectColor).ColorToString().c_str());
     tabBar->Put("labelStyle", label);
 
@@ -173,6 +173,20 @@ void TabContentNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
     tabBar->Put("id", tabContentPattern->GetId().c_str());
 
     json->PutExtAttr("tabBar", tabBar, filter);
+}
+
+Axis TabContentNode::GetTabBarAxis() const
+{
+    if (!tabBarItemId_.has_value()) {
+        return Axis::HORIZONTAL;
+    }
+    auto columnNode = GetFrameNode(V2::COLUMN_ETS_TAG, tabBarItemId_.value());
+    CHECK_NULL_RETURN(columnNode, Axis::HORIZONTAL);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(columnNode->GetParent());
+    CHECK_NULL_RETURN(tabBarNode, Axis::HORIZONTAL);
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_RETURN(tabBarLayoutProperty, Axis::HORIZONTAL);
+    return tabBarLayoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
 }
 
 std::string TabContentNode::ConvertFlexAlignToString(FlexAlign verticalAlign) const

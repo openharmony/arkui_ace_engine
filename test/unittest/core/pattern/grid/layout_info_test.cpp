@@ -415,6 +415,7 @@ void CheckEachIndex(const GridLayoutInfo& info, int32_t maxIdx)
 HWTEST_F(GridLayoutInfoTest, FindInMatrix, TestSize.Level1)
 {
     GridLayoutInfo info;
+    info.crossCount_ = 1;
     auto nullIt = info.FindInMatrix(1);
     EXPECT_EQ(nullIt, info.gridMatrix_.end());
 
@@ -434,6 +435,7 @@ HWTEST_F(GridLayoutInfoTest, FindInMatrix, TestSize.Level1)
 HWTEST_F(GridLayoutInfoTest, FindInMatrix002, TestSize.Level1)
 {
     GridLayoutInfo info;
+    info.crossCount_ = 2;
     info.gridMatrix_ = MATRIX_DEMO_3;
 
     CheckEachIndex(info, 11);
@@ -450,6 +452,7 @@ HWTEST_F(GridLayoutInfoTest, FindInMatrix002, TestSize.Level1)
 HWTEST_F(GridLayoutInfoTest, FindInMatrix003, TestSize.Level1)
 {
     GridLayoutInfo info;
+    info.crossCount_ = 2;
     info.gridMatrix_ = MATRIX_DEMO_5;
 
     CheckEachIndex(info, 10);
@@ -560,7 +563,7 @@ HWTEST_F(GridLayoutInfoTest, OutOfEnd001, TestSize.Level1)
 HWTEST_F(GridLayoutInfoTest, FindStartLineInMatrix001, TestSize.Level1)
 {
     GridLayoutInfo info;
-
+    info.crossCount_ = 3;
     info.gridMatrix_ = MATRIX_DEMO_8;
     auto item = info.FindInMatrix(5);
     item = info.FindStartLineInMatrix(item, 5);

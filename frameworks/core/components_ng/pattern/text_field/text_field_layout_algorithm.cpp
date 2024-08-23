@@ -525,6 +525,22 @@ void TextFieldLayoutAlgorithm::HandleNonTextArea(LayoutWrapper* layoutWrapper, c
     CHECK_NULL_VOID(textGeometryNode);
 
     countX = contentRect.GetX();
+    auto responseArea = pattern->GetResponseArea();
+    auto cleanNodeResponseArea = pattern->GetCleanNodeResponseArea();
+    if (responseArea) {
+        if (isRTL) {
+            countX -= responseArea->GetAreaRect().Width();
+        } else {
+            countX += responseArea->GetAreaRect().Width();
+        }
+    }
+    if (cleanNodeResponseArea) {
+        if (isRTL) {
+            countX -= cleanNodeResponseArea->GetAreaRect().Width();
+        } else {
+            countX += cleanNodeResponseArea->GetAreaRect().Width();
+        }
+    }
     textGeometryNode->SetFrameOffset(OffsetF(countX, frameRect.Height() + textGeometryNode->GetFrameRect().Height()));
     counterNode->Layout();
 }
@@ -966,34 +982,34 @@ bool TextFieldLayoutAlgorithm::AddAdaptFontSizeAndAnimations(TextStyle& textStyl
     SetAdaptFontSizeLineHeight(lineHeight, textStyle);
     textStyle.SetLineHeight(Dimension(), false);
     bool result = false;
+    const std::string& text = textContent_.empty() ? "a" : textContent_;
     switch (layoutProperty->GetHeightAdaptivePolicyValue(TextHeightAdaptivePolicy::MAX_LINES_FIRST)) {
         case TextHeightAdaptivePolicy::MAX_LINES_FIRST:
             if (pattern->IsInlineMode()) {
-                result = AdaptInlineFocusMinFontSize(textStyle, textContent_, 1.0_fp, contentConstraint,
-                    layoutWrapper);
+                result = AdaptInlineFocusMinFontSize(textStyle, text, 1.0_fp, contentConstraint, layoutWrapper);
             } else {
-                result = AdaptMinFontSize(textStyle, textContent_, 1.0_fp, contentConstraint, layoutWrapper);
+                result = AdaptMinFontSize(textStyle, text, 1.0_fp, contentConstraint, layoutWrapper);
             }
             break;
         case TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST:
             if (pattern->IsInlineMode()) {
-                result = AdaptInlineFocusFontSize(textStyle, textContent_, 1.0_fp, contentConstraint, layoutWrapper);
+                result = AdaptInlineFocusFontSize(textStyle, text, 1.0_fp, contentConstraint, layoutWrapper);
             } else {
-                result = AdaptMinFontSize(textStyle, textContent_, 1.0_fp, contentConstraint, layoutWrapper);
+                result = AdaptMinFontSize(textStyle, text, 1.0_fp, contentConstraint, layoutWrapper);
             }
             break;
         case TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST:
             if (pattern->IsInlineMode()) {
-                result = AdaptInlineFocusFontSize(textStyle, textContent_, 1.0_fp, contentConstraint, layoutWrapper);
+                result = AdaptInlineFocusFontSize(textStyle, text, 1.0_fp, contentConstraint, layoutWrapper);
             } else {
-                result = AdaptMaxFontSize(textStyle, textContent_, 1.0_fp, contentConstraint, layoutWrapper);
+                result = AdaptMaxFontSize(textStyle, text, 1.0_fp, contentConstraint, layoutWrapper);
             }
             break;
         default:
             break;
     }
     textStyle.SetLineHeight(lineHeight, hasHeightOverride);
-    if (result && hasHeightOverride) {
+    if (result && (hasHeightOverride || textContent_.empty())) {
         return CreateParagraphAndLayout(textStyle, textContent_, contentConstraint, layoutWrapper, false);
     }
     return result;

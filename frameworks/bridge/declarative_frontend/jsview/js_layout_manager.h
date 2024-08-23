@@ -22,6 +22,7 @@
  
 namespace OHOS::Ace::Framework {
 
+constexpr int32_t DEFAULT_HEIGHT_STYLE = 5;
 struct NapiMap {
     napi_value instance;
     napi_value setFunction;
@@ -56,7 +57,29 @@ public:
     void GetLineCount(const JSCallbackInfo& args);
  
     void GetRectsForRange(const JSCallbackInfo& args);
- 
+
+    RectWidthStyle ParseRectWidthStyle(const JsiValue& widthStyleVal)
+    {
+        if (widthStyleVal->IsNumber()) {
+            int widthStyleInt = widthStyleVal->ToNumber<int>();
+            if (widthStyleInt == 0 || widthStyleInt == 1) {
+                return static_cast<RectWidthStyle>(widthStyleInt);
+            }
+        }
+        return RectWidthStyle::TIGHT;
+    }
+
+    RectHeightStyle ParseRectHeightStyle(const JsiValue& heightStyleVal)
+    {
+        if (heightStyleVal->IsNumber()) {
+            int heightStyleInt = heightStyleVal->ToNumber<int>();
+            if (heightStyleInt >= 0 && heightStyleInt <= DEFAULT_HEIGHT_STYLE) {
+                return static_cast<RectHeightStyle>(heightStyleInt);
+            }
+        }
+        return RectHeightStyle::TIGHT;
+    }
+
     void GetGlyphPositionAtCoordinate(const JSCallbackInfo& args);
  
     void DidExceedMaxLines(const JSCallbackInfo& args);

@@ -76,6 +76,7 @@ struct ViewDataCommon {
     std::string pageUrl;
     bool isUserSelected = false;
     bool isOtherAccount = false;
+    std::string source;
 };
 
 #ifdef OHOS_STANDARD_SYSTEM

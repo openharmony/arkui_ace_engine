@@ -3172,6 +3172,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     if (this._gestureEvent !== null) {
       this._gestureEvent = new UIGestureEvent();
       this._gestureEvent.setNodePtr(this.nativePtr);
+      this._gestureEvent.setWeakNodePtr(this._weakPtr);
     }
     return this._gestureEvent;
   }
@@ -4615,10 +4616,17 @@ function attributeModifierFuncWithoutStateStyles<T>(modifier: AttributeModifier<
 
 class UIGestureEvent {
   private _nodePtr: Object | null;
+  private _weakNodePtr: JsPointerClass;
   setNodePtr(nodePtr: Object | null): void {
     this._nodePtr = nodePtr;
   }
+  setWeakNodePtr(weakNodePtr: JsPointerClass): void {
+    this._weakNodePtr = weakNodePtr;
+  }
   addGesture(gesture: GestureHandler, priority?: GesturePriority, mask?: GestureMask): void {
+    if (this._weakNodePtr.invalid()) {
+      return;
+    }
     switch (gesture.gestureType) {
       case CommonGestureType.TAP_GESTURE: {
         let tapGesture: TapGestureHandler = gesture as TapGestureHandler;
@@ -4679,9 +4687,15 @@ class UIGestureEvent {
     this.addGesture(gesture, GesturePriority.PARALLEL, mask);
   }
   removeGestureByTag(tag: string): void {
+    if (this._weakNodePtr.invalid()) {
+      return;
+    }
     getUINativeModule().common.removeGestureByTag(this._nodePtr, tag);
   }
   clearGestures(): void {
+    if (this._weakNodePtr.invalid()) {
+      return;
+    }
     getUINativeModule().common.clearGestures(this._nodePtr);
   }
 }
@@ -4752,11 +4766,31 @@ function applyGesture(modifier: GestureModifier, component: ArkComponent): void 
   }
 }
 
+globalThis.__mapOfModifier__ = new Map();
 function __gestureModifier__(modifier) {
+  if (globalThis.__mapOfModifier__.size === 0) {
+    __modifierElmtDeleteCallback__();
+  }
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = new ArkComponent(nativeNode);
-  applyGesture(modifier, component);
+  if (globalThis.__mapOfModifier__.get(elmtId)) {
+    let component = globalThis.__mapOfModifier__.get(elmtId);
+    applyGesture(modifier, component);
+  } else {
+    let component = new ArkComponent(nativeNode);
+    globalThis.__mapOfModifier__.set(elmtId, component);
+    applyGesture(modifier, component);
+  }
+}
+
+declare class UINodeRegisterProxy {
+  public static registerModifierElmtDeleteCallback(): void;
+}
+
+function __modifierElmtDeleteCallback__() {
+  UINodeRegisterProxy.registerModifierElmtDeleteCallback((elmtId) => {
+    globalThis.__mapOfModifier__.delete(elmtId);
+  });
 }
 
 const __elementIdToCustomProperties__ = new Map();

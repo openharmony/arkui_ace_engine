@@ -127,10 +127,10 @@ void FormModelNG::SetModuleName(const std::string& moduleName)
 }
 
 int32_t FormModelNG::RequestPublishFormWithSnapshot(const AAFwk::Want& want,
-    const std::string& formBindingDataStr, int64_t& formId)
+    const std::string& formBindingDataStr, int64_t& formId, std::string &errMsg)
 {
     auto formUtils = FormManager::GetInstance().GetFormUtils();
-    return formUtils->RequestPublishFormEvent(want, formBindingDataStr, formId);
+    return formUtils->RequestPublishFormEvent(want, formBindingDataStr, formId, errMsg);
 }
 
 void FormModelNG::SetOnAcquired(std::function<void(const std::string&)>&& onAcquired)

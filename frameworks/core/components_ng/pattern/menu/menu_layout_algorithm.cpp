@@ -1316,6 +1316,9 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto menuPosition = lastPosition_.has_value() && CheckIsEmbeddedMode(layoutWrapper) ? lastPosition_.value()
             : MenuLayoutAvoidAlgorithm(menuProp, menuPattern, size, didNeedArrow, layoutWrapper);
         menuPattern->UpdateLastPosition(menuPosition);
+        if (menuPattern->IsSelectOverlayRightClickMenu()) {
+            AdjustSelectOverlayMenuPosition(menuPosition, geometryNode);
+        }
         auto renderContext = menuNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         TAG_LOGI(AceLogTag::ACE_MENU, "update menu postion: %{public}s", menuPosition.ToString().c_str());
@@ -1323,9 +1326,6 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
         dumpInfo_.finalPlacement = PlacementUtils::ConvertPlacementToString(placement_);
         dumpInfo_.finalPosition = menuPosition;
-        if (menuPattern->IsSelectOverlayRightClickMenu()) {
-            AdjustSelectOverlayMenuPosition(menuPosition, geometryNode);
-        }
         SetMenuPlacementForAnimation(layoutWrapper);
         if (didNeedArrow && arrowPlacement_ != Placement::NONE) {
             arrowPosition_ = GetArrowPositionWithPlacement(size, layoutWrapper);

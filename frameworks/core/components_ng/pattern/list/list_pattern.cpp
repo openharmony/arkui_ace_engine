@@ -154,8 +154,11 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         lanes_ = listLayoutAlgorithm->GetLanes();
     }
     float relativeOffset = UpdateTotalOffset(listLayoutAlgorithm, isJump);
+    auto isNeedUpdateIndex = true;
     if (targetIndex_) {
         AnimateToTarget(targetIndex_.value(), targetIndexInGroup_, scrollAlign_);
+        // AniamteToTarget does not need to update endIndex and startIndex in the first frame.
+        isNeedUpdateIndex = false;
         targetIndex_.reset();
         targetIndexInGroup_.reset();
     }
@@ -211,9 +214,11 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
     bool indexChanged = false;
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-        indexChanged = (startIndex_ != listLayoutAlgorithm->GetStartIndex()) ||
-                       (endIndex_ != listLayoutAlgorithm->GetEndIndex()) ||
-                       (centerIndex_ != listLayoutAlgorithm->GetMidIndex(AceType::RawPtr(dirty)));
+        if (isNeedUpdateIndex) {
+            indexChanged = (startIndex_ != listLayoutAlgorithm->GetStartIndex()) ||
+                           (endIndex_ != listLayoutAlgorithm->GetEndIndex()) ||
+                           (centerIndex_ != listLayoutAlgorithm->GetMidIndex(AceType::RawPtr(dirty)));
+        }
     } else {
         indexChanged =
             (startIndex_ != listLayoutAlgorithm->GetStartIndex()) || (endIndex_ != listLayoutAlgorithm->GetEndIndex());
@@ -442,6 +447,8 @@ void ListPattern::ProcessEvent(
         bool scrollDownToStart = (LessNotEqual(prevStartOffset, contentStartOffset_) || !isInitialized_) &&
             GreatOrEqual(startMainPos_, contentStartOffset_);
         if (scrollUpToStart || scrollDownToStart) {
+            TAG_LOGI(AceLogTag::ACE_LIST, "List:%{public}d onReachStart scrollUpToStart:%{public}d, "
+                "scrollDownToStart:%{public}d", host->GetId(), scrollUpToStart, scrollDownToStart);
             onReachStart();
             AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
         }
@@ -454,6 +461,8 @@ void ListPattern::ProcessEvent(
             (endIndexChanged_ || (Positive(prevEndOffset) || !isInitialized_)) && NonPositive(endOffset);
         bool scrollDownToEnd = Negative(prevEndOffset) && NonNegative(endOffset);
         if (scrollUpToEnd || (scrollDownToEnd && GetScrollSource() != SCROLL_FROM_NONE)) {
+            TAG_LOGI(AceLogTag::ACE_LIST, "List:%{public}d onReachEnd scrollUpToEnd:%{public}d, "
+                "scrollDownToEnd:%{public}d", host->GetId(), scrollUpToEnd, scrollDownToEnd);
             onReachEnd();
             AddEventsFiredInfo(ScrollableEventType::ON_REACH_END);
         }

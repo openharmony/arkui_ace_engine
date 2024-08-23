@@ -493,6 +493,8 @@ public:
     void OnAttachToMainTree(bool recursive) override;
     void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
 
+    bool RenderCustomChild(int64_t deadline) override;
+
     void TryVisibleChangeOnDescendant(bool isVisible) override;
     void NotifyVisibleChange(bool isVisible);
     void PushDestroyCallback(std::function<void()>&& callback)
@@ -513,6 +515,7 @@ public:
     void SetNDKColorModeUpdateCallback(const std::function<void(int32_t)>&& callback)
     {
         ndkColorModeUpdateCallback_ = callback;
+        colorMode_ = SystemProperties::GetColorMode();
     }
 
     void SetNDKFontUpdateCallback(const std::function<void(float, float)>&& callback)
@@ -1230,6 +1233,8 @@ private:
     bool isInternal_ = false;
 
     std::string nodeName_;
+
+    ColorMode colorMode_;
 
     bool draggable_ = false;
     bool userSet_ = false;

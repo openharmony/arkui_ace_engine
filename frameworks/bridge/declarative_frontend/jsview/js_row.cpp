@@ -102,6 +102,15 @@ void JSRow::SetJustifyContent(int32_t value)
     }
 }
 
+void JSRow::SetReverse(const JSCallbackInfo& info)
+{
+    if (info[0]->IsBoolean()) {
+        RowModel::GetInstance()->SetIsReverse(info[0]->ToBoolean());
+    } else {
+        RowModel::GetInstance()->SetIsReverse(true);
+    }
+}
+
 void JSRow::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRow>::Declare("Row");
@@ -112,6 +121,7 @@ void JSRow::JSBind(BindingTarget globalObj)
     JSClass<JSRow>::StaticMethod("wrapContent", &JSFlex::SetWrapContent, opt);
     JSClass<JSRow>::StaticMethod("justifyContent", &JSRow::SetJustifyContent, opt);
     JSClass<JSRow>::StaticMethod("alignItems", &JSRow::SetAlignItems, opt);
+    JSClass<JSRow>::StaticMethod("reverse", &JSRow::SetReverse, opt);
     JSClass<JSRow>::StaticMethod("alignContent", &JSFlex::SetAlignContent, opt);
     JSClass<JSRow>::StaticMethod("height", &JSFlex::JsHeight, opt);
     JSClass<JSRow>::StaticMethod("width", &JSFlex::JsWidth, opt);

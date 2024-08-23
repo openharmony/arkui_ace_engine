@@ -294,7 +294,7 @@ void ScrollModelNG::SetEnablePaging(bool enablePaging)
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
     if (!enablePaging) {
-        pattern->SetEnablePaging(ScrollPagingStatus::NONE);
+        pattern->SetEnablePaging(ScrollPagingStatus::INVALID);
         return;
     }
     pattern->SetEnablePaging(ScrollPagingStatus::VALID);
@@ -490,7 +490,7 @@ void ScrollModelNG::SetEnablePaging(FrameNode* frameNode, bool enablePaging)
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
     if (!enablePaging) {
-        pattern->SetEnablePaging(ScrollPagingStatus::NONE);
+        pattern->SetEnablePaging(ScrollPagingStatus::INVALID);
         return;
     }
     pattern->SetEnablePaging(ScrollPagingStatus::VALID);

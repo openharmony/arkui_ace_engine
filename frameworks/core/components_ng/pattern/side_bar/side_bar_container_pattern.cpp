@@ -31,7 +31,6 @@
 #include "core/common/container.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
@@ -124,7 +123,7 @@ void SideBarContainerPattern::OnUpdateShowSideBar(const RefPtr<SideBarContainerL
     }
 
     auto newShowSideBar = layoutProperty->GetShowSideBar().value_or(true);
-    if (newShowSideBar == showSideBar_) {
+    if (newShowSideBar == userSetShowSideBar_) {
         return;
     }
 
@@ -132,7 +131,8 @@ void SideBarContainerPattern::OnUpdateShowSideBar(const RefPtr<SideBarContainerL
         (sideBarStatus_ == SideBarStatus::SHOW && !newShowSideBar))) {
         FireChangeEvent(newShowSideBar);
     }
-
+    
+    userSetShowSideBar_ = newShowSideBar;
     SetSideBarStatus(newShowSideBar ? SideBarStatus::SHOW : SideBarStatus::HIDDEN);
     UpdateControlButtonIcon();
     auto host = GetHost();
@@ -447,7 +447,6 @@ void SideBarContainerPattern::CreateAndMountNodes()
         UpdateDividerShadow();
         return;
     }
-
     auto sideBarNode = children.front();
     sideBarNode->MovePosition(DEFAULT_NODE_SLOT);
     auto sideBarFrameNode = AceType::DynamicCast<FrameNode>(sideBarNode);
@@ -471,7 +470,6 @@ void SideBarContainerPattern::CreateAndMountNodes()
         }
     }
     host->RebuildRenderContextTree();
-
     CreateAndMountDivider(host);
     CreateAndMountControlButton(host);
     UpdateDividerShadow();
@@ -872,7 +870,10 @@ void SideBarContainerPattern::FireChangeEvent(bool isShow)
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto inspectorId = host->GetInspectorId().value_or("");
-        builder.SetId(inspectorId).SetType(host->GetTag()).SetChecked(isShow);
+        builder.SetId(inspectorId)
+            .SetType(host->GetTag())
+            .SetChecked(isShow)
+            .SetDescription(host->GetAutoEventParamValue(""));
         Recorder::EventRecorder::Get().OnChange(std::move(builder));
     }
 }
@@ -1132,14 +1133,6 @@ void SideBarContainerPattern::InitDividerMouseEvent(const RefPtr<InputEventHub>&
 
 void SideBarContainerPattern::OnDividerMouseEvent(MouseInfo& info)
 {
-    if (info.GetAction() == MouseAction::PRESS) {
-        isMousePressing_ = true;
-        TAG_LOGI(AceLogTag::ACE_SIDEBAR, "sideBarContainer Divider mouse pressed.");
-    } else if (info.GetAction() == MouseAction::RELEASE) {
-        isMousePressing_ = false;
-        TAG_LOGI(AceLogTag::ACE_SIDEBAR, "sideBarContainer Divider mouse released.");
-    }
-
     // release the mouse button, to check if still in the divider's region
     if (info.GetAction() != MouseAction::RELEASE) {
         return;
@@ -1166,7 +1159,6 @@ void SideBarContainerPattern::OnDividerMouseEvent(MouseInfo& info)
     if (currentPointerStyle != static_cast<int32_t>(format)) {
         mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), format);
     }
-    isResizeMouseStyle_ = false;
 }
 
 void SideBarContainerPattern::OnHover(bool isHover)
@@ -1185,13 +1177,6 @@ void SideBarContainerPattern::OnHover(bool isHover)
         return;
     }
     isDividerDraggable_ = true;
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        if (isResizeMouseStyle_ && isMousePressing_) {
-            // we enterned the resizing status and leaves ther divider region with mouse button pressing,
-            // do not change the style back, the mouse up event will cover the change checking
-            return;
-        }
-    }
 
     MouseFormat format = isHover ? MouseFormat::RESIZE_LEFT_RIGHT : MouseFormat::DEFAULT;
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -1203,7 +1188,6 @@ void SideBarContainerPattern::OnHover(bool isHover)
     if (currentPointerStyle != static_cast<int32_t>(format) && sideBarStatus_ == SideBarStatus::SHOW) {
         mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), format);
     }
-    isResizeMouseStyle_ = (format == MouseFormat::RESIZE_LEFT_RIGHT);
 }
 
 SideBarPosition SideBarContainerPattern::GetSideBarPositionWithRtl(

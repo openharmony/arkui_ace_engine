@@ -713,7 +713,7 @@ void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)
     CHECK_NULL_VOID(scrollable);
     scrollable->SetEdgeEffect(edgeEffect);
     if (edgeEffect != EdgeEffect::SPRING) {
-        scrollable->StopSpringAnimation();
+        scrollable->StopSpringAnimation(true);
     }
 }
 
@@ -1924,13 +1924,15 @@ ScrollResult ScrollablePattern::HandleScrollParentFirst(float& offset, int32_t s
         SetCanOverScroll(false);
         return { remainOffset, !NearZero(overOffset) };
     }
+    bool parentEdgeEffect = false;
     if (GetEdgeEffect() == EdgeEffect::NONE) {
         result = parent->HandleScroll(remainOffset, source, NestedState::CHILD_OVER_SCROLL, GetVelocity());
         if (NearZero(result.remain)) {
             offset -= overOffset;
+            parentEdgeEffect = NearZero(offset) && result.reachEdge;
         }
     }
-    SetCanOverScroll(!NearZero(overOffset) || (NearZero(offset) && result.reachEdge));
+    SetCanOverScroll((!NearZero(overOffset) && GetEdgeEffect() != EdgeEffect::NONE) || parentEdgeEffect);
     return { 0, GetCanOverScroll() };
 }
 
@@ -1972,7 +1974,8 @@ ScrollResult ScrollablePattern::HandleScrollSelfFirst(float& offset, int32_t sou
     // triggering overScroll, parent always handle it first
     auto overRes = parent->HandleScroll(result.remain, source, NestedState::CHILD_OVER_SCROLL, GetVelocity());
     offset += LessNotEqual(std::abs(overOffset), std::abs(result.remain)) ? overOffset : overRes.remain;
-    SetCanOverScroll((!NearZero(overOffset) || NearZero(offset)) && overRes.reachEdge);
+    bool parentEdgeEffect = result.reachEdge && NearZero(offset);
+    SetCanOverScroll((!NearZero(overOffset) && GetEdgeEffect() != EdgeEffect::NONE) || parentEdgeEffect);
     return { 0, GetCanOverScroll() };
 }
 

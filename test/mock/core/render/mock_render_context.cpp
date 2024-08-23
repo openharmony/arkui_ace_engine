@@ -17,15 +17,14 @@
 #include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/mock/core/animation/mock_animation_proxy.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/base/modifier.h"
 
 namespace OHOS::Ace::NG {
-void MockRenderContext::AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> modifier)
+namespace {
+void InitProp(const RefPtr<PropertyBase>& propBase)
 {
-    if (!MockAnimationManager::Enabled()) {
-        return;
-    }
-    if (auto prop = DynamicCast<AnimatableProperty<float>>(modifier->GetProperty()); prop) {
+    if (auto prop = AceType::DynamicCast<AnimatablePropertyFloat>(propBase); prop) {
         MockAnimationProxy<float>::GetInstance().RegisterProperty(prop, prop->Get());
         // setup proxy for Set, Get, GetStageValue
         prop->SetUpCallbacks(
@@ -36,7 +35,48 @@ void MockRenderContext::AttachNodeAnimatableProperty(RefPtr<NodeAnimatableProper
                 return MockAnimationProxy<float>::GetInstance().GetStagingValue(weak.Upgrade());
             });
     }
+
+    if (auto prop = AceType::DynamicCast<AnimatablePropertyOffsetF>(propBase); prop) {
+        MockAnimationProxy<OffsetF>::GetInstance().RegisterProperty(prop, prop->Get());
+        prop->SetUpCallbacks(
+            [weak = WeakPtr(prop)]() { return MockAnimationProxy<OffsetF>::GetInstance().GetEndValue(weak.Upgrade()); },
+            [weak = WeakPtr(prop)](
+                OffsetF value) { MockAnimationProxy<OffsetF>::GetInstance().RecordPropChange(weak.Upgrade(), value); },
+            [weak = WeakPtr(prop)]() {
+                return MockAnimationProxy<OffsetF>::GetInstance().GetStagingValue(weak.Upgrade());
+            });
+    }
     /* add code for other types */
 }
+} // namespace
 
+void MockRenderContext::AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> modifier)
+{
+    if (!MockAnimationManager::Enabled()) {
+        return;
+    }
+    InitProp(modifier->GetProperty());
+}
+
+void MockRenderContext::CancelTranslateXYAnimation()
+{
+    CHECK_NULL_VOID(translateXY_);
+    translateXY_->Set(translateXY_->GetStagingValue());
+}
+OffsetF MockRenderContext::GetTranslateXYProperty()
+{
+    if (!translateXY_) {
+        translateXY_ = MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF());
+        InitProp(translateXY_);
+    }
+    return translateXY_->GetStagingValue();
+}
+void MockRenderContext::UpdateTranslateInXY(const OffsetF& offset)
+{
+    if (!translateXY_) {
+        translateXY_ = MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF());
+        InitProp(translateXY_);
+    }
+    translateXY_->Set(offset);
+}
 } // namespace OHOS::Ace::NG

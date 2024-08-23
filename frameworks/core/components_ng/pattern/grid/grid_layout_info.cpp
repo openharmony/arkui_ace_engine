@@ -677,10 +677,10 @@ MatIter SearchInReverse(const decltype(GridLayoutInfo::gridMatrix_)& mat, int32_
 
 MatIter GridLayoutInfo::FindInMatrix(int32_t index) const
 {
-    if (index == 0) {
-        return gridMatrix_.begin();
-    }
     if (crossCount_ == 0) {
+        return gridMatrix_.end();
+    }
+    if (index == 0) {
         return gridMatrix_.begin();
     }
     size_t count = gridMatrix_.size();

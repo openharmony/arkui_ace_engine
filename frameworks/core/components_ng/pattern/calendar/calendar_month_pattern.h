@@ -152,6 +152,8 @@ private:
     void InitializeCalendarAccessibility();
     void ChangeVirtualNodeState(const CalendarDay& calendarDay);
     void SetLineNodeSize(RefPtr<FrameNode> lineNode);
+    void SetFocusNode(int32_t index, bool isDeviceOrientation = false);
+    std::string GetDayStr(int32_t index);
     bool isCalendarDialog_ = false;
     bool hoverState_ = false;
     bool isOnHover_ = false;
@@ -168,6 +170,7 @@ private:
     std::shared_ptr<AccessibilitySAObserverCallback> accessibilitySAObserverCallback_;
     bool isInitVirtualNode_ = false;
     CalendarDay calendarDay_;
+    CalendarDay focusedCalendarDay_;
     ObtainedMonth obtainedMonth_;
     MonthState monthState_ = MonthState::CUR_MONTH;
     RefPtr<ClickEvent> clickListener_;

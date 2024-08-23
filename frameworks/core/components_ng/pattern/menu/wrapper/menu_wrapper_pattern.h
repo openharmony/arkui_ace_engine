@@ -355,6 +355,7 @@ public:
     }
 
     void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
 
     MenuDumpInfo GetDumpInfo() const
     {
@@ -404,7 +405,7 @@ public:
     {
         return ++embeddedSubMenuCount_;
     }
-    
+
     int DecreaseEmbeddedSubMenuCount()
     {
         return --embeddedSubMenuCount_;

@@ -6971,6 +6971,9 @@ void JSViewAbstract::JsBlendMode(const JSCallbackInfo& info)
         } else if (blendModeNum == BACKWARD_COMPAT_MAGIC_NUMBER_SRC_IN) {
             blendMode = BlendMode::BACK_COMPAT_SOURCE_IN;
         }
+    } else if (info[0]->IsObject()) {
+        auto blender = CreateRSBrightnessBlenderFromNapiValue(info[0]);
+        ViewAbstractModel::GetInstance()->SetBrightnessBlender(blender);
     }
     if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsNumber()) {
         auto blendApplyTypeNum = info[1]->ToNumber<int32_t>();
@@ -6978,7 +6981,9 @@ void JSViewAbstract::JsBlendMode(const JSCallbackInfo& info)
             blendApplyType = static_cast<BlendApplyType>(blendApplyTypeNum);
         }
     }
-    ViewAbstractModel::GetInstance()->SetBlendMode(blendMode);
+    if (!info[0]->IsObject()) {
+        ViewAbstractModel::GetInstance()->SetBlendMode(blendMode);
+    }
     ViewAbstractModel::GetInstance()->SetBlendApplyType(blendApplyType);
 }
 

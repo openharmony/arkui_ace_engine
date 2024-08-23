@@ -400,6 +400,8 @@ class JSBuilderNode extends BaseNode {
     // removedChildElmtIds will be filled with the elmtIds of all children and their children will be deleted in response to if .. else change
     let removedChildElmtIds = new Array();
     If.branchId(branchId, removedChildElmtIds);
+    //un-registers the removed child elementIDs using proxy
+    UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);
     this.purgeDeletedElmtIds();
 
     branchfunc();

@@ -72,8 +72,8 @@
 #include "core/components_ng/pattern/text_input/text_input_layout_algorithm.h"
 #include "core/components_ng/property/property.h"
 
-#if not defined(ACE_UNITTEST)
-#if defined(ENABLE_STANDARD_INPUT)
+#ifndef ACE_UNITTEST
+#ifdef ENABLE_STANDARD_INPUT
 #include "commonlibrary/c_utils/base/include/refbase.h"
 
 namespace OHOS::MiscServices {
@@ -155,10 +155,21 @@ enum class RequestKeyboardReason {
     MOUSE_RELEASE,
     SET_SELECTION,
     SEARCH_REQUEST,
-    AUTO_FILL_REQUEST_FILL,
+    AUTO_FILL_REQUEST_FAIL,
     SHOW_KEYBOARD_ON_FOCUS,
     STYLUS_DETECTOR,
     CUSTOM_KEYBOARD
+};
+
+enum class RequestFocusReason {
+    UNKNOWN = 0,
+    DRAG_END,
+    DRAG_MOVE,
+    CLICK,
+    LONG_PRESS,
+    AUTO_FILL,
+    CLEAN_NODE,
+    MOUSE,
 };
 
 struct PreviewTextInfo {
@@ -657,6 +668,12 @@ public:
 
     bool RequestKeyboardNotByFocusSwitch(RequestKeyboardReason reason = RequestKeyboardReason::UNKNOWN);
 
+    bool TextFieldRequestFocus(RequestFocusReason reason = RequestFocusReason::UNKNOWN);
+
+    static std::string RequestFocusReasonToString(RequestFocusReason reason);
+
+    static std::string RequestKeyboardReasonToString(RequestKeyboardReason reason);
+
     bool GetTextObscured() const
     {
         return textObscured_;
@@ -909,6 +926,8 @@ public:
     }
     void HandleOnUndoAction() override;
     void HandleOnRedoAction() override;
+    bool CanUndo();
+    bool CanRedo();
     void HandleOnSelectAll(bool isKeyEvent, bool inlineStyle = false, bool showMenu = false);
     void HandleOnSelectAll() override
     {
@@ -1124,6 +1143,7 @@ public:
     void DumpAdvanceInfo() override;
     void DumpPlaceHolderInfo();
     void DumpScaleInfo();
+    std::string GetDumpTextValue() const;
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) override;
     void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) override;
@@ -1419,7 +1439,14 @@ public:
         return multipleClickRecognizer_;
     }
 
+    void SetAdaptFontSize(const std::optional<Dimension>& adaptFontSize)
+    {
+        adaptFontSize_ = adaptFontSize;
+    }
+
     void ShowCaretAndStopTwinkling();
+
+    bool IsTextEditableForStylus() override;
 
 protected:
     virtual void InitDragEvent();
@@ -1850,6 +1877,7 @@ private:
     bool isPasswordSymbol_ = true;
     RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
     RefPtr<AIWriteAdapter> aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
+    std::optional<Dimension> adaptFontSize_;
 };
 } // namespace OHOS::Ace::NG
 

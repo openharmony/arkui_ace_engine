@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "test/unittest/core/pattern/waterflow/water_flow_test_ng.h"
+
 #include "water_flow_item_maps.h"
+#include "water_flow_test_ng.h"
 
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
 
@@ -249,7 +250,7 @@ HWTEST_F(WaterFlowSWTest, ModifyItem002, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 46), -100.0f);
     EXPECT_EQ(GetChildY(frameNode_, 51), 350.0f);
     auto child = GetChildFrameNode(frameNode_, 49);
-    child->layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(300.0)));
+    child->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(300.0)));
     child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info_->startIndex_, 45);
@@ -257,7 +258,7 @@ HWTEST_F(WaterFlowSWTest, ModifyItem002, TestSize.Level1)
     EXPECT_EQ(GetChildHeight(frameNode_, 49), 300.0f);
 
     child = GetChildFrameNode(frameNode_, 40);
-    child->layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(10.0)));
+    child->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(10.0)));
     child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info_->startIndex_, 45);
@@ -275,7 +276,7 @@ HWTEST_F(WaterFlowSWTest, ModifyItem002, TestSize.Level1)
     EXPECT_EQ(info_->lanes_[0][1].ToString(), "{StartPos: -50.000000 EndPos: 750.000000 Items [71 72 75 76 79 ] }");
 
     child = GetChildFrameNode(frameNode_, 0);
-    child->layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(1.0)));
+    child->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(1.0)));
     child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info_->lanes_[0][0].ToString(), "{StartPos: -150.000000 EndPos: 850.000000 Items [69 71 74 75 78 79 ] }");

@@ -27,6 +27,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components_ng/pattern/swiper/swiper_node.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -55,7 +56,21 @@ RefPtr<SwiperController> SwiperModelNG::Create()
 
 RefPtr<FrameNode> SwiperModelNG::CreateFrameNode(int32_t nodeId)
 {
-    auto swiperNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, nodeId, AceType::MakeRefPtr<SwiperPattern>());
+    auto swiperNode = ElementRegister::GetInstance()->GetSpecificItemById<SwiperNode>(nodeId);
+    if (swiperNode) {
+        if (swiperNode->GetTag() == V2::SWIPER_ETS_TAG) {
+            return swiperNode;
+        }
+        ElementRegister::GetInstance()->RemoveItemSilently(nodeId);
+        auto parent = swiperNode->GetParent();
+        if (parent) {
+            parent->RemoveChild(swiperNode);
+        }
+    }
+    // adapt for capi
+    swiperNode = AceType::MakeRefPtr<SwiperNode>(V2::SWIPER_ETS_TAG, nodeId, AceType::MakeRefPtr<SwiperPattern>());
+    swiperNode->InitializePatternAndContext();
+    ElementRegister::GetInstance()->AddUINode(swiperNode);
     return swiperNode;
 }
 

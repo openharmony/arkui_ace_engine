@@ -203,8 +203,10 @@ RefPtr<FrameNode> BaseTextSelectOverlay::GetOwner()
 
 void BaseTextSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType)
 {
-    if (IsMouseClickDown(sourceType, touchType) || IsTouchUp(sourceType, touchType)) {
+    if (IsMouseClickDown(sourceType, touchType)) {
         CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
+    } else if (IsTouchUp(sourceType, touchType)) {
+        HideMenu(true);
     }
 }
 
@@ -632,7 +634,7 @@ std::optional<RectF> BaseTextSelectOverlay::GetAncestorNodeViewPort()
     CHECK_NULL_RETURN(host, std::nullopt);
     auto parent = host->GetAncestorNodeOfFrame(true);
     while (parent) {
-        auto scrollableContainer = host->GetPattern<NestableScrollContainer>();
+        auto scrollableContainer = parent->GetPattern<NestableScrollContainer>();
         if (scrollableContainer) {
             return parent->GetTransformRectRelativeToWindow();
         }

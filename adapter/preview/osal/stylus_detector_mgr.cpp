@@ -29,6 +29,11 @@ void StylusDetectorMgr::StylusDetectorCallBack::OnDetector(
     const CommandType& command, std::string args, std::shared_ptr<IAceStylusCallback> callback)
 {}
 
+bool StylusDetectorMgr::StylusDetectorCallBack::OnDetectorSync(const CommandType& command)
+{
+    return false;
+}
+
 StylusDetectorMgr* StylusDetectorMgr::GetInstance()
 {
     static StylusDetectorMgr instance;
@@ -69,11 +74,6 @@ void StylusDetectorMgr::AddTextFieldFrameNode(const RefPtr<NG::FrameNode>& frame
 void StylusDetectorMgr::RemoveTextFieldFrameNode(const int32_t id) {}
 
 StylusDetectorMgr::StylusDetectorMgr() : engine_(nullptr), isRegistered_(false) {}
-
-bool StylusDetectorMgr::CheckTextEditable(const RefPtr<NG::FrameNode> frameNode)
-{
-    return false;
-}
 
 bool StylusDetectorMgr::IsStylusTouchEvent(const TouchEvent& touchEvent) const
 {
