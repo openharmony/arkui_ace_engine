@@ -32,9 +32,7 @@ const PUBLIC_MORE: Resource = $r('sys.media.ohos_ic_public_more');
 const IMAGE_SIZE: string = '24vp';
 const DEFAULT_TOOLBAR_HEIGHT: number = 56;
 const TOOLBAR_MAX_LENGTH: number = 5;
-const MIN_FONT_SIZE = 1.75;
 const MAX_FONT_SIZE = 3.2;
-const LONG_PRESS_TIME = 500;
 const DIALOG_IMAGE_SIZE = '64vp';
 const MAX_DIALOG = '256vp';
 const MIN_DIALOG = '216vp';
@@ -49,6 +47,35 @@ interface MenuController {
 export interface ToolBarSymbolGlyphOptions {
   normal?: SymbolGlyphModifier;
   activated?: SymbolGlyphModifier;
+}
+
+class ButtonGestureModifier implements GestureModifier {
+  public longPressTime: number = 500;
+  public fontSize: number = 1;
+  public minFontSize: number = 1.75;
+  public controller: CustomDialogController | null = null;
+
+  constructor(controller: CustomDialogController | null) {
+    this.controller = controller;
+  }
+
+  applyGesture(event: UIGestureEvent): void {
+    if (this.fontSize >= this.minFontSize) {
+      event.addGesture(
+        new LongPressGestureHandler({ repeat: false, duration: this.longPressTime })
+          .onAction(() => {
+            if (event) {
+              this.controller?.open();
+            }
+          })
+          .onActionEnd(() => {
+            this.controller?.close();
+          })
+      )
+    } else {
+      event.clearGestures();
+    }
+  }
 }
 
 @Observed
@@ -74,7 +101,7 @@ export class ToolBarModifier implements AttributeModifier<ColumnAttribute> {
   public stateEffectValue?: boolean = true;
   public paddingValue?: LengthMetrics = LengthMetrics.resource($r('sys.float.padding_level12'));
 
-  applyNormalAttribute(instance: ColumnAttribute):void {
+  applyNormalAttribute(instance: ColumnAttribute): void {
     instance.backgroundColor(this.backgroundColorValue);
   }
 
@@ -121,7 +148,7 @@ export struct ToolBar {
   @State fontActivatedPrimaryColor: ResourceColor = $r('sys.color.font_emphasize');
   @State symbolEffect: SymbolEffect = new SymbolEffect();
   @State fontSize: number = 1;
-  dialogController: CustomDialogController | null = null;
+  @State toolBarItemGestureModifier: ButtonGestureModifier[] = [];
   isFollowSystem: boolean = false;
   maxFontSizeScale: number = 3.2;
 
@@ -183,33 +210,7 @@ export struct ToolBar {
     .onTouch((event) => {
       this.touchEventAction(event, index);
     })
-    .gesture(
-      LongPressGesture({ repeat: false, duration: LONG_PRESS_TIME })
-        .onAction((event: GestureEvent) => {
-          this.fontSize = this.getFontSizeScale();
-          if (event) {
-            if (this.fontSize >= MIN_FONT_SIZE) {
-              this.dialogController = new CustomDialogController({
-                builder: ToolBarDialog({
-                  cancel: () => {
-                  },
-                  confirm: () => {
-                  },
-                  itemDialog: {
-                    content: this.moreText,
-                    icon: PUBLIC_MORE,
-                  },
-                  fontSize: this.fontSize,
-                }),
-                maskColor: Color.Transparent,
-                isModal: true,
-                customStyle: true,
-              })
-              this.dialogController?.open();
-            }
-          }
-        })
-    )
+    .gestureModifier(this.toolBarItemGestureModifier[index])
   }
 
   @Builder TabBuilder(index: number) {
@@ -221,14 +222,12 @@ export struct ToolBar {
             .fontSize(IMAGE_SIZE)
             .symbolEffect(this.symbolEffect, false)
             .attributeModifier(this.getToolBarSymbolModifier(index))
-            .opacity((this.toolBarList[index]?.state === ItemState.DISABLE) ? $r('sys.float.interactive_disable') : 1)
             .margin({ bottom: $r('sys.float.padding_level1') })
         } else {
           Image(this.toolBarList[index]?.icon)
             .width(IMAGE_SIZE)
             .height(IMAGE_SIZE)
             .fillColor(this.getIconColor(index))
-            .opacity((this.toolBarList[index]?.state === ItemState.DISABLE) ? $r('sys.float.interactive_disable') : 1)
             .margin({ bottom: $r('sys.float.padding_level1') })
             .objectFit(ImageFit.Contain)
             .draggable(false)
@@ -241,7 +240,6 @@ export struct ToolBar {
           .fontWeight(FontWeight.Medium)
           .maxLines(1)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
-          .opacity((this.toolBarList[index]?.state === ItemState.DISABLE) ? $r('sys.float.interactive_disable') : 1)
           .textAlign(TextAlign.Center)
       }
       .justifyContent(FlexAlign.Center)
@@ -282,32 +280,9 @@ export struct ToolBar {
     .onTouch((event) => {
       this.touchEventAction(event, index);
     })
-    .gesture(
-      LongPressGesture({ repeat: false, duration: LONG_PRESS_TIME })
-        .onAction((event: GestureEvent) => {
-          this.fontSize = this.getFontSizeScale();
-          if (event && (this.toolBarList[index]?.icon || this.toolBarList[index]?.toolBarSymbolOptions?.activated ||
-            this.toolBarList[index]?.toolBarSymbolOptions?.normal)) {
-            if (this.fontSize >= MIN_FONT_SIZE) {
-              this.dialogController = new CustomDialogController({
-                builder: ToolBarDialog({
-                  cancel: () => {
-                  },
-                  confirm: () => {
-                  },
-                  itemDialog: this.toolBarList[index],
-                  fontSize: this.fontSize,
-                  itemSymbolModifier: this.getToolBarSymbolModifier(index),
-                }),
-                maskColor: Color.Transparent,
-                isModal: true,
-                customStyle: true,
-              })
-              this.dialogController?.open();
-            }
-          }
-        })
-    )
+    .onClick(() => {
+    })
+    .gestureModifier(this.toolBarItemGestureModifier[index])
   }
 
   private getFontSizeScale(): number {
@@ -376,9 +351,6 @@ export struct ToolBar {
 
   private touchEventAction(event: TouchEvent, index: number): void {
     if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-      if (this.fontSize >= MIN_FONT_SIZE) {
-        this.dialogController?.close();
-      }
       let toolbar = this.toolBarList[index];
       if (toolbar.state === ItemState.ACTIVATE) {
         if (this.activateIndex === index) {
@@ -395,6 +367,8 @@ export struct ToolBar {
 
   refreshData() {
     this.menuContent = [];
+    this.toolBarItemGestureModifier = [];
+    this.fontSize = this.getFontSizeScale();
     for (let i = 0; i < this.toolBarList.length; i++) {
       if (i >= 4 && this.toolBarList.length > TOOLBAR_MAX_LENGTH) {
         this.menuContent[i - 4] = {
@@ -402,8 +376,36 @@ export struct ToolBar {
           action: this.toolBarList[i].action as () => void,
           enabled: this.toolBarList[i].state !== ItemState.DISABLE,
         }
+        this.toolBarItemGestureModifier[4] = new ButtonGestureModifier(new CustomDialogController({
+          builder: ToolBarDialog({
+            itemDialog: {
+              content: this.moreText,
+              icon: PUBLIC_MORE,
+            },
+            fontSize: this.fontSize,
+          }),
+          maskColor: Color.Transparent,
+          isModal: true,
+          customStyle: true,
+        }))
+        this.toolBarItemGestureModifier[4].fontSize = this.fontSize;
+      } else if (this.toolBarList[i]?.icon || this.toolBarList[i]?.toolBarSymbolOptions?.activated ||
+        this.toolBarList[i]?.toolBarSymbolOptions?.normal) {
+        this.menuContent = [];
+        this.toolBarItemGestureModifier[i] = new ButtonGestureModifier(new CustomDialogController({
+          builder: ToolBarDialog({
+            itemDialog: this.toolBarList[i],
+            fontSize: this.fontSize,
+            itemSymbolModifier: this.getToolBarSymbolModifier(i),
+          }),
+          maskColor: Color.Transparent,
+          isModal: true,
+          customStyle: true,
+        }))
+        this.toolBarItemGestureModifier[i].fontSize = this.fontSize;
       } else {
         this.menuContent = [];
+        this.toolBarItemGestureModifier[i] = new ButtonGestureModifier(null);
       }
       this.toolBarItemBackground[i] = Color.Transparent;
     }
@@ -423,49 +425,43 @@ export struct ToolBar {
   }
   build() {
     Column() {
+      Tabs({ controller: this.controller }) {
+      }
+      .visibility(Visibility.None)
       Divider()
         .width('100%').height(1)
         .attributeModifier(this.dividerModifier)
-      Column() {
-        Tabs({ barPosition: BarPosition.End, controller: this.controller}) {
-          ForEach(this.toolBarList, (item: ToolBarOption, index: number) => {
-            if (this.toolBarList.length <= TOOLBAR_MAX_LENGTH) {
-              TabContent() {
-              }.tabBar(this.TabBuilder(index))
-              .enabled(!(this.toolBarList[index]?.state === ItemState.DISABLE))
-              .focusOnTouch(!(this.toolBarList[index]?.state === ItemState.DISABLE))
-            } else if (index < 4){
-              TabContent() {
-              }.tabBar(this.TabBuilder(index))
-              .enabled(!(this.toolBarList[index]?.state === ItemState.DISABLE))
-              .focusOnTouch(!(this.toolBarList[index]?.state === ItemState.DISABLE))
+      Row() {
+        ForEach(this.toolBarList, (item: ToolBarOption, index: number) => {
+          if (this.toolBarList.length <= TOOLBAR_MAX_LENGTH || index < 4) {
+            Row() {
+              this.TabBuilder(index);
             }
-          })
-          if (this.refreshData() && this.toolBarList.length > TOOLBAR_MAX_LENGTH) {
-            TabContent() {
-            }.tabBar(this.MoreTabBuilder(4))
+            .height('100%')
+            .flexShrink(1)
           }
+        })
+        if (this.refreshData() && this.toolBarList.length > TOOLBAR_MAX_LENGTH) {
+          Row() {
+            this.MoreTabBuilder(4);
+          }
+          .height('100%')
+          .flexShrink(1)
         }
-        .vertical(false)
-        .constraintSize({
-          minHeight: this.toLengthString(this.toolBarModifier.heightValue),
-          maxHeight: this.toLengthString(this.toolBarModifier.heightValue),
-        })
-        .barHeight(this.toLengthString(this.toolBarModifier.heightValue))
-        .barMode(BarMode.Fixed)
-        .onChange((index: number) => {
-        })
-        .width('100%')
-        .height(this.toLengthString(this.toolBarModifier.heightValue))
-        .padding({
-          start: this.toolBarList.length < TOOLBAR_MAX_LENGTH ?
-          this.toolBarModifier.paddingValue : LengthMetrics.resource($r('sys.float.padding_level0')),
-          end: this.toolBarList.length < TOOLBAR_MAX_LENGTH ?
-          this.toolBarModifier.paddingValue : LengthMetrics.resource($r('sys.float.padding_level0')),
-        })
       }
       .justifyContent(FlexAlign.Center)
+      .constraintSize({
+        minHeight: this.toLengthString(this.toolBarModifier.heightValue),
+        maxHeight: this.toLengthString(this.toolBarModifier.heightValue),
+      })
       .width('100%')
+      .height(this.toLengthString(this.toolBarModifier.heightValue))
+      .padding({
+        start: this.toolBarList.length < TOOLBAR_MAX_LENGTH ?
+        this.toolBarModifier.paddingValue : LengthMetrics.resource($r('sys.float.padding_level0')),
+        end: this.toolBarList.length < TOOLBAR_MAX_LENGTH ?
+        this.toolBarModifier.paddingValue : LengthMetrics.resource($r('sys.float.padding_level0')),
+      })
     }
     .attributeModifier(this.toolBarModifier)
   }
