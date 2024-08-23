@@ -482,9 +482,6 @@ export class ToolBar extends ViewPU {
       ViewStackProcessor.visualState('normal');
       Button.backgroundColor(this.toolBarItemBackground[p5]);
       ViewStackProcessor.visualState();
-      Button.onClick(() => {
-        this.clickEventAction(p5);
-      });
       Button.gestureModifier(this.toolBarItemGestureModifier[p5]);
     }, Button);
     this.observeComponentCreation2((z5, a6) => {

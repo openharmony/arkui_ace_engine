@@ -207,9 +207,6 @@ export struct ToolBar {
         .backgroundColor(this.toolBarItemBackground[index])
       }
     })
-    .onClick(() => {
-      this.clickEventAction(index);
-    })
     .gestureModifier(this.toolBarItemGestureModifier[index])
   }
 
