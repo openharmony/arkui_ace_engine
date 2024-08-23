@@ -3010,9 +3010,11 @@ void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
         if (!overlayCreating_) {
             delegate_->HandleTouchUp(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
         } else {
-            imageAnalyzerManager_->UpdateOverlayTouchInfo(touchPoint.x, touchPoint.y, TouchType::UP);
-            overlayCreating_ = false;
-            delegate_->HandleTouchCancel();
+            if (imageAnalyzerManager_) {
+                imageAnalyzerManager_->UpdateOverlayTouchInfo(touchPoint.x, touchPoint.y, TouchType::UP);
+                overlayCreating_ = false;
+                delegate_->HandleTouchCancel();
+            }
         }
     }
 }
@@ -3624,7 +3626,11 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
     insertHandle_ = insertTouchHandle;
     startSelectionHandle_ = beginTouchHandle;
     endSelectionHandle_ = endTouchHandle;
-    return selectOverlayProxy_ ? true : false;
+    if (selectOverlayProxy_) {
+        DestroyAnalyzerOverlay();
+        return true;
+    }
+    return false;
 }
 
 void WebPattern::RegisterSelectOverLayOnClose(SelectOverlayInfo& selectInfo)
@@ -5003,6 +5009,7 @@ void WebPattern::OnVisibleAreaChange(bool isVisible)
     if (!isVisible_) {
         CloseSelectOverlay();
         SelectCancel();
+        DestroyAnalyzerOverlay();
         isDragEndMenuShow_ = false;
         if (isVisibleActiveEnable_ && (!isDialogNested || !isFocus_)) {
             OnInActive();
@@ -6183,9 +6190,11 @@ void WebPattern::OnTextSelected()
 
 void WebPattern::DestroyAnalyzerOverlay()
 {
-    if (imageAnalyzerManager_) {
+    if (imageAnalyzerManager_ && imageAnalyzerManager_->IsOverlayCreated()) {
         imageAnalyzerManager_->DestroyAnalyzerOverlay();
+        delegate_->OnDestroyImageAnalyzerOverlay();
     }
+    overlayCreating_ = false;
 }
 
 bool WebPattern::OnAccessibilityHoverEvent(const PointF& point)
