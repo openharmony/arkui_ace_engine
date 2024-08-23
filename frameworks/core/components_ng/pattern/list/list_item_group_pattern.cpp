@@ -414,8 +414,8 @@ int32_t ListItemGroupPattern::UpdateBackwardCachedIndex(int32_t cacheCount, bool
     return backwardCachedIndex_;
 }
 
-void ListItemGroupPattern::LayoutCache(const LayoutConstraintF& constraint,
-    bool forward, int64_t deadline, int32_t cached)
+void ListItemGroupPattern::LayoutCache(const LayoutConstraintF& constraint, bool forward, int64_t deadline,
+    int32_t cached, ListMainSizeValues listSizeValues)
 {
     ACE_SCOPED_TRACE("Group LayoutCache:%d,%d", forward, cached);
     auto listNode = GetListFrameNode();
@@ -441,6 +441,8 @@ void ListItemGroupPattern::LayoutCache(const LayoutConstraintF& constraint,
     };
     itemGroup->SetCacheParam(param);
     itemGroup->SetListLayoutProperty(listLayoutProperty);
+    itemGroup->SetListMainSize(listSizeValues.startPos, listSizeValues.endPos, listSizeValues.referencePos,
+        listSizeValues.prevContentMainSize, forward);
     host->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     host->GetGeometryNode()->SetParentLayoutConstraint(constraint);
     FrameNode::ProcessOffscreenNode(host);
