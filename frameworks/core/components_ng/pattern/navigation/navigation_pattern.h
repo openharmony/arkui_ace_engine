@@ -325,7 +325,7 @@ public:
     void NotifyDialogChange(NavDestinationLifecycle lifecycle, bool isNavigationChanged, bool isFromStandard);
     void NotifyPageHide(const std::string& pageName);
     void DumpInfo() override;
-
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void SetIsCustomAnimation(bool isCustom)
     {
         isCustomAnimation_ = isCustom;

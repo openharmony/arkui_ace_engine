@@ -2338,6 +2338,19 @@ void GetRealEventWindowId(
     windowId = ngPipeline->GetRealHostWindowId();
 }
 
+int64_t GetRealStackNodeId(const AccessibilityEvent& accessibilityEvent)
+{
+    int64_t stackNodeId = accessibilityEvent.stackNodeId;
+    if (stackNodeId != -1) {
+        int64_t splitElementId = AccessibilityElementInfo::UNDEFINED_ACCESSIBILITY_ID;
+        int32_t splitTreeId = AccessibilityElementInfo::UNDEFINED_TREE_ID;
+        AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(
+            accessibilityEvent.nodeId, splitElementId, splitTreeId);
+        AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(splitTreeId, stackNodeId);
+    }
+    return stackNodeId;
+}
+
 void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent)
 {
     ACE_ACCESS_SCOPED_TRACE("SendAccessibilityAsyncEvent");
@@ -2351,6 +2364,7 @@ void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEven
     AccessibilityEventInfo eventInfo;
     uint32_t realWindowId = GetWindowId();
     if (AceType::InstanceOf<NG::PipelineContext>(context)) {
+        int64_t stackNodeId = GetRealStackNodeId(accessibilityEvent);
         RefPtr<NG::FrameNode> node;
         ngPipeline = FindPipelineByElementId(accessibilityEvent.nodeId, node);
         CHECK_NULL_VOID(ngPipeline);
@@ -2358,7 +2372,7 @@ void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEven
         GetRealEventWindowId(accessibilityEvent, ngPipeline, realWindowId);
         FillEventInfo(node, eventInfo, ngPipeline, Claim(this),
             FillEventInfoParam {
-                accessibilityEvent.nodeId, accessibilityEvent.stackNodeId, realWindowId });
+                accessibilityEvent.nodeId, stackNodeId, realWindowId });
         eventInfo.SetWindowId(realWindowId);
     } else {
         ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
@@ -2389,6 +2403,7 @@ void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEven
             TaskExecutor::TaskType::BACKGROUND, "ArkUIAccessibilitySendSyncEvent");
     }
 }
+
 #ifdef WEB_SUPPORTED
 
 void JsAccessibilityManager::SendWebAccessibilityAsyncEvent(
@@ -4860,9 +4875,6 @@ void JsAccessibilityManager::UpdateElementInfoTreeId(Accessibility::Accessibilit
         info.SetParent(parentId);
     }
 
-    int32_t pageId = info.GetPageId();
-    info.SetPageId((treeId << shiftBits) + pageId);
-
     std::vector<int64_t> childIds = info.GetChildIds();
     for (int64_t child : childIds) {
         info.RemoveChild(child);
@@ -4888,9 +4900,6 @@ void JsAccessibilityManager::UpdateElementInfosTreeId(std::list<Accessibility::A
             AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(treeId, parentId);
             item.SetParent(parentId);
         }
-
-        int32_t pageId = item.GetPageId();
-        item.SetPageId((treeId << shiftBits) + pageId);
 
         std::vector<int64_t> childIds = item.GetChildIds();
         for (int64_t child : childIds) {

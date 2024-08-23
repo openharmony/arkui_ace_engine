@@ -1668,11 +1668,11 @@ float MenuPattern::GetSelectMenuWidth()
     } else {
         finalWidth = defaultWidth;
     }
-    
+
     if (finalWidth < MIN_SELECT_MENU_WIDTH.ConvertToPx()) {
         finalWidth = defaultWidth;
     }
-    
+
     return finalWidth;
 }
 
@@ -1791,4 +1791,8 @@ bool MenuPattern::IsMenuScrollable() const
     return false;
 }
 
+void MenuPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("MenuType", static_cast<int32_t>(GetMenuType()));
+}
 } // namespace OHOS::Ace::NG

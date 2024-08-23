@@ -230,6 +230,9 @@ export struct TipsDialog {
             Text(this.content)
               .focusable(true)
               .defaultFocus(!(this.primaryButton || this.secondaryButton))
+              .focusBox({
+                strokeWidth: LengthMetrics.px(0)
+              })
               .fontSize(this.getContentFontSize())
               .fontWeight(FontWeight.Medium)
               .fontColor(this.fontColorWithTheme)
@@ -656,6 +659,9 @@ export struct ConfirmDialog {
           Text(this.content)
             .focusable(true)
             .defaultFocus(!(this.primaryButton?.value || this.secondaryButton?.value))
+            .focusBox({
+              strokeWidth: LengthMetrics.px(0)
+            })
             .fontSize(`${BODY_L}fp`)
             .fontWeight(FontWeight.Medium)
             .fontColor(this.fontColorWithTheme)
@@ -801,6 +807,9 @@ export struct AlertDialog {
         Text(this.content)
           .focusable(true)
           .defaultFocus(!(this.primaryButton || this.secondaryButton))
+          .focusBox({
+            strokeWidth: LengthMetrics.px(0)
+          })
           .fontSize(`${BODY_L}fp`)
           .fontWeight(this.getFontWeight())
           .fontColor(this.fontColorWithTheme)
@@ -1607,6 +1616,9 @@ export struct LoadingDialog {
           .maxLines(this.fontSizeScale > MAX_FONT_SCALE ? LOADING_MAX_LINES_BIG_FONT : LOADING_MAX_LINES)
           .focusable(true)
           .defaultFocus(true)
+          .focusBox({
+            strokeWidth: LengthMetrics.px(0)
+          })
           .textOverflow({ overflow: TextOverflow.Ellipsis })
         LoadingProgress()
           .color(this.loadingProgressIconColorWithTheme)

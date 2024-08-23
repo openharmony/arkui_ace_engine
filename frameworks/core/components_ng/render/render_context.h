@@ -451,6 +451,8 @@ public:
 
     virtual void PaintAccessibilityFocus() {};
 
+    virtual void UpdateAccessibilityRoundRect() {};
+
     virtual void ClearAccessibilityFocus() {};
 
     virtual void OnAccessibilityFocusUpdate(

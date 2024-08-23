@@ -58,7 +58,7 @@ public:
         layout->SetIsShown(isOnShow_);
         return layout;
     }
-    
+
     bool CheckCustomAvoidKeyboard() const override
     {
         return !NearZero(avoidKeyboardOffset_);
@@ -186,6 +186,7 @@ public:
     }
 
     void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
 
     uint64_t GetNavDestinationId() const
     {
