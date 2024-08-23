@@ -75,6 +75,8 @@ void ClipboardImpl::HasDataType(
         [&hasData, mimeTypes]() {
             for (auto mimeType = mimeTypes.begin(); mimeType != mimeTypes.end(); ++mimeType) {
                 hasData = OHOS::MiscServices::PasteboardClient::GetInstance()->HasDataType(*mimeType);
+                TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "Clipboard data mimeType %{public}s available ? %{public}d",
+                    mimeType->c_str(), hasData);
                 if (hasData) {
                     break;
                 }
