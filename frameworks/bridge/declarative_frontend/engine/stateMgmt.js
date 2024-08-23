@@ -2949,6 +2949,26 @@ class CustomDialogController extends NativeCustomDialogController {
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ */
+class GestureStyle extends NativeGestureStyle {
+    constructor(arg) {
+        super(arg);
+        this.arg_ = arg;
+    }
+}
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
  */
 class Utils {
@@ -8067,21 +8087,10 @@ ObserveV2.arrayHandlerDeepObserved = {
             return target[key];
         }
         let refInfo = RefInfo.get(target);
-        if (key === 'size') {
-            ObserveV2.getObserve().addRef(refInfo, ObserveV2.OB_LENGTH);
-            return target.size;
-        }
         let ret = target[key];
         if (typeof (ret) !== 'function') {
-            if (typeof (ret) === 'object') {
-                let wrapper = RefInfo.get(ret);
-                ObserveV2.getObserve().addRef(refInfo, key);
-                return wrapper.proxy;
-            }
-            if (key === 'length') {
-                ObserveV2.getObserve().addRef(refInfo, ObserveV2.OB_LENGTH);
-            }
-            return ret;
+            ObserveV2.getObserve().addRef(refInfo, key === 'length' ? ObserveV2.OB_LENGTH : key);
+            return (typeof (ret) === 'object') ? RefInfo.get(ret).proxy : ret;
         }
         if (ObserveV2.arrayMutatingFunctions.has(key)) {
             return function (...args) {
@@ -8119,7 +8128,14 @@ ObserveV2.arrayHandlerDeepObserved = {
         }
     },
     set(target, key, value) {
-        return ObserveV2.commonHandlerSet(target, key, value);
+        if (typeof key === 'symbol' || target[key] === value) {
+            return true;
+        }
+        const originalLength = target.length;
+        target[key] = value;
+        const arrayLenChanged = target.length !== originalLength;
+        ObserveV2.getObserve().fireChange(RefInfo.get(target), arrayLenChanged ? ObserveV2.OB_LENGTH : key.toString());
+        return true;
     }
 };
 ObserveV2.setMapHandlerDeepObserved = {
@@ -8431,7 +8447,19 @@ ObserveV2.arraySetMapProxy = {
         if (target[key] === value) {
             return true;
         }
-        target[key] = value;
+        if (Array.isArray(target)) {
+            const originalLength = target.length;
+            target[key] = value;
+            if (target.length !== originalLength) {
+                ObserveV2.getObserve().fireChange(target, ObserveV2.OB_LENGTH);
+                // autoProxyObject function adds ref to OB_LENGTH for all arrays that
+                // are not MakeObserved. No need to fire key.toString() separately. Just return.
+                return true;
+            }
+        }
+        else {
+            target[key] = value;
+        }
         ObserveV2.getObserve().fireChange(target, key.toString());
         return true;
     }
@@ -11180,26 +11208,6 @@ class UIUtilsImpl {
     }
 }
 UIUtilsImpl.instance_ = undefined;
-/*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-class GestureStyle extends NativeGestureStyle {
-    constructor(arg) {
-        super(arg);
-        this.arg_ = arg;
-    }
-}
 /*
  * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
