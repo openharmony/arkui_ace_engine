@@ -75,7 +75,7 @@ constexpr int32_t VSYNC_PERIOD_COUNT = 5;
 constexpr int32_t MIN_IDLE_TIME = 1000;
 constexpr uint8_t SINGLECOLOR_UPDATE_ALPHA = 75;
 constexpr int8_t RENDERING_SINGLE_COLOR = 1;
-constexpr int32_t DELAY_TIME = 300;
+constexpr int32_t DELAY_TIME = 500;
 constexpr int32_t VSYNC_COLLECT_COUNT = 2;
 
 #define CHECK_THREAD_SAFE(isFormRender, taskExecutor) CheckThreadSafe(isFormRender, taskExecutor, __func__, __LINE__)
