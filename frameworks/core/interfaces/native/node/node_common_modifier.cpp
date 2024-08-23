@@ -44,6 +44,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
+#include "core/components_ng/pattern/text/image_span_view.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/property/transition_property.h"
@@ -747,7 +748,11 @@ void SetBorderRadius(ArkUINodeHandle node, const ArkUI_Float32* values, const Ar
     borderRadius.radiusBottomLeft = Dimension(values[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_2]));
     borderRadius.radiusBottomRight = Dimension(values[NUM_3], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_3]));
     borderRadius.multiValued = true;
-    ViewAbstract::SetBorderRadius(frameNode, borderRadius);
+    if (frameNode->GetTag() == V2::IMAGE_SPAN_ETS_TAG) {
+        ImageSpanView::SetBorderRadius(frameNode, borderRadius);
+    } else {
+        ViewAbstract::SetBorderRadius(frameNode, borderRadius);
+    }
 }
 
 void ResetBorderRadius(ArkUINodeHandle node)
@@ -755,7 +760,11 @@ void ResetBorderRadius(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     OHOS::Ace::CalcDimension reset;
-    ViewAbstract::SetBorderRadius(frameNode, reset);
+    if (frameNode->GetTag() == V2::IMAGE_SPAN_ETS_TAG) {
+        ImageSpanView::ResetBorderRadius(frameNode);
+    } else {
+        ViewAbstract::SetBorderRadius(frameNode, reset);
+    }
 }
 
 /**
