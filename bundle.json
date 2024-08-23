@@ -100,6 +100,7 @@
                 "zlib",
                 "skia",
                 "libuv",
+                "resource_schedule_service",
                 "background_task_mgr",
                 "atomicservice_basic_engine",
                 "egl"
