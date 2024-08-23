@@ -257,6 +257,7 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     if (config.skipMeasure && config.skipLayout) {
         return false;
     }
+    prevOffset_ += layoutInfo_->CalibrateOffset(); // adjust prevOffset_ to keep in sync with calibrated TotalOffset
     TriggerPostLayoutEvents();
 
     if (targetIndex_.has_value()) {

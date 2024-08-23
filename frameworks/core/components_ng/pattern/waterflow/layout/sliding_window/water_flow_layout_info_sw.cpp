@@ -58,6 +58,17 @@ void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, const std::vec
     synced_ = true;
 }
 
+float WaterFlowLayoutInfoSW::CalibrateOffset()
+{
+    if (startIndex_ == 0) {
+        // can calibrate totalOffset when at top
+        const float prev = totalOffset_;
+        totalOffset_ = startPos_ - TopMargin();
+        return totalOffset_ - prev;
+    }
+    return 0.0f;
+}
+
 float WaterFlowLayoutInfoSW::DistanceToTop(int32_t itemIdx, float mainGap) const
 {
     if (!ItemInView(itemIdx)) {
@@ -376,7 +387,6 @@ void WaterFlowLayoutInfoSW::ResetWithLaneOffset(std::optional<float> laneBasePos
             }
         });
     }
-    totalOffset_ = 0.0f;
     maxHeight_ = 0.0f;
     idxToLane_.clear();
     synced_ = false;
@@ -465,7 +475,7 @@ bool WaterFlowLayoutInfoSW::IsMisaligned() const
         }
         const float startPos = SectionStartPos(lanes_[i]);
         if (std::any_of(lanes_[i].begin(), lanes_[i].end(),
-                        [&startPos](const auto& lane) { return !NearEqual(lane.startPos, startPos); })) {
+                [&startPos](const auto& lane) { return !NearEqual(lane.startPos, startPos); })) {
             return true;
         }
         const int32_t sectionStart = (i == 0) ? 0 : segmentTails_[i - 1] + 1;

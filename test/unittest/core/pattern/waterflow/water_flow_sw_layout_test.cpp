@@ -574,6 +574,7 @@ HWTEST_F(WaterFlowSWTest, Misaligned001, TestSize.Level1)
     EXPECT_EQ(GetChildX(frameNode_, 1), 0.0f);
     EXPECT_EQ(info_->lanes_[0][0].startPos, -47.0f);
     EXPECT_EQ(info_->lanes_[0][0].items_.front().idx, 0);
+    EXPECT_EQ(info_->Offset(), -47.0f);
 }
 
 /**
