@@ -562,6 +562,7 @@ void ShowContextMenuDisappearAnimation(
     auto menuPattern = menuChild->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     auto menuPosition = menuPattern->GetEndOffset();
+    menuWrapperPattern->ClearAllSubMenu();
 
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
