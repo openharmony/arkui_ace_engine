@@ -201,7 +201,7 @@ export struct IconGroupSuffix {
   }
 
   build() {
-    Row() {
+    Row({ space: 8 }) {
       ForEach(this.items || [], (suffixItem: IconItemOptions | SymbolGlyphModifier) => {
         Button() {
           if (suffixItem instanceof SymbolGlyphModifier) {
@@ -548,7 +548,7 @@ export struct ChipGroup {
         if (this.suffix && !this.isReachEnd) {
           Stack()
             .width(iconGroupSuffixTheme.normalBackgroundSize)
-            .height(this.getChipGroupHeight() + (this.getPaddingTop() as number) + (this.getPaddingBottom() as number))
+            .height(this.getChipGroupHeight())
             .linearGradient({ angle: 90, colors: colorStops })
             .blendMode(BlendMode.DST_IN, BlendApplyType.OFFSCREEN)
             .hitTestBehavior(HitTestMode.None)
@@ -562,7 +562,9 @@ export struct ChipGroup {
       if (this.suffix) {
         Row() {
           this.suffix();
-        }.padding({ left: iconGroupSuffixTheme.marginLeft, right: iconGroupSuffixTheme.marginRight })
+        }.padding({ left: iconGroupSuffixTheme.marginLeft,
+          right: iconGroupSuffixTheme.marginRight
+        })
       }
     }
     .align(Alignment.End)

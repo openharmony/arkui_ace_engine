@@ -660,7 +660,7 @@ export class ChipGroup extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Stack.create();
                         Stack.width(iconGroupSuffixTheme.normalBackgroundSize);
-                        Stack.height(this.getChipGroupHeight() + this.getPaddingTop() + this.getPaddingBottom());
+                        Stack.height(this.getChipGroupHeight());
                         Stack.linearGradient({ angle: 90, colors: colorStops });
                         Stack.blendMode(BlendMode.DST_IN, BlendApplyType.OFFSCREEN);
                         Stack.hitTestBehavior(HitTestMode.None);
@@ -681,7 +681,9 @@ export class ChipGroup extends ViewPU {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Row.create();
-                        Row.padding({ left: iconGroupSuffixTheme.marginLeft, right: iconGroupSuffixTheme.marginRight });
+                        Row.padding({ left: iconGroupSuffixTheme.marginLeft,
+                            right: iconGroupSuffixTheme.marginRight
+                        });
                     }, Row);
                     this.suffix.bind(this)();
                     Row.pop();
