@@ -128,6 +128,7 @@ private:
 
     void UpdateImageNode();
     void UpdateVideoNode();
+    void UpdatePlayMode();
     SizeF CalculateFitContain(const SizeF& rawSize, const SizeF& layoutSize);
     SizeF CalculateFitFill(const SizeF& layoutSize);
     SizeF CalculateFitCover(const SizeF& rawSize, const SizeF& layoutSize);
@@ -171,9 +172,12 @@ private:
     void SelectPlaybackMode(PlaybackMode mode);
     void StartPlayback();
     void StartAnimation();
+    void CommonStartAnimation(const RefPtr<RenderContext>& image, const RefPtr<RenderContext>& video);
+    void RepeatStartAnimation(const RefPtr<RenderContext>& videoRsContext);
     void StopPlayback();
     void PausePlayback();
     void StopAnimation();
+    void RepeatStopAnimation(const RefPtr<RenderContext>& videoRsContext);
     void StopAnimationCallback();
     void StartAutoPlay();
     void StartRepeatPlay();
@@ -201,6 +205,7 @@ private:
     bool isFirstRepeatPlay_ = true;
     bool isSetAutoPlayPeriod_ = false;
     bool isVisible_ = false;
+    bool isChangePlayMode_ = false;
     PlaybackStatus currentPlayStatus_ = PlaybackStatus::NONE;
     PlaybackMode autoAndRepeatLevel_ = PlaybackMode::NONE;
     PlaybackMode historyAutoAndRepeatLevel_ = PlaybackMode::NONE;

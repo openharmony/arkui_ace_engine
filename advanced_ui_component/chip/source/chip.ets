@@ -109,7 +109,6 @@ interface ChipNodeOpacity {
   normal: number;
   hover: number;
   pressed: number;
-  disabled: number;
 }
 
 interface ChipNodeConstraintWidth {
@@ -216,7 +215,7 @@ export const defaultTheme: ChipTheme = {
     },
     hoverBlendColor: $r('sys.color.ohos_id_color_hover'),
     pressedBlendColor: $r('sys.color.ohos_id_color_click_effect'),
-    opacity: { normal: 1, hover: 0.95, pressed: 0.9, disabled: 0.4 },
+    opacity: { normal: 1, hover: 0.95, pressed: 0.9 },
     breakPointConstraintWidth: {
       breakPointMinWidth: 128,
       breakPointSmMaxWidth: 156,
@@ -296,9 +295,9 @@ export struct ChipComponent {
   private onClicked: () => void = noop
   @State suffixIconOnFocus: boolean = false
   @State chipBreakPoints: BreakPointsType = BreakPointsType.SM
-  private smListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("(0vp<width) and (width<600vp)")
-  private mdListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("(600vp<=width) and (width<840vp)")
-  private lgListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("(840vp<=width)")
+  private smListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync('(0vp<width) and (width<600vp)')
+  private mdListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync('(600vp<=width) and (width<840vp)')
+  private lgListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync('(840vp<=width)')
   @State private isShowPressedBackGroundColor: boolean = false
   @State fontSizeScale: number | undefined = 0
   @State fontWeightScale: number | undefined = 0
@@ -310,9 +309,9 @@ export struct ChipComponent {
     }
   }
   private callbackId: number | undefined = undefined
-  @State prefixSymbolWidth: Length | undefined = this.toVp(componentUtils.getRectangleById("PrefixSymbolGlyph")?.size?.width);
-  @State suffixSymbolWidth: Length | undefined = this.toVp(componentUtils.getRectangleById("SuffixSymbolGlyph")?.size?.width);
-  @State allowCloseSymbolWidth: Length | undefined = this.toVp(componentUtils.getRectangleById("AllowCloseSymbolGlyph")?.size?.width);
+  @State prefixSymbolWidth: Length | undefined = this.toVp(componentUtils.getRectangleById('PrefixSymbolGlyph')?.size?.width);
+  @State suffixSymbolWidth: Length | undefined = this.toVp(componentUtils.getRectangleById('SuffixSymbolGlyph')?.size?.width);
+  @State allowCloseSymbolWidth: Length | undefined = this.toVp(componentUtils.getRectangleById('AllowCloseSymbolGlyph')?.size?.width);
   @State symbolEffect: SymbolEffect = new SymbolEffect();
 
   private isChipSizeEnum(): boolean {
@@ -390,13 +389,7 @@ export struct ChipComponent {
         return value as number
       case 'object':
         try {
-          if ((value as Resource).id !== -1) {
-            return px2vp(getContext(this).resourceManager.getNumber((value as Resource).id))
-          } else {
-            return px2vp(getContext(this)
-              .resourceManager
-              .getNumberByName(((value.params as string[])[0]).split('.')[2]))
-          }
+          return this.lengthMetricsToVp(LengthMetrics.resource(value))
         } catch (error) {
           return Number.NEGATIVE_INFINITY
         }
@@ -702,7 +695,7 @@ export struct ChipComponent {
   }
 
   private getChipNodeOpacity(): number {
-    return this.getChipEnable() ? this.chipOpacity : this.theme.chipNode.opacity.disabled
+    return this.chipOpacity
   }
 
   private handleTouch(event: TouchEvent) {
@@ -911,7 +904,7 @@ export struct ChipComponent {
             .onSizeChange((oldValue, newValue) => {
               this.prefixSymbolWidth = newValue?.width
             })
-            .key("PrefixSymbolGlyph")
+            .key('PrefixSymbolGlyph')
         } else if (this.prefixIcon?.src !== "") {
           Image(this.prefixIcon?.src)
             .direction(this.chipDirection)
@@ -954,7 +947,7 @@ export struct ChipComponent {
             .onSizeChange((oldValue, newValue) => {
               this.suffixSymbolWidth = newValue?.width
             })
-            .key("SuffixSymbolGlyph")
+            .key('SuffixSymbolGlyph')
         } else if (this.suffixIcon?.src !== "") {
           Image(this.getSuffixIconSrc())
             .direction(this.chipDirection)
@@ -995,7 +988,7 @@ export struct ChipComponent {
             .onSizeChange((oldValue, newValue) => {
               this.allowCloseSymbolWidth = newValue?.width
             })
-            .key("AllowCloseSymbolGlyph")
+            .key('AllowCloseSymbolGlyph')
             .onClick(() => {
               if (!this.getChipEnable()) {
                 return

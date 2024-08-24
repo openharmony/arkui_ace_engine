@@ -58,6 +58,7 @@ float CalculateOffsetByFriction(float extentOffset, float delta, float friction)
 
 void ScrollPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
@@ -148,7 +149,7 @@ bool ScrollPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty)
         CheckScrollToEdge();
         AddScrollLayoutInfo();
     }
-    
+
     if (LessNotEqual(scrollableDistance_, oldScrollableDistance)) {
         CheckRestartSpring(true);
     }
@@ -1212,7 +1213,9 @@ void ScrollPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     initialOffset->Put("xOffset", GetInitialOffset().GetX().ToString().c_str());
     initialOffset->Put("yOffset", GetInitialOffset().GetY().ToString().c_str());
     json->PutExtAttr("initialOffset", initialOffset, filter);
-    json->PutExtAttr("enablePaging", IsEnablePagingValid(), filter);
+    if (enablePagingStatus_ != ScrollPagingStatus::NONE) {
+        json->PutExtAttr("enablePaging", enablePagingStatus_ == ScrollPagingStatus::VALID, filter);
+    }
 
     auto scrollSnapOptions = JsonUtil::Create(true);
     if (IsSnapToInterval()) {
@@ -1249,5 +1252,93 @@ std::string ScrollPattern::GetScrollSnapPagination() const
 bool ScrollPattern::OnScrollSnapCallback(double targetOffset, double velocity)
 {
     return ScrollSnapTrigger();
+}
+
+void ScrollPattern::GetScrollPagingStatusDumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    switch (enablePagingStatus_) {
+        case ScrollPagingStatus::NONE: {
+            json->Put("enablePaging", "ScrollPagingStatus::NONE");
+            break;
+        }
+        case ScrollPagingStatus::INVALID: {
+            json->Put("enablePaging", "ScrollPagingStatus::INVALID");
+            break;
+        }
+        case ScrollPagingStatus::VALID: {
+            json->Put("enablePaging", "ScrollPagingStatus::VALID");
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+void ScrollPattern::GetScrollSnapAlignDumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    switch (GetScrollSnapAlign()) {
+        case ScrollSnapAlign::NONE: {
+            json->Put("snapAlign", "ScrollSnapAlign::NONE");
+            break;
+        }
+        case ScrollSnapAlign::START: {
+            json->Put("snapAlign", "ScrollSnapAlign::START");
+            break;
+        }
+        case ScrollSnapAlign::CENTER: {
+            json->Put("snapAlign", "ScrollSnapAlign::CENTER");
+            break;
+        }
+        case ScrollSnapAlign::END: {
+            json->Put("snapAlign", "ScrollSnapAlign::END");
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+void ScrollPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(hub);
+    ScrollablePattern::DumpAdvanceInfo(json);
+    json->Put("currentOffset", std::to_string(currentOffset_).c_str());
+
+    GetScrollSnapAlignDumpInfo(json);
+    auto snapPaginationStr = std::string("snapPagination: ");
+    json->Put("snapPagination", GetScrollSnapPagination().c_str());
+    json->Put("enableSnapToStart", enableSnapToSide_.first ? "true" : "false");
+    json->Put("enableSnapToEnd", enableSnapToSide_.second ? "true" : "false");
+
+    GetScrollPagingStatusDumpInfo(json);
+    std::string snapOffsetsStr = "";
+    for (const auto& iter : snapPaginations_) {
+        snapOffsetsStr = snapOffsetsStr.append(iter.ToString()).append(" ");
+    }
+    json->Put("snapOffsets", snapOffsetsStr.c_str());
+    json->Put("initialOffset",
+        initialOffset_.has_value() ? initialOffset_->GetMainOffset(GetAxis()).ToString().c_str() : "None");
+    auto onScrollEdge = hub->GetScrollEdgeEvent();
+    json->Put("hasOnScrollEdge", onScrollEdge ? "true" : "false");
+
+    std::unique_ptr<JsonValue> children = JsonUtil::CreateArray(true);
+    for (const auto& info : scrollLayoutInfos_) {
+        std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
+        info.ToJson(child);
+        children->Put(child);
+    }
+    json->Put("scrollLayoutInfos", children);
+    std::unique_ptr<JsonValue> infochildren = JsonUtil::CreateArray(true);
+    for (const auto& info : scrollMeasureInfos_) {
+        std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
+        info.ToJson(child);
+        infochildren->Put(child);
+    }
+    json->Put("scrollMeasureInfos", infochildren);
 }
 } // namespace OHOS::Ace::NG

@@ -525,6 +525,22 @@ void TextFieldLayoutAlgorithm::HandleNonTextArea(LayoutWrapper* layoutWrapper, c
     CHECK_NULL_VOID(textGeometryNode);
 
     countX = contentRect.GetX();
+    auto responseArea = pattern->GetResponseArea();
+    auto cleanNodeResponseArea = pattern->GetCleanNodeResponseArea();
+    if (responseArea) {
+        if (isRTL) {
+            countX -= responseArea->GetAreaRect().Width();
+        } else {
+            countX += responseArea->GetAreaRect().Width();
+        }
+    }
+    if (cleanNodeResponseArea) {
+        if (isRTL) {
+            countX -= cleanNodeResponseArea->GetAreaRect().Width();
+        } else {
+            countX += cleanNodeResponseArea->GetAreaRect().Width();
+        }
+    }
     textGeometryNode->SetFrameOffset(OffsetF(countX, frameRect.Height() + textGeometryNode->GetFrameRect().Height()));
     counterNode->Layout();
 }

@@ -1212,5 +1212,17 @@ void ListItemPattern::OnDetachFromMainTree()
     CHECK_NULL_VOID(listPattern);
     listPattern->SetSwiperItemEnd(AceType::WeakClaim(this));
 }
+
+bool ListItemPattern::RenderCustomChild(int64_t deadline)
+{
+    if (shallowBuilder_ && !shallowBuilder_->IsExecuteDeepRenderDone()) {
+        if (GetSysTimestamp() > deadline) {
+            return false;
+        }
+        shallowBuilder_->ExecuteDeepRender();
+        shallowBuilder_.Reset();
+    }
+    return true;
+}
 } // namespace OHOS::Ace::NG
 

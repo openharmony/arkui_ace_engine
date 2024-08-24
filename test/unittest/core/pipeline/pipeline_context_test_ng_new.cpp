@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
+#include "test/mock/core/common/mock_container.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -1819,6 +1820,30 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg099, TestSize.Level1)
     context_->RemoveFrameNodeChangeListener(frameNode);
     context_->FlushNodeChangeFlag();
     EXPECT_EQ(context_->changeInfoListeners_.size(), 1);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg100
+ * @tc.desc: Test the function UpdateHalfFoldHoverStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg100, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->minPlatformVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
+    RefPtr<DisplayInfo> displayInfo = AceType::MakeRefPtr<DisplayInfo>();
+    displayInfo->SetWidth(DEFAULT_INT10);
+    displayInfo->SetHeight(DEFAULT_INT10);
+    displayInfo->SetIsFoldable(true);
+    displayInfo->SetFoldStatus(FoldStatus::HALF_FOLD);
+    displayInfo->SetRotation(Rotation::ROTATION_90);
+    MockContainer::Current()->SetDisplayInfo(displayInfo);
+    context_->UpdateHalfFoldHoverStatus(DEFAULT_INT10, DEFAULT_INT10);
+    ASSERT_EQ(context_->isHalfFoldHoverStatus_, true);
 }
 } // namespace NG
 } // namespace OHOS::Ace

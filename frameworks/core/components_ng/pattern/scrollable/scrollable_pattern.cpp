@@ -713,7 +713,7 @@ void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)
     CHECK_NULL_VOID(scrollable);
     scrollable->SetEdgeEffect(edgeEffect);
     if (edgeEffect != EdgeEffect::SPRING) {
-        scrollable->StopSpringAnimation();
+        scrollable->StopSpringAnimation(true);
     }
 }
 
@@ -1924,13 +1924,15 @@ ScrollResult ScrollablePattern::HandleScrollParentFirst(float& offset, int32_t s
         SetCanOverScroll(false);
         return { remainOffset, !NearZero(overOffset) };
     }
+    bool parentEdgeEffect = false;
     if (GetEdgeEffect() == EdgeEffect::NONE) {
         result = parent->HandleScroll(remainOffset, source, NestedState::CHILD_OVER_SCROLL, GetVelocity());
         if (NearZero(result.remain)) {
             offset -= overOffset;
+            parentEdgeEffect = NearZero(offset) && result.reachEdge;
         }
     }
-    SetCanOverScroll(!NearZero(overOffset) || (NearZero(offset) && result.reachEdge));
+    SetCanOverScroll((!NearZero(overOffset) && GetEdgeEffect() != EdgeEffect::NONE) || parentEdgeEffect);
     return { 0, GetCanOverScroll() };
 }
 
@@ -1972,7 +1974,8 @@ ScrollResult ScrollablePattern::HandleScrollSelfFirst(float& offset, int32_t sou
     // triggering overScroll, parent always handle it first
     auto overRes = parent->HandleScroll(result.remain, source, NestedState::CHILD_OVER_SCROLL, GetVelocity());
     offset += LessNotEqual(std::abs(overOffset), std::abs(result.remain)) ? overOffset : overRes.remain;
-    SetCanOverScroll((!NearZero(overOffset) || NearZero(offset)) && overRes.reachEdge);
+    bool parentEdgeEffect = result.reachEdge && NearZero(offset);
+    SetCanOverScroll((!NearZero(overOffset) && GetEdgeEffect() != EdgeEffect::NONE) || parentEdgeEffect);
     return { 0, GetCanOverScroll() };
 }
 
@@ -3282,5 +3285,181 @@ void ScrollablePattern::SetAccessibilityAction()
         CHECK_NULL_VOID(pattern->IsScrollable());
         pattern->ScrollPage(true, false, scrollType);
     });
+}
+
+void ScrollablePattern::GetPaintPropertyDumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
+    if (paintProperty) {
+        switch (paintProperty->GetScrollBarMode().value_or(DisplayMode::OFF)) {
+            case DisplayMode::OFF: {
+                json->Put("innerScrollBarState", "OFF");
+                break;
+            }
+            case DisplayMode::AUTO: {
+                json->Put("innerScrollBarState", "AUTO");
+                break;
+            }
+            case DisplayMode::ON: {
+                json->Put("innerScrollBarState", "ON");
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+        auto scrollBarWidth = paintProperty->GetScrollBarWidth();
+        json->Put("scrollBarWidth",
+            scrollBarWidth.has_value() ? paintProperty->GetScrollBarWidth().value().ToString().c_str() : "None");
+    }
+}
+
+void ScrollablePattern::GetAxisDumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    switch (axis_) {
+        case Axis::NONE: {
+            json->Put("Axis", "NONE");
+            break;
+        }
+        case Axis::VERTICAL: {
+            json->Put("Axis", "VERTICAL");
+            break;
+        }
+        case Axis::HORIZONTAL: {
+            json->Put("Axis", "HORIZONTAL");
+            break;
+        }
+        case Axis::FREE: {
+            json->Put("Axis", "FREE");
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+void ScrollablePattern::GetPanDirectionDumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    switch (GetScrollablePanDirection()) {
+        case Axis::NONE: {
+            json->Put("ScrollablePanDirection", "NONE");
+            break;
+        }
+        case Axis::VERTICAL: {
+            json->Put("ScrollablePanDirection", "VERTICAL");
+            break;
+        }
+        case Axis::HORIZONTAL: {
+            json->Put("ScrollablePanDirection", "HORIZONTAL");
+            break;
+        }
+        case Axis::FREE: {
+            json->Put("ScrollablePanDirection", "FREE");
+            break;
+        }
+        default: {
+            json->Put("ScrollablePanDirection", "null");
+            break;
+        }
+    }
+}
+
+void ScrollablePattern::GetEventDumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(hub);
+    auto onScrollStart = hub->GetOnScrollStart();
+    json->Put("hasOnScrollStart", onScrollStart ? "true" : "false");
+    auto onScrollStop = hub->GetOnScrollStop();
+    json->Put("hasOnScrollStop", onScrollStop ? "true" : "false");
+
+    auto scrollHub = host->GetEventHub<ScrollEventHub>();
+    if (scrollHub) {
+        auto onWillScroll = scrollHub->GetOnWillScrollEvent();
+        json->Put("hasOnWillScroll", onWillScroll ? "true" : "false");
+        auto onDidScroll = scrollHub->GetOnDidScrollEvent();
+        json->Put("hasOnDidScroll", onDidScroll ? "true" : "false");
+    } else {
+        auto onWillScroll = hub->GetOnWillScroll();
+        json->Put("hasOnWillScroll", onWillScroll ? "true" : "false");
+        auto onDidScroll = hub->GetOnDidScroll();
+        json->Put("hasOnDidScroll", onDidScroll ? "true" : "false");
+    }
+    auto onScrollFrameBegin = hub->GetOnScrollFrameBegin();
+    json->Put("hasOnScrollFrameBegin", onScrollFrameBegin ? "true" : "false");
+    auto onReachStart = hub->GetOnReachStart();
+    json->Put("hasOnReachStart", onReachStart ? "true" : "false");
+    auto onReachEnd = hub->GetOnReachEnd();
+    json->Put("hasOnReachEnd", onReachEnd ? "true" : "false");
+}
+
+void ScrollablePattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
+{
+    GetEdgeEffectDumpInfo(json);
+    json->Put("edgeEffectAlwaysEnabled", edgeEffectAlwaysEnabled_);
+    json->Put("isScrollable", IsScrollable());
+    GetEventDumpInfo(json);
+    json->Put("NestedScroll", GetNestedScroll().ToString().c_str());
+    json->Put("isSearchRefresh", GetIsSearchRefresh());
+    json->Put("isFixedNestedScrollMode", GetIsFixedNestedScrollMode());
+    auto parent = GetNestedScrollParent();
+    if (parent && parent->GetHost()) {
+        std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
+        children->Put("id", parent->GetHost()->GetId());
+        children->Put("tag", parent->GetHost()->GetTag().c_str());
+        json->Put("nestedScrollParent", children);
+    } else {
+        json->Put("nestedScrollParent", "null");
+    }
+    GetAxisDumpInfo(json);
+    GetPanDirectionDumpInfo(json);
+    GetPaintPropertyDumpInfo(json);
+    json->Put("enableScrollInteraction", GetScrollEnabled());
+    json->Put("friction", friction_);
+    json->Put("flingSpeedLimit", std::to_string(GetMaxFlingVelocity()).c_str());
+    json->Put("eventsFiredInfos", friction_);
+    std::unique_ptr<JsonValue> children = JsonUtil::CreateArray(true);
+    for (const auto& info : eventsFiredInfos_) {
+        std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
+        info.ToJson(child);
+        children->Put(child);
+    }
+    json->Put("eventsFiredInfos", children);
+    std::unique_ptr<JsonValue> childreninfo = JsonUtil::Create(true);
+    for (const auto& info : scrollableFrameInfos_) {
+        std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
+        info.ToJson(child);
+        childreninfo->Put(child);
+    }
+    json->Put("scrollableFrameInfos", childreninfo);
+    if (scrollBar_) {
+        scrollBar_->DumpAdvanceInfo(json);
+    } else {
+        json->Put("inner ScrollBar", "null");
+    }
+}
+
+void ScrollablePattern::GetEdgeEffectDumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    switch (edgeEffect_) {
+        case EdgeEffect::NONE: {
+            json->Put("edgeEffect", "NONE");
+            break;
+        }
+        case EdgeEffect::SPRING: {
+            json->Put("edgeEffect", "SPRING");
+            break;
+        }
+        case EdgeEffect::FADE: {
+            json->Put("edgeEffect", "FADE");
+            break;
+        }
+        default: {
+            break;
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

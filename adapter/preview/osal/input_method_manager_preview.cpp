@@ -17,16 +17,13 @@
 
 namespace OHOS::Ace {
 std::unique_ptr<InputMethodManager> InputMethodManager::instance_ = nullptr;
-std::mutex InputMethodManager::mtx_;
 
 InputMethodManager* InputMethodManager::GetInstance()
 {
-    if (instance_ == nullptr) {
-        std::lock_guard<std::mutex> lock(mtx_);
-        if (instance_ == nullptr) {
-            instance_.reset(new InputMethodManager);
-        }
-    }
+    static std::once_flag onceFlag;
+    std::call_once(onceFlag, []() {
+        instance_.reset(new InputMethodManager());
+    });
     return instance_.get();
 }
 

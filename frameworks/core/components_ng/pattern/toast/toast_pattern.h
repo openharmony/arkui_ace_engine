@@ -67,6 +67,7 @@ public:
     void OnColorConfigurationUpdate() override;
 
     void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
 
     void SetTextNode(RefPtr<FrameNode> textNode)
     {

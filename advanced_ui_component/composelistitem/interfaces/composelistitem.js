@@ -1789,14 +1789,10 @@ export class ComposeListItem extends ViewPU {
             If.create();
             if (this.contentItem !== null) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((o1, p1) => {
-                        __Common__.create();
-                        __Common__.flexShrink(0);
-                    }, __Common__);
                     {
-                        this.observeComponentCreation2((d, o) => {
-                            if (o) {
-                                let p = new ContentItemStruct(this, {
+                        this.observeComponentCreation2((z, f1) => {
+                            if (f1) {
+                                let t1 = new ContentItemStruct(this, {
                                     icon: this.contentItem?.icon,
                                     iconStyle: this.contentItem?.iconStyle,
                                     primaryText: this.contentItem?.primaryText,
@@ -1806,10 +1802,9 @@ export class ComposeListItem extends ViewPU {
                                     fontSizeScale: this.fontSizeScale,
                                     parentDirection: this.containerDirection,
                                     itemDirection: this.contentItemDirection,
-                                }, undefined, d, () => { },
-                                    { page: 'library/src/main/ets/components/composelistitem.ets', line: 942, col: 11 });
-                                ViewPU.create(p);
-                                let t = () => {
+                                }, undefined, z, () => { }, { page: "library/src/main/ets/components/composelistitem.ets", line: 942, col: 11 });
+                                ViewPU.create(t1);
+                                let a4 = () => {
                                     return {
                                         icon: this.contentItem?.icon,
                                         iconStyle: this.contentItem?.iconStyle,
@@ -1822,10 +1817,10 @@ export class ComposeListItem extends ViewPU {
                                         itemDirection: this.contentItemDirection
                                     };
                                 };
-                                p.paramsGenerator_ = t;
+                                t1.paramsGenerator_ = a4;
                             }
                             else {
-                                this.updateStateVarsOfChildByElmtId(d, {
+                                this.updateStateVarsOfChildByElmtId(z, {
                                     icon: this.contentItem?.icon,
                                     iconStyle: this.contentItem?.iconStyle,
                                     primaryText: this.contentItem?.primaryText,
@@ -1839,7 +1834,6 @@ export class ComposeListItem extends ViewPU {
                             }
                         }, { name: "ContentItemStruct" });
                     }
-                    __Common__.pop();
                 });
             }
             else {

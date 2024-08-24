@@ -592,8 +592,10 @@ TextStyle SpanItem::InheritParentProperties(const RefPtr<FrameNode>& frameNode, 
     INHERIT_TEXT_STYLE(fontStyle, FontFeature, SetFontFeatures);
     INHERIT_TEXT_STYLE(fontStyle, MinFontScale, SetMinFontScale);
     INHERIT_TEXT_STYLE(fontStyle, MaxFontScale, SetMaxFontScale);
-    INHERIT_TEXT_STYLE(fontStyle, VariableFontWeight, SetVariableFontWeight);
-    INHERIT_TEXT_STYLE(fontStyle, EnableVariableFontWeight, SetEnableVariableFontWeight);
+    if (!GetHasUserFontWeight()) {
+        INHERIT_TEXT_STYLE(fontStyle, VariableFontWeight, SetVariableFontWeight);
+        INHERIT_TEXT_STYLE(fontStyle, EnableVariableFontWeight, SetEnableVariableFontWeight);
+    }
     INHERIT_TEXT_STYLE(textLineStyle, LineHeight, SetLineHeight);
     INHERIT_TEXT_STYLE(textLineStyle, LineSpacing, SetLineSpacing);
     INHERIT_TEXT_STYLE(textLineStyle, HalfLeading, SetHalfLeading);

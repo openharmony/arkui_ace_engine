@@ -120,6 +120,8 @@ public:
     void SetUiDvsyncSwitch(bool vsyncSwitch) override;
 
     void NotifyExtensionTimeout(int32_t errorCode) override;
+    
+    uint32_t GetStatusBarHeight() const override;
 
 private:
     OHOS::sptr<OHOS::Rosen::Window> rsWindow_;

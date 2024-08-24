@@ -32,6 +32,10 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+
+constexpr int32_t DEFAULT_ALPHA = 255;
+constexpr float DEFAULT_OPACITY = 0.2;
+
 void TextModelNG::Create(const std::string& content)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -947,7 +951,12 @@ TextSelectableMode TextModelNG::GetTextSelectableMode(FrameNode* frameNode)
 
 void TextModelNG::SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SelectedBackgroundColor, value, frameNode);
+    Color color = value;
+    if (color.GetAlpha() == DEFAULT_ALPHA) {
+        // Default setting of 20% opacity
+        color = color.ChangeOpacity(DEFAULT_OPACITY);
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SelectedBackgroundColor, color, frameNode);
 }
 
 Color TextModelNG::GetSelectedBackgroundColor(FrameNode* frameNode)
@@ -1000,6 +1009,7 @@ void TextModelNG::SetTextContentWithStyledString(FrameNode* frameNode, ArkUI_Sty
                 position += static_cast<int32_t>(wSpanContent.length());
                 auto intervalEnd = position;
                 spanItem->interval = { intervalStart, intervalEnd };
+                spanItem->position = position;
                 spanItems.emplace_back(spanItem);
             }
         }
@@ -1064,6 +1074,36 @@ void TextModelNG::SetResponseRegion(bool isUserSetResponseRegion)
     auto textPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->SetIsUserSetResponseRegion(isUserSetResponseRegion);
+}
+
+void TextModelNG::SetResponseRegion(FrameNode* frameNode, std::vector<DimensionRect> regions)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    auto gesture = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    gesture->SetResponseRegion(regions);
+    textPattern->SetIsUserSetResponseRegion(true);
+}
+
+void TextModelNG::ClearResponseRegion(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    auto gesture = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    std::vector<DimensionRect> region;
+    CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension widthDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    CalcDimension heightDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    DimensionOffset offsetDimen(xDimen, yDimen);
+    DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen);
+    region.emplace_back(dimenRect);
+    gesture->SetResponseRegion(region);
+    textPattern->SetIsUserSetResponseRegion(false);
 }
 
 void TextModelNG::SetHalfLeading(bool halfLeading)

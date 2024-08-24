@@ -404,17 +404,19 @@ void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReaso
     }
     if (reason == CloseReason::CLOSE_REASON_BACK_PRESSED) {
         pattern->ResetSelection();
-        if (pattern->IsEditing()) {
-            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "only show caret for edit state");
-            pattern->isCursorAlwaysDisplayed_ = false;
-            pattern->StartTwinkling();
-        }
+        ResumeTwinkling();
     }
 }
 
 void RichEditorSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType)
 {
-    BaseTextSelectOverlay::OnHandleGlobalTouchEvent(sourceType, touchType);
+    CHECK_NULL_VOID(IsMouseClickDown(sourceType, touchType) || IsTouchUp(sourceType, touchType));
+    if (IsSingleHandle()) {
+        CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
+        ResumeTwinkling();
+    } else {
+        HideMenu();
+    }
 }
 
 void RichEditorSelectOverlay::OnHandleLevelModeChanged(HandleLevelMode mode)
@@ -495,7 +497,6 @@ void RichEditorSelectOverlay::UpdateHandleOffset()
 
 void RichEditorSelectOverlay::UpdateSelectOverlayOnAreaChanged()
 {
-    HideMenu(true);
     CHECK_NULL_VOID(SelectOverlayIsOn() || SelectOverlayIsCreating());
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
@@ -517,9 +518,17 @@ void RichEditorSelectOverlay::SwitchCaretState()
     if (isSingleHandleShow) {
         pattern->StopTwinkling();
     } else {
-        pattern->isCursorAlwaysDisplayed_ = false;
-        pattern->StartTwinkling();
+        ResumeTwinkling();
     }
+}
+
+void RichEditorSelectOverlay::ResumeTwinkling()
+{
+    auto pattern = GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern && pattern->IsEditing());
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "only show caret for edit state");
+    pattern->isCursorAlwaysDisplayed_ = false;
+    pattern->StartTwinkling();
 }
 
 void RichEditorSelectOverlay::OnHandleIsHidden()

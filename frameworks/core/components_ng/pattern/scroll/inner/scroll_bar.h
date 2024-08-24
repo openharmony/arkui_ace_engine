@@ -382,10 +382,15 @@ public:
     // infos for dump
     void AddScrollBarLayoutInfo();
     void GetShapeModeDumpInfo();
+    void GetShapeModeDumpInfo(std::unique_ptr<JsonValue>& json);
     void GetPositionModeDumpInfo();
+    void GetPositionModeDumpInfo(std::unique_ptr<JsonValue>& json);
     void GetAxisDumpInfo();
+    void GetAxisDumpInfo(std::unique_ptr<JsonValue>& json);
     void GetPanDirectionDumpInfo();
+    void GetPanDirectionDumpInfo(std::unique_ptr<JsonValue>& json);
     void DumpAdvanceInfo();
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json);
 
 protected:
     void InitTheme();

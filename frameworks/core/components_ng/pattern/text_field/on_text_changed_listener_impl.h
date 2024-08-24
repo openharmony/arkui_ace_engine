@@ -47,8 +47,9 @@ public:
     std::u16string GetRightTextOfCursor(int32_t number) override;
     int32_t GetTextIndexAtCursor() override;
     void NotifyPanelStatusInfo(const MiscServices::PanelStatusInfo& info) override;
-    void AutoFillReceivePrivateCommand(
-        const std::unordered_map<std::string, MiscServices::PrivateDataValue>& privateCommand);
+    static void AutoFillReceivePrivateCommand(
+        const std::unordered_map<std::string, MiscServices::PrivateDataValue>& privateCommand,
+        const WeakPtr<TextInputClient>& pattern);
     int32_t SetPreviewText(const std::u16string &text, const MiscServices::Range &range) override;
     void FinishTextPreview() override;
     int32_t ReceivePrivateCommand(

@@ -62,10 +62,12 @@ class ArkXComponentComponent extends ArkComponent implements XComponentAttribute
     throw new Error('Method not implemented.');
   }
   width(value: Length): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, XComponentWidthModifier.identity, XComponentWidthModifier, value);
+    return this;
   }
   height(value: Length): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, XComponentHeightModifier.identity, XComponentHeightModifier, value);
+    return this;
   }
   expandSafeArea(types?: SafeAreaType[], edges?: SafeAreaEdge[]): this {
     throw new Error('Method not implemented.');
@@ -497,10 +499,16 @@ class ArkXComponentComponent extends ArkComponent implements XComponentAttribute
     throw new Error('Method not implemented.');
   }
   onLoad(callback: (event?: object) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, XComponentOnLoadModifier.identity, XComponentOnLoadModifier, callback);
+    return this;
   }
   onDestroy(event: () => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, XComponentOnDestroyModifier.identity, XComponentOnDestroyModifier, event);
+    return this;
+  }
+  enableAnalyzer(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, XComponentEnableAnalyzerModifier.identity, XComponentEnableAnalyzerModifier, value);
+    return this;
   }
 
 }
@@ -528,6 +536,42 @@ class XComponentInitializeModifier extends ModifierWithKey<XComponentParam> {
       getUINativeModule().xComponent.setXComponentInitialize(node, this.value?.id,
         this.value?.type, this.value?.imageAIOptions, this.value?.libraryname, this.value?.controller);
     }
+  }
+}
+
+class XComponentWidthModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('xComponentWidth');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().xComponent.resetWidth(node);
+    } else {
+      getUINativeModule().xComponent.setWidth(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class XComponentHeightModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('xComponentHeight');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().xComponent.resetHeight(node);
+    } else {
+      getUINativeModule().xComponent.setHeight(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -839,5 +883,51 @@ class XComponentLinearGradientBlurModifier extends ModifierWithKey<ArkLinearGrad
   }
   checkObjectDiff(): boolean {
     return !this.value.isEqual(this.stageValue);
+  }
+}
+
+class XComponentOnLoadModifier extends ModifierWithKey<(event?: object) => void> {
+  constructor(value: (event?: object) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('xComponentOnLoad');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().xComponent.resetOnLoad(node);
+    } else {
+      getUINativeModule().xComponent.setOnLoad(node, this.value);
+    }
+  }
+}
+
+class XComponentOnDestroyModifier extends ModifierWithKey<() => void> {
+  constructor(value: () => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('xComponentOnDestroy');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().xComponent.resetOnDestroy(node);
+    } else {
+      getUINativeModule().xComponent.setOnDestroy(node, this.value);
+    }
+  }
+}
+
+class XComponentEnableAnalyzerModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('xComponentEnableAnalyzer');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().xComponent.resetEnableAnalyzer(node);
+    } else {
+      getUINativeModule().xComponent.setEnableAnalyzer(node, this.value);
+    }
+  }
+  
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }

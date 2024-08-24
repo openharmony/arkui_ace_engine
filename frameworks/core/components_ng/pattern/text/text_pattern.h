@@ -162,7 +162,11 @@ public:
 
     void DumpAdvanceInfo() override;
     void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
+    void SetTextStyleDumpInfo(std::unique_ptr<JsonValue>& json);
     void DumpScaleInfo();
+    void DumpTextEngineInfo();
 
     TextSelector GetTextSelector() const
     {
@@ -641,6 +645,8 @@ public:
 
     size_t GetLineCount() const override;
     TextLineMetrics GetLineMetrics(int32_t lineNumber) override;
+    std::vector<ParagraphManager::TextBox> GetRectsForRange(int32_t start, int32_t end,
+        RectHeightStyle heightStyle, RectWidthStyle widthStyle) override;
     PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y) override;
 
     void OnSelectionMenuOptionsUpdate(
@@ -655,6 +661,11 @@ public:
     void SetPrintInfo(const std::string& area, const OffsetF& paintOffset)
     {
         paintInfo_ = area + paintOffset.ToString();
+    }
+
+    void DumpRecord(const std::string& record)
+    {
+        frameRecord_.append(record);
     }
 
     void SetIsUserSetResponseRegion(bool isUserSetResponseRegion)
@@ -775,6 +786,7 @@ protected:
 
     std::string textForDisplay_;
     std::string paintInfo_ = "NA";
+    std::string frameRecord_ = "NA";
     std::optional<TextStyle> textStyle_;
     std::list<RefPtr<SpanItem>> spans_;
     mutable std::list<RefPtr<UINode>> childNodes_;
