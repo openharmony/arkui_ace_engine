@@ -452,8 +452,8 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
                      "canOverScroll_:%u, id:%d, tag:%s",
         mainPosition, gestureVelocity, currentVelocity_, moved_, canOverScroll_, nodeId_, nodeTag_.c_str());
     if (!moved_ || IsMouseWheelScroll(info)) {
-        if (calePredictSnapOffsetCallback_) {
-            std::optional<float> predictSnapOffset = calePredictSnapOffsetCallback_(0.0f, 0.0f, 0.0f);
+        if (calcPredictSnapOffsetCallback_) {
+            std::optional<float> predictSnapOffset = calcPredictSnapOffsetCallback_(0.0f, 0.0f, 0.0f);
             if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
                 currentPos_ = mainPosition;
                 ProcessScrollSnapSpringMotion(predictSnapOffset.value(), currentVelocity_);
@@ -497,9 +497,9 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
     initVelocity_ = correctVelocity;
     finalPosition_ = mainPosition + correctVelocity / (friction * -FRICTION_SCALE);
 
-    if (calePredictSnapOffsetCallback_) {
+    if (calcPredictSnapOffsetCallback_) {
         std::optional<float> predictSnapOffset =
-            calePredictSnapOffsetCallback_(GetFinalPosition() - mainPosition, GetDragOffset(), correctVelocity);
+            calcPredictSnapOffsetCallback_(GetFinalPosition() - mainPosition, GetDragOffset(), correctVelocity);
         if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
             currentPos_ = mainPosition;
             ProcessScrollSnapSpringMotion(predictSnapOffset.value(), correctVelocity);
@@ -911,9 +911,9 @@ void Scrollable::UpdateSpringMotion(
 
 void Scrollable::ProcessScrollMotionStop(bool stopFriction)
 {
-    if (needScrollSnapChange_ && calePredictSnapOffsetCallback_ && frictionOffsetProperty_) {
+    if (needScrollSnapChange_ && calcPredictSnapOffsetCallback_ && frictionOffsetProperty_) {
         needScrollSnapChange_ = false;
-        auto predictSnapOffset = calePredictSnapOffsetCallback_(GetFinalPosition() - currentPos_, 0.0f, 0.0f);
+        auto predictSnapOffset = calcPredictSnapOffsetCallback_(GetFinalPosition() - currentPos_, 0.0f, 0.0f);
         if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
             ProcessScrollSnapSpringMotion(predictSnapOffset.value(), currentVelocity_);
             return;

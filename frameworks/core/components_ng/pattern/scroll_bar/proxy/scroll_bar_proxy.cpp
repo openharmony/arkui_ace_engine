@@ -218,14 +218,14 @@ bool ScrollBarProxy::NotifySnapScroll(
 {
     for (const auto& node : scrollableNodes_) {
         auto scrollable = node.scrollableNode.Upgrade();
-        if (!scrollable || !CheckScrollable(scrollable) || !node.calePredictSnapOffsetCallback ||
+        if (!scrollable || !CheckScrollable(scrollable) || !node.calcPredictSnapOffsetCallback ||
             !node.startScrollSnapMotionCallback) {
             continue;
         }
         auto controlDistance = GetScrollableNodeDistance(scrollable);
         auto patternOffset = CalcPatternOffset(controlDistance, barScrollableDistance, delta);
         dragDistance = CalcPatternOffset(controlDistance, barScrollableDistance, dragDistance);
-        auto predictSnapOffset = node.calePredictSnapOffsetCallback(patternOffset, dragDistance, -velocity);
+        auto predictSnapOffset = node.calcPredictSnapOffsetCallback(patternOffset, dragDistance, -velocity);
         // If snap scrolling, predictSnapOffset will has a value.
         if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
             node.startScrollSnapMotionCallback(predictSnapOffset.value(), velocity);

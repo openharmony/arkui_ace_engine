@@ -375,7 +375,7 @@ public:
     void UpdateMouseStart(float offset);
 
     // scrollSnap
-    virtual std::optional<float> CalePredictSnapOffset(float delta, float dragDistance, float velocity)
+    virtual std::optional<float> CalcPredictSnapOffset(float delta, float dragDistance, float velocity)
     {
         std::optional<float> predictSnapPosition;
         return predictSnapPosition;
