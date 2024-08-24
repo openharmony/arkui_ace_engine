@@ -148,10 +148,13 @@ export struct ToolBar {
   @State fontActivatedPrimaryColor: ResourceColor = $r('sys.color.font_emphasize');
   @State symbolEffect: SymbolEffect = new SymbolEffect();
   @State fontSize: number = 1;
-  @State toolBarItemGestureModifier: ButtonGestureModifier[] = [];
   isFollowSystem: boolean = false;
   maxFontSizeScale: number = 3.2;
   moreIndex: number = 4;
+  moreItem: ToolBarOption = {
+    content: $r('sys.string.ohos_toolbar_more'),
+    icon: PUBLIC_MORE,
+  }
 
   onWillApplyTheme(theme: Theme) {
     this.iconPrimaryColor = theme.colors.iconPrimary;
@@ -208,7 +211,7 @@ export struct ToolBar {
         .backgroundColor(this.toolBarItemBackground[index])
       }
     })
-    .gestureModifier(this.toolBarItemGestureModifier[index])
+    .gestureModifier(this.getItemGestureModifier(this.moreItem, index))
   }
 
   @Builder TabBuilder(index: number) {
@@ -278,7 +281,7 @@ export struct ToolBar {
     .onClick(() => {
       this.clickEventAction(index);
     })
-    .gestureModifier(this.toolBarItemGestureModifier[index])
+    .gestureModifier(this.getItemGestureModifier(this.toolBarList[index], index))
   }
 
   private getFontSizeScale(): number {
@@ -359,47 +362,36 @@ export struct ToolBar {
     }
   }
 
+  private getItemGestureModifier(item: ToolBarOption, index: number): ButtonGestureModifier {
+    let buttonGestureModifier: ButtonGestureModifier = new ButtonGestureModifier(null);
+    if (item?.icon || item?.toolBarSymbolOptions?.activated || item?.toolBarSymbolOptions?.normal) {
+      buttonGestureModifier = new ButtonGestureModifier(new CustomDialogController({
+        builder: ToolBarDialog({
+          itemDialog: item,
+          fontSize: this.fontSize,
+          itemSymbolModifier: this.getToolBarSymbolModifier(index),
+        }),
+        maskColor: Color.Transparent,
+        isModal: true,
+        customStyle: true,
+      }))
+      buttonGestureModifier.fontSize = this.fontSize;
+    }
+    return buttonGestureModifier;
+  }
+
   refreshData() {
     this.menuContent = [];
-    this.toolBarItemGestureModifier = [];
     this.fontSize = this.getFontSizeScale();
     for (let i = 0; i < this.toolBarList.length; i++) {
-      if (i >= moreIndex && this.toolBarList.length > TOOLBAR_MAX_LENGTH) {
-        this.menuContent[i - moreIndex] = {
+      if (i >= this.moreIndex && this.toolBarList.length > TOOLBAR_MAX_LENGTH) {
+        this.menuContent[i - this.moreIndex] = {
           value: this.toolBarList[i].content,
           action: this.toolBarList[i].action as () => void,
           enabled: this.toolBarList[i].state !== ItemState.DISABLE,
         }
-        this.toolBarItemGestureModifier[moreIndex] = new ButtonGestureModifier(new CustomDialogController({
-          builder: ToolBarDialog({
-            itemDialog: {
-              content: this.moreText,
-              icon: PUBLIC_MORE,
-            },
-            fontSize: this.fontSize,
-          }),
-          maskColor: Color.Transparent,
-          isModal: true,
-          customStyle: true,
-        }))
-        this.toolBarItemGestureModifier[moreIndex].fontSize = this.fontSize;
-      } else if (this.toolBarList[i]?.icon || this.toolBarList[i]?.toolBarSymbolOptions?.activated ||
-        this.toolBarList[i]?.toolBarSymbolOptions?.normal) {
-        this.menuContent = [];
-        this.toolBarItemGestureModifier[i] = new ButtonGestureModifier(new CustomDialogController({
-          builder: ToolBarDialog({
-            itemDialog: this.toolBarList[i],
-            fontSize: this.fontSize,
-            itemSymbolModifier: this.getToolBarSymbolModifier(i),
-          }),
-          maskColor: Color.Transparent,
-          isModal: true,
-          customStyle: true,
-        }))
-        this.toolBarItemGestureModifier[i].fontSize = this.fontSize;
       } else {
         this.menuContent = [];
-        this.toolBarItemGestureModifier[i] = new ButtonGestureModifier(null);
       }
       this.toolBarItemBackground[i] = Color.Transparent;
     }
@@ -427,7 +419,7 @@ export struct ToolBar {
         .attributeModifier(this.dividerModifier)
       Row() {
         ForEach(this.toolBarList, (item: ToolBarOption, index: number) => {
-          if (this.toolBarList.length <= TOOLBAR_MAX_LENGTH || index < moreIndex) {
+          if (this.toolBarList.length <= TOOLBAR_MAX_LENGTH || index < this.moreIndex) {
             Row() {
               this.TabBuilder(index);
             }
@@ -437,7 +429,7 @@ export struct ToolBar {
         })
         if (this.refreshData() && this.toolBarList.length > TOOLBAR_MAX_LENGTH) {
           Row() {
-            this.MoreTabBuilder(moreIndex);
+            this.MoreTabBuilder(this.moreIndex);
           }
           .height('100%')
           .flexShrink(1)
@@ -457,6 +449,7 @@ export struct ToolBar {
         this.toolBarModifier.paddingValue : LengthMetrics.resource($r('sys.float.padding_level0')),
       })
     }
+    .backgroundColor($r('sys.color.ohos_id_color_toolbar_bg'))
     .attributeModifier(this.toolBarModifier)
   }
 }
