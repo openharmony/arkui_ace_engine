@@ -789,6 +789,11 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
         return new ArkWaterFlowComponent(node, type);
       })
     }],
+    ['SymbolGlyph', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'SymbolGlyph', (node: NodePtr, type: ModifierType): ArkSymbolGlyphComponent => {
+        return new ArkSymbolGlyphComponent(node, type);
+      })
+    }],
     ['FlowItem', (context: UIContext): FrameNode=> {
       return new TypedFrameNode(context, 'FlowItem', (node: NodePtr, type: ModifierType): ArkFlowItemComponent => {
         return new ArkFlowItemComponent(node, type);
