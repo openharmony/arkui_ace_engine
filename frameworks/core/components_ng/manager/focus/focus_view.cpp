@@ -342,6 +342,7 @@ void FocusView::FocusViewDidShow(const RefPtr<FocusHub>& focusHub)
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus view: %{public}s/%{public}d reset shown flag.",
             GetFrameName().c_str(), GetFrameId());
         neverShown_ = false;
+        return;
     }
     RefPtr<UINode> node = focusHub->GetFrameNode();
     do {

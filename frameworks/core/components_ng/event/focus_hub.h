@@ -1031,6 +1031,8 @@ public:
         const RefPtr<FocusHub>& hub, std::unique_ptr<JsonValue>& json, const InspectorFilter& filter);
 
     bool FocusToHeadOrTailChild(bool isHead);
+
+    WeakPtr<FocusHub> GetUnfocusableParentFocusNode();
 protected:
     bool OnKeyEvent(const KeyEvent& keyEvent);
     bool OnKeyEventNode(const KeyEvent& keyEvent);
