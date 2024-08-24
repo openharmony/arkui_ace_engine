@@ -1778,10 +1778,37 @@ void SearchPattern::SetSearchIconSize(const Dimension& value)
 
 void SearchPattern::SetSearchIconColor(const Color& color)
 {
+    LOGE("search SetSearchIconColor");
     CHECK_NULL_VOID(GetSearchNode());
-    auto& imageIconOptions = GetSearchNode()->GetSearchImageIconOptions();
-    imageIconOptions.UpdateColor(Color(color));
-    UpdateImageIconNode(IMAGE_INDEX);
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto iconFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
+    CHECK_NULL_VOID(iconFrameNode);
+    if (iconFrameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+        LOGE("search UpdateSearchIconColor UpdateSymbolColorList");
+        GetSearchNode()->SetSearchSymbolIconColor(Color(color));
+        auto symbolLayoutProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(symbolLayoutProperty);
+        symbolLayoutProperty->UpdateSymbolColorList({color});
+        iconFrameNode->MarkModifyDone();
+        iconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    } else {
+        LOGE("search UpdateSearchIconColor UpdateSvgFillColor");
+        auto &imageIconOptions = GetSearchNode()->GetSearchImageIconOptions();
+        imageIconOptions.UpdateColor(Color(color));
+        auto imageLayoutProperty = iconFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
+        auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value();
+        if (imageSourceInfo.IsSvg()) {
+            imageSourceInfo.SetFillColor(color);
+            imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+            auto imageRenderProperty = iconFrameNode->GetPaintProperty<ImageRenderProperty>();
+            CHECK_NULL_VOID(imageRenderProperty);
+            imageRenderProperty->UpdateSvgFillColor(color);
+            iconFrameNode->MarkModifyDone();
+            iconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
 }
 
 void SearchPattern::SetSearchImageIcon(IconOptions& iconOptions)
@@ -1790,8 +1817,6 @@ void SearchPattern::SetSearchImageIcon(IconOptions& iconOptions)
     auto& imageIconOptions = GetSearchNode()->GetSearchImageIconOptions();
     if (iconOptions.GetColor().has_value()) {
         imageIconOptions.UpdateColor(iconOptions.GetColor().value());
-    } else {
-        imageIconOptions.ResetColor();
     }
     if (iconOptions.GetSize().has_value()) {
         imageIconOptions.UpdateSize(ConvertImageIconSizeValue(iconOptions.GetSize().value()));
@@ -1819,10 +1844,37 @@ void SearchPattern::SetCancelIconSize(const Dimension& value)
 
 void SearchPattern::SetCancelIconColor(const Color& color)
 {
+    LOGE("search SetCancelIconColor");
     CHECK_NULL_VOID(GetSearchNode());
-    auto &imageIconOptions = GetSearchNode()->GetCancelImageIconOptions();
-    imageIconOptions.UpdateColor(Color(color));
-    UpdateImageIconNode(CANCEL_IMAGE_INDEX);
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto cancelIconFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
+    CHECK_NULL_VOID(cancelIconFrameNode);
+    if (cancelIconFrameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+        LOGE("search UpdateCancelIconColor UpdateSymbolColorList");
+        GetSearchNode()->SetCancelSymbolIconColor(Color(color));
+        auto symbolLayoutProperty = cancelIconFrameNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(symbolLayoutProperty);
+        symbolLayoutProperty->UpdateSymbolColorList({color});
+        cancelIconFrameNode->MarkModifyDone();
+        cancelIconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    } else {
+        LOGE("search UpdateCancelIconColor UpdateSvgFillColor");
+        auto &imageIconOptions = GetSearchNode()->GetCancelImageIconOptions();
+        imageIconOptions.UpdateColor(Color(color));
+        auto imageLayoutProperty = cancelIconFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
+        auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value();
+        if (imageSourceInfo.IsSvg()) {
+            imageSourceInfo.SetFillColor(color);
+            imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+            auto imageRenderProperty = cancelIconFrameNode->GetPaintProperty<ImageRenderProperty>();
+            CHECK_NULL_VOID(imageRenderProperty);
+            imageRenderProperty->UpdateSvgFillColor(color);
+            cancelIconFrameNode->MarkModifyDone();
+            cancelIconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
 }
 
 void SearchPattern::SetRightIconSrcPath(const std::string& src)
@@ -1846,8 +1898,6 @@ void SearchPattern::SetCancelImageIcon(IconOptions& iconOptions)
     auto& imageIconOptions = GetSearchNode()->GetCancelImageIconOptions();
     if (iconOptions.GetColor().has_value()) {
         imageIconOptions.UpdateColor(iconOptions.GetColor().value());
-    } else {
-        imageIconOptions.ResetColor();
     }
     if (iconOptions.GetSize().has_value()) {
         imageIconOptions.UpdateSize(ConvertImageIconSizeValue(iconOptions.GetSize().value()));
@@ -1914,8 +1964,6 @@ void SearchPattern::UpdateImageIconProperties(RefPtr<FrameNode>& iconFrameNode, 
         CHECK_NULL_VOID(searchTheme);
         auto iconTheme = pipeline->GetTheme<IconTheme>();
         CHECK_NULL_VOID(iconTheme);
-        auto imageRenderProperty = iconFrameNode->GetPaintProperty<ImageRenderProperty>();
-        CHECK_NULL_VOID(imageRenderProperty);
         if (iconOptions.GetSrc().value_or("").empty()) {
             imageSourceInfo.SetResourceId(index == IMAGE_INDEX ? InternalResource::ResourceId::SEARCH_SVG
                                                                : InternalResource::ResourceId::CLOSE_SVG);
@@ -1927,10 +1975,7 @@ void SearchPattern::UpdateImageIconProperties(RefPtr<FrameNode>& iconFrameNode, 
         }
         imageSourceInfo.SetBundleName(iconOptions.GetBundleName().value_or(""));
         imageSourceInfo.SetModuleName(iconOptions.GetModuleName().value_or(""));
-        if (iconOptions.GetColor().has_value()) {
-            imageSourceInfo.SetFillColor(iconOptions.GetColor().value());
-            imageRenderProperty->UpdateSvgFillColor(iconOptions.GetColor().value_or(searchTheme->GetSearchIconColor()));
-        }
+        imageSourceInfo.SetFillColor(iconOptions.GetColor().value_or(searchTheme->GetSearchIconColor()));
         imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
         CalcSize imageCalcSize(CalcLength(iconOptions.GetSize().value_or(searchTheme->GetIconHeight())),
             CalcLength(iconOptions.GetSize().value_or(searchTheme->GetIconHeight())));
@@ -1938,6 +1983,11 @@ void SearchPattern::UpdateImageIconProperties(RefPtr<FrameNode>& iconFrameNode, 
         imageLayoutProperty->UpdateUserDefinedIdealSize(imageCalcSize);
         auto parentInspector = GetSearchNode()->GetInspectorIdValue("");
         iconFrameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[index] + parentInspector);
+        auto imageRenderProperty = iconFrameNode->GetPaintProperty<ImageRenderProperty>();
+        CHECK_NULL_VOID(imageRenderProperty);
+        imageSourceInfo.SetFillColor(iconOptions.GetColor().value_or(searchTheme->GetSearchIconColor()));
+        imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+        imageRenderProperty->UpdateSvgFillColor(iconOptions.GetColor().value_or(searchTheme->GetSearchIconColor()));
     }
 }
 
