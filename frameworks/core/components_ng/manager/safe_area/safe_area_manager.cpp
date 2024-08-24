@@ -22,11 +22,11 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-bool SafeAreaManager::UpdateCutoutSafeArea(const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize)
+SafeAreaInsets GenerateCutOutAreaWithRoot(const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, false);
-    CHECK_NULL_RETURN(pipeline->GetUseCutout(), false);
+    CHECK_NULL_RETURN(pipeline, {});
+    CHECK_NULL_RETURN(pipeline->GetUseCutout(), {});
     // cutout regions adjacent to edges.
     auto cutoutArea = safeArea;
 
@@ -44,12 +44,27 @@ bool SafeAreaManager::UpdateCutoutSafeArea(const SafeAreaInsets& safeArea, NG::O
         cutoutArea.right_.end = rootSize.Width().has_value() ? rootSize.Width().value()
                                                              : PipelineContext::GetCurrentRootWidth();
     }
+    return cutoutArea;
+}
 
-    if (cutoutSafeArea_ == cutoutArea) {
+bool SafeAreaManager::CheckCutoutSafeArea(const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize)
+{
+    return cutoutSafeArea_ != GenerateCutOutAreaWithRoot(safeArea, rootSize);
+}
+
+bool SafeAreaManager::UpdateCutoutSafeArea(const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize)
+{
+    auto safeAreaWithRoot = GenerateCutOutAreaWithRoot(safeArea, rootSize);
+    if (cutoutSafeArea_ == safeAreaWithRoot) {
         return false;
     }
-    cutoutSafeArea_ = cutoutArea;
+    cutoutSafeArea_ = safeAreaWithRoot;
     return true;
+}
+
+bool SafeAreaManager::CheckSystemSafeArea(const SafeAreaInsets& safeArea)
+{
+    return systemSafeArea_ != safeArea;
 }
 
 bool SafeAreaManager::UpdateSystemSafeArea(const SafeAreaInsets& safeArea)
@@ -59,6 +74,11 @@ bool SafeAreaManager::UpdateSystemSafeArea(const SafeAreaInsets& safeArea)
     }
     systemSafeArea_ = safeArea;
     return true;
+}
+
+bool SafeAreaManager::CheckNavArea(const SafeAreaInsets& safeArea)
+{
+    return navSafeArea_ != safeArea;
 }
 
 bool SafeAreaManager::UpdateNavArea(const SafeAreaInsets& safeArea)
