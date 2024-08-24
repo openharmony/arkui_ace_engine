@@ -1407,6 +1407,20 @@ class BlendModeModifier extends ModifierWithKey {
   }
 }
 BlendModeModifier.identity = Symbol('blendMode');
+class AdvancedBlendModeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetAdvancedBlendMode(node);
+    }
+    else {
+      getUINativeModule().common.setAdvancedBlendMode(node, this.value.blendMode, this.value.blendApplyType);
+    }
+  }
+}
+AdvancedBlendModeModifier.identity = Symbol('advancedBlendMode');
 class ClipModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -4090,6 +4104,14 @@ class ArkComponent {
     arkBlendMode.blendMode = blendMode;
     arkBlendMode.blendApplyType = blendApplyType;
     modifierWithKey(this._modifiersWithKeys, BlendModeModifier.identity, BlendModeModifier, arkBlendMode);
+    return this;
+  }
+  advancedBlendMode(blendMode, blendApplyType) {
+    let arkBlendMode = new ArkBlendMode();
+    arkBlendMode.blendMode = blendMode;
+    arkBlendMode.blendApplyType = blendApplyType;
+    modifierWithKey(this._modifiersWithKeys, AdvancedBlendModeModifier.identity,
+      AdvancedBlendModeModifier, arkBlendMode);
     return this;
   }
   clip(value) {

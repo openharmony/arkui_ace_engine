@@ -6971,6 +6971,48 @@ void JSViewAbstract::JsBlendMode(const JSCallbackInfo& info)
         } else if (blendModeNum == BACKWARD_COMPAT_MAGIC_NUMBER_SRC_IN) {
             blendMode = BlendMode::BACK_COMPAT_SOURCE_IN;
         }
+    }
+    if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsNumber()) {
+        auto blendApplyTypeNum = info[1]->ToNumber<int32_t>();
+        if (blendApplyTypeNum >= 0 && blendApplyTypeNum < static_cast<int>(BlendApplyType::MAX)) {
+            blendApplyType = static_cast<BlendApplyType>(blendApplyTypeNum);
+        }
+    }
+    ViewAbstractModel::GetInstance()->SetBlendMode(blendMode);
+    ViewAbstractModel::GetInstance()->SetBlendApplyType(blendApplyType);
+}
+
+void JSViewAbstract::JsAdvancedBlendMode(const JSCallbackInfo& info)
+{
+    if (info.Length() == 0) {
+        return;
+    }
+    BlendMode blendMode = BlendMode::NONE;
+    BlendApplyType blendApplyType = BlendApplyType::FAST;
+    // for backward compatible, we temporary add a magic number to trigger offscreen, will remove soon
+    constexpr int BACKWARD_COMPAT_MAGIC_NUMBER_OFFSCREEN = 1000;
+    constexpr int BACKWARD_COMPAT_SOURCE_IN_NUMBER_OFFSCREEN = 2000;
+    constexpr int BACKWARD_COMPAT_DESTINATION_IN_NUMBER_OFFSCREEN = 3000;
+    constexpr int BACKWARD_COMPAT_MAGIC_NUMBER_SRC_IN = 5000;
+    if (info[0]->IsNumber()) {
+        auto blendModeNum = info[0]->ToNumber<int32_t>();
+        if (blendModeNum >= 0 && blendModeNum < static_cast<int>(BlendMode::MAX)) {
+            blendMode = static_cast<BlendMode>(blendModeNum);
+        } else if (blendModeNum == BACKWARD_COMPAT_MAGIC_NUMBER_OFFSCREEN) {
+            // backward compatibility code, will remove soon
+            blendMode = BlendMode::SRC_OVER;
+            blendApplyType = BlendApplyType::OFFSCREEN;
+        } else if (blendModeNum == BACKWARD_COMPAT_SOURCE_IN_NUMBER_OFFSCREEN) {
+            // backward compatibility code, will remove soon
+            blendMode = BlendMode::SRC_IN;
+            blendApplyType = BlendApplyType::OFFSCREEN;
+        } else if (blendModeNum == BACKWARD_COMPAT_DESTINATION_IN_NUMBER_OFFSCREEN) {
+            // backward compatibility code, will remove soon
+            blendMode = BlendMode::DST_IN;
+            blendApplyType = BlendApplyType::OFFSCREEN;
+        } else if (blendModeNum == BACKWARD_COMPAT_MAGIC_NUMBER_SRC_IN) {
+            blendMode = BlendMode::BACK_COMPAT_SOURCE_IN;
+        }
     } else if (info[0]->IsObject()) {
         auto blender = CreateRSBrightnessBlenderFromNapiValue(info[0]);
         ViewAbstractModel::GetInstance()->SetBrightnessBlender(blender);
@@ -8597,6 +8639,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("useSizeType", &JSViewAbstract::JsUseSizeType);
     JSClass<JSViewAbstract>::StaticMethod("shadow", &JSViewAbstract::JsShadow);
     JSClass<JSViewAbstract>::StaticMethod("blendMode", &JSViewAbstract::JsBlendMode);
+    JSClass<JSViewAbstract>::StaticMethod("advancedBlendMode", &JSViewAbstract::JsAdvancedBlendMode);
     JSClass<JSViewAbstract>::StaticMethod("grayscale", &JSViewAbstract::JsGrayScale);
     JSClass<JSViewAbstract>::StaticMethod("focusable", &JSViewAbstract::JsFocusable);
     JSClass<JSViewAbstract>::StaticMethod("focusBox", &JSViewAbstract::JsFocusBox);
