@@ -427,6 +427,63 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxChangeDataFunctionTest007, TestSi
 }
 
 /**
+ * @tc.name: ForEachSyntaxSetOnMoveFunctionTest001
+ * @tc.desc: Create LazyForEach, update its Items and invoke SetOnMove function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxSetOnMoveFunctionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Text and push it to view stack processor.
+     * @tc.expected: Make Text as LazyForEach parent.
+     */
+    auto frameNode = CreateNode(V2::TEXT_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. Invoke lazyForEach Create function.
+     * @tc.expected: Create LazyForEachNode and can be pop from ViewStackProcessor.
+     */
+    LazyForEachModelNG lazyForEach;
+    const RefPtr<LazyForEachActuator> mockLazyForEachActuator =
+        AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
+    lazyForEach.Create(mockLazyForEachActuator);
+    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(lazyForEachNode != nullptr && lazyForEachNode->GetTag() == V2::JS_LAZY_FOR_EACH_ETS_TAG);
+
+    UpdateItems(lazyForEachNode, mockLazyForEachActuator);
+
+    std::function<void(int32_t, int32_t)> lambda = [](int32_t a, int32_t b) {};
+
+    /**
+     * @tc.steps: step3. onMove not null and onMoveEvent_ not null.
+     */
+    lazyForEachNode->SetOnMove(std::move(lambda));
+    lazyForEachNode->onMoveEvent_ = std::move(lambda);
+    EXPECT_EQ(lazyForEachNode->ids_.size(), DEFAULT_SIZE);
+
+    /**
+     * @tc.steps: step4. onMove not null and onMoveEvent_ is null.
+     */
+    lazyForEachNode->SetOnMove(std::move(lambda));
+    lazyForEachNode->onMoveEvent_ = nullptr;
+    EXPECT_EQ(lazyForEachNode->ids_.size(), DEFAULT_SIZE);
+
+    /**
+     * @tc.steps: step5. onMove is null and onMoveEvent_ not null.
+     */
+    lazyForEachNode->SetOnMove(nullptr);
+    lazyForEachNode->onMoveEvent_ = std::move(lambda);
+    EXPECT_EQ(lazyForEachNode->ids_.size(), DEFAULT_SIZE);
+
+    /**
+     * @tc.steps: step6. onMove is null and onMoveEvent_ is null.
+     */
+    lazyForEachNode->SetOnMove(nullptr);
+    lazyForEachNode->onMoveEvent_ = nullptr;
+    EXPECT_EQ(lazyForEachNode->ids_.size(), DEFAULT_SIZE);
+}
+
+/**
  * @tc.name: ForEachSyntaxMoveDataFunctionTest008
  * @tc.desc: Create LazyForEach, update its Items and invoke OnDataMoved function.
  * @tc.type: FUNC
