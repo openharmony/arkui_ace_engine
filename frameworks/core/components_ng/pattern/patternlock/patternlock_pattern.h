@@ -159,6 +159,7 @@ private:
     void StartModifierCanceledAnimate();
     OffsetF GetLastChoosePointOffset();
     void CalculateCellCenter();
+    OffsetF GetTouchOffsetToNode();
 
     RefPtr<V2::PatternLockController> patternLockController_;
     RefPtr<TouchEventImpl> touchDownListener_;
