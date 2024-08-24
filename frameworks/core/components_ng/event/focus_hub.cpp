@@ -839,6 +839,7 @@ void FocusHub::RequestFocus() const
     }
     auto context = NG::PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
+    TAG_LOGI(AceLogTag::ACE_FOCUS, "Node: %{public}s/%{public}d RequestFocus.", GetFrameName().c_str(), GetFrameId());
     context->AddDirtyFocus(GetFrameNode());
 }
 
