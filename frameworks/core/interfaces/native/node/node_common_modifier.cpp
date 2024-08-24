@@ -3390,21 +3390,13 @@ void SetResponseRegion(ArkUINodeHandle node, const ArkUI_Float32* values, const 
         DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen);
         region.emplace_back(dimenRect);
     }
-    if (frameNode->GetTag() == V2::TEXT_ETS_TAG) {
-        TextModelNG::SetResponseRegion(frameNode, region);
-    } else {
-        ViewAbstract::SetResponseRegion(frameNode, region);
-    }
+    ViewAbstract::SetResponseRegion(frameNode, region);
 }
 
 void ResetResponseRegion(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (frameNode->GetTag() == V2::TEXT_ETS_TAG) {
-        TextModelNG::ClearResponseRegion(frameNode);
-        return;
-    }
     std::vector<DimensionRect> region;
     CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
     CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
