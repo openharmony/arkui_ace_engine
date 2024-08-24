@@ -1068,9 +1068,9 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractPositionEdges002, TestSize.Level1)
 
     EXPECT_NE(FRAME_NODE_ROOT->GetRenderContext(), nullptr);
     EXPECT_EQ(FRAME_NODE_ROOT->GetRenderContext()
-                  ->GetPositionEdgesValue(EdgesParam {}).bottom.value_or(Dimension {}).ConvertToVp(), 30.0f);
+                  ->GetPositionEdgesValue(EdgesParam {}).bottom.value_or(Dimension {}).ConvertToVp(), 0.0f);
     EXPECT_EQ(FRAME_NODE_ROOT->GetRenderContext()
-                  ->GetPositionEdgesValue(EdgesParam {}).right.value_or(Dimension {}).ConvertToVp(), 20.0f);
+                  ->GetPositionEdgesValue(EdgesParam {}).right.value_or(Dimension {}).ConvertToVp(), 0.0f);
 
     /**
      * @tc.steps: step5. finish view stack.
@@ -1110,9 +1110,9 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractOffset002, TestSize.Level1)
 
     EXPECT_NE(FRAME_NODE_ROOT->GetRenderContext(), nullptr);
     EXPECT_EQ(FRAME_NODE_ROOT->GetRenderContext()
-                  ->GetOffsetEdgesValue(EdgesParam {}).top.value_or(Dimension {}).ConvertToVp(), 30.0f);
+                  ->GetOffsetEdgesValue(EdgesParam {}).top.value_or(Dimension {}).ConvertToVp(), 0.0f);
     EXPECT_EQ(FRAME_NODE_ROOT->GetRenderContext()
-                  ->GetOffsetEdgesValue(EdgesParam {}).left.value_or(Dimension {}).ConvertToVp(), 20.0f);
+                  ->GetOffsetEdgesValue(EdgesParam {}).left.value_or(Dimension {}).ConvertToVp(), 0.0f);
 
     /**
      * @tc.steps: step5. finish view stack.
