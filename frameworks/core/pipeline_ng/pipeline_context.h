@@ -958,6 +958,7 @@ private:
     void RegisterFocusCallback();
     void DumpFocus(bool hasJson) const;
     void DumpInspector(const std::vector<std::string>& params, bool hasJson) const;
+    void DumpElement(const std::vector<std::string>& params, bool hasJson) const;
 
     template<typename T>
     struct NodeCompare {

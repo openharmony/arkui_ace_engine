@@ -84,6 +84,12 @@ struct EventTreeRecord {
 
     void Dump(std::unique_ptr<JsonValue>& json, int32_t depth, int32_t startNumber = 0) const;
     void BuildTouchPoints(std::list<TouchPointSnapshot> touchPoints, std::unique_ptr<JsonValue>& json) const;
+    void BuildGestureTree(
+        std::map<int32_t, std::list<RefPtr<GestureSnapshot>>> gestureTreeMap, std::unique_ptr<JsonValue>& json) const;
+    void BuildHitTestTree(std::list<FrameNodeSnapshot> hitTestTree, std::unique_ptr<JsonValue>& json) const;
+    void MountToParent(
+        std::vector<std::pair<std::string, std::pair<std::string, std::unique_ptr<JsonValue>>>> stateInfoList,
+        std::unique_ptr<JsonValue>& json) const;
     std::list<EventTree> eventTreeList;
 };
 }
