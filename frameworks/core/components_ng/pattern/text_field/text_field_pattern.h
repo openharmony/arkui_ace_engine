@@ -808,6 +808,16 @@ public:
         return contentRect_;
     }
 
+    const RefPtr<OverlayManager>& GetKeyboardOverLay()
+    {
+        return keyboardOverlay_;
+    }
+
+    bool GetIsCustomKeyboardAttached()
+    {
+        return isCustomKeyboardAttached_;
+    }
+
     const RefPtr<Paragraph>& GetDragParagraph() const override
     {
         return paragraph_;

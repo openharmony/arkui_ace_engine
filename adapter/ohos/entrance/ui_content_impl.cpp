@@ -115,6 +115,7 @@ const std::string LOCAL_BUNDLE_CODE_PATH = "/data/storage/el1/bundle/";
 const std::string FILE_SEPARATOR = "/";
 const std::string START_PARAMS_KEY = "__startParams";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
+constexpr int32_t AVOID_DELAY_TIME = 20;
 
 Rosen::Rect ConvertToRSRect(NG::RectF& rect)
 {
@@ -323,12 +324,12 @@ public:
             auto curWindow = context->GetCurrentWindowRect();
             positionY -= curWindow.Top();
             ContainerScope scope(instanceId_);
-            taskExecutor->PostTask(
+            taskExecutor->PostDelayedTask(
                 [context, keyboardRect, rsTransaction, positionY, height] {
                     CHECK_NULL_VOID(context);
                     context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height, rsTransaction);
                 },
-                TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
+                TaskExecutor::TaskType::UI, AVOID_DELAY_TIME, "ArkUIVirtualKeyboardAreaChange");
         }
     }
 
