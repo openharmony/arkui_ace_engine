@@ -665,6 +665,25 @@ const ArkUIListModifier* GetListModifier()
     return &modifier;
 }
 
+const CJUIListModifier* GetCJUIListModifier()
+{
+    static const CJUIListModifier modifier = { SetListLanes, ResetListLanes, SetEditMode, ResetEditMode,
+        SetMultiSelectable, ResetMultiSelectable, SetChainAnimation, ResetChainAnimation, SetCachedCount,
+        ResetCachedCount, GetEnableScrollInteraction, SetEnableScrollInteraction, ResetEnableScrollInteraction,
+        GetSticky, SetSticky, ResetSticky, GetListEdgeEffect, SetListEdgeEffect, ResetListEdgeEffect, GetListDirection,
+        SetListDirection, ResetListDirection, GetListFriction, SetListFriction, ResetListFriction,
+        GetListNestedScroll, SetListNestedScroll, ResetListNestedScroll, GetListScrollBar, SetListScrollBar,
+        ResetListScrollBar, GetListScrollBarWidth, SetListScrollBarWidth, ResetListScrollBarWidth,
+        GetListScrollBarColor, SetListScrollBarColor, ResetListScrollBarColor, GetAlignListItem, SetAlignListItem,
+        ResetAlignListItem, SetScrollSnapAlign, ResetScrollSnapAlign, SetContentStartOffset, ResetContentStartOffset,
+        SetContentEndOffset, ResetContentEndOffset, ListSetDivider, ListResetDivider, SetChainAnimationOptions,
+        ResetChainAnimationOptions, GetListSpace, SetListSpace, ResetListSpace, SetNodeAdapter, ResetNodeAdapter,
+        GetNodeAdapter, GetCachedCount, SetScrollToIndex, SetScrollBy, SetInitialIndex, ResetInitialIndex,
+        SetListChildrenMainSize, ResetListChildrenMainSize, SetListCloseAllSwipeActions,
+        SetListFlingSpeedLimit, ResetListFlingSpeedLimit, GetInitialIndex, GetlistDivider };
+    return &modifier;
+}
+
 void SetOnListScroll(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);

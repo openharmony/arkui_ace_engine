@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIRichEditorModifier* GetRichEditorModifier();
+const CJUIRichEditorModifier* GetCJUIRichEditorModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_RichEditor_MODIFIER_H

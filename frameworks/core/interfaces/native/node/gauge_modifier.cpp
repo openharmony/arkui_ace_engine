@@ -251,5 +251,17 @@ const ArkUIGaugeModifier* GetGaugeModifier()
 
     return &modifier;
 }
+
+const CJUIGaugeModifier* GetCJUIGaugeModifier()
+{
+    static const CJUIGaugeModifier modifier = { SetGaugeValue, ResetGaugeValue, SetGaugeStartAngle,
+        ResetGaugeStartAngle, SetGaugeEndAngle, ResetGaugeEndAngle, SetGaugeStrokeWidth, ResetGaugeStrokeWidth,
+        SetShadowOptions, ResetShadowOptions, SetIsShowIndicator,
+        SetIndicatorIconPath, ResetIndicatorIconPath, SetIndicatorSpace, ResetIndicatorSpace,
+        SetColors, ResetColors, SetGradientColors, ResetGradientColors
+    };
+
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

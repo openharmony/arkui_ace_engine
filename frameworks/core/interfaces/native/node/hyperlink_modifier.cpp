@@ -63,5 +63,13 @@ const ArkUIHyperlinkModifier* GetHyperlinkModifier()
 
     return &modifier;
 }
+
+const CJUIHyperlinkModifier* GetCJUIHyperlinkModifier()
+{
+    static const CJUIHyperlinkModifier modifier = { SetHyperlinkColor, ResetHyperlinkColor, SetHyperlinkDraggable,
+        ResetHyperlinkDraggable };
+
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

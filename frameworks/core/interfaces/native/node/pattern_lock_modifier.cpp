@@ -215,5 +215,20 @@ const ArkUIPatternLockModifier* GetPatternLockModifier()
     };
     return &modifier;
 }
+
+const CJUIPatternLockModifier* GetCJUIPatternLockModifier()
+{
+    static const CJUIPatternLockModifier modifier = {
+        SetPatternLockActiveColor, ResetPatternLockActiveColor, SetPatternLockCircleRadius,
+        ResetPatternLockCircleRadius, SetPatternLockSelectedColor, ResetPatternLockSelectedColor,
+        SetPatternLockSideLength, ResetPatternLockSideLength, SetPatternLockAutoReset,
+        ResetPatternLockAutoReset, SetPatternLockPathStrokeWidth, ResetPatternLockPathStrokeWidth,
+        SetPatternLockRegularColor, ResetPatternLockRegularColor, SetPatternLockPathColor,
+        ResetPatternLockPathColor, SetPatternLockActiveCircleColor, ResetPatternLockActiveCircleColor,
+        SetPatternLockActiveCircleRadius, ResetPatternLockActiveCircleRadius, SetPatternLockEnableWaveEffect,
+        ResetPatternLockEnableWaveEffect
+    };
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

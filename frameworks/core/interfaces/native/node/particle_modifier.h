@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIParticleModifier* GetParticleModifier();
+const CJUIParticleModifier* GetCJUIParticleModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_TEXT_MODIFIER_H

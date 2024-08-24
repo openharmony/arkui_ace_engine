@@ -115,5 +115,12 @@ const ArkUIStackModifier* GetStackModifier()
 
     return &modifier;
 }
+
+const CJUIStackModifier* GetCJUIStackModifier()
+{
+    static const CJUIStackModifier modifier = { SetAlignContent, ResetAlignContent, GetAlignContent };
+
+    return &modifier;
+}
 }
 }

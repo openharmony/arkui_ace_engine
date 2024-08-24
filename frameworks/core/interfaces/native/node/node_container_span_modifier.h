@@ -20,5 +20,6 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIContainerSpanModifier* GetContainerSpanModifier();
+const CJUIContainerSpanModifier* GetCJUIContainerSpanModifier();
 }
 #endif

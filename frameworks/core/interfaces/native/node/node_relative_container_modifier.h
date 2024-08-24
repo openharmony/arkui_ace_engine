@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
     const ArkUIRelativeContainerModifier* GetRelativeContainerModifier();
+    const CJUIRelativeContainerModifier* GetCJUIRelativeContainerModifier();
 } // namespace OHOS::Ace::NG::NodeModifier
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_RELATIVE_CONTAINER_MODIFIER_H

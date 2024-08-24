@@ -745,6 +745,30 @@ const ArkUIGestureModifier* GetGestureModifier()
     return &modifier;
 }
 
+const CJUIGestureModifier* GetCJUIGestureModifier()
+{
+    static const CJUIGestureModifier modifier = {
+        createTapGesture,
+        createLongPressGesture,
+        createPanGesture,
+        createPinchGesture,
+        createRotationGesture,
+        createSwipeGesture,
+        createSwipeGestureByModifier,
+        createGestureGroup,
+        addGestureToGestureGroup,
+        removeGestureFromGestureGroup,
+        dispose,
+        registerGestureEvent,
+        addGestureToNode,
+        removeGestureFromNode,
+        removeGestureFromNodeByTag,
+        clearGestures,
+        setGestureInterrupterToNode,
+    };
+    return &modifier;
+}
+
 ArkUIGestureRecognizer* CreateGestureRecognizer(const RefPtr<NG::NGGestureRecognizer>& recognizer)
 {
     CHECK_NULL_RETURN(recognizer, nullptr);

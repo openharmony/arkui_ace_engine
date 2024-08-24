@@ -194,5 +194,27 @@ const ArkUITextTimerModifier* GetTextTimerModifier()
 
     return &modifier;
 }
+
+const CJUITextTimerModifier* GetCJUITextTimerModifier()
+{
+    static const CJUITextTimerModifier modifier = {
+        TextTimerModifier::SetFontColor,
+        TextTimerModifier::ResetFontColor,
+        TextTimerModifier::SetFontSize,
+        TextTimerModifier::ResetFontSize,
+        TextTimerModifier::SetFontStyle,
+        TextTimerModifier::ResetFontStyle,
+        TextTimerModifier::SetFontWeight,
+        TextTimerModifier::ResetFontWeight,
+        TextTimerModifier::SetFontFamily,
+        TextTimerModifier::ResetFontFamily,
+        TextTimerModifier::SetFormat,
+        TextTimerModifier::ResetFormat,
+        TextTimerModifier::SetTextShadow,
+        TextTimerModifier::ResetTextShadow
+    };
+
+    return &modifier;
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

@@ -21,6 +21,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIProgressModifier* GetProgressModifier();
+const CJUIProgressModifier* GetCJUIProgressModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_COMMON_MODIFIER_H

@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
     const ArkUISpanModifier* GetSpanModifier();
+    const CJUISpanModifier* GetCJUISpanModifier();
     void SetCustomSpanOnMeasure(ArkUINodeHandle node, void* extraParam);
     void SetCustomSpanOnDraw(ArkUINodeHandle node, void* extraParam);
 }

@@ -19,6 +19,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIShapeModifier* GetShapeModifier();
+const CJUIShapeModifier* GetCJUIShapeModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_SHAPE_MODIFIER_H

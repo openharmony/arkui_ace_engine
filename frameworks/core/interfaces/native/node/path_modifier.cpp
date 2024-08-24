@@ -44,5 +44,12 @@ const ArkUIPathModifier* GetPathModifier()
 
     return &modifier;
 }
+
+const CJUIPathModifier* GetCJUIPathModifier()
+{
+    static const CJUIPathModifier modifier = {SetPathCommands, ResetPathCommands};
+
+    return &modifier;
+}
 }
 }

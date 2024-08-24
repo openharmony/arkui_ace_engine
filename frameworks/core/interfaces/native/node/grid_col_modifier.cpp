@@ -114,5 +114,13 @@ const ArkUIGridColModifier* GetGridColModifier()
     };
     return &modifier;
 }
+
+const CJUIGridColModifier* GetCJUIGridColModifier()
+{
+    static const CJUIGridColModifier modifier = {
+        SetSpan, ResetSpan, SetGridColOffset, ResetGridColOffset, SetOrder, ResetOrder,
+    };
+    return &modifier;
+}
 }
 }

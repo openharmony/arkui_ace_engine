@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIQRCodeModifier* GetQRCodeModifier();
+const CJUIQRCodeModifier* GetCJUIQRCodeModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_QRCODE_MODIFIER_H
