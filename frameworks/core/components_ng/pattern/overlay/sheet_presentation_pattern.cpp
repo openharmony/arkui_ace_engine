@@ -1050,6 +1050,15 @@ bool SheetPresentationPattern::IsShowCloseIcon()
     return layoutProperty->GetSheetStyleValue().showCloseIcon.value_or(true);
 }
 
+RefPtr<FrameNode> SheetPresentationPattern::GetTitleNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto operationNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+    CHECK_NULL_RETURN(operationNode, nullptr);
+    return DynamicCast<FrameNode>(operationNode->GetChildAtIndex(1));
+}
+
 void SheetPresentationPattern::UpdateTitlePadding()
 {
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
@@ -1064,9 +1073,7 @@ void SheetPresentationPattern::UpdateTitlePadding()
         return;
     }
 
-    auto operationNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
-    CHECK_NULL_VOID(operationNode);
-    auto titleNode = DynamicCast<FrameNode>(operationNode->GetChildAtIndex(1));
+    auto titleNode = GetTitleNode();
     CHECK_NULL_VOID(titleNode);
     auto titleLayoutProperty = DynamicCast<LinearLayoutProperty>(titleNode->GetLayoutProperty());
     CHECK_NULL_VOID(titleLayoutProperty);
