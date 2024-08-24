@@ -6282,7 +6282,12 @@ void OverlayManager::RemoveGatherNode()
 {
     CHECK_EQUAL_VOID(hasGatherNode_, false);
     auto frameNode = gatherNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(frameNode);
+    if (frameNode) {
+        hasGatherNode_ = false;
+        gatherNodeWeak_ = nullptr;
+        gatherNodeChildrenInfo_.clear();
+        return;
+    }
     auto rootNode = frameNode->GetParent();
     CHECK_NULL_VOID(rootNode);
     rootNode->RemoveChild(frameNode);
