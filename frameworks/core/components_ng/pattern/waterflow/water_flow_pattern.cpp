@@ -433,8 +433,6 @@ void WaterFlowPattern::OnSectionChanged(int32_t start)
     } else {
         layoutInfo_->InitSegments(sections_->GetSectionInfo(), start);
     }
-
-    MarkDirtyNodeSelf();
 }
 
 void WaterFlowPattern::ResetSections()
