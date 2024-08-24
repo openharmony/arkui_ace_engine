@@ -2293,7 +2293,7 @@ ScrollResult SheetPresentationPattern::HandleScrollWithSheet(float scrollOffset)
     ProcessColumnRect(currentHeightPos - currentOffset_);
     auto renderContext = host->GetRenderContext();
     renderContext->UpdateTransformTranslate({ 0.0f, sheetOffsetInPage, 0.0f });
-    isSheetPosChanged_ = NearZero(scrollOffset) ? false: true;
+    isSheetPosChanged_ = NearZero(scrollOffset) ? false : true;
     if (IsSheetBottomStyle()) {
         OnHeightDidChange(height_ - currentOffset_ + sheetHeightUp_);
     }
