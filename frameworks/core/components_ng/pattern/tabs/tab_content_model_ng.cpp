@@ -229,7 +229,6 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     }
     tabBarPattern->SetSelectedMode(selectedMode, myIndex);
     tabBarPattern->SetIndicatorStyle(indicatorStyle, myIndex);
-    tabBarPattern->UpdateSubTabBoard();
 
     // Create tab bar with builder.
     if (tabBarParam.HasBuilder()) {
@@ -323,17 +322,22 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     if (indicator > totalCount - 1 || indicator < 0) {
         indicator = 0;
     }
-
+    tabBarPattern->UpdateSubTabBoard(indicator);
     // Update property of text.
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
+    auto tabBarLayoutProperty = tabBarPattern->GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(tabBarLayoutProperty);
+    auto axis = tabBarLayoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
     if ((!swiperPattern->IsUseCustomAnimation() || !swiperPattern->GetCustomAnimationToIndex().has_value()) &&
         !isFrameNode) {
         if (myIndex == indicator) {
             if (labelStyle.selectedColor.has_value()) {
                 textLayoutProperty->UpdateTextColor(labelStyle.selectedColor.value());
             } else {
-                textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabTextOnColor());
+                selectedMode == SelectedMode::BOARD && axis == Axis::HORIZONTAL ?
+                    textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabBoardTextOnColor()) :
+                    textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabTextOnColor());
             }
         } else {
             if (labelStyle.unselectedColor.has_value()) {
