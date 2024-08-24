@@ -1071,8 +1071,7 @@ void TabBarPattern::HandleClick(const GestureEvent& info, int32_t index)
         return;
     }
 
-    TAG_LOGI(AceLogTag::ACE_TABS, "Clicked tabBarIndex: %{public}d, Clicked tabBarLocation: %{public}s", index,
-        info.GetLocalLocation().ToString().c_str());
+    TAG_LOGI(AceLogTag::ACE_TABS, "Clicked tabBarIndex: %{public}d", index);
     if (index < 0 || index >= totalCount || !swiperController_ ||
         indicator_ >= static_cast<int32_t>(tabBarStyles_.size())) {
         return;
@@ -2653,11 +2652,12 @@ void TabBarPattern::ApplyTurnPageRateToIndicator(float turnPageRate)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
+    auto totalCount = host->TotalChildCount() - MASK_COUNT;
     CHECK_NULL_VOID(layoutProperty);
     CHECK_NULL_VOID(IsValidIndex(swiperStartIndex_));
     auto index = swiperStartIndex_ + 1;
     auto isRtl = ParseTabsIsRtl();
-    if (index >= static_cast<int32_t>(tabBarStyles_.size()) && !isRtl) {
+    if ((index >= totalCount || index >= static_cast<int32_t>(tabBarStyles_.size())) && !isRtl) {
         swiperStartIndex_--;
         index--;
         turnPageRate += 1.0f;

@@ -397,7 +397,6 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
         if (itemPosition_.begin()->first > 0 || (forwardLayout_ && Negative(referencePos_))) {
             startPos = itemPosition_.begin()->second.startPos;
         }
-        endPos = itemPosition_.rbegin()->second.endPos;
         startIndex = GetStartIndex();
         if (startIndex >= totalItemCount_) {
             startIndex = totalItemCount_ - 1;
@@ -406,7 +405,10 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
                                GetLanesFloor(startIndex) + headerMainSize_;
             }
         }
-        endIndex = std::min(GetEndIndex(), totalItemCount_ - 1);
+        if (GreatNotEqual(referencePos_, endPos_)) {
+            endIndex = std::min(GetEndIndex(), totalItemCount_ - 1);
+            endPos = itemPosition_.rbegin()->second.endPos;
+        }
         if (forwardLayout_) {
             ModifyReferencePos(GetLanesFloor(startIndex), startPos);
         } else {

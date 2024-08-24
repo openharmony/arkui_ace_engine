@@ -635,8 +635,14 @@ public:
         closeDialogEvent_ = closeDialogEvent;
     }
 
+    const PickerTextProperties& GetTextProperties() const
+    {
+        return textProperties_;
+    }
+
     void SetTextProperties(const PickerTextProperties& properties)
     {
+        textProperties_ = properties;
         if (properties.disappearTextStyle_.fontSize.has_value() && properties.disappearTextStyle_.fontSize->IsValid()) {
             isUserSetGradientFont_ = true;
             gradientHeight_ = properties.disappearTextStyle_.fontSize.value();
@@ -699,6 +705,7 @@ private:
     void OrderCurrentDateByYearMonthDayColumn(
         RefPtr<FrameNode>& stackYear, RefPtr<FrameNode>& stackMonth, RefPtr<FrameNode>& stackDay) const;
     void FillSolarYearOptions(const PickerDate& current, RefPtr<FrameNode>& yearColumn);
+    void UpdateTitleTextColor(const RefPtr<FrameNode>& buttonTitleNode, const RefPtr<PickerTheme>& pickerTheme);
     void FillLunarMonthDaysOptions(const LunarDate& current, RefPtr<FrameNode>& monthDaysColumn);
     void AdjustSolarStartEndDate();
     void AdjustLunarStartEndDate();
@@ -766,6 +773,7 @@ private:
     Dimension gradientHeight_;
     Dimension dividerSpacing_;
     float paintDividerSpacing_ = 1.0f;
+    PickerTextProperties textProperties_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerPattern);
 };

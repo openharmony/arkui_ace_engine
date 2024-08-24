@@ -3366,6 +3366,15 @@ void FrontendDelegateDeclarative::GetSnapshot(
 #endif
 }
 
+std::pair<int32_t, std::shared_ptr<Media::PixelMap>> FrontendDelegateDeclarative::GetSyncSnapshot(
+    const std::string& componentId, const NG::SnapshotOptions& options)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    return NG::ComponentSnapshot::GetSync(componentId, options);
+#endif
+    return {ERROR_CODE_INTERNAL_ERROR, nullptr};
+}
+
 void FrontendDelegateDeclarative::CreateSnapshot(
     std::function<void()>&& customBuilder, NG::ComponentSnapshot::JsCallback&& callback, bool enableInspector,
     const NG::SnapshotParam& param)

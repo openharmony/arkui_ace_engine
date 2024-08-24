@@ -460,8 +460,14 @@ void MapToCFFIArrayToFreeMemory(MapToCFFIArray& mapToCFFIArray)
 void FfiOHOSAceFrameworkWebOnLoadIntercept(bool (*callback)(FfiWebResourceRequest event))
 {
     auto instanceId = Container::CurrentId();
-    auto onLoadIntercept = [func = CJLambda::Create(callback), instanceId](const BaseEventInfo* info) {
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onLoadIntercept = [func = CJLambda::Create(callback), instanceId, node = frameNode](
+        const BaseEventInfo* info) -> bool  {
         ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        pipelineContext->UpdateCurrentActiveNode(node);
+
         FfiWebResourceRequest cjWebResourceRequest {};
         auto* eventInfo = TypeInfoHelper::DynamicCast<LoadInterceptEvent>(info);
         auto request = eventInfo->GetRequest();
@@ -516,5 +522,30 @@ CJ_EXPORT void FfiOHOSAceFrameworkWebJavaScriptProxy(
         WebModel::GetInstance()->SetJsProxyCallback(jsProxyCallback);
     }
 #endif
+}
+
+void FfiOHOSAceFrameworkWebDarkMode(int32_t darkMode)
+{
+    auto mode = WebDarkMode::Off;
+    switch (darkMode) {
+        case 0:
+            mode = WebDarkMode::Off;
+            break;
+        case 1:
+            mode = WebDarkMode::On;
+            break;
+        case 2:
+            mode = WebDarkMode::Auto;
+            break;
+        default:
+            mode = WebDarkMode::Off;
+            break;
+    }
+    WebModel::GetInstance()->SetDarkMode(mode);
+}
+
+void FfiOHOSAceFrameworkWebForceDarkAccess(bool access)
+{
+    WebModel::GetInstance()->SetForceDarkAccess(access);
 }
 }

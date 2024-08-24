@@ -290,7 +290,7 @@ public:
     bool IsScrollable() const;
     void AvoidAiBar();
 
-    void AvoidSafeArea();
+    void AvoidSafeArea(bool forceChange = false);
     void CheckBuilderChange();
     float GetSheetHeightChange();
     void ScrollTo(float height);
@@ -324,11 +324,6 @@ public:
     void SetCurrentOffset(float currentOffset)
     {
         currentOffset_ = currentOffset;
-    }
-
-    void SetIsDirectionUp(bool isDirectionUp)
-    {
-        isDirectionUp_ = isDirectionUp;
     }
 
     void SetCurrentHeight(float currentHeight)
@@ -534,14 +529,24 @@ public:
         return isDrag_;
     }
 
-    void SetIsFoldable(bool isFoldable)
+    void SetFoldStatusChanged(bool isFoldStatusChanged)
     {
-        isFoldable_ = isFoldable;
+        isFoldStatusChanged_ = isFoldStatusChanged;
     }
 
-    bool IsFoldable() const
+    bool IsFoldStatusChanged() const
     {
-        return isFoldable_;
+        return isFoldStatusChanged_;
+    }
+
+    void UpdateFoldDisplayModeChangedCallbackId(std::optional<int32_t> id)
+    {
+        foldDisplayModeChangedCallbackId_ = id;
+    }
+
+    bool HasFoldDisplayModeChangedCallbackId()
+    {
+        return foldDisplayModeChangedCallbackId_.has_value();
     }
 
     // Get ScrollHeight before avoid keyboard
@@ -553,7 +558,7 @@ public:
         }
         return height_ - titleHeight;
     }
-    
+
     float GetFirstChildHeight() const;
 
     RefPtr<OverlayManager> GetOverlayManager();
@@ -665,7 +670,6 @@ private:
     float sheetTopSafeArea_ = .0f;
     bool isExecuteOnDisappear_ = false;
     bool windowRotate_ = false;
-    bool firstMeasure_ = true;
     bool isScrolling_ = false;
     float builderHeight_ = 0.0f;
     float sheetMaxHeight_ = 0.0f; // start from the bottom, pageHeight - sheetTopSafeArea
@@ -698,10 +702,11 @@ private:
     std::vector<float> unSortedSheetDentents_;
 
     std::shared_ptr<AnimationUtils::Animation> animation_;
+    std::optional<int32_t> foldDisplayModeChangedCallbackId_;
 
     bool show_ = true;
     bool isDrag_ = false;
-    bool isFoldable_ = false;
+    bool isFoldStatusChanged_ = false;
     bool isNeedProcessHeight_ = false;
     bool isSheetNeedScroll_ = false; // true if Sheet is ready to receive scroll offset.
     bool isSheetPosChanged_ = false; // UpdateTransformTranslate end

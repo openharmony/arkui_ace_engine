@@ -110,6 +110,12 @@ class ComponentSnapshot {
             __JSScopeUtil__.restoreInstanceId();
         }
     }
+    getSync(id, options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let pixelmap = this.ohos_componentSnapshot.getSync(id, options);
+        __JSScopeUtil__.restoreInstanceId();
+        return pixelmap;
+    }
 }
 
 class DragController {
@@ -490,6 +496,22 @@ class UIContext {
     getFrameNodeById(id) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let nodePtr = getUINativeModule().getFrameNodeByKey(id);
+        if (!nodePtr) {
+            __JSScopeUtil__.restoreInstanceId();
+            return null;
+        }
+        let xNode = globalThis.__getArkUINode__();
+        let node = xNode.FrameNodeUtils.searchNodeInRegisterProxy(nodePtr);
+        if (!node) {
+            node = xNode.FrameNodeUtils.createFrameNode(this, nodePtr);
+        }
+        __JSScopeUtil__.restoreInstanceId();
+        return node;
+    }
+
+    getAttachedFrameNodeById(id) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let nodePtr = getUINativeModule().getAttachedFrameNodeById(id);
         if (!nodePtr) {
             __JSScopeUtil__.restoreInstanceId();
             return null;

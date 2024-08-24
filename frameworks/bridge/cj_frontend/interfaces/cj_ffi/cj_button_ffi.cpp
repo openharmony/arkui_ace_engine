@@ -90,18 +90,6 @@ void FfiOHOSAceFrameworkButtonSetAllBorderRadius(CJBorderRadius value)
     CalcDimension topRight(value.topRight, static_cast<DimensionUnit>(value.topRightUnit));
     CalcDimension bottomLeft(value.bottomLeft, static_cast<DimensionUnit>(value.bottomLeftUnit));
     CalcDimension bottomRight(value.bottomRight, static_cast<DimensionUnit>(value.bottomRightUnit));
-    if (topLeft.Unit() == DimensionUnit::PERCENT) {
-        topLeft.Reset();
-    }
-    if (topRight.Unit() == DimensionUnit::PERCENT) {
-        topRight.Reset();
-    }
-    if (bottomLeft.Unit() == DimensionUnit::PERCENT) {
-        bottomLeft.Reset();
-    }
-    if (bottomRight.Unit() == DimensionUnit::PERCENT) {
-        bottomRight.Reset();
-    }
     ButtonModel::GetInstance()->SetBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
 }
 

@@ -108,8 +108,7 @@ public:
     void SetPosition(const Dimension& x, const Dimension& y) override;
     void SetOffset(const Dimension& x, const Dimension& y) override;
     void MarkAnchor(const Dimension& x, const Dimension& y) override;
-    void SetPaddings(const NG::PaddingProperty& paddings) override {};
-    void SetMargins(const NG::MarginProperty& margins) override {};
+
     void SetBorderRadius(const NG::BorderRadiusProperty& borderRadius) override {};
     void SetBorderColor(const NG::BorderColorProperty& borderColors) override {};
     void SetBorderWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
@@ -178,7 +177,8 @@ public:
     void SetFreeze(bool) override {}
 
     void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) override {}
-    void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) override;
+    void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc,
+        double distanceThreshold) override;
     void SetOnGestureJudgeBegin(NG::GestureJudgeFunc&& gestureJudgeFunc) override {}
     void SetOnTouchIntercept(NG::TouchInterceptFunc&& touchInterceptFunc) override {}
     void SetShouldBuiltInRecognizerParallelWith(

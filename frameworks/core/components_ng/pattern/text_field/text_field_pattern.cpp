@@ -543,42 +543,6 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     return true;
 }
 
-void TextFieldPattern::OnDirectionConfigurationUpdate()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto context = host->GetContextRefPtr();
-    CHECK_NULL_VOID(context);
-    auto taskExecutor = context->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [weak = WeakClaim(this)] {
-            auto textField = weak.Upgrade();
-            CHECK_NULL_VOID(textField);
-            textField->parentGlobalOffset_ = textField->GetPaintRectGlobalOffset();
-            textField->UpdateTextFieldManager(Offset(textField->parentGlobalOffset_.GetX(),
-                textField->parentGlobalOffset_.GetY()), textField->frameRect_.Height());
-            textField->UpdateCaretInfoToController(true);
-            TAG_LOGI(ACE_TEXT_FIELD, "onDirectionUpdate change parentGlobalOffset to: %{public}s",
-                textField->parentGlobalOffset_.ToString().c_str());
-        },
-        TaskExecutor::TaskType::UI, "ArkUITextFieldOnDirectionConfigurationUpdate");
-
-    if (isCustomKeyboardAttached_) {
-        auto caretHeight = selectController_->GetCaretRect().Height();
-        auto safeHeight = caretHeight + selectController_->GetCaretRect().GetY();
-        if (selectController_->GetCaretRect().GetY() > caretHeight) {
-            safeHeight = caretHeight;
-        }
-        auto nodeId = host->GetId();
-        context->AddAfterLayoutTask([keyboardWeak = WeakPtr<OverlayManager>(keyboardOverlay_), nodeId, safeHeight]() {
-            auto keyboardOverlay = keyboardWeak.Upgrade();
-            CHECK_NULL_VOID(keyboardOverlay);
-            keyboardOverlay->AvoidCustomKeyboard(nodeId, safeHeight);
-        });
-    }
-}
-
 void TextFieldPattern::SetAccessibilityPasswordIconAction()
 {
     if (IsInPasswordMode() && IsShowPasswordIcon()) {
@@ -946,7 +910,7 @@ void TextFieldPattern::HandleFocusEvent()
         needSelectAll_ = true;
     }
     ProcessFocusStyle();
-    RequestKeyboardOnFocus();
+    RequestKeyboardByFocusSwitch();
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ?
         PROPERTY_UPDATE_MEASURE_SELF : PROPERTY_UPDATE_MEASURE);
 }
@@ -1306,7 +1270,7 @@ bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
     if (event.code == KeyCode::KEY_TAB && HasFocus() && !needToRequestKeyboardOnFocus_ && needToRequestKeyboardInner_ &&
         textFieldManager->GetImeShow()) {
-        RequestKeyboard(false, true, true);
+        RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::ON_KEY_EVENT);
     }
     return TextInputClient::HandleKeyEvent(event);
 }
@@ -1934,7 +1898,7 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
             host->MarkDirtyNode(pattern->IsTextArea() ? PROPERTY_UPDATE_MEASURE : PROPERTY_UPDATE_MEASURE_SELF);
         }
         pattern->needToRequestKeyboardInner_ = pattern->dragStatus_ == DragStatus::NONE;
-        pattern->RequestKeyboardOnFocus();
+        pattern->RequestKeyboardByFocusSwitch();
     };
 }
 
@@ -2231,7 +2195,7 @@ void TextFieldPattern::DoProcessAutoFill()
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "isImeShow:%{public}d", isImeShow);
     if (!isPopup && isSuccess && !isImeShow) {
         needToRequestKeyboardInner_ = false;
-    } else if (RequestKeyboard(false, true, true)) {
+    } else if (RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::SINGLE_CLICK)) {
         NotifyOnEditChanged(true);
     }
 }
@@ -2242,13 +2206,14 @@ bool TextFieldPattern::IsAutoFillPasswordType(const AceAutoFillType& autoFillTyp
             autoFillType == AceAutoFillType::ACE_NEW_PASSWORD);
 }
 
-AceAutoFillType TextFieldPattern::GetHintType()
+HintToTypeWrap TextFieldPattern::GetHintType()
 {
+    HintToTypeWrap hintToTypeWrap;
     auto container = Container::Current();
-    CHECK_NULL_RETURN(container, AceAutoFillType::ACE_UNSPECIFIED);
+    CHECK_NULL_RETURN(container, hintToTypeWrap);
     auto onePlaceHolder = GetPlaceHolder();
     if (onePlaceHolder.empty()) {
-        return AceAutoFillType::ACE_UNSPECIFIED;
+        return hintToTypeWrap;
     }
     return container->PlaceHolderToType(onePlaceHolder);
 }
@@ -2312,14 +2277,36 @@ AceAutoFillType TextFieldPattern::GetAutoFillType(bool isNeedToHitType)
     if (aceContentType != AceAutoFillType::ACE_UNSPECIFIED) {
         return aceContentType;
     }
-    if (aceInputType != AceAutoFillType::ACE_UNSPECIFIED) {
-        if (IsAutoFillPasswordType(aceInputType)) {
-            return aceInputType;
-        } else {
-            return isNeedToHitType ? GetHintType() : AceAutoFillType::ACE_UNSPECIFIED;
-        }
+    if (aceInputType != AceAutoFillType::ACE_UNSPECIFIED && IsAutoFillPasswordType(aceInputType)) {
+        return aceInputType;
     }
-    return isNeedToHitType ? GetHintType() : AceAutoFillType::ACE_UNSPECIFIED;
+    if (isNeedToHitType) {
+        auto hintToTypeWrap = GetHintType();
+        return hintToTypeWrap.autoFillType;
+    }
+    return AceAutoFillType::ACE_UNSPECIFIED;
+}
+
+HintToTypeWrap TextFieldPattern::GetAutoFillTypeAndMetaData(bool isNeedToHitType)
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    HintToTypeWrap hintToTypeWrap;
+    CHECK_NULL_RETURN(layoutProperty, hintToTypeWrap);
+    auto aceContentType =
+        TextContentTypeToAceAutoFillType(layoutProperty->GetTextContentTypeValue(TextContentType::UNSPECIFIED));
+    auto aceInputType = ConvertToAceAutoFillType(layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED));
+    if (aceContentType != AceAutoFillType::ACE_UNSPECIFIED) {
+        hintToTypeWrap.autoFillType = aceContentType;
+        return hintToTypeWrap;
+    }
+    if (aceInputType != AceAutoFillType::ACE_UNSPECIFIED && IsAutoFillPasswordType(aceInputType)) {
+        hintToTypeWrap.autoFillType = aceInputType;
+        return hintToTypeWrap;
+    }
+    if (isNeedToHitType) {
+        hintToTypeWrap = GetHintType();
+    }
+    return hintToTypeWrap;
 }
 
 bool TextFieldPattern::CheckAutoFill(bool isFromKeyBoard)
@@ -2364,7 +2351,7 @@ void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)
         SetIsSingleHandle(true);
         CloseSelectOverlay();
     }
-    if (RequestKeyboard(false, true, true)) {
+    if (RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::DOUBLE_CLICK)) {
         NotifyOnEditChanged(true);
     }
     if (CanChangeSelectState()) {
@@ -2523,7 +2510,7 @@ void TextFieldPattern::CheckIfNeedToResetKeyboard()
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     if (needToResetKeyboard && HasFocus()) {
         if (isCustomKeyboardAttached_) {
-            RequestKeyboard(false, true, true);
+            RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::RESET_KEYBOARD);
             return;
         }
 #if defined(ENABLE_STANDARD_INPUT)
@@ -3441,7 +3428,7 @@ void TextFieldPattern::HandleLeftMouseReleaseEvent(MouseInfo& info)
     mouseStatus_ = MouseStatus::NONE;
     blockPress_ = false;
     leftMouseCanMove_ = false;
-    if (HasFocus() && RequestKeyboard(false, true, true)) {
+    if (HasFocus() && RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::MOUSE_RELEASE)) {
         NotifyOnEditChanged(true);
         tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
@@ -3527,14 +3514,15 @@ void TextFieldPattern::KeyboardContentTypeToInputType()
 
 bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard)
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield ready to request keyboard");
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield to request keyboard"
+        "showsoftkeyboard: %{public}d", needShowSoftKeyboard);
     if (!showKeyBoardOnFocus_ || !HasFocus()) {
         return false;
     }
     auto tmpHost = GetHost();
     CHECK_NULL_RETURN(tmpHost, false);
-    CHECK_NULL_RETURN(needShowSoftKeyboard, true);
     if (customKeyboard_ || customKeyboardBuilder_) {
+        CHECK_NULL_RETURN(needShowSoftKeyboard, true);
         return RequestCustomKeyboard();
     }
     bool ok = true;
@@ -3571,6 +3559,7 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     if (context && context->GetTextFieldManager()) {
         auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
         textFieldManager->SetImeAttached(true);
+        textFieldManager->SetLastRequestKeyboardId(tmpHost->GetId());
     }
     inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, textConfig);
     UpdateCaretInfoToController();
@@ -4675,14 +4664,14 @@ void TextFieldPattern::HandleParentGlobalOffsetChange()
     }
 }
 
-void TextFieldPattern::RequestKeyboardOnFocus()
+void TextFieldPattern::RequestKeyboardByFocusSwitch()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
-        "textfield %{public}d requestKeyboardOnFocus: onFocus_: %{public}d Inner: %{public}d modalCovered: %{public}d",
+        "%{public}d RequestKeyboardByFocusSwitch: onFocus_: %{public}d Inner: %{public}d modalCovered: %{public}d",
         host->GetId(), needToRequestKeyboardOnFocus_, needToRequestKeyboardInner_, IsModalCovered());
-    if (!needToRequestKeyboardOnFocus_ || !needToRequestKeyboardInner_ || IsModalCovered()) {
+    if (!needToRequestKeyboardInner_ || IsModalCovered()) {
         return;
     }
     auto pipeline = host->GetContextRefPtr();
@@ -4690,26 +4679,44 @@ void TextFieldPattern::RequestKeyboardOnFocus()
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
     textFieldManager->SetNeedToRequestKeyboard(true);
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d add requestkeyboard task", host->GetId());
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "%{public}d add requestkeyboard task", host->GetId());
     pipeline->AddAfterLayoutTask([weak = WeakClaim(this), manager = WeakPtr<TextFieldManagerNG>(textFieldManager)]() {
         auto textField = weak.Upgrade();
         CHECK_NULL_VOID(textField);
         auto textFieldManager = manager.Upgrade();
         if (textFieldManager && !textFieldManager->GetNeedToRequestKeyboard()) {
-            // already call close keyboard after text field get focus, so dont request keyboard now
-            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Already call close before attach, no need to request");
+            // already call close/attach keyboard after text field get focus, so dont request keyboard now
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Already call close/attach before attach, no need attach this time");
             return;
         }
         if (!textField->needToRequestKeyboardInner_) {
             TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Not need to requestKeyboard inner");
             return;
         }
-        if (!textField->RequestKeyboard(false, true, true)) {
+        if (!textField->RequestKeyboard(false, true, textField->needToRequestKeyboardOnFocus_)) {
             return;
         }
         textField->NotifyOnEditChanged(true);
         textField->needToRequestKeyboardInner_ = false;
     });
+}
+
+// to distiguish request keyboard not by focus switching
+bool TextFieldPattern::RequestKeyboardNotByFocusSwitch(RequestKeyboardReason reason)
+{
+    auto tmpHost = GetHost();
+    CHECK_NULL_RETURN(tmpHost, false);
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "%{public}d requestKeyboard With Reason %{public}d",
+        tmpHost->GetId(), static_cast<int32_t>(reason));
+    if (!RequestKeyboard(false, true, true)) {
+        return false;
+    }
+    auto context = tmpHost->GetContextRefPtr();
+    CHECK_NULL_RETURN(context, true);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
+    CHECK_NULL_RETURN(textFieldManager, true);
+    textFieldManager->SetNeedToRequestKeyboard(false);
+    return true;
 }
 
 bool TextFieldPattern::IsModalCovered()
@@ -5203,7 +5210,7 @@ void TextFieldPattern::SetSelectionFlag(
             selectController_->MoveSecondHandleToContentRect(selectionEnd);
         }
     }
-    if (RequestKeyboard(false, true, true)) {
+    if (RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::SET_SELECTION)) {
         NotifyOnEditChanged(true);
     }
     SetIsSingleHandle(!IsSelected());
@@ -5240,7 +5247,8 @@ bool TextFieldPattern::OnBackPressed()
 {
     auto tmpHost = GetHost();
     CHECK_NULL_RETURN(tmpHost, false);
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Textfield %{public}d receives back press event", tmpHost->GetId());
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "%{public}d receives back press event, %{public}d",
+        tmpHost->GetId(), isCustomKeyboardAttached_);
     if (SelectOverlayIsOn()) {
         selectController_->UpdateCaretIndex(
             std::max(selectController_->GetFirstHandleIndex(), selectController_->GetSecondHandleIndex()));
@@ -5563,7 +5571,7 @@ bool TextFieldPattern::GetErrorTextState() const
 void TextFieldPattern::SearchRequestKeyboard()
 {
     StartTwinkling();
-    if (RequestKeyboard(false, true, true)) {
+    if (RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::SEARCH_REQUEST)) {
         NotifyOnEditChanged(true);
     }
 }
@@ -6461,12 +6469,13 @@ void TextFieldPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, b
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto autoFillType = GetAutoFillType();
+    auto autoFillTypeAndMetaData = GetAutoFillTypeAndMetaData();
     auto info = PageNodeInfoWrap::CreatePageNodeInfoWrap();
     CHECK_NULL_VOID(info);
     info->SetId(host->GetId());
     info->SetDepth(host->GetDepth());
-    info->SetAutoFillType(autoFillType);
+    info->SetAutoFillType(autoFillTypeAndMetaData.autoFillType);
+    info->SetMetadata(autoFillTypeAndMetaData.metadata);
     info->SetTag(host->GetTag());
     if (autoFillOtherAccount_) {
         viewDataWrap->SetOtherAccount(true);
@@ -6570,7 +6579,7 @@ void TextFieldPattern::NotifyFillRequestFailed(int32_t errCode, const std::strin
         }
     }
     if (!isPopup || (isPopup && errCode == AUTO_FILL_CANCEL)) {
-        if (RequestKeyboard(false, true, true)) {
+        if (RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::AUTO_FILL_REQUEST_FILL)) {
             NotifyOnEditChanged(true);
         }
     }
@@ -7150,10 +7159,52 @@ void TextFieldPattern::RegisterWindowSizeCallback()
 
 void TextFieldPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
-    CHECK_NULL_VOID(SelectOverlayIsOn());
     if (type == WindowSizeChangeReason::ROTATION) {
-        selectController_->CalculateHandleOffset();
-        selectOverlay_->ProcessOverlayOnAreaChanged({ .menuIsShow = false});
+        if (SelectOverlayIsOn()) {
+            selectController_->CalculateHandleOffset();
+            selectOverlay_->ProcessOverlayOnAreaChanged({ .menuIsShow = false});
+        }
+
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContextRefPtr();
+        CHECK_NULL_VOID(context);
+        auto taskExecutor = context->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
+        CHECK_NULL_VOID(textFieldManager);
+        textFieldManager->ResetOptionalClickPosition();
+        taskExecutor->PostTask(
+            [weak = WeakClaim(this), manager = WeakPtr<TextFieldManagerNG>(textFieldManager)] {
+                auto textField = weak.Upgrade();
+                CHECK_NULL_VOID(textField);
+                textField->parentGlobalOffset_ = textField->GetPaintRectGlobalOffset();
+                textField->UpdateTextFieldManager(Offset(textField->parentGlobalOffset_.GetX(),
+                    textField->parentGlobalOffset_.GetY()), textField->frameRect_.Height());
+                textField->UpdateCaretInfoToController(true);
+                auto textFieldManager = manager.Upgrade();
+                if (textFieldManager && textField->HasFocus()) {
+                    textFieldManager->AvoidKeyboardInSheet(textField->GetHost());
+                }
+                TAG_LOGI(ACE_TEXT_FIELD, "OnWindowSizeChanged change parentGlobalOffset to: %{public}s",
+                    textField->parentGlobalOffset_.ToString().c_str());
+            },
+            TaskExecutor::TaskType::UI, "ArkUITextFieldOnWindowSizeChangedRotation");
+
+        if (isCustomKeyboardAttached_) {
+            auto caretHeight = selectController_->GetCaretRect().Height();
+            auto safeHeight = caretHeight + selectController_->GetCaretRect().GetY();
+            if (selectController_->GetCaretRect().GetY() > caretHeight) {
+                safeHeight = caretHeight;
+            }
+            auto nodeId = host->GetId();
+            context->AddAfterLayoutTask([keyboardWeak = WeakPtr<OverlayManager>(keyboardOverlay_),
+                nodeId, safeHeight]() {
+                auto keyboardOverlay = keyboardWeak.Upgrade();
+                CHECK_NULL_VOID(keyboardOverlay);
+                keyboardOverlay->AvoidCustomKeyboard(nodeId, safeHeight);
+            });
+        }
     }
 }
 
@@ -7292,7 +7343,7 @@ void TextFieldPattern::CheckTextAlignByDirection(TextAlign& textAlign, TextDirec
 void TextFieldPattern::RequestKeyboardAfterLongPress()
 {
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-    if (isLongPress_ && HasFocus() && RequestKeyboard(false, true, true)) {
+    if (isLongPress_ && HasFocus() && RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::LONG_PRESS)) {
         NotifyOnEditChanged(true);
     }
     isLongPress_ = false;
@@ -7715,7 +7766,7 @@ void TextFieldPattern::SetShowKeyBoardOnFocus(bool value)
     }
 
     if (value) {
-        RequestKeyboard(false, true, true);
+        RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::SHOW_KEYBOARD_ON_FOCUS);
     } else {
         CloseKeyboard(true, false);
     }

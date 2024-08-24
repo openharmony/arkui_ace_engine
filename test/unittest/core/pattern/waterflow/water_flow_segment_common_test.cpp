@@ -431,6 +431,7 @@ HWTEST_F(WaterFlowSegmentCommonTest, Replace003, TestSize.Level1)
     std::vector<WaterFlowSections::Section> newSection { SECTION_7[3] };
     newSection[0].itemsCount = 40;
     secObj->ChangeData(3, 1, newSection);
+    pattern_->BeforeCreateLayoutWrapper();
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     EXPECT_EQ(info_->segmentTails_.size(), 4);
     EXPECT_EQ(info_->segmentTails_[3], 46);
@@ -442,6 +443,7 @@ HWTEST_F(WaterFlowSegmentCommonTest, Replace003, TestSize.Level1)
     AddItems(7);
     frameNode_->ChildrenUpdatedFrom(7);
     secObj->ChangeData(1, 1, ADD_SECTION_7);
+    pattern_->BeforeCreateLayoutWrapper();
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     EXPECT_EQ(info_->segmentTails_[1], 13);
     FlushLayoutTask(frameNode_);
@@ -473,6 +475,7 @@ HWTEST_F(WaterFlowSegmentCommonTest, Replace004, TestSize.Level1)
     std::vector<WaterFlowSections::Section> newSection { SECTION_9[0] };
     newSection[0].itemsCount = 106;
     secObj->ChangeData(0, 1, newSection);
+    pattern_->BeforeCreateLayoutWrapper();
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     EXPECT_EQ(info_->segmentTails_.size(), 1);
     EXPECT_EQ(info_->segmentTails_[0], 105);
@@ -487,6 +490,7 @@ HWTEST_F(WaterFlowSegmentCommonTest, Replace004, TestSize.Level1)
     frameNode_->ChildrenUpdatedFrom(10);
     newSection[0].itemsCount = 10;
     secObj->ChangeData(0, 1, newSection);
+    pattern_->BeforeCreateLayoutWrapper();
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     EXPECT_EQ(info_->segmentTails_[0], 9);
     FlushLayoutTask(frameNode_);
@@ -525,6 +529,7 @@ HWTEST_F(WaterFlowSegmentCommonTest, Replace005, TestSize.Level1)
     newSection[0].itemsCount = 10;
     secObj->ChangeData(2, 1, newSection);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    pattern_->BeforeCreateLayoutWrapper();
     EXPECT_EQ(info_->segmentTails_.size(), 4);
     EXPECT_EQ(info_->segmentTails_[2], 16);
 

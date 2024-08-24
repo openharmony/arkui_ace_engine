@@ -2681,6 +2681,20 @@ struct ArkUITabsControllerModifier {
 
 struct ArkUIGesture;
 
+struct ArkUIGestureEventTargetInfo {
+    void* uiNode = nullptr;
+};
+
+struct ArkUIGestureRecognizer {
+    ArkUI_Int32 type = -1;
+    ArkUIGesture* gesture = nullptr;
+    void* extraData = nullptr;
+    void* attachNode = nullptr;
+    bool capi = true;
+    void* recognizer = nullptr;
+    ArkUIGestureEventTargetInfo targetInfo = {};
+};
+
 struct ArkUIGestureEvent {
     ArkUIAPIEventGestureAsyncEvent eventData;
     void* attachNode;
@@ -2693,10 +2707,30 @@ struct ArkUIGestureInterruptInfo {
     void* userData = nullptr;
     void* inputEvent = nullptr;
     void* gestureEvent = nullptr;
+    ArkUIGestureRecognizer** responseLinkRecognizer = nullptr;
+    ArkUI_Int32 count = 0;
+};
+
+enum ArkUIGestureRecognizerState {
+    RECOGNIZER_STATE_READY = 0,
+    RECOGNIZER_STATE_DETECTING = 1,
+    RECOGNIZER_STATE_PENDING = 2,
+    RECOGNIZER_STATE_BLOCKED = 3,
+    RECOGNIZER_STATE_SUCCESSFUL = 4,
+    RECOGNIZER_STATE_FAILED = 5,
+};
+
+struct ArkUIParallelInnerGestureEvent {
+    ArkUIGestureRecognizer* current = nullptr;
+    ArkUIGestureRecognizer** responseLinkRecognizer = nullptr;
+    void* userData = nullptr;
+    ArkUI_Int32 count = 0;
 };
 
 struct ArkUIGestureModifier {
     ArkUIGesture* (*createTapGesture)(ArkUI_Int32 count, ArkUI_Int32 fingers, void* userData);
+    ArkUIGesture* (*createTapGestureWithDistanceThreshold)(
+        ArkUI_Int32 count, ArkUI_Int32 fingers, ArkUI_Float64 distanceThreshold, void* userData);
     ArkUIGesture* (*createLongPressGesture)(ArkUI_Int32 fingers, bool repeat, ArkUI_Int32 duration, void* userData);
     ArkUIGesture* (*createPanGesture)(
         ArkUI_Int32 fingers, ArkUI_Int32 direction, ArkUI_Float64 distance, void* userData);
@@ -2717,6 +2751,22 @@ struct ArkUIGestureModifier {
     void (*clearGestures)(ArkUINodeHandle node);
     void (*setGestureInterrupterToNode)(
         ArkUINodeHandle node, ArkUI_Int32 (*interrupter)(ArkUIGestureInterruptInfo* interrupterInfo));
+    ArkUI_Int32 (*setInnerGestureParallelTo)(ArkUINodeHandle node, void* userData,
+        ArkUIGestureRecognizer* (*parallelInnerGesture)(ArkUIParallelInnerGestureEvent* event));
+    ArkUI_Int32 (*setGestureRecognizerEnabled)(ArkUIGestureRecognizer* recognizer, bool enabled);
+    ArkUI_Bool (*getGestureRecognizerEnabled)(ArkUIGestureRecognizer* recognizer);
+    ArkUI_Int32 (*getGestureRecognizerState)(ArkUIGestureRecognizer* recognizer, ArkUIGestureRecognizerState* state);
+    ArkUI_Int32 (*gestureEventTargetInfoIsScrollBegin)(ArkUIGestureEventTargetInfo* info, bool* ret);
+    ArkUI_Int32 (*gestureEventTargetInfoIsScrollEnd)(ArkUIGestureEventTargetInfo* info, bool* ret);
+    ArkUI_Int32 (*getPanGestureDirectionMask)(ArkUIGestureRecognizer* recognizer, ArkUIGestureDirection* direction);
+    ArkUI_Bool (*isBuiltInGesture)(ArkUIGestureRecognizer* recognizer);
+    ArkUI_Int32 (*getGestureTag)(
+        ArkUIGestureRecognizer* recognizer, char* buffer, ArkUI_Int32 bufferSize, ArkUI_Int32* result);
+    ArkUI_Int32 (*getGestureBindNodeId)(
+        ArkUIGestureRecognizer* recognizer, char* nodeId, ArkUI_Int32 size, ArkUI_Int32* result);
+    ArkUI_Bool (*isGestureRecognizerValid)(ArkUIGestureRecognizer* recognizer);
+    ArkUI_Int32 (*setArkUIGestureRecognizerDisposeNotify)(ArkUIGestureRecognizer* recognizer, void* userData,
+        void (*callback)(ArkUIGestureRecognizer* recognizer, void* userData));
 };
 
 struct ArkUISliderModifier {
@@ -3291,8 +3341,6 @@ struct ArkUIImageSpanModifier {
     void (*resetImageSpanOnComplete)(ArkUINodeHandle node);
     void (*setImageSpanOnError)(ArkUINodeHandle node, void* callback);
     void (*resetImageSpanOnError)(ArkUINodeHandle node);
-    void (*setImageSpanColorFilter)(ArkUINodeHandle node, const ArkUI_Float32* array, ArkUI_Int32 length);
-    void (*resetImageSpanColorFilter)(ArkUINodeHandle node);
 };
 
 struct ArkUIMenuModifier {
@@ -4425,6 +4473,7 @@ struct ArkUIFrameNodeModifier {
     ArkUINodeHandle (*getFrameNodeById)(ArkUI_Int32 nodeId);
     ArkUINodeHandle (*getFrameNodeByUniqueId)(ArkUI_Int32 uniqueId);
     ArkUINodeHandle (*getFrameNodeByKey)(ArkUI_CharPtr key);
+    ArkUINodeHandle (*getAttachedFrameNodeById)(ArkUI_CharPtr key);
     void (*propertyUpdate)(ArkUINodeHandle node);
     ArkUINodeHandle (*getLast)(ArkUINodeHandle node, ArkUI_Bool isExpanded);
     ArkUINodeHandle (*getFirstUINode)(ArkUINodeHandle node);

@@ -157,8 +157,7 @@ void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canva
     InitImagePaint(nullptr, &imageBrush_, sampleOptions_);
     RSBrush compositeOperationpBrush;
     InitPaintBlend(compositeOperationpBrush);
-    RSRect rec = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
-    RSSaveLayerOps layerOps(&rec, &compositeOperationpBrush);
+    RSSaveLayerOps layerOps(nullptr, &compositeOperationpBrush);
     if (state_.globalState.GetType() != CompositeOperation::SOURCE_OVER) {
         rsCanvas_->SaveLayer(layerOps);
     }

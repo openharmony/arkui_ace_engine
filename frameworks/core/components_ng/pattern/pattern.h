@@ -592,8 +592,6 @@ public:
         if (layoutProperty->IsOffsetLocalizedEdges()) {
             layoutProperty->CheckOffsetLocalizedEdges(layoutDirection);
         }
-        layoutProperty->CheckLocalizedPadding(layoutProperty, layoutDirection);
-        layoutProperty->CheckLocalizedMargin(layoutProperty, layoutDirection);
         layoutProperty->CheckLocalizedEdgeWidths(layoutProperty, layoutDirection);
         layoutProperty->CheckLocalizedEdgeColors(layoutDirection);
         layoutProperty->CheckLocalizedBorderRadiuses(layoutDirection);
@@ -624,6 +622,8 @@ public:
     {
         return RectF();
     }
+
+    virtual void NotifyDataChange(int32_t index, int32_t count) {};
 
 protected:
     virtual void OnAttachToFrameNode() {}

@@ -204,6 +204,7 @@ class SubscribableHandler {
         break;
       case ObserveV2.SYMBOL_REFS:
       case ObserveV2.V2_DECO_META:
+      case ObserveV2.SYMBOL_MAKE_OBSERVED:
         // return result unmonitored
         return Reflect.get(target, property, receiver);
         break;

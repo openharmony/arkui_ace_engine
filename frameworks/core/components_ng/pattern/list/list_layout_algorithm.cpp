@@ -130,6 +130,9 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             contentMainSize_ = GetMainAxisSize(parentMaxSize, axis_);
             mainSizeIsDefined_ = false;
         }
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            contentMainSize_ = std::max(contentMainSize_, GetMainAxisSize(contentConstraint.minSize, axis_));
+        }
     } else {
         contentMainSize_ = GetMainAxisSize(contentIdealSize.ConvertToSizeT(), axis_);
         mainSizeIsDefined_ = true;
@@ -703,7 +706,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
     int32_t endIndex = 0;
     int32_t midIndex = 0;
     float midItemMidPos = contentMainSize_ / 2.0f;
-    float startPos = 0.0f;
+    float startPos = contentStartOffset_;
     float endPos = 0.0f;
     float itemTotalSize = 0.0f;
     float jumpIndexStartPos = 0.0f;

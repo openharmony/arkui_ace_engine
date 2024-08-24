@@ -36,7 +36,6 @@ void FfiOHOSAceFrameworkLazyForEachCreate(int64_t viewID, int64_t parentViewID, 
         return;
     }
     auto lazyForeachFunc = LazyForEachFuncs::Create<LazyForEachFuncs>(lazyForEachFuncsID);
-    ViewStackModel::GetInstance()->ProcessViewId(std::to_string(viewID));
     auto builder = AceType::MakeRefPtr<CJLazyForEachBuilder>(std::move(lazyForeachFunc));
     LazyForEachModel::GetInstance()->Create(builder);
 }

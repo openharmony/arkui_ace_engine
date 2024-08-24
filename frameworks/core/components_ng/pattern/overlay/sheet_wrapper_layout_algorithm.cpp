@@ -14,16 +14,23 @@
  */
 
 #include "core/components_ng/layout/box_layout_algorithm.h"
+#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
-void SheetWrapperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void SheetWrapperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    BoxLayoutAlgorithm::PerformLayout(layoutWrapper);
+    BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
     auto child = layoutWrapper->GetChildByIndex(0);
     CHECK_NULL_VOID(child);
-    child->Layout();
+    auto sheetLayoutProperty = child->GetLayoutProperty();
+    CHECK_NULL_VOID(sheetLayoutProperty);
+    sheetLayoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+    auto layoutProp = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProp);
+    auto childConstraint = layoutProp->CreateChildConstraint();
+    child->Measure(childConstraint);
 }
 
 } // namespace OHOS::Ace::NG

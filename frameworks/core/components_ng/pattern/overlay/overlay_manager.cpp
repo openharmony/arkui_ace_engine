@@ -95,7 +95,11 @@
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline/pipeline_context.h"
 #ifdef WEB_SUPPORTED
+#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "core/components_ng/pattern/web/web_pattern.h"
+#else
+#include "core/components_ng/pattern/web/cross_platform/web_pattern.h"
+#endif
 #endif
 
 namespace OHOS::Ace::NG {
@@ -1135,6 +1139,8 @@ void OverlayManager::OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK,
     auto menuLayoutProp = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(menuLayoutProp);
     bool isShowInSubWindow = menuLayoutProp->GetShowInSubWindowValue(true);
+    auto targetId = menuWrapperPattern->GetTargetId();
+    overlayManager->EraseMenuInfo(targetId);
     if (((menuWrapperPattern && menuWrapperPattern->IsContextMenu()) || (isShowInSubWindow && expandDisplay)) &&
         (menuPattern->GetTargetTag() != V2::SELECT_ETS_TAG)) {
         SubwindowManager::GetInstance()->ClearMenuNG(instanceId, menuWrapperPattern->GetTargetId());
@@ -2986,7 +2992,11 @@ int32_t OverlayManager::GetPopupIdByNode(const RefPtr<FrameNode>& overlay)
 int32_t OverlayManager::RemoveOverlayCommon(const RefPtr<NG::UINode>& rootNode, RefPtr<NG::FrameNode>& overlay,
     RefPtr<Pattern>& pattern, bool isBackPressed, bool isPageRouter)
 {
-    auto currentIndex = rootNode->GetChildren().size() - 1;
+    const size_t size = rootNode->GetChildren().size();
+    if (size == 0) {
+        return OVERLAY_EXISTS;
+    }
+    auto currentIndex = size - 1;
     while (InstanceOf<ToastPattern>(pattern)) {
         // still have nodes on root expect stage and toast node.
         if (currentIndex > 0) {
@@ -3171,7 +3181,6 @@ bool OverlayManager::RemoveModalInOverlay()
     if (topModalNode->GetTag() == V2::SHEET_PAGE_TAG) {
         auto sheetPattern = topModalNode->GetPattern<SheetPresentationPattern>();
         CHECK_NULL_RETURN(sheetPattern, false);
-        sheetPattern->SetIsDirectionUp(false);
         sheetPattern->SheetInteractiveDismiss(BindSheetDismissReason::BACK_PRESSED);
         return true;
     } else if (topModalNode->GetTag() == V2::MODAL_PAGE_TAG) {
@@ -4069,7 +4078,6 @@ void OverlayManager::InitSheetMask(
                 if (sheetPattern->IsDragging()) {
                     return;
                 }
-                sheetPattern->SetIsDirectionUp(false);
                 sheetPattern->SheetInteractiveDismiss(BindSheetDismissReason::TOUCH_OUTSIDE);
             });
         auto maskNodeId = maskNode->GetId();
@@ -4093,6 +4101,22 @@ void OverlayManager::InitSheetMask(
     }
 }
 
+void OverlayManager::CleanInvalidModalNode(const WeakPtr<FrameNode>& invalidNode)
+{
+    // When a modalNode.Upgrade() == nullptr, the modalNode is invalid
+    modalList_.remove(invalidNode);
+    std::vector<WeakPtr<FrameNode>> sheetVector;
+    while (!modalStack_.empty()) {
+        if (modalStack_.top() != invalidNode) {
+            sheetVector.push_back(modalStack_.top());
+        }
+        modalStack_.pop();
+    }
+    for (auto iter : sheetVector) {
+        modalStack_.push(iter);
+    }
+}
+
 void OverlayManager::CloseSheet(const SheetKey& sheetKey)
 {
     if (modalStack_.empty()) {
@@ -4104,7 +4128,14 @@ void OverlayManager::CloseSheet(const SheetKey& sheetKey)
         return;
     }
     auto sheetNode = iter->second.Upgrade();
-    CHECK_NULL_VOID(sheetNode);
+    if (sheetNode == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_SHEET, "The sheetNode is null, clean it.");
+        CleanViewContextMap(Container::CurrentId(), sheetKey.contentId);
+        CleanInvalidModalNode(iter->second);
+        sheetMap_.erase(sheetKey);
+        SaveLastModalNode();
+        return;
+    }
     sheetNode->GetPattern<SheetPresentationPattern>()->SetShowState(false);
     auto scrollNode = AceType::DynamicCast<FrameNode>(sheetNode->GetChildAtIndex(1));
     CHECK_NULL_VOID(scrollNode);
@@ -4307,7 +4338,7 @@ void OverlayManager::PlaySheetTransition(
                 return;
             }
         }
-        if (sheetPattern->IsFoldable()) {
+        if (sheetPattern->IsFoldStatusChanged()) {
             option.SetDuration(0);
             option.SetCurve(Curves::LINEAR);
         }
@@ -4340,7 +4371,7 @@ void OverlayManager::PlaySheetTransition(
                 }
             },
             option.GetOnFinishEvent());
-        sheetPattern->SetIsFoldable(false);
+        sheetPattern->SetFoldStatusChanged(false);
     } else {
         option.SetOnFinishEvent(
             [rootWeak = rootNodeWeak_, sheetWK = WeakClaim(RawPtr(sheetNode)), weakOverlayManager = WeakClaim(this)] {

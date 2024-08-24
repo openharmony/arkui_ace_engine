@@ -957,7 +957,7 @@ HWTEST_F(WaterFlowSWTest, NotifyDataChange002, TestSize.Level1)
     EXPECT_EQ(info_->startIndex_, 13);
 
     newSections = { WaterFlowSections::Section { .itemsCount = 2, .crossCount = 5 } };
-    secObj->ChangeData(5, 1, newSections);
+    secObj->ChangeData(4, 1, newSections);
     EXPECT_EQ(info_->newStartIndex_, -2);
 
     FlushLayoutTask(frameNode_);

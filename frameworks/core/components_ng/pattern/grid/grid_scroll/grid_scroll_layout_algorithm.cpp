@@ -642,8 +642,27 @@ bool GridScrollLayoutAlgorithm::FillBlankAtStart(float mainSize, float crossSize
         gridLayoutInfo_.reachStart_ = true;
         break;
     }
-    if (gridLayoutInfo_.gridMatrix_[gridLayoutInfo_.startMainLineIndex_].size() < crossCount_ &&
-        gridLayoutInfo_.startIndex_ > 0) {
+
+    FillOneLineForwardWithoutUpdatingStartIndex(crossSize, mainSize, layoutWrapper);
+
+    gridLayoutInfo_.currentOffset_ = blankAtStart;
+    gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
+    return fillNewLine;
+}
+
+// If there is a multi-line item in the current line and its starting line is not within this line,
+// it may result in an incomplete layout.
+void GridScrollLayoutAlgorithm::FillOneLineForwardWithoutUpdatingStartIndex(
+    float crossSize, float mainSize, LayoutWrapper* layoutWrapper)
+{
+    if (gridLayoutInfo_.gridMatrix_.empty()) {
+        return;
+    }
+    auto startLine = gridLayoutInfo_.gridMatrix_.find(gridLayoutInfo_.startMainLineIndex_);
+    if (startLine == gridLayoutInfo_.gridMatrix_.end() || startLine->second.empty()) {
+        return;
+    }
+    if (startLine->second.size() < crossCount_ && gridLayoutInfo_.startIndex_ > 0) {
         auto tempStartIndex = gridLayoutInfo_.startIndex_;
         auto tempStartMainLineIndex = gridLayoutInfo_.startMainLineIndex_;
         auto tempCurrentMainLineIndex = currentMainLineIndex_;
@@ -659,10 +678,6 @@ bool GridScrollLayoutAlgorithm::FillBlankAtStart(float mainSize, float crossSize
         currentMainLineIndex_ = tempCurrentMainLineIndex;
         gridLayoutInfo_.reachStart_ = tempReachStart;
     }
-
-    gridLayoutInfo_.currentOffset_ = blankAtStart;
-    gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
-    return fillNewLine;
 }
 
 // When a moving up event comes, the [currentOffset_] may have been reduced too much than the items really need to
@@ -1125,6 +1140,13 @@ float GridScrollLayoutAlgorithm::MeasureRecordedItems(float mainSize, float cros
     return mainLength;
 }
 
+namespace {
+inline bool OneLineMovesOffViewportFromAbove(float mainLength, float lineHeight)
+{
+    return LessNotEqual(mainLength, 0.0) || (NearZero(mainLength) && GreatNotEqual(lineHeight, 0.0f));
+}
+} // namespace
+
 bool GridScrollLayoutAlgorithm::UseCurrentLines(
     float mainSize, float crossSize, LayoutWrapper* layoutWrapper, float& mainLength)
 {
@@ -1182,7 +1204,7 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
             mainLength += (cellAveLength_ + mainGap_);
         }
         // If a line moves up out of viewport, update [startIndex_], [currentOffset_] and [startMainLineIndex_]
-        if (LessNotEqual(mainLength, 0.0)) {
+        if (OneLineMovesOffViewportFromAbove(mainLength, cellAveLength_)) {
             gridLayoutInfo_.currentOffset_ = mainLength;
             gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
             gridLayoutInfo_.startMainLineIndex_ = currentMainLineIndex_ + 1;

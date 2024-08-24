@@ -419,6 +419,14 @@ public:
     {
         return navigationDividerColor_;
     }
+    const Dimension& GetMarginLeft() const
+    {
+        return marginLeft_;
+    }
+    const Dimension& GetMarginRight() const
+    {
+        return marginRight_;
+    }
     const Color& GetNavigationGroupColor() const
     {
         return navigationGroupColor_;
@@ -434,14 +442,6 @@ public:
     const Color& GetBackgroundBlurColor() const
     {
         return backgroundBlurColor_;
-    }
-    const Dimension& GetMarginLeft() const
-    {
-        return marginLeft_;
-    }
-    const Dimension& GetMarginRight() const
-    {
-        return marginRight_;
     }
     const Dimension& GetMainTitleFontSizeL() const
     {

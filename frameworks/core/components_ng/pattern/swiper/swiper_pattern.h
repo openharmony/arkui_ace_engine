@@ -430,7 +430,7 @@ public:
     void AdjustCurrentIndexOnSwipePage(int32_t index);
     void OnCustomContentTransition(int32_t toIndex);
     void OnCustomAnimationFinish(int32_t fromIndex, int32_t toIndex, bool hasOnChanged);
-    void OnSwiperCustomAnimationFinish(std::pair<int32_t, SwiperItemInfo> item);
+    void OnSwiperCustomAnimationFinish(CancelableCallback<void()>& task, int32_t index, bool isFinishAnimation);
 
     void SetCustomAnimationToIndex(int32_t toIndex)
     {
@@ -511,6 +511,7 @@ public:
     void FireWillHideEvent(int32_t willHideIndex) const;
     void FireWillShowEvent(int32_t willShowIndex) const;
     void SetOnHiddenChangeForParent();
+    void RemoveOnHiddenChange();
 
     void SetHasTabsAncestor(bool hasTabsAncestor)
     {
@@ -602,6 +603,7 @@ private:
     void OnAfterModifyDone() override;
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
+    void OnDetachFromMainTree() override;
     void InitSurfaceChangedCallback();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
@@ -901,6 +903,12 @@ private:
     void UpdateIgnoreBlankOffsetWithIndex();
     // overSrollDirection is true means over start boundary, false means over end boundary.
     void UpdateIgnoreBlankOffsetWithDrag(bool overSrollDirection);
+
+    std::set<int32_t> CalcVisibleIndex(float offset = 0.0f) const;
+
+    bool IsItemOverlay() const;
+
+    void CheckSpecialItemCount() const;
 
     friend class SwiperHelper;
 

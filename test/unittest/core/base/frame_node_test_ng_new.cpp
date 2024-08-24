@@ -52,7 +52,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest041, TestSize.Level1)
     PointF parentLocalPoint;
     TouchRestrict touchRestrict;
     TouchTestResult result;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     /**
      * @tc.steps: step2. set isActive_ and debugEnabled_ is true and FRAME_NODE2 eventHub is HTMBLOCK.
      * @tc.expected: expect The function return value is STOP_BUBBLING.
@@ -81,7 +81,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest042, TestSize.Level1)
     PointF parentLocalPoint;
     TouchRestrict touchRestrict;
     TouchTestResult result;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
 
     /**
      * @tc.steps: step2. set debugEnabled_ is true.
@@ -133,7 +133,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest043, TestSize.Level1)
     PointF parentLocalPoint;
     TouchRestrict touchRestrict;
     TouchTestResult result;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     /**
      * @tc.steps:    step2. eventHub_->GetGestureEventHub() != nullptr and callback != null.
      * @tc.expected: expect The function return value is STOP_BUBBLING.
@@ -1090,7 +1090,7 @@ HWTEST_F(FrameNodeTestNg, OnTouchInterceptTest001, TestSize.Level1)
     PointF parentLocalPoint;
     TouchRestrict touchRestrict;
     TouchTestResult result;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
 
     /**
      * @tc.steps: step2. create node and set callback.

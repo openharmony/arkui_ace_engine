@@ -19,6 +19,7 @@
 
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
+#include "unicode/unistr.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -287,6 +288,15 @@ TextEmojiSubStringRange TextEmojiProcessor::CalSubWstringRange(
         }
     }
     TextEmojiSubStringRange result = { startIndex, endIndex };
+    return result;
+}
+
+std::string TextEmojiProcessor::ConvertU8stringUnpairedSurrogates(const std::string& value)
+{
+    // Unpaired surrogates are replaced with U+FFFD
+    icu::UnicodeString ustring = icu::UnicodeString::fromUTF8(value);
+    std::string result;
+    ustring.toUTF8String(result);
     return result;
 }
 

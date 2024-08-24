@@ -19,6 +19,7 @@
 
 #include "cj_lambda.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/matrix4/cj_matrix4_ffi.h"
+#include "bridge/cj_frontend/interfaces/cj_ffi/cj_pixel_unit_convert_ffi.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components/theme/theme_manager.h"
@@ -413,18 +414,6 @@ void FfiOHOSAceFrameworkViewAbstractSetAllBorderRadius(CJBorderRadius value)
     CalcDimension topRight(value.topRight, static_cast<DimensionUnit>(value.topRightUnit));
     CalcDimension bottomLeft(value.bottomLeft, static_cast<DimensionUnit>(value.bottomLeftUnit));
     CalcDimension bottomRight(value.bottomRight, static_cast<DimensionUnit>(value.bottomRightUnit));
-    if (topLeft.Unit() == DimensionUnit::PERCENT) {
-        topLeft.Reset();
-    }
-    if (topRight.Unit() == DimensionUnit::PERCENT) {
-        topRight.Reset();
-    }
-    if (bottomLeft.Unit() == DimensionUnit::PERCENT) {
-        bottomLeft.Reset();
-    }
-    if (bottomRight.Unit() == DimensionUnit::PERCENT) {
-        bottomRight.Reset();
-    }
     ViewAbstractModel::GetInstance()->SetBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
 }
 
@@ -590,6 +579,7 @@ void FfiOHOSAceFrameworkViewAbstractSetBackgroundImagePositionAlign(int32_t alig
         return;
     }
     BackgroundImagePosition bgImgPosition;
+    bgImgPosition.SetIsAlign(true);
     UpdateBackgroundImagePosition(static_cast<Align>(align), bgImgPosition);
     ViewAbstractModel::GetInstance()->SetBackgroundImagePosition(bgImgPosition);
 }
@@ -603,13 +593,19 @@ void FfiOHOSAceFrameworkViewAbstractSetBackgroundImagePositionXY(double x, int32
 
     DimensionUnit typeX = xDime.Unit();
     DimensionUnit typeY = yDime.Unit();
-    double valueX = xDime.Value();
-    double valueY = yDime.Value();
+    double valueX = xDime.ConvertToPx();
+    double valueY = yDime.ConvertToPx();
+    if (xDime.Unit() == DimensionUnit::LPX) {
+        valueX = FfiOHOSAceFrameworkLpx2Px(xDime.Value());
+    }
+    if (yDime.Unit() == DimensionUnit::LPX) {
+        valueY = FfiOHOSAceFrameworkLpx2Px(yDime.Value());
+    }
     if (xDime.Unit() == DimensionUnit::PERCENT) {
-        valueX = xDime.Value() * FULL_DIMENSION;
+        valueX = xDime.Value();
     }
     if (yDime.Unit() == DimensionUnit::PERCENT) {
-        valueY = yDime.Value() * FULL_DIMENSION;
+        valueY = yDime.Value();
     }
     UpdateBackgroundImagePosition(typeX, typeY, valueX, valueY, bgImgPosition);
 
@@ -1327,7 +1323,7 @@ static void NewCjRadialGradient(RadialGradientParam radialGradientParam, NG::Gra
     DimensionUnit rowUnitType = static_cast<DimensionUnit>(center.rowUnitType);
     newGradient.GetRadialGradient()->radialCenterX = CalcDimension(center.rowValue, rowUnitType);
     double hundredPercent = 100.0;
-    if (static_cast<DimensionUnit>(center.rowValue) == DimensionUnit::PERCENT) {
+    if (static_cast<DimensionUnit>(center.rowUnitType) == DimensionUnit::PERCENT) {
         // [0,1] -> [0, 100]
         double rowValue = center.rowValue * hundredPercent;
         newGradient.GetRadialGradient()->radialCenterX = CalcDimension(rowValue, DimensionUnit::PERCENT);

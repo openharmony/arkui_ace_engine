@@ -418,14 +418,7 @@ RefPtr<WaterFlowSections> WaterFlowPattern::GetOrCreateWaterFlowSections()
     auto callback = [weakPattern = WeakClaim(this)](int32_t start) {
         auto pattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto context = PipelineContext::GetCurrentContextSafely();
-        CHECK_NULL_VOID(context);
-        context->AddBuildFinishCallBack([weakPattern, start]() {
-            auto pattern = weakPattern.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->OnSectionChanged(start);
-        });
-        context->RequestFrame();
+        pattern->AddSectionChangeStartPos(start);
     };
     sections_->SetOnDataChange(callback);
     sections_->SetNotifyDataChange(sectionChangeCallback);
@@ -619,7 +612,11 @@ int32_t WaterFlowPattern::GetChildrenCount() const
 void WaterFlowPattern::NotifyDataChange(int32_t index, int32_t count)
 {
     if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW && keepContentPosition_) {
-        layoutInfo_->NotifyDataChange(index, count);
+        if (footer_.Upgrade()) {
+            layoutInfo_->NotifyDataChange(index - 1, count);
+        } else {
+            layoutInfo_->NotifyDataChange(index, count);
+        }
     }
 }
 
@@ -752,5 +749,13 @@ void WaterFlowPattern::DumpAdvanceInfo()
         }
         DumpLog::GetInstance().AddDesc("-----------end print sections_------------");
     }
+}
+
+void WaterFlowPattern::BeforeCreateLayoutWrapper()
+{
+    for (const auto& start : sectionChangeStartPos_) {
+        OnSectionChanged(start);
+    }
+    sectionChangeStartPos_.clear();
 }
 } // namespace OHOS::Ace::NG

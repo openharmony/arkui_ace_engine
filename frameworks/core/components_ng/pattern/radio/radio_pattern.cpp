@@ -512,7 +512,10 @@ void RadioPattern::UpdateUncheckStatus(const RefPtr<FrameNode>& frameNode)
 {
     auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
     CHECK_NULL_VOID(radioPaintProperty);
-    radioPaintProperty->UpdateRadioCheck(false);
+    if (radioPaintProperty->GetRadioCheckValue(false)) {
+        radioPaintProperty->UpdateRadioCheck(false);
+        FireBuilder();
+    }
     frameNode->MarkNeedRenderOnly();
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         startExitAnimation();

@@ -178,9 +178,27 @@ public:
         dynamicPageSizeCallback_ = std::move(dynamicPageSizeCallback);
     }
 
-    void SetOnHiddenChange(std::function<void(bool)>&& onHiddenChange)
+    void AddOnHiddenChange(int32_t id, PageVisibilityChangeCallback&& onHiddenChange)
     {
-        onHiddenChange_ = std::move(onHiddenChange);
+        onHiddenChange_[id] = std::move(onHiddenChange);
+    }
+
+    void FireOnHiddenChange(bool flag)
+    {
+        for (auto& onHiddenChangeInfo : onHiddenChange_) {
+            if (onHiddenChangeInfo.second) {
+                auto onHiddenChange = onHiddenChangeInfo.second;
+                onHiddenChange(flag);
+            }
+        }
+    }
+
+    void RemoveOnHiddenChange(int32_t id)
+    {
+        auto iter = onHiddenChange_.find(id);
+        if (iter != onHiddenChange_.end()) {
+            onHiddenChange_.erase(iter);
+        }
     }
 
     void CreateOverlayManager(bool isShow)
@@ -258,7 +276,7 @@ protected:
     std::function<bool()> onBackPressed_;
     std::function<void()> pageTransitionFunc_;
     std::function<void()> firstBuildCallback_;
-    std::function<void(bool)> onHiddenChange_;
+    std::unordered_map<int32_t, PageVisibilityChangeCallback> onHiddenChange_;
     DynamicPageSizeCallback dynamicPageSizeCallback_;
     PageVisibilityChangeCallback visibilityChangeCallback_;
     std::shared_ptr<std::function<void()>> pageTransitionFinish_;

@@ -391,10 +391,10 @@ void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, Accessib
         nodeInfo.AddAction(action);
     }
 
-    if (node->GetImportantForAccessibility() == NG::AccessibilityProperty::Level::YES) {
+    if (node->GetImportantForAccessibility() == NG::AccessibilityProperty::Level::YES_STR) {
         actions.emplace_back(ActionType::ACCESSIBILITY_ACTION_FOCUS);
         nodeInfo.SetCheckable(true);
-    } else if (node->GetImportantForAccessibility() == NG::AccessibilityProperty::Level::NO ||
+    } else if (node->GetImportantForAccessibility() == NG::AccessibilityProperty::Level::NO_STR ||
                node->GetImportantForAccessibility() == NG::AccessibilityProperty::Level::NO_HIDE_DESCENDANTS) {
         nodeInfo.SetVisible(false);
     }
@@ -910,19 +910,15 @@ RefPtr<NG::FrameNode> GetFramenodeByAccessibilityId(const RefPtr<NG::FrameNode>&
 #endif
     std::queue<NG::UINode*> nodes;
     nodes.push(Referenced::RawPtr(root));
-    NG::UINode* virtualNode = nullptr;
     RefPtr<NG::FrameNode> frameNodeResult = nullptr;
 
     while (!nodes.empty()) {
         auto current = nodes.front();
         nodes.pop();
-        virtualNode = nullptr;
-        auto fnode = current->GetVirtualAccessibilityProperty();
-        if (fnode != nullptr) {
-            virtualNode = fnode->GetAccessibilityVirtualNodePtr();
-        }
-        if (virtualNode) {
-            const auto& children = std::list<RefPtr<NG::UINode>> { fnode->GetAccessibilityVirtualNode() };
+        if (current->HasVirtualNodeAccessibilityProperty()) {
+            auto fnode = AceType::DynamicCast<NG::FrameNode>(current);
+            auto property = fnode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+            const auto& children = std::list<RefPtr<NG::UINode>> { property->GetAccessibilityVirtualNode() };
             if (FindFrameNodeByAccessibilityId(id, children, nodes, frameNodeResult)) {
                 return frameNodeResult;
             }
@@ -1795,7 +1791,7 @@ bool CanAccessibilityFocusedNG(const RefPtr<NG::FrameNode>& node)
     auto level = accessibilityProperty->GetAccessibilityLevel();
     return !node->IsRootNode() &&
            node->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::VISIBLE &&
-           level != NG::AccessibilityProperty::Level::NO &&
+           level != NG::AccessibilityProperty::Level::NO_STR &&
            level != NG::AccessibilityProperty::Level::NO_HIDE_DESCENDANTS;
 }
 // focus move search

@@ -72,6 +72,7 @@ private:
     void LayoutCancelImage(const LayoutSearchParams& params);
     void LayoutTextField(const LayoutSearchParams& params);
     void UpdateClipBounds(LayoutWrapper* layoutWrapper, float height);
+    double CalcSymbolIconHeight(LayoutWrapper* layoutWrapper, int32_t index, double defaultImageHeight);
 
     ACE_DISALLOW_COPY_AND_MOVE(SearchLayoutAlgorithm);
 };

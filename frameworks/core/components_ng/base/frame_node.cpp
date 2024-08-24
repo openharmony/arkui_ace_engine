@@ -17,6 +17,7 @@
 
 #include <cstdint>
 #include "base/geometry/ng/rect_t.h"
+#include "core/pipeline/base/element_register.h"
 
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "core/common/layout_inspector.h"
@@ -2343,7 +2344,7 @@ void FrameNode::AddJudgeToTargetComponent(RefPtr<TargetComponent>& targetCompone
 
 HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
-    TouchTestResult& responseLinkResult, bool isDispatch)
+    ResponseLinkResult& responseLinkResult, bool isDispatch)
 {
     if (!isActive_ || !eventHub_->IsEnabled()) {
         TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s is inActive, need't do touch test", GetTag().c_str());
@@ -2526,7 +2527,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
             auto gestureHub = eventHub_->GetGestureEventHub();
             if (gestureHub) {
                 TouchTestResult finalResult;
-                TouchTestResult newComingResponseLinkTargets;
+                ResponseLinkResult newComingResponseLinkTargets;
                 const auto coordinateOffset = globalPoint - localPoint - localTransformOffset;
                 preventBubbling = gestureHub->ProcessTouchTestHit(coordinateOffset, touchRestrict, newComingTargets,
                     finalResult, touchId, localPoint, targetComponent, newComingResponseLinkTargets);
@@ -3186,7 +3187,7 @@ bool FrameNode::MarkRemoving()
         pendingRemove = true;
     }
 
-    const auto& children = GetChildren();
+    const auto children = GetChildren();
     for (const auto& child : children) {
         pendingRemove = child->MarkRemoving() || pendingRemove;
     }
@@ -3751,12 +3752,9 @@ void FrameNode::ProcessAccessibilityVirtualNode()
     auto virtualNode = accessibilityProperty->GetAccessibilityVirtualNode();
     auto virtualFrameNode = AceType::DynamicCast<NG::FrameNode>(virtualNode);
     if (virtualFrameNode) {
-        auto pipeline = GetContext();
-        CHECK_NULL_VOID(pipeline);
         auto constraint = GetLayoutConstraint();
         virtualFrameNode->ApplyConstraint(constraint);
         ProcessOffscreenNode(virtualFrameNode);
-        pipeline->SendUpdateVirtualNodeFocusEvent();
     }
 }
 
@@ -3831,6 +3829,9 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
     }
     layoutAlgorithm_.Reset();
     ProcessAccessibilityVirtualNode();
+    auto pipeline = GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    pipeline->SendUpdateVirtualNodeFocusEvent();
     return true;
 }
 
@@ -4128,6 +4129,7 @@ void FrameNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheS
 void FrameNode::OnInspectorIdUpdate(const std::string& id)
 {
     renderContext_->UpdateNodeName(id);
+    ElementRegister::GetInstance()->AddFrameNodeByInspectorId(id, AceType::WeakClaim(this));
     auto parent = GetAncestorNodeOfFrame();
     if (parent && parent->GetTag() == V2::RELATIVE_CONTAINER_ETS_TAG) {
         parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -4963,13 +4965,13 @@ int FrameNode::GetValidLeafChildNumber(const RefPtr<FrameNode>& host, int32_t th
 }
 
 void FrameNode::TriggerShouldParallelInnerWith(
-    const TouchTestResult& currentRecognizers, const TouchTestResult& responseLinkRecognizers)
+    const ResponseLinkResult& currentRecognizers, const ResponseLinkResult& responseLinkRecognizers)
 {
     auto gestureHub = eventHub_->GetGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     auto shouldBuiltInRecognizerParallelWithFunc = gestureHub->GetParallelInnerGestureToFunc();
     CHECK_NULL_VOID(shouldBuiltInRecognizerParallelWithFunc);
-    std::map<GestureTypeName, std::vector<RefPtr<TouchEventTarget>>> sortedResponseLinkRecognizers;
+    std::map<GestureTypeName, std::vector<RefPtr<NGGestureRecognizer>>> sortedResponseLinkRecognizers;
 
     for (const auto& item : responseLinkRecognizers) {
         auto recognizer = AceType::DynamicCast<NGGestureRecognizer>(item);
@@ -4981,23 +4983,21 @@ void FrameNode::TriggerShouldParallelInnerWith(
     }
 
     for (const auto& item : currentRecognizers) {
-        auto currentRecognizer = AceType::DynamicCast<NGGestureRecognizer>(item);
-        if (!currentRecognizer || !currentRecognizer->IsSystemGesture() ||
-            currentRecognizer->GetRecognizerType() != GestureTypeName::PAN_GESTURE) {
+        if (!item->IsSystemGesture() || item->GetRecognizerType() != GestureTypeName::PAN_GESTURE) {
             continue;
         }
         auto multiRecognizer = AceType::DynamicCast<MultiFingersRecognizer>(item);
         if (!multiRecognizer || multiRecognizer->GetTouchPointsSize() > 1) {
             continue;
         }
-        auto iter = sortedResponseLinkRecognizers.find(currentRecognizer->GetRecognizerType());
+        auto iter = sortedResponseLinkRecognizers.find(item->GetRecognizerType());
         if (iter == sortedResponseLinkRecognizers.end() || iter->second.empty()) {
             continue;
         }
         auto result = shouldBuiltInRecognizerParallelWithFunc(item, iter->second);
-        if (result && currentRecognizer != result) {
-            currentRecognizer->SetBridgeMode(true);
-            result->AddBridgeObj(currentRecognizer);
+        if (result && item != result) {
+            item->SetBridgeMode(true);
+            result->AddBridgeObj(item);
         }
     }
 }
@@ -5114,5 +5114,20 @@ uint32_t FrameNode::GetWindowPatternType() const
 {
     CHECK_NULL_RETURN(pattern_, 0);
     return pattern_->GetWindowPatternType();
+}
+
+void FrameNode::NotifyDataChange(int32_t index, int32_t count, int64_t id) const
+{
+    int32_t updateFrom = 0;
+    for (const auto& child : GetChildren()) {
+        if (child->GetAccessibilityId() == id) {
+            updateFrom += index;
+            break;
+        }
+        int32_t count = child->FrameCount();
+        updateFrom += count;
+    }
+    auto pattern = GetPattern();
+    pattern->NotifyDataChange(updateFrom, count);
 }
 } // namespace OHOS::Ace::NG

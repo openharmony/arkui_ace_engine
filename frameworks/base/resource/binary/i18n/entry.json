@@ -64,6 +64,9 @@
             "next_year":"下一年",
             "next_month":"下一月",
             "today":"今天"
+        },
+        "sheet":{
+            "close":"关闭"
         }
     },
     "en-US":{
@@ -112,6 +115,9 @@
         "navigation":{
             "back":"BACK",
             "more":"MORE"
+        },
+        "sheet":{
+            "close":"CLOSE"
         }
     },
     "ml":{

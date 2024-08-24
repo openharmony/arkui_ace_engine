@@ -94,11 +94,9 @@ public:
     virtual void SetPadding(const CalcDimension& value) = 0;
     virtual void SetPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
         const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) = 0;
-    virtual void SetPaddings(const NG::PaddingProperty& paddings) = 0;
     virtual void SetMargin(const CalcDimension& value) = 0;
     virtual void SetMargins(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
         const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) = 0;
-    virtual void SetMargins(const NG::MarginProperty& margins) = 0;
     virtual void ResetSafeAreaPadding() = 0;
     virtual void SetSafeAreaPadding(const CalcDimension& value) = 0;
     virtual void SetSafeAreaPaddings(const std::optional<CalcDimension>& top,
@@ -253,7 +251,8 @@ public:
     virtual void SetFreeze(bool freeze) = 0;
 
     // event
-    virtual void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) = 0;
+    virtual void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc,
+        double distanceThreshold = std::numeric_limits<double>::infinity()) = 0;
     virtual void SetOnGestureJudgeBegin(NG::GestureJudgeFunc&& gestureJudgeFunc) = 0;
     virtual void SetOnTouchIntercept(NG::TouchInterceptFunc&& touchInterceptFunc) = 0;
     virtual void SetShouldBuiltInRecognizerParallelWith(
