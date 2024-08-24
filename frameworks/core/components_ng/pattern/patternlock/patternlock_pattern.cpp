@@ -848,9 +848,26 @@ void PatternLockPattern::CalculateCellCenter()
         }
         cellCenter_ = GetLastChoosePointOffset();
     } else {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        cellCenter_ = screenTouchPoint_ - host->GetPositionToScreenWithTransform();
+        cellCenter_ = GetTouchOffsetToNode();
     }
+}
+
+OffsetF PatternLockPattern::GetTouchOffsetToNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, OffsetF());
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, OffsetF());
+    auto windowOffset = pipelineContext->GetCurrentWindowRect().GetOffset();
+    OffsetF nodeOffset = host->GetPositionToWindowWithTransform();
+    auto container = Container::CurrentSafely();
+    auto windowScale = container->GetWindowScale();
+    nodeOffset = nodeOffset * windowScale;
+    OffsetF offset(windowOffset.GetX() + nodeOffset.GetX(), windowOffset.GetY() + nodeOffset.GetY());
+    offset = screenTouchPoint_ - offset;
+    if (!NearZero(windowScale)) {
+        offset = offset / windowScale;
+    }
+    return offset;
 }
 } // namespace OHOS::Ace::NG
