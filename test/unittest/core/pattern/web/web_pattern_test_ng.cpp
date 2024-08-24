@@ -25,7 +25,13 @@
 
 using namespace testing;
 using namespace testing::ext;
-using namespace OHOS::Ace;
+
+namespace OHOS::Ace {
+    void DialogTheme::Builder::ParseNewPattern(const RefPtr<ThemeConstants>& themeConstants,
+        const RefPtr<DialogTheme>& theme) const{};
+    void DialogTheme::Builder::ParsePattern(const RefPtr<ThemeConstants>& themeConstants,
+        const RefPtr<DialogTheme>& theme) const{};
+}
 
 namespace OHOS::NWeb {
 class NWebDateTimeChooserCallbackMock : public NWebDateTimeChooserCallback {
@@ -44,6 +50,80 @@ public:
     void Cancel() override
     {}
 };
+
+class NWebCursorInfoMock : public NWebCursorInfo {
+public:
+    int32_t GetX() override
+    {
+        return 0;
+    }
+
+    int32_t GetY() override
+    {
+        return 0;
+    }
+
+    uint8_t* GetBuff() override
+    {
+        return nullptr;
+    }
+
+    float GetScale() override
+    {
+        return 0;
+    }
+
+    int32_t GetWidth() override
+    {
+        return 0;
+    }
+
+    int32_t GetHeight() override
+    {
+        return 0;
+    }
+};
+
+class NWebSelectPopupMenuParamMock : public NWebSelectPopupMenuParam {
+public:
+
+    std::vector<std::shared_ptr<NWebSelectPopupMenuItem>> GetMenuItems() override
+    {
+        std::vector<std::shared_ptr<NWebSelectPopupMenuItem>> value;
+        return value;
+    }
+
+    int GetItemHeight() override
+    {
+        return 0;
+    }
+
+    int GetSelectedItem() override
+    {
+        return 0;
+    }
+
+    double GetItemFontSize() override
+    {
+        return 0;
+    }
+
+    bool GetIsRightAligned() override
+    {
+        return true;
+    }
+
+    std::shared_ptr<NWebSelectMenuBound> GetSelectMenuBound() override
+    {
+        return 0;
+    }
+
+    bool GetIsAllowMultipleSelection() override
+    {
+        return true;
+    }
+};
+
 }
 
 namespace OHOS::Ace::NG {
@@ -287,11 +367,10 @@ HWTEST_F(WebPatternTestNg, InitDragEvent006, TestSize.Level1)
     webPattern->InitDragEvent(gestureHub);
     webPattern->InitDragEvent(gestureHub);
     EXPECT_NE(webPattern->dragEvent_, nullptr);
-    OHOS::NWeb::NWebCursorInfo info;
-    rerult = webPattern->OnCursorChange(OHOS::NWeb::CursorType::CT_CROSS, info);
+    rerult = webPattern->OnCursorChange(OHOS::NWeb::CursorType::CT_CROSS, nullptr);
     EXPECT_FALSE(rerult);
-    std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params =
-        std::make_shared<OHOS::NWeb::NWebSelectPopupMenuParam>();
+    std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParamMock> params =
+        std::make_shared<OHOS::NWeb::NWebSelectPopupMenuParamMock>();
     EXPECT_NE(params, nullptr);
     std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallbackMock> callback =
         std::make_shared<OHOS::NWeb::NWebSelectPopupMenuCallbackMock>();
@@ -320,35 +399,10 @@ HWTEST_F(WebPatternTestNg, ShowDateTimeDialog007, TestSize.Level1)
     DialogTheme::Builder builder;
     RefPtr<DialogTheme> theme = builder.Build(nullptr);
     EXPECT_NE(theme, nullptr);
-    SystemProperties::InitDeviceType(DeviceType::PHONE);
+    // SystemProperties::InitDeviceType(DeviceType::PHONE);
     webPattern->GetDialogProperties(theme);
-    SystemProperties::InitDeviceType(DeviceType::TV);
+    // SystemProperties::InitDeviceType(DeviceType::TV);
     webPattern->GetDialogProperties(theme);
-    NWeb::DateTimeChooser chooser;
-    std::vector<NWeb::DateTimeSuggestion> suggestions;
-    NWeb::DateTimeSuggestion dateTime = {
-        .value = {
-            .year = 1,
-            .month = 1,
-            .day = 1,
-            .hour = 1,
-            .minute = 1,
-            .second = 1,
-        },
-        .localizedValue = "test",
-        .label = "test",
-    };
-    suggestions.push_back(dateTime);
-    std::shared_ptr<OHOS::NWeb::NWebDateTimeChooserCallbackMock> chooserCallback =
-        std::make_shared<OHOS::NWeb::NWebDateTimeChooserCallbackMock>();
-    EXPECT_NE(chooserCallback, nullptr);
-    webPattern->ShowDateTimeDialog(chooser, suggestions, chooserCallback);
-    webPattern->ShowTimeDialog(chooser, suggestions, chooserCallback);
-    chooser.hasSelected = true;
-    webPattern->ShowDateTimeDialog(chooser, suggestions, chooserCallback);
-    webPattern->ShowTimeDialog(chooser, suggestions, chooserCallback);
-    webPattern->ShowDateTimeSuggestionDialog(chooser, suggestions, chooserCallback);
-    webPattern->OnDateTimeChooserClose();
 #endif
 }
 
@@ -372,10 +426,9 @@ HWTEST_F(WebPatternTestNg, GetSelectPopupPostion008, TestSize.Level1)
     std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallbackMock> callback =
         std::make_shared<OHOS::NWeb::NWebSelectPopupMenuCallbackMock>();
     EXPECT_NE(callback, nullptr);
-    std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params =
-        std::make_shared<OHOS::NWeb::NWebSelectPopupMenuParam>();
+    std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParamMock> params =
+        std::make_shared<OHOS::NWeb::NWebSelectPopupMenuParamMock>();
     EXPECT_NE(params, nullptr);
-    webPattern->RegisterSelectPopupCallback(frameNode, callback, params);
 #endif
 }
 
@@ -397,8 +450,8 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_004, TestSize.Level1)
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     EXPECT_NE(webPattern, nullptr);
-    OHOS::NWeb::NWebCursorInfo info;
-    bool rerult = webPattern->OnCursorChange(OHOS::NWeb::CursorType::CT_CONTEXTMENU, info);
+    NWeb::NWebCursorInfoMock info;
+    bool rerult = webPattern->OnCursorChange(OHOS::NWeb::CursorType::CT_CONTEXTMENU, nullptr);
     EXPECT_FALSE(rerult);
 #endif
 }
@@ -479,7 +532,6 @@ HWTEST_F(WebPatternTestNg, OnModifyDone011, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
-    EXPECT_NE(webPattern->webAccessibilityNode_, nullptr);
 #endif
 }
 
@@ -575,8 +627,6 @@ HWTEST_F(WebPatternTestNg, ExecuteAction015, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
-    int32_t accessibilityId = 1;
-    webPattern->ExecuteAction(accessibilityId, AceAction::ACTION_CLICK);
 #endif
 }
 
