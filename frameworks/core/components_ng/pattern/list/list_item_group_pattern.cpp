@@ -463,8 +463,9 @@ void ListItemGroupPattern::NotifyDataChange(int32_t index, int32_t count)
     if (itemPosition_.empty()) {
         return;
     }
-    if (count == 0 || (count > 0 && index > itemDisplayStartIndex_) ||
-        (count < 0 && index >= itemDisplayStartIndex_)) {
+    auto startIndex = itemPosition_.begin()->first;
+    if (count == 0 || (count > 0 && index > startIndex) ||
+        (count < 0 && index >= startIndex)) {
         return;
     }
 
@@ -476,7 +477,7 @@ void ListItemGroupPattern::NotifyDataChange(int32_t index, int32_t count)
         return;
     }
 
-    count = std::max(count, index - itemDisplayStartIndex_);
+    count = std::max(count, index - startIndex);
     int32_t mod = 0;
     if (count < 0 && lanes_ > 1) {
         mod = -count % lanes_;
@@ -490,13 +491,14 @@ void ListItemGroupPattern::NotifyDataChange(int32_t index, int32_t count)
         }
     }
     if (layoutedItemInfo_ && layoutedItemInfo_.value().startIndex >= index) {
-        layoutedItemInfo_.value().startIndex += count;
-        layoutedItemInfo_.value().endIndex += count;
+        auto& info = layoutedItemInfo_.value();
+        info.startIndex = std::max(info.startIndex + count, 0);
+        info.endIndex = std::max(info.endIndex + count, 0);
         if (lanes_ > 1) {
             if (count < 0) {
-                layoutedItemInfo_.value().startIndex += -count % lanes_;
+                info.startIndex += -count % lanes_;
             } else {
-                layoutedItemInfo_.value().endIndex -= count % lanes_;
+                info.endIndex -= count % lanes_;
             }
         }
     }
