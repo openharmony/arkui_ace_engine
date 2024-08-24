@@ -1778,14 +1778,12 @@ void SearchPattern::SetSearchIconSize(const Dimension& value)
 
 void SearchPattern::SetSearchIconColor(const Color& color)
 {
-    LOGE("search SetSearchIconColor");
     CHECK_NULL_VOID(GetSearchNode());
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     auto iconFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
     CHECK_NULL_VOID(iconFrameNode);
     if (iconFrameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
-        LOGE("search UpdateSearchIconColor UpdateSymbolColorList");
         GetSearchNode()->SetSearchSymbolIconColor(Color(color));
         auto symbolLayoutProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(symbolLayoutProperty);
@@ -1793,7 +1791,6 @@ void SearchPattern::SetSearchIconColor(const Color& color)
         iconFrameNode->MarkModifyDone();
         iconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     } else {
-        LOGE("search UpdateSearchIconColor UpdateSvgFillColor");
         auto &imageIconOptions = GetSearchNode()->GetSearchImageIconOptions();
         imageIconOptions.UpdateColor(Color(color));
         auto imageLayoutProperty = iconFrameNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -1844,14 +1841,12 @@ void SearchPattern::SetCancelIconSize(const Dimension& value)
 
 void SearchPattern::SetCancelIconColor(const Color& color)
 {
-    LOGE("search SetCancelIconColor");
     CHECK_NULL_VOID(GetSearchNode());
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     auto cancelIconFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
     CHECK_NULL_VOID(cancelIconFrameNode);
     if (cancelIconFrameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
-        LOGE("search UpdateCancelIconColor UpdateSymbolColorList");
         GetSearchNode()->SetCancelSymbolIconColor(Color(color));
         auto symbolLayoutProperty = cancelIconFrameNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(symbolLayoutProperty);
@@ -1859,7 +1854,6 @@ void SearchPattern::SetCancelIconColor(const Color& color)
         cancelIconFrameNode->MarkModifyDone();
         cancelIconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     } else {
-        LOGE("search UpdateCancelIconColor UpdateSvgFillColor");
         auto &imageIconOptions = GetSearchNode()->GetCancelImageIconOptions();
         imageIconOptions.UpdateColor(Color(color));
         auto imageLayoutProperty = cancelIconFrameNode->GetLayoutProperty<ImageLayoutProperty>();
