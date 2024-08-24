@@ -514,7 +514,7 @@ void JSGestureSpan::Destructor(JSGestureSpan* gestureSpan)
 
 void JSGestureSpan::JSBind(BindingTarget globalObj)
 {
-    JSClass<JSGestureSpan>::Declare("GestureStyle");
+    JSClass<JSGestureSpan>::Declare("NativeGestureStyle");
     JSClass<JSGestureSpan>::Bind(globalObj, JSGestureSpan::Constructor, JSGestureSpan::Destructor);
 }
 
@@ -532,7 +532,7 @@ RefPtr<GestureSpan> JSGestureSpan::ParseJSGestureSpan(const JSCallbackInfo& args
     if (!clickFunc->IsFunction() || clickFunc->IsUndefined()) {
         gestureInfo.onClick = std::nullopt;
     } else {
-        auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(clickFunc));
+        auto jsOnClickFunc = AceType::MakeRefPtr<JsWeakClickFunction>(JSRef<JSFunc>::Cast(clickFunc));
         auto onClick = [execCtx = args.GetExecutionContext(), func = jsOnClickFunc](BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
@@ -547,7 +547,7 @@ RefPtr<GestureSpan> JSGestureSpan::ParseJSGestureSpan(const JSCallbackInfo& args
     if (!longPressFunc->IsFunction() || longPressFunc->IsUndefined()) {
         gestureInfo.onLongPress = std::nullopt;
     } else {
-        auto jsOnLongPressFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(longPressFunc));
+        auto jsOnLongPressFunc = AceType::MakeRefPtr<JsWeakClickFunction>(JSRef<JSFunc>::Cast(longPressFunc));
         auto onLongPress = [execCtx = args.GetExecutionContext(), func = jsOnLongPressFunc](BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* longPressInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
