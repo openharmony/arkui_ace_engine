@@ -315,7 +315,7 @@ bool DragDropManager::CheckDragDropProxy(int64_t id) const
 }
 
 void DragDropManager::UpdateDragAllowDrop(
-    const RefPtr<FrameNode>& dragFrameNode, const DragBehavior dragBehavior, const int32_t eventId)
+    const RefPtr<FrameNode>& dragFrameNode, const DragBehavior dragBehavior, const int32_t eventId, bool isCapi)
 {
     if (!IsDropAllowed(dragFrameNode)) {
         UpdateDragStyle(DragCursorStyleCore::FORBIDDEN, eventId);
@@ -326,7 +326,9 @@ void DragDropManager::UpdateDragAllowDrop(
     CHECK_NULL_VOID(dragFrameNode);
     const auto& dragFrameNodeAllowDrop = dragFrameNode->GetAllowDrop();
     // special handling for no drag data present situation, always show as move
-    if (dragFrameNodeAllowDrop.empty() || summaryMap_.empty()) {
+    // For CAPI ,no ENABLE_DROP and DISABLE_DROP state, skip the judgment and consider it allowed to drop into. Continue
+    // to set dragBehavior.
+    if (!isCapi && (dragFrameNodeAllowDrop.empty() || summaryMap_.empty())) {
         UpdateDragStyle(DragCursorStyleCore::MOVE, eventId);
         return;
     }
@@ -1102,7 +1104,7 @@ void DragDropManager::FireOnDragEvent(
     } else if (event->GetResult() == DragRet::DISABLE_DROP) {
         UpdateDragStyle(DragCursorStyleCore::FORBIDDEN, pointerEvent.pointerEventId);
     } else {
-        UpdateDragAllowDrop(frameNode, event->GetDragBehavior(), pointerEvent.pointerEventId);
+        UpdateDragAllowDrop(frameNode, event->GetDragBehavior(), pointerEvent.pointerEventId, event->IsCapi());
     }
 }
 
