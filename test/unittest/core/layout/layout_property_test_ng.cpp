@@ -432,7 +432,7 @@ HWTEST_F(LayoutPropertyTestNg, BuildGridProperty001, TestSize.Level1)
      */
     layoutProperty->gridProperty_ = std::make_unique<GridProperty>();
     FRAME_NODE_ROOT->SetParent(FRAME_NODE_TEST);
-    FRAME_NODE_ROOT->NotifyVisibleChange(true);
+    FRAME_NODE_ROOT->NotifyVisibleChange(VisibleType::INVISIBLE, VisibleType::VISIBLE);
     layoutProperty->BuildGridProperty(FRAME_NODE_ROOT);
     auto result = FRAME_NODE_ROOT->GetAncestorNodeOfFrame();
     ASSERT_NE(result, nullptr);
