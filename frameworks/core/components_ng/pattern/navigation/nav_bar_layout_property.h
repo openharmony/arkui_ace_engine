@@ -67,34 +67,6 @@ public:
                 return "NavigationTitleMode.Free";
         }
     }
-
-    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
-    {
-        /* no fixed attr below, just return */
-        if (filter.IsFastFilter()) {
-            return;
-        }
-        json->PutExtAttr("titleMode", GetTitleModeString().c_str(), filter);
-        json->PutExtAttr("hideBackButton", GetHideBackButtonValue(false), filter);
-        json->PutExtAttr("hideTitleBar", GetHideTitleBarValue(false), filter);
-        json->PutExtAttr("hideToolBar", GetHideToolBarValue(false), filter);
-        json->PutExtAttr("navBarVisibility",
-            VisibleTypeToString(propVisibility_.value_or(VisibleType::VISIBLE)).c_str(), filter);
-    }
-
-    std::string VisibleTypeToString(VisibleType type) const
-    {
-        static const LinearEnumMapNode<VisibleType, std::string> visibilityMap[] = {
-            { VisibleType::VISIBLE, "Visibility.Visible" },
-            { VisibleType::INVISIBLE, "Visibility.Hidden" },
-            { VisibleType::GONE, "Visibility.None" },
-        };
-        auto idx = BinarySearchFindIndex(visibilityMap, ArraySize(visibilityMap), type);
-        if (idx >= 0) {
-            return visibilityMap[idx].value;
-        }
-        return "Visibility.Visible";
-    }
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TitleMode, NavigationTitleMode, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideTitleBar, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideToolBar, bool, PROPERTY_UPDATE_MEASURE);
