@@ -8240,6 +8240,14 @@ void TextFieldPattern::GetAIWriteInfo(AIWriteInfo& info)
     spanString->EncodeTlv(info.selectBuffer);
     TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "Sentence range=[%{public}d--%{public}d], content = %{public}s",
         sentenceStart, sentenceEnd, spanString->GetString().c_str());
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    info.maxLength = static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>()));
+    info.firstHandle = selectController_->GetFirstHandleRect().ToString();
+    info.secondHandle = selectController_->GetSecondHandleRect().ToString();
 }
 
 void TextFieldPattern::HandleOnAIWrite()
