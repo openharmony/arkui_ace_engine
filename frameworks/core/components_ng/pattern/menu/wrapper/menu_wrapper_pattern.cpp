@@ -557,6 +557,11 @@ void MenuWrapperPattern::SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper)
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         auto frameRect = child->GetGeometryNode()->GetFrameRect();
         // rect is relative to window
+        auto childNode = child->GetHostNode();
+        if (childNode &&
+            (childNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG || childNode->GetTag() == V2::IMAGE_ETS_TAG)) {
+            frameRect = childNode->GetPaintRectWithTransform(); // get preview area with scale transform
+        }
         auto rect = Rect(frameRect.GetX() + safeAreaInsetsLeft, frameRect.GetY() + safeAreaInsetsTop, frameRect.Width(),
             frameRect.Height());
 
@@ -716,6 +721,7 @@ void MenuWrapperPattern::ClearAllSubMenu()
         auto pattern = frameNode->GetPattern<MenuPattern>();
         if (pattern && pattern->IsSubMenu()) {
             host->RemoveChild(frameNode);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
         }
     }
 }

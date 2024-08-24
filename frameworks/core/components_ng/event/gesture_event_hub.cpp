@@ -1996,4 +1996,17 @@ void GestureEventHub::SetMouseDragMonitorState(bool state)
     }
     TAG_LOGI(AceLogTag::ACE_DRAG, "Set mouse drag monitor state %{public}d success", state);
 }
+
+bool GestureEventHub::IsAllowedDrag(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, false);
+    auto gestureEventHub = eventHub->GetGestureEventHub();
+    CHECK_NULL_RETURN(gestureEventHub, false);
+    if (gestureEventHub->IsTextCategoryComponent(frameNode->GetTag())) {
+        return frameNode->IsDraggable() && eventHub->HasOnDragStart();
+    }
+    return gestureEventHub->IsAllowedDrag(eventHub);
+}
 } // namespace OHOS::Ace::NG
