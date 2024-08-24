@@ -93,11 +93,11 @@ void GestureModelNG::SetTag(const std::string& tag)
     gesture->SetTag(tag);
 }
 
-void TapGestureModelNG::Create(int32_t countNum, int32_t fingersNum)
+void TapGestureModelNG::Create(int32_t countNum, int32_t fingersNum, double distanceThreshold)
 {
     RefPtr<GestureProcessor> gestureProcessor;
     gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
-    auto gesture = AceType::MakeRefPtr<NG::TapGesture>(countNum, fingersNum);
+    auto gesture = AceType::MakeRefPtr<NG::TapGesture>(countNum, fingersNum, distanceThreshold);
     gestureProcessor->PushGestureNG(gesture);
 }
 

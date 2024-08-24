@@ -71,6 +71,8 @@ class ObserveV2 {
 
   public static readonly SYMBOL_PROXY_GET_TARGET = Symbol('__proxy_get_target');
 
+  public static readonly SYMBOL_MAKE_OBSERVED = Symbol('___make_observed__');
+
   public static readonly OB_PREFIX = '__ob_'; // OB_PREFIX + attrName => backing store attribute name
   public static readonly OB_PREFIX_LEN = 5;
 
@@ -123,6 +125,11 @@ class ObserveV2 {
   // return true given value is @observed object
   public static IsObservedObjectV2(value: any): boolean {
     return (value && typeof (value) === 'object' && value[ObserveV2.V2_DECO_META]);
+  }
+
+  // return true given value is the return value of makeObserved
+  public static IsMakeObserved(value: any): boolean {
+    return (value && typeof (value) === 'object' && value[ObserveV2.SYMBOL_MAKE_OBSERVED]);
   }
 
   public static getCurrentRecordedId(): number {
@@ -407,7 +414,12 @@ class ObserveV2 {
       // exec a re-render or exec a monitor function changes some state -> calls fireChange -> ...
       if ((this.elmtIdsChanged_.size + this.monitorIdsChanged_.size + this.computedPropIdsChanged_.size === 0) &&
         /* update not already in progress */ !this.startDirty_) {
-        Promise.resolve().then(this.updateDirty.bind(this));
+        Promise.resolve()
+        .then(this.updateDirty.bind(this))
+        .catch(error => {
+          stateMgmtConsole.applicationError(`Exception occurred during the update process involving @Computed properties, @Monitor functions or UINode re-rendering`, error);
+          throw error;
+        });
       }
 
       // add bindId to the correct Set of pending changes.
@@ -638,17 +650,298 @@ class ObserveV2 {
 
     // If the return value is an Array, Set, Map
     if (!(val instanceof Date)) {
-      ObserveV2.getObserve().addRef(val, ObserveV2.OB_LENGTH);
+      ObserveV2.getObserve().addRef(ObserveV2.IsMakeObserved(val) ? RefInfo.get(UIUtilsImpl.instance().getTarget(val)) :
+        val, ObserveV2.OB_LENGTH);
     }
 
     return val;
   }
 
-  private static readonly arrayLengthChangingFunctions = new Set(['push', 'pop', 'shift', 'splice', 'unshift']);
+  // shrinkTo and extendTo is collection.Array api.
+  private static readonly arrayLengthChangingFunctions = new Set(['push', 'pop', 'shift', 'splice', 'unshift', 'shrinkTo', 'extendTo']);
   private static readonly arrayMutatingFunctions = new Set(['copyWithin', 'fill', 'reverse', 'sort']);
   private static readonly dateSetFunctions = new Set(['setFullYear', 'setMonth', 'setDate', 'setHours', 'setMinutes',
     'setSeconds', 'setMilliseconds', 'setTime', 'setUTCFullYear', 'setUTCMonth', 'setUTCDate', 'setUTCHours',
     'setUTCMinutes', 'setUTCSeconds', 'setUTCMilliseconds']);
+
+    public static readonly normalObjectHandlerDeepObserved = {
+      get(target: object, property: string | Symbol, receiver: any) {
+        if (typeof property === 'symbol') {
+          if (property === ObserveV2.SYMBOL_PROXY_GET_TARGET) {
+            return target;
+          }
+          if (property === ObserveV2.SYMBOL_MAKE_OBSERVED) {
+            return true;
+          }
+          return target[property];
+        }
+
+        let prop = property as string;
+        ObserveV2.getObserve().addRef(RefInfo.get(target), prop);
+        let ret = target[prop];
+        let type = typeof (ret);
+
+        return type === "function"
+          ? ret.bind(receiver)
+          : (type === "object"
+            ? RefInfo.get(ret).proxy
+            : ret);
+      },
+      set(target: object, prop: string, value: any, receiver: any) {
+        if (target[prop] === value) {
+          return true;
+        }
+        target[prop] = value;
+        ObserveV2.getObserve().fireChange(RefInfo.get(target), prop);
+        return true;
+      }
+    }
+
+
+  public static commonHandlerSet(target: any, key: string | symbol, value: any): boolean {
+    if (typeof key === 'symbol') {
+      return true;
+    }
+
+    if (target[key] === value) {
+      return true;
+    }
+    target[key] = value;
+    ObserveV2.getObserve().fireChange(RefInfo.get(target), key.toString());
+    return true;
+  }
+
+
+  public static readonly arrayHandlerDeepObserved = {
+    get(target: any, key: string | symbol, receiver: any): any {
+      if (typeof key === 'symbol') {
+        if (key === Symbol.iterator) {
+          let refInfo = RefInfo.get(target);
+          ObserveV2.getObserve().fireChange(refInfo, ObserveV2.OB_MAP_SET_ANY_PROPERTY);
+          ObserveV2.getObserve().addRef(refInfo, ObserveV2.OB_LENGTH);
+          return (...args): any => target[key](...args);
+        }
+        if (key === ObserveV2.SYMBOL_PROXY_GET_TARGET) {
+          return target;
+        }
+        if (key === ObserveV2.SYMBOL_MAKE_OBSERVED) {
+          return true;
+        }
+        return target[key];
+      }
+
+      let refInfo = RefInfo.get(target);
+      if (key === 'size') {
+        ObserveV2.getObserve().addRef(refInfo, ObserveV2.OB_LENGTH);
+        return target.size;
+      }
+  
+      let ret = target[key];
+      if (typeof (ret) !== 'function') {
+        if (typeof (ret) === "object") {
+          let wrapper = RefInfo.get(ret);
+          ObserveV2.getObserve().addRef(refInfo, key);
+          return wrapper.proxy;
+        }
+        if (key === 'length') {
+          ObserveV2.getObserve().addRef(refInfo, ObserveV2.OB_LENGTH);
+        }
+        return ret;
+      }
+
+      if (ObserveV2.arrayMutatingFunctions.has(key as string)) {
+        return function (...args): any {
+          ret.call(target, ...args);
+          ObserveV2.getObserve().fireChange(refInfo, ObserveV2.OB_LENGTH);
+          // returning the 'receiver(proxied object)' ensures that when chain calls also 2nd function call
+          // operates on the proxied object.
+          return receiver;
+        };
+      } else if (ObserveV2.arrayLengthChangingFunctions.has(key as string)) {
+        return function (...args): any {
+          const result = ret.call(target, ...args);
+          ObserveV2.getObserve().fireChange(refInfo, ObserveV2.OB_LENGTH);
+          return result;
+        };
+      } else if (key === 'forEach') {
+        // to make ForEach Component and its Item can addref
+        ObserveV2.getObserve().addRef(refInfo, ObserveV2.OB_LENGTH)
+        return function (callbackFn: (value: any, index: number, array: Array<any>) => void): any {
+          const result = ret.call(target, (value: any, index: number, array: Array<any>) => {
+            callbackFn(typeof value == "object" ? RefInfo.get(value).proxy : value, index, receiver);
+          });
+          return result;
+        }
+      } else {
+        return ret.bind(target);
+      }
+
+    },
+    set(target: any, key: string | symbol, value: any): boolean {
+      return ObserveV2.commonHandlerSet(target, key, value);
+    }
+  }
+
+  public static readonly setMapHandlerDeepObserved = {
+    get(target: any, key: string | symbol, receiver: any): any {
+      if (typeof key === 'symbol') {
+        if (key === Symbol.iterator) {
+          let refInfo = RefInfo.get(target);
+          ObserveV2.getObserve().fireChange(refInfo, ObserveV2.OB_MAP_SET_ANY_PROPERTY);
+          ObserveV2.getObserve().addRef(refInfo, ObserveV2.OB_LENGTH);
+          return (...args): any => target[key](...args);
+        }
+        if (key === ObserveV2.SYMBOL_PROXY_GET_TARGET) {
+          return target;
+        }
+        if (key === ObserveV2.SYMBOL_MAKE_OBSERVED) {
+          return true;
+        }
+        return target[key];
+      }
+  
+      let refInfo = RefInfo.get(target);
+      if (key === 'size') {
+        ObserveV2.getObserve().addRef(refInfo, ObserveV2.OB_LENGTH);
+        return target.size;
+      }
+  
+      let ret = target[key];
+      if (typeof (ret) !== 'function') {
+        if (typeof (ret) === "object") {
+          let wrapper = RefInfo.get(ret);
+          ObserveV2.getObserve().addRef(refInfo, key);
+          return wrapper.proxy;
+        }
+        if (key === 'length') {
+          ObserveV2.getObserve().addRef(refInfo, ObserveV2.OB_LENGTH);
+        }
+        return ret;
+      }
+
+      if (key === 'has') {
+        return (prop): boolean => {
+          const ret = target.has(prop);
+          if (ret) {
+            ObserveV2.getObserve().addRef(refInfo, prop);
+          } else {
+            ObserveV2.getObserve().addRef(refInfo, ObserveV2.OB_LENGTH);
+          }
+          return ret;
+        };
+      }
+      if (key === 'delete') {
+        return (prop): boolean => {
+          if (target.has(prop)) {
+            ObserveV2.getObserve().fireChange(refInfo, prop);
+            ObserveV2.getObserve().fireChange(refInfo, ObserveV2.OB_LENGTH);
+            return target.delete(prop);
+          } else {
+            return false;
+          }
+        };
+      }
+      if (key === 'clear') {
+        return (): void => {
+          if (target.size > 0) {
+            target.forEach((_, prop) => {
+              ObserveV2.getObserve().fireChange(refInfo, prop.toString());
+            });
+            ObserveV2.getObserve().fireChange(refInfo, ObserveV2.OB_LENGTH);
+            ObserveV2.getObserve().addRef(refInfo, ObserveV2.OB_MAP_SET_ANY_PROPERTY);
+            target.clear();
+          }
+        };
+      }
+      if (key === 'keys' || key === 'values' || key === 'entries') {
+        return (): any => {
+          ObserveV2.getObserve().addRef(refInfo, ObserveV2.OB_MAP_SET_ANY_PROPERTY);
+          ObserveV2.getObserve().addRef(refInfo, ObserveV2.OB_LENGTH);
+          return target[key]();
+        };
+      }
+
+
+      if (target instanceof Set || SendableType.isSet(target)) {
+        return key === 'add' ?
+          (val): any => {
+            ObserveV2.getObserve().fireChange(refInfo, val.toString());
+            ObserveV2.getObserve().fireChange(refInfo, ObserveV2.OB_MAP_SET_ANY_PROPERTY);
+            if (!target.has(val)) {
+              ObserveV2.getObserve().fireChange(refInfo, ObserveV2.OB_LENGTH);
+              target.add(val);
+            }
+            // return proxied This
+            return receiver;
+          } : (typeof ret === 'function')
+            ? ret.bind(target) : ret;
+      }
+
+      if (target instanceof Map || SendableType.isMap(target)) {
+        if (key === 'get') { // for Map
+          return (prop): any => {
+            if (target.has(prop)) {
+              ObserveV2.getObserve().addRef(refInfo, prop);
+            } else {
+              ObserveV2.getObserve().addRef(refInfo, ObserveV2.OB_LENGTH);
+            }
+            let ret = target.get(prop);
+
+            return typeof ret === 'object' ? RefInfo.get(ret).proxy : ret;
+          };
+        }
+        if (key === 'set') { // for Map
+          return (prop, val): any => {
+            if (!target.has(prop)) {
+              ObserveV2.getObserve().fireChange(refInfo, ObserveV2.OB_LENGTH);
+            } else if (target.get(prop) !== val) {
+              ObserveV2.getObserve().fireChange(refInfo, prop);
+            }
+            ObserveV2.getObserve().fireChange(refInfo, ObserveV2.OB_MAP_SET_ANY_PROPERTY);
+            target.set(prop, val);
+            return true;
+          };
+        }
+      }
+      return (typeof ret === 'function') ? ret.bind(target) : ret;
+    },
+    set(target: any, key: string | symbol, value: any): boolean {
+      return ObserveV2.commonHandlerSet(target, key, value);
+    }
+  }
+
+  public static readonly dateHandlerDeepObserved = {
+    get(target: any, key: string | symbol, receiver: any): any {
+      if (typeof key === 'symbol') {
+        if (key === ObserveV2.SYMBOL_PROXY_GET_TARGET) {
+          return target;
+        }
+        if (key === ObserveV2.SYMBOL_MAKE_OBSERVED) {
+          return true;
+        }
+        return target[key];
+      }
+
+      let ret = target[key];
+      let refInfo = RefInfo.get(target);
+      if (ObserveV2.dateSetFunctions.has(key)) {
+        return function (...args): any {
+          // execute original function with given arguments
+          let result = ret.call(this, ...args);
+          ObserveV2.getObserve().fireChange(refInfo, ObserveV2.OB_DATE);
+          return result;
+          // bind 'this' to target inside the function
+        }.bind(target);
+      } else {
+        ObserveV2.getObserve().addRef(refInfo, ObserveV2.OB_DATE);
+      }
+      return ret.bind(target);
+    },
+    
+    set(target: any, key: string | symbol, value: any): boolean {
+      return ObserveV2.commonHandlerSet(target, key, value);
+    }
+  }
 
   public static readonly arraySetMapProxy = {
     get(

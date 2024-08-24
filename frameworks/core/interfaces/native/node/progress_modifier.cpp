@@ -446,5 +446,14 @@ const ArkUIProgressModifier* GetProgressModifier()
         GetProgressTotal, GetProgressType, GetProgressColor, SetProgressInitialize, ResetProgressInitialize };
     return &modifier;
 }
+
+const CJUIProgressModifier* GetCJUIProgressModifier()
+{
+    static const CJUIProgressModifier modifier = { SetProgressValue, ResetProgressValue, SetProgressGradientColor,
+        SetProgressColor, ResetProgressColor, SetProgressStyle, ResetProgressStyle, SetProgressBackgroundColor,
+        ResetProgressBackgroundColor, SetProgressTotal, SetProgressType, ResetProgressType, GetProgressValue,
+        GetProgressTotal, GetProgressType, GetProgressColor, SetProgressInitialize, ResetProgressInitialize };
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

@@ -83,8 +83,8 @@ enum class HitTestMode {
 
 using TouchInterceptFunc = std::function<NG::HitTestMode(TouchEventInfo&)>;
 
-using ShouldBuiltInRecognizerParallelWithFunc =
-    std::function<RefPtr<NGGestureRecognizer>(RefPtr<TouchEventTarget>, std::vector<RefPtr<TouchEventTarget>>)>;
+using ShouldBuiltInRecognizerParallelWithFunc = std::function<RefPtr<NGGestureRecognizer>(
+    const RefPtr<NGGestureRecognizer>&, const std::vector<RefPtr<NGGestureRecognizer>>&)>;
 
 enum class TouchTestStrategy {
     DEFAULT = 0,
@@ -282,7 +282,8 @@ public:
 
     void CheckClickActuator();
     // Set by user define, which will replace old one.
-    void SetUserOnClick(GestureEventFunc&& clickEvent);
+    void SetUserOnClick(GestureEventFunc&& clickEvent,
+        double distanceThreshold = std::numeric_limits<double>::infinity());
 
      // Set by JS FrameNode.
     void SetJSFrameNodeOnClick(GestureEventFunc&& clickEvent);
@@ -434,7 +435,7 @@ public:
     // the return value means prevents event bubbling.
     bool ProcessTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint,
-        const RefPtr<TargetComponent>& targetComponent, TouchTestResult& responseLinkResult);
+        const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult);
 
     RefPtr<FrameNode> GetFrameNode() const;
 
@@ -694,7 +695,7 @@ public:
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,
-        const RefPtr<TargetComponent>& targetComponent, TouchTestResult& responseLinkResult);
+        const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult);
 
     void UpdateGestureHierarchy();
 

@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUISwiperModifier* GetSwiperModifier();
+const CJUISwiperModifier* GetCJUISwiperModifier();
 void SetSwiperChange(ArkUINodeHandle node, void* extraParam);
 void SetSwiperAnimationStart(ArkUINodeHandle node, void* extraParam);
 void SetSwiperAnimationEnd(ArkUINodeHandle node, void* extraParam);

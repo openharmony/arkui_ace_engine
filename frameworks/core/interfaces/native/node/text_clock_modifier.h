@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUITextClockModifier* GetTextClockModifier();
+const CJUITextClockModifier* GetCJUITextClockModifier();
 } // namespace OHOS::Ace::NG::NodeModifier
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_TEXT_CLOCK_MODIFIER_H

@@ -260,7 +260,8 @@ public:
     static void SetTransformMatrix(const Matrix4 &matrix);
 
     // event
-    static void SetOnClick(GestureEventFunc &&clickEventFunc);
+    static void SetOnClick(GestureEventFunc &&clickEventFunc,
+        double distanceThreshold = std::numeric_limits<double>::infinity());
     static void SetOnGestureJudgeBegin(GestureJudgeFunc &&gestureJudgeFunc);
     static void SetOnTouchIntercept(TouchInterceptFunc &&touchInterceptFunc);
     static void SetShouldBuiltInRecognizerParallelWith(
@@ -610,7 +611,8 @@ public:
         const OffsetF &oldOrigin, const RectF &rect, const OffsetF &origin)> &&onAreaChanged);
     static void SetOnFocus(FrameNode* frameNode, OnFocusFunc &&onFocusCallback);
     static void SetOnBlur(FrameNode* frameNode, OnBlurFunc &&onBlurCallback);
-    static void SetOnClick(FrameNode* frameNode, GestureEventFunc &&clickEventFunc);
+    static void SetOnClick(FrameNode* frameNode, GestureEventFunc &&clickEventFunc,
+        double distanceThreshold = std::numeric_limits<double>::infinity());
     static void SetOnTouch(FrameNode* frameNode, TouchEventFunc &&touchEventFunc);
     static void SetOnDragStart(FrameNode* frameNode,
         std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragStart);
@@ -626,6 +628,10 @@ public:
     static void SetOnGestureJudgeBegin(FrameNode* frameNode, GestureJudgeFunc&& gestureJudgeFunc);
     static void SetOnSizeChanged(
         FrameNode* frameNode, std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged);
+    static void SetOnGestureRecognizerJudgeBegin(
+        FrameNode* frameNode, GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc);
+    static void SetShouldBuiltInRecognizerParallelWith(
+        FrameNode* frameNode, NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc);
     static void SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style);
 
     static bool GetFocusable(FrameNode* frameNode);

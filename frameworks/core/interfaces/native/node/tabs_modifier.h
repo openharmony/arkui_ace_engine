@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUITabsModifier* GetTabsModifier();
+const CJUITabsModifier* GetCJUITabsModifier();
 } // namespace OHOS::Ace::NG::NodeModifier
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_TABS_MODIFIER_H

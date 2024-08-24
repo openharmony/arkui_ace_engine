@@ -570,6 +570,60 @@ const ArkUIScrollModifier* GetScrollModifier()
     return &modifier;
 }
 
+const CJUIScrollModifier* GetCJUIScrollModifier()
+{
+    static const CJUIScrollModifier modifier = {
+        SetScrollNestedScroll,
+        ResetScrollNestedScroll,
+        GetScrollEnableScroll,
+        SetScrollEnableScroll,
+        ResetScrollEnableScroll,
+        GetScrollFriction,
+        SetScrollFriction,
+        ResetScrollFriction,
+        GetScrollScrollSnap,
+        SetScrollScrollSnap,
+        ResetScrollScrollSnap,
+        GetScrollScrollBar,
+        SetScrollScrollBar,
+        ResetScrollScrollBar,
+        GetScrollScrollable,
+        SetScrollScrollable,
+        ResetScrollScrollable,
+        GetScrollScrollBarColor,
+        SetScrollScrollBarColor,
+        ResetScrollScrollBarColor,
+        GetScrollScrollBarWidth,
+        SetScrollScrollBarWidth,
+        ResetScrollScrollBarWidth,
+        GetScrollEdgeEffect,
+        SetScrollEdgeEffect,
+        ResetScrollEdgeEffect,
+        GetEnableScrollInteraction,
+        SetEnableScrollInteraction,
+        ResetEnableScrollInteraction,
+        SetScrollTo,
+        SetScrollEdge,
+        ResetScrollTo,
+        ResetScrollEdge,
+        GetScrollEnablePaging,
+        SetScrollEnablePaging,
+        ResetScrollEnablePaging,
+        GetScrollNestedScroll,
+        GetScrollOffset,
+        GetScrollEdge,
+        SetScrollInitialOffset,
+        ResetScrollInitialOffset,
+        SetScrollFlingSpeedLimit,
+        ResetScrollFlingSpeedLimit,
+        SetScrollPage,
+        SetScrollBy,
+        GetScroll,
+        SetScrollBarProxy, SetScrollToIndex,
+    };
+    return &modifier;
+}
+
 void SetOnScroll(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);

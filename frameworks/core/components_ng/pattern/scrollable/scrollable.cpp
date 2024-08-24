@@ -1272,7 +1272,7 @@ inline bool Scrollable::IsMouseWheelScroll(const GestureEvent& info)
 }
 
 void Scrollable::OnCollectTouchTarget(TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
-    const RefPtr<TargetComponent>& targetComponent, TouchTestResult& responseLinkResult)
+    const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult)
 {
     if (panRecognizerNG_) {
         panRecognizerNG_->SetNodeId(frameNode->GetId());

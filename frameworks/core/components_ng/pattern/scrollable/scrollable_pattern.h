@@ -621,7 +621,7 @@ public:
 
     void OnCollectClickTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-        TouchTestResult& responseLinkResult);
+        ResponseLinkResult& responseLinkResult);
 
     virtual void SetAccessibilityAction();
 

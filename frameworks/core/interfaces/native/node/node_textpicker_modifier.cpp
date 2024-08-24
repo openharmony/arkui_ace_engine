@@ -512,6 +512,21 @@ const ArkUITextPickerModifier* GetTextPickerModifier()
     return &modifier;
 }
 
+const CJUITextPickerModifier* GetCJUITextPickerModifier()
+{
+    static const CJUITextPickerModifier modifier = { SetTextPickerBackgroundColor, SetTextPickerCanLoop,
+        GetTextPickerSelectedIndex, SetTextPickerSelectedIndex, GetTextPickerTextStyle, SetTextPickerTextStyle,
+        GetTextPickerSelectedTextStyle, SetTextPickerSelectedTextStyle, GetTextPickerDisappearTextStyle,
+        SetTextPickerDisappearTextStyle, SetTextPickerDefaultPickerItemHeight, ResetTextPickerCanLoop,
+        ResetTextPickerSelectedIndex, ResetTextPickerTextStyle, ResetTextPickerSelectedTextStyle,
+        ResetTextPickerDisappearTextStyle, ResetTextPickerDefaultPickerItemHeight, ResetTextPickerBackgroundColor,
+        GetTextPickerRangeStr, GetTextPickerSingleRange, SetTextPickerRangeStr, GetTextPickerValue, SetTextPickerValue,
+        SetTextPickerDivider, ResetTextPickerDivider, SetTextPickerGradientHeight, ResetTextPickerGradientHeight,
+        GetTextPickerSelectedSize, GetTextPickerCanLoop, GetTextPickerDefaultPickerItemHeight };
+
+    return &modifier;
+}
+
 void GetPickerTextStyle(uint32_t color, ArkUI_CharPtr fontInfo, int32_t styleVal, NG::PickerTextStyle& textStyle)
 {
     textStyle.textColor = Color(color);

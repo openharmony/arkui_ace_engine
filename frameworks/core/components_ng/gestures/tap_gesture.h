@@ -42,7 +42,8 @@ public:
             gestureInfo_ = MakeRefPtr<GestureInfo>(GestureTypeName::TAP_GESTURE, GestureTypeName::TAP_GESTURE, false);
         }
     }
-    TapGesture(int32_t count, int32_t fingers) : Gesture(fingers), count_(count)
+    TapGesture(int32_t count, int32_t fingers, double distanceThreshold = std::numeric_limits<double>::infinity())
+        : Gesture(fingers), count_(count), distanceThreshold_(distanceThreshold)
     {
         if (gestureInfo_) {
             gestureInfo_->SetType(GestureTypeName::TAP_GESTURE);
@@ -63,6 +64,7 @@ protected:
 
 private:
     int32_t count_ = 1;
+    double distanceThreshold_ = std::numeric_limits<double>::infinity();
 };
 
 } // namespace OHOS::Ace::NG

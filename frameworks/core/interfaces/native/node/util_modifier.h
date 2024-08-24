@@ -18,5 +18,6 @@
 #include "core/interfaces/native/node/node_api.h"
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIUtilsModifier* GetUtilsModifier();
+const CJUIUtilsModifier* GetCJUIUtilsModifier();
 } // namespace OHOS::Ace::NG::NodeModifier
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_UTILS_MODIFIER_H

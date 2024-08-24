@@ -150,6 +150,8 @@ public:
 
     bool GetTextLimitExceededFlag(double maxHeight);
 
+    void DoMeasure(bool isVertical, float comWidth, float maxWidth, float idealWidth, float iconWidth);
+
 private:
     void UpdateSize(bool isWidth);
     void MeasureMinTextSize();

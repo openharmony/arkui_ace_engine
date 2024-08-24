@@ -374,6 +374,40 @@ const ArkUIToggleModifier* GetToggleModifier()
     return &modifier;
 }
 
+const CJUIToggleModifier* GetCJUIToggleModifier()
+{
+    static const CJUIToggleModifier modifier = {
+        SetToggleSelectedColor,
+        ResetToggleSelectedColor,
+        SetToggleSwitchPointColor,
+        ResetToggleSwitchPointColor,
+        SetToggleHeight,
+        ResetToggleHeight,
+        SetToggleResponseRegion,
+        ResetToggleResponseRegion,
+        SetTogglePadding,
+        ResetTogglePadding,
+        SetToggleBackgroundColor,
+        ResetToggleBackgroundColor,
+        SetToggleHoverEffect,
+        ResetToggleHoverEffect,
+        GetToggleSelectedColor,
+        GetToggleSwitchPointColor,
+        SetToggleIsOn,
+        ResetToggleIsOn,
+        GetToggleIsOn,
+        SetTogglePointRadius,
+        ResetTogglePointRadius,
+        SetToggleUnselectedColor,
+        ResetToggleUnselectedColor,
+        SetToggleTrackBorderRadius,
+        ResetToggleTrackBorderRadius,
+        GetToggleUnselectedColor,
+    };
+
+    return &modifier;
+}
+
 void SetOnToggleChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);

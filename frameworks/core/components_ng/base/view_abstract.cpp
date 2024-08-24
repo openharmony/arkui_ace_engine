@@ -1020,13 +1020,13 @@ void ViewAbstract::DisableOnAreaChange(FrameNode* frameNode)
     frameNode->ClearUserOnAreaChange();
 }
 
-void ViewAbstract::SetOnClick(GestureEventFunc&& clickEventFunc)
+void ViewAbstract::SetOnClick(GestureEventFunc&& clickEventFunc, double distanceThreshold)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    gestureHub->SetUserOnClick(std::move(clickEventFunc));
+    gestureHub->SetUserOnClick(std::move(clickEventFunc), distanceThreshold);
 
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -3749,11 +3749,11 @@ void ViewAbstract::SetOnBlur(FrameNode* frameNode, OnBlurFunc&& onBlurCallback)
     focusHub->SetOnBlurCallback(std::move(onBlurCallback));
 }
 
-void ViewAbstract::SetOnClick(FrameNode* frameNode, GestureEventFunc&& clickEventFunc)
+void ViewAbstract::SetOnClick(FrameNode* frameNode, GestureEventFunc&& clickEventFunc, double distanceThreshold)
 {
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    gestureHub->SetUserOnClick(std::move(clickEventFunc));
+    gestureHub->SetUserOnClick(std::move(clickEventFunc), distanceThreshold);
 
     auto focusHub = frameNode->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -4615,6 +4615,24 @@ void ViewAbstract::SetOnSizeChanged(
 {
     CHECK_NULL_VOID(frameNode);
     frameNode->SetOnSizeChangeCallback(std::move(onSizeChanged));
+}
+
+void ViewAbstract::SetOnGestureRecognizerJudgeBegin(
+    FrameNode* frameNode, GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc));
+}
+
+void ViewAbstract::SetShouldBuiltInRecognizerParallelWith(
+    FrameNode* frameNode, NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetShouldBuildinRecognizerParallelWithFunc(std::move(shouldBuiltInRecognizerParallelWithFunc));
 }
 
 void ViewAbstract::SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style)

@@ -307,7 +307,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest032, TestSize.Level1)
     TouchRestrict touchRestrict;
     std::list<RefPtr<NGGestureRecognizer>> innerTargets;
     TouchTestResult finalResult;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
 
     /**
      * @tc.steps: step3. call externalExclusiveRecognizer_
@@ -1521,7 +1521,7 @@ HWTEST_F(GestureEventHubTestNg, ProcessTouchTestHit001, TestSize.Level1)
     TouchRestrict touchRestrict;
     TouchTestResult innerTargets;
     TouchTestResult finalResult;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     innerTargets.emplace_back(recognizerGroup);
     gestureEventHub->redirectClick_=true;
     auto flag = gestureEventHub->ProcessTouchTestHit(

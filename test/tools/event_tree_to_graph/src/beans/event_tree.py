@@ -107,6 +107,7 @@ class EventTree(BaseBean):
             return True
         return False
 
+    # check the parse result
     def check_parse_result(self):
         if self.is_parse_failed():
             self.parse_failed()

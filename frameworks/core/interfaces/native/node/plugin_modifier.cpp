@@ -83,5 +83,13 @@ const ArkUIPluginModifier* GetPluginModifier()
 
     return &modifier;
 }
+
+const CJUIPluginModifier* GetCJUIPluginModifier()
+{
+    static const CJUIPluginModifier modifier = {SetPluginWidth, SetPluginHeight, SetPluginSize,
+        ResetPluginWidth, ResetPluginHeight, ResetPluginSize };
+
+    return &modifier;
+}
 }
 }

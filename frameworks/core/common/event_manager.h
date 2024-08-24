@@ -299,7 +299,7 @@ private:
     void DispatchTouchEventToTouchTestResult(TouchEvent touchEvent, TouchTestResult touchTestResult,
         bool sendOnTouch);
     void CleanRecognizersForDragBegin(TouchEvent& touchEvent);
-    void SetResponseLinkRecognizers(const TouchTestResult& result, const TouchTestResult& responseLinkRecognizers);
+    void SetResponseLinkRecognizers(const TouchTestResult& result, const ResponseLinkResult& responseLinkRecognizers);
     void MockCancelEventAndDispatch(const TouchEvent& touchPoint);
     void MockCancelEventAndDispatch(const AxisEvent& axisEvent);
     void MockHoverCancelEventAndDispatch(const TouchEvent& touchPoint);

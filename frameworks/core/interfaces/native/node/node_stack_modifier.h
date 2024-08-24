@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIStackModifier* GetStackModifier();
+const CJUIStackModifier* GetCJUIStackModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_NODE_STACK_MODIFIER_H

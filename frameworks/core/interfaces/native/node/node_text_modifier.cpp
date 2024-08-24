@@ -1087,7 +1087,38 @@ ArkUI_Int32 GetTextHalfLeading(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUITextModifier* GetTextModifier()
 {
-    static const ArkUITextModifier modifier = {
+    static const ArkUITextModifier modifier = { SetTextContent, SetFontWeight, ResetFontWeight, SetFontStyle,
+        ResetFontStyle, SetTextAlign, ResetTextAlign, SetFontColor, ResetFontColor, SetTextForegroundColor,
+        ResetTextForegroundColor, SetFontSize, ResetFontSize, SetTextLineHeight, ResetTextLineHeight,
+        SetTextTextOverflow, ResetTextTextOverflow, SetTextDecoration, ResetTextDecoration, SetTextTextCase,
+        ResetTextTextCase, SetTextMaxLines, ResetTextMaxLines, SetTextMinFontSize, ResetTextMinFontSize,
+        SetTextDraggable, ResetTextDraggable, SetTextPrivacySensitve, ResetTextPrivacySensitve, SetTextMaxFontSize,
+        ResetTextMaxFontSize, SetTextFontFamily, ResetTextFontFamily, SetTextCopyOption, ResetTextCopyOption,
+        SetTextTextShadow, ResetTextTextShadow, SetTextHeightAdaptivePolicy, ResetTextHeightAdaptivePolicy,
+        SetTextTextIndent, ResetTextTextIndent, SetTextBaselineOffset, ResetTextBaselineOffset, SetTextLetterSpacing,
+        ResetTextLetterSpacing, SetTextFont, ResetTextFont, SetFontWeightStr, SetWordBreak, ResetWordBreak,
+        GetFontFamily, GetCopyOption, GetHeightAdaptivePolicy, GetTextMinFontSize, GetTextMaxFontSize, GetFont,
+        GetFontSize, GetFontWeight, GetItalicFontStyle, SetEllipsisMode, ResetEllipsisMode, SetTextDetectEnable,
+        ResetTextDetectEnable, GetTextContent, GetTextLineHeight, GetTextDecoration, GetTextTextCase,
+        GetTextLetterSpacing, GetTextMaxLines, GetTextAlign, GetTextTextOverflow, GetTextTextIndent, GetFontColor,
+        GetTextBaselineOffset, GetTextShadowCount, GetTextShadow, GetTextWordBreak, GetTextEllipsisMode,
+        SetTextFontFeature, ResetTextFontFeature, SetTextLineSpacing, GetTextLineSpacing, ResetTextLineSpacing,
+        GetTextFontFeature, GetTextDetectEnable, SetTextDataDetectorConfig, GetTextDataDetectorConfig,
+        ResetTextDataDetectorConfig, SetLineBreakStrategy, ResetLineBreakStrategy, GetTextLineBreakStrategy,
+        SetTextSelectedBackgroundColor, GetTextSelectedBackgroundColor, ResetTextSelectedBackgroundColor,
+        SetTextContentWithStyledString, ResetTextContentWithStyledString, SetTextSelection, ResetTextSelection,
+        SetTextSelectableMode, ResetTextSelectableMode, SetTextDataDetectorConfigWithEvent,
+        ResetTextDataDetectorConfigWithEvent, SetTextOnCopy, ResetTextOnCopy, SetTextOnTextSelectionChange,
+        ResetTextOnTextSelectionChange, SetTextMinFontScale, ResetTextMinFontScale, SetTextMaxFontScale,
+        ResetTextMaxFontScale, SetTextSelectionMenuOptions, ResetTextSelectionMenuOptions, SetTextHalfLeading,
+        ResetTextHalfLeading, GetTextHalfLeading };
+
+    return &modifier;
+}
+
+const CJUITextModifier* GetCJUITextModifier()
+{
+    static const CJUITextModifier modifier = {
         SetTextContent,
         SetFontWeight,
         ResetFontWeight,
@@ -1168,20 +1199,20 @@ const ArkUITextModifier* GetTextModifier()
         GetTextEllipsisMode,
         SetTextFontFeature,
         ResetTextFontFeature,
-        SetTextLineSpacing,
-        GetTextLineSpacing,
-        ResetTextLineSpacing,
         GetTextFontFeature,
         GetTextDetectEnable,
         SetTextDataDetectorConfig,
         GetTextDataDetectorConfig,
         ResetTextDataDetectorConfig,
-        SetLineBreakStrategy,
-        ResetLineBreakStrategy,
-        GetTextLineBreakStrategy,
+        SetTextLineSpacing,
+        GetTextLineSpacing,
+        ResetTextLineSpacing,
         SetTextSelectedBackgroundColor,
         GetTextSelectedBackgroundColor,
         ResetTextSelectedBackgroundColor,
+        SetLineBreakStrategy,
+        ResetLineBreakStrategy,
+        GetTextLineBreakStrategy,
         SetTextContentWithStyledString,
         ResetTextContentWithStyledString,
         SetTextSelection,
@@ -1193,16 +1224,7 @@ const ArkUITextModifier* GetTextModifier()
         SetTextOnCopy,
         ResetTextOnCopy,
         SetTextOnTextSelectionChange,
-        ResetTextOnTextSelectionChange,
-        SetTextMinFontScale,
-        ResetTextMinFontScale,
-        SetTextMaxFontScale,
-        ResetTextMaxFontScale,
-        SetTextSelectionMenuOptions,
-        ResetTextSelectionMenuOptions,
-        SetTextHalfLeading,
-        ResetTextHalfLeading,
-        GetTextHalfLeading
+        ResetTextOnTextSelectionChange
     };
 
     return &modifier;

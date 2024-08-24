@@ -44,6 +44,7 @@
 #include "core/components_ng/pattern/swiper/swiper_layout_algorithm.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
+#include "core/components_ng/pattern/swiper/swiper_node.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_method.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
 #include "core/components_ng/pattern/swiper/swiper_utils.h"
@@ -366,6 +367,7 @@ void SwiperPattern::OnModifyDone()
     InitIndicator();
     InitArrow();
     InitCapture();
+    CheckSpecialItemCount();
     SetLazyLoadIsLoop();
     RegisterVisibleAreaChange();
     InitTouchEvent(gestureHub);
@@ -1460,6 +1462,18 @@ void SwiperPattern::OnSwiperCustomAnimationFinish(
         task.Cancel();
     }
 
+    int32_t timeout = 0;
+    if (onSwiperCustomContentTransition_ && !isFinishAnimation) {
+        timeout = onSwiperCustomContentTransition_->timeout;
+    }
+
+    if (timeout == 0) {
+        needUnmountIndexs_.erase(index);
+        itemPositionInAnimation_.erase(index);
+        MarkDirtyNodeSelf();
+        return;
+    }
+
     task.Reset([weak = AceType::WeakClaim(this), index] {
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
@@ -1467,10 +1481,6 @@ void SwiperPattern::OnSwiperCustomAnimationFinish(
         swiper->itemPositionInAnimation_.erase(index);
         swiper->MarkDirtyNodeSelf();
     });
-    int32_t timeout = 0;
-    if (onSwiperCustomContentTransition_ && !isFinishAnimation) {
-        timeout = onSwiperCustomContentTransition_->timeout;
-    }
     taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI, timeout, "ArkUISwiperDelayedCustomAnimation");
 }
 
@@ -6032,5 +6042,13 @@ bool SwiperPattern::IsItemOverlay() const
         lastItemEndPos = direction_ == Axis::HORIZONTAL ? rect.Right() : rect.Bottom();
     }
     return false;
+}
+
+void SwiperPattern::CheckSpecialItemCount() const
+{
+    auto swiperNode = AceType::DynamicCast<SwiperNode>(GetHost());
+    CHECK_NULL_VOID(swiperNode);
+    swiperNode->SetSpecialItemCount(indicatorId_.has_value() + leftButtonId_.has_value() + rightButtonId_.has_value() +
+                                    leftCaptureId_.has_value() + rightCaptureId_.has_value());
 }
 } // namespace OHOS::Ace::NG

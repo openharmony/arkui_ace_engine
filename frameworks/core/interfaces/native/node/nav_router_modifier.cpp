@@ -41,5 +41,12 @@ const ArkUINavRouterModifier* GetNavRouterModifier()
 
     return &modifier;
 }
+
+const CJUINavRouterModifier* GetCJUINavRouterModifier()
+{
+    static const CJUINavRouterModifier modifier = {SetNavRouteMode, ResetNavRouteMode};
+
+    return &modifier;
+}
 }
 }

@@ -170,5 +170,15 @@ const ArkUICheckboxGroupModifier* GetCheckboxGroupModifier()
         SetCheckboxGroupStyle, ResetCheckboxGroupStyle };
     return &modifier;
 }
+
+const CJUICheckboxGroupModifier* GetCJUICheckboxGroupModifier()
+{
+    static const CJUICheckboxGroupModifier modifier = { SetCheckboxGroupSelectedColor,
+        ResetCheckboxGroupSelectedColor, SetCheckboxGroupUnSelectedColor, ResetCheckboxGroupUnSelectedColor,
+        SetCheckboxGroupSelectAll, ResetCheckboxGroupSelectAll, SetCheckboxGroupWidth, ResetCheckboxGroupWidth,
+        SetCheckboxGroupHeight, ResetCheckboxGroupHeight, SetCheckboxGroupMark, ResetCheckboxGroupMark,
+        SetCheckboxGroupStyle, ResetCheckboxGroupStyle };
+    return &modifier;
+}
 }
 }

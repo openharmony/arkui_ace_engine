@@ -279,6 +279,11 @@ public:
         hasPixelMap_ = hasPixelMap;
     }
 
+    bool GetHasGatherNode()
+    {
+        return hasGatherNode_;
+    }
+
     RefPtr<FrameNode> GetPixelMapNode()
     {
         return pixmapColumnNodeWeak_.Upgrade();
@@ -830,7 +835,7 @@ private:
 
     int32_t dismissPopupId_ = 0;
 
-    bool hasGatherNode_ {false};
+    bool hasGatherNode_ { false };
     WeakPtr<FrameNode> gatherNodeWeak_;
     std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo_;
     bool isMenuShow_ = false;

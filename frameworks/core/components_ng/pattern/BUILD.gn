@@ -587,9 +587,6 @@ build_component_ng("pattern_ng") {
       external_deps += [ "window_manager:scene_session" ]
     }
   } else if (is_arkui_x) {
-    deps += [
-      "$ace_graphic/rosen/modules/render_service_client:librender_service_client_static",
-      "//plugins/libs/napi:napi_$platform",
-    ]
+    deps += [ "$ace_graphic/rosen/modules/render_service_client:librender_service_client_static" ]
   }
 }

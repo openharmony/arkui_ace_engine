@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUISideBarContainerModifier* GetSideBarContainerModifier();
+const CJUISideBarContainerModifier* GetCJUISideBarContainerModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_SIDE_BAR_CONTAINER_MODIFIER_H

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NODE_API_H
 
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/interfaces/cjui/cjui_api.h"
 #include "core/interfaces/native/node/node_utils.h"
 
 #ifdef __cplusplus
