@@ -1702,6 +1702,12 @@ var TransitionHierarchyStrategy;
   TransitionHierarchyStrategy[TransitionHierarchyStrategy["ADAPTIVE"] = 1] = "ADAPTIVE";
 })(TransitionHierarchyStrategy || (TransitionHierarchyStrategy = {}));
 
+var KeyboardAvoidMode;
+(function (KeyboardAvoidMode) {
+    KeyboardAvoidMode[KeyboardAvoidMode["DEFAULT"] = 0] = "DEFAULT";
+    KeyboardAvoidMode[KeyboardAvoidMode["NONE"] = 1] = "NONE";
+})(KeyboardAvoidMode || (KeyboardAvoidMode = {}));
+
 class SubTabBarStyle {
   constructor(content) {
     this.type = 'SubTabBarStyle';
