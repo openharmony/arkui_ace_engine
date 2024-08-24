@@ -2060,7 +2060,7 @@ void TextFieldPattern::InitDragDropCallBack()
                 paintProperty->GetInputStyleValue(InputStyle::DEFAULT) != InputStyle::INLINE &&
                 focusHub->IsFocusable()) {
                 pattern->ShowSelectAfterDragEvent();
-                focusHub->RequestFocusImmediately();
+                pattern->TextFieldRequestFocus(RequestFocusReason::DRAG_END);
             }
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
@@ -2149,7 +2149,7 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
         CHECK_NULL_VOID(host);
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d request focus currently", host->GetId());
         firstGetFocus = true;
-        if (!focusHub->IsFocusOnTouch().value_or(true) || !focusHub->RequestFocusImmediately()) {
+        if (!focusHub->IsFocusOnTouch().value_or(true) || !TextFieldRequestFocus(RequestFocusReason::CLICK)) {
             CloseSelectOverlay(true);
             StopTwinkling();
             return;
@@ -2380,9 +2380,8 @@ bool TextFieldPattern::ProcessAutoFill(bool& isPopup, bool isFromKeyBoard, bool 
     auto container = Container::Current();
     if (container == nullptr) {
         TAG_LOGW(AceLogTag::ACE_AUTO_FILL, "Get current container is nullptr.");
-        container = Container::GetActive();
+        return false;
     }
-    CHECK_NULL_RETURN(container, false);
     SetAutoFillTriggeredStateByType(autoFillType);
     SetFillRequestFinish(false);
     return (container->RequestAutoFill(host, autoFillType, isNewPassWord, isPopup, autoFillSessionId_));
@@ -3031,7 +3030,7 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     gestureHub->SetIsTextDraggable(false);
     isLongPress_ = true;
     if (!focusHub->IsCurrentFocus()) {
-        focusHub->RequestFocusImmediately();
+        TextFieldRequestFocus(RequestFocusReason::LONG_PRESS);
     }
     auto localOffset = ConvertGlobalToLocalOffset(info.GetGlobalLocation());
     if (CanChangeSelectState()) {
@@ -3432,7 +3431,7 @@ void TextFieldPattern::FocusAndUpdateCaretByMouse(MouseInfo& info)
     auto focusHub = GetFocusHub();
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (!focusHub->IsFocusOnTouch().value_or(true) || !focusHub->RequestFocusImmediately()) {
+    if (!focusHub->IsFocusOnTouch().value_or(true) || !TextFieldRequestFocus(RequestFocusReason::MOUSE)) {
         StopTwinkling();
         return;
     }
@@ -4566,7 +4565,7 @@ void TextFieldPattern::HandleCounterBorder()
             renderContext->UpdateBorderColor(overCountBorderColor);
         }
     } else {
-        if (IsUnderlineMode()) {
+        if (IsUnderlineMode() && !IsShowError()) {
             ApplyUnderlineTheme();
             UpdateCounterMargin();
         } else {
@@ -4759,8 +4758,8 @@ bool TextFieldPattern::RequestKeyboardNotByFocusSwitch(RequestKeyboardReason rea
 {
     auto tmpHost = GetHost();
     CHECK_NULL_RETURN(tmpHost, false);
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "%{public}d requestKeyboard With Reason %{public}d",
-        tmpHost->GetId(), static_cast<int32_t>(reason));
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "%{public}d requestKeyboard With Reason %{public}s",
+        tmpHost->GetId(), TextFieldPattern::RequestKeyboardReasonToString(reason).c_str());
     if (!RequestKeyboard(false, true, true)) {
         return false;
     }
@@ -4770,6 +4769,105 @@ bool TextFieldPattern::RequestKeyboardNotByFocusSwitch(RequestKeyboardReason rea
     CHECK_NULL_RETURN(textFieldManager, true);
     textFieldManager->SetNeedToRequestKeyboard(false);
     return true;
+}
+
+bool TextFieldPattern::TextFieldRequestFocus(RequestFocusReason reason)
+{
+    if (HasFocus()) {
+        return true;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "%{public}d Request Focus With Reason %{public}s",
+        host->GetId(), TextFieldPattern::RequestFocusReasonToString(reason).c_str());
+    auto focusHub = GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_RETURN(context, false);
+    if (!context->IsWindowFocused()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "window blur, don't request textfield focus");
+        return false;
+    }
+    return focusHub->RequestFocusImmediately();
+}
+
+std::string TextFieldPattern::RequestFocusReasonToString(RequestFocusReason reason)
+{
+    switch (reason) {
+        case RequestFocusReason::DRAG_END: {
+            return "DragEnd";
+        }
+        case RequestFocusReason::DRAG_MOVE: {
+            return "DragMove";
+        }
+        case RequestFocusReason::CLICK: {
+            return "Click";
+        }
+        case RequestFocusReason::LONG_PRESS: {
+            return "LongPress";
+        }
+        case RequestFocusReason::AUTO_FILL: {
+            return "AutoFill";
+        }
+        case RequestFocusReason::CLEAN_NODE: {
+            return "CleanNode";
+        }
+        case RequestFocusReason::MOUSE: {
+            return "Mouse";
+        }
+        case RequestFocusReason::UNKNOWN:
+        default: {
+            break;
+        }
+    }
+    return "Unknown";
+}
+
+std::string TextFieldPattern::RequestKeyboardReasonToString(RequestKeyboardReason reason)
+{
+    switch (reason) {
+        case RequestKeyboardReason::ON_KEY_EVENT: {
+            return "KeyEvent";
+        }
+        case RequestKeyboardReason::SINGLE_CLICK: {
+            return "SingleClick";
+        }
+        case RequestKeyboardReason::DOUBLE_CLICK: {
+            return "DoubleClick";
+        }
+        case RequestKeyboardReason::LONG_PRESS: {
+            return "LongPress";
+        }
+        case RequestKeyboardReason::RESET_KEYBOARD: {
+            return "ResetKeyboard";
+        }
+        case RequestKeyboardReason::MOUSE_RELEASE: {
+            return "MouseRelease";
+        }
+        case RequestKeyboardReason::SET_SELECTION: {
+            return "SetSelection";
+        }
+        case RequestKeyboardReason::SEARCH_REQUEST: {
+            return "SearchRequest";
+        }
+        case RequestKeyboardReason::AUTO_FILL_REQUEST_FAIL: {
+            return "AutoFillRequestFail";
+        }
+        case RequestKeyboardReason::SHOW_KEYBOARD_ON_FOCUS: {
+            return "ShowKeyboardOnFocus";
+        }
+        case RequestKeyboardReason::STYLUS_DETECTOR: {
+            return "StylusDetector";
+        }
+        case RequestKeyboardReason::CUSTOM_KEYBOARD: {
+            return "CustomKeyboard";
+        }
+        case RequestKeyboardReason::UNKNOWN:
+        default: {
+            break;
+        }
+    }
+    return "Unknown";
 }
 
 bool TextFieldPattern::IsModalCovered()
@@ -5722,7 +5820,7 @@ bool TextFieldPattern::OnScrollCallback(float offset, int32_t source)
         } else if (CheckSelectAreaVisible()) {
             isTextSelectionMenuShow_ = false;
         }
-        selectOverlay_->HideMenu();
+        selectOverlay_->HideMenu(true);
         return true;
     }
     if (IsReachedBoundary(offset)) {
@@ -6541,9 +6639,28 @@ void TextFieldPattern::DumpInfo()
     dumpLog.AddDesc(std::string("IsAIWrite: ").append(std::to_string(IsShowAIWrite())));
     DumpPlaceHolderInfo();
     DumpScaleInfo();
-    if (SystemProperties::GetDebugEnabled()) {
-        DumpAdvanceInfo();
-    }
+    DumpTextEngineInfo();
+    DumpAdvanceInfo();
+}
+
+void TextFieldPattern::DumpTextEngineInfo()
+{
+    auto& dumpLog = DumpLog::GetInstance();
+    dumpLog.AddDesc(std::string("-----TextEngine paragraphs_ info-----"));
+    dumpLog.AddDesc(std::string("GetTextWidth:")
+        .append(std::to_string(paragraph_->GetTextWidth()))
+        .append(" GetHeight:")
+        .append(std::to_string(paragraph_->GetHeight()))
+        .append(" GetMaxWidth:")
+        .append(std::to_string(paragraph_->GetMaxWidth()))
+        .append(" GetMaxIntrinsicWidth:")
+        .append(std::to_string(paragraph_->GetMaxIntrinsicWidth())));
+    dumpLog.AddDesc(std::string("GetLineCount:")
+        .append(std::to_string(paragraph_->GetLineCount()))
+        .append(" GetLongestLine:")
+        .append(std::to_string(paragraph_->GetLongestLine()))
+        .append(" GetLongestLineWithIndent:")
+        .append(std::to_string(paragraph_->GetLongestLineWithIndent())));
 }
 
 void TextFieldPattern::DumpAdvanceInfo()
@@ -6553,21 +6670,6 @@ void TextFieldPattern::DumpAdvanceInfo()
             std::string("CustomKeyboard: true, Attached:").append(std::to_string(isCustomKeyboardAttached_)));
     }
     DumpLog::GetInstance().AddDesc(std::string("FontColor: ").append(GetTextColor()));
-    DumpLog::GetInstance().AddDesc(std::string("from TextEngine paragraphs_ info :"));
-    DumpLog::GetInstance().AddDesc(std::string("GetTextWidth:")
-        .append(std::to_string(paragraph_->GetTextWidth()))
-        .append(" GetHeight:")
-        .append(std::to_string(paragraph_->GetHeight()))
-        .append(" GetMaxWidth:")
-        .append(std::to_string(paragraph_->GetMaxWidth()))
-        .append(" GetMaxIntrinsicWidth:")
-        .append(std::to_string(paragraph_->GetMaxIntrinsicWidth())));
-    DumpLog::GetInstance().AddDesc(std::string("GetLineCount:")
-        .append(std::to_string(paragraph_->GetLineCount()))
-        .append(" GetLongestLine:")
-        .append(std::to_string(paragraph_->GetLongestLine()))
-        .append(" GetLongestLineWithIndent:")
-        .append(std::to_string(paragraph_->GetLongestLineWithIndent())));
 #if defined(ENABLE_STANDARD_INPUT)
     auto miscTextConfig = GetMiscTextConfig();
     CHECK_NULL_VOID(miscTextConfig.has_value());
@@ -6679,8 +6781,7 @@ void TextFieldPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWra
     CHECK_NULL_VOID(nodeWrap);
     auto isFocus = nodeWrap->GetIsFocus();
     if (isFocus && !HasFocus()) {
-        auto focusHub = host->GetOrCreateFocusHub();
-        focusHub->RequestFocusImmediately();
+        TextFieldRequestFocus(RequestFocusReason::AUTO_FILL);
         DoProcessAutoFill();
     }
     auto type = GetAutoFillType();
@@ -6743,7 +6844,7 @@ void TextFieldPattern::NotifyFillRequestFailed(int32_t errCode, const std::strin
         }
     }
     if (!isPopup || (isPopup && errCode == AUTO_FILL_CANCEL)) {
-        if (RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::AUTO_FILL_REQUEST_FILL)) {
+        if (RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::AUTO_FILL_REQUEST_FAIL)) {
             NotifyOnEditChanged(true);
         }
     }
@@ -7321,7 +7422,7 @@ void TextFieldPattern::CleanNodeResponseKeyEvent()
     UpdateCaretInfoToController();
     if (!HasFocus()) {
         auto focusHub = host->GetOrCreateFocusHub();
-        focusHub->RequestFocusImmediately();
+        TextFieldRequestFocus(RequestFocusReason::CLEAN_NODE);
     }
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -7448,7 +7549,7 @@ void TextFieldPattern::HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& no
     }
     auto focusHub = GetFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->RequestFocusImmediately();
+    TextFieldRequestFocus(RequestFocusReason::DRAG_MOVE);
     if (focusHub->IsCurrentFocus()) {
         isCursorAlwaysDisplayed_ = true;
         StartTwinkling();
@@ -7488,7 +7589,7 @@ void TextFieldPattern::HandleCursorOnDragEnded(const RefPtr<NotifyDragEvent>& no
     }
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
         "In OnDragEnded, the released location is in the current TextField, id:%{public}d", host->GetId());
-    focusHub->RequestFocusImmediately();
+    TextFieldRequestFocus(RequestFocusReason::DRAG_END);
     isCursorAlwaysDisplayed_ = false;
     StartTwinkling();
 };

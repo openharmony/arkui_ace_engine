@@ -900,6 +900,12 @@ var DialogAlignment;
   DialogAlignment[DialogAlignment["BottomEnd"] = 9] = "BottomEnd";
 })(DialogAlignment || (DialogAlignment = {}));
 
+let HoverModeAreaType;
+(function (HoverModeAreaType) {
+  HoverModeAreaType[HoverModeAreaType["TOP_SCREEN"] = 0] = "TOP_SCREEN";
+  HoverModeAreaType[HoverModeAreaType["BOTTOM_SCREEN"] = 1] = "BOTTOM_SCREEN";
+})(HoverModeAreaType || (HoverModeAreaType = {}));
+
 var DialogButtonStyle;
 (function (DialogButtonStyle) {
   DialogButtonStyle[DialogButtonStyle["DEFAULT"] = 0] = "DEFAULT";
@@ -2084,7 +2090,7 @@ var LaunchMode;
 })(LaunchMode || (LaunchMode = {}));
 
 class NavPathInfo {
-  constructor(name, param, onPop) {
+  constructor(name, param, onPop, isEntry) {
     this.name = name;
     this.param = param;
     this.onPop = onPop;
@@ -2092,6 +2098,7 @@ class NavPathInfo {
     this.needUpdate = false;
     this.needBuildNewInstance = false;
     this.navDestinationId = undefined;
+    this.isEntry = isEntry;
   }
 }
 
@@ -2206,9 +2213,9 @@ class NavPathStack {
         reject({ message: 'Internal error.', code: 100001 });
       })
     }
-    promise.then(() => {
+    promise.then((navDestinationId) => {
       return new Promise((resolve, reject) => {
-        [info.index, info.navDestinationId] = this.findInPopArray(name);
+        info.navDestinationId = navDestinationId;
         this.pathArray.push(info);
         this.nativeStack?.onStateChanged();
         resolve({code: 0});
@@ -2242,6 +2249,7 @@ class NavPathStack {
         this.pathArray[index].param = info.param;
         this.pathArray[index].onPop = info.onPop;
         this.pathArray[index].needUpdate = true;
+        this.pathArray[index].isEntry = info.isEntry;
         if (launchMode === LaunchMode.MOVE_TO_TOP_SINGLETON) {
           this.moveIndexToTop(index, animated);
         } else {
@@ -2287,12 +2295,12 @@ class NavPathStack {
         reject({ message: 'Internal error.', code: 100001 });
       })
     }
-    promise.then(() => {
+    promise.then((navDestinationId) => {
       return new Promise((resolve, reject) => {
-        [info.index, info.navDestinationId] = this.findInPopArray(info.name);
         if (launchMode === LaunchMode.NEW_INSTANCE) {
           info.needBuildNewInstance = true;
         }
+        info.navDestinationId = navDestinationId;
         this.pathArray.push(info);
         this.nativeStack?.onStateChanged();
         resolve({code: 0});
@@ -2577,6 +2585,20 @@ class NavPathStack {
   }
   setInterception(interception) {
     this.interception = interception;
+  }
+  getIsEntryByIndex(index) {
+    let item = this.pathArray[index];
+    if (item === undefined) {
+      return false;
+    }
+    return item.isEntry;
+  }
+  setIsEntryByIndex(index, isEntry) {
+    let item = this.pathArray[index];
+    if (item === undefined) {
+      return;
+    }
+    item.isEntry = isEntry;
   }
 }
 
@@ -3325,6 +3347,14 @@ let GridItemAlignment;
   GridItemAlignment[GridItemAlignment['DEFAULT'] = 0] = 'DEFAULT';
   GridItemAlignment[GridItemAlignment['STRETCH'] = 1] = 'STRETCH';
 })(GridItemAlignment || (GridItemAlignment = {}));
+
+var AccessibilityHoverType;
+(function (AccessibilityHoverType) {
+  AccessibilityHoverType[AccessibilityHoverType["HOVER_ENTER"] = 0] = "HOVER_ENTER";
+  AccessibilityHoverType[AccessibilityHoverType["HOVER_MOVE"] = 1] = "HOVER_MOVE";
+  AccessibilityHoverType[AccessibilityHoverType["HOVER_EXIT"] = 2] = "HOVER_EXIT";
+  AccessibilityHoverType[AccessibilityHoverType["HOVER_CANCEL"] = 3] = "HOVER_CANCEL";
+})(AccessibilityHoverType || (AccessibilityHoverType = {}));
 
 class ImageAnalyzerController {
   constructor() {

@@ -95,6 +95,7 @@ public:
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr) override;
     void UpdateViewportConfigWithAnimation(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
         AnimationOption animationOpt, const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr);
+    void UIExtensionUpdateViewportConfig(const ViewportConfig& config);
     void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) override;
     void UpdateDecorVisible(bool visible, bool hasDeco) override;
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) override;

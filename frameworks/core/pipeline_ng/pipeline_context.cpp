@@ -75,7 +75,7 @@ constexpr int32_t VSYNC_PERIOD_COUNT = 5;
 constexpr int32_t MIN_IDLE_TIME = 1000;
 constexpr uint8_t SINGLECOLOR_UPDATE_ALPHA = 75;
 constexpr int8_t RENDERING_SINGLE_COLOR = 1;
-constexpr int32_t VSYNC_COLLECT_COUNT = 2;
+constexpr int32_t DELAY_TIME = 500;
 
 #define CHECK_THREAD_SAFE(isFormRender, taskExecutor) CheckThreadSafe(isFormRender, taskExecutor, __func__, __LINE__)
 void CheckThreadSafe(
@@ -1161,7 +1161,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     }
 
     FlushWindowSizeChangeCallback(width, height, type);
-
+    UpdateHalfFoldHoverStatus(width, height);
     UpdateSizeChangeReason(type, rsTransaction);
 
 #ifdef ENABLE_ROSEN_BACKEND
@@ -1214,6 +1214,7 @@ void PipelineContext::OnFoldStatusChange(FoldStatus foldStatus)
             callback(foldStatus);
         }
     }
+    StartFoldStatusDelayTask(foldStatus);
 }
 
 void PipelineContext::OnFoldDisplayModeChange(FoldDisplayMode foldDisplayMode)
@@ -2535,17 +2536,14 @@ void PipelineContext::DumpPipelineInfo() const
 
 void PipelineContext::CollectTouchEventsBeforeVsync(std::list<TouchEvent>& touchEvents)
 {
-    auto targetTimeStamp = GetVsyncTime();
+    auto targetTimeStamp = compensationValue_ > 0 ? GetVsyncTime() - compensationValue_ : GetVsyncTime();
     for (auto iter = touchEvents_.begin(); iter != touchEvents_.end();) {
         auto timeStamp = std::chrono::duration_cast<std::chrono::nanoseconds>(iter->time.time_since_epoch()).count();
         if (targetTimeStamp < static_cast<uint64_t>(timeStamp)) {
             iter++;
             continue;
         }
-        if (targetTimeStamp - static_cast<uint64_t>(timeStamp) <
-            static_cast<uint64_t>(VSYNC_COLLECT_COUNT * window_->GetVSyncPeriod())) {
-            touchEvents.emplace_back(*iter);
-        }
+        touchEvents.emplace_back(*iter);
         iter = touchEvents_.erase(iter);
     }
 }
@@ -3436,7 +3434,7 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
     }
 
     if (action == DragEventAction::DRAG_EVENT_START) {
-        manager->ResetPreTargetFrameNode();
+        manager->ResetPreTargetFrameNode(GetInstanceId());
         manager->RequireSummary();
         manager->SetDragCursorStyleCore(DragCursorStyleCore::DEFAULT);
         TAG_LOGI(AceLogTag::ACE_DRAG, "start drag, current windowId is %{public}d", container->GetWindowId());
@@ -4267,6 +4265,65 @@ void PipelineContext::NotifyAllWebPattern(bool isRegister)
 {
     rootNode_->NotifyWebPattern(isRegister);
 }
+
+void PipelineContext::UpdateHalfFoldHoverStatus(int32_t windowWidth, int32_t windowHeight)
+{
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        isHalfFoldHoverStatus_ = false;
+        return;
+    }
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    bool isFoldable = container->IsFoldable();
+    if (!isFoldable && !SystemProperties::IsSmallFoldProduct()) {
+        isHalfFoldHoverStatus_ = false;
+        return;
+    }
+    auto displayInfo = container->GetDisplayInfo();
+    CHECK_NULL_VOID(displayInfo);
+    auto windowManager = GetWindowManager();
+    auto windowMode = windowManager->GetWindowMode();
+    auto isHalfFolded = displayInfo->GetFoldStatus() == FoldStatus::HALF_FOLD;
+    auto displayWidth = displayInfo->GetWidth();
+    auto displayHeight = displayInfo->GetHeight();
+    auto isFullScreen = windowMode == WindowMode::WINDOW_MODE_FULLSCREEN ||
+        (NearEqual(displayWidth, windowWidth) && NearEqual(displayHeight, windowHeight));
+    if (!isFullScreen || !isHalfFolded) {
+        isHalfFoldHoverStatus_ = false;
+        return;
+    }
+    auto rotation = displayInfo->GetRotation();
+    if (SystemProperties::IsSmallFoldProduct()) {
+        isHalfFoldHoverStatus_ = rotation == Rotation::ROTATION_0 || rotation == Rotation::ROTATION_180;
+    } else {
+        isHalfFoldHoverStatus_ = rotation == Rotation::ROTATION_90 || rotation == Rotation::ROTATION_270;
+    }
+}
+
+void PipelineContext::OnHalfFoldHoverChangedCallback()
+{
+    for (auto&& [id, callback] : halfFoldHoverChangedCallbackMap_) {
+        if (callback) {
+            callback(isHalfFoldHoverStatus_);
+        }
+    }
+}
+
+void PipelineContext::StartFoldStatusDelayTask(FoldStatus foldStatus)
+{
+    if (foldStatusDelayTask_) {
+        foldStatusDelayTask_.Cancel();
+    }
+    foldStatusDelayTask_.Reset([weak = WeakClaim(this)]() {
+        auto context = weak.Upgrade();
+        CHECK_NULL_VOID(context);
+        context->UpdateHalfFoldHoverStatus(context->GetRootWidth(), context->GetRootHeight());
+        context->OnHalfFoldHoverChangedCallback();
+    });
+    taskExecutor_->PostDelayedTask(
+        foldStatusDelayTask_, TaskExecutor::TaskType::UI, DELAY_TIME, "ArkUIHalfFoldHoverStatusChange");
+}
+
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
 
 bool PipelineContext::OnTouchTargetHitTest(const TouchEvent& point, bool isSubPipe, const std::string& target)

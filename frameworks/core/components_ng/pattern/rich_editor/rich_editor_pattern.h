@@ -364,6 +364,7 @@ public:
     void OnModifyDone() override;
     void BeforeCreateLayoutWrapper() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void HandleSelectOverlayOnLayoutSwap();
     void FireOnReady();
     void SupplementIdealSizeWidth(const RefPtr<FrameNode>& frameNode);
     void MoveCaretOnLayoutSwap(bool isReduceSize);
@@ -662,6 +663,7 @@ public:
         selectionMenuMap_.clear();
     }
     void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void MouseDoubleClickParagraphEnd(int32_t& index);
     void AdjustSelectionExcludeSymbol(int32_t& start, int32_t& end);
     void InitSelection(const Offset& pos);
@@ -848,6 +850,7 @@ public:
     std::list<RefPtr<SpanItem>>::iterator GetSpanIter(int32_t index);
 
     void DumpAdvanceInfo() override {}
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override  {}
 
     void SetContentChange(bool onChange)
     {
@@ -966,7 +969,7 @@ private:
     void FireOnSelect(int32_t selectStart, int32_t selectEnd);
     void FireOnSelectionChange(const int32_t caretPosition);
     void FireOnSelectionChange(const TextSelector& selector);
-    void FireOnSelectionChange(int32_t selectStart, int32_t selectEnd);
+    void FireOnSelectionChange(int32_t selectStart, int32_t selectEnd, bool isForced = false);
     void MouseRightFocus(const MouseInfo& info);
     bool IsScrollBarPressed(const MouseInfo& info);
     void HandleMouseLeftButtonMove(const MouseInfo& info);

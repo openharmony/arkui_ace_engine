@@ -157,6 +157,10 @@ export class SplitLayout extends ViewPU {
                     this.observeComponentCreation2((o3, p3) => {
                         Scroll.create();
                         Scroll.scrollBar(BarState.On);
+                        Scroll.nestedScroll({
+                            scrollForward: NestedScrollMode.SELF_FIRST,
+                            scrollBackward: NestedScrollMode.SELF_FIRST,
+                        });
                     }, Scroll);
                     this.observeComponentCreation2((m3, n3) => {
                         Column.create();
@@ -198,7 +202,7 @@ export class SplitLayout extends ViewPU {
                         Column.height('66%');
                         Column.width('100%');
                     }, Column);
-                    this.container.bind(this)(this);
+                    this.container.bind(this)();
                     Column.pop();
                     Column.pop();
                     GridCol.pop();
@@ -237,6 +241,10 @@ export class SplitLayout extends ViewPU {
                     this.observeComponentCreation2((g2, h2) => {
                         Scroll.create();
                         Scroll.scrollBar(BarState.On);
+                        Scroll.nestedScroll({
+                            scrollForward: NestedScrollMode.SELF_FIRST,
+                            scrollBackward: NestedScrollMode.SELF_FIRST,
+                        });
                     }, Scroll);
                     this.observeComponentCreation2((e2, f2) => {
                         Column.create();
@@ -273,7 +281,7 @@ export class SplitLayout extends ViewPU {
                         Column.width('100%');
                         Column.height('66%');
                     }, Column);
-                    this.container.bind(this)(this);
+                    this.container.bind(this)();
                     Column.pop();
                     Column.pop();
                     GridCol.pop();
@@ -297,13 +305,11 @@ export class SplitLayout extends ViewPU {
                         GridCol.height('100%');
                     }, GridCol);
                     this.observeComponentCreation2((e1, f1) => {
-                        Column.create();
-                        Column.width('100%');
-                        Column.height('100%');
-                        Column.backgroundColor(this.imageBackgroundColor);
-                        Column.justifyContent(FlexAlign.Center);
-                        Column.alignItems(HorizontalAlign.Center);
-                    }, Column);
+                        Flex.create({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center, direction: FlexDirection.Column });
+                        Flex.width('100%');
+                        Flex.height('100%');
+                        Flex.backgroundColor(this.imageBackgroundColor);
+                    }, Flex);
                     this.observeComponentCreation2((c1, d1) => {
                         Image.create(this.mainImage);
                         Image.height('17%');
@@ -313,7 +319,10 @@ export class SplitLayout extends ViewPU {
                     this.observeComponentCreation2((a1, b1) => {
                         Scroll.create();
                         Scroll.scrollBar(BarState.On);
-                        Scroll.layoutWeight(1);
+                        Scroll.nestedScroll({
+                            scrollForward: NestedScrollMode.SELF_FIRST,
+                            scrollBackward: NestedScrollMode.SELF_FIRST,
+                        });
                     }, Scroll);
                     this.observeComponentCreation2((y, z) => {
                         Column.create();
@@ -351,12 +360,12 @@ export class SplitLayout extends ViewPU {
                     Text.pop();
                     Column.pop();
                     Scroll.pop();
-                    Column.pop();
+                    Flex.pop();
                     GridCol.pop();
                     this.observeComponentCreation2((q, r) => {
                         GridCol.create({ span: { xs: 8, sm: 8, md: 8, lg: 8 } });
                     }, GridCol);
-                    this.container.bind(this)(this);
+                    this.container.bind(this)();
                     GridCol.pop();
                     GridRow.pop();
                 });

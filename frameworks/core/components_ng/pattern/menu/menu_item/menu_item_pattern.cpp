@@ -336,9 +336,6 @@ void MenuItemPattern::ShowSubMenu()
         auto focusMenuBlurStyle = focusMenuRenderContext->GetBackBlurStyle();
         param.backgroundBlurStyle = static_cast<int>(focusMenuBlurStyle->blurStyle);
     }
-    if (focusMenuRenderContext->GetBackgroundColor().has_value()) {
-        param.backgroundColor = focusMenuRenderContext->GetBackgroundColor();
-    }
     param.type = isSelectOverlayMenu ? MenuType::SELECT_OVERLAY_SUB_MENU : MenuType::SUB_MENU;
     ParseMenuRadius(param);
     auto subMenu = MenuView::Create(customNode, host->GetId(), host->GetTag(), param);

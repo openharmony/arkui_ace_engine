@@ -1483,18 +1483,18 @@ void WebPattern::HandleOnDragDropFile(RefPtr<UnifiedData> aceData)
     delegate_->dragData_->ClearImageFileNames();
     for (std::string url : urlVec) {
         TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop event WebEventHub onDragDropId,"
-            "url get from udmf:%{public}s", url.c_str());
+            "url get from udmf:%{public}zu", url.length());
         AppFileService::ModuleFileUri::FileUri fileUri(url);
         TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop event WebEventHub onDragDropId,"
-            "fileUri ToString:%{public}s", fileUri.ToString().c_str());
+            "fileUri ToString:%{public}zu", fileUri.ToString().length());
         std::string uriRealPath = FileUriHelper::GetRealPath(url);
         if (!uriRealPath.empty() && access(uriRealPath.c_str(), F_OK) == 0) { // file exist
             TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop event WebEventHub onDragDropId,"
-            "url real path:%{public}s", uriRealPath.c_str());
+            "url real path:%{public}zu", uriRealPath.length());
             delegate_->dragData_->SetFileUri(uriRealPath);
         } else {
             TAG_LOGW(AceLogTag::ACE_WEB, "DragDrop event WebEventHub onDragDropId,"
-                "url is empty or not exist, uriRealPath:%{public}s", uriRealPath.c_str());
+                "url is empty or not exist, uriRealPath:%{public}zu", uriRealPath.length());
         }
     }
 }
@@ -3777,6 +3777,7 @@ void WebPattern::ParseNWebViewDataNode(std::unique_ptr<JsonValue> child,
         node->SetAutoFillType(type);
         if (type == AceAutoFillType::ACE_USER_NAME || type == AceAutoFillType::ACE_PASSWORD ||
             type == AceAutoFillType::ACE_NEW_PASSWORD) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "The form is login fill form");
             isPasswordFill_ = true;
         }
     } else {
@@ -3824,6 +3825,9 @@ void WebPattern::ParseNWebViewDataCommonField(std::unique_ptr<JsonValue> child, 
     }
     if (child->IsBool() && key == OHOS::NWeb::NWEB_AUTOFILL_IS_OTHER_ACCOUNT) {
         viewDataCommon.isOtherAccount = child->GetBool();
+    }
+    if (child->IsString() && key == OHOS::NWeb::NWEB_AUTOFILL_EVENT_SOURCE) {
+        viewDataCommon.source = child->GetString();
     }
 }
 
@@ -3874,6 +3878,13 @@ bool WebPattern::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessa
     viewDataCommon_ = {};
     isPasswordFill_ = false;
     ParseNWebViewDataJson(viewDataJson, pageNodeInfo_, viewDataCommon_);
+
+    if (isPasswordFill_ && viewDataCommon_.source != OHOS::NWeb::NWEB_AUTOFILL_FOR_LOGIN) {
+        TAG_LOGI(AceLogTag::ACE_WEB,
+            "Handle autofill event failed! The form contains a login node, but the soruce is incorrect.");
+        return false;
+    }
+
     auto eventType = viewDataCommon_.eventType;
 
     if (eventType == OHOS::NWeb::NWebAutofillEvent::FILL) {

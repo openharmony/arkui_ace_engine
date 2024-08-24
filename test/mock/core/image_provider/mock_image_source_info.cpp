@@ -182,6 +182,10 @@ bool ImageSourceInfo::IsInternalResource() const
 
 bool ImageSourceInfo::IsValid() const
 {
+    if (src_ == "IsValid false") {
+        return false;
+    }
+
     return true;
 }
 

@@ -1274,7 +1274,7 @@ void UIContentImpl::SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Con
 
 void UIContentImpl::StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
 {
-    if (config == nullptr) {
+    if (!config) {
         return;
     }
     TAG_LOGD(AceLogTag::ACE_WINDOW, "StoreConfiguration %{public}s", config->GetName().c_str());
@@ -1291,7 +1291,7 @@ void UIContentImpl::StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::C
         try {
             return std::stof(str);
         } catch (...) {
-            return (float)1.0;
+            return 1.0f;
         }
     };
     auto fontScale = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
@@ -2332,6 +2332,26 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     } else {
         viewportConfigMgr_->UpdateConfig(aceViewportConfig, std::move(task), container, "ArkUIUpdateViewportConfig");
     }
+    UIExtensionUpdateViewportConfig(config);
+}
+
+void UIContentImpl::UIExtensionUpdateViewportConfig(const ViewportConfig& config)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto updateSessionViewportConfigTask = [context, config]() {
+        CHECK_NULL_VOID(context);
+        auto uiExtMgr = context->GetUIExtensionManager();
+        if (uiExtMgr) {
+            uiExtMgr->UpdateSessionViewportConfig(config);
+        }
+    };
+    taskExecutor->PostTask(
+        std::move(updateSessionViewportConfigTask), TaskExecutor::TaskType::UI, "ArkUIUpdateSessionViewportConfig");
 }
 
 void UIContentImpl::SetIgnoreViewSafeArea(bool ignoreViewSafeArea)

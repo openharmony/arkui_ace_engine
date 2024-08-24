@@ -405,6 +405,8 @@ class JSBuilderNode extends BaseNode {
         // removedChildElmtIds will be filled with the elmtIds of all children and their children will be deleted in response to if .. else change
         let removedChildElmtIds = new Array();
         If.branchId(branchId, removedChildElmtIds);
+        //un-registers the removed child elementIDs using proxy
+        UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);
         this.purgeDeletedElmtIds();
         branchfunc();
     }
@@ -718,7 +720,7 @@ class NodeController {
  * limitations under the License.
  */
 class FrameNode {
-    constructor(uiContext, type) {
+    constructor(uiContext, type, options) {
         if (uiContext === undefined) {
             throw Error('Node constructor error, param uiContext error');
         }
@@ -746,7 +748,7 @@ class FrameNode {
             result = getUINativeModule().frameNode.createFrameNode(this);
         }
         else {
-            result = getUINativeModule().frameNode.createTypedFrameNode(this, type);
+            result = getUINativeModule().frameNode.createTypedFrameNode(this, type, options);
         }
         __JSScopeUtil__.restoreInstanceId();
         this._nativeRef = result?.nativeStrongRef;
@@ -1250,8 +1252,8 @@ class FrameNodeUtils {
     }
 }
 class TypedFrameNode extends FrameNode {
-    constructor(uiContext, type, attrCreator) {
-        super(uiContext, type);
+    constructor(uiContext, type, attrCreator, options) {
+        super(uiContext, type, options);
         this.attrCreator_ = attrCreator;
     }
     initialize(...args) {
@@ -1394,10 +1396,10 @@ const __creatorMap__ = new Map([
                 return new ArkButtonComponent(node, type);
             });
         }],
-    ['XComponent', (context) => {
+    ['XComponent', (context, options) => {
             return new TypedFrameNode(context, 'XComponent', (node, type) => {
                 return new ArkXComponentComponent(node, type);
-            });
+            }, options);
         }],
     ['ListItemGroup', (context) => {
             return new TypedFrameNode(context, 'ListItemGroup', (node, type) => {
@@ -1407,6 +1409,11 @@ const __creatorMap__ = new Map([
     ['WaterFlow', (context) => {
             return new TypedFrameNode(context, 'WaterFlow', (node, type) => {
                 return new ArkWaterFlowComponent(node, type);
+            });
+        }],
+    ['SymbolGlyph', (context)=> {
+            return new TypedFrameNode(context, 'SymbolGlyph', (node, type) => {
+                return new ArkSymbolGlyphComponent(node, type);
             });
         }],
     ['FlowItem', (context) => {
@@ -1424,14 +1431,24 @@ const __creatorMap__ = new Map([
                 return new ArkBadgeComponent(node, type);
             });
         }],
+    ['Grid', (context) => {
+            return new TypedFrameNode(context, 'Grid', (node, type) => {
+                return new ArkGridComponent(node, type);
+            });
+        }],
+    ['GridItem', (context) => {
+            return new TypedFrameNode(context, 'GridItem', (node, type) => {
+                return new ArkGridItemComponent(node, type);
+            });
+        }],
 ]);
 class typeNode {
-    static createNode(context, type) {
+    static createNode(context, type, options) {
         let creator = __creatorMap__.get(type);
         if (creator === undefined) {
             return undefined;
         }
-        return creator(context);
+        return creator(context, options);
     }
 }
 /*

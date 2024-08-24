@@ -254,6 +254,8 @@ void TabBarLayoutAlgorithm::MeasureScrollableMode(LayoutWrapper* layoutWrapper, 
                 HandleAlwaysAverageSplitLayoutStyle(layoutWrapper);
             } else if (layoutStyle.nonScrollableLayoutStyle == LayoutStyle::SPACE_BETWEEN_OR_CENTER) {
                 HandleSpaceBetweenOrCenterLayoutStyle(layoutWrapper);
+            } else {
+                useItemWidth_ = false;
             }
             scrollMargin_ = 0.0f;
         }

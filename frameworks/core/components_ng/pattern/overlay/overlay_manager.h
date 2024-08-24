@@ -234,6 +234,7 @@ public:
     bool RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackPressed, bool isPageRouter = false);
     bool RemoveBubble(const RefPtr<FrameNode>& overlay);
     bool RemoveMenu(const RefPtr<FrameNode>& overlay);
+    bool RemoveDragPreview(const RefPtr<FrameNode>& overlay);
     bool RemoveModalInOverlay();
     bool RemoveAllModalInOverlay();
     bool RemoveAllModalInOverlayByStack();

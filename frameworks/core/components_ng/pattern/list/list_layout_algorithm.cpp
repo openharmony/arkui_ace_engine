@@ -1917,7 +1917,21 @@ bool ListLayoutAlgorithm::PredictBuildGroup(RefPtr<LayoutWrapper> wrapper,
     CHECK_NULL_RETURN(groupNode, false);
     auto groupPattern = groupNode->GetPattern<ListItemGroupPattern>();
     CHECK_NULL_RETURN(groupPattern, false);
-    groupPattern->LayoutCache(constraint, forward, deadline, cached);
+    float referencePos = 0.0f;
+    if (jumpIndexInGroup_.has_value() && scrollAlign_ == ScrollAlign::CENTER) {
+        referencePos = (startMainPos_ + endMainPos_) / 2; // 2:average
+    }
+    float endPos = 0.0f;
+    float startPos = 0.0f;
+    if (forward) {
+        startPos = startMainPos_;
+        endPos = layoutEndMainPos_.value_or(endMainPos_);
+    } else {
+        startPos = layoutStartMainPos_.value_or(startMainPos_);
+        endPos = endMainPos_;
+    }
+    ListMainSizeValues listSizeValues = { startPos, endPos, referencePos, prevContentMainSize_ };
+    groupPattern->LayoutCache(constraint, forward, deadline, cached, listSizeValues);
     return true;
 }
 
@@ -1979,9 +1993,12 @@ void ListLayoutAlgorithm::PostIdleTaskV2(RefPtr<FrameNode> frameNode, const List
     pattern->SetPredictLayoutParamV2(param);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    context->AddPredictTask([weak = WeakClaim(RawPtr(frameNode))](int64_t deadline, bool canUseLongPredictTask) {
-        ListLayoutAlgorithm::PredictBuildV2(weak.Upgrade(), deadline);
-    });
+    context->AddPredictTask(
+        [weak = WeakClaim(RawPtr(frameNode)), wp = WeakClaim(this)](int64_t deadline, bool canUseLongPredictTask) {
+            auto algorithm = wp.Upgrade();
+            CHECK_NULL_VOID(algorithm);
+            algorithm->PredictBuildV2(weak.Upgrade(), deadline);
+        });
 }
 
 float ListLayoutAlgorithm::GetStopOnScreenOffset(V2::ScrollSnapAlign scrollSnapAlign) const

@@ -39,7 +39,6 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<DownloadManager> DownloadManager::instance_ = nullptr;
-std::mutex DownloadManager::mutex_;
 
 class ACE_FORCE_EXPORT DownloadManagerPrview : public DownloadManager {
 public:
@@ -173,12 +172,10 @@ private:
 
 DownloadManager* DownloadManager::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
-            instance_.reset(new DownloadManagerPrview());
-        }
-    }
+    static std::once_flag onceFlag;
+    std::call_once(onceFlag, []() {
+        instance_.reset(new DownloadManagerPrview());
+    });
     return instance_.get();
 }
 } // namespace OHOS::Ace

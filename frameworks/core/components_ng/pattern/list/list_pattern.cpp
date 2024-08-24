@@ -154,8 +154,11 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         lanes_ = listLayoutAlgorithm->GetLanes();
     }
     float relativeOffset = UpdateTotalOffset(listLayoutAlgorithm, isJump);
+    auto isNeedUpdateIndex = true;
     if (targetIndex_) {
         AnimateToTarget(targetIndex_.value(), targetIndexInGroup_, scrollAlign_);
+        // AniamteToTarget does not need to update endIndex and startIndex in the first frame.
+        isNeedUpdateIndex = false;
         targetIndex_.reset();
         targetIndexInGroup_.reset();
     }
@@ -211,9 +214,11 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
     bool indexChanged = false;
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-        indexChanged = (startIndex_ != listLayoutAlgorithm->GetStartIndex()) ||
-                       (endIndex_ != listLayoutAlgorithm->GetEndIndex()) ||
-                       (centerIndex_ != listLayoutAlgorithm->GetMidIndex(AceType::RawPtr(dirty)));
+        if (isNeedUpdateIndex) {
+            indexChanged = (startIndex_ != listLayoutAlgorithm->GetStartIndex()) ||
+                           (endIndex_ != listLayoutAlgorithm->GetEndIndex()) ||
+                           (centerIndex_ != listLayoutAlgorithm->GetMidIndex(AceType::RawPtr(dirty)));
+        }
     } else {
         indexChanged =
             (startIndex_ != listLayoutAlgorithm->GetStartIndex()) || (endIndex_ != listLayoutAlgorithm->GetEndIndex());
@@ -876,6 +881,9 @@ void ListPattern::OnScrollEndCallback()
     if (AnimateStoped()) {
         scrollStop_ = true;
         MarkDirtyNodeSelf();
+        if (chainAnimation_) {
+            chainAnimation_->SetOverDrag(false);
+        }
     }
 }
 
@@ -1982,8 +1990,7 @@ void ListPattern::ProcessDragStart(float startPosition)
 void ListPattern::ProcessDragUpdate(float dragOffset, int32_t source)
 {
     CHECK_NULL_VOID(chainAnimation_);
-    if (NearZero(dragOffset) || source == SCROLL_FROM_BAR || source == SCROLL_FROM_AXIS ||
-        source == SCROLL_FROM_BAR_FLING) {
+    if (source == SCROLL_FROM_BAR || source == SCROLL_FROM_AXIS || source == SCROLL_FROM_BAR_FLING) {
         bool overDrag = (source == SCROLL_FROM_UPDATE) && (IsAtTop() || IsAtBottom());
         chainAnimation_->SetOverDrag(overDrag);
         return;

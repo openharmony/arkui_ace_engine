@@ -366,7 +366,7 @@ void UIExtensionPattern::OnConnect()
     bool isFocused = focusHub && focusHub->IsCurrentFocus();
     RegisterVisibleAreaChange();
     DispatchFocusState(isFocused);
-    DispatchFollowHostDensity(GetDensityDpi());
+    sessionWrapper_->UpdateSessionViewportConfig();
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
@@ -436,6 +436,10 @@ void UIExtensionPattern::NotifyForeground()
         UIEXT_LOGI("The state is changing from '%{public}s' to 'FOREGROUND'.", ToString(state_));
         state_ = AbilityState::FOREGROUND;
         sessionWrapper_->NotifyForeground();
+        if (displayAreaChanged_) {
+            sessionWrapper_->NotifyDisplayArea(displayArea_);
+            displayAreaChanged_ = false;
+        }
     }
 }
 
@@ -780,7 +784,11 @@ void UIExtensionPattern::DispatchDisplayArea(bool isForce)
     auto displayArea = RectF(displayOffset, displaySize);
     if (displayArea_ != displayArea || isForce) {
         displayArea_ = displayArea;
-        sessionWrapper_->NotifyDisplayArea(displayArea_);
+        if (state_ == AbilityState::FOREGROUND) {
+            sessionWrapper_->NotifyDisplayArea(displayArea_);
+        } else {
+            displayAreaChanged_ = true;
+        }
     }
 }
 
@@ -1000,20 +1008,6 @@ void UIExtensionPattern::FireBindModalCallback()
 void UIExtensionPattern::SetDensityDpi(bool densityDpi)
 {
     densityDpi_ = densityDpi;
-}
-
-void UIExtensionPattern::DispatchFollowHostDensity(bool densityDpi)
-{
-    densityDpi_ = densityDpi;
-    CHECK_NULL_VOID(sessionWrapper_);
-    sessionWrapper_->SetDensityDpiImpl(densityDpi_);
-}
-
-void UIExtensionPattern::OnDpiConfigurationUpdate()
-{
-    if (GetDensityDpi()) {
-        DispatchFollowHostDensity(true);
-    }
 }
 
 bool UIExtensionPattern::GetDensityDpi()

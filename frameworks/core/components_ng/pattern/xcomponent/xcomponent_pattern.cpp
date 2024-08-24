@@ -527,7 +527,7 @@ void XComponentPattern::OnRebuildFrame()
 void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    if (!hasXComponentInit_) {
+    if (!isTypeNode_ && !hasXComponentInit_) {
         return;
     }
     if (type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE) {

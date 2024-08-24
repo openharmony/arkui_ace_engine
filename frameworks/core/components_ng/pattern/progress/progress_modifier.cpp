@@ -57,7 +57,7 @@ ProgressModifier::ProgressModifier(const ProgressAnimatableProperty& progressAni
       color_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(progressAnimatableProperty_.color))),
       bgColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(progressAnimatableProperty_.bgColor))),
       borderColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(progressAnimatableProperty_.borderColor))),
-      value_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
+      value_(AceType::MakeRefPtr<AnimatablePropertyFloat>(progressAnimatableProperty_.value)),
       ringProgressColors_(AceType::MakeRefPtr<AnimatablePropertyVectorColor>(GradientArithmetic())),
       sweepingDate_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
       trailingHeadDate_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
