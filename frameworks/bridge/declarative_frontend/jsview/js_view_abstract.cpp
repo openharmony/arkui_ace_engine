@@ -3621,7 +3621,7 @@ uint32_t ParseBindContextMenuShow(const JSCallbackInfo& info, NG::MenuParam& men
         menuParam.onStateChange = ParseDoubleBindCallback(info, callbackObj);
         auto isShowObj = callbackObj->GetProperty("value");
         if (isShowObj->IsBoolean()) {
-            menuParam.isShow = isShowObj->IsBoolean();
+            menuParam.isShow = isShowObj->ToBoolean();
             menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::CUSTOM_TYPE;
             builderIndex = 1;
         }
