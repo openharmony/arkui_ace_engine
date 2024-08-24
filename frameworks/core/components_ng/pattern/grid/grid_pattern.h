@@ -231,12 +231,12 @@ public:
         return true;
     }
 
-    const std::list<int32_t>& GetPreloadItemList() const
+    const std::list<GridPreloadItem>& GetPreloadItemList() const
     {
         return preloadItemList_;
     }
 
-    void SetPreloadItemList(std::list<int32_t>&& list)
+    void SetPreloadItemList(std::list<GridPreloadItem>&& list)
     {
         preloadItemList_ = std::move(list);
     }
@@ -336,7 +336,7 @@ private:
     GridItemIndexInfo curFocusIndexInfo_;
     GridLayoutInfo scrollGridLayoutInfo_;
     GridLayoutInfo gridLayoutInfo_;
-    std::list<int32_t> preloadItemList_; // list of GridItems to build preemptively in IdleTask
+    std::list<GridPreloadItem> preloadItemList_; // list of GridItems to build preemptively in IdleTask
     ACE_DISALLOW_COPY_AND_MOVE(GridPattern);
 };
 

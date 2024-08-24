@@ -39,9 +39,9 @@ constexpr size_t ACCEPT_BUTTON_INDEX = 0;
 constexpr size_t CANCEL_BUTTON_INDEX = 1;
 } // namespace
 bool TimePickerDialogView::switchFlag_ = false;
-Dimension TimePickerDialogView::selectedTextStyleFont_ = 40.0_vp;
-Dimension TimePickerDialogView::normalTextStyleFont_ = 32.0_vp;
-Dimension TimePickerDialogView::disappearTextStyleFont_ = 28.0_vp;
+Dimension TimePickerDialogView::selectedTextStyleFont_ = 40.0_fp;
+Dimension TimePickerDialogView::normalTextStyleFont_ = 32.0_fp;
+Dimension TimePickerDialogView::disappearTextStyleFont_ = 28.0_fp;
 
 RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogProperties,
     const TimePickerSettingData& settingData, const std::vector<ButtonInfo>& buttonInfos,
@@ -202,6 +202,14 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
         CHECK_NULL_RETURN(minuteLayoutProperty, nullptr);
         minuteLayoutProperty->UpdateVisibility(VisibleType::GONE);
         minuteNode->MarkModifyDone();
+        if (timePickerPattern->GetHasSecond()) {
+            auto secondNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(3));
+            CHECK_NULL_RETURN(secondNode, nullptr);
+            auto secondLayoutProperty = secondNode->GetLayoutProperty<LayoutProperty>();
+            CHECK_NULL_RETURN(secondLayoutProperty, nullptr);
+            secondLayoutProperty->UpdateVisibility(VisibleType::GONE);
+            secondNode->MarkModifyDone();
+        }
     }
     auto dialogNode = DialogView::CreateDialogNode(dialogProperties, contentColumn);
     CHECK_NULL_RETURN(dialogNode, nullptr);
@@ -581,6 +589,15 @@ void TimePickerDialogView::SwitchTimePickerPage(const RefPtr<FrameNode> &timePic
     minuteLayoutProperty->UpdateVisibility(switchFlag_ ? VisibleType::GONE : VisibleType::VISIBLE);
     hourNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     minuteNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+
+    auto timePickerPattern = timePickerNode->GetPattern<TimePickerRowPattern>();
+    if (timePickerPattern->GetHasSecond()) {
+        auto secondNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(3));
+        CHECK_NULL_VOID(secondNode);
+        auto secondLayoutProperty = secondNode->GetLayoutProperty<LayoutProperty>();
+        CHECK_NULL_VOID(secondLayoutProperty);
+        secondLayoutProperty->UpdateVisibility(switchFlag_ ? VisibleType::GONE : VisibleType::VISIBLE);
+    }
 
     auto cancelButtonLayoutProperty = buttonCancelNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(cancelButtonLayoutProperty);
@@ -1037,31 +1054,41 @@ const Dimension TimePickerDialogView::ConvertFontScaleValue(
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, fontSizeValue);
     float fontSizeScale = pipeline->GetFontScale();
-    Dimension fontSizeValueResult = fontSizeValue;
+    Dimension fontSizeValueResult = 0.0_fp;
+    Dimension fontSizeValueResultVp = 0.0_vp;
+
+    if (fontSizeValue.Unit() == DimensionUnit::VP) {
+        Dimension fontSizeValueVp(fontSizeLimit.Value(), DimensionUnit::VP);
+        if (GreatOrEqualCustomPrecision(fontSizeValue.ConvertToPx(), fontSizeValueVp.ConvertToPx())) {
+            fontSizeValueResultVp = fontSizeValueVp;
+        } else {
+            fontSizeValueResultVp = fontSizeValue;
+        }
+        return fontSizeValueResultVp;
+    } else {
+        fontSizeValueResult = fontSizeValue;
+    }
 
     if (NeedAdaptForAging()) {
-        if (fontSizeValue.Unit() == DimensionUnit::VP) {
-            if (isUserSetFont) {
-                fontSizeValueResult = ConvertFontSizeLimit(fontSizeValue, fontSizeLimit, isUserSetFont);
+        if (isUserSetFont) {
+            if (GreatOrEqualCustomPrecision(fontSizeValue.ConvertToPx() * fontSizeScale,
+                fontSizeLimit.ConvertToPx()) && (!NearZero(fontSizeScale))) {
+                fontSizeValueResult = fontSizeLimit / fontSizeScale;
+            } else {
+                fontSizeValueResult = fontSizeValue;
             }
-            fontSizeValueResult = AdjustFontSizeScale(fontSizeValueResult, fontSizeScale);
         } else {
             if (GreatOrEqualCustomPrecision(fontSizeScale, pickerTheme->GetMaxThirdFontScale())) {
                 fontSizeScale = pickerTheme->GetMaxTwoFontScale() / pickerTheme->GetMaxThirdFontScale();
                 fontSizeValueResult = fontSizeValue * fontSizeScale;
             }
-            if (isUserSetFont) {
-                fontSizeValueResult = ConvertFontSizeLimit(fontSizeValueResult, fontSizeLimit, isUserSetFont);
-            }
         }
     } else {
         if (isUserSetFont) {
-            fontSizeValueResult = ConvertFontSizeLimit(fontSizeValue, fontSizeLimit, isUserSetFont);
-        }
-
-        if (GreatOrEqualCustomPrecision(fontSizeScale, pickerTheme->GetMaxOneFontScale()) &&
-            fontSizeValueResult.Unit() != DimensionUnit::VP) {
-            if (!NearZero(fontSizeScale)) {
+            fontSizeValueResult = ConvertFontSizeLimit(fontSizeValueResult, fontSizeLimit, isUserSetFont);
+        } else {
+            if (GreatOrEqualCustomPrecision(fontSizeScale, pickerTheme->GetMaxOneFontScale()) &&
+                 (!NearZero(fontSizeScale))) {
                 fontSizeValueResult = fontSizeValueResult / fontSizeScale;
             }
         }
@@ -1075,21 +1102,18 @@ const Dimension TimePickerDialogView::ConvertFontSizeLimit(
     if (isUserSetFont == false) {
         return fontSizeValue;
     }
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, fontSizeValue);
+    auto fontScale = pipeline->GetFontScale();
+
     Dimension fontSizeValueResult = fontSizeValue;
-    if (fontSizeValue.Unit() == DimensionUnit::VP) {
-        if (GreatOrEqualCustomPrecision(fontSizeValue.ConvertToPx(), fontSizeLimit.ConvertToPx() / MARGIN_HALF)) {
-            fontSizeValueResult = fontSizeLimit / MARGIN_HALF;
-        } else {
-            fontSizeValueResult = fontSizeValue;
+    if (GreatOrEqualCustomPrecision(fontSizeValue.ConvertToPx() * fontScale, fontSizeLimit.ConvertToPx())) {
+        if (!NearZero(fontScale)) {
+            fontSizeValueResult = fontSizeLimit / fontScale;
         }
     } else {
-        if (GreatOrEqualCustomPrecision(fontSizeValue.ConvertToPx(), fontSizeLimit.ConvertToPx())) {
-            fontSizeValueResult = fontSizeLimit;
-        } else {
-            fontSizeValueResult = fontSizeValue;
-        }
+        fontSizeValueResult = fontSizeValue;
     }
-
     return fontSizeValueResult;
 }
 

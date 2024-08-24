@@ -19,6 +19,7 @@
 #include <memory>
 
 #include "accessibility_event_info.h"
+#include "interfaces/include/ws_common.h"
 #include "refbase.h"
 #include "session_manager/include/extension_session_manager.h"
 #include "transaction/rs_sync_transaction_controller.h"
@@ -284,6 +285,18 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionCon
         isNotifyOccupiedAreaChange_, realHostWindowId);
     auto callerToken = container->GetToken();
     auto parentToken = container->GetParentToken();
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto pattern = hostPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    SessionViewportConfig sessionViewportConfig = {
+        .isDensityFollowHost_ = pattern->GetDensityDpi(),
+        .density_ = context->GetCurrentDensity(),
+        .displayId_ = 0,
+        .orientation_ = static_cast<int32_t>(SystemProperties::GetDeviceOrientation()),
+        .transform_ = context->GetTransformHint(),
+    };
+    pattern->SetSessionViewportConfig(sessionViewportConfig);
     Rosen::SessionInfo extensionSessionInfo = {
         .bundleName_ = want.GetElement().GetBundleName(),
         .abilityName_ = want.GetElement().GetAbilityName(),
@@ -293,6 +306,7 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionCon
         .realParentId_ = static_cast<int32_t>(realHostWindowId),
         .uiExtensionUsage_ = static_cast<uint32_t>(config.uiExtensionUsage),
         .isAsyncModalBinding_ = config.isAsyncModalBinding,
+        .config_ = *reinterpret_cast<Rosen::SessionViewportConfig*>(&sessionViewportConfig),
     };
     session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
     CHECK_NULL_VOID(session_);
@@ -472,6 +486,12 @@ void SessionWrapperImpl::NotifyForeground()
         session_->GetPersistentId(), hostWindowId, windowSceneId, container->IsScenceBoardWindow());
     if (container->IsScenceBoardWindow() && windowSceneId != INVALID_WINDOW_ID) {
         hostWindowId = static_cast<uint32_t>(windowSceneId);
+    }
+    auto pattern = hostPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    if (pattern->IsViewportConfigChanged()) {
+        pattern->SetViewportConfigChanged(false);
+        UpdateSessionViewportConfig();
     }
     Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionActivation(
         session_, hostWindowId, std::move(foregroundCallback_));
@@ -711,14 +731,18 @@ bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaCh
     return true;
 }
 
-void SessionWrapperImpl::SetDensityDpiImpl(bool isDensityDpi)
+void SessionWrapperImpl::UpdateSessionViewportConfig()
 {
     CHECK_NULL_VOID(session_);
-    if (isDensityDpi) {
-        float density = PipelineBase::GetCurrentDensity();
-        session_->NotifyDensityFollowHost(isDensityDpi, density);
-    }
+    auto pattern = hostPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto config = pattern->GetSessionViewportConfig();
+    UIEXT_LOGI("SessionViewportConfig: isDensityFollowHost_ = %{public}d, density_ = %{public}f, "
+               "displayId_ = %{public}" PRIu64", orientation_ = %{public}d, transform_ = %{public}d",
+        config.isDensityFollowHost_, config.density_, config.displayId_, config.orientation_, config.transform_);
+    session_->UpdateSessionViewportConfig(*reinterpret_cast<Rosen::SessionViewportConfig*>(&config));
 }
+
 /***************************** End: The interface to control the display area and the avoid area **********************/
 
 /************************************************ Begin: The interface to send the data for ArkTS *********************/

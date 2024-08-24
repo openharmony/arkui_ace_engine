@@ -52,6 +52,7 @@ constexpr Dimension SHEET_DOUBLE_TITLE_TOP_PADDING = 16.0_vp;
 constexpr Dimension SHEET_DOUBLE_TITLE_BOTTON_PADDING = 8.0_vp;
 constexpr Dimension SHEET_TITLE_AERA_MARGIN = -8.0_vp;
 constexpr int32_t SHEET_TITLE_MAX_LINES = 1;
+constexpr int32_t SHEET_SHADOW_NONE = 6;
 } // namespace
 class SheetTheme : public virtual Theme {
     DECLARE_ACE_TYPE(SheetTheme, Theme);
@@ -101,6 +102,15 @@ public:
             theme->sheetMaxAgingScale_ = sheetPattern->GetAttr<double>("sheet_max_aging_scale", 1.75f);
             theme->closeIconSource_ = themeConstants->GetSymbolByName("sys.symbol.xmark");
             theme->closeIconSymbolColor_ = sheetPattern->GetAttr<Color>("close_icon_symbol_color", Color(0xff182431));
+            theme->sheetShadowConfig_ = sheetPattern->GetAttr<int>("sheet_shadow_config", SHEET_SHADOW_NONE);
+            theme->sheetOuterBorderWidth_ = sheetPattern->GetAttr<Dimension>("sheet_outline_border_width", 0.0_vp);
+            // If the outline border width is valid, outline border, shadow and border are default enable.
+            theme->isOuterBorderEnable_ = theme->sheetOuterBorderWidth_.IsValid();
+            theme->sheetInnerBorderWidth_ = sheetPattern->GetAttr<Dimension>("sheet_inner_border_width", 0.0_vp);
+            theme->sheetOuterBorderColor_ =
+                sheetPattern->GetAttr<Color>("sheet_outline_border_color", Color::TRANSPARENT);
+            theme->sheetInnerBorderColor_ =
+                sheetPattern->GetAttr<Color>("sheet_inner_border_color", Color::TRANSPARENT);
         }
     };
     ~SheetTheme() override = default;
@@ -200,6 +210,36 @@ public:
         return closeIconSource_;
     }
 
+    const int& GetSheetShadowConfig() const
+    {
+        return sheetShadowConfig_;
+    }
+
+    const Dimension& GetSheetOuterBorderWidth() const
+    {
+        return sheetOuterBorderWidth_;
+    }
+
+    const Dimension& GetSheetInnerBorderWidth() const
+    {
+        return sheetInnerBorderWidth_;
+    }
+
+    const Color& GetSheetOuterBorderColor() const
+    {
+        return sheetOuterBorderColor_;
+    }
+
+    const Color& GetSheetInnerBorderColor() const
+    {
+        return sheetInnerBorderColor_;
+    }
+
+    bool IsOuterBorderEnable() const
+    {
+        return isOuterBorderEnable_;
+    }
+
 protected:
     SheetTheme() = default;
 
@@ -223,6 +263,12 @@ private:
     double sheetNormalScale_;
     double sheetMaxAgingScale_;
     uint32_t closeIconSource_ = 0;
+    int sheetShadowConfig_;
+    Dimension sheetOuterBorderWidth_;
+    Dimension sheetInnerBorderWidth_;
+    bool isOuterBorderEnable_;
+    Color sheetOuterBorderColor_;
+    Color sheetInnerBorderColor_;
 };
 } // namespace OHOS::Ace::NG
 

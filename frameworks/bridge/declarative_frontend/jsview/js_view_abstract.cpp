@@ -6305,19 +6305,7 @@ NG::DragPreviewOption JSViewAbstract::ParseDragPreviewOptions (const JSCallbackI
         }
     }
 
-    auto numberBadge = obj->GetProperty("numberBadge");
-    if (!numberBadge->IsEmpty()) {
-        if (numberBadge->IsNumber()) {
-            previewOption.isNumber = true;
-            previewOption.badgeNumber = numberBadge->ToNumber<int>();
-        } else if (numberBadge->IsBoolean()) {
-            previewOption.isNumber = false;
-            previewOption.isShowBadge = numberBadge->ToBoolean();
-        }
-    } else {
-        previewOption.isNumber = false;
-        previewOption.isShowBadge = true;
-    }
+    JSViewAbstract::SetDragNumberBadge(info, previewOption);
 
     if (info.Length() > 1 && info[1]->IsObject()) {
         JSRef<JSObject> interObj = JSRef<JSObject>::Cast(info[1]);
@@ -10330,6 +10318,33 @@ void JSViewAbstract::SetDragPreviewOptionApply(const JSCallbackInfo& info, NG::D
             };
             option.onApply = onApply;
         }
+    }
+}
+
+void JSViewAbstract::SetDragNumberBadge(const JSCallbackInfo& info, NG::DragPreviewOption& option)
+{
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    auto numberBadge = obj->GetProperty("numberBadge");
+    if (!numberBadge->IsEmpty()) {
+        if (numberBadge->IsNumber()) {
+            int64_t number = numberBadge->ToNumber<int64_t>();
+            if (number < 0 || number > INT_MAX) {
+                option.isNumber = false;
+                option.isShowBadge = true;
+            } else {
+                option.isNumber = true;
+                option.badgeNumber = numberBadge->ToNumber<int>();
+            }
+        } else if (numberBadge->IsBoolean()) {
+            option.isNumber = false;
+            option.isShowBadge = numberBadge->ToBoolean();
+        }
+    } else {
+        option.isNumber = false;
+        option.isShowBadge = true;
     }
 }
 

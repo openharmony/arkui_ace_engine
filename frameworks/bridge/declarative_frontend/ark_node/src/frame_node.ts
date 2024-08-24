@@ -31,7 +31,7 @@ class FrameNode {
   protected nodePtr_: NodePtr;
   protected instanceId_?: number;
   private nodeAdapterRef_?: NodeAdapter;
-  constructor(uiContext: UIContext, type: string) {
+  constructor(uiContext: UIContext, type: string, options?: object) {
     if (uiContext === undefined) {
       throw Error('Node constructor error, param uiContext error');
     } else {
@@ -59,7 +59,7 @@ class FrameNode {
       this.renderNode_ = new RenderNode('CustomFrameNode');
       result = getUINativeModule().frameNode.createFrameNode(this);
     } else {
-      result = getUINativeModule().frameNode.createTypedFrameNode(this, type);
+      result = getUINativeModule().frameNode.createTypedFrameNode(this, type, options);
     }
     __JSScopeUtil__.restoreInstanceId();
     this._nativeRef = result?.nativeStrongRef;
@@ -623,8 +623,8 @@ class TypedFrameNode<T extends ArkComponent> extends FrameNode {
   attribute_: T;
   attrCreator_: (node: NodePtr, type: ModifierType) => T
 
-  constructor(uiContext: UIContext, type: string, attrCreator: (node: NodePtr, type: ModifierType) => T) {
-    super(uiContext, type)
+  constructor(uiContext: UIContext, type: string, attrCreator: (node: NodePtr, type: ModifierType) => T, options?: object) {
+    super(uiContext, type, options);
     this.attrCreator_ = attrCreator;
   }
 
@@ -668,7 +668,7 @@ class TypedFrameNode<T extends ArkComponent> extends FrameNode {
   }
 }
 
-const __creatorMap__ = new Map<string, (context: UIContext) => FrameNode>(
+const __creatorMap__ = new Map<string, (context: UIContext, options?: object) => FrameNode>(
   [
     ['Text', (context: UIContext): FrameNode=> {
       return new TypedFrameNode(context, 'Text', (node: NodePtr, type: ModifierType): ArkTextComponent => {
@@ -774,10 +774,10 @@ const __creatorMap__ = new Map<string, (context: UIContext) => FrameNode>(
         return new ArkButtonComponent(node, type);
       })
     }],
-    ['XComponent', (context: UIContext): FrameNode=> {
+    ['XComponent', (context: UIContext, options?: object): FrameNode=> {
       return new TypedFrameNode(context, 'XComponent', (node: NodePtr, type: ModifierType): ArkXComponentComponent => {
         return new ArkXComponentComponent(node, type);
-      })
+      }, options);
     }],
     ['ListItemGroup', (context: UIContext): FrameNode=> {
       return new TypedFrameNode(context, 'ListItemGroup', (node: NodePtr, type: ModifierType): ArkListItemGroupComponent => {
@@ -804,15 +804,25 @@ const __creatorMap__ = new Map<string, (context: UIContext) => FrameNode>(
         return new ArkBadgeComponent(node, type);
       })
     }],
+    ['Grid', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Grid', (node: NodePtr, type: ModifierType): ArkGridComponent => {
+        return new ArkGridComponent(node, type);
+      })
+    }],
+    ['GridItem', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'GridItem', (node: NodePtr, type: ModifierType): ArkGridItemComponent => {
+        return new ArkGridItemComponent(node, type);
+      })
+    }],
   ]
 )
 
 class typeNode {
-  static createNode(context: UIContext, type: string): FrameNode {
+  static createNode(context: UIContext, type: string, options?: object): FrameNode {
     let creator = __creatorMap__.get(type)
     if (creator === undefined) {
       return undefined
     }
-    return creator(context);
+    return creator(context, options);
   }
 }

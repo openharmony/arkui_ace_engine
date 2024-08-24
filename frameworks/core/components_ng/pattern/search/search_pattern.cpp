@@ -696,8 +696,10 @@ void SearchPattern::OnClickCancelButton()
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
     CHECK_NULL_VOID(!textFieldPattern->IsDragging());
+    CHECK_NULL_VOID(!textFieldPattern->IsHandleDragging());
     focusChoice_ = FocusChoice::SEARCH;
     textFieldPattern->InitEditingValueText("");
+    textFieldPattern->SetTextChangedAtCreation(true);
     auto textRect = textFieldPattern->GetTextRect();
     textRect.SetLeft(0.0f);
     textFieldPattern->SetTextRect(textRect);

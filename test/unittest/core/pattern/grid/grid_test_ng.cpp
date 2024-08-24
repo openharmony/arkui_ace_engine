@@ -21,9 +21,9 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components/button/button_theme.h"
+#include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_model_ng.h"
-#include "core/components_ng/pattern/button/button_model_ng.h"
 
 #ifndef TEST_IRREGULAR_GRID
 #include "test/mock/base/mock_system_properties.h"
@@ -50,6 +50,16 @@ void GridTestNg::SetUpTestSuite()
 #ifndef TEST_IRREGULAR_GRID
     g_irregularGrid = false;
 #endif
+}
+
+void GridTestNg::CheckPreloadListEqual(const std::list<int32_t>& expectedList) const
+{
+    ASSERT_EQ(expectedList.size(), pattern_->preloadItemList_.size());
+    auto it = expectedList.begin();
+    for (auto&& item : pattern_->preloadItemList_) {
+        EXPECT_EQ(*it, item.idx);
+        ++it;
+    }
 }
 
 void GridTestNg::TearDownTestSuite()

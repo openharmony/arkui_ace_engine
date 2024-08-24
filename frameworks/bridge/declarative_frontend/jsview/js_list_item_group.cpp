@@ -159,35 +159,48 @@ void JSListItemGroup::SetChildrenMainSize(const JSRef<JSObject>& childrenSizeObj
 
 void JSListItemGroup::Create(const JSCallbackInfo& args)
 {
-    V2::ListItemGroupStyle listItemGroupStyle = V2::ListItemGroupStyle::NONE;
-    if (args.Length() >= 1 && args[0]->IsObject()) {
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
-        auto styleObject = obj->GetProperty("style");
-        listItemGroupStyle = styleObject->IsNumber()
-                                 ? static_cast<V2::ListItemGroupStyle>(styleObject->ToNumber<int32_t>())
-                                 : V2::ListItemGroupStyle::NONE;
-    }
+    auto listItemGroupStyle = GetListItemGroupStyle(args);
     ListItemGroupModel::GetInstance()->Create(listItemGroupStyle);
-    if (args.Length() >= 1 && args[0]->IsObject()) {
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+    if (args.Length() < 1 || !args[0]->IsObject()) {
+        args.ReturnSelf();
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
 
-        Dimension space;
-        if (ConvertFromJSValue(obj->GetProperty("space"), space) && space.IsNonNegative()) {
-            ListItemGroupModel::GetInstance()->SetSpace(space);
+    Dimension space;
+    if (ConvertFromJSValue(obj->GetProperty("space"), space) && space.IsNonNegative()) {
+        ListItemGroupModel::GetInstance()->SetSpace(space);
+    }
+
+    auto headerComponentObject = obj->GetProperty("headerComponent");
+    if (headerComponentObject->IsObject()) {
+        if (!ParseHeaderAndFooterContent(headerComponentObject, true)) {
+            NG::ListItemGroupModelNG::GetInstance()->RemoveHeader();
         }
-
+    } else {
         auto headerObject = obj->GetProperty("header");
         if (headerObject->IsFunction()) {
             auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(headerObject));
             auto headerAction = [builderFunc]() { builderFunc->Execute(); };
             ListItemGroupModel::GetInstance()->SetHeader(headerAction);
+        } else {
+            NG::ListItemGroupModelNG::GetInstance()->RemoveHeader();
         }
+    }
 
+    auto footerComponentObject = obj->GetProperty("footerComponent");
+    if (footerComponentObject->IsObject()) {
+        if (!ParseHeaderAndFooterContent(footerComponentObject, false)) {
+            NG::ListItemGroupModelNG::GetInstance()->RemoveFooter();
+        }
+    } else {
         auto footerObject = obj->GetProperty("footer");
         if (footerObject->IsFunction()) {
             auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(footerObject));
             auto footerAction = [builderFunc]() { builderFunc->Execute(); };
             ListItemGroupModel::GetInstance()->SetFooter(footerAction);
+        } else {
+            NG::ListItemGroupModelNG::GetInstance()->RemoveFooter();
         }
     }
     args.ReturnSelf();
@@ -216,8 +229,47 @@ void JSListItemGroup::SetDivider(const JSCallbackInfo& args)
     args.ReturnSelf();
 }
 
-void JSListItemGroup::SetAspectRatio(const JSCallbackInfo& args)
+void JSListItemGroup::SetAspectRatio(const JSCallbackInfo& args) {}
+
+bool JSListItemGroup::ParseHeaderAndFooterContent(const JSRef<JSVal>& contentParam, bool isHeader)
 {
+    if (!contentParam->IsObject()) {
+        return false;
+    }
+    JSRef<JSObject> contentObject = JSRef<JSObject>::Cast(contentParam);
+    JSRef<JSVal> builderNodeParam = contentObject->GetProperty("builderNode_");
+    if (!builderNodeParam->IsObject()) {
+        return false;
+    }
+    JSRef<JSObject> builderNodeObject = JSRef<JSObject>::Cast(builderNodeParam);
+    JSRef<JSVal> nodeptr = builderNodeObject->GetProperty("nodePtr_");
+    if (nodeptr.IsEmpty()) {
+        return false;
+    }
+    const auto* vm = nodeptr->GetEcmaVM();
+    auto* node = nodeptr->GetLocalHandle()->ToNativePointer(vm)->Value();
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    RefPtr<NG::FrameNode> refPtrFrameNode = AceType::Claim(frameNode);
+    if (isHeader) {
+        NG::ListItemGroupModelNG::GetInstance()->SetHeaderComponent(refPtrFrameNode);
+    } else {
+        NG::ListItemGroupModelNG::GetInstance()->SetFooterComponent(refPtrFrameNode);
+    }
+    return true;
+}
+
+V2::ListItemGroupStyle JSListItemGroup::GetListItemGroupStyle(const JSCallbackInfo& args)
+{
+    V2::ListItemGroupStyle listItemGroupStyle = V2::ListItemGroupStyle::NONE;
+    if (args.Length() >= 1 && args[0]->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+        auto styleObject = obj->GetProperty("style");
+        listItemGroupStyle = styleObject->IsNumber()
+                                 ? static_cast<V2::ListItemGroupStyle>(styleObject->ToNumber<int32_t>())
+                                 : V2::ListItemGroupStyle::NONE;
+    }
+    return listItemGroupStyle;
 }
 
 void JSListItemGroup::JSBind(BindingTarget globalObj)

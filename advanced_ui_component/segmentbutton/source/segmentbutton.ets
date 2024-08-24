@@ -1135,6 +1135,7 @@ export struct SegmentButton {
         }
       }
     })
+    .accessibilityLevel('no')
     .priorityGesture(
       GestureGroup(GestureMode.Parallel,
         TapGesture()

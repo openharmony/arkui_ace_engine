@@ -881,8 +881,6 @@ bool NavigationModelNG::ParseCommonTitle(
         // update subtitle
         auto textLayoutProperty = subTitle->GetLayoutProperty<TextLayoutProperty>();
         textLayoutProperty->UpdateContent(subtitle);
-        auto renderContext = subTitle->GetRenderContext();
-        renderContext->UpdateOpacity(1.0);
     } else {
         // create and init subtitle
         subTitle = FrameNode::CreateFrameNode(

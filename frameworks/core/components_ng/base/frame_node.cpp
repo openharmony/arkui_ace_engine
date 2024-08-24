@@ -1095,6 +1095,14 @@ void FrameNode::OnAttachToBuilderNode(NodeStatus nodeStatus)
     pattern_->OnAttachToBuilderNode(nodeStatus);
 }
 
+bool FrameNode::RenderCustomChild(int64_t deadline)
+{
+    if (!pattern_->RenderCustomChild(deadline)) {
+        return false;
+    }
+    return UINode::RenderCustomChild(deadline);
+}
+
 void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationChange)
 {
     if (configurationChange.languageUpdate) {
@@ -1109,6 +1117,7 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
             auto cb = colorModeUpdateCallback_;
             cb();
         }
+        FireColorNDKCallback();
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
@@ -1141,19 +1150,22 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
-    NotifyConfigurationChangeNdk(configurationChange);
+    FireFontNDKCallback(configurationChange);
 }
 
-void FrameNode::NotifyConfigurationChangeNdk(const ConfigurationChange& configurationChange)
+void FrameNode::FireColorNDKCallback()
 {
-    if (ndkColorModeUpdateCallback_ && configurationChange.colorModeUpdate &&
-        colorMode_ != SystemProperties::GetColorMode()) {
+    std::shared_lock<std::shared_mutex> lock(colorModeCallbackMutex_);
+    if (ndkColorModeUpdateCallback_) {
         auto colorModeChange = ndkColorModeUpdateCallback_;
         colorModeChange(SystemProperties::GetColorMode() == ColorMode::DARK);
-        colorMode_ = SystemProperties::GetColorMode();
     }
+}
 
-    if (ndkFontUpdateCallback_ && (configurationChange.fontScaleUpdate || configurationChange.fontWeightScaleUpdate)) {
+void FrameNode::FireFontNDKCallback(const ConfigurationChange& configurationChange)
+{
+    std::shared_lock<std::shared_mutex> lock(fontSizeCallbackMutex_);
+    if ((configurationChange.fontScaleUpdate || configurationChange.fontWeightScaleUpdate) && ndkFontUpdateCallback_) {
         auto fontChangeCallback = ndkFontUpdateCallback_;
         auto pipeline = GetContextWithCheck();
         CHECK_NULL_VOID(pipeline);
@@ -3133,7 +3145,7 @@ void FrameNode::OnAccessibilityEvent(
         event.type = eventType;
         event.windowContentChangeTypes = windowsContentChangeType;
         event.nodeId = GetAccessibilityId();
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->SendEventToAccessibility(event);
     }
@@ -3878,6 +3890,7 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
         MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
     }
     layoutAlgorithm_.Reset();
+    renderContext_->UpdateAccessibilityRoundRect();
     ProcessAccessibilityVirtualNode();
     auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, false);

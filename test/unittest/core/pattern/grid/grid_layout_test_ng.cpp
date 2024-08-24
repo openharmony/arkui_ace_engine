@@ -1663,7 +1663,7 @@ HWTEST_F(GridLayoutTestNg, Cache001, TestSize.Level1)
     for (const int32_t i : preloadList) {
         EXPECT_FALSE(frameNode_->GetChildByIndex(i));
     }
-    EXPECT_EQ(pattern_->preloadItemList_, preloadList);
+    CheckPreloadListEqual(preloadList);
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     EXPECT_TRUE(pattern_->preloadItemList_.empty());
     for (const int32_t i : preloadList) {
@@ -1673,7 +1673,7 @@ HWTEST_F(GridLayoutTestNg, Cache001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     // preload next line
     const std::list<int32_t> preloadList2 = { 15, 16, 17 };
-    EXPECT_EQ(pattern_->preloadItemList_, preloadList2);
+    CheckPreloadListEqual(preloadList2);
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     EXPECT_TRUE(pattern_->preloadItemList_.empty());
     for (const int32_t i : preloadList2) {

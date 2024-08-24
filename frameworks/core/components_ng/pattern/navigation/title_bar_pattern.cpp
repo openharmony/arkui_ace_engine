@@ -1437,6 +1437,24 @@ void TitleBarPattern::SetTitlebarOptions(NavigationTitlebarOptions&& opt)
     UpdateBackgroundStyle(host);
 }
 
+void TitleBarPattern::UpdateBackgroundStyle(RefPtr<FrameNode>& host)
+{
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (options_.bgOptions.color.has_value()) {
+        renderContext->UpdateBackgroundColor(options_.bgOptions.color.value());
+    } else {
+        renderContext->ResetBackgroundColor();
+    }
+    if (options_.bgOptions.blurStyle.has_value()) {
+        BlurStyleOption blur;
+        blur.blurStyle = options_.bgOptions.blurStyle.value();
+        renderContext->UpdateBackBlurStyle(blur);
+    } else {
+        renderContext->ResetBackBlurStyle();
+    }
+}
+
 void TitleBarPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1469,24 +1487,6 @@ void TitleBarPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowS
         MountMenu(titleBarNode, true);
         titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     } while (0);
-}
-
-void TitleBarPattern::UpdateBackgroundStyle(RefPtr<FrameNode>& host)
-{
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    if (options_.bgOptions.color.has_value()) {
-        renderContext->UpdateBackgroundColor(options_.bgOptions.color.value());
-    } else {
-        renderContext->ResetBackgroundColor();
-    }
-    if (options_.bgOptions.blurStyle.has_value()) {
-        BlurStyleOption blur;
-        blur.blurStyle = options_.bgOptions.blurStyle.value();
-        renderContext->UpdateBackBlurStyle(blur);
-    } else {
-        renderContext->ResetBackBlurStyle();
-    }
 }
 
 void TitleBarPattern::DumpInfo()

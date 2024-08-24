@@ -164,11 +164,13 @@ bool DragEventActuator::IsGlobalStatusSuitableForDragging()
     CHECK_NULL_RETURN(pipeline, false);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_RETURN(dragDropManager, false);
-    if (dragDropManager->IsDragging() || dragDropManager->IsMSDPDragging()) {
-        TAG_LOGI(AceLogTag::ACE_DRAG,
-            "No need to collect drag gestures result, dragging is %{public}d,"
-            "MSDP dragging is %{public}d",
-            dragDropManager->IsDragging(), dragDropManager->IsMSDPDragging());
+    if (dragDropManager->IsDragging()) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "No need to collect drag gestures result, is dragging status");
+        return false;
+    }
+
+    if (dragDropManager->IsMSDPDragging()) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "No need to collect drag gestures result, is msdp dragging status");
         return false;
     }
 
@@ -459,7 +461,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         }
     };
     auto panOnReject = [weak = WeakClaim(this), hasContextMenuUsingGesture]() {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "Tragger pan onReject");
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger pan onReject");
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
         actuator->ResetResponseRegion();
@@ -1351,7 +1353,11 @@ void DragEventActuator::HideFilter()
 
 void DragEventActuator::HidePixelMap(bool startDrag, double x, double y, bool showAnimation)
 {
-    auto pipelineContext = PipelineContext::GetMainPipelineContext();
+    auto gestureEventHub = gestureEventHub_.Upgrade();
+    CHECK_NULL_VOID(gestureEventHub);
+    auto frameNode = gestureEventHub->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);

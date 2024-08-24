@@ -250,6 +250,7 @@ private:
         const RefPtr<FrameNode>& pointNode, uint32_t index, bool isClickAbled, bool reverse);
     void SetStepPointAccessibilityVirtualNode(
         const RefPtr<FrameNode>& pointNode, const SizeF& size, const PointF& point, const std::string& txt);
+    void SendAccessibilityValueEvent(int32_t mode);
 
     std::optional<SliderMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
@@ -323,7 +324,9 @@ private:
     std::vector<RefPtr<FrameNode>> pointAccessibilityNodeVec_;
     std::vector<GestureEventFunc> pointAccessibilityNodeEventVec_;
     bool isInitAccessibilityVirtualNode_ = false;
-
+    int64_t lastAccessibilityValueTime_ = 0;
+    float accessibilityValue_ = 0.0f;
+    
     ACE_DISALLOW_COPY_AND_MOVE(SliderPattern);
 };
 } // namespace OHOS::Ace::NG

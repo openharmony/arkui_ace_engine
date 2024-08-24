@@ -64,12 +64,13 @@ void JSNavigationStack::SetDataSourceObj(const JSRef<JSObject>& dataSourceObj)
     // add callback to new JSNavPathStack
     RemoveStack();
     UpdateOnStateChangedCallback(dataSourceObj_, onStateChangedCallback_);
-    auto checkNavDestinationExistsFunc = [weakStack = WeakClaim(this)](const JSRef<JSObject>& info) -> int32_t {
+    auto checkNavDestinationExistsFunc = [weakStack = WeakClaim(this)](
+        const JSRef<JSObject>& info, uint32_t& navDestinationId) -> int32_t {
         auto stack = weakStack.Upgrade();
         if (stack == nullptr) {
             return ERROR_CODE_INTERNAL_ERROR;
         }
-        auto errorCode = stack->CheckNavDestinationExists(info);
+        auto errorCode = stack->CheckNavDestinationExists(info, navDestinationId);
         if (errorCode != ERROR_CODE_NO_ERROR) {
             stack->RemoveInvalidPage(info);
         }
@@ -79,7 +80,7 @@ void JSNavigationStack::SetDataSourceObj(const JSRef<JSObject>& dataSourceObj)
 }
 
 void JSNavigationStack::UpdateCheckNavDestinationExistsFunc(JSRef<JSObject> obj,
-    std::function<int32_t(JSRef<JSObject>)> checkFunc)
+    std::function<int32_t(JSRef<JSObject>, uint32_t&)> checkFunc)
 {
     if (obj->IsEmpty()) {
         return;
@@ -328,7 +329,7 @@ RefPtr<NG::UINode> JSNavigationStack::CreateNodeByIndex(int32_t index, const Wea
     auto name = GetNameByIndex(index);
     auto param = GetParamByIndex(index);
     RefPtr<NG::UINode> node;
-    if (GetNodeFromPreBuildList(index, name, param, node)) {
+    if (GetNodeFromPreBuildList(index, node)) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "get node from prebuild list");
         return node;
     }
@@ -344,7 +345,8 @@ RefPtr<NG::UINode> JSNavigationStack::CreateNodeByIndex(int32_t index, const Wea
         pattern->SetName(name);
         pattern->SetIndex(index);
         auto onPop = GetOnPopByIndex(index);
-        auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, param, onPop);
+        auto isEntry = GetIsEntryByIndex(index);
+        auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, param, onPop, isEntry);
         pattern->SetNavPathInfo(pathInfo);
         pattern->SetNavigationStack(WeakClaim(this));
     }
@@ -422,6 +424,42 @@ JSRef<JSVal> JSNavigationStack::GetOnPopByIndex(int32_t index) const
     return func->Call(dataSourceObj_, 1, params);
 }
 
+bool JSNavigationStack::GetIsEntryByIndex(int32_t index)
+{
+    if (dataSourceObj_->IsEmpty()) {
+        return false;
+    }
+    auto getIsEntryFunc = dataSourceObj_->GetProperty("getIsEntryByIndex");
+    if (!getIsEntryFunc->IsFunction()) {
+        return false;
+    }
+    auto func = JSRef<JSFunc>::Cast(getIsEntryFunc);
+    JSRef<JSVal> params[1];
+    params[0] = JSRef<JSVal>::Make(ToJSValue(index));
+    auto result = func->Call(dataSourceObj_, 1, params);
+    if (!result->IsBoolean()) {
+        return false;
+    }
+    return result->ToBoolean();
+}
+
+void JSNavigationStack::SetIsEntryByIndex(int32_t index, bool isEntry)
+{
+    CHECK_NULL_VOID(dataSourceObj_->IsEmpty());
+    if (dataSourceObj_->IsEmpty()) {
+        return;
+    }
+    auto setIsEntryFunc = dataSourceObj_->GetProperty("setIsEntryByIndex");
+    if (!setIsEntryFunc->IsFunction()) {
+        return;
+    }
+    auto func = JSRef<JSFunc>::Cast(setIsEntryFunc);
+    JSRef<JSVal> params[ARGC_COUNT_TWO];
+    params[0] = JSRef<JSVal>::Make(ToJSValue(index));
+    params[1] = JSRef<JSVal>::Make(ToJSValue(isEntry));
+    func->Call(dataSourceObj_, ARGC_COUNT_TWO, params);
+}
+
 bool JSNavigationStack::GetNavDestinationNodeInUINode(
     RefPtr<NG::UINode> node, RefPtr<NG::NavDestinationGroupNode>& desNode)
 {
@@ -477,40 +515,6 @@ void JSNavigationStack::UpdateReplaceValue(int32_t replaceValue) const
     replaceFunc->Call(dataSourceObj_, 1, params);
 }
 
-bool JSNavigationStack::GetAnimatedValue() const
-{
-    if (dataSourceObj_->IsEmpty()) {
-        return true;
-    }
-    auto animated = dataSourceObj_->GetProperty("animated");
-    return animated->ToBoolean();
-}
-
-void JSNavigationStack::UpdateAnimatedValue(bool animated)
-{
-    if (dataSourceObj_->IsEmpty()) {
-        return;
-    }
-    auto setAnimatedFunc = dataSourceObj_->GetProperty("setAnimated");
-    if (!setAnimatedFunc->IsFunction()) {
-        return;
-    }
-    auto animatedFunc = JSRef<JSFunc>::Cast(setAnimatedFunc);
-    JSRef<JSVal> params[1];
-    params[0] = JSRef<JSVal>::Make(ToJSValue(animated));
-    animatedFunc->Call(dataSourceObj_, 1, params);
-}
-
-
-bool JSNavigationStack::GetDisableAnimation() const
-{
-    if (dataSourceObj_->IsEmpty()) {
-        return false;
-    }
-    auto disableAllAnimation = dataSourceObj_->GetProperty("disableAllAnimation");
-    return disableAllAnimation->ToBoolean();
-}
-
 std::string JSNavigationStack::GetRouteParam() const
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, "");
@@ -547,7 +551,7 @@ std::string JSNavigationStack::ConvertParamToString(const JSRef<JSVal>& param) c
     } else if (param->IsNumber()) {
         double ret = param->ToNumber<double>();
         std::ostringstream oss;
-        oss<< ret;
+        oss << ret;
         return oss.str();
     } else if (param->IsString()) {
         std::string ret = param->ToString();
@@ -587,7 +591,7 @@ void JSNavigationStack::ParseJsObject(
         } else if (value->IsNumber()) {
             double ret = value->ToNumber<double>();
             std::ostringstream oss;
-            oss<< ret;
+            oss << ret;
             json->Put(key, oss.str().c_str());
         } else if (value->IsString()) {
             std::string ret = value->ToString();
@@ -599,6 +603,40 @@ void JSNavigationStack::ParseJsObject(
             json->Put(key, childJson);
         }
     }
+}
+
+bool JSNavigationStack::GetAnimatedValue() const
+{
+    if (dataSourceObj_->IsEmpty()) {
+        return true;
+    }
+    auto animated = dataSourceObj_->GetProperty("animated");
+    return animated->ToBoolean();
+}
+
+void JSNavigationStack::UpdateAnimatedValue(bool animated)
+{
+    if (dataSourceObj_->IsEmpty()) {
+        return;
+    }
+    auto setAnimatedFunc = dataSourceObj_->GetProperty("setAnimated");
+    if (!setAnimatedFunc->IsFunction()) {
+        return;
+    }
+    auto animatedFunc = JSRef<JSFunc>::Cast(setAnimatedFunc);
+    JSRef<JSVal> params[1];
+    params[0] = JSRef<JSVal>::Make(ToJSValue(animated));
+    animatedFunc->Call(dataSourceObj_, 1, params);
+}
+
+
+bool JSNavigationStack::GetDisableAnimation() const
+{
+    if (dataSourceObj_->IsEmpty()) {
+        return false;
+    }
+    auto disableAllAnimation = dataSourceObj_->GetProperty("disableAllAnimation");
+    return disableAllAnimation->ToBoolean();
 }
 
 void JSNavigationStack::UpdateOnStateChangedCallback(JSRef<JSObject> obj, std::function<void()> callback)
@@ -681,16 +719,25 @@ void JSNavigationStack::SaveNodeToPreBuildList(const std::string& name, const JS
     preBuildNodeList_.emplace_back(name, param, node, GetSize() - 1);
 }
 
-bool JSNavigationStack::GetNodeFromPreBuildList(int32_t index, const std::string& name,
-    const JSRef<JSVal>& param, RefPtr<NG::UINode>& node)
+bool JSNavigationStack::GetNodeFromPreBuildList(int32_t index, RefPtr<NG::UINode>& node)
 {
-    auto isJsObjEqual = [](const JSRef<JSVal>& objLeft, const JSRef<JSVal>& objRight) {
-        return (objLeft->IsEmpty() && objRight->IsEmpty()) ||
-            (objLeft->GetLocalHandle()->IsStrictEquals(objLeft->GetEcmaVM(), objRight->GetLocalHandle()));
-    };
+    auto navPathInfo = GetJsPathInfo(index);
+    if (navPathInfo->IsEmpty()) {
+        return false;
+    }
+    uint64_t navDestinationId = navPathInfo->GetPropertyValue<uint64_t>("navDestinationId", UINT64_MAX);
     for (auto it = preBuildNodeList_.begin(); it != preBuildNodeList_.end(); ++it) {
-        if (it->name == name && isJsObjEqual(it->param, param) && it->index == index) {
-            node = it->uiNode;
+        node = it->uiNode;
+        auto navDestination = AceType::DynamicCast<NG::NavDestinationGroupNode>(
+            NG::NavigationGroupNode::GetNavDestinationNode(node));
+        if (!navDestination) {
+            continue;
+        }
+        auto pattern = navDestination->GetPattern<NG::NavDestinationPattern>();
+        if (!pattern) {
+            continue;
+        }
+        if (pattern->GetNavDestinationId() == navDestinationId) {
             preBuildNodeList_.erase(it);
             return true;
         }
@@ -703,7 +750,7 @@ void JSNavigationStack::ClearPreBuildNodeList()
     preBuildNodeList_.clear();
 }
 
-int32_t JSNavigationStack::CheckNavDestinationExists(const JSRef<JSObject>& navPathInfo)
+int32_t JSNavigationStack::CheckNavDestinationExists(const JSRef<JSObject>& navPathInfo, uint32_t& navDestinationId)
 {
     auto pathName = navPathInfo->GetProperty("name");
     auto param = navPathInfo->GetProperty("param");
@@ -723,9 +770,12 @@ int32_t JSNavigationStack::CheckNavDestinationExists(const JSRef<JSObject>& navP
     auto pattern = AceType::DynamicCast<NG::NavDestinationPattern>(desNode->GetPattern());
     if (pattern) {
         auto onPop = navPathInfo->GetProperty("onPop");
-        auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, param, onPop);
+        auto isEntryVal = navPathInfo->GetProperty("isEntry");
+        bool isEntry = isEntryVal->IsBoolean() ? isEntryVal->ToBoolean() : false;
+        auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, param, onPop, isEntry);
         pattern->SetNavPathInfo(pathInfo);
         pattern->SetNavigationStack(WeakClaim(this));
+        navDestinationId = pattern->GetNavDestinationId();
     }
     SaveNodeToPreBuildList(name, param, node);
     return ERROR_CODE_NO_ERROR;
@@ -768,6 +818,7 @@ void JSNavigationStack::FireNavigationInterception(bool isBefore, const RefPtr<N
         preProxy->SetNavDestinationContext(from);
         params[0] = preObj;
     }
+
     auto topDestination = AceType::DynamicCast<NG::NavDestinationContext>(to);
     if (!topDestination) {
         params[1] = JSRef<JSVal>::Make(ToJSValue("navBar"));
@@ -1064,6 +1115,7 @@ JSRef<JSObject> JSNavigationStack::CreatePathInfoWithNecessaryProperty(
     pathInfo->SetProperty<std::string>("navDestinationId", std::to_string(context->GetNavDestinationId()));
     pathInfo->SetProperty("param", jsPathInfo->GetParam());
     pathInfo->SetProperty("onPop", jsPathInfo->GetOnPop());
+    pathInfo->SetProperty("isEntry", jsPathInfo->GetIsEntry());
     return pathInfo;
 }
 
