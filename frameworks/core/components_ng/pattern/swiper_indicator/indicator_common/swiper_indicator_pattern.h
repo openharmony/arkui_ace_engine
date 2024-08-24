@@ -165,6 +165,7 @@ public:
     }
 
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void SetIndicatorInteractive(bool isInteractive);
 
 private:

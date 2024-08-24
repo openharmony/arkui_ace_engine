@@ -220,6 +220,9 @@ public:
     float GetAverageHeight() const;
 
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
+    void BuildGridLayoutInfo(std::unique_ptr<JsonValue>& json);
+    void BuildScrollAlignInfo(std::unique_ptr<JsonValue>& json);
 
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;

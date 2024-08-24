@@ -2438,4 +2438,38 @@ void SheetPresentationPattern::SetSheetOuterBorderWidth(
     }
 }
 
+void SheetPresentationPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("TargetId", static_cast<int32_t>(targetId_));
+    json->Put("TargetTag", targetTag_.c_str());
+    std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
+    children->Put("SheetType", static_cast<int32_t>(GetSheetType()));
+    children->Put("SheetPage Node Height", centerHeight_);
+    children->Put("Sheet Height [start from the bottom, KeyboardHeight = 0]", height_);
+    children->Put("SheetMaxHeight [start from the bottom, pageHeight - sheetTopSafeArea]", sheetMaxHeight_);
+    children->Put("Page Height", pageHeight_);
+    children->Put("StatusBar Height [current sheetType needed]", sheetTopSafeArea_);
+    children->Put("PopupSheet OffsetX", sheetOffsetX_);
+    children->Put("PopupSheet OffsetX", sheetOffsetY_);
+    children->Put("SheetMaxWidth", sheetMaxWidth_);
+    children->Put("FitContent Height", sheetFitContentHeight_);
+    children->Put("SheetThemeType", sheetThemeType_.c_str());
+    children->Put("currentOffset", currentOffset_);
+    json->Put("SheetPage Pattern", children);
+
+    json->Put("Height ScrollTo [KeyboardHeight > 0, and is scrolling]", -scrollHeight_);
+    json->Put("KeyboardHeight", static_cast<int32_t>(keyboardHeight_));
+    json->Put("is scrolling", isScrolling_);
+    json->Put("SheetHeightUp[sheet offset to move up when avoiding keyboard]", sheetHeightUp_);
+
+    auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+    json->Put("height", sheetStyle.height.has_value() ? sheetStyle.height->ToString().c_str() : "None");
+    json->Put("sheetMode", sheetStyle.sheetMode.has_value()
+                               ? std::to_string(static_cast<int32_t>(sheetStyle.sheetMode.value())).c_str()
+                               : "None");
+    json->Put("detents Size", static_cast<int32_t>(sheetStyle.detents.size()));
+    json->Put("IsShouldDismiss", shouldDismiss_ ? "true" : "false");
+}
 } // namespace OHOS::Ace::NG

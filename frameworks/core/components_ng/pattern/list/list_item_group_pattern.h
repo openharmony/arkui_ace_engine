@@ -70,6 +70,7 @@ public:
     ~ListItemGroupPattern() override = default;
 
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     bool IsAtomicNode() const override
     {
         return false;
