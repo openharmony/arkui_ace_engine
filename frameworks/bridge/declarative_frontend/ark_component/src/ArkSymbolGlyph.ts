@@ -146,9 +146,10 @@ class SymbolFontColorModifier extends ModifierWithKey<object> {
     static identity: Symbol = Symbol('symbolContent');
     applyPeer(node: KNode, reset: boolean): void {
       if (reset) {
-        getUINativeModule().symbolGlyph.resetSymbolGlyphInitialize(node);
-      } else {
-        getUINativeModule().symbolGlyph.setSymbolGlyphInitialize(node, this.value);
+        getUINativeModule().symbolGlyph.setSymbolId(node, '');
+      }
+      else {
+        getUINativeModule().symbolGlyph.setSymbolId(node, this.value);
       }
     }
   }
@@ -157,11 +158,9 @@ class SymbolFontColorModifier extends ModifierWithKey<object> {
     constructor(nativePtr: KNode, classType?: ModifierType) {
       super(nativePtr, classType);
     }
-    initialize(value: Object[]): this {
+    initialize(value: Object[]): SymbolGlyphAttribute {
       if (value[0] !== undefined) {
         modifierWithKey(this._modifiersWithKeys, SymbolContentModifier.identity, SymbolContentModifier, value[0]);
-      } else {
-        modifierWithKey(this._modifiersWithKeys, SymbolContentModifier.identity, SymbolContentModifier, undefined);
       }
       return this;
     }
