@@ -49,6 +49,7 @@ void RatingPattern::OnAttachToFrameNode()
     themeStepSize_ = ratingTheme->GetStepSize();
     themeRatingScore_ = ratingTheme->GetRatingScore();
     themeBorderWidth_ = ratingTheme->GetFocusBorderWidth();
+    pipelineContext_ = host->GetContextRefPtr();
 }
 
 void RatingPattern::CheckImageInfoHasChangedOrNot(
@@ -189,7 +190,7 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
         ratingModifier_ = AceType::MakeRefPtr<RatingModifier>();
     }
     auto starNum = ratingLayoutProperty->GetStarsValue(themeStarNum_);
-    auto defaultPaintMethod = MakeRefPtr<RatingPaintMethod>(ratingModifier_, starNum, state_, false);
+    auto defaultPaintMethod = MakeRefPtr<RatingPaintMethod>(WeakClaim(this), ratingModifier_, starNum, state_, false);
     CHECK_NULL_RETURN(ratingLayoutProperty, defaultPaintMethod);
     CHECK_NULL_RETURN(foregroundImageCanvas_, defaultPaintMethod);
     CHECK_NULL_RETURN(secondaryImageCanvas_, defaultPaintMethod);
@@ -220,7 +221,7 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
     auto direction = ratingLayoutProperty->GetLayoutDirection();
     auto reverse = direction == TextDirection::AUTO ? AceApplicationInfo::GetInstance().IsRightToLeft() :
         direction == TextDirection::RTL;
-    auto paintMethod = MakeRefPtr<RatingPaintMethod>(ratingModifier_, starNum, state_, reverse);
+    auto paintMethod = MakeRefPtr<RatingPaintMethod>(WeakClaim(this), ratingModifier_, starNum, state_, reverse);
     paintMethod->UpdateFocusState(isfocus_, focusRatingScore_);
     return paintMethod;
 }
@@ -520,14 +521,25 @@ void RatingPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
         double starNum = property->GetStarsValue(themeStarNum_);
         wholeStarNum = starNum - wholeStarNum - 1;
     }
+    auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
+    CHECK_NULL_VOID(ratingRenderProperty);
+    ratingRenderProperty->UpdateTouchStar(wholeStarNum);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto ratingTheme = pipeline->GetTheme<RatingTheme>();
     CHECK_NULL_VOID(ratingTheme);
     auto radius = ratingTheme->GetFocusBorderRadius();
+    auto focusButtonRect = RectF(static_cast<float>(wholeStarNum) * singleStarWidth_ + offsetLeft, offsetTop,
+        singleStarWidth_, singleStarHeight);
+    auto focusSpace = ratingTheme->GetFocusSpace().ConvertToPx();
+    focusButtonRect -= OffsetF(focusSpace, focusSpace);
+    focusButtonRect += SizeF(focusSpace + focusSpace, focusSpace + focusSpace);
+    PaintFocusRect(paintRect, focusButtonRect, radius);
+}
 
-    paintRect.SetRect(RectF(static_cast<float>(wholeStarNum) * singleStarWidth_ + offsetLeft, offsetTop,
-        singleStarWidth_, singleStarHeight));
+void RatingPattern::PaintFocusRect(RoundRect& paintRect, RectF& focusButtonRect, Dimension& radius)
+{
+    paintRect.SetRect(focusButtonRect);
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
         static_cast<RSScalar>(radius.ConvertToPx()));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
@@ -607,6 +619,12 @@ void RatingPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
             pattern->GetInnerFocusPaintRect(paintRect);
         }
     });
+    focusHub->SetOnFocusInternal([wp = WeakClaim(this)]() {
+        auto pattern = wp.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnFocusEvent();
+    });
+
     focusHub->SetOnBlurInternal([wp = WeakClaim(this)]() {
         auto pattern = wp.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -614,13 +632,59 @@ void RatingPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
     });
 }
 
+void RatingPattern::SetModifierFocus(bool isFocus)
+{
+    isfocus_ = isFocus;
+    state_ = isfocus_ ? RatingModifier::RatingAnimationType::FOCUS : RatingModifier::RatingAnimationType::NONE;
+
+    CHECK_NULL_VOID(pipelineContext_);
+    auto ratingTheme = pipelineContext_->GetTheme<RatingTheme>();
+    CHECK_NULL_VOID(ratingTheme);
+    if (ratingTheme->GetFocusAndBlurCancleAnimation()) {
+        ratingModifier_->SetFocusOrBlurColor(isfocus_ ? ratingTheme->GetFocusColor() : Color::TRANSPARENT);
+    }
+    ratingModifier_->SetIsFocus(isFocus);
+    MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void RatingPattern::OnFocusEvent()
+{
+    CHECK_NULL_VOID(pipelineContext_);
+    if (pipelineContext_->GetIsFocusActive()) {
+        SetModifierFocus(true);
+    }
+    AddIsFocusActiveUpdateEvent();
+}
+
 void RatingPattern::OnBlurEvent()
 {
-    isfocus_ = false;
+    SetModifierFocus(false);
+    RemoveIsFocusActiveUpdateEvent();
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
     CHECK_NULL_VOID(ratingRenderProperty);
     focusRatingScore_ = ratingRenderProperty->GetRatingScoreValue();
     MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void RatingPattern::AddIsFocusActiveUpdateEvent()
+{
+    if (!isFocusActiveUpdateEvent_) {
+        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetModifierFocus(isFocusAcitve);
+        };
+    }
+    auto pipline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
+}
+
+void RatingPattern::RemoveIsFocusActiveUpdateEvent()
+{
+    auto pipline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
 }
 
 void RatingPattern::SetRatingScore(double ratingScore)
@@ -668,9 +732,17 @@ void RatingPattern::InitMouseEvent()
 void RatingPattern::HandleHoverEvent(bool isHover)
 {
     isHover_ = isHover;
-    state_ = isHover_ ? RatingModifier::RatingAnimationType::HOVER : RatingModifier::RatingAnimationType::NONE;
+    if (isfocus_) {
+        state_ = RatingModifier::RatingAnimationType::FOCUS;
+    } else {
+        state_ = isHover_ ? RatingModifier::RatingAnimationType::HOVER : RatingModifier::RatingAnimationType::NONE;
+    }
+
     if (!isHover) {
         UpdateRatingScore(lastRatingScore_);
+        auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
+        CHECK_NULL_VOID(ratingRenderProperty);
+        ratingRenderProperty->UpdateTouchStar(lastRatingScore_);
     }
     MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
