@@ -22,15 +22,15 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT GridColModelNG : public GridColModel {
 public:
     void Create() override;
-    void Create(const RefPtr<V2::GridContainerSize>& span, const RefPtr<V2::GridContainerSize>& offset,
-        const RefPtr<V2::GridContainerSize>& order) override;
-    void SetSpan(const RefPtr<V2::GridContainerSize>& span) override;
-    void SetOffset(const RefPtr<V2::GridContainerSize>& offset) override;
-    void SetOrder(const RefPtr<V2::GridContainerSize>& order) override;
+    void Create(const V2::GridContainerSize& span, const V2::GridContainerSize& offset,
+        const V2::GridContainerSize& order) override;
+    void SetSpan(const V2::GridContainerSize& span) override;
+    void SetOffset(const V2::GridContainerSize& offset) override;
+    void SetOrder(const V2::GridContainerSize& order) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
-    static void SetSpan(FrameNode* frameNode, const RefPtr<V2::GridContainerSize>& span);
-    static void SetOffset(FrameNode* frameNode, const RefPtr<V2::GridContainerSize>& offset);
-    static void SetOrder(FrameNode* frameNode, const RefPtr<V2::GridContainerSize>& order);
+    static void SetSpan(FrameNode* frameNode, const V2::GridContainerSize& span);
+    static void SetOffset(FrameNode* frameNode, const V2::GridContainerSize& offset);
+    static void SetOrder(FrameNode* frameNode, const V2::GridContainerSize& order);
 };
 } // namespace OHOS::Ace::NG
 

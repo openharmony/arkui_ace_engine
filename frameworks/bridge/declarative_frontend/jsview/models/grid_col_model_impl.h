@@ -22,11 +22,11 @@ namespace OHOS::Ace::Framework {
 class GridColModelImpl : public GridColModel {
 public:
     void Create() override;
-    void Create(const RefPtr<V2::GridContainerSize>& span, const RefPtr<V2::GridContainerSize>& offset,
-        const RefPtr<V2::GridContainerSize>& order) override;
-    void SetSpan(const RefPtr<V2::GridContainerSize>& span) override;
-    void SetOffset(const RefPtr<V2::GridContainerSize>& offset) override;
-    void SetOrder(const RefPtr<V2::GridContainerSize>& order) override;
+    void Create(const V2::GridContainerSize& span, const V2::GridContainerSize& offset,
+        const V2::GridContainerSize& order) override;
+    void SetSpan(const V2::GridContainerSize& span) override;
+    void SetOffset(const V2::GridContainerSize& offset) override;
+    void SetOrder(const V2::GridContainerSize& order) override;
 };
 } // namespace OHOS::Ace::Framework
 
