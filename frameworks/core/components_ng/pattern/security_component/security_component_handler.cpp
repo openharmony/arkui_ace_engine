@@ -113,6 +113,18 @@ bool SecurityComponentHandler::CheckBlur(const RefPtr<FrameNode>& node, const Re
 {
     if (renderContext->GetFrontBlurRadius().has_value() &&
         GreatNotEqual(renderContext->GetFrontBlurRadius().value().ConvertToPx(), 0.0f)) {
+        LOGW("SecurityComponentCheckFail: Parent %{public}s blur is set, security component is invalid",
+            node->GetTag().c_str());
+        return true;
+    }
+    return false;
+}
+
+bool SecurityComponentHandler::CheckForegroundBlurStyle(const RefPtr<FrameNode>& node,
+    const RefPtr<RenderContext>& renderContext)
+{
+    auto blurStyleOption = renderContext->GetFrontBlurStyle();
+    if (blurStyleOption.has_value() && (blurStyleOption->blurStyle != BlurStyle::NO_MATERIAL)) {
         LOGW("SecurityComponentCheckFail: Parent %{public}s foregroundBlurStyle is set, security component is invalid",
             node->GetTag().c_str());
         return true;
@@ -212,8 +224,7 @@ bool SecurityComponentHandler::CheckClipMask(const RefPtr<FrameNode>& node, cons
 bool SecurityComponentHandler::CheckForegroundColor(const RefPtr<FrameNode>& node,
     const RefPtr<RenderContext>& renderContext)
 {
-    if (renderContext->GetForegroundColor().has_value() &&
-        (renderContext->GetForegroundColor().value() != Color::TRANSPARENT)) {
+    if (renderContext->GetForegroundColor().has_value()) {
         LOGW("SecurityComponentCheckFail: Parent %{public}s foregroundColor is set, security component is invalid",
             node->GetTag().c_str());
         return true;
@@ -268,8 +279,9 @@ bool SecurityComponentHandler::CheckRenderEffect(RefPtr<FrameNode>& node)
         CheckContrast(node, renderContext) || CheckInvert(node, renderContext) ||
         CheckSepia(node, renderContext) || CheckHueRotate(node, renderContext) ||
         CheckColorBlend(node, renderContext) || CheckClipMask(node, renderContext) ||
-        CheckForegroundColor(node, renderContext) || CheckSphericalEffect(node, renderContext)||
-        CheckLightUpEffect(node, renderContext) || CheckPixelStretchEffect(node, renderContext)) {
+        CheckForegroundColor(node, renderContext) || CheckSphericalEffect(node, renderContext) ||
+        CheckLightUpEffect(node, renderContext) || CheckPixelStretchEffect(node, renderContext) ||
+        CheckForegroundBlurStyle(node, renderContext)) {
         return true;
     }
     return false;
