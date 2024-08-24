@@ -529,7 +529,7 @@ void SelectModelNG::InitSelect(FrameNode* frameNode, const std::vector<SelectPar
         CHECK_NULL_VOID(overlayManager);
         overlayManager->DeleteMenu(id);
     };
-    select->PushDestroyCallback(destructor);
+    select->PushDestroyCallbackWithTag(destructor, V2::SELECT_ETS_TAG);
 }
 
 void SelectModelNG::SetArrowPosition(FrameNode* frameNode, const ArrowPosition value)
