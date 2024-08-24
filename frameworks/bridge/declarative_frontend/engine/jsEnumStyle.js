@@ -2902,7 +2902,7 @@ var SaveDescription;
   SaveDescription[SaveDescription["CONTINUE_TO_RECEIVE"] = 7] = "CONTINUE_TO_RECEIVE";
   SaveDescription[SaveDescription["SAVE_TO_GALLERY"] = 8] = "SAVE_TO_GALLERY";
   SaveDescription[SaveDescription["EXPORT_TO_GALLERY"] = 9] = "EXPORT_TO_GALLERY";
-  SaveDescription[SaveDescription["QUICK_SAVE_TO_GALLER"] = 10] = "QUICK_SAVE_TO_GALLER";
+  SaveDescription[SaveDescription["QUICK_SAVE_TO_GALLERY"] = 10] = "QUICK_SAVE_TO_GALLERY";
   SaveDescription[SaveDescription["RESAVE_TO_GALLERY"] = 11] = "RESAVE_TO_GALLERY";
 })(SaveDescription || (SaveDescription = {}));
 
