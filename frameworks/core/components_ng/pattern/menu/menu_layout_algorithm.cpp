@@ -419,38 +419,85 @@ void MenuLayoutAlgorithm::InitWrapperRect(
     if (menuPattern->IsSelectOverlayExtensionMenu() && GreatNotEqual(keyboardHeight, 0)) {
         bottom = keyboardHeight;
     }
-    auto top = safeAreaInsets.top_.Length();
-    auto left = safeAreaInsets.left_.Length();
-    auto right = safeAreaInsets.right_.Length();
-    dumpInfo_.top = top;
+    dumpInfo_.top = safeAreaInsets.top_.Length();
+    dumpInfo_.left = safeAreaInsets.left_.Length();
+    dumpInfo_.right = safeAreaInsets.right_.Length();
     dumpInfo_.bottom = bottom;
+
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         if (hierarchicalParameters_) {
             // wrapperRect_= windowGlobalRect- dock -statusbar
             wrapperRect_ = pipelineContext->GetDisplayAvailableRect();
         } else {
             // wrapperIdealSize.Height = windowGlobalRect.Height()-navigation_indicator.height,no AR to avoid navigation
+            auto windowGlobalRect = hierarchicalParameters_ ? pipelineContext->GetDisplayAvailableRect()
+                            : pipelineContext->GetDisplayWindowRectInfo();
             auto windowManager = pipelineContext->GetWindowManager();
             auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
-                                    windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
-            double width = windowGlobalRect.Width();
-            double height = windowGlobalRect.Height();
+                            windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+            dumpInfo_.width = windowGlobalRect.Width();
+            dumpInfo_.height = windowGlobalRect.Height();
             if (isContainerModal) {
-                LimitContainerModalMenuRect(width, height);
+                LimitContainerModalMenuRect(dumpInfo_.width, dumpInfo_.height);
             }
-            wrapperRect_.SetRect(left, top, width - left - right, height - top - bottom);
+            isHalfFoldHover_ = pipelineContext->IsHalfFoldHoverStatus();
+            SetWrapperRect(props, menuPattern);
         }
     }
-
     if (menuPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
         //  come from ModifyPreviewMenuPlacement
         if (NearEqual(wrapperIdealSize.Height(), windowGlobalRect.Height())) {
             wrapperRect_.SetRect(
-                left, top, windowGlobalRect.Width() - left - right, windowGlobalRect.Height() - top - bottom);
+                dumpInfo_.left, dumpInfo_.top, windowGlobalRect.Width() - dumpInfo_.left -
+                dumpInfo_.right, windowGlobalRect.Height() - dumpInfo_.top - dumpInfo_.bottom);
         }
     }
     wrapperSize_ = SizeF(wrapperRect_.Width(), wrapperRect_.Height());
     dumpInfo_.wrapperRect = wrapperRect_;
+}
+
+void MenuLayoutAlgorithm::SetWrapperRect(
+    const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern)
+{
+    int32_t creaseYTop = 0;
+    int32_t creaseYBottom = 0;
+    int32_t creaseHeight = 0;
+    auto container = Container::CurrentSafelyWithCheck();
+    CHECK_NULL_VOID(container);
+    auto displayInfo = container->GetDisplayInfo();
+    CHECK_NULL_VOID(displayInfo);
+    auto foldCreaseRects = displayInfo->GetCurrentFoldCreaseRegion();
+    if (!foldCreaseRects.empty()) {
+        auto foldCrease = foldCreaseRects.front();
+        creaseYTop = static_cast<int32_t>(foldCrease.Top());
+        creaseYBottom = static_cast<int32_t>(foldCrease.Bottom());
+        creaseHeight = static_cast<int32_t>(foldCrease.Height());
+    }
+    float getY = 0;
+    if (props->GetMenuPlacement().has_value()) {
+        getY = targetOffset_.GetY();
+    } else {
+        getY = position_.GetY();
+    }
+    bool enableFold = menuPattern->GetFold();
+    auto top = dumpInfo_.top;
+    auto bottom = dumpInfo_.bottom;
+    auto left = dumpInfo_.left;
+    auto right = dumpInfo_.right;
+    auto width = dumpInfo_.width;
+    auto height = dumpInfo_.height;
+    
+    if (enableFold && isHalfFoldHover_) {
+        if (getY < creaseYTop) {
+            wrapperRect_.SetRect(left, top, width - left - right, creaseYTop - top);
+        } else if (getY > creaseYBottom) {
+            wrapperRect_.SetRect(left, creaseYBottom, width - left - right, height - creaseYBottom - bottom);
+        } else {
+            wrapperRect_.SetRect(left, top, width - left - right, height - top - bottom);
+        }
+    } else {
+        wrapperRect_.SetRect(left, top, width - left - right, height - top - bottom);
+    }
 }
 
 void MenuLayoutAlgorithm::InitSpace(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern)

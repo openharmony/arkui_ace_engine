@@ -57,6 +57,7 @@ constexpr float PAN_MAX_VELOCITY = 2000.0f;
 constexpr Dimension MIN_SELECT_MENU_WIDTH = 64.0_vp;
 constexpr int32_t COLUMN_NUM = 2;
 constexpr int32_t STACK_EXPAND_DISAPPEAR_DURATION = 300;
+constexpr int32_t HALF_FOLD_HOVER_DURATION = 1000;
 constexpr double MENU_ORIGINAL_SCALE = 0.6f;
 constexpr double MOUNT_MENU_OPACITY = 0.4f;
 
@@ -198,6 +199,7 @@ void MenuPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(targetNode);
     auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
+    halfFoldHoverCallbackId_ = RegisterHalfFoldHover();
     OnAreaChangedFunc onAreaChangedFunc = [menuNodeWk = WeakPtr<FrameNode>(host)](const RectF& oldRect,
                                               const OffsetF& oldOrigin, const RectF& /* rect */,
                                               const OffsetF& /* origin */) {
@@ -205,7 +207,6 @@ void MenuPattern::OnAttachToFrameNode()
         if (oldRect.IsEmpty() && oldOrigin.NonOffset()) {
             return;
         }
-
         auto pipelineContext = PipelineContext::GetCurrentContext();
         AnimationOption option;
         option.SetCurve(pipelineContext->GetSafeAreaManager()->GetSafeAreaCurve());
@@ -230,6 +231,41 @@ void MenuPattern::OnAttachToFrameNode()
         pipelineContext->FlushPipelineImmediately();
     };
     eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
+}
+
+void MenuPattern::OnDetachFromFrameNode(FrameNode* node)
+{
+    auto containerId = Container::CurrentId();
+    auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
+    auto pipeline =
+        parentContainerId < 0 ? PipelineContext::GetCurrentContext() : PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    if (HasFoldDisplayModeChangedCallbackId()) {
+        pipeline->UnRegisterHalfFoldHoverChangedCallback(halfFoldHoverCallbackId_.value_or(-1));
+    }
+}
+
+int32_t MenuPattern::RegisterHalfFoldHover()
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, 0);
+    int32_t callbackId = pipelineContext->RegisterHalfFoldHoverChangedCallback(
+        [weak = WeakClaim(this), pipelineContext](bool isHalfFoldHover) { // 注册回调函数
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        AnimationOption optionPosition;
+        auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.35f, 1.0f, 0.0f);
+        optionPosition.SetDuration(HALF_FOLD_HOVER_DURATION);
+        optionPosition.SetCurve(motion);
+        pipelineContext->FlushUITasks();
+        pipelineContext->Animate(optionPosition, motion, [host, pipelineContext]() {
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            pipelineContext->FlushUITasks();
+        });
+    });
+    return callbackId;
 }
 
 void MenuPattern::OnModifyDone()
