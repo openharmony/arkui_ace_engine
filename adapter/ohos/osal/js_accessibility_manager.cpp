@@ -1522,8 +1522,8 @@ void JsAccessibilityManager::UpdateVirtualNodeInfo(std::list<AccessibilityElemen
     AccessibilityElementInfo& nodeInfo, const RefPtr<NG::UINode>& uiVirtualNode, const CommonProperty& commonProperty,
     const RefPtr<NG::PipelineContext>& ngPipeline)
 {
-    AccessibilityElementInfo virtualInfo;
     for (const auto& item : uiVirtualNode->GetChildren(true)) {
+        AccessibilityElementInfo virtualInfo;
         auto frameNodeChild = AceType::DynamicCast<NG::FrameNode>(item);
         if (frameNodeChild == nullptr) {
             continue;
@@ -4838,6 +4838,22 @@ void JsAccessibilityManager::JsInteractionOperation::SetChildTreeIdAndWinId(
     auto jsAccessibilityManager = GetHandler().Upgrade();
     CHECK_NULL_VOID(jsAccessibilityManager);
     jsAccessibilityManager->NotifySetChildTreeIdAndWinId(splitElementId, treeId, childWindowId);
+
+    auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
+    CHECK_NULL_VOID(context);
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+    CHECK_NULL_VOID(ngPipeline);
+    auto rootNode = ngPipeline->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
+    auto frameNode = GetFramenodeByAccessibilityId(rootNode, splitElementId);
+    CHECK_NULL_VOID(frameNode);
+
+    if ((!frameNode) || (IsExtensionComponent(frameNode) && !IsUIExtensionShowPlaceholder(frameNode))) {
+        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "Register element is uec: %{public}s ", frameNode->GetTag().c_str());
+        rootNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
+    } else {
+        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "Register element is not uec: %{public}s", frameNode->GetTag().c_str());
+    }
 }
 
 void JsAccessibilityManager::JsInteractionOperation::SetBelongTreeId(const int32_t treeId)
