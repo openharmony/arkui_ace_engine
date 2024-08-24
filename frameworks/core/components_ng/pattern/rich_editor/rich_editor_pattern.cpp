@@ -5865,10 +5865,10 @@ void RichEditorPattern::DeleteByDeleteValueInfo(const RichEditorDeleteValue& inf
     CHECK_NULL_VOID(host);
     std::list<RefPtr<UINode>> deleteNode;
     auto eraseLength = ProcessDeleteNodes(deleteSpans);
+    UpdateSpanPosition();
     if (info.GetRichEditorDeleteDirection() == RichEditorDeleteDirection::BACKWARD) {
         SetCaretPosition(caretPosition_ - eraseLength);
     }
-    UpdateSpanPosition();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     OnModifyDone();
 }
