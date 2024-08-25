@@ -21,7 +21,7 @@
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT CustomPattern : public Pattern {
-    DECLARE_ACE_TYPE(StackPattern, Pattern);
+    DECLARE_ACE_TYPE(CustomPattern, Pattern);
 
 public:
     CustomPattern() = default;
