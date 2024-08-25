@@ -589,20 +589,7 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createBadgeNode,
 };
 
-void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
-{
-    if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to create %{public}d type of node", tag);
-        return nullptr;
-    }
-    CHECK_NULL_RETURN(createArkUIFrameNodes[tag], nullptr);
-    if (nodeId == ARKUI_AUTO_GENERATE_NODE_ID) {
-        nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    }
-    return createArkUIFrameNodes[tag](nodeId);
-}
-
-void* CreateNodeWithParams(ArkUINodeType tag, ArkUI_Int32 nodeId, const ArkUI_Params& params)
+void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId, const ArkUI_Params& params)
 {
     if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to create %{public}d type of node", tag);

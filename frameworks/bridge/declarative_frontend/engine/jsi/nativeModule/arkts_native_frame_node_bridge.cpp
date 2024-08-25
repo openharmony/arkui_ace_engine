@@ -27,7 +27,6 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node_pattern.h"
-#include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/components_ng/syntax/node_content.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/extension_custom_node.h"
@@ -180,7 +179,7 @@ ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNode(ArkUIRuntimeCallInf
         if (nodeType != ARKUI_CUSTOM) {
             if (nodeType == ARKUI_XCOMPONENT) {
 #ifdef XCOMPONENT_SUPPORTED
-                ArkUI_XComponent_Params params;
+                ArkUI_Params params;
                 XComponentBridge::ParseParams(runtimeCallInfo, params);
                 params.nodeType = ARKUI_XCOMPONENT;
                 nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNodeWithParams(nodeType, nodeId, 0, params);

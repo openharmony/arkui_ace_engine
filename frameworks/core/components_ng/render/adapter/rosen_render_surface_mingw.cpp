@@ -95,12 +95,4 @@ void RosenRenderSurface::UpdateSurfaceSizeInUserData(uint32_t width, uint32_t he
 
 void RosenRenderSurface::DumpInfo() {}
 
-void RosenRenderSurface::RegisterSurface() const {}
-
-void RosenRenderSurface::UnregisterSurface() const {}
-
-void RosenRenderSurface::Connect() const {}
-
-void RosenRenderSurface::Disconnect() const {}
-
 } // namespace OHOS::Ace::NG
