@@ -38,6 +38,9 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr Color TEXT_DEFAULT_FONT_COLOR = Color(0xFF007DFF);
+constexpr Color TEXT_DEFAULT_HOVER_BACKGROUND_COLOR = Color(0x0C182431);
+constexpr Color TEXT_DEFAULT_PRESS_BACKGROUND_COLOR = Color(0x19182431);
 std::string GetDeclaration(const std::optional<Color>& color, const std::optional<TextDecoration>& textDecoration,
     const std::optional<TextDecorationStyle>& textDecorationStyle)
 {
@@ -651,9 +654,12 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem() const
 
     sameSpan->onClick = onClick;
     sameSpan->onLongPress = onLongPress;
+    sameSpan->urlOnClick = urlOnClick;
+    sameSpan->urlOnRelease = urlOnRelease;
+    sameSpan->urlOnPress = urlOnPress;
+    sameSpan->urlOnHover = urlOnHover;
     return sameSpan;
 }
-
 
 #define WRITE_TEXT_STYLE_TLV(group, name, tag, type)                   \
     do {                                                               \
@@ -818,6 +824,53 @@ std::optional<std::pair<int32_t, int32_t>> SpanItem::GetIntersectionInterval(std
     int32_t start = std::max(this->interval.first, interval.first);
     int32_t end = std::min(this->interval.second, interval.second);
     return std::make_optional<std::pair<int32_t, int32_t>>(std::make_pair(start, end));
+}
+
+void SpanItem::HandeUrlHoverEvent(bool isHover, int32_t urlId,
+    const RefPtr<SpanItem>& spanItem) const
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (isHover) {
+        spanItem->fontStyle->UpdateTextColor(TEXT_DEFAULT_FONT_COLOR);
+        TextBackgroundStyle backgroundStyle;
+        backgroundStyle.backgroundColor = (TEXT_DEFAULT_HOVER_BACKGROUND_COLOR);
+        backgroundStyle.backgroundRadius = { radius_, radius_, radius_, radius_};
+        spanItem->backgroundStyle = backgroundStyle;
+        pipelineContext->SetMouseStyleHoldNode(urlId);
+        pipelineContext->ChangeMouseStyle(urlId, MouseFormat::HAND_POINTING);
+    } else {
+        spanItem->fontStyle->UpdateTextColor(TEXT_DEFAULT_FONT_COLOR);
+        TextBackgroundStyle backgroundStyle;
+        backgroundStyle.backgroundColor = Color::TRANSPARENT;
+        spanItem->backgroundStyle = backgroundStyle;
+        pipelineContext->ChangeMouseStyle(urlId, MouseFormat::DEFAULT);
+        pipelineContext->FreeMouseStyleHoldNode(urlId);
+    }
+}
+
+void SpanItem::HandeUrlOnPressEvent(const RefPtr<SpanItem>& spanItem, bool isPress) const
+{
+    if (isPress) {
+        spanItem->fontStyle->UpdateTextColor(TEXT_DEFAULT_FONT_COLOR);
+        TextBackgroundStyle backgroundStyle;
+        backgroundStyle.backgroundRadius = { radius_, radius_, radius_, radius_};
+        backgroundStyle.backgroundColor = (TEXT_DEFAULT_PRESS_BACKGROUND_COLOR);
+        spanItem->backgroundStyle = backgroundStyle;
+    } else {
+        spanItem->fontStyle->UpdateTextColor(TEXT_DEFAULT_FONT_COLOR);
+        TextBackgroundStyle backgroundStyle;
+        backgroundStyle.backgroundColor = Color::TRANSPARENT;
+        spanItem->backgroundStyle = backgroundStyle;
+    }
+}
+
+void SpanItem::HandleUrlNormalStyle(const RefPtr<SpanItem>& spanItem) const
+{
+    spanItem->fontStyle->UpdateTextColor(TEXT_DEFAULT_FONT_COLOR);
+    TextBackgroundStyle backgroundStyle;
+    backgroundStyle.backgroundColor = Color::TRANSPARENT;
+    spanItem->backgroundStyle = backgroundStyle;
 }
 
 bool ImageSpanItem::EncodeTlv(std::vector<uint8_t>& buff)
