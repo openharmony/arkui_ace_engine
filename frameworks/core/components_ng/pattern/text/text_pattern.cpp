@@ -2293,7 +2293,7 @@ void TextPattern::AddSubComponentInfoForSpan(std::vector<SubComponentInfo>& subC
     CHECK_NULL_VOID(span);
     CHECK_NULL_VOID(span->onClick); // skip null onClick
     SubComponentInfo subComponentInfo;
-    subComponentInfo.spanId = subComponentInfos.size();
+    subComponentInfo.spanId = static_cast<int32_t>(subComponentInfos.size());
     subComponentInfo.spanText = content;
     if (span->accessibilityProperty == nullptr) {
         subComponentInfo.accessibilityLevel = AccessibilityProperty::Level::AUTO;
@@ -2314,7 +2314,7 @@ void TextPattern::AddSubComponentInfoForAISpan(std::vector<SubComponentInfo>& su
     const std::string& content, const AISpan& aiSpan)
 {
     SubComponentInfo subComponentInfo;
-    subComponentInfo.spanId = subComponentInfos.size();
+    subComponentInfo.spanId = static_cast<int32_t>(subComponentInfos.size());
     subComponentInfo.spanText = content;
     subComponentInfo.accessibilityLevel = AccessibilityProperty::Level::AUTO;
     subComponentInfos.emplace_back(subComponentInfo);
