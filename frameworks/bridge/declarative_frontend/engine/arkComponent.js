@@ -3066,6 +3066,7 @@ class ArkComponent {
     if (this._gestureEvent !== null) {
       this._gestureEvent = new UIGestureEvent();
       this._gestureEvent.setNodePtr(this.nativePtr);
+      this._gestureEvent.setWeakNodePtr(this._weakPtr);
     }
     return this._gestureEvent;
   }
@@ -4587,7 +4588,13 @@ class UIGestureEvent {
   setNodePtr(nodePtr) {
     this._nodePtr = nodePtr;
   }
+  setWeakNodePtr(weakNodePtr) {
+    this._weakNodePtr = weakNodePtr;
+  }
   addGesture(gesture, priority, mask) {
+    if (this._weakNodePtr.invalid()) {
+      return;
+    }
     switch (gesture.gestureType) {
       case CommonGestureType.TAP_GESTURE: {
         let tapGesture = gesture;
@@ -4648,9 +4655,15 @@ class UIGestureEvent {
     this.addGesture(gesture, GesturePriority.PARALLEL, mask);
   }
   removeGestureByTag(tag) {
+    if (this._weakNodePtr.invalid()) {
+      return;
+    }
     getUINativeModule().common.removeGestureByTag(this._nodePtr, tag);
   }
   clearGestures() {
+    if (this._weakNodePtr.invalid()) {
+      return;
+    }
     getUINativeModule().common.clearGestures(this._nodePtr);
   }
 }
@@ -4720,11 +4733,27 @@ function applyGesture(modifier, component) {
   }
 }
 
+globalThis.__mapOfModifier__ = new Map();
 function __gestureModifier__(modifier) {
+  if (globalThis.__mapOfModifier__.size === 0) {
+    __modifierElmtDeleteCallback__();
+  }
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = new ArkComponent(nativeNode);
-  applyGesture(modifier, component);
+  if (globalThis.__mapOfModifier__.get(elmtId)) {
+    let component = globalThis.__mapOfModifier__.get(elmtId);
+    applyGesture(modifier, component);
+  } else {
+    let component = new ArkComponent(nativeNode);
+    globalThis.__mapOfModifier__.set(elmtId, component);
+    applyGesture(modifier, component);
+  }
+}
+
+function __modifierElmtDeleteCallback__() {
+  UINodeRegisterProxy.registerModifierElmtDeleteCallback((elmtId) => {
+    globalThis.__mapOfModifier__.delete(elmtId);
+  });
 }
 
 const __elementIdToCustomProperties__ = new Map();
