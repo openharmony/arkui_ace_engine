@@ -4398,6 +4398,15 @@ struct ArkUIRichEditorModifier {
     void (*setRichEditorEditMenuOptions)(
         ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback);
     void (*resetRichEditorEditMenuOptions)(ArkUINodeHandle node);
+    void (*setRichEditorOnWillChange)(ArkUINodeHandle node, void* callback);
+    void (*resetRichEditorOnWillChange)(ArkUINodeHandle node);
+    void (*setRichEditorOnDidChange)(ArkUINodeHandle node, void* callback);
+    void (*resetRichEditorOnDidChange)(ArkUINodeHandle node);
+    void (*setRichEditorPlaceholder)(ArkUINodeHandle node, ArkUI_CharPtr* stringParameters,
+        const ArkUI_Uint32 stringParametersCount, const ArkUI_Float64* valuesArray, const ArkUI_Uint32 valuesCount);
+    void (*resetRichEditorPlaceholder)(ArkUINodeHandle node);
+    void (*setRichEditorAboutToDelete)(ArkUINodeHandle node, void* callback);
+    void (*resetRichEditorAboutToDelete)(ArkUINodeHandle node);
 };
 
 struct ArkUIRichEditorControllerModifier {

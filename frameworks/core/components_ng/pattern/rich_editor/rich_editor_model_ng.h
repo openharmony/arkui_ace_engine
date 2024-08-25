@@ -57,6 +57,10 @@ public:
     static void SetTextDetectConfig(FrameNode* frameNode, const TextDetectConfig& textDetectConfig);
     static void SetOnIMEInputComplete(FrameNode* frameNode,
         std::function<void(const RichEditorAbstractSpanResult&)>&& callback);
+    static void SetOnWillChange(FrameNode* frameNode, std::function<bool(const RichEditorChangeValue&)>&& func);
+    static void SetOnDidChange(FrameNode* frameNode, std::function<void(const RichEditorChangeValue&)>&& func);
+    static void SetPlaceholder(FrameNode* frameNode, PlaceholderOptions& options);
+    static void SetAboutToDelete(FrameNode* frameNode, std::function<bool(const RichEditorDeleteValue&)>&& func);
     static void SetOnDidIMEInput(FrameNode* frameNode, std::function<void(const TextRange&)>&& callback);
     static void SetCopyOption(FrameNode* frameNode, CopyOptions& copyOptions);
     static void SetOnSelectionChange(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& callback);
