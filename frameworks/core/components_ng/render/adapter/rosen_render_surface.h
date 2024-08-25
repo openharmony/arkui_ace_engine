@@ -129,11 +129,18 @@ public:
 
     void SetTransformHint(uint32_t rotation) override;
 
+    void RegisterSurface() const override;
+
+    void UnregisterSurface() const override;
+
+    void Connect() const override;
+
+    void Disconnect() const override;
+
     void DumpInfo() override;
 
 private:
     void PostRenderOnlyTaskToUI();
-    void RegisterSurface() const;
 
     std::mutex surfaceNodeMutex_;
     OffsetF orgin_ { 0, 0 };

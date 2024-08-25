@@ -36,7 +36,7 @@ void XComponentExtSurfaceCallbackClient::ProcessSurfaceDestroy()
 {
     auto xcPattern = weakXComponentPattern_.Upgrade();
     if (xcPattern) {
-        xcPattern->NativeXComponentDestroy();
+        xcPattern->OnSurfaceDestroyed();
     }
 }
 } // namespace OHOS::Ace::NG
