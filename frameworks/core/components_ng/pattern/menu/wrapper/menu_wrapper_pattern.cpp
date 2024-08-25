@@ -707,6 +707,7 @@ void MenuWrapperPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("MenuPreviewMode: " + std::to_string(dumpInfo_.menuPreviewMode));
     DumpLog::GetInstance().AddDesc("MenuType: " + std::to_string(dumpInfo_.menuType));
     DumpLog::GetInstance().AddDesc("EnableArrow: " + std::to_string(dumpInfo_.enableArrow));
+    DumpLog::GetInstance().AddDesc("Offset: " + dumpInfo_.offset.ToString());
     DumpLog::GetInstance().AddDesc("TargetNode: " + dumpInfo_.targetNode);
     DumpLog::GetInstance().AddDesc("TargetOffset: " + dumpInfo_.targetOffset.ToString());
     DumpLog::GetInstance().AddDesc("TargetSize: " + dumpInfo_.targetSize.ToString());

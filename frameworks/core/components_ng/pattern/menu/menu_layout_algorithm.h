@@ -34,6 +34,7 @@ struct MenuDumpInfo {
     uint32_t menuPreviewMode = 0;
     uint32_t menuType = 0;
     bool enableArrow = false;
+    OffsetF offset;
     std::string targetNode;
     OffsetF targetOffset;
     SizeF targetSize;
