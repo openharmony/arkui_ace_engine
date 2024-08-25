@@ -180,6 +180,36 @@ public:
         return bubbleSpacing_;
     }
 
+    const Dimension& GetAgingTextLeftPadding() const
+    {
+        return ageTextLeftPadding_;
+    }
+
+    const Dimension& GetAgingTextRightPadding() const
+    {
+        return ageTextRightPadding_;
+    }
+
+    const Dimension& GetAgingButtonTextLeftPadding() const
+    {
+        return ageButtonTextLeftPadding_;
+    }
+
+    const Dimension& GetAgingButtonTextRightPadding() const
+    {
+        return ageButtonTextRightPadding_;
+    }
+
+    const Dimension& GetAgingButtonLeftPadding() const
+    {
+        return ageButtonLeftPadding_;
+    }
+
+    const Dimension& GetAgingButtonRightPadding() const
+    {
+        return ageButtonRightPadding_;
+    }
+
     const Dimension& GetButtonTextInsideMargin() const
     {
         return buttonTextInsideMargin_;
@@ -324,6 +354,12 @@ private:
     Dimension buttonFontSize_ = 14.0_fp;
     Color fontColor_;
     Dimension bubbleSpacing_ = 8.0_vp;
+    Dimension ageTextLeftPadding_ = 12.0_vp;
+    Dimension ageTextRightPadding_ = 12.0_vp;
+    Dimension ageButtonTextLeftPadding_ = 12.0_vp;
+    Dimension ageButtonTextRightPadding_ = 16.0_vp;
+    Dimension ageButtonLeftPadding_ = 0.0_vp;
+    Dimension ageButtonRightPadding_ = 0.0_vp;
     Dimension buttonTextInsideMargin_ = 8.0_vp;
     Dimension buttonSpacing = 4.0_vp;
     Dimension littlePadding_ = 4.0_vp;
