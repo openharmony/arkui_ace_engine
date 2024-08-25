@@ -2126,7 +2126,12 @@ class NavPathStack {
     }
   }
   getAllPathIndex() {
-    let array = this.pathArray.flatMap(element => element.index);
+    let array = this.pathArray.flatMap(element => {
+      if (element.index === undefined) {
+        return -1;
+      }
+      return element.index;
+    });
     return array;
   }
   findInPopArray(name) {
