@@ -108,7 +108,7 @@ void GridPattern::BeforeCreateLayoutWrapper()
 
 RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
 {
-    auto paint = MakeRefPtr<GridPaintMethod>(GetAxis() == Axis::HORIZONTAL, GetScrollBar());
+    auto paint = MakeRefPtr<GridPaintMethod>(GetAxis() == Axis::HORIZONTAL, IsReverse(), GetScrollBar());
     CHECK_NULL_RETURN(paint, nullptr);
     CreateScrollBarOverlayModifier();
     paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());

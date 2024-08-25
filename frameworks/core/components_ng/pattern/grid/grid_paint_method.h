@@ -26,8 +26,8 @@ class ACE_EXPORT GridPaintMethod : public ScrollablePaintMethod {
     DECLARE_ACE_TYPE(GridPaintMethod, ScrollablePaintMethod)
 public:
     explicit GridPaintMethod(const RefPtr<ScrollBar>& scrollBar) : scrollBar_(scrollBar) {}
-    explicit GridPaintMethod(bool vertical, const RefPtr<ScrollBar>& scrollBar)
-        : ScrollablePaintMethod(vertical), scrollBar_(scrollBar)
+    explicit GridPaintMethod(bool vertical, bool isReverse, const RefPtr<ScrollBar>& scrollBar)
+        : ScrollablePaintMethod(vertical, isReverse), scrollBar_(scrollBar)
     {}
 
     ~GridPaintMethod() override = default;

@@ -95,6 +95,14 @@ bool WaterFlowPattern::IsReverse() const
     CHECK_NULL_RETURN(layoutProperty, false);
     return layoutProperty->IsReverse();
 }
+bool WaterFlowPattern::IsVerticalReverse() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto layoutProperty = host->GetLayoutProperty<WaterFlowLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->IsVerticalReverse();
+}
 OverScrollOffset WaterFlowPattern::GetOverScrollOffset(double delta) const
 {
     return layoutInfo_->GetOverScrolledDelta(static_cast<float>(delta));
@@ -153,7 +161,7 @@ RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
 
 RefPtr<NodePaintMethod> WaterFlowPattern::CreateNodePaintMethod()
 {
-    auto paint = MakeRefPtr<WaterFlowPaintMethod>(GetAxis() == Axis::HORIZONTAL);
+    auto paint = MakeRefPtr<WaterFlowPaintMethod>(GetAxis() == Axis::HORIZONTAL, IsReverse(), IsVerticalReverse());
     if (!contentModifier_) {
         contentModifier_ = AceType::MakeRefPtr<WaterFlowContentModifier>();
     }
