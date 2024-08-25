@@ -2043,7 +2043,9 @@ void TextPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-
+    auto nowTime = static_cast<unsigned long long>(GetSystemTimestamp());
+    ACE_LAYOUT_SCOPED_TRACE("OnModifyDone[Text][id:%d][time:%llu]", host->GetId(), nowTime);
+    DumpRecord(std::to_string(nowTime));
     if (!(PipelineContext::GetCurrentContextSafely() &&
             PipelineContext::GetCurrentContextSafely()->GetMinPlatformVersion() > API_PROTEXTION_GREATER_NINE)) {
         bool shouldClipToContent =
@@ -2671,34 +2673,8 @@ void TextPattern::AddImageToSpanItem(const RefPtr<UINode>& child)
 void TextPattern::DumpAdvanceInfo()
 {
     DumpLog::GetInstance().AddDesc(std::string("-----DumpAdvanceInfo-----"));
-    DumpLog::GetInstance().AddDesc(std::string("contentRect :").append(contentRect_.ToString()));
-    if (SystemProperties::GetDebugEnabled() && pManager_) {
-        DumpLog::GetInstance().AddDesc(std::string("from TextEngine paragraphs_ info :"));
-        DumpLog::GetInstance().AddDesc(
-            std::string("DidExceedMaxLines:").append(std::to_string(pManager_->DidExceedMaxLines())));
-
-        DumpLog::GetInstance().AddDesc(std::string("GetTextWidth:")
-                                           .append(std::to_string(pManager_->GetTextWidth()))
-                                           .append(" GetHeight:")
-                                           .append(std::to_string(pManager_->GetHeight()))
-                                           .append(" GetMaxWidth:")
-                                           .append(std::to_string(pManager_->GetMaxWidth()))
-                                           .append(" GetMaxIntrinsicWidth:")
-                                           .append(std::to_string(pManager_->GetMaxIntrinsicWidth())));
-        DumpLog::GetInstance().AddDesc(std::string("GetLineCount:")
-                                           .append(std::to_string(pManager_->GetLineCount()))
-                                           .append(" GetLongestLine:")
-                                           .append(std::to_string(pManager_->GetLongestLine())));
-    }
-
     DumpLog::GetInstance().AddDesc(
         std::string("BindSelectionMenu: ").append(std::to_string(selectionMenuMap_.empty())));
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_VOID(pipeline);
-    auto fontScale = pipeline->GetFontScale();
-    auto fontWeightScale = pipeline->GetFontWeightScale();
-    DumpLog::GetInstance().AddDesc(std::string("fontScale: ").append(std::to_string(fontScale)));
-    DumpLog::GetInstance().AddDesc(std::string("fontWeightScale: ").append(std::to_string(fontWeightScale)));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
@@ -2711,6 +2687,7 @@ void TextPattern::DumpAdvanceInfo()
         auto strategy = static_cast<int32_t>(renderContext->GetForegroundColorStrategyValue());
         DumpLog::GetInstance().AddDesc(std::string("ForegroundColorStrategy: ").append(std::to_string(strategy)));
     }
+    DumpLog::GetInstance().AddDesc(std::string("Selection: ").append("(").append(textSelector_.ToString()).append(")"));
 }
 
 void TextPattern::DumpInfo()
@@ -2718,6 +2695,9 @@ void TextPattern::DumpInfo()
     auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProp);
     auto& dumpLog = DumpLog::GetInstance();
+    auto nowTime = GetSystemTimestamp();
+    dumpLog.AddDesc(std::string("frameRecord: ").append(frameRecord_));
+    dumpLog.AddDesc(std::string("time: ").append(std::to_string(nowTime)));
     if (!IsSetObscured()) {
         dumpLog.AddDesc(std::string("Content: ").append(textLayoutProp->GetContent().value_or(" ")));
     }
@@ -2749,15 +2729,58 @@ void TextPattern::DumpInfo()
         std::string("HeightAdaptivePolicy: ")
             .append(V2::ConvertWrapTextHeightAdaptivePolicyToString(
                 textLayoutProp->GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST))));
-    dumpLog.AddDesc(std::string("Selection: ").append("(").append(textSelector_.ToString()).append(")"));
-    if (pManager_ && !pManager_->GetParagraphs().empty()) {
+    if (pManager_) {
         auto num = static_cast<int32_t>(pManager_->GetParagraphs().size());
         dumpLog.AddDesc(std::string("Paragraphs num: ").append(std::to_string(num)));
         dumpLog.AddDesc(std::string("PaintInfo: ").append(paintInfo_));
     }
+    DumpScaleInfo();
+    DumpTextEngineInfo();
     if (SystemProperties::GetDebugEnabled()) {
         DumpAdvanceInfo();
     }
+}
+
+void TextPattern::DumpScaleInfo()
+{
+    auto& dumpLog = DumpLog::GetInstance();
+    dumpLog.AddDesc(std::string("-----DumpScaleInfo-----"));
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto fontScale = pipeline->GetFontScale();
+    auto fontWeightScale = pipeline->GetFontWeightScale();
+    auto followSystem = pipeline->IsFollowSystem();
+    float maxFontScale = pipeline->GetMaxAppFontScale();
+    auto halfLeading = pipeline->GetHalfLeading();
+    dumpLog.AddDesc(std::string("fontScale: ").append(std::to_string(fontScale)));
+    dumpLog.AddDesc(std::string("fontWeightScale: ").append(std::to_string(fontWeightScale)));
+    dumpLog.AddDesc(std::string("IsFollowSystem: ").append(std::to_string(followSystem)));
+    dumpLog.AddDesc(std::string("maxFontScale: ").append(std::to_string(maxFontScale)));
+    dumpLog.AddDesc(std::string("halfLeading: ").append(std::to_string(halfLeading)));
+}
+
+void TextPattern::DumpTextEngineInfo()
+{
+    auto& dumpLog = DumpLog::GetInstance();
+    dumpLog.AddDesc(std::string("-----TextEngine paragraphs_ info-----"));
+    dumpLog.AddDesc(std::string("contentRect :").append(contentRect_.ToString()));
+    if (pManager_) {
+        dumpLog.AddDesc(std::string("from TextEngine paragraphs_ info :"));
+        dumpLog.AddDesc(std::string("DidExceedMaxLines:").append(std::to_string(pManager_->DidExceedMaxLines())));
+        dumpLog.AddDesc(std::string("GetTextWidth:")
+                            .append(std::to_string(pManager_->GetTextWidth()))
+                            .append(" GetHeight:")
+                            .append(std::to_string(pManager_->GetHeight()))
+                            .append(" GetMaxWidth:")
+                            .append(std::to_string(pManager_->GetMaxWidth()))
+                            .append(" GetMaxIntrinsicWidth:")
+                            .append(std::to_string(pManager_->GetMaxIntrinsicWidth())));
+        dumpLog.AddDesc(std::string("GetLineCount:")
+                            .append(std::to_string(pManager_->GetLineCount()))
+                            .append(" GetLongestLine:")
+                            .append(std::to_string(pManager_->GetLongestLine())));
+    }
+    dumpLog.AddDesc(std::string("spans size :").append(std::to_string(spans_.size())));
 }
 
 void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const

@@ -6400,13 +6400,30 @@ void TextFieldPattern::DumpInfo()
         std::string("HeightAdaptivePolicy: ")
             .append(V2::ConvertWrapTextHeightAdaptivePolicyToString(
                 layoutProperty->GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST))));
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto fontScale = pipeline->GetFontScale();
-    auto fontWeightScale = pipeline->GetFontWeightScale();
-    dumpLog.AddDesc(std::string("fontScale: ").append(std::to_string(fontScale)));
-    dumpLog.AddDesc(std::string("fontWeightScale: ").append(std::to_string(fontWeightScale)));
     DumpPlaceHolderInfo();
+    DumpScaleInfo();
+    DumpTextEngineInfo();
+    DumpAdvanceInfo();
+}
+
+void TextFieldPattern::DumpTextEngineInfo()
+{
+    auto& dumpLog = DumpLog::GetInstance();
+    dumpLog.AddDesc(std::string("-----TextEngine paragraphs_ info-----"));
+    dumpLog.AddDesc(std::string("GetTextWidth:")
+        .append(std::to_string(paragraph_->GetTextWidth()))
+        .append(" GetHeight:")
+        .append(std::to_string(paragraph_->GetHeight()))
+        .append(" GetMaxWidth:")
+        .append(std::to_string(paragraph_->GetMaxWidth()))
+        .append(" GetMaxIntrinsicWidth:")
+        .append(std::to_string(paragraph_->GetMaxIntrinsicWidth())));
+    dumpLog.AddDesc(std::string("GetLineCount:")
+        .append(std::to_string(paragraph_->GetLineCount()))
+        .append(" GetLongestLine:")
+        .append(std::to_string(paragraph_->GetLongestLine()))
+        .append(" GetLongestLineWithIndent:")
+        .append(std::to_string(paragraph_->GetLongestLineWithIndent())));
 }
 
 void TextFieldPattern::DumpAdvanceInfo()
@@ -6415,26 +6432,7 @@ void TextFieldPattern::DumpAdvanceInfo()
         DumpLog::GetInstance().AddDesc(
             std::string("CustomKeyboard: true, Attached:").append(std::to_string(isCustomKeyboardAttached_)));
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
     DumpLog::GetInstance().AddDesc(std::string("FontColor: ").append(GetTextColor()));
-    DumpLog::GetInstance().AddDesc(std::string("MinFontSize:").append(GetMinFontSize()));
-    DumpLog::GetInstance().AddDesc(std::string("MaxFontSize:").append(GetMaxFontSize()));
-    DumpLog::GetInstance().AddDesc(std::string("from TextEngine paragraphs_ info :"));
-    DumpLog::GetInstance().AddDesc(std::string("GetTextWidth:")
-        .append(std::to_string(paragraph_->GetTextWidth()))
-        .append(" GetHeight:")
-        .append(std::to_string(paragraph_->GetHeight()))
-        .append(" GetMaxWidth:")
-        .append(std::to_string(paragraph_->GetMaxWidth()))
-        .append(" GetMaxIntrinsicWidth:")
-        .append(std::to_string(paragraph_->GetMaxIntrinsicWidth())));
-    DumpLog::GetInstance().AddDesc(std::string("GetLineCount:")
-        .append(std::to_string(paragraph_->GetLineCount()))
-        .append(" GetLongestLine:")
-        .append(std::to_string(paragraph_->GetLongestLine())));
 #if defined(ENABLE_STANDARD_INPUT)
     auto miscTextConfig = GetMiscTextConfig();
     CHECK_NULL_VOID(miscTextConfig.has_value());
@@ -6460,6 +6458,37 @@ void TextFieldPattern::DumpPlaceHolderInfo()
     DumpLog::GetInstance().AddDesc(std::string("placeholder: ").append(GetPlaceHolder()));
     DumpLog::GetInstance().AddDesc(std::string("placeholderColor: ").append(GetPlaceholderColor()));
     DumpLog::GetInstance().AddDesc(std::string("placeholderFont: ").append(GetPlaceholderFont()));
+}
+
+void TextFieldPattern::DumpScaleInfo()
+{
+    auto& dumpLog = DumpLog::GetInstance();
+    dumpLog.AddDesc(std::string("-----DumpScaleInfo-----"));
+    dumpLog.AddDesc(std::string("MinFontSize:").append(GetMinFontSize()));
+    dumpLog.AddDesc(std::string("MaxFontSize:").append(GetMaxFontSize()));
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto fontScale = pipeline->GetFontScale();
+    auto fontWeightScale = pipeline->GetFontWeightScale();
+    auto followSystem = pipeline->IsFollowSystem();
+    float maxFontScale = pipeline->GetMaxAppFontScale();
+    auto halfLeading = pipeline->GetHalfLeading();
+    dumpLog.AddDesc(std::string("fontScale: ").append(std::to_string(fontScale)));
+    dumpLog.AddDesc(std::string("fontWeightScale: ").append(std::to_string(fontWeightScale)));
+    dumpLog.AddDesc(std::string("IsFollowSystem: ").append(std::to_string(followSystem)));
+    dumpLog.AddDesc(std::string("maxFontScale: ").append(std::to_string(maxFontScale)));
+    dumpLog.AddDesc(std::string("halfLeading: ").append(std::to_string(halfLeading)));
+}
+
+std::string TextFieldPattern::GetDumpTextValue() const
+{
+    if (IsInPasswordMode()) {
+        auto len = GetTextValue().length();
+        auto passwordLen = "passwordLen:" + std::to_string(len);
+        return passwordLen;
+    } else {
+        return GetTextValue();
+    }
 }
 
 void TextFieldPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData)
