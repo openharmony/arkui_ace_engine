@@ -112,6 +112,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_linear_indicator.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/jsview/js_navigation_stack.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_scrollbar_bridge.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_plugin_bridge.h"
 #endif
@@ -2609,6 +2610,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterResourceAttributes(object, vm);
     RegisterFlexAttributes(object, vm);
     RegisterBadgeAttributes(object, vm);
+    RegisterScrollBarAttributes(object, vm);
     return object;
 }
 
@@ -5162,5 +5164,15 @@ void ArkUINativeModule::RegisterBadgeAttributes(Local<panda::ObjectRef> object, 
     badge->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBadgeParamWithString"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), BadgeBridge::SetBadgeParamWithString));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "badge"), badge);
+}
+
+void ArkUINativeModule::RegisterScrollBarAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto ScrollBar = panda::ObjectRef::New(vm);
+    ScrollBar->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollBarEnableNestedScroll"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBarBridge::SetScrollBarEnableNestedScroll));
+    ScrollBar->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollBarEnableNestedScroll"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBarBridge::ResetScrollBarEnableNestedScroll));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "ScrollBar"), ScrollBar);
 }
 } // namespace OHOS::Ace::NG

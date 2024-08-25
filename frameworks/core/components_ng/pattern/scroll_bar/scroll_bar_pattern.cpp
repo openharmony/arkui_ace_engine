@@ -513,6 +513,8 @@ void ScrollBarPattern::DumpAdvanceInfo()
     hasChild_ ? DumpLog::GetInstance().AddDesc("hasChild: true") : DumpLog::GetInstance().AddDesc("hasChild: false");
     preFrameChildState_ ? DumpLog::GetInstance().AddDesc("preFrameChildState: true")
                         : DumpLog::GetInstance().AddDesc("preFrameChildState: false");
+    enableNestedSorll_ ? DumpLog::GetInstance().AddDesc("enableNestedSorll: true")
+                       : DumpLog::GetInstance().AddDesc("enableNestedSorll: false");
     if (!hasChild_ && scrollBar_) {
         scrollBar_->DumpAdvanceInfo();
     }
@@ -956,7 +958,7 @@ void ScrollBarPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     GetPanDirectionDumpInfo(json);
     json->Put("hasChild", hasChild_);
     json->Put("preFrameChildState", preFrameChildState_);
-
+    json->Put("enableNestedSorll", enableNestedSorll_);
     if (!hasChild_ && scrollBar_) {
         scrollBar_->DumpAdvanceInfo(json);
     }

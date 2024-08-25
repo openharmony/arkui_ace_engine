@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -974,7 +975,15 @@ void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeigh
     if (scrollBarProxy_) {
         estimatedHeight_ = estimatedHeight - (GetAxis() == Axis::VERTICAL ? viewPort.Height() : viewPort.Width());
         barOffset_ = -offset;
-        scrollBarProxy_->NotifyScrollBar(AceType::WeakClaim(this));
+        scrollBarProxy_->NotifyScrollBar();
+    }
+
+    for (auto nestbar : nestScrollBarProxy_) {
+        auto scrollBarProxy = nestbar.Upgrade();
+        if (!scrollBarProxy) {
+            continue;
+        }
+        scrollBarProxy->NotifyScrollBar();
     }
 }
 
@@ -3458,6 +3467,120 @@ void ScrollablePattern::GetEdgeEffectDumpInfo(std::unique_ptr<JsonValue>& json)
         default: {
             break;
         }
+    }
+}
+
+void ScrollablePattern::AddNestScrollBarProxy(const WeakPtr<ScrollBarProxy>& scrollBarProxy)
+{
+    if (std::find(nestScrollBarProxy_.begin(), nestScrollBarProxy_.end(), scrollBarProxy) !=
+        nestScrollBarProxy_.end()) {
+        return;
+    }
+    nestScrollBarProxy_.emplace_back(scrollBarProxy);
+}
+
+void ScrollablePattern::DeleteNestScrollBarProxy(const WeakPtr<ScrollBarProxy>& scrollBarProxy)
+{
+    auto iter = std::find(nestScrollBarProxy_.begin(), nestScrollBarProxy_.end(), scrollBarProxy);
+    if (iter != nestScrollBarProxy_.end()) {
+        nestScrollBarProxy_.erase(iter);
+    }
+}
+
+void ScrollablePattern::SetParentNestedScroll(RefPtr<ScrollablePattern>& parentPattern)
+{
+    CHECK_NULL_VOID(parentPattern);
+    auto parentScrollBarProxy = parentPattern->GetScrollBarProxy();
+    auto scrollBarProxy = scrollBarProxy_;
+    CHECK_NULL_VOID(scrollBarProxy);
+    if (!parentScrollBarProxy) {
+        auto proxy = AceType::MakeRefPtr<ScrollBarProxy>();
+        parentPattern->SetScrollBarProxy(proxy);
+        auto parentNodeInfo = proxy->GetScrollableNodeInfo();
+        scrollBarProxy->RegisterNestScrollableNode(parentNodeInfo);
+        parentPattern->AddNestScrollBarProxy(scrollBarProxy);
+    } else {
+        auto parentNodeInfo = parentScrollBarProxy->GetScrollableNodeInfo();
+        scrollBarProxy->RegisterNestScrollableNode(parentNodeInfo);
+        parentPattern->AddNestScrollBarProxy(scrollBarProxy);
+    }
+}
+
+void ScrollablePattern::SearchAndSetParentNestedScroll(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    auto scrollBarAxis = GetAxis();
+    for (auto parent = node->GetParent(); parent != nullptr; parent = parent->GetParent()) {
+        RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
+        if (!frameNode) {
+            continue;
+        }
+        auto parentPattern = frameNode->GetPattern<NestableScrollContainer>();
+        if (!parentPattern) {
+            continue;
+        }
+
+        if (AceType::InstanceOf<SwiperPattern>(parentPattern)) {
+            auto swiper = AceType::DynamicCast<SwiperPattern>(parentPattern);
+            CHECK_NULL_VOID(swiper);
+            auto direction = swiper->GetDirection();
+            CHECK_EQUAL_VOID(scrollBarAxis, direction);
+        }
+        auto ScrollPattern = AceType::DynamicCast<ScrollablePattern>(parentPattern);
+        SetParentNestedScroll(ScrollPattern);
+    }
+}
+
+void ScrollablePattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto scrollBarProxy = scrollBarProxy_;
+    CHECK_NULL_VOID(scrollBarProxy);
+    auto enableNestScroll = scrollBarProxy->IsNestScroller();
+    if (enableNestScroll) {
+        SearchAndSetParentNestedScroll(host);
+    }
+}
+
+void ScrollablePattern::UnsetParentNestedScroll(RefPtr<ScrollablePattern>& parentPattern)
+{
+    CHECK_NULL_VOID(parentPattern);
+    auto parentScrollBarProxy = parentPattern->GetScrollBarProxy();
+    CHECK_NULL_VOID(parentScrollBarProxy);
+    auto scrollBarProxy = scrollBarProxy_;
+    CHECK_NULL_VOID(scrollBarProxy);
+    auto parentNodeInfo = parentScrollBarProxy->GetScrollableNodeInfo();
+    auto pattern = parentNodeInfo.scrollableNode.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    scrollBarProxy->UnRegisterNestScrollableNode(pattern);
+    parentPattern->DeleteNestScrollBarProxy(scrollBarProxy);
+}
+
+void ScrollablePattern::SearchAndUnsetParentNestedScroll(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    auto scrollBarAxis = GetAxis();
+    for (auto parent = node->GetParent(); parent != nullptr; parent = parent->GetParent()) {
+        RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
+        if (!frameNode) {
+            continue;
+        }
+
+        auto parentPattern = frameNode->GetPattern<NestableScrollContainer>();
+        if (!parentPattern) {
+            continue;
+        }
+
+        if (AceType::InstanceOf<SwiperPattern>(parentPattern)) {
+            auto swiper = AceType::DynamicCast<SwiperPattern>(parentPattern);
+            CHECK_NULL_VOID(swiper);
+            auto direction = swiper->GetDirection();
+            CHECK_EQUAL_VOID(scrollBarAxis, direction);
+        }
+
+        auto ScrollPattern = AceType::DynamicCast<ScrollablePattern>(parentPattern);
+        UnsetParentNestedScroll(ScrollPattern);
     }
 }
 } // namespace OHOS::Ace::NG
