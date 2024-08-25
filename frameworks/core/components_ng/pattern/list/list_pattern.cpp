@@ -2427,10 +2427,11 @@ void ListPattern::NotifyDataChange(int32_t index, int32_t count)
     if (!maintainVisibleContentPosition_ || itemPosition_.empty()) {
         return;
     }
-    if (count == 0 || (count > 0 && index > startIndex_) || (count < 0 && index >= startIndex_)) {
+    auto startIndex = itemPosition_.begin()->first;
+    if (count == 0 || (count > 0 && index > startIndex) || (count < 0 && index >= startIndex)) {
         return;
     }
-    count = std::max(count, index - startIndex_);
+    count = std::max(count, index - startIndex);
     int32_t mod = 0;
     if (count < 0 && lanes_ > 1 && !(itemPosition_.begin()->second.isGroup)) {
         mod = -count % lanes_;
