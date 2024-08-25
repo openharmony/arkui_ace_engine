@@ -22,9 +22,7 @@
 
 namespace OHOS::Ace::NG::ViewModel {
 
-void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId);
-
-void* CreateNodeWithParams(ArkUINodeType tag, ArkUI_Int32 nodeId, const ArkUI_Params& params);
+void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId, const ArkUI_Params& params);
 
 ArkUI_CharPtr GetName(void* nativePtr);
 
