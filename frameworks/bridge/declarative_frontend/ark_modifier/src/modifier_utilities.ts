@@ -69,6 +69,7 @@ function mergeMaps(stageMap: Map<Symbol, AttributeModifierWithKey>,
 class ModifierUtils {
   static dirtyComponentSet: Set<ArkComponent | ArkSpanComponent> = new Set();
   static dirtyFlag = false;
+  static timeoutId = -1;
 
   static copyModifierWithKey(obj: ModifierWithKey<string | number | boolean | object>): ModifierWithKey<string | number | boolean | object> {
     let newObj: ModifierWithKey<string | number | boolean | object> = {
@@ -160,6 +161,9 @@ class ModifierUtils {
 
   static requestFrame(): void {
     const frameCallback = () => {
+      if (this.timeoutId !== -1) {
+        clearTimeout(this.timeoutId);
+      }
       this.dirtyComponentSet.forEach(item => {
         const nativePtrValid = !item._weakPtr.invalid();
         if (item._nativePtrChanged && nativePtrValid) {
@@ -175,8 +179,12 @@ class ModifierUtils {
       });
       this.dirtyComponentSet.clear();
       this.dirtyFlag = false;
+      this.timeoutId = -1;
     };
-  
+    if (this.timeoutId !== -1) {
+      clearTimeout(this.timeoutId);
+    }
+    this.timeoutId = setTimeout(frameCallback, 100);
     getUINativeModule().frameNode.registerFrameCallback(frameCallback);
   }
 }

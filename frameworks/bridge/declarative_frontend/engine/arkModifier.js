@@ -118,6 +118,9 @@ class ModifierUtils {
   }
   static requestFrame() {
     const frameCallback = () => {
+      if (this.timeoutId !== -1) {
+        clearTimeout(this.timeoutId);
+      }
       this.dirtyComponentSet.forEach((item) => {
         const nativePtrValid = !item._weakPtr.invalid();
         if (item._nativePtrChanged && nativePtrValid) {
@@ -133,12 +136,18 @@ class ModifierUtils {
       });
       this.dirtyComponentSet.clear();
       this.dirtyFlag = false;
+      this.timeoutId = -1;
     };
+    if (this.timeoutId !== -1) {
+      clearTimeout(this.timeoutId);
+    }
+    this.timeoutId = setTimeout(frameCallback, 100);
     getUINativeModule().frameNode.registerFrameCallback(frameCallback);
   }
 }
 ModifierUtils.dirtyComponentSet = new Set();
 ModifierUtils.dirtyFlag = false;
+ModifierUtils.timeoutId = -1;
 class ModifierMap {
   constructor() {
     this.map_ = new Map();
