@@ -819,6 +819,16 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
         return new ArkGridItemComponent(node, type);
       })
     }],
+    ['TextClock', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'TextClock', (node: NodePtr, type: ModifierType): ArkTextClockComponent => {
+        return new ArkTextClockComponent(node, type);
+      })
+    }],
+    ['TextTimer', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'TextTimer', (node: NodePtr, type: ModifierType): ArkTextTimerComponent => {
+        return new ArkTextTimerComponent(node, type);
+      })
+    }],
   ]
 )
 

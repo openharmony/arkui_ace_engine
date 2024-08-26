@@ -198,6 +198,10 @@ declare class ArkGridComponent extends ArkComponent {}
 
 declare class ArkGridItemComponent extends ArkComponent {}
 
+declare class ArkTextClockComponent extends ArkComponent {}
+
+declare class ArkTextTimerComponent extends ArkComponent {}
+
 declare class UICommonEvent {
   private _nodePtr: NodePtr;
   private _instanceId: number;
