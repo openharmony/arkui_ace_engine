@@ -518,7 +518,7 @@ public:
         return onAccessibilityHoverCallback_ != nullptr;
     }
 
-    bool IsPenHoverTarget()
+    bool IsPenHoverTarget() const
     {
         return onPenHoverEventCallback_ != nullptr;
     }

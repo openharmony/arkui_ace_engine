@@ -103,26 +103,26 @@ void InputEventActuator::OnCollectPenHoverEvent(
         return;
     }
 
-    auto onHoverCallback = [weak = WeakClaim(this)](bool info, HoverInfo& hoverInfo) {
-        auto actuator = weak.Upgrade();
+    auto penHoverCallback = [weakClaim = WeakClaim(this)](bool isHover, HoverInfo& penHoverInfo) {
+        auto actuator = weakClaim.Upgrade();
         CHECK_NULL_VOID(actuator);
-        auto innerEvents = actuator->inputEvents_;
-        for (const auto& callback : innerEvents) {
-            if (callback) {
-                (*callback)(info);
-                (*callback)(info, hoverInfo);
+        auto inputEvents = actuator->inputEvents_;
+        for (const auto& inputCallback : inputEvents) {
+            if (inputCallback) {
+                (*inputCallback)(isHover);
+                (*inputCallback)(isHover, penHoverInfo);
             }
         }
-        auto userEvent = actuator->userCallback_;
-        if (userEvent) {
-            (*userEvent)(info, hoverInfo);
+        auto userCallback = actuator->userCallback_;
+        if (userCallback) {
+            (*userCallback)(isHover, penHoverInfo);
         }
-        auto userJSFrameNodeCallback = actuator->userJSFrameNodeCallback_;
-        if (userJSFrameNodeCallback) {
-            (*userJSFrameNodeCallback)(info, hoverInfo);
+        auto userJSCallback = actuator->userJSFrameNodeCallback_;
+        if (userJSCallback) {
+            (*userJSCallback)(isHover, penHoverInfo);
         }
     };
-    penHoverEventTarget_->SetPenHoverCallback(onHoverCallback);
+    penHoverEventTarget_->SetPenHoverCallback(penHoverCallback);
     penHoverEventTarget_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     penHoverEventTarget_->SetGetEventTargetImpl(getEventTargetImpl);
     result.emplace_back(penHoverEventTarget_);

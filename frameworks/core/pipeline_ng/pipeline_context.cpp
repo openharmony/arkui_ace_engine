@@ -2680,10 +2680,10 @@ void PipelineContext::OnPenHoverEvent(const TouchEvent& point, const RefPtr<NG::
     if (scaleEvent.type != TouchType::MOVE) {
         eventManager_->GetEventTreeRecord().AddTouchPoint(scaleEvent);
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
-            "OnPenHoverEvent event id:%{public}d, fingerId:%{public}d, x=%{public}f y=%{public}f "
+            "OnPenHoverEvent event id:%{public}d, fingerId:%{public}d "
             "type=%{public}d, "
             "inject=%{public}d",
-            scaleEvent.touchEventId, scaleEvent.id, scaleEvent.x, scaleEvent.y, (int)scaleEvent.type,
+            scaleEvent.touchEventId, scaleEvent.id, (int)scaleEvent.type,
             scaleEvent.isInjected);
     }
 
