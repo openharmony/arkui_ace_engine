@@ -1727,7 +1727,7 @@ bool ParseColorById(int64_t id, Color& color)
     return true;
 }
 
-void ParseCJResponseRegion(CJResponseRegion value, std::vector<DimensionRect> result)
+void ParseCJResponseRegion(CJResponseRegion value, std::vector<DimensionRect>& result)
 {
     Dimension xDime(value.x, static_cast<DimensionUnit>(value.xUnit));
     Dimension yDime(value.y, static_cast<DimensionUnit>(value.yUnit));
@@ -1738,7 +1738,7 @@ void ParseCJResponseRegion(CJResponseRegion value, std::vector<DimensionRect> re
     result.emplace_back(dimenRect);
 }
 
-void ParseVectorStringPtr(VectorStringPtr vecContent, std::vector<DimensionRect> result)
+void ParseVectorStringPtr(VectorStringPtr vecContent, std::vector<DimensionRect>& result)
 {
     auto nativeRectangleVec = *reinterpret_cast<std::vector<NativeRectangle>*>(vecContent);
     for (size_t i = 0; i < nativeRectangleVec.size(); i++) {
