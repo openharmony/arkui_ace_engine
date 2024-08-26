@@ -54,6 +54,12 @@ enum class RectHeightStyle {
     STRUT,
 };
 
+// Type of hover mode area.
+enum class HoverModeAreaType {
+    TOP_SCREEN = 0,
+    BOTTOM_SCREEN = 1,
+};
+
 enum class ButtonStyleMode { NORMAL, EMPHASIZE, TEXT };
 
 enum class ControlSize { SMALL, NORMAL };
