@@ -691,7 +691,7 @@ void WaterFlowLayoutSW::LayoutFooter(const OffsetF& paddingOffset, bool reverse)
     if (info_->footerIndex_ != 0 || GreatOrEqual(mainPos, mainLen_)) {
         return;
     }
-    // auto footer = wrapper_->GetOrCreateChildByIndex(0);
+    auto footer = wrapper_->GetOrCreateChildByIndex(0);
     if (reverse) {
         mainPos = mainLen_ - info_->footerHeight_ - mainPos;
     }
