@@ -14,20 +14,9 @@
  */
 #include "window_extension_connection_ohos.h"
 
-#include <functional>
-#include <memory>
-
-#include "base/utils/utils.h"
-#include "common/rs_color.h"
-#include "element_name.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
 
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
 #include "core/common/ace_engine.h"
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
-#include "frameworks/base/json/json_util.h"
 #include "frameworks/core/components_v2/ability_component/render_ability_component.h"
 
 #ifdef OS_ACCOUNT_EXISTS

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "base/utils/utils.h"
 #include "storage_impl.h"
 
 namespace OHOS::Ace {

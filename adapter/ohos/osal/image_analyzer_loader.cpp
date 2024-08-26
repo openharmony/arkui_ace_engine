@@ -15,10 +15,8 @@
 
 #include <dlfcn.h>
 
-#include "frameworks/base/log/log_wrapper.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "core/common/ai/image_analyzer_loader.h"
-#include "napi/native_api.h"
 
 namespace OHOS::Ace {
 namespace {

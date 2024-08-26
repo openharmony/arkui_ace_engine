@@ -15,7 +15,6 @@
 
 #include "udmf_impl.h"
 
-#include <memory>
 #include <unordered_map>
 #include <variant>
 

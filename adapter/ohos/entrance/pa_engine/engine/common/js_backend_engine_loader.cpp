@@ -17,12 +17,6 @@
 
 #include <dlfcn.h>
 
-#include "base/log/log.h"
-#include "base/utils/singleton.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/utils.h"
-#include "core/common/ace_application_info.h"
-
 namespace OHOS::Ace {
 namespace {
 

@@ -16,8 +16,6 @@
 
 #include "window_extension_connection_ohos_ng.h"
 
-#include "base/memory/ace_type.h"
-
 namespace OHOS::Ace {
 RefPtr<WindowExtensionConnectionAdapterNG> WindowExtensionConnectionProxyNG::CreateAdapter()
 {

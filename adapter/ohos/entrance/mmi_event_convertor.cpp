@@ -15,18 +15,10 @@
 
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 
-#include <memory>
-
 #include "input_manager.h"
-#include "pointer_event.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/ace_extra_input_data.h"
-#include "base/utils/time_util.h"
-#include "base/utils/utils.h"
-#include "core/event/ace_events.h"
-#include "core/event/key_event.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::Platform {
 namespace {

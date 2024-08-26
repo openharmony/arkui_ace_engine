@@ -17,9 +17,6 @@
 
 #include "hitrace_meter.h"
 
-#include "base/log/log.h"
-#include "base/utils/macros.h"
-#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace {

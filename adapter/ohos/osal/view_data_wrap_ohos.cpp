@@ -16,8 +16,6 @@
 #include <dlfcn.h>
 #include "view_data_wrap_ohos.h"
 
-#include "base/utils/utils.h"
-
 namespace OHOS::Ace {
 #ifdef APP_USE_ARM
 constexpr char LIB_HINT2_TYPE_Z_SO_NAME[] = "/system/lib/module/core/atomicservicecomponent/libhint2type.z.so";

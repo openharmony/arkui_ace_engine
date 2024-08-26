@@ -15,13 +15,9 @@
 
 #include "base/log/frame_report.h"
 
-#include <cstdio>
 #include <dlfcn.h>
-#include <unistd.h>
-
 #include <frame_collector.h>
 
-#include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace {

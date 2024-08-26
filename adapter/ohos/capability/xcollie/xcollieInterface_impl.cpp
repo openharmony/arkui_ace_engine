@@ -14,7 +14,7 @@
  */
 
 #include "xcollieInterface_impl.h"
-#include <cstdint>
+
 #include "xcollie/xcollie.h"
 
 namespace OHOS::Ace {

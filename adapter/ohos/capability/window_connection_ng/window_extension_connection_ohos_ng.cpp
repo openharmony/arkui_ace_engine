@@ -14,10 +14,6 @@
  */
 #include "window_extension_connection_ohos_ng.h"
 
-#include <functional>
-#include <memory>
-
-#include "common/rs_color.h"
 #include "element_name.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
 

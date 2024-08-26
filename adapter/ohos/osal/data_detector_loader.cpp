@@ -14,7 +14,6 @@
  */
 #include <dlfcn.h>
 
-#include "base/log/log.h"
 #include "base/log/log_wrapper.h"
 #include "core/common/ai/data_detector_loader.h"
 namespace OHOS::Ace {

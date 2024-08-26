@@ -16,7 +16,6 @@
 #include "core/common/stylus/stylus_detector_loader.h"
 
 #include <dlfcn.h>
-#include <memory>
 
 #include "frameworks/base/log/log_wrapper.h"
 

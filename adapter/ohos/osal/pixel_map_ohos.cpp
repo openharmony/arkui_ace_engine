@@ -15,13 +15,9 @@
 
 #include "pixel_map_ohos.h"
 
-#include <sstream>
-
 #include "drawable_descriptor.h"
 #include "pixel_map_manager.h"
 
-#include "base/log/log_wrapper.h"
-#include "base/utils/utils.h"
 #include "core/image/image_file_cache.h"
 
 namespace OHOS::Ace {

@@ -15,12 +15,8 @@
 
 #include "adapter/ohos/entrance/utils.h"
 
-#include <cstdio>
 #include <regex>
-#include <sstream>
-#include <string>
 
-#include "extractor.h"
 #include "wm/wm_common.h"
 #include "dm/dm_common.h"
 

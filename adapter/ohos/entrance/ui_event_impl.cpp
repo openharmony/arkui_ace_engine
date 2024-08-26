@@ -16,17 +16,9 @@
 #include "adapter/ohos/entrance/ui_event_impl.h"
 
 #include <dlfcn.h>
-#include <mutex>
-#include <string>
-#include <unordered_map>
 
-#include "interfaces/inner_api/ace/ui_event_observer.h"
-
-#include "base/log/log.h"
-#include "base/thread/background_task_executor.h"
 #include "core/common/container.h"
 #include "core/common/recorder/event_controller.h"
-#include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components_ng/base/inspector.h"
 

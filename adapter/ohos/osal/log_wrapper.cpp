@@ -19,11 +19,6 @@
 #include <dlfcn.h>
 #endif
 #include <mutex>
-#include <cstring>
-#include <map>
-#include <unordered_map>
-
-#include "hilog/log.h"
 
 #ifdef ACE_INSTANCE_LOG
 #include "core/common/container_scope.h"

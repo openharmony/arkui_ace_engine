@@ -14,12 +14,6 @@
  */
 
 #include "adapter/ohos/entrance/timepicker/timepicker_haptic_impl.h"
-#include "adapter/ohos/entrance/timepicker/timepicker_haptic_stub.h"
-
-#include <cmath>
-#include <condition_variable>
-#include <mutex>
-#include <thread>
 
 namespace OHOS::Ace::NG {
 

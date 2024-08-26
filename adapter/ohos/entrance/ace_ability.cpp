@@ -15,7 +15,6 @@
 
 #include "adapter/ohos/entrance/ace_ability.h"
 
-#include <regex>
 #include <ui/rs_surface_node.h>
 
 #include "ability_process.h"

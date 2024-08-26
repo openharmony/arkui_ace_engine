@@ -12,18 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/pipeline/pipeline_context.h"
+
+#include "adapter/ohos/entrance/data_ability_helper_standard.h"
+
 #if !defined(PREVIEW)
 #include <dlfcn.h>
 #endif
 
 #include "data_ability_helper.h"
-#include "datashare_helper.h"
 
-#include "adapter/ohos/entrance/data_ability_helper_standard.h"
 #include "base/log/ace_trace.h"
 #include "base/utils/string_utils.h"
-#include "base/utils/utils.h"
 
 namespace OHOS::Ace {
 const std::string MEDIA_SERVER_HEAD = "datashare:///media";
