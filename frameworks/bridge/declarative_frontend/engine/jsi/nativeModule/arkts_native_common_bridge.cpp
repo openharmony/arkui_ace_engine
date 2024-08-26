@@ -5353,6 +5353,49 @@ ArkUINativeModuleValue CommonBridge::SetBlendMode(ArkUIRuntimeCallInfo *runtimeC
     auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
     int32_t blendModeValue = static_cast<int32_t>(OHOS::Ace::BlendMode::NONE);
     int32_t blendApplyTypeValue = static_cast<int32_t>(OHOS::Ace::BlendApplyType::FAST);
+    if (blendModeArg->IsNumber()) {
+        int32_t blendModeNum = blendModeArg->Int32Value(vm);
+        if (blendModeNum >= static_cast<int32_t>(OHOS::Ace::BlendMode::NONE) &&
+            blendModeNum <= static_cast<int32_t>(OHOS::Ace::BlendMode::LUMINOSITY)) {
+            blendModeValue = blendModeNum;
+        } else if (blendModeNum == BACKWARD_COMPAT_MAGIC_NUMBER_OFFSCREEN) {
+            blendModeValue = static_cast<int32_t>(OHOS::Ace::BlendMode::SRC_OVER);
+            blendApplyTypeValue = static_cast<int32_t>(OHOS::Ace::BlendApplyType::OFFSCREEN);
+        }
+        if (blendApplyTypeArg->IsNumber()) {
+            int32_t blendApplyTypeNum = blendApplyTypeArg->Int32Value(vm);
+            if (blendApplyTypeNum >= static_cast<int>(OHOS::Ace::BlendApplyType::FAST) &&
+                blendApplyTypeNum <= static_cast<int>(OHOS::Ace::BlendApplyType::OFFSCREEN)) {
+                blendApplyTypeValue = blendApplyTypeNum;
+            }
+        }
+        GetArkUINodeModifiers()->getCommonModifier()->setBlendMode(nativeNode, blendModeValue, blendApplyTypeValue);
+    } else {
+        GetArkUINodeModifiers()->getCommonModifier()->resetBlendMode(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetBlendMode(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonModifier()->resetBlendMode(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetAdvancedBlendMode(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(0);      // 0: index of parameter frameNode
+    Local<JSValueRef> blendModeArg = runtimeCallInfo->GetCallArgRef(1);      // 1: index of parameter blendMode
+    Local<JSValueRef> blendApplyTypeArg = runtimeCallInfo->GetCallArgRef(2); // 2: index of parameter blendApplyType
+    auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
+    int32_t blendModeValue = static_cast<int32_t>(OHOS::Ace::BlendMode::NONE);
+    int32_t blendApplyTypeValue = static_cast<int32_t>(OHOS::Ace::BlendApplyType::FAST);
     if (blendApplyTypeArg->IsNumber()) {
         int32_t blendApplyTypeNum = blendApplyTypeArg->Int32Value(vm);
         if (blendApplyTypeNum >= static_cast<int>(OHOS::Ace::BlendApplyType::FAST) &&
@@ -5380,7 +5423,7 @@ ArkUINativeModuleValue CommonBridge::SetBlendMode(ArkUIRuntimeCallInfo *runtimeC
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue CommonBridge::ResetBlendMode(ArkUIRuntimeCallInfo *runtimeCallInfo)
+ArkUINativeModuleValue CommonBridge::ResetAdvancedBlendMode(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
