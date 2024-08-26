@@ -243,7 +243,13 @@ RefPtr<DragWindow> DragWindow::CreateDragWindow(const DragWindowParams& params)
     OHOS::sptr<OHOS::Rosen::Window> dragWindow = OHOS::Rosen::Window::Create(params.windowName, option);
     CHECK_NULL_RETURN(dragWindow, nullptr);
 
-    OHOS::Rosen::WMError ret = dragWindow->Show();
+    OHOS::Rosen::WMError ret = dragWindow->MoveTo(params.x - halfWidth, params.y - halfHeight, true);
+    if (ret != OHOS::Rosen::WMError::WM_OK) {
+        TAG_LOGE(AceLogTag::ACE_DRAG, "DragWindow MoveTo, drag window move failed, ret: %d", ret);
+        return nullptr;
+    }
+
+    ret = dragWindow->Show();
     if (ret != OHOS::Rosen::WMError::WM_OK) {
         TAG_LOGE(AceLogTag::ACE_DRAG, "DragWindow CreateDragWindow, drag window Show() failed, ret: %d", ret);
         return nullptr;
