@@ -3342,7 +3342,8 @@ void ParseMenuBorderRadius(const JSRef<JSObject>& menuOptions, NG::MenuParam& me
         CalcDimension topRight;
         CalcDimension bottomLeft;
         CalcDimension bottomRight;
-        JSViewAbstract::ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight);
+        bool hasSetBorderRadius =
+            JSViewAbstract::ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight);
         if (LessNotEqual(topLeft.Value(), 0.0f)) {
             topLeft.Reset();
         }
@@ -3355,10 +3356,11 @@ void ParseMenuBorderRadius(const JSRef<JSObject>& menuOptions, NG::MenuParam& me
         if (LessNotEqual(bottomRight.Value(), 0.0f)) {
             bottomRight.Reset();
         }
-        menuBorderRadius.radiusTopLeft = topLeft;
-        menuBorderRadius.radiusTopRight = topRight;
-        menuBorderRadius.radiusBottomLeft = bottomLeft;
-        menuBorderRadius.radiusBottomRight = bottomRight;
+        auto isRtl = hasSetBorderRadius && AceApplicationInfo::GetInstance().IsRightToLeft();
+        menuBorderRadius.radiusTopLeft = isRtl ? topRight : topLeft;
+        menuBorderRadius.radiusTopRight = isRtl ? topLeft : topRight;
+        menuBorderRadius.radiusBottomLeft = isRtl ? bottomRight : bottomLeft;
+        menuBorderRadius.radiusBottomRight = isRtl ? bottomLeft : bottomRight;
         menuBorderRadius.multiValued = true;
         menuParam.borderRadius = menuBorderRadius;
     }
