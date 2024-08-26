@@ -234,8 +234,8 @@ void CJFrontendAbstract::ShowToast(
         auto toastInfo = NG::ToastInfo { .message = message,
             .duration = durationTime,
             .bottom = bottom,
-            .showMode = showMode,
             .isRightToLeft = isRightToLeft,
+            .showMode = showMode,
             .alignment = -1,
             .offset = std::nullopt };
         overlayManager->ShowToast(toastInfo, nullptr);
