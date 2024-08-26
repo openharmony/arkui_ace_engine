@@ -3832,7 +3832,7 @@ export struct TreeViewInner {
     right: $r('sys.float.padding_level0'),
     top: $r('sys.float.padding_level0'),
     bottom: $r('sys.float.padding_level0') };
-  private inputFontSize: number = getContext().resourceManager.getNumberByName('ohos_id_text_size_body1');
+    private inputFontSize: number = resourceManager.getSystemResourceManager().getNumberByName('ohos_id_text_size_body1');
 
   aboutToAppear(): void {
     if (this.item.getNodeItem().imageNode) {

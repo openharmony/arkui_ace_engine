@@ -3492,7 +3492,7 @@ export class i3 extends ViewPU {
                 'moduleName': '__harDefaultModuleName__',
             }
         };
-        this.inputFontSize = getContext().resourceManager.getNumberByName('ohos_id_text_size_body1');
+        this.inputFontSize = resourceManager.getSystemResourceManager().getNumberByName('ohos_id_text_size_body1');
         this.setInitiallyProvidedValue(params);
         this.finalizeConstruction();
     }
