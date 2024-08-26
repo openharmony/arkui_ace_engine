@@ -179,6 +179,7 @@ void IndexerPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 bool IndexerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure && config.skipLayout) {
+        initialized_ = true;
         return false;
     }
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
@@ -192,6 +193,8 @@ bool IndexerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty
         isNewHeightCalculated_ = true;
         auto hostNode = dirty->GetHostNode();
         StartCollapseDelayTask(hostNode, INDEXER_COLLAPSE_WAIT_DURATION);
+    } else {
+        initialized_ = true;
     }
     return true;
 }
@@ -702,7 +705,6 @@ void IndexerPattern::OnSelect()
 void IndexerPattern::ApplyIndexChanged(
     bool isTextNodeInTree, bool selectChanged, bool fromTouchUp, bool indexerSizeChanged)
 {
-    initialized_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
@@ -812,10 +814,13 @@ void IndexerPattern::ApplyIndexChanged(
                 childNode->MarkDirtyNode();
             }
             index++;
-            AccessibilityEventType type = AccessibilityEventType::SELECTED;
-            host->OnAccessibilityEvent(type);
-            auto textAccessibilityProperty = childNode->GetAccessibilityProperty<TextAccessibilityProperty>();
-            if (textAccessibilityProperty) textAccessibilityProperty->SetSelected(true);
+            if (selectChanged) {
+                AccessibilityEventType type = AccessibilityEventType::SELECTED;
+                host->OnAccessibilityEvent(type);
+                auto textAccessibilityProperty = childNode->GetAccessibilityProperty<TextAccessibilityProperty>();
+                CHECK_NULL_VOID(textAccessibilityProperty);
+                textAccessibilityProperty->SetSelected(true);
+            }
             continue;
         } else {
             if (!fromTouchUp || animateSelected_ == lastSelected_ || index != lastSelected_) {
