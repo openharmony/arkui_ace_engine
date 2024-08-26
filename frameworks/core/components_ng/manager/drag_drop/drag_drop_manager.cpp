@@ -1015,14 +1015,6 @@ void DragDropManager::onDragCancel()
     draggedFrameNode_ = nullptr;
 }
 
-void DragDropManager::EnsureStatusForPullIn()
-{
-    preTargetFrameNode_ = nullptr;
-    draggedFrameNode_ = nullptr;
-    hasNotifiedTransformation_ = false;
-    isDragFwkShow_ = true;
-}
-
 void DragDropManager::FireOnDragEventWithDragType(const RefPtr<EventHub>& eventHub, DragEventType type,
     RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams)
 {

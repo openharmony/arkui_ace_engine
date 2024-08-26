@@ -115,7 +115,6 @@ public:
     void OnDragMoveOut(const PointerEvent& pointerEvent);
     void OnTextDragEnd(float globalX, float globalY, const std::string& extraInfo);
     void onDragCancel();
-    void EnsureStatusForPullIn();
     void OnItemDragStart(float globalX, float globalY, const RefPtr<FrameNode>& frameNode);
     void OnItemDragMove(float globalX, float globalY, int32_t draggedIndex, DragType dragType);
     void OnItemDragEnd(float globalX, float globalY, int32_t draggedIndex, DragType dragType);
@@ -277,6 +276,11 @@ public:
     void ResetDragging(DragDropMgrState dragDropMgrState = DragDropMgrState::IDLE)
     {
         dragDropState_ = dragDropMgrState;
+    }
+
+    void ResetPreTargetFrameNode()
+    {
+        preTargetFrameNode_ = nullptr;
     }
 
     void SetDraggingPressedState(bool pointerPressed)
