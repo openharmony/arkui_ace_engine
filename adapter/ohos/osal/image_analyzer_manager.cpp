@@ -200,7 +200,7 @@ void ImageAnalyzerManager::UpdateAnalyzerOverlayLayout()
     CHECK_NULL_VOID(overlayLayoutProperty);
     overlayLayoutProperty->UpdateMeasureType(NG::MeasureType::MATCH_PARENT);
     overlayLayoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
-    if (holder_ == ImageAnalyzerHolder::IMAGE || holder_ == ImageAnalyzerHolder::VIDEO_CUSTOM) {
+    if (NeedUpdateOverlayOffset()) {
         overlayLayoutProperty->SetOverlayOffset(Dimension(padding.Offset().GetX()),
                                                 Dimension(padding.Offset().GetY()));
         if (holder_ == ImageAnalyzerHolder::IMAGE) {
@@ -379,5 +379,12 @@ void ImageAnalyzerManager::UpdateOverlayActiveStatus(bool status)
 {
     CHECK_NULL_VOID(isAnalyzerOverlayBuild_);
     ImageAnalyzerMgr::GetInstance().UpdateOverlayActiveStatus(&overlayData_, status);
+}
+
+bool ImageAnalyzerManager::NeedUpdateOverlayOffset()
+{
+    return holder_ == ImageAnalyzerHolder::IMAGE ||
+           holder_ == ImageAnalyzerHolder::VIDEO_CUSTOM ||
+           holder_ == ImageAnalyzerHolder::XCOMPONENT;
 }
 } // namespace OHOS::Ace
