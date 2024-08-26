@@ -7467,27 +7467,29 @@ class ObserveV2 {
     // clear any previously created dependency view model object to elmtId
     // find these view model objects with the reverse map id2targets_
     clearBinding(id) {
-        const targetSet = this.id2targets_[id];
-        let target;
-        if (targetSet && targetSet instanceof Set) {
-            targetSet.forEach((weakTarget) => {
-                var _a, _b;
-                if ((target = weakTarget.deref()) && target instanceof Object) {
-                    const idRefs = target[ObserveV2.ID_REFS];
-                    const symRefs = target[ObserveV2.SYMBOL_REFS];
-                    if (idRefs) {
-                        (_a = idRefs[id]) === null || _a === void 0 ? void 0 : _a.forEach(key => { var _a; return (_a = symRefs === null || symRefs === void 0 ? void 0 : symRefs[key]) === null || _a === void 0 ? void 0 : _a.delete(id); });
-                        delete idRefs[id];
-                    }
-                    else {
-                        for (let key in symRefs) {
-                            (_b = symRefs[key]) === null || _b === void 0 ? void 0 : _b.delete(id);
-                        }
-                        ;
-                    }
+        var _a;
+        // multiple weakRefs might point to the same target - here we get Set of unique targets
+        const targetSet = new Set();
+        (_a = this.id2targets_[id]) === null || _a === void 0 ? void 0 : _a.forEach((weak) => {
+            if (weak.deref() instanceof Object) {
+                targetSet.add(weak.deref());
+            }
+        });
+        targetSet.forEach((target) => {
+            var _a, _b;
+            const idRefs = target[ObserveV2.ID_REFS];
+            const symRefs = target[ObserveV2.SYMBOL_REFS];
+            if (idRefs) {
+                (_a = idRefs[id]) === null || _a === void 0 ? void 0 : _a.forEach(key => { var _a; return (_a = symRefs === null || symRefs === void 0 ? void 0 : symRefs[key]) === null || _a === void 0 ? void 0 : _a.delete(id); });
+                delete idRefs[id];
+            }
+            else {
+                for (let key in symRefs) {
+                    (_b = symRefs[key]) === null || _b === void 0 ? void 0 : _b.delete(id);
                 }
-            });
-        }
+                ;
+            }
+        });
         delete this.id2targets_[id];
         delete this.id2cmp_[id];
         
