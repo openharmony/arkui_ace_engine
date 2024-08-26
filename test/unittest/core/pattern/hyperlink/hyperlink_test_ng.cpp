@@ -453,6 +453,7 @@ HWTEST_F(HyperlinkTestNg, SetColor001, TestSize.Level1)
     HyperlinkModelNG hyperlinkModelNG;
     hyperlinkModelNG.SetResponseRegion(true);
     hyperlinkModelNG.SetColor(Color::BLACK);
+    frameNode->MarkModifyDone();
     EXPECT_EQ(LayoutProperty->GetTextColor().value(), Color::BLACK);
 }
 
