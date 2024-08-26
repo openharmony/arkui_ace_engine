@@ -16,7 +16,10 @@
 
 namespace OHOS::Ace {
 void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectText) {}
-void DataDetectorAdapter::SetTextDetectTypes(const std::string& types) {}
+void DataDetectorAdapter::SetTextDetectTypes(const std::string& types)
+{
+    textDetectTypes_ = types;
+}
 bool DataDetectorAdapter::ParseOriText(const std::unique_ptr<JsonValue>& entityJson, std::string& text)
 {
     return false;
