@@ -428,6 +428,8 @@ public:
     SizeF GetDragPixelMapSize() const;
     bool Backward();
     void OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMenuOption);
+    void UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+        const NG::OnMenuItemClickCallback&& onMenuItemClick);
     WebInfoType GetWebInfoType();
     void SetUpdateInstanceIdCallback(std::function<void(int32_t)> &&callabck);
 
