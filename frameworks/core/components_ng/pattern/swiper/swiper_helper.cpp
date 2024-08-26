@@ -249,6 +249,27 @@ void DumpItemPosition(const SwiperLayoutAlgorithm::PositionMap& positions)
 
 void SwiperHelper::DumpAdvanceInfo(SwiperPattern& swiper)
 {
+    DumpInfoAddDescPart1(swiper);
+    DumpInfoAddDescPart2(swiper);
+    DumpInfoAddDescPart3(swiper);
+    DumpIndicatorType(swiper.lastSwiperIndicatorType_);
+    DumpInfoAddDescPart4(swiper);
+    if (!swiper.itemPosition_.empty()) {
+        DumpLog::GetInstance().AddDesc("-----------start print itemPosition------------");
+        DumpItemPosition(swiper.itemPosition_);
+        DumpLog::GetInstance().AddDesc("-----------end print itemPosition------------");
+    }
+    if (!swiper.itemPositionInAnimation_.empty()) {
+        DumpLog::GetInstance().AddDesc("-----------start print itemPositionInAnimation------------");
+        DumpItemPosition(swiper.itemPositionInAnimation_);
+        DumpLog::GetInstance().AddDesc("-----------end print itemPositionInAnimation------------");
+    }
+    DumpPanDirection(swiper.panDirection_);
+    DumpDirection(swiper.direction_);
+}
+
+void SwiperHelper::DumpInfoAddDescPart1(SwiperPattern& swiper)
+{
     swiper.isLastIndicatorFocused_ ? DumpLog::GetInstance().AddDesc("isLastIndicatorFocused:true")
                                    : DumpLog::GetInstance().AddDesc("isLastIndicatorFocused:false");
     swiper.moveDirection_ ? DumpLog::GetInstance().AddDesc("moveDirection:true")
@@ -273,6 +294,10 @@ void SwiperHelper::DumpAdvanceInfo(SwiperPattern& swiper)
                        : DumpLog::GetInstance().AddDesc("isDragging:false");
     swiper.isTouchDown_ ? DumpLog::GetInstance().AddDesc("isTouchDown:true")
                         : DumpLog::GetInstance().AddDesc("isTouchDown:false");
+}
+
+void SwiperHelper::DumpInfoAddDescPart2(SwiperPattern& swiper)
+{
     swiper.preLoop_.has_value() ? DumpLog::GetInstance().AddDesc("preLoop:" + std::to_string(swiper.preLoop_.value()))
                                 : DumpLog::GetInstance().AddDesc("preLoop:null");
     swiper.indicatorId_.has_value()
@@ -307,6 +332,10 @@ void SwiperHelper::DumpAdvanceInfo(SwiperPattern& swiper)
     swiper.GetCurveIncludeMotion()
         ? DumpLog::GetInstance().AddDesc("curve:" + swiper.GetCurveIncludeMotion()->ToString())
         : DumpLog::GetInstance().AddDesc("curve:null");
+}
+
+void SwiperHelper::DumpInfoAddDescPart3(SwiperPattern& swiper)
+{
     swiper.isFinishAnimation_ ? DumpLog::GetInstance().AddDesc("isFinishAnimation:true")
                               : DumpLog::GetInstance().AddDesc("isFinishAnimation:false");
     swiper.mainSizeIsMeasured_ ? DumpLog::GetInstance().AddDesc("mainSizeIsMeasured:true")
@@ -327,7 +356,10 @@ void SwiperHelper::DumpAdvanceInfo(SwiperPattern& swiper)
         ? DumpLog::GetInstance().AddDesc(
               "surfaceChangedCallbackId:" + std::to_string(swiper.surfaceChangedCallbackId_.value()))
         : DumpLog::GetInstance().AddDesc("surfaceChangedCallbackId:null");
-    DumpIndicatorType(swiper.lastSwiperIndicatorType_);
+}
+
+void SwiperHelper::DumpInfoAddDescPart4(SwiperPattern& swiper)
+{
     DumpLog::GetInstance().AddDesc("currentIndex:" + std::to_string(swiper.currentIndex_));
     DumpLog::GetInstance().AddDesc("oldIndex:" + std::to_string(swiper.oldIndex_));
     DumpLog::GetInstance().AddDesc("currentOffset:" + std::to_string(swiper.currentOffset_));
@@ -343,18 +375,6 @@ void SwiperHelper::DumpAdvanceInfo(SwiperPattern& swiper)
     DumpLog::GetInstance().AddDesc("currentDelta:" + std::to_string(swiper.currentDelta_));
     DumpLog::GetInstance().AddDesc("propertyAnimationIndex:" + std::to_string(swiper.propertyAnimationIndex_));
     DumpLog::GetInstance().AddDesc("mainDeltaSum:" + std::to_string(swiper.mainDeltaSum_));
-    if (!swiper.itemPosition_.empty()) {
-        DumpLog::GetInstance().AddDesc("-----------start print itemPosition------------");
-        DumpItemPosition(swiper.itemPosition_);
-        DumpLog::GetInstance().AddDesc("-----------end print itemPosition------------");
-    }
-    if (!swiper.itemPositionInAnimation_.empty()) {
-        DumpLog::GetInstance().AddDesc("-----------start print itemPositionInAnimation------------");
-        DumpItemPosition(swiper.itemPositionInAnimation_);
-        DumpLog::GetInstance().AddDesc("-----------end print itemPositionInAnimation------------");
-    }
-    DumpPanDirection(swiper.panDirection_);
-    DumpDirection(swiper.direction_);
 }
 
 std::string SwiperHelper::GetDotIndicatorStyle(const std::shared_ptr<SwiperParameters>& params)
