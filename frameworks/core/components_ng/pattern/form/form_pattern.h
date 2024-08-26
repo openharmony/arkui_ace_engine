@@ -180,6 +180,7 @@ private:
     void RemoveFrsNode();
     void ReleaseRenderer();
     void DelayDeleteImageNode(bool needHandleCachedClick);
+    void SetNonTransparentAfterRecover();
     void DeleteImageNodeAfterRecover(bool needHandleCachedClick);
     void HandleStaticFormEvent(const PointF& touchPoint);
     void ProcDeleteImageNode(const AAFwk::Want& want);
