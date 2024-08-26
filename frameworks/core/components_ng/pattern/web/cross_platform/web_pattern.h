@@ -404,6 +404,8 @@ public:
         // cross platform is not support now;
         return false;
     }
+    void UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+        const NG::OnMenuItemClickCallback&& onMenuItemClick);
 
 private:
     void RegistVirtualKeyBoardListener();

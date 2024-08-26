@@ -1238,4 +1238,11 @@ void WebPattern::OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode)
 {
     // cross platform is not support now;
 }
+
+
+void UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+    const NG::OnMenuItemClickCallback&& onMenuItemClick)
+{
+    // cross platform is not support now;
+}
 } // namespace OHOS::Ace::NG
