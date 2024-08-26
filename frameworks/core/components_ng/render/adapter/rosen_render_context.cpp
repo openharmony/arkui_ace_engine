@@ -500,6 +500,8 @@ void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition
             sandBoxCount_++;
         }
         Rosen::Vector2f value = { parentPosition.value().GetX(), parentPosition.value().GetY() };
+        TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "node[%{public}s] Set SandBox",
+            std::to_string(rsNode_->GetId()).c_str());
         rsNode_->SetSandBox(value);
     } else {
         if (!force) {
@@ -512,6 +514,8 @@ void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition
         } else {
             sandBoxCount_ = 0;
         }
+        TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "node[%{public}s] Remove SandBox",
+            std::to_string(rsNode_->GetId()).c_str());
         rsNode_->SetSandBox(std::nullopt);
     }
 }
