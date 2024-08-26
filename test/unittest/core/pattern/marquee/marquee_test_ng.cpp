@@ -1122,7 +1122,7 @@ HWTEST_F(MarqueeTestNg, MarqueeTest015, TestSize.Level1)
     marqueeModel.SetAllowScale(true);
     EXPECT_EQ(marqueeLayoutProperty->GetAllowScale(), true);
     marqueeModel.SetAllowScale(std::nullopt);
-    EXPECT_FALSE(marqueeLayoutProperty->HasAllowScale());
+    EXPECT_EQ(marqueeLayoutProperty->GetAllowScale(), true);
 
     marqueeModel.SetMarqueeUpdateStrategy(Ace::MarqueeUpdateStrategy::DEFAULT);
     EXPECT_EQ(marqueeLayoutProperty->GetMarqueeUpdateStrategy(), Ace::MarqueeUpdateStrategy::DEFAULT);
@@ -1185,7 +1185,7 @@ HWTEST_F(MarqueeTestNg, MarqueeTest016, TestSize.Level1)
     marqueeModel.SetAllowScale(&frameNode, true);
     EXPECT_EQ(marqueeLayoutProperty->GetAllowScale(), true);
     marqueeModel.SetAllowScale(&frameNode, false);
-    EXPECT_FALSE(marqueeLayoutProperty->HasAllowScale());
+    EXPECT_EQ(marqueeLayoutProperty->GetAllowScale(), false);
 
     marqueeModel.SetMarqueeUpdateStrategy(&frameNode, Ace::MarqueeUpdateStrategy::PRESERVE_POSITION);
     EXPECT_EQ(marqueeLayoutProperty->GetMarqueeUpdateStrategy(), Ace::MarqueeUpdateStrategy::PRESERVE_POSITION);
