@@ -154,6 +154,9 @@ public:
     void SetRunMetrics(RunMetrics& runMetrics, const OHOS::Rosen::RunMetrics& runMetricsRes);
     bool GetLineMetricsByCoordinate(const Offset& offset, LineMetrics& lineMetrics) override;
     void UpdateColor(size_t from, size_t to, const Color& color) override;
+    void TxtGetRectsForRange(int32_t start, int32_t end,
+        RectHeightStyle heightStyle, RectWidthStyle widthStyle,
+        std::vector<RectF>& selectedRects, std::vector<TextDirection>& textDirections) override;
 
 private:
     void CreateBuilder();
@@ -170,6 +173,7 @@ private:
         RectHeightPolicy rectHeightPolicy = RectHeightPolicy::COVER_LINE);
     int32_t AdjustIndexForEmoji(int32_t index);
     bool IsIndexInEmoji(int32_t index, int32_t& emojiStart, int32_t& emojiEnd);
+    void CalculateLeadingMarginOffest(float& x, float& y);
 
     ParagraphStyle paraStyle_;
 #ifndef USE_GRAPHIC_TEXT_GINE

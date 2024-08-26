@@ -16,7 +16,6 @@
 #include "core/components/dialog_tween/dialog_tween_element.h"
 
 #include "core/components/common/properties/shadow_config.h"
-#include "core/components/dialog_tween/dialog_tween_component.h"
 #include "core/components/dialog_tween/render_dialog_tween.h"
 #include "core/components/transition/transition_element.h"
 

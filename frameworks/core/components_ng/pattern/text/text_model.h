@@ -92,6 +92,8 @@ public:
     virtual void SetTextShadow(const std::vector<Shadow>& value) = 0;
     virtual void SetItalicFontStyle(Ace::FontStyle value) = 0;
     virtual void SetFontWeight(FontWeight value) = 0;
+    virtual void SetVariableFontWeight(int32_t value) = 0;
+    virtual void SetEnableVariableFontWeight(bool value) = 0;
     virtual void SetMinFontScale(const float value) = 0;
     virtual void SetMaxFontScale(const float value) = 0;
     virtual void SetFontFamily(const std::vector<std::string>& value) = 0;

@@ -255,6 +255,15 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
     buttonEventHub->AddGesture(clickGesture);
     buttonNode->SetDraggable(canDrag);
 
+    
+    DimensionOffset offsetDimen(TITLE_BUTTON_RESPONSE_REGIOIN_OFFSET_X, TITLE_BUTTON_RESPONSE_REGIOIN_OFFSET_Y);
+    DimensionRect dimenRect(TITLE_BUTTON_RESPONSE_REGIOIN_WIDTH, TITLE_BUTTON_RESPONSE_REGIOIN_HEIGHT, offsetDimen);
+    std::vector<DimensionRect> result;
+    result.emplace_back(dimenRect);
+    auto gestureHub = buttonNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureHub, nullptr);
+    gestureHub->SetResponseRegion(result);
+
     auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(buttonLayoutProperty, nullptr);
     buttonLayoutProperty->UpdateType(ButtonType::CIRCLE);

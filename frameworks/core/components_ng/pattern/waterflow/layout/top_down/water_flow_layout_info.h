@@ -89,6 +89,12 @@ public:
 
     void UpdateOffset(float delta) override;
 
+    float CalibrateOffset() override
+    {
+        /* offset always accurate */
+        return 0.0f;
+    }
+
     float CalcTargetPosition(int32_t idx, int32_t crossIdx) const override;
 
     float GetDelta(float prevPos) const override
@@ -170,14 +176,20 @@ public:
      */
     void Sync(float mainSize, bool overScroll);
 
+    /**
+     * @brief Obtain index of last item recorded in Original layout.
+     * @note in segmented layout, use itemInfos_ instead.
+     */
+    int32_t GetLastItem() const;
+
     void NotifyDataChange(int32_t index, int32_t count) override {};
     void InitSegmentsForKeepPositionMode(const std::vector<WaterFlowSections::Section>& sections,
-        const std::vector<WaterFlowSections::Section>& prevSections, int32_t start) override {};
+        const std::vector<WaterFlowSections::Section>& prevSections, int32_t start) override
+    {}
 
     int32_t childrenCount_ = 0;
 
     float currentOffset_ = 0.0f;
-    float prevOffset_ = 0.0f;
     // 0.0f until itemEnd_ is true
     float maxHeight_ = 0.0f;
 

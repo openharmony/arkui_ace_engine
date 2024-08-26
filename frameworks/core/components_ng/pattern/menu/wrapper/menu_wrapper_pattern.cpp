@@ -86,8 +86,7 @@ RectF MenuWrapperPattern::GetMenuZone(RefPtr<UINode>& innerMenuNode)
         CHECK_NULL_RETURN(scrollNode, RectF());
         innerMenuNode = DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
         CHECK_NULL_RETURN(innerMenuNode, RectF());
-        auto offset = DynamicCast<FrameNode>(innerMenuNode)->GetOffsetRelativeToWindow();
-        menuZone.SetOffset(offset);
+        menuZone = subMenuNode->GetGeometryNode()->GetFrameRect();
     }
     return menuZone;
 }
@@ -318,11 +317,11 @@ RefPtr<FrameNode> MenuWrapperPattern::MenuFocusViewShow()
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     auto iter = host->GetChildren().begin();
-    int32_t focusNodeId = 2;
-    std::advance(iter, host->GetChildren().size() - focusNodeId);
+    int32_t focusNodeId = host->GetChildren().size() - 2;
+    std::advance(iter, focusNodeId);
     auto focusMenu = DynamicCast<FrameNode>(*iter);
     CHECK_NULL_RETURN(focusMenu, nullptr);
-    if (focusMenu->GetPattern<MenuPreviewPattern>()) {
+    if (GetPreviewMode() != MenuPreviewMode::NONE && focusNodeId == 1) {
         focusMenu = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
         CHECK_NULL_RETURN(focusMenu, nullptr);
     }
@@ -703,6 +702,23 @@ RefPtr<FrameNode> MenuWrapperPattern::GetMenuChild(const RefPtr<UINode>& node)
     return menuChild;
 }
 
+void MenuWrapperPattern::ClearAllSubMenu()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto children = host->GetChildren();
+    for (auto child = children.rbegin(); child != children.rend(); ++child) {
+        auto frameNode = DynamicCast<FrameNode>(*child);
+        if (!frameNode) {
+            continue;
+        }
+        auto pattern = frameNode->GetPattern<MenuPattern>();
+        if (pattern && pattern->IsSubMenu()) {
+            host->RemoveChild(frameNode);
+        }
+    }
+}
+
 void MenuWrapperPattern::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc("MenuPreviewMode: " + std::to_string(dumpInfo_.menuPreviewMode));
@@ -720,5 +736,26 @@ void MenuWrapperPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("OriginPlacement: " + dumpInfo_.originPlacement);
     DumpLog::GetInstance().AddDesc("FinalPosition: " + dumpInfo_.finalPosition.ToString());
     DumpLog::GetInstance().AddDesc("FinalPlacement: " + dumpInfo_.finalPlacement);
+}
+
+void MenuWrapperPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("MenuPreviewMode", std::to_string(dumpInfo_.menuPreviewMode).c_str());
+    json->Put("MenuType", std::to_string(dumpInfo_.menuType).c_str());
+    json->Put("EnableArrow", std::to_string(dumpInfo_.enableArrow).c_str());
+    json->Put("TargetNode", dumpInfo_.targetNode.c_str());
+    json->Put("TargetOffset", dumpInfo_.targetOffset.ToString().c_str());
+
+    json->Put("TargetSize", dumpInfo_.targetSize.ToString().c_str());
+    json->Put("WrapperRect", dumpInfo_.wrapperRect.ToString().c_str());
+    json->Put("PreviewBeginScale", std::to_string(dumpInfo_.previewBeginScale).c_str());
+    json->Put("PreviewEndScale", std::to_string(dumpInfo_.previewEndScale).c_str());
+    json->Put("Top", std::to_string(dumpInfo_.top).c_str());
+
+    json->Put("Bottom", std::to_string(dumpInfo_.bottom).c_str());
+    json->Put("GlobalLocation", dumpInfo_.globalLocation.ToString().c_str());
+    json->Put("OriginPlacement", dumpInfo_.originPlacement.c_str());
+    json->Put("FinalPosition", dumpInfo_.finalPosition.ToString().c_str());
+    json->Put("FinalPlacement", dumpInfo_.finalPlacement.c_str());
 }
 } // namespace OHOS::Ace::NG

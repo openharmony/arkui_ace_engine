@@ -115,4 +115,26 @@ RefPtr<Container> Container::GetContainer(int32_t containerId)
 {
     return MockContainer::Current();
 }
+
+void MockContainer::SetDisplayInfo(RefPtr<DisplayInfo> displayInfo)
+{
+    displayInfo_ = displayInfo;
+}
+
+RefPtr<DisplayInfo> Container::GetDisplayInfo()
+{
+    return MockContainer::Current()->GetMockDisplayInfo();
+}
+
+void Container::InitIsFoldable() {}
+
+bool Container::IsFoldable()
+{
+    return MockContainer::Current()->GetMockDisplayInfo()->GetIsFoldable();
+}
+
+FoldStatus Container::GetCurrentFoldStatus()
+{
+    return MockContainer::Current()->GetMockDisplayInfo()->GetFoldStatus();
+}
 } // namespace OHOS::Ace

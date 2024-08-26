@@ -15,12 +15,10 @@
 
 #include "core/components/page_transition/page_transition_element.h"
 
-#include "base/utils/system_properties.h"
 #include "core/animation/shared_transition_controller.h"
 #include "core/components/clip/clip_component.h"
 #include "core/components/clip/clip_element.h"
 #include "core/components/clip/render_clip.h"
-#include "core/components/page/page_element.h"
 #include "core/components/page_transition/page_transition_component.h"
 #include "core/components/transition/transition_component.h"
 

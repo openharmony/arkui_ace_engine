@@ -197,6 +197,30 @@ void ResetImageSpanColorFilter(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetColorFilterMatrix(frameNode, DEFAULT_COLOR_FILTER);
 }
+
+void SetImageSpanBorderRadius(ArkUINodeHandle node, const ArkUI_Float32* values,
+    const ArkUI_Int32* units, ArkUI_Int32 length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (length != DEFAULT_LENGTH) {
+        return;
+    }
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Dimension(values[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_0]));
+    borderRadius.radiusTopRight = Dimension(values[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_1]));
+    borderRadius.radiusBottomLeft = Dimension(values[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_2]));
+    borderRadius.radiusBottomRight = Dimension(values[NUM_3], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_3]));
+    borderRadius.multiValued = true;
+    ImageSpanView::SetBorderRadius(frameNode, borderRadius);
+}
+
+void ResetImageSpanBorderRadius(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageSpanView::ResetBorderRadius(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -206,7 +230,8 @@ const ArkUIImageSpanModifier* GetImageSpanModifier()
         SetImageSpanObjectFit, ResetImageSpanObjectFit, GetImageSpanVerticalAlign, GetImageSpanObjectFit,
         SetImageSpanTextBackgroundStyle, ResetImageSpanTextBackgroundStyle, GetImageSpanTextBackgroundStyle,
         SetImageSpanBaselineOffset, ResetImageSpanBaselineOffset, SetImageSpanOnComplete, ResetImageSpanOnComplete,
-        SetImageSpanOnError, ResetImageSpanOnError, SetImageSpanColorFilter, ResetImageSpanColorFilter};
+        SetImageSpanOnError, ResetImageSpanOnError, SetImageSpanColorFilter, ResetImageSpanColorFilter,
+        SetImageSpanBorderRadius, ResetImageSpanBorderRadius };
     return &modifier;
 }
 
@@ -216,7 +241,7 @@ const CJUIImageSpanModifier* GetCJUIImageSpanModifier()
         SetImageSpanObjectFit, ResetImageSpanObjectFit, GetImageSpanVerticalAlign, GetImageSpanObjectFit,
         SetImageSpanTextBackgroundStyle, ResetImageSpanTextBackgroundStyle, GetImageSpanTextBackgroundStyle,
         SetImageSpanBaselineOffset, ResetImageSpanBaselineOffset, SetImageSpanOnComplete, ResetImageSpanOnComplete,
-        SetImageSpanOnError, ResetImageSpanOnError};
+        SetImageSpanOnError, ResetImageSpanOnError };
     return &modifier;
 }
 } // namespace NodeModifier

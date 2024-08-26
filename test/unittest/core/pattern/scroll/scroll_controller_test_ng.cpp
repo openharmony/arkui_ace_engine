@@ -30,15 +30,15 @@ public:
 HWTEST_F(ScrolleControllerTestNg, ScrollPositionController001, TestSize.Level1)
 {
     CreateScroll();
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateDone();
     auto controller = pattern_->GetScrollPositionController();
     controller->ScrollToIndex(1, false, ScrollAlign::START, std::nullopt);
 
     /**
      * @tc.steps: step1. Test AnimateTo
      */
-    bool animate = controller->AnimateTo(Dimension(ITEM_HEIGHT * TOTAL_ITEM_NUMBER), -1.f, Curves::LINEAR, false);
+    bool animate = controller->AnimateTo(Dimension(600.f), -1.f, Curves::LINEAR, false);
     EXPECT_TRUE(animate);
     animate = controller->AnimateTo(Dimension(1.0, DimensionUnit::PERCENT), 1.f, Curves::LINEAR, false);
     EXPECT_FALSE(animate);
@@ -47,15 +47,17 @@ HWTEST_F(ScrolleControllerTestNg, ScrollPositionController001, TestSize.Level1)
      * @tc.steps: step2. jump to a position
      * @tc.expected: CurrentOffset would be to the position
      */
-    pattern_->DoJump(-ITEM_HEIGHT, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(-ITEM_HEIGHT));
+    pattern_->DoJump(-ITEM_MAIN_SIZE, SCROLL_FROM_UPDATE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_MAIN_SIZE);
 
     /**
      * @tc.steps: step3. jump to the same position
      * @tc.expected: CurrentOffset would not be change
      */
-    pattern_->DoJump(-ITEM_HEIGHT, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(-ITEM_HEIGHT));
+    pattern_->DoJump(-ITEM_MAIN_SIZE, SCROLL_FROM_UPDATE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_MAIN_SIZE);
 
     /**
      * @tc.steps: step4. ScrollBy 0
@@ -63,30 +65,33 @@ HWTEST_F(ScrolleControllerTestNg, ScrollPositionController001, TestSize.Level1)
      */
     ClearOldNodes();
     CreateScroll();
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateDone();
     controller = pattern_->GetScrollPositionController();
     controller->ScrollBy(0, 0, false);
-    EXPECT_TRUE(IsEqualCurrentPosition(0));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
 
     /**
      * @tc.steps: step5. ScrollBy a distance
      * @tc.expected: Scroll by the distance
      */
-    controller->ScrollBy(ITEM_WIDTH, ITEM_HEIGHT, false);
-    EXPECT_TRUE(IsEqualCurrentPosition(-ITEM_HEIGHT));
+    controller->ScrollBy(ITEM_MAIN_SIZE, ITEM_MAIN_SIZE, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_MAIN_SIZE);
 
     /**
      * @tc.steps: step6. ScrollTo same currentOffset_
      * @tc.expected: JumpToPosition do not SendEventToAccessibility
      */
     pattern_->ScrollTo(-pattern_->currentOffset_);
-    EXPECT_TRUE(IsEqualCurrentPosition(-ITEM_HEIGHT));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_MAIN_SIZE);
 
     /**
-     * @tc.steps: step7. Test GetCurrentPosition
+     * @tc.steps: step7. Test GetTotalOffset
      */
-    EXPECT_EQ(controller->GetCurrentOffset().GetY(), ITEM_HEIGHT);
+    EXPECT_EQ(controller->GetCurrentOffset().GetY(), ITEM_MAIN_SIZE);
 
     /**
      * @tc.steps: step8. Test ScrollEdgeType::SCROLL_NONE
@@ -94,43 +99,48 @@ HWTEST_F(ScrolleControllerTestNg, ScrollPositionController001, TestSize.Level1)
      */
     ClearOldNodes();
     CreateScroll();
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateDone();
     controller = pattern_->GetScrollPositionController();
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_NONE, false);
-    EXPECT_TRUE(IsEqualCurrentPosition(0));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
 
     /**
      * @tc.steps: step9. Test ScrollEdgeType::SCROLL_BOTTOM
      * @tc.expected: CurrentOffset would to be bottom
      */
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    EXPECT_TRUE(IsEqualCurrentPosition(SCROLL_HEIGHT - ITEM_HEIGHT * TOTAL_ITEM_NUMBER));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), VERTICAL_SCROLLABLE_DISTANCE);
 
     /**
      * @tc.steps: step10. Test ScrollEdgeType::SCROLL_TOP
      * @tc.expected: CurrentOffset would to be top
      */
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
-    EXPECT_TRUE(IsEqualCurrentPosition(0));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
 
     /**
      * @tc.steps: step11. Test ScrollPage
      */
     controller->ScrollPage(false, false);
-    EXPECT_TRUE(IsEqualCurrentPosition(SCROLL_HEIGHT - ITEM_HEIGHT * TOTAL_ITEM_NUMBER));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 400.f);
 
     /**
      * @tc.steps: step12. Test ScrollPage
      */
     controller->ScrollPage(true, false);
-    EXPECT_TRUE(IsEqualCurrentPosition(0));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
 
     /**
      * @tc.steps: step13. Test IsAtEnd
      */
     EXPECT_FALSE(controller->IsAtEnd());
-    ScrollTo(ITEM_HEIGHT * 2);
+    ScrollTo(CONTENT_MAIN_SIZE);
     EXPECT_TRUE(controller->IsAtEnd());
 }
 
@@ -143,15 +153,15 @@ HWTEST_F(ScrolleControllerTestNg, ScrollPositionController002, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
     model.SetAxis(Axis::HORIZONTAL);
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateDone();
     auto controller = pattern_->GetScrollPositionController();
     controller->ScrollToIndex(1, false, ScrollAlign::START, std::nullopt);
 
     /**
      * @tc.steps: step1. Test AnimateTo
      */
-    bool animate = controller->AnimateTo(Dimension(ITEM_HEIGHT * TOTAL_ITEM_NUMBER), -1.f, Curves::LINEAR, false);
+    bool animate = controller->AnimateTo(Dimension(600.f), -1.f, Curves::LINEAR, false);
     EXPECT_TRUE(animate);
     animate = controller->AnimateTo(Dimension(1.0, DimensionUnit::PERCENT), 1.f, Curves::LINEAR, false);
     EXPECT_FALSE(animate);
@@ -160,15 +170,17 @@ HWTEST_F(ScrolleControllerTestNg, ScrollPositionController002, TestSize.Level1)
      * @tc.steps: step2. jump to a position
      * @tc.expected: CurrentOffset would be to the position
      */
-    pattern_->DoJump(-ITEM_WIDTH, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(-ITEM_WIDTH));
+    pattern_->DoJump(-ITEM_MAIN_SIZE, SCROLL_FROM_UPDATE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_MAIN_SIZE);
 
     /**
      * @tc.steps: step3. jump to the same position
      * @tc.expected: CurrentOffset would not be change
      */
-    pattern_->DoJump(-ITEM_WIDTH, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(-ITEM_WIDTH));
+    pattern_->DoJump(-ITEM_MAIN_SIZE, SCROLL_FROM_UPDATE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_MAIN_SIZE);
 
     /**
      * @tc.steps: step4. ScrollBy 0
@@ -177,23 +189,25 @@ HWTEST_F(ScrolleControllerTestNg, ScrollPositionController002, TestSize.Level1)
     ClearOldNodes();
     model = CreateScroll();
     model.SetAxis(Axis::HORIZONTAL);
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateDone();
     controller = pattern_->GetScrollPositionController();
     controller->ScrollBy(0, 0, false);
-    EXPECT_TRUE(IsEqualCurrentPosition(0));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
 
     /**
      * @tc.steps: step5. ScrollBy a distance
      * @tc.expected: Scroll by the distance
      */
-    controller->ScrollBy(ITEM_WIDTH, ITEM_HEIGHT, false);
-    EXPECT_TRUE(IsEqualCurrentPosition(-ITEM_WIDTH));
+    controller->ScrollBy(ITEM_MAIN_SIZE, ITEM_MAIN_SIZE, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_MAIN_SIZE);
 
     /**
      * @tc.steps: step6. Test GetCurrentPosition
      */
-    EXPECT_EQ(controller->GetCurrentOffset().GetX(), ITEM_WIDTH);
+    EXPECT_EQ(controller->GetCurrentOffset().GetX(), ITEM_MAIN_SIZE);
 
     /**
      * @tc.steps: step7. Test ScrollEdgeType::SCROLL_NONE
@@ -202,43 +216,48 @@ HWTEST_F(ScrolleControllerTestNg, ScrollPositionController002, TestSize.Level1)
     ClearOldNodes();
     model = CreateScroll();
     model.SetAxis(Axis::HORIZONTAL);
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateDone();
     controller = pattern_->GetScrollPositionController();
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_NONE, false);
-    EXPECT_TRUE(IsEqualCurrentPosition(0));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
 
     /**
      * @tc.steps: step8. Test ScrollEdgeType::SCROLL_BOTTOM
      * @tc.expected: CurrentOffset would to be bottom
      */
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    EXPECT_TRUE(IsEqualCurrentPosition(SCROLL_WIDTH - ITEM_WIDTH * TOTAL_ITEM_NUMBER));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), CONTENT_MAIN_SIZE - SCROLL_WIDTH);
 
     /**
      * @tc.steps: step9. Test ScrollEdgeType::SCROLL_TOP
      * @tc.expected: CurrentOffset would to be top
      */
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
-    EXPECT_TRUE(IsEqualCurrentPosition(0));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
 
     /**
      * @tc.steps: step10. Test ScrollPage
      */
     controller->ScrollPage(false, false);
-    EXPECT_TRUE(IsEqualCurrentPosition(SCROLL_WIDTH - ITEM_WIDTH * TOTAL_ITEM_NUMBER));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 240.f);
 
     /**
      * @tc.steps: step11. Test ScrollPage
      */
     controller->ScrollPage(true, false);
-    EXPECT_TRUE(IsEqualCurrentPosition(0));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
 
     /**
      * @tc.steps: step12. Test IsAtEnd
      */
     EXPECT_FALSE(controller->IsAtEnd());
-    ScrollTo(ITEM_HEIGHT * 2);
+    ScrollTo(CONTENT_MAIN_SIZE);
     EXPECT_TRUE(controller->IsAtEnd());
 }
 
@@ -251,27 +270,29 @@ HWTEST_F(ScrolleControllerTestNg, ScrollPositionControlle003, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
     model.SetAxis(Axis::NONE);
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateDone();
     auto controller = pattern_->GetScrollPositionController();
 
     /**
      * @tc.steps: step1. Test AnimateTo
      */
-    bool animate = controller->AnimateTo(Dimension(ITEM_HEIGHT * TOTAL_ITEM_NUMBER), 1.f, Curves::LINEAR, false);
+    bool animate = controller->AnimateTo(Dimension(600.f), 1.f, Curves::LINEAR, false);
     EXPECT_FALSE(animate);
 
     /**
      * @tc.steps: step2. ScrollToEdge AnimateTo
      */
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    EXPECT_TRUE(IsEqualCurrentPosition(0));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
 
     /**
      * @tc.steps: step3. Test ScrollPage
      */
     controller->ScrollPage(false, false);
-    EXPECT_TRUE(IsEqualCurrentPosition(0));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
 }
 
 namespace {
@@ -287,9 +308,8 @@ constexpr int32_t TIME_CHANGED_COUNTS = 20;
 HWTEST_F(ScrolleControllerTestNg, ScrollPositionController004, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
-    model.SetAxis(Axis::VERTICAL);
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent(800.f);
+    CreateDone();
     auto controller = pattern_->GetScrollPositionController();
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_LEFT, SCROLL_FIXED_VELOCITY);
     EXPECT_FALSE(pattern_->fixedVelocityMotion_);
@@ -317,7 +337,6 @@ HWTEST_F(ScrolleControllerTestNg, ScrollPositionController004, TestSize.Level1)
     EXPECT_TRUE(pattern_->IsAtTop());
 }
 
-
 namespace {
 constexpr float SCROLL_FIXED_VELOCITY_005 = 300.f;
 constexpr float OFFSET_TIME_005 = 100.f;
@@ -335,10 +354,10 @@ HWTEST_F(ScrolleControllerTestNg, ScrollPositionController005, TestSize.Level1)
      */
     ScrollModelNG model = CreateScroll();
     model.SetAxis(Axis::VERTICAL);
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateDone();
     auto controller = pattern_->GetScrollPositionController();
-    
+
     /**
      * @tc.steps: step3. Scroll to the left edge
      * expected: Return fixed verify
@@ -425,10 +444,10 @@ HWTEST_F(ScrolleControllerTestNg, ScrollPositionController006, TestSize.Level1)
      */
     ScrollModelNG model = CreateScroll();
     model.SetAxis(Axis::VERTICAL);
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateDone();
     auto controller = pattern_->GetScrollPositionController();
-    
+
     /**
      * @tc.steps: step3. Scroll to the left edge
      * expected: Return fixed verify
@@ -489,18 +508,19 @@ HWTEST_F(ScrolleControllerTestNg, ScrollPositionController006, TestSize.Level1)
     }
     EXPECT_TRUE(pattern_->IsAtTop());
 
-    	/**
+    /**
      * @tc.steps: step9. ScrollBy 0
      * @tc.expected: CurrentOffset would not change
      */
     ClearOldNodes();
     model = CreateScroll();
     model.SetAxis(Axis::HORIZONTAL);
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateDone();
     controller = pattern_->GetScrollPositionController();
     controller->ScrollBy(0, 0, false);
-    EXPECT_TRUE(IsEqualCurrentPosition(0));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
 }
 
 namespace {
@@ -520,10 +540,10 @@ HWTEST_F(ScrolleControllerTestNg, ScrollPositionController007, TestSize.Level1)
      */
     ScrollModelNG model = CreateScroll();
     model.SetAxis(Axis::VERTICAL);
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateDone();
     auto controller = pattern_->GetScrollPositionController();
-    
+
     /**
      * @tc.steps: step3. Scroll to the left edge
      * expected: Return fixed verify
@@ -591,11 +611,12 @@ HWTEST_F(ScrolleControllerTestNg, ScrollPositionController007, TestSize.Level1)
     ClearOldNodes();
     model = CreateScroll();
     model.SetAxis(Axis::HORIZONTAL);
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateDone();
     controller = pattern_->GetScrollPositionController();
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_NONE, false);
-    EXPECT_TRUE(IsEqualCurrentPosition(0));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
 }
 
 namespace {
@@ -615,10 +636,10 @@ HWTEST_F(ScrolleControllerTestNg, ScrollPositionController008, TestSize.Level1)
      */
     ScrollModelNG model = CreateScroll();
     model.SetAxis(Axis::VERTICAL);
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateDone();
     auto controller = pattern_->GetScrollPositionController();
-    
+
     /**
      * @tc.steps: step3. Scroll to the left edge
      * expected: Return fixed verify
@@ -679,12 +700,13 @@ HWTEST_F(ScrolleControllerTestNg, ScrollPositionController008, TestSize.Level1)
     }
     EXPECT_TRUE(pattern_->IsAtTop());
 
-	/**
+    /**
      * @tc.steps: step9. jump to the same position
      * @tc.expected: CurrentOffset would not be change
      */
-    pattern_->DoJump(-ITEM_WIDTH, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(-ITEM_WIDTH));
+    pattern_->DoJump(-ITEM_MAIN_SIZE, SCROLL_FROM_UPDATE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_MAIN_SIZE);
 }
 
 namespace {
@@ -704,8 +726,8 @@ HWTEST_F(ScrolleControllerTestNg, ScrollPositionController009, TestSize.Level1)
      */
     ScrollModelNG model = CreateScroll();
     model.SetAxis(Axis::VERTICAL);
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateDone();
     auto controller = pattern_->GetScrollPositionController();
 
     /**
@@ -772,7 +794,7 @@ HWTEST_F(ScrolleControllerTestNg, ScrollPositionController009, TestSize.Level1)
      * @tc.steps: step9. Test AnimateTo
      * expected: animate is true
      */
-    bool animate = controller->AnimateTo(Dimension(ITEM_HEIGHT * TOTAL_ITEM_NUMBER), -1.f, Curves::LINEAR, false);
+    bool animate = controller->AnimateTo(Dimension(600.f), -1.f, Curves::LINEAR, false);
     EXPECT_TRUE(animate);
 
     /**
@@ -791,22 +813,22 @@ HWTEST_F(ScrolleControllerTestNg, ScrollPositionController009, TestSize.Level1)
 HWTEST_F(ScrolleControllerTestNg, ScrollTo001, TestSize.Level1)
 {
     CreateScroll();
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateDone();
 
     /**
      * @tc.steps: step1. ScrollTo normal position
      */
-    pattern_->ScrollTo(ITEM_HEIGHT);
+    pattern_->ScrollTo(ITEM_MAIN_SIZE);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_MAIN_SIZE);
 
     /**
      * @tc.steps: step2. ScrollTo same position
      */
-    pattern_->ScrollTo(ITEM_HEIGHT);
+    pattern_->ScrollTo(ITEM_MAIN_SIZE);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_MAIN_SIZE);
 
     /**
      * @tc.steps: step3. ScrollTo invalid position
@@ -825,11 +847,11 @@ HWTEST_F(ScrolleControllerTestNg, ScrollTo001, TestSize.Level1)
 HWTEST_F(ScrolleControllerTestNg, AnimateTo001, TestSize.Level1)
 {
     CreateScroll();
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateDone();
     auto smooth = false;
     pattern_->isAnimationStop_ = false;
-    pattern_->AnimateTo(ITEM_HEIGHT * TOTAL_ITEM_NUMBER, 1.f, Curves::LINEAR, smooth);
+    pattern_->AnimateTo(600.f, 1.f, Curves::LINEAR, smooth);
     EXPECT_FALSE(pattern_->isAnimationStop_);
 }
 
@@ -841,8 +863,8 @@ HWTEST_F(ScrolleControllerTestNg, AnimateTo001, TestSize.Level1)
 HWTEST_F(ScrolleControllerTestNg, AnimateTo002, TestSize.Level1)
 {
     CreateScroll();
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateDone();
     auto smooth = false;
     auto canOverScroll = false;
     pattern_->animateCanOverScroll_ = true;

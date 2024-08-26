@@ -22,29 +22,19 @@
 
 #define private public
 #define protected public
-#include "base/geometry/axis.h"
-#include "base/geometry/dimension.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/components/button/button_theme.h"
+#include "core/components/theme/theme_constants.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_abstract_model_ng.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern//linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern//linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 
 namespace OHOS::Ace::NG {
-namespace {
 using namespace testing;
 using namespace testing::ext;
 constexpr Dimension FILL_LENGTH = Dimension(1.0, DimensionUnit::PERCENT);
 constexpr double DEFAULT_FRICTION = 0.6;
 constexpr double NEW_DEFAULT_FRICTION = 0.7;
 constexpr int32_t NULL_VALUE = -1;
-} // namespace
 
 class TestNG : public testing::Test {
 public:
@@ -60,7 +50,7 @@ public:
     RefPtr<FrameNode> CreateText(const std::string& content, const std::function<void(TextModelNG)>& callback);
     RefPtr<FrameNode> CreateRow(const std::function<void(RowModelNG)>& callback);
     RefPtr<FrameNode> CreateColumn(const std::function<void(ColumnModelNG)>& callback);
-    void SetSize(Axis axis, const CalcLength& crossSize, const CalcLength& mainSize);
+    void SetSize(std::optional<Axis> axis, const CalcLength& crossSize, const CalcLength& mainSize);
 
     AssertionResult IsEqual(const SizeF& actual, const SizeF& expected)
     {

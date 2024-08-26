@@ -106,4 +106,16 @@ void HyperlinkModelNG::SetResponseRegion(bool isUserSetResponseRegion)
     CHECK_NULL_VOID(textPattern);
     textPattern->SetIsUserSetResponseRegion(isUserSetResponseRegion);
 }
+
+void HyperlinkModelNG::SetResponseRegion(
+    FrameNode* frameNode, const std::vector<DimensionRect>& regions, bool isUserSetResponseRegion)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    auto gesture = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    gesture->SetResponseRegion(regions);
+    textPattern->SetIsUserSetResponseRegion(isUserSetResponseRegion);
+}
 } // namespace OHOS::Ace::NG

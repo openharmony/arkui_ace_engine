@@ -202,7 +202,6 @@ struct ContentItemStruct {
           .fontColor(this.secondaryTextColor)
           .maxLines(TEXT_MAX_LINE)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
-          .focusable(true)
           .draggable(false)
       }
       if (this.description != null) {
@@ -211,7 +210,6 @@ struct ContentItemStruct {
           .fontColor(this.descriptionColor)
           .maxLines(TEXT_MAX_LINE)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
-          .focusable(true)
           .draggable(false)
       }
     }
@@ -427,7 +425,6 @@ struct OperateItemStruct {
       .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
       .fontSize($r('sys.float.ohos_id_text_size_body2'))
       .fontColor(this.secondaryTextColor)
-      .focusable(true)
       .draggable(false)
       .flexShrink(1)
   }
@@ -950,7 +947,6 @@ export struct ComposeListItem {
             parentDirection: this.containerDirection,
             itemDirection: this.contentItemDirection,
           })
-            .flexShrink(0)
         }
         if (this.operateItem !== null) {
           OperateItemStruct({

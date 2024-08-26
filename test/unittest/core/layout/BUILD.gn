@@ -22,7 +22,10 @@ ace_unittest("box_layout_algorithm_test_ng") {
 ace_unittest("layout_property_test_ng") {
   type = "new"
   module_output = "layout"
-  sources = [ "layout_property_test_ng.cpp" ]
+  sources = [
+    "layout_property_test_ng.cpp",
+    "layout_property_test_ng_two.cpp",
+  ]
 }
 
 ace_unittest("layout_wrapper_test_ng") {

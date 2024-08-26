@@ -254,6 +254,8 @@ void TabBarLayoutAlgorithm::MeasureScrollableMode(LayoutWrapper* layoutWrapper, 
                 HandleAlwaysAverageSplitLayoutStyle(layoutWrapper);
             } else if (layoutStyle.nonScrollableLayoutStyle == LayoutStyle::SPACE_BETWEEN_OR_CENTER) {
                 HandleSpaceBetweenOrCenterLayoutStyle(layoutWrapper);
+            } else {
+                useItemWidth_ = false;
             }
             scrollMargin_ = 0.0f;
         }
@@ -374,8 +376,7 @@ void TabBarLayoutAlgorithm::MeasureJumpIndex(LayoutWrapper* layoutWrapper, Layou
     visibleItemPosition_.clear();
     MeasureItem(layoutWrapper, childLayoutConstraint, jumpIndex_.value());
     if (GreatOrEqual(visibleItemLength_[jumpIndex_.value()], endMainPos_ - startMainPos_)) {
-        visibleItemPosition_[jumpIndex_.value()] = { scrollMargin_,
-            visibleItemLength_[jumpIndex_.value()] + scrollMargin_ };
+        visibleItemPosition_[jumpIndex_.value()] = { 0.0f, visibleItemLength_[jumpIndex_.value()] };
         return;
     }
 

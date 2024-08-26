@@ -113,4 +113,18 @@ void FfiOHOSAceFrameworkCheckBoxGroupSetOnChange(void (*callback)(FFiCheckboxGro
 {
     CheckBoxGroupModel::GetInstance()->SetOnChange(FormatOnChangeFunction(callback));
 }
+
+void FfiCheckBoxGroupSetResponseRegion(CJResponseRegion value)
+{
+    std::vector<DimensionRect> result;
+    ParseCJResponseRegion(value, result);
+    CheckBoxGroupModel::GetInstance()->SetResponseRegion(result);
+}
+
+void FfiCheckBoxGroupSetResponseRegionArray(VectorStringPtr vecContent)
+{
+    std::vector<DimensionRect> result;
+    ParseVectorStringPtr(vecContent, result);
+    CheckBoxGroupModel::GetInstance()->SetResponseRegion(result);
+}
 }

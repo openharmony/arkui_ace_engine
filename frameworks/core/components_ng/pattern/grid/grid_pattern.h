@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_GRID_PATTERN_H
 
 #include "core/components_ng/pattern/grid/grid_accessibility_property.h"
+#include "core/components_ng/pattern/grid/grid_content_modifier.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
@@ -239,12 +240,12 @@ public:
         return true;
     }
 
-    const std::list<int32_t>& GetPreloadItemList() const
+    const std::list<GridPreloadItem>& GetPreloadItemList() const
     {
         return preloadItemList_;
     }
 
-    void SetPreloadItemList(std::list<int32_t>&& list)
+    void SetPreloadItemList(std::list<GridPreloadItem>&& list)
     {
         preloadItemList_ = std::move(list);
     }
@@ -350,6 +351,8 @@ private:
     bool scrollable_ = true;
     bool forceOverScroll_ = false;
 
+    RefPtr<GridContentModifier> gridContentModifier_;
+
     float endHeight_ = 0.0f;
     bool isLeftStep_ = false;
     bool isRightStep_ = false;
@@ -366,7 +369,7 @@ private:
     GridItemIndexInfo curFocusIndexInfo_;
     GridLayoutInfo scrollGridLayoutInfo_;
     GridLayoutInfo gridLayoutInfo_;
-    std::list<int32_t> preloadItemList_; // list of GridItems to build preemptively in IdleTask
+    std::list<GridPreloadItem> preloadItemList_; // list of GridItems to build preemptively in IdleTask
     std::shared_ptr<GridItemAdapter> adapter_;
     ACE_DISALLOW_COPY_AND_MOVE(GridPattern);
 };

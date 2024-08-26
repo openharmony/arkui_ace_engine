@@ -15,14 +15,6 @@
 
 #include "core/components/progress/rosen_render_loading_progress.h"
 
-#include "include/core/SkMaskFilter.h"
-#include "include/core/SkPaint.h"
-
-#include "base/log/log.h"
-#include "base/utils/utils.h"
-#include "core/animation/curves.h"
-#include "core/pipeline/base/rosen_render_context.h"
-
 namespace OHOS::Ace {
 namespace {
 

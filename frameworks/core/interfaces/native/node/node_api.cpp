@@ -245,12 +245,19 @@ void SetCustomCallback(ArkUIVMContext context, ArkUINodeHandle node, ArkUI_Int32
 ArkUINodeHandle CreateNode(ArkUINodeType type, int peerId, ArkUI_Int32 flags)
 {
     ArkUINodeHandle node = nullptr;
+    ArkUI_Params params = { .nodeType = type };
     if (flags == ARKUI_NODE_FLAG_C) {
         ContainerScope Scope(Container::CurrentIdSafelyWithCheck());
-        node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId));
+        node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId, params));
     } else {
-        node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId));
+        node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId, params));
     }
+    return node;
+}
+
+ArkUINodeHandle CreateNodeWithParams(ArkUINodeType type, int peerId, ArkUI_Int32 flags, const ArkUI_Params& params)
+{
+    auto* node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId, params));
     return node;
 }
 
@@ -1807,6 +1814,7 @@ const ArkUIBasicAPI* GetBasicAPI()
     /* clang-format off */
     static const ArkUIBasicAPI basicImpl = {
         CreateNode,
+        CreateNodeWithParams,
         GetNodeByViewStack,
         DisposeNode,
         GetName,

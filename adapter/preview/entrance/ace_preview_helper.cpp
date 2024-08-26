@@ -21,16 +21,13 @@
 namespace OHOS::Ace::Platform {
 namespace {
 std::unique_ptr<AcePreviewHelper> instance_ = nullptr;
-std::mutex mutex_;
 } // namespace
 AcePreviewHelper* AcePreviewHelper::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
-            instance_.reset(new AcePreviewHelper());
-        }
-    }
+    static std::once_flag onceFlag;
+    std::call_once(onceFlag, []() {
+        instance_.reset(new AcePreviewHelper());
+    });
     return instance_.get();
 }
 } // namespace OHOS::Ace::Platform

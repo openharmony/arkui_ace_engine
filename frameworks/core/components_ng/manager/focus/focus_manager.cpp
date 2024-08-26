@@ -279,7 +279,7 @@ void FocusManager::UpdateCurrentFocus(const RefPtr<FocusHub>& current, Switching
 {
     if (isSwitchingFocus_.value_or(false)) {
         switchingFocus_ = current;
-        updateReason = reason;
+        updateReason_ = reason;
     }
 }
 
@@ -321,7 +321,19 @@ void FocusManager::FocusSwitchingStart(const RefPtr<FocusHub>& focusHub,
 {
     isSwitchingFocus_ = true;
     switchingFocus_ = focusHub;
-    startReason = reason;
+    startReason_ = reason;
+}
+
+void FocusManager::ReportFocusSwitching()
+{
+    for (auto& [_, cb] : listeners_) {
+        cb(currentFocus_, switchingFocus_);
+    }
+    currentFocus_ = switchingFocus_;
+    isSwitchingFocus_.reset();
+    startReason_.reset();
+    updateReason_.reset();
+    endReason_.reset();
 }
 
 void FocusManager::FocusSwitchingEnd(SwitchingEndReason reason)
@@ -332,20 +344,15 @@ void FocusManager::FocusSwitchingEnd(SwitchingEndReason reason)
         return;
     }
     if (!isSwitchingWindow_) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "FocusSwitching end, startReason: %{public}d, endReason: %{public}d, "
-            "updateReason: %{public}d",
-            startReason.value_or(SwitchingStartReason::DEFAULT),
-            reason, updateReason.value_or(SwitchingUpdateReason::DEFAULT));
-        for (auto& [_, cb] : listeners_) {
-            cb(currentFocus_, switchingFocus_);
-        }
-        currentFocus_ = switchingFocus_;
-        isSwitchingFocus_.reset();
-        startReason.reset();
-        updateReason.reset();
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "FocusSwitching end, startReason_: %{public}d, endReason_: %{public}d, "
+            "updateReason_: %{public}d",
+            startReason_.value_or(SwitchingStartReason::DEFAULT),
+            reason, updateReason_.value_or(SwitchingUpdateReason::DEFAULT));
+        ReportFocusSwitching();
+        PaintFocusState();
     } else {
         isSwitchingFocus_ = false;
-        endReason = reason;
+        endReason_ = reason;
     }
 }
 
@@ -358,19 +365,13 @@ void FocusManager::WindowFocusMoveEnd()
 {
     isSwitchingWindow_ = false;
     if (!isSwitchingFocus_.value_or(true)) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "WindowFocusMove end, startReason: %{public}d, endReason: %{public}d, "
-            "updateReason: %{public}d",
-            startReason.value_or(SwitchingStartReason::DEFAULT),
-            endReason.value_or(SwitchingEndReason::DEFAULT),
-            updateReason.value_or(SwitchingUpdateReason::DEFAULT));
-        for (auto& [_, cb] : listeners_) {
-            cb(currentFocus_, switchingFocus_);
-        }
-        currentFocus_ = switchingFocus_;
-        isSwitchingFocus_.reset();
-        startReason.reset();
-        updateReason.reset();
-        endReason.reset();
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "WindowFocusMove end, startReason_: %{public}d, endReason_: %{public}d, "
+            "updateReason_: %{public}d",
+            startReason_.value_or(SwitchingStartReason::DEFAULT),
+            endReason_.value_or(SwitchingEndReason::DEFAULT),
+            updateReason_.value_or(SwitchingUpdateReason::DEFAULT));
+        ReportFocusSwitching();
+        PaintFocusState();
     }
 }
 
@@ -406,5 +407,40 @@ FocusManager::FocusGuard::~FocusGuard()
     if (focusMng_) {
         focusMng_->FocusSwitchingEnd();
     }
+}
+
+void FocusManager::WindowFocus(bool isFocus)
+{
+    if (!isFocus) {
+        return;
+    }
+    WindowFocusMoveStart();
+    FocusSwitchingStart(GetCurrentFocus(), SwitchingStartReason::WINDOW_FOCUS);
+    auto curFocusView = GetLastFocusView().Upgrade();
+    auto curFocusViewHub = curFocusView ? curFocusView->GetFocusHub() : nullptr;
+    if (!curFocusViewHub) {
+        TAG_LOGW(AceLogTag::ACE_FOCUS, "Current focus view can not found!");
+    } else if (curFocusView->GetIsViewHasFocused() && !curFocusViewHub->IsCurrentFocus()) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on current focus view: %{public}s/%{public}d",
+            curFocusView->GetFrameName().c_str(), curFocusView->GetFrameId());
+        curFocusViewHub->RequestFocusImmediately();
+    } else {
+        auto container = Container::Current();
+        if (container && (container->IsUIExtensionWindow() || container->IsDynamicRender())) {
+            curFocusView->SetIsViewRootScopeFocused(false);
+            curFocusView->RequestDefaultFocus();
+        }
+    }
+
+    auto pipeline = pipeline_.Upgrade();
+    CHECK_NULL_VOID(pipeline);
+    auto root = pipeline->GetRootElement();
+    CHECK_NULL_VOID(root);
+    auto rootFocusHub = root->GetFocusHub();
+    CHECK_NULL_VOID(rootFocusHub);
+    if (!rootFocusHub->IsCurrentFocus()) {
+        rootFocusHub->RequestFocusImmediately();
+    }
+    pipeline->RequestFrame();
 }
 } // namespace OHOS::Ace::NG

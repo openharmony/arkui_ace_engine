@@ -15,11 +15,8 @@
 
 #include "core/components/select/select_component.h"
 
-#include "base/utils/string_utils.h"
-#include "core/common/container.h"
 #include "core/components/clip/clip_component.h"
 #include "core/components/flex/flex_item_component.h"
-#include "core/components/list/list_component.h"
 #include "core/components/select/render_select.h"
 #include "core/components/select/select_element.h"
 #include "core/components/triangle/triangle_component.h"

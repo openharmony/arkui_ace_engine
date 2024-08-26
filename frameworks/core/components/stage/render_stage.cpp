@@ -15,8 +15,6 @@
 
 #include "core/components/stage/render_stage.h"
 
-#include "base/utils/system_properties.h"
-#include "core/components/common/properties/page_transition_option.h"
 #include "core/components/stage/stage_element.h"
 
 namespace OHOS::Ace {

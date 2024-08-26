@@ -16,9 +16,7 @@
 #include "core/components/page/page_element.h"
 
 #include "base/log/dump_log.h"
-#include "core/common/frontend.h"
 #include "core/common/text_field_manager.h"
-#include "core/components/transform/transform_element.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
 
 namespace OHOS::Ace {

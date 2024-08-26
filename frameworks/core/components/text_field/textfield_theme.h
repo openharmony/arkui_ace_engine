@@ -212,6 +212,9 @@ public:
                 pattern->GetAttr<std::string>("textfield_accessibility_show_password", "");
             theme->hiddenPasswordPromptInformation_ =
                 pattern->GetAttr<std::string>("textfield_accessibility_hide_password", "");
+            theme->aiWriteBundleName_ = pattern->GetAttr<std::string>("textfield_writting_bundle_name", "");
+            theme->aiWriteAbilityName_ = pattern->GetAttr<std::string>("textfield_writting_ability_name", "");
+            
         }
     };
 
@@ -626,7 +629,14 @@ public:
     {
         return hiddenPasswordPromptInformation_;
     }
-
+    const std::string& GetAIWriteBundleName() const
+    {
+        return aiWriteBundleName_;
+    }
+    const std::string& GetAIWriteAbilityName() const
+    {
+        return aiWriteAbilityName_;
+    }
 protected:
     TextFieldTheme() = default;
 
@@ -733,6 +743,8 @@ private:
 
     std::string showPasswordPromptInformation_;
     std::string hiddenPasswordPromptInformation_;
+    std::string aiWriteBundleName_;
+    std::string aiWriteAbilityName_;
 };
 
 } // namespace OHOS::Ace

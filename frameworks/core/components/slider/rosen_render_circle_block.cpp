@@ -21,12 +21,9 @@
 #include "include/core/SkRRect.h"
 #endif
 
-#include "base/utils/system_properties.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
-#include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/pipeline/base/rosen_render_context.h"
-#include "render_service_client/core/ui/rs_node.h"
 
 namespace OHOS::Ace {
 namespace {

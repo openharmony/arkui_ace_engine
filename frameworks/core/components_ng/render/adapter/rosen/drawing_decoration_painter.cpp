@@ -629,6 +629,9 @@ public:
         if (sweepGradient->endAngle.has_value()) {
             endAngle = sweepGradient->endAngle.value().Value();
         }
+        if (startAngle > endAngle) {
+            return nullptr;
+        }
         return std::make_unique<NG::SweepGradientShader>(gradient, center, startAngle, endAngle, rotationAngle);
     }
 
@@ -683,6 +686,9 @@ std::shared_ptr<RSShaderEffect> DrawingDecorationPainter::CreateGradientShader(
         default:
             LOGE("unsupported gradient type.");
             break;
+    }
+    if (!ptr) {
+        return nullptr;
     }
     return ptr->CreateGradientShader();
 }

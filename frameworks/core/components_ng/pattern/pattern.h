@@ -385,7 +385,9 @@ public:
     }
 
     virtual void DumpInfo() {}
+    virtual void DumpInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpAdvanceInfo() {}
+    virtual void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) {}
     virtual void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) {}
@@ -631,7 +633,7 @@ public:
     {
         return 0;
     }
-    
+
     virtual bool IsResponseRegionExpandingNeededForStylus(const TouchEvent& touchEvent) const
     {
         return false;
@@ -643,6 +645,16 @@ public:
     }
 
     virtual void NotifyDataChange(int32_t index, int32_t count) {};
+
+    virtual bool RenderCustomChild(int64_t deadline)
+    {
+        return true;
+    }
+
+    virtual bool TriggerAutoSaveWhenInvisible()
+    {
+        return false;
+    }
 
 protected:
     virtual void OnAttachToFrameNode() {}

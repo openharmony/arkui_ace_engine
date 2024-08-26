@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
+#include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/multi_menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/sub_menu_layout_algorithm.h"
@@ -510,6 +511,10 @@ void MenuPattern::UpdateMenuItemChildren(RefPtr<UINode>& host)
             isNeedDivider_ = false;
             UpdateMenuItemChildren(itemGroupNode);
             isNeedDivider_ = false;
+            auto accessibilityProperty =
+                DynamicCast<FrameNode>(child)->GetAccessibilityProperty<AccessibilityProperty>();
+            CHECK_NULL_VOID(accessibilityProperty);
+            accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
         } else if (child->GetTag() == V2::JS_FOR_EACH_ETS_TAG || child->GetTag() == V2::JS_SYNTAX_ITEM_ETS_TAG) {
             auto nodesSet = AceType::DynamicCast<UINode>(child);
             CHECK_NULL_VOID(nodesSet);
@@ -1094,6 +1099,7 @@ void MenuPattern::ShowPreviewMenuAnimation()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    MenuView::ShowPixelMapAnimation(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateTransformCenter(DimensionOffset(GetTransformCenter()));
@@ -1662,11 +1668,11 @@ float MenuPattern::GetSelectMenuWidth()
     } else {
         finalWidth = defaultWidth;
     }
-    
+
     if (finalWidth < MIN_SELECT_MENU_WIDTH.ConvertToPx()) {
         finalWidth = defaultWidth;
     }
-    
+
     return finalWidth;
 }
 
@@ -1785,4 +1791,8 @@ bool MenuPattern::IsMenuScrollable() const
     return false;
 }
 
+void MenuPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("MenuType", static_cast<int32_t>(GetMenuType()));
+}
 } // namespace OHOS::Ace::NG

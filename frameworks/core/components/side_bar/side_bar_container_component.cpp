@@ -15,15 +15,9 @@
 
 #include "core/components/side_bar/side_bar_container_component.h"
 
-#include "base/geometry/dimension.h"
-#include "core/components/box/box_component.h"
-#include "core/components/display/display_component.h"
-#include "core/components/image/image_component.h"
 #include "core/components/side_bar/render_side_bar_container.h"
 #include "core/components/side_bar/side_bar_container_element.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/gestures/tap_gesture.h"
-#include "core/pipeline/base/component.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace {

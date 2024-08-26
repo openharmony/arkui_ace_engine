@@ -15,10 +15,8 @@
 
 #include "core/components/watch_slider/render_watch_slider.h"
 
-#include "base/json/json_util.h"
 #include "core/components/image/image_component.h"
 #include "core/components/image/render_image.h"
-#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 namespace {

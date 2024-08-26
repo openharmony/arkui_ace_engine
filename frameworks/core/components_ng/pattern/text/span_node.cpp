@@ -38,6 +38,9 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr Color TEXT_DEFAULT_FONT_COLOR = Color(0xFF007DFF);
+constexpr Color TEXT_DEFAULT_HOVER_BACKGROUND_COLOR = Color(0x0C182431);
+constexpr Color TEXT_DEFAULT_PRESS_BACKGROUND_COLOR = Color(0x19182431);
 std::string GetDeclaration(const std::optional<Color>& color, const std::optional<TextDecoration>& textDecoration,
     const std::optional<TextDecorationStyle>& textDecorationStyle)
 {
@@ -592,6 +595,10 @@ TextStyle SpanItem::InheritParentProperties(const RefPtr<FrameNode>& frameNode, 
     INHERIT_TEXT_STYLE(fontStyle, FontFeature, SetFontFeatures);
     INHERIT_TEXT_STYLE(fontStyle, MinFontScale, SetMinFontScale);
     INHERIT_TEXT_STYLE(fontStyle, MaxFontScale, SetMaxFontScale);
+    if (!GetHasUserFontWeight()) {
+        INHERIT_TEXT_STYLE(fontStyle, VariableFontWeight, SetVariableFontWeight);
+        INHERIT_TEXT_STYLE(fontStyle, EnableVariableFontWeight, SetEnableVariableFontWeight);
+    }
     INHERIT_TEXT_STYLE(textLineStyle, LineHeight, SetLineHeight);
     INHERIT_TEXT_STYLE(textLineStyle, LineSpacing, SetLineSpacing);
     INHERIT_TEXT_STYLE(textLineStyle, HalfLeading, SetHalfLeading);
@@ -642,16 +649,17 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem() const
     COPY_TEXT_STYLE(textLineStyle, HalfLeading, UpdateHalfLeading);
 
     if (backgroundStyle.has_value()) {
-        sameSpan->backgroundStyle->backgroundColor = backgroundStyle->backgroundColor;
-        sameSpan->backgroundStyle->backgroundRadius = backgroundStyle->backgroundRadius;
-        sameSpan->backgroundStyle->groupId = backgroundStyle->groupId;
+        sameSpan->backgroundStyle = backgroundStyle;
     }
 
     sameSpan->onClick = onClick;
     sameSpan->onLongPress = onLongPress;
+    sameSpan->urlOnClick = urlOnClick;
+    sameSpan->urlOnRelease = urlOnRelease;
+    sameSpan->urlOnPress = urlOnPress;
+    sameSpan->urlOnHover = urlOnHover;
     return sameSpan;
 }
-
 
 #define WRITE_TEXT_STYLE_TLV(group, name, tag, type)                   \
     do {                                                               \
@@ -816,6 +824,53 @@ std::optional<std::pair<int32_t, int32_t>> SpanItem::GetIntersectionInterval(std
     int32_t start = std::max(this->interval.first, interval.first);
     int32_t end = std::min(this->interval.second, interval.second);
     return std::make_optional<std::pair<int32_t, int32_t>>(std::make_pair(start, end));
+}
+
+void SpanItem::HandeUrlHoverEvent(bool isHover, int32_t urlId,
+    const RefPtr<SpanItem>& spanItem) const
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (isHover) {
+        spanItem->fontStyle->UpdateTextColor(TEXT_DEFAULT_FONT_COLOR);
+        TextBackgroundStyle backgroundStyle;
+        backgroundStyle.backgroundColor = (TEXT_DEFAULT_HOVER_BACKGROUND_COLOR);
+        backgroundStyle.backgroundRadius = { radius_, radius_, radius_, radius_};
+        spanItem->backgroundStyle = backgroundStyle;
+        pipelineContext->SetMouseStyleHoldNode(urlId);
+        pipelineContext->ChangeMouseStyle(urlId, MouseFormat::HAND_POINTING);
+    } else {
+        spanItem->fontStyle->UpdateTextColor(TEXT_DEFAULT_FONT_COLOR);
+        TextBackgroundStyle backgroundStyle;
+        backgroundStyle.backgroundColor = Color::TRANSPARENT;
+        spanItem->backgroundStyle = backgroundStyle;
+        pipelineContext->ChangeMouseStyle(urlId, MouseFormat::DEFAULT);
+        pipelineContext->FreeMouseStyleHoldNode(urlId);
+    }
+}
+
+void SpanItem::HandeUrlOnPressEvent(const RefPtr<SpanItem>& spanItem, bool isPress) const
+{
+    if (isPress) {
+        spanItem->fontStyle->UpdateTextColor(TEXT_DEFAULT_FONT_COLOR);
+        TextBackgroundStyle backgroundStyle;
+        backgroundStyle.backgroundRadius = { radius_, radius_, radius_, radius_};
+        backgroundStyle.backgroundColor = (TEXT_DEFAULT_PRESS_BACKGROUND_COLOR);
+        spanItem->backgroundStyle = backgroundStyle;
+    } else {
+        spanItem->fontStyle->UpdateTextColor(TEXT_DEFAULT_FONT_COLOR);
+        TextBackgroundStyle backgroundStyle;
+        backgroundStyle.backgroundColor = Color::TRANSPARENT;
+        spanItem->backgroundStyle = backgroundStyle;
+    }
+}
+
+void SpanItem::HandleUrlNormalStyle(const RefPtr<SpanItem>& spanItem) const
+{
+    spanItem->fontStyle->UpdateTextColor(TEXT_DEFAULT_FONT_COLOR);
+    TextBackgroundStyle backgroundStyle;
+    backgroundStyle.backgroundColor = Color::TRANSPARENT;
+    spanItem->backgroundStyle = backgroundStyle;
 }
 
 bool ImageSpanItem::EncodeTlv(std::vector<uint8_t>& buff)
@@ -1048,6 +1103,7 @@ int32_t PlaceholderSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNo
     run.width = placeholderStyle.width;
     run.height = placeholderStyle.height;
     textStyle.SetTextDecoration(TextDecoration::NONE);
+    textStyle.SetTextBackgroundStyle(backgroundStyle);
     builder->PushStyle(textStyle);
     int32_t index = builder->AddPlaceholder(run);
     run_ = run;
@@ -1088,7 +1144,7 @@ std::set<PropertyInfo> SpanNode::CalculateInheritPropertyInfo()
         PropertyInfo::SYMBOL_RENDERING_STRATEGY, PropertyInfo::SYMBOL_EFFECT_STRATEGY, PropertyInfo::WORD_BREAK,
         PropertyInfo::LINE_BREAK_STRATEGY, PropertyInfo::FONTFEATURE, PropertyInfo::LINESPACING,
         PropertyInfo::SYMBOL_EFFECT_OPTIONS, PropertyInfo::HALFLEADING, PropertyInfo::MIN_FONT_SCALE,
-        PropertyInfo::MAX_FONT_SCALE };
+        PropertyInfo::MAX_FONT_SCALE, PropertyInfo::VARIABLE_FONT_WEIGHT, PropertyInfo::ENABLE_VARIABLE_FONT_WEIGHT };
     set_difference(propertyInfoContainer.begin(), propertyInfoContainer.end(), propertyInfo_.begin(),
         propertyInfo_.end(), inserter(inheritPropertyInfo, inheritPropertyInfo.begin()));
     return inheritPropertyInfo;

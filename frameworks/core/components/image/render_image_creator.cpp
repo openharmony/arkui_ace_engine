@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "render_image.h"
 #include "rosen_render_image.h"
 
 namespace OHOS::Ace {

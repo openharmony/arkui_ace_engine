@@ -106,6 +106,23 @@ class RowPointLightModifier extends ModifierWithKey<PointLightStyle> {
   }
 }
 
+class RowReverseModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('rowReverse');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().row.resetReverse(node);
+    } else {
+      getUINativeModule().row.setReverse(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
+}
+
 interface RowParam {
   space: string | number;
 }
@@ -130,6 +147,10 @@ class ArkRowComponent extends ArkComponent implements RowAttribute {
   }
   pointLight(value: PointLightStyle): RowAttribute {
     modifierWithKey(this._modifiersWithKeys, RowPointLightModifier.identity, RowPointLightModifier, value);
+    return this;
+  }
+  reverse(value: boolean | undefined): RowAttribute {
+    modifierWithKey(this._modifiersWithKeys, RowReverseModifier.identity, RowReverseModifier, value);
     return this;
   }
 }

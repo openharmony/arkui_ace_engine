@@ -493,6 +493,10 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetSelectedTextStyle003, Test
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetSelectedTextStyle004, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create TimePickerSettingData and call GetIsUserSetTextProperties.
+     * @tc.expected: the third if condition is true and return true.
+     */
     TimePickerSettingData settingData;
     settingData.properties.selectedTextStyle_.textColor = Color::RED;
     settingData.properties.selectedTextStyle_.fontSize = Dimension(10);
@@ -500,6 +504,15 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetSelectedTextStyle004, Test
     settingData.isUseMilitaryTime = false;
     auto isUserSet = TimePickerDialogView::GetIsUserSetTextProperties(settingData.properties);
     EXPECT_EQ(isUserSet, true);
+    /**
+     * @tc.steps: step1+. set TimePickerSettingData and call GetIsUserSetTextProperties.
+     * @tc.expected: all of if conditions are false and return false.
+     */
+    settingData.properties.selectedTextStyle_.fontSize = Dimension(0);
+    settingData.properties.normalTextStyle_.fontSize = Dimension(0);
+    settingData.properties.disappearTextStyle_.fontSize = Dimension(0);
+    isUserSet = TimePickerDialogView::GetIsUserSetTextProperties(settingData.properties);
+    EXPECT_EQ(isUserSet, false);
 }
 
 /**
@@ -2882,19 +2895,35 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewUpdateButtonDefaultFocus00
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewUpdateButtonDefaultFocus002, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create ButtonInfos[2] and Create Button Node.
+     */
     std::vector<ButtonInfo> buttonInfos;
     ButtonInfo info1;
     info1.isPrimary = true;
     buttonInfos.push_back(info1);
+    ButtonInfo info2;
+    info2.isPrimary = true;
+    buttonInfos.push_back(info2);
 
     auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     ASSERT_NE(buttonNode, nullptr);
-
+    /**
+     * @tc.steps: step2. call UpdateButtonDefaultFocus expect defaultfocus is false.
+     */
     TimePickerDialogView::UpdateButtonDefaultFocus(buttonInfos, buttonNode, false);
     auto focusHub = buttonNode->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
-    EXPECT_EQ(focusHub->IsDefaultFocus(), true);
+    EXPECT_EQ(focusHub->IsDefaultFocus(), false);
+    /**
+     * @tc.steps: step2+. set buttoninfos isPrimary is false call UpdateButtonDefaultFocus
+     *  and set buttonnode is nullptr. IsDefaultFocus expects false.
+     */
+    buttonInfos[0].isPrimary = false;
+    buttonInfos[1].isPrimary = false;
+    TimePickerDialogView::UpdateButtonDefaultFocus(buttonInfos, nullptr, false);
+    EXPECT_EQ(focusHub->IsDefaultFocus(), false);
 }
 
 /**
@@ -2904,6 +2933,9 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewUpdateButtonDefaultFocus00
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewUpdateButtonDefaultFocus003, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create ButtonInfos[2] and Create Button Node set isPrimary true.
+     */
     std::vector<ButtonInfo> buttonInfos;
     ButtonInfo info1;
     info1.isPrimary = true;
@@ -2916,9 +2948,22 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewUpdateButtonDefaultFocus00
     auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     ASSERT_NE(buttonNode, nullptr);
-
+    /**
+     * @tc.steps: step2. call UpdateButtonDefaultFocus and isConfirm is true.
+     * @tc.expected: button1.isPrimary = true and IsDefaultFocus expects true.
+     */
     TimePickerDialogView::UpdateButtonDefaultFocus(buttonInfos, buttonNode, true);
     auto focusHub = buttonNode->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    EXPECT_EQ(focusHub->IsDefaultFocus(), true);
+    /**
+     * @tc.steps: step2+. call UpdateButtonDefaultFocus and isConfirm is false.
+     * @tc.expected: button2.isPrimary = true and IsDefaultFocus expects true.
+     */
+    buttonInfos[0].isPrimary = false;
+    buttonInfos[1].isPrimary = true;
+    TimePickerDialogView::UpdateButtonDefaultFocus(buttonInfos, buttonNode, false);
+    focusHub = buttonNode->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
     EXPECT_EQ(focusHub->IsDefaultFocus(), true);
 }
