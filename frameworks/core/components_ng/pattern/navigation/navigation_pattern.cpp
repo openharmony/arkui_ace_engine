@@ -906,8 +906,8 @@ void NavigationPattern::FireNavigationInner(const RefPtr<UINode>& node, bool isO
             }
             auto eventHub = curDestination->GetEventHub<NavDestinationEventHub>();
             CHECK_NULL_VOID(eventHub);
-            auto param = Recorder::EventRecorder::Get().IsPageRecordEnable() ?
-            navigationPattern->navigationStack_->GetRouteParam() : "";
+            auto param = Recorder::EventRecorder::Get().IsPageParamRecordEnable() ?
+                navigationPattern->navigationStack_->GetRouteParam() : "";
             eventHub->FireOnShownEvent(navDestinationPattern->GetName(), param);
             navDestinationPattern->SetIsOnShow(true);
             NavigationPattern::FireNavigationChange(curDestination, true, false);
@@ -2314,8 +2314,7 @@ void NavigationPattern::NotifyDestinationLifecycle(const RefPtr<UINode>& uiNode,
         return;
     }
     if (lifecycle == NavDestinationLifecycle::ON_SHOW) {
-        auto param = Recorder::EventRecorder::Get().IsPageRecordEnable() ?
-            navigationStack_->GetRouteParam() : "";
+        auto param = Recorder::EventRecorder::Get().IsPageParamRecordEnable() ? navigationStack_->GetRouteParam() : "";
         eventHub->FireOnShownEvent(navDestinationPattern->GetName(), param);
         NotifyPageShow(navDestinationPattern->GetName());
         navDestinationPattern->SetIsOnShow(true);

@@ -50,6 +50,7 @@ EventController& EventController::Get()
 
 void EventController::Register(const std::string& config, const std::shared_ptr<UIEventObserver>& observer)
 {
+    TAG_LOGI(AceLogTag::ACE_UIEVENT, "Register config");
     UIEventClient client;
     client.config.Init(config);
     if (!client.config.IsEnable()) {
@@ -82,6 +83,8 @@ void EventController::NotifyConfigChange()
             eventSwitch.exposureEnable || client.config.IsCategoryEnable(EventCategory::CATEGORY_EXPOSURE);
         eventSwitch.componentEnable =
             eventSwitch.componentEnable || client.config.IsCategoryEnable(EventCategory::CATEGORY_COMPONENT);
+        eventSwitch.pageParamEnable =
+            eventSwitch.pageParamEnable || client.config.IsCategoryEnable(EventCategory::CATEGORY_PAGE_PARAM);
         for (auto iter = client.config.GetConfig()->begin(); iter != client.config.GetConfig()->end(); iter++) {
             auto nodeIt = mergedConfig->shareNodes.find(iter->first);
             if (nodeIt != mergedConfig->shareNodes.end()) {
