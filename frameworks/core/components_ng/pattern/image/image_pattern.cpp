@@ -766,8 +766,10 @@ void ImagePattern::OnModifyDone()
         default:
             break;
     }
-
-    InitOnKeyEvent();
+    
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        InitOnKeyEvent();
+    }
 }
 
 void ImagePattern::InitOnKeyEvent()

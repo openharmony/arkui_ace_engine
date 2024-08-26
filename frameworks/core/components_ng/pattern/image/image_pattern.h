@@ -90,7 +90,11 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, false, FocusStyleType::OUTER_BORDER };
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+            return { FocusType::NODE, false, FocusStyleType::OUTER_BORDER };
+        } else {
+            return { FocusType::NODE, false };
+        }
     }
 
     const RefPtr<CanvasImage>& GetCanvasImage()
