@@ -274,7 +274,9 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
     CHECK_NULL_RETURN(pattern, -1);
     textStyle.SetTextBackgroundStyle(backgroundStyle);
     if (pattern->NeedShowAIDetect() && !aiSpanMap.empty()) {
-        UpdateTextStyleForAISpan(spanContent, builder, textStyle);
+        TextStyle aiSpanStyle = textStyle;
+        pattern->ModifyAISpanStyle(aiSpanStyle);
+        UpdateTextStyleForAISpan(spanContent, builder, textStyle, aiSpanStyle);
     } else {
         UpdateTextStyle(spanContent, builder, textStyle, selectedStart, selectedEnd);
     }
@@ -340,8 +342,8 @@ void SpanItem::UpdateSymbolSpanColor(const RefPtr<FrameNode>& frameNode, TextSty
     }
 }
 
-void SpanItem::UpdateTextStyleForAISpan(
-    const std::string& spanContent, const RefPtr<Paragraph>& builder, const TextStyle& textStyle)
+void SpanItem::UpdateTextStyleForAISpan(const std::string& spanContent, const RefPtr<Paragraph>& builder,
+    const TextStyle& textStyle, const TextStyle& aiSpanStyle)
 {
     auto wSpanContent = StringUtils::ToWstring(spanContent);
     int32_t wSpanContentLength = static_cast<int32_t>(wSpanContent.length());
@@ -350,8 +352,6 @@ void SpanItem::UpdateTextStyleForAISpan(
         spanStart -= 1;
     }
     int32_t preEnd = spanStart;
-    std::optional<TextStyle> aiSpanTextStyle = textStyle;
-    SetAiSpanTextStyle(aiSpanTextStyle);
     while (!aiSpanMap.empty()) {
         auto aiSpan = aiSpanMap.begin()->second;
         if (aiSpan.start >= position || preEnd >= position) {
@@ -374,7 +374,7 @@ void SpanItem::UpdateTextStyleForAISpan(
         }
         auto displayContent = StringUtils::ToWstring(aiSpan.content)
             .substr(aiSpanStartInSpan - aiSpan.start, aiSpanEndInSpan - aiSpanStartInSpan);
-        UpdateTextStyle(StringUtils::ToString(displayContent), builder, aiSpanTextStyle.value(),
+        UpdateTextStyle(StringUtils::ToString(displayContent), builder, aiSpanStyle,
             selectedStart - contentStart, selectedEnd - contentStart);
         preEnd = aiSpanEndInSpan;
         if (aiSpan.end > position) {
@@ -387,28 +387,6 @@ void SpanItem::UpdateTextStyleForAISpan(
         int32_t contentStart = preEnd - spanStart;
         auto afterContent = StringUtils::ToString(wSpanContent.substr(preEnd - spanStart, position - preEnd));
         UpdateTextStyle(afterContent, builder, textStyle, selectedStart - contentStart, selectedEnd - contentStart);
-    }
-}
-
-void SpanItem::SetAiSpanTextStyle(std::optional<TextStyle>& aiSpanTextStyle)
-{
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    if (!aiSpanTextStyle.has_value()) {
-        TextStyle themeTextStyle =
-            CreateTextStyleUsingTheme(fontStyle, textLineStyle, pipelineContext->GetTheme<TextTheme>());
-        if (NearZero(themeTextStyle.GetFontSize().Value())) {
-            return;
-        }
-        aiSpanTextStyle = themeTextStyle;
-    } else {
-        auto hyerlinkTheme = pipelineContext->GetTheme<HyperlinkTheme>();
-        CHECK_NULL_VOID(hyerlinkTheme);
-        auto hyerlinkColor = hyerlinkTheme->GetTextColor();
-        aiSpanTextStyle.value().SetTextColor(hyerlinkColor);
-        aiSpanTextStyle.value().SetTextDecoration(TextDecoration::UNDERLINE);
-        aiSpanTextStyle.value().SetTextDecorationColor(hyerlinkColor);
-        aiSpanTextStyle.value().SetTextDecorationStyle(TextDecorationStyle::SOLID);
     }
 }
 
