@@ -76,7 +76,7 @@ public:
     void ResetResizableLattice() override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& src, RefPtr<PixelMap>& pixMap,
         const std::string& bundleName, const std::string& moduleName, bool isUriPureNumber = false);
-    static void InitImage(FrameNode *frameNode, std::string& src);
+    static void InitImage(FrameNode *frameNode, const std::string& src);
     static void ResetImage(FrameNode* frameNode);
     static void SetInitialSrc(FrameNode* frameNode, const std::string& src, const std::string& bundleName,
         const std::string& moduleName, bool isUriPureNumber = false);

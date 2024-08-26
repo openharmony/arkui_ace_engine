@@ -552,7 +552,7 @@ bool ImageModelNG::UpdateDragItemInfo(DragItemInfo &itemInfo)
     return false;
 }
 
-void ImageModelNG::InitImage(FrameNode *frameNode, std::string& src)
+void ImageModelNG::InitImage(FrameNode *frameNode, const std::string& src)
 {
     std::string bundleName;
     std::string moduleName;

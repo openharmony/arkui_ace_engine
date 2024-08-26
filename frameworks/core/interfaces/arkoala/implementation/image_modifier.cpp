@@ -24,12 +24,12 @@ namespace ImageInterfaceModifier {
 void SetImageOptions0Impl(Ark_NativePointer node,
                           const Type_ImageInterface_setImageOptions_Arg0* src)
 {
-    ImageSourceInfo info = Converter::Convert(node, *src);
-    std::string imageSrc = info.GetSrc();
-
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ImageModelNG::InitImage(frameNode, imageSrc);
+    auto info = Converter::OptConvert<ImageSourceInfo>(*src);
+    if (info) {
+        auto frameNode = reinterpret_cast<FrameNode*>(node);
+        CHECK_NULL_VOID(frameNode);
+        ImageModelNG::InitImage(frameNode, info->GetSrc());
+    }
 }
 void SetImageOptions1Impl(Ark_NativePointer node,
                           const Type_ImageInterface_setImageOptions1_Arg0* src)
@@ -49,8 +49,10 @@ void AltImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageSourceInfo info = Converter::Convert(frameNode, *value);
-    ImageModelNG::SetAlt(frameNode, info);
+    auto info = Converter::OptConvert<ImageSourceInfo>(*value);
+    if (info) {
+        ImageModelNG::SetAlt(frameNode, info.value());
+    }
 }
 void MatchTextDirectionImpl(Ark_NativePointer node,
                             Ark_Boolean value)
