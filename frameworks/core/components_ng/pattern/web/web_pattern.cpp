@@ -2891,7 +2891,7 @@ void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeybo
     if (isUpdate) {
         rect.SetSize(SizeF(drawSize_.Width(), drawSize_.Height()));
         frameNode->GetRenderContext()->SyncGeometryProperties(rect);
-        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF | PROPERTY_UPDATE_RENDER);
     }
 }
 
