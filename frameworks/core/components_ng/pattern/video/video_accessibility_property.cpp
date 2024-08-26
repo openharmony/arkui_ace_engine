@@ -15,9 +15,6 @@
 
 #include "core/components_ng/pattern/video/video_accessibility_property.h"
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/video/video_layout_property.h"
-#include "core/components_ng/pattern/video/video_pattern.h"
 #include "core/components_ng/pattern/video/video_full_screen_node.h"
 #include "core/components_ng/pattern/video/video_full_screen_pattern.h"
 

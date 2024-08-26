@@ -15,12 +15,6 @@
 
 #include "core/components_ng/pattern/toggle/switch_layout_algorithm.h"
 
-#include "base/geometry/ng/size_t.h"
-#include "core/common/container.h"
-#include "core/components/checkable/checkable_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/pipeline/base/constants.h"
-#include "core/pipeline/pipeline_base.h"
 #include "core/components_ng/pattern/toggle/switch_pattern.h"
 
 namespace OHOS::Ace::NG {

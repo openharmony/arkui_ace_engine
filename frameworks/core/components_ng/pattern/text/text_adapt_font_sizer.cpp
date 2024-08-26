@@ -15,14 +15,6 @@
 
 #include "core/components_ng/pattern/text/text_adapt_font_sizer.h"
 
-#include <limits>
-
-#include "base/geometry/dimension.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
-#include "core/common/font_manager.h"
-#include "core/pipeline_ng/pipeline_context.h"
-
 namespace OHOS::Ace::NG {
 bool TextAdaptFontSizer::AdaptMaxFontSize(TextStyle& textStyle, const std::string& content,
     const Dimension& stepUnit, const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)

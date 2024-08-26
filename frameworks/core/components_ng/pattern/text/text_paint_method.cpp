@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/text/text_paint_method.h"
 
-#include "base/utils/utils.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {

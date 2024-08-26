@@ -30,10 +30,8 @@
 #include "core/components/picker/picker_base_component.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 namespace {

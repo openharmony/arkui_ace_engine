@@ -15,18 +15,12 @@
 
 #include "core/components_ng/pattern/texttimer/text_timer_pattern.h"
 
-#include <stack>
 #include <string>
 
 #include "base/log/dump_log.h"
 #include "base/i18n/localization.h"
-#include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/texttimer/text_timer_layout_property.h"
-#include "core/components_ng/property/property.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {

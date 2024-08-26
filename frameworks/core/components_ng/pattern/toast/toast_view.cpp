@@ -14,20 +14,10 @@
  */
 #include "core/components_ng/pattern/toast/toast_view.h"
 
-#include "base/geometry/dimension.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/components/common/properties/shadow_config.h"
-#include "core/components/toast/toast_theme.h"
 #include "core/components/theme/shadow_theme.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/toast/toast_layout_property.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
-#include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/base/element_register.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 constexpr float MAX_TOAST_SCALE = 2.0f;

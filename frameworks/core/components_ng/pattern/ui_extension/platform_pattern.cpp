@@ -23,7 +23,6 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/ace_extra_input_data.h"
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
-#include "base/geometry/offset.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/event/event_hub.h"

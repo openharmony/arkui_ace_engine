@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/web/web_content_modifier.h"
-#include "core/components_ng/render/drawing.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "pipeline/rs_recording_canvas.h"

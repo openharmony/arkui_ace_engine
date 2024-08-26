@@ -14,8 +14,6 @@
  */
 #include "core/components_ng/pattern/text_drag/text_drag_paint_method.h"
 
-#include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
-
 namespace OHOS::Ace::NG {
 TextDragPaintMethod::TextDragPaintMethod(const WeakPtr<Pattern>& pattern,
     const RefPtr<TextDragOverlayModifier>& textDragOverlayModifier) : pattern_(pattern),

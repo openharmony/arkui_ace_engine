@@ -14,14 +14,6 @@
  */
 
 #include "core/components_ng/pattern/text_picker/textpicker_layout_algorithm.h"
-#include <cstdint>
-
-#include "core/components/dialog/dialog_theme.h"
-#include "core/components/picker/picker_theme.h"
-#include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
-#include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 

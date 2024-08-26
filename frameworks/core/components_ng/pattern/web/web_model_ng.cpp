@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/web/web_model_ng.h"
 
-#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/node_flag.h"
 #include "core/components_ng/base/view_abstract.h"

@@ -14,11 +14,6 @@
  */
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
 
-#include <algorithm>
-#include <cstdint>
-
-#include "base/utils/utils.h"
-
 namespace OHOS::Ace::NG {
 void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, const std::vector<float>& mainGap)
 {

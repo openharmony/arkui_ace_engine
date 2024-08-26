@@ -21,7 +21,6 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/window_scene/scene/input_scene.h"
 #include "core/components_ng/pattern/window_scene/scene/panel_scene.h"
-#include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/components_ng/pattern/window_scene/scene/transform_scene.h"
 #include "core/components_ng/pattern/window_scene/scene/window_node.h"
 #include "core/components_ng/pattern/window_scene/scene/window_scene.h"

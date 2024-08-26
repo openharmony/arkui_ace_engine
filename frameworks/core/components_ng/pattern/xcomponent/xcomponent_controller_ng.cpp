@@ -15,9 +15,6 @@
 
 #include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
 
-#include "base/log/log_wrapper.h"
-#include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 
 namespace OHOS::Ace::NG {

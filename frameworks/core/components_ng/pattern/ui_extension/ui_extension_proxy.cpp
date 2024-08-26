@@ -16,8 +16,6 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_proxy.h"
 
 #include "adapter/ohos/osal/want_wrap_ohos.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 
 namespace OHOS::Ace::NG {
 UIExtensionProxy::UIExtensionProxy(

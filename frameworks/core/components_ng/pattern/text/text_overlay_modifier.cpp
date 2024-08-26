@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/text/text_overlay_modifier.h"
 
 #include "core/common/container.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {

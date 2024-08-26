@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/xcomponent/xcomponent_layout_algorithm.h"
-#include "base/utils/utils.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_utils.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_layout_property.h"
 

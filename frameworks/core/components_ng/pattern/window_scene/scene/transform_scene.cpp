@@ -17,7 +17,6 @@
 
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
-#include "ui/rs_canvas_node.h"
 
 namespace OHOS::Ace::NG {
 void TransformScene::OnAttachToFrameNode()

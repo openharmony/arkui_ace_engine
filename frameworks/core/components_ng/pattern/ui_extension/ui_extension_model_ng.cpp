@@ -15,17 +15,9 @@
 
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 
-#include "interfaces/inner_api/ace/modal_ui_extension_config.h"
-#include "want.h"
-
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/ui_extension/isolated_pattern.h"
-#include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/ui_extension/security_ui_extension_pattern.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_hub.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

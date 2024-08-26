@@ -17,8 +17,6 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text_clock/text_clock_layout_property.h"
 #include "core/components_ng/pattern/text_clock/text_clock_pattern.h"
 
 namespace OHOS::Ace::NG {

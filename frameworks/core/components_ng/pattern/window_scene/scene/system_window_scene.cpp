@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 
-#include "ui/rs_canvas_node.h"
 #include "ui/rs_surface_node.h"
 
 #include "adapter/ohos/entrance/mmi_event_convertor.h"

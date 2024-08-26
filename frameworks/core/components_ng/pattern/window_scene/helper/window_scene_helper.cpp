@@ -16,8 +16,6 @@
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 
 #include "input_manager.h"
-#include "key_event.h"
-#include "pointer_event.h"
 
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "base/memory/referenced.h"

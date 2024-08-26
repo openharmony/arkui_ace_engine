@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/ui_extension/security_ui_extension_proxy.h"
 
 #include "adapter/ohos/osal/want_wrap_ohos.h"
-#include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
 SecurityUIExtensionProxy::SecurityUIExtensionProxy(

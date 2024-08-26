@@ -14,15 +14,6 @@
  */
 #include "core/components_ng/pattern/text/span/span_object.h"
 
-#include <optional>
-#include <utility>
-
-#include "base/memory/referenced.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/pattern/text_field/text_field_model.h"
-#include "core/components_ng/render/paragraph.h"
-
 namespace OHOS::Ace {
 // SpanBase
 std::optional<std::pair<int32_t, int32_t>> SpanBase::GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const
