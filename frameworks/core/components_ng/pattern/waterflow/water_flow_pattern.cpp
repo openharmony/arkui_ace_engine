@@ -234,22 +234,39 @@ void WaterFlowPattern::TriggerPostLayoutEvents()
         FireOnScroll(delta, onDidScroll);
     }
     bool indexChanged = itemRange_.first != layoutInfo_->FirstIdx() || itemRange_.second != layoutInfo_->endIndex_;
-    if (indexChanged) {
-        auto onScrollIndex = eventHub->GetOnScrollIndex();
-        itemRange_ = { layoutInfo_->FirstIdx(), layoutInfo_->endIndex_ };
-        if (onScrollIndex) {
-            onScrollIndex(layoutInfo_->FirstIdx(), layoutInfo_->endIndex_);
-        }
-    }
+    auto onScrollIndex = eventHub->GetOnScrollIndex();
+    FireOnScrollIndex(indexChanged, onScrollIndex);
     auto onReachStart = eventHub->GetOnReachStart();
-    if (onReachStart && layoutInfo_->ReachStart(prevOffset_, !isInitialized_)) {
-        onReachStart();
-    }
+    FireOnReachStart(onReachStart);
     auto onReachEnd = eventHub->GetOnReachEnd();
-    if (onReachEnd && layoutInfo_->ReachEnd(prevOffset_)) {
-        onReachEnd();
-    }
+    FireOnReachEnd(onReachEnd);
     OnScrollStop(eventHub->GetOnScrollStop());
+}
+
+void WaterFlowPattern::FireOnReachStart(const OnReachEvent& onReachStart)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host && onReachStart && layoutInfo_->ReachStart(prevOffset_, !isInitialized_));
+    ACE_SCOPED_TRACE("OnReachStart, id:%d, tag:WaterFlow", static_cast<int32_t>(host->GetAccessibilityId()));
+    onReachStart();
+    AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
+}
+
+void WaterFlowPattern::FireOnReachEnd(const OnReachEvent& onReachEnd)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host && onReachEnd && layoutInfo_->ReachEnd(prevOffset_));
+    ACE_SCOPED_TRACE("OnReachEnd, id:%d, tag:WaterFlow", static_cast<int32_t>(host->GetAccessibilityId()));
+    onReachEnd();
+    AddEventsFiredInfo(ScrollableEventType::ON_REACH_END);
+}
+
+void WaterFlowPattern::FireOnScrollIndex(bool indexChanged, const ScrollIndexFunc& onScrollIndex)
+{
+    CHECK_NULL_VOID(indexChanged);
+    itemRange_ = { layoutInfo_->FirstIdx(), layoutInfo_->endIndex_ };
+    CHECK_NULL_VOID(onScrollIndex);
+    onScrollIndex(layoutInfo_->FirstIdx(), layoutInfo_->endIndex_);
 }
 
 bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
