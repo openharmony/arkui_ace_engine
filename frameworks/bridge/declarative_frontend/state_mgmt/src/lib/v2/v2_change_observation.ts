@@ -681,13 +681,13 @@ class ObserveV2 {
         let ret = target[prop];
         let type = typeof (ret);
 
-        return type === "function"
+        return type === 'function'
           ? ret.bind(receiver)
-          : (type === "object"
+          : (type === 'object'
             ? RefInfo.get(ret).proxy
             : ret);
       },
-      set(target: object, prop: string, value: any, receiver: any) {
+      set(target: object, prop: string, value: any, receiver: any): boolean {
         if (target[prop] === value) {
           return true;
         }
@@ -695,7 +695,7 @@ class ObserveV2 {
         ObserveV2.getObserve().fireChange(RefInfo.get(target), prop);
         return true;
       }
-    }
+    };
 
 
   public static commonHandlerSet(target: any, key: string | symbol, value: any): boolean {
@@ -738,7 +738,7 @@ class ObserveV2 {
   
       let ret = target[key];
       if (typeof (ret) !== 'function') {
-        if (typeof (ret) === "object") {
+        if (typeof (ret) === 'object') {
           let wrapper = RefInfo.get(ret);
           ObserveV2.getObserve().addRef(refInfo, key);
           return wrapper.proxy;
@@ -768,7 +768,12 @@ class ObserveV2 {
         ObserveV2.getObserve().addRef(refInfo, ObserveV2.OB_LENGTH)
         return function (callbackFn: (value: any, index: number, array: Array<any>) => void): any {
           const result = ret.call(target, (value: any, index: number, array: Array<any>) => {
-            callbackFn(typeof value == "object" ? RefInfo.get(value).proxy : value, index, receiver);
+            // Collections.Array will report BusinessError: The foreach cannot be bound if call "receiver".
+            // because the passed parameter is not the instance of the container class.
+            // so we must call "target" here to deal with the collections situations.
+            // But we also need to addref for each index.
+            receiver[index];
+            callbackFn(typeof value == 'object' ? RefInfo.get(value).proxy : value, index, receiver);
           });
           return result;
         }
@@ -808,7 +813,7 @@ class ObserveV2 {
   
       let ret = target[key];
       if (typeof (ret) !== 'function') {
-        if (typeof (ret) === "object") {
+        if (typeof (ret) === 'object') {
           let wrapper = RefInfo.get(ret);
           ObserveV2.getObserve().addRef(refInfo, key);
           return wrapper.proxy;
