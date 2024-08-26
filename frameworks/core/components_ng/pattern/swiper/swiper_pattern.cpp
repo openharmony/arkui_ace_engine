@@ -1197,6 +1197,13 @@ void SwiperPattern::FireChangeEvent(int32_t preIndex, int32_t currentIndex) cons
     swiperEventHub->FireChangeEvent(preIndex, currentIndex);
     swiperEventHub->FireIndicatorChangeEvent(currentIndex);
     swiperEventHub->FireChangeDoneEvent(moveDirection_);
+
+    if (jumpIndex_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
+        host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    }
 }
 
 void SwiperPattern::FireAnimationStartEvent(
