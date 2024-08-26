@@ -2144,12 +2144,7 @@ class NavPathStack {
     }
   }
   getAllPathIndex() {
-    let array = this.pathArray.flatMap(element => {
-      if (element.index === undefined) {
-        return -1;
-      }
-      return element.index;
-    });
+    let array = this.pathArray.flatMap(element => element.index);
     return array;
   }
   findInPopArray(name) {
@@ -2191,6 +2186,7 @@ class NavPathStack {
       info = new NavPathInfo(name, param, onPop);
     }
     [info.index, info.navDestinationId] = this.findInPopArray(name);
+    info.pushDestination = false;
     this.pathArray.push(info);
     this.isReplace = 0;
     if (typeof onPop === 'boolean') {
@@ -2224,18 +2220,10 @@ class NavPathStack {
         reject({ message: 'Internal error.', code: 100001 });
       })
     }
-    promise.then((navDestinationId) => {
-      return new Promise((resolve, reject) => {
-        info.navDestinationId = navDestinationId;
-        this.pathArray.push(info);
-        this.nativeStack?.onStateChanged();
-        resolve({code: 0});
-      }).catch((err) => {
-        return new Promise((resolve, reject) => {
-          reject(err);
-        })
-      })
-    })
+    [info.index, info.navDestinationId] = this.findInPopArray(name);
+    info.pushDestination = true;
+    this.pathArray.push(info);
+    this.nativeStack?.onStateChanged();
     return promise;
   }
   parseNavigationOptions(param) {
@@ -2287,6 +2275,7 @@ class NavPathStack {
     if (launchMode === LaunchMode.NEW_INSTANCE) {
       info.needBuildNewInstance = true;
     }
+    info.pushDestination = false;
     this.pathArray.push(info);
     this.isReplace = 0;
     this.animated = animated;
@@ -2306,21 +2295,13 @@ class NavPathStack {
         reject({ message: 'Internal error.', code: 100001 });
       })
     }
-    promise.then((navDestinationId) => {
-      return new Promise((resolve, reject) => {
-        if (launchMode === LaunchMode.NEW_INSTANCE) {
-          info.needBuildNewInstance = true;
-        }
-        info.navDestinationId = navDestinationId;
-        this.pathArray.push(info);
-        this.nativeStack?.onStateChanged();
-        resolve({code: 0});
-      }).catch((err) => {
-        return new Promise((resolve, reject) => {
-          reject(err);
-        })
-      })
-    })
+    [info.index, info.navDestinationId] = this.findInPopArray(info.name);
+    info.pushDestination = true;
+    if (launchMode === LaunchMode.NEW_INSTANCE) {
+      info.needBuildNewInstance = true;
+    }
+    this.pathArray.push(info);
+    this.nativeStack?.onStateChanged();
     return promise;
   }
   replacePath(info, optionParam) {
