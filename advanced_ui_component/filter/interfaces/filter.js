@@ -60,6 +60,8 @@ const INTER_POLATING_SPRING = curves.interpolatingSpring(0, 1, 328, 34);
 const FRICTION_CUBIC_BEZIER = curves.cubicBezierCurve(0.2, 0, 0.2, 1);
 const TRANS_COLOR = '#00FFFFFF';
 const GRADIENT_WIDTH = 16;
+const MAX_FONT_SCALE = 2;
+const ERROR_CODE = 0x3900;
 export let FilterType;
 (function (FilterType) {
     FilterType[FilterType.MULTI_LINE_FILTER = 0] = 'MULTI_LINE_FILTER';
@@ -268,7 +270,8 @@ class ListFilterRow extends ViewPU {
         } catch (err) {
             let code = err.code;
             let message = err.message;
-            hilog.error(0x3900, 'Ace', `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
+            hilog.error(ERROR_CODE, 'Ace', `Failed to init fontsizescale info, cause,
+             code: ${code}, message: ${message}`);
         }
     }
 
@@ -455,7 +458,7 @@ class ListFilterRow extends ViewPU {
                                 'moduleName': '__harDefaultModuleName__'
                             });
                             Text.minFontScale(1);
-                            Text.maxFontScale(Math.min(this.updateFontScale(), 2));
+                            Text.maxFontScale(Math.min(this.updateFontScale(), MAX_FONT_SCALE));
                             Text.fontColor(this.colorRow[colIndex]);
                             Text.fontWeight(this.fontWeightRow[colIndex]);
                             Text.focusable(true);
@@ -480,7 +483,7 @@ class ListFilterRow extends ViewPU {
                         x1: GRADIENT_WIDTH,
                         y1: LIST_ROW_HEIGHT / 2
                     }, undefined, elmtId, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/filter.ets', line: 240, col: 9 });
+                    }, { page: 'library/src/main/ets/components/mainpage/filter.ets', line: 242, col: 9 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -506,7 +509,7 @@ class ListFilterRow extends ViewPU {
                         x1: 0,
                         y1: LIST_ROW_HEIGHT / 2
                     }, undefined, elmtId, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/filter.ets', line: 247, col: 7 });
+                    }, { page: 'library/src/main/ets/components/mainpage/filter.ets', line: 249, col: 7 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -705,7 +708,8 @@ class MultiFilterRow extends ViewPU {
         } catch (err) {
             let code = err.code;
             let message = err.message;
-            hilog.error(0x3900, 'Ace', `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
+            hilog.error(ERROR_CODE, 'Ace', `Failed to init fontsizescale info, cause,
+             code: ${code}, message: ${message}`);
         }
     }
 
@@ -727,7 +731,7 @@ class MultiFilterRow extends ViewPU {
                 let option = this.filterRow.options[i];
                 let itemWidth = measure.measureText({
                     textContent: option,
-                    fontSize: `${FILTER_FONT_SIZE * Math.min(this.updateFontScale(), 2)}vp`,
+                    fontSize: `${FILTER_FONT_SIZE * Math.min(this.updateFontScale(), MAX_FONT_SCALE)}vp`,
                 });
                 if (i === 0) {
                     continue;
@@ -951,7 +955,7 @@ class MultiFilterRow extends ViewPU {
                             'moduleName': '__harDefaultModuleName__'
                         });
                         Text.minFontScale(1);
-                        Text.maxFontScale(Math.min(this.updateFontScale(), 2));
+                        Text.maxFontScale(Math.min(this.updateFontScale(), MAX_FONT_SCALE));
                         Text.maxLines(1);
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                         Text.fontColor(this.colorRow[0]);
@@ -1109,7 +1113,7 @@ class MultiFilterRow extends ViewPU {
                                     'moduleName': '__harDefaultModuleName__'
                                 });
                                 Text.minFontScale(1);
-                                Text.maxFontScale(Math.min(this.updateFontScale(), 2));
+                                Text.maxFontScale(Math.min(this.updateFontScale(), MAX_FONT_SCALE));
                                 Text.maxLines(1);
                                 Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                                 Text.height(LIST_ROW_HEIGHT);
@@ -1667,7 +1671,8 @@ export class Filter extends ViewPU {
         } catch (err) {
             let code = err.code;
             let message = err.message;
-            hilog.error(0x3900, 'Ace', `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
+            hilog.error(ERROR_CODE, 'Ace', `Failed to init fontsizescale info, cause,
+             code: ${code}, message: ${message}`);
         }
     }
 
@@ -1868,7 +1873,7 @@ export class Filter extends ViewPU {
                                 },
                                 rowIndex: rowIndex,
                             }, undefined, elmtId, () => {
-                            }, { page: 'library/src/main/ets/components/mainpage/filter.ets', line: 808, col: 9 });
+                            }, { page: 'library/src/main/ets/components/mainpage/filter.ets', line: 810, col: 9 });
                             ViewPU.create(componentCall);
                             let paramsLambda = () => {
                                 return {
@@ -1943,7 +1948,7 @@ export class Filter extends ViewPU {
                                 },
                                 rowIndex: rowIndex,
                             }, undefined, elmtId, () => {
-                            }, { page: 'library/src/main/ets/components/mainpage/filter.ets', line: 837, col: 9 });
+                            }, { page: 'library/src/main/ets/components/mainpage/filter.ets', line: 839, col: 9 });
                             ViewPU.create(componentCall);
                             let paramsLambda = () => {
                                 return {
@@ -2097,7 +2102,7 @@ export class Filter extends ViewPU {
                                     'moduleName': '__harDefaultModuleName__'
                                 });
                                 Text.minFontScale(1);
-                                Text.maxFontScale(Math.min(this.updateFontScale(), 2));
+                                Text.maxFontScale(Math.min(this.updateFontScale(), MAX_FONT_SCALE));
                                 Text.fontColor({
                                     'id': -1,
                                     'type': 10001,
@@ -2264,7 +2269,7 @@ export class Filter extends ViewPU {
                                             'moduleName': '__harDefaultModuleName__'
                                         });
                                         Text.minFontScale(1);
-                                        Text.maxFontScale(Math.min(this.updateFontScale(), 2));
+                                        Text.maxFontScale(Math.min(this.updateFontScale(), MAX_FONT_SCALE));
                                         Text.fontColor(this.additionColorArr ? this.additionColorArr[index] : '');
                                         Text.fontWeight(this.additionFontWeightArr ?
                                             this.additionFontWeightArr[index] : '');
@@ -2317,7 +2322,7 @@ export class Filter extends ViewPU {
                                     x1: 0,
                                     y1: LIST_ROW_HEIGHT / 2
                                 }, undefined, elmtId, () => {
-                                }, { page: 'library/src/main/ets/components/mainpage/filter.ets', line: 1006, col: 9 });
+                                }, { page: 'library/src/main/ets/components/mainpage/filter.ets', line: 1008, col: 9 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -2594,7 +2599,7 @@ export class Filter extends ViewPU {
                 'moduleName': '__harDefaultModuleName__'
             });
             Text.minFontScale(1);
-            Text.maxFontScale(Math.min(this.updateFontScale(), 2));
+            Text.maxFontScale(Math.min(this.updateFontScale(), MAX_FONT_SCALE));
             Text.constraintSize({ maxWidth: '85%' });
             Text.maxLines(1);
         }, Text);
