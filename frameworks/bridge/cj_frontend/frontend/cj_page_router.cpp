@@ -22,6 +22,44 @@
 #include "bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
+void SetCjPageCallbackClassic(RefPtr<Framework::JsAcePage> page, NativeView* view)
+{
+    CHECK_NULL_VOID(view);
+    wptr<NativeView> weak = view;
+    CHECK_NULL_VOID(page);
+    page->SetDeclarativeOnPageAppearCallback([weak]() {
+        auto view = weak.promote();
+        if (view) {
+            view->FireOnShow();
+        }
+    });
+    page->SetDeclarativeOnPageDisAppearCallback([weak]() {
+        auto view = weak.promote();
+        if (view) {
+            view->FireOnHide();
+        }
+    });
+    page->SetDeclarativeOnBackPressCallback([weak]() {
+        auto view = weak.promote();
+        if (view) {
+            return view->FireOnBackPress();
+        }
+        return false;
+    });
+    page->SetDeclarativeOnPageRefreshCallback([weak]() {
+        auto view = weak.promote();
+        if (view) {
+            view->MarkNeedUpdate();
+        }
+    });
+    page->SetDeclarativeOnUpdateWithValueParamsCallback([weak](const std::string& params) {
+        auto view = weak.promote();
+        if (view && !params.empty()) {
+            view->ExecuteUpdateWithValueParams(params);
+        }
+    });
+}
+
 bool LoadNativeViewClassic(NativeView* view)
 {
     auto currentObj = Container::Current();
@@ -56,38 +94,7 @@ bool LoadNativeViewClassic(NativeView* view)
 
     // We are done, tell to the JSAgePage
     page->SetPageCreated();
-    wptr<NativeView> weak = view;
-    page->SetDeclarativeOnPageAppearCallback([weak]() {
-        auto view = weak.promote();
-        if (view) {
-            view->FireOnShow();
-        }
-    });
-    page->SetDeclarativeOnPageDisAppearCallback([weak]() {
-        auto view = weak.promote();
-        if (view) {
-            view->FireOnHide();
-        }
-    });
-    page->SetDeclarativeOnBackPressCallback([weak]() {
-        auto view = weak.promote();
-        if (view) {
-            return view->FireOnBackPress();
-        }
-        return false;
-    });
-    page->SetDeclarativeOnPageRefreshCallback([weak]() {
-        auto view = weak.promote();
-        if (view) {
-            view->MarkNeedUpdate();
-        }
-    });
-    page->SetDeclarativeOnUpdateWithValueParamsCallback([weak](const std::string& params) {
-        auto view = weak.promote();
-        if (view && !params.empty()) {
-            view->ExecuteUpdateWithValueParams(params);
-        }
-    });
+    SetCjPageCallbackClassic(page, view);
     return true;
 }
 
