@@ -2678,6 +2678,25 @@ void TextFieldPattern::ProcessCounter()
     UpdateCounterMargin();
 }
 
+void TextFieldPattern::ProcessSelection()
+{
+    auto textWidth = static_cast<int32_t>(contentController_->GetWideText().length());
+    if (SelectOverlayIsOn()) {
+        needToRefreshSelectOverlay_ = textWidth > 0;
+        UpdateSelection(std::clamp(selectController_->GetStartIndex(), 0, textWidth),
+            std::clamp(selectController_->GetEndIndex(), 0, textWidth));
+        SetIsSingleHandle(!IsSelected());
+        if (isTextChangedAtCreation_ && textWidth == 0) {
+            CloseSelectOverlay();
+            StartTwinkling();
+        }
+    } else if (HasFocus() && !IsSelected()) {
+        StartTwinkling();
+    } else {
+        needToRefreshSelectOverlay_ = false;
+    }
+}
+
 void TextFieldPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -2733,21 +2752,7 @@ void TextFieldPattern::OnModifyDone()
     }
     CalculateDefaultCursor();
 
-    auto textWidth = static_cast<int32_t>(contentController_->GetWideText().length());
-    if (SelectOverlayIsOn()) {
-        needToRefreshSelectOverlay_ = textWidth > 0;
-        UpdateSelection(std::clamp(selectController_->GetStartIndex(), 0, textWidth),
-            std::clamp(selectController_->GetEndIndex(), 0, textWidth));
-        SetIsSingleHandle(!IsSelected());
-        if (isTextChangedAtCreation_ && textWidth == 0) {
-            CloseSelectOverlay();
-            StartTwinkling();
-        }
-    } else if (HasFocus() && !IsSelected()) {
-        StartTwinkling();
-    } else {
-        needToRefreshSelectOverlay_ = false;
-    }
+    ProcessSelection();
     isTextChangedAtCreation_ = false;
     if (layoutProperty->GetTypeChangedValue(false)) {
         layoutProperty->ResetTypeChanged();
@@ -7170,6 +7175,17 @@ void TextFieldPattern::CheckPasswordAreaState()
     auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);
     CHECK_NULL_VOID(passwordArea);
     passwordArea->SetObscured(!showPasswordState.value());
+}
+
+void TextFieldPattern::AfterLayoutProcessCleanResponse(
+    const RefPtr<CleanNodeResponseArea>& cleanNodeResponseArea)
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddAfterLayoutTask([cleanNodeResponseArea]() {
+        cleanNodeResponseArea->Refresh();
+        cleanNodeResponseArea->UpdateCleanNode(cleanNodeResponseArea->IsShow());
+    });
 }
 
 void TextFieldPattern::ProcessResponseArea()
