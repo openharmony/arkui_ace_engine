@@ -74,6 +74,7 @@ constexpr float LARGE_FONT_SIZE_SCALE = 2.0f;
 constexpr float MAX_FONT_SIZE_SCALE = 3.2f;
 constexpr double BIG_DIALOG_WIDTH = 216.0;
 constexpr double MAX_DIALOG_WIDTH = 256.0;
+const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example.svg";
 
 class TabsTestNg : public TestNG {
 public:
