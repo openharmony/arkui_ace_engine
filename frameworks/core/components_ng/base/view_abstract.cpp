@@ -3825,7 +3825,9 @@ void ViewAbstract::SetNeedFocus(FrameNode* frameNode, bool value)
     CHECK_NULL_VOID(frameNode);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    auto instanceId = frameNode->GetContext()->GetInstanceId();
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto instanceId = context->GetInstanceId();
     ContainerScope scope(instanceId);
     if (value) {
         focusHub->RequestFocus();
