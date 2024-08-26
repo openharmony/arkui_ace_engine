@@ -1186,6 +1186,11 @@ void WebPattern::SetNestedScroll(const NestedScrollOptions& nestedOpt)
     // cross platform is not support now;
 }
 
+void WebPattern::SetNestedScrollExt(const NestedScrollOptionsExt& nestedScroll)
+{
+    // cross platform is not support now;
+}
+
 void WebPattern::JavaScriptOnDocumentStart(const ScriptItems& scriptItems)
 {
     // cross platform is not support now;

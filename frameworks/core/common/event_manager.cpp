@@ -2085,7 +2085,7 @@ void EventManager::FalsifyCancelEventAndDispatch(const AxisEvent& axisEvent)
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
 
 bool EventManager::TouchTargetHitTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
-    TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend, const std::string& target)`
+    TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend, const std::string& target)
 {
     CHECK_NULL_RETURN(frameNode, false);
     TouchTestResult hitTestResult;
