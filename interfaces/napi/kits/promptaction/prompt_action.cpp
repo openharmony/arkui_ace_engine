@@ -42,6 +42,7 @@ const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, Di
     DialogAlignment::BOTTOM, DialogAlignment::DEFAULT, DialogAlignment::TOP_START, DialogAlignment::TOP_END,
     DialogAlignment::CENTER_START, DialogAlignment::CENTER_END, DialogAlignment::BOTTOM_START,
     DialogAlignment::BOTTOM_END };
+const std::vector<KeyboardAvoidMode> KEYBOARD_AVOID_MODE = { KeyboardAvoidMode::DEFAULT, KeyboardAvoidMode::NONE };
 
 #ifdef OHOS_STANDARD_SYSTEM
 bool ContainerIsService()
@@ -608,6 +609,7 @@ struct PromptAsyncContext {
     napi_ref onDidDisappearRef = nullptr;
     napi_ref onWillAppearRef = nullptr;
     napi_ref onWillDisappearRef = nullptr;
+    napi_value keyboardAvoidModeApi = nullptr;
 };
 
 void DeleteContextAndThrowError(
@@ -1110,6 +1112,20 @@ std::optional<CalcDimension> GetNapiDialogHeightProps(
     return heightProperty;
 }
 
+int32_t GetDialogKeyboardAvoidMode(napi_env env, napi_value keyboardAvoidModeApi)
+{
+    int32_t mode = 0;
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, keyboardAvoidModeApi, &valueType);
+    if (valueType == napi_number) {
+        napi_get_value_int32(env, keyboardAvoidModeApi, &mode);
+    }
+    if (mode >= 0 && mode < static_cast<int32_t>(KEYBOARD_AVOID_MODE.size())) {
+        return mode;
+    }
+    return 0;
+}
+
 void GetNapiNamedProperties(napi_env env, napi_value* argv, size_t index,
     std::shared_ptr<PromptAsyncContext>& asyncContext)
 {
@@ -1145,6 +1161,7 @@ void GetNapiNamedProperties(napi_env env, napi_value* argv, size_t index,
     napi_get_named_property(env, argv[index], "onDidDisappear", &asyncContext->onDidDisappear);
     napi_get_named_property(env, argv[index], "onWillAppear", &asyncContext->onWillAppear);
     napi_get_named_property(env, argv[index], "onWillDisappear", &asyncContext->onWillDisappear);
+    napi_get_named_property(env, argv[index], "keyboardAvoidMode", &asyncContext->keyboardAvoidModeApi);
 
     napi_typeof(env, asyncContext->autoCancel, &valueType);
     if (valueType == napi_boolean) {
@@ -1865,6 +1882,7 @@ PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<Promp
     auto maskColorProps = GetColorProps(env, asyncContext->maskColorApi);
     auto transitionEffectProps = GetTransitionProps(env, asyncContext);
     PromptDialogAttr lifeCycleAttr = GetDialogLifeCycleCallback(env, asyncContext);
+    int32_t mode = GetDialogKeyboardAvoidMode(env, asyncContext->keyboardAvoidModeApi);
     PromptDialogAttr promptDialogAttr = { .autoCancel = asyncContext->autoCancelBool,
         .showInSubWindow = asyncContext->showInSubWindowBool,
         .isModal = asyncContext->isModalBool,
@@ -1888,7 +1906,8 @@ PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<Promp
         .onDidAppear = lifeCycleAttr.onDidAppear,
         .onDidDisappear = lifeCycleAttr.onDidDisappear,
         .onWillAppear = lifeCycleAttr.onWillAppear,
-        .onWillDisappear = lifeCycleAttr.onWillDisappear };
+        .onWillDisappear = lifeCycleAttr.onWillDisappear,
+        .keyboardAvoidMode = KEYBOARD_AVOID_MODE[mode]};
     return promptDialogAttr;
 }
 

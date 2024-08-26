@@ -78,6 +78,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(hostNode);
     auto dialogPattern = hostNode->GetPattern<DialogPattern>();
     CHECK_NULL_VOID(dialogPattern);
+    keyboardAvoidMode_ = dialogPattern->GetDialogProperties().keyboardAvoidMode;
     isUIExtensionSubWindow_ = dialogPattern->IsUIExtensionSubWindow();
     hostWindowRect_ = dialogPattern->GetHostWindowRect();
     customSize_ = dialogProp->GetUseCustomStyle().value_or(false);
@@ -564,7 +565,8 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
 void DialogLayoutAlgorithm::AdjustHeightForKeyboard(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& child)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE) || !child || !resizeFlag_) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE) || !child || !resizeFlag_ ||
+        keyboardAvoidMode_ == KeyboardAvoidMode::NONE) {
         return;
     }
     auto childConstraint =
@@ -681,7 +683,8 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
     }
     const auto& expandSafeAreaOpts = prop->GetSafeAreaExpandOpts();
     bool needAvoidKeyboard = true;
-    if (expandSafeAreaOpts && (expandSafeAreaOpts->type | SAFE_AREA_TYPE_KEYBOARD)) {
+    if ((expandSafeAreaOpts && (expandSafeAreaOpts->type | SAFE_AREA_TYPE_KEYBOARD)) ||
+        keyboardAvoidMode_ == KeyboardAvoidMode::NONE) {
         needAvoidKeyboard = false;
     }
     return AdjustChildPosition(topLeftPoint, dialogOffset, childSize, needAvoidKeyboard);
