@@ -1637,6 +1637,7 @@ void TextFieldPattern::FireEventHubOnChange(const std::string& text)
 void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
     CHECK_NULL_VOID(!IsDragging());
+    CHECK_NULL_VOID(!info.GetTouches().empty());
     if (selectOverlay_->IsTouchAtHandle(info)) {
         return;
     }
