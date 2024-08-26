@@ -61,6 +61,8 @@ public:
                 theme->subTabTopPadding_ = pattern->GetAttr<Dimension>("subtab_top_padding", 0.0_vp);
                 theme->subTabBottomPadding_ = pattern->GetAttr<Dimension>("subtab_bottom_padding", 0.0_vp);
                 theme->subTabItemPadding_ = pattern->GetAttr<Dimension>("subtab_item_padding", 0.0_vp);
+                theme->subTabItemHorizontalPadding_ =
+                    pattern->GetAttr<Dimension>("subtab_item_Horizontal_padding", 0.0_vp);
                 theme->subTabBarHoverColor_ = pattern->GetAttr<Color>("subtab_hover_color", Color::WHITE);
                 theme->subTabBarPressedColor_ = pattern->GetAttr<Color>("subtab_press_color", Color::WHITE);
                 theme->subtabTextDefaultFontSize_ =
@@ -135,6 +137,7 @@ public:
             theme->dialog_iconColor_ = pattern->GetAttr<Color>("dialog_icon_primary", Color(0xff182431));
             theme->dialog_fontColor_ = pattern->GetAttr<Color>("dialog_font_primary", Color(0xff182431));
             theme->focusPadding_ = pattern->GetAttr<Dimension>("tab_bar_focus_padding", 0.0_vp);
+            theme->focusBoardPadding_ = pattern->GetAttr<Dimension>("tab_bar_board_focus_padding", 0.0_vp);
         }
     };
 
@@ -248,6 +251,11 @@ public:
     const Dimension& GetSubTabItemPadding() const
     {
         return subTabItemPadding_;
+    }
+
+    const Dimension& GetSubTabItemHorizontalPadding() const
+    {
+        return subTabItemHorizontalPadding_;
     }
 
     const Dimension& GetSubTabTopPadding() const
@@ -456,6 +464,11 @@ public:
         return focusPadding_;
     }
 
+    const Dimension& GetBoardFocusPadding() const
+    {
+        return focusBoardPadding_;
+    }
+
 protected:
     TabTheme() = default;
 
@@ -484,6 +497,7 @@ private:
     Dimension subTabTopPadding_;
     Dimension subTabBottomPadding_;
     Dimension subTabItemPadding_;
+    Dimension subTabItemHorizontalPadding_;
     Color subTabBarHoverColor_;
     Color subTabBarPressedColor_;
     Dimension subtabTextDefaultFontSize_;
@@ -524,6 +538,7 @@ private:
     Color dialog_fontColor_;
     int bottomTabBackgroundBlurStyle_;
     Dimension focusPadding_;
+    Dimension focusBoardPadding_;
 };
 
 } // namespace OHOS::Ace
