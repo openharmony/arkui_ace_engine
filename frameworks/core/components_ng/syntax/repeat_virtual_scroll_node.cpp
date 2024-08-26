@@ -350,12 +350,14 @@ RefPtr<UINode> RepeatVirtualScrollNode::GetFrameChildByIndex(
     PostIdleTask();
 
     auto childNode = node4Index->GetFrameChildByIndex(0, needBuild);
-    if (onMoveEvent_) {
+    if (childNode && onMoveEvent_) {
         InitDragManager(AceType::DynamicCast<FrameNode>(childNode));
     }
 
-    TAG_LOGD(AceLogTag::ACE_REPEAT, "index %{public}d, its child is %{public}d, returning child.",
-        static_cast<int32_t>(index), static_cast<int32_t>(childNode->GetId()));
+    if (childNode) {
+        TAG_LOGD(AceLogTag::ACE_REPEAT, "index %{public}d, its child is %{public}d, returning child.",
+            static_cast<int32_t>(index), static_cast<int32_t>(childNode->GetId()));
+    }
 
     return childNode;
 }
