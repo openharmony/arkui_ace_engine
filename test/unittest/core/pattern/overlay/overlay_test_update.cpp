@@ -1531,4 +1531,98 @@ HWTEST_F(OverlayTestUpdate, ToastTest027, TestSize.Level1)
     EXPECT_EQ(fontSize1, ADAPT_TOAST_MAX_FONT_SIZE);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
+
+/**
+ * @tc.name: ToastTest028
+ * @tc.desc: Test OverlayManager::ToastView.UpdateTextLayoutBorderShadowProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestUpdate, ToastTest028, TestSize.Level1)
+{
+     /**
+     * @tc.steps: step1. create DimensionOffset toastInfo.
+     */
+    auto offset = DimensionOffset(MENU_OFFSET);
+    ToastInfo toastInfo = { MESSAGE, 0, BOTTOMSTRING, false, ToastShowMode::TOP_MOST, 0, offset };
+    /**
+     * @tc.steps: step2. create ToastNode toastPattern1.
+     */
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto toastPattern1 = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern1, nullptr);
+    /**
+     * @tc.steps: step3. create textNode textLayoutProperty.
+     */
+    auto textNode = AceType::DynamicCast<FrameNode>(toastNode->GetFirstChild());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto renderContext = textNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    /**
+     * @tc.steps: step4. change version.
+     */
+    int32_t settingApiVersion = VERSION_TWELVE;
+    /**
+     * @tc.steps: step5. save version.
+     */
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    /**
+     * @tc.steps: step6. test UpdateTextLayoutBorderShadowProperty.
+     */
+    ToastView::UpdateTextLayoutBorderShadowProperty(textNode);
+    EXPECT_EQ(renderContext->HasBorderWidth(), true);
+    EXPECT_EQ(renderContext->HasBorderColor(), true);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ToastTest029
+ * @tc.desc: Test OverlayManager::ToastView.UpdateTextLayoutBorderShadowProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestUpdate, ToastTest029, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DimensionOffset toastInfo.
+     */
+    auto offset = DimensionOffset(MENU_OFFSET);
+    ToastInfo toastInfo = { MESSAGE, 0, BOTTOMSTRING, false, ToastShowMode::TOP_MOST, 0, offset };
+    /**
+     * @tc.steps: step2. create ToastNode toastPattern1.
+     */
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto toastPattern1 = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern1, nullptr);
+    /**
+     * @tc.steps: step3. create textNode textLayoutProperty.
+     */
+    auto textNode = AceType::DynamicCast<FrameNode>(toastNode->GetFirstChild());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto renderContext = textNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto && graphics = renderContext->GetOrCreateGraphics();
+    CHECK_NULL_VOID(graphics);
+    /**
+     * @tc.steps: step4. change version.
+     */
+    int32_t settingApiVersion = VERSION_TWELVE;
+    /**
+     * @tc.steps: step5. save version.
+     */
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    /**
+     * @tc.steps: step6. test UpdateTextLayoutBorderShadowProperty.
+     */
+    ToastView::UpdateTextLayoutBorderShadowProperty(textNode);
+    EXPECT_EQ(graphics->HasBackShadow(), true);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
 }
