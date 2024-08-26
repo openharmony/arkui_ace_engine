@@ -1031,6 +1031,36 @@ void TextModelNG::SetResponseRegion(bool isUserSetResponseRegion)
     textPattern->SetIsUserSetResponseRegion(isUserSetResponseRegion);
 }
 
+void TextModelNG::SetResponseRegion(FrameNode* frameNode, std::vector<DimensionRect> regions)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    auto gesture = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    gesture->SetResponseRegion(regions);
+    textPattern->SetIsUserSetResponseRegion(true);
+}
+
+void TextModelNG::ClearResponseRegion(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    auto gesture = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    std::vector<DimensionRect> region;
+    CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension widthDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    CalcDimension heightDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    DimensionOffset offsetDimen(xDimen, yDimen);
+    DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen);
+    region.emplace_back(dimenRect);
+    gesture->SetResponseRegion(region);
+    textPattern->SetIsUserSetResponseRegion(false);
+}
+
 void TextModelNG::SetHalfLeading(bool halfLeading)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, HalfLeading, halfLeading);

@@ -45,6 +45,7 @@
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/event/axis_event.h"
 #include "core/image/image_source_info.h"
@@ -3377,13 +3378,21 @@ void SetResponseRegion(ArkUINodeHandle node, const ArkUI_Float32* values, const 
         DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen);
         region.emplace_back(dimenRect);
     }
-    ViewAbstract::SetResponseRegion(frameNode, region);
+    if (frameNode->GetTag() == V2::TEXT_ETS_TAG) {
+        TextModelNG::SetResponseRegion(frameNode, region);
+    } else {
+        ViewAbstract::SetResponseRegion(frameNode, region);
+    }
 }
 
 void ResetResponseRegion(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == V2::TEXT_ETS_TAG) {
+        TextModelNG::ClearResponseRegion(frameNode);
+        return;
+    }
     std::vector<DimensionRect> region;
     CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
     CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
