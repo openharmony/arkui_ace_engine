@@ -25,8 +25,6 @@
 #include "core/components_ng/pattern/canvas/canvas_model_ng.h"
 
 namespace OHOS::Ace {
-std::unique_ptr<CanvasModel> CanvasModel::instance_ = nullptr;
-std::mutex CanvasModel::mutex_;
 CanvasModel* CanvasModel::GetInstance()
 {
     if (!instance_) {

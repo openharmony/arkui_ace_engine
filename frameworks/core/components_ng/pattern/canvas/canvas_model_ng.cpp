@@ -24,6 +24,8 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace {
+std::unique_ptr<CanvasModel> CanvasModel::instance_ = nullptr;
+std::mutex CanvasModel::mutex_;
 CanvasModel* CanvasModel::GetInstanceNG()
 {
     if (!instance_) {
