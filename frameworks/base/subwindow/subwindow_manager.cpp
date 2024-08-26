@@ -979,4 +979,14 @@ RefPtr<NG::FrameNode> SubwindowManager::GetSubwindowDialogNodeWithExistContent(c
     }
     return nullptr;
 }
+
+bool SubwindowManager::IsFreeMultiWindow(int32_t instanceId) const
+{
+    auto parentContainerId = instanceId >= MIN_SUBCONTAINER_ID
+                                 ? SubwindowManager::GetInstance()->GetParentContainerId(instanceId)
+                                 : instanceId;
+    auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(parentContainerId);
+    CHECK_NULL_RETURN(subWindow, false);
+    return subWindow->IsFreeMultiWindow();
+}
 } // namespace OHOS::Ace

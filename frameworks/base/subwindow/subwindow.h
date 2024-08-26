@@ -85,6 +85,10 @@ public:
     // Add interface to provide the size and offset of the parent window
     virtual Rect GetParentWindowRect() const = 0;
     virtual Rect GetUIExtensionHostWindowRect() const = 0;
+    virtual bool IsFreeMultiWindow() const = 0;
+    virtual void OnFreeMultiWindowSwitch(bool enable) = 0;
+    virtual int32_t RegisterFreeMultiWindowSwitchCallback(std::function<void(bool)>&& callback) = 0;
+    virtual void UnRegisterFreeMultiWindowSwitchCallback(int32_t callbackId) = 0;
 
     int32_t GetSubwindowId() const
     {
