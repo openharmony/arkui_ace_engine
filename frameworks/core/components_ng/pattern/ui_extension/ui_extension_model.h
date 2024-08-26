@@ -78,10 +78,6 @@ public:
         NG::SessionType sessionType = NG::SessionType::UI_EXTENSION_ABILITY);
     virtual void SetPlatformOnError(
         std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError);
-
-private:
-    static std::unique_ptr<UIExtensionModel> instance_;
-    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_MODEL_H
