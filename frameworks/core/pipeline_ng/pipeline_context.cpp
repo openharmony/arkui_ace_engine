@@ -2524,13 +2524,28 @@ void PipelineContext::DumpPipelineInfo() const
     }
 }
 
+void PipelineContext::CollectTouchEventsBeforeVsync(std::list<TouchEvent>& touchEvents)
+{
+    auto targetTimeStamp = GetVsyncTime() - compensationValue_;
+    for (auto iter = touchEvents_.begin(); iter != touchEvents_.end();) {
+        auto timeStamp = std::chrono::duration_cast<std::chrono::nanoseconds>(iter->time.time_since_epoch()).count();
+        if (targetTimeStamp < static_cast<uint64_t>(timeStamp)) {
+            iter++;
+            continue;
+        }
+        touchEvents.emplace_back(*iter);
+        iter = touchEvents_.erase(iter);
+    }
+}
+
 void PipelineContext::FlushTouchEvents()
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(rootNode_);
     {
         std::unordered_set<int32_t> moveEventIds;
-        decltype(touchEvents_) touchEvents(std::move(touchEvents_));
+        std::list<TouchEvent> touchEvents;
+        CollectTouchEventsBeforeVsync(touchEvents);
         if (touchEvents.empty()) {
             canUseLongPredictTask_ = true;
             return;
