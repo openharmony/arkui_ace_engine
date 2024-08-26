@@ -1962,7 +1962,8 @@ void NavigationPattern::UpdatePreNavDesZIndex(const RefPtr<FrameNode> &preTopNav
                 continue;
             }
             // get navDestination index in hideNodes, use navdestination index in pre navigation stack
-            int32_t hideNodesIndex = hideNodes.size() - (navDestination->GetIndex() - preLastStandardIndex);
+            int32_t hideNodesIndex =
+                static_cast<int32_t>(hideNodes.size()) - (navDestination->GetIndex() - preLastStandardIndex);
             navDestinationContext->UpdateZIndex(standardIndex - hideNodesIndex);
         }
         auto preDesNodeContext = preTopNavDestination->GetRenderContext();
