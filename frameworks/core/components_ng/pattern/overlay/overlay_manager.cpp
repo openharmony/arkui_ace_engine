@@ -4111,14 +4111,12 @@ void OverlayManager::InitSheetMask(
     CHECK_NULL_VOID(pipeline);
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
-    sheetMaskColor_ = sheetStyle.maskColor.value_or(sheetTheme->GetMaskColor());
     auto sheetLayoutProps = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(sheetLayoutProps);
     maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMDEFAULT);
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         UpdateSheetMaskBackgroundColor(maskNode, maskRenderContext, sheetStyle);
     } else {
-        maskRenderContext->UpdateBackgroundColor(sheetStyle.maskColor.value_or(sheetTheme->GetMaskColor()));
         auto eventConfirmHub = maskNode->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(eventConfirmHub);
         auto sheetMaskClickEvent = AceType::MakeRefPtr<NG::ClickEvent>(
@@ -4139,14 +4137,12 @@ void OverlayManager::InitSheetMask(
             if (sheetNode->GetPattern<SheetPresentationPattern>()->GetSheetType() == SheetType::SHEET_POPUP) {
                 maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
                     HitTestMode::HTMTRANSPARENT);
-                maskRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
                 eventConfirmHub->RemoveClickEvent(sheetMaskClickEvent);
                 sheetMaskClickEventMap_.erase(maskNodeId);
             }
         } else if (sheetStyle.interactive == true) {
             maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
                 HitTestMode::HTMTRANSPARENT);
-            maskRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
             eventConfirmHub->RemoveClickEvent(sheetMaskClickEvent);
             sheetMaskClickEventMap_.erase(maskNodeId);
         }
@@ -4557,6 +4553,7 @@ void OverlayManager::UpdateSheetRender(
     } else if (!isPartialUpdate) {
         sheetRenderContext->UpdateBackShadow(ShadowConfig::NoneShadow);
     }
+    sheetNodePattern->UpdateMaskBackgroundColor();
 }
 void OverlayManager::UpdateSheetProperty(const RefPtr<FrameNode>& sheetNode,
     NG::SheetStyle& currentStyle, bool isPartialUpdate)
@@ -4921,13 +4918,13 @@ void OverlayManager::PlaySheetMaskTransition(RefPtr<FrameNode> maskNode, bool is
         AceType::MakeRefPtr<InterpolatingSpring>(0.0f, CURVE_MASS, CURVE_STIFFNESS, CURVE_DAMPING);
     option.SetCurve(curve);
     option.SetFillMode(FillMode::FORWARDS);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
-    CHECK_NULL_VOID(sheetTheme);
     auto context = maskNode->GetRenderContext();
     CHECK_NULL_VOID(context);
-    auto backgroundColor = sheetMaskColor_.value_or(sheetTheme->GetMaskColor());
+    auto sheetNode = AceType::DynamicCast<FrameNode>(maskNode->GetChildAtIndex(0));
+    CHECK_NULL_VOID(sheetNode);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    auto backgroundColor = sheetPattern->GetMaskBackgroundColor();
     if (isTransitionIn) {
         context->UpdateBackgroundColor(backgroundColor.ChangeOpacity(0.0f));
         AnimationUtils::Animate(

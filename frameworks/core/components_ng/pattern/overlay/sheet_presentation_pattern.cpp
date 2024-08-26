@@ -1263,6 +1263,44 @@ bool SheetPresentationPattern::SheetHeightNeedChanged()
     return false;
 }
 
+void SheetPresentationPattern::UpdateMaskBackgroundColor()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    CHECK_NULL_VOID(sheetTheme);
+    auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    sheetMaskColor_ = sheetStyle.maskColor.value_or(sheetTheme->GetMaskColor());
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        if (sheetStyle.maskColor.has_value()) {
+            sheetMaskColor_ = sheetStyle.maskColor.value();
+        } else {
+            sheetMaskColor_ = Color::TRANSPARENT;
+        }
+    } else {
+        if ((!sheetStyle.interactive.has_value() && GetSheetType() == SheetType::SHEET_POPUP) ||
+            sheetStyle.interactive.value_or(false)) {
+            sheetMaskColor_ = Color::TRANSPARENT;
+        }
+    }
+}
+
+void SheetPresentationPattern::UpdateMaskBackgroundColorRender()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    UpdateMaskBackgroundColor();
+    auto maskNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(maskNode);
+    auto maskRenderContext = maskNode->GetRenderContext();
+    CHECK_NULL_VOID(maskRenderContext);
+    maskRenderContext->UpdateBackgroundColor(sheetMaskColor_);
+}
+
 void SheetPresentationPattern::CheckSheetHeightChange()
 {
     auto host = GetHost();
@@ -1292,6 +1330,10 @@ void SheetPresentationPattern::CheckSheetHeightChange()
                 renderContext->UpdateOpacity(SHEET_VISIABLE_ALPHA);
             }
             overlayManager->PlaySheetTransition(host, true, false);
+            auto maskNode = overlayManager->GetSheetMask(host);
+            if (maskNode) {
+                UpdateMaskBackgroundColorRender();
+            }
             windowChanged_ = false;
             topSafeAreaChanged_ = false;
         }
