@@ -187,8 +187,8 @@ void WaterFlowLayoutSW::CheckReset()
         return;
     }
 
-    if (wrapper_->GetLayoutProperty()->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST &&
-        ItemHeightChanged()) {
+    const bool childDirty = wrapper_->GetLayoutProperty()->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST;
+    if (childDirty && ItemHeightChanged()) {
         info_->ResetWithLaneOffset(std::nullopt);
         FillBack(mainLen_, info_->startIndex_, itemCnt_ - 1);
         return;
