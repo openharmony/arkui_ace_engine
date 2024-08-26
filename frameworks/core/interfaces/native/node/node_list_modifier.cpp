@@ -643,6 +643,20 @@ void ResetInitialScroller(ArkUINodeHandle node)
     RefPtr<ScrollProxy> listProxy;
     ListModelNG::SetScroller(frameNode, listController, listProxy);
 }
+
+void SetListMaintainVisibleContentPosition(ArkUINodeHandle node, ArkUI_Bool enabled)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetListMaintainVisibleContentPosition(frameNode, enabled);
+}
+
+void ResetListMaintainVisibleContentPosition(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetListMaintainVisibleContentPosition(frameNode, false);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -661,7 +675,8 @@ const ArkUIListModifier* GetListModifier()
         GetListSpace, SetListSpace, ResetListSpace, SetNodeAdapter, ResetNodeAdapter,
         GetNodeAdapter, GetCachedCount, SetScrollToIndex, SetScrollBy, SetInitialIndex, ResetInitialIndex,
         SetListChildrenMainSize, ResetListChildrenMainSize, SetListCloseAllSwipeActions, GetInitialIndex,
-        SetListFlingSpeedLimit, ResetListFlingSpeedLimit, GetlistDivider, SetInitialScroller, ResetInitialScroller };
+        SetListFlingSpeedLimit, ResetListFlingSpeedLimit, GetlistDivider, SetInitialScroller, ResetInitialScroller,
+        SetListMaintainVisibleContentPosition, ResetListMaintainVisibleContentPosition };
     return &modifier;
 }
 

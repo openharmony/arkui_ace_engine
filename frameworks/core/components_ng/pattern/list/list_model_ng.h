@@ -54,6 +54,7 @@ public:
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
     void SetScrollEnabled(bool scrollEnabled) override;
     void SetFriction(double friction) override;
+    void SetMaintainVisibleContentPosition(bool enabled) override;
     void SetOnScroll(OnScrollEvent&& onScroll) override;
     void SetOnScrollBegin(OnScrollBeginEvent&& onScrollBegin) override;
     void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin) override;
@@ -91,6 +92,7 @@ public:
     static void SetListDirection(FrameNode* frameNode, int32_t axis);
     static float GetListFriction(FrameNode* frameNode);
     static void SetListFriction(FrameNode* frameNode, double friction);
+    static void SetListMaintainVisibleContentPosition(FrameNode* frameNode, bool enabled);
     static void SetListNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
     static int32_t GetListScrollBar(FrameNode* frameNode);
     static void SetListScrollBar(FrameNode* frameNode, int32_t barState);

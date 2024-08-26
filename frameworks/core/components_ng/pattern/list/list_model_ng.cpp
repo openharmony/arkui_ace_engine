@@ -263,6 +263,15 @@ void ListModelNG::SetFriction(double friction)
     pattern->SetFriction(friction);
 }
 
+void ListModelNG::SetMaintainVisibleContentPosition(bool enabled)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMaintainVisibleContentPosition(enabled);
+}
+
 void ListModelNG::SetOnScroll(OnScrollEvent&& onScroll)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -541,6 +550,14 @@ void ListModelNG::SetListFriction(FrameNode* frameNode, double friction)
         pattern->SetFriction(FRICTION);
     }
     pattern->SetFriction(friction);
+}
+
+void ListModelNG::SetListMaintainVisibleContentPosition(FrameNode* frameNode, bool enabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMaintainVisibleContentPosition(enabled);
 }
 
 void ListModelNG::SetListNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt)
