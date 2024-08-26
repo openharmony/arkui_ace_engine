@@ -1038,6 +1038,9 @@ void JSSearch::SetMaxLength(const JSCallbackInfo& info)
         return;
     }
     maxLength = info[0]->ToNumber<int32_t>();
+    if (std::isinf(info[0]->ToNumber<float>())) {
+        maxLength = INT32_MAX; // Infinity
+    }
     if (GreatOrEqual(maxLength, 0)) {
         SearchModel::GetInstance()->SetMaxLength(maxLength);
     } else {
