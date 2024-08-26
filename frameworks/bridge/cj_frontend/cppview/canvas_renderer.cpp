@@ -396,7 +396,7 @@ void NativeCanvasRenderer::DrawImage(const RefPtr<OHOS::Ace::PixelMap>& pixelMap
     imageInfo.image = image;
     imageInfo.isImage = false;
     imageInfo.pixelMap = pixelMap;
-    renderingContext2DModel_->DrawImage(imageInfo);
+    renderingContext2DModel_->DrawPixelMap(imageInfo);
 }
 
 std::unique_ptr<ImageData> NativeCanvasRenderer::GetImageData(

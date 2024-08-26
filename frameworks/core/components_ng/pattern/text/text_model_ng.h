@@ -60,7 +60,7 @@ public:
     void SetAdaptMaxFontSize(const Dimension& value) override;
     void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) override;
     void SetTextDetectEnable(bool value) override;
-    void SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult) override;
+    void SetTextDetectConfig(const TextDetectConfig& textDetectConfig) override;
     void SetOnClick(std::function<void(BaseEventInfo* info)>&& click) override;
     void ClearOnClick() override;
     void SetRemoteMessage(std::function<void()>&& event) override;
@@ -161,8 +161,7 @@ public:
     static void ResetSelectedBackgroundColor(FrameNode* frameNode);
     static void SetTextSelection(FrameNode* frameNode, int32_t startIndex, int32_t endIndex);
     static void SetTextSelectableMode(FrameNode* frameNode, TextSelectableMode value);
-    static void SetTextDetectConfig(
-        FrameNode* frameNode, const std::string& value, std::function<void(const std::string&)>&& onResult);
+    static void SetTextDetectConfig(FrameNode* frameNode, const TextDetectConfig& textDetectConfig);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
     static void SetOnTextSelectionChange(FrameNode* frameNode, std::function<void(int32_t, int32_t)>&& func);
     static void SetSelectionMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,

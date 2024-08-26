@@ -302,6 +302,15 @@ struct ArkUITextShadowStruct {
     ArkUI_Uint32 fill;
 };
 
+struct ArkUITextDetectConfigStruct {
+    ArkUI_CharPtr types;
+    void* onResult;
+    ArkUI_Uint32 entityColor;
+    ArkUI_Int32 entityDecorationType;
+    ArkUI_Uint32 entityDecorationColor;
+    ArkUI_Int32 entityDecorationStyle;
+};
+
 struct ArkUIImagePropertiesStruct {
     ArkUI_CharPtr src;
     ArkUI_Float32 number[4];
@@ -1987,7 +1996,8 @@ struct ArkUITextModifier {
     void (*resetTextSelection)(ArkUINodeHandle node);
     void (*setTextSelectableMode)(ArkUINodeHandle node, ArkUI_Uint32 textSelectableMode);
     void (*resetTextSelectableMode)(ArkUINodeHandle node);
-    void (*setTextDataDetectorConfigWithEvent)(ArkUINodeHandle node, ArkUI_CharPtr types, void* callback);
+    void (*setTextDataDetectorConfigWithEvent)(
+        ArkUINodeHandle node, const struct ArkUITextDetectConfigStruct* arkUITextDetectConfig);
     void (*resetTextDataDetectorConfigWithEvent)(ArkUINodeHandle node);
     void (*setTextOnCopy)(ArkUINodeHandle node, void* callback);
     void (*resetTextOnCopy)(ArkUINodeHandle node);
@@ -2259,6 +2269,8 @@ struct ArkUIListModifier {
     void (*getlistDivider)(ArkUINodeHandle node, ArkUIdividerOptions* option, ArkUI_Int32 unit);
     void (*setInitialScroller)(ArkUINodeHandle node, ArkUINodeHandle controller, ArkUINodeHandle proxy);
     void (*resetInitialScroller)(ArkUINodeHandle node);
+    void (*setListMaintainVisibleContentPosition)(ArkUINodeHandle node, ArkUI_Bool enabled);
+    void (*resetListMaintainVisibleContentPosition)(ArkUINodeHandle node);
 };
 
 struct ArkUIListItemGroupModifier {
@@ -4231,7 +4243,8 @@ struct ArkUIColumnSplitModifier {
 struct ArkUIRichEditorModifier {
     void (*setRichEditorEnableDataDetector)(ArkUINodeHandle node, ArkUI_Uint32 enableDataDetector);
     void (*resetRichEditorEnableDataDetector)(ArkUINodeHandle node);
-    void (*setRichEditorDataDetectorConfigWithEvent)(ArkUINodeHandle node, ArkUI_CharPtr types, void* callback);
+    void (*setRichEditorDataDetectorConfigWithEvent)(
+        ArkUINodeHandle node, const struct ArkUITextDetectConfigStruct* arkUITextDetectConfig);
     void (*resetRichEditorDataDetectorConfigWithEvent)(ArkUINodeHandle node);
     void (*setRichEditorOnIMEInputComplete)(ArkUINodeHandle node, void* callback);
     void (*resetRichEditorOnIMEInputComplete)(ArkUINodeHandle node);

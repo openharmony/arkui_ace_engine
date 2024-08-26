@@ -82,7 +82,8 @@ bool ParseAndVerifyParams(const JSCallbackInfo& info)
     auto handlers = JSRef<JSObject>::Cast(info[PARAM_HANDLERS]);
     if (!handlers->GetProperty("onCreateNode")->IsFunction() || !handlers->GetProperty("onUpdateNode")->IsFunction() ||
         !handlers->GetProperty("onGetKeys4Range")->IsFunction() ||
-        !handlers->GetProperty("onGetTypes4Range")->IsFunction()) {
+        !handlers->GetProperty("onGetTypes4Range")->IsFunction() ||
+        !handlers->GetProperty("onSetActiveRange")->IsFunction()) {
         return false;
     }
 
@@ -166,19 +167,28 @@ void JSRepeatVirtualScroll::Create(const JSCallbackInfo& info)
         return list;
     };
 
+    auto onSetActiveRange = [execCtx = info.GetExecutionContext(), func = JSFUNC(handlers, "onSetActiveRange")](
+                            uint32_t from, uint32_t to) -> void {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto params = ConvertToJSValues(from, to);
+        func->Call(JSRef<JSObject>(), params.size(), params.data());
+    };
+
     RepeatVirtualScrollModel::GetInstance()->Create(
-        totalCount, templateCachedCountMap, onCreateNode, onUpdateNode, onGetKeys4Range, onGetTypes4Range);
+        totalCount, templateCachedCountMap, onCreateNode, onUpdateNode, onGetKeys4Range, onGetTypes4Range,
+        onSetActiveRange);
 }
 
-void JSRepeatVirtualScroll::InvalidateKeyCache(const JSCallbackInfo& info)
+void JSRepeatVirtualScroll::UpdateRenderState(const JSCallbackInfo& info)
 {
-    ACE_SCOPED_TRACE("RepeatVirtualScroll:InvalidateKeyCache");
-    TAG_LOGD(AceLogTag::ACE_REPEAT, "JSRepeatVirtualScroll::InvalidateKeyCache");
-    if (!info[0]->IsNumber()) {
+    ACE_SCOPED_TRACE("RepeatVirtualScroll:UpdateRenderState");
+    TAG_LOGD(AceLogTag::ACE_REPEAT, "JSRepeatVirtualScroll::UpdateRenderState");
+    if (!info[0]->IsNumber() || !info[1]->IsBoolean()) {
         return;
     }
     auto totalCount = info[0]->ToNumber<uint32_t>();
-    RepeatVirtualScrollModel::GetInstance()->InvalidateKeyCache(totalCount);
+    auto visibleItemsChanged = info[1]->ToBoolean();
+    RepeatVirtualScrollModel::GetInstance()->UpdateRenderState(totalCount, visibleItemsChanged);
 }
 
 void JSRepeatVirtualScroll::OnMove(const JSCallbackInfo& info)
@@ -199,7 +209,7 @@ void JSRepeatVirtualScroll::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRepeatVirtualScroll>::Declare("RepeatVirtualScrollNative");
     JSClass<JSRepeatVirtualScroll>::StaticMethod("create", &JSRepeatVirtualScroll::Create);
-    JSClass<JSRepeatVirtualScroll>::StaticMethod("invalidateKeyCache", &JSRepeatVirtualScroll::InvalidateKeyCache);
+    JSClass<JSRepeatVirtualScroll>::StaticMethod("updateRenderState", &JSRepeatVirtualScroll::UpdateRenderState);
     JSClass<JSRepeatVirtualScroll>::StaticMethod("onMove", &JSRepeatVirtualScroll::OnMove);
     JSClass<JSRepeatVirtualScroll>::Bind<>(globalObj);
 }

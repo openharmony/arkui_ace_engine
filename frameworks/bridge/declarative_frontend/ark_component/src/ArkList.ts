@@ -252,6 +252,20 @@ class ListFrictionModifier extends ModifierWithKey<number | Resource> {
   }
 }
 
+class ListMaintainVisibleContentPositionModifier extends ModifierWithKey<boolean | undefined> {
+  constructor(value: boolean | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listMaintainVisibleContentPosition');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetListMaintainVisibleContentPosition(node);
+    } else {
+      getUINativeModule().list.setListMaintainVisibleContentPosition(node, this.value);
+    }
+  }
+}
+
 class ListNestedScrollModifier extends ModifierWithKey<NestedScrollOptions> {
   constructor(value: NestedScrollOptions) {
     super(value);
@@ -551,6 +565,11 @@ class ArkListComponent extends ArkComponent implements ListAttribute {
   }
   friction(value: any): this {
     modifierWithKey(this._modifiersWithKeys, ListFrictionModifier.identity, ListFrictionModifier, value);
+    return this;
+  }
+  maintainVisibleContentPosition(value: boolean | undefined): this {
+    modifierWithKey(this._modifiersWithKeys, ListMaintainVisibleContentPositionModifier.identity,
+      ListMaintainVisibleContentPositionModifier, value);
     return this;
   }
   clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this {

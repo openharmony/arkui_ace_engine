@@ -42,6 +42,9 @@ class __RepeatVirtualScrollImpl<T> {
     // RepeatVirtualScrollNode elmtId
     private repeatElmtId_ : number = -1;
 
+    // Last known active range (as sparse array)
+    private lastActiveRangeData_: Array<{ item: T, ttype: string }> = [];
+
     public render(config: __RepeatConfig<T>, isInitialRender: boolean): void {
         this.arr_ = config.arr;
         this.itemGenFuncs_ = config.itemGenFuncs;
@@ -130,7 +133,6 @@ class __RepeatVirtualScrollImpl<T> {
         }; // onUpdateNode
 
         const onGetKeys4Range = (from: number, to: number): Array<string> => {
-
             if (to > this.totalCount_ || to > this.arr_.length) {
                 stateMgmtConsole.applicationError(`Repeat with virtualScroll elmtId ${this.repeatElmtId_}:  onGetKeys4Range from ${from} to ${to} \
                     with data array length ${this.arr_.length}, totalCount=${this.totalCount_} \
@@ -197,13 +199,7 @@ class __RepeatVirtualScrollImpl<T> {
             ObserveV2.getObserve().startRecordDependencies(owningView, this.repeatElmtId_, false);
 
             for (let i = from; i <= to && i < this.arr_.length; i++) {
-                let ttype = this.typeGenFunc_(this.arr_[i], i) ?? '';
-                if (!this.itemGenFuncs_[ttype]) {
-                    stateMgmtConsole.applicationError(`Repeat with virtual scroll elmtId: ${this.repeatElmtId_}. Factory function .templateId  returns template id '${ttype}'.` + 
-                        (ttype === '') ? 'Missing Repeat.each ' : `missing Repeat.template for id '${ttype}'` + '! Unrecoverable application error!');
-                    // fallback to use .each function and try to continue the app with it.
-                    ttype = '';
-                } 
+                let ttype = this.typeGenFunc_(this.arr_[i], i);
                 result.push(ttype);
             } // for
             ObserveV2.getObserve().stopRecordDependencies();
@@ -213,13 +209,25 @@ class __RepeatVirtualScrollImpl<T> {
             return result;
         }; // const onGetTypes4Range
 
+        const onSetActiveRange = (from: number, to: number): void => {
+            stateMgmtConsole.debug(`__RepeatVirtualScrollImpl: onSetActiveRange(${from}, ${to})`);
+            // make sparse copy of this.arr_
+            this.lastActiveRangeData_ = new Array<{item: T, ttype: string}>(this.arr_.length);
+            for (let i = from; i <= to && i < this.arr_.length; i++) {
+                const item = this.arr_[i];
+                const ttype = this.typeGenFunc_(this.arr_[i], i);
+                this.lastActiveRangeData_[i] = { item, ttype };
+            }
+        };
+
         stateMgmtConsole.debug(`__RepeatVirtualScrollImpl(${this.repeatElmtId_}): initialRenderVirtualScroll`);
 
         RepeatVirtualScrollNative.create(this.totalCount_, Object.entries(this.templateOptions_), {
             onCreateNode,
             onUpdateNode,
             onGetKeys4Range,
-            onGetTypes4Range
+            onGetTypes4Range,
+            onSetActiveRange
         });
         RepeatVirtualScrollNative.onMove(this.onMoveHandler_);
         stateMgmtConsole.debug(`__RepeatVirtualScrollImpl(${this.repeatElmtId_}): initialRenderVirtualScroll`);
@@ -227,22 +235,50 @@ class __RepeatVirtualScrollImpl<T> {
 
     private reRender(): void {
         stateMgmtConsole.debug(`__RepeatVirtualScrollImpl(${this.repeatElmtId_}): reRender ...`);
-        this.purgeKeyCache();
-        RepeatVirtualScrollNative.invalidateKeyCache(this.totalCount_);
-        stateMgmtConsole.debug(`__RepeatVirtualScrollImpl(${this.repeatElmtId_}): reRender - done`);
+        if (this.hasVisibleItemsChanged()) {
+            this.purgeKeyCache();
+            RepeatVirtualScrollNative.updateRenderState(this.totalCount_, true);
+            stateMgmtConsole.debug(`__RepeatVirtualScrollImpl: reRender - done.`);
+        } else {
+            // avoid re-render when data pushed outside visible area
+            RepeatVirtualScrollNative.updateRenderState(this.totalCount_, false);
+            stateMgmtConsole.debug(`__RepeatVirtualScrollImpl: reRender (no changes in visible items) - done.`);
+        }
     }
 
     private initialRenderItem(repeatItem: __RepeatItemFactoryReturn<T>): void {
         // execute the itemGen function
-        const itemType = this.typeGenFunc_(repeatItem.item, repeatItem.index) ?? '';
-        const itemFunc = this.itemGenFuncs_[itemType] ?? this.itemGenFuncs_[''];
-        if (typeof itemFunc === 'function') {
-            itemFunc(repeatItem);
-        } else {
-            stateMgmtConsole.applicationError(`Repeat with virtualScroll elmtId ${this.repeatElmtId_}: ` +
-                (itemType === '') ? 'Missing Repeat.each ' : `missing Repeat.template for id '${itemType}'` +
-                '! Unrecoverable application error!');
+        const itemType = this.typeGenFunc_(repeatItem.item, repeatItem.index);
+        const itemFunc = this.itemGenFuncs_[itemType];
+        itemFunc(repeatItem);
+    }
+
+    private hasVisibleItemsChanged(): boolean {
+        let lastActiveRangeIndex = 0;
+
+        // has any item or ttype in the active range changed?
+        for (let i in this.lastActiveRangeData_) {
+            if (!(i in this.arr_)) {
+                return true;
+            }
+            const oldItem = this.lastActiveRangeData_[+i]?.item;
+            const oldType = this.lastActiveRangeData_[+i]?.ttype;
+            const newItem = this.arr_[+i];
+            const newType = this.typeGenFunc_(this.arr_[+i], +i);
+
+            if (oldItem !== newItem) {
+                stateMgmtConsole.debug(`__RepeatVirtualScrollImpl.hasVisibleItemsChanged() i:#${i} item changed => true`);
+                return true;
+            }
+            if (oldType !== newType) {
+                stateMgmtConsole.debug(`__RepeatVirtualScrollImpl.hasVisibleItemsChanged() i:#${i} ttype changed => true`);
+                return true;
+            }
+            lastActiveRangeIndex = +i;
         }
+
+        stateMgmtConsole.debug(`__RepeatVirtualScrollImpl.hasVisibleItemsChanged() => false`);
+        return false;
     }
 
     /**

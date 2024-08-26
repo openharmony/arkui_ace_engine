@@ -1658,9 +1658,8 @@ HWTEST_F(TextTestThreeNg, SetTextDetectTypes001, TestSize.Level1)
      */
     TextModelNG textModelNG;
     textModelNG.Create("");
-    textModelNG.SetCopyOption(CopyOptions::InApp);
-    auto onResult = [](const std::string&) {};
-    textModelNG.SetTextDetectConfig("apple, orange, banana", std::move(onResult));
+    TextDetectConfig textDetectConfig;
+    textModelNG.SetTextDetectConfig(textDetectConfig);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     auto pattern = frameNode->GetPattern<TextPattern>();
     EXPECT_EQ(pattern->dataDetectorAdapter_->aiDetectInitialized_, false);

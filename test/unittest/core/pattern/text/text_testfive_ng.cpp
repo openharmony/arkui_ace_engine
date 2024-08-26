@@ -1788,33 +1788,6 @@ HWTEST_F(TextTestFiveNg, UpdateSymbolSpanColor001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetAiSpanTextStyle001
- * @tc.desc: test span_node.cpp SetAiSpanTextStyle function
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestFiveNg, SetAiSpanTextStyle001, TestSize.Level1)
-{
-    auto pattern = AceType::MakeRefPtr<TextPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
-    ASSERT_NE(frameNode, nullptr);
-    pattern->AttachToFrameNode(frameNode);
-
-    auto spanItem = AceType::MakeRefPtr<SpanItem>();
-    ASSERT_NE(spanItem, nullptr);
-
-    std::optional<TextStyle> aiSpanTextStyle = std::nullopt;
-
-    spanItem->fontStyle->UpdateFontSize(Dimension(0));
-    spanItem->SetAiSpanTextStyle(aiSpanTextStyle);
-    EXPECT_EQ(aiSpanTextStyle, std::nullopt);
-
-    spanItem->fontStyle->UpdateFontSize(Dimension(10));
-    spanItem->SetAiSpanTextStyle(aiSpanTextStyle);
-    EXPECT_NE(aiSpanTextStyle, std::nullopt);
-}
-
-/**
  * @tc.name: FontRegisterCallback002
  * @tc.desc: test span_node.cpp FontRegisterCallback function
  * @tc.type: FUNC

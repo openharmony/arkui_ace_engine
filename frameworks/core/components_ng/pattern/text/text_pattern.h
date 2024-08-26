@@ -148,6 +148,8 @@ public:
 
     void DumpAdvanceInfo() override;
     void DumpInfo() override;
+    void DumpScaleInfo();
+    void DumpTextEngineInfo();
 
     TextSelector GetTextSelector() const
     {
@@ -230,6 +232,33 @@ public:
     TextDataDetectResult GetTextDetectResult()
     {
         return dataDetectorAdapter_->textDetectResult_;
+    }
+    void SetTextDetectConfig(const TextDetectConfig& textDetectConfig)
+    {
+        dataDetectorAdapter_->SetTextDetectTypes(textDetectConfig.types);
+        dataDetectorAdapter_->onResult_ = std::move(textDetectConfig.onResult);
+        dataDetectorAdapter_->entityColor_ = textDetectConfig.entityColor;
+        dataDetectorAdapter_->entityDecorationType_ = textDetectConfig.entityDecorationType;
+        dataDetectorAdapter_->entityDecorationColor_ = textDetectConfig.entityDecorationColor;
+        dataDetectorAdapter_->entityDecorationStyle_ = textDetectConfig.entityDecorationStyle;
+        auto textDetectConfigCache = dataDetectorAdapter_->textDetectConfigStr_;
+        dataDetectorAdapter_->textDetectConfigStr_ = textDetectConfig.ToString();
+        if (textDetectConfigCache != dataDetectorAdapter_->textDetectConfigStr_) {
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
+    void ModifyAISpanStyle(TextStyle& aiSpanStyle)
+    {
+        TextDetectConfig textDetectConfig;
+        aiSpanStyle.SetTextColor(dataDetectorAdapter_->entityColor_.value_or(textDetectConfig.entityColor));
+        aiSpanStyle.SetTextDecoration(
+            dataDetectorAdapter_->entityDecorationType_.value_or(textDetectConfig.entityDecorationType));
+        aiSpanStyle.SetTextDecorationColor(
+            dataDetectorAdapter_->entityDecorationColor_.value_or(textDetectConfig.entityColor));
+        aiSpanStyle.SetTextDecorationStyle(
+            dataDetectorAdapter_->entityDecorationStyle_.value_or(textDetectConfig.entityDecorationStyle));
     }
 
     void OnVisibleChange(bool isVisible) override;
@@ -625,6 +654,11 @@ public:
         paintInfo_ = area + paintOffset.ToString();
     }
 
+    void DumpRecord(const std::string& record)
+    {
+        frameRecord_.append(record);
+    }
+
     void SetIsUserSetResponseRegion(bool isUserSetResponseRegion)
     {
         isUserSetResponseRegion_ = isUserSetResponseRegion;
@@ -634,6 +668,13 @@ public:
     void BeforeCreatePaintWrapper() override;
 
     void OnTextOverflowChanged();
+
+    uint64_t GetSystemTimestamp()
+    {
+        return static_cast<uint64_t>(
+            std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
+                .count());
+    }
 
 protected:
     void OnAttachToFrameNode() override;
@@ -720,6 +761,7 @@ protected:
 
     std::string textForDisplay_;
     std::string paintInfo_ = "NA";
+    std::string frameRecord_ = "NA";
     std::optional<TextStyle> textStyle_;
     std::list<RefPtr<SpanItem>> spans_;
     mutable std::list<RefPtr<UINode>> childNodes_;

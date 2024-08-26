@@ -236,8 +236,7 @@ void TextModelImpl::SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) {}
 
 void TextModelImpl::SetTextDetectEnable(bool value) {}
 
-void TextModelImpl::SetTextDetectConfig(const std::string& value,
-    std::function<void(const std::string&)>&& onResult) {}
+void TextModelImpl::SetTextDetectConfig(const TextDetectConfig& textDetectConfig) {}
 
 void TextModelImpl::OnSetWidth()
 {

@@ -115,7 +115,6 @@ public:
     void OnDragMoveOut(const PointerEvent& pointerEvent);
     void OnTextDragEnd(float globalX, float globalY, const std::string& extraInfo);
     void onDragCancel();
-    void EnsureStatusForPullIn();
     void OnItemDragStart(float globalX, float globalY, const RefPtr<FrameNode>& frameNode);
     void OnItemDragMove(float globalX, float globalY, int32_t draggedIndex, DragType dragType);
     void OnItemDragEnd(float globalX, float globalY, int32_t draggedIndex, DragType dragType);
@@ -277,6 +276,11 @@ public:
     void ResetDragging(DragDropMgrState dragDropMgrState = DragDropMgrState::IDLE)
     {
         dragDropState_ = dragDropMgrState;
+    }
+
+    void ResetPreTargetFrameNode()
+    {
+        preTargetFrameNode_ = nullptr;
     }
 
     void SetDraggingPressedState(bool pointerPressed)
@@ -537,6 +541,7 @@ private:
     bool ReachMoveLimit(const PointerEvent& pointerEvent, const Point& point);
     bool IsUIExtensionShowPlaceholder(const RefPtr<NG::UINode>& node);
     bool IsUIExtensionComponent(const RefPtr<NG::UINode>& node);
+    int32_t GetWindowId();
 
     std::map<int32_t, WeakPtr<FrameNode>> dragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> gridDragFrameNodes_;
@@ -574,6 +579,7 @@ private:
     bool isDragWindowShow_ = false;
     bool hasNotifiedTransformation_ = false;
     bool isPullMoveReceivedForCurrentDrag_ = false;
+    bool isDragWindowSubWindow_ = false;
     VelocityTracker velocityTracker_;
     DragDropMgrState dragDropState_ = DragDropMgrState::IDLE;
     PreDragStatus preDragStatus_ = PreDragStatus::ACTION_DETECTING_STATUS;

@@ -171,7 +171,7 @@ constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
 constexpr float MAX_ANGLE = 360.0f;
 constexpr float DEFAULT_BIAS = 0.5f;
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
-const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location" };
+const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location", "datetime" };
 const std::vector<std::string> RESOURCE_HEADS = { "app", "sys" };
 const std::string SHEET_HEIGHT_MEDIUM = "medium";
 const std::string SHEET_HEIGHT_LARGE = "large";
@@ -3342,7 +3342,8 @@ void ParseMenuBorderRadius(const JSRef<JSObject>& menuOptions, NG::MenuParam& me
         CalcDimension topRight;
         CalcDimension bottomLeft;
         CalcDimension bottomRight;
-        JSViewAbstract::ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight);
+        bool hasSetBorderRadius =
+            JSViewAbstract::ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight);
         if (LessNotEqual(topLeft.Value(), 0.0f)) {
             topLeft.Reset();
         }
@@ -3355,10 +3356,11 @@ void ParseMenuBorderRadius(const JSRef<JSObject>& menuOptions, NG::MenuParam& me
         if (LessNotEqual(bottomRight.Value(), 0.0f)) {
             bottomRight.Reset();
         }
-        menuBorderRadius.radiusTopLeft = topLeft;
-        menuBorderRadius.radiusTopRight = topRight;
-        menuBorderRadius.radiusBottomLeft = bottomLeft;
-        menuBorderRadius.radiusBottomRight = bottomRight;
+        auto isRtl = hasSetBorderRadius && AceApplicationInfo::GetInstance().IsRightToLeft();
+        menuBorderRadius.radiusTopLeft = isRtl ? topRight : topLeft;
+        menuBorderRadius.radiusTopRight = isRtl ? topLeft : topRight;
+        menuBorderRadius.radiusBottomLeft = isRtl ? bottomRight : bottomLeft;
+        menuBorderRadius.radiusBottomRight = isRtl ? bottomLeft : bottomRight;
         menuBorderRadius.multiValued = true;
         menuParam.borderRadius = menuBorderRadius;
     }
@@ -9202,8 +9204,7 @@ bool JSViewAbstract::ParseJsResource(const JSRef<JSVal>& jsValue, CalcDimension&
     return false;
 }
 
-bool JSViewAbstract::ParseDataDetectorConfig(
-    const JSCallbackInfo& info, std::string& types, std::function<void(const std::string&)>& onResult)
+bool JSViewAbstract::ParseDataDetectorConfig(const JSCallbackInfo& info, TextDetectConfig& textDetectConfig)
 {
     JSRef<JSVal> arg = info[0];
     if (!arg->IsObject()) {
@@ -9222,21 +9223,54 @@ bool JSViewAbstract::ParseDataDetectorConfig(
             return false;
         }
         if (i != 0) {
-            types.append(",");
+            textDetectConfig.types.append(",");
         }
-        types.append(TEXT_DETECT_TYPES[index]);
+        textDetectConfig.types.append(TEXT_DETECT_TYPES[index]);
     }
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     JSRef<JSVal> resultCallback = obj->GetProperty("onDetectResultUpdate");
     if (resultCallback->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsClipboardFunction>(JSRef<JSFunc>::Cast(resultCallback));
-        onResult = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
+        textDetectConfig.onResult = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
                        const std::string& result) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             PipelineContext::SetCallBackNode(node);
             func->Execute(result);
         };
     }
+
+    return ParseAIEntityColor(obj, textDetectConfig);
+}
+
+bool JSViewAbstract::ParseAIEntityColor(const JSRef<JSObject>& obj, TextDetectConfig& textDetectConfig)
+{
+    JSRef<JSVal> entityColorValue = obj->GetProperty("color");
+    ParseJsColor(entityColorValue, textDetectConfig.entityColor);
+
+    JSRef<JSVal> decorationValue = obj->GetProperty("decoration");
+    if (decorationValue->IsUndefined() || !decorationValue->IsObject()) {
+        textDetectConfig.entityDecorationColor = textDetectConfig.entityColor;
+        return true;
+    }
+    JSRef<JSObject> decorationObj = JSRef<JSObject>::Cast(decorationValue);
+    JSRef<JSVal> typeValue = decorationObj->GetProperty("type");
+    JSRef<JSVal> colorValue = decorationObj->GetProperty("color");
+    JSRef<JSVal> styleValue = decorationObj->GetProperty("style");
+
+    if (typeValue->IsNumber()) {
+        textDetectConfig.entityDecorationType = static_cast<TextDecoration>(typeValue->ToNumber<int32_t>());
+    } else {
+        textDetectConfig.entityDecorationType = TextDecoration::UNDERLINE;
+    }
+    if (!ParseJsColor(colorValue, textDetectConfig.entityDecorationColor)) {
+        textDetectConfig.entityDecorationColor = textDetectConfig.entityColor;
+    }
+    if (styleValue->IsNumber()) {
+         textDetectConfig.entityDecorationStyle = static_cast<TextDecorationStyle>(styleValue->ToNumber<int32_t>());
+    } else {
+        textDetectConfig.entityDecorationStyle = TextDecorationStyle::SOLID;
+    }
+
     return true;
 }
 

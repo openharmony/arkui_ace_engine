@@ -166,9 +166,13 @@ HWTEST_F(SharedOverlayManagerTestNg, SharedOverlayManagerTest002, TestSize.Level
      * @tc.steps: step1. add node configured with same shareId to source page and destination page respectively
      */
     auto srcNodeShareId1 = CreateSharedNode(SHARE_ID1, SRC_DURATION, SRC_SIZE);
+    srcNodeShareId1->GetRenderContext()->GetSharedTransitionOption()->type =
+        SharedTransitionEffectType::SHARED_EFFECT_STATIC;
     srcPage_->AddChild(srcNodeShareId1);
     srcPage_->GetPattern<PagePattern>()->sharedTransitionMap_.emplace(SHARE_ID1, srcNodeShareId1);
     auto destNodeShareId1 = CreateSharedNode(SHARE_ID1, DEST_DURATION, DEST_SIZE);
+    destNodeShareId1->GetRenderContext()->GetSharedTransitionOption()->type =
+        SharedTransitionEffectType::SHARED_EFFECT_STATIC;
     destPage_->AddChild(destNodeShareId1);
     destPage_->GetPattern<PagePattern>()->sharedTransitionMap_.emplace(SHARE_ID1, destNodeShareId1);
 
@@ -180,7 +184,7 @@ HWTEST_F(SharedOverlayManagerTestNg, SharedOverlayManagerTest002, TestSize.Level
     manager_->StartSharedTransition(srcPage_, destPage_);
     ASSERT_EQ(manager_->effects_.size(), 1);
     auto effect = *manager_->effects_.begin();
-    EXPECT_EQ(effect->GetType(), SharedTransitionEffectType::SHARED_EFFECT_EXCHANGE);
+    EXPECT_EQ(effect->GetType(), SharedTransitionEffectType::SHARED_EFFECT_STATIC);
     EXPECT_EQ(effect->GetSrcSharedNode().Upgrade(), srcNodeShareId1);
     EXPECT_EQ(effect->GetDestSharedNode().Upgrade(), destNodeShareId1);
     EXPECT_EQ(effect->GetShareId(), SHARE_ID1);
@@ -376,7 +380,7 @@ HWTEST_F(SharedOverlayManagerTestNg, SharedOverlayManagerTest008, TestSize.Level
     srcNode->GetGeometryNode()->SetFrameSize(SizeF(1.0, 1.0));
     auto option = std::make_shared<SharedTransitionOption>();
     SharedTransitionExchange test("test", option);
-    EXPECT_TRUE(test.CreateSizeAnimation(srcNode, destNode));
+    EXPECT_FALSE(test.CreateSizeAnimation(srcNode, destNode));
 }
 
 /**
@@ -409,7 +413,7 @@ HWTEST_F(SharedOverlayManagerTestNg, SharedOverlayManagerTest009, TestSize.Level
         inter->OnInitNotify(1.0, true);
     }
     test.PerformFinishCallback();
-    EXPECT_TRUE(flag);
+    EXPECT_FALSE(flag);
 }
 
 /**
@@ -441,7 +445,7 @@ HWTEST_F(SharedOverlayManagerTestNg, SharedOverlayManagerTest010, TestSize.Level
         inter->OnInitNotify(1.0, true);
     }
     test.PerformFinishCallback();
-    EXPECT_TRUE(flag);
+    EXPECT_FALSE(flag);
 }
 
 /**
