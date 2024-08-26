@@ -88,6 +88,7 @@ void BubblePattern::OnModifyDone()
         colorMode_ = SystemProperties::GetColorMode();
         UpdateBubbleText();
     }
+    UpdateAgingTextSize();
     Pattern::OnModifyDone();
     InitTouchEvent();
     RegisterButtonOnHover();
@@ -789,4 +790,12 @@ void BubblePattern::OnColorConfigurationUpdate()
     UpdateBubbleText();
 }
 
+void BubblePattern::UpdateAgingTextSize()
+{
+    if (isCustomPopup_) {
+        return;
+    }
+    CHECK_NULL_VOID(messageNode_);
+    messageNode_->MarkDirtyNode();
+}
 } // namespace OHOS::Ace::NG
