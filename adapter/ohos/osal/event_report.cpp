@@ -86,8 +86,11 @@ constexpr char EVENT_KEY_HOVER_TIME[] = "HOVER_TIME";
 constexpr char EVENT_KEY_IS_HOVER_MODE[] = "IS_HOVER_MODE";
 constexpr char EVENT_KEY_APP_ROTATION[] = "APP_ROTATION";
 constexpr char EVENT_KEY_WINDOW_MODE[] = "WINDOW_MODE";
+constexpr char EVENT_KEY_NON_MANUAL_POSTCARD_ACTION[] = "NON_MANUAL_POSTCARD_ACTION";
 constexpr char EVENT_KEY_PAGE_NAME[] = "PAGE_NAME";
 constexpr char EVENT_KEY_FILTER_TYPE[] = "FILTER_TYPE";
+constexpr char EVENT_KEY_FORM_NAME[] = "FORM_NAME";
+constexpr char EVENT_KEY_DIMENSION[] = "DIMENSION";
 
 constexpr int32_t MAX_PACKAGE_NAME_LENGTH = 128;
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
@@ -631,5 +634,17 @@ void EventReport::ReportHoverStatusChange(
         EVENT_KEY_IS_HOVER_MODE, isHoverMode,
         EVENT_KEY_WINDOW_MODE, windowMode,
         EVENT_KEY_APP_ROTATION, appRotation);
+}
+
+void EventReport::ReportNonManualPostCardActionInfo(const std::string& formName, const std::string& bundleName,
+    const std::string& abilityName, const std::string& moduleName, int32_t dimension)
+{
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_NON_MANUAL_POSTCARD_ACTION,
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        EVENT_KEY_FORM_NAME, formName,
+        EVENT_KEY_BUNDLE_NAME, bundleName,
+        EVENT_KEY_ABILITY_NAME, abilityName,
+        EVENT_KEY_MODULE_NAME, moduleName,
+        EVENT_KEY_DIMENSION, dimension);
 }
 } // namespace OHOS::Ace

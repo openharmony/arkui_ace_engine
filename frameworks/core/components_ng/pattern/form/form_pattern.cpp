@@ -25,6 +25,7 @@
 #include "adapter/ohos/osal/resource_adapter_impl_v2.h"
 #include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
+#include "base/log/event_report.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/system_properties.h"
@@ -64,6 +65,7 @@ constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_3S = 3000;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_EXTRA = 200;
 constexpr uint32_t DELAY_TIME_FOR_SET_NON_TRANSPARENT = 70;
 constexpr uint32_t DELAY_TIME_FOR_DELETE_IMAGE_NODE = 100;
+constexpr uint32_t DELAY_TIME_FOR_RESET_MANUALLY_CLICK_FLAG = 3000;
 constexpr double ARC_RADIUS_TO_DIAMETER = 2.0;
 constexpr double NON_TRANSPARENT_VAL = 1.0;
 constexpr double TRANSPARENT_VAL = 0;
@@ -1742,6 +1744,14 @@ void FormPattern::OnActionEvent(const std::string& action)
         return;
     }
 
+    RemoveDelayResetManuallyClickFlagTask();
+    if (!isManuallyClick_) {
+        EventReport::ReportNonManualPostCardActionInfo(cardInfo_.cardName, cardInfo_.bundleName, cardInfo_.abilityName,
+            cardInfo_.moduleName, cardInfo_.dimension);
+    } else {
+        isManuallyClick_ = false;
+    }
+
     if ("router" == type) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -1787,6 +1797,10 @@ void FormPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>&
     CHECK_NULL_VOID(pointerEvent);
     CHECK_NULL_VOID(formManagerBridge_);
 
+    if (OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN == pointerEvent->GetPointerAction()) {
+        isManuallyClick_ = true;
+        DelayResetManuallyClickFlag();
+    }
     if (!isVisible_) {
         auto pointerAction = pointerEvent->GetPointerAction();
         if (pointerAction == OHOS::MMI::PointerEvent::POINTER_ACTION_UP ||
@@ -1998,5 +2012,36 @@ bool FormPattern::CheckFormBundleForbidden(const std::string &bundleName)
 {
     CHECK_NULL_RETURN(formManagerBridge_, false);
     return formManagerBridge_->CheckFormBundleForbidden(bundleName);
+}
+
+void FormPattern::DelayResetManuallyClickFlag()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto executor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(executor);
+    std::string nodeIdStr = std::to_string(host->GetId());
+    executor->PostDelayedTask(
+        [weak = WeakClaim(this)] {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->isManuallyClick_ = false;
+        },
+        TaskExecutor::TaskType::UI, DELAY_TIME_FOR_RESET_MANUALLY_CLICK_FLAG,
+        std::string("ArkUIFormResetManuallyClickFlag").append(nodeIdStr));
+}
+
+void FormPattern::RemoveDelayResetManuallyClickFlagTask()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto executor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(executor);
+    std::string nodeIdStr = std::to_string(host->GetId());
+    executor->RemoveTask(TaskExecutor::TaskType::UI, std::string("ArkUIFormResetManuallyClickFlag").append(nodeIdStr));
 }
 } // namespace OHOS::Ace::NG
