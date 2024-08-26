@@ -631,6 +631,7 @@ private:
     void UpdateDragBarStatus();
     void UpdateCloseIconStatus();
     void UpdateTitlePadding();
+    RefPtr<FrameNode> GetTitleNode();
     float GetCloseIconPosX(const SizeF& sheetSize, const RefPtr<SheetTheme>& sheetTheme);
     void UpdateSheetTitle();
     void UpdateFontScaleStatus();
