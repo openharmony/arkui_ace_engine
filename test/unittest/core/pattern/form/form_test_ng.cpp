@@ -896,7 +896,8 @@ HWTEST_F(FormTestNg, formModelNG, TestSize.Level1)
     AAFwk::Want want;
     int64_t formId;
     std::string formBindingDataStr;
-    ASSERT_EQ(formModelNG.RequestPublishFormWithSnapshot(want, formBindingDataStr, formId), 1);
+    std::string errMsg;
+    ASSERT_EQ(formModelNG.RequestPublishFormWithSnapshot(want, formBindingDataStr, formId, errMsg), 1);
 }
 
 /**
