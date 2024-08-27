@@ -3568,6 +3568,7 @@ void ViewAbstract::SetMouseResponseRegion(FrameNode* frameNode, const std::vecto
 void ViewAbstract::SetSharedTransition(
     FrameNode* frameNode, const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option)
 {
+    CHECK_NULL_VOID(frameNode);
     const auto& target = frameNode->GetRenderContext();
     if (target) {
         target->SetSharedTransitionOptions(option);
