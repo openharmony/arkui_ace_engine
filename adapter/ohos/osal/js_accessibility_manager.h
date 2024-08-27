@@ -446,6 +446,8 @@ private:
 
     void NotifyChildTreeOnDeregister();
 
+    void SendUecOnTreeEvent(int64_t splitElementId);
+
     void NotifySetChildTreeIdAndWinId(int64_t elementId, const int32_t treeId, const int32_t childWindowId);
 
     bool CheckIsChildElement(

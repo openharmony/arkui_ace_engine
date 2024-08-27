@@ -2631,7 +2631,7 @@ void RosenRenderContext::UpdateAccessibilityRoundRect()
     frameRect.SetRect(RectF(lineWidth - borderPaddingPx - paintWidthPx / 2,
         lineWidth - borderPaddingPx - paintWidthPx / 2,
         noGreenBorderWidth + 2 * borderPaddingPx + paintWidthPx,
-        noGreenBorderHeight + 2 * borderPaddingPx + paintWidthPx));
+        noGreenBorderHeight + 2 * borderPaddingPx + paintWidthPx)); // 2: framenode to graphic specification
     modifier->SetRoundRect(frameRect, paintWidthPx);
 }
 void RosenRenderContext::ClearAccessibilityFocus()
