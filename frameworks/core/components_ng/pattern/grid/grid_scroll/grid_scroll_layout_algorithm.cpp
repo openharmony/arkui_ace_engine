@@ -1285,17 +1285,8 @@ void GridScrollLayoutAlgorithm::SkipBackwardLines(float mainSize, LayoutWrapper*
         return;
     }
 
-    auto totalViewHeight = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap_, true);
-    auto needSkipHeight = totalViewHeight + gridLayoutInfo_.prevOffset_ + mainGap_;
-    if (GreatOrEqual(needSkipHeight, -gridLayoutInfo_.currentOffset_)) {
+    if (!SkipLargeLineHeightLines(mainSize)) {
         return;
-    }
-
-    auto endLine = gridLayoutInfo_.gridMatrix_.find(gridLayoutInfo_.endMainLineIndex_ + 1);
-    if (endLine != gridLayoutInfo_.gridMatrix_.end() && !endLine->second.empty()) {
-        gridLayoutInfo_.currentOffset_ += needSkipHeight;
-        gridLayoutInfo_.endMainLineIndex_++;
-        gridLayoutInfo_.startMainLineIndex_ = gridLayoutInfo_.endMainLineIndex_;
     }
 
     // grid size change from big to small
@@ -2378,5 +2369,32 @@ void GridScrollLayoutAlgorithm::MergeRemainingLines(
             gridLayoutInfo_.gridMatrix_[line.first - forwardLines][crossIndex] = index;
         }
     }
+}
+
+bool GridScrollLayoutAlgorithm::SkipLargeLineHeightLines(float mainSize)
+{
+    bool needSkip = false;
+    for (int32_t line = gridLayoutInfo_.startMainLineIndex_; line <= gridLayoutInfo_.endMainLineIndex_; line++) {
+        auto iter = gridLayoutInfo_.lineHeightMap_.find(line);
+        if (iter != gridLayoutInfo_.lineHeightMap_.end() && iter->second >= mainSize) {
+            needSkip = true;
+            break;
+        }
+    }
+    if (needSkip) {
+        auto totalViewHeight = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap_, true);
+        auto needSkipHeight = totalViewHeight + gridLayoutInfo_.prevOffset_ + mainGap_;
+        if (GreatOrEqual(needSkipHeight, -gridLayoutInfo_.currentOffset_)) {
+            return false;
+        }
+
+        auto endLine = gridLayoutInfo_.gridMatrix_.find(gridLayoutInfo_.endMainLineIndex_ + 1);
+        if (endLine != gridLayoutInfo_.gridMatrix_.end() && !endLine->second.empty()) {
+            gridLayoutInfo_.currentOffset_ += needSkipHeight;
+            gridLayoutInfo_.endMainLineIndex_++;
+            gridLayoutInfo_.startMainLineIndex_ = gridLayoutInfo_.endMainLineIndex_;
+        }
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG
