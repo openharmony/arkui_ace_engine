@@ -547,12 +547,14 @@ void SubwindowOhos::ClearMenu()
 #endif
 }
 
-bool SubwindowOhos::ShowPreviewNG()
+bool SubwindowOhos::ShowPreviewNG(bool isStartDraggingFromSubWindow)
 {
     CHECK_NULL_RETURN(window_, false);
     ResizeWindow();
     ShowWindow(false);
-    window_->SetTouchable(false);
+    if (!isStartDraggingFromSubWindow) {
+        window_->SetTouchable(false);
+    }
     return true;
 }
 
