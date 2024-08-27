@@ -17677,7 +17677,7 @@ class ArkSelectComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, ControlSizeModifier.identity, ControlSizeModifier, controlSize);
     return this;
   }
-  setContentModifier(modifier) {
+  menuItemContentModifier(modifier) {
     if (modifier === undefined || modifier === null) {
       getUINativeModule().select.setContentModifierBuilder(this.nativePtr, false);
       return;
@@ -18121,7 +18121,7 @@ if (globalThis.Select !== undefined) {
     let component = this.createOrGetNode(elmtId, () => {
       return new ArkSelectComponent(nativeNode);
     });
-    component.setContentModifier(modifier);
+    component.menuItemContentModifier(modifier);
   };
 }
 

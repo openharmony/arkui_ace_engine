@@ -2640,4 +2640,33 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0130, TestSize.Level1)
     ASSERT_NE(childNode->GetRenderContext(), nullptr);
     EXPECT_EQ(childNode->GetRenderContext()->GetOpacityValue(), 0);
 }
+
+/**
+ * @tc.name: CheckBoxNGTest0131
+ * @tc.desc: Test SetCheckBoxName func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxNGTest0131, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    auto frameNode = CheckBoxModelNG::CreateFrameNode(0);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. SetCheckBoxName testName and testGroupName
+     */
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+    CheckBoxModelNG::SetCheckboxName(node, "testName");
+    CheckBoxModelNG::SetCheckboxGroup(node, "testGroupName");
+
+    /**
+     * @tc.steps: step3. assert Name and GroupName
+     */
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    EXPECT_EQ(eventHub->GetName(), "testName");
+    EXPECT_EQ(eventHub->GetGroupName(), "testGroupName");
+}
 } // namespace OHOS::Ace::NG
