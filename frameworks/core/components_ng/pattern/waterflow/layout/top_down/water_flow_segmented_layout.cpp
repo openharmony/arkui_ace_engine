@@ -299,7 +299,8 @@ inline float GetMeasuredHeight(const RefPtr<LayoutWrapper>& item, Axis axis)
 
 void WaterFlowSegmentedLayout::MeasureOnOffset()
 {
-    const bool forward = LessOrEqual(info_->currentOffset_, info_->prevOffset_) || info_->endIndex_ == -1;
+    const float prevOffset = wrapper_->GetHostNode()->GetPattern<WaterFlowPattern>()->GetPrevOffset();
+    const bool forward = LessOrEqual(info_->currentOffset_, prevOffset) || info_->endIndex_ == -1;
     if (forward) {
         Fill(info_->endIndex_ + 1);
     }

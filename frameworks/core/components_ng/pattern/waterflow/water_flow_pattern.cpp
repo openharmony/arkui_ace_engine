@@ -702,7 +702,7 @@ void WaterFlowPattern::DumpAdvanceInfo()
     std::vector<std::string> scrollAlign = { "START", "CENTER", "END", "AUTO", "NONE" };
 
     DumpLog::GetInstance().AddDesc("currentOffset:" + std::to_string(info->currentOffset_));
-    DumpLog::GetInstance().AddDesc("prevOffset:" + std::to_string(info->prevOffset_));
+    DumpLog::GetInstance().AddDesc("prevOffset:" + std::to_string(prevOffset_));
     DumpLog::GetInstance().AddDesc("lastMainSize:" + std::to_string(info->lastMainSize_));
     DumpLog::GetInstance().AddDesc("maxHeight:" + std::to_string(info->maxHeight_));
     DumpLog::GetInstance().AddDesc("startIndex:" + std::to_string(info->startIndex_));

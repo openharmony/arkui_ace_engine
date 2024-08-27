@@ -178,6 +178,11 @@ public:
         MarkDirtyNodeSelf();
     }
 
+    float GetPrevOffset() const
+    {
+        return prevOffset_;
+    }
+
 private:
     DisplayMode GetDefaultScrollBarDisplayMode() const override
     {
