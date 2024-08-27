@@ -4668,8 +4668,12 @@ void RosenRenderContext::ClipWithRRect(const RectF& rectF, const RadiusF& radius
 
 void RosenRenderContext::RemoveClipWithRRect()
 {
-    CHECK_NULL_VOID(rsNode_);
-    rsNode_->SetClipRRect(nullptr);
+    std::weak_ptr<Rosen::RSNode> weakRsNode = rsNode_;
+    AnimationUtils::ExecuteWithoutAnimation([weakRsNode]() {
+        auto rsNode = weakRsNode.lock();
+        CHECK_NULL_VOID(rsNode);
+        rsNode->SetClipRRect(nullptr);
+    });
     RequestNextFrame();
 }
 
