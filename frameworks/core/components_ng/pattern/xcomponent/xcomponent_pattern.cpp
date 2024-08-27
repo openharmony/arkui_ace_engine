@@ -1386,6 +1386,8 @@ void XComponentPattern::HandleSetExpectedRateRangeEvent()
     FrameRateRange frameRateRange;
     frameRateRange.Set(range->min, range->max, range->expected);
     displaySync_->SetExpectedFrameRateRange(frameRateRange);
+    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "Id: %{public}" PRIu64 " SetExpectedFrameRateRange"
+        "{%{public}d, %{public}d, %{public}d}", displaySync_->GetId(), range->min, range->max, range->expected);
 }
 
 void XComponentPattern::HandleOnFrameEvent()
@@ -1400,6 +1402,8 @@ void XComponentPattern::HandleOnFrameEvent()
         xComponentPattern->nativeXComponentImpl_->GetOnFrameCallback()(xComponentPattern->nativeXComponent_.get(),
             displaySyncData->GetTimestamp(), displaySyncData->GetTargetTimestamp());
     });
+    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "Id: %{public}" PRIu64 " RegisterOnFrame",
+        displaySync_->GetId());
     displaySync_->AddToPipelineOnContainer();
 }
 
@@ -1409,6 +1413,8 @@ void XComponentPattern::HandleUnregisterOnFrameEvent()
     CHECK_NULL_VOID(nativeXComponentImpl_);
     CHECK_NULL_VOID(displaySync_);
     displaySync_->UnregisterOnFrame();
+    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "Id: %{public}" PRIu64 " UnregisterOnFrame",
+        displaySync_->GetId());
     displaySync_->DelFromPipelineOnContainer();
 }
 
