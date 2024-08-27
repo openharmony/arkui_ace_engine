@@ -103,6 +103,15 @@ int32_t FocusHub::GetFrameId() const
     return frameNode ? frameNode->GetId() : -1;
 }
 
+RefPtr<PipelineContext> FocusHub::GetPipelineContext() const
+{
+    auto frameNode = GetFrameNode();
+    if (frameNode) {
+        return frameNode->GetContextRefPtr();
+    }
+    return NG::PipelineContext::GetCurrentContextSafely();
+}
+
 void FocusHub::GetChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes)
 {
     focusNodes.clear();
@@ -642,19 +651,41 @@ bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
         return false;
     }
 
-    auto frameNode = GetFrameNode();
-    CHECK_NULL_RETURN(frameNode, false);
-    auto* pipeline = frameNode->GetContext();
+    auto pipeline = GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, false);
     auto info = KeyEventInfo(keyEvent);
-    if (pipeline &&
-        (pipeline->IsKeyInPressed(KeyCode::KEY_META_LEFT) || pipeline->IsKeyInPressed(KeyCode::KEY_META_RIGHT))) {
+    if (pipeline->IsKeyInPressed(KeyCode::KEY_META_LEFT) ||
+        pipeline->IsKeyInPressed(KeyCode::KEY_META_RIGHT)) {
         info.SetMetaKey(1);
     }
-
     if (keyEvent.isPreIme) {
         return OnKeyPreIme(info, keyEvent);
     }
 
+    bool retInternal = OnKeyEventNodeInternal(keyEvent);
+    bool retCallback = OnKeyEventNodeUser(info, keyEvent);
+    if (!retInternal && !retCallback && keyEvent.action == KeyAction::DOWN) {
+        auto ret = false;
+        switch (keyEvent.code) {
+            case KeyCode::KEY_SPACE:
+            case KeyCode::KEY_ENTER:
+            case KeyCode::KEY_NUMPAD_ENTER:
+                ret = OnClick(keyEvent);
+                TAG_LOGI(AceLogTag::ACE_FOCUS,
+                    "OnClick: Node %{public}s/%{public}d handle KeyEvent(%{private}d, %{public}d) return: %{public}d",
+                    GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, ret);
+                break;
+            default:;
+        }
+        return ret;
+    }
+    return retInternal || retCallback;
+}
+
+bool FocusHub::OnKeyEventNodeInternal(const KeyEvent& keyEvent)
+{
+    auto pipeline = GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, false);
     bool isBypassInner = keyEvent.IsKey({ KeyCode::KEY_TAB }) && pipeline && pipeline->IsTabJustTriggerOnKeyEvent();
     auto retInternal = false;
     if ((GetFrameName() == V2::UI_EXTENSION_COMPONENT_ETS_TAG || GetFrameName() == V2::EMBEDDED_COMPONENT_ETS_TAG ||
@@ -668,7 +699,13 @@ bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
             "return: %{public}d",
             GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, retInternal);
     }
+    return retInternal;
+}
 
+bool FocusHub::OnKeyEventNodeUser(KeyEventInfo& info, const KeyEvent& keyEvent)
+{
+    auto pipeline = GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, false);
     auto retCallback = false;
     auto onKeyEventCallback = GetOnKeyCallback();
     if (onKeyEventCallback) {
@@ -688,23 +725,7 @@ bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
             "OnKeyEventUser: Node %{public}s/%{public}d handle KeyEvent(%{private}d, %{public}d) return: %{public}d",
             GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, retCallback);
     }
-
-    if (!retInternal && !retCallback && keyEvent.action == KeyAction::DOWN) {
-        auto ret = false;
-        switch (keyEvent.code) {
-            case KeyCode::KEY_SPACE:
-            case KeyCode::KEY_ENTER:
-            case KeyCode::KEY_NUMPAD_ENTER:
-                ret = OnClick(keyEvent);
-                TAG_LOGI(AceLogTag::ACE_FOCUS,
-                    "OnClick: Node %{public}s/%{public}d handle KeyEvent(%{private}d, %{public}d) return: %{public}d",
-                    GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, ret);
-                break;
-            default:;
-        }
-        return ret;
-    }
-    return retInternal || retCallback;
+    return retCallback;
 }
 
 bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
@@ -725,17 +746,11 @@ bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
         return true;
     }
 
-    if (keyEvent.isPreIme) {
+    if (keyEvent.isPreIme || keyEvent.action != KeyAction::DOWN) {
         return false;
     }
 
-    if (keyEvent.action != KeyAction::DOWN) {
-        return false;
-    }
-
-    auto frameNode = GetFrameNode();
-    CHECK_NULL_RETURN(frameNode, false);
-    auto* pipeline = frameNode->GetContext();
+    auto pipeline = GetPipelineContext();
     CHECK_NULL_RETURN(pipeline, false);
     if (!pipeline->GetIsFocusActive()) {
         return false;
@@ -752,6 +767,11 @@ bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
         return false;
     }
 
+    return RequestNextFocusByKey(keyEvent);
+}
+
+bool FocusHub::RequestNextFocusByKey(const KeyEvent& keyEvent)
+{
     switch (keyEvent.code) {
         case KeyCode::TV_CONTROL_UP:
             return RequestNextFocus(FocusStep::UP, GetRect());
