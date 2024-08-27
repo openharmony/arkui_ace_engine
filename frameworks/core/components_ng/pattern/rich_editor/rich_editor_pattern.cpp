@@ -3369,8 +3369,8 @@ NG::DragDropInfo RichEditorPattern::HandleDragStart(const RefPtr<Ace::DragEvent>
     }
     timestamp_ = std::chrono::system_clock::now().time_since_epoch().count();
     auto eventHub = GetEventHub<RichEditorEventHub>();
-    CHECK_NULL_RETURN(eventHub, { });
-    eventHub->SetTimestamp(GetTimestamp());
+    CHECK_NULL_RETURN(eventHub, {});
+    eventHub->SetTimestamp(timestamp_);
     showSelect_ = false;
     auto dropInfo = OnDragStart(event, extraParams);
     if (isOnlyImageDrag_) {
