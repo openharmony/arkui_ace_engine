@@ -25,6 +25,7 @@
 #include "base/want/want_wrap.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
+#include "interfaces/inner_api/ace/viewport_config.h"
 
 namespace OHOS {
 template<typename T>
@@ -106,6 +107,8 @@ public:
         WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction);
 
     void AddAliveUIExtension(int32_t nodeId, const WeakPtr<SecurityUIExtensionPattern>& uiExtension);
+
+    void UpdateSessionViewportConfig(const ViewportConfig& config);
 
 private:
     class UIExtensionIdUtility {

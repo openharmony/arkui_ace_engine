@@ -294,7 +294,7 @@ void PixelMapOhos::SavePixelMapToFile(const std::string& dst) const
 {
     int32_t w = pixmap_->GetWidth();
     int32_t h = pixmap_->GetHeight();
-    int32_t totalSize = pixmap_->GetByteCount();
+    int32_t totalSize = static_cast<int32_t>(pixmap_->GetCapacity());
     auto rowStride = pixmap_->GetRowStride();
     uint64_t nowTime = static_cast<uint64_t>(
         std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())

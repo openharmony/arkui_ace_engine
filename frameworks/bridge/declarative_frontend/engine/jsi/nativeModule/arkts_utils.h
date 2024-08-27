@@ -26,6 +26,10 @@
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/interfaces/native/node/node_api.h"
 
+namespace OHOS::Rosen {
+    class BrightnessBlender;
+}
+
 namespace OHOS::Ace::NG {
 using ArkUIRuntimeCallInfo = panda::JsiRuntimeCallInfo;
 class ArkTSUtils {
@@ -97,6 +101,9 @@ public:
             return false;
         }
         auto handle = panda::CopyableGlobal<panda::ArrayRef>(vm, arg);
+        if (handle->IsUndefined() || handle->IsNull()) {
+            return false;
+        }
         int32_t length = static_cast<int32_t>(handle->Length(vm));
         if (length != defaultLength) {
             return false;
@@ -166,6 +173,7 @@ public:
     static Local<JSValueRef> JsGetModifierKeyState(ArkUIRuntimeCallInfo* info);
     static bool IsDrawable(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
     static RefPtr<PixelMap> GetDrawablePixmap(const EcmaVM* vm, Local<JSValueRef> obj);
+    static Rosen::BrightnessBlender* CreateRSBrightnessBlenderFromNapiValue(const EcmaVM* vm, Local<JSValueRef> obj);
     static void* UnwrapNapiValue(const EcmaVM* vm, const Local<JSValueRef>& obj);
 #if !defined(PREVIEW)
     static RefPtr<PixelMap> CreatePixelMapFromNapiValue(const EcmaVM* vm, Local<JSValueRef> obj);

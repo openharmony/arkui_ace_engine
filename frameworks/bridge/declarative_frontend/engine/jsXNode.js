@@ -186,7 +186,7 @@ class JSBuilderNode extends BaseNode {
             return false;
         }
     }
-    buildWithNestingBuilder(builder) {
+    buildWithNestingBuilder(builder, supportLazyBuild) {
         if (this._supportNestingBuilder && this.isObject(this.params_)) {
             this._proxyObjectParam = new Proxy(this.params_, {
                 set(target, property, val) {
@@ -194,18 +194,19 @@ class JSBuilderNode extends BaseNode {
                 },
                 get: (target, property, receiver) => { return this.params_?.[property]; }
             });
-            this.nodePtr_ = super.create(builder.builder, this._proxyObjectParam, this.updateNodeFromNative, this.updateConfiguration);
+            this.nodePtr_ = super.create(builder.builder, this._proxyObjectParam, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
         }
         else {
-            this.nodePtr_ = super.create(builder.builder, this.params_, this.updateNodeFromNative, this.updateConfiguration);
+            this.nodePtr_ = super.create(builder.builder, this.params_, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
         }
     }
     build(builder, params, options) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this._supportNestingBuilder = options?.nestingBuilderSupported ? options.nestingBuilderSupported : false;
+        const supportLazyBuild = options?.lazyBuildSupported ? options.lazyBuildSupported : false;
         this.params_ = params;
         this.updateFuncByElmtId.clear();
-        this.buildWithNestingBuilder(builder);
+        this.buildWithNestingBuilder(builder, supportLazyBuild);
         this._nativeRef = getUINativeModule().nativeUtils.createNativeStrongRef(this.nodePtr_);
         if (this.frameNode_ === undefined || this.frameNode_ === null) {
             this.frameNode_ = new BuilderRootFrameNode(this.uiContext_);
@@ -405,6 +406,8 @@ class JSBuilderNode extends BaseNode {
         // removedChildElmtIds will be filled with the elmtIds of all children and their children will be deleted in response to if .. else change
         let removedChildElmtIds = new Array();
         If.branchId(branchId, removedChildElmtIds);
+        //un-registers the removed child elementIDs using proxy
+        UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);
         this.purgeDeletedElmtIds();
         branchfunc();
     }
@@ -718,7 +721,7 @@ class NodeController {
  * limitations under the License.
  */
 class FrameNode {
-    constructor(uiContext, type) {
+    constructor(uiContext, type, options) {
         if (uiContext === undefined) {
             throw Error('Node constructor error, param uiContext error');
         }
@@ -746,7 +749,7 @@ class FrameNode {
             result = getUINativeModule().frameNode.createFrameNode(this);
         }
         else {
-            result = getUINativeModule().frameNode.createTypedFrameNode(this, type);
+            result = getUINativeModule().frameNode.createTypedFrameNode(this, type, options);
         }
         __JSScopeUtil__.restoreInstanceId();
         this._nativeRef = result?.nativeStrongRef;
@@ -1250,8 +1253,8 @@ class FrameNodeUtils {
     }
 }
 class TypedFrameNode extends FrameNode {
-    constructor(uiContext, type, attrCreator) {
-        super(uiContext, type);
+    constructor(uiContext, type, attrCreator, options) {
+        super(uiContext, type, options);
         this.attrCreator_ = attrCreator;
     }
     initialize(...args) {
@@ -1394,10 +1397,10 @@ const __creatorMap__ = new Map([
                 return new ArkButtonComponent(node, type);
             });
         }],
-    ['XComponent', (context) => {
+    ['XComponent', (context, options) => {
             return new TypedFrameNode(context, 'XComponent', (node, type) => {
                 return new ArkXComponentComponent(node, type);
-            });
+            }, options);
         }],
     ['ListItemGroup', (context) => {
             return new TypedFrameNode(context, 'ListItemGroup', (node, type) => {
@@ -1409,19 +1412,54 @@ const __creatorMap__ = new Map([
                 return new ArkWaterFlowComponent(node, type);
             });
         }],
+    ['SymbolGlyph', (context)=> {
+            return new TypedFrameNode(context, 'SymbolGlyph', (node, type) => {
+                return new ArkSymbolGlyphComponent(node, type);
+            });
+        }],
     ['FlowItem', (context) => {
             return new TypedFrameNode(context, 'FlowItem', (node, type) => {
                 return new ArkFlowItemComponent(node, type);
             });
         }],
+    ['QRCode', (context) => {
+            return new TypedFrameNode(context, 'QRCode', (node, type) => {
+                return new ArkQRCodeComponent(node, type);
+            });
+        }],
+    ['Badge', (context) => {
+            return new TypedFrameNode(context, 'Badge', (node, type) => {
+                return new ArkBadgeComponent(node, type);
+            });
+        }],
+    ['Grid', (context) => {
+            return new TypedFrameNode(context, 'Grid', (node, type) => {
+                return new ArkGridComponent(node, type);
+            });
+        }],
+    ['GridItem', (context) => {
+            return new TypedFrameNode(context, 'GridItem', (node, type) => {
+                return new ArkGridItemComponent(node, type);
+            });
+        }],
+    ['TextClock', (context) => {
+            return new TypedFrameNode(context, 'TextClock', (node, type) => {
+                return new ArkTextClockComponent(node, type);
+            });
+        }],
+    ['TextTimer', (context) => {
+            return new TypedFrameNode(context, 'TextTimer', (node, type) => {
+                return new ArkTextTimerComponent(node, type);
+            });
+        }],
 ]);
 class typeNode {
-    static createNode(context, type) {
+    static createNode(context, type, options) {
         let creator = __creatorMap__.get(type);
         if (creator === undefined) {
             return undefined;
         }
-        return creator(context);
+        return creator(context, options);
     }
 }
 /*

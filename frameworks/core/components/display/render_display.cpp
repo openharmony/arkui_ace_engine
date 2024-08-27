@@ -17,9 +17,6 @@
 
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
-#include "core/accessibility/accessibility_node.h"
-#include "core/animation/curve_animation.h"
-#include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace {
 

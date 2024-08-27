@@ -15,7 +15,6 @@
 
 #include "frameworks/core/components/svg/parse/svg_ellipse.h"
 
-#include "frameworks/core/components/box/box_component.h"
 #include "frameworks/core/components/svg/render_svg_ellipse.h"
 
 namespace OHOS::Ace {

@@ -15,9 +15,7 @@
 
 #include "core/components/align/render_align.h"
 
-#include "base/log/log.h"
 #include "core/components/align/align_component.h"
-#include "core/components/common/properties/alignment.h"
 
 namespace OHOS::Ace {
 

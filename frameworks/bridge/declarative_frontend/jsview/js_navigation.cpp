@@ -103,10 +103,12 @@ void JSNavigation::ParseToolBarItems(const JSCallbackInfo& info, std::list<RefPt
         if (itemValueObject->IsString()) {
             toolBarItem->value = itemValueObject->ToString();
         }
+
         auto itemIconObject = itemObject->GetProperty("icon");
         std::string icon;
         ParseJsMedia(itemIconObject, icon);
         toolBarItem->icon = icon;
+
         auto itemActionValue = itemObject->GetProperty("action");
         if (itemActionValue->IsFunction()) {
             auto onClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(itemActionValue));

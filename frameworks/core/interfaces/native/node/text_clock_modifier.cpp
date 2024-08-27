@@ -183,6 +183,13 @@ void ResetDateTimeOptions(ArkUINodeHandle node)
     ZeroPrefixType hourType = ZeroPrefixType::AUTO;
     TextClockModelNG::SetDateTimeOptions(frameNode, hourType);
 }
+
+void SetTextClockTimeZoneOffset(ArkUINodeHandle node, ArkUI_Float32 timeZoneOffset)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextClockModelNG::SetHoursWest(frameNode, timeZoneOffset);
+}
 } // namespace TextClockModifier
 
 namespace NodeModifier {
@@ -206,7 +213,8 @@ const ArkUITextClockModifier* GetTextClockModifier()
         TextClockModifier::SetFontFeature,
         TextClockModifier::ResetFontFeature,
         TextClockModifier::SetDateTimeOptions,
-        TextClockModifier::ResetDateTimeOptions
+        TextClockModifier::ResetDateTimeOptions,
+        TextClockModifier::SetTextClockTimeZoneOffset
     };
 
     return &modifier;

@@ -14,6 +14,11 @@
  */
 
 #include "list_test_ng.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+
+#include "core/components_ng/pattern/list/list_item_group_paint_method.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1254,6 +1259,67 @@ HWTEST_F(ListLayoutTestNg, ListPattern_GetItemRect001, TestSize.Level1)
      */
     EXPECT_TRUE(IsEqual(pattern_->GetItemRect(pattern_->GetEndIndex()),
         Rect(0, LIST_HEIGHT - ITEM_HEIGHT, FILL_LENGTH.Value() * LIST_WIDTH, ITEM_HEIGHT)));
+}
+
+/**
+ * @tc.name: ListPattern_GetItemIndex001
+ * @tc.desc: Test the GetItemIndex function of List.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListPattern_GetItemIndex001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init List then slide List by Scroller.
+     */
+    ListModelNG model = CreateList();
+    model.SetInitialIndex(1);
+    CreateListItems(TOTAL_ITEM_NUMBER * 2);
+    CreateDone(frameNode_);
+    pattern_->ScrollBy(ITEM_HEIGHT / 2.0f);
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.steps: step2. Get invalid ListItem index.
+     * @tc.expected: Return -1 when input invalid x and y.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetItemIndex(100000, -100000), -1));
+
+    /**
+     * @tc.steps: step3. Get valid ListItem Rect.
+     * @tc.expected: Return actual Rect when input valid index.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetItemIndex(FILL_LENGTH.Value() * LIST_WIDTH /2, ITEM_HEIGHT * 0.2), 1));
+}
+
+/**
+ * @tc.name: ListPattern_GetItemIndexInGroup001
+ * @tc.desc: Test the GetItemIndexInGroup function of List.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListPattern_GetItemIndexInGroup001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init List then slide List by Scroller.
+     */
+    ListModelNG model = CreateList();
+    CreateListItemGroup(V2::ListItemGroupStyle::NONE);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
+    pattern_->ScrollTo(ITEM_HEIGHT * 2);
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.steps: step2. Get invalid group item index.
+     * @tc.expected: Return {-1, -1, -1} when input invalid group x and y.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetItemIndexInGroup(100000, -100000), {-1, -1, -1}));
+
+    /**
+     * @tc.steps: step3. Get valid group item index.
+     * @tc.expected: Return actual index when input valid group x and y.
+     */
+    EXPECT_TRUE(IsEqual(
+        pattern_->GetItemIndexInGroup(FILL_LENGTH.Value() * LIST_WIDTH* 0.9, ITEM_HEIGHT* 0.9), {0, 1, 2}));
 }
 
 /**

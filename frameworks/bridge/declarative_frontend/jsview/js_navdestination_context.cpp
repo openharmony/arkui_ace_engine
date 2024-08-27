@@ -41,6 +41,7 @@ void JSNavDestinationContext::GetPathInfo(const JSCallbackInfo& info)
         return;
     }
     obj->SetProperty<std::string>("name", pathInfo->GetName());
+    obj->SetProperty<bool>("isEntry", pathInfo->GetIsEntry());
     auto jsInfo = AceType::DynamicCast<JSNavPathInfo>(pathInfo);
     JSRef<JSVal> param;
     JSRef<JSVal> onPop;

@@ -15,9 +15,7 @@
 
 #include "core/components/text_overlay/text_overlay_element.h"
 
-#include "core/components/focus_collaboration/focus_collaboration_element.h"
 #include "core/components/text_overlay/render_text_overlay.h"
-#include "core/components/text_overlay/text_overlay_component.h"
 
 namespace OHOS::Ace {
 

@@ -42,9 +42,9 @@ extern const char _binary_paMgmt_abc_end[];
 namespace OHOS::Ace {
 namespace {
 #ifdef APP_USE_ARM
-const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/platformsdk/libark_inspector.z.so";
+const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/libark_inspector.z.so";
 #else
-const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/platformsdk/libark_inspector.z.so";
+const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/libark_inspector.z.so";
 #endif
 const char TASK_RUNNER[] = "PaEngineRunner";
 

@@ -15,7 +15,6 @@
 
 #include "core/components/list/list_component.h"
 
-#include "frameworks/core/components/foreach/for_each_component.h"
 #include "frameworks/core/components/ifelse/if_else_component.h"
 
 namespace OHOS::Ace {

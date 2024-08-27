@@ -15,9 +15,6 @@
 
 #include "frameworks/core/components/svg/rosen_render_svg_fe_colormatrix.h"
 
-#include "include/core/SkColorFilter.h"
-#include "include/effects/SkImageFilters.h"
-
 namespace OHOS::Ace {
 
 #ifndef USE_ROSEN_DRAWING

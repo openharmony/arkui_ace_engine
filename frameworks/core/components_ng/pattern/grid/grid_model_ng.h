@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -104,6 +104,9 @@ public:
     static float GetColumnsGap(FrameNode* frameNode);
     static float GetRowsGap(FrameNode* frameNode);
     static int32_t GetCachedCount(FrameNode* frameNode);
+    static void InitScroller(FrameNode* frameNode, const RefPtr<ScrollControllerBase>& positionController,
+        const RefPtr<ScrollProxy>& scrollProxy);
+    static void SetLayoutOptions(FrameNode* frameNode, GridLayoutOptions& options);
 
 private:
     void AddDragFrameNodeToManager() const;

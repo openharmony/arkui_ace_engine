@@ -15,7 +15,6 @@
 
 #include "core/components/video/video_component_v2.h"
 
-#include "base/log/log.h"
 #include "core/components/video/video_element_v2.h"
 
 namespace OHOS::Ace {

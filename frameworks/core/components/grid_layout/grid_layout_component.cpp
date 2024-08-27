@@ -16,10 +16,8 @@
 #include "core/components/grid_layout/grid_layout_component.h"
 
 #include "core/components/grid_layout/grid_layout_element.h"
-#include "core/components/grid_layout/render_grid_layout.h"
 #include "core/components_v2/grid/grid_element.h"
 #include "core/components_v2/grid/render_grid_scroll.h"
-#include "core/pipeline/base/multi_composed_component.h"
 
 namespace OHOS::Ace {
 

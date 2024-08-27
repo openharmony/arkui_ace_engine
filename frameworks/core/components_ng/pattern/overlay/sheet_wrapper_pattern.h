@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_layout_algorithm.h"
+#include "core/components_ng/pattern/overlay/sheet_wrapper_paint_method.h"
 
 namespace OHOS::Ace::NG {
 class SheetWrapperPattern : virtual public PopupBasePattern {
@@ -56,6 +57,12 @@ public:
         // set the sheet to float on the NavDestination's titlebar when the sheet shows in NavDestination
         wrapperRenderContext->UpdateZIndex(zIndex + 1);
     }
+
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
+    {
+        return MakeRefPtr<SheetWrapperPaintMethod>(WeakClaim(this));
+    }
+
 protected:
     bool AvoidKeyboard() const override
     {

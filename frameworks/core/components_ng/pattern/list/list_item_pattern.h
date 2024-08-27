@@ -62,6 +62,8 @@ public:
         }
     }
 
+    bool RenderCustomChild(int64_t deadline) override;
+
     FocusPattern GetFocusPattern() const override
     {
         if (listItemStyle_ == V2::ListItemStyle::CARD) {

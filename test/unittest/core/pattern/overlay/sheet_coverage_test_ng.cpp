@@ -471,20 +471,28 @@ HWTEST_F(SheetCoverageTestNg, BuildSubTitle001, TestSize.Level1)
 HWTEST_F(SheetCoverageTestNg, GetTitlePaddingPos001, TestSize.Level1)
 {
     PaddingProperty padding;
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    NG::SheetStyle sheetStyle;
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateSheetStyle(sheetStyle);
     AceApplicationInfo& applicationInfo = AceApplicationInfo::GetInstance();
     applicationInfo.apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TEN);
     EXPECT_FALSE(applicationInfo.GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE));
-    SheetView::GetTitlePaddingPos(padding);
+    SheetView::GetTitlePaddingPos(padding, sheetNode);
 
     applicationInfo.apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
     applicationInfo.isRightToLeft_ = false;
     EXPECT_TRUE(applicationInfo.GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE));
     EXPECT_FALSE(applicationInfo.IsRightToLeft());
-    SheetView::GetTitlePaddingPos(padding);
+    SheetView::GetTitlePaddingPos(padding, sheetNode);
 
     applicationInfo.isRightToLeft_ = true;
     EXPECT_TRUE(applicationInfo.IsRightToLeft());
-    SheetView::GetTitlePaddingPos(padding);
+    SheetView::GetTitlePaddingPos(padding, sheetNode);
 }
 
 /**
@@ -499,6 +507,9 @@ HWTEST_F(SheetCoverageTestNg, BuildTitleColumn001, TestSize.Level1)
     auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
         AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
     NG::SheetStyle sheetStyle;
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateSheetStyle(sheetStyle);
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     pipeline->fontScale_ = pipeline->GetTheme<SheetTheme>()->GetSheetNormalScale() + 1;

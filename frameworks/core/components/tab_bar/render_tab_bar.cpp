@@ -15,12 +15,8 @@
 
 #include "core/components/tab_bar/render_tab_bar.h"
 
-#include <algorithm>
-
 #include "base/log/event_report.h"
-#include "base/utils/system_properties.h"
 #include "core/common/container.h"
-#include "core/components/common/properties/alignment.h"
 
 namespace OHOS::Ace {
 namespace {

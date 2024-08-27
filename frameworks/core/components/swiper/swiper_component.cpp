@@ -16,7 +16,6 @@
 #include "core/components/swiper/swiper_component.h"
 
 #include "core/components/display/display_component.h"
-#include "core/components/foreach/for_each_component.h"
 #include "core/components/swiper/render_swiper.h"
 #include "core/components/swiper/swiper_element.h"
 #include "core/components_v2/swiper/swiper_element.h"

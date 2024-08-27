@@ -58,6 +58,7 @@ float CalculateOffsetByFriction(float extentOffset, float delta, float friction)
 
 void ScrollPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
@@ -79,6 +80,10 @@ void ScrollPattern::OnModifyDone()
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     Register2DragDropManager();
+    auto overlayNode = host->GetOverlayNode();
+    if (!overlayNode && paintProperty->GetFadingEdge().value_or(false)) {
+        CreateAnalyzerOverlay(host);
+    }
 }
 
 bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -102,19 +107,9 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     PrintOffsetLog(AceLogTag::ACE_SCROLL, host->GetId(), prevOffset_ - currentOffset_);
     FireOnDidScroll(prevOffset_ - currentOffset_);
     auto onReachStart = eventHub->GetOnReachStart();
-    if (onReachStart) {
-        if (ReachStart()) {
-            onReachStart();
-            AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
-        }
-    }
+    FireOnReachStart(onReachStart);
     auto onReachEnd = eventHub->GetOnReachEnd();
-    if (onReachEnd) {
-        if (ReachEnd()) {
-            onReachEnd();
-            AddEventsFiredInfo(ScrollableEventType::ON_REACH_END);
-        }
-    }
+    FireOnReachEnd(onReachEnd);
     OnScrollStop(eventHub->GetOnScrollStop());
     ScrollSnapTrigger();
     CheckScrollable();
@@ -126,7 +121,9 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     host->SetViewPort(globalViewPort);
     isInitialized_ = true;
     SetScrollSource(SCROLL_FROM_NONE);
-    return false;
+    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    return paintProperty->GetFadingEdge().value_or(false);
 }
 
 bool ScrollPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty)
@@ -142,7 +139,7 @@ bool ScrollPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty)
         CheckScrollToEdge();
         AddScrollLayoutInfo();
     }
-    
+
     if (LessNotEqual(scrollableDistance_, oldScrollableDistance)) {
         CheckRestartSpring(true);
     }
@@ -176,7 +173,7 @@ bool ScrollPattern::ScrollSnapTrigger()
         return false;
     }
     if (ScrollableIdle() && !AnimateRunning()) {
-        auto predictSnapOffset = CalePredictSnapOffset(0.0);
+        auto predictSnapOffset = CalcPredictSnapOffset(0.0);
         if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
             StartScrollSnapMotion(predictSnapOffset.value(), 0.0f);
             FireOnScrollStart();
@@ -437,6 +434,28 @@ void ScrollPattern::FireOnDidScroll(float scroll)
         if (scrollState != ScrollState::IDLE || !isTriggered) {
             onScroll(0.0_vp, 0.0_vp, ScrollState::IDLE);
         }
+    }
+}
+
+void ScrollPattern::FireOnReachStart(const OnReachEvent& onReachStart)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host && onReachStart);
+    if (ReachStart()) {
+        ACE_SCOPED_TRACE("OnReachStart, id:%d, tag:Scroll", static_cast<int32_t>(host->GetAccessibilityId()));
+        onReachStart();
+        AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
+    }
+}
+
+void ScrollPattern::FireOnReachEnd(const OnReachEvent& onReachEnd)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host && onReachEnd);
+    if (ReachEnd()) {
+        ACE_SCOPED_TRACE("OnReachEnd, id:%d, tag:Scroll", static_cast<int32_t>(host->GetAccessibilityId()));
+        onReachEnd();
+        AddEventsFiredInfo(ScrollableEventType::ON_REACH_END);
     }
 }
 
@@ -789,7 +808,7 @@ std::pair<std::function<bool(float)>, Axis> ScrollPattern::GetScrollOffsetAbilit
         GetAxis() };
 }
 
-std::optional<float> ScrollPattern::CalePredictSnapOffset(float delta, float dragDistance, float velocity)
+std::optional<float> ScrollPattern::CalcPredictSnapOffset(float delta, float dragDistance, float velocity)
 {
     std::optional<float> predictSnapOffset;
     CHECK_NULL_RETURN(IsScrollSnap(), predictSnapOffset);
@@ -1206,7 +1225,9 @@ void ScrollPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     initialOffset->Put("xOffset", GetInitialOffset().GetX().ToString().c_str());
     initialOffset->Put("yOffset", GetInitialOffset().GetY().ToString().c_str());
     json->PutExtAttr("initialOffset", initialOffset, filter);
-    json->PutExtAttr("enablePaging", IsEnablePagingValid(), filter);
+    if (enablePagingStatus_ != ScrollPagingStatus::NONE) {
+        json->PutExtAttr("enablePaging", enablePagingStatus_ == ScrollPagingStatus::VALID, filter);
+    }
 
     auto scrollSnapOptions = JsonUtil::Create(true);
     if (IsSnapToInterval()) {
@@ -1243,5 +1264,93 @@ std::string ScrollPattern::GetScrollSnapPagination() const
 bool ScrollPattern::OnScrollSnapCallback(double targetOffset, double velocity)
 {
     return ScrollSnapTrigger();
+}
+
+void ScrollPattern::GetScrollPagingStatusDumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    switch (enablePagingStatus_) {
+        case ScrollPagingStatus::NONE: {
+            json->Put("enablePaging", "ScrollPagingStatus::NONE");
+            break;
+        }
+        case ScrollPagingStatus::INVALID: {
+            json->Put("enablePaging", "ScrollPagingStatus::INVALID");
+            break;
+        }
+        case ScrollPagingStatus::VALID: {
+            json->Put("enablePaging", "ScrollPagingStatus::VALID");
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+void ScrollPattern::GetScrollSnapAlignDumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    switch (GetScrollSnapAlign()) {
+        case ScrollSnapAlign::NONE: {
+            json->Put("snapAlign", "ScrollSnapAlign::NONE");
+            break;
+        }
+        case ScrollSnapAlign::START: {
+            json->Put("snapAlign", "ScrollSnapAlign::START");
+            break;
+        }
+        case ScrollSnapAlign::CENTER: {
+            json->Put("snapAlign", "ScrollSnapAlign::CENTER");
+            break;
+        }
+        case ScrollSnapAlign::END: {
+            json->Put("snapAlign", "ScrollSnapAlign::END");
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+void ScrollPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(hub);
+    ScrollablePattern::DumpAdvanceInfo(json);
+    json->Put("currentOffset", std::to_string(currentOffset_).c_str());
+
+    GetScrollSnapAlignDumpInfo(json);
+    auto snapPaginationStr = std::string("snapPagination: ");
+    json->Put("snapPagination", GetScrollSnapPagination().c_str());
+    json->Put("enableSnapToStart", enableSnapToSide_.first ? "true" : "false");
+    json->Put("enableSnapToEnd", enableSnapToSide_.second ? "true" : "false");
+
+    GetScrollPagingStatusDumpInfo(json);
+    std::string snapOffsetsStr = "";
+    for (const auto& iter : snapPaginations_) {
+        snapOffsetsStr = snapOffsetsStr.append(iter.ToString()).append(" ");
+    }
+    json->Put("snapOffsets", snapOffsetsStr.c_str());
+    json->Put("initialOffset",
+        initialOffset_.has_value() ? initialOffset_->GetMainOffset(GetAxis()).ToString().c_str() : "None");
+    auto onScrollEdge = hub->GetScrollEdgeEvent();
+    json->Put("hasOnScrollEdge", onScrollEdge ? "true" : "false");
+
+    std::unique_ptr<JsonValue> children = JsonUtil::CreateArray(true);
+    for (const auto& info : scrollLayoutInfos_) {
+        std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
+        info.ToJson(child);
+        children->Put(child);
+    }
+    json->Put("scrollLayoutInfos", children);
+    std::unique_ptr<JsonValue> infochildren = JsonUtil::CreateArray(true);
+    for (const auto& info : scrollMeasureInfos_) {
+        std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
+        info.ToJson(child);
+        infochildren->Put(child);
+    }
+    json->Put("scrollMeasureInfos", infochildren);
 }
 } // namespace OHOS::Ace::NG

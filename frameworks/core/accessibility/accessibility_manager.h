@@ -123,7 +123,7 @@ public:
         const std::string& id, const std::string& target, const RefPtr<AccessibilityNode>& node) = 0;
     virtual void HandleComponentPostBinding() = 0;
     virtual void OnDumpInfo(const std::vector<std::string>& params) = 0;
-    virtual void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId) = 0;
+    virtual void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId, bool hasJson = false) = 0;
     virtual void SetCardViewPosition(int id, float offsetX, float offsetY) = 0;
     virtual void SetCardViewParams(const std::string& key, bool focus) = 0;
     virtual void SetSupportAction(uint32_t action, bool isEnable) = 0;

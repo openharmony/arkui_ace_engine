@@ -140,6 +140,8 @@ public:
         irregularItemInfo_.reset();
     }
 
+    void UpdateGridItemStyle(GridItemStyle gridItemStyle);
+
 protected:
     void OnModifyDone() override;
 

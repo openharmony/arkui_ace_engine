@@ -86,4 +86,15 @@ FocusPattern QRCodePattern::GetFocusPattern() const
     focusPaintParam.SetPaintColor(focusedColor);
     return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, focusPaintParam };
 }
+
+void QRCodePattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<QRCodePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    json->Put("Color", paintProperty->GetColorValue(Color::TRANSPARENT).ColorToString().c_str());
+    json->Put("ContentOpacity", std::to_string(paintProperty->GetOpacityValue(1.0f)).c_str());
+    json->Put("ContentString", paintProperty->GetValueValue(" ").c_str());
+}
 } // namespace OHOS::Ace::NG

@@ -15,10 +15,6 @@
 
 #include "core/components/form/resource/form_manager_resource.h"
 
-#include <sstream>
-
-#include "base/log/log.h"
-
 namespace OHOS::Ace {
 
 const char FORM_MANAGER_PARAM_NONE[] = "";

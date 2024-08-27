@@ -94,4 +94,18 @@ void FfiOHOSAceFrameworkCheckBoxSetCheckboxStyle(int32_t checkBoxStyle)
     CheckBoxStyle curCheckBoxStyle = static_cast<CheckBoxStyle>(checkBoxStyle);
     CheckBoxModel::GetInstance()->SetCheckboxStyle(curCheckBoxStyle);
 }
+
+void FfiCheckBoxSetResponseRegion(CJResponseRegion value)
+{
+    std::vector<DimensionRect> result;
+    ParseCJResponseRegion(value, result);
+    CheckBoxModel::GetInstance()->SetResponseRegion(result);
+}
+
+void FfiCheckBoxSetResponseRegionArray(VectorStringPtr vecContent)
+{
+    std::vector<DimensionRect> result;
+    ParseVectorStringPtr(vecContent, result);
+    CheckBoxModel::GetInstance()->SetResponseRegion(result);
+}
 }

@@ -111,9 +111,6 @@ void NavDestinationGroupNode::ProcessShallowBuilder()
     }
 }
 
-/**
- * @brief Find and return the nearest custom node, which is of type 'JsView'
- */
 RefPtr<CustomNodeBase> NavDestinationGroupNode::GetNavDestinationCustomNode()
 {
     return customNode_.Upgrade();

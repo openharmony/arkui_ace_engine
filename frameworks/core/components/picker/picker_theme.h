@@ -98,7 +98,7 @@ public:
                 theme->selectedOptionStyle_.SetTextColor(
                     pattern->GetAttr<Color>("selected_text_color", Color(0x007DFF)));
                 theme->selectedOptionStyle_.SetFontSize(
-                    pattern->GetAttr<Dimension>("selected_text_size", 20.0_vp));
+                    pattern->GetAttr<Dimension>("selected_text_size", 20.0_fp));
                 theme->selectedOptionStyle_.SetFontWeight(FontWeight::MEDIUM);
                 theme->selectedOptionStyle_.SetAdaptTextSize(theme->selectedOptionStyle_.GetFontSize(),
                     pattern->GetAttr<Dimension>("picker_select_option_min_font_size", 0.0_fp));

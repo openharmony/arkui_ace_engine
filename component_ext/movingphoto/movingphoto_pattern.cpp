@@ -42,7 +42,7 @@ constexpr int32_t PREPARE_RETURN = 0;
 constexpr int64_t VIDEO_PLAYTIME_START_POSITION = 0;
 constexpr int64_t VIDEO_PLAYTIME_END_POSITION = 3000;
 constexpr int32_t IMAGE_LOADING_COMPLETE = 1;
-int32_t DURATION_FLAG = -1;
+constexpr int32_t DURATION_FLAG = -1;
 }
 MovingPhotoPattern::MovingPhotoPattern(const RefPtr<MovingPhotoController>& controller)
     : instanceId_(Container::CurrentId()), controller_(controller)
@@ -62,6 +62,7 @@ void MovingPhotoPattern::OnModifyDone()
         pipelineContext->AddOnAreaChangeNode(host->GetId());
     }
     InitEvent();
+    UpdatePlayMode();
 }
 
 void MovingPhotoPattern::OnAttachToFrameNode()
@@ -197,7 +198,7 @@ void MovingPhotoPattern::HandleLongPress(GestureEvent& info)
     if (isSetAutoPlayPeriod_ && (currentPlayStatus_ == PlaybackStatus::PLAYBACK_COMPLETE ||
         currentPlayStatus_ == PlaybackStatus::PAUSED)) {
         isSetAutoPlayPeriod_ = false;
-        int32_t& duration = DURATION_FLAG;
+        int32_t duration = DURATION_FLAG;
         mediaPlayer_->GetDuration(duration);
         SetAutoPlayPeriod(PERIOD_START, duration);
     }
@@ -320,15 +321,16 @@ void MovingPhotoPattern::PrepareMediaPlayer()
 {
     auto layoutProperty = GetLayoutProperty<MovingPhotoLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (!layoutProperty->HasMovingPhotoUri() || layoutProperty->GetMovingPhotoUri().value() == uri_) {
-        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MovingPhoto source is null or the source has not changed.");
+    if (!layoutProperty->HasMovingPhotoUri() || !layoutProperty->HasVideoSource()) {
+        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MovingPhoto source is null.");
+        return;
+    }
+    if (layoutProperty->GetMovingPhotoUri().value() == uri_ &&
+        layoutProperty->GetVideoSource().value() == fd_) {
+        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer source has not changed.");
         return;
     }
     uri_ = layoutProperty->GetMovingPhotoUri().value();
-    if (!layoutProperty->HasVideoSource()) {
-        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer source is null or the source has not changed.");
-        return;
-    }
     fd_ = layoutProperty->GetVideoSource().value();
     if (mediaPlayer_ && !mediaPlayer_->IsMediaPlayerValid()) {
         mediaPlayer_->CreateMediaPlayer();
@@ -448,6 +450,18 @@ void MovingPhotoPattern::PrepareSurface()
     mediaPlayer_->SetRenderSurface(renderSurface_);
     if (mediaPlayer_->SetSurface() != 0) {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "prepare MediaPlayer failed.");
+    }
+}
+
+void MovingPhotoPattern::UpdatePlayMode()
+{
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto UpdatePlayMode.%{public}d", isChangePlayMode_);
+    if (isChangePlayMode_) {
+        if (historyAutoAndRepeatLevel_ == PlaybackMode::AUTO) {
+            SetAutoPlayPeriod(autoPlayPeriodStartTime_, autoPlayPeriodEndTime_);
+        }
+        MediaResetToPlay();
+        isChangePlayMode_ = false;
     }
 }
 
@@ -836,7 +850,7 @@ void MovingPhotoPattern::StartPlayback()
     isFastKeyUp_ = false;
     if (isSetAutoPlayPeriod_ && (currentPlayStatus_ == PlaybackStatus::PLAYBACK_COMPLETE ||
         currentPlayStatus_ == PlaybackStatus::PAUSED)) {
-        int32_t& duration = DURATION_FLAG;
+        int32_t duration = DURATION_FLAG;
         mediaPlayer_->GetDuration(duration);
         TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "StartPlayback duration:%{public}d.",
             duration);
@@ -847,6 +861,12 @@ void MovingPhotoPattern::StartPlayback()
 
 void MovingPhotoPattern::StartAnimation()
 {
+    if (historyAutoAndRepeatLevel_ == PlaybackMode::REPEAT) {
+        if (!isFirstRepeatPlay_) {
+            return;
+        }
+        isFirstRepeatPlay_ = false;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto movingPhoto = AceType::DynamicCast<MovingPhotoNode>(host);
@@ -855,21 +875,21 @@ void MovingPhotoPattern::StartAnimation()
     CHECK_NULL_VOID(image);
     auto imageRsContext = image->GetRenderContext();
     CHECK_NULL_VOID(imageRsContext);
-    imageRsContext->UpdateOpacity(1.0);
-    imageRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
     auto video = AceType::DynamicCast<FrameNode>(movingPhoto->GetVideo());
     CHECK_NULL_VOID(video);
     auto videoRsContext = video->GetRenderContext();
     CHECK_NULL_VOID(videoRsContext);
-    videoRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
 
+    imageRsContext->UpdateOpacity(1.0);
+    imageRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
+    videoRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
     auto movingPhotoPattern = WeakClaim(this);
     AnimationOption animationOption;
     animationOption.SetDuration(ANIMATION_DURATION_400);
     animationOption.SetCurve(Curves::FRICTION);
     animationOption.SetOnFinishEvent([movingPhotoPattern]() {
         auto movingPhoto = movingPhotoPattern.Upgrade();
-        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto StartAnimation OnFinishEvent.");
+        TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto StartAnimation OnFinishEvent.");
         CHECK_NULL_VOID(movingPhoto);
         if (movingPhoto->currentPlayStatus_ == PlaybackStatus::PAUSED
             || movingPhoto->currentPlayStatus_ == PlaybackStatus::STOPPED
@@ -879,11 +899,16 @@ void MovingPhotoPattern::StartAnimation()
         movingPhoto->HideImageNode();
     });
     startAnimationFlag_ = true;
-    AnimationUtils::Animate(animationOption, [imageCtx = imageRsContext, videoCtx = videoRsContext]() {
-            imageCtx->UpdateOpacity(0.0);
-            imageCtx->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
-            videoCtx->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
-         }, animationOption.GetOnFinishEvent());
+    AnimationUtils::Animate(animationOption,
+        [imageRsContext, videoRsContext, repeatFlag = historyAutoAndRepeatLevel_]() {
+            imageRsContext->UpdateOpacity(0.0);
+            imageRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
+            if (repeatFlag == PlaybackMode::REPEAT) {
+                videoRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
+            } else {
+                videoRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
+            }
+        }, animationOption.GetOnFinishEvent());
 }
 
 void MovingPhotoPattern::StopPlayback()
@@ -891,9 +916,11 @@ void MovingPhotoPattern::StopPlayback()
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto StopPlayback");
     isFastKeyUp_ = false;
     isPlayByController_ = false;
-    Stop();
+    Pause();
     autoAndRepeatLevel_ = PlaybackMode::NONE;
-    StopAnimation();
+    if (historyAutoAndRepeatLevel_ != PlaybackMode::REPEAT) {
+        StopAnimation();
+    }
 }
 
 void MovingPhotoPattern::PausePlayback()
@@ -916,6 +943,10 @@ void MovingPhotoPattern::PausePlayback()
 void MovingPhotoPattern::StopAnimation()
 {
     startAnimationFlag_ = false;
+    if (historyAutoAndRepeatLevel_ == PlaybackMode::REPEAT) {
+        StopAnimationCallback();
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto movingPhoto = AceType::DynamicCast<MovingPhotoNode>(host);
@@ -924,19 +955,19 @@ void MovingPhotoPattern::StopAnimation()
     CHECK_NULL_VOID(image);
     auto imageLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
-    imageLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     auto imageRsContext = image->GetRenderContext();
     CHECK_NULL_VOID(imageRsContext);
-    imageRsContext->UpdateOpacity(0.0);
-    imageRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
-    image->MarkModifyDone();
     auto video = AceType::DynamicCast<FrameNode>(movingPhoto->GetVideo());
     CHECK_NULL_VOID(video);
     auto videoRsContext = video->GetRenderContext();
     CHECK_NULL_VOID(videoRsContext);
     videoRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
     video->MarkModifyDone();
-
+    
+    imageLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    imageRsContext->UpdateOpacity(0.0);
+    imageRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
+    image->MarkModifyDone();
     auto movingPhotoPattern = WeakClaim(this);
     AnimationOption option;
     option.SetDuration(ANIMATION_DURATION_300);
@@ -946,17 +977,17 @@ void MovingPhotoPattern::StopAnimation()
         CHECK_NULL_VOID(movingPhoto);
         movingPhoto->StopAnimationCallback();
     });
-    AnimationUtils::Animate(option, [imageCtx = imageRsContext, videoCtx = videoRsContext]() {
-            imageCtx->UpdateOpacity(1.0);
-            imageCtx->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
-            videoCtx->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
-         }, option.GetOnFinishEvent());
+    AnimationUtils::Animate(option, [imageRsContext, videoRsContext]() {
+            imageRsContext->UpdateOpacity(1.0);
+            imageRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
+            videoRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
+        }, option.GetOnFinishEvent());
 }
 
 void MovingPhotoPattern::StopAnimationCallback()
 {
     Seek(0);
-    TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "StopAnimation OnFinishEvent:%{public}d.", autoAndRepeatLevel_);
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "StopAnimation OnFinishEvent:%{public}d.", autoAndRepeatLevel_);
     if (autoAndRepeatLevel_ == PlaybackMode::REPEAT) {
         StartRepeatPlay();
     } else if (autoAndRepeatLevel_ == PlaybackMode::AUTO) {
@@ -966,7 +997,10 @@ void MovingPhotoPattern::StopAnimationCallback()
 
 void MovingPhotoPattern::AutoPlay(bool isAutoPlay)
 {
-    TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto AutoPlay: %{public}d.", isAutoPlay);
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto AutoPlay: %{public}d.", isAutoPlay);
+    if (isAutoPlay && historyAutoAndRepeatLevel_ != PlaybackMode::AUTO) {
+        isChangePlayMode_ = true;
+    }
     if (isAutoPlay && autoAndRepeatLevel_ != PlaybackMode::REPEAT) {
         historyAutoAndRepeatLevel_ = PlaybackMode::AUTO;
         autoAndRepeatLevel_ = PlaybackMode::AUTO;
@@ -975,7 +1009,7 @@ void MovingPhotoPattern::AutoPlay(bool isAutoPlay)
 
 void MovingPhotoPattern::StartAutoPlay()
 {
-    TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto StartAutoPlay in.");
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto StartAutoPlay in.");
     isFastKeyUp_ = false;
     if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
         return;
@@ -989,6 +1023,7 @@ void MovingPhotoPattern::StartAutoPlay()
 
 void MovingPhotoPattern::StartRepeatPlay()
 {
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto StartRepeatPlay in.");
     isFastKeyUp_ = false;
     if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
         return;
@@ -998,8 +1033,7 @@ void MovingPhotoPattern::StartRepeatPlay()
         mediaPlayer_->PrepareAsync();
     }
     if (!isFirstRepeatPlay_ && isSetAutoPlayPeriod_) {
-        isFirstRepeatPlay_ = false;
-        int32_t& duration = DURATION_FLAG;
+        int32_t duration = DURATION_FLAG;
         mediaPlayer_->GetDuration(duration);
         SetAutoPlayPeriod(PERIOD_START, duration);
     }
@@ -1008,7 +1042,17 @@ void MovingPhotoPattern::StartRepeatPlay()
 
 void MovingPhotoPattern::RepeatPlay(bool isRepeatPlay)
 {
-    TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto RepeatPlay status: %{public}d.", isRepeatPlay);
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto RepeatPlay status: %{public}d.", isRepeatPlay);
+    if (isRepeatPlay && historyAutoAndRepeatLevel_ != PlaybackMode::REPEAT) {
+        isChangePlayMode_ = true;
+        isFirstRepeatPlay_ = true;
+    }
+    if (!isRepeatPlay && historyAutoAndRepeatLevel_ == PlaybackMode::REPEAT) {
+        isChangePlayMode_ = true;
+        historyAutoAndRepeatLevel_ = PlaybackMode::NONE;
+        Pause();
+        StopAnimation();
+    }
     if (isRepeatPlay) {
         historyAutoAndRepeatLevel_ = PlaybackMode::REPEAT;
         autoAndRepeatLevel_ = PlaybackMode::REPEAT;
@@ -1019,7 +1063,7 @@ void MovingPhotoPattern::AutoPlayPeriod(int64_t startTime, int64_t endTime)
 {
     if (startTime >= VIDEO_PLAYTIME_START_POSITION && startTime < endTime
             && endTime <= VIDEO_PLAYTIME_END_POSITION) {
-        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer set Period.");
+        TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer set Period.");
         autoPlayPeriodStartTime_ = startTime;
         autoPlayPeriodEndTime_ = endTime;
     }
@@ -1205,6 +1249,7 @@ void MovingPhotoPattern::OnWindowHide()
         PausePlayback();
     } else if (historyAutoAndRepeatLevel_ == PlaybackMode::REPEAT) {
         StopPlayback();
+        return;
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);

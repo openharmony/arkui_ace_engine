@@ -208,6 +208,8 @@ public:
         return recoveryList_;
     }
 
+    virtual void SetIsEntryByIndex(int32_t index, bool isEntry) {}
+
 protected:
     void MoveToTop(const std::string& name, const RefPtr<UINode>& navDestinationNode);
     void AddForDefault(const std::string& name, const RefPtr<UINode>& navDestinationNode,

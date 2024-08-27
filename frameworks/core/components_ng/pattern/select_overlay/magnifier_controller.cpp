@@ -63,7 +63,7 @@ bool MagnifierController::UpdateMagnifierOffsetY(OffsetF& magnifierPaintOffset, 
     float menuHeight = magnifierNodeHeight_.ConvertToPx();
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     auto keyboardInsert = safeAreaManager->GetKeyboardInset();
-    auto hasKeyboard = GreatNotEqual(safeAreaManager->IsNeedAvoidWindow() ? 0.0f : keyboardInsert.Length(), 0.0f);
+    auto hasKeyboard = GreatNotEqual(keyboardInsert.Length(), 0.0f);
     auto magnifierY = basePaintOffset.GetY() + localOffset_.GetY() - menuHeight / 2;
     float offsetY_ = 0.f;
 

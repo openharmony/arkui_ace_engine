@@ -380,6 +380,24 @@ class ListClipModifier extends ModifierWithKey<boolean | object> {
   }
 }
 
+class ListFadingEdgeModifier extends ModifierWithKey<ArkFadingEdge> {
+  constructor(value: ArkFadingEdge) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listFadingEdge');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetFadingEdge(node);
+    } else {
+      getUINativeModule().list.setFadingEdge(node, this.value.value!, this.value.options?.fadingEdgeLength);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !((this.stageValue.value === this.value.value) &&
+      (this.stageValue.options === this.value.options));
+  }
+}
+
 class ListChildrenMainSizeModifier extends ModifierWithKey<ChildrenMainSize> {
   constructor(value: ChildrenMainSize) {
     super(value);
@@ -567,7 +585,7 @@ class ArkListComponent extends ArkComponent implements ListAttribute {
     modifierWithKey(this._modifiersWithKeys, ListFrictionModifier.identity, ListFrictionModifier, value);
     return this;
   }
-  maintainVisibleContentPosition(value: any): this {
+  maintainVisibleContentPosition(value: boolean | undefined): this {
     modifierWithKey(this._modifiersWithKeys, ListMaintainVisibleContentPositionModifier.identity,
       ListMaintainVisibleContentPositionModifier, value);
     return this;
@@ -617,6 +635,13 @@ class ArkListComponent extends ArkComponent implements ListAttribute {
   }
   onScrollFrameBegin(event: (offset: number, state: ScrollState) => { offsetRemain: number; }): this {
     throw new Error('Method not implemented.');
+  }
+  fadingEdge(value: boolean, options?: FadingEdgeOptions | undefined): this {
+    let fadingEdge: ArkFadingEdge = new ArkFadingEdge();
+    fadingEdge.value = value;
+    fadingEdge.options = options;
+    modifierWithKey(this._modifiersWithKeys, ListFadingEdgeModifier.identity, ListFadingEdgeModifier, fadingEdge);
+    return this;
   }
   childrenMainSize(value: ChildrenMainSize): this {
     modifierWithKey(this._modifiersWithKeys, ListChildrenMainSizeModifier.identity, ListChildrenMainSizeModifier, value);

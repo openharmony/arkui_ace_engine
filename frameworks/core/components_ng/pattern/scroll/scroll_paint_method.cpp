@@ -33,6 +33,13 @@ CanvasDrawFunction ScrollPaintMethod::GetForegroundDrawFunction(PaintWrapper* pa
     return paintFunc;
 }
 
+void ScrollPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
+{
+    auto renderContext = paintWrapper->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    UpdateFadingGradient(renderContext);
+}
+
 void ScrollPaintMethod::PaintScrollEffect(RSCanvas& canvas, PaintWrapper* paintWrapper) const
 {
     auto scrollEdgeEffect = edgeEffect_.Upgrade();

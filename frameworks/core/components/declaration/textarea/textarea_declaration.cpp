@@ -16,9 +16,6 @@
 #include "core/components/declaration/textarea/textarea_declaration.h"
 
 #include "base/utils/string_utils.h"
-#include "core/components/declaration/common/declaration_constants.h"
-#include "frameworks/bridge/common/dom/input/dom_textfield_util.h"
-#include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/core/components/text_field/textfield_theme.h"
 
 namespace OHOS::Ace {

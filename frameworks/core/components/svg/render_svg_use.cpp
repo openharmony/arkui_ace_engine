@@ -16,7 +16,6 @@
 #include "frameworks/core/components/svg/render_svg_use.h"
 
 #include "frameworks/core/components/svg/svg_use_component.h"
-#include "frameworks/core/pipeline/base/render_component.h"
 
 namespace OHOS::Ace {
 

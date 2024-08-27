@@ -1605,7 +1605,7 @@ std::optional<float> RelativeContainerLayoutAlgorithm::GetOriginMarginLeft(
     TextDirection textDirection, const std::unique_ptr<MarginPropertyF>& marginProp)
 {
     CHECK_NULL_RETURN(marginProp, 0);
-    return textDirection != TextDirection::RTL ? marginProp->left:marginProp->right;
+    return textDirection != TextDirection::RTL ? marginProp->left : marginProp->right;
 }
 
 float RelativeContainerLayoutAlgorithm::CalcHorizontalOffset(
@@ -1646,7 +1646,7 @@ float RelativeContainerLayoutAlgorithm::CalcHorizontalOffset(
 }
 
 float RelativeContainerLayoutAlgorithm::CalcAnchorWidth(
-    bool anchorIsContainer, float& containerWidth, const std::string& anchor)
+    bool anchorIsContainer, float containerWidth, const std::string& anchor)
 {
     if (!versionGreatorOrEqualToEleven_) {
         return anchorIsContainer

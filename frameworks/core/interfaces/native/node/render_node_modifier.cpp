@@ -319,8 +319,9 @@ void SetBorderWidth(ArkUINodeHandle node, ArkUI_Float32 left, ArkUI_Float32 top,
         .bottomDimen = Dimension(bottom, unit),
         .multiValued = true
     };
-    renderContext->UpdateBorderWidth(borderWidthProperty);
     layoutProperty->UpdateBorderWidth(borderWidthProperty);
+    frameNode->MarkDirtyNode();
+    renderContext->SetBorderWidth(borderWidthProperty);
 }
 
 void SetBorderColor(ArkUINodeHandle node, uint32_t left, uint32_t top, uint32_t right, uint32_t bottom)

@@ -17,7 +17,6 @@
 
 #include "core/components/focusable/focusable_component.h"
 #include "core/components/touch_listener/touch_listener_component.h"
-#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 

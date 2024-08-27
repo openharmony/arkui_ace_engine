@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,16 @@
  * limitations under the License.
  */
 
-#include "test/unittest/core/pattern/test_ng.h"
-#include "test/mock/core/animation/mock_animation_manager.h"
+#include "test_ng.h"
 
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #define private public
 #define protected public
-#include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
+#include "core/components_ng/base/view_stack_processor.h"
 #undef private
 #undef protected
 
@@ -158,14 +160,14 @@ RefPtr<FrameNode> TestNG::CreateColumn(const std::function<void(ColumnModelNG)>&
     return AceType::DynamicCast<FrameNode>(element);
 }
 
-void TestNG::SetSize(Axis axis, const CalcLength& crossSize, const CalcLength& mainSize)
+void TestNG::SetSize(std::optional<Axis> axis, const CalcLength& crossSize, const CalcLength& mainSize)
 {
-    if (axis == Axis::VERTICAL) {
-        ViewAbstract::SetWidth(crossSize);
-        ViewAbstract::SetHeight(mainSize);
-    } else {
+    if (axis.has_value() && axis.value() == Axis::HORIZONTAL) {
         ViewAbstract::SetWidth(mainSize);
         ViewAbstract::SetHeight(crossSize);
+    } else {
+        ViewAbstract::SetWidth(crossSize);
+        ViewAbstract::SetHeight(mainSize);
     }
 }
 } // namespace OHOS::Ace::NG

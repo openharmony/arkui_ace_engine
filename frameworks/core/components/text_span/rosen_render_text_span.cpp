@@ -20,8 +20,6 @@
 #include "txt/paragraph_txt.h"
 #endif
 
-#include "base/utils/string_utils.h"
-#include "core/components/calendar/rosen_render_calendar.h"
 #include "core/components/font/constants_converter.h"
 
 namespace OHOS::Ace {

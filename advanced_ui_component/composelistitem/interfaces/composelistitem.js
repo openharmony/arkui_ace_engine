@@ -364,7 +364,6 @@ class ContentItemStruct extends ViewPU {
                         Text.fontColor(ObservedObject.GetRawObject(this.secondaryTextColor));
                         Text.maxLines(TEXT_MAX_LINE);
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-                        Text.focusable(true);
                         Text.draggable(false);
                     }, Text);
                     Text.pop();
@@ -386,7 +385,6 @@ class ContentItemStruct extends ViewPU {
                         Text.fontColor(ObservedObject.GetRawObject(this.descriptionColor));
                         Text.maxLines(TEXT_MAX_LINE);
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-                        Text.focusable(true);
                         Text.draggable(false);
                     }, Text);
                     Text.pop();
@@ -885,7 +883,6 @@ class OperateItemStruct extends ViewPU {
             Text.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
             Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
             Text.fontColor(ObservedObject.GetRawObject(this.secondaryTextColor));
-            Text.focusable(true);
             Text.draggable(false);
             Text.flexShrink(1);
         }, Text);
@@ -1789,14 +1786,10 @@ export class ComposeListItem extends ViewPU {
             If.create();
             if (this.contentItem !== null) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((o1, p1) => {
-                        __Common__.create();
-                        __Common__.flexShrink(0);
-                    }, __Common__);
                     {
-                        this.observeComponentCreation2((d, o) => {
-                            if (o) {
-                                let p = new ContentItemStruct(this, {
+                        this.observeComponentCreation2((z, f1) => {
+                            if (f1) {
+                                let t1 = new ContentItemStruct(this, {
                                     icon: this.contentItem?.icon,
                                     iconStyle: this.contentItem?.iconStyle,
                                     primaryText: this.contentItem?.primaryText,
@@ -1806,10 +1799,9 @@ export class ComposeListItem extends ViewPU {
                                     fontSizeScale: this.fontSizeScale,
                                     parentDirection: this.containerDirection,
                                     itemDirection: this.contentItemDirection,
-                                }, undefined, d, () => { },
-                                    { page: 'library/src/main/ets/components/composelistitem.ets', line: 942, col: 11 });
-                                ViewPU.create(p);
-                                let t = () => {
+                                }, undefined, z, () => { }, { page: "library/src/main/ets/components/composelistitem.ets", line: 942, col: 11 });
+                                ViewPU.create(t1);
+                                let a4 = () => {
                                     return {
                                         icon: this.contentItem?.icon,
                                         iconStyle: this.contentItem?.iconStyle,
@@ -1822,10 +1814,10 @@ export class ComposeListItem extends ViewPU {
                                         itemDirection: this.contentItemDirection
                                     };
                                 };
-                                p.paramsGenerator_ = t;
+                                t1.paramsGenerator_ = a4;
                             }
                             else {
-                                this.updateStateVarsOfChildByElmtId(d, {
+                                this.updateStateVarsOfChildByElmtId(z, {
                                     icon: this.contentItem?.icon,
                                     iconStyle: this.contentItem?.iconStyle,
                                     primaryText: this.contentItem?.primaryText,
@@ -1839,7 +1831,6 @@ export class ComposeListItem extends ViewPU {
                             }
                         }, { name: "ContentItemStruct" });
                     }
-                    __Common__.pop();
                 });
             }
             else {

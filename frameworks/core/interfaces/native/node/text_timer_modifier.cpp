@@ -170,6 +170,16 @@ void ResetTextShadow(ArkUINodeHandle node)
     shadow.SetOffsetY(0.0);
     TextTimerModelNG::SetTextShadow(frameNode, std::vector<Shadow> { shadow });
 }
+
+void setTextTimerOptions(ArkUINodeHandle node, ArkUI_Bool isCountDown, ArkUI_Float64 count)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextTimerModelNG::SetIsCountDown(frameNode, isCountDown);
+    if (isCountDown) {
+        TextTimerModelNG::SetInputCount(frameNode, count);
+    }
+}
 } // namespace TextTimerModifier
 
 namespace NodeModifier {
@@ -189,7 +199,8 @@ const ArkUITextTimerModifier* GetTextTimerModifier()
         TextTimerModifier::SetFormat,
         TextTimerModifier::ResetFormat,
         TextTimerModifier::SetTextShadow,
-        TextTimerModifier::ResetTextShadow
+        TextTimerModifier::ResetTextShadow,
+        TextTimerModifier::setTextTimerOptions
     };
 
     return &modifier;

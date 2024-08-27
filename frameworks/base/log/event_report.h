@@ -199,6 +199,10 @@ public:
 
 private:
     static void SendEventInner(const EventInfo& eventInfo);
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+    static void ReportAppFrameDropToRss(const bool isInteractionJank, const std::string &bundleName,
+        const int64_t maxFrameTime = 0);
+#endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
 };
 
 } // namespace OHOS::Ace

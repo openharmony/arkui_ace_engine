@@ -262,4 +262,18 @@ void RosenWindow::OnVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         }
 #endif
 }
+
+uint32_t RosenWindow::GetStatusBarHeight() const
+{
+#ifndef PREVIEW
+    if (rsWindow_) {
+        return rsWindow_->GetStatusBarHeight();
+    } else {
+        return 0;
+    }
+#else
+    return 0;
+#endif
+}
+
 } // namespace OHOS::Ace::NG

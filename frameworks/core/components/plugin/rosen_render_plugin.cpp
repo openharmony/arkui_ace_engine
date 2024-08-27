@@ -18,7 +18,6 @@
 #include "render_service_client/core/ui/rs_node.h"
 
 #include "core/components/plugin/render_plugin.h"
-#include "core/pipeline/base/render_node.h"
 #include "core/pipeline/base/rosen_render_context.h"
 #include "core/pipeline/layers/layer.h"
 

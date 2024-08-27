@@ -144,4 +144,56 @@ void DumpLog::OutPutDefault()
     result_.clear();
     ostream_->flush();
 }
+
+void DumpLog::PrintJson(const std::string& content)
+{
+    if (!ostream_->good()) {
+        return;
+    }
+    ostream_->write(content.c_str(), content.length());
+    ostream_->flush();
+}
+
+void DumpLog::PrintEndDumpInfoNG(bool isElement)
+{
+    int32_t depth = GetDepth() + DumpLog::END_POS_TWO;
+    std::string result;
+    for (int32_t i = 0; i < depth; ++i) {
+        result.append("}");
+    }
+    if (isElement) {
+        Append(result);
+    } else {
+        PrintJson(result);
+    }
+}
+
+std::string DumpLog::GetPrefix(int32_t depth)
+{
+    std::string prefix = "";
+    if (depth > 0) {
+        int32_t lastDepth = GetDepth();
+        if (depth == lastDepth) {
+            prefix.append("},");
+        } else if (depth > lastDepth) {
+            prefix = ",";
+        } else {
+            int32_t diff = lastDepth - depth + 1;
+            prefix.assign(diff, '}').append(",");
+        }
+    }
+    SetDepth(depth);
+    return prefix;
+}
+
+std::string DumpLog::FormatDumpInfo(const std::string& str, int32_t depth)
+{
+    if (!str.empty() && str.length() > DumpLog::MIN_JSON_LENGTH) {
+        if (depth == 0) {
+            return str.substr(0, str.length() - DumpLog::END_POS_TWO);
+        }
+        return str.substr(1, str.length() - DumpLog::END_POS_THREE);
+    }
+    return str;
+}
 } // namespace OHOS::Ace

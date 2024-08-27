@@ -12,26 +12,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "gtest/gtest.h"
-#include "gtest/hwext/gtest-ext.h"
 
-#include "core/components/common/layout/constants.h"
-
-#define protected public
-#define private public
+#include "scrollable_test_ng.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#define protected public
+#define private public
+#include "test/unittest/core/pattern/scrollable/mock_scrollable.h"
 
+#include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item_pool.h"
-#include "test/unittest/core/pattern/scrollable/scrollable_test_ng.h"
-#include "test/unittest/core/pattern/scrollable/mock_scrollable.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
-#include "core/components/scroll/scroll_bar_theme.h"
 
 namespace OHOS::Ace::NG {
 class ScrollableCoverTestNg : public ScrollableTestNg {
@@ -624,7 +620,7 @@ HWTEST_F(ScrollableCoverTestNg, ProcessScrollMotionStopTest001, TestSize.Level1)
     scrollable->needScrollSnapChange_ = true;
     scrollable->isDragUpdateStop_ = false;
     scrollable->scrollPause_ = false;
-    scrollable->calePredictSnapOffsetCallback_ = [](float delta, float dragDistance, float velocity) {
+    scrollable->calcPredictSnapOffsetCallback_ = [](float delta, float dragDistance, float velocity) {
         return 0.0f;
     };
     scrollable->currentVelocity_ = 10.0f;
@@ -1505,38 +1501,38 @@ HWTEST_F(ScrollableCoverTestNg, HandleDragEnd001, TestSize.Level1)
     info.SetGlobalPoint(Point(touchPosX, touchPosY));
     info.SetGlobalLocation(Offset(touchPosX, touchPosY));
     scrollable->moved_ = false;
-    bool isCalePredictCalled = false;
-    scrollable->calePredictSnapOffsetCallback_ = [&isCalePredictCalled](
+    bool isCalcPredictCalled = false;
+    scrollable->calcPredictSnapOffsetCallback_ = [&isCalcPredictCalled](
                                                      float position, float dragOffset, float correctVelocity) {
-        isCalePredictCalled = true;
+        isCalcPredictCalled = true;
         return 1.0f;
     };
     /**
-     * @tc.steps: step1.Set moved_ false and calePredictSnapOffsetCallback_ is called.
+     * @tc.steps: step1.Set moved_ false and calcPredictSnapOffsetCallback_ is called.
      */
     scrollable->currentVelocity_ = 1.0;
     scrollable->HandleDragEnd(info);
-    EXPECT_TRUE(isCalePredictCalled);
+    EXPECT_TRUE(isCalcPredictCalled);
     /**
-     * @tc.steps: step1.Set IsMouseWheelScroll(info) true and calePredictSnapOffsetCallback_ is called.
+     * @tc.steps: step1.Set IsMouseWheelScroll(info) true and calcPredictSnapOffsetCallback_ is called.
      */
     info.SetSourceTool(SourceTool::FINGER);
     info.SetInputEventType(InputEventType::AXIS);
     scrollable->moved_ = true;
-    isCalePredictCalled = false;
+    isCalcPredictCalled = false;
     scrollable->HandleDragEnd(info);
-    EXPECT_TRUE(isCalePredictCalled);
+    EXPECT_TRUE(isCalcPredictCalled);
     /**
-     * @tc.steps: step2.Set NearZero(predictSnapOffset.value() true and calePredictSnapOffsetCallback_ is called.
+     * @tc.steps: step2.Set NearZero(predictSnapOffset.value() true and calcPredictSnapOffsetCallback_ is called.
      */
-    isCalePredictCalled = false;
-    scrollable->calePredictSnapOffsetCallback_ = [&isCalePredictCalled](
+    isCalcPredictCalled = false;
+    scrollable->calcPredictSnapOffsetCallback_ = [&isCalcPredictCalled](
                                                      float position, float dragOffset, float correctVelocity) {
-        isCalePredictCalled = true;
+        isCalcPredictCalled = true;
         return 0.0f;
     };
     scrollable->HandleDragEnd(info);
-    EXPECT_TRUE(isCalePredictCalled);
+    EXPECT_TRUE(isCalcPredictCalled);
     EXPECT_EQ(scrollable->currentVelocity_, 0.0);
 }
 
@@ -1558,10 +1554,10 @@ HWTEST_F(ScrollableCoverTestNg, HandleDragEnd002, TestSize.Level1)
     info.SetGlobalPoint(Point(touchPosX, touchPosY));
     info.SetGlobalLocation(Offset(touchPosX, touchPosY));
     /**
-     * @tc.steps: step1.Set calePredictSnapOffsetCallback_ nullptr.
+     * @tc.steps: step1.Set calcPredictSnapOffsetCallback_ nullptr.
      */
     scrollable->moved_ = false;
-    scrollable->calePredictSnapOffsetCallback_ = nullptr;
+    scrollable->calcPredictSnapOffsetCallback_ = nullptr;
     scrollable->currentVelocity_ = 1.0;
     scrollable->HandleDragEnd(info);
     EXPECT_EQ(scrollable->currentVelocity_, 0.0);
@@ -1601,7 +1597,7 @@ HWTEST_F(ScrollableCoverTestNg, StartScrollAnimationTest002, TestSize.Level1)
     /**
      * @tc.steps: step1. Call StartScrollAnimation and verify ProcessScrollSnapSpringMotion is called.
      */
-    scrollable->calePredictSnapOffsetCallback_ = [](float delta, float dragDistance, float velocity) { return 100.0f; };
+    scrollable->calcPredictSnapOffsetCallback_ = [](float delta, float dragDistance, float velocity) { return 100.0f; };
     scrollable->StartScrollAnimation(100.0f, 200.0f);
     EXPECT_EQ(scrollable->currentPos_, 100.0f);
 }

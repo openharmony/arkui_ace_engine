@@ -285,14 +285,6 @@ public:
         return static_cast<Orientation>(static_cast<uint32_t>(dmOrientation));
     }
 
-    RefPtr<DisplayInfo> GetDisplayInfo() override;
-
-    void InitIsFoldable() override;
-
-    bool IsFoldable() const override;
-
-    FoldStatus GetCurrentFoldStatus() override;
-
     void SetHapPath(const std::string& hapPath);
 
     void Dispatch(
@@ -573,6 +565,7 @@ public:
     bool IsScenceBoardWindow() override;
     bool IsUIExtensionWindow() override;
     bool IsSceneBoardEnabled() override;
+    bool IsMainWindow() const override;
 
     void SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent);
     bool GetCurPointerEventInfo(int32_t& pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
@@ -704,7 +697,6 @@ private:
     RefPtr<PlatformResRegister> resRegister_;
     RefPtr<PipelineBase> pipelineContext_;
     RefPtr<Frontend> frontend_;
-    RefPtr<DisplayInfo> displayInfo_ = MakeRefPtr<DisplayInfo>();
     std::unordered_map<int64_t, WeakPtr<Frontend>> cardFrontendMap_;
     std::unordered_map<int64_t, WeakPtr<PipelineBase>> cardPipelineMap_;
 

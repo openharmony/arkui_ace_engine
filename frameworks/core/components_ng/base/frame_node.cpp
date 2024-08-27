@@ -480,7 +480,11 @@ FrameNode::~FrameNode()
     for (const auto& destroyCallback : destroyCallbacks_) {
         destroyCallback();
     }
-
+    for (const auto& destroyCallback : destroyCallbacksMap_) {
+        if (destroyCallback.second) {
+            destroyCallback.second();
+        }
+    }
     if (removeCustomProperties_) {
         removeCustomProperties_();
         removeCustomProperties_ = nullptr;
@@ -1095,6 +1099,14 @@ void FrameNode::OnAttachToBuilderNode(NodeStatus nodeStatus)
     pattern_->OnAttachToBuilderNode(nodeStatus);
 }
 
+bool FrameNode::RenderCustomChild(int64_t deadline)
+{
+    if (!pattern_->RenderCustomChild(deadline)) {
+        return false;
+    }
+    return UINode::RenderCustomChild(deadline);
+}
+
 void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationChange)
 {
     if (configurationChange.languageUpdate) {
@@ -1109,6 +1121,7 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
             auto cb = colorModeUpdateCallback_;
             cb();
         }
+        FireColorNDKCallback();
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
@@ -1141,17 +1154,22 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
-    NotifyConfigurationChangeNdk(configurationChange);
+    FireFontNDKCallback(configurationChange);
 }
 
-void FrameNode::NotifyConfigurationChangeNdk(const ConfigurationChange& configurationChange)
+void FrameNode::FireColorNDKCallback()
 {
-    if (ndkColorModeUpdateCallback_ && configurationChange.colorModeUpdate) {
+    std::shared_lock<std::shared_mutex> lock(colorModeCallbackMutex_);
+    if (ndkColorModeUpdateCallback_) {
         auto colorModeChange = ndkColorModeUpdateCallback_;
         colorModeChange(SystemProperties::GetColorMode() == ColorMode::DARK);
     }
+}
 
-    if (ndkFontUpdateCallback_ && (configurationChange.fontScaleUpdate || configurationChange.fontWeightScaleUpdate)) {
+void FrameNode::FireFontNDKCallback(const ConfigurationChange& configurationChange)
+{
+    std::shared_lock<std::shared_mutex> lock(fontSizeCallbackMutex_);
+    if ((configurationChange.fontScaleUpdate || configurationChange.fontWeightScaleUpdate) && ndkFontUpdateCallback_) {
         auto fontChangeCallback = ndkFontUpdateCallback_;
         auto pipeline = GetContextWithCheck();
         CHECK_NULL_VOID(pipeline);
@@ -1159,19 +1177,24 @@ void FrameNode::NotifyConfigurationChangeNdk(const ConfigurationChange& configur
     }
 }
 
-void FrameNode::NotifyVisibleChange(bool isVisible)
+void FrameNode::NotifyVisibleChange(VisibleType preVisibility, VisibleType currentVisibility)
 {
-    pattern_->OnVisibleChange(isVisible);
-    UpdateChildrenVisible(isVisible);
+    if ((preVisibility != currentVisibility &&
+            (preVisibility == VisibleType::GONE || currentVisibility == VisibleType::GONE)) &&
+        SelfExpansive()) {
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+    pattern_->OnVisibleChange(currentVisibility == VisibleType::VISIBLE);
+    UpdateChildrenVisible(preVisibility, currentVisibility);
 }
 
-void FrameNode::TryVisibleChangeOnDescendant(bool isVisible)
+void FrameNode::TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleType currentVisibility)
 {
     auto layoutProperty = GetLayoutProperty();
     if (layoutProperty && layoutProperty->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
         return;
     }
-    NotifyVisibleChange(isVisible);
+    NotifyVisibleChange(preVisibility, currentVisibility);
 }
 
 void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
@@ -3131,7 +3154,7 @@ void FrameNode::OnAccessibilityEvent(
         event.type = eventType;
         event.windowContentChangeTypes = windowsContentChangeType;
         event.nodeId = GetAccessibilityId();
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->SendEventToAccessibility(event);
     }
@@ -3202,6 +3225,11 @@ void FrameNode::OnRecycle()
     for (const auto& destroyCallback : destroyCallbacks_) {
         destroyCallback();
     }
+    for (const auto& destroyCallback : destroyCallbacksMap_) {
+        if (destroyCallback.second) {
+            destroyCallback.second();
+        }
+    }
     layoutProperty_->ResetGeometryTransition();
     pattern_->OnRecycle();
     UINode::OnRecycle();
@@ -3271,6 +3299,9 @@ RefPtr<FrameNode> FrameNode::FindChildByPosition(float x, float y)
     std::list<RefPtr<FrameNode>> children;
     GenerateOneDepthAllFrame(children);
     for (const auto& child : children) {
+        if (!child->IsActive()) {
+            continue;
+        }
         auto geometryNode = child->GetGeometryNode();
         if (!geometryNode) {
             continue;
@@ -3873,6 +3904,7 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
         MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
     }
     layoutAlgorithm_.Reset();
+    renderContext_->UpdateAccessibilityRoundRect();
     ProcessAccessibilityVirtualNode();
     auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, false);

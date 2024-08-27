@@ -19,9 +19,7 @@
 #include "include/core/SkRRect.h"
 #endif
 
-#include "core/components/common/properties/alignment.h"
 #include "core/pipeline/base/rosen_render_context.h"
-#include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
 namespace {

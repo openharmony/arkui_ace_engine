@@ -33,9 +33,6 @@ public:
 
     MOCK_METHOD(int32_t, SetMouseDragMonitorState, (bool state), (override));
 
-    MOCK_METHOD(int32_t, StartDrag, (const DragDataCore& dragData,
-        std::function<void(const OHOS::Ace::DragNotifyMsg&)> callback), (override));
-
     MOCK_METHOD(int32_t, UpdateDragStyle, (DragCursorStyleCore style, const int32_t eventId), (override));
     
     MOCK_METHOD(int32_t, UpdatePreviewStyle, (const PreviewStyle& previewStyle), (override));
@@ -65,10 +62,16 @@ public:
         return 1;
     }
 
+    int32_t StartDrag(const DragDataCore& dragData, std::function<void(const OHOS::Ace::DragNotifyMsg&)> callback)
+    {
+        return gStartDrag;
+    }
+
     MOCK_METHOD(int32_t, UnRegisterCoordinationListener, (), (override));
 
 private:
     std::function<void()> gDragOutCallback = nullptr;
+    int gStartDrag = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_TEST_MOCK_CORE_COMMON_MOCK_INTERACTION_H

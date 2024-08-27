@@ -16,14 +16,6 @@
 #include "core/components/select_popup/render_select_popup.h"
 
 #include "base/subwindow/subwindow_manager.h"
-#include "core/components/flex/flex_component.h"
-#include "core/components/flex/render_flex.h"
-#include "core/components/option/render_option.h"
-#include "core/components/select/select_theme.h"
-#include "core/components/select_popup/select_popup_component.h"
-#include "core/components/stack/stack_element.h"
-#include "core/components/text/render_text.h"
-#include "core/gestures/raw_recognizer.h"
 
 namespace OHOS::Ace {
 namespace {

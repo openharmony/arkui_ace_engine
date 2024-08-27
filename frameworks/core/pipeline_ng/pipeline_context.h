@@ -70,6 +70,7 @@ public:
         std::unordered_map<int32_t, std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>>;
     using SurfacePositionChangedCallbackMap = std::unordered_map<int32_t, std::function<void(int32_t, int32_t)>>;
     using FoldStatusChangedCallbackMap = std::unordered_map<int32_t, std::function<void(FoldStatus)>>;
+    using HalfFoldHoverChangedCallbackMap = std::unordered_map<int32_t, std::function<void(bool)>>;
     using FoldDisplayModeChangedCallbackMap = std::unordered_map<int32_t, std::function<void(FoldDisplayMode)>>;
     using TransformHintChangedCallbackMap = std::unordered_map<int32_t, std::function<void(uint32_t)>>;
     using PredictTask = std::function<void(int64_t, bool)>;
@@ -496,6 +497,29 @@ public:
         foldStatusChangedCallbackMap_.erase(callbackId);
     }
 
+    int32_t RegisterHalfFoldHoverChangedCallback(std::function<void(bool)>&& callback)
+    {
+        if (callback) {
+            halfFoldHoverChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
+            return callbackId_;
+        }
+        return 0;
+    }
+
+    void UnRegisterHalfFoldHoverChangedCallback(int32_t callbackId)
+    {
+        halfFoldHoverChangedCallbackMap_.erase(callbackId);
+    }
+
+    void UpdateHalfFoldHoverStatus(int32_t windowWidth, int32_t windowHeight);
+
+    bool IsHalfFoldHoverStatus()
+    {
+        return isHalfFoldHoverStatus_;
+    }
+
+    void OnHalfFoldHoverChangedCallback();
+
     int32_t RegisterFoldDisplayModeChangedCallback(std::function<void(FoldDisplayMode)>&& callback)
     {
         if (callback) {
@@ -623,10 +647,9 @@ public:
         return screenNode_.Upgrade();
     }
 
-    void SetFocusedWindowSceneNode(const RefPtr<FrameNode>& node)
+    void SetFocusedWindowSceneNode(const WeakPtr<FrameNode>& node)
     {
-        CHECK_NULL_VOID(node);
-        windowSceneNode_ = AceType::WeakClaim(AceType::RawPtr(node));
+        windowSceneNode_ = node;
     }
     RefPtr<FrameNode> GetFocusedWindowSceneNode() const
     {
@@ -847,6 +870,8 @@ public:
     {
         return isWindowHasFocused_ && GetOnFoucs();
     }
+
+    void CollectTouchEventsBeforeVsync(std::list<TouchEvent>& touchEvents);
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -881,6 +906,7 @@ protected:
     RefPtr<FrameNode> GetContainerModalNode();
     void DoKeyboardAvoidAnimate(const KeyboardAnimationConfig& keyboardAnimationConfig, float keyboardHeight,
         const std::function<void()>& func);
+    void StartFoldStatusDelayTask(FoldStatus foldStatus);
 
 private:
     void ExecuteSurfaceChangedCallbacks(int32_t newWidth, int32_t newHeight, WindowSizeChangeReason type);
@@ -929,6 +955,8 @@ private:
     void FlushFrameRate();
 
     void RegisterFocusCallback();
+    void DumpFocus(bool hasJson) const;
+    void DumpInspector(const std::vector<std::string>& params, bool hasJson) const;
 
     template<typename T>
     struct NodeCompare {
@@ -994,6 +1022,7 @@ private:
     SurfaceChangedCallbackMap surfaceChangedCallbackMap_;
     SurfacePositionChangedCallbackMap surfacePositionChangedCallbackMap_;
     FoldStatusChangedCallbackMap foldStatusChangedCallbackMap_;
+    HalfFoldHoverChangedCallbackMap halfFoldHoverChangedCallbackMap_;
     FoldDisplayModeChangedCallbackMap foldDisplayModeChangedCallbackMap_;
     TransformHintChangedCallbackMap transformHintChangedCallbackMap_;
 
@@ -1096,6 +1125,8 @@ private:
     uint32_t transform_ = 0;
     std::list<WeakPtr<FrameNode>> changeInfoListeners_;
     std::list<WeakPtr<FrameNode>> changedNodes_;
+    bool isHalfFoldHoverStatus_ = false;
+    CancelableCallback<void()> foldStatusDelayTask_;
 };
 } // namespace OHOS::Ace::NG
 

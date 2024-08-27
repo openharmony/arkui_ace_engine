@@ -15,7 +15,6 @@
 
 #include "core/components/display/rosen_render_display.h"
 
-#include "render_service_client/core/animation/rs_transition.h"
 #include "render_service_client/core/ui/rs_node.h"
 
 #include "core/pipeline/base/rosen_render_context.h"

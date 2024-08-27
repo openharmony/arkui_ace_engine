@@ -452,26 +452,34 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxSetOnMoveFunctionTest001, TestSiz
 
     UpdateItems(lazyForEachNode, mockLazyForEachActuator);
 
+    std::function<void(int32_t, int32_t)> lambda = [](int32_t a, int32_t b) {};
 
     /**
-     * @tc.steps: step3. onMove is null and onMoveEvent_ is null.
+     * @tc.steps: step3. onMove not null and onMoveEvent_ not null.
      */
-    lazyForEachNode->SetOnMove(nullptr);
+    lazyForEachNode->SetOnMove(std::move(lambda));
+    lazyForEachNode->onMoveEvent_ = std::move(lambda);
     EXPECT_EQ(lazyForEachNode->ids_.size(), DEFAULT_SIZE);
-
-    std::function<void(int32_t, int32_t)> lambda = [](int32_t a, int32_t b){};
 
     /**
      * @tc.steps: step4. onMove not null and onMoveEvent_ is null.
      */
     lazyForEachNode->SetOnMove(std::move(lambda));
+    lazyForEachNode->onMoveEvent_ = nullptr;
     EXPECT_EQ(lazyForEachNode->ids_.size(), DEFAULT_SIZE);
 
     /**
      * @tc.steps: step5. onMove is null and onMoveEvent_ not null.
      */
-    lazyForEachNode->onMoveEvent_=std::move(lambda);
     lazyForEachNode->SetOnMove(nullptr);
+    lazyForEachNode->onMoveEvent_ = std::move(lambda);
+    EXPECT_EQ(lazyForEachNode->ids_.size(), DEFAULT_SIZE);
+
+    /**
+     * @tc.steps: step6. onMove is null and onMoveEvent_ is null.
+     */
+    lazyForEachNode->SetOnMove(nullptr);
+    lazyForEachNode->onMoveEvent_ = nullptr;
     EXPECT_EQ(lazyForEachNode->ids_.size(), DEFAULT_SIZE);
 }
 

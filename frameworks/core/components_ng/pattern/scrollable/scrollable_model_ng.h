@@ -22,6 +22,8 @@
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::NG {
+
+constexpr Dimension DEFAULT_FADING_EDGE_LENGTH_SCROLLABLE = Dimension(32.0f, DimensionUnit::VP); // default value
 class ACE_EXPORT ScrollableModelNG {
 public:
     static void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled);
@@ -38,6 +40,10 @@ public:
     static void SetOnReachStart(OnReachEvent&& onReachStart);
     static void SetOnReachEnd(OnReachEvent&& onReachEnd);
     static void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& ScrollFrameBegin);
+    static void SetFadingEdge(
+        bool fadingEdge, const Dimension& fadingEdgeLength = DEFAULT_FADING_EDGE_LENGTH_SCROLLABLE);
+    static void SetFadingEdge(FrameNode* frameNode, bool fadingEdge,
+        const Dimension& fadingEdgeLength = DEFAULT_FADING_EDGE_LENGTH_SCROLLABLE);
 
     static void SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled);
     static void SetScrollBarMode(FrameNode* frameNode, int32_t displayNumber);

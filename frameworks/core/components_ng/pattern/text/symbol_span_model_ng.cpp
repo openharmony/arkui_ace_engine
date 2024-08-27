@@ -59,6 +59,9 @@ void SymbolSpanModelNG::SetFontSize(const Dimension& value)
 void SymbolSpanModelNG::SetFontWeight(Ace::FontWeight value)
 {
     ACE_UPDATE_SYMBOL_SPAN_PROPERTY(FontWeight, value, PropertyInfo::FONTWEIGHT);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    CHECK_NULL_VOID(spanNode);
+    spanNode->UpdateUserFontWeight(true);
 }
 
 void SymbolSpanModelNG::SetFontColor(std::vector<Color>& symbolColor)
@@ -91,6 +94,7 @@ void SymbolSpanModelNG::SetFontWeight(FrameNode* frameNode, FontWeight value)
     CHECK_NULL_VOID(spanNode);
     spanNode->UpdateFontWeight(value);
     spanNode->AddPropertyInfo(PropertyInfo::FONTWEIGHT);
+    spanNode->UpdateUserFontWeight(true);
 }
 
 void SymbolSpanModelNG::SetFontColor(FrameNode* frameNode, std::vector<Color>& symbolColor)

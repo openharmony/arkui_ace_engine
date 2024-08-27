@@ -50,6 +50,7 @@ class DrawCmdList;
 class VisualEffect;
 class Filter;
 enum class Gravity;
+class BrightnessBlender;
 }
 
 namespace OHOS::Ace::NG {
@@ -302,6 +303,7 @@ public:
     virtual void UpdateBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter) {}
     virtual void UpdateForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter) {}
     virtual void UpdateCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) {}
+    virtual void UpdateBrightnessBlender(const OHOS::Rosen::BrightnessBlender* brightnessBlender) {}
 
     virtual void OpacityAnimation(const AnimationOption& option, double begin, double end) {}
     virtual void ScaleAnimation(const AnimationOption& option, double begin, double end) {}
@@ -448,6 +450,8 @@ public:
     virtual void DetachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& modifier) {};
 
     virtual void PaintAccessibilityFocus() {};
+
+    virtual void UpdateAccessibilityRoundRect() {};
 
     virtual void ClearAccessibilityFocus() {};
 

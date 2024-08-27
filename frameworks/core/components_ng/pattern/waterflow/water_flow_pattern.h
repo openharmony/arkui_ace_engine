@@ -35,6 +35,7 @@ public:
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
     bool IsReverse() const override;
+    bool IsVerticalReverse() const;
     bool hasFooter()
     {
         return footer_.Upgrade() != nullptr;
@@ -152,13 +153,25 @@ public:
 
     void DumpAdvanceInfo() override;
 
-    void SetPredictLayoutParam(std::optional<WaterFlowLayoutBase::PredictLayoutParam> param)
+    void SetPreloadList(std::list<int32_t>&& preload)
     {
-        predictLayoutParam_ = param;
+        preloadItems_ = std::move(preload);
     }
-    std::optional<WaterFlowLayoutBase::PredictLayoutParam> GetPredictLayoutParam() const
+    bool PreloadListEmpty() const
     {
-        return predictLayoutParam_;
+        return preloadItems_.empty();
+    }
+    std::list<int32_t>&& MovePreloadList()
+    {
+        return std::move(preloadItems_);
+    }
+    void SetCacheLayoutAlgo(const RefPtr<WaterFlowLayoutBase>& algo)
+    {
+        cacheLayout_ = algo;
+    }
+    const RefPtr<WaterFlowLayoutBase>& GetCacheLayoutAlgo() const
+    {
+        return cacheLayout_;
     }
 
     void NotifyDataChange(int32_t index, int32_t count) override;
@@ -179,6 +192,11 @@ public:
         MarkDirtyNodeSelf();
     }
 
+    float GetPrevOffset() const
+    {
+        return prevOffset_;
+    }
+
 private:
     DisplayMode GetDefaultScrollBarDisplayMode() const override
     {
@@ -197,6 +215,9 @@ private:
     void OnScrollEndCallback() override;
     bool ScrollToTargetIndex(int32_t index);
     bool NeedRender();
+    void FireOnReachStart(const OnReachEvent& onReachStart) override;
+    void FireOnReachEnd(const OnReachEvent& onReachEnd) override;
+    void FireOnScrollIndex(bool indexChanged, const ScrollIndexFunc& onScrollIndex);
 
     /**
      * @param step FocusStep
@@ -213,13 +234,14 @@ private:
     SizeF lastSize_;
     std::pair<int32_t, int32_t> itemRange_ = { -1, -1 };
     WeakPtr<UINode> footer_;
-    //for keepVisiableContentPosition mode temporarily.
+    // for keepVisiableContentPosition mode temporarily.
     bool keepContentPosition_ = true;
 
     // clip padding of WaterFlow
     RefPtr<WaterFlowContentModifier> contentModifier_;
 
-    std::optional<WaterFlowLayoutBase::PredictLayoutParam> predictLayoutParam_;
+    std::list<int32_t> preloadItems_;
+    RefPtr<WaterFlowLayoutBase> cacheLayout_;
 
     std::vector<int32_t> sectionChangeStartPos_;
 };

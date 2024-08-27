@@ -64,6 +64,7 @@ bool BubblePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     childOffset_ = bubbleLayoutAlgorithm->GetChildOffset();
     childSize_ = bubbleLayoutAlgorithm->GetChildSize();
     touchRegion_ = bubbleLayoutAlgorithm->GetTouchRegion();
+    hostWindowRect_ = bubbleLayoutAlgorithm->GetHostWindowRect();
     targetOffset_ = bubbleLayoutAlgorithm->GetTargetOffset();
     targetSize_ = bubbleLayoutAlgorithm->GetTargetSize();
     arrowPlacement_ = bubbleLayoutAlgorithm->GetArrowPlacement();
@@ -451,7 +452,7 @@ void BubblePattern::StartEnteringTransitionEffects(
                         pattern->GetChildSize().Width(), pattern->GetChildSize().Height());
                     rects.emplace_back(rect);
                 } else {
-                    auto parentWindowRect = SubwindowManager::GetInstance()->GetParentWindowRect();
+                    auto parentWindowRect = pattern->GetHostWindowRect();
                     auto rect = Rect(pattern->GetChildOffset().GetX(), pattern->GetChildOffset().GetY(),
                         pattern->GetChildSize().Width(), pattern->GetChildSize().Height());
                     rects.emplace_back(parentWindowRect);
@@ -565,7 +566,7 @@ void BubblePattern::StartAlphaEnteringAnimation(std::function<void()> finish)
                         pattern->GetChildSize().Width(), pattern->GetChildSize().Height());
                     rects.emplace_back(rect);
                 } else {
-                    auto parentWindowRect = SubwindowManager::GetInstance()->GetParentWindowRect();
+                    auto parentWindowRect = pattern->GetHostWindowRect();
                     auto rect = Rect(pattern->GetChildOffset().GetX(), pattern->GetChildOffset().GetY(),
                         pattern->GetChildSize().Width(), pattern->GetChildSize().Height());
                     rects.emplace_back(parentWindowRect);
@@ -777,7 +778,7 @@ void BubblePattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("targetTag: " + dumpInfo_.targetNode + ", targetID: "
         + std::to_string(dumpInfo_.targetID));
     DumpLog::GetInstance().AddDesc("targetOffset: " + dumpInfo_.targetOffset.ToString());
-    DumpLog::GetInstance().AddDesc("targetSize: " + dumpInfo_.targetOffset.ToString());
+    DumpLog::GetInstance().AddDesc("targetSize: " + dumpInfo_.targetSize.ToString());
     DumpLog::GetInstance().AddDesc("touchRegion: " + dumpInfo_.touchRegion.ToString());
     DumpLog::GetInstance().AddDesc("avoid top: " + std::to_string(dumpInfo_.top)
         + ", bottom: " + std::to_string(dumpInfo_.bottom));

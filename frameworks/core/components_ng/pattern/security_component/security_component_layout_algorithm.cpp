@@ -168,6 +168,7 @@ double SecurityComponentLayoutAlgorithm::ShrinkWidth(double diff)
             icon_.ShrinkWidth(resText);
         }
     }
+    text_.DoMeasure(isVertical_, componentWidth_, maxWidth_, idealWidth_, icon_.width_);
     MeasureIntegralSize();
     return componentWidth_;
 }

@@ -32,6 +32,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkCheckBoxSetPadding(double padding, uint32_t un
 CJ_EXPORT void FfiOHOSAceFrameworkCheckBoxSetPaddings(CJEdge params);
 CJ_EXPORT void FfiOHOSAceFrameworkCheckBoxSetOnChange(void (*callback)(bool isOn));
 CJ_EXPORT void FfiOHOSAceFrameworkCheckBoxSetCheckboxStyle(int32_t checkBoxStyle);
+CJ_EXPORT void FfiCheckBoxSetResponseRegion(CJResponseRegion value);
+CJ_EXPORT void FfiCheckBoxSetResponseRegionArray(VectorStringPtr vecContent);
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_CHECKBOX_FFI_H

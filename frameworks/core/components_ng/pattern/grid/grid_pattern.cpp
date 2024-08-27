@@ -108,7 +108,7 @@ void GridPattern::BeforeCreateLayoutWrapper()
 
 RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
 {
-    auto paint = MakeRefPtr<GridPaintMethod>(GetScrollBar());
+    auto paint = MakeRefPtr<GridPaintMethod>(GetAxis() == Axis::HORIZONTAL, IsReverse(), GetScrollBar());
     CHECK_NULL_RETURN(paint, nullptr);
     CreateScrollBarOverlayModifier();
     paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
@@ -116,6 +116,11 @@ RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
     if (scrollEffect && scrollEffect->IsFadeEffect()) {
         paint->SetEdgeEffect(scrollEffect);
     }
+    if (!gridContentModifier_) {
+        gridContentModifier_ = AceType::MakeRefPtr<GridContentModifier>();
+    }
+    paint->SetContentModifier(gridContentModifier_);
+    UpdateFadingEdge(paint);
     return paint;
 }
 
@@ -160,6 +165,10 @@ void GridPattern::OnModifyDone()
     Register2DragDropManager();
     if (IsNeedInitClickEventRecorder()) {
         Pattern::InitClickEventRecorder();
+    }
+    auto overlayNode = host->GetOverlayNode();
+    if (!overlayNode && paintProperty->GetFadingEdge().value_or(false)) {
+        CreateAnalyzerOverlay(host);
     }
 }
 
@@ -282,6 +291,58 @@ void GridPattern::FireOnScrollStart()
     auto onScrollStart = hub->GetOnScrollStart();
     CHECK_NULL_VOID(onScrollStart);
     onScrollStart();
+}
+
+void GridPattern::FireOnReachStart(const OnReachEvent& onReachStart)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host && onReachStart);
+    if (gridLayoutInfo_.startIndex_ == 0) {
+        if (!isInitialized_) {
+            onReachStart();
+            AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
+        }
+        auto finalOffset = gridLayoutInfo_.currentHeight_ - gridLayoutInfo_.prevHeight_;
+        if (!NearZero(finalOffset)) {
+            bool scrollUpToStart =
+                GreatOrEqual(gridLayoutInfo_.prevHeight_, 0.0) && LessOrEqual(gridLayoutInfo_.currentHeight_, 0.0);
+            bool scrollDownToStart =
+                LessNotEqual(gridLayoutInfo_.prevHeight_, 0.0) && GreatOrEqual(gridLayoutInfo_.currentHeight_, 0.0);
+            if (scrollUpToStart || scrollDownToStart) {
+                ACE_SCOPED_TRACE("OnReachStart, scrollUpToStart:%u, scrollDownToStart:%u, id:%d, tag:Grid",
+                    scrollUpToStart, scrollDownToStart, static_cast<int32_t>(host->GetAccessibilityId()));
+                onReachStart();
+                AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
+            }
+        }
+    }
+}
+
+void GridPattern::FireOnReachEnd(const OnReachEvent& onReachEnd)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host && onReachEnd);
+    if (gridLayoutInfo_.endIndex_ == (gridLayoutInfo_.childrenCount_ - 1)) {
+        auto finalOffset = gridLayoutInfo_.currentHeight_ - gridLayoutInfo_.prevHeight_;
+        if (!NearZero(finalOffset)) {
+            bool scrollDownToEnd = LessNotEqual(gridLayoutInfo_.prevHeight_, endHeight_) &&
+                                   GreatOrEqual(gridLayoutInfo_.currentHeight_, endHeight_);
+            bool scrollUpToEnd = GreatNotEqual(gridLayoutInfo_.prevHeight_, endHeight_) &&
+                                 LessOrEqual(gridLayoutInfo_.currentHeight_, endHeight_);
+            if (scrollDownToEnd || scrollUpToEnd) {
+                ACE_SCOPED_TRACE("OnReachEnd, scrollUpToEnd:%u, scrollDownToEnd:%u, id:%d, tag:Grid", scrollUpToEnd,
+                    scrollDownToEnd, static_cast<int32_t>(host->GetAccessibilityId()));
+                onReachEnd();
+                AddEventsFiredInfo(ScrollableEventType::ON_REACH_END);
+            }
+        }
+    }
+}
+
+void GridPattern::FireOnScrollIndex(bool indexChanged, const ScrollIndexFunc& onScrollIndex)
+{
+    CHECK_NULL_VOID(indexChanged && onScrollIndex);
+    onScrollIndex(gridLayoutInfo_.startIndex_, gridLayoutInfo_.endIndex_);
 }
 
 SizeF GridPattern::GetContentSize() const
@@ -426,7 +487,9 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CheckScrollable();
     MarkSelectedItems();
     isInitialized_ = true;
-    return false;
+    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    return paintProperty->GetFadingEdge().value_or(false);
 }
 
 void GridPattern::CheckScrollable()
@@ -469,47 +532,12 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
     if (onDidScroll) {
         FireOnScroll(finalOffset, onDidScroll);
     }
-
-    if (indexChanged) {
-        auto onScrollIndex = gridEventHub->GetOnScrollIndex();
-        if (onScrollIndex) {
-            onScrollIndex(gridLayoutInfo_.startIndex_, gridLayoutInfo_.endIndex_);
-        }
-    }
-
+    auto onScrollIndex = gridEventHub->GetOnScrollIndex();
+    FireOnScrollIndex(indexChanged, onScrollIndex);
     auto onReachStart = gridEventHub->GetOnReachStart();
-    if (onReachStart && gridLayoutInfo_.startIndex_ == 0) {
-        if (!isInitialized_) {
-            onReachStart();
-            AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
-        }
-
-        if (!NearZero(finalOffset)) {
-            bool scrollUpToStart =
-                GreatOrEqual(gridLayoutInfo_.prevHeight_, 0.0) && LessOrEqual(gridLayoutInfo_.currentHeight_, 0.0);
-            bool scrollDownToStart =
-                LessNotEqual(gridLayoutInfo_.prevHeight_, 0.0) && GreatOrEqual(gridLayoutInfo_.currentHeight_, 0.0);
-            if (scrollUpToStart || scrollDownToStart) {
-                onReachStart();
-                AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
-            }
-        }
-    }
-
+    FireOnReachStart(onReachStart);
     auto onReachEnd = gridEventHub->GetOnReachEnd();
-    if (onReachEnd && gridLayoutInfo_.endIndex_ == (gridLayoutInfo_.childrenCount_ - 1)) {
-        if (!NearZero(finalOffset)) {
-            bool scrollDownToEnd = LessNotEqual(gridLayoutInfo_.prevHeight_, endHeight_) &&
-                                   GreatOrEqual(gridLayoutInfo_.currentHeight_, endHeight_);
-            bool scrollUpToEnd = GreatNotEqual(gridLayoutInfo_.prevHeight_, endHeight_) &&
-                                 LessOrEqual(gridLayoutInfo_.currentHeight_, endHeight_);
-            if (scrollDownToEnd || scrollUpToEnd) {
-                onReachEnd();
-                AddEventsFiredInfo(ScrollableEventType::ON_REACH_END);
-            }
-        }
-    }
-
+    FireOnReachEnd(onReachEnd);
     OnScrollStop(gridEventHub->GetOnScrollStop());
 }
 
@@ -1412,6 +1440,9 @@ float GridPattern::GetTotalHeight() const
 void GridPattern::UpdateScrollBarOffset()
 {
     if (!GetScrollBar() && !GetScrollBarProxy()) {
+        return;
+    }
+    if (!isConfigScrollable_) {
         return;
     }
     auto host = GetHost();

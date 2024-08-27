@@ -16,8 +16,6 @@
 #include "core/components/xcomponent/render_xcomponent.h"
 
 #include "base/ressched/ressched_report.h"
-#include "base/utils/time_util.h"
-#include "core/event/touch_event.h"
 namespace OHOS::Ace {
 namespace {
 #ifdef OHOS_PLATFORM

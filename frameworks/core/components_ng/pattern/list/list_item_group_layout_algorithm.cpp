@@ -887,6 +887,7 @@ void ListItemGroupLayoutAlgorithm::AdjustItemPosition()
             pos.second.endPos += delta;
         }
         totalMainSize_ = std::max(totalMainSize_ + delta, GetEndPosition() + footerMainSize_);
+        adjustReferenceDelta_ = -delta;
     } else if (GetStartIndex() == 0 && currentStartPos > headerMainSize_) {
         auto delta = currentStartPos - headerMainSize_;
         for (auto& pos : itemPosition_) {
@@ -894,6 +895,7 @@ void ListItemGroupLayoutAlgorithm::AdjustItemPosition()
             pos.second.endPos -= delta;
         }
         totalMainSize_ -= delta;
+        adjustReferenceDelta_ = delta;
     }
     if (GetEndIndex() == totalItemCount_ - 1) {
         totalMainSize_ = GetEndPosition() + footerMainSize_;
@@ -1216,9 +1218,6 @@ void ListItemGroupLayoutAlgorithm::MeasureCacheItem(LayoutWrapper* layoutWrapper
             if (!frameNode->CheckNeedForceMeasureAndLayout()) {
                 continue;
             }
-            if (frameNode->GetTag() == V2::LIST_ITEM_ETS_TAG) {
-                frameNode->GetPattern<ListItemPattern>()->BeforeCreateLayoutWrapper();
-            }
             if (!frameNode->GetHostNode()->RenderCustomChild(cacheParam.deadline)) {
                 break;
             }
@@ -1238,9 +1237,6 @@ void ListItemGroupLayoutAlgorithm::MeasureCacheItem(LayoutWrapper* layoutWrapper
             }
             if (!frameNode->CheckNeedForceMeasureAndLayout()) {
                 continue;
-            }
-            if (frameNode->GetTag() == V2::LIST_ITEM_ETS_TAG) {
-                frameNode->GetPattern<ListItemPattern>()->BeforeCreateLayoutWrapper();
             }
             if (!frameNode->GetHostNode()->RenderCustomChild(cacheParam.deadline)) {
                 break;

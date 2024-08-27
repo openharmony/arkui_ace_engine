@@ -665,34 +665,20 @@ void HtmlToSpan::HandleImagePixelMap(const std::string& src, ImageSpanOptions& o
     if (src.empty()) {
         return;
     }
-    auto iter = src.find_first_of(':');
-    if (iter == std::string::npos) {
-        return;
+    NG::LoadNotifier loadNotifier(nullptr, nullptr, nullptr);
+    RefPtr<NG::ImageLoadingContext> ctx =
+        AceType::MakeRefPtr<NG::ImageLoadingContext>(ImageSourceInfo(src), std::move(loadNotifier), true);
+    CHECK_NULL_VOID(ctx);
+    ctx->LoadImageData();
+    ctx->MakeCanvasImageIfNeed(ctx->GetImageSize(), true, ImageFit::NONE);
+    auto image = ctx->MoveCanvasImage();
+    if (image != nullptr) {
+        option.imagePixelMap = image->GetPixelMap();
     }
-    std::string head = src.substr(0, iter);
-    std::transform(head.begin(), head.end(), head.begin(), [](unsigned char c) { return std::tolower(c); });
-    if (head == "http" || head == "https") {
-        NG::LoadNotifier loadNotifier(nullptr, nullptr, nullptr);
-        RefPtr<NG::ImageLoadingContext> ctx =
-            AceType::MakeRefPtr<NG::ImageLoadingContext>(ImageSourceInfo(src), std::move(loadNotifier), true);
-        CHECK_NULL_VOID(ctx);
-        ctx->LoadImageData();
-        ctx->MakeCanvasImageIfNeed(ctx->GetImageSize(), true, ImageFit::NONE);
-        auto image = ctx->MoveCanvasImage();
-        if (image != nullptr) {
-            option.imagePixelMap = image->GetPixelMap();
-        }
-    } else if (head == "file") {
-        std::string filePath = FileUriHelper::GetRealPath(src);
-        auto imageSource = ImageSource::Create(filePath);
-        CHECK_NULL_VOID(imageSource);
-        option.imagePixelMap = imageSource->CreatePixelMap();
-    }
-
     if (option.imagePixelMap.has_value() && option.imagePixelMap.value() != nullptr) {
         auto pixel = option.imagePixelMap.value();
-        LOGI("img head:%{public}s height: %{public}d, width: %{public}d, size:%{public}d", head.c_str(),
-            pixel->GetHeight(), pixel->GetWidth(), pixel->GetByteCount());
+        LOGI("img height: %{public}d, width: %{public}d, size:%{public}d", pixel->GetHeight(),
+            pixel->GetWidth(), pixel->GetByteCount());
     }
 }
 
@@ -897,7 +883,8 @@ void HtmlToSpan::ToImageOptions(const std::map<std::string, std::string>& styles
     }
 }
 
-void HtmlToSpan::ToImage(xmlNodePtr node, size_t len, size_t& pos, std::vector<SpanInfo>& spanInfos)
+void HtmlToSpan::ToImage(xmlNodePtr node, size_t len, size_t& pos, std::vector<SpanInfo>& spanInfos,
+    bool isProcessImageOptions)
 {
     std::map<std::string, std::string> styleMap;
     xmlAttrPtr curNode = node->properties;
@@ -909,7 +896,9 @@ void HtmlToSpan::ToImage(xmlNodePtr node, size_t len, size_t& pos, std::vector<S
     }
 
     ImageSpanOptions option;
-    ToImageOptions(styleMap, option);
+    if (isProcessImageOptions) {
+        ToImageOptions(styleMap, option);
+    }
 
     SpanInfo info;
     info.type = HtmlType::IMAGE;
@@ -920,7 +909,8 @@ void HtmlToSpan::ToImage(xmlNodePtr node, size_t len, size_t& pos, std::vector<S
 }
 
 void HtmlToSpan::ToSpan(
-    xmlNodePtr curNode, size_t& pos, std::string& allContent, std::vector<SpanInfo>& spanInfos)
+    xmlNodePtr curNode, size_t& pos, std::string& allContent, std::vector<SpanInfo>& spanInfos,
+    bool isNeedLoadPixelMap)
 {
     size_t curNodeLen = 0;
     if (curNode->content) {
@@ -939,7 +929,7 @@ void HtmlToSpan::ToSpan(
             ToParagraphSpan(curNode, childPos - pos, pos, spanInfos);
         } else if (htmlTag == "img") {
             childPos++;
-            ToImage(curNode, childPos - pos, pos, spanInfos);
+            ToImage(curNode, childPos - pos, pos, spanInfos, isNeedLoadPixelMap);
         } else {
             ToTextSpan(htmlTag, curNode, childPos - pos, pos, spanInfos);
         }
@@ -948,12 +938,12 @@ void HtmlToSpan::ToSpan(
 }
 
 void HtmlToSpan::ParaseHtmlToSpanInfo(
-    xmlNodePtr node, size_t& pos, std::string& allContent, std::vector<SpanInfo>& spanInfos)
+    xmlNodePtr node, size_t& pos, std::string& allContent, std::vector<SpanInfo>& spanInfos, bool isNeedLoadPixelMap)
 {
     xmlNodePtr curNode = nullptr;
     for (curNode = node; curNode; curNode = curNode->next) {
         if (curNode->type == XML_ELEMENT_NODE || curNode->type == XML_TEXT_NODE) {
-            ToSpan(curNode, pos, allContent, spanInfos);
+            ToSpan(curNode, pos, allContent, spanInfos, isNeedLoadPixelMap);
         }
     }
 }
@@ -1095,7 +1085,7 @@ RefPtr<MutableSpanString> HtmlToSpan::GenerateSpans(
     return mutableSpan;
 }
 
-RefPtr<MutableSpanString> HtmlToSpan::ToSpanString(const std::string& html)
+RefPtr<MutableSpanString> HtmlToSpan::ToSpanString(const std::string& html, const bool isNeedLoadPixelMap)
 {
     htmlDocPtr doc = htmlReadMemory(html.c_str(), html.length(), nullptr, "UTF-8", 0);
     if (doc == nullptr) {
@@ -1115,7 +1105,7 @@ RefPtr<MutableSpanString> HtmlToSpan::ToSpanString(const std::string& html)
     size_t pos = 0;
     std::string content;
     std::vector<SpanInfo> spanInfos;
-    ParaseHtmlToSpanInfo(root, pos, content, spanInfos);
+    ParaseHtmlToSpanInfo(root, pos, content, spanInfos, isNeedLoadPixelMap);
     AfterProcSpanInfos(spanInfos);
     PrintSpanInfos(spanInfos);
     return GenerateSpans(content, spanInfos);

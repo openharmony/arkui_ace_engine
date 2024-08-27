@@ -16,18 +16,9 @@
 #include "core/components/image/render_image.h"
 
 #include "base/log/dump_log.h"
-#include "base/log/log.h"
-#include "base/utils/utils.h"
 #include "core/common/ace_engine_ext.h"
-#include "core/common/clipboard/clipboard_proxy.h"
-#include "core/components/container_modal/container_modal_constants.h"
-#include "core/components/image/image_component.h"
 #include "core/components/image/image_event.h"
-#include "core/components/positioned/positioned_component.h"
-#include "core/components/stack/stack_element.h"
 #include "core/components/text_overlay/text_overlay_component.h"
-#include "core/components/theme/icon_theme.h"
-#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 namespace {

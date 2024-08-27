@@ -15,12 +15,6 @@
 
 #include "core/components/split_container/render_row_split.h"
 
-#include "base/log/log_wrapper.h"
-#include "base/mousestyle/mouse_style.h"
-#include "core/components/flex/render_flex.h"
-#include "core/pipeline/base/constants.h"
-#include "core/pipeline/base/position_layout_utils.h"
-
 namespace OHOS::Ace {
 
 namespace {

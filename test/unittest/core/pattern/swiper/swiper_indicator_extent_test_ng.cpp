@@ -15,6 +15,9 @@
 
 #include "swiper_test_ng.h"
 
+#include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_method.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
+
 namespace OHOS::Ace::NG {
 
 class SwiperIndicatorExtentTestNg : public SwiperTestNg {

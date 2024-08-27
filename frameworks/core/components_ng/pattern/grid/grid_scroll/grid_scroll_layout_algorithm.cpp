@@ -35,7 +35,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
 namespace {
-void AddCacheItemsInFront(int32_t startIdx, LayoutWrapper* host, int32_t cacheCnt, std::list<int32_t>& buildList)
+void AddCacheItemsInFront(
+    int32_t startIdx, LayoutWrapper* host, int32_t cacheCnt, std::list<GridPreloadItem>& buildList)
 {
     for (int32_t i = 1; i <= cacheCnt; ++i) {
         int32_t item = startIdx - i;
@@ -43,7 +44,7 @@ void AddCacheItemsInFront(int32_t startIdx, LayoutWrapper* host, int32_t cacheCn
             break;
         }
         if (!host->GetChildByIndex(item, true)) {
-            buildList.push_back(item);
+            buildList.emplace_back(item, true);
         }
     }
 }
@@ -275,17 +276,17 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             } else {
                 SyncGeometry(wrapper);
             }
-            auto layoutProperty = wrapper->GetLayoutProperty();
-            CHECK_NULL_VOID(layoutProperty);
-            auto gridItemLayoutProperty = AceType::DynamicCast<GridItemLayoutProperty>(layoutProperty);
-            CHECK_NULL_VOID(gridItemLayoutProperty);
-            gridItemLayoutProperty->UpdateMainIndex(line->first);
-            gridItemLayoutProperty->UpdateCrossIndex(iter->first);
-            UpdateRealGridItemPositionInfo(wrapper, line->first, iter->first);
             auto frameNode = AceType::DynamicCast<FrameNode>(wrapper);
             if (frameNode) {
                 frameNode->MarkAndCheckNewOpIncNode();
             }
+            auto layoutProperty = wrapper->GetLayoutProperty();
+            CHECK_NULL_CONTINUE(layoutProperty);
+            auto gridItemLayoutProperty = AceType::DynamicCast<GridItemLayoutProperty>(layoutProperty);
+            CHECK_NULL_CONTINUE(gridItemLayoutProperty);
+            gridItemLayoutProperty->UpdateMainIndex(line->first);
+            gridItemLayoutProperty->UpdateCrossIndex(iter->first);
+            UpdateRealGridItemPositionInfo(wrapper, line->first, iter->first);
         }
         prevLineHeight += gridLayoutInfo_.lineHeightMap_[line->first] + mainGap_;
     }
@@ -2215,9 +2216,9 @@ void GridScrollLayoutAlgorithm::CompleteItemCrossPosition(
         auto currentIndex = item.second;
         auto itemWrapper = layoutWrapper->GetChildByIndex(currentIndex, true);
         if (!itemWrapper) {
-            if (predictBuildList_.back() < currentIndex) {
-                predictBuildList_.push_front(currentIndex);
-            } else if (predictBuildList_.front() > currentIndex) {
+            if (predictBuildList_.back().idx < currentIndex) {
+                predictBuildList_.emplace_front(currentIndex);
+            } else if (predictBuildList_.front().idx > currentIndex) {
                 predictBuildList_.emplace_back(currentIndex);
             }
         }

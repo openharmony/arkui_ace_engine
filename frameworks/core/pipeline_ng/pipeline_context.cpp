@@ -75,6 +75,7 @@ constexpr int32_t VSYNC_PERIOD_COUNT = 5;
 constexpr int32_t MIN_IDLE_TIME = 1000;
 constexpr uint8_t SINGLECOLOR_UPDATE_ALPHA = 75;
 constexpr int8_t RENDERING_SINGLE_COLOR = 1;
+constexpr int32_t DELAY_TIME = 500;
 
 #define CHECK_THREAD_SAFE(isFormRender, taskExecutor) CheckThreadSafe(isFormRender, taskExecutor, __func__, __LINE__)
 void CheckThreadSafe(
@@ -1160,7 +1161,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     }
 
     FlushWindowSizeChangeCallback(width, height, type);
-
+    UpdateHalfFoldHoverStatus(width, height);
     UpdateSizeChangeReason(type, rsTransaction);
 
 #ifdef ENABLE_ROSEN_BACKEND
@@ -1213,6 +1214,7 @@ void PipelineContext::OnFoldStatusChange(FoldStatus foldStatus)
             callback(foldStatus);
         }
     }
+    StartFoldStatusDelayTask(foldStatus);
 }
 
 void PipelineContext::OnFoldDisplayModeChange(FoldDisplayMode foldDisplayMode)
@@ -1289,11 +1291,7 @@ void PipelineContext::StartWindowMaximizeAnimation(
     int32_t duration = 400;
     MaximizeMode maximizeMode = GetWindowManager()->GetWindowMaximizeMode();
     if (maximizeMode == MaximizeMode::MODE_FULL_FILL || maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
-        int32_t preWidth = GetRootRect().Width();
-        int32_t preHeight = GetRootRect().Height();
-        if (width > preWidth && height > preHeight) {
-            duration = 0;
-        }
+        duration = 0;
     }
     option.SetDuration(duration);
     auto curve = Curves::EASE_OUT;
@@ -2371,9 +2369,30 @@ void PipelineContext::NotifyFillRequestFailed(RefPtr<FrameNode> node, int32_t er
     node->NotifyFillRequestFailed(errCode, fillContent, isPopup);
 }
 
+void PipelineContext::DumpFocus(bool hasJson) const
+{
+    auto rootFocusHub = rootNode_->GetFocusHub();
+    CHECK_NULL_VOID(rootFocusHub);
+    rootFocusHub->DumpFocusTree(0, hasJson);
+    if (hasJson) {
+        DumpLog::GetInstance().PrintEndDumpInfoNG();
+    }
+}
+
+void PipelineContext::DumpInspector(const std::vector<std::string>& params, bool hasJson) const
+{
+    auto accessibilityManager = GetAccessibilityManager();
+    if (accessibilityManager) {
+        accessibilityManager->OnDumpInfoNG(params, windowId_, hasJson);
+        if (hasJson) {
+            DumpLog::GetInstance().PrintEndDumpInfoNG();
+        }
+    }
+}
+
 bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
 {
-    ACE_DCHECK(!params.empty());
+    bool hasJson = params.back() == "-json";
     if (window_) {
         DumpLog::GetInstance().Print(1, "LastRequestVsyncTime: " + std::to_string(window_->GetLastRequestVsyncTime()));
 #ifdef ENABLE_ROSEN_BACKEND
@@ -2406,9 +2425,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
             navigationDumpMgr->OnDumpInfo();
         }
     } else if (params[0] == "-focus") {
-        if (rootNode_->GetFocusHub()) {
-            rootNode_->GetFocusHub()->DumpFocusTree(0);
-        }
+        DumpFocus(hasJson);
     } else if (params[0] == "-focuswindowscene") {
         auto windowSceneNode = GetFocusedWindowSceneNode();
         auto windowSceneFocusHub = windowSceneNode ? windowSceneNode->GetFocusHub() : nullptr;
@@ -2419,11 +2436,13 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         if (focusManager_) {
             focusManager_->DumpFocusManager();
         }
-    } else if (params[0] == "-accessibility" || params[0] == "-inspector") {
+    } else if (params[0] == "-accessibility") {
         auto accessibilityManager = GetAccessibilityManager();
         if (accessibilityManager) {
             accessibilityManager->OnDumpInfoNG(params, windowId_);
         }
+    } else if (params[0] == "-inspector") {
+        DumpInspector(params, hasJson);
     } else if (params[0] == "-rotation" && params.size() >= 2) {
     } else if (params[0] == "-animationscale" && params.size() >= 2) {
     } else if (params[0] == "-velocityscale" && params.size() >= 2) {
@@ -2442,7 +2461,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         }
     } else if (params[0] == "-event") {
         if (eventManager_) {
-            eventManager_->DumpEvent();
+            eventManager_->DumpEvent(hasJson);
         }
     } else if (params[0] == "-imagecache") {
         if (imageCache_) {
@@ -2515,13 +2534,28 @@ void PipelineContext::DumpPipelineInfo() const
     }
 }
 
+void PipelineContext::CollectTouchEventsBeforeVsync(std::list<TouchEvent>& touchEvents)
+{
+    auto targetTimeStamp = compensationValue_ > 0 ? GetVsyncTime() - compensationValue_ : GetVsyncTime();
+    for (auto iter = touchEvents_.begin(); iter != touchEvents_.end();) {
+        auto timeStamp = std::chrono::duration_cast<std::chrono::nanoseconds>(iter->time.time_since_epoch()).count();
+        if (targetTimeStamp < static_cast<uint64_t>(timeStamp)) {
+            iter++;
+            continue;
+        }
+        touchEvents.emplace_back(*iter);
+        iter = touchEvents_.erase(iter);
+    }
+}
+
 void PipelineContext::FlushTouchEvents()
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(rootNode_);
     {
         std::unordered_set<int32_t> moveEventIds;
-        decltype(touchEvents_) touchEvents(std::move(touchEvents_));
+        std::list<TouchEvent> touchEvents;
+        CollectTouchEventsBeforeVsync(touchEvents);
         if (touchEvents.empty()) {
             canUseLongPredictTask_ = true;
             return;
@@ -3066,31 +3100,11 @@ void PipelineContext::WindowFocus(bool isFocus)
         NotifyPopupDismiss();
     } else {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Window id: %{public}d get focus.", windowId_);
-        GetOrCreateFocusManager()->WindowFocusMoveStart();
-        GetOrCreateFocusManager()->FocusSwitchingStart(focusManager_->GetCurrentFocus(),
-            SwitchingStartReason::WINDOW_FOCUS);
+        
         isWindowHasFocused_ = true;
         InputMethodManager::GetInstance()->SetWindowFocus(true);
-        auto curFocusView = focusManager_ ? focusManager_->GetLastFocusView().Upgrade() : nullptr;
-        auto curFocusViewHub = curFocusView ? curFocusView->GetFocusHub() : nullptr;
-        if (!curFocusViewHub) {
-            TAG_LOGW(AceLogTag::ACE_FOCUS, "Current focus view can not found!");
-        } else if (curFocusView->GetIsViewHasFocused() && !curFocusViewHub->IsCurrentFocus()) {
-            TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on current focus view: %{public}s/%{public}d",
-                curFocusView->GetFrameName().c_str(), curFocusView->GetFrameId());
-            curFocusViewHub->RequestFocusImmediately();
-        } else {
-            auto container = Container::Current();
-            if (container && container->IsUIExtensionWindow()) {
-                curFocusView->RequestDefaultFocus();
-            }
-            if (container && container->IsDynamicRender()) {
-                curFocusView->SetIsViewRootScopeFocused(false);
-                curFocusView->RequestDefaultFocus();
-            }
-        }
-        RequestFrame();
     }
+    GetOrCreateFocusManager()->WindowFocus(isFocus);
     FlushWindowFocusChangedCallback(isFocus);
 }
 
@@ -3420,7 +3434,7 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
     }
 
     if (action == DragEventAction::DRAG_EVENT_START) {
-        manager->ResetPreTargetFrameNode();
+        manager->ResetPreTargetFrameNode(GetInstanceId());
         manager->RequireSummary();
         manager->SetDragCursorStyleCore(DragCursorStyleCore::DEFAULT);
         TAG_LOGI(AceLogTag::ACE_DRAG, "start drag, current windowId is %{public}d", container->GetWindowId());
@@ -4251,6 +4265,65 @@ void PipelineContext::NotifyAllWebPattern(bool isRegister)
 {
     rootNode_->NotifyWebPattern(isRegister);
 }
+
+void PipelineContext::UpdateHalfFoldHoverStatus(int32_t windowWidth, int32_t windowHeight)
+{
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        isHalfFoldHoverStatus_ = false;
+        return;
+    }
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    bool isFoldable = container->IsFoldable();
+    if (!isFoldable && !SystemProperties::IsSmallFoldProduct()) {
+        isHalfFoldHoverStatus_ = false;
+        return;
+    }
+    auto displayInfo = container->GetDisplayInfo();
+    CHECK_NULL_VOID(displayInfo);
+    auto windowManager = GetWindowManager();
+    auto windowMode = windowManager->GetWindowMode();
+    auto isHalfFolded = displayInfo->GetFoldStatus() == FoldStatus::HALF_FOLD;
+    auto displayWidth = displayInfo->GetWidth();
+    auto displayHeight = displayInfo->GetHeight();
+    auto isFullScreen = windowMode == WindowMode::WINDOW_MODE_FULLSCREEN ||
+        (NearEqual(displayWidth, windowWidth) && NearEqual(displayHeight, windowHeight));
+    if (!isFullScreen || !isHalfFolded) {
+        isHalfFoldHoverStatus_ = false;
+        return;
+    }
+    auto rotation = displayInfo->GetRotation();
+    if (SystemProperties::IsSmallFoldProduct()) {
+        isHalfFoldHoverStatus_ = rotation == Rotation::ROTATION_0 || rotation == Rotation::ROTATION_180;
+    } else {
+        isHalfFoldHoverStatus_ = rotation == Rotation::ROTATION_90 || rotation == Rotation::ROTATION_270;
+    }
+}
+
+void PipelineContext::OnHalfFoldHoverChangedCallback()
+{
+    for (auto&& [id, callback] : halfFoldHoverChangedCallbackMap_) {
+        if (callback) {
+            callback(isHalfFoldHoverStatus_);
+        }
+    }
+}
+
+void PipelineContext::StartFoldStatusDelayTask(FoldStatus foldStatus)
+{
+    if (foldStatusDelayTask_) {
+        foldStatusDelayTask_.Cancel();
+    }
+    foldStatusDelayTask_.Reset([weak = WeakClaim(this)]() {
+        auto context = weak.Upgrade();
+        CHECK_NULL_VOID(context);
+        context->UpdateHalfFoldHoverStatus(context->GetRootWidth(), context->GetRootHeight());
+        context->OnHalfFoldHoverChangedCallback();
+    });
+    taskExecutor_->PostDelayedTask(
+        foldStatusDelayTask_, TaskExecutor::TaskType::UI, DELAY_TIME, "ArkUIHalfFoldHoverStatusChange");
+}
+
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
 
 bool PipelineContext::OnTouchTargetHitTest(const TouchEvent& point, bool isSubPipe, const std::string& target)

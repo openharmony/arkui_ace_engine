@@ -1291,6 +1291,17 @@ void JSRichEditor::SetEnableKeyboardOnFocus(const JSCallbackInfo& info)
     RichEditorModel::GetInstance()->SetRequestKeyboardOnFocus(jsValue->ToBoolean());
 }
 
+void JSRichEditor::SetEnableHapticFeedback(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(info.Length() > 0);
+    auto jsValue = info[0];
+    if (jsValue->IsUndefined() || !jsValue->IsBoolean()) {
+        RichEditorModel::GetInstance()->SetEnableHapticFeedback(true);
+        return;
+    }
+    RichEditorModel::GetInstance()->SetEnableHapticFeedback(jsValue->ToBoolean());
+}
+
 void JSRichEditor::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRichEditor>::Declare("RichEditor");
@@ -1332,6 +1343,7 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("onCopy", &JSRichEditor::SetOnCopy);
     JSClass<JSRichEditor>::StaticMethod("editMenuOptions", &JSRichEditor::EditMenuOptions);
     JSClass<JSRichEditor>::StaticMethod("enableKeyboardOnFocus", &JSRichEditor::SetEnableKeyboardOnFocus);
+    JSClass<JSRichEditor>::StaticMethod("enableHapticFeedback", &JSRichEditor::SetEnableHapticFeedback);
     JSClass<JSRichEditor>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

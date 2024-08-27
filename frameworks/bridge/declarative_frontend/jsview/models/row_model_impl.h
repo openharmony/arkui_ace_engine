@@ -26,6 +26,7 @@ public:
     void Create(const std::optional<Dimension>& space, AlignDeclaration* declaration, const std::string& tag) override;
     void SetAlignItems(FlexAlign flexAlign) override;
     void SetJustifyContent(FlexAlign flexAlign) override;
+    void SetIsReverse(bool isReverse) override {};
     void CreateWithWrap() override;
 };
 

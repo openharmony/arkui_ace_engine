@@ -17,6 +17,25 @@
 
 namespace OHOS::Ace {
 
+bool g_isSupportImageAnalyzerFeature = false;
+bool g_isOverlayCreated = false;
+
+void MockImageAnalyzerManager::SetSupportImageAnalyzerFeature(bool isSupportImageAnalyzerFeature)
+{
+    g_isSupportImageAnalyzerFeature = isSupportImageAnalyzerFeature;
+}
+
+void MockImageAnalyzerManager::SetOverlayCreated(bool isOverlayCreated)
+{
+    g_isOverlayCreated = isOverlayCreated;
+}
+
+void MockImageAnalyzerManager::SetUp()
+{
+    g_isSupportImageAnalyzerFeature = false;
+    g_isOverlayCreated = false;
+}
+
 ImageAnalyzerManager::ImageAnalyzerManager(const RefPtr<NG::FrameNode>& frameNode, ImageAnalyzerHolder holder)
 {
     holder_ = holder;
@@ -38,12 +57,12 @@ void ImageAnalyzerManager::DestroyAnalyzerOverlay()
 
 bool ImageAnalyzerManager::IsSupportImageAnalyzerFeature()
 {
-    return false;
+    return g_isSupportImageAnalyzerFeature;
 }
 
 bool ImageAnalyzerManager::IsOverlayCreated()
 {
-    return false;
+    return g_isOverlayCreated;
 }
 
 void ImageAnalyzerManager::UpdateAnalyzerOverlayLayout()
@@ -68,6 +87,10 @@ void ImageAnalyzerManager::SetImageAnalyzerCallback(OnAnalyzedCallback& callback
 }
 
 void ImageAnalyzerManager::ReleaseImageAnalyzer()
+{
+}
+
+void ImageAnalyzerManager::UpdateOverlayTouchInfo(int touchPointX, int touchPointY, TouchType touchType)
 {
 }
 } // namespace OHOS::Ace

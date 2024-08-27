@@ -124,10 +124,9 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
         }
     }
     SetHittedFrameNode(hitTestRecognizers);
+    refereeNG_->AddGestureToScope(touchPoint.id, hitTestResult);
     touchTestResults_[touchPoint.id] = std::move(hitTestResult);
 
-    const auto& touchTestResult = touchTestResults_.find(touchPoint.id);
-    refereeNG_->AddGestureToScope(touchPoint.id, touchTestResult->second);
     int64_t currentEventTime = static_cast<int64_t>(touchPoint.time.time_since_epoch().count());
     int64_t lastEventTime = static_cast<int64_t>(lastEventTime_.time_since_epoch().count());
     int64_t duration = static_cast<int64_t>((currentEventTime - lastEventTime) / TRANSLATE_NS_TO_MS);
@@ -1897,12 +1896,20 @@ EventManager::EventManager()
     refereeNG_->SetQueryStateFunc(std::move(cleanReferee));
 }
 
-void EventManager::DumpEvent() const
+void EventManager::DumpEvent(bool hasJson) const
 {
-    std::list<std::pair<int32_t, std::string>> dumpList;
-    eventTree_.Dump(dumpList, 0);
-    for (auto& item : dumpList) {
-        DumpLog::GetInstance().Print(item.first, item.second);
+    if (hasJson) {
+        std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+        std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
+        eventTree_.Dump(children, 0);
+        json->Put("DumpEvent", children);
+        DumpLog::GetInstance().PrintJson(json->ToString());
+    } else {
+        std::list<std::pair<int32_t, std::string>> dumpList;
+        eventTree_.Dump(dumpList, 0);
+        for (auto& item : dumpList) {
+            DumpLog::GetInstance().Print(item.first, item.second);
+        }
     }
 }
 
@@ -2085,7 +2092,7 @@ void EventManager::FalsifyCancelEventAndDispatch(const AxisEvent& axisEvent)
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
 
 bool EventManager::TouchTargetHitTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
-    TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend, const std::string& target)`
+    TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend, const std::string& target)
 {
     CHECK_NULL_RETURN(frameNode, false);
     TouchTestResult hitTestResult;

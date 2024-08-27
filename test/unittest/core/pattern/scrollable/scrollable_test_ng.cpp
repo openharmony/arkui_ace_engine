@@ -12,21 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "gtest/gtest.h"
-#include "gtest/hwext/gtest-ext.h"
 
-#include "core/components/common/layout/constants.h"
+#include "scrollable_test_ng.h"
 
-#define protected public
-#define private public
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pattern/mock_nestable_scroll_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/scrollable/mock_scrollable.h"
-#include "test/unittest/core/pattern/scrollable/scrollable_test_ng.h"
-
+#define protected public
+#define private public
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::NG {
@@ -576,7 +573,7 @@ HWTEST_F(ScrollableTestNg, HandleScrollParent006, TestSize.Level1)
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::NONE);
     scrollPn->edgeEffect_ = EdgeEffect::NONE;
     auto result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::GESTURE);
-    EXPECT_TRUE(result.reachEdge);
+    EXPECT_FALSE(result.reachEdge);
     EXPECT_EQ(result.remain, 0.0f);
 }
 
@@ -1838,6 +1835,33 @@ HWTEST_F(ScrollableTestNg, Fling001, TestSize.Level1)
     scrollPn->Fling(correctVelocity);
     float finalPosition_ = scrollable->finalPosition_;
     EXPECT_EQ(finalPosition_, finalPosition);
+}
+
+/**
+ * @tc.name: FadingEdge001
+ * @tc.desc: Test SetFadingEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, FadingEdge001, TestSize.Level1)
+{
+    /**
+     * @tc.cases: SetFadingEdge false
+     * @tc.expected: FadingEdge false
+     */
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    auto paintProperty = scrollPn->GetPaintProperty<ScrollablePaintProperty>();
+    NG::ScrollableModelNG::SetFadingEdge(scroll_.GetRawPtr(), false);
+    EXPECT_FALSE(paintProperty->GetFadingEdge().value_or(false));
+    /**
+     * @tc.cases: SetFadingEdge true and SetFadingEdgeLength
+     * @tc.expected: FadingEdge true and FadingEdgeLength is the same as SetFadingEdgeLength
+     */
+    NG::ScrollableModelNG::SetFadingEdge(scroll_.GetRawPtr(), true);
+    EXPECT_TRUE(paintProperty->GetFadingEdge().value_or(false));
+    EXPECT_EQ(paintProperty->GetFadingEdgeLength().value(), Dimension(32.0f, DimensionUnit::VP)); // default value;
+    NG::ScrollableModelNG::SetFadingEdge(scroll_.GetRawPtr(), true, Dimension(50.0f, DimensionUnit::PERCENT));
+    EXPECT_TRUE(paintProperty->GetFadingEdge().value_or(false));
+    EXPECT_EQ(paintProperty->GetFadingEdgeLength().value(), Dimension(50.0f, DimensionUnit::PERCENT));
 }
 
 /**

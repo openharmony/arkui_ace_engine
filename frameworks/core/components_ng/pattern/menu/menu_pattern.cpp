@@ -28,12 +28,14 @@
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/select/select_theme.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
+#include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/multi_menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/sub_menu_layout_algorithm.h"
@@ -41,14 +43,13 @@
 #include "core/components_ng/pattern/option/option_pattern.h"
 #include "core/components_ng/pattern/option/option_view.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components/theme/shadow_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -77,7 +78,6 @@ const float MINIMUM_AMPLITUDE_RATION = 0.08f;
 constexpr double MOUNT_MENU_FINAL_SCALE = 0.95f;
 constexpr double SEMI_CIRCLE_ANGEL = 90.0f;
 constexpr Dimension PADDING = 4.0_vp;
-
 
 void UpdateFontStyle(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<MenuItemLayoutProperty>& itemProperty,
     RefPtr<MenuItemPattern>& itemPattern, bool& contentChanged, bool& labelChanged)
@@ -1098,6 +1098,7 @@ void MenuPattern::ShowPreviewMenuAnimation()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    MenuView::ShowPixelMapAnimation(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateTransformCenter(DimensionOffset(GetTransformCenter()));
@@ -1340,12 +1341,11 @@ void MenuPattern::ShowStackExpandDisappearAnimation(const RefPtr<FrameNode>& men
 
     option.SetCurve(MENU_ANIMATION_CURVE);
     auto subImageNode = GetImageNode(subMenuNode);
-    CHECK_NULL_VOID(subImageNode);
-    auto subImageContext = subImageNode->GetRenderContext();
-    AnimationUtils::Animate(option, [subImageContext]() {
-        if (subImageContext) {
-            subImageContext->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, 0.0f, 0.0f));
-        }
+    AnimationUtils::Animate(option, [subImageNode]() {
+        CHECK_NULL_VOID(subImageNode);
+        auto subImageContext = subImageNode->GetRenderContext();
+        CHECK_NULL_VOID(subImageContext);
+        subImageContext->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, 0.0f, 0.0f));
     });
 
     option.SetCurve(Curves::FRICTION);
@@ -1666,11 +1666,11 @@ float MenuPattern::GetSelectMenuWidth()
     } else {
         finalWidth = defaultWidth;
     }
-    
+
     if (finalWidth < MIN_SELECT_MENU_WIDTH.ConvertToPx()) {
         finalWidth = defaultWidth;
     }
-    
+
     return finalWidth;
 }
 
@@ -1789,4 +1789,8 @@ bool MenuPattern::IsMenuScrollable() const
     return false;
 }
 
+void MenuPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("MenuType", static_cast<int32_t>(GetMenuType()));
+}
 } // namespace OHOS::Ace::NG

@@ -58,7 +58,7 @@ public:
         layout->SetIsShown(isOnShow_);
         return layout;
     }
-    
+
     bool CheckCustomAvoidKeyboard() const override
     {
         return !NearZero(avoidKeyboardOffset_);
@@ -186,6 +186,7 @@ public:
     }
 
     void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
 
     uint64_t GetNavDestinationId() const
     {
@@ -267,6 +268,8 @@ public:
         return currStyle_;
     }
 
+    void OnWindowHide() override;
+
 private:
     void UpdateNameIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
     void UpdateBackgroundColorIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
@@ -288,6 +291,7 @@ private:
     bool isRightToLeft_ = false;
     uint64_t navDestinationId_ = 0;
     void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     float avoidKeyboardOffset_ = 0.0f;
 
     RefPtr<LongPressEvent> longPressEvent_;

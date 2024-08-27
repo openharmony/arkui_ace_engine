@@ -15,15 +15,8 @@
 
 #include "core/components/shared_transition/shared_transition_element.h"
 
-#include "core/components/box/box_element.h"
-#include "core/components/box/render_box.h"
-#include "core/components/display/display_component.h"
 #include "core/components/display/render_display.h"
-#include "core/components/image/image_element.h"
-#include "core/components/image/render_image.h"
 #include "core/components/page/page_element.h"
-#include "core/pipeline/base/element.h"
-#include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
 namespace {

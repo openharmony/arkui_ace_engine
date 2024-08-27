@@ -284,11 +284,30 @@ namespace OHOS::Ace::NG {
         }
     }
 
+    int32_t LazyForEachBuilder::GetTotalCountOfOriginalDataset(const std::list<V2::Operation>& DataOperations)
+    {
+        int32_t totalCountOfCurrentDataset_ = GetTotalCount();
+        int32_t deltaCount = 0;
+        for (auto& operation : DataOperations) {
+            switch (operationTypeMap[operation.type]) {
+                case OP::ADD:
+                    deltaCount = deltaCount - operation.count;
+                    break;
+                case OP::DEL:
+                    deltaCount = deltaCount + operation.count;
+                    break;
+                default:
+                    break;
+            }
+        }
+        return totalCountOfCurrentDataset_ + deltaCount;
+    }
+
     std::pair<int32_t, std::list<RefPtr<UINode>>> LazyForEachBuilder::OnDatasetChange(
         std::list<V2::Operation> DataOperations)
     {
-        totalCountForDataset_ = GetTotalCount();
-        int32_t initialIndex = totalCountForDataset_;
+        totalCountOfOriginalDataset_ = GetTotalCountOfOriginalDataset(DataOperations);
+        int32_t initialIndex = totalCountOfOriginalDataset_;
         std::map<int32_t, LazyForEachChild> expiringTempItem_;
         std::list<std::string> expiringKeys;
         for (auto& [key, cacheChild] : expiringItem_) {
@@ -309,6 +328,7 @@ namespace OHOS::Ace::NG {
         for (auto operation : DataOperations) {
             bool isReload = ClassifyOperation(operation, initialIndex, cachedItems_, expiringTemp);
             if (isReload) {
+                initialIndex = 0;
                 return std::pair(initialIndex, std::move(nodeList));
             }
         }
@@ -402,49 +422,49 @@ namespace OHOS::Ace::NG {
     bool LazyForEachBuilder::ClassifyOperation(V2::Operation& operation, int32_t& initialIndex,
         std::map<int32_t, LazyForEachChild>& cachedTemp, std::map<int32_t, LazyForEachChild>& expiringTemp)
     {
-        const int ADDOP = 1;
-        const int DELETEOP = 2;
-        const int CHANGEOP = 3;
-        const int MOVEOP = 4;
-        const int EXCHANGEOP = 5;
-        const int RELOADOP = 6;
         switch (operationTypeMap[operation.type]) {
-            case ADDOP:
+            case OP::ADD:
                 OperateAdd(operation, initialIndex);
                 break;
-            case DELETEOP:
+            case OP::DEL:
                 OperateDelete(operation, initialIndex);
                 break;
-            case CHANGEOP:
+            case OP::CHANGE:
                 OperateChange(operation, initialIndex, cachedTemp, expiringTemp);
                 break;
-            case MOVEOP:
+            case OP::MOVE:
                 OperateMove(operation, initialIndex, cachedTemp, expiringTemp);
                 break;
-            case EXCHANGEOP:
+            case OP::EXCHANGE:
                 OperateExchange(operation, initialIndex, cachedTemp, expiringTemp);
                 break;
-            case RELOADOP:
-                OperateReload(operation, initialIndex);
+            case OP::RELOAD:
+                OperateReload(expiringTemp);
                 return true;
         }
         return false;
     }
 
-    bool LazyForEachBuilder::ValidateIndex(int32_t index, std::string type)
+    bool LazyForEachBuilder::ValidateIndex(int32_t index, const std::string& type)
     {
-        if (index >= totalCountForDataset_ || index < 0) {
-            TAG_LOGE(AceLogTag::ACE_LAZY_FOREACH,
-                "%{public}s(%{public}d) Operation is out of range", type.c_str(), index);
-            return true;
+        bool isValid = true;
+        if (operationTypeMap[type] == OP::ADD) {
+            // for add operation, the index can equal totalCountOfOriginalDataset_
+            isValid = index >= 0 && index <= totalCountOfOriginalDataset_;
+        } else {
+            isValid = index >= 0 && index < totalCountOfOriginalDataset_;
         }
-        return false;
+        if (!isValid) {
+            TAG_LOGE(
+                AceLogTag::ACE_LAZY_FOREACH, "%{public}s(%{public}d) Operation is out of range", type.c_str(), index);
+        }
+        return isValid;
     }
 
     void LazyForEachBuilder::OperateAdd(V2::Operation& operation, int32_t& initialIndex)
     {
         OperationInfo itemInfo;
-        if (ValidateIndex(operation.index, operation.type)) {
+        if (!ValidateIndex(operation.index, operation.type)) {
             return;
         }
         auto indexExist = operationList_.find(operation.index);
@@ -467,7 +487,7 @@ namespace OHOS::Ace::NG {
     void LazyForEachBuilder::OperateDelete(V2::Operation& operation, int32_t& initialIndex)
     {
         OperationInfo itemInfo;
-        if (ValidateIndex(operation.index, operation.type)) {
+        if (!ValidateIndex(operation.index, operation.type)) {
             return;
         }
         auto indexExist = operationList_.find(operation.index);
@@ -494,7 +514,7 @@ namespace OHOS::Ace::NG {
         std::map<int32_t, LazyForEachChild>& cachedTemp, std::map<int32_t, LazyForEachChild>& expiringTemp)
     {
         OperationInfo itemInfo;
-        if (ValidateIndex(operation.index, operation.type)) {
+        if (!ValidateIndex(operation.index, operation.type)) {
             return;
         }
         auto indexExist = operationList_.find(operation.index);
@@ -524,8 +544,8 @@ namespace OHOS::Ace::NG {
     {
         OperationInfo fromInfo;
         OperationInfo toInfo;
-        if (ValidateIndex(operation.coupleIndex.first, operation.type) ||
-            ValidateIndex(operation.coupleIndex.second, operation.type)) {
+        if (!ValidateIndex(operation.coupleIndex.first, operation.type) ||
+            !ValidateIndex(operation.coupleIndex.second, operation.type)) {
             return;
         }
         auto fromIndexExist = operationList_.find(operation.coupleIndex.first);
@@ -567,8 +587,8 @@ namespace OHOS::Ace::NG {
     {
         OperationInfo startInfo;
         OperationInfo endInfo;
-        if (ValidateIndex(operation.coupleIndex.first, operation.type) ||
-            ValidateIndex(operation.coupleIndex.second, operation.type)) {
+        if (!ValidateIndex(operation.coupleIndex.first, operation.type) ||
+            !ValidateIndex(operation.coupleIndex.second, operation.type)) {
             return;
         }
         auto startIndexExist = operationList_.find(operation.coupleIndex.first);
@@ -619,8 +639,11 @@ namespace OHOS::Ace::NG {
         return iter;
     }
 
-    void LazyForEachBuilder::OperateReload(V2::Operation& operation, int32_t& initialIndex)
+    void LazyForEachBuilder::OperateReload(std::map<int32_t, LazyForEachChild>& expiringTemp)
     {
+        for (auto& [index, node] : expiringTemp) {
+            expiringItem_.emplace(node.first, LazyForEachCacheChild(index, node.second));
+        }
         operationList_.clear();
         OnDataReloaded();
     }

@@ -337,7 +337,7 @@ void CheckBoxPattern::UpdateUnSelect()
 
 void CheckBoxPattern::UpdateUIStatus(bool check)
 {
-    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkbox update ui status %{public}d", check);
+    TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "checkbox update status %{public}d", check);
     uiStatus_ = check ? UIStatus::OFF_TO_ON : UIStatus::ON_TO_OFF;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -445,7 +445,8 @@ void CheckBoxPattern::ChangeSelfStatusAndNotify(const RefPtr<CheckBoxPaintProper
             SetLastSelect(isSelected);
             auto checkboxEventHub = GetEventHub<CheckBoxEventHub>();
             CHECK_NULL_VOID(checkboxEventHub);
-            TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkbox update change event %{public}d", isSelected);
+            TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "checkbox node %{public}d update change event %{public}d",
+                host->GetId(), isSelected);
             checkboxEventHub->UpdateChangeEvent(isSelected);
         }
     }
@@ -585,7 +586,7 @@ void CheckBoxPattern::ChangeGroupStatusAndNotify(const RefPtr<FrameNode>& checkB
     CheckboxGroupResult groupResult(vec, int(status));
     auto eventHub = checkBoxGroupNode->GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_VOID(eventHub);
-    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "update checkboxgroup result %d", groupResult.GetStatus());
+    TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "update checkboxgroup result %d", groupResult.GetStatus());
     eventHub->UpdateChangeEvent(&groupResult);
 }
 

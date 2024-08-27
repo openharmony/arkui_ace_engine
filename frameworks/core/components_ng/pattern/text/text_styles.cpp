@@ -57,6 +57,8 @@ TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
         UPDATE_TEXT_STYLE(fontStyle, SymbolEffectOptions, SetSymbolEffectOptions);
         UPDATE_TEXT_STYLE(fontStyle, MinFontScale, SetMinFontScale);
         UPDATE_TEXT_STYLE(fontStyle, MaxFontScale, SetMaxFontScale);
+        UPDATE_TEXT_STYLE(fontStyle, VariableFontWeight, SetVariableFontWeight);
+        UPDATE_TEXT_STYLE(fontStyle, EnableVariableFontWeight, SetEnableVariableFontWeight);
     }
     if (textLineStyle) {
         UPDATE_TEXT_STYLE(textLineStyle, LineHeight, SetLineHeight);
@@ -99,6 +101,8 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle,
         UPDATE_TEXT_STYLE(fontStyle, SymbolEffectOptions, SetSymbolEffectOptions);
         UPDATE_TEXT_STYLE(fontStyle, MinFontScale, SetMinFontScale);
         UPDATE_TEXT_STYLE(fontStyle, MaxFontScale, SetMaxFontScale);
+        UPDATE_TEXT_STYLE(fontStyle, VariableFontWeight, SetVariableFontWeight);
+        UPDATE_TEXT_STYLE(fontStyle, EnableVariableFontWeight, SetEnableVariableFontWeight);
     }
     if (textLineStyle) {
         UPDATE_TEXT_STYLE(textLineStyle, LineHeight, SetLineHeight);

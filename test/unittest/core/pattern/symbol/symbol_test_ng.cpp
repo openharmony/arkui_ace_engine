@@ -366,4 +366,43 @@ HWTEST_F(SymbolTestNg, SymbolPropertyTest006, TestSize.Level1)
     EXPECT_EQ(symbolOptions.GetScopeType(), OHOS::Ace::ScopeType::WHOLE);
     EXPECT_EQ(symbolOptions.GetCommonSubType(), OHOS::Ace::CommonSubType::UP);
 }
+
+/**
+ * @tc.name: SymbolPropertyTest007
+ * @tc.desc: test static method of symbol model
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolTestNg, SymbolPropertyTest007, TestSize.Level1)
+{
+    MockPipelineContext::SetUp();
+    auto frameNode = SymbolModelNG::CreateFrameNode(CREATE_VALUE);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+
+    SymbolModelNG::SetFontColor(node, SYMBOL_COLOR_LIST);
+    SymbolModelNG::SetFontSize(node, FONT_SIZE_VALUE);
+    SymbolModelNG::SetFontWeight(node, FontWeight::W100);
+    SymbolModelNG::SetRenderingStrategy(node, RENDER_STRATEGY);
+    SymbolModelNG::SetSymbolEffect(node, EFFECT_STRATEGY);
+    SymbolModelNG::SetSymbolEffectOptions(node, SYMBOL_EFFECT_OPTIONS);
+
+    RefPtr<LayoutProperty> property = frameNode->GetLayoutProperty();
+    ASSERT_NE(property, nullptr);
+
+    RefPtr<TextLayoutProperty> textProperty = AceType::DynamicCast<TextLayoutProperty>(property);
+    ASSERT_NE(textProperty, nullptr);
+    const std::unique_ptr<FontStyle>& symbolStyle = textProperty->GetFontStyle();
+    ASSERT_NE(symbolStyle, nullptr);
+
+    auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr);
+    auto effectOptions = textStyle.GetSymbolEffectOptions().value_or(SymbolEffectOptions());
+    EXPECT_EQ(textStyle.GetRenderColors(), SYMBOL_COLOR_LIST);
+    EXPECT_EQ(textStyle.GetFontSize(), FONT_SIZE_VALUE);
+    EXPECT_EQ(symbolStyle->GetFontWeight(), FontWeight::W100);
+    EXPECT_EQ(textStyle.GetEffectStrategy(), EFFECT_STRATEGY);
+    EXPECT_EQ(effectOptions.GetEffectType(), OHOS::Ace::SymbolEffectType::BOUNCE);
+    EXPECT_EQ(effectOptions.GetScopeType(), OHOS::Ace::ScopeType::WHOLE);
+    EXPECT_EQ(effectOptions.GetCommonSubType(), OHOS::Ace::CommonSubType::UP);
+}
 } // namespace OHOS::Ace::NG

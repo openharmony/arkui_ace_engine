@@ -15,11 +15,6 @@
 
 #include "core/components/video/resource/player.h"
 
-#include <iomanip>
-#include <sstream>
-
-#include "base/log/log.h"
-
 namespace OHOS::Ace {
 
 const char PLAYER_PARAM_WIDTH[] = "width";

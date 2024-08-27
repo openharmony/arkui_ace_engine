@@ -15,15 +15,8 @@
 
 #include "core/components/box/render_box_base.h"
 
-#include <algorithm>
-
-#include "base/geometry/offset.h"
 #include "base/log/dump_log.h"
 #include "base/utils/string_expression.h"
-#include "core/animation/property_animatable_helper.h"
-#include "core/components/box/box_base_component.h"
-#include "core/components/common/properties/radius.h"
-#include "core/components/flex/render_flex.h"
 #include "core/components/text_field/render_text_field.h"
 
 namespace OHOS::Ace {

@@ -122,6 +122,14 @@ public:
 
     virtual void ReleaseSurfaceBuffers() {}
 
+    virtual void RegisterSurface() const {};
+
+    virtual void UnregisterSurface() const {};
+
+    virtual void Connect() const {};
+
+    virtual void Disconnect() const {};
+
 protected:
     ACE_DISALLOW_COPY_AND_MOVE(RenderSurface);
 };

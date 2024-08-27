@@ -57,6 +57,7 @@ const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, Di
     DialogAlignment::BOTTOM, DialogAlignment::DEFAULT, DialogAlignment::TOP_START, DialogAlignment::TOP_END,
     DialogAlignment::CENTER_START, DialogAlignment::CENTER_END, DialogAlignment::BOTTOM_START,
     DialogAlignment::BOTTOM_END };
+const std::vector<KeyboardAvoidMode> KEYBOARD_AVOID_MODE = { KeyboardAvoidMode::DEFAULT, KeyboardAvoidMode::NONE };
 constexpr int32_t DEFAULT_ANIMATION_DURATION = 200;
 
 } // namespace
@@ -132,6 +133,15 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
             auto alignment = alignmentValue->ToNumber<int32_t>();
             if (alignment >= 0 && alignment <= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
                 instance->dialogProperties_.alignment = DIALOG_ALIGNMENT[alignment];
+            }
+        }
+
+        // Parse keyboardAvoidMode
+        auto avoidModeValue = constructorArg->GetProperty("keyboardAvoidMode");
+        if (avoidModeValue->IsNumber()) {
+            auto avoidMode = avoidModeValue->ToNumber<int32_t>();
+            if (avoidMode >= 0 && avoidMode < static_cast<int32_t>(KEYBOARD_AVOID_MODE.size())) {
+                instance->dialogProperties_.keyboardAvoidMode = KEYBOARD_AVOID_MODE[avoidMode];
             }
         }
 

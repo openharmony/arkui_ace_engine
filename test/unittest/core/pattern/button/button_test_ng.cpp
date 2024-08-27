@@ -70,6 +70,7 @@ const ButtonType BUTTON_TYPE_CAPSULE_VALUE = ButtonType::CAPSULE;
 const ButtonType BUTTON_TYPE_CUSTOM_VALUE = ButtonType::CUSTOM;
 const ButtonType BUTTON_TYPE_DOWNLOAD_VALUE = ButtonType::DOWNLOAD;
 const ButtonType BUTTON_TYPE_CIRCLE_VALUE = ButtonType::CIRCLE;
+const ButtonType BUTTON_TYPE_ROUNDED_RECTANGLE_VALUE = ButtonType::ROUNDED_RECTANGLE;
 const Dimension BUTTON_FONT_SIZE_VALUE = 30.0_vp;
 const Dimension BORDER_RADIUS = 5.0_vp;
 const Ace::FontWeight BUTTON_BOLD_FONT_WEIGHT_VALUE = Ace::FontWeight::BOLD;
@@ -87,6 +88,9 @@ const int32_t DURATION = 100;
 
 struct CreateWithPara createWithPara = { std::make_optional(true), std::make_optional(CREATE_VALUE),
     std::make_optional(true), std::make_optional(ButtonType::CAPSULE), std::make_optional(true), std::nullopt,
+    std::nullopt, std::nullopt };
+struct CreateWithPara createWithParaByRoundedRect = { std::make_optional(true), std::make_optional(CREATE_VALUE),
+    std::make_optional(true), std::make_optional(ButtonType::ROUNDED_RECTANGLE), std::make_optional(true), std::nullopt,
     std::nullopt, std::nullopt };
 } // namespace
 
@@ -125,6 +129,8 @@ public:
 
 protected:
     RefPtr<FrameNode> CreateLabelButtonParagraph(const std::string& createValue, const TestProperty& testProperty);
+    RefPtr<FrameNode> CreateLabelButtonParagraphByRoundedRect(
+        const std::string& createValue, const TestProperty& testProperty);
     RefPtr<FrameNode> CreateChildButtonParagraph(const std::string& createValue, const TestProperty& testProperty);
     RefPtr<FrameNode> CreateLabelButtonParagraphForLableStyle(
         const std::string& createValue, const LableStyleProperty& lableStyleProperty);
@@ -232,6 +238,50 @@ PaddingProperty CreatePadding(float left, float top, float right, float bottom)
     padding.top = CalcLength(top);
     padding.bottom = CalcLength(bottom);
     return padding;
+}
+RefPtr<FrameNode> ButtonTestNg::CreateLabelButtonParagraphByRoundedRect(
+    const std::string& createValue, const TestProperty& testProperty)
+{
+    ButtonModelNG buttonModelNG;
+    std::list<RefPtr<Component>> buttonChildren;
+    createWithPara.parseSuccess = true;
+    createWithPara.label = createValue;
+    buttonModelNG.CreateWithLabel(createWithParaByRoundedRect, buttonChildren);
+    if (testProperty.typeValue.has_value()) {
+        buttonModelNG.SetType(static_cast<int32_t>(testProperty.typeValue.value()));
+    }
+    if (testProperty.stateEffectValue.has_value()) {
+        buttonModelNG.SetStateEffect(testProperty.stateEffectValue.value());
+    }
+    if (testProperty.fontSizeValue.has_value()) {
+        buttonModelNG.SetFontSize(testProperty.fontSizeValue.value());
+    }
+    if (testProperty.fontWeightValue.has_value()) {
+        buttonModelNG.SetFontWeight(testProperty.fontWeightValue.value());
+    }
+    if (testProperty.textColorValue.has_value()) {
+        buttonModelNG.SetFontColor(testProperty.textColorValue.value());
+    }
+    if (testProperty.fontStyleValue.has_value()) {
+        buttonModelNG.SetFontStyle(testProperty.fontStyleValue.value());
+    }
+    if (testProperty.fontFamilyValue.has_value()) {
+        buttonModelNG.SetFontFamily(testProperty.fontFamilyValue.value());
+    }
+    if (testProperty.borderRadius.has_value()) {
+        buttonModelNG.SetBorderRadius(testProperty.borderRadius.value());
+    }
+    if (testProperty.buttonStyle.has_value()) {
+        buttonModelNG.SetButtonStyle(testProperty.buttonStyle.value());
+    }
+    if (testProperty.controlSize.has_value()) {
+        buttonModelNG.SetControlSize(testProperty.controlSize.value());
+    }
+    if (testProperty.buttonRole.has_value()) {
+        buttonModelNG.SetRole(testProperty.buttonRole.value());
+    }
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    return AceType::DynamicCast<FrameNode>(element);
 }
 
 RefPtr<FrameNode> ButtonTestNg::CreateLabelButtonParagraph(
@@ -1486,6 +1536,118 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest027, TestSize.Level1)
      */
     buttonPattern->SetBuilderFunc(node);
     buttonPattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: ButtonPatternTest028
+ * @tc.desc: Test all the properties of rounded rectangle button.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonTestNg, ButtonPatternTest028, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.typeValue = std::make_optional(BUTTON_TYPE_ROUNDED_RECTANGLE_VALUE);
+    RefPtr<FrameNode> frameNode = CreateLabelButtonParagraphByRoundedRect(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetTypeValue(), BUTTON_TYPE_ROUNDED_RECTANGLE_VALUE);
+}
+
+/**
+ * @tc.name: ButtonPatternTest029
+ * @tc.desc: Test all the properties of default button.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonTestNg, ButtonPatternTest029, TestSize.Level1)
+{
+    TestProperty testProperty;
+    RefPtr<FrameNode> frameNode = CreateLabelButtonParagraphByRoundedRect(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetTypeValue(), BUTTON_TYPE_ROUNDED_RECTANGLE_VALUE);
+}
+
+/**
+ * @tc.name: ButtonPatternTest030
+ * @tc.desc: test button layout using buttonType ROUNDED_RECTANGLE and set border by user.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonTestNg, ButtonPatternTest030, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bubble and get frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.typeValue = std::make_optional(ButtonType::ROUNDED_RECTANGLE);
+    testProperty.stateEffectValue = std::make_optional(STATE_EFFECT);
+    testProperty.borderRadius = std::make_optional(BORDER_RADIUS);
+    auto frameNode = CreateLabelButtonParagraphByRoundedRect(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
+     * @tc.expected: step2. related function is called.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutWrapper = frameNode->CreateLayoutWrapper();
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    auto buttonLayoutAlgorithm = buttonPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(buttonLayoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(buttonLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. update layoutWrapper.
+     */
+    // set button width and height by user
+    layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(CalcLength(BUTTON_WIDTH), CalcLength()));
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+
+    PaddingProperty noPadding = CreatePadding(ZERO, ZERO, ZERO, ZERO);
+    layoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+
+    /**
+     * @tc.steps: step3. use layoutAlgorithm to measure and layout.
+     * @tc.expected: check whether the value of geometry's frameSize and frameOffset is correct.
+     */
+    buttonLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    buttonLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize().Width(), BUTTON_WIDTH);
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), OffsetF());
+
+    auto childWrapper = AceType::DynamicCast<LayoutWrapperNode>(layoutWrapper->GetOrCreateChildByIndex(0));
+    ASSERT_NE(childWrapper, nullptr);
+    auto iter = layoutWrapper->childrenMap_.find(0);
+    if (iter == layoutWrapper->childrenMap_.end()) {
+        layoutWrapper->AppendChild(childWrapper);
+    }
+    auto childButtonLayoutProperty =
+        AccessibilityManager::DynamicCast<LayoutProperty>(childWrapper->GetLayoutProperty());
+    ASSERT_NE(childButtonLayoutProperty, nullptr);
+    CalcSize calcSize { CalcLength(Dimension(300.0)), CalcLength(Dimension(300.0)) };
+    childButtonLayoutProperty->UpdateUserDefinedIdealSize(calcSize);
+
+    buttonLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    buttonLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(childWrapper->GetGeometryNode()->GetContentSize().Width(), 0);
+    /**
+     * @tc.steps: step4. use layoutAlgorithm to measure and layout.
+     * @tc.expected: check whether the value of geometry's contentSize's height is 1.
+     */
+    auto buttonLayoutProperty =
+        AccessibilityManager::DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    buttonLayoutProperty->UpdateFontSize(Dimension(24.0));
+    buttonLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    buttonLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(childWrapper->GetGeometryNode()->GetContentSize().Height(), 0);
 }
 
 /**

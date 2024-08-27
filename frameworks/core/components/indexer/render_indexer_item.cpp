@@ -15,10 +15,7 @@
 
 #include "core/components/indexer/render_indexer_item.h"
 
-#include "core/components/focus_animation/render_focus_animation.h"
 #include "core/components/indexer/render_indexer_circle.h"
-#include "core/components/indexer/render_indexer_list.h"
-#include "core/components/text/render_text.h"
 
 namespace OHOS::Ace {
 namespace {

@@ -151,4 +151,20 @@ void FfiOHOSAceFrameworkTextSetBaselineOffset(double baseLine, int32_t unit)
 }
 
 void FfiOHOSAceFrameworkTextOnClick(void (*callback)(CJClickInfo clickInfo)) {}
+
+void FfiTextSetResponseRegion(CJResponseRegion value)
+{
+    std::vector<DimensionRect> result;
+    ParseCJResponseRegion(value, result);
+    ViewAbstractModel::GetInstance()->SetResponseRegion(result);
+    TextModel::GetInstance()->SetResponseRegion(true);
+}
+
+void FfiTextSetResponseRegionArray(VectorStringPtr vecContent)
+{
+    std::vector<DimensionRect> result;
+    ParseVectorStringPtr(vecContent, result);
+    ViewAbstractModel::GetInstance()->SetResponseRegion(result);
+    TextModel::GetInstance()->SetResponseRegion(true);
+}
 }

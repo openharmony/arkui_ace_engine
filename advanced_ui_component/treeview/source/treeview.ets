@@ -2568,8 +2568,8 @@ class ListNodeDataSource extends BasicDataSource {
     if (operation === MenuOperation.MODIFY_NODE) {
       let modifyNodeInfo: NodeInfo = this.listNode[this.modifyNodeIndex];
       let backParamModify: CallbackParam = {
-        currentNodeId: modifyNodeInfo.getNodeCurrentNodeId(),
-        parentNodeId: modifyNodeInfo.getNodeParentNodeId(),
+        currentNodeId: modifyNodeInfo?.getNodeCurrentNodeId(),
+        parentNodeId: modifyNodeInfo?.getNodeParentNodeId(),
       };
       this.appEventBus.emit(TreeListenType.NODE_MODIFY, backParamModify);
     } else if (operation === MenuOperation.ADD_NODE) {
@@ -2584,8 +2584,8 @@ class ListNodeDataSource extends BasicDataSource {
       let editIcon: Resource | string | undefined = (addNodeInfo.getNodeItem().imageNode !== undefined) ?
         addNodeInfo.getNodeItem().imageNode?.editSource : undefined;
       let callbackParam: CallbackParam = {
-        currentNodeId: addNodeInfo.getNodeCurrentNodeId(),
-        parentNodeId: addNodeInfo.getNodeParentNodeId(),
+        currentNodeId: addNodeInfo?.getNodeCurrentNodeId(),
+        parentNodeId: addNodeInfo?.getNodeParentNodeId(),
       };
       this.appEventBus.emit(TreeListenType.NODE_ADD, callbackParam);
     }
@@ -2609,7 +2609,7 @@ class ListNodeDataSource extends BasicDataSource {
     }
     if (operation === MenuOperation.MODIFY_NODE) {
       for (let i: number = 0; i < this.listNode.length; i++) { // nodeId to find index
-        if (this.listNode[i].getNodeCurrentNodeId() === nodeId) {
+        if (this.listNode[i]?.getNodeCurrentNodeId() === nodeId) {
           index = i;
           break;
         }
@@ -2650,7 +2650,7 @@ class ListNodeDataSource extends BasicDataSource {
       this.setImageSource(index, InteractionStatus.FINISH_EDIT);
       this.setImageCollapseSource(index, InteractionStatus.FINISH_EDIT);
       this.notificationNodeInfo(this.modifyNodeIndex, this.currentOperation);
-      this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(nodeInfo.getNodeCurrentNodeId()));
+      this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(nodeInfo?.getNodeCurrentNodeId()));
     }
   }
 
@@ -3832,7 +3832,7 @@ export struct TreeViewInner {
     right: $r('sys.float.padding_level0'),
     top: $r('sys.float.padding_level0'),
     bottom: $r('sys.float.padding_level0') };
-  private inputFontSize: number = getContext().resourceManager.getNumberByName('ohos_id_text_size_body1');
+    private inputFontSize: number = resourceManager.getSystemResourceManager().getNumberByName('ohos_id_text_size_body1');
 
   aboutToAppear(): void {
     if (this.item.getNodeItem().imageNode) {

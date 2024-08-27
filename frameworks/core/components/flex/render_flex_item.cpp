@@ -16,7 +16,6 @@
 #include "core/components/flex/render_flex_item.h"
 
 #include "base/log/dump_log.h"
-#include "base/utils/utils.h"
 #include "core/components/flex/flex_item_component.h"
 
 namespace OHOS::Ace {

@@ -221,25 +221,42 @@ void DrawPixelMapInner(RSCanvas* canvas, const RefPtr<PixelMap>& pixmap, int32_t
 RefPtr<DragWindow> DragWindow::CreateDragWindow(
     const std::string& windowName, int32_t x, int32_t y, uint32_t width, uint32_t height)
 {
-    int32_t halfWidth = static_cast<int32_t>(width) / 2;
-    int32_t halfHeight = static_cast<int32_t>(height) / 2;
+    return CreateDragWindow({ windowName, x, y, width, height });
+}
+
+RefPtr<DragWindow> DragWindow::CreateDragWindow(const DragWindowParams& params)
+{
+    int32_t halfWidth = static_cast<int32_t>(params.width) / 2;
+    int32_t halfHeight = static_cast<int32_t>(params.height) / 2;
 
     OHOS::sptr<OHOS::Rosen::WindowOption> option = new OHOS::Rosen::WindowOption();
-    option->SetWindowRect({ x - halfWidth, y - halfHeight, width, height });
+    option->SetWindowRect({ params.x - halfWidth, params.y - halfHeight, params.width, params.height });
     option->SetHitOffset(halfWidth, halfHeight);
-    option->SetWindowType(OHOS::Rosen::WindowType::WINDOW_TYPE_DRAGGING_EFFECT);
+    if (params.parentWindowId == -1) {
+        option->SetWindowType(OHOS::Rosen::WindowType::WINDOW_TYPE_DRAGGING_EFFECT);
+    } else {
+        option->SetParentId(params.parentWindowId);
+        option->SetWindowType(OHOS::Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    }
     option->SetWindowMode(OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING);
     option->SetFocusable(false);
-    OHOS::sptr<OHOS::Rosen::Window> dragWindow = OHOS::Rosen::Window::Create(windowName, option);
+    OHOS::sptr<OHOS::Rosen::Window> dragWindow = OHOS::Rosen::Window::Create(params.windowName, option);
     CHECK_NULL_RETURN(dragWindow, nullptr);
 
-    OHOS::Rosen::WMError ret = dragWindow->Show();
+    OHOS::Rosen::WMError ret = dragWindow->MoveTo(params.x - halfWidth, params.y - halfHeight, true);
+    if (ret != OHOS::Rosen::WMError::WM_OK) {
+        TAG_LOGE(AceLogTag::ACE_DRAG, "DragWindow MoveTo, drag window move failed, ret: %d", ret);
+        return nullptr;
+    }
+
+    ret = dragWindow->Show();
     if (ret != OHOS::Rosen::WMError::WM_OK) {
         TAG_LOGE(AceLogTag::ACE_DRAG, "DragWindow CreateDragWindow, drag window Show() failed, ret: %d", ret);
+        return nullptr;
     }
 
     auto window = AceType::MakeRefPtr<DragWindowOhos>(dragWindow);
-    window->SetSize(width, height);
+    window->SetSize(params.width, params.height);
     return window;
 }
 
@@ -273,7 +290,7 @@ void DragWindowOhos::MoveTo(int32_t x, int32_t y) const
 {
     CHECK_NULL_VOID(dragWindow_);
 
-    OHOS::Rosen::WMError ret = dragWindow_->MoveTo(x + offsetX_ - width_ / 2, y + offsetY_ - height_ / 2);
+    OHOS::Rosen::WMError ret = dragWindow_->MoveTo(x + offsetX_ - width_ / 2, y + offsetY_ - height_ / 2, true);
     if (ret != OHOS::Rosen::WMError::WM_OK) {
         TAG_LOGE(AceLogTag::ACE_DRAG, "DragWindow MoveTo, drag window move failed, ret: %d", ret);
         return;

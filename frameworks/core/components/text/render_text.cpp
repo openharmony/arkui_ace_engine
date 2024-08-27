@@ -15,17 +15,11 @@
 
 #include "core/components/text/render_text.h"
 
-#include "base/geometry/size.h"
 #include "base/log/dump_log.h"
 #include "core/common/ace_engine_ext.h"
-#include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/font_manager.h"
 #include "core/components/container_modal/container_modal_constants.h"
-#include "core/components/gesture_listener/gesture_listener_component.h"
-#include "core/components/text/text_component.h"
-#include "core/components/text_field/render_text_field.h"
 #include "core/components/text_overlay/text_overlay_component.h"
-#include "core/components_v2/inspector/utils.h"
 #include "core/event/ace_event_helper.h"
 #include "core/event/ace_events.h"
 

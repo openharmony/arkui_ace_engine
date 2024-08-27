@@ -263,6 +263,8 @@ protected:
     float GetPageCurrentOffset();
     bool AccumulateExpandCacheHit(ExpandEdges& totalExpand);
     void GetAccumulatedSafeAreaExpandHelper(RectF& adjustingRect, ExpandEdges& totalExpand);
+    void ParseSafeAreaPaddingSides(const PaddingPropertyF& parentSafeAreaPadding,
+        const PaddingPropertyF& parentInnerSpace, const RectF& adjustingRect, ExpandEdges& rollingExpand);
 
     WeakPtr<FrameNode> hostNode_;
 

@@ -98,6 +98,12 @@ enum class DialogButtonDirection {
     VERTICAL,
 };
 
+// avoid mode when keyboard shows
+enum class KeyboardAvoidMode {
+    DEFAULT = 0,
+    NONE,
+};
+
 class DialogAlignmentUtils {
 public:
     static std::string ConvertDialogAlignmentToString(DialogAlignment dialogAlignment)
@@ -266,6 +272,8 @@ struct DialogProperties {
     std::function<bool(int32_t)> onWillDismissCallByNDK;
 
     WordBreak wordBreak = WordBreak::BREAK_ALL;
+
+    KeyboardAvoidMode keyboardAvoidMode = KeyboardAvoidMode::DEFAULT;
 };
 
 struct PromptDialogAttr {
@@ -299,6 +307,7 @@ struct PromptDialogAttr {
     std::function<void()> onWillAppear;
     std::function<void()> onWillDisappear;
     std::function<void(DialogProperties&)> onLanguageChange;
+    KeyboardAvoidMode keyboardAvoidMode = KeyboardAvoidMode::DEFAULT;
 };
 
 } // namespace OHOS::Ace

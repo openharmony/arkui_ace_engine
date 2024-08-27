@@ -38,6 +38,7 @@ constexpr int32_t DEFAULT_MIN_COUNT = 1;
 constexpr int32_t DEFAULT_CELL_LENGTH = 0;
 constexpr bool DEFAULT_MULTI_SELECTABLE = false;
 constexpr bool DEFAULT_SUPPORT_ANIMATION = false;
+constexpr Dimension DEFAULT_FADING_EDGE_LENGTH = Dimension(32.0f, DimensionUnit::VP); // default value
 const float ERROR_FLOAT_CODE = -1.0f;
 std::string g_strValue;
 
@@ -447,6 +448,23 @@ ArkUI_Int32 GetCachedCount(ArkUINodeHandle node)
     return GridModelNG::GetCachedCount(frameNode);
 }
 
+void SetGridFadingEdge(
+    ArkUINodeHandle node, ArkUI_Bool fadingEdge, ArkUI_Float32 fadingEdgeLengthValue, ArkUI_Int32 fadingEdgeLengthUnit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Dimension fadingEdgeLengthDimension =
+        Dimension(fadingEdgeLengthValue, static_cast<OHOS::Ace::DimensionUnit>(fadingEdgeLengthUnit));
+    NG::ScrollableModelNG::SetFadingEdge(frameNode, fadingEdge, fadingEdgeLengthDimension);
+}
+
+void ResetGridFadingEdge(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::ScrollableModelNG::SetFadingEdge(frameNode, false, DEFAULT_FADING_EDGE_LENGTH);
+}
+
 namespace NodeModifier {
 const ArkUIGridModifier* GetGridModifier()
 {
@@ -460,7 +478,7 @@ const ArkUIGridModifier* GetGridModifier()
         ResetNestedScroll, SetEnableScroll, ResetEnableScroll, SetFriction, ResetFriction, GetColumnsTemplate,
         GetRowsTemplate, GetColumnsGap, GetRowsGap, SetNodeAdapter, ResetNodeAdapter, GetNodeAdapter, SetCachedCount,
         ResetCachedCount, GetCachedCount, SetFlingSpeedLimit, ResetFlingSpeedLimit, SetGridAlignItems,
-        ResetGridAlignItems };
+        ResetGridAlignItems, SetGridFadingEdge, ResetGridFadingEdge };
     return &modifier;
 }
 

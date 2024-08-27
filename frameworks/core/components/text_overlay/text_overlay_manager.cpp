@@ -15,9 +15,6 @@
 
 #include "core/components/text_overlay/text_overlay_manager.h"
 
-#include <cmath>
-#include <string>
-
 #include "core/components/font/constants_converter.h"
 #include "core/components/stack/stack_element.h"
 #include "core/components/text_overlay/text_overlay_component.h"

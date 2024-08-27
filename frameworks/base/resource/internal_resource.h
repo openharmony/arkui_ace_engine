@@ -126,6 +126,7 @@ public:
         IC_SHARE_SVG,
         IC_TRANSLATE_SVG,
         IC_SEARCH_SVG,
+        IC_AI_WRITE_SVG,
         IC_BOTTOMSHEET_CLOSE_SVG,
         IC_CANCEL_SVG,
         RADIO_TICK_SVG,

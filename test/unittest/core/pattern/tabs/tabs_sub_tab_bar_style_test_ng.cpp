@@ -15,6 +15,10 @@
 
 #include "tabs_test_ng.h"
 
+#include "core/components/tab_bar/tab_theme.h"
+#include "core/components_ng/pattern/tabs/tab_content_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+
 namespace OHOS::Ace::NG {
 class TabsSubTabBarStyleTestNg : public TabsTestNg {
 public:

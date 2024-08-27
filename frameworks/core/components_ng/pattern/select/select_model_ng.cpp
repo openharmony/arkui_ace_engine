@@ -529,7 +529,7 @@ void SelectModelNG::InitSelect(FrameNode* frameNode, const std::vector<SelectPar
         CHECK_NULL_VOID(overlayManager);
         overlayManager->DeleteMenu(id);
     };
-    select->PushDestroyCallback(destructor);
+    select->PushDestroyCallbackWithTag(destructor, V2::SELECT_ETS_TAG);
 }
 
 void SelectModelNG::SetArrowPosition(FrameNode* frameNode, const ArrowPosition value)
@@ -742,6 +742,7 @@ void SelectModelNG::ResetBuilderFunc(FrameNode* frameNode)
 
 void SelectModelNG::SetBuilderFunc(FrameNode* frameNode, NG::SelectMakeCallback&& makeFunc)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<SelectPattern>();
     CHECK_NULL_VOID(pattern);
     auto menuNode = pattern->GetMenuNode();
@@ -753,6 +754,7 @@ void SelectModelNG::SetBuilderFunc(FrameNode* frameNode, NG::SelectMakeCallback&
 
 void SelectModelNG::SetChangeValue(FrameNode* frameNode, int index, const std::string& value)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<SelectPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetItemSelected(index, value);

@@ -511,6 +511,30 @@ HWTEST_F(TitleBarTestNg, TitleBarPattern005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TitleBarPattern006
+ * @tc.desc: Test ProcessTittleDragUpdate function in x Axis.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPattern006, TestSize.Level1)
+{
+    constexpr float offset = 190.0f;
+    InitTitleBarTestNg();
+    frameNode_->GetSubtitle();
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
+    titleBarPattern_->SetRelatedInfoOnXAxis();
+    titleBarPattern_->ProcessTitleDragUpdate(offset);
+    titleBarPattern_->ProcessTitleDragEnd();
+    titleBarPattern_->SetTempTitleOffsetY();
+    titleBarPattern_->SetTempTitleOffsetX();
+    EXPECT_EQ(titleBarPattern_->GetTempTitleOffsetX(), titleBarPattern_->maxTitleOffsetX_);
+    titleBarPattern_->SetTempSubTitleOffsetY();
+    titleBarPattern_->SetTempSubTitleOffsetX();
+    EXPECT_EQ(titleBarPattern_->GetTempSubTitleOffsetX(), titleBarPattern_->maxTitleOffsetX_);
+}
+
+/**
  * @tc.name: TitleBarPattern007
  * @tc.desc: Test CalculateHandledOffsetMinTitle function.
  * @tc.type: FUNC

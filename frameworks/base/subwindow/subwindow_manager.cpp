@@ -501,6 +501,7 @@ void SubwindowManager::CloseCustomDialogNG(int32_t dialogId)
     auto iter = subwindowMap_.begin();
     while (iter != subwindowMap_.end()) {
         auto overlay = iter->second->GetOverlayManager();
+        CHECK_NULL_VOID(overlay);
         if (overlay->GetDialogMap().find(dialogId) != overlay->GetDialogMap().end()) {
             return overlay->CloseCustomDialog(dialogId);
         }
@@ -514,6 +515,7 @@ void SubwindowManager::CloseCustomDialogNG(const WeakPtr<NG::UINode>& node, std:
     auto iter = subwindowMap_.begin();
     while (iter != subwindowMap_.end()) {
         auto overlay = iter->second->GetOverlayManager();
+        CHECK_NULL_VOID(overlay);
         overlay->CloseCustomDialog(node, std::move(callback));
         iter++;
     }

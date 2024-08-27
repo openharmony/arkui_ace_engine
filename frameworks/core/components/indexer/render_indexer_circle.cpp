@@ -15,9 +15,6 @@
 
 #include "core/components/indexer/render_indexer_circle.h"
 
-#include "core/components/arc/render_arc.h"
-#include "core/components/indexer/render_indexer_item.h"
-
 namespace OHOS::Ace {
 
 RefPtr<RenderNode> RenderIndexerCircle::Create()

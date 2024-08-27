@@ -15,8 +15,6 @@
 
 #include "core/components/tab_bar/render_tab_bar_item.h"
 
-#include "core/components/common/properties/decoration.h"
-
 namespace OHOS::Ace {
 namespace {
 

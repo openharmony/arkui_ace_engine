@@ -37,6 +37,10 @@ public:
         overScroll_ = value;
     }
 
+    void StartCacheLayout() override;
+    bool AppendCacheItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline) override;
+    void EndCacheLayout() override;
+
 private:
     void Init(const SizeF& frameSize);
     /* init WaterFlow without Sections */
@@ -85,7 +89,7 @@ private:
     /**
      * @brief fills backward with one section.
      *
-     * @return true if viewportBound is reached. False implies idx > maxChildIdx.
+     * @return true if fillFront should end. False implies section is completely filled or idx < minChildIdx.
      */
     bool FillFrontSection(float viewportBound, int32_t& idx, int32_t minChildIdx);
     /**
@@ -95,7 +99,7 @@ private:
     /**
      * @return new startPos of the filled lane.
      */
-    float FillFrontHelper(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, size_t laneIdx);
+    float FillFrontHelper(float itemLen, int32_t idx, size_t laneIdx);
     /**
      * @brief Clear items above the viewport.
      * Iterate by index to keep item range continuous.
@@ -113,7 +117,7 @@ private:
     /**
      * @brief fills forward with one section.
      *
-     * @return true if viewportBound is reached. False implies idx > maxChildIdx.
+     * @return true if fillBack should end. False implies section is completely filled or idx > maxChildIdx.
      */
     bool FillBackSection(float viewportBound, int32_t& idx, int32_t maxChildIdx);
     /**
@@ -123,7 +127,7 @@ private:
     /**
      * @return new endPos of the filled lane.
      */
-    float FillBackHelper(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, size_t laneIdx);
+    float FillBackHelper(float itemLen, int32_t idx, size_t laneIdx);
     /**
      * @brief Clear items below the viewport.
      *
@@ -138,7 +142,24 @@ private:
      */
     void PostMeasureSelf(float selfCrossLen);
 
-    float MeasureChild(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, size_t lane);
+    float MeasureChild(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, size_t lane) const;
+
+    /**
+     * @brief Fill cache items back to lanes_ to prepare for Layout phase.
+     * (These items were removed during ClearFront / ClearBack)
+     */
+    void RecoverCacheItems(int32_t cacheCount);
+    /**
+     * @param itemIdx to recover.
+     * @param front true if recovering an item before startIndex_.
+     * @return true if item is successfully recovered.
+     */
+    bool RecoverCachedHelper(int32_t itemIdx, bool front);
+
+    /**
+     * @brief Measure all items in view to check if any item's height changed.
+     */
+    bool ItemHeightChanged() const;
 
     /**
      * @brief Layout a single section of items
@@ -158,8 +179,9 @@ private:
     RefPtr<WaterFlowLayoutInfoSW> info_;
     RefPtr<WaterFlowSections> sections_;
 
-    int32_t itemCnt_ = 0;
+    int32_t itemCnt_ = 0; // total number of FlowItems (excluding footer)
     float mainLen_ = 0.0f;
+    std::optional<int64_t> cacheDeadline_; // cache layout deadline
 
     bool overScroll_ = true;
 };

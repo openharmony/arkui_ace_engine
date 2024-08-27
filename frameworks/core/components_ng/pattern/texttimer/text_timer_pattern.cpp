@@ -397,4 +397,13 @@ void TextTimerPattern::DumpInfo()
     auto elapsedTime = GetFormatDuration(elapsedTime_);
     DumpLog::GetInstance().AddDesc("elapsedTime: ", elapsedTime);
 }
+
+void TextTimerPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto textTimerLayoutProperty = GetLayoutProperty<TextTimerLayoutProperty>();
+    CHECK_NULL_VOID(textTimerLayoutProperty);
+    json->Put("isCountDown", textTimerLayoutProperty->GetIsCountDown().value_or(false));
+    json->Put("format", textTimerLayoutProperty->GetFormat().value_or(DEFAULT_FORMAT).c_str());
+    json->Put("elapsedTime", std::to_string(GetFormatDuration(elapsedTime_)).c_str());
+}
 } // namespace OHOS::Ace::NG

@@ -16,7 +16,6 @@
 #include "core/components/declaration/search/search_declaration.h"
 
 #include "base/utils/string_utils.h"
-#include "base/utils/system_properties.h"
 #include "core/components/declaration/common/declaration_constants.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/core/components/search/search_theme.h"

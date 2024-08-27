@@ -31,6 +31,7 @@ public:
     TextInputAction GetDefaultTextInputAction() const override;
     void InitDragEvent() override;
     void ApplyNormalTheme() override;
+    bool IsTextEditableForStylus() override;
 };
 } // namespace OHOS::Ace::NG
 

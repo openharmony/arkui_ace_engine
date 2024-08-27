@@ -88,6 +88,8 @@ public:
             theme->richeditorShowHandle_ = StringUtils::StringToInt(showHandle);
             theme->textStyle_.SetTextColor(pattern->GetAttr<Color>("default_text_color", DEFAULT_TEXT_COLOR));
             theme->textStyle_.SetTextDecorationColor(pattern->GetAttr<Color>("default_text_color", DEFAULT_TEXT_COLOR));
+            theme->aiWriteBundleName_ = pattern->GetAttr<std::string>("rich_editor_writting_bundle_name", "");
+            theme->aiWriteAbilityName_ = pattern->GetAttr<std::string>("rich_editor_writting_ability_name", "");
         }
     };
 
@@ -187,7 +189,14 @@ public:
     {
         return dragCornerRadius_;
     }
-
+    const std::string& GetAIWriteBundleName() const
+    {
+        return aiWriteBundleName_;
+    }
+    const std::string& GetAIWriteAbilityName() const
+    {
+        return aiWriteAbilityName_;
+    }
 protected:
     RichEditorTheme() = default;
 
@@ -213,6 +222,8 @@ private:
     Color menuIconColor_ = Color(0x99000000);
     Dimension previewUnderlineWidth_ = 2.0_vp;
     bool richeditorShowHandle_ = false;
+    std::string aiWriteBundleName_;
+    std::string aiWriteAbilityName_;
 };
 } // namespace OHOS::Ace::NG
 

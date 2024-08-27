@@ -15,7 +15,6 @@
 
 #include "core/components/image/image_animator_component.h"
 
-#include "core/animation/animation_pub.h"
 #include "core/components/image/image_animator_element.h"
 
 namespace OHOS::Ace {

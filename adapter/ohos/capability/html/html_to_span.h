@@ -50,7 +50,7 @@ class HtmlToSpan {
 public:
     explicit HtmlToSpan() {};
     ~HtmlToSpan() {};
-    RefPtr<MutableSpanString> ToSpanString(const std::string& html);
+    RefPtr<MutableSpanString> ToSpanString(const std::string& html, const bool isNeedLoadPixelMap = true);
     using Styles = std::vector<std::pair<std::string, std::string>>;
 
     class DecorationSpanParam {
@@ -150,14 +150,17 @@ private:
         size_t& pos, std::vector<SpanInfo>& spanInfos);
 
     void ToImageOptions(const std::map<std::string, std::string>& styles, ImageSpanOptions& option);
-    void ToImage(xmlNodePtr node, size_t len, size_t& pos, std::vector<SpanInfo>& spanInfos);
+    void ToImage(xmlNodePtr node, size_t len, size_t& pos, std::vector<SpanInfo>& spanInfos,
+        bool isProcessImageOptions = true);
 
     void ToParagraphStyle(const Styles& styleMap, SpanParagraphStyle& style);
     void ToParagraphSpan(xmlNodePtr node, size_t len, size_t& pos, std::vector<SpanInfo>& spanInfos);
 
     void ParaseHtmlToSpanInfo(
-        xmlNodePtr node, size_t& pos, std::string& allContent, std::vector<SpanInfo>& spanInfos);
-    void ToSpan(xmlNodePtr curNode, size_t& pos, std::string& allContent, std::vector<SpanInfo>& spanInfos);
+        xmlNodePtr node, size_t& pos, std::string& allContent, std::vector<SpanInfo>& spanInfos,
+        bool isNeedLoadPixelMap = true);
+    void ToSpan(xmlNodePtr curNode, size_t& pos, std::string& allContent, std::vector<SpanInfo>& spanInfos,
+        bool isNeedLoadPixelMap = true);
     void PrintSpanInfos(const std::vector<SpanInfo>& spanInfos);
     void AfterProcSpanInfos(std::vector<SpanInfo>& spanInfos);
     bool IsValidNode(const std::string& name);

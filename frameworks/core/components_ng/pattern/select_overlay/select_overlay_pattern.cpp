@@ -238,6 +238,9 @@ void SelectOverlayPattern::HandleOnClick(GestureEvent& info)
         StartHiddenHandleTask();
         info_->menuInfo.singleHandleMenuIsShow = info_->menuInfo.menuIsShow;
     }
+    if (info_->afterOnClick) {
+        info_->afterOnClick(info, isFirstHandleTouchDown_);
+    }
 }
 
 void SelectOverlayPattern::HandleTouchEvent(const TouchEventInfo& info)

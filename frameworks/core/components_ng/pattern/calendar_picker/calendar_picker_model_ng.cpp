@@ -356,6 +356,89 @@ void CalendarPickerModelNG::SetTextStyle(FrameNode* frameNode, const PickerTextS
         CalendarPickerLayoutProperty, Weight, textStyle.fontWeight.value_or(FontWeight::NORMAL), frameNode);
 }
 
+void CalendarPickerModelNG::ClearBorderColor()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
+    BorderColorProperty borderColor;
+    borderColor.SetColor(theme->GetEntryBorderColor());
+    frameNode->GetRenderContext()->UpdateBorderColor(borderColor);
+}
+
+void CalendarPickerModelNG::ClearBorderRadius()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(theme->GetEntryBorderRadius());
+    frameNode->GetRenderContext()->UpdateBorderRadius(borderRadius);
+}
+
+void CalendarPickerModelNG::ClearHeight()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
+    frameNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(std::nullopt, CalcLength(theme->GetEntryHeight())));
+}
+
+void CalendarPickerModelNG::ClearBorder()
+{
+    ClearBorderWidth();
+    ClearBorderRadius();
+    ClearBorderColor();
+}
+
+void CalendarPickerModelNG::ClearBorderWidth()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
+    BorderWidthProperty borderWidth;
+    borderWidth.SetBorderWidth(theme->GetEntryBorderWidth());
+    frameNode->GetLayoutProperty()->UpdateBorderWidth(borderWidth);
+}
+
+void CalendarPickerModelNG::ClearPadding()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+    if (!pickerPattern->HasContentNode()) {
+        return;
+    }
+    auto contentNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    CHECK_NULL_VOID(contentNode);
+    auto linearLayoutProperty = contentNode->GetLayoutProperty();
+    CHECK_NULL_VOID(linearLayoutProperty);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
+    PaddingProperty padding;
+    padding.top = CalcLength(theme->GetEntryDateTopBottomMargin());
+    padding.left = CalcLength(theme->GetEntryDateLeftRightMargin());
+    padding.right = CalcLength(theme->GetEntryDateLeftRightMargin());
+    padding.bottom = CalcLength(theme->GetEntryDateTopBottomMargin());
+    linearLayoutProperty->UpdatePadding(padding);
+}
+
 RefPtr<CalendarTheme> GetCalendarTheme()
 {
     auto pipeline = PipelineBase::GetCurrentContextSafely();

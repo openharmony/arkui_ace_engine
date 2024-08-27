@@ -135,4 +135,15 @@ double ConvertDensityToAce(Global::Resource::ScreenDensity density)
     }
 }
 
+Global::Resource::ColorMode ConvertColorModeToGlobal(ColorMode colorMode)
+{
+    switch (colorMode) {
+        case ColorMode::DARK:
+            return Global::Resource::ColorMode::DARK;
+        case ColorMode::LIGHT:
+            return Global::Resource::ColorMode::LIGHT;
+        default:
+            return Global::Resource::ColorMode::COLOR_MODE_NOT_SET;
+    }
+}
 } // namespace OHOS::Ace

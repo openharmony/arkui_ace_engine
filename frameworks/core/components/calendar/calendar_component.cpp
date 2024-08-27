@@ -16,18 +16,12 @@
 #include "core/components/calendar/calendar_component.h"
 
 #include "base/i18n/localization.h"
-#include "core/components/box/box_component.h"
-#include "core/components/button/button_component.h"
 #include "core/components/button/render_button.h"
 #include "core/components/calendar/calendar_element.h"
 #include "core/components/calendar/render_calendar.h"
 #include "core/components/display/display_component.h"
 #include "core/components/flex/flex_item_component.h"
-#include "core/components/image/image_component.h"
 #include "core/components/padding/padding_component.h"
-#include "core/components/text/text_component.h"
-#include "core/event/ace_event_helper.h"
-#include "core/event/back_end_event_manager.h"
 
 namespace OHOS::Ace {
 namespace {

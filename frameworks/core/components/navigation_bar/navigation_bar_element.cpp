@@ -15,9 +15,6 @@
 
 #include "core/components/navigation_bar/navigation_bar_element.h"
 
-#include "core/event/ace_event_helper.h"
-#include "core/gestures/click_recognizer.h"
-
 namespace OHOS::Ace {
 namespace {
 

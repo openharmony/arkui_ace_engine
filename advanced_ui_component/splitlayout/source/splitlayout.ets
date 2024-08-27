@@ -70,6 +70,10 @@ export struct SplitLayout {
                     left: $r('sys.float.ohos_id_max_padding_start'),
                     right: $r('sys.float.ohos_id_max_padding_end'), })
                 }.scrollBar(BarState.On)
+                .nestedScroll({
+                  scrollForward: NestedScrollMode.SELF_FIRST,
+                  scrollBackward: NestedScrollMode.SELF_FIRST,
+                })
               }
               .height('34%')
               .width('100%')
@@ -115,6 +119,10 @@ export struct SplitLayout {
                   .alignItems(HorizontalAlign.Start)
                   .margin({ end: LengthMetrics.vp(96) })
                 }.scrollBar(BarState.On)
+                .nestedScroll({
+                  scrollForward: NestedScrollMode.SELF_FIRST,
+                  scrollBackward: NestedScrollMode.SELF_FIRST,
+                })
               }
               .backgroundColor(this.imageBackgroundColor)
               .height('34%')
@@ -138,7 +146,7 @@ export struct SplitLayout {
           direction: GridRowDirection.Row
         }) {
           GridCol({ span: { xs: 4, sm: 4, md: 4, lg: 4 } }) {
-            Column() {
+            Flex({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center, direction: FlexDirection.Column }) {
               Image(this.mainImage)
                 .height('17%')
                 .width('34%')
@@ -167,13 +175,14 @@ export struct SplitLayout {
                   left: $r('sys.float.ohos_id_max_padding_start'),
                   right: $r('sys.float.ohos_id_max_padding_end'), })
               }.scrollBar(BarState.On)
-              .layoutWeight(1)
+              .nestedScroll({
+                scrollForward: NestedScrollMode.SELF_FIRST,
+                scrollBackward: NestedScrollMode.SELF_FIRST,
+              })
             }
             .width('100%')
             .height('100%')
             .backgroundColor(this.imageBackgroundColor)
-            .justifyContent(FlexAlign.Center)
-            .alignItems(HorizontalAlign.Center)
           }
           .height('100%')
 

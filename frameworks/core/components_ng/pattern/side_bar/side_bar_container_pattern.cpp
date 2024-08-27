@@ -31,7 +31,6 @@
 #include "core/common/container.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
@@ -63,7 +62,6 @@ constexpr Dimension DEFAULT_DRAG_REGION = 20.0_vp;
 constexpr int32_t SIDEBAR_DURATION = 500;
 const RefPtr<CubicCurve> SIDEBAR_CURVE = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.2f, 0.1f, 1.0f);
 constexpr Dimension DEFAULT_DIVIDER_STROKE_WIDTH = 1.0_vp;
-constexpr Dimension DEFAULT_DIVIDER_START_MARGIN_VP = 0.0_vp;
 constexpr Dimension DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_VP = 2.0_vp;
 constexpr Color DEFAULT_DIVIDER_COLOR = Color(0x08000000);
 constexpr static int32_t PLATFORM_VERSION_TEN = 10;
@@ -126,7 +124,7 @@ void SideBarContainerPattern::OnUpdateShowSideBar(const RefPtr<SideBarContainerL
     }
 
     auto newShowSideBar = layoutProperty->GetShowSideBar().value_or(true);
-    if (newShowSideBar == showSideBar_) {
+    if (newShowSideBar == userSetShowSideBar_) {
         return;
     }
 
@@ -134,7 +132,8 @@ void SideBarContainerPattern::OnUpdateShowSideBar(const RefPtr<SideBarContainerL
         (sideBarStatus_ == SideBarStatus::SHOW && !newShowSideBar))) {
         FireChangeEvent(newShowSideBar);
     }
-
+    
+    userSetShowSideBar_ = newShowSideBar;
     SetSideBarStatus(newShowSideBar ? SideBarStatus::SHOW : SideBarStatus::HIDDEN);
     UpdateControlButtonIcon();
     auto host = GetHost();
@@ -164,24 +163,7 @@ void SideBarContainerPattern::OnUpdateShowControlButton(
         return;
     }
 
-    auto controlButtonWidth = DEFAULT_CONTROL_BUTTON_WIDTH;
-    auto controlButtonHeight = DEFAULT_CONTROL_BUTTON_HEIGHT;
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TEN)) {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto sideBarTheme = pipeline->GetTheme<SideBarTheme>();
-        CHECK_NULL_VOID(sideBarTheme);
-        controlButtonWidth = sideBarTheme->GetControlButtonWidthSmall();
-        controlButtonHeight = sideBarTheme->GetControlButtonHeightSmall();
-    }
-
-    controlImageWidth_ = layoutProperty->GetControlButtonWidth().value_or(controlButtonWidth);
-    controlImageHeight_ = layoutProperty->GetControlButtonHeight().value_or(controlButtonHeight);
-    if (controlImageWidth_ != controlButtonWidth || controlImageHeight_ != controlButtonHeight) {
-        SetControlButtonSizeCustom(true);
-    } else {
-        SetControlButtonSizeCustom(false);
-    }
+    UpdateControlButtonImageSize();
     auto imageNode = controlButtonNode->GetFirstChild();
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(imageNode);
     if (!imageFrameNode || imageFrameNode ->GetTag() != V2::IMAGE_ETS_TAG) {
@@ -235,21 +217,7 @@ void SideBarContainerPattern::OnUpdateShowDivider(
 
 void SideBarContainerPattern::GetControlImageSize(Dimension& width, Dimension& height)
 {
-    auto controlButtonWidth = DEFAULT_CONTROL_BUTTON_WIDTH;
-    auto controlButtonHeight = DEFAULT_CONTROL_BUTTON_HEIGHT;
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TEN)) {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto sideBarTheme = pipeline->GetTheme<SideBarTheme>();
-        CHECK_NULL_VOID(sideBarTheme);
-        controlButtonWidth = sideBarTheme->GetControlButtonWidthSmall();
-        controlButtonHeight = sideBarTheme->GetControlButtonHeightSmall();
-    }
-    auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    controlImageWidth_ = layoutProperty->GetControlButtonWidth().value_or(controlButtonWidth);
-    controlImageHeight_ = layoutProperty->GetControlButtonHeight().value_or(controlButtonHeight);
-
+    UpdateControlButtonImageSize();
     width = controlImageWidth_;
     height = controlImageHeight_;
 }
@@ -469,7 +437,6 @@ void SideBarContainerPattern::CreateAndMountNodes()
         UpdateDividerShadow();
         return;
     }
-
     auto sideBarNode = children.front();
     sideBarNode->MovePosition(DEFAULT_NODE_SLOT);
     auto sideBarFrameNode = AceType::DynamicCast<FrameNode>(sideBarNode);
@@ -493,7 +460,6 @@ void SideBarContainerPattern::CreateAndMountNodes()
         }
     }
     host->RebuildRenderContextTree();
-
     CreateAndMountDivider(host);
     CreateAndMountControlButton(host);
     UpdateDividerShadow();
@@ -625,6 +591,7 @@ void SideBarContainerPattern::CreateAndMountControlButton(const RefPtr<NG::Frame
 
 RefPtr<FrameNode> SideBarContainerPattern::CreateControlButton(const RefPtr<SideBarTheme>& sideBarTheme)
 {
+    CHECK_NULL_RETURN(sideBarTheme, nullptr);
     int32_t buttonId = ElementRegister::GetInstance()->MakeUniqueId();
     auto buttonNode = FrameNode::GetOrCreateFrameNode(
         V2::BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
@@ -661,6 +628,7 @@ RefPtr<FrameNode> SideBarContainerPattern::CreateControlButton(const RefPtr<Side
 RefPtr<FrameNode> SideBarContainerPattern::CreateControlImage(
     const RefPtr<SideBarTheme>& sideBarTheme, const RefPtr<FrameNode>& parentNode)
 {
+    CHECK_NULL_RETURN(sideBarTheme, nullptr);
     int32_t imgNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto imgNode = FrameNode::GetOrCreateFrameNode(
         V2::IMAGE_ETS_TAG, imgNodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
@@ -681,14 +649,7 @@ RefPtr<FrameNode> SideBarContainerPattern::CreateControlImage(
         Color controlButtonColor;
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
             controlButtonColor = sideBarTheme->GetControlButtonIconColor();
-            auto isStartPos = GetSideBarPositionWithRtl(layoutProperty) == SideBarPosition::START;
-            if (sideBarStatus_ == SideBarStatus::HIDDEN) {
-                info->SetResourceId(isStartPos ?
-                    InternalResource::ResourceId::SIDE_BAR_OPEN : InternalResource::ResourceId::SIDE_BAR_CLOSE);
-            } else {
-                info->SetResourceId(isStartPos ?
-                    InternalResource::ResourceId::SIDE_BAR_CLOSE : InternalResource::ResourceId::SIDE_BAR_OPEN);
-            }
+            UpdateControlButtonImage(info);
         } else {
             controlButtonColor = sideBarTheme->GetControlImageColor();
         }
@@ -921,7 +882,10 @@ void SideBarContainerPattern::FireChangeEvent(bool isShow)
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto inspectorId = host->GetInspectorId().value_or("");
-        builder.SetId(inspectorId).SetType(host->GetTag()).SetChecked(isShow);
+        builder.SetId(inspectorId)
+            .SetType(host->GetTag())
+            .SetChecked(isShow)
+            .SetDescription(host->GetAutoEventParamValue(""));
         Recorder::EventRecorder::Get().OnChange(std::move(builder));
     }
 }
@@ -963,14 +927,7 @@ void SideBarContainerPattern::UpdateControlButtonIcon()
         imgSourceInfo = std::make_optional<ImageSourceInfo>();
         imgSourceInfo->SetResourceId(InternalResource::ResourceId::SIDE_BAR);
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
-            auto isStartPos = GetSideBarPositionWithRtl(layoutProperty) == SideBarPosition::START;
-            if (sideBarStatus_ == SideBarStatus::HIDDEN) {
-                imgSourceInfo->SetResourceId(isStartPos ?
-                    InternalResource::ResourceId::SIDE_BAR_OPEN : InternalResource::ResourceId::SIDE_BAR_CLOSE);
-            } else {
-                imgSourceInfo->SetResourceId(isStartPos ?
-                    InternalResource::ResourceId::SIDE_BAR_CLOSE : InternalResource::ResourceId::SIDE_BAR_OPEN);
-            }
+            UpdateControlButtonImage(imgSourceInfo);
         }
         imgSourceInfo->SetFillColor(controlButtonColor);
     }
@@ -1034,11 +991,9 @@ void SideBarContainerPattern::AddDividerHotZoneRect(const RefPtr<SideBarContaine
     auto dividerHeight = geometryNode->GetFrameSize().Height();
     auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto dividerStartMagin = layoutProperty->GetDividerStartMargin().value_or(DEFAULT_DIVIDER_START_MARGIN_VP);
 
     OffsetF hotZoneOffset;
     hotZoneOffset.SetX(-DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_VP.ConvertToPx());
-    hotZoneOffset.SetY(-dividerStartMagin.ConvertToPx());
     SizeF hotZoneSize;
     auto baseWidth = NearZero(realDividerWidth_, 0.0f) ?
         DEFAULT_DIVIDER_STROKE_WIDTH.ConvertToPx() : realDividerWidth_;
@@ -1192,14 +1147,6 @@ void SideBarContainerPattern::InitDividerMouseEvent(const RefPtr<InputEventHub>&
 
 void SideBarContainerPattern::OnDividerMouseEvent(MouseInfo& info)
 {
-    if (info.GetAction() == MouseAction::PRESS) {
-        isMousePressing_ = true;
-        TAG_LOGI(AceLogTag::ACE_SIDEBAR, "sideBarContainer Divider mouse pressed.");
-    } else if (info.GetAction() == MouseAction::RELEASE) {
-        isMousePressing_ = false;
-        TAG_LOGI(AceLogTag::ACE_SIDEBAR, "sideBarContainer Divider mouse released.");
-    }
-
     // release the mouse button, to check if still in the divider's region
     if (info.GetAction() != MouseAction::RELEASE) {
         return;
@@ -1226,7 +1173,6 @@ void SideBarContainerPattern::OnDividerMouseEvent(MouseInfo& info)
     if (currentPointerStyle != static_cast<int32_t>(format)) {
         mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), format);
     }
-    isResizeMouseStyle_ = false;
 }
 
 void SideBarContainerPattern::OnHover(bool isHover)
@@ -1245,13 +1191,6 @@ void SideBarContainerPattern::OnHover(bool isHover)
         return;
     }
     isDividerDraggable_ = true;
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        if (isResizeMouseStyle_ && isMousePressing_) {
-            // we enterned the resizing status and leaves ther divider region with mouse button pressing,
-            // do not change the style back, the mouse up event will cover the change checking
-            return;
-        }
-    }
 
     MouseFormat format = isHover ? MouseFormat::RESIZE_LEFT_RIGHT : MouseFormat::DEFAULT;
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -1263,7 +1202,6 @@ void SideBarContainerPattern::OnHover(bool isHover)
     if (currentPointerStyle != static_cast<int32_t>(format) && sideBarStatus_ == SideBarStatus::SHOW) {
         mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), format);
     }
-    isResizeMouseStyle_ = (format == MouseFormat::RESIZE_LEFT_RIGHT);
 }
 
 SideBarPosition SideBarContainerPattern::GetSideBarPositionWithRtl(
@@ -1478,6 +1416,46 @@ void SideBarContainerPattern::UpdateControlButtonInfo()
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         updateCallBack_(host);
+    }
+}
+
+void SideBarContainerPattern::UpdateControlButtonImageSize()
+{
+    auto controlButtonWidth = DEFAULT_CONTROL_BUTTON_WIDTH;
+    auto controlButtonHeight = DEFAULT_CONTROL_BUTTON_HEIGHT;
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TEN)) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto sideBarTheme = pipeline->GetTheme<SideBarTheme>();
+        CHECK_NULL_VOID(sideBarTheme);
+        controlButtonWidth = sideBarTheme->GetControlButtonWidthSmall();
+        controlButtonHeight = sideBarTheme->GetControlButtonHeightSmall();
+    }
+    auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    controlImageWidth_ = layoutProperty->GetControlButtonWidth().value_or(controlButtonWidth);
+    controlImageHeight_ = layoutProperty->GetControlButtonHeight().value_or(controlButtonHeight);
+    // check whether control image size is customed
+    if (controlImageWidth_ != controlButtonWidth || controlImageHeight_ != controlButtonHeight) {
+        SetControlButtonSizeCustom(true);
+    } else {
+        SetControlButtonSizeCustom(false);
+    }
+}
+
+void SideBarContainerPattern::UpdateControlButtonImage(std::optional<ImageSourceInfo>& info)
+{
+    CHECK_NULL_VOID(info);
+    auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto isStartPos = GetSideBarPositionWithRtl(layoutProperty) == SideBarPosition::START;
+    if (sideBarStatus_ == SideBarStatus::HIDDEN) {
+        info->SetResourceId(isStartPos ?
+            InternalResource::ResourceId::SIDE_BAR_OPEN : InternalResource::ResourceId::SIDE_BAR_CLOSE);
+    } else {
+        info->SetResourceId(isStartPos ?
+            InternalResource::ResourceId::SIDE_BAR_CLOSE : InternalResource::ResourceId::SIDE_BAR_OPEN);
     }
 }
 } // namespace OHOS::Ace::NG

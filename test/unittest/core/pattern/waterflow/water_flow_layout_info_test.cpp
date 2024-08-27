@@ -13,14 +13,12 @@
  * limitations under the License.
  */
 
-#include "gtest/gtest.h"
+#include "test/unittest/core/pattern/test_ng.h"
 
 #include "core/components_ng/property/measure_property.h"
-
 #define protected public
 #define private public
-#include "test/unittest/core/pattern/test_ng.h"
-#include "test/unittest/core/pattern/waterflow/water_flow_item_maps.h"
+#include "water_flow_item_maps.h"
 
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
 #undef private

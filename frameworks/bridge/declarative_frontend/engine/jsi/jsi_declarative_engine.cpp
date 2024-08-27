@@ -106,9 +106,9 @@ const std::string OHMURL_START_TAG = "@bundle:";
 #if defined(ANDROID_PLATFORM)
 const std::string ARK_DEBUGGER_LIB_PATH = "libark_inspector.so";
 #elif defined(APP_USE_ARM)
-const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/platformsdk/libark_inspector.z.so";
+const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/libark_inspector.z.so";
 #else
-const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/platformsdk/libark_inspector.z.so";
+const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/libark_inspector.z.so";
 #endif
 const std::string FORM_ES_MODULE_CARD_PATH = "ets/widgets.abc";
 const std::string FORM_ES_MODULE_PATH = "ets/modules.abc";
@@ -1532,13 +1532,15 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
     if (pos != std::string::npos && pos == url.length() - (sizeof(js_ext) - 1)) {
         std::string urlName = url.substr(0, pos) + bin_ext;
 #if !defined(PREVIEW)
-        if (IsModule() && !pluginModuleName_.empty()) {
-            if (engineInstance_->IsPlugin()) {
+        if (IsModule()) {
+            if (!engineInstance_->IsPlugin()) {
+                LoadJsWithModule(urlName);
+                return;
+            }
+            if (!pluginModuleName_.empty()) {
                 LoadPluginJsWithModule(urlName);
                 return;
             }
-            LoadJsWithModule(urlName);
-            return;
         }
 #endif
         if (isMainPage) {
@@ -2144,21 +2146,11 @@ void JsiDeclarativeEngine::FireExternalEvent(
         CHECK_EQUAL_VOID(xcPattern->GetLibraryName().has_value(), false);
         std::weak_ptr<OH_NativeXComponent> weakNativeXComponent;
         RefPtr<OHOS::Ace::NativeXComponentImpl> nativeXComponentImpl = nullptr;
-
         std::tie(nativeXComponentImpl, weakNativeXComponent) = xcPattern->GetNativeXComponent();
         auto nativeXComponent = weakNativeXComponent.lock();
         CHECK_NULL_VOID(nativeXComponent);
         CHECK_NULL_VOID(nativeXComponentImpl);
 
-        auto type = xcPattern->GetType();
-        if (type == XComponentType::SURFACE || type == XComponentType::TEXTURE) {
-            void* nativeWindow = nullptr;
-            nativeWindow = xcPattern->GetNativeWindow();
-            if (!nativeWindow) {
-                return;
-            }
-            nativeXComponentImpl->SetSurface(nativeWindow);
-        }
         nativeXComponentImpl->SetXComponentId(componentId);
 #ifdef XCOMPONENT_SUPPORTED
         xcPattern->SetExpectedRateRangeInit();
@@ -2191,6 +2183,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
         OHOS::Ace::Framework::XComponentClient::GetInstance().AddJsValToJsValMap(componentId, obj);
         napi_close_handle_scope(reinterpret_cast<napi_env>(nativeEngine_), handleScope);
 
+        auto type = xcPattern->GetType();
         if (type == XComponentType::SURFACE || type == XComponentType::TEXTURE) {
             auto task = [weak = WeakClaim(this), weakPattern = AceType::WeakClaim(AceType::RawPtr(xcPattern))]() {
                 auto pattern = weakPattern.Upgrade();

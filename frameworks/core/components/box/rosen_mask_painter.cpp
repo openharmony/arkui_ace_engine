@@ -21,7 +21,6 @@
 #include "core/components/box/rosen_mask_painter.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/declaration/common/declaration.h"
-#include "render_service_client/core/ui/rs_node.h"
 
 namespace OHOS::Ace {
 namespace {

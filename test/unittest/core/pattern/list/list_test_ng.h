@@ -16,49 +16,13 @@
 #ifndef FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_LIST_LIST_TEST_NG_H
 #define FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_LIST_LIST_TEST_NG_H
 
-#include <functional>
-#include <optional>
-
-#include "gtest/gtest.h"
-
-#include "base/geometry/axis.h"
-#include "base/geometry/dimension.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/property/safe_area_insets.h"
+#include "test/unittest/core/pattern/test_ng.h"
 #define private public
 #define protected public
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/unittest/core/pattern/test_ng.h"
-
-#include "bridge/common/utils/utils.h"
-#include "core/components/scroll/scrollable.h"
-#include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/base/view_abstract_model.h"
-#include "core/components_ng/base/view_abstract_model_ng.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
-#include "core/components_ng/pattern/list/list_item_group_layout_property.h"
 #include "core/components_ng/pattern/list/list_item_group_model_ng.h"
-#include "core/components_ng/pattern/list/list_item_group_paint_method.h"
-#include "core/components_ng/pattern/list/list_item_group_pattern.h"
-#include "core/components_ng/pattern/list/list_item_model.h"
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
-#include "core/components_ng/pattern/list/list_item_pattern.h"
-#include "core/components_ng/pattern/list/list_lanes_layout_algorithm.h"
-#include "core/components_ng/pattern/list/list_layout_algorithm.h"
-#include "core/components_ng/pattern/list/list_item_layout_algorithm.h"
-#include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
-#include "core/components_ng/pattern/list/list_position_controller.h"
-#include "core/components_ng/syntax/repeat_virtual_scroll_model_ng.h"
-#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
-#include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;
@@ -110,8 +74,8 @@ public:
     void CreateItemWithSize(int32_t itemNumber, SizeT<Dimension> itemSize);
     void CreateGroupChildrenMainSize(int32_t groupNumber);
     void CreateGroupWithItem(int32_t groupNumber, Axis axis = Axis::VERTICAL);
-    void CreateGroupWithSetting(int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle,
-        int32_t itemNumber = GROUP_ITEM_NUMBER);
+    void CreateGroupWithSetting(
+        int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle, int32_t itemNumber = GROUP_ITEM_NUMBER);
     void CreateGroupWithSettingChildrenMainSize(int32_t groupNumber);
     void CreateSwipeItems(std::function<void()> startAction, std::function<void()> endAction,
         V2::SwipeEdgeEffect effect, int32_t itemNumber = TOTAL_ITEM_NUMBER);

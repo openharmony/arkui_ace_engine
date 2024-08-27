@@ -29,6 +29,7 @@
 #include "base/memory/referenced.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/view_data/view_data_wrap.h"
+#include "core/common/ai/ai_write_adapter.h"
 #include "base/view_data/hint_to_type_wrap.h"
 #include "core/common/autofill/auto_fill_trigger_state_holder.h"
 #include "core/common/clipboard/clipboard.h"
@@ -71,8 +72,8 @@
 #include "core/components_ng/pattern/text_input/text_input_layout_algorithm.h"
 #include "core/components_ng/property/property.h"
 
-#if not defined(ACE_UNITTEST)
-#if defined(ENABLE_STANDARD_INPUT)
+#ifndef ACE_UNITTEST
+#ifdef ENABLE_STANDARD_INPUT
 #include "commonlibrary/c_utils/base/include/refbase.h"
 
 namespace OHOS::MiscServices {
@@ -154,10 +155,21 @@ enum class RequestKeyboardReason {
     MOUSE_RELEASE,
     SET_SELECTION,
     SEARCH_REQUEST,
-    AUTO_FILL_REQUEST_FILL,
+    AUTO_FILL_REQUEST_FAIL,
     SHOW_KEYBOARD_ON_FOCUS,
     STYLUS_DETECTOR,
     CUSTOM_KEYBOARD
+};
+
+enum class RequestFocusReason {
+    UNKNOWN = 0,
+    DRAG_END,
+    DRAG_MOVE,
+    CLICK,
+    LONG_PRESS,
+    AUTO_FILL,
+    CLEAN_NODE,
+    MOUSE,
 };
 
 struct PreviewTextInfo {
@@ -656,6 +668,12 @@ public:
 
     bool RequestKeyboardNotByFocusSwitch(RequestKeyboardReason reason = RequestKeyboardReason::UNKNOWN);
 
+    bool TextFieldRequestFocus(RequestFocusReason reason = RequestFocusReason::UNKNOWN);
+
+    static std::string RequestFocusReasonToString(RequestFocusReason reason);
+
+    static std::string RequestKeyboardReasonToString(RequestKeyboardReason reason);
+
     bool GetTextObscured() const
     {
         return textObscured_;
@@ -790,6 +808,16 @@ public:
         return contentRect_;
     }
 
+    const RefPtr<OverlayManager>& GetKeyboardOverLay()
+    {
+        return keyboardOverlay_;
+    }
+
+    bool GetIsCustomKeyboardAttached()
+    {
+        return isCustomKeyboardAttached_;
+    }
+
     const RefPtr<Paragraph>& GetDragParagraph() const override
     {
         return paragraph_;
@@ -908,6 +936,8 @@ public:
     }
     void HandleOnUndoAction() override;
     void HandleOnRedoAction() override;
+    bool CanUndo();
+    bool CanRedo();
     void HandleOnSelectAll(bool isKeyEvent, bool inlineStyle = false, bool showMenu = false);
     void HandleOnSelectAll() override
     {
@@ -917,6 +947,10 @@ public:
     void HandleOnPaste() override;
     void HandleOnCut() override;
     void HandleOnCameraInput();
+    void HandleOnAIWrite();
+    void GetAIWriteInfo(AIWriteInfo& info);
+    bool IsShowAIWrite();
+    void HandleAIWriteResult(int32_t start, int32_t end, std::vector<uint8_t>& buffer);
     void UpdateShowCountBorderStyle();
     void StripNextLine(std::wstring& data);
     bool IsShowHandle();
@@ -1118,7 +1152,9 @@ public:
     void DumpInfo() override;
     void DumpAdvanceInfo() override;
     void DumpPlaceHolderInfo();
+    void DumpTextEngineInfo();
     void DumpScaleInfo();
+    std::string GetDumpTextValue() const;
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) override;
     void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) override;
@@ -1414,7 +1450,21 @@ public:
         return multipleClickRecognizer_;
     }
 
+    void SetAdaptFontSize(const std::optional<Dimension>& adaptFontSize)
+    {
+        adaptFontSize_ = adaptFontSize;
+    }
+
     void ShowCaretAndStopTwinkling();
+
+    bool IsTextEditableForStylus() override;
+    bool IsHandleDragging();
+    bool IsLTRLayout()
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, true);
+        return host->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::LTR;
+    }
 
 protected:
     virtual void InitDragEvent();
@@ -1654,9 +1704,8 @@ private:
     bool FinishTextPreviewByPreview(const std::string& insertValue);
 
     bool GetTouchInnerPreviewText(const Offset& offset) const;
-    bool IsShowMenu(const std::optional<SelectionOptions>& options);
+    bool IsShowMenu(const std::optional<SelectionOptions>& options, bool defaultValue);
     bool IsContentRectNonPositive();
-    bool IsHandleDragging();
     void ReportEvent();
     void ResetPreviewTextState();
 
@@ -1844,6 +1893,8 @@ private:
     bool isTextChangedAtCreation_ = false;
     bool isPasswordSymbol_ = true;
     RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
+    RefPtr<AIWriteAdapter> aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
+    std::optional<Dimension> adaptFontSize_;
 };
 } // namespace OHOS::Ace::NG
 

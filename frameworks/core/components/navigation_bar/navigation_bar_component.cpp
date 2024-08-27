@@ -15,16 +15,11 @@
 
 #include "core/components/navigation_bar/navigation_bar_component.h"
 
-#include "base/utils/string_utils.h"
-#include "base/utils/system_properties.h"
 #include "core/components/display/display_component.h"
 #include "core/components/flex/flex_item_component.h"
 #include "core/components/navigation_bar/navigation_bar_element.h"
 #include "core/components/padding/padding_component.h"
-#include "core/components/positioned/positioned_component.h"
-#include "core/components/stack/stack_component.h"
 #include "core/components/transform/transform_component.h"
-#include "core/gestures/click_recognizer.h"
 #ifdef WEARABLE_PRODUCT
 #include "core/components/box/box_component.h"
 #include "core/components/button/button_theme.h"

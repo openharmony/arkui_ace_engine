@@ -18,8 +18,6 @@
 #include "base/log/event_report.h"
 #include "core/common/container.h"
 #include "core/common/font_manager.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 

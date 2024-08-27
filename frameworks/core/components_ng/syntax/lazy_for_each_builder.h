@@ -32,7 +32,6 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_v2/foreach/lazy_foreach_component.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -64,6 +63,8 @@ public:
     {
         return OnGetTotalCount();
     }
+
+    int32_t GetTotalCountOfOriginalDataset(const std::list<V2::Operation>& DataOperations);
 
     std::pair<std::string, RefPtr<UINode>> GetChildByIndex(int32_t index, bool needBuild, bool isCache = false);
 
@@ -103,7 +104,7 @@ public:
     bool ClassifyOperation(V2::Operation& operation, int32_t& initialIndex,
         std::map<int32_t, LazyForEachChild>& cachedTemp, std::map<int32_t, LazyForEachChild>& expiringTemp);
     
-    bool ValidateIndex(int32_t index, std::string type);
+    bool ValidateIndex(int32_t index, const std::string& type);
 
     void OperateAdd(V2::Operation& operation, int32_t& initialIndex);
 
@@ -121,7 +122,7 @@ public:
     void OperateExchange(V2::Operation& operation, int32_t& initialIndex,
         std::map<int32_t, LazyForEachChild>& cachedTemp, std::map<int32_t, LazyForEachChild>& expiringTemp);
 
-    void OperateReload(V2::Operation& operation, int32_t& initialIndex);
+    void OperateReload(std::map<int32_t, LazyForEachChild>& expiringTemp);
 
     void ThrowRepeatOperationError(int32_t index);
 
@@ -316,9 +317,6 @@ public:
         }
         ProcessOffscreenNode(itemInfo.second, false);
         itemInfo.second->Build(nullptr);
-        if (frameNode && frameNode->GetTag() == V2::LIST_ITEM_ETS_TAG) {
-            frameNode->GetPattern<ListItemPattern>()->BeforeCreateLayoutWrapper();
-        }
         context->ResetPredictNode();
         itemInfo.second->SetJSViewActive(false, true);
         cachedItems_[index] = LazyForEachChild(itemInfo.first, nullptr);
@@ -611,14 +609,13 @@ private:
     std::unordered_map<std::string, LazyForEachCacheChild> expiringItem_;
     std::list<std::pair<std::string, RefPtr<UINode>>> nodeList_;
     std::map<int32_t, OperationInfo> operationList_;
-    std::map<std::string, int32_t> operationTypeMap = {
-        {"add", 1},
-        {"delete", 2},
-        {"change", 3},
-        {"move", 4},
-        {"exchange", 5},
-        {"reload", 6}
-    };
+    enum class OP { ADD, DEL, CHANGE, MOVE, EXCHANGE, RELOAD };
+    std::map<std::string, OP> operationTypeMap = {{"add", OP::ADD},
+        {"delete", OP::DEL},
+        {"change", OP::CHANGE},
+        {"move", OP::MOVE},
+        {"exchange", OP::EXCHANGE},
+        {"reload", OP::RELOAD}};
     std::list<int32_t> outOfBoundaryNodes_;
     std::optional<std::pair<int32_t, int32_t>> moveFromTo_;
 
@@ -626,7 +623,7 @@ private:
     int32_t endIndex_ = -1;
     int32_t cacheCount_ = 0;
     int32_t preBuildingIndex_ = -1;
-    int32_t totalCountForDataset_ = 0;
+    int32_t totalCountOfOriginalDataset_ = 0;
     bool needTransition = false;
     bool isLoop_ = false;
     bool useNewInterface_ = false;

@@ -351,6 +351,10 @@ public:
 
     RefPtr<ThemeStyle> GetPatternByName(const std::string& patternName)
     {
+        if (!currentThemeStyle_) {
+            TAG_LOGE(AceLogTag::ACE_THEME, "Get theme by name error: currentThemeStyle_ is null");
+            return nullptr;
+        }
         currentThemeStyle_->CheckThemeStyleLoaded(patternName);
         auto patternStyle = currentThemeStyle_->GetAttr<RefPtr<ThemeStyle>>(patternName, nullptr);
         if (!patternStyle && resAdapter_) {

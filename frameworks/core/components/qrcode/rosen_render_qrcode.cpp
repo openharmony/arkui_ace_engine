@@ -22,7 +22,6 @@
 #endif
 
 #include "core/pipeline/base/rosen_render_context.h"
-#include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
 

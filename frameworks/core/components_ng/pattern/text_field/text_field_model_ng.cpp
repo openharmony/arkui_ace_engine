@@ -359,13 +359,16 @@ void TextFieldModelNG::SetLineBreakStrategy(LineBreakStrategy value)
 
 void TextFieldModelNG::SetMaxLength(uint32_t value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxLength, value);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    CHECK_NULL_VOID(pattern->HasFocus());
-    pattern->UpdateShowCountBorderStyle();
+    uint32_t preMaxLength = GetMaxLength(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxLength, value, frameNode);
+    if (preMaxLength != value) {
+        auto pattern = frameNode->GetPattern<TextFieldPattern>();
+        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID(pattern->HasFocus());
+        pattern->UpdateShowCountBorderStyle();
+    }
 }
 
 void TextFieldModelNG::ResetMaxLength()
@@ -1049,12 +1052,15 @@ void TextFieldModelNG::SetFontStyle(FrameNode* frameNode, Ace::FontStyle value)
 
 void TextFieldModelNG::SetMaxLength(FrameNode* frameNode, uint32_t value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxLength, value, frameNode);
     CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    CHECK_NULL_VOID(pattern->HasFocus());
-    pattern->UpdateShowCountBorderStyle();
+    uint32_t preMaxLength = GetMaxLength(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxLength, value, frameNode);
+    if (preMaxLength != value) {
+        auto pattern = frameNode->GetPattern<TextFieldPattern>();
+        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID(pattern->HasFocus());
+        pattern->UpdateShowCountBorderStyle();
+    }
 }
 
 void TextFieldModelNG::ResetMaxLength(FrameNode* frameNode)

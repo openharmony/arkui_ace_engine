@@ -15,8 +15,13 @@
 
 #include "tabs_test_ng.h"
 
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/components/dialog/dialog_theme.h"
+#include "core/components/tab_bar/tab_theme.h"
+#include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 
 namespace OHOS::Ace::NG {
 namespace {}

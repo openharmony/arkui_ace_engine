@@ -14,6 +14,9 @@
  */
 
 #include "swiper_test_ng.h"
+#include "test/mock/core/pattern/mock_nestable_scroll_container.h"
+
+#include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_method.h"
 
 namespace OHOS::Ace::NG {
 

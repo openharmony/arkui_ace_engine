@@ -15,9 +15,7 @@
 
 #include "core/components/tab_bar/tab_bar_element.h"
 
-#include "base/utils/system_properties.h"
 #include "core/components/tab_bar/render_tab_bar.h"
-#include "core/components/text/text_component.h"
 
 namespace OHOS::Ace {
 

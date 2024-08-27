@@ -100,6 +100,7 @@ private:
     void OnWindowHide() override;
     void OnWindowShow() override;
     void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void StartAnimation();
     void StopAnimation();
     void FireBuilder();

@@ -1175,9 +1175,12 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest042, TestSize.Level1)
      */
     GestureEvent event;
     dragDropManager->SetIsDragWithContextMenu(true);
-    dragDropManager->DoDragStartAnimation(overlayManager, event);
+    auto frameNode2 = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode2, nullptr);
+    auto guestureEventHub = frameNode2->GetOrCreateGestureEventHub();
+    dragDropManager->DoDragStartAnimation(overlayManager, event, guestureEventHub);
     dragDropManager->TransDragWindowToDragFwk(111);
-    bool retFlag = dragDropManager->GetDragPreviewInfo(overlayManager, dragDropManager->info_);
+    bool retFlag = dragDropManager->GetDragPreviewInfo(overlayManager, dragDropManager->info_, guestureEventHub);
     EXPECT_FALSE(retFlag);
 
     /**
@@ -1189,7 +1192,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest042, TestSize.Level1)
     frameNode->children_ = children;
     overlayManager->SetHasPixelMap(true);
     overlayManager->pixmapColumnNodeWeak_ = WeakPtr<FrameNode>(AceType::DynamicCast<FrameNode>(frameNode));
-    retFlag = dragDropManager->GetDragPreviewInfo(overlayManager, dragDropManager->info_);
+    retFlag = dragDropManager->GetDragPreviewInfo(overlayManager, dragDropManager->info_, guestureEventHub);
     EXPECT_TRUE(retFlag);
 
     /**
@@ -1197,7 +1200,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest042, TestSize.Level1)
      * @tc.expected: retFlag is false.
      */
     dragDropManager->info_.scale = -1.0f;
-    dragDropManager->DoDragStartAnimation(overlayManager, event);
+    dragDropManager->DoDragStartAnimation(overlayManager, event, guestureEventHub);
     retFlag = dragDropManager->IsNeedScaleDragPreview();
     EXPECT_FALSE(retFlag);
 }
@@ -1293,7 +1296,10 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest045, TestSize.Level1)
      * @tc.steps: step3. call GetDragPreviewInfo with arguments overlayManager and dragDropManager->info_.
      * @tc.expected: imageNode is null.
      */
-    dragDropManager->GetDragPreviewInfo(overlayManager, dragDropManager->info_);
+    auto frameNode2 = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode2, nullptr);
+    auto guestureEventHub = frameNode2->GetOrCreateGestureEventHub();
+    dragDropManager->GetDragPreviewInfo(overlayManager, dragDropManager->info_, guestureEventHub);
     auto imageNode = overlayManager->GetPixelMapContentNode();
     ASSERT_EQ(imageNode, nullptr);
 }
@@ -1361,7 +1367,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest047, TestSize.Level1)
     dragDropManager->OnDragStart(Point(1.0f, 1.0f), frameNode);
     dragDropManager->info_.scale = 0.5f;
     dragDropManager->OnDragMoveOut(pointerEvent);
-    EXPECT_FALSE(dragDropManager->IsNeedScaleDragPreview());
+    EXPECT_TRUE(dragDropManager->IsNeedScaleDragPreview());
 }
 
 /**

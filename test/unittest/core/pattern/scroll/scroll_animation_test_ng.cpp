@@ -30,11 +30,11 @@ public:
 HWTEST_F(ScrolleAnimationTestNg, PlaySpringAnimation001, TestSize.Level1)
 {
     CreateScroll();
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateDone();
     auto smooth = false;
     pattern_->isAnimationStop_ = false;
-    pattern_->AnimateTo(ITEM_HEIGHT * TOTAL_ITEM_NUMBER, 1.f, Curves::LINEAR, smooth);
+    pattern_->AnimateTo(600.f, 1.f, Curves::LINEAR, smooth);
     EXPECT_FALSE(pattern_->isAnimationStop_);
 }
 
@@ -46,8 +46,8 @@ HWTEST_F(ScrolleAnimationTestNg, PlaySpringAnimation001, TestSize.Level1)
 HWTEST_F(ScrolleAnimationTestNg, StopAnimation001, TestSize.Level1)
 {
     CreateScroll();
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateDone();
     std::shared_ptr<AnimationUtils::Animation> animation;
     pattern_->StopAnimation(animation);
     EXPECT_TRUE(pattern_->isAnimationStop_);

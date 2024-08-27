@@ -15,7 +15,6 @@
 
 #include "core/components/transform/rosen_render_transform.h"
 
-#include "render_service_client/core/animation/rs_transition.h"
 #include "render_service_client/core/ui/rs_node.h"
 
 namespace OHOS::Ace {

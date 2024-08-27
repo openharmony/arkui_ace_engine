@@ -353,7 +353,22 @@ void ContentController::erase(int32_t startIndex, int32_t length)
 
 int32_t ContentController::Delete(int32_t startIndex, int32_t length, bool isBackward)
 {
-    return TextEmojiProcessor::Delete(startIndex, length, content_, isBackward);
+    int32_t result = TextEmojiProcessor::Delete(startIndex, length, content_, isBackward);
+    if (length > 0 && result == 0) {
+        // try delete whole emoji
+        if (isBackward) {
+            TextEmojiSubStringRange range = TextEmojiProcessor::CalSubWstringRange(
+                startIndex - length, length, GetWideText(), true);
+            result = TextEmojiProcessor::Delete(range.endIndex,
+                length, content_, true);
+        } else {
+            TextEmojiSubStringRange range = TextEmojiProcessor::CalSubWstringRange(
+                startIndex, length, GetWideText(), true);
+            result = TextEmojiProcessor::Delete(range.startIndex,
+                length, content_, true);
+        }
+    }
+    return result;
 }
 
 int32_t ContentController::GetDeleteLength(int32_t startIndex, int32_t length, bool isBackward)

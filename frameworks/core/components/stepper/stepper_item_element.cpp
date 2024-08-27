@@ -15,7 +15,6 @@
 
 #include "core/components/stepper/stepper_item_element.h"
 
-#include "core/components/stepper/render_stepper_item.h"
 #include "core/components/stepper/stepper_item_component.h"
 
 namespace OHOS::Ace {

@@ -444,6 +444,19 @@ bool NavigationGroupNode::CheckCanHandleBack()
             navDestinationPattern->GetName().c_str());
         return true;
     }
+    auto navDestinationContext = navDestinationPattern->GetNavDestinationContext();
+    CHECK_NULL_RETURN(navDestinationContext, false);
+    auto navPathInfo = navDestinationContext->GetNavPathInfo();
+    CHECK_NULL_RETURN(navPathInfo, false);
+    auto isEntry = navPathInfo->GetIsEntry();
+    if (isEntry) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s is entry navDestination, do not consume backPressed event",
+            navDestinationPattern->GetName().c_str());
+        navPathInfo->SetIsEntry(false);
+        auto index = navDestinationContext->GetIndex();
+        navigationStack->SetIsEntryByIndex(index, false);
+        return false;
+    }
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navDestination consume back button event: %{public}s",
         navDestinationPattern->GetName().c_str());
     GestureEvent gestureEvent;
