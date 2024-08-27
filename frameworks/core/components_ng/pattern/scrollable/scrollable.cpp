@@ -21,6 +21,7 @@
 #include "base/log/frame_report.h"
 #include "base/log/jank_frame_report.h"
 #include "base/log/log.h"
+#include "base/ressched/ressched_report.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
@@ -394,6 +395,7 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
     auto increaseCpuTime = currentTime - startIncreaseTime_;
     if (increaseCpuTime >= INCREASE_CPU_TIME_ONCE) {
         startIncreaseTime_ = currentTime;
+        ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
         if (FrameReport::GetInstance().GetEnable()) {
             FrameReport::GetInstance().BeginListFling();
         }
@@ -482,6 +484,13 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     isTouching_ = false;
 }
 
+inline void ReportSlideOn()
+{
+#ifdef OHOS_PLATFORM
+    ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+#endif
+}
+
 void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
 {
     if (!isSpringAnimationStop_) {
@@ -540,6 +549,7 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
     frictionOffsetProperty_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
     ACE_SCOPED_TRACE("Scrollable friction animation start, start:%f, end:%f, vel:%f, id:%d, tag:%s", mainPosition,
         finalPosition_, initVelocity_, nodeId_, nodeTag_.c_str());
+    ReportSlideOn();
     frictionOffsetProperty_->AnimateWithVelocity(
         option, finalPosition_, initVelocity_, [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
             ContainerScope scope(id);
@@ -782,6 +792,7 @@ void Scrollable::OnAnimateStop()
     }
     moved_ = false;
 #ifdef OHOS_PLATFORM
+    ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndListFling();
     }
@@ -841,6 +852,7 @@ void Scrollable::StartSpringMotion(
             scroll->currentVelocity_ = 0.0;
             scroll->OnAnimateStop();
         });
+    ReportSlideOn();
     isSpringAnimationStop_ = false;
     skipRestartSpring_ = false;
     auto context = context_.Upgrade();
@@ -898,6 +910,7 @@ void Scrollable::UpdateSpringMotion(
             scroll->currentVelocity_ = 0.0;
             scroll->OnAnimateStop();
     });
+    ReportSlideOn();
     isSpringAnimationStop_ = false;
     skipRestartSpring_ = false;
 }
@@ -923,6 +936,7 @@ void Scrollable::ProcessScrollMotionStop(bool stopFriction)
         moved_ = false;
         HandleScrollEnd(std::nullopt);
 #ifdef OHOS_PLATFORM
+        ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
         if (FrameReport::GetInstance().GetEnable()) {
             FrameReport::GetInstance().EndListFling();
         }
