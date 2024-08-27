@@ -294,6 +294,11 @@ public:
         isScrollHeightNegative_ = isScrollHeightNegative;
     }
 
+    bool TriggerAutoSaveWhenInvisible() override
+    {
+        return true;
+    }
+
 private:
     bool AvoidKeyboard() const override
     {
