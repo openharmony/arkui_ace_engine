@@ -290,7 +290,6 @@ private:
     int32_t fingerId_ = -1;
     std::optional<Offset> lastTouchLocation_ = std::nullopt;
 
-    float stepRatio_ = 1.0f / 100.0f;
     float valueRatio_ = 0.0f;
     float sliderLength_ = 0.0f;
     float borderBlank_ = 0.0f;
