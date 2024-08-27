@@ -954,6 +954,7 @@ private:
     std::string EnumTypeToString(WebAccessibilityType type);
     std::string VectorIntToString(std::vector<int64_t>&& vec);
     void InitAiEngine();
+    int32_t GetBufferSizeByDeviceType();
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
