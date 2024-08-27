@@ -789,8 +789,18 @@ void PipelineContext::FlushRequestFocus()
     } else {
         auto focusNodeHub = requestFocusNode->GetFocusHub();
         if (focusNodeHub && !focusNodeHub->RequestFocusImmediately()) {
-            TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus by id on node: %{public}s/%{public}d return false",
-                requestFocusNode->GetTag().c_str(), requestFocusNode->GetId());
+            auto unfocusableParentFocusNode = focusNodeHub->GetUnfocusableParentFocusNode().Upgrade();
+            if (unfocusableParentFocusNode) {
+                TAG_LOGI(AceLogTag::ACE_FOCUS,
+                    "Request focus by id on node: %{public}s/%{public}d return false, unfocusable node: "
+                    "%{public}s/%{public}d",
+                    requestFocusNode->GetTag().c_str(), requestFocusNode->GetId(),
+                    unfocusableParentFocusNode->GetFrameName().c_str(), unfocusableParentFocusNode->GetFrameId());
+                unfocusableParentFocusNode = nullptr;
+            } else {
+                TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus by id on node: %{public}s/%{public}d return false",
+                    requestFocusNode->GetTag().c_str(), requestFocusNode->GetId());
+            }
         }
         dirtyFocusNode_.Reset();
         dirtyFocusScope_.Reset();

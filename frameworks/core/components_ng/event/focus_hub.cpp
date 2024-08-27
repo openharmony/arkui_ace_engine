@@ -1741,6 +1741,21 @@ bool FocusHub::IsFocusableWholePath()
     return IsFocusable();
 }
 
+WeakPtr<FocusHub> FocusHub::GetUnfocusableParentFocusNode()
+{
+    if (!IsFocusable()) {
+        return AceType::WeakClaim(this);
+    }
+    auto parent = GetParentFocusHub();
+    while (parent) {
+        if (!parent->IsFocusableNode()) {
+            return AceType::WeakClaim(AceType::RawPtr(parent));
+        }
+        parent = parent->GetParentFocusHub();
+    }
+    return nullptr;
+}
+
 bool FocusHub::IsSelfFocusableWholePath()
 {
     auto parent = GetParentFocusHub();
