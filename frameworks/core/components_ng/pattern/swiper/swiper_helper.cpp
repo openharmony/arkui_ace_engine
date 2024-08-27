@@ -249,11 +249,10 @@ void DumpItemPosition(const SwiperLayoutAlgorithm::PositionMap& positions)
 
 void SwiperHelper::DumpAdvanceInfo(SwiperPattern& swiper)
 {
-    DumpInfoAddDescPart1(swiper);
-    DumpInfoAddDescPart2(swiper);
-    DumpInfoAddDescPart3(swiper);
+    DumpInfoAddPositionDesc(swiper);
+    DumpInfoAddGestureDesc(swiper);
     DumpIndicatorType(swiper.lastSwiperIndicatorType_);
-    DumpInfoAddDescPart4(swiper);
+    DumpInfoAddAnimationDesc(swiper);
     if (!swiper.itemPosition_.empty()) {
         DumpLog::GetInstance().AddDesc("-----------start print itemPosition------------");
         DumpItemPosition(swiper.itemPosition_);
@@ -268,7 +267,40 @@ void SwiperHelper::DumpAdvanceInfo(SwiperPattern& swiper)
     DumpDirection(swiper.direction_);
 }
 
-void SwiperHelper::DumpInfoAddDescPart1(SwiperPattern& swiper)
+void SwiperHelper::DumpInfoAddPositionDesc(SwiperPattern& swiper)
+{
+    swiper.crossMatchChild_ ? DumpLog::GetInstance().AddDesc("crossMatchChild:true")
+                            : DumpLog::GetInstance().AddDesc("crossMatchChild:false");
+    swiper.uiCastJumpIndex_.has_value()
+        ? DumpLog::GetInstance().AddDesc("uiCastJumpIndex:" + std::to_string(swiper.uiCastJumpIndex_.value()))
+        : DumpLog::GetInstance().AddDesc("uiCastJumpIndex:null");
+    swiper.jumpIndex_.has_value()
+        ? DumpLog::GetInstance().AddDesc("jumpIndex:" + std::to_string(swiper.jumpIndex_.value()))
+        : DumpLog::GetInstance().AddDesc("jumpIndex:null");
+    swiper.targetIndex_.has_value()
+        ? DumpLog::GetInstance().AddDesc("targetIndex:" + std::to_string(swiper.targetIndex_.value()))
+        : DumpLog::GetInstance().AddDesc("targetIndex:null");
+    swiper.preTargetIndex_.has_value()
+        ? DumpLog::GetInstance().AddDesc("preTargetIndex:" + std::to_string(swiper.preTargetIndex_.value()))
+        : DumpLog::GetInstance().AddDesc("preTargetIndex:null");
+    swiper.pauseTargetIndex_.has_value()
+        ? DumpLog::GetInstance().AddDesc("pauseTargetIndex:" + std::to_string(swiper.pauseTargetIndex_.value()))
+        : DumpLog::GetInstance().AddDesc("pauseTargetIndex:null");
+    DumpLog::GetInstance().AddDesc("currentIndex:" + std::to_string(swiper.currentIndex_));
+    DumpLog::GetInstance().AddDesc("oldIndex:" + std::to_string(swiper.oldIndex_));
+    DumpLog::GetInstance().AddDesc("currentOffset:" + std::to_string(swiper.currentOffset_));
+    DumpLog::GetInstance().AddDesc("fadeOffset:" + std::to_string(swiper.fadeOffset_));
+    DumpLog::GetInstance().AddDesc("touchBottomRate:" + std::to_string(swiper.touchBottomRate_));
+    DumpLog::GetInstance().AddDesc("currentIndexOffset:" + std::to_string(swiper.currentIndexOffset_));
+    DumpLog::GetInstance().AddDesc("gestureSwipeIndex:" + std::to_string(swiper.gestureSwipeIndex_));
+    DumpLog::GetInstance().AddDesc("currentFirstIndex:" + std::to_string(swiper.currentFirstIndex_));
+    DumpLog::GetInstance().AddDesc("startMainPos:" + std::to_string(swiper.startMainPos_));
+    DumpLog::GetInstance().AddDesc("endMainPos:" + std::to_string(swiper.endMainPos_));
+    DumpLog::GetInstance().AddDesc("contentMainSize:" + std::to_string(swiper.contentMainSize_));
+    DumpLog::GetInstance().AddDesc("contentCrossSize:" + std::to_string(swiper.contentCrossSize_));
+}
+
+void SwiperHelper::DumpInfoAddGestureDesc(SwiperPattern& swiper)
 {
     swiper.isLastIndicatorFocused_ ? DumpLog::GetInstance().AddDesc("isLastIndicatorFocused:true")
                                    : DumpLog::GetInstance().AddDesc("isLastIndicatorFocused:false");
@@ -294,10 +326,8 @@ void SwiperHelper::DumpInfoAddDescPart1(SwiperPattern& swiper)
                        : DumpLog::GetInstance().AddDesc("isDragging:false");
     swiper.isTouchDown_ ? DumpLog::GetInstance().AddDesc("isTouchDown:true")
                         : DumpLog::GetInstance().AddDesc("isTouchDown:false");
-}
-
-void SwiperHelper::DumpInfoAddDescPart2(SwiperPattern& swiper)
-{
+    swiper.isIndicatorLongPress_ ? DumpLog::GetInstance().AddDesc("isIndicatorLongPress:true")
+                        : DumpLog::GetInstance().AddDesc("isIndicatorLongPress:false");
     swiper.preLoop_.has_value() ? DumpLog::GetInstance().AddDesc("preLoop:" + std::to_string(swiper.preLoop_.value()))
                                 : DumpLog::GetInstance().AddDesc("preLoop:null");
     swiper.indicatorId_.has_value()
@@ -309,32 +339,9 @@ void SwiperHelper::DumpInfoAddDescPart2(SwiperPattern& swiper)
     swiper.rightButtonId_.has_value()
         ? DumpLog::GetInstance().AddDesc("rightButtonId:" + std::to_string(swiper.rightButtonId_.value()))
         : DumpLog::GetInstance().AddDesc("rightButtonId:null");
-    swiper.crossMatchChild_ ? DumpLog::GetInstance().AddDesc("crossMatchChild:true")
-                            : DumpLog::GetInstance().AddDesc("crossMatchChild:false");
-    swiper.uiCastJumpIndex_.has_value()
-        ? DumpLog::GetInstance().AddDesc("uiCastJumpIndex:" + std::to_string(swiper.uiCastJumpIndex_.value()))
-        : DumpLog::GetInstance().AddDesc("uiCastJumpIndex:null");
-    swiper.jumpIndex_.has_value()
-        ? DumpLog::GetInstance().AddDesc("jumpIndex:" + std::to_string(swiper.jumpIndex_.value()))
-        : DumpLog::GetInstance().AddDesc("jumpIndex:null");
-    swiper.targetIndex_.has_value()
-        ? DumpLog::GetInstance().AddDesc("targetIndex:" + std::to_string(swiper.targetIndex_.value()))
-        : DumpLog::GetInstance().AddDesc("targetIndex:null");
-    swiper.preTargetIndex_.has_value()
-        ? DumpLog::GetInstance().AddDesc("preTargetIndex:" + std::to_string(swiper.preTargetIndex_.value()))
-        : DumpLog::GetInstance().AddDesc("preTargetIndex:null");
-    swiper.pauseTargetIndex_.has_value()
-        ? DumpLog::GetInstance().AddDesc("pauseTargetIndex:" + std::to_string(swiper.pauseTargetIndex_.value()))
-        : DumpLog::GetInstance().AddDesc("pauseTargetIndex:null");
-    swiper.velocity_.has_value()
-        ? DumpLog::GetInstance().AddDesc("velocity:" + std::to_string(swiper.velocity_.value()))
-        : DumpLog::GetInstance().AddDesc("velocity:null");
-    swiper.GetCurveIncludeMotion()
-        ? DumpLog::GetInstance().AddDesc("curve:" + swiper.GetCurveIncludeMotion()->ToString())
-        : DumpLog::GetInstance().AddDesc("curve:null");
 }
 
-void SwiperHelper::DumpInfoAddDescPart3(SwiperPattern& swiper)
+void SwiperHelper::DumpInfoAddAnimationDesc(SwiperPattern& swiper)
 {
     swiper.isFinishAnimation_ ? DumpLog::GetInstance().AddDesc("isFinishAnimation:true")
                               : DumpLog::GetInstance().AddDesc("isFinishAnimation:false");
@@ -346,8 +353,6 @@ void SwiperHelper::DumpInfoAddDescPart3(SwiperPattern& swiper)
                          : DumpLog::GetInstance().AddDesc("isUserFinish:false");
     swiper.isVoluntarilyClear_ ? DumpLog::GetInstance().AddDesc("isVoluntarilyClear:true")
                                : DumpLog::GetInstance().AddDesc("isVoluntarilyClear:false");
-    swiper.isIndicatorLongPress_ ? DumpLog::GetInstance().AddDesc("isIndicatorLongPress:true")
-                                 : DumpLog::GetInstance().AddDesc("isIndicatorLongPress:false");
     swiper.stopIndicatorAnimation_ ? DumpLog::GetInstance().AddDesc("stopIndicatorAnimation:true")
                                    : DumpLog::GetInstance().AddDesc("stopIndicatorAnimation:false");
     swiper.isTouchPad_ ? DumpLog::GetInstance().AddDesc("isTouchPad:true")
@@ -356,22 +361,12 @@ void SwiperHelper::DumpInfoAddDescPart3(SwiperPattern& swiper)
         ? DumpLog::GetInstance().AddDesc(
               "surfaceChangedCallbackId:" + std::to_string(swiper.surfaceChangedCallbackId_.value()))
         : DumpLog::GetInstance().AddDesc("surfaceChangedCallbackId:null");
-}
-
-void SwiperHelper::DumpInfoAddDescPart4(SwiperPattern& swiper)
-{
-    DumpLog::GetInstance().AddDesc("currentIndex:" + std::to_string(swiper.currentIndex_));
-    DumpLog::GetInstance().AddDesc("oldIndex:" + std::to_string(swiper.oldIndex_));
-    DumpLog::GetInstance().AddDesc("currentOffset:" + std::to_string(swiper.currentOffset_));
-    DumpLog::GetInstance().AddDesc("fadeOffset:" + std::to_string(swiper.fadeOffset_));
-    DumpLog::GetInstance().AddDesc("touchBottomRate:" + std::to_string(swiper.touchBottomRate_));
-    DumpLog::GetInstance().AddDesc("currentIndexOffset:" + std::to_string(swiper.currentIndexOffset_));
-    DumpLog::GetInstance().AddDesc("gestureSwipeIndex:" + std::to_string(swiper.gestureSwipeIndex_));
-    DumpLog::GetInstance().AddDesc("currentFirstIndex:" + std::to_string(swiper.currentFirstIndex_));
-    DumpLog::GetInstance().AddDesc("startMainPos:" + std::to_string(swiper.startMainPos_));
-    DumpLog::GetInstance().AddDesc("endMainPos:" + std::to_string(swiper.endMainPos_));
-    DumpLog::GetInstance().AddDesc("contentMainSize:" + std::to_string(swiper.contentMainSize_));
-    DumpLog::GetInstance().AddDesc("contentCrossSize:" + std::to_string(swiper.contentCrossSize_));
+    swiper.velocity_.has_value()
+        ? DumpLog::GetInstance().AddDesc("velocity:" + std::to_string(swiper.velocity_.value()))
+        : DumpLog::GetInstance().AddDesc("velocity:null");
+    swiper.GetCurveIncludeMotion()
+        ? DumpLog::GetInstance().AddDesc("curve:" + swiper.GetCurveIncludeMotion()->ToString())
+        : DumpLog::GetInstance().AddDesc("curve:null");
     DumpLog::GetInstance().AddDesc("currentDelta:" + std::to_string(swiper.currentDelta_));
     DumpLog::GetInstance().AddDesc("propertyAnimationIndex:" + std::to_string(swiper.propertyAnimationIndex_));
     DumpLog::GetInstance().AddDesc("mainDeltaSum:" + std::to_string(swiper.mainDeltaSum_));
