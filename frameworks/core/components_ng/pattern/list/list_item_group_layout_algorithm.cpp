@@ -887,6 +887,7 @@ void ListItemGroupLayoutAlgorithm::AdjustItemPosition()
             pos.second.endPos += delta;
         }
         totalMainSize_ = std::max(totalMainSize_ + delta, GetEndPosition() + footerMainSize_);
+        adjustReferenceDelta_ = -delta;
     } else if (GetStartIndex() == 0 && currentStartPos > headerMainSize_) {
         auto delta = currentStartPos - headerMainSize_;
         for (auto& pos : itemPosition_) {
@@ -894,6 +895,7 @@ void ListItemGroupLayoutAlgorithm::AdjustItemPosition()
             pos.second.endPos -= delta;
         }
         totalMainSize_ -= delta;
+        adjustReferenceDelta_ = delta;
     }
     if (GetEndIndex() == totalItemCount_ - 1) {
         totalMainSize_ = GetEndPosition() + footerMainSize_;

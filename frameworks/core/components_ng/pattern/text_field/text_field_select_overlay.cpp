@@ -583,9 +583,14 @@ void TextFieldSelectOverlay::OnHandleMoveStart(bool isFirst)
     BaseTextSelectOverlay::OnHandleMoveStart(isFirst);
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
+    auto pattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
     manager->SetHandleCircleIsShow(isFirst, false);
     if (IsSingleHandle()) {
         manager->SetIsHandleLineShow(false);
+        if (!pattern->IsOperation()) {
+            pattern->StartTwinkling();
+        }
     }
 }
 } // namespace OHOS::Ace::NG

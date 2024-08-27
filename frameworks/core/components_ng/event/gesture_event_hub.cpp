@@ -1000,7 +1000,8 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         }
 
         CHECK_NULL_VOID(imageNode);
-        float previewScale = DEFALUT_DRAG_PPIXELMAP_SCALE;
+        float previewScale =
+            info.GetInputEventType() == InputEventType::MOUSE_BUTTON ? 1.0f : DEFALUT_DRAG_PPIXELMAP_SCALE;
         if (IsPixelMapNeedScale()) {
             previewScale = static_cast<float>(imageNode->GetPreviewScaleVal());
             scale = previewScale * windowScale;
@@ -1996,5 +1997,18 @@ void GestureEventHub::SetMouseDragMonitorState(bool state)
         return;
     }
     TAG_LOGI(AceLogTag::ACE_DRAG, "Set mouse drag monitor state %{public}d success", state);
+}
+
+bool GestureEventHub::IsAllowedDrag(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, false);
+    auto gestureEventHub = eventHub->GetGestureEventHub();
+    CHECK_NULL_RETURN(gestureEventHub, false);
+    if (gestureEventHub->IsTextCategoryComponent(frameNode->GetTag())) {
+        return frameNode->IsDraggable() && eventHub->HasOnDragStart();
+    }
+    return gestureEventHub->IsAllowedDrag(eventHub);
 }
 } // namespace OHOS::Ace::NG

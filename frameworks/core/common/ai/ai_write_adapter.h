@@ -37,6 +37,9 @@ class RichEditorPattern;
 struct AIWriteInfo {
     int32_t selectStart = 0;
     int32_t selectEnd = 0;
+    int32_t maxLength = -1;
+    std::string firstHandle;
+    std::string secondHandle;
     PlatformVersion apiVersion = PlatformVersion::VERSION_THIRTEEN;
     std::vector<uint8_t> selectBuffer;
     std::vector<uint8_t> sentenceBuffer;
@@ -80,6 +83,7 @@ public:
         return abilityName_;
     }
 private:
+    void SetWantParams(const AIWriteInfo& info, AAFwk::Want& want);
     int32_t sessionId_ = -1;
     std::string bundleName_;
     std::string abilityName_;

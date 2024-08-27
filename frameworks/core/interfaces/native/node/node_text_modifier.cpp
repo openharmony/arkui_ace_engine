@@ -1214,7 +1214,10 @@ const CJUITextModifier* GetCJUITextModifier()
         SetTextContentWithStyledString, ResetTextContentWithStyledString, SetTextSelection, ResetTextSelection,
         SetTextSelectableMode, ResetTextSelectableMode, SetTextDataDetectorConfigWithEvent,
         ResetTextDataDetectorConfigWithEvent, SetTextOnCopy, ResetTextOnCopy, SetTextOnTextSelectionChange,
-        ResetTextOnTextSelectionChange };
+        ResetTextOnTextSelectionChange, SetFontWeightWithOption, SetTextMinFontScale, ResetTextMinFontScale,
+        SetTextMaxFontScale, ResetTextMaxFontScale, SetTextSelectionMenuOptions, ResetTextSelectionMenuOptions,
+        SetTextHalfLeading, ResetTextHalfLeading, GetTextHalfLeading, SetOnClick, ResetOnClick, SetResponseRegion,
+        ResetResponseRegion };
 
     return &modifier;
 }

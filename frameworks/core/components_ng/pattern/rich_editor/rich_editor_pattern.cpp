@@ -3345,16 +3345,7 @@ void RichEditorPattern::OnDragStartAndEnd()
         NG::DragDropInfo itemInfo;
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_RETURN(pattern, itemInfo);
-        if (!pattern->isDragSponsor_) {
-            pattern->isDragSponsor_ = true;
-            pattern->dragRange_ = { pattern->textSelector_.GetTextStart(), pattern->textSelector_.GetTextEnd() };
-        }
-        pattern->timestamp_ = std::chrono::system_clock::now().time_since_epoch().count();
-        auto eventHub = pattern->GetEventHub<RichEditorEventHub>();
-        eventHub->SetTimestamp(pattern->GetTimestamp());
-        CHECK_NULL_RETURN(eventHub, itemInfo);
-        pattern->showSelect_ = false;
-        return pattern->OnDragStart(event, extraParams);
+        return pattern->HandleDragStart(event, extraParams);
     };
     eventHub->SetDefaultOnDragStart(std::move(onDragStart));
     auto onDragEnd = [weakPtr = WeakClaim(this), scopeId = Container::CurrentId()](
@@ -3371,6 +3362,25 @@ void RichEditorPattern::OnDragStartAndEnd()
         pattern->OnDragEnd(event);
     };
     eventHub->SetOnDragEnd(std::move(onDragEnd));
+}
+
+NG::DragDropInfo RichEditorPattern::HandleDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams)
+{
+    if (!isDragSponsor_) {
+        isDragSponsor_ = true;
+        dragRange_ = { textSelector_.GetTextStart(), textSelector_.GetTextEnd() };
+    }
+    timestamp_ = std::chrono::system_clock::now().time_since_epoch().count();
+    auto eventHub = GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_RETURN(eventHub, {});
+    eventHub->SetTimestamp(timestamp_);
+    showSelect_ = false;
+    auto dropInfo = OnDragStart(event, extraParams);
+    if (isOnlyImageDrag_) {
+        recoverStart_ = -1;
+        recoverEnd_ = -1;
+    }
+    return dropInfo;
 }
 
 void RichEditorPattern::onDragDropAndLeave()
@@ -3647,9 +3657,17 @@ void RichEditorPattern::SetSubMap(RefPtr<SpanString>& spanString)
         if (!spanItem) {
             continue;
         }
-        std::list<RefPtr<SpanBase>> spanBases = { ToFontSpan(spanItem), ToDecorationSpan(spanItem),
-            ToBaselineOffsetSpan(spanItem), ToLetterSpacingSpan(spanItem), ToGestureSpan(spanItem),
-            ToImageSpan(spanItem), ToParagraphStyleSpan(spanItem), ToLineHeightSpan(spanItem) };
+        auto start = spanItem->rangeStart;
+        auto end = spanItem->position;
+        std::list<RefPtr<SpanBase>> spanBases = {
+            spanString->ToFontSpan(spanItem, start, end),
+            spanString->ToDecorationSpan(spanItem, start, end),
+            spanString->ToBaselineOffsetSpan(spanItem, start, end),
+            spanString->ToLetterSpacingSpan(spanItem, start, end),
+            spanString->ToGestureSpan(spanItem, start, end),
+            spanString->ToImageSpan(spanItem),
+            spanString->ToParagraphStyleSpan(spanItem, start, end),
+            spanString->ToLineHeightSpan(spanItem, start, end) };
         for (auto& spanBase : spanBases) {
             if (!spanBase) {
                 continue;
@@ -3663,111 +3681,6 @@ void RichEditorPattern::SetSubMap(RefPtr<SpanString>& spanString)
         }
     }
     spanString->SetSpanMap(std::move(subMap));
-}
-
-RefPtr<FontSpan> RichEditorPattern::ToFontSpan(const RefPtr<SpanItem>& spanItem)
-{
-    CHECK_NULL_RETURN(spanItem && spanItem->fontStyle, nullptr);
-    Font font;
-    font.fontColor = spanItem->fontStyle->GetTextColor();
-    font.fontFamiliesNG = spanItem->fontStyle->GetFontFamily();
-    font.fontSize = spanItem->fontStyle->GetFontSize();
-    font.fontStyle = spanItem->fontStyle->GetItalicFontStyle();
-    font.fontWeight = spanItem->fontStyle->GetFontWeight();
-    return AceType::MakeRefPtr<FontSpan>(
-        font, spanItem->position - StringUtils::ToWstring(spanItem->content).length(), spanItem->position);
-}
-
-RefPtr<DecorationSpan> RichEditorPattern::ToDecorationSpan(const RefPtr<SpanItem>& spanItem)
-{
-    CHECK_NULL_RETURN(spanItem && spanItem->fontStyle, nullptr);
-    TextDecoration type;
-    std::optional<Color> color;
-    std::optional<TextDecorationStyle> style;
-    if (spanItem->fontStyle->GetTextDecoration().has_value()) {
-        type = spanItem->fontStyle->GetTextDecoration().value();
-    }
-    color = spanItem->fontStyle->GetTextDecorationColor();
-    style = spanItem->fontStyle->GetTextDecorationStyle();
-    return AceType::MakeRefPtr<DecorationSpan>(type, color, style,
-        spanItem->position - StringUtils::ToWstring(spanItem->content).length(), spanItem->position);
-}
-
-RefPtr<BaselineOffsetSpan> RichEditorPattern::ToBaselineOffsetSpan(const RefPtr<SpanItem>& spanItem)
-{
-    CHECK_NULL_RETURN(spanItem && spanItem->textLineStyle, nullptr);
-    Dimension baselineOffset;
-    if (spanItem->textLineStyle->GetBaselineOffset().has_value()) {
-        baselineOffset.SetValue(spanItem->textLineStyle->GetBaselineOffsetValue().ConvertToVp());
-    }
-    return AceType::MakeRefPtr<BaselineOffsetSpan>(
-        baselineOffset, spanItem->position - StringUtils::ToWstring(spanItem->content).length(), spanItem->position);
-}
-
-RefPtr<LetterSpacingSpan> RichEditorPattern::ToLetterSpacingSpan(const RefPtr<SpanItem>& spanItem)
-{
-    CHECK_NULL_RETURN(spanItem && spanItem->fontStyle, nullptr);
-    Dimension letterSpacing;
-    if (spanItem->fontStyle->GetLetterSpacing().has_value()) {
-        letterSpacing.SetValue(spanItem->fontStyle->GetLetterSpacingValue().ConvertToVp());
-    }
-    return AceType::MakeRefPtr<LetterSpacingSpan>(
-        letterSpacing, spanItem->position - StringUtils::ToWstring(spanItem->content).length(), spanItem->position);
-}
-
-RefPtr<GestureSpan> RichEditorPattern::ToGestureSpan(const RefPtr<SpanItem>& spanItem)
-{
-    CHECK_NULL_RETURN(spanItem, nullptr);
-    GestureStyle gestureInfo;
-    if (spanItem->onClick) {
-        gestureInfo.onClick = spanItem->onClick;
-    }
-    if (spanItem->onLongPress) {
-        gestureInfo.onLongPress = spanItem->onLongPress;
-    }
-    return AceType::MakeRefPtr<GestureSpan>(
-        gestureInfo, spanItem->position - StringUtils::ToWstring(spanItem->content).length(), spanItem->position);
-}
-
-RefPtr<TextShadowSpan> RichEditorPattern::ToTextShadowSpan(const RefPtr<SpanItem>& spanItem)
-{
-    CHECK_NULL_RETURN(spanItem && spanItem->fontStyle, nullptr);
-    return AceType::MakeRefPtr<TextShadowSpan>(spanItem->fontStyle->GetTextShadow().value(),
-        spanItem->position - StringUtils::ToWstring(spanItem->content).length(), spanItem->position);
-}
-
-RefPtr<ImageSpan> RichEditorPattern::ToImageSpan(const RefPtr<SpanItem>& spanItem)
-{
-    CHECK_NULL_RETURN(spanItem, nullptr);
-    auto imageItem = DynamicCast<ImageSpanItem>(spanItem);
-    CHECK_NULL_RETURN(imageItem, nullptr);
-    const auto& options = imageItem->options;
-    return AceType::MakeRefPtr<ImageSpan>(options);
-}
-
-RefPtr<ParagraphStyleSpan> RichEditorPattern::ToParagraphStyleSpan(const RefPtr<SpanItem>& spanItem)
-{
-    CHECK_NULL_RETURN(spanItem && spanItem->textLineStyle, nullptr);
-    SpanParagraphStyle paragraphStyle;
-    paragraphStyle.align = spanItem->textLineStyle->GetTextAlign();
-    paragraphStyle.maxLines = spanItem->textLineStyle->GetMaxLines();
-    paragraphStyle.textOverflow = spanItem->textLineStyle->GetTextOverflow();
-    paragraphStyle.leadingMargin = spanItem->textLineStyle->GetLeadingMargin();
-    paragraphStyle.wordBreak = spanItem->textLineStyle->GetWordBreak();
-    paragraphStyle.textIndent = spanItem->textLineStyle->GetTextIndent();
-    return AceType::MakeRefPtr<ParagraphStyleSpan>(
-        paragraphStyle, spanItem->position - StringUtils::ToWstring(spanItem->content).length(), spanItem->position);
-}
-
-RefPtr<LineHeightSpan> RichEditorPattern::ToLineHeightSpan(const RefPtr<SpanItem>& spanItem)
-{
-    CHECK_NULL_RETURN(spanItem && spanItem->textLineStyle, nullptr);
-    Dimension lineHeight;
-    if (spanItem->textLineStyle->GetLineHeight().has_value()) {
-        lineHeight.SetValue(spanItem->textLineStyle->GetLineHeightValue().ConvertToVp());
-    }
-    return AceType::MakeRefPtr<LineHeightSpan>(
-        lineHeight, spanItem->position - StringUtils::ToWstring(spanItem->content).length(), spanItem->position);
 }
 
 void RichEditorPattern::AddSpanByPasteData(const RefPtr<SpanString>& spanString)
@@ -6758,7 +6671,7 @@ void RichEditorPattern::ShowHandles(const bool isNeedShowHandles)
     if (!isNeedShowHandles) {
         auto info = GetSpansInfo(textSelector_.GetTextStart(), textSelector_.GetTextEnd(), GetSpansMethod::ONSELECT);
         auto selResult = info.GetSelection().resultObjects;
-        if (selResult.size() == 1 && selResult.front().type == SelectSpanType::TYPEIMAGE) {
+        if (isMousePressed_ && selResult.size() == 1 && selResult.front().type == SelectSpanType::TYPEIMAGE) {
             textSelector_.Update(-1, -1);
             auto host = GetHost();
             CHECK_NULL_VOID(host);
@@ -10057,6 +9970,9 @@ void RichEditorPattern::GetAIWriteInfo(AIWriteInfo& info)
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "Sentence range=[%{public}d--%{public}d], content = %{public}s",
         sentenceStart, sentenceEnd, spanString->GetString().c_str());
     spanString->EncodeTlv(info.sentenceBuffer);
+
+    info.firstHandle = textSelector_.firstHandle.ToString();
+    info.secondHandle = textSelector_.secondHandle.ToString();
 }
 
 void RichEditorPattern::HandleOnAIWrite()

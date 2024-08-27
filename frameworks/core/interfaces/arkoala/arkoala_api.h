@@ -736,6 +736,8 @@ enum ArkUINodeType {
     ARKUI_SYMBOL_GLYPH,
     ARKUI_QRCODE,
     ARKUI_BADGE,
+    ARKUI_TEXT_CLOCK,
+    ARKUI_TEXT_TIMER,
 };
 
 enum ArkUIEventCategory {
@@ -3946,6 +3948,7 @@ struct ArkUITextClockModifier {
     void (*resetFontFeature)(ArkUINodeHandle node);
     void (*setDateTimeOptions)(ArkUINodeHandle node, ArkUI_Int32 hourType);
     void (*resetDateTimeOptions)(ArkUINodeHandle node);
+    void (*setTextClockTimeZoneOffset)(ArkUINodeHandle node, ArkUI_Float32 timeZoneOffset);
 };
 
 struct ArkUITextClockControllerModifier {
@@ -4008,6 +4011,7 @@ struct ArkUITextTimerModifier {
     void (*resetFormat)(ArkUINodeHandle node);
     void (*setTextShadow)(ArkUINodeHandle node, struct ArkUITextShadowStruct* shadows, ArkUI_Uint32 length);
     void (*resetTextShadow)(ArkUINodeHandle node);
+    void (*setTextTimerOptions)(ArkUINodeHandle node, ArkUI_Bool isCountDown, ArkUI_Float64 count);
 };
 
 struct ArkUISymbolGlyphModifier {
@@ -4369,6 +4373,13 @@ struct ArkUIRichEditorModifier {
     void (*resetRichEditorOnCopy)(ArkUINodeHandle node);
     void (*setRichEditorEnterKeyType)(ArkUINodeHandle node, ArkUI_Uint32 enterKeyType);
     void (*resetRichEditorEnterKeyType)(ArkUINodeHandle node);
+    void (*setRichEditorEnableKeyboardOnFocus)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetRichEditorEnableKeyboardOnFocus)(ArkUINodeHandle node);
+    void (*setRichEditorEnablePreviewText)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetRichEditorEnablePreviewText)(ArkUINodeHandle node);
+    void (*setRichEditorEditMenuOptions)(
+        ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback);
+    void (*resetRichEditorEditMenuOptions)(ArkUINodeHandle node);
 };
 
 struct ArkUIRichEditorControllerModifier {
@@ -4492,11 +4503,6 @@ struct ArkUIXComponentModifier {
     void (*setXComponentOptions)(ArkUINodeHandle node, ArkUI_CharPtr id, ArkUI_CharPtr type, ArkUI_CharPtr libraryName);
     ArkUI_CharPtr (*getXComponentSurfaceId)(ArkUIXComponentControllerHandle controller);
     ArkUIXComponentControllerHandle (*getXComponentController)(ArkUINodeHandle node);
-
-    void (*setXComponentWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue);
-    void (*resetXComponentWidth)(ArkUINodeHandle node);
-    void (*setXComponentHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue);
-    void (*resetXComponentHeight)(ArkUINodeHandle node);
     void (*setXComponentEnableAnalyzer)(ArkUINodeHandle node, ArkUI_Bool enable);
     void (*resetXComponentEnableAnalyzer)(ArkUINodeHandle node);
     void (*setXComponentBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
@@ -4513,6 +4519,7 @@ struct ArkUIXComponentModifier {
     void* (*getNativeXComponent)(ArkUINodeHandle node);
     void (*setXComponentLibraryname)(ArkUINodeHandle node, ArkUI_CharPtr libraryname);
     void (*setImageAIOptions)(ArkUINodeHandle node, void* options);
+    void (*initXComponent)(ArkUINodeHandle node);
 };
 
 struct ArkUIStateModifier {

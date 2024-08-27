@@ -1946,8 +1946,7 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
             pattern->MarkContentChange();
             host->MarkDirtyNode(pattern->IsTextArea() ? PROPERTY_UPDATE_MEASURE : PROPERTY_UPDATE_MEASURE_SELF);
         }
-        pattern->needToRequestKeyboardInner_ = pattern->dragStatus_ == DragStatus::NONE;
-        pattern->RequestKeyboardByFocusSwitch();
+        FocusHub::LostFocusToViewRoot();
     };
 }
 
@@ -3034,17 +3033,17 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     }
     auto localOffset = ConvertGlobalToLocalOffset(info.GetGlobalLocation());
     if (CanChangeSelectState()) {
-        selectController_->UpdateSelectByOffset(localOffset);
+        selectController_->UpdateSelectWithBlank(localOffset);
     }
     StopTwinkling();
     SetIsSingleHandle(!IsSelected());
     auto start = selectController_->GetStartIndex();
     auto end = selectController_->GetEndIndex();
     CloseSelectOverlay();
-    if (magnifierController_) {
+    if (magnifierController_ && IsOperation()) {
         magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() });
     }
-    StartGestureSelection(start, end);
+    StartGestureSelection(start, end, localOffset);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -4483,11 +4482,16 @@ bool TextFieldPattern::CursorMoveEnd()
 
 bool TextFieldPattern::CursorMoveUpOperation()
 {
-    CHECK_NULL_RETURN(IsTextArea(), false);
+    if (!IsTextArea()) {
+        return CursorMoveToParagraphBegin();
+    }
     auto originCaretPosition = selectController_->GetCaretIndex();
     auto offsetX = selectController_->GetCaretRect().GetX();
     // multiply by 0.5f to convert to the grapheme center point of the previous line.
     auto offsetY = selectController_->GetCaretRect().GetY() - PreferredLineHeight() * 0.5f;
+    if (offsetY < textRect_.GetY()) {
+        return CursorMoveToParagraphBegin();
+    }
     std::optional<Offset> offset;
     offset.emplace(Offset(offsetX, offsetY));
     OnCursorMoveDone(TextAffinity::DOWNSTREAM, offset);
@@ -4506,11 +4510,16 @@ bool TextFieldPattern::CursorMoveUp()
 
 bool TextFieldPattern::CursorMoveDownOperation()
 {
-    CHECK_NULL_RETURN(IsTextArea(), false);
+    if (!IsTextArea()) {
+        return CursorMoveToParagraphEnd();
+    }
     auto originCaretPosition = selectController_->GetCaretIndex();
     auto offsetX = selectController_->GetCaretRect().GetX();
     // multiply by 1.5f to convert to the grapheme center point of the next line.
     auto offsetY = selectController_->GetCaretRect().GetY() + PreferredLineHeight() * 1.5f;
+    if (offsetY > textRect_.GetY() + textRect_.Height()) {
+        return CursorMoveToParagraphEnd();
+    }
     std::optional<Offset> offset;
     offset.emplace(Offset(offsetX, offsetY));
     OnCursorMoveDone(TextAffinity::DOWNSTREAM, offset);
@@ -5348,6 +5357,7 @@ void TextFieldPattern::SetSelectionFlag(
     selectionStart = std::clamp(selectionStart, 0, length);
     selectionEnd = std::clamp(selectionEnd, 0, length);
     moveCaretState_.isTouchCaret = false;
+    bool isShowMenu = selectOverlay_->IsCurrentMenuVisibile();
     isTouchPreviewText_ = false;
     if (selectionStart == selectionEnd) {
         selectController_->MoveCaretToContentRect(selectionEnd, TextAffinity::DOWNSTREAM);
@@ -5371,7 +5381,7 @@ void TextFieldPattern::SetSelectionFlag(
     if (!IsShowHandle()) {
         CloseSelectOverlay(true);
     } else {
-        bool isShowMenu = IsShowMenu(options);
+        isShowMenu = IsShowMenu(options, isShowMenu);
         if (!isShowMenu && IsUsingMouse()) {
             CloseSelectOverlay();
         } else {
@@ -5383,7 +5393,7 @@ void TextFieldPattern::SetSelectionFlag(
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-bool TextFieldPattern::IsShowMenu(const std::optional<SelectionOptions>& options)
+bool TextFieldPattern::IsShowMenu(const std::optional<SelectionOptions>& options, bool defaultValue)
 {
     if (!options.has_value()) {
         return false;
@@ -5394,7 +5404,7 @@ bool TextFieldPattern::IsShowMenu(const std::optional<SelectionOptions>& options
     if (options.value().menuPolicy == MenuPolicy::SHOW) {
         return true;
     }
-    return selectOverlay_->IsCurrentMenuVisibile();
+    return defaultValue;
 }
 
 bool TextFieldPattern::OnBackPressed()
@@ -7580,7 +7590,7 @@ void TextFieldPattern::HandleCursorOnDragEnded(const RefPtr<NotifyDragEvent>& no
             "In OnDragEnded,"
             " the released location is not in the current textField, id:%{public}d",
             host->GetId());
-        focusHub->LostFocus();
+        FocusHub::LostFocusToViewRoot();
         StopTwinkling();
         return;
     }
@@ -8182,6 +8192,7 @@ void TextFieldPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, 
 
 void TextFieldPattern::OnTextGenstureSelectionEnd()
 {
+    SetIsSingleHandle(!IsSelected());
     if (!IsContentRectNonPositive()) {
         ProcessOverlay({ .animation = true });
     }
@@ -8231,6 +8242,14 @@ void TextFieldPattern::GetAIWriteInfo(AIWriteInfo& info)
     spanString->EncodeTlv(info.selectBuffer);
     TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "Sentence range=[%{public}d--%{public}d], content = %{public}s",
         sentenceStart, sentenceEnd, spanString->GetString().c_str());
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    info.maxLength = static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>()));
+    info.firstHandle = selectController_->GetFirstHandleRect().ToString();
+    info.secondHandle = selectController_->GetSecondHandleRect().ToString();
 }
 
 void TextFieldPattern::HandleOnAIWrite()

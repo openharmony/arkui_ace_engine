@@ -58,8 +58,6 @@ constexpr int32_t ERROR_CODE_UIEXTENSION_FOREGROUND_FAILED = 100018;
 constexpr int32_t ERROR_CODE_UIEXTENSION_BACKGROUND_FAILED = 100019;
 // The uiextension ability destruction failed.
 constexpr int32_t ERROR_CODE_UIEXTENSION_DESTRUCTION_FAILED = 100020;
-// The transparent uiextension node detected.
-constexpr int32_t ERROR_CODE_UIEXTENSION_TRANSPARENT_DETECTED = 1000;
 
 // C-API errors
 constexpr int32_t ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND = 106101;

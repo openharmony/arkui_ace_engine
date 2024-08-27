@@ -302,6 +302,9 @@ private:
     void SyncLayoutBeforeSpring();
 
     void FireOnScrollStart() override;
+    void FireOnReachStart(const OnReachEvent& onReachStart) override;
+    void FireOnReachEnd(const OnReachEvent& onReachEnd) override;
+    void FireOnScrollIndex(bool indexChanged, const ScrollIndexFunc& onScrollIndex);
 
     inline bool UseIrregularLayout() const;
 

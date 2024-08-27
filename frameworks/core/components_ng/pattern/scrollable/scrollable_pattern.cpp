@@ -124,10 +124,8 @@ void ScrollablePattern::UpdateFadingEdge(const RefPtr<ScrollablePaintMethod>& pa
     }
     auto isFadingTop = !IsAtTop();
     auto isFadingBottom = !IsAtBottom();
-    if (isFadingTop || isFadingBottom) {
-        paint->SetOverlayRenderContext(overlayRenderContext);
-        UpdateFadeInfo(isFadingTop, isFadingBottom, paint);
-    }
+    paint->SetOverlayRenderContext(overlayRenderContext);
+    UpdateFadeInfo(isFadingTop, isFadingBottom, paint);
 }
 
 void ScrollablePattern::UpdateFadeInfo(
@@ -570,14 +568,14 @@ void ScrollablePattern::AddScrollEvent()
     };
     scrollable->SetOnScrollSnapCallback(scrollSnap);
 
-    auto calePredictSnapOffsetCallback =
+    auto calcPredictSnapOffsetCallback =
             [weak = WeakClaim(this)](float delta, float dragDistance, float velocity) -> std::optional<float> {
         auto pattern = weak.Upgrade();
         std::optional<float> predictSnapOffset;
         CHECK_NULL_RETURN(pattern, predictSnapOffset);
-        return pattern->CalePredictSnapOffset(delta, dragDistance, velocity);
+        return pattern->CalcPredictSnapOffset(delta, dragDistance, velocity);
     };
-    scrollable->SetCalePredictSnapOffsetCallback(std::move(calePredictSnapOffsetCallback));
+    scrollable->SetCalcPredictSnapOffsetCallback(std::move(calcPredictSnapOffsetCallback));
 
     auto needScrollSnapToSideCallback = [weak = WeakClaim(this)](float delta) -> bool {
         auto pattern = weak.Upgrade();
@@ -779,13 +777,13 @@ void ScrollablePattern::RegisterScrollBarEventTask()
         pattern->OnScrollEnd();
     };
     scrollBar_->SetScrollEndCallback(std::move(scrollEnd));
-    auto calePredictSnapOffsetCallback =
+    auto calcPredictSnapOffsetCallback =
             [weak = WeakClaim(this)](float delta, float dragDistance, float velocity) -> std::optional<float> {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, std::optional<float>());
-        return pattern->CalePredictSnapOffset(delta, dragDistance, velocity);
+        return pattern->CalcPredictSnapOffset(delta, dragDistance, velocity);
     };
-    scrollBar_->SetCalePredictSnapOffsetCallback(std::move(calePredictSnapOffsetCallback));
+    scrollBar_->SetCalcPredictSnapOffsetCallback(std::move(calcPredictSnapOffsetCallback));
     auto startScrollSnapMotionCallback = [weak = WeakClaim(this)](float scrollSnapDelta, float scrollSnapVelocity) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -1005,11 +1003,11 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
         CHECK_NULL_VOID(pattern);
         pattern->OnScrollEnd();
     };
-    auto calePredictSnapOffsetCallback =
+    auto calcPredictSnapOffsetCallback =
             [weak = WeakClaim(this)](float delta, float dragDistance, float velocity) -> std::optional<float> {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, std::optional<float>());
-        return pattern->CalePredictSnapOffset(delta, dragDistance, velocity);
+        return pattern->CalcPredictSnapOffset(delta, dragDistance, velocity);
     };
     auto startScrollSnapMotionCallback = [weak = WeakClaim(this)](float scrollSnapDelta, float scrollSnapVelocity) {
         auto pattern = weak.Upgrade();
@@ -1029,7 +1027,7 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
         return pattern->ScrollPage(reverse, smooth);
     };
     ScrollableNodeInfo nodeInfo = { AceType::WeakClaim(this), std::move(scrollFunction), std::move(scrollStartCallback),
-        std::move(scrollEndCallback), std::move(calePredictSnapOffsetCallback),
+        std::move(scrollEndCallback), std::move(calcPredictSnapOffsetCallback),
         std::move(startScrollSnapMotionCallback), std::move(scrollbarFRcallback), std::move(scrollPageCallback) };
     scrollBarProxy->RegisterScrollableNode(nodeInfo);
     scrollBarProxy_ = scrollBarProxy;

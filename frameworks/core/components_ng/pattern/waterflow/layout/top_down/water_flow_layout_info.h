@@ -89,6 +89,12 @@ public:
 
     void UpdateOffset(float delta) override;
 
+    float CalibrateOffset() override
+    {
+        /* offset always accurate */
+        return 0.0f;
+    }
+
     float CalcTargetPosition(int32_t idx, int32_t crossIdx) const override;
 
     float GetDelta(float prevPos) const override

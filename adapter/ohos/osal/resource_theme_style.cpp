@@ -64,6 +64,9 @@ static const std::set<std::string> stringAttrs = {
     "description_receive",
     "description_continue_to_receive",
     "description_save_to_gallery",
+    "description_export_to_gallery",
+    "description_quick_save_to_gallery",
+    "description_quick_resave_to_gallery",
     "draggable",
     "divider_shadow_enable",
     "camera_input",
@@ -106,6 +109,7 @@ static const std::set<std::string> stringAttrs = {
     "textfield_writting_ability_name",
     "rich_editor_writting_bundle_name",
     "rich_editor_writting_ability_name",
+    "ai_write_menu_name",
     "textfield_accessibility_clear"
 };
 

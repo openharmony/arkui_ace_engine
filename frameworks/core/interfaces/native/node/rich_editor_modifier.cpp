@@ -342,6 +342,59 @@ void ResetRichEditorEnterKeyType(ArkUINodeHandle node)
     RichEditorModelNG::SetEnterKeyType(frameNode, defaultEnterKeyType);
 }
 
+void SetRichEditorEnableKeyboardOnFocus(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetRequestKeyboardOnFocus(frameNode, value);
+}
+
+void ResetRichEditorEnableKeyboardOnFocus(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetRequestKeyboardOnFocus(frameNode, true);
+}
+
+void SetRichEditorEnablePreviewText(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetSupportPreviewText(frameNode, value);
+}
+
+void ResetRichEditorEnablePreviewText(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetSupportPreviewText(frameNode, true);
+}
+
+
+void SetRichEditorEditMenuOptions(ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::OnCreateMenuCallback* onCreateMenu = nullptr;
+    NG::OnMenuItemClickCallback* onMenuItemClick = nullptr;
+    if (onCreateMenuCallback) {
+        onCreateMenu = reinterpret_cast<NG::OnCreateMenuCallback*>(onCreateMenuCallback);
+    }
+    if (onMenuItemClickCallback) {
+        onMenuItemClick = reinterpret_cast<NG::OnMenuItemClickCallback*>(onMenuItemClickCallback);
+    }
+    RichEditorModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu), std::move(*onMenuItemClick));
+}
+
+void ResetRichEditorEditMenuOptions(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::OnCreateMenuCallback onCreateMenuCallback;
+    NG::OnMenuItemClickCallback onMenuItemClick;
+    RichEditorModelNG::SetSelectionMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+}
+
 namespace NodeModifier {
 const ArkUIRichEditorModifier* GetRichEditorModifier()
 {
@@ -356,7 +409,10 @@ const ArkUIRichEditorModifier* GetRichEditorModifier()
         SetRichEditorOnEditingChange, ResetRichEditorOnEditingChange,
         SetRichEditorSelectedBackgroundColor, ResetRichEditorSelectedBackgroundColor, SetRichEditorOnPaste,
         ResetRichEditorOnPaste, SetRichEditorOnCut, ResetRichEditorOnCut, SetRichEditorOnCopy, ResetRichEditorOnCopy,
-        SetRichEditorEnterKeyType, ResetRichEditorEnterKeyType };
+        SetRichEditorEnterKeyType, ResetRichEditorEnterKeyType,
+        SetRichEditorEnableKeyboardOnFocus, ResetRichEditorEnableKeyboardOnFocus,
+        SetRichEditorEnablePreviewText, ResetRichEditorEnablePreviewText,
+        SetRichEditorEditMenuOptions, ResetRichEditorEditMenuOptions };
     return &modifier;
 }
 

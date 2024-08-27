@@ -119,7 +119,7 @@ private:
     void ShowAIWrite(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
     std::function<void()> GetDefaultOptionCallback();
     std::vector<OptionParam> GetDefaultOptionsParams(const std::shared_ptr<SelectOverlayInfo>& info);
-    void GetCameraInputParams(
+    void GetFlexibleOptionsParams(
         const std::shared_ptr<SelectOverlayInfo>& info, std::vector<OptionParam>& params);
     void addMenuOptionItemsParams(
         std::vector<OptionParam>& params, const std::shared_ptr<SelectOverlayInfo>& info, int32_t index);

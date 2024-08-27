@@ -4043,6 +4043,7 @@ void JsAccessibilityManager::SendActionEvent(const Accessibility::ActionType& ac
     SendAccessibilityAsyncEvent(accessibilityEvent);
 }
 
+namespace {
 void stringToLower(std::string &str)
 {
     std::transform(str.begin(), str.end(), str.begin(), [](char &c) {
@@ -4060,43 +4061,50 @@ bool conversionDirection(std::string dir)
     return false;
 }
 
-inline void getArgumentByKey(const std::map<std::string, std::string> &actionArguments, const std::string checkKey,
-    int32_t &argument)
+int32_t getArgumentByKey(const std::map<std::string, std::string>& actionArguments, const std::string& checkKey)
 {
     auto iter = actionArguments.find(checkKey);
+    int32_t argument = -1; // -1:default value
     if (iter != actionArguments.end()) {
         std::stringstream strArguments;
         strArguments << iter->second;
         strArguments >> argument;
     }
+    return argument;
 }
 
-bool ActAccessibilityAction(Accessibility::ActionType action, const std::map<std::string, std::string> actionArguments,
+AccessibilityScrollType findAccessibilityScrollType(int32_t accessibilityScrollTypeValue)
+{
+    switch (accessibilityScrollTypeValue) {
+        case 0:
+            return AccessibilityScrollType::SCROLL_HALF;
+        case 1:
+            return AccessibilityScrollType::SCROLL_FULL;
+        default:
+            return AccessibilityScrollType::SCROLL_DEFAULT;
+    }
+}
+
+AccessibilityScrollType getAccessibilityScrollType(const std::map<std::string, std::string>& actionArguments,
+    const std::string& checkKey)
+{
+    auto argument = getArgumentByKey(actionArguments, checkKey);
+    return findAccessibilityScrollType(argument);
+}
+
+
+bool ActAccessibilityAction(Accessibility::ActionType action, const std::map<std::string, std::string>& actionArguments,
     RefPtr<NG::AccessibilityProperty> accessibilityProperty)
 {
     AccessibilityActionParam param;
     if (action == ActionType::ACCESSIBILITY_ACTION_SET_SELECTION) {
-        int start = -1;
-        int end = -1;
         std::string dir = STRING_DIR_BACKWARD;
-        auto iter = actionArguments.find(ACTION_ARGU_SELECT_TEXT_START);
-        if (iter != actionArguments.end()) {
-            std::stringstream str_start;
-            str_start << iter->second;
-            str_start >> start;
-        }
-        iter = actionArguments.find(ACTION_ARGU_SELECT_TEXT_END);
-        if (iter != actionArguments.end()) {
-            std::stringstream str_end;
-            str_end << iter->second;
-            str_end >> end;
-        }
-        iter = actionArguments.find(ACTION_ARGU_SELECT_TEXT_INFORWARD);
+        auto iter = actionArguments.find(ACTION_ARGU_SELECT_TEXT_INFORWARD);
         if (iter != actionArguments.end()) {
             dir = iter->second;
         }
-        param.setSelectionStart = start;
-        param.setSelectionEnd = end;
+        param.setSelectionStart = getArgumentByKey(actionArguments, ACTION_ARGU_SELECT_TEXT_START);
+        param.setSelectionEnd = getArgumentByKey(actionArguments, ACTION_ARGU_SELECT_TEXT_END);
         param.setSelectionDir = conversionDirection(dir);
     }
     if (action == ActionType::ACCESSIBILITY_ACTION_SET_TEXT) {
@@ -4117,34 +4125,14 @@ bool ActAccessibilityAction(Accessibility::ActionType action, const std::map<std
         param.moveUnit = static_cast<TextMoveUnit>(moveUnit);
     }
     if (action == ActionType::ACCESSIBILITY_ACTION_SET_CURSOR_POSITION) {
-        auto iter = actionArguments.find(ACTION_ARGU_SET_OFFSET);
-        int32_t position = -1;
-        if (iter != actionArguments.end()) {
-            std::stringstream strPosition;
-            strPosition << iter->second;
-            strPosition >> position;
-        }
-        param.setCursorIndex = position;
+        param.setCursorIndex = getArgumentByKey(actionArguments, ACTION_ARGU_SET_OFFSET);
     }
     if ((action == ActionType::ACCESSIBILITY_ACTION_SCROLL_FORWARD) ||
         (action == ActionType::ACCESSIBILITY_ACTION_SCROLL_BACKWARD)) {
-        int32_t scrollType = static_cast<int32_t>(AccessibilityScrollType::SCROLL_DEFAULT);
-        getArgumentByKey(actionArguments, ACTION_ARGU_SCROLL_STUB, scrollType);
-        if ((scrollType < static_cast<int32_t>(AccessibilityScrollType::SCROLL_DEFAULT)) ||
-            (scrollType > static_cast<int32_t>(AccessibilityScrollType::SCROLL_MAX_TYPE))) {
-            scrollType = static_cast<int32_t>(AccessibilityScrollType::SCROLL_DEFAULT);
-        }
-        param.scrollType = static_cast<AccessibilityScrollType>(scrollType);
+        param.scrollType = getAccessibilityScrollType(actionArguments, ACTION_ARGU_SCROLL_STUB);
     }
     if (action == ActionType::ACCESSIBILITY_ACTION_SPAN_CLICK) {
-        auto iter = actionArguments.find(ACTION_ARGU_SPAN_ID);
-        int32_t spanId = -1;
-        if (iter != actionArguments.end()) {
-            std::stringstream strSpanId;
-            strSpanId << iter->second;
-            strSpanId >> spanId;
-        }
-        param.spanId = spanId;
+        param.spanId = getArgumentByKey(actionArguments, ACTION_ARGU_SPAN_ID);
     }
     auto accessibiltyAction = ACTIONS.find(action);
     if (accessibiltyAction != ACTIONS.end()) {
@@ -4152,6 +4140,7 @@ bool ActAccessibilityAction(Accessibility::ActionType action, const std::map<std
         return accessibiltyAction->second(param);
     }
     return false;
+}
 }
 
 bool JsAccessibilityManager::ExecuteExtensionActionNG(int64_t elementId,
@@ -4579,7 +4568,8 @@ int JsAccessibilityManager::RegisterInteractionOperation(int windowId)
         CHECK_NULL_RETURN(context, -1);
         interactionOperation = std::make_shared<JsInteractionOperation>(context->GetWindowId());
         interactionOperation->SetHandler(WeakClaim(this));
-        retReg = instance->RegisterElementOperator(context->GetWindowId(), interactionOperation);
+        auto retResult = instance->RegisterElementOperator(context->GetWindowId(), interactionOperation);
+        retReg = retResult == RET_OK ? retReg : retResult;
     }
     Register(retReg == RET_OK);
     if (retReg == RET_OK) {

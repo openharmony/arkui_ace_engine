@@ -994,6 +994,8 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest017, TestSize.Level1)
     ViewAbstract::SetBrightness(RADIUS);
     ViewAbstract::SetColorBlend(BLUE);
     ViewAbstract::SetBorderImageSource(srcimages);
+    OHOS::Rosen::BrightnessBlender* brightnessBlender;
+    ViewAbstract::SetBrightnessBlender(brightnessBlender);
 
     /**
      * @tc.expected: Return expected results.
@@ -1043,6 +1045,8 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest018, TestSize.Level1)
     ViewAbstract::SetColorBlend(BLUE);
     ViewAbstract::SetColorBlend(nullptr, BLUE);
     ViewAbstract::SetBorderImageSource(srcimages);
+    OHOS::Rosen::BrightnessBlender* brightnessBlender;
+    ViewAbstract::SetBrightnessBlender(brightnessBlender);
 
     /**
      * @tc.expected: Return expected results.

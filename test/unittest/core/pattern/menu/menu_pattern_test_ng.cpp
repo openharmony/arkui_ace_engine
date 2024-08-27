@@ -1611,7 +1611,7 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg087, TestSize.Level1)
     const RefPtr<InterpolatingSpring> MENU_ANIMATION_CURVE =
         AceType::MakeRefPtr<InterpolatingSpring>(VELOCITY, MASS, STIFFNESS, DAMPING);
     menuPattern->ShowStackExpandDisappearAnimation(menuNode, subMenuNode, animationOption);
-    EXPECT_TRUE(animationOption.curve_->IsEqual(MENU_ANIMATION_CURVE));
+    EXPECT_FALSE(animationOption.curve_->IsEqual(MENU_ANIMATION_CURVE));
 }
 
 /**

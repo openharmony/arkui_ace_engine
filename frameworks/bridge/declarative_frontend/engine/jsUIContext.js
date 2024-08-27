@@ -661,7 +661,7 @@ class DynamicSyncScene {
      */
     constructor(nodeRef, frameRateRange) {
         this.frameRateRange = { ...frameRateRange };
-        if (!nodeRef.invalid()){
+        if (!nodeRef.invalid()) {
             this.nodeRef = nodeRef;
             this.nodePtr = this.nodeRef.getNativeHandle();
         }

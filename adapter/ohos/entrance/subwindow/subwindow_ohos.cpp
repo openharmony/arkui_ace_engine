@@ -416,7 +416,10 @@ void SubwindowOhos::HideWindow()
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Hide the subwindow %{public}s", window_->GetWindowName().c_str());
 
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
-    CHECK_NULL_VOID(aceContainer);
+    if (!aceContainer) {
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "get container failed, child containerId: %{public}d", childContainerId_);
+        return;
+    }
 
 #ifdef NG_BUILD
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
@@ -425,6 +428,8 @@ void SubwindowOhos::HideWindow()
     CHECK_NULL_VOID(rootNode);
     if (!rootNode->GetChildren().empty() &&
         !(rootNode->GetChildren().size() == 1 && rootNode->GetLastChild()->GetTag() == V2::KEYBOARD_ETS_TAG)) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Subwindow has other node, the last child is %{public}s",
+            rootNode->GetLastChild()->GetTag().c_str());
         auto lastChildId = rootNode->GetLastChild()->GetId();
         auto iter = hotAreasMap_.find(lastChildId);
         if (iter != hotAreasMap_.end()) {
@@ -449,7 +454,7 @@ void SubwindowOhos::HideWindow()
         CHECK_NULL_VOID(rootNode);
         if (!rootNode->GetChildren().empty() &&
             !(rootNode->GetChildren().size() == 1 && rootNode->GetLastChild()->GetTag() == V2::KEYBOARD_ETS_TAG)) {
-            TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Subwindow has other node, the last child is %{public}s",
+            TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Subwindow has other node, the last child is %{public}s",
                 rootNode->GetLastChild()->GetTag().c_str());
             return;
         }
@@ -470,7 +475,10 @@ void SubwindowOhos::HideWindow()
     }
     OHOS::Rosen::WMError ret = window_->Hide();
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
-    CHECK_NULL_VOID(parentContainer);
+    if (!parentContainer) {
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "get container failed, parent containerId: %{public}d", parentContainerId_);
+        return;
+    }
     if (parentContainer->IsScenceBoardWindow()) {
         window_->SetTouchable(true);
     }

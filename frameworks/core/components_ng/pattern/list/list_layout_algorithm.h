@@ -430,6 +430,7 @@ protected:
     void ReviseSpace(const RefPtr<ListLayoutProperty>& listLayoutProperty);
     std::pair<int32_t, int32_t> GetLayoutGroupCachedCount(
         const RefPtr<LayoutWrapper>& wrapper, bool forward, int32_t cacheCount, bool outOfView);
+    void AdjustStartPosition(const RefPtr<LayoutWrapper>& layoutWrapper, float& startPos);
 
     Axis axis_ = Axis::VERTICAL;
     LayoutConstraintF childLayoutConstraint_;

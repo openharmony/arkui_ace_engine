@@ -1407,6 +1407,20 @@ class BlendModeModifier extends ModifierWithKey {
   }
 }
 BlendModeModifier.identity = Symbol('blendMode');
+class AdvancedBlendModeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetAdvancedBlendMode(node);
+    }
+    else {
+      getUINativeModule().common.setAdvancedBlendMode(node, this.value.blendMode, this.value.blendApplyType);
+    }
+  }
+}
+AdvancedBlendModeModifier.identity = Symbol('advancedBlendMode');
 class ClipModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -4091,6 +4105,14 @@ class ArkComponent {
     arkBlendMode.blendMode = blendMode;
     arkBlendMode.blendApplyType = blendApplyType;
     modifierWithKey(this._modifiersWithKeys, BlendModeModifier.identity, BlendModeModifier, arkBlendMode);
+    return this;
+  }
+  advancedBlendMode(blendMode, blendApplyType) {
+    let arkBlendMode = new ArkBlendMode();
+    arkBlendMode.blendMode = blendMode;
+    arkBlendMode.blendApplyType = blendApplyType;
+    modifierWithKey(this._modifiersWithKeys, AdvancedBlendModeModifier.identity,
+      AdvancedBlendModeModifier, arkBlendMode);
     return this;
   }
   clip(value) {
@@ -7996,6 +8018,48 @@ class RichEditorOnCopyModifier extends ModifierWithKey {
 }
 RichEditorOnCopyModifier.identity = Symbol('richEditorOnCopy');
 
+class RichEditorEnableKeyboardOnFocusModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetEnableKeyboardOnFocus(node);
+    } else {
+      getUINativeModule().richEditor.setEnableKeyboardOnFocus(node, this.value);
+    }
+  }
+}
+RichEditorEnableKeyboardOnFocusModifier.identity = Symbol('richEditorEnableKeyboardOnFocus');
+
+class RichEditorEnablePreviewTextModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetEnablePreviewText(node);
+    } else {
+      getUINativeModule().richEditor.setEnablePreviewText(node, this.value);
+    }
+  }
+}
+RichEditorEnablePreviewTextModifier.identity = Symbol('richEditorEnablePreviewText');
+
+class RichEditorEditMenuOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetEditMenuOptions(node);
+    } else {
+      getUINativeModule().richEditor.setEditMenuOptions(node, this.value);
+    }
+  }
+}
+RichEditorEditMenuOptionsModifier.identity = Symbol('richEditorEditMenuOptions');
+
 class RichEditorEnterKeyTypeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -8107,6 +8171,18 @@ class ArkRichEditorComponent extends ArkComponent {
   }
   onCopy(callback) {
     modifierWithKey(this._modifiersWithKeys, RichEditorOnCopyModifier.identity, RichEditorOnCopyModifier, callback);
+    return this;
+  }
+  enableKeyboardOnFocus(value) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorEnableKeyboardOnFocusModifier.identity, RichEditorEnableKeyboardOnFocusModifier, value);
+    return this;
+  }
+  enablePreviewText(value) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorEnablePreviewTextModifier.identity, RichEditorEnablePreviewTextModifier, value);
+    return this;
+  }
+  editMenuOptions(value) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorEditMenuOptionsModifier.identity, RichEditorEditMenuOptionsModifier, value);
     return this;
   }
 }
@@ -23394,6 +23470,29 @@ class ArkTextClockComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
+  allowChildCount() {
+    return 0;
+  }
+  initialize(value) {
+    var _a, _b;
+    if (value.length === 1 && isObject(value[0])) {
+      if (((_a = value[0]) === null || _a === void 0 ? void 0 : _a.timeZoneOffset) !== undefined) {
+        modifierWithKey(this._modifiersWithKeys, TextClockTimeZoneOffsetModifier.identity, TextClockTimeZoneOffsetModifier, value[0].timeZoneOffset);
+      } else {
+        modifierWithKey(this._modifiersWithKeys, TextClockTimeZoneOffsetModifier.identity, TextClockTimeZoneOffsetModifier, undefined);
+      }
+      if (((_b = value[0]) === null || _b === void 0 ? void 0 : _b.controller) !== undefined) {
+        modifierWithKey(this._modifiersWithKeys, TextClockControllerModifier.identity, TextClockControllerModifier, value[0].controller);
+      } else {
+        modifierWithKey(this._modifiersWithKeys, TextClockControllerModifier.identity, TextClockControllerModifier, undefined);
+      }
+    }
+    else {
+      modifierWithKey(this._modifiersWithKeys, TextClockTimeZoneOffsetModifier.identity, TextClockTimeZoneOffsetModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, TextClockControllerModifier.identity, TextClockControllerModifier, undefined);
+    }
+    return this;
+  }
   format(value) {
     modifierWithKey(this._modifiersWithKeys, TextClockFormatModifier.identity, TextClockFormatModifier, value);
     return this;
@@ -23463,6 +23562,38 @@ class ArkTextClockComponent extends ArkComponent {
     return this;
   }
 }
+class TextClockTimeZoneOffsetModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textClock.setTextClockTimeZoneOffset(node, undefined);
+    } else {
+      getUINativeModule().textClock.setTextClockTimeZoneOffset(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextClockTimeZoneOffsetModifier.identity = Symbol('textClockTimeZoneOffset');
+class TextClockControllerModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textClock.setTextClockController(node, undefined);
+    } else {
+      getUINativeModule().textClock.setTextClockController(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextClockControllerModifier.identity = Symbol('textClockController');
 class TextClockFormatModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -23670,6 +23801,17 @@ class ArkTextTimerComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
+  allowChildCount() {
+    return 0;
+  }
+  initialize(value) {
+    if (value.length === 1 && isObject(value[0])) {
+      modifierWithKey(this._modifiersWithKeys, TextTimerOptionsModifier.identity, TextTimerOptionsModifier, value[0]);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, TextTimerOptionsModifier.identity, TextTimerOptionsModifier, undefined);
+    }
+    return this;
+  }
   fontColor(value) {
     modifierWithKey(this._modifiersWithKeys, TextTimerFontColorModifier.identity, TextTimerFontColorModifier, value);
     return this;
@@ -23726,6 +23868,33 @@ class ArkTextTimerComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
 }
+class TextTimerOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    var _a, _b, _c;
+    if (reset) {
+        getUINativeModule().textTimer.setTextTimerOptions(node, undefined, undefined, undefined);
+    }
+    else {
+        getUINativeModule().textTimer.setTextTimerOptions(node,
+          (_a = this.value) === null || _a === void 0 ? void 0 : _a.isCountDown,
+          (_b = this.value) === null || _b === void 0 ? void 0 : _b.count,
+          (_c = this.value) === null || _c === void 0 ? void 0 : _c.controller);
+    }
+  }
+  checkObjectDiff() {
+    var _a, _b, _c, _d, _e, _f;
+    return !isBaseOrResourceEqual((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.isCountDown,
+              (_b = this.value) === null || _b === void 0 ? void 0 : _b.isCountDown) ||
+        !isBaseOrResourceEqual((_c = this.stageValue) === null || _c === void 0 ? void 0 : _c.count,
+          (_d = this.value) === null || _d === void 0 ? void 0 : _d.count) ||
+        !isBaseOrResourceEqual((_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.controller,
+          (_f = this.value) === null || _f === void 0 ? void 0 : _f.controller);
+  }
+}
+TextTimerOptionsModifier.identity = Symbol('textTimerOptions');
 class TextTimerFontColorModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
@@ -24220,14 +24389,6 @@ class ArkXComponentComponent extends ArkComponent {
   outlineWidth(value) {
     throw new Error('Method not implemented.');
   }
-  width(value) {
-    modifierWithKey(this._modifiersWithKeys, XComponentWidthModifier.identity, XComponentWidthModifier, value);
-    return this;
-  }
-  height(value) {
-    modifierWithKey(this._modifiersWithKeys, XComponentHeightModifier.identity, XComponentHeightModifier, value);
-    return this;
-  }
   expandSafeArea(types, edges) {
     throw new Error('Method not implemented.');
   }
@@ -24710,40 +24871,6 @@ class XComponentOpacityModifier extends ModifierWithKey {
   }
 }
 XComponentOpacityModifier.identity = Symbol('xComponentOpacity');
-class XComponentWidthModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().xComponent.resetWidth(node);
-    }
-    else {
-      getUINativeModule().xComponent.setWidth(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-XComponentWidthModifier.identity = Symbol('xComponentWidth');
-class XComponentHeightModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().xComponent.resetHeight(node);
-    }
-    else {
-      getUINativeModule().xComponent.setHeight(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-XComponentHeightModifier.identity = Symbol('xComponentHeight');
 class XComponentBackgroundColorModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

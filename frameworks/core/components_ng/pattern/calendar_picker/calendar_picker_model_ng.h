@@ -29,6 +29,12 @@ public:
     void SetOnChange(SelectedChangeEvent&& onChange) override;
     void SetChangeEvent(SelectedChangeEvent&& onChange) override;
     void SetPadding(const PaddingProperty& padding) override;
+    void ClearBorderColor() override;
+    void ClearBorderRadius() override;
+    void ClearHeight() override;
+    void ClearBorder() override;
+    void ClearBorderWidth() override;
+    void ClearPadding() override;
     static RefPtr<FrameNode> CreateNode(int32_t nodeId, const CalendarSettingData& settingData);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetTextStyle(FrameNode* frameNode, const PickerTextStyle& textStyle);

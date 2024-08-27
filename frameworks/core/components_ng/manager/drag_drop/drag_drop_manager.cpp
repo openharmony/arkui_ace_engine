@@ -137,7 +137,7 @@ void DragDropManager::CreateDragWindow(const GestureEvent& info, uint32_t width,
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     const int32_t windowId = GetWindowId();
-    const float windowScale = isDragWindowShow_ ? 1.0f : GetWindowScale();
+    const float windowScale = isDragWindowSubWindow_ ? 1.0f : GetWindowScale();
     const Rect rect = pipeline->GetDisplayWindowRectInfo();
     const int32_t windowY = static_cast<int32_t>(info.GetGlobalPoint().GetY() * windowScale);
     const int32_t windowX = static_cast<int32_t>(info.GetGlobalPoint().GetX() * windowScale);

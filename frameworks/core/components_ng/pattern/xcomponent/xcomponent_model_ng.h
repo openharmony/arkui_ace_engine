@@ -28,10 +28,10 @@ class FrameNode;
 class ArkUI_XComponent_Params final : public ArkUI_Params {
 public:
     std::string id;
-    XComponentType type;
-    std::string libraryName;
-    std::shared_ptr<InnerXComponentController> controller;
-    void* aiOptions;
+    XComponentType type = XComponentType::SURFACE;
+    std::optional<std::string> libraryName = std::nullopt;
+    std::shared_ptr<InnerXComponentController> controller = nullptr;
+    void* aiOptions = nullptr;
 };
 
 class ACE_EXPORT XComponentModelNG : public OHOS::Ace::XComponentModel {
@@ -62,6 +62,7 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(
         int32_t nodeId, const std::string& id, XComponentType type, const std::string& libraryname);
     static RefPtr<FrameNode> CreateTypeNode(int32_t nodeId, ArkUI_XComponent_Params* params);
+    static void InitXComponent(FrameNode* frameNode);
     static void SetXComponentId(FrameNode* frameNode, const std::string& id);
     static void SetXComponentType(FrameNode* frameNode, XComponentType type);
     static void SetXComponentSurfaceSize(FrameNode* frameNode, uint32_t width, uint32_t height);

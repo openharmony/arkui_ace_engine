@@ -1459,6 +1459,12 @@ public:
 
     bool IsTextEditableForStylus() override;
     bool IsHandleDragging();
+    bool IsLTRLayout()
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, true);
+        return host->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::LTR;
+    }
 
 protected:
     virtual void InitDragEvent();
@@ -1698,7 +1704,7 @@ private:
     bool FinishTextPreviewByPreview(const std::string& insertValue);
 
     bool GetTouchInnerPreviewText(const Offset& offset) const;
-    bool IsShowMenu(const std::optional<SelectionOptions>& options);
+    bool IsShowMenu(const std::optional<SelectionOptions>& options, bool defaultValue);
     bool IsContentRectNonPositive();
     void ReportEvent();
     void ResetPreviewTextState();

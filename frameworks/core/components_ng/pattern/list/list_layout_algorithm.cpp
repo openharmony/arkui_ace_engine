@@ -876,6 +876,15 @@ void ListLayoutAlgorithm::RecycleGroupItem(LayoutWrapper* layoutWrapper) const
     }
 }
 
+void ListLayoutAlgorithm::AdjustStartPosition(const RefPtr<LayoutWrapper>& layoutWrapper, float& startPos)
+{
+    auto layoutAlgorithmWrapper = layoutWrapper->GetLayoutAlgorithm(true);
+    CHECK_NULL_VOID(layoutAlgorithmWrapper);
+    auto itemGroup = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_VOID(itemGroup);
+    startPos += itemGroup->GetAdjustReferenceDelta();
+}
+
 int32_t ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper,
     int32_t& currentIndex, float startPos, float& endPos)
 {
@@ -893,6 +902,9 @@ int32_t ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper,
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItemGroup:%d, %f", currentIndex, startPos);
             SetListItemGroupParam(wrapper, currentIndex, startPos, true, listLayoutProperty, false);
             wrapper->Measure(childLayoutConstraint_);
+            if (LessOrEqual(startPos, 0.0f)) {
+                AdjustStartPosition(wrapper, startPos);
+            }
         } else if (expandSafeArea_ || CheckNeedMeasure(wrapper)) {
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d, %f", currentIndex, startPos);
             wrapper->Measure(childLayoutConstraint_);
@@ -978,7 +990,8 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
             endMainPos = layoutEndMainPos_.value_or(endMainPos_);
             forwardFeature_ = false;
         }
-    } while (LessNotEqual(currentEndPos + chainOffset, endMainPos));
+    } while (LessNotEqual(currentEndPos + chainOffset, endMainPos) ||
+        (NearEqual(currentEndPos + chainOffset, endMainPos) && scrollSnapAlign_ == V2::ScrollSnapAlign::NONE));
     currentEndPos += chainOffset;
     // adjust offset.
     UpdateSnapCenterContentOffset(layoutWrapper);
@@ -1022,6 +1035,13 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
         }
         recycledItemPosition_.emplace(pos->first, pos->second);
         itemPosition_.erase(pos++);
+    }
+    auto pos = itemPosition_.rbegin();
+    float chainDelta = chainOffsetFunc_ ? chainOffsetFunc_(pos->first) : 0.0f;
+    if (GreatNotEqual(pos->second.endPos + chainDelta, endMainPos_) &&
+        GreatOrEqual(pos->second.startPos + chainDelta, endMainPos_)) {
+        recycledItemPosition_.emplace(pos->first, pos->second);
+        itemPosition_.erase(pos->first);
     }
 }
 

@@ -117,9 +117,6 @@ private:
 
     bool ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer) override;
     GestureAcceptResult IsPanGestureAccept() const;
-    GestureAcceptResult IsPanGestureAcceptInAllDirection(double judgeDistance) const;
-    GestureAcceptResult IsPanGestureAcceptInHorizontalDirection(double judgeDistance) const;
-    GestureAcceptResult IsPanGestureAcceptInVerticalDirection(double judgeDistance) const;
     bool CalculateTruthFingers(bool isDirectionUp) const;
     void UpdateTouchPointInVelocityTracker(const TouchEvent& event, bool end = false);
     void UpdateAxisPointInVelocityTracker(const AxisEvent& event, bool end = false);
@@ -153,7 +150,6 @@ private:
     double mouseDistance_ = 0.0;
     AxisEvent lastAxisEvent_;
     Offset averageDistance_;
-    Offset averageScreenDistance_;
     std::map<int32_t, Offset> touchPointsDistance_;
     Offset delta_;
     double mainDelta_ = 0.0;

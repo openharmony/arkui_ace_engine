@@ -923,6 +923,37 @@ HWTEST_F(WaterFlowSegmentCommonTest, overScroll001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ReachStart001
+ * @tc.desc: Test onReachStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentCommonTest, ReachStart001, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(37);
+    bool reached = false;
+    model.SetOnReachStart([&reached](){reached = true;});
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_7);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    CreateDone();
+
+    auto info = pattern_->layoutInfo_;
+
+    UpdateCurrentOffset(-2.0f);
+    UpdateCurrentOffset(3.0f);
+    EXPECT_TRUE(reached);
+
+    reached = false;
+    pattern_->ScrollToIndex(36);
+    FlushLayoutTask(frameNode_);
+    UpdateCurrentOffset(Infinity<float>());
+    EXPECT_TRUE(reached);
+}
+
+/**
  * @tc.name: Cache001
  * @tc.desc: Layout WaterFlow cache items
  * @tc.type: FUNC

@@ -145,6 +145,8 @@ public:
     virtual bool OnScrollCallback(float offset, int32_t source);
     virtual void OnScrollStartCallback();
     virtual void FireOnScrollStart();
+    virtual void FireOnReachStart(const OnReachEvent& onReachStart) {}
+    virtual void FireOnReachEnd(const OnReachEvent& onReachEnd) {}
     bool ScrollableIdle()
     {
         return !scrollableEvent_ || scrollableEvent_->Idle();
@@ -375,7 +377,7 @@ public:
     void UpdateMouseStart(float offset);
 
     // scrollSnap
-    virtual std::optional<float> CalePredictSnapOffset(float delta, float dragDistance, float velocity)
+    virtual std::optional<float> CalcPredictSnapOffset(float delta, float dragDistance, float velocity)
     {
         std::optional<float> predictSnapPosition;
         return predictSnapPosition;

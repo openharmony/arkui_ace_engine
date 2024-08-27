@@ -351,6 +351,16 @@ void JSTextClockController::Stop()
     }
 }
 
+void JSTextClockController::removeController(const RefPtr<TextClockController>& controller)
+{
+    for (auto it = controller_.begin(); it != controller_.end(); it++) {
+        if (controller == *it) {
+            controller_.erase(it);
+            break;
+        }
+    }
+}
+
 void JSTextClock::SetDateTimeOptions(const JSCallbackInfo& info)
 {
     JSRef<JSObject> paramObject;

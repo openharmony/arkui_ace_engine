@@ -64,7 +64,7 @@ HWTEST_F(GridColTestNg, GridColDefault001, TestSize.Level1)
      */
     GridColModelNG gridColModelNG;
     gridColModelNG.Create();
-    auto testVal = AceType::MakeRefPtr<V2::GridContainerSize>(7);
+    auto testVal = V2::GridContainerSize(7);
     gridColModelNG.SetSpan(testVal);
     gridColModelNG.SetOffset(testVal);
     gridColModelNG.SetOrder(testVal);
@@ -77,9 +77,9 @@ HWTEST_F(GridColTestNg, GridColDefault001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<GridColLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
-    EXPECT_EQ(layoutProperty->GetSpan(), *testVal);
-    EXPECT_EQ(layoutProperty->GetOffset(), *testVal);
-    EXPECT_EQ(layoutProperty->GetOrder(), *testVal);
+    EXPECT_EQ(layoutProperty->GetSpan(), testVal);
+    EXPECT_EQ(layoutProperty->GetOffset(), testVal);
+    EXPECT_EQ(layoutProperty->GetOrder(), testVal);
 
     // rubbish code for coverity
     auto clone = layoutProperty->Clone();
