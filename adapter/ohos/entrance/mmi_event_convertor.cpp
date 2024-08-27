@@ -301,6 +301,9 @@ void GetMouseEventAction(int32_t action, MouseEvent& events, bool isScenceBoardW
             events.action = MouseAction::RELEASE;
             events.pullAction = MouseAction::PULL_UP;
             break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL:
+            events.action = MouseAction::CANCEL;
+            break;
         default:
             events.action = MouseAction::NONE;
             break;
