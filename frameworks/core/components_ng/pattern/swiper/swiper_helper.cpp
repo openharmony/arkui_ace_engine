@@ -358,7 +358,8 @@ void SwiperHelper::DumpInfoAddAnimationDesc(SwiperPattern& swiper)
     swiper.isTouchPad_ ? DumpLog::GetInstance().AddDesc("isTouchPad:true")
                        : DumpLog::GetInstance().AddDesc("isTouchPad:false");
     swiper.surfaceChangedCallbackId_.has_value()
-        ? DumpLog::GetInstance().AddDesc("surfaceChangedCallbackId:" + std::to_string(swiper.surfaceChangedCallbackId_.value()))
+        ? DumpLog::GetInstance().AddDesc("surfaceChangedCallbackId:"
+        + std::to_string(swiper.surfaceChangedCallbackId_.value()))
         : DumpLog::GetInstance().AddDesc("surfaceChangedCallbackId:null");
     swiper.velocity_.has_value()
         ? DumpLog::GetInstance().AddDesc("velocity:" + std::to_string(swiper.velocity_.value()))
