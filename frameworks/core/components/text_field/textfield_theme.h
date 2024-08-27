@@ -69,6 +69,7 @@ public:
             ParsePatternSubFirstPart(pattern, theme);
             ParsePatternSubSecondPart(pattern, theme);
             ParsePatternSubThirdPart(pattern, theme);
+            ParsePatternSubFourthPart(pattern, theme);
         }
 
         void ParsePatternSubFirstPart(const RefPtr<ThemeStyle>& pattern, const RefPtr<TextFieldTheme>& theme) const
@@ -215,6 +216,14 @@ public:
             theme->aiWriteBundleName_ = pattern->GetAttr<std::string>("textfield_writting_bundle_name", "");
             theme->aiWriteAbilityName_ = pattern->GetAttr<std::string>("textfield_writting_ability_name", "");
             
+        }
+
+        void ParsePatternSubFourthPart(const RefPtr<ThemeStyle>& pattern, const RefPtr<TextFieldTheme>& theme) const
+        {
+            std::string isTextFadeout = pattern->GetAttr<std::string>("text_fadeout_enable", "");
+            theme->textFadeoutEnabled_ = isTextFadeout == "true";
+            theme->textInputAndErrTipsSpacing_ =
+                pattern->GetAttr<Dimension>("text_input_and_error_tips_spacing", 8.0_vp);
         }
     };
 
@@ -637,6 +646,17 @@ public:
     {
         return aiWriteAbilityName_;
     }
+
+    bool TextFadeoutEnabled() const
+    {
+        return textFadeoutEnabled_;
+    }
+
+    const Dimension& GetTextInputAndErrTipsSpacing() const
+    {
+        return textInputAndErrTipsSpacing_;
+    }
+
 protected:
     TextFieldTheme() = default;
 
@@ -735,6 +755,9 @@ private:
     CancelButtonStyle cancelButtonStyle_ = CancelButtonStyle::INPUT;
     Color previewUnderlineColor_;
     Color previewBoardColor_;
+
+    bool textFadeoutEnabled_ = false;
+    Dimension textInputAndErrTipsSpacing_ = 4.0_vp;
 
     std::string cancelButton_;
 

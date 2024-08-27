@@ -543,6 +543,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
     SetAccessibilityClearAction();
     SetAccessibilityPasswordIconAction();
+    textParagraphIndent_ = textFieldLayoutAlgorithm->GetTextIndent();
     return true;
 }
 

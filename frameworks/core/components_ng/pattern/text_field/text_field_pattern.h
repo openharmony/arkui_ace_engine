@@ -534,6 +534,11 @@ public:
         textRect_ = textRect;
     }
 
+    float GetTextParagraphIndent() const
+    {
+        return textParagraphIndent_;
+    }
+
     const RectF& GetFrameRect() const
     {
         return frameRect_;
@@ -1025,6 +1030,7 @@ public:
     void SetTextInputFlag(bool isTextInput)
     {
         isTextInput_ = isTextInput;
+        SetTextFadeoutCapacity(isTextInput_);
     }
 
     void SetSingleLineHeight(float height)
@@ -1425,6 +1431,15 @@ public:
         adaptFontSize_ = adaptFontSize;
     }
 
+    void SetTextFadeoutCapacity(bool enabled)
+    {
+        haveTextFadeoutCapacity_ = enabled;
+    }
+    bool GetTextFadeoutCapacity()
+    {
+        return haveTextFadeoutCapacity_;
+    }
+
     void ShowCaretAndStopTwinkling();
 
     bool IsTextEditableForStylus() override;
@@ -1675,6 +1690,7 @@ private:
 
     RectF frameRect_;
     RectF textRect_;
+    float textParagraphIndent_ = 0.0;
     RefPtr<Paragraph> paragraph_;
     RefPtr<Paragraph> errorParagraph_;
     RefPtr<Paragraph> dragParagraph_;
@@ -1840,6 +1856,8 @@ private:
     bool textInputBlurOnSubmit_ = true;
     bool textAreaBlurOnSubmit_ = false;
     bool isDetachFromMainTree_ = false;
+
+    bool haveTextFadeoutCapacity_ = false;
 
     Dimension previewUnderlineWidth_ = 2.0_vp;
     bool hasSupportedPreviewText_ = true;
