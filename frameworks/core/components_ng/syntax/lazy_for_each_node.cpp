@@ -79,6 +79,7 @@ void LazyForEachNode::BuildAllChildren()
     auto items = builder_->GetAllChildren();
     for (auto& [index, item] : items) {
         if (item.second) {
+            RemoveDisappearingChild(item.second);
             children_.push_back(item.second);
         }
     }
@@ -170,7 +171,7 @@ void LazyForEachNode::OnDataDeleted(size_t index)
 
         if (node) {
             if (!node->OnRemoveFromParent(true)) {
-                const_cast<LazyForEachNode*>(this)->AddDisappearingChild(node);
+                AddDisappearingChild(node);
             } else {
                 node->DetachFromMainTree();
             }
@@ -197,7 +198,7 @@ void LazyForEachNode::OnDataBulkDeleted(size_t index, size_t count)
                 continue;
             }
             if (!node.second->OnRemoveFromParent(true)) {
-                const_cast<LazyForEachNode*>(this)->AddDisappearingChild(node.second);
+                AddDisappearingChild(node.second);
             } else {
                 node.second->DetachFromMainTree();
             }
@@ -241,7 +242,7 @@ void LazyForEachNode::OnDataBulkChanged(size_t index, size_t count)
                 continue;
             }
             if (!node.second->OnRemoveFromParent(true)) {
-                const_cast<LazyForEachNode*>(this)->AddDisappearingChild(node.second);
+                AddDisappearingChild(node.second);
             } else {
                 node.second->DetachFromMainTree();
             }
@@ -300,7 +301,7 @@ void LazyForEachNode::OnDatasetChange(const std::list<V2::Operation>& DataOperat
                 continue;
             }
             if (!node->OnRemoveFromParent(true)) {
-                const_cast<LazyForEachNode*>(this)->AddDisappearingChild(node);
+                AddDisappearingChild(node);
             } else {
                 node->DetachFromMainTree();
             }
