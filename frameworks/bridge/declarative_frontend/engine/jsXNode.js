@@ -1872,10 +1872,10 @@ class RenderNode {
     }
     set lengthMetricsUnit(unit) {
         if (unit === undefined || unit == null) {
-            this.lengthMetricsUnit = LengthMetricsUnit.DEFAULT;
+            this.lengthMetricsUnitValue = LengthMetricsUnit.DEFAULT;
         }
         else {
-            this.lengthMetricsUnit = unit;
+            this.lengthMetricsUnitValue = unit;
         }
     }
     set markNodeGroup(isNodeGroup) {
