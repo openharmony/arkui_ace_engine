@@ -208,10 +208,10 @@ public:
             theme->placeholderLineSpacing_ = pattern->GetAttr<Dimension>("text_field_placeholder_linespacing", 0.0_vp);
 
             theme->cancelButton_ = pattern->GetAttr<std::string>("textfield_accessibility_property_clear", "");
-            theme->showPasswordPromptInformation_ =
-                pattern->GetAttr<std::string>("textfield_accessibility_show_password", "");
-            theme->hiddenPasswordPromptInformation_ =
-                pattern->GetAttr<std::string>("textfield_accessibility_hide_password", "");
+            theme->showPassword_ = pattern->GetAttr<std::string>("textfield_show_password_button", "");
+            theme->hidePassword_ = pattern->GetAttr<std::string>("textfield_hide_password_button", "");
+            theme->hasShowedPassword_ = pattern->GetAttr<std::string>("textfield_has_showed_password", "");
+            theme->hasHiddenPassword_ = pattern->GetAttr<std::string>("textfield_has_hidden_password", "");
             theme->aiWriteBundleName_ = pattern->GetAttr<std::string>("textfield_writting_bundle_name", "");
             theme->aiWriteAbilityName_ = pattern->GetAttr<std::string>("textfield_writting_ability_name", "");
             
@@ -622,17 +622,29 @@ public:
 
     const std::string& GetShowPasswordPromptInformation() const
     {
-        return showPasswordPromptInformation_;
+        return showPassword_;
     }
 
     const std::string& GetHiddenPasswordPromptInformation() const
     {
-        return hiddenPasswordPromptInformation_;
+        return hidePassword_;
     }
+
+    const std::string& GetHasShowedPassword() const
+    {
+        return hasShowedPassword_;
+    }
+
+    const std::string& GetHasHiddenPassword() const
+    {
+        return hasHiddenPassword_;
+    }
+
     const std::string& GetAIWriteBundleName() const
     {
         return aiWriteBundleName_;
     }
+
     const std::string& GetAIWriteAbilityName() const
     {
         return aiWriteAbilityName_;
@@ -741,8 +753,10 @@ private:
     Dimension inlinePaddingRight_ = 12.0_vp;
     Dimension placeholderLineSpacing_ = 0.0_vp;
 
-    std::string showPasswordPromptInformation_;
-    std::string hiddenPasswordPromptInformation_;
+    std::string hasShowedPassword_;
+    std::string hasHiddenPassword_;
+    std::string showPassword_;
+    std::string hidePassword_;
     std::string aiWriteBundleName_;
     std::string aiWriteAbilityName_;
 };
