@@ -274,6 +274,15 @@ void* createXComponentNode(ArkUI_Int32 nodeId)
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
+
+void* createXComponentNodeWithParams(ArkUI_Int32 nodeId, const ArkUI_Params& params)
+{
+    ArkUI_XComponent_Params* xcParams = (ArkUI_XComponent_Params*)(&params);
+    CHECK_NULL_RETURN(xcParams, nullptr);
+    auto frameNode = XComponentModelNG::CreateTypeNode(nodeId, xcParams);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
 #endif
 
 void* createListItemGroupNode(ArkUI_Int32 nodeId)
@@ -488,68 +497,70 @@ void* createCustomSpanNode(ArkUI_Int32 nodeId)
 }
 
 using createArkUIFrameNode = void*(ArkUI_Int32 nodeId);
+
+static createArkUIFrameNode* createArkUIFrameNodes[] = {
+    nullptr,
+    createTextNode,
+    createSpanNode,
+    createImageSpanNode,
+    createImageNode,
+    createToggleNode,
+    createLoadingProgress,
+    createTextInputNode,
+    createStackNode,
+    createScrollNode,
+    createListNode,
+    createSwiperNode,
+    createTextAreaNode,
+    createButtonNode,
+    createProgressNode,
+    createCheckBoxNode,
+    createColumnNode,
+    createRowNode,
+    createFlexNode,
+    createListItemNode,
+    createTabsNode,
+    nullptr, // Navigator
+    nullptr, // Web
+    createSliderNode,
+    createCanvasNode,
+    createRadioNode, // Radio
+    createGridNode,
+#ifdef XCOMPONENT_SUPPORTED
+    createXComponentNode,
+#else
+    nullptr,
+#endif
+    nullptr, // SideBar
+    createRefreshNode,
+    createRootNode,
+    createComponentRootNode,
+    createListItemGroupNode,
+    createDatePickerNode,
+    createTimePickerNode,
+    createTextPickerNode,
+    createCalendarPickerNode,
+    createGridItemNode,
+    createCustomNode,
+    createWaterFlowNode,
+    createFlowItemNode,
+    createRelativeContainerNode,
+    createBlankNode,
+    createDividerNode,
+    createAlphabetIndexerNode,
+    createSearchNode,
+    createGridRowNode,
+    createGridColNode,
+    createSelectNode,
+    createImageAnimatorNode,
+    createCircleNode,
+    createTabContentNode,
+    createNavigationNode,
+    createCustomSpanNode,
+};
+
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
 {
-    static createArkUIFrameNode* createArkUIFrameNodes[] = {
-        nullptr,
-        createTextNode,
-        createSpanNode,
-        createImageSpanNode,
-        createImageNode,
-        createToggleNode,
-        createLoadingProgress,
-        createTextInputNode,
-        createStackNode,
-        createScrollNode,
-        createListNode,
-        createSwiperNode,
-        createTextAreaNode,
-        createButtonNode,
-        createProgressNode,
-        createCheckBoxNode,
-        createColumnNode,
-        createRowNode,
-        createFlexNode,
-        createListItemNode,
-        createTabsNode,
-        nullptr, // Navigator
-        nullptr, // Web
-        createSliderNode,
-        createCanvasNode,
-        createRadioNode, // Radio
-        createGridNode,
-#ifdef XCOMPONENT_SUPPORTED
-        createXComponentNode,
-#else
-        nullptr,
-#endif
-        nullptr, // SideBar
-        createRefreshNode,
-        createRootNode,
-        createComponentRootNode,
-        createListItemGroupNode,
-        createDatePickerNode,
-        createTimePickerNode,
-        createTextPickerNode,
-        createCalendarPickerNode,
-        createGridItemNode,
-        createCustomNode,
-        createWaterFlowNode,
-        createFlowItemNode,
-        createRelativeContainerNode,
-        createBlankNode,
-        createDividerNode,
-        createAlphabetIndexerNode,
-        createSearchNode,
-        createGridRowNode,
-        createGridColNode,
-        createSelectNode,
-        createImageAnimatorNode,
-        createCircleNode,
-        createTabContentNode,
-        createNavigationNode,
-        createCustomSpanNode,
-    };
     if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to create %{public}d type of node", tag);
         return nullptr;
@@ -558,6 +569,24 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
     if (nodeId == ARKUI_AUTO_GENERATE_NODE_ID) {
         nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     }
+    return createArkUIFrameNodes[tag](nodeId);
+}
+
+void* CreateNodeWithParams(ArkUINodeType tag, ArkUI_Int32 nodeId, const ArkUI_Params& params)
+{
+    if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to create %{public}d type of node", tag);
+        return nullptr;
+    }
+    CHECK_NULL_RETURN(createArkUIFrameNodes[tag], nullptr);
+    if (nodeId == ARKUI_AUTO_GENERATE_NODE_ID) {
+        nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    }
+#ifdef XCOMPONENT_SUPPORTED
+    if (tag == ArkUINodeType::ARKUI_XCOMPONENT) {
+        return createXComponentNodeWithParams(nodeId, params);
+    }
+#endif
     return createArkUIFrameNodes[tag](nodeId);
 }
 

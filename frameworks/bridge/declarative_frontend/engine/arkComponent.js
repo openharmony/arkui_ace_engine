@@ -23807,12 +23807,6 @@ class ArkXComponentComponent extends ArkComponent {
   outlineWidth(value) {
     throw new Error('Method not implemented.');
   }
-  width(value) {
-    throw new Error('Method not implemented.');
-  }
-  height(value) {
-    throw new Error('Method not implemented.');
-  }
   expandSafeArea(types, edges) {
     throw new Error('Method not implemented.');
   }
@@ -24229,10 +24223,16 @@ class ArkXComponentComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   onLoad(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, XComponentOnLoadModifier.identity, XComponentOnLoadModifier, callback);
+    return this;
   }
   onDestroy(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, XComponentOnDestroyModifier.identity, XComponentOnDestroyModifier, event);
+    return this;
+  }
+  enableAnalyzer(value) {
+    modifierWithKey(this._modifiersWithKeys, XComponentEnableAnalyzerModifier.identity, XComponentEnableAnalyzerModifier, value);
+    return this;
   }
 }
 // @ts-ignore
@@ -24583,6 +24583,51 @@ class XComponentLinearGradientBlurModifier extends ModifierWithKey {
   }
 }
 XComponentLinearGradientBlurModifier.identity = Symbol('xComponentlinearGradientBlur');
+class XComponentOnLoadModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().xComponent.resetOnLoad(node);
+    }
+    else {
+      getUINativeModule().xComponent.setOnLoad(node, this.value);
+    }
+  }
+}
+XComponentOnLoadModifier.identity = Symbol('xComponentOnLoad');
+class XComponentOnDestroyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().xComponent.resetOnDestroy(node);
+    }
+    else {
+      getUINativeModule().xComponent.setOnDestroy(node, this.value);
+    }
+  }
+}
+XComponentOnDestroyModifier.identity = Symbol('xComponentOnDestroy');
+class XComponentEnableAnalyzerModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().xComponent.resetEnableAnalyzer(node);
+    }
+    else {
+      getUINativeModule().xComponent.setEnableAnalyzer(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+XComponentEnableAnalyzerModifier.identity = Symbol('xComponentEnableAnalyzer');
 /// <reference path='./import.ts' />
 class ArkBadgeComponent extends ArkComponent {
   constructor(nativePtr, classType) {

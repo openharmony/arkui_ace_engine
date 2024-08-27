@@ -87,13 +87,7 @@ RosenRenderSurface::~RosenRenderSurface()
             DestoryNativeWindow(nativeWindow_);
             nativeWindow_ = nullptr;
         }
-        CHECK_NULL_VOID(producerSurface_);
-        auto* surfaceUtils = SurfaceUtils::GetInstance();
-        CHECK_NULL_VOID(surfaceUtils);
-        auto ret = surfaceUtils->Remove(producerSurface_->GetUniqueId());
-        if (ret != SurfaceError::SURFACE_ERROR_OK) {
-            LOGE("remove surface error: %{public}d", ret);
-        }
+        UnregisterSurface();
         while (!availableBuffers_.empty()) {
             auto surfaceNode = availableBuffers_.front();
             availableBuffers_.pop();
@@ -150,6 +144,18 @@ void RosenRenderSurface::InitSurface()
     RegisterSurface();
 }
 
+void RosenRenderSurface::Connect() const
+{
+    CHECK_NULL_VOID(producerSurface_);
+    producerSurface_->Connect();
+}
+
+void RosenRenderSurface::Disconnect() const
+{
+    CHECK_NULL_VOID(producerSurface_);
+    producerSurface_->Disconnect();
+}
+
 void RosenRenderSurface::RegisterSurface() const
 {
     CHECK_NULL_VOID(producerSurface_);
@@ -157,7 +163,18 @@ void RosenRenderSurface::RegisterSurface() const
     CHECK_NULL_VOID(surfaceUtils);
     auto ret = surfaceUtils->Add(producerSurface_->GetUniqueId(), producerSurface_);
     if (ret != SurfaceError::SURFACE_ERROR_OK) {
-        LOGW("add surface error: %{public}d", ret);
+        LOGE("add surface error: %{public}d", ret);
+    }
+}
+
+void RosenRenderSurface::UnregisterSurface() const
+{
+    CHECK_NULL_VOID(producerSurface_);
+    auto* surfaceUtils = SurfaceUtils::GetInstance();
+    CHECK_NULL_VOID(surfaceUtils);
+    auto ret = surfaceUtils->Remove(producerSurface_->GetUniqueId());
+    if (ret != SurfaceError::SURFACE_ERROR_OK) {
+        LOGE("remove surface error: %{public}d", ret);
     }
 }
 

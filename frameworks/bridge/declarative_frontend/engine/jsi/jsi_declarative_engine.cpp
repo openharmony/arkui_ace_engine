@@ -2144,21 +2144,11 @@ void JsiDeclarativeEngine::FireExternalEvent(
         CHECK_EQUAL_VOID(xcPattern->GetLibraryName().has_value(), false);
         std::weak_ptr<OH_NativeXComponent> weakNativeXComponent;
         RefPtr<OHOS::Ace::NativeXComponentImpl> nativeXComponentImpl = nullptr;
-
         std::tie(nativeXComponentImpl, weakNativeXComponent) = xcPattern->GetNativeXComponent();
         auto nativeXComponent = weakNativeXComponent.lock();
         CHECK_NULL_VOID(nativeXComponent);
         CHECK_NULL_VOID(nativeXComponentImpl);
 
-        auto type = xcPattern->GetType();
-        if (type == XComponentType::SURFACE || type == XComponentType::TEXTURE) {
-            void* nativeWindow = nullptr;
-            nativeWindow = xcPattern->GetNativeWindow();
-            if (!nativeWindow) {
-                return;
-            }
-            nativeXComponentImpl->SetSurface(nativeWindow);
-        }
         nativeXComponentImpl->SetXComponentId(componentId);
 #ifdef XCOMPONENT_SUPPORTED
         xcPattern->SetExpectedRateRangeInit();
@@ -2191,6 +2181,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
         OHOS::Ace::Framework::XComponentClient::GetInstance().AddJsValToJsValMap(componentId, obj);
         napi_close_handle_scope(reinterpret_cast<napi_env>(nativeEngine_), handleScope);
 
+        auto type = xcPattern->GetType();
         if (type == XComponentType::SURFACE || type == XComponentType::TEXTURE) {
             auto task = [weak = WeakClaim(this), weakPattern = AceType::WeakClaim(AceType::RawPtr(xcPattern))]() {
                 auto pattern = weakPattern.Upgrade();

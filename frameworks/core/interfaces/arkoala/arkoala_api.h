@@ -1376,6 +1376,10 @@ struct ArkUIDragAction {
     void** pixelmapNativeList;
 };
 
+typedef struct ArkUI_Params {
+    ArkUINodeType nodeType;
+} ArkUI_Params;
+
 struct ArkUICommonModifier {
     void (*setBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetBackgroundColor)(ArkUINodeHandle node);
@@ -1816,6 +1820,8 @@ struct ArkUICommonModifier {
         ArkUI_Float32 valueStrokeWidth, ArkUI_Int32 widthUnit, ArkUI_Uint32 valueColor, ArkUI_Uint32 hasValue);
     void (*resetFocusBoxStyle)(ArkUINodeHandle node);
     void (*setDisAllowDrop)(ArkUINodeHandle node);
+    void (*resetEnableAnalyzer)(ArkUINodeHandle node);
+    void (*setEnableAnalyzer)(ArkUINodeHandle node, ArkUI_Bool enable);
 };
 
 struct ArkUICommonShapeModifier {
@@ -4384,7 +4390,8 @@ struct ArkUIXComponentModifier {
     void (*setXComponentOptions)(ArkUINodeHandle node, ArkUI_CharPtr id, ArkUI_CharPtr type, ArkUI_CharPtr libraryName);
     ArkUI_CharPtr (*getXComponentSurfaceId)(ArkUIXComponentControllerHandle controller);
     ArkUIXComponentControllerHandle (*getXComponentController)(ArkUINodeHandle node);
-
+    void (*setXComponentEnableAnalyzer)(ArkUINodeHandle node, ArkUI_Bool enable);
+    void (*resetXComponentEnableAnalyzer)(ArkUINodeHandle node);
     void (*setXComponentBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetXComponentBackgroundColor)(ArkUINodeHandle node);
     void (*setXComponentOpacity)(ArkUINodeHandle node, ArkUI_Float32 opacity);
@@ -4399,6 +4406,7 @@ struct ArkUIXComponentModifier {
     void* (*getNativeXComponent)(ArkUINodeHandle node);
     void (*setXComponentLibraryname)(ArkUINodeHandle node, ArkUI_CharPtr libraryname);
     void (*setImageAIOptions)(ArkUINodeHandle node, void* options);
+    void (*initXComponent)(ArkUINodeHandle node);
 };
 
 struct ArkUIStateModifier {
@@ -4771,6 +4779,8 @@ typedef void (*EventReceiver)(ArkUINodeEvent* event);
 struct ArkUIBasicAPI {
     /// Tree operations.
     ArkUINodeHandle (*createNode)(ArkUINodeType type, ArkUI_Int32 id, ArkUI_Int32 flags);
+    ArkUINodeHandle (*createNodeWithParams)(
+        ArkUINodeType type, ArkUI_Int32 id, ArkUI_Int32 flags, const ArkUI_Params& params);
     ArkUINodeHandle (*getNodeByViewStack)();
     void (*disposeNode)(ArkUINodeHandle node);
     // Returned pointer is valid only till node is alive.
