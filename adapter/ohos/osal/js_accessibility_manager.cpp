@@ -1061,8 +1061,12 @@ void FillEventInfo(const RefPtr<NG::FrameNode>& node,
     eventInfo.SetBeginIndex(accessibilityProperty->GetBeginIndex());
     eventInfo.SetEndIndex(accessibilityProperty->GetEndIndex());
     AccessibilityElementInfo elementInfo;
-    FillElementInfo(param.elementId, elementInfo, context, jsAccessibilityManager);
-    elementInfo.SetNavDestinationId(param.stackNodeId);
+    FillElementInfo(param.elementId, elementInfo, context, jsAccessibilityManager, param);
+    if (param.stackNodeId != -1) {
+        int64_t stackNodeId = param.stackNodeId;
+        AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(elementInfo.GetBelongTreeId(), stackNodeId);
+        elementInfo.SetNavDestinationId(stackNodeId);
+    }
     eventInfo.SetElementInfo(elementInfo);
 }
 
@@ -2616,8 +2620,9 @@ void JsAccessibilityManager::SendAccessibilityAsyncEventInner(const Accessibilit
         CHECK_NULL_VOID(ngPipeline);
         CHECK_NULL_VOID(node);
         FillEventInfo(node, eventInfo, ngPipeline, Claim(this),
-            FillEventInfoParam { accessibilityEvent.nodeId, accessibilityEvent.stackNodeId });
-        eventInfo.SetWindowId(ngPipeline->GetFocusWindowId());
+            FillEventInfoParam {
+                accessibilityEvent.nodeId, accessibilityEvent.stackNodeId, realWindowId });
+        eventInfo.SetWindowId(realWindowId);
     } else {
         ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
         auto node = GetAccessibilityNodeFromPage(accessibilityEvent.nodeId);
@@ -3119,6 +3124,8 @@ void JsAccessibilityManager::DumpPropertyNG(int64_t nodeID)
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     if (accessibilityProperty) {
         DumpLog::GetInstance().AddDesc("offset: ", accessibilityProperty->GetScrollOffSet());
+        DumpLog::GetInstance().AddDesc("childTreeId: ", accessibilityProperty->GetChildTreeId());
+        DumpLog::GetInstance().AddDesc("childWindowId: ", accessibilityProperty->GetChildWindowId());
     }
     DumpLog::GetInstance().Print(0, nodeInfo.GetComponentType(), nodeInfo.GetChildCount());
 }
