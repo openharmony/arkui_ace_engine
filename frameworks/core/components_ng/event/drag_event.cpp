@@ -997,7 +997,7 @@ void DragEventActuator::SetPreviewDefaultAnimateProperty(const RefPtr<FrameNode>
 }
 
 void DragEventActuator::MountPixelMap(const RefPtr<OverlayManager>& manager, const RefPtr<GestureEventHub>& gestureHub,
-    const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& textNode)
+    const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& textNode, bool isDragPixelMap)
 {
     CHECK_NULL_VOID(manager);
     CHECK_NULL_VOID(imageNode);
@@ -1016,9 +1016,9 @@ void DragEventActuator::MountPixelMap(const RefPtr<OverlayManager>& manager, con
         auto frameNode = gestureHub->GetFrameNode();
         CHECK_NULL_VOID(frameNode);
         auto windowScene = manager->FindWindowScene(frameNode);
-        manager->MountPixelMapToWindowScene(columnNode, windowScene);
+        manager->MountPixelMapToWindowScene(columnNode, windowScene, isDragPixelMap);
     } else {
-        manager->MountPixelMapToRootNode(columnNode);
+        manager->MountPixelMapToRootNode(columnNode, isDragPixelMap);
     }
     SetPreviewDefaultAnimateProperty(imageNode);
     columnNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);

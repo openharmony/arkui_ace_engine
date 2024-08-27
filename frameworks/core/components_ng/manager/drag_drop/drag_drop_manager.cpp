@@ -212,6 +212,7 @@ void DragDropManager::HideDragPreviewOverlay()
     CHECK_NULL_VOID(manager);
     manager->RemovePixelMap();
     manager->RemoveGatherNode();
+    manager->RemoveDragPixelMap();
     SubwindowManager::GetInstance()->HidePreviewNG();
 }
 
@@ -221,6 +222,7 @@ void DragDropManager::HideDragPreviewWindow(int32_t containerId)
     CHECK_NULL_VOID(overlayManager);
     overlayManager->RemovePixelMap();
     overlayManager->RemoveGatherNode();
+    overlayManager->RemoveDragPixelMap();
     SubwindowManager::GetInstance()->HidePreviewNG();
 }
 
@@ -583,7 +585,7 @@ void DragDropManager::TransDragWindowToDragFwk(int32_t windowContainerId)
     menuWrapperNode_ = nullptr;
     auto overlayManager = GetDragAnimationOverlayManager(windowContainerId);
     CHECK_NULL_VOID(overlayManager);
-    overlayManager->RemovePixelMap();
+    overlayManager->RemoveDragPixelMap();
     overlayManager->RemoveGatherNode();
     SubwindowManager::GetInstance()->HidePreviewNG();
     info_.scale = -1.0;
@@ -1546,12 +1548,12 @@ void DragDropManager::UpdateVelocityTrackerPoint(const Point& point, bool isEnd)
 bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayManager,
     DragPreviewInfo& dragPreviewInfo, const RefPtr<GestureEventHub>& gestureHub)
 {
-    if (!overlayManager->GetHasPixelMap()) {
+    if (!overlayManager->GetHasDragPixelMap()) {
         return false;
     }
-    auto imageNode = overlayManager->GetPixelMapContentNode();
+    auto imageNode = overlayManager->GetDragPixelMapContentNode();
     CHECK_NULL_RETURN(imageNode, false);
-    auto badgeNode = overlayManager->GetPixelMapBadgeNode();
+    auto badgeNode = overlayManager->GetDragPixelMapBadgeNode();
     if (badgeNode) {
         dragPreviewInfo.textNode = badgeNode;
     }

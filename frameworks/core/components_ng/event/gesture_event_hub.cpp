@@ -1095,7 +1095,8 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             DragEventActuator::UpdatePreviewPositionAndScale(
                 textNode, textNode->GetOffsetInSubwindow(window->GetRect().GetOffset()));
         }
-        DragEventActuator::MountPixelMap(subWindowOverlayManager, eventHub->GetGestureEventHub(), imageNode, textNode);
+        DragEventActuator::MountPixelMap(
+            subWindowOverlayManager, eventHub->GetGestureEventHub(), imageNode, textNode, true);
         pipeline->FlushSyncGeometryNodeTasks();
         DragAnimationHelper::ShowBadgeAnimation(textNode);
         dragDropManager->DoDragStartAnimation(
