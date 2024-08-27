@@ -338,7 +338,7 @@ export struct SubHeader {
         Row() {
           this.rightArea();
         }
-        .justifyContent(FlexAlign.Start)
+        .justifyContent(FlexAlign.End)
         .alignItems(VerticalAlign.Bottom)
         .constraintSize({
           maxWidth: this.getRightAreaMaxWidth(),
