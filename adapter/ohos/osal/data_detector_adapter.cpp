@@ -106,7 +106,7 @@ void DataDetectorAdapter::OnClickAIMenuOption(const AISpan& aiSpan,
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     if (targetNode) {
-        overlayManager->CloseAIEntityMenu(targetNode);
+        overlayManager->CloseAIEntityMenu(targetNode->GetId());
     }
     Container::UpdateCurrent(mainContainerId_);
 
