@@ -1954,4 +1954,19 @@ void XComponentPattern::SetSurfaceRotation(bool isLock)
     CHECK_NULL_VOID(handlingSurfaceRenderContext_);
     handlingSurfaceRenderContext_->SetSurfaceRotation(isLock);
 }
+
+void XComponentPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("xcomponentId", id_.value_or("no id").c_str());
+    json->Put("xcomponentType", XComponentTypeToString(type_).c_str());
+    json->Put("libraryName", libraryname_.value_or("no library name").c_str());
+}
+
+void XComponentPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("surfaceRect", RectF { localPosition_, surfaceSize_ }.ToString().c_str());
+    if (renderSurface_) {
+        renderSurface_->DumpInfo(json);
+    }
+}
 } // namespace OHOS::Ace::NG

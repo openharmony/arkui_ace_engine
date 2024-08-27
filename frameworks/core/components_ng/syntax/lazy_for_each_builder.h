@@ -96,7 +96,8 @@ public:
 
     bool OnDataMoved(size_t from, size_t to);
 
-    std::pair<int32_t, std::list<std::pair<std::string, RefPtr<UINode>>>> OnDatasetChange(std::list<V2::Operation> DataOperations);
+    std::pair<int32_t, std::list<std::pair<std::string, RefPtr<UINode>>>> OnDatasetChange(
+        std::list<V2::Operation> DataOperations);
 
     void RepairDatasetItems(std::map<int32_t, LazyForEachChild>& cachedTemp,
         std::map<int32_t, LazyForEachChild>& expiringTempItem_, std::map<int32_t, int32_t>& indexChangedMap);
@@ -366,6 +367,9 @@ public:
         int64_t deadline, const std::optional<LayoutConstraintF>& itemConstraint, bool canRunLongPredictTask)
     {
         if (GetSysTimestamp() > deadline) {
+            if (!DeleteExpiringItemImmediately()) {
+                cache.merge(expiringItem_);
+            }
             return false;
         }
         bool isTimeout = false;
@@ -413,7 +417,6 @@ public:
     void ProcessCachedIndex(std::unordered_map<std::string, LazyForEachCacheChild>& cache,
         std::set<int32_t>& idleIndexes)
     {
-        std::set<std::string> cacheKeys;
         auto expiringIter = expiringItem_.begin();
         while (expiringIter != expiringItem_.end()) {
             const auto& key = expiringIter->first;
@@ -422,7 +425,7 @@ public:
             if (iter != idleIndexes.end() && node.second) {
                 LoadCacheByIndex(cache, idleIndexes, node, key, iter, expiringIter);
             } else {
-                LoadCacheByKey(cache, idleIndexes, node, key, cacheKeys, expiringIter);
+                LoadCacheByKey(cache, idleIndexes, node, key, expiringIter);
             }
         }
     }
@@ -445,22 +448,17 @@ public:
     }
 
     void LoadCacheByKey(std::unordered_map<std::string, LazyForEachCacheChild>& cache, std::set<int32_t>& idleIndexes,
-        const LazyForEachCacheChild& node, const std::string& key, std::set<std::string>& cacheKeys,
+        const LazyForEachCacheChild& node, const std::string& key,
         std::unordered_map<std::string, LazyForEachCacheChild>::iterator& expiringIter)
     {
         NotifyDataDeleted(node.second, static_cast<size_t>(node.first), true);
         ProcessOffscreenNode(node.second, true);
         NotifyItemDeleted(RawPtr(node.second), key);
 
-        if (!idleIndexes.empty() && cacheKeys.empty()) {
-            cacheKeys = GetCacheKeys(idleIndexes);
-        }
-
-        if (cacheKeys.find(key) != cacheKeys.end()) {
-            cache.try_emplace(key, node);
-            expiringIter++;
-        } else {
+        if (DeleteExpiringItemImmediately()) {
             expiringIter = expiringItem_.erase(expiringIter);
+        } else {
+            expiringIter++;
         }
     }
 
@@ -588,7 +586,10 @@ protected:
 
     virtual void OnItemDeleted(UINode* node, const std::string& key) {};
 
-    virtual std::set<std::string> GetCacheKeys(std::set<int32_t>& idleIndexes) = 0;
+    virtual bool DeleteExpiringItemImmediately()
+    {
+        return false;
+    }
 
     virtual LazyForEachChild OnGetChildByIndex(
         int32_t index, std::unordered_map<std::string, LazyForEachCacheChild>& cachedItems) = 0;

@@ -479,6 +479,9 @@ void JSTextField::SetMaxLength(const JSCallbackInfo& info)
         return;
     }
     maxLength = jsValue->ToNumber<int32_t>();
+    if (std::isinf(jsValue->ToNumber<float>())) {
+        maxLength = INT32_MAX; // Infinity
+    }
     if (GreatOrEqual(maxLength, 0)) {
         TextFieldModel::GetInstance()->SetMaxLength(maxLength);
     } else {

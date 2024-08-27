@@ -169,7 +169,7 @@ public:
     {
         return positionController_;
     }
-    
+
     void TriggerModifyDone();
 
     float GetTotalHeight() const override;
@@ -288,6 +288,7 @@ public:
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
 
     void SetNeedToUpdateListDirectionInCardStyle(bool isNeedToUpdateListDirection)
     {
@@ -326,7 +327,9 @@ private:
     }
 
     void OnScrollEndCallback() override;
-
+    void FireOnReachStart(const OnReachEvent& onReachStart) override;
+    void FireOnReachEnd(const OnReachEvent& onReachEnd) override;
+    void FireOnScrollIndex(bool indexChanged, const OnScrollIndexEvent& onScrollIndex);
     void OnModifyDone() override;
     void ChangeAxis(RefPtr<UINode> node);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -345,7 +348,7 @@ private:
 
     void MarkDirtyNodeSelf();
     SizeF GetContentSize() const;
-    void ProcessEvent(bool indexChanged, float finalOffset, bool isJump, float prevStartOffset, float prevEndOffset);
+    void ProcessEvent(bool indexChanged, float finalOffset, bool isJump);
     void CheckScrollable();
     bool IsOutOfBoundary(bool useCurrentDelta = true) override;
     bool OnScrollCallback(float offset, int32_t source) override;
@@ -384,13 +387,15 @@ private:
     float GetEndOverScrollOffset(float offset, float endMainPos, float startMainPos) const;
     float UpdateTotalOffset(const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm, bool isJump);
     RefPtr<ListContentModifier> listContentModifier_;
-
+    void CreatePositionInfo(std::unique_ptr<JsonValue>& json);
     int32_t maxListItemIndex_ = 0;
     int32_t startIndex_ = -1;
     int32_t endIndex_ = -1;
     int32_t centerIndex_ = -1;
     float startMainPos_ = 0.0f;
     float endMainPos_ = 0.0f;
+    float prevStartOffset_ = 0.f;
+    float prevEndOffset_ = 0.f;
     float currentOffset_ = 0.0f;
     float spaceWidth_ = 0.0f;
     float contentMainSize_ = 0.0f;

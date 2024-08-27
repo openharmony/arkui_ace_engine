@@ -379,11 +379,11 @@ namespace OHOS::Ace::NG {
         if (info.isExchange) {
             // if the child will be exchanged with a null node, this child should be deleted
             if (info.node == nullptr && child.second != nullptr) {
-                 nodeList_.emplace_back(child.first, child.second);
+                nodeList_.emplace_back(child.first, child.second);
             }
             // null node should not be put in expiringTempItem_ then expiringTempItem_
             if (info.node != nullptr) {
-                 expiringTempItem_.try_emplace(index + changedIndex, LazyForEachChild(info.key, info.node));
+                expiringTempItem_.try_emplace(index + changedIndex, LazyForEachChild(info.key, info.node));
             }
             return;
         }
@@ -634,8 +634,7 @@ namespace OHOS::Ace::NG {
         auto iterOfCached = cachedTemp.find(index);
         auto iterOfExpiring = expiringTemp.find(index);
         // if UI node can't be find in cachedTemp, find it in expiringTemp
-        if (iterOfCached == cachedTemp.end() || iterOfCached->second == nullptr ||
-            iterOfCached->second.second == nullptr) {
+        if (iterOfCached == cachedTemp.end() || iterOfCached->second.second == nullptr) {
             return iterOfExpiring;
         } else {
             return iterOfCached;

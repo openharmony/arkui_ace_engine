@@ -456,7 +456,7 @@ public:
     {
         return sheetKey_;
     }
-    
+
     bool GetAnimationBreak() const
     {
         return isAnimationBreak_;
@@ -588,6 +588,7 @@ public:
     void GetBuilderInitHeight();
     void ChangeSheetPage(float height);
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
 
     // Nestable Scroll
     Axis GetAxis() const override
@@ -600,6 +601,8 @@ public:
     void OnScrollEndRecursive (const std::optional<float>& velocity) override;
     bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
     ScrollResult HandleScrollWithSheet(float scrollOffset);
+    bool IsScrollOutOfBoundary();
+    RefPtr<FrameNode> GetScrollNode();
 
     bool IsSheetBottomStyle()
     {
@@ -609,7 +612,7 @@ public:
         }
         return sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOM_FREE_WINDOW;
     }
-    
+
     uint32_t GetDetentsIndex() const
     {
         return detentsFinalIndex_;
@@ -631,6 +634,7 @@ private:
     void UpdateDragBarStatus();
     void UpdateCloseIconStatus();
     void UpdateTitlePadding();
+    RefPtr<FrameNode> GetTitleNode();
     float GetCloseIconPosX(const SizeF& sheetSize, const RefPtr<SheetTheme>& sheetTheme);
     void UpdateSheetTitle();
     void UpdateFontScaleStatus();

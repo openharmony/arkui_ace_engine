@@ -339,6 +339,13 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
     if (event.isRotationEvent) {
         return;
     }
+
+    if (event.sourceTool == SourceTool::MOUSE) {
+        delta_ = event.ConvertToOffset();
+        mainDelta_ = GetMainAxisDelta();
+        averageDistance_ += delta_;
+    }
+
     globalPoint_ = Point(event.x, event.y);
 
     touchPoints_[event.id] = TouchEvent();

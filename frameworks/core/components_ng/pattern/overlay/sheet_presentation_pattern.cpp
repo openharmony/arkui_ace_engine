@@ -1050,6 +1050,15 @@ bool SheetPresentationPattern::IsShowCloseIcon()
     return layoutProperty->GetSheetStyleValue().showCloseIcon.value_or(true);
 }
 
+RefPtr<FrameNode> SheetPresentationPattern::GetTitleNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto operationNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+    CHECK_NULL_RETURN(operationNode, nullptr);
+    return DynamicCast<FrameNode>(operationNode->GetChildAtIndex(1));
+}
+
 void SheetPresentationPattern::UpdateTitlePadding()
 {
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
@@ -1064,9 +1073,7 @@ void SheetPresentationPattern::UpdateTitlePadding()
         return;
     }
 
-    auto operationNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
-    CHECK_NULL_VOID(operationNode);
-    auto titleNode = DynamicCast<FrameNode>(operationNode->GetChildAtIndex(1));
+    auto titleNode = GetTitleNode();
     CHECK_NULL_VOID(titleNode);
     auto titleLayoutProperty = DynamicCast<LinearLayoutProperty>(titleNode->GetLayoutProperty());
     CHECK_NULL_VOID(titleLayoutProperty);
@@ -1191,7 +1198,8 @@ void SheetPresentationPattern::UpdateFontScaleStatus()
                 layoutProps->UpdateUserDefinedIdealSize(
                     CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - SHEET_TITLE_AERA_MARGIN)));
                 titleLayoutProps->UpdateUserDefinedIdealSize(
-                    CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - SHEET_DRAG_BAR_HEIGHT)));
+                    CalcSize(std::nullopt,
+                        CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - SHEET_DOUBLE_TITLE_BOTTON_MARGIN)));
             }
         }
         UpdateSheetTitle();
@@ -2195,6 +2203,24 @@ void SheetPresentationPattern::FireOnTypeDidChange()
     preType_ = sheetType;
 }
 
+RefPtr<FrameNode> SheetPresentationPattern::GetScrollNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto scrollNode = DynamicCast<FrameNode>(host->GetChildAtIndex(1));
+    CHECK_NULL_RETURN(scrollNode, nullptr);
+    return scrollNode;
+}
+
+bool SheetPresentationPattern::IsScrollOutOfBoundary()
+{
+    auto scrollNode = GetScrollNode();
+    CHECK_NULL_RETURN(scrollNode, false);
+    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_RETURN(scrollPattern, false);
+    return scrollPattern->OutBoundaryCallback();
+}
+
 void SheetPresentationPattern::OnScrollStartRecursive(float position, float velocity)
 {
     if (animation_ && isAnimationProcess_) {
@@ -2213,7 +2239,7 @@ ScrollResult SheetPresentationPattern::HandleScroll(float scrollOffset, int32_t 
     if (GreatOrEqual(currentOffset_, 0.0) && (source == SCROLL_FROM_UPDATE) && !isSheetNeedScroll_) {
         isSheetNeedScroll_ = true;
     }
-    if (!isSheetNeedScroll_) {
+    if (!isSheetNeedScroll_ || IsScrollOutOfBoundary()) {
         return {scrollOffset, true};
     }
     ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
@@ -2281,6 +2307,7 @@ ScrollResult SheetPresentationPattern::HandleScrollWithSheet(float scrollOffset)
     ProcessColumnRect(currentHeightPos - currentOffset_);
     auto renderContext = host->GetRenderContext();
     renderContext->UpdateTransformTranslate({ 0.0f, sheetOffsetInPage, 0.0f });
+    isSheetPosChanged_ = NearZero(scrollOffset) ? false : true;
     if (IsSheetBottomStyle()) {
         OnHeightDidChange(height_ - currentOffset_ + sheetHeightUp_);
     }
@@ -2439,4 +2466,38 @@ void SheetPresentationPattern::SetSheetOuterBorderWidth(
     }
 }
 
+void SheetPresentationPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("TargetId", static_cast<int32_t>(targetId_));
+    json->Put("TargetTag", targetTag_.c_str());
+    std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
+    children->Put("SheetType", static_cast<int32_t>(GetSheetType()));
+    children->Put("SheetPage Node Height", centerHeight_);
+    children->Put("Sheet Height [start from the bottom, KeyboardHeight = 0]", height_);
+    children->Put("SheetMaxHeight [start from the bottom, pageHeight - sheetTopSafeArea]", sheetMaxHeight_);
+    children->Put("Page Height", pageHeight_);
+    children->Put("StatusBar Height [current sheetType needed]", sheetTopSafeArea_);
+    children->Put("PopupSheet OffsetX", sheetOffsetX_);
+    children->Put("PopupSheet OffsetX", sheetOffsetY_);
+    children->Put("SheetMaxWidth", sheetMaxWidth_);
+    children->Put("FitContent Height", sheetFitContentHeight_);
+    children->Put("SheetThemeType", sheetThemeType_.c_str());
+    children->Put("currentOffset", currentOffset_);
+    json->Put("SheetPage Pattern", children);
+
+    json->Put("Height ScrollTo [KeyboardHeight > 0, and is scrolling]", -scrollHeight_);
+    json->Put("KeyboardHeight", static_cast<int32_t>(keyboardHeight_));
+    json->Put("is scrolling", isScrolling_);
+    json->Put("SheetHeightUp[sheet offset to move up when avoiding keyboard]", sheetHeightUp_);
+
+    auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+    json->Put("height", sheetStyle.height.has_value() ? sheetStyle.height->ToString().c_str() : "None");
+    json->Put("sheetMode", sheetStyle.sheetMode.has_value()
+                               ? std::to_string(static_cast<int32_t>(sheetStyle.sheetMode.value())).c_str()
+                               : "None");
+    json->Put("detents Size", static_cast<int32_t>(sheetStyle.detents.size()));
+    json->Put("IsShouldDismiss", shouldDismiss_ ? "true" : "false");
+}
 } // namespace OHOS::Ace::NG

@@ -942,4 +942,25 @@ void SwiperIndicatorPattern::UpdateOverlongPaintMethod(
     jumpIndex_.reset();
     startIndex_.reset();
 }
+
+void SwiperIndicatorPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("isHover", isHover_);
+    json->Put("isPressed", isPressed_);
+    json->Put("isClicked", isClicked_);
+    json->Put("isRepeatClicked", isRepeatClicked_);
+    switch (swiperIndicatorType_) {
+        case SwiperIndicatorType::DOT: {
+            json->Put("SwiperIndicatorType", "DOT");
+            break;
+        }
+        case SwiperIndicatorType::DIGIT: {
+            json->Put("SwiperIndicatorType", "DIGIT");
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

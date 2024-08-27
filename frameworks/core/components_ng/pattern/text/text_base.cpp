@@ -98,10 +98,14 @@ void TextGestureSelector::DoGestureSelection(const TouchEventInfo& info)
 
 void TextGestureSelector::DoTextSelectionTouchMove(const TouchEventInfo& info)
 {
-    if (!isStarted) {
+    if (!isStarted_ || info.GetTouches().empty()) {
         return;
     }
     auto localOffset = info.GetTouches().front().GetLocalLocation();
+    if (!isSelecting_ && LessOrEqual((localOffset - startOffset_).GetDistance(), minMoveDistance_.ConvertToPx())) {
+        return;
+    }
+    isSelecting_ = true;
     auto index = GetTouchIndex({ localOffset.GetX(), localOffset.GetY() });
     auto start = std::min(index, start_);
     auto end = std::max(index, end_);

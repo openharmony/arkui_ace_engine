@@ -673,7 +673,8 @@ HWTEST_F(TextFieldPatternTestTwo, SetSelectionFlag001, TestSize.Level0)
     ASSERT_NE(theme, nullptr);
     theme->textfieldShowHandle_ = false;
     pattern->SetSelectionFlag(start, end, options, true);
-    EXPECT_EQ(pattern->IsShowMenu(options), false);
+    EXPECT_EQ(pattern->IsShowMenu(options, false), false);
+    EXPECT_EQ(pattern->IsShowMenu(options, true), false);
     theme->textfieldShowHandle_ = true;
     pattern->SetSelectionFlag(start, end, options, true);
     EXPECT_EQ(pattern->IsShowHandle(), false);

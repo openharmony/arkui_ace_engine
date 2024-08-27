@@ -3033,17 +3033,17 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     }
     auto localOffset = ConvertGlobalToLocalOffset(info.GetGlobalLocation());
     if (CanChangeSelectState()) {
-        selectController_->UpdateSelectByOffset(localOffset);
+        selectController_->UpdateSelectWithBlank(localOffset);
     }
     StopTwinkling();
     SetIsSingleHandle(!IsSelected());
     auto start = selectController_->GetStartIndex();
     auto end = selectController_->GetEndIndex();
     CloseSelectOverlay();
-    if (magnifierController_) {
+    if (magnifierController_ && IsOperation()) {
         magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() });
     }
-    StartGestureSelection(start, end);
+    StartGestureSelection(start, end, localOffset);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -5357,6 +5357,7 @@ void TextFieldPattern::SetSelectionFlag(
     selectionStart = std::clamp(selectionStart, 0, length);
     selectionEnd = std::clamp(selectionEnd, 0, length);
     moveCaretState_.isTouchCaret = false;
+    bool isShowMenu = selectOverlay_->IsCurrentMenuVisibile();
     isTouchPreviewText_ = false;
     if (selectionStart == selectionEnd) {
         selectController_->MoveCaretToContentRect(selectionEnd, TextAffinity::DOWNSTREAM);
@@ -5380,7 +5381,7 @@ void TextFieldPattern::SetSelectionFlag(
     if (!IsShowHandle()) {
         CloseSelectOverlay(true);
     } else {
-        bool isShowMenu = IsShowMenu(options);
+        isShowMenu = IsShowMenu(options, isShowMenu);
         if (!isShowMenu && IsUsingMouse()) {
             CloseSelectOverlay();
         } else {
@@ -5392,7 +5393,7 @@ void TextFieldPattern::SetSelectionFlag(
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-bool TextFieldPattern::IsShowMenu(const std::optional<SelectionOptions>& options)
+bool TextFieldPattern::IsShowMenu(const std::optional<SelectionOptions>& options, bool defaultValue)
 {
     if (!options.has_value()) {
         return false;
@@ -5403,7 +5404,7 @@ bool TextFieldPattern::IsShowMenu(const std::optional<SelectionOptions>& options
     if (options.value().menuPolicy == MenuPolicy::SHOW) {
         return true;
     }
-    return selectOverlay_->IsCurrentMenuVisibile();
+    return defaultValue;
 }
 
 bool TextFieldPattern::OnBackPressed()
@@ -8191,6 +8192,7 @@ void TextFieldPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, 
 
 void TextFieldPattern::OnTextGenstureSelectionEnd()
 {
+    SetIsSingleHandle(!IsSelected());
     if (!IsContentRectNonPositive()) {
         ProcessOverlay({ .animation = true });
     }
