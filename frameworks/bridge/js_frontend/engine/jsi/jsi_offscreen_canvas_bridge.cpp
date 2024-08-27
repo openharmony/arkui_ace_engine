@@ -1537,6 +1537,7 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsGetImageData(const shared_ptr<Js
 
     auto imageData = runtime->NewObject();
     auto colorArray = runtime->NewArray();
+    CHECK_NULL_RETURN(data, imageData);
     imageData->SetProperty(runtime, DOM_WIDTH, runtime->NewInt32(data->dirtyWidth));
     imageData->SetProperty(runtime, DOM_HEIGHT, runtime->NewInt32(data->dirtyHeight));
     uint32_t count = 0;
