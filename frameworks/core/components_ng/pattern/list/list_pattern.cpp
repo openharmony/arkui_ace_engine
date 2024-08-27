@@ -1487,14 +1487,26 @@ bool ListPattern::GetListItemGroupAnimatePosWithIndexInGroup(
     if (it == itemsPosInGroup.end()) {
         return false;
     }
-    auto padding = groupWrapper->GetGeometryNode()->GetPadding()->top;
-    float paddingBeforeContent = padding ? padding.value() : 0.0f;
+    auto axis = GetAxis();
+    std::optional<float> padding;
+    std::optional<float> margin;
+    if (axis == Axis::HORIZONTAL) {
+        padding = IsReverse() ? groupWrapper->GetGeometryNode()->GetPadding()->right
+                              : groupWrapper->GetGeometryNode()->GetPadding()->left;
+        margin = IsReverse() ? groupWrapper->GetGeometryNode()->GetMargin()->right
+                             : groupWrapper->GetGeometryNode()->GetMargin()->left;
+    } else {
+        padding = groupWrapper->GetGeometryNode()->GetPadding()->top;
+        margin = groupWrapper->GetGeometryNode()->GetMargin()->top;
+    }
+    auto marginValue = margin.value_or(0.f);
+    auto paddingValue = padding.value_or(0.f);
     if (align == ScrollAlign::CENTER) {
-        targetPos = paddingBeforeContent + startPos + (it->second.startPos + it->second.endPos) / 2.0f -
+        targetPos = paddingValue + marginValue + startPos + (it->second.startPos + it->second.endPos) / 2.0f -
                     contentMainSize_ / 2.0f;
     } else {
-        float itemStartPos = paddingBeforeContent + startPos + it->second.startPos;
-        float itemEndPos = paddingBeforeContent + startPos + it->second.endPos;
+        float itemStartPos = paddingValue + marginValue + startPos + it->second.startPos;
+        float itemEndPos = paddingValue + marginValue + startPos + it->second.endPos;
         if (stickyStyle == V2::StickyStyle::HEADER || stickyStyle == V2::StickyStyle::BOTH) {
             itemStartPos -= groupPattern->GetHeaderMainSize();
         }
