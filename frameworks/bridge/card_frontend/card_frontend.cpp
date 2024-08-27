@@ -15,14 +15,6 @@
 
 #include "frameworks/bridge/card_frontend/card_frontend.h"
 
-#include <memory>
-#include <vector>
-
-#include "base/log/event_report.h"
-#include "base/utils/utils.h"
-#include "core/common/thread_checker.h"
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace {
 namespace {
 

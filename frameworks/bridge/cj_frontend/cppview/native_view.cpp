@@ -15,10 +15,6 @@
 
 #include "bridge/cj_frontend/cppview/native_view.h"
 
-#include <cinttypes>
-#include <utility>
-
-#include "base/log/ace_trace.h"
 #include "bridge/cj_frontend/runtime/cj_runtime_delegate.h"
 #include "core/components_ng/base/view_partial_update_model.h"
 #include "core/components_ng/base/view_stack_model.h"

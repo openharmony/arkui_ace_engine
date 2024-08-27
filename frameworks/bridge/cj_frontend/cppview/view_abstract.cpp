@@ -14,26 +14,6 @@
  */
 #include "view_abstract.h"
 
-#include <regex>
-
-#include "base/geometry/animatable_dimension.h"
-#include "base/json/json_util.h"
-#include "base/memory/referenced.h"
-#include "bridge/common/utils/utils.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/common/ace_application_info.h"
-#include "core/common/container.h"
-#include "core/components/box/box_component_helper.h"
-#include "core/components/common/layout/align_declaration.h"
-#include "core/components/common/layout/position_param.h"
-#include "core/components/common/properties/motion_path_option.h"
-#include "core/components/display/display_component.h"
-#include "core/components/option/option_component.h"
-#include "core/components/split_container/column_split_component.h"
-#include "core/components/split_container/row_split_component.h"
-#include "core/components/split_container/split_container_component.h"
-#include "core/components/text/text_component.h"
-#include "core/components/theme/theme_manager.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"

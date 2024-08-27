@@ -15,12 +15,6 @@
 
 #include "frameworks/bridge/card_frontend/form_frontend_declarative.h"
 
-#include "base/log/event_report.h"
-#include "base/utils/utils.h"
-#include "core/common/thread_checker.h"
-#include "frameworks/bridge/common/utils/utils.h"
-#include "frameworks/core/pipeline_ng/pipeline_context.h"
-
 namespace OHOS::Ace {
 namespace {
 const char FILE_TYPE_BIN[] = ".abc";

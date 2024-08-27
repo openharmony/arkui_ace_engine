@@ -15,10 +15,6 @@
 
 #include "bridge/cj_frontend/cppview/canvas_path.h"
 
-#include <cinttypes>
-
-#include "base/log/log_wrapper.h"
-
 namespace OHOS::Ace::Framework {
 
 NativeCanvasPath::NativeCanvasPath() : FFIData()

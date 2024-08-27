@@ -15,14 +15,8 @@
 
 #include "frameworks/bridge/card_frontend/js_card_parser.h"
 
-#include <array>
-
 #include "base/i18n/localization.h"
 #include "base/resource/ace_res_config.h"
-#include "base/utils/utils.h"
-#include "core/common/ace_application_info.h"
-#include "frameworks/base/log/event_report.h"
-#include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {
 namespace {

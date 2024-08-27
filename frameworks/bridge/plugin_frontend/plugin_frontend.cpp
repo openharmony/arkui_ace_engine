@@ -15,13 +15,8 @@
 
 #include "frameworks/bridge/plugin_frontend/plugin_frontend.h"
 
-#include <memory>
-
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
-#include "base/utils/utils.h"
-#include "core/common/thread_checker.h"
-#include "core/components/navigator/navigator_component.h"
 
 namespace OHOS::Ace {
 namespace {

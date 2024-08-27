@@ -15,8 +15,6 @@
 
 #include "bridge/cj_frontend/cppview/canvas_gradient.h"
 
-#include <cinttypes>
-
 namespace OHOS::Ace::Framework {
 NativeCanvasGradient::NativeCanvasGradient(const Gradient& gradient) : FFIData()
 {

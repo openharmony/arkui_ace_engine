@@ -15,13 +15,8 @@
 
 #include "bridge/cj_frontend/frontend/cj_frontend_loader.h"
 
-#include "bridge/cj_frontend/cppview/native_view.h"
-#include "bridge/cj_frontend/frontend/cj_frontend_abstract.h"
 #include "bridge/cj_frontend/frontend/cj_frontend_ng.h"
-#include "bridge/cj_frontend/frontend/cj_frontend.h"
 #include "bridge/cj_frontend/frontend/cj_page_loader.h"
-#include "bridge/cj_frontend/frontend/cj_page_router.h"
-#include "core/components_ng/pattern/stage/page_pattern.h"
 
 namespace OHOS::Ace {
 namespace Framework {

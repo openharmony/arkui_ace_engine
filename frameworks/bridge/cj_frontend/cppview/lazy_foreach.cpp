@@ -15,15 +15,7 @@
 
 #include "bridge/cj_frontend/cppview/lazy_foreach.h"
 
-#include <functional>
-#include <set>
-#include <string>
-
-#include "base/utils/utils.h"
 #include "bridge/cj_frontend/cppview/data_change_listener.h"
-#include "bridge/cj_frontend/cppview/native_view.h"
-#include "core/common/container_scope.h"
-#include "core/components_v2/foreach/lazy_foreach_component.h"
 #include "core/components_ng/base/view_stack_model.h"
 
 using namespace OHOS::Ace;

@@ -15,12 +15,6 @@
 
 #include "bridge/cj_frontend/cppview/canvas_renderer.h"
 
-#include <cinttypes>
-#include <memory>
-
-#include "base/log/log_wrapper.h"
-#include "core/common/container.h"
-
 using namespace OHOS;
 
 namespace OHOS::Ace::Framework {
