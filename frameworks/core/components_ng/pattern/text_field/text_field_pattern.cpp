@@ -3040,7 +3040,8 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     auto start = selectController_->GetStartIndex();
     auto end = selectController_->GetEndIndex();
     CloseSelectOverlay();
-    if (magnifierController_ && IsOperation()) {
+    longPressFingerNum_ = info.GetFingerList().size();
+    if (magnifierController_ && IsOperation() && (longPressFingerNum_ == 1)) {
         magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() });
     }
     StartGestureSelection(start, end, localOffset);
@@ -8168,7 +8169,7 @@ int32_t TextFieldPattern::GetTouchIndex(const OffsetF& offset)
 void TextFieldPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info)
 {
     auto localOffset = info.GetTouches().front().GetLocalLocation();
-    if (magnifierController_) {
+    if (magnifierController_ && (longPressFingerNum_ == 1)) {
         magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() });
     }
     auto firstIndex = selectController_->GetFirstHandleIndex();

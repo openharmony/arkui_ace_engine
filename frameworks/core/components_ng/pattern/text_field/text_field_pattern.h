@@ -1895,6 +1895,7 @@ private:
     RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
     RefPtr<AIWriteAdapter> aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
     std::optional<Dimension> adaptFontSize_;
+    int32_t longPressFingerNum_ = 0;
 };
 } // namespace OHOS::Ace::NG
 
