@@ -39,7 +39,8 @@ enum class PlatformVersion {
     VERSION_TEN,
     VERSION_ELEVEN,
     VERSION_TWELVE,
-    VERSION_THIRTEEN
+    VERSION_THIRTEEN,
+    VERSION_FOURTEEN
 };
 struct AceBundleInfo {
     uint32_t versionCode = 0;

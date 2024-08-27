@@ -654,7 +654,7 @@ protected:
     int disappearingTransitionCount_ = 0;
     int sandBoxCount_ = 0;
     static constexpr int32_t INVALID_PARENT_ID = -2100000;
-    static constexpr uint32_t DRAW_REGION_RECT_COUNT = 6;
+    static constexpr uint32_t DRAW_REGION_RECT_COUNT = 7;
     std::map<std::string, RefPtr<ImageLoadingContext>> particleImageContextMap_;
     std::map<std::string, RefPtr<CanvasImage>> particleImageMap_;
     Color blendColor_ = Color::TRANSPARENT;
