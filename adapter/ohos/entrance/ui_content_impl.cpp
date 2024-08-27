@@ -1281,7 +1281,7 @@ void UIContentImpl::StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::C
     TAG_LOGD(AceLogTag::ACE_WINDOW, "StoreConfiguration %{public}s", config->GetName().c_str());
     auto colorMode = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     if (!colorMode.empty()) {
-        if (colorMode == "drak") {
+        if (colorMode == "dark") {
             SystemProperties::SetColorMode(ColorMode::DARK);
         } else {
             SystemProperties::SetColorMode(ColorMode::LIGHT);
