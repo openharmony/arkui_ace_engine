@@ -248,9 +248,9 @@ void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
     auto transactionController = Rosen::RSSyncTransactionController::GetInstance();
     if (transactionController && (session_->GetSessionRect() != windowRect)) {
         session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED,
-            transactionController->GetRSTransaction());
+            "OnBoundsChanged", transactionController->GetRSTransaction());
     } else {
-        session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED);
+        session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED, "OnBoundsChanged");
     }
 }
 
@@ -420,6 +420,7 @@ void WindowScene::DisposeSnapshotAndBlankWindow()
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     surfaceNode->SetBufferAvailableCallback(hotStartCallback_);
     CHECK_EQUAL_VOID(session_->GetSystemConfig().uiType_, "pc");
+    CHECK_EQUAL_VOID(session_->GetSystemConfig().freeMultiWindowEnable_, true);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto frameSize = geometryNode->GetFrameSize();
@@ -456,12 +457,18 @@ void WindowScene::OnConnect()
 
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto frameSize = geometryNode->GetFrameSize();
+        RectF windowRect(0, 0, frameSize.Width(), frameSize.Height());
+        context->SyncGeometryProperties(windowRect);
+
         self->AddChild(host, self->appWindow_, self->appWindowName_, 0);
-        self->appWindow_->ForceSyncGeometryNode();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
-            "[WMSMain] Add app window finished, id: %{public}d, node id: %{public}d, name: %{public}s",
-            self->session_->GetPersistentId(), host->GetId(), self->session_->GetSessionInfo().bundleName_.c_str());
+            "[WMSMain] Add app window finished, id: %{public}d, node id: %{public}d, "
+            "name: %{public}s, rect: %{public}s", self->session_->GetPersistentId(), host->GetId(),
+            self->session_->GetSessionInfo().bundleName_.c_str(), windowRect.ToString().c_str());
 
         surfaceNode->SetBufferAvailableCallback(self->coldStartCallback_);
     };
@@ -543,11 +550,12 @@ bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CHECK_EQUAL_RETURN(attachToFrameNodeFlag_ || session_->GetBlankFlag(), false, false);
     ACE_SCOPED_TRACE("WindowScene::OnDirtyLayoutWrapperSwap");
     attachToFrameNodeFlag_ = false;
-    CHECK_EQUAL_RETURN(session_->GetShowRecent(), true, false);
+    CHECK_EQUAL_RETURN(session_->GetShowRecent() && !session_->GetBlankFlag(), true, false);
     auto surfaceNode = session_->GetSurfaceNode();
     CHECK_NULL_RETURN(surfaceNode, false);
     surfaceNode->SetBufferAvailableCallback(hotStartCallback_);
     CHECK_EQUAL_RETURN(session_->GetSystemConfig().uiType_, "pc", false);
+    CHECK_EQUAL_RETURN(session_->GetSystemConfig().freeMultiWindowEnable_, true, false);
     CHECK_NULL_RETURN(dirty, false);
     auto geometryNode = dirty->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
@@ -563,6 +571,8 @@ bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     snapshotWindow_.Reset();
     session_->SetNeedSnapshot(true);
     AddChild(host, appWindow_, appWindowName_, 0);
+    RemoveChild(host, startingWindow_, startingWindowName_);
+    startingWindow_.Reset();
     surfaceNode->SetVisible(false);
     CreateBlankWindow();
     AddChild(host, blankWindow_, blankWindowName_);

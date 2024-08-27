@@ -72,10 +72,13 @@ ChainAnimation::ChainAnimation(float space, float maxSpace, float minSpace, RefP
         nodes_.emplace(-i, AceType::MakeRefPtr<ChainAnimationNode>(-i, space, maxSpace, minSpace, springProperty));
     }
     auto&& callback = [weak = AceType::WeakClaim(this)](uint64_t duration) {
+        ACE_SCOPED_TRACE("ChainAnimation");
         auto chain = weak.Upgrade();
         CHECK_NULL_VOID(chain);
         if (!chain->isOverDrag_) {
             chain->TickAnimation();
+        } else if (chain->scheduler_) {
+            chain->scheduler_->Stop();
         }
     };
     scheduler_ = AceType::MakeRefPtr<Scheduler>(callback, PipelineBase::GetCurrentContext());
@@ -222,6 +225,9 @@ void ChainAnimation::SetOverDrag(bool isOverDrag)
     }
     isOverDrag_ = isOverDrag;
     if (!isOverDrag) {
+        if (scheduler_ && !scheduler_->IsActive()) {
+            scheduler_->Start();
+        }
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
         timestamp_ = context->GetTimeFromExternalTimer();

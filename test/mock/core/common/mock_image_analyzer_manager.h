@@ -23,17 +23,15 @@ class MockImageAnalyzerManager : public ImageAnalyzerManager {
     DECLARE_ACE_TYPE(MockImageAnalyzerManager, ImageAnalyzerManager);
 
 public:
-    bool IsSupportImageAnalyzerFeature();
-    void CreateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, const NG::OffsetF& offset = { 0.0f, 0.0f });
-    void UpdateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, const NG::OffsetF& offset = { 0.0f, 0.0f });
-    void UpdateAnalyzerOverlayLayout();
-    void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode, const PixelMapInfo& info = {});
-    void DestroyAnalyzerOverlay();
-    void ReleaseImageAnalyzer();
-    void SetImageAnalyzerConfig(void* config);
-    void SetImageAnalyzerCallback(OnAnalyzedCallback& callback);
-    void SetImageAIOptions(void* options);
-    bool IsOverlayCreated();
+    explicit MockImageAnalyzerManager(const RefPtr<NG::FrameNode>& frameNode, ImageAnalyzerHolder holder)
+        : ImageAnalyzerManager(frameNode, holder)
+    {}
+    ~MockImageAnalyzerManager()
+    {}
+    void SetSupportImageAnalyzerFeature(bool isSupportImageAnalyzerFeature);
+    void SetOverlayCreated(bool isOverlayCreated);
+    static void SetUp();
+    static void TearDown() {}
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_ADAPTER_OHOS_OSAL_MOCK_IMAGE_ANALYZER_MANAGER_H

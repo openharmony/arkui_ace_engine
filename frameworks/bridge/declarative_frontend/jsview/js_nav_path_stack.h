@@ -51,7 +51,7 @@ public:
 
     void OnPushDestination(const JSCallbackInfo& info);
 
-    void SetCheckNavDestinationExistsFunc(std::function<int32_t(JSRef<JSObject>)> checkFunc)
+    void SetCheckNavDestinationExistsFunc(std::function<int32_t(JSRef<JSObject>, uint32_t&)> checkFunc)
     {
         checkNavDestinationExistsFunc_ = checkFunc;
     }
@@ -66,7 +66,7 @@ private:
     static void Destructor(JSNavPathStack* stack);
 
     std::function<void()> onStateChangedCallback_;
-    std::function<int32_t(JSRef<JSObject>)> checkNavDestinationExistsFunc_;
+    std::function<int32_t(JSRef<JSObject>, uint32_t&)> checkNavDestinationExistsFunc_;
 
     int32_t containerCurrentId_;
 };

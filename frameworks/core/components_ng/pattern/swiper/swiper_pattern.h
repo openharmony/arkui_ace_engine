@@ -98,8 +98,6 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
-    std::string GetDotIndicatorStyle() const;
-    std::string GetDigitIndicatorStyle() const;
 
     int32_t GetCurrentShownIndex() const
     {
@@ -128,6 +126,11 @@ public:
         return turnPageRate_;
     }
 
+    float GetGroupTurnPageRate() const
+    {
+        return groupTurnPageRate_;
+    }
+
     GestureState GetGestureState();
 
     TouchBottomTypeLoop GetTouchBottomTypeLoop() const
@@ -143,6 +146,11 @@ public:
     void SetTurnPageRate(float turnPageRate)
     {
         turnPageRate_ = turnPageRate;
+    }
+
+    void SetGroupTurnPageRate(float groupTurnPageRate)
+    {
+        groupTurnPageRate_ = groupTurnPageRate;
     }
 
     float GetTouchBottomRate() const
@@ -490,6 +498,8 @@ public:
 
     int32_t RealTotalCount() const;
     bool IsSwipeByGroup() const;
+    int32_t DisplayIndicatorTotalCount() const;
+    std::pair<int32_t, int32_t> CalculateStepAndItemCount() const;
     int32_t GetDisplayCount() const;
     int32_t GetCachedCount() const;
     bool ContentWillChange(int32_t comingIndex);
@@ -677,7 +687,19 @@ private:
     float GetItemSpace() const;
     float GetPrevMargin() const;
     float GetNextMargin() const;
-    float CalculateVisibleSize() const;
+    float GetPrevMarginWithItemSpace() const
+    {
+        return Positive(GetPrevMargin()) ? GetPrevMargin() + GetItemSpace() : 0.0f;
+    }
+    float GetNextMarginWithItemSpace() const
+    {
+        return Positive(GetNextMargin()) ? GetNextMargin() + GetItemSpace() : 0.0f;
+    }
+    float CalculateVisibleSize() const
+    {
+        return contentMainSize_ - GetPrevMarginWithItemSpace() - GetNextMarginWithItemSpace();
+    }
+    float CalculateGroupTurnPageRate(float additionalOffset);
     int32_t CurrentIndex() const;
     int32_t CalculateDisplayCount() const;
     int32_t CalculateCount(
@@ -903,10 +925,14 @@ private:
     void UpdateIgnoreBlankOffsetWithIndex();
     // overSrollDirection is true means over start boundary, false means over end boundary.
     void UpdateIgnoreBlankOffsetWithDrag(bool overSrollDirection);
+    void UpdateIgnoreBlankOffsetInMap(float lastIgnoreBlankOffset);
 
     std::set<int32_t> CalcVisibleIndex(float offset = 0.0f) const;
 
     bool IsItemOverlay() const;
+    void UpdateIndicatorOnChildChange();
+
+    void CheckSpecialItemCount() const;
 
     friend class SwiperHelper;
 
@@ -949,6 +975,7 @@ private:
     float currentOffset_ = 0.0f;
     float fadeOffset_ = 0.0f;
     float turnPageRate_ = 0.0f;
+    float groupTurnPageRate_ = 0.0f;
     float translateAnimationEndPos_ = 0.0f;
     GestureState gestureState_ = GestureState::GESTURE_STATE_INIT;
     TouchBottomTypeLoop touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;

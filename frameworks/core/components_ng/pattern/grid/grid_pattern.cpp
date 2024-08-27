@@ -112,7 +112,7 @@ void GridPattern::BeforeCreateLayoutWrapper()
 
 RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
 {
-    auto paint = MakeRefPtr<GridPaintMethod>(GetScrollBar());
+    auto paint = MakeRefPtr<GridPaintMethod>(GetAxis() == Axis::HORIZONTAL, IsReverse(), GetScrollBar());
     CHECK_NULL_RETURN(paint, nullptr);
     CreateScrollBarOverlayModifier();
     paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
@@ -120,6 +120,11 @@ RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
     if (scrollEffect && scrollEffect->IsFadeEffect()) {
         paint->SetEdgeEffect(scrollEffect);
     }
+    if (!gridContentModifier_) {
+        gridContentModifier_ = AceType::MakeRefPtr<GridContentModifier>();
+    }
+    paint->SetContentModifier(gridContentModifier_);
+    UpdateFadingEdge(paint);
     return paint;
 }
 
@@ -164,6 +169,10 @@ void GridPattern::OnModifyDone()
     Register2DragDropManager();
     if (IsNeedInitClickEventRecorder()) {
         Pattern::InitClickEventRecorder();
+    }
+    auto overlayNode = host->GetOverlayNode();
+    if (!overlayNode && paintProperty->GetFadingEdge().value_or(false)) {
+        CreateAnalyzerOverlay(host);
     }
 }
 
@@ -393,10 +402,8 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     const auto& gridLayoutInfo = gridLayoutAlgorithm->GetGridLayoutInfo();
     auto eventhub = GetEventHub<GridEventHub>();
     CHECK_NULL_RETURN(eventhub, false);
-    Dimension offset(0, DimensionUnit::VP);
     Dimension offsetPx(gridLayoutInfo.currentOffset_, DimensionUnit::PX);
-    auto offsetVpValue = offsetPx.ConvertToVp();
-    offset.SetValue(offsetVpValue);
+    Dimension offset(offsetPx.ConvertToVp(), DimensionUnit::VP);
     scrollbarInfo_ = eventhub->FireOnScrollBarUpdate(gridLayoutInfo.startIndex_, offset);
     if (!isInitialized_ || gridLayoutInfo_.startIndex_ != gridLayoutInfo.startIndex_) {
         eventhub->FireOnScrollToIndex(gridLayoutInfo.startIndex_);
@@ -433,7 +440,9 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     if (AceType::InstanceOf<GridScrollLayoutAlgorithm>(gridLayoutAlgorithm)) {
         CheckGridItemRange(DynamicCast<GridScrollLayoutAlgorithm>(gridLayoutAlgorithm)->GetItemAdapterRange());
     }
-    return false;
+    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    return paintProperty->GetFadingEdge().value_or(false);
 }
 
 void GridPattern::CheckGridItemRange(const std::pair<int32_t, int32_t>& range)
@@ -1441,6 +1450,9 @@ float GridPattern::GetTotalHeight() const
 void GridPattern::UpdateScrollBarOffset()
 {
     if (!GetScrollBar() && !GetScrollBarProxy()) {
+        return;
+    }
+    if (!isConfigScrollable_) {
         return;
     }
     auto host = GetHost();

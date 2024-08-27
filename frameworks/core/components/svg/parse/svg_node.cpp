@@ -15,9 +15,6 @@
 
 #include "frameworks/core/components/svg/parse/svg_node.h"
 
-#include "include/core/SkString.h"
-#include "include/utils/SkParsePath.h"
-
 #include "frameworks/core/components/svg/parse/svg_gradient.h"
 
 namespace OHOS::Ace {

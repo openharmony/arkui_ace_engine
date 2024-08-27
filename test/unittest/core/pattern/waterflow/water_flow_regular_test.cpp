@@ -12,7 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "test/unittest/core/pattern/waterflow/water_flow_test_ng.h"
+
+#include "water_flow_test_ng.h"
+
+#include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 // TEST non-segmented layout
@@ -206,5 +209,48 @@ HWTEST_F(WaterFlowTestNg, Property014, TestSize.Level1)
         EXPECT_GE(rect.Height(), 150.f);
         EXPECT_LE(rect.Height(), 250.f);
     }
+}
+
+/**
+ * @tc.name: Cache003
+ * @tc.desc: Test cache item with footer
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Cache003, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    model.SetFooter(GetDefaultHeaderBuilder());
+    CreateItemsInRepeat(50, [](int32_t i) { return i % 2 ? 100.0f : 200.0f; });
+
+    model.SetCachedCount(3);
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetRowsGap(Dimension(10));
+    model.SetColumnsGap(Dimension(10));
+    CreateDone();
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 51);
+    ASSERT_TRUE(GetChildFrameNode(frameNode_, 0));
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    auto info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 15);
+
+    const std::list<int32_t> preloadList = { 16, 17, 18 };
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 17));
+    EXPECT_EQ(pattern_->preloadItems_, preloadList);
+    EXPECT_TRUE(pattern_->cacheLayout_);
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_TRUE(pattern_->preloadItems_.empty());
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 17));
+    EXPECT_EQ(GetChildHeight(frameNode_, 17), 200.0f);
+    EXPECT_EQ(layoutProperty_->propertyChangeFlag_, PROPERTY_UPDATE_LAYOUT);
+
+    UpdateCurrentOffset(-Infinity<float>());
+    EXPECT_EQ(info->startIndex_, 36);
+    EXPECT_EQ(info->endIndex_, 49);
+    EXPECT_TRUE(pattern_->preloadItems_.empty());
+    EXPECT_EQ(GetChildY(frameNode_, 36), -140.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 35), -250.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 34), -250.0f);
 }
 } // namespace OHOS::Ace::NG

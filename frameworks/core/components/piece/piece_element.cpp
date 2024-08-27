@@ -15,7 +15,6 @@
 
 #include "core/components/piece/piece_element.h"
 
-#include "core/components/piece/piece_component.h"
 #include "core/components/piece/render_piece.h"
 
 namespace OHOS::Ace {

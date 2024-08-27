@@ -21,6 +21,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/qrcode/qrcode_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -64,6 +65,34 @@ void QRCodeModelNG::SetQRBackgroundColor(const Color& color)
 void QRCodeModelNG::SetContentOpacity(const double opacity)
 {
     ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Opacity, opacity);
+}
+
+RefPtr<FrameNode> QRCodeModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::QRCODE_ETS_TAG, nodeId, AceType::MakeRefPtr<QRCodePattern>());
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    RefPtr<QrcodeTheme> qrCodeTheme = pipeline->GetTheme<QrcodeTheme>();
+    CHECK_NULL_RETURN(qrCodeTheme, nullptr);
+    auto paintPropertyPtr = frameNode->GetPaintPropertyPtr<QRCodePaintProperty>();
+    if (paintPropertyPtr) {
+        paintPropertyPtr->UpdateColor(qrCodeTheme->GetQrcodeColor());
+        paintPropertyPtr->UpdateBackgroundColor(qrCodeTheme->GetBackgroundColor());
+    }
+    const auto& context = frameNode->GetRenderContext();
+    if (context) {
+        context->UpdateBackgroundColor(qrCodeTheme->GetBackgroundColor());
+    }
+    if (paintPropertyPtr) {
+        paintPropertyPtr->UpdateOpacity(DEFAULT_OPACITY);
+    }
+    return frameNode;
+}
+
+void QRCodeModelNG::SetQRCodeValue(FrameNode* frameNode, const std::string& value)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(QRCodePaintProperty, Value, value, frameNode);
 }
 
 void QRCodeModelNG::SetQRCodeColor(FrameNode* frameNode, const Color& color)

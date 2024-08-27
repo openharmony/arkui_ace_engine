@@ -17,7 +17,6 @@
 
 #include "core/components/plugin/plugin_element.h"
 #include "core/components/plugin/render_plugin.h"
-#include "core/components/stage/stage_component.h"
 
 namespace OHOS::Ace {
 RefPtr<Element> PluginComponent::CreateElement()

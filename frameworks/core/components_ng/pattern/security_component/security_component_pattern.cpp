@@ -31,6 +31,18 @@
 #endif
 
 namespace OHOS::Ace::NG {
+namespace {
+#ifdef SECURITY_COMPONENT_ENABLE
+const int32_t DELAY_RELEASE_MILLSEC = 10;
+#endif
+}
+SecurityComponentPattern::SecurityComponentPattern()
+{
+#ifdef SECURITY_COMPONENT_ENABLE
+    uiEventHandler_ = OHOS::AppExecFwk::EventHandler::Current();
+#endif
+}
+
 SecurityComponentPattern::~SecurityComponentPattern()
 {
 #ifdef SECURITY_COMPONENT_ENABLE
@@ -576,6 +588,53 @@ void SecurityComponentPattern::DoTriggerOnclick(int32_t result)
     gestureEventHub->ActClick(jsonShrd);
 }
 
+void SecurityComponentPattern::DelayReleaseNode(RefPtr<FrameNode>& node)
+{
+    if (uiEventHandler_ == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_SECURITY_COMPONENT, "UIEventHandler invalid");
+        return;
+    }
+    uiEventHandler_->PostTask(
+        [nodeInner = std::move(node)]() { return; },
+        DELAY_RELEASE_MILLSEC);
+}
+
+std::function<int32_t(int32_t)> SecurityComponentPattern::CreateFirstUseDialogCloseFunc(
+    RefPtr<FrameNode>& frameNode, RefPtr<PipelineContext>& pipeline, const std::string& taskName)
+{
+    return [weak = WeakClaim(this), weakContext = WeakPtr(pipeline),
+        node = frameNode, taskName = taskName](int32_t result) mutable {
+        auto pattern = weak.Upgrade();
+        if (pattern == nullptr) {
+            return -1;
+        }
+        auto context = weakContext.Upgrade();
+        if (context == nullptr) {
+            pattern->DelayReleaseNode(node);
+            return -1;
+        }
+        auto taskExecutor = context->GetTaskExecutor();
+        if (taskExecutor == nullptr) {
+            pattern->DelayReleaseNode(node);
+            return -1;
+        }
+        taskExecutor->PostTask(
+            [weak, instanceId = context->GetInstanceId(), result, nodeInner = std::move(node)] {
+                if (result == static_cast<int32_t>(SecurityComponentHandleResult::GRANT_CANCEL)) {
+                    return;
+                }
+                ContainerScope scope(instanceId);
+                auto pattern = weak.Upgrade();
+                if (pattern == nullptr) {
+                    return;
+                }
+                pattern->DoTriggerOnclick(result);
+            },
+            TaskExecutor::TaskType::UI, taskName);
+        return 0;
+    };
+}
+
 int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(GestureEvent& event)
 {
     if (regStatus_ == SecurityComponentRegisterStatus::UNREGISTERED) {
@@ -601,25 +660,8 @@ int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(GestureEvent
             frameNode, event, std::move(OnClickAfterFirstUseDialog));
     }
 
-    OnClickAfterFirstUseDialog = [weak = WeakClaim(this), weakContext = WeakPtr(pipeline),
-        node = frameNode](int32_t result) mutable {
-        auto context = weakContext.Upgrade();
-        CHECK_NULL_RETURN(context, -1);
-        auto taskExecutor = context->GetTaskExecutor();
-        CHECK_NULL_RETURN(taskExecutor, -1);
-        taskExecutor->PostTask(
-            [weak, instanceId = context->GetInstanceId(), result, nodeInner = std::move(node)] {
-                if (result == static_cast<int32_t>(SecurityComponentHandleResult::GRANT_CANCEL)) {
-                    return;
-                }
-                ContainerScope scope(instanceId);
-                auto pattern = weak.Upgrade();
-                CHECK_NULL_VOID(pattern);
-                pattern->DoTriggerOnclick(result);
-            },
-            TaskExecutor::TaskType::UI, "ArkUISecurityComponentGestureTriggerOnClick");
-        return 0;
-    };
+    OnClickAfterFirstUseDialog = CreateFirstUseDialogCloseFunc(
+        frameNode, pipeline, "ArkUISecurityComponentGestureTriggerOnClick");
 
     return SecurityComponentHandler::ReportSecurityComponentClickEvent(scId_,
         frameNode, event, std::move(OnClickAfterFirstUseDialog));
@@ -652,25 +694,8 @@ int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(const KeyEve
             frameNode, event, std::move(OnClickAfterFirstUseDialog));
     }
 
-    OnClickAfterFirstUseDialog = [weak = WeakClaim(this), weakContext = WeakPtr(pipeline),
-        node = frameNode](int32_t result) mutable {
-        auto context = weakContext.Upgrade();
-        CHECK_NULL_RETURN(context, -1);
-        auto taskExecutor = context->GetTaskExecutor();
-        CHECK_NULL_RETURN(taskExecutor, -1);
-        taskExecutor->PostTask(
-            [weak, instanceId = context->GetInstanceId(), result, nodeInner = std::move(node)] {
-                if (result == static_cast<int32_t>(SecurityComponentHandleResult::GRANT_CANCEL)) {
-                    return;
-                }
-                ContainerScope scope(instanceId);
-                auto pattern = weak.Upgrade();
-                CHECK_NULL_VOID(pattern);
-                pattern->DoTriggerOnclick(result);
-            },
-            TaskExecutor::TaskType::UI, "ArkUISecurityComponentKeyTriggerOnClick");
-        return 0;
-    };
+    OnClickAfterFirstUseDialog = CreateFirstUseDialogCloseFunc(
+        frameNode, pipeline, "ArkUISecurityComponentKeyTriggerOnClick");
 
     return SecurityComponentHandler::ReportSecurityComponentClickEvent(scId_,
         frameNode, event, std::move(OnClickAfterFirstUseDialog));

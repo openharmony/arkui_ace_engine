@@ -1754,4 +1754,28 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0023, TestSize.Level1)
      */
     EXPECT_EQ(imagePattern->animator_->GetIteration(), ITERATION_DEFAULT);
 }
+
+/**
+ * @tc.name: TestCreate001
+ * @tc.desc: Test image Create.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, TestCreate001, TestSize.Level1)
+{
+    auto [frameNode, imageLayoutProperty, imagePattern, imageRenderProperty] = GetCompoment();
+    ImageModelNG image;
+    image.SetSyncMode(frameNode, SYNCMODE_DEFAULT);
+    EXPECT_EQ(imagePattern->GetSyncLoad(), SYNCMODE_DEFAULT);
+    image.EnableAnalyzer(false);
+    image.EnableAnalyzer(frameNode, true);
+    imagePattern->SetImageType(ImagePattern::ImageType::ANIMATION);
+    image.ResetImageSrc(frameNode);
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(ALT_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+    EXPECT_EQ(imagePattern->GetImageType(), ImagePattern::ImageType::BASE);
+}
 } // namespace OHOS::Ace::NG

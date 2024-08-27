@@ -44,6 +44,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
+#include "core/components_ng/pattern/text/image_span_view.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/property/transition_property.h"
@@ -96,6 +97,7 @@ constexpr int32_t Y_INDEX = 1;
 constexpr int32_t Z_INDEX = 2;
 constexpr int32_t ARRAY_SIZE = 3;
 constexpr float HALF = 0.5f;
+constexpr float DEFAULT_BIAS = 0.5f;
 constexpr float DEFAULT_SATURATE = 1.0f;
 constexpr float DEFAULT_BRIGHTNESS = 1.0f;
 constexpr int32_t OUTLINE_LEFT_WIDTH_INDEX = 0;
@@ -746,7 +748,11 @@ void SetBorderRadius(ArkUINodeHandle node, const ArkUI_Float32* values, const Ar
     borderRadius.radiusBottomLeft = Dimension(values[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_2]));
     borderRadius.radiusBottomRight = Dimension(values[NUM_3], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_3]));
     borderRadius.multiValued = true;
-    ViewAbstract::SetBorderRadius(frameNode, borderRadius);
+    if (frameNode->GetTag() == V2::IMAGE_SPAN_ETS_TAG) {
+        ImageSpanView::SetBorderRadius(frameNode, borderRadius);
+    } else {
+        ViewAbstract::SetBorderRadius(frameNode, borderRadius);
+    }
 }
 
 void ResetBorderRadius(ArkUINodeHandle node)
@@ -754,7 +760,11 @@ void ResetBorderRadius(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     OHOS::Ace::CalcDimension reset;
-    ViewAbstract::SetBorderRadius(frameNode, reset);
+    if (frameNode->GetTag() == V2::IMAGE_SPAN_ETS_TAG) {
+        ImageSpanView::ResetBorderRadius(frameNode);
+    } else {
+        ViewAbstract::SetBorderRadius(frameNode, reset);
+    }
 }
 
 /**
@@ -3190,6 +3200,8 @@ void SetAlignRules(ArkUINodeHandle node, char** anchors, const ArkUI_Int32* dire
         rulesMap[static_cast<AlignDirection>(index)] = alignRule;
     }
     ViewAbstract::SetAlignRules(frameNode, rulesMap);
+    BiasPair biasPair(DEFAULT_BIAS, DEFAULT_BIAS);
+    ViewAbstract::SetBias(frameNode, biasPair);
 }
 
 void SetAlignRulesWidthType(ArkUINodeHandle node, const ArkUIAlignRulesType* alignRulesType)
@@ -3416,11 +3428,13 @@ void SetBackgroundEffect(ArkUINodeHandle node, ArkUI_Float32 radiusArg, ArkUI_Fl
     ArkUI_Int32 blurValuesSize)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-
     CalcDimension radius;
-    radius.SetValue(radiusArg);
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        radius = CalcDimension(radiusArg, DimensionUnit::VP);
+    } else {
+        radius = CalcDimension(radiusArg, DimensionUnit::PX);
+    }
     Color color(colorArg);
-
     BlurOption blurOption;
     blurOption.grayscale.assign(blurValues, blurValues + blurValuesSize);
 
@@ -6117,6 +6131,15 @@ void ResetFocusBoxStyle(ArkUINodeHandle node)
     NG::FocusBoxStyle style;
     ViewAbstract::SetFocusBoxStyle(frameNode, style);
 }
+
+void SetBlendModeByBlender(ArkUINodeHandle node, ArkUINodeHandle blender, ArkUI_Int32 blendApplyTypeValue)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    OHOS::Rosen::BrightnessBlender* brightnessBlender = reinterpret_cast<OHOS::Rosen::BrightnessBlender*>(blender);
+    ViewAbstractModelNG::SetBrightnessBlender(frameNode, brightnessBlender);
+    ViewAbstractModelNG::SetBlendApplyType(frameNode, static_cast<OHOS::Ace::BlendApplyType>(blendApplyTypeValue));
+}
 } // namespace
 
 namespace NodeModifier {
@@ -6192,7 +6215,8 @@ const ArkUICommonModifier* GetCommonModifier()
         ResetAccessibilityActions, GetAccessibilityActions, SetAccessibilityRole, ResetAccessibilityRole,
         GetAccessibilityRole, SetFocusScopeId, ResetFocusScopeId, SetFocusScopePriority, ResetFocusScopePriority,
         SetPixelRound, ResetPixelRound, SetBorderDashParams, GetExpandSafeArea, SetTransition, SetDragPreview,
-        ResetDragPreview, GetNodeUniqueId, SetFocusBoxStyle, ResetFocusBoxStyle, SetDisAllowDrop };
+        ResetDragPreview, GetNodeUniqueId, SetFocusBoxStyle, ResetFocusBoxStyle, SetDisAllowDrop,
+        SetBlendModeByBlender };
 
     return &modifier;
 }

@@ -104,6 +104,24 @@ class ColumnPointLightModifier extends ModifierWithKey<PointLightStyle> {
     !isBaseOrResourceEqual(this.stageValue.bloom, this.value.bloom);
   }
 }
+
+class ColumnReverseModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('columnReverse');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().column.resetReverse(node);
+    } else {
+      getUINativeModule().column.setReverse(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
+}
+
 interface ColumnParam {
   space: string | number;
 }
@@ -127,6 +145,10 @@ class ArkColumnComponent extends ArkComponent implements CommonMethod<ColumnAttr
   }
   pointLight(value: PointLightStyle): ColumnAttribute {
     modifierWithKey(this._modifiersWithKeys, ColumnPointLightModifier.identity, ColumnPointLightModifier, value);
+    return this;
+  }
+  reverse(value: boolean | undefined): ColumnAttribute {
+    modifierWithKey(this._modifiersWithKeys, ColumnReverseModifier.identity, ColumnReverseModifier, value);
     return this;
   }
 }

@@ -267,12 +267,12 @@ void ImageFileCache::ConvertToAstcAndWriteToFile(const std::string& fileCacheKey
     ACE_FUNCTION_TRACE();
     RefPtr<ImageSource> imageSource = ImageSource::Create(filePath);
     if (!imageSource || imageSource->GetFrameCount() != 1) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "Image frame count is not 1, will not convert to astc. %{public}s",
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "Image frame count is not 1, will not convert to astc. %{private}s",
             fileCacheKey.c_str());
         return;
     }
     if (imageSource->GetEncodedFormat() == SVG_FORMAT) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "Image is svg, will not convert to astc. %{public}s",
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "Image is svg, will not convert to astc. %{private}s",
             fileCacheKey.c_str());
         return;
     }
@@ -282,7 +282,7 @@ void ImageFileCache::ConvertToAstcAndWriteToFile(const std::string& fileCacheKey
     option.format = CONVERT_ASTC_FORMAT;
     auto pixelMap = imageSource->CreatePixelMap({-1, -1});
     if (pixelMap == nullptr) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "Get pixel map failed, will not convert to astc. %{public}s",
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Get pixel map failed, will not convert to astc. %{private}s",
             fileCacheKey.c_str());
         return;
     }
@@ -293,12 +293,12 @@ void ImageFileCache::ConvertToAstcAndWriteToFile(const std::string& fileCacheKey
     imagePacker->AddImage(*pixelMap);
     int64_t packedSize = 0;
     if (imagePacker->FinalizePacking(packedSize)) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "convert to astc failed. %{public}s", fileCacheKey.c_str());
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "convert to astc failed. %{private}s", fileCacheKey.c_str());
         return;
     }
 #if !defined(WINDOWS_PLATFORM) && !defined(ACE_UNITTEST)
     if (chmod(astcFilePath.c_str(), CHOWN_RW_UG) != 0) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "convert to astc chmod failed: %{public}s %{private}s",
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "convert to astc chmod failed: %{private}s %{private}s",
             url.c_str(), astcFilePath.c_str());
     }
 #endif
@@ -315,7 +315,7 @@ void ImageFileCache::ConvertToAstcAndWriteToFile(const std::string& fileCacheKey
     }
     // remove the old file before convert
     ClearCacheFile(removeVector);
-    TAG_LOGI(AceLogTag::ACE_IMAGE, "write image astc cache: %{public}s %{private}s", url.c_str(), astcFilePath.c_str());
+    TAG_LOGI(AceLogTag::ACE_IMAGE, "write astc cache: %{private}s %{private}s", url.c_str(), astcFilePath.c_str());
 }
 
 void ImageFileCache::ClearCacheFile(const std::vector<std::string>& removeFiles)

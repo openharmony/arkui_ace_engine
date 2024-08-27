@@ -16,61 +16,29 @@
 #ifndef FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_SCROLL_SCROLL_TEST_NG_H
 #define FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_SCROLL_SCROLL_TEST_NG_H
 
-#include <cstdint>
-#include <memory>
-#include <utility>
-
-#include "gtest/gtest.h"
-
-#include "base/geometry/ng/size_t.h"
-#include "base/geometry/offset.h"
-#include "base/memory/ace_type.h"
-#define private public
-#define protected public
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
-#include "core/animation/animator.h"
-#include "core/components/common/layout/grid_system_manager.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/scroll/scroll_bar_theme.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_abstract_model_ng.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/linear_layout/column_model_ng.h"
-#include "core/components_ng/pattern/linear_layout/row_model_ng.h"
-#include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
+#define private public
+#define protected public
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
-#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
-constexpr float SCROLL_WIDTH = 480.f;
-constexpr float SCROLL_HEIGHT = 800.f;
-constexpr int32_t TOTAL_ITEM_NUMBER = 10;
-constexpr int32_t VIEW_ITEM_NUMBER = 8;
-constexpr int32_t SNAP_ITEM_NUMBER = 30;
+constexpr float SCROLL_WIDTH = 240.f;
+constexpr float SCROLL_HEIGHT = 400.f;
+constexpr float CONTENT_MAIN_SIZE = 1000.f;
+constexpr float ITEM_MAIN_SIZE = 100.f;
+constexpr float VERTICAL_SCROLLABLE_DISTANCE = CONTENT_MAIN_SIZE - SCROLL_HEIGHT;
 constexpr float DEFAULT_ACTIVE_WIDTH = 8.0f;
 constexpr float DEFAULT_INACTIVE_WIDTH = 4.0f;
 constexpr float DEFAULT_NORMAL_WIDTH = 4.0f;
 constexpr float DEFAULT_TOUCH_WIDTH = 32.0f;
-constexpr float ITEM_WIDTH = 60.f;
-constexpr float ITEM_HEIGHT = 100.f;
-constexpr float VERTICAL_SCROLLABLE_DISTANCE = (TOTAL_ITEM_NUMBER - VIEW_ITEM_NUMBER) * ITEM_HEIGHT;
-constexpr float SNAP_SCROLLABLE_DISTANCE = (SNAP_ITEM_NUMBER - VIEW_ITEM_NUMBER) * ITEM_HEIGHT;
 constexpr float NORMAL_WIDTH = 4.f;
 constexpr float SCROLL_PAGING_SPEED_THRESHOLD = 1200.0f;
+constexpr int32_t TICK = 2;
+constexpr float DRAG_VELOCITY = 1200.f;
 
 class ScrollTestNg : public TestNG {
 public:
@@ -84,8 +52,8 @@ public:
     void CreateSnapScroll(ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
         const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide);
 
-    void CreateContent(int32_t childNumber = TOTAL_ITEM_NUMBER);
-    RefPtr<FrameNode> GetContentChild(int32_t index);
+    void CreateContent(float mainSize = CONTENT_MAIN_SIZE);
+    void CreateContentChild(int32_t childNumber = 10);
     void Touch(TouchType touchType, Offset offset, SourceType sourceType);
     void Mouse(Offset location, MouseButton mouseButton = MouseButton::NONE_BUTTON,
         MouseAction mouseAction = MouseAction::NONE);
@@ -94,10 +62,13 @@ public:
     void ScrollToEdge(ScrollEdgeType scrollEdgeType);
     void ScrollTo(float offset);
     Axis GetAxis();
-    float GetOffset(float childNumber);
     AssertionResult UpdateAndVerifyPosition(float delta, int32_t source, float expectOffset);
-    AssertionResult ScrollToNode(int32_t childIndex, float expectOffset);
+    AssertionResult ScrollToNode(const RefPtr<FrameNode>& focusFrameNode, float expectOffset);
     AssertionResult IsEqualCurrentPosition(float expectOffset);
+    AssertionResult VerifyTickPosition(float expectOffset);
+    void DragStart(GestureEvent& gesture);
+    void DragUpdate(GestureEvent& gesture);
+    void DragEnd(GestureEvent& gesture);
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<ScrollPattern> pattern_;
@@ -106,6 +77,8 @@ public:
     RefPtr<ScrollablePaintProperty> paintProperty_;
     RefPtr<ScrollAccessibilityProperty> accessibilityProperty_;
     RefPtr<ScrollBar> scrollBar_;
+
+    std::vector<RefPtr<FrameNode>> contentChildren_;
 };
 } // namespace OHOS::Ace::NG
 

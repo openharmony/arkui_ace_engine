@@ -3621,7 +3621,7 @@ uint32_t ParseBindContextMenuShow(const JSCallbackInfo& info, NG::MenuParam& men
         menuParam.onStateChange = ParseDoubleBindCallback(info, callbackObj);
         auto isShowObj = callbackObj->GetProperty("value");
         if (isShowObj->IsBoolean()) {
-            menuParam.isShow = isShowObj->IsBoolean();
+            menuParam.isShow = isShowObj->ToBoolean();
             menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::CUSTOM_TYPE;
             builderIndex = 1;
         }
@@ -6305,19 +6305,7 @@ NG::DragPreviewOption JSViewAbstract::ParseDragPreviewOptions (const JSCallbackI
         }
     }
 
-    auto numberBadge = obj->GetProperty("numberBadge");
-    if (!numberBadge->IsEmpty()) {
-        if (numberBadge->IsNumber()) {
-            previewOption.isNumber = true;
-            previewOption.badgeNumber = numberBadge->ToNumber<int>();
-        } else if (numberBadge->IsBoolean()) {
-            previewOption.isNumber = false;
-            previewOption.isShowBadge = numberBadge->ToBoolean();
-        }
-    } else {
-        previewOption.isNumber = false;
-        previewOption.isShowBadge = true;
-    }
+    JSViewAbstract::SetDragNumberBadge(info, previewOption);
 
     if (info.Length() > 1 && info[1]->IsObject()) {
         JSRef<JSObject> interObj = JSRef<JSObject>::Cast(info[1]);
@@ -6971,6 +6959,9 @@ void JSViewAbstract::JsBlendMode(const JSCallbackInfo& info)
         } else if (blendModeNum == BACKWARD_COMPAT_MAGIC_NUMBER_SRC_IN) {
             blendMode = BlendMode::BACK_COMPAT_SOURCE_IN;
         }
+    } else if (info[0]->IsObject()) {
+        auto blender = CreateRSBrightnessBlenderFromNapiValue(info[0]);
+        ViewAbstractModel::GetInstance()->SetBrightnessBlender(blender);
     }
     if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsNumber()) {
         auto blendApplyTypeNum = info[1]->ToNumber<int32_t>();
@@ -6978,7 +6969,9 @@ void JSViewAbstract::JsBlendMode(const JSCallbackInfo& info)
             blendApplyType = static_cast<BlendApplyType>(blendApplyTypeNum);
         }
     }
-    ViewAbstractModel::GetInstance()->SetBlendMode(blendMode);
+    if (!info[0]->IsObject()) {
+        ViewAbstractModel::GetInstance()->SetBlendMode(blendMode);
+    }
     ViewAbstractModel::GetInstance()->SetBlendApplyType(blendApplyType);
 }
 
@@ -10325,6 +10318,33 @@ void JSViewAbstract::SetDragPreviewOptionApply(const JSCallbackInfo& info, NG::D
             };
             option.onApply = onApply;
         }
+    }
+}
+
+void JSViewAbstract::SetDragNumberBadge(const JSCallbackInfo& info, NG::DragPreviewOption& option)
+{
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    auto numberBadge = obj->GetProperty("numberBadge");
+    if (!numberBadge->IsEmpty()) {
+        if (numberBadge->IsNumber()) {
+            int64_t number = numberBadge->ToNumber<int64_t>();
+            if (number < 0 || number > INT_MAX) {
+                option.isNumber = false;
+                option.isShowBadge = true;
+            } else {
+                option.isNumber = true;
+                option.badgeNumber = numberBadge->ToNumber<int>();
+            }
+        } else if (numberBadge->IsBoolean()) {
+            option.isNumber = false;
+            option.isShowBadge = numberBadge->ToBoolean();
+        }
+    } else {
+        option.isNumber = false;
+        option.isShowBadge = true;
     }
 }
 

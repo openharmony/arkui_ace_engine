@@ -167,6 +167,7 @@ public:
     void StopImageAnalyzer();
     void Reset();
     void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
 
 private:
     void OnAttachToFrameNode() override;

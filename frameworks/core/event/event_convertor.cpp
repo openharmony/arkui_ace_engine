@@ -17,35 +17,6 @@
 
 namespace OHOS::Ace {
 
-void ConvertTouchEvent(const std::vector<uint8_t>& data, std::vector<TouchEvent>& events)
-{
-    std::vector<TouchEvent> allEvents;
-    const auto* origin = reinterpret_cast<const AceActionData*>(data.data());
-    size_t size = data.size() / sizeof(AceActionData);
-    auto current = const_cast<AceActionData*>(origin);
-    auto end = current + size;
-    while (current < end) {
-        std::chrono::microseconds micros(current->timeStamp);
-        TimeStamp time(micros);
-        TouchEvent point;
-        point.SetId(static_cast<int32_t>(current->actionId))
-            .SetX(static_cast<float>(current->physicalX))
-            .SetY(static_cast<float>(current->physicalY))
-            .SetScreenX(static_cast<float>(current->physicalX))
-            .SetScreenY(static_cast<float>(current->physicalY))
-            .SetType(TouchType::UNKNOWN)
-            .SetPullType(TouchType::UNKNOWN)
-            .SetTime(time)
-            .SetSize(current->size)
-            .SetForce(static_cast<float>(current->pressure))
-            .SetDeviceId(static_cast<int64_t>(current->sourceDeviceId))
-            .SetSourceType(static_cast<SourceType>(current->sourceDevice));
-        SetTouchEventType(current->actionType, current->actionPoint, point, events, allEvents);
-        current++;
-    }
-    UpdateTouchEvent(events, allEvents);
-}
-
 void SetTouchEventType(AceActionData::ActionType actionType, int8_t actionPoint,
                        TouchEvent& point, std::vector<TouchEvent>& events, std::vector<TouchEvent>& allEvents)
 {

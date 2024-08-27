@@ -804,6 +804,11 @@ public:
         ViewAbstract::SetFgDynamicBrightness(brightnessOption);
     }
 
+    void SetBrightnessBlender(const OHOS::Rosen::BrightnessBlender* brightnessBlender) override
+    {
+        ViewAbstract::SetBrightnessBlender(brightnessBlender);
+    }
+
     void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption) override
     {
         ViewAbstract::SetFrontBlur(radius, blurOption);
@@ -1248,6 +1253,9 @@ public:
     void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, const MenuParam& menuParam,
         std::function<void()>& previewBuildFunc) override;
 
+    void BindContextMenu(const RefPtr<FrameNode>& targetNode, ResponseType type, std::function<void()>& buildFunc,
+        const NG::MenuParam& menuParam, std::function<void()>& previewBuildFunc) override;
+
     void BindDragWithContextMenuParams(const NG::MenuParam& menuParam) override;
 
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
@@ -1430,6 +1438,10 @@ public:
     static void SetBlendApplyType(FrameNode* frameNode, BlendApplyType blendApplyType)
     {
         ViewAbstract::SetBlendApplyType(frameNode, blendApplyType);
+    }
+    static void SetBrightnessBlender(FrameNode* frameNode, const OHOS::Rosen::BrightnessBlender* brightnessBlender)
+    {
+        ViewAbstract::SetBrightnessBlender(brightnessBlender);
     }
     static void SetMonopolizeEvents(FrameNode* frameNode, bool monopolizeEvents)
     {

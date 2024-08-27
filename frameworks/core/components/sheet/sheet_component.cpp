@@ -15,8 +15,6 @@
 
 #include "core/components/sheet/sheet_component.h"
 
-#include "core/components/sheet/sheet_element.h"
-
 namespace OHOS::Ace {
 
 RefPtr<Element> SheetComponent::CreateElement()

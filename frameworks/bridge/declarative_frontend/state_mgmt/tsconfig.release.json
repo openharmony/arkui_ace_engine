@@ -38,6 +38,8 @@
     "src/lib/common/observed_property_abstract.ts",
     "src/lib/common/custom_dialog_controller_native.d.ts",
     "src/lib/common/custom_dialog_controller.ts",
+    "src/lib/common/gesture_span.ts",
+    "src/lib/common/gesture_span_native.d.ts",
     "src/lib/common/utils.ts",
     "src/lib/common/state_mgmt_dfx.ts",
 

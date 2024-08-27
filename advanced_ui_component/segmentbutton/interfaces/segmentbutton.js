@@ -2063,6 +2063,7 @@ export class SegmentButton extends ViewPU {
     initialRender() {
         this.observeComponentCreation2((p33, q33) => {
             Stack.create();
+            Stack.accessibilityLevel('no');
             Stack.direction(this.options ? this.options.direction : undefined);
             Stack.onBlur(() => {
                 this.focusIndex = -1;

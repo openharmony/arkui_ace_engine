@@ -39,6 +39,9 @@ enum class SaveButtonSaveDescription : int32_t {
     RECEIVE,
     CONTINUE_TO_RECEIVE,
     SAVE_TO_GALLERY,
+    EXPORT_TO_GALLERY,
+    QUICK_SAVE_TO_GALLERY,
+    RESAVE_TO_GALLERY,
     MAX_LABEL_TYPE
 };
 } // namespace OHOS::Ace

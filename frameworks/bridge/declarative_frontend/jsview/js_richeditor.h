@@ -80,6 +80,7 @@ public:
     static void EditMenuOptions(const JSCallbackInfo& info);
     static std::optional<uint32_t> ParseColorResourceId(JSRef<JSVal> colorVal);
     static void SetEnableKeyboardOnFocus(const JSCallbackInfo& info);
+    static void SetEnableHapticFeedback(const JSCallbackInfo& info);
     static JSRef<JSArray> CreateJsTextShadowObjectArray(const TextStyleResult& textStyleResult);
     static JSRef<JSArray> CreateJsTextShadowObjectArray(const std::vector<Shadow>& textShadows);
 private:

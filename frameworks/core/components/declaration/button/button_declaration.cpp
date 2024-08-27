@@ -16,7 +16,6 @@
 #include "frameworks/core/components/declaration/button/button_declaration.h"
 
 #include "base/log/event_report.h"
-#include "core/common/ace_application_info.h"
 #include "core/components/button/button_theme.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/core/components/declaration/common/declaration_constants.h"

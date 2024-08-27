@@ -92,6 +92,14 @@ bool RefreshPattern::OnDirtyLayoutWrapperSwap(
         }
         isRemoveCustomBuilder_ = false;
         isTextNodeChanged_ = false;
+    } else if (progressChild_) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_RETURN(geometryNode, false);
+        auto refreshHeight = geometryNode->GetFrameSize().Height();
+        auto scrollOffset = std::clamp(scrollOffset_, 0.0f, refreshHeight);
+        UpdateScrollTransition(scrollOffset);
     }
     return false;
 }
@@ -181,6 +189,9 @@ void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     gestureHub->AddPanEvent(panEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        gestureHub->SetIsAllowMouse(false);
+    }
 }
 
 void RefreshPattern::InitOnKeyEvent()
@@ -353,8 +364,6 @@ void RefreshPattern::InitChildNode()
         CHECK_NULL_VOID(textAccessibilityProperty);
         textAccessibilityProperty->SetAccessibilityLevel(accessibilityLevel);
     }
-
-    OnColorConfigurationUpdate();
 }
 
 void RefreshPattern::RefreshStatusChangeEffect()
@@ -441,7 +450,7 @@ ScrollResult RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
                 return { 0.f, true };
             }
             UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_HAND, GetFollowRatio());
-            if (LessNotEqual(scrollOffset_, static_cast<float>(refreshOffset_.ConvertToPx())) || !pullToRefresh_) {
+            if (LessNotEqual(scrollOffset_, static_cast<float>(refreshOffset_.ConvertToPx()))) {
                 UpdateRefreshStatus(RefreshStatus::DRAG);
             } else {
                 UpdateRefreshStatus(RefreshStatus::OVER_DRAG);
@@ -716,12 +725,14 @@ void RefreshPattern::UpdateScrollTransition(float scrollOffset)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    // If the refresh has no children without loadingProgress, it does not need to be offset.
-    if (host->TotalChildCount() <= 1) {
+    int32_t childCount = host->TotalChildCount();
+    // If the refresh has no children without loadingProgress and text, it does not need to update offset.
+    if (childCount < 2 || (childCount == 2 && hasLoadingText_)) { // 2 means loadingProgress and text child components.
         return;
     }
     // Need to search for frameNode and skip ComponentNode
     auto childNode = host->GetLastChild();
+    CHECK_NULL_VOID(childNode);
     while (!AceType::InstanceOf<FrameNode>(childNode) && !childNode->GetChildren().empty()) {
         childNode = childNode->GetFirstChild();
     }
@@ -799,7 +810,7 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
         dealSpeed = speed / (targetOffset - scrollOffset_);
     }
     bool recycle = true;
-    if (!isSourceFromAnimation_ && refreshStatus_ == RefreshStatus::OVER_DRAG) {
+    if (pullToRefresh_ && !isSourceFromAnimation_ && refreshStatus_ == RefreshStatus::OVER_DRAG) {
         UpdateRefreshStatus(RefreshStatus::REFRESH);
         UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_TO_RECYCLE, GetFollowRatio());
     } else if (NearZero(targetOffset)) {
@@ -822,8 +833,6 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
             CHECK_NULL_VOID(pattern);
             if (recycle) {
                 pattern->UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, pattern->GetFollowRatio());
-            } else {
-                pattern->UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_HAND, pattern->GetFollowRatio());
             }
         });
     auto context = PipelineContext::GetCurrentContextSafely();

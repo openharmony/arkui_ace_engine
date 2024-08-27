@@ -29,6 +29,7 @@ using namespace testing;
 using namespace testing::ext;
 using namespace OHOS::NWeb;
 using namespace OHOS::Ace;
+using namespace OHOS::Rosen;
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -87,37 +88,47 @@ void WebPatternTest::TearDown() {}
 #ifdef OHOS_STANDARD_SYSTEM
 class NWebTouchHandleStateMock : public NWebTouchHandleState {
 public:
-    int32_t GetTouchHandleId() const override
+    int32_t GetTouchHandleId() override
     {
         return 0;
     }
 
-    int32_t GetX() const override
+    int32_t GetX() override
     {
         return 0;
     }
 
-    int32_t GetY() const override
+    int32_t GetY() override
     {
         return g_Y;
     }
 
-    TouchHandleType GetTouchHandleType() const override
+    int32_t GetViewPortX() override
+    {
+        return 0;
+    }
+
+    int32_t GetViewPortY() override
+    {
+        return 0;
+    }
+
+    TouchHandleType GetTouchHandleType() override
     {
         return TouchHandleType::INSERT_HANDLE;
     }
 
-    bool IsEnable() const override
+    bool IsEnable() override
     {
         return g_isEnable;
     }
 
-    float GetAlpha() const override
+    float GetAlpha() override
     {
         return g_alpha;
     }
 
-    float GetEdgeHeight() const override
+    float GetEdgeHeight() override
     {
         return g_height;
     }
@@ -148,6 +159,25 @@ public:
     int32_t GetEditStateFlags() override
     {
         return g_editStateFlags;
+    }
+
+    int32_t GetSelectX() override
+    {
+        return 0;
+    }
+    int32_t GetSelectY() override
+    {
+        return 0;
+    }
+
+    int32_t GetSelectWidth() override
+    {
+        return 0;
+    }
+
+    int32_t GetSelectXHeight() override
+    {
+        return 0;
     }
 
     std::shared_ptr<NWebTouchHandleState> GetTouchHandleState(NWebTouchHandleState::TouchHandleType type) override
@@ -276,7 +306,6 @@ HWTEST_F(WebPatternTest, IsTouchHandleValid003, TestSize.Level1)
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle = nullptr;
     bool result = g_webPattern->IsTouchHandleValid(handle);
     EXPECT_FALSE(result);
-    result = g_webPattern->IsTouchHandleShow(handle);
     EXPECT_FALSE(result);
     handle = std::make_shared<NWebTouchHandleStateMock>();
     result = g_webPattern->IsTouchHandleValid(handle);
@@ -285,14 +314,11 @@ HWTEST_F(WebPatternTest, IsTouchHandleValid003, TestSize.Level1)
     result = g_webPattern->IsTouchHandleValid(handle);
     EXPECT_TRUE(result);
 
-    result = g_webPattern->IsTouchHandleShow(handle);
     EXPECT_FALSE(result);
     g_alpha = 1;
-    result = g_webPattern->IsTouchHandleShow(handle);
     EXPECT_FALSE(result);
     g_Y = 0;
     g_height = 1;
-    result = g_webPattern->IsTouchHandleShow(handle);
     EXPECT_FALSE(result);
 #endif
 }
@@ -472,9 +498,10 @@ HWTEST_F(WebPatternTest, OnOverviewUpdateTest008, TestSize.Level1)
     webPattern->isW3cDragEvent_ = false;
     result = webPattern->GenerateDragDropInfo(dragDropInfo);
     EXPECT_FALSE(result);
-    g_webPattern->RegistVirtualKeyBoardListener();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    g_webPattern->RegistVirtualKeyBoardListener(pipelineContext);
     g_webPattern->needUpdateWeb_ = false;
-    g_webPattern->RegistVirtualKeyBoardListener();
+    g_webPattern->RegistVirtualKeyBoardListener(pipelineContext);
     g_webPattern->OnQuickMenuDismissed();
 #endif
 }
@@ -516,7 +543,8 @@ HWTEST_F(WebPatternTest, HandleDragUpdateTest010, TestSize.Level1)
     g_webPattern->HandleDragCancel();
     g_webPattern->HandleDragEnd(x, y);
     g_webPattern->needUpdateWeb_ = false;
-    g_webPattern->RegistVirtualKeyBoardListener();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    g_webPattern->RegistVirtualKeyBoardListener(pipelineContext);
 
     RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
     RefPtr<WebPattern> webPattern = AceType::MakeRefPtr<WebPattern>("test", controller);

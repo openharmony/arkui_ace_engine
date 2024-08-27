@@ -44,25 +44,7 @@ void TabContentNode::OnDetachFromMainTree(bool recursive, PipelineContext* conte
         return;
     }
 
-    // Change focus to the other tab if current is being deleted
-    auto swiper = AceType::DynamicCast<FrameNode>(tabs->GetTabs());
-    CHECK_NULL_VOID(swiper);
-
-    auto swiperPattern = AceType::DynamicCast<SwiperPattern>(swiper->GetPattern());
-    CHECK_NULL_VOID(swiperPattern);
-
-    auto deletedIdx = swiper->GetChildFlatIndex(GetId()).second;
-    auto currentIdx = swiperPattern->GetCurrentShownIndex();
-    // Removing currently shown tab, focus on first after that
-    if (currentIdx == deletedIdx) {
-        swiperPattern->GetSwiperController()->SwipeToWithoutAnimation(0);
-    }
     TabContentModelNG::RemoveTabBarItem(Referenced::Claim(this));
-
-    // Removing tab before current, re-focus on the same tab with new index
-    if (currentIdx > deletedIdx) {
-        swiperPattern->GetSwiperController()->SwipeToWithoutAnimation(currentIdx - 1);
-    }
 }
 
 void TabContentNode::OnOffscreenProcess(bool recursive)
@@ -169,8 +151,8 @@ void TabContentNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
     CHECK_NULL_VOID(tabTheme);
     label->Put("unselectedColor", labelStyle.unselectedColor.value_or(
         tabTheme->GetSubTabTextOffColor()).ColorToString().c_str());
-    auto selectColor = tabContentPattern->GetSelectedMode() == SelectedMode::BOARD ?
-        tabTheme->GetSubTabBoardTextOnColor() : tabTheme->GetSubTabTextOnColor();
+    auto selectColor = tabContentPattern->GetSelectedMode() == SelectedMode::BOARD &&
+        GetTabBarAxis() == Axis::HORIZONTAL ? tabTheme->GetSubTabBoardTextOnColor() : tabTheme->GetSubTabTextOnColor();
     label->Put("selectedColor", labelStyle.selectedColor.value_or(selectColor).ColorToString().c_str());
     tabBar->Put("labelStyle", label);
 
@@ -191,6 +173,20 @@ void TabContentNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
     tabBar->Put("id", tabContentPattern->GetId().c_str());
 
     json->PutExtAttr("tabBar", tabBar, filter);
+}
+
+Axis TabContentNode::GetTabBarAxis() const
+{
+    if (!tabBarItemId_.has_value()) {
+        return Axis::HORIZONTAL;
+    }
+    auto columnNode = GetFrameNode(V2::COLUMN_ETS_TAG, tabBarItemId_.value());
+    CHECK_NULL_RETURN(columnNode, Axis::HORIZONTAL);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(columnNode->GetParent());
+    CHECK_NULL_RETURN(tabBarNode, Axis::HORIZONTAL);
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_RETURN(tabBarLayoutProperty, Axis::HORIZONTAL);
+    return tabBarLayoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
 }
 
 std::string TabContentNode::ConvertFlexAlignToString(FlexAlign verticalAlign) const

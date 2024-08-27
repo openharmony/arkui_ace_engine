@@ -15,7 +15,6 @@
 
 #include "core/components/web/render_web.h"
 
-#include <cinttypes>
 #include <iomanip>
 #include <sstream>
 

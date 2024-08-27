@@ -53,11 +53,11 @@ enum class ScrollSnapAlign {
 };
 
 enum class ScrollPagingStatus {
-    // no enablePaging and scrollSnap setting
+    // no enablePaging set
     NONE = 0,
-    // scrollSnap has set, enablePaging is not effective
+    // enablePaging is false
     INVALID,
-    // enablePaging is effective
+    // enablePaging is true
     VALID,
 };
 
@@ -258,6 +258,13 @@ struct ScrollableEventsFiredInfo {
                 return "";
         }
     }
+
+    void ToJson(std::unique_ptr<JsonValue>& json) const
+    {
+        json->Put("event type", GetEventStr().c_str());
+        json->Put("fired in", std::to_string(eventFiredTime_).c_str());
+        json->Put("source is", GetSourceStr(scrollSource_).c_str());
+    }
 };
 
 struct ScrollableFrameInfo {
@@ -285,6 +292,18 @@ struct ScrollableFrameInfo {
             .append(" fired in ")
             .append(std::to_string(scrollStateTime_));
     }
+
+    void ToJson(std::unique_ptr<JsonValue>& json) const
+    {
+        json->Put("scroll from", GetSourceStr(scrollState_).c_str());
+        json->Put("canOverScroll", std::to_string(canOverScroll_).c_str());
+        json->Put("isScrollableSpringEffect", (canOverScrollInfo_ >> 4) & 1 ? "true" : "false");
+        json->Put("isScrollable", (canOverScrollInfo_ >> 3) & 1 ? "true" : "false");
+        json->Put("scrollableIdle", (canOverScrollInfo_ >> 2) & 1 ? "true" : "false");
+        json->Put("animateOverScroll", (canOverScrollInfo_ >> 1) & 1 ? "true" : "false");
+        json->Put("animateCanOverScroll", canOverScrollInfo_ & 1 ? "true" : "false");
+        json->Put("scroll from", std::to_string(scrollStateTime_).c_str());
+    }
 };
 
 struct ScrollLayoutInfo {
@@ -307,6 +326,15 @@ struct ScrollLayoutInfo {
             .append(" fired in ")
             .append(std::to_string(changedTime_));
     }
+
+    void ToJson(std::unique_ptr<JsonValue>& json) const
+    {
+        json->Put("scrollableDistance changed, scrollableDistance", std::to_string(scrollableDistance_).c_str());
+        json->Put("scrollSize", scrollSize_.ToString().c_str());
+        json->Put("viewPort", viewPort_.ToString().c_str());
+        json->Put("childSize", childSize_.ToString().c_str());
+        json->Put("fired in", std::to_string(changedTime_).c_str());
+    }
 };
 
 struct ScrollMeasureInfo {
@@ -328,6 +356,15 @@ struct ScrollMeasureInfo {
             .append(childSize_.ToString())
             .append(" fired in ")
             .append(std::to_string(changedTime_));
+    }
+
+    void ToJson(std::unique_ptr<JsonValue>& json) const
+    {
+        json->Put("Scroll Measure changed, parentConstraint", parentConstraint_->ToString().c_str());
+        json->Put("childConstraint", childConstraint_->ToString().c_str());
+        json->Put("selfSize", selfSize_.ToString().c_str());
+        json->Put("childSize", childSize_.ToString().c_str());
+        json->Put("fired in", std::to_string(changedTime_).c_str());
     }
 };
 
@@ -354,6 +391,16 @@ struct InnerScrollBarLayoutInfo {
             .append(" fired in ")
             .append(std::to_string(layoutTime_));
     }
+
+    void ToJson(std::unique_ptr<JsonValue>& json) const
+    {
+        json->Put("inner scrollBar layout, viewPortSize", viewPortSize_.ToString().c_str());
+        json->Put("lastOffset", lastOffset_.ToString().c_str());
+        json->Put("estimatedHeight", estimatedHeight_);
+        json->Put("outBoundary", std::to_string(outBoundary_).c_str());
+        json->Put("activeRect", activeRect_.ToString().c_str());
+        json->Put("fired in", std::to_string(layoutTime_).c_str());
+    }
 };
 
 struct OuterScrollBarLayoutInfo {
@@ -369,6 +416,13 @@ struct OuterScrollBarLayoutInfo {
             .append(std::to_string(scrollableNodeOffset_))
             .append(" fired in ")
             .append(std::to_string(layoutTime_));
+    }
+
+    void ToJson(std::unique_ptr<JsonValue>& json) const
+    {
+        json->Put("outer scrollBar layout, currentOffset", std::to_string(currentOffset_).c_str());
+        json->Put("scrollableNodeOffset", std::to_string(scrollableNodeOffset_).c_str());
+        json->Put("fired in", std::to_string(layoutTime_).c_str());
     }
 };
 
@@ -404,7 +458,7 @@ using OnScrollVisibleContentChangeEvent = std::function<void(ListItemIndex, List
 
 using ScrollPositionCallback = std::function<bool(double, int32_t source)>;
 using ScrollEndCallback = std::function<void()>;
-using CalePredictSnapOffsetCallback =
+using CalcPredictSnapOffsetCallback =
                 std::function<std::optional<float>(float delta, float dragDistance, float velocity)>;
 using StartScrollSnapMotionCallback = std::function<void(float scrollSnapDelta, float scrollSnapVelocity)>;
 using ScrollBarFRCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;

@@ -756,7 +756,8 @@ DialogProperties FrontendDelegateDeclarativeNG::ParsePropertiesFromAttr(const Pr
         .onDidAppear = dialogAttr.onDidAppear,
         .onDidDisappear = dialogAttr.onDidDisappear,
         .onWillAppear = dialogAttr.onWillAppear,
-        .onWillDisappear = dialogAttr.onWillDisappear };
+        .onWillDisappear = dialogAttr.onWillDisappear,
+        .keyboardAvoidMode = dialogAttr.keyboardAvoidMode };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
         LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "

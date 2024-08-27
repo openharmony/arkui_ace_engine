@@ -119,6 +119,7 @@ public:
     static void SetTabBarSymbolOptionApply(const JSCallbackInfo& info, TabBarSymbol& symbolApply,
         const JSRef<JSVal>& modifierNormalObj, const JSRef<JSVal>& modifierSelectedObj);
     static void SetDragPreviewOptionApply(const JSCallbackInfo& info, NG::DragPreviewOption& previewOption);
+    static void SetDragNumberBadge(const JSCallbackInfo& info, NG::DragPreviewOption& option);
     static void SetDefaultScale();
     static void JsScaleX(const JSCallbackInfo& info);
     static void JsScaleY(const JSCallbackInfo& info);

@@ -289,4 +289,21 @@ void IsolatedPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc(std::string("loadAbcTime: ")
         .append(std::to_string(rendererDumpInfo.loadAbcTime)));
 }
+
+void IsolatedPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("isolatedId", platformId_);
+    json->Put("abcPath", curIsolatedInfo_.abcPath.c_str());
+    json->Put("reourcePath", curIsolatedInfo_.reourcePath.c_str());
+    json->Put("entryPoint", curIsolatedInfo_.reourcePath.c_str());
+    json->Put("reourcePath", curIsolatedInfo_.entryPoint.c_str());
+    json->Put("createLimitedWorkerTime", std::to_string(isolatedDumpInfo_.createLimitedWorkerTime).c_str());
+
+    CHECK_NULL_VOID(dynamicComponentRenderer_);
+    RendererDumpInfo rendererDumpInfo;
+    dynamicComponentRenderer_->Dump(rendererDumpInfo);
+    json->Put("createUiContenTime", std::to_string(rendererDumpInfo.createUiContenTime).c_str());
+    json->Put("limitedWorkerInitTime", std::to_string(rendererDumpInfo.limitedWorkerInitTime).c_str());
+    json->Put("loadAbcTime", std::to_string(rendererDumpInfo.createUiContenTime).c_str());
+}
 } // namespace OHOS::Ace::NG

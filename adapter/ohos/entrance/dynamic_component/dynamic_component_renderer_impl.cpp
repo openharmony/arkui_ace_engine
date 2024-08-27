@@ -119,6 +119,15 @@ void DynamicComponentRendererImpl::InitUiContent()
 
     uiContent_->InitializeDynamic(
         isolatedInfo_.reourcePath, isolatedInfo_.abcPath, isolatedInfo_.entryPoint, isolatedInfo_.registerComponents);
+
+    auto runtimeContext = Platform::AceContainer::GetRuntimeContext(hostInstanceId_);
+    if (runtimeContext) {
+        auto uiContentImpl = std::static_pointer_cast<UIContentImpl>(uiContent_);
+        if (uiContentImpl) {
+            uiContentImpl->UpdateFontScale(runtimeContext->GetConfiguration());
+        }
+    }
+
     ContainerScope scope(uiContent_->GetInstanceId());
     RegisterErrorEventHandler();
     RegisterSizeChangedCallback();

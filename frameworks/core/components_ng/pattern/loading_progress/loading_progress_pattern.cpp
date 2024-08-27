@@ -178,4 +178,9 @@ RefPtr<FrameNode> LoadingProgressPattern::BuildContentModifierNode()
     LoadingProgressConfiguration loadingProgressConfiguration(enableLoading, enabled);
     return (makeFunc_.value())(loadingProgressConfiguration);
 }
+
+void LoadingProgressPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("IsInVisibleArea", isVisibleArea_ ? "true" : "false");
+}
 } // namespace OHOS::Ace::NG

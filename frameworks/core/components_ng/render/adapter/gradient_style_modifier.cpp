@@ -50,6 +50,10 @@ void GradientStyleModifier::PaintGradient(SkCanvas& canvas, const SizeF& frameSi
     auto shader = SkiaDecorationPainter::CreateGradientShader(GetGradient(), frameSize);
     auto renderContext = renderContext_.Upgrade();
     CHECK_NULL_VOID(renderContext);
+    if (!shader) {
+        renderContext->SetBackgroundShader(nullptr);
+        return;
+    }
     renderContext->SetBackgroundShader(Rosen::RSShader::CreateRSShader(shader));
 }
 #else
@@ -61,6 +65,10 @@ void GradientStyleModifier::PaintGradient(RSCanvas& canvas, const SizeF& frameSi
     auto shader = DrawingDecorationPainter::CreateGradientShader(GetGradient(), frameSize);
     auto renderContext = renderContext_.Upgrade();
     CHECK_NULL_VOID(renderContext);
+    if (!shader) {
+        renderContext->SetBackgroundShader(nullptr);
+        return;
+    }
     renderContext->SetBackgroundShader(Rosen::RSShader::CreateRSShader(shader));
 }
 #endif

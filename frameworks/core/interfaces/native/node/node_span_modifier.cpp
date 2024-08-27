@@ -446,6 +446,53 @@ void ResetTextTextShadow(ArkUINodeHandle node)
     SpanModelNG::SetTextShadow(frameNode, std::vector<Shadow> { shadow });
 }
 
+void SetAccessibilityText(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string valueStr = value;
+    SpanModelNG::SetAccessibilityText(frameNode, valueStr);
+}
+
+void ResetAccessibilityText(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SpanModelNG::SetAccessibilityText(frameNode, "");
+}
+
+void SetAccessibilityDescription(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    std::string valueStr = value;
+    SpanModelNG::SetAccessibilityDescription(frameNode, valueStr);
+}
+
+void ResetAccessibilityDescription(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SpanModelNG::SetAccessibilityDescription(frameNode, "");
+}
+
+void SetAccessibilityLevel(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    std::string valueStr = value;
+    SpanModelNG::SetAccessibilityImportance(frameNode, valueStr);
+}
+
+void ResetAccessibilityLevel(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SpanModelNG::SetAccessibilityImportance(frameNode, "");
+}
+
 ArkUI_CharPtr GetSpanFontFamily(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<UINode*>(node);
@@ -476,7 +523,9 @@ const ArkUISpanModifier* GetSpanModifier()
         SetSpanFontWeightStr, GetSpanContent, GetSpanDecoration, GetSpanFontColor, GetSpanFontSize, GetSpanFontStyle,
         GetSpanFontWeight, GetSpanLineHeight, GetSpanTextCase, GetSpanLetterSpacing, GetSpanBaselineOffset,
         SetSpanTextBackgroundStyle, ResetSpanTextBackgroundStyle, GetSpanTextBackgroundStyle, SetTextTextShadow,
-        ResetTextTextShadow, GetTextShadow, GetSpanFontFamily };
+        ResetTextTextShadow, GetTextShadow, GetSpanFontFamily,
+        SetAccessibilityText, ResetAccessibilityText, SetAccessibilityDescription, ResetAccessibilityDescription,
+        SetAccessibilityLevel, ResetAccessibilityLevel };
     return &modifier;
 }
 

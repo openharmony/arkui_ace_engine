@@ -186,7 +186,7 @@ public:
     void OnLanguageConfigurationUpdate() override;
 
     void DumpInfo() override;
-
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     bool AvoidBottom() const override
     {
         return false;
@@ -294,6 +294,11 @@ public:
         isScrollHeightNegative_ = isScrollHeightNegative;
     }
 
+    bool TriggerAutoSaveWhenInvisible() override
+    {
+        return true;
+    }
+
 private:
     bool AvoidKeyboard() const override
     {
@@ -353,7 +358,9 @@ private:
     void UpdateNodeContent(const RefPtr<FrameNode>& node, std::string& text);
     void UpdateAlignmentAndOffset();
     void DumpBoolProperty();
+    void DumpBoolProperty(std::unique_ptr<JsonValue>& json);
     void DumpObjectProperty();
+    void DumpObjectProperty(std::unique_ptr<JsonValue>& json);
     void UpdatePropertyForElderly(const std::vector<ButtonInfo>& buttons);
     bool NeedsButtonDirectionChange(const std::vector<ButtonInfo>& buttons);
     void OnFontConfigurationUpdate() override;

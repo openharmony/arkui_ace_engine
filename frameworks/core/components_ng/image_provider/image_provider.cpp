@@ -244,7 +244,7 @@ std::set<WeakPtr<ImageLoadingContext>> ImageProvider::EndTask(const std::string&
     }
     auto ctxs = it->second.ctxs_;
     if (ctxs.empty()) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "registered task has empty context %{public}s", key.c_str());
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "registered task has empty context %{private}s", key.c_str());
     }
     tasks_.erase(it);
     return ctxs;
@@ -292,7 +292,7 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& src, 
     auto imageDfxConfig = src.GetImageDfxConfig();
     if (!data) {
         TAG_LOGW(AceLogTag::ACE_IMAGE,
-            "data is null when try ParseImageObjectType, src: %{public}s, nodeID = %{public}d-%{public}lld.",
+            "data is null when try ParseImageObjectType, src: %{private}s, nodeID = %{public}d-%{public}lld.",
             imageDfxConfig.imageSrc_.c_str(), imageDfxConfig.nodeId_,
             static_cast<long long>(imageDfxConfig.accessibilityId_));
         return nullptr;
@@ -317,7 +317,7 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& src, 
     if (!size.IsPositive()) {
         TAG_LOGW(AceLogTag::ACE_IMAGE,
             "Image of src: %{private}s, imageData's size = %{public}d is invalid, and the parsed size is invalid "
-            "%{public}s, frameCount is %{public}d, nodeId = %{public}d-%{public}lld.",
+            "%{private}s, frameCount is %{public}d, nodeId = %{public}d-%{public}lld.",
             src.ToString().c_str(), static_cast<int32_t>(data->GetSize()), size.ToString().c_str(), frameCount,
             imageDfxConfig.nodeId_, static_cast<long long>(imageDfxConfig.accessibilityId_));
         return nullptr;
