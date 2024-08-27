@@ -150,26 +150,22 @@ void DOMVideo::CallSpecializedMethod(const std::string& method, const std::strin
     // Operator map for method
     static const std::unordered_map<std::string, void (*)(const RefPtr<VideoComponent>&, const std::string&)>
         methedOperators = {
-            { DOM_VIDEO_METHOD_START,
-                [](const RefPtr<VideoComponent>& video, const std::string& args) {
+            { DOM_VIDEO_METHOD_START, [](const RefPtr<VideoComponent>& video, const std::string& args) {
                     auto controller = video->GetVideoController();
                     ACE_DCHECK(controller);
                     controller->Start();
                 } },
-            { DOM_VIDEO_METHOD_PAUSE,
-                [](const RefPtr<VideoComponent>& video, const std::string& args) {
+            { DOM_VIDEO_METHOD_PAUSE, [](const RefPtr<VideoComponent>& video, const std::string& args) {
                     auto controller = video->GetVideoController();
                     ACE_DCHECK(controller);
                     controller->Pause();
                 } },
-            { DOM_VIDEO_METHOD_STOP,
-                [](const RefPtr<VideoComponent>& video, const std::string& args) {
+            { DOM_VIDEO_METHOD_STOP, [](const RefPtr<VideoComponent>& video, const std::string& args) {
                   auto controller = video->GetVideoController();
                   ACE_DCHECK(controller);
                   controller->Stop();
                 } },
-            { DOM_VIDEO_METHOD_SEEK_TO,
-                [](const RefPtr<VideoComponent>& video, const std::string& args) {
+            { DOM_VIDEO_METHOD_SEEK_TO, [](const RefPtr<VideoComponent>& video, const std::string& args) {
                     auto controller = video->GetVideoController();
                     ACE_DCHECK(controller);
                     auto value = GetParamFromJson(args, "currenttime");
@@ -178,8 +174,7 @@ void DOMVideo::CallSpecializedMethod(const std::string& method, const std::strin
                         controller->SeekTo(pos);
                     }
                 } },
-            { DOM_VIDEO_METHOD_REQUEST_FULLSCREEN,
-                [](const RefPtr<VideoComponent>& video, const std::string& args) {
+            { DOM_VIDEO_METHOD_REQUEST_FULLSCREEN, [](const RefPtr<VideoComponent>& video, const std::string& args) {
                     auto controller = video->GetVideoController();
                     ACE_DCHECK(controller);
                     auto value = GetParamFromJson(args, "screenOrientation ");
@@ -187,8 +182,7 @@ void DOMVideo::CallSpecializedMethod(const std::string& method, const std::strin
                         controller->RequestFullscreen(!(value->GetString() == "landscape"));
                     }
                 } },
-            { DOM_VIDEO_METHOD_EXIT_FULLSCREEN,
-                [](const RefPtr<VideoComponent>& video, const std::string& args) {
+            { DOM_VIDEO_METHOD_EXIT_FULLSCREEN, [](const RefPtr<VideoComponent>& video, const std::string& args) {
                     auto controller = video->GetVideoController();
                     ACE_DCHECK(controller);
                     controller->ExitFullscreen(false);
