@@ -461,9 +461,9 @@ public:
         return isUseDiffPointColor_;
     }
 
-    bool GetSwitchIsFocusBoxGlow() const
+    bool GetSwitchFocuPadding() const
     {
-        return isFocusBoxGlow_;
+        return focusPadding_ ;
     }
 
 private:
@@ -472,7 +472,7 @@ private:
     Color interactiveHoverColor_;
     Color interactivePressedColor_;
     bool isUseDiffPointColor_ = false;
-    bool isFocusBoxGlow_ = false;
+    bool focusPadding_  = false;
     Color focusedPointColorUnselected_;
     Color pointColorUnchecked_;
     Dimension focusBoardWidth_;
