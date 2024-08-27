@@ -14,10 +14,7 @@
  */
 #include "core/interfaces/native/node/menu_modifier.h"
 
-#include "core/components/common/properties/text_style.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/menu/menu_model_ng.h"
-#include "core/pipeline/base/element_register.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::NG {

@@ -14,10 +14,7 @@
  */
 #include "core/interfaces/native/node/path_modifier.h"
 
-#include "core/pipeline/base/element_register.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/shape/path_model_ng.h"
-#include "core/components/common/layout/constants.h"
 
 
 namespace OHOS::Ace::NG {

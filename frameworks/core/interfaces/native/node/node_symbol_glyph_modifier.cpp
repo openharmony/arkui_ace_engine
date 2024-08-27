@@ -14,15 +14,6 @@
  */
 #include "core/interfaces/native/node/node_symbol_glyph_modifier.h"
 
-#include "bridge/common/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components/common/properties/text_style_parser.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/pipeline/base/element_register.h"
-#include "frameworks/core/components/common/layout/constants.h"
-#include "frameworks/core/components/common/properties/text_style.h"
 #include "frameworks/core/components_ng/pattern/symbol/symbol_model_ng.h"
 
 namespace OHOS::Ace::NG {

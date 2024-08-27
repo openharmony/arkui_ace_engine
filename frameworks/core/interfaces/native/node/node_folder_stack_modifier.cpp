@@ -14,12 +14,7 @@
  */
 #include "core/interfaces/native/node/node_folder_stack_modifier.h"
 
-#include <cstdint>
-
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/folder_stack/folder_stack_model_ng.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 namespace {

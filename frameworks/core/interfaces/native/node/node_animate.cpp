@@ -16,13 +16,8 @@
 #include "core/interfaces/native/node/node_animate.h"
 
 #include "base/error/error_code.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-#include "core/animation/curve_animation.h"
 #include "core/animation/spring_curve.h"
 #include "core/common/ace_engine.h"
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
 
 namespace OHOS::Ace::NG::ViewAnimate {
 namespace {

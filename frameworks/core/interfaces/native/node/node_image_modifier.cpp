@@ -14,19 +14,11 @@
  */
 #include "core/interfaces/native/node/node_image_modifier.h"
 
-#include <cstdint>
-
-#include "base/utils/utils.h"
-#include "base/image/drawing_color_filter.h"
 #include "core/common/card_scope.h"
-#include "core/components/common/properties/alignment.h"
 #include "core/components/image/image_component.h"
 #include "core/components/image/image_theme.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
-#include "core/pipeline/base/element_register.h"
-#include "frameworks/core/components/common/layout/constants.h"
 
 #include "effect/color_filter.h"
 

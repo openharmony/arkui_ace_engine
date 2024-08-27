@@ -14,9 +14,7 @@
  */
 #include "core/interfaces/native/node/swiper_controller_modifier.h"
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
-#include "core/interfaces/native/node/view_model.h"
 
 namespace OHOS::Ace::NG {
 

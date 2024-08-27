@@ -14,13 +14,9 @@
  */
 #include "grid_modifier.h"
 
-#include <unordered_map>
-
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
-#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "core/interfaces/native/node/node_adapter_impl.h"
 
 namespace OHOS::Ace::NG {

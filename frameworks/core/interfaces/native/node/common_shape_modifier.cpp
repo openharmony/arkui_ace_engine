@@ -14,13 +14,9 @@
  */
 #include "core/interfaces/native/node/common_shape_modifier.h"
 
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "core/components_ng/pattern/shape/shape_model_ng.h"
-#include "core/pipeline/base/element_register.h"
-#include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace::NG {
 constexpr double DEFAULT_MITER_LIMIT = 4.0f;

@@ -13,20 +13,10 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/node_text_input_modifier.h"
-#include <functional>
 
-#include "base/geometry/dimension.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components/text_field/textfield_theme.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
-#include "core/pipeline/base/element_register.h"
 #include "bridge/common/utils/utils.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/interfaces/native/node/node_api.h"
-#include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "interfaces/native/node/node_model.h"
 

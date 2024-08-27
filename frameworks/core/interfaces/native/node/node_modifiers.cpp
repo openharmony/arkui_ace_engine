@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/interfaces/native/node/node_api.h"
 
 #include "core/interfaces/native/node/alphabet_indexer_modifier.h"
 #include "core/interfaces/native/node/badge_modifier.h"

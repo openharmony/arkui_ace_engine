@@ -16,11 +16,7 @@
 
 #include "interfaces/native/node/list_option.h"
 
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_item_group_model_ng.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 constexpr int CALL_ARG_0 = 0;

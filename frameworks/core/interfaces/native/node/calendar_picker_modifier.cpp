@@ -15,12 +15,8 @@
 
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
 
-#include "base/json/json_util.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "core/pipeline/base/element_register.h"
 #include "frameworks/core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
-#include "frameworks/core/components_ng/pattern/picker/picker_type_define.h"
 
 namespace OHOS::Ace::NG {
 namespace {

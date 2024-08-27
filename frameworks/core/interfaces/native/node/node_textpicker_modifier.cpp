@@ -14,18 +14,8 @@
  */
 #include "core/interfaces/native/node/node_textpicker_modifier.h"
 
-#include "base/geometry/dimension.h"
-#include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components/picker/picker_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
-#include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 namespace {

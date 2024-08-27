@@ -14,20 +14,8 @@
  */
 #include "core/interfaces/native/node/node_common_modifier.h"
 
-#include <cstddef>
-#include <cstdint>
-#include <string>
-#include <vector>
-
-#include "interfaces/native/native_type.h"
 #include "interfaces/native/node/node_model.h"
-#include "securec.h"
 
-#include "base/geometry/ng/vector.h"
-#include "base/geometry/shape.h"
-#include "base/image/pixel_map.h"
-#include "base/log/log_wrapper.h"
-#include "base/memory/ace_type.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"

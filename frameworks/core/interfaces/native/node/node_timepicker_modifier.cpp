@@ -14,18 +14,9 @@
  */
 #include "core/interfaces/native/node/node_timepicker_modifier.h"
 
-#include "base/utils/utils.h"
-#include "base/i18n/localization.h"
 #include "bridge/common/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
-#include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
-#include "core/interfaces/native/node/node_api.h"
 #include "core/interfaces/native/node/node_textpicker_modifier.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 namespace {

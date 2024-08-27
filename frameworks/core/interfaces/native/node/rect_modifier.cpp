@@ -14,7 +14,6 @@
  */
 #include "core/interfaces/native/node/rect_modifier.h"
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/shape/rect_model_ng.h"
 
 namespace OHOS::Ace::NG {

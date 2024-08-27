@@ -16,22 +16,8 @@
 
 #include "core/interfaces/native/node/progress_modifier.h"
 
-#include <algorithm>
-
-#include "base/geometry/dimension.h"
-#include "base/log/log_wrapper.h"
-#include "base/utils/utils.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/progress/progress_component.h"
-#include "core/components/progress/progress_theme.h"
-#include "core/components/theme/app_theme.h"
-#include "core/components_ng/pattern/progress/progress_date.h"
-#include "core/components_ng/pattern/progress/progress_layout_algorithm.h"
 #include "core/components_ng/pattern/progress/progress_layout_property.h"
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
-#include "core/components_ng/pattern/progress/progress_paint_property.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/pipeline/pipeline_base.h"
 #include "core/components/select/select_theme.h"
 
 namespace OHOS::Ace::NG {

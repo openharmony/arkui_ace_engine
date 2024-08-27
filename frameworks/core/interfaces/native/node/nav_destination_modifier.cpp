@@ -14,11 +14,7 @@
  */
 #include "core/interfaces/native/node/nav_destination_modifier.h"
 
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t DEFAULT_SAFE_AREA_TYPE = 0b1;

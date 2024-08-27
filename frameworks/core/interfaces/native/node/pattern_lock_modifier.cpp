@@ -15,12 +15,7 @@
 
 #include "core/interfaces/native/node/pattern_lock_modifier.h"
 #include "core/components_v2/pattern_lock/pattern_lock_theme.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/patternlock/patternlock_model_ng.h"
-#include "core/pipeline/base/element_register.h"
 namespace OHOS::Ace::NG {
 void SetPatternLockActiveColor(ArkUINodeHandle node, uint32_t value)
 {

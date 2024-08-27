@@ -14,14 +14,6 @@
  */
 #include "core/interfaces/native/node/canvas_rendering_context_2d_modifier.h"
 
-#include <string>
-
-#include "base/log/log.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/macros.h"
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/canvas/canvas_renderer_type.h"
 #include "core/components_ng/pattern/canvas/canvas_model_ng.h"
 
 namespace OHOS::Ace::NG {

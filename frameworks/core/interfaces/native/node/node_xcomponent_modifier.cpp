@@ -14,13 +14,9 @@
  */
 #include "core/interfaces/native/node/node_xcomponent_modifier.h"
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
-#include "core/pipeline/base/element_register.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "frameworks/bridge/common/utils/utils.h"
-#include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NG {
 namespace {

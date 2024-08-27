@@ -14,17 +14,9 @@
  */
 #include "core/interfaces/native/node/radio_modifier.h"
 
-#include <string>
-
 #include "core/components/checkable/checkable_theme.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/theme/theme_manager.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
-#include "core/pipeline/base/element_register.h"
-#include "core/pipeline_ng/pipeline_context.h"
-
 
 namespace OHOS::Ace::NG {
 namespace {

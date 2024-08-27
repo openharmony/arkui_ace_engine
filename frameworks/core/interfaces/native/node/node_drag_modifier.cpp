@@ -14,46 +14,10 @@
  */
 #include "core/interfaces/native/node/node_drag_modifier.h"
 
-#include <cstddef>
-#include <cstdint>
-#include <string>
-#include <vector>
-
-#include "interfaces/native/native_type.h"
 #include "interfaces/native/node/node_model.h"
-#include "securec.h"
 
-#include "base/geometry/ng/vector.h"
-#include "base/geometry/shape.h"
-#include "base/image/pixel_map.h"
-#include "base/log/log_wrapper.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/utils.h"
-#include "bridge/common/utils/utils.h"
-#include "core/animation/animation_pub.h"
-#include "core/animation/curves.h"
-#include "core/common/ime/text_input_type.h"
 #include "core/common/udmf/udmf_client.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/animation_option.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/common/properties/decoration.h"
-#include "core/components/common/properties/shadow.h"
-#include "core/components/theme/shadow_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_abstract_model_ng.h"
-#include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
-#include "core/components_ng/property/transition_property.h"
-#include "core/event/axis_event.h"
-#include "core/gestures/drag_event.h"
-#include "core/image/image_source_info.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
-#include "core/interfaces/native/node/node_api.h"
-#include "core/interfaces/native/node/touch_event_convertor.h"
-#include "core/interfaces/native/node/view_model.h"
 
 namespace OHOS::Ace::NG {
 namespace NodeModifier {

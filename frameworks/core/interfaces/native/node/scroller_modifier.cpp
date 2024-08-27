@@ -14,11 +14,8 @@
  */
 #include "core/interfaces/native/node/scroller_modifier.h"
 
-#include "base/log/log_wrapper.h"
 #include "bridge/common/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
-#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_controller.h"
 
 namespace OHOS::Ace::NG {

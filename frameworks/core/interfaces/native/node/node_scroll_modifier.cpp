@@ -15,22 +15,12 @@
 #include "core/interfaces/native/node/node_scroll_modifier.h"
 
 #include "interfaces/native/node/node_model.h"
-#include "base/geometry/calc_dimension.h"
-#include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/scroll/scroll_bar_theme.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
-#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
-#include "core/interfaces/native/node/node_api.h"
-#include "frameworks/bridge/common/utils/utils.h"
-#include "core/components/scroll/scroll_position_controller.h"
-#include "core/animation/curves.h"
 
 namespace OHOS::Ace::NG {
 namespace {

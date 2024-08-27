@@ -15,11 +15,7 @@
 
 #include "core/interfaces/native/node/form_component_modifier.h"
 
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/form/form_model_ng.h"
-#include "core/pipeline/base/element_register.h"
-#include "base/geometry/dimension.h"
 
 namespace OHOS::Ace::NG {
 const int32_t DEFAULT_VISIBILITY = 0;

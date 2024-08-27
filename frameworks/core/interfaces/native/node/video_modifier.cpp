@@ -14,14 +14,8 @@
  */
 #include "core/interfaces/native/node/video_modifier.h"
 
-#include <cstdint>
-
-#include "core/components/common/properties/alignment.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/video/video_model_ng.h"
-#include "core/pipeline/base/element_register.h"
-#include "frameworks/core/components/common/layout/constants.h"
 
 namespace OHOS::Ace::NG {
 constexpr ArkUI_Bool DEFAULT_CONTROLS_VALUE = true;
