@@ -623,6 +623,7 @@ OffsetF GestureEventHub::GetPixelMapOffset(
 RefPtr<PixelMap> GestureEventHub::GetPreScaledPixelMapIfExist(float targetScale, RefPtr<PixelMap> defaultPixelMap)
 {
     float preScale = 1.0f;
+    CHECK_NULL_RETURN(dragEventActuator_, defaultPixelMap);
     RefPtr<PixelMap> preScaledPixelMap = dragEventActuator_->GetPreScaledPixelMapForDragThroughTouch(preScale);
     if (preScale == targetScale && preScaledPixelMap != nullptr) {
         return preScaledPixelMap;
@@ -1025,6 +1026,8 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         }
     }
     RefPtr<PixelMap> pixelMapDuplicated = GetPreScaledPixelMapIfExist(scale, pixelMap);
+    dragEventActuator_->ResetPreScaledPixelMapForDragThroughTouch();
+    dragPreviewPixelMap_ = nullptr;
     auto width = pixelMapDuplicated->GetWidth();
     auto height = pixelMapDuplicated->GetHeight();
     auto pixelMapOffset = GetPixelMapOffset(info, SizeF(width, height), scale, IsPixelMapNeedScale());
