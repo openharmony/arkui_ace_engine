@@ -2087,4 +2087,24 @@ HWTEST_F(ScrollTestNg, ToJsonValue001, TestSize.Level1)
     EXPECT_EQ(initialOffset->GetString("xOffset"), "");
     EXPECT_EQ(initialOffset->GetString("yOffset"), "");
 }
+
+/**
+ * @tc.name: RTL001
+ * @tc.desc: Test horizontal scroll in RTL Layout, content size less than scroll size
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, RTL001, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    ScrollModelNG model = CreateScroll();
+    model.SetAxis(Axis::HORIZONTAL);
+    CreateContent(SCROLL_WIDTH / 2);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step1. Set content width less than scroll width
+     */
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(SCROLL_WIDTH/4, 0.f)));
+}
 } // namespace OHOS::Ace::NG
