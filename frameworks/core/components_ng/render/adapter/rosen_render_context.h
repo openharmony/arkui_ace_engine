@@ -324,7 +324,13 @@ public:
     void RecalculatePosition() override;
     void OnZIndexUpdate(int32_t value) override;
     void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
+    void SetAdvanceInfo(std::unique_ptr<JsonValue>& json);
+    void BuildStagingInfo(std::unique_ptr<JsonValue>& json);
+    void BuildPositionInfo(std::unique_ptr<JsonValue>& json);
+    void BuildShadowInfo(std::unique_ptr<JsonValue>& json);
     void SetClipBoundsWithCommands(const std::string& commands) override;
     void SetNeedDebugBoundary(bool flag) override
     {
