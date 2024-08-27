@@ -97,7 +97,8 @@ private:
      */
     void RecoverFront(float viewportBound, int32_t& idx, int32_t minChildIdx);
     /**
-     * @return new startPos of the filled lane.
+     * @brief Append Item in the front of a lane.
+     * @return endPos of next item in the filled lane.
      */
     float FillFrontHelper(float itemLen, int32_t idx, size_t laneIdx);
     /**
@@ -125,7 +126,8 @@ private:
      */
     void RecoverBack(float viewportBound, int32_t& idx, int32_t maxChildIdx);
     /**
-     * @return new endPos of the filled lane.
+     * @brief Append Item to a lane.
+     * @return startPos of next item in the filled lane.
      */
     float FillBackHelper(float itemLen, int32_t idx, size_t laneIdx);
     /**
