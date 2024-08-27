@@ -1834,14 +1834,20 @@ void XComponentPattern::CreateAnalyzerOverlay()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetOverlayNode(nullptr);
+
+    auto layoutProperty = GetLayoutProperty<XComponentLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto padding  = layoutProperty->CreatePaddingAndBorder();
+    Rect contentRect = { padding.left.value_or(0), padding.top.value_or(0), drawSize_.Width(), drawSize_.Height() };
     auto context = host->GetRenderContext();
     CHECK_NULL_VOID(context);
-    auto pixelMap = context->GetThumbnailPixelMap();
+    auto nailPixelMap = context->GetThumbnailPixelMap();
+    CHECK_NULL_VOID(nailPixelMap);
+    auto pixelMap = nailPixelMap->GetCropPixelMap(contentRect);
     CHECK_NULL_VOID(pixelMap);
-    if (IsSupportImageAnalyzerFeature()) {
-        CHECK_NULL_VOID(imageAnalyzerManager_);
-        imageAnalyzerManager_->CreateAnalyzerOverlay(pixelMap);
-    }
+
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    imageAnalyzerManager_->CreateAnalyzerOverlay(pixelMap);
 }
 
 void XComponentPattern::UpdateAnalyzerOverlay()
