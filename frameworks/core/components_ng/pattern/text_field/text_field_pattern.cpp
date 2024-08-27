@@ -3925,7 +3925,7 @@ void TextFieldPattern::InsertValueOperation(const SourceAndValueInfo& info)
         caretMoveLength = abs(static_cast<int32_t>(contentController_->GetWideText().length()) - originLength);
     }
     if (layoutProperty->HasMaxLength()) {
-        int32_t sum = originLength + static_cast<int32_t>(StringUtils::ToWstring(insertValue).length());
+        int32_t sum = static_cast<int32_t>(contentController_->GetWideText().length());
         showCountBorderStyle_ = sum > static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>()));
         HandleCountStyle();
     }
