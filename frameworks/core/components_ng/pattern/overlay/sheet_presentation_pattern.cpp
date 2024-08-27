@@ -1178,6 +1178,32 @@ void SheetPresentationPattern::OnColorConfigurationUpdate()
     iconNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+float SheetPresentationPattern::GetWrapperHeight()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.0f);
+    auto sheetWrapper = host->GetParent();
+    CHECK_NULL_RETURN(sheetWrapper, 0.0f);
+    auto sheetWrapperNode = AceType::DynamicCast<FrameNode>(sheetWrapper->GetParent());
+    CHECK_NULL_RETURN(sheetWrapperNode, 0.0f);
+    auto sheetWrapperGeometryNode = sheetWrapperNode->GetGeometryNode();
+    CHECK_NULL_RETURN(sheetWrapperGeometryNode, 0.0f);
+    return sheetWrapperGeometryNode->GetFrameSize().Height();
+}
+
+bool SheetPresentationPattern::SheetHeightNeedChanged()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto sheetGeometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(sheetGeometryNode, false);
+    if (!NearEqual(sheetGeometryNode->GetFrameSize().Height(), sheetHeight_) ||
+        !NearEqual(GetWrapperHeight(), wrapperHeight_)) {
+        return true;
+    }
+    return false;
+}
+
 void SheetPresentationPattern::CheckSheetHeightChange()
 {
     auto host = GetHost();
@@ -1186,13 +1212,14 @@ void SheetPresentationPattern::CheckSheetHeightChange()
     CHECK_NULL_VOID(sheetGeometryNode);
     if (isFirstInit_) {
         sheetHeight_ = sheetGeometryNode->GetFrameSize().Height();
+        wrapperHeight_ = GetWrapperHeight();
         sheetType_ = GetSheetType();
         isFirstInit_ = false;
     } else {
-        if ((!NearEqual(sheetGeometryNode->GetFrameSize().Height(), sheetHeight_)) || (sheetType_ != GetSheetType()) ||
-            windowChanged_ || topSafeAreaChanged_) {
+        if (SheetHeightNeedChanged() || (sheetType_ != GetSheetType()) || windowChanged_ || topSafeAreaChanged_) {
             sheetType_ = GetSheetType();
             sheetHeight_ = sheetGeometryNode->GetFrameSize().Height();
+            wrapperHeight_ = GetWrapperHeight();
             const auto& overlayManager = GetOverlayManager();
             CHECK_NULL_VOID(overlayManager);
             auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
