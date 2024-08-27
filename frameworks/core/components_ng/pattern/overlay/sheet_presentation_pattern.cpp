@@ -466,7 +466,7 @@ void SheetPresentationPattern::HandleDragUpdate(const GestureEvent& info)
     CHECK_NULL_VOID(host);
     auto tempOffset = currentOffset_;
     auto detentSize = sheetDetentHeight_.size();
-    if (LessOrEqual(detentSize, 0)) {
+    if (detentSize <= 0) {
         return;
     }
     auto height = height_ + sheetHeightUp_;
@@ -1292,7 +1292,7 @@ void SheetPresentationPattern::InitSheetDetents()
             }
         case SheetType::SHEET_BOTTOM:
         case SheetType::SHEET_BOTTOM_FREE_WINDOW:
-            if (LessOrEqual(sheetStyle.detents.size(), 0)) {
+            if (sheetStyle.detents.size() <= 0) {
                 height = InitialSingleGearHeight(sheetStyle);
                 sheetDetentHeight_.emplace_back(height);
                 break;
