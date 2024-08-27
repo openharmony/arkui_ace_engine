@@ -4797,12 +4797,6 @@ bool TextFieldPattern::TextFieldRequestFocus(RequestFocusReason reason)
         host->GetId(), TextFieldPattern::RequestFocusReasonToString(reason).c_str());
     auto focusHub = GetFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
-    auto context = host->GetContextRefPtr();
-    CHECK_NULL_RETURN(context, false);
-    if (!context->IsWindowFocused()) {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "window blur, don't request textfield focus");
-        return false;
-    }
     return focusHub->RequestFocusImmediately();
 }
 
