@@ -796,6 +796,7 @@ private:
 
     void OnScrollStartRecursive(float position, float velocity) override;
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
+    void OnScrollDragEndRecursive() override;
 
     /**
      * @brief Notifies the parent component that the scroll has started at the specified position.
