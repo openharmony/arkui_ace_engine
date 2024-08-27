@@ -1104,7 +1104,7 @@ HWTEST_F(ScrollableCoverTestNg, ScrollPage001, TestSize.Level1)
      * @tc.steps: step2. Test ScrollPage
      * @tc.expected: Verify the scrollAbort_ status
      */
-    scrollPn->ScrollPage(false, false, AccessibilityScrollType::SCROLL_HALF);
+    scrollPn->ScrollPage(false, true, AccessibilityScrollType::SCROLL_HALF);
     EXPECT_TRUE(scrollPn->scrollAbort_);
 }
 

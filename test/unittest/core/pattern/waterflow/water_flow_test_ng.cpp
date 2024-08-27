@@ -1193,8 +1193,12 @@ HWTEST_F(WaterFlowTestNg, PositionController008, TestSize.Level1)
      * @tc.expected: Will trigger ScrollPage func
      */
     accessibilityProperty_->ActActionScrollForward();
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
     EXPECT_TRUE(IsEqualTotalOffset(WATER_FLOW_HEIGHT));
     accessibilityProperty_->ActActionScrollBackward();
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
     EXPECT_TRUE(IsEqualTotalOffset(0));
 }
 
@@ -1432,8 +1436,12 @@ HWTEST_F(WaterFlowTestNg, WaterFlowAccessibilityTest002, TestSize.Level1)
     CreateWaterFlowItems(TOTAL_LINE_NUMBER * 2);
     CreateDone();
     accessibilityProperty_->ActActionScrollForward();
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
     EXPECT_TRUE(IsEqualTotalOffset(WATER_FLOW_HEIGHT));
     accessibilityProperty_->ActActionScrollBackward();
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
     EXPECT_TRUE(IsEqualTotalOffset(0));
 }
 

@@ -4146,7 +4146,7 @@ typedef enum {
      * @brief Scroll to the next or previous page.
      * 
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].i32 Indicates whether to scroll to next page. Value 1 indicates scroll to next page and value 0
+     * .value[0].i32 Indicates whether to scroll to next page. Value 0 indicates scroll to next page and value 1
      * indicates scroll to previous page. \n
      * .value[1]?.i32 Indicates whether to enable animation. Value 1 indicates enable and 0 indicates disable. \n
      *
