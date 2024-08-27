@@ -173,7 +173,7 @@ int32_t DragDropManager::GetWindowId()
         }
     }
 
-    windowId = container->GetWindowId();
+    windowId = static_cast<int32_t>(container->GetWindowId());
     isDragWindowSubWindow_ = true;
 
     return windowId;
