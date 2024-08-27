@@ -151,6 +151,8 @@ public:
             theme->cursorWidth_ = pattern->GetAttr<Dimension>("cursor_width", 2.0_vp);
             theme->hoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, Color());
             theme->pressColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_PRESSED, Color());
+            theme->hoverAndPressBgColorEnabled_ =
+                static_cast<uint32_t>(pattern->GetAttr<int>("textfield_hover_press_bg_color_enabled", 0));
             theme->borderRadiusSize_ = Radius(pattern->GetAttr<Dimension>(BORDER_RADIUS_SIZE, 20.0_vp));
             theme->disabledIconFillColor_ = theme->bgColor_.BlendOpacity(theme->disableOpacityRatio_);
             theme->passwordErrorTextColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color());
@@ -302,6 +304,11 @@ public:
     const Color& GetPressColor() const
     {
         return pressColor_;
+    }
+
+    bool GetHoverAndPressBgColorEnabled() const
+    {
+        return hoverAndPressBgColorEnabled_;
     }
 
     const Radius& GetBorderRadiusSize() const
@@ -621,6 +628,7 @@ private:
     Color selectedColor_;
     Color hoverColor_;
     Color pressColor_;
+    bool hoverAndPressBgColorEnabled_ = false;
     Color disabledIconFillColor_;
     Dimension errorSpacing_;
     bool errorIsInner_ = false;
