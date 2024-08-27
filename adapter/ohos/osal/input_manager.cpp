@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "frameworks/base/input_manager/input_manager.h"
+#include "base/input_manager/input_manager.h"
 
 #include "input_manager.h"
 
@@ -59,6 +59,24 @@ KeyboardType InputManager::GetKeyboardType(int32_t deviceId)
     inputManager->GetKeyboardType(
         deviceId, [&mmiKeyboardType](int32_t keyboardType) { mmiKeyboardType = keyboardType; });
     return ConvertKeyboardType(mmiKeyboardType);
+}
+
+bool InputManager::GetSystemHotkeys(std::vector<HotKey>& hotkeys)
+{
+    auto* inputManager = MMI::InputManager::GetInstance();
+    CHECK_NULL_RETURN(inputManager, false);
+
+    std::vector<std::unique_ptr<OHOS::MMI::KeyOption>> keyOptions;
+    int32_t count = 0;
+    inputManager->GetAllSystemHotkeys(keyOptions, count);
+
+    if (keyOptions.empty()) {
+        return false;
+    }
+    for (const auto& key : keyOptions) {
+        hotkeys.push_back({ key->GetPreKeys(), key->GetFinalKey() });
+    }
+    return true;
 }
 
 bool InputManager::IsKeyboardConnected()
