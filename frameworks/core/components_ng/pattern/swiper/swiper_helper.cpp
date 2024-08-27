@@ -327,7 +327,7 @@ void SwiperHelper::DumpInfoAddGestureDesc(SwiperPattern& swiper)
     swiper.isTouchDown_ ? DumpLog::GetInstance().AddDesc("isTouchDown:true")
                         : DumpLog::GetInstance().AddDesc("isTouchDown:false");
     swiper.isIndicatorLongPress_ ? DumpLog::GetInstance().AddDesc("isIndicatorLongPress:true")
-                        : DumpLog::GetInstance().AddDesc("isIndicatorLongPress:false");
+                                 : DumpLog::GetInstance().AddDesc("isIndicatorLongPress:false");
     swiper.preLoop_.has_value() ? DumpLog::GetInstance().AddDesc("preLoop:" + std::to_string(swiper.preLoop_.value()))
                                 : DumpLog::GetInstance().AddDesc("preLoop:null");
     swiper.indicatorId_.has_value()
@@ -358,8 +358,7 @@ void SwiperHelper::DumpInfoAddAnimationDesc(SwiperPattern& swiper)
     swiper.isTouchPad_ ? DumpLog::GetInstance().AddDesc("isTouchPad:true")
                        : DumpLog::GetInstance().AddDesc("isTouchPad:false");
     swiper.surfaceChangedCallbackId_.has_value()
-        ? DumpLog::GetInstance().AddDesc(
-              "surfaceChangedCallbackId:" + std::to_string(swiper.surfaceChangedCallbackId_.value()))
+        ? DumpLog::GetInstance().AddDesc("surfaceChangedCallbackId:" + std::to_string(swiper.surfaceChangedCallbackId_.value()))
         : DumpLog::GetInstance().AddDesc("surfaceChangedCallbackId:null");
     swiper.velocity_.has_value()
         ? DumpLog::GetInstance().AddDesc("velocity:" + std::to_string(swiper.velocity_.value()))
