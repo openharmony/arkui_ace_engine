@@ -230,6 +230,59 @@ RefPtr<NGGestureRecognizer> GestureEventHub::PackInnerRecognizer(
     return current;
 }
 
+void GestureEventHub::ProcessParallelPriorityGesture(RefPtr<NGGestureRecognizer>& current,
+    std::list<RefPtr<NGGestureRecognizer>>& recognizers, int32_t parallelIndex, const Offset& offset, int32_t touchId,
+    const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host)
+{
+    if (current) {
+        recognizers.push_front(current);
+    }
+    if (recognizers.size() > 1) {
+        if ((static_cast<int32_t>(externalParallelRecognizer_.size()) <= parallelIndex)) {
+            externalParallelRecognizer_.emplace_back(AceType::MakeRefPtr<ParallelRecognizer>(std::move(recognizers)));
+        } else {
+            externalParallelRecognizer_[parallelIndex]->AddChildren(recognizers);
+        }
+        externalParallelRecognizer_[parallelIndex]->SetCoordinateOffset(offset);
+        externalParallelRecognizer_[parallelIndex]->BeginReferee(touchId);
+        externalParallelRecognizer_[parallelIndex]->AttachFrameNode(WeakPtr<FrameNode>(host));
+        externalParallelRecognizer_[parallelIndex]->SetTargetComponent(targetComponent);
+        current = externalParallelRecognizer_[parallelIndex];
+        parallelIndex++;
+    } else if (recognizers.size() == 1) {
+        current = *recognizers.begin();
+    }
+}
+
+void GestureEventHub::ProcessExternalExclusiveRecognizer(RefPtr<NGGestureRecognizer>& current,
+    std::list<RefPtr<NGGestureRecognizer>>& recognizers, int32_t exclusiveIndex, const Offset& offset, int32_t touchId,
+    const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host, GesturePriority priority)
+{
+    if (current) {
+        if (priority == GesturePriority::Low) {
+            recognizers.push_front(current);
+        } else {
+            recognizers.push_back(current);
+        }
+    }
+
+    if (recognizers.size() > 1) {
+        if ((static_cast<int32_t>(externalExclusiveRecognizer_.size()) <= exclusiveIndex)) {
+            externalExclusiveRecognizer_.emplace_back(AceType::MakeRefPtr<ExclusiveRecognizer>(std::move(recognizers)));
+        } else {
+            externalExclusiveRecognizer_[exclusiveIndex]->AddChildren(recognizers);
+        }
+        externalExclusiveRecognizer_[exclusiveIndex]->SetCoordinateOffset(offset);
+        externalExclusiveRecognizer_[exclusiveIndex]->BeginReferee(touchId);
+        externalExclusiveRecognizer_[exclusiveIndex]->AttachFrameNode(WeakPtr<FrameNode>(host));
+        externalExclusiveRecognizer_[exclusiveIndex]->SetTargetComponent(targetComponent);
+        current = externalExclusiveRecognizer_[exclusiveIndex];
+        exclusiveIndex++;
+    } else if (recognizers.size() == 1) {
+        current = *recognizers.begin();
+    }
+}
+
 void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
     std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,
     const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult)
@@ -275,50 +328,10 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
         auto priority = recognizer->GetPriority();
         std::list<RefPtr<NGGestureRecognizer>> recognizers { 1, recognizer };
         if (priority == GesturePriority::Parallel) {
-            if (current) {
-                recognizers.push_front(current);
-            }
-            if (recognizers.size() > 1) {
-                if ((static_cast<int32_t>(externalParallelRecognizer_.size()) <= parallelIndex)) {
-                    externalParallelRecognizer_.emplace_back(
-                        AceType::MakeRefPtr<ParallelRecognizer>(std::move(recognizers)));
-                } else {
-                    externalParallelRecognizer_[parallelIndex]->AddChildren(recognizers);
-                }
-                externalParallelRecognizer_[parallelIndex]->SetCoordinateOffset(offset);
-                externalParallelRecognizer_[parallelIndex]->BeginReferee(touchId);
-                externalParallelRecognizer_[parallelIndex]->AttachFrameNode(WeakPtr<FrameNode>(host));
-                externalParallelRecognizer_[parallelIndex]->SetTargetComponent(targetComponent);
-                current = externalParallelRecognizer_[parallelIndex];
-                parallelIndex++;
-            } else if (recognizers.size() == 1) {
-                current = *recognizers.begin();
-            }
+            ProcessParallelPriorityGesture(current, recognizers, parallelIndex, offset, touchId, targetComponent, host);
         } else {
-            if (current) {
-                if (priority == GesturePriority::Low) {
-                    recognizers.push_front(current);
-                } else {
-                    recognizers.push_back(current);
-                }
-            }
-
-            if (recognizers.size() > 1) {
-                if ((static_cast<int32_t>(externalExclusiveRecognizer_.size()) <= exclusiveIndex)) {
-                    externalExclusiveRecognizer_.emplace_back(
-                        AceType::MakeRefPtr<ExclusiveRecognizer>(std::move(recognizers)));
-                } else {
-                    externalExclusiveRecognizer_[exclusiveIndex]->AddChildren(recognizers);
-                }
-                externalExclusiveRecognizer_[exclusiveIndex]->SetCoordinateOffset(offset);
-                externalExclusiveRecognizer_[exclusiveIndex]->BeginReferee(touchId);
-                externalExclusiveRecognizer_[exclusiveIndex]->AttachFrameNode(WeakPtr<FrameNode>(host));
-                externalExclusiveRecognizer_[exclusiveIndex]->SetTargetComponent(targetComponent);
-                current = externalExclusiveRecognizer_[exclusiveIndex];
-                exclusiveIndex++;
-            } else if (recognizers.size() == 1) {
-                current = *recognizers.begin();
-            }
+            ProcessExternalExclusiveRecognizer(
+                current, recognizers, exclusiveIndex, offset, touchId, targetComponent, host, priority);
         }
     }
 
