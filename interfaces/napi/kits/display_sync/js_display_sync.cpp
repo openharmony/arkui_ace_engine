@@ -152,7 +152,12 @@ napi_value JSSetExpectedFrameRateRange(napi_env env, napi_callback_info info)
     FrameRateRange frameRateRange;
     ParseExpectedFrameRateRange(env, info, frameRateRange);
 
-    RefPtr<UIDisplaySync> uiDisplaySync = GetDisplaySync(env, info)->GetUIDisplaySync();
+    auto displaySync = GetDisplaySync(env, info);
+    if (!displaySync) {
+        TAG_LOGW(AceLogTag::ACE_DISPLAY_SYNC, "JSSetExpectedFrameRateRange: cannot find displaySync.");
+        return NapiGetUndefined(env);
+    }
+    RefPtr<UIDisplaySync> uiDisplaySync = displaySync->GetUIDisplaySync();
     if (!uiDisplaySync) {
         TAG_LOGW(AceLogTag::ACE_DISPLAY_SYNC, "JSSetExpectedFrameRateRange: cannot get uiDisplaySync.");
         return NapiGetUndefined(env);
@@ -167,7 +172,12 @@ napi_value JSSetExpectedFrameRateRange(napi_env env, napi_callback_info info)
 
 napi_value JSStart(napi_env env, napi_callback_info info)
 {
-    RefPtr<UIDisplaySync> uiDisplaySync = GetDisplaySync(env, info)->GetUIDisplaySync();
+    auto displaySync = GetDisplaySync(env, info);
+    if (!displaySync) {
+        TAG_LOGW(AceLogTag::ACE_DISPLAY_SYNC, "JSStart: cannot find displaySync.");
+        return NapiGetUndefined(env);
+    }
+    RefPtr<UIDisplaySync> uiDisplaySync = displaySync->GetUIDisplaySync();
     if (!uiDisplaySync) {
         TAG_LOGW(AceLogTag::ACE_DISPLAY_SYNC, "JSStart: cannot get uiDisplaySync when starting.");
         return NapiGetUndefined(env);
@@ -180,7 +190,12 @@ napi_value JSStart(napi_env env, napi_callback_info info)
 
 napi_value JSStop(napi_env env, napi_callback_info info)
 {
-    RefPtr<UIDisplaySync> uiDisplaySync = GetDisplaySync(env, info)->GetUIDisplaySync();
+    auto displaySync = GetDisplaySync(env, info);
+    if (!displaySync) {
+        TAG_LOGW(AceLogTag::ACE_DISPLAY_SYNC, "JSStop: cannot find displaySync.");
+        return NapiGetUndefined(env);
+    }
+    RefPtr<UIDisplaySync> uiDisplaySync = displaySync->GetUIDisplaySync();
     if (!uiDisplaySync) {
         TAG_LOGW(AceLogTag::ACE_DISPLAY_SYNC, "JSStop: cannot get uiDisplaySync when stopping.");
         return NapiGetUndefined(env);
