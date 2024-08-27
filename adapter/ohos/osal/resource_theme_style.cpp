@@ -105,7 +105,8 @@ static const std::set<std::string> stringAttrs = {
     "textfield_writting_bundle_name",
     "textfield_writting_ability_name",
     "rich_editor_writting_bundle_name",
-    "rich_editor_writting_ability_name"
+    "rich_editor_writting_ability_name",
+    "textfield_accessibility_clear"
 };
 
 void ParseNumberUnit(const std::string& value, std::string& number, std::string& unit)

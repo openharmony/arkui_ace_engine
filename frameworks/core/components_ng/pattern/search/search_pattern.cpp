@@ -277,6 +277,7 @@ void SearchPattern::SetAccessibilityAction()
         return index;
     });
     SetSearchFieldAccessibilityAction();
+    SetSearchButtonAccessibilityAction();
 }
 
 void SearchPattern::SetSearchFieldAccessibilityAction()
@@ -314,6 +315,17 @@ void SearchPattern::SetSearchFieldAccessibilityAction()
     });
 }
 
+void SearchPattern::SetSearchButtonAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto buttonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(BUTTON_INDEX));
+    CHECK_NULL_VOID(buttonFrameNode);
+    auto searchButtonAccessibilityProperty = buttonFrameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(searchButtonAccessibilityProperty);
+    searchButtonAccessibilityProperty->SetAccessibilityLevel("yes");
+    searchButtonAccessibilityProperty->SetAccessibilityGroup(true);
+}
 
 void SearchPattern::HandleBackgroundColor()
 {
