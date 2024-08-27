@@ -411,4 +411,12 @@ void SwiperArrowPattern::DumpAdvanceInfo()
     hoverOnClickFlag_ ? DumpLog::GetInstance().AddDesc("hoverOnClickFlag:true")
                       : DumpLog::GetInstance().AddDesc("hoverOnClickFlag:false");
 }
+
+void SwiperArrowPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("index", index_);
+    json->Put("isTouch", isTouch_);
+    json->Put("isHover", isHover_);
+    json->Put("hoverOnClickFlag", hoverOnClickFlag_);
+}
 } // namespace OHOS::Ace::NG

@@ -75,6 +75,8 @@ public:
     void ButtonOnHover(RefPtr<FrameNode> buttonNode, bool isHovered);
     void SetButtonVisible(bool visible);
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
+
 private:
     void OnModifyDone() override;
     void InitNavigationArrow();

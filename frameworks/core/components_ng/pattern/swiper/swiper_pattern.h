@@ -432,6 +432,12 @@ public:
     void StopSpringAnimationImmediately();
     void StopSpringAnimation();
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
+    void BuildOffsetInfo(std::unique_ptr<JsonValue>& json);
+    void BuildAxisInfo(std::unique_ptr<JsonValue>& json);
+    void BuildItemPositionInfo(std::unique_ptr<JsonValue>& json);
+    void BuildIndicatorTypeInfo(std::unique_ptr<JsonValue>& json);
+    void BuildPanDirectionInfo(std::unique_ptr<JsonValue>& json);
     int32_t GetLoopIndex(int32_t originalIndex) const;
     int32_t GetDuration() const;
     void UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus);
