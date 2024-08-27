@@ -3997,6 +3997,17 @@ bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType)
     auto instanceId = context->GetInstanceId();
     CHECK_NULL_RETURN(instanceId, false);
     ContainerScope scope(instanceId);
+
+    if (isPasswordFill_) {
+        auto offset = GetCoordinatePoint().value_or(OffsetF());
+        for (auto& nodeInfo : pageNodeInfo_) {
+            auto rect = nodeInfo->GetPageNodeRect();
+            NG::RectF rectF;
+            rectF.SetRect(rect.GetX() + offset.GetX(), rect.GetY()+ offset.GetY(), rect.Width(), rect.Height());
+            nodeInfo->SetPageNodeRect(rectF);
+        }
+    }
+
     auto container = Container::Current();
     if (container == nullptr) {
         container = Container::GetActive();
