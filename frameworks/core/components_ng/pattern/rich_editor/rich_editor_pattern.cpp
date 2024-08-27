@@ -3342,16 +3342,7 @@ void RichEditorPattern::OnDragStartAndEnd()
         NG::DragDropInfo itemInfo;
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_RETURN(pattern, itemInfo);
-        if (!pattern->isDragSponsor_) {
-            pattern->isDragSponsor_ = true;
-            pattern->dragRange_ = { pattern->textSelector_.GetTextStart(), pattern->textSelector_.GetTextEnd() };
-        }
-        pattern->timestamp_ = std::chrono::system_clock::now().time_since_epoch().count();
-        auto eventHub = pattern->GetEventHub<RichEditorEventHub>();
-        eventHub->SetTimestamp(pattern->GetTimestamp());
-        CHECK_NULL_RETURN(eventHub, itemInfo);
-        pattern->showSelect_ = false;
-        return pattern->OnDragStart(event, extraParams);
+        return pattern->HandleDragStart(event, extraParams);
     };
     eventHub->SetDefaultOnDragStart(std::move(onDragStart));
     auto onDragEnd = [weakPtr = WeakClaim(this), scopeId = Container::CurrentId()](
@@ -3368,6 +3359,25 @@ void RichEditorPattern::OnDragStartAndEnd()
         pattern->OnDragEnd(event);
     };
     eventHub->SetOnDragEnd(std::move(onDragEnd));
+}
+
+NG::DragDropInfo RichEditorPattern::HandleDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams)
+{
+    if (!isDragSponsor_) {
+        isDragSponsor_ = true;
+        dragRange_ = { textSelector_.GetTextStart(), textSelector_.GetTextEnd() };
+    }
+    timestamp_ = std::chrono::system_clock::now().time_since_epoch().count();
+    auto eventHub = GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_RETURN(eventHub, { });
+    eventHub->SetTimestamp(GetTimestamp());
+    showSelect_ = false;
+    auto dropInfo = OnDragStart(event, extraParams);
+    if (isOnlyImageDrag_) {
+        recoverStart_ = -1;
+        recoverEnd_ = -1;
+    }
+    return dropInfo;
 }
 
 void RichEditorPattern::onDragDropAndLeave()
@@ -6751,7 +6761,7 @@ void RichEditorPattern::ShowHandles(const bool isNeedShowHandles)
     if (!isNeedShowHandles) {
         auto info = GetSpansInfo(textSelector_.GetTextStart(), textSelector_.GetTextEnd(), GetSpansMethod::ONSELECT);
         auto selResult = info.GetSelection().resultObjects;
-        if (selResult.size() == 1 && selResult.front().type == SelectSpanType::TYPEIMAGE) {
+        if (isMousePressed_ && selResult.size() == 1 && selResult.front().type == SelectSpanType::TYPEIMAGE) {
             textSelector_.Update(-1, -1);
             auto host = GetHost();
             CHECK_NULL_VOID(host);

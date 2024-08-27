@@ -573,7 +573,7 @@ OffsetF SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategy(
     avoidStrategyMember.hasKeyboard = GreatNotEqual(keyboardInsert.Length(), 0.0f);
     avoidStrategyMember.keyboardInsertStart = keyboardInsert.start;
     avoidStrategyMember.downHandleIsReallyShow = downHandle.isShow && downHandleIsReallyShow;
-    avoidStrategyMember.selectAreaTop = upHandle.isShow ? upPaint.Top() : selectArea.Top();
+    avoidStrategyMember.selectAreaTop = selectArea.Top();
     avoidStrategyMember.selectAndRootRectAreaTop = upHandle.isShow ? upPaint.Top() : selectAndRootRectArea.Top();
     avoidStrategyMember.selectAndRootRectAreaBottom =
         avoidStrategyMember.downHandleIsReallyShow ? downPaint.Bottom() : selectAndRootRectArea.Bottom();
