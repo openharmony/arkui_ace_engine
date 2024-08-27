@@ -2504,6 +2504,12 @@ void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset,
     CheckMarkForIndicatorBoundary();
     isRtl ? HandleTouchBottomLoopOnRTL() : HandleTouchBottomLoop();
 
+    if (IsVisibleChildrenSizeLessThanSwiper()) {
+        turnPageRate_ = 0.0f;
+        gestureState_ = GestureState::GESTURE_STATE_NONE;
+        touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
+    }
+
     if (!indicatorDoingAnimation_) {
         child->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
@@ -5399,11 +5405,6 @@ bool SwiperPattern::CheckSwiperPanEvent(float mainDeltaOrVelocity)
 
 void SwiperPattern::HandleTouchBottomLoopOnRTL()
 {
-    if (!IsLoop()) {
-        touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
-        return;
-    }
-
     auto currentFirstIndex = GetLoopIndex(currentFirstIndex_);
     auto currentIndex = GetLoopIndex(currentIndex_);
     bool commTouchBottom = (currentFirstIndex == TotalCount() - 1);
