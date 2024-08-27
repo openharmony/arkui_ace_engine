@@ -207,7 +207,7 @@ public:
 
             theme->placeholderLineSpacing_ = pattern->GetAttr<Dimension>("text_field_placeholder_linespacing", 0.0_vp);
 
-            theme->cancelButton_ = pattern->GetAttr<std::string>("textfield_accessibility_property_clear", "");
+            theme->cancelButton_ = pattern->GetAttr<std::string>("textfield_accessibility_clear", "");
             theme->showPasswordPromptInformation_ =
                 pattern->GetAttr<std::string>("textfield_accessibility_show_password", "");
             theme->hiddenPasswordPromptInformation_ =
