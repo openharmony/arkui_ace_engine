@@ -6095,6 +6095,12 @@ class UINodeRegisterProxy {
         UINodeRegisterProxy.instance_.populateRemoveElementInfo(removedElements);
         UINodeRegisterProxy.instance_.unregisterElmtIdsFromIViews();
     }
+    static registerModifierElmtDeleteCallback(callback) {
+        if (UINodeRegisterProxy.modifierElmtDeleteCallback_) {
+            return;
+        }
+        UINodeRegisterProxy.modifierElmtDeleteCallback_ = callback;
+    }
     populateRemoveElementInfo(removedElements) {
         for (const elmtId of removedElements) {
             this.removeElementsInfo_.push(elmtId);
@@ -6125,6 +6131,9 @@ class UINodeRegisterProxy {
                 }
                 else {
                     
+                }
+                if (UINodeRegisterProxy.modifierElmtDeleteCallback_) {
+                    UINodeRegisterProxy.modifierElmtDeleteCallback_(elmtId);
                 }
             }
             else {
