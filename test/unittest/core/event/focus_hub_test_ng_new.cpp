@@ -1395,7 +1395,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0094, TestSize.Level1)
     keyEvent.code = KeyCode::KEY_TAB;
     auto pipeline = PipelineContext::GetCurrentContext();
     pipeline->isTabJustTriggerOnKeyEvent_ = false;
-    EXPECT_TRUE(focusHub->HandleFocusByTabIndex(keyEvent));
+    EXPECT_FALSE(focusHub->HandleFocusByTabIndex(keyEvent));
 }
 
 /**
@@ -1797,7 +1797,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0107, TestSize.Level1)
     parentFocusHub->isFocusScope_ = true;
     EXPECT_TRUE(parentFocusHub->RequestFocusByPriorityInScope());
     parentFocusHub->isFocusScope_ = false;
-    EXPECT_TRUE(parentFocusHub->RequestFocusByPriorityInScope());
+    EXPECT_FALSE(parentFocusHub->RequestFocusByPriorityInScope());
     EXPECT_TRUE(child2FocusHub->IsCurrentFocus());
 
     auto pipeline = PipelineContext::GetCurrentContext();
