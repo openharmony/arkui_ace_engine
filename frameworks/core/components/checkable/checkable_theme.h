@@ -169,6 +169,31 @@ public:
         return dotResourceId_;
     }
 
+    const Color& GetFocusedBgColor() const
+    {
+        return focusedBgColor_;
+    }
+
+    const Dimension& GetSizeFocusBg() const
+    {
+        return sizeFocusBg_;
+    }
+
+    const Dimension& GetSizeHoverBg() const
+    {
+        return sizeHoverBg_;
+    }
+
+    const Color& GetFocusedRingUnchecked() const
+    {
+        return focusedRingUnchecked_;
+    }
+
+    const Color& GetFocusedBgUnchecked() const
+    {
+        return focusedBgUnchecked_;
+    }
+
 protected:
     CheckableTheme() = default;
 
@@ -180,6 +205,11 @@ protected:
     Color hoverColor_;
     Color clickEffectColor_;
     Color shadowColor_;
+    Color focusedRingUnchecked_;
+    Color focusedBgUnchecked_;
+    Color focusedBgColor_;
+    Dimension sizeFocusBg_;
+    Dimension sizeHoverBg_;
     Dimension width_;
     Dimension height_;
     Dimension hotZoneHorizontalPadding_;
@@ -424,6 +454,7 @@ public:
                 return theme;
             }
             ParsePattern(themeConstants, theme);
+            ParseNewPattern(themeConstants, theme);
             return theme;
         }
 
@@ -445,6 +476,7 @@ public:
                 theme->width_ = radioPattern->GetAttr<Dimension>("radio_size_api_twelve", 24.0_vp);
                 theme->height_ = theme->width_;
                 theme->defaultPaddingSize_ = radioPattern->GetAttr<Dimension>("radio_default_padding_size", 2.0_vp);
+                theme->sizeHoverBg_ = radioPattern->GetAttr<Dimension>("radio_hover_bg_size", 2.0_vp);
                 theme->defaultWidth_ = radioPattern->GetAttr<Dimension>("radio_default_size_api_twelve", 24.0_vp);
                 theme->defaultHeight_ = theme->defaultWidth_;
             }
@@ -483,6 +515,18 @@ public:
                 theme->width_ = radioPattern->GetAttr<Dimension>("radio_size_api_twelve", 24.0_vp);
                 theme->height_ = theme->width_;
             }
+        }
+        void ParseNewPattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<RadioTheme>& theme) const
+        {
+            RefPtr<ThemeStyle> radioPattern = themeConstants->GetPatternByName(THEME_PATTERN_RADIO);
+            if (!radioPattern) {
+                LOGW("find pattern of radio fail");
+                return;
+            }
+            theme->focusedRingUnchecked_ = radioPattern->GetAttr<Color>("focused_ring_unchecked", Color::TRANSPARENT);
+            theme->focusedBgUnchecked_ = radioPattern->GetAttr<Color>("focused_bg_unchecked", Color::TRANSPARENT);
+            theme->focusedBgColor_ = radioPattern->GetAttr<Color>("color_focused_bg", Color::RED);
+            theme->sizeFocusBg_ = radioPattern->GetAttr<Dimension>("size_focused_bg", 0.0_vp);
         }
     };
 };
