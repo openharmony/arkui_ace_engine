@@ -965,6 +965,7 @@ public:
     void StripNextLine(std::wstring& data);
     bool IsShowHandle();
     std::string GetCancelButton();
+    std::string GetCancelImageText();
     std::string GetPasswordIconPromptInformation(bool show);
     bool OnKeyEvent(const KeyEvent& event);
     int32_t GetLineCount() const;
