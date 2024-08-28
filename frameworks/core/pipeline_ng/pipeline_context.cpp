@@ -1868,6 +1868,17 @@ bool PipelineContext::OnBackPressed()
     }
 
     // if has popup, back press would hide popup and not trigger page back
+    auto textfieldMgr = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
+    if (textfieldMgr) {
+        auto lastRequestKeyboardNodeId = textfieldMgr->GetLastRequestKeyboardId();
+        auto lastRequestKeyboardNode = DynamicCast<FrameNode>(
+            ElementRegister::GetInstance()->GetUINodeById(lastRequestKeyboardNodeId));
+        if (lastRequestKeyboardNode && lastRequestKeyboardNode->GetPageId() == -1 &&
+            textfieldMgr->OnBackPressed()) {
+            LOGI("textfield consumed backpressed event");
+            return true;
+        }
+    }
     auto hasOverlay = false;
     taskExecutor_->PostSyncTask(
         [weakOverlay = AceType::WeakClaim(AceType::RawPtr(overlayManager_)),
