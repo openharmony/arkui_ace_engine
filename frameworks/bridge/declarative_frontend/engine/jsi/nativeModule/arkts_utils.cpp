@@ -595,7 +595,7 @@ bool ArkTSUtils::ParseStringArray(const EcmaVM* vm, const Local<JSValueRef>& arg
         return false;
     }
     auto handle = panda::CopyableGlobal<panda::ArrayRef>(vm, arg);
-    if (handle->IsUndefined() || handle->IsNull()) {
+    if (handle.IsEmpty() || handle->IsUndefined() || handle->IsNull()) {
         return false;
     }
     int32_t length = static_cast<int32_t>(handle->Length(vm));
