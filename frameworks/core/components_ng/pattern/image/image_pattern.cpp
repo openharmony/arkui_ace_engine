@@ -620,7 +620,7 @@ void ImagePattern::LoadImage(
 
     loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(loadNotifier), syncLoad_);
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGD(AceLogTag::ACE_IMAGE, "start loading image %{public}s", src.ToString().c_str());
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "start loading image %{private}s", src.ToString().c_str());
     }
     loadingCtx_->SetLoadInVipChannel(GetLoadInVipChannel());
     loadingCtx_->SetNodeId(GetHost()->GetId());
