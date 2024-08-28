@@ -1103,6 +1103,9 @@ private:
 
     void DumpFocusNodeTreeInJson(int32_t depth);
     void DumpFocusScopeTreeInJson(int32_t depth);
+
+    bool IsComponentDirectionRtl();
+
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;
     OnBlurReasonFunc onBlurReasonInternal_;

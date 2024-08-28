@@ -1032,7 +1032,7 @@ bool FocusHub::GoToNextFocusLinear(FocusStep step, const RectF& rect)
     if (step == FocusStep::NONE) {
         return false;
     }
-    bool reverse = !IsFocusStepForward(step, AceApplicationInfo::GetInstance().IsRightToLeft());
+    bool reverse = !IsFocusStepForward(step, IsComponentDirectionRtl());
     std::list<RefPtr<FocusHub>> focusNodes;
     auto itNewFocusNode = FlushChildrenFocusHub(focusNodes);
     if (focusNodes.empty()) {
@@ -2666,5 +2666,25 @@ void FocusHub::DumpFocusNodeTreeInJson(int32_t depth)
     std::string jsonstr = DumpLog::GetInstance().FormatDumpInfo(json->ToString(), depth);
     auto prefix = DumpLog::GetInstance().GetPrefix(depth);
     DumpLog::GetInstance().PrintJson(prefix + jsonstr);
+}
+
+bool FocusHub::IsComponentDirectionRtl()
+{
+    bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    auto frame = GetFrameNode();
+    CHECK_NULL_RETURN(frame, isRightToLeft);
+    auto layoutProperty = frame->GetLayoutPropertyPtr<LayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, isRightToLeft);
+    auto layoutDirection = layoutProperty->GetLayoutDirection();
+    if (layoutDirection == TextDirection::AUTO) {
+        return isRightToLeft;
+    }
+    if (layoutDirection == TextDirection::LTR) {
+        return false;
+    }
+    if (layoutDirection == TextDirection::RTL) {
+        return true;
+    }
+    return isRightToLeft;
 }
 } // namespace OHOS::Ace::NG
