@@ -58,7 +58,7 @@ public:
     const RefPtr<Subwindow>& GetCurrentWindow();
     Rect GetParentWindowRect();
 
-    RefPtr<Subwindow> ShowPreviewNG();
+    RefPtr<Subwindow> ShowPreviewNG(bool isStartDraggingFromSubWindow);
     void HidePreviewNG();
     void ShowMenu(const RefPtr<Component>& newComponent);
     void ShowMenuNG(const RefPtr<NG::FrameNode>& menuNode, const NG::MenuParam& menuParam,
@@ -141,6 +141,7 @@ public:
     }
     void ClearToastInSystemSubwindow();
     void OnWindowSizeChanged(int32_t instanceId, Rect windowRect, WindowSizeChangeReason reason);
+    bool IsFreeMultiWindow(int32_t instanceId) const;
 
     RefPtr<NG::FrameNode> GetSubwindowDialogNodeWithExistContent(const RefPtr<NG::UINode>& node);
 

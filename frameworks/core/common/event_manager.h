@@ -195,7 +195,7 @@ public:
 
     bool IsSameKeyboardShortcutNode(const std::string& value, uint8_t keys);
 
-    bool IsSystemKeyboardShortcut(const std::string& value, uint8_t keys);
+    bool IsSystemKeyboardShortcut(const KeyEvent& event);
 
     uint8_t GetKeyboardShortcutKeys(const std::vector<ModifierKey>& keys);
 

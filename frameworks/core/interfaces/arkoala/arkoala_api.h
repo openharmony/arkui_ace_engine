@@ -736,6 +736,9 @@ enum ArkUINodeType {
     ARKUI_SYMBOL_GLYPH,
     ARKUI_QRCODE,
     ARKUI_BADGE,
+    ARKUI_TEXT_CLOCK,
+    ARKUI_TEXT_TIMER,
+    ARKUI_MARQUEE,
 };
 
 enum ArkUIEventCategory {
@@ -3946,6 +3949,7 @@ struct ArkUITextClockModifier {
     void (*resetFontFeature)(ArkUINodeHandle node);
     void (*setDateTimeOptions)(ArkUINodeHandle node, ArkUI_Int32 hourType);
     void (*resetDateTimeOptions)(ArkUINodeHandle node);
+    void (*setTextClockTimeZoneOffset)(ArkUINodeHandle node, ArkUI_Float32 timeZoneOffset);
 };
 
 struct ArkUITextClockControllerModifier {
@@ -4008,6 +4012,7 @@ struct ArkUITextTimerModifier {
     void (*resetFormat)(ArkUINodeHandle node);
     void (*setTextShadow)(ArkUINodeHandle node, struct ArkUITextShadowStruct* shadows, ArkUI_Uint32 length);
     void (*resetTextShadow)(ArkUINodeHandle node);
+    void (*setTextTimerOptions)(ArkUINodeHandle node, ArkUI_Bool isCountDown, ArkUI_Float64 count);
 };
 
 struct ArkUISymbolGlyphModifier {
@@ -4072,6 +4077,16 @@ struct ArkUIMarqueeModifier {
     void (*resetMarqueeOnBounce)(ArkUINodeHandle node);
     void (*setMarqueeOnFinish)(ArkUINodeHandle node, void* callback);
     void (*resetMarqueeOnFinish)(ArkUINodeHandle node);
+    void (*setMarqueeSrcValue)(ArkUINodeHandle node, ArkUI_CharPtr src);
+    void (*resetMarqueeSrcValue)(ArkUINodeHandle node);
+    void (*setMarqueePlayerStatus)(ArkUINodeHandle node, ArkUI_Bool start);
+    void (*resetMarqueePlayerStatus)(ArkUINodeHandle node);
+    void (*setMarqueeScrollAmount)(ArkUINodeHandle node, ArkUI_Float64 step);
+    void (*resetMarqueeScrollAmount)(ArkUINodeHandle node);
+    void (*setMarqueeLoop)(ArkUINodeHandle node, ArkUI_Int32 loop);
+    void (*resetMarqueeLoop)(ArkUINodeHandle node);
+    void (*setMarqueeDirection)(ArkUINodeHandle node, ArkUI_Int32 direction);
+    void (*resetMarqueeDirection)(ArkUINodeHandle node);
 };
 
 struct ArkUIDatePickerModifier {
@@ -4369,6 +4384,13 @@ struct ArkUIRichEditorModifier {
     void (*resetRichEditorOnCopy)(ArkUINodeHandle node);
     void (*setRichEditorEnterKeyType)(ArkUINodeHandle node, ArkUI_Uint32 enterKeyType);
     void (*resetRichEditorEnterKeyType)(ArkUINodeHandle node);
+    void (*setRichEditorEnableKeyboardOnFocus)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetRichEditorEnableKeyboardOnFocus)(ArkUINodeHandle node);
+    void (*setRichEditorEnablePreviewText)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetRichEditorEnablePreviewText)(ArkUINodeHandle node);
+    void (*setRichEditorEditMenuOptions)(
+        ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback);
+    void (*resetRichEditorEditMenuOptions)(ArkUINodeHandle node);
 };
 
 struct ArkUIRichEditorControllerModifier {

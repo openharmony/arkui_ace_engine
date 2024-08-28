@@ -186,7 +186,7 @@ Rect SubwindowManager::GetParentWindowRect()
     return currentSubwindow_->GetParentWindowRect();
 }
 
-RefPtr<Subwindow> SubwindowManager::ShowPreviewNG()
+RefPtr<Subwindow> SubwindowManager::ShowPreviewNG(bool isStartDraggingFromSubWindow)
 {
     auto containerId = Container::CurrentId();
     auto subwindow =
@@ -195,7 +195,7 @@ RefPtr<Subwindow> SubwindowManager::ShowPreviewNG()
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "get or create subwindow failed");
         return nullptr;
     }
-    if (!subwindow->ShowPreviewNG()) {
+    if (!subwindow->ShowPreviewNG(isStartDraggingFromSubWindow)) {
         return nullptr;
     }
     return subwindow;
@@ -978,5 +978,15 @@ RefPtr<NG::FrameNode> SubwindowManager::GetSubwindowDialogNodeWithExistContent(c
         ++iter;
     }
     return nullptr;
+}
+
+bool SubwindowManager::IsFreeMultiWindow(int32_t instanceId) const
+{
+    auto parentContainerId = instanceId >= MIN_SUBCONTAINER_ID
+                                 ? SubwindowManager::GetInstance()->GetParentContainerId(instanceId)
+                                 : instanceId;
+    auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(parentContainerId);
+    CHECK_NULL_RETURN(subWindow, false);
+    return subWindow->IsFreeMultiWindow();
 }
 } // namespace OHOS::Ace

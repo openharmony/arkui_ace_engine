@@ -15,7 +15,6 @@
 
 #include "core/components_ng/base/transparent_node_detector.h"
 
-#include "base/error/error_code.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -55,14 +54,6 @@ void TransparentNodeDetector::PostCheckNodeTransparentTask(const RefPtr<FrameNod
                 return;
             }
             LOGW("TransparentNodeDetector transparent node detected");
-            auto container = Container::CurrentSafely();
-            if (container && container->IsUIExtensionWindow()) {
-                auto pipeline = currentNode->GetContext();
-                CHECK_NULL_VOID(pipeline);
-                auto window = pipeline->GetWindow();
-                CHECK_NULL_VOID(window);
-                window->NotifyExtensionTimeout(ERROR_CODE_UIEXTENSION_TRANSPARENT_DETECTED);
-            }
         }
     };
     executor->PostDelayedTask(std::move(task), TaskExecutor::TaskType::UI, DELAY_TIME,

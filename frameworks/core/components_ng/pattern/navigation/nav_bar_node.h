@@ -151,7 +151,6 @@ public:
     }
 
     std::string GetBarItemsString(bool isMenu) const;
-    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     // custom node checking
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PrevTitleIsCustom, bool);
@@ -176,6 +175,16 @@ public:
     {
         return transitionType_;
     }
+
+    float GetLanguageDirection()
+    {
+        return AceApplicationInfo::GetInstance().IsRightToLeft() ? -1.0f : 1.0f;
+    }
+
+    void InitSystemTransitionPop();
+    void SystemTransitionPushAction(bool isFinish);
+    void StartSystemTransitionPush();
+    void StartSystemTransitionPop();
 
 private:
     RefPtr<UINode> menu_;

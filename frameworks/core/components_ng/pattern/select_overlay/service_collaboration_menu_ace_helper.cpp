@@ -706,6 +706,7 @@ RefPtr<PixelMap> ServiceCollaborationAceCallback::CreatePixelMap(void *buffer, u
         TAG_LOGE(AceLogTag::ACE_MENU, "CreateImageSource from buffer failed.");
         return nullptr;
     }
+    CHECK_NULL_RETURN(imageSource, nullptr);
     Media::DecodeOptions decodeOpts;
     std::shared_ptr<Media::PixelMap> pixelMap = imageSource->CreatePixelMap(decodeOpts, errorCode);
     if (errorCode != 0) {

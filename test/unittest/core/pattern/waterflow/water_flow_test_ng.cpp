@@ -1924,4 +1924,31 @@ HWTEST_F(WaterFlowTestNg, Reverse001, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 4), 100.0f);
     EXPECT_EQ(GetChildY(frameNode_, 5), -100.0f);
 }
+
+/**
+ * @tc.name: MarginPadding001
+ * @tc.desc: Test margin/padding
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, MarginPadding001, TestSize.Level1)
+{
+    ColumnModelNG colModel;
+    colModel.Create(Dimension(0), nullptr, "");
+    auto colNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateWaterFlowItems(4);
+    CreateDone(colNode);
+
+    MarginProperty margin = { CalcLength(1), CalcLength(3), CalcLength(5), CalcLength(7) };
+    PaddingProperty padding = { CalcLength(2), CalcLength(4), CalcLength(6), CalcLength(8) };
+    layoutProperty_->UpdateMargin(margin);
+    layoutProperty_->UpdatePadding(padding);
+    auto itemLayoutProperty = GetChildLayoutProperty<WaterFlowItemLayoutProperty>(frameNode_, 2);
+    itemLayoutProperty->UpdateMargin(margin);
+    itemLayoutProperty->UpdatePadding(padding);
+    FlushLayoutTask(colNode, true);
+    EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameRect(), RectF(1, 5, 480, 800)));
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 2), RectF(3, 111, 237, 100)));
+}
 } // namespace OHOS::Ace::NG

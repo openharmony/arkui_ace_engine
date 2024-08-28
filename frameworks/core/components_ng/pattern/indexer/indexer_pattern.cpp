@@ -163,10 +163,11 @@ void IndexerPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
         auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
             auto indexerPattern = weak.Upgrade();
             CHECK_NULL_VOID(indexerPattern);
-            if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
+            TouchType touchType = info.GetTouches().front().GetTouchType();
+            if (touchType == TouchType::DOWN) {
                 indexerPattern->isTouch_ = true;
                 indexerPattern->OnTouchDown(info);
-            } else if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
+            } else if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
                 indexerPattern->isTouch_ = false;
                 indexerPattern->OnTouchUp(info);
             }
@@ -515,6 +516,7 @@ void IndexerPattern::InitPopupPanEvent()
 
 void IndexerPattern::OnTouchDown(const TouchEventInfo& info)
 {
+    TAG_LOGI(AceLogTag::ACE_ALPHABET_INDEXER, "touch down at alphabetIndexer");
     if (itemCount_ <= 0) {
         return;
     }
@@ -523,6 +525,7 @@ void IndexerPattern::OnTouchDown(const TouchEventInfo& info)
 
 void IndexerPattern::OnTouchUp(const TouchEventInfo& info)
 {
+    TAG_LOGI(AceLogTag::ACE_ALPHABET_INDEXER, "leave up from alphabetIndexer");
     if (itemCount_ <= 0) {
         return;
     }
@@ -1587,9 +1590,10 @@ void IndexerPattern::AddListItemClickListener(RefPtr<FrameNode>& listItemNode, i
     auto touchCallback = [weak = WeakClaim(this), index](const TouchEventInfo& info) {
         auto indexerPattern = weak.Upgrade();
         CHECK_NULL_VOID(indexerPattern);
-        if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
+        TouchType touchType = info.GetTouches().front().GetTouchType();
+        if (touchType == TouchType::DOWN) {
             indexerPattern->OnListItemClick(index);
-        } else if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
+        } else if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
             indexerPattern->ClearClickStatus();
         }
     };
@@ -1922,7 +1926,7 @@ void IndexerPattern::FireOnSelect(int32_t selectIndex, bool fromPress)
     CHECK_NULL_VOID(host);
     auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(indexerEventHub);
-    auto actualIndex = autoCollapse_ ?
+    int32_t actualIndex = autoCollapse_ ?
             selected_ > 0 ?
                 std::find(fullArrayValue_.begin(), fullArrayValue_.end(),
                     arrayValue_.at(selected_).first) - fullArrayValue_.begin() :
@@ -1939,6 +1943,7 @@ void IndexerPattern::FireOnSelect(int32_t selectIndex, bool fromPress)
         }
         auto onSelected = indexerEventHub->GetOnSelected();
         if (onSelected && (selectIndex >= 0) && (selectIndex < itemCount_)) {
+            TAG_LOGD(AceLogTag::ACE_ALPHABET_INDEXER, "item %{public}d is selected", actualIndex);
             onSelected(actualIndex); // fire onSelected with an item's index from original array
         }
     }
@@ -2071,6 +2076,11 @@ void IndexerPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("AutoCollapse: ", autoCollapse_ ? "true" : "false");
     DumpLog::GetInstance().AddDesc("IsPopup: ", isPopup_ ? "true" : "false");
     DumpLog::GetInstance().AddDesc(std::string("EnableHapticFeedback: ").append(std::to_string(enableHapticFeedback_)));
+    DumpLog::GetInstance().AddDesc("ItemSize: ", lastItemSize_);
+    DumpLog::GetInstance().AddDesc("ItemHeight: ", itemHeight_);
+    DumpLog::GetInstance().AddDesc("ActualItemCount: ", itemCount_);
+    DumpLog::GetInstance().AddDesc("FullItemCount: ", static_cast<int32_t>(fullArrayValue_.size()));
+    DumpLog::GetInstance().AddDesc("MaxContentHeight: ", maxContentHeight_);
 }
 
 void IndexerPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
@@ -2088,5 +2098,10 @@ void IndexerPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("AutoCollapse", autoCollapse_ ? "true" : "false");
     json->Put("IsPopup", isPopup_ ? "true" : "false");
     json->Put("EnableHapticFeedback", std::to_string(enableHapticFeedback_).c_str());
+    json->Put("ItemSize", lastItemSize_);
+    json->Put("ItemHeight", itemHeight_);
+    json->Put("ActualItemCount", itemCount_);
+    json->Put("FullItemCount", static_cast<int32_t>(fullArrayValue_.size()));
+    json->Put("MaxContentHeight", maxContentHeight_);
 }
 } // namespace OHOS::Ace::NG

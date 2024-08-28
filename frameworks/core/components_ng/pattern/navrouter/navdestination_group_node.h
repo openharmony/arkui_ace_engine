@@ -179,6 +179,19 @@ public:
         return needRemoveInPush_;
     }
 
+    float GetLanguageDirection()
+    {
+        return AceApplicationInfo::GetInstance().IsRightToLeft() ? -1.0f : 1.0f;
+    }
+
+    void InitSystemTransitionPush(bool transitionIn);
+    void StartSystemTransitionPush(bool transitionIn);
+    void SystemTransitionPushCallback(bool transitionIn);
+    void InitSystemTransitionPop(bool isTransitionIn);
+    void StartSystemTransitionPop(bool transitionIn);
+    bool SystemTransitionPopCallback(bool transitionIn);
+    void InitDialogTransition(bool isZeroY);
+
 private:
     RefPtr<UINode> titleBarNode_;
     RefPtr<UINode> contentNode_;

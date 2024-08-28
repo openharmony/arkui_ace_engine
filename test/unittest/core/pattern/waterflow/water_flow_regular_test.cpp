@@ -16,6 +16,7 @@
 #include "water_flow_test_ng.h"
 
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/syntax/if_else_node.h"
 
 namespace OHOS::Ace::NG {
 // TEST non-segmented layout
@@ -118,6 +119,39 @@ HWTEST_F(WaterFlowTestNg, Constraint001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ChangeFooter001
+ * @tc.desc: Test changing the footer of the WaterFlow layout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ChangeFooter001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetFooter(GetDefaultHeaderBuilder());
+    CreateWaterFlowItems(60);
+    CreateDone();
+
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushLayoutTask(frameNode_);
+    auto& info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->footerIndex_, 0);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 61);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 750.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 60), 550.0f);
+    EXPECT_EQ(info->endIndex_, 59);
+
+    auto ifNode = IfElseNode::GetOrCreateIfElseNode(-1);
+
+    pattern_->AddFooter(ifNode);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info->footerIndex_, -1);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 60);
+    EXPECT_EQ(GetChildY(frameNode_, 59), 600.0f);
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 0)->IsActive());
+}
+
+/**
  * @tc.name: IllegalItemCnt
  * @tc.desc: Layout WaterFlow without items.
  * @tc.type: FUNC
@@ -144,6 +178,73 @@ HWTEST_F(WaterFlowTestNg, IllegalItemCnt, TestSize.Level1)
     EXPECT_EQ(info->jumpIndex_, LAST_ITEM);
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(info->startIndex_ >= info->endIndex_);
+}
+
+/**
+ * @tc.name: ZeroHeightItem001
+ * @tc.desc: Layout WaterFlow with 0-height item.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ZeroHeightItem001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(5.0f));
+    model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    CreateItemWithHeight(0.0f);
+    CreateItemWithHeight(100.0f);
+    CreateItemWithHeight(100.0f);
+    CreateDone();
+    const auto& info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 2);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 2), 5.0f);
+
+    pattern_->SetAnimateCanOverScroll(true);
+    UpdateCurrentOffset(100.0f); // shouldn't move
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 2), 5.0f);
+
+    UpdateCurrentOffset(-100.0f); // shouldn't move
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 2), 5.0f);
+}
+
+/**
+ * @tc.name: ZeroHeightItem002
+ * @tc.desc: Layout WaterFlow with 0-height item at the bottom.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ZeroHeightItem002, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    for (int i = 0; i < 5; ++i) {
+        CreateItemWithHeight(100.0f);
+    }
+    CreateItemWithHeight(0.0f);
+    CreateDone();
+    const auto& info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 5);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 5), 500.0f);
+
+    pattern_->SetAnimateCanOverScroll(true);
+    UpdateCurrentOffset(100.0f); // shouldn't move
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 5), 500.0f);
+
+    UpdateCurrentOffset(-100.0f); // shouldn't move
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 5), 500.0f);
 }
 
 /**

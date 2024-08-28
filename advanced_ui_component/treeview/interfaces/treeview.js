@@ -72,6 +72,8 @@ const l2 = '#00FFFFFF';
 const m2 = 100;
 const n2 = 12;
 const o2 = 8;
+const TAG = 'TreeView';
+const LOG_CODE = 0x3900;
 const ARROW_DOWN = {
     'id': -1,
     'type': 20000,
@@ -1173,7 +1175,7 @@ export class TreeView extends ViewPU {
             List.create({});
             List.onDragMove((event, extraParams) => {
                 if (this.isMultiPress) {
-                    hilog.error(0x3900, 'TreeView', 'drag error, a item has been dragged');
+                    hilog.error(LOG_CODE, TAG, 'drag error, a item has been dragged');
                     return;
                 }
                 let b17 = i1;
@@ -1231,12 +1233,12 @@ export class TreeView extends ViewPU {
                 let n16 = JSON.parse(extraParams).insertIndex;
                 let o16 = this.dropSelectedIndex;
                 if (o16 - 1 > this.listNodeDataSource.totalCount() || o16 === undefined) {
-                    hilog.error(0x3900, 'TreeView', 'drag error, currentNodeIndex is not found');
+                    hilog.error(LOG_CODE, TAG, 'drag error, currentNodeIndex is not found');
                     this.listNodeDataSource.u8(false);
                     return;
                 }
                 if (n16 === this.listNodeDataSource.totalCount()) {
-                    hilog.info(0x3900, 'TreeView', 'need to insert into the position of the last line');
+                    hilog.info(LOG_CODE, TAG, 'need to insert into the position of the last line');
                     n16 -= 1;
                 }
                 let p16 = this.listNodeDataSource.getData(n16);
@@ -1349,7 +1351,7 @@ export class TreeView extends ViewPU {
                         ListItem.align(Alignment.Start);
                         ListItem.onDragStart((event, extraParams) => {
                             if (this.listNodeDataSource.a9() || this.listNodeDataSource.l8() || this.isMultiPress) {
-                                hilog.error(0x3900, 'TreeView', 'drag error, a item has been dragged');
+                                hilog.error(LOG_CODE, TAG, 'drag error, a item has been dragged');
                                 return;
                             }
                             this.dropSelectedIndex = JSON.parse(extraParams).selectedIndex;
@@ -1357,7 +1359,7 @@ export class TreeView extends ViewPU {
                             let f16 = this.listNodeDataSource.getData(e16);
                             let g16 = u15.e6();
                             if (e16 >= this.listNodeDataSource.totalCount() || e16 === undefined) {
-                                hilog.error(0x3900, 'TreeView',
+                                hilog.error(LOG_CODE, TAG,
                                     'drag error, currentNodeIndex is not found in onDragStart');
                                 return;
                             }
@@ -1370,7 +1372,7 @@ export class TreeView extends ViewPU {
                             this.listNodeDataSource.v8(h16);
                             this.listNodeDataSource.g9(e16);
                             if (g16 !== f16?.e6()) {
-                                hilog.error(0x3900, 'TreeView', 'drag is too fast, it attribute a fault to OH');
+                                hilog.error(LOG_CODE, TAG, 'drag is too fast, it attribute a fault to OH');
                                 this.listNodeDataSource.u8(false);
                                 return;
                             }
@@ -1664,7 +1666,7 @@ function j(parentNodeId, q14, r14, count) {
                 r14 ? parent.o6().r10 + count : parent.o6().r10 - count;
             s14 = parent.parentNodeId;
         } else {
-            hilog.error(0x3900, 'TreeView', 'updateParentChildNumHandler: parent node not found');
+            hilog.error(LOG_CODE, TAG, 'updateParentChildNumHandler: parent node not found');
             break;
         }
     }
@@ -1844,7 +1846,7 @@ class h3 extends g3 {
 
     p12(index) {
         if (index < 0 || index >= this.w7.length) {
-            hilog.error(0x3900, 'TreeView', 'check index fail');
+            hilog.error(LOG_CODE, TAG, 'check index fail');
             return false;
         }
         return true;
@@ -1918,7 +1920,7 @@ class h3 extends g3 {
 
     w12(e14) {
         if (e14 >= this.w7.length) {
-            hilog.error(0x3900, 'TreeView', 'changeNodeStatus clickIndex error.');
+            hilog.error(LOG_CODE, TAG, 'changeNodeStatus clickIndex error.');
             return;
         }
         let f14 = e14;
@@ -1934,7 +1936,7 @@ class h3 extends g3 {
 
     z12(v13, w13) {
         if (v13 >= this.w7.length) {
-            hilog.error(0x3900, 'TreeView', 'handleExpandAndCollapse clickIndex error.');
+            hilog.error(LOG_CODE, TAG, 'handleExpandAndCollapse clickIndex error.');
             return;
         }
         let x13 = v13;
@@ -2004,7 +2006,7 @@ class h3 extends g3 {
                 return false;
             }, this.s10, p13, q13);
         } catch (err) {
-            hilog.error(0x3900, 'TreeView', 'traverseSectionNodeDF function callbacks error.');
+            hilog.error(LOG_CODE, TAG, 'traverseSectionNodeDF function callbacks error.');
             this.c13(o13);
         }
     }
@@ -3112,7 +3114,7 @@ class h3 extends g3 {
                     t8 ? parent.o6().r10 + count : parent.o6().r10 - count;
                 parentNodeId = parent.parentNodeId;
             } else {
-                hilog.error(0x3900, 'TreeView', 'updateParentChildNum: parent node not found.');
+                hilog.error(LOG_CODE, TAG, 'updateParentChildNum: parent node not found.');
                 break;
             }
         }
@@ -3137,7 +3139,7 @@ class h3 extends g3 {
             let parent = this.v10.get(parentNodeId);
             let q8 = new j3(data);
             if (parent.b5 > this.t10) {
-                hilog.error(0x3900, 'TreeView',
+                hilog.error(LOG_CODE, TAG,
                     'ListDataSource[addNode]: The level of the tree view cannot exceed 50.');
                 return false;
             }
@@ -3162,7 +3164,7 @@ class h3 extends g3 {
             this.v10.set(currentNodeId, q8);
             return true;
         } else {
-            hilog.error(0x3900, 'TreeView', 'ListDataSource[addNode]: Parent node not found.');
+            hilog.error(LOG_CODE, TAG, 'ListDataSource[addNode]: Parent node not found.');
             return false;
         }
     }
@@ -3190,7 +3192,7 @@ class h3 extends g3 {
             let index = current.y14;
             let g8 = 0;
             if (index < 0) {
-                hilog.error(0x3900, 'TreeView', 'node does not exist.');
+                hilog.error(LOG_CODE, TAG, 'node does not exist.');
                 return [];
             } else {
                 g8 = parent.children[index].o6().r10 + 1;
@@ -3214,18 +3216,18 @@ class h3 extends g3 {
             i(false, g8, this.v10, h8);
             return f8;
         } else {
-            hilog.error(0x3900, 'TreeView', 'parent does not exist.');
+            hilog.error(LOG_CODE, TAG, 'parent does not exist.');
             return [];
         }
     }
 
     a15(e8) {
         if (e8?.currentNodeId === undefined) {
-            hilog.error(0x3900, 'TreeView', 'getNodeInfoByNodeItem: currentId is undefined');
+            hilog.error(LOG_CODE, TAG, 'getNodeInfoByNodeItem: currentId is undefined');
             return new f3(new j3(d3), d3);
         }
         if (!this.c11.has(e8.currentNodeId)) {
-            hilog.error(0x3900, 'TreeView', 'getNodeInfoByNodeItem: not has nodeItem.');
+            hilog.error(LOG_CODE, TAG, 'getNodeInfoByNodeItem: not has nodeItem.');
             return new f3(new j3(d3), d3);
         }
         let index = this.c11.get(e8.currentNodeId);
@@ -3365,7 +3367,7 @@ class h3 extends g3 {
             let parent = this.v10.get(parentNodeId);
             let l7 = new j3(data);
             if (parent.b5 > this.t10) {
-                hilog.error(0x3900, 'TreeView', 'addDragNode: The level of the tree view cannot exceed 50.');
+                hilog.error(LOG_CODE, TAG, 'addDragNode: The level of the tree view cannot exceed 50.');
                 return false;
             }
             l7.b5 = parent.b5 + 1;
@@ -3402,7 +3404,7 @@ class h3 extends g3 {
             this.w10.set(currentNodeId, data);
             return true;
         } else {
-            hilog.error(0x3900, 'TreeView', 'addDragNode: Parent node not found.');
+            hilog.error(LOG_CODE, TAG, 'addDragNode: Parent node not found.');
             return false;
         }
     }
@@ -3492,7 +3494,7 @@ export class i3 extends ViewPU {
                 'moduleName': '__harDefaultModuleName__',
             }
         };
-        this.inputFontSize = getContext().resourceManager.getNumberByName('ohos_id_text_size_body1');
+        this.inputFontSize = resourceManager.getSystemResourceManager().getNumberByName('ohos_id_text_size_body1');
         this.setInitiallyProvidedValue(params);
         this.finalizeConstruction();
     }
@@ -3677,6 +3679,22 @@ export class i3 extends ViewPU {
     getInputTextMaxFontSize() {
         let g7 = this.decideFontScale() * this.inputFontSize + 'vp';
         return g7;
+    }
+
+    getLeftIconColor() {
+        if (this.item.i7()) {
+            return {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.icon_on_primary'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            };
+        } else if (this.item.s6()) {
+            return this.treeViewTheme.h4;
+        } else {
+            return this.treeViewTheme.g4;
+        }
     }
 
     checkInvalidPattern(title) {
@@ -3935,8 +3953,7 @@ export class i3 extends ViewPU {
                                     Image.opacity(!this.item.s6() && !this.item.g7() ?
                                         this.item.k6().v3?.opacity : this.item.k6().v3?.k15);
                                     Image.focusable(this.item.k6().w3 !== null ? false : true);
-                                    Image.fillColor(!this.item.s6() && !this.item.g7() ?
-                                    this.treeViewTheme.g4 : this.treeViewTheme.h4);
+                                    Image.fillColor(this.getLeftIconColor());
                                     Image.matchTextDirection((this.item.k6().x3?.c8 === ARROW_RIGHT ||
                                         this.item.k6().x3?.c8 === s2) ? true : false);
                                 }, Image);

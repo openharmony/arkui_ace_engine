@@ -2678,6 +2678,25 @@ void TextFieldPattern::ProcessCounter()
     UpdateCounterMargin();
 }
 
+void TextFieldPattern::ProcessSelection()
+{
+    auto textWidth = static_cast<int32_t>(contentController_->GetWideText().length());
+    if (SelectOverlayIsOn()) {
+        needToRefreshSelectOverlay_ = textWidth > 0;
+        UpdateSelection(std::clamp(selectController_->GetStartIndex(), 0, textWidth),
+            std::clamp(selectController_->GetEndIndex(), 0, textWidth));
+        SetIsSingleHandle(!IsSelected());
+        if (isTextChangedAtCreation_ && textWidth == 0) {
+            CloseSelectOverlay();
+            StartTwinkling();
+        }
+    } else if (HasFocus() && !IsSelected()) {
+        StartTwinkling();
+    } else {
+        needToRefreshSelectOverlay_ = false;
+    }
+}
+
 void TextFieldPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -2733,21 +2752,7 @@ void TextFieldPattern::OnModifyDone()
     }
     CalculateDefaultCursor();
 
-    auto textWidth = static_cast<int32_t>(contentController_->GetWideText().length());
-    if (SelectOverlayIsOn()) {
-        needToRefreshSelectOverlay_ = textWidth > 0;
-        UpdateSelection(std::clamp(selectController_->GetStartIndex(), 0, textWidth),
-            std::clamp(selectController_->GetEndIndex(), 0, textWidth));
-        SetIsSingleHandle(!IsSelected());
-        if (isTextChangedAtCreation_ && textWidth == 0) {
-            CloseSelectOverlay();
-            StartTwinkling();
-        }
-    } else if (HasFocus() && !IsSelected()) {
-        StartTwinkling();
-    } else {
-        needToRefreshSelectOverlay_ = false;
-    }
+    ProcessSelection();
     isTextChangedAtCreation_ = false;
     if (layoutProperty->GetTypeChangedValue(false)) {
         layoutProperty->ResetTypeChanged();
@@ -3033,17 +3038,18 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     }
     auto localOffset = ConvertGlobalToLocalOffset(info.GetGlobalLocation());
     if (CanChangeSelectState()) {
-        selectController_->UpdateSelectByOffset(localOffset);
+        selectController_->UpdateSelectWithBlank(localOffset);
     }
     StopTwinkling();
     SetIsSingleHandle(!IsSelected());
     auto start = selectController_->GetStartIndex();
     auto end = selectController_->GetEndIndex();
     CloseSelectOverlay();
-    if (magnifierController_) {
+    longPressFingerNum_ = info.GetFingerList().size();
+    if (magnifierController_ && IsOperation() && (longPressFingerNum_ == 1)) {
         magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() });
     }
-    StartGestureSelection(start, end);
+    StartGestureSelection(start, end, localOffset);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -3919,7 +3925,7 @@ void TextFieldPattern::InsertValueOperation(const SourceAndValueInfo& info)
         caretMoveLength = abs(static_cast<int32_t>(contentController_->GetWideText().length()) - originLength);
     }
     if (layoutProperty->HasMaxLength()) {
-        int32_t sum = originLength + static_cast<int32_t>(StringUtils::ToWstring(insertValue).length());
+        int32_t sum = static_cast<int32_t>(contentController_->GetWideText().length());
         showCountBorderStyle_ = sum > static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>()));
         HandleCountStyle();
     }
@@ -4791,12 +4797,6 @@ bool TextFieldPattern::TextFieldRequestFocus(RequestFocusReason reason)
         host->GetId(), TextFieldPattern::RequestFocusReasonToString(reason).c_str());
     auto focusHub = GetFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
-    auto context = host->GetContextRefPtr();
-    CHECK_NULL_RETURN(context, false);
-    if (!context->IsWindowFocused()) {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "window blur, don't request textfield focus");
-        return false;
-    }
     return focusHub->RequestFocusImmediately();
 }
 
@@ -5357,6 +5357,7 @@ void TextFieldPattern::SetSelectionFlag(
     selectionStart = std::clamp(selectionStart, 0, length);
     selectionEnd = std::clamp(selectionEnd, 0, length);
     moveCaretState_.isTouchCaret = false;
+    bool isShowMenu = selectOverlay_->IsCurrentMenuVisibile();
     isTouchPreviewText_ = false;
     if (selectionStart == selectionEnd) {
         selectController_->MoveCaretToContentRect(selectionEnd, TextAffinity::DOWNSTREAM);
@@ -5380,7 +5381,7 @@ void TextFieldPattern::SetSelectionFlag(
     if (!IsShowHandle()) {
         CloseSelectOverlay(true);
     } else {
-        bool isShowMenu = IsShowMenu(options);
+        isShowMenu = IsShowMenu(options, isShowMenu);
         if (!isShowMenu && IsUsingMouse()) {
             CloseSelectOverlay();
         } else {
@@ -5392,7 +5393,7 @@ void TextFieldPattern::SetSelectionFlag(
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-bool TextFieldPattern::IsShowMenu(const std::optional<SelectionOptions>& options)
+bool TextFieldPattern::IsShowMenu(const std::optional<SelectionOptions>& options, bool defaultValue)
 {
     if (!options.has_value()) {
         return false;
@@ -5403,7 +5404,7 @@ bool TextFieldPattern::IsShowMenu(const std::optional<SelectionOptions>& options
     if (options.value().menuPolicy == MenuPolicy::SHOW) {
         return true;
     }
-    return selectOverlay_->IsCurrentMenuVisibile();
+    return defaultValue;
 }
 
 bool TextFieldPattern::OnBackPressed()
@@ -7172,6 +7173,17 @@ void TextFieldPattern::CheckPasswordAreaState()
     passwordArea->SetObscured(!showPasswordState.value());
 }
 
+void TextFieldPattern::AfterLayoutProcessCleanResponse(
+    const RefPtr<CleanNodeResponseArea>& cleanNodeResponseArea)
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddAfterLayoutTask([cleanNodeResponseArea]() {
+        cleanNodeResponseArea->Refresh();
+        cleanNodeResponseArea->UpdateCleanNode(cleanNodeResponseArea->IsShow());
+    });
+}
+
 void TextFieldPattern::ProcessResponseArea()
 {
     if (IsShowCancelButtonMode()) {
@@ -8167,7 +8179,7 @@ int32_t TextFieldPattern::GetTouchIndex(const OffsetF& offset)
 void TextFieldPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info)
 {
     auto localOffset = info.GetTouches().front().GetLocalLocation();
-    if (magnifierController_) {
+    if (magnifierController_ && (longPressFingerNum_ == 1)) {
         magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() });
     }
     auto firstIndex = selectController_->GetFirstHandleIndex();
@@ -8191,6 +8203,7 @@ void TextFieldPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, 
 
 void TextFieldPattern::OnTextGenstureSelectionEnd()
 {
+    SetIsSingleHandle(!IsSelected());
     if (!IsContentRectNonPositive()) {
         ProcessOverlay({ .animation = true });
     }
@@ -8240,6 +8253,14 @@ void TextFieldPattern::GetAIWriteInfo(AIWriteInfo& info)
     spanString->EncodeTlv(info.selectBuffer);
     TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "Sentence range=[%{public}d--%{public}d], content = %{public}s",
         sentenceStart, sentenceEnd, spanString->GetString().c_str());
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    info.maxLength = static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>()));
+    info.firstHandle = selectController_->GetFirstHandleRect().ToString();
+    info.secondHandle = selectController_->GetSecondHandleRect().ToString();
 }
 
 void TextFieldPattern::HandleOnAIWrite()

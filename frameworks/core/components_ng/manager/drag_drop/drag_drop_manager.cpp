@@ -137,7 +137,7 @@ void DragDropManager::CreateDragWindow(const GestureEvent& info, uint32_t width,
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     const int32_t windowId = GetWindowId();
-    const float windowScale = isDragWindowShow_ ? 1.0f : GetWindowScale();
+    const float windowScale = isDragWindowSubWindow_ ? 1.0f : GetWindowScale();
     const Rect rect = pipeline->GetDisplayWindowRectInfo();
     const int32_t windowY = static_cast<int32_t>(info.GetGlobalPoint().GetY() * windowScale);
     const int32_t windowX = static_cast<int32_t>(info.GetGlobalPoint().GetX() * windowScale);
@@ -173,7 +173,7 @@ int32_t DragDropManager::GetWindowId()
         }
     }
 
-    windowId = container->GetWindowId();
+    windowId = static_cast<int32_t>(container->GetWindowId());
     isDragWindowSubWindow_ = true;
 
     return windowId;
@@ -1160,8 +1160,6 @@ void DragDropManager::OnItemDragStart(float globalX, float globalY, const RefPtr
 
 void DragDropManager::OnItemDragMove(float globalX, float globalY, int32_t draggedIndex, DragType dragType)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
 
@@ -1171,8 +1169,8 @@ void DragDropManager::OnItemDragMove(float globalX, float globalY, int32_t dragg
     UpdateDragWindowPosition(static_cast<int32_t>(windowX), static_cast<int32_t>(windowY));
 
     OHOS::Ace::ItemDragInfo itemDragInfo;
-    itemDragInfo.SetX(pipeline->ConvertPxToVp(Dimension(windowX, DimensionUnit::PX)));
-    itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(windowY, DimensionUnit::PX)));
+    itemDragInfo.SetX(windowX);
+    itemDragInfo.SetY(windowY);
 
     // use -1 for grid item not in eventGrid
     auto getDraggedIndex = [draggedGrid = draggedGridFrameNode_, draggedIndex, dragType](
@@ -1224,15 +1222,13 @@ float DragDropManager::GetWindowScale() const
 void DragDropManager::OnItemDragEnd(float globalX, float globalY, int32_t draggedIndex, DragType dragType)
 {
     dragDropState_ = DragDropMgrState::IDLE;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
     auto windowScale = isDragWindowSubWindow_ ? 1.0f : GetWindowScale();
     auto windowX = globalX * windowScale;
     auto windowY = globalY * windowScale;
 
     OHOS::Ace::ItemDragInfo itemDragInfo;
-    itemDragInfo.SetX(pipeline->ConvertPxToVp(Dimension(windowX, DimensionUnit::PX)));
-    itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(windowY, DimensionUnit::PX)));
+    itemDragInfo.SetX(windowX);
+    itemDragInfo.SetY(windowY);
 
     auto dragFrameNode = FindDragFrameNodeByPosition(globalX, globalY);
     if (!dragFrameNode) {

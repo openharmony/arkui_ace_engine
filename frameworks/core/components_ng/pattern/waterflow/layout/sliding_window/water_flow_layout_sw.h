@@ -97,7 +97,8 @@ private:
      */
     void RecoverFront(float viewportBound, int32_t& idx, int32_t minChildIdx);
     /**
-     * @return new startPos of the filled lane.
+     * @brief Append Item in the front of a lane.
+     * @return endPos of next item in the filled lane.
      */
     float FillFrontHelper(float itemLen, int32_t idx, size_t laneIdx);
     /**
@@ -125,7 +126,8 @@ private:
      */
     void RecoverBack(float viewportBound, int32_t& idx, int32_t maxChildIdx);
     /**
-     * @return new endPos of the filled lane.
+     * @brief Append Item to a lane.
+     * @return startPos of next item in the filled lane.
      */
     float FillBackHelper(float itemLen, int32_t idx, size_t laneIdx);
     /**
@@ -142,7 +144,7 @@ private:
      */
     void PostMeasureSelf(float selfCrossLen);
 
-    float MeasureChild(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, size_t lane);
+    float MeasureChild(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, size_t lane) const;
 
     /**
      * @brief Fill cache items back to lanes_ to prepare for Layout phase.
@@ -155,6 +157,11 @@ private:
      * @return true if item is successfully recovered.
      */
     bool RecoverCachedHelper(int32_t itemIdx, bool front);
+
+    /**
+     * @brief Measure all items in view to check if any item's height changed.
+     */
+    bool ItemHeightChanged() const;
 
     /**
      * @brief Layout a single section of items

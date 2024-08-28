@@ -668,6 +668,7 @@ void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)
     JSRenderingContextSettings::JSBind(globalObj);
     JSRenderImage::JSBind(globalObj, nativeEngine);
     JSPath2D::JSBind(globalObj);
+    JSCanvasImageData::JSBind(globalObj);
     JSMock::JSBind(globalObj);
 }
 

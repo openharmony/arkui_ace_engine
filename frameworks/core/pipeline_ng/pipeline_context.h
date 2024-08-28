@@ -647,10 +647,9 @@ public:
         return screenNode_.Upgrade();
     }
 
-    void SetFocusedWindowSceneNode(const RefPtr<FrameNode>& node)
+    void SetFocusedWindowSceneNode(const WeakPtr<FrameNode>& node)
     {
-        CHECK_NULL_VOID(node);
-        windowSceneNode_ = AceType::WeakClaim(AceType::RawPtr(node));
+        windowSceneNode_ = node;
     }
     RefPtr<FrameNode> GetFocusedWindowSceneNode() const
     {
@@ -961,6 +960,7 @@ private:
     void RegisterFocusCallback();
     void DumpFocus(bool hasJson) const;
     void DumpInspector(const std::vector<std::string>& params, bool hasJson) const;
+    void DumpElement(const std::vector<std::string>& params, bool hasJson) const;
 
     template<typename T>
     struct NodeCompare {

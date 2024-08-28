@@ -42,6 +42,8 @@ const INTER_POLATING_SPRING = curves.interpolatingSpring(0, 1, 328, 34)
 const FRICTION_CUBIC_BEZIER = curves.cubicBezierCurve(0.2, 0, 0.2, 1)
 const TRANS_COLOR: string = '#00FFFFFF'
 const GRADIENT_WIDTH: number = 16
+const MAX_FONT_SCALE: number = 2;
+const ERROR_CODE: number = 0x3900;
 
 
 export enum FilterType {
@@ -127,7 +129,29 @@ struct ListFilterRow {
   filterRow: FilterParams = { name: '', options: [] };
   onItemClick: (colIndex: number) => void = () => {}
   rowIndex: number = 0
-  @State maxAppFontScale: number = 1;
+  maxAppFontScale: number = 1;
+  isFollowingSystemFontScale: boolean = false;
+
+  aboutToAppear() {
+    try {
+      let uiContent: UIContext = this.getUIContext();
+      this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
+      this.maxAppFontScale = uiContent.getMaxFontScale();
+    } catch (err) {
+      let code: number = (err as BusinessError).code;
+      let message: string = (err as BusinessError).message;
+      hilog.error(ERROR_CODE, 'Ace', `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
+    }
+  }
+
+  updateFontScale(): number {
+    let uiContent: UIContext = this.getUIContext();
+    let systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+    if (!this.isFollowingSystemFontScale) {
+      return 1;
+    }
+    return Math.min(systemFontScale, this.maxAppFontScale);
+  }
 
   build() {
     Stack({ alignContent: Alignment.End }) {
@@ -143,7 +167,7 @@ struct ListFilterRow {
               Text(option.toString())
                 .fontSize($r('sys.float.ohos_id_text_size_body3'))
                 .minFontScale(1)
-                .maxFontScale(Math.min(this.maxAppFontScale, 2))
+                .maxFontScale(Math.min(this.updateFontScale(), MAX_FONT_SCALE))
                 .fontColor(this.colorRow[colIndex])
                 .fontWeight(this.fontWeightRow[colIndex])
                 .focusable(true)
@@ -249,7 +273,29 @@ struct MultiFilterRow {
   private filterColumnWidth: number = 0
   private lastFilterColumnWidth: number = 0
   private rowIndex: number = 0
-  @State maxAppFontScale: number = 1;
+  maxAppFontScale: number = 1;
+  isFollowingSystemFontScale: boolean = false;
+
+  aboutToAppear() {
+    try {
+      let uiContent: UIContext = this.getUIContext();
+      this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
+      this.maxAppFontScale = uiContent.getMaxFontScale();
+    } catch (err) {
+      let code: number = (err as BusinessError).code;
+      let message: string = (err as BusinessError).message;
+      hilog.error(ERROR_CODE, 'Ace', `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
+    }
+  }
+
+  updateFontScale(): number {
+    let uiContent: UIContext = this.getUIContext();
+    let systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+    if (!this.isFollowingSystemFontScale) {
+      return 1;
+    }
+    return Math.min(systemFontScale, this.maxAppFontScale);
+  }
 
   private calcMultiFilterRowItemNum() {
     let curLineRetainWidth = this.filterColumnWidth;
@@ -260,7 +306,7 @@ struct MultiFilterRow {
         let option = this.filterRow.options[i]
         let itemWidth = measure.measureText({
           textContent: option,
-          fontSize: `${FILTER_FONT_SIZE * Math.min(this.maxAppFontScale, 2)}vp`,
+          fontSize: `${FILTER_FONT_SIZE * Math.min(this.updateFontScale(), MAX_FONT_SCALE)}vp`,
         })
         if (i === 0) {
           continue
@@ -402,7 +448,7 @@ struct MultiFilterRow {
           .margin({ start: LengthMetrics.vp(-TEXT_HOT_AREA_WIDTH) })
           .fontSize($r('sys.float.ohos_id_text_size_body3'))
           .minFontScale(1)
-          .maxFontScale(Math.min(this.maxAppFontScale, 2))
+          .maxFontScale(Math.min(this.updateFontScale(), MAX_FONT_SCALE))
           .maxLines(1)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .fontColor(this.colorRow[0])
@@ -476,7 +522,7 @@ struct MultiFilterRow {
                   .transition(TransitionEffect.OPACITY)
                   .fontSize($r('sys.float.ohos_id_text_size_body3'))
                   .minFontScale(1)
-                  .maxFontScale(Math.min(this.maxAppFontScale, 2))
+                  .maxFontScale(Math.min(this.updateFontScale(), MAX_FONT_SCALE))
                   .maxLines(1)
                   .textOverflow({ overflow: TextOverflow.Ellipsis })
                   .height(LIST_ROW_HEIGHT)
@@ -620,7 +666,7 @@ export struct Filter {
   @State twoLineModeItemNumRecord: Array<ObservedNumber> | null = null
   @State downArrowShowState: Array<ObservedBoolean> | null = null
   @State floatFilterBarText: string = ''
-  @State maxAppFontScale: number = 1;
+  maxAppFontScale: number = 1;
   isFollowingSystemFontScale: boolean = false;
 
   textColor(rowIndex: number, colIndex: number) {
@@ -640,7 +686,7 @@ export struct Filter {
     } catch (err) {
       let code: number = (err as BusinessError).code;
       let message: string = (err as BusinessError).message;
-      hilog.error(0x3900, 'Ace', `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
+      hilog.error(ERROR_CODE, 'Ace', `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
     }
   }
 
@@ -771,7 +817,6 @@ export struct Filter {
             this.filterItemClick(rowIndex, colIndex);
           },
           rowIndex: rowIndex,
-          maxAppFontScale: this.updateFontScale(),
         })
       })
     }.width(PERCENT_100)
@@ -806,7 +851,6 @@ export struct Filter {
             this.filterItemClick(rowIndex, colIndex);
           },
           rowIndex: rowIndex,
-          maxAppFontScale: this.updateFontScale(),
         })
       })
     }.width(PERCENT_100)
@@ -864,7 +908,7 @@ export struct Filter {
                 Text(this.additionFilters.name.toString())
                   .fontSize($r('sys.float.ohos_id_text_size_body3'))
                   .minFontScale(1)
-                  .maxFontScale(Math.min(this.updateFontScale(), 2))
+                  .maxFontScale(Math.min(this.updateFontScale(), MAX_FONT_SCALE))
                   .fontColor($r('sys.color.ohos_id_color_text_secondary'))
                   .margin({ start: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH), end: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH) })
                   .padding({ start: LengthMetrics.resource($r('sys.float.ohos_id_max_padding_start'))})
@@ -881,7 +925,7 @@ export struct Filter {
                 Text(option.toString())
                   .fontSize($r('sys.float.ohos_id_text_size_body3'))
                   .minFontScale(1)
-                  .maxFontScale(Math.min(this.updateFontScale(), 2))
+                  .maxFontScale(Math.min(this.updateFontScale(), MAX_FONT_SCALE))
                   .fontColor(this.additionColorArr ? this.additionColorArr[index] : '')
                   .fontWeight(this.additionFontWeightArr ? this.additionFontWeightArr[index] : '')
                   .focusable(true)
@@ -1046,7 +1090,7 @@ export struct Filter {
               .fontColor($r('sys.color.ohos_id_color_text_primary_activated'))
               .fontSize($r('sys.float.ohos_id_text_size_body3'))
               .minFontScale(1)
-              .maxFontScale(Math.min(this.updateFontScale(), 2))
+              .maxFontScale(Math.min(this.updateFontScale(), MAX_FONT_SCALE))
               .constraintSize({ maxWidth: '85%' })
               .maxLines(1)
 

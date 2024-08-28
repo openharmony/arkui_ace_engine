@@ -28,6 +28,7 @@ int32_t callBack3 = 0;
 const std::string IMAGE_VALUE = "image1";
 const std::string BUNDLE_NAME = "bundleName";
 const std::string MODULE_NAME = "moduleName";
+const std::string TEXT_DETECT_TYPES = "phoneNum,url,email,location,datetime";
 constexpr uint32_t DEFAULT_NODE_ID = 0;
 constexpr uint32_t UKNOWN_VALUE = 0;
 constexpr uint32_t RENDERINGSTRATEGY_MULTIPLE_COLOR = 1;
@@ -218,14 +219,14 @@ HWTEST_F(TextTestNg, SetTextDetectEnable003, TestSize.Level1)
     textModelNG.SetFontSize(frameNode, ADAPT_ZERO_FONT_SIZE_VALUE);
     EXPECT_EQ(textModelNG.GetFontSize(frameNode), ADAPT_ZERO_FONT_SIZE_VALUE);
 
-    textModelNG.SetTextDetectConfig(frameNode, "apple, orange, banana");
-    ASSERT_NE(textModelNG.GetTextDetectConfig(frameNode), "apple, orange, banana");
+    textModelNG.SetTextDetectConfig(frameNode, TEXT_DETECT_TYPES);
+    EXPECT_EQ(textModelNG.GetTextDetectConfig(frameNode), TEXT_DETECT_TYPES);
 
     TextDetectConfig textDetectConfig;
-    textDetectConfig.types = "apple, orange, banana";
+    textDetectConfig.types = TEXT_DETECT_TYPES;
     textDetectConfig.onResult = [](const std::string&) {};
     textModelNG.SetTextDetectConfig(frameNode, textDetectConfig);
-    ASSERT_NE(textModelNG.GetTextDetectConfig(frameNode), "apple, orange, banana");
+    EXPECT_EQ(textModelNG.GetTextDetectConfig(frameNode), TEXT_DETECT_TYPES);
 
     auto textPattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
@@ -261,6 +262,146 @@ HWTEST_F(TextTestNg, SetTextDetectEnable003, TestSize.Level1)
     auto onSelectionChanged = [&isSelectChanged](int32_t, int32_t) { isSelectChanged = true; };
     textModelNG.SetOnTextSelectionChange(frameNode, onSelectionChanged);
     EXPECT_NE(eventHub->onSelectionChange_, nullptr);
+}
+
+/**
+ * @tc.name: SetTextDetectConfig001
+ * @tc.desc: Test SetTextDetectConfig.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SetTextDetectConfig001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textModelNG and frameNode.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get hyperlink theme.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto mocktheme = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(mocktheme);
+    EXPECT_CALL(*mocktheme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<HyperlinkTheme>()));
+    auto theme = pipeline->GetTheme<HyperlinkTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    /**
+     * @tc.steps: step3. create textDetectConfig and call SetTextDetectConfig.
+     * @tc.expected: the properties are successfully set to default values.
+     */
+    TextDetectConfig textDetectConfig;
+    textModelNG.SetTextDetectConfig(textDetectConfig);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    EXPECT_EQ(pattern->dataDetectorAdapter_->textDetectTypes_, "");
+    EXPECT_EQ(pattern->dataDetectorAdapter_->onResult_, nullptr);
+    EXPECT_EQ(pattern->dataDetectorAdapter_->entityColor_, theme->GetTextColor());
+    EXPECT_EQ(pattern->dataDetectorAdapter_->entityDecorationType_, TextDecoration::UNDERLINE);
+    EXPECT_EQ(pattern->dataDetectorAdapter_->entityDecorationColor_, theme->GetTextColor());
+    EXPECT_EQ(pattern->dataDetectorAdapter_->entityDecorationStyle_, TextDecorationStyle::SOLID);
+
+    /**
+     * @tc.steps: step4. set values for textDetectConfig and call SetTextDetectConfig.
+     * @tc.expected: the values of properties are set successfully.
+     */
+    textDetectConfig.types = TEXT_DETECT_TYPES;
+    textDetectConfig.onResult = [](const std::string&) {};
+    textDetectConfig.entityColor = TEXT_COLOR_VALUE;
+    textDetectConfig.entityDecorationType = TextDecoration::OVERLINE;
+    textDetectConfig.entityDecorationColor = Color::BLACK;
+    textDetectConfig.entityDecorationStyle = TextDecorationStyle ::DOUBLE;
+    textModelNG.SetTextDetectConfig(textDetectConfig);
+    EXPECT_EQ(pattern->dataDetectorAdapter_->textDetectTypes_, TEXT_DETECT_TYPES);
+    EXPECT_NE(pattern->dataDetectorAdapter_->onResult_, nullptr);
+    EXPECT_EQ(pattern->dataDetectorAdapter_->entityColor_, TEXT_COLOR_VALUE);
+    EXPECT_EQ(pattern->dataDetectorAdapter_->entityDecorationType_, TextDecoration::OVERLINE);
+    EXPECT_EQ(pattern->dataDetectorAdapter_->entityDecorationColor_, Color::BLACK);
+    EXPECT_EQ(pattern->dataDetectorAdapter_->entityDecorationStyle_, TextDecorationStyle::DOUBLE);
+}
+
+/**
+ * @tc.name: SetTextDetectConfig002
+ * @tc.desc: Test SetTextDetectConfig.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SetTextDetectConfig002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textModelNG and frameNode.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. create textDetectConfig, set values for textDetectConfig and call SetTextDetectConfig.
+     * @tc.expected: the properties are successfully set to default values.
+     */
+    TextDetectConfig textDetectConfig;
+    textDetectConfig.types = TEXT_DETECT_TYPES;
+    textDetectConfig.onResult = [](const std::string&) {};
+    textDetectConfig.entityColor = TEXT_COLOR_VALUE;
+    textDetectConfig.entityDecorationType = TextDecoration::OVERLINE;
+    textDetectConfig.entityDecorationColor = Color::BLACK;
+    textDetectConfig.entityDecorationStyle = TextDecorationStyle ::DOUBLE;
+    textModelNG.SetTextDetectConfig(frameNode, textDetectConfig);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    EXPECT_EQ(pattern->dataDetectorAdapter_->textDetectTypes_, TEXT_DETECT_TYPES);
+    EXPECT_NE(pattern->dataDetectorAdapter_->onResult_, nullptr);
+    EXPECT_EQ(pattern->dataDetectorAdapter_->entityColor_, TEXT_COLOR_VALUE);
+    EXPECT_EQ(pattern->dataDetectorAdapter_->entityDecorationType_, TextDecoration::OVERLINE);
+    EXPECT_EQ(pattern->dataDetectorAdapter_->entityDecorationColor_, Color::BLACK);
+    EXPECT_EQ(pattern->dataDetectorAdapter_->entityDecorationStyle_, TextDecorationStyle::DOUBLE);
+}
+
+/**
+ * @tc.name: ModifyAISpanStyle001
+ * @tc.desc: test ModifyAISpanStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, ModifyAISpanStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create pattern and frameNode.
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+
+    /**
+     * @tc.steps: step2. create aiSpanStyle, textDetectConfig and call ModifyAISpanStyle.
+     * @tc.expected: the properties of aiSpanStyle are successfully set to default values of textDetectConfig.
+     */
+    TextStyle aiSpanStyle;
+    TextDetectConfig textDetectConfig;
+    pattern->ModifyAISpanStyle(aiSpanStyle);
+    EXPECT_EQ(aiSpanStyle.GetTextColor(), textDetectConfig.entityColor);
+    EXPECT_EQ(aiSpanStyle.GetTextDecoration(), textDetectConfig.entityDecorationType);
+    EXPECT_EQ(aiSpanStyle.GetTextDecorationColor(), textDetectConfig.entityDecorationColor);
+    EXPECT_EQ(aiSpanStyle.GetTextDecorationStyle(), textDetectConfig.entityDecorationStyle);
+
+    /**
+     * @tc.steps: step2. set values for textDetectConfig, call SetTextDetectConfig and ModifyAISpanStyle.
+     * @tc.expected: the properties of aiSpanStyle are successfully set to values of textDetectConfig.
+     */
+    textDetectConfig.entityColor = TEXT_COLOR_VALUE;
+    textDetectConfig.entityDecorationType = TextDecoration::OVERLINE;
+    textDetectConfig.entityDecorationColor = Color::BLACK;
+    textDetectConfig.entityDecorationStyle = TextDecorationStyle ::DOUBLE;
+    pattern->SetTextDetectConfig(textDetectConfig);
+    pattern->ModifyAISpanStyle(aiSpanStyle);
+    EXPECT_EQ(aiSpanStyle.GetTextColor(), TEXT_COLOR_VALUE);
+    EXPECT_EQ(aiSpanStyle.GetTextDecoration(), TextDecoration::OVERLINE);
+    EXPECT_EQ(aiSpanStyle.GetTextDecorationColor(), Color::BLACK);
+    EXPECT_EQ(aiSpanStyle.GetTextDecorationStyle(), TextDecorationStyle::DOUBLE);
 }
 
 /**

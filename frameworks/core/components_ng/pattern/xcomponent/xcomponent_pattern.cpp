@@ -261,7 +261,6 @@ void XComponentPattern::OnAttachToMainTree()
     if (isTypedNode_) {
         CHECK_NULL_VOID(renderSurface_);
         renderSurface_->RegisterSurface();
-        renderSurface_->Connect();
         surfaceId_ = renderSurface_->GetUniqueId();
         CHECK_NULL_VOID(xcomponentController_);
         xcomponentController_->SetSurfaceId(surfaceId_);
@@ -274,7 +273,6 @@ void XComponentPattern::OnDetachFromMainTree()
     if (isTypedNode_) {
         CHECK_NULL_VOID(renderSurface_);
         renderSurface_->ReleaseSurfaceBuffers();
-        renderSurface_->Disconnect();
         renderSurface_->UnregisterSurface();
         CHECK_NULL_VOID(xcomponentController_);
         OnSurfaceDestroyed();
@@ -1386,6 +1384,8 @@ void XComponentPattern::HandleSetExpectedRateRangeEvent()
     FrameRateRange frameRateRange;
     frameRateRange.Set(range->min, range->max, range->expected);
     displaySync_->SetExpectedFrameRateRange(frameRateRange);
+    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "Id: %{public}" PRIu64 " SetExpectedFrameRateRange"
+        "{%{public}d, %{public}d, %{public}d}", displaySync_->GetId(), range->min, range->max, range->expected);
 }
 
 void XComponentPattern::HandleOnFrameEvent()
@@ -1400,6 +1400,8 @@ void XComponentPattern::HandleOnFrameEvent()
         xComponentPattern->nativeXComponentImpl_->GetOnFrameCallback()(xComponentPattern->nativeXComponent_.get(),
             displaySyncData->GetTimestamp(), displaySyncData->GetTargetTimestamp());
     });
+    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "Id: %{public}" PRIu64 " RegisterOnFrame",
+        displaySync_->GetId());
     displaySync_->AddToPipelineOnContainer();
 }
 
@@ -1409,6 +1411,8 @@ void XComponentPattern::HandleUnregisterOnFrameEvent()
     CHECK_NULL_VOID(nativeXComponentImpl_);
     CHECK_NULL_VOID(displaySync_);
     displaySync_->UnregisterOnFrame();
+    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "Id: %{public}" PRIu64 " UnregisterOnFrame",
+        displaySync_->GetId());
     displaySync_->DelFromPipelineOnContainer();
 }
 
@@ -1828,14 +1832,20 @@ void XComponentPattern::CreateAnalyzerOverlay()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetOverlayNode(nullptr);
+
+    auto layoutProperty = GetLayoutProperty<XComponentLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto padding  = layoutProperty->CreatePaddingAndBorder();
+    Rect contentRect = { padding.left.value_or(0), padding.top.value_or(0), drawSize_.Width(), drawSize_.Height() };
     auto context = host->GetRenderContext();
     CHECK_NULL_VOID(context);
-    auto pixelMap = context->GetThumbnailPixelMap();
+    auto nailPixelMap = context->GetThumbnailPixelMap();
+    CHECK_NULL_VOID(nailPixelMap);
+    auto pixelMap = nailPixelMap->GetCropPixelMap(contentRect);
     CHECK_NULL_VOID(pixelMap);
-    if (IsSupportImageAnalyzerFeature()) {
-        CHECK_NULL_VOID(imageAnalyzerManager_);
-        imageAnalyzerManager_->CreateAnalyzerOverlay(pixelMap);
-    }
+
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    imageAnalyzerManager_->CreateAnalyzerOverlay(pixelMap);
 }
 
 void XComponentPattern::UpdateAnalyzerOverlay()
@@ -1953,5 +1963,20 @@ void XComponentPattern::SetSurfaceRotation(bool isLock)
 
     CHECK_NULL_VOID(handlingSurfaceRenderContext_);
     handlingSurfaceRenderContext_->SetSurfaceRotation(isLock);
+}
+
+void XComponentPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("xcomponentId", id_.value_or("no id").c_str());
+    json->Put("xcomponentType", XComponentTypeToString(type_).c_str());
+    json->Put("libraryName", libraryname_.value_or("no library name").c_str());
+}
+
+void XComponentPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("surfaceRect", RectF { localPosition_, surfaceSize_ }.ToString().c_str());
+    if (renderSurface_) {
+        renderSurface_->DumpInfo(json);
+    }
 }
 } // namespace OHOS::Ace::NG

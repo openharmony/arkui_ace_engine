@@ -330,7 +330,9 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     previewScale_ = LessOrEqual(afterAnimationScale, 0.0f) ? previewScale_ : afterAnimationScale;
     position_ = props->GetMenuOffset().value_or(OffsetF());
     dumpInfo_.globalLocation = position_;
+    // user-set offset
     positionOffset_ = props->GetPositionOffset().value_or(OffsetF());
+    dumpInfo_.offset = positionOffset_;
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         InitializePaddingAPI12(layoutWrapper);
     } else {
@@ -358,11 +360,9 @@ void MenuLayoutAlgorithm::InitializeParam(const RefPtr<MenuPattern>& menuPattern
     CHECK_NULL_VOID(safeAreaManager);
     auto safeAreaInsets = safeAreaManager->GetSafeAreaWithoutProcess();
     auto top = safeAreaInsets.top_.Length();
-    auto bottom = safeAreaInsets.bottom_.Length();
-    auto keyboardHeight = safeAreaManager->GetKeyboardInset().Length();
-    if (menuPattern->IsSelectOverlayExtensionMenu() && GreatNotEqual(keyboardHeight, 0)) {
-        bottom = keyboardHeight;
-    }
+    auto props = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    auto bottom = GetBottomBySafeAreaManager(safeAreaManager, props, menuPattern);
     auto windowGlobalRect = hierarchicalParameters_ ? pipelineContext->GetDisplayAvailableRect()
                                                     : pipelineContext->GetDisplayWindowRectInfo();
     float windowsOffsetX = static_cast<float>(windowGlobalRect.GetOffset().GetX());
@@ -414,11 +414,7 @@ void MenuLayoutAlgorithm::InitWrapperRect(
     CHECK_NULL_VOID(safeAreaManager);
     // system safeArea(AvoidAreaType.TYPE_SYSTEM) only include status bar,now the bottom is 0
     auto safeAreaInsets = safeAreaManager->GetSafeAreaWithoutProcess();
-    auto bottom = safeAreaInsets.bottom_.Length();
-    auto keyboardHeight = safeAreaManager->GetKeyboardInset().Length();
-    if (menuPattern->IsSelectOverlayExtensionMenu() && GreatNotEqual(keyboardHeight, 0)) {
-        bottom = keyboardHeight;
-    }
+    auto bottom = GetBottomBySafeAreaManager(safeAreaManager, props, menuPattern);
     auto top = safeAreaInsets.top_.Length();
     auto left = safeAreaInsets.left_.Length();
     auto right = safeAreaInsets.right_.Length();
@@ -451,6 +447,28 @@ void MenuLayoutAlgorithm::InitWrapperRect(
     }
     wrapperSize_ = SizeF(wrapperRect_.Width(), wrapperRect_.Height());
     dumpInfo_.wrapperRect = wrapperRect_;
+}
+
+uint32_t MenuLayoutAlgorithm::GetBottomBySafeAreaManager(const RefPtr<SafeAreaManager>& safeAreaManager,
+    const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern)
+{
+    auto safeAreaInsets = safeAreaManager->GetSafeAreaWithoutProcess();
+    auto bottom = safeAreaInsets.bottom_.Length();
+    auto keyboardHeight = safeAreaManager->GetKeyboardInset().Length();
+    if (menuPattern->IsSelectOverlayExtensionMenu() && GreatNotEqual(keyboardHeight, 0)) {
+        bottom = keyboardHeight;
+    }
+
+    // Determine whether the menu is an AI menu
+    if (props->GetIsRectInTargetValue(false)) {
+        if (LessOrEqual(keyboardHeight, 0)) {
+            keyboardHeight = safeAreaManager->GetkeyboardHeightConsideringUIExtension();
+        }
+        if (GreatNotEqual(keyboardHeight, 0)) {
+            bottom = keyboardHeight;
+        }
+    }
+    return bottom;
 }
 
 void MenuLayoutAlgorithm::InitSpace(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern)
@@ -1392,7 +1410,7 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
         auto renderContext = menuNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
-        TAG_LOGI(AceLogTag::ACE_MENU, "update menu postion: %{public}s", menuPosition.ToString().c_str());
+        TAG_LOGD(AceLogTag::ACE_MENU, "update menu postion: %{public}s", menuPosition.ToString().c_str());
         renderContext->UpdatePosition(
             OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
         dumpInfo_.finalPlacement = PlacementUtils::ConvertPlacementToString(placement_);
@@ -2587,15 +2605,11 @@ void MenuLayoutAlgorithm::InitHierarchicalParameters(bool isShowInSubWindow, con
         auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
         container = AceEngine::Get().GetContainer(parentContainerId);
     }
-    CHECK_NULL_VOID(container);
-    auto wrapperPipline = menuWrapperNode->GetContext();
-    auto wrapperRect = wrapperPipline ? wrapperPipline->GetDisplayWindowRectInfo() : Rect();
-    auto mainPipline = DynamicCast<PipelineContext>(container->GetPipelineContext());
-    auto mainRect = mainPipline ? mainPipline->GetDisplayWindowRectInfo() : Rect();
-    if (wrapperRect.IsValid() && mainRect.IsValid() && wrapperRect != mainRect) {
+    if (SubwindowManager::GetInstance()->IsFreeMultiWindow(containerId)) {
         hierarchicalParameters_ = true;
     }
 
+    CHECK_NULL_VOID(container);
     if (container->IsUIExtensionWindow()) {
         if (menuWrapperPattern->IsContextMenu()) {
             hierarchicalParameters_ = true;

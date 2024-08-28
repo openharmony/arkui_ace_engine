@@ -434,8 +434,8 @@ bool ParseCjString(
     int64_t id, ResourceType type, int64_t count, const std::string& plural, std::string& result);
 bool ParseCjDimension(int64_t id, Dimension& result);
 bool ParseColorById(int64_t id, Color& color);
-void ParseCJResponseRegion(CJResponseRegion value, std::vector<DimensionRect> result);
-void ParseVectorStringPtr(VectorStringPtr value, std::vector<DimensionRect> result);
+void ParseCJResponseRegion(CJResponseRegion value, std::vector<DimensionRect>& result);
+void ParseVectorStringPtr(VectorStringPtr value, std::vector<DimensionRect>& result);
 } // namespace OHOS::Ace
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_VIEW_ABSTRACT_FFI_H

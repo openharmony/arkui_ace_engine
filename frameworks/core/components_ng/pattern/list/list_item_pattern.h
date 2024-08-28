@@ -108,6 +108,7 @@ public:
     void MarkDirtyNode();
     void UpdatePostion(float delta);
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
 
     bool HasStartNode() const
     {
@@ -262,7 +263,7 @@ private:
     }
     bool IsRTLAndVertical() const;
     void OnDetachFromMainTree() override;
-
+    void BuildItemPositionInfo(std::unique_ptr<JsonValue>& json);
     RefPtr<ShallowBuilder> shallowBuilder_;
     V2::ListItemStyle listItemStyle_ = V2::ListItemStyle::NONE;
 

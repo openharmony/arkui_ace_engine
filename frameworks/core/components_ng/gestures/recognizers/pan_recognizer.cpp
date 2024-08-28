@@ -339,6 +339,13 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
     if (event.isRotationEvent) {
         return;
     }
+
+    if (event.sourceTool == SourceTool::MOUSE) {
+        delta_ = event.ConvertToOffset();
+        mainDelta_ = GetMainAxisDelta();
+        averageDistance_ += delta_;
+    }
+
     globalPoint_ = Point(event.x, event.y);
 
     touchPoints_[event.id] = TouchEvent();
@@ -754,6 +761,9 @@ bool PanRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
     }
 
     if (curr->fingers_ != fingers_ || curr->priorityMask_ != priorityMask_) {
+        if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) >= fingers_) {
+            SendCancelMsg();
+        }
         ResetStatus();
         return false;
     }

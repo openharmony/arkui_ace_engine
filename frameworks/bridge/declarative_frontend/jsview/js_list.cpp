@@ -972,7 +972,7 @@ void JSListScroller::GetVisibleListContentInfo(const JSCallbackInfo& args)
                 retObj->SetProperty<int32_t>("itemIndexInGroup", itemGroup.indexInGroup);
             }
 
-            JSRef<JSVal> ret = JSRef<JSObject>::Cast(retObj);
+            auto ret = JSRef<JSVal>::Cast(retObj);
             args.SetReturnValue(ret);
         }
     }

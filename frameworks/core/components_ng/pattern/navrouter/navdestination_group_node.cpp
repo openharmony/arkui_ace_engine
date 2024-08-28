@@ -23,6 +23,10 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
+constexpr double HALF = 0.5;
+constexpr float CONTENT_OFFSET_PERCENT = 0.2f;
+constexpr float TITLE_OFFSET_PERCENT = 0.02f;
+constexpr float REMOVE_CLIP_SIZE = 10000.0f;
 
 NavDestinationGroupNode::~NavDestinationGroupNode()
 {
@@ -143,5 +147,177 @@ void NavDestinationGroupNode::ToJsonValue(std::unique_ptr<JsonValue>& json, cons
     json->PutExtAttr("mode", mode_ == NavDestinationMode::DIALOG
         ? "NavDestinationMode::DIALOG"
         : "NavDestinationMode::STANDARD", filter);
+}
+
+void NavDestinationGroupNode::InitSystemTransitionPush(bool transitionIn)
+{
+    auto titleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
+    float isRTL = GetLanguageDirection();
+    if (transitionIn) {
+        SetIsOnAnimation(true);
+        SetTransitionType(PageTransitionType::ENTER_PUSH);
+        auto frameSize = GetGeometryNode()->GetFrameSize();
+        if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+            GetRenderContext()->ClipWithRRect(
+                RectF(0.0f, 0.0f, frameSize.Width() * HALF, REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
+        } else {
+            GetRenderContext()->ClipWithRRect(
+                RectF(frameSize.Width() * HALF, 0.0f, frameSize.Width(), REMOVE_CLIP_SIZE),
+                RadiusF(EdgeF(0.0f, 0.0f)));
+        }
+        GetRenderContext()->UpdateTranslateInXY({ frameSize.Width() * HALF * isRTL, 0.0f });
+        CHECK_NULL_VOID(titleBarNode);
+        titleBarNode->GetRenderContext()->UpdateTranslateInXY({ frameSize.Width() * HALF * isRTL, 0.0f });
+        return;
+    }
+    SetTransitionType(PageTransitionType::EXIT_PUSH);
+    SetIsOnAnimation(true);
+    GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+    GetEventHub<EventHub>()->SetEnabledInternal(false);
+    CHECK_NULL_VOID(titleBarNode);
+    titleBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+    if (NeedRemoveInPush()) {
+        GetEventHub<EventHub>()->SetEnabledInternal(false);
+    }
+}
+
+void NavDestinationGroupNode::StartSystemTransitionPush(bool transitionIn)
+{
+    auto titleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
+    auto frameSize = GetGeometryNode()->GetFrameSize();
+    float isRTL = GetLanguageDirection();
+    if (transitionIn) {
+        GetRenderContext()->ClipWithRRect(
+            RectF(0.0f, 0.0f, frameSize.Width(), REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
+        GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+        CHECK_NULL_VOID(titleBarNode);
+        titleBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+        return;
+    }
+    GetRenderContext()->UpdateTranslateInXY(
+        { -frameSize.Width() * CONTENT_OFFSET_PERCENT * isRTL, 0.0f });
+    CHECK_NULL_VOID(titleBarNode);
+    titleBarNode->GetRenderContext()->UpdateTranslateInXY(
+        { frameSize.Width() * TITLE_OFFSET_PERCENT  * isRTL, 0.0f });
+}
+
+void NavDestinationGroupNode::SystemTransitionPushCallback(bool transitionIn)
+{
+    if (transitionIn) {
+        if (GetTransitionType() != PageTransitionType::ENTER_PUSH) {
+            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "curNode has another transition");
+            return;
+        }
+        SetIsOnAnimation(false);
+        GetRenderContext()->RemoveClipWithRRect();
+        return;
+    }
+    GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+    GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT);
+    SetIsOnAnimation(false);
+    if (GetTransitionType() == PageTransitionType::EXIT_PUSH) {
+        GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+    }
+    auto titleNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
+    CHECK_NULL_VOID(titleNode);
+    titleNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+}
+
+void NavDestinationGroupNode::InitSystemTransitionPop(bool isTransitionIn)
+{
+    auto frameSize = GetGeometryNode()->GetFrameSize();
+    auto titleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
+    float isRTL = GetLanguageDirection();
+    if (isTransitionIn) {
+        SetTransitionType(PageTransitionType::ENTER_POP);
+        GetRenderContext()->RemoveClipWithRRect();
+        GetRenderContext()->UpdateTranslateInXY({ -frameSize.Width() * CONTENT_OFFSET_PERCENT * isRTL, 0.0f });
+        CHECK_NULL_VOID(titleBarNode);
+        titleBarNode->GetRenderContext()->UpdateTranslateInXY(
+            { frameSize.Width() * TITLE_OFFSET_PERCENT * isRTL, 0.0f });
+        return;
+    }
+    SetIsOnAnimation(true);
+    SetTransitionType(PageTransitionType::EXIT_POP);
+    GetEventHub<EventHub>()->SetEnabledInternal(false);
+    GetRenderContext()->ClipWithRRect(RectF(0.0f, 0.0f, frameSize.Width(), REMOVE_CLIP_SIZE),
+        RadiusF(EdgeF(0.0f, 0.0f)));
+    GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+    CHECK_NULL_VOID(titleBarNode);
+    titleBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+}
+
+void NavDestinationGroupNode::StartSystemTransitionPop(bool transitionIn)
+{
+    auto titleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
+    if (transitionIn) {
+        GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+        CHECK_NULL_VOID(titleBarNode);
+        titleBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+        return;
+    }
+    auto frameSize = GetGeometryNode()->GetFrameSize();
+    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+        GetRenderContext()->ClipWithRRect(
+            RectF(0.0f, 0.0f, frameSize.Width() * HALF, REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
+    } else {
+        GetRenderContext()->ClipWithRRect(
+            RectF(frameSize.Width() * HALF, 0.0f, frameSize.Width(), REMOVE_CLIP_SIZE),
+            RadiusF(EdgeF(0.0f, 0.0f)));
+    }
+    float isRTL = GetLanguageDirection();
+    GetRenderContext()->UpdateTranslateInXY({ frameSize.Width() * HALF * isRTL, 0.0f });
+    CHECK_NULL_VOID(titleBarNode);
+    titleBarNode->GetRenderContext()->UpdateTranslateInXY({ frameSize.Width() * HALF * isRTL, 0.0f });
+}
+
+bool NavDestinationGroupNode::SystemTransitionPopCallback(bool transitionIn)
+{
+    if (GetTransitionType() != PageTransitionType::EXIT_POP || transitionIn) {
+        // has another transition, just return
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "preNavDesNode has another transition");
+        return false;
+    }
+    auto preNavDesPattern = GetPattern<NavDestinationPattern>();
+    CHECK_NULL_RETURN(preNavDesPattern, false);
+
+    // NavRouter will restore the preNavDesNode and needs to set the initial state after the animation ends.
+    auto shallowBuilder = preNavDesPattern->GetShallowBuilder();
+    if (shallowBuilder) {
+        shallowBuilder->MarkIsExecuteDeepRenderDone(false);
+    }
+    if (!IsCacheNode() && GetContentNode()) {
+        GetContentNode()->Clean();
+    }
+    SetIsOnAnimation(false);
+    GetEventHub<EventHub>()->SetEnabledInternal(true);
+    GetRenderContext()->RemoveClipWithRRect();
+    GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+    auto preTitleNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
+    if (preTitleNode) {
+        preTitleNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+        preTitleNode->GetRenderContext()->SetOpacity(1.0);
+        auto titleBarNode = AceType::DynamicCast<TitleBarNode>(preTitleNode);
+        CHECK_NULL_RETURN(titleBarNode, true);
+        auto preBackIcon = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+        if (preBackIcon)  {
+            preBackIcon->GetRenderContext()->SetOpacity(1.0);
+        }
+    }
+    return true;
+}
+
+void NavDestinationGroupNode::InitDialogTransition(bool isZeroY)
+{
+    auto contentNode = AceType::DynamicCast<FrameNode>(GetContentNode());
+    CHECK_NULL_VOID(contentNode);
+    auto context = contentNode->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    if (isZeroY) {
+        context->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
+        return;
+    }
+    context->UpdateTransformTranslate({ 0.0f,
+        contentNode->GetGeometryNode()->GetFrameSize().Height(), 0.0f });
 }
 } // namespace OHOS::Ace::NG

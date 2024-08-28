@@ -809,6 +809,7 @@ private:
     bool CheckZoomStatus(const double& curScale);
     bool ZoomOutAndIn(const double& curScale, double& scale);
     void HandleScaleGestureChange(const GestureEvent& event);
+    double getZoomOffset(double& scale) const;
 
     NG::DragDropInfo HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent>& info);
     void HandleOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info);
@@ -1029,6 +1030,7 @@ private:
     int32_t tooltipId_ = -1;
     int32_t mouseHoveredX_ = -1;
     int32_t mouseHoveredY_ = -1;
+    int32_t mouseEventDeviceId_ = -1;
     int64_t tooltipTimestamp_ = -1;
     int32_t parentNWebId_ = -1;
     bool isInWindowDrag_ = false;
@@ -1073,7 +1075,7 @@ private:
     double startPinchScale_ = -1.0;
     double preScale_ = -1.0;
     double pageScale_ = 1.0;
-    int32_t pinchIndex_ = 0;
+    double startPageScale_ = 1.0;
     bool zoomOutSwitch_ = false;
     bool isTouchUpEvent_ = false;
     int32_t zoomStatus_ = 0;
