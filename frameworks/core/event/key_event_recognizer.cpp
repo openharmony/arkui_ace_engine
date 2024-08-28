@@ -494,7 +494,7 @@ KeyIntention keyItemsTransKeyIntention(const std::vector<KeyCode> &items)
         {(int64_t)KeyCode::KEY_MOVE_HOME, KeyIntention::INTENTION_HOME},
     };
 
-    auto iter = MAP_KEY_INTENTION.find(static_cast<uint64_t>(keyCodes));
+    auto iter = MAP_KEY_INTENTION.find(static_cast<int64_t>(keyCodes));
     if (iter == MAP_KEY_INTENTION.end()) {
         return KeyIntention::INTENTION_UNKNOWN;
     }
