@@ -604,6 +604,11 @@ public:
         return usePropertyAnimation_;
     }
 
+    bool IsTranslateAnimationRunning() const
+    {
+        return translateAnimationIsRunning_;
+    }
+
     bool IsTouchDown() const
     {
         return isTouchDown_;
