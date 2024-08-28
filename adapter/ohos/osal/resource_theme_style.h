@@ -18,6 +18,8 @@
 
 #include <map>
 #include <future>
+#include <mutex>
+#include <shared_mutex>
 
 #include "core/components/theme/theme_style.h"
 #include "core/components/theme/resource_adapter.h"
@@ -25,7 +27,8 @@
 namespace OHOS::Ace {
 class ResourceThemeStyle : public ThemeStyle {
     DECLARE_ACE_TYPE(ResourceThemeStyle, ThemeStyle);
-
+private:
+    mutable std::shared_mutex checkThemeStyleVectorMutex_;
 public:
     friend class ResourceAdapterImpl;
     friend class ResourceAdapterImplV2;
@@ -40,6 +43,18 @@ public:
     void SetPromiseValue()
     {
         promise_.set_value();
+    }
+    void pushBackCheckThemeStyleVector(const std::string& patternName) {
+        std::unique_lock<std::shared_mutex> lock(checkThemeStyleVectorMutex_);
+        checkThemeStyleVector.push_back(patternName);
+    }
+    bool checkThemeStyle(const std::string& patternName) {
+        std::shared_lock<std::shared_mutex> lock(checkThemeStyleVectorMutex_);
+        auto it = std::find(checkThemeStyleVector.begin(), checkThemeStyleVector.end(), patternName.c_str());
+        if (it == checkThemeStyleVector.end()) {
+            return false;
+        }
+        return true;
     }
 protected:
     void OnParseStyle();
