@@ -604,6 +604,20 @@ class UIContext {
         return windowName
     }
 
+    getWindowWidthBreakpoint() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        const breakpoint = getUINativeModule().common.getWindowWidthBreakpoint();
+        __JSScopeUtil__.restoreInstanceId();
+        return breakpoint
+    }
+
+    getWindowHeightBreakpoint() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        const breakpoint = getUINativeModule().common.getWindowHeightBreakpoint();
+        __JSScopeUtil__.restoreInstanceId();
+        return breakpoint;
+    }
+
     clearResourceCache() {
         getUINativeModule().resource.clearCache();
     }
