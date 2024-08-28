@@ -58,6 +58,9 @@ void NestableScrollContainer::UpdateNestedModeForChildren(const NestedScrollOpti
 
 void NestableScrollContainer::SetNestedScroll(const NestedScrollOptions& nestedScroll, bool isFixedNestedScrollMode)
 {
+    if (isFixedNestedScrollMode_ && !nestedScroll.NeedParent()) {
+        return;
+    }
     if (!isFixedNestedScrollMode && AceType::InstanceOf<ScrollablePattern>(this)) {
         if (nestedScroll.NeedParent()) {
             isSearchRefresh_ = false;
