@@ -23,8 +23,8 @@
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_segmented_layout.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
-#include "core/components_ng/pattern/waterflow/water_flow_paint_method.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
+#include "core/components_ng/pattern/waterflow/water_flow_paint_method.h"
 
 namespace OHOS::Ace::NG {
 SizeF WaterFlowPattern::GetContentSize() const
@@ -133,6 +133,21 @@ void WaterFlowPattern::UpdateScrollBarOffset()
         Size(viewSize.Width(), viewSize.Height()), Offset(0.0f, 0.0f));
 };
 
+void WaterFlowPattern::BeforeCreateLayoutWrapper()
+{
+    for (const auto& start : sectionChangeStartPos_) {
+        OnSectionChanged(start);
+    }
+    sectionChangeStartPos_.clear();
+
+    auto footer = footer_.Upgrade();
+    if (footer && footer->FrameCount() > 0) {
+        layoutInfo_->footerIndex_ = 0;
+    } else {
+        layoutInfo_->footerIndex_ = -1;
+    }
+}
+
 RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
 {
     if (targetIndex_.has_value()) {
@@ -144,15 +159,6 @@ RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
     } else if (sections_ || SystemProperties::WaterFlowUseSegmentedLayout()) {
         algorithm = MakeRefPtr<WaterFlowSegmentedLayout>(DynamicCast<WaterFlowLayoutInfo>(layoutInfo_));
     } else {
-        int32_t footerIndex = -1;
-        auto footer = footer_.Upgrade();
-        if (footer) {
-            int32_t count = footer->FrameCount();
-            if (count > 0) {
-                footerIndex = 0;
-            }
-        }
-        layoutInfo_->footerIndex_ = footerIndex;
         algorithm = MakeRefPtr<WaterFlowLayoutAlgorithm>(DynamicCast<WaterFlowLayoutInfo>(layoutInfo_));
     }
     algorithm->SetCanOverScroll(CanOverScroll(GetScrollSource()));
@@ -346,7 +352,7 @@ bool WaterFlowPattern::UpdateStartIndex(int32_t index)
     CHECK_NULL_RETURN(host, false);
     auto childCount = host->GetTotalChildCount();
     layoutInfo_->jumpIndex_ = (index == LAST_ITEM ? childCount - 1 : index);
-    //if target index is footer, fix align because it will jump after fillViewport.
+    // if target index is footer, fix align because it will jump after fillViewport.
     if (layoutInfo_->footerIndex_ == 0 && layoutInfo_->jumpIndex_ == childCount - 1) {
         SetScrollAlign(ScrollAlign::END);
     }
@@ -437,7 +443,7 @@ int32_t WaterFlowPattern::GetItemIndex(double x, double y) const
 {
     for (int32_t index = layoutInfo_->FirstIdx(); index <= layoutInfo_->endIndex_; ++index) {
         Rect rect = GetItemRect(index);
-        if (rect.IsInRegion({x, y})) {
+        if (rect.IsInRegion({ x, y })) {
             return index;
         }
     }
@@ -640,10 +646,6 @@ void WaterFlowPattern::SetLayoutMode(LayoutMode mode)
         layoutInfo_ = WaterFlowLayoutInfoBase::Create(mode);
         MarkDirtyNodeSelf();
     }
-    // footer index only set during first AddFooter call
-    if (footer_.Upgrade()) {
-        layoutInfo_->footerIndex_ = 0;
-    }
 }
 
 int32_t WaterFlowPattern::GetChildrenCount() const
@@ -795,13 +797,5 @@ void WaterFlowPattern::DumpAdvanceInfo()
         }
         DumpLog::GetInstance().AddDesc("-----------end print sections_------------");
     }
-}
-
-void WaterFlowPattern::BeforeCreateLayoutWrapper()
-{
-    for (const auto& start : sectionChangeStartPos_) {
-        OnSectionChanged(start);
-    }
-    sectionChangeStartPos_.clear();
 }
 } // namespace OHOS::Ace::NG
