@@ -472,28 +472,28 @@ public:
     void SetPaintRect(const RoundRect& rect)
     {
         if (!focusPaintParamsPtr_) {
-            focusPaintParamsPtr_ = std::unique_ptr<FocusPaintParam>();
+            focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
         }
         focusPaintParamsPtr_->SetPaintRect(rect);
     }
     void SetPaintColor(const Color& color)
     {
         if (!focusPaintParamsPtr_) {
-            focusPaintParamsPtr_ = std::unique_ptr<FocusPaintParam>();
+            focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
         }
         focusPaintParamsPtr_->SetPaintColor(color);
     }
     void SetPaintWidth(const Dimension& width)
     {
         if (!focusPaintParamsPtr_) {
-            focusPaintParamsPtr_ = std::unique_ptr<FocusPaintParam>();
+            focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
         }
         focusPaintParamsPtr_->SetPaintWidth(width);
     }
     void SetFocusPadding(const Dimension& padding)
     {
         if (!focusPaintParamsPtr_) {
-            focusPaintParamsPtr_ = std::unique_ptr<FocusPaintParam>();
+            focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
         }
         focusPaintParamsPtr_->SetFocusPadding(padding);
     }
