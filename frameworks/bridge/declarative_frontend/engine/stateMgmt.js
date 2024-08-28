@@ -10280,7 +10280,7 @@ class __Repeat {
         return this;
     }
     virtualScroll(options) {
-        if (options && options.totalCount && Number.isInteger(options.totalCount)) {
+        if (Number.isInteger(options === null || options === void 0 ? void 0 : options.totalCount)) {
             this.config.totalCount = options.totalCount;
             this.config.totalCountSpecified = true;
         }
