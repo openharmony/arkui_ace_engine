@@ -3032,7 +3032,7 @@ std::pair<OffsetF, float> RichEditorPattern::CalculateEmptyValueCaretRect()
         default:
             break;
     }
-    auto offsetY = contentRect_.GetY();
+    auto offsetY = richTextRect_.GetY();
     float caretHeight = 0.0f;
     if (!presetParagraph_) {
         PreferredParagraph();
@@ -8071,6 +8071,7 @@ void RichEditorPattern::HandleOnCameraInput()
         inputMethod->StartInputType(MiscServices::InputType::CAMERA_INPUT);
         inputMethod->ShowTextInput();
     }
+    CloseSelectOverlay();
 #endif
 #endif
 }
