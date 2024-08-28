@@ -128,7 +128,14 @@ void ArcIndexerLayoutAlgorithm::MeasureArc(LayoutWrapper* layoutWrapper)
     arcCenter_.SetY(positionY);
 
     itemRadius_ = itemSize_ * HALF ;
-    arcRadius_ = positionX < positionY ? positionX - itemRadius_: positionY - itemRadius_;
+    BorderWidthProperty currentBorderWidth;
+    if (layoutProperty->GetBorderWidthProperty() != nullptr) {
+        currentBorderWidth = *(layoutProperty->GetBorderWidthProperty());
+    } else {
+        currentBorderWidth.SetBorderWidth(Dimension(0.0));
+    }
+    auto borderWidth = currentBorderWidth.rightDimen.value_or(Dimension(0.0f)).ConvertToPx();
+    arcRadius_ = positionX < positionY ? positionX - itemRadius_ - borderWidth: positionY - itemRadius_ - borderWidth;
     stepAngle_ = DOUBLE * atan2f(itemRadius_, arcRadius_) * HALF_CIRCLE_ANGLE / M_PI;
     auto autoCollapse = layoutProperty->GetAutoCollapse().value_or(false);
     if (autoCollapse && fullCount_ > ARC_INDEXER_COLLAPSE_ITEM_COUNT) {
