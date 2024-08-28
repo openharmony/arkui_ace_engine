@@ -118,6 +118,46 @@ void ToastView::UpdateTextLayoutProperty(
         textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
         textLayoutProperty->UpdateEllipsisMode(EllipsisMode::TAIL);
     }
+    UpdateTextLayoutBorderShadowProperty(textNode);
+}
+
+void ToastView::UpdateTextLayoutBorderShadowProperty(
+    const RefPtr<FrameNode>& textNode)
+{
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto context = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_VOID(context);
+    auto toastTheme = context->GetTheme<ToastTheme>();
+    CHECK_NULL_VOID(toastTheme);
+
+    Color color = toastTheme->GetBorderColor();
+    Dimension width = toastTheme->GetBorderWidth();
+    BorderColorProperty borderColor;
+    BorderWidthProperty borderWidth;
+
+    borderColor.SetColor(color);
+    borderWidth.SetBorderWidth(width);
+
+    auto renderContext = textNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (!textLayoutProperty->GetBorderWidthProperty()) {
+        if (!renderContext->HasBorderWidth()) {
+            textLayoutProperty->UpdateBorderWidth(borderWidth);
+            renderContext->UpdateBorderWidth(borderWidth);
+        }
+        if (!renderContext->HasBorderColor()) {
+            renderContext->UpdateBorderColor(borderColor);
+        }
+    }
+
+    auto&& graphics = renderContext->GetOrCreateGraphics();
+    CHECK_NULL_VOID(graphics);
+    if (!graphics->HasBackShadow()) {
+        ShadowStyle shadowStyle = static_cast<ShadowStyle>(toastTheme->GetShadowNormal());
+        Shadow shadow = Shadow::CreateShadow(shadowStyle);
+        renderContext->UpdateBackShadow(shadow);
+    }
 }
 
 void ToastView::UpdateToastContext(const RefPtr<FrameNode>& toastNode)
@@ -154,10 +194,12 @@ void ToastView::UpdateToastContext(const RefPtr<FrameNode>& toastNode)
     auto toastInfo = pattern->GetToastInfo();
     toastContext->UpdateBackShadow(toastInfo.shadow.value_or(Shadow::CreateShadow(ShadowStyle::OuterDefaultMD)));
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        toastContext->UpdateBackgroundColor(toastInfo.backgroundColor.value_or(Color::TRANSPARENT));
+        auto defaultBGcolor = toastTheme->GetDefaultBGColor();
+        toastContext->UpdateBackgroundColor(defaultBGcolor);
         BlurStyleOption styleOption;
         styleOption.blurStyle = static_cast<BlurStyle>(
             toastInfo.backgroundBlurStyle.value_or(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)));
+        styleOption.colorMode = static_cast<ThemeColorMode>(toastTheme->GetBgThemeColorMode());
         styleOption.policy = BlurStyleActivePolicy::ALWAYS_ACTIVE;
         toastContext->UpdateBackBlurStyle(styleOption);
     } else {
