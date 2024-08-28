@@ -140,6 +140,9 @@ void WaterFlowPattern::BeforeCreateLayoutWrapper()
     }
     sectionChangeStartPos_.clear();
 
+    if (sections_ || SystemProperties::WaterFlowUseSegmentedLayout()) {
+        return;
+    }
     auto footer = footer_.Upgrade();
     if (footer && footer->FrameCount() > 0) {
         layoutInfo_->footerIndex_ = 0;

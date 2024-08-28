@@ -16,6 +16,7 @@
 #include "water_flow_test_ng.h"
 
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/syntax/if_else_node.h"
 
 namespace OHOS::Ace::NG {
 // TEST non-segmented layout
@@ -115,6 +116,39 @@ HWTEST_F(WaterFlowTestNg, Constraint001, TestSize.Level1)
     EXPECT_EQ(GetChildWidth(frameNode_, 4), 300.0f);
     EXPECT_EQ(info->storedOffset_, -20.0f);
     EXPECT_EQ(info->startIndex_, 3);
+}
+
+/**
+ * @tc.name: ChangeFooter001
+ * @tc.desc: Test changing the footer of the WaterFlow layout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ChangeFooter001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetFooter(GetDefaultHeaderBuilder());
+    CreateWaterFlowItems(60);
+    CreateDone();
+
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushLayoutTask(frameNode_);
+    auto& info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->footerIndex_, 0);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 61);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 750.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 60), 550.0f);
+    EXPECT_EQ(info->endIndex_, 59);
+
+    auto ifNode = IfElseNode::GetOrCreateIfElseNode(-1);
+
+    pattern_->AddFooter(ifNode);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info->footerIndex_, -1);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 60);
+    EXPECT_EQ(GetChildY(frameNode_, 59), 600.0f);
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 0)->IsActive());
 }
 
 /**
