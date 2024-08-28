@@ -1284,7 +1284,6 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorController012, TestSize.Level1)
     updateSpanStyle.updateSymbolColor = SYMBOL_COLOR_LIST_2;
     updateSpanStyle.updateSymbolRenderingStrategy = RENDER_STRATEGY_MULTI_COLOR;
     updateSpanStyle.updateSymbolEffectStrategy = EFFECT_STRATEGY_SCALE;
-    updateSpanStyle.isSymbolStyle = true;
     richEditorController->SetUpdateSpanStyle(updateSpanStyle);
 
     ImageSpanAttribute imageStyle;

@@ -1635,9 +1635,7 @@ void RichEditorPattern::UpdateFontFeatureTextStyle(
 void RichEditorPattern::UpdateTextStyle(
     RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle)
 {
-    if (spanNode->GetTag() != V2::SPAN_ETS_TAG || updateSpanStyle_.isSymbolStyle) {
-        return;
-    }
+    CHECK_NULL_VOID(spanNode->GetTag() == V2::SPAN_ETS_TAG);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     UpdateFontFeatureTextStyle(spanNode, updateSpanStyle, textStyle);
@@ -1700,38 +1698,28 @@ void RichEditorPattern::UpdateDecoration(
 void RichEditorPattern::UpdateSymbolStyle(
     RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle)
 {
-    if (spanNode->GetTag() != V2::SYMBOL_SPAN_ETS_TAG || !updateSpanStyle_.isSymbolStyle) {
-        return;
-    }
+    CHECK_NULL_VOID(spanNode->GetTag() == V2::SYMBOL_SPAN_ETS_TAG);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     UpdateFontFeatureTextStyle(spanNode, updateSpanStyle, textStyle);
-    if (updateSpanStyle.updateFontSize.has_value()) {
-        spanNode->UpdateFontSize(textStyle.GetFontSize());
+    if (updateSpanStyle.updateSymbolFontSize.has_value()) {
+        spanNode->UpdateFontSize(updateSpanStyle.updateSymbolFontSize.value());
         spanNode->AddPropertyInfo(PropertyInfo::FONTSIZE);
     }
-    if (updateSpanStyle.updateLineHeight.has_value()) {
-        spanNode->UpdateLineHeight(textStyle.GetLineHeight());
-        spanNode->AddPropertyInfo(PropertyInfo::LINEHEIGHT);
-    }
-    if (updateSpanStyle.updateLetterSpacing.has_value()) {
-        spanNode->UpdateLetterSpacing(textStyle.GetLetterSpacing());
-        spanNode->AddPropertyInfo(PropertyInfo::LETTERSPACE);
-    }
-    if (updateSpanStyle.updateFontWeight.has_value()) {
-        spanNode->UpdateFontWeight(textStyle.GetFontWeight());
+    if (updateSpanStyle.updateSymbolFontWeight.has_value()) {
+        spanNode->UpdateFontWeight(updateSpanStyle.updateSymbolFontWeight.value());
         spanNode->AddPropertyInfo(PropertyInfo::FONTWEIGHT);
     }
     if (updateSpanStyle.updateSymbolColor.has_value()) {
-        spanNode->UpdateSymbolColorList(textStyle.GetSymbolColorList());
+        spanNode->UpdateSymbolColorList(updateSpanStyle.updateSymbolColor.value());
         spanNode->AddPropertyInfo(PropertyInfo::SYMBOL_COLOR);
     }
     if (updateSpanStyle.updateSymbolRenderingStrategy.has_value()) {
-        spanNode->UpdateSymbolRenderingStrategy(textStyle.GetRenderStrategy());
+        spanNode->UpdateSymbolRenderingStrategy(updateSpanStyle.updateSymbolRenderingStrategy.value());
         spanNode->AddPropertyInfo(PropertyInfo::SYMBOL_RENDERING_STRATEGY);
     }
     if (updateSpanStyle.updateSymbolEffectStrategy.has_value()) {
-        spanNode->UpdateSymbolEffectStrategy(textStyle.GetEffectStrategy());
+        spanNode->UpdateSymbolEffectStrategy(updateSpanStyle.updateSymbolEffectStrategy.value());
         spanNode->AddPropertyInfo(PropertyInfo::SYMBOL_EFFECT_STRATEGY);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
