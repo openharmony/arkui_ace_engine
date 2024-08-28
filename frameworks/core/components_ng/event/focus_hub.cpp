@@ -1342,7 +1342,7 @@ bool FocusHub::PaintFocusState(bool isNeedStateStyles)
         return true;
     }
 
-    if (focusStyleType_ == FocusStyleType::NONE && !box_.HasCustomStyle()) {
+    if (focusStyleType_ == FocusStyleType::NONE) {
         return false;
     }
 
@@ -1503,7 +1503,7 @@ void FocusHub::ClearFocusState(bool isNeedStateStyles)
     if (onClearFocusStateCallback_) {
         onClearFocusStateCallback_();
     }
-    if (focusStyleType_ != FocusStyleType::NONE || box_.HasCustomStyle()) {
+    if (focusStyleType_ != FocusStyleType::NONE) {
         auto frameNode = GetFrameNode();
         CHECK_NULL_VOID(frameNode);
         auto renderContext = frameNode->GetRenderContext();
@@ -1533,18 +1533,23 @@ bool FocusHub::IsNeedPaintFocusState()
 {
     if (currentFocus_ && IsFocusableNode() &&
         (focusDepend_ == FocusDependence::SELF || focusType_ == FocusType::NODE)) {
-        return focusStyleType_ != FocusStyleType::NONE || HasFocusStateStyle() || box_.HasCustomStyle();
+        return IsNeedPaintFocusStateSelf();
     }
     auto lastFocusNode = GetLastWeakFocusNode().Upgrade();
     while (lastFocusNode) {
         if (!lastFocusNode->IsCurrentFocus() || !lastFocusNode->IsFocusableNode()) {
             break;
         }
-        if (lastFocusNode->GetFocusStyleType() != FocusStyleType::NONE || lastFocusNode->HasFocusStateStyle()) {
+        if (lastFocusNode->IsNeedPaintFocusStateSelf()) {
             return false;
         }
         lastFocusNode = lastFocusNode->GetLastWeakFocusNode().Upgrade();
     }
+    return IsNeedPaintFocusStateSelf();
+}
+
+bool FocusHub::IsNeedPaintFocusStateSelf()
+{
     return focusStyleType_ != FocusStyleType::NONE || HasFocusStateStyle() || box_.HasCustomStyle();
 }
 
