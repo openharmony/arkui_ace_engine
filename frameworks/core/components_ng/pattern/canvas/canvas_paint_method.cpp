@@ -43,8 +43,10 @@ CanvasPaintMethod::CanvasPaintMethod(RefPtr<CanvasModifier> contentModifier, con
     context_ = frameNode ? frameNode->GetContextRefPtr() : nullptr;
     imageShadow_ = std::make_unique<Shadow>();
     contentModifier_ = contentModifier;
-    // The initial value of the font size in canvas is 14px.
+    // The default value of the font size in canvas is 14px.
     SetFontSize(DEFAULT_FONT_SIZE);
+    // The default value of TextAlign is TextAlign::START.
+    SetDefaultTextAlign();
 }
 
 #ifndef USE_FAST_TASKPOOL

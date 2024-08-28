@@ -176,6 +176,13 @@ enum class PaintStyle {
 
 class PaintState {
 public:
+    PaintState() = default;
+    PaintState(TextAlign textAlign, TextDirection textDirection, const Dimension& size)
+        : textAlign_(textAlign), textDirection_(textDirection)
+    {
+        textStyle_.SetFontSize(size);
+    }
+
     const Color& GetColor() const
     {
         return color_;
