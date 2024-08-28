@@ -1318,15 +1318,15 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                 ? lastPosition_.value()
                 : MenuLayoutAvoidAlgorithm(menuProp, menuPattern, size, didNeedArrow);
         menuPattern->UpdateLastPosition(menuPosition);
+        if (menuPattern->IsSelectOverlayRightClickMenu()) {
+            AdjustSelectOverlayMenuPosition(menuPosition, geometryNode);
+        }
         auto renderContext = menuNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdatePosition(
             OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
         dumpInfo_.finalPlacement = PlacementUtils::ConvertPlacementToString(placement_);
         dumpInfo_.finalPosition = menuPosition;
-        if (menuPattern->IsSelectOverlayRightClickMenu()) {
-            AdjustSelectOverlayMenuPosition(menuPosition, geometryNode);
-        }
         SetMenuPlacementForAnimation(layoutWrapper);
         if (didNeedArrow && arrowPlacement_ != Placement::NONE) {
             arrowPosition_ = GetArrowPositionWithPlacement(size, layoutWrapper);
