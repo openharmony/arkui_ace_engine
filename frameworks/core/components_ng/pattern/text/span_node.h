@@ -335,6 +335,11 @@ public:
 
     bool UpdateSpanTextColor(Color color);
 
+    void SetDefaultMouseStyle(MouseFormat mouseStyle)
+    {
+        defaultMouseStyle_ = mouseStyle;
+    }
+
     void SetSymbolId(uint32_t symbolId)
     {
         symbolId_ = symbolId;
@@ -352,6 +357,7 @@ private:
     WeakPtr<Pattern> pattern_;
     Dimension radius_ = 2.0_vp;
     std::string address_;
+    MouseFormat defaultMouseStyle_ = MouseFormat::DEFAULT;
     uint32_t symbolId_ = 0;
 };
 

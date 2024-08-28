@@ -846,8 +846,8 @@ void SpanItem::HandeUrlHoverEvent(bool isHover, int32_t urlId,
         TextBackgroundStyle backgroundStyle;
         backgroundStyle.backgroundColor = Color::TRANSPARENT;
         spanItem->backgroundStyle = backgroundStyle;
-        pipelineContext->ChangeMouseStyle(urlId, MouseFormat::DEFAULT);
-        pipelineContext->FreeMouseStyleHoldNode(urlId);
+        pipelineContext->SetMouseStyleHoldNode(urlId);
+        pipelineContext->ChangeMouseStyle(urlId, defaultMouseStyle_);
     }
 }
 
