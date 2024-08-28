@@ -2326,7 +2326,7 @@ void TextPattern::CreateHandles()
         TAG_LOGI(AceLogTag::ACE_TEXT, "do not show handles when dragging");
         return;
     }
-    ShowSelectOverlay();
+    ShowSelectOverlay({ .menuIsShow = false });
 }
 
 bool TextPattern::BetweenSelectedPosition(const Offset& globalOffset)
