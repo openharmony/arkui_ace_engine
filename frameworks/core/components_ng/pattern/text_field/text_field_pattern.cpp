@@ -1213,7 +1213,7 @@ void TextFieldPattern::HandleBlurEvent()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "TextField %{public}d OnBlur", host->GetId());
-    auto context = PipelineContext::GetCurrentContextSafely();
+    auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     UpdateBlurReason();
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
@@ -3287,10 +3287,10 @@ void TextFieldPattern::RestoreDefaultMouseState()
 #ifdef WINDOW_SCENE_SUPPORTED
     windowId = static_cast<int32_t>(GetSCBSystemWindowId());
 #endif
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_VOID(pipeline);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
     auto id = host->GetId();
     pipeline->SetMouseStyleHoldNode(id);
     pipeline->ChangeMouseStyle(id, MouseFormat::DEFAULT, windowId);
