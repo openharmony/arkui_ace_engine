@@ -806,5 +806,13 @@ HWTEST_F(WaterFlowScrollerTestNg, ScrollPage001, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(GetChildY(frameNode_, 25), 400.0f);
+
+    ScrollableController controller;
+    controller.SetScrollPattern(pattern_);
+    controller.ScrollPage(true, true);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info->startIndex_, 17);
+    EXPECT_EQ(info->endIndex_, 21);
 }
 } // namespace OHOS::Ace::NG
