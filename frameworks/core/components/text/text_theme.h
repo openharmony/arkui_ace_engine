@@ -22,6 +22,9 @@
 #include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace {
+namespace {
+constexpr double OVERFLOW_STYLE_DEFAULT = 4.0;
+} // namespace
 
 /**
  * TextTheme defines color and styles of ThemeComponent. TextTheme should be built
@@ -68,6 +71,10 @@ public:
             theme->draggable_ = StringUtils::StringToInt(draggable);
             constexpr double childMinSize = 20.0;
             theme->linearSplitChildMinSize_ = pattern->GetAttr<double>(LINEAR_SPLIT_CHILD_MIN_SIZE, childMinSize);
+            theme->textOverflow_ = static_cast<TextOverflow>(static_cast<int32_t>(
+                pattern->GetAttr<double>("text_overflow_style", OVERFLOW_STYLE_DEFAULT)));
+            theme->marqueeStartPolicy_ = static_cast<MarqueeStartPolicy>(static_cast<int32_t>(
+                pattern->GetAttr<double>("text_marquee_start_policy", 0.0)));
             theme->isTextFadeout_ = pattern->GetAttr<std::string>("text_fadeout_enable", "") == "true";
             theme->fadeoutWidth_ = pattern->GetAttr<Dimension>("text_fadeout_width", 16.0_vp);
             RefPtr<ThemeStyle> textfieldPattern = themeConstants->GetPatternByName("textfield_pattern");
@@ -102,6 +109,16 @@ public:
         return linearSplitChildMinSize_;
     }
 
+    TextOverflow GetTextOverflow() const
+    {
+        return textOverflow_;
+    }
+
+    MarqueeStartPolicy GetMarqueeStartPolicy() const
+    {
+        return marqueeStartPolicy_;
+    }
+
     bool GetIsTextFadeout() const
     {
         return isTextFadeout_;
@@ -125,6 +142,8 @@ private:
     Color selectedColor_;
     bool draggable_ = false;
     double linearSplitChildMinSize_ = 20.0;
+    TextOverflow textOverflow_ = TextOverflow::DEFAULT;
+    MarqueeStartPolicy marqueeStartPolicy_ = MarqueeStartPolicy::DEFAULT;
     bool isTextFadeout_ = false;
     Dimension fadeoutWidth_;
     bool isShowHandle_ = false;
