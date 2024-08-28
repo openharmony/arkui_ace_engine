@@ -349,4 +349,13 @@ void MarqueeModelNG::ResetDirection(FrameNode* frameNode)
 {
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(MarqueePaintProperty, Direction, PROPERTY_UPDATE_RENDER, frameNode);
 }
+void MarqueeModelNG::SetMarqueeFrameRateRange(
+    FrameNode* frameNode, const RefPtr<FrameRateRange>& rateRange, MarqueeDynamicSyncSceneType type)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<MarqueePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMarqueeFrameRateRange(rateRange, type);
+}
+
 } // namespace OHOS::Ace::NG

@@ -58,6 +58,8 @@ public:
     static void ResetLoop(FrameNode* frameNode);
     static void SetDirection(FrameNode* frameNode, const std::optional<MarqueeDirection>& direction);
     static void ResetDirection(FrameNode* frameNode);
+    static void SetMarqueeFrameRateRange(
+        FrameNode* frameNode, const RefPtr<FrameRateRange>& rateRange, MarqueeDynamicSyncSceneType type);
 };
 } // namespace OHOS::Ace::NG
 
