@@ -19,8 +19,6 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/declaration/swiper/swiper_declaration.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
-// #include "arkoala_api_generated.h"
-//#include "base/log/log_wrapper.h"
 
 namespace {
 
@@ -162,7 +160,46 @@ SwiperDigitalParameters ParseDigitIndicator(const Ark_DigitIndicator& src,
     const RefPtr<SwiperIndicatorTheme> &theme)
 {
     SwiperDigitalParameters p;
-    // TODO
+    p.dimLeft = Converter::OptConvert<Dimension>(src._left);
+    p.dimTop = Converter::OptConvert<Dimension>(src._top);
+    p.dimRight = Converter::OptConvert<Dimension>(src._right);
+    p.dimBottom = Converter::OptConvert<Dimension>(src._bottom);
+
+    p.dimStart = Converter::OptConvert<Dimension>(src._start);
+    p.dimEnd = Converter::OptConvert<Dimension>(src._end);
+
+    if (auto font = Converter::OptConvert<Converter::FontMetaData>(src._digitFont); font) {
+        std::tie(p.fontSize, p.fontWeight) = *font;
+    }
+    if (auto font = Converter::OptConvert<Converter::FontMetaData>(src._selectedDigitFont); font) {
+        std::tie(p.selectedFontSize, p.selectedFontWeight) = *font;
+    }
+
+    p.fontColor = Converter::OptConvert<Color>(src._fontColor);
+    p.selectedFontColor = Converter::OptConvert<Color>(src._selectedFontColor);
+
+    if (!p.dimStart) {
+        p.dimStart = Dimension(0, DimensionUnit::VP);
+    }
+    if (!p.dimEnd) {
+        p.dimEnd = Dimension(0, DimensionUnit::VP);
+    }
+
+    checkDimValid(p.dimLeft);
+    checkDimValid(p.dimTop);
+    checkDimValid(p.dimRight);
+    checkDimValid(p.dimBottom);
+    checkDimValid(p.dimStart);
+    checkDimValid(p.dimEnd);
+
+    checkDimValid(p.fontSize);
+    checkDimValid(p.selectedFontSize);
+    if (!p.fontWeight) {
+        p.fontWeight = FontWeight::NORMAL;
+    }
+    if (!p.selectedFontWeight) {
+        p.selectedFontWeight = FontWeight::NORMAL;
+    }
     return p;
 }
 } // namespace

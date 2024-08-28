@@ -17,6 +17,7 @@
 
 #include <optional>
 
+#include "base/geometry/dimension.h"
 #include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace::NG::Converter {
@@ -25,5 +26,12 @@ struct RadioStyle {
     std::optional<Color> uncheckedBorderColor;
     std::optional<Color> indicatorColor;
 };
+
+typedef std::tuple<
+    std::optional<Dimension>,
+    std::optional<FontWeight>
+    // here it can be expanded by Family and Style data
+> FontMetaData;
+
 } // namespace OHOS::Ace::NG::Converter
 #endif  // GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_UTILITY_ACE_ENGINE_TYPES_H

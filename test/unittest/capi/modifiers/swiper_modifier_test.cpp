@@ -46,6 +46,7 @@ static const Ark_String ASTR_DIM_PX_POS = {.chars = "7.89px"};
 static const Ark_String ASTR_DIM_PX_NEG = {.chars = "-4.5px"};
 static const Ark_String ASTR_DIM_VP_POS = {.chars = "1.23vp"};
 static const Ark_String ASTR_DIM_VP_NEG = {.chars = "-56vp"};
+static const Ark_String ASTR_INVALID = {.chars = "(*%^&#@"};
 
 static const Ark_Length ALEN_PX_POS = {.type = ARK_TAG_INT32, .value = AINT32_POS, .unit = static_cast<int32_t>(DimensionUnit::PX)};
 static const Ark_Length ALEN_PX_NEG = {.type = ARK_TAG_INT32, .value = AINT32_NEG, .unit = static_cast<int32_t>(DimensionUnit::PX)};
@@ -56,6 +57,8 @@ static const Opt_Length OPT_LEN_PX_POS = { .tag = ARK_TAG_OBJECT, .value = ALEN_
 static const Opt_Length OPT_LEN_PX_NEG = { .tag = ARK_TAG_OBJECT, .value = ALEN_PX_NEG };
 static const Opt_Length OPT_LEN_VP_POS = { .tag = ARK_TAG_OBJECT, .value = ALEN_VP_POS };
 static const Opt_Length OPT_LEN_VP_NEG = { .tag = ARK_TAG_OBJECT, .value = ALEN_VP_NEG };
+
+static const Dimension g_swiperDefaultSize(9876, DimensionUnit::VP);
 
 inline Ark_Number ArkNum(int src)
 {
@@ -88,13 +91,17 @@ inline Ark_Resource ArkRes(Ark_String *name, int id = -1,
     };
 }
 
+inline Type_SwiperAttribute_displayCount_Arg0 ArkSwiperAutoFill(Ark_VP val) {
+    return {.selector = 2, .value2 = { .minSize = {val}}
+    };
+}
+
 std::string GetStringAttribute(const std::string &strWithJson, const std::string &name)
 {
     auto jsonVal = JsonUtil::ParseJsonData(strWithJson.c_str());
     return GetStringAttribute(jsonVal, name);
 }
 
-static inline Dimension g_swiperDefaultSize(9876, DimensionUnit::VP);
 } // namespace
 
 class SwiperModifierTest : public ModifierTestBase<GENERATED_ArkUISwiperModifier,
@@ -272,14 +279,14 @@ HWTEST_F(SwiperModifierTest, SwiperModifierTest5_dot_padding, TestSize.Level1)
 
     ASSERT_NE(modifier_->setIndicator, nullptr);
 
-    auto checkVal1 = GetStringAttribute(node_, "indicator");
+    auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal1, "true");
 
     static const std::vector<std::string> keys = { "left", "right", "top", "bottom",
         // "start", "end" - these fields are not supported in SwiperPattern::GetDotIndicatorStyle()
     };
-    for (const auto &[dot, expect]: testPlan) {
-        Type_SwiperAttribute_indicator_Arg0 arkParam = { .selector = 0, .value0 = dot };
+    for (const auto &[indicator, expect]: testPlan) {
+        Type_SwiperAttribute_indicator_Arg0 arkParam = { .selector = 0, .value0 = indicator };
         modifier_->setIndicator(node_, &arkParam);
         auto strWithObj = GetStringAttribute(node_, PROP_NAME);
         for (const auto &nameKey: keys) {
@@ -316,14 +323,14 @@ HWTEST_F(SwiperModifierTest, SwiperModifierTest5_dot_size, TestSize.Level1)
 
     ASSERT_NE(modifier_->setIndicator, nullptr);
 
-    auto checkVal1 = GetStringAttribute(node_, "indicator");
+    auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal1, "true");
 
     static const std::vector<std::string> keys = {
         "itemWidth", "itemHeight", "selectedItemWidth", "selectedItemHeight"
     };
-    for (const auto &[dot, expect]: testPlan) {
-        Type_SwiperAttribute_indicator_Arg0 arkParam = { .selector = 0, .value0 = dot };
+    for (const auto &[indicator, expect]: testPlan) {
+        Type_SwiperAttribute_indicator_Arg0 arkParam = { .selector = 0, .value0 = indicator };
         modifier_->setIndicator(node_, &arkParam);
         auto strWithObj = GetStringAttribute(node_, PROP_NAME);
         for (const auto &nameKey: keys) {
@@ -360,11 +367,11 @@ HWTEST_F(SwiperModifierTest, SwiperModifierTest5_dot_color, TestSize.Level1)
     EXPECT_EQ(checkVal1, "true");
 
     {
-        Ark_DotIndicator dot = {
-            ._color = {.tag = ARK_TAG_UNDEFINED},
-            ._selectedColor = {.tag = ARK_TAG_UNDEFINED}
+        Ark_DotIndicator indicator = {
+            ._color = { .tag = ARK_TAG_UNDEFINED },
+            ._selectedColor = { .tag = ARK_TAG_UNDEFINED }
         };
-        Type_SwiperAttribute_indicator_Arg0 arkParam = { .selector = 0, .value0 = dot };
+        Type_SwiperAttribute_indicator_Arg0 arkParam = { .selector = 0, .value0 = indicator };
         modifier_->setIndicator(node_, &arkParam);
         auto strWithObj = GetStringAttribute(node_, PROP_NAME);
         auto checkVal2 = GetStringAttribute(strWithObj, "color");
@@ -373,12 +380,12 @@ HWTEST_F(SwiperModifierTest, SwiperModifierTest5_dot_color, TestSize.Level1)
         EXPECT_EQ(checkVal3, "#FF007DFF");
     }
 
-    for (const auto &[arcResColor, expected]: testPlan) {
-        Ark_DotIndicator dot = {
-            ._color = {.tag = ARK_TAG_OBJECT, .value = { arcResColor} },
-            ._selectedColor = { .tag = ARK_TAG_OBJECT, .value = { arcResColor} }
+    for (const auto &[arkResColor, expected]: testPlan) {
+        Ark_DotIndicator indicator = {
+            ._color = { .tag = ARK_TAG_OBJECT, .value = arkResColor },
+            ._selectedColor = { .tag = ARK_TAG_OBJECT, .value = arkResColor }
         };
-        Type_SwiperAttribute_indicator_Arg0 arkParam = { .selector = 0, .value0 = dot };
+        Type_SwiperAttribute_indicator_Arg0 arkParam = { .selector = 0, .value0 = indicator };
         modifier_->setIndicator(node_, &arkParam);
         auto strWithObj = GetStringAttribute(node_, PROP_NAME);
         auto checkVal2 = GetStringAttribute(strWithObj, "color");
@@ -411,8 +418,8 @@ HWTEST_F(SwiperModifierTest, SwiperModifierTest5_dot_other, TestSize.Level1)
     auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal1, "true");
 
-    for (const auto &[dot, expectMask, expectCount]: testPlan) {
-        Type_SwiperAttribute_indicator_Arg0 arkParam = { .selector = 0, .value0 = dot };
+    for (const auto &[indicator, expectMask, expectCount]: testPlan) {
+        Type_SwiperAttribute_indicator_Arg0 arkParam = { .selector = 0, .value0 = indicator };
         modifier_->setIndicator(node_, &arkParam);
         auto strWithObj = GetStringAttribute(node_, PROP_NAME);
         auto checkVal2 = GetStringAttribute(strWithObj, "mask");
@@ -422,18 +429,215 @@ HWTEST_F(SwiperModifierTest, SwiperModifierTest5_dot_other, TestSize.Level1)
     }
 }
 /**
- * @tc.name: SwiperModifierTest5_digit
- * @tc.desc: Check the functionality of SwiperModifier.IndicatorImpl with Digit type
+ * @tc.name: SwiperModifierTest5_digit_padding
+ * @tc.desc: Check the functionality of SwiperModifier.IndicatorImpl with Digit indicator, padding's attributes
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, SwiperModifierTest5_digit, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, SwiperModifierTest5_digit_padding, TestSize.Level1)
 {
+    typedef std::tuple<Ark_DigitIndicator, std::string> OneTestStep;
     static const std::string PROP_NAME("indicator");
+    static const std::string DEFAULT_PADDING("0.00vp");
+    static const std::vector<OneTestStep> testPlan = {
+    { { ._left = OPT_LEN_VP_POS, ._top = OPT_LEN_VP_POS, ._right = OPT_LEN_VP_POS, ._bottom = OPT_LEN_VP_POS,
+        ._start = {.tag = ARK_TAG_OBJECT, .value = { .id = ARK_TAG_FLOAT32, .floats = {AFLT32_POS} } },
+        ._end = {.tag = ARK_TAG_OBJECT, .value = { .id = ARK_TAG_FLOAT32, .floats = {AFLT32_POS} } },
+        }, "1.23vp" },
+    { { ._left = OPT_LEN_PX_POS, ._top = OPT_LEN_PX_POS, ._right = OPT_LEN_PX_POS, ._bottom = OPT_LEN_PX_POS,
+        ._start = {.tag = ARK_TAG_OBJECT, .value = { .id = ARK_TAG_INT32, .floats = {AINT32_POS} } },
+        ._end = {.tag = ARK_TAG_OBJECT, .value = { .id = ARK_TAG_INT32, .floats = {AINT32_POS} } },
+        }, "1234.00px" },
+    { { ._left = OPT_LEN_VP_NEG, ._top = OPT_LEN_VP_NEG, ._right = OPT_LEN_VP_NEG, ._bottom = OPT_LEN_VP_NEG,
+        ._start = {.tag = ARK_TAG_OBJECT, .value = { .id = ARK_TAG_FLOAT32, .floats = {AFLT32_NEG} } },
+        ._end = {.tag = ARK_TAG_OBJECT, .value = { .id = ARK_TAG_FLOAT32, .floats = {AFLT32_NEG} } },
+        }, DEFAULT_PADDING },
+    { { ._left = OPT_LEN_PX_NEG, ._top = OPT_LEN_PX_NEG, ._right = OPT_LEN_PX_NEG, ._bottom = OPT_LEN_PX_NEG,
+        ._start = {.tag = ARK_TAG_OBJECT, .value = { .id = ARK_TAG_INT32, .floats = {AINT32_NEG} } },
+        ._end = {.tag = ARK_TAG_OBJECT, .value = { .id = ARK_TAG_INT32, .floats = {AINT32_NEG} } },
+        }, DEFAULT_PADDING },
+    };
+
     ASSERT_NE(modifier_->setIndicator, nullptr);
 
     auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal1, "true");
+
+    static const std::vector<std::string> keys = { "left", "right", "top", "bottom",
+        // "start", "end" - these fields are not supported in SwiperPattern::GetDigitIndicatorStyle()
+    };
+    for (const auto &[indicator, expect]: testPlan) {
+        Type_SwiperAttribute_indicator_Arg0 arkParam = { .selector = 1, .value1 = indicator };
+        modifier_->setIndicator(node_, &arkParam);
+        auto strWithObj = GetStringAttribute(node_, PROP_NAME);
+        for (const auto &nameKey: keys) {
+            auto checkVal2 = GetStringAttribute(strWithObj, nameKey);
+            EXPECT_EQ(checkVal2, expect);
+        }
+    }
 }
+
+/**
+ * @tc.name: SwiperModifierTest5_digit_fontsize
+ * @tc.desc: Check the functionality of SwiperModifier.IndicatorImpl with Digit indicator, font size attributes
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModifierTest, SwiperModifierTest5_digit_fontsize, TestSize.Level1)
+{
+    typedef std::tuple<Opt_Dimension, std::string> OneTestStep;
+    static const std::string PROP_NAME("indicator");
+    static const std::string DEFAULT_VALUE("0.00vp");
+    static const std::vector<OneTestStep> testPlan = {
+        { OPT_LEN_VP_POS, "1.23vp" },
+        { OPT_LEN_PX_POS, "1234.00px" },
+        { OPT_LEN_VP_NEG, DEFAULT_VALUE },
+        { OPT_LEN_PX_NEG, DEFAULT_VALUE },
+    };
+
+    ASSERT_NE(modifier_->setIndicator, nullptr);
+
+    auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal1, "true");
+
+    static const std::vector<std::string> keys = { "fontSize", "selectedFontSize" };
+    for (const auto &[size, expect]: testPlan) {
+        Type_SwiperAttribute_indicator_Arg0 arkParam = { .selector = 1,
+            .value1 = { ._digitFont =  {.tag = ARK_TAG_OBJECT, .value = {.size = size}},
+                ._selectedDigitFont =  {.tag = ARK_TAG_OBJECT, .value = {.size = size}}
+            }
+        };
+        modifier_->setIndicator(node_, &arkParam);
+        auto strWithObj = GetStringAttribute(node_, PROP_NAME);
+        for (const auto &nameKey: keys) {
+            auto checkVal2 = GetStringAttribute(strWithObj, nameKey);
+            EXPECT_EQ(checkVal2, expect);
+        }
+    }
+}
+
+/**
+ * @tc.name: SwiperModifierTest5_digit_fontwight
+ * @tc.desc: Check the functionality of SwiperModifier.IndicatorImpl with Digit indicator, font weight attributes
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModifierTest, SwiperModifierTest5_digit_fontsweight, TestSize.Level1)
+{
+    typedef std::tuple<Opt_Union_FontWeight_Number_String, std::string> OneTestStep;
+    static const std::string PROP_NAME("indicator");
+    static const std::string DEFAULT_VALUE("FontWeight.Normal");
+    static const std::vector<OneTestStep> testPlan = {
+        { {.tag = ARK_TAG_OBJECT, .value =
+            {.selector = 0, .value0 = static_cast<Ark_FontWeight>(FontWeight::W500)}}, "500" },
+        { {.tag = ARK_TAG_OBJECT, .value =
+            {.selector = 0, .value0 = static_cast<Ark_FontWeight>(FontWeight::BOLD)}}, "FontWeight.Bold" },
+        { {.tag = ARK_TAG_OBJECT, .value =
+            {.selector = 0, .value0 = static_cast<Ark_FontWeight>(FontWeight::REGULAR)}}, "FontWeight.Regular" },
+        { {.tag = ARK_TAG_OBJECT, .value =
+            {.selector = 1, .value1 = {.tag = ARK_TAG_INT32, .i32 = 100}}}, "100" },
+        { {.tag = ARK_TAG_OBJECT, .value =
+            {.selector = 1, .value1 = {.tag = ARK_TAG_INT32, .i32 = -111}}}, DEFAULT_VALUE },
+        { {.tag = ARK_TAG_OBJECT, .value =
+            {.selector = 1, .value1 = {.tag = ARK_TAG_FLOAT32, .f32 = 300.00}}}, "300" },
+        { {.tag = ARK_TAG_OBJECT, .value =
+            {.selector = 1, .value1 = {.tag = ARK_TAG_FLOAT32, .f32 = -123.456f}}}, DEFAULT_VALUE },
+        { {.tag = ARK_TAG_OBJECT, .value =
+            {.selector = 2, .value2 = {.chars = "700"}}}, "700" },
+        { {.tag = ARK_TAG_OBJECT, .value =
+            {.selector = 2, .value2 = {.chars = "bold"}}}, "FontWeight.Bold" },
+        { {.tag = ARK_TAG_OBJECT, .value =
+            {.selector = 2, .value2 = ASTR_INVALID}}, DEFAULT_VALUE },
+        { {.tag = ARK_TAG_UNDEFINED}, DEFAULT_VALUE },
+    };
+
+    ASSERT_NE(modifier_->setIndicator, nullptr);
+
+    auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal1, "true");
+
+    static const std::vector<std::string> keys = { "fontWeight", "selectedFontWeight" };
+    {
+        Type_SwiperAttribute_indicator_Arg0 arkParam = { .selector = 1, .value1 = {
+            ._digitFont = {.tag = ARK_TAG_UNDEFINED},
+            ._selectedDigitFont = {.tag = ARK_TAG_UNDEFINED},
+            }
+        };
+        modifier_->setIndicator(node_, &arkParam);
+        auto strWithObj = GetStringAttribute(node_, PROP_NAME);
+        for (const auto &nameKey: keys) {
+            auto checkVal2 = GetStringAttribute(strWithObj, nameKey);
+            EXPECT_EQ(checkVal2, DEFAULT_VALUE);
+        }
+    }
+    for (const auto &[weight, expect]: testPlan) {
+        Type_SwiperAttribute_indicator_Arg0 arkParam = { .selector = 1, .value1 = {
+            ._digitFont = {.tag = ARK_TAG_OBJECT, .value = {.weight = weight}},
+            ._selectedDigitFont = {.tag = ARK_TAG_OBJECT, .value = {.weight = weight}},
+            }
+        };
+        modifier_->setIndicator(node_, &arkParam);
+        auto strWithObj = GetStringAttribute(node_, PROP_NAME);
+        for (const auto &nameKey: keys) {
+            auto checkVal2 = GetStringAttribute(strWithObj, nameKey);
+            EXPECT_EQ(checkVal2, expect);
+        }
+    }
+}
+
+/**
+ * @tc.name: SwiperModifierTest5_digit_color
+ * @tc.desc: Check the functionality of SwiperModifier.IndicatorImpl with Digit Indicator, the Color type subattributes
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModifierTest, SwiperModifierTest5_digit_color, TestSize.Level1)
+{
+    typedef std::pair<Ark_ResourceColor, std::string> OneTestStep;
+    static const std::string PROP_NAME("indicator");
+    static const std::string DEFAULT_VALUE = Color::TRANSPARENT.ToString();
+    static Ark_String resName = {.chars = "aa.bb.cc"};
+    static const std::vector<OneTestStep> testPlan = {
+        { { .selector = 0, .value0 = 0x12345678 }, "#12345678" },
+        { { .selector = 1, .value1 = {.tag = ARK_TAG_INT32, .i32 = 0x123456} }, "#FF123456" },
+        { { .selector = 1, .value1 = {.tag = ARK_TAG_FLOAT32, .f32 = 0.5f} }, "#00000000" },
+        { { .selector = 2, .value2 = {.chars = "#11223344"} }, "#11223344" },
+        { { .selector = 2, .value2 = {.chars = "65535"} }, "#FF00FFFF" },
+        { { .selector = 3, .value3 = ArkRes(&resName) }, Color::RED.ToString() },// Color::RED is result
+            // of mocked ThemeConstants::GetColorByName
+        { { .selector = 3, .value3 = ArkRes(nullptr, 1234) }, Color::RED.ToString() },
+    };
+
+    ASSERT_NE(modifier_->setIndicator, nullptr);
+
+    auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal1, "true");
+
+    {
+        Ark_DigitIndicator indicator = {
+            ._fontColor = { .tag = ARK_TAG_UNDEFINED },
+            ._selectedFontColor = { .tag = ARK_TAG_UNDEFINED }
+        };
+        Type_SwiperAttribute_indicator_Arg0 arkParam = { .selector = 1, .value1 = indicator };
+        modifier_->setIndicator(node_, &arkParam);
+        auto strWithObj = GetStringAttribute(node_, PROP_NAME);
+        auto checkVal2 = GetStringAttribute(strWithObj, "fontColor");
+        EXPECT_EQ(checkVal2, DEFAULT_VALUE);
+        auto checkVal3 = GetStringAttribute(strWithObj, "selectedFontColor");
+        EXPECT_EQ(checkVal3, DEFAULT_VALUE);
+    }
+
+    for (const auto &[arkResColor, expected]: testPlan) {
+        Ark_DigitIndicator indicator = {
+            ._fontColor = { .tag = ARK_TAG_OBJECT, .value = arkResColor },
+            ._selectedFontColor = { .tag = ARK_TAG_OBJECT, .value = arkResColor }
+        };
+        Type_SwiperAttribute_indicator_Arg0 arkParam = { .selector = 1, .value1 = indicator };
+        modifier_->setIndicator(node_, &arkParam);
+        auto strWithObj = GetStringAttribute(node_, PROP_NAME);
+        auto checkVal2 = GetStringAttribute(strWithObj, "fontColor");
+        EXPECT_EQ(checkVal2, expected);
+        auto checkVal3 = GetStringAttribute(strWithObj, "selectedFontColor");
+        EXPECT_EQ(checkVal3, expected);
+    }
+}
+
 /**
  * @tc.name: SwiperModifierTest5_bool
  * @tc.desc: Check the functionality of SwiperModifier.IndicatorImpl with Boolean type
@@ -717,10 +921,6 @@ HWTEST_F(SwiperModifierTest, SwiperModifierTest13_Str, TestSize.Level1)
     modifier_->setDisplayCount(node_, &negVal, nullptr);
     auto checkVal4 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal4, DEFAULT_VALUE);
-}
-
-static Type_SwiperAttribute_displayCount_Arg0 ArkSwiperAutoFill(Ark_VP val) {
-    return {.selector = 2, .value2 = { .minSize = {val}}};
 }
 
 /**

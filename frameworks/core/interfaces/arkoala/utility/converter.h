@@ -128,7 +128,10 @@ namespace OHOS::Ace::NG::Converter {
     template<>
     inline FontWeight Convert(const Ark_Number& src)
     {
-        return src.tag == ARK_TAG_FLOAT32 ? static_cast<FontWeight>(src.f32) : static_cast<FontWeight>(src.i32);
+        auto str = std::to_string(
+            src.tag == ARK_TAG_FLOAT32 ? static_cast<int32_t>(src.f32) : src.i32
+        );
+        return Framework::ConvertStrToFontWeight(str);
     }
 
     template<>
@@ -439,7 +442,17 @@ namespace OHOS::Ace::NG::Converter {
     template<>
     inline Dimension Convert(const Ark_CustomObject& src)
     {
+        LOGE("Convert [Ark_CustomObject] to [Dimension] is not supported");
         return Dimension();
+    }
+
+    template<>
+    inline FontMetaData Convert(const Ark_Font& src)
+    {
+        return {
+            OptConvert<Dimension>(src.size),
+            OptConvert<FontWeight>(src.weight),
+        };
     }
 } // namespace OHOS::Ace::NG::Converter
 
