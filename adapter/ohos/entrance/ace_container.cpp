@@ -1475,6 +1475,7 @@ void AceContainer::OverwritePageNodeInfo(const RefPtr<NG::FrameNode>& frameNode,
         node.isFocus = info->GetIsFocus();
         node.value = info->GetValue();
         node.placeholder = info->GetPlaceholder();
+        node.metadata = info->GetMetadata();
         NG::RectF rectF = info->GetPageNodeRect();
         node.rect.left = rectF.GetX();
         node.rect.top = rectF.GetY();
@@ -2399,7 +2400,7 @@ void AceContainer::CheckAndSetFontFamily()
         std::lock_guard<std::mutex> lock(g_mutexFormRenderFontFamily);
         fontManager->SetFontFamily(familyName.c_str(), path.c_str());
     } else {
-        fontManager->SetFontFamily(familyName.c_str(), path.c_str());
+    fontManager->SetFontFamily(familyName.c_str(), path.c_str());
     }
 }
 
@@ -2479,7 +2480,7 @@ void AceContainer::SetFontScaleAndWeightScale(
         float fontSizeScale = StringUtils::StringToFloat(parsedConfig.fontScale);
         if (fontSizeScale != pipelineContext_->GetFontScale()) {
             SetFontScale(instanceId_, fontSizeScale);
-            configurationChange.fontScaleUpdate = true;
+        configurationChange.fontScaleUpdate = true;
         }
     }
     if (!parsedConfig.fontWeightScale.empty()) {
@@ -2489,7 +2490,7 @@ void AceContainer::SetFontScaleAndWeightScale(
         float fontWeightScale = StringUtils::StringToFloat(parsedConfig.fontWeightScale);
         if (fontWeightScale != pipelineContext_->GetFontWeightScale()) {
             SetFontWeightScale(instanceId_, fontWeightScale);
-            configurationChange.fontWeightScaleUpdate = true;
+        configurationChange.fontWeightScaleUpdate = true;
         }
     }
 }

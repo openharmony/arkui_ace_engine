@@ -191,6 +191,8 @@ const std::map<std::string, AceAutoFillType> NWEB_AUTOFILL_TYPE_TO_ACE = {
     {OHOS::NWeb::NWEB_AUTOFILL_EMAIL, AceAutoFillType::ACE_EMAIL_ADDRESS},
     {OHOS::NWeb::NWEB_AUTOFILL_CC_NUMBER, AceAutoFillType::ACE_BANK_CARD_NUMBER},
     {OHOS::NWeb::NWEB_AUTOFILL_ID_CARD_NUMBER, AceAutoFillType::ACE_ID_CARD_NUMBER},
+    {OHOS::NWeb::NWEB_AUTOFILL_DETAIL_INFO_WITHOUT_STREET, AceAutoFillType::ACE_DETAIL_INFO_WITHOUT_STREET},
+    {OHOS::NWeb::NWEB_AUTOFILL_FORMAT_ADDRESS, AceAutoFillType::ACE_FORMAT_ADDRESS},
     {OHOS::NWeb::NWEB_AUTOFILL_NICKNAME, AceAutoFillType::ACE_NICKNAME},
     {OHOS::NWeb::NWEB_AUTOFILL_USERNAME, AceAutoFillType::ACE_USER_NAME},
     {OHOS::NWeb::NWEB_AUTOFILL_PASSWORD, AceAutoFillType::ACE_PASSWORD},
@@ -212,6 +214,8 @@ const std::map<AceAutoFillType, std::string> ACE_AUTOFILL_TYPE_TO_NWEB = {
     {AceAutoFillType::ACE_EMAIL_ADDRESS, OHOS::NWeb::NWEB_AUTOFILL_EMAIL},
     {AceAutoFillType::ACE_BANK_CARD_NUMBER, OHOS::NWeb::NWEB_AUTOFILL_CC_NUMBER},
     {AceAutoFillType::ACE_ID_CARD_NUMBER, OHOS::NWeb::NWEB_AUTOFILL_ID_CARD_NUMBER},
+    {AceAutoFillType::ACE_DETAIL_INFO_WITHOUT_STREET, OHOS::NWeb::NWEB_AUTOFILL_DETAIL_INFO_WITHOUT_STREET},
+    {AceAutoFillType::ACE_FORMAT_ADDRESS, OHOS::NWeb::NWEB_AUTOFILL_FORMAT_ADDRESS},
     {AceAutoFillType::ACE_NICKNAME, OHOS::NWeb::NWEB_AUTOFILL_NICKNAME},
     {AceAutoFillType::ACE_USER_NAME, OHOS::NWeb::NWEB_AUTOFILL_USERNAME},
     {AceAutoFillType::ACE_PASSWORD, OHOS::NWeb::NWEB_AUTOFILL_PASSWORD},
@@ -3770,7 +3774,14 @@ void WebPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         // white list check
         if (ACE_AUTOFILL_TYPE_TO_NWEB.count(type) != 0) {
             std::string key = ACE_AUTOFILL_TYPE_TO_NWEB.at(type);
-            jsonNode->Put(key.c_str(), nodeInfoWrap->GetValue().c_str());
+            if (nodeInfoWrap->GetMetadata().empty()) {
+                jsonNode->Put(key.c_str(), nodeInfoWrap->GetValue().c_str());
+            } else {
+                auto json = JsonUtil::Create(true);
+                json->Put(OHOS::NWeb::NWEB_VIEW_DATA_KEY_PLACEHOLDER.c_str(), nodeInfoWrap->GetId());
+                json->Put(OHOS::NWeb::NWEB_VIEW_DATA_KEY_VALUE.c_str(), nodeInfoWrap->GetValue().c_str());
+                jsonNode->Put(key.c_str(), std::move(json));
+            }            
         }
         if (nodeInfoWrap->GetIsFocus()) {
             focusType = type;
@@ -3837,6 +3848,31 @@ void ParseViewDataString(const std::string& key,
     }
 }
 
+HintToTypeWrap WebPattern::GetHintTypeAndMetadata(const std::string& attribute, const std::string& placeholder)
+{
+    HintToTypeWrap hintToTypeWrap;
+    if (NWEB_AUTOFILL_TYPE_TO_ACE.count(attribute) != 0) {
+        AceAutoFillType type = NWEB_AUTOFILL_TYPE_TO_ACE.at(attribute);
+        if (type == AceAutoFillType::ACE_USER_NAME || type == AceAutoFillType::ACE_PASSWORD ||
+            type == AceAutoFillType::ACE_NEW_PASSWORD) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "The form is login fill form");
+            isPasswordFill_ = true;
+        }
+        hintToTypeWrap.autoFillType = type;
+    } else if (attribute.empty() && !placeholder.empty()) {
+        // try hint2Type
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, hintToTypeWrap);
+        auto container = Container::Current();
+        if (container == nullptr) {
+            container = Container::GetActive();
+        }
+        CHECK_NULL_RETURN(container, hintToTypeWrap);
+        hintToTypeWrap = container->PlaceHolderToType(placeholder);
+    }
+    return hintToTypeWrap;
+}
+
 void WebPattern::ParseNWebViewDataNode(std::unique_ptr<JsonValue> child,
     std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos, int32_t nodeId)
 {
@@ -3849,18 +3885,6 @@ void WebPattern::ParseNWebViewDataNode(std::unique_ptr<JsonValue> child,
 
     RefPtr<PageNodeInfoWrap> node = PageNodeInfoWrap::CreatePageNodeInfoWrap();
     std::string attribute = child->GetKey();
-    // white list check
-    if (NWEB_AUTOFILL_TYPE_TO_ACE.count(attribute) != 0) {
-        AceAutoFillType type = NWEB_AUTOFILL_TYPE_TO_ACE.at(attribute);
-        node->SetAutoFillType(type);
-        if (type == AceAutoFillType::ACE_USER_NAME || type == AceAutoFillType::ACE_PASSWORD ||
-            type == AceAutoFillType::ACE_NEW_PASSWORD) {
-            TAG_LOGI(AceLogTag::ACE_WEB, "The form is login fill form");
-            isPasswordFill_ = true;
-        }
-    } else {
-        return;
-    }
 
     RectT<float> rect;
     int32_t len = child->GetArraySize();
@@ -3877,6 +3901,16 @@ void WebPattern::ParseNWebViewDataNode(std::unique_ptr<JsonValue> child,
             }
         }
     }
+
+    HintToTypeWrap hintToTypeWrap = GetHintTypeAndMetadata(attribute, node->GetPlaceholder());
+    auto type = hintToTypeWrap.autoFillType;
+    if (type != AceAutoFillType::ACE_UNSPECIFIED) {
+        node->SetAutoFillType(type);
+        node->SetMetadata(hintToTypeWrap.metadata);
+    } else {
+        return;
+    }
+
     NG::RectF rectF;
     rectF.SetRect(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
     node->SetPageNodeRect(rectF);
