@@ -202,10 +202,7 @@ public:
 
     uint8_t GetKeyboardShortcutKeys(const std::vector<ModifierKey>& keys);
 
-    void DoMouseActionRelease()
-    {
-        pressMouseTestResults_.clear();
-    }
+    void DoMouseActionRelease();
 
     void SetIsDragging(bool isDragging)
     {
