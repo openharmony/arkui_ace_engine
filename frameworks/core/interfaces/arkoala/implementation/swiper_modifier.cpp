@@ -48,7 +48,8 @@ Ark_Int32 trimToAceRange(Ark_Int32 val, T min, T max)
     return (val >= limitMin && val <= limitMax) ? val : limitMin;
 }
 
-std::optional<OHOS::Ace::Dimension> &checkDimValid(std::optional<OHOS::Ace::Dimension> &dim) {
+std::optional<OHOS::Ace::Dimension> &checkDimValid(std::optional<OHOS::Ace::Dimension> &dim)
+{
     if (dim && dim->IsNegative()) {
         dim->SetValue(0);
         dim->SetUnit(OHOS::Ace::DimensionUnit::VP);
@@ -100,14 +101,17 @@ void IntervalImpl(Ark_NativePointer node,
 }
 
 namespace {
-bool checkDimCustom(std::optional<Dimension> &dim, const Dimension &defultVal) {
+bool checkDimCustom(std::optional<Dimension> &dim, const Dimension &defaultDim)
+{
     bool isCustom = dim && dim->Unit() != DimensionUnit::PERCENT;
     if (isCustom && dim->IsNegative()) {
-        *dim = defultVal;
+        *dim = defaultDim;
     }
     return isCustom;
 }
-std::tuple<SwiperParameters, bool> ParseDotIndicator(const Ark_DotIndicator& src) {
+std::tuple<SwiperParameters, bool> ParseDotIndicator(const Ark_DotIndicator& src,
+    const RefPtr<SwiperIndicatorTheme> &theme)
+{
     SwiperParameters p;
     bool isCustom;
     p.dimLeft = Converter::OptConvert<Dimension>(src._left);
@@ -142,7 +146,7 @@ std::tuple<SwiperParameters, bool> ParseDotIndicator(const Ark_DotIndicator& src
     checkDimValid(p.dimStart);
     checkDimValid(p.dimEnd);
 
-    Dimension defaultSize(0, DimensionUnit::VP);     // TODO
+    Dimension defaultSize = theme ? theme->GetSize() : std::move(Dimension(0, DimensionUnit::VP));
     isCustom = checkDimCustom(p.itemWidth, defaultSize);
     isCustom = checkDimCustom(p.itemHeight, defaultSize) || isCustom;
     isCustom = checkDimCustom(p.selectedItemWidth, defaultSize) || isCustom;
@@ -154,7 +158,9 @@ std::tuple<SwiperParameters, bool> ParseDotIndicator(const Ark_DotIndicator& src
     return {p, isCustom};
 }
 
-SwiperDigitalParameters ParseDigitIndicator(const Ark_DigitIndicator& src) {
+SwiperDigitalParameters ParseDigitIndicator(const Ark_DigitIndicator& src,
+    const RefPtr<SwiperIndicatorTheme> &theme)
+{
     SwiperDigitalParameters p;
     // TODO
     return p;
@@ -170,18 +176,22 @@ void IndicatorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
+    RefPtr<SwiperIndicatorTheme> swiperIndicatorTheme = nullptr;
+    if (auto pipelineContext = frameNode->GetContext(); pipelineContext) {
+        swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    }
     if (value->selector == SELECTOR_DIGIT) {
         SwiperModelNG::SetIndicatorIsBoolean(frameNode, false);
-        SwiperModelNG::SetDigitIndicatorStyle(frameNode, ParseDigitIndicator(value->value1));
+        SwiperModelNG::SetDigitIndicatorStyle(frameNode, ParseDigitIndicator(value->value1, swiperIndicatorTheme));
         SwiperModelNG::SetIndicatorType(frameNode, SwiperIndicatorType::DIGIT);
     } else {
         static Ark_DotIndicator defaultArkDot;
         const Ark_DotIndicator *arkDot = &defaultArkDot;
-        if (value->selector == SELECTOR_DOT ) {
+        if (value->selector == SELECTOR_DOT) {
             arkDot = &(value->value0);
             SwiperModelNG::SetIndicatorIsBoolean(frameNode, false);
         }
-        auto [params, isCustomSize] = ParseDotIndicator(*arkDot);
+        auto [params, isCustomSize] = ParseDotIndicator(*arkDot, swiperIndicatorTheme);
         SwiperModelNG::SetDotIndicatorStyle(frameNode, params);
         SwiperModelNG::SetIsIndicatorCustomSize(frameNode, isCustomSize);
         SwiperModelNG::SetIndicatorType(frameNode, SwiperIndicatorType::DOT);

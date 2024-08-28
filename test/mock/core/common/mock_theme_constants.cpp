@@ -14,6 +14,7 @@
  */
 
 #include "core/components/theme/theme_constants.h"
+#include "mock_theme_style.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -174,6 +175,7 @@ double ThemeConstants::GetBlendAlpha(const BlendAlpha& blendAlpha) const
 
 void ThemeConstants::LoadTheme(int32_t themeId)
 {
+    currentThemeStyle_ = MockThemeStyle::GetInstance();
 }
 
 void ThemeConstants::ParseTheme()

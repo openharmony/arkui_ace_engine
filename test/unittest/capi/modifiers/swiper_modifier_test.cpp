@@ -20,6 +20,7 @@
 #include "frameworks/core/components/declaration/swiper/swiper_declaration.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/common/mock_theme_style.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
@@ -92,24 +93,40 @@ std::string GetStringAttribute(const std::string &strWithJson, const std::string
     auto jsonVal = JsonUtil::ParseJsonData(strWithJson.c_str());
     return GetStringAttribute(jsonVal, name);
 }
+
+static inline Dimension g_swiperDefaultSize(9876, DimensionUnit::VP);
 } // namespace
 
 class SwiperModifierTest : public ModifierTestBase<GENERATED_ArkUISwiperModifier,
-    &GENERATED_ArkUINodeModifiers::getSwiperModifier, GENERATED_ARKUI_SWIPER> {
+    &GENERATED_ArkUINodeModifiers::getSwiperModifier, GENERATED_ARKUI_SWIPER>
+{
 public:
     static void SetUpTestCase()
     {
         MockPipelineContext::SetUp();
 
-        auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
         // assume using of test/mock/core/common/mock_theme_constants.cpp in build
         auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
-        EXPECT_CALL(*themeManager, GetThemeConstants(testing::_, testing::_)).WillRepeatedly(Return(themeConstants));
-        EXPECT_CALL(*themeManager, GetTheme(testing::_)).WillRepeatedly(
-            Return(std::make_unique<SwiperIndicatorTheme::Builder>()->Build(nullptr))
-        );
-        MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 
+        // set test values to Theme Pattern as data for the Theme building
+        auto themeStyle = AceType::MakeRefPtr<ThemeStyle>();
+        themeStyle->SetAttr("swiper_indicator_size", { .value = g_swiperDefaultSize });
+        MockThemeStyle::GetInstance()->SetAttr("swiper_pattern", { .value = themeStyle });
+        themeConstants->LoadTheme(0);
+
+        // build default SwiperTheme
+        SwiperIndicatorTheme::Builder builder;
+        auto swiperTheme = builder.Build(themeConstants);
+
+        // create Theme Manager and provide return of SwiperTheme
+        auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+        EXPECT_CALL(*themeManager, GetThemeConstants(testing::_, testing::_))
+            .WillRepeatedly(Return(themeConstants));
+        EXPECT_CALL(*themeManager, GetTheme(testing::_))
+            .WillRepeatedly(Return(swiperTheme));
+
+        // setup Context with Theme Manager and Container
+        MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
         MockContainer::SetUp(MockPipelineContext::GetCurrent());
         MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     }
@@ -223,39 +240,34 @@ HWTEST_F(SwiperModifierTest, SwiperModifierTest4, TestSize.Level1)
     auto checkVal5 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal5, DEFAULT_VALUE);
 }
+
 /**
- * @tc.name: SwiperModifierTest5_dot_len
- * @tc.desc: Check the functionality of SwiperModifier.IndicatorImpl with Dot type, the Length type subattr
+ * @tc.name: SwiperModifierTest5_dot_padding
+ * @tc.desc: Check the functionality of SwiperModifier.IndicatorImpl with Dot type, the padding's subattr
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, SwiperModifierTest5_dot_len, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, SwiperModifierTest5_dot_padding, TestSize.Level1)
 {
+    typedef std::tuple<Ark_DotIndicator, std::string> OneTestStep;
     static const std::string PROP_NAME("indicator");
-    static const std::vector<std::pair<Ark_DotIndicator, std::string>> testPlan = {
-        { { ._left = OPT_LEN_VP_POS, ._top = OPT_LEN_VP_POS, ._right = OPT_LEN_VP_POS, ._bottom = OPT_LEN_VP_POS,
-            ._start = {.tag = ARK_TAG_OBJECT, .value = { .id = ARK_TAG_FLOAT32, .floats = {AFLT32_POS} } },
-            ._end = {.tag = ARK_TAG_OBJECT, .value = { .id = ARK_TAG_FLOAT32, .floats = {AFLT32_POS} } },
-            ._itemWidth = OPT_LEN_VP_POS, ._itemHeight = OPT_LEN_VP_POS,
-            ._selectedItemWidth = OPT_LEN_VP_POS, ._selectedItemHeight = OPT_LEN_VP_POS,
-            }, "1.23vp" },
-        { { ._left = OPT_LEN_PX_POS, ._top = OPT_LEN_PX_POS, ._right = OPT_LEN_PX_POS, ._bottom = OPT_LEN_PX_POS,
-            ._start = {.tag = ARK_TAG_OBJECT, .value = { .id = ARK_TAG_INT32, .floats = {AINT32_POS} } },
-            ._end = {.tag = ARK_TAG_OBJECT, .value = { .id = ARK_TAG_INT32, .floats = {AINT32_POS} } },
-            ._itemWidth = OPT_LEN_PX_POS, ._itemHeight = OPT_LEN_PX_POS,
-            ._selectedItemWidth = OPT_LEN_PX_POS, ._selectedItemHeight = OPT_LEN_PX_POS,
-            }, "1234.00px" },
-        { { ._left = OPT_LEN_VP_NEG, ._top = OPT_LEN_VP_NEG, ._right = OPT_LEN_VP_NEG, ._bottom = OPT_LEN_VP_NEG,
-            ._start = {.tag = ARK_TAG_OBJECT, .value = { .id = ARK_TAG_FLOAT32, .floats = {AFLT32_NEG} } },
-            ._end = {.tag = ARK_TAG_OBJECT, .value = { .id = ARK_TAG_FLOAT32, .floats = {AFLT32_NEG} } },
-            ._itemWidth = OPT_LEN_VP_NEG, ._itemHeight = OPT_LEN_VP_NEG,
-            ._selectedItemWidth = OPT_LEN_VP_NEG, ._selectedItemHeight = OPT_LEN_VP_NEG,
-            }, "0.00vp" },
-        { { ._left = OPT_LEN_PX_NEG, ._top = OPT_LEN_PX_NEG, ._right = OPT_LEN_PX_NEG, ._bottom = OPT_LEN_PX_NEG,
-            ._start = {.tag = ARK_TAG_OBJECT, .value = { .id = ARK_TAG_INT32, .floats = {AINT32_NEG} } },
-            ._end = {.tag = ARK_TAG_OBJECT, .value = { .id = ARK_TAG_INT32, .floats = {AINT32_NEG} } },
-            ._itemWidth = OPT_LEN_PX_NEG, ._itemHeight = OPT_LEN_PX_NEG,
-            ._selectedItemWidth = OPT_LEN_PX_NEG, ._selectedItemHeight = OPT_LEN_PX_NEG,
-            }, "0.00vp" },
+    static const std::string DEFAULT_PADDING("0.00vp");
+    static const std::vector<OneTestStep> testPlan = {
+    { { ._left = OPT_LEN_VP_POS, ._top = OPT_LEN_VP_POS, ._right = OPT_LEN_VP_POS, ._bottom = OPT_LEN_VP_POS,
+        ._start = {.tag = ARK_TAG_OBJECT, .value = { .id = ARK_TAG_FLOAT32, .floats = {AFLT32_POS} } },
+        ._end = {.tag = ARK_TAG_OBJECT, .value = { .id = ARK_TAG_FLOAT32, .floats = {AFLT32_POS} } },
+        }, "1.23vp" },
+    { { ._left = OPT_LEN_PX_POS, ._top = OPT_LEN_PX_POS, ._right = OPT_LEN_PX_POS, ._bottom = OPT_LEN_PX_POS,
+        ._start = {.tag = ARK_TAG_OBJECT, .value = { .id = ARK_TAG_INT32, .floats = {AINT32_POS} } },
+        ._end = {.tag = ARK_TAG_OBJECT, .value = { .id = ARK_TAG_INT32, .floats = {AINT32_POS} } },
+        }, "1234.00px" },
+    { { ._left = OPT_LEN_VP_NEG, ._top = OPT_LEN_VP_NEG, ._right = OPT_LEN_VP_NEG, ._bottom = OPT_LEN_VP_NEG,
+        ._start = {.tag = ARK_TAG_OBJECT, .value = { .id = ARK_TAG_FLOAT32, .floats = {AFLT32_NEG} } },
+        ._end = {.tag = ARK_TAG_OBJECT, .value = { .id = ARK_TAG_FLOAT32, .floats = {AFLT32_NEG} } },
+        }, DEFAULT_PADDING },
+    { { ._left = OPT_LEN_PX_NEG, ._top = OPT_LEN_PX_NEG, ._right = OPT_LEN_PX_NEG, ._bottom = OPT_LEN_PX_NEG,
+        ._start = {.tag = ARK_TAG_OBJECT, .value = { .id = ARK_TAG_INT32, .floats = {AINT32_NEG} } },
+        ._end = {.tag = ARK_TAG_OBJECT, .value = { .id = ARK_TAG_INT32, .floats = {AINT32_NEG} } },
+        }, DEFAULT_PADDING },
     };
 
     ASSERT_NE(modifier_->setIndicator, nullptr);
@@ -264,16 +276,59 @@ HWTEST_F(SwiperModifierTest, SwiperModifierTest5_dot_len, TestSize.Level1)
     EXPECT_EQ(checkVal1, "true");
 
     static const std::vector<std::string> keys = { "left", "right", "top", "bottom",
-        "itemWidth", "itemHeight", "selectedItemWidth", "selectedItemHeight"
         // "start", "end" - these fields are not supported in SwiperPattern::GetDotIndicatorStyle()
     };
-    for (const auto &item: testPlan) {
-        Type_SwiperAttribute_indicator_Arg0 arkParam = { .selector = 0, .value0 = item.first };
+    for (const auto &[dot, expect]: testPlan) {
+        Type_SwiperAttribute_indicator_Arg0 arkParam = { .selector = 0, .value0 = dot };
         modifier_->setIndicator(node_, &arkParam);
         auto strWithObj = GetStringAttribute(node_, PROP_NAME);
         for (const auto &nameKey: keys) {
-            auto checkVal1 = GetStringAttribute(strWithObj, nameKey);
-            EXPECT_EQ(checkVal1, item.second);
+            auto checkVal2 = GetStringAttribute(strWithObj, nameKey);
+            EXPECT_EQ(checkVal2, expect);
+        }
+    }
+}
+
+/**
+ * @tc.name: SwiperModifierTest5_dot_size
+ * @tc.desc: Check the functionality of SwiperModifier.IndicatorImpl with Dot type, the size's subattr
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModifierTest, SwiperModifierTest5_dot_size, TestSize.Level1)
+{
+    typedef std::tuple<Ark_DotIndicator, std::string> OneTestStep;
+    static const std::string PROP_NAME("indicator");
+    static const std::string DEFAULT_SIZE = g_swiperDefaultSize.ToString();
+    static const std::vector<OneTestStep> testPlan = {
+    { { ._itemWidth = OPT_LEN_VP_POS, ._itemHeight = OPT_LEN_VP_POS,
+        ._selectedItemWidth = OPT_LEN_VP_POS, ._selectedItemHeight = OPT_LEN_VP_POS,
+        }, "1.23vp" },
+    { { ._itemWidth = OPT_LEN_PX_POS, ._itemHeight = OPT_LEN_PX_POS,
+        ._selectedItemWidth = OPT_LEN_PX_POS, ._selectedItemHeight = OPT_LEN_PX_POS,
+        }, "1234.00px" },
+    { { ._itemWidth = OPT_LEN_VP_NEG, ._itemHeight = OPT_LEN_VP_NEG,
+        ._selectedItemWidth = OPT_LEN_VP_NEG, ._selectedItemHeight = OPT_LEN_VP_NEG,
+        }, DEFAULT_SIZE },
+    { { ._itemWidth = OPT_LEN_PX_NEG, ._itemHeight = OPT_LEN_PX_NEG,
+        ._selectedItemWidth = OPT_LEN_PX_NEG, ._selectedItemHeight = OPT_LEN_PX_NEG,
+        }, DEFAULT_SIZE },
+    };
+
+    ASSERT_NE(modifier_->setIndicator, nullptr);
+
+    auto checkVal1 = GetStringAttribute(node_, "indicator");
+    EXPECT_EQ(checkVal1, "true");
+
+    static const std::vector<std::string> keys = {
+        "itemWidth", "itemHeight", "selectedItemWidth", "selectedItemHeight"
+    };
+    for (const auto &[dot, expect]: testPlan) {
+        Type_SwiperAttribute_indicator_Arg0 arkParam = { .selector = 0, .value0 = dot };
+        modifier_->setIndicator(node_, &arkParam);
+        auto strWithObj = GetStringAttribute(node_, PROP_NAME);
+        for (const auto &nameKey: keys) {
+            auto checkVal2 = GetStringAttribute(strWithObj, nameKey);
+            EXPECT_EQ(checkVal2, expect);
         }
     }
 }
@@ -318,8 +373,7 @@ HWTEST_F(SwiperModifierTest, SwiperModifierTest5_dot_color, TestSize.Level1)
         EXPECT_EQ(checkVal3, "#FF007DFF");
     }
 
-    for (const auto &item: testPlan) {
-        auto [arcResColor, expected] = item;
+    for (const auto &[arcResColor, expected]: testPlan) {
         Ark_DotIndicator dot = {
             ._color = {.tag = ARK_TAG_OBJECT, .value = { arcResColor} },
             ._selectedColor = { .tag = ARK_TAG_OBJECT, .value = { arcResColor} }
@@ -336,7 +390,7 @@ HWTEST_F(SwiperModifierTest, SwiperModifierTest5_dot_color, TestSize.Level1)
 
 /**
  * @tc.name: SwiperModifierTest5_dot_other
- * @tc.desc: Check the functionality of SwiperModifier.IndicatorImpl with Dot type, the other type subattr
+ * @tc.desc: Check the functionality of SwiperModifier.IndicatorImpl with Dot type, the other subattr
  * @tc.type: FUNC
  */
 HWTEST_F(SwiperModifierTest, SwiperModifierTest5_dot_other, TestSize.Level1)
@@ -357,8 +411,7 @@ HWTEST_F(SwiperModifierTest, SwiperModifierTest5_dot_other, TestSize.Level1)
     auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal1, "true");
 
-    for (const auto &item: testPlan) {
-        auto [dot, expectMask, expectCount] = item;
+    for (const auto &[dot, expectMask, expectCount]: testPlan) {
         Type_SwiperAttribute_indicator_Arg0 arkParam = { .selector = 0, .value0 = dot };
         modifier_->setIndicator(node_, &arkParam);
         auto strWithObj = GetStringAttribute(node_, PROP_NAME);
