@@ -473,7 +473,7 @@ public:
     void SetPaintRect(const RoundRect& rect)
     {
         if (!focusPaintParamsPtr_) {
-            focusPaintParamsPtr_ = std::unique_ptr<FocusPaintParam>();
+            focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
         }
         CHECK_NULL_VOID(focusPaintParamsPtr_);
         focusPaintParamsPtr_->SetPaintRect(rect);
@@ -481,7 +481,7 @@ public:
     void SetPaintColor(const Color& color)
     {
         if (!focusPaintParamsPtr_) {
-            focusPaintParamsPtr_ = std::unique_ptr<FocusPaintParam>();
+            focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
         }
         CHECK_NULL_VOID(focusPaintParamsPtr_);
         focusPaintParamsPtr_->SetPaintColor(color);
@@ -489,7 +489,7 @@ public:
     void SetPaintWidth(const Dimension& width)
     {
         if (!focusPaintParamsPtr_) {
-            focusPaintParamsPtr_ = std::unique_ptr<FocusPaintParam>();
+            focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
         }
         CHECK_NULL_VOID(focusPaintParamsPtr_);
         focusPaintParamsPtr_->SetPaintWidth(width);
@@ -497,7 +497,7 @@ public:
     void SetFocusPadding(const Dimension& padding)
     {
         if (!focusPaintParamsPtr_) {
-            focusPaintParamsPtr_ = std::unique_ptr<FocusPaintParam>();
+            focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
         }
         CHECK_NULL_VOID(focusPaintParamsPtr_);
         focusPaintParamsPtr_->SetFocusPadding(padding);
