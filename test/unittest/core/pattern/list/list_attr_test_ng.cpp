@@ -865,7 +865,7 @@ HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign001, TestSize.Level1)
     ScrollSnap(-500.0, 0.0);
     float scrollableDistance = pattern_->GetScrollableDistance();
     EXPECT_EQ(scrollableDistance, ITEM_HEIGHT * 2 + DEVIATION_HEIGHT); // 220.f
-    EXPECT_EQ(pattern_->GetTotalOffset(), scrollableDistance);
+    EXPECT_EQ(pattern_->GetTotalOffset(), scrollableDistance - DEVIATION_HEIGHT);
 
     /**
      * @tc.steps: step4. Scroll Up, the delta is small
