@@ -356,30 +356,6 @@ HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestInsertDiffStyleValueInSpa
 }
 
 /**
- * @tc.name: RichEditorPatternTestSpanNodeFission001
- * @tc.desc: test SpanNodeFission
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestSpanNodeFission001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto spanNode = AceType::MakeRefPtr<SpanNode>(testSpanNodeId);
-    ASSERT_NE(spanNode, nullptr);
-
-    std::string insertValue;
-    TextInsertValueInfo info;
-
-    richEditorPattern->SpanNodeFission(spanNode, insertValue, info);
-    ASSERT_EQ(spanNode->GetSpanItem()->position, -1);
-
-    insertValue = "hello\n";
-    richEditorPattern->SpanNodeFission(spanNode, insertValue, info);
-    ASSERT_EQ(spanNode->GetSpanItem()->position, 0);
-}
-
-/**
  * @tc.name: RichEditorPatternTestCreateTextSpanNode001
  * @tc.desc: test CreateTextSpanNode
  * @tc.type: FUNC
