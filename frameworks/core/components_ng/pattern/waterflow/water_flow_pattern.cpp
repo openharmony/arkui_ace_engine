@@ -190,6 +190,7 @@ RefPtr<NodePaintMethod> WaterFlowPattern::CreateNodePaintMethod()
 
 void WaterFlowPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto layoutProperty = GetLayoutProperty<WaterFlowLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     // SetAxis for scroll event
