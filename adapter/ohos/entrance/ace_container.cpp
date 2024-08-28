@@ -2400,7 +2400,7 @@ void AceContainer::CheckAndSetFontFamily()
         std::lock_guard<std::mutex> lock(g_mutexFormRenderFontFamily);
         fontManager->SetFontFamily(familyName.c_str(), path.c_str());
     } else {
-    fontManager->SetFontFamily(familyName.c_str(), path.c_str());
+        fontManager->SetFontFamily(familyName.c_str(), path.c_str());
     }
 }
 
@@ -2480,7 +2480,7 @@ void AceContainer::SetFontScaleAndWeightScale(
         float fontSizeScale = StringUtils::StringToFloat(parsedConfig.fontScale);
         if (fontSizeScale != pipelineContext_->GetFontScale()) {
             SetFontScale(instanceId_, fontSizeScale);
-        configurationChange.fontScaleUpdate = true;
+            configurationChange.fontScaleUpdate = true;
         }
     }
     if (!parsedConfig.fontWeightScale.empty()) {
@@ -2490,7 +2490,7 @@ void AceContainer::SetFontScaleAndWeightScale(
         float fontWeightScale = StringUtils::StringToFloat(parsedConfig.fontWeightScale);
         if (fontWeightScale != pipelineContext_->GetFontWeightScale()) {
             SetFontWeightScale(instanceId_, fontWeightScale);
-        configurationChange.fontWeightScaleUpdate = true;
+            configurationChange.fontWeightScaleUpdate = true;
         }
     }
 }
