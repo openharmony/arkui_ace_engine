@@ -387,6 +387,7 @@ void SheetPresentationPattern::SetSheetBorderWidth(bool isPartialUpdate)
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    renderContext->SetClipToBounds(true);
     if (sheetStyle.borderWidth.has_value()) {
         auto sheetRadius = sheetTheme->GetSheetRadius();
         auto borderWidth = sheetStyle.borderWidth.value();
