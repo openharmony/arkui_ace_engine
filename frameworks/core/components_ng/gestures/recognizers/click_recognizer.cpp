@@ -89,7 +89,7 @@ ClickRecognizer::ClickRecognizer(int32_t fingers, int32_t count, double distance
     if (fingers_ > MAX_TAP_FINGERS || fingers_ < DEFAULT_TAP_FINGERS) {
         fingers_ = DEFAULT_TAP_FINGERS;
     }
-    if (distanceThreshold_ < 0) {
+    if (distanceThreshold_ <= 0) {
         distanceThreshold_ = std::numeric_limits<double>::infinity();
     }
 }

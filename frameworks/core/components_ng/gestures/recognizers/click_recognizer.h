@@ -65,7 +65,7 @@ public:
     void SetDistanceThreshold(double distanceThreshold)
     {
         distanceThreshold_ = distanceThreshold;
-        if (distanceThreshold_ < 0) {
+        if (distanceThreshold_ <= 0) {
             distanceThreshold_ = std::numeric_limits<double>::infinity();
         }
     }
