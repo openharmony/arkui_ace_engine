@@ -367,11 +367,11 @@ void TextSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reas
     }
 }
 
-void TextSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType)
+void TextSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside)
 {
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
-    if (IsMouseClickDown(sourceType, touchType)) {
+    if (IsMouseClickDown(sourceType, touchType) && touchInside) {
         textPattern->ResetSelection();
     }
     BaseTextSelectOverlay::OnHandleGlobalTouchEvent(sourceType, touchType);

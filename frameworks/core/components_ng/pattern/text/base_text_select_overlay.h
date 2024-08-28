@@ -68,7 +68,7 @@ public:
 
     // override SelectOverlayHolder
     RefPtr<FrameNode> GetOwner() override;
-    void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType) override;
+    void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside = true) override;
     bool CheckTouchInHostNode(const PointF& touchPoint) override;
     void OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode) override;
     bool CheckRestartHiddenHandleTask(int32_t requestCode) override;

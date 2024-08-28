@@ -93,18 +93,19 @@ public:
     }
     virtual void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info = nullptr) {}
     virtual bool CheckTouchInHostNode(const PointF& touchPoint) = 0;
-    virtual void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType) {};
+    virtual void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside = true) {};
     virtual void OnHandleGlobalEvent(const PointF& touchPoint, const PointF& localPoint, const TouchEvent& event)
     {
+        bool touchInside = CheckTouchInHostNode(localPoint);
         if (event.type == TouchType::DOWN) {
-            isIntercept_ = event.sourceType != SourceType::MOUSE && CheckTouchInHostNode(localPoint);
+            isIntercept_ = event.sourceType != SourceType::MOUSE && touchInside;
         }
         CHECK_NULL_VOID(!isIntercept_);
         if (event.type == TouchType::UP) {
             isIntercept_ = false;
         }
         if (event.sourceType == SourceType::MOUSE && event.type == TouchType::DOWN) {
-            OnHandleGlobalTouchEvent(SourceType::MOUSE, TouchType::DOWN);
+            OnHandleGlobalTouchEvent(SourceType::MOUSE, TouchType::DOWN, touchInside);
             return;
         }
         if (event.sourceType == SourceType::TOUCH || event.sourceType == SourceType::TOUCH_PAD) {

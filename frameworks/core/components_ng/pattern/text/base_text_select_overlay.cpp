@@ -204,7 +204,7 @@ RefPtr<FrameNode> BaseTextSelectOverlay::GetOwner()
     return pattern->GetHost();
 }
 
-void BaseTextSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType)
+void BaseTextSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside)
 {
     if (IsMouseClickDown(sourceType, touchType)) {
         CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
