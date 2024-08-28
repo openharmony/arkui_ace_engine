@@ -95,4 +95,20 @@ std::shared_ptr<NavigationInfo> NavigationManager::GetNavigationInfo(const RefPt
     CHECK_NULL_RETURN(stack, nullptr);
     return std::make_shared<NavigationInfo>(navigation->GetInspectorId().value_or(""), stack);
 }
+
+bool NavigationManager::AddInteractiveAnimation(const std::function<void()>& addCallback)
+{
+    if (!isInteractive_) {
+        return false;
+    }
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(
+        FrameNode::GetFrameNode(V2::NAVIGATION_VIEW_ETS_TAG, interactiveAnimationId_));
+    CHECK_NULL_RETURN(navigationGroupNode, false);
+    auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    auto proxy = pattern->GetNavigationProxy();
+    CHECK_NULL_RETURN(proxy, false);
+    proxy->AddInteractiveAnimation(addCallback);
+    return true;
+}
 } // namespace OHOS::Ace::NG

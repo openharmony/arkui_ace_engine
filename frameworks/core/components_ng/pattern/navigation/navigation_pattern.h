@@ -395,6 +395,11 @@ public:
         return isCurTopNewInstance_;
     }
 
+    const RefPtr<NavigationTransitionProxy>& GetNavigationProxy() const
+    {
+        return currentProxy_;
+    }
+
 private:
     void UpdateIsFullPageNavigation(const RefPtr<FrameNode>& host);
     void UpdateSystemBarStyleOnFullPageStateChange(const RefPtr<WindowManager>& windowManager);
