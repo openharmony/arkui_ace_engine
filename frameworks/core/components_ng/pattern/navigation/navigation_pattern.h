@@ -395,6 +395,11 @@ public:
         return isCurTopNewInstance_;
     }
 
+    const RefPtr<NavigationTransitionProxy>& GetNavigationProxy() const
+    {
+        return currentProxy_;
+    }
+
     const std::vector<std::pair<std::string, WeakPtr<UINode>>>& GetAllNavDestinationNodesPrev()
     {
         return navigationStack_->GetAllNavDestinationNodesPrev();

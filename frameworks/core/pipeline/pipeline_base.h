@@ -145,7 +145,15 @@ public:
 
     void PrepareOpenImplicitAnimation();
 
+    virtual bool CatchInteractiveAnimations(const std::function<void()>& animationCallback)
+    {
+        return false;
+    }
+
     void OpenImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
+        const std::function<void()>& finishCallback = nullptr);
+
+    void StartImplicitAnimation(const AnimationOption& operation, const RefPtr<Curve>& curve,
         const std::function<void()>& finishCallback = nullptr);
 
     void PrepareCloseImplicitAnimation();
