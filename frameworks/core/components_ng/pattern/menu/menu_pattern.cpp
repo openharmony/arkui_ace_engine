@@ -516,7 +516,7 @@ void MenuPattern::UpdateMenuItemChildren(RefPtr<UINode>& host)
             CHECK_NULL_VOID(accessibilityProperty);
             accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
         } else if (child->GetTag() == V2::JS_FOR_EACH_ETS_TAG || child->GetTag() == V2::JS_SYNTAX_ITEM_ETS_TAG
-            ||  child->GetTag() == V2::JS_IF_ELSE_ETS_TAG) {
+            ||  child->GetTag() == V2::JS_IF_ELSE_ETS_TAG || child->GetTag() == V2::JS_REPEAT_ETS_TAG) {
             auto nodesSet = AceType::DynamicCast<UINode>(child);
             CHECK_NULL_VOID(nodesSet);
             UpdateMenuItemChildren(nodesSet);
