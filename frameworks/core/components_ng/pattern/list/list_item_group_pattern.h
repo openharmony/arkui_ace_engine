@@ -139,10 +139,10 @@ public:
     {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto prevFooter = header_.Upgrade();
+        auto prevFooter = footer_.Upgrade();
         if (prevFooter) {
             host->RemoveChild(prevFooter);
-            header_ = nullptr;
+            footer_ = nullptr;
         }
     }
 
