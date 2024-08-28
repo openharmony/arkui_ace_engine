@@ -271,6 +271,8 @@ HWTEST_F(MenuExpandTestNg, MenuExpandTestNg004, TestSize.Level1)
      */
     menuItemPattern_->ShowSubMenu();
     menuItemPattern_->CloseMenu();
+    menuItemPattern_->OnHover(true);
+    menuItemPattern_->OnHover(false);
     EXPECT_EQ(isSubMenuBuilded_, true);
 }
 

@@ -43,11 +43,82 @@ RefPtr<PipelineContext> GetMainPipelineContext()
         CHECK_NULL_RETURN(parentContainer, nullptr);
         context = AceType::DynamicCast<PipelineContext>(parentContainer->GetPipelineContext());
     } else {
-        context = PipelineContext::GetCurrentContext();
+        context = PipelineContext::GetCurrentContextSafelyWithCheck();
     }
     return context;
 }
 } // namespace
+
+void ToastPattern::InitWrapperRect(LayoutWrapper* layoutWrapper, const RefPtr<ToastLayoutProperty>& toastProps)
+{
+    // init toast wrapper rect with different settings.
+    auto pipelineContext =
+        IsDefaultToast() ? PipelineContext::GetCurrentContextSafelyWithCheck() : GetMainPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto safeAreaManager = pipelineContext->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
+    float safeAreaTop = safeAreaManager->GetSystemSafeArea().top_.Length();
+    const auto& safeArea = toastProps->GetSafeAreaInsets();
+    // Default Toast need to avoid keyboard, but the Top mode doesn't need.
+    float safeAreaBottom =
+        safeArea ? safeArea->bottom_.Length() : safeAreaManager->GetSafeAreaWithoutProcess().bottom_.Length();
+    wrapperRect_ = pipelineContext->GetDisplayWindowRectInfo();
+    wrapperRect_.SetRect(wrapperRect_.Left(), safeAreaTop,
+        pipelineContext->GetRootWidth(), pipelineContext->GetRootHeight() - safeAreaTop - safeAreaBottom);
+    isHoverMode_ = pipelineContext->IsHalfFoldHoverStatus();
+    if (isHoverMode_ && toastInfo_.enableHoverMode) {
+        UpdateHoverModeRect(toastProps, safeAreaManager, safeAreaTop, safeAreaBottom);
+    }
+}
+
+void ToastPattern::UpdateHoverModeRect(const RefPtr<ToastLayoutProperty>& toastProps,
+    const RefPtr<SafeAreaManager>& safeAreaManager, float safeAreaTop, float safeAreaBottom)
+{
+    auto hoverModeArea = toastProps->GetHoverModeAreaValue(HoverModeAreaType::TOP_SCREEN);
+    auto container = Container::CurrentSafelyWithCheck();
+    auto displayInfo = container->GetDisplayInfo();
+    auto foldCreaseRects = displayInfo->GetCurrentFoldCreaseRegion();
+    float foldCreaseTop = 0.0f;
+    float foldCreaseBottom = 0.0f;
+    if (!foldCreaseRects.empty()) {
+        auto foldCrease = foldCreaseRects.front();
+        foldCreaseTop = foldCrease.Top();
+        foldCreaseBottom = foldCrease.Bottom();
+    }
+    bool isKeyboardShow = false;
+    switch (hoverModeArea) {
+        case HoverModeAreaType::TOP_SCREEN:
+            wrapperRect_.SetRect(wrapperRect_.Left(), safeAreaTop, wrapperRect_.Width(), foldCreaseTop - safeAreaTop);
+            break;
+        case HoverModeAreaType::BOTTOM_SCREEN:
+            isKeyboardShow = safeAreaManager->GetKeyboardInset().IsValid();
+            // if keyboard is show, wrapper rect change to the up half screen.
+            if (isKeyboardShow && IsDefaultToast()) {
+                wrapperRect_.SetRect(wrapperRect_.Left(), safeAreaTop,
+                    wrapperRect_.Width(), foldCreaseTop - safeAreaTop);
+            } else {
+                wrapperRect_.SetRect(wrapperRect_.Left(), foldCreaseBottom,
+                    wrapperRect_.Width(), wrapperRect_.Height() - foldCreaseBottom + safeAreaTop);
+            }
+            break;
+        default:
+            break;
+    }
+}
+void ToastPattern::FoldStatusChangedAnimation()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    AnimationOption option;
+    auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.35f, 1.0f, 0.0f);
+    option.SetCurve(curve);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    AnimationUtils::Animate(option, [host, context]() {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        context->FlushUITasks();
+    });
+}
 
 bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& changeConfig)
 {
@@ -74,7 +145,7 @@ Dimension ToastPattern::GetOffsetX(const RefPtr<LayoutWrapper>& layoutWrapper)
     CHECK_NULL_RETURN(context, Dimension(0.0));
     auto text = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_RETURN(text, Dimension(0.0));
-    auto rootWidth = context->GetRootWidth();
+    auto rootWidth = wrapperRect_.Width();
     auto toastProp = DynamicCast<ToastLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(toastProp, Dimension(0.0));
     auto textWidth = text->GetGeometryNode()->GetMarginFrameSize().Width();
@@ -98,24 +169,16 @@ Dimension ToastPattern::GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper)
     CHECK_NULL_RETURN(context, Dimension(0.0));
     auto text = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_RETURN(text, Dimension(0.0));
-    auto rootHeight = context->GetRootHeight();
+    auto rootHeight = wrapperRect_.Height();
     auto toastProp = DynamicCast<ToastLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(toastProp, Dimension(0.0));
     auto textHeight = text->GetGeometryNode()->GetMarginFrameSize().Height();
     Dimension offsetY;
-    auto safeAreaManager = context->GetSafeAreaManager();
-    auto safeAreaOffset = safeAreaManager ? safeAreaManager->GetSafeAreaWithoutProcess().bottom_.Length() : 0;
-    auto showMode = toastProp->GetShowModeValue(ToastShowMode::DEFAULT);
-    if (showMode == ToastShowMode::DEFAULT) {
-        auto keyboardInset = safeAreaManager ? safeAreaManager->GetKeyboardInset().Length() : 0;
-        auto keyboardOffset = GreatNotEqual(keyboardInset, 0) ? keyboardInset : 0;
-        safeAreaOffset = safeAreaOffset + keyboardOffset;
-    }
     if (!toastProp->HasToastAlignment()) {
         auto toastBottom = GetBottomValue(layoutWrapper);
         toastBottom_ = toastBottom;
         if (context->GetMinPlatformVersion() > API_VERSION_9) {
-            offsetY = Dimension(rootHeight - toastBottom - textHeight - safeAreaOffset);
+            offsetY = Dimension(rootHeight - toastBottom - textHeight);
         } else {
             offsetY = Dimension(rootHeight - toastBottom);
         }
@@ -123,17 +186,16 @@ Dimension ToastPattern::GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper)
         Alignment alignment = toastProp->GetToastAlignmentValue(Alignment::BOTTOM_CENTER);
         if (alignment == Alignment::TOP_LEFT || alignment == Alignment::TOP_CENTER ||
             alignment == Alignment::TOP_RIGHT) {
-            // Top Needs Avoid System Navigation Bar
-            auto safeAreaManager = context->GetSafeAreaManager();
-            auto sysTop = safeAreaManager ? safeAreaManager->GetSystemSafeArea().top_.Length() : 0.0f;
-            offsetY = Dimension(sysTop);
+            offsetY = Dimension(0.0f);
         } else if (alignment == Alignment::CENTER_LEFT || alignment == Alignment::CENTER ||
                    alignment == Alignment::CENTER_RIGHT) {
-            offsetY = Dimension((rootHeight - textHeight - safeAreaOffset) / 2.0f);
+            offsetY = Dimension((rootHeight - textHeight) / 2.0f);
         } else {
-            offsetY = Dimension(rootHeight - textHeight - safeAreaOffset);
+            offsetY = Dimension(rootHeight - textHeight);
         }
     }
+    // add toast wrapper rect's offsetY.
+    offsetY += Dimension(wrapperRect_.Top());
     return offsetY + toastProp->GetToastOffsetValue(DimensionOffset()).GetY();
 }
 
@@ -142,7 +204,7 @@ double ToastPattern::GetBottomValue(const RefPtr<LayoutWrapper>& layoutWrapper)
     // Obtain the height relative to the main window
     auto pipeline = IsDefaultToast() ? PipelineContext::GetCurrentContext() : GetMainPipelineContext();
     CHECK_NULL_RETURN(pipeline, 0.0);
-    auto rootHeight = Dimension(pipeline->GetRootHeight());
+    auto rootHeight = Dimension(wrapperRect_.Height());
     auto toastTheme = pipeline->GetTheme<ToastTheme>();
     CHECK_NULL_RETURN(toastTheme, 0.0);
 
@@ -178,9 +240,7 @@ void ToastPattern::UpdateToastSize(const RefPtr<FrameNode>& toast)
     CHECK_NULL_VOID(toast);
     auto toastProperty = toast->GetLayoutProperty<ToastLayoutProperty>();
     CHECK_NULL_VOID(toastProperty);
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto rootWidth = Dimension(context->GetRootWidth());
+    auto rootWidth = Dimension(wrapperRect_.Width());
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto limitWidth = Dimension(GetTextMaxWidth());
         toastProperty->UpdateUserDefinedIdealSize(CalcSize(NG::CalcLength(limitWidth), std::nullopt));
@@ -264,6 +324,11 @@ void ToastPattern::OnAttachToFrameNode()
             }
         });
     UpdateFoldDisplayModeChangedCallbackId(callbackId);
+    auto halfFoldHoverCallbackId =
+        pipeline->RegisterHalfFoldHoverChangedCallback([weak = WeakClaim(this), this](bool isHoverMode) {
+            this->FoldStatusChangedAnimation();
+        });
+    UpdateHalfFoldHoverChangedCallbackId(halfFoldHoverCallbackId);
 }
 
 void ToastPattern::OnDetachFromFrameNode(FrameNode* node)
@@ -275,6 +340,9 @@ void ToastPattern::OnDetachFromFrameNode(FrameNode* node)
     CHECK_NULL_VOID(pipeline);
     if (HasFoldDisplayModeChangedCallbackId()) {
         pipeline->UnRegisterFoldDisplayModeChangedCallback(foldDisplayModeChangedCallbackId_.value_or(-1));
+    }
+    if (HasHalfFoldHoverChangedCallbackId()) {
+        pipeline->UnRegisterHalfFoldHoverChangedCallback(halfFoldHoverChangedCallbackId_.value_or(-1));
     }
 }
 
@@ -372,5 +440,34 @@ void ToastPattern::DumpInfo()
     auto offset = toastProp->GetToastOffsetValue(DimensionOffset());
     DumpLog::GetInstance().AddDesc(
         "Offset: { dx: " + offset.GetX().ToString() + " dy: " + offset.GetY().ToString() + " }");
+    std::string enableHoverMode = toastInfo_.enableHoverMode ? "true" : "false";
+    DumpLog::GetInstance().AddDesc("EnableHoverMode: " + enableHoverMode);
+    std::string hoverModeAreaType =
+        toastInfo_.hoverModeArea == HoverModeAreaType::TOP_SCREEN ? "TOP_SCREEN" : "BOTTOM_SCREEN";
+    DumpLog::GetInstance().AddDesc("HoverModeArea: " + hoverModeAreaType);
+}
+
+void ToastPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("Message", toastInfo_.message.c_str());
+    json->Put("Duration", toastInfo_.duration);
+    json->Put("Bottom", toastInfo_.bottom.c_str());
+    json->Put("IsRightToLeft", toastInfo_.isRightToLeft ? "true" : "false");
+    json->Put("ShowMode", toastInfo_.showMode == ToastShowMode::DEFAULT ? "DEFAULT" : "TOP_MOST");
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto toastProp = DynamicCast<ToastLayoutProperty>(host->GetLayoutProperty());
+    CHECK_NULL_VOID(toastProp);
+    if (!toastProp->HasToastAlignment()) {
+        json->Put("Alignment", "NONE");
+    } else {
+        json->Put(
+            "Alignment", toastProp->GetToastAlignmentValue().GetAlignmentStr(toastProp->GetLayoutDirection()).c_str());
+    }
+    auto offset = toastProp->GetToastOffsetValue(DimensionOffset());
+    std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
+    children->Put("dx", offset.GetX().ToString().c_str());
+    children->Put("dy", offset.GetY().ToString().c_str());
+    json->Put("Offset", children);
 }
 } // namespace OHOS::Ace::NG

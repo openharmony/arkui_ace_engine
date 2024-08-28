@@ -15,7 +15,6 @@
 
 #include "core/components/display/display_element.h"
 
-#include "core/components/display/render_display.h"
 #include "core/components/tween/tween_component.h"
 
 namespace OHOS::Ace {

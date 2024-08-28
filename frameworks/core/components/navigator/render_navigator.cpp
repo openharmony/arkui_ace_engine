@@ -16,9 +16,7 @@
 #include "core/components/navigator/render_navigator.h"
 
 #include "base/log/event_report.h"
-#include "core/components/common/properties/alignment.h"
 #include "core/components/page/page_target.h"
-#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 

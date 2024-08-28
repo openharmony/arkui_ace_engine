@@ -15,7 +15,6 @@
 
 #include "core/components/scroll/scroll_position_controller.h"
 
-#include "core/animation/curves.h"
 #include "core/components/scroll/render_scroll.h"
 
 namespace OHOS::Ace {

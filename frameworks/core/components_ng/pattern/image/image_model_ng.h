@@ -95,6 +95,7 @@ public:
     static void SetColorFilterMatrix(FrameNode *frameNode, const std::vector<float> &matrix);
     static void SetDraggable(FrameNode *frameNode, bool draggable);
     static void SetBackBorder(FrameNode *frameNode);
+    static void ResetBackBorder(FrameNode *frameNode);
     static bool IsSrcSvgImage(FrameNode* frameNode);
     static void SetOnComplete(FrameNode* frameNode, std::function<void(const LoadImageSuccessEvent& info)>&& callback);
     static void SetOnError(FrameNode* frameNode, std::function<void(const LoadImageFailEvent& info)>&& callback);

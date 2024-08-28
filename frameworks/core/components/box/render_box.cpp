@@ -15,34 +15,12 @@
 
 #include "core/components/box/render_box.h"
 
-#include <algorithm>
-#include <cinttypes>
-#include <cstddef>
-#include <cstdint>
-
-#include "base/geometry/offset.h"
 #include "base/log/event_report.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-#include "core/animation/property_animatable_helper.h"
-#include "core/common/clipboard/clipboard_proxy.h"
-#include "core/components/box/box_component.h"
 #include "core/components/box/box_component_helper.h"
 #include "core/components/container_modal/container_modal_constants.h"
-#include "core/components/root/root_element.h"
 #include "core/components/text_field/render_text_field.h"
-#include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/components_v2/list/render_list.h"
-#include "core/event/axis_event.h"
-#include "core/event/mouse_event.h"
-#include "core/gestures/click_recognizer.h"
-#include "core/gestures/drag_event.h"
-#include "core/gestures/exclusive_recognizer.h"
-#include "core/gestures/gesture_recognizer.h"
-#include "core/gestures/long_press_recognizer.h"
-#include "core/gestures/pan_recognizer.h"
 #include "core/gestures/parallel_recognizer.h"
-#include "core/gestures/sequenced_recognizer.h"
 
 namespace OHOS::Ace {
 namespace {

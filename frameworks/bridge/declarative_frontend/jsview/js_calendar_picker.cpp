@@ -186,18 +186,25 @@ void JSCalendarPicker::JSBind(BindingTarget globalObj)
     JSClass<JSCalendarPicker>::StaticMethod("onChange", &JSCalendarPicker::SetOnChange);
     JSClass<JSCalendarPicker>::StaticMethod("border", &JSCalendarPicker::SetBorder);
     JSClass<JSCalendarPicker>::StaticMethod("padding", &JSCalendarPicker::JsPadding);
+    JSClass<JSCalendarPicker>::StaticMethod("height", &JSCalendarPicker::JsHeight);
+    JSClass<JSCalendarPicker>::StaticMethod("borderColor", &JSCalendarPicker::JsBorderColor);
+    JSClass<JSCalendarPicker>::StaticMethod("borderRadius", &JSCalendarPicker::JsBorderRadius);
     JSClass<JSCalendarPicker>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSCalendarPicker::SetBorder(const JSCallbackInfo& info)
 {
     if (!info[0]->IsObject()) {
+        CalendarPickerModel::GetInstance()->ClearBorder();
         return;
     }
     JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
     auto valueWidth = object->GetProperty("width");
-    if (!valueWidth->IsUndefined()) {
+    CalcDimension value;
+    if (ParseJsDimensionVpNG(valueWidth, value) || valueWidth->IsObject()) {
         ParseBorderWidth(valueWidth);
+    } else {
+        CalendarPickerModel::GetInstance()->ClearBorderWidth();
     }
 
     // use default value when undefined.
@@ -298,19 +305,20 @@ void JSCalendarPicker::JsPadding(const JSCallbackInfo& info)
         JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info[0]);
 
         CalcDimension leftDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("left"), leftDimen)) {
+        if (ParseJsDimensionVpNG(paddingObj->GetProperty("left"), leftDimen) && leftDimen.IsNonNegative()) {
             left = leftDimen;
         }
         CalcDimension rightDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("right"), rightDimen)) {
+        if (ParseJsDimensionVpNG(paddingObj->GetProperty("right"), rightDimen) && rightDimen.IsNonNegative()) {
             right = rightDimen;
         }
         CalcDimension topDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("top"), topDimen)) {
+        if (ParseJsDimensionVpNG(paddingObj->GetProperty("top"), topDimen) && topDimen.IsNonNegative()) {
             top = topDimen;
         }
         CalcDimension bottomDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("bottom"), bottomDimen)) {
+        if (ParseJsDimensionVpNG(paddingObj->GetProperty("bottom"), bottomDimen) &&
+            bottomDimen.IsNonNegative()) {
             bottom = bottomDimen;
         }
         if (left.has_value() || right.has_value() || top.has_value() || bottom.has_value()) {
@@ -321,11 +329,45 @@ void JSCalendarPicker::JsPadding(const JSCallbackInfo& info)
     }
 
     CalcDimension length(-1);
-    ParseJsDimensionVp(info[0], length);
-    if (length.IsNonNegative()) {
+    if (ParseJsDimensionVpNG(info[0], length) && length.IsNonNegative()) {
         padding.SetEdges(NG::CalcLength(length));
+        CalendarPickerModel::GetInstance()->SetPadding(padding);
+    } else {
+        CalendarPickerModel::GetInstance()->ClearPadding();
     }
-    CalendarPickerModel::GetInstance()->SetPadding(padding);
+}
+
+void JSCalendarPicker::JsHeight(const JSCallbackInfo& info)
+{
+    auto jsValue = info[0];
+    CalcDimension value;
+    if (ParseJsDimensionVpNG(jsValue, value) && value.IsValid()) {
+        JSViewAbstract::JsHeight(info);
+    } else {
+        CalendarPickerModel::GetInstance()->ClearHeight();
+    }
+}
+
+void JSCalendarPicker::JsBorderColor(const JSCallbackInfo& info)
+{
+    Color borderColor;
+    auto jsValue = info[0];
+    if (ParseJsColor(jsValue, borderColor) || jsValue->IsObject()) {
+        JSViewAbstract::JsBorderColor(info);
+    } else {
+        CalendarPickerModel::GetInstance()->ClearBorderColor();
+    }
+}
+
+void JSCalendarPicker::JsBorderRadius(const JSCallbackInfo& info)
+{
+    auto jsValue = info[0];
+    CalcDimension value;
+    if (ParseJsDimensionVpNG(jsValue, value) || jsValue->IsObject()) {
+        JSViewAbstract::JsBorderRadius(info);
+    } else {
+        CalendarPickerModel::GetInstance()->ClearBorderRadius();
+    }
 }
 
 NG::PaddingProperty JSCalendarPicker::SetPaddings(const std::optional<CalcDimension>& top,

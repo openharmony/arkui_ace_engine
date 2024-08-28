@@ -83,7 +83,7 @@ public:
     virtual RefPtr<LayoutWrapperNode> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false);
 
     // Tree operation start.
-    void AddChild(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
+    virtual void AddChild(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
         bool addDefaultTransition = false, bool addModalUiextension = false);
     void AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
     void AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode,
@@ -196,10 +196,10 @@ public:
         RefPtr<ViewDataWrap> viewDataWrap, bool skipSubAutoFillContainer = false, bool needsRecordData = false);
     bool NeedRequestAutoSave();
     // DFX info.
-    void DumpTree(int32_t depth);
+    void DumpTree(int32_t depth, bool hasJson = false);
     virtual bool IsContextTransparent();
 
-    bool DumpTreeById(int32_t depth, const std::string& id);
+    bool DumpTreeById(int32_t depth, const std::string& id, bool hasJson = false);
 
     const std::string& GetTag() const
     {
@@ -352,7 +352,7 @@ public:
 
     virtual void SetJSViewActive(bool active, bool isLazyForEachNode = false);
 
-    virtual void TryVisibleChangeOnDescendant(bool isVisible);
+    virtual void TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleType currentVisibility);
 
     // call by recycle framework.
     virtual void OnRecycle();
@@ -782,7 +782,9 @@ protected:
     virtual void OnContextAttached() {}
     // dump self info.
     virtual void DumpInfo() {}
+    virtual void DumpInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpAdvanceInfo() {}
+    virtual void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) {}
     virtual bool CheckAutoSave()
     {
@@ -802,7 +804,7 @@ protected:
     static void RemoveFromParentCleanly(const RefPtr<UINode>& child, const RefPtr<UINode>& parent);
 
     // update visible change signal to children
-    void UpdateChildrenVisible(bool isVisible) const;
+    void UpdateChildrenVisible(VisibleType preVisibility, VisibleType currentVisibility) const;
 
     void CollectRemovedChildren(const std::list<RefPtr<UINode>>& children,
         std::list<int32_t>& removedElmtId, bool isEntry);

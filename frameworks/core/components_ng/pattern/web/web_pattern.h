@@ -76,6 +76,7 @@ struct ViewDataCommon {
     std::string pageUrl;
     bool isUserSelected = false;
     bool isOtherAccount = false;
+    std::string source;
 };
 
 #ifdef OHOS_STANDARD_SYSTEM
@@ -617,11 +618,15 @@ public:
     void SetAccessibilityState(bool state);
     void UpdateFocusedAccessibilityId(int64_t accessibilityId = -1);
     void OnTooltip(const std::string& tooltip);
+    void OnPopupSize(int32_t x, int32_t y, int32_t width, int32_t height);
+    void OnPopupShow(bool show);
     bool IsDefaultFocusNodeExist();
     bool IsRootNeedExportTexture();
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
     bool Backward();
     void OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMenuOption);
+    void UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+        const NG::OnMenuItemClickCallback&& onMenuItemClick);
     void NotifyForNextTouchEvent() override;
     void CloseKeyboard();
     void CreateOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, int offsetX, int offsetY, int rectWidth,
@@ -804,6 +809,7 @@ private:
     bool CheckZoomStatus(const double& curScale);
     bool ZoomOutAndIn(const double& curScale, double& scale);
     void HandleScaleGestureChange(const GestureEvent& event);
+    double getZoomOffset(double& scale) const;
 
     NG::DragDropInfo HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent>& info);
     void HandleOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info);
@@ -965,7 +971,9 @@ private:
     JsProxyCallback jsProxyCallback_ = nullptr;
     OnControllerAttachedCallback onControllerAttachedCallback_ = nullptr;
     RefPtr<RenderSurface> renderSurface_ = RenderSurface::Create();
+    RefPtr<RenderSurface> popupRenderSurface_ = RenderSurface::Create();
     RefPtr<RenderContext> renderContextForSurface_;
+    RefPtr<RenderContext> renderContextForPopupSurface_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> hoverEvent_;
@@ -1022,6 +1030,7 @@ private:
     int32_t tooltipId_ = -1;
     int32_t mouseHoveredX_ = -1;
     int32_t mouseHoveredY_ = -1;
+    int32_t mouseEventDeviceId_ = -1;
     int64_t tooltipTimestamp_ = -1;
     int32_t parentNWebId_ = -1;
     bool isInWindowDrag_ = false;
@@ -1066,7 +1075,7 @@ private:
     double startPinchScale_ = -1.0;
     double preScale_ = -1.0;
     double pageScale_ = 1.0;
-    int32_t pinchIndex_ = 0;
+    double startPageScale_ = 1.0;
     bool zoomOutSwitch_ = false;
     bool isTouchUpEvent_ = false;
     int32_t zoomStatus_ = 0;
@@ -1097,6 +1106,10 @@ private:
         .scrollLeft = NestedScrollMode::SELF_ONLY,
         .scrollRight = NestedScrollMode::SELF_ONLY,
     };
+
+protected:
+    OnCreateMenuCallback onCreateMenuCallback_;
+    OnMenuItemClickCallback onMenuItemClick_;
 };
 } // namespace OHOS::Ace::NG
 

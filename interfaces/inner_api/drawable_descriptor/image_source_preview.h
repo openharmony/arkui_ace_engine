@@ -113,6 +113,21 @@ public:
         return 0;
     }
 
+    void* GetWritablePixels()
+    {
+        return nullptr;
+    }
+
+    int32_t GetByteCount()
+    {
+        return 0;
+    }
+
+    static std::unique_ptr<PixelMap> Create(const InitializationOptions& opts)
+    {
+        return nullptr;
+    }
+
     static std::unique_ptr<PixelMap> Create(
         const uint32_t* colors, uint32_t colorLength, const InitializationOptions& opts)
     {

@@ -15,10 +15,6 @@
 
 #include "core/components/tip/rosen_render_tip.h"
 
-#include "core/components/common/properties/border.h"
-#include "core/components/common/properties/edge.h"
-#include "core/pipeline/base/rosen_render_context.h"
-
 #define SkPathkCCWDirection SkPathDirection::kCCW
 
 namespace OHOS::Ace {

@@ -20,7 +20,6 @@
 #include "include/core/SkMaskFilter.h"
 #endif
 
-#include "core/pipeline/base/rosen_render_context.h"
 #include "frameworks/core/components/transform/rosen_render_transform.h"
 
 namespace OHOS::Ace {

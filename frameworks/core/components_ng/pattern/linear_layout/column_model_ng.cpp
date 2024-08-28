@@ -74,6 +74,16 @@ void ColumnModelNG::SetJustifyContent(FlexAlign flexAlign)
     ACE_UPDATE_LAYOUT_PROPERTY(LinearLayoutProperty, MainAxisAlign, flexAlign);
 }
 
+void ColumnModelNG::SetIsReverse(bool isReverse)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, IsReverse, isReverse);
+}
+
+void ColumnModelNG::SetIsReverse(FrameNode* frameNode, bool isReverse)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, IsReverse, isReverse, frameNode);
+}
+
 void ColumnModelNG::SetJustifyContent(FrameNode* frameNode, FlexAlign flexAlign)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, MainAxisAlign, flexAlign, frameNode);

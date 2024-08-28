@@ -15,11 +15,8 @@
 
 #include "core/components/xcomponent/xcomponent_element.h"
 
-#include "base/json/json_util.h"
 #include "core/common/container.h"
-#include "core/components/xcomponent/render_xcomponent.h"
 #include "core/components/xcomponent/rosen_render_xcomponent.h"
-#include "core/components/xcomponent/xcomponent_component.h"
 
 namespace OHOS::Ace {
 #ifdef OHOS_STANDARD_SYSTEM

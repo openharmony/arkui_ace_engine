@@ -21,6 +21,7 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_common_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
+#include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
 
 extern "C" {
 CJ_EXPORT void FfiOHOSAceFrameworkToggleCreate(int type, bool isOn);
@@ -33,6 +34,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkToggleSelectedColor(uint32_t color);
 CJ_EXPORT void FfiOHOSAceFrameworkToggleSwitchPointColor(uint32_t color);
 CJ_EXPORT void FfiOHOSAceFrameworkToggleOnChange(void (*callback)(bool isOn));
 CJ_EXPORT void FfiOHOSAceFrameworkTogglePop();
+CJ_EXPORT void FfiToggleSetResponseRegion(CJResponseRegion value);
+CJ_EXPORT void FfiToggleSetResponseRegionArray(VectorStringPtr vecContent);
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_TOGGLE_FFI_H

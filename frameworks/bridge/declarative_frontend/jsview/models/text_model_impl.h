@@ -36,6 +36,8 @@ public:
     void SetTextSelectableMode(TextSelectableMode value) override {};
     void SetItalicFontStyle(Ace::FontStyle value) override;
     void SetFontWeight(FontWeight value) override;
+    void SetVariableFontWeight(int32_t value) override {};
+    void SetEnableVariableFontWeight(bool value) override {};
     void SetMinFontScale(const float value) override;
     void SetMaxFontScale(const float value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;

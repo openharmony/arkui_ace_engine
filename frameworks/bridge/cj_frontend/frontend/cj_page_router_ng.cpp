@@ -31,6 +31,35 @@ using namespace OHOS::Ace::NG;
 namespace OHOS::Ace::Framework {
 constexpr int PAGE_SIZE_TWO = 2;
 
+void UpdateCjPageLifeCycleFuncs(
+    RefPtr<NG::PagePattern> pagePattern, OHOS::wptr<NativeView> weakView, RefPtr<NG::FrameNode> pageNode)
+{
+    CHECK_NULL_VOID(pagePattern);
+    pagePattern->SetOnPageShow([weakView]() {
+        auto view = weakView.promote();
+        CHECK_NULL_VOID(view);
+        view->FireOnShow();
+    });
+    pagePattern->SetOnPageHide([weakView]() {
+        auto view = weakView.promote();
+        CHECK_NULL_VOID(view);
+        view->FireOnHide();
+    });
+    pagePattern->SetOnBackPressed([weakView]() {
+        auto view = weakView.promote();
+        CHECK_NULL_RETURN(view, false);
+        return view->FireOnBackPress();
+    });
+    pagePattern->SetPageTransitionFunc([weakView, weakPage = WeakPtr<NG::FrameNode>(pageNode)]() {
+        auto view = weakView.promote();
+        CHECK_NULL_VOID(view);
+        NG::ScopedViewStackProcessor scopedViewStackProcessor;
+        NG::ViewStackProcessor::GetInstance()->SetPageNode(weakPage.Upgrade());
+        view->FireOnTransition();
+        NG::ViewStackProcessor::GetInstance()->SetPageNode(nullptr);
+    });
+}
+
 bool LoadNativeViewNG(NativeView* view)
 {
     LOGI("LoadNativeView start");
@@ -70,45 +99,12 @@ bool LoadNativeViewNG(NativeView* view)
     }
     pageRootNode->MountToParent(pageNode);
     auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
-    if (!pagePattern) {
-        LOGE("loadCJView fail, pageNode's pattern is null");
-        return false;
-    }
+    CHECK_NULL_RETURN(pagePattern, false);
     OHOS::wptr<NativeView> weak = view;
     view->SetRenderDoneCallback([pagePattern] {
         pagePattern->MarkRenderDone();
     });
-    pagePattern->SetOnPageShow([weak]() {
-        auto view = weak.promote();
-        if (!view) {
-            return;
-        }
-        view->FireOnShow();
-    });
-    pagePattern->SetOnPageHide([weak]() {
-        auto view = weak.promote();
-        if (!view) {
-            return; // maybe released
-        }
-        view->FireOnHide();
-    });
-    pagePattern->SetOnBackPressed([weak]() {
-        auto view = weak.promote();
-        if (!view) {
-            return false;
-        }
-        return view->FireOnBackPress();
-    });
-    pagePattern->SetPageTransitionFunc([weak, weakPage = WeakPtr<NG::FrameNode>(pageNode)]() {
-        auto view = weak.promote();
-        if (!view) {
-            return;
-        }
-        NG::ScopedViewStackProcessor scopedViewStackProcessor;
-        NG::ViewStackProcessor::GetInstance()->SetPageNode(weakPage.Upgrade());
-        view->FireOnTransition();
-        NG::ViewStackProcessor::GetInstance()->SetPageNode(nullptr);
-    });
+    UpdateCjPageLifeCycleFuncs(pagePattern, weak, pageNode);
     pageRouterManager->AddView(view->GetID());
     LOGI("OHOSAceFrameworkNGLoadCJView end.");
     return true;

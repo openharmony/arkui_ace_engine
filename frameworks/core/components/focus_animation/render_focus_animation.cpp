@@ -16,9 +16,7 @@
 #include "core/components/focus_animation/render_focus_animation.h"
 
 #include "base/log/event_report.h"
-#include "core/components/scroll/render_multi_child_scroll.h"
 #include "core/components/scroll/render_single_child_scroll.h"
-#include "core/components/stack/stack_element.h"
 
 namespace OHOS::Ace {
 namespace {

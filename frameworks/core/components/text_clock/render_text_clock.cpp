@@ -14,15 +14,6 @@
  */
 
 #include "core/components/text_clock/render_text_clock.h"
-#include "core/components/text_clock/text_clock_controller.h"
-
-#include <chrono>
-#include <string>
-#include <sys/time.h>
-
-#include "base/utils/string_utils.h"
-#include "core/components/image/image_component.h"
-#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 namespace {

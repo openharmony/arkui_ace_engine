@@ -15,13 +15,7 @@
 
 #include "core/components/option/render_option.h"
 
-#include "base/geometry/offset.h"
-#include "base/log/log.h"
-#include "base/utils/string_utils.h"
-#include "base/utils/system_properties.h"
-#include "core/components/scroll/render_scroll.h"
 #include "core/components/select_popup/render_select_popup.h"
-#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 namespace {

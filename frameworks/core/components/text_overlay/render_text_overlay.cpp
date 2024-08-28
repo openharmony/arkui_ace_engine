@@ -15,7 +15,6 @@
 
 #include "core/components/text_overlay/render_text_overlay.h"
 
-#include "base/geometry/rect.h"
 #include "core/animation/scheduler.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/focus_collaboration/render_focus_collaboration.h"

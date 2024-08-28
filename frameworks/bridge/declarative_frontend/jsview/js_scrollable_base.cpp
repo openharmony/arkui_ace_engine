@@ -75,6 +75,23 @@ void JSScrollableBase::JsOnDidScroll(const JSCallbackInfo& args)
     }
 }
 
+void JSScrollableBase::SetFadingEdge(const JSCallbackInfo& info)
+{
+    bool fadingEdge = false;
+    CalcDimension fadingEdgeLength = Dimension(32.0, DimensionUnit::VP); // 32.0: default fading edge length
+    if (info.Length() >= 1) {
+        ParseJsBool(info[0], fadingEdge);
+    }
+    if (info.Length() == 2 && info[1]->IsObject()) { /* 2: parameter count */
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[1]);
+        JSViewAbstract::ParseLengthMetricsToDimension(obj->GetProperty("fadingEdgeLength"), fadingEdgeLength);
+        if (fadingEdgeLength.Value() < 0) {
+            fadingEdgeLength = Dimension(32.0, DimensionUnit::VP); // 32.0: default fading edge length
+        }
+    }
+    NG::ScrollableModelNG::SetFadingEdge(fadingEdge, fadingEdgeLength);
+}
+
 void JSScrollableBase::JSBind(BindingTarget globalObj)
 {
     MethodOptions opt = MethodOptions::NONE;
@@ -82,6 +99,7 @@ void JSScrollableBase::JSBind(BindingTarget globalObj)
     JSClass<JSScrollableBase>::StaticMethod("flingSpeedLimit", &JSScrollableBase::JSFlingSpeedLimit, opt);
     JSClass<JSScrollableBase>::StaticMethod("onWillScroll", &JSScrollableBase::JsOnWillScroll);
     JSClass<JSScrollableBase>::StaticMethod("onDidScroll", &JSScrollableBase::JsOnDidScroll);
+    JSClass<JSScrollableBase>::StaticMethod("fadingEdge", &JSScrollableBase::SetFadingEdge);
     JSClass<JSScrollableBase>::InheritAndBind<JSContainerBase>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

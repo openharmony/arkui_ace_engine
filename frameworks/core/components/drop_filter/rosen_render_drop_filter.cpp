@@ -17,10 +17,6 @@
 
 #include "render_service_client/core/ui/rs_node.h"
 
-#include "base/log/dump_log.h"
-#include "core/components/drop_filter/drop_filter_component.h"
-#include "core/pipeline/base/rosen_render_context.h"
-
 namespace OHOS::Ace {
 
 void RosenRenderDropFilter::Update(const RefPtr<Component>& component)

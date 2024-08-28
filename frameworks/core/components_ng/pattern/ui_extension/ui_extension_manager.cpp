@@ -201,4 +201,35 @@ bool UIExtensionManager::IsShowPlaceholder(int32_t nodeId)
     }
     return true;
 }
+
+void UIExtensionManager::UpdateSessionViewportConfig(const ViewportConfig& config)
+{
+    for (const auto& it : aliveUIExtensions_) {
+        auto uiExtension = it.second.Upgrade();
+        if (uiExtension == nullptr) {
+            continue;
+        }
+        SessionViewportConfig newConfig = {
+            .isDensityFollowHost_ = uiExtension->GetDensityDpi(),
+            .density_ = config.Density(),
+            .displayId_ = 0,
+            .orientation_ = config.Orientation(),
+            .transform_ = config.TransformHint(),
+        };
+        auto oldConfig = uiExtension->GetSessionViewportConfig();
+        if (oldConfig.density_ == newConfig.density_ && oldConfig.transform_ == newConfig.transform_ &&
+            oldConfig.orientation_ == newConfig.orientation_) {
+            continue;
+        }
+        uiExtension->SetSessionViewportConfig(newConfig);
+        if (uiExtension->IsForeground()) {
+            auto sessionWrapper = uiExtension->GetSessionWrapper();
+            if (sessionWrapper && sessionWrapper->IsSessionValid()) {
+                sessionWrapper->UpdateSessionViewportConfig();
+            }
+        } else {
+            uiExtension->SetViewportConfigChanged(true);
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

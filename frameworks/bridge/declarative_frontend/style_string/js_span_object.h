@@ -208,7 +208,26 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(JSTextShadowSpan);
     RefPtr<TextShadowSpan> textShadowSpan_;
 };
+class JSBackgroundColorSpan : public virtual AceType {
+    DECLARE_ACE_TYPE(JSBackgroundColorSpan, AceType)
 
+public:
+    JSBackgroundColorSpan() = default;
+    ~JSBackgroundColorSpan() override = default;
+    static void Constructor(const JSCallbackInfo& args);
+    static void Destructor(JSBackgroundColorSpan* backgroundColorSpan);
+    static void JSBind(BindingTarget globalObj);
+    static RefPtr<BackgroundColorSpan> ParseJSBackgroundColorSpan(const JSCallbackInfo& info);
+    void GetBackgroundColor(const JSCallbackInfo& info);
+    void SetBackgroundColor(const JSCallbackInfo& info);
+
+    RefPtr<BackgroundColorSpan>& GetBackgroundColorSpan();
+    void SetBackgroundColorSpan(const RefPtr<BackgroundColorSpan>& backgroundColorSpan);
+
+private:
+    ACE_DISALLOW_COPY_AND_MOVE(JSBackgroundColorSpan);
+    RefPtr<BackgroundColorSpan> backgroundColorSpan_;
+};
 class JSLineHeightSpan : public virtual AceType {
     DECLARE_ACE_TYPE(JSLineHeightSpan, AceType)
 
@@ -308,6 +327,26 @@ public:
 private:
     ACE_DISALLOW_COPY_AND_MOVE(JSExtSpan);
     JSRef<JSObject> extSpanObj_;
+};
+
+class JSUrlSpan : public virtual AceType {
+    DECLARE_ACE_TYPE(JSUrlSpan, AceType)
+
+public:
+    JSUrlSpan() = default;
+    ~JSUrlSpan() override = default;
+    static void Constructor(const JSCallbackInfo& args);
+    static void Destructor(JSUrlSpan* urlAddress);
+    static void JSBind(BindingTarget globalObj);
+    void GetUrlContext(const JSCallbackInfo& info);
+    void SetUrlContext(const JSCallbackInfo& info);
+
+    const RefPtr<UrlSpan>& GetUrlSpan();
+    void SetUrlSpan(const RefPtr<UrlSpan>& urlSpan);
+
+private:
+    ACE_DISALLOW_COPY_AND_MOVE(JSUrlSpan);
+    RefPtr<UrlSpan> urlContextSpan_;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_STYLE_STRING_JS_SPAN_OBJECT_H

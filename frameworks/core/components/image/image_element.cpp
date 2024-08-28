@@ -15,8 +15,6 @@
 
 #include "core/components/image/image_element.h"
 
-#include "core/components/image/image_component.h"
-
 namespace OHOS::Ace {
 
 void ImageElement::Update()

@@ -29,6 +29,7 @@
 
 namespace {
 constexpr uint64_t SCREEN_ID_INVALID = -1ULL;
+constexpr float EPSILON = 1e-3;
 }
 namespace OHOS::Ace::NG {
 WindowSceneLayoutManager* WindowSceneLayoutManager::GetInstance()
@@ -102,14 +103,14 @@ uint64_t WindowSceneLayoutManager::GetScreenId(const RefPtr<FrameNode>& screenNo
 }
 
 void WindowSceneLayoutManager::UpdateGeometry(const RefPtr<FrameNode>& node, const RefPtr<FrameNode>& parentNode,
-    bool isTransformScene)
+    bool isParentTransformScene)
 {
     CHECK_NULL_VOID(node);
     auto context = AceType::DynamicCast<RosenRenderContext>(node->GetRenderContext());
     CHECK_NULL_VOID(context);
     auto rsNode = context->GetRSNode();
     CHECK_NULL_VOID(rsNode);
-    auto globalGeometry = isTransformScene ? std::make_shared<Rosen::RSObjAbsGeometry>()
+    auto globalGeometry = isParentTransformScene ? std::make_shared<Rosen::RSObjAbsGeometry>()
                                            : GetGlobalGeometry(parentNode);
     if (!globalGeometry) {
         if (!WindowSceneHelper::IsScreenScene(node->GetWindowPatternType())) {
@@ -119,28 +120,42 @@ void WindowSceneLayoutManager::UpdateGeometry(const RefPtr<FrameNode>& node, con
         globalGeometry = std::make_shared<Rosen::RSObjAbsGeometry>();
     }
     rsNode->UpdateLocalGeometry();
+    if (WindowSceneHelper::IsTransformScene(node->GetWindowPatternType())) {
+        // once current transform scene, set pos/trans 0, to make global position relative to transform scene
+        auto localGeo = rsNode->GetLocalGeometry();
+        if (localGeo) {
+            localGeo->SetPosition(0.0f, 0.0f);
+            localGeo->SetTranslateX(0.0f);
+            localGeo->SetTranslateY(0.0f);
+        } else {
+            TAG_LOGW(AceLogTag::ACE_WINDOW_PIPELINE, "windowName:%{public}s, local geo is null",
+                GetWindowName(node).c_str());
+        }
+    }
     rsNode->UpdateGlobalGeometry(globalGeometry);
     rsNode->MarkDirty(Rosen::NodeDirtyType::GEOMETRY, false);
     rsNode->MarkDirty(Rosen::NodeDirtyType::APPEARANCE, false);
-    DumpNodeInfo(node, parentNode);
+    DumpNodeInfo(node, parentNode, "UpdateGeometry");
 }
 
-std::shared_ptr<Rosen::RSObjAbsGeometry> WindowSceneLayoutManager::GetGlobalGeometry(const RefPtr<FrameNode>& node)
+std::shared_ptr<Rosen::RSNode> WindowSceneLayoutManager::GetRSNode(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_RETURN(node, nullptr);
     auto context = AceType::DynamicCast<RosenRenderContext>(node->GetRenderContext());
     CHECK_NULL_RETURN(context, nullptr);
-    auto rsNode = context->GetRSNode();
+    return context->GetRSNode();
+}
+
+std::shared_ptr<Rosen::RSObjAbsGeometry> WindowSceneLayoutManager::GetGlobalGeometry(const RefPtr<FrameNode>& node)
+{
+    auto rsNode = GetRSNode(node);
     CHECK_NULL_RETURN(rsNode, nullptr);
     return rsNode->GetGlobalGeometry();
 }
 
 std::shared_ptr<Rosen::RSObjAbsGeometry> WindowSceneLayoutManager::GetLocalGeometry(const RefPtr<FrameNode>& node)
 {
-    CHECK_NULL_RETURN(node, nullptr);
-    auto context = AceType::DynamicCast<RosenRenderContext>(node->GetRenderContext());
-    CHECK_NULL_RETURN(context, nullptr);
-    auto rsNode = context->GetRSNode();
+    auto rsNode = GetRSNode(node);
     CHECK_NULL_RETURN(rsNode, nullptr);
     return rsNode->GetLocalGeometry();
 }
@@ -148,9 +163,14 @@ std::shared_ptr<Rosen::RSObjAbsGeometry> WindowSceneLayoutManager::GetLocalGeome
 void WindowSceneLayoutManager::FillWindowSceneInfo(const RefPtr<FrameNode>& node,
     TraverseResult& res, bool isAncestorRecent)
 {
+    auto rsNode = GetRSNode(node);
+    if (!rsNode) {
+        TAG_LOGE(AceLogTag::ACE_WINDOW_PIPELINE, "name:%{public}s rsNode is null", GetWindowName(node).c_str());
+        return;
+    }
     auto globalGeometry = isAncestorRecent ? std::make_shared<Rosen::RSObjAbsGeometry>()
-                                           : GetGlobalGeometry(node);
-    auto localGeometry = GetLocalGeometry(node);
+                                           : rsNode->GetGlobalGeometry();
+    auto localGeometry = rsNode->GetLocalGeometry();
     if (!globalGeometry || !localGeometry) {
         TAG_LOGD(AceLogTag::ACE_WINDOW_PIPELINE, "name:%{public}s globalGeo is null:%{public}d localGeo:%{public}d",
             GetWindowName(node).c_str(), globalGeometry == nullptr, localGeometry == nullptr);
@@ -159,16 +179,23 @@ void WindowSceneLayoutManager::FillWindowSceneInfo(const RefPtr<FrameNode>& node
     Rosen::SessionUIParam uiParam;
     auto width = localGeometry->GetWidth();
     auto height = localGeometry->GetHeight();
+    if (std::abs(width - 0.0f) < EPSILON || std::abs(height - 0.0f) < EPSILON) {
+        TAG_LOGE(AceLogTag::ACE_WINDOW_PIPELINE, "name:%{public}s w:%{public}f h:%{public}f is 0",
+            GetWindowName(node).c_str(), width, height);
+        return;
+    }
     if (isAncestorRecent) {
         uiParam.rect_ = { localGeometry->GetX(), localGeometry->GetY(), width, height };
     } else {
         auto absRect = globalGeometry->GetAbsRect();
         uiParam.rect_ = { absRect.GetLeft(), absRect.GetTop(), width, height };
+        uiParam.scaleX_ = absRect.GetWidth() / width;
+        uiParam.scaleY_ = absRect.GetHeight() / height;
     }
 
     auto matrix = globalGeometry->GetAbsMatrix();
-    uiParam.scaleX_ = matrix.Get(Rosen::Drawing::Matrix::SCALE_X);
-    uiParam.scaleY_ = matrix.Get(Rosen::Drawing::Matrix::SCALE_Y);
+    uiParam.transX_ = std::round(matrix.Get(Rosen::Drawing::Matrix::TRANS_X) - rsNode->GetGlobalPositionX());
+    uiParam.transY_ = std::round(matrix.Get(Rosen::Drawing::Matrix::TRANS_Y) - rsNode->GetGlobalPositionY());
     uiParam.pivotX_ = globalGeometry->GetPivotX();
     uiParam.pivotY_ = globalGeometry->GetPivotY();
     uiParam.zOrder_ = static_cast<uint32_t>(res.zOrderCnt_);
@@ -176,8 +203,9 @@ void WindowSceneLayoutManager::FillWindowSceneInfo(const RefPtr<FrameNode>& node
     uiParam.sessionName_ = GetWindowName(node);
     if (isAncestorRecent) {
         // panel scene self should be interactive, others should be false
+        // default interactive is true
         uiParam.interactive_ = WindowSceneHelper::IsPanelScene(node->GetWindowPatternType());
-    } // defalut interactive is true
+    }
     res.uiParams_[windowId] = std::move(uiParam);
 }
 
@@ -260,6 +288,7 @@ void WindowSceneLayoutManager::TraverseTree(const RefPtr<FrameNode>& rootNode, T
         // only window pattern but not transform scene need sync info
         if (hasWindowSession) {
             FillWindowSceneInfo(node, res, isAncestorRecent);
+            DumpNodeInfo(node, rootNode, "AfterFillWindowSceneInfo");
         }
 
         res.zOrderCnt_ = currentZorder; // use cnt++ for next zorder cnt
@@ -379,32 +408,33 @@ void WindowSceneLayoutManager::DumpFlushInfo(uint64_t screenId, TraverseResult& 
         return;
     }
     for (auto& [winId, uiParam] : res.uiParams_) {
-        TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "screenId:%{public}" PRIu64 " windowId:%{public}d name:%{public}s "
-            "rect:%{public}s, scaleX:%{public}f, scaleY:%{public}f, pivotX:%{public}f, pivotY:%{public}f "
-            "zOrder:%{public}u, interactive:%{public}d",
+        TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "DumpFlushInfo screenId:%{public}" PRIu64 " windowId:%{public}d"
+            " name:%{public}s rect:%{public}s, scaleX:%{public}f, scaleY:%{public}f, transX:%{public}f"
+            " transY:%{public}f pivotX:%{public}f, pivotY:%{public}f zOrder:%{public}u, interactive:%{public}d",
             screenId, winId, uiParam.sessionName_.c_str(), uiParam.rect_.ToString().c_str(), uiParam.scaleX_,
-            uiParam.scaleY_, uiParam.pivotX_, uiParam.pivotY_, uiParam.zOrder_, uiParam.interactive_);
+            uiParam.scaleY_, uiParam.transX_, uiParam.transY_,
+            uiParam.pivotX_, uiParam.pivotY_, uiParam.zOrder_, uiParam.interactive_);
     }
 }
 
 uint64_t WindowSceneLayoutManager::GetRSNodeId(const RefPtr<FrameNode>& node)
 {
-    CHECK_NULL_RETURN(node, 0);
-    auto context = AceType::DynamicCast<RosenRenderContext>(node->GetRenderContext());
-    CHECK_NULL_RETURN(context, 0);
-    auto rsNode = context->GetRSNode();
+    auto rsNode = GetRSNode(node);
     CHECK_NULL_RETURN(rsNode, 0);
     return rsNode->GetId();
 }
 
-void WindowSceneLayoutManager::DumpNodeInfo(const RefPtr<FrameNode>& node, const RefPtr<FrameNode>& parentNode)
+void WindowSceneLayoutManager::DumpNodeInfo(const RefPtr<FrameNode>& node,
+    const RefPtr<FrameNode>& parentNode, const std::string& reason)
 {
     if (!isCoreDebugEnable_) {
         return;
     }
     CHECK_NULL_VOID(node);
     int32_t parentId = parentNode ? parentNode->GetId() : 0;
-    auto nodeGeometry = GetGlobalGeometry(node);
+    auto rsNode = GetRSNode(node);
+    CHECK_NULL_VOID(rsNode);
+    auto nodeGeometry = rsNode->GetGlobalGeometry();
     if (!nodeGeometry) {
         TAG_LOGW(AceLogTag::ACE_WINDOW_PIPELINE,
             "globalGeometry name:%{public}s lrsId:%{public}" PRIu64 " %{public}d"
@@ -412,7 +442,7 @@ void WindowSceneLayoutManager::DumpNodeInfo(const RefPtr<FrameNode>& node, const
             GetWindowName(node).c_str(), GetRSNodeId(node), node->GetId(), GetRSNodeId(parentNode), parentId);
         return;
     }
-    auto nodeLocalGeometry = GetLocalGeometry(node);
+    auto nodeLocalGeometry = rsNode->GetLocalGeometry();
     if (!nodeLocalGeometry) {
         TAG_LOGW(AceLogTag::ACE_WINDOW_PIPELINE,
             "localGeometry name:%{public}s lrsId:%{public}" PRIu64 " parentRSId:%{public}" PRIu64 " localGeo is null",
@@ -424,28 +454,30 @@ void WindowSceneLayoutManager::DumpNodeInfo(const RefPtr<FrameNode>& node, const
         nodeGeometry->GetWidth(), nodeGeometry->GetHeight() };
     Rosen::WSRect tempLocal = { nodeLocalGeometry->GetX(), nodeLocalGeometry->GetY(),
         nodeLocalGeometry->GetWidth(), nodeLocalGeometry->GetHeight() };
-    auto localmatrix = nodeLocalGeometry->GetAbsMatrix();
+    auto localMatrix = nodeLocalGeometry->GetAbsMatrix();
     auto globalMatrix = nodeGeometry->GetAbsMatrix();
-    float localtransX = localmatrix.Get(Rosen::Drawing::Matrix::TRANS_X);
-    float localtransY = localmatrix.Get(Rosen::Drawing::Matrix::TRANS_Y);
-    float globaltransX = globalMatrix.Get(Rosen::Drawing::Matrix::TRANS_X);
-    float globaltransY = globalMatrix.Get(Rosen::Drawing::Matrix::TRANS_Y);
+    float localTransX = localMatrix.Get(Rosen::Drawing::Matrix::TRANS_X);
+    float localTransY = localMatrix.Get(Rosen::Drawing::Matrix::TRANS_Y);
+    float globalTransX = globalMatrix.Get(Rosen::Drawing::Matrix::TRANS_X);
+    float globalTransY = globalMatrix.Get(Rosen::Drawing::Matrix::TRANS_Y);
     auto absGlobalRect = nodeGeometry->GetAbsRect();
     auto absLocalRect = nodeLocalGeometry->GetAbsRect();
-    auto localScaleX = localmatrix.Get(Rosen::Drawing::Matrix::SCALE_X);
-    auto localScaleY = localmatrix.Get(Rosen::Drawing::Matrix::SCALE_Y);
+    auto localScaleX = localMatrix.Get(Rosen::Drawing::Matrix::SCALE_X);
+    auto localScaleY = localMatrix.Get(Rosen::Drawing::Matrix::SCALE_Y);
     auto gScaleX = globalMatrix.Get(Rosen::Drawing::Matrix::SCALE_X);
     auto gScaleY = globalMatrix.Get(Rosen::Drawing::Matrix::SCALE_Y);
+    float globalPosX = rsNode->GetGlobalPositionX();
+    float globalPosY = rsNode->GetGlobalPositionY();
     TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE,
-        "DumpNodeInfo name:%{public}s lrsId:%{public}" PRIu64 " parentRSId:%{public}" PRIu64 " frameNodeId:%{public}d "
-        "[Rect:%{public}s lTransX:%{public}f lTransY:%{public}f absLocalRect:%{public}s, gRect:%{public}s "
-        "gTransX:%{public}f gTransY:%{public}f absGlobalRect:%{public}s lScaleX:%{public}f lScaleY:%{public}f "
-        "gScaleX:%{public}f gScaleY:%{public}f]", GetWindowName(node).c_str(), GetRSNodeId(node),
-        GetRSNodeId(parentNode), parentId, tempLocal.ToString().c_str(), localtransX, localtransY,
-        absLocalRect.ToString().c_str(), tempGlobal.ToString().c_str(), globaltransX, globaltransY,
-        absGlobalRect.ToString().c_str(), localScaleX, localScaleY, gScaleX, gScaleY);
+        "DumpNodeInfo reason:%{public}s name:%{public}s lrsId:%{public}" PRIu64 " parentRSId:%{public}" PRIu64 ""
+        "frameNodeId:%{public}d [Rect:%{public}s lTransX:%{public}f lTransY:%{public}f absLocalRect:%{public}s, "
+        "gRect:%{public}s gTransX:%{public}f gTransY:%{public}f globalPosX:%{public}f, globalPosY:%{public}f, "
+        "absGlobalRect:%{public}s lScaleX:%{public}f lScaleY:%{public}f gScaleX:%{public}f gScaleY:%{public}f]",
+        GetWindowName(node).c_str(), reason.c_str(), GetRSNodeId(node), GetRSNodeId(parentNode), parentId,
+        tempLocal.ToString().c_str(), localTransX, localTransY,
+        absLocalRect.ToString().c_str(), tempGlobal.ToString().c_str(), globalTransX, globalTransY, globalPosX,
+        globalPosY, absGlobalRect.ToString().c_str(), localScaleX, localScaleY, gScaleX, gScaleY);
 }
-
 
 void WindowSceneLayoutManager::RegisterScreenNode(uint64_t screenId, const RefPtr<FrameNode>& node)
 {
@@ -480,22 +512,26 @@ void WindowSceneLayoutManager::GetUINodeInfo(const RefPtr<FrameNode>& node,
         oss << " resRect: [" << absRect.GetLeft() << ", " << absRect.GetTop() << ", "
             << localGeometry->GetWidth() << ", " << localGeometry->GetHeight() << "]";
         auto matrix = globalGeometry->GetAbsMatrix();
-        oss << " globalScaleX: " << matrix.Get(Rosen::Drawing::Matrix::SCALE_X);
-        oss << " globalScaleY: " << matrix.Get(Rosen::Drawing::Matrix::SCALE_Y);
-        oss << " pivotX: " << globalGeometry->GetPivotX();
-        oss << " pivotY: " << globalGeometry->GetPivotY();
+        oss << " globalScale: [ " << matrix.Get(Rosen::Drawing::Matrix::SCALE_X) << ", "
+            << matrix.Get(Rosen::Drawing::Matrix::SCALE_Y) << "],";
+        oss << " globalPos: [" << rsNode->GetGlobalPositionX() << ", "  << rsNode->GetGlobalPositionY() << "],";
+        oss << " pivot: [" << globalGeometry->GetPivotX() << ", "  << globalGeometry->GetPivotY() << "],";
     } else {
-        oss << " globalGeometry is null";
+        oss << " globalGeometry: [null],";
     }
     if (localGeometry) {
         auto absRect = localGeometry->GetAbsRect();
         oss << " localRect: [" << absRect.GetLeft() << ", " << absRect.GetTop() << ", "
             << localGeometry->GetWidth() << ", " << localGeometry->GetHeight() << "]";
         auto matrix = localGeometry->GetAbsMatrix();
-        oss << " localScaleX: " << matrix.Get(Rosen::Drawing::Matrix::SCALE_X);
-        oss << " localScaleY: " << matrix.Get(Rosen::Drawing::Matrix::SCALE_Y);
+        oss << " localScale: [" << matrix.Get(Rosen::Drawing::Matrix::SCALE_X) << ", "
+            << matrix.Get(Rosen::Drawing::Matrix::SCALE_Y) << "],";
+        oss << " localTrans: [" << matrix.Get(Rosen::Drawing::Matrix::TRANS_X) << ", "
+            << matrix.Get(Rosen::Drawing::Matrix::TRANS_Y) << "],";
+        oss << " localPos: [" << localGeometry->GetX() << ", "
+            << localGeometry->GetY() << "],";
     } else {
-        oss << " localGeometry is null";
+        oss << " localGeometry: [null],";
     }
     oss << " requestZIndex: " << context->GetZIndexValue(ZINDEX_DEFAULT_VALUE);
     oss << " rsId: " << GetRSNodeId(node);
@@ -518,6 +554,8 @@ void WindowSceneLayoutManager::GetTotalUITreeInfo(uint64_t screenId, std::string
         }
         std::ostringstream oss;
         GetUITreeInfo(screenNodeMap_[screenId], 0, 0, oss);
+        oss << "-------------------------------------RSTree-----------------------------------"<< std::endl;
+        GetRSNodeTreeInfo(GetRSNode(screenNodeMap_[screenId]), 0, oss);
         info.append(oss.str());
     };
     mainHandler_->PostSyncTask(std::move(task), "GetTotalUITreeInfo", AppExecFwk::EventQueue::Priority::IMMEDIATE);
@@ -541,5 +579,114 @@ void WindowSceneLayoutManager::GetUITreeInfo(const RefPtr<FrameNode>& node, int3
         }
         GetUITreeInfo(child, depth + 1, node->GetId(), oss);
     }
+}
+
+void WindowSceneLayoutManager::DumpRSNodeType(Rosen::RSUINodeType nodeType, std::ostringstream& oss)
+{
+    switch (nodeType) {
+        case Rosen::RSUINodeType::DISPLAY_NODE: {
+            oss << "DISPLAY_NODE";
+            break;
+        }
+        case Rosen::RSUINodeType::RS_NODE: {
+            oss << "RS_NODE";
+            break;
+        }
+        case Rosen::RSUINodeType::SURFACE_NODE: {
+            oss << "SURFACE_NODE";
+            break;
+        }
+        case Rosen::RSUINodeType::CANVAS_NODE: {
+            oss << "CANVAS_NODE";
+            break;
+        }
+        case Rosen::RSUINodeType::ROOT_NODE: {
+            oss << "ROOT_NODE";
+            break;
+        }
+        case Rosen::RSUINodeType::PROXY_NODE: {
+            oss << "PROXY_NODE";
+            break;
+        }
+        case Rosen::RSUINodeType::CANVAS_DRAWING_NODE: {
+            oss << "CANVAS_DRAWING_NODE";
+            break;
+        }
+        case Rosen::RSUINodeType::EFFECT_NODE: {
+            oss << "EFFECT_NODE";
+            break;
+        }
+        default: {
+            oss << "UNKNOWN_NODE";
+            break;
+        }
+    }
+}
+
+void WindowSceneLayoutManager::GetRSNodeTreeInfo(const std::shared_ptr<RSNode>& rsNode, int32_t depth,
+    std::ostringstream& oss)
+{
+    CHECK_NULL_VOID(rsNode);
+    for (int32_t i = 0; i < depth; ++i) {
+        oss << "  ";
+    }
+    oss << "| ";
+    GetRSNodeInfo(rsNode, oss);
+    auto children = rsNode->GetChildren();
+    for (auto child : children) {
+        if (auto childPtr = Rosen::RSNodeMap::Instance().GetNode(child)) {
+            GetRSNodeTreeInfo(childPtr, depth + 1, oss);
+        }
+    }
+}
+
+void WindowSceneLayoutManager::GetRSNodeInfo(const std::shared_ptr<RSNode>& rsNode,
+    std::ostringstream& oss)
+{
+    CHECK_NULL_VOID(rsNode);
+    DumpRSNodeType(rsNode->GetType(), oss);
+    oss << "[" + std::to_string(rsNode->GetId()) << "], ";
+    if (rsNode->GetType() == Rosen::RSUINodeType::SURFACE_NODE) {
+        auto surfaceNode = Rosen::RSNode::ReinterpretCast<Rosen::RSSurfaceNode>(rsNode);
+        std::string name = surfaceNode ? surfaceNode->GetName() : "";
+        oss << "Name [" << name << "]";
+    }
+    oss << ", StagingProperties" << rsNode->GetStagingProperties().Dump();
+    auto scale = rsNode->GetStagingProperties().GetScale();
+    oss << ", Scale: [" << scale[0] << ", " << scale[1] << "]";
+    auto translate = rsNode->GetStagingProperties().GetTranslate();
+    oss << ", Translate: [" << translate[0] << ", " << translate[1] << ", "
+        << rsNode->GetStagingProperties().GetTranslateZ() << "]";
+
+    oss << ", Rotation: " << rsNode->GetStagingProperties().GetRotation();
+    oss << ", Alpha: " << rsNode->GetStagingProperties().GetAlpha();
+    oss << ", ClipToBounds: " << rsNode->GetStagingProperties().GetClipBounds();
+
+    auto globalGeometry = rsNode->GetGlobalGeometry();
+    auto localGeometry = rsNode->GetLocalGeometry();
+    if (globalGeometry && localGeometry) {
+        auto absRect = globalGeometry->GetAbsRect();
+        oss << ", globalAbsRect: " << absRect.ToString().c_str();
+        auto matrix = globalGeometry->GetAbsMatrix();
+        oss << ", globalScale: [ " << matrix.Get(Rosen::Drawing::Matrix::SCALE_X) << ", "
+            << matrix.Get(Rosen::Drawing::Matrix::SCALE_Y) << "]";
+        oss << ", globalPos: [" << rsNode->GetGlobalPositionX() << ", "  << rsNode->GetGlobalPositionY() << "]";
+        oss << ", pivot: [" << globalGeometry->GetPivotX() << ", "  << globalGeometry->GetPivotY() << "]";
+    } else {
+        oss << "globalGeometry: [null],";
+    }
+    if (localGeometry) {
+        auto absRect = localGeometry->GetAbsRect();
+        oss << ", localAbsRect: " << absRect.ToString().c_str();
+        auto matrix = localGeometry->GetAbsMatrix();
+        oss << ", localScale: [" << matrix.Get(Rosen::Drawing::Matrix::SCALE_X) << ", "
+            << matrix.Get(Rosen::Drawing::Matrix::SCALE_Y) << "]";
+        oss << ", localTrans: [" << matrix.Get(Rosen::Drawing::Matrix::TRANS_X) << ", "
+            << matrix.Get(Rosen::Drawing::Matrix::TRANS_Y) << "]";
+        oss << ", localPos: [" << localGeometry->GetX() << ", " << localGeometry->GetY() << "]";
+    } else {
+        oss << "localGeometry: [null],";
+    }
+    oss << std::endl;
 }
 } // namespace OHOS::Ace::NG

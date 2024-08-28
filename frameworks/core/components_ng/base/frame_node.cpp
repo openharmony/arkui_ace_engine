@@ -480,7 +480,11 @@ FrameNode::~FrameNode()
     for (const auto& destroyCallback : destroyCallbacks_) {
         destroyCallback();
     }
-
+    for (const auto& destroyCallback : destroyCallbacksMap_) {
+        if (destroyCallback.second) {
+            destroyCallback.second();
+        }
+    }
     if (removeCustomProperties_) {
         removeCustomProperties_();
         removeCustomProperties_ = nullptr;
@@ -1095,6 +1099,14 @@ void FrameNode::OnAttachToBuilderNode(NodeStatus nodeStatus)
     pattern_->OnAttachToBuilderNode(nodeStatus);
 }
 
+bool FrameNode::RenderCustomChild(int64_t deadline)
+{
+    if (!pattern_->RenderCustomChild(deadline)) {
+        return false;
+    }
+    return UINode::RenderCustomChild(deadline);
+}
+
 void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationChange)
 {
     if (configurationChange.languageUpdate) {
@@ -1109,6 +1121,7 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
             auto cb = colorModeUpdateCallback_;
             cb();
         }
+        FireColorNDKCallback();
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
@@ -1141,17 +1154,22 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
-    NotifyConfigurationChangeNdk(configurationChange);
+    FireFontNDKCallback(configurationChange);
 }
 
-void FrameNode::NotifyConfigurationChangeNdk(const ConfigurationChange& configurationChange)
+void FrameNode::FireColorNDKCallback()
 {
-    if (ndkColorModeUpdateCallback_ && configurationChange.colorModeUpdate) {
+    std::shared_lock<std::shared_mutex> lock(colorModeCallbackMutex_);
+    if (ndkColorModeUpdateCallback_) {
         auto colorModeChange = ndkColorModeUpdateCallback_;
         colorModeChange(SystemProperties::GetColorMode() == ColorMode::DARK);
     }
+}
 
-    if (ndkFontUpdateCallback_ && (configurationChange.fontScaleUpdate || configurationChange.fontWeightScaleUpdate)) {
+void FrameNode::FireFontNDKCallback(const ConfigurationChange& configurationChange)
+{
+    std::shared_lock<std::shared_mutex> lock(fontSizeCallbackMutex_);
+    if ((configurationChange.fontScaleUpdate || configurationChange.fontWeightScaleUpdate) && ndkFontUpdateCallback_) {
         auto fontChangeCallback = ndkFontUpdateCallback_;
         auto pipeline = GetContextWithCheck();
         CHECK_NULL_VOID(pipeline);
@@ -1159,19 +1177,24 @@ void FrameNode::NotifyConfigurationChangeNdk(const ConfigurationChange& configur
     }
 }
 
-void FrameNode::NotifyVisibleChange(bool isVisible)
+void FrameNode::NotifyVisibleChange(VisibleType preVisibility, VisibleType currentVisibility)
 {
-    pattern_->OnVisibleChange(isVisible);
-    UpdateChildrenVisible(isVisible);
+    if ((preVisibility != currentVisibility &&
+            (preVisibility == VisibleType::GONE || currentVisibility == VisibleType::GONE)) &&
+        SelfExpansive()) {
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+    pattern_->OnVisibleChange(currentVisibility == VisibleType::VISIBLE);
+    UpdateChildrenVisible(preVisibility, currentVisibility);
 }
 
-void FrameNode::TryVisibleChangeOnDescendant(bool isVisible)
+void FrameNode::TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleType currentVisibility)
 {
     auto layoutProperty = GetLayoutProperty();
     if (layoutProperty && layoutProperty->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
         return;
     }
-    NotifyVisibleChange(isVisible);
+    NotifyVisibleChange(preVisibility, currentVisibility);
 }
 
 void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
@@ -2966,7 +2989,7 @@ RectF GetBoundingBox(std::vector<Point>& pointList)
 {
     Point pMax = pointList[0];
     Point pMin = pointList[0];
-    
+
     for (auto &point: pointList) {
         if (point.GetX() > pMax.GetX()) {
             pMax.SetX(point.GetX());
@@ -3131,7 +3154,7 @@ void FrameNode::OnAccessibilityEvent(
         event.type = eventType;
         event.windowContentChangeTypes = windowsContentChangeType;
         event.nodeId = GetAccessibilityId();
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->SendEventToAccessibility(event);
     }
@@ -3202,6 +3225,11 @@ void FrameNode::OnRecycle()
     for (const auto& destroyCallback : destroyCallbacks_) {
         destroyCallback();
     }
+    for (const auto& destroyCallback : destroyCallbacksMap_) {
+        if (destroyCallback.second) {
+            destroyCallback.second();
+        }
+    }
     layoutProperty_->ResetGeometryTransition();
     pattern_->OnRecycle();
     UINode::OnRecycle();
@@ -3271,6 +3299,9 @@ RefPtr<FrameNode> FrameNode::FindChildByPosition(float x, float y)
     std::list<RefPtr<FrameNode>> children;
     GenerateOneDepthAllFrame(children);
     for (const auto& child : children) {
+        if (!child->IsActive()) {
+            continue;
+        }
         auto geometryNode = child->GetGeometryNode();
         if (!geometryNode) {
             continue;
@@ -3873,6 +3904,7 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
         MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
     }
     layoutAlgorithm_.Reset();
+    renderContext_->UpdateAccessibilityRoundRect();
     ProcessAccessibilityVirtualNode();
     auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, false);
@@ -5183,5 +5215,193 @@ void FrameNode::NotifyDataChange(int32_t index, int32_t count, int64_t id) const
     }
     auto pattern = GetPattern();
     pattern->NotifyDataChange(updateFrom, count);
+}
+
+void FrameNode::DumpOnSizeChangeInfo(std::unique_ptr<JsonValue>& json)
+{
+    std::unique_ptr<JsonValue> children = JsonUtil::CreateArray(true);
+    for (auto it = onSizeChangeDumpInfos.rbegin(); it != onSizeChangeDumpInfos.rend(); ++it) {
+        std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
+        child->Put("onSizeChange Time", it->onSizeChangeTimeStamp);
+        child->Put("lastFrameRect", it->lastFrameRect.ToString().c_str());
+        child->Put("currFrameRect", it->currFrameRect.ToString().c_str());
+        children->Put(child);
+    }
+    children->Put("SizeChangeInfo", children);
+}
+
+void FrameNode::DumpOverlayInfo(std::unique_ptr<JsonValue>& json)
+{
+    if (!layoutProperty_->IsOverlayNode()) {
+        return;
+    }
+    json->Put("IsOverlayNode", "true");
+    Dimension offsetX, offsetY;
+    layoutProperty_->GetOverlayOffset(offsetX, offsetY);
+    std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
+    children->Put("x", offsetX.ToString().c_str());
+    children->Put("y", offsetY.ToString().c_str());
+    json->Put("OverlayOffset", children);
+}
+
+void FrameNode::DumpDragInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("Draggable", draggable_ ? "true" : "false");
+    json->Put("UserSet", userSet_ ? "true" : "false");
+    json->Put("CustomerSet", customerSet_ ? "true" : "false");
+    std::unique_ptr<JsonValue> dragPreview = JsonUtil::Create(true);
+    dragPreview->Put("Has customNode", dragPreviewInfo_.customNode ? "YES" : "NO");
+    dragPreview->Put("Has pixelMap", dragPreviewInfo_.pixelMap ? "YES" : "NO");
+    dragPreview->Put("extraInfo", dragPreviewInfo_.extraInfo.c_str());
+    dragPreview->Put("inspectorId", dragPreviewInfo_.inspectorId.c_str());
+    json->Put("DragPreview", dragPreview);
+
+    auto eventHub = GetEventHub<EventHub>();
+    std::unique_ptr<JsonValue> event = JsonUtil::Create(true);
+    event->Put("OnDragStart", eventHub->HasOnDragStart() ? "YES" : "NO");
+    event->Put("OnDragEnter", eventHub->HasOnDragEnter() ? "YES" : "NO");
+    event->Put("OnDragLeave", eventHub->HasOnDragLeave() ? "YES" : "NO");
+    event->Put("OnDragMove", eventHub->HasOnDragMove() ? "YES" : "NO");
+    event->Put("OnDrop", eventHub->HasOnDrop() ? "YES" : "NO");
+    event->Put("OnDragEnd", eventHub->HasOnDragEnd() ? "YES" : "NO");
+    event->Put("DefaultOnDragStart", eventHub->HasDefaultOnDragStart() ? "YES" : "NO");
+    event->Put("CustomerOnDragEnter", eventHub->HasCustomerOnDragEnter() ? "YES" : "NO");
+    event->Put("CustomerOnDragLeave", eventHub->HasCustomerOnDragLeave() ? "YES" : "NO");
+    event->Put("CustomerOnDragMove", eventHub->HasCustomerOnDragMove() ? "YES" : "NO");
+    event->Put("CustomerOnDrop", eventHub->HasCustomerOnDrop() ? "YES" : "NO");
+    event->Put("CustomerOnDragEnd", eventHub->HasCustomerOnDragEnd() ? "YES" : "NO");
+    json->Put("Event", event);
+}
+
+void FrameNode::DumpAlignRulesInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto& flexItemProperties = layoutProperty_->GetFlexItemProperty();
+    CHECK_NULL_VOID(flexItemProperties);
+    auto rulesToString = flexItemProperties->AlignRulesToString();
+    CHECK_NULL_VOID(!rulesToString.empty());
+    json->Put("AlignRules", rulesToString.c_str());
+}
+
+void FrameNode::DumpSafeAreaInfo(std::unique_ptr<JsonValue>& json)
+{
+    if (layoutProperty_->GetSafeAreaExpandOpts()) {
+        json->Put("SafeAreaExpandOpts", layoutProperty_->GetSafeAreaExpandOpts()->ToString().c_str());
+    }
+    if (layoutProperty_->GetSafeAreaInsets()) {
+        json->Put("SafeAreaInsets", layoutProperty_->GetSafeAreaInsets()->ToString().c_str());
+    }
+    if (SelfOrParentExpansive()) {
+        json->Put("selfAdjust", geometryNode_->GetSelfAdjust().ToString().c_str());
+        json->Put("parentAdjust", geometryNode_->GetParentAdjust().ToString().c_str());
+    }
+    CHECK_NULL_VOID(GetTag() == V2::PAGE_ETS_TAG);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_VOID(manager);
+    json->Put("ignoreSafeArea", std::to_string(manager->IsIgnoreAsfeArea()).c_str());
+    json->Put("isNeedAvoidWindow", std::to_string(manager->IsNeedAvoidWindow()).c_str());
+    json->Put("isFullScreen", std::to_string(manager->IsFullScreen()).c_str());
+    json->Put("isKeyboardAvoidMode", std::to_string(manager->KeyboardSafeAreaEnabled()).c_str());
+    json->Put("isUseCutout", std::to_string(pipeline->GetUseCutout()).c_str());
+}
+
+void FrameNode::DumpExtensionHandlerInfo(std::unique_ptr<JsonValue>& json)
+{
+    if (!extensionHandler_) {
+        return;
+    }
+    std::unique_ptr<JsonValue> extensionHandler = JsonUtil::Create(true);
+    extensionHandler->Put("HasCustomerMeasure", extensionHandler_->HasCustomerMeasure() ? "true" : "false");
+    extensionHandler->Put("HasCustomerLayout", extensionHandler_->HasCustomerLayout() ? "true" : "false");
+    json->Put("ExtensionHandler", extensionHandler);
+}
+
+void FrameNode::BuildLayoutInfo(std::unique_ptr<JsonValue>& json)
+{
+    if (geometryNode_->GetParentLayoutConstraint().has_value()) {
+        json->Put("ParentLayoutConstraint", geometryNode_->GetParentLayoutConstraint().value().ToString().c_str());
+    }
+    if (!(NearZero(GetOffsetRelativeToWindow().GetY()) && NearZero(GetOffsetRelativeToWindow().GetX()))) {
+        json->Put("top", GetOffsetRelativeToWindow().GetY());
+        json->Put("left", GetOffsetRelativeToWindow().GetX());
+    }
+    if (static_cast<int32_t>(IsActive()) != 1) {
+        json->Put("Active", static_cast<int32_t>(IsActive()));
+    }
+    if (static_cast<int32_t>(layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE)) != 0) {
+        json->Put("Visible", static_cast<int32_t>(layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE)));
+    }
+    if (layoutProperty_->GetPaddingProperty()) {
+        json->Put("Padding", layoutProperty_->GetPaddingProperty()->ToString().c_str());
+    }
+    if (layoutProperty_->GetSafeAreaPaddingProperty()) {
+        json->Put("SafeArea Padding", layoutProperty_->GetSafeAreaPaddingProperty()->ToString().c_str());
+    }
+    if (layoutProperty_->GetBorderWidthProperty()) {
+        json->Put("Border", layoutProperty_->GetBorderWidthProperty()->ToString().c_str());
+    }
+    if (layoutProperty_->GetMarginProperty()) {
+        json->Put("Margin", layoutProperty_->GetMarginProperty()->ToString().c_str());
+    }
+    if (layoutProperty_->GetLayoutRect()) {
+        json->Put("LayoutRect", layoutProperty_->GetLayoutRect().value().ToString().c_str());
+    }
+}
+
+void FrameNode::DumpCommonInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("FrameRect", geometryNode_->GetFrameRect().ToString().c_str());
+    json->Put("PaintRect without transform", renderContext_->GetPaintRectWithoutTransform().ToString().c_str());
+    if (renderContext_->GetBackgroundColor()->ColorToString().compare("#00000000") != 0) {
+        json->Put("BackgroundColor", renderContext_->GetBackgroundColor()->ColorToString().c_str());
+    }
+    BuildLayoutInfo(json);
+    DumpExtensionHandlerInfo(json);
+    DumpSafeAreaInfo(json);
+    if (layoutProperty_->GetCalcLayoutConstraint()) {
+        json->Put("User defined constraint", layoutProperty_->GetCalcLayoutConstraint()->ToString().c_str());
+    }
+    if (!propInspectorId_->empty()) {
+        json->Put("compid", propInspectorId_.value_or("").c_str());
+    }
+    if (layoutProperty_->GetPaddingProperty() || layoutProperty_->GetBorderWidthProperty() ||
+        layoutProperty_->GetMarginProperty() || layoutProperty_->GetCalcLayoutConstraint()) {
+        json->Put("ContentConstraint", layoutProperty_->GetContentLayoutConstraint().has_value()
+                                           ? layoutProperty_->GetContentLayoutConstraint().value().ToString().c_str()
+                                           : "NA");
+    }
+    DumpAlignRulesInfo(json);
+    DumpDragInfo(json);
+    DumpOverlayInfo(json);
+    if (frameProxy_->Dump().compare("totalCount is 0") != 0) {
+        json->Put("FrameProxy", frameProxy_->Dump().c_str());
+    }
+}
+
+void FrameNode::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    DumpCommonInfo(json);
+    DumpOnSizeChangeInfo(json);
+    if (pattern_) {
+        pattern_->DumpInfo(json);
+    }
+    if (renderContext_) {
+        renderContext_->DumpInfo(json);
+    }
+}
+
+void FrameNode::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
+{
+    DumpCommonInfo(json);
+    DumpOnSizeChangeInfo(json);
+    if (pattern_) {
+        pattern_->DumpInfo(json);
+        pattern_->DumpAdvanceInfo(json);
+    }
+    if (renderContext_) {
+        renderContext_->DumpInfo(json);
+        renderContext_->DumpAdvanceInfo(json);
+    }
 }
 } // namespace OHOS::Ace::NG

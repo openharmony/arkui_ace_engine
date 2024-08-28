@@ -23,6 +23,7 @@
 
 namespace OHOS::Ace::Framework {
 
+constexpr int32_t DEFAULT_LENGTH = 3;
 void JSLayoutManager::GetLineCount(const JSCallbackInfo& args)
 {
     auto layoutInfoInterface = layoutInfoInterface_.Upgrade();
@@ -86,6 +87,57 @@ void JSLayoutManager::DidExceedMaxLines(const JSCallbackInfo& args)
     CHECK_NULL_VOID(vm);
     auto exceedMaxLineObj = panda::BooleanRef::New(vm, exceedMaxLines);
     args.SetReturnValue(JsiRef<JsiObject>(JsiObject(exceedMaxLineObj)));
+}
+
+void JSLayoutManager::GetRectsForRange(const JSCallbackInfo& args)
+{
+    if (args.Length() < DEFAULT_LENGTH) {
+        return;
+    }
+    auto textRangeVal = args[0];
+    if (!textRangeVal->IsObject() || textRangeVal->IsNull() || textRangeVal->IsUndefined()) {
+        return;
+    }
+    auto layoutInfoInterface = layoutInfoInterface_.Upgrade();
+    CHECK_NULL_VOID(layoutInfoInterface);
+    int32_t start = -1;
+    int32_t end = -1;
+    JSRef<JSObject> rangeObj = JSRef<JSObject>::Cast(textRangeVal);
+    JSRef<JSVal> startVal = rangeObj->GetProperty("start");
+    JSRef<JSVal> endVal = rangeObj->GetProperty("end");
+    if (!startVal->IsNull() && startVal->IsNumber()) {
+        start = startVal->ToNumber<int32_t>();
+    }
+    if (!endVal->IsNull() && endVal->IsNumber()) {
+        end = endVal->ToNumber<int32_t>();
+    }
+
+    auto widthStyleVal = args[1];
+    if (widthStyleVal->IsNull() || widthStyleVal->IsUndefined()) {
+        return;
+    }
+    RectWidthStyle widthStyle = ParseRectWidthStyle(widthStyleVal.Get());
+    auto heightStyleVal = args[2];
+    if (heightStyleVal->IsNull() || heightStyleVal->IsUndefined()) {
+        return;
+    }
+    RectHeightStyle heightStyle = ParseRectHeightStyle(heightStyleVal.Get());
+    std::vector<NG::ParagraphManager::TextBox> textBoxes =
+        layoutInfoInterface->GetRectsForRange(start, end, heightStyle, widthStyle);
+    CHECK_NULL_VOID(&textBoxes);
+    JSRef<JSArray> textBoxArray = JSRef<JSArray>::New();
+    for (const auto& textBox : textBoxes) {
+        JSRef<JSObject> textBoxObj = JSRef<JSObject>::New();
+        JSRef<JSObject> rectObj = JSRef<JSObject>::New();
+        rectObj->SetProperty<float>("left", textBox.rect_.Left());
+        rectObj->SetProperty<float>("top", textBox.rect_.Top());
+        rectObj->SetProperty<float>("right", textBox.rect_.Right());
+        rectObj->SetProperty<float>("bottom", textBox.rect_.Bottom());
+        textBoxObj->SetPropertyObject("rect", rectObj);
+        textBoxObj->SetProperty<int32_t>("direction", static_cast<int32_t>(textBox.direction_));
+        textBoxArray->SetValueAt(textBoxArray->Length(), textBoxObj);
+    }
+    args.SetReturnValue(JSRef<JSVal>::Cast(textBoxArray));
 }
 
 Local<panda::ObjectRef> JSLayoutManager::CreateJSRunMetrics(const std::map<size_t,
@@ -211,6 +263,7 @@ void JSLayoutManager::JSBind(BindingTarget globalObj)
     JSClass<JSLayoutManager>::CustomMethod(
         "getGlyphPositionAtCoordinate", &JSLayoutManager::GetGlyphPositionAtCoordinate);
     JSClass<JSLayoutManager>::CustomMethod("getLineMetrics", &JSLayoutManager::GetLineMetrics);
+    JSClass<JSLayoutManager>::CustomMethod("getRectsForRange", &JSLayoutManager::GetRectsForRange);
     JSClass<JSLayoutManager>::CustomMethod("didExceedMaxLines", &JSLayoutManager::DidExceedMaxLines);
     JSClass<JSLayoutManager>::Bind(globalObj, JSLayoutManager::Constructor, JSLayoutManager::Destructor);
 }

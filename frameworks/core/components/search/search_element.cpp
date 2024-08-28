@@ -15,7 +15,6 @@
 
 #include "core/components/search/search_element.h"
 
-#include "core/components/search/search_component.h"
 #include "core/components/text_field/text_field_element.h"
 
 namespace OHOS::Ace {

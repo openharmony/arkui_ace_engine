@@ -15,8 +15,6 @@
 
 #include "core/components/bubble/bubble_component.h"
 
-#include "base/geometry/dimension.h"
-#include "core/components/box/box_component.h"
 #include "core/components/bubble/bubble_element.h"
 #include "core/components/bubble/render_bubble.h"
 

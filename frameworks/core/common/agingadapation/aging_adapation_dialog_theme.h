@@ -59,8 +59,8 @@ public:
             if (!dialogPattern) {
                 return theme;
             }
-            theme->dialogIconColor_ = dialogPattern->GetAttr<Color>("dialog_icon_primary", Color::TRANSPARENT);
-            theme->dialogFontColor_ = dialogPattern->GetAttr<Color>("dialog_font_primary", Color::TRANSPARENT);
+            theme->dialogIconColor_ = dialogPattern->GetAttr<Color>("aging_dialog_icon_primary", Color(0xff182431));
+            theme->dialogFontColor_ = dialogPattern->GetAttr<Color>("aging_dialog_font_primary", Color(0xff182431));
             theme->bigFontSizeScale_ = dialogPattern->GetAttr<double>("big_font_size_scale", 0.0);
             theme->largeFontSizeScale_ = dialogPattern->GetAttr<double>("large_font_size_scale", 0.0);
             theme->maxFontSizeScale_ = dialogPattern->GetAttr<double>("max_font_size_scale", 0.0);

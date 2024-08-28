@@ -15,15 +15,6 @@
 
 #include "core/components/xcomponent/resource/xcomponent_delegate.h"
 
-#include <algorithm>
-#include <iomanip>
-#include <sstream>
-
-#include "base/log/log.h"
-#include "core/event/ace_event_helper.h"
-#include "core/event/back_end_event_manager.h"
-#include "frameworks/bridge/js_frontend/frontend_delegate_impl.h"
-
 namespace OHOS::Ace {
 namespace {
 constexpr char XCOMPONENT_CREATE[] = "xcomponent";

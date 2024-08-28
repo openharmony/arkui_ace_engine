@@ -23,9 +23,11 @@
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_render_node_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_xcomponent_bridge.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node_pattern.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/components_ng/syntax/node_content.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/extension_custom_node.h"
@@ -166,15 +168,30 @@ ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNode(ArkUIRuntimeCallInf
         { "Divider", ARKUI_DIVIDER }, { "LoadingProgress", ARKUI_LOADING_PROGRESS }, { "TextInput", ARKUI_TEXT_INPUT },
         { "Search", ARKUI_SEARCH }, { "Button", ARKUI_BUTTON }, { "XComponent", ARKUI_XCOMPONENT },
         { "ListItemGroup", ARKUI_LIST_ITEM_GROUP }, { "WaterFlow", ARKUI_WATER_FLOW },
-        { "FlowItem", ARKUI_FLOW_ITEM} };
+        { "FlowItem", ARKUI_FLOW_ITEM}, { "QRCode", ARKUI_QRCODE }, { "Badge", ARKUI_BADGE }, { "Grid", ARKUI_GRID },
+        { "GridItem", ARKUI_GRID_ITEM }, { "SymbolGlyph", ARKUI_SYMBOL_GLYPH}, { "TextClock", ARKUI_TEXT_CLOCK },
+        { "TextTimer", ARKUI_TEXT_TIMER }, { "Marquee", ARKUI_MARQUEE }, { "TextArea", ARKUI_TEXTAREA } };
 
     ArkUINodeType nodeType = ARKUI_CUSTOM;
     RefPtr<FrameNode> node;
+    ArkUINodeHandle nodePtr = nullptr;
     auto iter = typeMap.find(type);
     if (iter != typeMap.end()) {
         nodeType = iter->second;
         if (nodeType != ARKUI_CUSTOM) {
-            auto nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNode(nodeType, nodeId, 0);
+            if (nodeType == ARKUI_XCOMPONENT) {
+#ifdef XCOMPONENT_SUPPORTED
+                ArkUI_XComponent_Params params;
+                XComponentBridge::ParseParams(runtimeCallInfo, params);
+                params.nodeType = ARKUI_XCOMPONENT;
+                nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNodeWithParams(nodeType, nodeId, 0, params);
+                XComponentBridge::SetControllerCallback(runtimeCallInfo, reinterpret_cast<FrameNode*>(nodePtr));
+#else
+                nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNode(nodeType, nodeId, 0);
+#endif
+            } else {
+                nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNode(nodeType, nodeId, 0);
+            }
             // let 'node' take the reference, so decrease ref of C node
             node = AceType::Claim(reinterpret_cast<FrameNode*>(nodePtr));
             if (node && node->RefCount() > 1) {

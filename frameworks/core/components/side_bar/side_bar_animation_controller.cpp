@@ -16,7 +16,6 @@
 #include "core/components/side_bar/side_bar_animation_controller.h"
 
 #include "core/components/side_bar/render_side_bar_container.h"
-#include "core/components/side_bar/side_bar_container_component.h"
 
 namespace OHOS::Ace {
 

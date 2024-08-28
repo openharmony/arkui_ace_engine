@@ -62,6 +62,7 @@ constexpr double FORM_CLICK_OPEN_LIMIT_DISTANCE = 20.0;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE = 30000;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_3S = 3000;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_EXTRA = 200;
+constexpr uint32_t DELAY_TIME_FOR_SET_NON_TRANSPARENT = 70;
 constexpr uint32_t DELAY_TIME_FOR_DELETE_IMAGE_NODE = 100;
 constexpr double ARC_RADIUS_TO_DIAMETER = 2.0;
 constexpr double NON_TRANSPARENT_VAL = 1.0;
@@ -437,22 +438,29 @@ void FormPattern::UpdateStaticCard()
     UnregisterAccessibility();
 }
 
-void FormPattern::DeleteImageNodeAfterRecover(bool needHandleCachedClick)
+void FormPattern::SetNonTransparentAfterRecover()
 {
-    // delete image rs node
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    // delete image frame node
-    RemoveFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE);
-
+    ACE_FUNCTION_TRACE();
     // set frs node non transparent
     if (formChildrenNodeMap_.find(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE)
         == formChildrenNodeMap_.end()) {
         UpdateChildNodeOpacity(FormChildNodeType::FORM_SURFACE_NODE, NON_TRANSPARENT_VAL);
-        TAG_LOGI(AceLogTag::ACE_FORM, "delete imageNode and setOpacity:1");
+        TAG_LOGI(AceLogTag::ACE_FORM, "setOpacity:1");
+    } else {
+        TAG_LOGW(AceLogTag::ACE_FORM, "has forbidden node");
     }
+}
+
+void FormPattern::DeleteImageNodeAfterRecover(bool needHandleCachedClick)
+{
+    ACE_FUNCTION_TRACE();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    // delete image rs node and frame node
+    RemoveFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE);
 
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     auto parent = host->GetParent();
@@ -1482,6 +1490,13 @@ void FormPattern::DelayDeleteImageNode(bool needHandleCachedClick)
     CHECK_NULL_VOID(context);
 
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    uiTaskExecutor.PostDelayedTask(
+        [weak = WeakClaim(this)] {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetNonTransparentAfterRecover();
+        },
+        DELAY_TIME_FOR_SET_NON_TRANSPARENT, "ArkUIFormSetNonTransparentAfterRecover");
     uiTaskExecutor.PostDelayedTask(
         [weak = WeakClaim(this), needHandleCachedClick] {
             auto pattern = weak.Upgrade();

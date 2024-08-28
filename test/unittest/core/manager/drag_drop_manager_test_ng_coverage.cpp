@@ -30,7 +30,7 @@ void DragDropManagerTestNgCoverage::SetUpTestCase()
 {
     MockPipelineContext::SetUp();
     MockContainer::SetUp();
-    MOCK_DRAG_WINDOW = DragWindow::CreateDragWindow("", 0, 0, 0, 0);
+    MOCK_DRAG_WINDOW = DragWindow::CreateDragWindow({"", 0, 0, 0, 0, 0});
 }
 
 void DragDropManagerTestNgCoverage::TearDownTestCase()
@@ -1178,16 +1178,15 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage047, TestSi
     GestureEvent event;
     event.SetDeviceId(0xFFFFFFFF);
     dragDropManager->SetIsDragWithContextMenu(true);
-    auto containerId = Container::CurrentId();
-    auto subwindow = AceType::MakeRefPtr<MockSubwindow>();
-    SubwindowManager::GetInstance()->AddSubwindow(containerId, subwindow);
-    EXPECT_CALL(*subwindow, GetOverlayManager()).WillRepeatedly(testing::Return(overlayManager));
-    dragDropManager->DoDragStartAnimation(overlayManager, event);
+    auto frameNode2 = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode2, nullptr);
+    auto guestureEventHub = frameNode2->GetOrCreateGestureEventHub();
+    dragDropManager->DoDragStartAnimation(overlayManager, event, guestureEventHub);
     dragDropManager->TransDragWindowToDragFwk(111);
     dragDropManager->SetIsDragWithContextMenu(false);
     event.SetDeviceId(0xFFFFEEEE);
-    dragDropManager->DoDragStartAnimation(overlayManager, event);
-    dragDropManager->DoDragStartAnimation(overlayManager, event, true);
+    dragDropManager->DoDragStartAnimation(overlayManager, event, guestureEventHub);
+    dragDropManager->DoDragStartAnimation(overlayManager, event, guestureEventHub, true);
     EXPECT_NE(frameNode, nullptr);
 }
 

@@ -947,7 +947,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder07, TestSize.Level1)
     auto lazyForEachBuilder = AceType::DynamicCast<LazyForEachBuilder>(mockLazyForEachActuator);
 
     /**
-     * @tc.steps: step1. operation.index >= totalCountForDataset_;
+     * @tc.steps: step1. operation.index >= totalCountOfOriginalDataset_;
      */
     V2::Operation operation;
     operation.index = 0;
@@ -960,7 +960,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder07, TestSize.Level1)
     /**
      * @tc.steps: step2. !indexExist == operationList_.end();
      */
-    lazyForEachBuilder->totalCountForDataset_ = 1;
+    lazyForEachBuilder->totalCountOfOriginalDataset_ = 1;
     OperationInfo operationinfo;
     lazyForEachBuilder->operationList_[1] = operationinfo;
     lazyForEachBuilder->OperateChange(operation, initialIndex, cachedTemp, expiringTemp);

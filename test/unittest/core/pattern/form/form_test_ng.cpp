@@ -901,7 +901,8 @@ HWTEST_F(FormTestNg, formModelNG, TestSize.Level1)
     AAFwk::Want want;
     int64_t formId;
     std::string formBindingDataStr;
-    ASSERT_EQ(formModelNG.RequestPublishFormWithSnapshot(want, formBindingDataStr, formId), 1);
+    std::string errMsg;
+    ASSERT_EQ(formModelNG.RequestPublishFormWithSnapshot(want, formBindingDataStr, formId, errMsg), 1);
 }
 
 /**
@@ -1080,7 +1081,7 @@ HWTEST_F(FormTestNg, FormSkeletonTest002, TestSize.Level1)
     pattern->cardInfo_.width = Dimension(cardWidth);
     pattern->cardInfo_.height = Dimension(cardHeight);
     pattern->cardInfo_.dimension = static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_2_4);
-    
+
     /**
      * @tc.steps: step3. Create a form skeleton view by LoadFormSkeleton.
      * @tc.expected: Create view success and mount to form node.

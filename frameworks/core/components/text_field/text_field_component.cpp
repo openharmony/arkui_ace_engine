@@ -15,7 +15,6 @@
 
 #include "core/components/text_field/text_field_component.h"
 
-#include "core/components/text_field/render_text_field.h"
 #include "core/components/text_field/text_field_element.h"
 
 namespace OHOS::Ace {

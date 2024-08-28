@@ -15,15 +15,6 @@
 
 #include "core/components/clock/rosen_render_clock.h"
 
-#include "include/core/SkCanvas.h"
-#include "include/core/SkColor.h"
-#include "include/core/SkMaskFilter.h"
-
-#include "base/json/json_util.h"
-#include "core/components/text/text_component.h"
-#include "core/pipeline/base/constants.h"
-#include "core/pipeline/base/rosen_render_context.h"
-
 namespace OHOS::Ace {
 namespace {
 constexpr double HOUR_ANGLE_UNIT = 360.0 / 12;

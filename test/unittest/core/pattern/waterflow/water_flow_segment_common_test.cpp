@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "test/unittest/core/pattern/waterflow/water_flow_item_maps.h"
-#include "test/unittest/core/pattern/waterflow/water_flow_test_ng.h"
+#include "water_flow_item_maps.h"
+#include "water_flow_test_ng.h"
 
 // mock
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -663,6 +663,33 @@ HWTEST_F(WaterFlowSegmentCommonTest, Segmented007, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Segmented008
+ * @tc.desc: It should be dirty after change Section.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentCommonTest, Segmented008, TestSize.Level1)
+{
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(60);
+    CreateDone();
+    // after measure, PropertyChangeFlag should be reset to 0.
+    EXPECT_EQ(layoutProperty_->GetPropertyChangeFlag(), NG::PROPERTY_UPDATE_NORMAL);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_4);
+    // after change section, PropertyChangeFlag should be dirty.
+    EXPECT_EQ(layoutProperty_->GetPropertyChangeFlag(), NG::PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(layoutProperty_->GetPropertyChangeFlag(), NG::PROPERTY_UPDATE_NORMAL);
+    std::vector<WaterFlowSections::Section> newSection = { WaterFlowSections::Section {
+        .itemsCount = 10, .onGetItemMainSizeByIndex = GET_MAIN_SIZE_FUNC, .crossCount = 5, .margin = MARGIN_1 } };
+    secObj->ChangeData(1, 1, newSection);
+    EXPECT_EQ(layoutProperty_->GetPropertyChangeFlag(), NG::PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+/**
  * @tc.name: CheckHeight001
  * @tc.desc: Layout WaterFlow and check if callback height is used
  * @tc.type: FUNC
@@ -920,5 +947,78 @@ HWTEST_F(WaterFlowSegmentCommonTest, overScroll001, TestSize.Level1)
     UpdateCurrentOffset(-4.0f);
     EXPECT_EQ(GetChildY(frameNode_, 36), 497.0f);
     EXPECT_TRUE(info->offsetEnd_);
+}
+
+/**
+ * @tc.name: ReachStart001
+ * @tc.desc: Test onReachStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentCommonTest, ReachStart001, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(37);
+    bool reached = false;
+    model.SetOnReachStart([&reached](){reached = true;});
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_7);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    CreateDone();
+
+    auto info = pattern_->layoutInfo_;
+
+    UpdateCurrentOffset(-2.0f);
+    UpdateCurrentOffset(3.0f);
+    EXPECT_TRUE(reached);
+
+    reached = false;
+    pattern_->ScrollToIndex(36);
+    FlushLayoutTask(frameNode_);
+    UpdateCurrentOffset(Infinity<float>());
+    EXPECT_TRUE(reached);
+}
+
+/**
+ * @tc.name: Cache001
+ * @tc.desc: Layout WaterFlow cache items
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentCommonTest, Cache001, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    CreateItemsInRepeat(30, [](int32_t i) { return 100.0f; });
+    model.SetCachedCount(3);
+    model.SetRowsGap(Dimension(10));
+    model.SetColumnsGap(Dimension(10));
+    CreateDone();
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_12);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, 7);
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 10));
+    const std::list<int32_t> preloadList = { 8, 9, 10 };
+    EXPECT_EQ(pattern_->preloadItems_, preloadList);
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    ASSERT_TRUE(GetChildFrameNode(frameNode_, 8));
+    ASSERT_TRUE(GetChildFrameNode(frameNode_, 9));
+    ASSERT_TRUE(GetChildFrameNode(frameNode_, 10));
+    EXPECT_EQ(GetChildWidth(frameNode_, 10), 111.5f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 8), 842.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 9), 944.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 10), 1154.0f);
+
+    UpdateCurrentOffset(-2000.0f);
+    EXPECT_EQ(info_->startIndex_, 15);
+    EXPECT_EQ(info_->endIndex_, 29);
+    EXPECT_TRUE(pattern_->preloadItems_.empty());
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_EQ(GetChildY(frameNode_, 12), -227.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 13), -227.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 14), -125.0f);
+    FlushLayoutTask(frameNode_);
 }
 } // namespace OHOS::Ace::NG

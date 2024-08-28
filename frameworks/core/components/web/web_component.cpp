@@ -15,15 +15,9 @@
 
 #include "core/components/web/web_component.h"
 
-#include <iomanip>
-#include <sstream>
-
-#include "base/geometry/offset.h"
-#include "base/geometry/size.h"
 #include "core/components/web/render_web.h"
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components/web/web_element.h"
-#include "frameworks/base/utils/system_properties.h"
 
 namespace OHOS::Ace {
 

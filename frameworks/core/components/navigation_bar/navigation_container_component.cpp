@@ -15,9 +15,6 @@
 
 #include "core/components/navigation_bar/navigation_container_component.h"
 
-#include "core/components/box/box_component.h"
-#include "core/components/display/display_component.h"
-#include "core/components/flex/flex_component.h"
 #include "core/components/flex/flex_item_component.h"
 #include "core/components/navigation_bar/navigation_bar_component.h"
 #include "core/components/navigation_bar/navigation_bar_component_v2.h"
@@ -25,7 +22,6 @@
 #include "core/components/navigation_bar/render_navigation_container.h"
 #include "core/components/padding/padding_component.h"
 #include "core/components/stage/stage_component.h"
-#include "core/components/theme/theme_manager_impl.h"
 namespace OHOS::Ace {
 
 namespace {

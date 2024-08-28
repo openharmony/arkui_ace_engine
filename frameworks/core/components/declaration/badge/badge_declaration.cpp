@@ -15,7 +15,6 @@
 
 #include "core/components/declaration/badge/badge_declaration.h"
 
-#include "base/utils/string_utils.h"
 #include "core/components/declaration/common/declaration_constants.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/core/components/badge/badge_theme.h"

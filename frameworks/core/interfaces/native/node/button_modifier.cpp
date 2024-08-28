@@ -30,6 +30,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t DEFAULT_BUTTON_TYPE = (int32_t)ButtonType::CAPSULE;
+constexpr int32_t DEFAULT_BUTTON_TYPE_VERSION_THIRTEEN = (int32_t)ButtonType::ROUNDED_RECTANGLE;
 constexpr bool DEFAULT_STATE_EFFECT = true;
 constexpr Ace::FontWeight DEFAULT_FONT_WEIGHT = Ace::FontWeight::NORMAL;
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
@@ -123,7 +124,8 @@ void SetButtonType(ArkUINodeHandle node, int type)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if ((ButtonType)type == ButtonType::CAPSULE || (ButtonType)type == ButtonType::CIRCLE ||
-        (ButtonType)type == ButtonType::ARC || (ButtonType)type == ButtonType::NORMAL) {
+        (ButtonType)type == ButtonType::ARC || (ButtonType)type == ButtonType::NORMAL ||
+        (ButtonType)type == ButtonType::ROUNDED_RECTANGLE) {
         ButtonModelNG::SetType(frameNode, type);
     }
 }
@@ -132,7 +134,12 @@ void ResetButtonType(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ButtonModelNG::SetType(frameNode, DEFAULT_BUTTON_TYPE);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        ButtonModelNG::SetType(frameNode, DEFAULT_BUTTON_TYPE_VERSION_THIRTEEN);
+    } else {
+        ButtonModelNG::SetType(frameNode, DEFAULT_BUTTON_TYPE);
+    }
+
     return;
 }
 
@@ -623,7 +630,11 @@ void ResetButtonOptions(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ButtonModelNG::SetType(frameNode, DEFAULT_BUTTON_TYPE);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        ButtonModelNG::SetType(frameNode, DEFAULT_BUTTON_TYPE_VERSION_THIRTEEN);
+    } else {
+        ButtonModelNG::SetType(frameNode, DEFAULT_BUTTON_TYPE);
+    }
     ButtonModelNG::SetStateEffect(frameNode, DEFAULT_STATE_EFFECT);
     ButtonModelNG::SetButtonStyle(frameNode, ButtonStyleMode::EMPHASIZE);
     ButtonModelNG::SetControlSize(frameNode, ControlSize::NORMAL);

@@ -16,13 +16,10 @@
 #include "core/components/calendar/calendar_element.h"
 
 #include "base/i18n/localization.h"
-#include "core/common/ace_application_info.h"
-#include "core/components/calendar/calendar_component.h"
 #include "core/components/calendar/calendar_component_v2.h"
 #include "core/components/calendar/render_calendar.h"
 #include "core/components/display/render_display.h"
 #include "core/components/swiper/swiper_element.h"
-#include "core/components/text/text_element.h"
 
 namespace OHOS::Ace {
 namespace {

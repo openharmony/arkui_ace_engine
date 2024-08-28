@@ -15,7 +15,15 @@
 
 #include "swiper_test_ng.h"
 
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
+
+#include "core/components/button/button_theme.h"
+#include "core/components/swiper/swiper_indicator_theme.h"
+#include "core/components_ng/pattern/button/button_model_ng.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_pattern.h"
 
 namespace OHOS::Ace::NG {
 void SwiperTestNg::SetUpTestSuite()
@@ -1850,7 +1858,7 @@ HWTEST_F(SwiperTestNg, FadeOverScroll001, TestSize.Level1)
     offset = 0.0f;
     EXPECT_FALSE(pattern_->FadeOverScroll(offset));
     EXPECT_FALSE(pattern_->IsVisibleChildrenSizeLessThanSwiper());
-    offset = 10.0f;
+    offset = -10.0f;
     EXPECT_TRUE(pattern_->FadeOverScroll(offset));
 }
 
@@ -1879,7 +1887,7 @@ HWTEST_F(SwiperTestNg, IsOutOfStart001, TestSize.Level1)
      * @tc.steps: step2. call mirror func.
      */
     layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
-    offset = 10.0f;
+    offset = -10.0f;
     EXPECT_TRUE(pattern_->IsOutOfStart(offset));
 }
 

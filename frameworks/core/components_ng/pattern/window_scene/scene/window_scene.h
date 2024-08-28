@@ -45,8 +45,8 @@ protected:
 
     void OnActivation() override;
     void OnConnect() override;
-    void OnBackground() override;
     void OnDisconnect() override;
+    void OnLayoutFinished() override;
     void OnDrawingCompleted() override;
 
 private:
@@ -56,6 +56,7 @@ private:
     void BufferAvailableCallbackForSnapshot();
     void DisposeSnapshotAndBlankWindow();
     void OnBoundsChanged(const Rosen::Vector4f& bounds);
+    bool IsWindowSizeEqual();
     void RegisterResponseRegionCallback();
     void RegisterFocusCallback();
     void CleanBlankWindow();

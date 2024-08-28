@@ -15,9 +15,7 @@
 
 #include "core/components/tab_bar/render_tab_content.h"
 
-#include "core/animation/curve_animation.h"
 #include "core/common/container.h"
-#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 namespace {

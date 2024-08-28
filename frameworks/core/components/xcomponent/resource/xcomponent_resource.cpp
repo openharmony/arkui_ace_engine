@@ -15,10 +15,6 @@
 
 #include "core/components/xcomponent/resource/xcomponent_resource.h"
 
-#include <sstream>
-
-#include "base/log/log.h"
-
 namespace OHOS::Ace {
 const char XCOMPONENT_PARAM_INIT[] = "initParam";
 const char XCOMPONENT_PARAM_NONE[] = "";

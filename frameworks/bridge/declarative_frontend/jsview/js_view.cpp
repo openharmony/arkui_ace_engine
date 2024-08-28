@@ -347,7 +347,8 @@ bool JSViewFullUpdate::GetChildByViewId(
     const std::string& viewId, JSRef<JSObject>& childView, JSRef<JSObject>& targetView)
 {
     auto* view = childView->Unwrap<JSViewFullUpdate>();
-    if (view && view->viewId_ == viewId) {
+    CHECK_NULL_RETURN(view, false);
+    if (view->viewId_ == viewId) {
         targetView = childView;
         return true;
     }

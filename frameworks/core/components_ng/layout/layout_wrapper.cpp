@@ -219,8 +219,7 @@ void LayoutWrapper::AdjustNotExpandNode()
         adjustedRect += geometryNode->GetParentAdjust();
     }
     geometryNode->SetSelfAdjust(adjustedRect - geometryNode->GetFrameRect());
-    renderContext->UpdatePaintRect(
-        adjustedRect + geometryNode->GetPixelGridRoundRect() - geometryNode->GetFrameRect());
+    renderContext->UpdatePaintRect(adjustedRect + geometryNode->GetPixelGridRoundRect() - geometryNode->GetFrameRect());
 }
 
 void LayoutWrapper::ExpandSafeArea()
@@ -371,6 +370,57 @@ ExpandEdges LayoutWrapper::GetAccumulatedSafeAreaExpand(bool includingSelf)
     return totalExpand;
 }
 
+void LayoutWrapper::ParseSafeAreaPaddingSides(const PaddingPropertyF& parentSafeAreaPadding,
+    const PaddingPropertyF& parentInnerSpace, const RectF& adjustingRect, ExpandEdges& rollingExpand)
+{
+    auto host = GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto parent = host->GetAncestorNodeOfFrame();
+    CHECK_NULL_VOID(parent);
+    const auto& parentGeometryNode = parent->GetGeometryNode();
+    CHECK_NULL_VOID(parentGeometryNode);
+    // check if current rect can overlap with four parent safeAreaPaddings
+    if (!NearZero(parentSafeAreaPadding.left.value_or(0.0f))) {
+        auto innerSpaceLeftLength = parentInnerSpace.left.value_or(0.0f);
+        // left side safeArea range is [border + padding, border + padding + safeAreaPadding]
+        if (InRange(adjustingRect.Left(), innerSpaceLeftLength,
+                innerSpaceLeftLength + parentSafeAreaPadding.left.value_or(0.0f))) {
+            rollingExpand.left = adjustingRect.Left() - innerSpaceLeftLength;
+        }
+    }
+    if (!NearZero(parentSafeAreaPadding.top.value_or(0.0f))) {
+        auto innerSpaceTopLength = parentInnerSpace.top.value_or(0.0f);
+        // top side safeArea padding range is [top border + padding, top border + padding + safeAreaPadding]
+        if (InRange(adjustingRect.Top(), innerSpaceTopLength,
+                innerSpaceTopLength + parentSafeAreaPadding.top.value_or(0.0f))) {
+            rollingExpand.top = adjustingRect.Top() - innerSpaceTopLength;
+        }
+    }
+    if (!NearZero(parentSafeAreaPadding.right.value_or(0.0f))) {
+        auto parentWidth = parentGeometryNode->GetFrameRect().Width();
+        auto innerSpaceRightLength = parentInnerSpace.right.value_or(0.0f);
+        // right side safeArea padding range is
+        // [parentWidth - (right border + padding) - right safeAreaPadding, parentWidth - (right border + padding)]
+        if (InRange(adjustingRect.Right(),
+                parentWidth - innerSpaceRightLength - parentSafeAreaPadding.right.value_or(0.0f),
+                parentWidth - innerSpaceRightLength)) {
+            rollingExpand.right = parentWidth - innerSpaceRightLength - adjustingRect.Right();
+        }
+    }
+    if (!NearZero(parentSafeAreaPadding.bottom.value_or(0.0f))) {
+        auto parentHeight = parentGeometryNode->GetFrameRect().Height();
+        // bottom side safeArea padding range is
+        // [parentHeight - (bottom border + padding) - bottom safeAreaPadding,
+        // parentHeight - (bottom border + padding)]
+        auto innerSpaceBottomLength = parentInnerSpace.bottom.value_or(0.0f);
+        if (InRange(adjustingRect.Bottom(),
+                parentHeight - innerSpaceBottomLength - parentSafeAreaPadding.bottom.value_or(0.0f),
+                parentHeight - innerSpaceBottomLength)) {
+            rollingExpand.bottom = parentHeight - innerSpaceBottomLength - adjustingRect.Bottom();
+        }
+    }
+}
+
 void LayoutWrapper::GetAccumulatedSafeAreaExpandHelper(RectF& adjustingRect, ExpandEdges& totalExpand)
 {
     auto host = GetHostNode();
@@ -395,16 +445,26 @@ void LayoutWrapper::GetAccumulatedSafeAreaExpandHelper(RectF& adjustingRect, Exp
     }
     // used to locate offset regions of safeAreaPaddings
     auto parentInnerSpace = parentLayoutProperty->CreatePaddingAndBorder(false, false);
-    // check if current rect can overlap with four parent safeAreaPaddings
-    if (!NearZero(parentSafeAreaPadding.left.value_or(0.0f))) {
-        auto innerSpaceLeftLength = parentInnerSpace.left.value_or(0.0f);
-        // left side safeArea range is [border + padding, border + padding + safeAreaPadding]
-        if (InRange(adjustingRect.Left(), innerSpaceLeftLength,
-            innerSpaceLeftLength + parentSafeAreaPadding.left.value_or(0.0f))) {
-            rollingExpand.left = adjustingRect.Left() - innerSpaceLeftLength;
-        }
+    ParseSafeAreaPaddingSides(parentSafeAreaPadding, parentInnerSpace, adjustingRect, rollingExpand);
+    adjustingRect.SetLeft(adjustingRect.Left() - rollingExpand.left.value_or(0.0f));
+    adjustingRect.SetTop(adjustingRect.Top() - rollingExpand.top.value_or(0.0f));
+    adjustingRect.SetWidth(
+        adjustingRect.Width() + rollingExpand.left.value_or(0.0f) + rollingExpand.right.value_or(0.0f));
+    adjustingRect.SetHeight(
+        adjustingRect.Height() + rollingExpand.top.value_or(0.0f) + rollingExpand.bottom.value_or(0.0f));
+    // after expanding based on parent safeAreaPadding, adjust rect to parent's coordinate
+    adjustingRect.SetOffset(adjustingRect.GetOffset() + parentGeometryNode->GetFrameOffset());
+    totalExpand = totalExpand.Plus(rollingExpand);
+    // CreateMargin does get or create
+    auto margin = parentLayoutProperty->CreateMargin();
+    // if parent has all four sides of innerSpace included(padding and border) or margin, stop expanding.
+    if (parentInnerSpace.AllSidesFilled(true) || margin.AllSidesFilled(true) || parent->GetTag() == V2::STAGE_ETS_TAG) {
+        return;
     }
-    return;
+    if (parent->AccumulateExpandCacheHit(totalExpand)) {
+        return;
+    }
+    parent->GetAccumulatedSafeAreaExpandHelper(adjustingRect, totalExpand);
 }
 
 void LayoutWrapper::AdjustChildren(const OffsetF& offset, bool parentScrollable)

@@ -654,4 +654,18 @@ bool MarqueePattern::IsRunMarquee()
     }
     return GreatOrEqual(textWidth + padding, marqueeSize.Width());
 }
+
+void MarqueePattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textChild = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+    CHECK_NULL_VOID(textChild);
+    auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    json->Put("Marquee text content", textLayoutProperty->GetContent().value_or("").c_str());
+    json->Put("Play status", playStatus_);
+    json->Put("loop", loop_);
+    json->Put("step", scrollAmount_);
+}
 } // namespace OHOS::Ace::NG

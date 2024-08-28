@@ -38,6 +38,8 @@ enum class SpanType {
     LetterSpacing,
     TextShadow = 4,
     LineHeight = 5,
+    BackgroundColor = 6,
+    Url = 7,
     Gesture = 100,
     ParagraphStyle = 200,
     Image = 300,
@@ -245,6 +247,24 @@ private:
 
     std::optional<std::vector<Shadow>> textShadow_ = std::nullopt;
 };
+class BackgroundColorSpan : public SpanBase {
+    DECLARE_ACE_TYPE(BackgroundColorSpan, SpanBase);
+public:
+    BackgroundColorSpan() = default;
+    explicit BackgroundColorSpan(std::optional<TextBackgroundStyle> textBackgroundStyle_);
+    BackgroundColorSpan(std::optional<TextBackgroundStyle> textBackgroundStyle_, int32_t start, int32_t end);
+    TextBackgroundStyle GetBackgroundColor() const;
+    void SetBackgroundColorGroupId(int32_t groupId);
+    RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
+    bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
+    SpanType GetSpanType() const override;
+    std::string ToString() const override;
+    void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override;
+private:
+    std::optional<TextBackgroundStyle> textBackgroundStyle_;
+    void AddSpanStyle(const RefPtr<NG::SpanItem>& spanItem) const;
+    static void RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem);
+};
 
 class ImageSpan : public SpanBase {
     DECLARE_ACE_TYPE(ImageSpan, SpanBase);
@@ -343,6 +363,25 @@ public:
     SpanType GetSpanType() const override;
     std::string ToString() const override;
     void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override {}
+};
+
+class UrlSpan : public SpanBase {
+    DECLARE_ACE_TYPE(UrlSpan, SpanBase);
+
+public:
+    UrlSpan() = default;
+    explicit UrlSpan(const std::string& urlAddress);
+    UrlSpan(const std::string& urlAddress, int32_t start, int32_t end);
+    std::string GetUrlSpanAddress() const&;
+    RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
+    bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
+    SpanType GetSpanType() const override;
+    std::string ToString() const override;
+    void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override;
+private:
+    void AddUrlStyle(const RefPtr<NG::SpanItem>& spanItem) const;
+    static void RemoveUrlStyle(const RefPtr<NG::SpanItem>& spanItem);
+    std::string urlAddress_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_SPAN_SPAN_OBJECT_H

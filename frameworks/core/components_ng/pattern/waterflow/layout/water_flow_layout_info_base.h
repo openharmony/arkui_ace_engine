@@ -46,6 +46,13 @@ public:
     virtual void UpdateOffset(float delta) = 0;
 
     /**
+     * @brief try calibrating total offset to an accurate value.
+     *
+     * @return amount of adjustment to total offset of content
+     */
+    virtual float CalibrateOffset() = 0;
+
+    /**
      * @brief Get which cross-axis lane the item is in.
      *
      * @param itemIndex
@@ -153,6 +160,14 @@ public:
     inline int32_t NodeIdx(int32_t idx) const
     {
         return idx + footerIndex_ + 1;
+    }
+
+    /**
+     * @brief obtain true total number of FlowItems by filtering out the footer node.
+     */
+    inline int32_t ItemCnt(int32_t childrenCount) const
+    {
+        return childrenCount - footerIndex_ - 1;
     }
 
     /**

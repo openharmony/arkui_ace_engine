@@ -81,6 +81,10 @@ float PipelineContext::GetCurrentRootWidth()
     return static_cast<float>(MockPipelineContext::GetCurrent()->rootWidth_);
 }
 
+void PipelineContext::RegisterTouchEventListener(const std::shared_ptr<ITouchEventCallback>& listener)
+{
+}
+
 float PipelineContext::GetCurrentRootHeight()
 {
     return static_cast<float>(MockPipelineContext::GetCurrent()->rootHeight_);
@@ -719,6 +723,8 @@ bool PipelineContext::HasOnAreaChangeNode(int32_t nodeId)
 {
     return false;
 }
+
+void PipelineContext::UnregisterTouchEventListener(const WeakPtr<NG::Pattern>& pattern) {}
 
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================

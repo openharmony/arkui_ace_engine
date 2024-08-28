@@ -15,8 +15,6 @@
 
 #include "core/components/navigation_bar/render_navigation_container.h"
 
-#include "core/animation/curve_animation.h"
-
 namespace OHOS::Ace {
 
 RefPtr<RenderNode> RenderNavigationContainer::Create()

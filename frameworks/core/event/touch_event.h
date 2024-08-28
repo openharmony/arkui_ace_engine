@@ -678,6 +678,16 @@ struct StateRecord {
         oss << ", " << "timestamp: " << ConvertTimestampToStr(timestamp);
         dumpList.emplace_back(std::make_pair(depth, oss.str()));
     }
+
+    void Dump(std::unique_ptr<JsonValue>& json) const
+    {
+        json->Put("procedure", procedure.c_str());
+        if (!state.empty()) {
+            json->Put("state", state.c_str());
+            json->Put("disposal", disposal.c_str());
+        }
+        json->Put("timestamp",  ConvertTimestampToStr(timestamp).c_str());
+    }
 };
 
 struct GestureSnapshot : public virtual AceType {
@@ -732,6 +742,37 @@ public:
             default:
                 return std::string("Type:").append(std::to_string(static_cast<int32_t>(type)));
         }
+    }
+
+    std::tuple<std::string, std::string> GetIds() const
+    {
+        std::stringstream oss;
+        oss << "0x" << std::hex << id;
+        std::string idStr = oss.str();
+        oss.str("");
+        oss << "0x" << std::hex << parentId;
+        std::string parentIdStr = oss.str();
+        return std::make_tuple(idStr, parentIdStr);
+    }
+
+    void Dump(std::unique_ptr<JsonValue>& json) const
+    {
+        json->Put("frameNodeId", nodeId);
+        json->Put("type", type.c_str());
+        auto result = GetIds();
+        json->Put("id", std::get<0>(result).c_str());
+        json->Put("parentId", std::get<1>(result).c_str());
+        json->Put("depth", this->depth);
+        if (!customInfo.empty()) {
+            json->Put("customInfo", customInfo.c_str());
+        }
+        std::unique_ptr<JsonValue> children = JsonUtil::CreateArray(true);
+        for (const auto& state : stateHistory) {
+            std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
+            state.Dump(child);
+            children->Put(child);
+        }
+        json->Put("stateHistory", children);
     }
 
     int32_t nodeId = -1;

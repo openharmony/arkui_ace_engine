@@ -15,14 +15,7 @@
 
 #include "core/components/xcomponent/xcomponent_component.h"
 
-#include <iomanip>
-#include <sstream>
-
-#include "base/geometry/offset.h"
-#include "base/geometry/size.h"
-#include "base/log/log.h"
 #include "core/components/xcomponent/render_xcomponent.h"
-#include "core/components/xcomponent/resource/xcomponent_delegate.h"
 #include "core/components/xcomponent/xcomponent_controller_impl.h"
 #include "core/components/xcomponent/xcomponent_element.h"
 

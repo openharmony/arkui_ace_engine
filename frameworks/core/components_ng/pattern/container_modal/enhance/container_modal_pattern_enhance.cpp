@@ -238,21 +238,18 @@ void ContainerModalPatternEnhance::SetContainerButtonHide(bool hideSplit, bool h
     CHECK_NULL_VOID(controlButtonsNode);
     ContainerModalViewEnhance::SetEnableSplit(!hideSplit);
 
-    if (hideMaximize) {
-        auto maximizeBtn =
-            AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MAX_RECOVER_BUTTON_INDEX));
-        CHECK_NULL_VOID(maximizeBtn);
-        maximizeBtn->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
-        maximizeBtn->MarkDirtyNode();
-    }
+    auto maximizeBtn =
+        AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MAX_RECOVER_BUTTON_INDEX));
+    CHECK_NULL_VOID(maximizeBtn);
+    maximizeBtn->GetLayoutProperty()->UpdateVisibility(hideMaximize ? VisibleType::GONE : VisibleType::VISIBLE);
+    maximizeBtn->MarkDirtyNode();
 
-    if (hideMinimize) {
-        auto minimizeBtn =
-            AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MINIMIZE_BUTTON_INDEX));
-        CHECK_NULL_VOID(minimizeBtn);
-        minimizeBtn->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
-        minimizeBtn->MarkDirtyNode();
-    }
+    auto minimizeBtn =
+        AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MINIMIZE_BUTTON_INDEX));
+    CHECK_NULL_VOID(minimizeBtn);
+    minimizeBtn->GetLayoutProperty()->UpdateVisibility(hideMinimize ? VisibleType::GONE : VisibleType::VISIBLE);
+    minimizeBtn->MarkDirtyNode();
+
     auto closeBtn = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, CLOSE_BUTTON_INDEX));
     InitTitleRowLayoutProperty(GetCustomTitleRow());
 }

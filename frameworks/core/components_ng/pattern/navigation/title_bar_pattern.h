@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_TITLE_BAR_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_TITLE_BAR_PATTERN_H
 
-#include "core/common/container.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/navigation/navigation_options.h"
@@ -251,16 +250,6 @@ public:
     {
         maxMenuNums_ = maxMenu;
     }
-
-    bool GetIsTitleMoving() const
-    {
-        return isTitleMoving_;
-    }
-
-    void SetIsTitleMoving(bool isTitleMoving)
-    {
-        isTitleMoving_ = isTitleMoving;
-    }
     void OnCoordScrollStart();
     float OnCoordScrollUpdate(float offset);
     void OnCoordScrollEnd();
@@ -403,7 +392,6 @@ private:
     bool CanOverDrag_ = true;
     bool isTitleScaleChange_ = true;
     bool isTitleChanged_ = false; // navigation Non-custom title changed
-    bool isTitleMoving_ = false;
     NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
 
     bool isFreeTitleUpdated_ = false;

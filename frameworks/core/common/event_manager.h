@@ -226,7 +226,7 @@ public:
         return eventTree_;
     }
 
-    void DumpEvent() const;
+    void DumpEvent(bool hasJson = false) const;
 
     void AddGestureSnapshot(int32_t finger, int32_t depth, const RefPtr<TouchEventTarget>& target);
 

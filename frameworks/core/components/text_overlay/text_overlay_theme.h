@@ -101,6 +101,7 @@ public:
                 theme->alphaDisabled_ =
                     pattern->GetAttr<double>(PATTERN_BG_COLOR_DISABLED_ALPHA, defaultTertiaryColorAlpha);
                 theme->cameraInput_ = pattern->GetAttr<std::string>("camera_input", "Camera input");
+                theme->aiWrite_ = pattern->GetAttr<std::string>("ai_write_menu_name", "Celia writer");
             } else {
                 LOGW("find pattern of textoverlay fail");
             }
@@ -244,6 +245,10 @@ public:
         return cameraInput_;
     }
 
+    const std::string& GetAIWrite() const
+    {
+        return aiWrite_;
+    }
 protected:
     TextOverlayTheme() = default;
 
@@ -268,6 +273,7 @@ private:
     TextStyle menuButtonTextStyle_;
     double alphaDisabled_ = 0.0;
     std::string cameraInput_;
+    std::string aiWrite_;
 
     InternalResource::ResourceId backResourceId_ = InternalResource::ResourceId::NO_ID;
     InternalResource::ResourceId moreResourceId_ = InternalResource::ResourceId::NO_ID;

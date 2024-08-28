@@ -52,6 +52,13 @@ struct VisibleContentInfo {
     int32_t indexInGroup = -1;
 };
 
+struct ListMainSizeValues {
+    float startPos = 0.0f;
+    float endPos = 0.0f;
+    float referencePos = 0.0f;
+    float prevContentMainSize = 0.0f;
+};
+
 class ACE_EXPORT ListItemGroupPattern : public Pattern {
     DECLARE_ACE_TYPE(ListItemGroupPattern, Pattern);
 
@@ -63,6 +70,7 @@ public:
     ~ListItemGroupPattern() override = default;
 
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     bool IsAtomicNode() const override
     {
         return false;
@@ -92,8 +100,10 @@ public:
         if (!prevHeader) {
             host->AddChild(header);
         } else {
-            host->ReplaceChild(prevHeader, header);
-            host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            if (header != prevHeader) {
+                host->ReplaceChild(prevHeader, header);
+                host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            }
         }
         header_ = header;
     }
@@ -106,10 +116,34 @@ public:
         if (!prevFooter) {
             host->AddChild(footer);
         } else {
-            host->ReplaceChild(prevFooter, footer);
-            host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            if (footer != prevFooter) {
+                host->ReplaceChild(prevFooter, footer);
+                host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            }
         }
         footer_ = footer;
+    }
+
+    void RemoveHeader()
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto prevHeader = header_.Upgrade();
+        if (prevHeader) {
+            host->RemoveChild(prevHeader);
+            header_ = nullptr;
+        }
+    }
+
+    void RemoveFooter()
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto prevFooter = header_.Upgrade();
+        if (prevFooter) {
+            host->RemoveChild(prevFooter);
+            header_ = nullptr;
+        }
     }
 
     const ListItemGroupLayoutAlgorithm::PositionMap& GetItemPosition()
@@ -212,7 +246,9 @@ public:
     void UpdateActiveChildRange(bool forward, int32_t cacheCount);
     int32_t UpdateForwardCachedIndex(int32_t cacheCount, bool outOfView);
     int32_t UpdateBackwardCachedIndex(int32_t cacheCount, bool outOfView);
-    void LayoutCache(const LayoutConstraintF& constraint, bool forward, int64_t deadline, int32_t cached);
+    void LayoutCache(const LayoutConstraintF& constraint, bool forward, int64_t deadline, int32_t cached,
+        ListMainSizeValues listSizeValues);
+
 private:
     bool IsNeedInitClickEventRecorder() const override
     {

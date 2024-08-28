@@ -27,6 +27,7 @@ class ResourceAdapterImpl : public ResourceAdapter {
 
 public:
     ResourceAdapterImpl() = default;
+    ResourceAdapterImpl(std::shared_ptr<Global::Resource::ResourceManager> resourceManager);
     ~ResourceAdapterImpl() override = default;
 
     void Init(const ResourceInfo& resourceInfo) override;
@@ -62,6 +63,8 @@ public:
     uint32_t GetSymbolById(uint32_t resId) const override;
     uint32_t GetSymbolByName(const char* resName) const override;
     ColorMode GetResourceColorMode() const override;
+    RefPtr<ResourceAdapter> GetOverrideResourceAdapter(
+        const ResourceConfiguration& config, const ConfigurationChange& configurationChange) override;
 private:
     static std::string GetActualResourceName(const std::string& resName);
 

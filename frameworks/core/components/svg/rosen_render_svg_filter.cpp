@@ -15,10 +15,6 @@
 
 #include "frameworks/core/components/svg/rosen_render_svg_filter.h"
 
-#include "include/core/SkColorFilter.h"
-#include "include/effects/SkColorMatrix.h"
-#include "include/effects/SkImageFilters.h"
-
 #include "frameworks/core/components/svg/rosen_render_svg_fe_colormatrix.h"
 #include "frameworks/core/components/svg/rosen_render_svg_fe_composite.h"
 #include "frameworks/core/components/svg/rosen_render_svg_fe_gaussianblur.h"

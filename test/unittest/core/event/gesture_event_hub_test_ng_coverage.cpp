@@ -336,4 +336,61 @@ HWTEST_F(GestureEventHubTestCoverageNg, GestureEventHubTestCoverage008, TestSize
     gestureEventHub->ClearJSFrameNodeOnClick();
     SUCCEED();
 }
+
+/**
+ * @tc.name: GestureEventHubTestCoverage009
+ * @tc.desc: test OnDragStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestCoverageNg, GestureEventHubTestCoverage009, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto childNode = AceType::MakeRefPtr<FrameNode>(V2::RICH_EDITOR_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::RICH_EDITOR_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto patternNode = AceType::MakeRefPtr<FrameNode>(V2::RICH_EDITOR_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    frameNode->AddChild(childNode);
+    DragDropInfo dragDropInfo;
+    eventHub->AttachHost(frameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    ASSERT_NE(gestureEventHub, nullptr);
+    gestureEventHub->InitDragDropEvent();
+    ASSERT_NE(gestureEventHub->dragEventActuator_, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    GestureEvent gestureEvent;
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    dragDropInfo.pixelMap = pixelMap;
+    frameNode->SetDragPreview(dragDropInfo);
+    gestureEventHub->dragEventActuator_->preScaledPixelMap_ = pixelMap;
+    gestureEventHub->dragPreviewPixelMap_ = pixelMap;
+    RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    auto dragDropProxy = AceType::MakeRefPtr<DragDropProxy>(101);
+    gestureEventHub->dragDropProxy_ = dragDropProxy;
+    auto textPattern = AceType::MakeRefPtr<TextPattern>();
+    textPattern->dragRecordSize_ = 1;
+    frameNode->pattern_ = textPattern;
+    frameNode->GetOrCreateFocusHub();
+    gestureEventHub->OnDragStart(gestureEvent, pipeline, frameNode, dragDropInfo, event);
+    gestureEventHub->dragEventActuator_->itemParentNode_ = patternNode;
+    auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
+    patternNode->pattern_ = mockPn;
+    gestureEventHub->dragEventActuator_->isSelectedItemNode_ = true;
+    auto pixmap = AceType::MakeRefPtr<MockPixelMap>();
+    dragDropInfo.pixelMap = pixmap;
+    EXPECT_CALL(*pixmap, GetWidth()).WillRepeatedly(Return(200));
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    auto overlayManager = mainPipeline->GetOverlayManager();
+    overlayManager->pixmapColumnNodeWeak_ = WeakPtr<FrameNode>(AceType::DynamicCast<FrameNode>(frameNode));
+    gestureEvent.inputEventType_ = InputEventType::MOUSE_BUTTON;
+    auto mock = AceType::DynamicCast<MockInteractionInterface>(InteractionInterface::GetInstance());
+    if (mock->gDragOutCallback) {
+        mock->gDragOutCallback();
+    }
+    mock->gStartDrag = 1;
+    gestureEventHub->OnDragStart(gestureEvent, pipeline, frameNode, dragDropInfo, event);
+    mock->gStartDrag = 0;
+    SUCCEED();
+}
+
 } // namespace OHOS::Ace::NG

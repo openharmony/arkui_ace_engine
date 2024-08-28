@@ -263,17 +263,11 @@ int32_t NativeRichEditorController::AddImageSpan(std::string value, NativeRichEd
     }
     if (srcType == SrcType::ASSET) {
         auto pipelineContext = PipelineBase::GetCurrentContext();
-        if (!pipelineContext) {
-            return -1;
-        }
+        CHECK_NULL_RETURN(pipelineContext, -1);
         auto assetManager = pipelineContext->GetAssetManager();
-        if (!assetManager) {
-            return -1;
-        }
+        CHECK_NULL_RETURN(assetManager, -1);
         auto assetData = assetManager->GetAsset(assetSrc);
-        if (!assetData) {
-            return -1;
-        }
+        CHECK_NULL_RETURN(assetData, -1);
     }
 
     options.offset = params.offset;

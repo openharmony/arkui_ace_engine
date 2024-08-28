@@ -15,9 +15,6 @@
 
 #include "core/components/scroll_bar/rosen_render_scroll_bar.h"
 
-#include "core/components/scroll_bar/scroll_bar_proxy.h"
-#include "core/pipeline/base/rosen_render_context.h"
-
 namespace OHOS::Ace {
 
 void RosenRenderScrollBar::Paint(RenderContext& context, const Offset& offset)

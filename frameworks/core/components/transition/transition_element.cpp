@@ -16,10 +16,8 @@
 #include "core/components/transition/transition_element.h"
 
 #include "core/components/box/render_box_base.h"
-#include "core/components/transform/transform_element.h"
 #include "core/components/transition/transition_component.h"
 #include "core/components/tween/tween_component.h"
-#include "core/components/tween/tween_element.h"
 
 namespace OHOS::Ace {
 

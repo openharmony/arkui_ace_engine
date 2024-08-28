@@ -15,8 +15,6 @@
 
 #include "frameworks/core/components/svg/rosen_render_svg_fe_offset.h"
 
-#include "include/effects/SkImageFilters.h"
-
 namespace OHOS::Ace {
 
 #ifndef USE_ROSEN_DRAWING

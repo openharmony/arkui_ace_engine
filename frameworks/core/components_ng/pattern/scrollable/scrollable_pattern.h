@@ -36,6 +36,7 @@
 #include "core/components_ng/pattern/scrollable/refresh_coordination.h"
 #include "core/components_ng/pattern/scrollable/scrollable_controller.h"
 #include "core/components_ng/pattern/scrollable/scrollable_coordination_event.h"
+#include "core/components_ng/pattern/scrollable/scrollable_paint_method.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/render/animation_utils.h"
@@ -78,6 +79,12 @@ public:
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override;
+
+    void CreateAnalyzerOverlay(const RefPtr<FrameNode> node);
+
+    void UpdateFadingEdge(const RefPtr<ScrollablePaintMethod>& paint);
+    
+    void UpdateFadeInfo(bool isFadingTop, bool isFadingBottom, const RefPtr<ScrollablePaintMethod>& paint);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void OnWindowHide() override;
@@ -138,6 +145,8 @@ public:
     virtual bool OnScrollCallback(float offset, int32_t source);
     virtual void OnScrollStartCallback();
     virtual void FireOnScrollStart();
+    virtual void FireOnReachStart(const OnReachEvent& onReachStart) {}
+    virtual void FireOnReachEnd(const OnReachEvent& onReachEnd) {}
     bool ScrollableIdle()
     {
         return !scrollableEvent_ || scrollableEvent_->Idle();
@@ -368,7 +377,7 @@ public:
     void UpdateMouseStart(float offset);
 
     // scrollSnap
-    virtual std::optional<float> CalePredictSnapOffset(float delta, float dragDistance, float velocity)
+    virtual std::optional<float> CalcPredictSnapOffset(float delta, float dragDistance, float velocity)
     {
         std::optional<float> predictSnapPosition;
         return predictSnapPosition;
@@ -584,16 +593,22 @@ public:
     void AddScrollableFrameInfo(int32_t scrollSource);
 
     void GetEdgeEffectDumpInfo();
+    void GetEdgeEffectDumpInfo(std::unique_ptr<JsonValue>& json);
 
     void GetAxisDumpInfo();
+    void GetAxisDumpInfo(std::unique_ptr<JsonValue>& json);
 
     void GetPanDirectionDumpInfo();
-    
+    void GetPanDirectionDumpInfo(std::unique_ptr<JsonValue>& json);
+
     void GetPaintPropertyDumpInfo();
+    void GetPaintPropertyDumpInfo(std::unique_ptr<JsonValue>& json);
 
     void GetEventDumpInfo();
+    void GetEventDumpInfo(std::unique_ptr<JsonValue>& json);
 
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
 
     void SetScrollToSafeAreaHelper(bool isScrollToSafeAreaHelper)
     {

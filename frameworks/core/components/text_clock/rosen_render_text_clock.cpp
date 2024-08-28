@@ -15,10 +15,6 @@
 
 #include "core/components/text_clock/rosen_render_text_clock.h"
 
-#include "base/json/json_util.h"
-#include "core/components/text/text_component.h"
-#include "core/pipeline/base/constants.h"
-
 namespace OHOS::Ace {
 namespace {
 constexpr int32_t INTERVAL_OF_USECOND = 1000000;

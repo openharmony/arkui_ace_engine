@@ -298,8 +298,8 @@ export struct SubHeader {
           bottom: LengthMetrics.resource($r('sys.float.padding_level1')),
         })
         .padding({
-          start: LengthMetrics.resource($r('sys.float.margin_left')),
-          end: LengthMetrics.resource($r('sys.float.margin_right')),
+          start: this.contentMargin ? this.contentMargin.start : LengthMetrics.resource($r('sys.float.margin_left')),
+          end: this.contentMargin ? this.contentMargin.end : LengthMetrics.resource($r('sys.float.margin_right')),
         })
         .width('100%')
 
@@ -311,9 +311,11 @@ export struct SubHeader {
         })
         .padding({
           // 'sys.float.margin_left' id,value: 16vp
-          start: LengthMetrics.vp(Util.getNumberByResource(125830936, LEFT_ICON_SIZE_NUMBER) - this.paddingLeft),
+          start: LengthMetrics.vp((this.contentMargin ? (this.contentMargin.start? this.contentMargin.start.value: 0) :
+          Util.getNumberByResource(125830936, LEFT_ICON_SIZE_NUMBER)) - this.paddingLeft),
           // 'sys.float.margin_right' id,value: 16vp
-          end: LengthMetrics.vp(Util.getNumberByResource(125830937, LEFT_ICON_SIZE_NUMBER)),
+          end: this.contentMargin ? this.contentMargin.end : LengthMetrics.vp(Util.getNumberByResource(125830937,
+            LEFT_ICON_SIZE_NUMBER)),
         })
         .justifyContent(FlexAlign.Start)
         .width('100%')
@@ -327,7 +329,8 @@ export struct SubHeader {
           this.leftArea();
         }
         .margin({
-          top: this.fontSize >= MIN_FONT_SIZE ? $r('sys.float.padding_level8') : ''
+          top: this.fontSize >= MIN_FONT_SIZE ? $r('sys.float.padding_level8') : '',
+          bottom: this.fontSize >= MIN_FONT_SIZE ? $r('sys.float.padding_level4') : '',
         })
         .width('100%')
         .flexShrink(1)
@@ -514,7 +517,7 @@ export struct SubHeader {
       Text($$.content)
         .primaryTitleStyles({
           fontWeight: FontWeight.Bold,
-          maxLines: SINGLE_LINE_NUM,
+          maxLines: DOUBLE_LINE_NUM,
           alignment: Alignment.Start,
           fontColor: this.subHeaderTheme.fontPrimaryColor,
         })
@@ -523,7 +526,7 @@ export struct SubHeader {
         .width('100%')
       Text($$.subContent)
         .secondaryTitleStyles({
-          maxLines: SINGLE_LINE_NUM,
+          maxLines: DOUBLE_LINE_NUM,
           fontWeight: FontWeight.Regular,
           alignment: Alignment.Start,
           fontColor: this.subHeaderTheme.fontSecondaryColor,
@@ -687,6 +690,9 @@ export struct SubHeader {
   }
 
   private leftIconMargin(): LengthMetrics {
+    if (this.titleBuilder) {
+      return LengthMetrics.vp(0);
+    }
     if (this.icon && Util.isSymbolResource(this.icon)) {
       return this.ageing ? LengthMetrics.vp((this.iconSymbolOptions?.fontSize ?
       Util.numberToSize(this.iconSymbolOptions?.fontSize) : LEFT_ICON_SIZE_NUMBER) +

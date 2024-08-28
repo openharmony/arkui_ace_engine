@@ -16,22 +16,11 @@
 #ifndef FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_INDEXER_INDEXER_TEST_NG_H
 #define FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_INDEXER_INDEXER_TEST_NG_H
 
-#include <optional>
-
-#include "gtest/gtest.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
-#include "base/geometry/dimension.h"
-
+#include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 #define protected public
 #define private public
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "core/common/container.h"
-#include "core/components/indexer/indexer_theme.h"
-#include "core/components_ng/pattern/indexer/indexer_layout_property.h"
-#include "core/components_ng/pattern/indexer/indexer_model_ng.h"
-#include "core/components_ng/pattern/indexer/indexer_paint_property.h"
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
 
 namespace OHOS::Ace::NG {

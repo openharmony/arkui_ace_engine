@@ -15,8 +15,6 @@
 
 #include "core/components/text_field/on_text_changed_listener_impl.h"
 
-#include "base/utils/utils.h"
-
 namespace OHOS::Ace {
 
 void OnTextChangedListenerImpl::InsertText(const std::u16string& text)

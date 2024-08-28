@@ -14,6 +14,7 @@
  */
 
 #include "scroll_bar_test_ng.h"
+#include "test/mock/base/mock_task_executor.h"
 
 namespace OHOS::Ace::NG {
 

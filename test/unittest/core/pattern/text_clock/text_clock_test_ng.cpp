@@ -788,9 +788,7 @@ HWTEST_F(TextClockTestNG, TextClockLayoutAlgorithm001, TestSize.Level1)
      * @tc.steps: step2. create childFrameNode.
      * @tc.expected: step2. check whether the properties is correct.
      */
-    auto textNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto textNode = FrameNode::GetOrCreateFrameNode(
-        V2::TEXT_ETS_TAG, textNodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
     ASSERT_NE(textNode, nullptr);
     RefPtr<GeometryNode> textGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto textLayoutWrapper =

@@ -162,7 +162,7 @@ class ComposeTitleBar extends ViewPU {
             value: PUBLIC_BACK,
             isEnabled: true,
             action: () => this.backActive = true
-          }, index: -1 }, undefined, r9, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 66, col: 9 });
+          }, index: -1 }, undefined, r9, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 64, col: 9 });
           ViewPU.create(t9);
           let u9 = () => {
             return {
@@ -320,7 +320,7 @@ class ComposeTitleBar extends ViewPU {
             this.observeComponentCreation((h8, i8) => {
               ViewStackProcessor.StartGetAccessRecordingFor(h8);
               if (i8) {
-                let j8 = new CollapsibleMenuSection(this, { menuItems: this.menuItems, index: 1 + ComposeTitleBar.instanceCount++ }, undefined, h8, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 116, col: 9 });
+                let j8 = new CollapsibleMenuSection(this, { menuItems: this.menuItems, index: 1 + ComposeTitleBar.instanceCount++ }, undefined, h8, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 114, col: 9 });
                 ViewPU.create(j8);
                 let k8 = () => {
                   return {
@@ -397,7 +397,7 @@ class CollapsibleMenuSection extends ViewPU {
           itemComposeTitleDialog: this.item,
           composeTitleBarDialog: this.item.label ? this.item.label : '',
           fontSize: this.fontSize,
-        }, undefined, -1, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 172, col: 14 });
+        }, undefined, -1, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 166, col: 14 });
         q7.setController(this.dialogController);
         ViewPU.create(q7);
         let r7 = () => {
@@ -605,7 +605,7 @@ class CollapsibleMenuSection extends ViewPU {
                       this.observeComponentCreation((h6, i6) => {
                         ViewStackProcessor.StartGetAccessRecordingFor(h6);
                         if (i6) {
-                          let j6 = new ImageMenuItem(this, { item: f6, index: this.index * 1000 + e6 + 1 }, undefined, h6, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 245, col: 15 });
+                          let j6 = new ImageMenuItem(this, { item: f6, index: this.index * 1000 + e6 + 1 }, undefined, h6, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 238, col: 15 });
                           ViewPU.create(j6);
                           let k6 = () => {
                             return {
@@ -642,7 +642,7 @@ class CollapsibleMenuSection extends ViewPU {
                       this.observeComponentCreation((r5, s5) => {
                         ViewStackProcessor.StartGetAccessRecordingFor(r5);
                         if (s5) {
-                          let t5 = new ImageMenuItem(this, { item: p5, index: this.index * 1000 + o5 + 1 }, undefined, r5, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 250, col: 17 });
+                          let t5 = new ImageMenuItem(this, { item: p5, index: this.index * 1000 + o5 + 1 }, undefined, r5, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 243, col: 17 });
                           ViewPU.create(t5);
                           let u5 = () => {
                             return {
@@ -813,13 +813,14 @@ class CollapsibleMenuSection extends ViewPU {
                   ViewStackProcessor.StartGetAccessRecordingFor(w3);
                   if (x3) {
                     let y3 = new ImageMenuItem(this, { item: u3, index: this.index * 1000 +
-                    CollapsibleMenuSection.maxCountOfVisibleItems + t3 }, undefined, w3, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 348, col: 13 });
+                    CollapsibleMenuSection.maxCountOfVisibleItems + t3, isPopup: true }, undefined, w3, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 341, col: 13 });
                     ViewPU.create(y3);
                     let z3 = () => {
                       return {
                         item: u3,
                         index: this.index * 1000 +
-                        CollapsibleMenuSection.maxCountOfVisibleItems + t3
+                        CollapsibleMenuSection.maxCountOfVisibleItems + t3,
+                        isPopup: true
                       };
                     };
                     y3.paramsGenerator_ = z3;
@@ -874,6 +875,7 @@ class ImageMenuItem extends ViewPU {
     this.isFollowingSystemFontScale = false;
     this.maxFontScale = 1;
     this.systemFontScale = 1;
+    this.isPopup = false;
     this.__isOnFocus = new ObservedPropertySimplePU(false, this, 'isOnFocus');
     this.__isOnHover = new ObservedPropertySimplePU(false, this, 'isOnHover');
     this.__isOnClick = new ObservedPropertySimplePU(false, this, 'isOnClick');
@@ -888,7 +890,7 @@ class ImageMenuItem extends ViewPU {
           itemComposeTitleDialog: this.item,
           composeTitleBarDialog: this.item.label ? this.item.label : this.textDialog(),
           fontSize: this.fontSize,
-        }, undefined, -1, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 386, col: 14 });
+        }, undefined, -1, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 378, col: 14 });
         c3.setController(this.dialogController);
         ViewPU.create(c3);
         let d3 = () => {
@@ -932,6 +934,9 @@ class ImageMenuItem extends ViewPU {
     }
     if (v2.systemFontScale !== undefined) {
       this.systemFontScale = v2.systemFontScale;
+    }
+    if (v2.isPopup !== undefined) {
+      this.isPopup = v2.isPopup;
     }
     if (v2.isOnFocus !== undefined) {
       this.isOnFocus = v2.isOnFocus;
@@ -1106,7 +1111,7 @@ class ImageMenuItem extends ViewPU {
         }
         if (e2.type === TouchType.Up || e2.type === TouchType.Cancel) {
           this.isOnClick = false;
-          if (this.fontSize >= this.minFontSize) {
+          if (this.fontSize >= this.minFontSize && this.isPopup === false) {
             this.dialogController?.close();
           }
         }
@@ -1121,7 +1126,7 @@ class ImageMenuItem extends ViewPU {
       LongPressGesture.onAction((d2) => {
         this.fontSize = this.decideFontScale();
         if (d2) {
-          if (this.fontSize >= this.minFontSize) {
+          if (this.fontSize >= this.minFontSize && this.isPopup === false) {
             this.dialogController?.open();
           }
         }

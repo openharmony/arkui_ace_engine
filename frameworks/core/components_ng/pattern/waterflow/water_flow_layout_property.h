@@ -60,6 +60,12 @@ public:
                 (isRtl && (axis == FlexDirection::COLUMN_REVERSE || axis == FlexDirection::ROW));
     }
 
+    bool IsVerticalReverse() const
+    {
+        auto axis = propWaterflowDirection_.value_or(FlexDirection::COLUMN);
+        return axis == FlexDirection::COLUMN_REVERSE;
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ColumnsTemplate, std::string);
     void OnColumnsTemplateUpdate(const std::string& /* columnsTemplate */) const
     {

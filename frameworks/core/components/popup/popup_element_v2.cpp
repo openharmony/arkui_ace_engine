@@ -15,8 +15,6 @@
 
 #include "core/components/popup/popup_element_v2.h"
 
-#include "base/i18n/localization.h"
-
 namespace OHOS::Ace {
 
 void PopupElementV2::PerformBuild()

@@ -12,7 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "test/unittest/core/pattern/waterflow/water_flow_test_ng.h"
+
+#include "water_flow_test_ng.h"
+
+#include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 // TEST non-segmented layout
@@ -144,6 +147,73 @@ HWTEST_F(WaterFlowTestNg, IllegalItemCnt, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ZeroHeightItem001
+ * @tc.desc: Layout WaterFlow with 0-height item.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ZeroHeightItem001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(5.0f));
+    model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    CreateItemWithHeight(0.0f);
+    CreateItemWithHeight(100.0f);
+    CreateItemWithHeight(100.0f);
+    CreateDone();
+    const auto& info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 2);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 2), 5.0f);
+
+    pattern_->SetAnimateCanOverScroll(true);
+    UpdateCurrentOffset(100.0f); // shouldn't move
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 2), 5.0f);
+
+    UpdateCurrentOffset(-100.0f); // shouldn't move
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 2), 5.0f);
+}
+
+/**
+ * @tc.name: ZeroHeightItem002
+ * @tc.desc: Layout WaterFlow with 0-height item at the bottom.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ZeroHeightItem002, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    for (int i = 0; i < 5; ++i) {
+        CreateItemWithHeight(100.0f);
+    }
+    CreateItemWithHeight(0.0f);
+    CreateDone();
+    const auto& info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 5);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 5), 500.0f);
+
+    pattern_->SetAnimateCanOverScroll(true);
+    UpdateCurrentOffset(100.0f); // shouldn't move
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 5), 500.0f);
+
+    UpdateCurrentOffset(-100.0f); // shouldn't move
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 5), 500.0f);
+}
+
+/**
  * @tc.name: Property014
  * @tc.desc: Test the property of itemConstraintSize.
  * @tc.type: FUNC
@@ -206,5 +276,48 @@ HWTEST_F(WaterFlowTestNg, Property014, TestSize.Level1)
         EXPECT_GE(rect.Height(), 150.f);
         EXPECT_LE(rect.Height(), 250.f);
     }
+}
+
+/**
+ * @tc.name: Cache003
+ * @tc.desc: Test cache item with footer
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Cache003, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    model.SetFooter(GetDefaultHeaderBuilder());
+    CreateItemsInRepeat(50, [](int32_t i) { return i % 2 ? 100.0f : 200.0f; });
+
+    model.SetCachedCount(3);
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetRowsGap(Dimension(10));
+    model.SetColumnsGap(Dimension(10));
+    CreateDone();
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 51);
+    ASSERT_TRUE(GetChildFrameNode(frameNode_, 0));
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    auto info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 15);
+
+    const std::list<int32_t> preloadList = { 16, 17, 18 };
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 17));
+    EXPECT_EQ(pattern_->preloadItems_, preloadList);
+    EXPECT_TRUE(pattern_->cacheLayout_);
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_TRUE(pattern_->preloadItems_.empty());
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 17));
+    EXPECT_EQ(GetChildHeight(frameNode_, 17), 200.0f);
+    EXPECT_EQ(layoutProperty_->propertyChangeFlag_, PROPERTY_UPDATE_LAYOUT);
+
+    UpdateCurrentOffset(-Infinity<float>());
+    EXPECT_EQ(info->startIndex_, 36);
+    EXPECT_EQ(info->endIndex_, 49);
+    EXPECT_TRUE(pattern_->preloadItems_.empty());
+    EXPECT_EQ(GetChildY(frameNode_, 36), -140.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 35), -250.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 34), -250.0f);
 }
 } // namespace OHOS::Ace::NG

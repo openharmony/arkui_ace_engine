@@ -706,6 +706,7 @@ public:
         const RefPtr<UINode>& builderNode, int32_t depth, bool& hasImageNode, std::list<RefPtr<FrameNode>>& imageNodes);
     static void CheckImageDecode(std::list<RefPtr<FrameNode>>& imageNodes);
 #endif
+    static bool IsAllowedDrag(const RefPtr<FrameNode>& frameNode);
 
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
@@ -731,6 +732,15 @@ private:
 
     template<typename T>
     const RefPtr<T> AccessibilityRecursionSearchRecognizer(const RefPtr<NGGestureRecognizer>& recognizer);
+
+    void ProcessParallelPriorityGesture(RefPtr<NGGestureRecognizer>& current,
+        std::list<RefPtr<NGGestureRecognizer>>& recognizers, int32_t parallelIndex, const Offset& offset,
+        int32_t touchId, const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host);
+    
+    void ProcessExternalExclusiveRecognizer(RefPtr<NGGestureRecognizer>& current,
+        std::list<RefPtr<NGGestureRecognizer>>& recognizers, int32_t exclusiveIndex, const Offset& offset,
+        int32_t touchId, const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host,
+        GesturePriority priority);
 
     WeakPtr<EventHub> eventHub_;
     RefPtr<ScrollableActuator> scrollableActuator_;

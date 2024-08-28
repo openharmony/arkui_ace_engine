@@ -15,7 +15,6 @@
 
 #include "core/components/dialog_modal/dialog_modal_component.h"
 
-#include "core/components/box/box_component.h"
 #include "core/components/clip/clip_component.h"
 #include "core/components/dialog_modal/dialog_modal_element.h"
 #include "core/components/dialog_modal/render_dialog_modal.h"

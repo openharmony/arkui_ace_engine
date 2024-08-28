@@ -326,4 +326,59 @@ void GridItemPattern::DumpAdvanceInfo()
         }
     }
 }
+
+void GridItemPattern::UpdateGridItemStyle(GridItemStyle gridItemStyle)
+{
+    gridItemStyle_ = gridItemStyle;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<GridItemTheme>();
+    CHECK_NULL_VOID(theme);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (gridItemStyle_ == GridItemStyle::PLAIN) {
+        renderContext->UpdateBorderRadius(theme->GetGridItemBorderRadius());
+    } else if (gridItemStyle_ == GridItemStyle::NONE) {
+        renderContext->UpdateBorderRadius(BorderRadiusProperty());
+    }
+}
+
+void GridItemPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto property = GetLayoutProperty<GridItemLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    json->Put("MainIndex",
+        property->GetMainIndex().has_value() ? std::to_string(property->GetMainIndex().value()).c_str() : "null");
+    json->Put("CrossIndex",
+        property->GetCrossIndex().has_value() ? std::to_string(property->GetCrossIndex().value()).c_str() : "null");
+    json->Put("RowStart",
+        property->GetRowStart().has_value() ? std::to_string(property->GetRowStart().value()).c_str() : "null");
+    json->Put(
+        "RowEnd", property->GetRowEnd().has_value() ? std::to_string(property->GetRowEnd().value()).c_str() : "null");
+    json->Put("ColumnStart",
+        property->GetColumnStart().has_value() ? std::to_string(property->GetColumnStart().value()).c_str() : "null");
+    json->Put("ColumnEnd",
+        property->GetColumnEnd().has_value() ? std::to_string(property->GetColumnEnd().value()).c_str() : "null");
+
+    json->Put("needStretch", property->GetNeedStretch());
+    json->Put("selectable", selectable_);
+    json->Put("isSelected", isSelected_);
+    json->Put("isHover", isHover_);
+    json->Put("isPressed", isPressed_);
+    switch (gridItemStyle_) {
+        case GridItemStyle::NONE: {
+            json->Put("GridItemStyle", "NONE");
+            break;
+        }
+        case GridItemStyle::PLAIN: {
+            json->Put("GridItemStyle", "PLAIN");
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

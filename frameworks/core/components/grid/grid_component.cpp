@@ -15,9 +15,6 @@
 
 #include "core/components/grid/grid_component.h"
 
-#include "core/components/grid/grid_element.h"
-#include "core/components/grid/render_grid.h"
-
 namespace OHOS::Ace {
 
 RefPtr<Element> GridComponent::CreateElement()

@@ -340,7 +340,7 @@ public:
     RefPtr<FrameNode> GetMenuWrapper() const;
     RefPtr<FrameNode> GetFirstInnerMenu() const;
     void DumpInfo() override;
-
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void SetFirstShow()
     {
         isFirstShow_ = true;

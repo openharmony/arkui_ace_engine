@@ -70,6 +70,16 @@ void RowModelNG::SetJustifyContent(FlexAlign flexAlign)
     ACE_UPDATE_LAYOUT_PROPERTY(LinearLayoutProperty, MainAxisAlign, flexAlign);
 }
 
+void RowModelNG::SetIsReverse(bool isReverse)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, IsReverse, isReverse);
+}
+
+void RowModelNG::SetIsReverse(FrameNode* frameNode, bool isReverse)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, IsReverse, isReverse, frameNode);
+}
+
 void RowModelNG::SetJustifyContent(FrameNode* frameNode, FlexAlign flexAlign)
 {
     CHECK_NULL_VOID(frameNode);

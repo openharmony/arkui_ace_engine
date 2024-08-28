@@ -175,6 +175,15 @@ void addGestureToGestureGroup(ArkUIGesture* group, ArkUIGesture* child)
     gestureGroup->AddGesture(AceType::Claim(childGesture));
 }
 
+void addGestureToGestureGroupWithRefCountDecrease(ArkUIGesture* group, ArkUIGesture* child)
+{
+    auto* gestureGroup = reinterpret_cast<GestureGroup*>(group);
+    auto* childGesture = reinterpret_cast<Gesture*>(child);
+    gestureGroup->AddGesture(AceType::Claim(childGesture));
+    // Gesture ptr ref count is not decrease, so need to decrease after attach to gestureEventHub.
+    childGesture->DecRefCount();
+}
+
 void removeGestureFromGestureGroup(ArkUIGesture* group, ArkUIGesture* child)
 {
     auto* gestureGroup = reinterpret_cast<GestureGroup*>(group);
@@ -443,6 +452,31 @@ void addGestureToNode(ArkUINodeHandle node, ArkUIGesture* gesture, ArkUI_Int32 p
     gestureHub->AttachGesture(gesturePtr);
 }
 
+void addGestureToNodeWithRefCountDecrease(
+    ArkUINodeHandle node, ArkUIGesture* gesture, ArkUI_Int32 priorityNum, ArkUI_Int32 mask)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    auto gesturePtr = Referenced::Claim(reinterpret_cast<Gesture*>(gesture));
+
+    GesturePriority priority = GesturePriority::Low;
+    if (priorityNum > static_cast<int32_t>(GesturePriority::Begin) &&
+            priorityNum < static_cast<int32_t>(GesturePriority::End)) {
+        priority = static_cast<GesturePriority>(priorityNum);
+    }
+    gesturePtr->SetPriority(priority);
+
+    GestureMask gestureMask = GestureMask::Normal;
+    if (mask > static_cast<int32_t>(GestureMask::Begin) &&
+        mask < static_cast<int32_t>(GestureMask::End)) {
+        gestureMask = static_cast<GestureMask>(mask);
+    }
+    gesturePtr->SetGestureMask(gestureMask);
+    gestureHub->AttachGesture(gesturePtr);
+    // Gesture ptr ref count is not decrease, so need to decrease after attach to gestureEventHub.
+    gesturePtr->DecRefCount();
+}
 
 void removeGestureFromNode(ArkUINodeHandle node, ArkUIGesture* gesture)
 {
@@ -741,6 +775,8 @@ const ArkUIGestureModifier* GetGestureModifier()
         getGestureBindNodeId,
         isGestureRecognizerValid,
         setArkUIGestureRecognizerDisposeNotify,
+        addGestureToGestureGroupWithRefCountDecrease,
+        addGestureToNodeWithRefCountDecrease,
         };
     return &modifier;
 }

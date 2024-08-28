@@ -22,7 +22,6 @@
 #include "base/utils/measure_util.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
-#include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/app_bar/app_bar_theme.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -189,7 +188,6 @@ float TitleBarLayoutAlgorithm::GetTitleWidth(const RefPtr<TitleBarNode>& titleBa
         }
         return titleBarSize.Width() < occupiedWidth ? 0.0f : titleBarSize.Width() - occupiedWidth;
     }
-    // navBar title bar
     auto navBarNode = AceType::DynamicCast<NavBarNode>(titleBarNode->GetParent());
     CHECK_NULL_RETURN(navBarNode, 0.0f);
     float occupiedWidth = 0.0f;
@@ -752,7 +750,7 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
         return;
     }
 
-    if (NearZero(titlePattern->GetTempTitleOffsetY()) || !titlePattern->GetIsTitleMoving()) {
+    if (NearZero(titlePattern->GetTempTitleOffsetY())) {
         initialTitleOffsetY_ = menuHeight_ + offsetY;
         auto titleOffset = OffsetF(offsetX, initialTitleOffsetY_);
         geometryNode->SetMarginFrameOffset(titleOffset);
@@ -838,7 +836,7 @@ void TitleBarLayoutAlgorithm::LayoutSubtitle(LayoutWrapper* layoutWrapper, const
 
             auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
             CHECK_NULL_VOID(titlePattern);
-            if (NearZero(titlePattern->GetTempTitleOffsetY()) || !titlePattern->GetIsTitleMoving()) {
+            if (NearZero(titlePattern->GetTempTitleOffsetY())) {
                 OffsetF titleOffset = OffsetF(offsetX, initialSubtitleOffsetY_);
                 geometryNode->SetMarginFrameOffset(titleOffset);
                 subtitleWrapper->Layout();

@@ -182,7 +182,7 @@ private:
     bool CheckLastLineItemFullyShowed(LayoutWrapper* layoutWrapper);
 
     bool IsIrregularLine(int32_t lineIndex) const override;
-    
+
     void ResetOffsetWhenHeightChanged();
 
     void MergeRemainingLines(std::map<int32_t, std::map<int32_t, int32_t>> matrix, int32_t forwardLines);
@@ -221,7 +221,7 @@ private:
     std::map<int32_t, float> itemsCrossPosition_;
     int32_t scrollSource_ = SCROLL_FROM_NONE;
     OffsetF childFrameOffset_;
-    std::list<int32_t> predictBuildList_;
+    std::list<GridPreloadItem> predictBuildList_;
     LayoutConstraintF cachedChildConstraint_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridScrollLayoutAlgorithm);

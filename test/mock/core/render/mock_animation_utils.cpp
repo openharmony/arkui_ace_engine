@@ -142,12 +142,13 @@ std::shared_ptr<AnimationUtils::Animation> AnimationUtils::StartAnimation(const 
 #endif
 }
 
+/* jump to end value of animation */
 void AnimationUtils::StopAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation)
 {
 #ifdef ENHANCED_ANIMATION
     CHECK_NULL_VOID(animation);
     for (auto&& anim : animation->impls_) {
-        anim->End();
+        anim->JumpToEnd();
     }
 #endif
 }
@@ -156,9 +157,23 @@ void AnimationUtils::BlendBgColorAnimation(
     RefPtr<NG::RenderContext>& renderContext, const Color& endColor, int32_t duration, const RefPtr<Curve>& curve)
 {}
 
-void AnimationUtils::PauseAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation) {}
+void AnimationUtils::PauseAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation) {
+#ifdef ENHANCED_ANIMATION
+    CHECK_NULL_VOID(animation);
+    for (auto&& anim : animation->impls_) {
+        anim->Pause();
+    }
+#endif
+}
 
-void AnimationUtils::ResumeAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation) {}
+void AnimationUtils::ResumeAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation) {
+#ifdef ENHANCED_ANIMATION
+    CHECK_NULL_VOID(animation);
+    for (auto&& anim : animation->impls_) {
+        anim->Resume();
+    }
+#endif
+}
 
 void AnimationUtils::ExecuteWithoutAnimation(const PropertyCallback& callback)
 {

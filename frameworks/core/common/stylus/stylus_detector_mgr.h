@@ -73,16 +73,16 @@ private:
         static void SetText(int32_t nodeId, std::string args);
         static std::string GetText(int32_t nodeId);
 
-        void OnDetector(const CommandType& command, std::string args,
-            std::shared_ptr<IAceStylusCallback> callback) override;
-
+        static void Redo(int32_t nodeId);
+        static void Undo(int32_t nodeId);
+        void OnDetector(
+            const CommandType& command, std::string args, std::shared_ptr<IAceStylusCallback> callback) override;
+        bool OnDetectorSync(const CommandType& command) override;
     };
 
     bool IsStylusTouchEvent(const TouchEvent& touchEvent) const;
     bool IsHitCleanNodeResponseArea(
         const NG::PointF& point, const RefPtr<NG::FrameNode>& frameNode, uint64_t nanoTimestamp);
-
-    bool CheckTextEditable(const RefPtr<NG::FrameNode> frameNode);
 
     std::unordered_map<int32_t, WeakPtr<NG::FrameNode>> textFieldNodes_;
 

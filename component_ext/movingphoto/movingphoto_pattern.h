@@ -128,6 +128,7 @@ private:
 
     void UpdateImageNode();
     void UpdateVideoNode();
+    void UpdatePlayMode();
     SizeF CalculateFitContain(const SizeF& rawSize, const SizeF& layoutSize);
     SizeF CalculateFitFill(const SizeF& layoutSize);
     SizeF CalculateFitCover(const SizeF& rawSize, const SizeF& layoutSize);
@@ -201,6 +202,7 @@ private:
     bool isFirstRepeatPlay_ = true;
     bool isSetAutoPlayPeriod_ = false;
     bool isVisible_ = false;
+    bool isChangePlayMode_ = false;
     PlaybackStatus currentPlayStatus_ = PlaybackStatus::NONE;
     PlaybackMode autoAndRepeatLevel_ = PlaybackMode::NONE;
     PlaybackMode historyAutoAndRepeatLevel_ = PlaybackMode::NONE;

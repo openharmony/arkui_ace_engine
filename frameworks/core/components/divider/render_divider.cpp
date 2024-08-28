@@ -16,7 +16,6 @@
 #include "core/components/divider/render_divider.h"
 
 #include "base/log/event_report.h"
-#include "core/components/divider/divider_component.h"
 
 namespace OHOS::Ace {
 

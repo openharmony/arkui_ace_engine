@@ -33,7 +33,7 @@
 namespace {
 constexpr char ACE_VERSION_2[] = "2.0";
 constexpr char MODEL_STAGE[] = "stage";
-constexpr char MAX_ARGS_COUNT = 2;
+constexpr int MAX_ARGS_COUNT = 2;
 const std::string pageProfile = "main_page";
 #ifdef MAC_PLATFORM
 const std::string assetPathJs = "/Volumes/SSD2T/daily-test/preview/js/default";

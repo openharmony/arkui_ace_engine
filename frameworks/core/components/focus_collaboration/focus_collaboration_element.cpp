@@ -18,7 +18,6 @@
 #include "core/components/focus_animation/focus_animation_component.h"
 #include "core/components/shadow/shadow_component.h"
 #include "core/pipeline/base/component_group.h"
-#include "core/pipeline/base/component_group_element.h"
 
 namespace OHOS::Ace {
 

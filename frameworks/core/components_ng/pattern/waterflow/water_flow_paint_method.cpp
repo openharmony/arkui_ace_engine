@@ -44,6 +44,7 @@ void WaterFlowPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto frameSize = geometryNode->GetPaddingSize();
     OffsetF paddingOffset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
     auto renderContext = paintWrapper->GetRenderContext();
+    UpdateFadingGradient(renderContext);
     bool clip = !renderContext || renderContext->GetClipEdge().value_or(true);
     contentModifier_->SetClipOffset(paddingOffset);
     contentModifier_->SetClipSize(frameSize);

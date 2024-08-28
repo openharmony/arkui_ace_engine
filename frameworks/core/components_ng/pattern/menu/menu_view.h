@@ -45,6 +45,8 @@ public:
     static RefPtr<FrameNode> Create(
         const std::vector<SelectParam>& params, int32_t targetId, const std::string& targetTag);
 
+    static void ShowPixelMapAnimation(const RefPtr<FrameNode>& menuNode);
+
 private:
     static void UpdateMenuPaintProperty(
         const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam, const MenuType& isContextMenu);

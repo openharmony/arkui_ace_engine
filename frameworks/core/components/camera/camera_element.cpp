@@ -15,12 +15,9 @@
 
 #include "core/components/camera/camera_element.h"
 
-#include <sstream>
 #if defined(PREVIEW)
 #include "base/i18n/localization.h"
 #endif
-#include "base/utils/system_properties.h"
-#include "core/components/camera/camera_component.h"
 #include "core/components/video/render_texture.h"
 
 namespace OHOS::Ace {

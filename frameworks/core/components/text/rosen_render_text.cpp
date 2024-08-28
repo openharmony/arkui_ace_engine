@@ -15,8 +15,6 @@
 
 #include "core/components/text/rosen_render_text.h"
 
-#include <cmath>
-
 #ifndef USE_GRAPHIC_TEXT_GINE
 #include "txt/paragraph_builder.h"
 #include "txt/paragraph_txt.h"
@@ -27,18 +25,12 @@
 #include "render_service_client/core/ui/rs_node.h"
 #include "unicode/uchar.h"
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/offset.h"
 #include "base/i18n/localization.h"
-#include "base/utils/string_utils.h"
-#include "base/utils/utils.h"
 #include "core/common/font_manager.h"
 #include "core/components/font/constants_converter.h"
 #include "core/components/font/rosen_font_collection.h"
-#include "core/components/text/text_component.h"
 #include "core/components/text_span/rosen_render_text_span.h"
 #include "core/pipeline/base/rosen_render_context.h"
-#include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
 namespace {

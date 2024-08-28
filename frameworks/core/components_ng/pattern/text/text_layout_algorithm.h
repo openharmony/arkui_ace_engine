@@ -114,6 +114,8 @@ private:
     bool AdaptMaxTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,
         LayoutWrapper* layoutWrapper);
     void UpdateSensitiveContent(std::string& content);
+    bool GetSuitableSize(TextStyle& textStyle, const std::string& content,
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, double& suitableSize);
 
     std::optional<TextStyle> textStyle_;
     RefPtr<PropertyBool> showSelect_;

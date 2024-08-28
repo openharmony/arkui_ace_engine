@@ -269,6 +269,10 @@ const char SPAN_ETS_TAG[] = "Span";
 const char SYMBOL_SPAN_COMPONENT_TAG[] = "SymbolSpanComponent";
 const char SYMBOL_SPAN_ETS_TAG[] = "SymbolSpan";
 
+// image span
+const char IMAGE_SPAN_COMPONENT_TAG[] = "ImageSpanComponent";
+const char IMAGE_SPAN_ETS_TAG[] = "ImageSpan";
+
 // placeholder span
 const char PLACEHOLDER_SPAN_COMPONENT_TAG[] = "PlaceholderSpanComponent";
 const char PLACEHOLDER_SPAN_ETS_TAG[] = "PlaceholderSpan";

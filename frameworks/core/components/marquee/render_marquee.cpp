@@ -16,9 +16,7 @@
 #include "core/components/marquee/render_marquee.h"
 
 #include "base/log/event_report.h"
-#include "core/animation/curves.h"
 #include "core/components/marquee/marquee_component.h"
-#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 namespace {

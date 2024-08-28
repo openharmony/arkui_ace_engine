@@ -18,8 +18,6 @@
 #include "render_service_client/core/ui/rs_node.h"
 #include "unicode/uchar.h"
 
-#include "base/utils/string_utils.h"
-
 namespace OHOS::Ace {
 
 void RosenRenderMarquee::Update(const RefPtr<Component>& component)

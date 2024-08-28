@@ -197,6 +197,11 @@ public:
     virtual void Unlock() {}
 
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch);
+    
+    virtual uint32_t GetStatusBarHeight() const
+    {
+        return 0;
+    }
 
 protected:
     bool isRequestVsync_ = false;

@@ -15,7 +15,6 @@
 
 #include "core/components/texttimer/texttimer_component.h"
 
-#include "base/i18n/localization.h"
 #include "core/components/texttimer/render_texttimer.h"
 #include "core/components/texttimer/texttimer_element.h"
 

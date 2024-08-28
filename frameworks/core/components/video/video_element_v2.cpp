@@ -15,9 +15,7 @@
 
 #include "core/components/video/video_element_v2.h"
 
-#include "base/json/json_util.h"
 #include "core/components/box/box_component.h"
-#include "core/components/stack/stack_element.h"
 
 namespace OHOS::Ace {
 

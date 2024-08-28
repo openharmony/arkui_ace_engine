@@ -15,9 +15,6 @@
 
 #include "core/components/declaration/svg/svg_fe_gaussianblur_declaration.h"
 
-#include <vector>
-
-#include "base/utils/string_utils.h"
 #include "core/components/declaration/common/declaration_constants.h"
 
 namespace OHOS::Ace {

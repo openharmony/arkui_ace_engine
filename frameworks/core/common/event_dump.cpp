@@ -221,4 +221,121 @@ void EventTreeRecord::Dump(std::list<std::pair<int32_t, std::string>>& dumpList,
         ++index;
     }
 }
-} // end of namespace
+
+void FrameNodeSnapshot::Dump(std::unique_ptr<JsonValue>& json) const
+{
+    json->Put("nodeId", nodeId);
+    json->Put("parentId", parentNodeId);
+    json->Put("tag", tag.c_str());
+    if (!comId.empty()) {
+        json->Put("comId", comId.c_str());
+    }
+    json->Put("monopolizeEvents", monopolizeEvents);
+    json->Put("isHit", isHit);
+    json->Put("hitTestMode", hitTestMode);
+    std::string region = "";
+    for (const auto& rect : responseRegionList) {
+        region.append(rect.ToString());
+    }
+    json->Put("responseRegion", region.c_str());
+}
+
+void TouchPointSnapshot::Dump(std::unique_ptr<JsonValue>& json) const
+{
+    json->Put("point", point.ToString().c_str());
+    json->Put("screenPoint", screenPoint.ToString().c_str());
+    json->Put("type", GestureSnapshot::TransTouchType(type).c_str());
+    json->Put("timestamp", ConvertTimestampToStr(timestamp).c_str());
+    json->Put("isInjected", isInjected);
+}
+
+void EventTreeRecord::BuildTouchPoints(
+    std::list<TouchPointSnapshot> touchPoints, std::unique_ptr<JsonValue>& json) const
+{
+    std::unique_ptr<JsonValue> touch = JsonUtil::CreateArray(true);
+    for (auto& item : touchPoints) {
+        std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
+        item.Dump(child);
+        touch->Put(child);
+    }
+    json->Put("touch points", touch);
+}
+
+void EventTreeRecord::BuildHitTestTree(std::list<FrameNodeSnapshot> hitTestTree, std::unique_ptr<JsonValue>& json) const
+{
+    std::unique_ptr<JsonValue> hittest = JsonUtil::CreateArray(true);
+    for (auto& item : hitTestTree) {
+        std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
+        item.Dump(child);
+        hittest->Put(child);
+    }
+    json->Put("hittest", hittest);
+}
+
+void EventTreeRecord::MountToParent(
+    std::vector<std::pair<std::string, std::pair<std::string, std::unique_ptr<JsonValue>>>> stateInfoList,
+    std::unique_ptr<JsonValue>& json) const
+{
+    for (auto entry = stateInfoList.rbegin(); entry != stateInfoList.rend(); ++entry) {
+        std::string parentId = entry->second.first;
+        if (parentId == "0x0") {
+            continue;
+        }
+        auto it = std::find_if(
+            stateInfoList.begin(), stateInfoList.end(), [&](const auto& pair) { return pair.first == parentId; });
+        if (it != stateInfoList.end()) {
+            std::string key = "detail_" + entry->first;
+            it->second.second->Put(key.c_str(), entry->second.second);
+        }
+    }
+
+    for (const auto& entry : stateInfoList) {
+        if (entry.second.first == "0x0") {
+            json->Put(("detail_" + entry.first).c_str(), std::move(entry.second.second));
+        }
+    }
+}
+
+void EventTreeRecord::BuildGestureTree(
+    std::map<int32_t, std::list<RefPtr<GestureSnapshot>>> gestureTreeMap, std::unique_ptr<JsonValue>& json) const
+{
+    std::unique_ptr<JsonValue> procedures = JsonUtil::Create(true);
+    std::unique_ptr<JsonValue> gestureTree = JsonUtil::Create(true);
+    std::vector<std::pair<std::string, std::pair<std::string, std::unique_ptr<JsonValue>>>> stateInfoList;
+    for (auto iter = gestureTreeMap.begin(); iter != gestureTreeMap.end(); ++iter) {
+        stateInfoList.clear();
+        for (const auto& item : iter->second) {
+            auto result = item->GetIds();
+            std::string id = std::get<0>(result);
+            std::string parentId = std::get<1>(result);
+            stateInfoList.push_back(std::make_pair(id, std::make_pair(parentId, JsonUtil::Create(true))));
+            auto it = std::find_if(
+                stateInfoList.begin(), stateInfoList.end(), [&](const auto& pair) { return pair.first == id; });
+            if (it != stateInfoList.end()) {
+                item->Dump(it->second.second);
+            }
+        }
+        MountToParent(std::move(stateInfoList), gestureTree);
+        procedures->Put(("finger_" + std::to_string(iter->first)).c_str(), gestureTree);
+    }
+    json->Put("event procedures", procedures);
+}
+
+void EventTreeRecord::Dump(std::unique_ptr<JsonValue>& json, int32_t depth, int32_t startNumber) const
+{
+    int32_t index = 0;
+    for (auto& tree : eventTreeList) {
+        if (index < startNumber) {
+            index++;
+            continue;
+        }
+        std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
+        BuildTouchPoints(tree.touchPoints, children);
+        BuildHitTestTree(tree.hitTestTree, children);
+        BuildGestureTree(tree.gestureTree, children);
+        std::string header = "event tree_" + std::to_string(index);
+        json->Put(header.c_str(), children);
+        ++index;
+    }
+}
+} // namespace OHOS::Ace::NG

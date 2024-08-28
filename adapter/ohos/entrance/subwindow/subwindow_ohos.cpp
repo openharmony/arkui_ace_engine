@@ -96,7 +96,6 @@ bool SubwindowOhos::InitContainer()
         OHOS::sptr<OHOS::Rosen::WindowOption> windowOption = new OHOS::Rosen::WindowOption();
         auto parentWindowName = parentContainer->GetWindowName();
         auto parentWindowId = parentContainer->GetWindowId();
-        auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
         sptr<OHOS::Rosen::Window> parentWindow = parentContainer->GetUIWindow(parentContainerId_);
         CHECK_NULL_RETURN(parentWindow, false);
         parentWindow_ = parentWindow;
@@ -126,6 +125,11 @@ bool SubwindowOhos::InitContainer()
         } else {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
             windowOption->SetParentId(parentWindowId);
+        }
+        auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+        if (!defaultDisplay) {
+            TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "DisplayManager GetDefaultDisplay failed");
+            return false;
         }
         windowOption->SetWindowRect({ 0, 0, defaultDisplay->GetWidth(), defaultDisplay->GetHeight() });
         windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
@@ -412,7 +416,10 @@ void SubwindowOhos::HideWindow()
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Hide the subwindow %{public}s", window_->GetWindowName().c_str());
 
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
-    CHECK_NULL_VOID(aceContainer);
+    if (!aceContainer) {
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "get container failed, child containerId: %{public}d", childContainerId_);
+        return;
+    }
 
 #ifdef NG_BUILD
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
@@ -421,6 +428,8 @@ void SubwindowOhos::HideWindow()
     CHECK_NULL_VOID(rootNode);
     if (!rootNode->GetChildren().empty() &&
         !(rootNode->GetChildren().size() == 1 && rootNode->GetLastChild()->GetTag() == V2::KEYBOARD_ETS_TAG)) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Subwindow has other node, the last child is %{public}s",
+            rootNode->GetLastChild()->GetTag().c_str());
         auto lastChildId = rootNode->GetLastChild()->GetId();
         auto iter = hotAreasMap_.find(lastChildId);
         if (iter != hotAreasMap_.end()) {
@@ -445,7 +454,7 @@ void SubwindowOhos::HideWindow()
         CHECK_NULL_VOID(rootNode);
         if (!rootNode->GetChildren().empty() &&
             !(rootNode->GetChildren().size() == 1 && rootNode->GetLastChild()->GetTag() == V2::KEYBOARD_ETS_TAG)) {
-            TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Subwindow has other node, the last child is %{public}s",
+            TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Subwindow has other node, the last child is %{public}s",
                 rootNode->GetLastChild()->GetTag().c_str());
             return;
         }
@@ -466,7 +475,10 @@ void SubwindowOhos::HideWindow()
     }
     OHOS::Rosen::WMError ret = window_->Hide();
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
-    CHECK_NULL_VOID(parentContainer);
+    if (!parentContainer) {
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "get container failed, parent containerId: %{public}d", parentContainerId_);
+        return;
+    }
     if (parentContainer->IsScenceBoardWindow()) {
         window_->SetTouchable(true);
     }
@@ -535,12 +547,14 @@ void SubwindowOhos::ClearMenu()
 #endif
 }
 
-bool SubwindowOhos::ShowPreviewNG()
+bool SubwindowOhos::ShowPreviewNG(bool isStartDraggingFromSubWindow)
 {
     CHECK_NULL_RETURN(window_, false);
-    ShowWindow(false);
     ResizeWindow();
-    window_->SetTouchable(false);
+    ShowWindow(false);
+    if (!isStartDraggingFromSubWindow) {
+        window_->SetTouchable(false);
+    }
     return true;
 }
 
@@ -581,8 +595,8 @@ void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> customNode, const NG:
         menuWrapperPattern->RegisterMenuCallback(menuNode, menuParam);
         menuWrapperPattern->SetMenuTransitionEffect(menuNode, menuParam);
     }
-    ShowWindow();
     ResizeWindow();
+    ShowWindow();
     CHECK_NULL_VOID(window_);
     window_->SetTouchable(true);
     overlay->ShowMenuInSubWindow(targetNode->GetId(), offset, menuNode);
@@ -599,8 +613,8 @@ void SubwindowOhos::ShowMenuNG(std::function<void()>&& buildFunc, std::function<
     CHECK_NULL_VOID(context);
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
-    ShowWindow();
     ResizeWindow();
+    ShowWindow();
     CHECK_NULL_VOID(window_);
     window_->SetTouchable(true);
     NG::ScopedViewStackProcessor builderViewStackProcessor;
@@ -864,11 +878,11 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
     }
     SubwindowManager::GetInstance()->SetDialogSubWindowId(
         SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
+    ResizeWindow();
     ShowWindow();
     CHECK_NULL_RETURN(window_, nullptr);
     window_->SetFullScreen(true);
     window_->SetTouchable(true);
-    ResizeWindow();
     ContainerScope scope(childContainerId_);
     auto dialog = overlay->ShowDialog(dialogProps, std::move(buildFunc));
     CHECK_NULL_RETURN(dialog, nullptr);
@@ -899,11 +913,11 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNGWithNode(
     }
     SubwindowManager::GetInstance()->SetDialogSubWindowId(
         SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
+    ResizeWindow();
     ShowWindow();
     CHECK_NULL_RETURN(window_, nullptr);
     window_->SetFullScreen(true);
     window_->SetTouchable(true);
-    ResizeWindow();
     ContainerScope scope(childContainerId_);
     auto dialog = overlay->ShowDialogWithNode(dialogProps, customNode);
     CHECK_NULL_RETURN(dialog, nullptr);
@@ -948,11 +962,11 @@ void SubwindowOhos::OpenCustomDialogNG(const DialogProperties& dialogProps, std:
     }
     SubwindowManager::GetInstance()->SetDialogSubWindowId(
         SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
+    ResizeWindow();
     ShowWindow();
     CHECK_NULL_VOID(window_);
     window_->SetFullScreen(true);
     window_->SetTouchable(true);
-    ResizeWindow();
     ContainerScope scope(childContainerId_);
     overlay->OpenCustomDialog(dialogProps, std::move(callback));
     haveDialog_ = true;

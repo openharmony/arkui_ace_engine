@@ -83,8 +83,8 @@ void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, con
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetPlaceholderNode(placeholderNode);
-    pattern->UpdateWant(wantWrap);
     pattern->SetDensityDpi(densityDpi);
+    pattern->UpdateWant(wantWrap);
     stack->Push(frameNode);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);

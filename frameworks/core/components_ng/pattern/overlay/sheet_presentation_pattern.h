@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_property.h"
+#include "core/components_ng/pattern/overlay/sheet_presentation_paint_method.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -88,6 +89,11 @@ public:
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<SheetPresentationProperty>();
+    }
+
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
+    {
+        return MakeRefPtr<SheetPresentationPaintMethod>(WeakClaim(this));
     }
 
     int32_t GetTargetId() const override
@@ -422,6 +428,7 @@ public:
 
     SheetType GetSheetType();
     bool IsPhoneInLandScape();
+    bool IsShowCloseIcon();
     ScrollSizeMode GetScrollSizeMode();
     void GetSheetTypeWithAuto(SheetType& sheetType);
     void GetSheetTypeWithPopup(SheetType& sheetType);
@@ -449,7 +456,7 @@ public:
     {
         return sheetKey_;
     }
-    
+
     bool GetAnimationBreak() const
     {
         return isAnimationBreak_;
@@ -504,6 +511,11 @@ public:
     float GetSheetOffset()
     {
         return sheetOffsetY_;
+    }
+
+    OffsetF GetSheetArrowOffset() const
+    {
+        return arrowOffset_;
     }
 
     float GetFitContentHeight();
@@ -576,6 +588,7 @@ public:
     void GetBuilderInitHeight();
     void ChangeSheetPage(float height);
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
 
     // Nestable Scroll
     Axis GetAxis() const override
@@ -588,6 +601,8 @@ public:
     void OnScrollEndRecursive (const std::optional<float>& velocity) override;
     bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
     ScrollResult HandleScrollWithSheet(float scrollOffset);
+    bool IsScrollOutOfBoundary();
+    RefPtr<FrameNode> GetScrollNode();
 
     bool IsSheetBottomStyle()
     {
@@ -597,7 +612,7 @@ public:
         }
         return sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOM_FREE_WINDOW;
     }
-    
+
     uint32_t GetDetentsIndex() const
     {
         return detentsFinalIndex_;
@@ -618,12 +633,16 @@ private:
     void SetColumnMinSize(bool reset = false);
     void UpdateDragBarStatus();
     void UpdateCloseIconStatus();
+    void UpdateTitlePadding();
+    RefPtr<FrameNode> GetTitleNode();
     float GetCloseIconPosX(const SizeF& sheetSize, const RefPtr<SheetTheme>& sheetTheme);
     void UpdateSheetTitle();
     void UpdateFontScaleStatus();
     RefPtr<RenderContext> GetRenderContext();
     bool PostTask(const TaskExecutor::Task& task, const std::string& name);
     void CheckSheetHeightChange();
+    float GetWrapperHeight();
+    bool SheetHeightNeedChanged();
     void InitSheetDetents();
     void HandleFitContontChange(float height);
     void ChangeSheetHeight(float height);
@@ -639,6 +658,11 @@ private:
     std::string LineTo(double x, double y);
     std::string ArcTo(double rx, double ry, double rotation, int32_t arc_flag, double x, double y);
     void DismissTransition(bool isTransitionIn, float dragVelocity = 0.0f);
+    bool IsNoStatusBarAndLandscape() const;
+    bool IsBottomLarge();
+    float GetTopAreaInWindow() const;
+    void MarkOuterBorderRender();
+    void SetSheetOuterBorderWidth(const RefPtr<SheetTheme>& sheetTheme, const NG::SheetStyle& sheetStyle);
     uint32_t keyboardHeight_ = 0;
     int32_t targetId_ = -1;
     SheetKey sheetKey_;
@@ -664,6 +688,7 @@ private:
     float sheetHeightUp_ = 0.0f; // sheet offset to move up when avoiding keyboard
     float height_ = 0.0f; // sheet height, start from the bottom, before avoiding keyboard
     float sheetHeight_ = 0.0f; // sheet frameSize Height
+    float wrapperHeight_ = 0.0f; // sheetWrapper frameSize Height
     float pageHeight_ = 0.0f; // root Height, = maxSize.Height()
     float scrollHeight_ = 0.0f;
     float preWidth_ = 0.0f;

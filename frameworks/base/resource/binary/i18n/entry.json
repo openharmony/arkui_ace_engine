@@ -18,7 +18,8 @@
             "select_all":"全选",
             "translate":"翻译",
             "share":"分享",
-            "search":"搜索"
+            "search":"搜索",
+            "ai_write":"帮写"
         },
         "switch":{
             "on":"开",

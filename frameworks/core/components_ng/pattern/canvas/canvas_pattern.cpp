@@ -1174,6 +1174,7 @@ void CanvasPattern::OnLanguageConfigurationUpdate()
 
 void CanvasPattern::OnModifyDone()
 {
+    Pattern::CheckLocalized();
     UpdateTextDefaultDirection();
 }
 
@@ -1188,5 +1189,13 @@ void CanvasPattern::UpdateTextDefaultDirection()
 void CanvasPattern::SetDensity(double density)
 {
     paintMethod_->SetDensity(density);
+}
+
+void CanvasPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_VOID(paintMethod_);
+    json->Put("CanvasPaint", paintMethod_->GetDumpInfo().c_str());
+    CHECK_NULL_VOID(contentModifier_);
+    json->Put("CanvasModifier", contentModifier_->GetDumpInfo().c_str());
 }
 } // namespace OHOS::Ace::NG

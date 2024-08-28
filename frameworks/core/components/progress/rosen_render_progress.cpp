@@ -16,11 +16,6 @@
 #include "core/components/progress/rosen_render_progress.h"
 
 #include "render_service_client/core/ui/rs_node.h"
-#include "include/effects/SkGradientShader.h"
-
-#include "core/components/progress/progress_component.h"
-#include "core/components/progress/render_progress.h"
-#include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {
 

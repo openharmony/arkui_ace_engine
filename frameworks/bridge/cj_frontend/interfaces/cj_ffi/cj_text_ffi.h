@@ -21,6 +21,7 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_common_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
+#include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
 
 extern "C" {
 CJ_EXPORT void FfiOHOSAceFrameworkTextCreate(const char* content);
@@ -41,6 +42,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkTextSetMaxFontSize(double fontSize, int32_t un
 CJ_EXPORT void FfiOHOSAceFrameworkTextSetTextCase(int32_t textCase);
 CJ_EXPORT void FfiOHOSAceFrameworkTextSetBaselineOffset(double baseLine, int32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkTextOnClick(void (*callback)(CJClickInfo clickInfo));
+CJ_EXPORT void FfiTextSetResponseRegion(CJResponseRegion value);
+CJ_EXPORT void FfiTextSetResponseRegionArray(VectorStringPtr vecContent);
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_TEXT_FFI_H

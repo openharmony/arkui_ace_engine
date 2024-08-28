@@ -15,14 +15,7 @@
 
 #include "core/components/rating/render_rating.h"
 
-#include <cmath>
-#include <sstream>
-
-#include "base/log/log.h"
-#include "base/utils/utils.h"
-#include "core/components/image/render_image.h"
 #include "core/components/rating/rating_component.h"
-#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 

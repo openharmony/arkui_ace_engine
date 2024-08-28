@@ -217,6 +217,12 @@ ArkUINodeHandle CreateNode(ArkUINodeType type, int peerId, ArkUI_Int32 flags)
     return node;
 }
 
+ArkUINodeHandle CreateNodeWithParams(ArkUINodeType type, int peerId, ArkUI_Int32 flags, const ArkUI_Params& params)
+{
+    auto* node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNodeWithParams(type, peerId, params));
+    return node;
+}
+
 ArkUINodeHandle GetNodeByViewStack()
 {
     auto node = ViewStackProcessor::GetInstance()->Finish();
@@ -1618,6 +1624,7 @@ const ArkUIBasicAPI* GetBasicAPI()
     /* clang-format off */
     static const ArkUIBasicAPI basicImpl = {
         CreateNode,
+        CreateNodeWithParams,
         GetNodeByViewStack,
         DisposeNode,
         GetName,

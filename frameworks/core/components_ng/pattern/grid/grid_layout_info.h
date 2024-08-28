@@ -30,7 +30,20 @@ namespace OHOS::Ace::NG {
 struct GridPredictLayoutParam {
     LayoutConstraintF layoutConstraint;
     std::map<int32_t, float> itemsCrossSizes;
-    float crossGap;
+    float crossGap = 0.0f;
+};
+
+struct GridPreloadItem {
+    explicit GridPreloadItem(int32_t idx) : idx(idx) {}
+    GridPreloadItem(int32_t idx, bool buildOnly) : idx(idx), buildOnly(buildOnly) {}
+
+    bool operator==(const GridPreloadItem& other) const
+    {
+        return idx == other.idx && buildOnly == other.buildOnly;
+    }
+
+    int32_t idx = -1;
+    bool buildOnly = false; // true if item only needs to be created, not measure / layout
 };
 
 /**

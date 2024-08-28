@@ -15,12 +15,7 @@
 
 #include "core/components/slider/render_slider.h"
 
-#include "base/json/json_util.h"
 #include "base/log/event_report.h"
-#include "core/components/box/render_box.h"
-#include "core/components/bubble/render_bubble.h"
-#include "core/components/tip/render_tip.h"
-#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 namespace {

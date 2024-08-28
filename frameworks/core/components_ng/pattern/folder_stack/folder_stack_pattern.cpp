@@ -303,4 +303,11 @@ void FolderStackPattern::UpdateChildAlignment()
         hoverLayoutProperty->UpdateAlignment(align);
     }
 }
+
+void FolderStackPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_VOID(displayInfo_);
+    auto rotation = displayInfo_->GetRotation();
+    json->Put("rotation", static_cast<int32_t>(rotation));
+}
 } // namespace OHOS::Ace::NG

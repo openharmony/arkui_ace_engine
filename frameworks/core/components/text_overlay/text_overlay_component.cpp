@@ -16,21 +16,15 @@
 #include "core/components/text_overlay/text_overlay_component.h"
 
 #include "base/i18n/localization.h"
-#include "base/json/json_util.h"
 #include "core/components/box/box_component.h"
-#include "core/components/button/button_component.h"
 #include "core/components/clip/clip_component.h"
 #include "core/components/common/properties/shadow_config.h"
-#include "core/components/flex/flex_component.h"
 #include "core/components/focus_collaboration/focus_collaboration_component.h"
-#include "core/components/image/image_component.h"
 #include "core/components/padding/padding_component.h"
 #include "core/components/text/text_component.h"
 #include "core/components/text_overlay/render_text_overlay.h"
 #include "core/components/text_overlay/text_overlay_element.h"
 #include "core/components/theme/theme_manager.h"
-#include "core/event/ace_event_helper.h"
-#include "core/event/back_end_event_manager.h"
 
 namespace OHOS::Ace {
 namespace {

@@ -15,7 +15,6 @@
 
 #include "core/components/image/rosen_render_image.h"
 
-#include "render_service_client/core/ui/rs_node.h"
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkClipOp.h"
 #include "include/core/SkColorFilter.h"
@@ -25,27 +24,14 @@
 #include "drawing/engine_adapter/skia_adapter/skia_data.h"
 #endif
 
-#include "base/image/pixel_map.h"
-#include "base/log/ace_trace.h"
-#include "base/memory/ace_type.h"
 #include "base/thread/background_task_executor.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
-#include "core/common/frontend.h"
-#include "core/components/align/render_align.h"
-#include "core/components/common/properties/radius.h"
-#include "core/components/image/image_component.h"
-#include "core/components/image/image_event.h"
 #include "core/components/text_overlay/text_overlay_component.h"
 #ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/render/adapter/skia_image.h"
 #else
 #include "core/components_ng/render/adapter/rosen/drawing_image.h"
 #endif
-#include "core/components_ng/render/canvas_image.h"
 #include "core/image/image_object.h"
-#include "core/image/sk_image_cache.h"
-#include "core/pipeline/base/constants.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {

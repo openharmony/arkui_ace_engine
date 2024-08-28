@@ -16,7 +16,6 @@
 #include "core/components/mouse_listener/render_mouse_listener.h"
 
 #include "core/components/mouse_listener/mouse_listener_component.h"
-#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 

@@ -15,8 +15,6 @@
 
 #include "core/components/focus_animation/rosen_render_focus_animation.h"
 
-#include <cmath>
-
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
@@ -27,7 +25,6 @@
 #include "include/effects/SkGradientShader.h"
 #endif
 
-#include "base/utils/system_properties.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {

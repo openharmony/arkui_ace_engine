@@ -207,11 +207,14 @@ public:
 
             theme->placeholderLineSpacing_ = pattern->GetAttr<Dimension>("text_field_placeholder_linespacing", 0.0_vp);
 
-            theme->cancelButton_ = pattern->GetAttr<std::string>("textfield_accessibility_property_clear", "");
+            theme->cancelButton_ = pattern->GetAttr<std::string>("textfield_accessibility_clear", "");
             theme->showPasswordPromptInformation_ =
                 pattern->GetAttr<std::string>("textfield_accessibility_show_password", "");
             theme->hiddenPasswordPromptInformation_ =
                 pattern->GetAttr<std::string>("textfield_accessibility_hide_password", "");
+            theme->aiWriteBundleName_ = pattern->GetAttr<std::string>("textfield_writting_bundle_name", "");
+            theme->aiWriteAbilityName_ = pattern->GetAttr<std::string>("textfield_writting_ability_name", "");
+            
         }
     };
 
@@ -626,7 +629,14 @@ public:
     {
         return hiddenPasswordPromptInformation_;
     }
-
+    const std::string& GetAIWriteBundleName() const
+    {
+        return aiWriteBundleName_;
+    }
+    const std::string& GetAIWriteAbilityName() const
+    {
+        return aiWriteAbilityName_;
+    }
 protected:
     TextFieldTheme() = default;
 
@@ -709,8 +719,8 @@ private:
     uint32_t showSymbolId_ = 0;
     uint32_t hideSymbolId_ = 0;
 
-    // UX::insert cursor offset up by 8vp
-    Dimension insertCursorOffset_ = 8.0_vp;
+    // UX::insert cursor offset up by 32vp
+    Dimension insertCursorOffset_ = 32.0_vp;
 
     Dimension avoidKeyboardOffset_ = 24.0_vp;
 
@@ -733,6 +743,8 @@ private:
 
     std::string showPasswordPromptInformation_;
     std::string hiddenPasswordPromptInformation_;
+    std::string aiWriteBundleName_;
+    std::string aiWriteAbilityName_;
 };
 
 } // namespace OHOS::Ace

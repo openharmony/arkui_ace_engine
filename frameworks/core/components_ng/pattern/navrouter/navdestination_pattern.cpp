@@ -268,6 +268,19 @@ void NavDestinationPattern::OnAttachToFrameNode()
         host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
     }
     isRightToLeft_ = AceApplicationInfo::GetInstance().IsRightToLeft();
+    auto id = host->GetId();
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddWindowStateChangedCallback(id);
+}
+
+void NavDestinationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto id = frameNode->GetId();
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveWindowStateChangedCallback(id);
 }
 
 void NavDestinationPattern::DumpInfo()
@@ -434,5 +447,26 @@ void NavDestinationPattern::SetSystemBarStyle(const RefPtr<SystemBarStyle>& styl
 int32_t NavDestinationPattern::GetTitlebarZIndex() const
 {
     return DEFAULT_TITLEBAR_ZINDEX;
+}
+
+void NavDestinationPattern::OnWindowHide()
+{
+    CHECK_NULL_VOID(navDestinationContext_);
+    auto navPathInfo = navDestinationContext_->GetNavPathInfo();
+    CHECK_NULL_VOID(navPathInfo);
+    if (!navPathInfo->GetIsEntry()) {
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "window lifecycle change to hide, clear navDestination entry tag");
+    navPathInfo->SetIsEntry(false);
+    auto stack = GetNavigationStack().Upgrade();
+    CHECK_NULL_VOID(stack);
+    auto index = navDestinationContext_->GetIndex();
+    stack->SetIsEntryByIndex(index, false);
+}
+
+void NavDestinationPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("name", name_.c_str());
 }
 } // namespace OHOS::Ace::NG

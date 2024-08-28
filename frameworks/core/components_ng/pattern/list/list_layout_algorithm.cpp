@@ -876,6 +876,15 @@ void ListLayoutAlgorithm::RecycleGroupItem(LayoutWrapper* layoutWrapper) const
     }
 }
 
+void ListLayoutAlgorithm::AdjustStartPosition(const RefPtr<LayoutWrapper>& layoutWrapper, float& startPos)
+{
+    auto layoutAlgorithmWrapper = layoutWrapper->GetLayoutAlgorithm(true);
+    CHECK_NULL_VOID(layoutAlgorithmWrapper);
+    auto itemGroup = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_VOID(itemGroup);
+    startPos += itemGroup->GetAdjustReferenceDelta();
+}
+
 int32_t ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper,
     int32_t& currentIndex, float startPos, float& endPos)
 {
@@ -893,6 +902,9 @@ int32_t ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper,
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItemGroup:%d, %f", currentIndex, startPos);
             SetListItemGroupParam(wrapper, currentIndex, startPos, true, listLayoutProperty, false);
             wrapper->Measure(childLayoutConstraint_);
+            if (LessOrEqual(startPos, 0.0f)) {
+                AdjustStartPosition(wrapper, startPos);
+            }
         } else if (expandSafeArea_ || CheckNeedMeasure(wrapper)) {
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d, %f", currentIndex, startPos);
             wrapper->Measure(childLayoutConstraint_);
@@ -978,7 +990,8 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
             endMainPos = layoutEndMainPos_.value_or(endMainPos_);
             forwardFeature_ = false;
         }
-    } while (LessNotEqual(currentEndPos + chainOffset, endMainPos));
+    } while (LessNotEqual(currentEndPos + chainOffset, endMainPos) ||
+        (NearEqual(currentEndPos + chainOffset, endMainPos) && scrollSnapAlign_ == V2::ScrollSnapAlign::NONE));
     currentEndPos += chainOffset;
     // adjust offset.
     UpdateSnapCenterContentOffset(layoutWrapper);
@@ -1022,6 +1035,13 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
         }
         recycledItemPosition_.emplace(pos->first, pos->second);
         itemPosition_.erase(pos++);
+    }
+    auto pos = itemPosition_.rbegin();
+    float chainDelta = chainOffsetFunc_ ? chainOffsetFunc_(pos->first) : 0.0f;
+    if (GreatNotEqual(pos->second.endPos + chainDelta, endMainPos_) &&
+        GreatOrEqual(pos->second.startPos + chainDelta, endMainPos_)) {
+        recycledItemPosition_.emplace(pos->first, pos->second);
+        itemPosition_.erase(pos->first);
     }
 }
 
@@ -1917,7 +1937,21 @@ bool ListLayoutAlgorithm::PredictBuildGroup(RefPtr<LayoutWrapper> wrapper,
     CHECK_NULL_RETURN(groupNode, false);
     auto groupPattern = groupNode->GetPattern<ListItemGroupPattern>();
     CHECK_NULL_RETURN(groupPattern, false);
-    groupPattern->LayoutCache(constraint, forward, deadline, cached);
+    float referencePos = 0.0f;
+    if (jumpIndexInGroup_.has_value() && scrollAlign_ == ScrollAlign::CENTER) {
+        referencePos = (startMainPos_ + endMainPos_) / 2; // 2:average
+    }
+    float endPos = 0.0f;
+    float startPos = 0.0f;
+    if (forward) {
+        startPos = startMainPos_;
+        endPos = layoutEndMainPos_.value_or(endMainPos_);
+    } else {
+        startPos = layoutStartMainPos_.value_or(startMainPos_);
+        endPos = endMainPos_;
+    }
+    ListMainSizeValues listSizeValues = { startPos, endPos, referencePos, prevContentMainSize_ };
+    groupPattern->LayoutCache(constraint, forward, deadline, cached, listSizeValues);
     return true;
 }
 
@@ -1979,9 +2013,12 @@ void ListLayoutAlgorithm::PostIdleTaskV2(RefPtr<FrameNode> frameNode, const List
     pattern->SetPredictLayoutParamV2(param);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    context->AddPredictTask([weak = WeakClaim(RawPtr(frameNode))](int64_t deadline, bool canUseLongPredictTask) {
-        ListLayoutAlgorithm::PredictBuildV2(weak.Upgrade(), deadline);
-    });
+    context->AddPredictTask(
+        [weak = WeakClaim(RawPtr(frameNode)), wp = WeakClaim(this)](int64_t deadline, bool canUseLongPredictTask) {
+            auto algorithm = wp.Upgrade();
+            CHECK_NULL_VOID(algorithm);
+            algorithm->PredictBuildV2(weak.Upgrade(), deadline);
+        });
 }
 
 float ListLayoutAlgorithm::GetStopOnScreenOffset(V2::ScrollSnapAlign scrollSnapAlign) const

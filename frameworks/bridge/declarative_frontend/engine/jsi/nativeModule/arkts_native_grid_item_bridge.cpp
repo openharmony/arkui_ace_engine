@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,9 +14,11 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_item_bridge.h"
 
+#include "core/components_ng/pattern/grid/grid_item_theme.h"
 namespace OHOS::Ace::NG {
 constexpr int32_t NUM_0 = 0;
 constexpr int32_t NUM_1 = 1;
+constexpr int32_t DEFAULT_GRIDITEM_STYLE = static_cast<int32_t>(GridItemStyle::NONE);
 
 ArkUINativeModuleValue GridItemBridge::SetGridItemSelectable(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
@@ -174,4 +176,20 @@ ArkUINativeModuleValue GridItemBridge::ResetGridItemColumnEnd(ArkUIRuntimeCallIn
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue GridItemBridge::SetGridItemOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeVal = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> styleVal = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(nodeVal->ToNativePointer(vm)->Value());
+
+    int32_t gridItemStyle = DEFAULT_GRIDITEM_STYLE;
+    if (styleVal->IsNumber() && styleVal->Int32Value(vm) >= static_cast<int32_t>(GridItemStyle::NONE) &&
+        styleVal->Int32Value(vm) <= static_cast<int32_t>(GridItemStyle::PLAIN)) {
+        gridItemStyle = styleVal->Int32Value(vm);
+    }
+    GetArkUINodeModifiers()->getGridItemModifier()->setGridItemOptions(nativeNode, gridItemStyle);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

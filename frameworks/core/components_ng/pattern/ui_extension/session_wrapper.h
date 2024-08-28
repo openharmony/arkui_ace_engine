@@ -132,11 +132,14 @@ public:
         WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) = 0;
     virtual void NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) const = 0;
     virtual bool NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaChangeInfo> info) const = 0;
-    virtual void SetDensityDpiImpl(bool densityDpi) = 0;
+    virtual void SetDensityDpiImpl(bool densityDpi) {}
 
     // The interface to send the data for ArkTS
     virtual void SendDataAsync(const AAFwk::WantParams& params) const = 0;
     virtual int32_t SendDataSync(const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams) const = 0;
+
+    // The interface to update viewport config
+    virtual void UpdateSessionViewportConfig() {}
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_SESSION_WRAPPER_H

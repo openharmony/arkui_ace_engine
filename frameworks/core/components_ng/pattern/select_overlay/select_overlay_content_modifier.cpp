@@ -352,14 +352,15 @@ void SelectOverlayContentModifier::PaintHandle(RSCanvas& canvas, const HandleDra
         canvas.DetachPen();
         canvas.Restore();
     }
-    if (handleInfo.isHandleLineShow) {
+    float handleLineWidth = handleInfo.handleWidth;
+    if (handleInfo.isHandleLineShow && !NearZero(handleLineWidth)) {
         canvas.Save();
         canvas.Scale(scaleX, 1.0f);
         RSPen pen;
         pen.SetAntiAlias(true);
         // Paint line of handle.
         pen.SetColor(handleColor.GetValue());
-        pen.SetWidth(handleInfo.handleWidth);
+        pen.SetWidth(handleLineWidth);
         pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
         canvas.AttachPen(pen);
         canvas.DrawLine(RSPoint(handleInfo.startPoint.GetX(), handleInfo.startPoint.GetY()),

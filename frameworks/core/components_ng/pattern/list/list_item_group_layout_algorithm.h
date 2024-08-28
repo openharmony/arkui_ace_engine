@@ -288,6 +288,11 @@ public:
 
     ListItemGroupLayoutInfo GetLayoutInfo() const;
 
+    float GetAdjustReferenceDelta() const
+    {
+        return adjustReferenceDelta_;
+    }
+
 private:
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
     void UpdateListItemConstraint(const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
@@ -374,6 +379,7 @@ private:
     float prevEndPos_ = 0.0f;
     float endPos_ = 0.0f;
     float referencePos_ = 0.0f;
+    float adjustReferenceDelta_ = 0.0f;
     float refPos_ = 0.0f;
     float prevContentMainSize_ = 0.0f;
     float contentStartOffset_ = 0.0f;

@@ -15,11 +15,7 @@
 
 #include "core/components/scroll/render_multi_child_scroll.h"
 
-#include "core/animation/curve.h"
-#include "core/animation/curve_animation.h"
 #include "core/common/vibrator/vibrator_proxy.h"
-#include "core/components/box/render_box.h"
-#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 namespace {

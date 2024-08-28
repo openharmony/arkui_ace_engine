@@ -1327,6 +1327,10 @@ HWTEST_F(SelectOverlayManagerTestNg, InitSelectOverlay, TestSize.Level1)
     client.selectOverlayInfo_.menuCallback.onCameraInput();
     EXPECT_FALSE(client.SelectOverlayIsOn());
 
+    client.InitSelectOverlay();
+    client.selectOverlayInfo_.menuCallback.onAIWrite();
+    EXPECT_FALSE(client.SelectOverlayIsOn());
+
     bool isFirst = true;
     client.InitSelectOverlay();
     client.selectOverlayInfo_.onHandleMoveStart(isFirst);

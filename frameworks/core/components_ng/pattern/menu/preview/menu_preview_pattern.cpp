@@ -159,14 +159,32 @@ bool MenuPreviewPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
             context->UpdateBorderRadius(borderRadius);
         },
         option.GetOnFinishEvent());
-    if (!hasPreviewTransitionEffect_) {
-        auto menuWrapper = GetMenuWrapper();
-        auto menuPattern = GetMenuPattern(menuWrapper);
-        ShowGatherAnimation(host, menuWrapper);
-        ShowScaleAnimation(context, menuTheme, menuPattern);
-    }
+    auto menuWrapper = GetMenuWrapper();
+    auto menuPattern = GetMenuPattern(menuWrapper);
+    ShowGatherAnimation(host, menuWrapper);
+    UpdateShowScale(context, menuTheme, menuPattern);
+
     isFirstShow_ = false;
     return false;
+}
+
+void MenuPreviewPattern::UpdateShowScale(const RefPtr<RenderContext>& context, const RefPtr<MenuTheme>& menuTheme,
+    const RefPtr<MenuPattern>& menuPattern)
+{
+    if (hasPreviewTransitionEffect_) {
+        CHECK_NULL_VOID(context);
+        CHECK_NULL_VOID(menuTheme);
+        auto scaleAfter { -1.0f };
+        if (menuPattern != nullptr) {
+            scaleAfter = menuPattern->GetPreviewAfterAnimationScale();
+        }
+        auto previewAfterAnimationScale =
+            LessOrEqual(scaleAfter, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : scaleAfter;
+
+        context->UpdateTransformScale(VectorF(previewAfterAnimationScale, previewAfterAnimationScale));
+    } else {
+        ShowScaleAnimation(context, menuTheme, menuPattern);
+    }
 }
 
 RefPtr<FrameNode> MenuPreviewPattern::GetMenuWrapper() const
@@ -189,9 +207,12 @@ void MenuPreviewPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     CHECK_NULL_VOID(mainPipeline);
     auto dragDropManager = mainPipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
-    auto preDragFrameNode = dragDropManager->GetPrepareDragFrameNode().Upgrade();
-    CHECK_NULL_VOID(preDragFrameNode);
-    auto eventHub = preDragFrameNode->GetEventHub<EventHub>();
+    auto menuWrapper = GetMenuWrapper();
+    auto menuPattern = GetMenuPattern(menuWrapper);
+    CHECK_NULL_VOID(menuPattern);
+    auto dragTargetNode = FrameNode::GetFrameNode(menuPattern->GetTargetTag(), menuPattern->GetTargetId());
+    CHECK_NULL_VOID(dragTargetNode);
+    auto eventHub = dragTargetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto targetGestureHub = eventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(targetGestureHub);

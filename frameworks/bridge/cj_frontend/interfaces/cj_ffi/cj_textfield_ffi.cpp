@@ -77,6 +77,12 @@ void FfiOHOSAceFrameworkTextFieldSetBorderColor(uint32_t color)
     TextFieldModel::GetInstance()->SetBackBorder();
 }
 
+void FfiOHOSAceFrameworkTextFieldSetBorderWidthWithCJEdge(CJEdge params)
+{
+    FfiOHOSAceFrameworkViewAbstractSetBorderWidthWithCJEdge(params);
+    TextFieldModel::GetInstance()->SetBackBorder();
+}
+
 void FfiOHOSAceFrameworkTextFieldSetBorderStyle(int32_t style)
 {
     if (!Utils::CheckParamsValid(style, BORDER_STYLES.size())) {

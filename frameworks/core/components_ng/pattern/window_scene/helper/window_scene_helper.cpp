@@ -30,8 +30,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "session/host/include/session.h"
 
-#if not defined(ACE_UNITTEST)
-#if defined(ENABLE_STANDARD_INPUT)
+#ifndef ACE_UNITTEST
+#ifdef ENABLE_STANDARD_INPUT
 #include "input_method_controller.h"
 #endif
 #endif

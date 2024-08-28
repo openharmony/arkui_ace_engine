@@ -15,9 +15,6 @@
 
 #include "core/components/dialog/action_sheet/action_sheet_component.h"
 
-#include "base/utils/system_properties.h"
-#include "core/components/flex/flex_component.h"
-#include "core/components/gesture_listener/gesture_listener_component.h"
 #include "core/components/image/image_component.h"
 #include "core/components/scroll/scroll_component.h"
 #include "core/components_v2/list/list_component.h"

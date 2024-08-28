@@ -15,15 +15,8 @@
 
 #include "core/components/scroll/scroll_bar_controller.h"
 
-#include "base/log/log.h"
-#include "core/animation/curve_animation.h"
-#include "core/animation/keyframe.h"
-#include "core/animation/keyframe_animation.h"
 #include "core/common/vibrator/vibrator_proxy.h"
 #include "core/components/scroll/render_scroll.h"
-#include "core/components/scroll/scrollable.h"
-#include "core/gestures/drag_recognizer.h"
-#include "core/gestures/pan_recognizer.h"
 
 namespace OHOS::Ace {
 namespace {

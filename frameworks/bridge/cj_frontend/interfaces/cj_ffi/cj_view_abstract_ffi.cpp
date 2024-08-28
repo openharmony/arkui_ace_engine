@@ -275,38 +275,15 @@ void FfiOHOSAceFrameworkViewAbstractSetSize(double width, int32_t widthUnit, dou
 
 void FfiOHOSAceFrameworkViewAbstractSetResponseRegion(CJResponseRegion value)
 {
-    Dimension xDime(value.x, static_cast<DimensionUnit>(value.xUnit));
-    Dimension yDime(value.y, static_cast<DimensionUnit>(value.yUnit));
-    Dimension widthDime(value.width, static_cast<DimensionUnit>(value.widthUnit));
-    Dimension heightDime(value.height, static_cast<DimensionUnit>(value.heightUnit));
-
     std::vector<DimensionRect> result;
-
-    DimensionOffset offsetDimen(xDime, yDime);
-    DimensionRect dimenRect(widthDime, heightDime, offsetDimen);
-
-    result.emplace_back(dimenRect);
+    ParseCJResponseRegion(value, result);
     ViewAbstractModel::GetInstance()->SetResponseRegion(result);
 }
 
 void FfiOHOSAceFrameworkViewAbstractSetResponseRegionArray(VectorStringPtr vecContent)
 {
-    auto nativeRectangleVec = *reinterpret_cast<std::vector<NativeRectangle>*>(vecContent);
-
     std::vector<DimensionRect> result;
-    for (size_t i = 0; i < nativeRectangleVec.size(); i++) {
-        Dimension xDimen = Dimension(nativeRectangleVec[i].x, static_cast<DimensionUnit>(nativeRectangleVec[i].xUnit));
-        Dimension yDimen = Dimension(nativeRectangleVec[i].y, static_cast<DimensionUnit>(nativeRectangleVec[i].yUnit));
-        Dimension widthDimen =
-            Dimension(nativeRectangleVec[i].width, static_cast<DimensionUnit>(nativeRectangleVec[i].widthUnit));
-        Dimension heightDimen =
-            Dimension(nativeRectangleVec[i].height, static_cast<DimensionUnit>(nativeRectangleVec[i].heightUnit));
-        DimensionOffset offsetDimen(xDimen, yDimen);
-        DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen);
-
-        result.emplace_back(dimenRect);
-    }
-
+    ParseVectorStringPtr(vecContent, result);
     ViewAbstractModel::GetInstance()->SetResponseRegion(result);
 }
 
@@ -874,7 +851,7 @@ void FfiOHOSAceFrameworkViewAbstractSetGeometryTransition(char* id, CJGeometryTr
 
 void FfiOHOSAceFrameworkViewAbstractSetBlur(double value)
 {
-    Dimension radius(value, DimensionUnit::VP);
+    Dimension radius(value, DimensionUnit::PX);
     BlurOption options;
     ViewAbstractModel::GetInstance()->SetFrontBlur(radius, options);
 }
@@ -886,7 +863,7 @@ void FfiOHOSAceFrameworkViewAbstractSetColorBlend(uint32_t color)
 
 void FfiOHOSAceFrameworkViewAbstractSetBackdropBlur(double value)
 {
-    Dimension radius(value, DimensionUnit::VP);
+    Dimension radius(value, DimensionUnit::PX);
     BlurOption options;
     ViewAbstractModel::GetInstance()->SetBackdropBlur(radius, options);
 }
@@ -1748,6 +1725,33 @@ bool ParseColorById(int64_t id, Color& color)
     }
     color = themeConstants->GetColor(static_cast<uint32_t>(id));
     return true;
+}
+
+void ParseCJResponseRegion(CJResponseRegion value, std::vector<DimensionRect>& result)
+{
+    Dimension xDime(value.x, static_cast<DimensionUnit>(value.xUnit));
+    Dimension yDime(value.y, static_cast<DimensionUnit>(value.yUnit));
+    Dimension widthDime(value.width, static_cast<DimensionUnit>(value.widthUnit));
+    Dimension heightDime(value.height, static_cast<DimensionUnit>(value.heightUnit));
+    DimensionOffset offsetDimen(xDime, yDime);
+    DimensionRect dimenRect(widthDime, heightDime, offsetDimen);
+    result.emplace_back(dimenRect);
+}
+
+void ParseVectorStringPtr(VectorStringPtr vecContent, std::vector<DimensionRect>& result)
+{
+    auto nativeRectangleVec = *reinterpret_cast<std::vector<NativeRectangle>*>(vecContent);
+    for (size_t i = 0; i < nativeRectangleVec.size(); i++) {
+        Dimension xDimen = Dimension(nativeRectangleVec[i].x, static_cast<DimensionUnit>(nativeRectangleVec[i].xUnit));
+        Dimension yDimen = Dimension(nativeRectangleVec[i].y, static_cast<DimensionUnit>(nativeRectangleVec[i].yUnit));
+        Dimension widthDimen =
+            Dimension(nativeRectangleVec[i].width, static_cast<DimensionUnit>(nativeRectangleVec[i].widthUnit));
+        Dimension heightDimen =
+            Dimension(nativeRectangleVec[i].height, static_cast<DimensionUnit>(nativeRectangleVec[i].heightUnit));
+        DimensionOffset offsetDimen(xDimen, yDimen);
+        DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen);
+        result.emplace_back(dimenRect);
+    }
 }
 
 } // namespace OHOS::Ace

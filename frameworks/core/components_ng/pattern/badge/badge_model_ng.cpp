@@ -116,4 +116,60 @@ void BadgeModelNG::UpdateBadgeStyle(BadgeParameters& badgeParameters, const RefP
         layoutProperty->UpdateBadgeFontWeight(FontWeight::NORMAL);
     }
 }
+
+RefPtr<FrameNode> BadgeModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::BADGE_ETS_TAG, nodeId, AceType::MakeRefPtr<BadgePattern>());
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return frameNode;
+}
+
+void BadgeModelNG::SetBadgeParam(
+    FrameNode* frameNode, BadgeParameters& badgeParameters, bool isDefaultFontSize, bool isDefaultBadgeSize)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+    CHECK_NULL_VOID(badgeTheme);
+    auto layoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->SetIsDefault(isDefaultFontSize, isDefaultBadgeSize);
+    if (badgeParameters.badgeValue.has_value()) {
+        layoutProperty->UpdateBadgeValue(badgeParameters.badgeValue.value());
+    } else {
+        layoutProperty->ResetBadgeValue();
+    }
+    if (badgeParameters.badgeCount.has_value()) {
+        layoutProperty->UpdateBadgeCount(badgeParameters.badgeCount.value());
+    }
+    if (badgeParameters.badgeMaxCount.has_value()) {
+        layoutProperty->UpdateBadgeMaxCount(badgeParameters.badgeMaxCount.value());
+    } else {
+        layoutProperty->UpdateBadgeMaxCount(badgeTheme->GetMaxCount());
+    }
+
+    if (badgeParameters.badgePosition.has_value()) {
+        auto badgePosition = static_cast<BadgePosition>(badgeParameters.badgePosition.value());
+        layoutProperty->UpdateBadgePosition(badgePosition);
+    } else {
+        layoutProperty->UpdateBadgePosition(badgeTheme->GetBadgePosition());
+    }
+    if (badgeParameters.badgePositionX.has_value()) {
+        layoutProperty->UpdateBadgePositionX(badgeParameters.badgePositionX.value());
+    } else {
+        layoutProperty->UpdateBadgePositionX(badgeTheme->GetBadgePositionX());
+    }
+    if (badgeParameters.badgePositionY.has_value()) {
+        layoutProperty->UpdateBadgePositionY(badgeParameters.badgePositionY.value());
+    } else {
+        layoutProperty->UpdateBadgePositionY(badgeTheme->GetBadgePositionY());
+    }
+    if (badgeParameters.isPositionXy.has_value()) {
+        layoutProperty->UpdateIsPositionXy(badgeParameters.isPositionXy.value());
+    } else {
+        layoutProperty->UpdateIsPositionXy(badgeTheme->GetIsPositionXy());
+    }
+    UpdateBadgeStyle(badgeParameters, AceType::Claim(frameNode));
+}
 } // namespace OHOS::Ace::NG

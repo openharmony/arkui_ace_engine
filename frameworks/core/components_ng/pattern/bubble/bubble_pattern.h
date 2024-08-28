@@ -215,9 +215,26 @@ public:
 
     void ResetFocusState()
     {
-        SetIsDefaultHasBeFocused(false);
+        FocusViewDidShow(nullptr);
         SetIsViewRootScopeFocused(true);
         SetIsViewHasFocused(false);
+    }
+
+    Rect GetHostWindowRect() const
+    {
+        return hostWindowRect_;
+    }
+
+    void RegisterPopupStateChangeCallback(const std::function<void(const std::string&)>& callback)
+    {
+        onStateChangeCallback_ = callback;
+    }
+
+    void CallPopupStateChangeCallback(const std::string& value)
+    {
+        if (onStateChangeCallback_) {
+            onStateChangeCallback_(value);
+        }
     }
 
 protected:
@@ -273,6 +290,7 @@ private:
     OffsetF arrowPosition_;
     SizeF childSize_;
     RectF touchRegion_;
+    Rect hostWindowRect_;
     BubbleDumpInfo dumpInfo_;
     // top right bottom left
     std::vector<float> arrowOffsetByClips_ = { 0.0f, 0.0f, 0.0f, 0.0f };
@@ -304,6 +322,7 @@ private:
 
     bool hasTransition_ = false;
     bool hasOnAreaChange_ = false;
+    std::function<void(const std::string&)> onStateChangeCallback_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 

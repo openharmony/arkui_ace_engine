@@ -16,7 +16,6 @@
 #include "core/components/declaration/clock/clock_declaration.h"
 
 #include "base/log/event_report.h"
-#include "base/utils/utils.h"
 #include "core/components/declaration/common/declaration_constants.h"
 #include "frameworks/bridge/common/utils/utils.h"
 

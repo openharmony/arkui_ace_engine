@@ -236,10 +236,6 @@ bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaCh
     return true;
 }
 
-void SessionWrapperImpl::SetDensityDpiImpl(bool isDensityDpi)
-{
-}
-
 void SessionWrapperImpl::SendDataAsync(const AAFwk::WantParams& params) const
 {
 }
@@ -247,5 +243,9 @@ void SessionWrapperImpl::SendDataAsync(const AAFwk::WantParams& params) const
 int32_t SessionWrapperImpl::SendDataSync(const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams) const
 {
     return 1;
+}
+
+void SessionWrapperImpl::UpdateSessionViewportConfig()
+{
 }
 } // namespace OHOS::Ace::NG

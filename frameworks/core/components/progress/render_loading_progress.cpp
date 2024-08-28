@@ -16,9 +16,6 @@
 #include "core/components/progress/render_loading_progress.h"
 
 #include "base/log/event_report.h"
-#include "base/log/log.h"
-#include "core/animation/curve_animation.h"
-#include "core/animation/keyframe_animation.h"
 #include "core/components/progress/progress_theme.h"
 
 namespace OHOS::Ace {

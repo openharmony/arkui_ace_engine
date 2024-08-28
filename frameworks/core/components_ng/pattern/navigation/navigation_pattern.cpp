@@ -1972,7 +1972,8 @@ void NavigationPattern::UpdatePreNavDesZIndex(const RefPtr<FrameNode> &preTopNav
                 continue;
             }
             // get navDestination index in hideNodes, use navdestination index in pre navigation stack
-            int32_t hideNodesIndex = hideNodes.size() - (navDestination->GetIndex() - preLastStandardIndex);
+            int32_t hideNodesIndex =
+                static_cast<int32_t>(hideNodes.size()) - (navDestination->GetIndex() - preLastStandardIndex);
             navDestinationContext->UpdateZIndex(standardIndex - hideNodesIndex);
         }
         auto preDesNodeContext = preTopNavDestination->GetRenderContext();
@@ -2558,5 +2559,13 @@ bool NavigationPattern::GetIsFocusable(const RefPtr<FrameNode>& frameNode)
     auto currentFocusHub = frameNode->GetFocusHub();
     CHECK_NULL_RETURN(currentFocusHub, false);
     return currentFocusHub->IsFocusableNode();
+}
+
+void NavigationPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    if (!navigationStack_) {
+        return;
+    }
+    json->Put("size", std::to_string(navigationStack_->Size()).c_str());
 }
 } // namespace OHOS::Ace::NG

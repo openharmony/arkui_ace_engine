@@ -16,6 +16,7 @@
 #include "image_converter.h"
 
 #include "drawable_descriptor_log.h"
+#include "securec.h"
 #ifndef PREVIEW
 #include "image_utils.h"
 #include "platform/image_native/image_type.h"
@@ -139,11 +140,16 @@ std::shared_ptr<Media::PixelMap> ImageConverter::BitmapToPixelMap(
     auto data = bitMap->GetPixels();
     opts.size.width = static_cast<int32_t>(bitMap->GetWidth());
     opts.size.height = static_cast<int32_t>(bitMap->GetHeight());
-    auto pixelMap = Media::PixelMap::Create(reinterpret_cast<uint32_t*>(data),
-        opts.size.width * opts.size.height, opts);
+    opts.editable = false;
+    auto pixelMap = Media::PixelMap::Create(opts);
     if (!pixelMap) {
         HILOGE("PixelMap is null, bitMap's Size = (%{public}d, %{public}d)", bitMap->GetWidth(), bitMap->GetHeight());
         return pixelMap;
+    }
+    auto dstAddr = pixelMap->GetWritablePixels();
+    if (memcpy_s(dstAddr, pixelMap->GetByteCount(), data, pixelMap->GetByteCount()) != 0) {
+        HILOGE("PixelMap write fail");
+        return nullptr;
     }
     return pixelMap;
 }

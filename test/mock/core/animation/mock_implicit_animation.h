@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ANIMATION_UTILS_H
 
 #include "base/memory/ace_type.h"
-#include "core/components_ng/render/animation_utils.h"
+#include "core/components_ng/base/modifier.h"
 namespace OHOS::Ace {
 
 struct AnimationCallbacks {
@@ -36,8 +36,12 @@ public:
     {
         cbs_ = std::move(cbs);
         remainingTicks_ = ticks;
+        paused_ = false;
     }
 
+    /**
+     * @brief move to next frame
+     */
     void Next();
 
     bool Finished() const
@@ -45,10 +49,25 @@ public:
         return remainingTicks_ <= 0;
     }
 
-    void End()
+    void Pause()
     {
-        remainingTicks_ = 0;
+        paused_ = true;
     }
+
+    void Resume()
+    {
+        paused_ = false;
+    }
+
+    /**
+     * @brief immediately terminate the animation without updating the value
+     */
+    void End();
+
+    /**
+     * @brief jump to the end of the animation and update the value
+     */
+    void JumpToEnd();
 
 private:
     void UpdateProp(const WeakPtr<NG::PropertyBase>& propWk) const;
@@ -56,6 +75,7 @@ private:
     AnimationCallbacks cbs_;
     WeakPtr<NG::PropertyBase> prop_;
     int32_t remainingTicks_ = 0;
+    bool paused_ = false;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ANIMATION_UTILS_H

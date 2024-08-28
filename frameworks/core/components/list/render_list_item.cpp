@@ -16,18 +16,13 @@
 #include "core/components/list/render_list_item.h"
 
 #include "base/log/dump_log.h"
-#include "base/utils/system_properties.h"
-#include "core/common/frontend.h"
 #include "core/common/vibrator/vibrator_proxy.h"
-#include "core/components/box/render_box.h"
 #include "core/components/flex/render_flex.h"
-#include "core/components/list/render_list.h"
 #include "core/components/list/render_list_item_group.h"
 #include "core/components/list/tv_interactive_effect.h"
 #ifdef WEARABLE_PRODUCT
 #include "core/components/list/watch_interactive_effect.h"
 #endif
-#include "core/components/proxy/render_item_proxy.h"
 
 namespace OHOS::Ace {
 namespace {

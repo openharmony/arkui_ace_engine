@@ -104,6 +104,7 @@ private:
     void SelectMenuAndInnerInitProperty();
     void AddMenuItemByCreateMenuCallback(const std::shared_ptr<SelectOverlayInfo>& info, float maxWidth);
     static const std::vector<MenuItemParam> GetSystemMenuItemParams(const std::shared_ptr<SelectOverlayInfo>& info);
+    static const MenuItemParam GetSystemMenuItemParam(const std::string& menuId, const std::string& menuButton);
     int32_t AddCreateMenuItems(const std::vector<NG::MenuOptionsParam>& menuItems,
         const std::shared_ptr<SelectOverlayInfo>& info, float maxWidth);
     bool AddSystemDefaultOptions(float maxWidth, float& allocatedSize);
@@ -115,8 +116,11 @@ private:
     void ShowCopyAll(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
     void ShowShare(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
     void ShowCamera(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
+    void ShowAIWrite(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
     std::function<void()> GetDefaultOptionCallback();
     std::vector<OptionParam> GetDefaultOptionsParams(const std::shared_ptr<SelectOverlayInfo>& info);
+    void GetFlexibleOptionsParams(
+        const std::shared_ptr<SelectOverlayInfo>& info, std::vector<OptionParam>& params);
     void addMenuOptionItemsParams(
         std::vector<OptionParam>& params, const std::shared_ptr<SelectOverlayInfo>& info, int32_t index);
     void AddExtensionMenuOptions(const std::shared_ptr<SelectOverlayInfo>& info, int32_t index);
@@ -203,7 +207,7 @@ private:
     bool isExtensionMenu_ = false;
 
     // Label whether the menu default button needs to appear within the extended menu
-    bool isShowInDefaultMenu_[8] = { false };
+    bool isShowInDefaultMenu_[9] = { false };
 
     bool isDefaultBtnOverMaxWidth_ = false;
 

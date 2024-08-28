@@ -15,14 +15,7 @@
 
 #include "core/components/refresh/render_refresh.h"
 
-#include <chrono>
-#include <ctime>
-
 #include "base/i18n/localization.h"
-#include "base/utils/string_utils.h"
-#include "base/utils/utils.h"
-#include "core/animation/curve_animation.h"
-#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 namespace {

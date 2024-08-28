@@ -15,7 +15,6 @@
 
 #include "core/components/video/video_element.h"
 
-#include <algorithm>
 #include <iomanip>
 #include <regex>
 #include <sstream>
@@ -27,30 +26,16 @@
 #include "base/image/file_uri_helper.h"
 #include "base/json/json_util.h"
 #include "base/log/dump_log.h"
-#include "base/log/log.h"
-#include "base/resource/asset_manager.h"
-#include "base/resource/internal_resource.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/utils.h"
-#include "core/common/container_scope.h"
 #include "core/components/align/align_component.h"
-#include "core/components/box/box_component.h"
 #include "core/components/button/button_component.h"
 #include "core/components/flex/flex_component.h"
 #include "core/components/flex/flex_item_component.h"
 #include "core/components/gesture_listener/gesture_listener_component.h"
-#include "core/components/image/image_component.h"
 #include "core/components/padding/padding_component.h"
 #include "core/components/slider/slider_component.h"
 #include "core/components/stage/stage_element.h"
 #include "core/components/text/text_component.h"
-#include "core/components/theme/resource_adapter.h"
-#include "core/components/theme/theme_manager.h"
 #include "core/components/video/render_texture.h"
-#include "core/event/ace_event_helper.h"
-#include "core/event/back_end_event_manager.h"
-#include "core/pipeline/base/composed_component.h"
-#include "core/pipeline/pipeline_context.h"
 
 #ifdef OHOS_STANDARD_SYSTEM
 #include <securec.h>

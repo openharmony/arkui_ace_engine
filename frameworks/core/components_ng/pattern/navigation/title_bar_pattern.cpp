@@ -933,7 +933,6 @@ void TitleBarPattern::SpringAnimation(float startPos, float endPos)
             auto pattern = weakPattern.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->CleanSpringAnimation();
-            pattern->SetIsTitleMoving(false);
         });
 }
 
@@ -1002,7 +1001,6 @@ void TitleBarPattern::AnimateTo(float offset)
             auto pattern = weakPattern.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->CleanAnimation();
-            pattern->SetIsTitleMoving(false);
         });
 }
 
@@ -1227,7 +1225,6 @@ float TitleBarPattern::OnCoordScrollUpdate(float offset)
 {
     float lastOffset = coordScrollOffset_;
     coordScrollOffset_ += offset;
-    isTitleMoving_ = true;
 
     float offsetHandled = 0.0f;
     float minHeight = static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
@@ -1260,7 +1257,6 @@ float TitleBarPattern::OnCoordScrollUpdate(float offset)
 void TitleBarPattern::OnCoordScrollEnd()
 {
     if (NearZero(coordScrollOffset_)) {
-        isTitleMoving_ = false;
         return;
     }
     float minHeight = static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
@@ -1441,6 +1437,24 @@ void TitleBarPattern::SetTitlebarOptions(NavigationTitlebarOptions&& opt)
     UpdateBackgroundStyle(host);
 }
 
+void TitleBarPattern::UpdateBackgroundStyle(RefPtr<FrameNode>& host)
+{
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (options_.bgOptions.color.has_value()) {
+        renderContext->UpdateBackgroundColor(options_.bgOptions.color.value());
+    } else {
+        renderContext->ResetBackgroundColor();
+    }
+    if (options_.bgOptions.blurStyle.has_value()) {
+        BlurStyleOption blur;
+        blur.blurStyle = options_.bgOptions.blurStyle.value();
+        renderContext->UpdateBackBlurStyle(blur);
+    } else {
+        renderContext->ResetBackBlurStyle();
+    }
+}
+
 void TitleBarPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1473,24 +1487,6 @@ void TitleBarPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowS
         MountMenu(titleBarNode, true);
         titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     } while (0);
-}
-
-void TitleBarPattern::UpdateBackgroundStyle(RefPtr<FrameNode>& host)
-{
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    if (options_.bgOptions.color.has_value()) {
-        renderContext->UpdateBackgroundColor(options_.bgOptions.color.value());
-    } else {
-        renderContext->ResetBackgroundColor();
-    }
-    if (options_.bgOptions.blurStyle.has_value()) {
-        BlurStyleOption blur;
-        blur.blurStyle = options_.bgOptions.blurStyle.value();
-        renderContext->UpdateBackBlurStyle(blur);
-    } else {
-        renderContext->ResetBackBlurStyle();
-    }
 }
 
 void TitleBarPattern::DumpInfo()

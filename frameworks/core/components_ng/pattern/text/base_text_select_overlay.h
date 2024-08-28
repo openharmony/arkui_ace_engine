@@ -131,6 +131,7 @@ public:
     void SetMenuIsShow(bool isShowMenu)
     {
         isShowMenu_ = isShowMenu;
+        originalMenuIsShow_ = isShowMenu;
     }
 
     bool IsShowMenu()
@@ -270,6 +271,11 @@ protected:
     void OnHandleScrolling(const WeakPtr<FrameNode>& scrollingNode);
     virtual void UpdateTransformFlag();
     bool CheckHasTransformAttr();
+    void UpdateOriginalMenuIsShow()
+    {
+        originalMenuIsShow_ = IsCurrentMenuVisibile();
+    }
+    virtual void UpdateMenuWhileAncestorNodeChanged(bool shouldHideMenu, bool shouldShowMenu);
     std::optional<OverlayRequest> latestReqeust_;
     bool hasTransform_ = false;
     HandleLevelMode handleLevelMode_ = HandleLevelMode::OVERLAY;
@@ -298,6 +304,7 @@ private:
     bool isChangeToOverlayModeAtEdge_ = true;
     bool hasRegisterListener_ = false;
     RectF globalPaintRect_;
+    bool originalMenuIsShow_ = true;
 };
 
 } // namespace OHOS::Ace::NG

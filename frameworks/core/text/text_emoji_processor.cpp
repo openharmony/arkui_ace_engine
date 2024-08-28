@@ -801,10 +801,11 @@ bool TextEmojiProcessor::ForwardDelete(std::u32string& u32Content)
 
 bool TextEmojiProcessor::HandleDeleteAction(std::u32string& u32Content, int32_t deleteCount, bool isBackward)
 {
+    int32_t contentLength = static_cast<int32_t>(u32Content.length());
+    deleteCount = std::min(deleteCount, contentLength);
     if (isBackward) {
         if (deleteCount > 0) {
-            int32_t start = static_cast<int32_t>(u32Content.length()) - deleteCount;
-            start = std::max(start, 0);
+            int32_t start = contentLength - deleteCount;
             u32Content.erase(start, deleteCount);
             return true;
         }

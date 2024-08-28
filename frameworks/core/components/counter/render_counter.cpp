@@ -15,9 +15,6 @@
 
 #include "core/components/counter/render_counter.h"
 
-#include "base/log/event_report.h"
-#include "base/log/log.h"
-
 namespace OHOS::Ace {
 
 void RenderCounter::Update(const RefPtr<Component>& component)

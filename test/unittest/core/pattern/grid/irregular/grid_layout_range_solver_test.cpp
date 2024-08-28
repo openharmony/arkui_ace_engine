@@ -303,7 +303,7 @@ HWTEST_F(GridLayoutRangeTest, SolveOverScroll002, TestSize.Level1)
 
 /**
  * @tc.name: ScrollItem001
- * @tc.desc: Test an error condition
+ * @tc.desc: Test ScrollToIndex
  * @tc.type: FUNC
  */
 HWTEST_F(GridLayoutRangeTest, ScrollItem001, TestSize.Level1)
@@ -331,6 +331,38 @@ HWTEST_F(GridLayoutRangeTest, ScrollItem001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info.startIndex_, 2);
     EXPECT_EQ(info.endIndex_, 2);
+}
+
+/**
+ * @tc.name: ScrollItem002
+ * @tc.desc: Test scroll to center of long item
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutRangeTest, ScrollItem002, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(GetOptionDemo14());
+    model.SetColumnsGap(Dimension { 10.0f });
+    model.SetRowsGap(Dimension { 10.0f });
+    constexpr float itemHeight = 300.0f;
+    CreateFixedHeightItems(1, itemHeight * 2 + 10.0f);
+    CreateFixedHeightItems(1, itemHeight);
+    CreateFixedHeightItems(1, itemHeight * 2 + 10.0f);
+    CreateFixedHeightItems(19, itemHeight);
+    CreateFixedHeightItems(1, itemHeight * 6 + 50.0f);
+    CreateFixedHeightItems(77, itemHeight);
+    CreateDone(frameNode_);
+    const auto& info = pattern_->gridLayoutInfo_;
+
+    pattern_->ScrollToIndex(22, false, ScrollAlign::CENTER, 0.0f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info.startIndex_, 22);
+    EXPECT_EQ(info.endIndex_, 26);
+    for (int i = info.startIndex_; i <= info.endIndex_; ++i) {
+        EXPECT_TRUE(GetChildFrameNode(frameNode_, i)->IsActive());
+    }
+    EXPECT_EQ(GetChildY(frameNode_, 22), -525.0f);
 }
 
 /**
@@ -567,7 +599,7 @@ HWTEST_F(GridLayoutRangeTest, Cache001, TestSize.Level1)
     for (const int32_t i : preloadList) {
         EXPECT_FALSE(frameNode_->GetChildByIndex(i));
     }
-    EXPECT_EQ(pattern_->preloadItemList_, preloadList);
+    CheckPreloadListEqual(preloadList);
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     EXPECT_TRUE(pattern_->preloadItemList_.empty());
     constexpr float itemWidth = (GRID_WIDTH - 20.0f) / 3.0f;
@@ -596,11 +628,11 @@ HWTEST_F(GridLayoutRangeTest, Cache001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info.startIndex_, 39);
     const std::list<int32_t> preloadList2 = { 38, 37, 36, 35, 34, 33 };
-    EXPECT_EQ(pattern_->preloadItemList_, preloadList2);
+    CheckPreloadListEqual(preloadList2);
     const int64_t time = GetSysTimestamp();
     PipelineContext::GetCurrentContext()->OnIdle(time - 1);
     // no time to execute
-    EXPECT_EQ(pattern_->preloadItemList_, preloadList2);
+    CheckPreloadListEqual(preloadList2);
 }
 
 /**
@@ -635,7 +667,7 @@ HWTEST_F(GridLayoutRangeTest, Cache002, TestSize.Level1)
     for (const int32_t i : preloadList) {
         EXPECT_FALSE(frameNode_->GetChildByIndex(i));
     }
-    EXPECT_EQ(pattern_->preloadItemList_, preloadList);
+    CheckPreloadListEqual(preloadList);
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     EXPECT_EQ(GetChildHeight(frameNode_, 22), 1250.0f);
 
@@ -648,5 +680,35 @@ HWTEST_F(GridLayoutRangeTest, Cache002, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 22), 810.0f);
     EXPECT_EQ(GetChildY(frameNode_, 23), 1020.0f);
     EXPECT_EQ(GetChildY(frameNode_, 24), 1230.0f);
+}
+
+/**
+ * @tc.name: Drag001
+ * @tc.desc: Test grid dragged item
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutRangeTest, Drag001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(GetOptionDemo14());
+    model.SetColumnsGap(Dimension { 10.0f });
+    model.SetRowsGap(Dimension { 20.0f });
+    model.SetEditable(true);
+    constexpr float itemHeight = 300.0f;
+    CreateFixedHeightItems(22, itemHeight);
+    CreateFixedHeightItems(1, itemHeight * 5 + 100.0f);
+    CreateFixedHeightItems(77, itemHeight);
+    CreateDone(frameNode_);
+
+    pattern_->ScrollToIndex(21, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 2)->IsActive());
+    EXPECT_EQ(GetChildY(frameNode_, 2), 640.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 24), 640.0f);
+    GestureEvent event;
+    event.SetGlobalPoint(Point(5.0f, 650.0f));
+    eventHub_->HandleOnItemDragStart(event);
+    EXPECT_EQ(eventHub_->draggedIndex_, 24);
 }
 } // namespace OHOS::Ace::NG

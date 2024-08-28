@@ -31,7 +31,7 @@
 #include "adapter/preview/entrance/ace_preview_helper.h"
 
 namespace {
-constexpr char MAX_ARGS_COUNT = 2;
+constexpr int MAX_ARGS_COUNT = 2;
 constexpr char MODEL_STAGE[] = "stage";
 // card default width and height:
 // 2*1 (150*54)
