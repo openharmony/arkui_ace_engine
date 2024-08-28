@@ -6666,6 +6666,7 @@ void TextFieldPattern::DumpTextEngineInfo()
 {
     auto& dumpLog = DumpLog::GetInstance();
     dumpLog.AddDesc(std::string("-----TextEngine paragraphs_ info-----"));
+    CHECK_NULL_VOID(paragraph_);
     dumpLog.AddDesc(std::string("GetTextWidth:")
         .append(std::to_string(paragraph_->GetTextWidth()))
         .append(" GetHeight:")
