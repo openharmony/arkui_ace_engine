@@ -16,15 +16,17 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("capi_all_modifiers_test") {
   type = "new"
   module_output = "capi"
-  sources = [ "capi-ut-modifiers-stubs.cpp" ]
-  sources += [
+  sources = [
     # place here your UT source code
     "blank_modifier_test.cpp",
     "divider_modifier_test.cpp",
     "radio_modifier_test.cpp",
   ]
   extra_deps = []
-  extra_deps += [ "${ace_root}/frameworks/core/interfaces/native:ace_core_interfaces_native_node_linux_unittest" ]
+  extra_deps += [
+    "${ace_root}/frameworks/core/interfaces/native:ace_core_interfaces_native_node_linux_unittest",
+    "../stubs:capi-ut-stubs",
+  ]
 }
 
 group("capi_modifiers_unittest") {
