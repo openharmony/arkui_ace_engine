@@ -2605,15 +2605,11 @@ void MenuLayoutAlgorithm::InitHierarchicalParameters(bool isShowInSubWindow, con
         auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
         container = AceEngine::Get().GetContainer(parentContainerId);
     }
-    CHECK_NULL_VOID(container);
-    auto wrapperPipline = menuWrapperNode->GetContext();
-    auto wrapperRect = wrapperPipline ? wrapperPipline->GetDisplayWindowRectInfo() : Rect();
-    auto mainPipline = DynamicCast<PipelineContext>(container->GetPipelineContext());
-    auto mainRect = mainPipline ? mainPipline->GetDisplayWindowRectInfo() : Rect();
-    if (wrapperRect.IsValid() && mainRect.IsValid() && wrapperRect != mainRect) {
+    if (SubwindowManager::GetInstance()->IsFreeMultiWindow(containerId)) {
         hierarchicalParameters_ = true;
     }
 
+    CHECK_NULL_VOID(container);
     if (container->IsUIExtensionWindow()) {
         if (menuWrapperPattern->IsContextMenu()) {
             hierarchicalParameters_ = true;
