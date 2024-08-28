@@ -176,6 +176,16 @@ public:
         return transitionType_;
     }
 
+    float GetLanguageDirection()
+    {
+        return AceApplicationInfo::GetInstance().IsRightToLeft() ? -1.0f : 1.0f;
+    }
+
+    void InitSystemTransitionPop();
+    void SystemTransitionPushAction(bool isFinish);
+    void StartSystemTransitionPush();
+    void StartSystemTransitionPop();
+
 private:
     RefPtr<UINode> menu_;
     RefPtr<UINode> toolbarMenu_;

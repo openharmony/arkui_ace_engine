@@ -169,6 +169,39 @@ public:
     void DealNavigationExit(const RefPtr<FrameNode>& preNode, bool isNavBar, bool isAnimated = true);
     void NotifyPageHide();
     void UpdateLastStandardIndex();
+
+    int32_t GetPreLastStandardIndex() const
+    {
+        return preLastStandardIndex_;
+    }
+
+    void PreNodeFinishCallback(const RefPtr<FrameNode>& preNode);
+    void CreateAnimationWithDialogPop(const AnimationFinishCallback callback,
+    const std::vector<WeakPtr<FrameNode>> prevNavList, const std::vector<WeakPtr<FrameNode>> curNavList);
+    void CreateAnimationWithDialogPush(const AnimationFinishCallback callback,
+    const std::vector<WeakPtr<FrameNode>> prevNavList, const std::vector<WeakPtr<FrameNode>> curNavList);
+    void TransitionWithDialogPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
+        bool isNavBar = false);
+    void TransitionWithDialogPop(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
+        bool isNavBar = false);
+    void StartDialogtransition(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
+        bool isTransitionIn);
+
+    void InitPopPreList(const RefPtr<FrameNode>& preNode, std::vector<WeakPtr<FrameNode>>& preNavList);
+    void InitPopCurList(const RefPtr<FrameNode>& curNode, std::vector<WeakPtr<FrameNode>>& curNavList,
+        bool isNavbarNeedAnimation);
+    void InitPushPreList(const RefPtr<FrameNode>& preNode, std::vector<WeakPtr<FrameNode>>& prevNavList,
+        bool isNavbarNeedAnimation);
+    void InitPushCurList(const RefPtr<FrameNode>& curNode, std::vector<WeakPtr<FrameNode>>& curNavList);
+
+    std::vector<WeakPtr<NavDestinationGroupNode>> FindNodesPoped(const RefPtr<FrameNode>& preNode,
+        const RefPtr<FrameNode>& curNode);
+    void DialogTransitionPopAnimation(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
+        AnimationOption option);
+    void DialogTransitionPushAnimation(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
+        AnimationOption option);
+    void InitDialogTransition(const RefPtr<NavDestinationGroupNode>& node, bool isZeroY);
+
     int32_t GetLastStandardIndex() const
     {
         return lastStandardIndex_;
@@ -264,6 +297,7 @@ private:
     std::string curId_;
     std::string navigationPathInfo_;
     std::string navigationModuleName_;
+    int32_t preLastStandardIndex_ = -1;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_GROUP_NODE_H
