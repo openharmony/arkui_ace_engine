@@ -1777,8 +1777,13 @@ void TabBarPattern::UpdateTextColorAndFontWeight(int32_t indicator)
     int32_t index = 0;
     for (const auto& columnNode : tabBarNode->GetChildren()) {
         CHECK_NULL_VOID(columnNode);
-        auto iter = tabBarType_.find(columnNode->GetId());
+        auto columnId = columnNode->GetId();
+        auto iter = tabBarType_.find(columnId);
         if (iter != tabBarType_.end() && iter->second) {
+            index++;
+            continue;
+        }
+        if (labelStyles_.find(columnId) == labelStyles_.end()) {
             index++;
             continue;
         }
@@ -1786,37 +1791,25 @@ void TabBarPattern::UpdateTextColorAndFontWeight(int32_t indicator)
         CHECK_NULL_VOID(textNode);
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        auto isSelected = columnNode->GetId() == selectedColumnId;
-        if (index >= 0 && index < static_cast<int32_t>(labelStyles_.size())) {
-            if (isSelected) {
-                auto selectColor = selectedModes_[index] == SelectedMode::BOARD && axis == Axis::HORIZONTAL ?
-                    tabTheme->GetSubTabBoardTextOnColor() : tabTheme->GetSubTabTextOnColor();
-                textLayoutProperty->UpdateTextColor(labelStyles_[index].selectedColor.has_value() ?
-                    labelStyles_[index].selectedColor.value() : selectColor);
-            } else {
-                textLayoutProperty->UpdateTextColor(labelStyles_[index].unselectedColor.has_value() ?
-                    labelStyles_[index].unselectedColor.value() : tabTheme->GetSubTabTextOffColor());
-            }
+        auto isSelected = columnId == selectedColumnId;
+        if (isSelected) {
+            auto selectedColor = index < static_cast<int32_t>(selectedModes_.size()) &&
+                                         selectedModes_[index] == SelectedMode::BOARD && axis == Axis::HORIZONTAL
+                                     ? tabTheme->GetSubTabBoardTextOnColor()
+                                     : tabTheme->GetSubTabTextOnColor();
+            textLayoutProperty->UpdateTextColor(labelStyles_[columnId].selectedColor.value_or(selectedColor));
+        } else {
+            textLayoutProperty->UpdateTextColor(
+                labelStyles_[columnId].unselectedColor.value_or(tabTheme->GetSubTabTextOffColor()));
         }
-        if (IsNeedUpdateFontWeight(index)) {
+        if (index < static_cast<int32_t>(tabBarStyles_.size()) && tabBarStyles_[index] != TabBarStyle::SUBTABBATSTYLE &&
+            !labelStyles_[columnId].fontWeight.has_value()) {
             textLayoutProperty->UpdateFontWeight(isSelected ? FontWeight::MEDIUM : FontWeight::NORMAL);
         }
         textNode->MarkModifyDone();
         textNode->MarkDirtyNode();
         index++;
     }
-}
-
-bool TabBarPattern::IsNeedUpdateFontWeight(int32_t index)
-{
-    if (index < 0 || index >= static_cast<int32_t>(tabBarStyles_.size()) ||
-        tabBarStyles_[index] != TabBarStyle::SUBTABBATSTYLE) {
-        return false;
-    }
-    if (index >= static_cast<int32_t>(labelStyles_.size()) || labelStyles_[index].fontWeight.has_value()) {
-        return false;
-    }
-    return true;
 }
 
 void TabBarPattern::UpdateImageColor(int32_t indicator)
