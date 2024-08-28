@@ -5152,7 +5152,10 @@ bool RichEditorPattern::CursorMoveLeftWord()
 {
     CloseSelectOverlay();
     ResetSelection();
-    auto newPos = GetLeftWordPosition(caretPosition_);
+    int32_t newPos = 0;
+    int32_t index = GetCaretPosition();
+    auto aiContentStart = std::clamp(index - RICH_DEFAULT_AI_WORD, 0, GetTextContentLength());
+    AIDeleteComb(aiContentStart, index, newPos, true);
     if (newPos == caretPosition_) {
         return false;
     }
@@ -5169,7 +5172,10 @@ bool RichEditorPattern::CursorMoveRightWord()
 {
     CloseSelectOverlay();
     ResetSelection();
-    auto newPos = GetRightWordPosition(caretPosition_);
+    int32_t newPos = 0;
+    int32_t index = GetCaretPosition();
+    auto aiContentEnd = std::clamp(index + RICH_DEFAULT_AI_WORD, 0, GetTextContentLength());
+    AIDeleteComb(index, aiContentEnd, newPos, false);
     if (newPos == caretPosition_) {
         return false;
     }
