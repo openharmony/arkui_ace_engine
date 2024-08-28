@@ -15,6 +15,8 @@
 
 #include "core/common/event_manager.h"
 
+
+#include "base/input_manager/input_manager.h"
 #include "base/log/dump_log.h"
 #include "base/thread/frame_trace_adapter.h"
 #include "core/common/container.h"
@@ -1491,29 +1493,43 @@ uint8_t EventManager::GetKeyboardShortcutKeys(const std::vector<ModifierKey>& ke
     return keyValue;
 }
 
-bool EventManager::IsSystemKeyboardShortcut(const std::string& value, uint8_t keys)
+bool EventManager::IsSystemKeyboardShortcut(const KeyEvent& event)
 {
-    if (value.size() != 1) {
+    static std::optional<std::vector<HotKey>> systemHotKeys;
+    static std::mutex lock_;
+
+    if (!systemHotKeys) {
+        std::lock_guard<std::mutex> lockGuard(lock_);
+        std::vector<HotKey> initHotKeys;
+        if (!systemHotKeys && InputManager::GetSystemHotkeys(initHotKeys)) {
+            systemHotKeys.emplace(initHotKeys);
+        }
+    }
+    if (systemHotKeys.value().empty()) {
         return false;
     }
 
-    const std::set<char> forbidValue{'X', 'Y', 'Z', 'A', 'C', 'V'};
-    auto c = std::toupper(value.front());
-    if (forbidValue.count(c) == 0) {
-        return false;
+    const auto& hotKeys = systemHotKeys.value();
+    std::string info;
+    for (const auto& hotKey : hotKeys) {
+        const auto [prekey, finalkey] = hotKey;
+        if (static_cast<int32_t>(event.code) != finalkey || (event.pressedCodes.size() != prekey.size() + 1)) {
+            continue;
+        }
+        bool matchPreKey = std::all_of(event.pressedCodes.begin(), event.pressedCodes.end(),
+            [&prekeySet = prekey, keycode = event.code](const KeyCode& item) {
+                return (item == keycode) ? true : prekeySet.count(static_cast<int32_t>(item)) != 0;
+            });
+        if (matchPreKey) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Match system hot key. Cannot trigger keyboard shortcut.");
+            return true;
+        }
     }
-
-    if (keys == CtrlKeysBit::CTRL) {
-        return true;
-    }
-    return (keys == (CTRL ^ SHIFT)) && (c == 'Z');
+    return false;
 }
 
 bool EventManager::IsSameKeyboardShortcutNode(const std::string& value, uint8_t keys)
 {
-    if (IsSystemKeyboardShortcut(value, keys)) {
-        return true;
-    }
     for (auto& weakNode : keyboardShortcutNode_) {
         auto frameNode = weakNode.Upgrade();
         if (!frameNode) {
@@ -1795,6 +1811,9 @@ bool EventManager::DispatchKeyboardShortcut(const KeyEvent& event)
         return false;
     }
     if (event.action != KeyAction::DOWN) {
+        return false;
+    }
+    if (keyboardShortcutNode_.empty() || IsSystemKeyboardShortcut(event)) {
         return false;
     }
     for (auto& node : keyboardShortcutNode_) {
