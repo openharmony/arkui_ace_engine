@@ -236,18 +236,7 @@ namespace {
 // [lane start/end position, lane index]
 using lanePos = std::pair<float, size_t>;
 
-// max heap but with smaller laneIdx at the top
-struct MaxHeapCmp {
-    bool operator()(const lanePos& left, const lanePos& right)
-    {
-        if (NearEqual(left.first, right.first)) {
-            return left.second > right.second;
-        }
-        return LessNotEqual(left.first, right.first);
-    }
-};
-
-using StartPosQ = std::priority_queue<lanePos, std::vector<lanePos>, MaxHeapCmp>;
+using StartPosQ = std::priority_queue<lanePos>;
 using EndPosQ = std::priority_queue<lanePos, std::vector<lanePos>, std::greater<>>;
 
 using Lanes = std::vector<WaterFlowLayoutInfoSW::Lane>;
