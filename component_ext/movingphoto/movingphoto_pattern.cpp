@@ -187,7 +187,7 @@ void MovingPhotoPattern::HandleLongPress(GestureEvent& info)
         return;
     }
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto HandleLongPress start.");
-    if (mediaPlayer_ && !mediaPlayer_->IsMediaPlayerValid()) {
+    if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer is null or invalid.");
         FireMediaPlayerError();
         return;
@@ -332,11 +332,16 @@ void MovingPhotoPattern::PrepareMediaPlayer()
     }
     uri_ = layoutProperty->GetMovingPhotoUri().value();
     fd_ = layoutProperty->GetVideoSource().value();
-    if (mediaPlayer_ && !mediaPlayer_->IsMediaPlayerValid()) {
+    if (!mediaPlayer_) {
+        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer is null.");
+        FireMediaPlayerError();
+        return;
+    }
+    if (!mediaPlayer_->IsMediaPlayerValid()) {
         mediaPlayer_->CreateMediaPlayer();
     }
-    if (mediaPlayer_ && !mediaPlayer_->IsMediaPlayerValid()) {
-        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer is null or invalid.");
+    if (!mediaPlayer_->IsMediaPlayerValid()) {
+        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer is invalid.");
         FireMediaPlayerError();
         return;
     }
@@ -998,12 +1003,15 @@ void MovingPhotoPattern::StopAnimationCallback()
 void MovingPhotoPattern::AutoPlay(bool isAutoPlay)
 {
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto AutoPlay: %{public}d.", isAutoPlay);
-    if (isAutoPlay && historyAutoAndRepeatLevel_ != PlaybackMode::AUTO) {
+    if (isAutoPlay) {
+        if (historyAutoAndRepeatLevel_ == PlaybackMode::AUTO) {
+            return;
+        }
         isChangePlayMode_ = true;
-    }
-    if (isAutoPlay && autoAndRepeatLevel_ != PlaybackMode::REPEAT) {
-        historyAutoAndRepeatLevel_ = PlaybackMode::AUTO;
-        autoAndRepeatLevel_ = PlaybackMode::AUTO;
+        if (autoAndRepeatLevel_ != PlaybackMode::REPEAT) {
+            historyAutoAndRepeatLevel_ = PlaybackMode::AUTO;
+            autoAndRepeatLevel_ = PlaybackMode::AUTO;
+        }
     }
 }
 
