@@ -4922,6 +4922,7 @@ void SwiperPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
 
 void SwiperPattern::OnScrollDragEndRecursive()
 {
+    NestableScrollContainer::OnScrollDragEndRecursive();
     if (IsDisableSwipe()) {
         return;
     }
