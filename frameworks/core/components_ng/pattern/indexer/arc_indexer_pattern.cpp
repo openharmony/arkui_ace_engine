@@ -40,7 +40,7 @@ void ArcIndexerPattern::OnModifyDone()
         auto newArray = layoutProperty->GetArrayValue().value_or(std::vector<std::string>());
         bool arrayValueChanged = newArray.size() != fullArrayValue_.size() || newArray != fullArrayValue_;
         if (arrayValueChanged || autoCollapseModeChanged) {
-            currectCollapsingMode_ = ArcIndexerCollapsingMode::INVALID;
+            lastCollapsingMode_ = ArcIndexerCollapsingMode::INVALID;
         }
         fullArrayValue_ = newArray;
     }

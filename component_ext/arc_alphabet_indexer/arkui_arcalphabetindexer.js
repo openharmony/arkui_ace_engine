@@ -210,7 +210,7 @@ class ArcAlphabetIndexer extends AlphabetIndexer {
     }
 
     static create(value) {
-        __ArcAlphabetIndexer__.create(value);
+        AlphabetIndexer.createArc(value);
     }
 
     static color(value) {
