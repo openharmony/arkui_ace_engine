@@ -117,6 +117,16 @@ napi_value ExtNapiUtils::CreateDouble(napi_env env, double value)
     return jsValue;
 }
 
+napi_value ExtNapiUtils::CreateFunction(napi_env env,
+                                        const char* utf8name, size_t length,
+                                        napi_callback cb,
+                                        void* data)
+{
+    napi_value jsfuncValue = nullptr;
+    napi_create_function(env, utf8name, length, cb, data, &jsfuncValue);
+    return jsfuncValue;
+}
+
 bool ExtNapiUtils::GetBool(napi_env env, napi_value value)
 {
     bool boolValue = false;

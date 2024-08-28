@@ -60,6 +60,18 @@ class ArcSwiper extends JSViewAbstract {
         __ArcSwiper__.digitalCrownSensitivity(value);
     }
 
+    static effectMode(value) {
+        __ArcSwiper__.effectMode(value);
+    }
+
+    static customContentTransition(value) {
+        __ArcSwiper__.customContentTransition(value);
+    }
+
+    static disableTransitionAnimation(value) {
+        __ArcSwiper__.disableTransitionAnimation(value);
+    }
+
     static onClick(value) {
         __Common__.onClick(value);
     }

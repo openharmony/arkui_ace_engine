@@ -242,6 +242,44 @@ napi_value GetAnimationInfoJsObject(napi_env env, const AnimationCallbackInfo& i
     return jsObject;
 }
 
+static  RefPtr<SwiperContentTransitionProxy> g_proxy = nullptr;
+
+static napi_value FinishTransition(napi_env env, napi_callback_info info)
+{
+    void *data = nullptr;
+    NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, nullptr, &data));
+    auto proxy = AceType::Claim(reinterpret_cast<SwiperContentTransitionProxy *>(data));
+    if (proxy) {
+        proxy->FinishTransition();
+    }
+    data = nullptr;
+    g_proxy = nullptr;
+    return nullptr;
+}
+
+static napi_value GetSwiperContentTransitionProxyJsObject(napi_env env,
+                                                          const RefPtr<SwiperContentTransitionProxy>& proxy)
+{
+    napi_value jsObject = ExtNapiUtils::CreateObject(env);
+
+    napi_value selectedIndex = ExtNapiUtils::CreateInt32(env, proxy->GetSelectedIndex());
+    ExtNapiUtils::SetNamedProperty(env, jsObject, "selectedIndex", selectedIndex);
+    napi_value index = ExtNapiUtils::CreateInt32(env, proxy->GetIndex());
+    ExtNapiUtils::SetNamedProperty(env, jsObject, "index", index);
+    napi_value position = ExtNapiUtils::CreateDouble(env, proxy->GetPosition());
+    ExtNapiUtils::SetNamedProperty(env, jsObject, "position", position);
+    napi_value mainAxisLength = ExtNapiUtils::CreateDouble(env, proxy->GetMainAxisLength());
+    ExtNapiUtils::SetNamedProperty(env, jsObject, "mainAxisLength", mainAxisLength);
+    const char* funName = "finishTransition";
+    napi_value funcValue = nullptr;
+    g_proxy = proxy;
+    funcValue = ExtNapiUtils::CreateFunction(env, funName, strlen(funName),
+                                             FinishTransition, (void*)g_proxy.GetRawPtr());
+    ExtNapiUtils::SetNamedProperty(env, jsObject, funName, funcValue);
+
+    return jsObject;
+}
+
 napi_value JsOnAnimationStart(napi_env env, napi_callback_info info)
 {
     size_t argc = MAX_ARG_NUM;
@@ -343,6 +381,78 @@ napi_value JsSetDigitalCrownSensitivity(napi_env env, napi_callback_info info)
     }
 
     SwiperModel::GetInstance()->SetDigitalCrownSensitivity(sensitivity);
+    return ExtNapiUtils::CreateNull(env);
+}
+
+napi_value JsSetEffectMode(napi_env env, napi_callback_info info)
+{
+    size_t argc = MAX_ARG_NUM;
+    napi_value thisVal = nullptr;
+    napi_value argv[MAX_ARG_NUM] = { nullptr };
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVal, nullptr));
+    NAPI_ASSERT(env, argc >= 1, "Wrong number of arguments");
+    EdgeEffect edgeEffect = EdgeEffect::NONE;
+    if (ExtNapiUtils::CheckTypeForNapiValue(env, argv[0], napi_number)) {
+        edgeEffect = static_cast<EdgeEffect>(ExtNapiUtils::GetCInt32(env, argv[0]));
+    }
+
+    SwiperModel::GetInstance()->SetEdgeEffect(edgeEffect);
+    return ExtNapiUtils::CreateNull(env);
+}
+
+napi_value JsSetCustomContentTransition(napi_env env, napi_callback_info info)
+{
+    size_t argc = MAX_ARG_NUM;
+    napi_value thisVal = nullptr;
+    napi_value argv[MAX_ARG_NUM] = { nullptr };
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVal, nullptr));
+    NAPI_ASSERT(env, argc >= 1, "Wrong number of arguments");
+    if (!ExtNapiUtils::CheckTypeForNapiValue(env, argv[0], napi_object)) {
+        return ExtNapiUtils::CreateNull(env);
+    }
+
+    SwiperContentAnimatedTransition transitionInfo;
+    napi_value jsTimeout = ExtNapiUtils::GetNamedProperty(env, argv[0], "timeout");
+    if (ExtNapiUtils::CheckTypeForNapiValue(env, jsTimeout, napi_number)) {
+        int32_t timeOut = static_cast<int32_t>(ExtNapiUtils::GetCInt32(env, jsTimeout));
+        transitionInfo.timeout = timeOut < 0 ? 0 : timeOut;
+    } else {
+        transitionInfo.timeout = 0;
+    }
+
+    napi_value jsTransition = ExtNapiUtils::GetNamedProperty(env, argv[0], "transition");
+    if (ExtNapiUtils::CheckTypeForNapiValue(env, jsTransition, napi_function)) {
+        auto asyncEvent = std::make_shared<NapiAsyncEvent>(env, jsTransition);
+        auto onTransition = [asyncEvent](const RefPtr<SwiperContentTransitionProxy>& proxy) {
+            napi_env env = asyncEvent->GetEnv();
+            napi_handle_scope scope = nullptr;
+            napi_open_handle_scope(env, &scope);
+            CHECK_NULL_VOID(scope);
+
+            napi_value arrayValueOne = GetSwiperContentTransitionProxyJsObject(env, proxy);
+            napi_value argv[1] = { arrayValueOne };
+            asyncEvent->Call(1, argv);
+            napi_close_handle_scope(env, scope);
+        };
+        transitionInfo.transition = std::move(onTransition);
+    }
+    SwiperModel::GetInstance()->SetCustomContentTransition(transitionInfo);
+    return ExtNapiUtils::CreateNull(env);
+}
+
+napi_value JsSetDisableTransitionAnimation(napi_env env, napi_callback_info info)
+{
+    size_t argc = MAX_ARG_NUM;
+    napi_value argv[MAX_ARG_NUM] = { nullptr };
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
+    NAPI_ASSERT(env, argc >= 1, "Wrong number of arguments");
+
+    bool isDisable = false;
+    if (ExtNapiUtils::CheckTypeForNapiValue(env, argv[0], napi_boolean)) {
+        isDisable = ExtNapiUtils::GetBool(env, argv[0]);
+    }
+    SwiperModel::GetInstance()->SetDisableTransitionAnimation(isDisable);
+
     return ExtNapiUtils::CreateNull(env);
 }
 
@@ -575,6 +685,9 @@ napi_value InitArcSwiper(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("onAnimationEnd", JsOnAnimationEnd),
         DECLARE_NAPI_FUNCTION("onGestureSwipe", JsOnGestureSwipe),
         DECLARE_NAPI_FUNCTION("digitalCrownSensitivity", JsSetDigitalCrownSensitivity),
+        DECLARE_NAPI_FUNCTION("effectMode", JsSetEffectMode),
+        DECLARE_NAPI_FUNCTION("customContentTransition", JsSetCustomContentTransition),
+        DECLARE_NAPI_FUNCTION("disableTransitionAnimation", JsSetDisableTransitionAnimation),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     return exports;
