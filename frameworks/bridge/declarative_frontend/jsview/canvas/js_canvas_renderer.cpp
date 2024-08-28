@@ -1304,6 +1304,9 @@ void JSCanvasRenderer::JsGetTransform(const JSCallbackInfo& info)
 // setTransform(transform?: Matrix2D): void
 void JSCanvasRenderer::JsSetTransform(const JSCallbackInfo& info)
 {
+    if (info.GetSize() == 0) {
+        renderingContext2DModel_->ResetTransform();
+    }
     double density = GetDensity();
     TransformParam param;
     // setTransform(a: number, b: number, c: number, d: number, e: number, f: number): void
