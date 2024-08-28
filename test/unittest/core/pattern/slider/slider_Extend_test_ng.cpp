@@ -1010,6 +1010,8 @@ HWTEST_F(SliderExTestNg, SliderPatternOnIsFocusActiveUpdate001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto sliderPaintProperty = sliderPattern->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
+    SliderContentModifier::Parameters parameters;
+    sliderPattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr, nullptr);
 
     /**
      * @tc.steps: step2. slider is focus,showtip is true.expect bubbleFlag_ is true.

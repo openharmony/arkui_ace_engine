@@ -98,7 +98,12 @@ public:
                 theme->markerSize_ = pattern->GetAttr<Dimension>("marker_size", 4.0_vp);
                 theme->tipFontSize_ = pattern->GetAttr<Dimension>("tip_font_size", 14.0_fp);
                 theme->tipTextPadding_ = pattern->GetAttr<Dimension>("tip_text_padding_size", 8.0_vp);
-                theme->blockShadowColor_ = BLOCK_SHADOW_COLOR;
+                theme->blockShadowColor_ = pattern->GetAttr<Color>("block_shadow_color", BLOCK_SHADOW_COLOR);
+                theme->controlFocusFrame_ = pattern->GetAttr<double>("control_focus_frame", 0.0);
+                theme->scaleValue_ = pattern->GetAttr<double>("scale_value", 1.0);
+                theme->outsetAndNoneTrackColor_ = pattern->GetAttr<Color>("outset_and_none_track_color", Color::RED);
+                theme->measureContentOutsetWidth_ =
+                    pattern->GetAttr<Dimension>("measure_content_outset_width", MEASURE_CONTENT_DEFAULT_WIDTH);
                 theme->selectedTxt_ = pattern->GetAttr<std::string>("slider_accessibility_selected", "");
                 theme->unselectedTxt_ = pattern->GetAttr<std::string>("slider_accessibility_unselected", "");
                 theme->unselectedDesc_ = pattern->GetAttr<std::string>("slider_accessibility_unselectedDesc", "");
@@ -276,6 +281,26 @@ public:
         return disabledDesc_;
     }
 
+    double GetControlFocusFrame() const
+    {
+        return controlFocusFrame_;
+    }
+
+    double GetScaleValue() const
+    {
+        return scaleValue_;
+    }
+
+    Dimension GetMeasureContentOutsetWidth() const
+    {
+        return measureContentOutsetWidth_;
+    }
+
+    const Color& GetOutsetAndNoneTrackColor() const
+    {
+        return outsetAndNoneTrackColor_;
+    }
+
 protected:
     SliderTheme() = default;
 
@@ -319,6 +344,10 @@ private:
     double hoverAnimationDuration_ = 0.0;
     double pressAnimationDuration_ = 0.0;
     double moveAnimationDuration_ = 0.0;
+    double controlFocusFrame_ = 0.0;
+    double scaleValue_ = 1.0;
+    Dimension measureContentOutsetWidth_;
+    Color outsetAndNoneTrackColor_;
 
     // accessibility
     std::string selectedTxt_ = "";

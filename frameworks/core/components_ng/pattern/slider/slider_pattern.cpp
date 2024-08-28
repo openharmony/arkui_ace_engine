@@ -44,6 +44,7 @@ constexpr float SLIDER_MIN = .0f;
 constexpr float SLIDER_MAX = 100.0f;
 constexpr Dimension BUBBLE_TO_SLIDER_DISTANCE = 10.0_vp;
 constexpr double STEP_OFFSET = 50.0;
+constexpr double CONTROL_FOCUS_FRAME = 1.0;
 
 bool GetReverseValue(RefPtr<SliderLayoutProperty> layoutProperty)
 {
@@ -647,6 +648,8 @@ void SliderPattern::HandleTouchDown(const Offset& location, SourceType sourceTyp
     mousePressedFlag_ = true;
     FireChangeEvent(SliderChangeMode::Begin);
     OpenTranslateAnimation(SliderStatus::CLICK);
+    CHECK_NULL_VOID(sliderContentModifier_);
+    sliderContentModifier_->SetIsPress(true);
 }
 
 void SliderPattern::HandleTouchUp(const Offset& location, SourceType sourceType)
@@ -671,6 +674,8 @@ void SliderPattern::HandleTouchUp(const Offset& location, SourceType sourceType)
     }
     FireChangeEvent(SliderChangeMode::End);
     CloseTranslateAnimation();
+    CHECK_NULL_VOID(sliderContentModifier_);
+    sliderContentModifier_->SetIsPress(false);
 }
 
 void SliderPattern::InitializeBubble()
@@ -1068,21 +1073,24 @@ void SliderPattern::GetOutsetInnerFocusPaintRect(RoundRect& paintRect)
     auto paintWidth = appTheme->GetFocusWidthVp();
     auto focusSideDistance = theme->GetFocusSideDistance();
     auto focusDistance = paintWidth * HALF + focusSideDistance;
-    auto halfWidth = blockSize_.Width() * HALF + static_cast<float>(focusDistance.ConvertToPx());
-    auto halfHeight = blockSize_.Height() * HALF + static_cast<float>(focusDistance.ConvertToPx());
-    paintRect.SetRect(RectF(circleCenter_.GetX() - halfWidth + contentOffset.GetX(),
-        circleCenter_.GetY() - halfHeight + contentOffset.GetY(), halfWidth / HALF, halfHeight / HALF));
-    paintRect.SetCornerRadius(focusDistance.ConvertToPx());
     auto paintProperty = GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto blockType = paintProperty->GetBlockTypeValue(SliderModelNG::BlockStyleType::DEFAULT);
-    if (blockType == SliderModelNG::BlockStyleType::DEFAULT) {
-        auto focusRadius =
-            std::min(blockSize_.Width(), blockSize_.Height()) * HALF + static_cast<float>(focusDistance.ConvertToPx());
-        paintRect.SetRect(RectF(circleCenter_.GetX() - focusRadius + contentOffset.GetX(),
-            circleCenter_.GetY() - focusRadius + contentOffset.GetY(), focusRadius / HALF, focusRadius / HALF));
-        paintRect.SetCornerRadius(focusRadius);
-    } else if (blockType == SliderModelNG::BlockStyleType::SHAPE) {
+    if (theme->GetControlFocusFrame() != CONTROL_FOCUS_FRAME) {
+        auto halfWidth = blockSize_.Width() * HALF + static_cast<float>(focusDistance.ConvertToPx());
+        auto halfHeight = blockSize_.Height() * HALF + static_cast<float>(focusDistance.ConvertToPx());
+        paintRect.SetRect(RectF(circleCenter_.GetX() - halfWidth + contentOffset.GetX(),
+            circleCenter_.GetY() - halfHeight + contentOffset.GetY(), halfWidth / HALF, halfHeight / HALF));
+        paintRect.SetCornerRadius(focusDistance.ConvertToPx());
+        if (blockType == SliderModelNG::BlockStyleType::DEFAULT) {
+            auto focusRadius = std::min(blockSize_.Width(), blockSize_.Height()) * HALF +
+                               static_cast<float>(focusDistance.ConvertToPx());
+            paintRect.SetRect(RectF(circleCenter_.GetX() - focusRadius + contentOffset.GetX(),
+                circleCenter_.GetY() - focusRadius + contentOffset.GetY(), focusRadius / HALF, focusRadius / HALF));
+            paintRect.SetCornerRadius(focusRadius);
+        }
+    }
+    if (blockType == SliderModelNG::BlockStyleType::SHAPE) {
         auto shape = paintProperty->GetBlockShape();
         if (shape.has_value() && shape.value()->GetBasicShapeType() == BasicShapeType::CIRCLE) {
             auto circle = DynamicCast<Circle>(shape.value());
@@ -1149,8 +1157,21 @@ void SliderPattern::GetInsetAndNoneInnerFocusPaintRect(RoundRect& paintRect)
             height += static_cast<float>(focusDistance.ConvertToPx()) / HALF;
         }
     }
-    paintRect.SetRect(RectF(offsetX, offsetY, width, height));
-    paintRect.SetCornerRadius(focusRadius);
+    UpdatePaintRect(theme, sliderMode, paintRect, RectF(offsetX, offsetY, width, height), focusRadius);
+}
+
+void SliderPattern::UpdatePaintRect(RefPtr<SliderTheme> theme, SliderModel::SliderMode& sliderMode,
+    RoundRect& paintRect, const RectF& rect, float rectRadius)
+{
+    if (theme->GetControlFocusFrame() == CONTROL_FOCUS_FRAME) {
+        if (sliderMode == SliderModel::SliderMode::INSET) {
+            paintRect.SetRect(rect);
+            paintRect.SetCornerRadius(rectRadius);
+        }
+    } else {
+        paintRect.SetRect(rect);
+        paintRect.SetCornerRadius(rectRadius);
+    }
 }
 
 void SliderPattern::PaintFocusState()
@@ -1277,11 +1298,15 @@ void SliderPattern::HandleHoverEvent(bool isHover)
 {
     hotFlag_ = isHover;
     mouseHoverFlag_ = mouseHoverFlag_ && isHover;
+    CHECK_NULL_VOID(sliderContentModifier_);
+    sliderContentModifier_->SetIsHover(true);
     if (!mouseHoverFlag_) {
         axisFlag_ = false;
+        sliderContentModifier_->SetIsHover(false);
     }
     if (!mouseHoverFlag_ && !axisFlag_ && !isFocusActive_ && !mousePressedFlag_) {
         bubbleFlag_ = false;
+        sliderContentModifier_->SetIsHover(false);
     }
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -1295,11 +1320,15 @@ void SliderPattern::HandleMouseEvent(const MouseInfo& info)
         if (showTips_) {
             bubbleFlag_ = true;
             InitializeBubble();
+            CHECK_NULL_VOID(sliderContentModifier_);
+            sliderContentModifier_->SetIsHover(true);
         }
     }
     // when mouse hovers over slider, distinguish between hover block and Wheel operation.
     if (!mouseHoverFlag_ && !axisFlag_ && !isFocusActive_ && !mousePressedFlag_) {
         bubbleFlag_ = false;
+        CHECK_NULL_VOID(sliderContentModifier_);
+        sliderContentModifier_->SetIsHover(false);
     }
 
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -1360,7 +1389,13 @@ SliderContentModifier::Parameters SliderPattern::UpdateContentParameters()
     // Distance between slide track and Content boundary
     auto centerWidth = direction_ == Axis::HORIZONTAL ? contentSize->Height() : contentSize->Width();
     centerWidth *= HALF;
-    parameters.selectColor = paintProperty->GetSelectColor().value_or(theme->GetTrackSelectedColor());
+    auto sliderLayoutProperty = GetLayoutProperty<SliderLayoutProperty>();
+    CHECK_NULL_RETURN(sliderLayoutProperty, SliderContentModifier::Parameters());
+    auto sliderMode = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET);
+    Color trackColor = (sliderMode == SliderModel::SliderMode::OUTSET || sliderMode == SliderModel::SliderMode::NONE)
+                           ? theme->GetOutsetAndNoneTrackColor()
+                           : theme->GetTrackSelectedColor();
+    parameters.selectColor = paintProperty->GetSelectColor().value_or(trackColor);
 
     Gradient defaultValue = SliderModelNG::CreateSolidGradient(theme->GetTrackBgColor());
     parameters.trackBackgroundColor = paintProperty->GetTrackBackgroundColor().value_or(defaultValue);
@@ -1722,6 +1757,8 @@ void SliderPattern::UpdateTipState()
         bubbleFlag_ = showBubble;
         UpdateBubble();
     }
+    CHECK_NULL_VOID(sliderContentModifier_);
+    sliderContentModifier_->SetIsFocused(isFocusActive_);
 }
 
 void SliderPattern::OnIsFocusActiveUpdate(bool isFocusActive)
@@ -1739,6 +1776,8 @@ void SliderPattern::OnIsFocusActiveUpdate(bool isFocusActive)
         UpdateBubble();
         UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
+    CHECK_NULL_VOID(sliderContentModifier_);
+    sliderContentModifier_->SetIsFocused(isFocusActive);
 }
 
 void SliderPattern::AddIsFocusActiveUpdateEvent()

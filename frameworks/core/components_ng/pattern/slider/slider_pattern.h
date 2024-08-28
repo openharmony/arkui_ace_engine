@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/components_ng/pattern/slider/slider_paint_method.h"
 #include "core/components_ng/pattern/slider/slider_paint_property.h"
+#include "core/components/theme/app_theme.h"
 
 namespace OHOS::Ace::NG {
 class SliderPattern : public Pattern {
@@ -105,7 +106,12 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION };
+        FocusPattern focusPattern { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION };
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, focusPattern);
+        auto theme = pipeline->GetTheme<AppTheme>();
+        CHECK_NULL_RETURN(theme, focusPattern);
+        return focusPattern;
     }
 
     const OffsetF& GetBlockCenter() const
@@ -171,6 +177,8 @@ private:
     void UpdateBubbleSizeAndLayout();
     void UpdateBubble();
     void InitializeBubble();
+    void UpdatePaintRect(RefPtr<SliderTheme> theme, SliderModel::SliderMode& sliderMode, RoundRect& paintRect,
+        const RectF& rect, float rectRadius);
 
     bool AtMousePanArea(const Offset& offsetInFrame);
     bool AtTouchPanArea(const Offset& offsetInFrame);
