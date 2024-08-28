@@ -662,6 +662,11 @@ bool ListPattern::IsAtTop() const
     GetListItemGroupEdge(groupAtStart, groupAtEnd);
     int32_t startIndex = startIndex_;
     float startMainPos = startMainPos_;
+    if (posMap_) {
+        auto res = posMap_->GetStartIndexAndPos();
+        startIndex = res.first;
+        startMainPos = res.second - currentOffset_;
+    }
     return (startIndex == 0 && groupAtStart) &&
            NonNegative(startMainPos - currentDelta_ + GetChainDelta(0) - contentStartOffset_);
 }
@@ -673,6 +678,11 @@ bool ListPattern::IsAtBottom() const
     GetListItemGroupEdge(groupAtStart, groupAtEnd);
     int32_t endIndex = endIndex_;
     float endMainPos = endMainPos_;
+    if (posMap_) {
+        auto res = posMap_->GetEndIndexAndPos();
+        endIndex = res.first;
+        endMainPos = res.second - currentOffset_;
+    }
     return (endIndex == maxListItemIndex_ && groupAtEnd) &&
            LessOrEqual(endMainPos - currentDelta_ + GetChainDelta(endIndex), contentMainSize_ - contentEndOffset_);
 }
@@ -715,6 +725,14 @@ OverScrollOffset ListPattern::GetOverScrollOffset(double delta) const
     float startMainPos = startMainPos_;
     int32_t endIndex = endIndex_;
     float endMainPos = endMainPos_;
+    if (posMap_) {
+        auto res = posMap_->GetStartIndexAndPos();
+        startIndex = res.first;
+        startMainPos = res.second - currentOffset_;
+        res = posMap_->GetEndIndexAndPos();
+        endIndex = res.first;
+        endMainPos = res.second - currentOffset_;
+    }
     if (startIndex == 0 && groupAtStart) {
         offset.start = GetStartOverScrollOffset(delta, startMainPos);
     }
@@ -776,6 +794,14 @@ OverScrollOffset ListPattern::GetOutBoundaryOffset(bool useCurrentDelta) const
     float startMainPos = startMainPos_;
     int32_t endIndex = endIndex_;
     float endMainPos = endMainPos_;
+    if (posMap_ && !IsScrollSnapAlignCenter()) {
+        auto res = posMap_->GetStartIndexAndPos();
+        startIndex = res.first;
+        startMainPos = res.second - currentOffset_;
+        res = posMap_->GetEndIndexAndPos();
+        endIndex = res.first;
+        endMainPos = res.second - currentOffset_;
+    }
     if (startIndex == 0 && groupAtStart) {
         if (useCurrentDelta) {
             offset.start = startMainPos - currentDelta_ + GetChainDelta(0) - contentStartOffset_;
@@ -929,6 +955,10 @@ void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
         auto list = weak.Upgrade();
         auto endPos = list->endMainPos_;
         auto startPos = list->startMainPos_;
+        if (list->posMap_) {
+            auto res = list->posMap_->GetEndIndexAndPos();
+            endPos = res.second - list->currentOffset_;
+        }
         float leading = list->contentMainSize_ - (endPos - startPos) - list->contentEndOffset_;
         return (list->startIndex_ == 0) ? std::min(leading, list->contentStartOffset_) : leading;
     });
@@ -941,6 +971,10 @@ void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
         auto list = weak.Upgrade();
         auto endPos = list->endMainPos_;
         auto startPos = list->startMainPos_;
+        if (list->posMap_) {
+            auto res = list->posMap_->GetEndIndexAndPos();
+            endPos = res.second - list->currentOffset_;
+        }
         float leading = list->contentMainSize_ - (endPos - startPos) - list->contentEndOffset_;
         return (list->startIndex_ == 0) ? std::min(leading, list->contentStartOffset_) : leading;
     });

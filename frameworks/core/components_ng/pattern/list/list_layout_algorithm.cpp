@@ -978,8 +978,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
             endMainPos = layoutEndMainPos_.value_or(endMainPos_);
             forwardFeature_ = false;
         }
-    } while (LessNotEqual(currentEndPos + chainOffset, endMainPos) ||
-        (NearEqual(currentEndPos + chainOffset, endMainPos) && scrollSnapAlign_ == V2::ScrollSnapAlign::NONE));
+    } while (LessNotEqual(currentEndPos + chainOffset, endMainPos));
     currentEndPos += chainOffset;
     // adjust offset.
     UpdateSnapCenterContentOffset(layoutWrapper);
@@ -1023,13 +1022,6 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
         }
         recycledItemPosition_.emplace(pos->first, pos->second);
         itemPosition_.erase(pos++);
-    }
-    auto pos = itemPosition_.rbegin();
-    float chainDelta = chainOffsetFunc_ ? chainOffsetFunc_(pos->first) : 0.0f;
-    if (GreatNotEqual(pos->second.endPos + chainDelta, endMainPos_) &&
-        GreatOrEqual(pos->second.startPos + chainDelta, endMainPos_)) {
-        recycledItemPosition_.emplace(pos->first, pos->second);
-        itemPosition_.erase(pos->first);
     }
 }
 
