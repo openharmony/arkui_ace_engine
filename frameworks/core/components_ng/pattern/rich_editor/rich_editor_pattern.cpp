@@ -554,6 +554,11 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
     bool ret = TextPattern::OnDirtyLayoutWrapperSwap(dirty, config);
     UpdateScrollStateAfterLayout(config.frameSizeChange);
+    if (config.frameSizeChange && magnifierController_ && magnifierController_->GetMagnifierNodeExist()) {
+        previewLongPress_ = false;
+        editingLongPress_ = false;
+        magnifierController_->RemoveMagnifierFrameNode();
+    }
     if (!isRichEditorInit_) {
         FireOnReady();
     }

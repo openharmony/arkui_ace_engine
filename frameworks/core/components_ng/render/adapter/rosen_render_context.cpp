@@ -102,6 +102,7 @@ constexpr uint32_t DRAW_REGION_FOCUS_MODIFIER_INDEX = 2;
 constexpr uint32_t DRAW_REGION_ACCESSIBILITY_FOCUS_MODIFIER_INDEX = 3;
 constexpr uint32_t DRAW_REGION_OVERLAY_TEXT_MODIFIER_INDEX = 4;
 constexpr uint32_t DRAW_REGION_DEBUG_BOUNDARY_MODIFIER_INDEX = 5;
+constexpr uint32_t DRAW_REGION_FOREGROUND_MODIFIER_INDEX = 6;
 constexpr int32_t RIGHT_ANGLE = 90;
 constexpr int32_t STRAIGHT_ANGLE = 180;
 constexpr int32_t REFLEX_ANGLE = 270;
@@ -2631,7 +2632,7 @@ void RosenRenderContext::UpdateAccessibilityRoundRect()
     frameRect.SetRect(RectF(lineWidth - borderPaddingPx - paintWidthPx / 2,
         lineWidth - borderPaddingPx - paintWidthPx / 2,
         noGreenBorderWidth + 2 * borderPaddingPx + paintWidthPx,
-        noGreenBorderHeight + 2 * borderPaddingPx + paintWidthPx));
+        noGreenBorderHeight + 2 * borderPaddingPx + paintWidthPx)); // 2: framenode to graphic specification
     modifier->SetRoundRect(frameRect, paintWidthPx);
 }
 void RosenRenderContext::ClearAccessibilityFocus()
@@ -2662,22 +2663,6 @@ void RosenRenderContext::BdImagePaintTask(RSCanvas& canvas)
     auto lpxScale = pipeline->GetLogicScale();
 
     CHECK_NULL_VOID(bdImage_);
-#ifndef USE_ROSEN_DRAWING
-    sk_sp<SkImage> image;
-    if (InstanceOf<SkiaImage>(bdImage_)) {
-        image = DynamicCast<SkiaImage>(bdImage_)->GetImage();
-    } else if (InstanceOf<PixelMapImage>(bdImage_)) {
-        auto pixmap = DynamicCast<PixelMapImage>(bdImage_)->GetPixelMap();
-        CHECK_NULL_VOID(pixmap);
-        image = SkiaImage::MakeSkImageFromPixmap(pixmap);
-    } else {
-        return;
-    }
-    CHECK_NULL_VOID(image);
-    RSImage rsImage(&image);
-    BorderImagePainter borderImagePainter(
-        *GetBdImage(), widthProp, paintRect.GetSize(), rsImage, { dipScale, lpxScale });
-#else
     std::shared_ptr<RSImage> image;
     if (InstanceOf<DrawingImage>(bdImage_)) {
         image = DynamicCast<DrawingImage>(bdImage_)->GetImage();
@@ -2691,7 +2676,12 @@ void RosenRenderContext::BdImagePaintTask(RSCanvas& canvas)
     CHECK_NULL_VOID(image);
     BorderImagePainter borderImagePainter(
         *GetBdImage(), widthProp, paintRect.GetSize(), *image, { dipScale, lpxScale });
-#endif
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        auto rect = borderImagePainter.GetDrawRect(OffsetF(0.0, 0.0));
+        std::shared_ptr<Rosen::RectF> drawRect =
+            std::make_shared<Rosen::RectF>(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
+        UpdateDrawRegion(DRAW_REGION_FOREGROUND_MODIFIER_INDEX, drawRect);
+    }
     borderImagePainter.PaintBorderImage(OffsetF(0.0, 0.0), canvas);
 }
 
@@ -4689,8 +4679,12 @@ void RosenRenderContext::ClipWithRRect(const RectF& rectF, const RadiusF& radius
 
 void RosenRenderContext::RemoveClipWithRRect()
 {
-    CHECK_NULL_VOID(rsNode_);
-    rsNode_->SetClipRRect(nullptr);
+    std::weak_ptr<Rosen::RSNode> weakRsNode = rsNode_;
+    AnimationUtils::ExecuteWithoutAnimation([weakRsNode]() {
+        auto rsNode = weakRsNode.lock();
+        CHECK_NULL_VOID(rsNode);
+        rsNode->SetClipRRect(nullptr);
+    });
     RequestNextFrame();
 }
 

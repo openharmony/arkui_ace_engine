@@ -789,8 +789,18 @@ void PipelineContext::FlushRequestFocus()
     } else {
         auto focusNodeHub = requestFocusNode->GetFocusHub();
         if (focusNodeHub && !focusNodeHub->RequestFocusImmediately()) {
-            TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus by id on node: %{public}s/%{public}d return false",
-                requestFocusNode->GetTag().c_str(), requestFocusNode->GetId());
+            auto unfocusableParentFocusNode = focusNodeHub->GetUnfocusableParentFocusNode().Upgrade();
+            if (unfocusableParentFocusNode) {
+                TAG_LOGI(AceLogTag::ACE_FOCUS,
+                    "Request focus by id on node: %{public}s/%{public}d return false, unfocusable node: "
+                    "%{public}s/%{public}d",
+                    requestFocusNode->GetTag().c_str(), requestFocusNode->GetId(),
+                    unfocusableParentFocusNode->GetFrameName().c_str(), unfocusableParentFocusNode->GetFrameId());
+                unfocusableParentFocusNode = nullptr;
+            } else {
+                TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus by id on node: %{public}s/%{public}d return false",
+                    requestFocusNode->GetTag().c_str(), requestFocusNode->GetId());
+            }
         }
         dirtyFocusNode_.Reset();
         dirtyFocusScope_.Reset();
@@ -2695,9 +2705,10 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
     }
 
     auto container = Container::Current();
-    if ((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS ||
-            event.action == MouseAction::MOVE) &&
-        (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) {
+    if (((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS ||
+             event.action == MouseAction::MOVE) &&
+            (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) ||
+        event.action == MouseAction::CANCEL) {
         auto touchPoint = event.CreateTouchPoint();
         if (event.pullAction == MouseAction::PULL_MOVE) {
             touchPoint.pullType = TouchType::PULL_MOVE;

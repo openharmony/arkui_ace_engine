@@ -131,55 +131,88 @@ void SessionWrapperImpl::InitAllCallback()
 {
     CHECK_NULL_VOID(session_);
     auto sessionCallbacks = session_->GetExtensionSessionEventCallback();
-
-    foregroundCallback_ = [weak = hostPattern_, taskExecutor = taskExecutor_](OHOS::Rosen::WSError errcode) {
-        if (errcode != OHOS::Rosen::WSError::WS_OK) {
-            taskExecutor->PostTask(
-                [weak, errcode] {
-                    auto pattern = weak.Upgrade();
-                    CHECK_NULL_VOID(pattern);
-                    int32_t code = pattern->IsCompatibleOldVersion()
-                        ? static_cast<int32_t>(errcode) : ERROR_CODE_UIEXTENSION_FOREGROUND_FAILED;
-                    pattern->FireOnErrorCallback(code, START_FAIL_NAME, START_FAIL_MESSAGE);
-                },
-                TaskExecutor::TaskType::UI, "ArkUIUIExtensionForegroundError");
+    int32_t callSessionId = GetSessionId();
+    foregroundCallback_ = [weak = hostPattern_, taskExecutor = taskExecutor_, callSessionId]
+        (OHOS::Rosen::WSError errcode) {
+        if (errcode == OHOS::Rosen::WSError::WS_OK) {
+            return;
         }
-    };
-    backgroundCallback_ = [weak = hostPattern_, taskExecutor = taskExecutor_](OHOS::Rosen::WSError errcode) {
-        if (errcode != OHOS::Rosen::WSError::WS_OK) {
-            taskExecutor->PostTask(
-                [weak, errcode] {
-                    auto pattern = weak.Upgrade();
-                    CHECK_NULL_VOID(pattern);
-                    int32_t code = pattern->IsCompatibleOldVersion()
-                        ? static_cast<int32_t>(errcode) : ERROR_CODE_UIEXTENSION_BACKGROUND_FAILED;
-                    pattern->FireOnErrorCallback(
-                        code, BACKGROUND_FAIL_NAME, BACKGROUND_FAIL_MESSAGE);
-                },
-                TaskExecutor::TaskType::UI, "ArkUIUIExtensionBackgroundError");
-        }
-    };
-    destructionCallback_ = [weak = hostPattern_, taskExecutor = taskExecutor_](OHOS::Rosen::WSError errcode) {
-        if (errcode != OHOS::Rosen::WSError::WS_OK) {
-            taskExecutor->PostTask(
-                [weak, errcode] {
-                    auto pattern = weak.Upgrade();
-                    CHECK_NULL_VOID(pattern);
-                    int32_t code = pattern->IsCompatibleOldVersion()
-                        ? static_cast<int32_t>(errcode) : ERROR_CODE_UIEXTENSION_DESTRUCTION_FAILED;
-                    pattern->FireOnErrorCallback(
-                        code, TERMINATE_FAIL_NAME, TERMINATE_FAIL_MESSAGE);
-                },
-                TaskExecutor::TaskType::UI, "ArkUIUIExtensionDestructionError");
-        }
-    };
-    sessionCallbacks->transferAbilityResultFunc_ = [weak = hostPattern_, taskExecutor = taskExecutor_,
-                                                       sessionType = sessionType_](
-                                                       int32_t code, const AAFwk::Want& want) {
         taskExecutor->PostTask(
-            [weak, code, want, sessionType]() {
+            [weak, errcode, callSessionId] {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
+                if (callSessionId != pattern->GetSessionId()) {
+                    TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                        "foregroundCallback_: The callSessionId(%{public}d)"
+                            " is inconsistent with the curSession(%{public}d)",
+                        callSessionId, pattern->GetSessionId());
+                        return;
+                }
+                int32_t code = pattern->IsCompatibleOldVersion()
+                    ? static_cast<int32_t>(errcode) : ERROR_CODE_UIEXTENSION_FOREGROUND_FAILED;
+                pattern->FireOnErrorCallback(code, START_FAIL_NAME, START_FAIL_MESSAGE);
+            },
+            TaskExecutor::TaskType::UI, "ArkUIUIExtensionForegroundError");
+    };
+    backgroundCallback_ = [weak = hostPattern_, taskExecutor = taskExecutor_, callSessionId]
+        (OHOS::Rosen::WSError errcode) {
+        if (errcode == OHOS::Rosen::WSError::WS_OK) {
+            return;
+        }
+        taskExecutor->PostTask(
+            [weak, errcode, callSessionId] {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                if (callSessionId != pattern->GetSessionId()) {
+                    TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                        "backgroundCallback_: The callSessionId(%{public}d)"
+                            " is inconsistent with the curSession(%{public}d)",
+                        callSessionId, pattern->GetSessionId());
+                        return;
+                }
+                int32_t code = pattern->IsCompatibleOldVersion()
+                    ? static_cast<int32_t>(errcode) : ERROR_CODE_UIEXTENSION_BACKGROUND_FAILED;
+                pattern->FireOnErrorCallback(
+                    code, BACKGROUND_FAIL_NAME, BACKGROUND_FAIL_MESSAGE);
+            },
+            TaskExecutor::TaskType::UI, "ArkUIUIExtensionBackgroundError");
+    };
+    destructionCallback_ = [weak = hostPattern_, taskExecutor = taskExecutor_, callSessionId]
+        (OHOS::Rosen::WSError errcode) {
+        if (errcode == OHOS::Rosen::WSError::WS_OK) {
+            return;
+        }
+        taskExecutor->PostTask(
+            [weak, errcode, callSessionId] {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                if (callSessionId != pattern->GetSessionId()) {
+                    TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                        "destructionCallback_: The callSessionId(%{public}d)"
+                            " is inconsistent with the curSession(%{public}d)",
+                        callSessionId, pattern->GetSessionId());
+                        return;
+                }
+                int32_t code = pattern->IsCompatibleOldVersion()
+                    ? static_cast<int32_t>(errcode) : ERROR_CODE_UIEXTENSION_DESTRUCTION_FAILED;
+                pattern->FireOnErrorCallback(
+                    code, TERMINATE_FAIL_NAME, TERMINATE_FAIL_MESSAGE);
+            },
+            TaskExecutor::TaskType::UI, "ArkUIUIExtensionDestructionError");
+    };
+    sessionCallbacks->transferAbilityResultFunc_ = [weak = hostPattern_, taskExecutor = taskExecutor_,
+        sessionType = sessionType_, callSessionId](int32_t code, const AAFwk::Want& want) {
+        taskExecutor->PostTask(
+            [weak, code, want, sessionType, callSessionId]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                if (callSessionId != pattern->GetSessionId()) {
+                    TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                        "transferAbilityResultFunc_: The callSessionId(%{public}d)"
+                            " is inconsistent with the curSession(%{public}d)",
+                        callSessionId, pattern->GetSessionId());
+                        return;
+                }
                 if (sessionType == SessionType::UI_EXTENSION_ABILITY && pattern->IsCompatibleOldVersion()) {
                     pattern->FireOnResultCallback(code, want);
                 } else {
@@ -188,48 +221,83 @@ void SessionWrapperImpl::InitAllCallback()
             },
             TaskExecutor::TaskType::UI, "ArkUIUIExtensionTransferAbilityResult");
     };
-    sessionCallbacks->transferExtensionDataFunc_ = [weak = hostPattern_, taskExecutor = taskExecutor_](
-                                                       const AAFwk::WantParams& params) {
+    sessionCallbacks->transferExtensionDataFunc_ = [weak = hostPattern_, taskExecutor = taskExecutor_, callSessionId](
+        const AAFwk::WantParams& params) {
         taskExecutor->PostTask(
-            [weak, params]() {
+            [weak, params, callSessionId]() {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
+                if (callSessionId != pattern->GetSessionId()) {
+                    TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                        "transferExtensionDataFunc_: The callSessionId(%{public}d)"
+                            " is inconsistent with the curSession(%{public}d)",
+                        callSessionId, pattern->GetSessionId());
+                        return;
+                }
                 pattern->FireOnReceiveCallback(params);
             },
             TaskExecutor::TaskType::UI, "ArkUIUIExtensionReceiveCallback");
     };
-    sessionCallbacks->notifyRemoteReadyFunc_ = [weak = hostPattern_, taskExecutor = taskExecutor_]() {
+    sessionCallbacks->notifyRemoteReadyFunc_ = [weak = hostPattern_, taskExecutor = taskExecutor_, callSessionId]() {
         taskExecutor->PostTask(
-            [weak]() {
+            [weak, callSessionId]() {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
+                if (callSessionId != pattern->GetSessionId()) {
+                    TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                        "notifyRemoteReadyFunc_: The callSessionId(%{public}d)"
+                            " is inconsistent with the curSession(%{public}d)",
+                        callSessionId, pattern->GetSessionId());
+                        return;
+                }
                 pattern->FireOnRemoteReadyCallback();
             },
             TaskExecutor::TaskType::UI, "ArkUIUIExtensionRemoteReadyCallback");
     };
-    sessionCallbacks->notifySyncOnFunc_ = [weak = hostPattern_, taskExecutor = taskExecutor_]() {
+    sessionCallbacks->notifySyncOnFunc_ = [weak = hostPattern_, taskExecutor = taskExecutor_, callSessionId]() {
         taskExecutor->PostTask(
-            [weak]() {
+            [weak, callSessionId]() {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
+                if (callSessionId != pattern->GetSessionId()) {
+                    TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                        "notifySyncOnFunc_: The callSessionId(%{public}d)"
+                            " is inconsistent with the curSession(%{public}d)",
+                        callSessionId, pattern->GetSessionId());
+                        return;
+                }
                 pattern->FireSyncCallbacks();
             },
             TaskExecutor::TaskType::UI, "ArkUIUIExtensionSyncCallbacks");
     };
-    sessionCallbacks->notifyAsyncOnFunc_ = [weak = hostPattern_, taskExecutor = taskExecutor_]() {
+    sessionCallbacks->notifyAsyncOnFunc_ = [weak = hostPattern_, taskExecutor = taskExecutor_, callSessionId]() {
         taskExecutor->PostTask(
-            [weak]() {
+            [weak, callSessionId]() {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
+                if (callSessionId != pattern->GetSessionId()) {
+                    TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                        "notifyAsyncOnFunc_: The callSessionId(%{public}d)"
+                            " is inconsistent with the curSession(%{public}d)",
+                        callSessionId, pattern->GetSessionId());
+                        return;
+                }
                 pattern->FireAsyncCallbacks();
             },
             TaskExecutor::TaskType::UI, "ArkUIUIExtensionAsyncCallbacks");
     };
-    sessionCallbacks->notifyBindModalFunc_ = [weak = hostPattern_, taskExecutor = taskExecutor_]() {
+    sessionCallbacks->notifyBindModalFunc_ = [weak = hostPattern_, taskExecutor = taskExecutor_, callSessionId]() {
         taskExecutor->PostSyncTask(
-            [weak]() {
+            [weak, callSessionId]() {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
+                if (callSessionId != pattern->GetSessionId()) {
+                    TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                        "notifyBindModalFunc_: The callSessionId(%{public}d)"
+                            " is inconsistent with the curSession(%{public}d)",
+                        callSessionId, pattern->GetSessionId());
+                        return;
+                }
                 pattern->FireBindModalCallback();
             },
             TaskExecutor::TaskType::UI, "ArkUIUIExtensionBindModalCallback");

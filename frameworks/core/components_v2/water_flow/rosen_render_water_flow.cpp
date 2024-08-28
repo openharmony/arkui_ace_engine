@@ -57,6 +57,7 @@ void RosenRenderWaterFlow::Paint(RenderContext& context, const Offset& offset)
         return;
     }
     const auto& renderContext = AceType::DynamicCast<RosenRenderContext>(&context);
+    CHECK_NULL_VOID(renderContext);
     auto *canvas = renderContext->GetCanvas();
     auto rsNode = renderContext->GetRSNode();
     if (!canvas || !rsNode) {

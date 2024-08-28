@@ -30,6 +30,7 @@ class FocusHub;
 class EventHub;
 class FocusView;
 class FocusManager;
+class PipelineContext;
 
 using TabIndexNodeList = std::list<std::pair<int32_t, WeakPtr<FocusHub>>>;
 constexpr int32_t DEFAULT_TAB_FOCUSED_INDEX = -2;
@@ -1031,6 +1032,8 @@ public:
         const RefPtr<FocusHub>& hub, std::unique_ptr<JsonValue>& json, const InspectorFilter& filter);
 
     bool FocusToHeadOrTailChild(bool isHead);
+
+    WeakPtr<FocusHub> GetUnfocusableParentFocusNode();
 protected:
     bool OnKeyEvent(const KeyEvent& keyEvent);
     bool OnKeyEventNode(const KeyEvent& keyEvent);
@@ -1061,6 +1064,8 @@ protected:
     }
 
 private:
+    friend class FocusView;
+
     bool CalculatePosition();
 
     void SetScopeFocusAlgorithm();
@@ -1091,6 +1096,10 @@ private:
     void RaiseZIndex(); // Recover z-index in ClearFocusState
 
     bool RequestFocusImmediatelyInner(bool isJudgeRootTree = false);
+    bool OnKeyEventNodeInternal(const KeyEvent& keyEvent);
+    bool OnKeyEventNodeUser(KeyEventInfo& info, const KeyEvent& keyEvent);
+    bool RequestNextFocusByKey(const KeyEvent& keyEvent);
+    RefPtr<PipelineContext> GetPipelineContext() const;
 
     void DumpFocusNodeTreeInJson(int32_t depth);
     void DumpFocusScopeTreeInJson(int32_t depth);

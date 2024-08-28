@@ -824,6 +824,7 @@ private:
 
     void OnScrollStartRecursive(float position, float velocity) override;
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
+    void OnScrollDragEndRecursive() override;
 
     /**
      * @brief Notifies the parent component that the scroll has started at the specified position.
@@ -850,6 +851,8 @@ private:
     int32_t CheckTargetIndex(int32_t targetIndex, bool isForceBackward = false);
 
     void HandleTouchBottomLoop();
+    void HandleTouchBottomLoopOnRTL();
+    void CalculateGestureStateOnRTL(float additionalOffset, float currentTurnPageRate, int32_t preFirstIndex);
     void CalculateGestureState(float additionalOffset, float currentTurnPageRate, int32_t preFirstIndex);
     std::pair<float, float> CalcCurrentPageStatus(float additionalOffset) const;
     std::pair<float, float> CalcCurrentPageStatusOnRTL(float additionalOffset) const;
