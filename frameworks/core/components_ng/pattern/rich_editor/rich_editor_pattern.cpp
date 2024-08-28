@@ -2837,7 +2837,7 @@ void RichEditorPattern::HandleBlurEvent()
     // The pattern handles blurevent, Need to close the softkeyboard first.
     if ((customKeyboardBuilder_ && isCustomKeyboardAttached_) || reason == BlurReason::FRAME_DESTROY) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "RichEditor Blur, Close Keyboard.");
-        CloseKeyboard(true);
+        CloseKeyboard(false);
     }
     if (magnifierController_) {
         magnifierController_->RemoveMagnifierFrameNode();
@@ -2856,7 +2856,8 @@ void RichEditorPattern::HandleFocusEvent()
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleFocusEvent/%{public}d", frameId_);
     UseHostToUpdateTextFieldManager();
     if (previewLongPress_) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "if preview and longpress: keep preview state");
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "preview longpress, closeKeyboard");
+        CloseKeyboard(true);
         return;
     }
     if (textSelector_.SelectNothing()) {
@@ -2899,40 +2900,37 @@ void RichEditorPattern::OnVisibleChange(bool isVisible)
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "isVisible=%{public}d", isVisible);
     TextPattern::OnVisibleChange(isVisible);
     StopTwinkling();
-    CloseKeyboard(true);
+    CloseKeyboard(false);
 }
 
 bool RichEditorPattern::CloseKeyboard(bool forceClose)
 {
     CloseSelectOverlay();
     ResetSelection();
-    if (forceClose) {
-        if (customKeyboardBuilder_ && isCustomKeyboardAttached_) {
-            return CloseCustomKeyboard();
-        }
-        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "Request close soft keyboard.");
+    if (customKeyboardBuilder_ && isCustomKeyboardAttached_) {
+        return CloseCustomKeyboard();
+    }
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "Request close soft keyboard.");
 #if defined(ENABLE_STANDARD_INPUT)
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-        if (!imeAttached_) {
-            return false;
-        }
+    if (!imeAttached_ && !forceClose) {
+        return false;
+    }
 #endif
-        auto inputMethod = MiscServices::InputMethodController::GetInstance();
-        CHECK_NULL_RETURN(inputMethod, false);
-        inputMethod->HideTextInput();
-        inputMethod->Close();
+    auto inputMethod = MiscServices::InputMethodController::GetInstance();
+    CHECK_NULL_RETURN(inputMethod, false);
+    inputMethod->HideTextInput();
+    inputMethod->Close();
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-        imeAttached_ = false;
+    imeAttached_ = false;
 #endif
 #else
-        if (HasConnection()) {
-            connection_->Close(GetInstanceId());
-            connection_ = nullptr;
-        }
-#endif
-        return true;
+    if (HasConnection()) {
+        connection_->Close(GetInstanceId());
+        connection_ = nullptr;
     }
-    return false;
+#endif
+    return true;
 }
 
 void RichEditorPattern::HandleDraggableFlag(bool isTouchSelectArea)
@@ -4985,7 +4983,7 @@ bool RichEditorPattern::OnBackPressed()
         return false;
     }
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    CloseKeyboard(true);
+    CloseKeyboard(false);
     FocusHub::LostFocusToViewRoot();
 #if defined(ANDROID_PLATFORM)
     return false;
@@ -8513,7 +8511,7 @@ void RichEditorPattern::ResetKeyboardIfNeed()
     }
 #else
     if (needToResetKeyboard && HasConnection()) {
-        CloseKeyboard(true);
+        CloseKeyboard(false);
         RequestKeyboard(false, true, true);
     }
 #endif
@@ -9983,7 +9981,7 @@ void RichEditorPattern::HandleOnAIWrite()
     AIWriteInfo info;
     GetAIWriteInfo(info);
     CloseSelectOverlay();
-    CloseKeyboard(true);
+    CloseKeyboard(false);
 
     auto callback = [weak = WeakClaim(this), info](std::vector<uint8_t>& buffer) {
         auto pattern = weak.Upgrade();
