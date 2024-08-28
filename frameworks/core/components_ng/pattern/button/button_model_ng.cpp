@@ -557,6 +557,7 @@ Color ButtonModelNG::GetFontColor(FrameNode* frameNode)
 }
 void ButtonModelNG::SetBuilderFunc(FrameNode* frameNode, NG::ButtonMakeCallback&& makeFunc)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ButtonPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetBuilderFunc(std::move(makeFunc));
@@ -564,6 +565,7 @@ void ButtonModelNG::SetBuilderFunc(FrameNode* frameNode, NG::ButtonMakeCallback&
 
 void ButtonModelNG::TriggerClick(FrameNode* frameNode, double xPos, double yPos)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ButtonPattern>();
     CHECK_NULL_VOID(pattern);
     auto host = pattern->GetHost();
