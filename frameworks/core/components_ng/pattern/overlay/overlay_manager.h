@@ -849,8 +849,6 @@ private:
     bool isAllowedBeCovered_ = true;
     // Only hasValue when isAllowedBeCovered is false
     std::set<int32_t> curSessionIds_;
-
-    std::optional<Color> sheetMaskColor_;
 };
 } // namespace OHOS::Ace::NG
 
