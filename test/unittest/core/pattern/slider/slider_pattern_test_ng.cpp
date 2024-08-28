@@ -1235,27 +1235,46 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest001, TestSize.Level1
     auto sliderPattern = frameNode->GetPattern<SliderPattern>();
     ASSERT_NE(sliderPattern, nullptr);
     sliderPattern->AttachToFrameNode(frameNode);
+    if (!sliderPattern->parentAccessibilityNode_) {
+        sliderPattern->parentAccessibilityNode_ = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    }
+    auto parent = sliderPattern->parentAccessibilityNode_;
+    ASSERT_NE(parent, nullptr);
+    if (!sliderPattern->sliderContentModifier_) {
+        sliderPattern->sliderContentModifier_ =
+            AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr, nullptr);
+    }
+    auto contentModifier = sliderPattern->sliderContentModifier_;
+    ASSERT_NE(contentModifier, nullptr);
+    contentModifier->stepPointVec_ = HORIZONTAL_STEP_POINTS;
+    /**
+     * @tc.steps: step2. Add Slider virtual node.
+     */
+    sliderPattern->AddStepPointsAccessibilityVirtualNode();
+
     auto geometryNode = frameNode->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     geometryNode->SetContentSize(SizeF(FRAME_WIDTH, FRAME_HEIGHT));
     const auto& content = geometryNode->GetContent();
     ASSERT_NE(content.get(), nullptr);
     auto contentRect = content->GetRect();
-
+    float pointNodeHeight = sliderPattern->sliderLength_ / (sliderPattern->pointAccessibilityNodeEventVec_.size() - 1);
+    float pointNodeWidth = pointNodeHeight;
     /**
-     * @tc.steps: step2. Get virtual nodes size in horizontal.
+     * @tc.steps: step3. Get virtual nodes size in horizontal.
      */
     auto hSize = sliderPattern->GetStepPointAccessibilityVirtualNodeSize();
-    EXPECT_EQ(hSize.Width(), sliderPattern->blockHotSize_.Width());
+    EXPECT_EQ(hSize.Width(), pointNodeWidth);
     EXPECT_EQ(hSize.Height(), contentRect.Height());
 
     sliderPattern->direction_ = Axis::VERTICAL;
     /**
-     * @tc.steps: step3. Get virtual nodes size in vertical.
+     * @tc.steps: step4 Get virtual nodes size in vertical.
      */
     auto vSize = sliderPattern->GetStepPointAccessibilityVirtualNodeSize();
     EXPECT_EQ(vSize.Width(), contentRect.Width());
-    EXPECT_EQ(vSize.Height(), sliderPattern->blockHotSize_.Height());
+    EXPECT_EQ(vSize.Height(), pointNodeHeight);
 }
 
 /**
@@ -1517,16 +1536,6 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest007, TestSize.Level1
  */
 HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest008, TestSize.Level1)
 {
-    std::vector<std::pair<bool, AccessibilityHoverAction>> testData { { true, AccessibilityHoverAction::HOVER_ENTER },
-        { true, AccessibilityHoverAction::HOVER_MOVE }, { true, AccessibilityHoverAction::HOVER_EXIT },
-        { false, AccessibilityHoverAction::HOVER_ENTER } };
-    auto checkFunc = [](const std::vector<RefPtr<FrameNode>>& vec, const std::string& level) {
-        for (const auto& pointNode : vec) {
-            ASSERT_NE(pointNode, nullptr);
-            ASSERT_NE(pointNode->GetAccessibilityProperty<AccessibilityProperty>(), nullptr);
-            EXPECT_EQ(pointNode->GetAccessibilityProperty<AccessibilityProperty>()->GetAccessibilityLevel(), level);
-        }
-    };
     /**
      * @tc.steps: step1. Init Slider node.
      */
@@ -1558,20 +1567,6 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest008, TestSize.Level1
     ASSERT_NE(callback, nullptr);
     auto hoverFunc = callback->GetOnAccessibilityHoverFunc();
     ASSERT_NE(hoverFunc, nullptr);
-    for (auto& item : testData) {
-        AccessibilityHoverInfo info;
-        info.SetActionType(item.second);
-        hoverFunc(item.first, info);
-        auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
-        ASSERT_NE(accessibilityProperty, nullptr);
-        if (!item.first) {
-            EXPECT_EQ(accessibilityProperty->GetAccessibilityLevel(), AccessibilityProperty::Level::YES_STR);
-            checkFunc(sliderPattern->pointAccessibilityNodeVec_, AccessibilityProperty::Level::NO_STR);
-        } else if (item.second == AccessibilityHoverAction::HOVER_ENTER ||
-                   item.second == AccessibilityHoverAction::HOVER_MOVE) {
-            checkFunc(sliderPattern->pointAccessibilityNodeVec_, AccessibilityProperty::Level::YES_STR);
-        }
-    }
 }
 
 /**

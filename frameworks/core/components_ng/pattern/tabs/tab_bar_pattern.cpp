@@ -646,7 +646,7 @@ void TabBarPattern::FocusIndexChange(int32_t index)
     CHECK_NULL_VOID(tabsPattern);
     auto tabBarLayoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(tabBarLayoutProperty);
-    
+
     if (!ContentWillChange(tabBarLayoutProperty->GetIndicatorValue(0), index)) {
         return;
     }
@@ -1526,7 +1526,7 @@ void TabBarPattern::HandleTouchEvent(const TouchLocationInfo& info)
     if (totalCount < 0) {
         return;
     }
-   
+
     if (touchType == TouchType::DOWN && index >= 0 && index < totalCount) {
         HandleTouchDown(index);
         touchingIndex_ = index;
@@ -2932,5 +2932,52 @@ bool TabBarPattern::IsValidIndex(int32_t index)
         return false;
     }
     return true;
+}
+
+void TabBarPattern::SetRegionInfo(std::unique_ptr<JsonValue>& json)
+{
+    std::string regionString = "";
+    for (auto item : gradientRegions_) {
+        item ? regionString.append("true ") : regionString.append("false ");
+    }
+    json->Put("region", regionString.c_str());
+    switch (axis_) {
+        case Axis::NONE: {
+            json->Put("Axis", "NONE");
+            break;
+        }
+        case Axis::HORIZONTAL: {
+            json->Put("Axis", "HORIZONTAL");
+            break;
+        }
+        case Axis::FREE: {
+            json->Put("Axis", "FREE");
+            break;
+        }
+        case Axis::VERTICAL: {
+            json->Put("Axis", "VERTICAL");
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+void TabBarPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("isRTL", isRTL_);
+    json->Put("touching", touching_);
+    json->Put("isMaskAnimationByCreate", isMaskAnimationByCreate_);
+    json->Put("animationDuration",
+        animationDuration_.has_value() ? std::to_string(animationDuration_.value()).c_str() : "null");
+    json->Put("isFirstFocus", isFirstFocus_);
+    json->Put("isTouchingSwiper", isTouchingSwiper_);
+    json->Put("isAnimating", isAnimating_);
+    json->Put("changeByClick", changeByClick_);
+    json->Put("indicator", indicator_);
+    json->Put("swiperStartIndex", swiperStartIndex_);
+    json->Put("scrollMargin", scrollMargin_);
+    SetRegionInfo(json);
 }
 } // namespace OHOS::Ace::NG

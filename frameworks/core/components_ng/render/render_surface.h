@@ -33,7 +33,7 @@ class ACE_FORCE_EXPORT RenderSurface : public virtual AceType {
 public:
     RenderSurface() = default;
     ~RenderSurface() override = default;
- 
+
 // under the condition of supporting cross platform and texture rendering,
 // it is necessary to dynamically set the rendering type of the surface node.
 // the defalut type is RenderSurfaceType::TEXTURE.
@@ -90,6 +90,8 @@ public:
     virtual void SetTransformHint(uint32_t rotation) {}
 
     virtual void DumpInfo() {}
+
+    virtual void DumpInfo(std::unique_ptr<JsonValue>& json) {}
 
     virtual void SetIsTexture(bool isTexture) {}
 

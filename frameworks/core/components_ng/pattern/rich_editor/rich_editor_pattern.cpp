@@ -554,6 +554,11 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
     bool ret = TextPattern::OnDirtyLayoutWrapperSwap(dirty, config);
     UpdateScrollStateAfterLayout(config.frameSizeChange);
+    if (config.frameSizeChange && magnifierController_ && magnifierController_->GetMagnifierNodeExist()) {
+        previewLongPress_ = false;
+        editingLongPress_ = false;
+        magnifierController_->RemoveMagnifierFrameNode();
+    }
     if (!isRichEditorInit_) {
         FireOnReady();
     }
@@ -8087,9 +8092,7 @@ void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
         return;
     }
     json->PutExtAttr("enableDataDetector", textDetectEnable_ ? "true" : "false", filter);
-    auto jsonValue = JsonUtil::Create(true);
-    jsonValue->Put("types", "");
-    json->PutExtAttr("dataDetectorConfig", jsonValue->ToString().c_str(), filter);
+    json->PutExtAttr("dataDetectorConfig", dataDetectorAdapter_->textDetectConfigStr_.c_str(), filter);
     json->PutExtAttr("placeholder", GetPlaceHolderInJson().c_str(), filter);
 }
 

@@ -1477,14 +1477,26 @@ bool ListPattern::GetListItemGroupAnimatePosWithIndexInGroup(
     if (it == itemsPosInGroup.end()) {
         return false;
     }
-    auto padding = groupWrapper->GetGeometryNode()->GetPadding()->top;
-    float paddingBeforeContent = padding ? padding.value() : 0.0f;
+    auto axis = GetAxis();
+    std::optional<float> padding;
+    std::optional<float> margin;
+    if (axis == Axis::HORIZONTAL) {
+        padding = IsReverse() ? groupWrapper->GetGeometryNode()->GetPadding()->right
+                              : groupWrapper->GetGeometryNode()->GetPadding()->left;
+        margin = IsReverse() ? groupWrapper->GetGeometryNode()->GetMargin()->right
+                             : groupWrapper->GetGeometryNode()->GetMargin()->left;
+    } else {
+        padding = groupWrapper->GetGeometryNode()->GetPadding()->top;
+        margin = groupWrapper->GetGeometryNode()->GetMargin()->top;
+    }
+    auto marginValue = margin.value_or(0.f);
+    auto paddingValue = padding.value_or(0.f);
     if (align == ScrollAlign::CENTER) {
-        targetPos = paddingBeforeContent + startPos + (it->second.startPos + it->second.endPos) / 2.0f -
+        targetPos = paddingValue + marginValue + startPos + (it->second.startPos + it->second.endPos) / 2.0f -
                     contentMainSize_ / 2.0f;
     } else {
-        float itemStartPos = paddingBeforeContent + startPos + it->second.startPos;
-        float itemEndPos = paddingBeforeContent + startPos + it->second.endPos;
+        float itemStartPos = paddingValue + marginValue + startPos + it->second.startPos;
+        float itemEndPos = paddingValue + marginValue + startPos + it->second.endPos;
         if (stickyStyle == V2::StickyStyle::HEADER || stickyStyle == V2::StickyStyle::BOTH) {
             itemStartPos -= groupPattern->GetHeaderMainSize();
         }
@@ -2457,5 +2469,63 @@ void ListPattern::NotifyDataChange(int32_t index, int32_t count)
         }
     }
     needReEstimateOffset_ = true;
+}
+
+void ListPattern::CreatePositionInfo(std::unique_ptr<JsonValue>& json)
+{
+    std::unique_ptr<JsonValue> children = JsonUtil::CreateArray(true);
+    for (auto item : itemPosition_) {
+        std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
+        child->Put("itemPosition.first", std::to_string(item.first).c_str());
+        child->Put("startPos", std::to_string(item.second.startPos).c_str());
+        child->Put("endPos", std::to_string(item.second.endPos).c_str());
+        child->Put("isGroup", std::to_string(item.second.isGroup).c_str());
+        children->Put(child);
+    }
+    json->Put("itemPosition", children);
+}
+
+void ListPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
+{
+    ScrollablePattern::DumpAdvanceInfo(json);
+    json->Put("maxListItemIndex", maxListItemIndex_);
+    json->Put("startIndex", startIndex_);
+    json->Put("endIndex", endIndex_);
+    json->Put("centerIndex", centerIndex_);
+    json->Put("startMainPos", startMainPos_);
+    json->Put("endMainPos", endMainPos_);
+    json->Put("currentOffset", currentOffset_);
+    json->Put("contentMainSize", contentMainSize_);
+    json->Put("contentStartOffset", contentStartOffset_);
+    json->Put("contentEndOffset", contentEndOffset_);
+    json->Put("currentDelta", currentDelta_);
+    json->Put("crossMatchChild", crossMatchChild_);
+    json->Put("smooth", smooth_);
+    json->Put("jumpIndex", jumpIndex_.has_value() ? std::to_string(jumpIndex_.value()).c_str() : "null");
+    json->Put(
+        "jumpIndexInGroup", jumpIndexInGroup_.has_value() ? std::to_string(jumpIndexInGroup_.value()).c_str() : "null");
+    json->Put("targetIndex", targetIndex_.has_value() ? std::to_string(targetIndex_.value()).c_str() : "null");
+    json->Put("predictSnapOffset",
+        predictSnapOffset_.has_value() ? std::to_string(predictSnapOffset_.value()).c_str() : "null");
+    json->Put("predictSnapEndPos",
+        predictSnapEndPos_.has_value() ? std::to_string(predictSnapEndPos_.value()).c_str() : "null");
+    json->Put("paintStateFlag", paintStateFlag_);
+    json->Put("isFramePaintStateValid", isFramePaintStateValid_);
+    CreatePositionInfo(json);
+    json->Put("scrollStop", scrollStop_);
+    std::unique_ptr<JsonValue> lanesChildrenArray = JsonUtil::CreateArray(true);
+    for (auto item : lanesItemRange_) {
+        std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
+        child->Put("lanesItemRange.first", std::to_string(item.first).c_str());
+        child->Put("lanesItemRange.second", std::to_string(item.second).c_str());
+        lanesChildrenArray->Put(child);
+    }
+    json->Put("lanesItemRange", lanesChildrenArray);
+    json->Put("lanes", std::to_string(lanes_).c_str());
+    json->Put("laneGutter", std::to_string(laneGutter_).c_str());
+    json->Put("dragFromSpring", dragFromSpring_);
+    json->Put("isScrollEnd", isScrollEnd_);
+    json->Put("IsAtTop", IsAtTop());
+    json->Put("IsAtBottom", IsAtBottom());
 }
 } // namespace OHOS::Ace::NG

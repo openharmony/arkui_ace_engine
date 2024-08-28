@@ -208,7 +208,7 @@ bool NavigationGroupNode::ReorderNavDestination(
         }
         int32_t childIndex = navigationContentNode->GetChildIndex(navDestination);
         if (childIndex < 0) {
-            navigationContentNode->AddChild(navDestination, slot);
+            navDestination->MountToParent(navigationContentNode, slot);
             hasChanged = true;
         } else if (childIndex != slot) {
             navDestination->MovePosition(slot);

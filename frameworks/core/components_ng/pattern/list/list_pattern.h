@@ -169,7 +169,7 @@ public:
     {
         return positionController_;
     }
-    
+
     void TriggerModifyDone();
 
     float GetTotalHeight() const override;
@@ -288,6 +288,7 @@ public:
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
 
     void SetNeedToUpdateListDirectionInCardStyle(bool isNeedToUpdateListDirection)
     {
@@ -386,7 +387,7 @@ private:
     float GetEndOverScrollOffset(float offset, float endMainPos, float startMainPos) const;
     float UpdateTotalOffset(const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm, bool isJump);
     RefPtr<ListContentModifier> listContentModifier_;
-
+    void CreatePositionInfo(std::unique_ptr<JsonValue>& json);
     int32_t maxListItemIndex_ = 0;
     int32_t startIndex_ = -1;
     int32_t endIndex_ = -1;

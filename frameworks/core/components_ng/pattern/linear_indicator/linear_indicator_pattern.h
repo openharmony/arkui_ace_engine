@@ -58,6 +58,7 @@ public:
     RefPtr<LayoutProperty> CreateLayoutProperty() override;
 
     void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
 
 private:
     void OnModifyDone() override;

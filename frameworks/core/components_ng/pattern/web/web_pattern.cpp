@@ -82,6 +82,7 @@ constexpr int32_t IMAGE_POINTER_CUSTOM_CHANNEL = 4;
 constexpr int32_t TOUCH_EVENT_MAX_SIZE = 5;
 constexpr int32_t KEYEVENT_MAX_NUM = 1000;
 constexpr float SELECT_MENE_HEIGHT = 140.0f;
+constexpr int32_t RESERVED_DEVICEID = 0xAAAAAAFF;
 const LinearEnumMapNode<OHOS::NWeb::CursorType, MouseFormat> g_cursorTypeMap[] = {
     { OHOS::NWeb::CursorType::CT_CROSS, MouseFormat::CROSS },
     { OHOS::NWeb::CursorType::CT_HAND, MouseFormat::HAND_POINTING },
@@ -1010,6 +1011,9 @@ void WebPattern::HandleMouseEvent(MouseInfo& info)
 
 void WebPattern::WebOnMouseEvent(const MouseInfo& info)
 {
+    if (mouseEventDeviceId_ != info.GetDeviceId()) {
+        mouseEventDeviceId_ = info.GetDeviceId();
+    }
     CHECK_NULL_VOID(delegate_);
     auto localLocation = info.GetLocalLocation();
     if ((mouseHoveredX_ != localLocation.GetX()) ||
@@ -3010,9 +3014,11 @@ void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
         if (!overlayCreating_) {
             delegate_->HandleTouchUp(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
         } else {
-            imageAnalyzerManager_->UpdateOverlayTouchInfo(touchPoint.x, touchPoint.y, TouchType::UP);
-            overlayCreating_ = false;
-            delegate_->HandleTouchCancel();
+            if (imageAnalyzerManager_) {
+                imageAnalyzerManager_->UpdateOverlayTouchInfo(touchPoint.x, touchPoint.y, TouchType::UP);
+                overlayCreating_ = false;
+                delegate_->HandleTouchCancel();
+            }
         }
     }
 }
@@ -3624,7 +3630,11 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
     insertHandle_ = insertTouchHandle;
     startSelectionHandle_ = beginTouchHandle;
     endSelectionHandle_ = endTouchHandle;
-    return selectOverlayProxy_ ? true : false;
+    if (selectOverlayProxy_) {
+        DestroyAnalyzerOverlay();
+        return true;
+    }
+    return false;
 }
 
 void WebPattern::RegisterSelectOverLayOnClose(SelectOverlayInfo& selectInfo)
@@ -3993,6 +4003,17 @@ bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType)
     auto instanceId = context->GetInstanceId();
     CHECK_NULL_RETURN(instanceId, false);
     ContainerScope scope(instanceId);
+
+    if (isPasswordFill_) {
+        auto offset = GetCoordinatePoint().value_or(OffsetF());
+        for (auto& nodeInfo : pageNodeInfo_) {
+            auto rect = nodeInfo->GetPageNodeRect();
+            NG::RectF rectF;
+            rectF.SetRect(rect.GetX() + offset.GetX(), rect.GetY()+ offset.GetY(), rect.Width(), rect.Height());
+            nodeInfo->SetPageNodeRect(rectF);
+        }
+    }
+
     auto container = Container::Current();
     if (container == nullptr) {
         container = Container::GetActive();
@@ -4155,6 +4176,10 @@ void WebPattern::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHa
 bool WebPattern::OnCursorChange(const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info)
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "OnCursorChange type: %{public}d", type);
+    if (mouseEventDeviceId_ == RESERVED_DEVICEID) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "OnCursorChange this device id is reserved.");
+        return false;
+    }
     if (isHoverExit_ && type == OHOS::NWeb::CursorType::CT_NONE) {
         TAG_LOGD(AceLogTag::ACE_WEB, "OnCursorChange reciving unexpected hide command");
         return false;
@@ -5003,6 +5028,7 @@ void WebPattern::OnVisibleAreaChange(bool isVisible)
     if (!isVisible_) {
         CloseSelectOverlay();
         SelectCancel();
+        DestroyAnalyzerOverlay();
         isDragEndMenuShow_ = false;
         if (isVisibleActiveEnable_ && (!isDialogNested || !isFocus_)) {
             OnInActive();
@@ -6183,9 +6209,11 @@ void WebPattern::OnTextSelected()
 
 void WebPattern::DestroyAnalyzerOverlay()
 {
-    if (imageAnalyzerManager_) {
+    if (imageAnalyzerManager_ && imageAnalyzerManager_->IsOverlayCreated()) {
         imageAnalyzerManager_->DestroyAnalyzerOverlay();
+        delegate_->OnDestroyImageAnalyzerOverlay();
     }
+    overlayCreating_ = false;
 }
 
 bool WebPattern::OnAccessibilityHoverEvent(const PointF& point)

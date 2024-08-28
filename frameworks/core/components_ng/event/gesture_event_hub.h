@@ -733,6 +733,15 @@ private:
     template<typename T>
     const RefPtr<T> AccessibilityRecursionSearchRecognizer(const RefPtr<NGGestureRecognizer>& recognizer);
 
+    void ProcessParallelPriorityGesture(RefPtr<NGGestureRecognizer>& current,
+        std::list<RefPtr<NGGestureRecognizer>>& recognizers, int32_t parallelIndex, const Offset& offset,
+        int32_t touchId, const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host);
+    
+    void ProcessExternalExclusiveRecognizer(RefPtr<NGGestureRecognizer>& current,
+        std::list<RefPtr<NGGestureRecognizer>>& recognizers, int32_t exclusiveIndex, const Offset& offset,
+        int32_t touchId, const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host,
+        GesturePriority priority);
+
     WeakPtr<EventHub> eventHub_;
     RefPtr<ScrollableActuator> scrollableActuator_;
     RefPtr<TouchEventActuator> touchEventActuator_;
