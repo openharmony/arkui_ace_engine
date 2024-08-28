@@ -5688,6 +5688,7 @@ bool WebPattern::ExecuteAction(int64_t accessibilityId, AceAction action,
 void WebPattern::SetAccessibilityState(bool state)
 {
     CHECK_NULL_VOID(delegate_);
+    focusedAccessibilityId_ = -1;
     if (!state) {
         if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()
             || inspectorAccessibilityEnable_ || textBlurAccessibilityEnable_) {
@@ -5713,11 +5714,12 @@ void WebPattern::UpdateFocusedAccessibilityId(int64_t accessibilityId)
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto paintProperty = GetPaintProperty<WebPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
 
+    if (accessibilityId > 0) {
+        focusedAccessibilityId_ = accessibilityId;
+    }
     RectT<int32_t> rect;
-    if (accessibilityId <= 0 || !GetAccessibilityFocusRect(rect, accessibilityId)) {
+    if (focusedAccessibilityId_ <= 0 || !GetAccessibilityFocusRect(rect, focusedAccessibilityId_)) {
         renderContext->ResetAccessibilityFocusRect();
         renderContext->UpdateAccessibilityFocus(false);
         return;
@@ -5725,6 +5727,21 @@ void WebPattern::UpdateFocusedAccessibilityId(int64_t accessibilityId)
 
     renderContext->UpdateAccessibilityFocusRect(rect);
     renderContext->UpdateAccessibilityFocus(true);
+}
+
+void WebPattern::ClearFocusedAccessibilityId()
+{
+    if (!accessibilityState_) {
+        return;
+    }
+
+    focusedAccessibilityId_ = -1;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->ResetAccessibilityFocusRect();
+    renderContext->UpdateAccessibilityFocus(false);
 }
 
 std::shared_ptr<Rosen::RSNode> WebPattern::GetSurfaceRSNode() const

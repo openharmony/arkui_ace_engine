@@ -617,6 +617,7 @@ public:
         const std::map<std::string, std::string>& actionArguments) const;
     void SetAccessibilityState(bool state);
     void UpdateFocusedAccessibilityId(int64_t accessibilityId = -1);
+    void ClearFocusedAccessibilityId();
     void OnTooltip(const std::string& tooltip);
     void OnPopupSize(int32_t x, int32_t y, int32_t width, int32_t height);
     void OnPopupShow(bool show);
@@ -1096,6 +1097,7 @@ private:
     std::shared_ptr<AccessibilityChildTreeCallback> accessibilityChildTreeCallback_;
     int32_t treeId_ = 0;
     int32_t instanceId_ = -1;
+    int64_t focusedAccessibilityId_ = -1;
     std::vector<RefPtr<PageNodeInfoWrap>> pageNodeInfo_;
     bool isAutoFillClosing_ = true;
     ViewDataCommon viewDataCommon_;
