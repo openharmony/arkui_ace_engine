@@ -785,7 +785,7 @@ void TextPattern::HandleClickEvent(GestureEvent& info)
 void TextPattern::HandleSingleClickEvent(GestureEvent& info)
 {
     if (selectOverlay_->SelectOverlayIsOn() && !selectOverlay_->IsUsingMouse() &&
-        BetweenSelectedPosition(info.GetGlobalLocation())) {
+        GlobalOffsetInSelectedArea(info.GetGlobalLocation())) {
         selectOverlay_->ToggleMenu();
         return;
     }
@@ -824,6 +824,35 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
             Recorder::EventRecorder::Get().OnClick(std::move(builder));
         }
     }
+}
+
+bool TextPattern::GlobalOffsetInSelectedArea(const Offset& globalOffset)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto offset = host->GetPaintRectOffset();
+    auto localOffset = globalOffset - Offset(offset.GetX(), offset.GetY());
+    if (selectOverlay_->HasRenderTransform()) {
+        localOffset = ConvertGlobalToLocalOffset(globalOffset);
+    }
+    return LocalOffsetInSelectedArea(localOffset);
+}
+
+bool TextPattern::LocalOffsetInSelectedArea(const Offset& localOffset)
+{
+    if (IsSelectableAndCopy() && GreatNotEqual(textSelector_.GetTextEnd(), textSelector_.GetTextStart())) {
+        // Determine if the pan location is in the selected area
+        auto selectedRects = pManager_->GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
+        TextBase::CalculateSelectedRect(selectedRects, contentRect_.Width());
+        auto panOffset = OffsetF(localOffset.GetX(), localOffset.GetY()) - contentRect_.GetOffset() +
+                         OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
+        for (const auto& selectedRect : selectedRects) {
+            if (selectedRect.IsInRegion(PointF(panOffset.GetX(), panOffset.GetY()))) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 void TextPattern::HandleClickAISpanEvent(const PointF& textOffset)
@@ -1687,20 +1716,7 @@ bool TextPattern::IsDraggable(const Offset& offset)
     CHECK_NULL_RETURN(host, false);
     auto eventHub = host->GetEventHub<EventHub>();
     bool draggable = eventHub->HasOnDragStart();
-    if (IsSelectableAndCopy() && draggable &&
-        GreatNotEqual(textSelector_.GetTextEnd(), textSelector_.GetTextStart())) {
-        // Determine if the pan location is in the selected area
-        auto selectedRects = pManager_->GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
-        TextBase::CalculateSelectedRect(selectedRects, contentRect_.Width());
-        auto panOffset = OffsetF(offset.GetX(), offset.GetY()) - contentRect_.GetOffset() +
-                         OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
-        for (const auto& selectedRect : selectedRects) {
-            if (selectedRect.IsInRegion(PointF(panOffset.GetX(), panOffset.GetY()))) {
-                return true;
-            }
-        }
-    }
-    return false;
+    return draggable && LocalOffsetInSelectedArea(offset);
 }
 
 NG::DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams)
