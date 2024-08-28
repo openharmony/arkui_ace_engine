@@ -40,12 +40,15 @@ private:
     void MeasureItemViews(LayoutConstraintF& childConstraint,
         std::optional<LayoutConstraintF>& layoutConstraint,
         PaddingPropertyF padding, LayoutWrapper* layoutWrapper);
-    void MeasureRow(const RefPtr<LayoutWrapper>& row, const LayoutConstraintF& constraint);
+    void MeasureLeftRow(const RefPtr<LayoutWrapper>& row, const LayoutConstraintF& constraint);
+    void MeasureRightRow(const RefPtr<LayoutWrapper>& row, const LayoutConstraintF& constraint);
     void CheckNeedExpandContent(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint);
     void UpdateSelfSize(LayoutWrapper* layoutWrapper, float width, float itemHeight, float expandableHeight);
     float GetDividerStroke(LayoutWrapper* layoutWrapper);
     float GetBordersHeight(LayoutWrapper* layoutWrapper);
     float GetMenuItemVerticalPadding();
+    void SetRightRowLayoutConstraint(LayoutConstraintF& childConstraint,
+        std::optional<LayoutConstraintF>& layoutConstraint, LayoutWrapper* layoutWrapper);
 
     float horInterval_ = 0.0f;
     float verInterval_ = 0.0f;
