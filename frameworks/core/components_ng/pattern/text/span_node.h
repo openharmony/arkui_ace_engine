@@ -150,7 +150,7 @@ using FONT_FEATURES_LIST = std::list<std::pair<std::string, int32_t>>;
 class InspectorFilter;
 class Paragraph;
 
-enum class SpanItemType { NORMAL = 0, IMAGE = 1, CustomSpan = 2 };
+enum class SpanItemType { NORMAL = 0, IMAGE = 1, CustomSpan = 2, SYMBOL = 3 };
 
 struct PlaceholderStyle {
     double width = 0.0f;
@@ -335,6 +335,15 @@ public:
 
     bool UpdateSpanTextColor(Color color);
 
+    void SetSymbolId(uint32_t symbolId)
+    {
+        symbolId_ = symbolId;
+    }
+
+    uint32_t GetSymbolId()
+    {
+        return symbolId_;
+    }
 private:
     std::optional<TextStyle> textStyle_;
     bool isParentText = false;
@@ -343,6 +352,7 @@ private:
     WeakPtr<Pattern> pattern_;
     Dimension radius_ = 2.0_vp;
     std::string address_;
+    uint32_t symbolId_ = 0;
 };
 
 enum class PropertyInfo {
@@ -615,6 +625,18 @@ public:
         dumpLog.AddDesc(std::string("TextBaseline: ").append(StringUtils::ToString(textStyle.GetTextBaseline())));
     }
     ACE_DISALLOW_COPY_AND_MOVE(PlaceholderSpanItem);
+
+    void SetCustomNode(const RefPtr<UINode>& customNode)
+    {
+        customNode_ = customNode;
+    }
+
+    const RefPtr<UINode> GetCustomNode() const
+    {
+        return customNode_;
+    }
+private:
+    RefPtr<UINode> customNode_;
 };
 
 class PlaceholderSpanPattern : public Pattern {

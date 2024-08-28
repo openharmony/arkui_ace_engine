@@ -746,6 +746,11 @@ public:
     void HandleOnAIWrite();
     void GetAIWriteInfo(AIWriteInfo& info);
     void HandleAIWriteResult(int32_t start, int32_t end, std::vector<uint8_t>& buffer);
+    void InsertSpanByBackData(RefPtr<SpanString>& spanString);
+    void AddSpansAndReplacePlaceholder(RefPtr<SpanString>& spanString);
+    void ReplacePlaceholderWithRawSpans(const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex);
+    void SetSubSpansWithAIWrite(RefPtr<SpanString>& spanString, int32_t start, int32_t end);
+    SymbolSpanOptions GetSymbolSpanOptions(const RefPtr<SpanItem>& spanItem);
     bool IsShowAIWrite();
     RefPtr<FocusHub> GetFocusHub() const;
     void ResetDragOption() override;
@@ -1303,6 +1308,7 @@ private:
     bool isModifyingContent_ = false;
     bool needToRequestKeyboardOnFocus_ = true;
     bool isEnableHapticFeedback_ = true;
+    std::unordered_map<std::string, RefPtr<SpanItem>> placeholderSpansMap_;
 };
 } // namespace OHOS::Ace::NG
 

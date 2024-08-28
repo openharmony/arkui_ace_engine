@@ -132,6 +132,10 @@ constexpr static int32_t SECOND_LINE = 2;
 constexpr float RICH_DEFAULT_SHADOW_COLOR = 0x33000000;
 constexpr float RICH_DEFAULT_ELEVATION = 120.0f;
 constexpr int32_t RICH_DEFAULT_AI_WORD = 100;
+constexpr int32_t CUSTOM_CONTENT_LENGTH = 1;
+constexpr int32_t SYMBOL_CONTENT_LENGTH = 2;
+constexpr int32_t PLACEHOLDER_LENGTH = 6;
+const std::wstring PLACEHOLDER_MARK = L"![id";
 } // namespace
 
 RichEditorPattern::RichEditorPattern()
@@ -735,6 +739,7 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     // The length of the imageSpan defaults to the length of a character to calculate the position
     spanItem->content = " ";
     spanItem->SetImageSpanOptions(options);
+    spanItem->spanItemType = SpanItemType::IMAGE;
     AddSpanItem(spanItem, spanIndex);
     SetGestureOptions(options.userGestureOption, spanItem);
     placeholderCount_++;
@@ -811,6 +816,8 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
     }
     auto spanItem = placeholderSpanNode->GetSpanItem();
     spanItem->content = " ";
+    spanItem->spanItemType = SpanItemType::CustomSpan;
+    spanItem->SetCustomNode(customNode);
     AddSpanItem(spanItem, spanIndex);
     placeholderCount_++;
     SetCaretPosition(insertIndex + spanItem->content.length());
@@ -999,6 +1006,8 @@ int32_t RichEditorPattern::AddSymbolSpanOperation(const SymbolSpanOptions& optio
     }
     auto spanItem = spanNode->GetSpanItem();
     spanItem->content = "  ";
+    spanItem->spanItemType = SpanItemType::SYMBOL;
+    spanItem->SetSymbolId(options.symbolId);
     spanItem->SetTextStyle(options.style);
     spanItem->SetResourceObject(options.resourceObject);
     AddSpanItem(spanItem, spanIndex);
@@ -3488,7 +3497,11 @@ RefPtr<SpanString> RichEditorPattern::ToStyledString(int32_t start, int32_t end)
         std::swap(realStart, realEnd);
     }
     RefPtr<SpanString> spanString = MakeRefPtr<SpanString>("");
-    SetSubSpans(spanString, realStart, realEnd);
+    if (aiWriteAdapter_->GetAIWrite()) {
+        SetSubSpansWithAIWrite(spanString, realStart, realEnd);
+    } else {
+        SetSubSpans(spanString, realStart, realEnd);
+    }
     SetSubMap(spanString);
     return spanString;
 }
@@ -3605,6 +3618,53 @@ ImageStyleResult RichEditorPattern::GetImageStyleBySpanItem(const RefPtr<SpanIte
         imageStyle.borderRadius = imageAttributeOp->borderRadius->ToString();
     }
     return imageStyle;
+}
+
+void RichEditorPattern::SetSubSpansWithAIWrite(RefPtr<SpanString>& spanString, int32_t start, int32_t end)
+{
+    placeholderSpansMap_.clear();
+    CHECK_NULL_VOID(spanString);
+    std::list<RefPtr<SpanItem>> subSpans;
+    std::string text;
+    size_t index = 0;
+    size_t placeholderGains = 0;
+    for (const auto& spanItem : spans_) {
+        if (!spanItem) {
+            continue;
+        }
+        auto oldEnd = spanItem->position;
+        auto oldStart = spanItem->rangeStart;
+        if (oldEnd <= start || oldStart >= end) {
+            continue;
+        }
+        RefPtr<SpanItem> newSpanItem = MakeRefPtr<SpanItem>();
+        auto spanStart = oldStart <= start ? 0 : oldStart - start;
+        auto spanEnd = oldEnd < end ? oldEnd - start : end - start;
+        spanStart += placeholderGains;
+        if (spanItem->spanItemType == SpanItemType::NORMAL) {
+            newSpanItem = spanItem->GetSameStyleSpanItem();
+            newSpanItem->content = StringUtils::ToString(
+                StringUtils::ToWstring(spanItem->content)
+                    .substr(std::max(start - oldStart, 0), std::min(end, oldEnd) - std::max(start, oldStart)));
+        } else if (spanItem->spanItemType == SpanItemType::SYMBOL) {
+            newSpanItem->content = "![id" + std::to_string(index++) + "]";
+            placeholderSpansMap_[newSpanItem->content] = spanItem;
+            placeholderGains += PLACEHOLDER_LENGTH - SYMBOL_CONTENT_LENGTH;
+            spanEnd += placeholderGains;
+        } else {
+            newSpanItem->content = "![id" + std::to_string(index++) + "]";
+            placeholderSpansMap_[newSpanItem->content] = spanItem;
+            placeholderGains += PLACEHOLDER_LENGTH - CUSTOM_CONTENT_LENGTH;
+            spanEnd += placeholderGains;
+        }
+        newSpanItem->interval = {spanStart, spanEnd};
+        newSpanItem->position = spanStart;
+        newSpanItem->rangeStart = spanEnd;
+        text.append(newSpanItem->content);
+        subSpans.emplace_back(newSpanItem);
+    }
+    spanString->SetString(text);
+    spanString->SetSpanItems(std::move(subSpans));
 }
 
 void RichEditorPattern::SetSubSpans(RefPtr<SpanString>& spanString, int32_t start, int32_t end)
@@ -9930,17 +9990,14 @@ bool RichEditorPattern::IsShowAIWrite()
 void RichEditorPattern::GetAIWriteInfo(AIWriteInfo& info)
 {
     CHECK_NULL_VOID(!textSelector_.SelectNothing());
-    // serialize the selected text
+    info.firstHandle = textSelector_.firstHandle.ToString();
+    info.secondHandle = textSelector_.secondHandle.ToString();
     info.selectStart = textSelector_.GetTextStart();
     info.selectEnd = textSelector_.GetTextEnd();
-    RefPtr<SpanString> spanString = ToStyledString(info.selectStart, info.selectEnd);
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "Selected range=[%{public}d--%{public}d], content = %{public}s",
-        info.selectStart, info.selectEnd, spanString->GetString().c_str());
-    spanString->EncodeTlv(info.selectBuffer);
 
     // serialize the sentenced-level text
     auto textSize = static_cast<int32_t>(GetWideText().length()) + placeholderCount_;
-    spanString = ToStyledString(0, textSize);
+    RefPtr<SpanString> spanString = ToStyledString(0, textSize);
     auto contentAll = spanString->GetWideString();
     auto sentenceStart = 0;
     auto sentenceEnd = textSize;
@@ -9961,12 +10018,16 @@ void RichEditorPattern::GetAIWriteInfo(AIWriteInfo& info)
         sentenceStart, sentenceEnd, spanString->GetString().c_str());
     spanString->EncodeTlv(info.sentenceBuffer);
 
-    info.firstHandle = textSelector_.firstHandle.ToString();
-    info.secondHandle = textSelector_.secondHandle.ToString();
+    // serialize the selected text
+    spanString = ToStyledString(info.selectStart, info.selectEnd);
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "Selected range=[%{public}d--%{public}d], content = %{public}s",
+        info.selectStart, info.selectEnd, spanString->GetString().c_str());
+    spanString->EncodeTlv(info.selectBuffer);
 }
 
 void RichEditorPattern::HandleOnAIWrite()
 {
+    aiWriteAdapter_->SetAIWrite(true);
     AIWriteInfo info;
     GetAIWriteInfo(info);
     CloseSelectOverlay();
@@ -9986,19 +10047,109 @@ void RichEditorPattern::HandleOnAIWrite()
     aiWriteAdapter_->ShowModalUIExtension(info, callback);
 }
 
+SymbolSpanOptions RichEditorPattern::GetSymbolSpanOptions(const RefPtr<SpanItem>& spanItem)
+{
+    CHECK_NULL_RETURN(spanItem, {});
+    TextStyle textStyle = GetDefaultTextStyle();
+    UseSelfStyle(spanItem->fontStyle, spanItem->textLineStyle, textStyle);
+    SymbolSpanOptions options;
+    options.style = textStyle;
+    options.offset = caretPosition_;
+    options.resourceObject = spanItem->GetResourceObject();
+    options.symbolId = spanItem->GetSymbolId();
+    return options;
+}
+
+void RichEditorPattern::ReplacePlaceholderWithRawSpans(
+    const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex)
+{
+    if (spanItem->spanItemType == SpanItemType::IMAGE) {
+        auto imageSpanItem = DynamicCast<ImageSpanItem>(spanItem);
+        CHECK_NULL_VOID(imageSpanItem);
+        auto options = imageSpanItem->options;
+        options.offset = caretPosition_;
+        AddImageSpan(options, true, caretPosition_, true);
+        textIndex = index + PLACEHOLDER_LENGTH;
+    } else if (spanItem->spanItemType == SpanItemType::CustomSpan) {
+        auto customSpanItem = DynamicCast<PlaceholderSpanItem>(spanItem);
+        CHECK_NULL_VOID(customSpanItem);
+        auto customNode = customSpanItem->GetCustomNode();
+        SpanOptionBase options;
+        options.offset = caretPosition_;
+        AddPlaceholderSpan(customNode, options);
+        textIndex = index + PLACEHOLDER_LENGTH;
+    } else if (spanItem->spanItemType == SpanItemType::SYMBOL) {
+        auto options = GetSymbolSpanOptions(spanItem);
+        options.offset = caretPosition_;
+        AddSymbolSpan(options, false, caretPosition_);
+        textIndex = index + PLACEHOLDER_LENGTH;
+    }
+}
+
+void RichEditorPattern::AddSpansAndReplacePlaceholder(RefPtr<SpanString>& spanString)
+{
+    auto content = spanString->GetWideString();
+    size_t textIndex = 0;
+    size_t index = content.find(PLACEHOLDER_MARK);
+
+    while (index != std::string::npos) {
+        if (textIndex < index) {
+            auto subSpan = spanString->GetSubSpanString(textIndex, index - textIndex);
+            AddSpansByPaste(subSpan->GetSpanItems());
+        }
+        auto key = StringUtils::ToString(content.substr(index, PLACEHOLDER_LENGTH));
+        if (placeholderSpansMap_.find(key) == placeholderSpansMap_.end()) {
+            index = content.find(PLACEHOLDER_MARK, index + 1);
+            continue;
+        }
+        auto spanItem = placeholderSpansMap_[key];
+        if (!spanItem) {
+            index = content.find(PLACEHOLDER_MARK, index + 1);
+            continue;
+        }
+        ReplacePlaceholderWithRawSpans(spanItem, index, textIndex);
+        index = content.find(PLACEHOLDER_MARK, index + 1);
+    }
+    if (textIndex < content.length()) {
+        auto subSpan = spanString->GetSubSpanString(textIndex, content.length() - textIndex);
+        AddSpansByPaste(subSpan->GetSpanItems());
+    }
+}
+
+void RichEditorPattern::InsertSpanByBackData(RefPtr<SpanString>& spanString)
+{
+    CHECK_NULL_VOID(spanString);
+    if (textSelector_.IsValid()) {
+        SetCaretPosition(textSelector_.GetTextStart());
+        DeleteForward(textSelector_.GetTextStart(), textSelector_.GetTextEnd() - textSelector_.GetTextStart());
+        ResetSelection();
+    }
+    if (placeholderSpansMap_.empty()) {
+        AddSpansByPaste(spanString->GetSpanItems());
+    } else {
+        AddSpansAndReplacePlaceholder(spanString);
+    }
+    StartTwinkling();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    host->MarkModifyDone();
+}
+
 void RichEditorPattern::HandleAIWriteResult(int32_t start, int32_t end, std::vector<uint8_t>& buffer)
 {
     RefPtr<SpanString> spanString = SpanString::DecodeTlv(buffer);
     if (spanString->GetSpanItems().empty()) {
         return;
     }
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "Backfilling results range=[%{public}d--%{public}d], content = %{public}s",
+        start, end, spanString->GetString().c_str());
+
     textSelector_.Update(start, end);
     auto length = end - start;
     CHECK_NULL_VOID(length > 0);
     DeleteBackward(length);
-    AddSpanByPasteData(spanString);
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "Backfilling results range=[%{public}d--%{public}d], content = %{public}s",
-        start, end, spanString->GetString().c_str());
+    InsertSpanByBackData(spanString);
 }
 
 bool RichEditorPattern::IsTextEditableForStylus()
