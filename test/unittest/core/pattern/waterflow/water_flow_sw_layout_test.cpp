@@ -244,21 +244,24 @@ HWTEST_F(WaterFlowSWTest, ModifyItem002, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 46), -100.0f);
     EXPECT_EQ(GetChildY(frameNode_, 51), 350.0f);
     auto child = GetChildFrameNode(frameNode_, 49);
-    child->layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(300.0)));
+    child->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(300.0)));
     child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(info_->startIndex_, 45);
-    EXPECT_EQ(GetChildY(frameNode_, 46), -50.0f);
     EXPECT_EQ(GetChildHeight(frameNode_, 49), 300.0f);
+    EXPECT_EQ(info_->startIndex_, 45);
+    EXPECT_EQ(GetChildY(frameNode_, 45), -100.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 46), -50.0f);
+    EXPECT_EQ(GetChildHeight(frameNode_, 49), 300.0f); // changed after refill
 
     child = GetChildFrameNode(frameNode_, 40);
-    child->layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(10.0)));
+    child->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(10.0)));
     child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info_->startIndex_, 45);
-    EXPECT_EQ(GetChildY(frameNode_, 45), -50.0f);
-    EXPECT_FALSE(child->IsActive());
-    EXPECT_FALSE(info_->idxToLane_.count(40));
+    EXPECT_EQ(GetChildY(frameNode_, 45), -100.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 46), -50.0f); // doesn't affect current layout
+    UpdateCurrentOffset(500.0f);
+    EXPECT_EQ(GetChildHeight(frameNode_, 40), 10.0f); // changed after refill
 
     // update footer
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
@@ -270,14 +273,13 @@ HWTEST_F(WaterFlowSWTest, ModifyItem002, TestSize.Level1)
     EXPECT_EQ(info_->lanes_[0][1].ToString(), "{StartPos: -50.000000 EndPos: 750.000000 Items [71 72 75 76 79 ] }");
 
     child = GetChildFrameNode(frameNode_, 0);
-    child->layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(1.0)));
+    child->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(1.0)));
     child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(info_->lanes_[0][0].ToString(), "{StartPos: -150.000000 EndPos: 850.000000 Items [69 71 74 75 78 79 ] }");
-    EXPECT_EQ(info_->lanes_[0][1].ToString(), "{StartPos: -50.000000 EndPos: 650.000000 Items [70 72 73 76 77 ] }");
-    EXPECT_EQ(GetChildY(frameNode_, 80), 650.0f);
-    EXPECT_EQ(info_->startIndex_, 69);
-    EXPECT_EQ(GetChildY(frameNode_, 70), -150.0f);
+    EXPECT_EQ(info_->lanes_[0][0].ToString(), "{StartPos: -101.000000 EndPos: 799.000000 Items [69 70 73 74 77 78 ] }");
+    EXPECT_EQ(info_->lanes_[0][1].ToString(), "{StartPos: -1.000000 EndPos: 799.000000 Items [71 72 75 76 79 ] }");
+    EXPECT_EQ(GetChildY(frameNode_, 0), 799.0f);
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 0)->IsActive());
 }
 
 /**
