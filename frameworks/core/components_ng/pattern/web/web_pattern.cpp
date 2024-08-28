@@ -3781,7 +3781,7 @@ void WebPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
                 json->Put(OHOS::NWeb::NWEB_VIEW_DATA_KEY_PLACEHOLDER.c_str(), nodeInfoWrap->GetId());
                 json->Put(OHOS::NWeb::NWEB_VIEW_DATA_KEY_VALUE.c_str(), nodeInfoWrap->GetValue().c_str());
                 jsonNode->Put(key.c_str(), std::move(json));
-            }            
+            }
         }
         if (nodeInfoWrap->GetIsFocus()) {
             focusType = type;
