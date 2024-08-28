@@ -161,7 +161,7 @@ void MenuItemLayoutAlgorithm::MeasureItemViews(LayoutConstraintF& childConstrain
     CHECK_NULL_VOID(leftRow);
 
     // measure right row
-    SetRightRowLayoutConstraint(childConstraint, layoutConstraint, layoutWrapper);
+    SetRightRowLayoutConstraint(childConstraint, layoutConstraint, padding, layoutWrapper);
     float rightRowWidth = 0.0f;
     float rightRowHeight = 0.0f;
     auto rightRow = layoutWrapper->GetOrCreateChildByIndex(1);
@@ -215,9 +215,12 @@ void MenuItemLayoutAlgorithm::MeasureItemViews(LayoutConstraintF& childConstrain
     UpdateSelfSize(layoutWrapper, actualWidth, itemHeight, expandableHeight);
 }
 
-void SetRightRowLayoutConstraint(LayoutConstraintF& childConstraint, std::optional<LayoutConstraintF>& layoutConstraint,
-    LayoutWrapper* layoutWrapper)
+void MenuItemLayoutAlgorithm::SetRightRowLayoutConstraint(LayoutConstraintF& childConstraint, std::optional<LayoutConstraintF>& layoutConstraint,
+    PaddingPropertyF padding, LayoutWrapper* layoutWrapper)
 {
+    auto leftRow = layoutWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_VOID(leftRow);
+
     auto menuItemNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(menuItemNode);
     auto pattern = menuItemNode->GetPattern<MenuItemPattern>();
