@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
+#include "core/components/text_field/textfield_theme.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -249,5 +250,28 @@ void RichEditorCommonTestNg::OnDrawVerify(
     ret = controller->GetShowMagnifier();
     EXPECT_FALSE(ret);
     richEditorNode_->GetGeometryNode()->SetContentSize(contentRect.GetSize());
+}
+
+void RichEditorCommonTestNg::InitMagnifierParams(const SizeF& frameSize)
+{
+    // set frameSize to RichEditor
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto geometryNode = richEditorNode_->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(frameSize);
+
+    // set frameSize to RootNode
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto rootUINode = pipeline->GetRootElement();
+    ASSERT_NE(rootUINode, nullptr);
+    auto rootGeometryNode = rootUINode->GetGeometryNode();
+    ASSERT_NE(rootGeometryNode, nullptr);
+    rootGeometryNode->SetFrameSize(frameSize);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textfieldTheme = AceType::MakeRefPtr<TextFieldTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textfieldTheme));
 }
 } // namespace OHOS::Ace::NG
