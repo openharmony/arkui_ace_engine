@@ -279,6 +279,7 @@ HWTEST_F(TextDragTestNg, TextDragCreateNodeTestNg003, TestSize.Level1)
         .lineCountValue = std::make_optional(EXPECT_MOCK_LINE_COUNT + 2), // 2: multi-lines
         .textWidthValue = std::make_optional(EXPECT_MOCK_TEXT_WIDTH),
     };
+    SystemProperties::SetDevicePhysicalHeight(2000);
     SetMockParagraphExpectCallParas(params);
     std::vector<RectF> rects { RectF(40, 40, 60, 60), RectF(100, 100, 60, 100)};
     EXPECT_CALL(*paragraph_, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));

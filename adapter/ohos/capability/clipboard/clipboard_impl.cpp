@@ -306,7 +306,7 @@ void ClipboardImpl::GetDataSync(const std::function<void(const std::string&)>& c
                 if (pasteDataRecord->GetHtmlText() != nullptr) {
                     auto htmlText = pasteDataRecord->GetHtmlText();
                     HtmlToSpan toSpan;
-                    auto spanStr = toSpan.ToSpanString(*htmlText);
+                    auto spanStr = toSpan.ToSpanString(*htmlText, false);
                     if (spanStr) {
                         result = spanStr->GetString();
                         break;
@@ -359,7 +359,7 @@ void ClipboardImpl::GetDataAsync(const std::function<void(const std::string&)>& 
                 [callback, result]() { callback(result); },
                 TaskExecutor::TaskType::UI, "ArkUIClipboardGetTextDataCallback");
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardGetTextDataAsync");
+        TaskExecutor::TaskType::BACKGROUND, "ArkUIClipboardGetTextDataAsync");
 }
 
 void ClipboardImpl::ProcessPasteDataRecord(const std::shared_ptr<MiscServices::PasteDataRecord>& pasteDataRecord,
@@ -491,9 +491,11 @@ void ClipboardImpl::GetSpanStringData(
 void ClipboardImpl::GetSpanStringDataHelper(
     const std::function<void(std::vector<uint8_t>&, const std::string&)>& callback, bool syncMode)
 {
-    auto task = [callback, weak = WeakClaim(this)]() {
+    auto task = [callback, weakExecutor = WeakClaim(RawPtr(taskExecutor_)), weak = WeakClaim(this)]() {
         auto clip = weak.Upgrade();
         CHECK_NULL_VOID(clip);
+        auto taskExecutor = weakExecutor.Upgrade();
+        CHECK_NULL_VOID(taskExecutor);
         auto hasData = OHOS::MiscServices::PasteboardClient::GetInstance()->HasPasteData();
         CHECK_NULL_VOID(hasData);
         OHOS::MiscServices::PasteData pasteData;
@@ -506,12 +508,15 @@ void ClipboardImpl::GetSpanStringDataHelper(
         if (textData && text.empty()) {
             text.append(*textData);
         }
-        callback(arr, text);
+        auto result = text;
+        taskExecutor->PostTask(
+            [callback, arr, result]() mutable { callback(arr, result); },
+            TaskExecutor::TaskType::UI, "ArkUIClipboardGetSpanStringDataCallback");
     };
     if (syncMode) {
-        taskExecutor_->PostSyncTask(task, TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardGetSpanStringDataSync");
+        taskExecutor_->PostSyncTask(task, TaskExecutor::TaskType::BACKGROUND, "ArkUIClipboardGetSpanStringDataSync");
     } else {
-        taskExecutor_->PostTask(task, TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardGetSpanStringDataAsync");
+        taskExecutor_->PostTask(task, TaskExecutor::TaskType::BACKGROUND, "ArkUIClipboardGetSpanStringDataAsync");
     }
 }
 

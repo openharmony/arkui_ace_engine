@@ -342,17 +342,12 @@ public:
         const std::string& insertValue, OperationRecord* const record = nullptr, bool isIME = true);
     void DeleteSelectOperation(OperationRecord* const record);
     void DeleteByRange(OperationRecord* const record, int32_t start, int32_t end);
-    void InsertValueAfterBeforeSpan(RefPtr<SpanNode>& spanNodeBefore, RefPtr<SpanNode>& spanNode,
-        const TextInsertValueInfo& info, const std::string& insertValue, bool isIME = true);
     void InsertDiffStyleValueInSpan(
-        RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue, bool isIME = true);
-    void InsertValueWithoutSpan(
         RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue, bool isIME = true);
     void InsertValueByPaste(const std::string& insertValue);
     bool IsLineSeparatorInLast(RefPtr<SpanNode>& spanNode);
     void InsertValueToSpanNode(
         RefPtr<SpanNode>& spanNode, const std::string& insertValue, const TextInsertValueInfo& info);
-    void SpanNodeFission(RefPtr<SpanNode>& spanNode, const std::string& insertValue, const TextInsertValueInfo& info);
     void SpanNodeFission(RefPtr<SpanNode>& spanNode);
     void CreateTextSpanNode(
         RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue, bool isIME = true);

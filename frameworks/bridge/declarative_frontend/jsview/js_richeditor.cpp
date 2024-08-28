@@ -234,9 +234,14 @@ JSRef<JSObject> JSRichEditor::CreateJSTextStyleResult(const TextStyleResult& tex
 
 JSRef<JSArray> JSRichEditor::CreateJsTextShadowObjectArray(const TextStyleResult& textSpanResult)
 {
+    return CreateJsTextShadowObjectArray(textSpanResult.textShadows);
+}
+
+JSRef<JSArray> JSRichEditor::CreateJsTextShadowObjectArray(const std::vector<Shadow>& textShadows)
+{
     JSRef<JSArray> textShadowArray = JSRef<JSArray>::New();
     int32_t index = 0;
-    for (const auto& it : textSpanResult.textShadows) {
+    for (const auto& it : textShadows) {
         JSRef<JSObject> textShadowObj = JSRef<JSObject>::New();
         textShadowObj->SetProperty<double>("radius", it.GetBlurRadius());
         textShadowObj->SetProperty<std::string>("color", it.GetColor().ToString());
@@ -2436,6 +2441,10 @@ JSRef<JSObject> JSRichEditorBaseController::CreateTypingStyleResult(const struct
     }
     if (typingStyle.updateTextDecoration.has_value() || typingStyle.updateTextDecorationColor.has_value()) {
         tyingStyleObj->SetPropertyObject("decoration", decorationObj);
+    }
+    if (typingStyle.updateTextShadows.has_value()) {
+        tyingStyleObj->SetPropertyObject("textShadows",
+            JSRichEditor::CreateJsTextShadowObjectArray(typingStyle.updateTextShadows.value()));
     }
     return tyingStyleObj;
 }
