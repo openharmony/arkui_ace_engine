@@ -77,7 +77,7 @@ const float MINIMUM_AMPLITUDE_RATION = 0.08f;
 constexpr double MOUNT_MENU_FINAL_SCALE = 0.95f;
 constexpr double SEMI_CIRCLE_ANGEL = 90.0f;
 constexpr Dimension PADDING = 4.0_vp;
-
+constexpr Dimension OPTION_MARGIN = 8.0_vp;
 
 void UpdateFontStyle(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<MenuItemLayoutProperty>& itemProperty,
     RefPtr<MenuItemPattern>& itemPattern, bool& contentChanged, bool& labelChanged)
@@ -265,7 +265,7 @@ void MenuPattern::OnModifyDone()
         BorderRadiusProperty borderRadius = menuLayoutProperty->GetBorderRadiusValue();
         UpdateBorderRadius(host, borderRadius);
     }
-
+    UpdateMenuBorderAndBackgroundBlur();
     SetAccessibilityAction();
 
     if (previewMode_ != MenuPreviewMode::NONE) {
@@ -278,6 +278,30 @@ void MenuPattern::OnModifyDone()
         auto gestureHub = hub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
         InitPanEvent(gestureHub);
+    }
+}
+
+void MenuPattern::UpdateMenuBorderAndBackgroundBlur()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    if (!renderContext->HasBorderColor()) {
+        BorderColorProperty borderColor;
+        borderColor.SetColor(theme->GetMenuNormalBorderColor());
+        renderContext->UpdateBorderColor(borderColor);
+    }
+    if (!renderContext->HasBorderWidth()) {
+        auto menuLayoutProperty = GetLayoutProperty<MenuLayoutProperty>();
+        BorderWidthProperty borderWidth;
+        borderWidth.SetBorderWidth(theme->GetMenuNormalBorderWidth());
+        menuLayoutProperty->UpdateBorderWidth(borderWidth);
+        renderContext->UpdateBorderWidth(borderWidth);
     }
 }
 
@@ -939,7 +963,8 @@ void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
     CHECK_NULL_VOID(theme);
     auto expandDisplay = theme->GetExpandDisplay();
     expandDisplay_ = expandDisplay;
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !renderContext->IsUniRenderEnabled()) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !renderContext->IsUniRenderEnabled()
+        || theme->GetMenuBlendBgColor()) {
         auto bgColor = theme->GetBackgroundColor();
         renderContext->UpdateBackgroundColor(bgColor);
     }
@@ -1560,7 +1585,8 @@ void MenuPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(menuPattern);
 
     auto renderContext = host->GetRenderContext();
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !renderContext->IsUniRenderEnabled()) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !renderContext->IsUniRenderEnabled()
+        || menuTheme->GetMenuBlendBgColor()) {
         renderContext->UpdateBackgroundColor(menuTheme->GetBackgroundColor());
     } else {
         renderContext->UpdateBackBlurStyle(renderContext->GetBackBlurStyle());
@@ -1651,13 +1677,14 @@ void MenuPattern::DumpInfo()
 
 float MenuPattern::GetSelectMenuWidth()
 {
+    auto minSelectWidth = MIN_SELECT_MENU_WIDTH.ConvertToPx();
     RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
-    CHECK_NULL_RETURN(columnInfo, MIN_SELECT_MENU_WIDTH.ConvertToPx());
+    CHECK_NULL_RETURN(columnInfo, minSelectWidth);
     auto parent = columnInfo->GetParent();
-    CHECK_NULL_RETURN(parent, MIN_SELECT_MENU_WIDTH.ConvertToPx());
+    CHECK_NULL_RETURN(parent, minSelectWidth);
     parent->BuildColumnWidth();
     auto defaultWidth = static_cast<float>(columnInfo->GetWidth(COLUMN_NUM));
-    float finalWidth = MIN_SELECT_MENU_WIDTH.ConvertToPx();
+    float finalWidth = minSelectWidth;
 
     if (IsWidthModifiedBySelect()) {
         auto menuLayoutProperty = GetLayoutProperty<MenuLayoutProperty>();
@@ -1667,7 +1694,7 @@ float MenuPattern::GetSelectMenuWidth()
         finalWidth = defaultWidth;
     }
     
-    if (finalWidth < MIN_SELECT_MENU_WIDTH.ConvertToPx()) {
+    if (finalWidth < minSelectWidth) {
         finalWidth = defaultWidth;
     }
     
@@ -1787,6 +1814,28 @@ bool MenuPattern::IsMenuScrollable() const
         return scrollPattern->IsScrollable() && Positive(scrollPattern->GetScrollableDistance());
     }
     return false;
+}
+
+float MenuPattern::GetSelectMenuWidthFromTheme()
+{
+    auto minSelectWidth = MIN_SELECT_MENU_WIDTH.ConvertToPx();
+    RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
+    CHECK_NULL_RETURN(columnInfo, minSelectWidth);
+    auto parent = columnInfo->GetParent();
+    CHECK_NULL_RETURN(parent, minSelectWidth);
+    parent->BuildColumnWidth();
+    auto defaultWidth = static_cast<float>(columnInfo->GetWidth(COLUMN_NUM));
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, minSelectWidth);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, minSelectWidth);
+    auto theme = context->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, minSelectWidth);
+    float finalWidth = (theme->GetMenuNormalWidth() + OPTION_MARGIN).ConvertToPx();
+    if (finalWidth < minSelectWidth) {
+        finalWidth = defaultWidth;
+    }
+    return finalWidth;
 }
 
 } // namespace OHOS::Ace::NG

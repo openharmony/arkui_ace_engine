@@ -39,6 +39,7 @@ namespace {
     constexpr Dimension MIN_OPTION_WIDTH = 56.0_vp;
     constexpr Dimension OPTION_MARGIN = 8.0_vp;
     constexpr int32_t COLUMN_NUM = 2;
+    constexpr Dimension BORDER_DEFAULT_WIDTH = 0.0_vp;
 } // namespace
 
 void OptionPattern::OnAttachToFrameNode()
@@ -79,6 +80,113 @@ void OptionPattern::OnModifyDone()
         UpdatePasteFontColor(selectTheme_->GetMenuFontColor());
     }
     SetAccessibilityAction();
+    InitFocusEvent();
+}
+
+void OptionPattern::InitFocusEvent()
+{
+    if (focusEventInitialized_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    auto focusTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleFocusEvent();
+    };
+    focusHub->SetOnFocusInternal(focusTask);
+
+    auto blurTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleBlurEvent();
+    };
+    focusHub->SetOnBlurInternal(blurTask);
+    focusEventInitialized_ = true;
+}
+
+void OptionPattern::HandleFocusEvent()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetIsFocusActive()) {
+        SetFocusStyle();
+    }
+
+    if (!isFocusActiveUpdateEvent_) {
+        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusActive) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            isFocusActive ? pattern->SetFocusStyle() : pattern->ClearFocusStyle();
+        };
+    }
+
+    pipeline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
+}
+
+void OptionPattern::HandleBlurEvent()
+{
+    ClearFocusStyle();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveIsFocusActiveUpdateEvent(GetHost());
+}
+
+void OptionPattern::SetFocusStyle()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto&& graphics = renderContext->GetOrCreateGraphics();
+    CHECK_NULL_VOID(graphics);
+    if (!selectTheme_->GetoptionApplyFocusedStyle()) {
+        return;
+    }
+
+    Shadow shadow = Shadow::CreateShadow(static_cast<ShadowStyle>(NONE_SHADOW_VALUE));
+    if (!graphics->HasBackShadow() || graphics->GetBackShadowValue() == shadow) {
+        ShadowStyle shadowStyle = static_cast<ShadowStyle>(selectTheme_->GetOptionFocusedShadow());
+        renderContext->UpdateBackShadow(Shadow::CreateShadow(shadowStyle));
+        isFocusShadowSet_ = true;
+    }
+
+    if (!isBGColorSetByUser_) {
+        renderContext->UpdateBackgroundColor(selectTheme_->GetOptionFocusedBackgroundColor());
+    }
+
+    if (!isTextColorSetByUser_) {
+        SetFontColor(selectTheme_->GetOptionFocusedFontColor());
+        text_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+}
+
+
+void OptionPattern::ClearFocusStyle()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (!selectTheme_->GetoptionApplyFocusedStyle()) {
+        return;
+    }
+    if (!isBGColorSetByUser_) {
+        renderContext->UpdateBackgroundColor(
+            rowSelected_ == index_ ? selectTheme_->GetSelectedColor() : Color::TRANSPARENT);
+    }
+    if (isFocusShadowSet_) {
+        renderContext->ResetBackShadow();
+        renderContext->SetShadowRadius(0.0f);
+        isFocusShadowSet_ = false;
+    }
+    if (!isTextColorSetByUser_) {
+        SetFontColor(rowSelected_ == index_ ? selectTheme_->GetSelectedColorText() : selectTheme_->GetMenuFontColor());
+        text_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 void OptionPattern::UpdatePasteFontColor(const Color& fontColor)
@@ -380,6 +488,42 @@ void OptionPattern::SetFontColor(const Color& color)
     context->ResetForegroundColorStrategy();
 }
 
+void OptionPattern::SetBorderColor(const Color& color)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    BorderColorProperty borderColor;
+    borderColor.SetColor(color);
+    renderContext->UpdateBorderColor(borderColor);
+}
+
+void OptionPattern::SetBorderWidth(const Dimension& value)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    BorderWidthProperty borderWidth;
+    borderWidth.SetBorderWidth(value);
+    auto layoutProp = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProp);
+    layoutProp->UpdateBorderWidth(borderWidth);
+    renderContext->UpdateBorderWidth(borderWidth);
+}
+
+Color OptionPattern::GetBorderColor()
+{
+    return Color::TRANSPARENT;
+}
+
+Dimension OptionPattern::GetBorderWidth()
+{
+    return BORDER_DEFAULT_WIDTH;
+}
+    
 std::string OptionPattern::InspectorGetFont()
 {
     CHECK_NULL_RETURN(text_, "");
