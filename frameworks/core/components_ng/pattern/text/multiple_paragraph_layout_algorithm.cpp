@@ -570,8 +570,8 @@ void MultipleParagraphLayoutAlgorithm::AddSymbolSpanToParagraph(const RefPtr<Spa
 void MultipleParagraphLayoutAlgorithm::AddTextSpanToParagraph(const RefPtr<SpanItem>& child, int32_t& spanTextLength,
     const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph)
 {
-    child->length = static_cast<int32_t>(StringUtils::ToWstring(child->content).length());
-    spanTextLength += child->length;
+    child->length = StringUtils::ToWstring(child->content).length();
+    spanTextLength += static_cast<int32_t>(child->length);
     child->position = spanTextLength;
     child->UpdateParagraph(frameNode, paragraph, isSpanStringMode_, PlaceholderStyle(), isMarquee_);
 }
@@ -584,7 +584,9 @@ void MultipleParagraphLayoutAlgorithm::AddImageToParagraph(RefPtr<ImageSpanItem>
     CHECK_NULL_VOID(frameNode);
     auto id = frameNode->GetId();
     int32_t targetId = imageSpanItem->imageNodeId;
-    CHECK_NULL_VOID(id == targetId);
+    if (!isSpanStringMode_) {
+        CHECK_NULL_VOID(id == targetId);
+    }
     layoutWrapper->Measure(layoutConstrain);
     PlaceholderStyle placeholderStyle;
     auto baselineOffset = Dimension(0.0f);

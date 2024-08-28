@@ -56,6 +56,7 @@ const Rosen::RSAnimationTimingCurve NODE_ANIMATION_TIMING_CURVE =
 #endif
 
 constexpr uint32_t COLOR_TRANSLUCENT_WHITE = 0x66ffffff;
+constexpr uint32_t COLOR_TRANSLUCENT_BLACK = 0x66000000;
 constexpr Dimension SNAPSHOT_RADIUS = 16.0_vp;
 } // namespace
 
@@ -99,19 +100,19 @@ public:
         windowPattern->OnDisconnect();
     }
 
+    void OnLayoutFinished() override
+    {
+        auto windowPattern = windowPattern_.Upgrade();
+        CHECK_NULL_VOID(windowPattern);
+        windowPattern->OnLayoutFinished();
+    }
+
     void OnDrawingCompleted() override
     {
         auto windowPattern = windowPattern_.Upgrade();
         CHECK_NULL_VOID(windowPattern);
         windowPattern->OnDrawingCompleted();
     }
-
-    void OnExtensionDied() override {}
-
-    void OnExtensionTimeout(int32_t errorCode) override {}
-
-    void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-        int64_t uiExtensionIdLevelVec) override {}
 
 private:
     WeakPtr<WindowPattern> windowPattern_;
@@ -176,16 +177,16 @@ void WindowPattern::OnAttachToFrameNode()
         return;
     }
 
+    attachToFrameNodeFlag_ = true;
     AddChild(host, appWindow_, appWindowName_, 0);
     auto surfaceNode = session_->GetSurfaceNode();
     CHECK_NULL_VOID(surfaceNode);
     if (!surfaceNode->IsBufferAvailable()) {
         CreateStartingWindow();
         AddChild(host, startingWindow_, startingWindowName_);
-        surfaceNode->SetBufferAvailableCallback(coldStartCallback_);
+        surfaceNode->SetBufferAvailableCallback(callback_);
         return;
     }
-    attachToFrameNodeFlag_ = true;
 }
 
 void WindowPattern::CreateBlankWindow()
@@ -415,7 +416,9 @@ void WindowPattern::UpdateSnapshotWindowProperty()
         borderRadius.SetRadius(SNAPSHOT_RADIUS);
         borderRadius.multiValued = false;
         renderContext->UpdateBorderRadius(borderRadius);
-        renderContext->UpdateBackgroundColor(Color(COLOR_TRANSLUCENT_WHITE));
+        auto backgroundColor =
+            SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_TRANSLUCENT_BLACK : COLOR_TRANSLUCENT_WHITE;
+        renderContext->UpdateBackgroundColor(Color(backgroundColor));
         imagePattern->SetNeedBorderRadius(true);
         imageRenderProperty->UpdateNeedBorderRadius(true);
     }

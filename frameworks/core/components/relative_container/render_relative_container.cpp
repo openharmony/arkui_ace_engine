@@ -15,8 +15,6 @@
 
 #include "core/components/relative_container/render_relative_container.h"
 
-#include "base/utils/utils.h"
-#include "core/components/flex/render_flex_item.h"
 #include "core/components/relative_container/relative_container_component.h"
 
 namespace OHOS::Ace {

@@ -219,6 +219,7 @@ void PluginPattern::CreatePluginSubContainer()
     pluginSubContainer_->SetPluginWindowId(GetHost()->GetId());
     pluginSubContainer_->SetPluginNode(GetHost());
 
+    CHECK_NULL_VOID(host_->GetContext());
     auto uiTaskExecutor = SingleTaskExecutor::Make(host_->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
 
     int32_t instanceID = context->GetInstanceId();

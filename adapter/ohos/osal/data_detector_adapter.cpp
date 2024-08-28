@@ -106,7 +106,7 @@ void DataDetectorAdapter::OnClickAIMenuOption(const AISpan& aiSpan,
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     if (targetNode) {
-        overlayManager->CloseAIEntityMenu(targetNode);
+        overlayManager->CloseAIEntityMenu(targetNode->GetId());
     }
     Container::UpdateCurrent(mainContainerId_);
 
@@ -215,11 +215,7 @@ void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectTex
     int32_t instanceID = context->GetInstanceId();
     auto textFunc = [weak = WeakClaim(this), instanceID, startPos, info](const TextDataDetectResult result) {
         ContainerScope scope(instanceID);
-        auto dataDetectorAdapter = weak.Upgrade();
-        CHECK_NULL_VOID(dataDetectorAdapter);
-        auto host = dataDetectorAdapter->GetHost();
-        CHECK_NULL_VOID(host);
-        auto context = host->GetContext();
+        auto context = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_VOID(context);
         auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask(

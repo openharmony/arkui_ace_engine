@@ -1347,7 +1347,7 @@ private:
     AceAutoFillType autoFillType_ = AceAutoFillType::ACE_UNSPECIFIED;
     bool isNative_ = true;
     AbilityBase::Rect rect_;
-    Rosen::Rect windowRect_;
+    Rosen::Rect windowRect_ { 0, 0, 0, 0 };
 };
 
 bool AceContainer::UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node,
@@ -1941,6 +1941,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
 #ifdef FORM_SUPPORTED
     if (isFormRender_) {
         pipelineContext_->SetIsFormRender(isFormRender_);
+        pipelineContext_->SetIsDynamicRender(isDynamicRender_);
         auto cardFrontend = AceType::DynamicCast<FormFrontendDeclarative>(frontend_);
         if (cardFrontend) {
             cardFrontend->SetTaskExecutor(taskExecutor_);
@@ -2463,16 +2464,22 @@ void AceContainer::SetFontScaleAndWeightScale(
     }
     if (!parsedConfig.fontScale.empty()) {
         TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "parsedConfig fontScale: %{public}s", parsedConfig.fontScale.c_str());
-        auto instanceId = instanceId_;
-        SetFontScale(instanceId, StringUtils::StringToFloat(parsedConfig.fontScale));
-        configurationChange.fontScaleUpdate = true;
+        CHECK_NULL_VOID(pipelineContext_);
+        float fontSizeScale = StringUtils::StringToFloat(parsedConfig.fontScale);
+        if (fontSizeScale != pipelineContext_->GetFontScale()) {
+            SetFontScale(instanceId_, fontSizeScale);
+            configurationChange.fontScaleUpdate = true;
+        }
     }
     if (!parsedConfig.fontWeightScale.empty()) {
         TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "parsedConfig fontWeightScale: %{public}s",
             parsedConfig.fontWeightScale.c_str());
-        auto instanceId = instanceId_;
-        SetFontWeightScale(instanceId, StringUtils::StringToFloat(parsedConfig.fontWeightScale));
-        configurationChange.fontWeightScaleUpdate = true;
+        CHECK_NULL_VOID(pipelineContext_);
+        float fontWeightScale = StringUtils::StringToFloat(parsedConfig.fontWeightScale);
+        if (fontWeightScale != pipelineContext_->GetFontWeightScale()) {
+            SetFontWeightScale(instanceId_, fontWeightScale);
+            configurationChange.fontWeightScaleUpdate = true;
+        }
     }
 }
 
@@ -2791,51 +2798,6 @@ void AceContainer::GetNamesOfSharedImage(std::vector<std::string>& picNameArray)
     }
 }
 
-RefPtr<DisplayInfo> AceContainer::GetDisplayInfo()
-{
-    auto displayManager = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
-    CHECK_NULL_RETURN(displayManager, nullptr);
-    auto dmRotation = displayManager->GetRotation();
-    auto isFoldable = Rosen::DisplayManager::GetInstance().IsFoldable();
-    auto dmFoldStatus = Rosen::DisplayManager::GetInstance().GetFoldStatus();
-    std::vector<Rect> rects;
-    auto foldCreaseRegion = Rosen::DisplayManager::GetInstance().GetCurrentFoldCreaseRegion();
-    if (foldCreaseRegion) {
-        auto creaseRects = foldCreaseRegion->GetCreaseRects();
-        if (!creaseRects.empty()) {
-            for (const auto& item : creaseRects) {
-                Rect rect;
-                rect.SetRect(item.posX_, item.posY_, item.width_, item.height_);
-                rects.insert(rects.end(), rect);
-            }
-        }
-    }
-    displayInfo_->SetDisplayId(displayManager->GetId());
-    displayInfo_->SetIsFoldable(isFoldable);
-    displayInfo_->SetFoldStatus(static_cast<FoldStatus>(static_cast<uint32_t>(dmFoldStatus)));
-    displayInfo_->SetRotation(static_cast<Rotation>(static_cast<uint32_t>(dmRotation)));
-    displayInfo_->SetCurrentFoldCreaseRegion(rects);
-    return displayInfo_;
-}
-
-void AceContainer::InitIsFoldable()
-{
-    auto isFoldable = Rosen::DisplayManager::GetInstance().IsFoldable();
-    displayInfo_->SetIsFoldable(isFoldable);
-}
-
-bool AceContainer::IsFoldable() const
-{
-    return displayInfo_->GetIsFoldable();
-}
-
-FoldStatus AceContainer::GetCurrentFoldStatus()
-{
-    auto dmFoldStatus = Rosen::DisplayManager::GetInstance().GetFoldStatus();
-    displayInfo_->SetFoldStatus(static_cast<FoldStatus>(static_cast<uint32_t>(dmFoldStatus)));
-    return displayInfo_->GetFoldStatus();
-}
-
 void AceContainer::UpdateSharedImage(
     std::vector<std::string>& picNameArray, std::vector<int32_t>& byteLenArray, std::vector<int>& fileDescriptorArray)
 {
@@ -2924,6 +2886,12 @@ bool AceContainer::IsSceneBoardEnabled()
     return Rosen::SceneBoardJudgement::IsSceneBoardEnabled();
 }
 // ArkTsCard end
+
+bool AceContainer::IsMainWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+}
 
 void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent)
 {

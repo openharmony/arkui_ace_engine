@@ -99,7 +99,15 @@ size_t GetLineCount(const RefPtr<LayoutWrapper>& textWrapper, LayoutConstraintF&
 
 void ToastLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
+    CHECK_NULL_VOID(layoutWrapper);
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    auto toastProps = DynamicCast<ToastLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(toastProps);
+    auto toastNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(toastNode);
+    auto toastPattern = toastNode->GetPattern<ToastPattern>();
+    CHECK_NULL_VOID(toastPattern);
+    toastPattern->InitWrapperRect(layoutWrapper, toastProps);
     auto text = layoutWrapper->GetOrCreateChildByIndex(0);
     // TextAlign should be START when lines of text are greater than 1
     if (GetLineCount(text, layoutConstraint) > 1) {

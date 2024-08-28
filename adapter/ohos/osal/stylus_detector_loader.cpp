@@ -31,7 +31,12 @@ const std::string STYLUS_CLIENT_SO_PATH = "/system/lib/libstylus_innerapi.z.so";
 std::shared_ptr<StylusDetectorLoader> StylusDetectorLoader::Load()
 {
     auto engLib(std::make_shared<StylusDetectorLoader>());
-    return engLib->Init() ? engLib : nullptr;
+    auto ret = engLib->Init();
+    if (!ret) {
+        LOGD("Stylus detector loader instance init failed.");
+        return nullptr;
+    }
+    return engLib;
 }
 
 StylusDetectorLoader::~StylusDetectorLoader()

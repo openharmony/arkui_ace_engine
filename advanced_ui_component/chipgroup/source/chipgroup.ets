@@ -201,7 +201,7 @@ export struct IconGroupSuffix {
   }
 
   build() {
-    Row() {
+    Row({ space: 8 }) {
       ForEach(this.items || [], (suffixItem: IconItemOptions | SymbolGlyphModifier) => {
         Button() {
           if (suffixItem instanceof SymbolGlyphModifier) {
@@ -461,6 +461,20 @@ export struct ChipGroup {
     );
   }
 
+  private getChipGroupHeight() {
+    if (typeof this.chipSize === 'string') {
+      if (this.chipSize === ChipSize.NORMAL) {
+        return ChipGroupHeight.NORMAL;
+      } else {
+        return ChipGroupHeight.SMALL;
+      }
+    } else if (typeof this.chipSize === 'object') {
+      return this.chipSize.height as number
+    } else {
+      return ChipGroupHeight.NORMAL
+    }
+  }
+
   build() {
     Row() {
       Stack() {
@@ -537,12 +551,13 @@ export struct ChipGroup {
         if (this.suffix && !this.isReachEnd) {
           Stack()
             .width(iconGroupSuffixTheme.normalBackgroundSize)
-            .padding({ top: this.getPaddingTop(), bottom: this.getPaddingBottom() })
+            .height(this.getChipGroupHeight())
             .linearGradient({ angle: 90, colors: colorStops })
             .blendMode(BlendMode.DST_IN, BlendApplyType.OFFSCREEN)
             .hitTestBehavior(HitTestMode.None)
         }
       }
+      .height(this.getChipGroupHeight())
       .layoutWeight(1)
       .blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN)
       .alignContent(Alignment.End)
@@ -551,9 +566,7 @@ export struct ChipGroup {
         Row() {
           this.suffix();
         }.padding({ left: iconGroupSuffixTheme.marginLeft,
-          right: iconGroupSuffixTheme.marginRight,
-          top: this.getPaddingTop(),
-          bottom: this.getPaddingBottom()
+          right: iconGroupSuffixTheme.marginRight
         })
       }
     }

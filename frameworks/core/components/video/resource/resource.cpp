@@ -15,10 +15,6 @@
 
 #include "core/components/video/resource/resource.h"
 
-#include <sstream>
-
-#include "base/log/log.h"
-
 namespace OHOS::Ace {
 
 const char PARAM_NONE[] = "";

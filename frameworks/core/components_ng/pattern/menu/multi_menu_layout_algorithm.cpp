@@ -53,6 +53,8 @@ void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 columnInfo->GetParent()->BuildColumnWidth();
                 auto minWidth = static_cast<float>(columnInfo->GetWidth(MENU_MIN_GRID_COUNTS));
                 layoutConstraint->selfIdealSize.SetWidth(minWidth);
+
+                UpdateMenuDefaultConstraintByDevice(pattern, childConstraint, padding.Width(), layoutConstraint, true);
             }
         }
         auto idealWidth =
@@ -68,10 +70,40 @@ void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         columnInfo->GetParent()->BuildColumnWidth();
         auto minWidth = static_cast<float>(columnInfo->GetWidth()) - padding.Width();
         childConstraint.minSize.SetWidth(minWidth);
+
+        UpdateMenuDefaultConstraintByDevice(pattern, childConstraint, padding.Width(), layoutConstraint, false);
     }
     // Calculate max width of menu items
     UpdateConstraintBaseOnMenuItems(layoutWrapper, childConstraint);
     UpdateSelfSize(layoutWrapper, childConstraint, layoutConstraint);
+}
+
+void MultiMenuLayoutAlgorithm::UpdateMenuDefaultConstraintByDevice(const RefPtr<MenuPattern>& pattern,
+    LayoutConstraintF& childConstraint, float paddingWidth, std::optional<LayoutConstraintF>& layoutConstraint,
+    bool idealSizeHasVal)
+{
+    CHECK_NULL_VOID(pattern);
+
+    // only 2in1 device has restrictions on the menu width in API13
+    CHECK_NULL_VOID(Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_THIRTEEN));
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    auto expandDisplay = theme->GetExpandDisplay();
+    CHECK_NULL_VOID(expandDisplay);
+
+    auto mainMenuPattern = pattern->GetMainMenuPattern();
+    CHECK_NULL_VOID(mainMenuPattern);
+    if (!mainMenuPattern->IsContextMenu() && !mainMenuPattern->IsMenu()) {
+        return;
+    }
+
+    if (idealSizeHasVal) {
+        layoutConstraint->selfIdealSize.SetWidth(theme->GetMenuDefaultWidth().ConvertToPx());
+    } else {
+        childConstraint.minSize.SetWidth(theme->GetMenuDefaultWidth().ConvertToPx() - paddingWidth);
+    }
 }
 
 void MultiMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

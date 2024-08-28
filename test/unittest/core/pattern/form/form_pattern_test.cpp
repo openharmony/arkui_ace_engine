@@ -52,6 +52,7 @@ DirtySwapConfig config;
 RequestFormInfo formInfo;
 const std::string INIT_VALUE_1 = "hello1";
 constexpr double ARC_RADIUS_TO_DIAMETER = 2.0;
+constexpr double TRANSPARENT_VAL = 0;
 }
 class FormPatternTest : public testing::Test {
 public:
@@ -66,6 +67,9 @@ void FormPatternTest::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
     MockContainer::SetUp();
+    MockContainer::Current()->pipelineContext_ = NG::MockPipelineContext::GetCurrent();
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockContainer::Current()->pipelineContext_->taskExecutor_ = MockContainer::Current()->taskExecutor_;
 }
 
 void FormPatternTest::TearDownTestSuite()
@@ -252,6 +256,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_007, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     EXPECT_NE(pipeline, nullptr);
     int32_t delayTime = 0;
+    pipeline->taskExecutor_ = nullptr;
     auto taskExecutor = pipeline->GetTaskExecutor();
     EXPECT_EQ(taskExecutor, nullptr);
     pattern->HandleSnapshot(delayTime);
@@ -1924,5 +1929,22 @@ HWTEST_F(FormPatternTest, FormPatternTest_051, TestSize.Level1)
 
     auto drawRSFrame = pattern->GetDrawDelegate();
     EXPECT_NE(drawRSFrame, nullptr);
+}
+
+/**
+ * @tc.name: FormPatternTest_052
+ * @tc.desc: SetNonTransparentAfterRecover
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTest, FormPatternTest_052, TestSize.Level1)
+{
+    RefPtr<FormNode> formNode = CreateFromNode();
+    auto pattern = formNode->GetPattern<FormPattern>();
+    EXPECT_NE(pattern, nullptr);
+    pattern->frameNode_ = formNode;
+    RefPtr<RenderContext> externalRenderContext = pattern->GetExternalRenderContext();
+    externalRenderContext->SetOpacity(TRANSPARENT_VAL);
+    pattern->SetNonTransparentAfterRecover();
+    EXPECT_EQ(formNode->GetTotalChildCount(), 0);
 }
 } // namespace OHOS::Ace::NG

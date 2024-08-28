@@ -67,7 +67,9 @@ public:
     MOCK_METHOD3(Paint, void(SkCanvas* skCanvas, float x, float y));
 #endif
     MOCK_METHOD3(GetWordBoundary, bool(int32_t offset, int32_t& start, int32_t& end));
-
+    MOCK_METHOD6(TxtGetRectsForRange, void(int32_t start, int32_t end,
+        RectHeightStyle heightStyle, RectWidthStyle widthStyle,
+        std::vector<RectF>& selectedRects, std::vector<TextDirection>& textDirections));
     bool CalcCaretMetricsByPosition(
         int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity, bool needLineHighest) override
     {

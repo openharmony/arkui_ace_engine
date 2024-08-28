@@ -18,15 +18,10 @@
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/grid/grid_item_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
-#include "core/components_ng/pattern/grid/grid_item_theme.h"
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
-#include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.h"
-#include "core/components_ng/pattern/grid/irregular/grid_irregular_layout_algorithm.h"
-#include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1668,7 +1663,7 @@ HWTEST_F(GridLayoutTestNg, Cache001, TestSize.Level1)
     for (const int32_t i : preloadList) {
         EXPECT_FALSE(frameNode_->GetChildByIndex(i));
     }
-    EXPECT_EQ(pattern_->preloadItemList_, preloadList);
+    CheckPreloadListEqual(preloadList);
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     EXPECT_TRUE(pattern_->preloadItemList_.empty());
     for (const int32_t i : preloadList) {
@@ -1678,7 +1673,7 @@ HWTEST_F(GridLayoutTestNg, Cache001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     // preload next line
     const std::list<int32_t> preloadList2 = { 15, 16, 17 };
-    EXPECT_EQ(pattern_->preloadItemList_, preloadList2);
+    CheckPreloadListEqual(preloadList2);
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     EXPECT_TRUE(pattern_->preloadItemList_.empty());
     for (const int32_t i : preloadList2) {
@@ -1932,5 +1927,32 @@ HWTEST_F(GridLayoutTestNg, Stretch008, TestSize.Level1)
     EXPECT_EQ(childRect1.Width(), 0);
     auto childRect2 = pattern_->GetItemRect(2);
     EXPECT_EQ(childRect2.Width(), 0);
+}
+
+/**
+ * @tc.name: MarginPadding001
+ * @tc.desc: Test margin/padding
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, MarginPadding001, TestSize.Level1)
+{
+    ColumnModelNG colModel;
+    colModel.Create(Dimension(0), nullptr, "");
+    auto colNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(4);
+    CreateDone(colNode);
+
+    MarginProperty margin = { CalcLength(1), CalcLength(3), CalcLength(5), CalcLength(7) };
+    PaddingProperty padding = { CalcLength(2), CalcLength(4), CalcLength(6), CalcLength(8) };
+    layoutProperty_->UpdateMargin(margin);
+    layoutProperty_->UpdatePadding(padding);
+    auto itemLayoutProperty = GetChildLayoutProperty<GridItemLayoutProperty>(frameNode_, 2);
+    itemLayoutProperty->UpdateMargin(margin);
+    itemLayoutProperty->UpdatePadding(padding);
+    FlushLayoutTask(colNode, true);
+    EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameRect(), RectF(1, 5, 480, 800)));
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 2), RectF(3, 211, 233, 200)));
 }
 } // namespace OHOS::Ace::NG

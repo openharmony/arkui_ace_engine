@@ -16,9 +16,7 @@
 
 #ifndef FOUNDATION_ACE_TEST_CORE_PATTERN_SCROLLABLE_SCROLLABLE_TEST_NG_H
 #define FOUNDATION_ACE_TEST_CORE_PATTERN_SCROLLABLE_SCROLLABLE_TEST_NG_H
-#include "gtest/gtest.h"
 
-#include "frameworks/core/components_ng/base/frame_node.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
 namespace OHOS::Ace::NG {

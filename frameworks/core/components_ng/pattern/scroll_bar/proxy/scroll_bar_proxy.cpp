@@ -169,17 +169,18 @@ void ScrollBarProxy::NotifyScrollBar(const WeakPtr<ScrollablePattern>& weakScrol
 
         scrollBar->SetControlDistance(controlDistance);
         scrollBar->SetReverse(scrollable->IsReverse());
-        scrollBar->SetScrollableNodeOffset(
-            !scrollable->IsReverse() ? scrollableNodeOffset : controlDistance - scrollableNodeOffset);
         scrollBar->HandleScrollBarOutBoundary(scrollBarOutBoundaryDistance);
         auto host = scrollBar->GetHost();
         if (!host) {
             continue;
         }
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && !scrollBar->HasChild()) {
+            scrollBar->SetScrollableNodeOffset(scrollableNodeOffset);
             scrollBar->UpdateScrollBarOffset();
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         } else {
+            scrollBar->SetScrollableNodeOffset(
+                !scrollable->IsReverse() ? scrollableNodeOffset : controlDistance - scrollableNodeOffset);
             host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
         }
     }
@@ -217,14 +218,14 @@ bool ScrollBarProxy::NotifySnapScroll(
 {
     for (const auto& node : scrollableNodes_) {
         auto scrollable = node.scrollableNode.Upgrade();
-        if (!scrollable || !CheckScrollable(scrollable) || !node.calePredictSnapOffsetCallback ||
+        if (!scrollable || !CheckScrollable(scrollable) || !node.calcPredictSnapOffsetCallback ||
             !node.startScrollSnapMotionCallback) {
             continue;
         }
         auto controlDistance = GetScrollableNodeDistance(scrollable);
         auto patternOffset = CalcPatternOffset(controlDistance, barScrollableDistance, delta);
         dragDistance = CalcPatternOffset(controlDistance, barScrollableDistance, dragDistance);
-        auto predictSnapOffset = node.calePredictSnapOffsetCallback(patternOffset, dragDistance, -velocity);
+        auto predictSnapOffset = node.calcPredictSnapOffsetCallback(patternOffset, dragDistance, -velocity);
         // If snap scrolling, predictSnapOffset will has a value.
         if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
             node.startScrollSnapMotionCallback(predictSnapOffset.value(), velocity);

@@ -34,6 +34,22 @@
 #include "core/components_ng/property/templates_parser.h"
 #include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
+namespace {
+void AddCacheItemsInFront(
+    int32_t startIdx, LayoutWrapper* host, int32_t cacheCnt, std::list<GridPreloadItem>& buildList)
+{
+    for (int32_t i = 1; i <= cacheCnt; ++i) {
+        int32_t item = startIdx - i;
+        if (item < 0) {
+            break;
+        }
+        if (!host->GetChildByIndex(item, true)) {
+            buildList.emplace_back(item, true);
+        }
+    }
+}
+} // namespace
+
 void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -77,7 +93,8 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     // update cache info.
-    layoutWrapper->SetCacheCount(static_cast<int32_t>(gridLayoutProperty->GetCachedCountValue(1) * crossCount_));
+    const int32_t cacheCnt = static_cast<int32_t>(gridLayoutProperty->GetCachedCountValue(1) * crossCount_);
+    layoutWrapper->SetCacheCount(cacheCnt);
 
     gridLayoutInfo_.lastMainSize_ = mainSize;
     gridLayoutInfo_.lastCrossSize_ = crossSize;
@@ -90,6 +107,7 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     if (SystemProperties::GetGridCacheEnabled()) {
         FillCacheLineAtEnd(mainSize, crossSize, layoutWrapper);
+        AddCacheItemsInFront(gridLayoutInfo_.startIndex_, layoutWrapper, cacheCnt, predictBuildList_);
         if (!predictBuildList_.empty()) {
             GridLayoutUtils::PreloadGridItems(layoutWrapper->GetHostNode()->GetPattern<GridPattern>(),
                 std::move(predictBuildList_),
@@ -258,17 +276,17 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             } else {
                 SyncGeometry(wrapper);
             }
-            auto layoutProperty = wrapper->GetLayoutProperty();
-            CHECK_NULL_VOID(layoutProperty);
-            auto gridItemLayoutProperty = AceType::DynamicCast<GridItemLayoutProperty>(layoutProperty);
-            CHECK_NULL_VOID(gridItemLayoutProperty);
-            gridItemLayoutProperty->UpdateMainIndex(line->first);
-            gridItemLayoutProperty->UpdateCrossIndex(iter->first);
-            UpdateRealGridItemPositionInfo(wrapper, line->first, iter->first);
             auto frameNode = AceType::DynamicCast<FrameNode>(wrapper);
             if (frameNode) {
                 frameNode->MarkAndCheckNewOpIncNode();
             }
+            auto layoutProperty = wrapper->GetLayoutProperty();
+            CHECK_NULL_CONTINUE(layoutProperty);
+            auto gridItemLayoutProperty = AceType::DynamicCast<GridItemLayoutProperty>(layoutProperty);
+            CHECK_NULL_CONTINUE(gridItemLayoutProperty);
+            gridItemLayoutProperty->UpdateMainIndex(line->first);
+            gridItemLayoutProperty->UpdateCrossIndex(iter->first);
+            UpdateRealGridItemPositionInfo(wrapper, line->first, iter->first);
         }
         prevLineHeight += gridLayoutInfo_.lineHeightMap_[line->first] + mainGap_;
     }
@@ -333,8 +351,7 @@ void GridScrollLayoutAlgorithm::LayoutBackwardCachedLine(LayoutWrapper* layoutWr
             itemIdex = iter.second;
             auto crossIter = itemsCrossPosition_.find(itemIdex);
             if (crossIter == itemsCrossPosition_.end()) {
-                crossIter =
-                    itemsCrossPosition_.emplace(itemIdex, ComputeItemCrossPosition(iter.first)).first;
+                crossIter = itemsCrossPosition_.emplace(itemIdex, ComputeItemCrossPosition(iter.first)).first;
             }
             bool prevLineNotContains =
                 std::none_of(prevLine.begin(), prevLine.end(), [itemIdex](auto ite) { return ite.second == itemIdex; });
@@ -643,8 +660,27 @@ bool GridScrollLayoutAlgorithm::FillBlankAtStart(float mainSize, float crossSize
         gridLayoutInfo_.reachStart_ = true;
         break;
     }
-    if (gridLayoutInfo_.gridMatrix_[gridLayoutInfo_.startMainLineIndex_].size() < crossCount_ &&
-        gridLayoutInfo_.startIndex_ > 0) {
+
+    FillOneLineForwardWithoutUpdatingStartIndex(crossSize, mainSize, layoutWrapper);
+
+    gridLayoutInfo_.currentOffset_ = blankAtStart;
+    gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
+    return fillNewLine;
+}
+
+// If there is a multi-line item in the current line and its starting line is not within this line,
+// it may result in an incomplete layout.
+void GridScrollLayoutAlgorithm::FillOneLineForwardWithoutUpdatingStartIndex(
+    float crossSize, float mainSize, LayoutWrapper* layoutWrapper)
+{
+    if (gridLayoutInfo_.gridMatrix_.empty()) {
+        return;
+    }
+    auto startLine = gridLayoutInfo_.gridMatrix_.find(gridLayoutInfo_.startMainLineIndex_);
+    if (startLine == gridLayoutInfo_.gridMatrix_.end() || startLine->second.empty()) {
+        return;
+    }
+    if (startLine->second.size() < crossCount_ && gridLayoutInfo_.startIndex_ > 0) {
         auto tempStartIndex = gridLayoutInfo_.startIndex_;
         auto tempStartMainLineIndex = gridLayoutInfo_.startMainLineIndex_;
         auto tempCurrentMainLineIndex = currentMainLineIndex_;
@@ -660,10 +696,6 @@ bool GridScrollLayoutAlgorithm::FillBlankAtStart(float mainSize, float crossSize
         currentMainLineIndex_ = tempCurrentMainLineIndex;
         gridLayoutInfo_.reachStart_ = tempReachStart;
     }
-
-    gridLayoutInfo_.currentOffset_ = blankAtStart;
-    gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
-    return fillNewLine;
 }
 
 // When a moving up event comes, the [currentOffset_] may have been reduced too much than the items really need to
@@ -2184,9 +2216,9 @@ void GridScrollLayoutAlgorithm::CompleteItemCrossPosition(
         auto currentIndex = item.second;
         auto itemWrapper = layoutWrapper->GetChildByIndex(currentIndex, true);
         if (!itemWrapper) {
-            if (predictBuildList_.back() < currentIndex) {
-                predictBuildList_.push_front(currentIndex);
-            } else if (predictBuildList_.front() > currentIndex) {
+            if (predictBuildList_.back().idx < currentIndex) {
+                predictBuildList_.emplace_front(currentIndex);
+            } else if (predictBuildList_.front().idx > currentIndex) {
                 predictBuildList_.emplace_back(currentIndex);
             }
         }

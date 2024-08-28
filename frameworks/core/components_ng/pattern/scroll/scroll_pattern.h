@@ -19,6 +19,7 @@
 #include "base/geometry/axis.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/scroll/scroll_accessibility_property.h"
+#include "core/components_ng/pattern/scroll/scroll_content_modifier.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_algorithm.h"
@@ -62,7 +63,13 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        auto paint = MakeRefPtr<ScrollPaintMethod>();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        auto layoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
+        CHECK_NULL_RETURN(layoutProperty, nullptr);
+        auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+        auto drawDirection = (layoutDirection == TextDirection::RTL);
+        auto paint = MakeRefPtr<ScrollPaintMethod>(GetAxis() == Axis::HORIZONTAL, drawDirection);
         paint->SetScrollBar(GetScrollBar());
         CreateScrollBarOverlayModifier();
         paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
@@ -70,6 +77,11 @@ public:
         if (scrollEffect && scrollEffect->IsFadeEffect()) {
             paint->SetEdgeEffect(scrollEffect);
         }
+        if (!scrollContentModifier_) {
+            scrollContentModifier_ = AceType::MakeRefPtr<ScrollContentModifier>();
+        }
+        paint->SetContentModifier(scrollContentModifier_);
+        UpdateFadingEdge(paint);
         return paint;
     }
 
@@ -189,7 +201,7 @@ public:
     Rect GetItemRect(int32_t index) const override;
 
     // scrollSnap
-    std::optional<float> CalePredictSnapOffset(float delta, float dragDistance = 0.f, float velocity = 0.f) override;
+    std::optional<float> CalcPredictSnapOffset(float delta, float dragDistance = 0.f, float velocity = 0.f) override;
     bool NeedScrollSnapToSide(float delta) override;
     void CaleSnapOffsets();
     void CaleSnapOffsetsByInterval(ScrollSnapAlign scrollSnapAlign);
@@ -339,10 +351,12 @@ public:
     void AddScrollLayoutInfo();
 
     void GetScrollSnapAlignDumpInfo();
+    void GetScrollSnapAlignDumpInfo(std::unique_ptr<JsonValue>& json);
 
     void GetScrollPagingStatusDumpInfo();
-
+    void GetScrollPagingStatusDumpInfo(std::unique_ptr<JsonValue>& json);
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
 
     SizeF GetViewSize() const
     {
@@ -384,6 +398,8 @@ private:
     void HandleScrollPosition(float scroll);
     float FireTwoDimensionOnWillScroll(float scroll);
     void FireOnDidScroll(float scroll);
+    void FireOnReachStart(const OnReachEvent& onReachStart) override;
+    void FireOnReachEnd(const OnReachEvent& onReachEnd) override;
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void UpdateScrollBarOffset() override;
     void SetAccessibilityAction() override;
@@ -420,6 +436,8 @@ private:
     float lastPageLength_ = 0.0f;
     float GetPagingOffset(float delta, float dragDistance, float velocity)  const;
     float GetPagingDelta(float dragDistance, float velocity, float pageLength) const;
+
+    RefPtr<ScrollContentModifier> scrollContentModifier_;
 
     //initialOffset
     std::optional<OffsetT<CalcDimension>> initialOffset_;

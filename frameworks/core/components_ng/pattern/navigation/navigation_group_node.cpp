@@ -212,7 +212,7 @@ bool NavigationGroupNode::ReorderNavDestination(
         }
         int32_t childIndex = navigationContentNode->GetChildIndex(navDestination);
         if (childIndex < 0) {
-            navigationContentNode->AddChild(navDestination, slot);
+            navDestination->MountToParent(navigationContentNode, slot);
             hasChanged = true;
         } else if (childIndex != slot) {
             navDestination->MovePosition(slot);
@@ -371,6 +371,10 @@ void NavigationGroupNode::SetBackButtonEvent(const RefPtr<NavDestinationGroupNod
         CHECK_NULL_RETURN(navDestination, false);
         auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
         CHECK_NULL_RETURN(eventHub, false);
+        eventHub->SetState(NavDestinationState::ON_BACKPRESS);
+        auto navdestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
+        UIObserverHandler::GetInstance().NotifyNavigationStateChange(
+            navdestinationPattern, NavDestinationState::ON_BACKPRESS);
         auto isOverride = eventHub->GetOnBackPressedEvent();
         auto result = false;
         if (isOverride) {
@@ -446,6 +450,19 @@ bool NavigationGroupNode::CheckCanHandleBack()
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navDestination's ovelay consume backPressed event: %{public}s",
             navDestinationPattern->GetName().c_str());
         return true;
+    }
+    auto navDestinationContext = navDestinationPattern->GetNavDestinationContext();
+    CHECK_NULL_RETURN(navDestinationContext, false);
+    auto navPathInfo = navDestinationContext->GetNavPathInfo();
+    CHECK_NULL_RETURN(navPathInfo, false);
+    auto isEntry = navPathInfo->GetIsEntry();
+    if (isEntry) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s is entry navDestination, do not consume backPressed event",
+            navDestinationPattern->GetName().c_str());
+        navPathInfo->SetIsEntry(false);
+        auto index = navDestinationContext->GetIndex();
+        navigationStack->SetIsEntryByIndex(index, false);
+        return false;
     }
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navDestination consume back button event: %{public}s",
         navDestinationPattern->GetName().c_str());

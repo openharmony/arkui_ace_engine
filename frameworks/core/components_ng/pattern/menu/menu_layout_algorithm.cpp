@@ -330,7 +330,9 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     previewScale_ = LessOrEqual(afterAnimationScale, 0.0f) ? previewScale_ : afterAnimationScale;
     position_ = props->GetMenuOffset().value_or(OffsetF());
     dumpInfo_.globalLocation = position_;
+    // user-set offset
     positionOffset_ = props->GetPositionOffset().value_or(OffsetF());
+    dumpInfo_.offset = positionOffset_;
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         InitializePaddingAPI12(layoutWrapper);
     } else {
@@ -358,11 +360,9 @@ void MenuLayoutAlgorithm::InitializeParam(const RefPtr<MenuPattern>& menuPattern
     CHECK_NULL_VOID(safeAreaManager);
     auto safeAreaInsets = safeAreaManager->GetSafeAreaWithoutProcess();
     auto top = safeAreaInsets.top_.Length();
-    auto bottom = safeAreaInsets.bottom_.Length();
-    auto keyboardHeight = safeAreaManager->GetKeyboardInset().Length();
-    if (menuPattern->IsSelectOverlayExtensionMenu() && GreatNotEqual(keyboardHeight, 0)) {
-        bottom = keyboardHeight;
-    }
+    auto props = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    auto bottom = GetBottomBySafeAreaManager(safeAreaManager, props, menuPattern);
     auto windowGlobalRect = hierarchicalParameters_ ? pipelineContext->GetDisplayAvailableRect()
                                                     : pipelineContext->GetDisplayWindowRectInfo();
     float windowsOffsetX = static_cast<float>(windowGlobalRect.GetOffset().GetX());
@@ -414,11 +414,7 @@ void MenuLayoutAlgorithm::InitWrapperRect(
     CHECK_NULL_VOID(safeAreaManager);
     // system safeArea(AvoidAreaType.TYPE_SYSTEM) only include status bar,now the bottom is 0
     auto safeAreaInsets = safeAreaManager->GetSafeAreaWithoutProcess();
-    auto bottom = safeAreaInsets.bottom_.Length();
-    auto keyboardHeight = safeAreaManager->GetKeyboardInset().Length();
-    if (menuPattern->IsSelectOverlayExtensionMenu() && GreatNotEqual(keyboardHeight, 0)) {
-        bottom = keyboardHeight;
-    }
+    auto bottom = GetBottomBySafeAreaManager(safeAreaManager, props, menuPattern);
     auto top = safeAreaInsets.top_.Length();
     auto left = safeAreaInsets.left_.Length();
     auto right = safeAreaInsets.right_.Length();
@@ -451,6 +447,28 @@ void MenuLayoutAlgorithm::InitWrapperRect(
     }
     wrapperSize_ = SizeF(wrapperRect_.Width(), wrapperRect_.Height());
     dumpInfo_.wrapperRect = wrapperRect_;
+}
+
+uint32_t MenuLayoutAlgorithm::GetBottomBySafeAreaManager(const RefPtr<SafeAreaManager>& safeAreaManager,
+    const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern)
+{
+    auto safeAreaInsets = safeAreaManager->GetSafeAreaWithoutProcess();
+    auto bottom = safeAreaInsets.bottom_.Length();
+    auto keyboardHeight = safeAreaManager->GetKeyboardInset().Length();
+    if (menuPattern->IsSelectOverlayExtensionMenu() && GreatNotEqual(keyboardHeight, 0)) {
+        bottom = keyboardHeight;
+    }
+
+    // Determine whether the menu is an AI menu
+    if (props->GetIsRectInTargetValue(false)) {
+        if (LessOrEqual(keyboardHeight, 0)) {
+            keyboardHeight = safeAreaManager->GetkeyboardHeightConsideringUIExtension();
+        }
+        if (GreatNotEqual(keyboardHeight, 0)) {
+            bottom = keyboardHeight;
+        }
+    }
+    return bottom;
 }
 
 void MenuLayoutAlgorithm::InitSpace(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern)
@@ -621,8 +639,79 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         childConstraint.selfIdealSize.SetWidth(selectMenuWidth);
     }
 
+    // The menu width child Constraint is added to the 2in1 device in API13
+    UpdateChildConstraintByDevice(menuPattern, childConstraint, constraint.value());
+
     auto parentItem = menuPattern->GetParentMenuItem();
     CalculateIdealSize(layoutWrapper, childConstraint, padding, idealSize, parentItem);
+}
+
+bool MenuLayoutAlgorithm::CheckChildConstraintCondition(const RefPtr<MenuPattern>& menuPattern)
+{
+    CHECK_NULL_RETURN(menuPattern, false);
+    CHECK_NULL_RETURN(Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_THIRTEEN), false);
+    if (menuPattern->IsSubMenu()) {
+        auto parentItem = menuPattern->GetParentMenuItem();
+        CHECK_NULL_RETURN(parentItem, false);
+        auto parentPattern = parentItem->GetPattern<MenuItemPattern>();
+        CHECK_NULL_RETURN(parentPattern, false);
+        auto expandingMode = parentPattern->GetExpandingMode();
+        if (expandingMode == SubMenuExpandingMode::SIDE) {
+            return true;
+        }
+        return false;
+    }
+
+    if (menuPattern->IsMenu() || menuPattern->IsContextMenu()) {
+        return true;
+    }
+    return false;
+}
+
+void MenuLayoutAlgorithm::UpdateChildConstraintByDevice(const RefPtr<MenuPattern>& menuPattern,
+    LayoutConstraintF& childConstraint, const LayoutConstraintF& layoutConstraint)
+{
+    CHECK_NULL_VOID(menuPattern);
+
+    // only 2in1 device has restrictions on the menu width in API13
+    if (!CheckChildConstraintCondition(menuPattern)) {
+        return;
+    }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    
+    auto expandDisplay = theme->GetExpandDisplay();
+    CHECK_NULL_VOID(expandDisplay);
+
+    auto menuMinWidth = theme->GetMenuMinWidth().ConvertToPx();
+    auto menuDefaultWidth = theme->GetMenuDefaultWidth().ConvertToPx();
+    auto menuMaxWidth = theme->GetMenuMaxWidthRatio() * SystemProperties::GetDeviceWidth();
+    double minWidth = 0.0f;
+    double maxWidth = 0.0f;
+
+    auto firstMenu = menuPattern->GetFirstInnerMenu();
+    CHECK_NULL_VOID(firstMenu);
+    auto layoutProperty = firstMenu->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->HasMenuWidth()) {
+        auto menuWidth = layoutProperty->GetMenuWidthValue();
+        auto menuWidthPX = (menuWidth.Unit() == DimensionUnit::PERCENT) ?
+            menuWidth.Value() * layoutConstraint.percentReference.Width() : menuWidth.ConvertToPx();
+        if (LessNotEqual(menuWidthPX, menuMinWidth) || GreatNotEqual(menuWidthPX, menuMaxWidth)) {
+            minWidth = menuDefaultWidth;
+            maxWidth = menuMaxWidth;
+        } else {
+            minWidth = menuWidthPX;
+            maxWidth = menuWidthPX;
+        }
+    } else {
+        minWidth = menuDefaultWidth;
+        maxWidth = menuMaxWidth;
+    }
+    childConstraint.minSize.SetWidth(minWidth);
+    childConstraint.maxSize.SetWidth(maxWidth);
 }
 
 void MenuLayoutAlgorithm::CalculateIdealSize(LayoutWrapper* layoutWrapper,
@@ -1316,16 +1405,16 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto menuPosition = lastPosition_.has_value() && CheckIsEmbeddedMode(layoutWrapper) ? lastPosition_.value()
             : MenuLayoutAvoidAlgorithm(menuProp, menuPattern, size, didNeedArrow, layoutWrapper);
         menuPattern->UpdateLastPosition(menuPosition);
+        if (menuPattern->IsSelectOverlayRightClickMenu()) {
+            AdjustSelectOverlayMenuPosition(menuPosition, geometryNode);
+        }
         auto renderContext = menuNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
-        TAG_LOGI(AceLogTag::ACE_MENU, "update menu postion: %{public}s", menuPosition.ToString().c_str());
+        TAG_LOGD(AceLogTag::ACE_MENU, "update menu postion: %{public}s", menuPosition.ToString().c_str());
         renderContext->UpdatePosition(
             OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
         dumpInfo_.finalPlacement = PlacementUtils::ConvertPlacementToString(placement_);
         dumpInfo_.finalPosition = menuPosition;
-        if (menuPattern->IsSelectOverlayRightClickMenu()) {
-            AdjustSelectOverlayMenuPosition(menuPosition, geometryNode);
-        }
         SetMenuPlacementForAnimation(layoutWrapper);
         if (didNeedArrow && arrowPlacement_ != Placement::NONE) {
             arrowPosition_ = GetArrowPositionWithPlacement(size, layoutWrapper);

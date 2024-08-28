@@ -62,6 +62,7 @@ constexpr double FORM_CLICK_OPEN_LIMIT_DISTANCE = 20.0;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE = 30000;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_3S = 3000;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_EXTRA = 200;
+constexpr uint32_t DELAY_TIME_FOR_SET_NON_TRANSPARENT = 70;
 constexpr uint32_t DELAY_TIME_FOR_DELETE_IMAGE_NODE = 100;
 constexpr double ARC_RADIUS_TO_DIAMETER = 2.0;
 constexpr double NON_TRANSPARENT_VAL = 1.0;
@@ -93,6 +94,25 @@ public:
 private:
     WeakPtr<FormPattern> weakFormPattern_ = nullptr;
 };
+
+void PostTask(const TaskExecutor::Task& task, TaskExecutor::TaskType type, const std::string& name)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(task, type, name, PriorityType::HIGH);
+}
+
+void PostUITask(const TaskExecutor::Task& task, const std::string& name)
+{
+    PostTask(task, TaskExecutor::TaskType::UI, name);
+}
+
+void PostBgTask(const TaskExecutor::Task& task, const std::string& name)
+{
+    PostTask(task, TaskExecutor::TaskType::BACKGROUND, name);
+}
 } // namespace
 
 FormPattern::FormPattern()
@@ -418,22 +438,29 @@ void FormPattern::UpdateStaticCard()
     UnregisterAccessibility();
 }
 
-void FormPattern::DeleteImageNodeAfterRecover(bool needHandleCachedClick)
+void FormPattern::SetNonTransparentAfterRecover()
 {
-    // delete image rs node
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    // delete image frame node
-    RemoveFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE);
-
+    ACE_FUNCTION_TRACE();
     // set frs node non transparent
     if (formChildrenNodeMap_.find(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE)
         == formChildrenNodeMap_.end()) {
         UpdateChildNodeOpacity(FormChildNodeType::FORM_SURFACE_NODE, NON_TRANSPARENT_VAL);
-        TAG_LOGI(AceLogTag::ACE_FORM, "delete imageNode and setOpacity:1");
+        TAG_LOGI(AceLogTag::ACE_FORM, "setOpacity:1");
+    } else {
+        TAG_LOGW(AceLogTag::ACE_FORM, "has forbidden node");
     }
+}
+
+void FormPattern::DeleteImageNodeAfterRecover(bool needHandleCachedClick)
+{
+    ACE_FUNCTION_TRACE();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    // delete image rs node and frame node
+    RemoveFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE);
 
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     auto parent = host->GetParent();
@@ -631,10 +658,16 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
 void FormPattern::HandleFormComponent(const RequestFormInfo& info)
 {
+    ACE_FUNCTION_TRACE();
     if (info.bundleName != cardInfo_.bundleName || info.abilityName != cardInfo_.abilityName ||
         info.moduleName != cardInfo_.moduleName || info.cardName != cardInfo_.cardName ||
         info.dimension != cardInfo_.dimension || info.renderingMode != cardInfo_.renderingMode) {
-        AddFormComponent(info);
+        PostBgTask(
+            [weak = WeakClaim(this), info] {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->AddFormComponent(info);
+            }, "ArkUIHandleFormComponent");
     } else {
         UpdateFormComponent(info);
     }
@@ -670,16 +703,7 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
     }
 #endif
 
-    CreateCardContainer();
-    if (host->IsDraggable()) {
-        EnableDrag();
-    }
-
-#if OHOS_STANDARD_SYSTEM
-    if (!isJsCard_ && ShouldLoadFormSkeleton(formInfo.transparencyEnabled, info)) {
-        LoadFormSkeleton();
-    }
-#endif
+    AddFormComponentUI(formInfo.transparencyEnabled, info);
 
     if (!formManagerBridge_) {
         TAG_LOGE(AceLogTag::ACE_FORM, "Form manager delegate is nullptr.");
@@ -692,8 +716,34 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
 #endif
 
     if (!formInfo.transparencyEnabled && CheckFormBundleForbidden(info.bundleName)) {
-        LoadDisableFormStyle(info);
+        PostUITask([weak = WeakClaim(this), info] {
+            ACE_SCOPED_TRACE("ArkUILoadDisableFormStyle");
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->LoadDisableFormStyle(info);
+            }, "ArkUILoadDisableFormStyle");
     }
+}
+
+void FormPattern::AddFormComponentUI(bool isTransparencyEnabled, const RequestFormInfo& info)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    PostUITask([weak = WeakClaim(this), host, isTransparencyEnabled, info, isJsCard = isJsCard_] {
+        ACE_SCOPED_TRACE("ArkUIAddFormComponentUI");
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->CreateCardContainer();
+        if (host->IsDraggable()) {
+            pattern->EnableDrag();
+        }
+
+#if OHOS_STANDARD_SYSTEM
+        if (!isJsCard && pattern->ShouldLoadFormSkeleton(isTransparencyEnabled, info)) {
+            pattern->LoadFormSkeleton();
+        }
+#endif
+        }, "ArkUIAddFormComponentUI");
 }
 
 void FormPattern::UpdateFormComponent(const RequestFormInfo& info)
@@ -1440,6 +1490,13 @@ void FormPattern::DelayDeleteImageNode(bool needHandleCachedClick)
     CHECK_NULL_VOID(context);
 
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    uiTaskExecutor.PostDelayedTask(
+        [weak = WeakClaim(this)] {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetNonTransparentAfterRecover();
+        },
+        DELAY_TIME_FOR_SET_NON_TRANSPARENT, "ArkUIFormSetNonTransparentAfterRecover");
     uiTaskExecutor.PostDelayedTask(
         [weak = WeakClaim(this), needHandleCachedClick] {
             auto pattern = weak.Upgrade();

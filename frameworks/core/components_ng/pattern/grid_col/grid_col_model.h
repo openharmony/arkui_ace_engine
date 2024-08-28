@@ -28,11 +28,11 @@ public:
     virtual ~GridColModel() = default;
 
     virtual void Create() = 0;
-    virtual void Create(const RefPtr<V2::GridContainerSize>& span, const RefPtr<V2::GridContainerSize>& offset,
-        const RefPtr<V2::GridContainerSize>& order) = 0;
-    virtual void SetSpan(const RefPtr<V2::GridContainerSize>& span) = 0;
-    virtual void SetOffset(const RefPtr<V2::GridContainerSize>& offset) = 0;
-    virtual void SetOrder(const RefPtr<V2::GridContainerSize>& order) = 0;
+    virtual void Create(const V2::GridContainerSize& span, const V2::GridContainerSize& offset,
+        const V2::GridContainerSize& order) = 0;
+    virtual void SetSpan(const V2::GridContainerSize& span) = 0;
+    virtual void SetOffset(const V2::GridContainerSize& offset) = 0;
+    virtual void SetOrder(const V2::GridContainerSize& order) = 0;
 
 private:
     static std::unique_ptr<GridColModel> instance_;

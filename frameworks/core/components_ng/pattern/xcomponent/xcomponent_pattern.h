@@ -61,8 +61,11 @@ public:
     XComponentPattern(const std::optional<std::string>& id, XComponentType type,
         const std::optional<std::string>& libraryname,
         const std::shared_ptr<InnerXComponentController>& xcomponentController, float initWidth = 0.0f,
-        float initHeight = 0.0f);
+        float initHeight = 0.0f, bool isTypedNode = false);
     ~XComponentPattern() override = default;
+
+    void OnAttachToMainTree() override;
+    void OnDetachFromMainTree() override;
 
     bool IsAtomicNode() const override
     {
@@ -116,46 +119,28 @@ public:
     std::pair<RefPtr<OHOS::Ace::NativeXComponentImpl>, std::weak_ptr<OH_NativeXComponent>> GetNativeXComponent()
     {
         if (!nativeXComponent_ || !nativeXComponentImpl_) {
+            // for XComponentType::NODE
             nativeXComponentImpl_ = AceType::MakeRefPtr<NativeXComponentImpl>();
             nativeXComponent_ = std::make_shared<OH_NativeXComponent>(AceType::RawPtr(nativeXComponentImpl_));
         }
         return std::make_pair(nativeXComponentImpl_, nativeXComponent_);
     }
 
-    void NativeXComponentInit()
-    {
-        ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] NativeXComponentInit", GetId().c_str());
-        CHECK_RUN_ON(UI);
-        CHECK_NULL_VOID(nativeXComponentImpl_);
-        CHECK_NULL_VOID(nativeXComponent_);
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto width = initSize_.Width();
-        auto height = initSize_.Height();
-        nativeXComponentImpl_->SetXComponentWidth(static_cast<uint32_t>(width));
-        nativeXComponentImpl_->SetXComponentHeight(static_cast<uint32_t>(height));
-        auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
-        const auto* callback = nativeXComponentImpl_->GetCallback();
-        if (callback && callback->OnSurfaceCreated != nullptr) {
-            callback->OnSurfaceCreated(nativeXComponent_.get(), surface);
-        }
-    }
-
-    void NativeXComponentOffset(double x, double y);
-    void NativeXComponentChange(float width, float height);
-    void NativeXComponentDestroy();
     void NativeXComponentDispatchTouchEvent(const OH_NativeXComponent_TouchEvent& touchEvent,
         const std::vector<XComponentTouchPoint>& xComponentTouchPoints);
     void NativeXComponentDispatchMouseEvent(const OH_NativeXComponent_MouseEvent& mouseEvent);
     void NativeXComponentDispatchAxisEvent(AxisEvent* axisEvent);
 
+    void InitXComponent();
+    void InitNativeXComponent();
     void InitNativeWindow(float textureWidth, float textureHeight);
     void XComponentSizeInit();
     void XComponentSizeChange(const RectF& surfaceRect, bool needFireNativeEvent);
-
-    void* GetNativeWindow()
+    void NativeXComponentInit()
     {
-        return renderSurface_->GetNativeWindow();
+        if (!isTypedNode_) {
+            OnSurfaceCreated();
+        }
     }
 
     std::string GetId() const
@@ -231,6 +216,16 @@ public:
         return isSurfaceLock_;
     }
 
+    void SetIsTypeNode(bool isTypeNode)
+    {
+        isTypedNode_ = isTypeNode;
+    }
+
+    std::shared_ptr<InnerXComponentController> GetXComponentController()
+    {
+        return xcomponentController_;
+    }
+
     void SetHandlingRenderContextForSurface(const RefPtr<RenderContext>& otherRenderContext);
 
     void RestoreHandlingRenderContextForSurface();
@@ -273,8 +268,6 @@ public:
         hasXComponentInit_ = isInit;
     }
 
-    void Initialize();
-
     bool ChangeRenderType(NodeRenderType renderType);
 
     void SetRenderType(NodeRenderType renderType)
@@ -290,6 +283,11 @@ public:
     bool HasTransformHintChangedCallbackId()
     {
         return transformHintChangedCallbackId_.has_value();
+    }
+
+    bool NeedTriggerLoadEventImmediately() const
+    {
+        return isTypedNode_ && isNativeXComponent_ && hasLoadNativeDone_;
     }
 
     void SetExportTextureSurfaceId(const std::string& surfaceId);
@@ -311,6 +309,7 @@ public:
     void StopImageAnalyzer();
     RectF AdjustPaintRect(float positionX, float positionY, float width, float height, bool isRound);
     float RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor);
+    void OnSurfaceDestroyed();
 
 private:
     void OnAttachToFrameNode() override;
@@ -320,14 +319,29 @@ private:
     void OnAreaChangedInner() override;
     void OnWindowHide() override;
     void OnWindowShow() override;
-    void NativeSurfaceHide();
-    void NativeSurfaceShow();
     void OnModifyDone() override;
     void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void OnAttachContext(PipelineContext *context) override;
     void OnDetachContext(PipelineContext *context) override;
 
+    void NativeXComponentOffset(double x, double y);
+
+    void LoadNative();
+    void OnNativeLoad(FrameNode* frameNode);
+    void OnNativeUnload(FrameNode* frameNode);
+
+    void OnSurfaceCreated();
+    void OnSurfaceChanged(const RectF& surfaceRect);
+
+    void NativeSurfaceShow();
+    void NativeSurfaceHide();
+
+    void Initialize();
+    void InitController();
+    void InitSurface();
     void InitNativeNodeCallbacks();
     void InitEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -344,8 +358,7 @@ private:
     bool HandleKeyEvent(const KeyEvent& event);
     void HandleBlurEvent();
     ExternalEvent CreateExternalEvent();
-    void CreateSurface();
-    void SetMethodCall();
+
     void SetTouchPoint(
         const std::list<TouchLocationInfo>& touchInfoList, int64_t timeStamp, const TouchType& touchType);
     void HandleSetExpectedRateRangeEvent();
@@ -424,6 +437,7 @@ private:
     std::optional<float> selfIdealSurfaceOffsetX_;
     std::optional<float> selfIdealSurfaceOffsetY_;
     std::string surfaceId_;
+    void* nativeWindow_ = nullptr;
 
     bool isSurfaceLock_ = false;
 
@@ -435,6 +449,9 @@ private:
     bool isEnableAnalyzer_ = false;
     std::optional<int32_t> transformHintChangedCallbackId_;
     uint32_t rotation_ = 0;
+    bool isTypedNode_ = false;
+    bool isNativeXComponent_ = false;
+    bool hasLoadNativeDone_ = false;
 };
 } // namespace OHOS::Ace::NG
 

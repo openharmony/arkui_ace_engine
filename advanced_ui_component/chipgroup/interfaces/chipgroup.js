@@ -172,7 +172,7 @@ export class IconGroupSuffix extends ViewPU {
     initialRender() {
         PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Row.create();
+            Row.create({ space: 8 });
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             ForEach.create();
@@ -547,6 +547,22 @@ export class ChipGroup extends ViewPU {
         }
         return parseDimension(this.getUIContext(), this.chipGroupPadding.bottom, isValidDimensionNoPercentageString, defaultTheme.chipGroupPadding.bottom);
     }
+    getChipGroupHeight() {
+        if (typeof this.chipSize === 'string') {
+            if (this.chipSize === ChipSize.NORMAL) {
+                return ChipGroupHeight.NORMAL;
+            }
+            else {
+                return ChipGroupHeight.SMALL;
+            }
+        }
+        else if (typeof this.chipSize === 'object') {
+            return this.chipSize.height;
+        }
+        else {
+            return ChipGroupHeight.NORMAL;
+        }
+    }
     initialRender() {
         PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -557,6 +573,7 @@ export class ChipGroup extends ViewPU {
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create();
+            Stack.height(this.getChipGroupHeight());
             Stack.layoutWeight(1);
             Stack.blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN);
             Stack.alignContent(Alignment.End);
@@ -645,7 +662,7 @@ export class ChipGroup extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Stack.create();
                         Stack.width(iconGroupSuffixTheme.normalBackgroundSize);
-                        Stack.padding({ top: this.getPaddingTop(), bottom: this.getPaddingBottom() });
+                        Stack.height(this.getChipGroupHeight());
                         Stack.linearGradient({ angle: 90, colors: colorStops });
                         Stack.blendMode(BlendMode.DST_IN, BlendApplyType.OFFSCREEN);
                         Stack.hitTestBehavior(HitTestMode.None);
@@ -667,9 +684,7 @@ export class ChipGroup extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Row.create();
                         Row.padding({ left: iconGroupSuffixTheme.marginLeft,
-                            right: iconGroupSuffixTheme.marginRight,
-                            top: this.getPaddingTop(),
-                            bottom: this.getPaddingBottom()
+                            right: iconGroupSuffixTheme.marginRight
                         });
                     }, Row);
                     this.suffix.bind(this)();

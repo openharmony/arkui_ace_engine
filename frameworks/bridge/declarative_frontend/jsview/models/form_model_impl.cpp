@@ -120,7 +120,7 @@ void FormModelImpl::SetObscured(const std::vector<ObscuredReasons>& reasons)
 }
 
 int32_t FormModelImpl::RequestPublishFormWithSnapshot(const AAFwk::Want& want,
-    const std::string& formBindingDataStr, int64_t& formId)
+    const std::string& formBindingDataStr, int64_t& formId, std::string &errMsg)
 {
     LOGE("Not support RequestPublishFormWithSnapshot in old pipeline");
     return 0;

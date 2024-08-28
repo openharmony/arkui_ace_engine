@@ -286,6 +286,9 @@ std::pair<float, float> DotIndicatorPaintMethod::CalculatePointCenterX(
     }
     float startCenterX = margin + padding;
     float endCenterX = margin + padding;
+    if (isSwipeByGroup_ && displayCount_ != 0) {
+        index /= displayCount_;
+    }
     if (Positive(turnPageRate_)) {
         auto itemWidth = itemHalfSizes[ITEM_HALF_WIDTH] * TWOFOLD;
         auto selectedItemWidth = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * TWOFOLD;
@@ -336,8 +339,9 @@ std::tuple<std::pair<float, float>, LinearVector<float>> DotIndicatorPaintMethod
 
 std::tuple<float, float, float> DotIndicatorPaintMethod::GetMoveRate()
 {
+    auto actualTurnPageRate = isSwipeByGroup_ ? groupTurnPageRate_ : turnPageRate_;
     float blackPointCenterMoveRate = CubicCurve(BLACK_POINT_CENTER_BEZIER_CURVE_VELOCITY, CENTER_BEZIER_CURVE_MASS,
-        CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING).MoveInternal(std::abs(turnPageRate_));
+        CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING).MoveInternal(std::abs(actualTurnPageRate));
     float longPointLeftCenterMoveRate = 0.0f;
     float longPointRightCenterMoveRate = 0.0f;
     if (isPressed_ && touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE) {
@@ -353,20 +357,20 @@ std::tuple<float, float, float> DotIndicatorPaintMethod::GetMoveRate()
         longPointLeftCenterMoveRate = 1;
         longPointRightCenterMoveRate = 1;
     } else if (touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT) {
-        auto rateAbs = 1.0f - std::abs(turnPageRate_);
+        auto rateAbs = 1.0f - std::abs(actualTurnPageRate);
         // x0:0.33, y0:0, x1:0.67, y1:1
         longPointLeftCenterMoveRate = longPointRightCenterMoveRate = CubicCurve(0.33, 0, 0.67, 1).MoveInternal(rateAbs);
     } else if (touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT) {
-        auto rateAbs = std::abs(turnPageRate_);
+        auto rateAbs = std::abs(actualTurnPageRate);
         // x0:0.33, y0:0, x1:0.67, y1:1
         longPointLeftCenterMoveRate = longPointRightCenterMoveRate = CubicCurve(0.33, 0, 0.67, 1).MoveInternal(rateAbs);
     } else if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT) {
-        longPointLeftCenterMoveRate =std::abs(turnPageRate_);
-        longPointRightCenterMoveRate = std::abs(turnPageRate_) +
+        longPointLeftCenterMoveRate =std::abs(actualTurnPageRate);
+        longPointRightCenterMoveRate = std::abs(actualTurnPageRate) +
                                        ((1 - longPointLeftCenterMoveRate) * LONG_POINT_TAIL_RATIO);
     } else if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT) {
-        longPointRightCenterMoveRate = std::abs(turnPageRate_);
-        longPointLeftCenterMoveRate = std::abs(turnPageRate_) * LONG_POINT_TAIL_RATIO;
+        longPointRightCenterMoveRate = std::abs(actualTurnPageRate);
+        longPointLeftCenterMoveRate = std::abs(actualTurnPageRate) * LONG_POINT_TAIL_RATIO;
     }
     return { blackPointCenterMoveRate, longPointLeftCenterMoveRate, longPointRightCenterMoveRate };
 }
@@ -491,11 +495,36 @@ void DotIndicatorPaintMethod::UpdateBackground(const PaintWrapper* paintWrapper)
         touchBottomType_, vectorBlackPointCenterX_, longPointCenterX_, touchBottomRate_);
 }
 
+std::pair<int32_t, int32_t> DotIndicatorPaintMethod::GetIndexOnRTL(int32_t index)
+{
+    int32_t startCurrentIndex = index;
+    auto isInvalid = NearEqual(turnPageRate_, 0.0f) || LessOrEqualCustomPrecision(turnPageRate_, -1.0f) ||
+                     GreatOrEqualCustomPrecision(turnPageRate_, 1.0f);
+    if (!isInvalid) {
+        startCurrentIndex = LessNotEqualCustomPrecision(turnPageRate_, 0.0f) ? index - 1 : index + 1;
+    }
+
+    if (startCurrentIndex == -1) {
+        startCurrentIndex = itemCount_ - 1;
+    }
+
+    return { startCurrentIndex, index };
+}
+
 std::pair<int32_t, int32_t> DotIndicatorPaintMethod::GetIndex(int32_t index)
 {
     if (mouseClickIndex_ || gestureState_ == GestureState::GESTURE_STATE_RELEASE_LEFT ||
         gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT) {
         turnPageRate_ = 0;
+    }
+
+    if (isHorizontalAndRightToLeft_) {
+        return GetIndexOnRTL(index);
+    }
+
+    auto actualTurnPageRate = turnPageRate_;
+    if (isSwipeByGroup_ && groupTurnPageRate_ != 0) {
+        actualTurnPageRate = groupTurnPageRate_;
     }
     // item may be invalid in auto linear scene
     if (nextValidIndex_ >= 0) {
@@ -513,14 +542,21 @@ std::pair<int32_t, int32_t> DotIndicatorPaintMethod::GetIndex(int32_t index)
     }
 
     int32_t startCurrentIndex = index;
-    int32_t endCurrentIndex = NearEqual(turnPageRate_, 0.0f) || LessOrEqualCustomPrecision(turnPageRate_, -1.0f) ||
-                                      GreatOrEqualCustomPrecision(turnPageRate_, 1.0f)
+    int32_t endCurrentIndex = NearEqual(actualTurnPageRate, 0.0f) ||
+        LessOrEqualCustomPrecision(actualTurnPageRate, -1.0f) || GreatOrEqualCustomPrecision(actualTurnPageRate, 1.0f)
                                   ? endCurrentIndex = index
-                                  : (LessNotEqualCustomPrecision(turnPageRate_, 0.0f) ? index + 1 : index - 1);
+                                  : (LessNotEqualCustomPrecision(actualTurnPageRate, 0.0f) ? index + 1 : index - 1);
     if (endCurrentIndex == -1) {
         endCurrentIndex = itemCount_ - 1;
-    } else if (endCurrentIndex == itemCount_) {
-        endCurrentIndex = 0;
+    } else if (endCurrentIndex >= itemCount_) {
+        if (isLoop_) {
+            endCurrentIndex = 0;
+        } else {
+            if (startCurrentIndex >= itemCount_) {
+                startCurrentIndex = itemCount_ - 1;
+            }
+            endCurrentIndex = itemCount_ - 1;
+        }
     }
     return { startCurrentIndex, endCurrentIndex };
 }

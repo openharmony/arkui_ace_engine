@@ -14,6 +14,9 @@
  */
 
 #include "swiper_test_ng.h"
+#include "test/mock/core/pattern/mock_nestable_scroll_container.h"
+
+#include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_method.h"
 
 namespace OHOS::Ace::NG {
 
@@ -83,6 +86,69 @@ HWTEST_F(SwiperAttrTestNg, AttrIndex004, TestSize.Level1)
      */
     CreateWithItem([](SwiperModelNG model) { model.SetIndex(ITEM_NUMBER); });
     EXPECT_GT(GetChildWidth(frameNode_, 0), 0.f);
+}
+
+/**
+ * @tc.name: AttrIndex005
+ * @tc.desc: Test currentIndex_ when loop change to false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAttrTestNg, AttrIndex005, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Set index=0
+     * @tc.expected: When loop change to false, 0 <= currentIndex_ <= totalCount - 1
+     */
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetIndex(0);
+        model.SetLoop(true);
+    });
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+    pattern_->ShowPrevious();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->currentIndex_, -1);
+    layoutProperty_->UpdateLoop(false);
+    pattern_->OnModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->currentIndex_, 3);
+}
+
+/**
+ * @tc.name: AttrIndex006
+ * @tc.desc: Test property about index
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAttrTestNg, AttrIndex006, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Set invalid index = ITEM_NUMBER - 1, loop = false, displayCount = 2
+     * @tc.expected: Default show(currentIndex_ = 0) first item
+     */
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetLoop(false);
+        model.SetDisplayCount(2);
+        model.SetIndex(ITEM_NUMBER - 1);
+    });
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+}
+
+/**
+ * @tc.name: AttrIndex007
+ * @tc.desc: Test property about index
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAttrTestNg, AttrIndex007, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Set index = ITEM_NUMBER - 2, loop = false, displayCount = 2
+     * @tc.expected: Default show currentIndex_ = ITEM_NUMBER - 2 item
+     */
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetLoop(false);
+        model.SetDisplayCount(2);
+        model.SetIndex(ITEM_NUMBER - 2);
+    });
+    EXPECT_EQ(pattern_->currentIndex_, ITEM_NUMBER - 2);
 }
 
 /**

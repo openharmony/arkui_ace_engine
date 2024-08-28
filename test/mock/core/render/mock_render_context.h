@@ -87,6 +87,16 @@ public:
         return paintRect_;
     }
 
+#ifdef ENHANCED_ANIMATION
+    void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> modifier) override;
+    void DetachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& modifier) override {}
+
+    void CancelTranslateXYAnimation() override;
+    OffsetF GetTranslateXYProperty() override;
+    void UpdateTranslateInXY(const OffsetF& offset) override;
+#endif
+
+
     void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle)
     {
         const auto& groupProperty = GetOrCreateBackground();
@@ -114,6 +124,7 @@ public:
     RectF paintRect_;
     Color blendColor_ = Color::TRANSPARENT;
     std::vector<double> transInfo_ = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    RefPtr<AnimatablePropertyOffsetF> translateXY_;
     float opacityMultiplier_ = 1.0f;
 };
 } // namespace OHOS::Ace::NG

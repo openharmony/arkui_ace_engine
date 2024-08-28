@@ -124,6 +124,11 @@ DimensionUnit ParseDimensionUnit(const std::string& unit)
     }
 }
 
+ResourceAdapterImpl::ResourceAdapterImpl(std::shared_ptr<Global::Resource::ResourceManager> resourceManager)
+{
+    resourceManager_ = resourceManager;
+}
+
 void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
 {
     std::string appResPath = resourceInfo.GetPackagePath();
@@ -544,5 +549,23 @@ ColorMode ResourceAdapterImpl::GetResourceColorMode() const
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     resourceManager_->GetResConfig(*resConfig);
     return resConfig->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK ? ColorMode::DARK : ColorMode::LIGHT;
+}
+
+RefPtr<ResourceAdapter> ResourceAdapterImpl::GetOverrideResourceAdapter(
+    const ResourceConfiguration& config, const ConfigurationChange& configurationChange)
+{
+    std::shared_ptr<Global::Resource::ResConfig> overrideResConfig(Global::Resource::CreateResConfig());
+    resourceManager_->GetOverrideResConfig(*overrideResConfig);
+    if (configurationChange.colorModeUpdate) {
+        overrideResConfig->SetColorMode(ConvertColorModeToGlobal(config.GetColorMode()));
+    }
+    if (configurationChange.directionUpdate) {
+        overrideResConfig->SetDirection(ConvertDirectionToGlobal(config.GetOrientation()));
+    }
+    if (configurationChange.dpiUpdate) {
+        overrideResConfig->SetScreenDensity(config.GetDensity());
+    }
+    auto overrideResMgr = resourceManager_->GetOverrideResourceManager(overrideResConfig);
+    return AceType::MakeRefPtr<ResourceAdapterImpl>(overrideResMgr);
 }
 } // namespace OHOS::Ace

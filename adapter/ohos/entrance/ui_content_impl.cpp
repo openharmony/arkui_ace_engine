@@ -115,6 +115,7 @@ const std::string LOCAL_BUNDLE_CODE_PATH = "/data/storage/el1/bundle/";
 const std::string FILE_SEPARATOR = "/";
 const std::string START_PARAMS_KEY = "__startParams";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
+constexpr int32_t AVOID_DELAY_TIME = 20;
 
 Rosen::Rect ConvertToRSRect(NG::RectF& rect)
 {
@@ -323,12 +324,12 @@ public:
             auto curWindow = context->GetCurrentWindowRect();
             positionY -= curWindow.Top();
             ContainerScope scope(instanceId_);
-            taskExecutor->PostTask(
+            taskExecutor->PostDelayedTask(
                 [context, keyboardRect, rsTransaction, positionY, height] {
                     CHECK_NULL_VOID(context);
                     context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height, rsTransaction);
                 },
-                TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
+                TaskExecutor::TaskType::UI, AVOID_DELAY_TIME, "ArkUIVirtualKeyboardAreaChange");
         }
     }
 
@@ -573,6 +574,7 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
     auto hapModuleInfo = context->GetHapModuleInfo();
     CHECK_NULL_VOID(hapModuleInfo);
     moduleName_ = hapModuleInfo->name;
+    StoreConfiguration(context->GetConfiguration());
 }
 
 UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, bool isCard)
@@ -598,6 +600,9 @@ UIContentImpl::UIContentImpl(OHOS::AppExecFwk::Ability* ability)
 {
     CHECK_NULL_VOID(ability);
     context_ = ability->GetAbilityContext();
+    auto context = context_.lock();
+    CHECK_NULL_VOID(context);
+    StoreConfiguration(context->GetConfiguration());
 }
 
 void UIContentImpl::DestroyUIDirector()
@@ -1248,16 +1253,8 @@ void UIContentImpl::SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Con
         return;
     }
 
-    auto colorMode = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     auto deviceAccess = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
     auto languageTag = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
-    if (!colorMode.empty()) {
-        if (colorMode == "dark") {
-            SystemProperties::SetColorMode(ColorMode::DARK);
-        } else {
-            SystemProperties::SetColorMode(ColorMode::LIGHT);
-        }
-    }
 
     if (!deviceAccess.empty()) {
         // Event of accessing mouse or keyboard
@@ -1272,6 +1269,39 @@ void UIContentImpl::SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Con
         if (!language.empty() || !script.empty() || !region.empty()) {
             AceApplicationInfo::GetInstance().SetLocale(language, region, script, "");
         }
+    }
+    StoreConfiguration(config);
+}
+
+void UIContentImpl::StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
+{
+    if (!config) {
+        return;
+    }
+    TAG_LOGD(AceLogTag::ACE_WINDOW, "StoreConfiguration %{public}s", config->GetName().c_str());
+    auto colorMode = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    if (!colorMode.empty()) {
+        if (colorMode == "drak") {
+            SystemProperties::SetColorMode(ColorMode::DARK);
+        } else {
+            SystemProperties::SetColorMode(ColorMode::LIGHT);
+        }
+    }
+
+    auto string2float = [](const std::string& str) {
+        try {
+            return std::stof(str);
+        } catch (...) {
+            return 1.0f;
+        }
+    };
+    auto fontScale = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
+    if (!fontScale.empty()) {
+        SystemProperties::SetFontScale(string2float(fontScale));
+    }
+    auto fontWeightScale = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE);
+    if (!fontWeightScale.empty()) {
+        SystemProperties::SetFontWeightScale(string2float(fontWeightScale));
     }
 }
 
@@ -2153,6 +2183,7 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
         return;
     }
 
+    StoreConfiguration(config);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
@@ -2302,6 +2333,26 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     } else {
         viewportConfigMgr_->UpdateConfig(aceViewportConfig, std::move(task), container, "ArkUIUpdateViewportConfig");
     }
+    UIExtensionUpdateViewportConfig(config);
+}
+
+void UIContentImpl::UIExtensionUpdateViewportConfig(const ViewportConfig& config)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto updateSessionViewportConfigTask = [context, config]() {
+        CHECK_NULL_VOID(context);
+        auto uiExtMgr = context->GetUIExtensionManager();
+        if (uiExtMgr) {
+            uiExtMgr->UpdateSessionViewportConfig(config);
+        }
+    };
+    taskExecutor->PostTask(
+        std::move(updateSessionViewportConfigTask), TaskExecutor::TaskType::UI, "ArkUIUpdateSessionViewportConfig");
 }
 
 void UIContentImpl::SetIgnoreViewSafeArea(bool ignoreViewSafeArea)

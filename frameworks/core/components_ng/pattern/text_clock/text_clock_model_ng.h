@@ -47,7 +47,10 @@ public:
     void InitFontDefault(const TextStyle& textStyle) override;
     void SetDateTimeOptions(const ZeroPrefixType& hourType) override;
 
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static RefPtr<TextClockController> InitTextController(FrameNode* frameNode);
     static void SetFormat(FrameNode* frameNode, const std::string& format);
+    static void SetHoursWest(FrameNode* frameNode, float hoursWest);
     static void SetFontColor(FrameNode* frameNode, const Color& value);
     static void SetFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetFontStyle(FrameNode* frameNode, Ace::FontStyle value);
@@ -56,7 +59,10 @@ public:
     static void SetTextShadow(FrameNode* frameNode, const std::vector<Shadow>& value);
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
     static void SetBuilderFunc(FrameNode* frameNode, TextClockMakeCallback&& jsMake);
+    static void InitFontDefault(FrameNode* frameNode, const TextStyle& textStyle);
     static void SetDateTimeOptions(FrameNode* frameNode, const ZeroPrefixType& hourType);
+    static void SetJSTextClockController(FrameNode* frameNode, const RefPtr<Referenced>& controller);
+    static RefPtr<Referenced> GetJSTextClockController(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 

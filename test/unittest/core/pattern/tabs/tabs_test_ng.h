@@ -16,56 +16,14 @@
 #ifndef FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_TABS_TABS_TEST_NG_H
 #define FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_TABS_TABS_TEST_NG_H
 
-#include <cstddef>
-#include <utility>
-
-#include "gtest/gtest.h"
-
-#include "base/geometry/axis.h"
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-
+#include "test/unittest/core/pattern/test_ng.h"
 #define private public
 #define protected public
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/unittest/core/pattern/test_ng.h"
-
-#include "base/memory/ace_type.h"
-#include "core/components/tab_bar/tab_theme.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/layout/layout_wrapper_builder.h"
-#include "core/components_ng/layout/layout_wrapper_node.h"
-#include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/pattern/linear_layout/column_model_ng.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
-#include "core/components_ng/pattern/scrollable/scrollable.h"
-#include "core/components_ng/pattern/stage/page_pattern.h"
-#include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
-#include "core/components_ng/pattern/tabs/tab_bar_item_accessibility_property.h"
-#include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
-#include "core/components_ng/pattern/tabs/tab_content_pattern.h"
-#include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/text/text_model_ng.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/property/layout_constraint.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;
@@ -116,6 +74,7 @@ constexpr float LARGE_FONT_SIZE_SCALE = 2.0f;
 constexpr float MAX_FONT_SIZE_SCALE = 3.2f;
 constexpr double BIG_DIALOG_WIDTH = 216.0;
 constexpr double MAX_DIALOG_WIDTH = 256.0;
+const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example.svg";
 
 class TabsTestNg : public TestNG {
 public:

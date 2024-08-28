@@ -27,11 +27,17 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
 {
     auto container = Container::Current();
     auto currentId = Container::CurrentId();
-    CHECK_NULL_VOID(container);
+    if (!container) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "Container is null.");
+        return;
+    }
     if (container->IsSubContainer() && !dialogProperties.isShowInSubWindow) {
         currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
         container = AceEngine::Get().GetContainer(currentId);
-        CHECK_NULL_VOID(container);
+        if (!container) {
+            TAG_LOGE(AceLogTag::ACE_DIALOG, "ParentContainer is null.");
+            return;
+        }
     }
     ContainerScope scope(currentId);
     auto pipelineContext = container->GetPipelineContext();
@@ -49,31 +55,56 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
 
     auto executor = context->GetTaskExecutor();
     CHECK_NULL_VOID(executor);
+    auto task = ParseOpenDialogTask(
+        currentId, controller, dialogProperties, dialogs, std::move(buildFunc), overlayManager);
+    executor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIDialogShowCustomDialog");
+}
+
+TaskExecutor::Task CustomDialogControllerModelNG::ParseOpenDialogTask(int32_t currentId,
+    const WeakPtr<AceType>& controller, DialogProperties& dialogProperties, std::vector<WeakPtr<AceType>>& dialogs,
+    std::function<void()>&& buildFunc, const RefPtr<OverlayManager>& overlayManager)
+{
     auto task = [currentId, controller, &dialogProperties, &dialogs, func = std::move(buildFunc),
                     weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager))]() mutable {
         ContainerScope scope(currentId);
         RefPtr<NG::FrameNode> dialog;
         auto overlayManager = weakOverlayManager.Upgrade();
-        CHECK_NULL_VOID(overlayManager);
+        if (!overlayManager) {
+            TAG_LOGE(AceLogTag::ACE_DIALOG, "OverlayManager is null.");
+            return;
+        }
         auto controllerPtr = controller.Upgrade();
-        CHECK_NULL_VOID(controllerPtr);
+        if (!controllerPtr) {
+            TAG_LOGE(AceLogTag::ACE_DIALOG, "CustomDialogController is null.");
+            return;
+        }
         auto container = Container::Current();
-        CHECK_NULL_VOID(container);
+        if (!container) {
+            TAG_LOGE(AceLogTag::ACE_DIALOG, "Current container is null.");
+            return;
+        }
         if (dialogProperties.isShowInSubWindow) {
             dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties, std::move(func));
+            CHECK_NULL_VOID(dialog);
             if (dialogProperties.isModal && !dialogProperties.isScenceBoardDialog &&
                 !container->IsUIExtensionWindow()) {
                 auto mask = overlayManager->SetDialogMask(dialogProperties);
-                CHECK_NULL_VOID(mask);
+                if (!mask) {
+                    TAG_LOGW(AceLogTag::ACE_DIALOG, "fail to set mask dialog.");
+                    return;
+                }
                 overlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());
             }
         } else {
             dialog = overlayManager->ShowDialog(dialogProperties, std::move(func), false);
         }
-        CHECK_NULL_VOID(dialog);
+        if (!dialog) {
+            TAG_LOGE(AceLogTag::ACE_DIALOG, "fail to show dialog.");
+            return;
+        }
         dialogs.emplace_back(dialog);
     };
-    executor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIDialogShowCustomDialog");
+    return task;
 }
 
 RefPtr<UINode> CustomDialogControllerModelNG::SetOpenDialogWithNode(DialogProperties& dialogProperties,
@@ -118,11 +149,17 @@ void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogPrope
 {
     auto container = Container::Current();
     auto currentId = Container::CurrentId();
-    CHECK_NULL_VOID(container);
+    if (!container) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "Container is null.");
+        return;
+    }
     if (container->IsSubContainer() && !dialogProperties.isShowInSubWindow) {
         currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
         container = AceEngine::Get().GetContainer(currentId);
-        CHECK_NULL_VOID(container);
+        if (!container) {
+            TAG_LOGE(AceLogTag::ACE_DIALOG, "ParentContainer is null.");
+            return;
+        }
     }
     ContainerScope scope(currentId);
     auto pipelineContext = container->GetPipelineContext();
@@ -133,12 +170,26 @@ void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogPrope
     CHECK_NULL_VOID(overlayManager);
     auto executor = context->GetTaskExecutor();
     CHECK_NULL_VOID(executor);
+    auto task = ParseCloseDialogTask(controller, dialogProperties, dialogs, overlayManager);
+    executor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIDialogCloseCustomDialog");
+}
+
+TaskExecutor::Task CustomDialogControllerModelNG::ParseCloseDialogTask(const WeakPtr<AceType>& controller,
+    DialogProperties& dialogProperties, std::vector<WeakPtr<AceType>>& dialogs,
+    const RefPtr<OverlayManager>& overlayManager)
+{
     auto task = [controller, &dialogs, &dialogProperties,
                     weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager))]() {
         auto overlayManager = weakOverlayManager.Upgrade();
-        CHECK_NULL_VOID(overlayManager);
+        if (!overlayManager) {
+            TAG_LOGE(AceLogTag::ACE_DIALOG, "OverlayManager is null.");
+            return;
+        }
         auto controllerPtr = controller.Upgrade();
-        CHECK_NULL_VOID(controllerPtr);
+        if (!controllerPtr) {
+            TAG_LOGE(AceLogTag::ACE_DIALOG, "CustomDialogController is null.");
+            return;
+        }
         RefPtr<NG::FrameNode> dialog;
         while (!dialogs.empty()) {
             dialog = AceType::DynamicCast<NG::FrameNode>(dialogs.back().Upgrade());
@@ -149,6 +200,7 @@ void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogPrope
             dialogs.pop_back();
         }
         if (dialogs.empty()) {
+            TAG_LOGW(AceLogTag::ACE_DIALOG, "Dialog map is empty.");
             return;
         }
         CHECK_NULL_VOID(dialog);
@@ -159,7 +211,7 @@ void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogPrope
             overlayManager->CloseDialog(dialog);
         }
     };
-    executor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIDialogCloseCustomDialog");
+    return task;
 }
 
 void CustomDialogControllerModelNG::SetCloseDialogForNDK(FrameNode* dialogNode)

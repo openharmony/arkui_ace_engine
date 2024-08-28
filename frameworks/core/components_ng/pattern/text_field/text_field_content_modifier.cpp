@@ -544,6 +544,9 @@ void TextFieldContentModifier::ProcessErrorParagraph(DrawingContext& context, fl
             return; // no enough space
         }
         errorParagraph->Layout(layoutWidth);
+        if (errorParagraph->GetLongestLine() > layoutWidth) {
+            return; // no enough space
+        }
         auto isRTL = property->GetNonAutoLayoutDirection() == TextDirection::RTL;
         auto offSetX = offset.GetX();
         if (isRTL) {

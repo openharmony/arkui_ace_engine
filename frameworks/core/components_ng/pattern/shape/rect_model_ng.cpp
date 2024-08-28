@@ -74,6 +74,7 @@ void RectModelNG::SetRadiusValue(const Dimension& radiusX, const Dimension& radi
 void RectModelNG::UpdateRadius(const Radius& radius)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto castRectPaintProperty = frameNode->GetPaintProperty<RectPaintProperty>();
     if (castRectPaintProperty) {
         castRectPaintProperty->UpdateTopLeftRadius(radius);

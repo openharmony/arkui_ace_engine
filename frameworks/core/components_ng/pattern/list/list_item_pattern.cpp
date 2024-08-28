@@ -702,13 +702,13 @@ void ListItemPattern::FireSwipeActionOffsetChange(float oldOffset, float newOffs
 
 void ListItemPattern::FireSwipeActionStateChange(ListItemSwipeIndex newSwiperIndex)
 {
-    TAG_LOGI(AceLogTag::ACE_LIST, "ListItem swiperIndex origin:%{public}d, new:%{public}d, curPos:%{public}f",
-        swiperIndex_, newSwiperIndex, curOffset_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    TAG_LOGI(AceLogTag::ACE_LIST, "ListItem:%{public}d swiperIndex origin:%{public}d, new:%{public}d, "
+        "curPos:%{public}f", host->GetId(), swiperIndex_, newSwiperIndex, curOffset_);
     if (newSwiperIndex == swiperIndex_) {
         return;
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(listItemEventHub);
 
@@ -744,7 +744,7 @@ void ListItemPattern::UpdateClickJudgeCallback()
     auto scrollableEvent = listPattern->GetScrollableEvent();
     CHECK_NULL_VOID(scrollableEvent);
     if (swipeActionState_ == SwipeActionState::COLLAPSED) {
-        TAG_LOGI(AceLogTag::ACE_LIST, "RemoveClickJudgeCallback");
+        TAG_LOGI(AceLogTag::ACE_LIST, "List:%{public}d RemoveClickJudgeCallback", frameNode->GetId());
         scrollableEvent->SetClickJudgeCallback(nullptr);
     } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         auto clickJudgeCallback = [weak = WeakClaim(this)](const PointF& localPoint) -> bool {
@@ -752,7 +752,7 @@ void ListItemPattern::UpdateClickJudgeCallback()
             CHECK_NULL_RETURN(item, false);
             return item->ClickJudge(localPoint);
         };
-        TAG_LOGI(AceLogTag::ACE_LIST, "AddClickJudgeCallback");
+        TAG_LOGI(AceLogTag::ACE_LIST, "List:%{public}d AddClickJudgeCallback", frameNode->GetId());
         scrollableEvent->SetClickJudgeCallback(clickJudgeCallback);
     }
 }
@@ -781,8 +781,8 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
     bool reachLeftSpeed = -velocity > SWIPER_SPEED_TH;
     isDragging_ = false;
 
-    TAG_LOGI(AceLogTag::ACE_LIST, "ListItem HandleDragEnd, velocity:%{public}f, curPos:%{public}f",
-        velocity, curOffset_);
+    TAG_LOGI(AceLogTag::ACE_LIST, "ListItem:%{public}d HandleDragEnd, velocity:%{public}f, curPos:%{public}f",
+        host->GetId(), velocity, curOffset_);
     if (swiperIndex_ != ListItemSwipeIndex::SWIPER_ACTION && hasStartDeleteArea_ && !HasStartNode() && startOnDelete &&
         GreatOrEqual(curOffset_, startDeleteAreaDistance_) && swiperIndex_ != ListItemSwipeIndex::SWIPER_END) {
         DoDeleteAnimation(true);
@@ -1212,5 +1212,55 @@ void ListItemPattern::OnDetachFromMainTree()
     CHECK_NULL_VOID(listPattern);
     listPattern->SetSwiperItemEnd(AceType::WeakClaim(this));
 }
-} // namespace OHOS::Ace::NG
 
+bool ListItemPattern::RenderCustomChild(int64_t deadline)
+{
+    if (shallowBuilder_ && !shallowBuilder_->IsExecuteDeepRenderDone()) {
+        if (GetSysTimestamp() > deadline) {
+            return false;
+        }
+        shallowBuilder_->ExecuteDeepRender();
+        shallowBuilder_.Reset();
+    }
+    return true;
+}
+
+void ListItemPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("indexInList", indexInList_);
+    json->Put("indexInListItemGroup", indexInListItemGroup_);
+    json->Put("swiperAction.startNodeIndex", startNodeIndex_);
+    json->Put("swiperAction.endNodeIndex", endNodeIndex_);
+    json->Put("swiperAction.childNodeIndex", childNodeIndex_);
+    json->Put("curOffset", curOffset_);
+    json->Put("startNodeSize", startNodeSize_);
+    json->Put("endNodeSize", endNodeSize_);
+    json->Put("startDeleteAreaDistance", startDeleteAreaDistance_);
+    json->Put("endDeleteAreaDistance", endDeleteAreaDistance_);
+
+    switch (swipeActionState_) {
+        case SwipeActionState::COLLAPSED:
+            json->Put("SwipeActionState", "COLLAPSED");
+            break;
+        case SwipeActionState::EXPANDED:
+            json->Put("SwipeActionState", "EXPANDED");
+            break;
+        case SwipeActionState::ACTIONING:
+            json->Put("SwipeActionState", "ACTIONING");
+            break;
+    }
+    json->Put("hasStartDeleteArea", hasStartDeleteArea_);
+    json->Put("hasEndDeleteArea", hasEndDeleteArea_);
+    json->Put("inStartDeleteArea", inStartDeleteArea_);
+    json->Put("inEndDeleteArea", inEndDeleteArea_);
+    json->Put("selectable", selectable_);
+    json->Put("isSelected", isSelected_);
+    json->Put("isHover", isHover_);
+    json->Put("isPressed", isPressed_);
+    json->Put("isLayouted", isLayouted_);
+    json->Put("hasStartDeleteArea", hasStartDeleteArea_);
+    if (enableOpacity_.has_value()) {
+        json->Put("enableOpacity", enableOpacity_.value() ? "true:" : "false");
+    }
+}
+} // namespace OHOS::Ace::NG

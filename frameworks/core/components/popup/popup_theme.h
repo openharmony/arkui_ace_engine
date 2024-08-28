@@ -86,10 +86,6 @@ public:
                 pattern->GetAttr<Dimension>(POPUP_VERTICAL_PADDING, 12.0_vp),
                 pattern->GetAttr<Dimension>(POPUP_HORIZONTAL_PADDING, 16.0_vp),
                 pattern->GetAttr<Dimension>(POPUP_VERTICAL_PADDING, 12.0_vp));
-            theme->textBottomPadding_ = Edge(pattern->GetAttr<Dimension>(POPUP_HORIZONTAL_PADDING, 0.0_vp),
-                pattern->GetAttr<Dimension>(POPUP_VERTICAL_PADDING, 1.0_vp),
-                pattern->GetAttr<Dimension>(POPUP_HORIZONTAL_PADDING, 0.0_vp),
-                pattern->GetAttr<Dimension>(POPUP_VERTICAL_PADDING, 30.0_vp));
             auto popupDoubleBorderEnable = pattern->GetAttr<std::string>("popup_double_border_enable", "0");
             theme->popupDoubleBorderEnable_ = StringUtils::StringToInt(popupDoubleBorderEnable);
             theme->popupOuterBorderWidth_ = pattern->GetAttr<Dimension>("popup_outer_border_width", 0.8_vp);
@@ -107,11 +103,6 @@ public:
     const Edge& GetPadding() const
     {
         return padding_;
-    }
-
-    const Edge& GetTextBottomPadding() const
-    {
-        return textBottomPadding_;
     }
 
     const Color& GetMaskColor() const
@@ -189,14 +180,39 @@ public:
         return bubbleSpacing_;
     }
 
+    const Dimension& GetAgingTextLeftPadding() const
+    {
+        return ageTextLeftPadding_;
+    }
+
+    const Dimension& GetAgingTextRightPadding() const
+    {
+        return ageTextRightPadding_;
+    }
+
+    const Dimension& GetAgingButtonTextLeftPadding() const
+    {
+        return ageButtonTextLeftPadding_;
+    }
+
+    const Dimension& GetAgingButtonTextRightPadding() const
+    {
+        return ageButtonTextRightPadding_;
+    }
+
+    const Dimension& GetAgingButtonLeftPadding() const
+    {
+        return ageButtonLeftPadding_;
+    }
+
+    const Dimension& GetAgingButtonRightPadding() const
+    {
+        return ageButtonRightPadding_;
+    }
+
     const Dimension& GetButtonTextInsideMargin() const
     {
         return buttonTextInsideMargin_;
-    }
-
-    const Dimension& GetButtonTextSpacing() const
-    {
-        return buttonTextSpacing_;
     }
 
     const Dimension& GetButtonSpacing() const
@@ -207,11 +223,6 @@ public:
     const Dimension& GetLittlePadding() const
     {
         return littlePadding_;
-    }
-
-    const Dimension& GetBottomPadding() const
-    {
-        return bottomPadding_;
     }
 
     const Dimension& GetFocusPaintWidth() const
@@ -322,7 +333,6 @@ protected:
 
 private:
     Edge padding_;
-    Edge textBottomPadding_;
     Color maskColor_;
     Color backgroundColor_;
     Color buttonHoverColor_ = Color(0x0cffffff);
@@ -344,11 +354,15 @@ private:
     Dimension buttonFontSize_ = 14.0_fp;
     Color fontColor_;
     Dimension bubbleSpacing_ = 8.0_vp;
+    Dimension ageTextLeftPadding_ = 12.0_vp;
+    Dimension ageTextRightPadding_ = 12.0_vp;
+    Dimension ageButtonTextLeftPadding_ = 12.0_vp;
+    Dimension ageButtonTextRightPadding_ = 16.0_vp;
+    Dimension ageButtonLeftPadding_ = 0.0_vp;
+    Dimension ageButtonRightPadding_ = 0.0_vp;
     Dimension buttonTextInsideMargin_ = 8.0_vp;
-    Dimension buttonTextSpacing_ = 12.0_vp;
     Dimension buttonSpacing = 4.0_vp;
     Dimension littlePadding_ = 4.0_vp;
-    Dimension bottomPadding_ = 4.0_vp;
     Dimension arrowHeight_ = 8.0_vp;
     Dimension focusPaintWidth_ = 2.0_vp;
     Dimension buttonMiniMumWidth = 72.0_vp;

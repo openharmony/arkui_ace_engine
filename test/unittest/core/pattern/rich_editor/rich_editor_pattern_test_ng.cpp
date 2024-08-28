@@ -356,30 +356,6 @@ HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestInsertDiffStyleValueInSpa
 }
 
 /**
- * @tc.name: RichEditorPatternTestSpanNodeFission001
- * @tc.desc: test SpanNodeFission
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestSpanNodeFission001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto spanNode = AceType::MakeRefPtr<SpanNode>(testSpanNodeId);
-    ASSERT_NE(spanNode, nullptr);
-
-    std::string insertValue;
-    TextInsertValueInfo info;
-
-    richEditorPattern->SpanNodeFission(spanNode, insertValue, info);
-    ASSERT_EQ(spanNode->GetSpanItem()->position, -1);
-
-    insertValue = "hello\n";
-    richEditorPattern->SpanNodeFission(spanNode, insertValue, info);
-    ASSERT_EQ(spanNode->GetSpanItem()->position, 0);
-}
-
-/**
  * @tc.name: RichEditorPatternTestCreateTextSpanNode001
  * @tc.desc: test CreateTextSpanNode
  * @tc.type: FUNC
@@ -1590,7 +1566,11 @@ HWTEST_F(RichEditorPatternTestNg, ToGestureSpan001, TestSize.Level1)
     spanItem->onClick = [](GestureEvent& info) {};
     spanItem->onLongPress = [](GestureEvent& info) {};
 
-    EXPECT_NE(richEditorPattern->ToGestureSpan(spanItem), nullptr);
+    auto spanString = AceType::MakeRefPtr<SpanString>(INIT_VALUE_1);
+    ASSERT_NE(spanString, nullptr);
+    auto start = spanItem->position - StringUtils::ToWstring(spanItem->content).length();
+    auto end = spanItem->position;
+    EXPECT_NE(spanString->ToGestureSpan(spanItem, start, end), nullptr);
 }
 
 /**
@@ -1746,7 +1726,11 @@ HWTEST_F(RichEditorPatternTestNg, ToBaselineOffsetSpan001, TestSize.Level1)
     auto spanItem = AceType::MakeRefPtr<SpanItem>();
     ASSERT_NE(spanItem, nullptr);
     spanItem->textLineStyle->UpdateBaselineOffset(Dimension(testNumber5, DimensionUnit::PX));
-    EXPECT_NE(richEditorPattern->ToBaselineOffsetSpan(spanItem), nullptr);
+    auto spanString = AceType::MakeRefPtr<SpanString>(INIT_VALUE_1);
+    ASSERT_NE(spanString, nullptr);
+    auto start = spanItem->position - StringUtils::ToWstring(spanItem->content).length();
+    auto end = spanItem->position;
+    EXPECT_NE(spanString->ToBaselineOffsetSpan(spanItem, start, end), nullptr);
 }
 
 /**
@@ -1769,7 +1753,11 @@ HWTEST_F(RichEditorPatternTestNg, ToTextShadowSpan001, TestSize.Level1)
     textShadow2.SetColor(Color::WHITE);
     std::vector<Shadow> shadows { textShadow1, textShadow2 };
     spanItem->fontStyle->UpdateTextShadow(shadows);
-    EXPECT_NE(richEditorPattern->ToTextShadowSpan(spanItem), nullptr);
+    auto spanString = AceType::MakeRefPtr<SpanString>(INIT_VALUE_1);
+    ASSERT_NE(spanString, nullptr);
+    auto start = spanItem->position - StringUtils::ToWstring(spanItem->content).length();
+    auto end = spanItem->position;
+    EXPECT_NE(spanString->ToTextShadowSpan(spanItem, start, end), nullptr);
 }
 
 /**

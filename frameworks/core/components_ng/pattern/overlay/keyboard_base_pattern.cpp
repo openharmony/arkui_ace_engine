@@ -141,4 +141,8 @@ void KeyboardPattern::OnDetachFromFrameNode(FrameNode* node)
     pipeline->RemoveOnAreaChangeNode(node->GetId());
 }
 
+void KeyboardPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("TargetId", targetId_);
+}
 } // namespace OHOS::Ace::NG

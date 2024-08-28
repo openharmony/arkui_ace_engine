@@ -15,7 +15,6 @@
 
 #include "core/components/watch_slider/watch_slider_component.h"
 
-#include "core/components/watch_slider/render_watch_slider.h"
 #include "core/components/watch_slider/watch_slider_element.h"
 
 namespace OHOS::Ace {

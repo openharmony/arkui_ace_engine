@@ -65,22 +65,25 @@ class TextGestureSelector : public virtual AceType {
     DECLARE_ACE_TYPE(TextGestureSelector, AceType);
 
 public:
-    void StartGestureSelection(int32_t start, int32_t end)
+    void StartGestureSelection(int32_t start, int32_t end, const Offset& startOffset)
     {
         start_ = start;
         end_ = end;
-        isStarted = start_ <= end_;
+        isStarted_ = start_ <= end_;
+        startOffset_ = startOffset;
     }
 
     void EndGestureSelection()
     {
-        if (!isStarted) {
+        if (!isStarted_) {
             return;
         }
         OnTextGenstureSelectionEnd();
         start_ = -1;
         end_ = -1;
-        isStarted = false;
+        isStarted_ = false;
+        startOffset_.Reset();
+        isSelecting_ = false;
     }
 
     void DoGestureSelection(const TouchEventInfo& info);
@@ -97,7 +100,10 @@ private:
     void DoTextSelectionTouchMove(const TouchEventInfo& info);
     int32_t start_ = -1;
     int32_t end_ = -1;
-    bool isStarted = false;
+    bool isStarted_ = false;
+    bool isSelecting_ = false;
+    Dimension minMoveDistance_ = 5.0_vp;
+    Offset startOffset_;
 };
 
 class TextBase : public SelectOverlayClient {
@@ -206,6 +212,11 @@ public:
     static int32_t GetGraphemeClusterLength(const std::wstring& text, int32_t extend, bool checkPrev = false);
     static void CalculateSelectedRect(
         std::vector<RectF>& selectedRect, float longestLine, TextDirection direction = TextDirection::LTR);
+
+    virtual bool IsTextEditableForStylus()
+    {
+        return false;
+    }
 
 protected:
     TextSelector textSelector_;

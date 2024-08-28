@@ -206,6 +206,7 @@ public:
     void UpdateBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter) override;
     void UpdateForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter) override;
     void UpdateCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) override;
+    void UpdateBrightnessBlender(const OHOS::Rosen::BrightnessBlender* brightnessBlender) override;
 
     Rosen::SHADOW_COLOR_STRATEGY ToShadowColorStrategy(ShadowColorStrategy shadowColorStrategy);
     void OnBackShadowUpdate(const Shadow& shadow) override;
@@ -307,6 +308,8 @@ public:
 
     void PaintAccessibilityFocus() override;
 
+    void UpdateAccessibilityRoundRect() override;
+
     void ClearAccessibilityFocus() override;
 
     void OnAccessibilityFocusUpdate(
@@ -321,7 +324,13 @@ public:
     void RecalculatePosition() override;
     void OnZIndexUpdate(int32_t value) override;
     void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
+    void SetAdvanceInfo(std::unique_ptr<JsonValue>& json);
+    void BuildStagingInfo(std::unique_ptr<JsonValue>& json);
+    void BuildPositionInfo(std::unique_ptr<JsonValue>& json);
+    void BuildShadowInfo(std::unique_ptr<JsonValue>& json);
     void SetClipBoundsWithCommands(const std::string& commands) override;
     void SetNeedDebugBoundary(bool flag) override
     {
@@ -645,7 +654,7 @@ protected:
     int disappearingTransitionCount_ = 0;
     int sandBoxCount_ = 0;
     static constexpr int32_t INVALID_PARENT_ID = -2100000;
-    static constexpr uint32_t DRAW_REGION_RECT_COUNT = 6;
+    static constexpr uint32_t DRAW_REGION_RECT_COUNT = 7;
     std::map<std::string, RefPtr<ImageLoadingContext>> particleImageContextMap_;
     std::map<std::string, RefPtr<CanvasImage>> particleImageMap_;
     Color blendColor_ = Color::TRANSPARENT;

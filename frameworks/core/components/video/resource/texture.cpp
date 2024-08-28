@@ -15,10 +15,6 @@
 
 #include "core/components/video/resource/texture.h"
 
-#include <sstream>
-
-#include "base/log/log.h"
-
 namespace OHOS::Ace {
 
 const char TEXTURE_ERRORCODE_CREATEFAIL[] = "error_video_000001";

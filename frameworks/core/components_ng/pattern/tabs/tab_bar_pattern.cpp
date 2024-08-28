@@ -646,7 +646,7 @@ void TabBarPattern::FocusIndexChange(int32_t index)
     CHECK_NULL_VOID(tabsPattern);
     auto tabBarLayoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(tabBarLayoutProperty);
-    
+
     if (!ContentWillChange(tabBarLayoutProperty->GetIndicatorValue(0), index)) {
         return;
     }
@@ -1071,8 +1071,7 @@ void TabBarPattern::HandleClick(const GestureEvent& info, int32_t index)
         return;
     }
 
-    TAG_LOGI(AceLogTag::ACE_TABS, "Clicked tabBarIndex: %{public}d, Clicked tabBarLocation: %{public}s", index,
-        info.GetLocalLocation().ToString().c_str());
+    TAG_LOGI(AceLogTag::ACE_TABS, "Clicked tabBarIndex: %{public}d", index);
     if (index < 0 || index >= totalCount || !swiperController_ ||
         indicator_ >= static_cast<int32_t>(tabBarStyles_.size())) {
         return;
@@ -1128,7 +1127,7 @@ void TabBarPattern::ClickTo(const RefPtr<FrameNode>& host, int32_t index)
 
 void TabBarPattern::HandleBottomTabBarChange(int32_t index)
 {
-    AnimationUtils::CloseImplicitAnimation();
+    AnimationUtils::StopAnimation(maskAnimation_);
     auto preIndex = GetImageColorOnIndex().value_or(indicator_);
     if (preIndex == index) {
         return;
@@ -1313,37 +1312,42 @@ void TabBarPattern::PlayMaskAnimation(float selectedImageSize,
     option.SetDuration(MASK_ANIMATION_DURATION);
     option.SetCurve(curve);
 
-    AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), [weak = AceType::WeakClaim(this),
-        selectedIndex, unselectedIndex]() {
-        auto tabBar = weak.Upgrade();
-        if (tabBar) {
-            auto host = tabBar->GetHost();
-            CHECK_NULL_VOID(host);
-            MaskAnimationFinish(host, selectedIndex, true);
-            MaskAnimationFinish(host, unselectedIndex, false);
-        }
-    });
-    AnimationUtils::AddKeyFrame(HALF_PROGRESS, [weak = AceType::WeakClaim(this), selectedIndex, unselectedIndex,
-        selectedImageSize, originalSelectedMaskOffset, unselectedImageSize, originalUnselectedMaskOffset]() {
-        auto tabBar = weak.Upgrade();
-        if (tabBar) {
-            tabBar->ChangeMask(selectedIndex, selectedImageSize, originalSelectedMaskOffset, FULL_OPACITY,
-                INVALID_RATIO, true);
-            tabBar->ChangeMask(unselectedIndex, unselectedImageSize, originalUnselectedMaskOffset, NEAR_FULL_OPACITY,
-                INVALID_RATIO, false);
-        }
-    });
-    AnimationUtils::AddKeyFrame(FULL_PROGRESS, [weak = AceType::WeakClaim(this), selectedIndex, unselectedIndex,
-        selectedImageSize, originalSelectedMaskOffset, unselectedImageSize, originalUnselectedMaskOffset]() {
-        auto tabBar = weak.Upgrade();
-        if (tabBar) {
-            tabBar->ChangeMask(selectedIndex, selectedImageSize, originalSelectedMaskOffset, FULL_OPACITY,
-                FULL_MASK_RADIUS_RATIO, true);
-            tabBar->ChangeMask(unselectedIndex, unselectedImageSize, originalUnselectedMaskOffset, NO_OPACITY,
-                HALF_MASK_RADIUS_RATIO, false);
-        }
-    });
-    AnimationUtils::CloseImplicitAnimation();
+    maskAnimation_ = AnimationUtils::StartAnimation(
+        option,
+        [weak = AceType::WeakClaim(this), selectedIndex, unselectedIndex, selectedImageSize, originalSelectedMaskOffset,
+            unselectedImageSize, originalUnselectedMaskOffset]() {
+            AnimationUtils::AddKeyFrame(
+                HALF_PROGRESS, [weak, selectedIndex, unselectedIndex, selectedImageSize, originalSelectedMaskOffset,
+                                   unselectedImageSize, originalUnselectedMaskOffset]() {
+                    auto tabBar = weak.Upgrade();
+                    if (tabBar) {
+                        tabBar->ChangeMask(selectedIndex, selectedImageSize, originalSelectedMaskOffset, FULL_OPACITY,
+                            INVALID_RATIO, true);
+                        tabBar->ChangeMask(unselectedIndex, unselectedImageSize, originalUnselectedMaskOffset,
+                            NEAR_FULL_OPACITY, INVALID_RATIO, false);
+                    }
+                });
+            AnimationUtils::AddKeyFrame(
+                FULL_PROGRESS, [weak, selectedIndex, unselectedIndex, selectedImageSize, originalSelectedMaskOffset,
+                                   unselectedImageSize, originalUnselectedMaskOffset]() {
+                    auto tabBar = weak.Upgrade();
+                    if (tabBar) {
+                        tabBar->ChangeMask(selectedIndex, selectedImageSize, originalSelectedMaskOffset, FULL_OPACITY,
+                            FULL_MASK_RADIUS_RATIO, true);
+                        tabBar->ChangeMask(unselectedIndex, unselectedImageSize, originalUnselectedMaskOffset,
+                            NO_OPACITY, HALF_MASK_RADIUS_RATIO, false);
+                    }
+                });
+        },
+        [weak = AceType::WeakClaim(this), selectedIndex, unselectedIndex]() {
+            auto tabBar = weak.Upgrade();
+            if (tabBar) {
+                auto host = tabBar->GetHost();
+                CHECK_NULL_VOID(host);
+                MaskAnimationFinish(host, selectedIndex, true);
+                MaskAnimationFinish(host, unselectedIndex, false);
+            }
+        });
 }
 
 void TabBarPattern::MaskAnimationFinish(const RefPtr<FrameNode>& host, int32_t selectedIndex,
@@ -1522,7 +1526,7 @@ void TabBarPattern::HandleTouchEvent(const TouchLocationInfo& info)
     if (totalCount < 0) {
         return;
     }
-   
+
     if (touchType == TouchType::DOWN && index >= 0 && index < totalCount) {
         HandleTouchDown(index);
         touchingIndex_ = index;
@@ -1666,7 +1670,6 @@ void TabBarPattern::OnTabBarIndexChange(int32_t index)
         CHECK_NULL_VOID(tabBarPattern);
         auto tabBarNode = tabBarPattern->GetHost();
         CHECK_NULL_VOID(tabBarNode);
-        tabBarPattern->ResetIndicatorAnimationState();
         auto tabBarLayoutProperty = tabBarPattern->GetLayoutProperty<TabBarLayoutProperty>();
         CHECK_NULL_VOID(tabBarLayoutProperty);
         if (!tabBarPattern->IsMaskAnimationByCreate()) {
@@ -1674,9 +1677,12 @@ void TabBarPattern::OnTabBarIndexChange(int32_t index)
         }
         tabBarPattern->SetMaskAnimationByCreate(false);
         tabBarPattern->SetIndicator(index);
-        tabBarPattern->UpdateIndicator(index);
         tabBarPattern->UpdateSubTabBoard(index);
         tabBarPattern->UpdateTextColorAndFontWeight(index);
+        if (!tabBarPattern->GetChangeByClick() || tabBarLayoutProperty->GetIndicator().value_or(0) == index) {
+            tabBarPattern->ResetIndicatorAnimationState();
+        }
+        tabBarPattern->UpdateIndicator(index);
         if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
             tabBarPattern->UpdateAnimationDuration();
             auto duration = tabBarPattern->GetAnimationDuration().value_or(0);
@@ -1765,6 +1771,9 @@ void TabBarPattern::UpdateTextColorAndFontWeight(int32_t indicator)
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
+    auto tabBarLayoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(tabBarLayoutProperty);
+    auto axis = tabBarLayoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
     int32_t index = 0;
     for (const auto& columnNode : tabBarNode->GetChildren()) {
         CHECK_NULL_VOID(columnNode);
@@ -1780,7 +1789,7 @@ void TabBarPattern::UpdateTextColorAndFontWeight(int32_t indicator)
         auto isSelected = columnNode->GetId() == selectedColumnId;
         if (index >= 0 && index < static_cast<int32_t>(labelStyles_.size())) {
             if (isSelected) {
-                auto selectColor = selectedModes_[index] == SelectedMode::BOARD ?
+                auto selectColor = selectedModes_[index] == SelectedMode::BOARD && axis == Axis::HORIZONTAL ?
                     tabTheme->GetSubTabBoardTextOnColor() : tabTheme->GetSubTabTextOnColor();
                 textLayoutProperty->UpdateTextColor(labelStyles_[index].selectedColor.has_value() ?
                     labelStyles_[index].selectedColor.value() : selectColor);
@@ -2668,7 +2677,7 @@ void TabBarPattern::ApplyTurnPageRateToIndicator(float turnPageRate)
     if ((index >= totalCount || index >= static_cast<int32_t>(tabBarStyles_.size())) && !isRtl) {
         swiperStartIndex_--;
         index--;
-        turnPageRate += 1.0f;
+        turnPageRate = 1.0f;
     }
     if (isRtl && (index == static_cast<int32_t>(tabBarStyles_.size()) || NearEqual(turnPageRate, 1.0f))) {
         return;
@@ -2923,5 +2932,52 @@ bool TabBarPattern::IsValidIndex(int32_t index)
         return false;
     }
     return true;
+}
+
+void TabBarPattern::SetRegionInfo(std::unique_ptr<JsonValue>& json)
+{
+    std::string regionString = "";
+    for (auto item : gradientRegions_) {
+        item ? regionString.append("true ") : regionString.append("false ");
+    }
+    json->Put("region", regionString.c_str());
+    switch (axis_) {
+        case Axis::NONE: {
+            json->Put("Axis", "NONE");
+            break;
+        }
+        case Axis::HORIZONTAL: {
+            json->Put("Axis", "HORIZONTAL");
+            break;
+        }
+        case Axis::FREE: {
+            json->Put("Axis", "FREE");
+            break;
+        }
+        case Axis::VERTICAL: {
+            json->Put("Axis", "VERTICAL");
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+void TabBarPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("isRTL", isRTL_);
+    json->Put("touching", touching_);
+    json->Put("isMaskAnimationByCreate", isMaskAnimationByCreate_);
+    json->Put("animationDuration",
+        animationDuration_.has_value() ? std::to_string(animationDuration_.value()).c_str() : "null");
+    json->Put("isFirstFocus", isFirstFocus_);
+    json->Put("isTouchingSwiper", isTouchingSwiper_);
+    json->Put("isAnimating", isAnimating_);
+    json->Put("changeByClick", changeByClick_);
+    json->Put("indicator", indicator_);
+    json->Put("swiperStartIndex", swiperStartIndex_);
+    json->Put("scrollMargin", scrollMargin_);
+    SetRegionInfo(json);
 }
 } // namespace OHOS::Ace::NG

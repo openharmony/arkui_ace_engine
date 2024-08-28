@@ -18,15 +18,18 @@
 
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
+#include "core/components_ng/pattern/scrollable/scrollable_paint_method.h"
 #include "core/components_ng/pattern/waterflow/water_flow_content_modifier.h"
-#include "core/components_ng/render/node_paint_method.h"
 
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT WaterFlowPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(WaterFlowPaintMethod, NodePaintMethod)
+class ACE_EXPORT WaterFlowPaintMethod : public ScrollablePaintMethod {
+    DECLARE_ACE_TYPE(WaterFlowPaintMethod, ScrollablePaintMethod)
 public:
     WaterFlowPaintMethod() = default;
+    WaterFlowPaintMethod(bool vertical, bool isReverse, bool isVerticalReverse)
+        : ScrollablePaintMethod(vertical, isReverse, isVerticalReverse)
+    {}
     ~WaterFlowPaintMethod() override = default;
 
     CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;

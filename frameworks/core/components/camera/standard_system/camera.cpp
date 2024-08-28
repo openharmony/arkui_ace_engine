@@ -15,19 +15,8 @@
 
 #include "core/components/camera/standard_system/camera.h"
 
-#include <algorithm>
-#include <cstring>
-#include <fcntl.h>
-#include <fstream>
-#include <iostream>
-#include <securec.h>
-#include <sstream>
 #include <sys/stat.h>
 #include <sys/time.h>
-#include <sys/types.h>
-#include <unistd.h>
-
-#include "base/log/log.h"
 
 #include "core/image/image_file_cache.h"
 
@@ -112,6 +101,7 @@ std::shared_ptr<Media::Recorder> CameraCallback::CreateRecorder()
     Media::VideoCodecFormat encoder = Media::H264;
 
     std::shared_ptr<Media::Recorder> recorder = Media::RecorderFactory::CreateRecorder();
+    CHECK_NULL_RETURN(recorder, nullptr);
     if ((ret = recorder->SetVideoSource(videoSource, videoSourceId)) != ERR_OK) {
         LOGE("SetVideoSource failed. ret= %{private}d.", ret);
         return nullptr;

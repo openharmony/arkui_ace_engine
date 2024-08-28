@@ -129,7 +129,7 @@ HWTEST_F(ScrollBarAccessibilityTestNg, SetSpecificSupportAction001, TestSize.Lev
      * @tc.steps: step3. Scroll to bottom.
      */
     pattern_->UpdateCurrentOffset(SCROLL_HEIGHT - SCROLL_BAR_CHILD_HEIGHT, SCROLL_FROM_BAR);
-    FlushLayoutTask(stackNode_);
+    FlushLayoutTask(stackNode_, true);
     EXPECT_EQ(pattern_->GetCurrentPosition(), 640.f);
     accessibilityProperty_->ResetSupportAction();
     expectActions = 0;

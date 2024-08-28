@@ -27,6 +27,20 @@ namespace {
 const uint32_t ERROR_UINT_CODE = -1;
 std::string g_strValue;
 
+void SetXComponentEnableAnalyzer(ArkUINodeHandle node, ArkUI_Bool enable)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    XComponentModelNG::EnableAnalyzer(frameNode, enable);
+}
+
+void ResetXComponentEnableAnalyzer(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    XComponentModelNG::EnableAnalyzer(frameNode, false);
+}
+
 void SetXComponentBackgroundColor(ArkUINodeHandle node, uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -145,6 +159,13 @@ void SetImageAIOptions(ArkUINodeHandle node, void* options)
     CHECK_NULL_VOID(frameNode);
     XComponentModelNG::SetImageAIOptions(frameNode, options);
 }
+
+void InitXComponent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    XComponentModelNG::InitXComponent(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -155,6 +176,8 @@ const ArkUIXComponentModifier* GetXComponentModifier()
         nullptr, // setXComponentOptions
         nullptr, // getXComponentSurfaceId
         nullptr, // getXComponentController
+        SetXComponentEnableAnalyzer,
+        ResetXComponentEnableAnalyzer,
         SetXComponentBackgroundColor,
         ResetXComponentBackgroundColor,
         SetXComponentOpacity,
@@ -169,6 +192,7 @@ const ArkUIXComponentModifier* GetXComponentModifier()
         GetNativeXComponent,
         SetXComponentLibraryname,
         SetImageAIOptions,
+        InitXComponent,
     };
 
     return &modifier;

@@ -116,6 +116,8 @@ private:
     SizeF dialogChildSize_;
     bool resizeFlag_ = false;
 
+    KeyboardAvoidMode keyboardAvoidMode_ = KeyboardAvoidMode::DEFAULT;
+
     ACE_DISALLOW_COPY_AND_MOVE(DialogLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

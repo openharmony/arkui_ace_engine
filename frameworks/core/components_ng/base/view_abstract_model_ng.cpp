@@ -47,6 +47,8 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t LONG_PRESS_DURATION = 800;
 constexpr int32_t HOVER_IMAGE_LONG_PRESS_DURATION = 250;
+constexpr char KEY_CONTEXT_MENU[] = "ContextMenu";
+constexpr char KEY_MENU[] = "Menu";
 } // namespace
 
 void ViewAbstractModelNG::BindMenuGesture(
@@ -136,7 +138,7 @@ void ViewAbstractModelNG::BindMenu(
             CHECK_NULL_VOID(overlayManager);
             overlayManager->DeleteMenu(id);
         };
-        targetNode->PushDestroyCallback(destructor);
+        targetNode->PushDestroyCallbackWithTag(destructor, KEY_MENU);
     } else {
         auto destructor = [id = targetNode->GetId(), containerId = Container::CurrentId(), params]() mutable {
             params.clear();
@@ -151,7 +153,7 @@ void ViewAbstractModelNG::BindMenu(
             CHECK_NULL_VOID(overlayManager);
             overlayManager->DeleteMenu(id);
         };
-        targetNode->PushDestroyCallback(destructor);
+        targetNode->PushDestroyCallbackWithTag(destructor, KEY_MENU);
     }
 }
 
@@ -215,6 +217,12 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
     const MenuParam& menuParam, std::function<void()>& previewBuildFunc)
 {
     auto targetNode = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    BindContextMenu(targetNode, type, buildFunc, menuParam, previewBuildFunc);
+}
+
+void ViewAbstractModelNG::BindContextMenu(const RefPtr<FrameNode>& targetNode, ResponseType type,
+    std::function<void()>& buildFunc, const NG::MenuParam& menuParam, std::function<void()>& previewBuildFunc)
+{
     CHECK_NULL_VOID(targetNode);
     auto targetId = targetNode->GetId();
     auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
@@ -232,6 +240,7 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
             auto menuWrapperPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();
             CHECK_NULL_VOID(menuWrapperPattern);
             menuWrapperPattern->SetMenuTransitionEffect(menuNode, menuParam);
+            menuWrapperPattern->RegisterMenuCallback(menuNode, menuParam);
         }
     }
     if (menuParam.contextMenuRegisterType == ContextMenuRegisterType::CUSTOM_TYPE) {
@@ -333,7 +342,7 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
         CHECK_NULL_VOID(overlayManager);
         overlayManager->DeleteMenu(id);
     };
-    targetNode->PushDestroyCallback(destructor);
+    targetNode->PushDestroyCallbackWithTag(destructor, KEY_CONTEXT_MENU);
 }
 
 void ViewAbstractModelNG::BindDragWithContextMenuParams(const NG::MenuParam& menuParam)

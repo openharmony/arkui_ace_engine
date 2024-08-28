@@ -130,6 +130,36 @@ void TextLayoutElement::Init(RefPtr<SecurityComponentLayoutProperty>& property,
     height_ = textSizeF.Height();
 }
 
+void TextLayoutElement::DoMeasure(bool isVertical, float comWidth, float maxWidth, float idealWidth, float iconWidth)
+{
+    if (!isExist_) {
+        return;
+    }
+    auto textProp = AceType::DynamicCast<TextLayoutProperty>(textWrap_->GetLayoutProperty());
+    CHECK_NULL_VOID(textProp);
+    auto textConstraint = textProp->GetContentLayoutConstraint();
+    CHECK_NULL_VOID(textConstraint);
+    auto minWidth = std::min(maxWidth, comWidth);
+    if (!NearEqual(idealWidth, 0.0)) {
+        minWidth = std::min(minWidth, idealWidth);
+    }
+
+    auto textMaxWidth = 0.0;
+    if (isVertical) {
+        textMaxWidth = minWidth > iconWidth ? minWidth : iconWidth;
+    } else {
+        textMaxWidth = minWidth > iconWidth ? minWidth - iconWidth : 0.0;
+    }
+
+    if (width_ > textMaxWidth) {
+        textConstraint->selfIdealSize.SetWidth(textMaxWidth);
+        textWrap_->Measure(textConstraint);
+        auto textSizeF = textWrap_->GetGeometryNode()->GetFrameSize();
+        width_ = textSizeF.Width();
+        height_ = textSizeF.Height();
+    }
+}
+
 void TextLayoutElement::ChooseExactFontSize(RefPtr<TextLayoutProperty>& property, bool isWidth)
 {
     if (!minTextSize_.has_value()) {

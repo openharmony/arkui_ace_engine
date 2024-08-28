@@ -69,7 +69,8 @@ public:
 
             auto maxDisplayCount = swiperPattern->GetMaxDisplayCount();
             maxDisplayCount > 0 ? indicatorLayoutAlgorithm->SetIndicatorDisplayCount(maxDisplayCount)
-                                : indicatorLayoutAlgorithm->SetIndicatorDisplayCount(swiperPattern->TotalCount());
+                                : indicatorLayoutAlgorithm->SetIndicatorDisplayCount(
+                                    swiperPattern->DisplayIndicatorTotalCount());
             return indicatorLayoutAlgorithm;
         } else {
             auto indicatorLayoutAlgorithm = MakeRefPtr<DigitIndicatorLayoutAlgorithm>();
@@ -88,11 +89,13 @@ public:
         paintMethod->SetCurrentIndexActual(swiperPattern->GetLoopIndex(swiperPattern->GetCurrentIndex()));
         paintMethod->SetNextValidIndex(swiperPattern->GetNextValidIndex());
         paintMethod->SetHorizontalAndRightToLeft(swiperLayoutProperty->GetNonAutoLayoutDirection());
-        paintMethod->SetItemCount(swiperPattern->RealTotalCount());
+        paintMethod->SetItemCount(swiperPattern->DisplayIndicatorTotalCount());
+        paintMethod->SetSwipeByGroup(swiperLayoutProperty->GetSwipeByGroup().value_or(false));
         paintMethod->SetDisplayCount(swiperLayoutProperty->GetDisplayCount().value_or(1));
         gestureState_ = swiperPattern->GetGestureState();
         paintMethod->SetGestureState(gestureState_);
         paintMethod->SetTurnPageRate(swiperPattern->GetTurnPageRate());
+        paintMethod->SetGroupTurnPageRate(swiperPattern->GetGroupTurnPageRate());
         paintMethod->SetIsLoop(swiperPattern->IsLoop());
         paintMethod->SetTouchBottomTypeLoop(swiperPattern->GetTouchBottomTypeLoop());
         paintMethod->SetIsHover(isHover_);
@@ -162,6 +165,7 @@ public:
     }
 
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void SetIndicatorInteractive(bool isInteractive);
 
 private:
@@ -202,6 +206,7 @@ private:
     RectF CalcBoundsRect() const;
     void UpdateOverlongPaintMethod(
         const RefPtr<SwiperPattern>& swiperPattern, RefPtr<OverlengthDotIndicatorPaintMethod>& overlongPaintMethod);
+    int32_t GetDisplayCurrentIndex() const;
 
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<InputEvent> hoverEvent_;

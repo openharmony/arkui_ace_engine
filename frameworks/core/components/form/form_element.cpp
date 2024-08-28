@@ -15,8 +15,6 @@
 
 #include "core/components/form/form_element.h"
 
-#include <string>
-
 #include "core/common/container_scope.h"
 #include "core/common/form_manager.h"
 #ifdef OHOS_STANDARD_SYSTEM

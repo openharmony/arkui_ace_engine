@@ -15,12 +15,6 @@
 
 #include "core/components/video/resource/ext_surface.h"
 
-#include <sstream>
-
-#include "base/log/log.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-
 namespace OHOS::Ace {
 
 const char SURFACE_ERRORCODE_CREATEFAIL[] = "error_video_000001";

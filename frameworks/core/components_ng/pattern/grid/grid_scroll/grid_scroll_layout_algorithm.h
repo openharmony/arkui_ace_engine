@@ -93,6 +93,8 @@ private:
     float FillNewLineForward(float crossSize, float mainSize, LayoutWrapper* layoutWrapper);
     void AddForwardLines(int32_t currentIndex, float crossSize, float mainSize, LayoutWrapper* layoutWrapper);
     void UpdateMatrixForAddedItems();
+    // Fill forward one line, but do not update startMainLineIndex_ and startIndex_
+    void FillOneLineForwardWithoutUpdatingStartIndex(float crossSize, float mainSize, LayoutWrapper* layoutWrapper);
 
     // fill end of viewport
     void FillBlankAtEnd(float mainSize, float crossSize, LayoutWrapper* layoutWrapper, float& mainLength);
@@ -180,7 +182,7 @@ private:
     bool CheckLastLineItemFullyShowed(LayoutWrapper* layoutWrapper);
 
     bool IsIrregularLine(int32_t lineIndex) const override;
-    
+
     void ResetOffsetWhenHeightChanged();
 
     void MergeRemainingLines(std::map<int32_t, std::map<int32_t, int32_t>> matrix, int32_t forwardLines);
@@ -219,7 +221,7 @@ private:
     std::map<int32_t, float> itemsCrossPosition_;
     int32_t scrollSource_ = SCROLL_FROM_NONE;
     OffsetF childFrameOffset_;
-    std::list<int32_t> predictBuildList_;
+    std::list<GridPreloadItem> predictBuildList_;
     LayoutConstraintF cachedChildConstraint_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridScrollLayoutAlgorithm);

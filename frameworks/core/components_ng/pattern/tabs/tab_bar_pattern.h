@@ -413,6 +413,8 @@ public:
     }
 
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
+    void SetRegionInfo(std::unique_ptr<JsonValue>& json);
 
     std::optional<int32_t> GetAnimationDuration()
     {
@@ -440,7 +442,7 @@ public:
     {
         surfaceChangedCallbackId_ = id;
     }
-    
+
     bool ContentWillChange(int32_t comingIndex);
     bool ContentWillChange(int32_t currentIndex, int32_t comingIndex);
 
@@ -579,6 +581,7 @@ private:
 
     std::shared_ptr<AnimationUtils::Animation> tabbarIndicatorAnimation_;
     std::shared_ptr<AnimationUtils::Animation> translateAnimation_;
+    std::shared_ptr<AnimationUtils::Animation> maskAnimation_;
 
     bool indicatorAnimationIsRunning_ = false;
     bool translateAnimationIsRunning_ = false;

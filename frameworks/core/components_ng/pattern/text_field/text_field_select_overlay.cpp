@@ -29,8 +29,8 @@
 #include "core/event/ace_events.h"
 #include "core/event/touch_event.h"
 
-#if not defined(ACE_UNITTEST)
-#if defined(ENABLE_STANDARD_INPUT)
+#ifndef ACE_UNITTEST
+#ifdef ENABLE_STANDARD_INPUT
 #include "input_method_controller.h"
 #endif
 #endif
@@ -285,6 +285,7 @@ void TextFieldSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOv
     menuInfo.showCopy = hasText && pattern->AllowCopy() && pattern->IsSelected();
     menuInfo.showCut = menuInfo.showCopy;
     menuInfo.showCopyAll = hasText && !pattern->IsSelectAll();
+    menuInfo.showAIWrite = pattern->IsShowAIWrite() && pattern->IsSelected();
 }
 
 void TextFieldSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode)
@@ -317,16 +318,12 @@ RectF TextFieldSelectOverlay::GetSelectArea()
     RectF res(pattern->GetCaretRect());
     auto textPaintOffset = host->GetTransformRelativeOffset();
     if (selectRects.empty()) {
-        if (hasTransform_) {
-            GetGlobalRectWithTransform(res);
-        } else {
-            res.SetOffset(res.GetOffset() + textPaintOffset);
-        }
-        return res;
+        res.SetOffset(res.GetOffset() + textPaintOffset);
+    } else {
+        auto contentRect = pattern->GetContentRect();
+        auto textRect = pattern->GetTextRect();
+        res = MergeSelectedBoxes(selectRects, contentRect, textRect, textPaintOffset);
     }
-    auto contentRect = pattern->GetContentRect();
-    auto textRect = pattern->GetTextRect();
-    res = MergeSelectedBoxes(selectRects, contentRect, textRect, textPaintOffset);
     auto globalContentRect = GetVisibleContentRect();
     auto intersectRect = res.IntersectRectT(globalContentRect);
     if (hasTransform_) {
@@ -365,6 +362,9 @@ void TextFieldSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuT
             return;
         case OptionMenuActionId::CAMERA_INPUT:
             pattern->HandleOnCameraInput();
+            return;
+        case OptionMenuActionId::AI_WRITE:
+            pattern->HandleOnAIWrite();
             return;
         default:
             return;
@@ -579,9 +579,14 @@ void TextFieldSelectOverlay::OnHandleMoveStart(bool isFirst)
     BaseTextSelectOverlay::OnHandleMoveStart(isFirst);
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
+    auto pattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
     manager->SetHandleCircleIsShow(isFirst, false);
     if (IsSingleHandle()) {
         manager->SetIsHandleLineShow(false);
+        if (!pattern->IsOperation()) {
+            pattern->StartTwinkling();
+        }
     }
 }
 } // namespace OHOS::Ace::NG

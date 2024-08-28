@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,6 +43,7 @@ public:
     static void SetRowEnd(FrameNode* frameNode, int32_t rowEnd);
     static void SetColumnStart(FrameNode* frameNode, int32_t columnStart);
     static void SetColumnEnd(FrameNode* frameNode, int32_t columnEnd);
+    static void SetGridItemStyle(FrameNode* frameNode, GridItemStyle gridItemStyle);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_GRID_ITEM_MODEL_NG_H

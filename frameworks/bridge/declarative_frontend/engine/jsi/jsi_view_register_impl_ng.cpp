@@ -446,9 +446,11 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSLetterSpacingSpan::JSBind(globalObj);
     JSGestureSpan::JSBind(globalObj);
     JSTextShadowSpan::JSBind(globalObj);
+    JSBackgroundColorSpan::JSBind(globalObj);
     JSImageAttachment::JSBind(globalObj);
     JSParagraphStyleSpan::JSBind(globalObj);
     JSLineHeightSpan::JSBind(globalObj);
+    JSUrlSpan::JSBind(globalObj);
     JSTabs::JSBind(globalObj);
     JSTabContent::JSBind(globalObj);
     JSTabsController::JSBind(globalObj);
@@ -666,6 +668,7 @@ void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)
     JSRenderingContextSettings::JSBind(globalObj);
     JSRenderImage::JSBind(globalObj, nativeEngine);
     JSPath2D::JSBind(globalObj);
+    JSCanvasImageData::JSBind(globalObj);
     JSMock::JSBind(globalObj);
 }
 

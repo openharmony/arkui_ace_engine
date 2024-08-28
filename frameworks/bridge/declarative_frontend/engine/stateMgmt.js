@@ -6095,6 +6095,12 @@ class UINodeRegisterProxy {
         UINodeRegisterProxy.instance_.populateRemoveElementInfo(removedElements);
         UINodeRegisterProxy.instance_.unregisterElmtIdsFromIViews();
     }
+    static registerModifierElmtDeleteCallback(callback) {
+        if (UINodeRegisterProxy.modifierElmtDeleteCallback_) {
+            return;
+        }
+        UINodeRegisterProxy.modifierElmtDeleteCallback_ = callback;
+    }
     populateRemoveElementInfo(removedElements) {
         for (const elmtId of removedElements) {
             this.removeElementsInfo_.push(elmtId);
@@ -6125,6 +6131,9 @@ class UINodeRegisterProxy {
                 }
                 else {
                     
+                }
+                if (UINodeRegisterProxy.modifierElmtDeleteCallback_) {
+                    UINodeRegisterProxy.modifierElmtDeleteCallback_(elmtId);
                 }
             }
             else {
@@ -7701,7 +7710,12 @@ class ObserveV2 {
             // exec a re-render or exec a monitor function changes some state -> calls fireChange -> ...
             if ((this.elmtIdsChanged_.size + this.monitorIdsChanged_.size + this.computedPropIdsChanged_.size === 0) &&
                 /* update not already in progress */ !this.startDirty_) {
-                Promise.resolve().then(this.updateDirty.bind(this));
+                Promise.resolve()
+                    .then(this.updateDirty.bind(this))
+                    .catch(error => {
+                    stateMgmtConsole.applicationError(`Exception occurred during the update process involving @Computed properties, @Monitor functions or UINode re-rendering`, error);
+                    throw error;
+                });
             }
             // add bindId to the correct Set of pending changes.
             if (id < ComputedV2.MIN_COMPUTED_ID) {
@@ -8020,9 +8034,9 @@ ObserveV2.normalObjectHandlerDeepObserved = {
         ObserveV2.getObserve().addRef(RefInfo.get(target), prop);
         let ret = target[prop];
         let type = typeof (ret);
-        return type === "function"
+        return type === 'function'
             ? ret.bind(receiver)
-            : (type === "object"
+            : (type === 'object'
                 ? RefInfo.get(ret).proxy
                 : ret);
     },
@@ -8059,7 +8073,7 @@ ObserveV2.arrayHandlerDeepObserved = {
         }
         let ret = target[key];
         if (typeof (ret) !== 'function') {
-            if (typeof (ret) === "object") {
+            if (typeof (ret) === 'object') {
                 let wrapper = RefInfo.get(ret);
                 ObserveV2.getObserve().addRef(refInfo, key);
                 return wrapper.proxy;
@@ -8090,7 +8104,12 @@ ObserveV2.arrayHandlerDeepObserved = {
             ObserveV2.getObserve().addRef(refInfo, ObserveV2.OB_LENGTH);
             return function (callbackFn) {
                 const result = ret.call(target, (value, index, array) => {
-                    callbackFn(typeof value == "object" ? RefInfo.get(value).proxy : value, index, receiver);
+                    // Collections.Array will report BusinessError: The foreach cannot be bound if call "receiver".
+                    // because the passed parameter is not the instance of the container class.
+                    // so we must call "target" here to deal with the collections situations.
+                    // But we also need to addref for each index.
+                    receiver[index];
+                    callbackFn(typeof value == 'object' ? RefInfo.get(value).proxy : value, index, receiver);
                 });
                 return result;
             };
@@ -8127,7 +8146,7 @@ ObserveV2.setMapHandlerDeepObserved = {
         }
         let ret = target[key];
         if (typeof (ret) !== 'function') {
-            if (typeof (ret) === "object") {
+            if (typeof (ret) === 'object') {
                 let wrapper = RefInfo.get(ret);
                 ObserveV2.getObserve().addRef(refInfo, key);
                 return wrapper.proxy;
@@ -8798,10 +8817,17 @@ class MonitorV2 {
     notifyChange() {
         if (this.bindRun(/* is init / first run */ false)) {
             
-            // exec @Monitor function
-            this.monitorFunction.call(this.target_, this);
-            // now -> before value
-            this.reset();
+            try {
+                // exec @Monitor function
+                this.monitorFunction.call(this.target_, this);
+            }
+            catch (e) {
+                stateMgmtConsole.applicationError(`@Monitor exception caught for ${this.monitorFunction.name}`, e.toString());
+                throw e;
+            }
+            finally {
+                this.reset();
+            }
         }
     }
     // called after @Monitor function call
@@ -8859,7 +8885,12 @@ MonitorV2.nextWatchId_ = MonitorV2.MIN_WATCH_ID;
 class AsyncAddMonitorV2 {
     static addMonitor(target, name) {
         if (AsyncAddMonitorV2.watches.length === 0) {
-            Promise.resolve(true).then(AsyncAddMonitorV2.run);
+            Promise.resolve(true)
+                .then(AsyncAddMonitorV2.run)
+                .catch(error => {
+                stateMgmtConsole.applicationError(`Exception caught in @Monitor function ${name}`, error);
+                throw error;
+            });
         }
         AsyncAddMonitorV2.watches.push([target, name]);
     }
@@ -8936,8 +8967,18 @@ class ComputedV2 {
     // register current watchId while executing compute function
     observeObjectAccess() {
         ObserveV2.getObserve().startRecordDependencies(this, this.computedId_);
-        let ret = this.propertyComputeFunc_.call(this.target_);
-        ObserveV2.getObserve().stopRecordDependencies();
+        let ret;
+        try {
+            ret = this.propertyComputeFunc_.call(this.target_);
+        }
+        catch (e) {
+            stateMgmtConsole.applicationError(`@Computed Exception caught for ${this.propertyComputeFunc_.name}`, e.toString());
+            ret = undefined;
+            throw e;
+        }
+        finally {
+            ObserveV2.getObserve().stopRecordDependencies();
+        }
         return ret;
     }
 }
@@ -8949,7 +8990,12 @@ ComputedV2.COMPUTED_CACHED_PREFIX = '___comp_cached_';
 class AsyncAddComputedV2 {
     static addComputed(target, name) {
         if (AsyncAddComputedV2.computedVars.length === 0) {
-            Promise.resolve(true).then(AsyncAddComputedV2.run);
+            Promise.resolve(true)
+                .then(AsyncAddComputedV2.run)
+                .catch(error => {
+                stateMgmtConsole.applicationError(`Exception caught in @Computed ${name}`, error);
+                throw error;
+            });
         }
         AsyncAddComputedV2.computedVars.push({ target: target, name: name });
     }
@@ -9223,8 +9269,16 @@ class ViewV2 extends PUV2ViewBase {
             const componentName = entry.getComponentName();
             
             
-            updateFunc(elmtId, /* isFirstRender */ false);
-            
+            try {
+                updateFunc(elmtId, /* isFirstRender */ false);
+            }
+            catch (e) {
+                stateMgmtConsole.applicationError(`Exception caught in update function of ${componentName} for elmtId ${elmtId}`, e.toString());
+                throw e;
+            }
+            finally {
+                
+            }
             
             this.finishUpdateFunc(elmtId);
             
@@ -9987,12 +10041,12 @@ class JSONCoder {
  */
 class RefInfo {
     static get(target) {
-        if (typeof (target) !== "object") {
-            throw new Error("target must be a object");
+        if (typeof (target) !== 'object') {
+            throw new Error('target must be a object');
         }
-        // makeObserved does not support @Observed and @ObservedV2/@Trace class, will return target directly
-        if (ObservedObject.IsObservedObject(target) || ObserveV2.IsObservedObjectV2(target)) {
-            stateMgmtConsole.warn(`${target.constructor.name} is Observed ${ObservedObject.IsObservedObject(target)}, IsObservedV2 ${ObserveV2.IsObservedObjectV2(target)}. makeObserved will stop work`);
+        // makeObserved does not support @Observed, @ObservedV2/@Trace class or makeObserved proxy, will return target directly
+        if (ObservedObject.IsObservedObject(target) || ObserveV2.IsObservedObjectV2(target) || ObserveV2.IsMakeObserved(target)) {
+            stateMgmtConsole.warn(`${target.constructor.name} is Observed ${ObservedObject.IsObservedObject(target)}, IsObservedV2 ${ObserveV2.IsObservedObjectV2(target)} or makeObserved proxy value ${ObserveV2.IsMakeObserved(target)}. makeObserved will stop work`);
             return { proxy: target };
         }
         let ret = RefInfo.obj2ref.get(target);
@@ -10165,9 +10219,18 @@ class __Repeat {
     }
     // function to decide which template to use, each template has an id
     templateId(typeGenFunc) {
+        const typeGenFuncImpl = (item, index) => {
+            try {
+                return typeGenFunc(item, index);
+            }
+            catch (e) {
+                stateMgmtConsole.applicationError(`Repeat with virtual scroll. Exception in templateId():`, e === null || e === void 0 ? void 0 : e.message);
+                return '';
+            }
+        };
         // typeGenFunc wrapper with ttype validation
         const typeGenFuncSafe = (item, index) => {
-            const itemType = typeGenFunc(item, index);
+            const itemType = typeGenFuncImpl(item, index);
             const itemFunc = this.config.itemGenFuncs[itemType];
             if (typeof itemFunc !== 'function') {
                 stateMgmtConsole.applicationError(`Repeat with virtual scroll. Missing Repeat.template for id '${itemType}'`);
@@ -10592,6 +10655,9 @@ class __RepeatVirtualScrollImpl {
         let lastActiveRangeIndex = 0;
         // has any item or ttype in the active range changed?
         for (let i in this.lastActiveRangeData_) {
+            if (!(i in this.arr_)) {
+                return true;
+            }
             const oldItem = (_a = this.lastActiveRangeData_[+i]) === null || _a === void 0 ? void 0 : _a.item;
             const oldType = (_b = this.lastActiveRangeData_[+i]) === null || _b === void 0 ? void 0 : _b.ttype;
             const newItem = this.arr_[+i];
@@ -11114,6 +11180,26 @@ class UIUtilsImpl {
     }
 }
 UIUtilsImpl.instance_ = undefined;
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+class GestureStyle extends NativeGestureStyle {
+    constructor(arg) {
+        super(arg);
+        this.arg_ = arg;
+    }
+}
 /*
  * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");

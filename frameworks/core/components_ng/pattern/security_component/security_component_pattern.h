@@ -16,6 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SECURITY_COMPONENT_SECURITY_COMPONENT_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SECURITY_COMPONENT_SECURITY_COMPONENT_PATTERN_H
 
+#ifdef SECURITY_COMPONENT_ENABLE
+#include "event_handler.h"
+#endif
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/security_component/security_component_accessibility_property.h"
@@ -55,7 +58,7 @@ class SecurityComponentPattern : public Pattern {
     DECLARE_ACE_TYPE(SecurityComponentPattern, Pattern);
 
 public:
-    SecurityComponentPattern() {};
+    SecurityComponentPattern();
     ~SecurityComponentPattern() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -114,12 +117,18 @@ private:
     int32_t ReportSecurityComponentClickEvent(GestureEvent& event);
     int32_t ReportSecurityComponentClickEvent(const KeyEvent& event);
     void DoTriggerOnclick(int32_t result);
+    void DelayReleaseNode(RefPtr<FrameNode>& node);
+    std::function<int32_t(int32_t)> CreateFirstUseDialogCloseFunc(
+        RefPtr<FrameNode>& frameNode, RefPtr<PipelineContext>& pipeline, const std::string& taskName);
 #endif
     std::unique_ptr<Offset> lastTouchOffset_;
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> onTouchListener_;
     bool isSetOnKeyEvent = false;
     bool isAppearCallback_ = false;
+#ifdef SECURITY_COMPONENT_ENABLE
+    std::shared_ptr<AppExecFwk::EventHandler> uiEventHandler_ = nullptr;
+#endif
     ACE_DISALLOW_COPY_AND_MOVE(SecurityComponentPattern);
 };
 } // namespace OHOS::Ace::NG

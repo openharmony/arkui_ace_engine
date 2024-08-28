@@ -14,6 +14,11 @@
  */
 
 #include "scroll_test_ng.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+
+#include "core/components/scroll/scroll_bar_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -33,8 +38,8 @@ void ScrollBarTestNg::CreateWithBar()
     ScrollModelNG model = CreateScroll();
     model.SetDisplayMode(static_cast<int>(DisplayMode::ON));
     model.SetScrollBarWidth(Dimension(BAR_WIDTH));
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateDone();
     scrollBar_ = pattern_->GetScrollBar();
 }
 
@@ -78,7 +83,7 @@ HWTEST_F(ScrollBarTestNg, ClickBar001, TestSize.Level1)
 {
     CreateWithBar();
     EXPECT_TRUE(IsEqual(scrollBar_->GetTouchRegion(),
-        Rect(SCROLL_WIDTH - BAR_WIDTH, 0.f, BAR_WIDTH, SCROLL_HEIGHT * VIEW_ITEM_NUMBER / TOTAL_ITEM_NUMBER)));
+        Rect(SCROLL_WIDTH - BAR_WIDTH, 0.f, BAR_WIDTH, SCROLL_HEIGHT * SCROLL_HEIGHT / CONTENT_MAIN_SIZE)));
     const float pointInBarX = scrollBar_->GetTouchRegion().Left() + BAR_WIDTH / 2;
     pattern_->isMousePressed_ = true;
 
@@ -100,16 +105,16 @@ HWTEST_F(ScrollBarTestNg, ClickBar001, TestSize.Level1)
      * @tc.steps: step3. Click below bar
      * @tc.expected: Scroll page down
      */
-    ClickBar(Offset(pointInBarX, 700.f));
-    EXPECT_TRUE(IsEqual(pattern_->finalPosition_, SCROLL_HEIGHT)); // 800.f
+    ClickBar(Offset(pointInBarX, 300.f));
+    EXPECT_TRUE(IsEqual(pattern_->finalPosition_, SCROLL_HEIGHT));
 
     /**
      * @tc.steps: step4. Scroll down and Click above bar
      * @tc.expected: Scroll page up
      */
-    ScrollTo(ITEM_HEIGHT);
+    ScrollTo(ITEM_MAIN_SIZE);
     ClickBar(Offset(pointInBarX, 1.f));
-    EXPECT_TRUE(IsEqual(pattern_->finalPosition_, ITEM_HEIGHT - SCROLL_HEIGHT)); // -700.f
+    EXPECT_TRUE(IsEqual(pattern_->finalPosition_, ITEM_MAIN_SIZE - SCROLL_HEIGHT));
 }
 
 /**
@@ -245,8 +250,8 @@ HWTEST_F(ScrollBarTestNg, TouchScrollBarEffect001, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
     model.SetAxis(Axis::VERTICAL);
-    CreateContent(TOTAL_ITEM_NUMBER);
-    auto paintWrapper = CreateDone(frameNode_);
+    CreateContent();
+    auto paintWrapper = CreateDone();
     auto scrollBar = pattern_->GetScrollBar();
     const Offset downInBar = Offset(SCROLL_WIDTH - 1.f, 0.f);
     const Offset moveInBar = Offset(SCROLL_WIDTH - 1.f, 10.f);
@@ -294,21 +299,20 @@ HWTEST_F(ScrollBarTestNg, TouchScrollBarEffect001, TestSize.Level1)
  */
 HWTEST_F(ScrollBarTestNg, onDraw001, TestSize.Level1)
 {
-    CreateScroll();
-    CreateContent(TOTAL_ITEM_NUMBER);
-    auto paintWrapper = CreateDone(frameNode_);
-    auto scrollBar = pattern_->GetScrollBar();
-
     /**
      * @tc.steps: step1. Has barWidth and barHeight
      * @tc.expected: Draw ScrollBar
      */
+    CreateScroll();
+    CreateContent();
+    auto paintWrapper = CreateDone();
     onDraw(paintWrapper);
 
     /**
      * @tc.steps: step2. No barWidth
      * @tc.expected: No Draw ScrollBar
      */
+    auto scrollBar = pattern_->GetScrollBar();
     scrollBar->SetNormalWidth(Dimension(0));
     onDraw(paintWrapper, false);
 
@@ -330,11 +334,11 @@ HWTEST_F(ScrollBarTestNg, onDraw001, TestSize.Level1)
 HWTEST_F(ScrollBarTestNg, Position001, TestSize.Level1)
 {
     const float barWidth = 10.f;
-    const float ratio = static_cast<float>(VIEW_ITEM_NUMBER) / TOTAL_ITEM_NUMBER;
+    float ratio = SCROLL_HEIGHT / CONTENT_MAIN_SIZE;
     ScrollModelNG model = CreateScroll();
     model.SetScrollBarWidth(Dimension(barWidth));
-    CreateContent(TOTAL_ITEM_NUMBER);
-    auto paintWrapper = CreateDone(frameNode_);
+    CreateContent();
+    auto paintWrapper = CreateDone();
     auto paintMethod = AceType::DynamicCast<ScrollPaintMethod>(paintWrapper->nodePaintImpl_);
     auto scrollBar = pattern_->GetScrollBar();
     auto scrollBarOverlayModifier = pattern_->GetScrollBarOverlayModifier();
@@ -353,18 +357,19 @@ HWTEST_F(ScrollBarTestNg, Position001, TestSize.Level1)
      * @tc.steps: step2. Scroll some distance in VERTICAL
      * @tc.expected: The ScrollBar touchRegion_ offset has changed
      */
-    ScrollTo(ITEM_HEIGHT);
-    expectRect.SetTop(ITEM_HEIGHT * ratio);
+    ScrollTo(ITEM_MAIN_SIZE);
+    expectRect.SetTop(ITEM_MAIN_SIZE * ratio);
     EXPECT_TRUE(IsEqual(scrollBar->touchRegion_, expectRect));
 
     /**
      * @tc.steps: step3. Change direction to Axis::HORIZONTAL
      * @tc.expected: ScrollBar at BOTTOM
      */
+    ratio = SCROLL_WIDTH / CONTENT_MAIN_SIZE;
     model = CreateScroll();
     model.SetAxis(Axis::HORIZONTAL);
-    CreateContent(TOTAL_ITEM_NUMBER);
-    paintWrapper = CreateDone(frameNode_);
+    CreateContent();
+    paintWrapper = CreateDone();
     EXPECT_EQ(pattern_->GetAxis(), Axis::HORIZONTAL);
     UpdateOverlayModifier(paintWrapper);
     EXPECT_EQ(scrollBarOverlayModifier->positionMode_, PositionMode::BOTTOM);
@@ -375,8 +380,8 @@ HWTEST_F(ScrollBarTestNg, Position001, TestSize.Level1)
      * @tc.steps: step4. Scroll some distance in HORIZONTAL
      * @tc.expected: The ScrollBar touchRegion_ offset has changed
      */
-    ScrollTo(ITEM_WIDTH);
-    expectRect.SetLeft(ITEM_WIDTH * ratio);
+    ScrollTo(ITEM_MAIN_SIZE);
+    expectRect.SetLeft(ITEM_MAIN_SIZE * ratio);
     EXPECT_TRUE(IsEqual(scrollBar->touchRegion_, expectRect));
 
     /**
@@ -396,8 +401,8 @@ HWTEST_F(ScrollBarTestNg, Position001, TestSize.Level1)
 HWTEST_F(ScrollBarTestNg, Opacity001, TestSize.Level1)
 {
     CreateScroll();
-    CreateContent(TOTAL_ITEM_NUMBER);
-    auto paintWrapper = CreateDone(frameNode_);
+    CreateContent();
+    auto paintWrapper = CreateDone();
     auto scrollBar = pattern_->GetScrollBar();
     auto scrollBarOverlayModifier = pattern_->GetScrollBarOverlayModifier();
 
@@ -438,8 +443,8 @@ HWTEST_F(ScrollBarTestNg, Opacity001, TestSize.Level1)
 HWTEST_F(ScrollBarTestNg, AdaptAnimation001, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
-    CreateContent(TOTAL_ITEM_NUMBER);
-    auto paintWrapper = CreateDone(frameNode_);
+    CreateContent();
+    auto paintWrapper = CreateDone();
     auto scrollBar = pattern_->GetScrollBar();
     auto scrollBarOverlayModifier = pattern_->GetScrollBarOverlayModifier();
 
@@ -469,7 +474,6 @@ HWTEST_F(ScrollBarTestNg, ScrollBar001, TestSize.Level1)
      * @tc.expected: step1. Check whether relevant parameters are correct.
      */
     auto scrollBar = AceType::MakeRefPtr<ScrollBar>(DisplayMode::AUTO);
-    ASSERT_NE(scrollBar, nullptr);
     scrollBar->shapeMode_ = ShapeMode::RECT;
     scrollBar->positionMode_ = PositionMode::LEFT;
     scrollBar->UpdateScrollBarRegion(Offset::Zero(), Size(100.0, 100.0), Offset(1.f, 1.f), 1.0);
@@ -553,8 +557,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBar002, TestSize.Level1)
     const float barWidth = 10.f;
     ScrollModelNG model = CreateScroll();
     model.SetScrollBarWidth(Dimension(barWidth));
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateDone();
     auto scrollBar = pattern_->GetScrollBar();
     const Offset downInBar = Offset(SCROLL_WIDTH - 1.f, 0.f);
     const Offset moveInBar = Offset(SCROLL_WIDTH - 1.f, 10.f);
@@ -653,8 +657,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBar002, TestSize.Level1)
     ClearOldNodes();
     model = CreateScroll();
     model.SetScrollBarWidth(Dimension(barWidth));
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateDone();
     scrollBar = pattern_->GetScrollBar();
     const Offset moveOutBar = Offset(SCROLL_WIDTH - barWidth - 1.f, 0.f);
     scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
@@ -721,8 +725,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBar004, TestSize.Level1)
     const float barWidth = 10.f;
     ScrollModelNG model = CreateScroll();
     model.SetScrollBarWidth(Dimension(barWidth));
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateDone();
     auto scrollBar = pattern_->GetScrollBar();
     scrollBar->SetShapeMode(ShapeMode::ROUND);
     EXPECT_FALSE(scrollBar->InBarTouchRegion(Point(0, 0)));
@@ -762,8 +766,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBar004, TestSize.Level1)
 HWTEST_F(ScrollBarTestNg, ScrollBar005, TestSize.Level1)
 {
     CreateScroll();
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateDone();
     auto pipelineContext = PipelineContext::GetCurrentContext();
     pipelineContext->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     auto scrollBar = pattern_->GetScrollBar();
@@ -805,8 +809,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarWidth001, TestSize.Level1)
      * @tc.expected: It will be default
      */
     ScrollModelNG model = CreateScroll();
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateDone();
     EXPECT_EQ(pattern_->scrollBar_->activeRect_.Width(), NORMAL_WIDTH);
     EXPECT_EQ(pattern_->scrollBar_->barRect_.Width(), NORMAL_WIDTH);
 
@@ -816,8 +820,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarWidth001, TestSize.Level1)
      */
     model = CreateScroll();
     model.SetScrollBarWidth(Dimension(10));
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateDone();
     EXPECT_EQ(pattern_->scrollBar_->activeRect_.Width(), 10);
     EXPECT_EQ(pattern_->scrollBar_->barRect_.Width(), 10);
 
@@ -827,8 +831,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarWidth001, TestSize.Level1)
      */
     model = CreateScroll();
     model.SetScrollBarWidth(Dimension(SCROLL_HEIGHT + 1));
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateDone();
     EXPECT_EQ(pattern_->scrollBar_->activeRect_.Width(), NORMAL_WIDTH);
     EXPECT_EQ(pattern_->scrollBar_->barRect_.Width(), NORMAL_WIDTH);
 
@@ -839,8 +843,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarWidth001, TestSize.Level1)
     float barWidth = SCROLL_HEIGHT - 1;
     model = CreateScroll();
     model.SetScrollBarWidth(Dimension(barWidth));
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateDone();
     EXPECT_EQ(pattern_->scrollBar_->activeRect_.Width(), barWidth);
     EXPECT_EQ(pattern_->scrollBar_->activeRect_.Height(), barWidth);
     EXPECT_EQ(pattern_->scrollBar_->barRect_.Width(), barWidth);
@@ -866,8 +870,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBar007, TestSize.Level1)
     model.SetScrollSnap(ScrollSnapAlign::START, intervalSize, snapPaginations, enableSnapToSide);
     OnScrollStartEvent event = [&isTrigger]() { isTrigger = true; };
     model.SetOnScrollStart(std::move(event));
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateDone();
 
     /**
      * @tc.steps: step1. when scrollbar IsPressed() is false
@@ -900,8 +904,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBar008, TestSize.Level1)
     model.SetScrollSnap(ScrollSnapAlign::START, intervalSize, snapPaginations, enableSnapToSide);
     OnScrollStartEvent event = [&isTrigger]() { isTrigger = true; };
     model.SetOnScrollStart(std::move(event));
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateDone();
 
     /**
      * @tc.steps: step1. when scrollbar IsPressed() is true
@@ -928,8 +932,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBar009, TestSize.Level1)
      */
     ScrollModelNG model = CreateScroll();
     model.SetDisplayMode(static_cast<int32_t>(DisplayMode::ON));
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateDone();
 
     RefPtr<ScrollBar> scrollBar = pattern_->GetScrollBar();
     pattern_->CreateScrollBarOverlayModifier();
@@ -955,7 +959,6 @@ HWTEST_F(ScrollBarTestNg, ScrollBar009, TestSize.Level1)
     auto childLayoutConstraint = layoutProperty_->CreateChildConstraint();
     childLayoutConstraint.selfIdealSize = { 300.f, 625.0f };
     auto colNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
-    ASSERT_NE(colNode, nullptr);
     RefPtr<LayoutWrapperNode> colLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(colNode, colNode->GetGeometryNode(), colNode->GetLayoutProperty());
     colLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
@@ -991,8 +994,8 @@ HWTEST_F(ScrollBarTestNg, AttrScrollBarColorWidth001, TestSize.Level1)
      * @tc.steps: step1. Text default value: [color:foregroundColor_, width: 4]
      */
     CreateScroll();
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateDone();
     auto themeManager = MockPipelineContext::GetCurrent()->GetThemeManager();
     auto scrollBarTheme = themeManager->GetTheme<ScrollBarTheme>();
     EXPECT_EQ(paintProperty_->GetBarColor(), scrollBarTheme->GetForegroundColor());
@@ -1003,8 +1006,8 @@ HWTEST_F(ScrollBarTestNg, AttrScrollBarColorWidth001, TestSize.Level1)
      */
     ScrollModelNG model = CreateScroll();
     model.SetScrollBarColor(Color::RED);
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateDone();
     EXPECT_EQ(paintProperty_->GetBarColor(), Color::RED);
 
     /**
@@ -1013,8 +1016,8 @@ HWTEST_F(ScrollBarTestNg, AttrScrollBarColorWidth001, TestSize.Level1)
     ClearOldNodes();
     model = CreateScroll();
     model.SetScrollBarWidth(Dimension(10));
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateDone();
     EXPECT_EQ(paintProperty_->GetBarWidth(), Dimension(10));
 }
 
@@ -1029,8 +1032,8 @@ HWTEST_F(ScrollBarTestNg, RegisterEventByClick001, TestSize.Level1)
     ScrollModelNG model = CreateScroll();
     model.SetDisplayMode(static_cast<int>(DisplayMode::ON));
     model.SetScrollBarWidth(Dimension(SCROLL_HEIGHT + 1.f)); // will be default
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateDone();
     scrollBar_ = pattern_->GetScrollBar();
     OffsetF coordinateOffset;
     TouchRestrict touchRestrict;
