@@ -708,18 +708,21 @@ HWTEST_F(ImageProviderTestNg, CreateImageObjHelper001, TestSize.Level1)
  */
 HWTEST_F(ImageProviderTestNg, MakeCanvasImage, TestSize.Level1)
 {
+    const int32_t apiTargetVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto src = ImageSourceInfo(SRC_THUMBNAIL);
     auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
     SizeF size(LENGTH_100, LENGTH_100);
     auto pixmap = AceType::MakeRefPtr<MockPixelMap>();
-    auto pixmapObj = AceType::MakeRefPtr<PixelMapImageObject>(pixmap, src, size);
-    pixmapObj->MakeCanvasImage(ctx, size, true, true);
-    EXPECT_EQ(ctx->canvasImage_, nullptr);
-
     pixmap = nullptr;
+    auto pixmapObj = AceType::MakeRefPtr<PixelMapImageObject>(pixmap, src, size);
+    pixmapObj->MakeCanvasImage(ctx, size, true, false);
+    EXPECT_EQ(ctx->canvasImage_, nullptr);
+    pixmap = AceType::MakeRefPtr<MockPixelMap>();
     pixmapObj = AceType::MakeRefPtr<PixelMapImageObject>(pixmap, src, size);
     pixmapObj->MakeCanvasImage(ctx, size, true, true);
-    EXPECT_EQ(ctx->canvasImage_, nullptr);
+    EXPECT_NE(ctx->canvasImage_, nullptr);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(apiTargetVersion);
 }
 
 /**
