@@ -912,7 +912,8 @@ void SearchPattern::PaintFocusState(bool recoverFlag)
                 textFieldPattern->NeedRequestKeyboard();
                 textFieldPattern->SearchRequestKeyboard();
                 textFieldPattern->HandleOnSelectAll(false); // Select all text
-                searchTextFieldPattern->SearchRequestStopTwinkling(); // Hide caret
+                searchTextFieldPattern->ResetSearchRequestStopTwinkling(); // reset flag
+                textFieldPattern->StopTwinkling(); // Hide caret
             } else {
                 textFieldPattern->HandleFocusEvent(); // Show caret
                 searchTextFieldPattern->SearchRequestStartTwinkling();
@@ -922,9 +923,6 @@ void SearchPattern::PaintFocusState(bool recoverFlag)
             searchTextFieldPattern->SearchRequestStartTwinkling();
         }
     } else {
-        if (textFieldPattern->IsSelected() || textFieldPattern->GetCursorVisible()) {
-            textFieldPattern->HandleSetSelection(0, 0, false); // Clear text selection & caret if focus has gone
-        }
         textFieldPattern->CloseKeyboard(true);
         searchTextFieldPattern->SearchRequestStopTwinkling(); // Hide caret
     }

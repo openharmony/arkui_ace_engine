@@ -114,9 +114,12 @@ void SearchTextFieldPattern::SearchRequestStartTwinkling()
 void SearchTextFieldPattern::SearchRequestStopTwinkling()
 {
     searchRequestStopTwinkling_ = true;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    UpdateSelection(selectController_->GetCaretIndex());
+    UpdateSelection(0);
     StopTwinkling();
+}
+
+void SearchTextFieldPattern::ResetSearchRequestStopTwinkling()
+{
+    searchRequestStopTwinkling_ = false;
 }
 } // namespace OHOS::Ace::NG
