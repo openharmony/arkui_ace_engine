@@ -462,7 +462,7 @@ void SecuritySessionWrapperImpl::NotifyBackground()
     Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(
         session_, std::move(backgroundCallback_));
 }
-void SecuritySessionWrapperImpl::NotifyDestroy()
+void SecuritySessionWrapperImpl::NotifyDestroy(bool isHandleError)
 {
     CHECK_NULL_VOID(session_);
     Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionDestruction(
