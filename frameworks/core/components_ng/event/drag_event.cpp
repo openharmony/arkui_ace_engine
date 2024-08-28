@@ -673,16 +673,19 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             CHECK_NULL_VOID(actuator);
             auto dragPreviewInfo = frameNode->GetDragPreview();
             if (dragPreviewInfo.inspectorId != "") {
+                TAG_LOGI(AceLogTag::ACE_DRAG, "Get thumbnail through inspectorId.");
                 auto previewPixelMap = GetPreviewPixelMap(dragPreviewInfo.inspectorId, frameNode);
                 gestureHub->SetPixelMap(previewPixelMap);
                 gestureHub->SetDragPreviewPixelMap(previewPixelMap);
                 actuator->PrepareFinalPixelMapForDragThroughTouch(previewPixelMap, false);
             } else if (dragPreviewInfo.pixelMap != nullptr) {
+                TAG_LOGI(AceLogTag::ACE_DRAG, "Get thumbnail through pixelMap.");
                 gestureHub->SetPixelMap(dragPreviewInfo.pixelMap);
                 gestureHub->SetDragPreviewPixelMap(dragPreviewInfo.pixelMap);
                 actuator->PrepareFinalPixelMapForDragThroughTouch(dragPreviewInfo.pixelMap, false);
             } else if (dragPreviewInfo.customNode != nullptr) {
 #if defined(PIXEL_MAP_SUPPORTED)
+                TAG_LOGI(AceLogTag::ACE_DRAG, "Get thumbnail through customNode.");
                 auto callback = [id = Container::CurrentId(), pipeline, gestureHub, weak]
                     (std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg, std::function<void()>) {
                     ContainerScope scope(id);
@@ -700,6 +703,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                                 actuator->PrepareFinalPixelMapForDragThroughTouch(customPixelMap, true);
                             },
                             TaskExecutor::TaskType::UI, "ArkUIDragSetCustomPixelMap");
+                    } else {
+                        TAG_LOGI(AceLogTag::ACE_DRAG, "PixelMap is null.");
                     }
                 };
                 SnapshotParam param;
