@@ -75,7 +75,7 @@
             "ok":"OK",
             "cancel":"Cancel",
             "more":"More",
-            "prev":"Prev",
+            "prev":"Previous",
             "next":"Next"
         },
         "refresh":{
@@ -96,29 +96,29 @@
             "off":"Off"
         },
         "stepper":{
-            "start":"START",
-            "skip":"SKIP",
-            "back":"BACK",
-            "next":"NEXT"
+            "start":"Start",
+            "skip":"Skip",
+            "back":"Back",
+            "next":"Next"
         },
         "window":{
             "maximize":"Maximize",
             "exitMaximize":"Exit Maximize",
             "fullScreen":"Full Screen",
             "exitFullScreen":"Exit Full Screen",
-            "leftSide":"Show On Left",
-            "rightSide":"Show On Right"
+            "leftSide":"Show on left",
+            "rightSide":"Show on right"
         },
         "datepicker":{
-            "lunarSwitch":"Display Lunar",
+            "lunarSwitch":"Show lunar calendar",
             "prev":"PREV"
         },
         "navigation":{
-            "back":"BACK",
-            "more":"MORE"
+            "back":"Back",
+            "more":"More"
         },
         "sheet":{
-            "close":"CLOSE"
+            "close":"Close"
         }
     },
     "ml":{
@@ -734,8 +734,8 @@
         "common":{
             "ok":"གཏན་འཁེལ།",
             "cancel":"འདོར་བ།",
-            "prev":"སྔོན་འགྲོ",
-            "next":"རྗེས་འགྲོ"
+            "prev":"གོམ་རིམ་གོང་མ།",
+            "next":"དེ་རྗེས།"
         },
         "textoverlay":{
             "paste":"སྦྱར་བ།",
@@ -747,22 +747,32 @@
             "translate":"ཡིག་སྒྱུར།"
         },
         "refresh":{
-            "last_updated":"ཐེངས་སྔོན་མར་གསར་བཅོས་བྱས་པའི་དུས་ཚོད། %s",
+            "last_updated":"ཐེངས་སྔོན་མའི་གསར་སྒྱུར་དུས་ཚོད། : %s",
             "loading":"གསར་འདོན་བྱེད་བཞིན་ཡོད།"
         },
         "switch":{
-            "on":"འབྱེད།",
+            "on":"ཕྱེ།",
             "off":"ཁ་རྒྱག"
         },
         "stepper":{
-            "skip":"མཆོང་པ།",
-            "next":"གོམ་རིམ་ཕྱི་མ།",
-            "start":"འགོ་རྩོམ།",
+            "skip":"མཆོང་བ།",
+            "next":"གོམ་རིམ་རྗེས་མ།",
+            "start":"འགོ་ཚུགས།",
             "back":"ཕྱིར་ལོག"
         },
         "window":{
             "leftSide":"སྒེའུ་ཁུང་བརྙན་ཡོལ་གྱི་གཡོན་དུ་མངོན་སྟོན་བྱེད།",
             "rightSide":"སྒེའུ་ཁུང་བརྙན་ཡོལ་གྱི་གཡས་སུ་མངོན་སྟོན་བྱེད།"
+        },
+        "datepicker":{
+            "lunarSwitch":"ལུགས་རྙིང་ལོ་ཐོ་མངོན་སྟོན།"
+        },
+        "navigation":{
+            "back":"ཕྱིར་ལོག",
+            "more":"དེ་ལས་མང་བ།"
+        },
+        "sheet":{
+            "close":"ཁ་རྒྱག"
         }
     },
     "mai":{
@@ -2016,8 +2026,8 @@
         "common":{
             "ok":"جەزملەش",
             "cancel":"بىكار قىلىش",
-            "prev":"ئالدىنقى قەدەم",
-            "next":"كېيىنكى قەدەم"
+            "prev":"ئالدىنقى",
+            "next":"كېيىنكى"
         },
         "textoverlay":{
             "paste":"چاپلاش",
@@ -2045,6 +2055,16 @@
         "window":{
             "leftSide":"سولدا كۆرسىتىش",
             "rightSide":"ئوڭدا كۆرسىتىش"
+        },
+        "datepicker":{
+            "lunarSwitch":"دېھقانلار كالېندارى كۆرسىتىش"
+        },
+        "navigation":{
+            "back":"قايتىش",
+            "more":"كۆپرەك"
+        },
+        "sheet":{
+            "close":"ئېتىش"
         }
     },
     "et":{
@@ -2202,7 +2222,7 @@
         "textoverlay":{
             "paste":"貼上",
             "select_all":"全選",
-            "cut":"剪下",
+            "cut":"剪切",
             "copy":"複製",
             "search":"搜尋",
             "share":"分享",
@@ -2213,8 +2233,8 @@
             "loading":"重新整理中..."
         },
         "switch":{
-            "on":"開",
-            "off":"關"
+            "on":"啟用",
+            "off":"停用"
         },
         "stepper":{
             "skip":"略過",
@@ -2228,6 +2248,13 @@
         },
         "datepicker":{
             "lunarSwitch":"顯示農曆"
+        },
+        "navigation":{
+            "back":"返回",
+            "more":"更多"
+        },
+        "sheet":{
+            "close":"關閉"
         }
     },
     "zh-TW":{
@@ -2266,6 +2293,13 @@
         },
         "datepicker":{
             "lunarSwitch":"顯示農曆"
+        },
+        "navigation":{
+            "back":"返回",
+            "more":"更多"
+        },
+        "sheet":{
+            "close":"關閉"
         }
     },
     "hr":{
