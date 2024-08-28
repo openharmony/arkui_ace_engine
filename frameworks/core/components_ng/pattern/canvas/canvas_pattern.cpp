@@ -846,7 +846,7 @@ void CanvasPattern::Save()
 #else
     paintMethod_->PushTask<SaveOp>();
 #endif
-    paintMethod_->SaveMatrix();
+    paintMethod_->SaveProperties();
 }
 
 void CanvasPattern::Restore()
@@ -859,7 +859,7 @@ void CanvasPattern::Restore()
 #else
     paintMethod_->PushTask<RestoreOp>();
 #endif
-    paintMethod_->RestoreMatrix();
+    paintMethod_->RestoreProperties();
 }
 
 void CanvasPattern::Scale(double x, double y)
@@ -1164,6 +1164,7 @@ void CanvasPattern::Reset()
     paintMethod_->PushTask<ResetCanvasOp>();
 #endif
     paintMethod_->ResetTransformMatrix();
+    paintMethod_->ResetLineDash();
     SetTextDirection(TextDirection::INHERIT);
 }
 
