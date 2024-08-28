@@ -369,6 +369,25 @@ void DatePickerPattern::PaintFocusState()
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void DatePickerPattern::CalcLeftTotalColumnWith(
+    const RefPtr<FrameNode>& host, float& leftTotalColumnWith, float childSize)
+{
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (isRtl) {
+        for (int32_t index = childSize - 1; index > focusKeyID_; --index) {
+            auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(index));
+            CHECK_NULL_VOID(stackChild);
+            leftTotalColumnWith += stackChild->GetGeometryNode()->GetFrameSize().Width();
+        }
+    } else {
+        for (int32_t index = 0; index < focusKeyID_; ++index) {
+            auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(index));
+            CHECK_NULL_VOID(stackChild);
+            leftTotalColumnWith += stackChild->GetGeometryNode()->GetFrameSize().Width();
+        }
+    }
+}
+
 void DatePickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 {
     auto host = GetHost();
@@ -378,11 +397,7 @@ void DatePickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
         childSize = static_cast<float>(host->GetChildren().size());
     }
     auto leftTotalColumnWith = 0.0f;
-    for (int32_t index = 0; index < focusKeyID_; ++index) {
-        auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(index));
-        CHECK_NULL_VOID(stackChild);
-        leftTotalColumnWith += stackChild->GetGeometryNode()->GetFrameSize().Width();
-    }
+    CalcLeftTotalColumnWith(host, leftTotalColumnWith, childSize);
     auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
     CHECK_NULL_VOID(stackChild);
     auto blendChild = DynamicCast<FrameNode>(stackChild->GetLastChild());
@@ -430,18 +445,22 @@ bool DatePickerPattern::OnKeyEvent(const KeyEvent& event)
     return false;
 }
 
-bool DatePickerPattern::HandleDirectionKey(KeyCode code)
+bool DatePickerPattern::CheckFocusID(int32_t childSize)
 {
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-
-    auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
-    auto pickerChild = DynamicCast<FrameNode>(stackChild->GetLastChild()->GetLastChild());
-    auto pattern = pickerChild->GetPattern<DatePickerColumnPattern>();
-    auto totalOptionCount = GetOptionCount(pickerChild);
-    if (totalOptionCount == 0) {
+    if (focusKeyID_ > childSize - 1) {
+        focusKeyID_ = childSize - 1;
+        return false;
+    } else if (focusKeyID_ < 0) {
+        focusKeyID_ = 0;
         return false;
     }
+    return true;
+}
+
+bool DatePickerPattern::ParseDirectionKey(
+    RefPtr<DatePickerColumnPattern>& pattern, KeyCode& code, uint32_t totalOptionCount, int32_t childSize)
+{
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (code == KeyCode::KEY_DPAD_UP) {
         pattern->InnerHandleScroll(false, false);
         return true;
@@ -461,28 +480,51 @@ bool DatePickerPattern::HandleDirectionKey(KeyCode code)
         return true;
     }
     if (code == KeyCode::KEY_DPAD_LEFT) {
-        focusKeyID_ -= 1;
-        if (focusKeyID_ < 0) {
-            focusKeyID_ = 0;
+        if (isRtl) {
+            focusKeyID_ += 1;
+        } else {
+            focusKeyID_ -= 1;
+        }
+        if (!CheckFocusID(childSize)) {
             return false;
         }
         PaintFocusState();
         return true;
     }
     if (code == KeyCode::KEY_DPAD_RIGHT) {
-        focusKeyID_ += 1;
-        auto childSize = 1.0f;
-        if (!ShowMonthDays()) {
-            childSize = static_cast<float>(host->GetChildren().size());
+        if (isRtl) {
+            focusKeyID_ -= 1;
+        } else {
+            focusKeyID_ += 1;
         }
-        if (focusKeyID_ > childSize - 1) {
-            focusKeyID_ = childSize - 1;
+        if (ShowMonthDays()) {
+            childSize = 1;
+        }
+        if (!CheckFocusID(childSize)) {
             return false;
         }
         PaintFocusState();
         return true;
     }
     return false;
+}
+
+bool DatePickerPattern::HandleDirectionKey(KeyCode code)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
+    CHECK_NULL_RETURN(stackChild, false);
+    auto childSize = host->GetChildren().size();
+    auto pickerChild = DynamicCast<FrameNode>(stackChild->GetLastChild()->GetLastChild());
+    CHECK_NULL_RETURN(pickerChild, false);
+    auto pattern = pickerChild->GetPattern<DatePickerColumnPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    auto totalOptionCount = GetOptionCount(pickerChild);
+    if (totalOptionCount == 0) {
+        return false;
+    }
+    return ParseDirectionKey(pattern, code, totalOptionCount, static_cast<int32_t>(childSize));
 }
 
 std::unordered_map<std::string, RefPtr<FrameNode>> DatePickerPattern::GetAllChildNode()

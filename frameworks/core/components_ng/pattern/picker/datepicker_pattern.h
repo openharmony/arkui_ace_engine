@@ -768,6 +768,10 @@ private:
     bool isFiredDateChange_ = false;
     bool isForceUpdate_ = false;
     std::optional<std::string> firedDateStr_;
+    void CalcLeftTotalColumnWith(const RefPtr<FrameNode>& host, float &leftTotalColumnWith, float childSize);
+    bool CheckFocusID(int32_t childSize);
+    bool ParseDirectionKey(RefPtr<DatePickerColumnPattern>& pattern, KeyCode& code, uint32_t totalOptionCount,
+                          int32_t childSize);
 
     bool hasUserDefinedDisappearFontFamily_ = false;
     bool hasUserDefinedNormalFontFamily_ = false;
