@@ -68,7 +68,7 @@ private:
     std::promise<void> promise_;
     std::shared_future<void> future_ = promise_.get_future();
     std::vector<std::string> checkThemeStyleVector; // theme pattern name list for checking the preloaded theme style
-    mutable std::shared_mutex checkThemeStyleVectorMutex_;
+    std::shared_mutex checkThemeStyleVectorMutex_;
 };
 } // namespace OHOS::Ace
 
