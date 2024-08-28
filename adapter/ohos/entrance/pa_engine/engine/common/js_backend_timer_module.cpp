@@ -139,11 +139,11 @@ napi_value StartTimeoutOrInterval(napi_env env, napi_callback_info info, bool is
     napi_value thisVar = nullptr;
     void* data = nullptr;
     napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr);
-    if (argc >= ARGC_MIN) {
-        argv = new napi_value[argc];
-    } else {
+    if (argc < ARGC_MIN) {
+        LOGE("Additional or equal to 2 are required for participation");
         return result;
     }
+    argv = new napi_value[argc];
     napi_get_cb_info(env, info, &argc, argv, &thisVar, &data);
 
     napi_valuetype valueType = napi_undefined;
