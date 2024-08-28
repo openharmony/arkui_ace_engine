@@ -261,7 +261,6 @@ void XComponentPattern::OnAttachToMainTree()
     if (isTypedNode_) {
         CHECK_NULL_VOID(renderSurface_);
         renderSurface_->RegisterSurface();
-        renderSurface_->Connect();
         surfaceId_ = renderSurface_->GetUniqueId();
         CHECK_NULL_VOID(xcomponentController_);
         xcomponentController_->SetSurfaceId(surfaceId_);
@@ -274,7 +273,6 @@ void XComponentPattern::OnDetachFromMainTree()
     if (isTypedNode_) {
         CHECK_NULL_VOID(renderSurface_);
         renderSurface_->ReleaseSurfaceBuffers();
-        renderSurface_->Disconnect();
         renderSurface_->UnregisterSurface();
         CHECK_NULL_VOID(xcomponentController_);
         OnSurfaceDestroyed();
