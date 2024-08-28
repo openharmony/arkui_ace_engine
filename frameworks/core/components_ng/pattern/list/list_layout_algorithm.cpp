@@ -824,9 +824,6 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             LessOrEqual(itemTotalSize, contentMainSize_ - contentStartOffset_ - contentEndOffset_))) &&
             !needLayoutBackward) {
             startIndex = GetLanesFloor(layoutWrapper, startIndex);
-            if (overScrollTop && !canOverScroll_) {
-                startPos = startMainPos_ + contentStartOffset_;
-            }
             if (IsScrollSnapAlignCenter(layoutWrapper)) {
                 startPos = midItemMidPos - midItemHeight / 2.0f;
             }
@@ -986,12 +983,24 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
         }
         chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(currentIndex) : 0.0f;
         // reach the valid target index
-        if (forwardFeature_ && targetIndex_ && GreatNotEqual(currentIndex, targetIndex_.value())) {
+        if (forwardFeature_ && targetIndex_ && currentIndex >= targetIndex_.value()) {
             endMainPos = layoutEndMainPos_.value_or(endMainPos_);
             forwardFeature_ = false;
         }
-    } while (LessNotEqual(currentEndPos + chainOffset, endMainPos));
+    } while (LessOrEqual(currentEndPos + chainOffset, endMainPos));
     currentEndPos += chainOffset;
+
+    while (!itemPosition_.empty() && !targetIndex_) {
+        auto pos = itemPosition_.rbegin();
+        float chainDelta = chainOffsetFunc_ ? chainOffsetFunc_(pos->first) : 0.0f;
+        if ((GreatNotEqual(pos->second.endPos + chainDelta, endMainPos) &&
+            GreatOrEqual(pos->second.startPos + chainDelta, endMainPos))) {
+            recycledItemPosition_.emplace(pos->first, pos->second);
+            itemPosition_.erase(pos->first);
+        } else {
+            break;
+        }
+    }
     // adjust offset.
     UpdateSnapCenterContentOffset(layoutWrapper);
     if (LessNotEqual(currentEndPos, endMainPos_ - contentEndOffset_) && !itemPosition_.empty()) {
