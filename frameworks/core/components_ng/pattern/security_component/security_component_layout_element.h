@@ -152,6 +152,11 @@ public:
 
     void DoMeasure(bool isVertical, float comWidth, float maxWidth, float idealWidth, float iconWidth);
 
+    bool IsExist()
+    {
+        return isExist_;
+    }
+
 private:
     void UpdateSize(bool isWidth);
     void MeasureMinTextSize();
