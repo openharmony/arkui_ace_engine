@@ -528,6 +528,7 @@ public:
             return false;
         }
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+        CompleteResourceObject(jsObj);
         int32_t resType = jsObj->GetPropertyValue<int32_t>("type", -1);
         if (resType == -1) {
             return false;
@@ -637,6 +638,8 @@ private:
     static JSRef<JSObject> CreateJsTextMenuId(const std::string& id);
     static JSRef<JSArray> CreateJsOnMenuItemClick(const NG::MenuItemParam& menuItemParam);
     static JSRef<JSVal> CreateJsSystemMenuItems(const std::vector<NG::MenuItemParam>& systemMenuItems);
+    static void CompleteResourceObjectInner(
+        JSRef<JSObject>& jsObj, std::string& bundleName, std::string& moduleName, int32_t& resIdValue);
 };
 } // namespace OHOS::Ace::Framework
 #endif // JS_VIEW_ABSTRACT_H
