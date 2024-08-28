@@ -227,7 +227,7 @@ void ResourceThemeStyle::OnParseResourceMedia(const std::string& attrName, const
 
 void ResourceThemeStyle::CheckThemeStyleLoaded(const std::string& patternName)
 {
-    if (!checkThemeStyle(patternName)) {
+    if (!CheckThemeStyle(patternName)) {
         return;
     }
     if (future_.valid()) {
