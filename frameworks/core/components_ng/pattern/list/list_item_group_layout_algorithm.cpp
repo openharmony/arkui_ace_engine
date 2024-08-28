@@ -130,6 +130,12 @@ float ListItemGroupLayoutAlgorithm::GetListItemGroupMaxWidth(
     auto maxGridWidth = static_cast<float>(columnInfo->GetWidth(GetMaxGridCounts(columnInfo)));
     auto parentWidth = parentIdealSize.CrossSize(axis_).value() + layoutProperty->CreatePaddingAndBorder().Width();
     auto maxWidth = std::min(parentWidth, maxGridWidth);
+    if (LessNotEqual(maxGridWidth, layoutProperty->CreatePaddingAndBorder().Width())) {
+        TAG_LOGI(AceLogTag::ACE_LIST,
+            "ListItemGroup reset to parentWidth since grid_col width:%{public}f, border:%{public}f",
+            maxGridWidth, layoutProperty->CreatePaddingAndBorder().Width());
+        maxWidth = parentWidth;
+    }
     return maxWidth;
 }
 
