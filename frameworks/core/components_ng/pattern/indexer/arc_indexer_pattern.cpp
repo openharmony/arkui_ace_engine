@@ -44,10 +44,13 @@ void ArcIndexerPattern::OnModifyDone()
         }
         fullArrayValue_ = newArray;
     }
-    ResetArrayValue (autoCollapseModeChanged);
     auto propSelect = layoutProperty->GetSelected().value();
-    if (propSelect < 0 || propSelect >= itemCount_) {
+    if (propSelect < 0) {
         propSelect = 0;
+        layoutProperty->UpdateSelected(propSelect);
+    }
+    if (propSelect >= fullCount_) {
+        propSelect = fullCount_;
         layoutProperty->UpdateSelected(propSelect);
     }
     if (propSelect != selected_) {
@@ -57,6 +60,7 @@ void ArcIndexerPattern::OnModifyDone()
     } else if (!isNewHeightCalculated_) {
         selectChanged_ = false;
     }
+    ResetArrayValue(autoCollapseModeChanged);
     isNewHeightCalculated_ = false;
     auto itemSize =
         layoutProperty->GetItemSize().value_or(Dimension(ARC_INDEXER_ITEM_SIZE, DimensionUnit::VP)).ConvertToPx();
@@ -67,7 +71,7 @@ void ArcIndexerPattern::OnModifyDone()
     SetAccessibilityAction();
 }
 
-void ArcIndexerPattern::ResetArrayValue (bool isModeChanged)
+void ArcIndexerPattern::ResetArrayValue(bool isModeChanged)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -221,9 +225,22 @@ void ArcIndexerPattern::CollapseArrayValue()
 
 void ArcIndexerPattern::ApplyFourPlusOneMode()
 {
+    if (selected_ >= endIndex_ - 1) {
+        endIndex_ = selected_ + 1;
+        if (endIndex_ > fullCount_) {
+            endIndex_ = fullCount_;
+        }
+        startIndex_ = endIndex_ - ARC_INDEXER_COLLAPSE_ITEM_COUNT;
+    } else if (selected_ < startIndex_) {
+        startIndex_ = selected_;
+        if (startIndex_ < 0) {
+            startIndex_ = 0;
+        }
+        endIndex_ = startIndex_ + ARC_INDEXER_COLLAPSE_ITEM_COUNT;
+    }
     arcArrayValue_.clear();
-    for (int32_t groupIndex = 0; groupIndex < ARC_INDEXER_COLLAPSE_ITEM_COUNT; groupIndex++) {
-        arcArrayValue_.push_back(std::pair(fullArrayValue_.at(groupIndex), ArcIndexerBarState::INVALID));
+    for (int32_t index = startIndex_; index < endIndex_; index++) {
+        arcArrayValue_.push_back(std::pair(fullArrayValue_.at(index), ArcIndexerBarState::INVALID));
     }
     arcArrayValue_.push_back(
         std::pair(StringUtils::Str16ToStr8(ARC_INDEXER_STR_EXPANDED), ArcIndexerBarState::EXPANDED));
@@ -318,11 +335,19 @@ void ArcIndexerPattern::MoveIndexByOffset(const Offset& offset)
     if (arcArrayValue_[nextSelectIndex].second != ArcIndexerBarState::INVALID) {
         isNewHeightCalculated_ = true;
         if (arcArrayValue_[nextSelectIndex].second == ArcIndexerBarState::COLLAPSED && autoCollapse_) {
+            startIndex_ = nextSelectIndex;
+            endIndex_ = startIndex_ + ARC_INDEXER_COLLAPSE_ITEM_COUNT;
+            if (endIndex_ > fullCount_) {
+                endIndex_ = fullCount_;
+                startIndex_ = endIndex_ - ARC_INDEXER_COLLAPSE_ITEM_COUNT;
+            }
             currectCollapsingMode_ = ArcIndexerCollapsingMode::FOUR;
             lastCollapsingMode_ = ArcIndexerCollapsingMode::NONE;
             ArcCollapedAnimation(ARC_INDEXER_COLLAPSE_ITEM_COUNT);
             IndexNodeCollapsedAnimation();
         } else {
+            startIndex_ = 0;
+            endIndex_ = ARC_INDEXER_COLLAPSE_ITEM_COUNT;
             currectCollapsingMode_ = ArcIndexerCollapsingMode::NONE;
             lastCollapsingMode_ = ArcIndexerCollapsingMode::FOUR;
             ArcExpandedAnimation(fullArrayValue_.size() - 1);
@@ -496,6 +521,7 @@ void ArcIndexerPattern::ApplyIndexChanged(bool isTextNodeInTree, bool selectChan
         total -= 1;
     }
     UpdateIndexerRender();
+    int32_t focusIndex = fromTouchUp ? selected_ : (selected_ - startIndex_);
     auto radiusSize =  Dimension(lastItemSize_ * HALF);
     for (int32_t i = 0; i < total; i++) {
         auto child = host->GetChildByIndex(i);
@@ -508,7 +534,7 @@ void ArcIndexerPattern::ApplyIndexChanged(bool isTextNodeInTree, bool selectChan
         auto nodeStr = GetChildNodeContent(index);
         if (index == childPressIndex_) {
             childRenderContext->UpdateBackgroundColor(indexerTheme->GetPressedBgAreaColor());
-        } else if (index == childFocusIndex_ || index == selected_) {
+        } else if (index == childFocusIndex_ || index == focusIndex) {
             SetFocusIndexStyle(index, nodeStr, isTextNodeInTree);
         } else {
             if (!fromTouchUp || animateSelected_ == lastSelected_ || index != lastSelected_) {
@@ -524,7 +550,7 @@ void ArcIndexerPattern::ApplyIndexChanged(bool isTextNodeInTree, bool selectChan
         && currectCollapsingMode_ != lastCollapsingMode_) {
         IndexNodeExpandedAnimation();
     }
-    ShowBubble(selectChanged);
+    if (selectChanged) ShowBubble(selectChanged);
 }
 
 void ArcIndexerPattern::UpdateIndexerRender()
@@ -1076,18 +1102,32 @@ void ArcIndexerPattern::StartBubbleDisappearAnimation()
         });
 }
 
+int32_t ArcIndexerPattern::GetActualIndex(int32_t selectIndex)
+{
+    int32_t actualIndex = selectIndex;
+    if (!autoCollapse_) {
+        return actualIndex;
+    }
+    auto arcIndex = selected_;
+    if (arcIndex > 0) {
+        arcIndex = std::find(fullArrayValue_.begin(), fullArrayValue_.end(), arcArrayValue_.at(arcIndex).first) -
+                   fullArrayValue_.begin();
+    } else if (arcIndex == 0) {
+        arcIndex = startIndex_;
+    }
+    return arcIndex;
+}
+
 void ArcIndexerPattern::FireOnSelect(int32_t selectIndex, bool fromPress)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(indexerEventHub);
-    auto actualIndex = autoCollapse_ ?
-            selected_ > 0 ?
-                std::find(fullArrayValue_.begin(), fullArrayValue_.end(),
-                    arcArrayValue_.at(selected_).first) - fullArrayValue_.begin() :
-                selected_ :
-        selectIndex;
+    auto actualIndex = selectIndex;
+    if (fromPress) {
+        actualIndex = GetActualIndex(selectIndex);
+    }
     if (fromPress || lastIndexFromPress_ == fromPress || lastFireSelectIndex_ != selectIndex) {
         auto onChangeEvent = indexerEventHub->GetChangeEvent();
         if (onChangeEvent && (selected_ >= 0) && (selected_ < itemCount_)) {

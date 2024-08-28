@@ -129,6 +129,7 @@ private:
     void StartIndexerNodeDisappearAnimation(int32_t nodeIndex);
     void IndexNodeCollapsedAnimation();
     void IndexNodeExpandedAnimation();
+    int32_t GetActualIndex(int32_t selectIndex);
     void FireOnSelect(int32_t selectIndex, bool fromPress);
     void UpdateBubbleBackgroundView();
     void UpdateBubbleLetterStackAndLetterTextView();
@@ -157,6 +158,8 @@ private:
     float stepAngle_ = 0.0f;
     float itemRadius_ = 0.0f;
     RefPtr<ArcIndexerContentModifier> contentModifier_;
+    int32_t startIndex_ = 0;
+    int32_t endIndex_ = ARC_INDEXER_COLLAPSE_ITEM_COUNT;
 };
 } // namespace OHOS::Ace::NG
 
