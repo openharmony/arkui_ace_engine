@@ -98,7 +98,7 @@ public:
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
 
     void OnScrollStartRecursive(float position, float velocity = 0.f) override;
-    
+
     bool NestedScrollOutOfBoundary() override
     {
         return !NearZero(scrollOffset_);
@@ -148,7 +148,7 @@ private:
     void InitProgressColumn();
     void UpdateLoadingTextOpacity(float opacity);
     void DumpInfo() override;
-
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     RefreshStatus refreshStatus_ = RefreshStatus::INACTIVE;
     RefPtr<PanEvent> panEvent_;
     float scrollOffset_;

@@ -100,19 +100,19 @@ public:
         windowPattern->OnDisconnect();
     }
 
+    void OnLayoutFinished() override
+    {
+        auto windowPattern = windowPattern_.Upgrade();
+        CHECK_NULL_VOID(windowPattern);
+        windowPattern->OnLayoutFinished();
+    }
+
     void OnDrawingCompleted() override
     {
         auto windowPattern = windowPattern_.Upgrade();
         CHECK_NULL_VOID(windowPattern);
         windowPattern->OnDrawingCompleted();
     }
-
-    void OnExtensionDied() override {}
-
-    void OnExtensionTimeout(int32_t errorCode) override {}
-
-    void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-        int64_t uiExtensionIdLevelVec) override {}
 
 private:
     WeakPtr<WindowPattern> windowPattern_;
@@ -177,16 +177,16 @@ void WindowPattern::OnAttachToFrameNode()
         return;
     }
 
+    attachToFrameNodeFlag_ = true;
     AddChild(host, appWindow_, appWindowName_, 0);
     auto surfaceNode = session_->GetSurfaceNode();
     CHECK_NULL_VOID(surfaceNode);
     if (!surfaceNode->IsBufferAvailable()) {
         CreateStartingWindow();
         AddChild(host, startingWindow_, startingWindowName_);
-        surfaceNode->SetBufferAvailableCallback(coldStartCallback_);
+        surfaceNode->SetBufferAvailableCallback(callback_);
         return;
     }
-    attachToFrameNodeFlag_ = true;
 }
 
 void WindowPattern::CreateBlankWindow()

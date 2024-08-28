@@ -39,8 +39,10 @@
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
+#include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/navrouter/navdestination_event_hub.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
@@ -208,7 +210,7 @@ bool NavigationGroupNode::ReorderNavDestination(
         }
         int32_t childIndex = navigationContentNode->GetChildIndex(navDestination);
         if (childIndex < 0) {
-            navigationContentNode->AddChild(navDestination, slot);
+            navDestination->MountToParent(navigationContentNode, slot);
             hasChanged = true;
         } else if (childIndex != slot) {
             navDestination->MovePosition(slot);
@@ -322,7 +324,22 @@ void NavigationGroupNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const In
     FrameNode::ToJsonValue(json, filter);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
-    navBarNode->ToJsonValue(json, filter);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    if (titleBarNode) {
+        std::string title = NavigationTitleUtil::GetTitleString(titleBarNode,
+            navBarNode->GetPrevTitleIsCustomValue(false));
+        std::string subtitle = NavigationTitleUtil::GetSubtitleString(titleBarNode);
+        json->PutExtAttr("title", title.c_str(), filter);
+        json->PutExtAttr("subtitle", subtitle.c_str(), filter);
+    }
+    json->PutExtAttr("menus", navBarNode->GetBarItemsString(true).c_str(), filter);
+    json->PutExtAttr("toolBar", navBarNode->GetBarItemsString(false).c_str(), filter);
+    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    CHECK_NULL_VOID(navBarLayoutProperty);
+    json->PutExtAttr("titleMode", navBarLayoutProperty->GetTitleModeString().c_str(), filter);
+    json->PutExtAttr("hideBackButton", navBarLayoutProperty->GetHideBackButtonValue(false), filter);
+    json->PutExtAttr("hideTitleBar", navBarLayoutProperty->GetHideTitleBarValue(false), filter);
+    json->PutExtAttr("hideToolBar", navBarLayoutProperty->GetHideToolBarValue(false), filter);
 }
 
 RefPtr<UINode> NavigationGroupNode::GetNavDestinationNode(RefPtr<UINode> uiNode)

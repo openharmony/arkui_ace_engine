@@ -504,4 +504,19 @@ void ListItemGroupPattern::NotifyDataChange(int32_t index, int32_t count)
     }
     listPattern->MarkNeedReEstimateOffset();
 }
+
+void ListItemGroupPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("itemStartIndex", itemStartIndex_);
+    json->Put("itemTotalCount", itemTotalCount_);
+    json->Put("itemDisplayEndIndex", itemDisplayEndIndex_);
+    json->Put("itemDisplayStartIndex", itemDisplayStartIndex_);
+    json->Put("headerMainSize", headerMainSize_);
+    json->Put("footerMainSize", footerMainSize_);
+    json->Put("spaceWidth", spaceWidth_);
+    json->Put("lanes", lanes_);
+    json->Put("laneGutter", laneGutter_);
+    json->Put("startHeaderPos", startHeaderPos_);
+    json->Put("endFooterPos", endFooterPos_);
+}
 } // namespace OHOS::Ace::NG

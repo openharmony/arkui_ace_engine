@@ -147,6 +147,73 @@ HWTEST_F(WaterFlowTestNg, IllegalItemCnt, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ZeroHeightItem001
+ * @tc.desc: Layout WaterFlow with 0-height item.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ZeroHeightItem001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(5.0f));
+    model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    CreateItemWithHeight(0.0f);
+    CreateItemWithHeight(100.0f);
+    CreateItemWithHeight(100.0f);
+    CreateDone();
+    const auto& info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 2);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 2), 5.0f);
+
+    pattern_->SetAnimateCanOverScroll(true);
+    UpdateCurrentOffset(100.0f); // shouldn't move
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 2), 5.0f);
+
+    UpdateCurrentOffset(-100.0f); // shouldn't move
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 2), 5.0f);
+}
+
+/**
+ * @tc.name: ZeroHeightItem002
+ * @tc.desc: Layout WaterFlow with 0-height item at the bottom.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ZeroHeightItem002, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    for (int i = 0; i < 5; ++i) {
+        CreateItemWithHeight(100.0f);
+    }
+    CreateItemWithHeight(0.0f);
+    CreateDone();
+    const auto& info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 5);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 5), 500.0f);
+
+    pattern_->SetAnimateCanOverScroll(true);
+    UpdateCurrentOffset(100.0f); // shouldn't move
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 5), 500.0f);
+
+    UpdateCurrentOffset(-100.0f); // shouldn't move
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 5), 500.0f);
+}
+
+/**
  * @tc.name: Property014
  * @tc.desc: Test the property of itemConstraintSize.
  * @tc.type: FUNC

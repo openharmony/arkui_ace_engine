@@ -76,6 +76,8 @@ constexpr int32_t MIN_IDLE_TIME = 1000;
 constexpr uint8_t SINGLECOLOR_UPDATE_ALPHA = 75;
 constexpr int8_t RENDERING_SINGLE_COLOR = 1;
 constexpr int32_t DELAY_TIME = 500;
+constexpr int32_t USED_JSON_PARAM = 4;
+constexpr int32_t PARAM_NUM = 2;
 
 #define CHECK_THREAD_SAFE(isFormRender, taskExecutor) CheckThreadSafe(isFormRender, taskExecutor, __func__, __LINE__)
 void CheckThreadSafe(
@@ -787,8 +789,18 @@ void PipelineContext::FlushRequestFocus()
     } else {
         auto focusNodeHub = requestFocusNode->GetFocusHub();
         if (focusNodeHub && !focusNodeHub->RequestFocusImmediately()) {
-            TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus by id on node: %{public}s/%{public}d return false",
-                requestFocusNode->GetTag().c_str(), requestFocusNode->GetId());
+            auto unfocusableParentFocusNode = focusNodeHub->GetUnfocusableParentFocusNode().Upgrade();
+            if (unfocusableParentFocusNode) {
+                TAG_LOGI(AceLogTag::ACE_FOCUS,
+                    "Request focus by id on node: %{public}s/%{public}d return false, unfocusable node: "
+                    "%{public}s/%{public}d",
+                    requestFocusNode->GetTag().c_str(), requestFocusNode->GetId(),
+                    unfocusableParentFocusNode->GetFrameName().c_str(), unfocusableParentFocusNode->GetFrameId());
+                unfocusableParentFocusNode = nullptr;
+            } else {
+                TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus by id on node: %{public}s/%{public}d return false",
+                    requestFocusNode->GetTag().c_str(), requestFocusNode->GetId());
+            }
         }
         dirtyFocusNode_.Reset();
         dirtyFocusScope_.Reset();
@@ -2390,6 +2402,39 @@ void PipelineContext::DumpInspector(const std::vector<std::string>& params, bool
     }
 }
 
+void PipelineContext::DumpElement(const std::vector<std::string>& params, bool hasJson) const
+{
+    if (params.size() > 1 && params[1] == "-lastpage") {
+        auto lastPage = stageManager_->GetLastPage();
+        if (hasJson) {
+            if (params.size() < USED_JSON_PARAM && lastPage) {
+                lastPage->DumpTree(0, hasJson);
+                DumpLog::GetInstance().PrintEndDumpInfoNG(true);
+                DumpLog::GetInstance().OutPutBySize();
+            }
+            if (params.size() > USED_JSON_PARAM && lastPage && !lastPage->DumpTreeById(0, params[PARAM_NUM], true)) {
+                DumpLog::GetInstance().Print(
+                    "There is no id matching the ID in the parameter,please check whether the id is correct");
+            }
+        } else {
+            if (params.size() < USED_ID_FIND_FLAG && lastPage) {
+                lastPage->DumpTree(0, hasJson);
+                DumpLog::GetInstance().OutPutBySize();
+            }
+            if (params.size() > USED_ID_FIND_FLAG && lastPage && !lastPage->DumpTreeById(0, params[PARAM_NUM])) {
+                DumpLog::GetInstance().Print(
+                    "There is no id matching the ID in the parameter,please check whether the id is correct");
+            }
+        }
+    } else {
+        rootNode_->DumpTree(0, hasJson);
+        if (hasJson) {
+            DumpLog::GetInstance().PrintEndDumpInfoNG(true);
+        }
+        DumpLog::GetInstance().OutPutBySize();
+    }
+}
+
 bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
 {
     bool hasJson = params.back() == "-json";
@@ -2405,20 +2450,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     }
     DumpLog::GetInstance().Print(1, "last vsyncId: " + std::to_string(GetFrameCount()));
     if (params[0] == "-element") {
-        if (params.size() > 1 && params[1] == "-lastpage") {
-            auto lastPage = stageManager_->GetLastPage();
-            if (params.size() < USED_ID_FIND_FLAG && lastPage) {
-                lastPage->DumpTree(0);
-                DumpLog::GetInstance().OutPutBySize();
-            }
-            if (params.size() == USED_ID_FIND_FLAG && lastPage && !lastPage->DumpTreeById(0, params[2])) {
-                DumpLog::GetInstance().Print(
-                    "There is no id matching the ID in the parameter,please check whether the id is correct");
-            }
-        } else {
-            rootNode_->DumpTree(0);
-            DumpLog::GetInstance().OutPutBySize();
-        }
+        DumpElement(params, hasJson);
     } else if (params[0] == "-navigation") {
         auto navigationDumpMgr = GetNavigationManager();
         if (navigationDumpMgr) {
@@ -2673,9 +2705,10 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
     }
 
     auto container = Container::Current();
-    if ((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS ||
-            event.action == MouseAction::MOVE) &&
-        (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) {
+    if (((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS ||
+             event.action == MouseAction::MOVE) &&
+            (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) ||
+        event.action == MouseAction::CANCEL) {
         auto touchPoint = event.CreateTouchPoint();
         if (event.pullAction == MouseAction::PULL_MOVE) {
             touchPoint.pullType = TouchType::PULL_MOVE;
@@ -3100,7 +3133,7 @@ void PipelineContext::WindowFocus(bool isFocus)
         NotifyPopupDismiss();
     } else {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Window id: %{public}d get focus.", windowId_);
-        
+
         isWindowHasFocused_ = true;
         InputMethodManager::GetInstance()->SetWindowFocus(true);
     }

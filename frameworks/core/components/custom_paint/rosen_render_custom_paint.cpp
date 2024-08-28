@@ -357,7 +357,9 @@ std::string RosenRenderCustomPaint::ToDataURL(const std::string& args)
             LOGE("Bitmap is invalid");
             return UNSUPPORTED;
         }
-        auto& skBitmap = canvasCache_.GetImpl<Rosen::Drawing::SkiaBitmap>()->ExportSkiaBitmap();
+        auto skiaBitmap = canvasCache_.GetImpl<Rosen::Drawing::SkiaBitmap>();
+        CHECK_NULL_RETURN(skiaBitmap, UNSUPPORTED);
+        auto& skBitmap = skiaBitmap->ExportSkiaBitmap();
         success = skBitmap.pixmap().scalePixels(
             tempCache.pixmap(), SkSamplingOptions(SkCubicResampler { 1 / 3.0f, 1 / 3.0f }));
 #endif

@@ -32,6 +32,11 @@ public:
 
     static std::string GetDotIndicatorStyle(const std::shared_ptr<SwiperParameters>& params);
     static std::string GetDigitIndicatorStyle(const std::shared_ptr<SwiperDigitalParameters>& params);
+
+private:
+    static void DumpInfoAddPositionDesc(SwiperPattern& swiper);
+    static void DumpInfoAddGestureDesc(SwiperPattern& swiper);
+    static void DumpInfoAddAnimationDesc(SwiperPattern& swiper);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_SWIPER_HELPER_H

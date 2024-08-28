@@ -1224,5 +1224,43 @@ bool ListItemPattern::RenderCustomChild(int64_t deadline)
     }
     return true;
 }
-} // namespace OHOS::Ace::NG
 
+void ListItemPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("indexInList", indexInList_);
+    json->Put("indexInListItemGroup", indexInListItemGroup_);
+    json->Put("swiperAction.startNodeIndex", startNodeIndex_);
+    json->Put("swiperAction.endNodeIndex", endNodeIndex_);
+    json->Put("swiperAction.childNodeIndex", childNodeIndex_);
+    json->Put("curOffset", curOffset_);
+    json->Put("startNodeSize", startNodeSize_);
+    json->Put("endNodeSize", endNodeSize_);
+    json->Put("startDeleteAreaDistance", startDeleteAreaDistance_);
+    json->Put("endDeleteAreaDistance", endDeleteAreaDistance_);
+
+    switch (swipeActionState_) {
+        case SwipeActionState::COLLAPSED:
+            json->Put("SwipeActionState", "COLLAPSED");
+            break;
+        case SwipeActionState::EXPANDED:
+            json->Put("SwipeActionState", "EXPANDED");
+            break;
+        case SwipeActionState::ACTIONING:
+            json->Put("SwipeActionState", "ACTIONING");
+            break;
+    }
+    json->Put("hasStartDeleteArea", hasStartDeleteArea_);
+    json->Put("hasEndDeleteArea", hasEndDeleteArea_);
+    json->Put("inStartDeleteArea", inStartDeleteArea_);
+    json->Put("inEndDeleteArea", inEndDeleteArea_);
+    json->Put("selectable", selectable_);
+    json->Put("isSelected", isSelected_);
+    json->Put("isHover", isHover_);
+    json->Put("isPressed", isPressed_);
+    json->Put("isLayouted", isLayouted_);
+    json->Put("hasStartDeleteArea", hasStartDeleteArea_);
+    if (enableOpacity_.has_value()) {
+        json->Put("enableOpacity", enableOpacity_.value() ? "true:" : "false");
+    }
+}
+} // namespace OHOS::Ace::NG

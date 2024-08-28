@@ -188,7 +188,7 @@ std::string DumpLog::GetPrefix(int32_t depth)
 
 std::string DumpLog::FormatDumpInfo(const std::string& str, int32_t depth)
 {
-    if (!str.empty() && str.length() > DumpLog::MIN_JSON_LENGTH) {
+    if (str.length() > DumpLog::MIN_JSON_LENGTH) {
         if (depth == 0) {
             return str.substr(0, str.length() - DumpLog::END_POS_TWO);
         }
