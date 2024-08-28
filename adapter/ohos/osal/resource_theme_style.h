@@ -43,11 +43,13 @@ public:
     {
         promise_.set_value();
     }
-    void PushBackCheckThemeStyleVector(const std::string& patternName) {
+    void PushBackCheckThemeStyleVector(const std::string& patternName)
+    {
         std::unique_lock<std::shared_mutex> lock(checkThemeStyleVectorMutex_);
         checkThemeStyleVector.push_back(patternName);
     }
-    bool CheckThemeStyle(const std::string& patternName) {
+    bool CheckThemeStyle(const std::string& patternName)
+    {
         std::shared_lock<std::shared_mutex> lock(checkThemeStyleVectorMutex_);
         auto it = std::find(checkThemeStyleVector.begin(), checkThemeStyleVector.end(), patternName.c_str());
         if (it == checkThemeStyleVector.end()) {
