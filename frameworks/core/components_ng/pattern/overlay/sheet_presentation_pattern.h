@@ -304,6 +304,7 @@ public:
     bool AdditionalScrollTo(const RefPtr<FrameNode>& scroll, float height);
     float InitialSingleGearHeight(NG::SheetStyle& sheetStyle);
     float GetSheetTopSafeArea();
+    float UpdateSheetTransitionOffset();
 
     // initial drag gesture event
     void InitPanEvent();
@@ -522,6 +523,11 @@ public:
 
     void ProcessColumnRect(float height = 0.0f);
 
+    bool WillSpringBack() const
+    {
+        return isSpringBack_;
+    }
+
     void SetShowState(bool show)
     {
         show_ = show;
@@ -736,6 +742,7 @@ private:
     bool isNeedProcessHeight_ = false;
     bool isSheetNeedScroll_ = false; // true if Sheet is ready to receive scroll offset.
     bool isSheetPosChanged_ = false; // UpdateTransformTranslate end
+    bool isSpringBack_ = false; // sheet rebound
 
     double start_ = 0.0; // start position of detents changed
     RefPtr<NodeAnimatablePropertyFloat> property_;

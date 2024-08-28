@@ -200,7 +200,7 @@ ArkUINativeModuleValue TabsBridge::SetDivider(ArkUIRuntimeCallInfo* runtimeCallI
     auto isDividerStrokeWidthArgsInvalid = dividerStrokeWidthArgs->IsNull() || dividerStrokeWidthArgs->IsUndefined();
     auto isDividerStartMarginArgsInvalid = dividerStartMarginArgs->IsNull() || dividerStartMarginArgs->IsUndefined();
     auto isDividerEndMarginArgsInvalid = dividerEndMarginArgs->IsNull() || dividerEndMarginArgs->IsUndefined();
-    auto isColorArgInvalid = !(colorArg->IsNull() || colorArg->IsUndefined());
+    auto isColorArgInvalid = colorArg->IsNull() || colorArg->IsUndefined();
     if (isDividerStrokeWidthArgsInvalid && isDividerStartMarginArgsInvalid && isDividerEndMarginArgsInvalid &&
         isColorArgInvalid) {
         GetArkUINodeModifiers()->getTabsModifier()->resetDivider(nativeNode);
