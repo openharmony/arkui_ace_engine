@@ -1728,6 +1728,7 @@ private:
     bool IsContentRectNonPositive();
     void ReportEvent();
     void ResetPreviewTextState();
+    void CalculateBoundsRect();
 
     RectF frameRect_;
     RectF textRect_;
