@@ -908,7 +908,8 @@ void SwiperIndicatorPattern::UpdateOverlongPaintMethod(
     }
 
     auto isSwiperTouchDown = swiperPattern->IsTouchDownOnOverlong();
-    auto isSwiperAnimationRunning = swiperPattern->IsPropertyAnimationRunning();
+    auto isSwiperAnimationRunning =
+        swiperPattern->IsPropertyAnimationRunning() || swiperPattern->IsTranslateAnimationRunning();
     auto keepStatus = !isSwiperTouchDown && !isSwiperAnimationRunning && animationStartIndex != animationEndIndex &&
                       !changeIndexWithAnimation_;
 
