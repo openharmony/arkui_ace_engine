@@ -181,11 +181,11 @@ var LineCapStyle;
 
 var ButtonType;
 (function (ButtonType) {
-  ButtonType[ButtonType["Normal"] = 0] = "Normal";
-  ButtonType[ButtonType["Capsule"] = 1] = "Capsule";
-  ButtonType[ButtonType["Circle"] = 2] = "Circle";
-  ButtonType[ButtonType["Arc"] = 4] = "Arc";
-  ButtonType[ButtonType["ROUNDED_RECTANGLE"] = 8] = "ROUNDED_RECTANGLE";
+  ButtonType[ButtonType['Normal'] = 0] = 'Normal';
+  ButtonType[ButtonType['Capsule'] = 1] = 'Capsule';
+  ButtonType[ButtonType['Circle'] = 2] = 'Circle';
+  ButtonType[ButtonType['Arc'] = 4] = 'Arc';
+  ButtonType[ButtonType['ROUNDED_RECTANGLE'] = 8] = 'ROUNDED_RECTANGLE';
 })(ButtonType || (ButtonType = {}));
 
 var DevicePosition;
