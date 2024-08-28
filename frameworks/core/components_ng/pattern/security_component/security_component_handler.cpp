@@ -564,7 +564,7 @@ bool SecurityComponentHandler::CheckContainerTags(const RefPtr<FrameNode>& frame
         "Swiper", "Grid", "GridItem", "page", "stage", "FormComponent", "Tabs", "TabContent", "ColumnSplit",
         "FolderStack", "GridCol", "GridRow", "RelativeContainer", "RowSplit", "List", "Scroll", "WaterFlow",
         "SideBarContainer", "Refresh", "Navigator", "ListItemGroup", "ListItem", "Hyperlink", "FormLink", "FlowItem",
-        "Counter" };
+        "Counter", "Custom" };
 
     const RefPtr<RenderContext> renderContext = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
