@@ -242,8 +242,11 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             }
             startIndex = startIndex == -1 ? itemIdex : std::min(startIndex, itemIdex);
             endIndex = std::max(itemIdex, endIndex);
-            auto frSize = itemsCrossSize_.at(iter->first);
-            SizeF blockSize = SizeF(frSize, lineHeight, axis_);
+            auto frSize = itemsCrossSize_.find(iter->first);
+            if (frSize == itemsCrossSize_.end()) {
+                continue;
+            }
+            SizeF blockSize = SizeF(frSize->second, lineHeight, axis_);
             auto translate = OffsetF(0.0f, 0.0f);
             auto childSize = wrapper->GetGeometryNode()->GetMarginFrameSize();
             translate = Alignment::GetAlignPosition(blockSize, childSize, align);
@@ -353,8 +356,11 @@ void GridScrollLayoutAlgorithm::LayoutBackwardCachedLine(LayoutWrapper* layoutWr
             if (!wrapper) {
                 continue;
             }
-            auto frSize = itemsCrossSize_.at(iter.first);
-            SizeF blockSize = gridLayoutProperty->IsVertical() ? SizeF(frSize, lineHeight) : SizeF(lineHeight, frSize);
+            auto frSize = itemsCrossSize_.find(iter.first);
+            if (frSize == itemsCrossSize_.end()) {
+                continue;
+            }
+            SizeF blockSize = SizeF(frSize->second, lineHeight, axis_);
             auto translate = OffsetF(0.0f, 0.0f);
             translate = Alignment::GetAlignPosition(blockSize, wrapper->GetGeometryNode()->GetMarginFrameSize(), align);
 
@@ -424,8 +430,11 @@ void GridScrollLayoutAlgorithm::LayoutForwardCachedLine(LayoutWrapper* layoutWra
             if (!wrapper) {
                 continue;
             }
-            auto frSize = itemsCrossSize_.at(iter.first);
-            SizeF blockSize = gridLayoutProperty->IsVertical() ? SizeF(frSize, lineHeight) : SizeF(lineHeight, frSize);
+            auto frSize = itemsCrossSize_.find(iter.first);
+            if (frSize == itemsCrossSize_.end()) {
+                continue;
+            }
+            SizeF blockSize = SizeF(frSize->second, lineHeight, axis_);
             auto translate = OffsetF(0.0f, 0.0f);
             translate = Alignment::GetAlignPosition(blockSize, wrapper->GetGeometryNode()->GetMarginFrameSize(), align);
 
@@ -1664,7 +1673,7 @@ LayoutConstraintF GridScrollLayoutAlgorithm::CreateChildConstraint(float mainSiz
     for (int32_t index = 0; index < crossSpan; ++index) {
         int32_t crossIndex = (crossStart + index) % static_cast<int32_t>(crossCount_);
         if (crossIndex >= 0 && crossIndex < static_cast<int32_t>(itemsCrossSize_.size())) {
-            itemCrossSize += itemsCrossSize_.at(crossIndex);
+            itemCrossSize += GetOrDefault(itemsCrossSize_, crossIndex, 0.0f);
         }
     }
 
@@ -1895,7 +1904,7 @@ float GridScrollLayoutAlgorithm::ComputeItemCrossPosition(int32_t crossStart) co
     float position = 0.0f;
     for (int32_t index = 0; index < crossStart; ++index) {
         if (index >= 0 && index < static_cast<int32_t>(itemsCrossSize_.size())) {
-            position += itemsCrossSize_.at(index);
+            position += GetOrDefault(itemsCrossSize_, index, 0.0f);
         }
     }
     position += crossStart * crossGap_ + crossPaddingOffset_;
@@ -2226,7 +2235,7 @@ bool GridScrollLayoutAlgorithm::PredictBuildItem(
         for (int32_t index = 0; index < crossSpan; ++index) {
             int32_t crossIndex = (crossStart + index) % static_cast<int32_t>(param.itemsCrossSizes.size());
             if (crossIndex >= 0 && crossIndex < static_cast<int32_t>(param.itemsCrossSizes.size())) {
-                itemCrossSize += param.itemsCrossSizes.at(crossIndex);
+                itemCrossSize += GetOrDefault(param.itemsCrossSizes, crossIndex, 0.0f);
             }
         }
         constraint.maxSize.SetCrossSize(itemCrossSize, axis);
