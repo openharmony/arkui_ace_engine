@@ -97,77 +97,12 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
 {
     auto host = GetFrameNode();
     CHECK_NULL_RETURN(host, false);
-    auto eventHub = eventHub_.Upgrade();
-    auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
-    if (scrollableActuator_) {
-        scrollableActuator_->CollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets,
-            localPoint, host, targetComponent, responseLinkResult);
-    }
     size_t idx = innerTargets.size();
     size_t newIdx = 0;
-    if (dragEventActuator_) {
-        dragEventActuator_->AddTouchListener(touchRestrict);
-    }
-    if (touchEventActuator_) {
-        touchEventActuator_->OnCollectTouchTarget(
-            coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets, responseLinkResult);
-    }
-    if (clickEventActuator_ && !redirectClick_) {
-        clickEventActuator_->OnCollectTouchTarget(
-            coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets, responseLinkResult);
-    }
-    if (userParallelClickEventActuator_) {
-        auto clickRecognizer = userParallelClickEventActuator_->GetClickRecognizer();
-        if (clickRecognizer) {
-            clickRecognizer->SetGestureInfo(
-                MakeRefPtr<GestureInfo>(GestureTypeName::CLICK, GestureTypeName::CLICK, true));
-            clickRecognizer->SetOnAction(userParallelClickEventActuator_->GetClickEvent());
-            clickRecognizer->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
-            clickRecognizer->SetGetEventTargetImpl(getEventTargetImpl);
-        }
-    }
-    if (panEventActuator_) {
-        panEventActuator_->OnCollectTouchTarget(
-            coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets, responseLinkResult);
-    }
-
-    TouchTestResult dragTargets;
-    if (longPressEventActuator_) {
-        longPressEventActuator_->OnCollectTouchTarget(
-            coordinateOffset, touchRestrict, getEventTargetImpl, dragTargets, responseLinkResult);
-    }
-    if (dragEventActuator_) {
-        dragEventActuator_->OnCollectTouchTarget(
-            coordinateOffset, touchRestrict, getEventTargetImpl, dragTargets, responseLinkResult);
-    }
-
-    std::list<RefPtr<NGGestureRecognizer>> longPressRecognizers;
-    for (const auto& item : dragTargets) {
-        auto recognizer = AceType::DynamicCast<NGGestureRecognizer>(item);
-        if (recognizer) {
-            recognizer->BeginReferee(touchId);
-            recognizer->AttachFrameNode(WeakPtr<FrameNode>(host));
-            recognizer->SetTargetComponent(targetComponent);
-            if (AceType::InstanceOf<RecognizerGroup>(recognizer)) {
-                auto group = AceType::DynamicCast<RecognizerGroup>(recognizer);
-                if (group) {
-                    group->SetChildrenTargetComponent(targetComponent);
-                }
-            }
-        }
-        longPressRecognizers.emplace_back(AceType::DynamicCast<NGGestureRecognizer>(item));
-    }
-    if (!longPressRecognizers.empty()) {
-        // this node has long press and drag event, combine into parallelRecognizer.
-        if (!nodeParallelRecognizer_) {
-            nodeParallelRecognizer_ = MakeRefPtr<ParallelRecognizer>(std::move(longPressRecognizers));
-        } else {
-            nodeParallelRecognizer_->AddChildren(longPressRecognizers);
-        }
-        innerTargets.emplace_back(nodeParallelRecognizer_);
-    } else {
-        nodeParallelRecognizer_.Reset();
-    }
+    ProcessEventTouchTestHit(coordinateOffset, touchRestrict, innerTargets,
+        finalResult, touchId, localPoint, targetComponent, responseLinkResult);
+    ProcessDragEventTouchTestHit(coordinateOffset, touchRestrict, innerTargets,
+        finalResult, touchId, localPoint, targetComponent, responseLinkResult);
 
     std::list<RefPtr<NGGestureRecognizer>> innerRecognizers;
     for (auto const& eventTarget : innerTargets) {
@@ -194,6 +129,92 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
     ProcessTouchTestHierarchy(
         coordinateOffset, touchRestrict, innerRecognizers, finalResult, touchId, targetComponent, responseLinkResult);
 
+    return false;
+}
+
+bool GestureEventHub::ProcessEventTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
+    TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint,
+    const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult)
+{
+    auto host = GetFrameNode();
+    CHECK_NULL_RETURN(host, false);
+    auto eventHub = eventHub_.Upgrade();
+    auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
+    if (scrollableActuator_) {
+        scrollableActuator_->CollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets,
+            localPoint, host, targetComponent, responseLinkResult);
+    }
+    if (dragEventActuator_) {
+        dragEventActuator_->AddTouchListener(touchRestrict);
+    }
+    if (touchEventActuator_) {
+        touchEventActuator_->OnCollectTouchTarget(
+            coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets, responseLinkResult);
+    }
+    if (clickEventActuator_ && !redirectClick_) {
+        clickEventActuator_->OnCollectTouchTarget(
+            coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets, responseLinkResult);
+    }
+    if (userParallelClickEventActuator_) {
+        auto clickRecognizer = userParallelClickEventActuator_->GetClickRecognizer();
+        if (clickRecognizer) {
+            clickRecognizer->SetGestureInfo(
+                MakeRefPtr<GestureInfo>(GestureTypeName::CLICK, GestureTypeName::CLICK, true));
+            clickRecognizer->SetOnAction(userParallelClickEventActuator_->GetClickEvent());
+            clickRecognizer->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+            clickRecognizer->SetGetEventTargetImpl(getEventTargetImpl);
+        }
+    }
+    if (panEventActuator_) {
+        panEventActuator_->OnCollectTouchTarget(
+            coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets, responseLinkResult);
+    }
+    return false;
+}
+
+bool GestureEventHub::ProcessDragEventTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
+    TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint,
+    const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult)
+{
+    auto host = GetFrameNode();
+    CHECK_NULL_RETURN(host, false);
+    auto eventHub = eventHub_.Upgrade();
+    auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
+    TouchTestResult dragTargets;
+    if (longPressEventActuator_) {
+        longPressEventActuator_->OnCollectTouchTarget(
+            coordinateOffset, touchRestrict, getEventTargetImpl, dragTargets, responseLinkResult);
+    }
+    if (dragEventActuator_) {
+        dragEventActuator_->OnCollectTouchTarget(
+            coordinateOffset, touchRestrict, getEventTargetImpl, dragTargets, responseLinkResult);
+    }
+
+    std::list<RefPtr<NGGestureRecognizer>> longPressRecognizers;
+    for (const auto& item : dragTargets) {
+        auto recognizer = AceType::DynamicCast<NGGestureRecognizer>(item);
+        if (recognizer) {
+            recognizer->BeginReferee(touchId);
+            recognizer->AttachFrameNode(WeakPtr<FrameNode>(host));
+            recognizer->SetTargetComponent(targetComponent);
+            auto group = AceType::DynamicCast<RecognizerGroup>(recognizer);
+            if (group) {
+                group->SetChildrenTargetComponent(targetComponent);
+            }
+        }
+        longPressRecognizers.emplace_back(AceType::DynamicCast<NGGestureRecognizer>(item));
+    }
+    if (!longPressRecognizers.empty()) {
+        // this node has long press and drag event, combine into parallelRecognizer.
+        if (!nodeParallelRecognizer_) {
+            nodeParallelRecognizer_ = MakeRefPtr<ParallelRecognizer>(std::move(longPressRecognizers));
+        } else {
+            nodeParallelRecognizer_->AddChildren(longPressRecognizers);
+        }
+        innerTargets.emplace_back(nodeParallelRecognizer_);
+    } else {
+        nodeParallelRecognizer_.Reset();
+    }
     return false;
 }
 

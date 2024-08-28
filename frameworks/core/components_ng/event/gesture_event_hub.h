@@ -442,6 +442,14 @@ public:
         TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint,
         const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult);
 
+    bool ProcessEventTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
+        TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint,
+        const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult);
+    
+    bool ProcessDragEventTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
+        TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint,
+        const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult);
+
     RefPtr<FrameNode> GetFrameNode() const;
 
     void OnContextAttached() {}
